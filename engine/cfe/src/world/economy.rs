@@ -327,6 +327,15 @@ impl World {
         if settleable.is_empty() {
             return Err(ActionRefused::NothingAccrued);
         }
+        // TAXATION (49 §5): the taxable throughput this touch — the net
+        // yield banked (positive lines only), the Trade base a
+        // Touch-triggered revenue levy draws on. Snapshotted here, before
+        // the receipts consume `settleable`; the levy settles into the
+        // treasury after the population, at the same stamp.
+        let taxable: Ratio = settleable
+            .iter()
+            .filter(|(_, amount)| *amount > ratio(0, 1))
+            .fold(ratio(0, 1), |sum, (_, amount)| sum + amount.clone());
         let orb_id = held.orb_id;
         let stamp = self.clock.now();
         let count = settleable.len();
@@ -480,6 +489,12 @@ impl World {
         if let Some((delta, _, _)) = population {
             self.settle_population(orb, delta);
         }
+        // TAXATION (49 §5): the Touch-triggered revenue levy collects into
+        // the sovereign treasury — governance reach × the taxable
+        // throughput. Zero reach (no GovernmentOffice standing) collects
+        // nothing, so a world without one is byte-identical.
+        let revenue = self.levy_collected_at_touch(orb, &taxable);
+        self.settle_treasury(orb, revenue);
         self.relieve_recovered(orb);
         Ok(count)
     }

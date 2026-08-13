@@ -2,9 +2,10 @@
 //! data, and the continuity tax — a demurrage on KNOWLEDGE keyed to
 //! lifespan turnover: the Locust churns, the Custodian accumulates.
 
-use cfe::dop::{ClosureEvent, Levy, LevyBase, LevySink, LevyTrigger};
+use cfe::dop::{positive, unit, ClosureEvent, Levy, LevyBase, LevySink, LevyTrigger, Resource, ZoneKind};
 use cfe::ratio::ratio;
-use cfe::world::{replay, World, FIRST_ORB};
+use cfe::thermal::StarClass;
+use cfe::world::{replay, World, FIRST_ORB, SOVEREIGN};
 
 /// A world sealed to a lifespan class (1 short-lived, 2 long-lived).
 fn lineage(class: u8) -> World {
@@ -12,6 +13,40 @@ fn lineage(class: u8) -> World {
     world.found("levy-hold").expect("founds");
     world.seal_taxon(class, 1).expect("seals the lifespan class");
     world
+}
+
+/// A world with a producing economy (an Extractor over a stocked bank),
+/// ready to raise civic zones and drive a taxed collect.
+fn producing_world() -> World {
+    let mut world = World::new();
+    world.found("tax-hold").expect("founds");
+    world.commission_star(StarClass::G).expect("commissions star");
+    world
+        .site_planet(FIRST_ORB, unit(0, 1), positive(1, 1), None, None)
+        .expect("sites the planet");
+    let stamp = world.now();
+    world.chronicle_mut().append(
+        ClosureEvent::YieldCollected {
+            orb_id: FIRST_ORB,
+            resource: Resource::Biomass,
+            amount: ratio(100_000, 1),
+        },
+        stamp,
+        vec![SOVEREIGN],
+    );
+    let mut world = World::resume(world.chronicle().clone());
+    world.zone(0, ZoneKind::Extractor).expect("builds an extractor");
+    world
+}
+
+/// Drive `rounds` collect touches, each after 4 ticks of accrual.
+fn run_collects(world: &mut World, rounds: usize) {
+    for _ in 0..rounds {
+        for _ in 0..4 {
+            world.tick();
+        }
+        let _ = world.collect();
+    }
 }
 
 #[test]
@@ -111,4 +146,56 @@ fn a_zero_delta_settles_nothing_so_a_taxless_world_is_byte_identical() {
         "a zero settle appends no receipt — the world that never taxes is untouched"
     );
     assert_eq!(taxed.committed(), untaxed.committed(), "byte-identical to a world that never called it");
+}
+
+// ── §5: levy collection at the touch (governance reach, GovernmentOffice) ──
+
+#[test]
+fn governance_reach_is_the_office_share_of_the_active_economy() {
+    // No office: the fiscal apparatus reaches nothing.
+    let mut world = producing_world();
+    assert_eq!(world.governance_reach(FIRST_ORB), ratio(0, 1), "no office reaches nothing");
+    // One office among two active zones (extractor + office) → half the
+    // economy is within fiscal reach. Structural, derived from the
+    // office/zone ratio — no dialed rate.
+    world.zone(1, ZoneKind::GovernmentOffice).expect("builds a government office");
+    assert_eq!(world.governance_reach(FIRST_ORB), ratio(1, 2), "one office among two zones reaches half");
+    // A second office lifts the reach toward the whole economy.
+    world.zone(2, ZoneKind::GovernmentOffice).expect("builds a second office");
+    assert_eq!(world.governance_reach(FIRST_ORB), ratio(2, 3), "more civic build, more reach");
+}
+
+#[test]
+fn a_touch_with_an_office_fills_the_treasury_by_reach_times_yield() {
+    let mut gov = producing_world();
+    gov.zone(1, ZoneKind::GovernmentOffice).expect("office");
+    assert_eq!(gov.governance_reach(FIRST_ORB), ratio(1, 2), "reach is one half");
+    // One collect: the extractor's measured 4-tick yield is 5; the levy
+    // takes reach (1/2) of it → 5/2 into the treasury.
+    run_collects(&mut gov, 1);
+    assert_eq!(gov.treasury_of(FIRST_ORB), ratio(5, 2), "the touch collects reach × yield");
+    // A second collect accumulates — the treasury is a standing reserve.
+    run_collects(&mut gov, 1);
+    assert_eq!(gov.treasury_of(FIRST_ORB), ratio(5, 1), "collections accumulate across touches");
+    // The whole taxed history replays byte-exact.
+    assert_eq!(replay(gov.chronicle()), gov.committed(), "taxed-collect replay MATCHES");
+}
+
+#[test]
+fn a_touch_without_an_office_collects_no_levy_and_is_byte_identical() {
+    // The same producing economy, but no GovernmentOffice: reach is zero,
+    // so the collect emits NO TreasurySettled deed at all — a world that
+    // never stands a civic office is byte-identical to the pre-taxation era.
+    let mut bare = producing_world();
+    run_collects(&mut bare, 2);
+    assert_eq!(bare.treasury_of(FIRST_ORB), ratio(0, 1), "no office → an empty treasury");
+    assert!(
+        !bare
+            .chronicle()
+            .receipts()
+            .iter()
+            .any(|r| matches!(r.event, ClosureEvent::TreasurySettled { .. })),
+        "no reach → no receipt: the untaxed collect is byte-identical"
+    );
+    assert_eq!(replay(bare.chronicle()), bare.committed(), "untaxed replay MATCHES");
 }

@@ -118,6 +118,46 @@ impl World {
         );
     }
 
+    /// **GOVERNANCE REACH** (`49_TAXATION` §5) — how far the sovereign's
+    /// fiscal apparatus extends over its own economy: the share of the
+    /// orb's ACTIVE zones that are GovernmentOffices. A line with no
+    /// office reaches nothing (0 → byte-identical); one whose civic
+    /// build keeps pace with its economy reaches further, up to the
+    /// whole of it. Derived from structural state (the office/zone
+    /// ratio), never a dialed rate — the moving-footprint precedent. The
+    /// levy collects proportionally, so the "slip" (evasion) is exactly
+    /// what governance does not reach.
+    pub fn governance_reach(&self, orb: u64) -> Ratio {
+        let Some(held) = self.orb_by_id(orb) else {
+            return ratio(0, 1);
+        };
+        let active = held.zones.iter().filter(|zone| held.zone_active(zone));
+        let (offices, total) = active.fold((0i64, 0i64), |(offices, total), zone| {
+            let is_office = zone.kind == ZoneKind::GovernmentOffice;
+            (offices + is_office as i64, total + 1)
+        });
+        if total == 0 {
+            return ratio(0, 1);
+        }
+        ratio(offices, total)
+    }
+
+    /// **THE LEVY COLLECTED AT A TOUCH** (`49_TAXATION` §5) — the fiscal
+    /// revenue a Touch-triggered levy draws into the treasury: the
+    /// governance reach applied to the `taxable` throughput (the net
+    /// yield banked this touch, the Trade base). The treasury is an
+    /// abstract fiscal reserve — the yield still banks in full; this
+    /// meters a governance shadow of it, so nothing is destroyed and
+    /// conservation is untouched. No office → zero reach → zero revenue,
+    /// so a world without a GovernmentOffice collects exactly as before.
+    pub fn levy_collected_at_touch(&self, orb: u64, taxable: &Ratio) -> Ratio {
+        let zero = ratio(0, 1);
+        if *taxable <= zero {
+            return zero;
+        }
+        self.governance_reach(orb) * taxable.clone()
+    }
+
     /// The standing continuity levy — its base/trigger/sink (Knowledge /
     /// Turnover / Void). The `continuity_tax` is its measured rate.
     pub fn continuity_levy(&self) -> Levy {
