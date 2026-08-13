@@ -354,6 +354,43 @@ fn disposition_traits_are_one_generic_read_not_scattered_checks() {
 }
 
 #[test]
+fn a_minted_disposition_inherits_its_base_traits() {
+    // CHARTER (a): a disposition MINTED from the expansionist base inherits
+    // its freight affinity — the trait flows to a line the seed table never
+    // named, through its lineage charter (an evolved/colonized line).
+    use cfe::dop::DispositionTrait;
+    use cfe::vocabulary::{trading, Axis, CHANNEL_UPKEEP, CHANNEL_YIELD};
+    let mut world = World::new();
+    world.found("mint-hold").expect("founds");
+    world
+        .seat_station(cfe::dop::name("tunborn"), cfe::dop::Station::from_wire(1).expect("band office"))
+        .expect("seats the progenitor");
+    let minted = world
+        .mint_vocabulary_based_as(
+            SOVEREIGN,
+            "tunborn",
+            Axis::Disposition,
+            "✦",
+            cfe::dop::name("frontier-collective"),
+            trading(vec![(CHANNEL_YIELD, ratio(5, 4)), (CHANNEL_UPKEEP, ratio(5, 4))]),
+            Some(1), // descends from expansionist
+        )
+        .expect("charter (a): a disposition may be minted from a base");
+    world.seal_genesis("tunborn", minted, 2, 1).expect("seals the minted disposition");
+    assert!(
+        world.disposition_carries(DispositionTrait::FreightAffinity),
+        "a disposition minted from expansionist INHERITS its freight affinity"
+    );
+    assert!(
+        !world.disposition_carries(DispositionTrait::VanityDisplay),
+        "but not a trait its base never bore"
+    );
+    // And the inherited trait reaches the live site: it may list futures.
+    assert!(world.futures_listable(), "the minted line inherits the freight power end-to-end");
+    assert_eq!(replay(world.chronicle()), world.committed(), "replay MATCHES");
+}
+
+#[test]
 fn an_undifferentiated_line_has_no_castes() {
     // A people with no sealed disposition has not specialized at all — the
     // split is empty (every hand is the same), not forced into a role.

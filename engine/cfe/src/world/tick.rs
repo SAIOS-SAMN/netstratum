@@ -605,10 +605,16 @@ impl World {
                     let checks: [(u8, bool, Option<u64>, u64); 2] = [
                         // resonance: a harmonic mind starved of links.
                         (2, sealed.perception == 3, sheet.last_link, 240),
-                        // novelty: an empiricist mind starved of
-                        // signal (a discovery must EXIST to starve
-                        // for the next).
-                        (3, sealed.disposition == 2, sheet.last_node, 480),
+                        // novelty: a novelty-hungry mind starved of
+                        // signal (a discovery must EXIST to starve for the
+                        // next) — the empiricist trait, read generically so a
+                        // line minted from it hungers too (`44_LINEAGES`).
+                        (
+                            3,
+                            self.disposition_carries(crate::dop::DispositionTrait::NoveltyHunger),
+                            sheet.last_node,
+                            480,
+                        ),
                     ];
                     for (kind, applies, last, window) in checks {
                         if !applies {
