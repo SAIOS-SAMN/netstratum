@@ -272,6 +272,11 @@ impl World {
                 .to_integer()
                 .try_into()
                 .unwrap_or(0);
+            // DISPOSITION (§5): an empiricist line spends half its surplus
+            // growth on KNOWLEDGE, not mouths — the research siphon redirects
+            // those births (the metric rides `research_siphon`). Zero for
+            // every other disposition, so their growth is untouched.
+            let births = births - self.research_siphon(births);
             Some((births - mortality, resource, demand))
         } else {
             // STARVED — only the people the span's food can feed survive;

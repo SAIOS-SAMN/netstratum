@@ -99,22 +99,64 @@ impl World {
     }
 
     /// The leisure the standing population demands over the span since the
-    /// last touch — the same per-capita rate the caloric demand uses (R6
-    /// half-harvest), now against the leisure good: a people wants as much
-    /// recreation as it eats. Derived from the population loop's own rate,
-    /// no new dial.
+    /// last touch — the base per-capita rate (R6 half-harvest, as the
+    /// caloric demand) MODULATED by the disposition (§5): an expansionist
+    /// wants none (military rations), an epicurean twice as much (the
+    /// luxury appetite that pulls specialised labour), every other line the
+    /// base. Derived from the population loop's own rate and the disposition
+    /// factor (0 / 1 / 2, all built from identity ratios), no new dial.
     pub fn leisure_demand(&self, orb: u64, stamp: u64) -> Ratio {
+        let zero = ratio(0, 1);
         let p = self.population_of(orb);
         let Some(held) = self.orb_by_id(orb) else {
-            return ratio(0, 1);
+            return zero;
         };
         let dt = stamp.saturating_sub(held.last_touch);
         if p == 0 || dt == 0 {
-            return ratio(0, 1);
+            return zero;
+        }
+        let factor = self.provision_leisure_factor();
+        if factor <= zero {
+            return zero;
         }
         let metabolism = self.genesis.as_ref().map(|held| held.metabolism).unwrap_or(2);
         let pair = ratio(1, 1) + ratio(1, 1);
         let per_capita = crate::dop::metabolic_harvest_of(metabolism, self.metabolic_element()).1 / pair;
-        ratio(p as i64, 1) * per_capita * ratio(dt as i64, 1)
+        ratio(p as i64, 1) * per_capita * ratio(dt as i64, 1) * factor
+    }
+
+    /// **THE DISPOSITION'S LEISURE APPETITE** (§5) — how much recreation a
+    /// line demands, as a factor on the base per-capita rate. Keyed on the
+    /// sealed/postured disposition (`civ_axes`, the same axis the
+    /// vocabulary mints): expansionist 0 (lean — no luxury tier, grows on
+    /// food alone), epicurean 2 (deep — the granary becomes an economic
+    /// engine), every other line 1 (the base). Built from `0`, `1`, and
+    /// `1+1` — a factor set, never a dial.
+    pub fn provision_leisure_factor(&self) -> Ratio {
+        match self.civ_axes().map(|axes| axes.disposition) {
+            Some(1) => ratio(0, 1),               // expansionist — military rations
+            Some(3) => ratio(1, 1) + ratio(1, 1), // epicurean — luxury appetite
+            _ => ratio(1, 1),                     // empiricist / default — the base
+        }
+    }
+
+    /// **THE EMPIRICIST RESEARCH SIPHON** (§5) — the share of would-be
+    /// births an empiricist line spends on KNOWLEDGE instead of mouths.
+    /// Half the surplus growth is redirected: the population grows slower,
+    /// and the redirected count is the research this society mints from its
+    /// provisioning margin (the metric here; the `DiscoveryMinted` deed is
+    /// the follow-up). Zero for every other disposition — they spend the
+    /// surplus on people. Derived (half = 1/(1+1)), no new dial.
+    pub fn research_siphon(&self, births: i64) -> i64 {
+        if births <= 0 {
+            return 0;
+        }
+        match self.civ_axes().map(|axes| axes.disposition) {
+            Some(2) => {
+                let half = ratio(1, 1) / (ratio(1, 1) + ratio(1, 1));
+                (ratio(births, 1) * half).floor().to_integer().try_into().unwrap_or(0)
+            }
+            _ => 0,
+        }
     }
 }

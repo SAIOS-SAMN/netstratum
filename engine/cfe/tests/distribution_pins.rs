@@ -230,3 +230,96 @@ fn a_world_with_no_granary_ignores_the_leisure_tier_entirely() {
         "with no granary, a stocked leisure good does not touch the population delta"
     );
 }
+
+// ── L4: DISPOSITION FACTORS — the granary as an economic driver (§5) ──
+
+/// A provisioned society (2 granaries) sealed to a DISPOSITION (1
+/// expansionist · 2 empiricist · 3 epicurean), biotic so the leisure good
+/// is Diamond, long-lived, seeded with people.
+fn disposed_society(disposition: u8, leisure: bool, seed: i64) -> World {
+    let mut world = society(6, 2, leisure, 0);
+    world.seal_genesis("civ", disposition, 2, 1).expect("seals disposition");
+    world.settle_population(FIRST_ORB, seed);
+    world
+}
+
+#[test]
+fn the_leisure_appetite_bands_by_disposition() {
+    // The factor set (§5), built from 0/1/2: lean, base, deep.
+    assert_eq!(
+        disposed_society(1, false, 10).provision_leisure_factor(),
+        ratio(0, 1),
+        "an expansionist wants no luxury — military rations"
+    );
+    assert_eq!(
+        disposed_society(2, false, 10).provision_leisure_factor(),
+        ratio(1, 1),
+        "an empiricist wants the base ration of leisure"
+    );
+    assert_eq!(
+        disposed_society(3, false, 10).provision_leisure_factor(),
+        ratio(2, 1),
+        "an epicurean wants twice the leisure — the luxury appetite"
+    );
+}
+
+#[test]
+fn an_expansionist_grows_lean_whether_or_not_it_has_luxury() {
+    // Factor 0 — no leisure tier applies, so an expansionist grows the same
+    // fed with luxury or without it. Lean provisioning, maximum output.
+    let (with_lux, w1) = population_after(disposed_society(1, true, 10), 8);
+    let (no_lux, w2) = population_after(disposed_society(1, false, 10), 8);
+    assert!(with_lux > 10, "the expansionist grows: {with_lux}");
+    assert_eq!(with_lux, no_lux, "and grows the SAME without luxury — it needs none");
+    assert_eq!(replay(w1.chronicle()), w1.committed(), "replay MATCHES (lux)");
+    assert_eq!(replay(w2.chronicle()), w2.committed(), "replay MATCHES (lean)");
+}
+
+#[test]
+fn an_epicurean_is_the_granary_engine_deep_luxury_or_stall() {
+    // Factor 2 — the epicurean demands twice the leisure. Met, it thrives;
+    // unmet, it stalls hard. This is the pull that makes the granary an
+    // economic engine: to grow, the civilisation must PRODUCE luxury.
+    let (fed_lux, w1) = population_after(disposed_society(3, true, 10), 8);
+    let (starved_lux, w2) = population_after(disposed_society(3, false, 10), 8);
+    assert!(fed_lux > 10, "deep luxury met — the epicurean grows: {fed_lux}");
+    assert_eq!(starved_lux, 10, "luxury unmet — the epicurean stalls at its seed");
+    assert_eq!(replay(w1.chronicle()), w1.committed(), "replay MATCHES (fed)");
+    assert_eq!(replay(w2.chronicle()), w2.committed(), "replay MATCHES (stalled)");
+}
+
+#[test]
+fn an_empiricist_spends_births_on_knowledge_and_grows_slower() {
+    // Factor: baseline leisure, but HALF the surplus births are siphoned to
+    // research — so a fed empiricist grows slower than a fed expansionist on
+    // the same world, spending mouths for knowledge.
+    let (empiricist, we) = population_after(disposed_society(2, true, 10), 8);
+    let (expansionist, _) = population_after(disposed_society(1, true, 10), 8);
+    assert!(empiricist > 10, "the empiricist still grows: {empiricist}");
+    assert!(
+        empiricist < expansionist,
+        "but slower — half its births went to research: {empiricist} < {expansionist}"
+    );
+    assert_eq!(replay(we.chronicle()), we.committed(), "replay MATCHES");
+}
+
+#[test]
+fn the_research_siphon_taxes_only_the_empiricist() {
+    // The siphon redirects half of a positive birth cohort — for the
+    // empiricist alone; every other disposition spends its surplus on people.
+    let cohort = 8;
+    assert_eq!(
+        disposed_society(2, true, 10).research_siphon(cohort),
+        cohort / 2,
+        "the empiricist siphons half its births to knowledge"
+    );
+    for disposition in [1u8, 3] {
+        assert_eq!(
+            disposed_society(disposition, true, 10).research_siphon(cohort),
+            0,
+            "disposition {disposition} spends its surplus on people, not research"
+        );
+    }
+    // A non-positive cohort is never taxed.
+    assert_eq!(disposed_society(2, true, 10).research_siphon(0), 0, "no births, no siphon");
+}

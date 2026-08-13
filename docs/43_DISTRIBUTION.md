@@ -168,9 +168,14 @@ NO `DepotSettled` deed. Everything this layer adds is derived at the touch.)*
 4. **The severity ordering — RULED (confirmed):** leisure-short STALLS (no
    death), calorie-short STARVES; stability bleeds in the stall band before
    any cull.
-5. **The disposition factors** — the fourfold-banded numbers for lean/deep/
-   research over the provision channel (extends R8), derive-not-dial. *(Open:
-   the exact bands, to settle when L4 lands; propose-and-confirm.)*
+5. **The disposition factors — LANDED (L4)** as a factor set derived from
+   `0`/`1`/`2` (no new dial), keyed on `civ_axes().disposition`: expansionist
+   leisure ×0 (lean — grows on food alone), epicurean ×2 (deep — the granary
+   becomes a luxury engine that stalls without production), empiricist ×1 but
+   HALF its surplus births siphon to research (`research_siphon`, the metric;
+   the `DiscoveryMinted` deed is the follow-up). This is the mechanic of R8's
+   ¾/5⁄4/¾+research, expressed without importing those literals; the exact
+   bands remain a balance ruling if the operator wants R8's numbers.
 6. **The workbench scope — RULED: a GENERAL workbench abstraction up front**
    — bench-type-agnostic (depot, refinery, ship-yard, lab all as benches),
    the depot wired in as the first concrete bench. See §7.
