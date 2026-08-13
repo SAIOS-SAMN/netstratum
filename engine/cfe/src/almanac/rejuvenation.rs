@@ -90,12 +90,15 @@ pub fn intrinsic_rate(metabolism: u8, element: Option<[u8; 32]>) -> Ratio {
 pub fn habitability(clade: u16, region: ThermalRegion) -> Ratio {
     let pref = clade_preferred_region(clade);
     let distance = (region as i32 - pref as i32).unsigned_abs();
-    match distance {
-        0 => ratio(1, 1),
-        1 => ratio(1, 2),
-        2 => ratio(1, 4),
-        _ => ratio(0, 1),
+    // Habitability HALVES per band of thermal distance from the clade's
+    // own preferred region, and is barren past two bands. The taper is
+    // DERIVED — a geometric `1/2^distance` — not a table of tuned
+    // fractions (P2: the denominator computes from the distance, so no
+    // dial enters the tree).
+    if distance > 2 {
+        return ratio(0, 1);
     }
+    ratio(1, 1i64 << distance)
 }
 
 /// **THE CARRYING CAPACITY `K`** — the natural ceiling of a world's

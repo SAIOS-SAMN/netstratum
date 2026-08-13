@@ -83,10 +83,14 @@ state-model laws, and earned gotchas live in `HANDOFF.md`.
 > `merchant_pins::the_caravan_bridges_the_walled_pair_at_a_profit`.
 >
 > **STANDING DEBT, not fixed here:** `tuned_constant_ratchet` is red on
-> `main` — 170 tuned ratio literals against the 112 ceiling (58 dials
-> entered during the Wave-6..8/E3 arc without derivation). The ceiling
-> does not rise by law; the debt needs its own remediation cadence
-> (derive, measure, or mint per dial — anchor-provenance ruling).
+> `main` — **163** tuned ratio literals against the 112 ceiling (51
+> excess dials, the R20 balance clusters `dop.rs`/`vocabulary.rs`,
+> operator-gated). The ceiling does not rise by law; the debt needs its
+> own remediation cadence (derive, measure, or mint per dial — anchor-
+> provenance ruling). *(Re-measured 2026-08-13: 170→163 as the seven
+> chartered-parameter seeds moved to the SEALED class; the emergent-
+> rejuvenation taper was kept DERIVED (`1/2^distance`) so it added no
+> dial.)*
 > MAPPED 2026-08-12: `docs/REMEDIATIONS.md` R20 (dop 66 · vocabulary
 > 37 · conductor 20 · science 10 · taxon 8 · parameter 7 · tail 22).
 
