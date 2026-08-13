@@ -362,11 +362,18 @@
 //!         program wire form) ‖ three confirming task digests. The
 //!         library is a FOLD of these receipts; certificates carry the
 //!         expansion, so the judge's wire never moves.)
-//!    Phase-5 claim ledger: next free **170** (163–164 ElementWant,
+//!    170  ClosureEvent::TitheReceipted (`#32`, 20_FOUNDING §3 — the
+//!         founding-tithe: a debit of the line's own metabolic ration,
+//!         paid to the seat whose standing covers the founding. FALLBACK
+//!         siting is the only landed acquisition path, so every founding
+//!         today raises a new world and tithes to the ANCIENT seat;
+//!         PURCHASE/COMMISSION (the elder path, an existing planet) are
+//!         deferred per HANDOFF_2026-08-13.)
+//!    Phase-5 claim ledger: next free **171** (163–164 ElementWant,
 //!    165 TreatyElementsAllowed, 166 SolverWordMinted, 167
 //!    PopulationSettled — 41_PROVISION §3, 169 EvolutionAdvanced —
-//!    44_LINEAGES §2c). Note: quarantine relief's PressureEbbed (ruling
-//!    R3) is reserved 168 for when #30 lands.
+//!    44_LINEAGES §2c, 170 TitheReceipted). Note: quarantine relief's
+//!    PressureEbbed (ruling R3) is reserved 168 for when #30 lands.
 //!    Seated science labs. E-MKT-1 (2026-08-10): tag **49** OfferPosted
 //!    wire extended in place (Resource 1..=7; Element = 0 ‖ id[32]).
 //!    E3.7 (2026-08-10): tags **163–164** ElementWantStruck/Relieved.
@@ -886,6 +893,11 @@ pub fn tech_node_name(condition: u8, node: &[u8; 32]) -> String {
     format!("{voice} {concept}")
 }
 
+/// `#32`, `20_FOUNDING` §3/§4a: the two seat scopes a founding can
+/// tithe to. `TitheReceipted.to_seat` names one of these.
+pub const SEAT_ELDER: u8 = 0;
+pub const SEAT_ANCIENT: u8 = 1;
+
 /// Founding banks the bootstrap reserves (02 §2.1): 20 iron, 10 biomass.
 ///
 /// This is the **pre-sky bronze kit** and the chart-transfer packet
@@ -893,6 +905,12 @@ pub fn tech_node_name(condition: u8, node: &[u8; 32]) -> String {
 /// genesis orb is top-upped to [`star_endowment`] — pure from class,
 /// replayed on `StarCommissioned`. G-class targets match this kit so
 /// legacy G fixtures are byte-stable.
+///
+/// **Left UNCHANGED, 2026-08-13 (`#32` founding tithe): `chart()`'s
+/// transfer amount reuses this exact function, and several fixtures
+/// (`rqp_scanner.rs`) hand-derive exact bank amounts against it — a
+/// dial bump here cascades far past founding. The tithe's headroom is
+/// given at `World::found` instead, one call site, not this shared one.**
 pub fn founding_reserves() -> Vec<(Resource, Ratio)> {
     vec![
         (Resource::Iron, ratio(20, 1)),    // APPROVED-SEED: founding endowment
@@ -3398,6 +3416,16 @@ pub enum ClosureEvent {
     /// nothing. Stage lifts the civilization's provisioning capacity
     /// (`population_ceiling`) — an evolved people sustains more.
     EvolutionAdvanced { stage: u8 },
+    /// **THE FOUNDING TITHE** (`#32`, `20_FOUNDING` §3, tag 170): the
+    /// economy's genesis transaction — a debit of the line's own
+    /// metabolic ration (G2, `metabolic_ration`/`metabolic_harvest`,
+    /// never a flat iron/biomass amount — the resource and rate are
+    /// the founder's OWN metabolism's), paid to the seat scope covering
+    /// the founding (`to_seat`: 0 = Elder, planetary; 1 = Ancient,
+    /// universal — `47_REGISTRY` §4a). A one-sided debit like
+    /// `DemurrageSettled`: the tithe leaves the conserved system rather
+    /// than crediting a bank this engine does not yet model per-seat.
+    TitheReceipted { orb_id: u64, to_seat: u8, resource: Resource, amount: Ratio },
     /// **THE VOCABULARY MINT** (tag 90, `28_VOCABULARY` §7,
     /// 2026-08-05): a T0 progenitor adds an entry to a vocabulary.
     ///
@@ -4675,6 +4703,13 @@ impl ClosureEvent {
             }
             Self::EvolutionAdvanced { stage } => {
                 tlv::put(169, &[*stage], &mut out);
+            }
+            Self::TitheReceipted { orb_id, to_seat, resource, amount } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                value.push(*to_seat);
+                value.push(*resource as u8);
+                ratio::encode(amount, &mut value);
+                tlv::put(170, &value, &mut out);
             }
             Self::VocabularyMinted { axis, code, sigil, word, binding, base, ration } => {
                 let mut value = vec![*axis, *code];
@@ -6003,6 +6038,13 @@ impl ClosureEvent {
                 Some(Self::TaxonSealed { class, clade })
             }
             169 => Some(Self::EvolutionAdvanced { stage: *value.first()? }),
+            170 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let to_seat = *value.get(8)?;
+                let resource = Resource::from_wire(*value.get(9)?)?;
+                let (amount, _) = ratio::decode(value.get(10..)?)?;
+                Some(Self::TitheReceipted { orb_id, to_seat, resource, amount })
+            }
             96 => {
                 let axis = *value.first()?;
                 let code = *value.get(1)?;

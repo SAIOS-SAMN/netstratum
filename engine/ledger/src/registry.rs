@@ -25,8 +25,14 @@ pub const PERCEPTIONS: [&str; 4] = ["planar", "volumetric", "harmonic", "umbral"
 /// offices in the union, never ranks. Append-only like the axes. A
 /// civilization with no station is simply a people of the bands (the
 /// common, lawful state). T4–T15 are **deeper functions**, not
-/// offices above the progenitors. **T10–T15 added 2026-08-08** for balance.
-pub const STATIONS: [&str; 16] = [
+/// offices above the progenitors. **T10–T15 added 2026-08-08** for
+/// balance. **T16–T17 (`elder`, `ancient`) added 2026-08-13** — the
+/// founding-tithe seat-scope ladder (`20_FOUNDING` §3, `47_REGISTRY`
+/// §4a): `elder` is a planetary seat (one per founded planet), `ancient`
+/// a universal one (unlocks the progenitor role, per `47_REGISTRY` §4b).
+/// Not a deeper office function like T4-T15 — a receiving seat for the
+/// founding transaction, which is why it sits above them, not among them.
+pub const STATIONS: [&str; 18] = [
     "progenitor",
     "watcher",
     "observer",
@@ -43,6 +49,8 @@ pub const STATIONS: [&str; 16] = [
     "warden",
     "foundry",
     "nexus",
+    "elder",
+    "ancient",
 ];
 
 /// BAND-1 (12_UNION §1): a station's seat width — SPACE AVAILABLE,
@@ -55,7 +63,9 @@ pub fn seat_width(station: &str) -> Option<u64> {
         "watcher" | "observer" => Some(16 + bonus),
         "caravan" | "crucible" | "exchange" | "assay" | "vault" => Some(16 + bonus),
         "herald" | "lattice" | "chorus" | "warden" | "foundry" => Some(16 + bonus),
-        "sovereign" | "anchor" | "nexus" => None,
+        // Unbounded like sovereign/anchor/nexus: the number of founded
+        // planets (elders) and of ancients is not a scarce band to cap.
+        "sovereign" | "anchor" | "nexus" | "elder" | "ancient" => None,
         _ => None,
     }
 }
@@ -101,6 +111,12 @@ pub enum Tier {
     T14,
     /// NEXUS — interstellar / union coordination (T15).
     T15,
+    /// ELDER — the founding-tithe seat for an existing planet, planetary
+    /// scope (T16, `20_FOUNDING` §3, `47_REGISTRY` §4a).
+    T16,
+    /// ANCIENT — the founding-tithe seat for a newly raised world,
+    /// universal scope (T17, same law).
+    T17,
 }
 
 /// The station → tier reading, and THE ENGINE AUTHORITY for it.
@@ -130,6 +146,8 @@ pub fn tier_of(station: Option<&str>) -> Option<Tier> {
         Some("warden") => Some(Tier::T13),
         Some("foundry") => Some(Tier::T14),
         Some("nexus") => Some(Tier::T15),
+        Some("elder") => Some(Tier::T16),
+        Some("ancient") => Some(Tier::T17),
         Some(_) => None,
     }
 }

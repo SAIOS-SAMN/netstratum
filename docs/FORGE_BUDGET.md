@@ -48,7 +48,7 @@ it as the whole space — the same failure as the commit before it, where
 I reasoned from the *shape* of proof-of-work instead of reading the
 code. Reach one axis, declare the manifold.
 
-The system's own law says it: `17_CAPACITY` §13d — *"a deterministic
+The system's own law says it: `48_CAPACITY_THREAT_MODEL` §13d — *"a deterministic
 universe does not make every level deterministic. Law is deterministic;
 the dynamics inside it are not."* §9 is the standing cure: the axes as
 capabilities, each with its own reading and its own refusal, so no

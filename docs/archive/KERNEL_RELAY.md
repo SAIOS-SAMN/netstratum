@@ -1,5 +1,7 @@
 # KERNEL RELAY — the reasoning behind the constitution
 
+> **ARCHIVED 2026-08-13.** Superseded/dead weight per the doc audit — kept for history, not live spec. See docs/BUILD_ORDER.md, docs/HANDOFF_2026-08-13.md, or the doc it names as its successor for current status.
+
 **Status:** RELAY CARRIER (beside `HANDOFF.md`, `PICKUP.md`,
 `BUILD_ORDER.md`). This document carries the *why* of the §11 trust-model
 correction and the kernel/convergence architecture — the full reasoning,

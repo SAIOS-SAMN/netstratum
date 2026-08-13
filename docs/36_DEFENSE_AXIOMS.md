@@ -6,7 +6,7 @@ features) · H close-out · **X7** in-tree strand/isthmus/datum adapters.
 Next free tag **152**.  
 **Authority:** `00_CHARTER`, `04_CIVILIZATION_GENESIS`, `05_THERMAL_BALANCE`,
 `06_CIVILIZATIONS`, `10_TECH_EMERGENCE` (TERRA-1, WARDEN-1, MASK-1, MANU-1),
-`14_ALMANAC`, `15_TAXON`, `33_TRADE_FLEET_AND_DESK` §Phase 5,
+`45_ALMANAC`, `15_TAXON`, `33_TRADE_FLEET_AND_DESK` §Phase 5,
 `TASKS_TRADE_FLEET_DESK` P5.*, `24_FORM` §2j (field, not collision).
 
 **Does not** default defense to human kinetic war. **Does not** invent

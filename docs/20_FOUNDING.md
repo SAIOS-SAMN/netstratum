@@ -4,6 +4,14 @@
 `00_CHARTER.md`. Supersedes the founding half of
 `04_CIVILIZATION_GENESIS.md` §4 and extends `01_ECONOMY.md` §2.
 
+> **STATUS CHECK 2026-08-13 (doc audit) — this is PARTIAL, not fully
+> landed.** §5's purse **IS built**: `world/economy.rs:776`, pinned by
+> `engine/cfe/tests/purse_pins.rs` (5 tests). §1-2's Elder/Ancient seats
+> and §3/§6a's tithe are **not** — zero hits for "Ancient" in `engine/`;
+> "Elder" only exists as the unrelated `ClosureEvent::ElderWarded` (tag
+> 74). This is `#32` on the build queue, HANDOFF's top-ranked item after
+> the Phase-3 flip. See `docs/GAME_SPEC.md` §2/§4 for the current board.
+
 ---
 
 ## §0 THE SUPREMACY CLAUSE
@@ -23,7 +31,7 @@ with its reason, never silently rewritten.
 game is; it does not change what a receipt means, and `lawful` still
 refuses an unlawful step from anybody. The operator directs the world;
 the operator does not get a bypass on arithmetic. That is the same
-constraint `19_REGISTRY` §4d puts on the ancient's seat, applied to the
+constraint `47_REGISTRY` §4d puts on the ancient's seat, applied to the
 seat that writes the rulings.
 
 ## §1 FOUNDING IS AN ACQUISITION, NEVER A DERIVATION
@@ -96,7 +104,7 @@ it, subject to §4.
 first economic event in a civilization's life and the point at which the
 baseline economy starts turning.
 
-**Who receives it follows the SEAT-SCOPE ladder** (`19_REGISTRY` §4a).
+**Who receives it follows the SEAT-SCOPE ladder** (`47_REGISTRY` §4a).
 **Not the ward** — warding is a colony-level shield an elder happens to
 hold on its own planet, and it names no scope (operator ruling
 2026-08-02). The tithe goes to the seat whose standing covers where the
@@ -114,7 +122,7 @@ the scope that does exist.
 **And it makes seat scope pay.** An elder or ancient is no longer a
 title with a vantage — it is a seat with REVENUE, funded by the
 foundings inside its ward. This is what gives an ancient a standing
-reason to open a room (`19_REGISTRY` §4b): more room admits more
+reason to open a room (`47_REGISTRY` §4b): more room admits more
 founders, and founders tithe.
 
 **The tithe is IN-GAME VALUE.** It settles in the resources of
@@ -655,7 +663,7 @@ rather than by design.
 
 **With flourish recorded, capacity grows dynamically from measured
 abundance:** a line in sustained surplus converts it into new dimensions
-— the direct mechanism behind `19_REGISTRY` §4b, where an ancient opens
+— the direct mechanism behind `47_REGISTRY` §4b, where an ancient opens
 a ROOM rather than granting a seat, and `20_FOUNDING` §6a, where a ward
 captures with capacity it BUILT. **Both of those laws currently name a
 growth they have no operand for. Flourish is the operand.**
@@ -761,7 +769,7 @@ difference between a tech tree and a list of upgrades.
 **Why this closes the loop the other sections opened.** §6f.3 asked what
 FLOURISH feeds; the answer is stock and regeneration. §6a asked what a
 ward's capture capacity is BUILT from; the answer is reinvested surplus.
-`19_REGISTRY` §4b asked what opens a ROOM; the answer is a line whose
+`47_REGISTRY` §4b asked what opens a ROOM; the answer is a line whose
 regenerating base actually grew. **Three laws were each missing the same
 operand, and it is capital.**
 
@@ -862,7 +870,7 @@ holdings: what a line's assets generate, not what sits in its banks.
 **Why the wrapper matters and is not financial decoration.** Separating
 the claim from the matter is what lets a line invest in a deposit it
 does not sit on, lets a ward hold standing across worlds, and gives
-`§6a`'s capture and `19_REGISTRY` §4b's room-opening something
+`§6a`'s capture and `47_REGISTRY` §4b's room-opening something
 transferable to be built from. Without it, ownership and location are
 the same fact and nothing can be financed.
 
@@ -942,7 +950,7 @@ lens labels moved with them; `FORWARD-1` became `FORWARD-1`.
 **THE WIRE DID NOT MOVE, and that is the property that made this
 lawful.** Tags 35, 36 and 37 carry the same meaning and the same bytes —
 only the symbol changed. A tag registry entry may never be repurposed
-(`19_REGISTRY` §5), and this repurposes nothing: it corrects what the
+(`47_REGISTRY` §5), and this repurposes nothing: it corrects what the
 code was always called. 534 workspace tests green including the wire
 round-trips, clippy clean, zero `Covenant` occurrences left in code.
 
@@ -966,7 +974,7 @@ CONTAINED  covenant as relational/moral vocabulary, available inside
            an axis the kernel judges on
 ```
 
-**This is `19_REGISTRY` §5's tiering doing its job:** an AXIS is
+**This is `47_REGISTRY` §5's tiering doing its job:** an AXIS is
 constitutional, a VALUE is claimed, and CONTENT is free. Moral
 vocabulary is CONTENT. A civilization may hold covenants, name them,
 build a whole ethics on them — and the kernel neither knows nor judges

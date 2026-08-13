@@ -154,7 +154,7 @@ effective weight and the disagreement entropy:
     entropy H = 1 - (ω_winner / Σ_ω)          // v0.1 mdc_entropy
     stasis  = H ≥ threshold                    // default threshold = 1/2
 
-**STRUCK 2026-08-01** (operator ruling; `17_CAPACITY` §10 AV-1, §11):
+**STRUCK 2026-08-01** (operator ruling; `48_CAPACITY_THREAT_MODEL` §10 AV-1, §11):
 
     STRUCK:  Operators are scored by how much they reduce C(Δ).
     STRUCK:  the damped-gradient term as a damping term.
@@ -169,7 +169,7 @@ collapsed to a magnitude, never bounded above (`24_FORM` §2b).
 **No quantity is scored, minimized, or descended.** An operator is
 ADMITTED or it ROOTS: where a proposed step composes, it folds; where it
 does not, the non-composition opens capacity by receipt rather than
-being refused (`17_CAPACITY` §11, THE BIFURCATION LAW). `C` survives
+being refused (`48_CAPACITY_THREAT_MODEL` §11, THE BIFURCATION LAW). `C` survives
 only as the component semantics, and only as a PREDICATE — the
 per-residual cocycle test, never the L1 sum, which is a lens reading
 (`17_CAPACITY` §5).

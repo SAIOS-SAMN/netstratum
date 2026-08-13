@@ -28,7 +28,7 @@ acquires a consumer or LAW 8 applies to it on its own terms.
 
 ### 2k. THE TRAVERSAL LANE — Einstein–Rosen throat, Einstein–Cartan interior (operator, 2026-08-02)
 
-The bond between two interlinking orbs (`19_KERNEL` §5a.1) is a THROAT,
+The bond between two interlinking orbs (`46_KERNEL` §5a.1) is a THROAT,
 not a link. This section says what keeps the throat OPEN, and the
 answer carries an economic ruling with it.
 
@@ -106,7 +106,7 @@ never taken the hashcash shape**, so this ruling defends a position
 rather than reversing one.
 
 **WHERE THE TEMPTATION ACTUALLY SITS, and it is one specific gap.**
-`19_KERNEL` §5 records the single missing miner piece: nothing makes
+`46_KERNEL` §5 records the single missing miner piece: nothing makes
 weight costly to fake — the Sybil and ordering anchor
 (`KERNEL_RELAY` §7.1). Hashcash is the reflexive fix for exactly that
 gap, and it is how a system that never wanted a nonce acquires one.
@@ -207,7 +207,7 @@ lobby for a residual that does not exist.
 — entries indexed by PAIRS, and residuals range over TRIPLES. **The
 complex tops out at 2-simplices.** The engine's own structure is flat
 in exactly the way the objection describes, and it is the SAME WALL as
-`19_KERNEL` §5a.1's second wall: orbs project to vertices, so there are
+`46_KERNEL` §5a.1's second wall: orbs project to vertices, so there are
 no higher cells for the twist to live in. Three separate lines — the
 Venn overlap, the traversal lane, and the depth of the torsion — all
 arrive at one wall. Giving orbs extent is what opens room above the
@@ -272,7 +272,7 @@ indices `i, j, k` are bare `usize` positions in `Committed::orbs`, and
 a bare index has no axis to wrap.
 
 Giving each index its own wrapped vertical axis is the same ruling as
-"orbs have extent" (`19_KERNEL` §5a.1, wall 2). **That is now a fourth
+"orbs have extent" (`46_KERNEL` §5a.1, wall 2). **That is now a fourth
 line arriving at one wall** — the Venn overlap, the traversal lane, the
 depth of the torsion, and now the per-index axis. The station (tag 89)
 is the vertical axis that landed, but it is seated per LINE, not per

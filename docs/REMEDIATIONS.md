@@ -391,7 +391,7 @@ law); the correction and its evidence are `docs/FORGE_REMEDIATION.md`
 |---|---|---|---|
 | `kernel-lane` | 19 | 19 | kernel parameters, `C_bound` containment, ruleset epochs, task #30 |
 | `lens-lane` | 5 | 18 | the display peel, the luminal layer, kinematic pressure |
-| `capacity-lane` | 5 | 18 | `19_REGISTRY`, `20_FOUNDING`, the purse |
+| `capacity-lane` | 5 | 18 | `47_REGISTRY`, `20_FOUNDING`, the purse |
 | `syntropy-inscription` | 1 | 0 | the value-loss book |
 | `ground-floor` | 0 | 18 | legacy — nothing to merge |
 | `remediations-lane` | this | 0 | this file, `cost_probe` |

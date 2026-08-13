@@ -21,8 +21,12 @@ program and an auditor.
 
 ## §2 WHAT IS ESSENTIAL — measured, not argued
 
-`engine/kernel` is 1003 lines in `lib.rs` plus 566 in `bridge.rs`. Its
-entire dependency on the 5001-line `world.rs` is **three items**:
+~~`engine/kernel` is 1003 lines in `lib.rs` plus 566 in `bridge.rs`.~~
+**STALE — corrected 2026-08-13 (doc audit): `lib.rs` is now 2662 lines,
+`bridge.rs` 927 (both grew since this doc was written; the `Refused`
+enum + `admits()` replaced the `Result<(), Unlawful>` / `well_formed`
+vocabulary this doc still uses below).** Its original entire dependency
+on the 5001-line `world.rs` was **three items**:
 
 | what the kernel takes from `cfe::world` | why |
 |---|---|
@@ -80,10 +84,12 @@ is not satisfied by a validator that stands beside the updater.
 ## §4 ~~`world.rs` IS THREE FILES WEARING ONE NAME~~ — **THE SPLIT LANDED**
 
 **Confirmed by measurement 2026-08-04:** `engine/cfe/src/world.rs` does
-not exist. `engine/cfe/src/world/` holds 19 files (6,860 lines, largest
-`mod.rs` at 903), and the three things this section separates now live
-apart. The analysis is kept because it is WHY the split has the shape it
-has; its tense is historical. Step 1 of the ladder below is DONE.
+not exist. `engine/cfe/src/world/` held 19 files at 6,860 lines then;
+**corrected 2026-08-13 (doc audit): now 17,212 lines** (~2.5× growth
+since, from the population/provisioning/distribution arcs), and the
+three things this section separates now live apart. The analysis is
+kept because it is WHY the split has the shape it has; its tense is
+historical. Step 1 of the ladder below is DONE.
 
 5001 lines, and the composition is not one thing grown large — it is
 three unrelated things stacked:

@@ -1,5 +1,7 @@
 # RELAY — TO THE WAVE-1 IMPLEMENTOR NODE
 
+> **ARCHIVED 2026-08-13.** Superseded/dead weight per the doc audit — kept for history, not live spec. See docs/BUILD_ORDER.md, docs/HANDOFF_2026-08-13.md, or the doc it names as its successor for current status.
+
 > **LANDED `2109bf0` (2026-08-07).** Wave-1 exit met: stations T4–T9,
 > NPC T4/T6 seats, REFINE-1 + pure-NPC refine; harness green for those
 > arcs. **Do not re-implement.** Standing law below remains authority for

@@ -1271,6 +1271,10 @@ fn covered(event: &ClosureEvent) -> bool {
         // atomic touch alike.
         | E::YieldCollected { .. } | E::DemurrageSettled { .. }
         | E::DemurrageTouched { .. }
+        // #32, 20_FOUNDING §3: the founding tithe is a one-sided debit,
+        // the DemurrageSettled shape — I1 (declaration==effect) covers
+        // it the same way.
+        | E::TitheReceipted { .. }
         // U1 — the discovery mint's FULL set is landed: I1
         // (declaration==effect), I2 (Collect), I3, and I4 whole (sign
         // + the replay-complete verification + the sealed-shut bound).
@@ -1720,6 +1724,7 @@ fn admitted_deltas(
         E::DiscoveryMinted { resource, amount, .. } => vec![(*resource, amount.clone())],
         // — decays (the sign lives at I5, order preserved) —
         E::DemurrageSettled { resource, amount, .. } => vec![(*resource, -amount.clone())],
+        E::TitheReceipted { resource, amount, .. } => vec![(*resource, -amount.clone())],
         E::DemurrageTouched { decays, .. } => decays
             .iter()
             .map(|(resource, amount)| (*resource, -amount.clone()))
@@ -2422,6 +2427,7 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         | E::EstateSurveyed { .. } | E::AppraisalStruck { .. } | E::ParcelConveyed { .. }
         | E::ZoneBuilt { .. } | E::ZoneRazed { .. }
         | E::YieldCollected { .. } | E::DemurrageSettled { .. } | E::DemurrageTouched { .. }
+        | E::TitheReceipted { .. }
         | E::UpkeepSettled { .. }
         | E::VentSettled { .. }
         | E::StarCommissioned { .. } | E::StarAged { .. } | E::PlanetSited { .. }
@@ -2540,6 +2546,10 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         // their #42 — unenforced until their covered() entry + witness.
         | E::TaxonSealed { .. }
         | E::EvolutionAdvanced { .. }
+        // #32, 20_FOUNDING §3: the tithe fires from seal_genesis_as,
+        // the same Build-class act that seals the axes — actor-scoped,
+        // unlike DemurrageSettled's passive decay (None, below).
+        | E::TitheReceipted { .. }
         | E::StationSeated { .. }
         // Build-class: a mint EXTENDS what the world can express. It
         // creates nothing bankable and razes nothing — it opens room in

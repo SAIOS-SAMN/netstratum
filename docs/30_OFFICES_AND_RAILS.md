@@ -8,8 +8,8 @@ the board). Higher **numbers** on the T-line are **deeper function
 bands**, not higher rank. The R-line is a **separate ladder** (settlement
 altitude), never a recolor of T.
 
-**Subordinate to:** `00_CHARTER`, `12_UNION`, `01_ECONOMY`, `14_ALMANAC`,
-`16_UNIT`, `19_REGISTRY`, `28_VOCABULARY`. Cross-repo: `isthmus` (superhighway),
+**Subordinate to:** `00_CHARTER`, `12_UNION`, `01_ECONOMY`, `45_ALMANAC`,
+`16_UNIT`, `47_REGISTRY`, `28_VOCABULARY`. Cross-repo: `isthmus` (superhighway),
 `datum` (authority bench), `xylarium/strand` (domain tollway).
 
 **Companion landings:** `31_ELEMENT_COMMERCE.md`, `32_STAMP_MARKET.md`,

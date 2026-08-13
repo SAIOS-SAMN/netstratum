@@ -1,5 +1,7 @@
 # RELAY — TO THE WAVE-2 IMPLEMENTOR NODE
 
+> **ARCHIVED 2026-08-13.** Superseded/dead weight per the doc audit — kept for history, not live spec. See docs/BUILD_ORDER.md, docs/HANDOFF_2026-08-13.md, or the doc it names as its successor for current status.
+
 > **LANDED Wave-2 (2026-08-07):** E-APT-1 tags 108–109, kernel **0.21.0**,
 > `element_trade_step`, harness route clear green.
 > **LANDED Wave-3/4 (2026-08-07):** ElementRouteChartered 110, SCHEMA_V6,

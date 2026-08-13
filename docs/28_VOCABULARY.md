@@ -379,8 +379,14 @@ operator drew on 2026-08-05.)*
   folded vocabulary, not the whole of it.
 - `04_CIVILIZATION_GENESIS` §1 — the axis vocabularies likewise.
 - `dop.rs` — `class_ceiling`, `clade_ceiling` and `axis_valid` become
-  readings of the fold.
+  readings of the fold. **NOT YET LANDED — corrected 2026-08-13 (doc
+  audit): all three are still hardcoded constants**
+  (`almanac::taxon_table.rs:15-22` returns a fixed 13 / a formula over
+  constants 20+25×13; `axis_valid` at `dop.rs:1556` is a plain hardcoded
+  match). The mint deed itself (tag 96, encode/decode) is real and
+  landed; this fold-wiring is the owed payoff, not yet built.
 - `12_UNION` ruling 4 — the progenitor power table gains one row:
-  *mint a vocabulary entry — `VocabularyMinted` (tag 90)*.
+  *mint a vocabulary entry — `VocabularyMinted` (tag 96, corrected from
+  a stale "tag 90" — see §7)*.
 - PRACTICE-1 — its one-benefit-one-friction law is promoted from a
   property of the five landed practices to the binding law of §4a.

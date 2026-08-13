@@ -484,6 +484,18 @@ fn the_ladder_reads_as_ruled() {
     assert_eq!(tier_of(Some("warden")), Some(Tier::T13));
     assert_eq!(tier_of(Some("foundry")), Some(Tier::T14));
     assert_eq!(tier_of(Some("nexus")), Some(Tier::T15));
+    assert_eq!(tier_of(Some("elder")), Some(Tier::T16));
+    assert_eq!(tier_of(Some("ancient")), Some(Tier::T17));
+}
+
+/// The founding-tithe seats (20_FOUNDING §3, 47_REGISTRY §4a) are
+/// unbounded, like the other whole-scope offices — the number of
+/// founded planets or of ancients is not a capacity to cap.
+#[test]
+fn elder_and_ancient_seats_are_unbounded() {
+    use ledger::registry::seat_width;
+    assert_eq!(seat_width("elder"), None);
+    assert_eq!(seat_width("ancient"), None);
 }
 
 /// AN UNREADABLE SEAT REFUSES. It must not fall through to the common —

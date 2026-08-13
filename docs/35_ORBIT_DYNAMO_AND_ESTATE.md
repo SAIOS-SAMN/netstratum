@@ -2,7 +2,7 @@
 
 **Status:** LANDING — orbit periods on main (`500be46`); estate ladder
 extended for orbital + stratum holdings (this session).  
-**Authority:** `05_THERMAL_BALANCE`, `14_ALMANAC` (orbit grain),
+**Authority:** `05_THERMAL_BALANCE`, `45_ALMANAC` (orbit grain),
 `24_FORM` §2j (magnets / field, not collision), `29_CONSTRUCTION` C1
 (slot type), `33_TRADE_FLEET_AND_DESK` §3, E5b estate chain (tags
 97–100), `ENDOWMENTS`.  

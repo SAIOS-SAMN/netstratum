@@ -92,8 +92,11 @@ convergence steps.
   stress and is never drained with it;
   `rfa_core::for_each_residual` (WHERE the stress lives, per triple,
   per coordinate); `rfa_core::validate_step` (typed refusals:
-  `ConservationViolated`, `MagnitudeDrift`, `Unproductive` — recovery
-  steps must strictly reduce C).
+  `ConservationViolated`, `MagnitudeDrift` — **corrected 2026-08-13
+  (doc audit): `Unproductive` was STRUCK by operator ruling 2026-08-01**
+  (`gates.rs:41-53` — "the productivity gate is struck"; `GateReading`
+  now has 2 refusal variants, not 3). The "recovery steps must strictly
+  reduce C" rule this variant enforced is gone with it.
 - **Witness:** `elasticity_witness.rs` — the full loop: coherent
   colony → shock → measured stress → gated recovery → convergence.
 

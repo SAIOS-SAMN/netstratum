@@ -99,8 +99,9 @@ the container is already ruled:
 - `00_CHARTER` §11 — the nursery law: a world is born and raised on one
   node; a fork that forks openly is lawful, only fabricated confirmation
   is not.
-- `17_CAPACITY` §1473 — *"the nursery routes divergence instead of
-  refusing it."*
+- `48_CAPACITY_THREAT_MODEL` §11c — *"the nursery routes divergence
+  instead of refusing it."* (moved from `17_CAPACITY` in the
+  2026-08-13 docs split)
 
 A minted operator lives in the minting civilization's own library on its
 own branch. It never enters another line's vocabulary except by the

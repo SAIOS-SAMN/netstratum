@@ -5,7 +5,7 @@ kernel-visible literals" without listing them. This measures them,
 states what each refusal calls through, and defines what each must
 become under THE DYNAMIC PARAMETER LAW (#16).
 
-Subordinate to `19_KERNEL` and `engine/kernel/CHARTER.md`.
+Subordinate to `46_KERNEL` and `engine/kernel/CHARTER.md`.
 
 ---
 
@@ -179,7 +179,7 @@ Four decisions are owed, in the order they bite:
 3. P3 and P4 follow, and are independent of each other.
 
 Each lands as: red-first witness → rule change → VERSION bump →
-`19_KERNEL` §6 updated. No schema bump on any of the four.
+`46_KERNEL` §6 updated. No schema bump on any of the four.
 
 ---
 
@@ -489,7 +489,7 @@ which the cliff treated identically as `1/1` and the gradient does not.
 
 ### 10a. THE FINDING IS WORTH MORE THAN THE FEATURE
 
-This is `19_KERNEL` §3 and task **#30** made concrete. The transition is
+This is `46_KERNEL` §3 and task **#30** made concrete. The transition is
 defined twice — `replay`'s 113 arms and the live proposer — and **they
 agree only while the shared rules stay still.** `ease_of` is a sealed
 rule both paths call, and the moment its VALUES changed the two paths
@@ -1037,7 +1037,7 @@ CELL, not a present cycle.**
 
 So `0` should be `3` and `1` should be `0`. Neither error is
 arithmetic. Both are the same projection failure that
-`19_KERNEL` §5a.1 found for orb interiors and §3b found for tile
+`46_KERNEL` §5a.1 found for orb interiors and §3b found for tile
 geometry: **the projection keeps the drawing and discards the space.**
 Third instance, same cause.
 
