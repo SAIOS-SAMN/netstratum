@@ -1731,6 +1731,38 @@ pub fn zone_upkeep(kind: ZoneKind, metabolism: u8) -> Vec<(Resource, Ratio)> {
         .collect()
 }
 
+/// G2: one zone's BUILD cost under the sealed metabolism — the exact
+/// substitution rule `zone_upkeep`/`zone_yield` already carry, applied
+/// to `kind.cost()`: every `Biomass` line is the FOOD slot (the
+/// founding-ration price every metabolism can meet once, `31 §3`) and
+/// reads the line's ration; structural lines (iron ore, alloy, worked
+/// crystal) never substitute — a Smelter's iron intake stays iron
+/// regardless of who is building it, the same as its upkeep does.
+/// Composed kinds (`Regenerator`/`ElementRefinery`/`ShipYard`/
+/// `Granary`) already resolve to a `Habitat`/`Encasement` bill inside
+/// `cost()` itself, so one substitution pass here covers them too.
+///
+/// **Gated on the metabolism's own harvest RATE, not just its
+/// resource.** Plasmic's ration is Joule at rate 0 — "food is
+/// captured heat, never a yield line" — and Joules never enter the
+/// founding kit (the fiat law: joules enter only by encasement). A
+/// plain resource swap would price a plasmic line's FIRST Habitat in
+/// a resource it structurally cannot hold yet, deadlocking every
+/// plasmic founding before an Encasement could ever be raised to earn
+/// one. Rate 0 is already this codebase's "opt out of this ration
+/// economy" signal (`zone_yield` reads it the same way); the build
+/// cost honours it by staying at the compiled default instead.
+pub fn zone_cost(kind: ZoneKind, metabolism: u8) -> Vec<(Resource, Ratio)> {
+    let (ration, rate) = metabolic_harvest(metabolism);
+    kind.cost()
+        .into_iter()
+        .map(|(resource, amount)| match resource {
+            Resource::Biomass if rate > ratio(0, 1) => (ration, amount),
+            held => (held, amount),
+        })
+        .collect()
+}
+
 /// G3 (04 §1.3, §4; NS-2 §4, placeholder table): the fraction of
 /// structure surviving a cross-frame read — exact rationals, symmetric
 /// in v1 (the loss prices the DISTANCE between frames). Same basis 1;
