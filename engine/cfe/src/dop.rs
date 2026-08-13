@@ -1892,6 +1892,7 @@ pub fn zone_word(kind: ZoneKind) -> &'static str {
         ZoneKind::Regenerator => "regenerator",
         ZoneKind::ElementRefinery => "element-refinery",
         ZoneKind::ShipYard => "shipyard",
+        ZoneKind::Granary => "granary",
         // #41: a minted kind's WORD lives in the fold, not the table.
         // The chronicle names it; this answers only that it is one.
         ZoneKind::Minted(_) => "minted",
@@ -1939,6 +1940,17 @@ pub enum ZoneKind {
     /// hulls via `mint_hull`. Resource yield zero. Cost mirrors
     /// smelter iron bill (call-not-copy). Q-F4: yard required to mint.
     ShipYard = 10,
+    /// **PROVISION-1 — THE GRANARY** (`43_DISTRIBUTION` §1, ruled
+    /// 2026-08-13): the provisioning node that turns the #40–42
+    /// subsistence ledger into an economy. It holds no stock of its own
+    /// (ruled: the depot IS the orb's banked ration); its PRESENCE flips
+    /// the provisioned consumption law on — stratified demand (calories
+    /// then a per-clade leisure invariant), a derived stability reading,
+    /// and the disposition distribution factors. Resource yield zero; it
+    /// is infrastructure, not a producer — the REGEN-1 precedent, a zone
+    /// whose placement unlocks a law. Buildable freely (no deepening
+    /// gate): provisioning is foundational, not a late technology.
+    Granary = 11,
     /// **A MINTED BUILDING (#41)** — the fold code of a zone-axis entry
     /// past the compiled table. Its economics are its BASE's, modulated
     /// by its binding (`vocabulary::zone_base`), so they are read
@@ -2171,6 +2183,7 @@ impl ZoneKind {
             Self::Regenerator => 8,
             Self::ElementRefinery => 9,
             Self::ShipYard => 10,
+            Self::Granary => 11,
             Self::Minted(code) => code,
         }
     }
@@ -2198,6 +2211,7 @@ impl ZoneKind {
             8 => Some(Self::Regenerator),
             9 => Some(Self::ElementRefinery),
             10 => Some(Self::ShipYard),
+            11 => Some(Self::Granary),
             _ => None,
         }
     }
@@ -2257,6 +2271,9 @@ impl ZoneKind {
             // salvage (measured: smelter cost left founding iron too
             // thin to mint a hauler in the same era).
             Self::ShipYard => Self::Habitat.cost(),
+            // DERIVED: the habitat's bill. A granary is a ration house —
+            // the same founding-ration cost the habitat pays, no new dial.
+            Self::Granary => Self::Habitat.cost(),
         }
     }
 
@@ -2293,6 +2310,9 @@ impl ZoneKind {
             // not a Resource flow — zero Resource yield.
             Self::ElementRefinery => (Resource::Iron, ratio(0, 1)),
             Self::ShipYard => (Resource::Iron, ratio(0, 1)),
+            // PROVISION-1: the granary produces nothing — it is the
+            // provisioning LAW's unlock, not a yield line. Zero rate.
+            Self::Granary => (Resource::Biomass, ratio(0, 1)),
             // #41: the ground state — see `cost`. A minted kind yields
             // through `World::zone_economics`, never here.
             Self::Minted(_) => (Resource::Iron, ratio(0, 1)),
@@ -2334,6 +2354,9 @@ impl ZoneKind {
             // spent the triangle-trade ration before industry could).
             Self::ElementRefinery => Self::Encasement.upkeep_per_tick(),
             Self::ShipYard => Self::Encasement.upkeep_per_tick(),
+            // DERIVED: the habitat's own life-support line — a granary is
+            // maintained like the ration house it is.
+            Self::Granary => Self::Habitat.upkeep_per_tick(),
             // #41: the ground state — see `cost`.
             Self::Minted(_) => Vec::new(),
         }
@@ -2352,7 +2375,9 @@ impl ZoneKind {
             | Self::ShipYard => {
                 ratio(1, 1)
             }
-            Self::Encasement | Self::CryoArray => ratio(0, 1),
+            // Passive storage/capture infrastructure runs cold: the
+            // granary joins the shell and the cryo-array at zero.
+            Self::Encasement | Self::CryoArray | Self::Granary => ratio(0, 1),
             // #41: the ground state — see `cost`.
             Self::Minted(_) => ratio(0, 1),
         }
