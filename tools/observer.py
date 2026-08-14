@@ -621,6 +621,35 @@ def count_closed_ruins(var_root):
     )
 
 
+def world_card_sigil(world_dir):
+    """The world's OWN civilization sigil, from `world.card` tag 30 — the
+    AUTHORITATIVE world->civ link. World names are flavourful and do NOT
+    prefix their sigil ('forge-reach' belongs to 'forgeborn', 'tun-reach'
+    to 'tunborn'), so the dir name alone cannot identify the line; the
+    scribe writes the sigil into the card exactly so it can. Returns None
+    when the card is absent or torn (then the caller falls back to the
+    dir-name guess)."""
+    path = Path(world_dir) / "world.card"
+    try:
+        data = path.read_bytes()
+    except OSError:
+        return None
+    at = 0
+    while at + 5 <= len(data):
+        tag = data[at]
+        ln = int.from_bytes(data[at + 1 : at + 5], "little")
+        val = data[at + 5 : at + 5 + ln]
+        if len(val) < ln:
+            break
+        if tag == 30:  # scribe: put_str(30, civilization sigil)
+            try:
+                return val.decode("utf-8")
+            except Exception:
+                return None
+        at += 5 + ln
+    return None
+
+
 def world_facts(world_dir):
     """Everything one world carries, gathered once.
 
@@ -652,7 +681,12 @@ def world_facts(world_dir):
     planets = []
     planets_dir = world_dir / "planets"
     world_name = world_dir.name
-    civ_guess = world_name.split("-")[0] if world_name else "?"
+    # AUTHORITATIVE: the sigil the scribe wrote into world.card. The
+    # dir-name split is only a fallback for a torn/absent card — it is
+    # wrong for every flavourfully-named world (forge-reach → forgeborn).
+    civ_guess = world_card_sigil(world_dir) or (
+        world_name.split("-")[0] if world_name else "?"
+    )
     if planets_dir.is_dir():
         for planet_dir in sorted(p for p in planets_dir.iterdir() if p.is_dir()):
             wire = decode_orb_tlv(planet_dir / "state.tlv")
