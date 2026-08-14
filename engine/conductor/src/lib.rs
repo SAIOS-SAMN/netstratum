@@ -2445,6 +2445,63 @@ impl Polity {
         Need { hungers, starved_for, thin: Vec::new() }
     }
 
+    /// **MULTI-ORB EXPANSION** (INTELLIGENCE ARC A1) — a matured
+    /// civilization grows into its star system, and that growth is what
+    /// gives its mind something to stand on.
+    ///
+    /// Once a line has climbed its research ladder (rung ≥ 3 — cognition
+    /// EARNED, not a clock) and its home is fed, it CHARTS a colony orb
+    /// and weaves its orbs into an internal SUPPLY RING (standing
+    /// inter-orb bonds, each orb streaming to the next and the last
+    /// closing back). That circular internal economy is exactly what the
+    /// relational algebra reads as RANK (`bridge::read_entangled`): a
+    /// civilization whose logistics form obligation cycles no simple
+    /// hierarchy can explain. It is the structure B-E1's depth coupling
+    /// was blocked on — every book held ONE orb, `rank 0`, so the mind
+    /// was pinned at the floor. A2 reads this rank into search depth, so
+    /// expansion itself deepens the mind.
+    ///
+    /// Re-sealing an existing bond refuses and is ignored, so this simply
+    /// MAINTAINS the ring as it grows. Nothing is minted — `chart_as`
+    /// MOVES founding reserves, and the bonds settle conserved at the
+    /// touch.
+    fn expand_step(&mut self) {
+        // A line expands only once it has climbed, and only when fed.
+        if self.level < 3 || self.world.orb().is_none_or(|o| !o.famine.is_empty()) {
+            return;
+        }
+        // THE SYSTEM CAP — a star system holds a handful of worlds. Four
+        // orbs give the internal economy room for more than one
+        // irreducible cycle (rank ≥ 1 at three, growing past it at four).
+        const SYSTEM_CAP: usize = 4;
+        let orbs: Vec<u64> =
+            self.world.committed().orbs.iter().map(|o| o.orb_id).collect();
+        if orbs.len() < SYSTEM_CAP {
+            let home = *orbs.first().unwrap_or(&cfe::world::FIRST_ORB);
+            let name = format!("{}-orb{}", self.spec.world_name, orbs.len());
+            let _ = self.world.chart_as(self.automaton, &name, home);
+        }
+        // Weave / maintain the internal supply ring over every orb.
+        let orbs: Vec<u64> =
+            self.world.committed().orbs.iter().map(|o| o.orb_id).collect();
+        if orbs.len() >= 2 {
+            if let Some(rate) = cfe::dop::Positive::new(ratio(1, 1)) {
+                for i in 0..orbs.len() {
+                    let (from, to) = (orbs[i], orbs[(i + 1) % orbs.len()]);
+                    if let Some(pair) = cfe::dop::Between::new(from, to) {
+                        let _ = self.world.seal_bond_as(
+                            self.automaton,
+                            pair,
+                            cfe::dop::Resource::Biomass,
+                            rate.clone(),
+                            0,
+                        );
+                    }
+                }
+            }
+        }
+    }
+
     fn research_step(&mut self, book: &Ledger) {
         let Some(receipt) = self.world.chronicle().receipts().last() else {
             return;
@@ -3052,6 +3109,7 @@ impl Polity {
             }
         });
         profile::timed("survey_step", || self.survey_step());
+        profile::timed("expand_step", || self.expand_step());
         profile::timed("research_step", || self.research_step(book));
         let newborn = profile::timed("divergence_step", || self.divergence_step(registry));
         // THE RESUME CARRIER (task 25, 2026-07-30): every polity

@@ -49,7 +49,17 @@ fn scratch(name: &str) -> PathBuf {
 /// digest carries its name, so the renamed lines draw different veins and
 /// the placement walk resolves differently, shifting the whole board's
 /// footprint deterministically. A pure identity re-measure — no law changed.
-const MEASURED_ZONE_TOTAL_AT_15: usize = 90;
+/// RE-MEASURED 2026-08-14 to 89: MULTI-ORB EXPANSION (INTELLIGENCE ARC A1)
+/// — a line that has climbed to rung 3 now CHARTS colony orbs and weaves an
+/// internal supply ring, and `chart_as` MOVES founding reserves from the
+/// home orb to the colony. So a fast-climbing line diverts inside the
+/// window what it would have spent on home zones — settlement trades
+/// against expansion, exactly as it should. The colonies' own zones are
+/// not counted here (this pins the HOME orb), so the footprint falls by the
+/// one home zone the reserves expansion drew (90 → 89). A deliberate
+/// re-measure; the divergence property still holds (the temperaments still
+/// build different cities).
+const MEASURED_ZONE_TOTAL_AT_15: usize = 89;
 
 /// **THE ENERGY-BOOTSTRAP DEBT** — the lines the settlement law cannot
 /// reach, pinned so the set can only SHRINK:
