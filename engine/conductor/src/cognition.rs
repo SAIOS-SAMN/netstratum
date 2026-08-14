@@ -57,6 +57,35 @@ pub fn settlement_choice(
     }
 }
 
+/// COGNITION-2 (2026-08-14, measured gap): the settlement tie-break
+/// above never fires for `Policy::Steady` — its own `wants_extractor`/
+/// `wants_habitat` are a structural exclusive-or, so Steady can never
+/// present the two-candidate moment utility/lookahead need. Measured
+/// live: 0/0 across a 60-beat, 45-civilization run where 18/23 of the
+/// roster is Steady. `industrial`'s Synthesizer-vs-Smelter choice has
+/// no such policy dependency — both conditions read only level/banked
+/// resources — so it is the one settlement-shaped choice EVERY policy
+/// can reach alike. Same veto law as `score_outcome`: a projection that
+/// starves the colony always loses. The base read is disposition-only
+/// (no ext/hab counts exist for a single industrial slot): empiricist
+/// reaches for the deeper unlock (Synthesizer, rung 5); everyone else
+/// takes the nearer, cheaper one (Smelter, rung 3) — the same
+/// "starved for the next discovery vs. security first" axis
+/// `settlement_choice` already reads, applied to tech depth instead of
+/// zone type.
+pub fn score_industrial_outcome(kind: ZoneKind, disposition: u8, famished: bool) -> Ratio {
+    if famished {
+        return ratio(-1_000_000, 1);
+    }
+    match (kind, disposition) {
+        (ZoneKind::Synthesizer, 2) => ratio(3, 2),
+        (ZoneKind::Smelter, 2) => ratio(1, 1),
+        (ZoneKind::Smelter, _) => ratio(3, 2),
+        (ZoneKind::Synthesizer, _) => ratio(1, 1),
+        _ => ratio(0, 1),
+    }
+}
+
 /// COGNITION-2: scores an actual simulated OUTCOME (`lookahead::project`'s
 /// `ext`/`hab`/gaps/`famished`, for the one candidate that was actually
 /// built on the clone) with the same weight table `settlement_choice`
@@ -221,6 +250,42 @@ mod tests {
             settlement_choice(true, true, 1, EconomicMode::Balanced, 10, 1, ratio(0, 1), ratio(0, 1)),
             Some(ZoneKind::Habitat)
         );
+    }
+
+    #[test]
+    fn industrial_choice_ignores_policy_by_construction() {
+        // score_industrial_outcome takes no Policy parameter at all —
+        // the whole point is that it is reachable regardless of which
+        // temperament sits the line, unlike the settlement tie-break.
+        for disposition in [0u8, 1, 2, 3] {
+            let synth = score_industrial_outcome(ZoneKind::Synthesizer, disposition, false);
+            let smelt = score_industrial_outcome(ZoneKind::Smelter, disposition, false);
+            assert_ne!(synth, ratio(0, 1));
+            assert_ne!(smelt, ratio(0, 1));
+        }
+    }
+
+    #[test]
+    fn empiricist_reaches_for_the_deeper_industrial_tier() {
+        let synth = score_industrial_outcome(ZoneKind::Synthesizer, 2, false);
+        let smelt = score_industrial_outcome(ZoneKind::Smelter, 2, false);
+        assert!(synth > smelt);
+    }
+
+    #[test]
+    fn every_other_disposition_takes_the_nearer_industrial_tier() {
+        for disposition in [0u8, 1, 3] {
+            let synth = score_industrial_outcome(ZoneKind::Synthesizer, disposition, false);
+            let smelt = score_industrial_outcome(ZoneKind::Smelter, disposition, false);
+            assert!(smelt > synth, "disposition {disposition}");
+        }
+    }
+
+    #[test]
+    fn a_famished_industrial_outcome_always_loses() {
+        let starved = score_industrial_outcome(ZoneKind::Synthesizer, 2, true);
+        let fed = score_industrial_outcome(ZoneKind::Smelter, 2, false);
+        assert!(fed > starved);
     }
 
     #[test]

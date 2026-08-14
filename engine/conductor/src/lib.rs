@@ -387,6 +387,16 @@ fn element_trade_intent(
 pub static PROBE_DIGEST_REPEAT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
 pub static PROBE_DIGEST_TOTAL: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
 
+/// COGNITION-1/2 measurement (2026-08-14): how often `build_step`
+/// actually reaches a genuine two-candidate settlement choice, and how
+/// often the lookahead (as opposed to the bootstrap hold or a missing
+/// projection) is what decided it. Mirrors `PROBE_DIGEST_REPEAT`'s own
+/// pattern — a measured count, never asserted from the code alone.
+pub static COGNITION_CHOICE_POINTS: std::sync::atomic::AtomicU64 =
+    std::sync::atomic::AtomicU64::new(0);
+pub static COGNITION_LOOKAHEAD_DECIDED: std::sync::atomic::AtomicU64 =
+    std::sync::atomic::AtomicU64::new(0);
+
 pub fn market_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, String)> {
     // Post intents. NO SINGLES (ruling 2026-07-31): the book is
     // open-ended — a fresh intent posts BESIDE what rests; only an
@@ -1841,21 +1851,74 @@ impl Polity {
         // forges iron; its advancement crosses by joint venture.
         let metabolism = self.spec.civilization.metabolism.clone();
         let (smelter_iron_gate, smelter_bio_gate) = smelter_gates();
-        let industrial: Option<ZoneKind> = if can_synth
+        let synth_conditions = can_synth
             && alloy >= ratio(20, 1)
             && bio >= ratio(15, 1)
-            && industry_relevant(&metabolism, ZoneKind::Synthesizer)
-        {
-            Some(ZoneKind::Synthesizer)
-        } else if can_smelt
+            && industry_relevant(&metabolism, ZoneKind::Synthesizer);
+        let smelter_conditions = can_smelt
             && smelters < 3
             && iron >= smelter_iron_gate
             && bio >= smelter_bio_gate
-            && industry_relevant(&metabolism, ZoneKind::Smelter)
-        {
-            Some(ZoneKind::Smelter)
-        } else {
-            None
+            && industry_relevant(&metabolism, ZoneKind::Smelter);
+        // COGNITION-2 (measured 2026-08-14: the settlement tie-break
+        // never fires for Policy::Steady — 0/0 across a live 60-beat,
+        // 45-civ run, since Steady's want-flags are a structural
+        // exclusive-or). `industrial` reads no Policy at all, so this
+        // IS the two-candidate moment every temperament can reach
+        // alike. Simulate both, veto a projection that starves the
+        // colony, and read disposition for the rest — falling back to
+        // the old fixed priority (Synthesizer first) whenever a tile
+        // or a projection isn't available.
+        let industrial: Option<ZoneKind> = match (synth_conditions, smelter_conditions) {
+            (false, false) => None,
+            (true, false) => Some(ZoneKind::Synthesizer),
+            (false, true) => Some(ZoneKind::Smelter),
+            (true, true) => {
+                COGNITION_CHOICE_POINTS.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+                let disposition = world.civ_axes().map(|axes| axes.disposition).unwrap_or(0);
+                next_free_tile(world)
+                    .and_then(|tile| {
+                        let synth_proj = crate::lookahead::project(
+                            world,
+                            automaton,
+                            primary,
+                            tile,
+                            ZoneKind::Synthesizer,
+                            LOOKAHEAD_DEPTH,
+                        );
+                        let smelt_proj = crate::lookahead::project(
+                            world,
+                            automaton,
+                            primary,
+                            tile,
+                            ZoneKind::Smelter,
+                            LOOKAHEAD_DEPTH,
+                        );
+                        match (synth_proj, smelt_proj) {
+                            (Some(s), Some(m)) => {
+                                COGNITION_LOOKAHEAD_DECIDED
+                                    .fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+                                let s_u = crate::cognition::score_industrial_outcome(
+                                    ZoneKind::Synthesizer,
+                                    disposition,
+                                    s.famished,
+                                );
+                                let m_u = crate::cognition::score_industrial_outcome(
+                                    ZoneKind::Smelter,
+                                    disposition,
+                                    m.famished,
+                                );
+                                Some(if s_u >= m_u {
+                                    ZoneKind::Synthesizer
+                                } else {
+                                    ZoneKind::Smelter
+                                })
+                            }
+                            _ => None,
+                        }
+                    })
+                    .or(Some(ZoneKind::Synthesizer))
+            }
         };
 
         // **THE FORGE HOLD, generalized from the Furnace arm** (the
@@ -2000,6 +2063,7 @@ impl Polity {
                     // isn't available, so there is always a defined
                     // answer.
                     let lookahead_pick = if extractor_viable && habitat_viable {
+                        COGNITION_CHOICE_POINTS.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
                         next_free_tile(world).and_then(|tile| {
                             let ext_proj = crate::lookahead::project(
                                 world,
@@ -2041,6 +2105,8 @@ impl Polity {
                                         h_bio_gap,
                                         h.famished,
                                     );
+                                    COGNITION_LOOKAHEAD_DECIDED
+                                        .fetch_add(1, std::sync::atomic::Ordering::Relaxed);
                                     Some(if e_u >= h_u {
                                         ZoneKind::Extractor
                                     } else {
