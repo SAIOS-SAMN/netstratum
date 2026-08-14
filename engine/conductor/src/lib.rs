@@ -60,6 +60,7 @@ use solver::{
 
 use std::path::Path;
 
+mod cognition;
 mod polities;
 pub use polities::{founding_polities, registered_polities, roster};
 
@@ -1924,15 +1925,74 @@ impl Polity {
             };
             if total >= cap {
                 None
-            } else if wants_extractor && gated(world, ZoneKind::Extractor) {
-                Some(ZoneKind::Extractor)
-            } else if wants_habitat && !forge_starved && gated(world, ZoneKind::Habitat) {
+            } else {
+                let extractor_viable = wants_extractor && gated(world, ZoneKind::Extractor);
                 // `forge_starved` holds the rations: the biomass a
                 // hearth would eat is the biomass the unlocked smelter
                 // is waiting on.
-                Some(ZoneKind::Habitat)
-            } else {
-                None
+                let habitat_viable =
+                    wants_habitat && !forge_starved && gated(world, ZoneKind::Habitat);
+                // COGNITION-1: the policy if/else above still decides
+                // AFFORDABILITY and shape (cap, wants_extractor,
+                // wants_habitat) — this only breaks the tie when BOTH
+                // are viable this beat, the one place the old code
+                // picked extractor by fixed priority alone. Disposition
+                // (44_LINEAGES) and economic mode (15_TAXON, clade-
+                // derived) are read here, not invented for this.
+                //
+                // BOOTSTRAP HOLD (measured, `measured_bounds.rs`): the
+                // settlement gates' own law (above) already draws the
+                // line between a build that OPENS a line's first income
+                // of a resource and one that expands it — utility only
+                // ever answers the second question. Until BOTH
+                // candidate resources already have a producing zone,
+                // the old fixed priority (extractor first) still
+                // decides; a founding-window colony has no banked
+                // history for utility to read yet, and letting it
+                // choose there stranded a measured line in famine.
+                let ext_resource = cfe::dop::zone_yield(ZoneKind::Extractor, metabolism).0;
+                let hab_resource = cfe::dop::zone_yield(ZoneKind::Habitat, metabolism).0;
+                let bootstrapping =
+                    !has_income(world, ext_resource) || !has_income(world, hab_resource);
+                if bootstrapping {
+                    if extractor_viable {
+                        Some(ZoneKind::Extractor)
+                    } else if habitat_viable {
+                        Some(ZoneKind::Habitat)
+                    } else {
+                        None
+                    }
+                } else {
+                    let disposition =
+                        world.civ_axes().map(|axes| axes.disposition).unwrap_or(0);
+                    let mode = world.taxon_economy_of(primary).mode;
+                    let smelter_pending = can_smelt
+                        && smelters < 3
+                        && industry_relevant(
+                            &self.spec.civilization.metabolism,
+                            ZoneKind::Smelter,
+                        );
+                    let iron_gap = if smelter_pending && iron < smelter_iron_gate {
+                        smelter_iron_gate.clone() - iron.clone()
+                    } else {
+                        ratio(0, 1)
+                    };
+                    let bio_gap = if smelter_pending && bio < smelter_bio_gate {
+                        smelter_bio_gate.clone() - bio.clone()
+                    } else {
+                        ratio(0, 1)
+                    };
+                    crate::cognition::settlement_choice(
+                        extractor_viable,
+                        habitat_viable,
+                        disposition,
+                        mode,
+                        ext as i64,
+                        hab as i64,
+                        iron_gap,
+                        bio_gap,
+                    )
+                }
             }
         };
 
