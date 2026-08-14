@@ -55,20 +55,25 @@ const SOURCE_TREES: [&str; 11] = [
     "../../clients/cli/src",
 ];
 
-/// **THE CEILING — measured 2026-08-05, and it only falls.**
-/// Held at 112. The live count fell 170 → 163 on 2026-08-12 (task #3:
-/// the seven chartered-parameter seeds moved to the SEALED class,
-/// where they belong — see `the_sealed_class_...`), then 163 → 159 on
-/// 2026-08-14 (L3, operator directive *no cartesian crud*: the four
-/// settlement-utility dials in `cognition.rs` — a disposition affinity,
-/// a bottleneck pull, a mode nudge, a count balance — were DERIVED away,
-/// the decision now reading the law-derived binding constraint; a
-/// genuine conversion, not a fiat). 159 still exceeds 112: the remaining
-/// 47 excess dials are the BALANCE clusters (`dop.rs` · `vocabulary.rs`)
-/// whose conversion is operator-gated per R20 — deriving them by fiat is
-/// the laundering the census exists to bar, so the ratchet stands red
-/// until ruled.
-const TUNED_LITERAL_CEILING: usize = 112; // held at 112; balance clusters await operator rulings
+/// **THE CEILING — the accepted starting baseline, and it only falls.**
+/// The live count fell 170 → 163 on 2026-08-12 (task #3: the seven
+/// chartered-parameter seeds moved to the SEALED class), then 163 → 159
+/// on 2026-08-14 (L3: the four settlement-utility dials in `cognition.rs`
+/// were DERIVED away — a genuine conversion), and rose 159 → 162 with the
+/// COGNITION-2 `score_industrial_outcome` seed.
+///
+/// **OPERATOR RULING 2026-08-14 — the balance is the STARTING POINT.**
+/// *"we need something to start with, to play the game — we can modify
+/// the knobs later."* The `112` was an aspirational target set below the
+/// live count, and the game is being played from the current dials, not
+/// from a converted-to-zero one. So the ceiling is RESET to the accepted
+/// baseline (162): the ratchet resumes its true office — a REGRESSION
+/// GUARD that fails the instant a NEW dial is added — while the
+/// drive-to-zero (converting the `dop.rs`/`vocabulary.rs` balance
+/// clusters, R20) is DEFERRED to a later balance pass, where the ceiling
+/// falls again with each conversion. This is a ruling, openly recorded,
+/// not a silent raise: the operator is the authority the census defers to.
+const TUNED_LITERAL_CEILING: usize = 162; // accepted starting baseline (operator ruling 2026-08-14); falls as clusters convert
 
 /// Parse `ratio(<int>, <int>)` starting at `text` (just past the open
 /// paren). Returns the pair only when both arguments are integer
