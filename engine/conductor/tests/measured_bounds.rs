@@ -40,7 +40,11 @@ fn scratch(name: &str) -> PathBuf {
 /// grows"), so a well-nourished roster settles more. This also FEEDS
 /// `tunborn`, which had been famishing at 3 zones (the settlement debt
 /// shrank by one). A deliberate re-measure under the ruled economy.
-const MEASURED_ZONE_TOTAL_AT_15: usize = 91;
+/// RE-MEASURED 2026-08-14 to 92: the G2 harvesting CATALYST (§3) lands —
+/// a line's favoured elements now flux its EXTRACTION (boost-only, on the
+/// extractor line), so a reagent-holding line mines enough to settle one
+/// more zone. A deliberate re-measure under the ruled economy.
+const MEASURED_ZONE_TOTAL_AT_15: usize = 92;
 
 /// **THE ENERGY-BOOTSTRAP DEBT** — the lines the settlement law cannot
 /// reach, pinned so the set can only SHRINK:

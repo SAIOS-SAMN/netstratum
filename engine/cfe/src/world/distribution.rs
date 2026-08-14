@@ -54,6 +54,38 @@ impl World {
         clade_warmth == 0 || (clade_warmth > 0) == (element_heat > 0)
     }
 
+    /// **THE HARVESTING CATALYST FACTOR** (G2 trace elements §3,
+    /// 2026-08-14) — elements are not only eaten, they are TOOLS: a line's
+    /// favoured elements flux its EXTRACTION, the reagents that let it mine
+    /// more matter per beat. Unlike the micronutrient maintenance need
+    /// this is BOOST-ONLY (a reagent lifts extraction where held; its
+    /// absence is merely baseline, never a penalty), and it lands on the
+    /// EXTRACTOR line alone — food and industry read it not.
+    ///
+    ///   factor = 1 + present / required                       ∈ [1, 2]
+    ///
+    /// A full reagent stock doubles extraction; a bare one leaves it at
+    /// baseline. The reagents are spent by the same trace vent that eats
+    /// them, so a catalysing line is under the same re-mine pressure. A
+    /// world with no favoured veins reads 1 — its extraction is untouched
+    /// and byte-identical. Derived from vein/bank counts, no dial.
+    pub fn catalyst_factor(&self, orb: u64) -> Ratio {
+        let full = ratio(1, 1);
+        let required = self.required_trace(orb);
+        if required.is_empty() {
+            return full;
+        }
+        let Some(held) = self.orb_by_id(orb) else {
+            return full;
+        };
+        let present = required
+            .iter()
+            .filter(|element| held.element_amount(element) > ratio(0, 1))
+            .count() as i64;
+        let req = required.len() as i64;
+        full + ratio(present, req)
+    }
+
     /// **THE LINE'S TRACE REQUIREMENT** — the distinct elements its world's
     /// veins bear THAT its substrate favours (the intersection of "you eat
     /// what your world grows" with the substrate's own signature). A

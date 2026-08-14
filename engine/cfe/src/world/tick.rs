@@ -454,6 +454,11 @@ impl World {
                 // on a bare larder. One per orb; exactly 1 (no change) for
                 // a world that never opened a vein.
                 let micronutrient = self.micronutrient_factor(*orb_id);
+                // G2 TRACE §3 (2026-08-14): the harvesting CATALYST — the
+                // line's favoured elements flux its EXTRACTION (extractors
+                // only), a boost-only reagent bonus. Exactly 1 for a world
+                // with no favoured veins.
+                let catalyst = self.catalyst_factor(*orb_id);
                 for (zone, vigour) in active {
                     // #41: a minted building's numbers are its BASE's —
                     // the binding modulates what a building DOES, and
@@ -517,6 +522,12 @@ impl World {
                     // Every other yield (iron extraction, joule capture)
                     // rides the resource store verbatim.
                     if !(element_ration.is_some() && resource == Resource::Biomass) {
+                        // The catalyst fluxes EXTRACTION alone; food and
+                        // industry read a flat 1.
+                        let catalyst_here = match seat {
+                            ZoneKind::Extractor => catalyst.clone(),
+                            _ => ratio(1, 1),
+                        };
                         accrue(
                             &mut self.accrued,
                             *orb_id,
@@ -526,6 +537,7 @@ impl World {
                                 * boost
                                 * yield_factor.clone()
                                 * micronutrient.clone()
+                                * catalyst_here
                                 * vigour.clone(),
                         );
                     }

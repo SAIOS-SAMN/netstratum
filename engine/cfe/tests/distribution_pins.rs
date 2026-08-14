@@ -673,3 +673,27 @@ fn a_substrate_favours_the_slice_of_the_spine_its_chemistry_prefers() {
     assert!(temperate.substrate_favours(&light) && temperate.substrate_favours(&heavy),
         "a temperate substrate takes the whole spine");
 }
+
+// ── G2 trace §3: the harvesting catalyst ──
+
+#[test]
+fn the_catalyst_boosts_extraction_where_the_reagent_stands_and_never_penalizes() {
+    // A full reagent stock DOUBLES extraction; burn it dry and the catalyst
+    // falls to baseline 1 — a missing reagent is no boost, but NEVER a
+    // penalty (the distinction from the maintenance micronutrient, which
+    // DOES sink to its ½ floor on the same empty larder).
+    let (_vein, mut world) = traced_world(20);
+    assert_eq!(world.catalyst_factor(FIRST_ORB), ratio(2, 1), "a full reagent stock doubles extraction");
+    for _ in 0..4 {
+        for _ in 0..8 { world.tick(); }
+        world.collect().expect("collects");
+    }
+    assert_eq!(world.catalyst_factor(FIRST_ORB), ratio(1, 1), "a spent reagent leaves extraction at baseline, never below");
+    assert_eq!(world.micronutrient_factor(FIRST_ORB), ratio(1, 2), "the maintenance need penalizes where the catalyst does not");
+}
+
+#[test]
+fn a_world_with_no_veins_has_no_catalyst_and_extraction_is_byte_identical() {
+    let world = society(6, 1, false, 100);
+    assert_eq!(world.catalyst_factor(FIRST_ORB), ratio(1, 1), "no veins → no catalyst → extraction untouched");
+}
