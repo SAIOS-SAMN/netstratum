@@ -70,6 +70,16 @@ pub struct Need {
     /// line), and the static preference stands. Ordering only, as
     /// ever: the observation still supplies every candidate.
     pub thin: Vec<Family>,
+    /// **THE DEPTH EXPANSION BUYS** (INTELLIGENCE ARC A2) — extra compose
+    /// depth a line has EARNED through its relational structure (rank).
+    /// The mind reaches this much DEEPER than hunger alone would take it:
+    /// a civilization whose internal economy sustains obligation cycles
+    /// (multi-orb, rank > 0) can hold more of the composition in view at
+    /// once. Zero for a single-orb line — advancement, not a clock, buys
+    /// this. Additive, never a cap: the baseline the rung climbs on is
+    /// untouched, so a young line is never starved of the depth it needs
+    /// to climb to the rung where it can expand (the B-E1 deadlock).
+    pub reach_bonus: usize,
 }
 
 impl Need {
@@ -80,7 +90,7 @@ impl Need {
 
     /// One struck want with its reading.
     pub fn struck(hunger: Hunger, starved_for: u64) -> Need {
-        Need { hungers: vec![hunger], starved_for, thin: Vec::new() }
+        Need { hungers: vec![hunger], starved_for, thin: Vec::new(), reach_bonus: 0 }
     }
 
     /// Map the chronicle's `(kind, reading)` wants into a reach.
@@ -96,22 +106,26 @@ impl Need {
                 starved_for = starved_for.max(reading);
             }
         }
-        Need { hungers, starved_for, thin: Vec::new() }
+        Need { hungers, starved_for, thin: Vec::new(), reach_bonus: 0 }
     }
 
     /// THE DEPTH THE NEED WILL COMPOSE TO.
     ///
     /// A sated mind takes single derived operators; a starving one will
-    /// compose two, and a long-starved one three. This is the ONLY place
-    /// hunger buys breadth, and it buys it over DERIVED candidates —
-    /// never over the raw vocabulary, which is the enumeration that was
-    /// struck.
+    /// compose two, and a long-starved one three — the HUNGER baseline.
+    /// On top of that a line composes as much DEEPER as its structure has
+    /// earned it (`reach_bonus`, A2): a developed, multi-orb civilization
+    /// holds more of a composition in view and so finds — and mints —
+    /// longer words a shallow mind never reaches. Hunger buys breadth over
+    /// DERIVED candidates; advancement buys DEPTH. The observation still
+    /// supplies every candidate.
     pub fn compose_limit(&self) -> usize {
-        match (self.hungers.is_empty(), self.starved_for) {
+        let hunger = match (self.hungers.is_empty(), self.starved_for) {
             (true, _) => 1,
             (false, r) if r >= 480 => 3,
             (false, _) => 2,
-        }
+        };
+        hunger + self.reach_bonus
     }
 
     /// Does this need reach for `family` before the others?

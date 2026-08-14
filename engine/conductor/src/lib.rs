@@ -690,6 +690,7 @@ impl Trajectory {
                     hungers: measured,
                     starved_for: starved,
                     thin: Vec::new(),
+                    reach_bonus: 0,
                 },
             },
         }
@@ -2442,7 +2443,7 @@ impl Polity {
             true => 0,
             false => found.max(linked),
         };
-        Need { hungers, starved_for, thin: Vec::new() }
+        Need { hungers, starved_for, thin: Vec::new(), reach_bonus: 0 }
     }
 
     /// **MULTI-ORB EXPANSION** (INTELLIGENCE ARC A1) — a matured
@@ -2618,6 +2619,22 @@ impl Polity {
                 if !need.hungers.is_empty() && !polity.library.words().is_empty() {
                     need.thin = solver::knowledge_order(&polity.library);
                 }
+                // **ADVANCEMENT DEEPENS THE MIND** (INTELLIGENCE ARC A2).
+                // The line's own RELATIONAL RANK — the irreducible
+                // obligation cycles its internal economy sustains
+                // (`bridge::read_entangled`, the multi-orb structure A1
+                // builds) — is read straight into how deep it composes.
+                // A single-orb line (rank 0) reaches as hunger alone
+                // takes it; an expanded, structured civilization holds
+                // more of the composition in view and finds longer words.
+                // Derived, not dialed: the depth is the rank, and the
+                // rank is the resolve reading its economy. Additive, so
+                // the baseline every line climbs on is untouched — no
+                // deadlock (EQUATIONS B-E1's reachability trap). The
+                // deeper search spends more reach, which the memo and the
+                // trajectory already price: a bigger mind costs more.
+                need.reach_bonus =
+                    kernel::bridge::read_entangled(&polity.world.committed()).rank;
                 // THE MEMO, restored into the coupled path (remediations
                 // R5). `propose` is pure: same digest, same difficulty,
                 // same need, same answer. Keyed on all three — a

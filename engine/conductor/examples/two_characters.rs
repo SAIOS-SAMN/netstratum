@@ -43,6 +43,7 @@ fn main() {
                 hungers: vec![Hunger::Novelty, Hunger::Resonance],
                 starved_for: 900,
                 thin: Vec::new(),
+                reach_bonus: 0,
             },
         ),
     ];
