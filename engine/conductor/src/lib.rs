@@ -61,6 +61,7 @@ use solver::{
 use std::path::Path;
 
 mod cognition;
+pub mod lookahead;
 mod polities;
 pub use polities::{founding_polities, registered_polities, roster};
 
@@ -1774,6 +1775,10 @@ impl Polity {
     }
 
     fn build_step(&mut self) {
+        // COGNITION-2: how far the settlement lookahead simulates before
+        // scoring — measured safe (a `World` clone + this many `tick()`
+        // calls, only at a genuine two-candidate choice, not every beat).
+        const LOOKAHEAD_DEPTH: u32 = 2;
         self.gather_for_forge();
         let steward = self.steward;
         let automaton = self.automaton;
@@ -1972,26 +1977,96 @@ impl Polity {
                             &self.spec.civilization.metabolism,
                             ZoneKind::Smelter,
                         );
-                    let iron_gap = if smelter_pending && iron < smelter_iron_gate {
-                        smelter_iron_gate.clone() - iron.clone()
-                    } else {
-                        ratio(0, 1)
+                    let gap_for = |iron: &Ratio, bio: &Ratio| -> (Ratio, Ratio) {
+                        let iron_gap = if smelter_pending && *iron < smelter_iron_gate {
+                            smelter_iron_gate.clone() - iron.clone()
+                        } else {
+                            ratio(0, 1)
+                        };
+                        let bio_gap = if smelter_pending && *bio < smelter_bio_gate {
+                            smelter_bio_gate.clone() - bio.clone()
+                        } else {
+                            ratio(0, 1)
+                        };
+                        (iron_gap, bio_gap)
                     };
-                    let bio_gap = if smelter_pending && bio < smelter_bio_gate {
-                        smelter_bio_gate.clone() - bio.clone()
+
+                    // COGNITION-2: when there's a genuine choice, SEE
+                    // what each candidate actually leads to
+                    // (`lookahead::project` — a real clone, real build,
+                    // real ticks forward) instead of scoring only the
+                    // current beat. Falls back to the COGNITION-1
+                    // static formula whenever a tile or a projection
+                    // isn't available, so there is always a defined
+                    // answer.
+                    let lookahead_pick = if extractor_viable && habitat_viable {
+                        next_free_tile(world).and_then(|tile| {
+                            let ext_proj = crate::lookahead::project(
+                                world,
+                                automaton,
+                                primary,
+                                tile,
+                                ZoneKind::Extractor,
+                                LOOKAHEAD_DEPTH,
+                            );
+                            let hab_proj = crate::lookahead::project(
+                                world,
+                                automaton,
+                                primary,
+                                tile,
+                                ZoneKind::Habitat,
+                                LOOKAHEAD_DEPTH,
+                            );
+                            match (ext_proj, hab_proj) {
+                                (Some(e), Some(h)) => {
+                                    let (e_iron_gap, e_bio_gap) = gap_for(&e.iron, &e.bio);
+                                    let (h_iron_gap, h_bio_gap) = gap_for(&h.iron, &h.bio);
+                                    let e_u = crate::cognition::score_outcome(
+                                        ZoneKind::Extractor,
+                                        disposition,
+                                        mode,
+                                        e.ext,
+                                        e.hab,
+                                        e_iron_gap,
+                                        e_bio_gap,
+                                        e.famished,
+                                    );
+                                    let h_u = crate::cognition::score_outcome(
+                                        ZoneKind::Habitat,
+                                        disposition,
+                                        mode,
+                                        h.ext,
+                                        h.hab,
+                                        h_iron_gap,
+                                        h_bio_gap,
+                                        h.famished,
+                                    );
+                                    Some(if e_u >= h_u {
+                                        ZoneKind::Extractor
+                                    } else {
+                                        ZoneKind::Habitat
+                                    })
+                                }
+                                _ => None,
+                            }
+                        })
                     } else {
-                        ratio(0, 1)
+                        None
                     };
-                    crate::cognition::settlement_choice(
-                        extractor_viable,
-                        habitat_viable,
-                        disposition,
-                        mode,
-                        ext as i64,
-                        hab as i64,
-                        iron_gap,
-                        bio_gap,
-                    )
+
+                    lookahead_pick.or_else(|| {
+                        let (iron_gap, bio_gap) = gap_for(&iron, &bio);
+                        crate::cognition::settlement_choice(
+                            extractor_viable,
+                            habitat_viable,
+                            disposition,
+                            mode,
+                            ext as i64,
+                            hab as i64,
+                            iron_gap,
+                            bio_gap,
+                        )
+                    })
                 }
             }
         };
