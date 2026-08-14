@@ -429,3 +429,20 @@ fn an_element_farm_past_the_richness_bound_refuses() {
         "a farm cannot conjure more matter than its energy buys"
     );
 }
+
+#[test]
+fn trace_consumption_admits_as_a_conserved_element_spend() {
+    // A population burns a trace of its element maintaining its substrate:
+    // the element leaves the ledger, declared and conserved — the kernel
+    // admits it exactly like a salvage.
+    let element = ELEMENT;
+    let prior = banked_element(&with_vein((2, 1), 1), element, ratio(10, 1));
+    let mut next = prior.clone();
+    next.orbs[0].bank_element(element, ratio(-3, 1));
+    let step = Step {
+        event: ClosureEvent::TraceConsumed { orb_id: 1, element, amount: ratio(3, 1) },
+        actor: SOVEREIGN,
+        stamp: 5,
+    };
+    assert_eq!(admits(&prior, &next, &step), Ok(()));
+}

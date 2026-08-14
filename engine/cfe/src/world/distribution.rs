@@ -57,6 +57,57 @@ impl World {
         full + ratio(present + present - req, req + req)
     }
 
+    /// **THE UNIVERSAL TRACE-CONSUMPTION VENT** (G2 trace elements, ruled
+    /// 2026-08-14) — the trace elements a POPULATION burns maintaining its
+    /// substrate over the span since the last touch, whatever its clade.
+    /// The requirement is the world's (the distinct elements its veins
+    /// bear); of those, the line burns a TRACE of each it actually holds
+    /// — the demand scaled to population × the span at trace proportions
+    /// (`(p·Δt)/grain` per element, `≪` the gross caloric ration), capped
+    /// by what is banked so the larder never goes negative. Returned as
+    /// `(element, amount)` draws to receipt as `TraceConsumed` and debit.
+    ///
+    /// A world with no veins, no population, or an empty larder burns
+    /// nothing — so every world without the trace economy is byte-identical.
+    /// The DEPLETION is the point: as the larder empties the
+    /// `micronutrient_factor` sinks toward its ½ floor, pressuring the line
+    /// to re-mine or trade — a perpetual, organic elemental demand.
+    pub fn trace_consumption_at_touch(&self, orb: u64, stamp: u64) -> Vec<([u8; 32], Ratio)> {
+        let pop = self.population_of(orb);
+        if pop == 0 {
+            return Vec::new();
+        }
+        let Some(held) = self.orb_by_id(orb) else {
+            return Vec::new();
+        };
+        let dt = stamp.saturating_sub(held.last_touch);
+        if dt == 0 {
+            return Vec::new();
+        }
+        // Trace proportion: 1/grain of an element per head per beat — far
+        // under the gross caloric ration. Derived (grain is structural).
+        let grain = crate::almanac::REGROWTH_GRAIN;
+        let demand = ratio(pop as i64 * dt as i64, grain);
+        if demand <= ratio(0, 1) {
+            return Vec::new();
+        }
+        let mut required: Vec<[u8; 32]> = self
+            .prospects
+            .iter()
+            .filter(|vein| vein.orb == orb)
+            .map(|vein| vein.element)
+            .collect();
+        required.sort();
+        required.dedup();
+        required
+            .into_iter()
+            .filter_map(|element| {
+                let draw = held.element_amount(&element).min(demand.clone());
+                (draw > ratio(0, 1)).then_some((element, draw))
+            })
+            .collect()
+    }
+
     /// **DOES THIS ORB STAND A GRANARY?** The gate that flips the
     /// provisioned economy on. Where it answers false, the population
     /// runs the #40–42 subsistence model verbatim (harvest→stomach, no

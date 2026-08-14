@@ -8652,6 +8652,10 @@ fn chronicle(world: &World, style: &Style) {
                 style.strong(&amount(joule)),
                 style.strong(&amount(minted))
             ),
+            cfe::dop::ClosureEvent::TraceConsumed { orb_id, amount, .. } => format!(
+                "· trace BURNED — orb {orb_id} spent {} of a trace element maintaining its substrate",
+                style.strong(&amount(amount))
+            ),
             cfe::dop::ClosureEvent::CivilizationCollapsed { .. } => format!(
                 "{} the line has COLLAPSED — every orb stands at zero; the chronicle closes here, there is no win to reach for instead",
                 style.bad("☠")

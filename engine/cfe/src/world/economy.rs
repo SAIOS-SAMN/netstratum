@@ -297,6 +297,12 @@ impl World {
         // its own ElementFarmed receipt after the touch. `None` for every
         // non-eater, so a v1 world is byte-identical.
         let farm = self.element_farm_at_touch(orb, self.clock.now());
+        // G2 TRACE (2026-08-14): the trace elements the population burns
+        // maintaining its substrate this span — read pre-touch (over the
+        // span just ended), settled as `TraceConsumed` debits after the
+        // touch. Empty for a world with no veins or no population, so it is
+        // byte-identical.
+        let trace = self.trace_consumption_at_touch(orb, self.clock.now());
         // TAXATION (49 §5): the welfare OUTFLOW is read HERE, before the
         // touch advances `last_touch` — the demand it funds is measured
         // over the span just ended (the same pre-touch reading as the
@@ -564,6 +570,21 @@ impl World {
                     vec![actor],
                 );
             }
+        }
+        // G2 TRACE (2026-08-14): burn the trace elements the population
+        // consumed this span — one debit per veined element it held, drawn
+        // from the larder (read pre-touch). No veins / no population → no
+        // draws → no deed → byte-identical.
+        let stamp = self.clock.now();
+        for (element, amount) in trace {
+            if let Some(held) = peel(&mut self.orbs, orb) {
+                held.bank_element(element, -amount.clone());
+            }
+            self.chronicle.append(
+                ClosureEvent::TraceConsumed { orb_id: orb, element, amount },
+                stamp,
+                vec![actor],
+            );
         }
         Ok(count)
     }

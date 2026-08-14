@@ -1184,6 +1184,13 @@ impl Replayer {
                 held.bank_scrap(amount.clone());
             }
         }
+        // G2 (#trace): the trace element burned maintaining the substrate
+        // leaves the larder (no scrap — it is spent, not salvaged).
+        ClosureEvent::TraceConsumed { orb_id, element, amount } => {
+            if let Some(held) = peel(&mut *orbs, *orb_id) {
+                held.bank_element(*element, -amount.clone());
+            }
+        }
         ClosureEvent::NoteIssued {
             note_id,
             orb_id,

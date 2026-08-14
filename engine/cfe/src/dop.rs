@@ -381,14 +381,15 @@
 //!         first; 173 -> 174 then collided with ElementFarmed, which
 //!         ALSO committed to main first. Landed concurrently with two
 //!         separate lanes claiming the same next-free tag in a row.)
-//!    Phase-5 claim ledger: next free **175** (163–164 ElementWant,
+//!    Phase-5 claim ledger: next free **176** (163–164 ElementWant,
 //!    165 TreatyElementsAllowed, 166 SolverWordMinted, 167
 //!    PopulationSettled — 41_PROVISION §3, 169 EvolutionAdvanced —
 //!    44_LINEAGES §2c, 170 TitheReceipted, 171 TreasurySettled —
 //!    49_TAXATION §5, 168 PressureEbbed — bio quarantine relief #30,
 //!    ruling R3, 172 PracticesLapsed — 49_TAXATION §3, 173
 //!    ElementFarmed — G2 element economy #29, 174
-//!    CivilizationCollapsed — 50_WIN_CONDITIONS).
+//!    CivilizationCollapsed — 50_WIN_CONDITIONS, 175 TraceConsumed —
+//!    G2 trace elements).
 //!    Seated science labs. E-MKT-1 (2026-08-10): tag **49** OfferPosted
 //!    wire extended in place (Resource 1..=7; Element = 0 ‖ id[32]).
 //!    E3.7 (2026-08-10): tags **163–164** ElementWantStruck/Relieved.
@@ -3033,6 +3034,22 @@ pub enum ClosureEvent {
         minted: Ratio,
         eaten: Ratio,
     },
+    /// **THE UNIVERSAL TRACE-CONSUMPTION VENT** (G2 trace elements,
+    /// ruled 2026-08-14, tag 175) — the thermodynamic cost of substrate
+    /// maintenance every populated line pays, whatever its clade. At the
+    /// settle touch a population debits `amount` of `element` (a trace
+    /// element its own world's veins bear) from its larder to hold peak
+    /// throughput — at true trace proportions, scaled to population × the
+    /// span. The element leaves the ledger (a conserved spend); when the
+    /// larder empties the line does not die (that is gross-calorie
+    /// famine) — its `micronutrient_factor` sinks toward the ½ floor,
+    /// pressuring it to re-mine or trade. A world with no veins or no
+    /// population debits nothing and is byte-identical.
+    TraceConsumed {
+        orb_id: u64,
+        element: [u8; 32],
+        amount: Ratio,
+    },
     /// **THE FAILURE STATE** (`50_WIN_CONDITIONS`, operator ruling
     /// 2026-08-13, tag 174): *"there is no win state — there is a
     /// failure state — otherwise the game should just continue in
@@ -4332,6 +4349,12 @@ impl ClosureEvent {
                 value.extend_from_slice(element);
                 ratio::encode(amount, &mut value);
                 tlv::put(119, &value, &mut out);
+            }
+            Self::TraceConsumed { orb_id, element, amount } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                value.extend_from_slice(element);
+                ratio::encode(amount, &mut value);
+                tlv::put(175, &value, &mut out);
             }
             Self::NoteIssued {
                 note_id,
@@ -5663,6 +5686,12 @@ impl ClosureEvent {
                     element,
                     amount,
                 })
+            }
+            175 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let element: [u8; 32] = value.get(8..40)?.try_into().ok()?;
+                let (amount, _) = ratio::decode(value.get(40..)?)?;
+                Some(Self::TraceConsumed { orb_id, element, amount })
             }
             120 => {
                 let note_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);

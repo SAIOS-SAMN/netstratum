@@ -544,3 +544,98 @@ fn the_harvest_scales_with_how_well_the_larder_meets_the_worlds_veins() {
     let full = World::resume(world.chronicle().clone());
     assert_eq!(full.micronutrient_factor(FIRST_ORB), ratio(3, 2), "a full larder lifts the harvest by half");
 }
+
+// ── G2 trace elements: the universal consumption vent (2026-08-14) ──
+
+/// A populated world under a sun with one vein opened and a modest larder
+/// of its element banked — the setting for the trace-consumption burn.
+fn traced_world(banked_trace: i64) -> ([u8; 32], World) {
+    let mut world = World::new();
+    world.found("trace-hold").expect("founds");
+    world.commission_star(StarClass::G).expect("star");
+    world.site_planet(FIRST_ORB, unit(0, 1), positive(1, 1), None, None).expect("sites");
+    for tech in 1u8..=5 {
+        world.grant_tech_as(SOVEREIGN, FIRST_ORB, tech).expect("reach");
+    }
+    let mut vein = [0u8; 32];
+    for stratum in 0u8..=4 {
+        if let Ok(struck) = world.prospect(FIRST_ORB, stratum) {
+            vein = struck.element;
+            break;
+        }
+    }
+    assert_ne!(vein, [0u8; 32], "a vein opened");
+    let stamp = world.now();
+    for (res, amt) in [(Resource::Biomass, 400i64), (Resource::Iron, 100_000)] {
+        world.chronicle_mut().append(
+            ClosureEvent::YieldCollected { orb_id: FIRST_ORB, resource: res, amount: ratio(amt, 1) },
+            stamp, vec![SOVEREIGN],
+        );
+    }
+    if banked_trace > 0 {
+        world.chronicle_mut().append(
+            ClosureEvent::AssayStruck { orb_id: FIRST_ORB, element: vein, amount: ratio(banked_trace, 1), richness: None },
+            stamp, vec![SOVEREIGN],
+        );
+    }
+    let mut world = World::resume(world.chronicle().clone());
+    for tile in 0..6 { world.zone(tile, ZoneKind::Habitat).expect("hab"); }
+    world.zone(50, ZoneKind::Granary).expect("granary");
+    world.seal_taxon(2, 1).expect("biotic");
+    world.settle_population(FIRST_ORB, 100);
+    (vein, world)
+}
+
+#[test]
+fn the_trace_deed_round_trips() {
+    let deed = ClosureEvent::TraceConsumed { orb_id: 7, element: [9u8; 32], amount: ratio(3, 4) };
+    let bytes = deed.wire_bytes();
+    let mut records = cfe::tlv::records(&bytes);
+    let (tag, value) = records.next().expect("one record");
+    assert_eq!(tag, 175, "TraceConsumed is tag 175");
+    assert_eq!(ClosureEvent::from_wire(tag, value).expect("decodes"), deed);
+}
+
+#[test]
+fn a_population_burns_its_trace_and_the_larder_depletes_to_the_penalty_floor() {
+    // A fed population maintains its substrate by burning a trace of the
+    // element its world offers. With a full larder the harvest is boosted;
+    // as the population burns it dry, the factor sinks to its ½ FLOOR — the
+    // efficiency penalty, NOT death (the population lives on). The line must
+    // re-mine to recover.
+    let (vein, mut world) = traced_world(20);
+    let bank = |w: &World| w.orb_by_id(FIRST_ORB).map(|h| h.element_amount(&vein)).unwrap_or_else(|| ratio(0, 1));
+    assert_eq!(world.micronutrient_factor(FIRST_ORB), ratio(3, 2), "a full larder boosts the harvest");
+
+    for _ in 0..8 { world.tick(); }
+    world.collect().expect("collects");
+    let after_one = bank(&world);
+    assert!(after_one < ratio(20, 1), "the population burned some of its trace: {after_one}");
+    assert!(
+        world.chronicle().receipts().iter().any(|r| matches!(r.event, ClosureEvent::TraceConsumed { .. })),
+        "the burn is receipted"
+    );
+
+    // Keep running: the larder empties and the factor sinks to the ½ floor.
+    for _ in 0..3 {
+        for _ in 0..8 { world.tick(); }
+        world.collect().expect("collects");
+    }
+    assert_eq!(bank(&world), ratio(0, 1), "the trace larder ran dry");
+    assert_eq!(world.micronutrient_factor(FIRST_ORB), ratio(1, 2), "a spent larder falls to the penalty floor");
+    assert!(world.population_of(FIRST_ORB) > 0, "but the population LIVES — trace lack is a penalty, not a die-off");
+    assert_eq!(replay(world.chronicle()), world.committed(), "the whole burn replays MATCHES");
+}
+
+#[test]
+fn a_world_with_no_veins_burns_no_trace_and_is_byte_identical() {
+    // Every world that never opened a vein bears no trace need — no debit,
+    // no deed, byte-identical to the pre-trace era.
+    let mut world = society(6, 1, false, 100);
+    for _ in 0..8 { world.tick(); }
+    world.collect().expect("collects");
+    assert!(
+        !world.chronicle().receipts().iter().any(|r| matches!(r.event, ClosureEvent::TraceConsumed { .. })),
+        "no veins → no trace burn → byte-identical"
+    );
+}
