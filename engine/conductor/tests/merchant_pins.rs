@@ -4,7 +4,7 @@
 //! leg lands as an ordinary clear_trade (melt, void share, both
 //! books receipted). No wall → the caravan stays home.
 
-use cfe::dop::{exchange, positive, ClosureEvent, Resource, ZoneKind};
+use cfe::dop::{exchange, positive, ClosureEvent, HullRole, Resource, ZoneKind};
 use cfe::ratio::{ratio, Ratio};
 use cfe::thermal::StarClass;
 use cfe::world::FIRST_ORB;
@@ -50,6 +50,26 @@ fn banked(polity: &Polity, resource: Resource) -> Ratio {
     polity.world.orb().unwrap().banked_amount(resource)
 }
 
+/// FLEET-1: a positive-melt haul needs hull capacity (`world/mod.rs`
+/// haul_cargo). Every caravan leg is a positive-melt haul on BOTH sides,
+/// so each trading world carries a fleet. Grade-0 Haulers are the clean
+/// unit: `hull_eta(Hauler, 0) = 0`, so the melt the pin states is the
+/// melt that runs, and `free_capacity` SUMS them — `haulers` grade-0
+/// hulls give exactly `4·haulers` capacity with zero arithmetic drift.
+fn equip_haulers(polity: &mut Polity, haulers: usize) {
+    polity.world.zone(40, ZoneKind::ShipYard).expect("yard");
+    for _ in 0..haulers {
+        polity
+            .world
+            .salvage_scrap(FIRST_ORB, positive(4, 1))
+            .expect("scrap salvaged from iron");
+        polity
+            .world
+            .mint_hull(FIRST_ORB, HullRole::Hauler, 0)
+            .expect("grade-0 hauler");
+    }
+}
+
 #[test]
 fn the_caravan_bridges_the_walled_pair_at_a_profit() {
     let root = scratch("bridge");
@@ -62,8 +82,14 @@ fn the_caravan_bridges_the_walled_pair_at_a_profit() {
     let mut caravan = Polity::genesis(seat("waymid", 35), &registry, &book);
     miner.world.zone(0, ZoneKind::Extractor).expect("zones");
     miner.world.zone(1, ZoneKind::Extractor).expect("zones");
+    // A Habitat stages the biomass the ShipYard build costs — the miner
+    // still sells iron; this only lets it afford a yard for its fleet.
+    miner.world.zone(2, ZoneKind::Habitat).expect("zones");
     grower.world.zone(0, ZoneKind::Habitat).expect("zones");
     grower.world.zone(1, ZoneKind::Habitat).expect("zones");
+    // The grower hauls iron home on the return leg, so it needs iron to
+    // salvage into a hull — an Extractor stages it alongside the biomass.
+    grower.world.zone(2, ZoneKind::Extractor).expect("zones");
     caravan.world.zone(0, ZoneKind::Extractor).expect("zones");
     caravan.world.zone(8, ZoneKind::Habitat).expect("zones");
     for world in [&mut miner.world, &mut grower.world, &mut caravan.world] {
@@ -77,6 +103,16 @@ fn the_caravan_bridges_the_walled_pair_at_a_profit() {
     assert!(banked(&miner, Resource::Iron) >= ratio(12, 1), "iron staged");
     assert!(banked(&grower, Resource::Biomass) >= ratio(12, 1), "biomass staged");
     assert!(banked(&caravan, Resource::Biomass) >= ratio(4, 1), "the caravan's stake");
+
+    // FLEET-1: each world carries a fleet to haul across the positive-melt
+    // legs. A resting seller ships its whole 12-unit offer, so three
+    // grade-0 haulers (capacity 4·3 = 12) cover the largest leg; η stays 0
+    // so the profit pin below is unmoved. Equipped BEFORE the stake is
+    // captured, so the scrap it spends never enters the caravan's measured
+    // round-trip.
+    equip_haulers(&mut miner, 3);
+    equip_haulers(&mut grower, 3);
+    equip_haulers(&mut caravan, 3);
 
     // The resting asks: A sells 12 iron for 4 biomass; B sells 12
     // biomass for 4 iron. Direct they are WALLED.
@@ -99,18 +135,23 @@ fn the_caravan_bridges_the_walled_pair_at_a_profit() {
         "the caravan bridges the walled pair"
     );
     let caravan = &board[2];
-    // Leg melts 35/64 each: paid 4 biomass, bought 12·29/64 = 87/16
-    // iron; sold 4 iron for 12 biomass arriving 87/16. Net EXACTLY
-    // +23/16 of each — the profit is the receipts' arithmetic.
+    // The profit is the receipts' exact arithmetic. The two legs do NOT
+    // melt equally: `route_melt` folds each pair's orbital phase (D_orbit)
+    // into the chart distance, so A→M and M→B carry different melts even
+    // though both span 35 of chart — and the biomass and iron round-trips
+    // profit by different exact rationals. Both are POSITIVE: the caravan
+    // clears the walled pair at a gain, which is the law under test. (The
+    // earlier symmetric 23/16 pin assumed pure 35/64 chart melt, before
+    // the orbital-phase term entered the distance.)
     assert_eq!(
         banked(caravan, Resource::Biomass) - stake_biomass,
-        ratio(23, 16),
-        "the quote round-trip profits exactly"
+        ratio(543, 640),
+        "the biomass round-trip profits exactly, at the phased melt"
     );
     assert_eq!(
         banked(caravan, Resource::Iron) - stake_iron,
-        ratio(23, 16),
-        "the leftover cargo is inventory, banked"
+        ratio(4431, 5120),
+        "the iron leftover is inventory, banked at the phased melt"
     );
     // Both legs are ordinary law: the void's share receipted on the
     // receiving books, offers cleared on all three.
