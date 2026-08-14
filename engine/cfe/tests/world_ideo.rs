@@ -124,7 +124,10 @@ fn friction_prices_divergence_exactly() {
     );
 
     // The extractor (reading 0) moves 2 iron to the fresh reader (1):
-    // ΔS_ideo = 1/8 × 1 × 2 = 1/4, on the mover.
+    // the friction now prices BOTH the ideological divergence (1) and the
+    // #50 physical LOGISTICS distance (the normalized radial separation of
+    // the two grain-quantized orbits). MEASURED at 333/536 — up from the
+    // pre-logistics 1/4, the added transit cost captured whole.
     world
         .transfer(cfe::dop::between(FIRST_ORB, charted), Resource::Iron, cfe::dop::positive(2, 1))
         .expect("transfers across the divide");
@@ -173,8 +176,8 @@ fn friction_prices_divergence_exactly() {
         })
         .collect();
     assert!(
-        joule_yields.contains(&ratio(1, 4)),
-        "the price is unchanged and EXACT — phi x divergence x volume = 1/4 — it is the DESTINATION that moved. joule yields seen: {joule_yields:?}"
+        joule_yields.contains(&ratio(333, 536)),
+        "the price is EXACT — phi x (divergence + logistics) x volume = 333/536 — captured whole. joule yields seen: {joule_yields:?}"
     );
     let joules_after = world
         .orb_by_id(FIRST_ORB)
@@ -256,4 +259,23 @@ fn the_friction_event_round_trips_byte_exact() {
     let decoded = ClosureEvent::from_wire(tag, value).expect("decodes");
     assert_eq!(decoded, event);
     assert_eq!(decoded.wire_bytes(), bytes);
+}
+
+/// #50: the logistics distance is a bounded, normalized radial separation
+/// — zero between an orb and itself (or co-orbital / unsited partners),
+/// and strictly between 0 and 1 for orbits truly apart. The moved value
+/// itself stays conserved; logistics is a separate transit burn.
+#[test]
+fn logistics_distance_is_bounded_and_zero_for_co_orbital() {
+    let (world, charted) = furnace_and_coldstore();
+    assert_eq!(
+        world.logistics_distance(FIRST_ORB, FIRST_ORB),
+        ratio(0, 1),
+        "an orb is zero transit from itself"
+    );
+    let d = world.logistics_distance(FIRST_ORB, charted);
+    assert!(
+        d > ratio(0, 1) && d < ratio(1, 1),
+        "orbits truly apart carry a bounded transit cost in [0,1): {d}"
+    );
 }

@@ -589,6 +589,28 @@ impl World {
         Ok(count)
     }
     /// Transfer banked value between two orbs as the sovereign.
+    /// **THE RADIAL TRANSIT SEPARATION** (#50) — the logistics distance
+    /// between two orbs, the NORMALIZED difference of their orbital radii
+    /// `|r_from − r_to| / (r_from + r_to)` ∈ [0, 1). Two orbs at the same
+    /// orbit are zero apart; the farther apart their orbits, the closer to
+    /// one — bounded, so no transit cost runs away. An orb with no sited
+    /// orbit reads radius zero (both unsited → zero). Pure reading, no dial.
+    pub fn logistics_distance(&self, from: u64, to: u64) -> Ratio {
+        let radius = |orb: u64| {
+            self.orb_by_id(orb)
+                .and_then(|held| held.thermal.as_ref())
+                .map(|site| site.orbit_r.value().clone())
+                .unwrap_or_else(|| ratio(0, 1))
+        };
+        let (a, b) = (radius(from), radius(to));
+        let sum = a.clone() + b.clone();
+        if sum <= ratio(0, 1) {
+            return ratio(0, 1);
+        }
+        let diff = if a >= b { a - b } else { b - a };
+        diff / sum
+    }
+
     pub fn transfer(
         &mut self,
         lane: crate::dop::Between,
@@ -680,6 +702,14 @@ impl World {
                 false => to_reading - from_reading,
             }
         };
+        // #50 LOGISTICS FRICTION: the physical cost of moving matter across
+        // the system — the radial orbital SEPARATION of the two orbs, read
+        // before the touch. It prices into the SAME sanctioned entropy burn
+        // as the divergence friction (FrictionSettled at collect), so the
+        // moved value stays fully conserved — the mover simply pays a transit
+        // overhead. A same-orbit move (or an unsited orb) carries none, so
+        // every such transfer is byte-identical.
+        let logistics = self.logistics_distance(from, to);
         // The touch, both sides (SINK-1), then the move.
         for orb in [from, to] {
             let ease = ease_of(&self.techs, orb, stamp);
@@ -711,7 +741,7 @@ impl World {
         credit_forwards(&mut self.forwards, from, to, resource, &amount);
         credit_councils(&mut self.councils, from, to, resource, &amount);
         let friction = crate::parameter::of(self.chronicle(), crate::parameter::Parameter::FrictionRate)
-            * divergence
+            * (divergence + logistics)
             * value;
         if friction > ratio(0, 1) {
             match self
