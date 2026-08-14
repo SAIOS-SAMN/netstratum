@@ -506,7 +506,7 @@ fn an_unknown_station_refuses_rather_than_defaulting() {
     assert_eq!(tier_of(Some("glasskeeper")), None, "an unknown seat defaulted");
     assert_eq!(tier_of(Some("")), None, "an empty seat defaulted");
     assert_ne!(
-        tier_of(Some("archon")),
+        tier_of(Some("stillcold")),
         Some(Tier::T3),
         "an unreadable seat landed in the common — that is the hole a gate would leak through"
     );

@@ -208,11 +208,11 @@ fn every_archetype_class_keeps_its_seated_lines() {
     // partition names as FOUNDING occupants (grown lines join at play).
     const SEATED: [(u8, &str, &[&str]); 6] = [
         (1, "biotic-swarm", &["hivelight", "klethaxu", "mycelial-weft", "coralline", "deepmat"]),
-        (2, "geodic-lithovore", &["slagborn", "tunborn", "agarthan"]),
+        (2, "geodic-lithovore", &["slagborn", "tunborn", "corebound"]),
         (3, "metashifter", &["darlok"]),
-        (4, "telepathic-resonant", &["syzygy", "archon", "draco"]),
+        (4, "telepathic-resonant", &["syzygy", "stillcold", "umbrid"]),
         (6, "plasma-field", &["coronal-choir"]),
-        (7, "apex-terrestrial", &["lyran", "anunnaki"]),
+        (7, "apex-terrestrial", &["sylvane", "forgeborn"]),
     ];
     let founding = founding_polities();
     let mut empty = Vec::new();
@@ -242,17 +242,17 @@ fn every_archetype_class_keeps_its_seated_lines() {
     // INSIDE class 4 beside Archon (operator ruling 2026-08-01: one
     // archetype, two expressions). A clade with no line wearing it is a
     // ruling with no expression on the board it governs.
-    let draco = founding
+    let umbrid = founding
         .iter()
-        .find(|s| s.civilization.sigil == "draco")
+        .find(|s| s.civilization.sigil == "umbrid")
         .expect("clade 19 draconic needs the line that wears it");
-    assert_eq!(draco.civilization.clade, "draconic");
+    assert_eq!(umbrid.civilization.clade, "draconic");
     let archon = founding
         .iter()
-        .find(|s| s.civilization.sigil == "archon")
+        .find(|s| s.civilization.sigil == "stillcold")
         .expect("the class-4 archetype Draco expresses");
     assert_ne!(
-        draco.civilization.clade, archon.civilization.clade,
+        umbrid.civilization.clade, archon.civilization.clade,
         "two expressions, or it is not a sub-archetype"
     );
 }

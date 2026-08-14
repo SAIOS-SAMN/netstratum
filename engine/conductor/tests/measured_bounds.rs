@@ -44,7 +44,12 @@ fn scratch(name: &str) -> PathBuf {
 /// a line's favoured elements now flux its EXTRACTION (boost-only, on the
 /// extractor line), so a reagent-holding line mines enough to settle one
 /// more zone. A deliberate re-measure under the ruled economy.
-const MEASURED_ZONE_TOTAL_AT_15: usize = 92;
+/// RE-MEASURED 2026-08-14 to 90: the COURT RENAME (#5) — the Earth-culture
+/// line names retired for coined netstratum-native ones. A world's founding
+/// digest carries its name, so the renamed lines draw different veins and
+/// the placement walk resolves differently, shifting the whole board's
+/// footprint deterministically. A pure identity re-measure — no law changed.
+const MEASURED_ZONE_TOTAL_AT_15: usize = 90;
 
 /// **THE ENERGY-BOOTSTRAP DEBT** — the lines the settlement law cannot
 /// reach, pinned so the set can only SHRINK:
@@ -53,17 +58,17 @@ const MEASURED_ZONE_TOTAL_AT_15: usize = 92;
 ///   (the Frost branch's own doc calls the freeze-lock "legitimate
 ///   drama, not a bug");
 /// - Furnace / thermal holds and new sovereign seats that famish inside
-///   the window (pleiadian, baktun, dogon) — recorded so a cure shrinks
+///   the window (thresholder, tallykeep, glyphward) — recorded so a cure shrinks
 ///   this list rather than silently green-washing the debt.
 const FROZEN_AT_15: [&str; 8] = [
-    "agarthan",
-    "archon",
-    "draco",
+    "corebound",
+    "stillcold",
+    "umbrid",
     "frostwright",
     "darlok",
-    "pleiadian",
-    "baktun",
-    "dogon",
+    "thresholder",
+    "tallykeep",
+    "glyphward",
 ];
 
 /// **THE SETTLEMENT BOUNDS, MEASURED.** Fifteen beats over the whole

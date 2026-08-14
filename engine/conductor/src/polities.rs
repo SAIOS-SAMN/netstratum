@@ -174,30 +174,30 @@ pub fn founding_polities() -> Vec<PolitySpec> {
         // CLASS 7 — apex-solitary. Seated by these two and no others,
         // so the class stands or falls with them (`15_TAXON` §2 / 37).
         seat(
-            "Lyran", "lyran", "ailuroform-primus", "ailuroform",
+            "Sylvane", "sylvane", "ailuroform-primus", "ailuroform",
             "we were first, and we remember why that matters less than you think",
             "epicurean", "biotic", "harmonic",
             Some("progenitor"), &[],
-            "lyra-hearth", "sunwell", "first-hearth", Policy::Steady,
+            "sylvane-hearth", "sunwell", "first-hearth", Policy::Steady,
             (ratio(1, 1), ratio(1, 1), ratio(1, 1)), None,
         ),
         seat(
             // FLATLANDER BASELINE seat (clade bimaniform) — knowledge baseline
             // for design; extract+regen both natural (EconomicMode::Balanced).
-            "Anunnaki", "anunnaki", "bimaniform-flatlander", "bimaniform",
+            "Forgeborn", "forgeborn", "bimaniform-flatlander", "bimaniform",
             "we plan in stone and fire; we no longer dig",
             "expansionist", "mineral", "planar",
             Some("progenitor"), &[],
-            "eridu-forge", "duranki", "abzu", Policy::Industry,
+            "forge-reach", "anvil-spire", "deepforge", Policy::Industry,
             (ratio(8, 1), ratio(3, 1), ratio(5, 1)), g_half(),
         ),
         // CLASS 2 — geodic-lithovore, beside Slagborn and Tunborn.
         seat(
-            "Agarthan", "agarthan", "lithophage-stonewill", "lithophage",
+            "Corebound", "corebound", "lithophage-stonewill", "lithophage",
             "the surface is weather; we are the world",
             "epicurean", "mineral", "volumetric",
             Some("progenitor"), &[],
-            "agartha-deep", "innerlight", "vril-hollow", Policy::Steady,
+            "core-deep", "coreglow", "stone-hollow", Policy::Steady,
             (ratio(0, 1), ratio(-13, 1), ratio(7, 1)),
             Some((StarClass::M, ratio(1, 2), ratio(2, 1))),
         ),
@@ -215,20 +215,20 @@ pub fn founding_polities() -> Vec<PolitySpec> {
         // the shared identity, clade is how it is expressed, and any
         // mechanic keyed on class sees them as one line.
         seat(
-            "Archon", "archon", "cryocoherens-still", "cryocoherens",
+            "Stillcold", "stillcold", "cryocoherens-still", "cryocoherens",
             "in the perfect cold, everything can be known",
             "empiricist", "biotic", "volumetric",
             Some("watcher"), &[],
-            "kenoma-vault", "stillspire", "pleroma-gate", Policy::Steady,
+            "cryo-vault", "stillspire", "still-gate", Policy::Steady,
             (ratio(-9, 1), ratio(14, 1), ratio(2, 1)),
             Some((StarClass::M, ratio(0, 1), ratio(1, 1))),
         ),
         seat(
-            "Pleiadian", "pleiadian", "bimaniform-septem", "bimaniform",
+            "Thresholder", "thresholder", "bimaniform-septem", "bimaniform",
             "we hold the threshold and do not descend",
             "empiricist", "biotic", "harmonic",
             Some("watcher"), &[],
-            "seven-sisters", "maia", "threshold-watch", Policy::Steady,
+            "sevenwatch", "threshold-spire", "threshold-watch", Policy::Steady,
             (ratio(21, 1), ratio(-6, 1), ratio(13, 1)),
             Some((StarClass::B, ratio(1, 4), ratio(1, 1))),
         ),
@@ -245,11 +245,11 @@ pub fn founding_polities() -> Vec<PolitySpec> {
         // of it; the first cut of this roster orphaned the clade by
         // dropping the only line that wears it.
         seat(
-            "Draco", "draco", "draconiform-umbra", "draconic",
+            "Umbrid", "umbrid", "draconiform-umbra", "draconic",
             "the union is the evidence; the seat above re-checks it",
             "epicurean", "biotic", "umbral",
             Some("observer"), &[],
-            "eclipse-hold", "umbra", "totality", Policy::Steady,
+            "umbra-hold", "shadowspire", "first-umbra", Policy::Steady,
             (ratio(-11, 1), ratio(16, 1), ratio(4, 1)),
             Some((StarClass::K, ratio(1, 4), ratio(3, 4))),
         ),
@@ -265,29 +265,29 @@ pub fn founding_polities() -> Vec<PolitySpec> {
         // unbounded for sovereigns (registry.rs), so three founding
         // seats do not exhaust the band.
         seat(
-            "Kemet", "kemet", "bimaniform-flatlander", "bimaniform",
+            "Stelahold", "stelahold", "bimaniform-flatlander", "bimaniform",
             "what is written in stone outlives the flood",
             "empiricist", "mineral", "planar",
-            Some("sovereign"), &["anunnaki"],
-            "kemet-reach", "white-wall", "first-stela", Policy::Steady,
+            Some("sovereign"), &["forgeborn"],
+            "stela-reach", "pale-wall", "first-slab", Policy::Steady,
             (ratio(18, 1), ratio(-8, 1), ratio(4, 1)),
             Some((StarClass::G, ratio(1, 3), ratio(1, 1))),
         ),
         seat(
-            "Baktun", "baktun", "bimaniform-calendar", "bimaniform",
+            "Tallykeep", "tallykeep", "bimaniform-calendar", "bimaniform",
             "the calendar is the spine of the sky",
             "empiricist", "biotic", "harmonic",
-            Some("sovereign"), &["anunnaki"],
-            "baktun-span", "kinich", "first-baktun", Policy::Steady,
+            Some("sovereign"), &["forgeborn"],
+            "tally-span", "sun-crown", "first-tally", Policy::Steady,
             (ratio(-14, 1), ratio(9, 1), ratio(22, 1)),
             Some((StarClass::K, ratio(1, 4), ratio(4, 5))),
         ),
         seat(
-            "Dogon", "dogon", "bimaniform-scribe", "bimaniform",
+            "Glyphward", "glyphward", "bimaniform-scribe", "bimaniform",
             "we kept the star before the star kept us",
             "empiricist", "biotic", "harmonic",
-            Some("sovereign"), &["anunnaki"],
-            "dogon-sky", "sirius-gate", "first-word", Policy::Steady,
+            Some("sovereign"), &["forgeborn"],
+            "glyph-sky", "star-gate", "first-word", Policy::Steady,
             (ratio(11, 1), ratio(27, 1), ratio(-5, 1)),
             Some((StarClass::A, ratio(1, 5), ratio(1, 1))),
         ),
