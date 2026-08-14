@@ -2482,12 +2482,18 @@ impl Polity {
             let reach = |polity: &mut Self| {
                 let mut need =
                     polity.trajectory.need_of(polity.hunger().hungers, polity.starved);
-                // ORBIT-DIRECTED HUNGER (38 §6): a starving mind reads
-                // its own library's census and reaches thinnest-first —
-                // curiosity pointed at the measured frontier. Sated
-                // minds and empty libraries keep the standing order.
+                // ORBIT-DIRECTED HUNGER (38 §6), THE ALGEBRAIC FORM: a
+                // starving mind RESOLVES its own knowledge into one
+                // coherent frame (`knowledge_order` runs the spanning-
+                // forest resolve over its concept map) and reaches for
+                // the most PERIPHERAL family — the thinnest frontier its
+                // resolved understanding leaves open. This supersedes the
+                // flat `family_census` count with the same reach read from
+                // the recursive algebra. Sated minds and empty libraries
+                // keep the standing order; ordering only, the observation
+                // still supplies every candidate.
                 if !need.hungers.is_empty() && !polity.library.words().is_empty() {
-                    need.thin = solver::mint::family_census(&polity.library);
+                    need.thin = solver::knowledge_order(&polity.library);
                 }
                 // THE MEMO, restored into the coupled path (remediations
                 // R5). `propose` is pure: same digest, same difficulty,
