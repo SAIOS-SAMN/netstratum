@@ -14,6 +14,49 @@ use crate::almanac::carrying_capacity;
 use crate::dop::{metabolic_leisure, Caste, Ration, Resource, ZoneKind};
 
 impl World {
+    /// **THE MICRONUTRIENT FACTOR** (G2 trace elements, ruled 2026-08-14)
+    /// — how a line's HARVEST is modulated by the trace elements its own
+    /// world offers. The requirement is the PLANET's: the distinct
+    /// elements its prospected veins bear ("you eat what your world
+    /// grows"). Of those, the line thrives on the ones it actually holds
+    /// (a positive bank, mined or traded in) and sickens on the ones it
+    /// lacks. SOFT and graded, never a freeze:
+    ///
+    ///   factor = 1 + (present − absent) / (2 × required)
+    ///          = 1 + (2·present − required) / (2·required)     ∈ [½, 3/2]
+    ///
+    /// Full coverage lifts the harvest by half; a bare larder halves it;
+    /// the penalty DEEPENS as more of the world's elements go unmet. A
+    /// planet with NO prospected veins bears no requirement, so the factor
+    /// is exactly one and every world that never opened a vein is
+    /// byte-identical. Derived from vein/bank counts — no dial.
+    pub fn micronutrient_factor(&self, orb: u64) -> Ratio {
+        let full = ratio(1, 1);
+        // The world's trace elements: the distinct veins it bears.
+        let mut required: Vec<[u8; 32]> = self
+            .prospects
+            .iter()
+            .filter(|vein| vein.orb == orb)
+            .map(|vein| vein.element)
+            .collect();
+        required.sort();
+        required.dedup();
+        if required.is_empty() {
+            return full;
+        }
+        let Some(held) = self.orb_by_id(orb) else {
+            return full;
+        };
+        let present = required
+            .iter()
+            .filter(|element| held.element_amount(element) > ratio(0, 1))
+            .count() as i64;
+        let req = required.len() as i64;
+        // (present − absent)/(2·req) = (2·present − req)/(2·req). Non-literal
+        // ratio (counts), so no tuned constant enters the tree.
+        full + ratio(present + present - req, req + req)
+    }
+
     /// **DOES THIS ORB STAND A GRANARY?** The gate that flips the
     /// provisioned economy on. Where it answers false, the population
     /// runs the #40–42 subsistence model verbatim (harvest→stomach, no

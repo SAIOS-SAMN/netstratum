@@ -478,3 +478,69 @@ fn every_bench_kind_reads_uniformly() {
         }
     }
 }
+
+// ── G2 trace elements: the micronutrient factor (2026-08-14) ──
+
+#[test]
+fn a_world_with_no_veins_bears_no_micronutrient_need() {
+    // Nothing prospected → no requirement → factor exactly one, so every
+    // world that never opened a vein harvests byte-identically.
+    let world = society(4, 0, false, 5);
+    assert_eq!(
+        world.micronutrient_factor(FIRST_ORB),
+        ratio(1, 1),
+        "no veins, no trace need — the harvest is untouched"
+    );
+}
+
+#[test]
+fn the_harvest_scales_with_how_well_the_larder_meets_the_worlds_veins() {
+    // Open two distinct veins — the world now OFFERS two trace elements
+    // ("you eat what your world grows"). A bare larder (neither mined)
+    // halves the harvest; a full one lifts it by half; half-coverage sits
+    // exactly at baseline.
+    let mut world = World::new();
+    world.found("mineral-hold").expect("founds");
+    world.commission_star(StarClass::G).expect("commissions a sun");
+    world
+        .site_planet(FIRST_ORB, unit(0, 1), positive(1, 1), None, None)
+        .expect("sites a planet to dig");
+    for tech in 1u8..=5 {
+        world.grant_tech_as(SOVEREIGN, FIRST_ORB, tech).expect("reach to dig");
+    }
+    let mut veins: Vec<[u8; 32]> = Vec::new();
+    for stratum in 0u8..=3 {
+        if let Ok(struck) = world.prospect(FIRST_ORB, stratum) {
+            if !veins.contains(&struck.element) {
+                veins.push(struck.element);
+            }
+        }
+        if veins.len() == 2 {
+            break;
+        }
+    }
+    assert_eq!(veins.len(), 2, "two distinct veins opened: {veins:?}");
+
+    // Nothing mined: a bare larder against both needs → ½.
+    let bare = World::resume(world.chronicle().clone());
+    assert_eq!(bare.micronutrient_factor(FIRST_ORB), ratio(1, 2), "a bare larder halves the harvest");
+
+    // Mine ONE of the two (an assay banks it) → half coverage → baseline.
+    let stamp = world.now();
+    world.chronicle_mut().append(
+        ClosureEvent::AssayStruck { orb_id: FIRST_ORB, element: veins[0], amount: ratio(10, 1), richness: None },
+        stamp,
+        vec![SOVEREIGN],
+    );
+    let half = World::resume(world.chronicle().clone());
+    assert_eq!(half.micronutrient_factor(FIRST_ORB), ratio(1, 1), "half its veins met → baseline");
+
+    // Mine BOTH → full coverage → the harvest lifts by half.
+    world.chronicle_mut().append(
+        ClosureEvent::AssayStruck { orb_id: FIRST_ORB, element: veins[1], amount: ratio(10, 1), richness: None },
+        stamp,
+        vec![SOVEREIGN],
+    );
+    let full = World::resume(world.chronicle().clone());
+    assert_eq!(full.micronutrient_factor(FIRST_ORB), ratio(3, 2), "a full larder lifts the harvest by half");
+}

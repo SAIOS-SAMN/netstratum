@@ -34,7 +34,13 @@ fn scratch(name: &str) -> PathBuf {
 /// the reserve gates fund, so the era's footprint grew — a deliberate
 /// re-measure under the ruled economy, the divergence property still
 /// holds below (the temperaments still build different cities).
-const MEASURED_ZONE_TOTAL_AT_15: usize = 73;
+/// RE-MEASURED 2026-08-14 to 91: the G2 TRACE-ELEMENT (micronutrient)
+/// factor lands — a line's harvest now scales with how well it meets the
+/// trace-element need its own veins bear ("you eat what your world
+/// grows"), so a well-nourished roster settles more. This also FEEDS
+/// `tunborn`, which had been famishing at 3 zones (the settlement debt
+/// shrank by one). A deliberate re-measure under the ruled economy.
+const MEASURED_ZONE_TOTAL_AT_15: usize = 91;
 
 /// **THE ENERGY-BOOTSTRAP DEBT** — the lines the settlement law cannot
 /// reach, pinned so the set can only SHRINK:

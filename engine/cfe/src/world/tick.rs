@@ -448,6 +448,12 @@ impl World {
                 // unsealed read ruleset v1 verbatim.
                 let metabolism = self.genesis.as_ref().map(|held| held.metabolism).unwrap_or(2);
                 let standing: Vec<Zone> = active.iter().map(|(zone, _)| zone.clone()).collect();
+                // G2 TRACE ELEMENTS (2026-08-14): the harvest is modulated
+                // by how well the line meets the trace-element need its own
+                // world offers — full on its veined micronutrients, halved
+                // on a bare larder. One per orb; exactly 1 (no change) for
+                // a world that never opened a vein.
+                let micronutrient = self.micronutrient_factor(*orb_id);
                 for (zone, vigour) in active {
                     // #41: a minted building's numbers are its BASE's —
                     // the binding modulates what a building DOES, and
@@ -515,7 +521,12 @@ impl World {
                             &mut self.accrued,
                             *orb_id,
                             resource,
-                            amount * efficiency.clone() * boost * yield_factor.clone() * vigour.clone(),
+                            amount
+                                * efficiency.clone()
+                                * boost
+                                * yield_factor.clone()
+                                * micronutrient.clone()
+                                * vigour.clone(),
                         );
                     }
                     // A zone drawing half its inputs consumes half.
