@@ -7427,6 +7427,16 @@ fn refuse_text(world: &World, refusal: &ActionRefused, style: &Style) -> String 
              word mints",
             style.strong("three")
         ),
+        ActionRefused::KnowledgeKnown { signature } => format!(
+            "the shared axiom {} already stands in this line's chronicle — convergence is \
+             recorded once, never re-recorded",
+            style.strong(&hex(signature)[..8])
+        ),
+        ActionRefused::ConsilienceAlone { mass } => format!(
+            "a consilience is agreement BETWEEN lines — a mass of {} is one line agreeing with \
+             itself, which is no measurement",
+            style.strong(&mass.to_string())
+        ),
         ActionRefused::MatterDoesNotBond => format!(
             "this matter does not BOND — a set compounds when every member shares the geometry \
              and the phase, the count equals the geometry's arity, and the binds saturate. \
@@ -8778,6 +8788,12 @@ fn chronicle(world: &World, style: &Style) {
                 "◈ a WORD enters the library — orbit {} confirmed by {} tasks; the language grew",
                 style.strong(&hex(orbit)[..8]),
                 style.strong(&cited.len().to_string())
+            ),
+            cfe::dop::ClosureEvent::KnowledgeConverged { signature, mass, hardness } => format!(
+                "◈ a shared TRUTH — {} lines resolved to invariant {} (hardness {}); no one line owns it",
+                style.strong(&mass.to_string()),
+                style.strong(&hex(signature)[..8]),
+                style.strong(&hardness.to_string())
             ),
             cfe::dop::ClosureEvent::GemCompounded { members, gem, .. } => format!(
                 "◈ {} bond into {} — the lanes saturate and the matter holds",
