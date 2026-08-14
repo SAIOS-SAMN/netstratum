@@ -696,11 +696,26 @@ def world_facts(world_dir):
         pending = sum(
             1 for p in inbox.iterdir() if p.is_file() and p.suffix == ".dir"
         )
+    # ── THE MIND'S OWN GROWTH (this version): tally the cognition deeds
+    # from the chronicle. A line's intelligence shows here — the words it
+    # MINTED (166, its own vocabulary), whether it has CLEAVED (43, spawned
+    # a peer branch on reaching mastery), and the shared TRUTHS it reached
+    # by converging with other independent lines (177, cross-line
+    # consilience). These are what "watch the civs grow" means now.
+    words, cleaved, axioms = 0, False, 0
+    for etag, _eval in iter_chronicle_events(world_dir):
+        if etag == 166:
+            words += 1
+        elif etag == 43:
+            cleaved = True
+        elif etag == 177:
+            axioms += 1
     return {
         "name": world_dir.name, "linked": linked, "receipts": receipts,
         "events": events, "consumed": consumed, "puzzles": puzzles,
         "depth": depth, "planets": planets, "pending": pending,
         "digest": terminal_digest,
+        "words": words, "cleaved": cleaved, "axioms": axioms,
     }
 
 
@@ -1197,6 +1212,10 @@ def view_board(var_root, args, paint):
     total_receipts = sum(w["receipts"] for w in worlds.values())
     total_puzzles = sum(w["puzzles"] for w in worlds.values())
     petitions = sum(w["pending"] for w in worlds.values())
+    # This version's growth signals, summed across the board.
+    minted_words = sum(w.get("words", 0) for w in worlds.values())
+    cleaves = sum(1 for w in worlds.values() if w.get("cleaved"))
+    shared_truths = sum(w.get("axioms", 0) for w in worlds.values())
     offers = 0
     for facts in worlds.values():
         for state in facts["planets"]:
@@ -1248,6 +1267,12 @@ def view_board(var_root, args, paint):
         f"{paint.strong(str(total_puzzles))} puzzles solved · "
         f"{paint.strong(str(offers))} market offer(s) · "
         f"{paint.strong(str(petitions))} petition(s)",
+        f"  cognition: {paint.strong(str(minted_words))} words minted "
+        f"(each line's own vocabulary) · "
+        f"{paint.strong(str(cleaves))} lines CLEAVED "
+        f"(spawned a peer branch at mastery) · "
+        f"{paint.strong(str(shared_truths))} shared truth(s) "
+        f"(independent lines converged)",
         f"  matter — elements {paint.strong(str(element_kinds))} kinds "
         f"({paint.strong(show_board(element_mass))} total mass) · "
         f"law carriers: biomass {paint.strong(show_board(totals['biomass']))} · "
