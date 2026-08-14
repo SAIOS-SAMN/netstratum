@@ -135,7 +135,7 @@ lanes at once, not just rejuvenation.
 
 This is new scope this session surfaced, not a pre-existing task-board
 item, so it needs its own ruling before work starts. `12_UNION.md`
-§2/§2a (`Station::progenitor` as Tier-0 star/planet creator, planets
+§2/§2a (the progenitor `Station` as Tier-0 star/planet creator, planets
 DELEGATED to sovereigns under council-gated diplomacy) is marked
 DESIGN and is, independently confirmed by two audits this sweep,
 **almost entirely unimplemented**:

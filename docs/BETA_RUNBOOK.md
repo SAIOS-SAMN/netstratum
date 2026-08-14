@@ -18,7 +18,7 @@ proves useful work by solving ARC-AGI puzzles for the PoW layer — it
 does not choose what a civilization builds, tithes, or researches, and
 has no read/write path into a `Polity`'s decisions. What plays a beta
 civ today is `conductor`'s own scripted/procedural policy
-(`Policy::Steady` and its siblings in `polities.rs`), not learned or
+(`Policy::Steady` and its peers in `polities.rs`), not learned or
 inferred strategy. If "AI-piloted" is read as "cognition-driven
 strategy," that link does not exist yet — this runbook demonstrates
 the autonomous-PLAY loop, not an autonomous-THINKING one.
@@ -26,7 +26,7 @@ the autonomous-PLAY loop, not an autonomous-THINKING one.
 ## 1. Run it — zero setup required
 
 The roster ships with a compiled default set of founding civilizations
-(`polities.rs::founding_polities` — Tunborn and its siblings). No
+(`polities.rs::founding_polities` — Tunborn and its peers). No
 `civ new`, no world-founding, no genesis-sealing needed for a first
 run:
 

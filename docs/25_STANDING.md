@@ -29,7 +29,8 @@ computation, hiding one behind vocabulary is cosmetic.
    no work, not because a law forbids it but because there is no free
    energy in it.*
 
-   **LAW 4 now carries that ground**, thermodynamically rather than
+   **LAW 4 now carries that ground** (this paragraph is STRUCK,
+   2026-08-04 — see the correction below), thermodynamically rather than
    morally, through `dual_pole` / `Vacuity::Stasis` — landed, and
    already consulted by `kernel::capacity_law`. Building the window
    arithmetic would have implemented a corpse. What the lens owed

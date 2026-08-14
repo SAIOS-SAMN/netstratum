@@ -53,8 +53,8 @@ state, recomputed identically on every node, never a stored authority.
 **Rejuvenation is demurrage run backwards.** `world::rules::demurrage_due`
 (rules.rs:121) already settles a FLAT decay lazily *at the touch*:
 `elapsed = stamp − orb.last_touch`, the decay applied only when a deed
-touches the orb, capped so it never overshoots. Regrowth is the mirror
-image — a settlement toward `K` instead of toward `0` — and it reuses
+touches the orb, capped so it never overshoots. Regrowth is that same
+organ run backwards — a settlement toward `K` instead of toward `0` — and it reuses
 the same `last_touch` stamp the demurrage organ already carries.
 
 ## 2. Lazy evaluation — settle Δt only at an audit
@@ -188,7 +188,7 @@ territorial borders.
 Five architectural pillars, pre-authorized before the counter-play
 question was resolved (§6.2) and before any code lands:
 
-1. **The Medium ration.** A new ration carrier — sibling to
+1. **The Medium ration.** A new ration carrier — a peer to
    `dop::Resource` and the minted-element `Ration::Element` — that is
    read and written on the orb's own site record, never on a player's
    `banked`/`elements` ledger. Extracting it debits the PLANET; only
@@ -277,7 +277,7 @@ and needs its own task.
 Once a shared star has a real progenitor owner, the counter-play
 composes from precedent already standing, four levers deep:
 
-- **Diplomatic** — a rate-CAP annex sibling to `treaty_elements`
+- **Diplomatic** — a rate-CAP annex peer to `treaty_elements`
   (E3.9): a live Trade pact between co-signed sovereigns capping a
   partner's Medium extraction rate the same way an element allow-list
   caps what crosses. Consensual, dies with the pact it rides, composes
@@ -321,7 +321,7 @@ composes from precedent already standing, four levers deep:
   unimplemented — this is now the gating task, ahead of anything else
   in §6.
 - **The system perturbation term.** How a stripped orbit's Medium level
-  enters a sibling orbit's `t_eq4` needs its own derivation, the same
+  enters a neighbouring orbit's `t_eq4` needs its own derivation, the same
   weight of design `t_eq4`'s luminosity/albedo/orbit_r composition
   already got — not a bare tuned literal (the tuned-constant ratchet,
   `tests/tuned_constant_ratchet.rs`, is already red against 112 and
