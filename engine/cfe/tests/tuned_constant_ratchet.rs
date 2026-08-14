@@ -58,11 +58,16 @@ const SOURCE_TREES: [&str; 11] = [
 /// **THE CEILING — measured 2026-08-05, and it only falls.**
 /// Held at 112. The live count fell 170 → 163 on 2026-08-12 (task #3:
 /// the seven chartered-parameter seeds moved to the SEALED class,
-/// where they belong — see `the_sealed_class_...`). 163 still exceeds
-/// 112: the remaining 51 excess dials are the BALANCE clusters
-/// (`dop.rs` 59 · `vocabulary.rs` 37 · conductor) whose conversion is
-/// operator-gated per R20 — deriving them by fiat is the laundering
-/// the census exists to bar, so the ratchet stands red until ruled.
+/// where they belong — see `the_sealed_class_...`), then 163 → 159 on
+/// 2026-08-14 (L3, operator directive *no cartesian crud*: the four
+/// settlement-utility dials in `cognition.rs` — a disposition affinity,
+/// a bottleneck pull, a mode nudge, a count balance — were DERIVED away,
+/// the decision now reading the law-derived binding constraint; a
+/// genuine conversion, not a fiat). 159 still exceeds 112: the remaining
+/// 47 excess dials are the BALANCE clusters (`dop.rs` · `vocabulary.rs`)
+/// whose conversion is operator-gated per R20 — deriving them by fiat is
+/// the laundering the census exists to bar, so the ratchet stands red
+/// until ruled.
 const TUNED_LITERAL_CEILING: usize = 112; // held at 112; balance clusters await operator rulings
 
 /// Parse `ratio(<int>, <int>)` starting at `text` (just past the open

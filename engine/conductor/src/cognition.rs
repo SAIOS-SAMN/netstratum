@@ -15,12 +15,14 @@
 //! regenerative, from `World::taxon_economy_of`) — the clade weighting
 //! the operator asked for is this mode, not a new invented table.
 //!
-//! The weight literals below (base affinities, the bottleneck pull, the
-//! mode nudge, the balance pull) are new BALANCE dials — the same
-//! already-acknowledged, operator-gated conductor debt bucket the
-//! tuned-constant ratchet (`engine/cfe/tests/tuned_constant_ratchet.rs`)
-//! already carries red for `dop.rs`/`vocabulary.rs`/conductor; not a
-//! fresh regression, the same owed conversion.
+//! **L3 (operator directive 2026-08-14, *no cartesian crud*): the weight
+//! DIALS are RETIRED.** The interim scoring summed four hand-tuned
+//! affinities (`3/2`, `1/4`, `1/4`, `3/4`); the decision now DERIVES from
+//! the binding constraint — a zone is worth the law-derived deficit it
+//! relieves, and disposition/mode enter only as a one-unit DIRECTION when
+//! the world leaves the choice genuinely open. No tuned magnitude
+//! survives (`utility` below), so the conductor's share of the
+//! tuned-constant debt falls by exactly these four.
 
 use cfe::almanac::EconomicMode;
 use cfe::dop::ZoneKind;
@@ -86,8 +88,26 @@ pub fn score_outcome(
     }
 }
 
-/// Disposition base weight + economic-mode nudge + bottleneck read.
-/// Pure and exact-rational — same inputs always score the same, so a
+/// **THE BINDING CONSTRAINT, DERIVED** (L3, operator directive
+/// 2026-08-14: *no cartesian crud guiding them*). A zone's worth is the
+/// DEFICIT it relieves — nothing hand-weighted. `iron_gap` / `bio_gap`
+/// are how far the line sits below the gate that unlocks its next growth
+/// (law-derived from `smelter_gates`, zero when no gate is pending);
+/// extraction relieves iron, a habitat relieves biomass. The world says
+/// which resource is scarce, so the scarcer resource's zone scores
+/// higher — the same "relieve the binding constraint" the resolved
+/// knowledge-map already runs on curiosity, here on settlement.
+///
+/// The retired formula summed four DIALS (a disposition affinity, a
+/// bottleneck pull, a mode nudge, a count balance — `3/2`, `1/4`, `1/4`,
+/// `3/4`). None survives: a genuine deficit dominates for EVERY
+/// temperament, because a line that ignores its binding constraint to
+/// honour a preference is not being clever. Temperament shows only where
+/// the world leaves the choice genuinely open (both gaps equal, commonly
+/// both zero) — and even there it is a DIRECTION, one unit, never a
+/// weighted magnitude.
+///
+/// Pure and exact-rational; same inputs always score the same, so a
 /// beat-for-beat replay picks the same zone every time.
 fn utility(
     disposition: u8,
@@ -97,48 +117,37 @@ fn utility(
     iron_gap: Ratio,
     bio_gap: Ratio,
 ) -> (Ratio, Ratio) {
-    // Base: disposition's own affinity (44_LINEAGES — expansionist
-    // reads yield/growth, empiricist reads the discovery bottleneck,
-    // epicurean reads food/biomass security).
-    let (mut extractor_u, mut habitat_u) = match disposition {
-        1 => (ratio(3, 2), ratio(1, 1)), // expansionist: extraction leads
-        3 => (ratio(1, 1), ratio(3, 2)), // epicurean: security leads
-        _ => (ratio(1, 1), ratio(1, 1)), // empiricist (2) and unminted: even base
-    };
-
-    // Empiricist (and, mildly, everyone) weight whichever resource is
-    // presently the bottleneck to the next unlocked-industry gate —
-    // the same "what is this line starved for" read `hunger()` already
-    // uses for forge task selection, applied here to settlement.
-    let bottleneck_pull = if disposition == 2 { ratio(1, 1) } else { ratio(1, 4) };
-    if iron_gap > ratio(0, 1) {
-        extractor_u = extractor_u + bottleneck_pull.clone();
-    }
-    if bio_gap > ratio(0, 1) {
-        habitat_u = habitat_u + bottleneck_pull;
+    let zero = ratio(0, 1);
+    // A genuine binding constraint decides outright: build for the
+    // resource furthest below its gate.
+    if iron_gap != bio_gap {
+        return (iron_gap, bio_gap);
     }
 
-    // Economic mode (clade-derived taxon economy): extractive lines
-    // lean further into extraction, regenerative lines lean away from
-    // it, balanced (the flatlander baseline) stays neutral — a soft
-    // nudge, not a hard cap, so it never overrides an outright shortage.
-    let mode_nudge = ratio(1, 4);
-    match mode {
-        EconomicMode::Extractive => extractor_u = extractor_u + mode_nudge,
-        EconomicMode::Regenerative => habitat_u = habitat_u + mode_nudge,
-        EconomicMode::Balanced => {}
+    // No binding deficit (the gaps are equal — usually both zero, no
+    // industry pending). The choice is genuinely open, so it falls to
+    // SHAPE and DIRECTION, both dial-free:
+    let (mut extractor_u, mut habitat_u) = (zero.clone(), zero.clone());
+    let unit = ratio(1, 1);
+    // keep the two seats balanced — the SHAPE deficit is how lopsided the
+    // counts already are (live state, derived, never a dial): the scarcer
+    // TYPE is pulled up by exactly the count gap, so a badly-skewed colony
+    // corrects itself however strong its lean.
+    if hab > ext {
+        extractor_u = extractor_u + ratio(hab - ext, 1);
+    } else if ext > hab {
+        habitat_u = habitat_u + ratio(ext - hab, 1);
     }
-
-    // A standing lopsided count pulls the other way — the same
-    // ext/hab ratio the policy caps already read, so utility never
-    // fights the shape a temperament was built around, only the beats
-    // where the temperament itself left the choice open.
-    if ext > hab {
-        habitat_u = habitat_u + ratio(3, 4);
-    } else if hab > ext {
-        extractor_u = extractor_u + ratio(3, 4);
+    // and one unit of the line's own structural lean — a DIRECTION drawn
+    // from its sealed disposition (44_LINEAGES) and clade economy
+    // (15_TAXON), never a tuned weight. Expansionist / extractive lean to
+    // extraction; epicurean / regenerative lean to security.
+    if disposition == 1 || matches!(mode, EconomicMode::Extractive) {
+        extractor_u = extractor_u + unit.clone();
     }
-
+    if disposition == 3 || matches!(mode, EconomicMode::Regenerative) {
+        habitat_u = habitat_u + unit;
+    }
     (extractor_u, habitat_u)
 }
 
