@@ -639,3 +639,37 @@ fn a_world_with_no_veins_burns_no_trace_and_is_byte_identical() {
         "no veins → no trace burn → byte-identical"
     );
 }
+
+// ── G2 trace §2: the substrate-specific signature ──
+
+/// A star-lit line sealed to a clade of chosen thermal temperament.
+fn clade_world(clade: u16) -> World {
+    let mut world = World::new();
+    world.found("substrate-hold").expect("founds");
+    world.commission_star(StarClass::G).expect("a G sun");
+    world.seal_taxon(2, clade).expect("seals the clade");
+    world
+}
+
+#[test]
+fn a_substrate_favours_the_slice_of_the_spine_its_chemistry_prefers() {
+    // Under a G sun, element[1] picks the periodic family: 0 → light
+    // (family 1), 4 → heavy (family 4).
+    let light = { let mut id = [0u8; 32]; id[1] = 0; id };
+    let heavy = { let mut id = [0u8; 32]; id[1] = 4; id };
+
+    // A HOT-preferring clade (HyperThermal) is heavy-element chemistry.
+    let hot = clade_world(12);
+    assert!(hot.substrate_favours(&heavy), "a hot substrate favours heavy elements");
+    assert!(!hot.substrate_favours(&light), "and spurns the light ones");
+
+    // A COLD-preferring clade (Cryogenic) is light-element chemistry.
+    let cold = clade_world(3);
+    assert!(cold.substrate_favours(&light), "a cold substrate favours light elements");
+    assert!(!cold.substrate_favours(&heavy), "and spurns the heavy ones");
+
+    // A TEMPERATE (Mesic) clade takes the whole spine.
+    let temperate = clade_world(1);
+    assert!(temperate.substrate_favours(&light) && temperate.substrate_favours(&heavy),
+        "a temperate substrate takes the whole spine");
+}

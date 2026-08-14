@@ -30,17 +30,51 @@ impl World {
     /// planet with NO prospected veins bears no requirement, so the factor
     /// is exactly one and every world that never opened a vein is
     /// byte-identical. Derived from vein/bank counts — no dial.
-    pub fn micronutrient_factor(&self, orb: u64) -> Ratio {
-        let full = ratio(1, 1);
-        // The world's trace elements: the distinct veins it bears.
+    /// **THE SUBSTRATE'S TRACE SIGNATURE** (G2 trace elements §2,
+    /// 2026-08-14) — does this line's chemistry favour `element`? Each
+    /// substrate values a different slice of the periodic spine, DERIVED
+    /// (never a species table) from the clade's own thermal preference
+    /// against the element's family. The spine of four splits at its
+    /// median: light families {1,2} vs heavy {3,4}. A HOT-preferring
+    /// clade's chemistry is built of and maintained by HEAVY elements
+    /// (the plasmic/reptilian lines that prefer the torrid bands); a
+    /// COLD-preferring one by LIGHT elements (the cryo lines); a temperate
+    /// clade takes the whole spine. No star → no family reading → the line
+    /// favours all (byte-identical to the pre-signature law).
+    pub fn substrate_favours(&self, element: &[u8; 32]) -> bool {
+        let Some(class) = self.star else {
+            return true;
+        };
+        let pref = crate::almanac::clade_preferred_region(self.rejuvenation_clade()).flux_level()
+            as i64;
+        let mesic = crate::almanac::ThermalRegion::Mesic.flux_level() as i64;
+        let (family, _, _) = crate::dop::element_properties(element, class);
+        let clade_warmth = pref - mesic; // + hot, − cold, 0 temperate
+        let element_heat = 2 * family as i64 - 5; // + heavy, − light (spine of 4)
+        clade_warmth == 0 || (clade_warmth > 0) == (element_heat > 0)
+    }
+
+    /// **THE LINE'S TRACE REQUIREMENT** — the distinct elements its world's
+    /// veins bear THAT its substrate favours (the intersection of "you eat
+    /// what your world grows" with the substrate's own signature). A
+    /// world with no matching veins bears no trace need.
+    pub fn required_trace(&self, orb: u64) -> Vec<[u8; 32]> {
         let mut required: Vec<[u8; 32]> = self
             .prospects
             .iter()
             .filter(|vein| vein.orb == orb)
             .map(|vein| vein.element)
+            .filter(|element| self.substrate_favours(element))
             .collect();
         required.sort();
         required.dedup();
+        required
+    }
+
+    pub fn micronutrient_factor(&self, orb: u64) -> Ratio {
+        let full = ratio(1, 1);
+        // The world's trace elements this substrate favours (§2).
+        let required = self.required_trace(orb);
         if required.is_empty() {
             return full;
         }
@@ -91,15 +125,8 @@ impl World {
         if demand <= ratio(0, 1) {
             return Vec::new();
         }
-        let mut required: Vec<[u8; 32]> = self
-            .prospects
-            .iter()
-            .filter(|vein| vein.orb == orb)
-            .map(|vein| vein.element)
-            .collect();
-        required.sort();
-        required.dedup();
-        required
+        // Only the elements this substrate's signature favours (§2).
+        self.required_trace(orb)
             .into_iter()
             .filter_map(|element| {
                 let draw = held.element_amount(&element).min(demand.clone());
