@@ -8652,9 +8652,13 @@ fn chronicle(world: &World, style: &Style) {
                 style.strong(&amount(joule)),
                 style.strong(&amount(minted))
             ),
-            cfe::dop::ClosureEvent::TraceConsumed { orb_id, amount, .. } => format!(
+            cfe::dop::ClosureEvent::TraceConsumed { orb_id, amount: burned, .. } => format!(
                 "· trace BURNED — orb {orb_id} spent {} of a trace element maintaining its substrate",
-                style.strong(&amount(amount))
+                style.strong(&amount(burned))
+            ),
+            cfe::dop::ClosureEvent::EnrichmentStruck { orb_id, richness, .. } => format!(
+                "✧ SUPERNOVA enrichment — orb {orb_id} seeded a heavy vein at richness {}",
+                style.strong(&amount(richness))
             ),
             cfe::dop::ClosureEvent::CivilizationCollapsed { .. } => format!(
                 "{} the line has COLLAPSED — every orb stands at zero; the chronicle closes here, there is no win to reach for instead",

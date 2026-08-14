@@ -1193,6 +1193,16 @@ fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
                 last_assay: step.stamp,
             });
         }
+        // #27: a dying star scatters a vein — the same push a prospect makes.
+        ClosureEvent::EnrichmentStruck { orb_id, stratum, element, richness } => {
+            book.push(cfe::world::Prospected {
+                orb: *orb_id,
+                stratum: *stratum,
+                element: *element,
+                richness: richness.clone(),
+                last_assay: step.stamp,
+            });
+        }
         ClosureEvent::AssayStruck { orb_id, element, richness, .. } => {
             if let Some(vein) = book
                 .iter_mut()
@@ -1428,7 +1438,7 @@ fn covered(event: &ClosureEvent) -> bool {
         | E::ScienceSeated { .. } | E::LabCreated { .. } | E::ScienceExploded { .. }
         | E::RogueFactionStruck { .. }
         | E::PressureEbbed { .. }
-        | E::GenesisSealed { .. } | E::ProspectStruck { .. } | E::LineSucceeded { .. }
+        | E::GenesisSealed { .. } | E::ProspectStruck { .. } | E::EnrichmentStruck { .. } | E::LineSucceeded { .. }
         | E::TechLicensed { .. } | E::InstrumentForged { .. } | E::RouteChartered { .. }
         | E::OfferPosted { .. } | E::BondSealed { .. }
         // THE MISSED SIXTH (arch-02's coverage audit): the enum holds
@@ -2493,7 +2503,7 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         | E::OverheatStruck { .. } | E::OverheatCleared { .. }
         | E::FamineStruck { .. } | E::FamineRelieved { .. }
         | E::GaugeShifted { .. } | E::GaugeShiftedAt { .. }
-        | E::ProspectStruck { .. } | E::AssayStruck { .. } | E::CrystalDrawn { .. }
+        | E::ProspectStruck { .. } | E::EnrichmentStruck { .. } | E::AssayStruck { .. } | E::CrystalDrawn { .. }
         | E::ElementFarmed { .. }
         // ELEMENT-CHEMISTRY (#37): a bond is WORLD-layer beside the
         // mint and the assay it consumes — it carries an orb's matter,
@@ -2605,7 +2615,7 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         | E::ColonyCharted { .. } | E::StarCommissioned { .. } | E::PlanetSited { .. }
         | E::BondSealed { .. } | E::ForwardSealed { .. } | E::CouncilSealed { .. }
         | E::GaugeShiftedAt { .. } | E::TechLicensed { .. } | E::GenesisSealed { .. }
-        | E::PracticeAdopted { .. } | E::PracticeReleased { .. } | E::ProspectStruck { .. }
+        | E::PracticeAdopted { .. } | E::PracticeReleased { .. } | E::ProspectStruck { .. } | E::EnrichmentStruck { .. }
         // #42: sealing or ending a pact re-rules what crossing this
         // pair costs — Build, the founding class of act, beside the
         // chartered parameter it most resembles. E3.9's element annex

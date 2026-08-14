@@ -679,6 +679,16 @@ impl Replayer {
                 last_assay: receipt.stamp,
             });
         }
+        // #27: a dying star scatters a vein — the same push a prospect makes.
+        ClosureEvent::EnrichmentStruck { orb_id, stratum, element, richness } => {
+            prospects.push(Prospected {
+                orb: *orb_id,
+                stratum: *stratum,
+                element: *element,
+                richness: richness.clone(),
+                last_assay: receipt.stamp,
+            });
+        }
         // ELEMENT-CHEMISTRY (#37): the bond replays by re-deriving
         // its own recipe from the members the receipt names — the
         // same one home the verb settled and the gate judged. A

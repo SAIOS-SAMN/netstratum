@@ -381,7 +381,8 @@
 //!         first; 173 -> 174 then collided with ElementFarmed, which
 //!         ALSO committed to main first. Landed concurrently with two
 //!         separate lanes claiming the same next-free tag in a row.)
-//!    Phase-5 claim ledger: next free **176** (163–164 ElementWant,
+//!    Phase-5 claim ledger: next free **177** (176 EnrichmentStruck —
+//!    stellar nucleosynthesis #27; 163–164 ElementWant,
 //!    165 TreatyElementsAllowed, 166 SolverWordMinted, 167
 //!    PopulationSettled — 41_PROVISION §3, 169 EvolutionAdvanced —
 //!    44_LINEAGES §2c, 170 TitheReceipted, 171 TreasurySettled —
@@ -3050,6 +3051,23 @@ pub enum ClosureEvent {
         element: [u8; 32],
         amount: Ratio,
     },
+    /// **STELLAR NUCLEOSYNTHESIS ON STAR DEATH** (task #27, ruled
+    /// 2026-08-14, tag 176) — when a star ages into a REMNANT (a
+    /// collapsed/exploded end-state, the heavy end of the class spine),
+    /// its death forges heavy elements and SCATTERS them: every sited orb
+    /// gains an enrichment vein of `element` (family drawn from the
+    /// remnant's own periodic spine, so a heavier remnant seeds heavier
+    /// matter) at `richness`, at a reserved stellar `stratum` above the
+    /// diggable reach. A supernova is a galactic elemental windfall — the
+    /// veins it opens feed the trace/catalyst economy. Replays as a vein
+    /// push, exactly like a prospect; a star that never dies enriches
+    /// nothing and is byte-identical.
+    EnrichmentStruck {
+        orb_id: u64,
+        stratum: u8,
+        element: [u8; 32],
+        richness: Ratio,
+    },
     /// **THE FAILURE STATE** (`50_WIN_CONDITIONS`, operator ruling
     /// 2026-08-13, tag 174): *"there is no win state — there is a
     /// failure state — otherwise the game should just continue in
@@ -4355,6 +4373,13 @@ impl ClosureEvent {
                 value.extend_from_slice(element);
                 ratio::encode(amount, &mut value);
                 tlv::put(175, &value, &mut out);
+            }
+            Self::EnrichmentStruck { orb_id, stratum, element, richness } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                value.push(*stratum);
+                value.extend_from_slice(element);
+                ratio::encode(richness, &mut value);
+                tlv::put(176, &value, &mut out);
             }
             Self::NoteIssued {
                 note_id,
@@ -5692,6 +5717,13 @@ impl ClosureEvent {
                 let element: [u8; 32] = value.get(8..40)?.try_into().ok()?;
                 let (amount, _) = ratio::decode(value.get(40..)?)?;
                 Some(Self::TraceConsumed { orb_id, element, amount })
+            }
+            176 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let stratum = *value.get(8)?;
+                let element: [u8; 32] = value.get(9..41)?.try_into().ok()?;
+                let (richness, _) = ratio::decode(value.get(41..)?)?;
+                Some(Self::EnrichmentStruck { orb_id, stratum, element, richness })
             }
             120 => {
                 let note_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);

@@ -216,7 +216,63 @@ impl World {
         }
         self.star = Some(class);
         self.close(ClosureEvent::StarAged { class: class as u8 }, SOVEREIGN);
+        // #27 STELLAR NUCLEOSYNTHESIS: a star aging into a REMNANT (the
+        // heavy end of the class spine — a white dwarf and beyond) dies
+        // and scatters heavy elements; every sited orb gains an enrichment
+        // vein. A main-sequence move forges nothing new.
+        if class as u8 >= crate::thermal::StarClass::WhiteDwarf as u8 {
+            self.scatter_enrichment(class);
+        }
         Ok(())
+    }
+
+    /// #27: seed each sited orb with an enrichment vein of a heavy element
+    /// the dying `class` forged — element drawn from the remnant's own
+    /// periodic spine (a heavier remnant seeds heavier matter), at a
+    /// reserved stellar stratum above the diggable reach so it never
+    /// collides with a prospect. Idempotent per (orb, remnant): a star
+    /// that dies twice into the same class enriches once.
+    fn scatter_enrichment(&mut self, class: crate::thermal::StarClass) {
+        let stratum = class as u8;
+        let Some(root) = self
+            .chronicle
+            .receipts()
+            .iter()
+            .find(|receipt| matches!(receipt.event, ClosureEvent::ColonyFounded { .. }))
+            .map(|receipt| receipt.own.0)
+        else {
+            return;
+        };
+        let sited: Vec<u64> = self
+            .orbs
+            .iter()
+            .filter(|held| held.thermal.is_some())
+            .map(|held| held.orb_id)
+            .collect();
+        let stamp = self.clock.now();
+        for orb in sited {
+            if self.prospects.iter().any(|vein| vein.orb == orb && vein.stratum == stratum) {
+                continue;
+            }
+            let mut seed = root.to_vec();
+            seed.extend_from_slice(&orb.to_le_bytes());
+            seed.push(stratum);
+            let mut element: [u8; 32] = blake3::hash(&seed).into();
+            element[3] %= crate::almanac::strata_lines(u8::MAX, class).max(1);
+            let (_, _, richness) = crate::dop::element_properties(&element, class);
+            self.prospects.push(crate::world::Prospected {
+                orb,
+                stratum,
+                element,
+                richness: richness.clone(),
+                last_assay: stamp,
+            });
+            self.chronicle.append(
+                ClosureEvent::EnrichmentStruck { orb_id: orb, stratum, element, richness },
+                stamp,
+                vec![SOVEREIGN],
+            );
+        }
     }
     /// ABSORB-1: this orb's un-sealed vented overflow (workspace) —
     /// what stands absorbable before the void claims it at collect.
