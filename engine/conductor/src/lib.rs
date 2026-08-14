@@ -1308,18 +1308,38 @@ impl Polity {
             return;
         }
         let evidence = office_evidence(&self.world);
-        // Expansionist → caravan (routes); empiricist → exchange
-        // (books); epicurean / others prefer caravan when elements
-        // stand, exchange when market clears already.
-        let want = match self.spec.civilization.disposition.as_str() {
-            "empiricist" => "exchange",
-            "expansionist" => "caravan",
-            _ if evidence.market_clears > 0 => "exchange",
-            _ => "caravan",
+        // **THE OFFICE DERIVES FROM THE OPPORTUNITY** (INTELLIGENCE ARC B,
+        // business-development made cognition-driven). A line no longer
+        // takes the office a fixed `disposition → office` dial assigns it;
+        // it seats the vocation its OWN economy is strongest in — a router
+        // turns caravan, a market-maker turns exchange. The FIT is the
+        // COMMENSURATE activity each vocation is measured by: routes
+        // chartered vs. market clears, both event counts on the same
+        // scale (element_kinds is inventory BREADTH, a precondition to
+        // seat, never a fit — comparing it against a trade count seats
+        // every element-holder crucible by an accident of units).
+        let want = if evidence.routes_chartered != evidence.market_clears {
+            // the stronger demonstrated activity wins outright.
+            if evidence.routes_chartered > evidence.market_clears {
+                "caravan"
+            } else {
+                "exchange"
+            }
+        } else {
+            // no distinguishing activity yet — fall to the disposition's
+            // own structural LEAN (a direction from temperament,
+            // 44_LINEAGES, never a tuned magnitude).
+            match self.spec.civilization.disposition.as_str() {
+                "empiricist" => "exchange",
+                _ => "caravan",
+            }
         };
         if office_preconditions(want, &evidence).is_err() {
             return;
         }
+        let Some(station) = Station::from_word(want) else {
+            return;
+        };
         let Some(station) = Station::from_word(want) else {
             return;
         };
