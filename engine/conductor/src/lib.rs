@@ -3718,6 +3718,61 @@ pub fn merchant_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, String, S
     crossings
 }
 
+/// **CROSS-LINE CONSILIENCE** (38 §5, the mesh half of the intelligence
+/// arc) — the board's once-per-beat convergence pass.
+///
+/// Each line resolves its OWN knowledge into a crystallized invariant
+/// (`solver::knowledge_map`, the same resolve the reach consults). When
+/// INDEPENDENT lines land on the SAME invariant, that agreement is a
+/// shared axiom no single line owns — and each converged line records its
+/// OWN leg on its OWN chain (`crystallize_knowledge_as`), one leg per
+/// book, the way a lane spans two worlds without a second copy of one
+/// truth. It is idempotent by construction: a line already carrying a
+/// signature's axiom refuses, so a standing consilience records once and
+/// then rests.
+///
+/// Libraryless lines are skipped — a line that has minted no vocabulary
+/// has resolved no knowledge to share — so the pass costs nothing until
+/// lines begin to learn. Returns the crystallizations struck THIS beat,
+/// each `(world, mass, hardness)`.
+pub fn consilience_step(worlds: &mut [Polity], _beat: u64) -> Vec<(String, u32, u32)> {
+    // Each learning line's crystallized knowledge, keyed by board seat.
+    let maps: Vec<(u64, solver::SelfMap)> = worlds
+        .iter()
+        .enumerate()
+        .filter(|(_, polity)| !polity.library.words().is_empty())
+        .map(|(seat, polity)| (seat as u64, solver::knowledge_map(&polity.library)))
+        .collect();
+    if maps.len() < 2 {
+        return Vec::new(); // one learning line is no agreement
+    }
+    let refs: Vec<(u64, &solver::SelfMap)> = maps.iter().map(|(seat, map)| (*seat, map)).collect();
+
+    let mut recorded = Vec::new();
+    for consilience in solver::consilience(&refs) {
+        for seat in &consilience.lines {
+            let polity = &mut worlds[*seat as usize];
+            if polity
+                .world
+                .crystallize_knowledge_as(
+                    polity.automaton,
+                    consilience.signature,
+                    consilience.mass as u32,
+                    consilience.hardness as u32,
+                )
+                .is_ok()
+            {
+                recorded.push((
+                    polity.spec.world_name.clone(),
+                    consilience.mass as u32,
+                    consilience.hardness as u32,
+                ));
+            }
+        }
+    }
+    recorded
+}
+
 /// MESH-1b (#2, the consumer slice): the conductor's side of the
 /// receipted handoff. `yield <world> <seat>` lines in the control
 /// file ask for the pen; the beat boundary is the one lawful moment

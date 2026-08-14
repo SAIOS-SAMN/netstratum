@@ -381,7 +381,12 @@
 //!         first; 173 -> 174 then collided with ElementFarmed, which
 //!         ALSO committed to main first. Landed concurrently with two
 //!         separate lanes claiming the same next-free tag in a row.)
-//!    Phase-5 claim ledger: next free **177** (176 EnrichmentStruck —
+//!    177  ClosureEvent::KnowledgeConverged (38 §5 — cross-line
+//!         consilience: independent lines that resolve their knowledge to
+//!         the same crystallized invariant record a shared axiom, one leg
+//!         per book. signature[32] ‖ mass u32 ‖ hardness u32.)
+//!    Phase-5 claim ledger: next free **178** (177 KnowledgeConverged —
+//!    38 §5 cross-line consilience; 176 EnrichmentStruck —
 //!    stellar nucleosynthesis #27; 163–164 ElementWant,
 //!    165 TreatyElementsAllowed, 166 SolverWordMinted, 167
 //!    PopulationSettled — 41_PROVISION §3, 169 EvolutionAdvanced —
@@ -2864,6 +2869,23 @@ pub enum ClosureEvent {
         expansion: Vec<u8>,
         cited: Vec<[u8; 32]>,
     },
+    /// **CROSS-LINE CONSILIENCE (tag 177, 38 §5)** — the shared knowledge
+    /// no single line owns. When INDEPENDENT lines resolve their own
+    /// knowledge-maps to the SAME crystallized invariant (`signature`),
+    /// that agreement is a MEASUREMENT, not a reconciled copy: the
+    /// one-truth amendment bars reconciling copies, never observing that
+    /// two independent derivations landed on one structure (the same law
+    /// the solver mint's three-distinct-tasks runs on). Each converged
+    /// line records its OWN participation on its OWN chain — one leg per
+    /// book, as a lane does. `mass` is the effort share (how many lines
+    /// reached it); `hardness` the diversity bridged (how differently the
+    /// converged lines are built — a truth two unlike lines share is
+    /// harder-won). Banked-neutral: knowledge, never matter.
+    KnowledgeConverged {
+        signature: [u8; 32],
+        mass: u32,
+        hardness: u32,
+    },
     /// **ELEMENT-CHEMISTRY (tag 104, #37) — MATTER BONDS.** The
     /// almanac's first consumer: a set of banked elements whose lanes
     /// saturate bonds into a GEM, each member spending its lane's
@@ -4026,6 +4048,13 @@ impl ClosureEvent {
                 }
                 value.extend_from_slice(expansion);
                 tlv::put(166, &value, &mut out);
+            }
+            Self::KnowledgeConverged { signature, mass, hardness } => {
+                // signature[32] ‖ mass u32 ‖ hardness u32.
+                let mut value = signature.to_vec();
+                value.extend_from_slice(&mass.to_le_bytes());
+                value.extend_from_slice(&hardness.to_le_bytes());
+                tlv::put(177, &value, &mut out);
             }
             Self::GemCompounded { orb_id, members, gem } => {
                 // orb ‖ gem ‖ members — the member count is the
@@ -5329,6 +5358,12 @@ impl ClosureEvent {
                 }
                 let expansion = value.get(at..)?.to_vec();
                 Some(Self::SolverWordMinted { orbit, expansion, cited })
+            }
+            177 => {
+                let signature: [u8; 32] = value.get(..32)?.try_into().ok()?;
+                let mass = u32::from_le_bytes(value.get(32..36)?.try_into().ok()?);
+                let hardness = u32::from_le_bytes(value.get(36..40)?.try_into().ok()?);
+                Some(Self::KnowledgeConverged { signature, mass, hardness })
             }
             104 => {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);

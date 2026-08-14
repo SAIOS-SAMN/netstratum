@@ -288,6 +288,41 @@ impl World {
         Ok(())
     }
 
+    /// **CONSILIENCE (tag 177, 38 §5)** — record this line's participation
+    /// in a shared knowledge axiom. The prover side (`solver::consilience`)
+    /// established that INDEPENDENT lines resolved their knowledge to the
+    /// same crystallized `signature`; this door holds the CHAIN's share,
+    /// recording the line's own leg. Idempotent per signature (a line
+    /// already recording this convergence refuses — the fold's own
+    /// idempotence), and a consilience is agreement between at least two
+    /// lines (`mass < 2` refuses: one line is no measurement).
+    pub fn crystallize_knowledge_as(
+        &mut self,
+        actor: u64,
+        signature: [u8; 32],
+        mass: u32,
+        hardness: u32,
+    ) -> Result<(), ActionRefused> {
+        self.permitted(actor, Scope::Build)?;
+        if mass < 2 {
+            return Err(ActionRefused::ConsilienceAlone { mass });
+        }
+        let known = self.chronicle.receipts().iter().any(|receipt| {
+            matches!(
+                &receipt.event,
+                ClosureEvent::KnowledgeConverged { signature: held, .. } if *held == signature
+            )
+        });
+        if known {
+            return Err(ActionRefused::KnowledgeKnown { signature });
+        }
+        self.close(
+            ClosureEvent::KnowledgeConverged { signature, mass, hardness },
+            actor,
+        );
+        Ok(())
+    }
+
     /// PRACTICE-1 — adopt a discipline: one benefit, one friction,
     /// bound by receipt (the derived creed never binds; the practice
     /// does). Build scope. The Overdrive (5) takes only the tempered —

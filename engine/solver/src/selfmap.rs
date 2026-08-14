@@ -162,6 +162,79 @@ pub fn knowledge_map(library: &Library) -> SelfMap {
     }
 }
 
+/// **CROSS-LINE CONSILIENCE** (38 §5) — the shared knowledge no single
+/// line owns.
+///
+/// A [`SelfMap::signature`] is the crystallized invariant of ONE line's
+/// resolved knowledge: two lines carry the same 32 bytes exactly when
+/// their knowledge is the same shape up to a frame. When INDEPENDENT
+/// lines — different vocabularies, different histories — converge on one
+/// signature, that agreement is a MEASUREMENT, not a reconciled copy
+/// (the one-truth amendment bars reconciling copies; it does not bar
+/// observing that two derivations landed on the same structure — the
+/// same law the ARC mint's three-distinct-tasks already runs on).
+///
+/// This is the KNOWLEDGE row of `38 §1`, realized: mass is the effort
+/// share (how many lines reached it), hardness is the diversity bridged
+/// (how differently they are built — a truth two UNLIKE lines share is
+/// harder-won than one two near-twins do).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Consilience {
+    /// The shared invariant the converged lines all crystallized.
+    pub signature: [u8; 32],
+    /// The converged lines, by id, in ascending order.
+    pub lines: Vec<u64>,
+    /// Effort share — how many independent lines reached this knowledge.
+    pub mass: usize,
+    /// Diversity bridged — how many DISTINCT curiosity-orders the
+    /// converged lines wear. Two lines that reached the same knowledge by
+    /// the same route bridge nothing; two that reached it from different
+    /// frontiers bridge a gap, and the knowledge is harder for it.
+    pub hardness: usize,
+}
+
+/// Detect the cross-line consilences among a roster of resolved maps.
+///
+/// Each `(line_id, map)` is one line's own reading. Lines are grouped by
+/// their exact signature; a group of TWO OR MORE independent lines is a
+/// consilience. A lone line is no agreement and yields nothing. The
+/// zero-map signature (an empty library) is skipped — a line that knows
+/// nothing has reached no shared truth by having nothing in common.
+/// Deterministic: groups are returned in ascending signature order, each
+/// naming its lines in ascending id order.
+pub fn consilience(maps: &[(u64, &SelfMap)]) -> Vec<Consilience> {
+    let empty = knowledge_map(&Library::new()).signature;
+    let mut groups: std::collections::BTreeMap<[u8; 32], Vec<(u64, &SelfMap)>> =
+        std::collections::BTreeMap::new();
+    for &(line, map) in maps {
+        if map.signature == empty {
+            continue; // nothing known is nothing shared
+        }
+        groups.entry(map.signature).or_default().push((line, map));
+    }
+    let mut found = Vec::new();
+    for (signature, mut members) in groups {
+        if members.len() < 2 {
+            continue; // one line is not a consilience
+        }
+        members.sort_by_key(|(line, _)| *line);
+        let lines: Vec<u64> = members.iter().map(|(line, _)| *line).collect();
+        // Diversity bridged: the count of DISTINCT curiosity-orders among
+        // the converged lines. Same knowledge from the same frontier
+        // bridges nothing; the more distinct the routes, the harder-won.
+        let mut orders: Vec<&Vec<Family>> = members.iter().map(|(_, m)| &m.order).collect();
+        orders.sort();
+        orders.dedup();
+        found.push(Consilience {
+            signature,
+            mass: lines.len(),
+            hardness: orders.len(),
+            lines,
+        });
+    }
+    found
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -234,5 +307,65 @@ mod tests {
         let map = knowledge_map(&library);
         assert_eq!(map.signature, knowledge_map(&library).signature, "the invariant is stable");
         assert_eq!(map.order.len(), FAMILIES.len(), "every family is placed");
+    }
+
+    /// A knowledge shape is frame-invariant: a line whose library spells
+    /// the SAME structure with re-labelled symmetry letters crystallizes
+    /// the SAME signature — the ground the cross-line consilience stands
+    /// on.
+    #[test]
+    fn the_same_shape_crystallizes_the_same_signature() {
+        let mut a = Library::new();
+        a.adopt(word(vec![Op::Rotate90, tile()]));
+        let mut b = Library::new();
+        // A DIFFERENT symmetry letter, same family draw and structure.
+        b.adopt(word(vec![Op::FlipH, tile()]));
+        assert_eq!(
+            knowledge_map(&a).signature,
+            knowledge_map(&b).signature,
+            "same shape up to a frame → same crystallized knowledge"
+        );
+    }
+
+    /// Two INDEPENDENT lines that crystallize the same signature are a
+    /// consilience; a lone line is not; an empty line shares nothing.
+    #[test]
+    fn independent_lines_that_converge_are_a_consilience() {
+        let mut a = Library::new();
+        a.adopt(word(vec![Op::Rotate90, tile()]));
+        let mut b = Library::new();
+        b.adopt(word(vec![Op::FlipH, tile()])); // same shape, different letter
+        let mut lone = Library::new();
+        // A STRUCTURALLY distinct shape: one word drawing on a SINGLE
+        // family (a pendant), not a two-family bridge — a different
+        // invariant, so a different crystallized knowledge.
+        lone.adopt(word(vec![Op::Rotate90, Op::Rotate180]));
+        let empty = Library::new();
+
+        let ma = knowledge_map(&a);
+        let mb = knowledge_map(&b);
+        let ml = knowledge_map(&lone);
+        let me = knowledge_map(&empty);
+        let found = consilience(&[(1, &ma), (2, &mb), (3, &ml), (7, &me)]);
+
+        assert_eq!(found.len(), 1, "exactly one shared truth — lines 1 and 2");
+        let c = &found[0];
+        assert_eq!(c.lines, vec![1, 2], "the two converged lines, in id order");
+        assert_eq!(c.mass, 2, "effort share is the count that reached it");
+        assert_eq!(c.signature, ma.signature, "keyed by the shared invariant");
+    }
+
+    /// An empty roster and a roster of all-distinct lines both yield no
+    /// consilience — agreement is the measurement, and there is none.
+    #[test]
+    fn distinct_lines_share_nothing() {
+        let mut a = Library::new();
+        a.adopt(word(vec![Op::Rotate90, tile()]));
+        let mut b = Library::new();
+        b.adopt(word(vec![recolor([9, 8, 7, 6, 5, 4, 3, 2, 1, 0]), Op::Transpose, tile()]));
+        let ma = knowledge_map(&a);
+        let mb = knowledge_map(&b);
+        assert!(consilience(&[(1, &ma), (2, &mb)]).is_empty(), "no two share a shape");
+        assert!(consilience(&[]).is_empty(), "an empty roster converges nothing");
     }
 }

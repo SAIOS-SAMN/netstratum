@@ -166,6 +166,10 @@ impl Replayer {
         // these receipts (`vocabulary::solver_words`) — no committed
         // field moves, so replay carries nothing for it.
         ClosureEvent::SolverWordMinted { .. } => {}
+        // CONSILIENCE (tag 177): a knowledge axiom is a record of
+        // convergence — no committed field moves, so replay carries
+        // nothing for it (the SolverWordMinted discipline).
+        ClosureEvent::KnowledgeConverged { .. } => {}
         // BOOK-1 (19_LENS §16) — the open registry rebuilds from
         // receipts alone, like every other committed ledger here.
         // LIT-1 — the literature rebuilds from receipts alone.

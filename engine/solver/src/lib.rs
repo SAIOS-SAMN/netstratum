@@ -44,7 +44,7 @@ pub use solver_verify::{
 
 pub use derive::{derive, Candidate};
 pub use need::{Family, Hunger, Need};
-pub use selfmap::{knowledge_map, knowledge_order, SelfMap};
+pub use selfmap::{consilience, knowledge_map, knowledge_order, Consilience, SelfMap};
 pub use search::{
     consult_observed, frontier, propose, propose_consulted, propose_consulted_measured,
     propose_measured, solve, solve_consulted, sweep_vocabulary,

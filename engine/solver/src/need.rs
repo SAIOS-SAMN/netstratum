@@ -152,7 +152,7 @@ pub fn family_of(op: &solver_verify::grid::Op) -> Family {
 
 /// The operator families, named so a need can speak about them without
 /// naming individual operators (which only the observation may supply).
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Family {
     Symmetry,
     Recolor,

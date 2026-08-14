@@ -190,6 +190,14 @@ pub enum ActionRefused {
     /// NOVELTY-GATE — fewer than the three confirming closes the
     /// promote law demands; nothing enters the library unearned.
     SolverWordUnconfirmed { confirms: u8 },
+    /// CONSILIENCE (38 §5) — this line already records the shared axiom
+    /// for this signature: convergence is recorded once per line, never
+    /// re-recorded.
+    KnowledgeKnown { signature: [u8; 32] },
+    /// CONSILIENCE — a consilience is agreement BETWEEN lines; a mass
+    /// below two is one line agreeing with itself, which is no
+    /// measurement.
+    ConsilienceAlone { mass: u32 },
     /// ZONE-VOCABULARY (#41) — no zone-axis entry in the FOLD carries
     /// this code. A fact of the chain, not a shape: what the fold holds
     /// grows by receipt, so this can never move to a door (the

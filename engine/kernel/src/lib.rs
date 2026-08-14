@@ -1395,6 +1395,10 @@ fn covered(event: &ClosureEvent) -> bool {
         // later enables are judged at tag 86 by verify_work as ever.
         // {I2 containment, I3 exactness} complete it. BY HAND.
         | E::SolverWordMinted { .. }
+        // CROSS-LINE CONSILIENCE (tag 177) — banked-neutral: a shared
+        // knowledge axiom is identity, never matter; it records that
+        // lines converged, moving nothing bankable. BY HAND.
+        | E::KnowledgeConverged { .. }
         // E3.9 (tag 165) — banked-neutral: the allow-list annex
         // re-rules WHICH matter may cross the pair and moves nothing
         // by itself; the haul it later refuses or admits is the
@@ -2460,6 +2464,9 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         // NOVELTY-GATE (tag 166): a solver word is a LINE's own
         // instrument — identity vocabulary in the axis mint's class.
         | E::SolverWordMinted { .. }
+        // CONSILIENCE (tag 177): a shared knowledge axiom is keyed on the
+        // LINE that reached it — its own knowledge, the same layer.
+        | E::KnowledgeConverged { .. }
         // P2 (tag 103): a chartered parameter is a DEFINITION the
         // world's rules read, exactly as a minted vocabulary entry is.
         | E::ParameterChartered { .. }
@@ -2642,6 +2649,9 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         // NOVELTY-GATE: a solver-word mint extends what the LINE can
         // reach — the same founding class.
         | E::SolverWordMinted { .. }
+        // CONSILIENCE: recording a shared knowledge axiom extends what
+        // the LINE holds — the same founding/Build class.
+        | E::KnowledgeConverged { .. }
         // P2 (tag 103): chartering a parameter re-rules the board —
         // Build-class, the progenitor's own office.
         | E::ParameterChartered { .. }

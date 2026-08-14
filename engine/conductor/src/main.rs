@@ -261,6 +261,13 @@ fn main() {
                 "beat {beat}: STAMP SPOT — {buyer} ⇌ {seller}; crystal clears for STAMP"
             );
         }
+        // CONSILIENCE (38 §5): independent lines that resolved their
+        // knowledge to the same invariant crystallize a shared axiom.
+        for (world, mass, hardness) in conductor::profile::timed("consilience_step", || conductor::consilience_step(&mut worlds, beat)) {
+            println!(
+                "beat {beat}: CONSILIENCE — {world} shares a truth {mass} lines reached (hardness {hardness})"
+            );
+        }
         // JOURNAL-1 (08 §3): on year boundaries every civilization
         // speaks — journals + the Terminal Wall regenerate lens-side.
         if beat.is_multiple_of(scribe::journal::YEAR_TICKS) {
