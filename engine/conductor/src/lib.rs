@@ -3762,6 +3762,21 @@ pub fn consilience_step(worlds: &mut [Polity], _beat: u64) -> Vec<(String, u32, 
                 )
                 .is_ok()
             {
+                // **L4: CONSILIENCE PAYS.** Reaching a shared truth IS a
+                // discovery, so it relieves the line's novelty hunger and
+                // lifts its trajectory to growth exactly as a solve does —
+                // the collective payoff spent through the SAME trajectory
+                // that drives every line's economy, no new matter minted,
+                // no dial. It is gated on HARDNESS ≥ 2 (the truth was
+                // bridged by genuinely UNLIKE lines): a hard-won shared
+                // insight prospers the minds that reached it; a trivial
+                // agreement between near-twins is recorded but earns
+                // nothing. Idempotent by the crystallize door above, so
+                // one convergence pays once.
+                if consilience.hardness >= 2 {
+                    polity.trajectory = polity.trajectory.advance(true);
+                    polity.starved = 0;
+                }
                 recorded.push((
                     polity.spec.world_name.clone(),
                     consilience.mass as u32,
