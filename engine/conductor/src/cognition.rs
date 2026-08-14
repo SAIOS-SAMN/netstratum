@@ -57,6 +57,35 @@ pub fn settlement_choice(
     }
 }
 
+/// COGNITION-2: scores an actual simulated OUTCOME (`lookahead::project`'s
+/// `ext`/`hab`/gaps/`famished`, for the one candidate that was actually
+/// built on the clone) with the same weight table `settlement_choice`
+/// uses — a projection and a live read are never judged by two different
+/// laws — plus one veto no static formula can express: an outcome that
+/// starves the colony is always worse than one that doesn't, whatever
+/// its other weights read. `kind` says which side's score this outcome
+/// answers for (the projection already reflects having built it).
+pub fn score_outcome(
+    kind: ZoneKind,
+    disposition: u8,
+    mode: EconomicMode,
+    ext: i64,
+    hab: i64,
+    iron_gap: Ratio,
+    bio_gap: Ratio,
+    famished: bool,
+) -> Ratio {
+    if famished {
+        return ratio(-1_000_000, 1);
+    }
+    let (extractor_u, habitat_u) = utility(disposition, mode, ext, hab, iron_gap, bio_gap);
+    match kind {
+        ZoneKind::Extractor => extractor_u,
+        ZoneKind::Habitat => habitat_u,
+        _ => ratio(0, 1),
+    }
+}
+
 /// Disposition base weight + economic-mode nudge + bottleneck read.
 /// Pure and exact-rational — same inputs always score the same, so a
 /// beat-for-beat replay picks the same zone every time.
@@ -191,6 +220,36 @@ mod tests {
         assert_eq!(
             settlement_choice(true, true, 1, EconomicMode::Balanced, 10, 1, ratio(0, 1), ratio(0, 1)),
             Some(ZoneKind::Habitat)
+        );
+    }
+
+    #[test]
+    fn a_famished_outcome_always_scores_worst() {
+        // Expansionist base heavily favours extractor, but an outcome
+        // that starves the colony must never win regardless.
+        let starved = score_outcome(
+            ZoneKind::Extractor, 1, EconomicMode::Extractive, 99, 0, ratio(0, 1), ratio(0, 1), true,
+        );
+        let fed = score_outcome(
+            ZoneKind::Habitat, 1, EconomicMode::Extractive, 0, 1, ratio(0, 1), ratio(0, 1), false,
+        );
+        assert!(fed > starved);
+    }
+
+    #[test]
+    fn score_outcome_matches_settlement_choice_on_the_same_inputs() {
+        // The two entry points must never disagree given the same read
+        // — one static formula, whichever candidate is asked about.
+        let extractor_u = score_outcome(
+            ZoneKind::Extractor, 2, EconomicMode::Balanced, 0, 0, ratio(0, 1), ratio(0, 1), false,
+        );
+        let habitat_u = score_outcome(
+            ZoneKind::Habitat, 2, EconomicMode::Balanced, 0, 0, ratio(0, 1), ratio(0, 1), false,
+        );
+        let picked = if extractor_u >= habitat_u { ZoneKind::Extractor } else { ZoneKind::Habitat };
+        assert_eq!(
+            settlement_choice(true, true, 2, EconomicMode::Balanced, 0, 0, ratio(0, 1), ratio(0, 1)),
+            Some(picked)
         );
     }
 }

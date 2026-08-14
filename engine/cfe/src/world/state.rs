@@ -275,6 +275,11 @@ pub struct Prospected {
     pub last_assay: u64,
 }
 
+/// COGNITION-2: `Clone` exists so a caller (`conductor::lookahead`) can
+/// simulate a few beats ahead on a throwaway copy — every field already
+/// derives `Clone` (no external handle lives here), so this is exactly
+/// as cheap and as safe as `committed()`'s existing field-wise clone.
+#[derive(Clone)]
 pub struct World {
     pub(super) clock: WorldClock,
     pub(super) keepers: [Timekeeper; 3],
