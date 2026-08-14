@@ -117,6 +117,50 @@ pub struct Holonomy {
     pub value: Ratio,
 }
 
+/// ONE LAYER'S SPANNING FOREST — grow a forest over the present edges of
+/// coordinate `l`, assigning each vertex the potential its forest path
+/// accumulates (roots at zero). Returns the per-vertex potentials
+/// (`None` for a vertex the layer never touches — no edge, no potential)
+/// and the forest-edge mask (`in_forest[i*dim + j]`).
+///
+/// This is THE FRAME: a spanning forest is a coboundary by construction —
+/// each forest edge is exactly `p_j − p_i` — so the potentials explain
+/// away precisely what a coordinate frame should, and what they cannot
+/// explain is every remaining edge's holonomy. Both [`holonomies`] (the
+/// charge each non-forest edge carries) and [`forest_potentials`] (the
+/// reconciled worldview itself) read this ONE walk, so they can never
+/// disagree about the frame. Deterministic: the DFS pops the highest
+/// index first and the walk is a pure function of `(delta, support, l)`.
+fn spanning_forest(
+    delta: &Delta,
+    support: &Support,
+    l: usize,
+    dim: usize,
+) -> (Vec<Option<Ratio>>, Vec<bool>) {
+    let mut potential: Vec<Option<Ratio>> = vec![None; dim];
+    let mut in_forest = vec![false; dim * dim];
+    for root in 0..dim {
+        if potential[root].is_some() {
+            continue;
+        }
+        potential[root] = Some(Ratio::zero());
+        let mut frontier = vec![root];
+        while let Some(here) = frontier.pop() {
+            let base = potential[here].clone().unwrap_or_else(Ratio::zero);
+            for next in 0..dim {
+                if next == here || !support.has(here, next, l) || potential[next].is_some() {
+                    continue;
+                }
+                potential[next] = Some(base.clone() + delta.entry(here, next, l));
+                in_forest[here * dim + next] = true;
+                in_forest[next * dim + here] = true;
+                frontier.push(next);
+            }
+        }
+    }
+    (potential, in_forest)
+}
+
 /// SUPPORT-AWARE REDUCTION — reduce against a spanning FOREST of the
 /// present edges rather than against vertex 0.
 ///
@@ -142,28 +186,7 @@ pub fn holonomies(delta: &Delta, support: &Support) -> Vec<Holonomy> {
     let mut found = Vec::new();
 
     for l in 0..fiber {
-        // Grow a spanning forest, assigning potentials as we walk.
-        let mut potential: Vec<Option<Ratio>> = vec![None; dim];
-        let mut in_forest = vec![false; dim * dim];
-        for root in 0..dim {
-            if potential[root].is_some() {
-                continue;
-            }
-            potential[root] = Some(Ratio::zero());
-            let mut frontier = vec![root];
-            while let Some(here) = frontier.pop() {
-                let base = potential[here].clone().unwrap_or_else(Ratio::zero);
-                for next in 0..dim {
-                    if next == here || !support.has(here, next, l) || potential[next].is_some() {
-                        continue;
-                    }
-                    potential[next] = Some(base.clone() + delta.entry(here, next, l));
-                    in_forest[here * dim + next] = true;
-                    in_forest[next * dim + here] = true;
-                    frontier.push(next);
-                }
-            }
-        }
+        let (potential, in_forest) = spanning_forest(delta, support, l, dim);
         // Every present edge OUTSIDE the forest closes one independent
         // cycle. Its holonomy is what the forest's frame cannot explain.
         for i in 0..dim {
@@ -182,6 +205,37 @@ pub fn holonomies(delta: &Delta, support: &Support) -> Vec<Holonomy> {
         }
     }
     found
+}
+
+/// **THE RECONCILED WORLDVIEW** — the spanning-forest potential of every
+/// vertex, per coordinate. `[l][i]` is the potential coordinate `l`
+/// assigns vertex `i`: the accumulated relation along the forest path
+/// from its component root (rooted at zero), and zero for any vertex the
+/// coordinate never touches.
+///
+/// This is the coherent frame the sparse reduction fits to the data —
+/// the one globally-consistent reading of a web of pairwise relations
+/// that a resolve produces. Where the pairwise relations DO compose
+/// (`C = 0`), the potential explains them entirely; where they do not,
+/// [`holonomies`] carries exactly the irreducible remainder the
+/// potential could not. The two are the two halves of the ONE resolve,
+/// read off the same [`spanning_forest`] walk.
+///
+/// Exact rational throughout; no float, no root. A `None` potential
+/// (isolated vertex) reads as zero — it stands at its own ground,
+/// relating to nothing.
+pub fn forest_potentials(delta: &Delta, support: &Support) -> Vec<Vec<Ratio>> {
+    let dim = delta.dim().min(support.dim());
+    let fiber = delta.fiber().min(support.fiber());
+    (0..fiber)
+        .map(|l| {
+            let (potential, _) = spanning_forest(delta, support, l, dim);
+            potential
+                .into_iter()
+                .map(|p| p.unwrap_or_else(Ratio::zero))
+                .collect()
+        })
+        .collect()
 }
 
 /// Reduce `delta` to the canonical representative of its H¹ class.

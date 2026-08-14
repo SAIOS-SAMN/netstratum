@@ -54,4 +54,10 @@ pub use gates::{validate_step, GateReading, StepBound};
 // against.
 pub use boundary::{boundary_form, Flow, BoundaryForm};
 pub use rcf::{invariant_factors, rcf_hash, rcf_signature, RatPoly, RcfSignature};
-pub use reduce::{coboundary_reduce, holonomies, Holonomy, Support};
+pub use reduce::{coboundary_reduce, forest_potentials, holonomies, Holonomy, Support};
+// THE CARRIER, re-exported. A crate that builds a Delta through this
+// algebra must name its exact-rational entries; re-exporting `Ratio`
+// here lets a crate ABOVE rfa-core (and below `cfe` in the arrow law,
+// like `solver`) do so through the algebra it already depends on,
+// without a direct edge to `cfe`.
+pub use cfe::ratio::{ratio, Ratio};
