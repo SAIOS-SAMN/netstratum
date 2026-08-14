@@ -360,5 +360,12 @@ fn main() {
         "R5 probe: {repeat}/{total} forge draws reused an unchanged digest ({}%)",
         repeat * 100 / total.max(1)
     );
+    let choice_points =
+        conductor::COGNITION_CHOICE_POINTS.load(std::sync::atomic::Ordering::Relaxed);
+    let lookahead_decided =
+        conductor::COGNITION_LOOKAHEAD_DECIDED.load(std::sync::atomic::Ordering::Relaxed);
+    println!(
+        "COGNITION-1/2 probe: {choice_points} genuine settlement choices, {lookahead_decided} decided by the lookahead"
+    );
     println!("era complete: {beat} heartbeats, {} civilizations live", worlds.len());
 }
