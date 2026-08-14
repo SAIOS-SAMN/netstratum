@@ -805,20 +805,26 @@ impl World {
             .and_then(|entry| entry.ration)
     }
 
-    /// **G2 (#29) — THE FOOD-ELEMENT FARMED at a collect touch.** An
-    /// element-eater SYNTHESIZES its metabolic element from ENERGY,
-    /// topping its larder toward the food demand over the span: it spends
-    /// Joule to mint the element (a conserved transmutation, bounded by
-    /// the element's own richness — `minted ≤ joule × richness`, so a
-    /// rarer element costs more energy). Returns `(element, joule_spent,
-    /// minted)` to receipt as `ElementFarmed`, or `None` for a non-eater,
-    /// no deficit, no joule, or no star. Every v1 (biotic/unsealed) world
-    /// reads `None` in O(1), so it is byte-identical.
+    /// **G2 (#29) — THE FOOD-ELEMENT CYCLE at a collect touch.** An
+    /// element-eater EATS the stored food its zones ran on this span and
+    /// SYNTHESIZES more from ENERGY to refill its larder toward a span's
+    /// buffer: it spends Joule to mint the element (a conserved
+    /// transmutation, bounded by the element's richness — `minted ≤ joule
+    /// × richness`, so a rarer element costs more energy). Returns
+    /// `(element, joule_spent, minted, eaten)` to receipt as
+    /// `ElementFarmed`, or `None` for a non-eater, no bill, or no star.
+    /// Every v1 (biotic/unsealed) world reads `None` in O(1) — byte-identical.
+    ///
+    /// The larder moves by `minted − eaten`: in steady state the line
+    /// farms exactly what it ate and holds the buffer; short of joule it
+    /// eats into the buffer and freezes; overstocked it coasts on the
+    /// stored food and farms less. `eaten` never exceeds what is stored,
+    /// so the larder never goes negative.
     pub(super) fn element_farm_at_touch(
         &self,
         orb: u64,
         stamp: u64,
-    ) -> Option<([u8; 32], Ratio, Ratio)> {
+    ) -> Option<([u8; 32], Ratio, Ratio, Ratio)> {
         let element = self.metabolic_element()?;
         let class = self.star?;
         let metabolism = self.genesis.as_ref().map(|held| held.metabolism)?;
@@ -838,23 +844,22 @@ impl World {
         if bill <= ratio(0, 1) {
             return None;
         }
-        // Top the larder toward a span's worth of food; never overfill.
-        let demand = bill * ratio(dt as i64, 1);
-        let deficit = (demand - held.element_amount(&element)).max(ratio(0, 1));
-        if deficit <= ratio(0, 1) {
-            return None;
-        }
-        // Bound the mint by the joule on hand × the element's richness.
         let (_, _, richness) = crate::dop::element_properties(&element, class);
         if richness <= ratio(0, 1) {
             return None;
         }
+        let span = bill * ratio(dt as i64, 1); // a span's food: the demand AND the buffer
+        let have = held.element_amount(&element);
+        // EAT only what is stored — a frozen span (empty larder) eats nothing.
+        let eaten = span.clone().min(have.clone());
+        // REFILL toward the buffer after eating, joule-bounded.
         let joule = held.banked_amount(Resource::Joule);
-        let minted = deficit.min(joule * richness.clone());
-        if minted <= ratio(0, 1) {
+        let want = (span - (have - eaten.clone())).max(ratio(0, 1));
+        let minted = want.min(joule * richness.clone());
+        if minted <= ratio(0, 1) && eaten <= ratio(0, 1) {
             return None;
         }
-        Some((element, minted.clone() / richness, minted))
+        Some((element, minted.clone() / richness, minted, eaten))
     }
 
     /// G2: the base FOOD BILL an element-eater's active zones levy this

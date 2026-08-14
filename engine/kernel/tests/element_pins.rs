@@ -366,9 +366,9 @@ fn sunlit_with_joule(joule: Ratio) -> Committed {
     committed
 }
 
-fn farm(element: [u8; 32], joule: Ratio, minted: Ratio, stamp: u64) -> Step {
+fn farm(element: [u8; 32], joule: Ratio, minted: Ratio, eaten: Ratio, stamp: u64) -> Step {
     Step {
-        event: ClosureEvent::ElementFarmed { orb_id: 1, element, joule, minted },
+        event: ClosureEvent::ElementFarmed { orb_id: 1, element, joule, minted, eaten },
         actor: SOVEREIGN,
         stamp,
     }
@@ -386,7 +386,26 @@ fn an_honest_element_farm_admits_the_conserved_transmutation() {
     let mut next = prior.clone();
     next.orbs[0].bank(cfe::dop::Resource::Joule, -joule.clone());
     next.orbs[0].bank_element(element, minted.clone());
-    assert_eq!(admits(&prior, &next, &farm(element, joule, minted, 5)), Ok(()));
+    assert_eq!(admits(&prior, &next, &farm(element, joule, minted, ratio(0, 1), 5)), Ok(()));
+}
+
+#[test]
+fn the_food_cycle_nets_the_mint_against_what_the_zones_ate() {
+    // The line mints its food AND eats some of it: the larder moves by
+    // `minted − eaten`, and the joule spend still buys only up to the
+    // richness bound. Both declared, both conserved — the kernel admits.
+    let element = ELEMENT;
+    // Start with some stored food to eat.
+    let mut prior = sunlit_with_joule(ratio(100, 1));
+    prior.orbs[0].bank_element(element, ratio(20, 1));
+    let (_, _, richness) = cfe::dop::element_properties(&element, cfe::thermal::StarClass::G);
+    let joule = ratio(10, 1);
+    let minted = joule.clone() * richness.clone();
+    let eaten = ratio(5, 1);
+    let mut next = prior.clone();
+    next.orbs[0].bank(cfe::dop::Resource::Joule, -joule.clone());
+    next.orbs[0].bank_element(element, minted.clone() - eaten.clone()); // net
+    assert_eq!(admits(&prior, &next, &farm(element, joule, minted, eaten, 5)), Ok(()));
 }
 
 #[test]
@@ -404,7 +423,7 @@ fn an_element_farm_past_the_richness_bound_refuses() {
     next.orbs[0].bank_element(element, greedy.clone());
     assert!(
         matches!(
-            admits(&prior, &next, &farm(element, joule, greedy, 5)),
+            admits(&prior, &next, &farm(element, joule, greedy, ratio(0, 1), 5)),
             Err(Refused::AssayExceedsVein { .. })
         ),
         "a farm cannot conjure more matter than its energy buys"

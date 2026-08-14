@@ -3016,20 +3016,22 @@ pub enum ClosureEvent {
     /// exactly as the settle did. A world that never quarantines emits
     /// none and is byte-identical.
     PressureEbbed { orb_id: u64 },
-    /// **G2 ELEMENT ECONOMY (task #29, tag 173)** — an element-eating
-    /// line SYNTHESIZES its metabolic element at the collect touch: it
-    /// SPENDS `joule` and MINTS `minted` of `element`. A conserved
-    /// TRANSMUTATION (energy in, matter out) — not a free mint: the
-    /// kernel bounds `minted ≤ joule × richness` (the element's own
-    /// natural flow from `element_properties`), so a rarer element yields
-    /// less per joule and costs more energy to eat. Replay banks the
-    /// joule spend and the element mint. A world with no element-eater
-    /// emits none and is byte-identical.
+    /// **G2 ELEMENT ECONOMY (task #29, tag 173)** — the element-eater's
+    /// food cycle at the collect touch. It SPENDS `joule` to MINT `minted`
+    /// of its `element` (a conserved TRANSMUTATION, energy in / matter
+    /// out; the kernel bounds `minted ≤ joule × richness`, the element's
+    /// own natural flow — a rarer element yields less per joule and costs
+    /// more energy), and its zones EAT `eaten` of the same element running
+    /// the span. The net change to the larder is `minted − eaten`: in
+    /// steady state the line farms exactly what it ate and holds its
+    /// buffer; starved of joule it eats into the buffer and freezes. A
+    /// world with no element-eater emits none and is byte-identical.
     ElementFarmed {
         orb_id: u64,
         element: [u8; 32],
         joule: Ratio,
         minted: Ratio,
+        eaten: Ratio,
     },
     /// **THE FAILURE STATE** (`50_WIN_CONDITIONS`, operator ruling
     /// 2026-08-13, tag 174): *"there is no win state — there is a
@@ -4160,11 +4162,12 @@ impl ClosureEvent {
             Self::PressureEbbed { orb_id } => {
                 tlv::put(168, &orb_id.to_le_bytes(), &mut out);
             }
-            Self::ElementFarmed { orb_id, element, joule, minted } => {
+            Self::ElementFarmed { orb_id, element, joule, minted, eaten } => {
                 let mut value = orb_id.to_le_bytes().to_vec();
                 value.extend_from_slice(element);
                 ratio::encode(joule, &mut value);
                 ratio::encode(minted, &mut value);
+                ratio::encode(eaten, &mut value);
                 tlv::put(173, &value, &mut out);
             }
             Self::CivilizationCollapsed { orb_id } => {
@@ -5462,9 +5465,10 @@ impl ClosureEvent {
             173 => {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let element: [u8; 32] = value.get(8..40)?.try_into().ok()?;
-                let (joule, used) = ratio::decode(value.get(40..)?)?;
-                let (minted, _) = ratio::decode(value.get(40 + used..)?)?;
-                Some(Self::ElementFarmed { orb_id, element, joule, minted })
+                let (joule, used_j) = ratio::decode(value.get(40..)?)?;
+                let (minted, used_m) = ratio::decode(value.get(40 + used_j..)?)?;
+                let (eaten, _) = ratio::decode(value.get(40 + used_j + used_m..)?)?;
+                Some(Self::ElementFarmed { orb_id, element, joule, minted, eaten })
             }
             174 => {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);

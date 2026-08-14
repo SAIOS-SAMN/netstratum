@@ -725,12 +725,13 @@ impl Replayer {
                 held.bank_element(*element, amount.clone());
             }
         }
-        // G2 (#29): the food-element synthesis — spend joule, mint the
-        // element (a conserved transmutation, bounded in the kernel).
-        ClosureEvent::ElementFarmed { orb_id, element, joule, minted } => {
+        // G2 (#29): the food-element cycle — spend joule, mint the element
+        // (conserved transmutation, bounded in the kernel), net of what the
+        // zones ate running the span: the larder moves by `minted − eaten`.
+        ClosureEvent::ElementFarmed { orb_id, element, joule, minted, eaten } => {
             if let Some(held) = peel(&mut *orbs, *orb_id) {
                 held.bank(Resource::Joule, -joule.clone());
-                held.bank_element(*element, minted.clone());
+                held.bank_element(*element, minted.clone() - eaten.clone());
             }
         }
         // ABSORB-1: the three-way move replays — the absorber's

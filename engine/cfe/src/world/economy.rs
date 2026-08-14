@@ -536,20 +536,34 @@ impl World {
         // the touch — both pressure axes ebb by one. Not quarantined → no
         // ebb → no deed, so an unmodified world is byte-identical.
         self.ebb_pressure(orb);
-        // G2 (#29): the food-element synthesis settles — joule → element,
-        // banked, receipted as ElementFarmed. `None` for every non-eater,
-        // so a v1 world emits nothing and is byte-identical.
-        if let Some((element, joule, minted)) = farm {
+        // G2 (#29): the food-element cycle settles — joule → element minted,
+        // net of what the zones ate; receipted as ElementFarmed. `None` for
+        // every non-eater, so a v1 world emits nothing and is byte-identical.
+        // The joule spend is CAPPED at the post-touch bank (the pre-touch
+        // reading may exceed it after this touch's demurrage), and the mint
+        // re-derived from the capped spend at the element's richness — so
+        // the bank never overdraws and the kernel bound still holds tight.
+        if let Some((element, _joule, _minted, eaten)) = farm {
             let stamp = self.clock.now();
-            if let Some(held) = peel(&mut self.orbs, orb) {
-                held.bank(Resource::Joule, -joule.clone());
-                held.bank_element(element, minted.clone());
+            let mut joule = ratio(0, 1);
+            let mut minted = ratio(0, 1);
+            if let Some(class) = self.star {
+                let (_, _, richness) = crate::dop::element_properties(&element, class);
+                if let Some(held) = peel(&mut self.orbs, orb) {
+                    let avail = held.banked_amount(Resource::Joule).max(ratio(0, 1));
+                    joule = _joule.min(avail);
+                    minted = joule.clone() * richness;
+                    held.bank(Resource::Joule, -joule.clone());
+                    held.bank_element(element, minted.clone() - eaten.clone());
+                }
             }
-            self.chronicle.append(
-                ClosureEvent::ElementFarmed { orb_id: orb, element, joule, minted },
-                stamp,
-                vec![actor],
-            );
+            if minted > ratio(0, 1) || eaten > ratio(0, 1) {
+                self.chronicle.append(
+                    ClosureEvent::ElementFarmed { orb_id: orb, element, joule, minted, eaten },
+                    stamp,
+                    vec![actor],
+                );
+            }
         }
         Ok(count)
     }

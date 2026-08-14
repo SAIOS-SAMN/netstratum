@@ -313,6 +313,10 @@ fn stasis_lifts_the_moment_the_element_bank_is_refilled() {
 /// which for an element-eater is paid in stone). Iron/Biomass are stocked
 /// only to afford the builds.
 fn energized_stone_eater(stone: [u8; 32], extractors: u16) -> World {
+    energized_stone_eater_fueled(stone, extractors, 1_000_000)
+}
+
+fn energized_stone_eater_fueled(stone: [u8; 32], extractors: u16, joule: i64) -> World {
     let mut world = World::new();
     world.found("stone-forge").expect("founds");
     world
@@ -331,7 +335,7 @@ fn energized_stone_eater(stone: [u8; 32], extractors: u16) -> World {
         .site_planet(FIRST_ORB, unit(0, 1), positive(1, 1), None, None)
         .expect("sites");
     let stamp = world.now();
-    for (res, amt) in [(Resource::Joule, 1_000_000i64), (Resource::Iron, 1_000_000), (Resource::Biomass, 1_000_000)] {
+    for (res, amt) in [(Resource::Joule, joule), (Resource::Iron, 1_000_000), (Resource::Biomass, 1_000_000)] {
         world.chronicle_mut().append(
             ClosureEvent::YieldCollected { orb_id: FIRST_ORB, resource: res, amount: ratio(amt, 1) },
             stamp, vec![SOVEREIGN],
@@ -415,5 +419,32 @@ fn a_biotic_world_never_farms_an_element() {
     assert!(
         !world.chronicle().receipts().iter().any(|r| matches!(r.event, ClosureEvent::ElementFarmed { .. })),
         "a biotic world never emits ElementFarmed — byte-identical"
+    );
+}
+
+#[test]
+fn the_food_cycle_burns_energy_and_starves_when_the_joule_runs_dry() {
+    // The ongoing cost: a stone-eater EATS its stored food each span and
+    // must farm more from joule to hold its buffer. Given only a small
+    // tank, it holds the buffer while the joule lasts, then — unable to
+    // refill what it eats — its larder DRAINS to empty and it starves. The
+    // element economy has a standing energy cost, not a free lunch.
+    let stone = element(1, 3);
+    let mut world = energized_stone_eater_fueled(stone, 4, 30);
+    // Run it until the joule is spent.
+    for _ in 0..8 {
+        for _ in 0..4 { world.tick(); }
+        let _ = world.collect();
+    }
+    let joule_left = world.orb_by_id(FIRST_ORB).map(|h| h.banked_amount(Resource::Joule)).unwrap();
+    assert_eq!(joule_left, ratio(0, 1), "the joule tank is spent — never overdrawn");
+    assert_eq!(stone_bank(&world, &stone), ratio(0, 1), "and the larder drained: no energy, no food");
+    assert_eq!(replay(world.chronicle()), world.committed(), "the whole drain replays MATCHES");
+    // The joule was SPENT on food (ElementFarmed deeds carry the burn).
+    assert!(
+        world.chronicle().receipts().iter().any(|r| matches!(
+            r.event, ClosureEvent::ElementFarmed { ref minted, ref eaten, .. } if *minted > ratio(0, 1) && *eaten > ratio(0, 1)
+        )),
+        "the receipts show the farm-and-eat cycle"
     );
 }

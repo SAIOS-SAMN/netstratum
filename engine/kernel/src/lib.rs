@@ -1088,14 +1088,15 @@ fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
             }
             vec![(*element, amount.clone())]
         }
-        // G2 (#29): an element-eater SYNTHESIZES its food-element from
-        // energy — a conserved TRANSMUTATION (the joule spend is checked
-        // in conservation(); here we bound the element MINT). The bound
-        // is the element's own natural flow (richness): minted ≤ joule ×
-        // richness, so a rarer element yields less per joule and costs
-        // more energy to eat. No star → no lawful recipe → zero bound.
-        ClosureEvent::ElementFarmed { element, joule, minted, .. } => {
-            if *minted < ratio(0, 1) || *joule < ratio(0, 1) {
+        // G2 (#29): an element-eater's food cycle — it SYNTHESIZES its
+        // element from energy (a conserved TRANSMUTATION; the joule spend
+        // is checked in conservation(), here we bound the element MINT)
+        // and EATS some of the same element running its zones. The net
+        // element change is `minted − eaten`. The mint bound is the
+        // element's own natural flow (richness): minted ≤ joule × richness,
+        // so a rarer element yields less per joule. No star → zero bound.
+        ClosureEvent::ElementFarmed { element, joule, minted, eaten, .. } => {
+            if *minted < ratio(0, 1) || *joule < ratio(0, 1) || *eaten < ratio(0, 1) {
                 return Err(Refused::ElementNotPositive {
                     element: *element,
                     amount: Box::new(minted.clone()),
@@ -1114,7 +1115,7 @@ fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
                     claimed: Box::new(minted.clone()),
                 });
             }
-            vec![(*element, minted.clone())]
+            vec![(*element, minted.clone() - eaten.clone())]
         }
         // 34: element → scrap; element mass leaves the open-matter ledger.
         ClosureEvent::ElementSalvaged { element, amount, .. } => {
