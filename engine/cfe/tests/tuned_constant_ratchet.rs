@@ -244,6 +244,6 @@ fn the_approved_seed_is_exactly_as_large_as_approved() {
     assert_eq!(
         seeded, 68,
         "the founding roster's seed count moved — approval covered 68 values \
-         (Wave-1 added three T2 sovereign seats: Kemet · Baktun · Dogon)"
+         (Wave-1 added three T2 sovereign seats: Stelahold · Tallykeep · Glyphward)"
     );
 }

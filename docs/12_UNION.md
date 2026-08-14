@@ -53,19 +53,19 @@ visible from here.
 
 | Species | Lineage domain | Overlay (06 world-book) | Register note |
 |---|---|---|---|
-| **Lyran** | mesic / biotic (250–320 K) | the Wanderers' shepherds | the warm-world progenitor: life as chemistry in liquid water |
-| **Anunnaki** | hyper-thermal / mineral (Furnace) | the Emberkin's elders | backed OUT of the miner role (ruling 3): they keep the *creation* function, not the extraction — the miners-from-above myth retires; the planners-of-the-fire myth stands |
-| **Archon** | cryogenic / deep Frost | the Coherent's elders | the cold-world progenitor: order that holds because the cold allows it |
-| **Agarthan** | deep rock / mantle (cross-band) | the Marrow's and Glasskeepers' elders | the interior progenitor: the will inside the stone |
+| **Sylvane** | mesic / biotic (250–320 K) | the Wanderers' shepherds | the warm-world progenitor: life as chemistry in liquid water |
+| **Forgeborn** | hyper-thermal / mineral (Furnace) | the Emberkin's elders | backed OUT of the miner role (ruling 3): they keep the *creation* function, not the extraction — they are planners of the fire, not miners from above |
+| **Stillcold** | cryogenic / deep Frost | the Coherent's elders | the cold-world progenitor: order that holds because the cold allows it |
+| **Corebound** | deep rock / mantle (cross-band) | the Marrow's and Glasskeepers' elders | the interior progenitor: the will inside the stone |
 
-*(Archon and Agarthan are placeholder names pending operator naming; the
-domains are the binding part.)*
+*(Stillcold and Corebound are the ruled names, #5; the domains are the
+binding part.)*
 
 **The fifth seat (operator ruling, 2026-07-30).** The tardigrade line sits
-in the progenitor band from this aeon: **Tunborn** (placeholder name
-pending operator naming), the Slagborn line's OWN head — seated among the
+in the progenitor band from this aeon: **Tunborn**, the Slagborn line's
+OWN head — seated among the
 mineral-domain seats exactly as §5 reads it ("a tardigrade progenitor among
-the Anunnaki-domain seats is the design working, not an anomaly").
+the Forgeborn-domain seats is the design working, not an anomaly").
 Slagborn's lineage pointer resolves to it; no alien physiology progenerated
 it (ruling 6 holds). The founding four remain the domain heads; Tunborn is
 the first seat filled beside them — the band doing what bands do.
@@ -105,15 +105,15 @@ does not buy what it may order. `world::seal_forward` enforces it and
 The board's vertical reading, overlaid on the bands. **This is not the
 hierarchy the seats forbid** — it is WHO MAKES THE ROOM: Tier 0 creates
 the board everyone else moves on. (An external four-tier sketch placing
-"Archons" above the progenitors was consulted and OVERRIDDEN: in this
+an "overseer" caste above the progenitors was consulted and OVERRIDDEN: in this
 game the progenitors are the top — they contract and expand the board,
 they create it, they overlay technology. Everything else plays on it.)
 
 | Tier | Who | The reading |
 |---|---|---|
 | **0 — the Board-Makers** | the PROGENITORS | **the conductor's own operations ARE their deeds, named:** seeding NPCs (genesis — create species/stars/worlds), expanding the board (roster waves — new lines online), contracting the board (the FOLD — the era seals and rotates), overlaying technology (the licensed leap, tag 40), deploying Watchers and Observers (the station seats) |
-| 1 — the Architect Observers | crossed NHI lines; the Watcher and Observer offices | interstellar corridor operations; shield enforcement readings; the LENS made diegetic |
-| 2 — the Record Keepers | the ancient contact lines (Anunnaki-descended memory: Kemet, Baktun, Dogon shapes) | ledger auditing across aperture endpoints (the INTEGRITY books); polytonic calendar-keeping (the voices, 11 §1) |
+| 1 — the Architect Observers | the crossed exo-lineages; the Watcher and Observer offices | interstellar corridor operations; shield enforcement readings; the LENS made diegetic |
+| 2 — the Archivists | the archival lineages (descended from the Forgeborn domain: Stelahold, Tallykeep, Glyphward) | ledger auditing across aperture endpoints (the INTEGRITY books); polytonic calendar-keeping (the voices, 11 §1) |
 | 3 — the Biosphere Nodes | the local species lines (Slagborn, Echowright, Hivelight, Eightfold, the Weft) | the thermodynamic foundation: raw extraction, local loops, the entropy stability every higher tier stands on |
 
 The tier is a **derived reading, never stored** (the standing law):
@@ -219,8 +219,8 @@ concept made diegetic:
 - **Watchers.** They hold the **threshold shield** (§7): the wardens of
   pre-interstellar worlds. A Watcher reads a shielded world's chronicle,
   may petition a council on its behalf, and may not act upon it. (The
-  register note writes them as the Grigori myth — those who watch the
-  young worlds and are forbidden to descend.)
+  register note writes them as the sentinels of the threshold — those who
+  watch the young worlds and are forbidden to descend.)
 - **Observers.** The **lens made diegetic**: the lens law as a
   people. Observers render the boards, the journals, the wall — they read
   everything and author nothing, and their whole law is the one the engine
@@ -589,7 +589,7 @@ together.
 
 **THE REGISTER — the cosmic marriage** (per the `06` law: myth beside
 physiology, and only what ties to the engine is mechanically real). The
-world-book writes the two offices as starseeded lovers — a Progenitor
+world-book writes the two offices as paired progenitors — a Progenitor
 who lays down the ground and a Sovereign who lives upon it, come from
 different suns and bound to each other. Their bond is a contract signed
 in the stars and witnessed by the cosmos; what they make together
@@ -671,7 +671,7 @@ union, under the shield (§7).
 ## 5. The lineage law — every line raises its own
 
 **No species is progenerated by an alien physiology** (ruling 6). An
-Anunnaki is not the progenitor of a tardigrade; the tardigrade line raises
+Forgeborn is not the progenitor of a tardigrade; the tardigrade line raises
 its OWN progenitor, or stands headless until it does. Extrapolated upward,
 the whole union is **lineage-typed**:
 
@@ -684,7 +684,7 @@ the whole union is **lineage-typed**:
   seats, never the mesic ones. The four species names in §2 are the
   *founding* heads; as lines elevate, the eight seats of each species fill
   with ascended members of that domain — a tardigrade progenitor among the
-  Anunnaki-domain seats is the design working, not an anomaly.
+  Forgeborn-domain seats is the design working, not an anomaly.
 - Divergence and confluence (11 §3) move a line's members on the manifold;
   the lineage pointer follows the chronicle, so a confluent hybrid points
   to BOTH predecessors' lines and elevates toward whichever domain its

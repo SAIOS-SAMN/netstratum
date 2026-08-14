@@ -2,7 +2,7 @@
 //! *execute the conductor thresholds as measured system bounds*).
 //!
 //! Re-measured 2026-08-07 after GROUND STEP (prospect/assay + regenerator
-//! ecology) and the sovereign founding band (Kemet · Baktun · Dogon).
+//! ecology) and the sovereign founding band (Stelahold · Tallykeep · Glyphward).
 //! The autonomous loop opens veins and may place Regenerators when veins
 //! wear, so the settlement footprint moved. The pin records the new
 //! measurement deliberately — not a silent nudge.

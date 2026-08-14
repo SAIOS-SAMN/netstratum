@@ -46,7 +46,7 @@ fn every_draw_is_lawful_by_construction() {
         );
         assert!(
             (1..=clade_ceiling()).contains(&line.clade),
-            "clade within the ratified ceiling — Draco's 19 and Darlok's 20 are lawful draws"
+            "clade within the ratified ceiling — Umbrid's 19 and Darlok's 20 are lawful draws"
         );
         assert!(!line.name.is_empty() && !line.species.is_empty() && !line.motto.is_empty());
     }

@@ -37,7 +37,7 @@ impl World {
     /// against the element's family. The spine of four splits at its
     /// median: light families {1,2} vs heavy {3,4}. A HOT-preferring
     /// clade's chemistry is built of and maintained by HEAVY elements
-    /// (the plasmic/reptilian lines that prefer the torrid bands); a
+    /// (the plasmic/saurian lines that prefer the torrid bands); a
     /// COLD-preferring one by LIGHT elements (the cryo lines); a temperate
     /// clade takes the whole spine. No star → no family reading → the line
     /// favours all (byte-identical to the pre-signature law).
@@ -267,7 +267,7 @@ impl World {
     /// **IS THE SITTING CLADE FLUX-DRIVEN?** (`44_LINEAGES` §2b) — a line
     /// whose HOME band is hot (Torrid or hotter) is adapted to run on stellar
     /// flux: its output rises in heat and falls in cold. DERIVED from the
-    /// clade's own preferred region (no new map) — the reptilian Scale-Matrix
+    /// clade's own preferred region (no new map) — the saurian Scale-Matrix
     /// and the plasmoid Vapor-Stalker are flux-driven because their clades
     /// prefer the hot bands; a mesic clade is not.
     pub fn flux_affine(&self) -> bool {

@@ -82,7 +82,7 @@ pub enum Tier {
     T0,
     /// THE ARCHITECT OBSERVERS — watchers and observers.
     T1,
-    /// THE RECORD KEEPERS — sovereigns.
+    /// THE ARCHIVISTS — sovereigns.
     T2,
     /// THE BIOSPHERE NODES — the common, lawful state. Reached by
     /// holding no seat, never by holding an unrecognised one.

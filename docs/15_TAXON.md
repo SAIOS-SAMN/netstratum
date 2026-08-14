@@ -37,12 +37,12 @@ partition needs:
 |---|---|---|---|
 | 0 | ∅ | unclassed (lawful — a class arrives by amendment, never by default) | revenants, unratified lines |
 | 1 | ⬡ | biotic-swarm (collective/eusocial/colonial) | Hivelight, Klethaxu, Mycelial Weft, Coralline, Deepmat |
-| 2 | ◈ | geodic-lithovore (mineral metabolisms, stone-eaters) | Slagborn, Tunborn, Cairnborn, Agarthan |
+| 2 | ◈ | geodic-lithovore (mineral metabolisms, stone-eaters) | Slagborn, Tunborn, Cairnborn, Corebound |
 | 3 | ◐ | metashifter (veil-native) | Darlok — the seat is FILLED (2026-08-01) |
-| 4 | ≋ | telepathic-resonant (alignment/coherence lines) | Syzygy, Archon, **Draco** (sub-archetype of Archon — same class, clade 19) |
+| 4 | ≋ | telepathic-resonant (alignment/coherence lines) | Syzygy, Stillcold, **Umbrid** (sub-archetype of Stillcold — same class, clade 19) |
 | 5 | ⊚ | pelagic-aerial (volumetric biotic) | Echowright, Eightfold, Hadal, Aerie, Frostwright |
 | 6 | ∿ | plasma-field (plasmic/energy) | Coronal Choir, Borealis |
-| 7 | ▲ | apex-solitary (solitary apex; was "terrestrial") | Lyran, Anunnaki |
+| 7 | ▲ | apex-solitary (solitary apex; was "terrestrial") | Sylvane, Forgeborn |
 | **8** | ⟺ | **corridor-nomad** (transit / corridor specialists) | open |
 | **9** | ▼ | **abyssal-pressure** (trench / deep-pressure life) | open |
 | **10** | ◆ | **crystal-mind** (compute / lattice intelligence) | open |
@@ -86,10 +86,10 @@ type width fight. *(Legacy English aliases still parse.)*
 
 **19 draconic — a SUB-ARCHETYPE, not a peer line** (operator ruling
 2026-08-01). The draconic clade seats inside class 4
-(telepathic-resonant), the SAME class the Archon line holds. That is
+(telepathic-resonant), the SAME class the Stillcold line holds. That is
 what "entangled" means here and it is the structural claim, not a
 flavour note: **one archetype, two expressions.** Class is the shared
-identity; clade is how it is expressed. A draconic line and an Archon
+identity; clade is how it is expressed. A draconic line and an Stillcold
 line are not two peoples who happen to cooperate — they are the same
 coherence-archetype read at two clades, and any mechanic keyed on class
 sees them as one.

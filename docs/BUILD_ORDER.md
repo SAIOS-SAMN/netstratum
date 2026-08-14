@@ -827,7 +827,7 @@ market board's; union tags allocate from 52 at each landing.
 | **TECH-1b** | D | **LANDED 2026-07-29** | the crystallized tree (10 §3b): all five conditions weighed exactly at every year boundary from receipts and committed state; seeded-synthesis node ids (BLAKE3 of the chronicle root — replay re-derives at the identical tick); all five modifiers live in the heat law (insulation ×3/4 heating, discipline ×5/4 encasement, deepening ×5/4 sink, doctrine ×5/4 radiator, long-stores ×1/2 demurrage threaded through every touch/affordability read); idempotent per orb per condition. Deferred, recorded: deepening/long-stores end-to-end arc witnesses; throttle-α policy action. Evidence: 3 witnesses green — held pressure crystallizes discipline beside the doctrine while the one-pair world is cured whole (measured survival); survived cold crystallizes insulation at 3/4 exact; replay+resume carry the tree |
 | **NAMING (10 §2 law 4)** | D | **LANDED 2026-07-30** | node names are never rung labels: `tech_node_name` composes CONCEPT (condition-fixed) × VOICE (node-hash-drawn) — two lines crystallizing the same condition speak of it differently; the hash is the identity, the name is the line's tongue |
 | **NOVEL-1** | D | **LANDED 2026-07-30 (coder-03)** | the succession law (10 §3c, tag 59 `LineSucceeded`): a successor line inherits a CHRONICLE, not a tree — the deed refuses PURE while any orb stands unfamished (07 §3 triage, v1 cascade law: every orb famished); on the deed the living tree drops to the world's kernel (the sun is the WORLD's fact, condition 0 stays) and every discovered node stands in the record forever; the successor's conditions evaluate over the whole inherited history and its node ids seed from roots containing that history + the deed — novel by construction, NO new crystallizer code (the deposit sheet and the seeded synthesis already read this way). Deferred, recorded: registry/mirror-side line-identity handoff (the sigil-migration lane); conductor-driven succession for polity worlds; richer 07 §3 triage (interrupted vs collapsed) beyond the v1 law. Evidence: 4 witnesses green (a living line refuses pure and orphans nothing; predecessor node A stands while the successor mints B ≠ A from the INHERITED famine span — no new famine-years paid after the deed; a second succession mints a third novel node, three insulations standing, no root repeats; tag 59 round-trips byte-exact; replay MATCHES and resume carries the boundary) — 198/198 workspace, clippy zero |
-| **TIER overlay (12_UNION §2a)** | — | **LANDED 2026-07-30** | progenitors are TIER 0, the board-makers — the conductor's operations named as their deeds (seed/expand/contract/overlay/deploy); tiers 1–3 below (architects · record keepers · biosphere); the tier is a DERIVED reading from station, rendered on the observer, never stored |
+| **TIER overlay (12_UNION §2a)** | — | **LANDED 2026-07-30** | progenitors are TIER 0, the board-makers — the conductor's operations named as their deeds (seed/expand/contract/overlay/deploy); tiers 1–3 below (architects · archivists · biosphere); the tier is a DERIVED reading from station, rendered on the observer, never stored |
 | **CONSTEL-1** | D | **LANDED 2026-07-30** | the constellation reading: `World::constellation(orb)` — per-condition held/progress/threshold DERIVED from the crystallizer's own deposit sheet (never a second bookkeeping); the CLI `tech` card renders the base-7 sky (voice-names, exact tick progress, the crown's gate, the joint-venture prompt). Deferred, recorded: mirror-side export of the progress readings into `state.json` so the observer/web render the same card (mirror is coder-02/03's lane this cadence) |
 | WANT-1 | D | open (specced, 12_UNION §5b) | THE WANT — famine speciated by entity: metabolic wants landed in shape (tag 5 strikes any store); cognitive wants specced (epistemological · resonance · novelty — receipts-derived, per-register voicing, candidate tags from 60) |
 | SIGIL rename | — | ruled (06 §2a) | slug → sigil (NS-2's own word), a recorded migration; locality-anchored naming law with the proposed founding renames (Abyssal Vocalis · Vitreous Hex · Mantle Anhydro · Brine Cortex) — applied at the next roster wave, never retroactively |
@@ -907,13 +907,13 @@ so a board ran five lines, all T3, with the whole progenitor band absent
 from play. That is the failure the ruling exists to make unreachable.
 
 **AN ARCHETYPE IS NOT A DOCTRINE** (operator correction, same day).
-The first cut of this ruling held six lines out of the roster — Lyran,
-Anunnaki, Archon, Agarthan, Draco, Pleiadian — reading them as occult
+The first cut of this ruling held six lines out of the roster — Sylvane,
+Forgeborn, Stillcold, Corebound, Umbrid, Thresholder — reading them as occult
 content. That conflated two different things:
 
 - **Occult terminology in the LAW** is a document treating mythology as
   an authority or a claim about reality (the retired `18_TORSION` asserting that the
-  Anunnaki *ratified* something; THE CURSE offered as a mechanism). That
+  Forgeborn *ratified* something; THE CURSE offered as a mechanism). That
   is non-science stated as fact inside physics law, and it stays struck.
 - **An ARCHETYPE for a civilization class is game content.** This is an
   AI MUD; its factions may be drawn from myth as any space opera's are.
@@ -921,8 +921,8 @@ content. That conflated two different things:
 The tell that the first cut was wrong: it kept Darlok — a *Master of
 Orion* race — while striking five neighbours on identical reasoning.
 And the six are not decoration, they ARE the class partition
-(`15_TAXON` §2): class 7 (apex-terrestrial) is seated by Lyran and
-Anunnaki and by nobody else, so holding them out EMPTIED a class, and
+(`15_TAXON` §2): class 7 (apex-terrestrial) is seated by Sylvane and
+Forgeborn and by nobody else, so holding them out EMPTIED a class, and
 clade 19 `draconic` — a landed operator ruling of 2026-08-01 — was
 orphaned by dropping the only line that wears it. All six are restored
 with their ratified taxa, and the pin now runs the other way: every
@@ -957,7 +957,7 @@ roster.
 | `ledger::registry` | `STATIONS[10]`, `tier_of` T0–T9, seat_width 16 (T4–T8), unbounded T9/T2; `office_preconditions` + `OfficeEvidence` |
 | `ratio::RING_ARITIES` | `{3,4,5,10}` — stations arity 10; lcm still 60 |
 | Conductor | `office_step` (T3→caravan/exchange); `refine_step`; build prefers ElementRefinery when raw surplus (after industry/forge-starved law) |
-| Founding roster | T2 sovereigns Kemet·Baktun·Dogon; gamified species words |
+| Founding roster | T2 sovereigns Stelahold·Tallykeep·Glyphward; gamified species words |
 | Kernel | `covered` / `element_move` / `layer_of` / `scope_of` for `ElementRefined` |
 | CLI | `ascend` checks preconditions; map glyphs `F` for refinery |
 | Pins | `wave1_era_pins` (T4+T6 seat + refine green; route/STAMP ignored); ledger tier/seat pins; vertical_axis 1..=10 |

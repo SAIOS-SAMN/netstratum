@@ -30,12 +30,12 @@ the board needs more slots — wire already holds 65535.
 |---|-------|------|--------------|
 | 0 | ∅ | unclassed | revenants |
 | 1 | ⬡ | biotic-swarm | Vitreous Hex, Klethaxu, Mycelial Weft, Coralline, Deepmat |
-| 2 | ◈ | geodic-lithovore | Slagborn, Tunborn, Agarthan |
+| 2 | ◈ | geodic-lithovore | Slagborn, Tunborn, Corebound |
 | 3 | ◐ | metashifter | Darlok |
-| 4 | ≋ | telepathic-resonant | Archon, Draco, Syzygy |
+| 4 | ≋ | telepathic-resonant | Stillcold, Umbrid, Syzygy |
 | 5 | ⊚ | pelagic-aerial | Echowright, Brine Cortex, Frostwright |
 | 6 | ∿ | plasma-field | Coronal Choir |
-| 7 | ▲ | **apex-solitary** | Lyran, Anunnaki (flatlander seat class) |
+| 7 | ▲ | **apex-solitary** | Sylvane, Forgeborn (flatlander seat class) |
 
 ---
 
@@ -79,8 +79,8 @@ Wire codes **locked**. Display is imperium; aliases parse forever.
 | Economic mode | **Balanced** (always) |
 | Design role | Earth-trained operator knowledge is **this** suite |
 
-**Lines that seat the baseline:** Anunnaki (progenitor), Kemet / Baktun / Dogon
-(sovereign Record Keepers), Pleiadian (watcher) — all `bimaniform`.
+**Lines that seat the baseline:** Forgeborn (progenitor), Stelahold / Tallykeep / Glyphward
+(sovereign Archivists), Thresholder (watcher) — all `bimaniform`.
 
 Unsealed worlds **default** taxon economy to flatlander balanced so play
 and tests have a readable baseline before `seal_taxon`.
@@ -144,8 +144,8 @@ No second physics — only pure scales and gates over existing zones/tech.
 
 ## 6. LOCKED line names (court only)
 
-Tunborn · Slagborn · Echowright · Coronal Choir · Agarthan · Archon · Draco ·
-Darlok · Lyran · Anunnaki — seat structure. Species/clade words move;
+Tunborn · Slagborn · Echowright · Coronal Choir · Corebound · Stillcold · Umbrid ·
+Darlok · Sylvane · Forgeborn — seat structure. Species/clade words move;
 **line names** wait for operator court rename.
 
 ---

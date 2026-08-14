@@ -52,7 +52,7 @@ Therefore:
 ```
 T0  Board-Makers        ← create / fold / license (TOP)
 T1  Architect Observers ← corridor / lens
-T2  Record Keepers      ← integrity / calendar
+T2  Archivists      ← integrity / calendar
 T3  Biosphere Common    ← thermodynamic foundation (default)
 T4  Caravan             ← route and melt (deeper)
 T5  Crucible            ← element refining

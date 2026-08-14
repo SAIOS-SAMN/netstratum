@@ -128,33 +128,22 @@ fn seat(
 /// `ENDOWMENTS.md` inventories. Compiling the roster resolves it: one
 /// name, one place.
 ///
-/// **AN ARCHETYPE IS NOT A DOCTRINE** (operator correction, 2026-08-05).
+/// **THE CLASS PARTITION** (identity re-key #5, 2026-08-14).
 ///
-/// The first cut of this roster held six lines OUT — Lyran, Anunnaki,
-/// Archon, Agarthan, Draco, Pleiadian — reading them as occult content
-/// under the operator's order to clear the build of non-science. That
-/// conflated two different things, and the operator named the
-/// distinction: *there is a difference between archetypes for our
-/// classes and having occult terminology in our documentation.*
+/// The roster is keyed to the game's own SCI-FI taxonomy — substrate
+/// (biotic · mineral · plasmic · element-eater), clade (the biological
+/// form), thermal band, and tier — never to Earth myth or esoterica.
+/// Names that once carried occult/contactee baggage were retired for
+/// coined netstratum-native ones; the STRUCTURE they anchor is unchanged.
 ///
-/// **Occult terminology in the LAW** is a document treating mythology as
-/// an AUTHORITY or a claim about reality — the retired `18_TORSION`
-/// asserting that the Anunnaki RATIFIED something, THE CURSE offered as a mechanism.
-/// That is non-science stated as fact inside physics law, and it stays
-/// struck.
-///
-/// **An archetype is game content.** This is an AI MUD; its factions may
-/// be drawn from myth exactly as any space opera's are. The tell that
-/// the first cut was wrong: it kept Darlok — a *Master of Orion* race —
-/// while striking five neighbours on identical reasoning.
-///
-/// And these six are not decoration; they ARE the class partition
-/// (`15_TAXON` §2). Class 7 (apex-terrestrial) is seated by Lyran and
-/// Anunnaki and by nobody else, so holding them out EMPTIED a class.
-/// Clade 19 `draconic` is a landed operator ruling of 2026-08-01 with a
-/// structural argument — *one archetype, two expressions*, draconic
-/// seating inside class 4 beside Archon — so holding Draco out orphaned
-/// a ruled clade. All six are restored with their ratified taxa.
+/// Six of the founding lines are not decoration — they ARE the taxon
+/// partition (`15_TAXON` §2): class 7 (apex-solitary) is seated by
+/// Sylvane and Forgeborn and by nobody else, so the class stands or
+/// falls with them; and clade 19 `draconic` (the 2026-08-01 ruling —
+/// *one archetype, two expressions*) rides on Umbrid, the saurian
+/// expression of the class-4 archetype Stillcold also wears. Each line's
+/// identity is its substrate and clade; the myth is gone, the physics
+/// stays.
 pub fn founding_polities() -> Vec<PolitySpec> {
     let g_half = || Some((StarClass::G, ratio(1, 2), ratio(1, 2)));
     vec![
@@ -210,7 +199,7 @@ pub fn founding_polities() -> Vec<PolitySpec> {
             (ratio(15, 1), ratio(15, 1), ratio(-6, 1)), None,
         ),
         // ── THE WATCHER BAND (T1) ─────────────────────────────────────
-        // CLASS 4 — telepathic-resonant. Archon and Draco are ONE
+        // CLASS 4 — telepathic-resonant. Stillcold and Umbrid are ONE
         // archetype at two clades (operator ruling 2026-08-01): class is
         // the shared identity, clade is how it is expressed, and any
         // mechanic keyed on class sees them as one line.
@@ -240,10 +229,9 @@ pub fn founding_polities() -> Vec<PolitySpec> {
             (ratio(12, 1), ratio(0, 1), ratio(0, 1)), None,
         ),
         // ── THE OBSERVER BAND (T1) ────────────────────────────────────
-        // Clade 19 `draconiform` — the sub-archetype the 2026-08-01 ruling
-        // exists to seat. Same class as Archon, a different expression
-        // of it; the first cut of this roster orphaned the clade by
-        // dropping the only line that wears it.
+        // Clade 19 `draconiform` — the saurian sub-archetype the 2026-08-01
+        // ruling exists to seat. Same class as Stillcold, a different
+        // expression of it.
         seat(
             "Umbrid", "umbrid", "draconiform-umbra", "draconic",
             "the union is the evidence; the seat above re-checks it",
@@ -254,11 +242,12 @@ pub fn founding_polities() -> Vec<PolitySpec> {
             Some((StarClass::K, ratio(1, 4), ratio(3, 4))),
         ),
         // ── THE SOVEREIGN BAND (T2) ───────────────────────────────────
+        // The ARCHIVISTS — the sovereign audit tier (12_UNION §2a):
+        // Stelahold · Tallykeep · Glyphward, the ledger-integrity and
+        // calendar-keeping lineages descended from the Forgeborn domain.
         // WHY THIS WAS EMPTY: founding_polities seated T0 (progenitor),
-        // T1 (watcher/observer), and T3 (stationless) — and never T2.
-        // 12_UNION §2a names the Record Keepers (Anunnaki-descended
-        // contact memory: Kemet · Baktun · Dogon) but the compiled
-        // roster had no `seat(..., Some("sovereign"), ...)`, so the only
+        // T1 (watcher/observer), and T3 (stationless) — and never T2. The
+        // compiled roster had no `seat(..., Some("sovereign"), ...)`, so the only
         // path to T2 was the CLI `ascend` deed. Same mechanism as every
         // other class: compile the office into the roster, lineage to
         // the domain head, station Some("sovereign"). seat_width is
@@ -284,7 +273,7 @@ pub fn founding_polities() -> Vec<PolitySpec> {
         ),
         seat(
             "Glyphward", "glyphward", "bimaniform-scribe", "bimaniform",
-            "we kept the star before the star kept us",
+            "the record outlives the recorder",
             "empiricist", "biotic", "harmonic",
             Some("sovereign"), &["forgeborn"],
             "glyph-sky", "star-gate", "first-word", Policy::Steady,

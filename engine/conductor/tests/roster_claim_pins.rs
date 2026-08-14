@@ -187,17 +187,13 @@ fn the_placement_is_the_same_on_every_reading() {
 
 /// **EVERY ARCHETYPE CLASS KEEPS ITS SEATED LINES** (`15_TAXON` §2).
 ///
-/// This pin is the inverse of the one it replaces, which asserted that
-/// six mythologically-named lines stayed OUT of the roster. That was a
-/// category error the operator corrected: occult terminology in the LAW
-/// (mythology invoked as an authority, as the retired `18_TORSION` once did) is
-/// struck; ARCHETYPES for civilization classes are game content and
-/// belong here.
-///
-/// Left standing, the error had already cost something measurable —
-/// class 7 (apex-terrestrial) is seated by Lyran and Anunnaki ALONE, so
-/// holding them out emptied a class, and clade 19 `draconic` was
-/// orphaned by dropping Draco, the one line that wears it.
+/// The roster's lines are the taxon partition (`15_TAXON` §2), each keyed
+/// to its SUBSTRATE and CLADE — the game's own sci-fi taxonomy, never
+/// Earth myth (the earlier esoteric names were retired for coined
+/// netstratum-native ones, #5). A class the partition says is seated must
+/// have its occupant IN the roster: class 7 (apex-solitary) is seated by
+/// Sylvane and Forgeborn ALONE, and clade 19 `draconic` — the saurian
+/// expression the 2026-08-01 ruling exists to seat — rides on Umbrid.
 ///
 /// So the guard runs the other way: the taxonomy's named occupants must
 /// be IN the roster. A class the partition says is seated, and which no
@@ -239,7 +235,7 @@ fn every_archetype_class_keeps_its_seated_lines() {
     );
 
     // AND THE RULED SUB-ARCHETYPE IS WORN. Clade 19 `draconic` seats
-    // INSIDE class 4 beside Archon (operator ruling 2026-08-01: one
+    // INSIDE class 4 beside Stillcold (operator ruling 2026-08-01: one
     // archetype, two expressions). A clade with no line wearing it is a
     // ruling with no expression on the board it governs.
     let umbrid = founding
@@ -247,12 +243,12 @@ fn every_archetype_class_keeps_its_seated_lines() {
         .find(|s| s.civilization.sigil == "umbrid")
         .expect("clade 19 draconic needs the line that wears it");
     assert_eq!(umbrid.civilization.clade, "draconic");
-    let archon = founding
+    let stillcold = founding
         .iter()
         .find(|s| s.civilization.sigil == "stillcold")
-        .expect("the class-4 archetype Draco expresses");
+        .expect("the class-4 archetype Umbrid expresses");
     assert_ne!(
-        umbrid.civilization.clade, archon.civilization.clade,
+        umbrid.civilization.clade, stillcold.civilization.clade,
         "two expressions, or it is not a sub-archetype"
     );
 }
