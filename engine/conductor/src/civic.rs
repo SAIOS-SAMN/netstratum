@@ -82,6 +82,69 @@ pub fn fold_generators(
         .collect()
 }
 
+/// THE STANDING SUPPLY — the aggregate net capacity of the zones already
+/// raised, as a `ℤ`-module vector over `axes`: `Σ` of each standing zone's
+/// `zone_capacity` (yield − upkeep). This is what the colony ALREADY
+/// produces per tick before any new build, netted for the upkeep the
+/// standing infrastructure itself eats. Reading it as one vector is the
+/// peel's `supply` argument — no per-plane sweep, one fold over the zones.
+pub fn standing_supply(kinds: &[ZoneKind], metabolism: u8, axes: &[Resource]) -> Vec<BigInt> {
+    let mut sum = vec![BigInt::zero(); axes.len()];
+    for &kind in kinds {
+        for (i, c) in zone_capacity(kind, metabolism, axes)
+            .into_iter()
+            .enumerate()
+        {
+            sum[i] += c;
+        }
+    }
+    sum
+}
+
+/// A live civic reading — everything the beat draws from one peel: the
+/// production/research split (`peel`) and the one structure Production
+/// samples to raise this cycle (`build`, `None` when the deficit is covered
+/// or purely irreducible). The `build` index is resolved back to its
+/// `ZoneKind` through the same fold the generators came from, so what
+/// Production names is always a structure this specific civilization KNOWS.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CivicReading {
+    pub peel: EconomicPeel,
+    pub build: Option<ZoneKind>,
+}
+
+/// RUN THE LIVE PEEL (COG Slice 1). From a species' real committed state —
+/// its `Axis::Zone` fold (`seed ∪ minted`), its sealed metabolism, the
+/// zones already standing, and the metabolic demand its population places —
+/// compute the one economic peel the beat acts on. Demand is a set of
+/// `(carrier, exact rate)` loads (population food = `pop × per_capita`,
+/// leisure, …); each is quantized onto the lattice and summed onto its
+/// axis. The generators are drawn STRICTLY from the fold, so a civilization
+/// that has minted a new structure peels against it and one that has not
+/// never sees it — the buildable set is the civilization's own vocabulary,
+/// not a compiled menu.
+pub fn civic_reading(
+    fold: &[Entry],
+    metabolism: u8,
+    standing: &[ZoneKind],
+    demand_loads: &[(Resource, Ratio)],
+    seed: [u8; 32],
+) -> CivicReading {
+    let axes = resource_axes();
+    let generators = fold_generators(fold, metabolism, &axes);
+    let buildables: Vec<Vec<BigInt>> = generators.iter().map(|(_, v)| v.clone()).collect();
+    let supply = standing_supply(standing, metabolism, &axes);
+    let mut demand = vec![BigInt::zero(); axes.len()];
+    for (res, rate) in demand_loads {
+        if let Some(i) = axes.iter().position(|r| r == res) {
+            demand[i] += quantize(rate);
+        }
+    }
+    let peel = peel_economy(&demand, &supply, &buildables);
+    let build = sample_build(&peel.coefficients, seed).map(|i| generators[i].0);
+    CivicReading { peel, build }
+}
+
 /// The peel of a colony's deficit against its buildable structures.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct EconomicPeel {
