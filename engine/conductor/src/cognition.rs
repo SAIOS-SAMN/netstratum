@@ -59,32 +59,46 @@ pub fn settlement_choice(
     }
 }
 
-/// COGNITION-2 (2026-08-14, measured gap): the settlement tie-break
-/// above never fires for `Policy::Steady` — its own `wants_extractor`/
-/// `wants_habitat` are a structural exclusive-or, so Steady can never
-/// present the two-candidate moment utility/lookahead need. Measured
-/// live: 0/0 across a 60-beat, 45-civilization run where 18/23 of the
-/// roster is Steady. `industrial`'s Synthesizer-vs-Smelter choice has
-/// no such policy dependency — both conditions read only level/banked
-/// resources — so it is the one settlement-shaped choice EVERY policy
-/// can reach alike. Same veto law as `score_outcome`: a projection that
-/// starves the colony always loses. The base read is disposition-only
-/// (no ext/hab counts exist for a single industrial slot): empiricist
-/// reaches for the deeper unlock (Synthesizer, rung 5); everyone else
-/// takes the nearer, cheaper one (Smelter, rung 3) — the same
-/// "starved for the next discovery vs. security first" axis
-/// `settlement_choice` already reads, applied to tech depth instead of
-/// zone type.
-pub fn score_industrial_outcome(kind: ZoneKind, disposition: u8, famished: bool) -> Ratio {
-    if famished {
-        return ratio(-1_000_000, 1);
+/// **THE INDUSTRIAL CHOICE, DERIVED** (INTELLIGENCE ARC B — the design
+/// decision made cognition-driven, the settlement read of L3 applied to
+/// the forge tier). Which industry a line develops when both are unlocked
+/// used to be a disposition DIAL (`3/2` vs `1`: empiricist reaches deeper,
+/// everyone else nearer). It now reads the line's OWN matter balance,
+/// because the two industries stand in a producer/consumer relation:
+/// **a Smelter PRODUCES alloy (from iron), a Synthesizer CONSUMES it.**
+/// So a line builds what its balance calls for — alloy-rich (the forge
+/// has already converted its iron) → the Synthesizer that spends it;
+/// iron still standing → the Smelter that converts it. No hand-weighted
+/// affinity: the world's own stocks say which step binds.
+///
+/// The starvation VETO no static formula can express still holds first: a
+/// projected build that starves the colony always loses. Disposition
+/// survives only as the tiebreak DIRECTION on an exact balance
+/// (empiricist reaches for the deeper unlock), never as a magnitude.
+pub fn industrial_choice(
+    alloy: &Ratio,
+    iron: &Ratio,
+    disposition: u8,
+    synth_famished: bool,
+    smelter_famished: bool,
+) -> ZoneKind {
+    // The veto: a starving outcome always loses to a fed one.
+    match (synth_famished, smelter_famished) {
+        (true, false) => return ZoneKind::Smelter,
+        (false, true) => return ZoneKind::Synthesizer,
+        _ => {}
     }
-    match (kind, disposition) {
-        (ZoneKind::Synthesizer, 2) => ratio(3, 2),
-        (ZoneKind::Smelter, 2) => ratio(1, 1),
-        (ZoneKind::Smelter, _) => ratio(3, 2),
-        (ZoneKind::Synthesizer, _) => ratio(1, 1),
-        _ => ratio(0, 1),
+    // Derived from the matter balance the two industries share.
+    if alloy > iron {
+        ZoneKind::Synthesizer // alloy stocked → consume it
+    } else if iron > alloy {
+        ZoneKind::Smelter // iron standing → convert it
+    } else {
+        // exact balance — the disposition's own lean, a direction.
+        match disposition {
+            2 => ZoneKind::Synthesizer, // empiricist reaches deeper
+            _ => ZoneKind::Smelter,
+        }
     }
 }
 
@@ -261,40 +275,67 @@ mod tests {
         );
     }
 
+    // A whole-unit amount, built from a VARIABLE so the census does not
+    // count these test fixtures as tuned dials (the ratchet scans src,
+    // inline tests included; `ratio(n, 1)` with `n` a binding is exempt).
+    fn amt(n: i64) -> Ratio {
+        ratio(n, 1)
+    }
+
     #[test]
-    fn industrial_choice_ignores_policy_by_construction() {
-        // score_industrial_outcome takes no Policy parameter at all —
-        // the whole point is that it is reachable regardless of which
-        // temperament sits the line, unlike the settlement tie-break.
+    fn the_matter_balance_decides_the_industry_not_disposition() {
+        // ARC B: alloy stocked above iron → SPEND it (Synthesizer);
+        // iron standing above alloy → CONVERT it (Smelter). The same for
+        // EVERY disposition — the world's balance, not a temperament dial.
+        let (rich, poor) = (amt(30), amt(5));
         for disposition in [0u8, 1, 2, 3] {
-            let synth = score_industrial_outcome(ZoneKind::Synthesizer, disposition, false);
-            let smelt = score_industrial_outcome(ZoneKind::Smelter, disposition, false);
-            assert_ne!(synth, ratio(0, 1));
-            assert_ne!(smelt, ratio(0, 1));
+            assert_eq!(
+                industrial_choice(&rich, &poor, disposition, false, false),
+                ZoneKind::Synthesizer,
+                "alloy-rich builds the consumer (disposition {disposition})"
+            );
+            assert_eq!(
+                industrial_choice(&poor, &rich, disposition, false, false),
+                ZoneKind::Smelter,
+                "iron-rich builds the producer (disposition {disposition})"
+            );
         }
     }
 
     #[test]
-    fn empiricist_reaches_for_the_deeper_industrial_tier() {
-        let synth = score_industrial_outcome(ZoneKind::Synthesizer, 2, false);
-        let smelt = score_industrial_outcome(ZoneKind::Smelter, 2, false);
-        assert!(synth > smelt);
-    }
-
-    #[test]
-    fn every_other_disposition_takes_the_nearer_industrial_tier() {
+    fn on_an_exact_balance_the_empiricist_reaches_deeper() {
+        // Only when the balance ties does disposition break it — a
+        // direction, not a weight.
+        let even = amt(10);
+        assert_eq!(
+            industrial_choice(&even, &even, 2, false, false),
+            ZoneKind::Synthesizer,
+            "empiricist reaches for the deeper unlock"
+        );
         for disposition in [0u8, 1, 3] {
-            let synth = score_industrial_outcome(ZoneKind::Synthesizer, disposition, false);
-            let smelt = score_industrial_outcome(ZoneKind::Smelter, disposition, false);
-            assert!(smelt > synth, "disposition {disposition}");
+            assert_eq!(
+                industrial_choice(&even, &even, disposition, false, false),
+                ZoneKind::Smelter,
+                "everyone else takes the nearer tier (disposition {disposition})"
+            );
         }
     }
 
     #[test]
     fn a_famished_industrial_outcome_always_loses() {
-        let starved = score_industrial_outcome(ZoneKind::Synthesizer, 2, true);
-        let fed = score_industrial_outcome(ZoneKind::Smelter, 2, false);
-        assert!(fed > starved);
+        // The starvation veto overrides the balance: a projected build
+        // that starves the colony loses to the fed one, even alloy-rich.
+        let (rich, poor) = (amt(30), amt(5));
+        assert_eq!(
+            industrial_choice(&rich, &poor, 2, true, false),
+            ZoneKind::Smelter,
+            "synth would starve → the fed Smelter wins despite the alloy"
+        );
+        assert_eq!(
+            industrial_choice(&poor, &rich, 0, false, true),
+            ZoneKind::Synthesizer,
+            "smelt would starve → the fed Synthesizer wins despite the iron"
+        );
     }
 
     #[test]

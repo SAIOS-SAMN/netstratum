@@ -1919,21 +1919,17 @@ impl Polity {
                             (Some(s), Some(m)) => {
                                 COGNITION_LOOKAHEAD_DECIDED
                                     .fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-                                let s_u = crate::cognition::score_industrial_outcome(
-                                    ZoneKind::Synthesizer,
+                                // ARC B: the choice DERIVES from the
+                                // line's alloy/iron balance (Smelter makes
+                                // alloy, Synthesizer spends it), the
+                                // starvation veto riding the projections.
+                                Some(crate::cognition::industrial_choice(
+                                    &alloy,
+                                    &iron,
                                     disposition,
                                     s.famished,
-                                );
-                                let m_u = crate::cognition::score_industrial_outcome(
-                                    ZoneKind::Smelter,
-                                    disposition,
                                     m.famished,
-                                );
-                                Some(if s_u >= m_u {
-                                    ZoneKind::Synthesizer
-                                } else {
-                                    ZoneKind::Smelter
-                                })
+                                ))
                             }
                             _ => None,
                         }

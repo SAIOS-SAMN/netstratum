@@ -73,7 +73,7 @@ const SOURCE_TREES: [&str; 11] = [
 /// clusters, R20) is DEFERRED to a later balance pass, where the ceiling
 /// falls again with each conversion. This is a ruling, openly recorded,
 /// not a silent raise: the operator is the authority the census defers to.
-const TUNED_LITERAL_CEILING: usize = 162; // accepted starting baseline (operator ruling 2026-08-14); falls as clusters convert
+const TUNED_LITERAL_CEILING: usize = 159; // 162 baseline − 3 (ARC B: score_industrial_outcome's dials DERIVED into industrial_choice); falls as clusters convert
 
 /// Parse `ratio(<int>, <int>)` starting at `text` (just past the open
 /// paren). Returns the pair only when both arguments are integer
