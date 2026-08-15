@@ -37,9 +37,23 @@ pub fn thermal_k() -> Ratio {
 /// `T_eq⁴ = L (1 − A) K / r²` — the equilibrium baseline in flux space
 /// (05 §1.1). Exact for rational inputs; the root is never taken.
 pub fn t_eq4(luminosity: &Ratio, albedo: &Ratio, orbit_r: &Ratio) -> Ratio {
+    insolation(luminosity, albedo, orbit_r) * thermal_k()
+}
+
+/// **THE CONTINUOUS INSOLATION** `I = L·(1−A)/r²` — the absorbed stellar
+/// flux per unit area, an EXACT rational (COG Slice 2b). This is the
+/// physical vector the 8-way [`ThermalRegion`](crate::almanac::ThermalRegion)
+/// buckets discard: `t_eq4` collapses it into a temperature and bins it, but
+/// primary production reads it NATIVELY, so a bright or close star delivers
+/// more food than a dim or distant one — continuously, not in temperature
+/// steps. `L` is the star's own luminosity ([`StarClass::luminosity`]), so
+/// the star class injects its exact energy output straight into the food
+/// economy; the temperature bucket becomes an efficiency term (η), never the
+/// magnitude of the light.
+pub fn insolation(luminosity: &Ratio, albedo: &Ratio, orbit_r: &Ratio) -> Ratio {
     let one_minus_a = ratio(1, 1) - albedo.clone();
     let r2 = orbit_r.clone() * orbit_r.clone();
-    luminosity.clone() * one_minus_a * thermal_k() / r2
+    luminosity.clone() * one_minus_a / r2
 }
 
 /// The substrate equilibrium bands (05 §2): each is an inclusive interval

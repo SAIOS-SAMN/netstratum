@@ -10,7 +10,6 @@
 //! consults; L1 is the gate itself.
 
 use super::*;
-use crate::almanac::carrying_capacity;
 use crate::dop::{metabolic_leisure, Caste, Ration, Resource, ZoneKind};
 
 impl World {
@@ -200,23 +199,140 @@ impl World {
     /// own regrowth ceiling, which stays ecological. With no granary and no
     /// advancement the footprint is exactly `living_zones_of`, so the
     /// ceiling — and every #40–42 world — is byte-identical.
-    pub fn population_ceiling(&self, orb: u64) -> Ratio {
-        match self.orb_region(orb) {
-            Some(region) => {
-                let footprint = self.living_zones_of(orb)
-                    + self.granary_footprint(orb)
-                    + self.evolution_stage() as u64;
-                // A cooling-driven line's ceiling ratchets with the thermal
-                // band (§2b); every other line reads a factor of 1.
-                // A cooling-driven line's ceiling ratchets with the band; a
-                // mobile line trades permanence for speed (§2b). Both default
-                // to 1, so a standard world is byte-identical.
-                carrying_capacity(footprint, self.rejuvenation_clade(), region)
-                    * self.cooling_k_factor(orb)
-                    * self.footprint_permanence_factor(orb)
-            }
-            None => ratio(0, 1),
+    /// **THE CONTINUOUS INSOLATION AT THIS ORB** `I = L·(1−A)/r²` (COG Slice
+    /// 2b) — the absorbed stellar flux, read NATIVELY from the star's exact
+    /// luminosity and the planet's albedo/orbit, before any thermal bucket.
+    /// Zero for an unsited orb or a starless system.
+    pub fn insolation_of(&self, orb: u64) -> Ratio {
+        let Some(class) = self.star else {
+            return ratio(0, 1);
+        };
+        self.orb_by_id(orb)
+            .and_then(|held| held.thermal.as_ref())
+            .map(|site| {
+                crate::thermal::insolation(
+                    &class.luminosity(),
+                    site.albedo.value(),
+                    site.orbit_r.value(),
+                )
+            })
+            .unwrap_or_else(|| ratio(0, 1))
+    }
+
+    /// The insolation NORMALIZED to a reference G-type star at unit orbit and
+    /// zero albedo (`I / L_G`), so a Sol-like seat reads ≈1 and the star's
+    /// class is a pure multiplier: an M-dwarf seat reads well below one, an
+    /// O-giant seat far above. Dimensionless, exact.
+    pub fn insolation_norm(&self, orb: u64) -> Ratio {
+        let reference = crate::thermal::StarClass::G.luminosity();
+        if reference <= ratio(0, 1) {
+            return ratio(0, 1);
         }
+        self.insolation_of(orb) / reference
+    }
+
+    /// A stable per-orb seed for the planet's hash-derived geometry — the
+    /// FOUNDING digest (immutable after founding) folded with the orb id, so
+    /// each world's planets carry distinct area yet every read and every
+    /// replay reproduces it bit-for-bit. Not the terminal digest (which moves
+    /// each beat); the founding receipt's own hash, fixed for the world's life.
+    fn planet_geometry_seed(&self, orb: u64, salt: &[u8]) -> u64 {
+        let founding = self
+            .chronicle
+            .receipts()
+            .first()
+            .map(|receipt| receipt.own.0)
+            .unwrap_or([0u8; 32]);
+        let mut hasher = blake3::Hasher::new();
+        hasher.update(salt);
+        hasher.update(&founding);
+        hasher.update(&orb.to_le_bytes());
+        u64::from_le_bytes(hasher.finalize().as_bytes()[..8].try_into().expect("eight bytes"))
+    }
+
+    /// **THE PLANET'S SURFACE AREA** (COG Slice 2b) — the total geometric
+    /// capacity of the manifold (the `4πR²` of the sphere, held directly as
+    /// an exact rational in area units so no irrational `π` enters). Hash-
+    /// derived from the founding digest, so a system's worlds range from
+    /// small rocks to broad giants deterministically. In `[8, 40)` units.
+    pub fn surface_area_of(&self, orb: u64) -> Ratio {
+        ratio(8 + (self.planet_geometry_seed(orb, b"netstratum.planet.area.v1") % 32) as i64, 1)
+    }
+
+    /// **THE ARABLE RATIO** `ρ` (COG Slice 2b) — the fraction of the surface
+    /// that is chemically and topologically viable for primary production
+    /// (the hydrology/nutrient face of the world). Hash-derived in
+    /// `(1/16, 15/16)`, so no world is wholly barren or wholly fertile.
+    pub fn arable_ratio_of(&self, orb: u64) -> Ratio {
+        ratio(1 + (self.planet_geometry_seed(orb, b"netstratum.planet.arable.v1") % 15) as i64, 16)
+    }
+
+    /// **THE ARABLE AREA** `Area × ρ` — the growing surface primary
+    /// production actually runs over, the area term of the `P_primary` law.
+    pub fn arable_area_of(&self, orb: u64) -> Ratio {
+        self.surface_area_of(orb) * self.arable_ratio_of(orb)
+    }
+
+    /// **THE POPULATION CEILING `K_pop`** (§2, COG Slice 2b) — the true
+    /// THERMODYNAMIC food capacity of the world, derived from the star, no
+    /// longer a flat zone count in a temperature bucket. Primary production
+    ///
+    /// ```text
+    ///   P_primary = I_norm × (Area × ρ + built) × η × REGROWTH_GRAIN
+    /// ```
+    ///
+    /// is the star's raw insolation `I` delivered over the arable surface
+    /// `Area × ρ` (plus the granary/evolution footprint a line ADDS), gated
+    /// by the sitting clade's biological efficiency `η = habitability` — the
+    /// CRUCIAL shift: habitability is no longer a cap on capacity, it is the
+    /// fraction of the raw starlight THIS species can convert. A clade
+    /// matched to its band reads η=1 and harvests the planet's full light; a
+    /// mismatched one (a flatlander on a scorched rock, a plasmoid on a
+    /// temperate world) reads η→0 and starves under the same sun. The
+    /// carrying capacity is then that production over the metabolic draw,
+    ///
+    /// ```text
+    ///   K = P_primary / per_capita_ration
+    /// ```
+    ///
+    /// so a bright/close star with a broad fertile world and a well-matched
+    /// species sustains a vast population (and, downstream, a deep mind),
+    /// while a dim dwarf or a barren rock or a mismatched clade sustains
+    /// almost none. The "habitable zone" is thus RELATIONAL — an intersection
+    /// of the star's output and a species' fold — never a fixed spatial ring.
+    pub fn population_ceiling(&self, orb: u64) -> Ratio {
+        let Some(region) = self.orb_region(orb) else {
+            return ratio(0, 1);
+        };
+        // η — the species' biological efficiency at this star's thermal band.
+        // A barren band (η=0) feeds nobody, whatever the raw light.
+        let eta = crate::almanac::habitability(self.rejuvenation_clade(), region);
+        if eta <= ratio(0, 1) {
+            return ratio(0, 1);
+        }
+        // A rate-0 capture line (plasmoid) has no ration-based population —
+        // it rides the energy economy (#29 deferred); no metabolic draw to
+        // divide by, so no ration ceiling.
+        let draw = self.per_capita_ration();
+        if draw <= ratio(0, 1) {
+            return ratio(0, 1);
+        }
+        // The growing area: the planet's arable surface PLUS the provisioning
+        // footprint (granaries) and earned evolutionary stage — storage and
+        // advancement are area a line adds to what the planet gives, so their
+        // yield scales with the same insolation and efficiency.
+        let built = ratio(
+            (self.granary_footprint(orb) + self.evolution_stage() as u64) as i64,
+            1,
+        );
+        let area = self.arable_area_of(orb) + built;
+        let quantum = ratio(crate::almanac::REGROWTH_GRAIN, 1);
+        let p_primary = self.insolation_norm(orb) * area * eta * quantum;
+        // K = P_primary / metabolic draw, then the cooling/permanence
+        // factors (thermal-band ratchet and mobile-footprint trade) as before.
+        (p_primary / draw)
+            * self.cooling_k_factor(orb)
+            * self.footprint_permanence_factor(orb)
     }
 
     /// **THE EVOLUTIONARY STAGE** (`44_LINEAGES` §2c) — how far this line
