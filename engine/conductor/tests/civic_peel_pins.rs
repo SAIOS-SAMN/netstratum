@@ -228,3 +228,43 @@ fn the_live_cascade_stratifies_real_demand_and_surfaces_leisure() {
     assert!(fed >= 1, "at least one line clears its metabolic floor");
     assert!(banked_leisure >= 1, "abundance surfaces as bankable leisure on real state");
 }
+
+/// **THE LOOP IS LIVE** (COG-1/3/4) — the beat now runs the cascade and settles
+/// the leisure bank, so a founded era leaves real cognition budgets standing in
+/// committed state (not a dormant reader). At least one fed line banks leisure
+/// the beat actually settled, and every bank is non-negative and bounded — the
+/// Mind's purse, filled by abundance and drawn by thought.
+#[test]
+fn the_beat_banks_leisure_into_committed_state() {
+    let root = scratch("live-bank");
+    let worlds = run_era(&root.to_string_lossy(), 15);
+    assert!(worlds.len() >= 3, "the roster founded");
+    let primary = cfe::world::FIRST_ORB;
+    let zero = cfe::ratio::ratio(0, 1);
+
+    let mut with_bank = 0usize;
+    let mut banked_while_living = 0usize;
+    for polity in &worlds {
+        // The committed leisure bank is what the beat's cognition_step settled.
+        let bank = polity.world.leisure_bank_of(primary);
+        assert!(bank >= zero, "a leisure bank is never negative");
+        if bank > zero {
+            with_bank += 1;
+            // A line still living that holds a bank is a mind that ran a
+            // surplus (an EXTINCT line may retain the savings it banked while
+            // alive — that persistence is lawful, so it is not asserted here).
+            if polity.world.population_of(primary) > 0 {
+                banked_while_living += 1;
+            }
+        }
+    }
+    assert!(
+        with_bank >= 1,
+        "the live beat settled a leisure bank on at least one founded line — \
+         the cognition loop is wired, not dormant"
+    );
+    assert!(
+        banked_while_living >= 1,
+        "at least one LIVING line holds the leisure its surplus banked"
+    );
+}

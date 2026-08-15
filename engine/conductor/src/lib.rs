@@ -2582,6 +2582,28 @@ impl Polity {
         }
     }
 
+    /// **COGNITION STEP** (COG-1) — bank the beat's LEISURE. `cascade_reading`
+    /// reads the colony's stratified demand from live committed state and pours
+    /// its food flow through the survival tiers (metabolic, then cognitive);
+    /// whatever surplus survives is leisure, the budget the Mind spends to
+    /// think. A line at or below its survival floor banks nothing — a mind with
+    /// no cognitive surplus cannot afford a thought (COG-3). Settled on the
+    /// primary orb, where the founding population sits.
+    fn cognition_step(&mut self) {
+        let primary = cfe::world::FIRST_ORB;
+        // No people, no mind: an unpopulated colony has no one to hold leisure,
+        // even where its untended wild flow runs a nominal surplus. Cognition
+        // is a property of a living population, so a line with none banks
+        // nothing (and the cascade's "surplus with no demand" is not leisure).
+        if self.world.population_of(primary) == 0 {
+            return;
+        }
+        let leisure = civic::cascade_reading(&self.world, primary).leisure;
+        if leisure > ratio(0, 1) {
+            self.world.settle_leisure(primary, leisure);
+        }
+    }
+
     fn research_step(&mut self, book: &Ledger) {
         let Some(receipt) = self.world.chronicle().receipts().last() else {
             return;
@@ -2803,12 +2825,37 @@ impl Polity {
                             if pending.2.len() >= solver::mint::CONFIRMS_TO_MINT {
                                 let cited = pending.2.clone();
                                 let expansion = pending.1.clone();
+                                // **THINKING IS METABOLIC WORK** (COG-2/3/4).
+                                // Minting a word is a THOUGHT, and a thought is
+                                // priced by its own homological complexity —
+                                // `mint_cost` of its program. A solver program
+                                // carries no torsion, so the bill reduces to its
+                                // Betti extent: its depth (op count). The mind
+                                // pays from its LEISURE bank; one with no
+                                // cognitive surplus to cover the bill cannot
+                                // afford the thought this beat and leaves the
+                                // word pending (fasting) — a starving mind
+                                // cannot think as hard (COG-3).
+                                let bill = civic::mint_cost(
+                                    &[num_bigint::BigInt::from(expansion.len())],
+                                    &[],
+                                );
+                                let price = ratio(
+                                    num_traits::ToPrimitive::to_i64(&bill).unwrap_or(i64::MAX),
+                                    1,
+                                );
+                                let primary = cfe::world::FIRST_ORB;
+                                let afford = self.world.leisure_bank_of(primary) >= price;
                                 if let Some(bytes) = solver_verify::program_bytes(&expansion) {
-                                    if self
+                                    if afford
+                                        && self
                                         .world
                                         .mint_solver_word_as(self.automaton, orbit, bytes, cited.clone())
                                         .is_ok()
                                     {
+                                        // COG-4: the thought draws the leisure
+                                        // bank by its exact price.
+                                        self.world.settle_leisure(primary, -price);
                                         self.library.adopt(solver::mint::MintedWord {
                                             orbit,
                                             expansion,
@@ -3204,6 +3251,9 @@ impl Polity {
                 let _ = self.world.collect_as(self.automaton, orb);
             }
         });
+        // COG-1: the collect settled the people's food; the surplus above their
+        // survival drives banks as leisure — the Mind's budget for this beat.
+        profile::timed("cognition_step", || self.cognition_step());
         profile::timed("survey_step", || self.survey_step());
         profile::timed("expand_step", || self.expand_step());
         profile::timed("research_step", || self.research_step(book));
