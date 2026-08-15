@@ -59,3 +59,12 @@ pub fn transpose(a: &Mat) -> Mat {
     let (r, c) = shape(a);
     (0..c).map(|j| (0..r).map(|i| a[i][j].clone()).collect()).collect()
 }
+
+/// Exact matrix–vector product `a · x` (length `rows(a)`).
+pub fn matvec(a: &Mat, x: &[BigInt]) -> Vec<BigInt> {
+    let (r, k) = shape(a);
+    debug_assert!(k == x.len() || r == 0, "matvec: inner dim {k} != {}", x.len());
+    (0..r)
+        .map(|i| (0..k).fold(BigInt::zero(), |acc, j| acc + &a[i][j] * &x[j]))
+        .collect()
+}

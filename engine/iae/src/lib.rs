@@ -19,5 +19,6 @@ pub mod transport;
 // and exact restriction morphisms, and the commutation-gated transduction
 // between complexes. The reduction (cohomology by exact SNF) lands next.
 mod mat;
+pub mod cohomology;
 pub mod sheaf;
 pub mod transduction;
