@@ -9,7 +9,7 @@
 use cfe::dop::ZoneKind;
 use cfe::ratio::ratio;
 use cfe::world::World;
-use codec::{from_state_bytes, state_bytes, SCHEMA_V22};
+use codec::{from_state_bytes, state_bytes, SCHEMA_V24};
 
 /// A rich session: zones, ticks, a collection, a gauge shift, a raw
 /// want — enough committed surface to exercise the families that a
@@ -36,13 +36,14 @@ fn the_state_round_trips_byte_exact() {
     let bytes = state_bytes(&committed);
     // The CURRENT schema leads. Every older schema still READS — a
     // v5 state decodes with no element lanes, which is what a world
-    // predating them held. RATIFIED at v22 (50_WIN_CONDITIONS collapsed
-    // flag); v21 (49_TAXATION §5 treasury balances), v20 (44_LINEAGES
-    // evolution_stage) and v19 (E3.9 allow-lists) before it — and v18's
-    // bump (E3.7) had landed WITHOUT moving this pin, so the gate was
-    // red for a landing; the ratification is part of the schema bump,
-    // not an afterthought.
-    assert_eq!(bytes[0], SCHEMA_V22, "the schema leads the bytes");
+    // predating them held. RATIFIED at v24 (COG-1 leisure_banks); v23
+    // (41_PROVISION COG Slice 2 pop_accrued) and v22 (50_WIN_CONDITIONS
+    // collapsed flag) before it — v23 had landed WITHOUT moving this pin
+    // (its bump ran no codec test), so the gate stood red across two
+    // landings; the ratification is part of the schema bump, not an
+    // afterthought. v21 (49_TAXATION §5 treasury balances), v20
+    // (44_LINEAGES evolution_stage), v19 (E3.9 allow-lists) precede.
+    assert_eq!(bytes[0], SCHEMA_V24, "the schema leads the bytes");
     let decoded = from_state_bytes(&bytes).expect("the canonical state decodes");
     assert_eq!(decoded, committed, "value round trip");
     assert_eq!(state_bytes(&decoded), bytes, "BYTE round trip — one state, one encoding");
@@ -61,7 +62,7 @@ fn the_empty_world_encodes() {
 fn a_future_schema_refuses() {
     let committed = World::new().committed();
     let mut bytes = state_bytes(&committed);
-    bytes[0] = SCHEMA_V22 + 1;
+    bytes[0] = SCHEMA_V24 + 1;
     assert!(
         from_state_bytes(&bytes).is_none(),
         "a schema this kernel does not know refuses — never a guess"

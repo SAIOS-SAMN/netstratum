@@ -8658,6 +8658,13 @@ fn chronicle(world: &World, style: &Style) {
                     style.strong(&amount(delta))
                 )
             }
+            cfe::dop::ClosureEvent::LeisureSettled { orb_id, delta } => {
+                let verb = if *delta >= cfe::ratio::ratio(0, 1) { "banked" } else { "spent" };
+                format!(
+                    "🧠 leisure {verb} — orb {orb_id} by {} (surplus in, minting out)",
+                    style.strong(&amount(delta))
+                )
+            }
             cfe::dop::ClosureEvent::PracticesLapsed { count } => format!(
                 "📉 {} practice(s) LAPSED at the generation turnover — the continuity tax to the void",
                 style.strong(&count.to_string())

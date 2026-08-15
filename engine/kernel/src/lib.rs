@@ -1480,6 +1480,7 @@ fn covered(event: &ClosureEvent) -> bool {
         | E::PopulationSettled { .. }
         | E::PopulationAccrued { .. }
         | E::TreasurySettled { .. }
+        | E::LeisureSettled { .. }
         | E::PracticesLapsed { .. }
         // 50_WIN_CONDITIONS, operator ruling 2026-08-13: the failure
         // state is world-driven and moves no value — I2 containment +
@@ -2582,6 +2583,9 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         // precondition for anyone else's standing (the Civilizational
         // criterion), exactly like their population.
         | E::TreasurySettled { .. }
+        // COG-1 (doc 52 §7): the leisure bank is a line's own cognition
+        // budget — universal to a founded line, never another's standing.
+        | E::LeisureSettled { .. }
         // TAXATION (49 §3): a line's practices lapsing at its own
         // generation turnover — its own knowledge, no one else's.
         | E::PracticesLapsed { .. }
@@ -2731,6 +2735,7 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         | E::PopulationSettled { .. }
         | E::PopulationAccrued { .. }
         | E::TreasurySettled { .. }
+        | E::LeisureSettled { .. }
         | E::PracticesLapsed { .. }
         | E::CivilizationCollapsed { .. }
         | E::HandoffSealed { .. } | E::GaugeShifted { .. } | E::Diverged { .. }

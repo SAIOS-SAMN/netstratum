@@ -124,6 +124,11 @@ pub const SCHEMA_V22: u8 = 22;
 /// and decodes a whole state with every band at a whole headcount.
 pub const SCHEMA_V23: u8 = 23;
 
+/// **SCHEMA v24 — leisure_banks (COG-1, doc 52 §7, trailing run).** The
+/// cognition budget per orb — a v23 reader stops before it and decodes a
+/// whole state with every mind's leisure bank empty.
+pub const SCHEMA_V24: u8 = 24;
+
 fn put_u16(out: &mut Vec<u8>, value: u16) {
     out.extend_from_slice(&value.to_le_bytes());
 }
@@ -144,7 +149,7 @@ fn put_text(out: &mut Vec<u8>, text: &str) {
 /// The one encoding: schema byte, then every committed family in
 /// declaration order, positionally, canonically.
 pub fn state_bytes(committed: &Committed) -> Vec<u8> {
-    let mut out = vec![SCHEMA_V23];
+    let mut out = vec![SCHEMA_V24];
 
     put_u32(&mut out, committed.orbs.len() as u32);
     for orb in &committed.orbs {
@@ -567,6 +572,14 @@ pub fn state_bytes(committed: &Committed) -> Vec<u8> {
         put_u64(&mut out, *orb);
         ratio::encode(remainder, &mut out);
     }
+    // SCHEMA v24 trailing: the leisure banks (COG-1, doc 52 §7) — (orb,
+    // balance) run, LAST. A v23 reader stops before it and decodes a whole
+    // state with every mind's cognition budget empty.
+    put_u32(&mut out, committed.leisure_banks.len() as u32);
+    for (orb, bal) in &committed.leisure_banks {
+        put_u64(&mut out, *orb);
+        ratio::encode(bal, &mut out);
+    }
     out
 }
 
@@ -666,6 +679,7 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         && schema != SCHEMA_V21
         && schema != SCHEMA_V22
         && schema != SCHEMA_V23
+        && schema != SCHEMA_V24
     {
         return None;
     }
@@ -1229,6 +1243,17 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         }
     }
 
+    // SCHEMA v24 trailing: the leisure banks, or empty for a pre-v24 snapshot
+    // (every mind's cognition budget read as empty).
+    let mut leisure_banks = Vec::new();
+    if schema >= SCHEMA_V24 {
+        for _ in 0..take.u32()? {
+            let orb = take.u64()?;
+            let bal = take.ratio()?;
+            leisure_banks.push((orb, bal));
+        }
+    }
+
     if !take.done() {
         return None;
     }
@@ -1282,6 +1307,7 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         clone_counts,
         pop_accrued,
         treasury_balances,
+        leisure_banks,
         synth_mods,
         skin_mods,
         rogue_pressure,

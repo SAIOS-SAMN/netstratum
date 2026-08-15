@@ -623,6 +623,42 @@ impl World {
         Ok(stage)
     }
 
+    /// **THE LEISURE BANK** (COG-1, doc 52 §7) — the cognition budget standing
+    /// on this orb: everything the cascade's surplus above every survival drive
+    /// has banked, net of everything the Mind has spent minting. A line that
+    /// has never run a surplus reads zero — a mind that cannot afford to think.
+    /// Folded from the `LeisureSettled` receipts (floored at zero).
+    pub fn leisure_bank_of(&self, orb: u64) -> Ratio {
+        self.leisure_banks
+            .iter()
+            .find(|(o, _)| *o == orb)
+            .map(|(_, bal)| bal.clone())
+            .unwrap_or_else(|| ratio(0, 1))
+    }
+
+    /// **SETTLE THE LEISURE BANK** (COG-1, doc 52 §7, tag 180) — apply a NET
+    /// change to the cognition budget (the cascade's surplus banked in, the
+    /// Mind's `mint_cost` spent out), floored at zero, and receipt it so replay
+    /// applies the same delta. A zero delta emits nothing, so a world that
+    /// neither banks surplus nor thinks is byte-identical.
+    pub fn settle_leisure(&mut self, orb: u64, delta: Ratio) {
+        let zero = ratio(0, 1);
+        if delta == zero {
+            return;
+        }
+        let next = (self.leisure_bank_of(orb) + delta.clone()).max(zero.clone());
+        self.leisure_banks.retain(|(o, _)| *o != orb);
+        if next > zero {
+            self.leisure_banks.push((orb, next));
+        }
+        let stamp = self.clock.now();
+        self.chronicle.append(
+            crate::dop::ClosureEvent::LeisureSettled { orb_id: orb, delta },
+            stamp,
+            vec![],
+        );
+    }
+
     /// The per-clade LEISURE good this orb's line savours (§3), or `None`
     /// for a line with no closed ration to pair it with (an element-eater,
     /// whose higher tiers ride #29). Reads the same genesis metabolism the

@@ -390,7 +390,10 @@
 //!         the library fold reads it beside SolverWordMinted, so knowledge
 //!         circulates. orbit[32] ‖ cited ‖ opaque expansion, the
 //!         SolverWordMinted wire shape.)
-//!    Phase-5 claim ledger: next free **179** (178 KnowledgeLicensed —
+//!    Phase-5 claim ledger: next free **181** (180 LeisureSettled —
+//!    COG-1 the leisure bank / cognition budget, doc 52 §7;
+//!    179 PopulationAccrued — 41_PROVISION COG Slice 2;
+//!    178 KnowledgeLicensed —
 //!    ARC C knowledge market; 177 KnowledgeConverged —
 //!    38 §5 cross-line consilience; 176 EnrichmentStruck —
 //!    stellar nucleosynthesis #27; 163–164 ElementWant,
@@ -3054,6 +3057,11 @@ pub enum ClosureEvent {
     /// never crafts a levy nor stands a WelfareHub emits none, so it
     /// replays byte-identical.
     TreasurySettled { orb_id: u64, delta: Ratio },
+    /// **COG-1 (doc 52 §7, tag 180)** — settle the LEISURE BANK: the net
+    /// change to an orb's cognition budget (the cascade's surplus above every
+    /// survival drive in, the Mind's minting out), floored at zero. A world
+    /// with no surplus and no thought emits none, so it replays byte-identical.
+    LeisureSettled { orb_id: u64, delta: Ratio },
     /// **TAXATION (49_TAXATION §3, tag 172)** — the CONTINUITY levy at a
     /// generation turnover: `count` of the line's most-recently adopted
     /// practices LAPSE to the void (its unconfirmed knowledge, unkept as
@@ -4268,6 +4276,11 @@ impl ClosureEvent {
                 let mut value = orb_id.to_le_bytes().to_vec();
                 ratio::encode(delta, &mut value);
                 tlv::put(171, &value, &mut out);
+            }
+            Self::LeisureSettled { orb_id, delta } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                ratio::encode(delta, &mut value);
+                tlv::put(180, &value, &mut out);
             }
             Self::PracticesLapsed { count } => {
                 tlv::put(172, &[*count], &mut out);
@@ -5607,6 +5620,11 @@ impl ClosureEvent {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let (delta, _) = ratio::decode(value.get(8..)?)?;
                 Some(Self::TreasurySettled { orb_id, delta })
+            }
+            180 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let (delta, _) = ratio::decode(value.get(8..)?)?;
+                Some(Self::LeisureSettled { orb_id, delta })
             }
             172 => Some(Self::PracticesLapsed { count: *value.first()? }),
             168 => Some(Self::PressureEbbed {

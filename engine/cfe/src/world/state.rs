@@ -239,6 +239,11 @@ pub struct Committed {
     /// abstract fiscal reserve levies flow into and welfare spends from
     /// (replay of `TreasurySettled`, floored at zero).
     pub treasury_balances: Vec<(u64, Ratio)>,
+    /// COG-1 (doc 52 §7): the LEISURE BANK per orb — the cascade's surplus
+    /// above every survival drive, accumulated as the budget the Mind spends
+    /// to mint (replay of `LeisureSettled`, floored at zero). Zero for a line
+    /// with no surplus to spare — a mind that cannot afford to think.
+    pub leisure_banks: Vec<(u64, Ratio)>,
     /// LAB: synthetic mod grade per orb.
     pub synth_mods: Vec<(u64, u8)>,
     /// LAB: skin/face mod grade per orb.
@@ -389,6 +394,9 @@ pub struct World {
     /// TAXATION (49 §5): sovereign treasury balances — replay of
     /// `TreasurySettled` (levies in, welfare out; floored at zero).
     pub(super) treasury_balances: Vec<(u64, Ratio)>,
+    /// COG-1 (doc 52 §7): leisure banks — replay of `LeisureSettled`
+    /// (cascade surplus in, minting out; floored at zero).
+    pub(super) leisure_banks: Vec<(u64, Ratio)>,
     /// LAB: synth mod grades.
     pub(super) synth_mods: Vec<(u64, u8)>,
     /// LAB: skin mod grades.

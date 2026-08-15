@@ -358,6 +358,7 @@ impl World {
             clone_counts: self.clone_counts.clone(),
             pop_accrued: self.pop_accrued.clone(),
             treasury_balances: self.treasury_balances.clone(),
+            leisure_banks: self.leisure_banks.clone(),
             synth_mods: self.synth_mods.clone(),
             skin_mods: self.skin_mods.clone(),
             rogue_pressure: self.rogue_pressure.clone(),

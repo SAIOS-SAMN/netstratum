@@ -91,6 +91,7 @@ impl Replayer {
                 clone_counts: Vec::new(),
                 pop_accrued: Vec::new(),
                 treasury_balances: Vec::new(),
+                leisure_banks: Vec::new(),
                 synth_mods: Vec::new(),
                 skin_mods: Vec::new(),
                 rogue_pressure: Vec::new(),
@@ -158,6 +159,7 @@ impl Replayer {
             clone_counts,
             pop_accrued,
             treasury_balances,
+            leisure_banks,
             synth_mods,
             skin_mods,
             rogue_pressure,
@@ -1058,6 +1060,22 @@ impl Replayer {
             treasury_balances.retain(|(o, _)| *o != *orb_id);
             if next > ratio(0, 1) {
                 treasury_balances.push((*orb_id, next));
+            }
+        }
+        // COG-1 (doc 52 §7): the leisure bank — the cascade's surplus above
+        // every survival drive in (positive), the Mind's minting out
+        // (negative), floored at zero. The receipt carries the net, so replay
+        // applies it straight.
+        ClosureEvent::LeisureSettled { orb_id, delta } => {
+            let current = leisure_banks
+                .iter()
+                .find(|(o, _)| *o == *orb_id)
+                .map(|(_, b)| b.clone())
+                .unwrap_or_else(|| ratio(0, 1));
+            let next = (current + delta.clone()).max(ratio(0, 1));
+            leisure_banks.retain(|(o, _)| *o != *orb_id);
+            if next > ratio(0, 1) {
+                leisure_banks.push((*orb_id, next));
             }
         }
         // 50_WIN_CONDITIONS, operator ruling 2026-08-13: the failure
