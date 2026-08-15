@@ -16,9 +16,71 @@
 //!     Economic failure IS the tech-tree trigger — Production and Research are
 //!     the same coheterological equation, read from two parts of one output.
 
+use cfe::dop::{zone_upkeep, zone_yield, Resource, ZoneKind};
+use cfe::ratio::{ratio, Ratio};
+use cfe::vocabulary::Entry;
 use iae::resolve::overlay;
 use num_bigint::BigInt;
 use num_traits::{Signed, ToPrimitive, Zero};
+
+/// The lattice a rational rate is quantized onto to become a `ℤ`-module
+/// coordinate — the melt grid the market already speaks. Rates are exact
+/// rationals; the peel works over integers, so a rate `r` becomes `⌊r·LATTICE⌉`.
+pub const LATTICE: i64 = 64;
+
+/// The capacity axes of the physical economy: the closed `Resource` carriers.
+/// (Space and play-minted elements extend this basis; a structure's footprint
+/// rides the Space axis, and the verifier conserves it — doc 52 §2 / the
+/// operator's Space-as-coordinate ruling. Slice 1 covers the closed carriers.)
+pub fn resource_axes() -> Vec<Resource> {
+    Resource::ALL.to_vec()
+}
+
+/// Quantize an exact rate onto the lattice: `⌊r·LATTICE⌉` as an integer.
+fn quantize(r: &Ratio) -> BigInt {
+    (r * ratio(LATTICE, 1)).round().to_integer()
+}
+
+/// A zone's NET capacity as a `ℤ`-module vector over `axes`: its yield MINUS
+/// its upkeep, quantized onto the lattice. This is the `CHANNEL_YIELD −
+/// CHANNEL_UPKEEP` coordinate the fold entry carries — the algebraic boundary
+/// of the structure. Metabolism-aware, so a biotic and a plasmic line read
+/// different vectors from the same kind.
+pub fn zone_capacity(kind: ZoneKind, metabolism: u8, axes: &[Resource]) -> Vec<BigInt> {
+    let mut v = vec![BigInt::zero(); axes.len()];
+    let (yield_res, yield_rate) = zone_yield(kind, metabolism);
+    if let Some(i) = axes.iter().position(|r| *r == yield_res) {
+        v[i] += quantize(&yield_rate);
+    }
+    for (upkeep_res, upkeep_rate) in zone_upkeep(kind, metabolism) {
+        if let Some(i) = axes.iter().position(|r| *r == upkeep_res) {
+            v[i] -= quantize(&upkeep_rate);
+        }
+    }
+    v
+}
+
+/// THE GENERATORS ARE THE FOLD (doc 52 / operator ruling). Map a species'
+/// `Axis::Zone` fold (`seed ∪ minted`) into the buildable capacity generators
+/// the peel reduces against — one net-capacity vector per structure the
+/// civilization KNOWS, seed or self-invented. A minted entry resolves through
+/// its base kind (the modulation the channels carry rides the same
+/// `zone_yield`/`zone_upkeep` reading); an entry whose code no longer names a
+/// buildable kind is skipped. NOT a hardcoded menu — the array grows as the
+/// civilization mints.
+pub fn fold_generators(
+    fold: &[Entry],
+    metabolism: u8,
+    axes: &[Resource],
+) -> Vec<(ZoneKind, Vec<BigInt>)> {
+    fold.iter()
+        .filter_map(|entry| {
+            let code = entry.base.unwrap_or(entry.code);
+            let kind = ZoneKind::from_wire(code)?;
+            Some((kind, zone_capacity(kind, metabolism, axes)))
+        })
+        .collect()
+}
 
 /// The peel of a colony's deficit against its buildable structures.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -155,6 +217,32 @@ mod tests {
         // Building farms won't fix a knowledge wall — Production is silent here;
         // this γ is Research's problem (a Sullivan mint), not Production's.
         assert!(sample_build(&peel.coefficients, seed(b"orb")).is_none());
+    }
+
+    #[test]
+    fn the_generators_are_the_zone_fold_not_a_hardcoded_menu() {
+        // A biotic line's buildable generators = its Axis::Zone fold (here the
+        // seed; a minted civilization's fold is larger). Each is a real
+        // net-capacity vector read from the channels — yield positive, upkeep
+        // negative — NOT an entry in a compiled menu.
+        let axes = resource_axes();
+        let fold = cfe::vocabulary::seed(cfe::vocabulary::Axis::Zone);
+        let generators = fold_generators(&fold, 2, &axes); // 2 = biotic
+        assert!(!generators.is_empty(), "the fold yields buildable generators");
+
+        let (_, extractor) = generators
+            .iter()
+            .find(|(kind, _)| *kind == ZoneKind::Extractor)
+            .expect("the extractor stands in the fold");
+        assert!(extractor.iter().any(|c| c.is_positive()), "the extractor PRODUCES (a +yield axis)");
+        assert!(
+            extractor.iter().any(|c| c.is_negative()),
+            "the extractor CONSUMES upkeep (a −axis) — a multi-axis boundary, not a scalar"
+        );
+        // A different metabolism reads a different vector from the same fold —
+        // the structure's boundary is species-relative.
+        let plasmic = fold_generators(&fold, 3, &axes); // 3 = plasmic
+        assert_eq!(plasmic.len(), generators.len(), "same fold, per-species capacity");
     }
 
     #[test]
