@@ -372,6 +372,45 @@ pub fn cascade_reading(world: &cfe::world::World, orb: u64) -> Cascade {
     cascade(supply, &demands)
 }
 
+/// **THE DEFECT CLASSIFICATION** (COG-12) — the void's homological SHAPE tells
+/// the Mind what KIND of tool is missing, so the leap into an irreducible void
+/// is not blind. When γ can be inverted against known structure there is no
+/// search — Production builds the answer; a search happens ONLY for an
+/// irreducible residual (a Sullivan extension, a genuinely new dimension), and
+/// even then the exact SNF split the peel already carries dictates the class:
+///
+///   * a void dominated by **free residual** (an unspanned new direction) needs
+///     a tool that MAKES structure that was not there — the STRUCTURE families
+///     (Tile, Object);
+///   * a void dominated by **torsion** (a twist onto existing structure) needs a
+///     tool that RELATES what is — the CORRESPONDENCE families (Symmetry, Recolor).
+///
+/// This reuses the engine's OWN family semantics (`need.rs`: Novelty→structure,
+/// Resonance→correspondence), so the economic void and the solver's hungers
+/// speak one language. Returns the indicated families FIRST — ordering only, the
+/// observation still supplies every candidate; empty when γ = 0 (no defect).
+///
+/// EXACT is the free-vs-torsion character, read from the SNF. The one bridge is
+/// WHICH families are "structure" vs "correspondence" — the engine's declared
+/// convention, not a derived identity (the economic ℤ-module and the grid-op
+/// families are distinct spaces).
+pub fn classify_defect(residual: &[BigInt], torsion: &[BigInt]) -> Vec<solver::need::Family> {
+    use solver::need::Family;
+    let free: BigInt = residual.iter().map(|x| x.abs()).sum();
+    let twist: BigInt = torsion.iter().map(|d| BigInt::from(d.bits())).sum();
+    if free.is_zero() && twist.is_zero() {
+        return Vec::new(); // covered — no void to classify, no search
+    }
+    let structure = [Family::Tile, Family::Object]; // MAKE what was not there
+    let correspondence = [Family::Symmetry, Family::Recolor]; // RELATE what is
+    // The dominant character leads; the other trails (still reachable).
+    if free >= twist {
+        structure.iter().chain(correspondence.iter()).copied().collect()
+    } else {
+        correspondence.iter().chain(structure.iter()).copied().collect()
+    }
+}
+
 /// **THE STRESS INDEX σ** (COG-7) — a colony's thermodynamic stress in `[0, 1]`,
 /// the blend coefficient between instinct (exploit) and curiosity (explore). It
 /// reads the live cascade: a line whose METABOLIC floor is unmet is starving and
@@ -635,6 +674,22 @@ mod tests {
         assert!(heads > leisure_price, "burning people is dearer than spending leisure: {heads}");
         // A costlier thought burns proportionally more of the colony.
         assert!(desperation_price(&r(6, 1)) > desperation_price(&r(3, 1)), "a deeper Eureka costs more lives");
+    }
+
+    #[test]
+    fn the_void_shape_classifies_the_missing_tool() {
+        use solver::need::Family;
+        // A FREE-dominated void (unspanned direction, no twist) → the Mind must
+        // MAKE structure: the structure families lead.
+        let structure = classify_defect(&[b(0), b(0), b(9)], &[]);
+        assert_eq!(structure.first(), Some(&Family::Tile), "an unspanned void leads with structure");
+        assert!(structure.contains(&Family::Symmetry), "correspondence still reachable (ordering only)");
+        // A TORSION-dominated void (tiny free part, heavy twist) → the Mind must
+        // RELATE existing structure: the correspondence families lead.
+        let twist = classify_defect(&[b(1)], &[b(255), b(255)]);
+        assert_eq!(twist.first(), Some(&Family::Symmetry), "a twisted void leads with correspondence");
+        // A COVERED deficit is no void — nothing to classify, no search at all.
+        assert!(classify_defect(&[b(0), b(0)], &[]).is_empty(), "covered → no search");
     }
 
     #[test]

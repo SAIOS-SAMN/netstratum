@@ -2608,6 +2608,43 @@ impl Polity {
         }
     }
 
+    /// **THE DEFECT HANDOFF** (COG-12) — run the civic peel over live state and
+    /// read the irreducible void BACKWARDS: its SHAPE (`classify_defect` — which
+    /// family class can bridge it, from the SNF free/torsion character) and its
+    /// SIZE (`mint_cost` — the homological pressure). The Mind reaches toward the
+    /// shape and as deep as the size demands. Empty shape / zero pressure when
+    /// the economy is covered — then there is no void, and no search.
+    fn civic_defect(&self) -> (Vec<solver::need::Family>, u64) {
+        let world = &self.world;
+        let Some(orb) = world.orb() else {
+            return (Vec::new(), 0);
+        };
+        let metabolism = world
+            .committed()
+            .genesis
+            .as_ref()
+            .map(|g| g.metabolism)
+            .unwrap_or(2);
+        let fold = cfe::vocabulary::fold(world.chronicle(), cfe::vocabulary::Axis::Zone);
+        let standing: Vec<cfe::dop::ZoneKind> = orb.zones.iter().map(|z| z.kind).collect();
+        let primary = cfe::world::FIRST_ORB;
+        let pop = world.population_of(primary);
+        let demand: Vec<(cfe::dop::Resource, cfe::ratio::Ratio)> = if pop > 0 {
+            let carrier = cfe::dop::metabolic_ration(metabolism);
+            vec![(carrier, ratio(pop as i64, 1) * world.per_capita_ration())]
+        } else {
+            Vec::new()
+        };
+        let reading = civic::civic_reading(&fold, metabolism, &standing, &demand, [0u8; 32]);
+        let shape = civic::classify_defect(&reading.peel.residual, &reading.peel.torsion);
+        let pressure = num_traits::ToPrimitive::to_u64(&civic::mint_cost(
+            &reading.peel.residual,
+            &reading.peel.torsion,
+        ))
+        .unwrap_or(0);
+        (shape, pressure)
+    }
+
     fn research_step(&mut self, book: &Ledger) {
         let Some(receipt) = self.world.chronicle().receipts().last() else {
             return;
@@ -2722,18 +2759,31 @@ impl Polity {
                 // keep the standing order; ordering only, the observation
                 // still supplies every candidate.
                 if !need.hungers.is_empty() && !polity.library.words().is_empty() {
-                    // **THE WORKBENCH CHOOSER** (COG-7) — the reach is no longer
-                    // pure curiosity. Two opposing biases are blended by the
-                    // line's thermodynamic STRESS σ: the THIN frontier
-                    // (`knowledge_order`, explore what you lack) and the THICK
-                    // habit (`instinct_weights`, the rut its history carved). A
-                    // sated line (σ→0) follows curiosity and diversifies; a
-                    // starving line (σ→1) collapses onto instinct and reaches for
-                    // the tools that saved it before. The digest-seeded draw over
-                    // the blend picks the family to reach FIRST — stochastic,
-                    // replayable, and carrying the line's own trauma. Ordering
-                    // only; the observation still supplies every candidate.
-                    let curiosity = solver::knowledge_order(&polity.library);
+                    // **THE WORKBENCH CHOOSER** (COG-7/COG-12) — the reach is no
+                    // longer a blind search. The Mind reads its own economic void
+                    // BACKWARDS: `civic_defect` classifies γ's homological shape
+                    // into the family class that can bridge it (COG-12) and reads
+                    // its size as pressure. The shape becomes the CURIOSITY
+                    // direction (explore toward what the void needs, not a generic
+                    // frontier); the size DEEPENS the reach (saturating into
+                    // `starved_for` — a massive γ forces a bigger thought, zero
+                    // dials). Against that, the THICK habit (`instinct_weights`,
+                    // the rut history carved) pulls the other way, and the two are
+                    // blended by thermodynamic STRESS σ: a sated line (σ→0)
+                    // follows the void-shaped curiosity and diversifies; a
+                    // starving line (σ→1) collapses onto instinct. The
+                    // digest-seeded draw picks the family to reach FIRST —
+                    // stochastic, replayable, carrying the line's trauma. Ordering
+                    // only; the observation still supplies every candidate, and a
+                    // covered economy (empty shape) reverts to generic curiosity —
+                    // pure basic research funded by abundance.
+                    let (shape, pressure) = polity.civic_defect();
+                    need.starved_for = need.starved_for.saturating_add(pressure);
+                    let curiosity = if shape.is_empty() {
+                        solver::knowledge_order(&polity.library)
+                    } else {
+                        shape
+                    };
                     let genesis = solver::instinct::genesis_instinct(
                         &polity.spec.civilization.disposition,
                     );
