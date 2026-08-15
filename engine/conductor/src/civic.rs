@@ -150,6 +150,10 @@ pub fn civic_reading(
 pub struct EconomicPeel {
     /// Per buildable: how many to raise to cover the deficit (PRODUCTION).
     pub coefficients: Vec<BigInt>,
+    /// The TWIST — the invariant factors `> 1` the binding carried (`ℤ/dᵢ`).
+    /// Retained from the resolve (it was discarded before COG-2) so the Mind
+    /// can PRICE the mint that bridges this deficit: torsion is shear work.
+    pub torsion: Vec<BigInt>,
     /// The irreducible deficit no structure spans — the Mind's feedstock (RESEARCH).
     pub residual: Vec<BigInt>,
     /// True iff the deficit is fully covered by known structures (`γ = 0`).
@@ -190,9 +194,43 @@ pub fn peel_economy(
     let binding = overlay(&deficit, &cols);
     EconomicPeel {
         coefficients: binding.coefficients,
+        torsion: binding.torsion,
         residual: binding.residual,
         covered: binding.locked,
     }
+}
+
+/// **THE HOMOLOGY SETS THE BILL** (COG-2). The exact metabolic work to mint the
+/// generator that bridges a residual obstruction — priced from the homological
+/// complexity of the void, never a flat fee. A simple linear disconnect is
+/// cheap; a wide, deep, or twisted void is dear. Two terms, both EXACT integers
+/// (a ℚ-module cannot carry the `ln` a continuous Landauer bound would spend, so
+/// the bit-length stands in for it):
+///
+///   * **THE BETTI EXTENT** — `Σ |residualᵢ|`, the total unspanned deficit the
+///     new generator must cover. The free rank's magnitude: more independent
+///     unbound directions, and a larger shortfall along each, cost more to
+///     bridge (the `Σ βₖ·cₖ` term, read off the surviving obstruction).
+///   * **THE TORSION SHEAR** — `Σ bitlen(dᵢ)` over the invariant factors `> 1`.
+///     Twisting a manifold onto an imperfect match `ℤ/dᵢ` takes physical shear;
+///     the higher the torsion the higher the friction to snap it into a rigid
+///     crystal (the `Σ penalty(dᵢ)` term).
+///
+/// A pure resolve output → a pure price. The Mind pays this `W_mint` from its
+/// accumulated LEISURE (COG-1); a starving mind whose leisure cannot cover it
+/// physically cannot afford to think (COG-3).
+pub fn mint_cost(residual: &[BigInt], torsion: &[BigInt]) -> BigInt {
+    let betti_extent: BigInt = residual.iter().map(|x| x.abs()).sum();
+    // COVERED IS FREE. A vanished residual means the deficit is spanned by
+    // structures the civilization ALREADY knows — nothing is minted, so nothing
+    // is paid, whatever standing twist the generator lattice carries. The
+    // torsion shear is the friction of threading a NEW generator through that
+    // twist, and it applies only when there is a genuine void to bridge.
+    if betti_extent.is_zero() {
+        return BigInt::zero();
+    }
+    let torsion_shear: BigInt = torsion.iter().map(|d| BigInt::from(d.bits())).sum();
+    betti_extent + torsion_shear
 }
 
 /// A BLAKE3-seeded index in `[0, bound)` — the Mind's chance, replayable.
@@ -306,6 +344,71 @@ mod tests {
         // the structure's boundary is species-relative.
         let plasmic = fold_generators(&fold, 3, &axes); // 3 = plasmic
         assert_eq!(plasmic.len(), generators.len(), "same fold, per-species capacity");
+    }
+
+    #[test]
+    fn the_homology_sets_the_bill_a_wider_or_twisted_void_costs_more() {
+        // A pure FREE residual (no torsion): the bill is the void's extent —
+        // Σ|residualᵢ|, what the new generator must span. Nothing to twist.
+        assert_eq!(mint_cost(&[b(0), b(0), b(5)], &[]), b(5), "the free void costs its extent");
+        // A deeper void along the same axis costs strictly more.
+        assert!(
+            mint_cost(&[b(0), b(0), b(10)], &[]) > mint_cost(&[b(0), b(0), b(5)], &[]),
+            "a deeper deficit is dearer to bridge"
+        );
+        // More independent unbound directions cost more (two axes vs one).
+        assert!(
+            mint_cost(&[b(3), b(0), b(5)], &[]) > mint_cost(&[b(0), b(0), b(5)], &[]),
+            "a wider void — more free rank — is dearer"
+        );
+        // A residual threaded through a TWISTED lattice pays the shear on top:
+        // binding a new generator onto a ℤ/4 twist takes friction. bitlen(4)=3.
+        assert_eq!(
+            mint_cost(&[b(0), b(0), b(5)], &[b(4)]),
+            b(5) + b(3),
+            "the bill is the Betti extent plus the torsion shear"
+        );
+        // Higher torsion is more friction to snap into a rigid crystal.
+        assert!(
+            mint_cost(&[b(0), b(0), b(5)], &[b(255)]) > mint_cost(&[b(0), b(0), b(5)], &[b(4)]),
+            "a higher invariant factor shears harder"
+        );
+        // COVERED IS FREE: a vanished residual mints nothing, whatever twist the
+        // lattice carries — the shear is paid only to bridge a genuine void.
+        assert_eq!(mint_cost(&[b(0), b(0), b(0)], &[b(4)]), b(0), "no void, no bill — even through a twist");
+    }
+
+    #[test]
+    fn a_covered_deficit_is_free_to_the_mind_nothing_to_bridge() {
+        // A deficit fully spanned by known structures leaves no residual and no
+        // torsion — there is nothing to mint, so the Mind pays nothing.
+        let buildables = vec![vec![b(2), b(0), b(0)], vec![b(0), b(3), b(0)]];
+        let peel = peel_economy(&[b(4), b(0), b(0)], &[b(0), b(0), b(0)], &buildables);
+        assert!(peel.covered, "the deficit is spanned");
+        assert_eq!(mint_cost(&peel.residual, &peel.torsion), b(0), "no void, no bill");
+    }
+
+    #[test]
+    fn the_bill_is_priced_from_the_real_peel_of_a_knowledge_wall() {
+        // The residual-drives-research peel: nothing produces the knowledge
+        // axis, so a deficit of 5 there is irreducible. The Mind's bill to mint
+        // the missing generator is priced from THAT residual — the same homology
+        // the research trigger reads, not a synthetic number.
+        let buildables = vec![vec![b(2), b(0), b(0)], vec![b(0), b(3), b(0)]];
+        let peel = peel_economy(&[b(0), b(0), b(5)], &[b(0), b(0), b(0)], &buildables);
+        assert!(!peel.covered, "the knowledge wall stands");
+        let bill = mint_cost(&peel.residual, &peel.torsion);
+        assert!(bill > b(0), "an irreducible deficit carries a real bill: {bill}");
+        // The bill is the void's extent (5 units of unspanned knowledge) PLUS
+        // the shear of threading the new generator through the economy's own
+        // standing twist: the food/metal generators (yields 2 and 3) span a
+        // lattice with invariant factor ℤ/6, and bitlen(6) = 3. A more baroque
+        // economy is harder to innovate in — the homology says so exactly.
+        let extent: BigInt = peel.residual.iter().map(|x| x.abs()).sum();
+        let shear: BigInt = peel.torsion.iter().map(|d| BigInt::from(d.bits())).sum();
+        assert_eq!(extent, b(5), "the unspanned knowledge deficit");
+        assert_eq!(bill, extent + shear, "extent plus the ambient lattice shear");
+        assert_eq!(bill, b(8), "5 unspanned + 3 shear through the ℤ/6 twist");
     }
 
     #[test]
