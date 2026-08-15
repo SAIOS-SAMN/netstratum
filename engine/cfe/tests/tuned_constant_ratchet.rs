@@ -236,13 +236,17 @@ fn the_sealed_class_is_exactly_as_large_as_sealed() {
         walk_marks(Path::new(tree), SEED_MARK, &mut seeded, &mut seed_files);
     }
     assert_eq!(
-        seeded, 3,
+        seeded, 5,
         "the marked seed class moved — approval covers the founding \
-         endowment's two values (operator ruling 2026-08-06) PLUS the \
+         endowment's two values (operator ruling 2026-08-06); the \
          syntropic wild-baseline fraction (1/4 of primary production, \
-         operator ruling 2026-08-15, COG Slice 2c): the untended share a \
-         gatherer band subsists on, matched to the marginal habitable band's \
-         own quarter efficiency."
+         operator ruling 2026-08-15, COG Slice 2c); AND the two COG-3 \
+         cognitive-escape rates (operator ruling 2026-08-15): the base \
+         cognitive rate (1/16 of the syntropic flow feeds base thought even \
+         at zero leisure — the fasting trickle that breaks the reachability \
+         deadlock) and the desperation burn inefficiency (4 heads per unit of \
+         mint_cost — the crisis exchange when a starving line cannibalizes its \
+         people for a Eureka)."
     );
 }
 

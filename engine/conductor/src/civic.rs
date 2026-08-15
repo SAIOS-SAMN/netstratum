@@ -233,6 +233,42 @@ pub fn mint_cost(residual: &[BigInt], torsion: &[BigInt]) -> BigInt {
     betti_extent + torsion_shear
 }
 
+/// The base cognitive rate — the fraction of a colony's syntropic WILD flow
+/// that always feeds base cognition (the "brain stem"), even at zero leisure.
+/// The thermodynamic escape valve that breaks the reachability deadlock: a
+/// destitute line thinks slowly off its wild-food trickle rather than never.
+fn base_cognitive_rate() -> Ratio {
+    ratio(1, 16) // APPROVED-SEED (operator ruling 2026-08-15, COG-3 fasting)
+}
+
+/// The desperation exchange rate — how many heads a starving line burns per
+/// unit of `mint_cost` when it cannibalizes its own people to force a Eureka.
+/// Deliberately INEFFICIENT: thinking on a full stomach is cheap, thinking by
+/// sacrificing your population is dear.
+fn burn_inefficiency() -> Ratio {
+    ratio(4, 1) // APPROVED-SEED (operator ruling 2026-08-15, COG-3 desperation burn)
+}
+
+/// **THE FASTING FILL** (COG-3) — the cognitive accumulator's inflow this beat:
+/// the cascade's LEISURE plus a base trickle off the syntropic wild flow. The
+/// rich pay `mint_cost` instantly from their large leisure and coin many words
+/// a beat; the poor (leisure 0) fill only from the trickle — agonizingly slow
+/// thought, but never zero, so a line stuck at an irreducible γ is never
+/// PERMANENTLY deadlocked. It saves for tens of beats, then affords one word.
+pub fn fasting_fill(leisure: Ratio, syntropic: Ratio) -> Ratio {
+    leisure + syntropic * base_cognitive_rate()
+}
+
+/// **THE DESPERATION PRICE** (COG-3) — the population a line must burn to mint a
+/// word it cannot afford from leisure, when a metabolic deficit is actively
+/// biting. `mint_cost` heads times the inefficiency: the crisis instinct that
+/// spends the one substrate a starving colony still has — its people — to buy
+/// the geometry that unlocks its escape. A gamble: the burn may leave a viable
+/// remnant, or it may be the last thing a dying line ever does.
+pub fn desperation_price(mint_price: &Ratio) -> Ratio {
+    mint_price.clone() * burn_inefficiency()
+}
+
 /// **THE STRATIFIED DRIVES** (doc 52 §7 / the operator's drive-ladder ruling
 /// 2026-08-15) — a civilization's needs in STRICT Maslow priority. Supply fills
 /// each tier in turn and only the surplus ABOVE one tier's demand spills to the
@@ -543,6 +579,33 @@ mod tests {
         // COVERED IS FREE: a vanished residual mints nothing, whatever twist the
         // lattice carries — the shear is paid only to bridge a genuine void.
         assert_eq!(mint_cost(&[b(0), b(0), b(0)], &[b(4)]), b(0), "no void, no bill — even through a twist");
+    }
+
+    #[test]
+    fn fasting_breaks_the_deadlock_the_poor_still_think_slowly() {
+        // The rich: large leisure dwarfs the trickle — they coin instantly.
+        let rich = fasting_fill(r(500, 1), r(80, 1));
+        assert!(rich > r(500, 1), "leisure plus a trickle exceeds leisure alone");
+        // The destitute: ZERO leisure, but a live syntropic flow still feeds a
+        // base cognitive trickle — the accumulator inches up, never stuck at 0.
+        let poor = fasting_fill(r(0, 1), r(80, 1));
+        assert!(poor > r(0, 1), "a zero-leisure line still fills from the wild trickle: {poor}");
+        // The truly barren: no wild flow either (unsited/dead world) — no trickle,
+        // no thought. The floor is survival, not free cognition.
+        assert_eq!(fasting_fill(r(0, 1), r(0, 1)), r(0, 1), "no wild flow, no trickle");
+        // The trickle is a small fraction of the wild flow — slow, not free.
+        assert!(poor < r(80, 1), "the trickle is a fraction of the flow, not all of it");
+    }
+
+    #[test]
+    fn the_desperation_burn_is_dear_paid_in_people() {
+        // A word that costs 3 leisure costs 3×inefficiency HEADS to burn — the
+        // crisis exchange is deliberately worse than thinking on a full stomach.
+        let leisure_price = r(3, 1);
+        let heads = desperation_price(&leisure_price);
+        assert!(heads > leisure_price, "burning people is dearer than spending leisure: {heads}");
+        // A costlier thought burns proportionally more of the colony.
+        assert!(desperation_price(&r(6, 1)) > desperation_price(&r(3, 1)), "a deeper Eureka costs more lives");
     }
 
     #[test]

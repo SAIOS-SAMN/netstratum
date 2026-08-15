@@ -2598,9 +2598,13 @@ impl Polity {
         if self.world.population_of(primary) == 0 {
             return;
         }
+        // COG-3 FASTING: the accumulator's inflow is the cascade's leisure PLUS
+        // a base trickle off the syntropic wild flow, so a zero-leisure line is
+        // never permanently deadlocked — it thinks slowly rather than never.
         let leisure = civic::cascade_reading(&self.world, primary).leisure;
-        if leisure > ratio(0, 1) {
-            self.world.settle_leisure(primary, leisure);
+        let fill = civic::fasting_fill(leisure, self.world.syntropic_flow(primary));
+        if fill > ratio(0, 1) {
+            self.world.settle_leisure(primary, fill);
         }
     }
 
@@ -2846,16 +2850,38 @@ impl Polity {
                                 );
                                 let primary = cfe::world::FIRST_ORB;
                                 let afford = self.world.leisure_bank_of(primary) >= price;
+                                // COG-3 DESPERATION BURN: when a metabolic
+                                // deficit is actively biting (the cascade binds
+                                // at the survival floor) and leisure cannot pay,
+                                // a line may cannibalize its own PEOPLE to force
+                                // the Eureka — minting the geometry that unlocks
+                                // its escape, paid in heads at a punishing rate.
+                                // Bounded to leave a remnant (never self-extinct
+                                // in one thought); a colony too small to spare
+                                // the price must wait on the fasting trickle.
+                                let burn = civic::desperation_price(&price);
+                                let head = ratio(self.world.population_of(primary) as i64, 1);
+                                let starving = matches!(
+                                    civic::cascade_reading(&self.world, primary).binding,
+                                    Some(civic::Drive::Metabolic)
+                                );
+                                let can_burn = !afford && starving && head > burn.clone();
                                 if let Some(bytes) = solver_verify::program_bytes(&expansion) {
-                                    if afford
+                                    if (afford || can_burn)
                                         && self
                                         .world
                                         .mint_solver_word_as(self.automaton, orbit, bytes, cited.clone())
                                         .is_ok()
                                     {
-                                        // COG-4: the thought draws the leisure
-                                        // bank by its exact price.
-                                        self.world.settle_leisure(primary, -price);
+                                        if afford {
+                                            // COG-4: the thought draws the
+                                            // leisure bank by its exact price.
+                                            self.world.settle_leisure(primary, -price);
+                                        } else {
+                                            // The crisis instinct: the colony
+                                            // spends its people for the Eureka.
+                                            self.world.settle_population_exact(primary, -burn);
+                                        }
                                         self.library.adopt(solver::mint::MintedWord {
                                             orbit,
                                             expansion,
