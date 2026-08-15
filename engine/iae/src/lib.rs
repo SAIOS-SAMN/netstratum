@@ -21,5 +21,6 @@ pub mod transport;
 mod mat;
 pub mod bridge;
 pub mod cohomology;
+pub mod resolve;
 pub mod sheaf;
 pub mod transduction;
