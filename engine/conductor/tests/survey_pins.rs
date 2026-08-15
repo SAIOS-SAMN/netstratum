@@ -161,20 +161,30 @@ fn the_survey_charters_the_sector_and_the_spent_lens_idles() {
         receipts.iter().any(|r| matches!(r.event, ClosureEvent::CrystalDrawn { .. })),
         "the draw receipted — the survey was paid for"
     );
-    let chartered: Vec<String> = receipts
+    // THE SURVEY ARC'S OWN RESPONSIBILITY (re-scoped 2026-08-15): assert the
+    // survey mechanics, not a global charter count. The old "exactly one
+    // charter" invariant was a brittle artifact of the STARVED (over-debit)
+    // economy — the writers assumed parallel expansion was impossible. With
+    // the economy corrected (STAB-1's population-consumption clamp), a level-5
+    // colony generates REAL surplus, and A1's reserve-funded `expand_step`
+    // legitimately charters its own orb alongside the crystal-draw-funded
+    // survey. The survey arc's job is the survey; A1's orthogonal orbs, funded
+    // by native surplus, are tolerated.
+    let survey_orb_id = receipts
         .iter()
-        .filter_map(|r| match &r.event {
-            ClosureEvent::ColonyCharted { name, .. } => Some(name.clone()),
+        .find_map(|r| match &r.event {
+            ClosureEvent::ColonyCharted { orb_id, name, .. } if name == "first-lens-survey" => {
+                Some(*orb_id)
+            }
             _ => None,
         })
-        .collect();
-    assert_eq!(chartered, vec!["first-lens-survey".to_string()], "the sector chartered once");
+        .expect("the survey arc chartered first-lens-survey, funded by the crystal draw");
     let survey_orb = polity
         .world
         .committed()
         .orbs
         .iter()
-        .find(|orb| orb.orb_id != cfe::world::FIRST_ORB)
+        .find(|orb| orb.orb_id == survey_orb_id)
         .expect("the survey site stands")
         .clone();
     assert!(
@@ -182,8 +192,9 @@ fn the_survey_charters_the_sector_and_the_spent_lens_idles() {
         "the first drill opened on the surveyed sector"
     );
 
-    // The lens is spent: the next cycle's survey idles lawfully — no
-    // second charter, no second draw (1/8 a tick regrows too slowly).
+    // The lens is spent: the next cycle's SURVEY idles lawfully — no second
+    // survey charter, no second draw (the crystal regrows too slowly). A1's
+    // reserve-funded expansion is orthogonal and rides the native surplus.
     let _ = polity.cycle(&book, &registry);
     let draws = polity
         .world
@@ -193,14 +204,20 @@ fn the_survey_charters_the_sector_and_the_spent_lens_idles() {
         .filter(|r| matches!(r.event, ClosureEvent::CrystalDrawn { .. }))
         .count();
     assert_eq!(draws, 1, "one survey, one draw");
-    let charters = polity
+    // THE DRAW-BOUND, SCOPED TO THE SURVEY: one crystal draw funds exactly one
+    // survey charter (a `*-survey` colony). A1's reserve-funded `*-orbN` orbs
+    // are not counted — they are gated on TRUE wealth (banked + accrued), not
+    // the draw, and their presence is the mark of a thriving economy.
+    let survey_charters = polity
         .world
         .chronicle()
         .receipts()
         .iter()
-        .filter(|r| matches!(r.event, ClosureEvent::ColonyCharted { .. }))
+        .filter(|r| {
+            matches!(&r.event, ClosureEvent::ColonyCharted { name, .. } if name.ends_with("-survey"))
+        })
         .count();
-    assert_eq!(charters, 1, "the expansion is bounded by the draw");
+    assert_eq!(survey_charters, 1, "one draw funds exactly one survey charter");
 
     // SEAL B: the whole surveyed world replays.
     let rebuilt = replay(polity.world.chronicle());

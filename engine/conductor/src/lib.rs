@@ -2492,8 +2492,32 @@ impl Polity {
             self.world.committed().orbs.iter().map(|o| o.orb_id).collect();
         if orbs.len() < SYSTEM_CAP {
             let home = *orbs.first().unwrap_or(&cfe::world::FIRST_ORB);
-            let name = format!("{}-orb{}", self.spec.world_name, orbs.len());
-            let _ = self.world.chart_as(self.automaton, &name, home);
+            // TRUE-WEALTH GATE (operator ruling 2026-08-15): capital
+            // expenditure may not ignore accrued debt. STAB-1 floors a
+            // colony's bank at zero and defers its unpayable upkeep into
+            // NEGATIVE accrued; funding a new founding from that floored cash
+            // is toxic leverage — phantom wealth. A line dodging its upkeep is
+            // functionally insolvent and forfeits the right to charter, or the
+            // economy invites the debt-spiral exploit (starve your own
+            // infrastructure to spam territory). Charter only when NET
+            // liquidity (banked + accrued) covers the founding reserves for
+            // EVERY resource; a debt-ridden line stalls until its true wealth
+            // recovers, which is the correct economics.
+            let accrued = self.world.accrued_of(home);
+            let liquid = |resource| {
+                let pending: Ratio = accrued
+                    .iter()
+                    .filter(|(r, _)| *r == resource)
+                    .fold(ratio(0, 1), |sum, (_, a)| sum + a.clone());
+                banked(&self.world, resource) + pending
+            };
+            let solvent = cfe::dop::founding_reserves()
+                .into_iter()
+                .all(|(resource, moved)| liquid(resource) >= moved);
+            if solvent {
+                let name = format!("{}-orb{}", self.spec.world_name, orbs.len());
+                let _ = self.world.chart_as(self.automaton, &name, home);
+            }
         }
         // Weave / maintain the internal supply ring over every orb. An
         // edge whose source cannot yet stream simply settles to nothing
