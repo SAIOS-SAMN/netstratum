@@ -344,13 +344,27 @@ impl World {
             }
         }
         // Fold the food the population ate this span into the same touch as
-        // a DEBIT — the mirror of the regrowth credit. Never exceeds the
-        // pre-touch bank (FED caps at demand ≤ bank; STARVED eats the whole
-        // bank), so the settled net stays ≥ 0 after regrowth and yield.
+        // a DEBIT — the mirror of the regrowth credit. The population's
+        // `consumed` is computed against what it BELIEVED was available
+        // (bank + harvested + natural, rejuvenation.rs), but a colony can
+        // hold people while its harvest fails to materialise this touch —
+        // so the belief can outrun the coin actually in hand. A mind may
+        // only ever eat what STANDS: the pre-touch bank plus the credits
+        // this same touch banks (yield + regrown). Clamp the debit to that
+        // ceiling so the settled bank can never cross zero — a starving
+        // colony eats itself to empty and stops, it does not overdraw and
+        // strike a negative-amount famine the kernel must refuse.
         if let Some((_, resource, consumed)) = &population {
+            let credit = settleable
+                .iter()
+                .find(|(held_res, _)| held_res == resource)
+                .map(|(_, amount)| amount.clone())
+                .unwrap_or_else(|| ratio(0, 1));
+            let standing = (held.banked_amount(*resource) + credit).max(ratio(0, 1));
+            let eaten = consumed.clone().min(standing);
             match settleable.iter_mut().find(|(held_res, _)| held_res == resource) {
-                Some((_, amount)) => *amount -= consumed.clone(),
-                None => settleable.push((*resource, -consumed.clone())),
+                Some((_, amount)) => *amount -= eaten,
+                None => settleable.push((*resource, -eaten)),
             }
         }
         if settleable.is_empty() && farm.is_none() {
@@ -487,17 +501,37 @@ impl World {
                     );
                 }
                 false => {
-                    let drawn = -amount;
-                    held.bank(resource, -drawn.clone());
-                    self.chronicle.append(
-                        ClosureEvent::UpkeepSettled {
-                            orb_id,
-                            resource,
-                            amount: drawn,
-                        },
-                        stamp,
-                        vec![actor],
-                    );
+                    // A negative line is accrued upkeep drawing on the bank.
+                    // It may draw only what STANDS: a bank must never cross
+                    // zero, because the per-tick famine check reads the
+                    // banked balance and a negative one strikes a nonsensical
+                    // NEGATIVE draw the kernel refuses (AmountNotPositive).
+                    // Pay what the bank holds; the unpayable remainder returns
+                    // to the accrued pool, where the famine check reads it as
+                    // `banked(≥0) + accrued(<0) < 0` and strikes lawfully with
+                    // a non-negative draw. A solvent world (bank ≥ owed) draws
+                    // the whole owed exactly as before — byte-identical; only a
+                    // world that would have overdrawn diverges, and there the
+                    // old path was the negative-bank refusal itself.
+                    let owed = -amount;
+                    let standing = held.banked_amount(resource).max(ratio(0, 1));
+                    let drawn = owed.clone().min(standing);
+                    let unpaid = owed - drawn.clone();
+                    if unpaid > ratio(0, 1) {
+                        accrue(&mut self.accrued, orb_id, resource, -unpaid);
+                    }
+                    if drawn > ratio(0, 1) {
+                        held.bank(resource, -drawn.clone());
+                        self.chronicle.append(
+                            ClosureEvent::UpkeepSettled {
+                                orb_id,
+                                resource,
+                                amount: drawn,
+                            },
+                            stamp,
+                            vec![actor],
+                        );
+                    }
                 }
             }
         }
