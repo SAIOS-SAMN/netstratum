@@ -61,6 +61,10 @@ use solver::{
 use std::path::Path;
 
 mod cognition;
+// COG (doc 52): the homological economy — the deficit peeled through the same
+// `overlay` the cognition uses; coefficients drive production, residual drives
+// research. Replaces the cartesian build cascade with the peel.
+pub mod civic;
 pub mod lookahead;
 mod polities;
 pub use polities::{founding_polities, registered_polities, roster};
