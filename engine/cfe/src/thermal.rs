@@ -15,6 +15,7 @@
 //! `T_eq`=279 K (mesic), i.e. `K = 279⁴`.
 
 use crate::ratio::{ratio, Ratio};
+use num_traits::ToPrimitive;
 
 /// The fourth power of a CITED kelvin anchor, exact — the ONLY way a
 /// band bound or the folded constant enters this module (P2, operator
@@ -284,6 +285,63 @@ impl StarClass {
                 anchored => unreachable!("{anchored:?} is anchored"),
             })
     }
+
+    /// The star's MASS in solar masses (`M☉ = 1`) — the anchor Kepler's third
+    /// law reads. The lore White Hole has no citation, so it takes the solar
+    /// baseline (trivial, no dial).
+    pub fn mass(self) -> Ratio {
+        crate::anchor::mass(self).unwrap_or_else(|| match self {
+            StarClass::LuminalWhiteHole => ratio(1, 1),
+            anchored => unreachable!("{anchored:?} is anchored"),
+        })
+    }
+}
+
+/// The base orbital period: a reference G-type world at `r = 1` completes its
+/// 360° circuit in this many universal beats — one beat per degree of arc, the
+/// Base-60/360 tie-in. Every other period scales off it by Kepler's law.
+const BASE_ORBIT_BEATS: i64 = 360; // the beat↔degree definition (360° circuit)
+
+/// **THE KEPLERIAN PERIOD, SQUARED** (the Keplerian clock) — Kepler's third law
+/// `P² = (360)²·r³/M` in exact rationals (`r` in AU, `M` in `M☉`, `P` in beats).
+/// SQUARED because the period itself, `√(r³/M)`, is irrational and a ℚ-engine
+/// cannot hold it — but the SEMANTIC quantity, the count of completed orbits, is
+/// exact from `P²` alone (see [`local_years`]). A close orbit or a heavy star
+/// gives a small `P²` (a short year); a distant orbit or a light star a large one.
+pub fn orbital_period_squared(orbit_r: &Ratio, mass: &Ratio) -> Ratio {
+    let base = ratio(BASE_ORBIT_BEATS, 1);
+    let r3 = orbit_r.clone() * orbit_r.clone() * orbit_r.clone();
+    (base.clone() * base) * r3 / mass.clone()
+}
+
+/// **THE LOCAL YEAR** (the Keplerian clock) — how many complete 360° orbits a
+/// planet has traced in `beats` universal ticks: `⌊beats / P⌋ = ⌊√(beats²/P²)⌋`.
+/// EXACT — the largest `n` with `n² ≤ beats²/P²` (an integer square root of an
+/// exact rational), so the year COUNT never touches the irrational period. The
+/// beat is the absolute cosmic tick; the year is local geometry — a tight inner
+/// world rolls its calendar often, a distant one seldom, on the very same beat.
+pub fn local_years(orbit_r: &Ratio, mass: &Ratio, beats: u64) -> u64 {
+    let p2 = orbital_period_squared(orbit_r, mass);
+    if p2 <= ratio(0, 1) {
+        return 0;
+    }
+    let beats2 = ratio(beats as i64, 1) * ratio(beats as i64, 1);
+    // x = ⌊beats²/P²⌋; years = ⌊√x⌋, both exact-integer once floored.
+    let x = (beats2 / p2).floor().to_integer().to_u128().unwrap_or(u128::MAX);
+    let mut lo = 0u64;
+    let mut hi = 1u64;
+    while (hi as u128).saturating_mul(hi as u128) <= x {
+        hi = hi.saturating_mul(2);
+    }
+    while lo < hi {
+        let mid = lo + (hi - lo + 1) / 2;
+        if (mid as u128).saturating_mul(mid as u128) <= x {
+            lo = mid;
+        } else {
+            hi = mid - 1;
+        }
+    }
+    lo
 }
 
 #[cfg(test)]
@@ -292,6 +350,40 @@ mod tests {
 
     fn r(n: i64, d: i64) -> Ratio {
         ratio(n, d)
+    }
+
+    #[test]
+    fn stellar_mass_ranks_the_main_sequence() {
+        // Massive hot stars burn heavy; dim red dwarfs are tiny.
+        assert!(StarClass::O.mass() > StarClass::G.mass(), "O outweighs the Sun");
+        assert_eq!(StarClass::G.mass(), r(1, 1), "G is the solar unit");
+        assert!(StarClass::G.mass() > StarClass::M.mass(), "the Sun outweighs a red dwarf");
+        assert_eq!(StarClass::M.mass(), r(1, 5), "M is the tiny red dwarf");
+    }
+
+    #[test]
+    fn the_keplerian_clock_ages_planets_by_their_own_geometry() {
+        use crate::thermal::{local_years, orbital_period_squared};
+        let g = StarClass::G.mass();
+        // Kepler: a distant orbit is a LONGER year than a close one (same star).
+        let close = orbital_period_squared(&r(1, 2), &g);
+        let far = orbital_period_squared(&r(4, 1), &g);
+        assert!(far > close, "a distant world has a longer period");
+        // A HEAVIER star pulls a SHORTER year at the same orbit.
+        let round_heavy = orbital_period_squared(&r(1, 1), &StarClass::O.mass());
+        let round_sol = orbital_period_squared(&r(1, 1), &g);
+        assert!(round_heavy < round_sol, "a heavier star shortens the year");
+        // The reference G world at r=1 completes its 360-beat circuit exactly:
+        // 0 years before beat 360, exactly 1 at beat 360, 2 at 720.
+        assert_eq!(local_years(&r(1, 1), &g, 359), 0, "not yet a full orbit");
+        assert_eq!(local_years(&r(1, 1), &g, 360), 1, "one 360-beat circuit = one local year");
+        assert_eq!(local_years(&r(1, 1), &g, 720), 2, "two circuits, two years");
+        // Two planets, SAME beat, DIFFERENT ages: the close-and-heavy world has
+        // lived far more local years than a distant one on the same cosmic tick.
+        let beat = 3600;
+        let inner = local_years(&r(1, 4), &StarClass::O.mass(), beat);
+        let outer = local_years(&r(9, 1), &StarClass::M.mass(), beat);
+        assert!(inner > outer, "same beat, but the inner-heavy world is far older: {inner} vs {outer}");
     }
 
     #[test]

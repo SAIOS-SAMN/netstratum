@@ -55,6 +55,24 @@ fn the_luminosity_anchors_stand_exactly() {
             "{class:?} moved off its citation"
         );
     }
+    let masses = [
+        (StarClass::O, ratio(20, 1)),
+        (StarClass::B, ratio(5, 1)),
+        (StarClass::A, ratio(2, 1)),
+        (StarClass::F, ratio(3, 2)),
+        (StarClass::G, ratio(1, 1)),
+        (StarClass::K, ratio(3, 4)),
+        (StarClass::M, ratio(1, 5)),
+        (StarClass::BrownDwarf, ratio(1, 20)),
+        (StarClass::WhiteDwarf, ratio(3, 5)),
+        (StarClass::RedGiant, ratio(2, 1)),
+        (StarClass::NeutronStar, ratio(3, 2)),
+        (StarClass::WolfRayet, ratio(20, 1)),
+    ];
+    for (class, cited) in masses {
+        assert_eq!(cfe::anchor::mass(class), Some(cited), "{class:?} mass moved off its citation");
+    }
+    assert_eq!(cfe::anchor::mass(StarClass::LuminalWhiteHole), None, "lore mass is not an anchor");
     assert_eq!(
         luminosity(StarClass::LuminalWhiteHole),
         None,

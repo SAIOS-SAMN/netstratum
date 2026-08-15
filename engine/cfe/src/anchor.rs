@@ -73,6 +73,41 @@ impl KelvinAnchor {
 /// per class, relative to Sol = 1, each cited against the astronomy it
 /// stands near. `None` for the lore classes: fiction has no empirical
 /// citation, so its value stays a DIAL where it is used.
+/// Main-sequence and remnant MASS in solar masses (`M☉ = 1`) — the second
+/// stellar anchor, the one Kepler's third law reads (`P² ∝ r³/M`). Cited to the
+/// Morgan–Keenan mass sequence; the lore White Hole has no citation and its
+/// value lives as a dial where it is used.
+pub fn mass(class: StarClass) -> Option<Ratio> {
+    match class {
+        // O V: 16–90 M☉; 20 representative of the massive, fast-burning hot end.
+        StarClass::O => Some(ratio(20, 1)),
+        // B V: 2.1–16 M☉; 5 mid-class.
+        StarClass::B => Some(ratio(5, 1)),
+        // A V: 1.4–2.1 M☉ (Sirius A ≈ 2); 2 representative.
+        StarClass::A => Some(ratio(2, 1)),
+        // F V: 1.0–1.4 M☉; 3/2 mid-class.
+        StarClass::F => Some(ratio(3, 2)),
+        // G V: Sol, the unit itself.
+        StarClass::G => Some(ratio(1, 1)),
+        // K V: 0.45–0.8 M☉; 3/4 representative.
+        StarClass::K => Some(ratio(3, 4)),
+        // M V: 0.08–0.45 M☉; 1/5 the dim red dwarf.
+        StarClass::M => Some(ratio(1, 5)),
+        // Brown dwarf: 0.013–0.08 M☉ (sub-stellar); 1/20.
+        StarClass::BrownDwarf => Some(ratio(1, 20)),
+        // White dwarf: 0.5–0.7 M☉ (degenerate remnant); 3/5.
+        StarClass::WhiteDwarf => Some(ratio(3, 5)),
+        // Red giant: 0.5–8 M☉ up the RGB; 2 representative.
+        StarClass::RedGiant => Some(ratio(2, 1)),
+        // Neutron star: ~1.4 M☉ (the Chandrasekhar mass); 3/2.
+        StarClass::NeutronStar => Some(ratio(3, 2)),
+        // Wolf–Rayet: 10–25 M☉; 20 representative.
+        StarClass::WolfRayet => Some(ratio(20, 1)),
+        // LORE — no citation exists; the dial lives in thermal.rs.
+        StarClass::LuminalWhiteHole => None,
+    }
+}
+
 pub fn luminosity(class: StarClass) -> Option<Ratio> {
     match class {
         // O V: 30,000–1,000,000 L☉ measured range; 10⁵ representative.
