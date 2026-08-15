@@ -151,18 +151,6 @@ fn col_addmul(a: &mut Mat, v: &mut Mat, v_inv: &mut Mat, i: usize, j: usize, q: 
     }
 }
 
-/// Negate column `i` of `a` and `v`; the inverse negates row `i` of `v_inv`.
-fn col_negate(a: &mut Mat, v: &mut Mat, v_inv: &mut Mat, i: usize) {
-    for m in [a, v] {
-        for row in m.iter_mut() {
-            row[i] = -std::mem::take(&mut row[i]);
-        }
-    }
-    for x in v_inv[i].iter_mut() {
-        *x = -std::mem::take(x);
-    }
-}
-
 /// Compute the exact integer Smith Normal Form of `a` with full witnesses.
 ///
 /// `a` is `rows × cols` (a ragged input is padded conceptually by treating a
