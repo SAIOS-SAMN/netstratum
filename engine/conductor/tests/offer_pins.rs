@@ -204,11 +204,15 @@ fn any_famine_can_ask_the_market() {
         seat("mossmarket", StarClass::G, (1, 4), (1, 1)), &registry, &book);
     equip_hauler(&mut miner.world);
     equip_hauler(&mut grower.world);
-    // KNOWN RED (ledgered 2026-08-12, task #10): the crossing below
-    // no longer clears — the staging restores capacity but the steep
-    // famine bids' price cross fails under the post-arc stocks. The
-    // freeze pin proves the rescue law; this one still owes its
-    // diagnosis.
+    // DIAGNOSED AND FIXED (task #10, 2026-08-15): this crossing was red for
+    // three days and the ledger blamed a "price cross" — WRONG. The cross
+    // (gives ≥ asks) always holds for two famished lines: it reduces to
+    // (1+sevₐ)(1+sev_b) ≥ 1, and both severities are ≥ 1. The real refusal
+    // was HullCapacityShort — the post-arc trade (255/16) exceeded the
+    // equipped hauler (4), and `require_hull_capacity` refused the WHOLE
+    // trade instead of filling what the hull could carry. `clear_trade` now
+    // PARTIAL-FILLS to hull capacity (FLEET-1), so the two complementary
+    // famines relieve on the one crossing they genuinely cross on.
 
     // The miner extracts only (iron banks, biomass drains); the
     // grower inhabits only (biomass banks, iron drains).

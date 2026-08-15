@@ -1181,6 +1181,37 @@ pub fn clear_trade(
     // pair_melt, nothing recomputes the formula.
     // Phase-2: distance arg is D_chart; melt sees D_eff.
     let melt = route_melt(a, b, &distance);
+    // FLEET-1 PARTIAL FILL: a hull carries what it CAN. A positive-melt crossing
+    // larger than the haulers moves to their capacity and rests the remainder —
+    // it is NOT refused whole. The all-or-nothing `require_hull_capacity` was
+    // the market's silent stall: two complementary famine bids that genuinely
+    // cross never cleared because one leg exceeded a hauler, so both starved
+    // beside a standing trade (the KNOWN RED, task #10 — misdiagnosed as a price
+    // cross; it is hull capacity). Gated EXACTLY on the hull door's own
+    // condition (`melt > 0`, `haul`/`haul_element`): a melt-free haul needs no
+    // hull, so it is byte-identical, and so is any trade that already fits
+    // (scale = 1). Both legs scale by the tightest hull so the exact price holds.
+    let (x, y) = {
+        let have_x = a.free_capacity(deal);
+        let have_y = b.free_capacity(deal + 1);
+        // ONLY the haulable, hulled range partial-fills: a melt-free haul needs
+        // no hull (byte-identical), a walled haul (melt ≥ 1) still refuses
+        // EconomicallyWalled, and a haul with NO hull still refuses
+        // HullCapacityShort in `haul` — never silently filled to zero here.
+        let haulable = melt > ratio(0, 1)
+            && melt < ratio(1, 1)
+            && have_x > ratio(0, 1)
+            && have_y > ratio(0, 1);
+        if haulable {
+            let scale = ratio(1, 1).min(have_x / x.clone()).min(have_y / y.clone());
+            (smelt(&(x * scale.clone())), smelt(&(y * scale)))
+        } else {
+            (x, y)
+        }
+    };
+    if x <= ratio(0, 1) || y <= ratio(0, 1) {
+        return Err(ActionRefused::NoCrossing);
+    }
     // The two directions — each an aperture pair (resource or element),
     // shield-checked; sent − received = the void's exact share.
     haul_cargo(a, held_a.orb, b, held_b.orb, &held_a.give, x, deal, &melt)?;

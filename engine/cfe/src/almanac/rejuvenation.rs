@@ -8,16 +8,20 @@
 //! the flat law. So the exponential is replaced by a RATIONAL SURROGATE
 //! on a grain (the `grained_t_eq4`/`ORBIT_GRAIN` discipline):
 //!
-//!     s(Δt) = GRAIN / (GRAIN + r·Δt)
+//! ```text
+//! s(Δt) = GRAIN / (GRAIN + r·Δt)
+//! ```
 //!
 //! which is `1` at `Δt=0`, falls monotonically toward `0`, and is a
 //! single exact ratio — so the whole curve is ONE rational operation,
 //! never an iterated product, and its denominator stays bounded.
 //! Substituting and clearing fractions:
 //!
+//! ```text
 //!     P(Δt) = K·P0·(GRAIN + r·Δt)
 //!             ─────────────────────────────────────
 //!             P0·(GRAIN + r·Δt) + (K − P0)·GRAIN
+//! ```
 //!
 //! This is the RULED (B) form: the S-shape is preserved (a collapsed
 //! world recovers slowly at first, which is what forces the Locust to
