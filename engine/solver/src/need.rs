@@ -125,7 +125,16 @@ impl Need {
             (false, r) if r >= 480 => 3,
             (false, _) => 2,
         };
-        hunger + self.reach_bonus
+        // THE NO-OVERFIT CEILING. Depth 3 is the measured frontier: a
+        // composition of four or more DERIVED operators was measured to
+        // overfit the train pairs and fail the held-out test (33 solves
+        // confirmed at ≤3, 4 false beyond it). Advancement buys depth UP
+        // TO that frontier — a shallow-hunger line its structure earned it
+        // climbs to 3 — but never PAST it, where the reach stops finding
+        // real structure and starts memorising noise. Beyond 3, capability
+        // grows only by CONDENSATION (a composed word becoming one deeper
+        // letter), not by reaching further into the closed algebra.
+        (hunger + self.reach_bonus).min(3)
     }
 
     /// Does this need reach for `family` before the others?
