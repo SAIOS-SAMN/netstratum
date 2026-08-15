@@ -435,9 +435,11 @@ pub fn stress(world: &cfe::world::World, orb: u64) -> Ratio {
 /// blend — the same melt grid the rest of the economy speaks. A caller with no
 /// world clock hands this straight to [`instinct::blend`].
 pub fn stress_quantized(world: &cfe::world::World, orb: u64) -> (u64, u64) {
-    let scaled = (stress(world, orb) * ratio(64, 1)).round().to_integer();
-    let num = scaled.to_u64().unwrap_or(0).min(64);
-    (num, 64)
+    // Quantise onto the existing melt lattice (no new dial — the same grid the
+    // market and the peel already speak).
+    let scaled = (stress(world, orb) * ratio(LATTICE, 1)).round().to_integer();
+    let num = scaled.to_u64().unwrap_or(0).min(LATTICE as u64);
+    (num, LATTICE as u64)
 }
 
 /// A BLAKE3-seeded index in `[0, bound)` — the Mind's chance, replayable.

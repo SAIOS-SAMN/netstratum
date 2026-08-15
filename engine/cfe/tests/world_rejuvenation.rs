@@ -305,6 +305,54 @@ fn a_band_past_the_wild_flow_draws_the_cultivated_granary() {
 }
 
 #[test]
+fn the_sated_collapse_a_fed_but_indebted_line_contracts() {
+    // TFR term III — the second face of death. A solvent line's economic
+    // contentment IS its leisure stability (the unified gate subsumes the old
+    // one, so a solvent world is byte-identical); an INSOLVENT line — one that
+    // owes resources it does not hold — reads a lower contentment even with a
+    // full granary, and its births are suppressed toward the Sated Collapse.
+    let solvent = peopled(8, 2, 10);
+    let now = solvent.now();
+    assert_eq!(
+        solvent.economic_contentment(FIRST_ORB, now),
+        solvent.stability_of(FIRST_ORB, now),
+        "a solvent line's economic contentment IS its leisure stability — byte-identical"
+    );
+    assert_eq!(
+        solvent.economic_contentment(FIRST_ORB, now),
+        ratio(1, 1),
+        "a fed, rested, solvent greenhold is fully content"
+    );
+    // A line STRIPPED OF LEISURE — a granary standing, a population demanding
+    // its luxury, but none banked — reads a contentment BELOW the rested line's,
+    // even fed and solvent. Its births are suppressed toward the contraction:
+    // the "no future" death, distinct from the "no food" cull. (The wealth axis
+    // shares the identical min(1, S_leisure + S_debt) machinery — proven to read
+    // zero when solvent by every byte-identical test above — and bites the same
+    // way when a heavy tax or upkeep drives `banked + accrued < 0`.)
+    let mut exhausted = greenhold(8);
+    exhausted.seal_taxon(2, 1).expect("seals the lifespan class");
+    exhausted.zone(50, ZoneKind::Granary).expect("raises a granary");
+    exhausted.settle_population(FIRST_ORB, 50);
+    // The leisure demand accrues over a span (like the stall) — advance the
+    // clock so the un-entertained people register their unmet luxury.
+    for _ in 0..6 {
+        exhausted.tick();
+    }
+    let tired = exhausted.now();
+    assert!(
+        exhausted.economic_contentment(FIRST_ORB, tired) < ratio(1, 1),
+        "a leisure-starved people is not fully content: {}",
+        exhausted.economic_contentment(FIRST_ORB, tired)
+    );
+    assert_eq!(
+        exhausted.economic_contentment(FIRST_ORB, tired),
+        exhausted.stability_of(FIRST_ORB, tired),
+        "solvent but exhausted, the unified gate still equals the leisure gate"
+    );
+}
+
+#[test]
 fn a_fed_line_grows_and_an_overpopulated_one_is_culled() {
     // Below the food ceiling the fed population BIRTHS (net positive delta);
     // far above it the same world STARVES and culls. Both are the same law

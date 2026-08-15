@@ -301,8 +301,13 @@ impl World {
             // not floored (COG Slice 2). Every modulator is a rational factor
             // the settle later promotes into whole colonists as the carry
             // crosses one; nothing is truncated here.
+            // TFR term III: births are gated by the UNIFIED economic contentment
+            // `max(0, 1 − σ)` — leisure exhaustion AND insolvency — not leisure
+            // alone. It subsumes the old `stability_of` gate (a solvent, rested
+            // line reads exactly `stability_of`, so unchanged) and adds the
+            // wealth axis, precipitating the Sated Collapse. `43_DISTRIBUTION`.
             let births = (grown - pr.clone())
-                * self.stability_of(orb, stamp)
+                * self.economic_contentment(orb, stamp)
                 * self.flux_output_factor(orb);
             // DISPOSITION (§5): the cognition caste spends its share of
             // surplus growth on KNOWLEDGE, not mouths — an exact fraction

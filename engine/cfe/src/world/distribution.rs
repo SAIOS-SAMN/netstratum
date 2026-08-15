@@ -659,6 +659,61 @@ impl World {
         );
     }
 
+    /// **THE ECONOMIC CONTENTMENT** (TFR term III — the Demographic Stress
+    /// Tensor, operator ruling 2026-08-15). Births are gated not by leisure
+    /// alone but by the UNIFIED macroeconomic stress σ, `max(0, 1 − σ)`, which
+    /// SUBSUMES the old `stability_of` leisure gate and adds the wealth axis:
+    ///
+    ///   σ = min(1,  S_leisure  +  S_debt)
+    ///
+    ///   * `S_leisure = 1 − stability_of` — societal exhaustion, the leisure
+    ///     coverage already netted of welfare (so this contains the whole of
+    ///     the old gate: a solvent line reads `1 − S_leisure = stability_of`).
+    ///   * `S_debt = min(1, |accrued_deficit| / cultivated_yield)` — insolvency:
+    ///     resources the line owes but does not hold (`accrued < 0`, the
+    ///     True-Wealth Gate), measured against its gross continuous income. Debt
+    ///     with no income at all reads full stress; a solvent line reads zero.
+    ///
+    /// The unit weights (`w₁ = w₂ = 1`) are the operator-approved seed; at them
+    /// a rested, solvent line reads `stability_of` exactly, so a world that
+    /// never falls into arrears is byte-identical. This is the second face of
+    /// death: the STARVATION cull empties a line that has no food; the SATED
+    /// COLLAPSE contracts one that is fed but has no future — taxed into debt or
+    /// stripped of leisure, it simply stops having children.
+    pub fn economic_contentment(&self, orb: u64, stamp: u64) -> Ratio {
+        let one = ratio(1, 1);
+        let zero = ratio(0, 1);
+        let s_leisure = (one.clone() - self.stability_of(orb, stamp)).max(zero.clone());
+        // Insolvency is the UNCOVERED shortfall — `banked + accrued < 0` per
+        // resource (the engine's own insolvency condition, economy.rs). Reading
+        // bare `accrued < 0` would count the normal pending upkeep of any tick
+        // as debt; only what the line owes BEYOND what it holds is arrears, so a
+        // solvent line reads zero and stays byte-identical.
+        let debt: Ratio = self
+            .accrued_of(orb)
+            .iter()
+            .map(|(res, accrued)| {
+                let held = self
+                    .orb_by_id(orb)
+                    .map(|o| o.banked_amount(*res))
+                    .unwrap_or_else(|| zero.clone());
+                (-(held + accrued.clone())).max(zero.clone())
+            })
+            .fold(zero.clone(), |sum, shortfall| sum + shortfall);
+        let s_debt = if debt <= zero {
+            zero.clone()
+        } else {
+            let income = self.cultivated_yield(orb);
+            if income <= zero {
+                one.clone() // owes with no income to service it — full stress
+            } else {
+                (debt / income).min(one.clone())
+            }
+        };
+        let sigma = (s_leisure + s_debt).min(one.clone());
+        (one - sigma).max(zero)
+    }
+
     /// The per-clade LEISURE good this orb's line savours (§3), or `None`
     /// for a line with no closed ration to pair it with (an element-eater,
     /// whose higher tiers ride #29). Reads the same genesis metabolism the
