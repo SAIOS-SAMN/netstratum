@@ -9,3 +9,6 @@ substrate = { path = "../substrate" }
 num-bigint.workspace = true
 num-traits.workspace = true
 thiserror.workspace = true
+# IAE-5: the Mind's seed. The proposer's stochasticity is strictly
+# BLAKE3(state_digest)-seeded so the deterministic Universe stays replayable.
+blake3.workspace = true
