@@ -323,6 +323,44 @@ impl World {
         Ok(())
     }
 
+    /// **THE KNOWLEDGE MARKET (tag 178, ARC C)** — license a word this
+    /// line lacks into its own library. The prover side named a word some
+    /// OTHER line minted and this line does not hold; this door holds the
+    /// CHAIN's share: an orbit already in the library refuses (a line
+    /// never licenses what it already knows — minted OR licensed), an
+    /// empty expansion refuses (nothing enters the library unearned). The
+    /// word is banked-neutral identity; the buyer's PROSPERITY gate (it
+    /// can afford the price) is the market's, applied by the caller — this
+    /// door only records the acquisition so the fold reads it.
+    pub fn license_knowledge_as(
+        &mut self,
+        actor: u64,
+        orbit: [u8; 32],
+        expansion: Vec<u8>,
+        cited: Vec<[u8; 32]>,
+    ) -> Result<(), ActionRefused> {
+        self.permitted(actor, Scope::Build)?;
+        if expansion.is_empty() {
+            return Err(ActionRefused::SolverWordEmpty);
+        }
+        let held = self.chronicle.receipts().iter().any(|receipt| {
+            matches!(
+                &receipt.event,
+                ClosureEvent::SolverWordMinted { orbit: held, .. }
+                    | ClosureEvent::KnowledgeLicensed { orbit: held, .. }
+                    if *held == orbit
+            )
+        });
+        if held {
+            return Err(ActionRefused::SolverWordKnown { orbit });
+        }
+        self.close(
+            ClosureEvent::KnowledgeLicensed { orbit, expansion, cited },
+            actor,
+        );
+        Ok(())
+    }
+
     /// PRACTICE-1 — adopt a discipline: one benefit, one friction,
     /// bound by receipt (the derived creed never binds; the practice
     /// does). Build scope. The Overdrive (5) takes only the tempered —

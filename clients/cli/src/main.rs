@@ -8795,6 +8795,11 @@ fn chronicle(world: &World, style: &Style) {
                 style.strong(&hex(signature)[..8]),
                 style.strong(&hardness.to_string())
             ),
+            cfe::dop::ClosureEvent::KnowledgeLicensed { orbit, cited, .. } => format!(
+                "◈ an idea LICENSED — word {} ({} confirms) enters the library from the market; knowledge circulates",
+                style.strong(&hex(orbit)[..8]),
+                style.strong(&cited.len().to_string())
+            ),
             cfe::dop::ClosureEvent::GemCompounded { members, gem, .. } => format!(
                 "◈ {} bond into {} — the lanes saturate and the matter holds",
                 style.strong(&format!("{} elements", members.len())),

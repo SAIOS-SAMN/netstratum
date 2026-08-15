@@ -385,7 +385,13 @@
 //!         consilience: independent lines that resolve their knowledge to
 //!         the same crystallized invariant record a shared axiom, one leg
 //!         per book. signature[32] ‖ mass u32 ‖ hardness u32.)
-//!    Phase-5 claim ledger: next free **178** (177 KnowledgeConverged —
+//!    178  ClosureEvent::KnowledgeLicensed (ARC C — the knowledge market:
+//!         a line licenses a word it lacks from the roster's minted pool;
+//!         the library fold reads it beside SolverWordMinted, so knowledge
+//!         circulates. orbit[32] ‖ cited ‖ opaque expansion, the
+//!         SolverWordMinted wire shape.)
+//!    Phase-5 claim ledger: next free **179** (178 KnowledgeLicensed —
+//!    ARC C knowledge market; 177 KnowledgeConverged —
 //!    38 §5 cross-line consilience; 176 EnrichmentStruck —
 //!    stellar nucleosynthesis #27; 163–164 ElementWant,
 //!    165 TreatyElementsAllowed, 166 SolverWordMinted, 167
@@ -2886,6 +2892,22 @@ pub enum ClosureEvent {
         mass: u32,
         hardness: u32,
     },
+    /// **THE KNOWLEDGE MARKET (tag 178, INTELLIGENCE ARC C)** — a line
+    /// LICENSES a word it lacks from the roster's minted pool: its own
+    /// library gains the word (the fold reads this receipt beside
+    /// `SolverWordMinted`), so knowledge CIRCULATES, not just matter.
+    /// `orbit` is the word's action fingerprint, `expansion` the program
+    /// it spells (the certificate's form), `cited` the tasks that
+    /// confirmed it at its origin. Banked-neutral: the word is identity
+    /// vocabulary, never matter — this FIRST cut gates acquisition on the
+    /// buyer's own prosperity (Crystal standing) rather than moving a
+    /// payment; the conserved buyer→seller settlement is the two-sided
+    /// follow-up.
+    KnowledgeLicensed {
+        orbit: [u8; 32],
+        expansion: Vec<u8>,
+        cited: Vec<[u8; 32]>,
+    },
     /// **ELEMENT-CHEMISTRY (tag 104, #37) — MATTER BONDS.** The
     /// almanac's first consumer: a set of banked elements whose lanes
     /// saturate bonds into a GEM, each member spending its lane's
@@ -4055,6 +4077,17 @@ impl ClosureEvent {
                 value.extend_from_slice(&mass.to_le_bytes());
                 value.extend_from_slice(&hardness.to_le_bytes());
                 tlv::put(177, &value, &mut out);
+            }
+            Self::KnowledgeLicensed { orbit, expansion, cited } => {
+                // orbit[32] ‖ cited count u8 ‖ count × digest[32] ‖
+                // expansion (rest, opaque) — the SolverWordMinted shape.
+                let mut value = orbit.to_vec();
+                value.push(cited.len() as u8);
+                for digest in cited {
+                    value.extend_from_slice(digest);
+                }
+                value.extend_from_slice(expansion);
+                tlv::put(178, &value, &mut out);
             }
             Self::GemCompounded { orb_id, members, gem } => {
                 // orb ‖ gem ‖ members — the member count is the
@@ -5364,6 +5397,19 @@ impl ClosureEvent {
                 let mass = u32::from_le_bytes(value.get(32..36)?.try_into().ok()?);
                 let hardness = u32::from_le_bytes(value.get(36..40)?.try_into().ok()?);
                 Some(Self::KnowledgeConverged { signature, mass, hardness })
+            }
+            178 => {
+                let orbit: [u8; 32] = value.get(..32)?.try_into().ok()?;
+                let count = *value.get(32)? as usize;
+                let mut at = 33usize;
+                let mut cited = Vec::with_capacity(count);
+                for _ in 0..count {
+                    let digest: [u8; 32] = value.get(at..at + 32)?.try_into().ok()?;
+                    at += 32;
+                    cited.push(digest);
+                }
+                let expansion = value.get(at..)?.to_vec();
+                Some(Self::KnowledgeLicensed { orbit, expansion, cited })
             }
             104 => {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);

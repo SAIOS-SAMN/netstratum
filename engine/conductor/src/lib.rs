@@ -3945,6 +3945,79 @@ pub fn consilience_step(worlds: &mut [Polity], _beat: u64) -> Vec<(String, u32, 
     recorded
 }
 
+/// **THE KNOWLEDGE MARKET** (INTELLIGENCE ARC C — trade minds, not just
+/// matter) — the board's once-per-beat circulation of vocabulary.
+///
+/// Every word any line has minted is a listing in the roster's pool. A
+/// line that LACKS a word may LICENSE it into its own library — knowledge
+/// spreads from the minds that forged it to the minds that can use it,
+/// the way a design or a business idea spreads once it exists. This FIRST
+/// cut prices the listing by its DEPTH (the length of the program it
+/// spells — a longer, harder-won word costs more) and gates the buy on
+/// the line's own PROSPERITY: it licenses only a word it can afford
+/// against its banked Crystal. So a rich, developed civilization acquires
+/// the ideas it lacks; a poor one cannot yet reach the deep ones. One
+/// license per line per beat, the cheapest it can afford — the market
+/// clears gradually, not in a flood.
+///
+/// Banked-neutral: the word is identity, and this cut does not yet MOVE
+/// the payment to the seller (the conserved buyer→seller settlement is
+/// the two-sided follow-up). The prosperity gate is the throttle.
+pub fn knowledge_market_step(worlds: &mut [Polity], _beat: u64) -> Vec<(String, usize)> {
+    // The roster's pool of words, deduped by orbit.
+    let mut pool: Vec<([u8; 32], Vec<u8>, Vec<[u8; 32]>)> = Vec::new();
+    let mut seen: std::collections::HashSet<[u8; 32]> = std::collections::HashSet::new();
+    for polity in worlds.iter() {
+        for (orbit, expansion, cited) in cfe::vocabulary::solver_words(polity.world.chronicle()) {
+            if seen.insert(orbit) {
+                pool.push((orbit, expansion, cited));
+            }
+        }
+    }
+    if pool.is_empty() {
+        return Vec::new(); // nothing minted yet — no market
+    }
+    // The price of a listing: the DEPTH of the word it spells (program
+    // length), derived from the word itself, never a dial.
+    let price_of = |expansion: &[u8]| -> usize {
+        solver_verify::program_from_bytes(expansion)
+            .map(|program| program.len())
+            .unwrap_or(0)
+            .max(1)
+    };
+    let mut licensed = Vec::new();
+    for buyer in 0..worlds.len() {
+        let own: std::collections::HashSet<[u8; 32]> =
+            cfe::vocabulary::solver_words(worlds[buyer].world.chronicle())
+                .into_iter()
+                .map(|(orbit, _, _)| orbit)
+                .collect();
+        let crystal = worlds[buyer]
+            .world
+            .orb()
+            .map(|orb| orb.banked_amount(cfe::dop::Resource::Crystal))
+            .unwrap_or_else(|| ratio(0, 1));
+        // The cheapest lacked word this line can afford — its first
+        // reachable idea.
+        let pick = pool
+            .iter()
+            .filter(|(orbit, _, _)| !own.contains(orbit))
+            .map(|(orbit, expansion, cited)| (price_of(expansion), orbit, expansion, cited))
+            .filter(|(price, _, _, _)| crystal >= ratio(*price as i64, 1))
+            .min_by_key(|(price, _, _, _)| *price);
+        if let Some((price, orbit, expansion, cited)) = pick {
+            if worlds[buyer]
+                .world
+                .license_knowledge_as(worlds[buyer].automaton, *orbit, expansion.clone(), cited.clone())
+                .is_ok()
+            {
+                licensed.push((worlds[buyer].spec.world_name.clone(), price));
+            }
+        }
+    }
+    licensed
+}
+
 /// MESH-1b (#2, the consumer slice): the conductor's side of the
 /// receipted handoff. `yield <world> <seat>` lines in the control
 /// file ask for the pen; the beat boundary is the one lawful moment

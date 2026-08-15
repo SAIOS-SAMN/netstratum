@@ -170,6 +170,10 @@ impl Replayer {
         // convergence — no committed field moves, so replay carries
         // nothing for it (the SolverWordMinted discipline).
         ClosureEvent::KnowledgeConverged { .. } => {}
+        // ARC C: a licensed word is a FOLD of this receipt (vocabulary::
+        // solver_words) — no committed field moves, so replay carries
+        // nothing for it (the SolverWordMinted discipline).
+        ClosureEvent::KnowledgeLicensed { .. } => {}
         // BOOK-1 (19_LENS §16) — the open registry rebuilds from
         // receipts alone, like every other committed ledger here.
         // LIT-1 — the literature rebuilds from receipts alone.

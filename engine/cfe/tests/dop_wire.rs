@@ -160,6 +160,12 @@ fn events_round_trip_through_their_wire_records() {
         },
         // CONSILIENCE (tag 177): signature ‖ mass ‖ hardness.
         ClosureEvent::KnowledgeConverged { signature: [9u8; 32], mass: 3, hardness: 2 },
+        // KNOWLEDGE MARKET (tag 178): orbit ‖ cited ‖ opaque expansion.
+        ClosureEvent::KnowledgeLicensed {
+            orbit: [8u8; 32],
+            expansion: vec![3, 1, 4],
+            cited: vec![[1u8; 32], [2u8; 32], [3u8; 32]],
+        },
         ClosureEvent::OfferCleared { offer: 7, deal: 100 },
         ClosureEvent::GaugeShiftedAt { grade: 2, gauge: ratio(2, 3) },
         ClosureEvent::InstrumentForged { orb_id: 4, tech_hash: [3u8; 32], grade: 3 },

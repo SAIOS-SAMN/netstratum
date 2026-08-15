@@ -268,6 +268,13 @@ fn main() {
                 "beat {beat}: CONSILIENCE — {world} shares a truth {mass} lines reached (hardness {hardness})"
             );
         }
+        // THE KNOWLEDGE MARKET (ARC C): a prosperous line licenses a word
+        // it lacks from the roster's pool — ideas circulate, not just matter.
+        for (world, price) in conductor::profile::timed("knowledge_market_step", || conductor::knowledge_market_step(&mut worlds, beat)) {
+            println!(
+                "beat {beat}: KNOWLEDGE MARKET — {world} licenses an idea (depth {price}); vocabulary spreads"
+            );
+        }
         // JOURNAL-1 (08 §3): on year boundaries every civilization
         // speaks — journals + the Terminal Wall regenerate lens-side.
         if beat.is_multiple_of(scribe::journal::YEAR_TICKS) {

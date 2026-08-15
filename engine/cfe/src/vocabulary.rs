@@ -645,10 +645,16 @@ pub fn solver_words(
 ) -> Vec<([u8; 32], Vec<u8>, Vec<[u8; 32]>)> {
     let mut out = Vec::new();
     for receipt in chronicle.receipts() {
-        if let crate::dop::ClosureEvent::SolverWordMinted { orbit, expansion, cited } =
-            &receipt.event
-        {
-            out.push((*orbit, expansion.clone(), cited.clone()));
+        // A line's vocabulary is the words it MINTED plus the words it
+        // LICENSED from the roster's pool (ARC C — knowledge circulates,
+        // not just matter). Both enter the library identically: same
+        // orbit, same expansion, same certificate.
+        match &receipt.event {
+            crate::dop::ClosureEvent::SolverWordMinted { orbit, expansion, cited }
+            | crate::dop::ClosureEvent::KnowledgeLicensed { orbit, expansion, cited } => {
+                out.push((*orbit, expansion.clone(), cited.clone()));
+            }
+            _ => {}
         }
     }
     out
