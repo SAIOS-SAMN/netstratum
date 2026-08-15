@@ -35,6 +35,10 @@ pub mod horizon;
 pub mod mirror;
 pub mod multivector;
 pub mod rational;
+// IAE-2 (homological ground): exact integer Smith Normal Form with full
+// unimodular witnesses — the substrate the sheaf cohomology stands on. Pure
+// exact-integer linear algebra, no cognition, so it belongs here.
+pub mod snf;
 pub mod vector_module;
 pub mod volume;
 pub mod wire;
