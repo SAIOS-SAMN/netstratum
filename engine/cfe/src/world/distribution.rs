@@ -273,64 +273,105 @@ impl World {
         self.surface_area_of(orb) * self.arable_ratio_of(orb)
     }
 
-    /// **THE POPULATION CEILING `K_pop`** (§2, COG Slice 2b) — the true
-    /// THERMODYNAMIC food capacity of the world, derived from the star, no
-    /// longer a flat zone count in a temperature bucket. Primary production
+    /// **THE PRIMARY PRODUCTION POTENTIAL** (COG Slice 2b/2c) — the absolute
+    /// thermodynamic food FLOW the star could grow over this world's arable
+    /// surface for THIS clade:
     ///
     /// ```text
-    ///   P_primary = I_norm × (Area × ρ + built) × η × REGROWTH_GRAIN
+    ///   P_primary = I_norm × (Area × ρ) × η × REGROWTH_GRAIN
     /// ```
     ///
-    /// is the star's raw insolation `I` delivered over the arable surface
-    /// `Area × ρ` (plus the granary/evolution footprint a line ADDS), gated
+    /// the star's raw insolation `I` delivered over the arable surface, gated
     /// by the sitting clade's biological efficiency `η = habitability` — the
-    /// CRUCIAL shift: habitability is no longer a cap on capacity, it is the
-    /// fraction of the raw starlight THIS species can convert. A clade
-    /// matched to its band reads η=1 and harvests the planet's full light; a
-    /// mismatched one (a flatlander on a scorched rock, a plasmoid on a
-    /// temperate world) reads η→0 and starves under the same sun. The
-    /// carrying capacity is then that production over the metabolic draw,
-    ///
-    /// ```text
-    ///   K = P_primary / per_capita_ration
-    /// ```
-    ///
-    /// so a bright/close star with a broad fertile world and a well-matched
-    /// species sustains a vast population (and, downstream, a deep mind),
-    /// while a dim dwarf or a barren rock or a mismatched clade sustains
-    /// almost none. The "habitable zone" is thus RELATIONAL — an intersection
-    /// of the star's output and a species' fold — never a fixed spatial ring.
-    pub fn population_ceiling(&self, orb: u64) -> Ratio {
+    /// crucial shift: habitability is not a cap on capacity, it is the
+    /// fraction of the raw starlight THIS species can convert. A clade matched
+    /// to its band reads η=1 and drinks the planet's full light; a mismatched
+    /// one (a flatlander on a scorched rock, a plasmoid on a temperate world)
+    /// reads η→0 and starves under the same sun. This is the CEILING the
+    /// syntropic and cultivated flows draw from — never itself the population
+    /// ceiling.
+    pub fn primary_production(&self, orb: u64) -> Ratio {
         let Some(region) = self.orb_region(orb) else {
             return ratio(0, 1);
         };
-        // η — the species' biological efficiency at this star's thermal band.
-        // A barren band (η=0) feeds nobody, whatever the raw light.
         let eta = crate::almanac::habitability(self.rejuvenation_clade(), region);
         if eta <= ratio(0, 1) {
             return ratio(0, 1);
         }
-        // A rate-0 capture line (plasmoid) has no ration-based population —
-        // it rides the energy economy (#29 deferred); no metabolic draw to
-        // divide by, so no ration ceiling.
-        let draw = self.per_capita_ration();
-        if draw <= ratio(0, 1) {
+        self.insolation_norm(orb)
+            * self.arable_area_of(orb)
+            * eta
+            * ratio(crate::almanac::REGROWTH_GRAIN, 1)
+    }
+
+    /// **THE SYNTROPIC BASELINE FLOW** (COG Slice 2c, operator ruling
+    /// 2026-08-15) — the WILD share of primary production the planet grows
+    /// with NO infrastructure and NO labor, driven purely by physics (the
+    /// star pumps it in). Because it is syntropic it can never sit at zero on
+    /// a lit, habitable world: a stock stripped bare regenerates to this
+    /// flow. A genesis band subsists on exactly this — gatherers on the wild
+    /// baseline — and it is the floor the ambient ration stock recovers to.
+    pub fn syntropic_flow(&self, orb: u64) -> Ratio {
+        // A quarter of the potential is the untended wild yield; the other
+        // three-quarters is unlocked only by cultivation (operator ruling
+        // 2026-08-15). The marginal habitable band already reads a quarter
+        // efficiency (`habitability` = 1/2² at the two-band edge), so a
+        // forager on the wild fringe gathering a quarter is the same law.
+        self.primary_production(orb) * ratio(1, 4) // APPROVED-SEED
+    }
+
+    /// **THE CULTIVATED YIELD** (COG Slice 2c) — the food FLOW extracted
+    /// ABOVE the wild baseline by infrastructure the civilization has RAISED:
+    /// its ration-producing zones (each scaled by its vigour), its granaries,
+    /// its earned evolutionary stage. Zero for a band that has built nothing
+    /// — the gatherers. This is the flow the Mind unlocks when starvation
+    /// forces it to invent cultivation, and it grows `K` past the wild limit.
+    /// Polymorphic: the ration is the sitting species' own metabolic carrier
+    /// (biomass, iron, …), so every clade cultivates its own energy.
+    pub fn cultivated_yield(&self, orb: u64) -> Ratio {
+        let Ration::Resource(ration) = self.ration_of(orb) else {
+            return ratio(0, 1); // element-eaters ride the element economy (#29)
+        };
+        let metabolism = self.genesis.as_ref().map(|held| held.metabolism).unwrap_or(2);
+        let Some(held) = self.orb_by_id(orb) else {
             return ratio(0, 1);
-        }
-        // The growing area: the planet's arable surface PLUS the provisioning
-        // footprint (granaries) and earned evolutionary stage — storage and
-        // advancement are area a line adds to what the planet gives, so their
-        // yield scales with the same insolation and efficiency.
+        };
+        let zone_flow: Ratio = held
+            .zones
+            .iter()
+            .filter(|zone| crate::dop::zone_yield(zone.kind, metabolism).0 == ration)
+            .map(|zone| crate::dop::zone_yield(zone.kind, metabolism).1 * held.zone_vigour(zone))
+            .fold(ratio(0, 1), |sum, yielded| sum + yielded);
         let built = ratio(
             (self.granary_footprint(orb) + self.evolution_stage() as u64) as i64,
             1,
         );
-        let area = self.arable_area_of(orb) + built;
-        let quantum = ratio(crate::almanac::REGROWTH_GRAIN, 1);
-        let p_primary = self.insolation_norm(orb) * area * eta * quantum;
-        // K = P_primary / metabolic draw, then the cooling/permanence
-        // factors (thermal-band ratchet and mobile-footprint trade) as before.
-        (p_primary / draw)
+        zone_flow + built
+    }
+
+    /// **THE DYNAMIC POPULATION CEILING `K_pop`** (§2, COG Slice 2c) — no
+    /// longer a fixed planetary limit but the SUM of the wild and cultivated
+    /// food flows over the metabolic draw:
+    ///
+    /// ```text
+    ///   K = (Syntropic Flow + Cultivated Yield) / per_capita_ration
+    /// ```
+    ///
+    /// A genesis band with no infrastructure is bounded by the syntropic flow
+    /// alone — it stabilizes at the wild limit, generating a standing
+    /// deficit. As the Mind invents cultivation and raises farms, the
+    /// cultivated yield lifts `K`, and the population climbs toward the
+    /// planet's full primary-production potential. The "habitable zone" is
+    /// thus RELATIONAL and the ceiling DYNAMIC — earned, not merely sited.
+    pub fn population_ceiling(&self, orb: u64) -> Ratio {
+        // A rate-0 capture line (plasmoid) has no ration-based population —
+        // it rides the energy economy (#29 deferred); no metabolic draw.
+        let draw = self.per_capita_ration();
+        if draw <= ratio(0, 1) {
+            return ratio(0, 1);
+        }
+        let flow = self.syntropic_flow(orb) + self.cultivated_yield(orb);
+        (flow / draw)
             * self.cooling_k_factor(orb)
             * self.footprint_permanence_factor(orb)
     }

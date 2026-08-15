@@ -207,14 +207,22 @@ fn a_bored_people_stalls_where_an_entertained_one_grows() {
 }
 
 #[test]
-fn starvation_crashes_where_a_stall_merely_holds() {
-    // The severity ordering (§2): a leisure-short people STALLS (holds,
-    // does not die), but a calorie-short people STARVES (crashes to zero).
-    // Stall is the milder tier, and it fires before any cull.
+fn starvation_culls_to_the_syntropic_limit_where_a_stall_merely_holds() {
+    // The severity ordering (§2), UPDATED for the syntropic baseline (COG
+    // Slice 2c): a leisure-short people STALLS (holds, does not die), and a
+    // calorie-short people STARVES — but starvation now regresses the
+    // overpopulated line to the WILD carrying capacity it can gather, it does
+    // NOT spiral to extinction (the star keeps feeding the baseline). The
+    // massive seed is culled hard toward the syntropic limit, while the
+    // stalled line simply holds; both endure.
     let (stalled, _) = population_after(society(6, 2, false, 10), 5);
     let (starved, _) = population_after(society(6, 2, true, 6000), 5);
     assert!(stalled > 0, "a stalled (bored but fed) people endures: {stalled}");
-    assert_eq!(starved, 0, "a starved (overpopulated) people crashes to nothing");
+    assert!(starved > 0, "a starved people stabilizes at the wild limit, not extinction: {starved}");
+    assert!(
+        starved < 6000,
+        "and the overshoot is culled hard toward that limit: {starved} << 6000"
+    );
 }
 
 #[test]

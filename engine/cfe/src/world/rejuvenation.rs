@@ -265,7 +265,19 @@ impl World {
             Some((res, signed)) if res == resource => signed,
             _ => ratio(0, 1),
         };
-        let available = held.banked_amount(resource) + harvested + natural;
+        // THE SYNTROPIC BASELINE (COG Slice 2c, operator ruling 2026-08-15) —
+        // the WILD food the band GATHERS from the planet's untended primary
+        // production, ambient and physics-driven (`syntropic_flow`). It is
+        // eaten, not banked, so it never appears in the ledger — the debit
+        // (economy.rs) draws only on the stored bank, leaving this free. Its
+        // purpose is the syntropic cap on the extinction vent: even with the
+        // ambient stock eaten to zero a band always has the wild flow to eat,
+        // so the starvation cull regresses it to the SYNTROPIC LIMIT
+        // (`syntropic_flow / per_capita`) and holds it there — a standing
+        // deficit that drives the Mind to invent cultivation, never a spiral
+        // to extinction. Zero on a barren or unsited world, so those still die.
+        let syntropic = self.syntropic_flow(orb) * dtr.clone();
+        let available = held.banked_amount(resource) + harvested + natural + syntropic;
         if available >= demand {
             // FED — births ride the #28 logistic on PEOPLE toward K_pop,
             // less the ordinary mortality; the people eat their full demand.

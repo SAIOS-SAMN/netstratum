@@ -324,6 +324,32 @@ fn a_small_fed_population_grows_instead_of_freezing() {
 }
 
 #[test]
+fn an_overgrown_line_stabilizes_at_the_syntropic_limit_never_extinct() {
+    // COG Slice 2c — the syntropic baseline caps the extinction vent. A band
+    // that grows past what it can gather does NOT collapse: the star keeps
+    // feeding the wild baseline (`syntropic_flow`), so the starvation cull
+    // regresses the line to that limit and HOLDS it there, alive, forever — a
+    // standing deficit, never a spiral to zero. (Before the baseline this
+    // exact seed grew, ate the ambient stock to zero, and reached 0 clones by
+    // the sixteenth collect — entropy winning an uncapped vent.)
+    let mut world = peopled(8, 2, 2);
+    let mut trajectory = Vec::new();
+    for _ in 0..40 {
+        for _ in 0..8 {
+            world.tick();
+        }
+        world.collect().expect("the line never collapses — syntropy floors it");
+        trajectory.push(world.population_of(FIRST_ORB));
+    }
+    let tail_min = *trajectory[30..].iter().min().expect("tail");
+    assert!(
+        tail_min > 0,
+        "the line endures at the wild limit across the whole tail — no famine spiral: {trajectory:?}"
+    );
+    assert_eq!(replay(world.chronicle()), world.committed(), "replay MATCHES");
+}
+
+#[test]
 fn the_settle_denominator_stays_bounded_over_many_collects() {
     // THE #28 LATTICE GUARD. The regrowth logistic is an exact rational
     // whose denominator compounds each time its output banks and feeds
