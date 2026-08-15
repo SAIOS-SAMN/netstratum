@@ -1,0 +1,11 @@
+[package]
+name = "iae"
+version = "0.1.0"
+edition = "2021"
+description = "The thought engine — exact algebraic cognition vendored from ipsal-autic-v0.4. IAE-1: the transport pair Φ/Φ⁻¹ on the substrate multivector."
+
+[dependencies]
+substrate = { path = "../substrate" }
+num-bigint.workspace = true
+num-traits.workspace = true
+thiserror.workspace = true

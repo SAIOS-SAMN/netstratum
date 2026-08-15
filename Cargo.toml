@@ -1,13 +1,18 @@
 [workspace]
 resolver = "2"
 members = [
-    "engine/ratio","engine/cfe", "engine/kernel", "engine/codec", "engine/rfa-core", "engine/physics", "engine/solver", "engine/solver-verify", "engine/scribe", "engine/ledger", "engine/lens", "engine/conductor", "engine/mesh", "clients/cli", "xtask"]
+    "engine/ratio","engine/cfe", "engine/kernel", "engine/codec", "engine/rfa-core", "engine/physics", "engine/solver", "engine/solver-verify", "engine/scribe", "engine/ledger", "engine/lens", "engine/conductor", "engine/mesh", "engine/substrate", "engine/iae", "clients/cli", "xtask"]
 
 [workspace.dependencies]
 blake3 = "1.5"
 num-bigint = "0.4"
 num-rational = "0.4"
 num-traits = "0.2"
+# The thought engine's ground (IAE-1, vendored from ipsal-autic-v0.4):
+# substrate's exact-ℚ Clifford algebra needs these two beyond the num-*
+# trio the game already carries.
+num-integer = "0.1"
+thiserror = "1.0"
 
 # THE TACTICAL BLEED (operator order 2026-08-12): tests were running
 # exact-rational physics at opt-level 0 — the slowest possible
