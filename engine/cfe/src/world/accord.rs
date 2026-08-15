@@ -243,7 +243,13 @@ impl World {
                 .unwrap_or_else(|| ratio(0, 1));
             held.banked_amount(resource) - decay
         };
-        let pay = owed.clone().min(affordable);
+        // Floored at zero: a bond DELIVERS, never claws back. When the
+        // source is insolvent (`affordable < 0` — its bank sits below the
+        // decay due, e.g. a colony that produces none of this resource
+        // yet), the stream is nothing, not a NEGATIVE transfer that would
+        // debit the target and credit the source (the wrong side, which
+        // `kernel::admits` rightly refuses as `AmountNotPositive`).
+        let pay = owed.clone().min(affordable).max(ratio(0, 1));
         let insolvent = pay < owed;
         let ended = ending.is_some() || insolvent;
         // The caller's ruling wins (expiry: zero — the term was

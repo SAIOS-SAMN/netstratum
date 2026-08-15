@@ -2498,14 +2498,28 @@ impl Polity {
             let name = format!("{}-orb{}", self.spec.world_name, orbs.len());
             let _ = self.world.chart_as(self.automaton, &name, home);
         }
-        // Weave / maintain the internal supply ring over every orb.
-        let orbs: Vec<u64> =
-            self.world.committed().orbs.iter().map(|o| o.orb_id).collect();
+        // Weave / maintain the internal supply ring over every orb — but
+        // only an edge its SOURCE can sustain. A colony that banks no
+        // biomass yet cannot stream it; sealing such an edge would settle
+        // to nothing and sever every beat, a churn of re-seals. So an
+        // orb joins the ring as a source only once it holds the rate it
+        // would owe. The ring fills in as biomass propagates around it,
+        // and the cycles it closes are the rank the mind stands on.
+        let committed = self.world.committed();
+        let orbs: Vec<(u64, Ratio)> = committed
+            .orbs
+            .iter()
+            .map(|o| (o.orb_id, o.banked_amount(cfe::dop::Resource::Biomass)))
+            .collect();
         if orbs.len() >= 2 {
             if let Some(rate) = cfe::dop::Positive::new(ratio(1, 1)) {
                 for i in 0..orbs.len() {
-                    let (from, to) = (orbs[i], orbs[(i + 1) % orbs.len()]);
-                    if let Some(pair) = cfe::dop::Between::new(from, to) {
+                    let (from, held) = &orbs[i];
+                    if *held < ratio(1, 1) {
+                        continue; // a source that cannot stream does not bond
+                    }
+                    let to = orbs[(i + 1) % orbs.len()].0;
+                    if let Some(pair) = cfe::dop::Between::new(*from, to) {
                         let _ = self.world.seal_bond_as(
                             self.automaton,
                             pair,
