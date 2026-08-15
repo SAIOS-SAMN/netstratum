@@ -233,6 +233,81 @@ pub fn mint_cost(residual: &[BigInt], torsion: &[BigInt]) -> BigInt {
     betti_extent + torsion_shear
 }
 
+/// **THE STRATIFIED DRIVES** (doc 52 §7 / the operator's drive-ladder ruling
+/// 2026-08-15) — a civilization's needs in STRICT Maslow priority. Supply fills
+/// each tier in turn and only the surplus ABOVE one tier's demand spills to the
+/// next, so the same waterfall that meets survival also decides what abundance
+/// is FOR. Ordered: the discriminant is the priority.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Drive {
+    /// Tier 1 — the caloric floor (`pop × per_capita`). Unmet ⇒ STARVATION.
+    Metabolic,
+    /// Tier 2 — containment against the demurrage the surplus sheds (SINK-1 /
+    /// 05 §1.4). Unmet ⇒ entropy wins; the Mind is driven to mint storage.
+    Homeostatic,
+    /// Tier 3 — the leisure the cognitive caste demands to fund thought. Unmet
+    /// ⇒ the Mind cannot afford to mint (the metabolic bound on cognition).
+    Cognitive,
+    /// Tier 4 — reach into new niches. Unmet ⇒ confined to the local well.
+    Expansive,
+}
+
+/// One tier's reading in the cascade: what it demanded, what the flow reaching
+/// it could meet, and the deficit that survived (`0` when fully met).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct TierReading {
+    pub drive: Drive,
+    pub demand: Ratio,
+    pub met: Ratio,
+    pub deficit: Ratio,
+}
+
+/// The outcome of pouring one beat's supply through the stratified demand.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Cascade {
+    /// Per tier, in priority order: demand / met / surviving deficit.
+    pub tiers: Vec<TierReading>,
+    /// The surplus that survives EVERY tier — the LEISURE the Mind banks to
+    /// fund minting (COG-1). Zero the moment any tier is left wanting.
+    pub leisure: Ratio,
+    /// The FIRST tier left with a deficit — the binding constraint. `Metabolic`
+    /// here is STARVATION (the classic crisis, halt); a higher tier is
+    /// STAGNATION (fed, but an unmet drive whose γ routes to the proposer as a
+    /// NON-food need). `None` ⇒ every drive met, pure surplus to leisure.
+    pub binding: Option<Drive>,
+}
+
+/// **THE CASCADE PEEL** (COG-1) — pour `supply` (the metabolic carrier's total
+/// flow this beat: syntropic + cultivated) through the stratified `demands` in
+/// STRICT priority order. Each tier takes what it can (the min of the flow
+/// reaching it and its demand); the deficit that survives is that drive's γ; the
+/// surplus spills to the next tier. Whatever survives the lowest tier is
+/// LEISURE — the budget banked to fund thought. Exact-rational throughout; a
+/// negative demand is treated as no demand (a tier the line does not feel).
+///
+/// This is the separation the whole arc turns on: a metabolic deficit is
+/// STARVATION and halts the waterfall at the floor; a deficit only at a higher
+/// tier is STAGNATION — the line is fed, but its surplus has nowhere productive
+/// to go, so the binding γ is a call for storage, amenities, or invention, not
+/// for food.
+pub fn cascade(supply: Ratio, demands: &[(Drive, Ratio)]) -> Cascade {
+    let zero = ratio(0, 1);
+    let mut flow = supply.max(zero.clone());
+    let mut tiers = Vec::with_capacity(demands.len());
+    let mut binding = None;
+    for (drive, raw_demand) in demands {
+        let demand = raw_demand.clone().max(zero.clone());
+        let met = flow.clone().min(demand.clone());
+        let deficit = (demand.clone() - flow.clone()).max(zero.clone());
+        if deficit > zero && binding.is_none() {
+            binding = Some(*drive);
+        }
+        flow = (flow - demand.clone()).max(zero.clone());
+        tiers.push(TierReading { drive: *drive, demand, met, deficit });
+    }
+    Cascade { tiers, leisure: flow, binding }
+}
+
 /// A BLAKE3-seeded index in `[0, bound)` — the Mind's chance, replayable.
 fn seeded_index(seed: [u8; 32], salt: &[u8], bound: u64) -> u64 {
     let mut hasher = blake3::Hasher::new();
@@ -344,6 +419,70 @@ mod tests {
         // the structure's boundary is species-relative.
         let plasmic = fold_generators(&fold, 3, &axes); // 3 = plasmic
         assert_eq!(plasmic.len(), generators.len(), "same fold, per-species capacity");
+    }
+
+    fn r(n: i64, d: i64) -> Ratio {
+        ratio(n, d)
+    }
+
+    #[test]
+    fn the_cascade_separates_starvation_from_stagnation() {
+        use Drive::*;
+        // STARVATION — supply below the metabolic floor. The waterfall halts at
+        // tier 1: the binding constraint is Metabolic, no surplus survives, and
+        // the higher tiers get nothing.
+        let starving = cascade(
+            r(3, 1),
+            &[(Metabolic, r(10, 1)), (Homeostatic, r(5, 1)), (Cognitive, r(8, 1))],
+        );
+        assert_eq!(starving.binding, Some(Metabolic), "an unmet floor is starvation");
+        assert_eq!(starving.tiers[0].met, r(3, 1));
+        assert_eq!(starving.tiers[0].deficit, r(7, 1), "the caloric shortfall");
+        assert_eq!(starving.tiers[2].met, r(0, 1), "nothing reaches cognition");
+        assert_eq!(starving.leisure, r(0, 1), "a starving line banks no leisure");
+
+        // STAGNATION — fed past the floor, but the surplus cannot cover the
+        // cognitive demand. The binding constraint is a HIGHER tier (Cognitive),
+        // NOT Metabolic: the line is fed yet its Mind is starved of leisure. This
+        // is the Sated crisis the flat model could never express.
+        let stagnant = cascade(
+            r(25, 1),
+            &[(Metabolic, r(10, 1)), (Homeostatic, r(5, 1)), (Cognitive, r(30, 1))],
+        );
+        assert_eq!(stagnant.tiers[0].deficit, r(0, 1), "the floor IS met — not starving");
+        assert_eq!(stagnant.tiers[1].deficit, r(0, 1), "containment met too");
+        assert_eq!(stagnant.binding, Some(Cognitive), "the binding γ is a cognitive need, not food");
+        assert_eq!(stagnant.tiers[2].met, r(10, 1), "10 of the 30 cognitive demand covered");
+        assert_eq!(stagnant.leisure, r(0, 1), "no surplus survives an unmet cognitive tier");
+    }
+
+    #[test]
+    fn abundance_survives_the_lowest_tier_as_leisure() {
+        use Drive::*;
+        // Every tier met, with room to spare: the surplus that survives the
+        // whole waterfall is the leisure the Mind banks. 100 − (10+20+30) = 40.
+        let rich = cascade(
+            r(100, 1),
+            &[(Metabolic, r(10, 1)), (Homeostatic, r(20, 1)), (Cognitive, r(30, 1))],
+        );
+        assert_eq!(rich.binding, None, "no drive left wanting");
+        assert!(rich.tiers.iter().all(|t| t.deficit == r(0, 1)), "all tiers met");
+        assert_eq!(rich.leisure, r(40, 1), "the surplus above every drive is leisure");
+    }
+
+    #[test]
+    fn priority_is_strict_a_lower_tier_binds_first() {
+        use Drive::*;
+        // Both homeostatic and cognitive go unmet, but the FIRST unmet tier is
+        // the binding one — priority is strict, not a max over deficits.
+        let c = cascade(r(12, 1), &[(Metabolic, r(10, 1)), (Homeostatic, r(9, 1)), (Cognitive, r(9, 1))]);
+        assert_eq!(c.binding, Some(Homeostatic), "the lower unmet tier binds, not the larger deficit");
+        assert_eq!(c.tiers[1].met, r(2, 1), "homeostatic takes the 2 surplus after the floor");
+        assert_eq!(c.tiers[2].met, r(0, 1), "nothing spills past the unmet homeostatic tier");
+        // A negative demand is simply a drive not felt — it passes surplus on.
+        let unfelt = cascade(r(10, 1), &[(Metabolic, r(4, 1)), (Cognitive, r(-3, 1))]);
+        assert_eq!(unfelt.binding, None, "a drive not felt is never a deficit");
+        assert_eq!(unfelt.leisure, r(6, 1), "the unfelt tier passes its surplus straight through");
     }
 
     #[test]
