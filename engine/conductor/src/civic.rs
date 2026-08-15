@@ -308,6 +308,34 @@ pub fn cascade(supply: Ratio, demands: &[(Drive, Ratio)]) -> Cascade {
     Cascade { tiers, leisure: flow, binding }
 }
 
+/// **THE LIVE CASCADE** (COG-1) — read a colony's stratified demand from its
+/// real committed state and pour the beat's food flow through it. Supply is the
+/// total metabolic flow this beat (the syntropic WILD gather plus the CULTIVATED
+/// yield — the same two the population eats). The tiers, in priority:
+///   * **Metabolic** = `population × per_capita_ration` — the caloric floor.
+///   * **Cognitive** = `cognition caste × per_capita_ration` — the leisure the
+///     thinkers draw to fund thought (the cognition caste is the mouths that
+///     eat perspective, not bread).
+///
+/// The Homeostatic tier is DEFERRED until containment state lands — a colony
+/// with no storage structure feels no containment demand yet, so it is omitted
+/// rather than stubbed at a false deficit. The surplus surviving both tiers is
+/// the LEISURE the beat banks (`settle_leisure`); the `binding` tier names the
+/// crisis: Metabolic is STARVATION, Cognitive is STAGNATION (fed, but the Mind
+/// is short of the leisure to think).
+pub fn cascade_reading(world: &cfe::world::World, orb: u64) -> Cascade {
+    let per_capita = world.per_capita_ration();
+    let pop = ratio(world.population_of(orb) as i64, 1);
+    // The cognition caste — the line's thinkers, the mouths that eat leisure.
+    let cognition = ratio(world.caste_of(orb, cfe::dop::Caste::Cognition) as i64, 1);
+    let supply = world.syntropic_flow(orb) + world.cultivated_yield(orb);
+    let demands = [
+        (Drive::Metabolic, pop * per_capita.clone()),
+        (Drive::Cognitive, cognition * per_capita),
+    ];
+    cascade(supply, &demands)
+}
+
 /// A BLAKE3-seeded index in `[0, bound)` — the Mind's chance, replayable.
 fn seeded_index(seed: [u8; 32], salt: &[u8], bound: u64) -> u64 {
     let mut hasher = blake3::Hasher::new();

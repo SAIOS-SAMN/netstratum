@@ -167,3 +167,64 @@ fn the_live_peel_reads_real_state_and_names_known_structures() {
         "a line with a deficit either named a build or surfaced a research wall on real state"
     );
 }
+
+/// **THE LIVE CASCADE** (COG-1) — read the stratified drive vector from real
+/// founded worlds and pour their food flow through it. The pins assert the
+/// cascade is coherent on live data: every tier conserves (met + deficit =
+/// demand), a fed line's metabolic floor is covered, and abundance surfaces as
+/// bankable leisure — the surplus that will fund the Mind.
+#[test]
+fn the_live_cascade_stratifies_real_demand_and_surfaces_leisure() {
+    let root = scratch("cascade");
+    let worlds = run_era(&root.to_string_lossy(), 15);
+    assert!(worlds.len() >= 3, "the roster founded");
+    let primary = cfe::world::FIRST_ORB;
+
+    let zero = cfe::ratio::ratio(0, 1);
+    let mut populated = 0usize; // lines with a live population (the Awakening)
+    let mut banked_leisure = 0usize; // lines whose abundance survives as leisure
+    let mut fed = 0usize; // lines whose metabolic floor is fully met
+
+    for polity in &worlds {
+        let world = &polity.world;
+        if world.orb().is_none() || world.population_of(primary) == 0 {
+            continue;
+        }
+        populated += 1;
+        let c = civic::cascade_reading(world, primary);
+
+        // CONSERVATION — every tier splits its demand exactly: what the flow
+        // reaching it met, plus the deficit that survived, equals the demand.
+        for tier in &c.tiers {
+            assert_eq!(
+                tier.met.clone() + tier.deficit.clone(),
+                tier.demand,
+                "cascade tier {:?} broke conservation on real state",
+                tier.drive
+            );
+            assert!(tier.met >= zero && tier.deficit >= zero, "no negative met/deficit");
+        }
+        // Leisure is never negative, and it is positive ONLY when every tier
+        // was met (a binding deficit halts the waterfall and banks nothing).
+        assert!(c.leisure >= zero, "leisure never goes negative");
+        if c.leisure > zero {
+            assert_eq!(c.binding, None, "leisure survives only when no drive is left wanting");
+            banked_leisure += 1;
+        }
+        // The metabolic floor is tier 0; a fed line covers it (deficit 0).
+        if c.tiers[0].deficit == zero {
+            fed += 1;
+        }
+    }
+
+    eprintln!(
+        "LIVE CASCADE: {populated} populated lines · {fed} fed at the floor · \
+         {banked_leisure} banking leisure"
+    );
+    // The Awakening seated founding bands, so the era carries live populations;
+    // the cascade reads them, and their planetary-scale food flow leaves most
+    // of them fed with a surplus to bank — the abundance that funds the Mind.
+    assert!(populated >= 3, "the cascade ran over at least three populated lines");
+    assert!(fed >= 1, "at least one line clears its metabolic floor");
+    assert!(banked_leisure >= 1, "abundance surfaces as bankable leisure on real state");
+}
