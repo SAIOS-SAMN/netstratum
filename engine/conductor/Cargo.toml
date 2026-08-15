@@ -30,6 +30,11 @@ num-traits.workspace = true
 # Dev-only (the arrow-law guard's own note: dev-deps are lawful).
 kernel = { path = "../kernel" }
 solver-verify = { path = "../solver-verify" }
+# IAE-7: the cognitive engine, wired in as a DEV dependency first — the
+# compounding benchmark exercises it over real forged tasks without touching
+# the live economic beat (the golden mint_loop pins stay byte-identical).
+iae = { path = "../iae" }
+blake3.workspace = true
 
 [[bin]]
 name = "conductor"

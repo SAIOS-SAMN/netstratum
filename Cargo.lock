@@ -74,8 +74,10 @@ dependencies = [
 name = "conductor"
 version = "0.1.0"
 dependencies = [
+ "blake3",
  "cfe",
  "codec",
+ "iae",
  "kernel",
  "ledger",
  "mesh",
