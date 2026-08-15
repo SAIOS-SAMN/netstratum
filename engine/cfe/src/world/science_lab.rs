@@ -105,6 +105,29 @@ impl World {
         self.science_rank(orb, discipline) >= 1
     }
 
+    /// **COGNITIVE CAPACITY** (COG-6) — the deepest thought this colony's built
+    /// brain can contain, in compose-depth. Leisure buys the TIME to think; this
+    /// bounds the SIZE — you cannot contain an 11-dimensional bridge in a mud
+    /// hut. The apparatus is the seated HARD-COGNITIVE sciences (Math, Physics,
+    /// Research — the Academy/Observatory in all but name), each a paid, built
+    /// research institution. BASIC invention is universal — every line can
+    /// compose a depth-2 tool (knap flint), the minimum a mint requires — but
+    /// the depth-3 FRONTIER (the particle accelerator, the 11-dimensional
+    /// bridge) is contained only by a built brain: it opens once a hard-
+    /// cognitive science (Math, Physics, Research) is seated. A mud hut invents
+    /// the simple; the Academy invents the deep. To think a bigger thought,
+    /// build a bigger brain. Read into `Need::capacity`; the search composes no
+    /// deeper. (COG-8 gives the conductor the drive to build this apparatus.)
+    pub fn cognitive_capacity(&self, orb: u64) -> usize {
+        use crate::almanac::science::ScienceDiscipline::{Math, Physics, Research};
+        let brain = [Math, Physics, Research]
+            .into_iter()
+            .map(|d| self.science_rank(orb, d))
+            .max()
+            .unwrap_or(0) as usize;
+        (2 + brain).min(3)
+    }
+
     pub fn require_science_seat(
         &self,
         orb: u64,

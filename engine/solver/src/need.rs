@@ -80,6 +80,14 @@ pub struct Need {
     /// untouched, so a young line is never starved of the depth it needs
     /// to climb to the rung where it can expand (the B-E1 deadlock).
     pub reach_bonus: usize,
+    /// **THE INFRASTRUCTURE CEILING** (COG-6) — the deepest thought the
+    /// civilization's built COGNITIVE APPARATUS can contain. Leisure buys the
+    /// TIME to think (COG-1/3); this bounds the SIZE: you cannot contain an
+    /// 11-dimensional bridge in a mud hut. Set by the conductor from the seated
+    /// research sciences (an Academy in all but name). `0` means UNCAPPED — the
+    /// standing no-overfit frontier stands, so a line that never sets it (every
+    /// test, the sweep path) is unchanged.
+    pub capacity: usize,
 }
 
 impl Need {
@@ -90,7 +98,7 @@ impl Need {
 
     /// One struck want with its reading.
     pub fn struck(hunger: Hunger, starved_for: u64) -> Need {
-        Need { hungers: vec![hunger], starved_for, thin: Vec::new(), reach_bonus: 0 }
+        Need { hungers: vec![hunger], starved_for, thin: Vec::new(), reach_bonus: 0, capacity: 0 }
     }
 
     /// Map the chronicle's `(kind, reading)` wants into a reach.
@@ -106,7 +114,7 @@ impl Need {
                 starved_for = starved_for.max(reading);
             }
         }
-        Need { hungers, starved_for, thin: Vec::new(), reach_bonus: 0 }
+        Need { hungers, starved_for, thin: Vec::new(), reach_bonus: 0, capacity: 0 }
     }
 
     /// THE DEPTH THE NEED WILL COMPOSE TO.
@@ -134,7 +142,15 @@ impl Need {
         // real structure and starts memorising noise. Beyond 3, capability
         // grows only by CONDENSATION (a composed word becoming one deeper
         // letter), not by reaching further into the closed algebra.
-        (hunger + self.reach_bonus).min(3)
+        //
+        // **THE INFRASTRUCTURE CEILING** (COG-6) — the mind composes only as
+        // deep as its built apparatus contains, never past it, however much
+        // leisure or rank it has. `capacity == 0` is uncapped (the standing
+        // frontier); a set capacity caps below it, so a mud-hut line (no
+        // research seated) is held to the shallowest thought until it builds a
+        // bigger brain. Leisure buys the time; infrastructure bounds the size.
+        let frontier = if self.capacity == 0 { 3 } else { self.capacity.min(3) };
+        (hunger + self.reach_bonus).min(frontier)
     }
 
     /// Does this need reach for `family` before the others?
@@ -156,6 +172,29 @@ impl Need {
                 None => matches!(family, Family::Tile | Family::Object),
             },
         })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn infrastructure_caps_the_mind() {
+        // A long-starved, structurally deep line WANTS the frontier...
+        let mut deep = Need::struck(Hunger::Novelty, 500);
+        deep.reach_bonus = 2;
+        assert_eq!(deep.compose_limit(), 3, "uncapped (capacity 0), it reaches the no-overfit frontier");
+        // ...but a mud hut (no brain built, capacity 1) holds it to the
+        // shallowest thought, however starved or developed it is.
+        deep.capacity = 1;
+        assert_eq!(deep.compose_limit(), 1, "no apparatus, no deep thought");
+        // A built brain lifts the ceiling one rung at a time.
+        deep.capacity = 2;
+        assert_eq!(deep.compose_limit(), 2, "a bigger brain contains a bigger thought");
+        // But infrastructure can never buy PAST the overfit frontier.
+        deep.capacity = 9;
+        assert_eq!(deep.compose_limit(), 3, "the no-overfit frontier still stands above any apparatus");
     }
 }
 

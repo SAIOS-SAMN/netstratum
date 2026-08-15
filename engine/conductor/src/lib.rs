@@ -710,6 +710,7 @@ impl Trajectory {
                     starved_for: starved,
                     thin: Vec::new(),
                     reach_bonus: 0,
+                    capacity: 0,
                 },
             },
         }
@@ -2494,7 +2495,7 @@ impl Polity {
             true => 0,
             false => found.max(linked),
         };
-        Need { hungers, starved_for, thin: Vec::new(), reach_bonus: 0 }
+        Need { hungers, starved_for, thin: Vec::new(), reach_bonus: 0, capacity: 0 }
     }
 
     /// **MULTI-ORB EXPANSION** (INTELLIGENCE ARC A1) — a matured
@@ -2748,6 +2749,11 @@ impl Polity {
             let reach = |polity: &mut Self| {
                 let mut need =
                     polity.trajectory.need_of(polity.hunger().hungers, polity.starved);
+                // **THE INFRASTRUCTURE CEILING** (COG-6) — bound the reach depth
+                // by the built cognitive apparatus. A mud-hut line (no research
+                // seated) thinks only the shallowest thought however much leisure
+                // it banks; to compose deeper it must build a bigger brain.
+                need.capacity = polity.world.cognitive_capacity(cfe::world::FIRST_ORB);
                 // ORBIT-DIRECTED HUNGER (38 §6), THE ALGEBRAIC FORM: a
                 // starving mind RESOLVES its own knowledge into one
                 // coherent frame (`knowledge_order` runs the spanning-

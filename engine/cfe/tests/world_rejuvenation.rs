@@ -305,6 +305,22 @@ fn a_band_past_the_wild_flow_draws_the_cultivated_granary() {
 }
 
 #[test]
+fn infrastructure_bounds_the_mind_a_mud_hut_cannot_reach_the_frontier() {
+    // COG-6: a colony with no seated cognitive science invents the SIMPLE — a
+    // depth-2 tool, the minimum a mint requires — but its brain cannot contain
+    // the depth-3 FRONTIER, however much leisure it banks. Only a built research
+    // apparatus (Math/Physics/Research) opens the deepest thought.
+    let world = greenhold(8);
+    assert_eq!(
+        world.cognitive_capacity(FIRST_ORB),
+        2,
+        "an unseated colony invents the simple (depth 2) but not the frontier"
+    );
+    // The ceiling never exceeds the no-overfit frontier, whatever is built.
+    assert!(world.cognitive_capacity(FIRST_ORB) <= 3, "capacity is bounded by the frontier");
+}
+
+#[test]
 fn the_sated_collapse_a_fed_but_indebted_line_contracts() {
     // TFR term III — the second face of death. A solvent line's economic
     // contentment IS its leisure stability (the unified gate subsumes the old
