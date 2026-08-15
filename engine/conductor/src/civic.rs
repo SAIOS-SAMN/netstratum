@@ -372,6 +372,35 @@ pub fn cascade_reading(world: &cfe::world::World, orb: u64) -> Cascade {
     cascade(supply, &demands)
 }
 
+/// **THE STRESS INDEX σ** (COG-7) — a colony's thermodynamic stress in `[0, 1]`,
+/// the blend coefficient between instinct (exploit) and curiosity (explore). It
+/// reads the live cascade: a line whose METABOLIC floor is unmet is starving and
+/// stressed to the maximum (σ = 1 — pure instinct, no energy for research);
+/// otherwise σ is the unmet fraction of its COGNITIVE tier — a line whose
+/// thinkers are fully fed reads σ = 0 (sated, free to explore), one whose leisure
+/// only partly covers them reads a genuine blend. Exact-rational; no new dial.
+pub fn stress(world: &cfe::world::World, orb: u64) -> Ratio {
+    let c = cascade_reading(world, orb);
+    if c.binding == Some(Drive::Metabolic) {
+        return ratio(1, 1); // starving — no metabolic luxury for curiosity
+    }
+    for tier in &c.tiers {
+        if tier.drive == Drive::Cognitive && tier.demand > ratio(0, 1) {
+            return (tier.deficit.clone() / tier.demand.clone()).min(ratio(1, 1));
+        }
+    }
+    ratio(0, 1) // sated
+}
+
+/// σ quantised onto a 64-lattice as `(numerator, 64)`, for the exact-integer
+/// blend — the same melt grid the rest of the economy speaks. A caller with no
+/// world clock hands this straight to [`instinct::blend`].
+pub fn stress_quantized(world: &cfe::world::World, orb: u64) -> (u64, u64) {
+    let scaled = (stress(world, orb) * ratio(64, 1)).round().to_integer();
+    let num = scaled.to_u64().unwrap_or(0).min(64);
+    (num, 64)
+}
+
 /// A BLAKE3-seeded index in `[0, bound)` — the Mind's chance, replayable.
 fn seeded_index(seed: [u8; 32], salt: &[u8], bound: u64) -> u64 {
     let mut hasher = blake3::Hasher::new();

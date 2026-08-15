@@ -112,6 +112,56 @@ pub fn choose(weights: &[(Family, u64)], seed: [u8; 32]) -> Option<Family> {
     None
 }
 
+/// **THE STRESS BLEND** (COG-7 — the Explore/Exploit tradeoff, thermodynamically
+/// gated). Two opposing biases: the THICK habit (`instinct`, reach for your rut)
+/// and the THIN curiosity (`curiosity`, the `knowledge_order` frontier — reach
+/// for what you lack). Curiosity is a high-entropy, expensive search that only a
+/// line with surplus can afford; instinct is the low-energy path of least
+/// homological resistance. So the composition is gated by thermodynamic stress:
+///
+/// ```text
+///   W = σ · Î + (1 − σ) · Ĉ        (over NORMALISED distributions)
+/// ```
+///
+/// σ → 1 (starving, pinned at the syntropic limit, existential γ): the draw
+/// collapses onto instinct — a stressed colony desperately reaches for the tools
+/// that saved it before, culturally rigid. σ → 0 (full granaries, banked
+/// leisure): the draw favours curiosity — a prosperous empire has the metabolic
+/// luxury to explore its frontier and diversify.
+///
+/// EXACT-INTEGER: σ arrives quantised as `sigma_num/sigma_den` (the caller
+/// clamps `sigma_num ≤ sigma_den`). Each distribution is normalised to its own
+/// total, then the blend is cleared to a common denominator so the returned
+/// weights are exact integers — `choose` only needs their ratios, and the shared
+/// denominator cancels in the draw.
+pub fn blend(
+    instinct: &[(Family, u64)],
+    curiosity: &[Family],
+    sigma_num: u64,
+    sigma_den: u64,
+) -> Vec<(Family, u64)> {
+    let i_total: u64 = instinct.iter().map(|(_, w)| *w).sum::<u64>().max(1);
+    let n = curiosity.len().max(1) as u64;
+    // Curiosity ranks: thinnest-first (position 0) is the most peripheral, so it
+    // takes the largest rank weight `n`; the sum of ranks is the triangular n.
+    let c_total = (n * (n + 1) / 2).max(1);
+    let sn = sigma_num.min(sigma_den); // clamp σ ≤ 1
+    let inv = sigma_den - sn; // (1 − σ) numerator over the same denom
+    FAMILIES
+        .iter()
+        .map(|f| {
+            let i_f = instinct.iter().find(|(g, _)| g == f).map(|(_, w)| *w).unwrap_or(0);
+            let c_f = curiosity.iter().position(|g| g == f).map(|p| n - p as u64).unwrap_or(0);
+            // W_f × (σ_den · i_total · c_total) = σ_n·i_f·c_total + inv·c_f·i_total.
+            // The bracket is a shared constant across families — it cancels in
+            // the proportional draw, so these integers ARE the blended weights.
+            let habit = sn.saturating_mul(i_f).saturating_mul(c_total);
+            let frontier = inv.saturating_mul(c_f).saturating_mul(i_total);
+            (*f, habit.saturating_add(frontier))
+        })
+        .collect()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -195,6 +245,32 @@ mod tests {
             weight_of(&w, Family::Recolor) > weight_of(&w, Family::Tile),
             "the invented Recolor rut overwhelms the empiricist birth lean toward structure"
         );
+    }
+
+    #[test]
+    fn stress_blends_exploit_against_explore() {
+        use Family::*;
+        // A line whose history is all RECOLOR (the rut), but whose thin frontier
+        // (curiosity) points at OBJECT (the family it lacks).
+        let instinct = vec![(Symmetry, 1u64), (Recolor, 40), (Tile, 1), (Object, 1)];
+        let curiosity = vec![Object, Tile, Symmetry, Recolor]; // thinnest-first
+
+        // σ = 1 (starving): collapse onto the rut — Recolor must be the heaviest.
+        let stressed = blend(&instinct, &curiosity, 1, 1);
+        let top = |w: &[(Family, u64)]| w.iter().max_by_key(|(_, x)| *x).map(|(f, _)| *f).unwrap();
+        assert_eq!(top(&stressed), Recolor, "a starving line reaches for its rut");
+
+        // σ = 0 (sated): follow curiosity — the thin frontier Object leads.
+        let sated = blend(&instinct, &curiosity, 0, 1);
+        assert_eq!(top(&sated), Object, "a prosperous line explores its frontier");
+
+        // σ = 1/2: the rut still shows through (Recolor's 40 is large), but the
+        // frontier has pulled real weight onto Object — the blend is a genuine
+        // mix, not a switch.
+        let mixed = blend(&instinct, &curiosity, 1, 2);
+        let w = |f| mixed.iter().find(|(g, _)| *g == f).map(|(_, x)| *x).unwrap();
+        assert!(w(Object) > w(Tile), "at half stress the frontier lifts Object above its habit weight");
+        assert!(w(Recolor) > 0, "the rut is still present in the blend");
     }
 
     #[test]

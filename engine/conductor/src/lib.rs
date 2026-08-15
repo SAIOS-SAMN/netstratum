@@ -2722,7 +2722,31 @@ impl Polity {
                 // keep the standing order; ordering only, the observation
                 // still supplies every candidate.
                 if !need.hungers.is_empty() && !polity.library.words().is_empty() {
-                    need.thin = solver::knowledge_order(&polity.library);
+                    // **THE WORKBENCH CHOOSER** (COG-7) — the reach is no longer
+                    // pure curiosity. Two opposing biases are blended by the
+                    // line's thermodynamic STRESS σ: the THIN frontier
+                    // (`knowledge_order`, explore what you lack) and the THICK
+                    // habit (`instinct_weights`, the rut its history carved). A
+                    // sated line (σ→0) follows curiosity and diversifies; a
+                    // starving line (σ→1) collapses onto instinct and reaches for
+                    // the tools that saved it before. The digest-seeded draw over
+                    // the blend picks the family to reach FIRST — stochastic,
+                    // replayable, and carrying the line's own trauma. Ordering
+                    // only; the observation still supplies every candidate.
+                    let curiosity = solver::knowledge_order(&polity.library);
+                    let genesis = solver::instinct::genesis_instinct(
+                        &polity.spec.civilization.disposition,
+                    );
+                    let instinct =
+                        solver::instinct::instinct_weights(&polity.library, &genesis);
+                    let (sn, sd) = civic::stress_quantized(&polity.world, cfe::world::FIRST_ORB);
+                    let blended = solver::instinct::blend(&instinct, &curiosity, sn, sd);
+                    need.thin = match solver::instinct::choose(&blended, digest) {
+                        Some(first) => std::iter::once(first)
+                            .chain(curiosity.into_iter().filter(|f| *f != first))
+                            .collect(),
+                        None => curiosity,
+                    };
                 }
                 // **ADVANCEMENT DEEPENS THE MIND** (INTELLIGENCE ARC A2).
                 // The line's own RELATIONAL RANK — the irreducible
