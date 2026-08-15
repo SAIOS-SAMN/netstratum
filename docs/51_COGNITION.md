@@ -103,3 +103,27 @@ proposer seam first on the SNF base**, and swap in the Gröbner reducer only onc
 the proposer actually emits multivariate generators. A multivariate quotient
 engine built before a system that proposes multivariate generators is untestable
 dead code.
+
+## 6. BIND, DON'T FOLD (binding, not subtractive collapse)
+
+> **A manifold does not disappear when it solves a problem; it binds to it. The
+> engine retains the binding — the overlap and its torsion twist — never
+> collapsing a solved obstruction to a bare zero.**
+
+Reducing an obstruction to a residual is a `ℤ`-module **decomposition**
+question (is the cochain in the span of what the Mind knows), and that is
+intrinsically what it is — no cup product decides membership. But returning
+*only* the residual throws the solution's geometry away, and that discard is a
+disguised collapse. So `overlay` (`iae::resolve`) returns the whole
+[`Binding`]: the **coefficients** (the integer overlap — which generators, in
+what combination, wrapped the obstruction), the **torsion** (the `ℤ/dᵢ` twist —
+the flex that maps a manifold onto an imperfect match, which a `ℚ` vector space
+could not carry), and the **residual** (only the genuinely unbound part). The
+exact reconstruction `generators · coefficients + residual = obstruction` always
+holds: nothing collapses.
+
+The cup product `⌣` and the tensor/`Tor` interaction are the genuine
+**composition** operations — how two learned patches overlay into a
+higher-degree class — and they are added as such, never as a fake resolver.
+Learning adjoins a manifold patch; solving twists and overlaps the internal
+geometry until it wraps the external obstruction, and the wrapping is kept.

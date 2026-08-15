@@ -18,32 +18,79 @@ use crate::bridge::{relational_complex, GridObs};
 use crate::mat::{matvec, Mat};
 use crate::sheaf::CellSheaf;
 use num_bigint::BigInt;
-use num_traits::{Signed, Zero};
+use num_traits::{One, Signed, Zero};
 use substrate::snf::smith_normal_form;
 
 /// The coordinate count of the locality measurement: value, Δrow, Δcol, and
 /// the adjacency boundary.
 pub const RELATIONAL_M: usize = 4;
 
-/// Reduce `c ∈ ℤ^d` to its canonical representative modulo the sublattice
-/// spanned by the COLUMNS of `generators` (`d × g`). The exact ℤ-module
-/// quotient via SNF — the general "resolve, don't enumerate" primitive.
-/// `Im(G) = span{ dᵢ · U⁻¹[:,i] }`, so a coordinate on a torsion generator is
-/// taken modulo its invariant factor and the free coordinates are kept whole.
-pub fn reduce_modulo(c: &[BigInt], generators: &Mat) -> Vec<BigInt> {
-    if generators.is_empty() {
-        return c.to_vec();
+/// THE BINDING of an obstruction onto a geometry — retained WHOLE, never
+/// collapsed to a bare residual (doc 51 §6, "bind, don't fold"). A manifold
+/// does not disappear when it solves a problem; it wraps it, and this records
+/// exactly HOW:
+///
+/// * `coefficients` — THE OVERLAP: the integer combination of the generators
+///   that binds the obstruction (`generators · coefficients + residual` equals
+///   the obstruction exactly — nothing is discarded).
+/// * `torsion` — THE TWIST: the invariant factors `> 1`. A ℤ-module carries
+///   torsion natively (a ℚ-vector space cannot); binding modulo `ℤ/dᵢ` is the
+///   flex that lets the geometry map onto an imperfect match.
+/// * `residual` — the irreducible remainder that did NOT bind (the surviving
+///   obstruction).
+/// * `locked` — `residual == 0`: the geometries overlapped completely.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Binding {
+    pub coefficients: Vec<BigInt>,
+    pub torsion: Vec<BigInt>,
+    pub residual: Vec<BigInt>,
+    pub locked: bool,
+}
+
+/// OVERLAY — bind `obstruction` onto the geometry spanned by the COLUMNS of
+/// `generators`, retaining the whole binding (not just the residual). The
+/// exact reconstruction `generators · coefficients + residual = obstruction`
+/// always holds, so nothing collapses: the overlap and its torsion twist are
+/// carried, and only the genuinely unbound part survives as `residual`.
+pub fn overlay(obstruction: &[BigInt], generators: &Mat) -> Binding {
+    let n = generators.first().map(|r| r.len()).unwrap_or(0);
+    if generators.is_empty() || n == 0 {
+        return Binding {
+            coefficients: vec![BigInt::zero(); n],
+            torsion: Vec::new(),
+            residual: obstruction.to_vec(),
+            locked: obstruction.iter().all(|x| x.is_zero()),
+        };
     }
+    // D = U·G·V. In the U⁻¹ basis, Im(G) = span{ dᵢ · U⁻¹[:,i] }. Decompose the
+    // obstruction's coordinates: the torsion coordinates split into a bound
+    // quotient (times dᵢ) and a remainder in [0, dᵢ); the free coordinates ride
+    // whole into the residual. The generator coefficients are V·q.
     let s = smith_normal_form(generators);
-    let mut coords = matvec(&s.u, c);
-    for (i, d) in s.invariant_factors().iter().enumerate() {
+    let coords = matvec(&s.u, obstruction);
+    let factors = s.invariant_factors();
+    let mut q_ext = vec![BigInt::zero(); n];
+    let mut res_coords = coords.clone();
+    for (i, d) in factors.iter().enumerate() {
         let mut r = &coords[i] % d;
         if r.is_negative() {
             r += d;
         }
-        coords[i] = r;
+        q_ext[i] = (&coords[i] - &r) / d;
+        res_coords[i] = r;
     }
-    matvec(&s.u_inv, &coords)
+    let residual = matvec(&s.u_inv, &res_coords);
+    let coefficients = matvec(&s.v, &q_ext);
+    let torsion = factors.into_iter().filter(|d| d > &BigInt::one()).collect();
+    let locked = residual.iter().all(|x| x.is_zero());
+    Binding { coefficients, torsion, residual, locked }
+}
+
+/// The residual alone — the non-collapsing binding's remainder. A thin view
+/// over [`overlay`] kept for the proposer's exact verifier (which only needs
+/// the yes/no of a complete lock).
+pub fn reduce_modulo(c: &[BigInt], generators: &Mat) -> Vec<BigInt> {
+    overlay(c, generators).residual
 }
 
 /// The outcome of a resolve: the irreducible residual and whether it vanished.

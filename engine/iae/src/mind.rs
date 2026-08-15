@@ -22,7 +22,7 @@
 //! what it knows, and that is the honest cost of a growing algebra.
 
 use crate::proposer::{propose_and_verify, Mint};
-use crate::resolve::reduce_modulo;
+use crate::resolve::{overlay, reduce_modulo, Binding};
 use num_bigint::BigInt;
 use num_traits::Zero;
 
@@ -125,15 +125,23 @@ impl Mind {
         Ok(())
     }
 
-    /// RESOLVE (fold): the irreducible residual of `field` against everything
-    /// the mind has learned. O(n) in the rank.
+    /// BIND (overlay, not fold): wrap `field` onto the mind's geometry,
+    /// retaining the WHOLE binding — which generators overlapped it, the
+    /// torsion twist that let them flex onto it, and the unbound residual. The
+    /// manifold binds to the problem; it does not vanish (doc 51 §6). O(n) in
+    /// the mind's rank.
+    pub fn bind(&self, field: &[BigInt]) -> Binding {
+        overlay(field, &self.generators())
+    }
+
+    /// The irreducible residual alone — the unbound remainder of the binding.
     pub fn resolve(&self, field: &[BigInt]) -> Vec<BigInt> {
         reduce_modulo(field, &self.generators())
     }
 
-    /// Does `field` resolve fully against the learned geometry?
+    /// Did the mind's geometry lock onto `field` completely (empty residual)?
     pub fn resolved(&self, field: &[BigInt]) -> bool {
-        self.resolve(field).iter().all(|x| x.is_zero())
+        self.bind(field).locked
     }
 
     /// LEARN — the seam (IAE-5) tied to condensation (IAE-6). The proposer,
