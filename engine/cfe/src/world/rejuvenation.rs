@@ -268,16 +268,21 @@ impl World {
         // THE SYNTROPIC BASELINE (COG Slice 2c, operator ruling 2026-08-15) —
         // the WILD food the band GATHERS from the planet's untended primary
         // production, ambient and physics-driven (`syntropic_flow`). It is
-        // eaten, not banked, so it never appears in the ledger — the debit
-        // (economy.rs) draws only on the stored bank, leaving this free. Its
-        // purpose is the syntropic cap on the extinction vent: even with the
-        // ambient stock eaten to zero a band always has the wild flow to eat,
-        // so the starvation cull regresses it to the SYNTROPIC LIMIT
-        // (`syntropic_flow / per_capita`) and holds it there — a standing
-        // deficit that drives the Mind to invent cultivation, never a spiral
-        // to extinction. Zero on a barren or unsited world, so those still die.
+        // gathered, never banked, and EATEN FIRST: it feeds the band before any
+        // cultivated/banked stock, so only the demand beyond it debits the
+        // ledger (the `bank_draw` netting below). It serves two ends at once:
+        // (1) the syntropic cap on the extinction vent — even with the ambient
+        // stock eaten to zero a band always has the wild flow, so the
+        // starvation cull regresses it to the SYNTROPIC LIMIT
+        // (`syntropic_flow / per_capita`) and holds it there, a standing deficit
+        // that drives the Mind to invent cultivation, never a spiral to
+        // extinction; and (2) a founding band under the wild flow draws NOTHING
+        // from the granary, so the industrial surplus is untouched until the
+        // population outgrows gathering. Zero on a barren/unsited world, so
+        // those still die.
         let syntropic = self.syntropic_flow(orb) * dtr.clone();
-        let available = held.banked_amount(resource) + harvested + natural + syntropic;
+        let available =
+            held.banked_amount(resource) + harvested + natural + syntropic.clone();
         if available >= demand {
             // FED — births ride the #28 logistic on PEOPLE toward K_pop,
             // less the ordinary mortality; the people eat their full demand.
@@ -311,7 +316,19 @@ impl World {
             } else {
                 births
             };
-            Some((births - mortality, resource, demand))
+            // THE WILD FLOW IS EATEN FIRST (COG Slice 2c, made real at the
+            // ledger). The syntropic food the band GATHERS is free and drawn
+            // before any cultivated/banked stock, so only the demand BEYOND the
+            // wild flow debits the bank. A founding band whose whole demand sits
+            // under the syntropic flow draws NOTHING from the granary — it lives
+            // by gathering, and the industrial surplus it never touches is
+            // preserved. The bank is pressured only once the population outgrows
+            // the wild flow — which IS the cultivation trigger (the standing
+            // deficit that drives the Mind). This is the third element: the
+            // amount economy.rs debits from the stored bank, wild food already
+            // netted out.
+            let bank_draw = (demand - syntropic).max(ratio(0, 1));
+            Some((births - mortality, resource, bank_draw))
         } else {
             // STARVED — only the fraction of the band the span's food can
             // feed survives; the unfed die atop the ordinary mortality, and
@@ -320,7 +337,12 @@ impl World {
             // fed line is not collapsed by one lean touch.
             let fed = available.clone() / (per_capita * dtr);
             let unfed = (pr - fed).max(ratio(0, 1));
-            Some((-(mortality + unfed), resource, available))
+            // The bank draw nets out the wild flow here too: a starving band
+            // eats everything it can reach, but the syntropic share was
+            // gathered free, so only the non-wild remainder (bank + harvested +
+            // natural) debits the granary — which is exactly what STANDS there.
+            let bank_draw = (available - syntropic).max(ratio(0, 1));
+            Some((-(mortality + unfed), resource, bank_draw))
         }
     }
 }

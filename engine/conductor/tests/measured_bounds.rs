@@ -59,7 +59,20 @@ fn scratch(name: &str) -> PathBuf {
 /// one home zone the reserves expansion drew (90 → 89). A deliberate
 /// re-measure; the divergence property still holds (the temperaments still
 /// build different cities).
-const MEASURED_ZONE_TOTAL_AT_15: usize = 89;
+/// RE-MEASURED 2026-08-15 to 88: **THE AWAKENING** (COG Slice 2 activation).
+/// The first habitat on a colony now seats a FOUNDING BAND (`FOUNDING_BAND`),
+/// so the population is LIVE. Because the founding bands live by GATHERING —
+/// their whole demand sits under the planet's syntropic WILD flow, which is
+/// eaten first and never touches the granary (COG Slice 2c, the bank-draw
+/// netting) — they draw NOTHING from the cultivated biomass the builds spend.
+/// So the footprint barely moves (89 → 88): a single marginal zone tips across
+/// the whole roster as the live population perturbs one digest-seeded decision,
+/// no more. (Were the bands eating the granary, this fell to 67 — a broken
+/// bootstrap that also starved the smelter loop; the wild-flow-first law is
+/// what keeps a founding band from taxing the industrial economy.) The per-line
+/// bootstrap law is UNCHANGED and the temperaments still diverge. A deliberate
+/// re-measure under the now-live population.
+const MEASURED_ZONE_TOTAL_AT_15: usize = 88;
 
 /// **THE ENERGY-BOOTSTRAP DEBT** — the lines the settlement law cannot
 /// reach, pinned so the set can only SHRINK:

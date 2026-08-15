@@ -235,10 +235,13 @@ fn peopled(habitats: u16, class: u8, seed: i64) -> World {
 }
 
 #[test]
-fn a_collect_applies_the_population_net_delta_and_debits_its_food() {
+fn a_collect_applies_the_net_delta_and_a_founding_band_lives_by_gathering() {
     // The touch settles what the reading predicts: the headcount moves by
-    // exactly `population_touch_delta`'s Δ, and the food it ate leaves the
-    // biomass bank as part of the same touch — one lazy settle, replay-exact.
+    // exactly `population_touch_delta`'s Δ as part of the same lazy,
+    // replay-exact settle. AND (COG Slice 2c, corrected) a founding-scale band
+    // whose whole demand sits under the planet's SYNTROPIC wild flow draws
+    // NOTHING from the granary — it lives by gathering, the wild food eaten
+    // first, so the cultivated bank is left untouched for building.
     let mut world = peopled(8, 2, 10);
     for _ in 0..8 {
         world.tick();
@@ -247,7 +250,11 @@ fn a_collect_applies_the_population_net_delta_and_debits_its_food() {
         .population_touch_delta(FIRST_ORB, world.now())
         .expect("a peopled, farming world drives population");
     assert_eq!(resource, Resource::Biomass, "a biotic line's people eat biomass");
-    assert!(consumed > ratio(0, 1), "the people ate this span: {consumed}");
+    assert_eq!(
+        consumed,
+        ratio(0, 1),
+        "a band under the wild flow draws nothing from the granary: {consumed}"
+    );
     // The TRUE mass — the integer headcount plus its fractional carry —
     // moves by the predicted rational delta, QUANTIZED onto the population
     // lattice (COG Slice 2: the whole part promotes to the headcount, the
@@ -263,6 +270,36 @@ fn a_collect_applies_the_population_net_delta_and_debits_its_food() {
     assert_eq!(
         after, expected,
         "the collect applies the predicted net delta, quantized onto the lattice"
+    );
+    assert_eq!(replay(world.chronicle()), world.committed(), "replay MATCHES");
+}
+
+#[test]
+fn a_band_past_the_wild_flow_draws_the_cultivated_granary() {
+    // Seed a band FAR above the syntropic limit: the wild flow no longer covers
+    // its demand, so the surplus draw debits the biomass bank — the cultivation
+    // pressure the whole COG arc turns on (a standing food deficit only appears
+    // once the people outgrow gathering). The debit is the demand netted of the
+    // free wild flow, clamped to what STANDS in the granary, and the collect
+    // banks it exactly — replay-exact.
+    let mut world = peopled(8, 2, 5_000);
+    for _ in 0..8 {
+        world.tick();
+    }
+    let bank_before = world.orb().expect("stands").banked_amount(Resource::Biomass);
+    let (_, resource, consumed) = world
+        .population_touch_delta(FIRST_ORB, world.now())
+        .expect("a peopled, farming world drives population");
+    assert_eq!(resource, Resource::Biomass, "a biotic line's people eat biomass");
+    assert!(
+        consumed > ratio(0, 1),
+        "past the wild flow the band draws the cultivated granary: {consumed}"
+    );
+    world.collect().expect("collects");
+    let bank_after = world.orb().expect("stands").banked_amount(Resource::Biomass);
+    assert!(
+        bank_after < bank_before,
+        "the granary fell by the cultivated draw: {bank_before} -> {bank_after}"
     );
     assert_eq!(replay(world.chronicle()), world.committed(), "replay MATCHES");
 }

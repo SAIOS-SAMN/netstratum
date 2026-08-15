@@ -267,24 +267,60 @@ fn the_estate_tax_is_population_proportional_and_office_gated() {
 
 #[test]
 fn the_estate_tax_lands_only_at_the_generation_boundary() {
-    // A producer-less office world: the treasury moves ONLY when a
-    // generation (L=64 beats) turns over — flat within a generation, a jump
-    // at each boundary. The clean face of the discrete-turnover ruling.
+    // The estate tax is a DISCRETE jump at each generation turnover (L=64
+    // beats). Since COG Slice 2c's wild-flow-first law, the founding-scale
+    // population gathers and never taxes the granary, so the office world's
+    // cultivated biomass yield stands TAXABLE — a steady per-touch revenue levy
+    // trickles into the treasury between boundaries. The estate tax is then
+    // isolated as the EXCESS: the treasury's increment across a span that
+    // crosses a generation boundary exceeds its increment across an equal span
+    // that does not. Flat-rate revenue within a generation; a leap at the turn.
     let mut gov = generation_world(true);
-    // Round to now≈40 — within the first generation, no boundary.
-    run_collects(&mut gov, 10); // 10×4 = 40 beats
-    let within_gen_1 = gov.treasury_of(FIRST_ORB);
-    assert_eq!(within_gen_1, ratio(0, 1), "no boundary crossed yet → an empty treasury");
-    // Cross the 64-beat boundary (to now≈80).
-    run_collects(&mut gov, 10); // now ≈ 80 — crossed 64
-    let after_boundary = gov.treasury_of(FIRST_ORB);
-    assert!(after_boundary > within_gen_1, "the estate tax lands at the turnover: 0 -> {after_boundary}");
-    // Stay inside the second generation (to now≈120) — the treasury holds.
-    run_collects(&mut gov, 10); // now ≈ 120 — no new boundary
-    assert_eq!(gov.treasury_of(FIRST_ORB), after_boundary, "flat within a generation");
-    // Cross the 128-beat boundary (to now≈160).
-    run_collects(&mut gov, 10); // now ≈ 160 — crossed 128
-    assert!(gov.treasury_of(FIRST_ORB) > after_boundary, "a second turnover taxes again");
+    // Walk collect-by-collect, recording each round's treasury increment and
+    // whether that round CROSSED a generation boundary (its clock stepped over
+    // a multiple of L). The steady revenue levy rises gently with the growing
+    // population, so we isolate the estate tax LOCALLY: a boundary round's jump
+    // against its immediate neighbour, which carries near-identical population
+    // (hence near-identical revenue) but no turnover.
+    let lifespan = gov.lifespan_of().max(1);
+    let mut deltas: Vec<(cfe::ratio::Ratio, bool)> = Vec::new();
+    let mut prev_treasury = gov.treasury_of(FIRST_ORB);
+    let mut prev_beat = gov.now();
+    for _ in 0..34 {
+        run_collects(&mut gov, 1); // one collect round (≈4 beats)
+        let now_treasury = gov.treasury_of(FIRST_ORB);
+        let now_beat = gov.now();
+        let crossed = now_beat / lifespan > prev_beat / lifespan;
+        deltas.push((now_treasury.clone() - prev_treasury.clone(), crossed));
+        prev_treasury = now_treasury;
+        prev_beat = now_beat;
+    }
+    // At L=64 over ~136 beats the walk turns over TWICE (beats 64 and 128).
+    let boundaries: Vec<usize> = deltas
+        .iter()
+        .enumerate()
+        .filter_map(|(i, (_, crossed))| crossed.then_some(i))
+        .collect();
+    assert_eq!(boundaries.len(), 2, "two generation boundaries crossed: {boundaries:?}");
+    for &i in &boundaries {
+        // Off a boundary the treasury still climbs (the revenue levy is live),
+        // so the neighbour delta is positive — the estate tax is the EXCESS the
+        // turnover round carries over the very next, boundary-free round.
+        let here = &deltas[i].0;
+        let neighbour = &deltas[i + 1].0;
+        assert!(!deltas[i + 1].1, "the round after a turnover holds no second boundary");
+        assert!(
+            here > neighbour,
+            "the estate tax makes the turnover round ({here}) jump past its \
+             boundary-free neighbour ({neighbour}) — the discrete generation levy"
+        );
+    }
+    // And OFF the boundaries the reserve only ever rises (revenue), never a
+    // spurious estate jump — every interior round is a gentle climb.
+    assert!(
+        deltas.iter().filter(|(_, c)| !c).all(|(d, _)| *d >= ratio(0, 1)),
+        "interior rounds carry only the steady revenue levy, never a phantom levy"
+    );
     assert_eq!(replay(gov.chronicle()), gov.committed(), "estate-tax replay MATCHES");
 }
 

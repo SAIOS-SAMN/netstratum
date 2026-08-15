@@ -196,6 +196,21 @@ pub fn industry_relevant(metabolism: &str, kind: ZoneKind) -> bool {
 /// the denominator of its relaxed ask and the floor of its surplus.
 pub const TARGET_RESERVE: (i64, i64) = (8, 1);
 
+/// **THE FOUNDING BAND** (COG Slice 2 activation, operator ruling
+/// 2026-08-15 "seed per habitat"). When the conductor raises a
+/// colony's FIRST habitat, a founding band of hunter-gatherers takes
+/// up residence — the settlement is founded, and from that moment the
+/// population is LIVE: it grows toward the thermodynamic K_pop on the
+/// syntropic wild flow, and the beat's `collect` drives the logistic
+/// every cycle. Subsequent habitats raise living capacity (K), they do
+/// not reseed the band. This is APPROVED SEED — the founding endowment
+/// of a settlement, definition not tuning (same class as
+/// `founding_reserves`), and it seats through `settle_population`
+/// (whole-integer, so it carries no fractional dial). It is small: a
+/// band well below any world's syntropic limit, so a fresh settlement
+/// GROWS up to its limit rather than being culled down to it.
+pub const FOUNDING_BAND: i64 = 4;
+
 /// The reference model posts in WHOLE LOTS: amounts floor to the
 /// 1/64 grid the melt law already speaks (MELT_PER_UNIT). This is
 /// layer-2 prudence, not law — it keeps every book amount's
@@ -1551,12 +1566,20 @@ impl Polity {
             });
             if can_pay {
                 if let Some(tile) = next_free_tile(&self.world) {
-                    let _ = self.world.zone_as(
-                        self.automaton,
-                        primary,
-                        tile,
-                        ZoneKind::Habitat,
-                    );
+                    if self
+                        .world
+                        .zone_as(self.automaton, primary, tile, ZoneKind::Habitat)
+                        .is_ok()
+                    {
+                        // **THE AWAKENING** (COG Slice 2 activation). This is
+                        // the dedicated first-habitat seat (`labor.habitats ==
+                        // 0`), so it is a genuine 0→1 transition — the founding
+                        // band takes residence exactly once, and the population
+                        // goes LIVE. (build_step's own first-habitat path seeds
+                        // the same way; the two are mutually exclusive within a
+                        // beat, so a colony seeds a single band.)
+                        self.world.settle_population(primary, FOUNDING_BAND);
+                    }
                 }
             }
         }
@@ -2288,7 +2311,18 @@ impl Polity {
                     let _ = world.grant_tech_as(steward, primary, 3);
                 }
             }
-            let _ = world.zone_as(self.automaton, cfe::world::FIRST_ORB, tile, kind);
+            let built = world
+                .zone_as(self.automaton, cfe::world::FIRST_ORB, tile, kind)
+                .is_ok();
+            // **THE AWAKENING** (COG Slice 2 activation). The FIRST
+            // habitat on a colony founds a settlement — a founding band
+            // takes residence and the population goes LIVE. `hab` is the
+            // pre-beat habitat count, so this fires exactly once per
+            // colony; every later habitat only lifts K_pop. The band
+            // seats AFTER the build so the dwelling stands to hold it.
+            if built && kind == ZoneKind::Habitat && hab == 0 {
+                world.settle_population(cfe::world::FIRST_ORB, FOUNDING_BAND);
+            }
         }
     }
 
