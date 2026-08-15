@@ -5392,7 +5392,9 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
         }
         Some("map") => map(world, style, *current),
         Some("status") => status(world, style, *current),
-        Some("bench") => workbench_panel(world, style, *current),
+        // The #49 workbench: its own word, since `bench` is the root hub above
+        // (the panel was previously shadowed dead by that arm).
+        Some("workbench") => workbench_panel(world, style, *current),
         Some("chronicle") => chronicle(world, style),
         Some("journal") => journal_feed(world, style),
         Some("verify") => match world.chronicle().verify_chain() {

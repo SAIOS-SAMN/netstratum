@@ -4,8 +4,6 @@
 //! named receipts instead of counts. Opt-in, appends nothing, judges
 //! nothing into the chain — the cost_probe discipline.
 
-use std::path::Path;
-
 fn main() {
     let root = std::env::args().nth(1).unwrap_or_else(|| "var/worlds".into());
     let limit: usize = std::env::args()

@@ -1340,9 +1340,6 @@ impl Polity {
         let Some(station) = Station::from_word(want) else {
             return;
         };
-        let Some(station) = Station::from_word(want) else {
-            return;
-        };
         let Some(line) = cfe::dop::Name::new(&self.spec.civilization.sigil) else {
             return;
         };
