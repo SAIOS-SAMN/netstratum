@@ -550,7 +550,7 @@ impl World {
         // ration settled, so the food it ate is banked first. Zero deltas
         // no-op (no deed), so a world at demographic rest is byte-identical.
         if let Some((delta, _, _)) = population {
-            self.settle_population(orb, delta);
+            self.settle_population_exact(orb, delta);
         }
         // TAXATION (49 §5): the Touch-triggered revenue levy collects into
         // the sovereign treasury — governance reach × the taxable

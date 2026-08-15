@@ -8645,6 +8645,12 @@ fn chronicle(world: &World, style: &Style) {
                 let verb = if *delta >= 0 { "grew" } else { "starved" };
                 format!("👥 population {verb} — orb {orb_id} by {delta} (the fed/starved logistic)")
             }
+            cfe::dop::ClosureEvent::PopulationAccrued { orb_id, remainder } => {
+                format!(
+                    "👥 population carry — orb {orb_id} holds {} of a colonist (the fractional birth accrual)",
+                    style.strong(&amount(remainder))
+                )
+            }
             cfe::dop::ClosureEvent::TreasurySettled { orb_id, delta } => {
                 let verb = if *delta >= cfe::ratio::ratio(0, 1) { "collected" } else { "spent" };
                 format!(

@@ -202,9 +202,15 @@ impl World {
     /// - **STARVED** (`available < demand`): only the people the span's
     ///   food can feed survive — the unfed die atop the mortality — and
     ///   all of it is eaten.
-    pub fn population_touch_delta(&self, orb: u64, stamp: u64) -> Option<(i64, Resource, Ratio)> {
-        let p = self.population_of(orb);
-        if p == 0 {
+    pub fn population_touch_delta(&self, orb: u64, stamp: u64) -> Option<(Ratio, Resource, Ratio)> {
+        // THE POPULATION IS EXACT-RATIONAL (COG Slice 2): the integer
+        // headcount PLUS the fractional carry the logistic has accrued but
+        // not yet promoted to a whole colonist. The logistic is a multiplier
+        // on this mass, so a sub-one band (a founding seed part-way to its
+        // next birth) still grows — reading only the integer count would
+        // freeze it, and flooring its births would discard the growth.
+        let pr = ratio(self.population_of(orb) as i64, 1) + self.pop_accrued_of(orb);
+        if pr <= ratio(0, 1) {
             return None;
         }
         let Ration::Resource(resource) = self.ration_of(orb) else {
@@ -227,13 +233,20 @@ impl World {
         if per_capita <= ratio(0, 1) {
             return None;
         }
-        let pr = ratio(p as i64, 1);
         let dtr = ratio(dt as i64, 1);
         let demand = pr.clone() * per_capita.clone() * dtr.clone();
         // R7b — mortality: the population turns over once per lifespan `L`,
-        // so `p·Δt/L` die this span. u128 math floored, never zero-div
-        // (`lifespan_of` ≥ one grain).
-        let mortality = ((p as u128 * dt as u128) / self.lifespan_of() as u128) as i64;
+        // so `⌊head·Δt/L⌋` WHOLE colonists die this span. Kept integer (as
+        // before Slice 2) and read on the whole HEADCOUNT — turnover claims
+        // whole people, and a long-lived line whose `head·Δt` has not yet
+        // reached one lifespan neither grows nor dies (the leisure STALL
+        // holds exactly, `43_DISTRIBUTION` §3–4). Only BIRTHS carry a
+        // fraction; deaths-by-turnover stay whole.
+        let head = self.population_of(orb) as u128;
+        let mortality = ratio(
+            ((head * dt as u128) / self.lifespan_of().max(1) as u128) as i64,
+            1,
+        );
         // THE FOOD AVAILABLE THIS SPAN — the standing bank PLUS what the
         // world produced over the same beats (the farmed yield accrued by
         // the ticks, and the natural regrowth/decay settling at this same
@@ -267,37 +280,34 @@ impl World {
             // un-entertained people STALLS (births→0, only mortality runs)
             // rather than starving. Without a granary stability reads 1, so
             // this multiplies by one and the #40–42 path is byte-identical.
-            let births_raw = (grown - pr).floor();
-            let births: i64 = (births_raw * self.stability_of(orb, stamp))
-                .floor()
-                .to_integer()
-                .try_into()
-                .unwrap_or(0);
-            // DISPOSITION (§5): an empiricist line spends half its surplus
-            // growth on KNOWLEDGE, not mouths — the research siphon redirects
-            // those births (the metric rides `research_siphon`). Zero for
-            // every other disposition, so their growth is untouched.
-            // FLUX-TIED OUTPUT (`44_LINEAGES` §2b): a flux-driven line grows
-            // by the stellar flux it stands in — faster near a star, starved
-            // in the cold. A line that is not flux-driven scales by one, so a
-            // mesic world is unchanged.
-            let births: i64 = (ratio(births, 1) * self.flux_output_factor(orb))
-                .floor()
-                .to_integer()
-                .try_into()
-                .unwrap_or(0);
-            let births = births - self.research_siphon(orb, births);
+            // EXACT births — the logistic's fractional output is PRESERVED,
+            // not floored (COG Slice 2). Every modulator is a rational factor
+            // the settle later promotes into whole colonists as the carry
+            // crosses one; nothing is truncated here.
+            let births = (grown - pr.clone())
+                * self.stability_of(orb, stamp)
+                * self.flux_output_factor(orb);
+            // DISPOSITION (§5): the cognition caste spends its share of
+            // surplus growth on KNOWLEDGE, not mouths — an exact fraction
+            // (`cognition / people`) of births, so it too carries no floor.
+            // Only a positive surplus is siphoned; a cull is never redirected.
+            let people = self.population_of(orb);
+            let births = if births > ratio(0, 1) && people > 0 {
+                let cognition = self.caste_of(orb, crate::dop::Caste::Cognition);
+                let kept = ratio(1, 1) - ratio(cognition as i64, 1) / ratio(people as i64, 1);
+                births * kept
+            } else {
+                births
+            };
             Some((births - mortality, resource, demand))
         } else {
-            // STARVED — only the people the span's food can feed survive;
-            // the unfed die atop the ordinary mortality, and all of it is
-            // eaten.
-            let fed: i64 = (available.clone() / per_capita / dtr)
-                .floor()
-                .to_integer()
-                .try_into()
-                .unwrap_or(0);
-            let unfed = (p as i64 - fed).max(0);
+            // STARVED — only the fraction of the band the span's food can
+            // feed survives; the unfed die atop the ordinary mortality, and
+            // all of it is eaten. Exact-rational: a transient shortfall shaves
+            // a fraction of a colonist rather than killing a whole one, so a
+            // fed line is not collapsed by one lean touch.
+            let fed = available.clone() / (per_capita * dtr);
+            let unfed = (pr - fed).max(ratio(0, 1));
             Some((-(mortality + unfed), resource, available))
         }
     }

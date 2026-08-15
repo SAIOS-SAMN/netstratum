@@ -89,6 +89,7 @@ impl Replayer {
                 chem_catalog: Vec::new(),
                 science_seats: Vec::new(),
                 clone_counts: Vec::new(),
+                pop_accrued: Vec::new(),
                 treasury_balances: Vec::new(),
                 synth_mods: Vec::new(),
                 skin_mods: Vec::new(),
@@ -155,6 +156,7 @@ impl Replayer {
             chem_catalog,
             science_seats,
             clone_counts,
+            pop_accrued,
             treasury_balances,
             synth_mods,
             skin_mods,
@@ -1031,6 +1033,15 @@ impl Replayer {
             clone_counts.retain(|(o, _)| *o != *orb_id);
             if next > 0 {
                 clone_counts.push((*orb_id, next));
+            }
+        }
+        // PROVISION (41 §3, COG Slice 2): the fractional remainder is
+        // absolute — the receipt carries the new `[0, 1)` carry, so replay
+        // sets it straight (zero drops the entry, one state one encoding).
+        ClosureEvent::PopulationAccrued { orb_id, remainder } => {
+            pop_accrued.retain(|(o, _)| *o != *orb_id);
+            if *remainder > ratio(0, 1) {
+                pop_accrued.push((*orb_id, remainder.clone()));
             }
         }
         // TAXATION (49 §5): the treasury settles by its net delta —

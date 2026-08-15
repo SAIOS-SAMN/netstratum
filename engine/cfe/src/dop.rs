@@ -1621,6 +1621,7 @@ pub fn metabolic_ration(metabolism: u8) -> Resource {
     }
 }
 
+
 /// **WHAT A LEVY DRAWS ON** (`49_TAXATION` §1) — the base a tax is levied
 /// against.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -3032,6 +3033,16 @@ pub enum ClosureEvent {
     /// not a ledger — it is not conserved — so the receipt carries the
     /// net and replay applies it straight (saturating at zero).
     PopulationSettled { orb_id: u64, delta: i64 },
+    /// **THE FRACTIONAL POPULATION REMAINDER (41_PROVISION, COG Slice 2,
+    /// tag 179)** — the exact-rational carry in `[0, 1)` the integer
+    /// headcount cannot hold. The logistic (`population_touch_delta`) yields
+    /// an EXACT growth each touch; a small band's births are a fraction of a
+    /// person, which `PopulationSettled` (integer) would truncate to zero,
+    /// freezing every founding band forever. This receipt carries the
+    /// remainder that survives the truncation: births accrue here until they
+    /// cross a whole person, then promote to the headcount. Absolute (the
+    /// new remainder, not a delta), so replay sets it straight.
+    PopulationAccrued { orb_id: u64, remainder: Ratio },
     /// **TAXATION (49_TAXATION §5, tag 171)** — the SOVEREIGN TREASURY
     /// settled by a net change: crafted levies collected INTO the
     /// treasury (positive) net of a welfare budget spent OUT of it
@@ -4247,6 +4258,11 @@ impl ClosureEvent {
                 let mut value = orb_id.to_le_bytes().to_vec();
                 value.extend_from_slice(&delta.to_le_bytes());
                 tlv::put(167, &value, &mut out);
+            }
+            Self::PopulationAccrued { orb_id, remainder } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                ratio::encode(remainder, &mut value);
+                tlv::put(179, &value, &mut out);
             }
             Self::TreasurySettled { orb_id, delta } => {
                 let mut value = orb_id.to_le_bytes().to_vec();
@@ -5581,6 +5597,11 @@ impl ClosureEvent {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let delta = i64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
                 Some(Self::PopulationSettled { orb_id, delta })
+            }
+            179 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let (remainder, _) = ratio::decode(value.get(8..)?)?;
+                Some(Self::PopulationAccrued { orb_id, remainder })
             }
             171 => {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);

@@ -248,12 +248,21 @@ fn a_collect_applies_the_population_net_delta_and_debits_its_food() {
         .expect("a peopled, farming world drives population");
     assert_eq!(resource, Resource::Biomass, "a biotic line's people eat biomass");
     assert!(consumed > ratio(0, 1), "the people ate this span: {consumed}");
-    let before = world.population_of(FIRST_ORB);
+    // The TRUE mass — the integer headcount plus its fractional carry —
+    // moves by the predicted rational delta, QUANTIZED onto the population
+    // lattice (COG Slice 2: the whole part promotes to the headcount, the
+    // fraction is carried on the 1024-lattice that bounds the #28 feedback
+    // denominator). So the mass after equals the lattice-floor of
+    // `before + delta` — exact and replayable, the carry off by at most one
+    // lattice step from the raw prediction.
+    let before = ratio(world.population_of(FIRST_ORB) as i64, 1) + world.pop_accrued_of(FIRST_ORB);
     world.collect().expect("collects");
+    let after = ratio(world.population_of(FIRST_ORB) as i64, 1) + world.pop_accrued_of(FIRST_ORB);
+    let lattice = cfe::world::stock::lattice();
+    let expected = ((before.clone() + delta) * lattice.clone()).floor() / lattice;
     assert_eq!(
-        world.population_of(FIRST_ORB) as i64,
-        before as i64 + delta,
-        "the collect applies exactly the predicted net delta"
+        after, expected,
+        "the collect applies the predicted net delta, quantized onto the lattice"
     );
     assert_eq!(replay(world.chronicle()), world.committed(), "replay MATCHES");
 }
@@ -268,9 +277,11 @@ fn a_fed_line_grows_and_an_overpopulated_one_is_culled() {
         fed.tick();
     }
     let (grow, _, _) = fed.population_touch_delta(FIRST_ORB, fed.now()).expect("driven");
-    assert!(grow > 0, "a small fed population grows: Δ={grow}");
+    assert!(grow > ratio(0, 1), "a small fed population grows: Δ={grow}");
     fed.collect().expect("collects");
-    assert!(fed.population_of(FIRST_ORB) > 10, "the people multiplied");
+    let fed_mass =
+        ratio(fed.population_of(FIRST_ORB) as i64, 1) + fed.pop_accrued_of(FIRST_ORB);
+    assert!(fed_mass > ratio(10, 1), "the people multiplied: {fed_mass}");
     assert_eq!(replay(fed.chronicle()), fed.committed(), "fed replay MATCHES");
 
     // A world seeded far past what its habitats can feed collapses.
@@ -279,24 +290,36 @@ fn a_fed_line_grows_and_an_overpopulated_one_is_culled() {
         crowded.tick();
     }
     let (cull, _, _) = crowded.population_touch_delta(FIRST_ORB, crowded.now()).expect("driven");
-    assert!(cull < 0, "an overpopulated world culls: Δ={cull}");
+    assert!(cull < ratio(0, 1), "an overpopulated world culls: Δ={cull}");
     crowded.collect().expect("collects");
     assert!(crowded.population_of(FIRST_ORB) < 4000, "the famine took its toll");
     assert_eq!(replay(crowded.chronicle()), crowded.committed(), "cull replay MATCHES");
 }
 
 #[test]
-fn a_small_population_holds_across_many_collects() {
-    // A population well within its world's food economy is SUSTAINED —
-    // neither exploding nor dying — collect after collect, replay-exact.
+fn a_small_fed_population_grows_instead_of_freezing() {
+    // COG Slice 2 — the fractional-birth accumulator. A small fed band GROWS:
+    // its sub-one births accrue on the exact-rational carry (lattice-bounded)
+    // and promote whole colonists across collects, where the old FLOORED
+    // logistic discarded any birth below one and froze the band at its seed
+    // forever. Replay-exact — the carry rides its own receipt (tag 179).
+    //
+    // (The food ceiling that eventually bounds and culls an over-provisioned
+    // line — grow AND die — is the separate population-balance work, tuned
+    // with the seed activation; here the horizon stays inside the band's
+    // sustainable growth so the accumulator itself is what is measured.)
     let mut world = peopled(8, 2, 2);
-    for _ in 0..25 {
+    for _ in 0..10 {
         for _ in 0..8 {
             world.tick();
         }
         world.collect().expect("collects");
     }
-    assert!(world.population_of(FIRST_ORB) > 0, "a sustainable line endures");
+    assert!(
+        world.population_of(FIRST_ORB) > 2,
+        "the small fed band grew past its seed of 2: {}",
+        world.population_of(FIRST_ORB)
+    );
     assert_eq!(replay(world.chronicle()), world.committed(), "replay MATCHES");
 }
 

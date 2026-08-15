@@ -173,31 +173,97 @@ impl World {
         self.population_ceiling(orb)
     }
 
-    /// **SETTLE THE POPULATION** (41_PROVISION §3, tag 167) — apply a NET
-    /// change (births − deaths) to the elastic population, floored at
-    /// zero, and receipt it so replay applies the same delta. Population
-    /// is a logistic, not a ledger — the receipt carries the net.
+    /// The fractional population carry on an orb — the `[0, 1)` remainder
+    /// the logistic has grown but not yet promoted to a whole colonist
+    /// (COG Slice 2). Zero where a line stands at a whole headcount.
+    pub fn pop_accrued_of(&self, orb: u64) -> Ratio {
+        self.pop_accrued
+            .iter()
+            .find(|(o, _)| *o == orb)
+            .map(|(_, r)| r.clone())
+            .unwrap_or_else(|| ratio(0, 1))
+    }
+
+    fn set_pop_accrued(&mut self, orb: u64, remainder: Ratio) {
+        self.pop_accrued.retain(|(o, _)| *o != orb);
+        if remainder > ratio(0, 1) {
+            self.pop_accrued.push((orb, remainder));
+        }
+    }
+
+    /// **SETTLE THE POPULATION** (41_PROVISION §3, tag 167) — the whole-head
+    /// entry point: apply an INTEGER net change. A convenience over
+    /// [`Self::settle_population_exact`] for the seed, the tests, and any
+    /// caller with a whole delta; a whole delta leaves the fractional carry
+    /// untouched, so this path is byte-identical to the pre-Slice-2 settle.
     pub fn settle_population(&mut self, orb: u64, delta: i64) {
-        if delta == 0 {
+        self.settle_population_exact(orb, ratio(delta, 1));
+    }
+
+    /// **SETTLE THE POPULATION, EXACTLY** (41_PROVISION §3, COG Slice 2) —
+    /// apply a rational NET change (births − deaths) to the EXACT-RATIONAL
+    /// population. The current mass is the integer headcount plus its
+    /// fractional carry; the net delta folds into that mass, whole colonists
+    /// promote to the headcount (receipt tag 167), and the surviving `[0, 1)`
+    /// carry is kept (receipt tag 179). Population is a logistic, not a
+    /// ledger — the receipts carry the promotion and the remainder, so replay
+    /// reconstructs both. A sub-one delta that does not cross a whole colonist
+    /// still moves the carry, so a small founding band grows instead of
+    /// freezing. The tag-179 receipt is emitted ONLY when the carry actually
+    /// changes, so a whole-integer settle stays byte-identical to the old
+    /// path (which had no carry).
+    pub fn settle_population_exact(&mut self, orb: u64, delta: Ratio) {
+        if delta == ratio(0, 1) {
             return;
         }
-        let next = (self.clone_count_of(orb) as i64 + delta).max(0) as u64;
-        self.set_clone_count(orb, next);
+        let count = self.clone_count_of(orb) as i64;
+        let prev_carry = self.pop_accrued_of(orb);
+        // THE TRUE MASS as an exact rational, floored at extinction — a cull
+        // can empty a line but never take it negative.
+        let total = (ratio(count, 1) + prev_carry.clone() + delta).max(ratio(0, 1));
+        let whole: i64 = total.floor().to_integer().try_into().unwrap_or(i64::MAX);
+        // THE #28 LATTICE GUARD, on the population carry. The logistic feeds
+        // the carry back as the next touch's `p0`, so its denominator
+        // compounds every settle (the same recurrence `stock.rs` lattice-
+        // floors for the ration — a denominator that squares each tick).
+        // Bound it: quantize the `[0, 1)` carry onto the SAME lattice the
+        // ration stock uses (`stock::lattice`), so there is one lattice in
+        // the engine, not a new dial. The shave is sub-one-lattice-step of a
+        // colonist and bounded; population is a logistic, not a ledger, so
+        // this loses no conserved matter.
+        let lattice = crate::world::stock::lattice();
+        let remainder = ((total - ratio(whole, 1)) * lattice.clone()).floor() / lattice;
+        let next = whole.max(0) as u64;
+        let promotion = next as i64 - count;
         let stamp = self.clock.now();
-        self.chronicle.append(
-            crate::dop::ClosureEvent::PopulationSettled { orb_id: orb, delta },
-            stamp,
-            vec![],
-        );
-        // 50_WIN_CONDITIONS, operator ruling 2026-08-13: THE FAILURE
-        // STATE. Once every orb this line holds stands at zero clones,
-        // the civilization has collapsed — the only closure this game
-        // has. Checked here, not derived lazily, because it must fire
-        // exactly once and receipt when it happens (a reading has no
-        // moment to fire AT). Idempotent: collapsed only ever goes
-        // None -> Some, so a line that later re-seeds (if that's ever
-        // lawful) does not re-fire or un-collapse.
-        if self.collapsed.is_none() && self.clone_counts.iter().all(|(_, count)| *count == 0) {
+        self.set_clone_count(orb, next);
+        self.set_pop_accrued(orb, remainder.clone());
+        // The whole-colonist promotion receipts on tag 167 (integer
+        // headcount); a touch that only moves the carry emits no promotion.
+        if promotion != 0 {
+            self.chronicle.append(
+                crate::dop::ClosureEvent::PopulationSettled { orb_id: orb, delta: promotion },
+                stamp,
+                vec![],
+            );
+        }
+        // The surviving fractional carry receipts on tag 179 (absolute) —
+        // only when it CHANGED, so a whole-integer settle carries no new deed.
+        if remainder != prev_carry {
+            self.chronicle.append(
+                crate::dop::ClosureEvent::PopulationAccrued { orb_id: orb, remainder },
+                stamp,
+                vec![],
+            );
+        }
+        // 50_WIN_CONDITIONS, operator ruling 2026-08-13: THE FAILURE STATE.
+        // A line has collapsed only when it is TRULY extinct — every orb at
+        // zero headcount AND no fractional carry anywhere (a `0.4`-colonist
+        // band is still alive and still growing, so it is not a collapse).
+        // Checked here, fires exactly once, idempotent (None -> Some only).
+        let extinct = self.clone_counts.iter().all(|(_, count)| *count == 0)
+            && self.pop_accrued.is_empty();
+        if self.collapsed.is_none() && extinct {
             self.collapsed = Some(stamp);
             self.chronicle.append(
                 crate::dop::ClosureEvent::CivilizationCollapsed { orb_id: FIRST_ORB },

@@ -230,6 +230,11 @@ pub struct Committed {
     pub science_seats: Vec<(u8, u64, u8)>,
     /// LAB: bio clone counts per orb.
     pub clone_counts: Vec<(u64, u64)>,
+    /// PROVISION (41 §3, COG Slice 2): the fractional population remainder
+    /// per orb, in `[0, 1)` — the sub-person births the integer
+    /// `clone_counts` cannot hold, accrued across touches (replay of
+    /// `PopulationAccrued`). Zero for a line at demographic rest.
+    pub pop_accrued: Vec<(u64, Ratio)>,
     /// TAXATION (49 §5): the sovereign treasury balance per orb — an
     /// abstract fiscal reserve levies flow into and welfare spends from
     /// (replay of `TreasurySettled`, floored at zero).
@@ -378,6 +383,9 @@ pub struct World {
     pub(super) science_seats: Vec<(u8, u64, u8)>,
     /// LAB: clone counts — replay of LabCreated (clone path).
     pub(super) clone_counts: Vec<(u64, u64)>,
+    /// PROVISION (41 §3, COG Slice 2): fractional population remainder per
+    /// orb in `[0, 1)` — replay of `PopulationAccrued`.
+    pub(super) pop_accrued: Vec<(u64, Ratio)>,
     /// TAXATION (49 §5): sovereign treasury balances — replay of
     /// `TreasurySettled` (levies in, welfare out; floored at zero).
     pub(super) treasury_balances: Vec<(u64, Ratio)>,

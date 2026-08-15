@@ -119,6 +119,11 @@ pub const SCHEMA_V21: u8 = 21;
 /// optional trailing stamp).**
 pub const SCHEMA_V22: u8 = 22;
 
+/// **SCHEMA v23 — pop_accrued (41_PROVISION, COG Slice 2, trailing run).**
+/// The fractional population carry per orb — a v22 reader stops before it
+/// and decodes a whole state with every band at a whole headcount.
+pub const SCHEMA_V23: u8 = 23;
+
 fn put_u16(out: &mut Vec<u8>, value: u16) {
     out.extend_from_slice(&value.to_le_bytes());
 }
@@ -139,7 +144,7 @@ fn put_text(out: &mut Vec<u8>, text: &str) {
 /// The one encoding: schema byte, then every committed family in
 /// declaration order, positionally, canonically.
 pub fn state_bytes(committed: &Committed) -> Vec<u8> {
-    let mut out = vec![SCHEMA_V22];
+    let mut out = vec![SCHEMA_V23];
 
     put_u32(&mut out, committed.orbs.len() as u32);
     for orb in &committed.orbs {
@@ -554,6 +559,14 @@ pub fn state_bytes(committed: &Committed) -> Vec<u8> {
         }
         None => out.push(0),
     }
+    // SCHEMA v23 trailing: the fractional population carry (41_PROVISION,
+    // COG Slice 2) — (orb, remainder) run, LAST. A v22 reader stops before
+    // it and decodes a whole state with every band at a whole headcount.
+    put_u32(&mut out, committed.pop_accrued.len() as u32);
+    for (orb, remainder) in &committed.pop_accrued {
+        put_u64(&mut out, *orb);
+        ratio::encode(remainder, &mut out);
+    }
     out
 }
 
@@ -652,6 +665,7 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         && schema != SCHEMA_V20
         && schema != SCHEMA_V21
         && schema != SCHEMA_V22
+        && schema != SCHEMA_V23
     {
         return None;
     }
@@ -1204,6 +1218,17 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         None
     };
 
+    // SCHEMA v23 trailing: the fractional population carry, or empty for a
+    // pre-v23 snapshot (every band read at a whole headcount).
+    let mut pop_accrued = Vec::new();
+    if schema >= SCHEMA_V23 {
+        for _ in 0..take.u32()? {
+            let orb = take.u64()?;
+            let remainder = take.ratio()?;
+            pop_accrued.push((orb, remainder));
+        }
+    }
+
     if !take.done() {
         return None;
     }
@@ -1255,6 +1280,7 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         chem_catalog,
         science_seats,
         clone_counts,
+        pop_accrued,
         treasury_balances,
         synth_mods,
         skin_mods,

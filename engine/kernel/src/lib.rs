@@ -1478,6 +1478,7 @@ fn covered(event: &ClosureEvent) -> bool {
         | E::WantStruck { .. } | E::WantRelieved { .. }
         | E::ElementWantStruck { .. } | E::ElementWantRelieved { .. }
         | E::PopulationSettled { .. }
+        | E::PopulationAccrued { .. }
         | E::TreasurySettled { .. }
         | E::PracticesLapsed { .. }
         // 50_WIN_CONDITIONS, operator ruling 2026-08-13: the failure
@@ -2575,6 +2576,7 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         E::WantStruck { .. } | E::WantRelieved { .. }
         | E::ElementWantStruck { .. } | E::ElementWantRelieved { .. }
         | E::PopulationSettled { .. }
+        | E::PopulationAccrued { .. }
         // TAXATION (49 §5): a sovereign treasury is a people's own
         // fiscal store — universal to every founded line, yet never a
         // precondition for anyone else's standing (the Civilizational
@@ -2727,6 +2729,7 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         | E::ForwardSlashed { .. } | E::WantStruck { .. } | E::WantRelieved { .. }
         | E::ElementWantStruck { .. } | E::ElementWantRelieved { .. }
         | E::PopulationSettled { .. }
+        | E::PopulationAccrued { .. }
         | E::TreasurySettled { .. }
         | E::PracticesLapsed { .. }
         | E::CivilizationCollapsed { .. }
