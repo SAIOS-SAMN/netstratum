@@ -44,6 +44,7 @@ fn main() {
                 starved_for: 900,
                 thin: Vec::new(),
                 reach_bonus: 0,
+                capacity: 0,
             },
         ),
     ];

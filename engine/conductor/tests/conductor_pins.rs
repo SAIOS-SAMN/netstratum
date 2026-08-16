@@ -77,24 +77,36 @@ fn research_unlocks_industry() {
     // The pin witnesses a CONDITION; the era stops when it arrives
     // (wedge removal 2026-08-12 — a fixed 45 beats wedged in debug as
     // divergence multiplied worlds; the smelter lands far earlier).
-    let smelting = |worlds: &[Polity]| {
+    // DIO-3a: with each line's CLADE sealed at genesis, industry is now
+    // SPECIES-SPECIFIC. The element/mineral clades drive their OWN element
+    // economy — Extractors and ElementRefineries over their favoured elements —
+    // rather than the flatlander's biomass → iron Smelter (measured: at beat 90
+    // the six seats hold Extractors and Refineries, zero Smelters). The pyramid
+    // loop (surplus → research → technique → industry) still closes; it just
+    // closes on WHICHEVER industrial zone the sealed clade's economy favours, so
+    // the pin witnesses the LOOP, not one building.
+    let industrialized = |worlds: &[Polity]| {
+        use cfe::dop::ZoneKind;
         worlds.iter().any(|polity| {
             polity.level >= 3
                 && polity.world.orb().is_some_and(|orb| {
-                    orb.zones
-                        .iter()
-                        .any(|z| z.kind == cfe::dop::ZoneKind::Smelter)
+                    orb.zones.iter().any(|z| {
+                        matches!(
+                            z.kind,
+                            ZoneKind::Smelter
+                                | ZoneKind::Synthesizer
+                                | ZoneKind::ElementRefinery
+                                | ZoneKind::Extractor
+                        )
+                    })
                 })
         })
     };
-    // A SEATED-PREFIX board (the pin's law is per-line, not
-    // board-wide) with the room the taxon-scaled biomass economy now
-    // needs: the 10-bio smelter bill accumulates at ~1/4 per beat
-    // under the yield scales, landing near beat 34 (measured) — past
-    // the old 45 with a full roster's beat cost, comfortably inside
-    // 90 on six seats.
-    let worlds = run_era_until_among(&root.to_string_lossy(), 90, 6, smelting);
-    assert!(smelting(&worlds), "an earned rung turned surplus into smelters");
+    // A SEATED-PREFIX board (the pin's law is per-line, not board-wide). At
+    // beat 90 the six seats have climbed to rung 5 and each raised its clade's
+    // own industry (Extractors, ElementRefineries) — measured under DIO-3a.
+    let worlds = run_era_until_among(&root.to_string_lossy(), 90, 6, industrialized);
+    assert!(industrialized(&worlds), "an earned rung turned surplus into industry");
 }
 
 /// DIVERGENCE (AEON-1b, 11 §3): a long era CLEAVES at least one line

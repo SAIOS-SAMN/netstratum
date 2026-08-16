@@ -169,21 +169,29 @@ fn a_lush_world_carries_more_than_a_barren_one_and_a_rock_carries_nothing() {
     // K rises with the living footprint and with the place's
     // habitability for the SITTING CLADE — a flatlander's own band
     // (Mesic) holds a large K for it.
-    let lush = carrying_capacity(8, FLATLANDER, ThermalRegion::Mesic);
-    let cold = carrying_capacity(8, FLATLANDER, ThermalRegion::Cryogenic);
-    let rock = carrying_capacity(8, FLATLANDER, ThermalRegion::Incandescent);
+    // DIO-2: carrying_capacity now reads habitability as the CONTINUOUS flux
+    // tent on t_eq4, so feed it a band-CENTRE flux rather than a discrete
+    // region. A clade dead-centre in its own band reads η=1; far outside, η=0.
+    use cfe::thermal::SubstrateBand;
+    let centre = |band: SubstrateBand| -> Ratio {
+        let (lo, hi) = band.bounds4();
+        (lo + hi) / ratio(2, 1)
+    };
+    let lush = carrying_capacity(8, FLATLANDER, &centre(SubstrateBand::Mesic));
+    let cold = carrying_capacity(8, FLATLANDER, &centre(SubstrateBand::Cryogenic));
+    let rock = carrying_capacity(8, FLATLANDER, &centre(SubstrateBand::HyperThermal));
     assert!(lush > cold, "the same zones hold more stock in the flatlander's own band");
     assert_eq!(rock, ratio(0, 1), "a scorched rock carries no ration, whatever it builds");
     // More living zones, more capacity — the footprint scales it.
     assert!(
-        carrying_capacity(16, FLATLANDER, ThermalRegion::Mesic) > lush,
+        carrying_capacity(16, FLATLANDER, &centre(SubstrateBand::Mesic)) > lush,
         "a wider ecological footprint holds more"
     );
     // A world with no living zones has no natural ceiling to speak of.
-    assert_eq!(carrying_capacity(0, FLATLANDER, ThermalRegion::Mesic), ratio(0, 1));
+    assert_eq!(carrying_capacity(0, FLATLANDER, &centre(SubstrateBand::Mesic)), ratio(0, 1));
     // A cryophage on the SAME cold world reads capacity a flatlander on
     // that world would not — the ceiling follows the clade, not the place.
-    let cryophage_cold = carrying_capacity(8, CRYOPHAGE, ThermalRegion::Cryogenic);
+    let cryophage_cold = carrying_capacity(8, CRYOPHAGE, &centre(SubstrateBand::Cryogenic));
     assert!(cryophage_cold > cold, "the cryophage's own band carries more for it");
 }
 
@@ -192,7 +200,10 @@ fn the_derivations_feed_the_curve_and_a_collapsed_lush_world_climbs_back() {
     // The pieces compose: a world in a clade's own band, stripped to an
     // ember, recovers toward its (large) K along the S-curve, slowly at
     // first — the flatlander/biotic pair, verbatim v1.
-    let k = carrying_capacity(10, FLATLANDER, ThermalRegion::Mesic);
+    let k = {
+        let (lo, hi) = cfe::thermal::SubstrateBand::Mesic.bounds4();
+        carrying_capacity(10, FLATLANDER, &((lo + hi) / ratio(2, 1)))
+    };
     let r = intrinsic_rate(BIOTIC, None);
     let ember = ratio(1, 10);
     let early = cfe::almanac::grained_logistic(&ember, &k, &r, 10);

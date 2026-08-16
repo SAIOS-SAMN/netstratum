@@ -214,6 +214,14 @@ pub const TARGET_RESERVE: (i64, i64) = (8, 1);
 /// GROWS up to its limit rather than being culled down to it.
 pub const FOUNDING_BAND: i64 = 4;
 
+/// The archetype CLASS a founding line seals at genesis (DIO-3a). The roster
+/// declares each line's CLADE (the species — soniform, cnidiform) but no
+/// class; 7 is the neutral baseline `science_lab` already reads for an
+/// unsealed world, and it falls through `economic_mode` to let the clade
+/// colour the economy. A definition, not a dial (a bare integer, and the
+/// class ceiling is 13); a per-clade archetype table is a later refinement.
+pub const NEUTRAL_ARCHETYPE_CLASS: u8 = 7;
+
 /// The reference model posts in WHOLE LOTS: amounts floor to the
 /// 1/64 grid the melt law already speaks (MELT_PER_UNIT). This is
 /// layer-2 prudence, not law — it keeps every book amount's
@@ -1137,6 +1145,22 @@ impl Polity {
             (cfe::dop::Unit::new(albedo), cfe::dop::Positive::new(orbit))
         {
             let _ = world.site_planet(cfe::world::FIRST_ORB, albedo, orbit, None, None);
+        }
+        // **DIO-3a: SEAL THE CLADE AT GENESIS** (operator ruling 2026-08-16). Until
+        // sealed, every founding line reads the flatlander default (clade 2,
+        // Mesic), so DIO-2's species-relative η is LATENT — a whale, a coral,
+        // and a plasmoid all read the same temperate optimum. Translate the
+        // spec's DECLARED clade string to its code and seal it, so
+        // `rejuvenation_clade` returns the real species and `habitability_flux`
+        // reads its OWN band. Class 7 is the neutral baseline `science_lab`
+        // already assumes when unsealed (so `economic_mode` falls through to the
+        // clade — the identity, not the archetype, colours the economy); a
+        // per-clade archetype class is a later refinement. Sealed AFTER siting so
+        // the orbit draw (which reads the genesis digest) is unchanged: DIO-3a
+        // isolates to "the clade goes live". A clade the table does not know
+        // stays flatlander rather than refusing the founding.
+        if let Some(clade) = cfe::almanac::table_clade_from_word(&spec.civilization.clade) {
+            let _ = world.seal_taxon(NEUTRAL_ARCHETYPE_CLASS, clade);
         }
         Polity {
             chained: 0,

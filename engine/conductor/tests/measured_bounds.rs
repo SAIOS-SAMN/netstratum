@@ -131,7 +131,16 @@ fn scratch(name: &str) -> PathBuf {
 /// `coralline` back below its cultivation threshold into famine. A pure
 /// identity re-measure — no law changed; `coralline` is a marginal line whose
 /// cultivation build-order flips on any reseed. Bootstrap law UNCHANGED.
-const MEASURED_ZONE_TOTAL_AT_15: usize = 86;
+/// RE-MEASURED 2026-08-16 to 76: **DIO-3a — CLADE SEALED AT GENESIS.** Every
+/// founding line now seals its DECLARED clade at birth (class 7, neutral) so
+/// `rejuvenation_clade` returns the real species and `habitability_flux` reads
+/// its OWN band — DIO-2's species-relative tent is finally LIVE, not the
+/// flatlander-mesic stand-in. A physics-base change (taxon also drives economic
+/// mode, so the build walk reseeds board-wide): the total settles at 76 and the
+/// famished set SHRINKS 9 → 6 (each line reading its own habitability, three —
+/// stillcold, thresholder, glyphward — now feed). Deliberate re-measure; the
+/// per-line bootstrap law is UNCHANGED.
+const MEASURED_ZONE_TOTAL_AT_15: usize = 76;
 
 /// **THE ENERGY-BOOTSTRAP DEBT** — the lines the settlement law cannot
 /// reach, pinned so the set can only SHRINK:
@@ -139,25 +148,20 @@ const MEASURED_ZONE_TOTAL_AT_15: usize = 86;
 /// - cold-siting lines freeze-lock in joule famine at one CryoArray
 ///   (the Frost branch's own doc calls the freeze-lock "legitimate
 ///   drama, not a bug");
-/// - Furnace / thermal holds and new sovereign seats that famish inside
-///   the window (thresholder, tallykeep, glyphward) — recorded so a cure shrinks
-///   this list rather than silently green-washing the debt;
+/// - `tallykeep` — a sovereign seat that famishes inside the window;
 /// - `coralline` (cnidiform): a marginal temperate line whose famine flips with
 ///   the digest — it raises a ration zone and feeds itself under some reseeds,
-///   falls just below the threshold under others. Famished here after the
-///   mysticeti-pelagic rename reseed. (The line once called `deep-chorus`,
-///   another temperate case, passed through this list too before its rename
-///   drew it a proper temperate orbit; whether such a line feeds is cultivation
-///   build-order, not thermal preference, until clades seal at genesis.)
-const FROZEN_AT_15: [&str; 9] = [
+///   falls just below the threshold under others.
+///
+/// SHRANK 9 → 6 at DIO-3a: once each line reads its OWN species' habitability
+/// (not the flatlander default), `stillcold`, `thresholder`, and `glyphward`
+/// feed and leave the debt. A cure shrinks this list; it may not grow silently.
+const FROZEN_AT_15: [&str; 6] = [
     "corebound",
-    "stillcold",
     "umbrid",
     "frostwright",
     "darlok",
-    "thresholder",
     "tallykeep",
-    "glyphward",
     "coralline",
 ];
 

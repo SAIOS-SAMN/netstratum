@@ -55,3 +55,21 @@ fn census() {
     }
     println!("TOTAL_ZONES={total} FAMISHED_COUNT={} FAMISHED={:?}", frozen.len(), frozen);
 }
+
+#[test]
+#[ignore = "diagnostic: 6-seat industry trajectory under DIO-3a"]
+fn industry_probe() {
+    let root = scratch("industry");
+    let worlds = conductor::run_era_until_among(&root.to_string_lossy(), 90, 6, |_| false);
+    println!("SIGIL          METAB     CLADE LEVEL ZONES SMELT FAM");
+    for p in &worlds {
+        let orb = p.world.orb();
+        use cfe::dop::ZoneKind::*;
+        let count = |k: cfe::dop::ZoneKind| orb.map(|o| o.zones.iter().filter(|z| z.kind == k).count()).unwrap_or(0);
+        let zones = orb.map(|o| o.zones.len()).unwrap_or(0);
+        println!("{:14} {:9} clade={:3} lvl={} zones={} | Smelt={} Synth={} Refin={} Extract={}",
+            p.spec.civilization.sigil, p.spec.civilization.metabolism,
+            p.world.rejuvenation_clade(), p.level, zones,
+            count(Smelter), count(Synthesizer), count(ElementRefinery), count(Extractor));
+    }
+}

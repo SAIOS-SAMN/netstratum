@@ -182,8 +182,13 @@ fn pure_npc_refines_elements() {
         &book,
     );
 
+    // DIO-3a: the pure NPC now seals its clade at genesis (tardigrade →
+    // hypobiotid, an EXTRACTIVE economy). The digest reseed and the changed
+    // economic mode push its first refine from within 48 beats to beat 64
+    // (measured), so the window widens to 90 — the loop still witnesses the
+    // element economy closing (bank → refine), just on the sealed clade's clock.
     let mut refined_on = None;
-    for beat in 1u32..=48 {
+    for beat in 1u32..=90 {
         let _ = polity.cycle(&book, &registry);
         if refined_kinds(&polity) > 0 {
             refined_on = Some(beat);
@@ -197,7 +202,7 @@ fn pure_npc_refines_elements() {
     );
     assert!(
         refined_on.is_some(),
-        "pure NPC must refine at least once within 48 beats; \
+        "pure NPC must refine at least once within 90 beats; \
          elements={} refined_receipts={}",
         element_kinds(&polity),
         refined_kinds(&polity)
