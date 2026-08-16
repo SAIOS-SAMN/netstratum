@@ -105,6 +105,67 @@ pub fn habitability(clade: u16, region: ThermalRegion) -> Ratio {
     ratio(1, 1i64 << distance)
 }
 
+/// The clade's preferred substrate band as exact `T⁴` bounds
+/// `(floor⁴, ceiling⁴)`, DERIVED from the cited Kelvin anchors
+/// ([`crate::thermal::SubstrateBand::bounds4`]). The 8-way preference ladder
+/// collapses onto the three anchored bands; the one inter-band preference
+/// (Torrid, the 320–600 K silence) is the gap BETWEEN the mesic ceiling and
+/// the foundry floor — itself two cited anchors, no invented bound.
+fn preferred_band_bounds4(clade: u16) -> (Ratio, Ratio) {
+    use crate::thermal::SubstrateBand;
+    match clade_preferred_region(clade) {
+        ThermalRegion::Quenched | ThermalRegion::Cryogenic => SubstrateBand::Cryogenic.bounds4(),
+        ThermalRegion::HyperThermal | ThermalRegion::Incandescent | ThermalRegion::Beyond => {
+            SubstrateBand::HyperThermal.bounds4()
+        }
+        ThermalRegion::Torrid => {
+            (SubstrateBand::Mesic.bounds4().1, SubstrateBand::HyperThermal.bounds4().0)
+        }
+        ThermalRegion::Sublime | ThermalRegion::Mesic => SubstrateBand::Mesic.bounds4(),
+    }
+}
+
+/// **THE FLUX-DOMAIN HABITABILITY** (DIO-2, operator-ruled 2026-08-16) — the
+/// continuous, species-relative refinement of [`habitability`]. Where the
+/// band-distance form tapers in HALF-steps across the 8-way region ladder,
+/// this reads the clade's alignment as an exact-rational TENT on the
+/// continuous equilibrium flux `t_eq4`, so a continuously-sited Diophantine
+/// orbit ([`crate::thermal`] / `siting.rs`) grades SMOOTHLY instead of
+/// snapping at bucket edges:
+///
+/// ```text
+///   η = max(0, 1 − |t_eq4 − U_opt| / V)
+/// ```
+///
+/// `U_opt` is the CENTRE of the clade's preferred substrate band and `V` its
+/// full width — both derived from the cited Kelvin anchors, no dial. A clade
+/// sits at η=1 dead-centre of its band, η=1/2 at either band edge, and η=0 a
+/// full band-width beyond. So a carbon-water line on a HOT Diophantine track
+/// (`t_eq4` above its mesic band) denatures to η→0, while a thermophile at the
+/// SAME orbit — its `U_opt` high — reads η→1. There is no absolute habitable
+/// zone: only the overlap of THIS clade's optimum with THIS orbit's flux.
+///
+/// The ÷2 of the band centre is cleared by doubling numerator and
+/// denominator, so the whole tent is exact rationals with no literal dial:
+/// `η = 1 − |2·t_eq4 − (floor⁴+ceiling⁴)| / (2·(ceiling⁴−floor⁴))`.
+pub fn habitability_flux(clade: u16, t_eq4: &Ratio) -> Ratio {
+    let (floor4, ceiling4) = preferred_band_bounds4(clade);
+    let two_t = t_eq4.clone() + t_eq4.clone();
+    let edges = floor4.clone() + ceiling4.clone();
+    let span = ceiling4 - floor4;
+    let two_width = span.clone() + span;
+    if two_width <= ratio(0, 1) {
+        return ratio(0, 1);
+    }
+    let deviation = if two_t >= edges { two_t - edges } else { edges - two_t };
+    let eta = ratio(1, 1) - deviation / two_width;
+    if eta <= ratio(0, 1) {
+        ratio(0, 1)
+    } else {
+        eta
+    }
+}
+
 /// **THE CARRYING CAPACITY `K`** — the natural ceiling of a world's
 /// ration stock, from the three readings the ruling names: the living
 /// ZONES (habitats and regenerators — the ecological footprint), and
@@ -117,6 +178,6 @@ pub fn habitability(clade: u16, region: ThermalRegion) -> Ratio {
 /// scaled by the place's [`habitability`] for that clade, so a lush
 /// world's `K` stands well above any young colony's founding stock and
 /// a scorched rock holds nothing.
-pub fn carrying_capacity(living_zones: u64, clade: u16, region: ThermalRegion) -> Ratio {
-    ratio(living_zones as i64 * REGROWTH_GRAIN, 1) * habitability(clade, region)
+pub fn carrying_capacity(living_zones: u64, clade: u16, t_eq4: &Ratio) -> Ratio {
+    ratio(living_zones as i64 * REGROWTH_GRAIN, 1) * habitability_flux(clade, t_eq4)
 }

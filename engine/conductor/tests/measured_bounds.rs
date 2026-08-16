@@ -95,7 +95,20 @@ fn scratch(name: &str) -> PathBuf {
 /// flux η will formalize (a carbon-water line cannot take that heat; a
 /// thermophile sited there would thrive). A deliberate re-measure under the
 /// now-continuous orbital physics; the per-line bootstrap law is UNCHANGED.
-const MEASURED_ZONE_TOTAL_AT_15: usize = 83;
+/// RE-MEASURED 2026-08-16 to 81: **THE SPECIES-RELATIVE η** (DIO-2). Habitability
+/// is no longer the shared 8-way band-distance halving; it is a CONTINUOUS
+/// flux tent read on the exact `t_eq4` against EACH clade's own preferred-band
+/// optimum (`habitability_flux`). The absolute habitable zone is gone, and the
+/// board proves it: `deep-chorus` — DIO-1's hot-tail casualty — is now FED,
+/// because its clade prefers the warm (Torrid) band, so the very orbit that
+/// starved it under the shared zone SUITS it (the exact vindication the DIO-1
+/// note predicted). In its place `coralline`, a temperate-preferring clade that
+/// also drew a hot orbit (insolation ≈ 2.1), denatures below its founding
+/// band — it cannot take the heat its neighbour loves. Same sun, opposite
+/// outcomes. The famished COUNT is unchanged (9); the sharper, coherent tent
+/// (now shared by primary_production AND the regrowth ceiling) trims two
+/// marginal zones (83 → 81). A deliberate re-measure; bootstrap law UNCHANGED.
+const MEASURED_ZONE_TOTAL_AT_15: usize = 81;
 
 /// **THE ENERGY-BOOTSTRAP DEBT** — the lines the settlement law cannot
 /// reach, pinned so the set can only SHRINK:
@@ -106,14 +119,16 @@ const MEASURED_ZONE_TOTAL_AT_15: usize = 83;
 /// - Furnace / thermal holds and new sovereign seats that famish inside
 ///   the window (thresholder, tallykeep, glyphward) — recorded so a cure shrinks
 ///   this list rather than silently green-washing the debt;
-/// - `deep-chorus` (added 2026-08-16, DIO-1): the ONE new casualty of the
-///   Diophantine realignment — a mesic line that drew a HOT track (r ≈ 0.646)
-///   sitting above the mesic ceiling, so it over-heats rather than freezes.
-///   Unlike the cold Frost/sovereign seats above (which are PINNED and so
-///   untouched by the derived generator), this is a DERIVED orbit that landed
-///   in the starving hot tail. It is recorded here as debt, but its true cure
-///   is not a settlement gate — it is DIO-2's species-relative η, which will
-///   either site it by its own optimum or let a thermophile claim the heat.
+/// - `coralline` (2026-08-16, DIO-2): the hot-orbit casualty under the
+///   SPECIES-RELATIVE η. DIO-1 recorded `deep-chorus` here as the hot-tail
+///   casualty and predicted its cure was species-relative habitability — and
+///   that is exactly what happened: under DIO-2's flux tent `deep-chorus`
+///   (its clade preferring the warm band) now THRIVES on that same hot orbit
+///   and LEAVES this list, while `coralline` — a temperate-preferring clade
+///   that likewise drew a hot track — denatures in its place. Same debt slot,
+///   different occupant: the heat one clade loves is the heat another cannot
+///   take. Its cure is not a settlement gate but its own orbit (a cooler
+///   Diophantine draw) or a warm-adapted lineage.
 const FROZEN_AT_15: [&str; 9] = [
     "corebound",
     "stillcold",
@@ -123,7 +138,7 @@ const FROZEN_AT_15: [&str; 9] = [
     "thresholder",
     "tallykeep",
     "glyphward",
-    "deep-chorus",
+    "coralline",
 ];
 
 /// **THE SETTLEMENT BOUNDS, MEASURED.** Fifteen beats over the whole

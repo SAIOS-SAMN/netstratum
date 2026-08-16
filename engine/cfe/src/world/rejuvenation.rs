@@ -72,12 +72,13 @@ impl World {
     /// THE SITTING CLADE. An unsited orb, or one on a barren rock (for
     /// this clade), carries none.
     pub fn ration_capacity_of(&self, orb: u64) -> Ratio {
-        match self.orb_region(orb) {
-            Some(region) => {
-                carrying_capacity(self.living_zones_of(orb), self.rejuvenation_clade(), region)
-            }
-            None => ratio(0, 1),
+        if self.orb_region(orb).is_none() {
+            return ratio(0, 1);
         }
+        // DIO-2: read the sitting clade's habitability as the continuous flux
+        // tent on the exact `t_eq4`, coherent with `primary_production`.
+        let t_eq4 = self.insolation_of(orb) * crate::thermal::thermal_k();
+        carrying_capacity(self.living_zones_of(orb), self.rejuvenation_clade(), &t_eq4)
     }
 
     /// **THE REGROWN STOCK — a SCAN, never a deed.** What this orb's

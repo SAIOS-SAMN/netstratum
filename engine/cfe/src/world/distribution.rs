@@ -291,10 +291,16 @@ impl World {
     /// syntropic and cultivated flows draw from — never itself the population
     /// ceiling.
     pub fn primary_production(&self, orb: u64) -> Ratio {
-        let Some(region) = self.orb_region(orb) else {
+        if self.orb_region(orb).is_none() {
             return ratio(0, 1);
-        };
-        let eta = crate::almanac::habitability(self.rejuvenation_clade(), region);
+        }
+        // DIO-2: the species-relative η is now a CONTINUOUS flux tent read on
+        // the exact equilibrium flux `t_eq4 = insolation · K`, so a
+        // continuously-sited Diophantine orbit grades smoothly (no 8-way
+        // bucket cliffs). A clade off its optimum converts less of the same
+        // starlight; far enough off, it starves.
+        let t_eq4 = self.insolation_of(orb) * crate::thermal::thermal_k();
+        let eta = crate::almanac::habitability_flux(self.rejuvenation_clade(), &t_eq4);
         if eta <= ratio(0, 1) {
             return ratio(0, 1);
         }
