@@ -634,55 +634,14 @@ pub enum Trajectory {
     Decline,
 }
 
-/// WHICH REGIME a board runs under — the three paths, held together so
-/// they can be measured against each other rather than argued about.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
-pub enum SearchMode {
-    /// COUPLED — the trajectory routes. Read while reading pays,
-    /// escalate the hunger on stagnation, exhaust only on decline.
-    #[default]
-    Coupled,
-    /// UNCOUPLED — always exhaust. The original path, and the control
-    /// every other number is read against.
-    Uncoupled,
-    /// **V ∪ D** — the union. Every task gets BOTH: read first, and
-    /// exhaust whenever the reading did not close. Not a router — a
-    /// dyad, neither path deriving its standing from the other, and the
-    /// closure set is the union of what each can reach alone.
-    ///
-    /// It should find everything either finds, and pay both costs to do
-    /// it. Whether that is worth it is what the benchmark answers.
-    Union,
-}
-
-/// HOW a line searches. Both paths are live; neither is deprecated.
-///
-/// They are not competitors — they fail in different places. The reach
-/// MATCHES an exhaustive sweep exactly at rung 3 (200/199/1) at 8
-/// candidates against up to 200,000, and loses only at rungs 4-5, where
-/// the answer needs composition through states the observation cannot
-/// name. So the engine reads first and exhausts only when reading has
-/// demonstrably run out — which is what makes exhaustion affordable at
-/// all.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum SearchPath {
-    /// Derivation-first: the observation names the operator, the need
-    /// orders the reach. ~66x the energy per candidate on the live
-    /// board.
-    Reach,
-    /// Exhaustive composition, bounded by `SEARCH_BUDGET`. Finds what
-    /// no reading motivates, and costs four orders of magnitude more.
-    Sweep,
-}
+// SearchMode / SearchPath (the Coupled/Uncoupled/Union regimes and the
+// Reach/Sweep split) were RETIRED with the Cartesian sweep (operator ruling
+// 2026-08-16, "no enums — that is just more cartesian slop"): with the
+// exhaustive path gone there is one path (Reach, the SNF derivation), so the
+// mode/path enums were dead discrete-case dispatch. The line searches by
+// deriving; a miss asserts a cokernel failure.
 
 impl Trajectory {
-    /// WHICH PATH this trajectory searches by.
-    pub fn path(&self) -> SearchPath {
-        match self {
-            Trajectory::Growth | Trajectory::Stagnation => SearchPath::Reach,
-            Trajectory::Decline => SearchPath::Sweep,
-        }
-    }
 
     /// The reach this trajectory buys, when it is reading. Unused on
     /// the sweep path, which has no need to order.
@@ -845,9 +804,6 @@ pub struct Polity {
     /// The fiber's grade count is `world.key().len()`; this counts the
     /// openings that got it there.
     pub unfolded: u64,
-    /// WHICH REGIME this line searches under. Set by the era runner so
-    /// the three paths can be benchmarked against one another.
-    pub mode: SearchMode,
     /// WHERE THIS LINE IS GOING, read from its own outcomes and used
     /// to decide what the next beat's search may spend.
     pub trajectory: Trajectory,
@@ -1089,7 +1045,6 @@ impl Polity {
                         lane_refused: Vec::new(),
                         last_forge: None,
                         reported: 0,
-                        mode: SearchMode::default(),
                         trajectory: Trajectory::Growth,
                         starved: 0,
                         spent: 0,
@@ -1195,7 +1150,6 @@ impl Polity {
             lane_refused: Vec::new(),
             last_forge: None,
             reported: 0,
-            mode: SearchMode::default(),
             trajectory: Trajectory::Growth,
             starved: 0,
             spent: 0,
@@ -4505,7 +4459,7 @@ fn galaxy_creator(registry: &Registry, civilization: &Civilization) -> String {
 /// every polity, then `cycles` heartbeats; branches born mid-era join the
 /// beat. Returns the live worlds.
 pub fn run_era(var_root: &str, cycles: u32) -> Vec<Polity> {
-    run_era_with(var_root, cycles, SearchMode::default())
+    run_era_inner(var_root, cycles, None, None)
 }
 
 /// **THE CONDITION-DRIVEN ERA** (wedge removal, 2026-08-12): run at
@@ -4523,7 +4477,7 @@ pub fn run_era_until(
     cycles: u32,
     arrived: impl Fn(&[Polity]) -> bool,
 ) -> Vec<Polity> {
-    run_era_inner(var_root, cycles, SearchMode::default(), None, Some(&arrived))
+    run_era_inner(var_root, cycles, None, Some(&arrived))
 }
 
 /// The condition-driven era over a SEATED PREFIX of the founding
@@ -4537,19 +4491,12 @@ pub fn run_era_until_among(
     seats: usize,
     arrived: impl Fn(&[Polity]) -> bool,
 ) -> Vec<Polity> {
-    run_era_inner(var_root, cycles, SearchMode::default(), Some(seats), Some(&arrived))
-}
-
-/// The era runner, under a named search regime — the seam the
-/// three-path benchmark drives.
-pub fn run_era_with(var_root: &str, cycles: u32, mode: SearchMode) -> Vec<Polity> {
-    run_era_inner(var_root, cycles, mode, None, None)
+    run_era_inner(var_root, cycles, Some(seats), Some(&arrived))
 }
 
 fn run_era_inner(
     var_root: &str,
     cycles: u32,
-    mode: SearchMode,
     seats: Option<usize>,
     arrived: Option<&dyn Fn(&[Polity]) -> bool>,
 ) -> Vec<Polity> {
@@ -4569,9 +4516,7 @@ fn run_era_inner(
         .map(|mut spec| {
             let opening = spec.gauge.take().unwrap_or_else(|| ratio(0, 1));
             spec.gauge = Some(cfe::world::wrap_gauge(opening + live_base.clone()));
-            let mut polity = Polity::genesis(spec, &registry, &book);
-            polity.mode = mode;
-            polity
+            Polity::genesis(spec, &registry, &book)
         })
         .collect();
     for beat in 0..cycles {
@@ -4584,9 +4529,7 @@ fn run_era_inner(
             }
         }
         for spec in newborns {
-            let mut polity = Polity::genesis(spec, &registry, &book);
-            polity.mode = mode;
-            worlds.push(polity);
+            worlds.push(Polity::genesis(spec, &registry, &book));
         }
         // OFFER-1a + MERCHANT-1 + E3.3: market, caravan, element haul.
         fleet_step(&mut worlds);
