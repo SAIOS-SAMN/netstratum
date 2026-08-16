@@ -90,21 +90,25 @@ pub fn material_of(element: &[u8; 32]) -> Vec<Ratio> {
     ]
 }
 
-/// **THE THERMODYNAMIC FILTER `F_thermo`** — the orbit's diagonal scaling of the
-/// raw material, `heat ∈ [0, 1]` rising with insolation. A scorched world
-/// (`heat → 1`) maximises Cohesion and drives Volatility and resonance to zero
-/// (matter bakes to rock/metal); a frozen world (`heat → 0`) loses Cohesion but
-/// keeps Volatility and resonance (ices, gas, plasma). Syntropy and thermal
-/// capacitance ride neutral. This is why inner worlds are rocky and outer worlds
-/// gaseous — the same duality our own system shows.
+/// **THE THERMODYNAMIC FILTER `F_thermo`** (ONT-1c: the thermal-cohesion sign
+/// corrected) — the orbit's diagonal scaling of the raw material, `heat ∈ [0, 1]`
+/// rising with insolation. The physics runs the RIGHT way: high thermal energy
+/// agitates and melts bonds, so a scorched world (`heat → 1`) has MAXIMUM
+/// Volatility and near-zero Cohesion (fluid, gas, plasma); a frozen world
+/// (`heat → 0`) condenses matter into stable cohesive lattices (ice, frozen
+/// silicate, dense metal) — MAXIMUM Cohesion, near-zero Volatility. Resonance
+/// rides the dense hot phase (plasma carries the harmonic); syntropy and thermal
+/// capacitance ride neutral.
+///
+///   c(heat) = 1 − heat      v(heat) = heat      f(heat) = heat
 fn thermo_scale(heat: &Ratio) -> Vec<Ratio> {
     let one = ratio(1, 1);
     let cold = one.clone() - heat.clone();
     let mut scale = vec![ratio(0, 1); 5];
-    scale[C] = heat.clone(); // cohesion bakes in with heat
-    scale[V] = cold.clone(); // volatility boils off with heat
+    scale[C] = cold; // cohesion: cold condenses stable lattices
+    scale[V] = heat.clone(); // volatility: heat melts bonds into fluid/gas/plasma
     scale[S] = one.clone(); // syntropy neutral
-    scale[F] = cold; // resonance survives in the cold
+    scale[F] = heat.clone(); // resonance: the dense hot phase carries the harmonic
     scale[H] = one; // capacitance neutral
     scale
 }
@@ -266,8 +270,15 @@ pub fn viable_roles(metabolism: &Metabolism, substrate: &[Ratio]) -> Vec<usize> 
 ///
 /// Exact-rational; the same inputs always grade the same, so genesis is
 /// replay-exact.
-pub fn fitness(metabolism: &Metabolism, substrate: &[Ratio]) -> Ratio {
-    let u = project(metabolism, substrate);
+pub fn fitness(metabolism: &Metabolism, substrate: &[Ratio], clade_align: &Ratio) -> Ratio {
+    let mut u = project(metabolism, substrate);
+    // CLADE THERMAL ALIGNMENT (ONT-1c). A species can only put its structural
+    // material to use where the SEALED CLADE's own thermal band is met — the
+    // DIO-2 habitability tent, `clade_align ∈ [0, 1]`, supplied by the caller. A
+    // cold-preferring clade on a warm orbit reads a low alignment and its
+    // Structure collapses: a thermal MISMATCH, correctly signalled, not a false
+    // starvation on an otherwise-habitable orbit.
+    u[STRUCT] = u[STRUCT].clone() * clade_align.clone();
     let mut binding = ratio(1, 1);
     for &role in &ESSENTIAL {
         let cap = ceiling(metabolism, role);
@@ -283,8 +294,8 @@ pub fn fitness(metabolism: &Metabolism, substrate: &[Ratio]) -> Ratio {
 }
 
 /// A species survives a planet iff its graded fitness is non-zero.
-pub fn survives(metabolism: &Metabolism, substrate: &[Ratio]) -> bool {
-    fitness(metabolism, substrate) > ratio(0, 1)
+pub fn survives(metabolism: &Metabolism, substrate: &[Ratio], clade_align: &Ratio) -> bool {
+    fitness(metabolism, substrate, clade_align) > ratio(0, 1)
 }
 
 /// The archetype for a metabolism NAME (the roster's string axis): mineral,
@@ -308,92 +319,107 @@ mod tests {
         ratio(num, den)
     }
 
-    // The planet as siting sees it, from the orbit alone. A hot rocky inner world
-    // (flatlander earth): heat at the scorched extreme → cohesion baked in,
-    // volatility and resonance driven off; bathed in light. A cold outer gas
-    // giant: heat at the frozen extreme → cohesion lost, volatility and resonance
-    // preserved; little light, a live thermal gradient. A warm mesic world sits
-    // between (heat = 1/2), where the subsistence floor decides the marginal case.
-    fn rocky_earth() -> Vec<Ratio> {
-        planet_from_orbit(&ratio(1, 1), &ratio(1, 1), &q(1, 2))
+    // A neutral clade — no thermal preference, alignment 1 everywhere — so a
+    // pure-metabolism witness reads the material physics alone.
+    fn any_clade() -> Ratio {
+        ratio(1, 1)
     }
-    fn gas_giant() -> Vec<Ratio> {
-        planet_from_orbit(&ratio(0, 1), &q(1, 8), &ratio(1, 1))
+
+    // The planet as siting sees it, from the orbit alone, under the CORRECTED
+    // physics (ONT-1c): heat melts bonds into volatility, cold condenses cohesive
+    // lattices. A COLD solid world (heat → 0): cohesion high, volatility zero —
+    // the home of cohesion-building life (frozen silicate, ice, dense metal). A
+    // HOT plasma world (heat → 1): volatility and resonance high, cohesion zero —
+    // the home of plasma life. A mesic world sits between (heat = 1/2).
+    fn cold_solid() -> Vec<Ratio> {
+        planet_from_orbit(&ratio(0, 1), &q(1, 4), &ratio(1, 1))
+    }
+    fn hot_plasma() -> Vec<Ratio> {
+        planet_from_orbit(&ratio(1, 1), &ratio(1, 1), &ratio(1, 1))
     }
     fn mesic_world() -> Vec<Ratio> {
-        planet_from_orbit(&q(1, 2), &ratio(1, 1), &q(1, 2))
+        planet_from_orbit(&q(1, 2), &ratio(1, 1), &ratio(1, 1))
     }
 
     #[test]
-    fn the_biotic_generalist_lives_on_rocky_earth_not_a_gas_giant() {
+    fn cohesion_life_lives_on_the_cold_solid_world_not_the_hot_one() {
+        // Corrected physics: a biotic builds its body from Cohesion, which
+        // CONDENSES in the cold. It thrives on the cold solid world and cannot
+        // hold structure on a hot volatile one (cohesion melted to zero).
         let biotic = archetype(2);
-        assert!(survives(&biotic, &rocky_earth()), "biotic thrives on the rocky lit world");
-        // On a gas giant its Structure role (Cohesion) falls below subsistence —
-        // it cannot build a body from gas.
-        assert!(project(&biotic, &gas_giant())[FOOD] > ratio(0, 1), "it can still find food");
-        assert!(!survives(&biotic, &gas_giant()), "but it cannot hold structure in gas — culled");
+        assert!(survives(&biotic, &cold_solid(), &any_clade()), "cohesion life holds on the cold solid world");
+        assert_eq!(project(&biotic, &hot_plasma())[STRUCT], ratio(0, 1), "cohesion melts to zero in the heat");
+        assert!(!survives(&biotic, &hot_plasma(), &any_clade()), "it cannot hold a body in plasma — culled");
     }
 
     #[test]
-    fn the_plasmic_dies_on_earth_and_is_free_on_the_gas_giant() {
-        // THE OPERATOR'S LAW: a plasmic metabolism structures itself by resonance
-        // and volatility — both baked out of a hot silicate earth — so its
-        // Structure falls to zero: empty intersection, Starvation Cull.
+    fn plasma_life_lives_on_the_hot_world_not_the_cold_one() {
+        // A plasmic structures itself by resonance and volatility — the dense hot
+        // phase. It is free on the hot world and dies on the cold solid one, where
+        // volatility and resonance freeze out.
         let plasmic = archetype(3);
-        assert_eq!(project(&plasmic, &rocky_earth())[STRUCT], ratio(0, 1), "no resonance or volatility on a baked rock");
-        assert!(!survives(&plasmic, &rocky_earth()), "plasmic on a flatlander earth is culled on beat one");
-        // On the cold gas giant volatility and resonance survive — it is free.
-        assert!(survives(&plasmic, &gas_giant()), "the plasmic is free on the gas giant");
+        assert!(survives(&plasmic, &hot_plasma(), &any_clade()), "the plasmic is free in the heat");
+        assert_eq!(project(&plasmic, &cold_solid())[STRUCT], ratio(0, 1), "no volatility or resonance in the frozen lattice");
+        assert!(!survives(&plasmic, &cold_solid(), &any_clade()), "plasma life is culled on the cold solid world");
+    }
+
+    #[test]
+    fn the_clade_thermal_band_gates_structure() {
+        // ONT-1c, the stillcold fix. TWO biotic lines with the SAME metabolism on
+        // the SAME cold solid world differ only by clade thermal alignment. A
+        // cold-preferring clade (alignment 1 here) holds its structure and lives;
+        // a warm-preferring clade dropped onto the same cold world (alignment 0)
+        // cannot use the cohesion — a thermal MISMATCH, culled — never a false
+        // starvation on an otherwise-habitable orbit.
+        let biotic = archetype(2);
+        assert!(survives(&biotic, &cold_solid(), &ratio(1, 1)), "the cold-aligned clade lives on the cold world");
+        assert!(!survives(&biotic, &cold_solid(), &ratio(0, 1)), "a warm clade on the same cold world is a thermal mismatch — culled");
+        // A partial alignment grades the fitness down, not to zero.
+        let partial = fitness(&biotic, &cold_solid(), &q(3, 4));
+        assert!(partial > ratio(0, 1) && partial <= ratio(1, 1), "partial thermal alignment grades fitness: {partial}");
     }
 
     #[test]
     fn the_subsistence_floor_bites_at_an_intermediate_orbit() {
-        // ONT-1b: the cull is not only at the extremes. On a warm mesic world
-        // (heat = 1/2), a plasmic's Structure = v + f = 1/2 + 1/2 = 1, but its
-        // ceiling is 2, so subsistence is 1 — it sits EXACTLY at the floor and
-        // barely clings on, while a biotic (Structure = cohesion 1/2, ceiling 1,
-        // subsistence 1/2) also just clears. The floor is the wall the operator
-        // asked for: derived, not dialled, and it decides the marginal world.
+        // The cull is not only at the extremes. On a mesic world (heat = 1/2) a
+        // plasmic's Structure = v + f = 1/2 + 1/2 = 1, ceiling 2, subsistence 1 —
+        // it clings at the floor. A touch colder and its volatility/resonance drop
+        // below the floor. Derived, not dialled.
         let plasmic = archetype(3);
-        // Nudge the mesic world a touch warmer: v, f drop below their floor.
-        let warmer = planet_from_orbit(&q(3, 4), &ratio(1, 1), &q(1, 2));
-        assert!(!survives(&plasmic, &warmer), "a warmer-than-mesic orbit already starves the plasmic's structure");
-        // A marginal survivor reads a proportional fitness in [1/2, 1], not 1.
-        let f = fitness(&archetype(2), &mesic_world());
-        assert!(f > ratio(0, 1) && f <= ratio(1, 1), "a mesic biotic lives, at a graded fitness: {f}");
-    }
-
-    #[test]
-    fn the_lithophage_eats_the_geothermal_gradient() {
-        // A mineral metabolism draws Food from Cohesion + the thermal gradient,
-        // so a warm rocky world with a live gradient sustains it.
-        assert!(survives(&archetype(1), &rocky_earth()), "the lithophage eats rock and heat");
+        let colder = planet_from_orbit(&q(1, 4), &ratio(1, 1), &ratio(1, 1));
+        assert!(!survives(&plasmic, &colder, &any_clade()), "a colder-than-mesic orbit starves the plasmic's structure");
+        let f = fitness(&archetype(2), &mesic_world(), &any_clade());
+        assert!(f > ratio(0, 1) && f <= ratio(1, 1), "a mesic biotic lives at a graded fitness: {f}");
     }
 
     #[test]
     fn a_pure_phototroph_reads_massless_flux_and_starves_in_the_dark() {
         // THE FLUX DECOUPLING, WITNESSED: an autotroph draws Food from the
-        // luminous flux ALONE (no material term) and structure from cohesion.
-        // Metabolism as extraction of order from a gradient that is not matter.
+        // luminous flux ALONE (no material term) — order from a gradient that is
+        // not matter — and structure from cohesion (so it wants a lit COLD world).
         let autotroph: Metabolism = vec![
             row(&[(LUM, 1)]), // Food: pure light, no material consumption
-            row(&[(C, 1)]),   // Structure: local cohesion
+            row(&[(C, 1)]),   // Structure: local cohesion (condenses cold)
             row(&[(LUM, 1)]), // Energy: light
             row(&[(F, 1)]),   // Cognition
             row(&[(H, 1)]),   // Sink
         ];
-        // A lit rocky world: it lives on sunlight.
-        assert!(survives(&autotroph, &rocky_earth()), "the phototroph lives on light");
-        // A sunless rogue world (φ_lum = 0) but with rock and a thermal gradient:
-        // there is matter to stand on, but no light to eat — Food is zero.
-        let dark_rogue = planet_from_orbit(&ratio(1, 1), &ratio(0, 1), &ratio(1, 1));
-        assert_eq!(project(&autotroph, &dark_rogue)[FOOD], ratio(0, 1), "no light, no food, however much rock stands");
-        assert!(!survives(&autotroph, &dark_rogue), "the phototroph starves in the dark — flux, not matter, feeds it");
+        // A lit but cold-enough world: cohesion holds and the light feeds it.
+        let lit_cold = planet_from_orbit(&q(1, 4), &ratio(1, 1), &ratio(1, 1));
+        assert!(survives(&autotroph, &lit_cold, &any_clade()), "the phototroph lives on light with cohesion to stand on");
+        // A sunless cold world: matter to stand on, but no light to eat.
+        let dark = planet_from_orbit(&ratio(0, 1), &ratio(0, 1), &ratio(1, 1));
+        assert_eq!(project(&autotroph, &dark)[FOOD], ratio(0, 1), "no light, no food, however much rock stands");
+        assert!(!survives(&autotroph, &dark, &any_clade()), "the phototroph starves in the dark — flux, not matter, feeds it");
     }
 
     #[test]
     fn fitness_is_replay_exact() {
-        let earth = rocky_earth();
-        assert_eq!(fitness(&archetype(2), &earth), fitness(&archetype(2), &earth), "same inputs, same fitness");
+        let world = cold_solid();
+        assert_eq!(
+            fitness(&archetype(2), &world, &any_clade()),
+            fitness(&archetype(2), &world, &any_clade()),
+            "same inputs, same fitness"
+        );
     }
 }
