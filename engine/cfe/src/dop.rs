@@ -1744,6 +1744,26 @@ pub fn metabolic_leisure(metabolism: u8) -> Resource {
     }
 }
 
+/// **RCP-2 F2 — THE ROLE→RESOURCE PROJECTION (transitional).** An emergent
+/// recipe delivers a universal ROLE (`morphogen::FOOD … SINK`). Until the
+/// roles are first-class bankable stocks, the yield lands in the species'
+/// resource for that role, reusing the projections the economy already
+/// speaks — food follows the clade (`metabolic_ration`), energy is joules
+/// (the universal thermal stock), cognition follows the clade's savoured
+/// luxury (`metabolic_leisure`, the leisure-follows-the-clade law COG runs
+/// on). `None` is an HONEST HOLE: a role with no species-neutral bankable
+/// home yet — STRUCT would reintroduce the iron singularity the ONT arc
+/// dissolved, and SINK absorbs rather than yields — so a recipe in it builds
+/// and yields nothing until the role economy lands first-class.
+pub fn role_resource(role: usize, metabolism: u8) -> Option<Resource> {
+    match role {
+        r if r == crate::morphogen::FOOD => Some(metabolic_ration(metabolism)),
+        r if r == crate::morphogen::ENERGY => Some(Resource::Joule),
+        r if r == crate::morphogen::COGNITION => Some(metabolic_leisure(metabolism)),
+        _ => None, // STRUCT, SINK — honest holes until roles are first-class
+    }
+}
+
 /// G2: the habitat's harvest under the sealed metabolism — what the
 /// line farms. Biotic farms biomass (v1 verbatim); mineral farms
 /// iron; plasmic farms NOTHING (rate 0 — its food is captured heat,

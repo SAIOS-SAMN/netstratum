@@ -227,6 +227,43 @@ impl World {
         Ok(())
     }
 
+    /// **RCP-2 F2 — THE BUILT-RECIPE YIELD at a collect touch.** Every
+    /// emergent recipe a society has raised on this orb delivers its
+    /// `yield_of_role` of the role's resource per beat; over the `dt` beats
+    /// since `last_touch` it yields `yield_of_role · dt`, folded into this
+    /// touch's settlement so it rides the existing `YieldCollected` receipt
+    /// (no new deed, SEAL-B-safe — the rejuvenation/population pattern).
+    /// A role with no bankable home yet (`role_resource` → `None`) yields
+    /// nothing — the honest hole. Empty for a world that raised no recipe, so
+    /// a v1 world is byte-identical. Read BEFORE the peel, like every other
+    /// touch-delta, so no borrow of `self.orbs` is held across it.
+    fn recipe_yield_at_touch(&self, orb: u64, stamp: u64) -> Vec<(Resource, Ratio)> {
+        let Some(held) = self.orb_by_id(orb) else {
+            return Vec::new();
+        };
+        let dt = stamp.saturating_sub(held.last_touch);
+        if dt == 0 {
+            return Vec::new();
+        }
+        let metabolism = self.genesis.as_ref().map(|held| held.metabolism).unwrap_or(2);
+        let dtr = ratio(dt as i64, 1);
+        let mut out: Vec<(Resource, Ratio)> = Vec::new();
+        for recipe in crate::vocabulary::recipes_built(self.chronicle()) {
+            if recipe.orb_id != orb {
+                continue;
+            }
+            let Some(resource) = crate::dop::role_resource(recipe.role, metabolism) else {
+                continue; // an honest hole — no bankable home for this role yet
+            };
+            let amount = recipe.yield_of_role * dtr.clone();
+            match out.iter_mut().find(|(held_res, _)| *held_res == resource) {
+                Some((_, held_amount)) => *held_amount += amount,
+                None => out.push((resource, amount)),
+            }
+        }
+        out
+    }
+
     /// Collect the genesis orb as the sovereign.
     pub fn collect(&mut self) -> Result<usize, ActionRefused> {
         self.collect_as(SOVEREIGN, FIRST_ORB)
@@ -321,6 +358,11 @@ impl World {
         // TAXATION (49 §3): the continuity levy — practices the line does
         // not keep across the same generation turnover lapse to the void.
         let lapse = self.continuity_lapse_at_touch(generations);
+        // RCP-2 F2: the built recipes' yield over the span just ended — read
+        // pre-touch (over the old `last_touch`) like the regrowth and the
+        // population, folded into this touch's settlement below. Empty until a
+        // recipe is raised, so a v1 world is byte-identical.
+        let recipe_yields = self.recipe_yield_at_touch(orb, self.clock.now());
         let held = peel(&mut self.orbs, orb)
             .ok_or(ActionRefused::NoSuchOrb { orb })?;
         let mut settleable: Vec<(Resource, Ratio)> = Vec::new();
@@ -365,6 +407,16 @@ impl World {
             match settleable.iter_mut().find(|(held_res, _)| held_res == resource) {
                 Some((_, amount)) => *amount -= eaten,
                 None => settleable.push((*resource, -eaten)),
+            }
+        }
+        // RCP-2 F2: fold each built recipe's span yield into this touch, its
+        // role's resource merged with any tick-accrued line — the rejuvenation
+        // credit pattern. A world can collect on a recipe's yield ALONE, so
+        // this joins before the empty gate below.
+        for (resource, amount) in recipe_yields {
+            match settleable.iter_mut().find(|(held_res, _)| *held_res == resource) {
+                Some((_, held_amount)) => *held_amount += amount,
+                None => settleable.push((resource, amount)),
             }
         }
         if settleable.is_empty() && farm.is_none() {

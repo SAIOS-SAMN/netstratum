@@ -2,7 +2,7 @@
 //! refusals, the built-recipe fold, the wire, and SEAL B. The doing-layer
 //! becomes a FOLD of receipts — no `ZoneKind` enum, no committed field.
 
-use cfe::dop::ClosureEvent;
+use cfe::dop::{ClosureEvent, Resource};
 use cfe::ratio::ratio;
 use cfe::vocabulary::{recipes_built, BuiltRecipe};
 use cfe::world::{ActionRefused, World};
@@ -82,4 +82,48 @@ fn the_recipe_built_deed_round_trips_on_the_wire() {
     let mut sr = cfe::tlv::records(&sb);
     let (st, sv) = sr.next().expect("one record");
     assert_eq!(ClosureEvent::from_wire(st, sv).expect("decodes"), single);
+}
+
+#[test]
+fn a_built_recipe_yields_its_role_into_the_economy_each_beat() {
+    // F2: a built recipe delivers its role's resource per beat, folded into
+    // the collect touch over the elapsed span. An ENERGY recipe yields into
+    // Joule — the universal energy stock, which nothing else in a bare world
+    // banks — so the recipe's contribution reads EXACTLY (food would be
+    // muddied by regrowth; Joule is clean).
+    let mut w = founded();
+    let orb = w.orb().expect("founded").orb_id;
+    let per_beat = ratio(2, 1);
+    w.build_recipe_as(cfe::world::SOVEREIGN, orb, vec![[5u8; 32]], cfe::morphogen::ENERGY, per_beat.clone())
+        .expect("the energy recipe builds");
+    let t0 = w.now();
+    for _ in 0..3 {
+        w.tick();
+    }
+    // The yield settles at the touch, riding YieldCollected — no new deed.
+    w.collect_as(cfe::world::SOVEREIGN, orb).expect("collect banks the recipe yield");
+    let dt = w.now() - t0;
+    assert_eq!(dt, 3, "three beats elapsed since the founding touch");
+    let banked = w.orb().expect("founded").banked_amount(Resource::Joule);
+    assert_eq!(
+        banked,
+        per_beat * ratio(dt as i64, 1),
+        "the recipe yielded its role's resource each beat over the span"
+    );
+    // A role with no bankable home yet (STRUCT) yields nothing — the honest
+    // hole; the build stands, the economy stays untouched by it.
+    let before = w.orb().expect("founded").banked_amount(Resource::Iron);
+    w.build_recipe_as(cfe::world::SOVEREIGN, orb, vec![[6u8; 32]], cfe::morphogen::STRUCT, ratio(9, 1))
+        .expect("the structure recipe builds");
+    for _ in 0..3 {
+        w.tick();
+    }
+    w.collect_as(cfe::world::SOVEREIGN, orb).expect("collect");
+    assert_eq!(
+        w.orb().expect("founded").banked_amount(Resource::Iron),
+        before,
+        "an unbankable role is an honest hole — it yields nothing yet"
+    );
+    // SEAL B holds: the yield is a fold of existing receipts.
+    assert_eq!(cfe::world::replay(w.chronicle()), w.committed());
 }
