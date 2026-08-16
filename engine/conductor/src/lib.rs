@@ -70,6 +70,11 @@ mod polities;
 // DIO-1 (operator-ruled 2026-08-16): planetary siting on exact rational
 // Diophantine tracks (r = M·k², P = M·k³ off the (M,M) base). See siting.rs.
 mod siting;
+// SOC-1 (operator directive 2026-08-16): the open build workbench — the surplus
+// phase of `build_step` draws its next building from a disposition-weighted
+// partition function seeded by the chronicle digest, in place of the fixed
+// `.or()` priority. Crisis stays canalized; surplus explores. See soc.rs.
+pub mod soc;
 pub use polities::{founding_polities, registered_polities, roster};
 
 /// AEON-1b (11 §5): THE FOLD — seal the live era and rotate it into
@@ -1838,10 +1843,14 @@ impl Polity {
         let can_smelt = self.level >= 3;
         let can_synth = self.level >= 5;
 
-        // Unlocked industry takes priority for every temperament —
-        // that is what research is FOR. SCIENCE-1: only inside the
-        // line's OWN science (relevance table) — a plasmic line never
-        // forges iron; its advancement crosses by joint venture.
+        // Unlocked industry ENTERS THE SURPLUS-PHASE SURFACE as a
+        // candidate (SOC-1: it no longer strictly outranks settlement —
+        // the disposition-weighted workbench draw below decides among the
+        // viable, so an empiricist reaches for the forge far more often
+        // than an epicurean does, but neither is gated out). SCIENCE-1:
+        // industry is offered only inside the line's OWN science
+        // (relevance table) — a plasmic line never forges iron; its
+        // advancement crosses by joint venture.
         let metabolism = self.spec.civilization.metabolism.clone();
         let (smelter_iron_gate, smelter_bio_gate) = smelter_gates();
         let synth_conditions = can_synth
@@ -2155,7 +2164,30 @@ impl Polity {
         } else {
             None
         };
-        let with_refine = |base: Option<ZoneKind>| industrial.or(refine).or(base);
+        // SOC-1 — THE OPEN WORKBENCH. The surplus-phase composition below used
+        // to be a fixed `industrial.or(refine).or(base)` priority: industry
+        // always beat refinement always beat settlement, for every temperament.
+        // That is the boolean-gate cartesian the operator ruled out. Now the
+        // viable candidates form the option surface `S_valid`, weighted by the
+        // line's disposition and drawn from its chronicle digest (`soc::choose_build`,
+        // the civic partition function). Membership is still the upstream gates
+        // (affordability is the EDGE OF THE POSSIBLE, not the decision); only the
+        // PRIORITY among the viable is opened to the line's stochastic freedom.
+        // The crisis arms (regenerator, thermal shells, the Frost sink, the
+        // forge-hold) stay deterministic above and below — the Heaviside veto
+        // that canalizes physical law is untouched.
+        let disposition = world.civ_axes().map(|axes| axes.disposition).unwrap_or(0);
+        let digest = world
+            .chronicle()
+            .receipts()
+            .last()
+            .map(|receipt| receipt.own.0)
+            .unwrap_or([0u8; 32]);
+        let with_refine = |base: Option<ZoneKind>| {
+            let surface: Vec<ZoneKind> =
+                [industrial, refine, base].into_iter().flatten().collect();
+            crate::soc::choose_build(&surface, disposition, digest)
+        };
         let wanted: Option<ZoneKind> =
             match regime(world, &self.spec.civilization.metabolism) {
             Some((Regime::Furnace, t4)) => {
