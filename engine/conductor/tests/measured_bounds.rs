@@ -122,7 +122,16 @@ fn scratch(name: &str) -> PathBuf {
 /// feeds itself (it leaves the frozen list, +3 zones across the roster,
 /// 81 → 84). No minting has begun by beat 15, so this is the digest reseed
 /// from changed leisure banking, not a spend effect. Bootstrap law UNCHANGED.
-const MEASURED_ZONE_TOTAL_AT_15: usize = 84;
+/// RE-MEASURED 2026-08-16 to 86: the roster seat `deep-chorus` was RENAMED to
+/// the phylogenetically accurate `mysticeti-pelagic` (a baleen — soniform,
+/// song — cetacean; operator ruling). A world's founding digest carries its
+/// sigil, so the rename draws a different Diophantine k and a different orbit:
+/// the renamed line lands temperate (insolation ≈ 1.30, η ≈ 0.90, a proper
+/// mesic sea for a whale) and thrives at 6 zones, while the digest reseed tips
+/// `coralline` back below its cultivation threshold into famine. A pure
+/// identity re-measure — no law changed; `coralline` is a marginal line whose
+/// cultivation build-order flips on any reseed. Bootstrap law UNCHANGED.
+const MEASURED_ZONE_TOTAL_AT_15: usize = 86;
 
 /// **THE ENERGY-BOOTSTRAP DEBT** — the lines the settlement law cannot
 /// reach, pinned so the set can only SHRINK:
@@ -133,12 +142,14 @@ const MEASURED_ZONE_TOTAL_AT_15: usize = 84;
 /// - Furnace / thermal holds and new sovereign seats that famish inside
 ///   the window (thresholder, tallykeep, glyphward) — recorded so a cure shrinks
 ///   this list rather than silently green-washing the debt;
-/// (`deep-chorus` and `coralline` have both passed THROUGH this list as
-/// hot-orbit casualties — DIO-1 and DIO-2 respectively — each recovering when a
-/// later digest reseed had it raise a ration zone. Both are temperate clades on
-/// hot orbits with η ≈ 0; whether they feed is cultivation build-order, not
-/// thermal preference, until clades seal at genesis and metabolism decides.)
-const FROZEN_AT_15: [&str; 8] = [
+/// - `coralline` (cnidiform): a marginal temperate line whose famine flips with
+///   the digest — it raises a ration zone and feeds itself under some reseeds,
+///   falls just below the threshold under others. Famished here after the
+///   mysticeti-pelagic rename reseed. (The line once called `deep-chorus`,
+///   another temperate case, passed through this list too before its rename
+///   drew it a proper temperate orbit; whether such a line feeds is cultivation
+///   build-order, not thermal preference, until clades seal at genesis.)
+const FROZEN_AT_15: [&str; 9] = [
     "corebound",
     "stillcold",
     "umbrid",
@@ -147,6 +158,7 @@ const FROZEN_AT_15: [&str; 8] = [
     "thresholder",
     "tallykeep",
     "glyphward",
+    "coralline",
 ];
 
 /// **THE SETTLEMENT BOUNDS, MEASURED.** Fifteen beats over the whole

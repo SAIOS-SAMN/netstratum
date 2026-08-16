@@ -291,7 +291,7 @@ pub fn founding_polities() -> Vec<PolitySpec> {
             (ratio(0, 1), ratio(0, 1), ratio(0, 1)), g_half(),
         ),
         seat(
-            "Echowright", "deep-chorus", "soniform-songline", "soniform", "we heard it before you saw it",
+            "Echowright", "mysticeti-pelagic", "soniform-songline", "soniform", "we heard it before you saw it",
             "epicurean", "biotic", "harmonic",
             None, &[],
             "kepler-passage", "tidefall", "songline", Policy::Steady,
