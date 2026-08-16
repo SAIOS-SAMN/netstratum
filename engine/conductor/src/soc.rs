@@ -112,6 +112,40 @@ fn requirement(kind: ZoneKind, ration: Resource) -> Option<(Option<Resource>, Re
     }
 }
 
+/// **THE ALGEBRAIC RANK** (operator ruling 2026-08-16 — SNF as a presentation,
+/// not a scalar) — the society's intelligence read as the invariant PAIR the
+/// Smith Normal Form of `∂₁` yields, because a chain complex of free ℤ-modules
+/// IS a free resolution (a generators-and-relations presentation):
+///
+/// - **Free generators** — the algebraic DIMENSION (a Krull-dimension analog):
+///   `components` (`β₀`, independent capabilities reachable from the seed) plus
+///   `cycles` (`β₁`, independent metabolic loops — regeneration is a CYCLE, a
+///   syzygy, never a new variable, so dimension alone would miss it).
+/// - **Relations** — the torsion coefficients `dᵢ > 1` (the `ℤ/dᵢ` twists /
+///   syzygies). Empty while `M_civ` is a graph (graph homology is torsion-free);
+///   non-empty once higher cells enter. The nonlinear `ℚ[x]/I` / Gröbner frontier
+///   (RCP-2, DIO-3b) is DEFERRED — and, when built, carries modular truncation
+///   from line one; the linear core stays SNF, bounded and cheap.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct AlgebraicRank {
+    /// `β₀` — free rank of `H₀`: independent capability components.
+    pub components: u64,
+    /// `β₁` — free rank of `H₁`: independent metabolic cycles (recycling loops).
+    pub cycles: u64,
+    /// The torsion coefficients `dᵢ > 1` — the relations/syzygies. Torsion-free
+    /// (empty) for a metabolic graph; the seam higher relations enter through.
+    pub relations: Vec<BigInt>,
+}
+
+impl AlgebraicRank {
+    /// The free rank — the algebraic DIMENSION, `components + cycles`. This is the
+    /// scalar the draw summarises as `genus`; the pair loses nothing, it makes the
+    /// split (and the relation structure) explicit.
+    pub fn dimension(&self) -> u64 {
+        self.components + self.cycles
+    }
+}
+
 /// **`M_civ` — THE SPECIES METABOLIC COMPLEX.** Its vertices (`⊥` + the reachable
 /// resource traits), its exact boundary `∂₁` factored to Smith Normal Form once,
 /// and its genus. Every affinity query pairs against this without refactoring.
@@ -270,6 +304,26 @@ impl SpeciesManifold {
             0
         }
     }
+
+    /// **THE ALGEBRAIC RANK** — read the intelligence as the SNF invariant PAIR
+    /// (generators ⊕ relations) rather than the collapsed `genus` scalar. Free
+    /// ranks straight off the factored boundary: `β₀ = rows − rank`,
+    /// `β₁ = cols − rank`; torsion = the invariant factors `> 1`. Exact, and no
+    /// new computation — `∂₁` was already factored in `of`. `dimension()` recovers
+    /// `genus`, so the draw is untouched; this only makes the presentation legible.
+    pub fn algebraic_rank(&self) -> AlgebraicRank {
+        let rank = self.boundary.rank();
+        AlgebraicRank {
+            components: (self.boundary.rows - rank) as u64,
+            cycles: (self.boundary.cols - rank) as u64,
+            relations: self
+                .boundary
+                .invariant_factors()
+                .into_iter()
+                .filter(|d| *d > BigInt::from(1))
+                .collect(),
+        }
+    }
 }
 
 /// Exact integer `A · x`.
@@ -413,6 +467,35 @@ mod tests {
             regenerative.genus,
             extractive.genus
         );
+    }
+
+    #[test]
+    fn intelligence_reads_as_the_algebraic_presentation_not_a_scalar() {
+        // OPERATOR RULING: reach reports the SNF invariant PAIR — free generators
+        // (algebraic dimension) ⊕ relations (torsion) — the two projections of the
+        // chain complex's free-resolution presentation, on the boundary already
+        // factored in `of`.
+        let extractive = SpeciesManifold::of(2, "aqueous", false);
+        let regenerative = SpeciesManifold::of(2, "aqueous", true);
+        let ext = extractive.algebraic_rank();
+        let reg = regenerative.algebraic_rank();
+
+        // The dimension scalar equals the genus the draw uses — nothing lost, the
+        // split just made explicit.
+        assert_eq!(ext.dimension(), extractive.genus);
+        assert_eq!(reg.dimension(), regenerative.genus);
+
+        // Regeneration is a RELATION, not a new generator: it adds a metabolic
+        // CYCLE (β₁), the syzygy a recycling loop introduces — the component count
+        // is unchanged, only the cycle rank rises. Krull dimension alone (free
+        // generators) would miss it; the pair does not.
+        assert_eq!(reg.components, ext.components, "recycling adds no new capability axis");
+        assert!(reg.cycles > ext.cycles, "it adds an independent cycle ({} > {})", reg.cycles, ext.cycles);
+
+        // A metabolic graph is torsion-free, so the relation coefficients are
+        // empty — the seam higher cells (the RCP-2 / DIO-3b nonlinear frontier)
+        // enter through.
+        assert!(ext.relations.is_empty() && reg.relations.is_empty(), "graph homology carries no torsion yet");
     }
 
     #[test]
