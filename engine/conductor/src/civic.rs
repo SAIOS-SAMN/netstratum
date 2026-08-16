@@ -249,6 +249,31 @@ fn burn_inefficiency() -> Ratio {
     ratio(4, 1) // APPROVED-SEED (operator ruling 2026-08-15, COG-3 desperation burn)
 }
 
+/// **THE COGNITIVE DEMURRAGE** (COG-5) — the fraction of banked leisure that
+/// DISSIPATES each beat. Unused free time is not a hard resource; you cannot
+/// bank a nap for ten years. Aggressive by design, so the leisure bank tracks a
+/// line's CURRENT surplus rather than hoarding a lifetime's — which is what
+/// makes the cost of thought bite (the live-era hyperinflation: banks of 100k
+/// against thoughts costing single digits).
+fn leisure_decay() -> Ratio {
+    ratio(1, 4) // APPROVED-SEED (operator ruling 2026-08-16, COG-5 demurrage)
+}
+
+/// **THE METABOLIC EXCHANGE RATE** (COG-5) — the scalar bridging the calorie
+/// (leisure, in food-surplus units) to the homology (`mint_cost`, in raw
+/// Betti/torsion units). Without it a thought costs single digits against a
+/// bank of thousands and the starvation gate is toothless; with it a thought
+/// costs a MEANINGFUL fraction of the surplus, so a poor line genuinely cannot
+/// afford to think while a rich one can.
+pub fn metabolic_exchange() -> Ratio {
+    ratio(8, 1) // APPROVED-SEED (operator ruling 2026-08-16, COG-5 exchange rate)
+}
+
+/// The demurrage a standing leisure bank sheds this beat — `bank × decay`.
+pub fn leisure_dissipation(bank: Ratio) -> Ratio {
+    bank * leisure_decay()
+}
+
 /// **THE FASTING FILL** (COG-3) — the cognitive accumulator's inflow this beat:
 /// the cascade's LEISURE plus a base trickle off the syntropic wild flow. The
 /// rich pay `mint_cost` instantly from their large leisure and coin many words

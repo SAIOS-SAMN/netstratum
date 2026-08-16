@@ -72,7 +72,14 @@ fn scratch(name: &str) -> PathBuf {
 /// what keeps a founding band from taxing the industrial economy.) The per-line
 /// bootstrap law is UNCHANGED and the temperaments still diverge. A deliberate
 /// re-measure under the now-live population.
-const MEASURED_ZONE_TOTAL_AT_15: usize = 88;
+/// RE-MEASURED 2026-08-16 to 86: COG-5 (cognitive demurrage). The leisure bank
+/// now decays each beat (fill − bank·¼) instead of only filling, so the
+/// `LeisureSettled` values differ — and since the chronicle digest seeds the
+/// stochastic build/divergence choices, two marginal zones tip across the whole
+/// roster (88 → 86). No minting has begun by beat 15 (rung 3 lands later), so
+/// this is purely the digest reseed from the changed leisure values, not a
+/// physical effect on builds. Per-line bootstrap law unchanged. Deliberate.
+const MEASURED_ZONE_TOTAL_AT_15: usize = 86;
 
 /// **THE ENERGY-BOOTSTRAP DEBT** — the lines the settlement law cannot
 /// reach, pinned so the set can only SHRINK:

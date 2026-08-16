@@ -2604,8 +2604,14 @@ impl Polity {
         // never permanently deadlocked — it thinks slowly rather than never.
         let leisure = civic::cascade_reading(&self.world, primary).leisure;
         let fill = civic::fasting_fill(leisure, self.world.syntropic_flow(primary));
-        if fill > ratio(0, 1) {
-            self.world.settle_leisure(primary, fill);
+        // COG-5 COGNITIVE DEMURRAGE: unused leisure dissipates each beat (you
+        // cannot bank a nap for ten years), so the bank tracks CURRENT surplus
+        // instead of hoarding a lifetime's. The net settle is this beat's fill
+        // minus the standing bank's decay — one deed, not two.
+        let decay = civic::leisure_dissipation(self.world.leisure_bank_of(primary));
+        let delta = fill - decay;
+        if delta != ratio(0, 1) {
+            self.world.settle_leisure(primary, delta);
         }
     }
 
@@ -2924,10 +2930,14 @@ impl Polity {
                                     &[num_bigint::BigInt::from(expansion.len())],
                                     &[],
                                 );
+                                // COG-5: price the homological bill in LEISURE
+                                // units via the metabolic exchange rate, so a
+                                // thought costs a meaningful fraction of the
+                                // surplus, not single digits against thousands.
                                 let price = ratio(
                                     num_traits::ToPrimitive::to_i64(&bill).unwrap_or(i64::MAX),
                                     1,
-                                );
+                                ) * civic::metabolic_exchange();
                                 let primary = cfe::world::FIRST_ORB;
                                 let afford = self.world.leisure_bank_of(primary) >= price;
                                 // COG-3 DESPERATION BURN: when a metabolic
