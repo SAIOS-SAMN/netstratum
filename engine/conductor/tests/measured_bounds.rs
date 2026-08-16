@@ -79,7 +79,23 @@ fn scratch(name: &str) -> PathBuf {
 /// roster (88 → 86). No minting has begun by beat 15 (rung 3 lands later), so
 /// this is purely the digest reseed from the changed leisure values, not a
 /// physical effect on builds. Per-line bootstrap law unchanged. Deliberate.
-const MEASURED_ZONE_TOTAL_AT_15: usize = 86;
+/// RE-MEASURED 2026-08-16 to 83: **THE DIOPHANTINE GENERATOR** (DIO-1). The
+/// derived siting no longer hands mesic lines one of three fixed orbits
+/// (r ∈ {1, 1, 6/5}); it draws a CONTINUOUS exact-rational scale k and sites
+/// each world on its own track r = M·k² (siting.rs). So the derived biotic
+/// roster now SPREADS across real thermal diversity — measured this era at
+/// r ≈ 0.65 … 1.17, insolation ≈ 0.66 … 2.39 — where before every mesic line
+/// sat at essentially unit orbit. Two effects move the total from 86 to 83:
+/// the reseeded orbits perturb the digest-seeded build walk (as every
+/// re-measure before), AND one line — `deep-chorus` — draws a HOT orbit
+/// (r ≈ 0.646, insolation ≈ 2.39, ABOVE the mesic ceiling ≈ 1.73) whose
+/// over-heat coverage penalty pulls its primary production below what feeds
+/// its founding band, so it famishes. That is the hot-tail analogue of the
+/// cold freeze-lock, and it is the exact phenomenon DIO-2's species-relative
+/// flux η will formalize (a carbon-water line cannot take that heat; a
+/// thermophile sited there would thrive). A deliberate re-measure under the
+/// now-continuous orbital physics; the per-line bootstrap law is UNCHANGED.
+const MEASURED_ZONE_TOTAL_AT_15: usize = 83;
 
 /// **THE ENERGY-BOOTSTRAP DEBT** — the lines the settlement law cannot
 /// reach, pinned so the set can only SHRINK:
@@ -89,8 +105,16 @@ const MEASURED_ZONE_TOTAL_AT_15: usize = 86;
 ///   drama, not a bug");
 /// - Furnace / thermal holds and new sovereign seats that famish inside
 ///   the window (thresholder, tallykeep, glyphward) — recorded so a cure shrinks
-///   this list rather than silently green-washing the debt.
-const FROZEN_AT_15: [&str; 8] = [
+///   this list rather than silently green-washing the debt;
+/// - `deep-chorus` (added 2026-08-16, DIO-1): the ONE new casualty of the
+///   Diophantine realignment — a mesic line that drew a HOT track (r ≈ 0.646)
+///   sitting above the mesic ceiling, so it over-heats rather than freezes.
+///   Unlike the cold Frost/sovereign seats above (which are PINNED and so
+///   untouched by the derived generator), this is a DERIVED orbit that landed
+///   in the starving hot tail. It is recorded here as debt, but its true cure
+///   is not a settlement gate — it is DIO-2's species-relative η, which will
+///   either site it by its own optimum or let a thermophile claim the heat.
+const FROZEN_AT_15: [&str; 9] = [
     "corebound",
     "stillcold",
     "umbrid",
@@ -99,6 +123,7 @@ const FROZEN_AT_15: [&str; 8] = [
     "thresholder",
     "tallykeep",
     "glyphward",
+    "deep-chorus",
 ];
 
 /// **THE SETTLEMENT BOUNDS, MEASURED.** Fifteen beats over the whole

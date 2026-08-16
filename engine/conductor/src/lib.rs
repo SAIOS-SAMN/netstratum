@@ -67,6 +67,9 @@ mod cognition;
 pub mod civic;
 pub mod lookahead;
 mod polities;
+// DIO-1 (operator-ruled 2026-08-16): planetary siting on exact rational
+// Diophantine tracks (r = M·k², P = M·k³ off the (M,M) base). See siting.rs.
+mod siting;
 pub use polities::{founding_polities, registered_polities, roster};
 
 /// AEON-1b (11 §5): THE FOLD — seal the live era and rotate it into
@@ -1002,40 +1005,6 @@ fn regime(world: &World, metabolism: &str) -> Option<(Regime, Ratio)> {
     }
 }
 
-/// BOT-THERM: the axis→regime preference (06 §1) for specs that pin no
-/// siting — a mineral metabolism settles hot (the Furnace mints; 05
-/// §3.1), a biotic one settles mesic. The exact seat inside the regime
-/// is beacon-drawn from the civilization's OWN genesis receipts:
-/// deterministic, replayable, never authored. A Frost seat is never
-/// derived — settling the vault is a deliberate act (the operator's,
-/// or the founding file's, which seeds one).
-fn derived_siting(civilization: &Civilization, beacon: &Beacon) -> (StarClass, Ratio, Ratio) {
-    match civilization.metabolism.as_str() {
-        // A plasmic metabolism is of the stellar environs (12_UNION
-        // §5a) — it shares the Furnace regime's seats; the mesic band
-        // would starve a current sheet.
-        "mineral" | "plasmic" => {
-            // Furnace seats: a G sun at half orbit, stellar loads
-            // 2, 11/5, 12/5 — every one past the mesic ceiling; the
-            // encasement shells will answer.
-            let albedos = [ratio(1, 2), ratio(9, 20), ratio(2, 5)];
-            let drawn = beacon.uniform_index("genesis.furnace.albedo", 3) as usize;
-            (StarClass::G, albedos[drawn].clone(), ratio(1, 2))
-        }
-        _ => {
-            // Mesic seats: stellar loads 1, 9/10, 25/36 — every one
-            // inside the mesic band (05 §2).
-            let seats = [
-                (ratio(0, 1), ratio(1, 1)),
-                (ratio(1, 10), ratio(1, 1)),
-                (ratio(0, 1), ratio(6, 5)),
-            ];
-            let drawn = beacon.uniform_index("genesis.mesic.seat", 3) as usize;
-            (StarClass::G, seats[drawn].0.clone(), seats[drawn].1.clone())
-        }
-    }
-}
-
 impl Polity {
     /// Found the era: registry entry (join if present), the colony,
     /// the contained polity actor, the steward entity, and the world's
@@ -1191,7 +1160,7 @@ impl Polity {
             .0;
         let beacon = Beacon::from_digest(digest);
         let (derived_star, derived_albedo, derived_orbit) =
-            derived_siting(&spec.civilization, &beacon);
+            siting::diophantine_siting(&spec.civilization, &beacon);
         let class = spec.star.unwrap_or(derived_star);
         let albedo = spec.albedo.clone().unwrap_or(derived_albedo);
         let orbit = spec.orbit.clone().unwrap_or(derived_orbit);

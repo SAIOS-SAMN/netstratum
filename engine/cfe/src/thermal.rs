@@ -331,19 +331,53 @@ pub fn orbital_normal(seed: [u8; 32]) -> (Ratio, Ratio, Ratio) {
     (tilt(seed[0]), ratio(1, 1), tilt(seed[16]))
 }
 
-/// **THE LOCAL YEAR** (the Keplerian clock) — how many complete 360° orbits a
-/// planet has traced in `beats` universal ticks: `⌊beats / P⌋ = ⌊√(beats²/P²)⌋`.
-/// EXACT — the largest `n` with `n² ≤ beats²/P²` (an integer square root of an
-/// exact rational), so the year COUNT never touches the irrational period. The
-/// beat is the absolute cosmic tick; the year is local geometry — a tight inner
-/// world rolls its calendar often, a distant one seldom, on the very same beat.
+/// The EXACT rational square root of `x`, or `None` when `x` is not a perfect
+/// rational square. `√(p/q) = √p/√q` is exact iff both the numerator and
+/// denominator (of the reduced fraction) are perfect integer squares — the
+/// `BigRational` is always reduced, so this test is total and exact. This is
+/// the DIOPHANTINE window: a track sited by `siting.rs` at `r = M·k²` has
+/// `P² = BASE²·M²·k⁶`, a perfect rational square, so its period `P` is an
+/// EXACT rational and no root is ever approximated.
+fn exact_sqrt(x: &Ratio) -> Option<Ratio> {
+    if *x < ratio(0, 1) {
+        return None;
+    }
+    let n = x.numer();
+    let d = x.denom();
+    let sn = n.sqrt();
+    let sd = d.sqrt();
+    if &(sn.clone() * sn.clone()) == n && &(sd.clone() * sd.clone()) == d {
+        Some(Ratio::new(sn, sd))
+    } else {
+        None
+    }
+}
+
+/// **THE LOCAL YEAR** (the Keplerian clock, DIO-1) — how many complete 360°
+/// orbits a planet has traced in `beats` universal ticks: `⌊beats / P⌋`.
+///
+/// **The last irrational is gone.** A Diophantine track (`siting.rs`,
+/// `r = M·k²`, `P = M·k³·BASE`) has a PERFECT-SQUARE `P²`, so `P` is an exact
+/// rational and the year is a pure rational floor `⌊beats / P⌋` — the exact
+/// angular step `Δθ = 360/P` walked `beats` times, no integer square root. For
+/// any OTHER `r` (an operator-pinned off-track world) `P` may be irrational;
+/// there we fall back to the exact integer-sqrt floor `⌊√(beats²/P²)⌋`, which
+/// is the same value computed without forming the root. The beat is the
+/// absolute cosmic tick; the year is local geometry — a tight inner world
+/// rolls its calendar often, a distant one seldom, on the very same beat.
 pub fn local_years(orbit_r: &Ratio, mass: &Ratio, beats: u64) -> u64 {
     let p2 = orbital_period_squared(orbit_r, mass);
     if p2 <= ratio(0, 1) {
         return 0;
     }
+    // THE DIOPHANTINE PATH: P² is a perfect rational square ⇒ P is exact ⇒
+    // the year is a direct rational floor, no isqrt.
+    if let Some(period) = exact_sqrt(&p2) {
+        let years = (ratio(beats as i64, 1) / period).floor();
+        return years.to_integer().to_u128().unwrap_or(u128::MAX as u128) as u64;
+    }
+    // THE FALLBACK (off-track r): the exact integer-sqrt floor of beats²/P².
     let beats2 = ratio(beats as i64, 1) * ratio(beats as i64, 1);
-    // x = ⌊beats²/P²⌋; years = ⌊√x⌋, both exact-integer once floored.
     let x = (beats2 / p2).floor().to_integer().to_u128().unwrap_or(u128::MAX);
     let mut lo = 0u64;
     let mut hi = 1u64;
@@ -419,6 +453,29 @@ mod tests {
         let inner = local_years(&r(1, 4), &StarClass::O.mass(), beat);
         let outer = local_years(&r(9, 1), &StarClass::M.mass(), beat);
         assert!(inner > outer, "same beat, but the inner-heavy world is far older: {inner} vs {outer}");
+    }
+
+    #[test]
+    fn the_diophantine_clock_is_an_exact_rational_floor() {
+        use crate::thermal::{exact_sqrt, local_years, orbital_period_squared};
+        let g = StarClass::G.mass();
+        // A Diophantine track r = M·k² has a PERFECT-SQUARE P², so the period
+        // is an EXACT rational and the year is a pure floor ⌊T/P⌋ — no isqrt.
+        let k = r(3, 2); // an off-lattice continuous k
+        let rr = g.clone() * k.clone() * k.clone(); // r = M·k²
+        let p2 = orbital_period_squared(&rr, &g);
+        let period = exact_sqrt(&p2).expect("a Diophantine track has an exact rational period");
+        // P = BASE·M·k³ exactly (BASE = 360, M = 1): 360·(3/2)³ = 360·27/8.
+        assert_eq!(period, r(360, 1) * k.clone() * k.clone() * k, "P = BASE·M·k³ exact");
+        // The year count is the exact rational floor ⌊beats/P⌋.
+        let p_int = period.to_integer().to_u128().unwrap() as u64; // P here is integral
+        assert_eq!(local_years(&rr, &g, p_int), 1, "one exact period = one year");
+        assert_eq!(local_years(&rr, &g, p_int - 1), 0, "not yet a full period");
+        assert_eq!(local_years(&rr, &g, 3 * p_int), 3, "three periods, three years");
+        // A NON-Diophantine r (P² not a perfect square) has no exact period —
+        // the isqrt fallback still answers, and agrees at the reference world.
+        assert_eq!(exact_sqrt(&orbital_period_squared(&r(2, 1), &g)), None, "r=2 is off-track");
+        assert_eq!(local_years(&r(1, 1), &g, 720), 2, "the reference world still ages exactly");
     }
 
     #[test]
