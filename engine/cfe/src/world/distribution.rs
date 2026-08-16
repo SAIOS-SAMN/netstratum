@@ -12,6 +12,18 @@
 use super::*;
 use crate::dop::{metabolic_leisure, Caste, Ration, Resource, ZoneKind};
 
+/// The melt lattice the leisure bank truncates to WHEN it must (matches the
+/// market / regrowth / orbit grids, all `64`). A bare STRUCTURAL constant, not a
+/// balance dial. See `settle_leisure`.
+const LEISURE_GRAIN: i64 = 64;
+
+/// The denominator ceiling (in bits) above which the leisure accumulator is
+/// truncated. Below it the balance stays BYTE-EXACT, so a short-horizon board is
+/// unchanged; the truncation only fires when the running sum's denominator
+/// genuinely threatens to explode (measured: a plasmic bank crossed this only
+/// deep in a 60-beat era, on its way to the OOM). Structural, not tuned.
+const LEISURE_DENOM_BITS: u64 = 256;
+
 impl World {
     /// **THE MICRONUTRIENT FACTOR** (G2 trace elements, ruled 2026-08-14)
     /// — how a line's HARVEST is modulated by the trace elements its own
@@ -652,7 +664,23 @@ impl World {
         if delta == zero {
             return;
         }
-        let next = (self.leisure_bank_of(orb) + delta.clone()).max(zero.clone());
+        // G_flux TRUNCATION, LAZY. The bank is a running SUM of per-beat deltas
+        // (surplus in, decay and mint-cost out); summing rationals of differing
+        // denominators compounds the LCM without bound, so over a long horizon the
+        // exact-rational denominator explodes (measured: a plasmic bank passed 80
+        // digits by beat 48 and OOM'd the era). But truncating EVERY settle nudges
+        // knife-edge lines across discrete gates (measured: it tipped `stillcold`
+        // into famine at 15 beats). So the bank stays BYTE-EXACT until its
+        // denominator crosses `LEISURE_DENOM_BITS`, and only THEN is it grained
+        // onto `1/LEISURE_GRAIN` — the truncation fires at the explosion, not on
+        // every value. Replay recomputes the same bank and re-grains identically.
+        let raw = (self.leisure_bank_of(orb) + delta.clone()).max(zero.clone());
+        let next = if raw.denom().bits() > LEISURE_DENOM_BITS {
+            let grid = ratio(LEISURE_GRAIN, 1);
+            (raw * grid.clone()).round() / grid
+        } else {
+            raw
+        };
         self.leisure_banks.retain(|(o, _)| *o != orb);
         if next > zero {
             self.leisure_banks.push((orb, next));

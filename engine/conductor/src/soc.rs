@@ -46,6 +46,7 @@
 //! by the line's `chronicle_digest`, domain-tagged `b"workbench"` to decorrelate
 //! from the Mind's `b"instinct"` draw. Replay-exact, `ℤ/ℚ` throughout.
 
+use crate::civic::{Drive, LATTICE};
 use cfe::dop::{metabolic_harvest, Resource, ZoneKind};
 use num_bigint::BigInt;
 use substrate::snf::{smith_normal_form, Smith};
@@ -139,53 +140,52 @@ impl SpeciesManifold {
         // that its metabolism cannot run, never contributes its output — that is
         // how a hole (a missing trait) forms, with no exclusion table. A plasmic
         // line never seeds Iron, so the whole iron forge is unreachable from it.
+        // THE FRONTIER PEEL (not a sweep). The relevant conversions form a DAG
+        // rooted at the seed traits; walk it ONCE with a worklist, firing each
+        // conversion exactly when its input trait arrives. This replaces a
+        // fixpoint that re-scanned every conversion each round until nothing grew
+        // (O(rounds·E·V), the cartesian find-scan the standing ruling forbids):
+        // now every trait is dequeued once and every relevant conversion fired
+        // once. Source conversions (⊥ input) add nothing to reachability — the
+        // environment hands a plasmic line no iron; their output must already be
+        // a native seed.
+        let relevant: Vec<(Option<Resource>, Resource)> = conversions()
+            .into_iter()
+            .filter(|(kind, _, _)| crate::industry_relevant(metabolism_name, *kind))
+            .map(|(_, input, output)| (input, output))
+            .collect();
+
         let mut reachable: Vec<Resource> = metabolic_traits(metabolism);
         if !reachable.contains(&ration) {
             reachable.push(ration);
         }
-        loop {
-            let mut grew = false;
-            for (kind, input, output) in conversions() {
-                if !crate::industry_relevant(metabolism_name, kind) {
-                    continue;
+        let mut frontier: std::collections::VecDeque<Resource> =
+            reachable.iter().copied().collect();
+        while let Some(arrived) = frontier.pop_front() {
+            for (input, output) in &relevant {
+                if *input == Some(arrived) && !reachable.contains(output) {
+                    reachable.push(*output);
+                    frontier.push_back(*output);
                 }
-                // A source conversion (input from ⊥) only runs if its output is
-                // already a NATIVE trait — the environment does not hand a
-                // plasmic line iron ore. A real conversion extends the set when
-                // its input is reachable.
-                let input_ready = match input {
-                    None => reachable.contains(&output),
-                    Some(r) => reachable.contains(&r),
-                };
-                if input_ready && !reachable.contains(&output) {
-                    reachable.push(output);
-                    grew = true;
-                }
-            }
-            if !grew {
-                break;
             }
         }
         reachable.sort_by_key(|r| *r as u8);
 
-        // The edges: every relevant conversion whose endpoints are reachable,
-        // plus the ration source edge (Habitat), plus the recycling return edge
-        // (ration → ⊥) when the economy is regenerative.
+        // The edges — ONE projection over the same relevant set (each conversion
+        // whose endpoints are both reachable is an edge), plus the ration source
+        // edge (Habitat) and the recycling return edge (ration → ⊥).
         let idx = |r: Resource, traits: &[Resource]| -> usize {
             traits.iter().position(|t| *t == r).map(|p| p + 1).unwrap_or(0)
         };
         let mut edges: Vec<(usize, usize)> = Vec::new();
-        for (kind, input, output) in conversions() {
-            if !crate::industry_relevant(metabolism_name, kind) {
-                continue;
-            }
-            let ok = match input {
-                None => reachable.contains(&output),
-                Some(r) => reachable.contains(&r),
+        for (input, output) in &relevant {
+            let input_reachable = match input {
+                None => true,
+                Some(r) => reachable.contains(r),
             };
-            if ok && reachable.contains(&output) {
+            if input_reachable && reachable.contains(output) {
                 let from = input.map(|r| idx(r, &reachable)).unwrap_or(0);
-                edges.push((from, idx(output, &reachable)));
+                edges.push((from, idx(*output, &reachable)));
             }
         }
         edges.push((0, idx(ration, &reachable))); // the habitat source
@@ -289,14 +289,57 @@ fn matvec(a: &[Vec<BigInt>], x: &[BigInt]) -> Vec<BigInt> {
 /// line's `chronicle_digest`. A non-native building weighs `0` — excluded from
 /// `Z` with no boolean override. `None` only when no candidate is natively
 /// bounded (the beat builds nothing, exactly as the old priority returned `None`).
+/// **THE DEFICIT-CLOSER** (SOC-3) — does building `kind` relieve the `binding`
+/// drive's deficit? A society under METABOLIC or COGNITIVE pressure is starved of
+/// SUPPLY — the ration flow that feeds the whole cascade — so the settlement/food
+/// buildings close it; a HOMEOSTATIC deficit (entropy shed faster than contained)
+/// closes with sinks; an EXPANSIVE one with the industry that reaches new niches.
+/// (The live cascade surfaces Metabolic/Cognitive as binding today; the full map
+/// is future-proof for when the higher tiers are wired.)
+fn serves(kind: ZoneKind, binding: Drive) -> bool {
+    use ZoneKind::*;
+    match binding {
+        Drive::Metabolic | Drive::Cognitive => {
+            matches!(kind, Extractor | Habitat | Regenerator | Granary)
+        }
+        Drive::Homeostatic => matches!(kind, Encasement | CryoArray),
+        Drive::Expansive => matches!(kind, Smelter | Synthesizer | ShipYard),
+    }
+}
+
+/// **THE WORKBENCH CHOOSER, NEED-TILTED** (SOC-3). Over the native surface, the
+/// homological `affinity` weight is TILTED toward the building that closes the
+/// society's BINDING drive, scaled by how starved that drive is:
+///
+/// ```text
+///   w_s = affinity(s) · ( L + γ_num · [s closes the binding drive] )
+/// ```
+///
+/// `L` is the melt lattice; `γ_num ∈ [0, L]` is the binding drive's unmet fraction
+/// (`deficit / demand`) quantised onto it. A society that STARVES (`γ_num → L`)
+/// leans hard toward the closer (up to twice as likely); a society at ease
+/// (`binding = None`, `γ_num = 0`) reads `w_s = affinity·L` for every native — the
+/// uniform SOC-2 draw, so the society EXPLORES when comfortable and BUILDS WHAT IT
+/// NEEDS when pressured. The shared `L` and `affinity` (genus) cancel in the draw;
+/// a non-native still weighs `0`. Exact-integer, digest-seeded, replay-exact.
 pub fn choose_build(
     candidates: &[ZoneKind],
     manifold: &SpeciesManifold,
+    binding: Option<Drive>,
+    gamma_num: u64,
     seed: [u8; 32],
 ) -> Option<ZoneKind> {
-    let total: u64 = candidates
-        .iter()
-        .fold(0u64, |sum, k| sum.saturating_add(manifold.affinity(*k)));
+    let lattice = LATTICE as u64;
+    let weight = |kind: ZoneKind| -> u64 {
+        let tilt = match binding {
+            Some(drive) if serves(kind, drive) => gamma_num,
+            _ => 0,
+        };
+        manifold
+            .affinity(kind)
+            .saturating_mul(lattice.saturating_add(tilt))
+    };
+    let total: u64 = candidates.iter().fold(0u64, |sum, k| sum.saturating_add(weight(*k)));
     if total == 0 {
         return None;
     }
@@ -307,7 +350,7 @@ pub fn choose_build(
     let roll = u64::from_le_bytes(block[0..8].try_into().expect("32 >= 8")) % total;
     let mut acc = 0u64;
     for kind in candidates {
-        acc = acc.saturating_add(manifold.affinity(*kind));
+        acc = acc.saturating_add(weight(*kind));
         if roll < acc {
             return Some(*kind);
         }
@@ -400,7 +443,7 @@ mod tests {
         let surface = [ZoneKind::Smelter, ZoneKind::Habitat];
         for n in 0u8..16 {
             assert_eq!(
-                choose_build(&surface, &plasmic, seed(n)),
+                choose_build(&surface, &plasmic, None, 0, seed(n)),
                 Some(ZoneKind::Habitat),
                 "the obstructed forge is never drawn"
             );
@@ -408,7 +451,7 @@ mod tests {
         // And the draw is replayable: same digest, same building.
         let m = balanced();
         let full = [ZoneKind::Smelter, ZoneKind::Extractor, ZoneKind::Habitat];
-        assert_eq!(choose_build(&full, &m, seed(5)), choose_build(&full, &m, seed(5)));
+        assert_eq!(choose_build(&full, &m, None, 0, seed(5)), choose_build(&full, &m, None, 0, seed(5)));
     }
 
     #[test]
@@ -420,12 +463,49 @@ mod tests {
         let surface = [ZoneKind::Smelter, ZoneKind::Extractor, ZoneKind::Habitat];
         let mut seen: Vec<ZoneKind> = Vec::new();
         for n in 0u8..48 {
-            if let Some(k) = choose_build(&surface, &m, seed(n)) {
+            if let Some(k) = choose_build(&surface, &m, None, 0, seed(n)) {
                 if !seen.contains(&k) {
                     seen.push(k);
                 }
             }
         }
         assert!(seen.len() >= 2, "the draw explores more than one native building");
+    }
+
+    #[test]
+    fn the_binding_drive_tilts_the_workbench_toward_the_closer() {
+        // SOC-3 LAW: a society STARVED on its metabolic tier (binding = Metabolic,
+        // γ maxed) leans toward the food/settlement building that closes it far
+        // more often than a SATED society, whose draw stays uniform. The society
+        // builds what it NEEDS under pressure and EXPLORES at ease.
+        let m = balanced();
+        let surface = [ZoneKind::Smelter, ZoneKind::Extractor]; // industry vs food
+        let full = LATTICE as u64; // maximal deficit fraction
+        let starving = (0..90u8)
+            .filter(|i| {
+                choose_build(&surface, &m, Some(Drive::Metabolic), full, seed(*i))
+                    == Some(ZoneKind::Extractor)
+            })
+            .count();
+        let sated = (0..90u8)
+            .filter(|i| choose_build(&surface, &m, None, 0, seed(*i)) == Some(ZoneKind::Extractor))
+            .count();
+        assert!(
+            starving > sated,
+            "starvation tilts toward the food-closer ({starving} vs {sated} of 90)"
+        );
+        // The tilt is a lean, not a lock: industry is still sometimes drawn even
+        // while starving (the workbench stays open).
+        assert!(starving < 90, "even a starving line still explores ({starving})");
+
+        // And a SATED society (binding None) reads exactly the SOC-2 uniform draw:
+        // the tilt vanishes, every native equally weighted regardless of drive.
+        for i in 0u8..16 {
+            assert_eq!(
+                choose_build(&surface, &m, None, 0, seed(i)),
+                choose_build(&surface, &m, Some(Drive::Metabolic), 0, seed(i)),
+                "γ = 0 collapses the tilt to the uniform SOC-2 draw"
+            );
+        }
     }
 }

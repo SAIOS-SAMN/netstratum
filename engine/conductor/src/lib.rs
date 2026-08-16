@@ -2198,10 +2198,20 @@ impl Polity {
             .last()
             .map(|receipt| receipt.own.0)
             .unwrap_or([0u8; 32]);
+        // SOC-3 — THE NEED TILT. Read the society's binding drive and how starved
+        // it is. `stress_quantized` gives the binding tier's unmet fraction ALREADY
+        // grained onto the melt lattice (`(γ_num, LATTICE)`) — reused, not
+        // recomputed, so the raw `deficit / demand` division never forms (that
+        // ungrained ratio explodes the denominator over a long era). The workbench
+        // then leans toward the building that closes the binding drive, scaled by
+        // γ_num: a starving line builds food, a sated one explores uniformly
+        // (γ_num = 0 ⇒ the SOC-2 draw).
+        let binding = civic::cascade_reading(world, primary).binding;
+        let (gamma_num, _) = civic::stress_quantized(world, primary);
         let with_refine = |base: Option<ZoneKind>| {
             let surface: Vec<ZoneKind> =
                 [industrial, refine, base].into_iter().flatten().collect();
-            crate::soc::choose_build(&surface, &manifold, digest)
+            crate::soc::choose_build(&surface, &manifold, binding, gamma_num, digest)
         };
         let wanted: Option<ZoneKind> =
             match regime(world, &self.spec.civilization.metabolism) {
