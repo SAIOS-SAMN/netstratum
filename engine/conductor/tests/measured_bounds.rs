@@ -112,7 +112,17 @@ fn scratch(name: &str) -> PathBuf {
 /// preference. The sharper tent trims two marginal zones (83 → 81); famished
 /// count steady at 9, casualty deep-chorus → coralline. Making the tent truly
 /// per-species (sealing the roster clade at genesis) is a separate ruled step.
-const MEASURED_ZONE_TOTAL_AT_15: usize = 81;
+/// RE-MEASURED 2026-08-16 to 84: **THE EROI GATE** (COG-13). The leisure spend
+/// is no longer a reflexive `afford == spend` boolean; it is a stratified
+/// investment decision (`civic::cognitive_investment`) that BANKS surplus
+/// unless the return clears a friction margin and a stress-scaled reserve is
+/// intact. That changes the beat's banked-leisure values, and — since the
+/// chronicle digest seeds the stochastic build walk — reseeds the board: the
+/// energy debt SHRINKS by one as `coralline` now raises a ration zone and
+/// feeds itself (it leaves the frozen list, +3 zones across the roster,
+/// 81 → 84). No minting has begun by beat 15, so this is the digest reseed
+/// from changed leisure banking, not a spend effect. Bootstrap law UNCHANGED.
+const MEASURED_ZONE_TOTAL_AT_15: usize = 84;
 
 /// **THE ENERGY-BOOTSTRAP DEBT** — the lines the settlement law cannot
 /// reach, pinned so the set can only SHRINK:
@@ -123,15 +133,12 @@ const MEASURED_ZONE_TOTAL_AT_15: usize = 81;
 /// - Furnace / thermal holds and new sovereign seats that famish inside
 ///   the window (thresholder, tallykeep, glyphward) — recorded so a cure shrinks
 ///   this list rather than silently green-washing the debt;
-/// - `coralline` (2026-08-16, DIO-2): the hot-orbit casualty under the flux
-///   tent. Both it and `deep-chorus` (DIO-1's casualty) drew hot orbits and,
-///   with taxon UNSEALED, both read the flatlander-mesic η ≈ 0 — thermally
-///   roasting alike. The list-swap deep-chorus → coralline is therefore NOT a
-///   thermal-preference story (they resolve to the same clade for now); it is
-///   cultivation build-order — `deep-chorus` raised a ration zone and feeds
-///   itself, `coralline` did not. Its cure is a cooler Diophantine draw, a
-///   built ration zone, or — once clades seal at genesis — its own metabolism.
-const FROZEN_AT_15: [&str; 9] = [
+/// (`deep-chorus` and `coralline` have both passed THROUGH this list as
+/// hot-orbit casualties — DIO-1 and DIO-2 respectively — each recovering when a
+/// later digest reseed had it raise a ration zone. Both are temperate clades on
+/// hot orbits with η ≈ 0; whether they feed is cultivation build-order, not
+/// thermal preference, until clades seal at genesis and metabolism decides.)
+const FROZEN_AT_15: [&str; 8] = [
     "corebound",
     "stillcold",
     "umbrid",
@@ -140,7 +147,6 @@ const FROZEN_AT_15: [&str; 9] = [
     "thresholder",
     "tallykeep",
     "glyphward",
-    "coralline",
 ];
 
 /// **THE SETTLEMENT BOUNDS, MEASURED.** Fifteen beats over the whole

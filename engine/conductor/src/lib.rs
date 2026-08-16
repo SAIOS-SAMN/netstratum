@@ -2908,7 +2908,15 @@ impl Polity {
                                     1,
                                 ) * civic::metabolic_exchange();
                                 let primary = cfe::world::FIRST_ORB;
+                                // COG-13: the EROI investment gate REPLACES the
+                                // reflexive `afford == spend` boolean. A thought
+                                // is funded only when the return justifies it and
+                                // a stress-scaled reserve is intact, so leisure
+                                // BANKS instead of draining on every affordable
+                                // thought. `afford` survives only as the hard
+                                // floor that decides the desperation burn.
                                 let afford = self.world.leisure_bank_of(primary) >= price;
+                                let commit = civic::cognitive_investment(&self.world, primary, &price);
                                 // COG-3 DESPERATION BURN: when a metabolic
                                 // deficit is actively biting (the cascade binds
                                 // at the survival floor) and leisure cannot pay,
@@ -2926,13 +2934,13 @@ impl Polity {
                                 );
                                 let can_burn = !afford && starving && head > burn.clone();
                                 if let Some(bytes) = solver_verify::program_bytes(&expansion) {
-                                    if (afford || can_burn)
+                                    if (commit || can_burn)
                                         && self
                                         .world
                                         .mint_solver_word_as(self.automaton, orbit, bytes, cited.clone())
                                         .is_ok()
                                     {
-                                        if afford {
+                                        if commit {
                                             // COG-4: the thought draws the
                                             // leisure bank by its exact price.
                                             self.world.settle_leisure(primary, -price);

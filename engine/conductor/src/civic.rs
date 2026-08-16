@@ -397,6 +397,81 @@ pub fn cascade_reading(world: &cfe::world::World, orb: u64) -> Cascade {
     cascade(supply, &demands)
 }
 
+/// The EROI friction margin μ (> 1): a thought must return MORE than it costs,
+/// or the surplus is better banked. A bare integer, not a `ratio` dial — the
+/// ratchet does not count it — set by the COG-13 ruling (operator 2026-08-16):
+/// the return must at least DOUBLE the cost to clear the investment threshold.
+const FRICTION_MARGIN: i64 = 2;
+
+/// **COG-13 — THE COGNITIVE INVESTMENT GATE (EROI)** (operator ruling
+/// 2026-08-16). Reflexive spending (`afford == spend`) violates Energy Return
+/// on Investment: a mind does not burn accumulated surplus just because the
+/// baseline cost is met. It banks, and invests only when the return justifies
+/// the expenditure AND a stress-scaled resilience reserve is intact. This
+/// replaces the boolean drain with a stratified decision:
+///
+/// ```text
+///   Commit = ( B ≥ W + R(γ) ) ∧ ( γ·T_gen > μ·W  ∨  B ≥ W + R_max )
+/// ```
+///
+/// - `B` the leisure bank, `W` the thought's price (homological cost × the
+///   metabolic exchange), both in the same food-surplus units.
+/// - **ROI**: the expected return is the deficit the geometry targets (`γ`, the
+///   binding tier's unmet demand) carried over a generation `T_gen`
+///   ([`World::lifespan_of`]); it must exceed the cost by the friction margin
+///   `μ` ([`FRICTION_MARGIN`]). A cheap topology that solves a real deficit
+///   clears it; an over-complex one (high `W`) is rejected and the line waits
+///   for a cheaper configuration.
+/// - **Dynamic reserve** `R(γ) = R_max·(1 − s)`: the buffer collapses with
+///   stress `s` (the binding tier's deficit fraction). Sated (`s = 0`) the
+///   reserve stands at `R_max` — a generation of the thinkers' own upkeep —
+///   so the bank ACCUMULATES; under crisis the floor drops toward zero and the
+///   line spends down to fund its escape (below which the desperation burn, in
+///   the caller, takes over).
+/// - **Curiosity**: a massively overflowing bank (`B ≥ W + R_max`) funds
+///   speculative thought even at `γ = 0`, where ROI is undefined.
+///
+/// Pure and total; `γ` and the tier demands are read from the live cascade, so
+/// the gate speaks the same stratified language as the rest of the economy.
+pub fn cognitive_investment(world: &cfe::world::World, orb: u64, price: &Ratio) -> bool {
+    let zero = ratio(0, 1);
+    let bank = world.leisure_bank_of(orb);
+    // The hard floor — a thought cannot be paid from an empty bank.
+    if bank < *price {
+        return false;
+    }
+    let cascade = cascade_reading(world, orb);
+    let t_gen = ratio(world.lifespan_of() as i64, 1);
+    // R_max — the sated reserve: a GENERATION of the cognition caste's own
+    // upkeep, so a prosperous line banks deeply before indulging curiosity.
+    let cognitive_demand = cascade
+        .tiers
+        .iter()
+        .find(|tier| matches!(tier.drive, Drive::Cognitive))
+        .map(|tier| tier.demand.clone())
+        .unwrap_or_else(|| zero.clone());
+    let reserve_max = cognitive_demand * t_gen.clone();
+    // γ and the stress fraction from the BINDING tier (zero when sated).
+    let (gamma, stress) = match cascade
+        .binding
+        .and_then(|drive| cascade.tiers.iter().find(|tier| tier.drive == drive))
+    {
+        Some(tier) if tier.demand > zero => {
+            (tier.deficit.clone(), tier.deficit.clone() / tier.demand.clone())
+        }
+        _ => (zero.clone(), zero.clone()),
+    };
+    // Systemic resilience: the reserve collapses proportionally to stress.
+    let reserve = reserve_max.clone() * (ratio(1, 1) - stress);
+    if bank < price.clone() + reserve {
+        return false;
+    }
+    // Thermodynamic viability (ROI) OR the curiosity overflow.
+    let roi_ok = gamma * t_gen > ratio(FRICTION_MARGIN, 1) * price.clone();
+    let curiosity = bank >= price.clone() + reserve_max;
+    roi_ok || curiosity
+}
+
 /// **THE DEFECT CLASSIFICATION** (COG-12) — the void's homological SHAPE tells
 /// the Mind what KIND of tool is missing, so the leap into an irreducible void
 /// is not blind. When γ can be inverted against known structure there is no
