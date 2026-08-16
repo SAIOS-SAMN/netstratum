@@ -79,6 +79,20 @@ fn track(mass: &Ratio, k: &Ratio) -> (Ratio, Ratio) {
     (mass.clone() * k2, mass.clone() * k3)
 }
 
+/// **THE TRUNCATION BOUNDARY** — quantize `k` onto the orbit sub-lattice
+/// `k_grained = round(k·G)/G` (G = [`cfe::almanac::ORBIT_GRAIN`]) IMMEDIATELY
+/// after the beacon draw and BEFORE any exponentiation. The beacon expands to a
+/// rational with a 2¹²⁸ denominator; `r = M·k²` squares it and the incident
+/// flux `∝ k⁴` takes it toward 2⁵¹², so every downstream exact-rational
+/// operation drowns in a GCD cascade (the denominator-explosion that stalled
+/// the beat). Graining bounds the denominator — and thus the memory footprint —
+/// to `G`, restoring O(1) arithmetic, while keeping `k` EXACTLY rational so the
+/// Diophantine track (`r³ = P²M`, perfect-square `P²`) stays exact.
+fn grain_k(k: &Ratio) -> Ratio {
+    let g = cfe::almanac::ORBIT_GRAIN;
+    (k.clone() * ratio(g, 1)).round() / ratio(g, 1)
+}
+
 /// **THE DIOPHANTINE SITING** — replaces the old hand-picked seat table
 /// (05 §3.1) with a continuous exact-rational track, scored by η.
 ///
@@ -142,7 +156,9 @@ pub(crate) fn diophantine_siting(
     for attempt in 0..REROLL_LIMIT {
         let domain = format!("genesis.diophantine.k.{attempt}");
         let unit = beacon.draw(&domain); // ∈ [0, 1)
-        let k = k_center.clone() + (unit - half.clone()) * full_width.clone();
+        // Grain k HERE — before track() exponentiates it — so r and P inherit a
+        // bounded denominator instead of the draw's 2^128 basis (see grain_k).
+        let k = grain_k(&(k_center.clone() + (unit - half.clone()) * full_width.clone()));
         if k <= ratio(0, 1) {
             continue; // k must be strictly positive
         }

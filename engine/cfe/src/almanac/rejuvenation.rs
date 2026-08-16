@@ -149,6 +149,13 @@ fn preferred_band_bounds4(clade: u16) -> (Ratio, Ratio) {
 /// denominator, so the whole tent is exact rationals with no literal dial:
 /// `η = 1 − |2·t_eq4 − (floor⁴+ceiling⁴)| / (2·(ceiling⁴−floor⁴))`.
 pub fn habitability_flux(clade: u16, t_eq4: &Ratio) -> Ratio {
+    // Quantize the incident flux onto the grain BEFORE it meets the biological
+    // tensor: `U_eq_grained = round(U_eq·G)/G` (G = ORBIT_GRAIN). The raw
+    // `t_eq4` inherits the orbit's precision; ungrained, the tent's exact
+    // subtraction and division stall the beat in a GCD cascade. Graining bounds
+    // the denominator to G with no physical loss (the bands are ~10⁹ K⁴ wide).
+    let g = super::thermal::ORBIT_GRAIN;
+    let t_eq4 = (t_eq4.clone() * ratio(g, 1)).round() / ratio(g, 1);
     let (floor4, ceiling4) = preferred_band_bounds4(clade);
     let two_t = t_eq4.clone() + t_eq4.clone();
     let edges = floor4.clone() + ceiling4.clone();
