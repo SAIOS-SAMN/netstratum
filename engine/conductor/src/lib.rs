@@ -75,6 +75,11 @@ mod siting;
 // partition function seeded by the chronicle digest, in place of the fixed
 // `.or()` priority. Crisis stays canalized; surplus explores. See soc.rs.
 pub mod soc;
+// RCP-2 (operator directive 2026-08-16): the emergent recipe space — a buildable
+// is a hashed transformation from open-almanac elements into the universal roles,
+// discovered against a deficit and gated by TOPOLOGICAL reach, never a ZoneKind
+// enum variant or an integer level. See recipe.rs.
+pub mod recipe;
 pub use polities::{founding_polities, registered_polities, roster};
 
 /// AEON-1b (11 §5): THE FOLD — seal the live era and rotate it into

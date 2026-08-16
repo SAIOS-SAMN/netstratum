@@ -191,6 +191,22 @@ pub fn archetype(metabolism: u8) -> Metabolism {
     }
 }
 
+/// **PROJECT A RAW MATERIAL** (RCP: the recipe-discovery hook) — project an
+/// element's own morphodynamic vector `[c,v,s,f,h]` through a metabolism into the
+/// five roles, with the ambient flux held neutral (a RECIPE works the material
+/// itself, not the planet's light or heat). This is how the discovery engine asks
+/// "how much of role `r` can THIS species wrest from THIS element" — the pairing
+/// that turns an open-almanac element into an emergent recipe, no authored table.
+pub fn project_material(metabolism: &Metabolism, material: &[Ratio]) -> Vec<Ratio> {
+    let mut env = vec![ratio(0, 1); ENV_DIM];
+    for (i, slot) in env.iter_mut().take(5).enumerate() {
+        if let Some(v) = material.get(i) {
+            *slot = v.clone();
+        }
+    }
+    project(metabolism, &env)
+}
+
 /// **THE PROJECTION `U_role = T_metab · S_planet`** — the utility a species can
 /// draw into each role from this planet. Exact-rational; the same inputs always
 /// project the same, so genesis is replay-exact.
