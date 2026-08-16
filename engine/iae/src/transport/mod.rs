@@ -7,7 +7,7 @@
 //! never recomputed. A movement (learn, deposit, promote, drain, absorb,
 //! exhale, reduce, peel, recall, project — every one of them) is DATA:
 //! `Movement { stroke, arity, altitude, axis }` on the one pair — never a
-//! suffix, never a clone, never a sibling function family (01 §2).
+//! suffix, never a clone, never a counterpart function family (01 §2).
 //!
 //! Ascent is descent read backwards off the carried inverse: `Stroke::Up`
 //! applies Φ, `Stroke::Down` applies Φ⁻¹ — one transport, two reads.

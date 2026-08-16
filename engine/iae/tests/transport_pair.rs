@@ -4,7 +4,7 @@
 //! `Φ·Φ⁻¹ = 1` exact-rational; a pair that does not close is refused with
 //! the residual carried whole; the up stroke read backwards off the
 //! carried inverse IS the down stroke; and a movement is DATA on the one
-//! pair (arity is a composition count, never a sibling mechanism).
+//! pair (arity is a composition count, never a counterpart mechanism).
 //!
 //! The letter-alphabet witnesses (the 17 Cayley letters, word composition)
 //! land with the `letters` module in a later IAE slice — they bridge to the
@@ -97,7 +97,7 @@ fn the_up_stroke_read_backwards_by_the_carried_inverse_is_the_down_stroke() {
 
 #[test]
 fn a_movement_is_data_the_same_pair_serves_every_arity() {
-    // Movement{arity} multiplies the SAME operator — no sibling mechanism
+    // Movement{arity} multiplies the SAME operator — no counterpart mechanism
     // exists for "apply twice" (LAW XV: a movement is data, never a clone).
     let v = Multivector::<Space>::from_planes(
         &[(
