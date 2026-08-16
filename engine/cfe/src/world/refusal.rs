@@ -198,6 +198,18 @@ pub enum ActionRefused {
     /// below two is one line agreeing with itself, which is no
     /// measurement.
     ConsilienceAlone { mass: u32 },
+    /// RCP-2 (tag 181) — a recipe with no inputs transforms nothing: the
+    /// doing-layer consumes the open almanac, and an empty draw is not a
+    /// recipe.
+    RecipeInputsEmpty,
+    /// RCP-2 — a recipe that delivers nothing of its role is no
+    /// technology; the discovery engine yields `None` for such a hole, so
+    /// the door refuses a zero-yield build in kind.
+    RecipeYieldEmpty,
+    /// RCP-2 — this society already raised this exact recipe (same inputs,
+    /// same role) on this orb: the built set is a fold, and a recipe is
+    /// minted once, never re-built (the SolverWordKnown discipline).
+    RecipeAlreadyBuilt { orb_id: u64 },
     /// ZONE-VOCABULARY (#41) — no zone-axis entry in the FOLD carries
     /// this code. A fact of the chain, not a shape: what the fold holds
     /// grows by receipt, so this can never move to a door (the

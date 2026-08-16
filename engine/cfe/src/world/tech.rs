@@ -288,6 +288,50 @@ impl World {
         Ok(())
     }
 
+    /// **RCP-2 (tag 181) — RAISE AN EMERGENT RECIPE.** A society builds a
+    /// recipe its discovery engine (`conductor::recipe::discover`) minted: a
+    /// hashed transformation `∏ inputs → role` over the OPEN almanac, priced
+    /// by no `ZoneKind` and gated by no integer level — the doing-layer's
+    /// enum and scalar, both dissolved. This door holds the CHAIN's share: a
+    /// recipe with no inputs, or one that delivers nothing of its role, is
+    /// not a recipe (the discovery engine returns an honest `None` for such a
+    /// hole, and the door refuses in kind); and the SAME recipe (inputs ‖
+    /// role) already raised on this orb refuses — the built set is a FOLD
+    /// (`vocabulary::recipes_built`), minted once, never re-built. The caller
+    /// (the conductor's workbench) owns the species affinity and topological
+    /// reach gate; this door records the build so the fold reads it.
+    pub fn build_recipe_as(
+        &mut self,
+        actor: u64,
+        orb_id: u64,
+        inputs: Vec<[u8; 32]>,
+        role: usize,
+        yield_of_role: Ratio,
+    ) -> Result<(), ActionRefused> {
+        self.permitted(actor, Scope::Build)?;
+        if inputs.is_empty() {
+            return Err(ActionRefused::RecipeInputsEmpty);
+        }
+        if yield_of_role <= ratio(0, 1) {
+            return Err(ActionRefused::RecipeYieldEmpty);
+        }
+        let built = self.chronicle.receipts().iter().any(|receipt| {
+            matches!(
+                &receipt.event,
+                ClosureEvent::RecipeBuilt { orb_id: held_orb, inputs: held, role: held_role, .. }
+                    if *held_orb == orb_id && *held == inputs && *held_role == role
+            )
+        });
+        if built {
+            return Err(ActionRefused::RecipeAlreadyBuilt { orb_id });
+        }
+        self.close(
+            ClosureEvent::RecipeBuilt { orb_id, inputs, role, yield_of_role },
+            actor,
+        );
+        Ok(())
+    }
+
     /// **CONSILIENCE (tag 177, 38 §5)** — record this line's participation
     /// in a shared knowledge axiom. The prover side (`solver::consilience`)
     /// established that INDEPENDENT lines resolved their knowledge to the

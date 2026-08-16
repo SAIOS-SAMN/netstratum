@@ -660,6 +660,43 @@ pub fn solver_words(
     out
 }
 
+/// **A BUILT RECIPE, READ FROM THE FOLD** (RCP-2, tag 181) — the receipt's
+/// payload whole: the orb that raised it, the open-almanac `inputs` it
+/// consumes, the universal `role` it fills, and the `yield_of_role` grained
+/// at synthesis. The recipe's cryptographic `id` is not carried — it
+/// re-derives as `blake3(inputs ‖ role ‖ "recipe")` from these fields, so the
+/// consumer (the conductor's `MintedRecipe`) reconstructs it by call, never
+/// by copy.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct BuiltRecipe {
+    pub orb_id: u64,
+    pub inputs: Vec<[u8; 32]>,
+    pub role: usize,
+    pub yield_of_role: crate::ratio::Ratio,
+}
+
+/// **THE BUILT-RECIPE FOLD** (RCP-2, tag 181) — every emergent recipe a world
+/// has raised, read whole from its own receipts in build order. The same
+/// fold law as the solver library and the axis vocabularies: the chronicle is
+/// the register, the doing-layer is never a committed field, and every node
+/// folds to the same recipes forever. The caller filters by orb.
+pub fn recipes_built(chronicle: &crate::vrp::Chronicle) -> Vec<BuiltRecipe> {
+    let mut out = Vec::new();
+    for receipt in chronicle.receipts() {
+        if let crate::dop::ClosureEvent::RecipeBuilt { orb_id, inputs, role, yield_of_role } =
+            &receipt.event
+        {
+            out.push(BuiltRecipe {
+                orb_id: *orb_id,
+                inputs: inputs.clone(),
+                role: *role,
+                yield_of_role: yield_of_role.clone(),
+            });
+        }
+    }
+    out
+}
+
 /// **THE FOLD** — `seed ∪ minted`, in chronicle order.
 ///
 /// Same chain, same vocabulary, on every node, forever. This is the

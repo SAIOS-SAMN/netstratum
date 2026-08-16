@@ -390,7 +390,10 @@
 //!         the library fold reads it beside SolverWordMinted, so knowledge
 //!         circulates. orbit[32] ‖ cited ‖ opaque expansion, the
 //!         SolverWordMinted wire shape.)
-//!    Phase-5 claim ledger: next free **181** (180 LeisureSettled —
+//!    Phase-5 claim ledger: next free **182** (181 RecipeBuilt —
+//!    RCP-2 the emergent recipe built (∏ inputs → role over the open
+//!    almanac; the built set is a FOLD, `vocabulary::recipes_built`),
+//!    2026-08-16; 180 LeisureSettled —
 //!    COG-1 the leisure bank / cognition budget, doc 52 §7;
 //!    179 PopulationAccrued — 41_PROVISION COG Slice 2;
 //!    178 KnowledgeLicensed —
@@ -3062,6 +3065,19 @@ pub enum ClosureEvent {
     /// survival drive in, the Mind's minting out), floored at zero. A world
     /// with no surplus and no thought emits none, so it replays byte-identical.
     LeisureSettled { orb_id: u64, delta: Ratio },
+    /// **RCP-2 (tag 181, 2026-08-16) — THE EMERGENT RECIPE BUILT.** A
+    /// society raised a recipe its discovery engine minted: a hashed
+    /// transformation `∏ inputs → role` over the OPEN almanac, NOT a
+    /// `ZoneKind` variant (the doing-layer's enum, dissolved). The receipt
+    /// carries the recipe whole — the open-almanac `inputs`, the universal
+    /// `role` it fills (`morphogen::FOOD … SINK`, the only fixed vocabulary),
+    /// and the `yield_of_role` grained onto the melt lattice at synthesis.
+    /// The recipe's `id` is NOT stored: it re-derives as `blake3(inputs ‖
+    /// role ‖ "recipe")` from the fields here, so the built set is a FOLD of
+    /// these receipts (`vocabulary::recipes_built`), never a committed field
+    /// — the SolverWordMinted discipline. A world that mints no recipe emits
+    /// none, so it replays byte-identical.
+    RecipeBuilt { orb_id: u64, inputs: Vec<[u8; 32]>, role: usize, yield_of_role: Ratio },
     /// **TAXATION (49_TAXATION §3, tag 172)** — the CONTINUITY levy at a
     /// generation turnover: `count` of the line's most-recently adopted
     /// practices LAPSE to the void (its unconfirmed knowledge, unkept as
@@ -4281,6 +4297,19 @@ impl ClosureEvent {
                 let mut value = orb_id.to_le_bytes().to_vec();
                 ratio::encode(delta, &mut value);
                 tlv::put(180, &value, &mut out);
+            }
+            Self::RecipeBuilt { orb_id, inputs, role, yield_of_role } => {
+                // orb ‖ role u8 ‖ input count u8 ‖ count × element[32] ‖
+                // yield (rest) — the SolverWordMinted count-prefix shape, the
+                // variable-length yield last so it can run to the frame edge.
+                let mut value = orb_id.to_le_bytes().to_vec();
+                value.push(*role as u8);
+                value.push(inputs.len() as u8);
+                for element in inputs {
+                    value.extend_from_slice(element);
+                }
+                ratio::encode(yield_of_role, &mut value);
+                tlv::put(181, &value, &mut out);
             }
             Self::PracticesLapsed { count } => {
                 tlv::put(172, &[*count], &mut out);
@@ -5625,6 +5654,20 @@ impl ClosureEvent {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let (delta, _) = ratio::decode(value.get(8..)?)?;
                 Some(Self::LeisureSettled { orb_id, delta })
+            }
+            181 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let role = *value.get(8)? as usize;
+                let count = *value.get(9)? as usize;
+                let mut at = 10usize;
+                let mut inputs = Vec::with_capacity(count);
+                for _ in 0..count {
+                    let element: [u8; 32] = value.get(at..at + 32)?.try_into().ok()?;
+                    at += 32;
+                    inputs.push(element);
+                }
+                let (yield_of_role, _) = ratio::decode(value.get(at..)?)?;
+                Some(Self::RecipeBuilt { orb_id, inputs, role, yield_of_role })
             }
             172 => Some(Self::PracticesLapsed { count: *value.first()? }),
             168 => Some(Self::PressureEbbed {

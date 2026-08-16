@@ -1400,6 +1400,12 @@ fn covered(event: &ClosureEvent) -> bool {
         // lines converged, moving nothing bankable. BY HAND.
         | E::KnowledgeConverged { .. }
         | E::KnowledgeLicensed { .. }
+        // RCP-2 (tag 181) — banked-neutral at BUILD: raising an emergent
+        // recipe moves no value, no element and no key; it opens the
+        // society's doing-layer vocabulary, and the per-tick yield it later
+        // enables is judged where it banks. {I2 containment, I3 exactness}
+        // complete it — the SolverWordMinted discipline. BY HAND.
+        | E::RecipeBuilt { .. }
         // E3.9 (tag 165) — banked-neutral: the allow-list annex
         // re-rules WHICH matter may cross the pair and moves nothing
         // by itself; the haul it later refuses or admits is the
@@ -2524,6 +2530,13 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         // REFINE-1: WORLD-layer beside the assay and the gem — an
         // orb's matter converts, no line is keyed.
         | E::ElementRefined { .. }
+        // RCP-2 (tag 181): the emergent doing-layer, the ZoneBuilt
+        // successor — a recipe is raised ON an orb and yields INTO that
+        // orb's economy, so it BINDS the orb, not a line's identity (a
+        // sister orb of the same line raises its own). It carries almanac
+        // matter over the universal roles, exactly as GemCompounded and
+        // ElementRefined carry an orb's matter — World.
+        | E::RecipeBuilt { .. }
         | E::ElementApertureSent { .. } | E::ElementApertureReceived { .. }
         | E::ElementRouteChartered { .. }
         | E::StampMinted { .. } | E::StampApertureSent { .. } | E::StampApertureReceived { .. }
@@ -2657,6 +2670,12 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         // NOVELTY-GATE: a solver-word mint extends what the LINE can
         // reach — the same founding class.
         | E::SolverWordMinted { .. }
+        // RCP-2 (tag 181): raising an emergent recipe EXTENDS what the
+        // world can express — it opens the society's doing-layer over the
+        // open almanac and banks nothing at the build itself (the yield
+        // accrues per tick, judged where it lands). Build, the
+        // SolverWordMinted / ZoneBuilt founding class.
+        | E::RecipeBuilt { .. }
         // CONSILIENCE: recording a shared knowledge axiom extends what
         // the LINE holds — the same founding/Build class.
         | E::KnowledgeConverged { .. }

@@ -178,6 +178,10 @@ impl Replayer {
         // solver_words) — no committed field moves, so replay carries
         // nothing for it (the SolverWordMinted discipline).
         ClosureEvent::KnowledgeLicensed { .. } => {}
+        // RCP-2 (tag 181): the built-recipe set is a FOLD of these receipts
+        // (`vocabulary::recipes_built`) — no committed field moves, so replay
+        // carries nothing for it (the SolverWordMinted discipline).
+        ClosureEvent::RecipeBuilt { .. } => {}
         // BOOK-1 (19_LENS §16) — the open registry rebuilds from
         // receipts alone, like every other committed ledger here.
         // LIT-1 — the literature rebuilds from receipts alone.

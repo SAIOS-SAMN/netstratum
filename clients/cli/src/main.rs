@@ -7964,6 +7964,17 @@ fn refuse_text(world: &World, refusal: &ActionRefused, style: &Style) -> String 
             "an open forward already stands on that lane — a vitrified pact cannot be cancelled, only fulfilled or slashed ({} lists them)",
             style.strong("forwards")
         ),
+        ActionRefused::RecipeInputsEmpty => {
+            "a recipe transforms matter — name at least one element for it to work on".to_string()
+        }
+        ActionRefused::RecipeYieldEmpty => "that draw yields nothing of its role — no element \
+             this line can reach fills it, and an honest hole is not a recipe"
+            .to_string(),
+        ActionRefused::RecipeAlreadyBuilt { orb_id } => format!(
+            "this world already raised that recipe on {} — a recipe is minted once, and the \
+             fold already holds it",
+            style.strong(&orb_id.to_string())
+        ),
     };
     text
 }
@@ -8814,6 +8825,19 @@ fn chronicle(world: &World, style: &Style) {
                 "◈ an idea LICENSED — word {} ({} confirms) enters the library from the market; knowledge circulates",
                 style.strong(&hex(orbit)[..8]),
                 style.strong(&cited.len().to_string())
+            ),
+            cfe::dop::ClosureEvent::RecipeBuilt { inputs, role, yield_of_role, .. } => format!(
+                "◈ a RECIPE raised — {} → {} (+{}); the doing-layer grew from the almanac",
+                style.strong(&format!("{} element(s)", inputs.len())),
+                style.strong(match *role {
+                    r if r == cfe::morphogen::FOOD => "food",
+                    r if r == cfe::morphogen::STRUCT => "structure",
+                    r if r == cfe::morphogen::ENERGY => "energy",
+                    r if r == cfe::morphogen::COGNITION => "cognition",
+                    r if r == cfe::morphogen::SINK => "sink",
+                    _ => "role",
+                }),
+                style.strong(&amount(yield_of_role))
             ),
             cfe::dop::ClosureEvent::GemCompounded { members, gem, .. } => format!(
                 "◈ {} bond into {} — the lanes saturate and the matter holds",
