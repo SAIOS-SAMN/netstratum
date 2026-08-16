@@ -330,6 +330,43 @@ pub fn phase_feasibility(metabolism: u8, thermal: &Ratio, aridity: &Ratio) -> Ra
     structural_grade(&archetype(3), &substrate)
 }
 
+/// **THE INGESTION KERNEL κ** (ONT metabolic — the diet is the ALMANAC, never an
+/// enum). A species metabolizes an element when the morphodynamic FOOD projection
+/// of that element clears a tolerance `epsilon` — the extraction of ORDER from a
+/// gradient, read straight off the species tensor × the element itself, with no
+/// taxonomy branch and no `Resource::{Iron|Joule|Biomass}` bucket. Over the OPEN
+/// blake3 almanac this returns the species' whole diet in DESCENDING affinity, so
+/// a lithophage finds the dense-cohesion elements, a syntroph the mesic-organic,
+/// each through the SAME projection over the planet's own catalogue. A species
+/// that draws its Food from FLUX rather than matter (a plasmic feeds on the
+/// thermal band) reads zero on every material and so has an EMPTY diet here — it
+/// does not eat elements. The ordering is deterministic and replay-exact (ties
+/// break to the lexicographically smaller id).
+pub fn ingest(species: &Metabolism, almanac: &[[u8; 32]], epsilon: &Ratio) -> Vec<([u8; 32], Ratio)> {
+    let zero = ratio(0, 1);
+    let mut diet: Vec<([u8; 32], Ratio)> = almanac
+        .iter()
+        .filter_map(|element| {
+            let food = project_material(species, &material_of(element))
+                .get(FOOD)
+                .cloned()
+                .unwrap_or_else(|| zero.clone());
+            (food > *epsilon).then_some((*element, food))
+        })
+        .collect();
+    diet.sort_by(|a, b| b.1.cmp(&a.1).then_with(|| a.0.cmp(&b.0)));
+    diet
+}
+
+/// **THE STAPLE** — the single element a species metabolizes best on this almanac,
+/// or `None` when its kernel evaluates to ∅ (the universal Starvation Cull: an
+/// empty diet, because no local element aligns with the species — never because a
+/// rule named it). This is what dissolves `metabolic_ration`: a food ELEMENT drawn
+/// from the open catalogue by the species tensor × the planet, not a 3-way match.
+pub fn staple(species: &Metabolism, almanac: &[[u8; 32]], epsilon: &Ratio) -> Option<[u8; 32]> {
+    ingest(species, almanac, epsilon).into_iter().next().map(|(id, _)| id)
+}
+
 /// The archetype for a metabolism NAME (the roster's string axis): mineral,
 /// plasmic, or the biotic generalist otherwise.
 pub fn archetype_named(metabolism: &str) -> Metabolism {
@@ -373,6 +410,71 @@ mod tests {
     }
     fn mesic_world() -> Vec<Ratio> {
         environment(&q(1, 2), &wet(), &ratio(1, 1), &ratio(1, 1))
+    }
+
+    // An almanac element whose material vector is set on two INDEPENDENT axes:
+    // byte 0 = cohesion `c`, byte 8 = syntropy `s` — the axes a lithophage vs a
+    // syntroph draws its Food from. Everything else neutral, so the witness reads
+    // the ingestion projection alone.
+    fn element(cohesion: u8, syntropy: u8) -> [u8; 32] {
+        let mut e = [0u8; 32];
+        e[0] = cohesion;
+        e[8] = syntropy;
+        e
+    }
+
+    #[test]
+    fn the_ingestion_kernel_reads_diet_from_the_open_almanac_no_taxonomy() {
+        // One almanac, three elements; the diet each species draws is a pure
+        // projection of its tensor over the SAME catalogue — no `Resource` enum,
+        // no `is_plasmoid()` branch.
+        let dense = element(255, 0);
+        let organic = element(0, 255);
+        let middling = element(100, 100);
+        let almanac = vec![dense, organic, middling];
+        let eps = q(0, 1);
+
+        // A lithophage draws Food from COHESION: it eats the dense element then the
+        // middling one; the purely-syntropic element is not food for it.
+        let mineral = archetype(1);
+        assert_eq!(staple(&mineral, &almanac, &eps), Some(dense), "the lithophage's staple is the densest element");
+        let m_ids: Vec<[u8; 32]> = ingest(&mineral, &almanac, &eps).iter().map(|(id, _)| *id).collect();
+        assert_eq!(m_ids, vec![dense, middling], "it eats cohesion, descending; the organic is not its food");
+
+        // A syntroph draws Food from SYNTROPY: the mirror diet, the SAME pipeline.
+        let biotic = archetype(2);
+        assert_eq!(staple(&biotic, &almanac, &eps), Some(organic), "the syntroph's staple is the most syntropic element");
+        let b_ids: Vec<[u8; 32]> = ingest(&biotic, &almanac, &eps).iter().map(|(id, _)| *id).collect();
+        assert_eq!(b_ids, vec![organic, middling], "it eats syntropy, descending; the dense is not its food");
+
+        // Two species, one almanac, one code path — disjoint staples. Emergence,
+        // never an authored table.
+        assert_ne!(staple(&mineral, &almanac, &eps), staple(&biotic, &almanac, &eps));
+    }
+
+    #[test]
+    fn a_flux_feeder_does_not_eat_elements_the_starvation_cull_emerges() {
+        // A plasmic species draws its Food from the thermal FLUX, not from any
+        // material axis, so over a material almanac its kernel evaluates to ∅ — the
+        // universal Starvation Cull, from the projection alone, no prohibition rule.
+        let plasmic = archetype(3);
+        let almanac = vec![element(255, 255), element(128, 200), element(10, 90)];
+        let eps = q(0, 1);
+        assert!(ingest(&plasmic, &almanac, &eps).is_empty(), "a flux-feeder eats no element");
+        assert_eq!(staple(&plasmic, &almanac, &eps), None, "no staple — the kernel is empty (the cull)");
+    }
+
+    #[test]
+    fn the_diet_is_deterministic_and_ordered_by_affinity() {
+        let biotic = archetype(2);
+        let almanac: Vec<[u8; 32]> =
+            (0..12u8).map(|s| element(s.wrapping_mul(20), 255 - s.wrapping_mul(15))).collect();
+        let eps = q(1, 64);
+        let a = ingest(&biotic, &almanac, &eps);
+        assert_eq!(a, ingest(&biotic, &almanac, &eps), "same species × same almanac ⇒ same diet, every replay");
+        for pair in a.windows(2) {
+            assert!(pair[0].1 >= pair[1].1, "the diet is ordered by descending affinity");
+        }
     }
 
     #[test]
