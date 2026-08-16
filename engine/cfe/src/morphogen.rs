@@ -44,7 +44,7 @@
 //! `SpeciesManifold`'s `C₀` at `U_role` (replacing `metabolic_traits`) and reads
 //! the cull into genesis η.
 
-use cfe::ratio::{ratio, Ratio};
+use crate::ratio::{ratio, Ratio};
 
 // The environment axes — material `M` then flux `Φ`. Indices into `Env`.
 const C: usize = 0; // topological cohesion
@@ -103,11 +103,20 @@ pub fn material_of(element: &[u8; 32]) -> Vec<Ratio> {
 ///   c(heat) = 1 − heat      v(heat) = heat      f(heat) = heat
 fn thermo_scale(heat: &Ratio) -> Vec<Ratio> {
     let one = ratio(1, 1);
+    let zero = ratio(0, 1);
     let cold = one.clone() - heat.clone();
+    // Syntropy is a TENT peaking at the mesic middle (heat = 1/2) and falling to
+    // zero at both thermal extremes — the temperate band organic/carbon-style
+    // life needs: `s = 1 − |2·heat − 1|` (doubled by addition, so no ratio dial
+    // enters). Cohesion condenses cold, volatility and resonance ride the hot
+    // dense phase — so the three structural bases (cohesion, syntropy, volatility)
+    // peak at three different thermal niches: cold, mesic, hot.
+    let excursion = (heat.clone() + heat.clone()) - one.clone(); // 2·heat − 1 ∈ [−1, 1]
+    let excursion = if excursion < zero { -excursion } else { excursion };
     let mut scale = vec![ratio(0, 1); 5];
     scale[C] = cold; // cohesion: cold condenses stable lattices
     scale[V] = heat.clone(); // volatility: heat melts bonds into fluid/gas/plasma
-    scale[S] = one.clone(); // syntropy neutral
+    scale[S] = one.clone() - excursion; // syntropy: the mesic organic band
     scale[F] = heat.clone(); // resonance: the dense hot phase carries the harmonic
     scale[H] = one; // capacitance neutral
     scale
@@ -180,10 +189,14 @@ fn row(weights: &[(usize, i64)]) -> Vec<Ratio> {
 ///
 /// - **mineral / lithophage (1):** eats dense Cohesion and the geothermal
 ///   gradient; builds from Cohesion.
-/// - **biotic (2):** eats Syntropy fed by light; builds from Cohesion (mines its
-///   tools) — the generalist.
+/// - **biotic (2):** eats Syntropy fed by light and builds its body from the same
+///   organic Syntropy — the mesic temperate band, its niche between the extremes.
 /// - **plasmic (3):** feeds on the thermal/energy flux; structures itself by
-///   harmonic resonance and containment (Volatility), never by Cohesion.
+///   harmonic resonance and containment (Volatility), the hot dense phase.
+///
+/// The three structural bases — cohesion (cold), syntropy (mesic), volatility
+/// (hot) — peak at three DIFFERENT thermal niches, so the archetypes diverge
+/// across the orbit with no habitability table.
 pub fn archetype(metabolism: u8) -> Metabolism {
     match metabolism {
         1 => vec![
@@ -202,7 +215,7 @@ pub fn archetype(metabolism: u8) -> Metabolism {
         ],
         _ => vec![
             row(&[(S, 1), (LUM, 1)]), // Food: syntropy + light
-            row(&[(C, 1)]),           // Structure: cohesion
+            row(&[(S, 1)]),           // Structure: the organic syntropy body (mesic)
             row(&[(LUM, 1)]),         // Energy: light
             row(&[(F, 1)]),           // Cognition: resonance
             row(&[(H, 1)]),           // Sink: capacitance
@@ -325,12 +338,11 @@ mod tests {
         ratio(1, 1)
     }
 
-    // The planet as siting sees it, from the orbit alone, under the CORRECTED
-    // physics (ONT-1c): heat melts bonds into volatility, cold condenses cohesive
-    // lattices. A COLD solid world (heat → 0): cohesion high, volatility zero —
-    // the home of cohesion-building life (frozen silicate, ice, dense metal). A
-    // HOT plasma world (heat → 1): volatility and resonance high, cohesion zero —
-    // the home of plasma life. A mesic world sits between (heat = 1/2).
+    // The planet as siting sees it, from the orbit alone. Corrected physics
+    // (ONT-1c) with the syntropy tent (ONT-1d): the three structural bases peak at
+    // three niches. A COLD solid world (heat → 0): cohesion high — mineral life.
+    // A MESIC world (heat = 1/2): syntropy peaks — carbon/organic life. A HOT
+    // plasma world (heat → 1): volatility and resonance high — plasma life.
     fn cold_solid() -> Vec<Ratio> {
         planet_from_orbit(&ratio(0, 1), &q(1, 4), &ratio(1, 1))
     }
@@ -342,21 +354,31 @@ mod tests {
     }
 
     #[test]
-    fn cohesion_life_lives_on_the_cold_solid_world_not_the_hot_one() {
-        // Corrected physics: a biotic builds its body from Cohesion, which
-        // CONDENSES in the cold. It thrives on the cold solid world and cannot
-        // hold structure on a hot volatile one (cohesion melted to zero).
+    fn carbon_life_holds_the_temperate_band_not_the_extremes() {
+        // A biotic builds its body from organic SYNTROPY, which peaks at the
+        // mesic middle and falls to zero at both thermal extremes. It thrives in
+        // the temperate band and is culled on the cold solid world AND the hot
+        // plasma one — carbon life's niche is the middle.
         let biotic = archetype(2);
-        assert!(survives(&biotic, &cold_solid(), &any_clade()), "cohesion life holds on the cold solid world");
-        assert_eq!(project(&biotic, &hot_plasma())[STRUCT], ratio(0, 1), "cohesion melts to zero in the heat");
-        assert!(!survives(&biotic, &hot_plasma(), &any_clade()), "it cannot hold a body in plasma — culled");
+        assert!(survives(&biotic, &mesic_world(), &any_clade()), "carbon life holds the temperate band");
+        assert_eq!(project(&biotic, &hot_plasma())[STRUCT], ratio(0, 1), "syntropy falls to zero in the heat");
+        assert_eq!(project(&biotic, &cold_solid())[STRUCT], ratio(0, 1), "and to zero in the cold");
+        assert!(!survives(&biotic, &hot_plasma(), &any_clade()) && !survives(&biotic, &cold_solid(), &any_clade()), "culled at both extremes");
     }
 
     #[test]
-    fn plasma_life_lives_on_the_hot_world_not_the_cold_one() {
+    fn mineral_life_holds_the_cold_solid_world() {
+        // A mineral builds from Cohesion, which condenses cold. It thrives on the
+        // cold solid world and cannot hold a body in the heat.
+        let mineral = archetype(1);
+        assert!(survives(&mineral, &cold_solid(), &any_clade()), "mineral life condenses on the cold solid world");
+        assert!(!survives(&mineral, &hot_plasma(), &any_clade()), "its cohesion melts in the heat — culled");
+    }
+
+    #[test]
+    fn plasma_life_holds_the_hot_world_not_the_cold_one() {
         // A plasmic structures itself by resonance and volatility — the dense hot
-        // phase. It is free on the hot world and dies on the cold solid one, where
-        // volatility and resonance freeze out.
+        // phase. Free on the hot world, frozen out on the cold solid one.
         let plasmic = archetype(3);
         assert!(survives(&plasmic, &hot_plasma(), &any_clade()), "the plasmic is free in the heat");
         assert_eq!(project(&plasmic, &cold_solid())[STRUCT], ratio(0, 1), "no volatility or resonance in the frozen lattice");
@@ -366,16 +388,15 @@ mod tests {
     #[test]
     fn the_clade_thermal_band_gates_structure() {
         // ONT-1c, the stillcold fix. TWO biotic lines with the SAME metabolism on
-        // the SAME cold solid world differ only by clade thermal alignment. A
-        // cold-preferring clade (alignment 1 here) holds its structure and lives;
-        // a warm-preferring clade dropped onto the same cold world (alignment 0)
-        // cannot use the cohesion — a thermal MISMATCH, culled — never a false
-        // starvation on an otherwise-habitable orbit.
+        // the SAME temperate world differ only by clade thermal alignment. A clade
+        // whose sealed band matches (alignment 1) holds its structure and lives; a
+        // clade whose band is elsewhere (alignment 0) cannot use the syntropy — a
+        // thermal MISMATCH, culled — never a false starvation on a habitable orbit.
         let biotic = archetype(2);
-        assert!(survives(&biotic, &cold_solid(), &ratio(1, 1)), "the cold-aligned clade lives on the cold world");
-        assert!(!survives(&biotic, &cold_solid(), &ratio(0, 1)), "a warm clade on the same cold world is a thermal mismatch — culled");
+        assert!(survives(&biotic, &mesic_world(), &ratio(1, 1)), "the aligned clade lives in its band");
+        assert!(!survives(&biotic, &mesic_world(), &ratio(0, 1)), "a mismatched clade on the same world is culled");
         // A partial alignment grades the fitness down, not to zero.
-        let partial = fitness(&biotic, &cold_solid(), &q(3, 4));
+        let partial = fitness(&biotic, &mesic_world(), &q(3, 4));
         assert!(partial > ratio(0, 1) && partial <= ratio(1, 1), "partial thermal alignment grades fitness: {partial}");
     }
 
