@@ -1775,7 +1775,23 @@ impl Replayer {
                     .as_ref()
                     .map(|g| g.metabolism)
                     .unwrap_or(2);
-                let bill = crate::almanac::science_seat_bill(d, *rank, met, 1);
+                // Re-derive the SAME affinity the LIVE seat billed, replay-exact:
+                // the clade's seat affinity, and for Research the economic-mode
+                // multiplier — both pure over the sealed taxon this replay already
+                // reconstructs (the `TaxonSealed` arm). Hardcoding `1` here
+                // undercharged every non-Primary line and diverged committed
+                // Biomass/local stock (the science-seat SEAL-B seam, task #103).
+                let tx = *taxon;
+                let clade = tx.map(|(_, c)| c);
+                let mut aff = crate::almanac::science_seat_affinity(met, d, clade).fee_mult();
+                if matches!(d, crate::almanac::ScienceDiscipline::Research) {
+                    let (mclass, mclade) =
+                        tx.unwrap_or((7, u16::from(crate::almanac::FLATLANDER_CLADE)));
+                    aff *= crate::almanac::research_affinity_mult(
+                        crate::almanac::economic_mode(mclass, mclade),
+                    );
+                }
+                let bill = crate::almanac::science_seat_bill(d, *rank, met, aff);
                 if let Some(held) = peel(&mut *orbs, *orb_id) {
                     for (resource, amount) in &bill {
                         held.bank(*resource, -amount.clone());
