@@ -326,20 +326,24 @@ pub fn structural_grade(metabolism: &Metabolism, substrate: &[Ratio]) -> Ratio {
 }
 
 /// **PHASE FEASIBILITY** (ONT-1d) — does the planet's physical phase, set by the
-/// orbit's `heat`, provide the metabolism's structural basis? Biotic organic life
-/// spans the temperate range its clade band already gates (via `habitability_flux`),
-/// so it is always feasible here — gating it again would double-count the thermal
-/// tent. Mineral (a solid/cohesive phase) and plasmic (a plasma/volatile phase)
-/// require an ABSOLUTE phase that no clade tuning supplies, so their structural
-/// grade IS their feasibility: a plasmic on a frozen world, or a mineral on a
-/// molten one, reads zero — the Starvation Cull, in production, with no table.
-/// Returns `1` for biotic, so a biotic economy is byte-identical.
+/// orbit's `heat`, provide the metabolism's structural basis? Only PLASMA carries
+/// a HARD, clade-independent temperature floor: it needs stellar-level heat to
+/// ionize, and no cold world offers it. The SOLID (mineral) and ORGANIC (biotic)
+/// phases are condensed matter that spans the temperate-to-cold range each clade
+/// already ADAPTS to — a lithophage's rock is solid whether its band is torrid or
+/// frozen — so their thermal fit is fully carried by `habitability_flux` (the
+/// clade band) and their phase feasibility is `1` (gating them again would
+/// double-count the clade tent and wrongly cull a warm-clade rock-eater). So the
+/// production factor is `1` for everything but plasmic, whose structural grade IS
+/// its feasibility: a plasmic on anything short of a hot world reads zero — the
+/// Starvation Cull, in the live economy, with no prohibition table. This is the
+/// operator's headline law: a plasmic cannot live on a flatlander earth.
 pub fn phase_feasibility(metabolism: u8, heat: &Ratio) -> Ratio {
-    if metabolism == 2 {
-        return ratio(1, 1);
+    if metabolism != 3 {
+        return ratio(1, 1); // solid and organic phases span the clade-gated range
     }
     let substrate = planet_from_orbit(heat, &ratio(1, 1), &ratio(1, 1));
-    structural_grade(&archetype(metabolism), &substrate)
+    structural_grade(&archetype(3), &substrate)
 }
 
 /// The archetype for a metabolism NAME (the roster's string axis): mineral,
@@ -463,6 +467,23 @@ mod tests {
         let dark = planet_from_orbit(&ratio(0, 1), &ratio(0, 1), &ratio(1, 1));
         assert_eq!(project(&autotroph, &dark)[FOOD], ratio(0, 1), "no light, no food, however much rock stands");
         assert!(!survives(&autotroph, &dark, &any_clade()), "the phototroph starves in the dark — flux, not matter, feeds it");
+    }
+
+    #[test]
+    fn only_plasma_carries_a_hard_phase_floor_in_production() {
+        // ONT-1d production gate: PLASMA needs stellar heat to exist, so a plasmic
+        // reads zero feasibility on a cold world and positive on a hot one — the
+        // operator's headline law. SOLID (mineral) and ORGANIC (biotic) span the
+        // clade-gated range, so their production feasibility is 1 at ANY heat: a
+        // warm-clade rock-eater is NOT culled (that was the regression this guards).
+        let hot = q(3, 4);
+        let cold = q(1, 4);
+        assert_eq!(phase_feasibility(3, &cold), ratio(0, 1), "no plasma phase on a cold world");
+        assert!(phase_feasibility(3, &hot) > ratio(0, 1), "plasma is feasible in the heat");
+        for m in [1u8, 2] {
+            assert_eq!(phase_feasibility(m, &hot), ratio(1, 1), "solid/organic feasible when warm ({m})");
+            assert_eq!(phase_feasibility(m, &cold), ratio(1, 1), "and when cold ({m})");
+        }
     }
 
     #[test]
