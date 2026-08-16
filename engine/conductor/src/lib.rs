@@ -2334,6 +2334,47 @@ impl Polity {
                 world.settle_population(cfe::world::FIRST_ORB, FOUNDING_BAND);
             }
         }
+        // RCP-2 F3 — THE EMERGENT DOING-LAYER GROWS. When a drive BINDS (a
+        // tier left wanting), the society searches its OWN almanac — the raw
+        // elements it holds — for the one whose morphodynamic vector projects
+        // into the deficit role, gated by the manifold's topological reach
+        // (`recipe::discover`), and raises the recipe it finds. No ZoneKind,
+        // no level: the doing-layer grows from the almanac × the species'
+        // projection. Idempotent at the door — a recipe already raised refuses
+        // — so a standing deficit mints each recipe once, not per beat; and a
+        // role no held element can fill (or reach too shallow) mints nothing,
+        // the honest hole.
+        if let Some(drive) = binding {
+            let almanac: Vec<[u8; 32]> = world
+                .orb()
+                .map(|orb| orb.elements.iter().map(|(id, _)| *id).collect())
+                .unwrap_or_default();
+            if !almanac.is_empty() {
+                // The binding drive names the DEFICIT ROLE: metabolic hunger
+                // seeks FOOD, the homeostatic drive a SINK for its entropy, the
+                // cognitive drive the COGNITION its mind runs on, the expansive
+                // drive the ENERGY that funds reach.
+                let role = match drive {
+                    civic::Drive::Metabolic => cfe::morphogen::FOOD,
+                    civic::Drive::Homeostatic => cfe::morphogen::SINK,
+                    civic::Drive::Cognitive => cfe::morphogen::COGNITION,
+                    civic::Drive::Expansive => cfe::morphogen::ENERGY,
+                };
+                let species = cfe::morphogen::archetype(metabolism);
+                let rank = manifold.algebraic_rank();
+                if let Some(recipe) =
+                    crate::recipe::discover(role, &almanac, &species, &rank)
+                {
+                    let _ = world.build_recipe_as(
+                        self.automaton,
+                        cfe::world::FIRST_ORB,
+                        recipe.inputs,
+                        recipe.role,
+                        recipe.yield_of_role,
+                    );
+                }
+            }
+        }
     }
 
     /// Drain the operator's inbox: each directive applies as the
