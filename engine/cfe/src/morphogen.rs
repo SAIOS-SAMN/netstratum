@@ -90,78 +90,46 @@ pub fn material_of(element: &[u8; 32]) -> Vec<Ratio> {
     ]
 }
 
-/// **THE THERMODYNAMIC FILTER `F_thermo`** (ONT-1c: the thermal-cohesion sign
-/// corrected) — the orbit's diagonal scaling of the raw material, `heat ∈ [0, 1]`
-/// rising with insolation. The physics runs the RIGHT way: high thermal energy
-/// agitates and melts bonds, so a scorched world (`heat → 1`) has MAXIMUM
-/// Volatility and near-zero Cohesion (fluid, gas, plasma); a frozen world
-/// (`heat → 0`) condenses matter into stable cohesive lattices (ice, frozen
-/// silicate, dense metal) — MAXIMUM Cohesion, near-zero Volatility. Resonance
-/// rides the dense hot phase (plasma carries the harmonic); syntropy and thermal
-/// capacitance ride neutral.
-///
-///   c(heat) = 1 − heat      v(heat) = heat      f(heat) = heat
-fn thermo_scale(heat: &Ratio) -> Vec<Ratio> {
+/// The mesic TENT on the thermal axis — the temperate band, peaking at `1/2` and
+/// falling to zero at both extremes: `1 − |2·thermal − 1|` (doubled by addition,
+/// so no ratio dial enters). The window organic life is built for.
+fn mesic_tent(thermal: &Ratio) -> Ratio {
     let one = ratio(1, 1);
-    let zero = ratio(0, 1);
-    let cold = one.clone() - heat.clone();
-    // Syntropy is a TENT peaking at the mesic middle (heat = 1/2) and falling to
-    // zero at both thermal extremes — the temperate band organic/carbon-style
-    // life needs: `s = 1 − |2·heat − 1|` (doubled by addition, so no ratio dial
-    // enters). Cohesion condenses cold, volatility and resonance ride the hot
-    // dense phase — so the three structural bases (cohesion, syntropy, volatility)
-    // peak at three different thermal niches: cold, mesic, hot.
-    let excursion = (heat.clone() + heat.clone()) - one.clone(); // 2·heat − 1 ∈ [−1, 1]
-    let excursion = if excursion < zero { -excursion } else { excursion };
-    let mut scale = vec![ratio(0, 1); 5];
-    scale[C] = cold; // cohesion: cold condenses stable lattices
-    scale[V] = heat.clone(); // volatility: heat melts bonds into fluid/gas/plasma
-    scale[S] = one.clone() - excursion; // syntropy: the mesic organic band
-    scale[F] = heat.clone(); // resonance: the dense hot phase carries the harmonic
-    scale[H] = one; // capacitance neutral
-    scale
+    let excursion = (thermal.clone() + thermal.clone()) - one.clone();
+    let excursion = if excursion < ratio(0, 1) { -excursion } else { excursion };
+    one - excursion
 }
 
-/// **THE PLANETARY SUBSTRATE `S_planet = (F_thermo · m̄) ⊕ Φ`** — the orbit-filtered
-/// mean material vector of the planet's element endowment, joined with the
-/// massless ambient fluxes. `phi_lum` is exact insolation `L/r²`; `phi_therm` the
-/// thermal-band gradient. A planet with no elements still offers its fluxes — a
-/// phototroph can live on light alone.
-pub fn planet_substrate(
-    elements: &[[u8; 32]],
-    heat: &Ratio,
-    phi_lum: &Ratio,
-    phi_therm: &Ratio,
-) -> Vec<Ratio> {
-    let scale = thermo_scale(heat);
-    let n = elements.len().max(1) as i64;
-    // Mean material over the endowment, then the orbit filter.
-    let mut mat = vec![ratio(0, 1); 5];
-    for element in elements {
-        let m = material_of(element);
-        for i in 0..5 {
-            mat[i] = mat[i].clone() + m[i].clone();
-        }
-    }
-    for i in 0..5 {
-        mat[i] = scale[i].clone() * (mat[i].clone() / ratio(n, 1));
-    }
+/// **THE ENVIRONMENTAL GRADIENT** — the planet's condition tensor from INDEPENDENT
+/// axes, never a single scalar (the collapse this replaces derived all five
+/// material axes from one `heat`, so a "5-D" vector traced a 1-D curve). Two
+/// orthogonal drivers here, and the shape is built to take more:
+///
+/// - `thermal ∈ [0, 1]` (cold → hot) sets the PHASE balance: cold condenses
+///   cohesion, heat melts to volatility, resonance rides the dense hot phase.
+/// - `aridity ∈ [0, 1]` (0 = arid/dry → 1 = humid/wet) is the ORTHOGONAL moisture
+///   axis — a cold world can be bone-dry and a warm world drenched — so it drives
+///   syntropy (organic life needs a temperate band AND a solvent) and thermal
+///   capacitance (fluids buffer heat) independently of temperature.
+///
+/// ```text
+///   c = 1 − thermal                    (cohesion — cold solids)
+///   v = thermal                        (volatility — hot fluids/plasma)
+///   s = mesic_tent(thermal) · aridity  (syntropy — temperate AND wet)
+///   f = thermal                        (resonance — dense hot phase)
+///   h = aridity                        (capacitance — fluid buffering)
+/// ```
+///
+/// Pressure, radiation, and magnetism are further axes to add here as the model
+/// grows — each its own dimension, none collapsing the others.
+pub fn environment(thermal: &Ratio, aridity: &Ratio, phi_lum: &Ratio, phi_therm: &Ratio) -> Vec<Ratio> {
+    let one = ratio(1, 1);
     let mut env = vec![ratio(0, 1); ENV_DIM];
-    env[..5].clone_from_slice(&mat);
-    env[LUM] = phi_lum.clone();
-    env[THERM] = phi_therm.clone();
-    env
-}
-
-/// **`S_planet` FROM THE ORBIT ALONE** — the thermodynamic filter applied to a
-/// uniform unit material base (element specifics are a later refinement), joined
-/// with the ambient fluxes. This is the substrate as siting sees it before a
-/// planet's elements are seeded: a hot inner orbit is cohesive rock (high `c`, no
-/// `v`/`f`), a cold outer orbit is volatile and resonant (no `c`, high `v`/`f`).
-pub fn planet_from_orbit(heat: &Ratio, phi_lum: &Ratio, phi_therm: &Ratio) -> Vec<Ratio> {
-    let scale = thermo_scale(heat); // uniform unit base ⇒ the filter IS the material
-    let mut env = vec![ratio(0, 1); ENV_DIM];
-    env[..5].clone_from_slice(&scale);
+    env[C] = one - thermal.clone();
+    env[V] = thermal.clone();
+    env[S] = mesic_tent(thermal) * aridity.clone();
+    env[F] = thermal.clone();
+    env[H] = aridity.clone();
     env[LUM] = phi_lum.clone();
     env[THERM] = phi_therm.clone();
     env
@@ -338,11 +306,11 @@ pub fn structural_grade(metabolism: &Metabolism, substrate: &[Ratio]) -> Ratio {
 /// its feasibility: a plasmic on anything short of a hot world reads zero — the
 /// Starvation Cull, in the live economy, with no prohibition table. This is the
 /// operator's headline law: a plasmic cannot live on a flatlander earth.
-pub fn phase_feasibility(metabolism: u8, heat: &Ratio) -> Ratio {
+pub fn phase_feasibility(metabolism: u8, thermal: &Ratio, aridity: &Ratio) -> Ratio {
     if metabolism != 3 {
         return ratio(1, 1); // solid and organic phases span the clade-gated range
     }
-    let substrate = planet_from_orbit(heat, &ratio(1, 1), &ratio(1, 1));
+    let substrate = environment(thermal, aridity, &ratio(1, 1), &ratio(1, 1));
     structural_grade(&archetype(3), &substrate)
 }
 
@@ -373,19 +341,22 @@ mod tests {
         ratio(1, 1)
     }
 
-    // The planet as siting sees it, from the orbit alone. Corrected physics
-    // (ONT-1c) with the syntropy tent (ONT-1d): the three structural bases peak at
-    // three niches. A COLD solid world (heat → 0): cohesion high — mineral life.
-    // A MESIC world (heat = 1/2): syntropy peaks — carbon/organic life. A HOT
-    // plasma world (heat → 1): volatility and resonance high — plasma life.
+    // Worlds across the thermal axis, WET (aridity 1) so the temperate one can
+    // hold organic life. The three structural bases peak at three niches: a COLD
+    // solid world (thermal → 0) is cohesion — mineral life; a MESIC world
+    // (thermal = 1/2) is syntropy — carbon/organic life; a HOT plasma world
+    // (thermal → 1) is volatility/resonance — plasma life.
+    fn wet() -> Ratio {
+        ratio(1, 1)
+    }
     fn cold_solid() -> Vec<Ratio> {
-        planet_from_orbit(&ratio(0, 1), &q(1, 4), &ratio(1, 1))
+        environment(&ratio(0, 1), &wet(), &q(1, 4), &ratio(1, 1))
     }
     fn hot_plasma() -> Vec<Ratio> {
-        planet_from_orbit(&ratio(1, 1), &ratio(1, 1), &ratio(1, 1))
+        environment(&ratio(1, 1), &wet(), &ratio(1, 1), &ratio(1, 1))
     }
     fn mesic_world() -> Vec<Ratio> {
-        planet_from_orbit(&q(1, 2), &ratio(1, 1), &ratio(1, 1))
+        environment(&q(1, 2), &wet(), &ratio(1, 1), &ratio(1, 1))
     }
 
     #[test]
@@ -442,7 +413,7 @@ mod tests {
         // it clings at the floor. A touch colder and its volatility/resonance drop
         // below the floor. Derived, not dialled.
         let plasmic = archetype(3);
-        let colder = planet_from_orbit(&q(1, 4), &ratio(1, 1), &ratio(1, 1));
+        let colder = environment(&q(1, 4), &wet(), &ratio(1, 1), &ratio(1, 1));
         assert!(!survives(&plasmic, &colder, &any_clade()), "a colder-than-mesic orbit starves the plasmic's structure");
         let f = fitness(&archetype(2), &mesic_world(), &any_clade());
         assert!(f > ratio(0, 1) && f <= ratio(1, 1), "a mesic biotic lives at a graded fitness: {f}");
@@ -461,12 +432,32 @@ mod tests {
             row(&[(H, 1)]),   // Sink
         ];
         // A lit but cold-enough world: cohesion holds and the light feeds it.
-        let lit_cold = planet_from_orbit(&q(1, 4), &ratio(1, 1), &ratio(1, 1));
+        let lit_cold = environment(&q(1, 4), &wet(), &ratio(1, 1), &ratio(1, 1));
         assert!(survives(&autotroph, &lit_cold, &any_clade()), "the phototroph lives on light with cohesion to stand on");
         // A sunless cold world: matter to stand on, but no light to eat.
-        let dark = planet_from_orbit(&ratio(0, 1), &ratio(0, 1), &ratio(1, 1));
+        let dark = environment(&ratio(0, 1), &wet(), &ratio(0, 1), &ratio(1, 1));
         assert_eq!(project(&autotroph, &dark)[FOOD], ratio(0, 1), "no light, no food, however much rock stands");
         assert!(!survives(&autotroph, &dark, &any_clade()), "the phototroph starves in the dark — flux, not matter, feeds it");
+    }
+
+    #[test]
+    fn aridity_is_orthogonal_to_temperature() {
+        // THE COLLAPSE, GONE: temperature and moisture are INDEPENDENT axes. Two
+        // worlds at the SAME temperate thermal differ only in aridity — the wet one
+        // grows organic life, the arid one cannot (syntropy needs a solvent), and a
+        // cold world can be wet while a warm world is bone-dry. A single `heat`
+        // scalar could never say this.
+        let biotic = archetype(2);
+        let temperate_wet = environment(&q(1, 2), &ratio(1, 1), &ratio(1, 1), &ratio(1, 1));
+        let temperate_arid = environment(&q(1, 2), &ratio(0, 1), &ratio(1, 1), &ratio(1, 1));
+        assert!(project(&biotic, &temperate_wet)[STRUCT] > project(&biotic, &temperate_arid)[STRUCT], "syntropy needs moisture, not just warmth");
+        assert!(survives(&biotic, &temperate_wet, &any_clade()), "organic life holds the warm WET world");
+        assert!(!survives(&biotic, &temperate_arid, &any_clade()), "and is culled on the warm ARID one — same temperature");
+        // Aridity is free to vary with temperature held fixed, and vice versa: the
+        // material vector is a genuine 2-D field, not a 1-D curve.
+        let cold_wet = environment(&ratio(0, 1), &ratio(1, 1), &ratio(1, 1), &ratio(1, 1));
+        let cold_arid = environment(&ratio(0, 1), &ratio(0, 1), &ratio(1, 1), &ratio(1, 1));
+        assert_ne!(cold_wet[H], cold_arid[H], "capacitance tracks moisture independently of temperature");
     }
 
     #[test]
@@ -478,11 +469,11 @@ mod tests {
         // warm-clade rock-eater is NOT culled (that was the regression this guards).
         let hot = q(3, 4);
         let cold = q(1, 4);
-        assert_eq!(phase_feasibility(3, &cold), ratio(0, 1), "no plasma phase on a cold world");
-        assert!(phase_feasibility(3, &hot) > ratio(0, 1), "plasma is feasible in the heat");
+        assert_eq!(phase_feasibility(3, &cold, &wet()), ratio(0, 1), "no plasma phase on a cold world");
+        assert!(phase_feasibility(3, &hot, &wet()) > ratio(0, 1), "plasma is feasible in the heat");
         for m in [1u8, 2] {
-            assert_eq!(phase_feasibility(m, &hot), ratio(1, 1), "solid/organic feasible when warm ({m})");
-            assert_eq!(phase_feasibility(m, &cold), ratio(1, 1), "and when cold ({m})");
+            assert_eq!(phase_feasibility(m, &hot, &wet()), ratio(1, 1), "solid/organic feasible when warm ({m})");
+            assert_eq!(phase_feasibility(m, &cold, &wet()), ratio(1, 1), "and when cold ({m})");
         }
     }
 

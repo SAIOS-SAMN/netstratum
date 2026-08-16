@@ -191,17 +191,25 @@ pub fn habitability_flux(clade: u16, t_eq4: &Ratio) -> Ratio {
 /// factor is `1` (its phase spans the temperate range the clade band already
 /// gates), so a biotic economy is byte-identical; a plasmic on a frozen world or
 /// a mineral on a molten one reads zero, the substrate boundary in production.
-pub fn carrying_capacity(living_zones: u64, clade: u16, metabolism: u8, t_eq4: &Ratio) -> Ratio {
-    let heat = morphodynamic_heat(t_eq4);
-    let feasible = crate::morphogen::phase_feasibility(metabolism, &heat);
+pub fn carrying_capacity(
+    living_zones: u64,
+    clade: u16,
+    metabolism: u8,
+    t_eq4: &Ratio,
+    aridity: &Ratio,
+) -> Ratio {
+    let thermal = morphodynamic_thermal(t_eq4);
+    let feasible = crate::morphogen::phase_feasibility(metabolism, &thermal, aridity);
     ratio(living_zones as i64 * REGROWTH_GRAIN, 1) * habitability_flux(clade, t_eq4) * feasible
 }
 
-/// The orbit's normalized thermal state `heat ∈ [0, 1)` from the incident flux,
+/// The orbit's normalized THERMAL axis `∈ [0, 1)` from the incident flux,
 /// referenced to the mesic band centre so a temperate world reads `1/2` (the
-/// syntropy peak). `heat = t_eq4 / (t_eq4 + mesic)`, cleared to
-/// `2·t_eq4 / (2·t_eq4 + lo + hi)` so no `ratio` dial (the `/2`) is minted.
-fn morphodynamic_heat(t_eq4: &Ratio) -> Ratio {
+/// syntropy peak). `thermal = t_eq4 / (t_eq4 + mesic)`, cleared to
+/// `2·t_eq4 / (2·t_eq4 + lo + hi)` so no `ratio` dial (the `/2`) is minted. This
+/// is ONE axis of the environmental gradient — aridity is supplied separately, so
+/// no single scalar drives the whole material vector.
+fn morphodynamic_thermal(t_eq4: &Ratio) -> Ratio {
     let (lo, hi) = crate::thermal::SubstrateBand::Mesic.bounds4();
     let two_t = t_eq4.clone() + t_eq4.clone();
     let denom = two_t.clone() + lo + hi;

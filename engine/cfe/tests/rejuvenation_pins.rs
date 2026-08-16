@@ -177,21 +177,21 @@ fn a_lush_world_carries_more_than_a_barren_one_and_a_rock_carries_nothing() {
         let (lo, hi) = band.bounds4();
         (lo + hi) / ratio(2, 1)
     };
-    let lush = carrying_capacity(8, FLATLANDER, BIOTIC, &centre(SubstrateBand::Mesic));
-    let cold = carrying_capacity(8, FLATLANDER, BIOTIC, &centre(SubstrateBand::Cryogenic));
-    let rock = carrying_capacity(8, FLATLANDER, BIOTIC, &centre(SubstrateBand::HyperThermal));
+    let lush = carrying_capacity(8, FLATLANDER, BIOTIC, &centre(SubstrateBand::Mesic), &ratio(1, 1));
+    let cold = carrying_capacity(8, FLATLANDER, BIOTIC, &centre(SubstrateBand::Cryogenic), &ratio(1, 1));
+    let rock = carrying_capacity(8, FLATLANDER, BIOTIC, &centre(SubstrateBand::HyperThermal), &ratio(1, 1));
     assert!(lush > cold, "the same zones hold more stock in the flatlander's own band");
     assert_eq!(rock, ratio(0, 1), "a scorched rock carries no ration, whatever it builds");
     // More living zones, more capacity — the footprint scales it.
     assert!(
-        carrying_capacity(16, FLATLANDER, BIOTIC, &centre(SubstrateBand::Mesic)) > lush,
+        carrying_capacity(16, FLATLANDER, BIOTIC, &centre(SubstrateBand::Mesic), &ratio(1, 1)) > lush,
         "a wider ecological footprint holds more"
     );
     // A world with no living zones has no natural ceiling to speak of.
-    assert_eq!(carrying_capacity(0, FLATLANDER, BIOTIC, &centre(SubstrateBand::Mesic)), ratio(0, 1));
+    assert_eq!(carrying_capacity(0, FLATLANDER, BIOTIC, &centre(SubstrateBand::Mesic), &ratio(1, 1)), ratio(0, 1));
     // A cryophage on the SAME cold world reads capacity a flatlander on
     // that world would not — the ceiling follows the clade, not the place.
-    let cryophage_cold = carrying_capacity(8, CRYOPHAGE, BIOTIC, &centre(SubstrateBand::Cryogenic));
+    let cryophage_cold = carrying_capacity(8, CRYOPHAGE, BIOTIC, &centre(SubstrateBand::Cryogenic), &ratio(1, 1));
     assert!(cryophage_cold > cold, "the cryophage's own band carries more for it");
 }
 
@@ -210,11 +210,11 @@ fn the_metabolic_phase_boundary_culls_production_live() {
     const PLASMIC: u8 = 3;
     let cold = centre(cfe::thermal::SubstrateBand::Cryogenic);
     assert!(
-        carrying_capacity(8, CRYOPHAGE, BIOTIC, &cold) > ratio(0, 1),
+        carrying_capacity(8, CRYOPHAGE, BIOTIC, &cold, &ratio(1, 1)) > ratio(0, 1),
         "organic life carries capacity in its own cold band"
     );
     assert_eq!(
-        carrying_capacity(8, CRYOPHAGE, PLASMIC, &cold),
+        carrying_capacity(8, CRYOPHAGE, PLASMIC, &cold, &ratio(1, 1)),
         ratio(0, 1),
         "a plasmic has no plasma phase in the frozen solid — production culled"
     );
@@ -227,7 +227,7 @@ fn the_derivations_feed_the_curve_and_a_collapsed_lush_world_climbs_back() {
     // first — the flatlander/biotic pair, verbatim v1.
     let k = {
         let (lo, hi) = cfe::thermal::SubstrateBand::Mesic.bounds4();
-        carrying_capacity(10, FLATLANDER, BIOTIC, &((lo + hi) / ratio(2, 1)))
+        carrying_capacity(10, FLATLANDER, BIOTIC, &((lo + hi) / ratio(2, 1)), &ratio(1, 1))
     };
     let r = intrinsic_rate(BIOTIC, None);
     let ember = ratio(1, 10);
