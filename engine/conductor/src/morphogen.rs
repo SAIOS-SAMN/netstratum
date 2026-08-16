@@ -140,6 +140,20 @@ pub fn planet_substrate(
     env
 }
 
+/// **`S_planet` FROM THE ORBIT ALONE** — the thermodynamic filter applied to a
+/// uniform unit material base (element specifics are a later refinement), joined
+/// with the ambient fluxes. This is the substrate as siting sees it before a
+/// planet's elements are seeded: a hot inner orbit is cohesive rock (high `c`, no
+/// `v`/`f`), a cold outer orbit is volatile and resonant (no `c`, high `v`/`f`).
+pub fn planet_from_orbit(heat: &Ratio, phi_lum: &Ratio, phi_therm: &Ratio) -> Vec<Ratio> {
+    let scale = thermo_scale(heat); // uniform unit base ⇒ the filter IS the material
+    let mut env = vec![ratio(0, 1); ENV_DIM];
+    env[..5].clone_from_slice(&scale);
+    env[LUM] = phi_lum.clone();
+    env[THERM] = phi_therm.clone();
+    env
+}
+
 /// A metabolic projection `T_metab` — a `ROLE_DIM × ENV_DIM` exact-rational
 /// matrix. `signature[role]` weights the environment axes that role draws on.
 pub type Metabolism = Vec<Vec<Ratio>>;
@@ -206,19 +220,81 @@ pub fn project(metabolism: &Metabolism, substrate: &[Ratio]) -> Vec<Ratio> {
         .collect()
 }
 
-/// The roles a species can actually FILL on a planet — those with a strictly
-/// positive projection. These become the `C₀` generators of its `M_civ`.
-pub fn viable_roles(u_role: &[Ratio]) -> Vec<usize> {
-    (0..ROLE_DIM).filter(|r| u_role[*r] > ratio(0, 1)).collect()
+/// The essential roles a body must fill to live — it must eat and it must hold a
+/// form. A metabolism that cannot reach subsistence in EITHER is culled.
+const ESSENTIAL: [usize; 2] = [FOOD, STRUCT];
+
+/// The subsistence fraction: a role is genuinely filled only when its projection
+/// reaches at least half the metabolism's OWN theoretical maximum for that role
+/// (every axis it draws on at unity). Derived from the projection matrix itself —
+/// no external dial — and the same `1/2` the siting viability floor already uses.
+/// This is why the Starvation Cull bites at intermediate orbits, not only the
+/// extremes.
+const HALVING: i64 = 2;
+
+/// A role's theoretical ceiling — the sum of its projection weights (every drawn
+/// axis saturated at unity).
+fn ceiling(metabolism: &Metabolism, role: usize) -> Ratio {
+    metabolism[role].iter().fold(ratio(0, 1), |a, w| a + w.clone())
 }
 
-/// **THE SUBSTRATE BOUNDARY CONDITION.** A metabolism survives only where it can
-/// fill both ESSENTIAL roles — Food (it must eat) and Structure (it must hold a
-/// body). If either projects to zero the intersection with the planet is the
-/// null set: `η = 0`, an infinite deficit, the Starvation Cull on beat one. No
-/// prohibition table — the geometry rejects the pairing.
-pub fn survives(u_role: &[Ratio]) -> bool {
-    u_role[FOOD] > ratio(0, 1) && u_role[STRUCT] > ratio(0, 1)
+/// The subsistence floor for a role — half its ceiling.
+pub fn subsistence(metabolism: &Metabolism, role: usize) -> Ratio {
+    ceiling(metabolism, role) / ratio(HALVING, 1)
+}
+
+/// The roles a species can FILL on a planet at or above subsistence — the `C₀`
+/// generators of its `M_civ`.
+pub fn viable_roles(metabolism: &Metabolism, substrate: &[Ratio]) -> Vec<usize> {
+    let u = project(metabolism, substrate);
+    (0..ROLE_DIM)
+        .filter(|r| u[*r] >= subsistence(metabolism, *r))
+        .collect()
+}
+
+/// **THE SUBSTRATE BOUNDARY CONDITION, GRADED** (ONT-1b, operator refinement: a
+/// marginal world is a proportional penalty, not binary death). The morphodynamic
+/// fitness `η_m`:
+///
+/// - `η_m = 0` — the CULL. A species that cannot reach subsistence in an
+///   essential role (Food or Structure) has an empty intersection with the
+///   planet: `⟨C₀, S_planet⟩ = 0`, an infinite deficit, the Starvation Cull on
+///   beat one. No prohibition table — the geometry rejects the pairing.
+/// - `η_m ∈ [1/2, 1]` — ALIVE, proportionally. The binding essential fill
+///   fraction: a marginal world (barely above subsistence) reads `≈ 1/2` and
+///   carries a proportional carrying-capacity penalty; an ideal home reads `1`.
+///
+/// Exact-rational; the same inputs always grade the same, so genesis is
+/// replay-exact.
+pub fn fitness(metabolism: &Metabolism, substrate: &[Ratio]) -> Ratio {
+    let u = project(metabolism, substrate);
+    let mut binding = ratio(1, 1);
+    for &role in &ESSENTIAL {
+        let cap = ceiling(metabolism, role);
+        if cap == ratio(0, 1) || u[role] < cap.clone() / ratio(HALVING, 1) {
+            return ratio(0, 1); // an essential role below subsistence — culled
+        }
+        let frac = (u[role].clone() / cap).min(ratio(1, 1));
+        if frac < binding {
+            binding = frac;
+        }
+    }
+    binding
+}
+
+/// A species survives a planet iff its graded fitness is non-zero.
+pub fn survives(metabolism: &Metabolism, substrate: &[Ratio]) -> bool {
+    fitness(metabolism, substrate) > ratio(0, 1)
+}
+
+/// The archetype for a metabolism NAME (the roster's string axis): mineral,
+/// plasmic, or the biotic generalist otherwise.
+pub fn archetype_named(metabolism: &str) -> Metabolism {
+    archetype(match metabolism {
+        "mineral" => 1,
+        "plasmic" => 3,
+        _ => 2,
+    })
 }
 
 #[cfg(test)]
@@ -232,56 +308,66 @@ mod tests {
         ratio(num, den)
     }
 
-    // A representative element endowment: a spread of ids so the mean material
-    // vector is well away from any axis, letting the orbit filter decide the
-    // planet's character.
-    fn endowment(salt: u8) -> Vec<[u8; 32]> {
-        (0..8u8).map(|i| *blake3::hash(&[salt, i]).as_bytes()).collect()
-    }
-
-    // A hot rocky inner world (flatlander earth): heat at the scorched extreme →
-    // cohesion baked in, volatility and resonance fully driven off; bathed in
-    // light. (The extremes give the cull an exact zero; intermediate orbits need
-    // a subsistence threshold, a wiring-time calibration.)
+    // The planet as siting sees it, from the orbit alone. A hot rocky inner world
+    // (flatlander earth): heat at the scorched extreme → cohesion baked in,
+    // volatility and resonance driven off; bathed in light. A cold outer gas
+    // giant: heat at the frozen extreme → cohesion lost, volatility and resonance
+    // preserved; little light, a live thermal gradient. A warm mesic world sits
+    // between (heat = 1/2), where the subsistence floor decides the marginal case.
     fn rocky_earth() -> Vec<Ratio> {
-        planet_substrate(&endowment(1), &ratio(1, 1), &ratio(1, 1), &q(1, 2))
+        planet_from_orbit(&ratio(1, 1), &ratio(1, 1), &q(1, 2))
     }
-    // A cold outer gas giant: heat at the frozen extreme → cohesion fully lost,
-    // volatility and resonance preserved; little light, a live thermal gradient.
     fn gas_giant() -> Vec<Ratio> {
-        planet_substrate(&endowment(1), &ratio(0, 1), &q(1, 8), &ratio(1, 1))
+        planet_from_orbit(&ratio(0, 1), &q(1, 8), &ratio(1, 1))
+    }
+    fn mesic_world() -> Vec<Ratio> {
+        planet_from_orbit(&q(1, 2), &ratio(1, 1), &q(1, 2))
     }
 
     #[test]
     fn the_biotic_generalist_lives_on_rocky_earth_not_a_gas_giant() {
         let biotic = archetype(2);
-        assert!(survives(&project(&biotic, &rocky_earth())), "biotic thrives on the rocky lit world");
-        // On a gas giant its Structure role (Cohesion) projects to ~zero — it
-        // cannot build a body from gas.
-        let on_giant = project(&biotic, &gas_giant());
-        assert!(on_giant[FOOD] > ratio(0, 1), "it can still find food");
-        assert!(!survives(&on_giant), "but it cannot hold structure in gas — culled");
+        assert!(survives(&biotic, &rocky_earth()), "biotic thrives on the rocky lit world");
+        // On a gas giant its Structure role (Cohesion) falls below subsistence —
+        // it cannot build a body from gas.
+        assert!(project(&biotic, &gas_giant())[FOOD] > ratio(0, 1), "it can still find food");
+        assert!(!survives(&biotic, &gas_giant()), "but it cannot hold structure in gas — culled");
     }
 
     #[test]
     fn the_plasmic_dies_on_earth_and_is_free_on_the_gas_giant() {
         // THE OPERATOR'S LAW: a plasmic metabolism structures itself by resonance
         // and volatility — both baked out of a hot silicate earth — so its
-        // Structure projects to zero: empty intersection, Starvation Cull.
+        // Structure falls to zero: empty intersection, Starvation Cull.
         let plasmic = archetype(3);
-        let on_earth = project(&plasmic, &rocky_earth());
-        assert_eq!(on_earth[STRUCT], ratio(0, 1), "no resonance or volatility on a baked rock");
-        assert!(!survives(&on_earth), "plasmic on a flatlander earth is culled on beat one");
+        assert_eq!(project(&plasmic, &rocky_earth())[STRUCT], ratio(0, 1), "no resonance or volatility on a baked rock");
+        assert!(!survives(&plasmic, &rocky_earth()), "plasmic on a flatlander earth is culled on beat one");
         // On the cold gas giant volatility and resonance survive — it is free.
-        assert!(survives(&project(&plasmic, &gas_giant())), "the plasmic is free on the gas giant");
+        assert!(survives(&plasmic, &gas_giant()), "the plasmic is free on the gas giant");
+    }
+
+    #[test]
+    fn the_subsistence_floor_bites_at_an_intermediate_orbit() {
+        // ONT-1b: the cull is not only at the extremes. On a warm mesic world
+        // (heat = 1/2), a plasmic's Structure = v + f = 1/2 + 1/2 = 1, but its
+        // ceiling is 2, so subsistence is 1 — it sits EXACTLY at the floor and
+        // barely clings on, while a biotic (Structure = cohesion 1/2, ceiling 1,
+        // subsistence 1/2) also just clears. The floor is the wall the operator
+        // asked for: derived, not dialled, and it decides the marginal world.
+        let plasmic = archetype(3);
+        // Nudge the mesic world a touch warmer: v, f drop below their floor.
+        let warmer = planet_from_orbit(&q(3, 4), &ratio(1, 1), &q(1, 2));
+        assert!(!survives(&plasmic, &warmer), "a warmer-than-mesic orbit already starves the plasmic's structure");
+        // A marginal survivor reads a proportional fitness in [1/2, 1], not 1.
+        let f = fitness(&archetype(2), &mesic_world());
+        assert!(f > ratio(0, 1) && f <= ratio(1, 1), "a mesic biotic lives, at a graded fitness: {f}");
     }
 
     #[test]
     fn the_lithophage_eats_the_geothermal_gradient() {
         // A mineral metabolism draws Food from Cohesion + the thermal gradient,
         // so a warm rocky world with a live gradient sustains it.
-        let litho = archetype(1);
-        assert!(survives(&project(&litho, &rocky_earth())), "the lithophage eats rock and heat");
+        assert!(survives(&archetype(1), &rocky_earth()), "the lithophage eats rock and heat");
     }
 
     #[test]
@@ -297,19 +383,17 @@ mod tests {
             row(&[(H, 1)]),   // Sink
         ];
         // A lit rocky world: it lives on sunlight.
-        assert!(survives(&project(&autotroph, &rocky_earth())), "the phototroph lives on light");
+        assert!(survives(&autotroph, &rocky_earth()), "the phototroph lives on light");
         // A sunless rogue world (φ_lum = 0) but with rock and a thermal gradient:
         // there is matter to stand on, but no light to eat — Food is zero.
-        let dark_rogue = planet_substrate(&endowment(2), &ratio(1, 1), &ratio(0, 1), &ratio(1, 1));
-        let starved = project(&autotroph, &dark_rogue);
-        assert_eq!(starved[FOOD], ratio(0, 1), "no light, no food, however much rock stands");
-        assert!(!survives(&starved), "the phototroph starves in the dark — flux, not matter, feeds it");
+        let dark_rogue = planet_from_orbit(&ratio(1, 1), &ratio(0, 1), &ratio(1, 1));
+        assert_eq!(project(&autotroph, &dark_rogue)[FOOD], ratio(0, 1), "no light, no food, however much rock stands");
+        assert!(!survives(&autotroph, &dark_rogue), "the phototroph starves in the dark — flux, not matter, feeds it");
     }
 
     #[test]
-    fn the_projection_is_replay_exact() {
-        let biotic = archetype(2);
+    fn fitness_is_replay_exact() {
         let earth = rocky_earth();
-        assert_eq!(project(&biotic, &earth), project(&biotic, &earth), "same inputs, same projection");
+        assert_eq!(fitness(&archetype(2), &earth), fitness(&archetype(2), &earth), "same inputs, same fitness");
     }
 }
