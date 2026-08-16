@@ -1,17 +1,18 @@
-//! **THE MEASURED SYSTEM BOUNDS** (P2, operator ruling 2026-08-06:
-//! *execute the conductor thresholds as measured system bounds*).
+//! **THE SETTLEMENT LAW, WITNESSED** (P2, operator ruling 2026-08-06 as
+//! rebuilt 2026-08-16).
 //!
-//! Re-measured 2026-08-07 after GROUND STEP (prospect/assay + regenerator
-//! ecology) and the sovereign founding band (Stelahold · Tallykeep · Glyphward).
-//! The autonomous loop opens veins and may place Regenerators when veins
-//! wear, so the settlement footprint moved. The pin records the new
-//! measurement deliberately — not a silent nudge.
-//!
-//! The industry half of the bounds (smelter/synthesizer gates behind
-//! research rungs) is measured where it always was:
-//! `research_unlocks_industry` pins the 45-beat outcome; this file
-//! deliberately stays inside the cheap 15-beat window the settlement
-//! thresholds govern.
+//! This began as an EXACT-count pin — a fixed 15-beat zone total and a
+//! hard-coded frozen list. Under the species-relative physics (DIO-1/2/3a)
+//! the chronicle digest reseeds the board on every change, so those numbers
+//! churned every commit and could not distinguish an intended physics change
+//! from a bug; they witnessed the retired flatlander-mesic era, not the law.
+//! Per the operator's ruling — *don't bend the logic to esotericism; move the
+//! guards to the logic we're implementing and remove the antiquated
+//! methodology* — the exact pins are torn down. What remains is the LAW, which
+//! is stable under any reseed because it IS the physics: no line runs away,
+//! every FAMINE is explained by the species' own habitability (η < ½), a
+//! viable line bootstraps, a majority of the roster bootstraps, and species
+//! diverge. See `the_settlement_law_holds_under_species_physics`.
 
 use conductor::run_era;
 use std::fs;
@@ -26,196 +27,71 @@ fn scratch(name: &str) -> PathBuf {
     dir
 }
 
-/// Measured 2026-08-07 on the founding roster (incl. sovereign band),
-/// 15 beats, under derived settlement gates + ground_step.
-/// Prior pin was 50 (2026-08-06, pre-ground, no T2 seats).
-/// RE-MEASURED 2026-08-12 to 73: the taxon yield scales + endowment
-/// gifts (STAR-ENDOW-1/ORBIT-ENDOW-1) + the deposit law changed what
-/// the reserve gates fund, so the era's footprint grew — a deliberate
-/// re-measure under the ruled economy, the divergence property still
-/// holds below (the temperaments still build different cities).
-/// RE-MEASURED 2026-08-14 to 91: the G2 TRACE-ELEMENT (micronutrient)
-/// factor lands — a line's harvest now scales with how well it meets the
-/// trace-element need its own veins bear ("you eat what your world
-/// grows"), so a well-nourished roster settles more. This also FEEDS
-/// `tunborn`, which had been famishing at 3 zones (the settlement debt
-/// shrank by one). A deliberate re-measure under the ruled economy.
-/// RE-MEASURED 2026-08-14 to 92: the G2 harvesting CATALYST (§3) lands —
-/// a line's favoured elements now flux its EXTRACTION (boost-only, on the
-/// extractor line), so a reagent-holding line mines enough to settle one
-/// more zone. A deliberate re-measure under the ruled economy.
-/// RE-MEASURED 2026-08-14 to 90: the COURT RENAME (#5) — the Earth-culture
-/// line names retired for coined netstratum-native ones. A world's founding
-/// digest carries its name, so the renamed lines draw different veins and
-/// the placement walk resolves differently, shifting the whole board's
-/// footprint deterministically. A pure identity re-measure — no law changed.
-/// RE-MEASURED 2026-08-14 to 89: MULTI-ORB EXPANSION (INTELLIGENCE ARC A1)
-/// — a line that has climbed to rung 3 now CHARTS colony orbs and weaves an
-/// internal supply ring, and `chart_as` MOVES founding reserves from the
-/// home orb to the colony. So a fast-climbing line diverts inside the
-/// window what it would have spent on home zones — settlement trades
-/// against expansion, exactly as it should. The colonies' own zones are
-/// not counted here (this pins the HOME orb), so the footprint falls by the
-/// one home zone the reserves expansion drew (90 → 89). A deliberate
-/// re-measure; the divergence property still holds (the temperaments still
-/// build different cities).
-/// RE-MEASURED 2026-08-15 to 88: **THE AWAKENING** (COG Slice 2 activation).
-/// The first habitat on a colony now seats a FOUNDING BAND (`FOUNDING_BAND`),
-/// so the population is LIVE. Because the founding bands live by GATHERING —
-/// their whole demand sits under the planet's syntropic WILD flow, which is
-/// eaten first and never touches the granary (COG Slice 2c, the bank-draw
-/// netting) — they draw NOTHING from the cultivated biomass the builds spend.
-/// So the footprint barely moves (89 → 88): a single marginal zone tips across
-/// the whole roster as the live population perturbs one digest-seeded decision,
-/// no more. (Were the bands eating the granary, this fell to 67 — a broken
-/// bootstrap that also starved the smelter loop; the wild-flow-first law is
-/// what keeps a founding band from taxing the industrial economy.) The per-line
-/// bootstrap law is UNCHANGED and the temperaments still diverge. A deliberate
-/// re-measure under the now-live population.
-/// RE-MEASURED 2026-08-16 to 86: COG-5 (cognitive demurrage). The leisure bank
-/// now decays each beat (fill − bank·¼) instead of only filling, so the
-/// `LeisureSettled` values differ — and since the chronicle digest seeds the
-/// stochastic build/divergence choices, two marginal zones tip across the whole
-/// roster (88 → 86). No minting has begun by beat 15 (rung 3 lands later), so
-/// this is purely the digest reseed from the changed leisure values, not a
-/// physical effect on builds. Per-line bootstrap law unchanged. Deliberate.
-/// RE-MEASURED 2026-08-16 to 83: **THE DIOPHANTINE GENERATOR** (DIO-1). The
-/// derived siting no longer hands mesic lines one of three fixed orbits
-/// (r ∈ {1, 1, 6/5}); it draws a CONTINUOUS exact-rational scale k and sites
-/// each world on its own track r = M·k² (siting.rs). So the derived biotic
-/// roster now SPREADS across real thermal diversity — measured this era at
-/// r ≈ 0.65 … 1.17, insolation ≈ 0.66 … 2.39 — where before every mesic line
-/// sat at essentially unit orbit. Two effects move the total from 86 to 83:
-/// the reseeded orbits perturb the digest-seeded build walk (as every
-/// re-measure before), AND one line — `deep-chorus` — draws a HOT orbit
-/// (r ≈ 0.646, insolation ≈ 2.39, ABOVE the mesic ceiling ≈ 1.73) whose
-/// over-heat coverage penalty pulls its primary production below what feeds
-/// its founding band, so it famishes. That is the hot-tail analogue of the
-/// cold freeze-lock, and it is the exact phenomenon DIO-2's species-relative
-/// flux η will formalize (a carbon-water line cannot take that heat; a
-/// thermophile sited there would thrive). A deliberate re-measure under the
-/// now-continuous orbital physics; the per-line bootstrap law is UNCHANGED.
-/// RE-MEASURED 2026-08-16 to 81: **THE FLUX-TENT η** (DIO-2). Habitability is no
-/// longer the 8-way band-distance halving; it is a CONTINUOUS flux tent on the
-/// exact `t_eq4` against the sitting clade's preferred-band optimum
-/// (`habitability_flux`), shared coherently by `primary_production` AND the
-/// regrowth ceiling. **MEASURED CAVEAT — do not over-read this as per-species
-/// yet.** In a founding era NO world has sealed its taxon (`seal_taxon` is a
-/// deliberate deed that has not fired), so every line resolves to the
-/// flatlander default (clade 2, Mesic); the roster's DECLARED clades (soniform,
-/// cnidiform, …) do not yet reach habitability. So this re-measure is the tent
-/// applied UNIFORMLY as mesic, not per-species. Both `deep-chorus` and
-/// `coralline` drew hot orbits (insolation ≈ 2.1–2.4 ⇒ η ≈ 0–0.15, correctly
-/// near-zero for a temperate clade); the reason `deep-chorus` survives while
-/// `coralline` famishes is CULTIVATION build-order (deep-chorus raised a ration
-/// zone, cultivated ≈ 1; coralline raised none, cultivated 0), NOT thermal
-/// preference. The sharper tent trims two marginal zones (83 → 81); famished
-/// count steady at 9, casualty deep-chorus → coralline. Making the tent truly
-/// per-species (sealing the roster clade at genesis) is a separate ruled step.
-/// RE-MEASURED 2026-08-16 to 84: **THE EROI GATE** (COG-13). The leisure spend
-/// is no longer a reflexive `afford == spend` boolean; it is a stratified
-/// investment decision (`civic::cognitive_investment`) that BANKS surplus
-/// unless the return clears a friction margin and a stress-scaled reserve is
-/// intact. That changes the beat's banked-leisure values, and — since the
-/// chronicle digest seeds the stochastic build walk — reseeds the board: the
-/// energy debt SHRINKS by one as `coralline` now raises a ration zone and
-/// feeds itself (it leaves the frozen list, +3 zones across the roster,
-/// 81 → 84). No minting has begun by beat 15, so this is the digest reseed
-/// from changed leisure banking, not a spend effect. Bootstrap law UNCHANGED.
-/// RE-MEASURED 2026-08-16 to 86: the roster seat `deep-chorus` was RENAMED to
-/// the phylogenetically accurate `mysticeti-pelagic` (a baleen — soniform,
-/// song — cetacean; operator ruling). A world's founding digest carries its
-/// sigil, so the rename draws a different Diophantine k and a different orbit:
-/// the renamed line lands temperate (insolation ≈ 1.30, η ≈ 0.90, a proper
-/// mesic sea for a whale) and thrives at 6 zones, while the digest reseed tips
-/// `coralline` back below its cultivation threshold into famine. A pure
-/// identity re-measure — no law changed; `coralline` is a marginal line whose
-/// cultivation build-order flips on any reseed. Bootstrap law UNCHANGED.
-/// RE-MEASURED 2026-08-16 to 76: **DIO-3a — CLADE SEALED AT GENESIS.** Every
-/// founding line now seals its DECLARED clade at birth (class 7, neutral) so
-/// `rejuvenation_clade` returns the real species and `habitability_flux` reads
-/// its OWN band — DIO-2's species-relative tent is finally LIVE, not the
-/// flatlander-mesic stand-in. A physics-base change (taxon also drives economic
-/// mode, so the build walk reseeds board-wide): the total settles at 76 and the
-/// famished set SHRINKS 9 → 6 (each line reading its own habitability, three —
-/// stillcold, thresholder, glyphward — now feed). Deliberate re-measure; the
-/// per-line bootstrap law is UNCHANGED.
-const MEASURED_ZONE_TOTAL_AT_15: usize = 76;
-
-/// **THE ENERGY-BOOTSTRAP DEBT** — the lines the settlement law cannot
-/// reach, pinned so the set can only SHRINK:
+/// **THE SETTLEMENT LAW, WITNESSED** (rebuilt at DIO-3a per the operator's
+/// ruling: *don't bend the logic to esotericism — move the guards to the logic
+/// we're implementing and remove the antiquated methodology*).
 ///
-/// - cold-siting lines freeze-lock in joule famine at one CryoArray
-///   (the Frost branch's own doc calls the freeze-lock "legitimate
-///   drama, not a bug");
-/// - `tallykeep` — a sovereign seat that famishes inside the window;
-/// - `coralline` (cnidiform): a marginal temperate line whose famine flips with
-///   the digest — it raises a ration zone and feeds itself under some reseeds,
-///   falls just below the threshold under others.
+/// The old form pinned the EXACT zone total and an EXACT hard-coded frozen
+/// list. Under the species-relative physics (DIO-1/2/3a) the digest reseeds the
+/// board on every change, so those numbers churned every commit and could not
+/// tell an intended physics change from a bug — they were witnesses of the
+/// retired flatlander-mesic era, not of the law. They are torn down.
 ///
-/// SHRANK 9 → 6 at DIO-3a: once each line reads its OWN species' habitability
-/// (not the flatlander default), `stillcold`, `thresholder`, and `glyphward`
-/// feed and leave the debt. A cure shrinks this list; it may not grow silently.
-const FROZEN_AT_15: [&str; 6] = [
-    "corebound",
-    "umbrid",
-    "frostwright",
-    "darlok",
-    "tallykeep",
-    "coralline",
-];
-
-/// **THE SETTLEMENT BOUNDS, MEASURED.** Fifteen beats over the whole
-/// founding roster; per line, the city its gates actually built.
+/// What this witnesses instead is stable under any reseed because it is the
+/// physics itself:
+///   1. **No runaway** — no line exceeds the largest city cap.
+///   2. **Famine is EXPLAINED** — every famished line reads habitability
+///      η < ½: its own species cannot take its own orbit (a cold-pinned Frost
+///      seat, or a temperate clade drawn hot). A famine at η ≥ ½ would be a
+///      broken gate, not a species-thermal cull — THAT is the guard.
+///   3. **Bootstrap** — a line whose species CAN take its world settles past
+///      its founding (≥ 2 zones), and a strong MAJORITY of the roster does.
+///   4. **Species diverge** — the physics builds different cities, never one
+///      roster of identical settlements.
 #[test]
-fn the_settlement_thresholds_measure_and_pin() {
+fn the_settlement_law_holds_under_species_physics() {
     let root = scratch("settlement");
     let worlds = run_era(&root.to_string_lossy(), 15);
     assert!(worlds.len() >= 3, "the roster founded");
 
-    let mut census: Vec<(String, usize)> = Vec::new();
-    for polity in &worlds {
-        let sigil = polity.spec.civilization.sigil.clone();
-        let orb = polity.world.orb().expect("every polity holds its orb");
-        let zones = orb.zones.len();
-        let famished = !orb.famine.is_empty();
-        census.push((sigil.clone(), zones));
+    let orb_id = cfe::world::FIRST_ORB;
+    let viable = cfe::ratio::ratio(1, 2);
+    let mut zones_seen: Vec<usize> = Vec::new();
+    let (mut fed, mut famished) = (0usize, 0usize);
 
-        if FROZEN_AT_15.contains(&sigil.as_str()) {
-            assert!(
-                famished,
-                "{sigil}: recorded frozen, measured fed — the energy debt \
-                 moved; re-measure and shrink the pin"
-            );
-            continue;
-        }
-        // THE BOOTSTRAP LAW, held: every line the energy debt does not
-        // claim builds past its founding inside the window…
-        assert!(
-            zones >= 2 && !famished,
-            "{sigil}: stranded at {zones} zones (famine: {famished}) — \
-             a gate stopped satisfying the bootstrap law"
-        );
-        // …and none runs past the largest city cap.
+    for polity in &worlds {
+        let sigil = &polity.spec.civilization.sigil;
+        let world = &polity.world;
+        let orb = world.orb().expect("every polity holds its orb");
+        let zones = orb.zones.len();
+        zones_seen.push(zones);
+
+        // 1. NO RUNAWAY.
         assert!(zones <= 20, "{sigil}: {zones} zones exceeds every cap");
+
+        if orb.famine.is_empty() {
+            // 3. A viable line BOOTSTRAPS.
+            fed += 1;
+            assert!(zones >= 2, "{sigil}: fed but stranded at {zones} zones — a gate stopped bootstrapping");
+        } else {
+            // 2. A famine must be EXPLAINED by the species-relative habitability.
+            famished += 1;
+            let t_eq4 = world.insolation_of(orb_id) * cfe::thermal::thermal_k();
+            let eta = cfe::almanac::habitability_flux(world.rejuvenation_clade(), &t_eq4);
+            assert!(
+                eta < viable,
+                "{sigil}: famished at η = {eta} (≥ ½) — famine on a HABITABLE orbit \
+                 is a broken gate, not a species-thermal cull"
+            );
+        }
     }
 
-    // The temperaments DISTINGUISH — the reserve factors buy
-    // divergence or they buy nothing.
-    let counts: Vec<usize> = census.iter().map(|(_, zones)| *zones).collect();
-    assert!(
-        counts.windows(2).any(|pair| pair[0] != pair[1]),
-        "every temperament built the same city: {census:?}"
-    );
+    // 3. The roster bootstraps a strong majority; the thermal debt is the minority.
+    assert!(fed > famished, "the roster failed to bootstrap: {fed} fed vs {famished} famished");
 
-    // THE MEASUREMENT, PINNED WHOLE: the era's zone total — the
-    // reserve factors' aggregate footprint at beat 15, deterministic,
-    // exact. A factor change lands here first and answers for its
-    // whole-board effect in review.
-    let total: usize = counts.iter().sum();
-    assert_eq!(
-        total, MEASURED_ZONE_TOTAL_AT_15,
-        "the settlement footprint moved — a bound changed; re-measure \
-         deliberately and move this pin with it: {census:?}"
+    // 4. Species diverge.
+    assert!(
+        zones_seen.windows(2).any(|pair| pair[0] != pair[1]),
+        "every line built the same city — the physics stopped distinguishing species"
     );
 }
