@@ -72,6 +72,27 @@ fn conversions() -> [(ZoneKind, Option<Resource>, Resource); 6] {
     ]
 }
 
+/// **THE METABOLIC TRAIT SEED** — the resources a clade draws from its
+/// environment BEFORE any conversion: its constitutive nature, not a universal
+/// baseline. This reads the primary-resource axis the science law already tables
+/// (`science.rs`: mineral is pressure/metal work → Iron, biotic is life →
+/// Biomass, plasmic rides resonance/energy → Joule, never Iron). Biotic is the
+/// generalist that also mines iron for tools; a plasmic energy-being has no iron
+/// in its world at all — the operator's law, *why would a plasmic want iron?*
+/// The ration (`metabolic_harvest`) always lies in this set.
+///
+/// This is the SEED of the reachability, so it decides which pathways can exist:
+/// a trait absent here, and unreachable by any relevant conversion, is a genuine
+/// hole in the species' phase space — the homological exclusion, not a table of
+/// forbidden buildings.
+fn metabolic_traits(metabolism: u8) -> Vec<Resource> {
+    match metabolism {
+        1 => vec![Resource::Iron],                    // mineral — metal & pressure
+        3 => vec![Resource::Joule],                   // plasmic — energy, no iron
+        _ => vec![Resource::Biomass, Resource::Iron], // biotic — life, mines tools
+    }
+}
+
 /// The pathway a buildable REQUIRES: `(input trait, output trait)`. A source
 /// building draws its output from the environment (`None` input). Buildings with
 /// no metabolic conversion (civic/refinery infrastructure) return `None` — they
@@ -111,12 +132,14 @@ impl SpeciesManifold {
     pub fn of(metabolism: u8, metabolism_name: &str, recycles: bool) -> Self {
         let ration = metabolic_harvest(metabolism).0;
 
-        // Reachability from ⊥: the traits the clade can actually touch. Iron (the
-        // universal extractor) and the ration seed it; relevant conversions
+        // Reachability from ⊥: the traits the clade can actually touch. The
+        // metabolic trait seed (its constitutive nature — mineral iron, biotic
+        // life, plasmic energy) plus the ration seed it; relevant conversions
         // extend it to a fixpoint. A conversion whose input is unreachable, or
         // that its metabolism cannot run, never contributes its output — that is
-        // how a hole (a missing trait) forms, with no exclusion table.
-        let mut reachable: Vec<Resource> = vec![Resource::Iron];
+        // how a hole (a missing trait) forms, with no exclusion table. A plasmic
+        // line never seeds Iron, so the whole iron forge is unreachable from it.
+        let mut reachable: Vec<Resource> = metabolic_traits(metabolism);
         if !reachable.contains(&ration) {
             reachable.push(ration);
         }
@@ -126,8 +149,12 @@ impl SpeciesManifold {
                 if !crate::industry_relevant(metabolism_name, kind) {
                     continue;
                 }
+                // A source conversion (input from ⊥) only runs if its output is
+                // already a NATIVE trait — the environment does not hand a
+                // plasmic line iron ore. A real conversion extends the set when
+                // its input is reachable.
                 let input_ready = match input {
-                    None => true,
+                    None => reachable.contains(&output),
                     Some(r) => reachable.contains(&r),
                 };
                 if input_ready && !reachable.contains(&output) {
@@ -153,7 +180,7 @@ impl SpeciesManifold {
                 continue;
             }
             let ok = match input {
-                None => true,
+                None => reachable.contains(&output),
                 Some(r) => reachable.contains(&r),
             };
             if ok && reachable.contains(&output) {
@@ -324,8 +351,10 @@ mod tests {
         assert!(!plasmic.bounds(ZoneKind::Smelter), "the iron forge is a hole for a plasmic line");
         assert_eq!(plasmic.affinity(ZoneKind::Smelter), 0, "obstructed → excluded from Z");
         assert_eq!(plasmic.affinity(ZoneKind::Synthesizer), 0, "the deeper forge too");
-        // Yet its own sources remain native — it still settles and extracts.
-        assert!(plasmic.affinity(ZoneKind::Extractor) > 0);
+        // A plasmic line never mines ore either — iron is simply not in its world.
+        assert_eq!(plasmic.affinity(ZoneKind::Extractor), 0, "no iron to extract");
+        // Yet it still settles — the ration house (its Joule energy) is native.
+        assert!(plasmic.affinity(ZoneKind::Habitat) > 0);
     }
 
     #[test]
@@ -344,15 +373,35 @@ mod tests {
     }
 
     #[test]
+    fn the_metabolic_trait_seed_diverges_the_native_set_across_species() {
+        // THE ENRICHMENT, WITNESSED: viability is now the species' constitutive
+        // nature, not a universal baseline. A mineral line's world is built of
+        // iron (the forge is native); a plasmic line's world has no iron at all
+        // (the forge is a hole); a biotic line is the generalist that mines iron
+        // for tools yet lives on biomass. Three species, three different sets of
+        // what is even buildable — with no per-building exclusion table.
+        let mineral = SpeciesManifold::of(1, "lithic", false);
+        let biotic = SpeciesManifold::of(2, "aqueous", false);
+        let plasmic = SpeciesManifold::of(3, "plasmic", false);
+
+        assert!(mineral.bounds(ZoneKind::Smelter), "the iron forge is native to a mineral line");
+        assert!(biotic.bounds(ZoneKind::Smelter), "the generalist biotic line mines iron too");
+        assert!(!plasmic.bounds(ZoneKind::Smelter), "a plasmic line has no iron in its world");
+        assert!(!plasmic.bounds(ZoneKind::Extractor), "and never reaches for the ore");
+        // Yet each still settles — the ration house is native to all.
+        assert!(mineral.bounds(ZoneKind::Habitat) && plasmic.bounds(ZoneKind::Habitat));
+    }
+
+    #[test]
     fn the_draw_excludes_obstructions_and_stays_replayable() {
         let plasmic = SpeciesManifold::of(3, "plasmic", false);
-        // Offered the forge and a settlement, a plasmic line can only draw the
-        // settlement — the forge is weight 0, out of the partition.
-        let surface = [ZoneKind::Smelter, ZoneKind::Extractor];
+        // Offered the iron forge and its own ration house, a plasmic line can
+        // only draw the settlement — the forge is weight 0, out of the partition.
+        let surface = [ZoneKind::Smelter, ZoneKind::Habitat];
         for n in 0u8..16 {
             assert_eq!(
                 choose_build(&surface, &plasmic, seed(n)),
-                Some(ZoneKind::Extractor),
+                Some(ZoneKind::Habitat),
                 "the obstructed forge is never drawn"
             );
         }
