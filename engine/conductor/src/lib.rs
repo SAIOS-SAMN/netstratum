@@ -54,7 +54,7 @@ use ledger::registry::{
 use ledger::{Directive, Disposition, Ledger};
 use physics::Beacon;
 use solver::{
-    forge_task, propose_consulted_measured, solve_consulted, Difficulty, Hunger, Need,
+    forge_task, propose_consulted_measured, Difficulty, Hunger, Need,
     SolveRead,
 };
 
@@ -2823,29 +2823,25 @@ impl Polity {
             let read = if let Some(hit) = pre_reached {
                 hit
             } else {
-                match self.mode {
-                SearchMode::Uncoupled => {
+                // **ONE PATH — NO MODE/PATH ENUM TO BRANCH ON** (operator ruling
+                // 2026-08-16). Every line derives its geometry by Reach (the
+                // Smith-Normal-Form derivation). A miss means the residual deficit
+                // γ lies in the COKERNEL of the boundary operator ∂ — γ ∉
+                // Span(V_current), orthogonal to the current dimensional basis —
+                // so enumerating the unspanned space is physically an
+                // infinite-energy search. The solver asserts failure and lets the
+                // PHYSICAL CONSEQUENCE follow: stagnation → decline → the COG-3
+                // desperation burn (and, once DIO-3 lands, biological adaptation /
+                // generational turnover). The `solve_consulted` sweep is retired,
+                // and with no exhaustive alternative to route to, the
+                // SearchMode/SearchPath enum dispatch was vestigial cartesian
+                // branching — collapsed here. `swept` now counts cokernel
+                // failures asserted, not enumerations run.
+                let derived = reach(self);
+                if matches!(derived, SolveRead::Unsolved) {
                     self.swept = self.swept.saturating_add(1);
-                    solve_consulted(&task, difficulty.word_len)
                 }
-                SearchMode::Coupled => match self.trajectory.path() {
-                    SearchPath::Reach => reach(self),
-                    SearchPath::Sweep => {
-                        self.swept = self.swept.saturating_add(1);
-                        solve_consulted(&task, difficulty.word_len)
-                    }
-                },
-                // V ∪ D: read, and exhaust whenever the reading did not
-                // close. Both costs paid; the closure set is the union.
-                SearchMode::Union => match reach(self) {
-                    closed @ SolveRead::Solved { .. } => closed,
-                    SolveRead::Unsolved => {
-                        self.swept = self.swept.saturating_add(1);
-                        solve_consulted(&task, difficulty.word_len)
-                    }
-                },
-
-                }
+                derived
             };
             match read {
                 SolveRead::Solved {
