@@ -311,6 +311,37 @@ pub fn survives(metabolism: &Metabolism, substrate: &[Ratio], clade_align: &Rati
     fitness(metabolism, substrate, clade_align) > ratio(0, 1)
 }
 
+/// **THE STRUCTURAL GRADE** — the metabolism's Structure viability on a substrate,
+/// clade-neutral: the Structure fill-fraction, `0` below subsistence, graded in
+/// `[1/2, 1]` when the structural phase is present. (The clade's fine thermal band
+/// is handled separately by `habitability_flux`; this is the ABSOLUTE material
+/// phase — can a body of this kind exist here at all.)
+pub fn structural_grade(metabolism: &Metabolism, substrate: &[Ratio]) -> Ratio {
+    let u = project(metabolism, substrate);
+    let cap = ceiling(metabolism, STRUCT);
+    if cap == ratio(0, 1) || u[STRUCT] < cap.clone() / ratio(HALVING, 1) {
+        return ratio(0, 1);
+    }
+    (u[STRUCT].clone() / cap).min(ratio(1, 1))
+}
+
+/// **PHASE FEASIBILITY** (ONT-1d) — does the planet's physical phase, set by the
+/// orbit's `heat`, provide the metabolism's structural basis? Biotic organic life
+/// spans the temperate range its clade band already gates (via `habitability_flux`),
+/// so it is always feasible here — gating it again would double-count the thermal
+/// tent. Mineral (a solid/cohesive phase) and plasmic (a plasma/volatile phase)
+/// require an ABSOLUTE phase that no clade tuning supplies, so their structural
+/// grade IS their feasibility: a plasmic on a frozen world, or a mineral on a
+/// molten one, reads zero — the Starvation Cull, in production, with no table.
+/// Returns `1` for biotic, so a biotic economy is byte-identical.
+pub fn phase_feasibility(metabolism: u8, heat: &Ratio) -> Ratio {
+    if metabolism == 2 {
+        return ratio(1, 1);
+    }
+    let substrate = planet_from_orbit(heat, &ratio(1, 1), &ratio(1, 1));
+    structural_grade(&archetype(metabolism), &substrate)
+}
+
 /// The archetype for a metabolism NAME (the roster's string axis): mineral,
 /// plasmic, or the biotic generalist otherwise.
 pub fn archetype_named(metabolism: &str) -> Metabolism {

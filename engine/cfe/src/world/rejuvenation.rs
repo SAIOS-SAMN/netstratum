@@ -78,7 +78,10 @@ impl World {
         // DIO-2: read the sitting clade's habitability as the continuous flux
         // tent on the exact `t_eq4`, coherent with `primary_production`.
         let t_eq4 = self.insolation_of(orb) * crate::thermal::thermal_k();
-        carrying_capacity(self.living_zones_of(orb), self.rejuvenation_clade(), &t_eq4)
+        // ONT-1d: production reads the SAME morphodynamic viability siting will —
+        // thermal habitability AND the metabolism's phase feasibility.
+        let metabolism = self.genesis.as_ref().map(|held| held.metabolism).unwrap_or(2);
+        carrying_capacity(self.living_zones_of(orb), self.rejuvenation_clade(), metabolism, &t_eq4)
     }
 
     /// **THE REGROWN STOCK — a SCAN, never a deed.** What this orb's
