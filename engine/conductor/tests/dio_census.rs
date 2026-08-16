@@ -21,29 +21,37 @@ fn scratch(name: &str) -> PathBuf {
 fn census() {
     let root = scratch("beat15");
     let worlds = run_era(&root.to_string_lossy(), 15);
+    use num_traits::ToPrimitive;
+    let f = |x: &cfe::ratio::Ratio| x.to_f64().unwrap_or(f64::NAN);
     let mut total = 0usize;
     let mut frozen: Vec<String> = Vec::new();
-    println!("SIGIL          METAB     ZONES FAM  R            INSOLATION");
+    println!("SIGIL          CLADE PREF          INS    ETA    SYNTR  CULT   ZONES FAM");
     for p in &worlds {
         let sigil = p.spec.civilization.sigil.clone();
-        let meta = p.spec.civilization.metabolism.clone();
         let orb = p.world.orb().expect("orb");
+        let orb_id = cfe::world::FIRST_ORB;
         let zones = orb.zones.len();
         let fam = !orb.famine.is_empty();
         total += zones;
         if fam {
             frozen.push(sigil.clone());
         }
-        let site = orb.thermal.clone();
-        let (r, ins) = match (site, p.world.star()) {
-            (Some(t), Some(class)) => {
-                let r = t.orbit_r.value().clone();
-                let ins = cfe::thermal::insolation(&class.luminosity(), t.albedo.value(), &r);
-                (format!("{r}"), format!("{ins}"))
-            }
-            _ => ("none".into(), "none".into()),
+        let clade = p.world.rejuvenation_clade();
+        let pref = cfe::almanac::clade_preferred_region(clade);
+        let sited = orb.thermal.is_some();
+        let (ins, eta) = if sited {
+            let raw = p.world.insolation_of(orb_id);
+            let t_eq4 = raw.clone() * cfe::thermal::thermal_k();
+            let eta = cfe::almanac::habitability_flux(clade, &t_eq4);
+            (f(&raw), f(&eta))
+        } else {
+            (f64::NAN, f64::NAN)
         };
-        println!("{sigil:14} {meta:9} {zones:5} {fam:5} {r:12} {ins}");
+        let syn = f(&p.world.syntropic_flow(orb_id));
+        let cult = f(&p.world.cultivated_yield(orb_id));
+        println!(
+            "{sigil:14} {clade:5} {pref:13?} {ins:6.3} {eta:6.3} {syn:6.2} {cult:6.2} {zones:5} {fam}"
+        );
     }
     println!("TOTAL_ZONES={total} FAMISHED_COUNT={} FAMISHED={:?}", frozen.len(), frozen);
 }

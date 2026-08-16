@@ -95,19 +95,23 @@ fn scratch(name: &str) -> PathBuf {
 /// flux η will formalize (a carbon-water line cannot take that heat; a
 /// thermophile sited there would thrive). A deliberate re-measure under the
 /// now-continuous orbital physics; the per-line bootstrap law is UNCHANGED.
-/// RE-MEASURED 2026-08-16 to 81: **THE SPECIES-RELATIVE η** (DIO-2). Habitability
-/// is no longer the shared 8-way band-distance halving; it is a CONTINUOUS
-/// flux tent read on the exact `t_eq4` against EACH clade's own preferred-band
-/// optimum (`habitability_flux`). The absolute habitable zone is gone, and the
-/// board proves it: `deep-chorus` — DIO-1's hot-tail casualty — is now FED,
-/// because its clade prefers the warm (Torrid) band, so the very orbit that
-/// starved it under the shared zone SUITS it (the exact vindication the DIO-1
-/// note predicted). In its place `coralline`, a temperate-preferring clade that
-/// also drew a hot orbit (insolation ≈ 2.1), denatures below its founding
-/// band — it cannot take the heat its neighbour loves. Same sun, opposite
-/// outcomes. The famished COUNT is unchanged (9); the sharper, coherent tent
-/// (now shared by primary_production AND the regrowth ceiling) trims two
-/// marginal zones (83 → 81). A deliberate re-measure; bootstrap law UNCHANGED.
+/// RE-MEASURED 2026-08-16 to 81: **THE FLUX-TENT η** (DIO-2). Habitability is no
+/// longer the 8-way band-distance halving; it is a CONTINUOUS flux tent on the
+/// exact `t_eq4` against the sitting clade's preferred-band optimum
+/// (`habitability_flux`), shared coherently by `primary_production` AND the
+/// regrowth ceiling. **MEASURED CAVEAT — do not over-read this as per-species
+/// yet.** In a founding era NO world has sealed its taxon (`seal_taxon` is a
+/// deliberate deed that has not fired), so every line resolves to the
+/// flatlander default (clade 2, Mesic); the roster's DECLARED clades (soniform,
+/// cnidiform, …) do not yet reach habitability. So this re-measure is the tent
+/// applied UNIFORMLY as mesic, not per-species. Both `deep-chorus` and
+/// `coralline` drew hot orbits (insolation ≈ 2.1–2.4 ⇒ η ≈ 0–0.15, correctly
+/// near-zero for a temperate clade); the reason `deep-chorus` survives while
+/// `coralline` famishes is CULTIVATION build-order (deep-chorus raised a ration
+/// zone, cultivated ≈ 1; coralline raised none, cultivated 0), NOT thermal
+/// preference. The sharper tent trims two marginal zones (83 → 81); famished
+/// count steady at 9, casualty deep-chorus → coralline. Making the tent truly
+/// per-species (sealing the roster clade at genesis) is a separate ruled step.
 const MEASURED_ZONE_TOTAL_AT_15: usize = 81;
 
 /// **THE ENERGY-BOOTSTRAP DEBT** — the lines the settlement law cannot
@@ -119,16 +123,14 @@ const MEASURED_ZONE_TOTAL_AT_15: usize = 81;
 /// - Furnace / thermal holds and new sovereign seats that famish inside
 ///   the window (thresholder, tallykeep, glyphward) — recorded so a cure shrinks
 ///   this list rather than silently green-washing the debt;
-/// - `coralline` (2026-08-16, DIO-2): the hot-orbit casualty under the
-///   SPECIES-RELATIVE η. DIO-1 recorded `deep-chorus` here as the hot-tail
-///   casualty and predicted its cure was species-relative habitability — and
-///   that is exactly what happened: under DIO-2's flux tent `deep-chorus`
-///   (its clade preferring the warm band) now THRIVES on that same hot orbit
-///   and LEAVES this list, while `coralline` — a temperate-preferring clade
-///   that likewise drew a hot track — denatures in its place. Same debt slot,
-///   different occupant: the heat one clade loves is the heat another cannot
-///   take. Its cure is not a settlement gate but its own orbit (a cooler
-///   Diophantine draw) or a warm-adapted lineage.
+/// - `coralline` (2026-08-16, DIO-2): the hot-orbit casualty under the flux
+///   tent. Both it and `deep-chorus` (DIO-1's casualty) drew hot orbits and,
+///   with taxon UNSEALED, both read the flatlander-mesic η ≈ 0 — thermally
+///   roasting alike. The list-swap deep-chorus → coralline is therefore NOT a
+///   thermal-preference story (they resolve to the same clade for now); it is
+///   cultivation build-order — `deep-chorus` raised a ration zone and feeds
+///   itself, `coralline` did not. Its cure is a cooler Diophantine draw, a
+///   built ration zone, or — once clades seal at genesis — its own metabolism.
 const FROZEN_AT_15: [&str; 9] = [
     "corebound",
     "stillcold",
