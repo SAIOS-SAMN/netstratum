@@ -25,6 +25,10 @@ solver = { path = "../solver" }
 # the economy's deficit through the same `overlay` the cognition uses, so
 # production (coefficients) and research (residual) are one operation.
 iae = { path = "../iae" }
+# SOC-2: the exact integer Smith Normal Form — the homological pairing that
+# reads a species' metabolic complex (Ker/Im/rank of ∂₁) to weight the
+# workbench. The topology engine `iae` itself rests on this.
+substrate = { path = "../substrate" }
 blake3.workspace = true
 num-bigint.workspace = true
 num-traits.workspace = true

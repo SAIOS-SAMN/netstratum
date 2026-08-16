@@ -2176,7 +2176,22 @@ impl Polity {
         // The crisis arms (regenerator, thermal shells, the Frost sink, the
         // forge-hold) stay deterministic above and below — the Heaviside veto
         // that canalizes physical law is untouched.
-        let disposition = world.civ_axes().map(|axes| axes.disposition).unwrap_or(0);
+        // SOC-2 — THE SPECIES MANIFOLD. The surplus draw weights each viable
+        // candidate by the homological pairing `𝒯` against the line's metabolic
+        // complex `M_civ` (soc.rs): a native pathway scores `W_base·genus`, a
+        // pathway into a trait the clade cannot touch pairs to a non-trivial
+        // obstruction and weighs 0 — excluded from the partition with no boolean
+        // gate. `recycles` (a regenerative economy) closes a metabolic loop, so a
+        // topologically richer society is read straight off `∂₁`.
+        let recycles = matches!(
+            world.taxon_economy_of(primary).mode,
+            cfe::almanac::EconomicMode::Regenerative
+        );
+        let manifold = crate::soc::SpeciesManifold::of(
+            metabolism,
+            &self.spec.civilization.metabolism,
+            recycles,
+        );
         let digest = world
             .chronicle()
             .receipts()
@@ -2186,7 +2201,7 @@ impl Polity {
         let with_refine = |base: Option<ZoneKind>| {
             let surface: Vec<ZoneKind> =
                 [industrial, refine, base].into_iter().flatten().collect();
-            crate::soc::choose_build(&surface, disposition, digest)
+            crate::soc::choose_build(&surface, &manifold, digest)
         };
         let wanted: Option<ZoneKind> =
             match regime(world, &self.spec.civilization.metabolism) {

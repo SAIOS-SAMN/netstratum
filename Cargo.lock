@@ -87,6 +87,7 @@ dependencies = [
  "scribe",
  "solver",
  "solver-verify",
+ "substrate",
 ]
 
 [[package]]
