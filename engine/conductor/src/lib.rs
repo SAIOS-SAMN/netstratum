@@ -75,6 +75,12 @@ mod siting;
 // partition function seeded by the chronicle digest, in place of the fixed
 // `.or()` priority. Crisis stays canalized; surplus explores. See soc.rs.
 pub mod soc;
+// ONT-1a (operator directive 2026-08-16): the morphodynamic field — materials
+// as morphodynamic vectors, the environment as M ⊕ Φ (matter + massless flux),
+// a species as a projection T_metab into the 5 universal roles. Dissolves the
+// iron coordinate singularity: viability is a topological intersection, not a
+// tech tree. See morphogen.rs.
+pub mod morphogen;
 pub use polities::{founding_polities, registered_polities, roster};
 
 /// AEON-1b (11 §5): THE FOLD — seal the live era and rotate it into
