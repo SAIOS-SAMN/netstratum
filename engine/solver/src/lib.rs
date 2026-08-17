@@ -57,6 +57,7 @@ pub use search::{
     SolveRead,
 };
 pub use nsearch::{solve_field, FieldSolveRead};
+pub use think::{measure_grid, think_task};
 pub use volume::{
     forge_volume, run_volume, solve_volume, VOp, VolDifficulty, Volume, VolumeSolveRead,
     VolumeTask,
