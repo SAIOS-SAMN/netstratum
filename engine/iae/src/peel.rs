@@ -93,7 +93,17 @@ impl FullMeasurement {
             (None, Some(index)) => Err(MeasurementRefusal::SiteUncarried {
                 site: site_of(index, frame),
             }),
-            (None, None) => Ok(Self { fiber_rank, frame, occupancy }),
+            (None, None) => {
+                // CANONICAL CARRIAGE ORDER (row-major): a whole measurement is a
+                // site→direction map with total coverage, so equality is
+                // content, never input order. Sorting here makes `PartialEq`
+                // content-based — two vantages that carry the same cells are the
+                // same measurement however their occupancy was assembled (the
+                // re-form's remove-then-push must not read as a different value).
+                let mut occupancy = occupancy;
+                occupancy.sort_by_key(|(site, _)| (site.row, site.col));
+                Ok(Self { fiber_rank, frame, occupancy })
+            }
         }
     }
 

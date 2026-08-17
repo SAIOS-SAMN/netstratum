@@ -13,6 +13,7 @@
 //! the abelianised chain shadow. The chain carrier, its reduction, and the
 //! bridges (`letters`, `equivalence`) land in the following IAE slices.
 
+pub mod congruence;
 pub mod peel;
 pub mod transport;
 
