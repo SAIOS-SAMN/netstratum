@@ -1,7 +1,7 @@
 //! Wave-6 offices as play — Exchange MM · Assay court · Vault custody (30).
 
 use super::*;
-use crate::dop::{Resource, Station};
+use crate::dop::Station;
 
 impl World {
     pub fn assay_seated(&self) -> bool {
@@ -160,73 +160,10 @@ impl World {
         r
     }
 
-    /// O6.4 Assay court: re-derive vein richness; slash on mismatch.
-    pub fn challenge_assay(
-        &mut self,
-        orb: u64,
-        element: [u8; 32],
-    ) -> Result<bool, ActionRefused> {
-        self.challenge_assay_as(SOVEREIGN, orb, element)
-    }
-
-    pub fn challenge_assay_as(
-        &mut self,
-        actor: u64,
-        orb: u64,
-        element: [u8; 32],
-    ) -> Result<bool, ActionRefused> {
-        self.permitted(actor, Scope::Build)?;
-        if !self.assay_seated() {
-            return Err(ActionRefused::AssayRequired);
-        }
-        let star = self.star.ok_or(ActionRefused::NoStarCommissioned)?;
-        let vein = self
-            .prospects
-            .iter()
-            .find(|p| p.orb == orb && p.element == element)
-            .ok_or(ActionRefused::NoSuchElement { element })?;
-        let held_rich = vein.richness.clone();
-        let (_, _, true_rich) = crate::dop::element_properties(&element, star);
-        let matched = held_rich == true_rich;
-        self.close(
-            ClosureEvent::AssayConsilience {
-                orb_id: orb,
-                element,
-                matched,
-            },
-            actor,
-        );
-        if matched {
-            return Ok(true);
-        }
-        // Slash: eighth of crystal bank (or identity if none), correct richness.
-        let eighth = ZoneKind::Resonator.yield_per_tick().1;
-        let held = peel(&mut self.orbs, orb).ok_or(ActionRefused::NoSuchOrb { orb })?;
-        let have = held.banked_amount(Resource::Crystal);
-        let slash = if have > eighth {
-            eighth.clone()
-        } else {
-            have.clone()
-        };
-        if slash > ratio(0, 1) {
-            held.bank(Resource::Crystal, -slash.clone());
-        }
-        if let Some(v) = self
-            .prospects
-            .iter_mut()
-            .find(|p| p.orb == orb && p.element == element)
-        {
-            v.richness = true_rich.clone();
-        }
-        self.close(
-            ClosureEvent::AssaySlashed {
-                orb_id: orb,
-                element,
-                slash,
-                richness_after: true_rich,
-            },
-            actor,
-        );
-        Ok(false)
-    }
+    // ONT-2: the O6.4 assay-consilience court is DELETED. It existed only to
+    // catch `vein_wear`'s stored richness drifting from the geometric truth
+    // and slash crystal to snap it back — a patch confessing the scalar was a
+    // lossy shadow of the manifold. Richness is now derived as
+    // `element_properties − extracted` on every read: it cannot drift, so
+    // there is nothing to challenge and no crystal to spend enforcing geometry.
 }

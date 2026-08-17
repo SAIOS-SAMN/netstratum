@@ -705,7 +705,19 @@ fn appraisal_rule(prior: &Committed, step: &Step) -> Result<(), Refused> {
     let prospects: Vec<cfe::dop::ProspectRow> = prior
         .prospects
         .iter()
-        .map(|p| (p.orb, p.stratum, p.richness.clone()))
+        // ONT-2: richness derives — natural endowment minus extraction.
+        .map(|p| {
+            let richness = prior
+                .star
+                .map(|c| {
+                    cfe::dop::vein_richness(
+                        &cfe::dop::element_properties(&p.element, c).2,
+                        &p.extracted,
+                    )
+                })
+                .unwrap_or_else(|| ratio(0, 1));
+            (p.orb, p.stratum, richness)
+        })
         .collect();
     match cfe::dop::appraised_value(subject, &prior.orbs, &parcels, star_m, &prospects) {
         Some(computed) if computed == *value => Ok(()),
@@ -902,22 +914,30 @@ fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
     // The declared element moves for this deed (empty = every key
     // holds still). Signed: a mint is positive, a spend negative.
     let declared: Vec<([u8; 32], Ratio)> = match &step.event {
-        ClosureEvent::AssayStruck { orb_id, element, amount, richness } => {
+        ClosureEvent::AssayStruck { orb_id, element, amount, .. } => {
             if *amount < ratio(0, 1) {
                 return Err(Refused::ElementNotPositive {
                     element: *element,
                     amount: Box::new(amount.clone()),
                 });
             }
-            // The vein's yield, read from PRIOR state: richness ×
-            // elapsed since its last assay; no vein yields nothing.
+            // ONT-2: the vein's yield, RE-DERIVED from the immutable geometry
+            // and the PRIOR extraction integral (call-not-copy, the one home
+            // `vein_flow`) — the vein carries no stored richness scalar. Richness
+            // is `natural − extracted` (the hash-derived endowment under the
+            // prior star, minus what the ledger already took); the flow is that
+            // richness's geometric decay over the settled span. A claim above
+            // this refuses; no vein yields more than its geometry allows.
             let bound = prior
                 .prospects
                 .iter()
                 .find(|vein| vein.orb == *orb_id && vein.element == *element)
-                .map(|vein| match step.stamp > vein.last_assay {
-                    true => vein.richness.clone() * ratio((step.stamp - vein.last_assay) as i64, 1),
-                    false => ratio(0, 1),
+                .and_then(|vein| {
+                    let class = prior.star?;
+                    let (_, _, natural) = cfe::dop::element_properties(element, class);
+                    let elapsed = step.stamp.saturating_sub(vein.last_assay);
+                    let richness = cfe::dop::vein_richness(&natural, &vein.extracted);
+                    Some(cfe::dop::vein_flow(&richness, &natural, elapsed))
                 })
                 .unwrap_or_else(|| ratio(0, 1));
             if *amount > bound {
@@ -925,53 +945,6 @@ fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
                     bound: Box::new(bound),
                     claimed: Box::new(amount.clone()),
                 });
-            }
-            // ECO-1 (#40): the declared after-richness, judged by
-            // CALLING the emitter's one home on the same prior reads
-            // (call-not-copy): the vein's standing flow, the spring's
-            // hash-derived natural flow under the prior star, the
-            // regenerators standing on the orb, the settled span. The
-            // sealed 3-field form declares nothing and skips this arm.
-            if let Some(declared_richness) = richness {
-                let expected = prior
-                    .prospects
-                    .iter()
-                    .find(|vein| vein.orb == *orb_id && vein.element == *element)
-                    .and_then(|vein| {
-                        let class = prior.star?;
-                        let (_, _, natural) =
-                            cfe::dop::element_properties(element, class);
-                        let regenerators = prior
-                            .orbs
-                            .iter()
-                            .find(|held| held.orb_id == *orb_id)
-                            .map(|held| {
-                                held.zones
-                                    .iter()
-                                    .filter(|zone| {
-                                        zone.kind == cfe::dop::ZoneKind::Regenerator
-                                    })
-                                    .count() as u64
-                            })
-                            .unwrap_or(0);
-                        let elapsed = step.stamp.saturating_sub(vein.last_assay);
-                        Some(cfe::dop::vein_wear(
-                            &vein.richness,
-                            &natural,
-                            amount,
-                            regenerators,
-                            elapsed,
-                        ))
-                    });
-                match expected {
-                    Some(expected) if expected == *declared_richness => {}
-                    other => {
-                        return Err(Refused::VeinWearMisdeclared {
-                            expected: Box::new(other.unwrap_or_else(|| ratio(0, 1))),
-                            declared: Box::new(declared_richness.clone()),
-                        })
-                    }
-                }
             }
             vec![(*element, amount.clone())]
         }
@@ -1188,43 +1161,41 @@ fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
             });
         }
     }
-    // ECO-1 (#40): THE VEIN BOOK HOLDS STILL. Richness became judged
-    // state, so the book's whole motion is declared: a prospect pushes
-    // exactly its receipted vein; an assay moves that vein's span
-    // anchor and lands its declared richness (the sealed 3-field form
-    // holds richness where it stood); every other deed leaves the book
-    // untouched. Declaration == effect, the banked law's shape applied
-    // to the vein registry.
+    // ONT-2: THE VEIN BOOK HOLDS STILL. The vein carries an EXTRACTION
+    // INTEGRAL, not a richness scalar (richness derives as natural −
+    // extracted), so the book's whole motion is declared: a prospect (or a
+    // supernova scatter) pushes a FRESH vein with extracted = 0; an assay
+    // moves that vein's span anchor and grows its integral by exactly the
+    // banked amount; every other deed leaves the book untouched. Declaration
+    // == effect, the banked law's shape applied to the vein registry.
     let mut book = prior.prospects.clone();
     match &step.event {
-        ClosureEvent::ProspectStruck { orb_id, stratum, element, richness, .. } => {
+        ClosureEvent::ProspectStruck { orb_id, stratum, element, .. } => {
             book.push(cfe::world::Prospected {
                 orb: *orb_id,
                 stratum: *stratum,
                 element: *element,
-                richness: richness.clone(),
+                extracted: ratio(0, 1),
                 last_assay: step.stamp,
             });
         }
         // #27: a dying star scatters a vein — the same push a prospect makes.
-        ClosureEvent::EnrichmentStruck { orb_id, stratum, element, richness } => {
+        ClosureEvent::EnrichmentStruck { orb_id, stratum, element, .. } => {
             book.push(cfe::world::Prospected {
                 orb: *orb_id,
                 stratum: *stratum,
                 element: *element,
-                richness: richness.clone(),
+                extracted: ratio(0, 1),
                 last_assay: step.stamp,
             });
         }
-        ClosureEvent::AssayStruck { orb_id, element, richness, .. } => {
+        ClosureEvent::AssayStruck { orb_id, element, amount, .. } => {
             if let Some(vein) = book
                 .iter_mut()
                 .find(|vein| vein.orb == *orb_id && vein.element == *element)
             {
                 vein.last_assay = step.stamp;
-                if let Some(after) = richness {
-                    vein.richness = after.clone();
-                }
+                vein.extracted += amount.clone();
             }
         }
         _ => {}

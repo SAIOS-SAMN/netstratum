@@ -1967,51 +1967,34 @@ pub fn element_properties(
     (family, tier, richness)
 }
 
-/// **ECO-1 (#40) — THE VEIN'S WEAR LAW, the one home.** The verb
-/// settles it, the kernel re-derives it; both call HERE (the
-/// `fourfold_band` discipline — one function, two readers).
+/// **ONT-2 — THE DERIVED VEIN RICHNESS, the one home.** The verb reads it,
+/// the kernel re-derives it; both call HERE (the one-function discipline
+/// that replaced the collapsing `vein_wear` recurrence).
 ///
-/// The vein is a SPRING. Its natural flow is hash-derived
-/// ([`element_properties`]) and never moves; its standing flow is
-/// committed state that the draw tires and the regenerators restore.
-/// Every quantity below already rides the receipt or prior committed
-/// state, so the law holds NO new dial:
-///
-/// 1. WEAR — the draw priced against the spring's own nature:
-///    `worn = standing × natural / (natural + drawn)`. A draw the size
-///    of the natural flow halves the vein; a light draw barely marks
-///    it; a hard draw guts it. Exact-rational throughout.
-/// 2. RECOVERY — the Regenerator's second arm, THE SAME FORM RUN ON
-///    THE GAP. Each regenerator standing on the orb returns matter at
-///    its own working rate ([`ZoneKind::Regenerator`]'s yield rate —
-///    what extraction takes, regeneration returns) across the settled
-///    span, and that returned quantity closes the distance to natural
-///    by exactly the fraction the drawn quantity opened it by:
-///    `after = natural − (natural − worn) × natural / (natural + restored)`.
-///
-/// **The cap is a THEOREM, not a check.** Recovery shrinks the gap by
-/// a factor in `(0, 1]`, so `worn ≤ after ≤ natural` for every input:
-/// no regenerator can lift a vein past its nature, and no draw can
-/// push one below zero. Both bounds hold by construction, which is
-/// why neither is written as a clamp. A first cut ADDED the recovery
-/// as a flat `rate × elapsed` and clamped at the top — that summed a
-/// quantity into a flow, and made one regenerator saturate the cap in
-/// a single tick, so the whole ecology collapsed to a binary.
-///
-/// `natural` is strictly positive for every drawn element (the family
-/// bases are 1..=3 over tiers 1..=3), so the divisors never vanish.
-pub fn vein_wear(
-    standing: &Ratio,
-    natural: &Ratio,
-    drawn: &Ratio,
-    regenerators: u64,
-    elapsed: u64,
-) -> Ratio {
-    let worn = standing.clone() * natural.clone() / (natural.clone() + drawn.clone());
-    let (_, rate) = ZoneKind::Regenerator.yield_per_tick();
-    let restored = ratio(regenerators as i64, 1) * rate * ratio(elapsed as i64, 1);
-    let gap = (natural.clone() - worn) * natural.clone() / (natural.clone() + restored);
-    natural.clone() - gap
+/// A vein is not a stored number that drains and refills. Its richness is a
+/// PROJECTION of the immutable geometry minus the exact ledger it has
+/// yielded: `richness = natural − extracted`, floored at zero. `natural` is
+/// the hash-derived endowment ([`element_properties`], a reading of where the
+/// element sits in the star's spine) and never moves; `extracted` is the
+/// vein's cumulative `Σ AssayStruck.amount` — a bounded ledger sum, not a
+/// stepped scalar. There is no differential equation to integrate, so there
+/// is no denominator to explode: the whole 115-beat scalar collapse is
+/// structurally impossible, not patched.
+pub fn vein_richness(natural: &Ratio, extracted: &Ratio) -> Ratio {
+    (natural.clone() - extracted.clone()).max(ratio(0, 1))
+}
+
+/// **ONT-2 — THE EXTRACTION FLOW at an assay.** What a draw over `elapsed`
+/// beats takes from a vein at the given (derived) `richness`:
+/// `richness × natural × elapsed`, an exact-rational GEOMETRIC DECAY (the
+/// vein yields logarithmically less as it depletes, an algebraic `e^{−λt}`),
+/// CAPPED at the remaining richness so the extraction integral never crosses
+/// the endowment (`extracted ≤ natural`, richness ≥ 0 — a theorem, not a
+/// clamped afterthought). Because the flow is `richness · natural · int` — a
+/// product, never a division — the sum it feeds carries a denominator bounded
+/// forever by `denom(natural)² ≤ 36`.
+pub fn vein_flow(richness: &Ratio, natural: &Ratio, elapsed: u64) -> Ratio {
+    (richness.clone() * natural.clone() * ratio(elapsed as i64, 1)).min(richness.clone())
 }
 
 /// The element's name — the naming law (10 §2 law 4) applied to

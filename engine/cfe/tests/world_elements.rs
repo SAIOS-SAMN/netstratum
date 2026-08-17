@@ -105,12 +105,14 @@ fn the_assay_banks_richness_times_elapsed_in_one_receipt() {
             .any(|(o, e)| *o == FIRST_ORB && e == &struck.element);
         match world.assay(FIRST_ORB, struck.element) {
             Ok(drawn) => {
-                let elapsed = ratio((world.now() - opened_at) as i64, 1);
-                assert_eq!(
-                    drawn,
-                    struck.richness.clone() * elapsed,
-                    "richness × elapsed, exact"
-                );
+                // ONT-2: a fresh vein (extracted 0, richness = natural) draws
+                // its DERIVED geometric-decay flow — min(natural·natural·Δt,
+                // natural), capped at the richness that stands — not the old
+                // richness × elapsed. The one home is `vein_flow`.
+                let elapsed_beats = world.now() - opened_at;
+                let expected =
+                    cfe::dop::vein_flow(&struck.richness, &struck.richness, elapsed_beats);
+                assert_eq!(drawn, expected, "the derived geometric-decay flow, exact");
                 assert_eq!(
                     world.chronicle().receipts().len(),
                     receipts_before + 1 + usize::from(want_stands),

@@ -471,18 +471,24 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                             // wear settled in that same receipt, so the
                             // player sees what the draw cost the spring
                             // at the moment they take it.
-                            let after = world
-                                .committed()
-                                .prospects
-                                .iter()
-                                .find(|vein| vein.orb == *current && vein.element == element)
-                                .map(|vein| vein.richness.clone());
-                            let natural = world.committed().star.map(|star| {
-                                let (_, _, natural) =
-                                    cfe::dop::element_properties(&element, star);
-                                natural
+                            // ONT-2: the standing flow is DERIVED — natural
+                            // endowment minus the extraction integral.
+                            let after = world.committed().star.and_then(|star| {
+                                world
+                                    .committed()
+                                    .prospects
+                                    .iter()
+                                    .find(|vein| vein.orb == *current && vein.element == element)
+                                    .map(|vein| {
+                                        let natural =
+                                            cfe::dop::element_properties(&element, star).2;
+                                        (
+                                            cfe::dop::vein_richness(&natural, &vein.extracted),
+                                            natural,
+                                        )
+                                    })
                             });
-                            if let (Some(after), Some(natural)) = (after, natural) {
+                            if let Some((after, natural)) = after {
                                 println!(
                                     "  {} the spring now runs at {} of {}/tick natural — {}",
                                     style.dim("↳"),
@@ -490,7 +496,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                                     amount(&natural),
                                     match after < natural {
                                         true => style.dim(
-                                            "a regenerator on this orb restores it between draws",
+                                            "worked below its nature; it will not refill until rejuvenation derives it back (ONT-3)",
                                         ),
                                         false => style.dim("still running at its nature"),
                                     }
@@ -3134,58 +3140,14 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
             ),
         },
         Some("challenge") | Some("challenge_assay") => {
-            let prefix = words.next();
-            match prefix {
-                Some(p) => {
-                    let orb = world.orb().map(|o| o.orb_id).unwrap_or(*current);
-                    // Resolve element by prefix against open prospects.
-                    let hit = world
-                        .committed()
-                        .prospects
-                        .iter()
-                        .find(|v| {
-                            let hex: String = v
-                                .element
-                                .iter()
-                                .take(4)
-                                .map(|b| format!("{b:02x}"))
-                                .collect();
-                            hex.starts_with(p) || hex.starts_with(&p.to_lowercase())
-                        })
-                        .map(|v| v.element);
-                    match hit {
-                        Some(el) => match world.challenge_assay(orb, el) {
-                            Ok(true) => {
-                                let _ = sync_world(world);
-                                println!(
-                                    "{} assay consilience MATCH on {}",
-                                    style.ok("ASSAY"),
-                                    &hex(&el)[..8]
-                                );
-                            }
-                            Ok(false) => {
-                                let _ = sync_world(world);
-                                println!(
-                                    "{} assay MISMATCH — richness corrected + crystal slash on {}",
-                                    style.warn("SLASH"),
-                                    &hex(&el)[..8]
-                                );
-                            }
-                            Err(refusal) => refuse(world, &refusal, style),
-                        },
-                        None => println!(
-                            "{} no open vein matches prefix {} — prospect first",
-                            style.bad("✗"),
-                            p
-                        ),
-                    }
-                }
-                None => println!(
-                    "{} usage: {}",
-                    style.bad("✗"),
-                    style.strong("challenge <element-prefix>")
-                ),
-            }
+            // ONT-2: the assay-consilience court is RETIRED. Richness is
+            // derived (natural − extracted) and cannot drift from geometry, so
+            // there is nothing to challenge and no crystal to spend enforcing
+            // it — the manifold is the only truth the vein carries.
+            println!(
+                "{} the assay court is retired — vein richness derives from the star and the extraction ledger; it cannot drift",
+                style.dim("·")
+            );
         },
         // X7 Anchor export/import (feature-gated deeds)
         Some("anchor") => match words.next() {
@@ -4781,6 +4743,10 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
             for vein in &committed.prospects {
                 let (family, tier, natural) =
                     cfe::dop::element_properties(&vein.element, star);
+                // ONT-2: the standing flow is DERIVED — natural minus the
+                // extraction integral; never stored, so it cannot drift or
+                // collapse.
+                let richness = cfe::dop::vein_richness(&natural, &vein.extracted);
                 // The periodic EXTRAPOLATION: group and period derive
                 // from the identity hash by the same modular law as
                 // family and tier — display until the chemistry lands
@@ -4796,39 +4762,24 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                     tier,
                     group,
                     period,
-                    amount(&vein.richness),
+                    amount(&richness),
                     vein.last_assay
                 );
-                // ECO-1 (#40): THE GROUND'S CONDITION. A vein is a
-                // spring — the draw tires it and regenerators restore
-                // it — so the standing flow is shown against the
-                // nature it can never pass, with the tending that
-                // decides which way it is heading.
-                let tending = committed
-                    .orbs
-                    .iter()
-                    .find(|orb| orb.orb_id == vein.orb)
-                    .map(|orb| {
-                        orb.zones
-                            .iter()
-                            .filter(|zone| zone.kind == cfe::dop::ZoneKind::Regenerator)
-                            .count()
-                    })
-                    .unwrap_or(0);
-                let worn = vein.richness < natural;
+                // ONT-2: THE GROUND'S CONDITION. The standing flow is shown
+                // against the nature it can never pass. A worked vein stays
+                // worn until rejuvenation DERIVES it back (ONT-3: orbital
+                // forcing / topological cycle injection) — there is no stored
+                // number ticking up between draws.
+                let worn = richness < natural;
                 println!(
-                    "      {} {} of {}/tick natural{}",
-                    match (worn, tending) {
-                        (false, _) => style.dim("○ untouched —"),
-                        (true, 0) => style.warn("◔ WORN —"),
-                        (true, _) => style.dim("◑ recovering —"),
+                    "      {} {} of {}/tick natural",
+                    if worn {
+                        style.warn("◔ WORN —")
+                    } else {
+                        style.dim("○ untouched —")
                     },
-                    amount(&vein.richness),
+                    amount(&richness),
                     amount(&natural),
-                    match tending {
-                        0 => String::new(),
-                        held => format!(" · {held} regenerator(s) tending"),
-                    }
                 );
             }
             for orb in &committed.orbs {

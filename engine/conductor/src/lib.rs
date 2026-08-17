@@ -1763,7 +1763,9 @@ impl Polity {
                 return false;
             }
             let (_, _, natural) = cfe::dop::element_properties(&vein.element, class);
-            vein.richness < natural
+            // ONT-2: worn = the DERIVED richness (natural − extracted) stands
+            // below nature, i.e. the vein has yielded anything at all.
+            cfe::dop::vein_richness(&natural, &vein.extracted) < natural
         })
     }
 

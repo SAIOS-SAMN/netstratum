@@ -686,22 +686,24 @@ impl Replayer {
         }
         // ELEMENT-GRAMMAR-1: the receipt carries the drawn
         // properties — replay reads, never rolls.
-        ClosureEvent::ProspectStruck { orb_id, stratum, element, richness, .. } => {
+        ClosureEvent::ProspectStruck { orb_id, stratum, element, .. } => {
             prospects.push(Prospected {
                 orb: *orb_id,
                 stratum: *stratum,
                 element: *element,
-                richness: richness.clone(),
+                // ONT-2: a fresh vein has extracted nothing; richness derives.
+                extracted: ratio(0, 1),
                 last_assay: receipt.stamp,
             });
         }
         // #27: a dying star scatters a vein — the same push a prospect makes.
-        ClosureEvent::EnrichmentStruck { orb_id, stratum, element, richness } => {
+        ClosureEvent::EnrichmentStruck { orb_id, stratum, element, .. } => {
             prospects.push(Prospected {
                 orb: *orb_id,
                 stratum: *stratum,
                 element: *element,
-                richness: richness.clone(),
+                // ONT-2: a supernova-scattered vein opens fresh — extracted 0.
+                extracted: ratio(0, 1),
                 last_assay: receipt.stamp,
             });
         }
@@ -733,19 +735,16 @@ impl Replayer {
                 held.bank_element(*refined, yielded.clone());
             }
         }
-        ClosureEvent::AssayStruck { orb_id, element, amount, richness } => {
+        ClosureEvent::AssayStruck { orb_id, element, amount, .. } => {
             if let Some(vein) = prospects
                 .iter_mut()
                 .find(|held| held.orb == *orb_id && held.element == *element)
             {
                 vein.last_assay = receipt.stamp;
-                // ECO-1 (#40): the receipt carries the vein's flow
-                // after the deed — replay reads, never re-derives.
-                // The sealed 3-field form carries none: richness
-                // holds still, exactly as the pre-ecology law did.
-                if let Some(after) = richness {
-                    vein.richness = after.clone();
-                }
+                // ONT-2: fold the receipt's Δ into the extraction integral —
+                // replay reads, never re-derives. Richness is a projection of
+                // (geometry − this sum), so re-derivation is free and exact.
+                vein.extracted += amount.clone();
             }
             if let Some(held) = peel(&mut *orbs, *orb_id) {
                 held.bank_element(*element, amount.clone());
@@ -1729,20 +1728,13 @@ impl Replayer {
             }
         }
         ClosureEvent::AssayConsilience { .. } => {}
-        ClosureEvent::AssaySlashed {
-            orb_id,
-            element,
-            slash,
-            richness_after,
-        } => {
+        ClosureEvent::AssaySlashed { orb_id, slash, .. } => {
+            // ONT-2: the consilience patch is deleted — richness can no longer
+            // drift from geometry, so there is nothing to correct. A legacy
+            // AssaySlashed receipt still burns its crystal; the vein's derived
+            // richness is untouched (the correction was the vestige).
             if let Some(held) = peel(&mut *orbs, *orb_id) {
                 held.bank(crate::dop::Resource::Crystal, -slash.clone());
-            }
-            if let Some(v) = prospects
-                .iter_mut()
-                .find(|p| p.orb == *orb_id && p.element == *element)
-            {
-                v.richness = richness_after.clone();
             }
         }
         ClosureEvent::IsoUnionStruck {

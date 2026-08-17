@@ -1,26 +1,35 @@
-//! THE ELEMENT LAW — the element ledger enters conservation with
-//! strict symmetry to the banked ledger (operator ruling 2026-08-01).
-//! Red-first.
+//! THE ELEMENT LAW — the element ledger enters conservation with strict
+//! symmetry to the banked ledger (operator ruling 2026-08-01).
 //!
-//! An assay mints `richness · elapsed` into a vein's element — sign-
-//! guarded (amount ≥ 0) and bounded by the PRIOR vein's richness and
-//! last_assay, both already committed state, so the bound is
-//! deterministic from (prior, step). Every other deed holds every
-//! element key still: an element total changed under a deed that
-//! declares no element move refuses, exactly as a smuggled bank does.
+//! ONT-2: an assay mints the vein's DERIVED flow into its element — sign-
+//! guarded (amount ≥ 0) and bounded by the geometry minus the PRIOR
+//! extraction integral, both re-derivable from (prior, step), so the bound is
+//! deterministic and needs no stored richness scalar. The vein book holds
+//! still: a prospect pushes a FRESH vein (extracted nothing), an assay grows
+//! that vein's integral by exactly the banked amount, and every other deed
+//! leaves the book untouched — an undeclared change refuses.
 
 use cfe::dop::{ClosureEvent, ColonyOrb};
 use cfe::ipsal::Entity;
 use cfe::ratio::{ratio, Ratio};
 use cfe::world::{Committed, Prospected, World, SOVEREIGN};
-use kernel::{admits, Step, Refused};
+use kernel::{admits, Refused, Step};
 
 const ELEMENT: [u8; 32] = [3u8; 32];
 
-/// A one-orb state with an opened vein: element ELEMENT, richness 2,
-/// last assayed at stamp 1. Sovereign seated.
-fn with_vein(richness: (i64, i64), last_assay: u64) -> Committed {
+/// ELEMENT's geometric endowment (`natural`) under a G star — the hash's own
+/// reading, the number the extraction bound derives against. Pinned: 1/2.
+fn natural() -> Ratio {
+    cfe::dop::element_properties(&ELEMENT, cfe::thermal::StarClass::G).2
+}
+
+/// A one-orb state under a G sun with a vein at ELEMENT that has EXTRACTED
+/// `extracted` so far, last assayed at `last_assay`. Sovereign seated. The
+/// star stands so the bound (natural − extracted, decayed over the span) is
+/// derivable — the vein carries no richness scalar.
+fn with_vein(extracted: (i64, i64), last_assay: u64) -> Committed {
     let mut committed = World::new().committed();
+    committed.star = Some(cfe::thermal::StarClass::G);
     committed.orbs = vec![ColonyOrb { orb_id: 1, name: "site".into(), ..Default::default() }];
     committed.entities = vec![Entity {
         entity_id: SOVEREIGN,
@@ -32,10 +41,27 @@ fn with_vein(richness: (i64, i64), last_assay: u64) -> Committed {
         orb: 1,
         stratum: 0,
         element: ELEMENT,
-        richness: ratio(richness.0, richness.1),
+        extracted: ratio(extracted.0, extracted.1),
         last_assay,
     }];
     committed
+}
+
+/// The vein's derived flow over the span to `stamp` — the exact bound the
+/// gate re-derives (call-not-copy, the one home `vein_flow`).
+fn flow_to(prior: &Committed, stamp: u64) -> Ratio {
+    prior
+        .prospects
+        .iter()
+        .find(|v| v.element == ELEMENT)
+        .and_then(|v| {
+            let class = prior.star?;
+            let n = cfe::dop::element_properties(&ELEMENT, class).2;
+            let elapsed = stamp.saturating_sub(v.last_assay);
+            let richness = cfe::dop::vein_richness(&n, &v.extracted);
+            Some(cfe::dop::vein_flow(&richness, &n, elapsed))
+        })
+        .unwrap_or_else(|| ratio(0, 1))
 }
 
 fn banked_element(state: &Committed, element: [u8; 32], delta: Ratio) -> Committed {
@@ -44,233 +70,132 @@ fn banked_element(state: &Committed, element: [u8; 32], delta: Ratio) -> Committ
     next
 }
 
-/// ECO-1 (#40): the assay's FULL effect on the vein book — the span
-/// anchor advances to the deed's stamp, and the declared after-richness
-/// lands. The sealed form (`None`) holds richness where it stood.
-fn worked_vein(state: &Committed, stamp: u64, richness: Option<Ratio>) -> Committed {
-    let mut next = state.clone();
-    if let Some(vein) = next.prospects.iter_mut().find(|vein| vein.element == ELEMENT) {
-        vein.last_assay = stamp;
-        if let Some(after) = richness {
-            vein.richness = after;
-        }
-    }
-    next
-}
-
-fn assay(amount: (i64, i64), stamp: u64) -> Step {
+fn assay(amount: Ratio, stamp: u64) -> Step {
     Step {
-        event: ClosureEvent::AssayStruck {
-            orb_id: 1,
-            element: ELEMENT,
-            amount: ratio(amount.0, amount.1),
-            // The SEALED pre-ecology form: declares no after-richness,
-            // so the vein's flow holds still and only the bound is
-            // judged. Chains cut this way verify forever this way.
-            richness: None,
-        },
+        event: ClosureEvent::AssayStruck { orb_id: 1, element: ELEMENT, amount, richness: None },
         actor: SOVEREIGN,
         stamp,
     }
 }
 
+/// The full ONT-2 assay effect on the book: the element banks, the span
+/// anchor advances, and the extraction integral grows by exactly the amount.
+fn worked(prior: &Committed, amount: Ratio, stamp: u64) -> (Committed, Step) {
+    let mut next = banked_element(prior, ELEMENT, amount.clone());
+    if let Some(vein) = next.prospects.iter_mut().find(|v| v.element == ELEMENT) {
+        vein.last_assay = stamp;
+        vein.extracted += amount.clone();
+    }
+    (next, assay(amount, stamp))
+}
+
 #[test]
-fn an_honest_assay_mints_exactly_the_vein_yield() {
-    // richness 2 × elapsed (4 − 1 = 3) = 6, minted into the element.
-    //
-    // WITNESS TRUTH-UPDATE (ECO-1, #40): `next` now also carries the
-    // advanced span anchor. It always SHOULD have — live and replay
-    // both advance it — but until the vein book became judged state
-    // the gate could not see it, and an assay that banked its element
-    // while leaving the anchor where it stood left the same span
-    // drawable again on the next step. That is now VeinBookBroken.
-    let prior = with_vein((2, 1), 1);
-    let next = worked_vein(&banked_element(&prior, ELEMENT, ratio(6, 1)), 4, None);
-    assert_eq!(admits(&prior, &next, &assay((6, 1), 4)), Ok(()));
+fn an_honest_assay_mints_exactly_the_vein_flow() {
+    // A fresh vein (extracted 0) under G runs at natural 1/2. Over a 3-tick
+    // span the derived flow is min(1/2·1/2·3, 1/2) = 1/2 (the span would take
+    // more than stands, so it caps at the remaining richness). The gate
+    // re-derives that exact number; banking it, advancing the anchor and
+    // growing the integral admits.
+    assert_eq!(natural(), ratio(1, 2), "the hash's reading, pinned");
+    let prior = with_vein((0, 1), 1);
+    let flow = flow_to(&prior, 4);
+    assert_eq!(flow, ratio(1, 2), "a fresh vein pays its whole richness this span");
+    let (next, step) = worked(&prior, flow, 4);
+    assert_eq!(admits(&prior, &next, &step), Ok(()));
 }
 
 #[test]
 fn an_assay_that_leaves_the_span_anchor_unmoved_refuses() {
-    // THE HOLE THE BOOK LAW CLOSES: the element ledger balanced, the
-    // bound honoured — and the vein left exactly as it was, so the
-    // same three ticks of span stand ready to be drawn again.
-    let prior = with_vein((2, 1), 1);
-    let unmoved = banked_element(&prior, ELEMENT, ratio(6, 1));
+    // The element ledger balanced and the bound honoured, but the vein left
+    // as it was, so the span stands drawable again → the book law refuses.
+    let prior = with_vein((0, 1), 1);
+    let flow = flow_to(&prior, 4);
+    let unmoved = banked_element(&prior, ELEMENT, flow.clone());
     assert_eq!(
-        admits(&prior, &unmoved, &assay((6, 1), 4)),
+        admits(&prior, &unmoved, &assay(flow, 4)),
         Err(Refused::VeinBookBroken { at: 0 }),
-        "an assay moves its vein's anchor or it does not stand"
+        "an assay moves its vein's anchor and integral, or it does not stand"
     );
 }
 
 #[test]
-fn an_assay_past_the_vein_yield_refuses_bounded() {
-    // The same vein yields 6 at stamp 4; a claim of 7 refuses with the
-    // bound and the claim carried whole.
-    let prior = with_vein((2, 1), 1);
-    let greedy = banked_element(&prior, ELEMENT, ratio(7, 1));
+fn an_assay_past_the_vein_flow_refuses_bounded() {
+    let prior = with_vein((0, 1), 1);
+    let flow = flow_to(&prior, 4);
+    let over = flow.clone() + ratio(1, 1);
+    let greedy = banked_element(&prior, ELEMENT, over.clone());
     assert_eq!(
-        admits(&prior, &greedy, &assay((7, 1), 4)),
-        Err(Refused::AssayExceedsVein {
-            bound: Box::new(ratio(6, 1)),
-            claimed: Box::new(ratio(7, 1)),
-        }),
-        "value enters the element ledger only up to the vein's yield"
+        admits(&prior, &greedy, &assay(over.clone(), 4)),
+        Err(Refused::AssayExceedsVein { bound: Box::new(flow), claimed: Box::new(over) }),
+        "value enters the element ledger only up to the vein's derived flow"
     );
 }
 
 #[test]
 fn a_negative_assay_refuses_by_sign() {
-    let prior = with_vein((2, 1), 1);
+    let prior = with_vein((0, 1), 1);
     let inverted = banked_element(&prior, ELEMENT, ratio(-6, 1));
     assert_eq!(
-        admits(&prior, &inverted, &assay((-6, 1), 4)),
-        Err(Refused::ElementNotPositive {
-            element: ELEMENT,
-            amount: Box::new(ratio(-6, 1)),
-        }),
+        admits(&prior, &inverted, &assay(ratio(-6, 1), 4)),
+        Err(Refused::ElementNotPositive { element: ELEMENT, amount: Box::new(ratio(-6, 1)) }),
         "an element mint is non-negative by declaration"
     );
 }
 
 #[test]
 fn an_assay_with_no_vein_yields_nothing() {
-    // No prior vein for this element: the bound is zero, so any
-    // positive claim refuses.
-    let mut prior = with_vein((2, 1), 1);
+    let mut prior = with_vein((0, 1), 1);
     prior.prospects.clear();
-    let claimed = banked_element(&prior, ELEMENT, ratio(6, 1));
+    let claimed = banked_element(&prior, ELEMENT, ratio(1, 1));
     assert_eq!(
-        admits(&prior, &claimed, &assay((6, 1), 4)),
-        Err(Refused::AssayExceedsVein {
-            bound: Box::new(ratio(0, 1)),
-            claimed: Box::new(ratio(6, 1)),
-        }),
+        admits(&prior, &claimed, &assay(ratio(1, 1), 4)),
+        Err(Refused::AssayExceedsVein { bound: Box::new(ratio(0, 1)), claimed: Box::new(ratio(1, 1)) }),
         "no vein, no yield"
     );
 }
 
-/// ECO-1 (#40): the vein's NATURAL flow for ELEMENT under a G star —
-/// the hash's own reading, the number the wear law caps against.
-fn natural() -> Ratio {
-    let (_, _, richness) = cfe::dop::element_properties(&ELEMENT, cfe::thermal::StarClass::G);
-    richness
-}
-
-/// A state whose sun stands (the wear law reads the star to derive the
-/// spring's nature) and whose orb carries `regenerators` regenerators.
-fn under_a_sun(richness: (i64, i64), last_assay: u64, regenerators: usize) -> Committed {
-    let mut committed = with_vein(richness, last_assay);
-    committed.star = Some(cfe::thermal::StarClass::G);
-    committed.orbs[0].zones = (0..regenerators)
-        .map(|tile| cfe::dop::Zone { tile: tile as u16, kind: cfe::dop::ZoneKind::Regenerator, base: None })
-        .collect();
-    committed
-}
-
-/// The full ecological assay: the element banked, the anchor advanced,
-/// and the declared after-richness landed on the vein.
-fn worked(prior: &Committed, amount: Ratio, stamp: u64, after: Ratio) -> (Committed, Step) {
-    let mut next = banked_element(prior, ELEMENT, amount.clone());
-    if let Some(vein) = next.prospects.iter_mut().find(|vein| vein.element == ELEMENT) {
-        vein.last_assay = stamp;
-        vein.richness = after.clone();
-    }
-    let step = Step {
-        event: ClosureEvent::AssayStruck {
-            orb_id: 1,
-            element: ELEMENT,
-            amount,
-            richness: Some(after),
-        },
-        actor: SOVEREIGN,
-        stamp,
-    };
-    (next, step)
+#[test]
+fn an_assay_with_no_star_yields_nothing() {
+    // ONT-2: the vein's nature derives from the star's spectrum; with no sun
+    // the endowment is underivable, so the bound is zero and any positive
+    // claim refuses. (The verb cannot reach this — prospecting requires a
+    // sun — but the gate judges states, not paths.)
+    let mut starless = with_vein((0, 1), 1);
+    starless.star = None;
+    let claimed = banked_element(&starless, ELEMENT, ratio(1, 1));
+    assert_eq!(
+        admits(&starless, &claimed, &assay(ratio(1, 1), 4)),
+        Err(Refused::AssayExceedsVein { bound: Box::new(ratio(0, 1)), claimed: Box::new(ratio(1, 1)) }),
+        "no sun, no nature, no yield"
+    );
 }
 
 #[test]
-fn the_gate_re_derives_the_wear_and_admits_only_that_number() {
-    // The vein runs at its nature (1/2 under G) and is drawn for its
-    // whole three-tick span. The gate re-derives the wear by CALLING
-    // the emitter's one home, so the ONLY admissible after-richness is
-    // the one the verb would have settled.
-    let natural = natural();
-    assert_eq!(natural, ratio(1, 2), "the hash's reading, pinned");
-    let prior = under_a_sun((1, 2), 1, 0);
-    let drawn = ratio(3, 2);
-    let expected = cfe::dop::vein_wear(&natural, &natural, &drawn, 0, 3);
-    assert_eq!(expected, ratio(1, 8), "a draw of three times the nature guts the spring");
-
-    let (next, step) = worked(&prior, drawn.clone(), 4, expected.clone());
+fn the_integral_grows_by_exactly_the_banked_amount() {
+    // A partly-worked vein (already extracted 1/8) is drawn again: the gate
+    // admits only a next whose extraction integral grew by EXACTLY the banked
+    // amount. A book that grows it by any other step — the old 'after-richness'
+    // drift — is VeinBookBroken.
+    let prior = with_vein((1, 8), 1);
+    let flow = flow_to(&prior, 4);
+    let (next, step) = worked(&prior, flow.clone(), 4);
     assert_eq!(admits(&prior, &next, &step), Ok(()));
 
-    // A gentler wear than the law allows — the vein flattered by a
-    // tick — refuses with both numbers whole.
-    let flattered = ratio(1, 4);
-    let (next, step) = worked(&prior, drawn, 4, flattered.clone());
+    let mut drifted = banked_element(&prior, ELEMENT, flow.clone());
+    if let Some(v) = drifted.prospects.iter_mut().find(|v| v.element == ELEMENT) {
+        v.last_assay = 4;
+        v.extracted += flow.clone() + ratio(1, 100);
+    }
     assert_eq!(
-        admits(&prior, &next, &step),
-        Err(Refused::VeinWearMisdeclared {
-            expected: Box::new(expected),
-            declared: Box::new(flattered),
-        }),
-        "the emitter cannot quote the ground one way and work it another"
+        admits(&prior, &drifted, &assay(flow, 4)),
+        Err(Refused::VeinBookBroken { at: 0 }),
+        "the integral grows by the banked amount, never a declared drift"
     );
 }
 
 #[test]
-fn the_gate_reads_the_regenerators_standing_on_the_orb() {
-    // The SAME draw over the SAME span, judged against an orb that
-    // tends its ground: the gate reads the regenerators from prior
-    // state, so the number it admits rises with them — and a
-    // declaration that claims the tended recovery on BARE ground
-    // refuses.
-    let natural = natural();
-    let drawn = ratio(3, 2);
-    let bare = under_a_sun((1, 2), 1, 0);
-    let tended = under_a_sun((1, 2), 1, 1);
-    let restored = cfe::dop::vein_wear(&natural, &natural, &drawn, 1, 3);
-    assert_eq!(restored, ratio(37, 80), "one regenerator closes most of the gap");
-    assert!(restored > ratio(1, 8), "and stands above the untended wear");
-
-    let (next, step) = worked(&tended, drawn.clone(), 4, restored.clone());
-    assert_eq!(admits(&tended, &next, &step), Ok(()));
-
-    let (next, step) = worked(&bare, drawn, 4, restored.clone());
-    assert_eq!(
-        admits(&bare, &next, &step),
-        Err(Refused::VeinWearMisdeclared {
-            expected: Box::new(ratio(1, 8)),
-            declared: Box::new(restored),
-        }),
-        "recovery is earned by standing regenerators, never by declaration"
-    );
-}
-
-#[test]
-fn a_wear_declaration_with_nothing_to_derive_from_refuses() {
-    // No star: the spring's nature is underivable, so no after-richness
-    // is lawful. (The verb cannot reach this — prospecting requires a
-    // commissioned sun — but the gate judges states, not paths.)
-    let mut starless = under_a_sun((1, 2), 1, 0);
-    starless.star = None;
-    let (next, step) = worked(&starless, ratio(3, 2), 4, ratio(1, 8));
-    assert_eq!(
-        admits(&starless, &next, &step),
-        Err(Refused::VeinWearMisdeclared {
-            expected: Box::new(ratio(0, 1)),
-            declared: Box::new(ratio(1, 8)),
-        }),
-        "no sun, no nature, no lawful wear"
-    );
-}
-
-#[test]
-fn a_prospect_pushes_exactly_its_receipted_vein() {
-    // The book law's other half: the mint deed's effect is declared by
-    // its own receipt, and a book that grew some other vein refuses.
-    let prior = under_a_sun((1, 2), 1, 0);
+fn a_prospect_pushes_a_fresh_vein() {
+    let prior = with_vein((0, 1), 1);
     let struck = ClosureEvent::ProspectStruck {
         orb_id: 1,
         stratum: 7,
@@ -282,167 +207,45 @@ fn a_prospect_pushes_exactly_its_receipted_vein() {
     };
     let step = Step { event: struck, actor: SOVEREIGN, stamp: 9 };
     let mut next = prior.clone();
-    next.prospects.push(cfe::world::Prospected {
+    next.prospects.push(Prospected {
         orb: 1,
         stratum: 7,
         element: [11u8; 32],
-        richness: ratio(3, 4),
+        extracted: ratio(0, 1),
         last_assay: 9,
     });
     assert_eq!(admits(&prior, &next, &step), Ok(()));
 
+    // A vein pushed already part-drained — the ground a world stands on is
+    // what its receipts struck, and a prospect strikes a FRESH vein.
     let mut smuggled = prior.clone();
-    smuggled.prospects.push(cfe::world::Prospected {
+    smuggled.prospects.push(Prospected {
         orb: 1,
         stratum: 7,
         element: [11u8; 32],
-        // A richer vein than the receipt struck.
-        richness: ratio(9, 1),
+        extracted: ratio(9, 1),
         last_assay: 9,
     });
     assert_eq!(
         admits(&prior, &smuggled, &step),
         Err(Refused::VeinBookBroken { at: 1 }),
-        "the ground a world stands on is what its receipts struck"
+        "a prospect pushes a fresh vein — extracted nothing"
     );
 }
 
 #[test]
 fn a_neutral_deed_holds_the_vein_book_still() {
-    let prior = under_a_sun((1, 2), 1, 0);
-    let mut enriched = prior.clone();
-    enriched.prospects[0].richness = ratio(9, 1);
+    let prior = with_vein((0, 1), 1);
+    let mut drained = prior.clone();
+    drained.prospects[0].extracted = ratio(9, 1);
     let neutral = Step {
         event: ClosureEvent::OverheatCleared { orb_id: 1 },
         actor: 999,
         stamp: 4,
     };
     assert_eq!(
-        admits(&prior, &enriched, &neutral),
+        admits(&prior, &drained, &neutral),
         Err(Refused::VeinBookBroken { at: 0 }),
-        "no deed enriches a vein undeclared"
+        "no deed drains a vein undeclared"
     );
-}
-
-#[test]
-fn an_element_change_under_a_neutral_deed_refuses() {
-    // Zero-invariance: a covered deed that declares no element move
-    // must leave every element key still. A smuggled element mint
-    // under a neutral deed refuses, exactly as a smuggled bank does.
-    let prior = with_vein((2, 1), 1);
-    let smuggled = banked_element(&prior, ELEMENT, ratio(6, 1));
-    let neutral = Step {
-        event: ClosureEvent::OverheatCleared { orb_id: 1 },
-        actor: 999,
-        stamp: 4,
-    };
-    assert_eq!(
-        admits(&prior, &smuggled, &neutral),
-        Err(Refused::ElementBroken {
-            element: ELEMENT,
-            expected: Box::new(ratio(0, 1)),
-            actual: Box::new(ratio(6, 1)),
-        }),
-        "no deed mints an element undeclared"
-    );
-}
-
-// ── task #29: the element-food synthesis — a conserved transmutation ──
-
-/// A sunlit one-orb state with `joule` banked and the sovereign seated —
-/// the setting for an element-eater synthesizing its food from energy.
-fn sunlit_with_joule(joule: Ratio) -> Committed {
-    let mut committed = World::new().committed();
-    let mut orb = ColonyOrb { orb_id: 1, name: "forge".into(), ..Default::default() };
-    orb.bank(cfe::dop::Resource::Joule, joule);
-    committed.orbs = vec![orb];
-    committed.entities = vec![Entity {
-        entity_id: SOVEREIGN,
-        handle: "sovereign".into(),
-        principal: None,
-        grants: vec![],
-    }];
-    committed.star = Some(cfe::thermal::StarClass::G);
-    committed
-}
-
-fn farm(element: [u8; 32], joule: Ratio, minted: Ratio, eaten: Ratio, stamp: u64) -> Step {
-    Step {
-        event: ClosureEvent::ElementFarmed { orb_id: 1, element, joule, minted, eaten },
-        actor: SOVEREIGN,
-        stamp,
-    }
-}
-
-#[test]
-fn an_honest_element_farm_admits_the_conserved_transmutation() {
-    // Spend joule, mint the element at exactly the richness bound — energy
-    // leaves the ledger, matter enters, both declared. The kernel admits.
-    let element = ELEMENT;
-    let prior = sunlit_with_joule(ratio(100, 1));
-    let (_, _, richness) = cfe::dop::element_properties(&element, cfe::thermal::StarClass::G);
-    let joule = ratio(10, 1);
-    let minted = joule.clone() * richness.clone(); // exactly minted ≤ joule × richness
-    let mut next = prior.clone();
-    next.orbs[0].bank(cfe::dop::Resource::Joule, -joule.clone());
-    next.orbs[0].bank_element(element, minted.clone());
-    assert_eq!(admits(&prior, &next, &farm(element, joule, minted, ratio(0, 1), 5)), Ok(()));
-}
-
-#[test]
-fn the_food_cycle_nets_the_mint_against_what_the_zones_ate() {
-    // The line mints its food AND eats some of it: the larder moves by
-    // `minted − eaten`, and the joule spend still buys only up to the
-    // richness bound. Both declared, both conserved — the kernel admits.
-    let element = ELEMENT;
-    // Start with some stored food to eat.
-    let mut prior = sunlit_with_joule(ratio(100, 1));
-    prior.orbs[0].bank_element(element, ratio(20, 1));
-    let (_, _, richness) = cfe::dop::element_properties(&element, cfe::thermal::StarClass::G);
-    let joule = ratio(10, 1);
-    let minted = joule.clone() * richness.clone();
-    let eaten = ratio(5, 1);
-    let mut next = prior.clone();
-    next.orbs[0].bank(cfe::dop::Resource::Joule, -joule.clone());
-    next.orbs[0].bank_element(element, minted.clone() - eaten.clone()); // net
-    assert_eq!(admits(&prior, &next, &farm(element, joule, minted, eaten, 5)), Ok(()));
-}
-
-#[test]
-fn an_element_farm_past_the_richness_bound_refuses() {
-    // Mint MORE element than the joule buys at the element's richness —
-    // conjuring matter. The kernel refuses, bounded (the AssayExceedsVein
-    // law, shared with the vein and the refinery).
-    let element = ELEMENT;
-    let prior = sunlit_with_joule(ratio(100, 1));
-    let (_, _, richness) = cfe::dop::element_properties(&element, cfe::thermal::StarClass::G);
-    let joule = ratio(10, 1);
-    let greedy = joule.clone() * richness + ratio(1, 1); // one over the bound
-    let mut next = prior.clone();
-    next.orbs[0].bank(cfe::dop::Resource::Joule, -joule.clone());
-    next.orbs[0].bank_element(element, greedy.clone());
-    assert!(
-        matches!(
-            admits(&prior, &next, &farm(element, joule, greedy, ratio(0, 1), 5)),
-            Err(Refused::AssayExceedsVein { .. })
-        ),
-        "a farm cannot conjure more matter than its energy buys"
-    );
-}
-
-#[test]
-fn trace_consumption_admits_as_a_conserved_element_spend() {
-    // A population burns a trace of its element maintaining its substrate:
-    // the element leaves the ledger, declared and conserved — the kernel
-    // admits it exactly like a salvage.
-    let element = ELEMENT;
-    let prior = banked_element(&with_vein((2, 1), 1), element, ratio(10, 1));
-    let mut next = prior.clone();
-    next.orbs[0].bank_element(element, ratio(-3, 1));
-    let step = Step {
-        event: ClosureEvent::TraceConsumed { orb_id: 1, element, amount: ratio(3, 1) },
-        actor: SOVEREIGN,
-        stamp: 5,
-    };
-    assert_eq!(admits(&prior, &next, &step), Ok(()));
 }

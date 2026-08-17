@@ -113,34 +113,7 @@ fn o6_5_vault_deposit_withdraw_and_margin_hold() {
     assert_eq!(replay(w.chronicle()), w.committed(), "SEAL B vault");
 }
 
-#[test]
-fn o6_4_assay_consilience_match() {
-    let mut w = stamp_world("assay");
-    w.commission_star(cfe::thermal::StarClass::G)
-        .expect("star");
-    w.site_planet(
-        FIRST_ORB,
-        cfe::dop::unit(0, 1),
-        cfe::dop::positive(1, 1),
-        None,
-        None,
-    )
-    .expect("site");
-    let struck = w.prospect(FIRST_ORB, 1).expect("prospect");
-    assert!(matches!(
-        w.challenge_assay(FIRST_ORB, struck.element),
-        Err(cfe::world::ActionRefused::AssayRequired)
-    ));
-    w.seat_station(Name::new("court").unwrap(), Station::Assay)
-        .expect("assay");
-    // Honest vein matches element_properties → true, no slash.
-    let ok = w
-        .challenge_assay(FIRST_ORB, struck.element)
-        .expect("challenge");
-    assert!(ok, "fresh prospect matches true richness");
-    let ok2 = w
-        .challenge_assay(FIRST_ORB, struck.element)
-        .expect("again");
-    assert!(ok2);
-    assert_eq!(replay(w.chronicle()), w.committed(), "SEAL B assay");
-}
+// ONT-2: o6_4_assay_consilience_match is DELETED. The assay-consilience court
+// existed only to catch a stored richness scalar drifting from the geometric
+// truth; richness is now derived (natural − extracted) and cannot drift, so
+// the court — and this test — no longer have anything to challenge.

@@ -414,7 +414,7 @@ impl World {
             }
             let local = star.is_some_and(|c| local_to(&p.element, c));
             let refines_now = star.is_some_and(|c| refines(&p.element, stratum_for_pressure, c));
-            let (family, _, _) = crate::dop::element_properties(&p.element, star.unwrap_or(crate::thermal::StarClass::G));
+            let (family, _, natural) = crate::dop::element_properties(&p.element, star.unwrap_or(crate::thermal::StarClass::G));
             let name = element_name(family, &p.element);
             veins.push(StellarVeinRow {
                 stratum: p.stratum,
@@ -422,7 +422,9 @@ impl World {
                 line,
                 local,
                 refines_now,
-                richness: p.richness.clone(),
+                // ONT-2: derived, not stored — natural endowment minus the
+                // extraction integral.
+                richness: crate::dop::vein_richness(&natural, &p.extracted),
                 name,
             });
         }

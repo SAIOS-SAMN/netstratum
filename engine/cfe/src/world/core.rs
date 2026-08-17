@@ -416,21 +416,12 @@ impl World {
         if !crate::almanac::refines(&element, opened.stratum, class) {
             return Err(ActionRefused::PressureUnreached { element });
         }
-        // ECO-1 (#40): the loop's two inputs, read before the vein is
-        // borrowed — the star (proven Some only once a vein is found:
-        // prospecting requires it, and nothing uncommissions a sun)
-        // and the regenerators standing on this orb (prior state; the
-        // kernel re-derives both from the same reads).
+        // ONT-2: the star is read before the vein is borrowed (proven Some
+        // once a vein is found: prospecting requires it, and nothing
+        // uncommissions a sun). Regenerators no longer enter here — recovery
+        // is no longer an in-assay recurrence term; it derives separately
+        // (ONT-3: orbital forcing / topological cycle injection).
         let star = self.star;
-        let regenerators = self
-            .orb_by_id(orb)
-            .map(|held| {
-                held.zones
-                    .iter()
-                    .filter(|zone| zone.kind == crate::dop::ZoneKind::Regenerator)
-                    .count() as u64
-            })
-            .unwrap_or(0);
         let now = self.clock.now();
         let Some(vein) = self
             .prospects
@@ -443,15 +434,16 @@ impl World {
             return Err(ActionRefused::NothingAccrued);
         }
         let span = now - vein.last_assay;
-        let elapsed = ratio(span as i64, 1);
-        let amount = vein.richness.clone() * elapsed;
-        // ECO-1: wear and recovery settle in the SAME receipt — the
-        // one-home law prices both (the kernel calls the same fn).
+        // ONT-2: richness is DERIVED (natural − extracted), never a stored
+        // scalar; the flow is a geometric decay capped at the remaining
+        // richness; the extraction integral grows by exactly what banks. No
+        // wear recurrence, so nothing can collapse. The kernel re-derives the
+        // identical amount from the same geometry and the prior integral.
         let class = star.expect("a vein stands, so a star was commissioned");
         let (_, _, natural) = crate::dop::element_properties(&element, class);
-        let after =
-            crate::dop::vein_wear(&vein.richness, &natural, &amount, regenerators, span);
-        vein.richness = after.clone();
+        let richness = crate::dop::vein_richness(&natural, &vein.extracted);
+        let amount = crate::dop::vein_flow(&richness, &natural, span);
+        vein.extracted += amount.clone();
         vein.last_assay = now;
         let held = peel(&mut self.orbs, orb).expect("judged above");
         held.bank_element(element, amount.clone());
@@ -476,7 +468,10 @@ impl World {
                 orb_id: orb,
                 element,
                 amount: amount.clone(),
-                richness: Some(after),
+                // ONT-2: no after-richness to carry — it is derived, never
+                // stored. The receipt is the extraction integral's Δ (`amount`);
+                // replay folds it into `extracted` and re-derives richness.
+                richness: None,
             },
             actor,
         );

@@ -304,7 +304,9 @@ pub fn state_bytes(committed: &Committed) -> Vec<u8> {
         put_u64(&mut out, prospect.orb);
         out.push(prospect.stratum);
         out.extend_from_slice(&prospect.element);
-        ratio::encode(&prospect.richness, &mut out);
+        // ONT-2: the vein carries its extraction integral, not a richness
+        // scalar (richness derives as natural − extracted).
+        ratio::encode(&prospect.extracted, &mut out);
         put_u64(&mut out, prospect.last_assay);
     }
 
@@ -848,7 +850,7 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
             orb: take.u64()?,
             stratum: take.u8()?,
             element: take.array32()?,
-            richness: take.ratio()?,
+            extracted: take.ratio()?,
             last_assay: take.u64()?,
         });
     }

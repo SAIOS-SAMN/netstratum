@@ -588,7 +588,11 @@ impl World {
             orb,
             stratum,
             element,
-            richness: richness.clone(),
+            // ONT-2: a fresh vein has extracted NOTHING; its richness derives
+            // as `natural − 0 = natural`. The endowment (`richness` above) is
+            // the geometry, carried in the receipt for the record, never stored
+            // as a mutable scalar.
+            extracted: ratio(0, 1),
             last_assay: stamp,
         });
         self.close(
@@ -832,7 +836,19 @@ impl World {
         let prospects: Vec<crate::dop::ProspectRow> = self
             .prospects
             .iter()
-            .map(|p| (p.orb, p.stratum, p.richness.clone()))
+            // ONT-2: richness is derived — natural endowment minus extraction.
+            .map(|p| {
+                let richness = self
+                    .star
+                    .map(|c| {
+                        crate::dop::vein_richness(
+                            &crate::dop::element_properties(&p.element, c).2,
+                            &p.extracted,
+                        )
+                    })
+                    .unwrap_or_else(|| ratio(0, 1));
+                (p.orb, p.stratum, richness)
+            })
             .collect();
         crate::dop::appraised_value(holding, &self.orbs, &parcels, star_m, &prospects)
     }

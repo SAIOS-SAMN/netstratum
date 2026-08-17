@@ -279,7 +279,15 @@ pub struct Prospected {
     pub orb: u64,
     pub stratum: u8,
     pub element: [u8; 32],
-    pub richness: Ratio,
+    /// **ONT-2 — THE EXTRACTION INTEGRAL, not a richness scalar.** The
+    /// vein carries NO stored richness. Richness is DERIVED on every read
+    /// as `element_properties(element, star).2 − extracted` (the immutable
+    /// geometry minus this bounded ledger sum) — the collapsing `vein_wear`
+    /// recurrence is gone. `extracted` is the cumulative `Σ AssayStruck.amount`
+    /// for this vein, a division-FREE monotonic sum of `richness·natural·Δt`
+    /// terms, so its denominator is bounded forever by `denom(natural)² ≤ 36`
+    /// and cannot explode. Starts at zero when the vein opens.
+    pub extracted: Ratio,
     /// The last assay's stamp (the prospect's own at opening) — the
     /// span anchor, the bond-settle shape.
     pub last_assay: u64,
