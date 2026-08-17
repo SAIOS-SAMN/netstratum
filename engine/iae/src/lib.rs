@@ -18,13 +18,15 @@ pub mod mint;
 pub mod observation;
 pub mod peel;
 pub mod reduction;
+pub mod think;
 pub mod transport;
 
 // The port's reduce organ, re-exported for the vessel layer (`cfe` grows a
-// basin of `iae::Crystal`; the seat renders `observe`).
+// basin of `iae::Crystal`; the seat renders `observe`/`think`).
 pub use congruence::ChainDelta;
 pub use observation::{adopt, observe, Observed};
 pub use reduction::Crystal;
+pub use think::{think, PairClosure, TaskThought};
 
 // IAE-2 — the stratified carrier: a cellular sheaf with heterogeneous stalks
 // and exact restriction morphisms, and the commutation-gated transduction
