@@ -13,6 +13,7 @@
 //! the abelianised chain shadow. The chain carrier, its reduction, and the
 //! bridges (`letters`, `equivalence`) land in the following IAE slices.
 
+pub mod peel;
 pub mod transport;
 
 // IAE-2 — the stratified carrier: a cellular sheaf with heterogeneous stalks
