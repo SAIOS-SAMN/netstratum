@@ -7,8 +7,8 @@
 
 use iae::peel::{CellFrame, FullMeasurement, GaugeDirection, Site};
 use iae::reduction::{
-    canonicalize, deduce_gauge_move, Exchange, Flip, GaugeDeduction, ObserverFrame, PlaneElement,
-    Relabel,
+    canonicalize, deduce_gauge_move, reduce_pair, Dir13Route, Exchange, Flip, GaugeDeduction,
+    ObserverFrame, PlaneElement, Relabel, ReduceVerdict, Remainder,
 };
 
 fn measurement(rows: i64, cols: i64, fiber: u8, hues: &[u8]) -> FullMeasurement {
@@ -118,4 +118,66 @@ fn a_frame_shape_change_is_content_difference() {
         matches!(deduce(&a, &b), GaugeDeduction::ContentDiffers),
         "a different frame shape is content difference, never a fabricated gauge",
     );
+}
+
+// ── SLICE 3 / PIN A SKELETON — reduce_pair, empty basis ──────────────────
+// The five verdicts, no search, no proposer, no program, no solver hook. If
+// CongruentThroughP is not reachable without a sweep, the organ is wrong.
+
+#[test]
+fn pin_a_identical_is_congruent() {
+    let a = measurement(2, 2, 4, &[0, 1, 2, 3]);
+    assert_eq!(
+        reduce_pair(&a, &a, &[]),
+        ReduceVerdict::Congruent { bounding: Vec::new() },
+        "A = B drains to nothing",
+    );
+}
+
+#[test]
+fn pin_a_rotation_is_congruent_through_p() {
+    let a = measurement(2, 2, 4, &[0, 1, 2, 3]);
+    let rot90 = PlaneElement { exchange: Exchange::Swap, row: Flip::Keep, col: Flip::Mirror };
+    let b = ObserverFrame { plane: rot90, relabel: Relabel::new(Vec::new()) }.apply(&a).unwrap();
+    match reduce_pair(&a, &b, &[]) {
+        ReduceVerdict::CongruentThroughP { p } => reconstructs(&p, &a, &b),
+        other => panic!("a rotation is CongruentThroughP, got {other:?}"),
+    }
+}
+
+#[test]
+fn pin_a_pure_hue_permutation_is_congruent_through_p_not_a_wall() {
+    // 0d3d703e: all fives → all sixes is a GAUGE, not a generation gap.
+    let a = measurement(2, 2, 7, &[5, 5, 5, 5]);
+    let b = measurement(2, 2, 7, &[6, 6, 6, 6]);
+    match reduce_pair(&a, &b, &[]) {
+        ReduceVerdict::CongruentThroughP { p } => reconstructs(&p, &a, &b),
+        other => panic!("a hue permutation is CongruentThroughP, not GenerationGap, got {other:?}"),
+    }
+}
+
+#[test]
+fn pin_a_novel_hue_is_a_generation_gap() {
+    // A novel hue in B that A never expressed (not a global relabel of an equal
+    // form) — the 5→6 wall. Route on ABSENCE-FROM-SOURCE, never `if hue == n`.
+    let a = measurement(2, 2, 3, &[0, 1, 0, 1]);
+    let b = measurement(2, 2, 3, &[0, 1, 0, 2]);
+    match reduce_pair(&a, &b, &[]) {
+        ReduceVerdict::Remainder { remainder: Remainder::ChainClass { .. }, route } => {
+            assert_eq!(route, Dir13Route::GenerationGap, "a hue absent from source is generation");
+        }
+        other => panic!("a novel hue is a ChainClass GenerationGap remainder, got {other:?}"),
+    }
+}
+
+#[test]
+fn pin_a_frame_change_is_a_category_error() {
+    let a = measurement(2, 2, 1, &[0, 0, 0, 0]);
+    let b = measurement(3, 3, 1, &[0, 0, 0, 0, 0, 0, 0, 0, 0]);
+    match reduce_pair(&a, &b, &[]) {
+        ReduceVerdict::Remainder { remainder: Remainder::FrameShift { .. }, route } => {
+            assert_eq!(route, Dir13Route::CategoryError, "a frame shape change is a category error");
+        }
+        other => panic!("a frame change is a FrameShift CategoryError remainder, got {other:?}"),
+    }
 }

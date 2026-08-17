@@ -16,6 +16,7 @@
 //! `observe` — later landings. `reduce_cochain`/SNF untouched: two functions,
 //! two jobs (the SNF verifier gates commits; this is the think drain).
 
+use crate::congruence::{signed_entry_sum, signed_remainder, ChainDelta};
 use crate::peel::{CellFrame, FullMeasurement, GaugeDirection, MeasurementRefusal, Site};
 use thiserror::Error;
 
@@ -414,4 +415,178 @@ fn rule_between_frames(g_a: &RenamingFrame, g_b: &RenamingFrame) -> ObserverFram
         })
         .collect();
     ObserverFrame { plane, relabel: Relabel::new(pairs) }
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// SLICE 3 — the drain, the route, the conductor.
+// ─────────────────────────────────────────────────────────────────────
+
+/// A basis element — an installed class the drain accounts against. Class-only
+/// this landing (the self-addressing canonical sigil is N-I2+); `seal` carries
+/// the class whole.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Crystal {
+    pub class: ChainDelta,
+}
+
+impl Crystal {
+    /// Seal a class into a crystal (class-only — no canonical-key addressing).
+    pub fn seal(class: ChainDelta) -> Self {
+        Crystal { class }
+    }
+}
+
+/// THE BOUNDING RECORD: the accounted image WITH the address of the crystal that
+/// accounted it, inscribed at the instant of accounting. Re-adding every image
+/// reconstructs the input byte-exact (the image is the proof, untouched).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct BoundingRecord {
+    pub image: ChainDelta,
+    pub basis_at: usize,
+}
+
+/// The DIR-13 per-pair routing of a remainder — a decision about THIS pair's
+/// structure, never a corpus statistic.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Dir13Route {
+    /// The letters' own axes carry this shape — unlearned, not unreachable; the
+    /// K-step loop reduces it when its pieces crystallize.
+    CompositionGap,
+    /// Content no letter reaches (a gauge direction absent from the source's
+    /// world) — mint feedstock, on measured irreducibility only.
+    GenerationGap,
+    /// The frame's own shape changed — the translation arm's business.
+    CategoryError,
+}
+
+/// A remainder class, whole at its coordinate.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Remainder {
+    /// A same-frame chain class with full content and support.
+    ChainClass { chain: ChainDelta },
+    /// The frame's own shape shifted — typed, never squeezed into a fabricated
+    /// same-frame chain.
+    FrameShift { from: CellFrame, to: CellFrame },
+}
+
+impl Remainder {
+    /// The chain content, where this remainder is a chain class.
+    pub fn chain(&self) -> Option<&ChainDelta> {
+        match self {
+            Remainder::ChainClass { chain } => Some(chain),
+            Remainder::FrameShift { .. } => None,
+        }
+    }
+}
+
+/// The three verdicts — the ONLY verdict vocabulary of the reduce. No boolean
+/// form, no None-miss, no census.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ReduceVerdict {
+    /// Drained whole. The bounding records carry every drained part in drain
+    /// order WITH its source address — re-adding the images reconstructs the
+    /// input exactly.
+    Congruent { bounding: Vec<BoundingRecord> },
+    /// One class through a deduced frame, carried with P⁻¹ (`ObserverFrame::inverse`).
+    CongruentThroughP { p: ObserverFrame },
+    /// The irreducible part, whole, routed per pair.
+    Remainder { remainder: Remainder, route: Dir13Route },
+}
+
+/// Exact accounting: every entry of the class matches an identical entry of the
+/// residual (site, direction, AND exact coefficient) — sub-multiset, never
+/// nearness, never ranked.
+fn accounts_exactly(residual: &ChainDelta, class: &ChainDelta) -> bool {
+    !class.entries.is_empty()
+        && class.entries.iter().all(|needed| {
+            residual.entries.iter().any(|held| {
+                held.site == needed.site
+                    && held.direction == needed.direction
+                    && held.coefficient == needed.coefficient
+            })
+        })
+}
+
+/// THE DRAIN: account the residual against the basis by EXACT accounting,
+/// terminating by EXHAUSTION (a full pass draining nothing); what survives is
+/// the remainder. Each accounted image subtracts (monotone — entries cancel to
+/// zero and drop, nothing is created) and inscribes its source address. An
+/// EMPTY basis drains nothing — the residual is the whole (the Pin A path).
+/// (No refraction / valence routing / support addressing this landing.)
+fn drain_exact(mut residual: ChainDelta, basis: &[Crystal]) -> (ChainDelta, Vec<BoundingRecord>) {
+    let mut bounding: Vec<BoundingRecord> = Vec::new();
+    let mut drained_this_pass = true;
+    while drained_this_pass {
+        drained_this_pass = false;
+        for (basis_at, crystal) in basis.iter().enumerate() {
+            if accounts_exactly(&residual, &crystal.class) {
+                let image = crystal.class.clone();
+                residual = ChainDelta {
+                    from: residual.from,
+                    to: residual.to,
+                    entries: signed_entry_sum(&[(&residual, 1), (&image, -1)]),
+                };
+                bounding.push(BoundingRecord { image, basis_at });
+                drained_this_pass = true;
+            }
+        }
+    }
+    (residual, bounding)
+}
+
+/// DIR-13, per pair: a residual carrying a gauge direction the SOURCE never
+/// expressed is generation feedstock; everything else on the letters' own axes
+/// is a composition gap. (The frame-shift arm routes `CategoryError` upstream.)
+/// Route on ABSENCE-FROM-SOURCE, never on a literal hue value.
+fn route_per_pair(a: &FullMeasurement, residual: &ChainDelta) -> Dir13Route {
+    let mut source_directions: Vec<u8> =
+        a.occupancy().iter().map(|(_, direction)| direction.index).collect();
+    source_directions.sort_unstable();
+    source_directions.dedup();
+    let novel = residual
+        .entries
+        .iter()
+        .any(|entry| source_directions.binary_search(&entry.direction.index).is_err());
+    match novel {
+        true => Dir13Route::GenerationGap,
+        false => Dir13Route::CompositionGap,
+    }
+}
+
+/// **THE REDUCE (the conductor).** Canonical-equal pairs resolve through the
+/// deduced frame (identity → Congruent, else CongruentThroughP); unequal pairs
+/// take the pair's same-frame difference (`signed_remainder`, NOT a second
+/// peel), drain it against the basis, and route what survives. Frame-shifting
+/// pairs refuse at the difference and route CategoryError. There is no second
+/// difference and no candidate loop.
+pub fn reduce_pair(a: &FullMeasurement, b: &FullMeasurement, basis: &[Crystal]) -> ReduceVerdict {
+    let ca = canonicalize(a);
+    let cb = canonicalize(b);
+    match deduce_gauge_move(&ca, &cb) {
+        GaugeDeduction::GaugeMove { rule } => {
+            if rule == identity_frame() {
+                ReduceVerdict::Congruent { bounding: Vec::new() }
+            } else {
+                ReduceVerdict::CongruentThroughP { p: rule }
+            }
+        }
+        GaugeDeduction::ContentDiffers => match signed_remainder(a, b) {
+            Err(_) => ReduceVerdict::Remainder {
+                remainder: Remainder::FrameShift { from: a.frame(), to: b.frame() },
+                route: Dir13Route::CategoryError,
+            },
+            Ok(whole) => {
+                let (residual, bounding) = drain_exact(whole, basis);
+                if residual.entries.is_empty() {
+                    ReduceVerdict::Congruent { bounding }
+                } else {
+                    let route = route_per_pair(a, &residual);
+                    ReduceVerdict::Remainder {
+                        remainder: Remainder::ChainClass { chain: residual },
+                        route,
+                    }
+                }
+            }
+        },
+    }
 }
