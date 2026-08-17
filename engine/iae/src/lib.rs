@@ -14,9 +14,17 @@
 //! bridges (`letters`, `equivalence`) land in the following IAE slices.
 
 pub mod congruence;
+pub mod mint;
+pub mod observation;
 pub mod peel;
 pub mod reduction;
 pub mod transport;
+
+// The port's reduce organ, re-exported for the vessel layer (`cfe` grows a
+// basin of `iae::Crystal`; the seat renders `observe`).
+pub use congruence::ChainDelta;
+pub use observation::{adopt, observe, Observed};
+pub use reduction::Crystal;
 
 // IAE-2 — the stratified carrier: a cellular sheaf with heterogeneous stalks
 // and exact restriction morphisms, and the commutation-gated transduction
