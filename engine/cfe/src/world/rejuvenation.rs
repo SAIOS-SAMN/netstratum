@@ -66,6 +66,33 @@ impl World {
         metabolic_ration_of(metabolism, self.metabolic_element())
     }
 
+    /// **ING-2 — THE STAPLE DIET FROM THE WORLD'S OWN VEINS.** The food ELEMENT
+    /// this orb's line metabolises best: the ingestion kernel
+    /// ([`morphogen::staple`]) over the elements the planet's PROSPECTED veins
+    /// bear ("you eat what your world grows"), keyed on the species' morphodynamic
+    /// signature. `None` when no prospected vein aligns — an unprospected world,
+    /// or matter this line cannot metabolise (a plasmic reads no material vein; a
+    /// mineral reads no organic one) — the Starvation Cull, from the projection.
+    ///
+    /// This is the almanac-derived diet HANDLE that dissolves the 3-`Resource`
+    /// `metabolic_ration` enum: a food ELEMENT drawn from the open blake3 catalogue
+    /// by the species tensor × the planet, never a bucket. It reads only; ING-2b
+    /// routes `ration_of`/population/famine through it (a breaking migration off
+    /// the closed carriers), so this landing is byte-identical.
+    ///
+    /// [`morphogen::staple`]: crate::morphogen::staple
+    pub fn staple_diet_of(&self, orb: u64) -> Option<[u8; 32]> {
+        let metabolism = self.genesis.as_ref().map(|held| held.metabolism).unwrap_or(2);
+        let species = crate::morphogen::archetype(metabolism);
+        let veins: Vec<[u8; 32]> = self
+            .prospects
+            .iter()
+            .filter(|vein| vein.orb == orb)
+            .map(|vein| vein.element)
+            .collect();
+        crate::morphogen::staple(&species, &veins, &ratio(0, 1))
+    }
+
     /// **THE CARRYING CAPACITY of this orb's ration** — the ruled `K`,
     /// from the living footprint and the place (`ZoneKind` ⊗ star ⊗
     /// orbit, the last two folded into the thermal region) AS READ BY
