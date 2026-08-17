@@ -231,6 +231,187 @@ pub fn identity_frame() -> ObserverFrame {
 /// Typed refusals of the frame surface.
 #[derive(Debug, Clone, PartialEq, Eq, Error)]
 pub enum FrameRefusal {
+    #[error("direction {index} outside the renaming's chart")]
+    DirectionNotInChart { index: u8 },
+
     #[error("frame application broke measurement wholeness: {0:?}")]
     Measurement(MeasurementRefusal),
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// SLICE 2 — the orbit-min canonical form and the deduced gauge move.
+// ─────────────────────────────────────────────────────────────────────
+
+/// A RENAMING — the FULL chart map of gauge directions (from → to), every
+/// present direction carried explicitly, identity-acting pairs INCLUDED (for a
+/// chart-to-chart map `0 → 0` is real action, not presentation; dropping it
+/// destroys the domain and fabricates action outside the chart). The achieving
+/// frames of canonicalization are renamings; RULES are `Relabel` permutations —
+/// two carriers, two jobs.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Renaming {
+    pub pairs: Vec<(u8, u8)>,
+}
+
+impl Renaming {
+    /// Canonical: pairs sorted by source, ALL pairs kept.
+    pub fn new(mut pairs: Vec<(u8, u8)>) -> Self {
+        pairs.sort_unstable();
+        Self { pairs }
+    }
+
+    /// Where a direction goes; a direction outside the chart refuses typed.
+    pub fn image(&self, direction: GaugeDirection) -> Result<GaugeDirection, FrameRefusal> {
+        self.pairs
+            .iter()
+            .find(|(from, _)| *from == direction.index)
+            .map(|(_, to)| GaugeDirection { index: *to })
+            .ok_or(FrameRefusal::DirectionNotInChart { index: direction.index })
+    }
+
+    /// The exact inverse chart map.
+    pub fn inverse(&self) -> Self {
+        Self::new(self.pairs.iter().map(|(from, to)| (*to, *from)).collect())
+    }
+}
+
+/// The achieving frame of a canonicalization: a plane element and the full chart
+/// RENAMING, applied plane-first.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RenamingFrame {
+    pub plane: PlaneElement,
+    pub renaming: Renaming,
+}
+
+impl RenamingFrame {
+    /// Apply to a measurement: sites through the plane, directions through the
+    /// chart map (out-of-chart refuses typed), wholeness re-verified.
+    pub fn apply(&self, measurement: &FullMeasurement) -> Result<FullMeasurement, FrameRefusal> {
+        let in_frame = measurement.frame();
+        let out_frame = self.plane.frame(in_frame);
+        let occupancy = measurement
+            .occupancy()
+            .iter()
+            .map(|(site, direction)| {
+                self.renaming.image(*direction).map(|d| (self.plane.site(*site, in_frame), d))
+            })
+            .collect::<Result<Vec<_>, _>>()?;
+        FullMeasurement::try_new(measurement.fiber_rank(), out_frame, occupancy)
+            .map_err(FrameRefusal::Measurement)
+    }
+}
+
+/// The canonical form — a full measurement in the pinned representative gauge.
+/// Re-liftable by construction, never a digest.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CanonicalForm {
+    measurement: FullMeasurement,
+}
+
+impl CanonicalForm {
+    /// The form IS a measurement — whole, re-liftable.
+    pub fn to_measurement(&self) -> FullMeasurement {
+        self.measurement.clone()
+    }
+}
+
+/// The canonicalization emission: the form and the achieving frame (the chart
+/// map into the canonical gauge). The whole stabilizer COSET (glue across pairs)
+/// is N-I3, not this slice — one achieving frame is enough for Pin A.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Canonicalized {
+    pub form: CanonicalForm,
+    pub achieving_frame: RenamingFrame,
+}
+
+/// **ONE CANONICALIZATION PER MEASUREMENT** — orbit-min over the plane group
+/// (eight elements, a structural constant), first-appearance relabel per image,
+/// row-major lex-min over (frame, direction bytes). Orbit-min IS how the
+/// canonical form is built; the sweep is group-order bounded, NEVER a content
+/// search, and NEVER a no-op (a no-op canonicalize reads a pure hue permutation
+/// as a generation gap — the sodalitum false wall).
+pub fn canonicalize(measurement: &FullMeasurement) -> Canonicalized {
+    let candidates: Vec<(Vec<u8>, CellFrame, RenamingFrame, FullMeasurement)> = PlaneElement::all()
+        .iter()
+        .map(|element| {
+            let frame = RenamingFrame {
+                plane: *element,
+                renaming: first_appearance_renaming(measurement, element),
+            };
+            let image = frame
+                .apply(measurement)
+                .expect("the first-appearance chart covers every present direction");
+            let bytes: Vec<u8> = image.occupancy().iter().map(|(_, d)| d.index).collect();
+            (bytes, image.frame(), frame, image)
+        })
+        .collect();
+    let winner = candidates
+        .iter()
+        .min_by_key(|(bytes, frame, _, _)| (frame.rows, frame.cols, bytes.clone()))
+        .expect("the plane group is never empty");
+    Canonicalized {
+        form: CanonicalForm { measurement: winner.3.clone() },
+        achieving_frame: winner.2.clone(),
+    }
+}
+
+/// The first-appearance RENAMING of a plane image: every present direction
+/// renamed in the order the transformed row-major walk first meets it — the
+/// fiber-group quotient's pinned convention. A full chart map: identity-acting
+/// pairs are kept (they ARE the chart).
+fn first_appearance_renaming(measurement: &FullMeasurement, element: &PlaneElement) -> Renaming {
+    let in_frame = measurement.frame();
+    let mut transformed: Vec<(Site, GaugeDirection)> = measurement
+        .occupancy()
+        .iter()
+        .map(|(site, direction)| (element.site(*site, in_frame), *direction))
+        .collect();
+    transformed.sort_by_key(|(site, _)| (site.row, site.col));
+    let mut pairs: Vec<(u8, u8)> = Vec::new();
+    for (_, direction) in &transformed {
+        if !pairs.iter().any(|(from, _)| *from == direction.index) {
+            let next = u8::try_from(pairs.len()).expect("fiber ranks are small");
+            pairs.push((direction.index, next));
+        }
+    }
+    Renaming::new(pairs)
+}
+
+/// The deduction's typed verdict: a pure gauge move with its derived rule, or
+/// real content difference (which enters the reduction ladder).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum GaugeDeduction {
+    GaugeMove { rule: ObserverFrame },
+    ContentDiffers,
+}
+
+/// Equal canonical forms ⟺ a gauge move; the rule is the difference of achieved
+/// frames. Form equality ONLY — no content walk.
+pub fn deduce_gauge_move(a: &Canonicalized, b: &Canonicalized) -> GaugeDeduction {
+    if a.form == b.form {
+        GaugeDeduction::GaugeMove { rule: rule_between_frames(&a.achieving_frame, &b.achieving_frame) }
+    } else {
+        GaugeDeduction::ContentDiffers
+    }
+}
+
+/// The difference of two achieved frames — `g_B⁻¹ ∘ g_A` on the plane; the
+/// relabel walks A's FULL chart through the inverse of B's chart
+/// (raw_A → canonical → raw_B), so the rule is a bijective permutation whose
+/// inverse reconstructs (the componentwise `Relabel.compose` fabricates a
+/// non-bijective rule on shared images — the reconstruction pin catches it).
+fn rule_between_frames(g_a: &RenamingFrame, g_b: &RenamingFrame) -> ObserverFrame {
+    let plane = g_b.plane.inverse().compose(&g_a.plane);
+    let back = g_b.renaming.inverse();
+    let pairs = g_a
+        .renaming
+        .pairs
+        .iter()
+        .map(|(raw_a, canonical_label)| {
+            back.image(GaugeDirection { index: *canonical_label })
+                .map(|raw_b| (*raw_a, raw_b.index))
+                .expect("equal forms share one canonical chart — every label maps back")
+        })
+        .collect();
+    ObserverFrame { plane, relabel: Relabel::new(pairs) }
 }

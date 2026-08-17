@@ -6,7 +6,10 @@
 //! reconstruction, before `reduce_pair` exists.
 
 use iae::peel::{CellFrame, FullMeasurement, GaugeDirection, Site};
-use iae::reduction::{Exchange, Flip, ObserverFrame, PlaneElement, Relabel};
+use iae::reduction::{
+    canonicalize, deduce_gauge_move, Exchange, Flip, GaugeDeduction, ObserverFrame, PlaneElement,
+    Relabel,
+};
 
 fn measurement(rows: i64, cols: i64, fiber: u8, hues: &[u8]) -> FullMeasurement {
     let occupancy = (0..rows)
@@ -53,4 +56,66 @@ fn a_relabel_transposition_is_an_involution() {
     assert_eq!(swap12.inverse(), swap12, "a transposition is its own inverse");
     // Total on unmoved points; fixed points are not data.
     assert_eq!(swap12.image(GaugeDirection { index: 3 }), GaugeDirection { index: 3 });
+}
+
+// ── SLICE 2 — canonicalize + deduce_gauge_move (the DERIVE seat) ──────────
+// Equal canonical forms are a GAUGE MOVE with a bijective rule that
+// reconstructs BOTH ways; distinct content is ContentDiffers. The all-5s vs
+// all-6s row is the sodalitum discriminator: a no-op canonicalize reads it as a
+// generation gap; a real orbit-min reads the relabel AS the rule.
+
+fn deduce(a: &FullMeasurement, b: &FullMeasurement) -> GaugeDeduction {
+    deduce_gauge_move(&canonicalize(a), &canonicalize(b))
+}
+
+/// A gauge rule must carry its inverse: p(A)=B AND p⁻¹(B)=A (the reconstruction
+/// pin — a non-bijective rule fails the second leg).
+fn reconstructs(rule: &ObserverFrame, a: &FullMeasurement, b: &FullMeasurement) {
+    assert_eq!(rule.apply(a).expect("rule stays whole"), *b, "p(A) = B");
+    assert_eq!(rule.inverse().apply(b).expect("inverse stays whole"), *a, "p⁻¹(B) = A");
+}
+
+#[test]
+fn equal_content_is_a_gauge_move_that_reconstructs() {
+    let a = measurement(2, 2, 4, &[0, 1, 2, 3]);
+    match deduce(&a, &a) {
+        GaugeDeduction::GaugeMove { rule } => reconstructs(&rule, &a, &a),
+        other => panic!("A = A is a gauge move, got {other:?}"),
+    }
+}
+
+#[test]
+fn a_rotation_is_deduced_as_the_gauge_and_reconstructs() {
+    let a = measurement(2, 2, 4, &[0, 1, 2, 3]);
+    let rot90 = PlaneElement { exchange: Exchange::Swap, row: Flip::Keep, col: Flip::Mirror };
+    let b = ObserverFrame { plane: rot90, relabel: Relabel::new(Vec::new()) }
+        .apply(&a)
+        .expect("a plane move stays whole");
+    match deduce(&a, &b) {
+        GaugeDeduction::GaugeMove { rule } => reconstructs(&rule, &a, &b),
+        other => panic!("a rotation is a gauge move, got {other:?}"),
+    }
+}
+
+#[test]
+fn a_pure_hue_permutation_is_the_gauge_not_a_wall() {
+    // 0d3d703e: all fives vs all sixes — the SAME structure through a relabel.
+    // The rule must be the bijection 5↔6, whose inverse reconstructs; a
+    // no-op canonicalize would mis-read this as ContentDiffers → GenerationGap.
+    let a = measurement(2, 2, 7, &[5, 5, 5, 5]);
+    let b = measurement(2, 2, 7, &[6, 6, 6, 6]);
+    match deduce(&a, &b) {
+        GaugeDeduction::GaugeMove { rule } => reconstructs(&rule, &a, &b),
+        other => panic!("a pure hue permutation is a gauge, not a wall, got {other:?}"),
+    }
+}
+
+#[test]
+fn a_frame_shape_change_is_content_difference() {
+    let a = measurement(2, 2, 1, &[0, 0, 0, 0]);
+    let b = measurement(3, 3, 1, &[0, 0, 0, 0, 0, 0, 0, 0, 0]);
+    assert!(
+        matches!(deduce(&a, &b), GaugeDeduction::ContentDiffers),
+        "a different frame shape is content difference, never a fabricated gauge",
+    );
 }
