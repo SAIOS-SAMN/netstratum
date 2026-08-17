@@ -28,6 +28,10 @@ pub mod perspective;
 pub mod search;
 pub mod selfmap;
 pub mod nsearch;
+// N-I3 (THE INTELLIGENCE PORT) — the ARC seat: peel train grids into
+// `iae::FullMeasurement`, read them through the ONE reduce organ (`iae::think`),
+// render a glued frame to a program, seal the proof. NOT a search path.
+pub mod think;
 pub mod volume;
 
 // The verifier half moved to `solver-verify` (the prover/verifier
