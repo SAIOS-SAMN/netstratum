@@ -5,7 +5,7 @@
 //! Pin D: ByDrain / Unglueable / Withheld / Insufficient emit no grid.
 
 use iae::Crystal;
-use solver::{think_task, Grid, Op, SolveCertificate, SolveRead, Task, TaskPair};
+use solver::{forge_task, think_task, Difficulty, Grid, Op, SolveCertificate, SolveRead, Task, TaskPair};
 use solver_verify::certificate::{verify_certificate, CertificateRead};
 
 fn grid(rows: usize, cols: usize, cells: &[u8]) -> Grid {
@@ -143,6 +143,37 @@ fn a_novel_hue_task_withholds_and_learns_then_drains_to_no_render() {
         "the drained close names no frame — no output (Pin D)",
     );
     assert_eq!(grown.len(), 1, "draining grows nothing");
+}
+
+#[test]
+fn pin_a_a_live_forge_draw_solves_with_an_intact_certificate() {
+    // Pin A (N-I4, ON THE BEAT): a forge draw whose net rule is a frame
+    // difference is Solved by the ONE organ with an Intact certificate — no
+    // search anywhere in the path. `think_task` returns Solved only AFTER
+    // `verify_certificate == Intact`, so a Solved forge draw IS an intact proof;
+    // this re-checks it on the forged task the beat actually draws. Level 1
+    // (word_len 1) draws are single frames — most solve; we assert at least one
+    // does and that its proof verifies.
+    let mut proven = false;
+    for seed in 0u64..16 {
+        let mut digest = [0u8; 32];
+        digest[..8].copy_from_slice(&seed.to_le_bytes());
+        let task = forge_task(digest, Difficulty::level(1));
+        let mut grown: Vec<Crystal> = Vec::new();
+        if let SolveRead::Solved { program, test_output, certificate, .. } =
+            think_task(&task, &mut grown)
+        {
+            assert!(task.name.starts_with("forge_"), "a live forge draw, not a fixture");
+            assert_eq!(
+                verify_certificate(&certificate, &task, &program, &test_output),
+                CertificateRead::Intact,
+                "the beat's proof verifies (Pin A) — no search produced it",
+            );
+            proven = true;
+            break;
+        }
+    }
+    assert!(proven, "a level-1 forge draw is a frame difference the one organ solves on the beat");
 }
 
 #[test]

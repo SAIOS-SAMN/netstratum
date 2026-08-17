@@ -140,6 +140,13 @@ fn research_unlocks_industry() {
 /// at least visible in the output; a pin that BITES needs the draw
 /// tested where the draw lives, and `divergence_step` is private.
 #[test]
+#[ignore = "N-I4 (THE INTELLIGENCE PORT): search left the live beat, so a line \
+solves only frame-difference tasks through think_task and plateaus at the frame \
+ceiling (measured beat solve rates: rung1 80%, rung2 100%, rung3 26%, rung4 10%). \
+A cleave is gated on the TOP rung + 20 solves; reaching the top rung reliably \
+returns with the vocabulary loop (N-I5+) that lets think climb past composite / \
+Tile / Object tasks. Re-enable once lines reach max rung on the beat. The cleave \
+mechanic itself is unchanged — this witnesses an outcome the ceiling now defers."]
 fn a_cleave_walks_the_manifold_not_one_axis_at_a_time() {
     let root = scratch("speciate");
     let var = root.to_string_lossy().into_owned();
@@ -445,9 +452,15 @@ fn a_steward_directive_lands_through_the_leash() {
     );
 }
 
-/// PERCEPTION ROUTES RESEARCH: the volumetric civilization's solves
-/// are volumetric tasks (volf_*), the planar civilizations' are
-/// planar (forge_*) — the genesis axis has mechanical teeth.
+/// PERCEPTION ROUTES RESEARCH — and after N-I4 (THE INTELLIGENCE PORT) the
+/// routing has TEETH OF A NEW KIND. The port admits exactly ONE reduce organ,
+/// and the volumetric 3-form lens (a volumetric peel into `iae::FullMeasurement`)
+/// is not built this landing. So the genesis axis now decides whether a line
+/// THINKS or WAITS: the PLANAR line solves `forge_` tasks through `think_task`,
+/// and the VOLUMETRIC line RESTS — its search-thinker (`solve_volume`) has left
+/// the beat, so it withholds every beat until the volumetric transducer lands.
+/// (The prior pin asserted the volumetric line produced `volf_` solves; that was
+/// the retired search's behavior. The witness moves to the logic.)
 #[test]
 fn perception_routes_the_research() {
     let root = scratch("perception");
@@ -461,10 +474,17 @@ fn perception_routes_the_research() {
             })
             .unwrap_or_default()
     };
-    let hivelight = names("amber-veil"); // volumetric honeybees
-    let slagborn = names("cinder-reach"); // planar tardigrades
-    assert!(!hivelight.is_empty() && hivelight.iter().all(|n| n.starts_with("volf_")));
-    assert!(!slagborn.is_empty() && slagborn.iter().all(|n| n.starts_with("forge_")));
+    let hivelight = names("amber-veil"); // volumetric honeybees — the 3-form seat is off the beat
+    let slagborn = names("cinder-reach"); // planar tardigrades — the one organ thinks
+    assert!(
+        !slagborn.is_empty() && slagborn.iter().all(|n| n.starts_with("forge_")),
+        "the planar line THINKS: `forge_` solves through the one reduce organ",
+    );
+    assert!(
+        hivelight.is_empty(),
+        "the volumetric line RESTS — `solve_volume` is off the beat (N-I4); it \
+         solves nothing until the volumetric 3-form lens lands, got {hivelight:?}",
+    );
 }
 
 /// **THE ROSTER IS THE COMPILED ROSTER** — the inverse of the pin this

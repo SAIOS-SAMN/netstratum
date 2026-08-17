@@ -58,6 +58,9 @@ pub use search::{
 };
 pub use nsearch::{solve_field, FieldSolveRead};
 pub use think::{measure_grid, think_task};
+// N-I4 — the cognitive basin's element, re-exported for the vessel layer
+// (`conductor` grows a `Vec<Crystal>` per line and passes it to `think_task`).
+pub use iae::Crystal;
 pub use volume::{
     forge_volume, run_volume, solve_volume, VOp, VolDifficulty, Volume, VolumeSolveRead,
     VolumeTask,

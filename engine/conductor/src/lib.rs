@@ -53,10 +53,7 @@ use ledger::registry::{
 };
 use ledger::{Directive, Disposition, Ledger};
 use physics::Beacon;
-use solver::{
-    forge_task, propose_consulted_measured, Difficulty, Hunger, Need,
-    SolveRead,
-};
+use solver::{forge_task, Difficulty, Hunger, Need, SolveRead};
 
 use std::path::Path;
 
@@ -875,7 +872,15 @@ pub struct Polity {
     /// and got a different grid — `WorkRefused { OutputMismatch }`, a
     /// mint the proposer emitted and the gate refused. The task IS the
     /// whole difficulty, so the key must be too.
-    last_forge: Option<([u8; 32], Difficulty, Need, SolveRead)>,
+    /// N-I4 — THE COGNITIVE BASIN (THE INTELLIGENCE PORT). This line's
+    /// automaton grows a basin of crystallized residuals: every wall
+    /// `think_task` mints and adopts joins it, and the next beat's think DRAINS
+    /// against it (Pin B) — thinking changes the thinker. Non-committed
+    /// workspace, exactly like `library`: the committed wire (Entity) stays
+    /// empty, so replay of a pre-grown receipt still matches (empty basin).
+    /// Distinct from `library` (minted WORDS) — this is the raw residual basin
+    /// the reduce organ reads. Not shared: two lines, two basins.
+    grown: Vec<solver::Crystal>,
     /// How many refusals the board has already been TOLD. The record
     /// above is permanent; this is only the narrator's place in it, so
     /// a refusal is announced once per process and kept forever.
@@ -1065,7 +1070,7 @@ impl Polity {
                         refused: Vec::new(),
                         unfolded: 0,
                         lane_refused: Vec::new(),
-                        last_forge: None,
+                        grown: Vec::new(),
                         reported: 0,
                         trajectory: Trajectory::Growth,
                         starved: 0,
@@ -1186,7 +1191,7 @@ impl Polity {
             refused: Vec::new(),
             unfolded: 0,
             lane_refused: Vec::new(),
-            last_forge: None,
+            grown: Vec::new(),
             reported: 0,
             trajectory: Trajectory::Growth,
             starved: 0,
@@ -2549,6 +2554,12 @@ impl Polity {
     /// The hunger steers the reach; it never steers what is accepted.
     /// The sector door still re-derives every proposal, so a starving
     /// mind looking in a different order costs the gate nothing.
+    // N-I4: idle on the beat. This shaped the retired SEARCH's beam; the one
+    // reduce organ observes the forged task's train pairs directly, with no
+    // beam to tilt. Preserved for the survival seat (N-I5), where Need/instinct
+    // may ORDER which leftover or book a starving line observes first — an
+    // ordering of observation, never a widening or a search.
+    #[allow(dead_code)]
     fn hunger(&self) -> Need {
         let now = self.world.now();
         let receipts = self.world.chronicle().receipts();
@@ -2751,6 +2762,7 @@ impl Polity {
     /// SIZE (`mint_cost` — the homological pressure). The Mind reaches toward the
     /// shape and as deep as the size demands. Empty shape / zero pressure when
     /// the economy is covered — then there is no void, and no search.
+    #[allow(dead_code)]
     fn civic_defect(&self) -> (Vec<solver::need::Family>, u64) {
         let world = &self.world;
         let Some(orb) = world.orb() else {
@@ -2793,33 +2805,16 @@ impl Polity {
         let trajectory_before = self.trajectory;
 
         let solved = if self.spec.civilization.perception == "volumetric" {
-            let difficulty = solver::VolDifficulty::level(self.level);
-            let task = solver::forge_volume(digest, difficulty);
-            match solver::solve_volume(&task, difficulty.word_len) {
-                solver::VolumeSolveRead::Solved {
-                    program,
-                    matches_expected: Some(true),
-                    certificate,
-                    ..
-                } => {
-                    let word: Vec<String> = program.iter().map(|op| op.describe()).collect();
-                    // MECHANICAL ADAPTATION (cognition lane, 2026-08-04,
-                    // relayed): `seal_volume`'s bare digest became a real
-                    // parent-linked `VolumeCertificate`, so the journal
-                    // takes its output link. Nothing else here changed.
-                    //
-                    // STILL OWED, and the harness lane's to land: this arm
-                    // passes `None` as the proof because C8 made volumetric
-                    // work decorative. That deferral is LIFTED — the
-                    // verifier exists (`verify_volume_work`, schema v3).
-                    // The arm should now build a `VolumeProof` and carry it,
-                    // exactly as the planar arm builds a `WorkProof`. It
-                    // waits on a deed tag (91, cfe's registry) and a
-                    // `mint_bound` arm for the volumetric ladder.
-                    Some((task.name, word.join(" → "), hex(&certificate.output), None))
-                }
-                _ => None,
-            }
+            // THE VOLUMETRIC SEAT IS OFF THE BEAT (N-I4, THE INTELLIGENCE PORT).
+            // `solve_volume` is a SECOND search-thinker, and the port admits
+            // exactly one organ. Perception is a LENS on `measure_grid`, and the
+            // 3-form lens — a volumetric peel into `iae::FullMeasurement` — is
+            // not built this landing. So a volumetric line WITHHOLDS rather than
+            // reach through a search-shaped volume path left "until later": an
+            // honest rest (the `None` arm declines the trajectory) until the
+            // volumetric transducer lands. `forge_volume`/`solve_volume` remain
+            // in the crate; they are simply no longer in this stack.
+            None
         } else {
             let difficulty = Difficulty::level(self.level);
             let task = forge_task(digest, difficulty);
@@ -2862,147 +2857,22 @@ impl Polity {
                     test_output: output,
                 }
             });
-            // THE SECTOR DOOR is the live forge path. The search only
-            // PROPOSES; nothing crosses until every training pair has
-            // been re-derived exactly, which is the same re-derivation
-            // `verify_work` performs at the kernel. An unproved
-            // candidate reads `Unsolved` and the line simply rests that
-            // beat — so the search inside may become as dirty as it
-            // likes (float scoring, batching, sampled beam) and nothing
-            // downstream changes.
-            //
-            // THE REACH IS COUPLED TO THE LINE'S OWN TRAJECTORY, never
-            // to a constant. What it spends is decided by whether
-            // spending has been PAYING — see `Trajectory::read`, and
-            // `examples/forge_reach.rs` for the numbers each branch
-            // cites. `SEARCH_BUDGET` still stands behind this as the
-            // per-beat ceiling that keeps one heartbeat bounded; it is
-            // no longer what DECIDES the spend.
-            // THE THREE PATHS. Each spends differently and each is
-            // counted separately: read-candidates are MEASURED, sweep
-            // invocations are BOUNDED by `SEARCH_BUDGET`, and blending
-            // the two would ruin both yields.
-            let reach = |polity: &mut Self| {
-                let mut need =
-                    polity.trajectory.need_of(polity.hunger().hungers, polity.starved);
-                // **THE INFRASTRUCTURE CEILING** (COG-6) — bound the reach depth
-                // by the built cognitive apparatus. A mud-hut line (no research
-                // seated) thinks only the shallowest thought however much leisure
-                // it banks; to compose deeper it must build a bigger brain.
-                need.capacity = polity.world.cognitive_capacity(cfe::world::FIRST_ORB);
-                // ORBIT-DIRECTED HUNGER (38 §6), THE ALGEBRAIC FORM: a
-                // starving mind RESOLVES its own knowledge into one
-                // coherent frame (`knowledge_order` runs the spanning-
-                // forest resolve over its concept map) and reaches for
-                // the most PERIPHERAL family — the thinnest frontier its
-                // resolved understanding leaves open. This supersedes the
-                // flat `family_census` count with the same reach read from
-                // the recursive algebra. Sated minds and empty libraries
-                // keep the standing order; ordering only, the observation
-                // still supplies every candidate.
-                if !need.hungers.is_empty() && !polity.library.words().is_empty() {
-                    // **THE WORKBENCH CHOOSER** (COG-7/COG-12) — the reach is no
-                    // longer a blind search. The Mind reads its own economic void
-                    // BACKWARDS: `civic_defect` classifies γ's homological shape
-                    // into the family class that can bridge it (COG-12) and reads
-                    // its size as pressure. The shape becomes the CURIOSITY
-                    // direction (explore toward what the void needs, not a generic
-                    // frontier); the size DEEPENS the reach (saturating into
-                    // `starved_for` — a massive γ forces a bigger thought, zero
-                    // dials). Against that, the THICK habit (`instinct_weights`,
-                    // the rut history carved) pulls the other way, and the two are
-                    // blended by thermodynamic STRESS σ: a sated line (σ→0)
-                    // follows the void-shaped curiosity and diversifies; a
-                    // starving line (σ→1) collapses onto instinct. The
-                    // digest-seeded draw picks the family to reach FIRST —
-                    // stochastic, replayable, carrying the line's trauma. Ordering
-                    // only; the observation still supplies every candidate, and a
-                    // covered economy (empty shape) reverts to generic curiosity —
-                    // pure basic research funded by abundance.
-                    let (shape, pressure) = polity.civic_defect();
-                    need.starved_for = need.starved_for.saturating_add(pressure);
-                    let curiosity = if shape.is_empty() {
-                        solver::knowledge_order(&polity.library)
-                    } else {
-                        shape
-                    };
-                    let genesis = solver::instinct::genesis_instinct(
-                        &polity.spec.civilization.disposition,
-                    );
-                    let instinct =
-                        solver::instinct::instinct_weights(&polity.library, &genesis);
-                    let (sn, sd) = civic::stress_quantized(&polity.world, cfe::world::FIRST_ORB);
-                    let blended = solver::instinct::blend(&instinct, &curiosity, sn, sd);
-                    need.thin = match solver::instinct::choose(&blended, digest) {
-                        Some(first) => std::iter::once(first)
-                            .chain(curiosity.into_iter().filter(|f| *f != first))
-                            .collect(),
-                        None => curiosity,
-                    };
-                }
-                // **ADVANCEMENT DEEPENS THE MIND** (INTELLIGENCE ARC A2).
-                // The line's own RELATIONAL RANK — the irreducible
-                // obligation cycles its internal economy sustains
-                // (`bridge::read_entangled`, the multi-orb structure A1
-                // builds) — is read straight into how deep it composes.
-                // A single-orb line (rank 0) reaches as hunger alone
-                // takes it; an expanded, structured civilization holds
-                // more of the composition in view and finds longer words.
-                // Derived, not dialed: the depth is the rank, and the
-                // rank is the resolve reading its economy. Additive, so
-                // the baseline every line climbs on is untouched — no
-                // deadlock (EQUATIONS B-E1's reachability trap). The
-                // deeper search spends more reach, which the memo and the
-                // trajectory already price: a bigger mind costs more.
-                need.reach_bonus =
-                    kernel::bridge::read_entangled(&polity.world.committed()).rank;
-                // THE MEMO, restored into the coupled path (remediations
-                // R5). `propose` is pure: same digest, same difficulty,
-                // same need, same answer. Keyed on all three — a
-                // need-blind key hands a hungry mind its sated self's
-                // answer, which is the staleness that shipped a level-3
-                // solve as a level-4 proof.
-                if let Some((held, held_d, held_need, cached)) = polity.last_forge.clone() {
-                    if held == digest && held_d == difficulty && held_need == need {
-                        PROBE_DIGEST_REPEAT.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-                        return cached;
-                    }
-                }
-                // COST IS MEASURED, then the proposal crosses THE SECTOR
-                // DOOR. `propose_measured` alone would skip it: the
-                // reach may look in any order it likes, but nothing
-                // crosses that does not re-derive against every training
-                // pair. Measure inside, dispose outside.
-                let proposal = propose_consulted_measured(&task, &need);
-                polity.spent = polity.spent.saturating_add(proposal.tested as u64);
-                polity.last_forge =
-                    Some((digest, difficulty, need, proposal.read.clone()));
-                proposal.read
-            };
-            // WHICH PATH ACTUALLY PAID FOR THIS BEAT — captured before
-            // the trajectory advances, because promotion reads it.
-            let read = if let Some(hit) = pre_reached {
-                hit
-            } else {
-                // **ONE PATH — NO MODE/PATH ENUM TO BRANCH ON** (operator ruling
-                // 2026-08-16). Every line derives its geometry by Reach (the
-                // Smith-Normal-Form derivation). A miss means the residual deficit
-                // γ lies in the COKERNEL of the boundary operator ∂ — γ ∉
-                // Span(V_current), orthogonal to the current dimensional basis —
-                // so enumerating the unspanned space is physically an
-                // infinite-energy search. The solver asserts failure and lets the
-                // PHYSICAL CONSEQUENCE follow: stagnation → decline → the COG-3
-                // desperation burn (and, once DIO-3 lands, biological adaptation /
-                // generational turnover). The `solve_consulted` sweep is retired,
-                // and with no exhaustive alternative to route to, the
-                // SearchMode/SearchPath enum dispatch was vestigial cartesian
-                // branching — collapsed here. `swept` now counts cokernel
-                // failures asserted, not enumerations run.
-                let derived = reach(self);
-                if matches!(derived, SolveRead::Unsolved) {
-                    self.swept = self.swept.saturating_add(1);
-                }
-                derived
+            // THE PRODUCER IS THE ONE REDUCE ORGAN (N-I4, THE INTELLIGENCE
+            // PORT). On a pre-reach MISS the line THINKS: `think_task` peels the
+            // forged task's train pairs and GLUES a frame, or WITHHOLDS. Search
+            // has LEFT the live beat — `propose_consulted_measured`, `solve`,
+            // `sweep_vocabulary` are no longer in this stack (search.rs survives
+            // only as a novelty instrument on the mint path below, never as how
+            // this mind solves the K-step). A withhold is REST: the `None` arm
+            // declines the trajectory exactly as a barren beat always did. It is
+            // NOT a sweep — `swept` does not move on a think withhold (that
+            // cokernel-failure count was the search's, and the search is gone).
+            // The basin persists across beats: a wall `think_task` mints and
+            // adopts this beat DRAINS the next (Pin B), so the thinker is
+            // changed by what it thought.
+            let read = match pre_reached {
+                Some(hit) => hit,
+                None => solver::think_task(&task, &mut self.grown),
             };
             match read {
                 SolveRead::Solved {
