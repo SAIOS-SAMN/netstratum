@@ -70,11 +70,11 @@ fn the_discover_then_build_seam_grows_the_doing_layer() {
 }
 
 #[test]
-fn a_founded_era_stays_replay_exact_across_the_recipe_wire() {
-    // The deficit path is live in the beat; a prosperous era leaves it dormant
-    // (no line starved), and any line that DOES raise a recipe replays exactly.
-    // This guards the integration's replay-safety without asserting the (false,
-    // pre-existing) claim that every founded polity replays.
+fn a_fed_roster_proactively_grows_recipes_on_the_workbench() {
+    // RCP-2 F4 — recipes compete in the workbench partition, so a FED line running
+    // a surplus (leisure > 0) grows its doing-layer PROACTIVELY, not only under
+    // scarcity. Over a founded era a real fraction of the roster raises a recipe,
+    // and every recipe-bearing line replays exactly (SEAL B holds across the wire).
     let root = scratch("era");
     let worlds = run_era(&root.to_string_lossy(), 20);
     assert!(worlds.len() >= 3, "the roster founded");
@@ -96,4 +96,10 @@ fn a_founded_era_stays_replay_exact_across_the_recipe_wire() {
         );
     }
     eprintln!("RECIPE ERA: {with_recipe} of {} lines raised a recipe", worlds.len());
+    // The doing-layer is LIVE: the emergent recipe space is not a dormant wire but
+    // a thing fed societies actually build from their own almanac.
+    assert!(
+        with_recipe >= 1,
+        "no line grew a recipe — the workbench never drew the emergent doing-layer"
+    );
 }

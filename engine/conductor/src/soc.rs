@@ -376,6 +376,80 @@ fn serves(kind: ZoneKind, binding: Drive) -> bool {
 /// uniform SOC-2 draw, so the society EXPLORES when comfortable and BUILDS WHAT IT
 /// NEEDS when pressured. The shared `L` and `affinity` (genus) cancel in the draw;
 /// a non-native still weighs `0`. Exact-integer, digest-seeded, replay-exact.
+/// **A ZONE'S WORKBENCH WEIGHT** — the homological `affinity` (genus) of building
+/// `kind` for this species, tilted toward the binding drive when the building
+/// closes it: `affinity · (L + γ·[serves])`. A non-native weighs `0`.
+pub fn zone_weight(
+    kind: ZoneKind,
+    manifold: &SpeciesManifold,
+    binding: Option<Drive>,
+    gamma_num: u64,
+) -> u64 {
+    let lattice = LATTICE as u64;
+    let tilt = match binding {
+        Some(drive) if serves(kind, drive) => gamma_num,
+        _ => 0,
+    };
+    manifold
+        .affinity(kind)
+        .saturating_mul(lattice.saturating_add(tilt))
+}
+
+/// **A ROLE CLOSES A DRIVE** (RCP-2 F4) — the recipe analogue of `serves`: does a
+/// recipe delivering `role` relieve the `binding` drive? A supply-starved line
+/// (Metabolic/Cognitive) is closed by FOOD or COGNITION; a Homeostatic one by a
+/// SINK; an Expansive one by the ENERGY/STRUCT that reaches new niches. Mirrors
+/// the zone `serves` map so a recipe and a building compete on equal footing.
+fn role_serves(role: usize, binding: Drive) -> bool {
+    use cfe::morphogen::{COGNITION, ENERGY, FOOD, SINK, STRUCT};
+    match binding {
+        Drive::Metabolic | Drive::Cognitive => role == FOOD || role == COGNITION,
+        Drive::Homeostatic => role == SINK,
+        Drive::Expansive => role == ENERGY || role == STRUCT,
+    }
+}
+
+/// **A RECIPE'S WORKBENCH WEIGHT** (RCP-2 F4) — a minted recipe competes in the
+/// SAME partition as the zones, weighted by the manifold's topological REACH
+/// (`Σβ_k`, the algebraic dimension — the recipe's analogue of a zone's genus
+/// affinity) tilted toward the binding drive when the recipe's role closes it:
+/// `reach · (L + γ·[role serves])`. A society of greater reach raises richer
+/// recipes more readily, exactly as a stronger affinity raises a native building.
+pub fn recipe_weight(
+    role: usize,
+    rank: &AlgebraicRank,
+    binding: Option<Drive>,
+    gamma_num: u64,
+) -> u64 {
+    let lattice = LATTICE as u64;
+    let tilt = match binding {
+        Some(drive) if role_serves(role, drive) => gamma_num,
+        _ => 0,
+    };
+    (rank.dimension() as u64).saturating_mul(lattice.saturating_add(tilt))
+}
+
+/// **THE PARTITION DRAW** — the shared engine under the workbench: sample an index
+/// `P(i) = w_i/Z` from a weight vector against a caller-salted `draw_seed`. `None`
+/// when every weight is `0` (nothing native — the beat builds nothing). The seed
+/// is the FINAL draw seed; each caller salts its own so independent draws off the
+/// same chronicle digest do not correlate. Exact-integer, replay-exact.
+pub fn partition_draw(weights: &[u64], draw_seed: [u8; 32]) -> Option<usize> {
+    let total: u64 = weights.iter().fold(0u64, |sum, w| sum.saturating_add(*w));
+    if total == 0 {
+        return None;
+    }
+    let roll = u64::from_le_bytes(draw_seed[0..8].try_into().expect("32 >= 8")) % total;
+    let mut acc = 0u64;
+    for (i, w) in weights.iter().enumerate() {
+        acc = acc.saturating_add(*w);
+        if roll < acc {
+            return Some(i);
+        }
+    }
+    None
+}
+
 pub fn choose_build(
     candidates: &[ZoneKind],
     manifold: &SpeciesManifold,
@@ -383,33 +457,18 @@ pub fn choose_build(
     gamma_num: u64,
     seed: [u8; 32],
 ) -> Option<ZoneKind> {
-    let lattice = LATTICE as u64;
-    let weight = |kind: ZoneKind| -> u64 {
-        let tilt = match binding {
-            Some(drive) if serves(kind, drive) => gamma_num,
-            _ => 0,
-        };
-        manifold
-            .affinity(kind)
-            .saturating_mul(lattice.saturating_add(tilt))
-    };
-    let total: u64 = candidates.iter().fold(0u64, |sum, k| sum.saturating_add(weight(*k)));
-    if total == 0 {
-        return None;
-    }
+    let weights: Vec<u64> = candidates
+        .iter()
+        .map(|kind| zone_weight(*kind, manifold, binding, gamma_num))
+        .collect();
+    // The zone draw salts the chronicle digest with "workbench" — the SAME salt
+    // and cumulative walk as before this factoring, so a zone-only beat is
+    // byte-identical.
     let mut hasher = blake3::Hasher::new();
     hasher.update(&seed);
     hasher.update(b"workbench");
-    let block = *hasher.finalize().as_bytes();
-    let roll = u64::from_le_bytes(block[0..8].try_into().expect("32 >= 8")) % total;
-    let mut acc = 0u64;
-    for kind in candidates {
-        acc = acc.saturating_add(weight(*kind));
-        if roll < acc {
-            return Some(*kind);
-        }
-    }
-    None
+    let draw_seed = *hasher.finalize().as_bytes();
+    partition_draw(&weights, draw_seed).map(|i| candidates[i])
 }
 
 #[cfg(test)]

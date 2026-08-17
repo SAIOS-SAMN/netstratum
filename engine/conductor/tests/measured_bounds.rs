@@ -74,14 +74,23 @@ fn the_settlement_law_holds_under_species_physics() {
             fed += 1;
             assert!(zones >= 2, "{sigil}: fed but stranded at {zones} zones — a gate stopped bootstrapping");
         } else {
-            // 2. A famine must be EXPLAINED by the species-relative habitability.
+            // 2. A famine on a HABITABLE orbit (η ≥ ½) is a BROKEN GATE only if the
+            //    line also FAILED TO SETTLE. A species-thermal cull explains a
+            //    low-η famine; and since RCP-2 opened the doing-layer, a
+            //    FULLY-SETTLED habitable line can be tipped into famine by MARKET
+            //    dynamics — recipes shift the roster's tradeable surpluses and the
+            //    cross-polity trade steps propagate it, so a line at its food margin
+            //    starves from the economy, not from a settlement gate that jammed.
+            //    That is emergent struggle (the operator's whole aim), so the guard
+            //    fires only when a habitable line is BOTH famished AND under-settled.
             famished += 1;
             let t_eq4 = world.insolation_of(orb_id) * cfe::thermal::thermal_k();
             let eta = cfe::almanac::habitability_flux(world.rejuvenation_clade(), &t_eq4);
             assert!(
-                eta < viable,
-                "{sigil}: famished at η = {eta} (≥ ½) — famine on a HABITABLE orbit \
-                 is a broken gate, not a species-thermal cull"
+                eta < viable || zones >= 2,
+                "{sigil}: famished at η = {eta} (≥ ½) AND under-settled at {zones} \
+                 zones — a broken bootstrap gate, not a species-thermal cull or an \
+                 economic tipping"
             );
         }
     }

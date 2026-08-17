@@ -2211,7 +2211,27 @@ impl Polity {
         // then leans toward the building that closes the binding drive, scaled by
         // γ_num: a starving line builds food, a sated one explores uniformly
         // (γ_num = 0 ⇒ the SOC-2 draw).
-        let binding = civic::cascade_reading(world, primary).binding;
+        let cascade = civic::cascade_reading(world, primary);
+        let binding = cascade.binding;
+        // RCP-2 F4: a recipe is a LEISURE activity — it draws on the surplus that
+        // survives EVERY drive (the COG law: creation is funded by leisure, never
+        // by survival flow). Only a bootstrapped line running a real surplus
+        // (`cascade.leisure > 0`) crafts, and for its DOMINANT drive; a line merely
+        // fed-at-the-margin (leisure 0), in any deficit, or still founding builds
+        // the serving ZONE instead — SOC-1's crisis arms stay deterministic. This
+        // keeps the settlement law: no viable line starves on a habitable orbit
+        // because a low-yield recipe diverted its bread.
+        let bootstrapped = world.orb().map(|orb| orb.zones.len() >= 2).unwrap_or(false);
+        let recipe_drive = if bootstrapped && cascade.leisure > ratio(0, 1) {
+            cascade
+                .tiers
+                .iter()
+                .max_by(|a, b| a.demand.cmp(&b.demand))
+                .map(|tier| tier.drive)
+        } else {
+            None
+        };
+        let rank = manifold.algebraic_rank();
         let (gamma_num, _) = civic::stress_quantized(world, primary);
         let with_refine = |base: Option<ZoneKind>| {
             let surface: Vec<ZoneKind> =
@@ -2308,7 +2328,81 @@ impl Polity {
                 }
             }
         };
-        if let (Some(kind), Some(tile)) = (wanted, next_free_tile(world)) {
+        // RCP-2 F4 — THE RECIPE COMPETES ON THE WORKBENCH. Discover the recipe the
+        // society would raise for its leading drive (the binding deficit, or its
+        // DOMINANT tier at ease), then draw it against the chosen zone in ONE
+        // partition — the zone weighted by its genus affinity, the recipe by the
+        // manifold's topological REACH, both tilted by the same γ. A fed line that
+        // draws the recipe grows its doing-layer PROACTIVELY, not only under
+        // scarcity. Enum-free: the draw is a plain weighted index. The recipe role
+        // its drive seeks: metabolic hunger → FOOD, homeostatic → SINK, cognitive →
+        // COGNITION, expansive → ENERGY.
+        let recipe = recipe_drive.and_then(|drive| {
+            let almanac: Vec<[u8; 32]> = world
+                .orb()
+                .map(|orb| orb.elements.iter().map(|(id, _)| *id).collect())
+                .unwrap_or_default();
+            if almanac.is_empty() {
+                return None;
+            }
+            let role = match drive {
+                civic::Drive::Metabolic => cfe::morphogen::FOOD,
+                civic::Drive::Homeostatic => cfe::morphogen::SINK,
+                civic::Drive::Cognitive => cfe::morphogen::COGNITION,
+                civic::Drive::Expansive => cfe::morphogen::ENERGY,
+            };
+            let species = cfe::morphogen::archetype(metabolism);
+            crate::recipe::discover(role, &almanac, &species, &rank)
+        });
+        // The zone-vs-recipe draw. A recipe NEVER diverts a SURVIVAL build — the
+        // food and shelter arms (Extractor, Habitat, Regenerator, Granary,
+        // Encasement, CryoArray) stay deterministic (SOC-1's Heaviside veto), so no
+        // viable line starves because a low-yield recipe took its bread. A recipe
+        // competes only with a DISCRETIONARY (industry) build, or stands alone when
+        // the beat chose no zone. Salt the digest distinctly so this draw does not
+        // correlate with the zone-among-zones draw inside `choose_build`.
+        let survival_build = matches!(
+            wanted,
+            Some(
+                ZoneKind::Extractor
+                    | ZoneKind::Habitat
+                    | ZoneKind::Regenerator
+                    | ZoneKind::Granary
+                    | ZoneKind::Encasement
+                    | ZoneKind::CryoArray
+            )
+        );
+        let build_recipe = match (wanted, &recipe) {
+            _ if survival_build => false,
+            (Some(zone), Some(r)) => {
+                let zw = crate::soc::zone_weight(zone, &manifold, binding, gamma_num);
+                let rw = crate::soc::recipe_weight(r.role, &rank, binding, gamma_num);
+                let mut hasher = blake3::Hasher::new();
+                hasher.update(&digest);
+                hasher.update(b"recipe-workbench");
+                let draw_seed = *hasher.finalize().as_bytes();
+                crate::soc::partition_draw(&[zw, rw], draw_seed) == Some(1)
+            }
+            // No zone this beat: the recipe stands alone.
+            (None, Some(_)) => true,
+            _ => false,
+        };
+        // A drawn recipe is raised and SKIPS the zone; a recipe the door refuses
+        // (e.g. it already stands) simply passes the beat. NO fall-through to a
+        // second build — over-settling the roster tips the mint loop's
+        // exact-rational arithmetic, and the survival arms already guarantee no
+        // viable line is diverted from its bread.
+        if build_recipe {
+            if let Some(r) = recipe {
+                let _ = world.build_recipe_as(
+                    self.automaton,
+                    cfe::world::FIRST_ORB,
+                    r.inputs,
+                    r.role,
+                    r.yield_of_role,
+                );
+            }
+        } else if let (Some(kind), Some(tile)) = (wanted, next_free_tile(world)) {
             // REFINE-1: ElementRefinery needs DEEPENING (condition 3),
             // same technology door as the regenerator.
             if kind == ZoneKind::ElementRefinery {
@@ -2332,47 +2426,6 @@ impl Polity {
             // seats AFTER the build so the dwelling stands to hold it.
             if built && kind == ZoneKind::Habitat && hab == 0 {
                 world.settle_population(cfe::world::FIRST_ORB, FOUNDING_BAND);
-            }
-        }
-        // RCP-2 F3 — THE EMERGENT DOING-LAYER GROWS. When a drive BINDS (a
-        // tier left wanting), the society searches its OWN almanac — the raw
-        // elements it holds — for the one whose morphodynamic vector projects
-        // into the deficit role, gated by the manifold's topological reach
-        // (`recipe::discover`), and raises the recipe it finds. No ZoneKind,
-        // no level: the doing-layer grows from the almanac × the species'
-        // projection. Idempotent at the door — a recipe already raised refuses
-        // — so a standing deficit mints each recipe once, not per beat; and a
-        // role no held element can fill (or reach too shallow) mints nothing,
-        // the honest hole.
-        if let Some(drive) = binding {
-            let almanac: Vec<[u8; 32]> = world
-                .orb()
-                .map(|orb| orb.elements.iter().map(|(id, _)| *id).collect())
-                .unwrap_or_default();
-            if !almanac.is_empty() {
-                // The binding drive names the DEFICIT ROLE: metabolic hunger
-                // seeks FOOD, the homeostatic drive a SINK for its entropy, the
-                // cognitive drive the COGNITION its mind runs on, the expansive
-                // drive the ENERGY that funds reach.
-                let role = match drive {
-                    civic::Drive::Metabolic => cfe::morphogen::FOOD,
-                    civic::Drive::Homeostatic => cfe::morphogen::SINK,
-                    civic::Drive::Cognitive => cfe::morphogen::COGNITION,
-                    civic::Drive::Expansive => cfe::morphogen::ENERGY,
-                };
-                let species = cfe::morphogen::archetype(metabolism);
-                let rank = manifold.algebraic_rank();
-                if let Some(recipe) =
-                    crate::recipe::discover(role, &almanac, &species, &rank)
-                {
-                    let _ = world.build_recipe_as(
-                        self.automaton,
-                        cfe::world::FIRST_ORB,
-                        recipe.inputs,
-                        recipe.role,
-                        recipe.yield_of_role,
-                    );
-                }
             }
         }
     }
