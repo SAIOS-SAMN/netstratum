@@ -2794,7 +2794,51 @@ impl Polity {
         (shape, pressure)
     }
 
-    fn research_step(&mut self, book: &Ledger) {
+    /// N-I5 — THE RATION BOOK'S DIRECTION: the species's owed fiber index. A
+    /// Resource ration is its discriminant (1..=7, distinct per metabolism); an
+    /// element-eater owes the reserved element slot. Never `UNFED` (0), so the
+    /// unfed mouth stays distinguishable from a fed one.
+    fn ration_direction(ration: &cfe::dop::Ration) -> u8 {
+        match ration {
+            cfe::dop::Ration::Resource(r) => *r as u8,
+            cfe::dop::Ration::Element(_) => 8,
+        }
+    }
+
+    /// N-I5 — THE SURVIVAL OBSERVATION. Peel the ration book of one orb into
+    /// HAVE|OWE (mouths as sites over the species-ration fiber) and read it with
+    /// the ONE organ (`solver::ration_reads` → `reduce_pair`). `true` iff the
+    /// larder feeds every working mouth this beat. No mouths — or a rate-0 line
+    /// with no farmed ration (plasmoid, #29) — trivially survives: there is no
+    /// book to peel. A pure deterministic read (labor, sustenance, ration), so
+    /// replay reads the same verdict and SEAL-B is untouched.
+    pub fn ration_survives(&self, orb: u64) -> bool {
+        let mouths = self.world.labor_force(orb);
+        if mouths == 0 {
+            return true;
+        }
+        let per_capita = self.world.per_capita_ration();
+        if per_capita <= ratio(0, 1) {
+            return true;
+        }
+        let stamp = self.world.now();
+        let available: Ratio = self
+            .world
+            .sustenance_sources(orb, stamp)
+            .iter()
+            .map(|source| source.available())
+            .fold(ratio(0, 1), |sum, amount| sum + amount);
+        // Mouth-granular coverage — how many mouths the larder feeds this beat.
+        // `to_integer` truncates toward zero, which IS floor since the quotient
+        // is non-negative; capped at the mouths (surplus feeds no phantom).
+        let fed = num_traits::ToPrimitive::to_u64(&(available / per_capita).to_integer())
+            .unwrap_or(mouths)
+            .min(mouths);
+        let ration_dir = Self::ration_direction(&self.world.ration_of(orb));
+        matches!(solver::ration_reads(mouths, fed, ration_dir), solver::RationRead::Fed)
+    }
+
+    fn research_step(&mut self, book: &Ledger, survives: bool) {
         let Some(receipt) = self.world.chronicle().receipts().last() else {
             return;
         };
@@ -2804,7 +2848,19 @@ impl Polity {
         // advances the trajectory to Growth.
         let trajectory_before = self.trajectory;
 
-        let solved = if self.spec.civilization.perception == "volumetric" {
+        // N-I5 — THE SURVIVAL OBSERVATION (Pin G, THE INTELLIGENCE PORT). Peel
+        // the ration book: does the larder feed the working mouths? A line that
+        // cannot does NOT think ARC this beat — it rests (the `None` arm below,
+        // exactly as a barren beat rests; not a sweep). The owe column is
+        // labor_force × the line's ration (mouths eat — buildings' upkeep is not
+        // the pair), the have is the derived sustenance, and the owed DIRECTION
+        // is the species's ration (a plasmoid owes joule, not biomass — no
+        // hardcode). The SAME reduce organ the grid seat runs. `survives` was
+        // read in `cycle` after regrowth and before collect drained the larder.
+        let solved = if !survives {
+            // The book did not close — withhold the beat, call no think_task.
+            None
+        } else if self.spec.civilization.perception == "volumetric" {
             // THE VOLUMETRIC SEAT IS OFF THE BEAT (N-I4, THE INTELLIGENCE PORT).
             // `solve_volume` is a SECOND search-thinker, and the port admits
             // exactly one organ. Perception is a LENS on `measure_grid`, and the
@@ -3362,6 +3418,15 @@ impl Polity {
         profile::timed("tick", || {
             self.world.tick();
         });
+        // N-I5 — THE SURVIVAL OBSERVATION (Pin G), read AFTER the beat's
+        // regrowth (tick) and BEFORE collect consumes it: can the vein/flow feed
+        // the working mouths this beat? Read post-collect it would see the
+        // ONT-2b larder drained to ~0 (the staple is MINED vein → mouths at
+        // collect, the bank bypassed) and falsely starve a flow-fed line. Pure
+        // read — replay reads the same verdict, so SEAL-B is untouched.
+        let survives = profile::timed("survival_read", || {
+            self.ration_survives(cfe::world::FIRST_ORB)
+        });
         // Every settled orb collects — a chartered survey site left
         // uncollected would starve at its own upkeep.
         profile::timed("collect", || {
@@ -3376,7 +3441,7 @@ impl Polity {
         profile::timed("cognition_step", || self.cognition_step());
         profile::timed("survey_step", || self.survey_step());
         profile::timed("expand_step", || self.expand_step());
-        profile::timed("research_step", || self.research_step(book));
+        profile::timed("research_step", || self.research_step(book, survives));
         let newborn = profile::timed("divergence_step", || self.divergence_step(registry));
         // THE RESUME CARRIER (task 25, 2026-07-30): every polity
         // world syncs its tlv chronicle beside the ledger exports — an

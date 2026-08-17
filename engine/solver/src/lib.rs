@@ -32,6 +32,10 @@ pub mod nsearch;
 // `iae::FullMeasurement`, read them through the ONE reduce organ (`iae::think`),
 // render a glued frame to a program, seal the proof. NOT a search path.
 pub mod think;
+// N-I5 (THE INTELLIGENCE PORT) — the survival seat: peel the ration book
+// (HAVE|OWE, mouths as sites) through the SAME reduce organ. The observation
+// that gates the beat (Pin G); naming a survival deed is N-I6.
+pub mod survival;
 pub mod volume;
 
 // The verifier half moved to `solver-verify` (the prover/verifier
@@ -58,6 +62,7 @@ pub use search::{
 };
 pub use nsearch::{solve_field, FieldSolveRead};
 pub use think::{measure_grid, think_task};
+pub use survival::{ration_reads, RationRead};
 // N-I4 — the cognitive basin's element, re-exported for the vessel layer
 // (`conductor` grows a `Vec<Crystal>` per line and passes it to `think_task`).
 pub use iae::Crystal;
