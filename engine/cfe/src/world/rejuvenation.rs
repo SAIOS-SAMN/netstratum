@@ -287,29 +287,33 @@ impl World {
     /// eats its ration, births from the surplus toward `K_pop`, and turns
     /// over across its lifespan — all computed lazily at the touch from
     /// the beats elapsed since `last_touch`, the same clock the ration
-    /// settle reads. Returns `(Δpop, resource, consumed)`:
-    /// `settle_population(Δpop)` receipts the headcount, and `consumed`
-    /// folds into the touch's ration as a DEBIT (the food eaten this
-    /// span), the exact mirror of the regrowth credit — so the whole
-    /// thing rides existing receipts and stays SEAL-B-safe.
+    /// settle reads. Returns `(Δpop, source, consumed)`: `settle_population(Δpop)`
+    /// receipts the headcount, `consumed` is the amount drawn from the primary
+    /// (non-wild) [`FoodSource`] this span, and `source` is that source — the
+    /// collect draws `consumed` from it, depleting it via its own receipt (a
+    /// bank debit or a vein mine), the exact mirror of the regrowth credit, so
+    /// the whole thing rides existing receipts and stays SEAL-B-safe.
     ///
     /// `None` when nothing is driven here: a world with no people, a
     /// zero-span touch, or a rate-0 CAPTURE line (the plasmoid, whose
     /// energy population rides the heat economy, not a farmed stock).
-    /// ING-2b: an almanac-ELEMENT staple line IS driven — it eats its
-    /// mined food element through the same logistic, the consumption
-    /// banked as `RationElementSettled`; only the carrier differs.
     ///
-    /// The food AVAILABLE this span is the standing bank plus the harvest
-    /// the same beats produced (farmed yield + natural regrowth), so a
-    /// world that farms plenty feeds its people however seldom it collects.
+    /// SOURCE-1: the food AVAILABLE this span is summed over the line's derived
+    /// [`FoodSource`]s ([`Self::sustenance_sources_with`]) — the wild flow it
+    /// gathers plus the stock its metabolism grows (a Resource bank, or its
+    /// mineral vein) — so this reads no `match ration`; the species → source
+    /// mapping lives in the derivation alone.
     /// - **FED** (`available ≥ demand`): the population grows an S-curve
     ///   toward its ceiling ([`grained_logistic`] on people, the #28
     ///   curve), less the ordinary mortality; it eats its full demand.
     /// - **STARVED** (`available < demand`): only the people the span's
     ///   food can feed survive — the unfed die atop the mortality — and
     ///   all of it is eaten.
-    pub fn population_touch_delta(&self, orb: u64, stamp: u64) -> Option<(Ratio, Ration, Ratio)> {
+    pub fn population_touch_delta(
+        &self,
+        orb: u64,
+        stamp: u64,
+    ) -> Option<(Ratio, FoodSource, Ratio)> {
         self.population_touch_delta_with(orb, stamp, self.ration_of(orb))
     }
 
@@ -322,7 +326,7 @@ impl World {
         orb: u64,
         stamp: u64,
         ration: Ration,
-    ) -> Option<(Ratio, Ration, Ratio)> {
+    ) -> Option<(Ratio, FoodSource, Ratio)> {
         // THE POPULATION IS EXACT-RATIONAL (COG Slice 2): the integer
         // headcount PLUS the fractional carry the logistic has accrued but
         // not yet promoted to a whole colonist. The logistic is a multiplier
@@ -372,54 +376,29 @@ impl World {
         // however seldom its sovereign collects, the same path-independence
         // the lazy ration settle already gives. All three fold into this
         // touch, so `consumed ≤ available` keeps the settled bank ≥ 0.
-        // The tick-accrued yield of the RESOURCE carrier this line farms. An
-        // almanac-ELEMENT staple is banked directly by assay (not the accrued
-        // pool), so its harvest reads zero here — the mined stock stands in
-        // the element larder, read as `ration_amount` below.
-        let harvested: Ratio = match &ration {
-            Ration::Resource(resource) => self
-                .accrued_of(orb)
-                .into_iter()
-                .filter(|(res, _)| res == resource)
-                .map(|(_, amount)| amount)
-                .fold(ratio(0, 1), |sum, amount| sum + amount),
-            Ration::Element(_) => ratio(0, 1),
-        };
-        let natural = match self.ration_touch_delta_with(orb, stamp, ration.clone()) {
-            Some((r, signed)) if r == ration => signed,
-            _ => ratio(0, 1),
-        };
-        // THE SYNTROPIC BASELINE (COG Slice 2c, operator ruling 2026-08-15) —
-        // the WILD food the band GATHERS from the planet's untended primary
-        // production, ambient and physics-driven (`syntropic_flow`). It is
-        // gathered, never banked, and EATEN FIRST: it feeds the band before any
-        // cultivated/banked stock, so only the demand beyond it debits the
-        // ledger (the `bank_draw` netting below). It serves two ends at once:
-        // (1) the syntropic cap on the extinction vent — even with the ambient
-        // stock eaten to zero a band always has the wild flow, so the
-        // starvation cull regresses it to the SYNTROPIC LIMIT
-        // (`syntropic_flow / per_capita`) and holds it there, a standing deficit
-        // that drives the Mind to invent cultivation, never a spiral to
-        // extinction; and (2) a founding band under the wild flow draws NOTHING
-        // from the granary, so the industrial surplus is untouched until the
-        // population outgrows gathering. Zero on a barren/unsited world, so
-        // those still die.
-        let syntropic = self.syntropic_flow(orb) * dtr.clone();
-        // ONT-2b: the food available this span reads its LARDER.
-        // - A RESOURCE line: the standing bank + this span's harvest (farmed
-        //   yield + natural regrowth) + the wild flow — the #40–42 path.
-        // - An ELEMENT line: the vein IS the larder. The band eats the wild
-        //   flow first, then draws on the UNEXTRACTED vein richness
-        //   (`cultivated_yield` = Σ vein_richness), which it MINES by eating at
-        //   the collect touch (`StapleMined`). The element BANK is bypassed for
-        //   food, and element regrowth is deferred to ONT-3, so neither
-        //   `ration_amount` nor `natural` enters — the population grows into
-        //   the FULL vein read here (before any depletion), then eats it down.
-        let available = match &ration {
-            Ration::Resource(_) => {
-                held.ration_amount(&ration) + harvested + natural + syntropic.clone()
-            }
-            Ration::Element(_) => syntropic.clone() + self.cultivated_yield(orb),
+        // SOURCE-1: DERIVE this line's sustenance sources and read the food it
+        // has this span off the vector — the WILD flow it gathers (eaten first,
+        // never banked) plus the stock its metabolism grows (a Resource bank +
+        // this span's harvest, or its mineral vein's unextracted richness). The
+        // species → source mapping lives ONLY in `sustenance_sources_with`; here
+        // the population just sums availability and nets the wild share — no
+        // `match ration`, so a FLUX source (energy-eaters, #29) or a multi-source
+        // diet slots in with no change to this loop.
+        let sources = self.sustenance_sources_with(orb, stamp, &ration);
+        let syntropic: Ratio = sources
+            .iter()
+            .filter(|source| source.is_wild())
+            .map(|source| source.available())
+            .fold(ratio(0, 1), |sum, amount| sum + amount);
+        let available: Ratio = sources
+            .iter()
+            .map(|source| source.available())
+            .fold(ratio(0, 1), |sum, amount| sum + amount);
+        // The PRIMARY larder — the first non-wild source, the one the draw
+        // depletes. `None` only where the derivation found no stock (an unsited
+        // line), which the guards above have already turned back.
+        let Some(larder) = sources.into_iter().find(|source| !source.is_wild()) else {
+            return None;
         };
         if available >= demand {
             // FED — births ride the #28 logistic on PEOPLE toward K_pop,
@@ -471,7 +450,7 @@ impl World {
             // amount economy.rs debits from the stored bank, wild food already
             // netted out.
             let bank_draw = (demand - syntropic).max(ratio(0, 1));
-            Some((births - mortality, ration, bank_draw))
+            Some((births - mortality, larder, bank_draw))
         } else {
             // STARVED — only the fraction of the band the span's food can
             // feed survives; the unfed die atop the ordinary mortality, and
@@ -485,7 +464,7 @@ impl World {
             // gathered free, so only the non-wild remainder (bank + harvested +
             // natural) debits the granary — which is exactly what STANDS there.
             let bank_draw = (available - syntropic).max(ratio(0, 1));
-            Some((-(mortality + unfed), ration, bank_draw))
+            Some((-(mortality + unfed), larder, bank_draw))
         }
     }
 }

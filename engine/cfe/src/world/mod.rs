@@ -76,11 +76,13 @@ pub mod science_lab;
 pub mod ap_budget;
 pub mod labor;
 pub mod rejuvenation;
+pub mod sustenance;
 pub mod distribution;
 pub mod workbench;
 pub mod taxation;
 
 pub use science_lab::{LabCreateResult, ScienceLabBoard};
+pub use sustenance::FoodSource;
 pub use bench_games::{
     DoctrineBoard, IntelBoard, IntelStep, LinkBoard, ResearchBoard, ResearchNode,
     StellarCapacityBoard, StellarLineRow, StellarVeinRow,

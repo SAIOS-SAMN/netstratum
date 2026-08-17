@@ -425,9 +425,14 @@ impl World {
         // colony eats itself to empty and stops, it does not overdraw and
         // strike a negative-amount famine the kernel must refuse. The
         // element carrier holds the SAME law against the element larder.
-        if let Some((_, ration, consumed)) = &population {
-            match ration {
-                Ration::Resource(resource) => {
+        // SOURCE-1: the draw dispatches on the primary FoodSource the population
+        // read (not `match ration`) — the source's OWN nature says how eating it
+        // depletes it. A Resource BANK debits (clamped to what stands); a mineral
+        // VEIN is mined (captured here, extracted below). A new source kind (a
+        // FLUX field, #29) adds an arm here, not a fork through the economy.
+        if let Some((_, source, consumed)) = &population {
+            match source {
+                FoodSource::Bank { resource, .. } => {
                     let credit = settleable
                         .iter()
                         .find(|(held_res, _)| held_res == resource)
@@ -447,9 +452,12 @@ impl World {
                 // the vein is the larder). The richness cap and lattice floor
                 // are applied against the live vein below, where `StapleMined`
                 // grows `extracted` and receipts the pull.
-                Ration::Element(id) => {
-                    staple_mine = Some((*id, consumed.clone()));
+                FoodSource::Vein { element, .. } => {
+                    staple_mine = Some((*element, consumed.clone()));
                 }
+                // The primary larder is never the wild flow (it is gathered
+                // free, netted out of `consumed`); this arm cannot arise.
+                FoodSource::Wild(_) => {}
             }
         }
         // RCP-2 F2: fold each built recipe's span yield into this touch, its

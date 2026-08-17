@@ -11,7 +11,7 @@ use cfe::almanac::ThermalRegion;
 use cfe::dop::{positive, unit, ClosureEvent, Ration, Resource, ZoneKind};
 use cfe::ratio::ratio;
 use cfe::thermal::StarClass;
-use cfe::world::{replay, World, FIRST_ORB, SOVEREIGN};
+use cfe::world::{replay, FoodSource, World, FIRST_ORB, SOVEREIGN};
 
 /// A world sited in the mesic band under a G star, with `habitats`
 /// habitats standing — the lush case. Biomass is topped up by receipt
@@ -246,13 +246,12 @@ fn a_collect_applies_the_net_delta_and_a_founding_band_lives_by_gathering() {
     for _ in 0..8 {
         world.tick();
     }
-    let (delta, ration, consumed) = world
+    let (delta, source, consumed) = world
         .population_touch_delta(FIRST_ORB, world.now())
         .expect("a peopled, farming world drives population");
-    assert_eq!(
-        ration,
-        Ration::Resource(Resource::Biomass),
-        "an unprospected biotic line's people eat biomass"
+    assert!(
+        matches!(source, FoodSource::Bank { resource: Resource::Biomass, .. }),
+        "an unprospected biotic line's people draw the biomass BANK source: {source:?}"
     );
     assert_eq!(
         consumed,
@@ -291,13 +290,12 @@ fn a_band_past_the_wild_flow_draws_the_cultivated_granary() {
         world.tick();
     }
     let bank_before = world.orb().expect("stands").banked_amount(Resource::Biomass);
-    let (_, ration, consumed) = world
+    let (_, source, consumed) = world
         .population_touch_delta(FIRST_ORB, world.now())
         .expect("a peopled, farming world drives population");
-    assert_eq!(
-        ration,
-        Ration::Resource(Resource::Biomass),
-        "an unprospected biotic line's people eat biomass"
+    assert!(
+        matches!(source, FoodSource::Bank { resource: Resource::Biomass, .. }),
+        "an unprospected biotic line's people draw the biomass BANK source: {source:?}"
     );
     assert!(
         consumed > ratio(0, 1),
@@ -310,6 +308,35 @@ fn a_band_past_the_wild_flow_draws_the_cultivated_granary() {
         "the granary fell by the cultivated draw: {bank_before} -> {bank_after}"
     );
     assert_eq!(replay(world.chronicle()), world.committed(), "replay MATCHES");
+}
+
+#[test]
+fn sustenance_is_derived_as_a_source_vector_not_a_carrier_branch() {
+    // SOURCE-1: a line's food this span is DERIVED as a ranked FoodSource
+    // vector at one point (`sustenance_sources`) — the WILD flow it gathers
+    // first, then the stock its metabolism grows — never a `match ration` in
+    // the consumption path. A biotic line's derivation is [Wild, Bank(Biomass)]:
+    // the structure is uniform, and only the second source's KIND is
+    // metabolism-specific (a Vein here for an element-eater, a Flux for #29).
+    let mut world = peopled(8, 2, 5_000);
+    for _ in 0..8 {
+        world.tick();
+    }
+    let sources = world.sustenance_sources(FIRST_ORB, world.now());
+    assert_eq!(sources.len(), 2, "wild flow + the metabolism's one stock");
+    assert!(sources[0].is_wild(), "the wild flow ranks first — gathered, eaten first");
+    assert!(
+        matches!(sources[1], FoodSource::Bank { resource: Resource::Biomass, .. }),
+        "a biotic line's derived stock is its biomass bank: {:?}",
+        sources[1]
+    );
+    // The summed availability is what the population reads — no branch consults
+    // the carrier type to get it.
+    let available: cfe::ratio::Ratio = sources
+        .iter()
+        .map(|source| source.available())
+        .fold(ratio(0, 1), |sum, amount| sum + amount);
+    assert!(available > ratio(0, 1), "a fed world has food to sum: {available}");
 }
 
 #[test]
