@@ -5,6 +5,7 @@
 //! single sealed-rule surface and it is deliberate.
 
 use super::*;
+use crate::dop::Ration;
 
 impl World {
     /// MARKET-1: the resting offers.
@@ -320,7 +321,14 @@ impl World {
         // yield receipt (no deed of its own — the §2 digest rides the
         // settled amount), so replay banks it straight from the receipt
         // and `last_touch` advances by the same carrier.
-        let rejuvenated = self.ration_touch_delta(orb, self.clock.now());
+        // ING-2b PERF: resolve this line's ration (the almanac-staple scan,
+        // `ration_of`) ONCE for the whole touch and thread it through both the
+        // rejuvenation settle and the population delta (and its `natural`
+        // recursion), instead of each reader re-resolving it — the same value,
+        // computed once. The staple depends only on the (unchanging this
+        // touch) prospects/genesis, so this is a pure memoization.
+        let ration = self.ration_of(orb);
+        let rejuvenated = self.ration_touch_delta_with(orb, self.clock.now(), ration.clone());
         // POPULATION (task #40/#41/#42): the elastic population eats its
         // ration, births from the surplus, and turns over — computed HERE
         // from the pre-touch state (the old `last_touch`, the old bank),
@@ -328,7 +336,7 @@ impl World {
         // touch's ration as a debit (`pop_consumed`); the net headcount
         // change (`pop_delta`) receipts as its own `PopulationSettled`
         // after the touch, at the same stamp.
-        let population = self.population_touch_delta(orb, self.clock.now());
+        let population = self.population_touch_delta_with(orb, self.clock.now(), ration);
         // G2 (#29): the food-element an element-eater synthesizes this
         // touch (joule → element, conserved). Read pre-touch; settled as
         // its own ElementFarmed receipt after the touch. `None` for every
@@ -375,14 +383,29 @@ impl World {
                 false => *owner != orb,
             }
         });
+        // ING-2b: the food settle rides whichever CARRIER this line's ration
+        // is. A Resource ration folds into `settleable` (YieldCollected, as
+        // ever); an almanac-ELEMENT staple (`ration_of` → `Ration::Element`,
+        // drawn from the planet's own veins) nets into `food_element` and
+        // settles as `RationElementSettled` — the element ledger, off the
+        // closed 3-Resource carriers.
+        let mut food_element: Option<([u8; 32], Ratio)> = None;
         // Fold the regrown ration into this touch's yield — merged with
         // its resource where the tick also accrued some, otherwise its
         // own line. A world can collect on regrowth ALONE, so this joins
         // before the empty gate.
-        if let Some((resource, grown)) = rejuvenated {
-            match settleable.iter_mut().find(|(held_res, _)| *held_res == resource) {
-                Some((_, amount)) => *amount += grown,
-                None => settleable.push((resource, grown)),
+        if let Some((ration, grown)) = rejuvenated {
+            match ration {
+                Ration::Resource(resource) => {
+                    match settleable.iter_mut().find(|(held_res, _)| *held_res == resource) {
+                        Some((_, amount)) => *amount += grown,
+                        None => settleable.push((resource, grown)),
+                    }
+                }
+                Ration::Element(id) => {
+                    let entry = food_element.get_or_insert((id, ratio(0, 1)));
+                    entry.1 += grown;
+                }
             }
         }
         // Fold the food the population ate this span into the same touch as
@@ -395,18 +418,48 @@ impl World {
         // this same touch banks (yield + regrown). Clamp the debit to that
         // ceiling so the settled bank can never cross zero — a starving
         // colony eats itself to empty and stops, it does not overdraw and
-        // strike a negative-amount famine the kernel must refuse.
-        if let Some((_, resource, consumed)) = &population {
-            let credit = settleable
-                .iter()
-                .find(|(held_res, _)| held_res == resource)
-                .map(|(_, amount)| amount.clone())
-                .unwrap_or_else(|| ratio(0, 1));
-            let standing = (held.banked_amount(*resource) + credit).max(ratio(0, 1));
-            let eaten = consumed.clone().min(standing);
-            match settleable.iter_mut().find(|(held_res, _)| held_res == resource) {
-                Some((_, amount)) => *amount -= eaten,
-                None => settleable.push((*resource, -eaten)),
+        // strike a negative-amount famine the kernel must refuse. The
+        // element carrier holds the SAME law against the element larder.
+        if let Some((_, ration, consumed)) = &population {
+            match ration {
+                Ration::Resource(resource) => {
+                    let credit = settleable
+                        .iter()
+                        .find(|(held_res, _)| held_res == resource)
+                        .map(|(_, amount)| amount.clone())
+                        .unwrap_or_else(|| ratio(0, 1));
+                    let standing = (held.banked_amount(*resource) + credit).max(ratio(0, 1));
+                    let eaten = consumed.clone().min(standing);
+                    match settleable.iter_mut().find(|(held_res, _)| held_res == resource) {
+                        Some((_, amount)) => *amount -= eaten,
+                        None => settleable.push((*resource, -eaten)),
+                    }
+                }
+                Ration::Element(id) => {
+                    let credit = food_element
+                        .as_ref()
+                        .filter(|(e, _)| e == id)
+                        .map(|(_, amount)| amount.clone())
+                        .unwrap_or_else(|| ratio(0, 1));
+                    let standing = (held.element_amount(id) + credit).max(ratio(0, 1));
+                    // LATTICE-FLOOR THE FOOD DEBIT (the `stock.rs` §lattice / #28
+                    // discipline, as `regrown_ration` floors the credit). Unlike
+                    // the Resource ledger, the element ledger takes no demurrage
+                    // floor at the touch, so a consumption drawn from `demand =
+                    // pr · per_capita · dt` (a product of rationals) compounds an
+                    // unbounded denominator into the larder and explodes it (the
+                    // 2^N blow-up measured at ~beat 115). Quantizing the debit to
+                    // `LATTICE` — a deterministic, replayable floor, never a round
+                    // — keeps the whole element-food delta `/1024` (the credit is
+                    // already floored), so the larder's denominator is bounded
+                    // forever and the settle replays byte-exact. Flooring rounds
+                    // the debit DOWN, so it never over-draws the standing larder.
+                    let lattice = crate::world::stock::lattice();
+                    let eaten =
+                        (consumed.clone().min(standing) * lattice.clone()).floor() / lattice;
+                    let entry = food_element.get_or_insert((*id, ratio(0, 1)));
+                    entry.1 -= eaten;
+                }
             }
         }
         // RCP-2 F2: fold each built recipe's span yield into this touch, its
@@ -419,7 +472,15 @@ impl World {
                 None => settleable.push((resource, amount)),
             }
         }
-        if settleable.is_empty() && farm.is_none() {
+        // ING-2b: a line whose only movement this touch is its almanac-staple
+        // food (regrew or was eaten) has accrued something — the element
+        // settle counts against the empty gate, exactly as the Resource yield
+        // does. A zero net (nothing grew, nothing eaten) does not.
+        let food_moves = food_element
+            .as_ref()
+            .map(|(_, delta)| *delta != ratio(0, 1))
+            .unwrap_or(false);
+        if settleable.is_empty() && farm.is_none() && !food_moves {
             return Err(ActionRefused::NothingAccrued);
         }
         // TAXATION (49 §5): the taxable throughput this touch — the net
@@ -652,6 +713,27 @@ impl World {
             if minted > ratio(0, 1) || eaten > ratio(0, 1) {
                 self.chronicle.append(
                     ClosureEvent::ElementFarmed { orb_id: orb, element, joule, minted, eaten },
+                    stamp,
+                    vec![actor],
+                );
+            }
+        }
+        // ING-2b: the STAPLE FOOD settles on the element ledger — the planet's
+        // regrowth credit net of the band's consumption this span (both read
+        // pre-touch, the debit clamped to the standing larder above so the
+        // ledger never crosses zero). Banks the net delta and receipts it as
+        // `RationElementSettled`, the element mirror of the Resource
+        // `YieldCollected` fold. `None`/zero for a Resource-ration (v1,
+        // unprospected) line — that line settles food through `settleable`
+        // and emits none here, so it is byte-identical.
+        if let Some((element, delta)) = food_element {
+            if delta != ratio(0, 1) {
+                let stamp = self.clock.now();
+                if let Some(held) = peel(&mut self.orbs, orb) {
+                    held.bank_element(element, delta.clone());
+                }
+                self.chronicle.append(
+                    ClosureEvent::RationElementSettled { orb_id: orb, element, delta },
                     stamp,
                     vec![actor],
                 );

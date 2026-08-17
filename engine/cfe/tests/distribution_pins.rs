@@ -611,6 +611,13 @@ fn a_population_burns_its_trace_and_the_larder_depletes_to_the_penalty_floor() {
     // as the population burns it dry, the factor sinks to its ½ FLOOR — the
     // efficiency penalty, NOT death (the population lives on). The line must
     // re-mine to recover.
+    //
+    // ING-2b coupling: in this single-vein world the vein is ALSO the line's
+    // food staple (`ration_of` → `Ration::Element(vein)`), so the population
+    // eats it down as food while the planet regrows it — a slower, deeper
+    // drain than pure trace burn, but the larder STILL runs dry (regrowth is
+    // dead at zero — a stock must be reseeded), and then the factor sinks to
+    // its floor exactly as before. Only the timescale moved; drain until dry.
     let (vein, mut world) = traced_world(20);
     let bank = |w: &World| w.orb_by_id(FIRST_ORB).map(|h| h.element_amount(&vein)).unwrap_or_else(|| ratio(0, 1));
     assert_eq!(world.micronutrient_factor(FIRST_ORB), ratio(3, 2), "a full larder boosts the harvest");
@@ -625,10 +632,13 @@ fn a_population_burns_its_trace_and_the_larder_depletes_to_the_penalty_floor() {
     );
 
     // Keep running: the larder empties and the factor sinks to the ½ floor.
-    for _ in 0..3 {
+    let mut guard = 0;
+    while bank(&world) > ratio(0, 1) && guard < 20 {
         for _ in 0..8 { world.tick(); }
         world.collect().expect("collects");
+        guard += 1;
     }
+    assert!(guard < 20, "the trace/food larder drained within the bound");
     assert_eq!(bank(&world), ratio(0, 1), "the trace larder ran dry");
     assert_eq!(world.micronutrient_factor(FIRST_ORB), ratio(1, 2), "a spent larder falls to the penalty floor");
     assert!(world.population_of(FIRST_ORB) > 0, "but the population LIVES — trace lack is a penalty, not a die-off");
@@ -690,12 +700,18 @@ fn the_catalyst_boosts_extraction_where_the_reagent_stands_and_never_penalizes()
     // falls to baseline 1 — a missing reagent is no boost, but NEVER a
     // penalty (the distinction from the maintenance micronutrient, which
     // DOES sink to its ½ floor on the same empty larder).
-    let (_vein, mut world) = traced_world(20);
+    let (vein, mut world) = traced_world(20);
+    let bank = |w: &World| w.orb_by_id(FIRST_ORB).map(|h| h.element_amount(&vein)).unwrap_or_else(|| ratio(0, 1));
     assert_eq!(world.catalyst_factor(FIRST_ORB), ratio(2, 1), "a full reagent stock doubles extraction");
-    for _ in 0..4 {
+    // ING-2b: the reagent vein is also this line's food staple, so it drains
+    // over more touches (eaten as food + burned as trace); run until dry.
+    let mut guard = 0;
+    while bank(&world) > ratio(0, 1) && guard < 20 {
         for _ in 0..8 { world.tick(); }
         world.collect().expect("collects");
+        guard += 1;
     }
+    assert!(guard < 20, "the reagent larder drained within the bound");
     assert_eq!(world.catalyst_factor(FIRST_ORB), ratio(1, 1), "a spent reagent leaves extraction at baseline, never below");
     assert_eq!(world.micronutrient_factor(FIRST_ORB), ratio(1, 2), "the maintenance need penalizes where the catalyst does not");
 }

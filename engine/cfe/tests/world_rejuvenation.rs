@@ -8,7 +8,7 @@
 //! changes nothing.
 
 use cfe::almanac::ThermalRegion;
-use cfe::dop::{positive, unit, ClosureEvent, Resource, ZoneKind};
+use cfe::dop::{positive, unit, ClosureEvent, Ration, Resource, ZoneKind};
 use cfe::ratio::ratio;
 use cfe::thermal::StarClass;
 use cfe::world::{replay, World, FIRST_ORB, SOVEREIGN};
@@ -246,10 +246,14 @@ fn a_collect_applies_the_net_delta_and_a_founding_band_lives_by_gathering() {
     for _ in 0..8 {
         world.tick();
     }
-    let (delta, resource, consumed) = world
+    let (delta, ration, consumed) = world
         .population_touch_delta(FIRST_ORB, world.now())
         .expect("a peopled, farming world drives population");
-    assert_eq!(resource, Resource::Biomass, "a biotic line's people eat biomass");
+    assert_eq!(
+        ration,
+        Ration::Resource(Resource::Biomass),
+        "an unprospected biotic line's people eat biomass"
+    );
     assert_eq!(
         consumed,
         ratio(0, 1),
@@ -287,10 +291,14 @@ fn a_band_past_the_wild_flow_draws_the_cultivated_granary() {
         world.tick();
     }
     let bank_before = world.orb().expect("stands").banked_amount(Resource::Biomass);
-    let (_, resource, consumed) = world
+    let (_, ration, consumed) = world
         .population_touch_delta(FIRST_ORB, world.now())
         .expect("a peopled, farming world drives population");
-    assert_eq!(resource, Resource::Biomass, "a biotic line's people eat biomass");
+    assert_eq!(
+        ration,
+        Ration::Resource(Resource::Biomass),
+        "an unprospected biotic line's people eat biomass"
+    );
     assert!(
         consumed > ratio(0, 1),
         "past the wild flow the band draws the cultivated granary: {consumed}"
@@ -542,16 +550,16 @@ fn a_quarantined_world_starves_its_ration_at_the_touch() {
         .map(|(_, amount)| amount.clone())
         .fold(ratio(0, 1), |sum, amount| sum + amount);
     // A sealed world DECAYS where a free one would regrow.
-    let (resource, decay) = world
+    let (ration, decay) = world
         .quarantine_decay(FIRST_ORB, world.now())
         .expect("a sealed world starves");
-    assert_eq!(resource, Resource::Biomass);
+    assert_eq!(ration, Ration::Resource(Resource::Biomass));
     assert!(decay > ratio(0, 1), "the ration is decaying: {decay}");
     // The TOUCH settles a starving DEBIT, not a recovery credit — the
     // quarantine branch overrides regrowth for a sealed world.
     assert_eq!(
         world.ration_touch_delta(FIRST_ORB, world.now()),
-        Some((Resource::Biomass, -decay.clone())),
+        Some((Ration::Resource(Resource::Biomass), -decay.clone())),
         "a sealed world's touch is a debit, never a credit"
     );
 

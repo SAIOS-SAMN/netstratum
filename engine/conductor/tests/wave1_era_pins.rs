@@ -182,13 +182,18 @@ fn pure_npc_refines_elements() {
         &book,
     );
 
-    // DIO-3a: the pure NPC now seals its clade at genesis (tardigrade →
-    // hypobiotid, an EXTRACTIVE economy). The digest reseed and the changed
-    // economic mode push its first refine from within 48 beats to beat 64
-    // (measured), so the window widens to 90 — the loop still witnesses the
-    // element economy closing (bank → refine), just on the sealed clade's clock.
+    // DIO-3a: the pure NPC seals its clade at genesis (tardigrade →
+    // hypobiotid, an EXTRACTIVE economy). ING-2b: the mineral line now EATS
+    // its mined vein as food (the almanac staple, `ration_of` → Element),
+    // competing with refining for the same stock, so the first refine moves
+    // from beat 64 to beat 91 (measured). The window widens to 110 and the
+    // loop BREAKS at first refine (~beat 91) — deliberately kept below the
+    // pre-existing beat-115 vein-richness scalar collapse (the `vein_wear`
+    // Euler-integration denominator explosion, ONT-2 #108), which this test
+    // does not exercise. The break-at-refine keeps the replay assert well
+    // inside the exact window.
     let mut refined_on = None;
-    for beat in 1u32..=90 {
+    for beat in 1u32..=110 {
         let _ = polity.cycle(&book, &registry);
         if refined_kinds(&polity) > 0 {
             refined_on = Some(beat);
@@ -202,7 +207,7 @@ fn pure_npc_refines_elements() {
     );
     assert!(
         refined_on.is_some(),
-        "pure NPC must refine at least once within 90 beats; \
+        "pure NPC must refine at least once within 110 beats; \
          elements={} refined_receipts={}",
         element_kinds(&polity),
         refined_kinds(&polity)
