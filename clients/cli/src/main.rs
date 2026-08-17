@@ -8643,6 +8643,10 @@ fn chronicle(world: &World, style: &Style) {
                 "🌾 staple food SETTLED — orb {orb_id} banks {} of its almanac staple (planet regrew, band ate)",
                 style.strong(&amount(delta))
             ),
+            cfe::dop::ClosureEvent::StapleMined { orb_id, eaten, .. } => format!(
+                "⛏ staple vein MINED by eating — orb {orb_id} drew {} of food straight from the vein (the larder)",
+                style.strong(&amount(eaten))
+            ),
             cfe::dop::ClosureEvent::TraceConsumed { orb_id, amount: burned, .. } => format!(
                 "· trace BURNED — orb {orb_id} spent {} of a trace element maintaining its substrate",
                 style.strong(&amount(burned))
@@ -9265,6 +9269,10 @@ fn chronicle(world: &World, style: &Style) {
                     Some(after) => format!(" · the spring now runs at {}", amount(after)),
                     None => String::new(),
                 }
+            ),
+            cfe::dop::ClosureEvent::StapleMined { eaten, .. } => format!(
+                "⛏ {} eaten straight from the staple vein — the population mined its own larder",
+                style.strong(&amount(eaten))
             ),
             cfe::dop::ClosureEvent::HandoffSealed { from, to } => format!(
                 "✍ hand {} yields the pen to hand {} (NS-5 §7)",

@@ -193,6 +193,76 @@ fn the_integral_grows_by_exactly_the_banked_amount() {
     );
 }
 
+fn stmine(eaten: Ratio, stamp: u64) -> Step {
+    Step {
+        event: ClosureEvent::StapleMined { orb_id: 1, element: ELEMENT, eaten },
+        actor: SOVEREIGN,
+        stamp,
+    }
+}
+
+/// The full ONT-2b staple-mine effect on the book: NO element banks (the food
+/// goes vein → mouths, the bank bypassed), the span anchor advances, and the
+/// extraction integral grows by exactly `eaten`.
+fn eaten_from_vein(prior: &Committed, eaten: Ratio, stamp: u64) -> (Committed, Step) {
+    let mut next = prior.clone();
+    if let Some(vein) = next.prospects.iter_mut().find(|v| v.element == ELEMENT) {
+        vein.last_assay = stamp;
+        vein.extracted += eaten.clone();
+    }
+    (next, stmine(eaten, stamp))
+}
+
+#[test]
+fn eating_mines_the_whole_vein_past_the_geometric_flow() {
+    // ONT-2b: a DEMAND-driven mine is bounded by the vein's REMAINING RICHNESS
+    // (natural − extracted), NOT the per-span geometric flow — a hungry band
+    // may draw its whole larder in one pull. A fresh vein under G holds
+    // richness 1/2; over a ONE-tick span the geometric flow is only 1/4, yet
+    // the mine may take the whole 1/2. And NO element banks — the food is eaten.
+    let prior = with_vein((0, 1), 3);
+    assert_eq!(flow_to(&prior, 4), ratio(1, 4), "the geometric throttle this span");
+    let (next, step) = eaten_from_vein(&prior, ratio(1, 2), 4);
+    assert_eq!(admits(&prior, &next, &step), Ok(()), "eating draws up to the whole richness");
+    // The element ledger held STILL — a delta-0 move (food went vein → mouths).
+    assert_eq!(next.orbs[0].elements, prior.orbs[0].elements, "the bank is bypassed for food");
+}
+
+#[test]
+fn a_mine_past_the_remaining_richness_refuses() {
+    // Geometry BOUNDS the demand: the vein feeds no more than it holds.
+    let prior = with_vein((0, 1), 3);
+    let over = ratio(1, 2) + ratio(1, 100);
+    let (next, step) = eaten_from_vein(&prior, over.clone(), 4);
+    assert_eq!(
+        admits(&prior, &next, &step),
+        Err(Refused::AssayExceedsVein { bound: Box::new(ratio(1, 2)), claimed: Box::new(over) }),
+        "no vein feeds more than its remaining richness"
+    );
+}
+
+#[test]
+fn a_staple_mine_that_banks_the_element_refuses() {
+    // The mine is DELTA-0 on the element ledger — the food is consumed, never
+    // banked. A next that ALSO banks the element declares an undeclared mint,
+    // so the conservation law refuses it.
+    let prior = with_vein((0, 1), 3);
+    let eaten = ratio(1, 4);
+    let mut banked = prior.clone();
+    if let Some(v) = banked.prospects.iter_mut().find(|v| v.element == ELEMENT) {
+        v.last_assay = 4;
+        v.extracted += eaten.clone();
+    }
+    banked.orbs[0].bank_element(ELEMENT, eaten.clone());
+    assert!(
+        matches!(
+            admits(&prior, &banked, &stmine(eaten, 4)),
+            Err(Refused::ElementBroken { .. })
+        ),
+        "eating mines the vein but banks nothing — the element ledger holds still"
+    );
+}
+
 #[test]
 fn a_prospect_pushes_a_fresh_vein() {
     let prior = with_vein((0, 1), 1);

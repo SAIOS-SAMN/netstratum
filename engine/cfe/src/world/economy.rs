@@ -383,13 +383,15 @@ impl World {
                 false => *owner != orb,
             }
         });
-        // ING-2b: the food settle rides whichever CARRIER this line's ration
+        // ONT-2b: the food settle rides whichever CARRIER this line's ration
         // is. A Resource ration folds into `settleable` (YieldCollected, as
-        // ever); an almanac-ELEMENT staple (`ration_of` → `Ration::Element`,
-        // drawn from the planet's own veins) nets into `food_element` and
-        // settles as `RationElementSettled` — the element ledger, off the
-        // closed 3-Resource carriers.
-        let mut food_element: Option<([u8; 32], Ratio)> = None;
+        // ever). An almanac-ELEMENT staple no longer routes through the element
+        // BANK — the vein IS the larder: the band's `bank_draw` this span (the
+        // demand beyond the free wild flow) is captured here and MINED from the
+        // staple vein after the touch (`StapleMined`, `extracted += eaten`).
+        // `(element, bank_draw)`; resolved to the floored, richness-capped
+        // `eaten` below. A Resource line leaves it `None`, byte-identical.
+        let mut staple_mine: Option<([u8; 32], Ratio)> = None;
         // Fold the regrown ration into this touch's yield — merged with
         // its resource where the tick also accrued some, otherwise its
         // own line. A world can collect on regrowth ALONE, so this joins
@@ -402,10 +404,13 @@ impl World {
                         None => settleable.push((resource, grown)),
                     }
                 }
-                Ration::Element(id) => {
-                    let entry = food_element.get_or_insert((id, ratio(0, 1)));
-                    entry.1 += grown;
-                }
+                // ONT-2b: element REGROWTH no longer feeds the food economy —
+                // the vein is a FINITE larder that boom-busts (no regeneration
+                // until ONT-3 #109, and folding the collapse-prone regrowth
+                // logistic here is the very ONT-3 scalar this arc eradicates).
+                // Food is mined from the vein by eating (below); the grown
+                // credit is dropped.
+                Ration::Element(_) => {}
             }
         }
         // Fold the food the population ate this span into the same touch as
@@ -435,30 +440,15 @@ impl World {
                         None => settleable.push((*resource, -eaten)),
                     }
                 }
+                // ONT-2b: eating MINES the staple vein. The band's `bank_draw`
+                // this span (the demand beyond the free wild flow) is captured
+                // here and extracted from the staple vein after the touch — NOT
+                // debited from the element bank (the bank is bypassed for food;
+                // the vein is the larder). The richness cap and lattice floor
+                // are applied against the live vein below, where `StapleMined`
+                // grows `extracted` and receipts the pull.
                 Ration::Element(id) => {
-                    let credit = food_element
-                        .as_ref()
-                        .filter(|(e, _)| e == id)
-                        .map(|(_, amount)| amount.clone())
-                        .unwrap_or_else(|| ratio(0, 1));
-                    let standing = (held.element_amount(id) + credit).max(ratio(0, 1));
-                    // LATTICE-FLOOR THE FOOD DEBIT (the `stock.rs` §lattice / #28
-                    // discipline, as `regrown_ration` floors the credit). Unlike
-                    // the Resource ledger, the element ledger takes no demurrage
-                    // floor at the touch, so a consumption drawn from `demand =
-                    // pr · per_capita · dt` (a product of rationals) compounds an
-                    // unbounded denominator into the larder and explodes it (the
-                    // 2^N blow-up measured at ~beat 115). Quantizing the debit to
-                    // `LATTICE` — a deterministic, replayable floor, never a round
-                    // — keeps the whole element-food delta `/1024` (the credit is
-                    // already floored), so the larder's denominator is bounded
-                    // forever and the settle replays byte-exact. Flooring rounds
-                    // the debit DOWN, so it never over-draws the standing larder.
-                    let lattice = crate::world::stock::lattice();
-                    let eaten =
-                        (consumed.clone().min(standing) * lattice.clone()).floor() / lattice;
-                    let entry = food_element.get_or_insert((*id, ratio(0, 1)));
-                    entry.1 -= eaten;
+                    staple_mine = Some((*id, consumed.clone()));
                 }
             }
         }
@@ -472,15 +462,15 @@ impl World {
                 None => settleable.push((resource, amount)),
             }
         }
-        // ING-2b: a line whose only movement this touch is its almanac-staple
-        // food (regrew or was eaten) has accrued something — the element
-        // settle counts against the empty gate, exactly as the Resource yield
-        // does. A zero net (nothing grew, nothing eaten) does not.
-        let food_moves = food_element
+        // ONT-2b: a line whose only movement this touch is mining its staple
+        // vein (a positive `bank_draw`) has accrued something — the vein pull
+        // counts against the empty gate, exactly as the Resource yield does. A
+        // zero draw (the band lives wholly on the free wild flow) does not.
+        let staple_mines = staple_mine
             .as_ref()
-            .map(|(_, delta)| *delta != ratio(0, 1))
+            .map(|(_, draw)| *draw > ratio(0, 1))
             .unwrap_or(false);
-        if settleable.is_empty() && farm.is_none() && !food_moves {
+        if settleable.is_empty() && farm.is_none() && !staple_mines {
             return Err(ActionRefused::NothingAccrued);
         }
         // TAXATION (49 §5): the taxable throughput this touch — the net
@@ -718,25 +708,49 @@ impl World {
                 );
             }
         }
-        // ING-2b: the STAPLE FOOD settles on the element ledger — the planet's
-        // regrowth credit net of the band's consumption this span (both read
-        // pre-touch, the debit clamped to the standing larder above so the
-        // ledger never crosses zero). Banks the net delta and receipts it as
-        // `RationElementSettled`, the element mirror of the Resource
-        // `YieldCollected` fold. `None`/zero for a Resource-ration (v1,
-        // unprospected) line — that line settles food through `settleable`
-        // and emits none here, so it is byte-identical.
-        if let Some((element, delta)) = food_element {
-            if delta != ratio(0, 1) {
-                let stamp = self.clock.now();
-                if let Some(held) = peel(&mut self.orbs, orb) {
-                    held.bank_element(element, delta.clone());
+        // ONT-2b: EATING MINES THE STAPLE VEIN — the vein is the larder. The
+        // band's `bank_draw` this span (captured pre-touch) is extracted from
+        // the orb's staple vein: `extracted += eaten`, capped at the vein's
+        // remaining richness (`natural − extracted`, read live), and
+        // LATTICE-FLOORED so the extraction integral's denominator stays
+        // bounded forever (the ONT-2 law — a demand draw is a product of
+        // rationals with an unbounded denominator; flooring to `1/1024` keeps
+        // `extracted` a `1/1024` multiple, denominator-bounded, replay-exact).
+        // NO bank move: the mined food goes vein → mouths, the element bank
+        // bypassed (the grow-your-own mirror of the syntropic wild gather).
+        // Receipts as `StapleMined`; replay folds the same `extracted += eaten`
+        // and the kernel re-derives the richness bound. `None`/exhausted for a
+        // Resource-ration or worked-out line — no receipt, byte-identical.
+        if let Some((element, draw)) = staple_mine {
+            let stamp = self.clock.now();
+            if let Some(class) = self.star {
+                let (_, _, natural) = crate::dop::element_properties(&element, class);
+                let lattice = crate::world::stock::lattice();
+                let mined = self
+                    .prospects
+                    .iter_mut()
+                    .find(|vein| vein.orb == orb && vein.element == element)
+                    .map(|vein| {
+                        let richness = crate::dop::vein_richness(&natural, &vein.extracted);
+                        let eaten =
+                            (draw.min(richness) * lattice.clone()).floor() / lattice;
+                        if eaten > ratio(0, 1) {
+                            // The SAME book motion an assay makes — the span
+                            // anchor moves and the integral grows — so the
+                            // live state, replay, and the kernel book agree.
+                            vein.extracted += eaten.clone();
+                            vein.last_assay = stamp;
+                        }
+                        eaten
+                    })
+                    .unwrap_or_else(|| ratio(0, 1));
+                if mined > ratio(0, 1) {
+                    self.chronicle.append(
+                        ClosureEvent::StapleMined { orb_id: orb, element, eaten: mined },
+                        stamp,
+                        vec![actor],
+                    );
                 }
-                self.chronicle.append(
-                    ClosureEvent::RationElementSettled { orb_id: orb, element, delta },
-                    stamp,
-                    vec![actor],
-                );
             }
         }
         // G2 TRACE (2026-08-14): burn the trace elements the population

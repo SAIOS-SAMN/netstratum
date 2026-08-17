@@ -767,6 +767,21 @@ impl Replayer {
                 held.bank_element(*element, delta.clone());
             }
         }
+        // ONT-2b (tag 183): eating MINES the staple vein. Fold the receipt's
+        // `eaten` into the vein's extraction integral — replay reads, never
+        // re-derives (richness is a projection of geometry − this sum). NO
+        // bank move: the mined food went vein → mouths, the bank bypassed, so
+        // the element ledger holds still (a delta-0 move) and only the vein
+        // book advances.
+        ClosureEvent::StapleMined { orb_id, element, eaten } => {
+            if let Some(vein) = prospects
+                .iter_mut()
+                .find(|held| held.orb == *orb_id && held.element == *element)
+            {
+                vein.last_assay = receipt.stamp;
+                vein.extracted += eaten.clone();
+            }
+        }
         // ABSORB-1: the three-way move replays — the absorber's
         // ledger carries the shed; the window opens; crisis reads
         // match the live order exactly.

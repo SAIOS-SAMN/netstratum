@@ -405,8 +405,22 @@ impl World {
         // population outgrows gathering. Zero on a barren/unsited world, so
         // those still die.
         let syntropic = self.syntropic_flow(orb) * dtr.clone();
-        let available =
-            held.ration_amount(&ration) + harvested + natural + syntropic.clone();
+        // ONT-2b: the food available this span reads its LARDER.
+        // - A RESOURCE line: the standing bank + this span's harvest (farmed
+        //   yield + natural regrowth) + the wild flow — the #40–42 path.
+        // - An ELEMENT line: the vein IS the larder. The band eats the wild
+        //   flow first, then draws on the UNEXTRACTED vein richness
+        //   (`cultivated_yield` = Σ vein_richness), which it MINES by eating at
+        //   the collect touch (`StapleMined`). The element BANK is bypassed for
+        //   food, and element regrowth is deferred to ONT-3, so neither
+        //   `ration_amount` nor `natural` enters — the population grows into
+        //   the FULL vein read here (before any depletion), then eats it down.
+        let available = match &ration {
+            Ration::Resource(_) => {
+                held.ration_amount(&ration) + harvested + natural + syntropic.clone()
+            }
+            Ration::Element(_) => syntropic.clone() + self.cultivated_yield(orb),
+        };
         if available >= demand {
             // FED — births ride the #28 logistic on PEOPLE toward K_pop,
             // less the ordinary mortality; the people eat their full demand.

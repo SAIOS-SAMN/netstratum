@@ -390,7 +390,13 @@
 //!         the library fold reads it beside SolverWordMinted, so knowledge
 //!         circulates. orbit[32] ‖ cited ‖ opaque expansion, the
 //!         SolverWordMinted wire shape.)
-//!    Phase-5 claim ledger: next free **183** (182 RationElementSettled —
+//!    Phase-5 claim ledger: next free **184** (183 StapleMined —
+//!    ONT-2b the demand-driven staple extraction: the population MINES its
+//!    staple vein by eating (`extracted += eaten`, capped at the vein's
+//!    remaining richness), the vein IS the larder — a delta-0 element move
+//!    (food goes vein → mouths, the bank bypassed) that only advances the
+//!    vein book; replaces the geometric ground-assay + the RationElementSettled
+//!    bank-debit for the staple, 2026-08-17; 182 RationElementSettled —
 //!    ING-2b the staple food settled on the element ledger (net
 //!    `regrown − eaten` for the line's almanac staple; the element
 //!    mirror of the YieldCollected food mint), 2026-08-17; 181 RecipeBuilt —
@@ -3099,6 +3105,23 @@ pub enum ClosureEvent {
     /// Resource-ration (v1, or unprospected) line settles food through
     /// `YieldCollected` as ever and emits none, so it replays byte-identical.
     RationElementSettled { orb_id: u64, element: [u8; 32], delta: Ratio },
+    /// **ONT-2b — THE DEMAND-DRIVEN STAPLE EXTRACTION (tag 183, the vein is
+    /// the larder).** A population MINES its staple vein by EATING: the food
+    /// beyond the free wild flow (the span's `bank_draw`) is drawn straight
+    /// from the orb's staple vein — `extracted += eaten`, capped at the vein's
+    /// remaining richness (`natural − extracted`), lattice-floored so the
+    /// extraction integral's denominator stays bounded forever (the ONT-2 law).
+    /// A DELTA-0 element move: the mined food goes vein → mouths, never the
+    /// bank — the grow-your-own mirror of the syntropic wild gather — so the
+    /// element LEDGER holds still and only the vein BOOK advances. Replaces
+    /// both the geometric ground-assay pre-mine AND the `RationElementSettled`
+    /// bank-debit for the staple: the band grows into the FULL vein
+    /// (`cultivated_yield` = Σ vein_richness lifts `K_pop`), eats it down, and
+    /// as the vein depletes `K_pop` drops → plateau/starve/invent (boom-bust,
+    /// operator ruling III). Replay folds the same `extracted += eaten`; the
+    /// kernel re-derives the richness bound from geometry + the prior integral.
+    /// A Resource-ration (v1, unprospected) line never emits it, byte-identical.
+    StapleMined { orb_id: u64, element: [u8; 32], eaten: Ratio },
     /// **TAXATION (49_TAXATION §3, tag 172)** — the CONTINUITY levy at a
     /// generation turnover: `count` of the line's most-recently adopted
     /// practices LAPSE to the void (its unconfirmed knowledge, unkept as
@@ -4341,6 +4364,14 @@ impl ClosureEvent {
                 value.extend_from_slice(element);
                 ratio::encode(delta, &mut value);
                 tlv::put(182, &value, &mut out);
+            }
+            Self::StapleMined { orb_id, element, eaten } => {
+                // orb ‖ element[32] ‖ eaten (rest) — the RationElementSettled
+                // shape (tag 182), the amount unsigned (a draw is never < 0).
+                let mut value = orb_id.to_le_bytes().to_vec();
+                value.extend_from_slice(element);
+                ratio::encode(eaten, &mut value);
+                tlv::put(183, &value, &mut out);
             }
             Self::PracticesLapsed { count } => {
                 tlv::put(172, &[*count], &mut out);
@@ -5705,6 +5736,12 @@ impl ClosureEvent {
                 let element: [u8; 32] = value.get(8..40)?.try_into().ok()?;
                 let (delta, _) = ratio::decode(value.get(40..)?)?;
                 Some(Self::RationElementSettled { orb_id, element, delta })
+            }
+            183 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let element: [u8; 32] = value.get(8..40)?.try_into().ok()?;
+                let (eaten, _) = ratio::decode(value.get(40..)?)?;
+                Some(Self::StapleMined { orb_id, element, eaten })
             }
             172 => Some(Self::PracticesLapsed { count: *value.first()? }),
             168 => Some(Self::PressureEbbed {

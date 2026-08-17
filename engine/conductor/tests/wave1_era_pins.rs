@@ -170,61 +170,50 @@ fn pure_npc_seats_caravan_and_exchange() {
     );
 }
 
-/// REFINE-1 — pure NPC builds a refinery and converts raw elements.
+/// REFINE-1 — pure NPCs build refineries and convert raw elements.
+///
+/// **ONT-2b re-pin.** This was a SOLO extractive line that, under ING-2b,
+/// refined its geometrically-banked STAPLE at ~beat 91. ONT-2b makes the
+/// staple food-only — the extractive line now EATS its main vein
+/// (`StapleMined`) instead of banking it, and its small non-staple veins are
+/// drained by trace maintenance, so an ISOLATED element-eater no longer
+/// accumulates an industrial surplus (measured: solo lines across all three
+/// metabolisms refine 0× in 110 beats). Refining is now a NETWORKED / richer-
+/// world property: at era scale the diverse roster (Resource-eaters whose
+/// element veins are wholly industrial + cross-polity element trade + worlds
+/// with many veins) sustains it — measured 2 refining lines / 13 refineries /
+/// banks up to 20 element kinds over a seated 10-line, 95-beat era. So the
+/// done-bar is witnessed at era scale, early-stopped the instant the first
+/// line refines (below the ONT-4 leisure horizon ~b117 that this does not
+/// exercise), and every refining line still replays byte-exact (SEAL B).
 #[test]
 fn pure_npc_refines_elements() {
     let root = scratch("refine");
-    let registry = Registry::at(root.join("registry"));
-    let book = Ledger::at(root.join("worlds"));
-    let mut polity = Polity::genesis(
-        line("Cruciblewright", "cruciblewright", "expansionist", "mineral"),
-        &registry,
-        &book,
-    );
+    let refining = |worlds: &[Polity]| -> bool {
+        worlds.iter().any(|p| refined_kinds(p) > 0)
+    };
+    // A seated 10-line era, capped at 100 beats, STOPPING the instant any line
+    // refines — the condition-driven era pattern, cutting the dead tail.
+    let worlds = conductor::run_era_until_among(&root.to_string_lossy(), 100, 10, refining);
 
-    // DIO-3a: the pure NPC seals its clade at genesis (tardigrade →
-    // hypobiotid, an EXTRACTIVE economy). ING-2b: the mineral line now EATS
-    // its mined vein as food (the almanac staple, `ration_of` → Element),
-    // competing with refining for the same stock, so the first refine moves
-    // from beat 64 to beat 91 (measured). The window widens to 110 and the
-    // loop BREAKS at first refine (~beat 91) — deliberately kept below the
-    // pre-existing beat-115 vein-richness scalar collapse (the `vein_wear`
-    // Euler-integration denominator explosion, ONT-2 #108), which this test
-    // does not exercise. The break-at-refine keeps the replay assert well
-    // inside the exact window.
-    let mut refined_on = None;
-    for beat in 1u32..=110 {
-        let _ = polity.cycle(&book, &registry);
-        if refined_kinds(&polity) > 0 {
-            refined_on = Some(beat);
-            break;
-        }
+    let refiners: Vec<&Polity> = worlds.iter().filter(|p| refined_kinds(p) > 0).collect();
+    assert!(
+        !refiners.is_empty(),
+        "pure NPCs must refine at least once at era scale (networked/richer-world industry)"
+    );
+    // A refine only clears where an ElementRefinery stands, and every line that
+    // refined replays byte-exact — the refine wire is SEAL-B-safe end to end.
+    for p in &refiners {
+        let has_refinery = p.world.orb().is_some_and(|o| {
+            o.zones.iter().any(|z| z.kind == cfe::dop::ZoneKind::ElementRefinery)
+        });
+        assert!(has_refinery, "ElementRefinery must stand for a refine to clear");
+        assert_eq!(
+            replay(p.world.chronicle()),
+            p.world.committed(),
+            "a refining line replays MATCHES (SEAL B across the refine)"
+        );
     }
-
-    assert!(
-        element_kinds(&polity) >= 1 || refined_kinds(&polity) > 0,
-        "ground_step must bank elements before or as refine runs"
-    );
-    assert!(
-        refined_on.is_some(),
-        "pure NPC must refine at least once within 110 beats; \
-         elements={} refined_receipts={}",
-        element_kinds(&polity),
-        refined_kinds(&polity)
-    );
-
-    let has_refinery = polity.world.orb().is_some_and(|o| {
-        o.zones
-            .iter()
-            .any(|z| z.kind == cfe::dop::ZoneKind::ElementRefinery)
-    });
-    assert!(has_refinery, "ElementRefinery must stand for a refine to clear");
-
-    assert_eq!(
-        replay(polity.world.chronicle()),
-        polity.world.committed(),
-        "replay MATCHES after refine"
-    );
 }
 
 /// Wave-2 exit — pure NPC element aperture clear (E-APT + E3.3).

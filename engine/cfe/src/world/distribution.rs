@@ -347,8 +347,29 @@ impl World {
     /// Polymorphic: the ration is the sitting species' own metabolic carrier
     /// (biomass, iron, …), so every clade cultivates its own energy.
     pub fn cultivated_yield(&self, orb: u64) -> Ratio {
-        let Ration::Resource(ration) = self.ration_of(orb) else {
-            return ratio(0, 1); // element-eaters ride the element economy (#29)
+        let ration = match self.ration_of(orb) {
+            Ration::Resource(ration) => ration,
+            // ONT-2b (operator ruling I — mining IS a lithotroph's agriculture):
+            // for an element-eater the LATENT CAPACITY is the UNEXTRACTED
+            // richness of its staple veins (Σ vein_richness = natural −
+            // extracted). This is the vein-as-larder read that lifts `K_pop`
+            // above the wild syntropic limit so the band GROWS INTO the vein;
+            // as eating mines the vein (`StapleMined`), `extracted` climbs, the
+            // richness falls, this yield drops, and `K_pop` follows it down —
+            // boom-bust (ruling III). Zero once the staple vein is worked out
+            // (no element regrowth until ONT-3) or before a star/vein stands.
+            Ration::Element(staple) => {
+                let Some(class) = self.star else {
+                    return ratio(0, 1);
+                };
+                let (_, _, natural) = crate::dop::element_properties(&staple, class);
+                return self
+                    .prospects
+                    .iter()
+                    .filter(|vein| vein.orb == orb && vein.element == staple)
+                    .map(|vein| crate::dop::vein_richness(&natural, &vein.extracted))
+                    .fold(ratio(0, 1), |sum, richness| sum + richness);
+            }
         };
         let metabolism = self.genesis.as_ref().map(|held| held.metabolism).unwrap_or(2);
         let Some(held) = self.orb_by_id(orb) else {

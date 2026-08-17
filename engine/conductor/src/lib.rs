@@ -905,7 +905,11 @@ fn office_evidence(world: &World) -> OfficeEvidence {
     }
     for receipt in world.chronicle().receipts() {
         match &receipt.event {
-            ClosureEvent::AssayStruck { .. } => evidence.assays_struck += 1,
+            // ONT-2b: eating-mining is still mining — a staple pull counts
+            // toward the ground evidence beside the geometric assay.
+            ClosureEvent::AssayStruck { .. } | ClosureEvent::StapleMined { .. } => {
+                evidence.assays_struck += 1
+            }
             ClosureEvent::RouteChartered { .. } => evidence.routes_chartered += 1,
             ClosureEvent::OfferCleared { .. } => evidence.market_clears += 1,
             _ => {}
@@ -1250,6 +1254,16 @@ impl Polity {
             }
         }
 
+        // ONT-2b: the STAPLE is an ORB invariant — the law partitions the vein
+        // book by orb, so resolve each orb's staple ONCE (a peel by the orb
+        // plane), never per vein. Recomputing `staple_diet_of` (an O(prospects)
+        // scan + morphogen projection) inside the assay walk would be a
+        // cartesian re-scan of the book per vein — the sweep the standing
+        // ruling forbids. `orbs` is the polity's few orbs, so this is one
+        // projection per orb and the assay walk below stays linear.
+        let staples: Vec<(u64, Option<[u8; 32]>)> =
+            orbs.iter().map(|&orb| (orb, self.world.staple_diet_of(orb))).collect();
+
         // ASSAY — every open vein with a positive span.
         // Snapshot (orb, element, last_assay): assay mutates prospects.
         let veins: Vec<(u64, [u8; 32], u64)> = self
@@ -1263,6 +1277,17 @@ impl Polity {
         for (orb, element, last_assay) in veins {
             if now <= last_assay {
                 continue; // NothingAccrued — wait for the tick to open span
+            }
+            // The STAPLE vein is the population's larder — it is mined by EATING
+            // at the collect touch (demand-driven `StapleMined`), not pumped here
+            // on the geometric span. Pre-mining it would strip the vein's
+            // richness before `K_pop` reads it (the deadlock the reverted first
+            // attempt hit). Every NON-staple vein (industry, trade, trace) still
+            // assays on its geometric span. The staple is read from the per-orb
+            // peel above, an O(1) lookup in the polity's small orb set.
+            let staple = staples.iter().find(|(o, _)| *o == orb).and_then(|(_, s)| *s);
+            if staple == Some(element) {
+                continue;
             }
             let _ = self.world.assay_as(automaton, orb, element);
         }

@@ -1074,6 +1074,40 @@ fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
         ClosureEvent::RationElementSettled { element, delta, .. } => {
             vec![(*element, delta.clone())]
         }
+        // ONT-2b (tag 183): eating MINES the staple vein. The bound is the
+        // vein's REMAINING RICHNESS (`natural − extracted`), re-derived from
+        // the immutable geometry and the PRIOR extraction integral — a demand
+        // draw may take up to the whole larder in one pull (no per-span
+        // geometric throttle; that is the geometric ground-assay's law, not
+        // this one). NO element-ledger move is declared: the mined food went
+        // vein → mouths, never the bank, so the ledger holds still (delta 0)
+        // and only the vein BOOK advances (below). A claim above the remaining
+        // richness refuses — no vein feeds more than its geometry holds.
+        ClosureEvent::StapleMined { orb_id, element, eaten } => {
+            if *eaten < ratio(0, 1) {
+                return Err(Refused::ElementNotPositive {
+                    element: *element,
+                    amount: Box::new(eaten.clone()),
+                });
+            }
+            let bound = prior
+                .prospects
+                .iter()
+                .find(|vein| vein.orb == *orb_id && vein.element == *element)
+                .and_then(|vein| {
+                    let class = prior.star?;
+                    let (_, _, natural) = cfe::dop::element_properties(element, class);
+                    Some(cfe::dop::vein_richness(&natural, &vein.extracted))
+                })
+                .unwrap_or_else(|| ratio(0, 1));
+            if *eaten > bound {
+                return Err(Refused::AssayExceedsVein {
+                    bound: Box::new(bound),
+                    claimed: Box::new(eaten.clone()),
+                });
+            }
+            Vec::new()
+        }
         // G2 (#29): an element-eater's food cycle — it SYNTHESIZES its
         // element from energy (a conserved TRANSMUTATION; the joule spend
         // is checked in conservation(), here we bound the element MINT)
@@ -1196,6 +1230,19 @@ fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
             {
                 vein.last_assay = step.stamp;
                 vein.extracted += amount.clone();
+            }
+        }
+        // ONT-2b: eating mines the staple vein — the SAME book motion an assay
+        // makes (the span anchor moves, the integral grows by exactly `eaten`),
+        // only the amount is demand-driven, not geometric. Declaration ==
+        // effect, the banked law's shape applied to the vein registry.
+        ClosureEvent::StapleMined { orb_id, element, eaten, .. } => {
+            if let Some(vein) = book
+                .iter_mut()
+                .find(|vein| vein.orb == *orb_id && vein.element == *element)
+            {
+                vein.last_assay = step.stamp;
+                vein.extracted += eaten.clone();
             }
         }
         _ => {}
@@ -1510,6 +1557,12 @@ fn covered(event: &ClosureEvent) -> bool {
         // beside it. Banked-neutral: it moves no Resource. {I2 containment,
         // I3 exactness} complete it.
         | E::RationElementSettled { .. }
+        // ONT-2b (tag 183): eating mines the staple vein — a DELTA-0 element
+        // move that only advances the vein book, bounded by the vein's
+        // remaining richness (`element_move`). Banked-neutral (no Resource, no
+        // element ledger change — food goes vein → mouths). {I2 containment
+        // (Collect), I3 exactness} complete it.
+        | E::StapleMined { .. }
         // THE LAST DEED (operator ruling 2026-08-01, folded to arch-01):
         // TaxonSealed — class and clade sealed as identity, once per
         // star (15 §4). {I2 containment (Build), I3 exactness} complete
@@ -1697,7 +1750,9 @@ fn admitted_deltas(
         // ING-2b (tag 182): the staple food settle moves the ELEMENT ledger
         // only (declared in `element_move`), never a Resource — no banked
         // delta, exactly as TraceConsumed.
-        E::RationElementSettled { .. } => Vec::new(),
+        // ONT-2b (tag 183): the staple mine moves the VEIN book only (a
+        // delta-0 element move), never a Resource — no banked delta.
+        E::RationElementSettled { .. } | E::StapleMined { .. } => Vec::new(),
         E::NoteIssued { .. } | E::NoteRedeemed { .. } | E::FutureOpened { .. } | E::FutureSettled { .. } | E::LastClearMarked { .. } | E::ShareIssued { .. } | E::ShareTransferred { .. } | E::ShareDividend { .. } | E::PerpOpened { .. } | E::PerpFunded { .. } | E::PerpClosed { .. } | E::HullFinanced { .. } | E::EscortOnDuty { .. } | E::InterdictionStruck { .. } | E::ConvoyRiskMarked { .. }
         | E::MarketSealed { .. } | E::MarketResumed { .. } | E::SpotClearRecorded { .. } | E::LiquidityRaidStruck { .. } | E::ClearPoisonRefused { .. }
         | E::NoteCascadeStruck { .. } | E::TamperDetected { .. } | E::PostureReoriented { .. } => {
@@ -2536,6 +2591,10 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         // element ledger — World, beside ElementFarmed and the assay it
         // draws on; no line is keyed by it.
         | E::RationElementSettled { .. }
+        // ONT-2b (tag 183): the staple mine advances an ORB's vein book (the
+        // population dug its staple by eating) — World, beside the assay it
+        // shares its book motion with; no line is keyed by it.
+        | E::StapleMined { .. }
         | E::ElementApertureSent { .. } | E::ElementApertureReceived { .. }
         | E::ElementRouteChartered { .. }
         | E::StampMinted { .. } | E::StampApertureSent { .. } | E::StampApertureReceived { .. }
@@ -2714,6 +2773,9 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         // collect touch — Collect, exactly as the ElementFarmed food cycle
         // and the YieldCollected it mirrors.
         | E::RationElementSettled { .. }
+        // ONT-2b (tag 183): eating mines the staple vein at a collect touch —
+        // Collect, exactly as the assay that shares its book motion.
+        | E::StapleMined { .. }
         // ELEMENT-CHEMISTRY (#37): compounding SPENDS banked element
         // value and banks a gem — Collect, exactly as the assay that
         // filled the ledger it draws on. Ratified by the chemistry

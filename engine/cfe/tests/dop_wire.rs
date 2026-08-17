@@ -79,6 +79,13 @@ fn events_round_trip_through_their_wire_records() {
             element: [11u8; 32],
             delta: ratio(-7, 4),
         },
+        // ONT-2b (tag 183): the staple mine — eating extracts from the vein.
+        // One element key, an unsigned draw (the RationElementSettled shape).
+        ClosureEvent::StapleMined {
+            orb_id: 1,
+            element: [11u8; 32],
+            eaten: ratio(5, 8),
+        },
         ClosureEvent::UpkeepSettled {
             orb_id: 1,
             resource: Resource::Biomass,
