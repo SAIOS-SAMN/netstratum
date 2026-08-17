@@ -11,9 +11,14 @@ with a single exact seam between them. This document is the law of that split.
 
 ## 1. THE TWO TIERS (binding)
 
-> **The Universe is exact and deterministic; it commits. The Mind is stochastic
-> and float-tolerant; it proposes. Nothing the Mind proposes enters the Universe
-> except through the exact verifier, and the verifier admits only what conserves.**
+> **AMENDED by `53_INTELLIGENCE_PORT` (operator ruling 2026-08-17).** The
+> Universe half of this section STANDS, absolute and unchanged. The Mind half —
+> "stochastic, float-tolerant, proposes/guesses candidate generators" — is
+> RETIRED: it was the costume. The Mind does not sample; it OBSERVES. See §1a.
+
+> **The Universe is exact and deterministic; it commits. The Mind is exact and
+> observational; it reduces. Nothing the Mind reduces enters the Universe except
+> through the exact verifier, and the verifier admits only what conserves.**
 
 **THE UNIVERSE (the kernel).** Exact `ℚ/ℤ` (and later `ℚ[x₁…xₘ]`), deterministic,
 replayable. It holds the state, computes the exact obstruction, runs the exact
@@ -22,20 +27,29 @@ multivariate generators appear), and is the **only tier that commits a deed**.
 Conservation is enforced here (`kernel::admits`). No float, no threshold, no
 heuristic score ever enters this tier — that law is unchanged and absolute.
 
-**THE MIND (the entity-level proposer).** Stochastic, learned, **GPU-offloadable,
-float-tolerant**. It does not commit; it *guesses*. Given the exact obstruction,
-it samples candidate generators (words / algebraic boundaries) and hands each to
-the Universe's exact verifier. Intelligence lives here — in *which* candidates
-are tried, not in exhaustive enumeration. A brain is noisy; the physics it lives
-in still conserves energy exactly. Floats are lawful in thought and forbidden in
-the world.
+### 1a. THE MIND IS EXACT OBSERVATION (binding, `53`)
 
-**Why the split is load-bearing.** An exact homological engine that *enumerates*
-candidates is brute force no matter how much cohomology it wears — the costume.
-The cognition was never going to live in the reducer; it lives in the proposal
-distribution. Remove the Mind and the Universe is exhaustive search; remove the
-exact Universe and the Mind hallucinates unconserved state. Both, jointly, are
-bounded cognition.
+**THE MIND (the entity-level observer).** Exact, learned, `grown_basis`-seeded —
+**no float, no candidate loop.** It does not guess; it PEELS a pair (a grid at the
+ARC seat, a book at the survival seat), canonicalizes-and-DIFFERENCES the pair
+against the crystals it has already grown, and **the residual NAMES the deed** —
+the entity becomes the thing that recognized the leftover. Intelligence lives in
+*which book or family is read first* (need orders; observation supplies), never in
+*which candidate is sampled*. A mind whose biomass book is short builds or razes
+from that residual, not from a score.
+
+**Why the earlier split was wrong.** An exact engine that *enumerates* candidates
+is brute force no matter how much cohomology it wears — but a *stochastic
+proposer* that *samples* candidates is the same brute force wearing a noise
+generator, and a *utility-weighted partition-draw* over candidates is the same
+sweep-and-pick wearing a weight. The cognition was never going to live in a
+proposal distribution; it lives in the REDUCTION — peel → difference → drain
+against grown crystals → decline through a deduced frame → compose only on the
+remainder. Remove the observation and there is nothing to reduce; remove the exact
+Universe and the render hallucinates unconserved state. Both, jointly — one
+reduction organ at two seats — are bounded cognition. Floats are forbidden in
+*both* tiers now; the thought is as exact as the world it commits to. `53` is the
+carrier; this section is its seam.
 
 ## 2. DETERMINISM IS PRESERVED BY SEEDING (binding)
 
