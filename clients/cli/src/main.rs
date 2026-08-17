@@ -8688,6 +8688,10 @@ fn chronicle(world: &World, style: &Style) {
                 style.strong(&amount(joule)),
                 style.strong(&amount(minted))
             ),
+            cfe::dop::ClosureEvent::RationElementSettled { orb_id, delta, .. } => format!(
+                "🌾 staple food SETTLED — orb {orb_id} banks {} of its almanac staple (planet regrew, band ate)",
+                style.strong(&amount(delta))
+            ),
             cfe::dop::ClosureEvent::TraceConsumed { orb_id, amount: burned, .. } => format!(
                 "· trace BURNED — orb {orb_id} spent {} of a trace element maintaining its substrate",
                 style.strong(&amount(burned))

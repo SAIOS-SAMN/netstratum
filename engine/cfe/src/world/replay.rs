@@ -760,6 +760,14 @@ impl Replayer {
                 held.bank_element(*element, minted.clone() - eaten.clone());
             }
         }
+        // ING-2b (tag 182): the staple food settle on the element ledger —
+        // the net `delta = regrown − eaten` banks straight into the element
+        // ledger, the mirror of the Resource food fold (`YieldCollected`).
+        ClosureEvent::RationElementSettled { orb_id, element, delta } => {
+            if let Some(held) = peel(&mut *orbs, *orb_id) {
+                held.bank_element(*element, delta.clone());
+            }
+        }
         // ABSORB-1: the three-way move replays — the absorber's
         // ledger carries the shed; the window opens; crisis reads
         // match the live order exactly.

@@ -390,7 +390,10 @@
 //!         the library fold reads it beside SolverWordMinted, so knowledge
 //!         circulates. orbit[32] ‖ cited ‖ opaque expansion, the
 //!         SolverWordMinted wire shape.)
-//!    Phase-5 claim ledger: next free **182** (181 RecipeBuilt —
+//!    Phase-5 claim ledger: next free **183** (182 RationElementSettled —
+//!    ING-2b the staple food settled on the element ledger (net
+//!    `regrown − eaten` for the line's almanac staple; the element
+//!    mirror of the YieldCollected food mint), 2026-08-17; 181 RecipeBuilt —
 //!    RCP-2 the emergent recipe built (∏ inputs → role over the open
 //!    almanac; the built set is a FOLD, `vocabulary::recipes_built`),
 //!    2026-08-16; 180 LeisureSettled —
@@ -3098,6 +3101,21 @@ pub enum ClosureEvent {
     /// — the SolverWordMinted discipline. A world that mints no recipe emits
     /// none, so it replays byte-identical.
     RecipeBuilt { orb_id: u64, inputs: Vec<[u8; 32]>, role: usize, yield_of_role: Ratio },
+    /// **ING-2b (tag 182, 2026-08-17) — THE STAPLE FOOD SETTLED ON THE
+    /// ELEMENT LEDGER.** A line whose ration is an almanac ELEMENT — its
+    /// staple drawn from the planet's own veins ([`crate::world::World::staple_diet_of`],
+    /// the 3-`Resource` food enum dissolved) — settles its food at a
+    /// collect touch on the element ledger, the exact mirror of the
+    /// Resource food fold (`YieldCollected`): the planet REGROWS the
+    /// staple toward `K` (the rejuvenation logistic — an admitted FREE
+    /// MINT, the star driving primary production, the #28 settle law) and
+    /// the population EATS its span's demand. The receipt carries the NET
+    /// `delta = regrown − eaten` for the one `element`; replay banks
+    /// `bank_element(element, delta)`. The headcount rides its own
+    /// `PopulationSettled`, exactly as on the Resource path. A
+    /// Resource-ration (v1, or unprospected) line settles food through
+    /// `YieldCollected` as ever and emits none, so it replays byte-identical.
+    RationElementSettled { orb_id: u64, element: [u8; 32], delta: Ratio },
     /// **TAXATION (49_TAXATION §3, tag 172)** — the CONTINUITY levy at a
     /// generation turnover: `count` of the line's most-recently adopted
     /// practices LAPSE to the void (its unconfirmed knowledge, unkept as
@@ -4330,6 +4348,16 @@ impl ClosureEvent {
                 }
                 ratio::encode(yield_of_role, &mut value);
                 tlv::put(181, &value, &mut out);
+            }
+            Self::RationElementSettled { orb_id, element, delta } => {
+                // orb ‖ element[32] ‖ delta (signed, rest) — the
+                // LeisureSettled signed-delta shape (tag 180) with the
+                // element key between (tag 173's 8..40), the yield last so
+                // it runs to the frame edge.
+                let mut value = orb_id.to_le_bytes().to_vec();
+                value.extend_from_slice(element);
+                ratio::encode(delta, &mut value);
+                tlv::put(182, &value, &mut out);
             }
             Self::PracticesLapsed { count } => {
                 tlv::put(172, &[*count], &mut out);
@@ -5688,6 +5716,12 @@ impl ClosureEvent {
                 }
                 let (yield_of_role, _) = ratio::decode(value.get(at..)?)?;
                 Some(Self::RecipeBuilt { orb_id, inputs, role, yield_of_role })
+            }
+            182 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let element: [u8; 32] = value.get(8..40)?.try_into().ok()?;
+                let (delta, _) = ratio::decode(value.get(40..)?)?;
+                Some(Self::RationElementSettled { orb_id, element, delta })
             }
             172 => Some(Self::PracticesLapsed { count: *value.first()? }),
             168 => Some(Self::PressureEbbed {

@@ -1088,6 +1088,19 @@ fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
             }
             vec![(*element, amount.clone())]
         }
+        // ING-2b (tag 182): the staple food settle on the element ledger.
+        // The net `delta = regrown − eaten` is DECLARED whole — the element
+        // mirror of the Resource food fold (`YieldCollected`, the #28
+        // admitted free mint the star drives). Signed: net regrowth mints
+        // (positive), a lean span where the band ate more than the planet
+        // regrew debits (negative). Not re-derived here — symmetric with the
+        // Resource food economy, whose regrowth `YieldCollected` the kernel
+        // likewise admits free; the emitter clamps the debit to the standing
+        // larder so the total never crosses zero. Every OTHER deed still
+        // declares no element move, so the ledger holds still under them.
+        ClosureEvent::RationElementSettled { element, delta, .. } => {
+            vec![(*element, delta.clone())]
+        }
         // G2 (#29): an element-eater's food cycle — it SYNTHESIZES its
         // element from energy (a conserved TRANSMUTATION; the joule spend
         // is checked in conservation(), here we bound the element MINT)
@@ -1520,6 +1533,12 @@ fn covered(event: &ClosureEvent) -> bool {
         // G2 (#29): the element-food synthesis — a conserved transmutation
         // (joule spend + bounded element mint), covered by the value law.
         | E::ElementFarmed { .. }
+        // ING-2b (tag 182): the staple food settle on the element ledger —
+        // an element move (net regrown − eaten), covered by THE ELEMENT LAW
+        // (`element_move` declares its delta) exactly as the assay and farm
+        // beside it. Banked-neutral: it moves no Resource. {I2 containment,
+        // I3 exactness} complete it.
+        | E::RationElementSettled { .. }
         // THE LAST DEED (operator ruling 2026-08-01, folded to arch-01):
         // TaxonSealed — class and clade sealed as identity, once per
         // star (15 §4). {I2 containment (Build), I3 exactness} complete
@@ -1704,6 +1723,10 @@ fn admitted_deltas(
         // Hull mint/assign/scrap move scrap ledger only (not Resource).
         E::HullMinted { .. } | E::HullAssigned { .. } | E::HullScrapped { .. } | E::OrderWorked { .. } => Vec::new(),
         E::ElementSalvaged { .. } | E::TraceConsumed { .. } => Vec::new(),
+        // ING-2b (tag 182): the staple food settle moves the ELEMENT ledger
+        // only (declared in `element_move`), never a Resource — no banked
+        // delta, exactly as TraceConsumed.
+        E::RationElementSettled { .. } => Vec::new(),
         E::NoteIssued { .. } | E::NoteRedeemed { .. } | E::FutureOpened { .. } | E::FutureSettled { .. } | E::LastClearMarked { .. } | E::ShareIssued { .. } | E::ShareTransferred { .. } | E::ShareDividend { .. } | E::PerpOpened { .. } | E::PerpFunded { .. } | E::PerpClosed { .. } | E::HullFinanced { .. } | E::EscortOnDuty { .. } | E::InterdictionStruck { .. } | E::ConvoyRiskMarked { .. }
         | E::MarketSealed { .. } | E::MarketResumed { .. } | E::SpotClearRecorded { .. } | E::LiquidityRaidStruck { .. } | E::ClearPoisonRefused { .. }
         | E::NoteCascadeStruck { .. } | E::TamperDetected { .. } | E::PostureReoriented { .. } => {
@@ -2537,6 +2560,11 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         // matter over the universal roles, exactly as GemCompounded and
         // ElementRefined carry an orb's matter — World.
         | E::RecipeBuilt { .. }
+        // ING-2b (tag 182): the staple food settle carries an ORB's grown
+        // matter (the planet regrew its staple, the population ate) over the
+        // element ledger — World, beside ElementFarmed and the assay it
+        // draws on; no line is keyed by it.
+        | E::RationElementSettled { .. }
         | E::ElementApertureSent { .. } | E::ElementApertureReceived { .. }
         | E::ElementRouteChartered { .. }
         | E::StampMinted { .. } | E::StampApertureSent { .. } | E::StampApertureReceived { .. }
@@ -2711,6 +2739,10 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         | E::OverflowAbsorbed { .. } | E::BondSettled { .. } | E::ForwardReleased { .. }
         | E::FrictionSettled { .. } | E::ApertureSent { .. } | E::ApertureReceived { .. }
         | E::CrystalDrawn { .. } | E::AssayStruck { .. } | E::ElementFarmed { .. } | E::OfferCleared { .. }
+        // ING-2b (tag 182): the staple food settle SETTLES banked food at a
+        // collect touch — Collect, exactly as the ElementFarmed food cycle
+        // and the YieldCollected it mirrors.
+        | E::RationElementSettled { .. }
         // ELEMENT-CHEMISTRY (#37): compounding SPENDS banked element
         // value and banks a gem — Collect, exactly as the assay that
         // filled the ledger it draws on. Ratified by the chemistry

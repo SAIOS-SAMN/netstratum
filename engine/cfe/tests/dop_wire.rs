@@ -72,6 +72,13 @@ fn events_round_trip_through_their_wire_records() {
             resource: Resource::Iron,
             amount: ratio(3, 2),
         },
+        // ING-2b (tag 182): the staple food settle — the element mirror of
+        // YieldCollected. Signed net delta, one element key.
+        ClosureEvent::RationElementSettled {
+            orb_id: 1,
+            element: [11u8; 32],
+            delta: ratio(-7, 4),
+        },
         ClosureEvent::UpkeepSettled {
             orb_id: 1,
             resource: Resource::Biomass,
