@@ -15,6 +15,7 @@
 
 pub mod congruence;
 pub mod peel;
+pub mod reduction;
 pub mod transport;
 
 // IAE-2 — the stratified carrier: a cellular sheaf with heterogeneous stalks
