@@ -1,0 +1,5 @@
+# v0.4 drain census — HOLE, pending a one-shot dump in /opt/ipsal-autic-v0.4
+# (the arms/arc/examples/drain_census.rs shape), SAME fixtures, SAME columns,
+# NO crate-link. Until filled, the census is single-sided (here.tsv is the
+# witness). Filling this two-sides the census and closes #114's census bar.
+name	arm	route	bounding_len	remainder_terms	inverse_carried
