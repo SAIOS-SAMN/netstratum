@@ -285,8 +285,9 @@ pub fn substrate_viability(clade: u16, metabolism: u8, t_eq4: &Ratio, aridity: &
 /// syntropy peak). `thermal = t_eq4 / (t_eq4 + mesic)`, cleared to
 /// `2·t_eq4 / (2·t_eq4 + lo + hi)` so no `ratio` dial (the `/2`) is minted. This
 /// is ONE axis of the environmental gradient — aridity is supplied separately, so
-/// no single scalar drives the whole material vector.
-fn morphodynamic_thermal(t_eq4: &Ratio) -> Ratio {
+/// no single scalar drives the whole material vector. Public since ONT-4: the
+/// leisure demurrage reads it as the thermal tempo a world dissipates surplus at.
+pub fn morphodynamic_thermal(t_eq4: &Ratio) -> Ratio {
     let (lo, hi) = crate::thermal::SubstrateBand::Mesic.bounds4();
     let two_t = t_eq4.clone() + t_eq4.clone();
     let denom = two_t.clone() + lo + hi;

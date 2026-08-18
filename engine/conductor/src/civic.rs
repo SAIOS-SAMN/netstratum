@@ -249,16 +249,6 @@ fn burn_inefficiency() -> Ratio {
     ratio(4, 1) // APPROVED-SEED (operator ruling 2026-08-15, COG-3 desperation burn)
 }
 
-/// **THE COGNITIVE DEMURRAGE** (COG-5) — the fraction of banked leisure that
-/// DISSIPATES each beat. Unused free time is not a hard resource; you cannot
-/// bank a nap for ten years. Aggressive by design, so the leisure bank tracks a
-/// line's CURRENT surplus rather than hoarding a lifetime's — which is what
-/// makes the cost of thought bite (the live-era hyperinflation: banks of 100k
-/// against thoughts costing single digits).
-fn leisure_decay() -> Ratio {
-    ratio(1, 4) // APPROVED-SEED (operator ruling 2026-08-16, COG-5 demurrage)
-}
-
 /// **THE METABOLIC EXCHANGE RATE** (COG-5) — the scalar bridging the calorie
 /// (leisure, in food-surplus units) to the homology (`mint_cost`, in raw
 /// Betti/torsion units). Without it a thought costs single digits against a
@@ -267,19 +257,6 @@ fn leisure_decay() -> Ratio {
 /// afford to think while a rich one can.
 pub fn metabolic_exchange() -> Ratio {
     ratio(8, 1) // APPROVED-SEED (operator ruling 2026-08-16, COG-5 exchange rate)
-}
-
-/// **THE COGNITIVE DEMURRAGE** (COG-5) — the leisure a standing bank sheds this
-/// beat, `bank × decay`. PROPORTIONAL by design: zero when the bank is empty (so
-/// a poor line still accumulates its fasting trickle, COG-3), and aggressive when
-/// the bank is large (so no line hoards a lifetime's surplus, COG-5). ONT-4 keeps
-/// this shape — the collapse it caused is cured downstream, by flooring the
-/// settle FLOW onto the leisure grain (`World::settle_leisure`) rather than
-/// stepping the raw bank, so the denominator stays bounded without a flat decay
-/// (which, being nonzero at an empty bank, would out-drain the trickle and starve
-/// the poor of thought entirely).
-pub fn leisure_dissipation(bank: Ratio) -> Ratio {
-    bank * leisure_decay()
 }
 
 /// **THE FASTING FILL** (COG-3) — the cognitive accumulator's inflow this beat:

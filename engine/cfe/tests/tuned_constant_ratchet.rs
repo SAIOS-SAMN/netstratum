@@ -236,16 +236,17 @@ fn the_sealed_class_is_exactly_as_large_as_sealed() {
         walk_marks(Path::new(tree), SEED_MARK, &mut seeded, &mut seed_files);
     }
     assert_eq!(
-        seeded, 7,
+        seeded, 6,
         "the marked seed class moved — approval covers the founding \
          endowment's two values (operator ruling 2026-08-06); the \
          syntropic wild-baseline fraction (1/4, COG Slice 2c); the two COG-3 \
          cognitive-escape rates (base cognitive 1/16 fasting trickle + \
-         desperation burn 4 heads/unit, ruling 2026-08-15); AND the two COG-5 \
-         hyperinflation fixes (operator ruling 2026-08-16): the cognitive \
-         demurrage (1/4 of banked leisure dissipates each beat — you cannot bank \
-         a nap) and the metabolic exchange rate (8 leisure per unit of mint_cost \
-         — bridging the calorie-to-homology unit gap so thought bites)."
+         desperation burn 4 heads/unit, ruling 2026-08-15); AND the ONE remaining \
+         COG-5 seed, the metabolic exchange rate (8 leisure per unit of mint_cost \
+         — bridging the calorie-to-homology unit gap so thought bites). Fell 7 → 6 \
+         on 2026-08-18 (ONT-4): the cognitive demurrage `1/4` dial is GONE — the \
+         leisure decay rate is now DERIVED from the planet's orbit and vitals \
+         (`World::leisure_decay_rate` = thermal·dry·orbital_tempo), not a seed."
     );
 }
 

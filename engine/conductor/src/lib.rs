@@ -2134,13 +2134,15 @@ impl Polity {
         // never permanently deadlocked — it thinks slowly rather than never.
         let leisure = civic::cascade_reading(&self.world, primary).leisure;
         let fill = civic::fasting_fill(leisure, self.world.syntropic_flow(primary));
-        // COG-5 COGNITIVE DEMURRAGE: unused leisure dissipates each beat (you
-        // cannot bank a nap for ten years), so the bank tracks CURRENT surplus
-        // instead of hoarding a lifetime's. Proportional (zero at an empty bank,
-        // so a poor line still banks its trickle — COG-3). ONT-4: the collapse
-        // this once caused is cured in `settle_leisure` by flooring the FLOW, not
-        // by flattening the decay. The net settle is fill minus decay, one deed.
-        let decay = civic::leisure_dissipation(self.world.leisure_bank_of(primary));
+        // COG-5 / ONT-4 COGNITIVE DEMURRAGE: unused leisure dissipates each beat
+        // (you cannot bank a nap for ten years). The rate is now DERIVED from the
+        // planet's orbit and vitals — `thermal(t_eq4) · dry(albedo) ·
+        // orbital_tempo(P)` (`World::leisure_decay_rate`) — not a dial: a hot, dry,
+        // fast-orbit world spends its surplus quickly, a cold, wet, distant one
+        // hoards it. PROPORTIONAL (`bank × rate`), so zero at an empty bank (a poor
+        // line still banks its trickle — COG-3); the collapse it once caused is
+        // cured in `settle_leisure` by flooring the FLOW. Net settle = fill − decay.
+        let decay = self.world.leisure_bank_of(primary) * self.world.leisure_decay_rate(primary);
         let delta = fill - decay;
         if delta != ratio(0, 1) {
             self.world.settle_leisure(primary, delta);

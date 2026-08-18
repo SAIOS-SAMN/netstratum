@@ -674,6 +674,58 @@ impl World {
     /// Mind's `mint_cost` spent out), floored at zero, and receipt it so replay
     /// applies the same delta. A zero delta emits nothing, so a world that
     /// neither banks surplus nor thinks is byte-identical.
+    /// **THE THERMODYNAMIC DEMURRAGE RATE** (ONT-4, operator ruling 2026-08-18) —
+    /// the fraction of the leisure bank a world dissipates each beat, DERIVED from
+    /// its orbit and planetary vitals, never a dial. Leisure is stored surplus; it
+    /// relaxes at a rate the world's OWN physics sets:
+    ///
+    /// ```text
+    ///   rate = thermal(t_eq4) · dry(albedo) · orbital_tempo(P)
+    /// ```
+    ///
+    /// - `thermal` = the morphodynamic thermal fraction (a scorched world → ~1, a
+    ///   frozen one → ~0, mesic → ½): heat spends surplus, cold preserves it.
+    /// - `dry` = `1 − albedo`: an arid dark rock burns its surplus fast, a wet
+    ///   icy/cloudy world holds it (the moisture axis, ONT-1d).
+    /// - `orbital_tempo` = `P_unit² / (P_unit² + P²)` — the world's Keplerian
+    ///   period against its own star's unit-orbit year, in SQUARED periods so it
+    ///   stays exact (`P` itself is a root): a close, fast-orbit world turns
+    ///   leisure over quickly, a distant slow one hoards it.
+    ///
+    /// PROPORTIONAL (the caller forms `decay = bank × rate`), so zero at an empty
+    /// bank — a poor line still banks its fasting trickle (COG-3) — and `rate ∈
+    /// [0, 1)`, so a beat never sheds more than the bank stands. An unsited world
+    /// (no star or no orbit, hence no thermal clock) sheds nothing. Exact-rational
+    /// and replay-exact throughout.
+    pub fn leisure_decay_rate(&self, orb: u64) -> Ratio {
+        let zero = ratio(0, 1);
+        let one = ratio(1, 1);
+        let Some(class) = self.star else {
+            return zero;
+        };
+        let Some((orbit_r, albedo)) = self
+            .orb_by_id(orb)
+            .and_then(|held| held.thermal.as_ref())
+            .map(|site| (site.orbit_r.value().clone(), site.albedo.value().clone()))
+        else {
+            return zero;
+        };
+        let mass = class.mass();
+        // t_eq4 — the incident flux the orbit sets, the same reading production
+        // uses; thermal(t_eq4) is the world's dissipation tempo.
+        let t_eq4 = self.insolation_of(orb) * crate::thermal::thermal_k();
+        let thermal = crate::almanac::morphodynamic_thermal(&t_eq4);
+        // dry ∈ [0,1]: a wet (high-albedo) world holds its surplus; an arid one
+        // spends it. albedo is a reflectance ≤ 1, so `1 − albedo` never goes < 0.
+        let dry = (one - albedo).max(zero.clone());
+        // orbital_tempo from SQUARED periods (both exact rational — no √ formed).
+        let p2 = crate::thermal::orbital_period_squared(&orbit_r, &mass);
+        let p_unit2 = crate::thermal::orbital_period_squared(&ratio(1, 1), &mass);
+        let denom = p_unit2.clone() + p2;
+        let orbital_tempo = if denom <= zero { zero.clone() } else { p_unit2 / denom };
+        thermal * dry * orbital_tempo
+    }
+
     pub fn settle_leisure(&mut self, orb: u64, delta: Ratio) {
         let zero = ratio(0, 1);
         // ONT-4 — FLOOR THE FLOW, never the accumulator. The bank is a running SUM
