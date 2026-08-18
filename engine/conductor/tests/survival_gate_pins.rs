@@ -97,3 +97,31 @@ fn pin_g_a_species_reads_its_own_ration_column() {
         );
     }
 }
+
+#[test]
+fn the_survival_express_is_the_sole_builder_and_bootstraps_the_board() {
+    // N-I6: build_step no longer raises zones — the survival express (post-tick)
+    // is the sole builder. Founding (charter §3) seats the ration source, the
+    // founding band seeds on the first Habitat, and the board comes alive from
+    // the survival think, not Policy. It replays byte-exact (the express commits
+    // through the same zone_as door — no shadow state).
+    let root = scratch("bootstrap");
+    let registry = Registry::at(root.join("registry"));
+    let book = Ledger::at(root.join("worlds"));
+    let mut polity = Polity::genesis(line("hearth", "biotic"), &registry, &book);
+    let orb = cfe::world::FIRST_ORB;
+    for _ in 0..10 {
+        let _ = polity.cycle(&book, &registry);
+    }
+    let zones = polity.world.orb().map(|o| o.zones.len()).unwrap_or(0);
+    assert!(zones > 0, "the survival express seated the founding ration source (zones={zones})");
+    assert!(
+        polity.world.population_of(orb) > 0,
+        "the founding band seeded when the first Habitat rose — the board lives",
+    );
+    assert_eq!(
+        replay(polity.world.chronicle()),
+        polity.world.committed(),
+        "a board built solely by the survival express replays MATCHES (SEAL B)",
+    );
+}

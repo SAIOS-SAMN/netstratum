@@ -57,7 +57,6 @@ use solver::{forge_task, Difficulty, Hunger, Need, SolveRead};
 
 use std::path::Path;
 
-mod cognition;
 // COG (doc 52): the homological economy — the deficit peeled through the same
 // `overlay` the cognition uses; coefficients drive production, residual drives
 // research. Replaces the cartesian build cascade with the peel.
@@ -1780,686 +1779,15 @@ impl Polity {
             }
         }
     }
-
-    /// True when any open vein on `orb` is worn: richness below the
-    /// hash-derived natural spring (`element_properties`). Prospected
-    /// but never assayed veins sit at nature and do not count.
-    fn orb_veins_worn(world: &World, orb: u64) -> bool {
-        let Some(class) = world.star() else {
-            return false;
-        };
-        world.committed().prospects.iter().any(|vein| {
-            if vein.orb != orb {
-                return false;
-            }
-            let (_, _, natural) = cfe::dop::element_properties(&vein.element, class);
-            // ONT-2: worn = the DERIVED richness (natural − extracted) stands
-            // below nature, i.e. the vein has yielded anything at all.
-            cfe::dop::vein_richness(&natural, &vein.extracted) < natural
-        })
-    }
-
-    /// An orb that has worn veins and no regenerator yet needs repair.
-    fn orb_needs_regenerator(world: &World, orb: u64) -> bool {
-        if !Self::orb_veins_worn(world, orb) {
-            return false;
-        }
-        let regens = world
-            .committed()
-            .orbs
-            .iter()
-            .find(|held| held.orb_id == orb)
-            .map(|held| {
-                held.zones
-                    .iter()
-                    .filter(|z| z.kind == ZoneKind::Regenerator)
-                    .count()
-            })
-            .unwrap_or(0);
-        regens == 0
-    }
-
     fn build_step(&mut self) {
-        // COGNITION-2: how far the settlement lookahead simulates before
-        // scoring — measured safe (a `World` clone + this many `tick()`
-        // calls, only at a genuine two-candidate choice, not every beat).
-        const LOOKAHEAD_DEPTH: u32 = 2;
+        // N-I6 — build_step NO LONGER RAISES ZONES. The survival express
+        // (`express_survival`, post-tick) is the SOLE zone-raiser; Policy and
+        // think must not both build. `gather_for_forge` stays pre-tick — it
+        // stocks the forge, it does not settle. The old settlement / industrial
+        // / regenerator / forge-hold arms and every decider they called
+        // (`settlement_choice` / `industrial_choice` / `score_outcome` /
+        // `lookahead::project` / `soc::choose_build`) are OFF the live path.
         self.gather_for_forge();
-        let steward = self.steward;
-        let automaton = self.automaton;
-        let world = &mut self.world;
-        if world.orb().is_none_or(|orb| !orb.famine.is_empty()) {
-            return; // starving colonies build nothing
-        }
-
-        // ECO regenerators first: extract-without-repair is a doomed
-        // ecology. Prefer the regenerator over every other build when
-        // veins are worn and no regenerator stands. DEEPENING (3) is
-        // gifted by the steward when the zone gate requires it.
-        let primary = cfe::world::FIRST_ORB;
-        if Self::orb_needs_regenerator(world, primary) {
-            let holds_deepening = world
-                .committed()
-                .techs
-                .iter()
-                .any(|(o, c, _, _)| *o == primary && *c == 3);
-            if !holds_deepening {
-                let _ = world.grant_tech_as(steward, primary, 3);
-            }
-            let can_pay = ZoneKind::Regenerator.cost().into_iter().all(|(resource, need)| {
-                banked(world, resource) >= need
-            });
-            if can_pay {
-                if let Some(tile) = next_free_tile(world) {
-                    if world
-                        .zone_as(automaton, primary, tile, ZoneKind::Regenerator)
-                        .is_ok()
-                    {
-                        return; // one zone per beat — the regenerator took it
-                    }
-                }
-            }
-        }
-
-        let (ext, hab) = (
-            zone_count(world, ZoneKind::Extractor),
-            zone_count(world, ZoneKind::Habitat),
-        );
-        let iron = banked(world, Resource::Iron);
-        let bio = banked(world, Resource::Biomass);
-        let alloy = banked(world, Resource::Alloy);
-        let total = world.orb().map(|o| o.zones.len()).unwrap_or(0);
-        let smelters = zone_count(world, ZoneKind::Smelter);
-        let element_kinds = world
-            .orb()
-            .map(|o| o.elements.len())
-            .unwrap_or(0);
-        let has_refinery = zone_count(world, ZoneKind::ElementRefinery) > 0;
-
-        // The earned tech tree.
-        let can_smelt = self.level >= 3;
-        let can_synth = self.level >= 5;
-
-        // Unlocked industry ENTERS THE SURPLUS-PHASE SURFACE as a
-        // candidate (SOC-1: it no longer strictly outranks settlement —
-        // the disposition-weighted workbench draw below decides among the
-        // viable, so an empiricist reaches for the forge far more often
-        // than an epicurean does, but neither is gated out). SCIENCE-1:
-        // industry is offered only inside the line's OWN science
-        // (relevance table) — a plasmic line never forges iron; its
-        // advancement crosses by joint venture.
-        let metabolism = self.spec.civilization.metabolism.clone();
-        let (smelter_iron_gate, smelter_bio_gate) = smelter_gates();
-        let synth_conditions = can_synth
-            && alloy >= ratio(20, 1)
-            && bio >= ratio(15, 1)
-            && industry_relevant(&metabolism, ZoneKind::Synthesizer);
-        let smelter_conditions = can_smelt
-            && smelters < 3
-            && iron >= smelter_iron_gate
-            && bio >= smelter_bio_gate
-            && industry_relevant(&metabolism, ZoneKind::Smelter);
-        // COGNITION-2 (measured 2026-08-14: the settlement tie-break
-        // never fires for Policy::Steady — 0/0 across a live 60-beat,
-        // 45-civ run, since Steady's want-flags are a structural
-        // exclusive-or). `industrial` reads no Policy at all, so this
-        // IS the two-candidate moment every temperament can reach
-        // alike. Simulate both, veto a projection that starves the
-        // colony, and read disposition for the rest — falling back to
-        // the old fixed priority (Synthesizer first) whenever a tile
-        // or a projection isn't available.
-        let industrial: Option<ZoneKind> = match (synth_conditions, smelter_conditions) {
-            (false, false) => None,
-            (true, false) => Some(ZoneKind::Synthesizer),
-            (false, true) => Some(ZoneKind::Smelter),
-            (true, true) => {
-                COGNITION_CHOICE_POINTS.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-                let disposition = world.civ_axes().map(|axes| axes.disposition).unwrap_or(0);
-                next_free_tile(world)
-                    .and_then(|tile| {
-                        let synth_proj = crate::lookahead::project(
-                            world,
-                            automaton,
-                            primary,
-                            tile,
-                            ZoneKind::Synthesizer,
-                            LOOKAHEAD_DEPTH,
-                        );
-                        let smelt_proj = crate::lookahead::project(
-                            world,
-                            automaton,
-                            primary,
-                            tile,
-                            ZoneKind::Smelter,
-                            LOOKAHEAD_DEPTH,
-                        );
-                        match (synth_proj, smelt_proj) {
-                            (Some(s), Some(m)) => {
-                                COGNITION_LOOKAHEAD_DECIDED
-                                    .fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-                                // ARC B: the choice DERIVES from the
-                                // line's alloy/iron balance (Smelter makes
-                                // alloy, Synthesizer spends it), the
-                                // starvation veto riding the projections.
-                                Some(crate::cognition::industrial_choice(
-                                    &alloy,
-                                    &iron,
-                                    disposition,
-                                    s.famished,
-                                    m.famished,
-                                ))
-                            }
-                            _ => None,
-                        }
-                    })
-                    .or(Some(ZoneKind::Synthesizer))
-            }
-        };
-
-        // **THE FORGE HOLD, generalized from the Furnace arm** (the
-        // G2 measurement, 2026-08-06): when ONLY the biomass line
-        // blocks an unlocked smelter, hold the rations for it — a
-        // habitat spent now pushes the forge past the horizon again.
-        // Measured before this arm existed: mineral lines imported
-        // biomass through the triangle trade and spent every unit on
-        // hearths — bio 0 at every mineral line, the smelter's 10
-        // never accumulating. The Furnace branch already ruled these
-        // exact words for its own seat; this is the same law on the
-        // settlement path.
-        let forge_starved = can_smelt
-            && smelters < 3
-            && iron >= smelter_iron_gate
-            && bio < smelter_bio_gate
-            && industry_relevant(&metabolism, ZoneKind::Smelter);
-
-        // **THE SETTLEMENT GATES DERIVE** (P2, operator ruling
-        // 2026-08-06: measured system bounds). The per-policy reserve
-        // numbers these replace were restated by hand, and the
-        // measurement (`measured_bounds.rs`) proved the shape unlawful
-        // at bootstrap: a reserve gate on a resource with NO INCOME
-        // SOURCE is unsatisfiable — Steady's habitat gate equalled the
-        // whole founding biomass and seven lines locked at one zone;
-        // Industry's extractor gate exceeded the endowment and every
-        // Industry line habitat-spammed into iron famine. The derived
-        // law: a build that opens the line's FIRST income of a funding
-        // resource gates at COST (affordability); expansion gates at
-        // COST × the policy's reserve factor. Post-bootstrap the
-        // derived gates reproduce the dead numbers exactly.
-        let metabolism = world
-            .committed()
-            .genesis
-            .as_ref()
-            .map(|held| held.metabolism)
-            .unwrap_or(2);
-        let has_income = |world: &World, resource: Resource| {
-            world.orb().is_some_and(|orb| {
-                orb.zones
-                    .iter()
-                    .any(|zone| cfe::dop::zone_yield(zone.kind, metabolism).0 == resource)
-            })
-        };
-        let reserve_factor = match self.spec.policy {
-            Policy::Aggressive => ratio(1, 1),
-            Policy::Steady => ratio(2, 1),
-            Policy::Industry => ratio(5, 2),
-        };
-        let gated = |world: &World, kind: ZoneKind| {
-            kind.cost().into_iter().all(|(resource, need)| {
-                let bar = match has_income(world, resource) {
-                    true => need * reserve_factor.clone(),
-                    false => need,
-                };
-                banked(world, resource) >= bar
-            })
-        };
-        let settlement: Option<ZoneKind> = {
-            // The city caps and shape preferences ARE the temperament
-            // — they stay; only the reserve arithmetic derives.
-            let (cap, wants_extractor) = match self.spec.policy {
-                // One extractor SHORT of the knife-edge: a standing
-                // +1/tick biomass surplus, so industry stays fundable.
-                Policy::Aggressive => (16, ext + 1 < 2 * hab.max(1)),
-                Policy::Steady => (12, ext <= hab),
-                Policy::Industry => (20, ext < 2 * hab.max(1)),
-            };
-            let wants_habitat = match self.spec.policy {
-                Policy::Steady => hab < ext,
-                _ => true,
-            };
-            if total >= cap {
-                None
-            } else {
-                let extractor_viable = wants_extractor && gated(world, ZoneKind::Extractor);
-                // `forge_starved` holds the rations: the biomass a
-                // hearth would eat is the biomass the unlocked smelter
-                // is waiting on.
-                let habitat_viable =
-                    wants_habitat && !forge_starved && gated(world, ZoneKind::Habitat);
-                // COGNITION-1: the policy if/else above still decides
-                // AFFORDABILITY and shape (cap, wants_extractor,
-                // wants_habitat) — this only breaks the tie when BOTH
-                // are viable this beat, the one place the old code
-                // picked extractor by fixed priority alone. Disposition
-                // (44_LINEAGES) and economic mode (15_TAXON, clade-
-                // derived) are read here, not invented for this.
-                //
-                // BOOTSTRAP HOLD (measured, `measured_bounds.rs`): the
-                // settlement gates' own law (above) already draws the
-                // line between a build that OPENS a line's first income
-                // of a resource and one that expands it — utility only
-                // ever answers the second question. Until BOTH
-                // candidate resources already have a producing zone,
-                // the old fixed priority (extractor first) still
-                // decides; a founding-window colony has no banked
-                // history for utility to read yet, and letting it
-                // choose there stranded a measured line in famine.
-                let ext_resource = cfe::dop::zone_yield(ZoneKind::Extractor, metabolism).0;
-                let hab_resource = cfe::dop::zone_yield(ZoneKind::Habitat, metabolism).0;
-                let bootstrapping =
-                    !has_income(world, ext_resource) || !has_income(world, hab_resource);
-                if bootstrapping {
-                    if extractor_viable {
-                        Some(ZoneKind::Extractor)
-                    } else if habitat_viable {
-                        Some(ZoneKind::Habitat)
-                    } else {
-                        None
-                    }
-                } else {
-                    let disposition =
-                        world.civ_axes().map(|axes| axes.disposition).unwrap_or(0);
-                    let mode = world.taxon_economy_of(primary).mode;
-                    let smelter_pending = can_smelt
-                        && smelters < 3
-                        && industry_relevant(
-                            &self.spec.civilization.metabolism,
-                            ZoneKind::Smelter,
-                        );
-                    let gap_for = |iron: &Ratio, bio: &Ratio| -> (Ratio, Ratio) {
-                        let iron_gap = if smelter_pending && *iron < smelter_iron_gate {
-                            smelter_iron_gate.clone() - iron.clone()
-                        } else {
-                            ratio(0, 1)
-                        };
-                        let bio_gap = if smelter_pending && *bio < smelter_bio_gate {
-                            smelter_bio_gate.clone() - bio.clone()
-                        } else {
-                            ratio(0, 1)
-                        };
-                        (iron_gap, bio_gap)
-                    };
-
-                    // COGNITION-2: when there's a genuine choice, SEE
-                    // what each candidate actually leads to
-                    // (`lookahead::project` — a real clone, real build,
-                    // real ticks forward) instead of scoring only the
-                    // current beat. Falls back to the COGNITION-1
-                    // static formula whenever a tile or a projection
-                    // isn't available, so there is always a defined
-                    // answer.
-                    let lookahead_pick = if extractor_viable && habitat_viable {
-                        COGNITION_CHOICE_POINTS.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-                        next_free_tile(world).and_then(|tile| {
-                            let ext_proj = crate::lookahead::project(
-                                world,
-                                automaton,
-                                primary,
-                                tile,
-                                ZoneKind::Extractor,
-                                LOOKAHEAD_DEPTH,
-                            );
-                            let hab_proj = crate::lookahead::project(
-                                world,
-                                automaton,
-                                primary,
-                                tile,
-                                ZoneKind::Habitat,
-                                LOOKAHEAD_DEPTH,
-                            );
-                            match (ext_proj, hab_proj) {
-                                (Some(e), Some(h)) => {
-                                    let (e_iron_gap, e_bio_gap) = gap_for(&e.iron, &e.bio);
-                                    let (h_iron_gap, h_bio_gap) = gap_for(&h.iron, &h.bio);
-                                    let e_u = crate::cognition::score_outcome(
-                                        ZoneKind::Extractor,
-                                        disposition,
-                                        mode,
-                                        e.ext,
-                                        e.hab,
-                                        e_iron_gap,
-                                        e_bio_gap,
-                                        e.famished,
-                                    );
-                                    let h_u = crate::cognition::score_outcome(
-                                        ZoneKind::Habitat,
-                                        disposition,
-                                        mode,
-                                        h.ext,
-                                        h.hab,
-                                        h_iron_gap,
-                                        h_bio_gap,
-                                        h.famished,
-                                    );
-                                    COGNITION_LOOKAHEAD_DECIDED
-                                        .fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-                                    Some(if e_u >= h_u {
-                                        ZoneKind::Extractor
-                                    } else {
-                                        ZoneKind::Habitat
-                                    })
-                                }
-                                _ => None,
-                            }
-                        })
-                    } else {
-                        None
-                    };
-
-                    lookahead_pick.or_else(|| {
-                        let (iron_gap, bio_gap) = gap_for(&iron, &bio);
-                        crate::cognition::settlement_choice(
-                            extractor_viable,
-                            habitat_viable,
-                            disposition,
-                            mode,
-                            ext as i64,
-                            hab as i64,
-                            iron_gap,
-                            bio_gap,
-                        )
-                    })
-                }
-            }
-        };
-
-        // BOT-THERM: thermal temperament. A Furnace-sited polity answers
-        // rising heat with encasement shells BEFORE anything else —
-        // minted joules are what the regime is FOR (05 §1.2); a
-        // Frost-sited polity raises its sink charter (one cryo-lattice
-        // array, 05 §1.4), then holds every further build against the
-        // joule runway — famine avoidance, honestly allowed to fail
-        // (a freeze-lock is legitimate drama, not a bug). Mesic-sited
-        // and unsited polities keep their temperament untouched.
-        let affords = |world: &World, kind: ZoneKind| {
-            kind.cost()
-                .into_iter()
-                .all(|(resource, need)| banked(world, resource) >= need)
-        };
-        // REFINE-1 (E3.5): prefer an ElementRefinery when raw elements
-        // stand and none does — only when unlocked industry is not
-        // already claiming the slot, and not while forge-starved (the
-        // biomass ration is held for the smelter). Cost is habitat's
-        // biomass bill; upkeep is encasement iron — neither raids the
-        // smelter's iron gate.
-        let refine: Option<ZoneKind> = if element_kinds > 0
-            && !has_refinery
-            && industrial.is_none()
-            && !forge_starved
-            && affords(world, ZoneKind::ElementRefinery)
-        {
-            Some(ZoneKind::ElementRefinery)
-        } else {
-            None
-        };
-        // SOC-1 — THE OPEN WORKBENCH. The surplus-phase composition below used
-        // to be a fixed `industrial.or(refine).or(base)` priority: industry
-        // always beat refinement always beat settlement, for every temperament.
-        // That is the boolean-gate cartesian the operator ruled out. Now the
-        // viable candidates form the option surface `S_valid`, weighted by the
-        // line's disposition and drawn from its chronicle digest (`soc::choose_build`,
-        // the civic partition function). Membership is still the upstream gates
-        // (affordability is the EDGE OF THE POSSIBLE, not the decision); only the
-        // PRIORITY among the viable is opened to the line's stochastic freedom.
-        // The crisis arms (regenerator, thermal shells, the Frost sink, the
-        // forge-hold) stay deterministic above and below — the Heaviside veto
-        // that canalizes physical law is untouched.
-        // SOC-2 — THE SPECIES MANIFOLD. The surplus draw weights each viable
-        // candidate by the homological pairing `𝒯` against the line's metabolic
-        // complex `M_civ` (soc.rs): a native pathway scores `W_base·genus`, a
-        // pathway into a trait the clade cannot touch pairs to a non-trivial
-        // obstruction and weighs 0 — excluded from the partition with no boolean
-        // gate. `recycles` (a regenerative economy) closes a metabolic loop, so a
-        // topologically richer society is read straight off `∂₁`.
-        let recycles = matches!(
-            world.taxon_economy_of(primary).mode,
-            cfe::almanac::EconomicMode::Regenerative
-        );
-        let manifold = crate::soc::SpeciesManifold::of(
-            metabolism,
-            &self.spec.civilization.metabolism,
-            recycles,
-        );
-        let digest = world
-            .chronicle()
-            .receipts()
-            .last()
-            .map(|receipt| receipt.own.0)
-            .unwrap_or([0u8; 32]);
-        // SOC-3 — THE NEED TILT. Read the society's binding drive and how starved
-        // it is. `stress_quantized` gives the binding tier's unmet fraction ALREADY
-        // grained onto the melt lattice (`(γ_num, LATTICE)`) — reused, not
-        // recomputed, so the raw `deficit / demand` division never forms (that
-        // ungrained ratio explodes the denominator over a long era). The workbench
-        // then leans toward the building that closes the binding drive, scaled by
-        // γ_num: a starving line builds food, a sated one explores uniformly
-        // (γ_num = 0 ⇒ the SOC-2 draw).
-        let cascade = civic::cascade_reading(world, primary);
-        let binding = cascade.binding;
-        // RCP-2 F4: a recipe is a LEISURE activity — it draws on the surplus that
-        // survives EVERY drive (the COG law: creation is funded by leisure, never
-        // by survival flow). Only a bootstrapped line running a real surplus
-        // (`cascade.leisure > 0`) crafts, and for its DOMINANT drive; a line merely
-        // fed-at-the-margin (leisure 0), in any deficit, or still founding builds
-        // the serving ZONE instead — SOC-1's crisis arms stay deterministic. This
-        // keeps the settlement law: no viable line starves on a habitable orbit
-        // because a low-yield recipe diverted its bread.
-        let bootstrapped = world.orb().map(|orb| orb.zones.len() >= 2).unwrap_or(false);
-        let recipe_drive = if bootstrapped && cascade.leisure > ratio(0, 1) {
-            cascade
-                .tiers
-                .iter()
-                .max_by(|a, b| a.demand.cmp(&b.demand))
-                .map(|tier| tier.drive)
-        } else {
-            None
-        };
-        let rank = manifold.algebraic_rank();
-        let (gamma_num, _) = civic::stress_quantized(world, primary);
-        let with_refine = |base: Option<ZoneKind>| {
-            let surface: Vec<ZoneKind> =
-                [industrial, refine, base].into_iter().flatten().collect();
-            crate::soc::choose_build(&surface, &manifold, binding, gamma_num, digest)
-        };
-        let wanted: Option<ZoneKind> =
-            match regime(world, &self.spec.civilization.metabolism) {
-            Some((Regime::Furnace, t4)) => {
-                let shells = zone_count(world, ZoneKind::Encasement) as i64;
-                // Famine-free here (guarded above), so every zone is
-                // active and this factory sum matches the tick law's.
-                let factory = world
-                    .orb()
-                    .map(|orb| {
-                        orb.zones
-                            .iter()
-                            .fold(ratio(0, 1), |sum, zone| sum + zone.kind.factory_heat())
-                    })
-                    .unwrap_or_else(|| ratio(0, 1));
-                // P2 (tag 103): the mirror follows the CHARTERED
-                // fold, exactly as the tick does — a chartered radiator
-                // must move the conductor's read too or the mirror lies.
-                let heat_net = t4 / cfe::thermal::thermal_k() + factory
-                    - world.parameter(cfe::parameter::Parameter::RadiatorBase);
-                let throughput =
-                    world.parameter(cfe::parameter::Parameter::EncasementThroughput)
-                        * ratio(shells, 1);
-                if heat_net > throughput {
-                    // The shell answer: joule collection outranks
-                    // sprawl — raise the next shell, or HOARD the ore
-                    // toward it (expanding deeper into uncaptured heat
-                    // only degrades every yield, 05 §1.2). Shells come
-                    // from SURPLUS: the colony waits until the shell
-                    // AND the next extractor are both funded, so one
-                    // purchase cannot flip its compounding arm.
-                    let iron_for = |kind: ZoneKind| {
-                        kind.cost()
-                            .into_iter()
-                            .find(|(resource, _)| *resource == Resource::Iron)
-                            .map(|(_, need)| need)
-                            .unwrap_or_else(|| ratio(0, 1))
-                    };
-                    let shell_line =
-                        iron_for(ZoneKind::Encasement) + iron_for(ZoneKind::Extractor);
-                    (iron >= shell_line).then_some(ZoneKind::Encasement)
-                } else if can_smelt
-                    && smelters < 3
-                    && iron >= ratio(30, 1)
-                    && bio < ratio(10, 1)
-                {
-                    // Industry outranks new settlement on a Furnace
-                    // seat: when ONLY the biomass line still blocks an
-                    // unlocked smelter, hold the rations for it — a
-                    // habitat spent now would push the forge past the
-                    // horizon again.
-                    industrial.or(match settlement {
-                        Some(ZoneKind::Habitat) => None,
-                        held => held,
-                    })
-                } else {
-                    with_refine(settlement)
-                }
-            }
-            Some((Regime::Frost, _)) => {
-                if zone_count(world, ZoneKind::CryoArray) == 0 {
-                    // The sink charter: a Frost colony exists to bank
-                    // the cold; its first array is founded on the
-                    // founding iron, before any joule flows.
-                    affords(world, ZoneKind::CryoArray).then_some(ZoneKind::CryoArray)
-                } else if joule_runway_allows(&banked(world, Resource::Joule), total) {
-                    with_refine(settlement)
-                } else {
-                    None // the runway is short: STOP expanding
-                }
-            }
-            None => {
-                // ENCASE-FIRST (05 §1.2) holds on the temperate seat
-                // too: a colony whose vented book outruns its contained
-                // one is bleeding the currency order-work is priced in
-                // (34's gate reads exactly these two arms), and no
-                // amount of sprawl repays that. One shell, then back to
-                // the settlement line.
-                let venting = world
-                    .orb()
-                    .is_some_and(|orb| orb.entropy_vented > orb.syntropy_contained);
-                if venting
-                    && zone_count(world, ZoneKind::Encasement) == 0
-                    && affords(world, ZoneKind::Encasement)
-                {
-                    Some(ZoneKind::Encasement)
-                } else {
-                    with_refine(settlement)
-                }
-            }
-        };
-        // RCP-2 F4 — THE RECIPE COMPETES ON THE WORKBENCH. Discover the recipe the
-        // society would raise for its leading drive (the binding deficit, or its
-        // DOMINANT tier at ease), then draw it against the chosen zone in ONE
-        // partition — the zone weighted by its genus affinity, the recipe by the
-        // manifold's topological REACH, both tilted by the same γ. A fed line that
-        // draws the recipe grows its doing-layer PROACTIVELY, not only under
-        // scarcity. Enum-free: the draw is a plain weighted index. The recipe role
-        // its drive seeks: metabolic hunger → FOOD, homeostatic → SINK, cognitive →
-        // COGNITION, expansive → ENERGY.
-        let recipe = recipe_drive.and_then(|drive| {
-            let almanac: Vec<[u8; 32]> = world
-                .orb()
-                .map(|orb| orb.elements.iter().map(|(id, _)| *id).collect())
-                .unwrap_or_default();
-            if almanac.is_empty() {
-                return None;
-            }
-            let role = match drive {
-                civic::Drive::Metabolic => cfe::morphogen::FOOD,
-                civic::Drive::Homeostatic => cfe::morphogen::SINK,
-                civic::Drive::Cognitive => cfe::morphogen::COGNITION,
-                civic::Drive::Expansive => cfe::morphogen::ENERGY,
-            };
-            let species = cfe::morphogen::archetype(metabolism);
-            crate::recipe::discover(role, &almanac, &species, &rank)
-        });
-        // The zone-vs-recipe draw. A recipe NEVER diverts a SURVIVAL build — the
-        // food and shelter arms (Extractor, Habitat, Regenerator, Granary,
-        // Encasement, CryoArray) stay deterministic (SOC-1's Heaviside veto), so no
-        // viable line starves because a low-yield recipe took its bread. A recipe
-        // competes only with a DISCRETIONARY (industry) build, or stands alone when
-        // the beat chose no zone. Salt the digest distinctly so this draw does not
-        // correlate with the zone-among-zones draw inside `choose_build`.
-        let survival_build = matches!(
-            wanted,
-            Some(
-                ZoneKind::Extractor
-                    | ZoneKind::Habitat
-                    | ZoneKind::Regenerator
-                    | ZoneKind::Granary
-                    | ZoneKind::Encasement
-                    | ZoneKind::CryoArray
-            )
-        );
-        let build_recipe = match (wanted, &recipe) {
-            _ if survival_build => false,
-            (Some(zone), Some(r)) => {
-                let zw = crate::soc::zone_weight(zone, &manifold, binding, gamma_num);
-                let rw = crate::soc::recipe_weight(r.role, &rank, binding, gamma_num);
-                let mut hasher = blake3::Hasher::new();
-                hasher.update(&digest);
-                hasher.update(b"recipe-workbench");
-                let draw_seed = *hasher.finalize().as_bytes();
-                crate::soc::partition_draw(&[zw, rw], draw_seed) == Some(1)
-            }
-            // No zone this beat: the recipe stands alone.
-            (None, Some(_)) => true,
-            _ => false,
-        };
-        // A drawn recipe is raised and SKIPS the zone; a recipe the door refuses
-        // (e.g. it already stands) simply passes the beat. NO fall-through to a
-        // second build — over-settling the roster tips the mint loop's
-        // exact-rational arithmetic, and the survival arms already guarantee no
-        // viable line is diverted from its bread.
-        if build_recipe {
-            if let Some(r) = recipe {
-                let _ = world.build_recipe_as(
-                    self.automaton,
-                    cfe::world::FIRST_ORB,
-                    r.inputs,
-                    r.role,
-                    r.yield_of_role,
-                );
-            }
-        } else if let (Some(kind), Some(tile)) = (wanted, next_free_tile(world)) {
-            // REFINE-1: ElementRefinery needs DEEPENING (condition 3),
-            // same technology door as the regenerator.
-            if kind == ZoneKind::ElementRefinery {
-                let holds_deepening = world
-                    .committed()
-                    .techs
-                    .iter()
-                    .any(|(o, c, _, _)| *o == primary && *c == 3);
-                if !holds_deepening {
-                    let _ = world.grant_tech_as(steward, primary, 3);
-                }
-            }
-            let built = world
-                .zone_as(self.automaton, cfe::world::FIRST_ORB, tile, kind)
-                .is_ok();
-            // **THE AWAKENING** (COG Slice 2 activation). The FIRST
-            // habitat on a colony founds a settlement — a founding band
-            // takes residence and the population goes LIVE. `hab` is the
-            // pre-beat habitat count, so this fires exactly once per
-            // colony; every later habitat only lifts K_pop. The band
-            // seats AFTER the build so the dwelling stands to hold it.
-            if built && kind == ZoneKind::Habitat && hab == 0 {
-                world.settle_population(cfe::world::FIRST_ORB, FOUNDING_BAND);
-            }
-        }
     }
 
     /// Drain the operator's inbox: each directive applies as the
@@ -2836,6 +2164,144 @@ impl Polity {
             .min(mouths);
         let ration_dir = Self::ration_direction(&self.world.ration_of(orb));
         matches!(solver::ration_reads(mouths, fed, ration_dir), solver::RationRead::Fed)
+    }
+
+    /// N-I6 — peel the survival book for one orb: the exact integer readings the
+    /// solver seat thinks (mouths, fed, accrued, housing, matter), all
+    /// mouth-/unit-equivalents. The conductor peels the world; the solver thinks
+    /// the measurement. A pure read (SEAL-B-safe).
+    fn survival_book(&self, orb: u64) -> solver::SurvivalBook {
+        let world = &self.world;
+        let ration = world.ration_of(orb);
+        let ration_dir = Self::ration_direction(&ration);
+        let metabolism =
+            world.committed().genesis.as_ref().map(|g| g.metabolism).unwrap_or(2);
+        let ration_resource = match &ration {
+            cfe::dop::Ration::Resource(r) => Some(*r),
+            cfe::dop::Ration::Element(_) => None,
+        };
+        let yields_ration = |kind: ZoneKind| match ration_resource {
+            Some(r) => cfe::dop::zone_yield(kind, metabolism).0 == r,
+            None => kind == ZoneKind::Extractor, // an element-eater mines its ration
+        };
+        let ration_source_sites = world
+            .orb()
+            .map(|o| o.zones.iter().filter(|z| yields_ration(z.kind)).count() as u64)
+            .unwrap_or(0);
+        let mouths = world.labor_force(orb);
+        let per_capita = world.per_capita_ration();
+        let to_u64 = |r: Ratio| num_traits::ToPrimitive::to_u64(&r.to_integer()).unwrap_or(u64::MAX);
+        let (fed, accrued, habitat_support) = if per_capita <= ratio(0, 1) {
+            (mouths, mouths, mouths) // a rate-0 line (plasmoid, #29) has no farmed ration gate
+        } else {
+            let available: Ratio = world
+                .sustenance_sources(orb, world.now())
+                .iter()
+                .map(|s| s.available())
+                .fold(ratio(0, 1), |a, b| a + b);
+            let fed = to_u64(available / per_capita.clone()).min(mouths);
+            let accrued_amt = ration_resource
+                .and_then(|r| {
+                    world.accrued_of(orb).into_iter().find(|(res, _)| *res == r).map(|(_, a)| a)
+                })
+                .unwrap_or_else(|| ratio(0, 1));
+            let accrued = to_u64(accrued_amt / per_capita.clone());
+            let support = to_u64(world.population_capacity(orb) / per_capita);
+            (fed, accrued, support)
+        };
+        solver::SurvivalBook {
+            ration_source_sites,
+            mouths,
+            fed,
+            ration_dir,
+            accrued,
+            habitat_support,
+            habitats: world.habitat_count(orb),
+            extractors: zone_count(world, ZoneKind::Extractor) as u64,
+            matter_opened: false,
+            alloy: to_u64(banked(world, Resource::Alloy)),
+            iron: to_u64(banked(world, Resource::Iron)),
+        }
+    }
+
+    /// N-I6 — the ZoneKind whose `zone_yield` is this line's ration (charter §3
+    /// founding): Habitat for a biomass line, Extractor for a mineral/element
+    /// line. Resolved from `zone_yield`, never hardcoded.
+    fn ration_source_zone(&self, orb: u64) -> ZoneKind {
+        let metabolism =
+            self.world.committed().genesis.as_ref().map(|g| g.metabolism).unwrap_or(2);
+        if let cfe::dop::Ration::Resource(r) = self.world.ration_of(orb) {
+            for kind in [ZoneKind::Habitat, ZoneKind::Extractor] {
+                if cfe::dop::zone_yield(kind, metabolism).0 == r {
+                    return kind;
+                }
+            }
+        }
+        ZoneKind::Extractor
+    }
+
+    /// N-I6 — THE SURVIVAL EXPRESS. Peel the book, think the deed, express ≤1
+    /// deed through a door that already exists (`zone_as` / `raze_as`; Collect and
+    /// Rest express nothing extra — the cycle collect IS the deed). The SOLE
+    /// zone-raiser now (`build_step` no longer builds). Runs in the post-tick
+    /// window so it reads the food that feeds the mouths, not the drained larder.
+    /// `industry_relevant` / affordability stay RENDER gates — an unaffordable or
+    /// off-metabolism deed is rest, not a score.
+    fn express_survival(&mut self, orb: u64, matter_opened: bool) {
+        let mut book = self.survival_book(orb);
+        book.matter_opened = matter_opened;
+        let metabolism = self.spec.civilization.metabolism.clone();
+        match solver::think_survival(&book) {
+            solver::SurvivalDeed::Rest | solver::SurvivalDeed::Collect => {}
+            solver::SurvivalDeed::SeatRationSource => {
+                let kind = self.ration_source_zone(orb);
+                self.seat_zone(orb, kind);
+            }
+            solver::SurvivalDeed::Habitat => self.seat_zone(orb, ZoneKind::Habitat),
+            solver::SurvivalDeed::RazeExtractor => self.raze_zone(orb, ZoneKind::Extractor),
+            solver::SurvivalDeed::Synthesizer => {
+                if industry_relevant(&metabolism, ZoneKind::Synthesizer) {
+                    self.seat_zone(orb, ZoneKind::Synthesizer);
+                }
+            }
+            solver::SurvivalDeed::Smelter => {
+                if industry_relevant(&metabolism, ZoneKind::Smelter) {
+                    self.seat_zone(orb, ZoneKind::Smelter);
+                }
+            }
+        }
+    }
+
+    /// Seat one zone if a tile is free and its cost is banked (the render gate —
+    /// an unaffordable deed is rest). One zone per beat is the metabolic bound.
+    fn seat_zone(&mut self, orb: u64, kind: ZoneKind) {
+        let can_pay = kind.cost().into_iter().all(|(res, need)| banked(&self.world, res) >= need);
+        if !can_pay {
+            return;
+        }
+        let hab_before = self.world.habitat_count(orb);
+        if let Some(tile) = next_free_tile(&self.world) {
+            if self.world.zone_as(self.automaton, orb, tile, kind).is_ok()
+                && kind == ZoneKind::Habitat
+                && hab_before == 0
+            {
+                // THE FOUNDING BAND, carried from the retired build_step: the
+                // FIRST Habitat seeds the initial population (else no mouths ever
+                // rise and the board never comes alive).
+                self.world.settle_population(cfe::world::FIRST_ORB, FOUNDING_BAND);
+            }
+        }
+    }
+
+    /// Raze one zone of the given kind — the typed inverse of build (Pin E).
+    fn raze_zone(&mut self, orb: u64, kind: ZoneKind) {
+        let tile = self
+            .world
+            .orb()
+            .and_then(|o| o.zones.iter().find(|z| z.kind == kind).map(|z| z.tile));
+        if let Some(tile) = tile {
+            let _ = self.world.raze_as(self.automaton, orb, tile);
+        }
     }
 
     fn research_step(&mut self, book: &Ledger, survives: bool) {
@@ -3426,6 +2892,13 @@ impl Polity {
         // read — replay reads the same verdict, so SEAL-B is untouched.
         let survives = profile::timed("survival_read", || {
             self.ration_survives(cfe::world::FIRST_ORB)
+        });
+        // N-I6 — THE SURVIVAL EXPRESS: the residual names ≤1 deed, expressed in
+        // this same post-tick / pre-collect window (the sole zone-raiser now).
+        // A Fed book may open matter (Pin F); a Short book still thinks — that is
+        // how it names the cure (Pin G withholds only ARC, below).
+        profile::timed("survival_express", || {
+            self.express_survival(cfe::world::FIRST_ORB, survives)
         });
         // Every settled orb collects — a chartered survey site left
         // uncollected would starve at its own upkeep.
