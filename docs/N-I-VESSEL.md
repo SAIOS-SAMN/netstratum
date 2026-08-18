@@ -156,5 +156,4 @@ Prior witnesses stay green (`survival_pins`, `survival_gate_pins`,
 `conductor_pins`). A red `an_era_brings_the_board_alive` is the same class
 of bug — measure the vessel drain in the same post-tick window.
 
-Idle when Pin B is green at vessel grain. N-I7 (price the thought) is the
-next file, then N-I8 (a second vessel drains the word).
+**LANDED** `4399627`. Pin B green at vessel grain. Next is [`N-I7.md`](N-I7.md).
