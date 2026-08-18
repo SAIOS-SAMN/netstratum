@@ -812,8 +812,11 @@ pub struct Polity {
     /// at the first research beat of a process.
     library: solver::mint::Library,
     library_folded: bool,
-    /// Words seeking their three confirms: (orbit, expansion, cited).
-    word_pending: Vec<([u8; 32], Vec<solver_verify::grid::Op>, Vec<[u8; 32]>)>,
+    /// N-I8 — words seeking CONSILIENCE: (orbit, expansion, deposits). Each
+    /// deposit is `(vessel_id, digest)`; the word mints only when two DISTINCT
+    /// vessels have independently closed the orbit. One vessel confirming many
+    /// digests is Horizon, not an install (C−) — pending is a wait.
+    word_pending: Vec<([u8; 32], Vec<solver_verify::grid::Op>, Vec<(u64, [u8; 32])>)>,
     /// Planes this line has OPENED — the unfold, one per earned mint.
     /// The fiber's grade count is `world.key().len()`; this counts the
     /// openings that got it there.
@@ -928,6 +931,41 @@ fn office_evidence(world: &World) -> OfficeEvidence {
     }
     evidence.has_crossed = world.has_crossed();
     evidence
+}
+
+/// N-I8 — CONSILIENCE deposit (pure). Record `vessel`'s closure of `orbit` in the
+/// pending board (idempotent per vessel+digest), and return the cited digests IFF
+/// two DISTINCT vessels have now closed it. Does NOT remove the entry — the caller
+/// removes it only on a SUCCESSFUL (affordable) mint, so a consilient-but-unpaid
+/// word stays pending (fasting). One vessel confirming many digests never reaches
+/// two distinct vessel_ids (C−).
+pub fn consilience_deposit(
+    pending: &mut Vec<([u8; 32], Vec<solver_verify::grid::Op>, Vec<(u64, [u8; 32])>)>,
+    orbit: [u8; 32],
+    expansion: &[solver_verify::grid::Op],
+    vessel: u64,
+    digest: [u8; 32],
+) -> Option<Vec<[u8; 32]>> {
+    let entry = match pending.iter_mut().find(|(held, _, _)| *held == orbit) {
+        Some(e) => e,
+        None => {
+            pending.push((orbit, expansion.to_vec(), Vec::new()));
+            pending.last_mut().expect("just pushed")
+        }
+    };
+    if !entry.2.iter().any(|(v, d)| *v == vessel && *d == digest) {
+        entry.2.push((vessel, digest));
+    }
+    let mut vessels: Vec<u64> = entry.2.iter().map(|(v, _)| *v).collect();
+    vessels.sort_unstable();
+    vessels.dedup();
+    if vessels.len() < 2 {
+        return None; // Horizon — one vantage waiting, not a mint (C−)
+    }
+    let mut cited: Vec<[u8; 32]> = entry.2.iter().map(|(_, d)| *d).collect();
+    cited.sort_unstable();
+    cited.dedup();
+    Some(cited)
 }
 
 fn banked(world: &World, resource: Resource) -> Ratio {
@@ -2322,6 +2360,86 @@ impl Polity {
             * civic::metabolic_exchange()
     }
 
+    /// N-I8 — deposit `vessel`'s closure of `orbit` toward a shared word, and
+    /// MINT it iff two DISTINCT vessels have now closed it (consilience). The
+    /// mint bills `mint_cost` in leisure (COG-2/4/5, unchanged) — an unaffordable
+    /// consilient word stays pending (fasting), a starving line may burn people
+    /// (COG-3). A lone vessel never reaches two (C−): pending is a wait, not an
+    /// install. The mint DEED (`mint_solver_word_as`) is unchanged.
+    fn deposit_toward_word(
+        &mut self,
+        orbit: [u8; 32],
+        expansion: &[solver_verify::grid::Op],
+        vessel: u64,
+        digest: [u8; 32],
+    ) {
+        let Some(cited) =
+            consilience_deposit(&mut self.word_pending, orbit, expansion, vessel, digest)
+        else {
+            return; // one vantage waiting — Horizon, not a mint (C−)
+        };
+        let expansion = expansion.to_vec();
+        let bill = civic::mint_cost(&[num_bigint::BigInt::from(expansion.len())], &[]);
+        // COG-5: price the homological bill in LEISURE via the exchange rate.
+        let price = ratio(num_traits::ToPrimitive::to_i64(&bill).unwrap_or(i64::MAX), 1)
+            * civic::metabolic_exchange();
+        let primary = cfe::world::FIRST_ORB;
+        // COG-13 EROI gate; `afford` survives only as the desperation-burn floor.
+        let afford = self.world.leisure_bank_of(primary) >= price;
+        let commit = civic::cognitive_investment(&self.world, primary, &price);
+        // COG-3 desperation burn: a starving line may spend people for the Eureka.
+        let burn = civic::desperation_price(&price);
+        let head = ratio(self.world.population_of(primary) as i64, 1);
+        let starving = matches!(
+            civic::cascade_reading(&self.world, primary).binding,
+            Some(civic::Drive::Metabolic)
+        );
+        let can_burn = !afford && starving && head > burn.clone();
+        if let Some(bytes) = solver_verify::program_bytes(&expansion) {
+            if (commit || can_burn)
+                && self
+                    .world
+                    .mint_solver_word_as(self.automaton, orbit, bytes, cited.clone())
+                    .is_ok()
+            {
+                if commit {
+                    self.world.settle_leisure(primary, -price);
+                } else {
+                    self.world.settle_population_exact(primary, -burn);
+                }
+                self.library.adopt(solver::mint::MintedWord { orbit, expansion, cited });
+                self.word_pending.retain(|(held, _, _)| *held != orbit);
+            }
+        }
+    }
+
+    /// N-I8 — the SIBLING office's independent deposit toward consilience. It
+    /// thinks `task` on ITS OWN basin (the line's second registered office,
+    /// `steward`), pays its OWN look (N-I7), and on a verified close deposits
+    /// `(steward, digest)` toward the shared word. Deposit-only: no value mint
+    /// (the automaton is the line's value producer). It looks only if the bank
+    /// can pay AFTER the automaton's look — affordability-staggered, so a line
+    /// with one look's surplus funds the automaton first and the sibling fasts.
+    fn sibling_deposit(&mut self, task: &solver_verify::loader::Task, digest: [u8; 32]) {
+        let orb = cfe::world::FIRST_ORB;
+        let price = Self::observe_price();
+        if self.world.leisure_bank_of(orb) < price {
+            return; // the sibling fasts — its look is not free (N-I7)
+        }
+        self.world.settle_leisure(orb, -price);
+        let sibling = self.steward;
+        let read = solver::think_task(task, self.grown.entry(sibling).or_default());
+        if let SolveRead::Solved { program, matches_expected: Some(true), .. } = read {
+            if program.len() >= 2 {
+                let standing =
+                    solver::mint::standing_orbits(&solver::search::sweep_vocabulary(task));
+                if let Some(orbit) = solver::mint::consider(&program, &self.library, &standing) {
+                    self.deposit_toward_word(orbit, &program, sibling, digest);
+                }
+            }
+        }
+    }
+
     fn research_step(&mut self, book: &Ledger, survives: bool) {
         let Some(receipt) = self.world.chronicle().receipts().last() else {
             return;
@@ -2433,7 +2551,7 @@ impl Polity {
                     }
                 }
             };
-            match read {
+            let auto = match read {
                 SolveRead::Solved {
                     program,
                     matches_expected: Some(true),
@@ -2447,103 +2565,18 @@ impl Polity {
                     // one confirmation; the third mints — receipted,
                     // adopted, and a depth-1 letter from then on.
                     if program.len() >= 2 {
+                        // N-I8 — a confirmed composite is a WORD candidate; the
+                        // AUTOMATON deposits its closure. The word mints only on
+                        // CONSILIENCE (a second vessel independently closes the
+                        // same orbit) — `deposit_toward_word` gates that and bills
+                        // the mint (`mint_cost`, COG-2/4/5, unchanged).
                         let standing = solver::mint::standing_orbits(
                             &solver::search::sweep_vocabulary(&task),
                         );
                         if let Some(orbit) =
                             solver::mint::consider(&program, &self.library, &standing)
                         {
-                            let pending = match self
-                                .word_pending
-                                .iter_mut()
-                                .find(|(held, _, _)| *held == orbit)
-                            {
-                                Some(held) => held,
-                                None => {
-                                    self.word_pending.push((orbit, program.clone(), Vec::new()));
-                                    self.word_pending.last_mut().expect("just pushed")
-                                }
-                            };
-                            if !pending.2.contains(&digest) {
-                                pending.2.push(digest);
-                            }
-                            if pending.2.len() >= solver::mint::CONFIRMS_TO_MINT {
-                                let cited = pending.2.clone();
-                                let expansion = pending.1.clone();
-                                // **THINKING IS METABOLIC WORK** (COG-2/3/4).
-                                // Minting a word is a THOUGHT, and a thought is
-                                // priced by its own homological complexity —
-                                // `mint_cost` of its program. A solver program
-                                // carries no torsion, so the bill reduces to its
-                                // Betti extent: its depth (op count). The mind
-                                // pays from its LEISURE bank; one with no
-                                // cognitive surplus to cover the bill cannot
-                                // afford the thought this beat and leaves the
-                                // word pending (fasting) — a starving mind
-                                // cannot think as hard (COG-3).
-                                let bill = civic::mint_cost(
-                                    &[num_bigint::BigInt::from(expansion.len())],
-                                    &[],
-                                );
-                                // COG-5: price the homological bill in LEISURE
-                                // units via the metabolic exchange rate, so a
-                                // thought costs a meaningful fraction of the
-                                // surplus, not single digits against thousands.
-                                let price = ratio(
-                                    num_traits::ToPrimitive::to_i64(&bill).unwrap_or(i64::MAX),
-                                    1,
-                                ) * civic::metabolic_exchange();
-                                let primary = cfe::world::FIRST_ORB;
-                                // COG-13: the EROI investment gate REPLACES the
-                                // reflexive `afford == spend` boolean. A thought
-                                // is funded only when the return justifies it and
-                                // a stress-scaled reserve is intact, so leisure
-                                // BANKS instead of draining on every affordable
-                                // thought. `afford` survives only as the hard
-                                // floor that decides the desperation burn.
-                                let afford = self.world.leisure_bank_of(primary) >= price;
-                                let commit = civic::cognitive_investment(&self.world, primary, &price);
-                                // COG-3 DESPERATION BURN: when a metabolic
-                                // deficit is actively biting (the cascade binds
-                                // at the survival floor) and leisure cannot pay,
-                                // a line may cannibalize its own PEOPLE to force
-                                // the Eureka — minting the geometry that unlocks
-                                // its escape, paid in heads at a punishing rate.
-                                // Bounded to leave a remnant (never self-extinct
-                                // in one thought); a colony too small to spare
-                                // the price must wait on the fasting trickle.
-                                let burn = civic::desperation_price(&price);
-                                let head = ratio(self.world.population_of(primary) as i64, 1);
-                                let starving = matches!(
-                                    civic::cascade_reading(&self.world, primary).binding,
-                                    Some(civic::Drive::Metabolic)
-                                );
-                                let can_burn = !afford && starving && head > burn.clone();
-                                if let Some(bytes) = solver_verify::program_bytes(&expansion) {
-                                    if (commit || can_burn)
-                                        && self
-                                        .world
-                                        .mint_solver_word_as(self.automaton, orbit, bytes, cited.clone())
-                                        .is_ok()
-                                    {
-                                        if commit {
-                                            // COG-4: the thought draws the
-                                            // leisure bank by its exact price.
-                                            self.world.settle_leisure(primary, -price);
-                                        } else {
-                                            // The crisis instinct: the colony
-                                            // spends its people for the Eureka.
-                                            self.world.settle_population_exact(primary, -burn);
-                                        }
-                                        self.library.adopt(solver::mint::MintedWord {
-                                            orbit,
-                                            expansion,
-                                            cited,
-                                        });
-                                        self.word_pending.retain(|(held, _, _)| *held != orbit);
-                                    }
-                                }
-                            }
+                            self.deposit_toward_word(orbit, &program, self.automaton, digest);
                         }
                     }
                     let word: Vec<String> = program.iter().map(|op| op.describe()).collect();
@@ -2558,14 +2591,23 @@ impl Polity {
                         certificate,
                     };
                     Some((
-                        task.name,
+                        task.name.clone(),
                         word.join(" → "),
                         cert_hex,
                         solver_verify::encode_work(&proof).map(|bytes| (bytes, difficulty)),
                     ))
                 }
                 _ => None,
-            }
+            };
+            // N-I8 — the SIBLING office's independent vantage: its OWN basin
+            // (N-I·VESSEL), its OWN look (N-I7), deposit-only (no value mint —
+            // the automaton is the line's value producer). Affordability-
+            // staggered: it looks only if the bank can still pay AFTER the
+            // automaton, so a line with one look's surplus funds the automaton
+            // first and the sibling fasts. When both close the same orbit, the
+            // second deposit reaches two distinct vessels and the word mints.
+            self.sibling_deposit(&task, digest);
+            auto
         };
         match solved {
             Some((name, word, cert_hex, proof)) => {
