@@ -230,7 +230,7 @@ second brain (lifespan is a clock on the mouth count).
 | N-I7 | metabolic debit on the LOOK; leisure gates the observe | **LANDED** `c079dfd` · [`N-I7.md`](N-I7.md) · unfunded line fasts; funded Fed line thinks |
 | N-I8 | sun / `vocabulary::fold` from two vessel deposits | **LANDED** `ab01400` · [`N-I8.md`](N-I8.md) · Pin C (two offices mint), C− (one vantage does not) |
 | N-I9 | same doors: CLI think verb = automaton path; NS-6 grant gates render | **waits** — product parity, not converse |
-| N-I10 | refraction between entities | **NAMED** [`N-I10.md`](N-I10.md) · peer drains or walls a folded word |
+| N-I10 | refraction between entities | **LANDED** `3099b80` · [`N-I10.md`](N-I10.md) · peer drains or walls a folded word (primitive + steward swap) |
 
 **Do NOT start N-I10, lifespan, or dogma until N-I6 is green. A social mind on a
 body that cannot count is fiction.**
