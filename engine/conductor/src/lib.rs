@@ -2311,6 +2311,17 @@ impl Polity {
         }
     }
 
+    /// N-I7 — THE LOOK PRICE: the cheapest thought (a single degree-1
+    /// observation), billed in leisure through the SEATED cost law
+    /// (`civic::mint_cost × metabolic_exchange`) — no new rate table. A constant,
+    /// strictly cheaper than any composed word (`mint_cost` is monotone in
+    /// residual extent); it moves automatically if the seated cost law moves.
+    pub fn observe_price() -> Ratio {
+        let bill = civic::mint_cost(&[num_bigint::BigInt::from(1)], &[]);
+        ratio(num_traits::ToPrimitive::to_i64(&bill).unwrap_or(i64::MAX), 1)
+            * civic::metabolic_exchange()
+    }
+
     fn research_step(&mut self, book: &Ledger, survives: bool) {
         let Some(receipt) = self.world.chronicle().receipts().last() else {
             return;
@@ -2400,13 +2411,26 @@ impl Polity {
             // adopts this beat DRAINS the next (Pin B), so the thinker is
             // changed by what it thought.
             let read = match pre_reached {
+                // `pre_reach` is a REDUCE against crystallized words — a library
+                // hit, not a fresh look. It stays UNCHARGED (N-I7).
                 Some(hit) => hit,
                 None => {
-                    // N-I·VESSEL — drain THIS vessel's mouth, not the line pool.
-                    // The seed vessel is the acting cognitive entity (`automaton`);
-                    // its wall lands in its own basin, a sibling's stays untouched.
-                    let vessel = self.automaton;
-                    solver::think_task(&task, self.grown.entry(vessel).or_default())
+                    // N-I7 — THE LOOK COSTS LEISURE. The line is Fed here (Pin G
+                    // passed above, else `solved` is already None). The fresh
+                    // peel-and-reduce is the priced act: pay the observe price
+                    // FIRST, then drain. An unaffordable look is FASTING — rest
+                    // (this None arm), not a sweep; the bank refills from surplus
+                    // (`cognition_step`) and a later beat can pay.
+                    let orb = cfe::world::FIRST_ORB;
+                    let price = Self::observe_price();
+                    if self.world.leisure_bank_of(orb) >= price {
+                        self.world.settle_leisure(orb, -price);
+                        // N-I·VESSEL — drain THIS vessel's mouth, not the line pool.
+                        let vessel = self.automaton;
+                        solver::think_task(&task, self.grown.entry(vessel).or_default())
+                    } else {
+                        SolveRead::Unsolved // the bank cannot pay the look — fast this beat
+                    }
                 }
             };
             match read {
