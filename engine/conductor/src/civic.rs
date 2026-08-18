@@ -397,6 +397,111 @@ pub fn cascade_reading(world: &cfe::world::World, orb: u64) -> Cascade {
     cascade(supply, &demands)
 }
 
+// ── ONT-4: THE LEISURE MANIFOLD ────────────────────────────────────────────
+//
+// The leisure bank was ONE scalar per orb, stepped each beat by the geometric
+// demurrage `bank × (1 − d)` — a stored scalar through a recurrence with a
+// multiplication, so its exact-rational denominator accreted the whole causal
+// history and detonated (~beat 117, the collapse ONT-2 unmasked once the vein's
+// mask was gone; see [[scalar-collapse-derivation-law]]). ONT-4 eradicates it on
+// BOTH counts the operator ruled (2026-08-18): (1) NO scalar collapse — the
+// geometric recurrence is replaced by FLAT, floored per-beat flows, so every
+// stratum stays a bounded `1/grain` integral and no denominator can explode;
+// (2) DIMENSIONAL VOLUME PRESERVED — leisure is no longer collapsed to a 1-D
+// shadow but banked PER DRIVE-LADDER STRATUM (a manifold over `Cascade.tiers`),
+// its volume the sum over strata, so a want's surplus is earmarked by the drive
+// level it survived to rather than melted into one fungible number.
+
+/// **THE LEISURE MANIFOLD** (ONT-4) — the cognition budget as a manifold over the
+/// drive ladder, not a scalar. Each stratum is one drive tier's standing surplus,
+/// a bounded floored-flow integral; the total [`budget`](Self::budget) is their
+/// sum (the volume). Held separate so minting a want draws the stratum that want
+/// funds, and no tier's balance ever multiplies itself.
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct LeisureManifold {
+    /// Per drive tier (survival tiers never banked), in priority order: the
+    /// stratum's standing balance. Absent ⇒ that stratum holds nothing.
+    pub strata: Vec<(Drive, Ratio)>,
+}
+
+impl LeisureManifold {
+    /// **THE VOLUME** — the scalar budget, `Σ` over strata. The dimensional
+    /// structure lives in `strata`; this is its projection for a scalar reader
+    /// (the COG-13 gate, the mint), so nothing downstream must change to read it.
+    pub fn budget(&self) -> Ratio {
+        self.strata.iter().fold(ratio(0, 1), |sum, (_, bal)| sum + bal.clone())
+    }
+
+    /// One stratum's standing balance (zero if the tier banks nothing).
+    pub fn of(&self, drive: Drive) -> Ratio {
+        self.strata
+            .iter()
+            .find(|(d, _)| *d == drive)
+            .map(|(_, bal)| bal.clone())
+            .unwrap_or_else(|| ratio(0, 1))
+    }
+
+    /// Set a stratum's balance, dropping it when empty (so the manifold carries
+    /// no zero rows and two equal manifolds compare equal).
+    fn set(&mut self, drive: Drive, bal: Ratio) {
+        self.strata.retain(|(d, _)| *d != drive);
+        if bal > ratio(0, 1) {
+            self.strata.push((drive, bal));
+        }
+    }
+}
+
+/// Floor a flow onto `1/grain` — the ONT-2b discipline (floor the FLOW at the
+/// source, NEVER the accumulator), so each stratum stays a bounded `1/grain`
+/// multiple forever and its denominator cannot explode. `grain` is a bound
+/// variable, so `ratio(grain, 1)` mints no tuned dial.
+fn floor_flow(x: &Ratio, grain: i64) -> Ratio {
+    let g = ratio(grain, 1);
+    (x.clone() * g.clone()).floor() / g
+}
+
+/// **SETTLE THE LEISURE MANIFOLD** (ONT-4) — fold one beat into the per-stratum
+/// banks: each tier's `surplus` IN, its `spend` OUT, and a FLAT `decay` (a
+/// bounded per-beat drain, NOT `bank × d`) — every flow floored to `1/grain` and
+/// the balance floored at zero. No stratum multiplies its own balance, so the
+/// geometric recurrence that detonated is gone by construction and replay
+/// recomputes the identical banks. Attribution — how the beat's surplus splits
+/// across tiers — is the CALLER's (it reads the live cascade); this is the pure
+/// bounded accounting the wire settles against.
+pub fn settle_leisure_manifold(
+    prior: &LeisureManifold,
+    surplus: &[(Drive, Ratio)],
+    spend: &[(Drive, Ratio)],
+    flat_decay: &Ratio,
+    grain: i64,
+) -> LeisureManifold {
+    let zero = ratio(0, 1);
+    let decay = floor_flow(&flat_decay.clone().max(zero.clone()), grain);
+    let read = |list: &[(Drive, Ratio)], drive: Drive| {
+        list.iter()
+            .find(|(d, _)| *d == drive)
+            .map(|(_, v)| v.clone())
+            .unwrap_or_else(|| zero.clone())
+    };
+    // Every tier named by the prior manifold or this beat's flows.
+    let mut tiers: Vec<Drive> = prior.strata.iter().map(|(d, _)| *d).collect();
+    for (drive, _) in surplus.iter().chain(spend.iter()) {
+        if !tiers.contains(drive) {
+            tiers.push(*drive);
+        }
+    }
+    let mut next = LeisureManifold::default();
+    for drive in tiers {
+        let inflow = floor_flow(&read(surplus, drive), grain);
+        let outflow = floor_flow(&read(spend, drive), grain);
+        // FLAT decay, not geometric: a bounded per-beat drain the stratum sheds,
+        // so a want cannot hoard a lifetime's surplus, without a self-multiply.
+        let bal = (prior.of(drive) + inflow - outflow - decay.clone()).max(zero.clone());
+        next.set(drive, bal);
+    }
+    next
+}
+
 /// The EROI friction margin μ (> 1): a thought must return MORE than it costs,
 /// or the surplus is better banked. A bare integer, not a `ratio` dial — the
 /// ratchet does not count it — set by the COG-13 ruling (operator 2026-08-16):
