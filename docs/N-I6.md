@@ -1,6 +1,6 @@
 # N-I6 — the residual names the deed
 
-**Lane:** intelligence port · **Status: NAMED — implement this cut**  
+**Lane:** intelligence port · **Status: IMPLEMENT — charter seated `c623f84`**  
 **Charter:** [`53_INTELLIGENCE_PORT.md`](53_INTELLIGENCE_PORT.md) D4.3–D4.6 · D7 · Pins E, F, H  
 **Companions:** N-I5 (`solver/src/survival.rs`) · `cognition.rs` (comes down) · `kernel::admits`
 
@@ -72,6 +72,7 @@ is Short — that is how it names the cure. Pin G still withholds ARC.
 | Ration Short, accrued covers the shortfall | accrued workspace vs the leftover | DERIVE identity | **Collect** (Pin H). The cycle collect *is* the deed. No zone. |
 | Ration Short, accrued does not cover | standing habitat support vs mouths; extractor drain vs habitat | leftover on the **ration** fiber | **Habitat** or **raze Extractor** (Pin E). Never a third Extractor — that is the wrong column. |
 | Ration Fed, Matter opened | alloy vs iron as two sites on the matter fiber | leftover direction | **Synthesizer** (alloy > iron) or **Smelter** (iron > alloy) (Pin F) |
+| Settled orb, zero sites that *yield* the ration | owe one production site on the ration fiber; have none | leftover on the ration column | the unique `industry_relevant` zone whose `zone_yield` is that ration. Founding is this peel, not Policy bootstrap. |
 | No inverse-priced deed | — | — | **Rest**. Chronicle a withhold, not a failed sweep. |
 
 The render is a small closed table from leftover class → deed, the
@@ -172,3 +173,31 @@ is the same class of bug as N-I5 — measure in the post-tick window.
 
 Idle after this seats unless the next file is named. N-I7 is leisure
 gating ARC, not this cut.
+
+---
+
+## 9 · Implement order (serial)
+
+1. **Solver.** Keep `ration_reads` → `Fed`/`Short` (Pin G, 6/6). Surface
+   the leftover. Add `think_survival` + closed `SurvivalDeed` render
+   (Collect / Habitat / RazeExtractor / Synthesizer / Smelter / Rest).
+   Measurement-layer E / F / H. No `cfe`.
+2. **Cycle.** After `ration_survives`, before `collect`: peel →
+   `think_survival` → express ≤1 deed through `zone_as` / `raze_as`.
+   Pin H Collect expresses nothing extra — cycle collect *is* the deed.
+3. **`build_step`.** Stop raising zones. Famine early-return comes down
+   (that function only). `gather_for_forge` may stay pre-tick — it is
+   not a scored zone. Regenerator / encase / forge-hold do not fire
+   while this landing has no thermal book. Do not leave Policy *and*
+   think both raising a zone.
+4. **Deciders off the live path**, then delete
+   `settlement_choice` / `industrial_choice` / `score_outcome`.
+   `lookahead::project` and `soc::choose_build` lose their `build_step`
+   callers. Do not delete `soc.rs`.
+5. **Conductor pins** E / F / H worlds. Hold G, N-I4, SEAL-B, mint_loop.
+
+**Founding trap.** Zero habitats ⇒ `labor_force == 0` ⇒ N-I5 Fed
+(empty pair). If express is Rest forever, the era never builds a first
+zone and `mint_loop` / `an_era_brings_the_board_alive` die. The
+founding row above is the cure: peel owe-one / have-none on the ration
+fiber. Do not revive extractor-first Policy to save the pin.
