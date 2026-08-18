@@ -2454,6 +2454,32 @@ impl Polity {
                 }
             }
         }
+        // N-I10 — after thinking, the sibling HEARS one shared word (culture in
+        // motion). Affordability-gated: it hears only if it can still pay.
+        self.sibling_hear();
+    }
+
+    /// N-I10 — the sibling HEARS one folded word from the sun each beat it can
+    /// afford: it drains the word (understood) or WALLS and adopts it (learns a
+    /// shared/inherited word its basin lacked). Hearing is looking — it pays
+    /// `observe_price` (N-I7); a broke sibling fasts the hear. Bounded to one
+    /// word per beat, rotated by the beat clock so the whole vocabulary is heard
+    /// over time. No copy — the sibling reaches each word through its own reduce.
+    fn sibling_hear(&mut self) {
+        let words = self.library.words();
+        if words.is_empty() {
+            return;
+        }
+        let orb = cfe::world::FIRST_ORB;
+        let price = Self::observe_price();
+        if self.world.leisure_bank_of(orb) < price {
+            return; // the sibling cannot afford to hear this beat
+        }
+        let idx = (self.world.now() as usize) % words.len();
+        let expansion = words[idx].expansion.clone();
+        self.world.settle_leisure(orb, -price);
+        let sibling = self.sibling;
+        let _ = solver::hear_word(&expansion, self.grown.entry(sibling).or_default());
     }
 
     fn research_step(&mut self, book: &Ledger, survives: bool) {

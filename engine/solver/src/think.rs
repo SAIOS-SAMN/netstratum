@@ -189,3 +189,23 @@ pub fn hear(a: &FullMeasurement, b: &FullMeasurement, grown: &mut Vec<Crystal>) 
         iae::Observed::Carried => Heard::Learned,
     }
 }
+
+/// N-I10 — HEAR a folded word (a `Program`): the word is the utterance, offered
+/// as the pair `(probe, word(probe))` and heard against the hearer's basin. A
+/// pure-geometry word is a universal gauge (drains → `Understood`); a word that
+/// recolors a probe hue to one the probe never carried is a generation gap
+/// (walls → `Learned`, adopted onto the hearer's basin only). The transducer
+/// twin of `measure_grid` for the survival/ARC seats — no `cfe`, no leisure (the
+/// caller prices the look).
+pub fn hear_word(expansion: &[Op], grown: &mut Vec<Crystal>) -> Heard {
+    // A probe with a small palette so a recolor OUT of it reads as novel.
+    let probe = match Grid::new(3, 3, vec![1, 0, 2, 0, 1, 0, 2, 0, 1]) {
+        Some(g) => g,
+        None => return Heard::Understood,
+    };
+    let uttered = run(&expansion.to_vec(), &probe);
+    match (measure_grid(&probe), measure_grid(&uttered)) {
+        (Ok(a), Ok(b)) => hear(&a, &b, grown),
+        _ => Heard::Understood,
+    }
+}
