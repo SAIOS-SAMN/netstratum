@@ -483,7 +483,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                                         let natural =
                                             cfe::dop::element_properties(&element, star).2;
                                         (
-                                            cfe::dop::vein_richness(&natural, &vein.extracted),
+                                            cfe::dop::vein_richness(&natural, &vein.extracted, &vein.rejuvenated),
                                             natural,
                                         )
                                     })
@@ -4746,7 +4746,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 // ONT-2: the standing flow is DERIVED — natural minus the
                 // extraction integral; never stored, so it cannot drift or
                 // collapse.
-                let richness = cfe::dop::vein_richness(&natural, &vein.extracted);
+                let richness = cfe::dop::vein_richness(&natural, &vein.extracted, &vein.rejuvenated);
                 // The periodic EXTRAPOLATION: group and period derive
                 // from the identity hash by the same modular law as
                 // family and tier — display until the chemistry lands
@@ -8647,6 +8647,10 @@ fn chronicle(world: &World, style: &Style) {
                 "⛏ staple vein MINED by eating — orb {orb_id} drew {} of food straight from the vein (the larder)",
                 style.strong(&amount(eaten))
             ),
+            cfe::dop::ClosureEvent::VeinRejuvenated { orb_id, injected, .. } => format!(
+                "🌱 vein REJUVENATED — orb {orb_id} recovered {} under orbital forcing (the vein grows back)",
+                style.strong(&amount(injected))
+            ),
             cfe::dop::ClosureEvent::TraceConsumed { orb_id, amount: burned, .. } => format!(
                 "· trace BURNED — orb {orb_id} spent {} of a trace element maintaining its substrate",
                 style.strong(&amount(burned))
@@ -9273,6 +9277,10 @@ fn chronicle(world: &World, style: &Style) {
             cfe::dop::ClosureEvent::StapleMined { eaten, .. } => format!(
                 "⛏ {} eaten straight from the staple vein — the population mined its own larder",
                 style.strong(&amount(eaten))
+            ),
+            cfe::dop::ClosureEvent::VeinRejuvenated { injected, .. } => format!(
+                "🌱 {} recovered by the staple vein — orbital forcing grew it back",
+                style.strong(&amount(injected))
             ),
             cfe::dop::ClosureEvent::HandoffSealed { from, to } => format!(
                 "✍ hand {} yields the pen to hand {} (NS-5 §7)",

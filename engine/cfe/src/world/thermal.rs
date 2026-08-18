@@ -267,6 +267,8 @@ impl World {
                 // ONT-2: a supernova-scattered vein opens fresh — extracted 0,
                 // richness deriving as its geometric `natural`.
                 extracted: ratio(0, 1),
+                // ONT-3: nothing recovered yet.
+                rejuvenated: ratio(0, 1),
                 last_assay: stamp,
             });
             self.chronicle.append(

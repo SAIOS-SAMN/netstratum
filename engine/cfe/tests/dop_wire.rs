@@ -86,6 +86,13 @@ fn events_round_trip_through_their_wire_records() {
             element: [11u8; 32],
             eaten: ratio(5, 8),
         },
+        // ONT-3 (tag 184): the vein rejuvenation — the mirror of the mine, an
+        // unsigned injection on the same orb ‖ element ‖ amount shape.
+        ClosureEvent::VeinRejuvenated {
+            orb_id: 1,
+            element: [11u8; 32],
+            injected: ratio(3, 8),
+        },
         ClosureEvent::UpkeepSettled {
             orb_id: 1,
             resource: Resource::Biomass,

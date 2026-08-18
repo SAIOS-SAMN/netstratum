@@ -693,6 +693,8 @@ impl Replayer {
                 element: *element,
                 // ONT-2: a fresh vein has extracted nothing; richness derives.
                 extracted: ratio(0, 1),
+                // ONT-3: nothing recovered yet.
+                rejuvenated: ratio(0, 1),
                 last_assay: receipt.stamp,
             });
         }
@@ -704,6 +706,8 @@ impl Replayer {
                 element: *element,
                 // ONT-2: a supernova-scattered vein opens fresh — extracted 0.
                 extracted: ratio(0, 1),
+                // ONT-3: nothing recovered yet.
+                rejuvenated: ratio(0, 1),
                 last_assay: receipt.stamp,
             });
         }
@@ -780,6 +784,21 @@ impl Replayer {
             {
                 vein.last_assay = receipt.stamp;
                 vein.extracted += eaten.clone();
+            }
+        }
+        // ONT-3 (tag 184): a worked vein RECOVERS. Fold the receipt's `injected`
+        // into the vein's rejuvenation integral — the mirror of StapleMined's
+        // `extracted += eaten` — and advance the span anchor, so richness
+        // (`natural − extracted + rejuvenated`) reads the same live, on replay,
+        // and in the kernel book. NO bank move: a delta-0 element event, the
+        // vein book alone advancing.
+        ClosureEvent::VeinRejuvenated { orb_id, element, injected } => {
+            if let Some(vein) = prospects
+                .iter_mut()
+                .find(|held| held.orb == *orb_id && held.element == *element)
+            {
+                vein.last_assay = receipt.stamp;
+                vein.rejuvenated += injected.clone();
             }
         }
         // ABSORB-1: the three-way move replays — the absorber's

@@ -129,6 +129,14 @@ pub const SCHEMA_V23: u8 = 23;
 /// whole state with every mind's leisure bank empty.
 pub const SCHEMA_V24: u8 = 24;
 
+/// **SCHEMA v25 — vein `rejuvenated` (ONT-3, resource rejuvenation).** The
+/// mirror of a vein's `extracted` integral: the inverse-receipt sum a worked
+/// vein has recovered under Keplerian orbital forcing. Appended per prospect
+/// after `last_assay`, version-gated — a v24 reader stops before it and decodes
+/// every vein with `rejuvenated = 0` (richness `natural − extracted`, exactly
+/// the ONT-2 read).
+pub const SCHEMA_V25: u8 = 25;
+
 fn put_u16(out: &mut Vec<u8>, value: u16) {
     out.extend_from_slice(&value.to_le_bytes());
 }
@@ -149,7 +157,7 @@ fn put_text(out: &mut Vec<u8>, text: &str) {
 /// The one encoding: schema byte, then every committed family in
 /// declaration order, positionally, canonically.
 pub fn state_bytes(committed: &Committed) -> Vec<u8> {
-    let mut out = vec![SCHEMA_V24];
+    let mut out = vec![SCHEMA_V25];
 
     put_u32(&mut out, committed.orbs.len() as u32);
     for orb in &committed.orbs {
@@ -308,6 +316,8 @@ pub fn state_bytes(committed: &Committed) -> Vec<u8> {
         // scalar (richness derives as natural − extracted).
         ratio::encode(&prospect.extracted, &mut out);
         put_u64(&mut out, prospect.last_assay);
+        // ONT-3 (schema v25): the rejuvenation integral, the mirror of extracted.
+        ratio::encode(&prospect.rejuvenated, &mut out);
     }
 
     match committed.warded {
@@ -682,6 +692,7 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         && schema != SCHEMA_V22
         && schema != SCHEMA_V23
         && schema != SCHEMA_V24
+        && schema != SCHEMA_V25
     {
         return None;
     }
@@ -852,6 +863,9 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
             element: take.array32()?,
             extracted: take.ratio()?,
             last_assay: take.u64()?,
+            // ONT-3 (schema v25): appended after last_assay; a pre-v25 snapshot
+            // has no rejuvenation and reads richness as natural − extracted.
+            rejuvenated: if schema >= SCHEMA_V25 { take.ratio()? } else { ratio::ratio(0, 1) },
         });
     }
 

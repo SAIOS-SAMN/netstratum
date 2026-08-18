@@ -713,6 +713,7 @@ fn appraisal_rule(prior: &Committed, step: &Step) -> Result<(), Refused> {
                     cfe::dop::vein_richness(
                         &cfe::dop::element_properties(&p.element, c).2,
                         &p.extracted,
+                        &p.rejuvenated,
                     )
                 })
                 .unwrap_or_else(|| ratio(0, 1));
@@ -936,7 +937,7 @@ fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
                     let class = prior.star?;
                     let (_, _, natural) = cfe::dop::element_properties(element, class);
                     let elapsed = step.stamp.saturating_sub(vein.last_assay);
-                    let richness = cfe::dop::vein_richness(&natural, &vein.extracted);
+                    let richness = cfe::dop::vein_richness(&natural, &vein.extracted, &vein.rejuvenated);
                     Some(cfe::dop::vein_flow(&richness, &natural, elapsed))
                 })
                 .unwrap_or_else(|| ratio(0, 1));
@@ -1097,13 +1098,40 @@ fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
                 .and_then(|vein| {
                     let class = prior.star?;
                     let (_, _, natural) = cfe::dop::element_properties(element, class);
-                    Some(cfe::dop::vein_richness(&natural, &vein.extracted))
+                    Some(cfe::dop::vein_richness(&natural, &vein.extracted, &vein.rejuvenated))
                 })
                 .unwrap_or_else(|| ratio(0, 1));
             if *eaten > bound {
                 return Err(Refused::AssayExceedsVein {
                     bound: Box::new(bound),
                     claimed: Box::new(eaten.clone()),
+                });
+            }
+            Vec::new()
+        }
+        // ONT-3 (tag 184): a worked vein RECOVERS. The bound is the RECOVERY
+        // HEADROOM — the net drawn so far, `extracted − rejuvenated`, re-derived
+        // from the prior integrals — so an injection can only undo real
+        // extraction and never lifts richness above the endowment (no matter is
+        // minted from geometry). NO element-ledger move: a delta-0 event, the
+        // vein book alone advancing (below). A claim above the headroom refuses.
+        ClosureEvent::VeinRejuvenated { orb_id, element, injected } => {
+            if *injected < ratio(0, 1) {
+                return Err(Refused::ElementNotPositive {
+                    element: *element,
+                    amount: Box::new(injected.clone()),
+                });
+            }
+            let bound = prior
+                .prospects
+                .iter()
+                .find(|vein| vein.orb == *orb_id && vein.element == *element)
+                .map(|vein| (vein.extracted.clone() - vein.rejuvenated.clone()).max(ratio(0, 1)))
+                .unwrap_or_else(|| ratio(0, 1));
+            if *injected > bound {
+                return Err(Refused::AssayExceedsVein {
+                    bound: Box::new(bound),
+                    claimed: Box::new(injected.clone()),
                 });
             }
             Vec::new()
@@ -1210,6 +1238,8 @@ fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
                 stratum: *stratum,
                 element: *element,
                 extracted: ratio(0, 1),
+                // ONT-3: a fresh vein has recovered nothing.
+                rejuvenated: ratio(0, 1),
                 last_assay: step.stamp,
             });
         }
@@ -1220,6 +1250,8 @@ fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
                 stratum: *stratum,
                 element: *element,
                 extracted: ratio(0, 1),
+                // ONT-3: a fresh vein has recovered nothing.
+                rejuvenated: ratio(0, 1),
                 last_assay: step.stamp,
             });
         }
@@ -1243,6 +1275,18 @@ fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
             {
                 vein.last_assay = step.stamp;
                 vein.extracted += eaten.clone();
+            }
+        }
+        // ONT-3: rejuvenation advances the vein book — the mirror of the mine,
+        // the span anchor moving and the rejuvenation integral growing by
+        // exactly `injected`. Declaration == effect, the same banked-law shape.
+        ClosureEvent::VeinRejuvenated { orb_id, element, injected, .. } => {
+            if let Some(vein) = book
+                .iter_mut()
+                .find(|vein| vein.orb == *orb_id && vein.element == *element)
+            {
+                vein.last_assay = step.stamp;
+                vein.rejuvenated += injected.clone();
             }
         }
         _ => {}
@@ -1563,6 +1607,9 @@ fn covered(event: &ClosureEvent) -> bool {
         // element ledger change — food goes vein → mouths). {I2 containment
         // (Collect), I3 exactness} complete it.
         | E::StapleMined { .. }
+        // ONT-3 (tag 184): rejuvenation is the mine's mirror — a delta-0 element
+        // move, covered by the same {containment, exactness} completion.
+        | E::VeinRejuvenated { .. }
         // THE LAST DEED (operator ruling 2026-08-01, folded to arch-01):
         // TaxonSealed — class and clade sealed as identity, once per
         // star (15 §4). {I2 containment (Build), I3 exactness} complete
@@ -1752,7 +1799,7 @@ fn admitted_deltas(
         // delta, exactly as TraceConsumed.
         // ONT-2b (tag 183): the staple mine moves the VEIN book only (a
         // delta-0 element move), never a Resource — no banked delta.
-        E::RationElementSettled { .. } | E::StapleMined { .. } => Vec::new(),
+        E::RationElementSettled { .. } | E::StapleMined { .. } | E::VeinRejuvenated { .. } => Vec::new(),
         E::NoteIssued { .. } | E::NoteRedeemed { .. } | E::FutureOpened { .. } | E::FutureSettled { .. } | E::LastClearMarked { .. } | E::ShareIssued { .. } | E::ShareTransferred { .. } | E::ShareDividend { .. } | E::PerpOpened { .. } | E::PerpFunded { .. } | E::PerpClosed { .. } | E::HullFinanced { .. } | E::EscortOnDuty { .. } | E::InterdictionStruck { .. } | E::ConvoyRiskMarked { .. }
         | E::MarketSealed { .. } | E::MarketResumed { .. } | E::SpotClearRecorded { .. } | E::LiquidityRaidStruck { .. } | E::ClearPoisonRefused { .. }
         | E::NoteCascadeStruck { .. } | E::TamperDetected { .. } | E::PostureReoriented { .. } => {
@@ -2595,6 +2642,9 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         // population dug its staple by eating) — World, beside the assay it
         // shares its book motion with; no line is keyed by it.
         | E::StapleMined { .. }
+        // ONT-3 (tag 184): rejuvenation advances an orb's vein book — World,
+        // beside the mine and assay it shares its book motion with.
+        | E::VeinRejuvenated { .. }
         | E::ElementApertureSent { .. } | E::ElementApertureReceived { .. }
         | E::ElementRouteChartered { .. }
         | E::StampMinted { .. } | E::StampApertureSent { .. } | E::StampApertureReceived { .. }
@@ -2776,6 +2826,9 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         // ONT-2b (tag 183): eating mines the staple vein at a collect touch —
         // Collect, exactly as the assay that shares its book motion.
         | E::StapleMined { .. }
+        // ONT-3 (tag 184): rejuvenation settles at a collect touch — Collect,
+        // exactly as the mine and assay that share its book motion.
+        | E::VeinRejuvenated { .. }
         // ELEMENT-CHEMISTRY (#37): compounding SPENDS banked element
         // value and banks a gem — Collect, exactly as the assay that
         // filled the ledger it draws on. Ratified by the chemistry

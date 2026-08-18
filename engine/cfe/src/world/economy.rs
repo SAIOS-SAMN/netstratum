@@ -716,6 +716,11 @@ impl World {
                 );
             }
         }
+        // ONT-3: every worked vein on the orb RECOVERS at this touch — the
+        // Keplerian orbital-forcing injection over the local years elapsed,
+        // amplified by the orb's recycling (β₁). Settled BEFORE the staple mine
+        // reads richness, so a vein that recovered this span can feed the mouths.
+        self.rejuvenate_orb_veins(orb, self.clock.now(), actor);
         // ONT-2b: EATING MINES THE STAPLE VEIN — the vein is the larder. The
         // band's `bank_draw` this span (captured pre-touch) is extracted from
         // the orb's staple vein: `extracted += eaten`, capped at the vein's
@@ -739,7 +744,7 @@ impl World {
                     .iter_mut()
                     .find(|vein| vein.orb == orb && vein.element == element)
                     .map(|vein| {
-                        let richness = crate::dop::vein_richness(&natural, &vein.extracted);
+                        let richness = crate::dop::vein_richness(&natural, &vein.extracted, &vein.rejuvenated);
                         let eaten =
                             (draw.min(richness) * lattice.clone()).floor() / lattice;
                         if eaten > ratio(0, 1) {

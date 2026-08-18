@@ -367,7 +367,7 @@ impl World {
                     .prospects
                     .iter()
                     .filter(|vein| vein.orb == orb && vein.element == staple)
-                    .map(|vein| crate::dop::vein_richness(&natural, &vein.extracted))
+                    .map(|vein| crate::dop::vein_richness(&natural, &vein.extracted, &vein.rejuvenated))
                     .fold(ratio(0, 1), |sum, richness| sum + richness);
             }
         };

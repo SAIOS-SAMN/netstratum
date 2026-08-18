@@ -390,7 +390,15 @@
 //!         the library fold reads it beside SolverWordMinted, so knowledge
 //!         circulates. orbit[32] ‖ cited ‖ opaque expansion, the
 //!         SolverWordMinted wire shape.)
-//!    Phase-5 claim ledger: next free **184** (183 StapleMined —
+//!    Phase-5 claim ledger: next free **185** (184 VeinRejuvenated —
+//!    ONT-3 resource rejuvenation as derivation: a worked vein RECOVERS at a
+//!    collect touch, its inverse-receipt integral `rejuvenated` growing by the
+//!    KEPLERIAN orbital-forcing quantum (one `natural/REGROWTH_GRAIN` per
+//!    completed local year) AMPLIFIED by topological recycling (β₁, the orb's
+//!    Regenerator return-pathways); a delta-0 element move (no matter minted,
+//!    the vein book alone advances) capped so richness never exceeds the
+//!    endowment; replay folds `rejuvenated += injected`, the mirror of
+//!    StapleMined's `extracted += eaten`, 2026-08-18; 183 StapleMined —
 //!    ONT-2b the demand-driven staple extraction: the population MINES its
 //!    staple vein by eating (`extracted += eaten`, capped at the vein's
 //!    remaining richness), the vein IS the larder — a delta-0 element move
@@ -1986,8 +1994,12 @@ pub fn element_properties(
 /// stepped scalar. There is no differential equation to integrate, so there
 /// is no denominator to explode: the whole 115-beat scalar collapse is
 /// structurally impossible, not patched.
-pub fn vein_richness(natural: &Ratio, extracted: &Ratio) -> Ratio {
-    (natural.clone() - extracted.clone()).max(ratio(0, 1))
+pub fn vein_richness(natural: &Ratio, extracted: &Ratio, rejuvenated: &Ratio) -> Ratio {
+    // ONT-3: richness is `natural − (extracted − rejuvenated)` — the endowment
+    // minus NET extraction, two bounded monotone integrals. While `rejuvenated`
+    // is zero (no rejuvenation settle has fired) this is byte-identical to the
+    // ONT-2 `natural − extracted`.
+    crate::almanac::rejuvenated_richness(natural, extracted, rejuvenated)
 }
 
 /// **ONT-2 — THE EXTRACTION FLOW at an assay.** What a draw over `elapsed`
@@ -3122,6 +3134,17 @@ pub enum ClosureEvent {
     /// kernel re-derives the richness bound from geometry + the prior integral.
     /// A Resource-ration (v1, unprospected) line never emits it, byte-identical.
     StapleMined { orb_id: u64, element: [u8; 32], eaten: Ratio },
+    /// **VEIN REJUVENATION (ONT-3, tag 184)** — a worked vein RECOVERS. At a
+    /// collect touch the vein's inverse-receipt integral `rejuvenated` grows by
+    /// the orbital-forcing injection: `natural/REGROWTH_GRAIN` per completed
+    /// LOCAL YEAR (Keplerian ⌊Δt/P⌋) times `(1 + β₁)` for the orb's recycling
+    /// return-pathways, capped at `extracted − rejuvenated` so richness never
+    /// exceeds the endowment (inverse receipts undo real extraction, never mint
+    /// matter). A DELTA-0 element move — the vein book alone advances, the
+    /// element ledger holds still — the mirror of `StapleMined`. Replay folds
+    /// `rejuvenated += injected`; the kernel re-derives the cap from geometry +
+    /// the prior integrals. A whole or never-worked vein emits none.
+    VeinRejuvenated { orb_id: u64, element: [u8; 32], injected: Ratio },
     /// **TAXATION (49_TAXATION §3, tag 172)** — the CONTINUITY levy at a
     /// generation turnover: `count` of the line's most-recently adopted
     /// practices LAPSE to the void (its unconfirmed knowledge, unkept as
@@ -4372,6 +4395,14 @@ impl ClosureEvent {
                 value.extend_from_slice(element);
                 ratio::encode(eaten, &mut value);
                 tlv::put(183, &value, &mut out);
+            }
+            Self::VeinRejuvenated { orb_id, element, injected } => {
+                // orb ‖ element[32] ‖ injected (rest) — the StapleMined shape
+                // (tag 183), the amount unsigned (an injection is never < 0).
+                let mut value = orb_id.to_le_bytes().to_vec();
+                value.extend_from_slice(element);
+                ratio::encode(injected, &mut value);
+                tlv::put(184, &value, &mut out);
             }
             Self::PracticesLapsed { count } => {
                 tlv::put(172, &[*count], &mut out);
@@ -5742,6 +5773,12 @@ impl ClosureEvent {
                 let element: [u8; 32] = value.get(8..40)?.try_into().ok()?;
                 let (eaten, _) = ratio::decode(value.get(40..)?)?;
                 Some(Self::StapleMined { orb_id, element, eaten })
+            }
+            184 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let element: [u8; 32] = value.get(8..40)?.try_into().ok()?;
+                let (injected, _) = ratio::decode(value.get(40..)?)?;
+                Some(Self::VeinRejuvenated { orb_id, element, injected })
             }
             172 => Some(Self::PracticesLapsed { count: *value.first()? }),
             168 => Some(Self::PressureEbbed {

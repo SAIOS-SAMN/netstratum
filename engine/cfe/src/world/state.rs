@@ -288,6 +288,15 @@ pub struct Prospected {
     /// terms, so its denominator is bounded forever by `denom(natural)² ≤ 36`
     /// and cannot explode. Starts at zero when the vein opens.
     pub extracted: Ratio,
+    /// **ONT-3 — THE REJUVENATION INTEGRAL, the mirror of `extracted`.** The
+    /// bounded monotone sum of inverse receipts (`Σ VeinRejuvenated.injected`)
+    /// a worked vein has recovered. Richness derives as
+    /// `natural − extracted + rejuvenated` — `Geometry − Σ receipts + Σ inverse
+    /// receipts`, the scalar-collapse law's exact form. Held below `extracted`
+    /// by construction (recovery caps at the net drawn), so its own denominator
+    /// stays bounded and it can never lift richness above the endowment. Starts
+    /// at zero; a vein no touch has rejuvenated reads byte-identically to ONT-2.
+    pub rejuvenated: Ratio,
     /// The last assay's stamp (the prospect's own at opening) — the
     /// span anchor, the bond-settle shape.
     pub last_assay: u64,

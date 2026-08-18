@@ -424,7 +424,7 @@ impl World {
                 refines_now,
                 // ONT-2: derived, not stored — natural endowment minus the
                 // extraction integral.
-                richness: crate::dop::vein_richness(&natural, &p.extracted),
+                richness: crate::dop::vein_richness(&natural, &p.extracted, &p.rejuvenated),
                 name,
             });
         }

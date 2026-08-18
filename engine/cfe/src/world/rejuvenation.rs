@@ -225,6 +225,82 @@ impl World {
         (grown > ratio(0, 1)).then_some((ration, grown))
     }
 
+    /// **ONT-3 — THE VEIN REJUVENATION SETTLE.** At a collect touch every worked
+    /// vein on the orb RECOVERS. The injection is Keplerian: one
+    /// `natural/REGROWTH_GRAIN` quantum per LOCAL YEAR elapsed since the vein's
+    /// last book motion (`⌊now/P⌋ − ⌊last/P⌋`, exact off the two-clock model),
+    /// amplified by the orb's topological recycling (`β₁` = the count of
+    /// Regenerator return-pathways closing a metabolic loop), capped so a vein
+    /// never recovers past its endowment. Lattice-floored (the ONT-2 denominator
+    /// discipline) and receipted as `VeinRejuvenated` — a delta-0 element move
+    /// that advances the vein book alone. Runs BEFORE the staple mine, so a vein
+    /// that recovered this touch can feed the mouths the same span. A world with
+    /// no star or no orbit rejuvenates nothing (no place, no forcing clock).
+    pub(super) fn rejuvenate_orb_veins(&mut self, orb: u64, stamp: u64, actor: u64) {
+        let Some(class) = self.star else { return };
+        let mass = class.mass();
+        let Some(orbit_r) = self
+            .orb_by_id(orb)
+            .and_then(|held| held.thermal.as_ref())
+            .map(|site| site.orbit_r.value().clone())
+        else {
+            return;
+        };
+        // β₁ — the recycling return-pathways: the orb's Regenerator zones, the
+        // loop-closing edge that raises the metabolic complex's first Betti
+        // number ([[soc-society-buildout]] `SpeciesManifold`, read locally so
+        // cfe carries no upward dependency on the conductor).
+        let cycles = self
+            .orb_by_id(orb)
+            .map(|held| {
+                held.zones
+                    .iter()
+                    .filter(|zone| matches!(zone.kind, ZoneKind::Regenerator))
+                    .count() as u64
+            })
+            .unwrap_or(0);
+        let now_years = crate::thermal::local_years(&orbit_r, &mass, stamp);
+        let lattice = crate::world::stock::lattice();
+        // Phase 1 (READ): the floored injection each vein has earned since its
+        // last book motion. Immutable scan, so no borrow spans the mutation.
+        let injections: Vec<([u8; 32], Ratio)> = self
+            .prospects
+            .iter()
+            .filter(|vein| vein.orb == orb)
+            .filter_map(|vein| {
+                let (_, _, natural) = crate::dop::element_properties(&vein.element, class);
+                let then_years = crate::thermal::local_years(&orbit_r, &mass, vein.last_assay);
+                let orbits = now_years.saturating_sub(then_years);
+                let raw = crate::almanac::vein_forcing_injection(
+                    &natural,
+                    &vein.extracted,
+                    &vein.rejuvenated,
+                    orbits,
+                    cycles,
+                );
+                let inject = (raw * lattice.clone()).floor() / lattice.clone();
+                (inject > ratio(0, 1)).then_some((vein.element, inject))
+            })
+            .collect();
+        // Phase 2 (WRITE): advance the vein book and receipt each recovery — the
+        // mirror of the staple mine's `extracted += eaten`.
+        for (element, inject) in injections {
+            if let Some(vein) = self
+                .prospects
+                .iter_mut()
+                .find(|vein| vein.orb == orb && vein.element == element)
+            {
+                vein.rejuvenated += inject.clone();
+                vein.last_assay = stamp;
+            }
+            self.chronicle.append(
+                crate::dop::ClosureEvent::VeinRejuvenated { orb_id: orb, element, injected: inject },
+                stamp,
+                vec![actor],
+            );
+        }
+    }
+
     /// **THE QUARANTINE DECAY — what a sealed world LOSES at a touch**
     /// (task #30, ruled 2026-08-12). While a world is quarantined
     /// (bio-pressure past the threshold), its ration does not recover —

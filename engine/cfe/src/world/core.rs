@@ -441,7 +441,7 @@ impl World {
         // identical amount from the same geometry and the prior integral.
         let class = star.expect("a vein stands, so a star was commissioned");
         let (_, _, natural) = crate::dop::element_properties(&element, class);
-        let richness = crate::dop::vein_richness(&natural, &vein.extracted);
+        let richness = crate::dop::vein_richness(&natural, &vein.extracted, &vein.rejuvenated);
         let amount = crate::dop::vein_flow(&richness, &natural, span);
         vein.extracted += amount.clone();
         vein.last_assay = now;

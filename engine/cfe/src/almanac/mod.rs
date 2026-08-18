@@ -36,7 +36,8 @@ pub use locality::{
 pub use periodic::{periodic_of, Periodic, CELLS, LANES, LINES, PHASES, SHELLS, SPINS};
 pub use rejuvenation::{
     carrying_capacity, grained_logistic, habitability, habitability_flux, intrinsic_rate,
-    substrate_viability, REGROWTH_GRAIN,
+    rejuvenated_richness, rejuvenation_quantum, substrate_viability, vein_forcing_injection,
+    REGROWTH_GRAIN,
 };
 pub use science::{
     bill_crystal_portion, dark_utility, explodes, explosion_risk, explosion_threshold, isomorphic,

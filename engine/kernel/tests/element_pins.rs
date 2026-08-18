@@ -42,6 +42,7 @@ fn with_vein(extracted: (i64, i64), last_assay: u64) -> Committed {
         stratum: 0,
         element: ELEMENT,
         extracted: ratio(extracted.0, extracted.1),
+        rejuvenated: ratio(0, 1),
         last_assay,
     }];
     committed
@@ -58,7 +59,7 @@ fn flow_to(prior: &Committed, stamp: u64) -> Ratio {
             let class = prior.star?;
             let n = cfe::dop::element_properties(&ELEMENT, class).2;
             let elapsed = stamp.saturating_sub(v.last_assay);
-            let richness = cfe::dop::vein_richness(&n, &v.extracted);
+            let richness = cfe::dop::vein_richness(&n, &v.extracted, &v.rejuvenated);
             Some(cfe::dop::vein_flow(&richness, &n, elapsed))
         })
         .unwrap_or_else(|| ratio(0, 1))
@@ -282,6 +283,7 @@ fn a_prospect_pushes_a_fresh_vein() {
         stratum: 7,
         element: [11u8; 32],
         extracted: ratio(0, 1),
+        rejuvenated: ratio(0, 1),
         last_assay: 9,
     });
     assert_eq!(admits(&prior, &next, &step), Ok(()));
@@ -294,6 +296,7 @@ fn a_prospect_pushes_a_fresh_vein() {
         stratum: 7,
         element: [11u8; 32],
         extracted: ratio(9, 1),
+        rejuvenated: ratio(0, 1),
         last_assay: 9,
     });
     assert_eq!(

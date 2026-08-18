@@ -593,6 +593,8 @@ impl World {
             // the geometry, carried in the receipt for the record, never stored
             // as a mutable scalar.
             extracted: ratio(0, 1),
+            // ONT-3: nothing recovered yet.
+            rejuvenated: ratio(0, 1),
             last_assay: stamp,
         });
         self.close(
@@ -844,6 +846,7 @@ impl World {
                         crate::dop::vein_richness(
                             &crate::dop::element_properties(&p.element, c).2,
                             &p.extracted,
+                            &p.rejuvenated,
                         )
                     })
                     .unwrap_or_else(|| ratio(0, 1));

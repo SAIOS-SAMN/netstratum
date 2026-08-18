@@ -43,7 +43,7 @@ fn standing(world: &World, element: &[u8; 32]) -> Ratio {
         .prospects
         .iter()
         .find(|vein| vein.element == *element)
-        .map(|vein| vein_richness(&element_properties(element, star).2, &vein.extracted))
+        .map(|vein| vein_richness(&element_properties(element, star).2, &vein.extracted, &vein.rejuvenated))
         .expect("the vein stands")
 }
 
@@ -89,7 +89,7 @@ fn the_extraction_law_is_bounded_by_construction() {
     // richness that stands (so the integral never crosses the endowment).
     let natural = ratio(1, 2);
     for extracted in [ratio(0, 1), ratio(1, 4), ratio(1, 2), ratio(97, 1)] {
-        let richness = vein_richness(&natural, &extracted);
+        let richness = vein_richness(&natural, &extracted, &ratio(0, 1));
         assert!(richness <= natural, "no vein stands past its nature: {richness}");
         assert!(richness >= ratio(0, 1), "and none below zero: {richness}");
         for elapsed in [0u64, 1, 40] {
@@ -127,6 +127,41 @@ fn the_worked_vein_stays_cheap_to_carry_forever() {
     // THE CARRY COST: the written form does not grow — the denominator is
     // pinned to the geometry, not the causal history.
     assert!(widest <= 12, "a worked vein's exact form stays short: {widest} chars");
+    assert_eq!(replay(world.chronicle()), world.committed(), "replay MATCHES");
+}
+
+#[test]
+fn a_worked_vein_rejuvenates_at_a_collect_touch() {
+    // ONT-3, LIVE — a vein drawn down RECOVERS under Keplerian orbital forcing.
+    // At orbit_r = 1 under a G star the local year IS the beat (P = 1), so the
+    // ticks between the draw and the collect close that many orbits and the vein
+    // grows back a quantum apiece, receipted and replay-exact.
+    let mut world = charted("regrow-hold");
+    let struck = world.prospect(FIRST_ORB, 1).expect("the stratum opens");
+    let natural = natural_of(&world, &struck.element);
+    // Work the vein down so there is headroom to recover into.
+    for _ in 0..4 {
+        world.tick();
+    }
+    let _ = world.assay(FIRST_ORB, struck.element);
+    let depleted = standing(&world, &struck.element);
+    assert!(depleted < natural, "the vein is worked below its nature: {depleted}");
+    // Let many local years pass (P = 360 beats at r = 1), then collect —
+    // rejuvenation settles the veins over the orbits that closed.
+    for _ in 0..4000 {
+        world.tick();
+    }
+    world.collect().expect("collects");
+    let recovered = standing(&world, &struck.element);
+    assert!(recovered > depleted, "the vein recovered: {depleted} → {recovered}");
+    assert!(recovered <= natural, "but never past its endowment: {recovered} vs {natural}");
+    // A VeinRejuvenated receipt carries the recovery; replay banks the same.
+    let receipted = world
+        .chronicle()
+        .receipts()
+        .iter()
+        .any(|r| matches!(r.event, cfe::dop::ClosureEvent::VeinRejuvenated { .. }));
+    assert!(receipted, "a VeinRejuvenated receipt stands");
     assert_eq!(replay(world.chronicle()), world.committed(), "replay MATCHES");
 }
 
