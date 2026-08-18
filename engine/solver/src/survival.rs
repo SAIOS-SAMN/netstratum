@@ -71,3 +71,113 @@ pub fn ration_reads(mouths: u64, fed: u64, ration_dir: u8) -> RationRead {
         _ => RationRead::Short,
     }
 }
+
+// ─────────────────────────────────────────────────────────────────────
+// N-I6 — THE EXPRESS ARM: the residual NAMES one deed.
+// ─────────────────────────────────────────────────────────────────────
+
+/// The reserved housing fiber — habitat SUPPORT vs mouths and extractor DRAIN vs
+/// habitats are peeled on their own direction, distinct from the ration column.
+const HOUSING: u8 = 62;
+/// The reserved matter fiber — alloy vs iron, the industry leftover (Pin F).
+const MATTER: u8 = 63;
+
+/// The closed survival-deed vocabulary — the survival twin of the ARC seat's
+/// `Program`. Each is an INVERSE-CARRYING deed (raze inverts build; collect
+/// inverts the draw just priced) the conductor expresses through a door that
+/// already exists (`zone_as` / `raze_as` / the cycle `collect_as`). NOT a score,
+/// NOT a `ZoneKind` (the conductor resolves those) — a leftover class.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum SurvivalDeed {
+    /// Pin H — the accrued larder already covers the shortfall; the cycle
+    /// `collect` IS the deed. Express nothing extra.
+    Collect,
+    /// Founding (charter §3): a settled orb yields the ration nowhere — seat the
+    /// unique zone whose `zone_yield` is the ration. The conductor resolves the
+    /// `ZoneKind` from the ration column; the solver only names "the source."
+    SeatRationSource,
+    /// Pin E — housing support is short of the mouths; seat a Habitat.
+    Habitat,
+    /// Pin E — extractors outweigh the habitats and drain the food column; raze
+    /// one. Never a THIRD extractor (that is the wrong column).
+    RazeExtractor,
+    /// Pin F — the ration is Fed and the matter leftover is alloy over iron.
+    Synthesizer,
+    /// Pin F — the ration is Fed and the matter leftover is iron over alloy.
+    Smelter,
+    /// No inverse-priced deed — rest (a withhold, never a sweep).
+    Rest,
+}
+
+/// The peeled survival book — the exact readings the conductor hands the seat
+/// (all integer mouth-/unit-equivalents; NO cfe types, NO ZoneKind). The solver
+/// thinks the measurements; the conductor peeled the world.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct SurvivalBook {
+    /// Zones whose `zone_yield` is the ration. `0` on a settled orb ⇒ founding.
+    pub ration_source_sites: u64,
+    /// Working mouths (`labor_force`) and how many the larder feeds this beat.
+    pub mouths: u64,
+    pub fed: u64,
+    /// The species column — the owed ration direction (≥ 1).
+    pub ration_dir: u8,
+    /// The accrued larder, in mouth-equivalents (Pin H: covers the shortfall?).
+    pub accrued: u64,
+    /// Housing support (habitat capacity) and the standing habitat/extractor
+    /// counts (Pin E: support vs mouths, then extractors vs habitats).
+    pub habitat_support: u64,
+    pub habitats: u64,
+    pub extractors: u64,
+    /// Whether Need opened the matter book this beat (only a Fed line may), and
+    /// the matter fiber's two sites (Pin F).
+    pub matter_opened: bool,
+    pub alloy: u64,
+    pub iron: u64,
+}
+
+/// Does `have` cover `owe` on `dir` — the ONE organ (`reduce_pair`) read as a
+/// coverage: `have` fed mouths of an `owe`-mouth demand close iff `have ≥ owe`.
+fn covers(have: u64, owe: u64, dir: u8) -> bool {
+    matches!(ration_reads(owe, have, dir), RationRead::Fed)
+}
+
+/// **THINK THE SURVIVAL BOOK** — the residual names ONE deed, by a SEQUENCE of
+/// `reduce_pair` peels (ration first, then — only when Short — accrued, housing,
+/// drain; or — only when Fed — the matter book). Ration and matter are
+/// SEQUENTIAL seats, never two train pairs of one `think`. A closed table, the
+/// survival twin of `render_frame`: no disposition, no `Policy`, no score. Any
+/// leg with no inverse-priced deed falls through to `Rest`.
+pub fn think_survival(book: &SurvivalBook) -> SurvivalDeed {
+    // Founding — a settled orb yields the ration nowhere. Seat the source first
+    // (owe one production site on the ration fiber, have none). Charter §3.
+    if book.ration_source_sites == 0 {
+        return SurvivalDeed::SeatRationSource;
+    }
+    // Ration seat FIRST. Fed → the ration book names nothing; a Fed line may
+    // open matter (Pin F); else rest and let ARC run.
+    if covers(book.fed, book.mouths, book.ration_dir) {
+        if book.matter_opened {
+            let alloy_over = covers(book.alloy, book.iron, MATTER);
+            let iron_over = covers(book.iron, book.alloy, MATTER);
+            return match (alloy_over, iron_over) {
+                (true, false) => SurvivalDeed::Synthesizer,
+                (false, true) => SurvivalDeed::Smelter,
+                _ => SurvivalDeed::Rest, // balanced — no leftover direction
+            };
+        }
+        return SurvivalDeed::Rest;
+    }
+    // Short — the sequential ration-fiber peels: accrued (H), then housing (E
+    // build), then drain (E raze). The FIRST that fires is the deed.
+    let shortfall = book.mouths.saturating_sub(book.fed);
+    if covers(book.accrued, shortfall, book.ration_dir) {
+        return SurvivalDeed::Collect; // Pin H — the accrued larder settles at collect
+    }
+    if !covers(book.habitat_support, book.mouths, HOUSING) {
+        return SurvivalDeed::Habitat; // Pin E — housing short of the mouths
+    }
+    if !covers(book.habitats, book.extractors, HOUSING) {
+        return SurvivalDeed::RazeExtractor; // Pin E — extractors outweigh habitats
+    }
+    SurvivalDeed::Rest
+}
