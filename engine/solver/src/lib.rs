@@ -61,7 +61,7 @@ pub use search::{
     SolveRead,
 };
 pub use nsearch::{solve_field, FieldSolveRead};
-pub use think::{measure_grid, think_task};
+pub use think::{hear, measure_grid, think_task, Heard};
 pub use survival::{ration_reads, think_survival, RationRead, SurvivalBook, SurvivalDeed};
 // N-I4 — the cognitive basin's element, re-exported for the vessel layer
 // (`conductor` grows a `Vec<Crystal>` per line and passes it to `think_task`).

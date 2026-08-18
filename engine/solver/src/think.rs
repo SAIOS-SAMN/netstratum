@@ -156,3 +156,36 @@ pub fn think_task(task: &Task, grown: &mut Vec<Crystal>) -> SolveRead {
     let matches_expected = task.test_expected.as_ref().map(|expected| *expected == test_output);
     SolveRead::Solved { program, test_output, matches_expected, certificate }
 }
+
+// ─────────────────────────────────────────────────────────────────────
+// N-I10 — HEAR: the crystal-exchange primitive (an utterance drained or walled).
+// ─────────────────────────────────────────────────────────────────────
+
+/// How a hearer received an utterance — the ONLY verdicts hearing renders.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Heard {
+    /// The hearer's basin DRAINED the utterance — already accounted (understood).
+    /// Nothing adopted; the hearer knew it (or it is a universal gauge).
+    Understood,
+    /// The utterance WALLED — the hearer could not account it; the crystal is
+    /// adopted onto the hearer's OWN basin (learned).
+    Learned,
+}
+
+/// **HEAR** (N-I10) — a folded word / crystal offered to a hearer, as a
+/// measurement pair, reduced against the hearer's OWN basin (`iae::observe` — the
+/// SAME reduce organ as think). `Accounted` → `Understood` (drain, nothing
+/// adopted); a wall → `Learned`, and the crystal is adopted onto `grown` ONLY.
+/// No chat, no score, and NEVER a copy of the speaker's basin — the hearer
+/// reaches the utterance through its own reduce or walls and mints its own
+/// crystal. The caller prices the look (N-I7); this owns no leisure.
+pub fn hear(a: &FullMeasurement, b: &FullMeasurement, grown: &mut Vec<Crystal>) -> Heard {
+    match iae::observe(a, b, grown) {
+        iae::Observed::Accounted => Heard::Understood,
+        iae::Observed::Minted(crystal) => {
+            iae::adopt(grown, crystal);
+            Heard::Learned
+        }
+        iae::Observed::Carried => Heard::Learned,
+    }
+}

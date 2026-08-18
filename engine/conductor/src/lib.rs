@@ -771,8 +771,14 @@ pub struct Polity {
     pub world: World,
     /// The polity's contained agent (build/raze/collect granted).
     automaton: u64,
-    /// The steward's contained entity (drains the operator's inbox).
+    /// The steward's contained entity (drains the operator's inbox) — DIRECTIVES
+    /// ONLY. The inbox is not a mind; the steward is no longer a thinker (N-I10).
     steward: u64,
+    /// N-I10 — the SIBLING office: the line's second COGNITIVE vessel. It thinks
+    /// its own basin toward consilience (N-I8) and hears offered words; distinct
+    /// from the steward so culture never requires the player's directive vessel
+    /// to think.
+    sibling: u64,
     /// The forge rung this civilization currently attempts.
     pub level: u32,
     /// Confirms at the current rung (3 promote).
@@ -1058,6 +1064,7 @@ impl Polity {
                         .find(|held| held.handle == name)
                         .map(|held| held.entity_id)
                 };
+                let sibling0 = by_handle("sibling");
                 if let (Some(automaton), Some(steward)) =
                     (by_handle(&handle), by_handle("steward"))
                 {
@@ -1068,6 +1075,10 @@ impl Polity {
                     // first seal); a violating arbor waits penned —
                     // writes never land on a refused chain.
                     let mut world = world;
+                    // N-I10 — the SIBLING is the second cognitive vessel; a world
+                    // founded before N-I10 lacks it, so register it on resume.
+                    let sibling = sibling0
+                        .unwrap_or_else(|| world.register_agent("sibling").expect("registers"));
                     let penned = match mesh::authority(world.chronicle()) {
                         Ok(Some(hand)) if hand == cfe::vrp::CONDUCTOR_HAND => {
                             world.hold_pen(Some(cfe::vrp::CONDUCTOR_HAND));
@@ -1124,6 +1135,7 @@ impl Polity {
                         world,
                         automaton,
                         steward,
+                        sibling,
                         level,
                         streak: solved % 3,
                         solved,
@@ -1155,6 +1167,9 @@ impl Polity {
             .register_agent(&format!("{}-conductor", spec.civilization.sigil))
             .expect("registers");
         let steward = world.register_agent("steward").expect("registers");
+        // N-I10 — the SIBLING: the second cognitive vessel (distinct from the
+        // steward, which stays on directives). Thinks toward consilience + hears.
+        let sibling = world.register_agent("sibling").expect("registers");
         for scope in [Scope::Build, Scope::Raze, Scope::Collect] {
             world.grant(automaton, scope).expect("grants the automaton");
             world.grant(steward, scope).expect("grants the steward");
@@ -1245,6 +1260,7 @@ impl Polity {
             world,
             automaton,
             steward,
+            sibling,
             level: 1,
             streak: 0,
             solved: 0,
@@ -2427,7 +2443,7 @@ impl Polity {
             return; // the sibling fasts — its look is not free (N-I7)
         }
         self.world.settle_leisure(orb, -price);
-        let sibling = self.steward;
+        let sibling = self.sibling;
         let read = solver::think_task(task, self.grown.entry(sibling).or_default());
         if let SolveRead::Solved { program, matches_expected: Some(true), .. } = read {
             if program.len() >= 2 {
@@ -4055,6 +4071,18 @@ pub fn incursion(
             .entities
             .iter()
             .find(|held| held.handle == "steward")
+            .map(|held| held.entity_id)
+            .ok_or(IncursionRefused::AlreadyWoken)?,
+    };
+    // N-I10 — seed the SIBLING cognitive vessel too; `genesis` re-reads it by
+    // handle on the resume below (the binding is only for the register side-effect).
+    let _sibling = match world.register_agent("sibling") {
+        Ok(entity) => entity,
+        Err(_) => world
+            .committed()
+            .entities
+            .iter()
+            .find(|held| held.handle == "sibling")
             .map(|held| held.entity_id)
             .ok_or(IncursionRefused::AlreadyWoken)?,
     };
