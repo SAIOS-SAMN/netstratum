@@ -228,7 +228,7 @@ second brain (lifespan is a clock on the mouth count).
 | N-I6 | survival think names a deed; delete the utility deciders | **LANDED** `fd7bbcc` · Pins E, F, H · [`N-I6.md`](N-I6.md) |
 | N-I-VESSEL | basin per vessel (workspace, not `Entity`) | **LANDED** `4399627` · Pin B at vessel grain · [`N-I-VESSEL.md`](N-I-VESSEL.md) |
 | N-I7 | metabolic debit on the LOOK; leisure gates the observe | **LANDED** `c079dfd` · [`N-I7.md`](N-I7.md) · unfunded line fasts; funded Fed line thinks |
-| N-I8 | sun / `vocabulary::fold` from two vessel deposits | **NAMED** [`N-I8.md`](N-I8.md) · Pin C |
+| N-I8 | sun / `vocabulary::fold` from two vessel deposits | **LANDED** `ab01400` · [`N-I8.md`](N-I8.md) · Pin C (two offices mint), C− (one vantage does not) |
 | N-I9 | same doors: CLI think verb = automaton path; NS-6 grant gates render | player and NPC produce identical receipts from identical books |
 | N-I10 | refraction between entities | a peer closes a word in a frame the speaker never saw |
 

@@ -1,6 +1,6 @@
 # N-I8 — the first shared word
 
-**Lane:** intelligence port · **Status: NAMED — implement this cut**
+**Lane:** intelligence port · **Status: IMPLEMENT — no one-vantage fallback**
 **Charter:** [`53_INTELLIGENCE_PORT.md`](53_INTELLIGENCE_PORT.md) D3 Pin C · D1 (`sun / vocabulary::fold`)
 **Companions:** N-I-VESSEL (per-vessel basin, seated) · N-I7 (look priced, seated) · `solver::mint::consider` · `vocabulary::fold`
 
@@ -67,6 +67,12 @@ of a society; one vessel's private residual is not.
 - **Same mouth twice does not mint (C−).** One vessel closing the same orbit
   across many beats is still one distinct vessel_id — it never reaches two,
   so it never mints. A lone thinker builds no vocabulary; a word is social.
+- **No weaker one-vantage mint.** Pending is a wait, not an install. Do not
+  keep `CONFIRMS_TO_MINT` as a fallback for a lone line.
+- **Sibling look must be payable.** Two `observe_price`s in one beat can
+  starve founding. If `mint_loop` dies, stagger: automaton looks this beat,
+  sibling the next — still two vessels, still one orb bank. Do not give the
+  sibling a free look.
 - **Independent closures only.** Each deposit is a vessel reaching the orbit
   from its own drained basin — never a crystal copied across. If B only
   "knows" the orbit because it read A's basin, it is not a second vantage.
