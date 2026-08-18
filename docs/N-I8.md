@@ -1,6 +1,6 @@
 # N-I8 — the first shared word
 
-**Lane:** intelligence port · **Status: IMPLEMENT — no one-vantage fallback**
+**Lane:** intelligence port · **Status: LANDED `ab01400` — Pin C green**
 **Charter:** [`53_INTELLIGENCE_PORT.md`](53_INTELLIGENCE_PORT.md) D3 Pin C · D1 (`sun / vocabulary::fold`)
 **Companions:** N-I-VESSEL (per-vessel basin, seated) · N-I7 (look priced, seated) · `solver::mint::consider` · `vocabulary::fold`
 
