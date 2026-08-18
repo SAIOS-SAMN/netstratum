@@ -171,4 +171,4 @@ means the price starved the founding window — the look must be affordable to
 a surplus-carrying Fed line, or the board never learns.
 
 Idle when the look costs and `mint_loop` still mints for a rich Fed line.
-N-I8 (a second vessel drains the word — `vocabulary::fold`) is the file after.
+**LANDED** `c079dfd`. Next is [`N-I8.md`](N-I8.md).
