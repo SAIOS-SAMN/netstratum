@@ -80,6 +80,69 @@ pub fn intrinsic_rate(metabolism: u8, element: Option<[u8; 32]>) -> Ratio {
     metabolic_harvest_of(metabolism, element).1
 }
 
+// ── ONT-3: VEIN REJUVENATION AS DERIVATION ────────────────────────────────
+//
+// ONT-2 made vein richness a DERIVED read — `natural − extracted`, the immutable
+// endowment minus a bounded monotone extraction integral — killing the stored
+// `vein_wear` scalar that detonated at ~beat 115 ([[scalar-collapse-derivation-law]]).
+// But a vein so derived only ever FALLS: `extracted` climbs, richness drains to
+// zero, and a strip-mined world stays dead forever (the Locust with nothing left
+// to jump to). ONT-3 restores recovery WITHOUT re-introducing a stored scalar: a
+// second bounded monotone integral, `rejuvenated`, the mirror of `extracted`, so
+// richness derives as `natural − extracted + rejuvenated` — `Geometry − Σ receipts
+// + Σ inverse receipts`, exactly the law's `derive-on-read` form. Both integrals
+// are sums of endowment-scaled quanta, so the denominator stays bounded and no
+// recurrence compounds.
+
+/// **THE VEIN-REJUVENATION QUANTUM** — the base injection a single completed
+/// ORBIT returns to a worked vein: `natural / REGROWTH_GRAIN`, the endowment
+/// closed over the same half-recovery grain the ration curve uses. An endowment
+/// with a bounded denominator (`denom ≤ 6`) over the integer grain keeps every
+/// quantum denominator-bounded, so the accumulated integral cannot explode.
+pub fn rejuvenation_quantum(natural: &Ratio) -> Ratio {
+    natural.clone() / ratio(REGROWTH_GRAIN, 1)
+}
+
+/// **THE ORBITAL-FORCING INJECTION** (ONT-3, operator-ruled 2026-08-18) — how
+/// much a vein rejuvenates over a span, the inverse-receipt amount a settle banks.
+/// The drive is KEPLERIAN: one quantum per completed local year (`orbits`, the
+/// exact `⌊Δt/P⌋` the two-clock model already reads — a tight inner world rolls
+/// its calendar often and recovers fast, a distant one seldom), AMPLIFIED by the
+/// economy's TOPOLOGICAL RECYCLING (`cycles` = `β₁`, the count of independent
+/// return-pathways closing a metabolic loop — a regenerative economy re-deposits
+/// what it draws): `quantum · (1 + cycles) · orbits`. Capped at `extracted −
+/// rejuvenated`, the net drawn so far, so a vein NEVER recovers past its own
+/// endowment (the inverse receipts can only undo real extraction — no matter is
+/// minted from nothing). Returns the INJECTION (the delta a receipt carries), zero
+/// when no orbit has closed or the vein is already whole.
+pub fn vein_forcing_injection(
+    natural: &Ratio,
+    extracted: &Ratio,
+    rejuvenated: &Ratio,
+    orbits: u64,
+    cycles: u64,
+) -> Ratio {
+    let headroom = (extracted.clone() - rejuvenated.clone()).max(ratio(0, 1));
+    if orbits == 0 || headroom <= ratio(0, 1) {
+        return ratio(0, 1);
+    }
+    let drive = rejuvenation_quantum(natural)
+        * ratio((1 + cycles) as i64, 1)
+        * ratio(orbits as i64, 1);
+    drive.min(headroom)
+}
+
+/// **THE REJUVENATED RICHNESS — the derive-on-read** (ONT-3). What a vein bears
+/// now: `natural − extracted + rejuvenated`, the endowment minus net extraction,
+/// clamped to `[0, natural]`. Since `rejuvenated ≤ extracted` always holds (the
+/// injection caps at the net drawn), the upper clamp is a belt-and-braces
+/// invariant, never a real cut; the lower clamp guards a vein worked to nothing
+/// between rejuvenation settles. Replaces `natural − extracted` at every reader.
+pub fn rejuvenated_richness(natural: &Ratio, extracted: &Ratio, rejuvenated: &Ratio) -> Ratio {
+    let net = extracted.clone() - rejuvenated.clone();
+    (natural.clone() - net).max(ratio(0, 1)).min(natural.clone())
+}
+
 /// **HABITABILITY** — how life-bearing a thermal region is FOR A GIVEN
 /// CLADE, in `[0,1]`. Every clade has its own workable band
 /// ([`clade_preferred_region`] — Mesic for the bimaniform flatlander,
@@ -231,4 +294,99 @@ fn morphodynamic_thermal(t_eq4: &Ratio) -> Ratio {
         return ratio(0, 1);
     }
     two_t / denom
+}
+
+#[cfg(test)]
+mod ont3_rejuvenation_tests {
+    use super::*;
+    use num_traits::ToPrimitive;
+
+    // A worked vein: endowment 4, drawn down by 3 (richness now 1), nothing
+    // rejuvenated yet.
+    fn worked() -> (Ratio, Ratio, Ratio) {
+        (ratio(4, 1), ratio(3, 1), ratio(0, 1))
+    }
+
+    #[test]
+    fn injection_caps_at_the_net_drawn() {
+        // Many orbits cannot return more than was ever extracted: a vein drawn
+        // by 3 rejuvenates by at most 3, back to its endowment, never past.
+        let (natural, extracted, rejuvenated) = worked();
+        let inject = vein_forcing_injection(&natural, &extracted, &rejuvenated, 10_000, 0);
+        assert_eq!(inject, ratio(3, 1), "recovery caps at extracted − rejuvenated");
+        // And richness with that injection is exactly the endowment, not above.
+        let richness = rejuvenated_richness(&natural, &extracted, &inject);
+        assert_eq!(richness, natural, "a fully-rejuvenated vein reads its endowment");
+    }
+
+    #[test]
+    fn more_orbits_recover_more() {
+        // Below the cap, the injection is monotone in completed orbits — a tight
+        // inner world (more orbits per beat) recovers faster.
+        let (natural, extracted, rejuvenated) = worked();
+        let few = vein_forcing_injection(&natural, &extracted, &rejuvenated, 1, 0);
+        let many = vein_forcing_injection(&natural, &extracted, &rejuvenated, 20, 0);
+        assert!(few > ratio(0, 1) && many > few, "recovery grows with orbits: {few} < {many}");
+    }
+
+    #[test]
+    fn recycling_amplifies_recovery() {
+        // β₁ > 0 (a regenerative economy, return-pathways closing the loop) injects
+        // strictly more than a barren one over the same orbits — topological cycle
+        // injection amplifying the orbital forcing.
+        let (natural, extracted, rejuvenated) = worked();
+        let barren = vein_forcing_injection(&natural, &extracted, &rejuvenated, 1, 0);
+        let recycling = vein_forcing_injection(&natural, &extracted, &rejuvenated, 1, 2);
+        assert!(recycling > barren, "recycling recovers faster: {recycling} > {barren}");
+        // (1 + cycles) amplification: 2 cycles ⇒ 3× the base quantum.
+        assert_eq!(recycling, barren.clone() * ratio(3, 1), "cycles amplify as (1 + β₁)");
+    }
+
+    #[test]
+    fn a_still_orbit_and_a_whole_vein_return_nothing() {
+        let (natural, extracted, rejuvenated) = worked();
+        assert_eq!(
+            vein_forcing_injection(&natural, &extracted, &rejuvenated, 0, 5),
+            ratio(0, 1),
+            "no completed orbit, no injection"
+        );
+        // An unworked vein (nothing extracted) has no headroom to recover into.
+        assert_eq!(
+            vein_forcing_injection(&natural, &ratio(0, 1), &ratio(0, 1), 100, 3),
+            ratio(0, 1),
+            "a whole vein rejuvenates nothing"
+        );
+    }
+
+    #[test]
+    fn richness_is_endowment_minus_net_extraction() {
+        // The derive-on-read: natural − (extracted − rejuvenated), clamped.
+        let natural = ratio(10, 1);
+        assert_eq!(rejuvenated_richness(&natural, &ratio(7, 1), &ratio(2, 1)), ratio(5, 1));
+        // Worked to nothing between settles: the lower clamp holds at zero.
+        assert_eq!(rejuvenated_richness(&natural, &ratio(12, 1), &ratio(0, 1)), ratio(0, 1));
+    }
+
+    #[test]
+    fn the_integral_stays_denominator_bounded() {
+        // THE ANTI-COLLAPSE PROPERTY. Accumulating injection over many settles is a
+        // sum of endowment-scaled quanta, never a compounding recurrence, so the
+        // denominator stays bounded forever (contrast the stored-scalar detonation
+        // ONT-2 killed). Endowment with denom 6 is the worst bounded case.
+        let natural = ratio(5, 6);
+        let extracted = natural.clone(); // fully drawn, maximal headroom
+        let mut rejuvenated = ratio(0, 1);
+        let mut max_denom: u64 = 1;
+        for _ in 0..500 {
+            let inject = vein_forcing_injection(&natural, &extracted, &rejuvenated, 1, 1);
+            if inject <= ratio(0, 1) {
+                break;
+            }
+            rejuvenated += inject;
+            max_denom = max_denom.max(rejuvenated.denom().to_u64().unwrap_or(u64::MAX));
+        }
+        // REGROWTH_GRAIN=64, endowment denom 6 ⇒ quanta ride denom ≤ 6·64·(1+β₁);
+        // the accumulated sum's denominator never leaves that bound.
+        assert!(max_denom <= 6 * REGROWTH_GRAIN as u64 * 2, "denominator bounded: {max_denom}");
+    }
 }
