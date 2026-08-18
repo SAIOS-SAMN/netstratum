@@ -871,15 +871,22 @@ pub struct Polity {
     /// and got a different grid — `WorkRefused { OutputMismatch }`, a
     /// mint the proposer emitted and the gate refused. The task IS the
     /// whole difficulty, so the key must be too.
-    /// N-I4 — THE COGNITIVE BASIN (THE INTELLIGENCE PORT). This line's
-    /// automaton grows a basin of crystallized residuals: every wall
-    /// `think_task` mints and adopts joins it, and the next beat's think DRAINS
-    /// against it (Pin B) — thinking changes the thinker. Non-committed
-    /// workspace, exactly like `library`: the committed wire (Entity) stays
-    /// empty, so replay of a pre-grown receipt still matches (empty basin).
-    /// Distinct from `library` (minted WORDS) — this is the raw residual basin
-    /// the reduce organ reads. Not shared: two lines, two basins.
-    grown: Vec<solver::Crystal>,
+    /// N-I·VESSEL — THE COGNITIVE BASIN, PER VESSEL (THE INTELLIGENCE PORT).
+    /// Each VESSEL (person) grows its OWN basin of crystallized residuals: a
+    /// wall `think_task` mints and adopts joins THAT vessel's mouth, and the
+    /// same vessel's next think DRAINS against it (Pin B) — thinking changes the
+    /// thinker, one thinker at a time. A sibling on the same puzzle walls afresh;
+    /// it never inherits the wall (isolation IS the map key).
+    ///
+    /// **Law II — the map is an INDEX, not the thought.** `Vec<Crystal>` is the
+    /// basin the organ reduces; `BTreeMap<vessel_id, _>` only ADDRESSES which
+    /// basin — ordered by `vessel_id` (`Ord`), so iteration is a replay-stable
+    /// walk. NEVER `HashMap` (hash addressing throws away the fiber); `Q/ℤ` lives
+    /// INSIDE the crystals, never in the key. Non-committed workspace like
+    /// `library` — the committed wire (`Entity`) stays empty, so replay of a
+    /// pre-grown receipt still matches. Seed vessel is the line's `automaton`;
+    /// the map admits many (population individuation is a later cut).
+    grown: std::collections::BTreeMap<u64, Vec<solver::Crystal>>,
     /// How many refusals the board has already been TOLD. The record
     /// above is permanent; this is only the narrator's place in it, so
     /// a refusal is announced once per process and kept forever.
@@ -1069,7 +1076,7 @@ impl Polity {
                         refused: Vec::new(),
                         unfolded: 0,
                         lane_refused: Vec::new(),
-                        grown: Vec::new(),
+                        grown: std::collections::BTreeMap::new(),
                         reported: 0,
                         trajectory: Trajectory::Growth,
                         starved: 0,
@@ -1190,7 +1197,7 @@ impl Polity {
             refused: Vec::new(),
             unfolded: 0,
             lane_refused: Vec::new(),
-            grown: Vec::new(),
+            grown: std::collections::BTreeMap::new(),
             reported: 0,
             trajectory: Trajectory::Growth,
             starved: 0,
@@ -2394,7 +2401,13 @@ impl Polity {
             // changed by what it thought.
             let read = match pre_reached {
                 Some(hit) => hit,
-                None => solver::think_task(&task, &mut self.grown),
+                None => {
+                    // N-I·VESSEL — drain THIS vessel's mouth, not the line pool.
+                    // The seed vessel is the acting cognitive entity (`automaton`);
+                    // its wall lands in its own basin, a sibling's stays untouched.
+                    let vessel = self.automaton;
+                    solver::think_task(&task, self.grown.entry(vessel).or_default())
+                }
             };
             match read {
                 SolveRead::Solved {
