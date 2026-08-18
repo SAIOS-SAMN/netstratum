@@ -198,9 +198,23 @@ pub fn carrying_capacity(
     t_eq4: &Ratio,
     aridity: &Ratio,
 ) -> Ratio {
+    ratio(living_zones as i64 * REGROWTH_GRAIN, 1)
+        * substrate_viability(clade, metabolism, t_eq4, aridity)
+}
+
+/// **THE ONE SUBSTRATE VIABILITY** (ONT-1d part 3) — the per-zone morphodynamic
+/// viability of a (clade × metabolism) on an orbit: the clade's thermal band tent
+/// (`habitability_flux`) TIMES the metabolism's phase feasibility (1 for the
+/// condensed solid/organic phases, the plasma structural grade for plasmic). This
+/// is the SINGLE viability both PRODUCTION (`carrying_capacity`, above) and SITING
+/// (`conductor::siting`) read, so a species is sited where it can produce and
+/// culled where it cannot — one geometry, no two-viabilities seam. `0` is the
+/// Starvation Cull (an essential phase or the clade band absent); graded in
+/// `(0, 1]` otherwise. Exact-rational, replay-exact.
+pub fn substrate_viability(clade: u16, metabolism: u8, t_eq4: &Ratio, aridity: &Ratio) -> Ratio {
     let thermal = morphodynamic_thermal(t_eq4);
     let feasible = crate::morphogen::phase_feasibility(metabolism, &thermal, aridity);
-    ratio(living_zones as i64 * REGROWTH_GRAIN, 1) * habitability_flux(clade, t_eq4) * feasible
+    habitability_flux(clade, t_eq4) * feasible
 }
 
 /// The orbit's normalized THERMAL axis `∈ [0, 1)` from the incident flux,

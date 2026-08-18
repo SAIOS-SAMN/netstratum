@@ -31,13 +31,18 @@
 //! invert `r = M·k²` (which would need a root); we draw `k` and forward-form
 //! `r`.
 //!
-//! **η grades habitability, it does not gate it (DIO-1).** The candidate is
-//! scored by `coverage(t_eq4)` — the continuous relational η, defined
-//! everywhere. If a draw lands non-viable (η below a derived floor) the draw
-//! advances deterministically (a suffixed beacon domain) until it clears the
-//! floor, so an off-window orbit self-corrects toward the temperate band
-//! without a discrete seat table. (DIO-2 will replace this shared-zone η with
-//! a species-relative flux η; DIO-1 is the safe checkpoint.)
+//! **THE GATE IS PRODUCTION'S OWN VIABILITY (ONT-1d part 3).** A candidate
+//! draw is scored by [`cfe::almanac::substrate_viability`] — the SAME
+//! `habitability_flux(clade) · phase_feasibility(metabolism)` product that
+//! `carrying_capacity` reads. If a draw lands below the derived floor the draw
+//! advances deterministically (a suffixed beacon domain) until it clears, so a
+//! line self-corrects toward the orbit where it can actually PRODUCE, one
+//! geometry, no two-viabilities seam. (Earlier DIO-1 scored a shared, species-
+//! blind thermal-coverage η here; that mesic tent could not tell a plasma from
+//! a phototroph, and it is retired.) The k-window per regime only BOUNDS the
+//! search; the species-relative gate PLACES the niche within it — measured
+//! 2026-08-18 to seat the plasma in the furnace (r ≲ 1/9) where its clade band
+//! and plasma phase both hold, and the biotic lines mesic.
 //!
 //! **No new dials.** Every window bound is built from loop/anchor variables
 //! (`ratio(i, j)` with `i, j` bound), never a hand-picked `ratio(5, 4)`
@@ -119,12 +124,29 @@ pub(crate) fn diophantine_siting(
     // Albedo + the continuous k-window, per regime. The window is
     // (center, half_width) in units of k, both built from `twelfths` of a
     // bound integer so no literal dial enters.
+    let plasmic = civilization.metabolism.as_str() == "plasmic";
     let furnace = matches!(civilization.metabolism.as_str(), "mineral" | "plasmic");
-    let (albedo, k_center, k_half) = if furnace {
-        // Furnace: the old hot albedo set; a window centred at k = 8/12 (r ≈
-        // 0.44, hotter than the old r = 1/2 seat's neighbourhood) with a
-        // 2/12 half-width — the closer, brighter tracks that clear the mesic
-        // ceiling toward the foundry.
+    let (albedo, k_center, k_half) = if plasmic {
+        // ONT-1d part 3 — THE PLASMA NICHE, DERIVED FROM THE GATE. Measured
+        // 2026-08-18: a plasmiform line (HyperThermal clade band × plasma phase
+        // feasibility) clears its `substrate_viability` floor (1/HALVING) only
+        // for r ≲ 1/9 — k ≲ 4/12 — and reads exactly ZERO past k = 10/12 (a
+        // world too cold has no plasma). The old shared furnace window (centred
+        // k = 8/12) sat the plasma at viability ≈ 0.32, below floor, so every
+        // re-roll failed and it fell back to a non-viable centre. The plasma's
+        // OWN window: centre k = GRAIN/4 = 3/12 (r ≈ 1/16), half 1/12, so
+        // k ∈ [2/12, 4/12] — the band, verified end to end, where every draw is
+        // viable (0.73 → 0.51) and the gate clears on the first roll.
+        let albedos = [ratio(1, 2), ratio(9, 20), ratio(2, 5)];
+        let drawn = beacon.uniform_index("genesis.plasmic.albedo", albedos.len() as u64) as usize;
+        (albedos[drawn].clone(), twelfths(GRAIN / 4), twelfths(1))
+    } else if furnace {
+        // Mineral furnace: the old hot albedo set; a window centred at k = 8/12
+        // (r ≈ 0.44) with a 2/12 half-width. NO roster line derives a mineral
+        // orbit (every mineral seat is thermally PINNED in `polities.rs`), so
+        // this path is unexercised and kept byte-identical; the mineral-cold
+        // niche waits on a mineral line that actually derives (or a mineral
+        // phase-cull) to be MEASURED rather than guessed.
         let albedos = [ratio(1, 2), ratio(9, 20), ratio(2, 5)];
         let drawn = beacon.uniform_index("genesis.furnace.albedo", albedos.len() as u64) as usize;
         (albedos[drawn].clone(), twelfths(GRAIN - 4), twelfths(2))
@@ -138,9 +160,28 @@ pub(crate) fn diophantine_siting(
         (albedos[drawn].clone(), twelfths(GRAIN - 1), twelfths(2))
     };
 
-    // THE VIABILITY FLOOR, DERIVED (not tuned): η at least 1/HALVING of the
-    // band optimum (η = 1 inside any band). A reading, not a dial.
+    // THE VIABILITY FLOOR, DERIVED (not tuned): at least 1/HALVING of the
+    // band optimum. A reading, not a dial.
     let floor = ratio(1, HALVING);
+
+    // ONT-1d part 3 — SITING READS THE ONE VIABILITY PRODUCTION READS. The old
+    // gate scored a shared thermal-coverage η (a mesic tent, blind to species);
+    // now the draw is scored by `cfe::almanac::substrate_viability` — the SAME
+    // `habitability_flux(clade) · phase_feasibility(metabolism)` product
+    // `carrying_capacity` uses — so a line is sited where it can PRODUCE and
+    // culled where it cannot, one geometry. The clade band pulls the niche
+    // (cold-clade → cold orbit); the metabolism's phase gates it (plasmic needs
+    // a hot world for its plasma structure). No two-viabilities seam.
+    let clade = cfe::almanac::table_clade_from_word(&civilization.clade)
+        .unwrap_or(cfe::almanac::FLATLANDER_CLADE as u16);
+    let metab: u8 = match civilization.metabolism.as_str() {
+        "mineral" => 1,
+        "plasmic" => 3,
+        _ => 2,
+    };
+    // A fresh siting has no world yet; a neutral aridity (the solid/organic
+    // phases ignore it, plasmic reads it for its dry-hot plasma window).
+    let aridity = ratio(1, 1);
 
     // THE CONTINUOUS DRAW. k = center + (draw − 1/2)·(2·half) sweeps the whole
     // window [center − half, center + half) as `draw` ranges over [0, 1). A
@@ -163,8 +204,9 @@ pub(crate) fn diophantine_siting(
             continue; // k must be strictly positive
         }
         let (r, _p) = track(&mass, &k);
-        let eta = thermal::coverage(&thermal::t_eq4(&luminosity, &albedo, &r));
-        if eta >= floor {
+        let t_eq4 = thermal::t_eq4(&luminosity, &albedo, &r);
+        let viability = cfe::almanac::substrate_viability(clade, metab, &t_eq4, &aridity);
+        if viability >= floor {
             chosen_k = k;
             break;
         }
@@ -230,6 +272,31 @@ mod tests {
         let (_, _, r_furnace) = diophantine_siting(&civ("mineral"), &beacon);
         let (_, _, r_mesic) = diophantine_siting(&civ("biotic"), &beacon);
         assert!(r_furnace < r_mesic, "furnace sits inward: {r_furnace} < {r_mesic}");
+    }
+
+    #[test]
+    fn a_plasmic_line_sites_viable_and_hot() {
+        // ONT-1d part 3 — THE LIVE PLASMIC NICHE. The only roster line that
+        // DERIVES a plasmic orbit (Coronal Choir, clade `plasmiform` = 12) must
+        // site where its NEW gate — `substrate_viability` — actually clears the
+        // floor: a hot world where the HyperThermal clade band AND the plasma
+        // phase feasibility both read high. This pins the real niche, unlike the
+        // furnace test above (empty clade → mesic default), which pins only the
+        // window geometry.
+        let mut c = civ("plasmic");
+        c.clade = "plasmiform".to_string();
+        let beacon = Beacon::from_digest([42u8; 32]);
+        let (class, albedo, r_plasmic) = diophantine_siting(&c, &beacon);
+        let t_eq4 = thermal::t_eq4(&class.luminosity(), &albedo, &r_plasmic);
+        let viability = cfe::almanac::substrate_viability(12, 3, &t_eq4, &ratio(1, 1));
+        assert!(
+            viability >= ratio(1, HALVING),
+            "a plasmiform line sites where its own gate clears: viability = {viability}"
+        );
+        // And it sits inward (hotter) than a mesic biotic line under the same
+        // digest — the plasma seeks the furnace.
+        let (_, _, r_mesic) = diophantine_siting(&civ("biotic"), &beacon);
+        assert!(r_plasmic < r_mesic, "plasma sits inward: {r_plasmic} < {r_mesic}");
     }
 
     #[test]
