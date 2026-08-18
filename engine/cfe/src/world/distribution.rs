@@ -12,17 +12,11 @@
 use super::*;
 use crate::dop::{metabolic_leisure, Caste, Ration, Resource, ZoneKind};
 
-/// The melt lattice the leisure bank truncates to WHEN it must (matches the
-/// market / regrowth / orbit grids, all `64`). A bare STRUCTURAL constant, not a
-/// balance dial. See `settle_leisure`.
+/// The leisure grain: every leisure FLOW is floored onto `1/64` at the source
+/// (`settle_leisure`, ONT-4), so the bank is always a bounded `1/64` multiple and
+/// its denominator can never explode. Matches the market / regrowth / orbit grids
+/// (all `64`). A bare STRUCTURAL constant, not a balance dial.
 const LEISURE_GRAIN: i64 = 64;
-
-/// The denominator ceiling (in bits) above which the leisure accumulator is
-/// truncated. Below it the balance stays BYTE-EXACT, so a short-horizon board is
-/// unchanged; the truncation only fires when the running sum's denominator
-/// genuinely threatens to explode (measured: a plasmic bank crossed this only
-/// deep in a 60-beat era, on its way to the OOM). Structural, not tuned.
-const LEISURE_DENOM_BITS: u64 = 256;
 
 impl World {
     /// **THE MICRONUTRIENT FACTOR** (G2 trace elements, ruled 2026-08-14)
@@ -682,33 +676,33 @@ impl World {
     /// neither banks surplus nor thinks is byte-identical.
     pub fn settle_leisure(&mut self, orb: u64, delta: Ratio) {
         let zero = ratio(0, 1);
-        if delta == zero {
+        // ONT-4 — FLOOR THE FLOW, never the accumulator. The bank is a running SUM
+        // of per-beat deltas (surplus in, decay and mint-cost out); summing
+        // rationals of differing denominators compounds the LCM without bound, and
+        // the geometric demurrage (`bank × d`) accreted the whole causal history,
+        // so the exact-rational denominator detonated (~beat 117 — and the OLD lazy
+        // accumulator-graining that masked it grained the LIVE bank but NOT replay,
+        // which applies the raw receipt delta, so the two SPLIT the moment the
+        // graining fired). The cure the scalar-collapse law names: floor the FLOW
+        // at the source onto `1/LEISURE_GRAIN`, so the bank is always a bounded
+        // `1/GRAIN` multiple and its denominator can never explode — and the
+        // receipt carries the FLOORED delta, so replay banks the identical value.
+        // SEAL-B is a theorem again, not a truncation coincidence. Signed floor
+        // (toward −∞): a spend rounds slightly larger, an inflow slightly smaller,
+        // deterministic either way.
+        let grid = ratio(LEISURE_GRAIN, 1);
+        let flowed = (delta * grid.clone()).floor() / grid;
+        if flowed == zero {
             return;
         }
-        // G_flux TRUNCATION, LAZY. The bank is a running SUM of per-beat deltas
-        // (surplus in, decay and mint-cost out); summing rationals of differing
-        // denominators compounds the LCM without bound, so over a long horizon the
-        // exact-rational denominator explodes (measured: a plasmic bank passed 80
-        // digits by beat 48 and OOM'd the era). But truncating EVERY settle nudges
-        // knife-edge lines across discrete gates (measured: it tipped `stillcold`
-        // into famine at 15 beats). So the bank stays BYTE-EXACT until its
-        // denominator crosses `LEISURE_DENOM_BITS`, and only THEN is it grained
-        // onto `1/LEISURE_GRAIN` — the truncation fires at the explosion, not on
-        // every value. Replay recomputes the same bank and re-grains identically.
-        let raw = (self.leisure_bank_of(orb) + delta.clone()).max(zero.clone());
-        let next = if raw.denom().bits() > LEISURE_DENOM_BITS {
-            let grid = ratio(LEISURE_GRAIN, 1);
-            (raw * grid.clone()).round() / grid
-        } else {
-            raw
-        };
+        let next = (self.leisure_bank_of(orb) + flowed.clone()).max(zero.clone());
         self.leisure_banks.retain(|(o, _)| *o != orb);
         if next > zero {
             self.leisure_banks.push((orb, next));
         }
         let stamp = self.clock.now();
         self.chronicle.append(
-            crate::dop::ClosureEvent::LeisureSettled { orb_id: orb, delta },
+            crate::dop::ClosureEvent::LeisureSettled { orb_id: orb, delta: flowed },
             stamp,
             vec![],
         );

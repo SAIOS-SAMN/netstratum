@@ -2136,8 +2136,10 @@ impl Polity {
         let fill = civic::fasting_fill(leisure, self.world.syntropic_flow(primary));
         // COG-5 COGNITIVE DEMURRAGE: unused leisure dissipates each beat (you
         // cannot bank a nap for ten years), so the bank tracks CURRENT surplus
-        // instead of hoarding a lifetime's. The net settle is this beat's fill
-        // minus the standing bank's decay — one deed, not two.
+        // instead of hoarding a lifetime's. Proportional (zero at an empty bank,
+        // so a poor line still banks its trickle — COG-3). ONT-4: the collapse
+        // this once caused is cured in `settle_leisure` by flooring the FLOW, not
+        // by flattening the decay. The net settle is fill minus decay, one deed.
         let decay = civic::leisure_dissipation(self.world.leisure_bank_of(primary));
         let delta = fill - decay;
         if delta != ratio(0, 1) {

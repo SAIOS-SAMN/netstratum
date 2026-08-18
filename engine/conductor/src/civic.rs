@@ -269,7 +269,15 @@ pub fn metabolic_exchange() -> Ratio {
     ratio(8, 1) // APPROVED-SEED (operator ruling 2026-08-16, COG-5 exchange rate)
 }
 
-/// The demurrage a standing leisure bank sheds this beat — `bank × decay`.
+/// **THE COGNITIVE DEMURRAGE** (COG-5) — the leisure a standing bank sheds this
+/// beat, `bank × decay`. PROPORTIONAL by design: zero when the bank is empty (so
+/// a poor line still accumulates its fasting trickle, COG-3), and aggressive when
+/// the bank is large (so no line hoards a lifetime's surplus, COG-5). ONT-4 keeps
+/// this shape — the collapse it caused is cured downstream, by flooring the
+/// settle FLOW onto the leisure grain (`World::settle_leisure`) rather than
+/// stepping the raw bank, so the denominator stays bounded without a flat decay
+/// (which, being nonzero at an empty bank, would out-drain the trickle and starve
+/// the poor of thought entirely).
 pub fn leisure_dissipation(bank: Ratio) -> Ratio {
     bank * leisure_decay()
 }
