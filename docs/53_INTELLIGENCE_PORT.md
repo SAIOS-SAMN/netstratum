@@ -226,7 +226,7 @@ second brain (lifespan is a clock on the mouth count).
 | N-I4 | `research_step` calls only `think_task`; search off the beat | forge still verifies; sweep counter = 0 on the live path |
 | N-I5 | book peel; mouths eat (`41 §2`) | **LANDED** `641470e` · Pin G |
 | N-I6 | survival think names a deed; delete the utility deciders | **LANDED** `fd7bbcc` · Pins E, F, H · [`N-I6.md`](N-I6.md) |
-| N-I-VESSEL | basin per vessel (workspace, not `Entity`) | Pin B at vessel grain · **NAMED** [`N-I-VESSEL.md`](N-I-VESSEL.md) |
+| N-I-VESSEL | basin per vessel (workspace, not `Entity`) | **LANDED** `4399627` · Pin B at vessel grain · [`N-I-VESSEL.md`](N-I-VESSEL.md) |
 | N-I7 | metabolic debit on think; leisure gates **which vessel** may think | starving mouth withholds ARC; fed vessel thinks |
 | N-I8 | sun / `vocabulary::fold` from two vessel deposits | Pin C |
 | N-I9 | same doors: CLI think verb = automaton path; NS-6 grant gates render | player and NPC produce identical receipts from identical books |

@@ -1,6 +1,6 @@
 # N-I-VESSEL — think as a person
 
-**Lane:** intelligence port · **Status: NAMED — implement this cut**
+**Lane:** intelligence port · **Status: IMPLEMENT — grain + isolation only**
 **Charter:** [`53_INTELLIGENCE_PORT.md`](53_INTELLIGENCE_PORT.md) · Pin B at vessel grain
 **Companions:** N-I6 (`survival`, seated) · `iae::adopt` / `iae::think` · `Polity.grown`
 
@@ -25,7 +25,8 @@ does not inherit it.
 | Two-vessel fold (`vocabulary::fold` from two deposits) | N-I8. Two deposits cannot fold until two vessels EXIST. This cut makes the two vessels. |
 | Hearing a word in another frame | N-I10. |
 | SOC groupings / shared objective | SOC-4/5. A society is shared leftover direction + a fold — both downstream of this. |
-| Individuating the whole population into vessels | Not required to compress think. The line's cognitive entity is the seed vessel; the MODEL admits more, the WIRING of population-thinkers is a later cut. |
+| Individuating the whole population into vessels | **Hold.** Seed vessel is the automaton. The map admits many; wiring mouths as thinkers is a later cut. |
+| `HashMap` as the basin or the index | Law II (AlignmentConfirmed): HashMap in cognition is dimensional collapse. Forbidden. |
 | Moving `grown` onto `Entity` | Entity stays empty — the basin is non-committed workspace, keyed by vessel. SEAL-B untouched. |
 | Touching the survival book | Survival stays the LINE's ration book (N-I5/N-I6). Only the ARC think basin becomes per-vessel. |
 | Leisure debit on think | N-I7. Speech must be leisure-priced or culture is free — but pricing comes AFTER the vessel exists. |
@@ -52,20 +53,32 @@ people's word, until the person's basin exists.
 
 ```
 - grown: Vec<Crystal>                     // the line pool (civ-average)
-+ grown: BTreeMap<u64, Vec<Crystal>>       // vessel_id → basin (per-person)
++ grown: BTreeMap<u64, Vec<Crystal>>       // vessel_id → basin (index only)
 ```
 
-- **Keyed by vessel.** `BTreeMap` (deterministic iteration), non-committed
-  workspace on `Polity` — exactly the category the `Vec` was, now keyed.
-- **`think_task` drains that vessel's mouth**, never the pool: the acting
-  cognitive vessel's basin (`self.grown.entry(vessel).or_default()`).
-- **Siblings are isolated by construction.** A wall vessel V mints and
-  adopts lands in `grown[V]` alone; vessel W's basin is untouched. The map
-  key IS the isolation — no cross-basin read exists.
-- **The seed vessel this cut is the line's cognitive entity** (`automaton`).
-  The map admits many; wiring the population's thinker-mouths as distinct
-  vessels is a LATER cut, not this one. This cut delivers the grain and the
-  isolation invariant, not population individuation.
+**Law II — maps.** AlignmentConfirmed: *no HashMap in cognition.* A hash
+bucket flattens a structured key and discards the fiber. `Q/ℤ` lives
+**inside** `Crystal` / `Exact`, not in the key. You do **not** need a
+BTree because the rationals demand one.
+
+| Allowed | Role |
+|---|---|
+| `Vec<Crystal>` | the basin — the organ still thinks a list of leftovers |
+| `BTreeMap<u64, Vec<Crystal>>` | **index of mouths**, ordered by `vessel_id` (`Ord`). Deterministic iteration for replay. Not the thought. |
+| `Vec<(u64, Vec<Crystal>)>` + `.find()` | also lawful if you would rather not open a tree this cut |
+
+| Forbidden | Why |
+|---|---|
+| `HashMap<u64, Vec<Crystal>>` | hash addressing; iteration order is not a replay law |
+| Hashing a `Crystal` / remainder / `Ratio` as a lookup key | that **is** the collapse Law II names |
+
+`entry(vessel).or_default()` on the BTree is bookkeeping: which `Vec`
+`think_task` receives. `iae::think` / `adopt` never see the tree.
+
+- **Seed vessel** is the line's cognitive entity (`automaton`).
+- **Isolation:** wall on V lands in `grown[V]` only; W on the same unique
+  walls afresh.
+- **Population individuation stays later.** Do not fold it into this cut.
 
 ---
 
