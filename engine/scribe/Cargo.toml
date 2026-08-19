@@ -10,3 +10,13 @@ cfe = { path = "../cfe" }
 ledger = { path = "../ledger" }
 lens = { path = "../lens" }
 physics = { path = "../physics" }
+# The mesh membrane: the kernel attaches as a peer over MY-K via the
+# shared attach loop (sdk::attach) — no exporter, no bespoke wire code.
+mycelium = { path = "/opt/mycelium" }
+
+# THE MESH SCRIBE — the kernel's resident pen for the mycelium
+# membrane (replaces tools/mesh_feed.py). Peels solve records into
+# var/mesh-feed claims; the uniform door does all the speaking.
+[[bin]]
+name = "mesh-scribe"
+path = "src/bin/mesh_scribe.rs"
