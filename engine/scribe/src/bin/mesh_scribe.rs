@@ -14,9 +14,11 @@
 //! re-spoken when it was withheld and the sun has since GROWN.
 //!
 //! STATUS: demoted to the MIGRATION VERB (Law II landed — mycelium
-//! docs/23_RESIDENCY.md): live solves now offer themselves from the
-//! conductor's solve-completion path (`scribe::membrane::offer`,
-//! non-blocking, resident thread). This binary remains only to
+//! docs/23_RESIDENCY.md): live solves now offer THEMSELVES — the
+//! pairs they were proved on — from the conductor's solve-completion
+//! path (`scribe::membrane::offer_proved`, non-blocking, resident
+//! thread; every program family the forge proves is speakable, no
+//! synthesis). This binary remains only to
 //! backfill HISTORICAL solve records into the mesh — run once after
 //! standing up a hypha, then delete it with a clear conscience.
 //! Every re-utterance is a lawful no-op (installed orbits
