@@ -183,7 +183,9 @@ fn run(rx: mpsc::Receiver<(String, String)>) {
                 _ => continue,
             };
             if session.is_none() {
-                session = attach(&addr, &pair[0].0);
+                // Stable position: the emblem, never the claim in hand.
+                session = mycelium::sdk::attach::emblem(KERNEL, None)
+                    .and_then(|occ| attach(&addr, &occ));
             }
             let Some(s) = session.as_mut() else {
                 still.push_back((task, program)); // mesh unreachable: keep owing

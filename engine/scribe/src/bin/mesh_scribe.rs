@@ -215,7 +215,7 @@ fn main() {
     let mut words_seen = 0usize;
     loop {
         let work = claims();
-        let Some((_, first_in, _)) = work.first() else {
+        let Some(_) = work.first() else {
             if !resident {
                 eprintln!("mesh-scribe: no solve records under {WORLDS}");
                 return;
@@ -224,7 +224,8 @@ fn main() {
             continue;
         };
         if session.is_none() {
-            session = measurement(first_in).and_then(|occ| attach(&occ));
+            // Stable position: the emblem, never the claim in hand.
+            session = mycelium::sdk::attach::emblem(KERNEL, None).and_then(|occ| attach(&occ));
         }
         let Some(s) = session.as_mut() else {
             if !resident {
