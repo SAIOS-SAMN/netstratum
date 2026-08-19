@@ -33,7 +33,10 @@ use mycelium::sdk::attach::{measurement, six_step, Arm};
 use mycelium::sdk::{CrystalId, KernelRef, Session};
 
 const WORLDS: &str = "/opt/netstratum/var/worlds";
-const ADDR: &str = "hypha://127.0.0.1:7420";
+// Any node: the mesh is symmetric; MYCELIUM_ADDR selects the door.
+fn addr() -> String {
+    std::env::var("MYCELIUM_ADDR").unwrap_or_else(|_| "hypha://127.0.0.1:7420".into())
+}
 const KERNEL: &str = "net";
 const BEAT_SECS: u64 = 5;
 
@@ -187,15 +190,15 @@ fn claims() -> Vec<(String, Grid, Grid)> {
     out
 }
 
-fn attach(occ: &mycelium::iae::peel::FullMeasurement) -> Option<Session> {
+fn attach(addr: &str, occ: &mycelium::iae::peel::FullMeasurement) -> Option<Session> {
     let inv = Word::new(vec![LetterId::IDENTITY]);
-    match Session::connect(ADDR, KernelRef::of(occ, None), occ, &inv, None) {
+    match Session::connect(addr, KernelRef::of(occ, None), occ, &inv, None) {
         Ok(s) => {
-            eprintln!("mesh-scribe: kernel '{KERNEL}' seated at {ADDR}");
+            eprintln!("mesh-scribe: kernel '{KERNEL}' seated at {addr}");
             Some(s)
         }
         Err(e) => {
-            eprintln!("mesh-scribe: attach {ADDR} refused: {e:?}");
+            eprintln!("mesh-scribe: attach {addr} refused: {e:?}");
             None
         }
     }
@@ -225,7 +228,7 @@ fn main() {
         };
         if session.is_none() {
             // Stable position: the emblem, never the claim in hand.
-            session = mycelium::sdk::attach::emblem(KERNEL, None).and_then(|occ| attach(&occ));
+            session = mycelium::sdk::attach::emblem(KERNEL, None).and_then(|occ| attach(&addr(), &occ));
         }
         let Some(s) = session.as_mut() else {
             if !resident {
