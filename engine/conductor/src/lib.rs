@@ -2780,6 +2780,20 @@ impl Polity {
                     }
                     let word: Vec<String> = program.iter().map(|op| op.describe()).collect();
                     let cert_hex = hex(&certificate.output);
+                    // Law II in full: the pairs the solve was PROVED
+                    // on cross the membrane whole — the train family
+                    // plus the confirmed test — so the mesh judges by
+                    // replay, not by a synthesized stand-in. Cloned
+                    // here because the proof takes `test_output` next.
+                    let rows = |g: &solver_verify::Grid| -> Vec<Vec<u8>> {
+                        g.cells.chunks(g.cols).map(|r| r.to_vec()).collect()
+                    };
+                    let mut proved: Vec<(Vec<Vec<u8>>, Vec<Vec<u8>>)> = task
+                        .train
+                        .iter()
+                        .map(|p| (rows(&p.input), rows(&p.output)))
+                        .collect();
+                    proved.push((rows(&task.test_in), rows(&test_output)));
                     // THE PROOF, riding WHOLE (the opaque-payload law):
                     // the deed carries what the kernel re-runs.
                     let proof = solver_verify::WorkProof {
@@ -2794,6 +2808,7 @@ impl Polity {
                         word.join(" → "),
                         cert_hex,
                         solver_verify::encode_work(&proof).map(|bytes| (bytes, difficulty)),
+                        proved,
                     ))
                 }
                 _ => None,
@@ -2809,7 +2824,7 @@ impl Polity {
             auto
         };
         match solved {
-            Some((name, word, cert_hex, proof)) => {
+            Some((name, word, cert_hex, proof, proved_pairs)) => {
                 // A1 — CLOSE THE PoUW LOOP. Cognition proved out; now it
                 // MINTS. The amount is `kernel::mint_bound` — the ruled
                 // ladder read from the same function the gate enforces,
@@ -2858,10 +2873,11 @@ impl Polity {
                     self.level,
                 );
                 // Law II (mycelium 23_RESIDENCY): the solve offers
-                // itself — same moment, same strings, non-blocking;
+                // ITSELF — the proved pairs, same moment, non-blocking;
                 // the resident membrane thread speaks MY-K while the
-                // world beat moves on.
-                scribe::membrane::offer(&name, &word);
+                // world beat moves on. The mesh judges by replay, so
+                // every program family the forge proves is speakable.
+                scribe::membrane::offer_proved(&name, &word, proved_pairs);
                 self.solved += 1;
                 self.streak += 1;
                 // THE COUPLING CLOSES HERE. A close returns the line to

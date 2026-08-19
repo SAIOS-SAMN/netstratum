@@ -13,16 +13,20 @@
 //! short-circuit; once-per-work_id guards the court), so nothing
 //! here is durable state — Law I: the mesh is the memory.
 //!
-//! Programs this membrane can peel today: the D4 family, single-layer
-//! `per_layer(d4)`, and standalone `recolor[perm]`. Compositions and
-//! tiles return None — named for the C6 pass, never silently dropped.
+//! The membrane no longer synthesizes claims from program strings:
+//! the conductor passes the pairs the solve was PROVED on (train
+//! family + confirmed test), and every program family the forge
+//! proves — composites, tiles, object ops — reaches the mesh and is
+//! judged by replay. `claim_for` remains only as the backfill
+//! fallback for program-string-only records (`--backfill`, a
+//! migration verb); its coverage limit is that era's, not this path's.
 
 use std::collections::VecDeque;
 use std::sync::mpsc;
 use std::sync::OnceLock;
 
 use mycelium::autic::letters::{LetterId, Word};
-use mycelium::sdk::attach::{measurement, six_step, Arm};
+use mycelium::sdk::attach::{six_step, Arm};
 use mycelium::sdk::{CrystalId, KernelRef, Session};
 
 pub type Grid = Vec<Vec<u8>>;
@@ -100,14 +104,23 @@ pub fn claim_for(program: &str) -> Option<(String, Grid, Grid)> {
     Some((format!("net_recolor_{tag}"), hues, img))
 }
 
+/// One solve crossing the membrane: the pairs it was proved on
+/// (empty only on the backfill path, where just the program string
+/// survives on paper).
+pub struct SolveOffer {
+    pub task: String,
+    pub program: String,
+    pub pairs: Vec<(Grid, Grid)>,
+}
+
 /// The resident mouth: send-only from the engine's side.
 pub struct Membrane {
-    tx: mpsc::Sender<(String, String)>,
+    tx: mpsc::Sender<SolveOffer>,
 }
 
 impl Membrane {
     pub fn spawn() -> Membrane {
-        let (tx, rx) = mpsc::channel::<(String, String)>();
+        let (tx, rx) = mpsc::channel::<SolveOffer>();
         std::thread::Builder::new()
             .name("mycelium-membrane".into())
             .spawn(move || run(rx))
@@ -120,7 +133,20 @@ impl Membrane {
     /// stands in the kernel's own record either way, and backfill
     /// remains the lawful migration verb.
     pub fn offer(&self, task: &str, program: &str) {
-        let _ = self.tx.send((task.to_string(), program.to_string()));
+        let _ = self.tx.send(SolveOffer {
+            task: task.to_string(),
+            program: program.to_string(),
+            pairs: Vec::new(),
+        });
+    }
+
+    /// The proved family crosses whole: train pairs + confirmed test.
+    pub fn offer_proved(&self, task: &str, program: &str, pairs: Vec<(Grid, Grid)>) {
+        let _ = self.tx.send(SolveOffer {
+            task: task.to_string(),
+            program: program.to_string(),
+            pairs,
+        });
     }
 }
 
@@ -135,11 +161,49 @@ fn attach(addr: &str, occ: &mycelium::iae::peel::FullMeasurement) -> Option<Sess
     }
 }
 
-fn run(rx: mpsc::Receiver<(String, String)>) {
+/// Measure one grid at a FAMILY rank: the fiber must be uniform
+/// across every chart of one observation family, or a hue present in
+/// one pair and absent in another reads as a different fiber — the
+/// family-glue "fixedness is a constraint" law needs every hue
+/// representable on every chart.
+pub fn measure_at(grid: &Grid, rank: u8) -> Option<mycelium::iae::peel::FullMeasurement> {
+    use mycelium::iae::peel::{CellFrame, FullMeasurement, GaugeDirection, Site};
+    let rows = u32::try_from(grid.len()).ok()?;
+    let cols = u32::try_from(grid.first()?.len()).ok()?;
+    let mut occ = Vec::new();
+    for (r, row) in grid.iter().enumerate() {
+        if row.len() != cols as usize {
+            return None; // ragged paper is not a grid
+        }
+        for (c, &h) in row.iter().enumerate() {
+            occ.push((
+                Site {
+                    row: i64::try_from(r).ok()?,
+                    col: i64::try_from(c).ok()?,
+                },
+                GaugeDirection { index: h },
+            ));
+        }
+    }
+    FullMeasurement::try_new(rank, CellFrame { rows, cols }, occ).ok()
+}
+
+pub fn family_rank(pairs: &[(Grid, Grid)]) -> u8 {
+    pairs
+        .iter()
+        .flat_map(|(a, b)| a.iter().chain(b.iter()))
+        .flatten()
+        .map(|&h| h.saturating_add(1))
+        .max()
+        .unwrap_or(2)
+        .max(2)
+}
+
+fn run(rx: mpsc::Receiver<SolveOffer>) {
     let addr = std::env::var(ADDR_ENV).unwrap_or_else(|_| ADDR_DEFAULT.to_string());
     let mut session: Option<Session> = None;
     let mut basis: Vec<CrystalId> = Vec::new();
-    let mut pending: VecDeque<(String, String)> = VecDeque::new();
+    let mut pending: VecDeque<SolveOffer> = VecDeque::new();
     let mut tag: u16 = 0;
     loop {
         // Drain what arrived; block only when there is nothing to do.
@@ -171,34 +235,80 @@ fn run(rx: mpsc::Receiver<(String, String)>) {
         while let Ok(more) = rx.try_recv() {
             pending.push_back(more);
         }
-        let mut still: VecDeque<(String, String)> = VecDeque::new();
-        while let Some((task, program)) = pending.pop_front() {
-            let Some((_claim, input, output)) = claim_for(&program) else {
-                // Not peelable yet (composition/tile) — named, dropped.
-                eprintln!("membrane: {task} program '{program}' waits on the C6 pass");
+        let mut still: VecDeque<SolveOffer> = VecDeque::new();
+        while let Some(o) = pending.pop_front() {
+            // The proved family is the claim. Only the backfill path
+            // (program string alone on paper) synthesizes one.
+            let family: Vec<(Grid, Grid)> = if o.pairs.is_empty() {
+                match claim_for(&o.program) {
+                    Some((_claim, input, output)) => vec![(input, output)],
+                    None => {
+                        // Backfill-era record this membrane cannot
+                        // reconstruct — named, dropped. Live solves
+                        // never land here: they carry their pairs.
+                        eprintln!(
+                            "membrane: {} backfill program '{}' has no pairs on paper",
+                            o.task, o.program
+                        );
+                        continue;
+                    }
+                }
+            } else {
+                o.pairs.clone()
+            };
+            let rank = family_rank(&family);
+            let mut pair = Vec::new();
+            for (a, b) in &family {
+                match (measure_at(a, rank), measure_at(b, rank)) {
+                    (Some(x), Some(y)) => pair.push((x, y)),
+                    _ => {
+                        eprintln!("membrane: {} carries an unmeasurable grid", o.task);
+                        pair.clear();
+                        break;
+                    }
+                }
+            }
+            if pair.is_empty() {
                 continue;
-            };
-            let pair = match (measurement(&input), measurement(&output)) {
-                (Some(a), Some(b)) => vec![(a, b)],
-                _ => continue,
-            };
+            }
             if session.is_none() {
                 // Stable position: the emblem, never the claim in hand.
                 session = mycelium::sdk::attach::emblem(KERNEL, None)
                     .and_then(|occ| attach(&addr, &occ));
+                // Boot chain (23_RESIDENCY §3): enroll at attach — the
+                // kernel re-derives the lexicon and certifies mesh-side.
+                if let Some(s) = session.as_mut() {
+                    match mycelium::sdk::attach::enroll(s, KERNEL) {
+                        Ok((n, missed)) => eprintln!(
+                            "membrane: kernel '{KERNEL}' enrolled {n} certificates ({missed} missed)"
+                        ),
+                        Err(_) => {}
+                    }
+                }
             }
             let Some(s) = session.as_mut() else {
-                still.push_back((task, program)); // mesh unreachable: keep owing
+                still.push_back(o); // mesh unreachable: keep owing
                 continue;
             };
             tag = tag.wrapping_add(1);
             match six_step(s, KERNEL, &pair, tag, &mut basis) {
-                Ok(Arm::ExactInstall) => {}
-                Ok(_) => {} // withheld/unglueable: the mesh's honest verdict
+                Ok(Arm::ExactInstall) => {
+                    eprintln!("membrane: {} '{}' installed", o.task, o.program);
+                }
+                Ok(Arm::Withhold { terms, .. }) => {
+                    // The mesh's honest verdict, visible per family.
+                    eprintln!(
+                        "membrane: {} '{}' withheld ({terms} terms carried)",
+                        o.task, o.program
+                    );
+                }
+                Ok(Arm::Unglueable) => {
+                    eprintln!("membrane: {} '{}' unglueable — structural cohort", o.task, o.program);
+                }
                 Err(_) => {
                     // Socket likely gone: the seat outlives the socket.
                     session = None;
-                    still.push_back((task, program));
+                    still.push_back(o);
                 }
             }
         }
@@ -214,4 +324,14 @@ static MOUTH: OnceLock<Membrane> = OnceLock::new();
 /// moment, neither waiting on the other.
 pub fn offer(task: &str, program: &str) {
     MOUTH.get_or_init(Membrane::spawn).offer(task, program);
+}
+
+/// The Law II hook in full: the solve offers ITSELF — the pairs it
+/// was proved on (train family + confirmed test), not a synthesized
+/// stand-in. Every program family the forge proves reaches the mesh
+/// and is judged by replay; coverage is the forge's, not this file's.
+pub fn offer_proved(task: &str, program: &str, pairs: Vec<(Grid, Grid)>) {
+    MOUTH
+        .get_or_init(Membrane::spawn)
+        .offer_proved(task, program, pairs);
 }
