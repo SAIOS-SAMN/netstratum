@@ -273,6 +273,35 @@ pub fn cognitive_efficiency(evolution_stage: u8) -> Ratio {
     ratio(1, 1 + evolution_stage as i64)
 }
 
+/// **THE COGNITIVE γ** (COG-EMERGENCE-1, operator mandate 2026-08-19) — "lack of
+/// cognitive depth" as a DEFICIT the workbench weighs, NOT an `if capacity < 3`
+/// gate. A civilization feels a cognitive tension when it carries irreducible
+/// problems — the civic residual γ, the physical deficit NO KNOWN STRUCTURE spans
+/// (`EconomicPeel.residual`, the same extent `mint_cost` prices) — AND its thinking
+/// is too shallow to INVENT the structure that would span them: invention depth is
+/// bounded by `cognitive_capacity`, so a deeper mind mints more complex generators.
+/// The drive to deepen is that unspanned extent scaled by the depth HEADROOM
+/// (`frontier − capacity`): zero for a mind already at the frontier (more depth
+/// spans nothing new) and zero for an economy already covered (γ = 0, no problem to
+/// invent past). This is the number the workbench READS to weigh a cognitive-science
+/// seat against every other build — it does not decide; the entity does, by drawing
+/// the fold under this tension. Exact integer, no gate, no dial.
+pub fn cognitive_deficit(residual_extent: u64, capacity: usize, frontier: usize) -> u64 {
+    let headroom = frontier.saturating_sub(capacity) as u64;
+    residual_extent.saturating_mul(headroom)
+}
+
+/// The residual EXTENT of a peel — `Σ|γ_i|`, the Betti-extent of the unspanned
+/// void (the same measure `mint_cost` bills). The cognitive γ's raw driver: how
+/// much of the economy's demand no known structure covers.
+pub fn residual_extent(peel: &EconomicPeel) -> u64 {
+    peel.residual
+        .iter()
+        .fold(BigInt::zero(), |sum, g| sum + g.abs())
+        .to_u64()
+        .unwrap_or(u64::MAX)
+}
+
 /// **THE FASTING FILL** (COG-3) — the cognitive accumulator's inflow this beat:
 /// the cascade's LEISURE plus a base trickle off the syntropic wild flow. The
 /// rich pay `mint_cost` instantly from their large leisure and coin many words
