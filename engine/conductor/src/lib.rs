@@ -2857,6 +2857,11 @@ impl Polity {
                     &cert_hex,
                     self.level,
                 );
+                // Law II (mycelium 23_RESIDENCY): the solve offers
+                // itself — same moment, same strings, non-blocking;
+                // the resident membrane thread speaks MY-K while the
+                // world beat moves on.
+                scribe::membrane::offer(&name, &word);
                 self.solved += 1;
                 self.streak += 1;
                 // THE COUPLING CLOSES HERE. A close returns the line to

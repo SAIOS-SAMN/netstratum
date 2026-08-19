@@ -27,6 +27,7 @@ use ledger::{card, sanitize, Ledger};
 use std::fs;
 
 pub mod journal;
+pub mod membrane;
 
 /// Reflect one colony: write `state.tlv` + `world.card`, rotate on
 /// chronicle divergence. Call after every command.

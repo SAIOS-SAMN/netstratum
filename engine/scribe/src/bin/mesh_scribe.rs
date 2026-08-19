@@ -13,18 +13,16 @@
 //! buys a voice never a vote. A claim is spoken when NEW, or
 //! re-spoken when it was withheld and the sun has since GROWN.
 //!
-//! STATUS: v1 of the packaged shape — LAW II NOT YET SATISFIED
-//! (mycelium docs/23_RESIDENCY.md): this is still a sidecar scanning
-//! solve paper on a beat. The destination: the forge's own
-//! solve-completion path calls sdk::attach at the moment of solve,
-//! and this binary shrinks to `--backfill` (a one-shot migration
-//! verb for historical records, then deleted). Demand — answering
-//! OTHER kernels' walls — waits on mesh-side wall listing (Law III).
-//! Scribe law holds meanwhile: reads the kernel's own solve paper,
-//! writes nothing back as state.
+//! STATUS: demoted to the MIGRATION VERB (Law II landed — mycelium
+//! docs/23_RESIDENCY.md): live solves now offer themselves from the
+//! conductor's solve-completion path (`scribe::membrane::offer`,
+//! non-blocking, resident thread). This binary remains only to
+//! backfill HISTORICAL solve records into the mesh — run once after
+//! standing up a hypha, then delete it with a clear conscience.
+//! Every re-utterance is a lawful no-op (installed orbits
+//! short-circuit; once-per-work_id guards the court).
 //!
-//!   mesh-scribe --sync            attach, speak every claim once, exit
-//!   mesh-scribe --resident        attach and stay seated, forever
+//!   mesh-scribe --backfill        attach, speak every historical claim once, exit
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::fs;
@@ -205,9 +203,9 @@ fn attach(occ: &mycelium::iae::peel::FullMeasurement) -> Option<Session> {
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
-    let resident = args.iter().any(|a| a == "--resident");
-    if !resident && !args.iter().any(|a| a == "--sync") {
-        eprintln!("usage: mesh-scribe --sync | --resident");
+    let resident = false; // Law II: residency lives in the membrane now
+    if !args.iter().any(|a| a == "--backfill" || a == "--sync") {
+        eprintln!("usage: mesh-scribe --backfill");
         std::process::exit(2);
     }
     // name → (arm code, sun words at attempt). 0 = installed: settled.
