@@ -259,6 +259,20 @@ pub fn metabolic_exchange() -> Ratio {
     ratio(8, 1) // APPROVED-SEED (operator ruling 2026-08-16, COG-5 exchange rate)
 }
 
+/// **THE EVOLUTION DISCOUNT — think more on less** (COG-11, doc 52 §2: "Evolution
+/// is the discount: the evolution/caste deeds lower the metabolism spent per unit
+/// of thought — an evolved line thinks more on less."). A line advances its
+/// `evolution_stage` along its arc (the EARNED transformation deed, gated on a
+/// crystallized deepening); each stage makes thought CHEAPER. The multiplier is
+/// `1/(1 + stage)` — exact-rational, monotone decreasing, and exactly `1` at
+/// stage 0, so an un-evolved line (every founding line) is BYTE-IDENTICAL: the
+/// discount touches only what a line has earned. A stage-1 line thinks at half the
+/// cost, stage-2 a third — a strong return on a rare, gated advancement. No dial:
+/// the denominator is the stage itself.
+pub fn cognitive_efficiency(evolution_stage: u8) -> Ratio {
+    ratio(1, 1 + evolution_stage as i64)
+}
+
 /// **THE FASTING FILL** (COG-3) — the cognitive accumulator's inflow this beat:
 /// the cascade's LEISURE plus a base trickle off the syntropic wild flow. The
 /// rich pay `mint_cost` instantly from their large leisure and coin many words
