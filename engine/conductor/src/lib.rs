@@ -1487,20 +1487,22 @@ impl Polity {
         // (and others default expansionist-ish yield path).
         let chem = cfe::almanac::ScienceDiscipline::Chem;
 
-        // 1. Seat chem lab if unseated and the bill is affordable.
+        // THE BASE CHEM SEAT IS SURVIVAL INFRASTRUCTURE, not a discretionary
+        // luxury. Measurement (EMERGENCE-2b) showed the base lab is load-bearing:
+        // its disposition-ordered survival compounds feed food-margin lines, so
+        // the roster seats it universally. Folding the BASE seat into the surplus
+        // tier starved the very lines with no surplus to invest — so it stays
+        // here, in the survival phase. The DISCRETIONARY chemistry — advancing the
+        // lab deeper — is the abundance resolver's Synthesize act. (The full
+        // gate-removal waits for `express_survival` to name a chem deed itself.)
         if self.world.science_rank(primary, chem) < 1 {
-            if self
-                .world
-                .seat_science_as(automaton, primary, chem)
-                .is_ok()
-            {
+            if self.world.seat_science_as(automaton, primary, chem).is_ok() {
                 return; // one act per beat
             }
-            // Cannot seat yet — no chemistry below the lab door.
-            return;
+            return; // cannot seat yet — no chemistry below the lab door
         }
 
-        // 2. Disposition-ordered chemistry acts.
+        // Disposition-ordered chemistry acts (production, once seated).
         match dis {
             2 => {
                 // Empiricist: catalog first (knowledge), then compound survival.
@@ -1852,30 +1854,101 @@ impl Polity {
     /// comb-compute hexasocial reaches for Math, a plasmiform Physics), seeded by
     /// the line's latest receipt digest so replay is exact (the SOC
     /// stochastic-freedom principle). One seat per beat.
-    fn cognitive_investment_step(&mut self) {
-        use cfe::almanac::ScienceDiscipline::{Math, Physics, Research};
+    /// **THE ABUNDANCE TENSIONS** (COG-EMERGENCE-2) — the three γ the surplus
+    /// resolver weighs, each a saturation on the melt lattice `[0, L]`, read from
+    /// live committed state. The material VOID (`Σ|γ|`, the peel's unspanned
+    /// residual) admits TWO cures: DEEPEN the mind to invent past it (while the
+    /// mind has depth headroom — `civic::cognitive_deficit`, zero once a
+    /// hard-cognitive science is seated), or seat CHEMISTRY to synthesise the
+    /// missing structure (while the lab is unseated). Both read the SAME void, so
+    /// the draw picks the cure. EXPANSION reads a different axis — the spatial
+    /// room left in the star system. No affordability enters: these are tensions,
+    /// not budgets.
+    fn abundance_tensions(&self) -> (u64, u64, u64) {
+        use cfe::almanac::ScienceDiscipline::Chem;
+        const FRONTIER: usize = 3; // compose-depth ceiling; cognitive_capacity caps here
+        const SYSTEM_CAP: u64 = 4; // a star system holds a handful of worlds (expand_step)
+        let l = civic::LATTICE as u64;
         let primary = cfe::world::FIRST_ORB;
+        let ext = self.civic_peel().map(|p| civic::residual_extent(&p)).unwrap_or(0);
+        // DEEPEN: the void weighed against the mind's remaining depth.
+        let capacity = self.world.cognitive_capacity(primary);
+        let cognitive = civic::cognitive_deficit(ext, capacity, FRONTIER).min(l);
+        // SYNTHESIZE: the DISCRETIONARY deepening of chemistry — advancing the lab
+        // BEYOND the survival base seat (chemistry_step seats rank 1 as survival
+        // infra). Once the lab stands, the SAME material void can be cured further
+        // by deepening it — a luxury, so it competes in the abundance fold. Zero
+        // before the base seat (survival's job) and once chemistry is maxed.
+        let chem_rank = self.world.science_rank(primary, Chem);
+        let synthesis = if chem_rank >= 1 && chem_rank < Chem.max_rank() {
+            ext.min(l)
+        } else {
+            0
+        };
+        // EXPAND: the spatial room left in the system, as a lattice fraction.
+        let orbs = self.world.committed().orbs.len() as u64;
+        let expansion = SYSTEM_CAP.saturating_sub(orbs).saturating_mul(l) / SYSTEM_CAP;
+        (cognitive, expansion, synthesis)
+    }
+
+    /// **THE ABUNDANCE STEP** (COG-EMERGENCE-2) — above the survival floor
+    /// (`express_survival`, the sole zone-raiser — N-I6), the line makes ONE
+    /// surplus choice per beat, not three authored gates. It FEELS the three
+    /// tensions and draws one act — deepen, expand, synthesise, or hoard — off
+    /// its own chronicle digest. NO affordability is consulted: the will is
+    /// topological; the chosen act pays its own bill or is REFUSED
+    /// (`seat_science_as`/`chart_as` return `Err` on an unpayable bill, or the
+    /// founding on toxic leverage) AFTER the choice. Two lines, same surplus,
+    /// different histories → different acts. Replay-exact.
+    fn abundance_step(&mut self) {
+        let primary = cfe::world::FIRST_ORB;
+        // A world must exist to act upon — a precondition, not a decision.
         if self.world.orb().is_none() || self.world.star().is_none() {
             return;
         }
-        if self.world.orb().is_some_and(|o| !o.famine.is_empty()) {
-            return; // a starving line builds no academy
-        }
-        // Already at the depth-3 frontier — a cognitive science stands.
-        if self.world.cognitive_capacity(primary) >= 3 {
+        // NO surplus precondition, NO affordability. The fold runs every beat a
+        // world stands and draws by tension + instinct ALONE; a chosen act pays
+        // its own resource bill or is REFUSED by physics after the fact (cognition
+        // seats in Iron/Crystal, never in food, so a lean line's Deepen attempt is
+        // rejected, not a famine). Measurement (EMERGENCE-2b) confirmed: with the
+        // base chem seat kept in survival, the fold needs no leisure gate — the
+        // settlement law holds and cognition seats at baseline parity.
+        let (cognitive, expansion, synthesis) = self.abundance_tensions();
+        // `reach` is the line's survey depth — its accumulated history —
+        // perturbing the draw. It scales every weight equally, so it never biases
+        // WHICH act, only how this line's own digest lands.
+        let reach = soc::AlgebraicRank {
+            components: (self.world.civ_reach() as u64).max(1),
+            cycles: 0,
+            relations: Vec::new(),
+        };
+        let Some(receipt) = self.world.chronicle().receipts().last() else {
             return;
+        };
+        let mut hasher = blake3::Hasher::new();
+        hasher.update(&receipt.own.0);
+        hasher.update(b"abundance-resolve");
+        let seed = *hasher.finalize().as_bytes();
+        match soc::resolve_investment(&reach, cognitive, expansion, synthesis, seed) {
+            soc::Investment::Deepen => self.invest_cognition(primary, seed),
+            soc::Investment::Expand => self.invest_expansion(),
+            soc::Investment::Synthesize => {
+                let _ = self
+                    .world
+                    .seat_science_as(self.automaton, primary, cfe::almanac::ScienceDiscipline::Chem);
+            }
+            soc::Investment::Hoard => {}
         }
-        // THE DRIVE: only a line that already THINKS deepens its mind — a banked
-        // LEISURE surplus (the COG budget the Mind mints from) is the signal that
-        // this line has cognitive wealth to invest in depth. A line with no
-        // leisure has nothing to spare for a bigger brain (and, fasting, barely
-        // thinks at all — COG-3). This ties build-to-think to the cognitive
-        // economy: surplus thought funds deeper thought.
-        if self.world.leisure_bank_of(primary) <= ratio(0, 1) {
-            return;
-        }
-        // The unseated cognitive sciences, weighted by the species' own seat
-        // affinity (Primary 4 · Secondary 2 · Alien 1) — a stochastic reach.
+    }
+
+    /// The DEEPEN act — seat one unseated hard-cognitive science (Math, Physics,
+    /// Research), the sub-draw weighted by the species' seat affinity (Primary 4 ·
+    /// Secondary 2 · Alien 1). Called only once the abundance resolver has CHOSEN
+    /// to deepen; the seat pays its bill or is refused (unaffordable ⇒ the line
+    /// willed a bigger brain it cannot yet build). Was `cognitive_investment_step`
+    /// — its leisure/famine/capacity gates dissolved into the abundance tension.
+    fn invest_cognition(&mut self, primary: u64, seed: [u8; 32]) {
+        use cfe::almanac::ScienceDiscipline::{Math, Physics, Research};
         let met = self.world.genesis().map(|g| g.metabolism).unwrap_or(2);
         let clade = Some(self.world.rejuvenation_clade());
         let unseated: Vec<cfe::almanac::ScienceDiscipline> = [Math, Physics, Research]
@@ -1892,19 +1965,50 @@ impl Polity {
                 (4 / fee).max(1) as u64
             })
             .collect();
-        let Some(receipt) = self.world.chronicle().receipts().last() else {
-            return;
-        };
         let mut hasher = blake3::Hasher::new();
-        hasher.update(&receipt.own.0);
-        hasher.update(b"cognitive-invest");
-        let seed = *hasher.finalize().as_bytes();
-        let Some(i) = soc::partition_draw(&weights, seed) else {
+        hasher.update(&seed);
+        hasher.update(b"which-science");
+        let sub = *hasher.finalize().as_bytes();
+        if let Some(i) = soc::partition_draw(&weights, sub) {
+            let _ = self.world.seat_science_as(self.automaton, primary, unseated[i]);
+        }
+    }
+
+    /// The EXPAND act — charter one new world in the system. Called only once the
+    /// abundance resolver has CHOSEN to expand; the system cap is a physical
+    /// bound, and the TRUE-WEALTH solvency (operator ruling 2026-08-15: no
+    /// toxic-leverage founding off floored cash) is the post-choice PHYSICS bound,
+    /// NOT a pre-decision gate. Was `expand_step`'s charter branch; the
+    /// supply-ring weave stays every-beat in `expand_step`.
+    fn invest_expansion(&mut self) {
+        const SYSTEM_CAP: usize = 4;
+        // A line cannot PROJECT settlement to a new world before it has matured
+        // (level ≥ 3) — a physical progression bound, kept post-choice (the line
+        // may WILL to expand young; it simply cannot yet reach). Founding early
+        // would split the food base and tip the home orb into famine.
+        if self.level < 3 {
             return;
+        }
+        let orbs: Vec<u64> = self.world.committed().orbs.iter().map(|o| o.orb_id).collect();
+        if orbs.len() >= SYSTEM_CAP {
+            return; // the system is full — a physical cap
+        }
+        let home = *orbs.first().unwrap_or(&cfe::world::FIRST_ORB);
+        let accrued = self.world.accrued_of(home);
+        let liquid = |resource| {
+            let pending: Ratio = accrued
+                .iter()
+                .filter(|(r, _)| *r == resource)
+                .fold(ratio(0, 1), |sum, (_, a)| sum + a.clone());
+            banked(&self.world, resource) + pending
         };
-        // Seat it — pays the bill or refuses (unaffordable ⇒ the line waits, with
-        // thinkers but not yet rich enough to grow their minds). One act per beat.
-        let _ = self.world.seat_science_as(self.automaton, primary, unseated[i]);
+        let solvent = cfe::dop::founding_reserves()
+            .into_iter()
+            .all(|(resource, moved)| liquid(resource) >= moved);
+        if solvent {
+            let name = format!("{}-orb{}", self.spec.world_name, orbs.len());
+            let _ = self.world.chart_as(self.automaton, &name, home);
+        }
     }
 
     fn build_step(&mut self) {
@@ -2120,41 +2224,11 @@ impl Polity {
         if self.level < 3 || self.world.orb().is_none_or(|o| !o.famine.is_empty()) {
             return;
         }
-        // THE SYSTEM CAP — a star system holds a handful of worlds. Four
-        // orbs give the internal economy room for more than one
-        // irreducible cycle (rank ≥ 1 at three, growing past it at four).
-        const SYSTEM_CAP: usize = 4;
-        let orbs: Vec<u64> =
-            self.world.committed().orbs.iter().map(|o| o.orb_id).collect();
-        if orbs.len() < SYSTEM_CAP {
-            let home = *orbs.first().unwrap_or(&cfe::world::FIRST_ORB);
-            // TRUE-WEALTH GATE (operator ruling 2026-08-15): capital
-            // expenditure may not ignore accrued debt. STAB-1 floors a
-            // colony's bank at zero and defers its unpayable upkeep into
-            // NEGATIVE accrued; funding a new founding from that floored cash
-            // is toxic leverage — phantom wealth. A line dodging its upkeep is
-            // functionally insolvent and forfeits the right to charter, or the
-            // economy invites the debt-spiral exploit (starve your own
-            // infrastructure to spam territory). Charter only when NET
-            // liquidity (banked + accrued) covers the founding reserves for
-            // EVERY resource; a debt-ridden line stalls until its true wealth
-            // recovers, which is the correct economics.
-            let accrued = self.world.accrued_of(home);
-            let liquid = |resource| {
-                let pending: Ratio = accrued
-                    .iter()
-                    .filter(|(r, _)| *r == resource)
-                    .fold(ratio(0, 1), |sum, (_, a)| sum + a.clone());
-                banked(&self.world, resource) + pending
-            };
-            let solvent = cfe::dop::founding_reserves()
-                .into_iter()
-                .all(|(resource, moved)| liquid(resource) >= moved);
-            if solvent {
-                let name = format!("{}-orb{}", self.spec.world_name, orbs.len());
-                let _ = self.world.chart_as(self.automaton, &name, home);
-            }
-        }
+        // THE CHARTER DECISION MOVED to the abundance resolver (Expand arm,
+        // EMERGENCE-2 — `invest_expansion`, which keeps the TRUE-WEALTH solvency
+        // as its post-choice bound). This step now only weaves the internal
+        // supply ring — maintenance that runs every beat a climbed, fed line
+        // holds, exactly as before.
         // Weave / maintain the internal supply ring over every orb. An
         // edge whose source cannot yet stream simply settles to nothing
         // (settle_bond floors delivery at zero) — never a negative
@@ -2222,12 +2296,15 @@ impl Polity {
     /// SIZE (`mint_cost` — the homological pressure). The Mind reaches toward the
     /// shape and as deep as the size demands. Empty shape / zero pressure when
     /// the economy is covered — then there is no void, and no search.
-    #[allow(dead_code)]
-    fn civic_defect(&self) -> (Vec<solver::need::Family>, u64) {
+    /// **THE LIVE CIVIC PEEL** — overlay the population's material deficit on the
+    /// standing generators and read the residual γ (`EconomicPeel`), the void no
+    /// known structure spans. `None` when there is no world to read. This is the
+    /// organ N-I6 orphaned (its live caller `build_step` was removed); EMERGENCE-2
+    /// reads it live again — for the abundance TENSIONS, not as a second builder
+    /// (`express_survival` stays the sole zone-raiser).
+    fn civic_peel(&self) -> Option<civic::EconomicPeel> {
         let world = &self.world;
-        let Some(orb) = world.orb() else {
-            return (Vec::new(), 0);
-        };
+        let orb = world.orb()?;
         let metabolism = world
             .committed()
             .genesis
@@ -2244,13 +2321,18 @@ impl Polity {
         } else {
             Vec::new()
         };
-        let reading = civic::civic_reading(&fold, metabolism, &standing, &demand, [0u8; 32]);
-        let shape = civic::classify_defect(&reading.peel.residual, &reading.peel.torsion);
-        let pressure = num_traits::ToPrimitive::to_u64(&civic::mint_cost(
-            &reading.peel.residual,
-            &reading.peel.torsion,
-        ))
-        .unwrap_or(0);
+        Some(civic::civic_reading(&fold, metabolism, &standing, &demand, [0u8; 32]).peel)
+    }
+
+    #[allow(dead_code)]
+    fn civic_defect(&self) -> (Vec<solver::need::Family>, u64) {
+        let Some(peel) = self.civic_peel() else {
+            return (Vec::new(), 0);
+        };
+        let shape = civic::classify_defect(&peel.residual, &peel.torsion);
+        let pressure =
+            num_traits::ToPrimitive::to_u64(&civic::mint_cost(&peel.residual, &peel.torsion))
+                .unwrap_or(0);
         (shape, pressure)
     }
 
@@ -3110,14 +3192,14 @@ impl Polity {
         profile::timed("cognition_step", || self.cognition_step());
         profile::timed("survey_step", || self.survey_step());
         profile::timed("expand_step", || self.expand_step());
-        // COG-8 BUILD-TO-THINK: a fed line with thinkers invests surplus in a
-        // bigger brain (a cognitive-science seat), lifting the depth cap 2→3 —
-        // BEFORE research, so a seat this beat deepens this beat's mint.
-        // COG-8 BUILD-TO-THINK: a fed line with surplus seats a cognitive science,
-        // lifting the depth cap 2→3 — BEFORE research, so a seat this beat deepens
-        // this beat's mint. (The kernel now declares the seat's affinity-scaled bill
-        // correctly, so a non-Primary Iron-billed seat conserves — task #127.)
-        profile::timed("cognitive_investment_step", || self.cognitive_investment_step());
+        // COG-EMERGENCE-2 THE ABUNDANCE STEP: above the survival floor, the line
+        // makes ONE surplus choice — deepen, expand, synthesise, or hoard — by a
+        // single fold-draw over its tensions, not three authored gates. Runs
+        // BEFORE research so a cognitive seat this beat deepens this beat's mint;
+        // the chosen act pays its own bill or is refused by physics AFTER the
+        // choice (the will stays the line's own). Replaces cognitive_investment_
+        // step + expand_step's charter + chemistry_step's seat.
+        profile::timed("abundance_step", || self.abundance_step());
         profile::timed("research_step", || self.research_step(book, survives));
         let newborn = profile::timed("divergence_step", || self.divergence_step(registry));
         // THE RESUME CARRIER (task 25, 2026-07-30): every polity
