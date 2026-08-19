@@ -1840,6 +1840,73 @@ impl Polity {
             }
         }
     }
+    /// **COG-8 — BUILD-TO-THINK.** A line invests in a bigger BRAIN when it has
+    /// thinkers to deepen and can afford the apparatus. Seating a cognitive
+    /// science (Math/Physics/Research) lifts `cognitive_capacity` 2→3, so the Mind
+    /// composes one rung deeper — COG-6's depth-3 frontier that the conductor,
+    /// seating only Chem, never unlocked. A COSTED investment: `seat_science_as`
+    /// pays the science-seat bill from the orb's banks, so a poor or starving line
+    /// cannot buy depth — intelligence is EARNED, not gifted (true-wealth). The
+    /// discipline is drawn STOCHASTICALLY — a partition draw over the unseated
+    /// cognitive sciences, weighted by the species' own seat affinity (a
+    /// comb-compute hexasocial reaches for Math, a plasmiform Physics), seeded by
+    /// the line's latest receipt digest so replay is exact (the SOC
+    /// stochastic-freedom principle). One seat per beat.
+    fn cognitive_investment_step(&mut self) {
+        use cfe::almanac::ScienceDiscipline::{Math, Physics, Research};
+        let primary = cfe::world::FIRST_ORB;
+        if self.world.orb().is_none() || self.world.star().is_none() {
+            return;
+        }
+        if self.world.orb().is_some_and(|o| !o.famine.is_empty()) {
+            return; // a starving line builds no academy
+        }
+        // Already at the depth-3 frontier — a cognitive science stands.
+        if self.world.cognitive_capacity(primary) >= 3 {
+            return;
+        }
+        // THE DRIVE: only a line that already THINKS deepens its mind — a banked
+        // LEISURE surplus (the COG budget the Mind mints from) is the signal that
+        // this line has cognitive wealth to invest in depth. A line with no
+        // leisure has nothing to spare for a bigger brain (and, fasting, barely
+        // thinks at all — COG-3). This ties build-to-think to the cognitive
+        // economy: surplus thought funds deeper thought.
+        if self.world.leisure_bank_of(primary) <= ratio(0, 1) {
+            return;
+        }
+        // The unseated cognitive sciences, weighted by the species' own seat
+        // affinity (Primary 4 · Secondary 2 · Alien 1) — a stochastic reach.
+        let met = self.world.genesis().map(|g| g.metabolism).unwrap_or(2);
+        let clade = Some(self.world.rejuvenation_clade());
+        let unseated: Vec<cfe::almanac::ScienceDiscipline> = [Math, Physics, Research]
+            .into_iter()
+            .filter(|d| self.world.science_rank(primary, *d) < 1)
+            .collect();
+        if unseated.is_empty() {
+            return;
+        }
+        let weights: Vec<u64> = unseated
+            .iter()
+            .map(|d| {
+                let fee = cfe::almanac::science_seat_affinity(met, *d, clade).fee_mult();
+                (4 / fee).max(1) as u64
+            })
+            .collect();
+        let Some(receipt) = self.world.chronicle().receipts().last() else {
+            return;
+        };
+        let mut hasher = blake3::Hasher::new();
+        hasher.update(&receipt.own.0);
+        hasher.update(b"cognitive-invest");
+        let seed = *hasher.finalize().as_bytes();
+        let Some(i) = soc::partition_draw(&weights, seed) else {
+            return;
+        };
+        // Seat it — pays the bill or refuses (unaffordable ⇒ the line waits, with
+        // thinkers but not yet rich enough to grow their minds). One act per beat.
+        let _ = self.world.seat_science_as(self.automaton, primary, unseated[i]);
+    }
+
     fn build_step(&mut self) {
         // N-I6 — build_step NO LONGER RAISES ZONES. The survival express
         // (`express_survival`, post-tick) is the SOLE zone-raiser; Policy and
@@ -3039,6 +3106,10 @@ impl Polity {
         profile::timed("cognition_step", || self.cognition_step());
         profile::timed("survey_step", || self.survey_step());
         profile::timed("expand_step", || self.expand_step());
+        // COG-8 BUILD-TO-THINK: a fed line with thinkers invests surplus in a
+        // bigger brain (a cognitive-science seat), lifting the depth cap 2→3 —
+        // BEFORE research, so a seat this beat deepens this beat's mint.
+        profile::timed("cognitive_investment_step", || self.cognitive_investment_step());
         profile::timed("research_step", || self.research_step(book, survives));
         let newborn = profile::timed("divergence_step", || self.divergence_step(registry));
         // THE RESUME CARRIER (task 25, 2026-07-30): every polity
