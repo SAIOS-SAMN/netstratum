@@ -548,6 +548,53 @@ pub fn resolve_investment(
     Investment::MENU[i]
 }
 
+/// **THE CASTE WEIGHTS** (SOC-4) — the unspanned deficit γ (`EconomicPeel.residual`,
+/// what no standing structure spans) read as the society's unmet work, per axis.
+/// `|γ_i|` is how much internal specialisation axis `i` calls for. A covered
+/// economy weighs all-zero — a homogeneous society, no caste.
+pub fn caste_weights(residual: &[BigInt]) -> Vec<u64> {
+    residual
+        .iter()
+        .map(|g| num_traits::ToPrimitive::to_u64(&num_traits::Signed::abs(g)).unwrap_or(u64::MAX))
+        .collect()
+}
+
+/// **THE CASTE DRAW** (SOC-4) — which residual-axis caste one unit of the society
+/// joins, weighted by the unspanned deficit on each axis. The society does not
+/// ASSIGN castes by a table; each unit is DRAWN toward the work that is most
+/// unmet, off the line's own digest (salted `b"caste"` to decorrelate from the
+/// zone `b"workbench"` and abundance `b"abundance"` draws). `None` when the
+/// economy is covered (every residual zero) — no caste forms. Replay-exact.
+pub fn caste_draw(residual: &[BigInt], seed: [u8; 32]) -> Option<usize> {
+    let weights = caste_weights(residual);
+    let mut hasher = blake3::Hasher::new();
+    hasher.update(&seed);
+    hasher.update(b"caste");
+    let draw_seed = *hasher.finalize().as_bytes();
+    partition_draw(&weights, draw_seed)
+}
+
+/// **THE CASTE CENSUS** (SOC-4) — partition `members` of the society across the
+/// residual axes: each member DRAWS its caste independently (salted by index), so
+/// the census is a stochastic partition that SELF-ORGANISES proportional to the
+/// residual, never a centrally-assigned quota. Per-axis head counts (len =
+/// `residual.len()`); all zero when the economy is covered. Two societies with
+/// the same residual but different digests organise DIFFERENTLY — emergence, not
+/// a caste table. Replay-exact.
+pub fn caste_census(residual: &[BigInt], members: u64, seed: [u8; 32]) -> Vec<u64> {
+    let mut census = vec![0u64; residual.len()];
+    for m in 0..members {
+        let mut hasher = blake3::Hasher::new();
+        hasher.update(&seed);
+        hasher.update(&m.to_le_bytes());
+        let member_seed = *hasher.finalize().as_bytes();
+        if let Some(axis) = caste_draw(residual, member_seed) {
+            census[axis] += 1;
+        }
+    }
+    census
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
