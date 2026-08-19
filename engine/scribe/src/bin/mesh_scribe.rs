@@ -13,10 +13,15 @@
 //! buys a voice never a vote. A claim is spoken when NEW, or
 //! re-spoken when it was withheld and the sun has since GROWN.
 //!
-//! Scribe law holds: this reads the kernel's own solve paper and
-//! writes nothing back as state. (Stricter future form: read the
-//! chain, not .sol paper. Demand — answering OTHER kernels' walls —
-//! waits on mesh-side wall listing; recorded, not landed.)
+//! STATUS: v1 of the packaged shape — LAW II NOT YET SATISFIED
+//! (mycelium docs/23_RESIDENCY.md): this is still a sidecar scanning
+//! solve paper on a beat. The destination: the forge's own
+//! solve-completion path calls sdk::attach at the moment of solve,
+//! and this binary shrinks to `--backfill` (a one-shot migration
+//! verb for historical records, then deleted). Demand — answering
+//! OTHER kernels' walls — waits on mesh-side wall listing (Law III).
+//! Scribe law holds meanwhile: reads the kernel's own solve paper,
+//! writes nothing back as state.
 //!
 //!   mesh-scribe --sync            attach, speak every claim once, exit
 //!   mesh-scribe --resident        attach and stay seated, forever
