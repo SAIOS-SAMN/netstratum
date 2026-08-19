@@ -471,6 +471,83 @@ pub fn choose_build(
     partition_draw(&weights, draw_seed).map(|i| candidates[i])
 }
 
+/// **THE ABUNDANCE MENU** (COG-EMERGENCE-2). Above the survival floor — which
+/// `express_survival` raises as the SOLE zone-builder (N-I6) — a line with
+/// surplus faces ONE choice, not three authored `_step` gates. Each act is a
+/// candidate in the same kind of fold the zone workbench draws from.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Investment {
+    /// Deepen the mind — seat cognition, lift the compose-depth. Closed by the
+    /// cognitive γ (`civic::cognitive_deficit`): an unspanned residual weighed
+    /// against a shallow mind's headroom.
+    Deepen,
+    /// Reach a new niche — acquire territory. Closed by frontier pressure.
+    Expand,
+    /// Synthesize new matter — seat chemistry. Closed by the chemical residual.
+    Synthesize,
+    /// Bank the surplus and raise nothing — the rest/explore default that wins
+    /// when no deficit pulls.
+    Hoard,
+}
+
+impl Investment {
+    /// The menu, in fold order. `Hoard` is the untilted baseline.
+    pub const MENU: [Investment; 4] =
+        [Investment::Deepen, Investment::Expand, Investment::Synthesize, Investment::Hoard];
+}
+
+/// **THE ABUNDANCE WEIGHTS** — the workbench principle carried to the surplus
+/// choice: `w = reach · (L + γ)`, the line's topological richness (`reach`, its
+/// algebraic dimension — the same instinct/history the recipe draw reads)
+/// TILTED by the deficit each act would close. `Hoard` carries no tilt
+/// (`w = reach·L`), so a line at ease reads a UNIFORM menu and the draw
+/// EXPLORES; a line under a sharp cognitive γ leans hard toward `Deepen`. NO
+/// affordability enters — the weight is topological tension ALONE. The shared
+/// `reach` cancels in the draw, exactly as the shared genus does for zones.
+pub fn investment_weights(
+    reach: &AlgebraicRank,
+    cognitive_gamma: u64,
+    expansion_gamma: u64,
+    synthesis_gamma: u64,
+) -> [u64; 4] {
+    let lattice = LATTICE as u64;
+    let dim = reach.dimension().max(1); // a line always has some reach to spend
+    let tilt = |gamma: u64| dim.saturating_mul(lattice.saturating_add(gamma));
+    [
+        tilt(cognitive_gamma), // Deepen
+        tilt(expansion_gamma), // Expand
+        tilt(synthesis_gamma), // Synthesize
+        tilt(0),               // Hoard — the untilted floor
+    ]
+}
+
+/// **THE ABUNDANCE RESOLVER** (COG-EMERGENCE-2) — the single draw that will
+/// replace `cognitive_investment_step`, `chemistry_step`'s seat-decision, and
+/// `expand_step`'s gate. The line does not evaluate three `if`s; it FEELS three
+/// tensions and draws one act against its own chronicle digest (salted
+/// `abundance`, independent of the zone draw). Two lines with the same surplus
+/// and the same tensions but DIFFERENT histories (seeds) can choose
+/// differently — design, not convergence. If the chosen act is unaffordable,
+/// physics rejects it AFTER the fact; its will stays mathematically its own.
+/// Replay-exact. (Not yet on the live path — EMERGENCE-2b wires `cycle()`.)
+pub fn resolve_investment(
+    reach: &AlgebraicRank,
+    cognitive_gamma: u64,
+    expansion_gamma: u64,
+    synthesis_gamma: u64,
+    seed: [u8; 32],
+) -> Investment {
+    let weights = investment_weights(reach, cognitive_gamma, expansion_gamma, synthesis_gamma);
+    let mut hasher = blake3::Hasher::new();
+    hasher.update(&seed);
+    hasher.update(b"abundance");
+    let draw_seed = *hasher.finalize().as_bytes();
+    // Every weight is `dim·L >= 1 > 0`, so the draw always resolves; the floor
+    // (`Hoard`) is the fallback only in the impossible total-zero case.
+    let i = partition_draw(&weights, draw_seed).unwrap_or(Investment::MENU.len() - 1);
+    Investment::MENU[i]
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
