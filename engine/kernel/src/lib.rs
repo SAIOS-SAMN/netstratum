@@ -1851,8 +1851,26 @@ fn admitted_deltas(
                 .map(|g| g.metabolism)
                 .unwrap_or(2);
             if let Some(d) = cfe::almanac::ScienceDiscipline::from_wire(*discipline) {
+                // Re-derive the SEAT AFFINITY exactly as the cfe seat pays it
+                // (call-not-copy): the bill scales by the species' affinity
+                // (Primary 1 · Secondary 2 · Alien 4), and Research by its economic
+                // mode besides. The old hard-coded `affinity_mult = 1` UNDER-declared
+                // any non-Primary bill, so the seat consumed more resource than this
+                // conservation check was told — a break only a non-Primary Iron-billed
+                // seat surfaces (Physics off a mineral line, once COG-8 seats it).
+                // Primary seats (Chem for its own metabolism) read aff = 1 as before,
+                // so every current seat is byte-identical.
+                let clade = prior.taxon.map(|(_, c)| c);
+                let mut aff = cfe::almanac::science_seat_affinity(met, d, clade).fee_mult();
+                if matches!(d, cfe::almanac::ScienceDiscipline::Research) {
+                    let (class, eco_clade) =
+                        prior.taxon.unwrap_or((7, u16::from(cfe::almanac::FLATLANDER_CLADE)));
+                    aff *= cfe::almanac::research_affinity_mult(cfe::almanac::economic_mode(
+                        class, eco_clade,
+                    ));
+                }
                 let mut out = Vec::new();
-                for (r, a) in cfe::almanac::science_seat_bill(d, *rank, met, 1) {
+                for (r, a) in cfe::almanac::science_seat_bill(d, *rank, met, aff) {
                     non_negative(r, &a)?;
                     out.push((r, -a));
                 }

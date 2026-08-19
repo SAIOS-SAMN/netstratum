@@ -1852,7 +1852,6 @@ impl Polity {
     /// comb-compute hexasocial reaches for Math, a plasmiform Physics), seeded by
     /// the line's latest receipt digest so replay is exact (the SOC
     /// stochastic-freedom principle). One seat per beat.
-    #[allow(dead_code)] // COG-8 wiring HELD in cycle() pending the depth-3 conservation fix.
     fn cognitive_investment_step(&mut self) {
         use cfe::almanac::ScienceDiscipline::{Math, Physics, Research};
         let primary = cfe::world::FIRST_ORB;
@@ -3114,14 +3113,11 @@ impl Polity {
         // COG-8 BUILD-TO-THINK: a fed line with thinkers invests surplus in a
         // bigger brain (a cognitive-science seat), lifting the depth cap 2→3 —
         // BEFORE research, so a seat this beat deepens this beat's mint.
-        // COG-8 BUILD-TO-THINK — WIRING HELD (2026-08-19). The step is correct and
-        // witnessed (a fed line seats a cognitive science, capacity 2→3), but
-        // enabling it lifts the depth cap to 3 and the previously-unreachable
-        // depth-3 mint path surfaces a latent Iron CONSERVATION break in a long era
-        // (mint_loop: Iron consumed with no counterparty — ~0.375 at beat 44,
-        // compounding after; isolated to this call). The bug is downstream (the
-        // depth-3 economy / science-seat conservation), not the drive; re-enable
-        // once it is fixed. `cognitive_investment_step` stays defined below.
+        // COG-8 BUILD-TO-THINK: a fed line with surplus seats a cognitive science,
+        // lifting the depth cap 2→3 — BEFORE research, so a seat this beat deepens
+        // this beat's mint. (The kernel now declares the seat's affinity-scaled bill
+        // correctly, so a non-Primary Iron-billed seat conserves — task #127.)
+        profile::timed("cognitive_investment_step", || self.cognitive_investment_step());
         profile::timed("research_step", || self.research_step(book, survives));
         let newborn = profile::timed("divergence_step", || self.divergence_step(registry));
         // THE RESUME CARRIER (task 25, 2026-07-30): every polity
