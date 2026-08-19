@@ -1,0 +1,14 @@
+# THE BOARD'S HEARTBEAT — netstratum's civilizations think forever;
+# every proved solve offers itself to the mycelium through the
+# membrane (Law II). This is the kernel: not a bridge, the game.
+[Unit]
+Description=netstratum conductor (civilizations thinking, membrane speaking)
+After=mycelium-hypha.service
+[Service]
+WorkingDirectory=/opt/netstratum
+Environment=MYCELIUM_ADDR=hypha://127.0.0.1:7420
+ExecStart=/opt/netstratum/target/release/conductor --cadence 2
+Restart=on-failure
+RestartSec=10
+[Install]
+WantedBy=default.target
