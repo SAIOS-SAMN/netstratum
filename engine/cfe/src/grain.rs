@@ -35,7 +35,7 @@ use num_bigint::BigInt;
 /// records the measurement that fixes this number, and it is never hand-edited;
 /// the derivation re-runs if the wall moves. (Placeholder until the live
 /// measurement lands; wiring is inert until then.)
-#[allow(dead_code)] // wired into pair_melt in Phase B of #136
+#[allow(dead_code)] // grain organ landed unwired (8ccf6f7); re-wired only when the trace convicts an arithmetic input
 pub(crate) const GRAIN_DENOM_MAX: i64 = 4096;
 
 /// **GRAIN A RATE** — the deterministic best-rational-approximation of `x` to a
@@ -50,7 +50,7 @@ pub(crate) const GRAIN_DENOM_MAX: i64 = 4096;
 ///   with `k_next > GRAIN_DENOM_MAX`.
 ///
 /// **Rates only** — see the module boundary. Never call this on a conserved stock.
-#[allow(dead_code)] // wired into pair_melt in Phase B of #136
+#[allow(dead_code)] // grain organ landed unwired; wired only on a trace-convicted input
 pub(crate) fn grain_rate(x: &Ratio) -> Ratio {
     let zero = BigInt::from(0);
     let bound = BigInt::from(GRAIN_DENOM_MAX);

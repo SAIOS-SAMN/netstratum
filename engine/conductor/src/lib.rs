@@ -3626,6 +3626,21 @@ pub fn element_trade_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, Stri
         }
     }
     let mut masses: Vec<Ratio> = worlds.iter().map(mass_of).collect();
+    // #136 MEMOIZATION RIDER — the exporter's TOP element is a per-WORLD reading
+    // (max over its element ledger, up to ~11.5k kinds). Reading it per (a, b)
+    // pair was the O(kinds·pairs) SWEEP that dominated the beat once the melt
+    // grain landed. Peel it ONCE per world here and refresh only the two a clear
+    // moves — same element, same tie-break (`max_by` keeps the last of equals),
+    // same choices — exactly the bargain the mass cache above already strikes.
+    let top_of = |p: &Polity| -> Option<([u8; 32], Ratio)> {
+        p.world.orb().and_then(|o| {
+            o.elements
+                .iter()
+                .max_by(|x, y| x.1.cmp(&y.1))
+                .map(|(id, amt)| (*id, amt.clone()))
+        })
+    };
+    let mut top: Vec<Option<([u8; 32], Ratio)>> = worlds.iter().map(top_of).collect();
     for a in 0..n {
         for b in (a + 1)..n {
             if worlds[a].penned || worlds[b].penned {
@@ -3646,20 +3661,15 @@ pub fn element_trade_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, Stri
             } else {
                 (b, a)
             };
-            let Some((element, have)) = worlds[exporter]
-                .world
-                .orb()
-                .and_then(|o| {
-                    o.elements
-                        .iter()
-                        .max_by(|x, y| x.1.cmp(&y.1))
-                        .map(|(id, amt)| (*id, amt.clone()))
-                })
-            else {
+            let Some((element, have)) = top[exporter].clone() else {
                 continue;
             };
             // Ship half (derive 2 as 1+1 — no tuned dial).
-            let ship = have.clone() / (ratio(1, 1) + ratio(1, 1));
+            // #136 — the dispatched amount lands on the 1/64 lattice too, so the
+            // sender's stock stays `denom | 64` after the debit (the giver keeps
+            // the sub-lattice remainder, un-shipped). A ship below 1/64 smelts to
+            // zero and the guards below skip it — a fill smelted to zero refuses.
+            let ship = cfe::world::smelt(&(have.clone() / (ratio(1, 1) + ratio(1, 1))));
             if ship <= ratio(0, 1) {
                 continue;
             }
@@ -3689,6 +3699,8 @@ pub fn element_trade_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, Stri
                 // touched readings (the cache's whole bargain).
                 masses[exporter] = mass_of(&worlds[exporter]);
                 masses[importer] = mass_of(&worlds[importer]);
+                top[exporter] = top_of(&worlds[exporter]);
+                top[importer] = top_of(&worlds[importer]);
             }
         }
     }

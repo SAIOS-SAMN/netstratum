@@ -107,3 +107,29 @@ needed).
 
 SEAL-B stays green throughout (the beat stays deterministic); the numbers change
 because they stop being rounded. Each slice commits green with its witness.
+
+## 6 The complementary law — every ledger declares its lattice at its fill site
+
+Operator ruling 2026-08-20 (the third occurrence of one disease: leisure banks, the
+d_orbit hypothesis, now element stocks). The no-scalar law above governs COGNITION,
+where exactness is unbounded and protected forever. Its complement governs the
+WORLD:
+
+**Every conserved world-physics ledger declares its lattice at its fill site.
+Unbounded exactness is reserved for cognition, where it is law.**
+
+A conserved ledger (element stocks, banked matter, leisure) is quantised on its own
+lattice by SMELT-flooring every fill at the site the delta lands — `smelt(x) =
+floor(x·64)/64`, the 1/64 grid the melt law speaks. This is NOT the environment
+grain (`grain_rate`, a best-rational approximation of a *rate* at a call site); a
+floor at a fill and a grain at a call site are different instruments, and element
+math must use neither grain nor unbounded drift. A fill smelted below one lattice
+unit refuses whole; the shaved remainder never vanishes (it stays with the giver,
+or the audited void records it — matter included).
+
+The disease this prevents is not denominator blowup as such — it is discovering,
+per hot loop, that a ledger never declared its lattice. `haul_element` bypassed the
+SMELT and element stocks drifted to 107,756-bit denominators, stalling `mass_of` at
+96 s/beat; the trace convicted it (top_build 6 ms, mass_build 96350 ms). One
+standing rule ends the series: when you add a conserved world-ledger, floor its
+fills. (#136; witnesses in `cfe/tests/element_smelt_pins.rs`.)

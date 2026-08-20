@@ -526,7 +526,16 @@ fn haul_element(
         src_stamp,
         vec![SOVEREIGN],
     );
-    let delivered = amount.clone() * (ratio(1, 1) - melt.clone());
+    // #136 THE SMELT, EXTENDED TO ELEMENT FILLS (operator ruling B, 2026-08-20).
+    // Every FILL lands on the 1/64 lattice — the same law resource fills obey
+    // (`smelt`), bypassed here until now, which is why element stocks drifted to
+    // ~700-bit denominators and stalled `mass_of`. The DELIVERED fill is smelted;
+    // the sender debits `amount` (kept on the lattice by the caller), so both
+    // stocks stay `denom | 64`. The void audit (sent − received) absorbs the melt
+    // iceberg plus the sub-1/64 shave — no matter is un-receipted (the receipts
+    // record `amount` sent and `delivered` banked; their difference is the void's,
+    // exactly as the iceberg law already states).
+    let delivered = smelt(&(amount.clone() * (ratio(1, 1) - melt.clone())));
     {
         let target = dst
             .orbs
