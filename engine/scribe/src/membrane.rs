@@ -21,7 +21,7 @@
 //! fallback for program-string-only records (`--backfill`, a
 //! migration verb); its coverage limit is that era's, not this path's.
 
-use std::collections::VecDeque;
+use std::collections::{HashSet, VecDeque};
 use std::sync::mpsc;
 use std::sync::Mutex;
 use std::sync::OnceLock;
@@ -237,6 +237,24 @@ pub fn measure_at(grid: &Grid, rank: u8) -> Option<mycelium::iae::peel::FullMeas
     FullMeasurement::try_new(rank, CellFrame { rows, cols }, occ).ok()
 }
 
+/// **THE CLAIMANT'S BRIDGE** (#132) — carry a wall's measurement from mycelium's
+/// carrier onto net's OWN reduce carrier (`reduct`), so net re-derives the wall
+/// through ITS organ. This is the second, INDEPENDENT vantage consilience rests
+/// on: net never borrows the wall's own `omega` (that is the judge's derivation).
+/// Same shape (fiber, frame, occupancy); the ARC ten-hue ladder is the fixed
+/// fiber net's own `measure_grid` uses, so a heard wall reduces against a basin
+/// grown on the same ladder. `None` if a direction falls outside the ladder.
+fn to_reduct_fm(m: &mycelium::iae::peel::FullMeasurement) -> Option<reduct::peel::FullMeasurement> {
+    use reduct::peel::{CellFrame, FullMeasurement, GaugeDirection, Site};
+    let frame = m.frame();
+    let occ: Vec<(Site, GaugeDirection)> = m
+        .occupancy()
+        .iter()
+        .map(|(s, d)| (Site { row: s.row, col: s.col }, GaugeDirection { index: d.index }))
+        .collect();
+    FullMeasurement::try_new(10, CellFrame { rows: frame.rows, cols: frame.cols }, occ).ok()
+}
+
 pub fn family_rank(pairs: &[(Grid, Grid)]) -> u8 {
     pairs
         .iter()
@@ -254,6 +272,15 @@ fn run(rx: mpsc::Receiver<SolveOffer>) {
     let mut basis: Vec<CrystalId> = Vec::new();
     let mut pending: VecDeque<SolveOffer> = VecDeque::new();
     let mut tag: u16 = 0;
+    // #132 — the listening half's state (side-channel; never touches the beat).
+    // `me` routes `walls` by net's certificates — the SAME emblem the membrane
+    // enrols with. `net_basin` is net's own claimant mind (independent of the
+    // mesh judge); `heard` dedups (a re-hear without new vocabulary is
+    // recognition-replay, not new evidence).
+    let me: Option<[u8; 32]> = mycelium::sdk::attach::emblem(KERNEL, None)
+        .map(|occ| KernelRef::of(&occ, None).0);
+    let mut net_basin: Vec<reduct::Crystal> = Vec::new();
+    let mut heard: HashSet<[u8; 32]> = HashSet::new();
     loop {
         // Drain what arrived; block only when there is nothing to do.
         let disconnected = if pending.is_empty() {
@@ -369,6 +396,43 @@ fn run(rx: mpsc::Receiver<SolveOffer>) {
             }
         }
         pending = still;
+
+        // #132 — THE LISTENING HALF (Law III, side-channel — the beat stays
+        // replay-exact). Hear the mesh's demand through net's OWN organ:
+        //   Understood → net already holds the structure → OFFER the wall's own
+        //     pair (lawful: net genuinely derived it; the hypha's sweep settles
+        //     the wall mesh-wide, no verb to name it).
+        //   Learned → the wall walled net → its basin just GREW (a crystal
+        //     minted) → never offered (net derived it FROM the wall, not from
+        //     prior work — the PoUW honesty rule). The honest withhold becomes
+        //     priced census evidence once E-1 lands (ECONOMY_BRIEF E-2).
+        if let (Some(s), Some(me)) = (session.as_mut(), me) {
+            if let Ok(walls) = s.walls(me) {
+                for (orbit, wall) in walls {
+                    if !heard.insert(orbit) {
+                        continue;
+                    }
+                    let Some((a, b)) = wall.pair.as_ref() else { continue };
+                    let (Some(ra), Some(rb)) = (to_reduct_fm(a), to_reduct_fm(b)) else {
+                        continue;
+                    };
+                    match solver::hear(&ra, &rb, &mut net_basin) {
+                        solver::Heard::Understood => {
+                            tag = tag.wrapping_add(1);
+                            let pair = vec![(a.clone(), b.clone())];
+                            let _ = six_step(s, KERNEL, &pair, tag, &mut basis);
+                            eprintln!("membrane: wall understood → offered (net derived it)");
+                        }
+                        solver::Heard::Learned => {
+                            eprintln!(
+                                "membrane: wall learned → basin grew to {} (census when E-1 lands)",
+                                net_basin.len()
+                            );
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
