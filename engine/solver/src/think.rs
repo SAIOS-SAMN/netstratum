@@ -8,13 +8,27 @@
 //! Slice 2 (this landing): the `Grid → FullMeasurement` transducer only.
 //! Slice 3 adds `think_task`, the render table, and the certificate.
 
-use crate::search::SolveRead;
 use reduct::peel::{CellFrame, FullMeasurement, GaugeDirection, MeasurementRefusal, Site};
 use reduct::reduction::{ObserverFrame, PlaneElement, Relabel};
 use reduct::{think, Crystal, PairClosure, TaskThought};
 use solver_verify::certificate::{verify_certificate, CertificateRead, SolveCertificate};
 use solver_verify::grid::{run, Grid, Op, Program, TileMirror, HUES};
 use solver_verify::loader::Task;
+
+/// The typed solve reading — the ARC seat's verdict (moved here from the retired
+/// `search` module, deleted 2026-08-19: the mind observes, it does not search).
+/// `Solved` carries the proved program, the rendered test output, and its
+/// certificate; `Unsolved` is the honest withhold (Pin D).
+#[derive(Debug, Clone)]
+pub enum SolveRead {
+    Solved {
+        program: Program,
+        test_output: Grid,
+        matches_expected: Option<bool>,
+        certificate: SolveCertificate,
+    },
+    Unsolved,
+}
 
 /// Transduce a colored grid into a full measurement: every cell is a site
 /// carrying its hue as a gauge direction.

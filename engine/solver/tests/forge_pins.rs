@@ -1,9 +1,11 @@
-//! The forge pins: determinism (a task is a reading of history),
-//! digest separation (a different chronicle forges a different task),
-//! fairness (a forged task closes at its stated search depth), and
-//! the certificate replays on forged solves.
+//! The forge pins: determinism (a task is a reading of history), digest
+//! separation (a different chronicle forges a different task), and the forged
+//! name's provenance. (The old `forged_tasks_close_at_fair_depth` pin was tied
+//! to the retired enumerative `solve` — the "all forged tasks close at word_len
+//! depth" assumption is a search-budget claim, not a forge invariant, and the
+//! ARC seat's reach is pinned in `think_task_pins` / `tile_seat_pins` instead.)
 
-use solver::{forge_task, solve, verify_certificate, CertificateRead, Difficulty, SolveRead};
+use solver::{forge_task, Difficulty};
 
 /// Same digest + same difficulty → byte-identical task, on every
 /// machine, forever (CHARTER §9 at the forge).
@@ -26,39 +28,6 @@ fn digests_and_difficulties_separate() {
     let other_level = forge_task([11u8; 32], Difficulty::level(3));
     assert_ne!(base, other_digest);
     assert_ne!(base, other_level);
-}
-
-/// FAIRNESS: a forged task is solvable at its stated word length —
-/// the solver, searching to that depth, closes the training pairs and
-/// matches the held-out answer; the certificate replays intact.
-#[test]
-fn forged_tasks_close_at_fair_depth() {
-    let mut confirmed = 0;
-    for seed in 0..8u8 {
-        let difficulty = Difficulty::level(1 + (seed % 3) as u32);
-        let task = forge_task([seed; 32], difficulty);
-        match solve(&task, difficulty.word_len) {
-            SolveRead::Solved {
-                program,
-                test_output,
-                matches_expected,
-                certificate,
-            } => {
-                assert_eq!(matches_expected, Some(true), "seed {seed}: render matches");
-                assert_eq!(
-                    verify_certificate(&certificate, &task, &program, &test_output),
-                    CertificateRead::Intact
-                );
-                confirmed += 1;
-            }
-            SolveRead::Unsolved => panic!(
-                "seed {seed}: a forged level-{} task must close at depth {}",
-                1 + (seed % 3),
-                difficulty.word_len
-            ),
-        }
-    }
-    assert_eq!(confirmed, 8);
 }
 
 /// The forged name carries provenance: digest prefix + tier + word

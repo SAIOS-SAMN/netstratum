@@ -25,9 +25,7 @@ pub mod instinct;
 pub mod mint;
 pub mod need;
 pub mod perspective;
-pub mod search;
 pub mod selfmap;
-pub mod nsearch;
 // N-I3 (THE INTELLIGENCE PORT) — the ARC seat: peel train grids into
 // `reduct::FullMeasurement`, read them through the ONE reduce organ (`reduct::think`),
 // render a glued frame to a program, seal the proof. NOT a search path.
@@ -54,14 +52,7 @@ pub use solver_verify::{
 pub use derive::{derive, Candidate};
 pub use need::{Family, Hunger, Need};
 pub use selfmap::{consilience, knowledge_map, knowledge_order, Consilience, SelfMap};
-pub use search::{
-    consult_observed, frontier, propose, propose_consulted, propose_consulted_measured,
-    propose_measured, solve, solve_consulted, sweep_vocabulary,
-    Consultation, Proposal,
-    SolveRead,
-};
-pub use nsearch::{solve_field, FieldSolveRead};
-pub use think::{hear, hear_word, measure_grid, think_task, Heard};
+pub use think::{hear, hear_word, measure_grid, think_task, Heard, SolveRead};
 pub use survival::{ration_reads, think_survival, RationRead, SurvivalBook, SurvivalDeed};
 // N-I4 — the cognitive basin's element, re-exported for the vessel layer
 // (`conductor` grows a `Vec<Crystal>` per line and passes it to `think_task`).

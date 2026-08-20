@@ -10,7 +10,7 @@
 //! plane is load-bearing — on all-distinct hues a rotation reads as a recolor
 //! and would not glue (the organ's honest ambiguity, pinned in think_task_pins).
 
-use solver::search::SolveRead;
+use solver::SolveRead;
 use solver::{forge_task, think_task, Difficulty};
 use solver_verify::grid::{run, Grid, Op, TileMirror};
 use solver_verify::loader::{Task, TaskPair};

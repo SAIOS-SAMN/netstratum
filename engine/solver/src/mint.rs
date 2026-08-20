@@ -28,7 +28,8 @@
 //!                (Cross-LINE convergence is #14's crystallization.)
 //! ```
 
-use solver_verify::grid::{Grid, Op};
+use solver_verify::grid::{Grid, Op, TileMirror};
+use solver_verify::loader::Task;
 
 /// One minted word: its action orbit, its expansion (the letters it
 /// spells to — what every certificate carries), and the tasks that
@@ -194,4 +195,136 @@ pub fn pre_reach(
         }
     }
     None
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// THE STANDING VOCABULARY — op-DERIVATION off the observation, the input to
+// the novelty gate above. Moved here from the deleted `search` module
+// (2026-08-19): these are bounded derivations (peel the task's own ops), never
+// the retired enumerate-and-test search. `sweep_vocabulary` lists the ops a
+// task's observation NAMES; `standing_orbits` fingerprints them so a minted
+// word that is merely a standing op is refused as non-novel.
+// ─────────────────────────────────────────────────────────────────────
+
+/// Derive candidate recolor maps from the training pairs: under each geometric
+/// normalisation prefix (identity + the six symmetries), if every pair reads
+/// cell-wise consistent between `prefix(input)` and `output`, the observed hue
+/// mapping is a candidate op. Observed content, never a rule table.
+fn derived_recolors(task: &Task) -> Vec<Op> {
+    let prefixes: [Option<Op>; 7] = [
+        None,
+        Some(Op::Rotate90),
+        Some(Op::Rotate180),
+        Some(Op::Rotate270),
+        Some(Op::FlipH),
+        Some(Op::FlipV),
+        Some(Op::Transpose),
+    ];
+    let mut found: Vec<Op> = Vec::new();
+    'prefix: for prefix in &prefixes {
+        let mut map = [255u8; 10];
+        for pair in &task.train {
+            let seen = match prefix {
+                None => pair.input.clone(),
+                Some(op) => op.apply(&pair.input),
+            };
+            if seen.rows != pair.output.rows || seen.cols != pair.output.cols {
+                continue 'prefix;
+            }
+            for (i, &from) in seen.cells.iter().enumerate() {
+                let to = pair.output.cells[i];
+                match map[from as usize] {
+                    255 => map[from as usize] = to,
+                    already if already == to => {}
+                    _ => continue 'prefix,
+                }
+            }
+        }
+        for (h, slot) in map.iter_mut().enumerate() {
+            if *slot == 255 {
+                *slot = h as u8;
+            }
+        }
+        let op = Op::Recolor(map);
+        if !found.contains(&op) {
+            found.push(op);
+        }
+    }
+    found
+}
+
+/// Derive candidate tilings from the shape ratio, under the same seven prefixes.
+/// A ratio must hold on EVERY pair (one pair agreeing is a coincidence). The
+/// 4×4 `TileMirror` grid is enumerated to list the STANDING tile vocabulary
+/// (bounded ≤112 ops, grid-independent — vocabulary construction, not a
+/// recognition sweep; the tile SEAT reads the specific mirror off the carrier).
+fn derived_tiles(task: &Task) -> Vec<Op> {
+    let prefixes: [Option<Op>; 7] = [
+        None,
+        Some(Op::Rotate90),
+        Some(Op::Rotate180),
+        Some(Op::Rotate270),
+        Some(Op::FlipH),
+        Some(Op::FlipV),
+        Some(Op::Transpose),
+    ];
+    let mut ops: Vec<Op> = Vec::new();
+    for prefix in &prefixes {
+        let mut ratio: Option<(usize, usize)> = None;
+        let mut holds = true;
+        for pair in &task.train {
+            let seen = match prefix {
+                None => pair.input.clone(),
+                Some(op) => op.apply(&pair.input),
+            };
+            let (ir, ic) = (seen.rows, seen.cols);
+            let (or, oc) = (pair.output.rows, pair.output.cols);
+            if ir == 0 || ic == 0 || or % ir != 0 || oc % ic != 0 {
+                holds = false;
+                break;
+            }
+            let here = (or / ir, oc / ic);
+            match ratio {
+                None => ratio = Some(here),
+                Some(held) if held == here => {}
+                Some(_) => {
+                    holds = false;
+                    break;
+                }
+            }
+        }
+        let Some((down, across)) = ratio.filter(|_| holds) else { continue };
+        if down * across <= 1 || down > 6 || across > 6 {
+            continue;
+        }
+        for odd_row in TileMirror::ALL {
+            for odd_col in TileMirror::ALL {
+                let op = Op::Tile { down, across, odd_row, odd_col };
+                if !ops.contains(&op) {
+                    ops.push(op);
+                }
+            }
+        }
+    }
+    ops
+}
+
+/// **THE STANDING VOCABULARY** — the ops a task's observation names: derived
+/// recolors and tilings first (what the observation itself spells), then the
+/// fixed symmetry alphabet and object ops. Feeds `standing_orbits` (the novelty
+/// gate's "is this merely a standing op?" check). Bounded derivation, no search.
+pub fn sweep_vocabulary(task: &Task) -> Vec<Op> {
+    let mut vocabulary: Vec<Op> = Vec::new();
+    vocabulary.extend(derived_recolors(task));
+    vocabulary.extend(derived_tiles(task));
+    vocabulary.extend([
+        Op::Rotate90,
+        Op::Rotate180,
+        Op::Rotate270,
+        Op::FlipH,
+        Op::FlipV,
+        Op::Transpose,
+    ]);
+    vocabulary.extend(solver_verify::objects::OBJ_OPS.iter().cloned().map(Op::Object));
+    vocabulary
 }

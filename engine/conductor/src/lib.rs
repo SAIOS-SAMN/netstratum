@@ -2617,7 +2617,7 @@ impl Polity {
         if let SolveRead::Solved { program, matches_expected: Some(true), .. } = read {
             if program.len() >= 2 {
                 let standing =
-                    solver::mint::standing_orbits(&solver::search::sweep_vocabulary(task));
+                    solver::mint::standing_orbits(&solver::mint::sweep_vocabulary(task));
                 if let Some(orbit) = solver::mint::consider(&program, &self.library, &standing) {
                     self.deposit_toward_word(orbit, &program, sibling, digest);
                 }
@@ -2782,7 +2782,7 @@ impl Polity {
                         // same orbit) — `deposit_toward_word` gates that and bills
                         // the mint (`mint_cost`, COG-2/4/5, unchanged).
                         let standing = solver::mint::standing_orbits(
-                            &solver::search::sweep_vocabulary(&task),
+                            &solver::mint::sweep_vocabulary(&task),
                         );
                         if let Some(orbit) =
                             solver::mint::consider(&program, &self.library, &standing)
