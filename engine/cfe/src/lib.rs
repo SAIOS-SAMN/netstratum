@@ -22,6 +22,7 @@ pub mod growth;
 pub mod literature;
 pub mod dop;
 pub mod epoch;
+mod grain;
 // ONT-1 (operator directive 2026-08-16): the morphodynamic field — materials as
 // vectors, environment as M ⊕ Φ (matter + massless flux), a species as a
 // projection T_metab into the 5 universal roles; viability is a topological
