@@ -2677,7 +2677,7 @@ impl Polity {
             // THE VOLUMETRIC SEAT IS OFF THE BEAT (N-I4, THE INTELLIGENCE PORT).
             // `solve_volume` is a SECOND search-thinker, and the port admits
             // exactly one organ. Perception is a LENS on `measure_grid`, and the
-            // 3-form lens — a volumetric peel into `iae::FullMeasurement` — is
+            // 3-form lens — a volumetric peel into `reduct::FullMeasurement` — is
             // not built this landing. So a volumetric line WITHHOLDS rather than
             // reach through a search-shaped volume path left "until later": an
             // honest rest (the `None` arm declines the trajectory) until the

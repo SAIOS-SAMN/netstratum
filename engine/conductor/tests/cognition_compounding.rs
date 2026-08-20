@@ -15,9 +15,9 @@
 //! locality-sparse complex and the guided/GPU proposer (doc 51 §1) — this
 //! proves the loop and the mechanics, deterministically, in the live harness.
 
-use iae::bridge::GridObs;
-use iae::mind::{Manifold, Mind};
-use iae::proposer::seed_from;
+use reduct::bridge::GridObs;
+use reduct::mind::{Manifold, Mind};
+use reduct::proposer::seed_from;
 use num_bigint::BigInt;
 use solver::{forge_task, Difficulty};
 

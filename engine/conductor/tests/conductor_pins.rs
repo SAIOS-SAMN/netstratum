@@ -454,7 +454,7 @@ fn a_steward_directive_lands_through_the_leash() {
 
 /// PERCEPTION ROUTES RESEARCH — and after N-I4 (THE INTELLIGENCE PORT) the
 /// routing has TEETH OF A NEW KIND. The port admits exactly ONE reduce organ,
-/// and the volumetric 3-form lens (a volumetric peel into `iae::FullMeasurement`)
+/// and the volumetric 3-form lens (a volumetric peel into `reduct::FullMeasurement`)
 /// is not built this landing. So the genesis axis now decides whether a line
 /// THINKS or WAITS: the PLANAR line solves `forge_` tasks through `think_task`,
 /// and the VOLUMETRIC line RESTS — its search-thinker (`solve_volume`) has left

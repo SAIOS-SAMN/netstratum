@@ -4,9 +4,9 @@
 //! drains. A gauge glues without growing the basis. One observation is
 //! insufficient; disagreeing pairs do not glue.
 
-use iae::peel::{CellFrame, FullMeasurement, GaugeDirection, Site};
-use iae::reduction::{Exchange, Flip, ObserverFrame, PlaneElement, Relabel};
-use iae::{think, Crystal, PairClosure, TaskThought};
+use reduct::peel::{CellFrame, FullMeasurement, GaugeDirection, Site};
+use reduct::reduction::{Exchange, Flip, ObserverFrame, PlaneElement, Relabel};
+use reduct::{think, Crystal, PairClosure, TaskThought};
 
 fn measurement(rows: i64, cols: i64, fiber: u8, hues: &[u8]) -> FullMeasurement {
     let occupancy = (0..rows)

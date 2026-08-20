@@ -6,8 +6,8 @@
 //! leaving the irreducible residual; and adding the explaining local
 //! translation to the vocabulary drives the residual to zero (solved).
 
-use iae::bridge::{obstruction, GridObs};
-use iae::resolve::{measure_relational, reduce_modulo, resolve};
+use reduct::bridge::{obstruction, GridObs};
+use reduct::resolve::{measure_relational, reduce_modulo, resolve};
 use num_bigint::BigInt;
 
 fn b(x: i64) -> BigInt {

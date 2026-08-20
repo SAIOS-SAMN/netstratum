@@ -16,8 +16,8 @@
 //! This landing is the OBSERVATION only: `Fed` lets the beat think ARC, `Short`
 //! withholds it (Pin G). Naming a survival DEED from the residual is N-I6.
 
-use iae::peel::{CellFrame, FullMeasurement, GaugeDirection, Site};
-use iae::reduction::{reduce_pair, ReduceVerdict};
+use reduct::peel::{CellFrame, FullMeasurement, GaugeDirection, Site};
+use reduct::reduction::{reduce_pair, ReduceVerdict};
 
 /// The unfed direction — a mouth the larder does not cover carries this, not the
 /// ration. Reserved `0` so every ration direction (a `Resource` discriminant,

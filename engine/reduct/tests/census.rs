@@ -6,8 +6,8 @@
 //! independently and the tsvs are compared as text. Disagreement is lawful; the
 //! ABSENCE of the table is not.
 
-use iae::peel::{CellFrame, FullMeasurement, GaugeDirection, Site};
-use iae::reduction::{
+use reduct::peel::{CellFrame, FullMeasurement, GaugeDirection, Site};
+use reduct::reduction::{
     reduce_pair, Dir13Route, Exchange, Flip, ObserverFrame, PlaneElement, Relabel, ReduceVerdict,
     Remainder,
 };

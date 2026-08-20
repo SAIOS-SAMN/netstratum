@@ -3,10 +3,10 @@
 //! gauge does not grow the basis; the adopted word re-forms its source; adoption
 //! is idempotent.
 
-use iae::congruence::re_form_with;
-use iae::peel::{CellFrame, FullMeasurement, GaugeDirection, Site};
-use iae::reduction::{reduce_pair, ReduceVerdict};
-use iae::{adopt, observe, Observed};
+use reduct::congruence::re_form_with;
+use reduct::peel::{CellFrame, FullMeasurement, GaugeDirection, Site};
+use reduct::reduction::{reduce_pair, ReduceVerdict};
+use reduct::{adopt, observe, Observed};
 
 fn measurement(rows: i64, cols: i64, fiber: u8, hues: &[u8]) -> FullMeasurement {
     let occupancy = (0..rows)
@@ -26,7 +26,7 @@ fn walled_pair() -> (FullMeasurement, FullMeasurement) {
 #[test]
 fn pin_b_a_wall_at_k_is_a_crystal_at_k_plus_one() {
     let (a, b) = walled_pair();
-    let mut grown: Vec<iae::Crystal> = Vec::new();
+    let mut grown: Vec<reduct::Crystal> = Vec::new();
 
     // K: empty basis — the pair walls, and the wall is minted.
     let crystal = match observe(&a, &b, &grown) {
@@ -54,7 +54,7 @@ fn a_gauge_does_not_grow_the_basis() {
     // adopt, the basis stays empty (the sodalitum false-wall refusal).
     let a = measurement(2, 2, 7, &[5, 5, 5, 5]);
     let b = measurement(2, 2, 7, &[6, 6, 6, 6]);
-    let grown: Vec<iae::Crystal> = Vec::new();
+    let grown: Vec<reduct::Crystal> = Vec::new();
     assert_eq!(observe(&a, &b, &grown), Observed::Accounted, "a gauge accounts, never mints");
     assert!(grown.is_empty(), "a gauge grows nothing");
 }
@@ -82,7 +82,7 @@ fn adoption_is_idempotent() {
         Observed::Minted(c) => c,
         other => panic!("expected a mint, got {other:?}"),
     };
-    let mut grown: Vec<iae::Crystal> = Vec::new();
+    let mut grown: Vec<reduct::Crystal> = Vec::new();
     adopt(&mut grown, crystal.clone());
     adopt(&mut grown, crystal);
     assert_eq!(grown.len(), 1, "the same obstruction twice is one crystal");

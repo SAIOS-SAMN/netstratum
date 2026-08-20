@@ -4,7 +4,7 @@
 //! residual = obstruction` holds exactly, so nothing collapses — the manifold
 //! wraps the problem and records how. Torsion is the ℤ/d flex, carried whole.
 
-use iae::resolve::overlay;
+use reduct::resolve::overlay;
 use num_bigint::BigInt;
 
 fn b(x: i64) -> BigInt {

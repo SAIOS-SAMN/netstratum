@@ -1,6 +1,6 @@
 //! **THE ARC SEAT** (N-I3, doc `53_INTELLIGENCE_PORT` D1/D2) — the solver reads
 //! its train grids through the ONE reduce organ. It owns NO search: it peels the
-//! observed pairs into measurements, hands them to `iae::think`, and — only when
+//! observed pairs into measurements, hands them to `reduct::think`, and — only when
 //! the task GLUES a nameable frame — renders that frame to a program and seals
 //! the proof. Every other verdict WITHHOLDS. `search::solve` / `propose_*` /
 //! `sweep_vocabulary` are the costume this seat replaces; none is called here.
@@ -9,9 +9,9 @@
 //! Slice 3 adds `think_task`, the render table, and the certificate.
 
 use crate::search::SolveRead;
-use iae::peel::{CellFrame, FullMeasurement, GaugeDirection, MeasurementRefusal, Site};
-use iae::reduction::{ObserverFrame, PlaneElement, Relabel};
-use iae::{think, Crystal, PairClosure, TaskThought};
+use reduct::peel::{CellFrame, FullMeasurement, GaugeDirection, MeasurementRefusal, Site};
+use reduct::reduction::{ObserverFrame, PlaneElement, Relabel};
+use reduct::{think, Crystal, PairClosure, TaskThought};
 use solver_verify::certificate::{verify_certificate, CertificateRead, SolveCertificate};
 use solver_verify::grid::{run, Grid, Op, Program, HUES};
 use solver_verify::loader::Task;
@@ -115,7 +115,7 @@ fn render_frame(frame: &ObserverFrame) -> Option<Program> {
 }
 
 /// **THINK THE TASK** — the ARC seat. Peel the train pairs into measurements,
-/// read them through the ONE reduce organ (`iae::think`), and — only when the
+/// read them through the ONE reduce organ (`reduct::think`), and — only when the
 /// task GLUES a nameable frame — render it to a program, apply it to the
 /// held-out input, and seal the proof. Every other verdict WITHHOLDS: a task
 /// that drained without expressing a frame (ByDrain), disagreed across pairs
@@ -173,20 +173,20 @@ pub enum Heard {
 }
 
 /// **HEAR** (N-I10) — a folded word / crystal offered to a hearer, as a
-/// measurement pair, reduced against the hearer's OWN basin (`iae::observe` — the
+/// measurement pair, reduced against the hearer's OWN basin (`reduct::observe` — the
 /// SAME reduce organ as think). `Accounted` → `Understood` (drain, nothing
 /// adopted); a wall → `Learned`, and the crystal is adopted onto `grown` ONLY.
 /// No chat, no score, and NEVER a copy of the speaker's basin — the hearer
 /// reaches the utterance through its own reduce or walls and mints its own
 /// crystal. The caller prices the look (N-I7); this owns no leisure.
 pub fn hear(a: &FullMeasurement, b: &FullMeasurement, grown: &mut Vec<Crystal>) -> Heard {
-    match iae::observe(a, b, grown) {
-        iae::Observed::Accounted => Heard::Understood,
-        iae::Observed::Minted(crystal) => {
-            iae::adopt(grown, crystal);
+    match reduct::observe(a, b, grown) {
+        reduct::Observed::Accounted => Heard::Understood,
+        reduct::Observed::Minted(crystal) => {
+            reduct::adopt(grown, crystal);
             Heard::Learned
         }
-        iae::Observed::Carried => Heard::Learned,
+        reduct::Observed::Carried => Heard::Learned,
     }
 }
 

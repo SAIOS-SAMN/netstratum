@@ -5,8 +5,8 @@
 //! downstream test as a plausible-but-wrong gauge, so it is pinned HERE, by
 //! reconstruction, before `reduce_pair` exists.
 
-use iae::peel::{CellFrame, FullMeasurement, GaugeDirection, Site};
-use iae::reduction::{
+use reduct::peel::{CellFrame, FullMeasurement, GaugeDirection, Site};
+use reduct::reduction::{
     canonicalize, deduce_gauge_move, reduce_pair, Dir13Route, Exchange, Flip, GaugeDeduction,
     ObserverFrame, PlaneElement, Relabel, ReduceVerdict, Remainder,
 };

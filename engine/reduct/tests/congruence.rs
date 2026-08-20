@@ -2,8 +2,8 @@
 //! (the riding inverse). A recolored cell departs its old hue and arrives at the
 //! new one; applying that chain to A re-forms B; identical vantages read empty.
 
-use iae::congruence::{re_form_with, signed_remainder};
-use iae::peel::{CellFrame, FullMeasurement, GaugeDirection, Site};
+use reduct::congruence::{re_form_with, signed_remainder};
+use reduct::peel::{CellFrame, FullMeasurement, GaugeDirection, Site};
 use num_bigint::BigInt;
 
 fn measurement(rows: i64, cols: i64, fiber: u8, hues: &[u8]) -> FullMeasurement {

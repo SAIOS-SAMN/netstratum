@@ -6,7 +6,7 @@
 //! exactness), and the peel itself: a coboundary folds to zero, a torsion
 //! cochain folds modulo its invariant factor — never truncated.
 
-use iae::sheaf::{CellSheaf, Incidence};
+use reduct::sheaf::{CellSheaf, Incidence};
 use num_bigint::BigInt;
 
 fn b(x: i64) -> BigInt {

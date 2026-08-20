@@ -3,8 +3,8 @@
 //! and that uniform fiber is exactly what lets a pure hue permutation read as a
 //! gauge move (CongruentThroughP) rather than false content difference.
 
-use iae::peel::GaugeDirection;
-use iae::reduction::{reduce_pair, ReduceVerdict};
+use reduct::peel::GaugeDirection;
+use reduct::reduction::{reduce_pair, ReduceVerdict};
 use solver::think::measure_grid;
 use solver_verify::grid::Grid;
 

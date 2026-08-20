@@ -98,13 +98,13 @@ dependencies = [
  "blake3",
  "cfe",
  "codec",
- "iae",
  "kernel",
  "ledger",
  "mesh",
  "num-bigint",
  "num-traits",
  "physics",
+ "reduct",
  "scribe",
  "solver",
  "solver-verify",
@@ -154,17 +154,6 @@ name = "find-msvc-tools"
 version = "0.1.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5baebc0774151f905a1a2cc41989300b1e6fbb29aff0ceffa1064fdd3088d582"
-
-[[package]]
-name = "iae"
-version = "0.1.0"
-dependencies = [
- "blake3",
- "num-bigint",
- "num-traits",
- "substrate",
- "thiserror",
-]
 
 [[package]]
 name = "kernel"
@@ -349,6 +338,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "reduct"
+version = "0.1.0"
+dependencies = [
+ "blake3",
+ "num-bigint",
+ "num-traits",
+ "substrate",
+ "thiserror",
+]
+
+[[package]]
 name = "rfa-core"
 version = "0.1.0"
 dependencies = [
@@ -383,8 +383,8 @@ name = "solver"
 version = "0.1.0"
 dependencies = [
  "blake3",
- "iae",
  "physics",
+ "reduct",
  "rfa-core",
  "solver-verify",
 ]

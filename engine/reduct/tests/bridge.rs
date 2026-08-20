@@ -6,7 +6,7 @@
 //! directly-measured non-closing triple carries a non-zero torsion obstruction
 //! whole, which the peel folds to its harmonic class.
 
-use iae::bridge::{color_entities, entity_potential, measure, obstruction, relational_complex, GridObs};
+use reduct::bridge::{color_entities, entity_potential, measure, obstruction, relational_complex, GridObs};
 use num_bigint::BigInt;
 
 fn b(x: i64) -> BigInt {

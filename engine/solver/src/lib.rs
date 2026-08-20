@@ -29,7 +29,7 @@ pub mod search;
 pub mod selfmap;
 pub mod nsearch;
 // N-I3 (THE INTELLIGENCE PORT) — the ARC seat: peel train grids into
-// `iae::FullMeasurement`, read them through the ONE reduce organ (`iae::think`),
+// `reduct::FullMeasurement`, read them through the ONE reduce organ (`reduct::think`),
 // render a glued frame to a program, seal the proof. NOT a search path.
 pub mod think;
 // N-I5 (THE INTELLIGENCE PORT) — the survival seat: peel the ration book
@@ -65,7 +65,7 @@ pub use think::{hear, hear_word, measure_grid, think_task, Heard};
 pub use survival::{ration_reads, think_survival, RationRead, SurvivalBook, SurvivalDeed};
 // N-I4 — the cognitive basin's element, re-exported for the vessel layer
 // (`conductor` grows a `Vec<Crystal>` per line and passes it to `think_task`).
-pub use iae::Crystal;
+pub use reduct::Crystal;
 pub use volume::{
     forge_volume, run_volume, solve_volume, VOp, VolDifficulty, Volume, VolumeSolveRead,
     VolumeTask,

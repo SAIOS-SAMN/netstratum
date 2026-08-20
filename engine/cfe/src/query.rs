@@ -5,7 +5,7 @@
 //! the one chronicle event of RQP (the crystal draw, NS-2 §1.5) lives
 //! in `world::scan`, which pays before it calls in.
 //!
-//! Composed FROM the v0.4 sigil index (`iae::reduction`, the SIGIL1
+//! Composed FROM the v0.4 sigil index (`reduct::reduction`, the SIGIL1
 //! block — CHARTER §8): the address is projections of ONE joint
 //! canonical shadow, never independent marginals (the
 //! dimensional-collapse warning); T is excluded from the key — you

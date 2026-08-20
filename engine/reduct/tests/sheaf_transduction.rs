@@ -7,8 +7,8 @@
 //! gate admits a commuting chain map while refusing a non-commuting one with
 //! its obstruction whole.
 
-use iae::sheaf::{CellSheaf, Incidence, SheafError};
-use iae::transduction::{transduce, TransductionError};
+use reduct::sheaf::{CellSheaf, Incidence, SheafError};
+use reduct::transduction::{transduce, TransductionError};
 use num_bigint::BigInt;
 
 fn b(x: i64) -> BigInt {

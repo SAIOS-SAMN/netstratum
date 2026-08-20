@@ -11,7 +11,7 @@
 //! chain carrier. These four stand on `substrate` alone, which is exactly
 //! what IAE-1 establishes: the geometry, before the chain.
 
-use iae::transport::{Axis, Movement, Stroke, Transport, TransportError};
+use reduct::transport::{Axis, Movement, Stroke, Transport, TransportError};
 use substrate::horizon::HorizonContext;
 use substrate::multivector::{Multivector, PlaneIndex};
 use substrate::rational::{BigInt, Rational, Space};

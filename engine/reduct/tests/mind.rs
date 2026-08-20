@@ -6,8 +6,8 @@
 //! bridge and condenses it. And the mind breathes: rank grows as it unfolds,
 //! and every unfolded obstruction folds to nothing.
 
-use iae::mind::{ContainmentRefusal, Manifold, Mind};
-use iae::proposer::seed_from;
+use reduct::mind::{ContainmentRefusal, Manifold, Mind};
+use reduct::proposer::seed_from;
 use num_bigint::BigInt;
 
 fn b(x: i64) -> BigInt {

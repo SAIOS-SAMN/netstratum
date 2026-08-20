@@ -2,7 +2,7 @@
 //! law). No judgment, no transform: a `FullMeasurement` exists only whole, and
 //! its cover lifts back to it exactly.
 
-use iae::peel::{
+use reduct::peel::{
     peel, CellFrame, FullMeasurement, GaugeDirection, MeasurementRefusal, Site,
 };
 

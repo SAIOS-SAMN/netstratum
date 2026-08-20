@@ -1,4 +1,13 @@
-//! # iae — the thought engine (vendored into netstratum)
+//! # reduct — netstratum's exact-reduction organ (formerly the local `iae`)
+//!
+//! **NAMING (2026-08-19, operator ruling).** The IAE/AUTIC thought engine was
+//! ported to mycelium, which is now the AUTHORITY on IAE. This crate — the copy
+//! vendored into netstratum — is renamed `reduct` so the two never collide in
+//! one workspace. It keeps net's LIVE reduce organ (the D₄×recolor ARC seat +
+//! the survival seat); frame-morphism recognition (the asymmetric coboundary /
+//! `FrameMorph` vocabulary) is mycelium's IAE domain and is coordinated with it,
+//! not re-forked here. `mycelium::iae` (used only in `scribe`) is the OTHER,
+//! authoritative crate — never conflate the two.
 //!
 //! The cognition layer of ipsal-autic-v0.4, brought into netstratum to
 //! replace brute-force enumeration with exact algebraic reduction. It sits
@@ -22,7 +31,7 @@ pub mod think;
 pub mod transport;
 
 // The port's reduce organ, re-exported for the vessel layer (`cfe` grows a
-// basin of `iae::Crystal`; the seat renders `observe`/`think`).
+// basin of `reduct::Crystal`; the seat renders `observe`/`think`).
 pub use congruence::ChainDelta;
 pub use observation::{adopt, observe, Observed};
 pub use reduction::Crystal;

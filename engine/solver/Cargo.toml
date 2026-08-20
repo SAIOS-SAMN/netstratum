@@ -12,6 +12,6 @@ physics = { path = "../physics" }
 rfa-core = { path = "../rfa-core" }
 solver-verify = { path = "../solver-verify" }
 # N-I3 (THE INTELLIGENCE PORT): the solver seat peels its train grids into
-# `iae::FullMeasurement` and reads them through the ONE reduce organ
-# (`iae::think`). A clean new edge — iae never imports solver/cfe, so no cycle.
-iae = { path = "../iae" }
+# `reduct::FullMeasurement` and reads them through the ONE reduce organ
+# (`reduct::think`). A clean new edge — reduct never imports solver/cfe, so no cycle.
+reduct = { path = "../reduct" }

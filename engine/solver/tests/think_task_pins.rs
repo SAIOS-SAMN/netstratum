@@ -4,7 +4,7 @@
 //! program reproduces every train output AND its certificate verifies Intact.
 //! Pin D: ByDrain / Unglueable / Withheld / Insufficient emit no grid.
 
-use iae::Crystal;
+use reduct::Crystal;
 use solver::{forge_task, think_task, Difficulty, Grid, Op, SolveCertificate, SolveRead, Task, TaskPair};
 use solver_verify::certificate::{verify_certificate, CertificateRead};
 

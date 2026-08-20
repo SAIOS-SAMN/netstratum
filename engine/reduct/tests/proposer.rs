@@ -7,8 +7,8 @@
 //! obstruction. The guessing is BLAKE3-seeded, so the mint is replayable — the
 //! Universe stays deterministic even though the Mind is stochastic.
 
-use iae::proposer::{propose_and_verify, seed_from};
-use iae::resolve::reduce_modulo;
+use reduct::proposer::{propose_and_verify, seed_from};
+use reduct::resolve::reduce_modulo;
 use num_bigint::BigInt;
 
 fn b(x: i64) -> BigInt {

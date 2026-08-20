@@ -19,7 +19,7 @@
 use cfe::dop::{zone_upkeep, zone_yield, Resource, ZoneKind};
 use cfe::ratio::{ratio, Ratio};
 use cfe::vocabulary::Entry;
-use iae::resolve::overlay;
+use reduct::resolve::overlay;
 use num_bigint::BigInt;
 use num_traits::{Signed, ToPrimitive, Zero};
 
