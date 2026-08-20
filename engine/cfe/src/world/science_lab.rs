@@ -120,12 +120,39 @@ impl World {
     /// deeper. (COG-8 gives the conductor the drive to build this apparatus.)
     pub fn cognitive_capacity(&self, orb: u64) -> usize {
         use crate::almanac::science::ScienceDiscipline::{Math, Physics, Research};
+        use crate::dop::ClosureEvent;
         let brain = [Math, Physics, Research]
             .into_iter()
             .map(|d| self.science_rank(orb, d))
             .max()
             .unwrap_or(0) as usize;
-        (2 + brain).min(3)
+        // **BASIN → CAPACITY** (operator directive 2026-08-20). The seated
+        // sciences are ONE path to a bigger brain; the mind's OWN GROWTH is the
+        // other. Every proven word — minted here or licensed from the roster —
+        // condenses the basis, a letter earned by THINKING, so a line that has
+        // thought enough reaches the depth frontier by COGNITION, not only by
+        // building an academy. Grained one rung per `WORDS_PER_RUNG` words. At
+        // the frontier a mind's Deepen-γ headroom vanishes (`cognitive_deficit`),
+        // so the abundance fold spends its surplus OUTWARD (Expand/Synthesise) —
+        // the deeper mind builds the richer city, emergent from the fold, no
+        // authored tilt. (Bounded at the no-overfit frontier: condensation is the
+        // legitimate path PAST it, but the live consumer — the γ — saturates at
+        // 3, so a second, capacity-scaled consumer is what a beyond-3 gradient
+        // would need; wiring cognition to the frontier is this slice.)
+        const WORDS_PER_RUNG: usize = 8;
+        let vocabulary = self
+            .chronicle
+            .receipts()
+            .iter()
+            .filter(|r| {
+                matches!(
+                    r.event,
+                    ClosureEvent::SolverWordMinted { .. } | ClosureEvent::KnowledgeLicensed { .. }
+                )
+            })
+            .count();
+        let condensed = vocabulary / WORDS_PER_RUNG;
+        (2 + brain.max(condensed)).min(3)
     }
 
     pub fn require_science_seat(

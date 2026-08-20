@@ -356,6 +356,36 @@ fn infrastructure_bounds_the_mind_a_mud_hut_cannot_reach_the_frontier() {
 }
 
 #[test]
+fn a_mind_reaches_the_frontier_by_thinking_basin_to_capacity() {
+    // BASIN → CAPACITY (operator directive 2026-08-20): the SAME mud hut — no
+    // seated cognitive science — reaches the depth frontier by COGNITION alone.
+    // Every proven word condenses the basis; once the line has minted a rung's
+    // worth (WORDS_PER_RUNG = 8), its capacity climbs from the unseated depth-2
+    // to the depth-3 frontier, never having built an academy. Thinking, not only
+    // infrastructure, deepens the mind — so a thoughtful line joins the
+    // build-outward regime (its Deepen-γ headroom vanishing, it spends OUTWARD).
+    let mut world = greenhold(8);
+    assert_eq!(world.cognitive_capacity(FIRST_ORB), 2, "unseated: begins at depth 2");
+    let cited = vec![[4u8; 32], [5u8; 32], [6u8; 32]];
+    // Seven proven words: short of a rung, still depth 2.
+    for n in 0..7u8 {
+        world
+            .mint_solver_word_as(SOVEREIGN, [n; 32], vec![1u8, 2u8], cited.clone())
+            .expect("a lawful minted word");
+    }
+    assert_eq!(world.cognitive_capacity(FIRST_ORB), 2, "seven words is short of a rung");
+    // The eighth completes the rung — the frontier reached by thought, not stone.
+    world
+        .mint_solver_word_as(SOVEREIGN, [7u8; 32], vec![1u8, 2u8], cited)
+        .expect("a lawful minted word");
+    assert_eq!(
+        world.cognitive_capacity(FIRST_ORB),
+        3,
+        "eight proven words condense a rung: the frontier reached by cognition"
+    );
+}
+
+#[test]
 fn the_sated_collapse_a_fed_but_indebted_line_contracts() {
     // TFR term III — the second face of death. A solvent line's economic
     // contentment IS its leisure stability (the unified gate subsumes the old
