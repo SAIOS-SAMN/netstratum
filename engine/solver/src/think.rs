@@ -277,6 +277,73 @@ fn recognize_tile(pairs: &[(&Grid, &Grid)], grown: &mut Vec<Crystal>) -> Option<
     None
 }
 
+/// **A PURE TILING** — the `Tile` op that reproduces `tiled` from `base` (base
+/// repeated `down×across` with the odd bands mirrored), or `None` if `tiled` is
+/// not such a tiling of `base`. Derive `(down,across)` from the dimension ratio
+/// and READ the mirrors off blocks (1,0)/(0,1); the cheap apply is the pin.
+fn recognize_pure_tile(base: &Grid, tiled: &Grid) -> Option<Op> {
+    if base.rows == 0 || base.cols == 0 || tiled.rows % base.rows != 0 || tiled.cols % base.cols != 0
+    {
+        return None;
+    }
+    let (down, across) = (tiled.rows / base.rows, tiled.cols / base.cols);
+    if down * across <= 1 {
+        return None;
+    }
+    let odd_row = if down >= 2 {
+        read_mirror(&block_at(tiled, 1, 0, base.rows, base.cols)?, base)?
+    } else {
+        TileMirror::None
+    };
+    let odd_col = if across >= 2 {
+        read_mirror(&block_at(tiled, 0, 1, base.rows, base.cols)?, base)?
+    } else {
+        TileMirror::None
+    };
+    let tile = Op::Tile { down, across, odd_row, odd_col };
+    (run(&vec![tile.clone()], base) == *tiled).then_some(tile)
+}
+
+/// The D₄ inverse permutation over `d4_words()` — `inv[i]` is the word that
+/// undoes `d4_words()[i]` (matched on a 2×2 probe, a structural constant, never
+/// a search). Used to un-apply a tile-FIRST word's trailing transform.
+fn d4_inverse_map() -> [usize; 8] {
+    let probe = Grid::new(2, 2, vec![0, 1, 2, 3]).expect("the 2×2 probe is lawful");
+    let words = d4_words();
+    let mut inv = [0usize; 8];
+    for (i, wi) in words.iter().enumerate() {
+        for (j, wj) in words.iter().enumerate() {
+            if run(wi, &run(wj, &probe)) == probe {
+                inv[i] = j;
+                break;
+            }
+        }
+    }
+    inv
+}
+
+/// **THE TILE-FIRST SEAT** — the frame morphism the OTHER way round: `output =
+/// transform(Tile(input))`, the tile applied FIRST then a D₄ word. The tile seat
+/// proper reads tile-LAST; here, for each of the 8 D₄ finals, un-apply it (its
+/// inverse) to recover the pre-transform tiled grid, and check THAT is a pure
+/// tiling of the input. A structural enumeration bounded by the plane group,
+/// never a program search; Pin A (the caller) is the authority.
+fn recognize_tile_first(pairs: &[(&Grid, &Grid)]) -> Option<Program> {
+    let (in0, out0) = *pairs.first()?;
+    let words = d4_words();
+    let inv = d4_inverse_map();
+    for (i, final_word) in words.iter().enumerate() {
+        let tiled0 = run(&words[inv[i]], out0); // final⁻¹(output) = the tiled grid
+        let Some(tile) = recognize_pure_tile(in0, &tiled0) else { continue };
+        let mut word = vec![tile];
+        word.extend(final_word.iter().cloned());
+        if run(&word, in0) == *out0 {
+            return Some(word);
+        }
+    }
+    None
+}
+
 /// **THINK THE TASK** — the ARC seat. Read the train pairs through the ONE
 /// reduce organ and render its verdict to a program, or WITHHOLD. Dispatch on
 /// the frame: when the output shares the input's frame (up to a D₄ transpose)
@@ -298,7 +365,12 @@ pub fn think_task(task: &Task, grown: &mut Vec<Crystal>) -> SolveRead {
     let program = if same_frame {
         recognize_frame(&pairs, grown)
     } else {
-        recognize_tile(&pairs, grown)
+        // Frame change: tile-LAST first (the reduce organ recognises the base
+        // transform), then tile-FIRST (a D₄ word after the tile) — both peel.
+        match recognize_tile(&pairs, grown) {
+            Some(p) => Some(p),
+            None => recognize_tile_first(&pairs),
+        }
     };
     let Some(program) = program else {
         return SolveRead::Unsolved;

@@ -86,6 +86,18 @@ fn a_plain_d4_task_still_solves_through_the_same_frame_seat() {
 }
 
 #[test]
+fn the_tile_seat_proves_a_tiling_before_a_symmetry() {
+    // Tile-FIRST: tile the input 2×1, THEN flip it — output = FlipV(Tile(input)).
+    // The tile-last seat can't see this; the tile-first seat un-applies the D₄
+    // final and recognises the pure tiling underneath.
+    let word = [
+        Op::Tile { down: 2, across: 1, odd_row: TileMirror::None, odd_col: TileMirror::None },
+        Op::FlipV,
+    ];
+    assert_solves(&task_from(3, 3, &word, &chiral()));
+}
+
+#[test]
 fn a_forged_tier3_tile_task_now_proves_and_crosses() {
     // THE ACCEPTANCE (#131): over real forge draws at the tier-3 rung, at least
     // one TILE task now proves with a Tile in its word — before the tile seat,
