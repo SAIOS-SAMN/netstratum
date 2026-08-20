@@ -161,6 +161,7 @@ fn main() {
     };
 
     let mut beat: u64 = 0;
+    let mut total_cleaves: u64 = 0;
     let mut announced_pause = false;
     loop {
         let (paused, cadence, advance) = read_control(cadence_secs);
@@ -223,6 +224,7 @@ fn main() {
                 );
             }
         }
+        total_cleaves += newborns.len() as u64;
         for spec in newborns {
             println!(
                 "beat {beat}: DIVERGENCE — {} ({}) cleaves from the line of {}, settling {}/{}",
@@ -308,6 +310,33 @@ fn main() {
                     galaxy.reach
                 );
             }
+        }
+        // THE LIVE CENSUS (operator methodology 2026-08-20): the beat-level
+        // signal to deduce, LIVE, whether cognition and the civilizations
+        // advanced — tests and pins prove lawfulness, never improvement; that is
+        // proven by running the civs and reading the network. Emitted on stderr
+        // (line-buffered, reaches the log at once) so the running kernel is
+        // judged without a fold. Cognition = the words each line has minted (its
+        // own grown vocabulary) and the peers cleaved at mastery; civ health =
+        // population, and how many lines the larder still feeds.
+        if beat.is_multiple_of(25) {
+            use std::io::Write;
+            let mut pop: u64 = 0;
+            let mut words: usize = 0;
+            let mut fed: usize = 0;
+            let live: Vec<&Polity> = worlds.iter().filter(|p| !p.penned).collect();
+            for polity in &live {
+                pop += polity.world.population_of(cfe::world::FIRST_ORB);
+                words += cfe::vocabulary::solver_words(polity.world.chronicle()).len();
+                if polity.ration_survives(cfe::world::FIRST_ORB) {
+                    fed += 1;
+                }
+            }
+            let n = live.len();
+            eprintln!(
+                "census beat {beat}: lines={n} pop={pop} words_minted={words} cleaved={total_cleaves} fed={fed}/{n}"
+            );
+            let _ = std::io::stderr().flush();
         }
         // THE REFUSALS SPEAK (operator ruling 2026-08-02: stop
         // swallowing them). Both were collected and neither was ever
