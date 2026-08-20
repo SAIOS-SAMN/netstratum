@@ -23,6 +23,7 @@
 
 use std::collections::VecDeque;
 use std::sync::mpsc;
+use std::sync::Mutex;
 use std::sync::OnceLock;
 
 use mycelium::autic::letters::{LetterId, Word};
@@ -111,6 +112,54 @@ pub struct SolveOffer {
     pub task: String,
     pub program: String,
     pub pairs: Vec<(Grid, Grid)>,
+}
+
+/// **THE STRUCTURAL COHORT** (Fragment B grammar diet) — a proved composite the
+/// mesh judged UNGLUEABLE: a real frame-changer that does not glue as a word at
+/// its current rung. Before, the `Arm::Unglueable` verdict was logged and
+/// DROPPED — a dead letter. Captured here instead, so the grammar's diagnosis
+/// pass has a diet to read (a structural mismatch at rung K is synthesis
+/// feedstock at rung K+1). The mesh stays the durable memory (Law I); this is a
+/// live, in-process window onto what the forge is proving-but-not-yet-installing.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Cohort {
+    pub task: String,
+    pub program: String,
+    pub pairs: Vec<(Grid, Grid)>,
+}
+
+/// The captured unglueable specimens since the last drain.
+static COHORT: Mutex<Vec<Cohort>> = Mutex::new(Vec::new());
+
+/// The cap on the retained cohort — a ring, newest kept. The diagnosis pass
+/// drains faster than the forge fills; this only bounds a stalled consumer.
+const COHORT_CAP: usize = 4096;
+
+/// Record one unglueable specimen. Newest-kept: at the cap, the oldest specimen
+/// is evicted (the freshest structural evidence is the most diagnosable).
+fn record_cohort(entry: Cohort) {
+    if let Ok(mut log) = COHORT.lock() {
+        if log.len() >= COHORT_CAP {
+            log.remove(0);
+        }
+        log.push(entry);
+    }
+}
+
+/// **DRAIN THE STRUCTURAL COHORT** — take the unglueable specimens captured
+/// since the last drain, for the grammar's diagnosis pass. Draining (not
+/// peeking) so each specimen is handed to a consumer once; re-proofs re-fill it.
+pub fn drain_cohort() -> Vec<Cohort> {
+    COHORT
+        .lock()
+        .map(|mut log| std::mem::take(&mut *log))
+        .unwrap_or_default()
+}
+
+/// The count of unglueable specimens currently waiting for the grammar — an
+/// observability read that does not consume them.
+pub fn cohort_depth() -> usize {
+    COHORT.lock().map(|log| log.len()).unwrap_or(0)
 }
 
 /// The resident mouth: send-only from the engine's side.
@@ -304,6 +353,13 @@ fn run(rx: mpsc::Receiver<SolveOffer>) {
                 }
                 Ok(Arm::Unglueable) => {
                     eprintln!("membrane: {} '{}' unglueable — structural cohort", o.task, o.program);
+                    // Capture, don't drop: the unglueable specimen is the
+                    // grammar's diet (Fragment B), not a dead letter.
+                    record_cohort(Cohort {
+                        task: o.task.clone(),
+                        program: o.program.clone(),
+                        pairs: o.pairs.clone(),
+                    });
                 }
                 Err(_) => {
                     // Socket likely gone: the seat outlives the socket.
@@ -334,4 +390,45 @@ pub fn offer_proved(task: &str, program: &str, pairs: Vec<(Grid, Grid)>) {
     MOUTH
         .get_or_init(Membrane::spawn)
         .offer_proved(task, program, pairs);
+}
+
+#[cfg(test)]
+mod cohort_tests {
+    use super::*;
+
+    fn specimen(task: &str) -> Cohort {
+        Cohort {
+            task: task.into(),
+            program: "per_layer(rotate90) -> flip_v".into(),
+            pairs: vec![(vec![vec![1u8, 2], vec![3, 4]], vec![vec![3u8, 1], vec![4, 2]])],
+        }
+    }
+
+    #[test]
+    fn the_unglueable_stream_is_captured_and_bounded() {
+        // One sequential test — the cohort log is a process-global, so parallel
+        // tests would race it.
+        let _ = drain_cohort();
+        assert_eq!(cohort_depth(), 0, "starts empty after a drain");
+
+        // CAPTURED, NOT DROPPED — the dead letter is now a diet.
+        record_cohort(specimen("t1"));
+        record_cohort(specimen("t2"));
+        assert_eq!(cohort_depth(), 2, "unglueable specimens are retained");
+
+        // Draining hands each specimen to the grammar once.
+        let drained = drain_cohort();
+        assert_eq!(drained.len(), 2);
+        assert_eq!(drained[0].task, "t1", "in arrival order");
+        assert!(!drained[0].pairs.is_empty(), "the proved pairs cross whole for re-observation");
+        assert_eq!(cohort_depth(), 0, "a drained log is empty");
+
+        // BOUNDED — a stalled consumer cannot grow it without end (ring, newest kept).
+        for i in 0..(COHORT_CAP + 10) {
+            record_cohort(specimen(&format!("t{i}")));
+        }
+        assert_eq!(cohort_depth(), COHORT_CAP, "the ring caps at COHORT_CAP");
+        let all = drain_cohort();
+        assert_eq!(all.first().unwrap().task, "t10", "the oldest 10 were evicted, the newest kept");
+    }
 }
