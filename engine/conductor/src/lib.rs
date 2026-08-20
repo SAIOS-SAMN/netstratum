@@ -1092,21 +1092,17 @@ impl Polity {
                         (&spec.position.0, &spec.position.1, &spec.position.2),
                         world.gauge(),
                     );
-                    // The forge state is not yet receipted — it
-                    // reconstructs from the solves artifacts (an
-                    // honest approximation until solves become
-                    // receipts): three confirms promote a rung.
-                    let solved = std::fs::read_dir(
-                        book.world_dir(&spec.world_name).join("solves"),
-                    )
-                    .map(|entries| {
-                        entries
-                            .filter_map(|e| e.ok())
-                            .filter(|e| e.path().extension().is_some_and(|x| x == "json"))
-                            .count() as u32
-                    })
-                    .unwrap_or(0);
-                    let level = (1 + solved / 3).min(5);
+                    // The ladder resumes from the solve cards
+                    // themselves: the highest rung any solve in this
+                    // world was EARNED at (sol::DEPTH). The .json
+                    // count that stood here died with the format
+                    // migration to .sol — it read 0 forever and
+                    // silently reset every resumed world to rung 1,
+                    // which is why eras re-proved D4 singles for
+                    // hours after each restart.
+                    let level = scribe::resume_level(book, &spec.world_name)
+                        .unwrap_or(1)
+                        .max(1);
                     // One divergence per era: a resumed continuation
                     // is the same era — the receipt remembers.
                     let cleaved = world.chronicle().receipts().iter().any(|receipt| {
