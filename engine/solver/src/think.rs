@@ -13,7 +13,7 @@ use reduct::peel::{CellFrame, FullMeasurement, GaugeDirection, MeasurementRefusa
 use reduct::reduction::{ObserverFrame, PlaneElement, Relabel};
 use reduct::{think, Crystal, PairClosure, TaskThought};
 use solver_verify::certificate::{verify_certificate, CertificateRead, SolveCertificate};
-use solver_verify::grid::{run, Grid, Op, Program, HUES};
+use solver_verify::grid::{run, Grid, Op, Program, TileMirror, HUES};
 use solver_verify::loader::Task;
 
 /// Transduce a colored grid into a full measurement: every cell is a site
@@ -124,24 +124,170 @@ fn render_frame(frame: &ObserverFrame) -> Option<Program> {
 /// sweeps; the certificate + train reproduction is the pin (Pin A) — a frame
 /// that does not reproduce every train output is withheld, not emitted. This
 /// path calls neither `search::solve` nor any `propose_*` / `sweep_vocabulary`.
-pub fn think_task(task: &Task, grown: &mut Vec<Crystal>) -> SolveRead {
-    // Peel every train pair; a grid we cannot measure withholds the whole task.
-    let mut observations = Vec::with_capacity(task.train.len());
-    for pair in &task.train {
-        match (measure_grid(&pair.input), measure_grid(&pair.output)) {
+/// **THE SAME-FRAME SEAT** — the D₄×recolor recognition, factored so the tile
+/// seat can reuse it on the untiled base. Peel every pair, hand the family to
+/// the ONE reduce organ, render the glued plane+relabel frame. `None` when a
+/// grid will not measure, the family glues no single rule, or the frame is
+/// unnameable. Runs `think` exactly once (the caller ensures one think/task).
+fn recognize_frame(pairs: &[(&Grid, &Grid)], grown: &mut Vec<Crystal>) -> Option<Program> {
+    let mut observations = Vec::with_capacity(pairs.len());
+    for (input, output) in pairs {
+        match (measure_grid(input), measure_grid(output)) {
             (Ok(a), Ok(b)) => observations.push((a, b)),
-            _ => return SolveRead::Unsolved,
+            _ => return None,
         }
     }
-    // The ONE reduce organ owns the judgment; the seat only renders its verdict.
-    let program = match think(&observations, grown) {
-        TaskThought::Glued(PairClosure::Frame(frame)) => match render_frame(&frame) {
-            Some(program) => program,
-            None => return SolveRead::Unsolved, // unnameable frame — withhold
-        },
-        // ByDrain closed against the grown basis but expressed no renderable
-        // frame; the other verdicts closed no single rule. No output (Pin D).
-        _ => return SolveRead::Unsolved,
+    match think(&observations, grown) {
+        TaskThought::Glued(PairClosure::Frame(frame)) => render_frame(&frame),
+        // ByDrain / Unglueable / Withheld close no single renderable frame.
+        _ => None,
+    }
+}
+
+/// The top-left `br × bc` block of a grid — the tiling's (0,0) cell, which is
+/// unmirrored by construction, so it IS the base the tile repeats.
+fn top_left_block(g: &Grid, br: usize, bc: usize) -> Option<Grid> {
+    if br == 0 || bc == 0 || br > g.rows || bc > g.cols {
+        return None;
+    }
+    let mut cells = Vec::with_capacity(br * bc);
+    for r in 0..br {
+        for c in 0..bc {
+            cells.push(g.at(r, c));
+        }
+    }
+    Grid::new(br, bc, cells)
+}
+
+/// The `(tile_r, tile_c)` block of a tiled grid — `br × bc` at offset
+/// `(tile_r·br, tile_c·bc)`.
+fn block_at(g: &Grid, tile_r: usize, tile_c: usize, br: usize, bc: usize) -> Option<Grid> {
+    let (r0, c0) = (tile_r * br, tile_c * bc);
+    if br == 0 || bc == 0 || r0 + br > g.rows || c0 + bc > g.cols {
+        return None;
+    }
+    let mut cells = Vec::with_capacity(br * bc);
+    for r in 0..br {
+        for c in 0..bc {
+            cells.push(g.at(r0 + r, c0 + c));
+        }
+    }
+    Grid::new(br, bc, cells)
+}
+
+/// A `TileMirror` as the grid word that realises it — `None`=identity,
+/// `Rows`=vertical flip (row index reversed), `Cols`=horizontal flip, `Both`=180°.
+/// The tile transport reversed into the D₄ vocabulary the render already speaks.
+fn mirror_word(m: TileMirror) -> Program {
+    match m {
+        TileMirror::None => Vec::new(),
+        TileMirror::Rows => vec![Op::FlipV],
+        TileMirror::Cols => vec![Op::FlipH],
+        TileMirror::Both => vec![Op::Rotate180],
+    }
+}
+
+/// **READ the band mirror off the carrier** — a `TileMirror` is one direction of
+/// the tile transport, so an odd band `block` IS `base` under exactly one of the
+/// four reflections. A single walk over the 4-element `TileMirror` carrier reads
+/// it directly — no cartesian product, no re-tiling of the whole output.
+fn read_mirror(block: &Grid, base: &Grid) -> Option<TileMirror> {
+    TileMirror::ALL
+        .into_iter()
+        .find(|m| run(&mirror_word(*m), base) == *block)
+}
+
+/// **THE TILE SEAT** — the first frame-MORPHISM the ARC seat expresses (the
+/// render-expressiveness ceiling that saturated the D₄×recolor curriculum). A
+/// frame morphism CHANGES the frame — `output = Tile{d,a,mirrors}(base)`, a
+/// `br × bc` base repeated `d × a` with the odd bands mirrored — so the
+/// same-frame gauge organ cannot see it. This PEELS the tile-LAST word (no
+/// sweep, per the peels-and-shears law):
+///   1. derive `(d, a)` from the dimension ratio (the base is a D₄ image of the
+///      input, so its dims are the input's, or transposed);
+///   2. READ the odd-band mirrors straight off the carrier — `odd_row` from
+///      block (1,0), `odd_col` from block (0,1) — each a single walk over the
+///      4-element `TileMirror`, never the 16-way product;
+///   3. verify the tile CHEAPLY (`Tile(base0) == out0`, one apply) BEFORE paying
+///      the reduce organ, then recognise the base transform `input → base0`
+///      through it exactly ONCE.
+/// Pin A (the caller) is the authority: a candidate that does not replay every
+/// pair withholds.
+fn recognize_tile(pairs: &[(&Grid, &Grid)], grown: &mut Vec<Crystal>) -> Option<Program> {
+    let (in0, out0) = *pairs.first()?;
+    // The base is a D₄ image of the input: its dims are the input's, or swapped.
+    for (br, bc) in [(in0.rows, in0.cols), (in0.cols, in0.rows)] {
+        if br == 0 || bc == 0 || out0.rows % br != 0 || out0.cols % bc != 0 {
+            continue;
+        }
+        let (down, across) = (out0.rows / br, out0.cols / bc);
+        if down * across <= 1 {
+            continue; // no growth — the same-frame seat already owns this
+        }
+        let Some(base0) = top_left_block(out0, br, bc) else { continue };
+        // READ each odd-band mirror off its own block — two 1-D reads, not a
+        // 2-D product. A band that is not a reflection of the base is no tiling.
+        let odd_row = if down >= 2 {
+            match block_at(out0, 1, 0, br, bc).and_then(|b| read_mirror(&b, &base0)) {
+                Some(m) => m,
+                None => continue,
+            }
+        } else {
+            TileMirror::None
+        };
+        let odd_col = if across >= 2 {
+            match block_at(out0, 0, 1, br, bc).and_then(|b| read_mirror(&b, &base0)) {
+                Some(m) => m,
+                None => continue,
+            }
+        } else {
+            TileMirror::None
+        };
+        let tile = Op::Tile { down, across, odd_row, odd_col };
+        // CHEAP structural pin (one apply) — the derived tile must reproduce the
+        // whole output from its own (0,0) block. Only then pay the reduce organ.
+        if run(&vec![tile.clone()], &base0) != *out0 {
+            continue;
+        }
+        // The ONE reduce-organ call: the base transform `input → base0`, family-wide.
+        let bases: Option<Vec<(Grid, Grid)>> = pairs
+            .iter()
+            .map(|(input, output)| top_left_block(output, br, bc).map(|b| ((*input).clone(), b)))
+            .collect();
+        let Some(bases) = bases else { continue };
+        let base_refs: Vec<(&Grid, &Grid)> = bases.iter().map(|(i, b)| (i, b)).collect();
+        let Some(mut word) = recognize_frame(&base_refs, grown) else { continue };
+        word.push(tile);
+        return Some(word);
+    }
+    None
+}
+
+/// **THINK THE TASK** — the ARC seat. Read the train pairs through the ONE
+/// reduce organ and render its verdict to a program, or WITHHOLD. Dispatch on
+/// the frame: when the output shares the input's frame (up to a D₄ transpose)
+/// the same-frame seat names a D₄×recolor word; when the output is a strict
+/// MULTIPLE of it, the tile seat names a frame morphism. Every other verdict
+/// returns `Unsolved` with NO output (Pin D). The render never invents an Op;
+/// the certificate + train reproduction is the pin (Pin A). No `search::solve`,
+/// no `propose_*`, no `sweep_vocabulary`.
+pub fn think_task(task: &Task, grown: &mut Vec<Crystal>) -> SolveRead {
+    let Some(first) = task.train.first() else {
+        return SolveRead::Unsolved; // no pairs proves nothing
+    };
+    let (in0, out0) = (&first.input, &first.output);
+    let pairs: Vec<(&Grid, &Grid)> = task.train.iter().map(|p| (&p.input, &p.output)).collect();
+    // A D₄ image preserves the frame or transposes it; anything else is a frame
+    // CHANGE — the tile seat's business (one think per task either way).
+    let same_frame = (out0.rows, out0.cols) == (in0.rows, in0.cols)
+        || (out0.rows, out0.cols) == (in0.cols, in0.rows);
+    let program = if same_frame {
+        recognize_frame(&pairs, grown)
+    } else {
+        recognize_tile(&pairs, grown)
+    };
+    let Some(program) = program else {
+        return SolveRead::Unsolved;
     };
     // Pin A: the program must reproduce EVERY train output exactly. A render
     // that does not reproduce is a withhold, never an emitted guess.
