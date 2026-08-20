@@ -3665,9 +3665,9 @@ pub fn element_trade_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, Stri
                 continue;
             };
             // Ship half (derive 2 as 1+1 — no tuned dial).
-            // #136 — the dispatched amount lands on the 1/64 lattice too, so the
-            // sender's stock stays `denom | 64` after the debit (the giver keeps
-            // the sub-lattice remainder, un-shipped). A ship below 1/64 smelts to
+            // #136 — the dispatched amount lands on the 1/64 SMELT grain too, so
+            // the sender's stock stays `denom | 64` after the debit (the giver
+            // keeps the sub-grain remainder, un-shipped). A ship below 1/64 smelts to
             // zero and the guards below skip it — a fill smelted to zero refuses.
             let ship = cfe::world::smelt(&(have.clone() / (ratio(1, 1) + ratio(1, 1))));
             if ship <= ratio(0, 1) {

@@ -527,10 +527,10 @@ fn haul_element(
         vec![SOVEREIGN],
     );
     // #136 THE SMELT, EXTENDED TO ELEMENT FILLS (operator ruling B, 2026-08-20).
-    // Every FILL lands on the 1/64 lattice — the same law resource fills obey
+    // Every FILL lands on the 1/64 SMELT grain — the same law resource fills obey
     // (`smelt`), bypassed here until now, which is why element stocks drifted to
     // ~700-bit denominators and stalled `mass_of`. The DELIVERED fill is smelted;
-    // the sender debits `amount` (kept on the lattice by the caller), so both
+    // the sender debits `amount` (kept on the grain by the caller), so both
     // stocks stay `denom | 64`. The void audit (sent − received) absorbs the melt
     // iceberg plus the sub-1/64 shave — no matter is un-receipted (the receipts
     // record `amount` sent and `delivered` banked; their difference is the void's,
@@ -1112,13 +1112,13 @@ pub fn pair_melt(a: &World, b: &World, distance: &Ratio) -> Ratio {
 }
 
 /// THE SMELT (ruled 2026-07-31): every FILL lands on the 1/64
-/// lattice the melt law speaks — floor(amount × 64)/64. GCD
+/// SMELT grain the melt law speaks — floor(amount × 64)/64. GCD
 /// reduction alone cannot bound growth: lowest terms themselves grow
 /// when arbitrary rationals multiply through fills and premiums
 /// (measured 2026-07-31: the open no-singles book stalled the beat
 /// by ~6 crossings deep on compounding denominators — the demurrage
-/// precedent at `demurrage_due`, now made a market law). Bounded
-/// lattices keep replay and consilience verification affordable
+/// precedent at `demurrage_due`, now made a market law). A bounded
+/// grain keeps replay and consilience verification affordable
 /// forever — the POW++ requirement. The shaved dust never leaves the
 /// giver's bank: nothing moves un-receipted, conservation holds by
 /// construction, and a fill smelted to zero refuses whole (dust
@@ -1134,7 +1134,7 @@ pub fn smelt(amount: &Ratio) -> Ratio {
 /// by lower offer id), moves as TWO aperture pairs (deal and deal+1 —
 /// the two directions, each conservation-exact, shield-checked), and
 /// closes both intents with OfferCleared. Fill = the largest exchange
-/// both intents admit, SMELTED to the lattice; remainders are not
+/// both intents admit, SMELTED to the grain; remainders are not
 /// carried — an unfilled remainder reposts (offers are intents, not
 /// escrows).
 pub fn clear_trade(
