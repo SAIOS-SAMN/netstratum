@@ -60,6 +60,51 @@ pub fn zone_capacity(kind: ZoneKind, metabolism: u8, axes: &[Resource]) -> Vec<B
     v
 }
 
+/// **THE EXACT NET CAPACITY** (OCULAR, doc 54) — a zone's yield MINUS its upkeep
+/// as an exact-rational field over `axes`, NOT quantized onto the lattice. The
+/// same `zone_yield`/`zone_upkeep` reading `zone_capacity` uses, kept exact so
+/// the ocular organ reads the true rate and nothing rounds. A field, never a
+/// scalar; no `quantize`.
+pub fn zone_capacity_exact(kind: ZoneKind, metabolism: u8, axes: &[Resource]) -> Vec<Ratio> {
+    let mut v = vec![ratio(0, 1); axes.len()];
+    let (yield_res, yield_rate) = zone_yield(kind, metabolism);
+    if let Some(i) = axes.iter().position(|r| *r == yield_res) {
+        v[i] += yield_rate;
+    }
+    for (upkeep_res, upkeep_rate) in zone_upkeep(kind, metabolism) {
+        if let Some(i) = axes.iter().position(|r| *r == upkeep_res) {
+            v[i] -= upkeep_rate;
+        }
+    }
+    v
+}
+
+/// **THE EXACT STANDING SUPPLY** (OCULAR) — the summed exact net capacity of the
+/// zones already standing, as a field over `axes`. The loss-free twin of
+/// `standing_supply`; no lattice.
+pub fn standing_supply_exact(kinds: &[ZoneKind], metabolism: u8, axes: &[Resource]) -> Vec<Ratio> {
+    let mut sum = vec![ratio(0, 1); axes.len()];
+    for &kind in kinds {
+        for (i, c) in zone_capacity_exact(kind, metabolism, axes).into_iter().enumerate() {
+            sum[i] += c;
+        }
+    }
+    sum
+}
+
+/// **THE EXACT DEMAND** (OCULAR) — the population's metabolic loads summed onto
+/// their axes as an exact-rational field, no lattice. Each `(carrier, rate)` is
+/// an exact `Ratio` already; this places it, unrounded.
+pub fn demand_exact(demand_loads: &[(Resource, Ratio)], axes: &[Resource]) -> Vec<Ratio> {
+    let mut demand = vec![ratio(0, 1); axes.len()];
+    for (res, rate) in demand_loads {
+        if let Some(i) = axes.iter().position(|r| r == res) {
+            demand[i] += rate.clone();
+        }
+    }
+    demand
+}
+
 /// THE GENERATORS ARE THE FOLD (doc 52 / operator ruling). Map a species'
 /// `Axis::Zone` fold (`seed ∪ minted`) into the buildable capacity generators
 /// the peel reduces against — one net-capacity vector per structure the

@@ -66,3 +66,74 @@ fn the_environment_carries_the_closing_balance() {
     assert_eq!(div[2][0], ratio(1, 1));
     assert_eq!(div[0][0], ratio(-3, 1), "the reservoir sources exactly what the axes demand");
 }
+
+// --- OCULAR-2: the organ on the LIVE economy (still additive) ---
+
+use cfe::thermal::StarClass;
+use conductor::{Policy, Polity, PolitySpec};
+use ledger::registry::{Civilization, Registry};
+use ledger::Ledger;
+use std::fs;
+use std::path::PathBuf;
+
+fn scratch(name: &str) -> PathBuf {
+    let dir = std::env::temp_dir().join(format!("ocular-{name}-{}", std::process::id()));
+    let _ = fs::remove_dir_all(&dir);
+    dir
+}
+
+fn line(sigil: &str) -> PolitySpec {
+    PolitySpec {
+        civilization: Civilization {
+            name: format!("{sigil}-eye"),
+            sigil: sigil.into(),
+            species: "void-sleeper".into(),
+            clade: "tardigrade".into(),
+            motto: "we see the exact lack".into(),
+            disposition: "empiricist".into(),
+            metabolism: "mineral".into(),
+            perception: "planar".into(),
+            founder: "conductor".into(),
+            lineage: Vec::new(),
+            station: None,
+        },
+        world_name: format!("{sigil}-hearth"),
+        planet: format!("{sigil}-prime"),
+        colony: format!("first-{sigil}"),
+        policy: Policy::Steady,
+        position: (ratio(3, 1), ratio(3, 1), ratio(3, 1)),
+        star: Some(StarClass::G),
+        albedo: Some(ratio(0, 1)),
+        orbit: Some(ratio(1, 1)),
+        gauge: None,
+    }
+}
+
+#[test]
+fn the_live_society_sees_its_deficit_as_an_exact_field() {
+    // Drive a founding line and read what it sees through the ocular organ: an
+    // exact-rational field over the resource axes, one entry per axis, carried
+    // whole -- never summed to a magnitude, never rounded to a grain. Once the
+    // line carries mouths, a positive (unmet) entry appears -- a real need the
+    // society sees exactly. Additive: the live path is unchanged this slice.
+    let root = scratch("live-field");
+    let registry = Registry::at(root.join("registry"));
+    let book = Ledger::at(root.join("worlds"));
+    let mut polity = Polity::genesis(line("iris"), &registry, &book);
+
+    let axes = conductor::civic::resource_axes().len();
+    let mut saw_need = false;
+    for _ in 1u32..=64 {
+        let _ = polity.cycle(&book, &registry);
+        let Some(field) = polity.ocular_deficit() else { continue };
+        // The reading is a full field over the axes -- graded, not collapsed.
+        assert_eq!(field.len(), axes, "the society sees one exact entry per axis");
+        // A DERIVED read: the same committed state reads the same field.
+        assert_eq!(polity.ocular_deficit(), Some(field.clone()), "the ocular read is pure");
+        if field.iter().any(|g| *g > ratio(0, 1)) {
+            saw_need = true;
+            break;
+        }
+    }
+    assert!(saw_need, "a founding line with mouths sees an unmet need in its exact field");
+}

@@ -2346,6 +2346,39 @@ impl Polity {
         Some(civic::civic_reading(&fold, metabolism, &standing, &demand, [0u8; 32]).peel)
     }
 
+    /// **WHAT THE SOCIETY SEES** (OCULAR-2, doc 54) — the same live economy the
+    /// civic peel reads, but through the ocular organ instead of the lattice: the
+    /// exact-rational DIVERGENCE FIELD of the economic connection. `field[i] =
+    /// demand_i - supply_i`, the signed per-axis deficit, exact and unrounded — a
+    /// positive entry is unmet need, a negative one surplus. A graded field, never
+    /// summed or normed. `None` when there is no world. This is the loss-free
+    /// reading the abundance drives migrate onto (OCULAR-3): no `quantize`, no
+    /// `residual_extent`. A DERIVED read (pure over committed state), so SEAL-B is
+    /// untouched while it stands alongside the lattice peel.
+    pub fn ocular_deficit(&self) -> Option<Vec<cfe::ratio::Ratio>> {
+        let world = &self.world;
+        let orb = world.orb()?;
+        let metabolism = world
+            .committed()
+            .genesis
+            .as_ref()
+            .map(|g| g.metabolism)
+            .unwrap_or(2);
+        let axes = civic::resource_axes();
+        let standing: Vec<cfe::dop::ZoneKind> = orb.zones.iter().map(|z| z.kind).collect();
+        let primary = cfe::world::FIRST_ORB;
+        let pop = world.population_of(primary);
+        let demand_loads: Vec<(cfe::dop::Resource, cfe::ratio::Ratio)> = if pop > 0 {
+            let carrier = cfe::dop::metabolic_ration(metabolism);
+            vec![(carrier, ratio(pop as i64, 1) * world.per_capita_ration())]
+        } else {
+            Vec::new()
+        };
+        let demand = civic::demand_exact(&demand_loads, &axes);
+        let supply = civic::standing_supply_exact(&standing, metabolism, &axes);
+        Some(ocular::seen_deficit(&demand, &supply))
+    }
+
     /// **THE LIVE CASTE CENSUS** (SOC-4b) — the society self-organises this beat.
     /// Partition the working population across the unspanned residual axes the
     /// live civic peel reads (`civic_peel().residual`, the void no standing
