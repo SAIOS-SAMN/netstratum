@@ -63,3 +63,17 @@ fn backfill_claim_for_unchanged() {
         "composite stays backfill-unreachable; live solves carry pairs"
     );
 }
+
+/// The climb survives the reboot: resume_level reads the highest
+/// rung from the world's own solve cards; a fresh world resumes None.
+#[test]
+fn ladder_resumes_from_the_book() {
+    let root = std::env::temp_dir().join(format!("resume-pin-{}", std::process::id()));
+    let book = ledger::Ledger::at(&root);
+    assert_eq!(scribe::resume_level(&book, "w"), None, "fresh world: no paper");
+    scribe::record_solve(&book, "w", "t1", "flip_h", "aa", 1).unwrap();
+    scribe::record_solve(&book, "w", "t2", "rotate90 → flip_h", "bb", 3).unwrap();
+    scribe::record_solve(&book, "w", "t3", "transpose", "cc", 2).unwrap();
+    assert_eq!(scribe::resume_level(&book, "w"), Some(3), "highest rung earned");
+    let _ = std::fs::remove_dir_all(&root);
+}

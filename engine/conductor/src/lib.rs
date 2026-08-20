@@ -1240,6 +1240,7 @@ impl Polity {
         if let Some(clade) = cfe::almanac::table_clade_from_word(&spec.civilization.clade) {
             let _ = world.seal_taxon(NEUTRAL_ARCHETYPE_CLASS, clade);
         }
+        let world_name_for_level = spec.world_name.clone();
         Polity {
             chained: 0,
             arbor_committed: 0,
@@ -1261,7 +1262,10 @@ impl Polity {
             automaton,
             steward,
             sibling,
-            level: 1,
+            // The climb resumes from the kernel's own paper — a
+            // restart is a reboot, not an amnesia (scribe::resume_level;
+            // the ladder saturates on its own, no cap needed here).
+            level: scribe::resume_level(book, &world_name_for_level).unwrap_or(1).max(1),
             streak: 0,
             solved: 0,
             cleaved: false,

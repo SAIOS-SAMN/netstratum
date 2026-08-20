@@ -143,4 +143,35 @@ pub fn record_solve(
     card::write_atomic(&dir.join(format!("{}.sol", sanitize(task))), &out)
 }
 
+/// Resume the curriculum ladder from the kernel's OWN paper: the
+/// highest rung any solve in this world was earned at. The level is
+/// kernel-local state and the book is its lawful memory (Law I —
+/// state lives where it is law: the mesh remembers words, the book
+/// remembers the climb). Without this, every service restart reset
+/// the ladder to rung 1 and the era re-proved D4 singles for hours —
+/// growth lost to a reboot, twice on the night Law II landed.
+/// `None` on a fresh world; torn or foreign cards skip (SEAL A).
+pub fn resume_level(book: &Ledger, world: &str) -> Option<u32> {
+    let dir = book.world_dir(world).join("solves");
+    let rd = fs::read_dir(dir).ok()?;
+    let mut top: Option<u32> = None;
+    for f in rd.flatten() {
+        if f.path().extension().and_then(|e| e.to_str()) != Some("sol") {
+            continue;
+        }
+        let Some(raw) = card::read(&f.path()) else {
+            continue;
+        };
+        for (tag, value) in card::records(&raw) {
+            if tag == card::sol::DEPTH {
+                if let Some(v) = card::u64_of(value) {
+                    let v = u32::try_from(v).unwrap_or(u32::MAX);
+                    top = Some(top.map_or(v, |t| t.max(v)));
+                }
+            }
+        }
+    }
+    top
+}
+
 pub use journal::{record_journal, render_wall};
