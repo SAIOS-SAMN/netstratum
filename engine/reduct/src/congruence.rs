@@ -12,7 +12,7 @@ use crate::peel::{
     peel, CellFrame, Cover, DirectionSupport, FullMeasurement, GaugeDirection, Site, ValueManifold,
 };
 use num_bigint::{BigInt, Sign};
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashSet};
 use thiserror::Error;
 
 /// One direction's asymmetry between two vantages: the sites that DEPARTED (in
@@ -65,22 +65,28 @@ impl CongruenceReading {
         let mut supports: Vec<DirectionSupport> = source.supports.clone();
         for asymmetry in &self.gauge {
             let position = supports.iter().position(|s| s.direction == asymmetry.direction);
-            let mut sites = match position {
+            let base = match position {
                 Some(at) => supports.remove(at).sites,
                 None => Vec::new(),
             };
+            // Remove the departed sites by MEMBERSHIP, not an O(sites) scan each
+            // (a 30×30 direction carries up to ~900 sites — the removal was
+            // O(departed·sites)). Set-remove refuses the first departure absent
+            // from the support, in departed order; the final sort reproduces the
+            // canonical (row,col) order exactly — output-identical.
+            let mut present: HashSet<Site> = base.into_iter().collect();
             for gone in &asymmetry.departed {
-                let at = sites.iter().position(|s| s == gone).ok_or(
-                    CongruenceRefusal::DepartureFromAbsentSite {
+                if !present.remove(gone) {
+                    return Err(CongruenceRefusal::DepartureFromAbsentSite {
                         direction: asymmetry.direction,
                         site: *gone,
-                    },
-                )?;
-                sites.remove(at);
+                    });
+                }
             }
-            sites.extend(asymmetry.arrived.iter().copied());
-            sites.sort_by_key(|s| (s.row, s.col));
-            if !sites.is_empty() {
+            present.extend(asymmetry.arrived.iter().copied());
+            if !present.is_empty() {
+                let mut sites: Vec<Site> = present.into_iter().collect();
+                sites.sort_by_key(|s| (s.row, s.col));
                 supports.push(DirectionSupport { direction: asymmetry.direction, sites });
             }
         }
@@ -294,24 +300,25 @@ pub fn re_form_with(
     let mut occupancy: Vec<(Site, GaugeDirection)> = source.occupancy().to_vec();
     // Departures first (a site's replace is remove-then-add regardless of entry
     // order); the final whole-or-refused constructor holds coverage exact.
+    // Validate by MEMBERSHIP (was an O(occupancy) scan per −1 entry): `present`
+    // refuses the first −1 whose (site,direction) is absent, in entry order —
+    // the same refusal — and `retain` drops them preserving occupancy order.
+    let mut present: HashSet<(Site, GaugeDirection)> =
+        occupancy.iter().map(|(s, d)| (*s, *d)).collect();
+    let mut departed: HashSet<(Site, GaugeDirection)> = HashSet::new();
     for entry in &chain.entries {
         if entry.coefficient.sign() == Sign::Minus {
-            let held = occupancy
-                .iter()
-                .position(|(site, direction)| *site == entry.site && *direction == entry.direction);
-            match held {
-                Some(at) => {
-                    occupancy.remove(at);
-                }
-                None => {
-                    return Err(CongruenceRefusal::DepartureFromAbsentSite {
-                        direction: entry.direction,
-                        site: entry.site,
-                    })
-                }
+            let key = (entry.site, entry.direction);
+            if !present.remove(&key) {
+                return Err(CongruenceRefusal::DepartureFromAbsentSite {
+                    direction: entry.direction,
+                    site: entry.site,
+                });
             }
+            departed.insert(key);
         }
     }
+    occupancy.retain(|(site, direction)| !departed.contains(&(*site, *direction)));
     for entry in &chain.entries {
         if entry.coefficient.sign() == Sign::Plus {
             occupancy.push((entry.site, entry.direction));

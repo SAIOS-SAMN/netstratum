@@ -334,27 +334,35 @@ pub struct Canonicalized {
 /// search, and NEVER a no-op (a no-op canonicalize reads a pure hue permutation
 /// as a generation gap — the sodalitum false wall).
 pub fn canonicalize(measurement: &FullMeasurement) -> Canonicalized {
-    let candidates: Vec<(Vec<u8>, CellFrame, RenamingFrame, FullMeasurement)> = PlaneElement::all()
+    let mut candidates: Vec<(Vec<u8>, CellFrame, RenamingFrame, FullMeasurement)> =
+        PlaneElement::all()
+            .iter()
+            .map(|element| {
+                let frame = RenamingFrame {
+                    plane: *element,
+                    renaming: first_appearance_renaming(measurement, element),
+                };
+                let image = frame
+                    .apply(measurement)
+                    .expect("the first-appearance chart covers every present direction");
+                let bytes: Vec<u8> = image.occupancy().iter().map(|(_, d)| d.index).collect();
+                (bytes, image.frame(), frame, image)
+            })
+            .collect();
+    // Pick the orbit-min by (rows, cols, bytes) WITHOUT cloning the byte vector
+    // per comparison (`min_by` borrows), then MOVE the winner out instead of
+    // re-cloning its whole measurement and frame. `min_by` returns the first
+    // minimum, exactly as the old `min_by_key` did — output-identical.
+    let winner_idx = candidates
         .iter()
-        .map(|element| {
-            let frame = RenamingFrame {
-                plane: *element,
-                renaming: first_appearance_renaming(measurement, element),
-            };
-            let image = frame
-                .apply(measurement)
-                .expect("the first-appearance chart covers every present direction");
-            let bytes: Vec<u8> = image.occupancy().iter().map(|(_, d)| d.index).collect();
-            (bytes, image.frame(), frame, image)
-        })
-        .collect();
-    let winner = candidates
-        .iter()
-        .min_by_key(|(bytes, frame, _, _)| (frame.rows, frame.cols, bytes.clone()))
+        .enumerate()
+        .min_by(|(_, a), (_, b)| (a.1.rows, a.1.cols, &a.0).cmp(&(b.1.rows, b.1.cols, &b.0)))
+        .map(|(i, _)| i)
         .expect("the plane group is never empty");
+    let (_, _, achieving_frame, measurement) = candidates.swap_remove(winner_idx);
     Canonicalized {
-        form: CanonicalForm { measurement: winner.3.clone() },
-        achieving_frame: winner.2.clone(),
+        form: CanonicalForm { measurement },
+        achieving_frame,
     }
 }
 
