@@ -2336,6 +2336,38 @@ impl Polity {
         Some(civic::civic_reading(&fold, metabolism, &standing, &demand, [0u8; 32]).peel)
     }
 
+    /// **THE LIVE CASTE CENSUS** (SOC-4b) — the society self-organises this beat.
+    /// Partition the working population across the unspanned residual axes the
+    /// live civic peel reads (`civic_peel().residual`, the void no standing
+    /// structure spans): each member is DRAWN toward the work most unmet, off
+    /// the line's own committed digest, never assigned by a table. A DERIVED read
+    /// — pure over committed state, exactly like `ration_survives` — so replay
+    /// reads the same partition and SEAL-B is untouched. Empty when there is no
+    /// world; all-zero over the residual axes when the population is nil or the
+    /// economy is covered (no deficit ⇒ no caste, a homogeneous society). This is
+    /// the pure `soc::caste_census` organ finally reading the LIVE deficit rather
+    /// than a fixture; the shared objective SOC-5 will converge on is this census.
+    pub fn caste_partition(&self) -> Vec<u64> {
+        let Some(peel) = self.civic_peel() else {
+            return Vec::new();
+        };
+        let members = self.world.labor_force(cfe::world::FIRST_ORB);
+        if members == 0 {
+            return vec![0u64; peel.residual.len()];
+        }
+        // The line's OWN history salts the draw (SOC-2's emergence law): two
+        // societies with the same deficit but different pasts organise
+        // differently. The last committed digest is that history, deterministic.
+        let seed = self
+            .world
+            .chronicle()
+            .receipts()
+            .last()
+            .map(|receipt| receipt.own.0)
+            .unwrap_or([0u8; 32]);
+        soc::caste_census(&peel.residual, members, seed)
+    }
+
     #[allow(dead_code)]
     fn civic_defect(&self) -> (Vec<solver::need::Family>, u64) {
         let Some(peel) = self.civic_peel() else {

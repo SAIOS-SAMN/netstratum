@@ -5,11 +5,21 @@
 //! fold use. These witnesses pin the properties: a covered economy forms NO
 //! caste; the deepest deficit draws the largest caste; and two societies with the
 //! same residual but different histories organise DIFFERENTLY (emergence, not a
-//! caste table). Additive + DORMANT — not yet on the live beat. (In `tests/`,
-//! off the tuned-constant ratchet.)
+//! caste table). SOC-4b now takes the organ LIVE: `Polity::caste_partition`
+//! reads the REAL peeled residual off the running beat, so the self-organisation
+//! happens in the sim, not just over a fixture — pinned by the final witness.
+//! (In `tests/`, off the tuned-constant ratchet.)
 
+use cfe::ratio::ratio;
+use cfe::thermal::StarClass;
+use cfe::world::FIRST_ORB;
 use conductor::soc::{caste_census, caste_draw, caste_weights};
+use conductor::{Policy, Polity, PolitySpec};
+use ledger::registry::{Civilization, Registry};
+use ledger::Ledger;
 use num_bigint::BigInt;
+use std::fs;
+use std::path::PathBuf;
 
 fn seed(n: u8) -> [u8; 32] {
     *blake3::hash(&[n]).as_bytes()
@@ -17,6 +27,39 @@ fn seed(n: u8) -> [u8; 32] {
 
 fn residual(axes: &[i64]) -> Vec<BigInt> {
     axes.iter().map(|a| BigInt::from(*a)).collect()
+}
+
+fn scratch(name: &str) -> PathBuf {
+    let dir = std::env::temp_dir().join(format!("soc4-{name}-{}", std::process::id()));
+    let _ = fs::remove_dir_all(&dir);
+    dir
+}
+
+fn line(sigil: &str) -> PolitySpec {
+    PolitySpec {
+        civilization: Civilization {
+            name: format!("{sigil}-clan"),
+            sigil: sigil.into(),
+            species: "void-sleeper".into(),
+            clade: "tardigrade".into(),
+            motto: "we divide the work by the work".into(),
+            disposition: "empiricist".into(),
+            metabolism: "mineral".into(),
+            perception: "planar".into(),
+            founder: "conductor".into(),
+            lineage: Vec::new(),
+            station: None,
+        },
+        world_name: format!("{sigil}-hearth"),
+        planet: format!("{sigil}-prime"),
+        colony: format!("first-{sigil}"),
+        policy: Policy::Steady,
+        position: (ratio(3, 1), ratio(3, 1), ratio(3, 1)),
+        star: Some(StarClass::G),
+        albedo: Some(ratio(0, 1)),
+        orbit: Some(ratio(1, 1)),
+        gauge: None,
+    }
 }
 
 #[test]
@@ -69,4 +112,40 @@ fn castes_self_organise_differently_on_history() {
     // ...but each is still a total partition of its members.
     assert_eq!(a.iter().sum::<u64>(), 300);
     assert_eq!(b.iter().sum::<u64>(), 300);
+}
+
+/// **SOC-4b — THE LIVE PARTITION.** Drive a founding line and read the caste
+/// census off its REAL peeled residual (`Polity::caste_partition`), not a
+/// fixture. The organ is finally on the beat: a line with unmet work partitions
+/// EVERY worker into a caste proportional to its own deficit, a covered one
+/// forms none, and the read is pure over committed state (replay-exact).
+#[test]
+fn the_live_society_self_organises_over_its_real_deficit() {
+    let root = scratch("live-caste");
+    let registry = Registry::at(root.join("registry"));
+    let book = Ledger::at(root.join("worlds"));
+    let mut polity = Polity::genesis(line("clan"), &registry, &book);
+
+    let mut organised = false;
+    for _ in 1u32..=64 {
+        let _ = polity.cycle(&book, &registry);
+        let members = polity.world.labor_force(FIRST_ORB);
+        if members == 0 {
+            continue; // no mouths yet — nothing to organise
+        }
+        let census = polity.caste_partition();
+        let seated: u64 = census.iter().sum();
+        // BOUNDED: a caste is drawn from the workforce, never beyond it.
+        assert!(seated <= members, "castes over-partition the workforce: {seated} > {members}");
+        // DERIVED + REPLAY-EXACT: the same committed state reads the same census.
+        assert_eq!(census, polity.caste_partition(), "the live census is a pure derived read");
+        if seated > 0 {
+            // An uncovered economy draws EVERY worker into a caste — the
+            // partition fills the deficit, off the line's own history.
+            assert_eq!(seated, members, "unmet work seats every worker in a caste");
+            organised = true;
+            break;
+        }
+    }
+    assert!(organised, "a founding line with unmet work self-organises over its live residual");
 }
