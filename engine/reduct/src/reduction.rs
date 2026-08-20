@@ -16,8 +16,10 @@
 //! `observe` — later landings. `reduce_cochain`/SNF untouched: two functions,
 //! two jobs (the SNF verifier gates commits; this is the think drain).
 
-use crate::congruence::{signed_entry_sum, signed_remainder, ChainDelta};
+use crate::congruence::{signed_remainder, ChainDelta, ChainEntry};
 use crate::peel::{CellFrame, FullMeasurement, GaugeDirection, MeasurementRefusal, Site};
+use num_bigint::BigInt;
+use std::collections::BTreeMap;
 use thiserror::Error;
 
 // ─────────────────────────────────────────────────────────────────────
@@ -493,45 +495,56 @@ pub enum ReduceVerdict {
     Remainder { remainder: Remainder, route: Dir13Route },
 }
 
-/// Exact accounting: every entry of the class matches an identical entry of the
-/// residual (site, direction, AND exact coefficient) — sub-multiset, never
-/// nearness, never ranked.
-fn accounts_exactly(residual: &ChainDelta, class: &ChainDelta) -> bool {
-    !class.entries.is_empty()
-        && class.entries.iter().all(|needed| {
-            residual.entries.iter().any(|held| {
-                held.site == needed.site
-                    && held.direction == needed.direction
-                    && held.coefficient == needed.coefficient
-            })
-        })
-}
-
-/// THE DRAIN: account the residual against the basis by EXACT accounting,
-/// terminating by EXHAUSTION (a full pass draining nothing); what survives is
-/// the remainder. Each accounted image subtracts (monotone — entries cancel to
-/// zero and drop, nothing is created) and inscribes its source address. An
-/// EMPTY basis drains nothing — the residual is the whole (the Pin A path).
-/// (No refraction / valence routing / support addressing this landing.)
-fn drain_exact(mut residual: ChainDelta, basis: &[Crystal]) -> (ChainDelta, Vec<BoundingRecord>) {
+/// THE DRAIN: account the residual against the basis by EXACT accounting; what
+/// survives is the remainder. A crystal drains iff EVERY entry of its class is
+/// present in the residual with an IDENTICAL coefficient (sub-multiset, never
+/// nearness); the subtraction cancels exactly those entries to zero and touches
+/// nothing else. An EMPTY basis drains nothing — the residual is the whole
+/// (the Pin A path).
+///
+/// **SINGLE FORWARD PASS** (was a `while drained_this_pass` fixpoint over the
+/// whole basis; scaling audit Tier-1). Because a drain only ZEROES the entries
+/// it matched exactly, it can only ever DISABLE another crystal (remove an entry
+/// the crystal needed present), never ENABLE one the scan already passed — so
+/// the old loop's extra passes drained nothing. One indexed pass reproduces the
+/// exact same drain sequence, `bounding`, and remainder. The residual is carried
+/// as a `(site,direction) → coefficient` map for O(log n) exact accounting (was
+/// an O(class·residual) nested scan per crystal, per pass), and rebuilt in the
+/// same canonical order `into_entries` uses. Output-identical; SEAL-B untouched.
+fn drain_exact(residual: ChainDelta, basis: &[Crystal]) -> (ChainDelta, Vec<BoundingRecord>) {
+    let (from, to) = (residual.from, residual.to);
+    let mut index: BTreeMap<(i64, i64, u8), BigInt> = residual
+        .entries
+        .into_iter()
+        .map(|e| ((e.site.row, e.site.col, e.direction.index), e.coefficient))
+        .collect();
     let mut bounding: Vec<BoundingRecord> = Vec::new();
-    let mut drained_this_pass = true;
-    while drained_this_pass {
-        drained_this_pass = false;
-        for (basis_at, crystal) in basis.iter().enumerate() {
-            if accounts_exactly(&residual, &crystal.class) {
-                let image = crystal.class.clone();
-                residual = ChainDelta {
-                    from: residual.from,
-                    to: residual.to,
-                    entries: signed_entry_sum(&[(&residual, 1), (&image, -1)]),
-                };
-                bounding.push(BoundingRecord { image, basis_at });
-                drained_this_pass = true;
+    for (basis_at, crystal) in basis.iter().enumerate() {
+        let key = |e: &ChainEntry| (e.site.row, e.site.col, e.direction.index);
+        let accounts = !crystal.class.entries.is_empty()
+            && crystal
+                .class
+                .entries
+                .iter()
+                .all(|needed| index.get(&key(needed)) == Some(&needed.coefficient));
+        if accounts {
+            for needed in &crystal.class.entries {
+                index.remove(&key(needed)); // matched coefficient → residual − class = 0
             }
+            bounding.push(BoundingRecord { image: crystal.class.clone(), basis_at });
         }
     }
-    (residual, bounding)
+    let mut entries: Vec<ChainEntry> = index
+        .into_iter()
+        .filter(|(_, coefficient)| coefficient != &BigInt::from(0))
+        .map(|((row, col, idx), coefficient)| ChainEntry {
+            site: Site { row, col },
+            direction: GaugeDirection { index: idx },
+            coefficient,
+        })
+        .collect();
+    entries.sort_by_key(|e| (e.direction.index, e.site.row, e.site.col));
+    (ChainDelta { from, to, entries }, bounding)
 }
 
 /// DIR-13, per pair: a residual carrying a gauge direction the SOURCE never
