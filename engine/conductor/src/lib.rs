@@ -4650,19 +4650,46 @@ pub mod profile {
     use std::time::{Duration, Instant};
 
     static ARMED: OnceLock<bool> = OnceLock::new();
+    static TRACED: OnceLock<bool> = OnceLock::new();
     static BOOK: Mutex<Vec<(&'static str, Duration)>> = Mutex::new(Vec::new());
 
     fn armed() -> bool {
         *ARMED.get_or_init(|| std::env::var_os("NETSTRATUM_PROFILE").is_some())
     }
 
+    /// **THE BOUNDARY TRACE** (task #136) — armed by `NETSTRATUM_TRACE`, emits a
+    /// line on stderr AS each step is entered and left, so a step that never
+    /// returns (a beat that will not advance) is named the instant it is entered:
+    /// the last `-> name` with no `<- name` is the stall. Unarmed it is one
+    /// `OnceLock` read. Distinct from the aggregate profile, which cannot report
+    /// a beat that never completes.
+    fn traced() -> bool {
+        *TRACED.get_or_init(|| std::env::var_os("NETSTRATUM_TRACE").is_some())
+    }
+
     pub fn timed<T>(name: &'static str, run: impl FnOnce() -> T) -> T {
+        if traced() {
+            use std::io::Write;
+            eprintln!("trace: -> {name}");
+            let _ = std::io::stderr().flush();
+        }
         if !armed() {
-            return run();
+            let out = run();
+            if traced() {
+                use std::io::Write;
+                eprintln!("trace: <- {name}");
+                let _ = std::io::stderr().flush();
+            }
+            return out;
         }
         let at = Instant::now();
         let out = run();
         let spent = at.elapsed();
+        if traced() {
+            use std::io::Write;
+            eprintln!("trace: <- {name} {}ms", spent.as_millis());
+            let _ = std::io::stderr().flush();
+        }
         let mut book = BOOK.lock().expect("profile book");
         match book.iter_mut().find(|(held, _)| *held == name) {
             Some((_, total)) => *total += spent,
