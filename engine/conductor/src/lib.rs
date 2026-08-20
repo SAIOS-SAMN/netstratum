@@ -1941,7 +1941,16 @@ impl Polity {
         hasher.update(&receipt.own.0);
         hasher.update(b"abundance-resolve");
         let seed = *hasher.finalize().as_bytes();
-        match soc::resolve_investment(&reach, cognitive, expansion, synthesis, seed) {
+        // SOC-5 — THE COLLECTIVE RESOLVE. The society's self-organisation
+        // (SOC-4's live caste census) sets how decisively it spends its surplus:
+        // a workforce concentrated on one shared deficit commits (a low Hoard
+        // floor), a covered or scattered one rests. The concentration is a fold
+        // of the distributed caste draws — the collective converging on its own
+        // deepest void, no central plan — and it descends the residual: a sharp
+        // deficit focuses the surplus that closes it, and a closed deficit
+        // dissolves the caste that formed on it.
+        let convergence = soc::caste_convergence(&self.caste_partition());
+        match soc::resolve_investment(&reach, cognitive, expansion, synthesis, convergence, seed) {
             soc::Investment::Deepen => self.invest_cognition(primary, seed),
             soc::Investment::Expand => self.invest_expansion(),
             soc::Investment::Synthesize => {

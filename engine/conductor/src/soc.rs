@@ -509,15 +509,28 @@ pub fn investment_weights(
     cognitive_gamma: u64,
     expansion_gamma: u64,
     synthesis_gamma: u64,
+    convergence: u64,
 ) -> [u64; 4] {
     let lattice = LATTICE as u64;
     let dim = reach.dimension().max(1); // a line always has some reach to spend
     let tilt = |gamma: u64| dim.saturating_mul(lattice.saturating_add(gamma));
+    // **SOC-5 — THE COLLECTIVE RESOLVE.** `Hoard` is the society's default rest —
+    // bank the surplus, raise nothing. A society that has SELF-ORGANISED around a
+    // shared deficit (a concentrated caste census, `caste_convergence` ∈ [0, L])
+    // lowers that floor in proportion: it COMMITS its surplus to the shared
+    // objective rather than banking it. Convergence 0 — a covered economy, no
+    // caste — leaves the floor whole (`dim·L`), so a line at ease rests and
+    // explores EXACTLY as before this slice. The tensions still set the DIRECTION
+    // (which act); the collective's focus sets only the DECISIVENESS (whether to
+    // act at all). Emergent: the concentration is a fold of distributed caste
+    // draws, no central plan. Bounded — full convergence zeroes the floor, never
+    // negative.
+    let hoard = dim.saturating_mul(lattice.saturating_sub(convergence));
     [
         tilt(cognitive_gamma), // Deepen
         tilt(expansion_gamma), // Expand
         tilt(synthesis_gamma), // Synthesize
-        tilt(0),               // Hoard — the untilted floor
+        hoard,                 // Hoard — the floor the collective resolve lowers
     ]
 }
 
@@ -535,9 +548,11 @@ pub fn resolve_investment(
     cognitive_gamma: u64,
     expansion_gamma: u64,
     synthesis_gamma: u64,
+    convergence: u64,
     seed: [u8; 32],
 ) -> Investment {
-    let weights = investment_weights(reach, cognitive_gamma, expansion_gamma, synthesis_gamma);
+    let weights =
+        investment_weights(reach, cognitive_gamma, expansion_gamma, synthesis_gamma, convergence);
     let mut hasher = blake3::Hasher::new();
     hasher.update(&seed);
     hasher.update(b"abundance");
@@ -593,6 +608,27 @@ pub fn caste_census(residual: &[BigInt], members: u64, seed: [u8; 32]) -> Vec<u6
         }
     }
     census
+}
+
+/// **THE COLLECTIVE RESOLVE** (SOC-5) — how sharply the society has CONVERGED on
+/// a shared objective, read off its caste census as a lattice fraction ∈ `[0, L]`.
+/// The measure is the dominant caste's SHARE of the organised workforce: everyone
+/// drawn to one axis → `L` (a society of one mind, fully focused); an even spread
+/// over `k` axes → `L/k` (organised but diffuse); a covered economy that seats no
+/// caste → `0` (nothing to converge on — rest). This is the SHAPE of the deficit
+/// the scalar `residual_extent` cannot see: two societies carrying the same total
+/// void differ here iff one faces a single sharp deficit and the other a scatter.
+/// The abundance fold reads it as the surplus's DECISIVENESS (`investment_weights`
+/// lowers `Hoard` by it), never its direction. Replay-exact — a pure fold.
+pub fn caste_convergence(census: &[u64]) -> u64 {
+    let total: u64 = census.iter().sum();
+    if total == 0 {
+        return 0; // no caste seated — a covered economy, at ease, converges on nothing
+    }
+    let dominant = census.iter().copied().max().unwrap_or(0);
+    // The dominant share, scaled to the lattice: focus, not headcount (the raw
+    // count would explode the weight; the fraction is grained by construction).
+    dominant.saturating_mul(LATTICE as u64) / total
 }
 
 #[cfg(test)]
