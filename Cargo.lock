@@ -370,6 +370,8 @@ dependencies = [
  "lens",
  "mycelium",
  "physics",
+ "reduct",
+ "solver",
 ]
 
 [[package]]
