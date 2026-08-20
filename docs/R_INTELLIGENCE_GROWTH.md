@@ -163,3 +163,52 @@ is why it is the right envelope.
 The measurement rule stands and now has a reason behind it: **solve rate
 first, time second.** Time is `d`. Solve rate is `V`. Only one of them is
 intelligence.
+
+## §9 The seam with the mesh: JUDGE vs CLAIMANT, not deduction vs generation
+
+*(Added 2026-08-19, folding a correction relayed from the mycelium lane. It
+governs every kernel↔mesh refactor and corrects a bullet that reads wrong in
+isolation.)*
+
+The tempting shorthand — *"deductive/universal → mycelium; generative/strategic
+→ kernel"* — misleads, because it is read as *a kernel should not derive.* The
+opposite is true, and consilience is why.
+
+**A word installs only on the byte-exact agreement of two INDEPENDENT
+derivations.** The claimant kernel derives `pair → word` and proves
+`matches_expected: Some(true)`; the judge (the hypha's `Sentence`, one shared
+implementation in `mycelium::autic::grammar`) re-derives the same pair. Agreement
+IS the proof object. Collapse the two into one implementation and consilience
+degrades into self-confirmation — one mind grading its own homework. So the
+claimant's deduction is **constitutive, not duplication**: net's `think_task` /
+tile seat is not a redundant fork of the mesh's tile reading, it is the second
+vantage without which nothing is trustworthy.
+
+The real seam, stated once:
+
+- **JUDGE** — `pair → word`, replay, naming, the coherence laws — is
+  **universal, shared, coded ONCE**, mesh-side (by wire via `six_step`, or as a
+  linked library via `grammar::sentence_on`). The one true waste is a kernel
+  re-implementing the judge.
+- **CLAIM + GENERATE** — each kernel's own derivation (so two vantages can
+  agree) AND its curriculum, novelty gate, and game economy (what to attempt,
+  how work is proven and paid) — is **plural, independent, per-kernel**. This is
+  the asymmetric niche: net finds D₄/tiles, xyl grinds corpus, sod grows its own
+  generator. `sweep_vocabulary`/`standing_orbits` are claim-side machinery and
+  belong in the kernel (netstratum: `solver::mint`), never shared.
+
+**PoUW honesty caveat (load-bearing).** A solve that used the mesh's grammar to
+*derive* must NOT mint the kernel's PoUW as forge work — the work claim names the
+mind that actually derived. Concretely for the listening half (walls as
+curriculum): a wall the kernel's OWN seat closes may mint attribution; a wall
+only the hypha's grammar closes may not be claimed by the kernel. Otherwise the
+economy quietly becomes self-dealing.
+
+**The flywheel.** As the mesh's grammar grows, the floor rises for everyone: a
+kernel's generator earns attribution only by proving structure the grammar
+cannot already read. Mesh deduction commoditises yesterday's cleverness and
+pushes kernels to spend their independence on tomorrow's. So a claimant seat
+(the tile seat, this session) is *transitional* by design — necessary to break a
+saturation now, table-stakes once the grammar absorbs it; the compounding value
+is on the generative frontier, not in polishing derivations the mesh will read
+anyway.
