@@ -1103,6 +1103,18 @@ impl Polity {
                     let level = scribe::resume_level(book, &spec.world_name)
                         .unwrap_or(1)
                         .max(1);
+                    // The tally keeps its own honest count (.sol, the
+                    // format actually written) for streak/solved.
+                    let solved = std::fs::read_dir(
+                        book.world_dir(&spec.world_name).join("solves"),
+                    )
+                    .map(|entries| {
+                        entries
+                            .filter_map(|e| e.ok())
+                            .filter(|e| e.path().extension().is_some_and(|x| x == "sol"))
+                            .count() as u32
+                    })
+                    .unwrap_or(0);
                     // One divergence per era: a resumed continuation
                     // is the same era — the receipt remembers.
                     let cleaved = world.chronicle().receipts().iter().any(|receipt| {
