@@ -12,6 +12,7 @@ use crate::peel::{
     peel, CellFrame, Cover, DirectionSupport, FullMeasurement, GaugeDirection, Site, ValueManifold,
 };
 use num_bigint::{BigInt, Sign};
+use std::collections::BTreeMap;
 use thiserror::Error;
 
 /// One direction's asymmetry between two vantages: the sites that DEPARTED (in
@@ -212,23 +213,28 @@ impl ChainDelta {
     }
 }
 
-/// The accumulation carrier — the CALL SITE the chains expand into.
+/// The accumulation carrier — the CALL SITE the chains expand into. Keyed by
+/// `(row, col, direction)` in a `BTreeMap`, so accumulation is O(log n) per
+/// contribution, not the linear slot-scan it was (a 30×30, 10-hue wall makes
+/// ~9000 possible entries — the scan was O(entries²)). `into_entries` sorts the
+/// output canonically REGARDLESS of insertion order, so this is output-identical
+/// (the map's own key order is normalised away — SEAL-B untouched).
 pub struct Ledger {
-    slots: Vec<((i64, i64, u8), BigInt)>,
+    slots: BTreeMap<(i64, i64, u8), BigInt>,
 }
 
 impl Ledger {
     pub fn new() -> Self {
-        Self { slots: Vec::new() }
+        Self { slots: BTreeMap::new() }
     }
 
     /// One signed exact contribution at (site, direction).
     pub fn add(&mut self, site: Site, direction: GaugeDirection, value: BigInt) {
         let key = (site.row, site.col, direction.index);
-        match self.slots.iter_mut().find(|(k, _)| *k == key) {
-            Some((_, coefficient)) => *coefficient += value,
-            None => self.slots.push((key, value)),
-        }
+        self.slots
+            .entry(key)
+            .and_modify(|coefficient| *coefficient += &value)
+            .or_insert(value);
     }
 
     /// Close the ledger: non-zero entries only, canonical order.
