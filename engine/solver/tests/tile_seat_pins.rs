@@ -14,6 +14,7 @@ use solver::SolveRead;
 use solver::{forge_task, think_task, Difficulty};
 use solver_verify::grid::{run, Grid, Op, TileMirror};
 use solver_verify::loader::{Task, TaskPair};
+use solver_verify::objects::ObjOp;
 
 fn g(rows: usize, cols: usize, cells: Vec<u8>) -> Grid {
     Grid::new(rows, cols, cells).expect("lawful test grid")
@@ -95,6 +96,21 @@ fn the_tile_seat_proves_a_tiling_before_a_symmetry() {
         Op::FlipV,
     ];
     assert_solves(&task_from(3, 3, &word, &chiral()));
+}
+
+#[test]
+fn the_object_seat_proves_a_segmentation_crop() {
+    // CropContent = extract-non-background (crop to the bounding box of the
+    // non-background content) — a segmentation morphism, neither a plane word
+    // nor a tiling. TWO separated objects per grid, so CropContent (bbox of ALL
+    // content) is distinct from CropLargest — the train disambiguates the op.
+    let word = [Op::Object(ObjOp::CropContent)];
+    let inputs = vec![
+        vec![1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0],
+        vec![3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 0, 0, 4, 0],
+        vec![5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6],
+    ];
+    assert_solves(&task_from(4, 4, &word, &inputs));
 }
 
 #[test]

@@ -344,6 +344,22 @@ fn recognize_tile_first(pairs: &[(&Grid, &Grid)]) -> Option<Program> {
     None
 }
 
+/// **THE OBJECT SEAT** — the segmentation morphisms (keep/delete/crop over the
+/// 4-connected non-background objects; `CropContent` IS extract-non-background).
+/// These are neither a plane word nor a tiling, so the frame and tile seats
+/// withhold them. Recognise the PURE object op: the single `ObjOp` whose action
+/// reproduces every train pair. A bounded walk over the fixed object vocabulary
+/// (`OBJ_OPS`), never a program search; Pin A (the caller) is the authority.
+fn recognize_object(pairs: &[(&Grid, &Grid)]) -> Option<Program> {
+    for objop in solver_verify::objects::OBJ_OPS {
+        let program = vec![Op::Object(objop)];
+        if pairs.iter().all(|&(input, output)| run(&program, input) == *output) {
+            return Some(program);
+        }
+    }
+    None
+}
+
 /// **THINK THE TASK** — the ARC seat. Read the train pairs through the ONE
 /// reduce organ and render its verdict to a program, or WITHHOLD. Dispatch on
 /// the frame: when the output shares the input's frame (up to a D₄ transpose)
@@ -371,7 +387,10 @@ pub fn think_task(task: &Task, grown: &mut Vec<Crystal>) -> SolveRead {
             Some(p) => Some(p),
             None => recognize_tile_first(&pairs),
         }
-    };
+    }
+    // A pure object op (segmentation morphism) is neither a plane word nor a
+    // tiling — try it when the frame/tile seats withhold, in either frame regime.
+    .or_else(|| recognize_object(&pairs));
     let Some(program) = program else {
         return SolveRead::Unsolved;
     };
