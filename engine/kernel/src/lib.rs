@@ -1610,6 +1610,12 @@ fn covered(event: &ClosureEvent) -> bool {
         // ONT-3 (tag 184): rejuvenation is the mine's mirror — a delta-0 element
         // move, covered by the same {containment, exactness} completion.
         | E::VeinRejuvenated { .. }
+        // #136 (tag 185): THE SMELT-SWEEP — the one-time grain migration. An
+        // element-ledger move that FLOORS every stock, declaring a per-element
+        // reduction whose sum is the recorded dust (pre = post + dust); banked-
+        // neutral (no Resource moves), a sign-guarded loss like the demurrage decay,
+        // covered by THE ELEMENT LAW beside the assay and farm above.
+        | E::ElementStocksSwept { .. }
         // THE LAST DEED (operator ruling 2026-08-01, folded to arch-01):
         // TaxonSealed — class and clade sealed as identity, once per
         // star (15 §4). {I2 containment (Build), I3 exactness} complete
@@ -2636,6 +2642,10 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         | E::GaugeShifted { .. } | E::GaugeShiftedAt { .. }
         | E::ProspectStruck { .. } | E::EnrichmentStruck { .. } | E::AssayStruck { .. } | E::CrystalDrawn { .. }
         | E::ElementFarmed { .. }
+        // #136 (tag 185): the smelt-sweep floors an orb's element MATTER — WORLD-
+        // layer beside the farm and assay it migrates, keyed on the place it floors,
+        // never a line's identity.
+        | E::ElementStocksSwept { .. }
         // ELEMENT-CHEMISTRY (#37): a bond is WORLD-layer beside the
         // mint and the assay it consumes — it carries an orb's matter,
         // not a line's identity. The gem's name is content-addressed
@@ -2884,6 +2894,9 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         E::FamineStruck { .. } | E::FamineRelieved { .. } | E::EraAnnexed { .. }
         | E::GalaxyObserved { .. } | E::OverheatStruck { .. } | E::OverheatCleared { .. }
         | E::VentSettled { .. } | E::DemurrageSettled { .. } | E::DemurrageTouched { .. }
+        // #136 — the smelt-sweep is a world-ledger migration (a one-time grain floor),
+        // no actor scope; governed by conservation, like the demurrage settle beside it.
+        | E::ElementStocksSwept { .. }
         | E::AbsorptionLapsed { .. }
         | E::ForwardSlashed { .. } | E::WantStruck { .. } | E::WantRelieved { .. }
         | E::ElementWantStruck { .. } | E::ElementWantRelieved { .. }

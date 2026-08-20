@@ -658,6 +658,15 @@ impl Replayer {
             }
             *crossed = true;
         }
+        // #136 THE SMELT-SWEEP (tag 185) — the migration deed floors EVERY element
+        // stock on every orb to the 1/64 grain. Shares `sweep_element_grain` with
+        // the live emit, so replay reproduces the historical explosion then floors
+        // it byte-identically (`replay == committed`). The receipt's `dust` is the
+        // audit total only — the floor is a pure function of the current stocks, so
+        // a tampered dust cannot bend the replayed state.
+        ClosureEvent::ElementStocksSwept { .. } => {
+            let _dust = super::sweep_element_grain(&mut *orbs);
+        }
         // N4 (NS-2 §1.5): the draw replays as a bank debit and a
         // touch anchor. The reading it paid for CANNOT replay —
         // the receipt is deliberately blind to it (the lens law).

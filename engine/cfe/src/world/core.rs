@@ -95,6 +95,13 @@ impl World {
     pub fn orbs(&self) -> &[ColonyOrb] {
         &self.orbs
     }
+    /// Mutable orb access — the mirror of [`Self::orbs`] (as `chronicle_mut`
+    /// mirrors `chronicle`). Used to stage a legacy off-grain fixture for the
+    /// #136 smelt-sweep witnesses; the live kernel mutates orbs through receipted
+    /// actions, never this.
+    pub fn orbs_mut(&mut self) -> &mut Vec<ColonyOrb> {
+        &mut self.orbs
+    }
     pub fn orb_by_id(&self, orb: u64) -> Option<&ColonyOrb> {
         peek(&self.orbs, orb)
     }
@@ -442,7 +449,12 @@ impl World {
         let class = star.expect("a vein stands, so a star was commissioned");
         let (_, _, natural) = crate::dop::element_properties(&element, class);
         let richness = crate::dop::vein_richness(&natural, &vein.extracted, &vein.rejuvenated);
-        let amount = crate::dop::vein_flow(&richness, &natural, span);
+        // #136 D3 — the element ledger declares its grain (1/1024) at the assay fill:
+        // the vein flow is a geometric decay (a product of arbitrary rationals), so it
+        // SMELTS to the element grain before it folds into the extraction integral,
+        // receipts, or banks. The receipt carries this smelted Δ; replay reads it
+        // (never re-derives), so `extracted` and the stock stay on-grain, byte-exact.
+        let amount = smelt_element(&crate::dop::vein_flow(&richness, &natural, span));
         vein.extracted += amount.clone();
         vein.last_assay = now;
         let held = peel(&mut self.orbs, orb).expect("judged above");

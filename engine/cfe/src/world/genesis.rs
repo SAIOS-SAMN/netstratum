@@ -81,7 +81,7 @@ impl World {
             .map(|receipt| receipt.stamp)
             .max()
             .unwrap_or(0);
-        World {
+        let mut world = World {
             clock: WorldClock::resume(stamp),
             keepers: [Timekeeper { id: 0 }, Timekeeper { id: 1 }, Timekeeper { id: 2 }],
             chronicle,
@@ -142,7 +142,14 @@ impl World {
             skin_mods: committed.skin_mods,
             rogue_pressure: committed.rogue_pressure,
             element_allowlists: committed.element_allowlists,
-        }
+        };
+        // #136 THE SMELT-SWEEP: floor legacy off-grain element stocks ONCE, as a
+        // committed deed in this world's era stream. A no-op (no deed) for a world
+        // already on the grain — post-fix worlds and every fresh test build — so
+        // SEAL B is untouched; only a pre-ruling-B chronicle is migrated, exactly
+        // once, and every later resume re-floors during replay.
+        world.smelt_sweep();
+        world
     }
     /// ELEVATE-1 (12_UNION §6) — THE THREE-GATE GAUGE CLIMB, the
     /// discrete-gauge-morphodynamics ascent (Q3 resolved). An earned,

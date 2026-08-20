@@ -9282,6 +9282,10 @@ fn chronicle(world: &World, style: &Style) {
                 "🌱 {} recovered by the staple vein — orbital forcing grew it back",
                 style.strong(&amount(injected))
             ),
+            cfe::dop::ClosureEvent::ElementStocksSwept { dust } => format!(
+                "⊞ element stocks floored to the grain — {} of dust shed (the one-time smelt-sweep, #136)",
+                style.strong(&amount(dust))
+            ),
             cfe::dop::ClosureEvent::HandoffSealed { from, to } => format!(
                 "✍ hand {} yields the pen to hand {} (NS-5 §7)",
                 style.strong(&from.to_string()),

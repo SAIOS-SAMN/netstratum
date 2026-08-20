@@ -696,6 +696,14 @@ impl World {
         // the bank never overdraws and the kernel bound still holds tight.
         if let Some((element, _joule, _minted, eaten)) = farm {
             let stamp = self.clock.now();
+            // #136 D3 — the element ledger declares its grain (1/1024) at this fill
+            // site: the mint (`joule · richness`) is a product of arbitrary rationals,
+            // so it SMELTS to the element grain before it banks or receipts; the eaten
+            // debit is smelted to the same grain so the net `minted − eaten` lands
+            // on-grain and the stock's denominator stays bounded (replay banks the
+            // recorded, already-smelted, fields — byte-identical). 1/1024 not 1/64:
+            // a food mint is naturally sub-1/64 and would floor toward zero.
+            let eaten = smelt_element(&eaten);
             let mut joule = ratio(0, 1);
             let mut minted = ratio(0, 1);
             if let Some(class) = self.star {
@@ -703,7 +711,7 @@ impl World {
                 if let Some(held) = peel(&mut self.orbs, orb) {
                     let avail = held.banked_amount(Resource::Joule).max(ratio(0, 1));
                     joule = _joule.min(avail);
-                    minted = joule.clone() * richness;
+                    minted = smelt_element(&(joule.clone() * richness));
                     held.bank(Resource::Joule, -joule.clone());
                     held.bank_element(element, minted.clone() - eaten.clone());
                 }

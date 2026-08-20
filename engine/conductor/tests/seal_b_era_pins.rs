@@ -35,3 +35,38 @@ fn every_founded_line_replays_exactly() {
     }
     eprintln!("SEAL B: all {} founded lines replay exactly", worlds.len());
 }
+
+/// **#136 D3 — THE STANDING NEGATIVE WITNESS: every conserved element ledger stays
+/// on the grain.** Every element FILL declares its grain at its fill site — haul and
+/// trade (`world/mod.rs`), farm (`economy.rs`), assay (`core.rs`), refine / gem /
+/// iso-union (`chemistry.rs`), salvage (`fleet.rs`). After a full era exercises those
+/// paths, EVERY element stock on EVERY orb must land on the 1/1024 element grain: its
+/// denominator divides 1024, i.e. `smelt_element(amount) == amount` (the floor is
+/// idempotent exactly on the grain). A future fill site that forgets to smelt re-opens the
+/// denominator explosion that stalled `mass_of` (#136) — and fails THIS witness, at
+/// build time, not a live beat. This is what makes doc 54 §6 a law, not an intention.
+#[test]
+fn every_element_stock_stays_on_the_grain() {
+    let root = scratch("grain");
+    let worlds = run_era(&root.to_string_lossy(), 20);
+    let mut checked = 0u64;
+    for (i, polity) in worlds.iter().enumerate() {
+        for orb in polity.world.orbs() {
+            for (element, amount) in &orb.elements {
+                assert_eq!(
+                    cfe::world::smelt_element(amount),
+                    *amount,
+                    "polity {i} orb {} element {:02x?} is off the 1/1024 grain: {amount} \
+                     (a fill site forgot to smelt — the #136 denominator explosion)",
+                    orb.orb_id,
+                    &element[..4],
+                );
+                checked += 1;
+            }
+        }
+    }
+    eprintln!(
+        "#136 D3: {checked} element stocks across {} founded lines, all on the 1/1024 grain",
+        worlds.len()
+    );
+}

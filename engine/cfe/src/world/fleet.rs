@@ -99,7 +99,11 @@ impl World {
         amount: crate::dop::Positive,
     ) -> Result<(), ActionRefused> {
         self.permitted(actor, Scope::Collect)?;
-        let spent = amount.value().clone();
+        // #136 D3 — the element salvage debit declares its grain: the spend SMELTS
+        // to the element grain (1/1024) so the stock stays on-grain after the draw (an
+        // off-grain spend knocks an on-grain stock off it). Scrap fills with the same
+        // smelted spend and the receipt carries it, so replay is byte-identical.
+        let spent = smelt_element(&amount.value().clone());
         let held = peek(&self.orbs, orb).ok_or(ActionRefused::NoSuchOrb { orb })?;
         if !held.zones.iter().any(|z| z.kind == ZoneKind::ShipYard) {
             return Err(ActionRefused::NoShipYard { orb });

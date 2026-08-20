@@ -115,6 +115,13 @@ impl World {
         if crucible {
             spend /= ratio(1, 1) + ratio(1, 1);
         }
+        // #136 D3 — refine declares its grain (1/1024): the Crucible halving can push
+        // the spend off the grain, and the yield is a recipe rational; both SMELT to
+        // the element grain before the affordability check, order arms, receipt, and
+        // banking read them, so the stock stays on-grain and replay (which decodes
+        // these fields) is byte-identical.
+        let spend = smelt_element(&spend);
+        let yielded = smelt_element(&yielded);
         let have = held.element_amount(&raw);
         if have < spend {
             return Err(ActionRefused::CannotAffordElement {
@@ -179,6 +186,13 @@ impl World {
 
         // THE RECIPE — one home, the same the gate re-derives from.
         let (spends, yielded) = crate::almanac::recipe_of(&set);
+        // #136 D3 — gem-compound declares its grain (1/1024): every spend and the
+        // yield SMELT to the element grain before the order arms, receipt, and banking
+        // read them, so the element stocks stay on-grain and replay (which decodes
+        // these fields) is byte-identical.
+        let spends: Vec<([u8; 32], Ratio)> =
+            spends.iter().map(|(element, spend)| (*element, smelt_element(spend))).collect();
+        let yielded = smelt_element(&yielded);
 
         // 34_MATTER_BALANCE: alchemy is order-work.
         self.require_order_balance(orb)?;
@@ -608,6 +622,12 @@ impl World {
         }
         let (spend_each, yielded, product) = crate::almanac::iso_union_recipe(&a, &b)
             .ok_or(ActionRefused::NotIsomorphic)?;
+        // #136 D3 — iso-union declares its grain (1/1024): the per-side spend and the
+        // yield SMELT to the element grain before the affordability check, order arms,
+        // receipt, and banking read them, so the element stocks stay on-grain and
+        // replay (which decodes these fields) is byte-identical.
+        let spend_each = smelt_element(&spend_each);
+        let yielded = smelt_element(&yielded);
         let knowledge = crate::almanac::iso_union_knowledge(&a, &b).unwrap_or(0);
         let held = peek(&self.orbs, orb).expect("checked");
         for id in [&a, &b] {

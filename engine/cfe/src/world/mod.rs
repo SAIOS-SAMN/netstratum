@@ -827,6 +827,28 @@ fn route_charter_cost() -> Ratio {
 }
 
 impl World {
+    /// #136 THE SMELT-SWEEP (ruling B / Directive 2, 2026-08-20) — the one-time
+    /// migration that floors this world's element stocks to the 1/64 grain, ONCE,
+    /// as a committed deed (`ElementStocksSwept`). Historical hauls banked element
+    /// fills un-smelted, so a resumed chronicle re-explodes stocks to ~700-bit
+    /// denominators every boot and stalls `mass_of`. This floors the whole board and
+    /// records the shaved dust in the receipt (pre = post + dust, bit-for-bit),
+    /// leaving `replay == committed` intact — the apply arm re-floors on replay.
+    ///
+    /// Idempotent + self-terminating: it appends the deed ONLY when some stock is
+    /// off-grain, so a board already on the grain emits nothing (a second boot floors
+    /// during replay and adds no new deed). Returns the swept dust, or `None` when
+    /// there was nothing to sweep. The live floor and the append share
+    /// [`sweep_element_grain`] with the replay arm, so both sides are byte-identical.
+    pub fn smelt_sweep(&mut self) -> Option<Ratio> {
+        if !any_off_grain(&self.orbs) {
+            return None;
+        }
+        let dust = sweep_element_grain(&mut self.orbs);
+        self.close(ClosureEvent::ElementStocksSwept { dust: dust.clone() }, SOVEREIGN);
+        Some(dust)
+    }
+
     /// ROUTE-1: the year-voice maintenance draw — 1/4 joule per live
     /// lane (v1 placeholder). An unaffordable lane LAPSES by receipt
     /// on this book; the pair dies with either leg. Returns the
@@ -1126,6 +1148,57 @@ pub fn pair_melt(a: &World, b: &World, distance: &Ratio) -> Ratio {
 pub fn smelt(amount: &Ratio) -> Ratio {
     let grid = num_bigint::BigInt::from(64);
     Ratio::new(amount.numer() * &grid / amount.denom(), grid)
+}
+
+/// #136 — THE ELEMENT-LEDGER GRAIN (1/1024). The element ledger declares a FINER
+/// grain than the 1/64 market/resource SMELT: element MINTS (the food synthesis
+/// `joule·richness`, the vein flow) are naturally sub-1/64, and flooring them to
+/// 1/64 floors small quanta toward zero and starves the food economy. 1/1024 (the
+/// grain ONT-2 already floors the vein integral to) preserves 16× finer food while
+/// still bounding every element denominator to ≤ 1024 (~10 bits) — the #136
+/// explosion (~700 bits) cannot recur. Every conserved ledger declares ITS grain
+/// (doc 54 §6): the market speaks 1/64, the element ledger 1/1024. The dominant
+/// haul floors to 1/64 (a coarser sub-grid, 64 | 1024, still on-grain), so the whole
+/// element ledger stays `denom | 1024`.
+pub const ELEMENT_GRAIN: i64 = 1024;
+
+pub fn smelt_element(amount: &Ratio) -> Ratio {
+    let grid = num_bigint::BigInt::from(ELEMENT_GRAIN);
+    Ratio::new(amount.numer() * &grid / amount.denom(), grid)
+}
+
+/// #136 THE SMELT-SWEEP, shared body (ruling B / Directive 2). Floor every element
+/// stock on these orbs to the 1/64 grain, drop any stock that smelts to zero, and
+/// return the total dust shaved — `Σ (amount − smelt(amount))`. ONE body, called by
+/// BOTH the live emit ([`World::smelt_sweep`]) and the replay apply arm
+/// (`ElementStocksSwept`), so the migrated state is byte-identical on both sides and
+/// `replay == committed` holds by construction. Conservation is dust-exact: pre =
+/// post + returned dust, the shaving recorded, never vanished (a floor never lifts,
+/// so the dust is non-negative). Keys are untouched (still id-ascending); only the
+/// bank's zero-drop law is re-applied after flooring.
+pub fn sweep_element_grain(orbs: &mut [ColonyOrb]) -> Ratio {
+    let mut dust = ratio(0, 1);
+    for orb in orbs.iter_mut() {
+        for (_, amount) in orb.elements.iter_mut() {
+            let floored = smelt_element(amount);
+            dust += amount.clone() - floored.clone();
+            *amount = floored;
+        }
+        orb.elements.retain(|(_, amount)| *amount != ratio(0, 1));
+    }
+    dust
+}
+
+/// #136 — is any element stock off the 1/1024 element grain (its denominator does
+/// not divide 1024)? The guard the live sweep tests: a board already on the grain
+/// emits no deed.
+fn any_off_grain(orbs: &[ColonyOrb]) -> bool {
+    let grid = num_bigint::BigInt::from(ELEMENT_GRAIN);
+    orbs.iter().any(|orb| {
+        orb.elements
+            .iter()
+            .any(|(_, amount)| (&grid % amount.denom()) != num_bigint::BigInt::from(0))
+    })
 }
 
 /// MARKET-1 (BUILD_ORDER §3a) — CLEAR A CROSSING: two resting offers

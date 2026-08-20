@@ -125,9 +125,17 @@ say "lattice" here, and the word must not creep back in: names shape what gets
 built, and a conserved ledger is a measured fluid, not a crystal.
 
 A conserved ledger (element stocks, banked matter, leisure) is quantised to its own
-grain by SMELT-flooring every fill at the site the delta lands — `smelt(x) =
-floor(x·64)/64`, the 1/64 grain the melt law speaks. This is NOT the environment
-grain-rate (`grain_rate`, a best-rational approximation of a *rate* at a call site);
+grain by SMELT-flooring every fill at the site the delta lands. Each ledger declares
+ITS grain: the market/resource ledger speaks 1/64 (`smelt(x) = floor(x·64)/64`, the
+grain the melt law speaks); the ELEMENT ledger speaks the finer 1/1024
+(`smelt_element`, the grain ONT-2 already floors the vein integral to), because
+element MINTS — the food synthesis `joule·richness`, the vein flow — are naturally
+sub-1/64 and flooring them to 1/64 floors small quanta toward zero and starves the
+food economy. 1/1024 preserves 16× finer food while still bounding every element
+denominator to ≤ 1024 (~10 bits): the explosion cannot recur. The dominant haul
+floors to 1/64 (a coarser sub-grid, 64 | 1024, still on the element grain), so the
+whole element ledger stays `denom | 1024`. This is NOT the environment grain-rate
+(`grain_rate`, a best-rational approximation of a *rate* at a call site);
 a floor at a fill and a rate-grain at a call site are different instruments, and
 element math must use neither rate-grain nor unbounded drift. A fill smelted below
 one grain refuses whole; the shaved remainder never vanishes (it stays with the

@@ -3145,6 +3145,24 @@ pub enum ClosureEvent {
     /// `rejuvenated += injected`; the kernel re-derives the cap from geometry +
     /// the prior integrals. A whole or never-worked vein emits none.
     VeinRejuvenated { orb_id: u64, element: [u8; 32], injected: Ratio },
+    /// **THE SMELT-SWEEP (#136, ruling B / Directive 2, tag 185)** — the one-time
+    /// migration that floors every element stock to the 1/64 SMELT grain. Historical
+    /// hauls banked element fills UN-smelted (before ruling B extended the SMELT to
+    /// the element aperture), so a resumed chronicle re-explodes stocks to ~700-bit
+    /// denominators every boot and stalls `mass_of` (96 s/beat, `mass_denom_bits`
+    /// 107 756). This deed floors the whole board ONCE, in the era stream, so
+    /// `replay == committed` holds across the historical eras — replay reproduces
+    /// the explosion, then this event floors it, byte-identical. A WORLD-wide move
+    /// (no orb key): the apply arm floors EVERY element stock on every orb and drops
+    /// any that smelt to zero. Conservation is dust-exact — the `dust` field is the
+    /// summed shaving `Σ (amount − smelt(amount))` across the whole world, the
+    /// receipt of matter that left the ledger (pre = post + dust, bit-for-bit); it
+    /// is informational (the apply arm re-floors, it does not read `dust`), so a
+    /// tampered dust cannot bend the state. Idempotent + self-terminating: the live
+    /// emit (`World::smelt_sweep`) appends it only when some stock is off-grain, so a
+    /// board already on the grain emits nothing and a second boot re-floors during
+    /// replay and adds no new deed.
+    ElementStocksSwept { dust: Ratio },
     /// **TAXATION (49_TAXATION §3, tag 172)** — the CONTINUITY levy at a
     /// generation turnover: `count` of the line's most-recently adopted
     /// practices LAPSE to the void (its unconfirmed knowledge, unkept as
@@ -4403,6 +4421,13 @@ impl ClosureEvent {
                 value.extend_from_slice(element);
                 ratio::encode(injected, &mut value);
                 tlv::put(184, &value, &mut out);
+            }
+            Self::ElementStocksSwept { dust } => {
+                // dust (rest) — a world-wide deed, no orb key; the shaving total
+                // is unsigned (a floor never lifts) and runs to the frame edge.
+                let mut value = Vec::new();
+                ratio::encode(dust, &mut value);
+                tlv::put(185, &value, &mut out);
             }
             Self::PracticesLapsed { count } => {
                 tlv::put(172, &[*count], &mut out);
@@ -5779,6 +5804,10 @@ impl ClosureEvent {
                 let element: [u8; 32] = value.get(8..40)?.try_into().ok()?;
                 let (injected, _) = ratio::decode(value.get(40..)?)?;
                 Some(Self::VeinRejuvenated { orb_id, element, injected })
+            }
+            185 => {
+                let (dust, _) = ratio::decode(value.get(..)?)?;
+                Some(Self::ElementStocksSwept { dust })
             }
             172 => Some(Self::PracticesLapsed { count: *value.first()? }),
             168 => Some(Self::PressureEbbed {
