@@ -29,6 +29,7 @@ reduct = { path = "../reduct" }
 # reads a species' metabolic complex (Ker/Im/rank of ∂₁) to weight the
 # workbench. The topology engine `reduct` itself rests on this.
 substrate = { path = "../substrate" }
+rfa-core = { path = "../rfa-core" }
 blake3.workspace = true
 num-bigint.workspace = true
 num-traits.workspace = true

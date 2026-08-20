@@ -62,6 +62,7 @@ use std::path::Path;
 // research. Replaces the cartesian build cascade with the peel.
 pub mod civic;
 pub mod lookahead;
+pub mod ocular;
 mod polities;
 // DIO-1 (operator-ruled 2026-08-16): planetary siting on exact rational
 // Diophantine tracks (r = M·k², P = M·k³ off the (M,M) base). See siting.rs.
