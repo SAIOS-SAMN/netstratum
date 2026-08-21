@@ -2777,27 +2777,36 @@ impl Polity {
                 _ => None,
             };
         let direction_override: Option<Trajectory> = if let Some((read, syn, ent)) = self_now {
-            // Slice 3 — DIRECTION EMERGES FROM THE ORDER-CAPTURE FLOW, not a lifetime
-            // level. The books are cumulative, so the per-beat delta is what the line
-            // did THIS beat: `Δsyntropy − Δentropy` is the net order it captured vs
-            // shed, and `Δfamilies` whether its material self gained or collapsed
-            // structure. Evolution — the line measured against its own last beat, no
-            // authored threshold. First read has no flow yet, so it rests at Stagnation.
-            let zero = cfe::ratio::ratio(0, 1);
-            let derived = match self.prev_order.as_ref() {
-                Some((psyn, pent, pfam)) => {
-                    let d_order = (syn.clone() - psyn.clone()) - (ent.clone() - pent.clone());
-                    let d_fam = read.families as i64 - *pfam as i64;
-                    if d_fam < 0 {
-                        Trajectory::Decline // material structure collapsing (a lost family)
-                    } else if d_order > zero {
-                        Trajectory::Growth // captured more order than it shed this beat
-                    } else {
-                        Trajectory::Stagnation // shedding or flat — necessity opens the reach
-                    }
+            // WITHHOLD LAW (operator ruling 2026-08-21): a direction verdict requires a
+            // SIGNAL. The absence of a reading HOLDS the prior trajectory — it is never
+            // mapped to a negative verdict (the honest-withhold principle enforced
+            // everywhere in this project). Two consequences:
+            //
+            // (a) The DRIVER is the lifetime LEVEL read, not the 1-beat FLOW. Measured:
+            //     the flow reads ~72% zeros because the entropy/syntropy books are
+            //     CUMULATIVE, so a single beat's delta is usually 0. Driving on a
+            //     72%-zero instrument maps "unmeasured" to a verdict for most lines —
+            //     the withhold sin through a coarse thermometer. The level drives until
+            //     Slice 3a's WINDOWED flow is PROVEN to discriminate (flat-fraction well
+            //     below 72%); the flow is emitted for witness only, and flow=0 is a
+            //     HOLD, never a verdict.
+            // (b) Cold books (no thermodynamic reading yet) HOLD the prior trajectory.
+            //
+            // `families < 2` is a MEASURED collapse (the peel sees the mono-family hole),
+            // a real signal, so it verdicts Decline even under the withhold law.
+            let derived = if read.families < 2 {
+                Trajectory::Decline
+            } else {
+                match read.cohesion.as_ref() {
+                    None => trajectory_before, // no thermodynamic signal — HOLD prior
+                    Some(c) if *c > cfe::ratio::ratio(1, 2) => Trajectory::Growth,
+                    Some(_) => Trajectory::Stagnation, // below break-even — a measured signal
                 }
-                None => Trajectory::Stagnation,
             };
+            // The per-beat FLOW — WITNESSED ONLY (Slice 3a's input; drives nothing yet).
+            // A zero flow is NO SIGNAL (a hold), printed `0` for the discrimination
+            // measurement, never a verdict here.
+            let zero = cfe::ratio::ratio(0, 1);
             let flow = match self.prev_order.as_ref() {
                 Some((psyn, pent, _)) => {
                     let d = (syn.clone() - psyn.clone()) - (ent.clone() - pent.clone());
@@ -2811,7 +2820,7 @@ impl Polity {
                 .map(|c| format!("{}/{}", c.numer(), c.denom()))
                 .unwrap_or_else(|| "cold".to_string());
             eprintln!(
-                "COG-DIR clock {} {}: elems={} families={}/5 cohesion={} flow={} -> drives={} (was FSM={})",
+                "COG-DIR clock {} {}: elems={} families={}/5 cohesion={} flow={} -> drives={} (level; was FSM={})",
                 self.world.now(),
                 self.spec.civilization.sigil,
                 read.elements,
