@@ -41,6 +41,7 @@ pub use think::{think, PairClosure, TaskThought};
 // and exact restriction morphisms, and the commutation-gated transduction
 // between complexes. The reduction (cohomology by exact SNF) lands next.
 mod mat;
+pub mod atlas;
 pub mod bridge;
 pub mod cohomology;
 pub mod mind;

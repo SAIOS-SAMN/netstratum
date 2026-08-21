@@ -95,25 +95,38 @@ today is the **disjoint sum** `⊕_i H*(W_i)`: each world's classes, isolated.
 Convergence must be shown to mint classes NO single world could — otherwise it is
 re-plumbing without intelligence gain.
 
-**The metric (measured on the SAME live population, before vs after gluing):**
+**The metric (measured on the SAME live population).** The naive
+`rank H*(atlas) − Σ rank H*(chart_i)` is WRONG — gluing both *creates* classes and
+*merges* redundant ones, so the raw difference undercounts. The worked
+counter-example is the canonical proof itself: two contractible arcs `U, V` glued
+on a two-point overlap `W` form a circle `X`; `rank H*(X) = 2` (one `H⁰`, one
+`H¹`) and `rank H*(U) + rank H*(V) = 2` (one `H⁰` each), so the raw difference is
+`0` — yet the loop `H¹(X)` is a genuinely new shared class no arc carries. The raw
+formula scores that convergence as zero cognition, which is false.
+
+The correct measure is the **connecting-homomorphism rank** — the classes of the
+glued atlas that restrict to ZERO on *every* chart (born purely on the overlaps):
 
 ```
-ΔH  =  rank H*(atlas)  −  Σ_i rank H*(chart_i)
+ΔH  :=  rank ker( H*(atlas) --restriction--> ⊕_i H*(chart_i) )
 ```
 
-By Mayer–Vietoris, `ΔH` is exactly the contribution of the **connecting
-homomorphism** — global classes born on the overlaps (Čech `H¹` of the cover)
-that no chart carries alone. Therefore:
+By the Mayer–Vietoris long exact sequence this kernel is exactly `im(δ)`, the
+image of the connecting map `δ: H*(overlaps) → H*(atlas)` — the shared ideas no
+chart holds alone. On the circle it is `1` (the loop restricts to `0` on both
+arcs); on a disjoint cover it is `0`. Therefore:
 
-- **ΔH ≥ 0 always** (gluing never destroys a class), and
-- **ΔH > 0 iff the cover has non-trivial overlaps** that fail to lift locally —
-  i.e., iff convergence created a genuinely shared idea.
+- **ΔH ≥ 0 always** (a kernel rank), and
+- **ΔH > 0 iff the cover has non-trivial overlaps** that mint a class invisible to
+  every chart — i.e., iff convergence created a genuinely shared idea.
 
-`ΔH > 0`, **attributed to specific overlaps** (not a counting artifact), IS the
-provable cognitive increase. It is topological, exact (integer ranks + torsion,
-no float), and reproducible. The **maturity signature**: `ΔH` rising while
-per-chart `Σ rank H*` flattens — shared cognition replacing private coinage (the
-§3-language maturity signature, one dimension up).
+`ΔH > 0`, **attributed to the specific overlap** that produced each kernel class
+(not a counting artifact), IS the provable cognitive increase — topological, exact
+(integer ranks + torsion, no float), reproducible. Oracle fixtures the
+implementation must pass: **circle ⇒ ΔH = 1**, **disjoint ⇒ ΔH = 0**. The
+**maturity signature**: `ΔH` rising while per-chart `Σ rank H*` flattens — shared
+cognition replacing private coinage (the §3-language maturity signature, one
+dimension up).
 
 Secondary, human-legible corollaries the observer must surface: solved-classes
 that transport across ≥2 worlds by the connection (fluid intelligence made
