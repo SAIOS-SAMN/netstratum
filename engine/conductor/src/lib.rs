@@ -937,6 +937,50 @@ fn smelter_gates() -> (Ratio, Ratio) {
     (ratio(30, 1), ratio(10, 1))
 }
 
+// ── #146 THE ENTITY-ATLAS (doc 55 §9) — value-preserving live cognition ──
+//
+// A civilization's collective cognition = the manifold ΔH over its VESSELS
+// (minds). A crystal's key is its FULL CANONICAL CLASS (`ChainDelta` — frame +
+// exact entries), NEVER a u64 digest: the digest would collapse the frame-morphism
+// and the Q/ℤ coefficients — the very value (the per-vessel analog of a line's
+// `rcf_hash`). Two vessels SHARE a class iff their canonical classes match.
+
+/// The value-preserving key of a crystal — its full canonical class, lossless.
+fn atlas_crystal_key(c: &solver::Crystal) -> String {
+    format!("{:?}", c.class)
+}
+/// A splitmix seed from bytes — for the CONNECTION SAMPLE only, never the value key.
+fn atlas_seed(bytes: &[u8]) -> u64 {
+    let mut h = 0xcbf2_9ce4_8422_2325u64;
+    for b in bytes {
+        h ^= *b as u64;
+        h = h.wrapping_mul(0x0100_0000_01b3);
+    }
+    h
+}
+fn atlas_draw(seed: u64) -> u64 {
+    let mut z = seed.wrapping_add(0x9E37_79B9_7F4A_7C15);
+    z = (z ^ (z >> 30)).wrapping_mul(0xBF58_476D_1CE4_E5B9);
+    z = (z ^ (z >> 27)).wrapping_mul(0x94D0_49BB_1331_11EB);
+    (z ^ (z >> 31)) % 1000
+}
+/// A contractible house-chart (one mind).
+fn atlas_point() -> reduct::sheaf::CellSheaf {
+    reduct::sheaf::CellSheaf::new(vec![vec![1]], vec![]).expect("point chart")
+}
+/// `n` shared-class contacts as an overlap.
+fn atlas_contacts(n: usize) -> reduct::sheaf::CellSheaf {
+    reduct::sheaf::CellSheaf::new(vec![vec![1; n.max(1)]], vec![]).expect("contact overlap")
+}
+fn atlas_restr(n: usize) -> Vec<Vec<Vec<num_bigint::BigInt>>> {
+    vec![(0..n.max(1)).map(|_| vec![num_bigint::BigInt::from(1)]).collect()]
+}
+/// A cohesion ratio in `[0,1]` as a per-mille connection coherence, clamped.
+fn atlas_permille(c: &Ratio) -> u64 {
+    let scaled = (c.numer() * num_bigint::BigInt::from(1000)) / c.denom();
+    scaled.to_string().parse::<i64>().unwrap_or(0).clamp(0, 1000) as u64
+}
+
 /// Evidence the ascend gates read — folded from the live world
 /// (receipts + banked elements). One home for office_step and pins.
 fn office_evidence(world: &World) -> OfficeEvidence {
@@ -2751,6 +2795,58 @@ impl Polity {
         let _ = solver::hear_word(&expansion, self.grown.entry(sibling).or_default());
     }
 
+    /// #146 THE EMERGENT ENTITY-ATLAS — this civilization's collective cognition,
+    /// measured live through the manifold. VESSELS (minds) are houses; a class held
+    /// by ≥ 2 vessels is a shared idea — a VALUE-PRESERVING overlap (crystals
+    /// compared by their full canonical class, never a lossy digest). The
+    /// connection is sampled PROBABILISTICALLY (seeded by civ+beat+class, replay-
+    /// exact — `instinct::choose` in the small, weighted by the civ's own cohesion
+    /// coherence), so collective cognition EMERGES from which shared ideas transport
+    /// this beat rather than any dialed knob. ΔH is the exact `reduct::atlas`
+    /// measure (the Ignition Law, dh = flat − 1). Returns
+    /// `(vessels, contacts, flat, ΔH)`. OBSERVATION ONLY — no committed state, no
+    /// receipt, no replay effect.
+    fn cognition_atlas(&self, coherence_permille: u64, beat: u64) -> (usize, usize, usize, usize) {
+        let houses: Vec<std::collections::BTreeSet<String>> = self
+            .grown
+            .values()
+            .map(|cs| cs.iter().map(atlas_crystal_key).collect())
+            .filter(|s: &std::collections::BTreeSet<String>| !s.is_empty())
+            .collect();
+        let vessels = houses.len();
+        if vessels < 2 {
+            return (vessels, 0, 0, 0);
+        }
+        // Emergent overlap: the value-preserving classes held by ≥ 2 vessels.
+        let mut counts: std::collections::BTreeMap<&String, usize> = std::collections::BTreeMap::new();
+        for h in &houses {
+            for k in h {
+                *counts.entry(k).or_default() += 1;
+            }
+        }
+        let contacts: Vec<&String> = counts.into_iter().filter(|(_, c)| *c >= 2).map(|(k, _)| k).collect();
+        let n_contacts = contacts.len();
+        // Probabilistic connection: each shared class transports flatly this beat
+        // with the civ's coherence (seeded by civ+beat+the class's own value).
+        let civ_seed = atlas_seed(self.spec.civilization.sigil.as_bytes());
+        let flat = contacts
+            .iter()
+            .filter(|k| atlas_draw(civ_seed ^ (beat << 20) ^ atlas_seed(k.as_bytes())) < coherence_permille)
+            .count();
+        let dh = if flat == 0 {
+            0
+        } else {
+            reduct::atlas::delta_h(
+                &atlas_point(),
+                &atlas_point(),
+                &atlas_contacts(flat),
+                &atlas_restr(flat),
+                &atlas_restr(flat),
+            )
+        };
+        (vessels, n_contacts, flat, dh)
+    }
+
     fn research_step(&mut self, book: &Ledger, survives: bool) {
         let Some(receipt) = self.world.chronicle().receipts().last() else {
             return;
@@ -2878,6 +2974,22 @@ impl Polity {
                 flow,
                 derived.describe(),
                 trajectory_before.describe(),
+            );
+            // COG-ATLAS — the emergent, value-preserving entity-atlas cognition:
+            // this civilization's collective ΔH over its own minds, the connection
+            // sampled probabilistically at its cohesion coherence. Emergent, not
+            // hardcoded; observation only.
+            let coherence = read.cohesion.as_ref().map(atlas_permille).unwrap_or(0);
+            let (vessels, contacts, flat, dh) = self.cognition_atlas(coherence, self.world.now());
+            eprintln!(
+                "COG-ATLAS clock {} {}: vessels={} contacts={} flat={} dH={} coherence={}permille (emergent)",
+                self.world.now(),
+                self.spec.civilization.sigil,
+                vessels,
+                contacts,
+                flat,
+                dh,
+                coherence,
             );
             self.prev_order = Some((syn, ent, read.families));
             Some(derived)
