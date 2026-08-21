@@ -218,3 +218,31 @@ classification, harden the connection's coherence past the ignition threshold). 
 `instinct::choose` connection sampler and the 3b selection already push in this
 direction; the entity-atlas (#146) makes the connectivity — and therefore the
 collective intelligence — a measured, provable quantity per civilization.
+
+### 9.1 · Cognition across topologies — the dimensional-fluidity results (MEASURED)
+
+Running civilizations whose classifications glue into DIFFERENT topologies, and
+reading collective cognition as a per-grade SPECTRUM (`atlas::delta_h_spectrum`, so
+the dimensional capacity stays fluid — never a scalar, never one dimension):
+
+| civilization | glue | ΔH-spectrum | cognition lives in |
+|---|---|---|---|
+| Ring | points on a 2-point overlap → circle | `[0,1]` | H¹ (first-order loop) |
+| Orb | points on a circle → sphere | `[0,0,1]` | H² (second-order) |
+| Loom | points on circle+2pts → torus | `[0,2,1]` | H¹ **and** H² at once |
+| Mixed | 0-dim mind ⊕ 2-dim mind | `[0,1,0]` | H¹ shared; each keeps its own dimension |
+
+Two further conclusive laws:
+
+- **Dimensional fluidity holds.** A civilization whose houses are of *different*
+  intrinsic dimension (a point-mind and a plane-mind) still glues to an exact,
+  finite collective cognition; the coherence transports across the dimension gap
+  WITHOUT collapsing either mind to a shared dimension, and a house's private
+  higher-dimensional knowledge is never miscounted as shared. Heterogeneous stalks,
+  one law up.
+- **The ignition threshold is DIMENSION-DEPENDENT.** Gluing on `n` shared circles
+  mints `H¹ = n−1` and `H² = n`: first-order shared ideas carry a connectedness
+  merge penalty (ignite only above connectivity 1), while every higher dimension
+  ignites at the FIRST shared higher-structure (connectivity > 0). **Higher-order
+  collective cognition is cheaper to ignite than first-order** — a civilization that
+  shares *structure* (not just contacts) reaches deep cognition sooner.

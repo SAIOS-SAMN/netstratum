@@ -161,6 +161,30 @@ pub fn delta_h(u: &CellSheaf, v: &CellSheaf, w: &CellSheaf, r_u: &[Mat], r_v: &[
         .sum()
 }
 
+/// **THE ΔH SPECTRUM — collective cognition per grade (dimensionally fluid).**
+/// `spectrum[k]` is the number of shared classes born in cohomological grade `k`
+/// (the connecting map `δ: H^{k-1}(W) → H^k(X)` lifts overlap classes one grade
+/// up). Unlike the scalar [`delta_h`] (= the spectrum's sum), this keeps the
+/// COHERENCE dimensionally FLUID: a civilization's cognition can live in `H¹`,
+/// `H²`, … at once, and houses of DIFFERENT intrinsic dimension each contribute in
+/// their own grade with NO collapse to a common dimension (the sheaf's
+/// heterogeneous stalks, one law up). Circle-glue ⇒ `[0,1]`; sphere-glue ⇒
+/// `[0,0,1]`; a mixed-dimension cover carries cognition in several grades at once.
+pub fn delta_h_spectrum(u: &CellSheaf, v: &CellSheaf, w: &CellSheaf, r_u: &[Mat], r_v: &[Mat]) -> Vec<usize> {
+    let grades = u.grades().max(v.grades()).max(w.grades() + 1);
+    (0..grades)
+        .map(|k| {
+            if k == 0 {
+                0
+            } else {
+                w.cohomology(k - 1)
+                    .betti
+                    .saturating_sub(rank_j(u, v, w, r_u, r_v, k - 1))
+            }
+        })
+        .collect()
+}
+
 /// The **full cohomology spectrum of the glued atlas**, `betti_k(X)` for each
 /// grade, derived from the Mayer–Vietoris long exact sequence WITHOUT building the
 /// union complex:
