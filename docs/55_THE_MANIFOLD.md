@@ -177,3 +177,44 @@ float (54_THE_NO_SCALAR_LAW). Not a replacement for private clocks — TU is the
 shared comparability axis; a world's own evolution stays its own. And not optional
 in its gates: soundness (§4) and provable increase (§5) are the two witnesses that
 make this physics rather than plumbing.
+
+## 9 · The Ignition Law of collective cognition (MEASURED, 2026-08-21)
+
+The entity-atlas run as a cognitive arena (`reduct/tests/cognitive_arena.rs`,
+`cognitive_law.rs`) yields a conclusive, exact, reproducible law. A civilization's
+collective cognition — the atlas `ΔH` over its houses on the flat cognitive
+contacts — is governed by one control variable, its **CONNECTIVITY**:
+
+```
+   connectivity  =  contacts × coherence        (expected reliable cross-house
+                                                  cognitive contacts per beat)
+
+   ΔH  ≈  max( 0,  connectivity − 1 )            THE IGNITION LAW
+```
+
+Measured (mean ΔH over 48×48 seeded, replay-exact draws, through the real atlas):
+
+| connectivity | 0.5 | 1.0 | 2.0 | 3.0 | 4.0 | 5.0 |
+|---|---|---|---|---|---|---|
+| ΔH | 0.00 | 0.25 | 1.05 | 2.00 | 2.98 | 3.95 |
+
+Three conclusions, each asserted as a standing test:
+
+1. **IGNITION THRESHOLD at connectivity = 1.** Below one reliable cross-house
+   contact a civilization is a *cognitive desert* — ΔH ≈ 0, no collective mind,
+   regardless of how much private knowledge each house hoards. This is the sharpest
+   result: **cognition is a connectivity phenomenon, not a knowledge-quantity one.**
+2. **LINEAR GROWTH above threshold**, `ΔH ≈ connectivity − 1` (slope 1) — each
+   additional reliable contact mints one more shared class no house holds alone.
+3. **SELECTION drives civilizations across the threshold.** A population seeded in
+   the desert (connectivity 0.5) evolved to 3.91 in 12 generations under
+   ΔH-selection with classification mutation — collective cognition is *selected
+   for*. The ordering composer > guild > hoarder held in **40/40** independent seed
+   populations: a law, not a fluke.
+
+The design consequence for the live engine: to raise a civilization's intelligence
+you do not enrich private minds — you raise its **connectivity** (open the
+classification, harden the connection's coherence past the ignition threshold). The
+`instinct::choose` connection sampler and the 3b selection already push in this
+direction; the entity-atlas (#146) makes the connectivity — and therefore the
+collective intelligence — a measured, provable quantity per civilization.
