@@ -2736,6 +2736,40 @@ impl Polity {
         // advances the trajectory to Growth.
         let trajectory_before = self.trajectory;
 
+        // COG-DIRECTION Slice 1 — THE CIVILIZATION READS ITSELF, LIVE ON THE WIRE.
+        // The SAME `reduct::peel` organ the grid seat runs, turned on this line's own
+        // material self: its element holdings projected into the five almanac families
+        // (the ONT lens, past iron+biomass), combined with its thermodynamic books
+        // (`cohesion_ratio`), to DERIVE a direction (ordering vs dissipating) — no
+        // `if biomass then food`. Emitted to STDERR so it is witnessed live on the
+        // network, not in a test. Slice 2 wires this derived read to drive the
+        // trajectory and retires the `advance(closed)` FSM shown here for comparison.
+        if let (Some(orb), Some(class)) = (self.world.orb(), self.world.star()) {
+            if let Some(read) = soc::observe_direction(
+                &orb.elements,
+                class,
+                &orb.syntropy_contained,
+                &orb.entropy_vented,
+            ) {
+                let cohesion = read
+                    .cohesion
+                    .as_ref()
+                    .map(|c| format!("{}/{}", c.numer(), c.denom()))
+                    .unwrap_or_else(|| "cold".to_string());
+                eprintln!(
+                    "COG-DIR clock {} {}: elems={} families={}/5 bodies={} cohesion={} -> {} (FSM={})",
+                    self.world.now(),
+                    self.spec.civilization.sigil,
+                    read.elements,
+                    read.families,
+                    read.bodies,
+                    cohesion,
+                    read.verdict(),
+                    trajectory_before.describe(),
+                );
+            }
+        }
+
         // N-I5 — THE SURVIVAL OBSERVATION (Pin G, THE INTELLIGENCE PORT). Peel
         // the ration book: does the larder feed the working mouths? A line that
         // cannot does NOT think ARC this beat — it rests (the `None` arm below,

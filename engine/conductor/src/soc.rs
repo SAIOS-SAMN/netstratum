@@ -48,8 +48,88 @@
 
 use crate::civic::{Drive, LATTICE};
 use cfe::dop::{metabolic_harvest, Resource, ZoneKind};
+use cfe::ratio::{ratio, Ratio};
 use num_bigint::BigInt;
 use substrate::snf::{smith_normal_form, Smith};
+
+/// **THE CIVILIZATION READS ITSELF (COG-DIRECTION Slice 1).** The same reduce organ
+/// that solves an ARC grid (`reduct::peel`) is turned on the civilization's OWN
+/// material self — not a hardcoded `if biomass then food`. Its element holdings are
+/// projected into the FIVE almanac families (the ONT lens, past iron+biomass:
+/// `element_properties(..).0` is the family 1..5) and laid on a 1×n frame; `peel`
+/// covers them into family-bodies. That structural reading is combined with the
+/// thermodynamic books — `cohesion_ratio(syntropy, entropy) ∈ [0,1]`, the fraction
+/// of a line's total activity that is ORDER CAPTURED rather than SHED — to DERIVE a
+/// direction: a line that captures more order than it vents (`cohesion > ½`) AND
+/// sustains material diversity (≥2 families present — a mono-family field is a
+/// collapse, a hole the reduce organ sees) is ORDERING; else it is DISSIPATING.
+/// Meaning emerges from the syntropic↔entropic combination, read through the organ,
+/// never a scalar threshold on a legacy resource. Slice 1 EMITS this live to witness
+/// on the wire; Slice 2 lets it drive the trajectory and retires the FSM.
+#[derive(Debug, Clone)]
+pub struct DirectionRead {
+    pub elements: usize,
+    /// Distinct almanac families present (fiber coverage) — material diversity.
+    pub families: usize,
+    /// Connected family-bodies in the peel cover — the material's structure.
+    pub bodies: usize,
+    /// syntropy / (syntropy + entropy) ∈ [0,1]; None when the books are cold.
+    pub cohesion: Option<Ratio>,
+    /// Derived: is the line composing its material self (ordering) or dissipating?
+    pub ordering: bool,
+}
+
+impl DirectionRead {
+    pub fn verdict(&self) -> &'static str {
+        match self.ordering {
+            true => "ordering",
+            false => "dissipating",
+        }
+    }
+}
+
+/// Turn the reduce organ on the civilization itself. `holdings` is the orb's element
+/// ledger (id-ascending), `class` its star (for the family projection), and the two
+/// books its captured order and vented entropy. `None` when the line holds no
+/// elements (nothing material to read yet).
+pub fn observe_direction(
+    holdings: &[([u8; 32], Ratio)],
+    class: cfe::thermal::StarClass,
+    syntropy: &Ratio,
+    entropy: &Ratio,
+) -> Option<DirectionRead> {
+    use reduct::peel::{peel, CellFrame, FullMeasurement, GaugeDirection, Site};
+    if holdings.is_empty() {
+        return None;
+    }
+    let cols = holdings.len();
+    // Each held element is a site; its gauge direction is its almanac FAMILY (1..5
+    // -> 0..4), the ONT projection past the iron coordinate. A 1×n frame is whole by
+    // construction (each cell carried exactly once), so `try_new` admits it.
+    let occupancy: Vec<(Site, GaugeDirection)> = holdings
+        .iter()
+        .enumerate()
+        .map(|(i, (id, _amount))| {
+            let (family, _tier, _richness) = cfe::dop::element_properties(id, class);
+            (
+                Site { row: 0, col: i as i64 },
+                GaugeDirection { index: family.saturating_sub(1) },
+            )
+        })
+        .collect();
+    let measurement =
+        FullMeasurement::try_new(5, CellFrame { rows: 1, cols: cols as u32 }, occupancy).ok()?;
+    let cover = peel(&measurement);
+    let families = cover.value.supports.len();
+    let bodies = cover.object.bodies.len();
+    let cohesion = cfe::dop::cohesion_ratio(syntropy, entropy);
+    let ordering = cohesion
+        .as_ref()
+        .map(|c| *c > ratio(1, 2))
+        .unwrap_or(false)
+        && families >= 2;
+    Some(DirectionRead { elements: cols, families, bodies, cohesion, ordering })
+}
 
 /// The base affinity a natively-bounded building carries before the genus scale.
 /// A bare integer (no `ratio` dial — the ratchet is unmoved); the draw needs only
