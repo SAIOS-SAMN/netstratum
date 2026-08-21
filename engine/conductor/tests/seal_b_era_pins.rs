@@ -70,3 +70,37 @@ fn every_element_stock_stays_on_the_grain() {
         worlds.len()
     );
 }
+
+/// **#138 — THE STANDING NEGATIVE WITNESS: every conserved RESOURCE + STAMP ledger
+/// stays on the grain.** The banked-resource twin of the element witness above, and
+/// the deed that ENDS the grain series (doc 54 §6). Every banked-resource and STAMP
+/// FILL declares its grain at its fill site — the market clears to 1/64 (a coarser
+/// on-grain sub-grid), the cross-world aperture delivery and STAMP mint floor to the
+/// 1/1024 resource grain (`smelt_resource`, `world/mod.rs`). After a full era
+/// exercises those paths, EVERY banked resource stock AND every orb's STAMP on EVERY
+/// orb must land on the 1/1024 resource grain: its denominator divides 1024, i.e.
+/// `smelt_resource(amount) == amount` (the floor is idempotent exactly on the grain).
+/// A future fill site that forgets to smelt re-opens the ~30 000-bit aperture
+/// denominator explosion that ground the beat judge (#138) — and fails THIS witness,
+/// at build time, not a live beat. This is what makes the resource grain a law.
+#[test]
+fn every_resource_and_stamp_stays_on_the_grain() {
+    let root = scratch("resource-grain");
+    let worlds = run_era(&root.to_string_lossy(), 20);
+    // Peel, not scan: each world reports its OWN off-grain residual
+    // (`off_grain_stock`), co-located with the ledger it guards. The witness
+    // asks the carrier the question; it does not walk the board itself.
+    for (i, polity) in worlds.iter().enumerate() {
+        if let Some((orb, carrier, amount)) = polity.world.off_grain_stock() {
+            let ledger = carrier.map_or("STAMP".to_string(), |r| format!("resource {r:?}"));
+            panic!(
+                "polity {i} orb {orb} {ledger} is off the 1/1024 grain: {amount} \
+                 (a fill site forgot to smelt — the #138 denominator explosion)"
+            );
+        }
+    }
+    eprintln!(
+        "#138: all resource + STAMP ledgers across {} founded lines report on the 1/1024 grain",
+        worlds.len()
+    );
+}

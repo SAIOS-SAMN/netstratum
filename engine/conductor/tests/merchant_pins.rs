@@ -143,15 +143,22 @@ fn the_caravan_bridges_the_walled_pair_at_a_profit() {
     // clears the walled pair at a gain, which is the law under test. (The
     // earlier symmetric 23/16 pin assumed pure 35/64 chart melt, before
     // the orbital-phase term entered the distance.)
+    //
+    // #138 THE RESOURCE GRAIN — the aperture delivery now floors to the 1/1024
+    // resource grain (`smelt_resource`), so each melted leg lands on the grain
+    // and the round-trip profits at ON-GRAIN rationals: biomass 55/64 (was the
+    // off-grain 543/640, itself stale after the orbital-phase term), iron 437/512
+    // (was 4431/5120). Both still strictly POSITIVE — the law is unmoved; only
+    // the exact value re-seats on the grain, which is the migration working.
     assert_eq!(
         banked(caravan, Resource::Biomass) - stake_biomass,
-        ratio(543, 640),
-        "the biomass round-trip profits exactly, at the phased melt"
+        ratio(55, 64),
+        "the biomass round-trip profits exactly, on the grain"
     );
     assert_eq!(
         banked(caravan, Resource::Iron) - stake_iron,
-        ratio(4431, 5120),
-        "the iron leftover is inventory, banked at the phased melt"
+        ratio(437, 512),
+        "the iron leftover is inventory, banked on the grain"
     );
     // Both legs are ordinary law: the void's share receipted on the
     // receiving books, offers cleared on all three.

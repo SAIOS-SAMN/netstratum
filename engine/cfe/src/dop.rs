@@ -3163,6 +3163,26 @@ pub enum ClosureEvent {
     /// board already on the grain emits nothing and a second boot re-floors during
     /// replay and adds no new deed.
     ElementStocksSwept { dust: Ratio },
+    /// **THE RESOURCE SMELT-SWEEP (#138, tag 186)** — the element sweep's twin
+    /// for the BANKED RESOURCE + STAMP ledgers. Cross-world aperture transfers
+    /// bank `amount·(1−melt)` UN-smelted (the melt carries a /67-class logistics
+    /// denominator), and each hop compounds it, so a resumed chronicle re-grows
+    /// Crystal/Iron/Biomass and STAMP to ~30 000-bit denominators every boot and
+    /// the conservation judge grinds them (the beat-1 freeze's resource twin,
+    /// #138). This deed floors every banked resource stock AND every orb's STAMP
+    /// to the 1/64 grain ONCE, in the era stream, so `replay == committed` holds
+    /// across the historical eras — replay reproduces the explosion, then this
+    /// event floors it, byte-identical. A WORLD-wide move (no orb key): the apply
+    /// arm floors every banked resource on every orb (dropping zeros) and every
+    /// stamp balance. Conservation is dust-exact — `dust` is the summed shaving
+    /// `Σ (amount − smelt(amount))` across banks AND stamps, informational only
+    /// (the apply arm re-floors; it does not read `dust`), the kernel re-derives
+    /// the per-resource deltas (`admitted_deltas`) and the stamp delta
+    /// (`stamp_move`) from prior. Idempotent + self-terminating: the live emit
+    /// (`World::smelt_resource_sweep`) appends it only when some stock is
+    /// off-grain, so a board already on the grain emits nothing and a second boot
+    /// re-floors during replay and adds no new deed.
+    ResourceStocksSwept { dust: Ratio },
     /// **TAXATION (49_TAXATION §3, tag 172)** — the CONTINUITY levy at a
     /// generation turnover: `count` of the line's most-recently adopted
     /// practices LAPSE to the void (its unconfirmed knowledge, unkept as
@@ -4428,6 +4448,13 @@ impl ClosureEvent {
                 let mut value = Vec::new();
                 ratio::encode(dust, &mut value);
                 tlv::put(185, &value, &mut out);
+            }
+            Self::ResourceStocksSwept { dust } => {
+                // #138 — the banked-resource + STAMP twin of tag 185. Same shape:
+                // a world-wide deed, no orb key; the shaving total is unsigned.
+                let mut value = Vec::new();
+                ratio::encode(dust, &mut value);
+                tlv::put(186, &value, &mut out);
             }
             Self::PracticesLapsed { count } => {
                 tlv::put(172, &[*count], &mut out);
@@ -5808,6 +5835,10 @@ impl ClosureEvent {
             185 => {
                 let (dust, _) = ratio::decode(value.get(..)?)?;
                 Some(Self::ElementStocksSwept { dust })
+            }
+            186 => {
+                let (dust, _) = ratio::decode(value.get(..)?)?;
+                Some(Self::ResourceStocksSwept { dust })
             }
             172 => Some(Self::PracticesLapsed { count: *value.first()? }),
             168 => Some(Self::PressureEbbed {

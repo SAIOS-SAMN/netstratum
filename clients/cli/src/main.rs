@@ -9286,6 +9286,10 @@ fn chronicle(world: &World, style: &Style) {
                 "⊞ element stocks floored to the grain — {} of dust shed (the one-time smelt-sweep, #136)",
                 style.strong(&amount(dust))
             ),
+            cfe::dop::ClosureEvent::ResourceStocksSwept { dust } => format!(
+                "⊞ resource + STAMP stocks floored to the grain — {} of dust shed (the one-time resource smelt-sweep, #138)",
+                style.strong(&amount(dust))
+            ),
             cfe::dop::ClosureEvent::HandoffSealed { from, to } => format!(
                 "✍ hand {} yields the pen to hand {} (NS-5 §7)",
                 style.strong(&from.to_string()),

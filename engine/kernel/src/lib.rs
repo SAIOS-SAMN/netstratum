@@ -601,6 +601,18 @@ fn stamp_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Re
                 -collateral.clone()
             }
         }
+        // #138 THE RESOURCE SMELT-SWEEP (tag 186): the migration floors every
+        // orb's STAMP to the 1/64 grain. RE-DERIVE the total floor delta from
+        // PRIOR (call-not-copy): `Σ (smelt(stamp) − stamp)`, a non-positive shave
+        // to the void, exactly what `sweep_resource_grain` applies to `orb.stamp`,
+        // so the total-check `after == before + declared` holds. (The banked
+        // resource floors are judged in `admitted_deltas`.)
+        ClosureEvent::ResourceStocksSwept { .. } => prior
+            .orbs
+            .iter()
+            .fold(ratio(0, 1), |s, o| {
+                s + (cfe::world::smelt_resource(&o.stamp) - o.stamp.clone())
+            }),
         _ => ratio(0, 1),
     };
     let before = prior
@@ -1636,6 +1648,12 @@ fn covered(event: &ClosureEvent) -> bool {
         // neutral (no Resource moves), a sign-guarded loss like the demurrage decay,
         // covered by THE ELEMENT LAW beside the assay and farm above.
         | E::ElementStocksSwept { .. }
+        // #138 (tag 186): THE RESOURCE SMELT-SWEEP — the banked-resource + STAMP
+        // grain migration. NOT banked-neutral: it declares a per-resource floor
+        // reduction (arm in `admitted_deltas`) and a STAMP floor reduction (arm in
+        // `stamp_move`), each a sign-guarded loss re-derived from prior (the dust
+        // is the recorded shave). Conservation + stamp_move gate it fully.
+        | E::ResourceStocksSwept { .. }
         // THE LAST DEED (operator ruling 2026-08-01, folded to arch-01):
         // TaxonSealed — class and clade sealed as identity, once per
         // star (15 §4). {I2 containment (Build), I3 exactness} complete
@@ -2140,6 +2158,27 @@ fn admitted_deltas(
             // committed state here needs no fold and trusts nothing new.
             .map(|zone| zone.priced_as().raze_refund())
             .unwrap_or_default(),
+        // #138 THE RESOURCE SMELT-SWEEP (tag 186): the migration floors every
+        // banked resource stock to the 1/64 grain. RE-DERIVE the per-resource
+        // floor deltas from PRIOR (call-not-copy — the deed carries only a scalar
+        // dust, never per-resource amounts a receipt could quote one way and
+        // settle another): each stock's declared delta is `smelt(prior) − prior`,
+        // a non-positive shave to the void, summed per resource by the total-check
+        // below. This mirrors `sweep_resource_grain` exactly, so
+        // `after == before + declared` holds and the migration is
+        // conservation-exact. (The STAMP floor is judged in `stamp_move`.)
+        E::ResourceStocksSwept { .. } => {
+            let mut declared: Vec<(Resource, Ratio)> = Vec::new();
+            for orb in &prior.orbs {
+                for (resource, amount) in &orb.banked {
+                    let floored = cfe::world::smelt_resource(amount);
+                    if floored != *amount {
+                        declared.push((*resource, floored - amount.clone()));
+                    }
+                }
+            }
+            declared
+        }
         // No arm: the deed declares NO banked movement — the total
         // check holds every bank still.
         _ => Vec::new(),
@@ -2666,6 +2705,10 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         // layer beside the farm and assay it migrates, keyed on the place it floors,
         // never a line's identity.
         | E::ElementStocksSwept { .. }
+        // #138 (tag 186): the resource smelt-sweep floors an orb's banked RESOURCE
+        // + STAMP — WORLD-layer, same as its element twin, keyed on the place it
+        // floors, never a line's identity.
+        | E::ResourceStocksSwept { .. }
         // ELEMENT-CHEMISTRY (#37): a bond is WORLD-layer beside the
         // mint and the assay it consumes — it carries an orb's matter,
         // not a line's identity. The gem's name is content-addressed
@@ -2917,6 +2960,9 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         // #136 — the smelt-sweep is a world-ledger migration (a one-time grain floor),
         // no actor scope; governed by conservation, like the demurrage settle beside it.
         | E::ElementStocksSwept { .. }
+        // #138 — the resource smelt-sweep, same shape: a one-time grain floor of the
+        // banked-resource + STAMP ledgers, no actor scope, governed by conservation.
+        | E::ResourceStocksSwept { .. }
         | E::AbsorptionLapsed { .. }
         | E::ForwardSlashed { .. } | E::WantStruck { .. } | E::WantRelieved { .. }
         | E::ElementWantStruck { .. } | E::ElementWantRelieved { .. }

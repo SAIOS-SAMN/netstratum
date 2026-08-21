@@ -596,6 +596,18 @@ impl World {
         for (resource, amount) in settleable {
             match amount >= ratio(0, 1) {
                 true => {
+                    // #138 THE RESOURCE GRAIN — a yield lands on the 1/1024
+                    // resource grain at its fill site. Yields fold demand splits
+                    // and rate·elapsed products that carry non-power-of-2
+                    // denominators (a biomass half-harvest banks /15, off any
+                    // power-of-2 grid); flooring here keeps every banked resource
+                    // `denom | 1024`, the grain the standing witness asserts. The
+                    // recorded YieldCollected carries the SAME floored amount, so
+                    // declaration == effect and the kernel admits (call-not-copy).
+                    let amount = smelt_resource(&amount);
+                    if amount == ratio(0, 1) {
+                        continue;
+                    }
                     held.bank(resource, amount.clone());
                     // THE SYNTROPIC BOOK — the inverse of
                     // entropy_vented. A joule yield IS an encased joule
@@ -624,7 +636,15 @@ impl World {
                     // the whole owed exactly as before — byte-identical; only a
                     // world that would have overdrawn diverges, and there the
                     // old path was the negative-bank refusal itself.
-                    let owed = -amount;
+                    // #138 THE RESOURCE GRAIN — the upkeep bill lands on the
+                    // 1/1024 grain at its fill site. The accrued-upkeep rate folds
+                    // off-grain products (a /15-class demand, compounded across
+                    // beats through the accrued pool), so flooring `owed` here keeps
+                    // the DRAW — and, since `unpaid = owed − drawn` and the accrued
+                    // pool only ever takes floored deltas, the accrued pool too — on
+                    // the grain. The recorded UpkeepSettled carries the same floored
+                    // `drawn`, so declaration == effect and the kernel admits.
+                    let owed = smelt_resource(&(-amount));
                     let standing = held.banked_amount(resource).max(ratio(0, 1));
                     let drawn = owed.clone().min(standing);
                     let unpaid = owed - drawn.clone();

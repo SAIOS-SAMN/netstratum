@@ -153,6 +153,13 @@ impl World {
         // conservation holds and no world is refused (the seam that ElementBroken'd
         // the whole board is closed; witnessed in `smelt_sweep_judge_pins`).
         world.smelt_sweep();
+        // #138 THE RESOURCE SMELT-SWEEP: the banked-resource + STAMP twin. Floor
+        // legacy off-grain resource stocks (aperture-compounded Crystal/Iron/
+        // Biomass) and STAMP ONCE, same idempotent + self-terminating shape, so a
+        // world already on the grain emits no deed and SEAL B is untouched; the
+        // kernel admits it (`admitted_deltas` + `stamp_move` re-derive the deltas
+        // from prior). Ordered after the element sweep — independent ledgers.
+        world.smelt_resource_sweep();
         world
     }
     /// ELEVATE-1 (12_UNION §6) — THE THREE-GATE GAUGE CLIMB, the

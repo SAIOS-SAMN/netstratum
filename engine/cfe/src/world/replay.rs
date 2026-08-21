@@ -667,6 +667,14 @@ impl Replayer {
         ClosureEvent::ElementStocksSwept { .. } => {
             let _dust = super::sweep_element_grain(&mut *orbs);
         }
+        // #138 THE RESOURCE SMELT-SWEEP (tag 186) — the banked-resource + STAMP
+        // twin of tag 185. Shares `sweep_resource_grain` with the live emit, so
+        // replay reproduces the aperture-compounded explosion then floors it
+        // byte-identically. The `dust` is audit-only; the floor is a pure
+        // function of the current stocks + stamps.
+        ClosureEvent::ResourceStocksSwept { .. } => {
+            let _dust = super::sweep_resource_grain(&mut *orbs);
+        }
         // N4 (NS-2 §1.5): the draw replays as a bank debit and a
         // touch anchor. The reading it paid for CANNOT replay —
         // the receipt is deliberately blind to it (the lens law).

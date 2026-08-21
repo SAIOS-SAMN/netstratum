@@ -299,6 +299,14 @@ fn haul(
     deal: u64,
     melt: &Ratio,
 ) -> Result<(), ActionRefused> {
+    // #138 THE RESOURCE GRAIN — the haul carries its cargo on the 1/1024 grain.
+    // Both LEGS floor here at the transport's mouth: the SEND draws `amount`
+    // (this floor) and the RECEIVE banks `smelt_resource(amount·(1−melt))`
+    // below, so neither the sender's nor the receiver's bank leaves the grain.
+    // A market fill is already 1/64 (a coarser on-grain sub-grid), so this is
+    // idempotent there; a non-market haul is re-seated. The transport carries
+    // the exactness, so no downstream bank needs to re-smelt.
+    let amount = smelt_resource(&amount);
     // P2: each world's standing supply, snapshotted before either side
     // is peeled. A haul crosses two worlds and each sink reads its OWN
     // supply — a busy world's rate must not be charged to a quiet one.
@@ -383,10 +391,20 @@ fn haul(
     } else {
         ratio(0, 1)
     };
+    // #138 THE RESOURCE GRAIN — the delivered stock lands on the 1/64
+    // market grain (the same grain `clear_trade` fills at). `after_melt =
+    // amount·(1−melt)` un-grains the sent amount (melt carries the /67-class
+    // logistics denominator), and each cross-world hop compounds it, which is
+    // the Crystal/Iron denominator explosion the trace convicted at
+    // `ApertureReceived`. Flooring here re-seats delivered on the grain; the
+    // shaved dust joins `void_share = amount − delivered`, the SAME first-class
+    // melt-loss receipt (a transit loss and a grain shave are the same kind of
+    // physical loss), so conservation holds by construction and no new deed is
+    // needed.
     let delivered = if interdicted >= after_melt {
         ratio(0, 1)
     } else {
-        after_melt - interdicted
+        smelt_resource(&(after_melt - interdicted))
     };
     {
         let target = dst.orbs.iter_mut().find(|held| held.orb_id == to).expect("checked");
@@ -647,7 +665,16 @@ pub fn mint_stamp_from_crystal(
     orb: u64,
     amount: crate::dop::Positive,
 ) -> Result<(), ActionRefused> {
-    let spent = amount.value().clone();
+    // #138 THE RESOURCE GRAIN — the crystal spent (and the STAMP minted 1:1
+    // from it) lands on the 1/64 grain. The live mint draws `half(surplus)`
+    // off the banked Crystal, whose /2 re-off-grains the balance every beat;
+    // flooring here keeps both the Crystal debit and the identity STAMP credit
+    // on grain, so the stamp ledger stops inheriting Crystal's denominator. A
+    // sub-grain surplus smelts to zero and mints nothing (dust never mints).
+    let spent = smelt_resource(&amount.value().clone());
+    if spent == ratio(0, 1) {
+        return Ok(());
+    }
     let held = peel(&mut world.orbs, orb).ok_or(ActionRefused::NoSuchOrb { orb })?;
     let have = held.banked_amount(Resource::Crystal);
     if have < spent {
@@ -707,7 +734,11 @@ pub fn stamp_aperture_transfer(
             dest_shielded: !dst.knows_its_sun(),
         });
     }
-    let amount = amount.value().clone();
+    // #138 THE RESOURCE GRAIN — the STAMP haul carries on the 1/1024 grain,
+    // both legs floored at the transport's mouth (the SEND here, the RECEIVE
+    // `smelt_resource(amount·(1−melt))` below), so neither stamp balance leaves
+    // the grain and the STAMP aperture cannot re-explode the unit of account.
+    let amount = smelt_resource(&amount.value().clone());
     {
         let source = src
             .orbs
@@ -740,7 +771,11 @@ pub fn stamp_aperture_transfer(
         src_stamp,
         vec![SOVEREIGN],
     );
-    let delivered = amount * (ratio(1, 1) - melt.clone());
+    // #138 THE RESOURCE GRAIN — STAMP lands on the 1/64 grain, same as the
+    // resource haul: `amount·(1−melt)` un-grains the sent STAMP, so floor the
+    // delivered balance. The melt shave is already a silent loss here (STAMP
+    // aperture writes no VoidShare), and the grain dust joins it.
+    let delivered = smelt_resource(&(amount * (ratio(1, 1) - melt.clone())));
     {
         let target = dst.orbs.iter_mut().find(|h| h.orb_id == to).expect("ok");
         target.bank_stamp(delivered.clone());
@@ -847,6 +882,46 @@ impl World {
         let dust = sweep_element_grain(&mut self.orbs);
         self.close(ClosureEvent::ElementStocksSwept { dust: dust.clone() }, SOVEREIGN);
         Some(dust)
+    }
+
+    /// #138 THE RESOURCE SMELT-SWEEP (the element sweep's twin) — the one-time
+    /// migration that floors this world's banked resource stocks AND every orb's
+    /// STAMP to the 1/64 grain, ONCE, as a committed deed (`ResourceStocksSwept`).
+    /// Historical cross-world aperture transfers banked `amount·(1−melt)`
+    /// un-smelted, so a resumed chronicle re-explodes Crystal/Iron/Biomass + STAMP
+    /// to ~30 000-bit denominators every boot and the conservation judge grinds
+    /// them. This floors the whole board and records the shaved dust in the
+    /// receipt (pre = post + dust, bit-for-bit), leaving `replay == committed`
+    /// intact — the apply arm re-floors on replay. Idempotent + self-terminating:
+    /// it appends ONLY when some stock is off-grain. Returns the swept dust, or
+    /// `None` when there was nothing to sweep. The live floor and the append share
+    /// [`sweep_resource_grain`] with the replay arm, so both sides are identical.
+    pub fn smelt_resource_sweep(&mut self) -> Option<Ratio> {
+        if !any_resource_off_grain(&self.orbs) {
+            return None;
+        }
+        let dust = sweep_resource_grain(&mut self.orbs);
+        self.close(ClosureEvent::ResourceStocksSwept { dust: dust.clone() }, SOVEREIGN);
+        Some(dust)
+    }
+
+    /// #138 — THE RESOURCE LEDGER'S OWN GRAIN PROJECTION. The first banked
+    /// resource (`Some(resource)`) or STAMP (`None`) on this world that is off
+    /// the 1/1024 grain, with its amount — or `None` when the whole ledger is on
+    /// the grain. The carrier reports its OWN residual: a witness asks the world
+    /// "are you on grain?" and never walks the board itself. A leaked fill site
+    /// surfaces HERE, co-located with the ledger law it broke.
+    pub fn off_grain_stock(&self) -> Option<(u64, Option<Resource>, Ratio)> {
+        self.orbs.iter().find_map(|orb| {
+            orb.banked
+                .iter()
+                .find(|(_, amount)| smelt_resource(amount) != *amount)
+                .map(|(resource, amount)| (orb.orb_id, Some(*resource), amount.clone()))
+                .or_else(|| {
+                    (smelt_resource(&orb.stamp) != orb.stamp)
+                        .then(|| (orb.orb_id, None, orb.stamp.clone()))
+                })
+        })
     }
 
     /// ROUTE-1: the year-voice maintenance draw — 1/4 joule per live
@@ -1167,6 +1242,24 @@ pub fn smelt_element(amount: &Ratio) -> Ratio {
     Ratio::new(amount.numer() * &grid / amount.denom(), grid)
 }
 
+/// #138 — THE RESOURCE-LEDGER GRAIN (1/1024). The banked resource ledger
+/// declares the SAME finer grain as the element ledger, and for the same
+/// measured reason: cross-world aperture deliveries (`amount·(1−melt)`) and the
+/// settlement economy they feed carry sub-1/64 quanta, and flooring them to the
+/// coarse 1/64 market grain shaves enough value to starve marginal lines
+/// (`measured_bounds`: 1/64 tips fed<famished). 1/1024 is 16× finer — it
+/// preserves the food/settlement economy while still bounding every resource
+/// denominator to ≤ 1024 (~10 bits), so the aperture-compounded explosion
+/// (~30 000 bits) cannot recur. The MARKET still SMELTs fills to 1/64 (a coarser
+/// sub-grid, 64 | 1024, strictly on-grain), so every banked resource stays
+/// `denom | 1024`. Every conserved ledger declares ITS grain (doc 54 §6).
+pub const RESOURCE_LEDGER_GRAIN: i64 = 1024;
+
+pub fn smelt_resource(amount: &Ratio) -> Ratio {
+    let grid = num_bigint::BigInt::from(RESOURCE_LEDGER_GRAIN);
+    Ratio::new(amount.numer() * &grid / amount.denom(), grid)
+}
+
 /// #136 THE SMELT-SWEEP, shared body (ruling B / Directive 2). Floor every element
 /// stock on these orbs to the 1/64 grain, drop any stock that smelts to zero, and
 /// return the total dust shaved — `Σ (amount − smelt(amount))`. ONE body, called by
@@ -1198,6 +1291,44 @@ fn any_off_grain(orbs: &[ColonyOrb]) -> bool {
         orb.elements
             .iter()
             .any(|(_, amount)| (&grid % amount.denom()) != num_bigint::BigInt::from(0))
+    })
+}
+
+/// #138 THE RESOURCE SMELT-SWEEP, shared body — the banked-resource + STAMP twin
+/// of [`sweep_element_grain`]. Floor every banked resource stock (dropping any
+/// that smelt to zero) and every orb's STAMP balance to the 1/64 SMELT grain, and
+/// return the total dust `Σ (amount − smelt(amount))` shaved across BOTH ledgers.
+/// ONE body, called by BOTH the live emit ([`World::smelt_resource_sweep`]) and
+/// the replay apply arm (`ResourceStocksSwept`), so the migrated state is
+/// byte-identical on both sides and `replay == committed` holds by construction.
+/// Conservation is dust-exact: pre = post + returned dust, the shaving recorded,
+/// never vanished (a floor never lifts, so the dust is non-negative). Keys are
+/// untouched (still resource-ascending); only the bank's zero-drop law is
+/// re-applied after flooring.
+pub fn sweep_resource_grain(orbs: &mut [ColonyOrb]) -> Ratio {
+    let mut dust = ratio(0, 1);
+    for orb in orbs.iter_mut() {
+        for (_, amount) in orb.banked.iter_mut() {
+            let floored = smelt_resource(amount);
+            dust += amount.clone() - floored.clone();
+            *amount = floored;
+        }
+        orb.banked.retain(|(_, amount)| *amount != ratio(0, 1));
+        let floored = smelt_resource(&orb.stamp);
+        dust += orb.stamp.clone() - floored.clone();
+        orb.stamp = floored;
+    }
+    dust
+}
+
+/// #138 — is any banked resource stock or STAMP balance off the 1/1024 resource
+/// grain (its denominator does not divide 1024)? The guard the live resource
+/// sweep tests: a board already on the grain emits no deed.
+fn any_resource_off_grain(orbs: &[ColonyOrb]) -> bool {
+    let grid = num_bigint::BigInt::from(RESOURCE_LEDGER_GRAIN);
+    let off = |a: &Ratio| (&grid % a.denom()) != num_bigint::BigInt::from(0);
+    orbs.iter().any(|orb| {
+        orb.banked.iter().any(|(_, a)| off(a)) || off(&orb.stamp)
     })
 }
 
