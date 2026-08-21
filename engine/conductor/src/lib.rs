@@ -831,6 +831,14 @@ pub struct Polity {
     /// WHERE THIS LINE IS GOING, read from its own outcomes and used
     /// to decide what the next beat's search may spend.
     pub trajectory: Trajectory,
+    /// COG-DIRECTION Slice 3 — the line's ORDER state at the last beat it read
+    /// itself: `(syntropy_contained, entropy_vented, families)`. The books are
+    /// cumulative, so the per-beat DELTA is the order-capture FLOW — whether the line
+    /// captured or shed order THIS beat — and the family delta is whether its material
+    /// self is gaining or collapsing structure. Direction is derived from those FLOWS
+    /// (evolution — the line vs its own past), not a lifetime-level threshold. `None`
+    /// until the first material read.
+    prev_order: Option<(Ratio, Ratio, usize)>,
     /// Beats since this line last closed a task — what it hands the
     /// hunger when it reaches. A real duration, never a constant.
     pub starved: u64,
@@ -1137,6 +1145,7 @@ impl Polity {
                         grown: std::collections::BTreeMap::new(),
                         reported: 0,
                         trajectory: Trajectory::Growth,
+                        prev_order: None,
                         starved: 0,
                         spent: 0,
                         swept: 0,
@@ -1263,6 +1272,7 @@ impl Polity {
             grown: std::collections::BTreeMap::new(),
             reported: 0,
             trajectory: Trajectory::Growth,
+            prev_order: None,
             starved: 0,
             spent: 0,
             swept: 0,
@@ -2751,7 +2761,9 @@ impl Polity {
         //   ordering (captures order AND ≥2 families)     -> Growth   (composing itself)
         //   dissipating but ≥2 families (venting order)   -> Stagnation (necessity opens the reach)
         //   collapsed to <2 families (a hole)             -> Decline  (material collapse)
-        let direction_override: Option<Trajectory> =
+        // Read the material self as OWNED values so the borrow of `self.world` ends
+        // before we mutate `self.prev_order` below.
+        let self_now: Option<(soc::DirectionRead, cfe::ratio::Ratio, cfe::ratio::Ratio)> =
             match (self.world.orb(), self.world.star()) {
                 (Some(orb), Some(class)) => soc::observe_direction(
                     &orb.elements,
@@ -2760,34 +2772,60 @@ impl Polity {
                     &orb.entropy_vented,
                 )
                 .map(|read| {
-                    let derived = if read.ordering {
-                        Trajectory::Growth
-                    } else if read.families >= 2 {
-                        Trajectory::Stagnation
-                    } else {
-                        Trajectory::Decline
-                    };
-                    let cohesion = read
-                        .cohesion
-                        .as_ref()
-                        .map(|c| format!("{}/{}", c.numer(), c.denom()))
-                        .unwrap_or_else(|| "cold".to_string());
-                    eprintln!(
-                        "COG-DIR clock {} {}: elems={} families={}/5 bodies={} cohesion={} -> {} drives={} (was FSM={})",
-                        self.world.now(),
-                        self.spec.civilization.sigil,
-                        read.elements,
-                        read.families,
-                        read.bodies,
-                        cohesion,
-                        read.verdict(),
-                        derived.describe(),
-                        trajectory_before.describe(),
-                    );
-                    derived
+                    (read, orb.syntropy_contained.clone(), orb.entropy_vented.clone())
                 }),
                 _ => None,
             };
+        let direction_override: Option<Trajectory> = if let Some((read, syn, ent)) = self_now {
+            // Slice 3 — DIRECTION EMERGES FROM THE ORDER-CAPTURE FLOW, not a lifetime
+            // level. The books are cumulative, so the per-beat delta is what the line
+            // did THIS beat: `Δsyntropy − Δentropy` is the net order it captured vs
+            // shed, and `Δfamilies` whether its material self gained or collapsed
+            // structure. Evolution — the line measured against its own last beat, no
+            // authored threshold. First read has no flow yet, so it rests at Stagnation.
+            let zero = cfe::ratio::ratio(0, 1);
+            let derived = match self.prev_order.as_ref() {
+                Some((psyn, pent, pfam)) => {
+                    let d_order = (syn.clone() - psyn.clone()) - (ent.clone() - pent.clone());
+                    let d_fam = read.families as i64 - *pfam as i64;
+                    if d_fam < 0 {
+                        Trajectory::Decline // material structure collapsing (a lost family)
+                    } else if d_order > zero {
+                        Trajectory::Growth // captured more order than it shed this beat
+                    } else {
+                        Trajectory::Stagnation // shedding or flat — necessity opens the reach
+                    }
+                }
+                None => Trajectory::Stagnation,
+            };
+            let flow = match self.prev_order.as_ref() {
+                Some((psyn, pent, _)) => {
+                    let d = (syn.clone() - psyn.clone()) - (ent.clone() - pent.clone());
+                    if d > zero { "+" } else if d < zero { "-" } else { "0" }
+                }
+                None => "?",
+            };
+            let cohesion = read
+                .cohesion
+                .as_ref()
+                .map(|c| format!("{}/{}", c.numer(), c.denom()))
+                .unwrap_or_else(|| "cold".to_string());
+            eprintln!(
+                "COG-DIR clock {} {}: elems={} families={}/5 cohesion={} flow={} -> drives={} (was FSM={})",
+                self.world.now(),
+                self.spec.civilization.sigil,
+                read.elements,
+                read.families,
+                cohesion,
+                flow,
+                derived.describe(),
+                trajectory_before.describe(),
+            );
+            self.prev_order = Some((syn, ent, read.families));
+            Some(derived)
+        } else {
+            None
+        };
 
         // N-I5 — THE SURVIVAL OBSERVATION (Pin G, THE INTELLIGENCE PORT). Peel
         // the ration book: does the larder feed the working mouths? A line that
