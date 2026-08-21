@@ -7,7 +7,7 @@
 //! ΔH = 0. §4 SOUNDNESS: the cocycle condition on transitions.
 
 use num_bigint::BigInt;
-use reduct::atlas::{cocycle_holds, delta_h};
+use reduct::atlas::{atlas_betti, cocycle_holds, delta_h};
 use reduct::sheaf::CellSheaf;
 
 fn i(n: i64) -> BigInt {
@@ -47,6 +47,38 @@ fn a_single_point_glue_mints_nothing() {
     let r_v = vec![vec![vec![i(1)]]];
     let dh = delta_h(&u, &v, &w, &r_u, &r_v);
     assert_eq!(dh, 0, "a contractible glue creates no shared class");
+}
+
+#[test]
+fn the_mayer_vietoris_spectrum_matches_ground_truth() {
+    // Build the circle DIRECTLY as one complex: one 0-cell + one 1-cell, no
+    // incidence (a loop's head/tail cancel), so H⁰ = ℤ, H¹ = ℤ → betti [1,1].
+    let circle_direct = CellSheaf::new(vec![vec![1], vec![1]], vec![]).expect("S¹ is a complex");
+    let ground_truth: Vec<usize> = (0..circle_direct.grades())
+        .map(|k| circle_direct.cohomology(k).betti)
+        .collect();
+    assert_eq!(ground_truth, vec![1, 1], "the direct circle is H⁰=H¹=ℤ");
+
+    // The atlas assembled by Mayer–Vietoris from two arcs glued on the two-point
+    // overlap must reproduce that exact spectrum — the ground-truth soundness
+    // witness (S4: its alternating sum is χ(U)+χ(V)−χ(W)).
+    let u = point();
+    let v = point();
+    let w = two_points();
+    let r_u = vec![vec![vec![i(1)], vec![i(1)]]];
+    let r_v = vec![vec![vec![i(1)], vec![i(1)]]];
+    let mv = atlas_betti(&u, &v, &w, &r_u, &r_v);
+    assert_eq!(mv, vec![1, 1], "MV reconstructs the circle's cohomology exactly");
+
+    // Euler additivity (S4): χ(X) = χ(U)+χ(V)−χ(W).
+    let chi = |b: &[usize]| -> i64 {
+        b.iter().enumerate().map(|(k, &x)| if k % 2 == 0 { x as i64 } else { -(x as i64) }).sum()
+    };
+    let chi_x = chi(&mv);
+    let chi_u = u.euler_characteristic();
+    let chi_v = v.euler_characteristic();
+    let chi_w = w.euler_characteristic();
+    assert_eq!(chi_x, chi_u + chi_v - chi_w, "Euler additivity of the cover holds");
 }
 
 #[test]

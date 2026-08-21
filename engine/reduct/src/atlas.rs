@@ -126,39 +126,70 @@ pub fn cocycle_holds(g_ij: &Mat, g_jk: &Mat, g_ik: &Mat) -> bool {
 /// shared ideas no chart carries alone. `ΔH ≥ 0` always; `ΔH > 0` iff convergence
 /// minted a genuinely global class. The restriction maps must be honest cochain
 /// maps (they commute with `δ`); when a grade has no restriction the map is zero.
-pub fn delta_h(
-    u: &CellSheaf,
-    v: &CellSheaf,
-    w: &CellSheaf,
-    r_u: &[Mat],
-    r_v: &[Mat],
-) -> usize {
-    let grades = u.grades().max(v.grades()).max(w.grades());
-    let mut total = 0usize;
-    for k in 0..grades {
-        let betti_w = w.cohomology(k).betti;
-        if betti_w == 0 {
-            continue; // nothing on the overlap at this grade → no new class here
+/// `rank( j_k : H^k(U)⊕H^k(V) → H^k(W) )` — the induced restriction-difference on
+/// cohomology at grade `k`. Apply `r_u` to each `H^k(U)` rep and `r_v` to each
+/// `H^k(V)` rep, reduce each image to its harmonic class in `H^k(W)`, and take the
+/// exact rank of the spanned subspace. (The sign on the V side does not change a
+/// rank, so it is dropped.)
+fn rank_j(u: &CellSheaf, v: &CellSheaf, w: &CellSheaf, r_u: &[Mat], r_v: &[Mat], k: usize) -> usize {
+    let mut images: Vec<Vec<BigInt>> = Vec::new();
+    let apply = |restr: Option<&Mat>, rep: &[BigInt]| -> Vec<BigInt> {
+        match restr {
+            Some(m) if !m.is_empty() => w.reduce_cochain(k, &matvec(m, rep)),
+            _ => vec![BigInt::zero(); w.dim_cochain(k)],
         }
-        // The induced restriction-difference on cohomology: apply r_u to each
-        // H^k(U) rep and r_v to each H^k(V) rep, reduce each image in H^k(W), and
-        // take the rank of the spanned subspace. (Sign on the V side does not
-        // change the rank, so we drop it.)
-        let mut images: Vec<Vec<BigInt>> = Vec::new();
-        let apply = |restr: Option<&Mat>, rep: &[BigInt]| -> Vec<BigInt> {
-            match restr {
-                Some(m) if !m.is_empty() => w.reduce_cochain(k, &matvec(m, rep)),
-                _ => vec![BigInt::zero(); w.dim_cochain(k)],
-            }
-        };
-        for rep in cohomology_reps(u, k) {
-            images.push(apply(r_u.get(k), &rep));
-        }
-        for rep in cohomology_reps(v, k) {
-            images.push(apply(r_v.get(k), &rep));
-        }
-        let rank_j = rank_of_columns(&images);
-        total += betti_w.saturating_sub(rank_j);
+    };
+    for rep in cohomology_reps(u, k) {
+        images.push(apply(r_u.get(k), &rep));
     }
-    total
+    for rep in cohomology_reps(v, k) {
+        images.push(apply(r_v.get(k), &rep));
+    }
+    rank_of_columns(&images)
+}
+
+/// **§5 PROVABLE COGNITIVE INCREASE** — the connecting-homomorphism rank
+/// `ΔH = Σ_k [ betti_k(W) − rank j_k ]` (see module header). `ΔH > 0` iff
+/// convergence minted a class no chart carries.
+pub fn delta_h(u: &CellSheaf, v: &CellSheaf, w: &CellSheaf, r_u: &[Mat], r_v: &[Mat]) -> usize {
+    let grades = u.grades().max(v.grades()).max(w.grades());
+    (0..grades)
+        .map(|k| {
+            let betti_w = w.cohomology(k).betti;
+            betti_w.saturating_sub(rank_j(u, v, w, r_u, r_v, k))
+        })
+        .sum()
+}
+
+/// The **full cohomology spectrum of the glued atlas**, `betti_k(X)` for each
+/// grade, derived from the Mayer–Vietoris long exact sequence WITHOUT building the
+/// union complex:
+///
+/// ```text
+///   betti_k(X) = [betti_k(U)+betti_k(V) − rank j_k] + [betti_{k-1}(W) − rank j_{k-1}]
+/// ```
+///
+/// (the `ker i_k` term from the two charts, plus the connecting-map term from the
+/// previous overlap grade). This is `H*(atlas)`. A test that builds the same glued
+/// space directly and matches this spectrum is the ground-truth soundness witness;
+/// its alternating sum satisfies Euler additivity `χ(X)=χ(U)+χ(V)−χ(W)` (S4).
+pub fn atlas_betti(u: &CellSheaf, v: &CellSheaf, w: &CellSheaf, r_u: &[Mat], r_v: &[Mat]) -> Vec<usize> {
+    // The connecting map lifts H^k(W) to H^{k+1}(X), so the atlas can carry a class
+    // one grade above the overlap's top — span there (e.g. two point-arcs glued on
+    // a two-point overlap mint an H^1 the charts never reach).
+    let grades = u.grades().max(v.grades()).max(w.grades() + 1);
+    (0..grades)
+        .map(|k| {
+            let charts = (u.cohomology(k).betti + v.cohomology(k).betti)
+                .saturating_sub(rank_j(u, v, w, r_u, r_v, k));
+            let connecting = if k == 0 {
+                0
+            } else {
+                w.cohomology(k - 1)
+                    .betti
+                    .saturating_sub(rank_j(u, v, w, r_u, r_v, k - 1))
+            };
+            charts + connecting
+        })
+        .collect()
 }
