@@ -202,6 +202,11 @@ fn main() {
         )) {
             println!("beat {beat}: {line}");
         }
+        // COG-DIRECTION Slice 3b: the population cohesion census BEFORE the cycle
+        // loop, so each line reads its direction relative to the live cohort.
+        conductor::profile::timed("direction_census_step", || {
+            conductor::direction_census_step(&mut worlds)
+        });
         let mut newborns = Vec::new();
         for polity in &mut worlds {
             if polity.penned {

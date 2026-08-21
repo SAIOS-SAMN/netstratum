@@ -839,6 +839,19 @@ pub struct Polity {
     /// (evolution — the line vs its own past), not a lifetime-level threshold. `None`
     /// until the first material read.
     prev_order: Option<(Ratio, Ratio, usize)>,
+    /// COG-DIRECTION Slice 3b — the POPULATION's cohesion band this beat:
+    /// `(lower_third, upper_third)`, the tertile cuts of the live cohesion
+    /// distribution across every warm-booked line. Set once per beat by
+    /// [`direction_census_step`] before the cycle loop; read by `research_step` so
+    /// a line's direction is its fitness RELATIVE TO THE POPULATION (true natural
+    /// selection: the top third grows, the bottom third declines) rather than an
+    /// absolute 1/2 dial. `None` before the first census or when fewer than three
+    /// warm lines stand (no population to be relative to → hold). MEASURED
+    /// (2026-08-21, 90-civ live journal): the cohesion LEVEL spreads 0..0.93,
+    /// median 0.070, 72/90 distinct — a clean partition; the per-beat FLOW is ~75%
+    /// flat at EVERY window 1..13, so selection reads the discriminating LEVEL,
+    /// population-relative, never the flat flow (Slice 3a refuted by measurement).
+    pop_cohesion_band: Option<(Ratio, Ratio)>,
     /// Beats since this line last closed a task — what it hands the
     /// hunger when it reaches. A real duration, never a constant.
     pub starved: u64,
@@ -1146,6 +1159,7 @@ impl Polity {
                         reported: 0,
                         trajectory: Trajectory::Growth,
                         prev_order: None,
+                        pop_cohesion_band: None,
                         starved: 0,
                         spent: 0,
                         swept: 0,
@@ -1273,6 +1287,7 @@ impl Polity {
             reported: 0,
             trajectory: Trajectory::Growth,
             prev_order: None,
+            pop_cohesion_band: None,
             starved: 0,
             spent: 0,
             swept: 0,
@@ -2794,13 +2809,33 @@ impl Polity {
             //
             // `families < 2` is a MEASURED collapse (the peel sees the mono-family hole),
             // a real signal, so it verdicts Decline even under the withhold law.
+            //
+            // SLICE 3b — POPULATION-RELATIVE SELECTION. Fitness is a line's cohesion
+            // RELATIVE TO THE LIVE POPULATION (the tertile band set by
+            // `direction_census_step`), not an absolute 1/2 dial: the top third GROWS
+            // (fittest — its mind climbs the difficulty ladder), the bottom third
+            // DECLINES (selected against), the middle STAGNATES. This is evolution over
+            // the syntropic value — the same reduce organ reading the civilization's
+            // place in its cohort. The absolute 1/2 threshold is the FALLBACK for a
+            // sparse cohort (< 3 warm lines, no band). Withhold law intact: cold books
+            // (cohesion None) hold the prior trajectory, never a verdict from absence.
             let derived = if read.families < 2 {
                 Trajectory::Decline
             } else {
-                match read.cohesion.as_ref() {
-                    None => trajectory_before, // no thermodynamic signal — HOLD prior
-                    Some(c) if *c > cfe::ratio::ratio(1, 2) => Trajectory::Growth,
-                    Some(_) => Trajectory::Stagnation, // below break-even — a measured signal
+                match (read.cohesion.as_ref(), self.pop_cohesion_band.as_ref()) {
+                    (None, _) => trajectory_before, // cold books — HOLD prior
+                    (Some(c), Some((lo, hi))) => {
+                        if *c >= *hi {
+                            Trajectory::Growth // top third of the living cohort
+                        } else if *c < *lo {
+                            Trajectory::Decline // bottom third — selection presses
+                        } else {
+                            Trajectory::Stagnation // the middle band holds station
+                        }
+                    }
+                    // Sparse cohort (no population band): the absolute break-even holds.
+                    (Some(c), None) if *c > cfe::ratio::ratio(1, 2) => Trajectory::Growth,
+                    (Some(_), None) => Trajectory::Stagnation,
                 }
             };
             // The per-beat FLOW — WITNESSED ONLY (Slice 3a's input; drives nothing yet).
@@ -2819,13 +2854,27 @@ impl Polity {
                 .as_ref()
                 .map(|c| format!("{}/{}", c.numer(), c.denom()))
                 .unwrap_or_else(|| "cold".to_string());
+            let band = self
+                .pop_cohesion_band
+                .as_ref()
+                .map(|(lo, hi)| {
+                    format!(
+                        "[{}/{}..{}/{}]",
+                        lo.numer(),
+                        lo.denom(),
+                        hi.numer(),
+                        hi.denom()
+                    )
+                })
+                .unwrap_or_else(|| "solo".to_string());
             eprintln!(
-                "COG-DIR clock {} {}: elems={} families={}/5 cohesion={} flow={} -> drives={} (level; was FSM={})",
+                "COG-DIR clock {} {}: elems={} families={}/5 cohesion={} pop-band={} flow={} -> drives={} (relative; was FSM={})",
                 self.world.now(),
                 self.spec.civilization.sigil,
                 read.elements,
                 read.families,
                 cohesion,
+                band,
                 flow,
                 derived.describe(),
                 trajectory_before.describe(),
@@ -4596,6 +4645,42 @@ fn galaxy_creator(registry: &Registry, civilization: &Civilization) -> String {
         .unwrap_or_else(|| "conductor".into())
 }
 
+/// **COG-DIRECTION Slice 3b — THE POPULATION CENSUS (true natural selection).**
+/// Once per beat, BEFORE the cycle loop, read every warm-booked line's cohesion
+/// (its syntropy fraction, `thermal_balance_of` — `None` when the books are cold,
+/// so a cold line is not in the distribution and holds) and stamp each line's
+/// `pop_cohesion_band` with the TERTILE CUTS of that live distribution. A line
+/// then reads its own direction RELATIVE TO THE POPULATION: the top third grows
+/// (fittest), the bottom third declines (selected against), the middle stagnates.
+/// Fitness is relative to peers, not an absolute dial — evolution over the
+/// syntropic value. Fewer than three warm lines → no band (nothing to be relative
+/// to; the absolute read holds). Grounded by measurement (2026-08-21): the
+/// cohesion LEVEL spreads 0..0.93 (median 0.070, 72/90 distinct) — a clean
+/// partition — while the per-beat FLOW is ~75% flat at every window, so selection
+/// reads the discriminating level, not the flat flow. This mutates only ephemeral
+/// conductor state (`trajectory`/`level`), never the chronicle — no replay risk.
+pub fn direction_census_step(worlds: &mut [Polity]) {
+    let mut cohesions: Vec<Ratio> = worlds
+        .iter()
+        .filter_map(|p| {
+            let id = p.world.orb()?.orb_id;
+            p.world.thermal_balance_of(id)
+        })
+        .collect();
+    if cohesions.len() < 3 {
+        for p in worlds.iter_mut() {
+            p.pop_cohesion_band = None;
+        }
+        return;
+    }
+    cohesions.sort();
+    let n = cohesions.len();
+    let band = (cohesions[n / 3].clone(), cohesions[(2 * n) / 3].clone());
+    for p in worlds.iter_mut() {
+        p.pop_cohesion_band = Some(band.clone());
+    }
+}
+
 /// Run one era: CONVERGE the archived eras (07 §1.6), then genesis for
 /// every polity, then `cycles` heartbeats; branches born mid-era join the
 /// beat. Returns the live worlds.
@@ -4663,6 +4748,9 @@ fn run_era_inner(
     for beat in 0..cycles {
         // TUniversal T = epoch base + this era's beat (07 §1.3).
         let _ = book.set_universal_clock(epoch_base + u64::from(beat) + 1);
+        // Slice 3b: the population census BEFORE the cycle loop, so each line's
+        // direction read this beat is relative to the live cohort.
+        direction_census_step(&mut worlds);
         let mut newborns = Vec::new();
         for polity in &mut worlds {
             if let Some(spec) = polity.cycle(&book, &registry) {
