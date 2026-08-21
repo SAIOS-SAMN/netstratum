@@ -7,7 +7,7 @@
 //! ΔH = 0. §4 SOUNDNESS: the cocycle condition on transitions.
 
 use num_bigint::BigInt;
-use reduct::atlas::{atlas_betti, cocycle_holds, delta_h};
+use reduct::atlas::{atlas_betti, cocycle_holds, curvature, delta_h, holonomy, transports_flatly};
 use reduct::sheaf::CellSheaf;
 
 fn i(n: i64) -> BigInt {
@@ -95,5 +95,35 @@ fn the_cocycle_condition_gates_the_bundle() {
     assert!(
         !cocycle_holds(&g_ij, &g_jk, &tampered),
         "a broken cocycle is not a bundle and must fail soundness"
+    );
+}
+
+#[test]
+fn the_connection_holonomy_measures_curvature() {
+    let shear = vec![vec![i(1), i(1)], vec![i(0), i(1)]];
+    let unshear = vec![vec![i(1), i(-1)], vec![i(0), i(1)]];
+    let id2 = vec![vec![i(1), i(0)], vec![i(0), i(1)]];
+
+    // A consistent loop (g · g⁻¹ · I = I) is FLAT — a class transports intact
+    // across the charts (fluid intelligence: knowledge propagates geometrically).
+    assert!(
+        transports_flatly(&[shear.clone(), unshear, id2.clone()], 2),
+        "a flat loop transports the class whole"
+    );
+
+    // A curved loop (g · g · I = g² ≠ I) has non-trivial HOLONOMY — the class hits
+    // an obstruction it cannot transport past (the reduce organ's torsion, the
+    // 'unglueable structural cohort').
+    let curved = holonomy(&[shear.clone(), shear.clone(), id2.clone()]);
+    assert_eq!(curved, vec![vec![i(1), i(2)], vec![i(0), i(1)]], "holonomy = g²");
+    assert!(
+        !transports_flatly(&[shear.clone(), shear.clone(), id2.clone()], 2),
+        "a curved loop obstructs transport — the class does not survive convergence"
+    );
+    // The curvature is exactly holonomy − I (the measurable obstruction).
+    assert_eq!(
+        curvature(&[shear.clone(), shear, id2], 2),
+        vec![vec![i(0), i(2)], vec![i(0), i(0)]],
+        "curvature = holonomy − I is the obstruction, non-zero iff not flat"
     );
 }

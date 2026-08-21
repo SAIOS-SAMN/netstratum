@@ -17,7 +17,7 @@ use num_bigint::BigInt;
 use num_traits::Zero;
 use substrate::snf::smith_normal_form;
 
-use crate::mat::{matvec, Mat};
+use crate::mat::{is_zero, matmul, matvec, sub, Mat};
 use crate::sheaf::CellSheaf;
 
 /// The kernel of `δ^k` (the `k`-cocycles) as a basis of column vectors in `C^k`.
@@ -192,4 +192,43 @@ pub fn atlas_betti(u: &CellSheaf, v: &CellSheaf, w: &CellSheaf, r_u: &[Mat], r_v
             charts + connecting
         })
         .collect()
+}
+
+/// The identity transition on a fiber of dimension `n`.
+pub fn identity(n: usize) -> Mat {
+    (0..n)
+        .map(|i| (0..n).map(|j| BigInt::from((i == j) as i64)).collect())
+        .collect()
+}
+
+/// **§6 THE CONNECTION — holonomy around a loop of charts (fluid intelligence).**
+/// Parallel-transport a fiber around a CLOSED loop of overlaps by composing their
+/// transitions `g_{i→j} · g_{j→k} · … · g_{z→i}`. The result is the HOLONOMY. When
+/// it is the identity the connection is FLAT around the loop and a class
+/// transports intact — knowledge propagates geometrically (not by market copy).
+/// Any deviation is the CURVATURE: the obstruction a class hits, exactly the
+/// reduce organ's torsion — the "unglueable structural cohort" made measurable.
+pub fn holonomy(loop_transitions: &[Mat]) -> Mat {
+    let mut h: Option<Mat> = None;
+    for g in loop_transitions {
+        h = Some(match h {
+            None => g.clone(),
+            Some(prev) => matmul(&prev, g),
+        });
+    }
+    h.unwrap_or_default()
+}
+
+/// The curvature of a loop: `holonomy − I`. Zero iff the connection is flat there
+/// (a class transports); non-zero IS the obstruction (= torsion).
+pub fn curvature(loop_transitions: &[Mat], fiber_dim: usize) -> Mat {
+    sub(&holonomy(loop_transitions), &identity(fiber_dim))
+}
+
+/// **§4 S3 — is the connection FLAT around this loop?** Identity holonomy ⇒ a
+/// class parallel-transports intact. This is the cocycle condition made dynamic:
+/// flatness around ANY loop, not just a triple. A class survives convergence iff
+/// its loops are flat; where they curve, the reduce organ reads the torsion.
+pub fn transports_flatly(loop_transitions: &[Mat], fiber_dim: usize) -> bool {
+    is_zero(&curvature(loop_transitions, fiber_dim))
 }
