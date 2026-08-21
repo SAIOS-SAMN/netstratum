@@ -2736,39 +2736,58 @@ impl Polity {
         // advances the trajectory to Growth.
         let trajectory_before = self.trajectory;
 
-        // COG-DIRECTION Slice 1 — THE CIVILIZATION READS ITSELF, LIVE ON THE WIRE.
-        // The SAME `reduct::peel` organ the grid seat runs, turned on this line's own
-        // material self: its element holdings projected into the five almanac families
-        // (the ONT lens, past iron+biomass), combined with its thermodynamic books
-        // (`cohesion_ratio`), to DERIVE a direction (ordering vs dissipating) — no
-        // `if biomass then food`. Emitted to STDERR so it is witnessed live on the
-        // network, not in a test. Slice 2 wires this derived read to drive the
-        // trajectory and retires the `advance(closed)` FSM shown here for comparison.
-        if let (Some(orb), Some(class)) = (self.world.orb(), self.world.star()) {
-            if let Some(read) = soc::observe_direction(
-                &orb.elements,
-                class,
-                &orb.syntropy_contained,
-                &orb.entropy_vented,
-            ) {
-                let cohesion = read
-                    .cohesion
-                    .as_ref()
-                    .map(|c| format!("{}/{}", c.numer(), c.denom()))
-                    .unwrap_or_else(|| "cold".to_string());
-                eprintln!(
-                    "COG-DIR clock {} {}: elems={} families={}/5 bodies={} cohesion={} -> {} (FSM={})",
-                    self.world.now(),
-                    self.spec.civilization.sigil,
-                    read.elements,
-                    read.families,
-                    read.bodies,
-                    cohesion,
-                    read.verdict(),
-                    trajectory_before.describe(),
-                );
-            }
-        }
+        // COG-DIRECTION (Slices 1+2) — THE CIVILIZATION READS ITSELF AND THAT
+        // READING IS ITS DIRECTION. The SAME `reduct::peel` organ the grid seat runs,
+        // turned on this line's own material self: element holdings projected into the
+        // five almanac families (the ONT lens, past iron+biomass), combined with its
+        // thermodynamic books (`cohesion_ratio`), to DERIVE a direction — no
+        // `if biomass then food`. Slice 2: this derived read now DRIVES the trajectory
+        // (the `direction_override` below), retiring the boolean `advance(closed)` FSM
+        // for any line with a material self; the FSM survives only as the fallback for
+        // a pre-material line (no star, no elements — nothing yet to read). Emitted to
+        // STDERR to be witnessed live on the network, not in a test.
+        //
+        // The mapping is derived from the organ's own readings, not a puzzle boolean:
+        //   ordering (captures order AND ≥2 families)     -> Growth   (composing itself)
+        //   dissipating but ≥2 families (venting order)   -> Stagnation (necessity opens the reach)
+        //   collapsed to <2 families (a hole)             -> Decline  (material collapse)
+        let direction_override: Option<Trajectory> =
+            match (self.world.orb(), self.world.star()) {
+                (Some(orb), Some(class)) => soc::observe_direction(
+                    &orb.elements,
+                    class,
+                    &orb.syntropy_contained,
+                    &orb.entropy_vented,
+                )
+                .map(|read| {
+                    let derived = if read.ordering {
+                        Trajectory::Growth
+                    } else if read.families >= 2 {
+                        Trajectory::Stagnation
+                    } else {
+                        Trajectory::Decline
+                    };
+                    let cohesion = read
+                        .cohesion
+                        .as_ref()
+                        .map(|c| format!("{}/{}", c.numer(), c.denom()))
+                        .unwrap_or_else(|| "cold".to_string());
+                    eprintln!(
+                        "COG-DIR clock {} {}: elems={} families={}/5 bodies={} cohesion={} -> {} drives={} (was FSM={})",
+                        self.world.now(),
+                        self.spec.civilization.sigil,
+                        read.elements,
+                        read.families,
+                        read.bodies,
+                        cohesion,
+                        read.verdict(),
+                        derived.describe(),
+                        trajectory_before.describe(),
+                    );
+                    derived
+                }),
+                _ => None,
+            };
 
         // N-I5 — THE SURVIVAL OBSERVATION (Pin G, THE INTELLIGENCE PORT). Peel
         // the ration book: does the larder feed the working mouths? A line that
@@ -3004,7 +3023,12 @@ impl Polity {
                 // THE COUPLING CLOSES HERE. A close returns the line to
                 // growth from wherever it was, and clears the hunger it
                 // reached with.
-                self.trajectory = self.trajectory.advance(true);
+                // Slice 2: the civilization's DIRECTION is its self-reading when it
+                // has a material self; the boolean close only sets direction for a
+                // pre-material line (the FSM fallback). The close still clears the
+                // hunger below either way.
+                self.trajectory =
+                    direction_override.unwrap_or_else(|| self.trajectory.advance(true));
                 self.starved = 0;
                 // D CLIMBS WHEN THE RUNG IS MASTERED — coupled, not
                 // counted. The old rule was `streak >= 3 && level < 5`:
@@ -3047,7 +3071,10 @@ impl Polity {
                 self.streak = 0;
                 // Growth → stagnation → decline, one step per barren
                 // beat. What each state SPENDS is `Trajectory::need`.
-                self.trajectory = self.trajectory.advance(false);
+                // Slice 2: the derived self-reading is the direction; the FSM's
+                // barren-beat step only stands for a pre-material line.
+                self.trajectory =
+                    direction_override.unwrap_or_else(|| self.trajectory.advance(false));
                 self.starved = self.starved.saturating_add(1);
             }
         }
