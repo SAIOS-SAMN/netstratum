@@ -1187,6 +1187,26 @@ fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
             }
             vec![(*element, -amount.clone())]
         }
+        // #136 THE SMELT-SWEEP (tag 185): the one-time migration floors every element
+        // stock to the 1/1024 grain. RE-DERIVE the per-element floor deltas from the
+        // PRIOR state (call-not-copy — the deed carries only a scalar dust, never
+        // per-element amounts a receipt could quote one way and settle another): each
+        // stock's declared delta is `smelt_element(prior) − prior`, a non-positive
+        // shave to the void, summed per element by the total-check below. This mirrors
+        // `sweep_element_grain` exactly, so `after == before + declared` holds and the
+        // migration is conservation-exact (the dust is the recorded loss).
+        ClosureEvent::ElementStocksSwept { .. } => {
+            let mut declared: Vec<([u8; 32], Ratio)> = Vec::new();
+            for orb in &prior.orbs {
+                for (element, amount) in &orb.elements {
+                    let floored = cfe::world::smelt_element(amount);
+                    if floored != *amount {
+                        declared.push((*element, floored - amount.clone()));
+                    }
+                }
+            }
+            declared
+        }
         _ => Vec::new(),
     };
     // Total-check every element key present in either state or in the

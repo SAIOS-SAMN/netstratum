@@ -166,9 +166,6 @@ fn the_smelt_sweep_migrates_a_resumed_chronicle() {
         vec![1],
     );
 
-    // The resume-path sweep is ENV-GATED OFF live (the #136 judge seam); enable it
-    // here to exercise the migration on resume.
-    std::env::set_var("NETSTRATUM_SMELT_SWEEP", "1");
     // Resume replays the off-grain history, then the sweep floors it.
     let resumed = World::resume(world.chronicle().clone());
     let migrated = resumed.orb().expect("orb").element_amount(&element);

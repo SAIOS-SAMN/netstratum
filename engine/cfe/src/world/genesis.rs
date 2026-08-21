@@ -147,19 +147,12 @@ impl World {
         // committed deed in this world's era stream. A no-op (no deed) for a world
         // already on the grain — post-fix worlds and every fresh test build — so
         // SEAL B is untouched; only a pre-ruling-B chronicle is migrated, exactly
-        // once, and every later resume re-floors during replay.
-        //
-        // ENV-GATED OFF BY DEFAULT (#136 seam, 2026-08-20): the live sweep desyncs
-        // the kernel's element-conservation JUDGE — the deed records only a scalar
-        // `dust`, so the judge (which reconstructs each element's balance from the
-        // receipts' per-element deltas) cannot attribute the floor and refuses every
-        // world (ElementBroken). SEAL B (`replay == committed`) stays green; the
-        // judge is a separate layer. Until the judge learns the sweep (carry
-        // per-element deltas, or mirror `sweep_element_grain` in element verification),
-        // the sweep only fires under NETSTRATUM_SMELT_SWEEP=1 (tests call it directly).
-        if std::env::var("NETSTRATUM_SMELT_SWEEP").is_ok() {
-            world.smelt_sweep();
-        }
+        // once, and every later resume re-floors during replay. The kernel judge
+        // admits the deed: `element_move`'s `ElementStocksSwept` arm re-derives the
+        // per-element floor deltas from prior (mirroring `sweep_element_grain`), so
+        // conservation holds and no world is refused (the seam that ElementBroken'd
+        // the whole board is closed; witnessed in `smelt_sweep_judge_pins`).
+        world.smelt_sweep();
         world
     }
     /// ELEVATE-1 (12_UNION §6) — THE THREE-GATE GAUGE CLIMB, the
