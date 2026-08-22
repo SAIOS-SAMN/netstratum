@@ -374,6 +374,8 @@ fn main() {
         // over 107 civs is slow, so run it every few beats, not every 30.
         if beat.is_multiple_of(3) || (cycles > 0 && beat == cycles) {
             conductor::shared_language_census(&worlds, epoch_base + beat);
+            // Make the wired-but-silent economy + societies visible on the wire.
+            conductor::emergent_census(&worlds, epoch_base + beat);
         }
         if beat.is_multiple_of(10) || (cycles > 0 && beat == cycles) {
             let summary: Vec<String> = worlds

@@ -5136,6 +5136,54 @@ pub fn direction_census_step(worlds: &mut [Polity]) {
     }
 }
 
+/// **THE EMERGENT CENSUS, LIVE** — make the wired-but-silent civilization visible
+/// on the wire (mesh relay #69 + the audit's invisible layers). COG-ECON reports
+/// the ECONOMY moving (chartered lanes, banked primitives, Alloy, zones built) and
+/// the COGNITIVE FLOOR (minds whose cognitive_capacity has lifted off survival to
+/// 3 — a seated science). COG-SOC reports the SELF-ORGANIZATION (caste count +
+/// how many lines have a multi-caste society) that until now steered investment
+/// entirely unseen. Observation only; reads committed/derived state, writes
+/// nothing. Bounded to the live (unpenned) roster.
+pub fn emergent_census(worlds: &[Polity], beat: u64) {
+    let live: Vec<&Polity> = worlds.iter().filter(|p| !p.penned).collect();
+    if live.is_empty() {
+        return;
+    }
+    let mut routes = 0usize;
+    let mut zones = 0usize;
+    let mut minds_at_cap = 0usize;
+    let mut caste_lines = 0usize;
+    let mut castes_total = 0usize;
+    let mut banked_bic = ratio(0, 1);
+    let mut alloy = ratio(0, 1);
+    for p in &live {
+        routes += p.world.routes().len();
+        zones += p.world.orb().map(|o| o.zones.len()).unwrap_or(0);
+        if p.world.cognitive_capacity(cfe::world::FIRST_ORB) >= 3 {
+            minds_at_cap += 1;
+        }
+        for r in [Resource::Biomass, Resource::Iron, Resource::Crystal] {
+            banked_bic += banked(&p.world, r);
+        }
+        alloy += banked(&p.world, Resource::Alloy);
+        let census = p.caste_partition();
+        if census.len() >= 2 {
+            caste_lines += 1;
+            castes_total += census.len();
+        }
+    }
+    eprintln!(
+        "COG-ECON beat {beat}: civs={} routes={routes} banked_BIC={} alloy={} zones={zones} minds_at_cap3={minds_at_cap} (trade | building | cognitive floor)",
+        live.len(),
+        banked_bic.to_integer(),
+        alloy.to_integer(),
+    );
+    eprintln!(
+        "COG-SOC beat {beat}: caste_societies={caste_lines}/{} castes_total={castes_total} (self-organization made visible)",
+        live.len(),
+    );
+}
+
 /// **THE SHARED-LANGUAGE CENSUS, LIVE** — prove on the wire that the
 /// civilizations speak ONE tongue, learned from the AUTIC network, not private
 /// dialects. Three measured claims over the live population's own basins:
