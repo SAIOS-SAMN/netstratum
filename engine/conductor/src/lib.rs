@@ -3014,6 +3014,19 @@ impl Polity {
                 dh,
                 coherence,
             );
+            // COG-LEX — the emergent VOCABULARY made visible: shared words this
+            // civilization has minted (two vantages agreed and the word landed) and
+            // the agreements still in flight (one vantage waiting on the pending
+            // board for a second). A growing lexicon IS communication — a society
+            // composing a shared language. Observation only; the mint happens on the
+            // research beat, this only reports the standing count.
+            eprintln!(
+                "COG-LEX clock {} {}: words={} pending={} (emergent vocabulary)",
+                self.world.now(),
+                self.spec.civilization.sigil,
+                self.library.words().len(),
+                self.word_pending.len(),
+            );
             self.prev_order = Some((syn, ent, read.families));
             Some(derived)
         } else {
