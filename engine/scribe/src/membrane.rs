@@ -178,6 +178,53 @@ pub fn prime_autic_basin(crystals: Vec<reduct::Crystal>) {
     }
 }
 
+/// **THE AUTIC WALLS** (AUTIC-1 curriculum axis) — the mesh's PROBLEMS, published
+/// for the entities to PRACTICE. Where `AUTIC_BASIN` carries net's learned answers
+/// (crystals), this carries the raw walls (measurement pairs) net heard from the
+/// mycelium network. An entity that HEARS a wall re-derives it through ITS OWN
+/// organ (`solver::hear`): a second, independent vantage on the mesh's problem, not
+/// a copy of net's answer. A bounded ring, newest kept (the freshest demand is the
+/// most worth practising); a live workspace mirror, never a replay-durable deed.
+static AUTIC_WALLS: Mutex<Vec<(reduct::peel::FullMeasurement, reduct::peel::FullMeasurement)>> =
+    Mutex::new(Vec::new());
+
+const AUTIC_WALLS_CAP: usize = 512;
+
+/// Publish one heard wall (the reduct measurement pair) for the entities to
+/// practise. Newest-kept ring, deduped by pair.
+fn publish_autic_wall(a: reduct::peel::FullMeasurement, b: reduct::peel::FullMeasurement) {
+    if let Ok(mut walls) = AUTIC_WALLS.lock() {
+        if walls.iter().any(|(x, y)| x == &a && y == &b) {
+            return;
+        }
+        if walls.len() >= AUTIC_WALLS_CAP {
+            walls.remove(0);
+        }
+        walls.push((a, b));
+    }
+}
+
+/// **READ THE AUTIC WALLS** — the mesh problems net has heard, for the conductor
+/// to hand entities as practice. A clone (never hold the lock across the beat).
+pub fn autic_walls() -> Vec<(reduct::peel::FullMeasurement, reduct::peel::FullMeasurement)> {
+    AUTIC_WALLS.lock().map(|w| w.clone()).unwrap_or_default()
+}
+
+/// The count of published AUTIC walls — an observability read (no clone).
+pub fn autic_walls_depth() -> usize {
+    AUTIC_WALLS.lock().map(|w| w.len()).unwrap_or(0)
+}
+
+/// **PRIME THE AUTIC WALLS** — seat practice walls without the mesh (warm start /
+/// off-wire exercise of the curriculum axis). Appended, deduped, bounded.
+pub fn prime_autic_walls(
+    walls: Vec<(reduct::peel::FullMeasurement, reduct::peel::FullMeasurement)>,
+) {
+    for (a, b) in walls {
+        publish_autic_wall(a, b);
+    }
+}
+
 /// The cap on the retained cohort — a ring, newest kept. The diagnosis pass
 /// drains faster than the forge fills; this only bounds a stalled consumer.
 const COHORT_CAP: usize = 4096;
@@ -463,6 +510,9 @@ fn run(rx: mpsc::Receiver<SolveOffer>) {
                     let (Some(ra), Some(rb)) = (to_reduct_fm(a), to_reduct_fm(b)) else {
                         continue;
                     };
+                    // AUTIC-1 curriculum axis — publish the wall so the entities can
+                    // PRACTISE the mesh's real problem, re-deriving it themselves.
+                    publish_autic_wall(ra.clone(), rb.clone());
                     match solver::hear(&ra, &rb, &mut net_basin) {
                         solver::Heard::Understood => {
                             tag = tag.wrapping_add(1);

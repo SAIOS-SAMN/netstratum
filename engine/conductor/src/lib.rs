@@ -928,6 +928,11 @@ pub struct Polity {
     /// COMPOSE move: multi-word thought exchanged and comprehended between minds.
     pub autic_spoke: usize,
     pub autic_learned: usize,
+    /// AUTIC-1 curriculum axis — how many mesh walls this line's vessels have
+    /// PRACTISED (heard the mesh's own problem and re-derived it, growing the
+    /// basin where it walled). Cumulative workspace. The live measure of the
+    /// entities facing the network's real problems, not only forged ones.
+    pub autic_practiced: usize,
     /// How many refusals the board has already been TOLD. The record
     /// above is permanent; this is only the narrator's place in it, so
     /// a refusal is announced once per process and kept forever.
@@ -1213,6 +1218,7 @@ impl Polity {
                         autic_absorbed: 0,
                         autic_spoke: 0,
                         autic_learned: 0,
+                        autic_practiced: 0,
                         reported: 0,
                         trajectory: Trajectory::Growth,
                         prev_order: None,
@@ -1344,6 +1350,7 @@ impl Polity {
             autic_absorbed: 0,
             autic_spoke: 0,
             autic_learned: 0,
+            autic_practiced: 0,
             reported: 0,
             trajectory: Trajectory::Growth,
             prev_order: None,
@@ -2756,6 +2763,35 @@ impl Polity {
         self.grown.values().map(|v| v.len()).max().unwrap_or(0)
     }
 
+    /// AUTIC-1 CURRICULUM AXIS, LIVE. The vessel PRACTISES the mesh's own
+    /// problems: draw a hash-seeded wall from net's published AUTIC walls (the
+    /// mesh's real ARC-AGI-2 demand, heard through the membrane) and HEAR it
+    /// through this vessel's own organ (`solver::hear`) — a second, INDEPENDENT
+    /// vantage on the mesh's problem, growing the basin where the vessel walls.
+    /// This is the entities facing the network's problems, not only forged ones;
+    /// where `absorb_autic` copies net's ANSWERS, this practises net's QUESTIONS.
+    /// Emergent (a different wall per vessel by hash), replay-safe (`grown` is
+    /// workspace; replay folds deeds). A no-op with no published walls (run_era
+    /// off-wire), so it is silent, not dormant.
+    fn practise_autic_wall(&mut self, vessel: u64) {
+        let depth = scribe::membrane::autic_walls_depth();
+        if depth == 0 {
+            return;
+        }
+        let walls = scribe::membrane::autic_walls();
+        if walls.is_empty() {
+            return;
+        }
+        // Hash-seeded pick: a different wall per (vessel, beat), deterministic.
+        let seed = vessel
+            .wrapping_mul(0x9E3779B97F4A7C15)
+            .wrapping_add(self.world.now())
+            .wrapping_mul(0xD1B54A32D192ED03);
+        let (a, b) = &walls[(seed as usize) % walls.len()];
+        let _ = solver::hear(a, b, self.grown.entry(vessel).or_default());
+        self.autic_practiced += 1;
+    }
+
     fn speak_and_hear(&mut self, speaker: u64, hearer: u64) {
         const AUTIC_SENTENCE_LEN: usize = 4;
         // Compose the sentence from the speaker's freshest words (borrow released
@@ -3129,13 +3165,14 @@ impl Polity {
             // shared tongue the entities will come to think in. Watching the two
             // together is the emergent measure of the recursion closing.
             eprintln!(
-                "COG-LEX clock {} {}: words={} pending={} autic={} absorbed={} spoke={} learned={} (private | shared | sentences)",
+                "COG-LEX clock {} {}: words={} pending={} autic={} absorbed={} practiced={} spoke={} learned={} (private | shared | curriculum | sentences)",
                 self.world.now(),
                 self.spec.civilization.sigil,
                 self.library.words().len(),
                 self.word_pending.len(),
                 scribe::membrane::autic_basin_depth(),
                 self.autic_absorbed,
+                self.autic_practiced,
                 self.autic_spoke,
                 self.autic_learned,
             );
@@ -3241,6 +3278,7 @@ impl Polity {
                         // N-I·VESSEL — drain THIS vessel's mouth, not the line pool.
                         let vessel = self.automaton;
                         self.absorb_autic(vessel); // think in the learned AUTIC tongue
+                        self.practise_autic_wall(vessel); // practise the mesh's own problems
                         solver::think_task(&task, self.grown.entry(vessel).or_default())
                     } else {
                         SolveRead::Unsolved // the bank cannot pay the look — fast this beat
