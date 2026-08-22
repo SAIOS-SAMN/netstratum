@@ -433,9 +433,17 @@ fn main() {
         // control). Bounded to <=8 civs x 40 words, so it is cheap; a global beat
         // over 107 civs is slow, so run it every few beats, not every 30.
         if beat.is_multiple_of(3) || (cycles > 0 && beat == cycles) {
-            conductor::shared_language_census(&worlds, epoch_base + beat);
+            // BEAT-PARALLEL (#152): these were invisible to the phase profile
+            // even though the comment above already names them the suspected
+            // cost (a global pass over 107 civs) — wrapped so the census that
+            // finds the bottleneck can find THIS one too.
+            conductor::profile::timed("shared_language_census", || {
+                conductor::shared_language_census(&worlds, epoch_base + beat)
+            });
             // Make the wired-but-silent economy + societies visible on the wire.
-            conductor::emergent_census(&worlds, epoch_base + beat);
+            conductor::profile::timed("emergent_census", || {
+                conductor::emergent_census(&worlds, epoch_base + beat)
+            });
         }
         if beat.is_multiple_of(10) || (cycles > 0 && beat == cycles) {
             let summary: Vec<String> = worlds
