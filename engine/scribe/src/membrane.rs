@@ -260,29 +260,24 @@ pub fn prime_autic_basin(crystals: Vec<reduct::Crystal>) {
 /// organ (`solver::hear`): a second, independent vantage on the mesh's problem, not
 /// a copy of net's answer. A bounded ring, newest kept (the freshest demand is the
 /// most worth practising); a live workspace mirror, never a replay-durable deed.
-static AUTIC_WALLS: Mutex<Vec<(reduct::peel::FullMeasurement, reduct::peel::FullMeasurement)>> =
-    Mutex::new(Vec::new());
+type WallPair = (reduct::peel::FullMeasurement, reduct::peel::FullMeasurement);
+static AUTIC_WALLS: Mutex<Vec<([u8; 32], WallPair)>> = Mutex::new(Vec::new());
 
 const AUTIC_WALLS_CAP: usize = 512;
 
-/// Publish one heard wall (the reduct measurement pair) for the entities to
-/// practise. Newest-kept ring, deduped by pair.
-fn publish_autic_wall(a: reduct::peel::FullMeasurement, b: reduct::peel::FullMeasurement) {
+/// Publish one heard wall (its closing ORBIT + the reduct measurement pair) for
+/// the entities to practise. The orbit lets practice PREFER walls of measured
+/// worth (ADOPT BY WORTH). Newest-kept ring, deduped by pair.
+fn publish_autic_wall(orbit: [u8; 32], a: reduct::peel::FullMeasurement, b: reduct::peel::FullMeasurement) {
     if let Ok(mut walls) = AUTIC_WALLS.lock() {
-        if walls.iter().any(|(x, y)| x == &a && y == &b) {
+        if walls.iter().any(|(_, (x, y))| x == &a && y == &b) {
             return;
         }
         if walls.len() >= AUTIC_WALLS_CAP {
             walls.remove(0);
         }
-        walls.push((a, b));
+        walls.push((orbit, (a, b)));
     }
-}
-
-/// **READ THE AUTIC WALLS** — the mesh problems net has heard, for the conductor
-/// to hand entities as practice. A clone (never hold the lock across the beat).
-pub fn autic_walls() -> Vec<(reduct::peel::FullMeasurement, reduct::peel::FullMeasurement)> {
-    AUTIC_WALLS.lock().map(|w| w.clone()).unwrap_or_default()
 }
 
 /// The count of published AUTIC walls — an observability read (no clone).
@@ -290,28 +285,35 @@ pub fn autic_walls_depth() -> usize {
     AUTIC_WALLS.lock().map(|w| w.len()).unwrap_or(0)
 }
 
-/// Pick ONE published wall by `seed` (mod ring length), cloning only that pair —
-/// not the whole ring. A vessel draws a practice wall per think without an
-/// O(ring) clone every beat.
-pub fn autic_wall_pick(
-    seed: u64,
-) -> Option<(reduct::peel::FullMeasurement, reduct::peel::FullMeasurement)> {
-    AUTIC_WALLS.lock().ok().and_then(|w| {
-        if w.is_empty() {
-            None
-        } else {
-            Some(w[(seed as usize) % w.len()].clone())
-        }
-    })
+/// **PICK A PRACTICE WALL — ADOPT BY WORTH (curriculum half).** Prefer a wall
+/// whose closing orbit has MEASURED worth (distinct walls closed, per
+/// lexicon.worth) — a line practises the mesh's PROVEN-USEFUL problems, not
+/// arbitrary demand. Falls back to any wall when none carry worth yet (young line
+/// / off-wire), so practice never stalls. Clones only the one chosen pair.
+pub fn autic_wall_pick(seed: u64) -> Option<WallPair> {
+    let walls = AUTIC_WALLS.lock().ok()?;
+    if walls.is_empty() {
+        return None;
+    }
+    let worthy: Vec<usize> = walls
+        .iter()
+        .enumerate()
+        .filter(|(_, (orbit, _))| word_worth(orbit) > 0)
+        .map(|(i, _)| i)
+        .collect();
+    let idx = if worthy.is_empty() {
+        (seed as usize) % walls.len()
+    } else {
+        worthy[(seed as usize) % worthy.len()]
+    };
+    Some(walls[idx].1.clone())
 }
 
-/// **PRIME THE AUTIC WALLS** — seat practice walls without the mesh (warm start /
-/// off-wire exercise of the curriculum axis). Appended, deduped, bounded.
-pub fn prime_autic_walls(
-    walls: Vec<(reduct::peel::FullMeasurement, reduct::peel::FullMeasurement)>,
-) {
-    for (a, b) in walls {
-        publish_autic_wall(a, b);
+/// **PRIME THE AUTIC WALLS** — seat practice walls (with their closing orbit)
+/// without the mesh (warm start / off-wire exercise). Appended, deduped, bounded.
+pub fn prime_autic_walls(walls: Vec<([u8; 32], WallPair)>) {
+    for (orbit, (a, b)) in walls {
+        publish_autic_wall(orbit, a, b);
     }
 }
 
@@ -600,9 +602,10 @@ fn run(rx: mpsc::Receiver<SolveOffer>) {
                     let (Some(ra), Some(rb)) = (to_reduct_fm(a), to_reduct_fm(b)) else {
                         continue;
                     };
-                    // AUTIC-1 curriculum axis — publish the wall so the entities can
-                    // PRACTISE the mesh's real problem, re-deriving it themselves.
-                    publish_autic_wall(ra.clone(), rb.clone());
+                    // AUTIC-1 curriculum axis — publish the wall (with its closing
+                    // orbit) so entities can PRACTISE the mesh's real problem, and
+                    // prefer the worth-ranked ones (ADOPT BY WORTH, curriculum half).
+                    publish_autic_wall(orbit, ra.clone(), rb.clone());
                     match solver::hear(&ra, &rb, &mut net_basin) {
                         solver::Heard::Understood => {
                             tag = tag.wrapping_add(1);

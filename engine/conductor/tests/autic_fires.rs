@@ -37,8 +37,8 @@ fn the_autic_bridge_fires_end_to_end() {
         primed.push(crystal(i % 3, i / 3, (i % 4) as u8 + 1));
     }
     scribe::membrane::prime_autic_basin(primed);
-    let walls: Vec<(FullMeasurement, FullMeasurement)> =
-        (0..6u8).map(|d| (measurement(d), measurement((d + 1) % 10))).collect();
+    let walls: Vec<([u8; 32], (FullMeasurement, FullMeasurement))> =
+        (0..6u8).map(|d| ([d; 32], (measurement(d), measurement((d + 1) % 10)))).collect();
     scribe::membrane::prime_autic_walls(walls);
     assert!(scribe::membrane::autic_basin_depth() >= 12, "basin primed");
     assert!(scribe::membrane::autic_walls_depth() >= 1, "walls primed");
