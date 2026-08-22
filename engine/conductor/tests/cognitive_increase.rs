@@ -1,17 +1,28 @@
-// PROOF that the AUTIC bridge INCREASED entity intelligence.
+// PROOF (scoped honestly) — what the AUTIC bridge measurably adds, and what it
+// does NOT.
 //
-// Intelligence := comprehension capacity — a mind's ability to ACCOUNT a
-// structured problem against what it knows (reduct::assemble drains it to zero),
-// rather than face it as opaque. Two problem classes are probed:
+// Metric := comprehension capacity — a mind's ability to ACCOUNT a structured
+// problem against what it knows (reduct::assemble drains it to zero), rather than
+// face it as opaque. Two problem classes are probed:
 //   SINGLE   — one learned word (does the mind hold this concept?).
 //   COMPOSITE— two words spliced (can the mind DECOMPOSE a structured problem
 //              into parts it holds? the harder, deeper capacity).
 //
 // Controlled A/B: the SAME engine (conductor::run_era), the SAME curriculum, the
-// SAME beats. The ONLY difference is whether net's learned crystals were present
-// to absorb. Control first (basin empty -> absorb is a no-op); then prime and run
-// treatment. If treatment comprehends problems the control cannot, intelligence
-// rose, and the bridge is the cause (nothing else differs).
+// SAME beats. The ONLY difference is whether net's learned vocabulary was present
+// to absorb. Control first (basin empty -> absorb is a no-op); then prime, run.
+//
+// WHAT THIS PROVES: the bridge raises comprehension of the absorbed vocabulary
+// from ZERO (control) to non-zero (treatment), including DECOMPOSITION of
+// composite problems — a real, causal, wired capacity a mind lacks without it.
+//
+// WHAT THIS DOES NOT PROVE (measured, reported, NOT asserted): general
+// solve-transfer. The live `solved` count is IDENTICAL across arms (the corpus
+// here is synthetic — unrelated to the forged curriculum — so draining a task
+// against it accounts nothing new). Comprehending learned vocabulary != solving
+// unrelated problems. True transfer needs priming with net's REAL mesh-learned
+// crystals (structurally related to the curriculum) and a live-solve lift; that
+// is a separate, honest test this pin deliberately does not overclaim.
 use reduct::congruence::ChainEntry;
 use reduct::peel::{CellFrame, GaugeDirection, Site};
 use reduct::{assemble, AuticSentence, ChainDelta, Crystal};
@@ -59,6 +70,7 @@ fn the_autic_bridge_increased_intelligence() {
     let control = conductor::run_era(&croot.to_string_lossy(), 40);
     let (cs_n, cs_d) = comprehension(&control, &singles);
     let (cc_n, cc_d) = comprehension(&control, &composites);
+    let c_solved: u32 = control.iter().map(|p| p.solved).sum();
 
     // TREATMENT — net's learned vocabulary is present to absorb; SAME engine.
     scribe::membrane::prime_autic_basin(corpus.iter().cloned().map(Crystal::seal).collect());
@@ -67,10 +79,12 @@ fn the_autic_bridge_increased_intelligence() {
     let treatment = conductor::run_era(&troot.to_string_lossy(), 40);
     let (ts_n, ts_d) = comprehension(&treatment, &singles);
     let (tc_n, tc_d) = comprehension(&treatment, &composites);
+    let t_solved: u32 = treatment.iter().map(|p| p.solved).sum();
 
     eprintln!("=== COGNITIVE INCREASE (control vs treatment) ===");
     eprintln!("SINGLE-word comprehension:  control {cs_n}/{cs_d}  ->  treatment {ts_n}/{ts_d}");
     eprintln!("COMPOSITE decomposition:    control {cc_n}/{cc_d}  ->  treatment {tc_n}/{tc_d}");
+    eprintln!("LIVE solves (forged curriculum): control {c_solved}  ->  treatment {t_solved}");
 
     // The control mind, never having met the vocabulary, comprehends NONE of it.
     assert_eq!(cs_n, 0, "control comprehended a word it never learned");
