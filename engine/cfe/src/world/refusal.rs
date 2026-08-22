@@ -271,6 +271,9 @@ pub enum ActionRefused {
     TaxonUnknown { class: u8, clade: u16 },
     /// KERNEL-TAXON — one seal per star; identity is forever.
     TaxonAlreadySealed,
+    /// GALACTIC-1 — one region charted per world; a system does not
+    /// travel between galactic cells.
+    RegionAlreadyCharted,
     /// **THE COVENANT IS A T3 INSTRUMENT** (operator ruling 2026-08-05:
     /// *drop covenant to T3 and below*). A line holding a chartered
     /// OFFICE does not covenant — it decrees, delegates, or petitions

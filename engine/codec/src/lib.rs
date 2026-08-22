@@ -137,6 +137,13 @@ pub const SCHEMA_V24: u8 = 24;
 /// the ONT-2 read).
 pub const SCHEMA_V25: u8 = 25;
 
+/// **SCHEMA v26 — region_seed (GALACTIC-1).** The world's regional
+/// resource-weighting seed, sealed once at genesis from its charted
+/// position. Appended LAST as a presence byte + 32 bytes, version-gated —
+/// a v25 reader stops before it and decodes `region_seed = None` (byte-
+/// identical to a world that never charted a region).
+pub const SCHEMA_V26: u8 = 26;
+
 fn put_u16(out: &mut Vec<u8>, value: u16) {
     out.extend_from_slice(&value.to_le_bytes());
 }
@@ -157,7 +164,7 @@ fn put_text(out: &mut Vec<u8>, text: &str) {
 /// The one encoding: schema byte, then every committed family in
 /// declaration order, positionally, canonically.
 pub fn state_bytes(committed: &Committed) -> Vec<u8> {
-    let mut out = vec![SCHEMA_V25];
+    let mut out = vec![SCHEMA_V26];
 
     put_u32(&mut out, committed.orbs.len() as u32);
     for orb in &committed.orbs {
@@ -592,6 +599,15 @@ pub fn state_bytes(committed: &Committed) -> Vec<u8> {
         put_u64(&mut out, *orb);
         ratio::encode(bal, &mut out);
     }
+    // SCHEMA v26 trailing: the regional seed (GALACTIC-1), LAST. A v25
+    // reader stops before it and decodes `region_seed = None`.
+    match committed.region_seed {
+        Some(seed) => {
+            out.push(1);
+            out.extend_from_slice(&seed);
+        }
+        None => out.push(0),
+    }
     out
 }
 
@@ -693,6 +709,7 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         && schema != SCHEMA_V23
         && schema != SCHEMA_V24
         && schema != SCHEMA_V25
+        && schema != SCHEMA_V26
     {
         return None;
     }
@@ -1270,6 +1287,17 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         }
     }
 
+    // SCHEMA v26 trailing: the regional seed (GALACTIC-1), or None for a
+    // pre-v26 snapshot (no world had yet charted a region).
+    let region_seed = if schema >= SCHEMA_V26 {
+        match take.u8()? {
+            1 => Some(take.slice(32)?.try_into().ok()?),
+            _ => None,
+        }
+    } else {
+        None
+    };
+
     if !take.done() {
         return None;
     }
@@ -1299,6 +1327,7 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         warded,
         veiled,
         taxon,
+        region_seed,
         evolution_stage,
         collapsed,
         stations,

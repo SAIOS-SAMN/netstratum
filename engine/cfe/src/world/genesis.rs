@@ -37,6 +37,7 @@ impl World {
             warded: None,
             veiled: false,
             taxon: None,
+            region_seed: None,
             evolution_stage: 0,
             collapsed: None,
             stations: Vec::new(),
@@ -113,6 +114,7 @@ impl World {
             warded: committed.warded,
             veiled: committed.veiled,
             taxon: committed.taxon,
+            region_seed: committed.region_seed,
             evolution_stage: committed.evolution_stage,
             collapsed: committed.collapsed,
             stations: committed.stations,
@@ -427,6 +429,29 @@ impl World {
     /// KERNEL-TAXON: the sealed taxon, if the deed has been done.
     pub fn taxon(&self) -> Option<(u8, u16)> {
         self.taxon
+    }
+    /// GALACTIC-1 — seal the world's regional resource-weighting seed
+    /// (`dop::region_seed_of`, derived from the charted position outside
+    /// this chronicle — the caller holds the ledger, this deed only
+    /// records the DERIVED seed, never the position itself, so the
+    /// chronicle stays self-contained and replay never touches the
+    /// starchart). One per world, mirrors `commission_star`/`seal_taxon`:
+    /// sealed once, forever.
+    pub fn chart_region(&mut self, seed: [u8; 32]) -> Result<(), ActionRefused> {
+        self.chart_region_as(SOVEREIGN, seed)
+    }
+    pub fn chart_region_as(
+        &mut self,
+        actor: u64,
+        seed: [u8; 32],
+    ) -> Result<(), ActionRefused> {
+        self.permitted(actor, Scope::Build)?;
+        if self.region_seed.is_some() {
+            return Err(ActionRefused::RegionAlreadyCharted);
+        }
+        self.close(ClosureEvent::RegionCharted { seed }, actor);
+        self.region_seed = Some(seed);
+        Ok(())
     }
     /// **MINT A LINE** (tag 101, 2026-08-06): the engine mints its
     /// peoples — the standing ruling that retired the author. The seed

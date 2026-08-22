@@ -173,6 +173,9 @@ pub struct Committed {
     /// KERNEL-TAXON (15 §4): the sealed (class, clade), or None —
     /// unclassed is lawful until the seat.
     pub taxon: Option<(u8, u16)>,
+    /// GALACTIC-1 (tag 187): the regional resource-weighting seed, or None
+    /// for a world that never charted a region.
+    pub region_seed: Option<[u8; 32]>,
     /// **THE EVOLUTIONARY STAGE** (`44_LINEAGES` §2c, tag 169): how far
     /// the line has advanced along its arc. 0 at founding; the gated
     /// `EvolutionAdvanced` deed increments it. Lifts provisioning capacity.
@@ -375,6 +378,12 @@ pub struct World {
     pub(super) veiled: bool,
     /// KERNEL-TAXON: the sealed taxon (replay of the receipt).
     pub(super) taxon: Option<(u8, u16)>,
+    /// GALACTIC-1 (tag 187): the regional resource-weighting seed, sealed
+    /// once at genesis from the world's charted position (replay of the
+    /// receipt). `None` for a world that never charted a region — every
+    /// prospect it already struck stays byte-identical either way, since
+    /// `ProspectStruck` bakes its drawn element into the receipt forever.
+    pub(super) region_seed: Option<[u8; 32]>,
     /// THE EVOLUTIONARY STAGE (tag 169): the arc position (replay).
     pub(super) evolution_stage: u8,
     /// THE FAILURE STATE (tag 172): `Some(stamp)` once collapsed (replay).

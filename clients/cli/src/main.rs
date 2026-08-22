@@ -7779,6 +7779,8 @@ fn refuse_text(world: &World, refusal: &ActionRefused, style: &Style) -> String 
         ),
         ActionRefused::TaxonAlreadySealed =>
             "the taxon is already sealed — one seal per star, identity is forever (15 §4)".to_string(),
+        ActionRefused::RegionAlreadyCharted =>
+            "the regional seed is already charted — one seal per world; a system does not travel between galactic cells".to_string(),
         ActionRefused::TerrainAlreadyCharted => format!(
             "the terrain is already charted — one seed per star, forever (02 §2.5); {} reads the map",
             style.strong("terrain")
@@ -8407,6 +8409,10 @@ fn chronicle(world: &World, style: &Style) {
                 "◈ taxon SEALED — class {} · clade {} (identity, forever)",
                 style.strong(&class.to_string()),
                 style.strong(&clade.to_string())
+            ),
+            cfe::dop::ClosureEvent::RegionCharted { seed } => format!(
+                "◈ region CHARTED — seed {} (identity, forever)",
+                style.strong(&hex(seed))
             ),
             cfe::dop::ClosureEvent::EvolutionAdvanced { stage } => format!(
                 "⇑ the line EVOLVES — stage {} (the arc advances)",

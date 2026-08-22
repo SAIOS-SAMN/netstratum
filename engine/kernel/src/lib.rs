@@ -1664,6 +1664,11 @@ fn covered(event: &ClosureEvent) -> bool {
         // witnessed in `taxon_pins.rs`). The sealed default stays as
         // defense for FUTURE enum additions (refuse-unknown).
         | E::TaxonSealed { .. }
+        // GALACTIC-1 (tag 187): the regional seed sealed as identity, once
+        // per world — the TaxonSealed shape exactly (moves no bank, no
+        // element, no key; {I2 containment (Build), I3 exactness} complete
+        // it).
+        | E::RegionCharted { .. }
         | E::EvolutionAdvanced { .. }
         // THE VERTICAL AXIS (tag 89): the seat is banked-neutral — it
         // moves no value, no element and no key — so {I2 containment,
@@ -2640,6 +2645,7 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         E::GenesisSealed { .. }        // civilization + the three axes
         | E::LineMinted { .. }         // a people enters — line-keyed by nature
         | E::TaxonSealed { .. }        // class, clade
+        | E::RegionCharted { .. }      // GALACTIC-1: the regional seed, identity not ledger
         | E::EvolutionAdvanced { .. }  // the arc advances — identity, not ledger
         // THE VOCABULARY MINT is CIVILIZATIONAL, and the row is keyed on
         // what the deed CARRIES rather than on what it enables. It is
@@ -2855,6 +2861,9 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         // KERNEL-TAXON: the drafted Build-class arm coder-03 named for
         // their #42 — unenforced until their covered() entry + witness.
         | E::TaxonSealed { .. }
+        // GALACTIC-1: chart_region_as gates on Scope::Build, the same as
+        // seal_taxon_as.
+        | E::RegionCharted { .. }
         | E::EvolutionAdvanced { .. }
         // #32, 20_FOUNDING §3: the tithe fires from seal_genesis_as,
         // the same Build-class act that seals the axes — actor-scoped,

@@ -71,7 +71,10 @@ const G: i64 = 64;
 
 /// One byte → an exact-rational scalar in `[0, 1]`, grained onto `1/G`. Rounded
 /// half-up in pure integer arithmetic (no float, no `Ratio::round`).
-fn grained_unit(byte: u8) -> Ratio {
+/// `pub(crate)`: reused by the founder-tail law (`almanac::rejuvenation`) to
+/// draw a deterministic scalar from a founding digest — the SAME grain, so no
+/// second byte-to-ratio convention enters the tree.
+pub(crate) fn grained_unit(byte: u8) -> Ratio {
     let g = ((byte as i64) * G + 127) / 255;
     ratio(g, G)
 }

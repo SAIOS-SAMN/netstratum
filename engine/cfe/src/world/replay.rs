@@ -67,6 +67,7 @@ impl Replayer {
                 warded: None,
                 veiled: false,
                 taxon: None,
+                region_seed: None,
                 evolution_stage: 0,
                 collapsed: None,
                 stations: Vec::new(),
@@ -135,6 +136,7 @@ impl Replayer {
             warded,
             veiled,
             taxon,
+            region_seed,
             evolution_stage,
             collapsed,
             stations,
@@ -480,6 +482,8 @@ impl Replayer {
         ClosureEvent::VeilLifted { .. } => *veiled = false,
         // KERNEL-TAXON: the seal replays — identity is forever.
         ClosureEvent::TaxonSealed { class, clade } => *taxon = Some((*class, *clade)),
+        // GALACTIC-1: the regional seed replays — sealed once, forever.
+        ClosureEvent::RegionCharted { seed } => *region_seed = Some(*seed),
         ClosureEvent::EvolutionAdvanced { stage } => *evolution_stage = *stage,
         // #32, 20_FOUNDING §3: the tithe leaves the founding orb's
         // bank. One-sided (the DemurrageSettled precedent) — no

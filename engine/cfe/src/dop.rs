@@ -390,7 +390,10 @@
 //!         the library fold reads it beside SolverWordMinted, so knowledge
 //!         circulates. orbit[32] ‖ cited ‖ opaque expansion, the
 //!         SolverWordMinted wire shape.)
-//!    Phase-5 claim ledger: next free **185** (184 VeinRejuvenated —
+//!    187  ClosureEvent::RegionCharted (GALACTIC-1 — a world's charted
+//!         (X,Y,Z) quantized onto a coarse galactic grid cell, hashed once
+//!         at genesis into a regional resource-weighting seed. seed[32].)
+//!    Phase-5 claim ledger: next free **188** (186 ResourceStocksSwept, 184 VeinRejuvenated —
 //!    ONT-3 resource rejuvenation as derivation: a worked vein RECOVERS at a
 //!    collect touch, its inverse-receipt integral `rejuvenated` growing by the
 //!    KEPLERIAN orbital-forcing quantum (one `natural/REGROWTH_GRAIN` per
@@ -1030,6 +1033,35 @@ pub fn star_endowment(class: crate::thermal::StarClass) -> Vec<(Resource, Ratio)
             (Resource::Crystal, ratio(8, 1)),
         ],
     }
+}
+
+/// **GALACTIC-1 — THE REGIONAL SEED.** Quantize a charted `(X,Y,Z)` onto a
+/// coarse galactic grid cell (width `REGION_CELL`, the SAME units chart
+/// positions carry) and hash the CELL — never the exact position — into a
+/// 32-byte regional weighting seed. Two worlds in the same cell always
+/// derive the SAME seed; a world one cell over derives a DIFFERENT one
+/// entirely (no interpolation, no smoothing — a genuine grid, the
+/// "topological map of resources spread across systems" the design calls
+/// for). `World::prospect_as` folds this alongside the founding digest, so
+/// same-region systems share statistical resource character while each
+/// world still draws its own local variance. Exact-rational quantization
+/// (`round`, never a float), so two positions on either side of a cell
+/// boundary land deterministically on one side or the other, replay-exact.
+pub const REGION_CELL: i64 = 64;
+
+pub fn region_seed_of(x: &Ratio, y: &Ratio, z: &Ratio) -> [u8; 32] {
+    let cell = |v: &Ratio| -> i64 {
+        (v.clone() / ratio(REGION_CELL, 1))
+            .round()
+            .to_integer()
+            .try_into()
+            .unwrap_or(0)
+    };
+    let mut seed = Vec::with_capacity(24);
+    seed.extend_from_slice(&cell(x).to_le_bytes());
+    seed.extend_from_slice(&cell(y).to_le_bytes());
+    seed.extend_from_slice(&cell(z).to_le_bytes());
+    blake3::hash(&seed).into()
 }
 
 /// **ORBIT-ENDOW-1** — small band gift at siting (place, not free mint).
@@ -3183,6 +3215,20 @@ pub enum ClosureEvent {
     /// off-grain, so a board already on the grain emits nothing and a second boot
     /// re-floors during replay and adds no new deed.
     ResourceStocksSwept { dust: Ratio },
+    /// **THE GALACTIC REGION (GALACTIC-1, tag 187)** — a world's charted
+    /// `(X,Y,Z)` quantized onto a coarse galactic grid cell and hashed once
+    /// at genesis into a REGIONAL weighting seed. Purely additive: an old
+    /// chronicle that never charts a region has `region_seed = None` and
+    /// every prospect it already struck stays byte-identical (the receipt
+    /// carries the drawn element, replay copies it, never rerolls — see
+    /// `ProspectStruck`). Going forward, `World::prospect_as` folds this
+    /// seed alongside the founding digest, so neighboring systems in the
+    /// same cell share statistical resource character while each world
+    /// still draws its own local variance — a topological gradient across
+    /// the galaxy, not independent per-world noise. One per world, sealed
+    /// once (the `StarCommissioned`/`TaxonSealed` precedent): the position
+    /// a system charts at is fixed at founding, never travels.
+    RegionCharted { seed: [u8; 32] },
     /// **TAXATION (49_TAXATION §3, tag 172)** — the CONTINUITY levy at a
     /// generation turnover: `count` of the line's most-recently adopted
     /// practices LAPSE to the void (its unconfirmed knowledge, unkept as
@@ -4455,6 +4501,10 @@ impl ClosureEvent {
                 let mut value = Vec::new();
                 ratio::encode(dust, &mut value);
                 tlv::put(186, &value, &mut out);
+            }
+            Self::RegionCharted { seed } => {
+                // seed[32] alone — a world-wide identity fact, no orb key.
+                tlv::put(187, seed, &mut out);
             }
             Self::PracticesLapsed { count } => {
                 tlv::put(172, &[*count], &mut out);
@@ -5839,6 +5889,10 @@ impl ClosureEvent {
             186 => {
                 let (dust, _) = ratio::decode(value.get(..)?)?;
                 Some(Self::ResourceStocksSwept { dust })
+            }
+            187 => {
+                let seed: [u8; 32] = value.get(..32)?.try_into().ok()?;
+                Some(Self::RegionCharted { seed })
             }
             172 => Some(Self::PracticesLapsed { count: *value.first()? }),
             168 => Some(Self::PressureEbbed {

@@ -568,6 +568,13 @@ impl World {
             .own
             .0;
         let mut seed = root.to_vec();
+        // GALACTIC-1: fold the world's regional weighting seed in — same-
+        // cell systems share statistical resource character; a world that
+        // never charted a region (old chronicles, tests) draws byte-
+        // identically to before (no bytes appended).
+        if let Some(region) = self.region_seed {
+            seed.extend_from_slice(&region);
+        }
         seed.extend_from_slice(&orb.to_le_bytes());
         seed.push(stratum);
         let mut element: [u8; 32] = blake3::hash(&seed).into();

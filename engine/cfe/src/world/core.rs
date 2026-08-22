@@ -341,6 +341,7 @@ impl World {
             warded: self.warded,
             veiled: self.veiled,
             taxon: self.taxon,
+            region_seed: self.region_seed,
             evolution_stage: self.evolution_stage,
             collapsed: self.collapsed,
             stations: self.stations.clone(),

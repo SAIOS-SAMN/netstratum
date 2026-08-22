@@ -1284,6 +1284,12 @@ impl Polity {
         );
         let mut world = World::new();
         world.found(&spec.colony).expect("a fresh world founds");
+        // GALACTIC-1: seal the regional resource-weighting seed from the
+        // charted position — derived here (the caller holds the ledger's
+        // position), recorded into the chronicle as the DERIVED seed only,
+        // so replay never needs the starchart back.
+        let region_seed = cfe::dop::region_seed_of(&spec.position.0, &spec.position.1, &spec.position.2);
+        let _ = world.chart_region(region_seed);
         if opening != ratio(0, 1) {
             world.shift_gauge(opening.clone());
         }
