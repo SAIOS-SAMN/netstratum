@@ -918,6 +918,10 @@ pub struct Polity {
     /// pre-grown receipt still matches. Seed vessel is the line's `automaton`;
     /// the map admits many (population individuation is a later cut).
     grown: std::collections::BTreeMap<u64, Vec<solver::Crystal>>,
+    /// AUTIC-1 — how many AUTIC crystals this line's vessels have absorbed from
+    /// the mesh-learned basin (cumulative, workspace like `grown`). The live
+    /// measure of the shared tongue entering entity cognition.
+    autic_absorbed: usize,
     /// How many refusals the board has already been TOLD. The record
     /// above is permanent; this is only the narrator's place in it, so
     /// a refusal is announced once per process and kept forever.
@@ -1200,6 +1204,7 @@ impl Polity {
                         unfolded: 0,
                         lane_refused: Vec::new(),
                         grown: std::collections::BTreeMap::new(),
+                        autic_absorbed: 0,
                         reported: 0,
                         trajectory: Trajectory::Growth,
                         prev_order: None,
@@ -1328,6 +1333,7 @@ impl Polity {
             unfolded: 0,
             lane_refused: Vec::new(),
             grown: std::collections::BTreeMap::new(),
+            autic_absorbed: 0,
             reported: 0,
             trajectory: Trajectory::Growth,
             prev_order: None,
@@ -2685,6 +2691,45 @@ impl Polity {
             * civic::metabolic_exchange()
     }
 
+    /// AUTIC-1 Slice 1b — THE VESSEL ABSORBS THE SHARED TONGUE. Draw a
+    /// hash-seeded subset of net's learned AUTIC basin (the crystals net acquired
+    /// from the mycelium network's walls) into this `vessel`'s grown basin, so it
+    /// REDUCES against the shared language in `think_task`. This is the entity-scale
+    /// end of the recursion: net learns AUTIC at the membrane, the entities come to
+    /// think in it. EMERGENT, not forced — a per-vessel hash gate admits a different
+    /// ~1/3 subset per vessel, so dialects persist where derivations differ (operator:
+    /// "let it emerge, measure it"). Idempotent: dedup by class, so re-drawing each
+    /// beat only picks up newly learned crystals. Replay-safe: `grown` is live
+    /// workspace, never chronicled, and replay folds recorded deeds rather than
+    /// re-running think — so this changes what the LIVE beat discovers (recorded as
+    /// deeds), never the replay. In headless `run_era` the membrane is inert (empty
+    /// basin), so this is a no-op and SEAL B holds unchanged.
+    fn absorb_autic(&mut self, vessel: u64) -> usize {
+        if scribe::membrane::autic_basin_depth() == 0 {
+            return 0; // no mesh (run_era) or nothing learned yet — cheap exit, no clone
+        }
+        let autic = scribe::membrane::autic_basin();
+        let basin = self.grown.entry(vessel).or_default();
+        let mut fresh = 0;
+        for (i, crystal) in autic.into_iter().enumerate() {
+            // Per-vessel stochastic gate, deterministic in (vessel, i): two odd
+            // mixing constants spread the low bits so `% 3` admits ~1/3 evenly.
+            let seed = vessel
+                .wrapping_mul(0x9E3779B97F4A7C15)
+                .wrapping_add(i as u64)
+                .wrapping_mul(0xD1B54A32D192ED03);
+            if seed % 3 != 0 {
+                continue;
+            }
+            if !basin.contains(&crystal) {
+                basin.push(crystal);
+                fresh += 1;
+            }
+        }
+        self.autic_absorbed += fresh;
+        fresh
+    }
+
     /// N-I8 — deposit `vessel`'s closure of `orbit` toward a shared word, and
     /// MINT it iff two DISTINCT vessels have now closed it (consilience). The
     /// mint bills `mint_cost` in leisure (COG-2/4/5, unchanged) — an unaffordable
@@ -2780,6 +2825,7 @@ impl Polity {
         }
         self.world.settle_leisure(orb, -price);
         let sibling = self.sibling;
+        self.absorb_autic(sibling); // think in the shared tongue net has learned
         let read = solver::think_task(task, self.grown.entry(sibling).or_default());
         if let SolveRead::Solved { program, matches_expected: Some(true), .. } = read {
             if program.len() >= 2 {
@@ -3026,12 +3072,13 @@ impl Polity {
             // shared tongue the entities will come to think in. Watching the two
             // together is the emergent measure of the recursion closing.
             eprintln!(
-                "COG-LEX clock {} {}: words={} pending={} autic={} (private | shared)",
+                "COG-LEX clock {} {}: words={} pending={} autic={} absorbed={} (private | shared learned/drawn)",
                 self.world.now(),
                 self.spec.civilization.sigil,
                 self.library.words().len(),
                 self.word_pending.len(),
                 scribe::membrane::autic_basin_depth(),
+                self.autic_absorbed,
             );
             self.prev_order = Some((syn, ent, read.families));
             Some(derived)
@@ -3134,6 +3181,7 @@ impl Polity {
                         self.world.settle_leisure(orb, -price);
                         // N-I·VESSEL — drain THIS vessel's mouth, not the line pool.
                         let vessel = self.automaton;
+                        self.absorb_autic(vessel); // think in the learned AUTIC tongue
                         solver::think_task(&task, self.grown.entry(vessel).or_default())
                     } else {
                         SolveRead::Unsolved // the bank cannot pay the look — fast this beat
