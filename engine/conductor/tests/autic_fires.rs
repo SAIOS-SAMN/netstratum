@@ -49,9 +49,11 @@ fn the_autic_bridge_fires_end_to_end() {
     let absorbed: usize = worlds.iter().map(|p| p.autic_absorbed).sum();
     let practiced: usize = worlds.iter().map(|p| p.autic_practiced).sum();
     let spoke: usize = worlds.iter().map(|p| p.autic_spoke).sum();
+    let authored: usize = worlds.iter().map(|p| p.autic_authored).sum();
     let learned: usize = worlds.iter().map(|p| p.autic_learned).sum();
-    eprintln!("AUTIC END-TO-END: absorbed={absorbed} practiced={practiced} spoke={spoke} learned={learned} across {} civs", worlds.len());
+    eprintln!("AUTIC END-TO-END: absorbed={absorbed} practiced={practiced} spoke={spoke} learned={learned} authored={authored} across {} civs", worlds.len());
     assert!(absorbed > 0, "AUTIC-1 vocabulary axis (absorb) never fired");
     assert!(practiced > 0, "AUTIC-1 curriculum axis (practise) never fired");
     assert!(spoke > 0, "AUTIC-2 COMPOSE move never fired");
+    assert!(authored > 0, "COG-AUTHOR variation verb never fired");
 }

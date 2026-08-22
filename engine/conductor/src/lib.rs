@@ -950,6 +950,11 @@ pub struct Polity {
     /// learned crystals this vessel has already been offered. Absorption examines
     /// only crystals PAST this mark, so it is O(new) per think, never O(basin).
     autic_seen: std::collections::BTreeMap<u64, usize>,
+    /// COG-AUTHOR (A3) — variant words this line has AUTHORED: cited a word it
+    /// holds, rebound it under a seeded symmetry, and offered the result to the
+    /// mesh door. The live measure of the rung from hearing to authoring — a
+    /// reader becoming a speaker.
+    pub autic_authored: usize,
     /// How many refusals the board has already been TOLD. The record
     /// above is permanent; this is only the narrator's place in it, so
     /// a refusal is announced once per process and kept forever.
@@ -1237,6 +1242,7 @@ impl Polity {
                         autic_learned: 0,
                         autic_practiced: 0,
                         autic_seen: std::collections::BTreeMap::new(),
+                        autic_authored: 0,
                         reported: 0,
                         trajectory: Trajectory::Growth,
                         prev_order: None,
@@ -1370,6 +1376,7 @@ impl Polity {
             autic_learned: 0,
             autic_practiced: 0,
             autic_seen: std::collections::BTreeMap::new(),
+            autic_authored: 0,
             reported: 0,
             trajectory: Trajectory::Growth,
             prev_order: None,
@@ -2890,6 +2897,69 @@ impl Polity {
         self.autic_spoke += 1;
     }
 
+    /// COG-AUTHOR (A3) — THE VARIATION VERB. The rung between hearing and
+    /// authoring: a line CITES a word it already holds, REBINDS it (composes the
+    /// cited program with a seeded D4 symmetry — role/quantifier re-aim), PROVES
+    /// the variant on a probe grid, and OFFERS it to the mesh door, which judges
+    /// it like any word (installs the real ones, withholds noise). The civ's own
+    /// beat seeds the choice (replayable, divergent across lines), so the variant
+    /// is AUTHORED, not searched — cheaper than deriving from scratch, more than
+    /// hearing. This is net CLAIMING (the judge/claimant seam): net authors and
+    /// proves; mycelium's grammar is the sole judge. Periodic (AUTIC_STRIDE) and
+    /// only when the library is non-empty — a line with nothing to cite is silent.
+    fn author_variation(&mut self, vessel: u64) {
+        if !self.world.now().is_multiple_of(AUTIC_STRIDE) {
+            return;
+        }
+        let words = self.library.words();
+        if words.is_empty() {
+            return; // nothing to cite — no authorship without a vocabulary
+        }
+        // Seed on the civ's own beat + vessel: replayable, divergent across lines.
+        let seed = self
+            .world
+            .now()
+            .wrapping_mul(0x9E3779B97F4A7C15)
+            .wrapping_add(vessel)
+            .wrapping_mul(0xD1B54A32D192ED03);
+        let word = &words[(seed as usize) % words.len()];
+        // The six D4 rebinds; the seed picks one.
+        use solver_verify::grid::Op;
+        const D4: [Op; 6] = [
+            Op::Rotate90,
+            Op::Rotate180,
+            Op::Rotate270,
+            Op::FlipH,
+            Op::FlipV,
+            Op::Transpose,
+        ];
+        let g = D4[((seed >> 8) as usize) % D4.len()].clone();
+        let mut variant = word.expansion.clone();
+        variant.push(g);
+        let name = format!("net_var_{:016x}", seed);
+        let program: String = variant
+            .iter()
+            .map(|op| op.describe())
+            .collect::<Vec<_>>()
+            .join(" -> ");
+        // Prove the variant on a canonical probe grid — the authored word is a
+        // lawful (input -> output) claim the mesh door can replay. Build the
+        // sealed-math Grid, run, then cast both to the membrane's row-vectors.
+        let Some(probe) =
+            solver_verify::grid::Grid::new(3, 3, vec![1, 2, 3, 4, 5, 6, 7, 8, 9])
+        else {
+            return;
+        };
+        let out = solver_verify::grid::run(&variant, &probe);
+        let rows = |g: &solver_verify::grid::Grid| -> Vec<Vec<u8>> {
+            (0..g.rows)
+                .map(|r| g.cells[r * g.cols..(r + 1) * g.cols].to_vec())
+                .collect()
+        };
+        scribe::membrane::offer_proved(&name, &program, vec![(rows(&probe), rows(&out))]);
+        self.autic_authored += 1;
+    }
+
     /// N-I8 — deposit `vessel`'s closure of `orbit` toward a shared word, and
     /// MINT it iff two DISTINCT vessels have now closed it (consilience). The
     /// mint bills `mint_cost` in leisure (COG-2/4/5, unchanged) — an unaffordable
@@ -3004,6 +3074,9 @@ impl Polity {
         // the sibling ASSEMBLES it against its basin, learning exactly the leftover
         // it lacked. Multi-word thought, not one invariant at a time.
         self.speak_and_hear(self.automaton, self.sibling);
+        // COG-AUTHOR (A3) — and the automaton AUTHORS: cites a word, rebinds it,
+        // offers the variant to the mesh door. The rung from hearing to authoring.
+        self.author_variation(self.automaton);
     }
 
     /// N-I10 — the sibling HEARS one folded word from the sun each beat it can
@@ -3237,7 +3310,7 @@ impl Polity {
             // shared tongue the entities will come to think in. Watching the two
             // together is the emergent measure of the recursion closing.
             eprintln!(
-                "COG-LEX clock {} {}: words={} pending={} autic={} absorbed={} practiced={} spoke={} learned={} (private | shared | curriculum | sentences)",
+                "COG-LEX clock {} {}: words={} pending={} autic={} absorbed={} practiced={} spoke={} learned={} authored={} (private | shared | curriculum | sentences | authorship)",
                 self.world.now(),
                 self.spec.civilization.sigil,
                 self.library.words().len(),
@@ -3247,6 +3320,7 @@ impl Polity {
                 self.autic_practiced,
                 self.autic_spoke,
                 self.autic_learned,
+                self.autic_authored,
             );
             self.prev_order = Some((syn, ent, read.families));
             Some(derived)
