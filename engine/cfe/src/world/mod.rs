@@ -823,24 +823,39 @@ pub fn charter_route(
     {
         return Err(ActionRefused::RouteKnown { deal });
     }
-    let cost = route_charter_cost();
+    // ROUTE-1 (the founding-deadlock fix): the BASIC resource lane is paid in the
+    // PRIMITIVES a nascent line already produces — Biomass + Iron — not forged
+    // Alloy. A civilization must not need super-metals to draw its first trade
+    // lane; Alloy stays the price of the ADVANCED element lane
+    // (`charter_element_route`). Both legs pay both primitives.
+    let (biomass_cost, iron_cost) = resource_route_charter_cost();
     for (world, orb) in [(&mut *a, orb_a), (&mut *b, orb_b)] {
         let held = peek(&world.orbs, orb).ok_or(ActionRefused::NoSuchOrb { orb })?;
-        let have = held.banked_amount(Resource::Alloy);
-        if have < cost {
-            return Err(ActionRefused::CannotAfford {
-                resource: Resource::Alloy,
-                need: Box::new(cost),
-                have: Box::new(have),
-            });
+        for (resource, cost) in [(Resource::Biomass, &biomass_cost), (Resource::Iron, &iron_cost)] {
+            let have = held.banked_amount(resource);
+            if have < *cost {
+                return Err(ActionRefused::CannotAfford {
+                    resource,
+                    need: Box::new(cost.clone()),
+                    have: Box::new(have),
+                });
+            }
         }
     }
     for (world, orb) in [(&mut *a, orb_a), (&mut *b, orb_b)] {
-        let held = peel(&mut world.orbs, orb).expect("checked");
-        held.bank(Resource::Alloy, -cost.clone());
+        {
+            let held = peel(&mut world.orbs, orb).expect("checked");
+            held.bank(Resource::Biomass, -biomass_cost.clone());
+            held.bank(Resource::Iron, -iron_cost.clone());
+        }
         let stamp = world.clock.now();
         world.chronicle.append(
-            ClosureEvent::UpkeepSettled { orb_id: orb, resource: Resource::Alloy, amount: cost.clone() },
+            ClosureEvent::UpkeepSettled { orb_id: orb, resource: Resource::Biomass, amount: biomass_cost.clone() },
+            stamp,
+            vec![SOVEREIGN],
+        );
+        world.chronicle.append(
+            ClosureEvent::UpkeepSettled { orb_id: orb, resource: Resource::Iron, amount: iron_cost.clone() },
             stamp,
             vec![SOVEREIGN],
         );
@@ -854,11 +869,24 @@ pub fn charter_route(
     Ok(())
 }
 
-/// ROUTE-1 / E-ROUTE-1 alloy charter bill — one literal for both
-/// charter paths (call-not-copy; ratchet). Derived 1+1+1+1 (no dial).
+/// E-ROUTE-1 alloy charter bill — the ADVANCED element lane
+/// (`charter_element_route`) is paid in forged Alloy: a super-metal for a
+/// high-capacity almanac corridor, earned once a line has smelters. Derived
+/// 1+1+1+1 (no dial).
 fn route_charter_cost() -> Ratio {
     let two = ratio(1, 1) + ratio(1, 1);
     two.clone() + two
+}
+
+/// ROUTE-1 resource-charter bill — the BASIC (founding) trade lane, paid in the
+/// PRIMITIVES a nascent civilization already produces: (Biomass, Iron) per leg,
+/// not forged Alloy. This breaks the founding deadlock — a line no longer needs
+/// the LAST step's output (Alloy, which needs a smelter, which needs level, which
+/// needs trade) to take the FIRST step (trade). Route -> trade -> level ->
+/// smelter -> Alloy -> element route, in order. Modest and affordable within a few
+/// ticks of a Habitat + Extractor, so early lanes open without flooding.
+fn resource_route_charter_cost() -> (Ratio, Ratio) {
+    (ratio(2, 1), ratio(2, 1))
 }
 
 impl World {
