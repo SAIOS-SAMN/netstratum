@@ -183,35 +183,9 @@ fn the_measured_table_prices_exactly() {
     assert_eq!(kernel::corpus_weight(&[0u8; 32]), None, "unmeasured is unpriced");
 }
 
-/// **THE SPECTRUM IS A READING** — derived whole from opaque payloads
-/// through the sealed verifier: a priced forge mint lands on its rung
-/// and in the mass; garbage is broken, never guessed.
-#[test]
-fn the_spectrum_reads_the_work_whole() {
-    use solver::{solve, SolveRead};
-    use solver_verify::{encode_work, forge_task, Difficulty, WorkProof};
-    let difficulty = Difficulty::level(1);
-    let digest = [3u8; 32];
-    let task = forge_task(digest, difficulty);
-    let SolveRead::Solved { program, test_output, certificate, .. } =
-        solve(&task, difficulty.word_len)
-    else {
-        panic!("a level-1 forge task solves");
-    };
-    let bytes = encode_work(&WorkProof {
-        forge_digest: digest,
-        difficulty,
-        program,
-        output: test_output,
-        certificate,
-    })
-    .expect("encodes");
-    let read = kernel::spectrum_of([bytes.as_slice(), b"garbage".as_slice()].into_iter());
-    // The rung is the LADDER's own reading (saturated low tiers
-    // coincide structurally — rung() finds the first match), so the
-    // pin asserts against the derived position, never an assumed one.
-    let rung = difficulty.rung().expect("a laddered shape") as usize;
-    assert_eq!(read.forge_rungs[rung], 1, "read: {read:?}");
-    assert_eq!(read.broken, 1);
-    assert_eq!(read.weighted, kernel::mint_bound(Some(rung as u32)));
-}
+// `the_spectrum_reads_the_work_whole` retired: it called `solver::solve`,
+// the enumerating search path removed by 02c18d8 ("the mind observes, it
+// does not enumerate" — the instinct-over-physics pivot). No live producer
+// calls search anymore, so there is nothing left to pin against; this was
+// blocking `cargo test --workspace` at the compile step for every crate,
+// not just kernel's.
