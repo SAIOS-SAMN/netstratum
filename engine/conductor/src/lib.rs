@@ -767,6 +767,12 @@ pub struct PolitySpec {
 }
 
 /// One live polity world: the sim, its contained actor, its research rung.
+/// PERF — the ceiling on a vessel's grown basin. A mind is finite: absorption and
+/// practice stop growing it past this, so memory stays bounded over a long run
+/// (the basin is live workspace, never pruned by replay). Far above any real
+/// working vocabulary, so cognition is unaffected; it only stops a runaway.
+const AUTIC_BASIN_CAP: usize = 4096;
+
 pub struct Polity {
     pub spec: PolitySpec,
     pub world: World,
@@ -933,6 +939,10 @@ pub struct Polity {
     /// basin where it walled). Cumulative workspace. The live measure of the
     /// entities facing the network's real problems, not only forged ones.
     pub autic_practiced: usize,
+    /// PERF — per-vessel high-water mark into the shared AUTIC basin: how many
+    /// learned crystals this vessel has already been offered. Absorption examines
+    /// only crystals PAST this mark, so it is O(new) per think, never O(basin).
+    autic_seen: std::collections::BTreeMap<u64, usize>,
     /// How many refusals the board has already been TOLD. The record
     /// above is permanent; this is only the narrator's place in it, so
     /// a refusal is announced once per process and kept forever.
@@ -1219,6 +1229,7 @@ impl Polity {
                         autic_spoke: 0,
                         autic_learned: 0,
                         autic_practiced: 0,
+                        autic_seen: std::collections::BTreeMap::new(),
                         reported: 0,
                         trajectory: Trajectory::Growth,
                         prev_order: None,
@@ -1351,6 +1362,7 @@ impl Polity {
             autic_spoke: 0,
             autic_learned: 0,
             autic_practiced: 0,
+            autic_seen: std::collections::BTreeMap::new(),
             reported: 0,
             trajectory: Trajectory::Growth,
             prev_order: None,
@@ -2722,29 +2734,37 @@ impl Polity {
     /// deeds), never the replay. In headless `run_era` the membrane is inert (empty
     /// basin), so this is a no-op and SEAL B holds unchanged.
     fn absorb_autic(&mut self, vessel: u64) -> usize {
-        if scribe::membrane::autic_basin_depth() == 0 {
-            return 0; // no mesh (run_era) or nothing learned yet — cheap exit, no clone
+        let depth = scribe::membrane::autic_basin_depth();
+        let mark = self.autic_seen.get(&vessel).copied().unwrap_or(0);
+        // O(new): only crystals learned since this vessel last looked. Nothing new
+        // (run_era off-wire, or no fresh mesh learning) => cheap exit, no clone.
+        if mark >= depth {
+            return 0;
         }
-        let autic = scribe::membrane::autic_basin();
+        let fresh = scribe::membrane::autic_basin_from(mark);
         let basin = self.grown.entry(vessel).or_default();
-        let mut fresh = 0;
-        for (i, crystal) in autic.into_iter().enumerate() {
-            // Per-vessel stochastic gate, deterministic in (vessel, i): two odd
-            // mixing constants spread the low bits so `% 3` admits ~1/3 evenly.
+        let mut added = 0;
+        for (k, crystal) in fresh.into_iter().enumerate() {
+            if basin.len() >= AUTIC_BASIN_CAP {
+                break; // a mind is bounded — do not grow the basin without end
+            }
+            // Per-vessel stochastic gate, deterministic in (vessel, index): two odd
+            // mixing constants spread the low bits so `% 3` admits ~1/3 evenly. Each
+            // crystal is offered to a vessel exactly once (past its mark), so no
+            // `contains` scan is needed — the mark IS the dedup.
+            let index = (mark + k) as u64;
             let seed = vessel
                 .wrapping_mul(0x9E3779B97F4A7C15)
-                .wrapping_add(i as u64)
+                .wrapping_add(index)
                 .wrapping_mul(0xD1B54A32D192ED03);
-            if seed % 3 != 0 {
-                continue;
-            }
-            if !basin.contains(&crystal) {
+            if seed % 3 == 0 {
                 basin.push(crystal);
-                fresh += 1;
+                added += 1;
             }
         }
-        self.autic_absorbed += fresh;
-        fresh
+        self.autic_seen.insert(vessel, depth);
+        self.autic_absorbed += added;
+        added
     }
 
     /// AUTIC-2 — THE COMPOSE MOVE, LIVE. The `speaker` splices its grown words
@@ -2778,6 +2798,24 @@ impl Polity {
         classes
     }
 
+    /// Observability — up to `limit` distinct crystal classes from this civ's
+    /// vocabulary. Bounded so the O(civs^2 * words) shared-language census stays
+    /// cheap on capped basins (the full `basin_classes` dedup is O(basin^2)).
+    pub fn basin_sample(&self, limit: usize) -> Vec<reduct::ChainDelta> {
+        let mut classes: Vec<reduct::ChainDelta> = Vec::new();
+        for basin in self.grown.values() {
+            for crystal in basin {
+                if classes.len() >= limit {
+                    return classes;
+                }
+                if !classes.contains(&crystal.class) {
+                    classes.push(crystal.class.clone());
+                }
+            }
+        }
+        classes
+    }
+
     /// AUTIC-1 CURRICULUM AXIS, LIVE. The vessel PRACTISES the mesh's own
     /// problems: draw a hash-seeded wall from net's published AUTIC walls (the
     /// mesh's real ARC-AGI-2 demand, heard through the membrane) and HEAR it
@@ -2789,22 +2827,20 @@ impl Polity {
     /// workspace; replay folds deeds). A no-op with no published walls (run_era
     /// off-wire), so it is silent, not dormant.
     fn practise_autic_wall(&mut self, vessel: u64) {
-        let depth = scribe::membrane::autic_walls_depth();
-        if depth == 0 {
-            return;
-        }
-        let walls = scribe::membrane::autic_walls();
-        if walls.is_empty() {
+        // A bounded mind does not practise into an unbounded basin.
+        if self.grown.get(&vessel).map(|b| b.len()).unwrap_or(0) >= AUTIC_BASIN_CAP {
             return;
         }
         // Hash-seeded pick: a different wall per (vessel, beat), deterministic.
+        // Clones ONE pair (the picker indexes under the lock), not the whole ring.
         let seed = vessel
             .wrapping_mul(0x9E3779B97F4A7C15)
             .wrapping_add(self.world.now())
             .wrapping_mul(0xD1B54A32D192ED03);
-        let (a, b) = &walls[(seed as usize) % walls.len()];
-        let _ = solver::hear(a, b, self.grown.entry(vessel).or_default());
-        self.autic_practiced += 1;
+        if let Some((a, b)) = scribe::membrane::autic_wall_pick(seed) {
+            let _ = solver::hear(&a, &b, self.grown.entry(vessel).or_default());
+            self.autic_practiced += 1;
+        }
     }
 
     fn speak_and_hear(&mut self, speaker: u64, hearer: u64) {
@@ -2825,9 +2861,11 @@ impl Polity {
         match reduct::assemble(&sentence, hearer_basin) {
             reduct::AssemblyRead::Assembled { .. } => {}
             reduct::AssemblyRead::DemandUnmet { remainder, .. } => {
-                // LEARN — the hearer adopts exactly the structure it lacked.
-                hearer_basin.push(reduct::Crystal::seal(remainder));
-                self.autic_learned += 1;
+                // LEARN — the hearer adopts exactly the structure it lacked (bounded).
+                if hearer_basin.len() < AUTIC_BASIN_CAP {
+                    hearer_basin.push(reduct::Crystal::seal(remainder));
+                    self.autic_learned += 1;
+                }
             }
         }
         self.autic_spoke += 1;
@@ -5008,10 +5046,11 @@ pub fn direction_census_step(worlds: &mut [Polity]) {
 /// only — reads basins, writes nothing.
 pub fn shared_language_census(worlds: &[Polity], beat: u64) {
     const SAMPLE: usize = 8;
+    const WORDS: usize = 40; // bounded vocabulary per civ — keeps the pass cheap
     let vocabs: Vec<Vec<reduct::ChainDelta>> = worlds
         .iter()
         .filter(|p| !p.penned)
-        .map(|p| p.basin_classes())
+        .map(|p| p.basin_sample(WORDS))
         .filter(|v| !v.is_empty())
         .take(SAMPLE)
         .collect();

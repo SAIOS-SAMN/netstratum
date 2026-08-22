@@ -163,6 +163,16 @@ pub fn autic_basin_depth() -> usize {
     AUTIC_BASIN.lock().map(|b| b.len()).unwrap_or(0)
 }
 
+/// The crystals learned SINCE index `from` — clones only the tail, not the whole
+/// basin. A vessel that tracks how many it has already seen absorbs each new
+/// crystal exactly once, so absorption is O(new), never O(basin) per think.
+pub fn autic_basin_from(from: usize) -> Vec<reduct::Crystal> {
+    AUTIC_BASIN
+        .lock()
+        .map(|b| if from < b.len() { b[from..].to_vec() } else { Vec::new() })
+        .unwrap_or_default()
+}
+
 /// **PRIME THE AUTIC BASIN** — seat a set of crystals as net's learned language
 /// without the mesh. The membrane grows the basin from the network at runtime;
 /// this is the deterministic path for a saved corpus (a warm start) and for
@@ -213,6 +223,21 @@ pub fn autic_walls() -> Vec<(reduct::peel::FullMeasurement, reduct::peel::FullMe
 /// The count of published AUTIC walls — an observability read (no clone).
 pub fn autic_walls_depth() -> usize {
     AUTIC_WALLS.lock().map(|w| w.len()).unwrap_or(0)
+}
+
+/// Pick ONE published wall by `seed` (mod ring length), cloning only that pair —
+/// not the whole ring. A vessel draws a practice wall per think without an
+/// O(ring) clone every beat.
+pub fn autic_wall_pick(
+    seed: u64,
+) -> Option<(reduct::peel::FullMeasurement, reduct::peel::FullMeasurement)> {
+    AUTIC_WALLS.lock().ok().and_then(|w| {
+        if w.is_empty() {
+            None
+        } else {
+            Some(w[(seed as usize) % w.len()].clone())
+        }
+    })
 }
 
 /// **PRIME THE AUTIC WALLS** — seat practice walls without the mesh (warm start /
