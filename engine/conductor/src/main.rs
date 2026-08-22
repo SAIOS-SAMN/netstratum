@@ -370,8 +370,9 @@ fn main() {
         }
         // THE SHARED-LANGUAGE CENSUS — prove on the wire that the civilizations
         // speak one AUTIC tongue (common vocabulary + cross-civ comprehension vs a
-        // control). O(civs^2 * words), so run it less often than the 10-beat census.
-        if beat.is_multiple_of(30) || (cycles > 0 && beat == cycles) {
+        // control). Bounded to <=8 civs x 40 words, so it is cheap; a global beat
+        // over 107 civs is slow, so run it every few beats, not every 30.
+        if beat.is_multiple_of(3) || (cycles > 0 && beat == cycles) {
             conductor::shared_language_census(&worlds, epoch_base + beat);
         }
         if beat.is_multiple_of(10) || (cycles > 0 && beat == cycles) {

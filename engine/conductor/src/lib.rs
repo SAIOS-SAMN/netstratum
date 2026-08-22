@@ -773,6 +773,13 @@ pub struct PolitySpec {
 /// working vocabulary, so cognition is unaffected; it only stops a runaway.
 const AUTIC_BASIN_CAP: usize = 4096;
 
+/// PERF — how often (in world beats) a vessel PRACTISES a mesh wall and SPEAKS a
+/// sentence. Every beat would put two extra reduce ops per civ on top of the
+/// existing think_task, dominating a 107-civ global beat. Periodic keeps both
+/// axes flowing at a fraction of the cost. Absorption stays every beat (it is
+/// already O(new) via the high-water mark).
+const AUTIC_STRIDE: u64 = 4;
+
 pub struct Polity {
     pub spec: PolitySpec,
     pub world: World,
@@ -2827,6 +2834,13 @@ impl Polity {
     /// workspace; replay folds deeds). A no-op with no published walls (run_era
     /// off-wire), so it is silent, not dormant.
     fn practise_autic_wall(&mut self, vessel: u64) {
+        // PERF — practice is periodic, not every think. A global beat already
+        // steps 107 civs through think_task; adding a full solver::hear per civ
+        // per beat dominates the beat. Every AUTIC_STRIDE beats keeps the mesh
+        // curriculum flowing without tripling the per-beat cognition cost.
+        if !self.world.now().is_multiple_of(AUTIC_STRIDE) {
+            return;
+        }
         // A bounded mind does not practise into an unbounded basin.
         if self.grown.get(&vessel).map(|b| b.len()).unwrap_or(0) >= AUTIC_BASIN_CAP {
             return;
@@ -2845,6 +2859,11 @@ impl Polity {
 
     fn speak_and_hear(&mut self, speaker: u64, hearer: u64) {
         const AUTIC_SENTENCE_LEN: usize = 4;
+        // PERF — speech is periodic (see practise): one compose+assemble per civ
+        // per beat would dominate the global beat. Every AUTIC_STRIDE beats.
+        if !self.world.now().is_multiple_of(AUTIC_STRIDE) {
+            return;
+        }
         // Compose the sentence from the speaker's freshest words (borrow released
         // before the hearer's basin is taken mutably).
         let words: Vec<reduct::ChainDelta> = match self.grown.get(&speaker) {
