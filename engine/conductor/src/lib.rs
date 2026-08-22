@@ -2763,6 +2763,21 @@ impl Polity {
         self.grown.values().map(|v| v.len()).max().unwrap_or(0)
     }
 
+    /// Observability — this civilization's whole VOCABULARY: the distinct crystal
+    /// classes held across all its vessels' basins (the words it can speak and
+    /// hear). Used to prove a shared language across civilizations.
+    pub fn basin_classes(&self) -> Vec<reduct::ChainDelta> {
+        let mut classes: Vec<reduct::ChainDelta> = Vec::new();
+        for basin in self.grown.values() {
+            for crystal in basin {
+                if !classes.contains(&crystal.class) {
+                    classes.push(crystal.class.clone());
+                }
+            }
+        }
+        classes
+    }
+
     /// AUTIC-1 CURRICULUM AXIS, LIVE. The vessel PRACTISES the mesh's own
     /// problems: draw a hash-seeded wall from net's published AUTIC walls (the
     /// mesh's real ARC-AGI-2 demand, heard through the membrane) and HEAR it
