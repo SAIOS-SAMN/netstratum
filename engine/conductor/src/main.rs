@@ -207,21 +207,55 @@ fn main() {
         conductor::profile::timed("direction_census_step", || {
             conductor::direction_census_step(&mut worlds)
         });
-        let mut newborns = Vec::new();
+        // BEAT-PARALLEL (#152) — the per-civ cognitive phase is INDEPENDENT: each
+        // line reads its own tasks/surplus/caste-census and mutates only its own
+        // world. `book` is per-world filesystem (race-free across worlds),
+        // `registry.seat` is lock-guarded, and the membrane/worth/profile statics
+        // are Mutex-guarded — so it fans out across threads over disjoint slices.
+        // The mesh-level settlement/trade/consilience steps BELOW stay sequential
+        // (they need the whole roster). Order is preserved (chunks joined in spawn
+        // order = world order), so newborn cleaves and replay stay deterministic.
+        let newborns: Vec<conductor::PolitySpec> = {
+            let threads = std::thread::available_parallelism()
+                .map(|n| n.get())
+                .unwrap_or(4)
+                .min(16);
+            let chunk = ((worlds.len() + threads - 1) / threads).max(1);
+            let book = &book;
+            let registry = &registry;
+            let slices: Vec<&mut [conductor::Polity]> = worlds.chunks_mut(chunk).collect();
+            std::thread::scope(|s| {
+                let handles: Vec<_> = slices
+                    .into_iter()
+                    .map(|slice| {
+                        s.spawn(move || {
+                            let mut local = Vec::new();
+                            for polity in slice.iter_mut() {
+                                if polity.penned {
+                                    continue;
+                                }
+                                if let Some(spec) = polity.cycle(book, registry) {
+                                    local.push(spec);
+                                }
+                            }
+                            local
+                        })
+                    })
+                    .collect();
+                handles
+                    .into_iter()
+                    .flat_map(|h| h.join().unwrap_or_default())
+                    .collect()
+            })
+        };
+        // DIRECTIVE 19: the gate speaks on the board — SEQUENTIAL after the parallel
+        // phase, so verdicts are not interleaved and each line drains once. The
+        // deed still STANDS in the chronicle (`replay` is the live transition until
+        // the Phase 3 flip); this reports a gate overruled by a proposer.
         for polity in &mut worlds {
             if polity.penned {
                 continue;
             }
-            if let Some(spec) = polity.cycle(&book, &registry) {
-                newborns.push(spec);
-            }
-            // DIRECTIVE 19: the gate speaks on the board. Every deed
-            // `kernel::admits` refused this beat is named here, once —
-            // the verdict stays on the polity's permanent record either
-            // way. The deed still STANDS in the chronicle: `replay` is
-            // the live transition until the Phase 3 flip demotes it
-            // (U_DIRECTIVES §5), so this line reports a gate overruled
-            // by a proposer, which is exactly the gap worth seeing.
             let world_name = polity.spec.world_name.clone();
             for (sequence, unlawful) in polity.unreported_refusals() {
                 println!(

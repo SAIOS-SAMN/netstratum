@@ -823,39 +823,31 @@ pub fn charter_route(
     {
         return Err(ActionRefused::RouteKnown { deal });
     }
-    // ROUTE-1 (the founding-deadlock fix): the BASIC resource lane is paid in the
-    // PRIMITIVES a nascent line already produces — Biomass + Iron — not forged
-    // Alloy. A civilization must not need super-metals to draw its first trade
-    // lane; Alloy stays the price of the ADVANCED element lane
-    // (`charter_element_route`). Both legs pay both primitives.
-    let (biomass_cost, iron_cost) = resource_route_charter_cost();
+    // ROUTE-1 (the founding-deadlock fix): the BASIC resource lane is paid in
+    // BIOMASS — the one primitive a nascent line makes in surplus (Habitats) that
+    // does NOT feed the Iron→hull→Alloy chain. A civilization must not need forged
+    // super-metals to draw its first trade lane, and it must not starve its hull/
+    // smelter economy to pay for a map line either (measured: charging Iron here
+    // delayed hulls past the NPC window). Alloy stays the price of the ADVANCED
+    // element lane (`charter_element_route`).
+    let cost = resource_route_charter_cost();
     for (world, orb) in [(&mut *a, orb_a), (&mut *b, orb_b)] {
         let held = peek(&world.orbs, orb).ok_or(ActionRefused::NoSuchOrb { orb })?;
-        for (resource, cost) in [(Resource::Biomass, &biomass_cost), (Resource::Iron, &iron_cost)] {
-            let have = held.banked_amount(resource);
-            if have < *cost {
-                return Err(ActionRefused::CannotAfford {
-                    resource,
-                    need: Box::new(cost.clone()),
-                    have: Box::new(have),
-                });
-            }
+        let have = held.banked_amount(Resource::Biomass);
+        if have < cost {
+            return Err(ActionRefused::CannotAfford {
+                resource: Resource::Biomass,
+                need: Box::new(cost.clone()),
+                have: Box::new(have),
+            });
         }
     }
     for (world, orb) in [(&mut *a, orb_a), (&mut *b, orb_b)] {
-        {
-            let held = peel(&mut world.orbs, orb).expect("checked");
-            held.bank(Resource::Biomass, -biomass_cost.clone());
-            held.bank(Resource::Iron, -iron_cost.clone());
-        }
+        let held = peel(&mut world.orbs, orb).expect("checked");
+        held.bank(Resource::Biomass, -cost.clone());
         let stamp = world.clock.now();
         world.chronicle.append(
-            ClosureEvent::UpkeepSettled { orb_id: orb, resource: Resource::Biomass, amount: biomass_cost.clone() },
-            stamp,
-            vec![SOVEREIGN],
-        );
-        world.chronicle.append(
-            ClosureEvent::UpkeepSettled { orb_id: orb, resource: Resource::Iron, amount: iron_cost.clone() },
+            ClosureEvent::UpkeepSettled { orb_id: orb, resource: Resource::Biomass, amount: cost.clone() },
             stamp,
             vec![SOVEREIGN],
         );
@@ -885,8 +877,8 @@ fn route_charter_cost() -> Ratio {
 /// needs trade) to take the FIRST step (trade). Route -> trade -> level ->
 /// smelter -> Alloy -> element route, in order. Modest and affordable within a few
 /// ticks of a Habitat + Extractor, so early lanes open without flooding.
-fn resource_route_charter_cost() -> (Ratio, Ratio) {
-    (ratio(2, 1), ratio(2, 1))
+fn resource_route_charter_cost() -> Ratio {
+    ratio(4, 1)
 }
 
 impl World {

@@ -295,12 +295,21 @@ pub fn autic_wall_pick(seed: u64) -> Option<WallPair> {
     if walls.is_empty() {
         return None;
     }
-    let worthy: Vec<usize> = walls
-        .iter()
-        .enumerate()
-        .filter(|(_, (orbit, _))| word_worth(orbit) > 0)
-        .map(|(i, _)| i)
-        .collect();
+    // DEPLOY GATE (operator sequencing): the worth-preference is LOCKED behind
+    // AUTIC_WORTH_CURRICULUM so the parallelised fast-beat binary can ship while
+    // the economy settles WITHOUT changing how entities learn (that would confound
+    // the solve-lift measurement). Flag OFF (default) => inert, any-wall pick, exactly
+    // the pre-curriculum behaviour. Flip the flag at the measured phase to activate.
+    let worthy: Vec<usize> = if std::env::var_os("AUTIC_WORTH_CURRICULUM").is_some() {
+        walls
+            .iter()
+            .enumerate()
+            .filter(|(_, (orbit, _))| word_worth(orbit) > 0)
+            .map(|(i, _)| i)
+            .collect()
+    } else {
+        Vec::new()
+    };
     let idx = if worthy.is_empty() {
         (seed as usize) % walls.len()
     } else {

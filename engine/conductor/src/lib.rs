@@ -780,6 +780,11 @@ const AUTIC_BASIN_CAP: usize = 4096;
 /// already O(new) via the high-water mark).
 const AUTIC_STRIDE: u64 = 4;
 
+/// BEAT-PARALLEL — serialises the one non-isolated per-civ op (`registry.seat`,
+/// which reads the whole roster and enforces a global seat-width limit). Rare
+/// (once per line), so it does not gate the parallel cognition.
+static SEAT_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
+
 pub struct Polity {
     pub spec: PolitySpec,
     pub world: World,
@@ -1548,7 +1553,18 @@ impl Polity {
         {
             return;
         }
-        if registry.seat(&self.spec.civilization.sigil, want).is_ok() {
+        // BEAT-PARALLEL — `registry.seat` reads the WHOLE roster (`self.list()`)
+        // and enforces a global seat-width constraint, so it is the one op in the
+        // per-civ cycle that is not per-world isolated. It fires at most once per
+        // line's lifetime (guarded above by `held.is_some()`), so serialising it
+        // under a global lock keeps the width invariant exact without touching the
+        // parallel cognition. Everything else in `cycle` is per-world (`book` is
+        // filesystem-keyed by world) or Mutex-guarded (membrane/worth/profile).
+        let seated = {
+            let _guard = SEAT_LOCK.lock().unwrap_or_else(|p| p.into_inner());
+            registry.seat(&self.spec.civilization.sigil, want)
+        };
+        if seated.is_ok() {
             self.spec.civilization.station = Some(want.into());
         }
     }
@@ -5335,12 +5351,41 @@ fn run_era_inner(
         // Slice 3b: the population census BEFORE the cycle loop, so each line's
         // direction read this beat is relative to the live cohort.
         direction_census_step(&mut worlds);
-        let mut newborns = Vec::new();
-        for polity in &mut worlds {
-            if let Some(spec) = polity.cycle(&book, &registry) {
-                newborns.push(spec);
-            }
-        }
+        // BEAT-PARALLEL (#152) — the same per-civ fan-out the live loop uses, here
+        // so the SEAL-B pins PROVE it bit-identical to sequential: each civ is
+        // deterministically self-seeded and mutates only its own world, chunks are
+        // joined in spawn order (= world order), so replay == committed and the
+        // roster is order-independent.
+        let newborns: Vec<PolitySpec> = {
+            let threads = std::thread::available_parallelism()
+                .map(|n| n.get())
+                .unwrap_or(4)
+                .min(16);
+            let chunk = ((worlds.len() + threads - 1) / threads).max(1);
+            let book = &book;
+            let registry = &registry;
+            let slices: Vec<&mut [Polity]> = worlds.chunks_mut(chunk).collect();
+            std::thread::scope(|s| {
+                let handles: Vec<_> = slices
+                    .into_iter()
+                    .map(|slice| {
+                        s.spawn(move || {
+                            let mut local = Vec::new();
+                            for polity in slice.iter_mut() {
+                                if let Some(spec) = polity.cycle(book, registry) {
+                                    local.push(spec);
+                                }
+                            }
+                            local
+                        })
+                    })
+                    .collect();
+                handles
+                    .into_iter()
+                    .flat_map(|h| h.join().unwrap_or_default())
+                    .collect()
+            })
+        };
         for spec in newborns {
             worlds.push(Polity::genesis(spec, &registry, &book));
         }
