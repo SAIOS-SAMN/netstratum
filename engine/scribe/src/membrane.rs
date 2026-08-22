@@ -163,6 +163,21 @@ pub fn autic_basin_depth() -> usize {
     AUTIC_BASIN.lock().map(|b| b.len()).unwrap_or(0)
 }
 
+/// **PRIME THE AUTIC BASIN** — seat a set of crystals as net's learned language
+/// without the mesh. The membrane grows the basin from the network at runtime;
+/// this is the deterministic path for a saved corpus (a warm start) and for
+/// exercising the entity-side bridge off-wire. Appended (dedup by class), so a
+/// later mesh-learned crystal is not lost; idempotent for a given set.
+pub fn prime_autic_basin(crystals: Vec<reduct::Crystal>) {
+    if let Ok(mut shared) = AUTIC_BASIN.lock() {
+        for c in crystals {
+            if !shared.contains(&c) {
+                shared.push(c);
+            }
+        }
+    }
+}
+
 /// The cap on the retained cohort — a ring, newest kept. The diagnosis pass
 /// drains faster than the forge fills; this only bounds a stalled consumer.
 const COHORT_CAP: usize = 4096;

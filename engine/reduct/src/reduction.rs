@@ -519,7 +519,7 @@ pub enum ReduceVerdict {
 /// as a `(site,direction) → coefficient` map for O(log n) exact accounting (was
 /// an O(class·residual) nested scan per crystal, per pass), and rebuilt in the
 /// same canonical order `into_entries` uses. Output-identical; SEAL-B untouched.
-fn drain_exact(residual: ChainDelta, basis: &[Crystal]) -> (ChainDelta, Vec<BoundingRecord>) {
+pub(crate) fn drain_exact(residual: ChainDelta, basis: &[Crystal]) -> (ChainDelta, Vec<BoundingRecord>) {
     let (from, to) = (residual.from, residual.to);
     let mut index: BTreeMap<(i64, i64, u8), BigInt> = residual
         .entries

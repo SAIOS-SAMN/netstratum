@@ -921,7 +921,13 @@ pub struct Polity {
     /// AUTIC-1 — how many AUTIC crystals this line's vessels have absorbed from
     /// the mesh-learned basin (cumulative, workspace like `grown`). The live
     /// measure of the shared tongue entering entity cognition.
-    autic_absorbed: usize,
+    pub autic_absorbed: usize,
+    /// AUTIC-2 — sentences one vessel has SPOKEN to the other (composed
+    /// utterances), and how many carried a DemandUnmet leftover the hearer LEARNED
+    /// (adopted as a new crystal). Cumulative workspace. The live measure of the
+    /// COMPOSE move: multi-word thought exchanged and comprehended between minds.
+    pub autic_spoke: usize,
+    pub autic_learned: usize,
     /// How many refusals the board has already been TOLD. The record
     /// above is permanent; this is only the narrator's place in it, so
     /// a refusal is announced once per process and kept forever.
@@ -1205,6 +1211,8 @@ impl Polity {
                         lane_refused: Vec::new(),
                         grown: std::collections::BTreeMap::new(),
                         autic_absorbed: 0,
+                        autic_spoke: 0,
+                        autic_learned: 0,
                         reported: 0,
                         trajectory: Trajectory::Growth,
                         prev_order: None,
@@ -1334,6 +1342,8 @@ impl Polity {
             lane_refused: Vec::new(),
             grown: std::collections::BTreeMap::new(),
             autic_absorbed: 0,
+            autic_spoke: 0,
+            autic_learned: 0,
             reported: 0,
             trajectory: Trajectory::Growth,
             prev_order: None,
@@ -2730,6 +2740,48 @@ impl Polity {
         fresh
     }
 
+    /// AUTIC-2 — THE COMPOSE MOVE, LIVE. The `speaker` splices its grown words
+    /// into an `AuticSentence` (a composed multi-word utterance) and the `hearer`
+    /// ASSEMBLES it against ITS OWN basin: the pieces it recognises are accounted,
+    /// and any leftover (`DemandUnmet`) is exactly the structure it lacked — which
+    /// it LEARNS by adopting the remainder as a new crystal. This is genuine
+    /// knowledge transfer between two minds: one composes a thought from what it
+    /// knows, the other comprehends what it can and grows by precisely what it
+    /// could not. Bounded to a real sentence (up to AUTIC_SENTENCE_LEN of the
+    /// speaker's freshest words), not the whole basin. Replay-safe: `grown` is
+    /// live workspace, folded deeds carry replay. A no-op until a speaker holds
+    /// two words, so early/isolated minds are silent, not fabricating speech.
+    /// Observability — the largest vessel basin this line holds (AUTIC-2 probe).
+    pub fn max_basin(&self) -> usize {
+        self.grown.values().map(|v| v.len()).max().unwrap_or(0)
+    }
+
+    fn speak_and_hear(&mut self, speaker: u64, hearer: u64) {
+        const AUTIC_SENTENCE_LEN: usize = 4;
+        // Compose the sentence from the speaker's freshest words (borrow released
+        // before the hearer's basin is taken mutably).
+        let words: Vec<reduct::ChainDelta> = match self.grown.get(&speaker) {
+            Some(basin) if basin.len() >= 2 => basin
+                .iter()
+                .rev()
+                .take(AUTIC_SENTENCE_LEN)
+                .map(|c| c.class.clone())
+                .collect(),
+            _ => return, // nothing composed to say — silence, not fabricated speech
+        };
+        let sentence = reduct::AuticSentence::speak(words);
+        let hearer_basin = self.grown.entry(hearer).or_default();
+        match reduct::assemble(&sentence, hearer_basin) {
+            reduct::AssemblyRead::Assembled { .. } => {}
+            reduct::AssemblyRead::DemandUnmet { remainder, .. } => {
+                // LEARN — the hearer adopts exactly the structure it lacked.
+                hearer_basin.push(reduct::Crystal::seal(remainder));
+                self.autic_learned += 1;
+            }
+        }
+        self.autic_spoke += 1;
+    }
+
     /// N-I8 — deposit `vessel`'s closure of `orbit` toward a shared word, and
     /// MINT it iff two DISTINCT vessels have now closed it (consilience). The
     /// mint bills `mint_cost` in leisure (COG-2/4/5, unchanged) — an unaffordable
@@ -2839,6 +2891,11 @@ impl Polity {
         // N-I10 — after thinking, the sibling HEARS one shared word (culture in
         // motion). Affordability-gated: it hears only if it can still pay.
         self.sibling_hear();
+        // AUTIC-2 — THE COMPOSE MOVE, LIVE. Above single-word hearing: the
+        // automaton SPEAKS a composed sentence (several of its words spliced) and
+        // the sibling ASSEMBLES it against its basin, learning exactly the leftover
+        // it lacked. Multi-word thought, not one invariant at a time.
+        self.speak_and_hear(self.automaton, self.sibling);
     }
 
     /// N-I10 — the sibling HEARS one folded word from the sun each beat it can
@@ -3072,13 +3129,15 @@ impl Polity {
             // shared tongue the entities will come to think in. Watching the two
             // together is the emergent measure of the recursion closing.
             eprintln!(
-                "COG-LEX clock {} {}: words={} pending={} autic={} absorbed={} (private | shared learned/drawn)",
+                "COG-LEX clock {} {}: words={} pending={} autic={} absorbed={} spoke={} learned={} (private | shared | sentences)",
                 self.world.now(),
                 self.spec.civilization.sigil,
                 self.library.words().len(),
                 self.word_pending.len(),
                 scribe::membrane::autic_basin_depth(),
                 self.autic_absorbed,
+                self.autic_spoke,
+                self.autic_learned,
             );
             self.prev_order = Some((syn, ent, read.families));
             Some(derived)
