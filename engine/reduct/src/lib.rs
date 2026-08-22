@@ -36,7 +36,7 @@ pub mod transport;
 pub use congruence::ChainDelta;
 pub use observation::{adopt, observe, Observed};
 pub use reduction::Crystal;
-pub use sentence::{assemble, AssemblyRead, AuticSentence};
+pub use sentence::{assemble, probe_class, AssemblyRead, AuticSentence};
 pub use think::{think, PairClosure, TaskThought};
 
 // IAE-2 — the stratified carrier: a cellular sheaf with heterogeneous stalks

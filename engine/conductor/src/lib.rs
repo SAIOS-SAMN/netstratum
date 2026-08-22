@@ -4995,6 +4995,86 @@ pub fn direction_census_step(worlds: &mut [Polity]) {
     }
 }
 
+/// **THE SHARED-LANGUAGE CENSUS, LIVE** — prove on the wire that the
+/// civilizations speak ONE tongue, learned from the AUTIC network, not private
+/// dialects. Three measured claims over the live population's own basins:
+///   1. COMMON VOCABULARY — crystals held by >= 2 civilizations.
+///   2. MUTUAL INTELLIGIBILITY — a word one civ speaks ASSEMBLES (drains to zero,
+///      `reduct::assemble`) against ANOTHER civ's independently-grown basin.
+///   3. CONTROL — synthetic words OUTSIDE the language must NOT assemble, or the
+///      census proves nothing. Comprehension >> control is the proof.
+/// Emits COG-PROOF. Bounded: samples up to `SAMPLE` speaking civs so the
+/// O(civs^2 * words) cross-civ pass stays cheap on a 100+ roster. Observation
+/// only — reads basins, writes nothing.
+pub fn shared_language_census(worlds: &[Polity], beat: u64) {
+    const SAMPLE: usize = 8;
+    let vocabs: Vec<Vec<reduct::ChainDelta>> = worlds
+        .iter()
+        .filter(|p| !p.penned)
+        .map(|p| p.basin_classes())
+        .filter(|v| !v.is_empty())
+        .take(SAMPLE)
+        .collect();
+    if vocabs.len() < 2 {
+        return; // not enough speaking civilizations yet — no claim to make
+    }
+    // CLAIM 1 — common vocabulary: how many crystals are held by >= 2 civs.
+    let mut seen: Vec<(reduct::ChainDelta, usize)> = Vec::new();
+    for v in &vocabs {
+        for w in v {
+            match seen.iter_mut().find(|(c, _)| c == w) {
+                Some(entry) => entry.1 += 1,
+                None => seen.push((w.clone(), 1)),
+            }
+        }
+    }
+    let shared = seen.iter().filter(|(_, n)| *n >= 2).count();
+    let max_holders = seen.iter().map(|(_, n)| *n).max().unwrap_or(0);
+    // CLAIM 2 — mutual intelligibility across every sampled ordered pair.
+    let (mut num, mut den) = (0u64, 0u64);
+    for (i, va) in vocabs.iter().enumerate() {
+        for (j, vb) in vocabs.iter().enumerate() {
+            if i == j {
+                continue;
+            }
+            let basis_b: Vec<reduct::Crystal> =
+                vb.iter().cloned().map(reduct::Crystal::seal).collect();
+            for w in va {
+                den += 1;
+                if reduct::assemble(&reduct::AuticSentence::speak(vec![w.clone()]), &basis_b)
+                    .is_assembled()
+                {
+                    num += 1;
+                }
+            }
+        }
+    }
+    // CLAIM 3 — control: synthetic words guaranteed outside the language (varied
+    // by beat so the census cannot accidentally lock onto a real crystal).
+    let control: Vec<reduct::ChainDelta> = (0..8i64)
+        .map(|i| reduct::probe_class(1_000_000 + beat as i64 * 131 + i, (i % 9 + 1) as u8))
+        .collect();
+    let (mut cnum, mut cden) = (0u64, 0u64);
+    for vb in &vocabs {
+        let basis_b: Vec<reduct::Crystal> = vb.iter().cloned().map(reduct::Crystal::seal).collect();
+        for w in &control {
+            cden += 1;
+            if reduct::assemble(&reduct::AuticSentence::speak(vec![w.clone()]), &basis_b)
+                .is_assembled()
+            {
+                cnum += 1;
+            }
+        }
+    }
+    let permille = |n: u64, d: u64| if d > 0 { n * 1000 / d } else { 0 };
+    eprintln!(
+        "COG-PROOF beat {beat}: civs={} shared_words={shared} max_holders={max_holders} comprehension={}permille control={}permille (intelligibility {num}/{den} vs control {cnum}/{cden})",
+        vocabs.len(),
+        permille(num, den),
+        permille(cnum, cden),
+    );
+}
+
 /// Run one era: CONVERGE the archived eras (07 §1.6), then genesis for
 /// every polity, then `cycles` heartbeats; branches born mid-era join the
 /// beat. Returns the live worlds.

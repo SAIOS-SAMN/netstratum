@@ -368,6 +368,12 @@ fn main() {
                 println!("beat {beat}: JUDGE REFUSED — {judged_tally:?}");
             }
         }
+        // THE SHARED-LANGUAGE CENSUS — prove on the wire that the civilizations
+        // speak one AUTIC tongue (common vocabulary + cross-civ comprehension vs a
+        // control). O(civs^2 * words), so run it less often than the 10-beat census.
+        if beat.is_multiple_of(30) || (cycles > 0 && beat == cycles) {
+            conductor::shared_language_census(&worlds, epoch_base + beat);
+        }
         if beat.is_multiple_of(10) || (cycles > 0 && beat == cycles) {
             let summary: Vec<String> = worlds
                 .iter()

@@ -78,6 +78,24 @@ impl AssemblyRead {
     }
 }
 
+/// A single-entry probe class at a far-off site — a synthetic "word" for building
+/// CONTROL utterances (guaranteed outside any real learned language) without the
+/// caller reaching for `num_bigint`/`ChainEntry`. `seed` places it; `dir` is its
+/// gauge direction.
+pub fn probe_class(seed: i64, dir: u8) -> ChainDelta {
+    use crate::congruence::ChainEntry;
+    use crate::peel::{CellFrame, GaugeDirection, Site};
+    ChainDelta {
+        from: CellFrame { rows: 1, cols: 1 },
+        to: CellFrame { rows: 1, cols: 1 },
+        entries: vec![ChainEntry {
+            site: Site { row: seed, col: seed },
+            direction: GaugeDirection { index: dir },
+            coefficient: num_bigint::BigInt::from(1),
+        }],
+    }
+}
+
 /// **ASSEMBLE** — hear a sentence: splice it, then account it exactly against the
 /// hearer's `basis`. Residual to zero is `Assembled`; a surviving remainder is
 /// `DemandUnmet`, naming precisely the structure the hearer lacked.
