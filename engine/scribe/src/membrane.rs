@@ -163,6 +163,71 @@ pub fn autic_basin_depth() -> usize {
     AUTIC_BASIN.lock().map(|b| b.len()).unwrap_or(0)
 }
 
+/// **ADOPT BY WORTH** (mesh relay) — the mesh's measured lexicon utility: per
+/// closing orbit, the count of DISTINCT WALLS it has closed. Rebuilt every sweep
+/// mesh-side from the canonical receipt fold; net re-reads it so adoption follows
+/// MEASURED utility (words that actually close walls), not certificate existence.
+/// An orbit absent from the table has never closed a wall (worth 0).
+static WORTH: Mutex<std::collections::BTreeMap<[u8; 32], u32>> =
+    Mutex::new(std::collections::BTreeMap::new());
+
+const WORTH_PATH: &str = "/var/tmp/mycelium/lexicon.worth";
+
+fn hex32(s: &str) -> Option<[u8; 32]> {
+    if s.len() != 64 {
+        return None;
+    }
+    let mut out = [0u8; 32];
+    for (i, byte) in out.iter_mut().enumerate() {
+        *byte = u8::from_str_radix(&s[2 * i..2 * i + 2], 16).ok()?;
+    }
+    Some(out)
+}
+
+/// Reload the worth table from the mesh file. Tab-separated:
+/// `orbit<TAB>walls<TAB>settles<TAB>last_unix<TAB>last_tu`; worth = `walls`. Silent
+/// on a missing file (off-wire) — the table just stays empty, so `word_worth` is 0
+/// and callers fall back to their un-weighted behaviour.
+pub fn load_worth() {
+    let Ok(text) = std::fs::read_to_string(WORTH_PATH) else {
+        return;
+    };
+    let mut map = std::collections::BTreeMap::new();
+    for line in text.lines().skip(1) {
+        let mut it = line.split('\t');
+        let (Some(orbit_hex), Some(walls)) = (it.next(), it.next()) else {
+            continue;
+        };
+        if let (Some(orbit), Ok(worth)) = (hex32(orbit_hex), walls.parse::<u32>()) {
+            map.insert(orbit, worth);
+        }
+    }
+    if let Ok(mut w) = WORTH.lock() {
+        *w = map;
+    }
+}
+
+/// The measured worth (distinct walls closed) of a word's orbit — 0 if it has
+/// never closed a wall (absent from the table, or the table is unloaded off-wire).
+pub fn word_worth(orbit: &[u8; 32]) -> u32 {
+    WORTH.lock().ok().and_then(|w| w.get(orbit).copied()).unwrap_or(0)
+}
+
+/// How many orbits carry measured worth — an observability read.
+pub fn worth_loaded() -> usize {
+    WORTH.lock().map(|w| w.len()).unwrap_or(0)
+}
+
+/// Seat a worth table without the mesh file (warm start / off-wire test of
+/// adoption-by-worth). Appended.
+pub fn prime_worth(entries: Vec<([u8; 32], u32)>) {
+    if let Ok(mut w) = WORTH.lock() {
+        for (orbit, worth) in entries {
+            w.insert(orbit, worth);
+        }
+    }
+}
+
 /// The crystals learned SINCE index `from` — clones only the tail, not the whole
 /// basin. A vessel that tracks how many it has already seen absorbs each new
 /// crystal exactly once, so absorption is O(new), never O(basin) per think.
@@ -557,6 +622,9 @@ fn run(rx: mpsc::Receiver<SolveOffer>) {
                 // can seed entity cognition. Once per listen cycle, after the
                 // walls are heard: the read-side sees the whole grown basin.
                 publish_autic_basin(&net_basin);
+                // ADOPT BY WORTH — refresh the mesh's measured lexicon utility so
+                // adoption tracks the ledger's current reality (rebuilt every sweep).
+                load_worth();
             }
         }
     }

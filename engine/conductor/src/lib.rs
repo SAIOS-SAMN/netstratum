@@ -2922,7 +2922,16 @@ impl Polity {
             .wrapping_mul(0x9E3779B97F4A7C15)
             .wrapping_add(vessel)
             .wrapping_mul(0xD1B54A32D192ED03);
-        let word = &words[(seed as usize) % words.len()];
+        // ADOPT BY WORTH — cite the word of GREATEST measured utility (distinct
+        // walls it has closed, per the mesh's lexicon.worth), not a hash-random one.
+        // A line authors variations of what actually WORKS, so its offers are worth
+        // the mesh's judgment. A library with no worth yet (young line, off-wire)
+        // falls back to the seeded pick, so authorship never stalls.
+        let worthiest = words
+            .iter()
+            .max_by_key(|w| scribe::membrane::word_worth(&w.orbit))
+            .filter(|w| scribe::membrane::word_worth(&w.orbit) > 0);
+        let word = worthiest.unwrap_or(&words[(seed as usize) % words.len()]);
         // The six D4 rebinds; the seed picks one.
         use solver_verify::grid::Op;
         const D4: [Op; 6] = [
@@ -3310,7 +3319,7 @@ impl Polity {
             // shared tongue the entities will come to think in. Watching the two
             // together is the emergent measure of the recursion closing.
             eprintln!(
-                "COG-LEX clock {} {}: words={} pending={} autic={} absorbed={} practiced={} spoke={} learned={} authored={} (private | shared | curriculum | sentences | authorship)",
+                "COG-LEX clock {} {}: words={} pending={} autic={} absorbed={} practiced={} spoke={} learned={} authored={} worth={} (private | shared | curriculum | sentences | authorship | measured-utility)",
                 self.world.now(),
                 self.spec.civilization.sigil,
                 self.library.words().len(),
@@ -3321,6 +3330,7 @@ impl Polity {
                 self.autic_spoke,
                 self.autic_learned,
                 self.autic_authored,
+                scribe::membrane::worth_loaded(),
             );
             self.prev_order = Some((syn, ent, read.families));
             Some(derived)
