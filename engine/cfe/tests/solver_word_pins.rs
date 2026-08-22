@@ -20,16 +20,13 @@ fn the_door_holds_and_the_fold_reads() {
         w.mint_solver_word_as(cfe::world::SOVEREIGN, orbit, Vec::new(), cited.clone()),
         Err(ActionRefused::SolverWordEmpty)
     );
+    // COMM-1 — CONGRUENCE THRESHOLD: one vantage is not yet agreement (refuses);
+    // two independent vantages converging on the orbit IS (mints).
     assert_eq!(
-        w.mint_solver_word_as(
-            cfe::world::SOVEREIGN,
-            orbit,
-            expansion.clone(),
-            vec![[1u8; 32], [2u8; 32]]
-        ),
-        Err(ActionRefused::SolverWordUnconfirmed { confirms: 2 })
+        w.mint_solver_word_as(cfe::world::SOVEREIGN, orbit, expansion.clone(), vec![[1u8; 32]]),
+        Err(ActionRefused::SolverWordUnconfirmed { confirms: 1 })
     );
-    // The lawful mint lands and folds.
+    // The lawful mint lands and folds — two vantages agree.
     w.mint_solver_word_as(cfe::world::SOVEREIGN, orbit, expansion.clone(), cited.clone())
         .expect("the word mints");
     let folded = cfe::vocabulary::solver_words(w.chronicle());

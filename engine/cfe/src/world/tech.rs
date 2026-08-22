@@ -269,7 +269,17 @@ impl World {
         if expansion.is_empty() {
             return Err(ActionRefused::SolverWordEmpty);
         }
-        if cited.len() < 3 {
+        // COMM-1 — CONGRUENCE THRESHOLD. A shared word is admitted when TWO
+        // independent vantages have converged on the same orbit (the consilience
+        // principle, N-I8: two distinct minds agreeing IS a measurement of truth).
+        // The prior bar of three distinct tasks demanded proof of GENERALITY before
+        // ADMISSION, and it was so strict the vocabulary never formed (0 words across
+        // the live population) — communication died at the gate. Two vantages is the
+        // trigger; generality hardens the word afterward through reuse (`pre_reach`),
+        // not as a precondition to speaking it. (This count is the crude first gauge
+        // of congruence — the degree of agreement thresholded to a mint; the graded
+        // residual measure is the evolution once its live behaviour is observed.)
+        if cited.len() < 2 {
             return Err(ActionRefused::SolverWordUnconfirmed { confirms: cited.len() as u8 });
         }
         let known = self.chronicle.receipts().iter().any(|receipt| {

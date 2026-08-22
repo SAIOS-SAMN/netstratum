@@ -2724,16 +2724,27 @@ impl Polity {
             Some(civic::Drive::Metabolic)
         );
         let can_burn = !afford && starving && head > burn.clone();
+        // COMM-1 — AGREEMENT IS NEVER DISCARDED. Two minds have independently closed
+        // the same orbit (consilience reached above) — that shared truth is the rare,
+        // precious event, and its cognitive cost was ALREADY paid by the two looks.
+        // Minting the word is the RECEIPT of the agreement (a banked-neutral deed,
+        // 28_VOCABULARY §7), not a fresh investment to EROI-gate. Discarding an agreed
+        // word because the starved economy can't clear the bar is the deepest waste:
+        // the civilization reached a shared word and threw it away, guaranteeing it
+        // never builds a language. So the agreed word ALWAYS mints; the leisure cost
+        // is settled only when a solvent line can pay it (COG-13 EROI) or a starving
+        // line burns for the eureka (COG-3) — otherwise the truth is recorded free.
+        // The society keeps every shared word it earns; the economy prices the
+        // ONGOING draw, never the record of agreement.
         if let Some(bytes) = solver_verify::program_bytes(&expansion) {
-            if (commit || can_burn)
-                && self
-                    .world
-                    .mint_solver_word_as(self.automaton, orbit, bytes, cited.clone())
-                    .is_ok()
+            if self
+                .world
+                .mint_solver_word_as(self.automaton, orbit, bytes, cited.clone())
+                .is_ok()
             {
                 if commit {
                     self.world.settle_leisure(primary, -price);
-                } else {
+                } else if can_burn {
                     self.world.settle_population_exact(primary, -burn);
                 }
                 self.library.adopt(solver::mint::MintedWord { orbit, expansion, cited });
@@ -2751,9 +2762,21 @@ impl Polity {
     /// with one look's surplus funds the automaton first and the sibling fasts.
     fn sibling_deposit(&mut self, task: &solver_verify::loader::Task, digest: [u8; 32]) {
         let orb = cfe::world::FIRST_ORB;
-        let price = Self::observe_price();
+        // COMM-1 — THE CONFIRMING LOOK IS CHEAPER THAN THE DISCOVERING LOOK. The
+        // sibling is not searching the orbit the automaton already found; it is
+        // CONFIRMING it — verification, not discovery. Communication (a second
+        // vantage on the same wall) is the FOUNDATION of a society, not a surplus
+        // luxury paid only after discovery, so it must not cost a full second look:
+        // priced at full `observe_price` the sibling always fasts under scarcity,
+        // consilience never reaches two vessels, and no shared word ever mints
+        // (measured: 0 VocabularyMinted / 0 KnowledgeConverged across 8 mature
+        // worlds — isolated, non-composing civilizations). Priced as a fraction, a
+        // line that can afford ONE discovery can always afford the confirmation, so
+        // two vessels close the same orbit and the word mints. The discount is the
+        // ratio of verifying a known program to searching for it.
+        let price = Self::observe_price() * cfe::ratio::ratio(1, 4);
         if self.world.leisure_bank_of(orb) < price {
-            return; // the sibling fasts — its look is not free (N-I7)
+            return; // the sibling fasts — even the confirming look is not free (N-I7)
         }
         self.world.settle_leisure(orb, -price);
         let sibling = self.sibling;
