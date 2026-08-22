@@ -3020,12 +3020,18 @@ impl Polity {
             // board for a second). A growing lexicon IS communication — a society
             // composing a shared language. Observation only; the mint happens on the
             // research beat, this only reports the standing count.
+            // AUTIC-1 — alongside the civ's PRIVATE lexicon, the size of the
+            // SHARED AUTIC language net has learned from the mycelium network
+            // (net_basin). words=/pending= is the parochial dialect; autic= is the
+            // shared tongue the entities will come to think in. Watching the two
+            // together is the emergent measure of the recursion closing.
             eprintln!(
-                "COG-LEX clock {} {}: words={} pending={} (emergent vocabulary)",
+                "COG-LEX clock {} {}: words={} pending={} autic={} (private | shared)",
                 self.world.now(),
                 self.spec.civilization.sigil,
                 self.library.words().len(),
                 self.word_pending.len(),
+                scribe::membrane::autic_basin_depth(),
             );
             self.prev_order = Some((syn, ent, read.families));
             Some(derived)

@@ -131,6 +131,38 @@ pub struct Cohort {
 /// The captured unglueable specimens since the last drain.
 static COHORT: Mutex<Vec<Cohort>> = Mutex::new(Vec::new());
 
+/// **THE LEARNED AUTIC BASIN** (AUTIC-1) — a published snapshot of `net_basin`,
+/// the crystals net has LEARNED from the mycelium network's walls (the AUTIC
+/// language, grown one invariant at a time in the listening half). The basin
+/// lives in the resident `run` thread; this static is the read-side window the
+/// conductor draws on so a civilization's minds can think in the language net
+/// already speaks — the entity-scale end of the recursion. Overwritten whole each
+/// listen cycle (the basin is monotone-growing; a snapshot is a prefix), so a
+/// reader always sees net's current understanding. This is NOT the chronicle
+/// (Law I: the mesh is the memory); it is a live workspace mirror, never
+/// replay-durable — the conductor seeds `grown` (live-only) from it, never a deed.
+static AUTIC_BASIN: Mutex<Vec<reduct::Crystal>> = Mutex::new(Vec::new());
+
+/// Publish the current learned basin (called from the listening half after a
+/// hear cycle). Cheap: one clone per BEAT_SECS cycle, not per wall.
+fn publish_autic_basin(basin: &[reduct::Crystal]) {
+    if let Ok(mut shared) = AUTIC_BASIN.lock() {
+        *shared = basin.to_vec();
+    }
+}
+
+/// **READ THE LEARNED AUTIC BASIN** — the crystals net has learned from the mesh,
+/// for the conductor to seed entity cognition. A clone (the reader must not hold
+/// the lock across the beat). Empty until the membrane has heard its first wall.
+pub fn autic_basin() -> Vec<reduct::Crystal> {
+    AUTIC_BASIN.lock().map(|b| b.clone()).unwrap_or_default()
+}
+
+/// The size of the learned AUTIC basin — an observability read (no clone).
+pub fn autic_basin_depth() -> usize {
+    AUTIC_BASIN.lock().map(|b| b.len()).unwrap_or(0)
+}
+
 /// The cap on the retained cohort — a ring, newest kept. The diagnosis pass
 /// drains faster than the forge fills; this only bounds a stalled consumer.
 const COHORT_CAP: usize = 4096;
@@ -431,6 +463,10 @@ fn run(rx: mpsc::Receiver<SolveOffer>) {
                         }
                     }
                 }
+                // AUTIC-1 — publish net's current understanding so the conductor
+                // can seed entity cognition. Once per listen cycle, after the
+                // walls are heard: the read-side sees the whole grown basin.
+                publish_autic_basin(&net_basin);
             }
         }
     }
