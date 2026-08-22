@@ -5353,27 +5353,42 @@ fn run_era_inner(
         direction_census_step(&mut worlds);
         // BEAT-PARALLEL (#152) — the same per-civ fan-out the live loop uses, here
         // so the SEAL-B pins PROVE it bit-identical to sequential: each civ is
-        // deterministically self-seeded and mutates only its own world, chunks are
-        // joined in spawn order (= world order), so replay == committed and the
-        // roster is order-independent.
+        // deterministically self-seeded and mutates only its own world. Balanced
+        // by MEASURED cost (`spent + swept`, greedy LPT bin-packing) rather than
+        // civ count — one heavy civ no longer stalls a whole thread. Determinism
+        // rides on each result's ORIGINAL index (sorted back before use), not on
+        // chunk/spawn order, so replay == committed regardless of assignment.
         let newborns: Vec<PolitySpec> = {
             let threads = std::thread::available_parallelism()
                 .map(|n| n.get())
                 .unwrap_or(4)
                 .min(16);
-            let chunk = ((worlds.len() + threads - 1) / threads).max(1);
             let book = &book;
             let registry = &registry;
-            let slices: Vec<&mut [Polity]> = worlds.chunks_mut(chunk).collect();
-            std::thread::scope(|s| {
-                let handles: Vec<_> = slices
+            let mut indexed: Vec<(usize, &mut Polity)> = worlds.iter_mut().enumerate().collect();
+            indexed.sort_by_key(|(_, p)| std::cmp::Reverse(p.spent + p.swept));
+            let mut buckets: Vec<Vec<(usize, &mut Polity)>> =
+                (0..threads).map(|_| Vec::new()).collect();
+            let mut bucket_cost: Vec<u64> = vec![0; threads];
+            for (idx, polity) in indexed {
+                let lightest = bucket_cost
+                    .iter()
+                    .enumerate()
+                    .min_by_key(|&(_, &c)| c)
+                    .map(|(i, _)| i)
+                    .unwrap_or(0);
+                bucket_cost[lightest] += polity.spent + polity.swept;
+                buckets[lightest].push((idx, polity));
+            }
+            let mut results: Vec<(usize, PolitySpec)> = std::thread::scope(|s| {
+                let handles: Vec<_> = buckets
                     .into_iter()
-                    .map(|slice| {
+                    .map(|bucket| {
                         s.spawn(move || {
                             let mut local = Vec::new();
-                            for polity in slice.iter_mut() {
+                            for (idx, polity) in bucket {
                                 if let Some(spec) = polity.cycle(book, registry) {
-                                    local.push(spec);
+                                    local.push((idx, spec));
                                 }
                             }
                             local
@@ -5384,7 +5399,9 @@ fn run_era_inner(
                     .into_iter()
                     .flat_map(|h| h.join().unwrap_or_default())
                     .collect()
-            })
+            });
+            results.sort_by_key(|(idx, _)| *idx);
+            results.into_iter().map(|(_, spec)| spec).collect()
         };
         for spec in newborns {
             worlds.push(Polity::genesis(spec, &registry, &book));

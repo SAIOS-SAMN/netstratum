@@ -220,22 +220,46 @@ fn main() {
                 .map(|n| n.get())
                 .unwrap_or(4)
                 .min(16);
-            let chunk = ((worlds.len() + threads - 1) / threads).max(1);
             let book = &book;
             let registry = &registry;
-            let slices: Vec<&mut [conductor::Polity]> = worlds.chunks_mut(chunk).collect();
-            std::thread::scope(|s| {
-                let handles: Vec<_> = slices
+            // BEAT-PARALLEL follow-up: balance by MEASURED cost (`spent +
+            // swept` — the cognitive-attempt counters each line already
+            // tracks), not civ count. Equal-count chunking let one heavy
+            // civ dominate its thread while lighter civs on other threads
+            // sat idle. Greedy LPT bin-packing (heaviest civ first, always
+            // into the currently lightest bucket) approximates a balanced
+            // partition. Determinism no longer rides on spawn/finish order:
+            // each result carries its ORIGINAL index, and results are
+            // sorted back into world order before use — the same guarantee
+            // the old chunk-order trick gave, robust to reassignment.
+            let mut indexed: Vec<(usize, &mut conductor::Polity)> =
+                worlds.iter_mut().enumerate().collect();
+            indexed.sort_by_key(|(_, p)| std::cmp::Reverse(p.spent + p.swept));
+            let mut buckets: Vec<Vec<(usize, &mut conductor::Polity)>> =
+                (0..threads).map(|_| Vec::new()).collect();
+            let mut bucket_cost: Vec<u64> = vec![0; threads];
+            for (idx, polity) in indexed {
+                let lightest = bucket_cost
+                    .iter()
+                    .enumerate()
+                    .min_by_key(|&(_, &c)| c)
+                    .map(|(i, _)| i)
+                    .unwrap_or(0);
+                bucket_cost[lightest] += polity.spent + polity.swept;
+                buckets[lightest].push((idx, polity));
+            }
+            let mut results: Vec<(usize, conductor::PolitySpec)> = std::thread::scope(|s| {
+                let handles: Vec<_> = buckets
                     .into_iter()
-                    .map(|slice| {
+                    .map(|bucket| {
                         s.spawn(move || {
                             let mut local = Vec::new();
-                            for polity in slice.iter_mut() {
+                            for (idx, polity) in bucket {
                                 if polity.penned {
                                     continue;
                                 }
                                 if let Some(spec) = polity.cycle(book, registry) {
-                                    local.push(spec);
+                                    local.push((idx, spec));
                                 }
                             }
                             local
@@ -246,7 +270,9 @@ fn main() {
                     .into_iter()
                     .flat_map(|h| h.join().unwrap_or_default())
                     .collect()
-            })
+            });
+            results.sort_by_key(|(idx, _)| *idx);
+            results.into_iter().map(|(_, spec)| spec).collect()
         };
         // DIRECTIVE 19: the gate speaks on the board — SEQUENTIAL after the parallel
         // phase, so verdicts are not interleaved and each line drains once. The
