@@ -18,6 +18,9 @@ mycelium = { path = "/opt/mycelium" }
 # offer, Learned → grow. Solver carries `hear`; reduct carries the measurement.
 solver = { path = "../solver" }
 reduct = { path = "../reduct" }
+# IDENTITY v2 R1: the deterministic attest-sample seed (mirrors
+# Hypha::attest_sample, mycelium's src/wire/myk.rs).
+blake3.workspace = true
 
 # THE MESH SCRIBE — the kernel's resident pen for the mycelium
 # membrane (replaces tools/mesh_feed.py). Peels solve records into

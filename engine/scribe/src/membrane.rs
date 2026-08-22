@@ -26,6 +26,7 @@ use std::sync::mpsc;
 use std::sync::Mutex;
 use std::sync::OnceLock;
 
+use mycelium::autic::fold::Orbit;
 use mycelium::autic::letters::{LetterId, Word};
 use mycelium::sdk::attach::{six_step, Arm};
 use mycelium::sdk::{CrystalId, KernelRef, Session};
@@ -476,6 +477,11 @@ fn run(rx: mpsc::Receiver<SolveOffer>) {
         .map(|occ| KernelRef::of(&occ, None).0);
     let mut net_basin: Vec<reduct::Crystal> = Vec::new();
     let mut heard: HashSet<[u8; 32]> = HashSet::new();
+    // IDENTITY v2 R1: the certified orbit list `enroll_orbits` records
+    // mesh-side — the same list TAG_ATTEST samples from — and the last
+    // barrier-id this mouth attested (never re-attest within a window).
+    let mut certified: Vec<[u8; 32]> = Vec::new();
+    let mut last_barrier: Option<u64> = None;
     loop {
         // Drain what arrived; block only when there is nothing to do.
         let disconnected = if pending.is_empty() {
@@ -549,10 +555,13 @@ fn run(rx: mpsc::Receiver<SolveOffer>) {
                 // Boot chain (23_RESIDENCY §3): enroll at attach — the
                 // kernel re-derives the lexicon and certifies mesh-side.
                 if let Some(s) = session.as_mut() {
-                    match mycelium::sdk::attach::enroll(s, KERNEL) {
-                        Ok((n, missed)) => eprintln!(
-                            "membrane: kernel '{KERNEL}' enrolled {n} certificates ({missed} missed)"
-                        ),
+                    match mycelium::sdk::attach::enroll_orbits(s, KERNEL) {
+                        Ok((n, missed, orbits)) => {
+                            eprintln!(
+                                "membrane: kernel '{KERNEL}' enrolled {n} certificates ({missed} missed)"
+                            );
+                            certified = orbits;
+                        }
                         Err(_) => {}
                     }
                 }
@@ -637,8 +646,83 @@ fn run(rx: mpsc::Receiver<SolveOffer>) {
                 // ADOPT BY WORTH — refresh the mesh's measured lexicon utility so
                 // adoption tracks the ledger's current reality (rebuilt every sweep).
                 load_worth();
+                // IDENTITY v2 R1: attest once per new barrier window (§141
+                // closes on the same TAG_TU pull this uses for barrier-id).
+                maybe_attest(s, Some(me), &certified, &mut last_barrier);
             }
         }
+    }
+}
+
+/// IDENTITY v2 R1: the deterministic per-barrier attest sample — both
+/// sides compute the same k orbits from the certified list, no
+/// negotiation (mirrors Hypha::attest_sample, mycelium's
+/// src/wire/myk.rs — the reference, not re-derived law).
+fn attest_sample(who: &[u8; 32], certified: &[[u8; 32]], barrier: u64) -> Vec<[u8; 32]> {
+    if certified.is_empty() {
+        return Vec::new();
+    }
+    let mut list = certified.to_vec();
+    list.sort();
+    let mut hasher = blake3::Hasher::new();
+    hasher.update(who);
+    hasher.update(&barrier.to_le_bytes());
+    let seed = hasher.finalize();
+    let k = list.len().min(3);
+    let mut picked: Vec<[u8; 32]> = Vec::new();
+    for &byte in seed.as_bytes().iter() {
+        if picked.len() >= k {
+            break;
+        }
+        let candidate = list[byte as usize % list.len()];
+        if !picked.contains(&candidate) {
+            picked.push(candidate);
+        }
+    }
+    picked
+}
+
+/// IDENTITY v2 R1 + #141 (TAG_TU): pull the network clock, derive the
+/// barrier-id (ticks / 10_000), and attest once per new window. A
+/// refused/unrunning clock means no time — never zero time — so this
+/// simply declines to attest rather than guessing a barrier.
+fn maybe_attest(
+    s: &mut Session,
+    me: Option<[u8; 32]>,
+    certified: &[[u8; 32]],
+    last_barrier: &mut Option<u64>,
+) {
+    let Some(me) = me else { return };
+    let Ok((running, ticks, _origin)) = s.tu() else {
+        return;
+    };
+    if !running {
+        return;
+    }
+    let barrier = ticks / 10_000;
+    if *last_barrier == Some(barrier) {
+        return;
+    }
+    let picked = attest_sample(&me, certified, barrier);
+    if picked.is_empty() {
+        return;
+    }
+    let mut sample: Vec<([u8; 32], Word)> = Vec::with_capacity(picked.len());
+    for orbit in &picked {
+        match s.fold_read(Orbit(*orbit)) {
+            Ok((_rec, Some(word))) => sample.push((*orbit, word)),
+            _ => return, // partial sample — never attest a wrong count
+        }
+    }
+    match s.attest(me, &sample) {
+        Ok(attest_tu) => {
+            *last_barrier = Some(barrier);
+            eprintln!(
+                "membrane: TAG_ATTEST barrier {barrier} sample={} attest_tu={attest_tu}",
+                sample.len()
+            );
+        }
+        Err(_) => {} // no penalty for refuse; only staleness costs (R4, later)
     }
 }
 
