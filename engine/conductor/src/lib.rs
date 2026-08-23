@@ -3185,6 +3185,28 @@ impl Polity {
         (vessels, n_contacts, flat, dh)
     }
 
+    /// MANIFOLD-1a: the world's own reduce-organ occupancy this beat,
+    /// encoded raw (`row: i64 LE ‖ col: i64 LE ‖ index: u8`, entries in
+    /// occupancy order) — never re-derived by a receipt reader, never the
+    /// `reduct::GaugeDirection` type itself (`cfe` does not depend on
+    /// `reduct`; this crate does, so the encoding lives here). Withheld
+    /// (chronicle's gauge cache stays whatever it already was — empty
+    /// before any beat has one) for a line with nothing material to read
+    /// yet, per this codebase's honest-withhold law.
+    fn gauge_step(&mut self) {
+        let (Some(orb), Some(class)) = (self.world.orb(), self.world.star()) else {
+            return;
+        };
+        let occupancy = soc::gauge_occupancy(&orb.elements, class);
+        let mut sample = Vec::with_capacity(occupancy.len() * 17);
+        for (site, direction) in &occupancy {
+            sample.extend_from_slice(&site.row.to_le_bytes());
+            sample.extend_from_slice(&site.col.to_le_bytes());
+            sample.push(direction.index);
+        }
+        self.world.observe_gauge(sample);
+    }
+
     fn research_step(&mut self, book: &Ledger, survives: bool) {
         let Some(receipt) = self.world.chronicle().receipts().last() else {
             return;
@@ -3894,6 +3916,17 @@ impl Polity {
     /// elements; office seats T4/T6; refine converts raw; chemistry
     /// seats labs / catalogs / compounds — all pure NPC.
     pub fn cycle(&mut self, book: &Ledger, registry: &Registry) -> Option<PolitySpec> {
+        // MANIFOLD-1a (TU-1 / G, doc 55 §1/§3): stamp THIS beat's gauge
+        // sample first, before any deed below can close a receipt — every
+        // receipt this beat reads the SAME snapshot (TU-1c: gauge settles
+        // at the beat boundary, never mid-beat). The sample is the SAME
+        // reduce-organ occupancy `soc::observe_direction` already peels
+        // (the civilization's own material self, `G_cognition =
+        // reduct::GaugeDirection`, doc 55 §1 — "already live"), read here
+        // raw rather than re-derived, so the receipt carries the organ's
+        // actual reading. A pre-material line (no orb/star yet) has
+        // nothing to read — withhold, not a manufactured zero.
+        profile::timed("gauge_step", || self.gauge_step());
         profile::timed("drain_inbox", || self.drain_inbox(book));
         profile::timed("build_step", || self.build_step());
         profile::timed("ground_step", || self.ground_step());

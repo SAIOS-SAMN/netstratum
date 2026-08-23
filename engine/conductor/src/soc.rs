@@ -92,21 +92,18 @@ impl DirectionRead {
 /// ledger (id-ascending), `class` its star (for the family projection), and the two
 /// books its captured order and vented entropy. `None` when the line holds no
 /// elements (nothing material to read yet).
-pub fn observe_direction(
+/// The civilization's own material self, laid on a 1×n frame: each held
+/// element is a site, its gauge direction its almanac FAMILY (1..5 -> 0..4,
+/// the ONT projection past the iron coordinate). Shared by `observe_direction`
+/// (the peel reads this occupancy) and the per-beat gauge sample (TU-1 / G:
+/// `MANIFOLD-1a` stamps this SAME occupancy on the beat's receipts, raw — the
+/// reduce organ's actual reading, not a re-derived summary).
+pub fn gauge_occupancy(
     holdings: &[([u8; 32], Ratio)],
     class: cfe::thermal::StarClass,
-    syntropy: &Ratio,
-    entropy: &Ratio,
-) -> Option<DirectionRead> {
-    use reduct::peel::{peel, CellFrame, FullMeasurement, GaugeDirection, Site};
-    if holdings.is_empty() {
-        return None;
-    }
-    let cols = holdings.len();
-    // Each held element is a site; its gauge direction is its almanac FAMILY (1..5
-    // -> 0..4), the ONT projection past the iron coordinate. A 1×n frame is whole by
-    // construction (each cell carried exactly once), so `try_new` admits it.
-    let occupancy: Vec<(Site, GaugeDirection)> = holdings
+) -> Vec<(reduct::peel::Site, reduct::peel::GaugeDirection)> {
+    use reduct::peel::{GaugeDirection, Site};
+    holdings
         .iter()
         .enumerate()
         .map(|(i, (id, _amount))| {
@@ -116,7 +113,23 @@ pub fn observe_direction(
                 GaugeDirection { index: family.saturating_sub(1) },
             )
         })
-        .collect();
+        .collect()
+}
+
+pub fn observe_direction(
+    holdings: &[([u8; 32], Ratio)],
+    class: cfe::thermal::StarClass,
+    syntropy: &Ratio,
+    entropy: &Ratio,
+) -> Option<DirectionRead> {
+    use reduct::peel::{peel, CellFrame, FullMeasurement};
+    if holdings.is_empty() {
+        return None;
+    }
+    let cols = holdings.len();
+    // A 1×n frame is whole by construction (each cell carried exactly once),
+    // so `try_new` admits it.
+    let occupancy = gauge_occupancy(holdings, class);
     let measurement =
         FullMeasurement::try_new(5, CellFrame { rows: 1, cols: cols as u32 }, occupancy).ok()?;
     let cover = peel(&measurement);
