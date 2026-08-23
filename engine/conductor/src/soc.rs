@@ -578,15 +578,29 @@ pub enum Investment {
     Expand,
     /// Synthesize new matter — seat chemistry. Closed by the chemical residual.
     Synthesize,
+    /// Adopt a discipline the line's chronicle has EARNED but not yet taken up
+    /// — a practice already in the fold (seed ∪ minted, `28_VOCABULARY`) this
+    /// line doesn't hold. Closed by the culture γ: how many such practices
+    /// stand unclaimed. Physics still gates the actual adoption (a tempered
+    /// discipline needs its hardship receipts) — the will is topological, the
+    /// same law every other arm already keeps.
+    Culture,
     /// Bank the surplus and raise nothing — the rest/explore default that wins
     /// when no deficit pulls.
     Hoard,
 }
 
 impl Investment {
-    /// The menu, in fold order. `Hoard` is the untilted baseline.
-    pub const MENU: [Investment; 4] =
-        [Investment::Deepen, Investment::Expand, Investment::Synthesize, Investment::Hoard];
+    /// The menu, in fold order. `Hoard` is the untilted baseline and MUST stay
+    /// last — `resolve_investment`'s impossible-zero-weight fallback indexes
+    /// `MENU.len() - 1`.
+    pub const MENU: [Investment; 5] = [
+        Investment::Deepen,
+        Investment::Expand,
+        Investment::Synthesize,
+        Investment::Culture,
+        Investment::Hoard,
+    ];
 }
 
 /// **THE ABUNDANCE WEIGHTS** — the workbench principle carried to the surplus
@@ -602,8 +616,9 @@ pub fn investment_weights(
     cognitive_gamma: u64,
     expansion_gamma: u64,
     synthesis_gamma: u64,
+    culture_gamma: u64,
     convergence: u64,
-) -> [u64; 4] {
+) -> [u64; 5] {
     let lattice = LATTICE as u64;
     let dim = reach.dimension().max(1); // a line always has some reach to spend
     let tilt = |gamma: u64| dim.saturating_mul(lattice.saturating_add(gamma));
@@ -623,6 +638,7 @@ pub fn investment_weights(
         tilt(cognitive_gamma), // Deepen
         tilt(expansion_gamma), // Expand
         tilt(synthesis_gamma), // Synthesize
+        tilt(culture_gamma),   // Culture
         hoard,                 // Hoard — the floor the collective resolve lowers
     ]
 }
@@ -641,11 +657,18 @@ pub fn resolve_investment(
     cognitive_gamma: u64,
     expansion_gamma: u64,
     synthesis_gamma: u64,
+    culture_gamma: u64,
     convergence: u64,
     seed: [u8; 32],
 ) -> Investment {
-    let weights =
-        investment_weights(reach, cognitive_gamma, expansion_gamma, synthesis_gamma, convergence);
+    let weights = investment_weights(
+        reach,
+        cognitive_gamma,
+        expansion_gamma,
+        synthesis_gamma,
+        culture_gamma,
+        convergence,
+    );
     let mut hasher = blake3::Hasher::new();
     hasher.update(&seed);
     hasher.update(b"abundance");

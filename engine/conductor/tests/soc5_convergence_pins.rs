@@ -23,7 +23,7 @@ fn reach() -> AlgebraicRank {
     AlgebraicRank { components: 2, cycles: 1, relations: vec![] }
 }
 
-const HOARD: usize = 3;
+const HOARD: usize = 4;
 
 #[test]
 fn a_covered_economy_converges_on_nothing() {
@@ -57,9 +57,9 @@ fn convergence_lowers_the_hoard_floor_the_collective_commits() {
     // The floor a society at ease rests on (convergence 0) is the untilted
     // `dim·L`; as the collective converges, that floor drops — it banks less and
     // acts more. Full convergence zeroes it: a society of one mind never hoards.
-    let at_ease = investment_weights(&reach(), 0, 0, 0, 0)[HOARD];
-    let focused = investment_weights(&reach(), 0, 0, 0, LATTICE as u64 / 2)[HOARD];
-    let unanimous = investment_weights(&reach(), 0, 0, 0, LATTICE as u64)[HOARD];
+    let at_ease = investment_weights(&reach(), 0, 0, 0, 0, 0)[HOARD];
+    let focused = investment_weights(&reach(), 0, 0, 0, 0, LATTICE as u64 / 2)[HOARD];
+    let unanimous = investment_weights(&reach(), 0, 0, 0, 0, LATTICE as u64)[HOARD];
     assert!(at_ease > focused, "convergence lowers the rest floor");
     assert!(focused > unanimous, "sharper convergence lowers it further");
     assert_eq!(unanimous, 0, "a unanimous society commits its whole surplus");
@@ -69,8 +69,8 @@ fn convergence_lowers_the_hoard_floor_the_collective_commits() {
 fn convergence_never_touches_the_tensioned_acts_only_the_floor() {
     // SOC-5 sets DECISIVENESS, never DIRECTION: the three tensioned weights are
     // identical whatever the convergence — only Hoard moves.
-    let scattered = investment_weights(&reach(), 40, 20, 10, 0);
-    let converged = investment_weights(&reach(), 40, 20, 10, LATTICE as u64 / 2);
+    let scattered = investment_weights(&reach(), 40, 20, 10, 0, 0);
+    let converged = investment_weights(&reach(), 40, 20, 10, 0, LATTICE as u64 / 2);
     assert_eq!(scattered[0], converged[0], "Deepen unmoved by convergence");
     assert_eq!(scattered[1], converged[1], "Expand unmoved by convergence");
     assert_eq!(scattered[2], converged[2], "Synthesize unmoved by convergence");
@@ -85,10 +85,10 @@ fn a_converged_society_hoards_less_than_a_scattered_one() {
     let mut hoard_at_ease = 0;
     let mut hoard_converged = 0;
     for n in 0..96u8 {
-        if resolve_investment(&reach(), 4, 4, 4, 0, seed(n)) == Investment::Hoard {
+        if resolve_investment(&reach(), 4, 4, 4, 0, 0, seed(n)) == Investment::Hoard {
             hoard_at_ease += 1;
         }
-        if resolve_investment(&reach(), 4, 4, 4, LATTICE as u64, seed(n)) == Investment::Hoard {
+        if resolve_investment(&reach(), 4, 4, 4, 0, LATTICE as u64, seed(n)) == Investment::Hoard {
             hoard_converged += 1;
         }
     }

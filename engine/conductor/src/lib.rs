@@ -2029,7 +2029,7 @@ impl Polity {
     /// the draw picks the cure. EXPANSION reads a different axis — the spatial
     /// room left in the star system. No affordability enters: these are tensions,
     /// not budgets.
-    fn abundance_tensions(&self) -> (u64, u64, u64) {
+    fn abundance_tensions(&self) -> (u64, u64, u64, u64) {
         use cfe::almanac::ScienceDiscipline::Chem;
         const FRONTIER: usize = 3; // compose-depth ceiling; cognitive_capacity caps here
         const SYSTEM_CAP: u64 = 4; // a star system holds a handful of worlds (expand_step)
@@ -2053,7 +2053,28 @@ impl Polity {
         // EXPAND: the spatial room left in the system, as a lattice fraction.
         let orbs = self.world.committed().orbs.len() as u64;
         let expansion = SYSTEM_CAP.saturating_sub(orbs).saturating_mul(l) / SYSTEM_CAP;
-        (cognitive, expansion, synthesis)
+        // CULTURE — the practices this line's own chronicle has EARNED into the
+        // fold (seed ∪ minted, `28_VOCABULARY`) but not yet taken up. Adoption
+        // itself stays physics-gated (a tempered discipline still needs its
+        // hardship receipts, `adopt_practice_as`) — this tension is only the
+        // WILL: how much unclaimed discipline stands in the fold, capped like
+        // every other γ.
+        let culture = self.earnable_practices().len() as u64;
+        let culture = culture.min(l);
+        (cognitive, expansion, synthesis, culture)
+    }
+
+    /// The fold's practices this line has not yet adopted — the raw material
+    /// CULTURE's tension reads and `invest_culture` draws from. Order is the
+    /// fold's own (append order, `28_VOCABULARY`), never re-sorted, so the
+    /// seed-draw below is the only source of which one a beat picks.
+    fn earnable_practices(&self) -> Vec<u8> {
+        let held = &self.world.committed().practices;
+        cfe::vocabulary::fold(self.world.chronicle(), cfe::vocabulary::Axis::Practice)
+            .into_iter()
+            .map(|entry| entry.code)
+            .filter(|code| !held.contains(code))
+            .collect()
     }
 
     /// **THE ABUNDANCE STEP** (COG-EMERGENCE-2) — above the survival floor
@@ -2078,7 +2099,7 @@ impl Polity {
         // rejected, not a famine). Measurement (EMERGENCE-2b) confirmed: with the
         // base chem seat kept in survival, the fold needs no leisure gate — the
         // settlement law holds and cognition seats at baseline parity.
-        let (cognitive, expansion, synthesis) = self.abundance_tensions();
+        let (cognitive, expansion, synthesis, culture) = self.abundance_tensions();
         // `reach` is the line's survey depth — its accumulated history —
         // perturbing the draw. It scales every weight equally, so it never biases
         // WHICH act, only how this line's own digest lands.
@@ -2103,7 +2124,9 @@ impl Polity {
         // deficit focuses the surplus that closes it, and a closed deficit
         // dissolves the caste that formed on it.
         let convergence = soc::caste_convergence(&self.caste_partition());
-        match soc::resolve_investment(&reach, cognitive, expansion, synthesis, convergence, seed) {
+        match soc::resolve_investment(
+            &reach, cognitive, expansion, synthesis, culture, convergence, seed,
+        ) {
             soc::Investment::Deepen => self.invest_cognition(primary, seed),
             soc::Investment::Expand => self.invest_expansion(),
             soc::Investment::Synthesize => {
@@ -2111,8 +2134,31 @@ impl Polity {
                     .world
                     .seat_science_as(self.automaton, primary, cfe::almanac::ScienceDiscipline::Chem);
             }
+            soc::Investment::Culture => self.invest_culture(seed),
             soc::Investment::Hoard => {}
         }
+    }
+
+    /// The CULTURE act — take up one earned-but-unclaimed practice from the
+    /// fold. Which one is a seed-draw over `earnable_practices()` (the same
+    /// chronicle-digest discipline every other draw in this file uses), so two
+    /// lines with the same unclaimed set but different histories pick
+    /// differently. NO pre-filtering by the tempering gate: the will names a
+    /// practice, `adopt_practice_as` is the physics that refuses an untempered
+    /// one AFTER the choice — the same law `invest_cognition`'s unaffordable
+    /// seat already keeps.
+    fn invest_culture(&mut self, seed: [u8; 32]) {
+        let earnable = self.earnable_practices();
+        if earnable.is_empty() {
+            return;
+        }
+        let mut hasher = blake3::Hasher::new();
+        hasher.update(&seed);
+        hasher.update(b"culture");
+        let draw = *hasher.finalize().as_bytes();
+        let index = (u64::from_le_bytes(draw[..8].try_into().expect("8 bytes")) as usize)
+            % earnable.len();
+        let _ = self.world.adopt_practice_as(self.automaton, earnable[index]);
     }
 
     /// The DEEPEN act — seat one unseated hard-cognitive science (Math, Physics,
