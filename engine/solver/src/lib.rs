@@ -52,7 +52,9 @@ pub use solver_verify::{
 pub use derive::{derive, Candidate};
 pub use need::{Family, Hunger, Need};
 pub use selfmap::{consilience, knowledge_map, knowledge_order, Consilience, SelfMap};
-pub use think::{hear, hear_word, measure_grid, think_task, Heard, SolveRead};
+pub use think::{
+    hear, hear_word, measure_grid, measure_volume, think_task, think_volume_task, Heard, SolveRead,
+};
 pub use survival::{ration_reads, think_survival, RationRead, SurvivalBook, SurvivalDeed};
 // N-I4 — the cognitive basin's element, re-exported for the vessel layer
 // (`conductor` grows a `Vec<Crystal>` per line and passes it to `think_task`).

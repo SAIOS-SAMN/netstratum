@@ -54,6 +54,7 @@ use ledger::registry::{
 use ledger::{Directive, Disposition, Ledger};
 use physics::Beacon;
 use solver::{forge_task, Difficulty, Hunger, Need, SolveRead};
+use solver::{forge_volume, think_volume_task, VolDifficulty};
 
 use std::path::Path;
 
@@ -3445,15 +3446,38 @@ impl Polity {
             // The book did not close — withhold the beat, call no think_task.
             None
         } else if self.spec.civilization.perception == "volumetric" {
-            // THE VOLUMETRIC SEAT IS OFF THE BEAT (N-I4, THE INTELLIGENCE PORT).
-            // `solve_volume` is a SECOND search-thinker, and the port admits
-            // exactly one organ. Perception is a LENS on `measure_grid`, and the
-            // 3-form lens — a volumetric peel into `reduct::FullMeasurement` — is
-            // not built this landing. So a volumetric line WITHHOLDS rather than
-            // reach through a search-shaped volume path left "until later": an
-            // honest rest (the `None` arm declines the trajectory) until the
-            // volumetric transducer lands. `forge_volume`/`solve_volume` remain
-            // in the crate; they are simply no longer in this stack.
+            // VOLUMETRIC-1d — THE VOLUMETRIC SEAT, WIRED. `think_volume_task`
+            // is the SAME reduce-organ discipline as `think_task` (peel, glue
+            // through `reduct::think`, render, seal — no search; `solve_volume`
+            // stays the retired prover-side sweep, never called live). The
+            // SAME N-I7 leisure gate applies — the look's price is a function
+            // of "one degree-1 observation" (`Self::observe_price()`), not of
+            // the seat's geometry, so a volumetric line pays exactly what a
+            // planar one does for the same look.
+            //
+            // MINT/WORD-MINT DEFERRED, deliberately, not by oversight: the wire
+            // machinery for a volumetric PoUW deed already exists whole
+            // (`WorkClass::Volumetric(VolDifficulty)`, `encode_volume_work` —
+            // `mint_discovery_as` takes raw bytes, so it is reachable), but the
+            // word-mint/vocabulary system (`solver::mint::Library`, `consider`,
+            // `sweep_vocabulary`) is typed to the planar `Program`/`Op`
+            // exclusively — extending it to `VProgram` is its own typed-system
+            // landing. This wiring's own measured goal does not need it: `think`
+            // grows the basin on ANY wall (Pin B, N-I2), Solved or not — so
+            // `self.grown` (the vessel cognition COG-ATLAS/ΔH reads) fills for a
+            // volumetric line exactly the way it does for a planar one, which is
+            // the actual thing #173 exists to unblock.
+            let orb = cfe::world::FIRST_ORB;
+            let price = Self::observe_price();
+            if self.world.leisure_bank_of(orb) >= price {
+                self.world.settle_leisure(orb, -price);
+                let vessel = self.automaton;
+                self.absorb_autic(vessel);
+                self.practise_autic_wall(vessel);
+                let vdifficulty = VolDifficulty::level(self.level);
+                let vtask = forge_volume(digest, vdifficulty);
+                let _ = think_volume_task(&vtask, self.grown.entry(vessel).or_default());
+            }
             None
         } else {
             let difficulty = Difficulty::level(self.level);
