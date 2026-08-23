@@ -585,6 +585,16 @@ pub enum Investment {
     /// discipline needs its hardship receipts) — the will is topological, the
     /// same law every other arm already keeps.
     Culture,
+    /// **RCP-2 F4** — raise an emergent recipe (`recipe::discover` →
+    /// `build_recipe_as`): a hashed `∏ elements → role` transformation from
+    /// the line's own held almanac, gated by topological reach, never a
+    /// `ZoneKind`. Closed by the craft γ: how many of the five universal
+    /// roles (`morphogen::ROLE_DIM`) the line's almanac COULD fill but hasn't
+    /// yet raised a recipe for. A FED line grows its doing-layer
+    /// proactively — the discovery search itself stays honest (a role no
+    /// held element can fill draws nothing, an honest hole, not a forced
+    /// pick).
+    Craft,
     /// Bank the surplus and raise nothing — the rest/explore default that wins
     /// when no deficit pulls.
     Hoard,
@@ -594,11 +604,12 @@ impl Investment {
     /// The menu, in fold order. `Hoard` is the untilted baseline and MUST stay
     /// last — `resolve_investment`'s impossible-zero-weight fallback indexes
     /// `MENU.len() - 1`.
-    pub const MENU: [Investment; 5] = [
+    pub const MENU: [Investment; 6] = [
         Investment::Deepen,
         Investment::Expand,
         Investment::Synthesize,
         Investment::Culture,
+        Investment::Craft,
         Investment::Hoard,
     ];
 }
@@ -617,8 +628,9 @@ pub fn investment_weights(
     expansion_gamma: u64,
     synthesis_gamma: u64,
     culture_gamma: u64,
+    craft_gamma: u64,
     convergence: u64,
-) -> [u64; 5] {
+) -> [u64; 6] {
     let lattice = LATTICE as u64;
     let dim = reach.dimension().max(1); // a line always has some reach to spend
     let tilt = |gamma: u64| dim.saturating_mul(lattice.saturating_add(gamma));
@@ -639,6 +651,7 @@ pub fn investment_weights(
         tilt(expansion_gamma), // Expand
         tilt(synthesis_gamma), // Synthesize
         tilt(culture_gamma),   // Culture
+        tilt(craft_gamma),     // Craft
         hoard,                 // Hoard — the floor the collective resolve lowers
     ]
 }
@@ -658,6 +671,7 @@ pub fn resolve_investment(
     expansion_gamma: u64,
     synthesis_gamma: u64,
     culture_gamma: u64,
+    craft_gamma: u64,
     convergence: u64,
     seed: [u8; 32],
 ) -> Investment {
@@ -667,6 +681,7 @@ pub fn resolve_investment(
         expansion_gamma,
         synthesis_gamma,
         culture_gamma,
+        craft_gamma,
         convergence,
     );
     let mut hasher = blake3::Hasher::new();

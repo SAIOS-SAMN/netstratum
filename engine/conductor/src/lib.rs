@@ -2029,7 +2029,7 @@ impl Polity {
     /// the draw picks the cure. EXPANSION reads a different axis — the spatial
     /// room left in the star system. No affordability enters: these are tensions,
     /// not budgets.
-    fn abundance_tensions(&self) -> (u64, u64, u64, u64) {
+    fn abundance_tensions(&self) -> (u64, u64, u64, u64, u64) {
         use cfe::almanac::ScienceDiscipline::{Chem, Math, Physics, Research};
         const FRONTIER: usize = 3; // compose-depth ceiling; cognitive_capacity caps here
         const SYSTEM_CAP: u64 = 4; // a star system holds a handful of worlds (expand_step)
@@ -2076,7 +2076,16 @@ impl Polity {
         // every other γ.
         let culture = self.earnable_practices().len() as u64;
         let culture = culture.min(l);
-        (cognitive, expansion, synthesis, culture)
+        // CRAFT (RCP-2 F4) — the doing-layer's own unclaimed headroom: how
+        // many of the five universal roles this line's held almanac could
+        // fill (`recipe::discover`) but hasn't yet raised a recipe for.
+        // Reads the SAME "unclaimed but earnable" shape Culture already
+        // uses, applied to the material doing-layer instead of vocabulary —
+        // a role no held element can fill never counts (the discovery
+        // search itself stays honest).
+        let craft = self.craftable_roles().len() as u64;
+        let craft = craft.min(l);
+        (cognitive, expansion, synthesis, culture, craft)
     }
 
     /// The fold's practices this line has not yet adopted — the raw material
@@ -2089,6 +2098,45 @@ impl Polity {
             .into_iter()
             .map(|entry| entry.code)
             .filter(|code| !held.contains(code))
+            .collect()
+    }
+
+    /// This line's own species manifold (metabolism archetype) and topological
+    /// reach, as `recipe::discover` needs them — the SAME `civ_reach`-derived
+    /// `AlgebraicRank` shape `abundance_step` already builds for the resolver's
+    /// own `reach` argument, kept local here since `discover` wants it doubly
+    /// (once to size the tension, again inside `invest_craft` to act on it).
+    fn species_and_reach(&self) -> (cfe::morphogen::Metabolism, soc::AlgebraicRank) {
+        let species = cfe::morphogen::archetype_named(&self.spec.civilization.metabolism);
+        let reach = soc::AlgebraicRank {
+            components: (self.world.civ_reach() as u64).max(1),
+            cycles: 0,
+            relations: Vec::new(),
+        };
+        (species, reach)
+    }
+
+    /// The universal roles (`morphogen::FOOD..SINK`) this line's held almanac
+    /// could fill via `recipe::discover` but hasn't yet raised a recipe for —
+    /// the raw material CRAFT's tension reads and `invest_craft` draws from.
+    /// A role the almanac cannot fill (no held element projects into it) is an
+    /// honest hole, never counted — `discover` itself is the single source of
+    /// truth on workability, never re-derived here.
+    fn craftable_roles(&self) -> Vec<usize> {
+        let held: Vec<[u8; 32]> =
+            self.world.committed().prospects.iter().map(|p| p.element).collect();
+        if held.is_empty() {
+            return Vec::new();
+        }
+        let built: std::collections::HashSet<usize> =
+            cfe::vocabulary::recipes_built(self.world.chronicle())
+                .into_iter()
+                .map(|r| r.role)
+                .collect();
+        let (species, reach) = self.species_and_reach();
+        (0..cfe::morphogen::ROLE_DIM)
+            .filter(|role| !built.contains(role))
+            .filter(|&role| recipe::discover(role, &held, &species, &reach).is_some())
             .collect()
     }
 
@@ -2114,7 +2162,7 @@ impl Polity {
         // rejected, not a famine). Measurement (EMERGENCE-2b) confirmed: with the
         // base chem seat kept in survival, the fold needs no leisure gate — the
         // settlement law holds and cognition seats at baseline parity.
-        let (cognitive, expansion, synthesis, culture) = self.abundance_tensions();
+        let (cognitive, expansion, synthesis, culture, craft) = self.abundance_tensions();
         // `reach` is the line's survey depth — its accumulated history —
         // perturbing the draw. It scales every weight equally, so it never biases
         // WHICH act, only how this line's own digest lands.
@@ -2140,7 +2188,7 @@ impl Polity {
         // dissolves the caste that formed on it.
         let convergence = soc::caste_convergence(&self.caste_partition());
         match soc::resolve_investment(
-            &reach, cognitive, expansion, synthesis, culture, convergence, seed,
+            &reach, cognitive, expansion, synthesis, culture, craft, convergence, seed,
         ) {
             soc::Investment::Deepen => self.invest_cognition(primary, seed),
             soc::Investment::Expand => self.invest_expansion(),
@@ -2150,6 +2198,7 @@ impl Polity {
                     .seat_science_as(self.automaton, primary, cfe::almanac::ScienceDiscipline::Chem);
             }
             soc::Investment::Culture => self.invest_culture(seed),
+            soc::Investment::Craft => self.invest_craft(primary, seed),
             soc::Investment::Hoard => {}
         }
     }
@@ -2183,6 +2232,40 @@ impl Polity {
         let index = (u64::from_le_bytes(draw[..8].try_into().expect("8 bytes")) as usize)
             % earnable.len();
         let _ = self.world.adopt_practice_as(self.automaton, earnable[index]);
+    }
+
+    /// **THE CRAFT ACT** (RCP-2 F4) — raise one earned-but-unbuilt recipe:
+    /// which ROLE is a seed-draw over `craftable_roles()` (the same
+    /// chronicle-digest discipline every other draw in this file uses), then
+    /// `recipe::discover` names the exact transformation (which held element,
+    /// how much it yields) and `build_recipe_as` raises it. No pre-filtering
+    /// beyond `craftable_roles()`'s own honesty check — a role the almanac
+    /// truly cannot fill was never a candidate, so `discover` inside here
+    /// always succeeds for a role this same beat's tension already vetted.
+    fn invest_craft(&mut self, primary: u64, seed: [u8; 32]) {
+        let roles = self.craftable_roles();
+        if roles.is_empty() {
+            return;
+        }
+        let mut hasher = blake3::Hasher::new();
+        hasher.update(&seed);
+        hasher.update(b"craft");
+        let draw = *hasher.finalize().as_bytes();
+        let index =
+            (u64::from_le_bytes(draw[..8].try_into().expect("8 bytes")) as usize) % roles.len();
+        let role = roles[index];
+        let held: Vec<[u8; 32]> =
+            self.world.committed().prospects.iter().map(|p| p.element).collect();
+        let (species, reach) = self.species_and_reach();
+        if let Some(minted) = recipe::discover(role, &held, &species, &reach) {
+            let _ = self.world.build_recipe_as(
+                self.automaton,
+                primary,
+                minted.inputs,
+                minted.role,
+                minted.yield_of_role,
+            );
+        }
     }
 
     /// **INVENT A PRACTICE** — mint a new discipline into THIS line's own

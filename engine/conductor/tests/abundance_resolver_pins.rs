@@ -25,17 +25,19 @@ const DEEPEN: usize = 0;
 const EXPAND: usize = 1;
 const SYNTHESIZE: usize = 2;
 const CULTURE: usize = 3;
-const HOARD: usize = 4;
+const CRAFT: usize = 4;
+const HOARD: usize = 5;
 
 #[test]
 fn at_ease_the_menu_is_uniform_the_line_explores() {
     // No tension anywhere ⇒ every act (including Hoard, the untilted floor)
     // weighs the same. The draw is a uniform explore, not a fixed default.
-    let w = investment_weights(&reach(), 0, 0, 0, 0, 0);
+    let w = investment_weights(&reach(), 0, 0, 0, 0, 0, 0);
     assert_eq!(w[DEEPEN], w[HOARD]);
     assert_eq!(w[EXPAND], w[HOARD]);
     assert_eq!(w[SYNTHESIZE], w[HOARD]);
     assert_eq!(w[CULTURE], w[HOARD]);
+    assert_eq!(w[CRAFT], w[HOARD]);
     assert!(w[HOARD] > 0, "a line always has reach to spend");
 }
 
@@ -44,9 +46,9 @@ fn a_uniform_menu_reaches_every_act_it_does_not_collapse_to_one() {
     // EXPLORE, witnessed: at ease, sweeping the line's histories reaches every
     // act — the surplus choice is a genuine draw over the manifold, not an
     // authored winner. (Two civs, same ease, different builds.)
-    let mut seen = [false; 5];
+    let mut seen = [false; 6];
     for n in 0..64u8 {
-        let act = resolve_investment(&reach(), 0, 0, 0, 0, 0, seed(n));
+        let act = resolve_investment(&reach(), 0, 0, 0, 0, 0, 0, seed(n));
         seen[Investment::MENU.iter().position(|a| *a == act).unwrap()] = true;
     }
     assert!(seen.iter().all(|&s| s), "a uniform menu must reach every act, {seen:?}");
@@ -55,36 +57,41 @@ fn a_uniform_menu_reaches_every_act_it_does_not_collapse_to_one() {
 #[test]
 fn a_cognitive_tension_leans_the_menu_toward_deepening() {
     // The cognitive γ tilts ONLY Deepen; the others stay at the floor.
-    let w = investment_weights(&reach(), 40, 0, 0, 0, 0);
+    let w = investment_weights(&reach(), 40, 0, 0, 0, 0, 0);
     assert!(w[DEEPEN] > w[HOARD], "the void pulls the mind's act above the floor");
     assert_eq!(w[EXPAND], w[HOARD], "an untilted act stays at the floor");
     assert_eq!(w[SYNTHESIZE], w[HOARD]);
     assert_eq!(w[CULTURE], w[HOARD]);
+    assert_eq!(w[CRAFT], w[HOARD]);
 }
 
 #[test]
 fn the_lean_rises_monotonically_with_the_tension() {
     // Deeper void ⇒ heavier pull toward Deepen — a continuous tension, not a
     // threshold. (Monotone in the γ, exactly like the zone tilt.)
-    let mild = investment_weights(&reach(), 10, 0, 0, 0, 0)[DEEPEN];
-    let sharp = investment_weights(&reach(), 100, 0, 0, 0, 0)[DEEPEN];
+    let mild = investment_weights(&reach(), 10, 0, 0, 0, 0, 0)[DEEPEN];
+    let sharp = investment_weights(&reach(), 100, 0, 0, 0, 0, 0)[DEEPEN];
     assert!(sharp > mild, "a sharper void leans harder toward deepening");
 }
 
 #[test]
 fn each_tension_leans_its_own_act() {
-    // The four tensions are independent axes — each raises only its act.
-    let expand = investment_weights(&reach(), 0, 40, 0, 0, 0);
+    // The five tensions are independent axes — each raises only its act.
+    let expand = investment_weights(&reach(), 0, 40, 0, 0, 0, 0);
     assert!(expand[EXPAND] > expand[HOARD]);
     assert_eq!(expand[DEEPEN], expand[HOARD]);
 
-    let synth = investment_weights(&reach(), 0, 0, 40, 0, 0);
+    let synth = investment_weights(&reach(), 0, 0, 40, 0, 0, 0);
     assert!(synth[SYNTHESIZE] > synth[HOARD]);
     assert_eq!(synth[DEEPEN], synth[HOARD]);
 
-    let culture = investment_weights(&reach(), 0, 0, 0, 40, 0);
+    let culture = investment_weights(&reach(), 0, 0, 0, 40, 0, 0);
     assert!(culture[CULTURE] > culture[HOARD]);
     assert_eq!(culture[DEEPEN], culture[HOARD]);
+
+    let craft = investment_weights(&reach(), 0, 0, 0, 0, 40, 0);
+    assert!(craft[CRAFT] > craft[HOARD]);
+    assert_eq!(craft[DEEPEN], craft[HOARD]);
 }
 
 #[test]
@@ -94,10 +101,10 @@ fn two_histories_diverge_on_the_same_surplus() {
     // the outcome is NOT a pure function of the situation: different lines make
     // different choices. If a single winner always dominated, this would be a
     // gate, not a draw.
-    let mut seen = [false; 5];
+    let mut seen = [false; 6];
     for n in 0..32u8 {
         // A non-degenerate menu (Deepen tilted, but the floor still competes).
-        let act = resolve_investment(&reach(), 20, 0, 0, 0, 0, seed(n));
+        let act = resolve_investment(&reach(), 20, 0, 0, 0, 0, 0, seed(n));
         seen[Investment::MENU.iter().position(|a| *a == act).unwrap()] = true;
     }
     let distinct = seen.iter().filter(|&&s| s).count();
@@ -115,7 +122,7 @@ fn the_resolver_consults_no_budget_the_will_is_topological() {
     let mut deepen = 0;
     for n in 0..64u8 {
         // γ far above the lattice floor ⇒ Deepen dominates the mass.
-        if resolve_investment(&reach(), 10_000, 0, 0, 0, 0, seed(n)) == Investment::Deepen {
+        if resolve_investment(&reach(), 10_000, 0, 0, 0, 0, 0, seed(n)) == Investment::Deepen {
             deepen += 1;
         }
     }
