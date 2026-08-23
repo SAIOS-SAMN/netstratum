@@ -134,9 +134,16 @@ fn the_joule_runway_defers_the_frost() {
     // (`ration_source_zone` only ever returns Habitat or Extractor) —
     // the "sink charter" assertion tested dead functionality and is
     // dropped, not re-pinned.
+    //
+    // RE-PINNED 2026-08-23 (again, same beat): #88 gave the Deepen tension a
+    // second, capacity-scaled consumer (`abundance_tensions`) so it no longer
+    // dies the instant one hard science seats — it now competes against Expand
+    // for longer, so the mesic control's 40-beat plateau measures one zone
+    // lower (2, not 3). The invariants this pin actually guards — the Frost
+    // freeze-locks at 1, and Frost < mesic — are untouched.
     assert_eq!(zones(&frost), 1, "the Frost freeze-locks at its first zone, its runway spent");
     assert!(
-        zones(&mesic) >= 3,
+        zones(&mesic) >= 2,
         "the mesic control kept building: {}",
         zones(&mesic)
     );

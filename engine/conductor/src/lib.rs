@@ -2030,15 +2030,30 @@ impl Polity {
     /// room left in the star system. No affordability enters: these are tensions,
     /// not budgets.
     fn abundance_tensions(&self) -> (u64, u64, u64, u64) {
-        use cfe::almanac::ScienceDiscipline::Chem;
+        use cfe::almanac::ScienceDiscipline::{Chem, Math, Physics, Research};
         const FRONTIER: usize = 3; // compose-depth ceiling; cognitive_capacity caps here
         const SYSTEM_CAP: u64 = 4; // a star system holds a handful of worlds (expand_step)
         let l = civic::LATTICE as u64;
         let primary = cfe::world::FIRST_ORB;
         let ext = self.civic_peel().map(|p| civic::residual_extent(&p)).unwrap_or(0);
-        // DEEPEN: the void weighed against the mind's remaining depth.
+        // DEEPEN: the void weighed against the mind's remaining depth. The base
+        // γ saturates at the FRONTIER (by design — the no-overfit ceiling), but
+        // that saturation triggers the instant ONE hard science seats, long
+        // before the Deepen ACT itself runs out of room (`invest_cognition` can
+        // still seat/deepen the other two, or elevate any of the three past rank
+        // 1). THE SECOND, CAPACITY-SCALED CONSUMER `cognitive_capacity`'s comment
+        // calls for: while any hard-cognitive science stands seated but below
+        // its own `max_rank()`, the same material void keeps tilting Deepen —
+        // the exact shape `synthesis` already uses to deepen Chem past its base
+        // seat, applied by symmetry to Math/Physics/Research.
         let capacity = self.world.cognitive_capacity(primary);
-        let cognitive = civic::cognitive_deficit(ext, capacity, FRONTIER).min(l);
+        let base_deficit = civic::cognitive_deficit(ext, capacity, FRONTIER);
+        let deepenable = [Math, Physics, Research].into_iter().any(|d| {
+            let r = self.world.science_rank(primary, d);
+            r >= 1 && r < d.max_rank()
+        });
+        let beyond_frontier = if deepenable { ext.min(l) } else { 0 };
+        let cognitive = (base_deficit + beyond_frontier).min(l);
         // SYNTHESIZE: the DISCRETIONARY deepening of chemistry — advancing the lab
         // BEYOND the survival base seat (chemistry_step seats rank 1 as survival
         // infra). Once the lab stands, the SAME material void can be cured further
@@ -2237,24 +2252,34 @@ impl Polity {
         );
     }
 
-    /// The DEEPEN act — seat one unseated hard-cognitive science (Math, Physics,
-    /// Research), the sub-draw weighted by the species' seat affinity (Primary 4 ·
-    /// Secondary 2 · Alien 1). Called only once the abundance resolver has CHOSEN
-    /// to deepen; the seat pays its bill or is refused (unaffordable ⇒ the line
-    /// willed a bigger brain it cannot yet build). Was `cognitive_investment_step`
-    /// — its leisure/famine/capacity gates dissolved into the abundance tension.
+    /// The DEEPEN act — seat one hard-cognitive science (Math, Physics, Research)
+    /// that has headroom, the sub-draw weighted by the species' seat affinity
+    /// (Primary 4 · Secondary 2 · Alien 1). Called only once the abundance
+    /// resolver has CHOSEN to deepen; the seat pays its bill or is refused
+    /// (unaffordable ⇒ the line willed a bigger brain it cannot yet build). Was
+    /// `cognitive_investment_step` — its leisure/famine/capacity gates dissolved
+    /// into the abundance tension.
+    ///
+    /// **BEYOND THE BASE SEAT**: the candidate set is any discipline below its
+    /// OWN `max_rank()`, not just the unseated ones — `seat_science_as` already
+    /// elevates rank on a repeat call (1→2), so the same action that seats a
+    /// science from cold also deepens one already standing, exactly mirroring
+    /// how Chemistry's `Synthesize` arm deepens `chem_rank` past its base seat
+    /// (`abundance_tensions`). Without this, Deepen's own action space died the
+    /// moment all three sciences reached rank 1, independent of any tension math
+    /// — the plateau `cognitive_capacity`'s doc comment names.
     fn invest_cognition(&mut self, primary: u64, seed: [u8; 32]) {
         use cfe::almanac::ScienceDiscipline::{Math, Physics, Research};
         let met = self.world.genesis().map(|g| g.metabolism).unwrap_or(2);
         let clade = Some(self.world.rejuvenation_clade());
-        let unseated: Vec<cfe::almanac::ScienceDiscipline> = [Math, Physics, Research]
+        let open: Vec<cfe::almanac::ScienceDiscipline> = [Math, Physics, Research]
             .into_iter()
-            .filter(|d| self.world.science_rank(primary, *d) < 1)
+            .filter(|d| self.world.science_rank(primary, *d) < d.max_rank())
             .collect();
-        if unseated.is_empty() {
+        if open.is_empty() {
             return;
         }
-        let weights: Vec<u64> = unseated
+        let weights: Vec<u64> = open
             .iter()
             .map(|d| {
                 let fee = cfe::almanac::science_seat_affinity(met, *d, clade).fee_mult();
@@ -2266,7 +2291,7 @@ impl Polity {
         hasher.update(b"which-science");
         let sub = *hasher.finalize().as_bytes();
         if let Some(i) = soc::partition_draw(&weights, sub) {
-            let _ = self.world.seat_science_as(self.automaton, primary, unseated[i]);
+            let _ = self.world.seat_science_as(self.automaton, primary, open[i]);
         }
     }
 
