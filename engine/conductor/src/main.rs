@@ -103,6 +103,9 @@ fn main() {
             format!("running {cycles} heartbeats")
         }
     );
+    // Block-buffered stdout under systemd otherwise sits on this line for
+    // minutes (measured 8+ minutes live) — see the flush note further down.
+    let _ = std::io::Write::flush(&mut std::io::stdout());
 
     // OPERATOR CONTROLS (2026-07-30 ruling): `<var>/conductor.ctl`,
     // polled each beat — the player's hand on the autonomous board.
@@ -467,6 +470,14 @@ fn main() {
                 })
                 .collect();
             println!("beat {beat}: {}", summary.join("  "));
+            // Rust's stdout is BLOCK buffered once it isn't a TTY (systemd pipes
+            // it to journald) — unlike every status eprintln! elsewhere in this
+            // codebase, which flushes immediately. Confirmed live: the boot
+            // line above this block sat unflushed for 8+ minutes under
+            // systemd. Force it out so an external reader (mycelium's
+            // observe.py) sees this beat's line within the beat, not whenever
+            // an unrelated stdout write happens to fill the buffer.
+            let _ = std::io::Write::flush(&mut std::io::stdout());
         }
         // Task #8: the opt-in phase profile (NETSTRATUM_PROFILE=1).
         for (name, spent) in conductor::profile::drain() {
