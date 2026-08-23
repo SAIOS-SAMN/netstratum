@@ -9,18 +9,24 @@
 //! against the live lists. Copying the numbers down would be the
 //! two-truths defect; stating and proving is not.
 //!
-//! **THIS FILE IS RED, PRE-EXISTING (2026-08-13 doc-audit finding, not
-//! caused by this pass).** `STATIONS` grew 4 → 10 (Wave-1, 2026-08-07,
-//! `RING_ARITIES` updated to match) then 10 → 16 (T10-T15, 2026-08-08,
-//! `RING_ARITIES` NOT updated — the drift these tests exist to catch,
-//! uncaught until now) then 16 → 18 (elder/ancient, T16-T17, this pass).
-//! Fixing it means bumping `ratio::TURN_SLOTS` (60 → 180), which is
-//! load-bearing far outside this crate — `solver-verify/src/shell.rs`'s
-//! orbital shell geometry and `shell_pins.rs` hard-assert `TURN_SLOTS ==
-//! 60` — a cross-cutting change out of this task's scope. Left red and
-//! named rather than silently worked around; owed as its own task.
+//! **RESOLVED (ruling 2026-08-23).** `STATIONS` grew 4 → 10 (Wave-1,
+//! 2026-08-07, `RING_ARITIES` updated to match) then 10 → 16 (T10-T15,
+//! 2026-08-08, `RING_ARITIES` NOT updated — the drift these tests exist
+//! to catch) then 16 → 18 (elder/ancient, 2026-08-13). This file went
+//! red naming the fork: bump `TURN_SLOTS` 60 → 180 (cross-cutting —
+//! `solver-verify/src/shell.rs`'s orbital shell geometry and
+//! `shell_pins.rs` hard-assert `TURN_SLOTS == 60`), or drop the
+//! requirement that was never load-bearing for stations. `STATIONS` is
+//! an append-only OFFICE/ROLE taxonomy, not a population partition any
+//! live code lays out on the turn ring (`STATIONS.len()` appeared only
+//! in this file's own arrays, never in a ring-placement call) — unlike
+//! dispositions/metabolisms/perceptions, which the incursion generator
+//! genuinely draws uniformly. Sixty stands on `lcm(3,4,5)` alone now,
+//! the base-60 orbital ring `ratio::TURN_SLOTS` already documents
+//! (twelve exact subdivisions — the reason base 60 has always been
+//! used), unmoved by however many offices the game later names.
 
-use ledger::registry::{DISPOSITIONS, METABOLISMS, PERCEPTIONS, STATIONS};
+use ledger::registry::{DISPOSITIONS, METABOLISMS, PERCEPTIONS};
 
 /// **EVERY CLOSED VOCABULARY'S ARITY IS ONE THE RING ADMITS.**
 ///
@@ -30,13 +36,15 @@ use ledger::registry::{DISPOSITIONS, METABOLISMS, PERCEPTIONS, STATIONS};
 /// is the day `RING_ARITIES` needs the new number.
 #[test]
 fn every_live_vocabulary_divides_the_ring() {
-    let live: [(&str, i64); 5] = [
+    let live: [(&str, i64); 4] = [
         ("dispositions", DISPOSITIONS.len() as i64),
         ("metabolisms", METABOLISMS.len() as i64),
         ("perceptions", PERCEPTIONS.len() as i64),
-        ("stations", STATIONS.len() as i64),
         // PRACTICE-1's five receipted disciplines (in-value codes 1..=5).
         ("practices", 5),
+        // STATIONS is deliberately absent — see the file header: an
+        // append-only office/role taxonomy, never a population
+        // partition any live code lays out on the turn ring.
     ];
     for (name, arity) in live {
         let proof = ratio::divide_ring(ratio::TURN_SLOTS, arity);
@@ -60,7 +68,6 @@ fn the_ring_is_the_least_that_admits_them_all() {
         DISPOSITIONS.len() as i64,
         METABOLISMS.len() as i64,
         PERCEPTIONS.len() as i64,
-        STATIONS.len() as i64,
         5,
     ];
     assert_eq!(
@@ -81,18 +88,17 @@ fn the_ring_is_the_least_that_admits_them_all() {
 
 /// **THE STATED ARITIES ARE THE LIVE ONES, as a SET.**
 ///
-/// `RING_ARITIES` is `{3, 4, 5, 10}`; the vocabularies are 3, 3, 4, 10, 5
-/// (stations grew to 10 with Wave-1 T4–T9). Duplicates do not change an
-/// lcm, so the set is what matters — and this is the witness that the
-/// set is a reading of the tree rather than a guess that happens to
-/// agree.
+/// `RING_ARITIES` is `{3, 4, 5}`; the vocabularies are 3, 3, 4, 5
+/// (stations is deliberately excluded — see the file header). Duplicates
+/// do not change an lcm, so the set is what matters — and this is the
+/// witness that the set is a reading of the tree rather than a guess
+/// that happens to agree.
 #[test]
 fn the_stated_arities_are_the_live_ones() {
     let mut live: Vec<i64> = vec![
         DISPOSITIONS.len() as i64,
         METABOLISMS.len() as i64,
         PERCEPTIONS.len() as i64,
-        STATIONS.len() as i64,
         5,
     ];
     live.sort_unstable();

@@ -154,21 +154,38 @@ pub const fn lcm_through(n: i64) -> i64 {
 ///     3   dispositions   expansionist · empiricist · epicurean
 ///     3   metabolisms    mineral · biotic · plasmic
 ///     4   perceptions    planar · volumetric · harmonic · umbral
-///     4   stations       progenitor · watcher · observer · sovereign
 ///     5   practices      the five receipted disciplines
 /// ```
 ///
-/// The distinct arities are `{3, 4, 5, 10}` and `lcm(3, 4, 5, 10) = 60`.
-/// Wave-1 (2026-08-07) opened stations T4–T9 — the stations vocabulary
-/// grew from 4 to 10, so 10 joins the ring's admitted arities. The lcm
-/// is unchanged (60 already divides by 10); the set is what moved.
+/// The distinct arities are `{3, 4, 5}` and `lcm(3, 4, 5) = 60`.
+///
+/// **STATIONS IS NOT IN THIS SET (ruling 2026-08-23).** `STATIONS`
+/// (`ledger::registry`) is an append-only OFFICE/ROLE taxonomy — T4–T9
+/// (Wave-1, 2026-08-07), then T10–T15 (2026-08-08), then `elder`/
+/// `ancient` (2026-08-13) grew it 4 → 10 → 16 → 18, and it will keep
+/// growing as new offices land. It was folded into this set when it
+/// still happened to divide 60 (at 10); once it grew to 18, `ring_
+/// derivation_pins` caught the drift and named the fork: either bump
+/// `TURN_SLOTS` to `lcm(…, 18) = 180` (cross-cutting — `solver-verify/
+/// src/shell.rs`'s orbital shell geometry and `shell_pins.rs` hard-
+/// assert `TURN_SLOTS == 60`), or recognize the coupling was never
+/// load-bearing for stations in the first place. No production code
+/// positions a station on the turn ring (`STATIONS.len()` appeared
+/// ONLY in this test's own arrays, never in `shell.rs`, never in a
+/// ring-placement call) — unlike dispositions/metabolisms/perceptions,
+/// which the incursion generator DOES draw uniformly over
+/// (`conductor::lib::beacon.uniform_index`), a real (if not yet
+/// ring-positioned) population partition. Sixty already IS the
+/// requirement's own answer for the four vocabularies that remain in
+/// it — the base-60 orbital ring (below) stands on its own, unmoved
+/// by however many offices the game later names.
 ///
 /// **The vocabularies live ABOVE this crate** — `ledger::registry` and
 /// `cfe` both depend on `ratio`, never the reverse — so the arities are
 /// stated here and PINNED against the live vocabularies from up there
 /// (`ring_derivation_pins`). Copying them down would be the two-truths
 /// defect; stating the requirement and proving it matches is not.
-pub const RING_ARITIES: [i64; 4] = [3, 4, 5, 10];
+pub const RING_ARITIES: [i64; 3] = [3, 4, 5];
 
 /// The lcm of a set of arities — the smallest ring admitting them all.
 pub const fn lcm_of(arities: &[i64]) -> i64 {
