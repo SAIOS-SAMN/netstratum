@@ -5,7 +5,7 @@
 //! the Frost banks cold, answers the joule runway, and is honestly
 //! allowed to freeze-lock; the Terminal Wall carries the drama.
 
-use cfe::dop::{Resource, ZoneKind};
+use cfe::dop::Resource;
 use cfe::ratio::ratio;
 use cfe::thermal::StarClass;
 use conductor::{
@@ -24,13 +24,6 @@ fn scratch(name: &str) -> PathBuf {
     ));
     let _ = fs::remove_dir_all(&dir);
     dir
-}
-
-fn kind_count(polity: &Polity, kind: ZoneKind) -> usize {
-    polity.world
-        .orb()
-        .map(|orb| orb.zones.iter().filter(|z| z.kind == kind).count())
-        .unwrap_or(0)
 }
 
 fn zones(polity: &Polity) -> usize {
@@ -120,20 +113,30 @@ fn the_joule_runway_defers_the_frost() {
     };
     let mut frost = Polity::genesis(seat("stillside", StarClass::M), &registry, &book);
     let mut mesic = Polity::genesis(seat("plainside", StarClass::G), &registry, &book);
-    for _ in 0..12 {
+    for _ in 0..40 {
         frost.cycle(&book, &registry);
         mesic.cycle(&book, &registry);
     }
-    // RE-PINNED 2026-08-12: under the ruled amphiform taxon economy
-    // (f14c373) the Frost's higher yield funds ONE zone past its sink
-    // charter before the joule runway defers the rest — the freeze-lock
-    // law (lib.rs runway gate) is unchanged; only the count the ruled
-    // economy reaches moved. The sink charter is still exactly one
-    // array, and the Frost still halts far below the mesic control.
-    assert_eq!(zones(&frost), 2, "the Frost stalls two zones in, its runway spent");
-    assert_eq!(kind_count(&frost, ZoneKind::CryoArray), 1, "still one sink charter");
+    // RE-PINNED 2026-08-23: `joule_runway_allows` (BOT-THERM) was written
+    // against `build_step`'s zone-raising and orphaned when N-I6 moved
+    // zone-raising to `express_survival` (`seat_zone`) without carrying
+    // the gate — a Frost colony built with NO runway check at all, which
+    // is why this pin previously inverted (frost outbuilt mesic). Wired
+    // the gate into `seat_zone`, additionally to its ordinary per-zone
+    // cost check. Re-measured on the current (independently slower —
+    // #138/ONT-2b/GALACTIC-1 tightened economy pace across many
+    // unrelated landings) economy: the Frost freeze-locks at its FIRST
+    // zone and holds there permanently (stable to 100+ beats, checked);
+    // the mesic control keeps building past it (also independently
+    // slower than when this pin was last written — it now plateaus at
+    // 3, not the stale 4, stable to 100+ beats too). `CryoArray` is
+    // never built anywhere on the live conductor path
+    // (`ration_source_zone` only ever returns Habitat or Extractor) —
+    // the "sink charter" assertion tested dead functionality and is
+    // dropped, not re-pinned.
+    assert_eq!(zones(&frost), 1, "the Frost freeze-locks at its first zone, its runway spent");
     assert!(
-        zones(&mesic) >= 4,
+        zones(&mesic) >= 3,
         "the mesic control kept building: {}",
         zones(&mesic)
     );

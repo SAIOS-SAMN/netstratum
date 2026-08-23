@@ -7,7 +7,7 @@
 //! the boundary: what has no receipt does not persist.
 
 use std::fs;
-use std::io::Write;
+use std::io::{Read, Seek, SeekFrom, Write};
 use std::path::Path;
 
 use crate::tlv;
@@ -92,4 +92,102 @@ pub fn sync(chronicle: &Chronicle, path: &Path) -> Result<usize, PersistRefused>
         message: error.to_string(),
     })?;
     Ok(tail.len())
+}
+
+/// **THE SYNC CURSOR** — what THIS PROCESS already proved about a
+/// chronicle file, so a later sync never re-reads or re-verifies the
+/// bytes it already walked. `sync` re-parses and re-digest-chains the
+/// WHOLE on-disk file every call — fine once, ruinous called every
+/// beat over a file that only grows (measured: #157, ~3s/civ/beat by
+/// beat 11, the dominant share of the per-beat floor). The carrier is
+/// append-only and single-writer (the two-writer split NS-5 refuses
+/// elsewhere) — a prefix this process itself wrote and verified in an
+/// earlier beat cannot have changed under it, so there is nothing to
+/// re-prove there. Default is the cold-start cursor (nothing proved
+/// yet), which makes the first `sync_from` call identical to `sync`.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub struct SyncCursor {
+    receipts: usize,
+    bytes: u64,
+}
+
+/// Sync a chronicle to its file, ADDITIONALLY caching how much of it
+/// this process has already proved (`cursor`) so a later call in the
+/// SAME process skips straight to the unread tail — never reloads or
+/// re-verifies the proved prefix. Semantics match `sync` exactly
+/// (same refusals, same append-only law, same divergence safety
+/// against a shortened or tampered TAIL); only the WORK differs. A
+/// cold cursor (`Default`, or a file shorter than what was last
+/// proved — rolled back or replaced under this process) falls back to
+/// the full `sync` once and seeds the cursor from its result.
+pub fn sync_from(
+    chronicle: &Chronicle,
+    path: &Path,
+    cursor: &mut SyncCursor,
+) -> Result<usize, PersistRefused> {
+    let held = chronicle.receipts();
+    let cold = |cursor: &mut SyncCursor| -> Result<usize, PersistRefused> {
+        let appended = sync(chronicle, path)?;
+        let bytes = fs::metadata(path).map(|m| m.len()).unwrap_or(0);
+        *cursor = SyncCursor { receipts: held.len(), bytes };
+        Ok(appended)
+    };
+    if cursor.receipts == 0 || !path.exists() {
+        return cold(cursor);
+    }
+    let mut file = fs::File::open(path).map_err(|error| PersistRefused::Io {
+        message: error.to_string(),
+    })?;
+    let file_len = file.metadata().map(|m| m.len()).map_err(|error| PersistRefused::Io {
+        message: error.to_string(),
+    })?;
+    if file_len < cursor.bytes {
+        // Shorter than what this process already proved — never trust
+        // a shrunk carrier; re-derive the cursor from a full check.
+        return cold(cursor);
+    }
+    file.seek(SeekFrom::Start(cursor.bytes)).map_err(|error| PersistRefused::Io {
+        message: error.to_string(),
+    })?;
+    let mut tail_bytes = Vec::new();
+    file.read_to_end(&mut tail_bytes).map_err(|error| PersistRefused::Io {
+        message: error.to_string(),
+    })?;
+    let mut on_disk_tail = Vec::new();
+    for (frame, (tag, value)) in tlv::records(&tail_bytes).enumerate() {
+        if tag == crate::vrp::RECEIPT_FRAME_TAG || tag == crate::vrp::RECEIPT_FRAME_TAG_V2 {
+            let receipt =
+                Receipt::from_wire(tag, value).ok_or(PersistRefused::Malformed { frame })?;
+            on_disk_tail.push(receipt);
+        }
+    }
+    let proved = cursor.receipts.min(held.len());
+    let held_from_cursor = &held[proved..];
+    if on_disk_tail.len() > held_from_cursor.len() {
+        return Err(PersistRefused::HistoryDiverged { at: proved as u64 });
+    }
+    for (i, stored) in on_disk_tail.iter().enumerate() {
+        if stored != &held_from_cursor[i] {
+            return Err(PersistRefused::HistoryDiverged { at: (proved + i) as u64 });
+        }
+    }
+    let to_write = &held_from_cursor[on_disk_tail.len()..];
+    let mut appended_bytes: u64 = 0;
+    if !to_write.is_empty() {
+        let mut file = fs::OpenOptions::new().append(true).open(path).map_err(|error| {
+            PersistRefused::Io { message: error.to_string() }
+        })?;
+        for receipt in to_write {
+            let wire = receipt.wire_bytes();
+            appended_bytes += wire.len() as u64;
+            file.write_all(&wire).map_err(|error| PersistRefused::Io {
+                message: error.to_string(),
+            })?;
+        }
+        file.flush().map_err(|error| PersistRefused::Io {
+            message: error.to_string(),
+        })?;
+    }
+    *cursor = SyncCursor { receipts: held.len(), bytes: file_len + appended_bytes };
+    Ok(to_write.len())
 }

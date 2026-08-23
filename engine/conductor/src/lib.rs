@@ -969,6 +969,15 @@ pub struct Polity {
     /// is honest — the gate met the deed again — and it is the same
     /// re-verification `chained: 0` already performs.
     reported: usize,
+    /// #157 — this process's proof that the resume carrier
+    /// (`chronicle.tlv`) matches this world up to some point: lets
+    /// `persist_sync` skip re-reading and re-verifying the whole file
+    /// every beat, the dominant share of the per-beat floor on a live
+    /// era (measured ~3s/civ by beat 11, growing every beat since).
+    /// Workspace like `chained`/`stepper`: a RESUMED world starts cold
+    /// (`Default`) and pays one full check on its first beat, exactly
+    /// like today.
+    sync_cursor: cfe::persist::SyncCursor,
 
 }
 
@@ -1249,6 +1258,7 @@ impl Polity {
                         autic_seen: std::collections::BTreeMap::new(),
                         autic_authored: 0,
                         reported: 0,
+            sync_cursor: cfe::persist::SyncCursor::default(),
                         trajectory: Trajectory::Growth,
                         prev_order: None,
                         pop_cohesion_band: None,
@@ -1389,6 +1399,7 @@ impl Polity {
             autic_seen: std::collections::BTreeMap::new(),
             autic_authored: 0,
             reported: 0,
+            sync_cursor: cfe::persist::SyncCursor::default(),
             trajectory: Trajectory::Growth,
             prev_order: None,
             pop_cohesion_band: None,
@@ -2715,10 +2726,28 @@ impl Polity {
 
     /// Seat one zone if a tile is free and its cost is banked (the render gate —
     /// an unaffordable deed is rest). One zone per beat is the metabolic bound.
+    ///
+    /// BOT-THERM (N-I6 follow-up, 2026-08-23): `joule_runway_allows` was
+    /// written against `build_step`'s zone-raising and orphaned when
+    /// N-I6 moved zone-raising here (`express_survival`) without
+    /// carrying the gate — a sub-mesic (Frost) colony built with no
+    /// runway check at all, which is why the runway pin's own frost-
+    /// vs-mesic comparison inverted (a cold colony's PER-ZONE cost
+    /// gate alone is not the same law as its ONE-TICK HEATING BILL
+    /// gate). Checked here, ADDITIONALLY to the ordinary cost gate —
+    /// never in place of it.
     fn seat_zone(&mut self, orb: u64, kind: ZoneKind) {
         let can_pay = kind.cost().into_iter().all(|(res, need)| banked(&self.world, res) >= need);
         if !can_pay {
             return;
+        }
+        if let Some((Regime::Frost, _)) =
+            regime(&self.world, &self.spec.civilization.metabolism)
+        {
+            let zones_now = self.world.orb().map(|o| o.zones.len()).unwrap_or(0);
+            if !joule_runway_allows(&banked(&self.world, Resource::Joule), zones_now) {
+                return;
+            }
         }
         let hab_before = self.world.habitat_count(orb);
         if let Some(tile) = next_free_tile(&self.world) {
@@ -3984,13 +4013,19 @@ impl Polity {
         // the WRITING hand stays refused at the CLI (two writers on
         // one clock is the split-brain NS-5 exists to arbitrate) —
         // intervention still goes through the steward inbox.
-        profile::timed("persist_sync", || {
-            let _ = cfe::persist::sync(
+        // #157 — `sync_from` skips re-reading/re-verifying the prefix
+        // this process already proved in an earlier beat (`sync_cursor`),
+        // reading only the unwritten tail. A cold cursor (first beat)
+        // pays the same full check `sync` always did.
+        let synced_clean = profile::timed("persist_sync", || {
+            cfe::persist::sync_from(
                 self.world.chronicle(),
                 &book
                     .world_dir(&self.spec.world_name)
                     .join("chronicle.tlv"),
-            );
+                &mut self.sync_cursor,
+            )
+            .is_ok()
         });
         // #36 KERNEL-OBSERVED PLAY: the beat chains. The committed
         // state extends this world's arbor at the world clock —
@@ -4005,13 +4040,30 @@ impl Polity {
             let _ = self.chain_beat(book);
         });
         profile::timed("scribe_record", || {
-            let _ = scribe::record(
-            book,
-            &self.spec.world_name,
-            &self.spec.planet,
-                &self.spec.civilization.sigil,
-                &self.world,
-            );
+            // #157 — a clean `sync_from` this SAME beat already proved
+            // chronicle.tlv consistent; `record`'s own divergence check
+            // (`rotate_divergent`) would re-read and re-parse the whole
+            // file again to answer a question just answered. Skip it
+            // only then — `record` stays the correct door whenever the
+            // sync didn't run clean (a fresh/foreign world, or a
+            // refused sync this beat).
+            let _ = if synced_clean {
+                scribe::record_synced(
+                    book,
+                    &self.spec.world_name,
+                    &self.spec.planet,
+                    &self.spec.civilization.sigil,
+                    &self.world,
+                )
+            } else {
+                scribe::record(
+                    book,
+                    &self.spec.world_name,
+                    &self.spec.planet,
+                    &self.spec.civilization.sigil,
+                    &self.world,
+                )
+            };
         });
         newborn
     }

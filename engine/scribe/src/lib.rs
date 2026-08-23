@@ -40,6 +40,36 @@ pub fn record(
 ) -> std::io::Result<()> {
     let dir = book.world_dir(world_name);
     rotate_divergent(&dir, world)?;
+    record_body(&dir, world_name, planet, civilization, world)
+}
+
+/// `record`, minus the divergence check — for a caller that ALREADY
+/// proved this beat's chronicle consistent against the SAME on-disk
+/// file this same process (e.g. a `cfe::persist::sync_from` cursor
+/// that just succeeded). `rotate_divergent` re-reads and re-parses
+/// the whole carrier via `persist::load` to answer a question the
+/// caller's own successful sync already answered — the SECOND half of
+/// #157's measured per-beat floor (the sync itself was the first).
+/// Only safe when the caller can make that guarantee; `record` stays
+/// the correct, self-contained door for everyone else.
+pub fn record_synced(
+    book: &Ledger,
+    world_name: &str,
+    planet: &str,
+    civilization: &str,
+    world: &World,
+) -> std::io::Result<()> {
+    let dir = book.world_dir(world_name);
+    record_body(&dir, world_name, planet, civilization, world)
+}
+
+fn record_body(
+    dir: &std::path::Path,
+    world_name: &str,
+    planet: &str,
+    civilization: &str,
+    world: &World,
+) -> std::io::Result<()> {
     fs::create_dir_all(dir.join("inbox"))?;
     fs::create_dir_all(dir.join("solves"))?;
     let planet_dir = dir.join("planets").join(sanitize(planet));
