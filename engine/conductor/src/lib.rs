@@ -2150,6 +2150,15 @@ impl Polity {
     fn invest_culture(&mut self, seed: [u8; 32]) {
         let earnable = self.earnable_practices();
         if earnable.is_empty() {
+            // CLOSING THE LOOP: this line has adopted every practice its own
+            // fold contains — the earned path alone would leave it idle
+            // forever (the fold's "seed ∪ minted" was, until now, ALWAYS just
+            // "seed": `mint_vocabulary_as`'s only live caller was the
+            // operator's CLI, never a civ's own derivation). If a real void
+            // still stands, invent one — the same "read the residual, tilt
+            // toward closing it" law the whole abundance fold already runs
+            // on, applied to vocabulary itself instead of zones/science.
+            self.invent_practice(seed);
             return;
         }
         let mut hasher = blake3::Hasher::new();
@@ -2159,6 +2168,73 @@ impl Polity {
         let index = (u64::from_le_bytes(draw[..8].try_into().expect("8 bytes")) as usize)
             % earnable.len();
         let _ = self.world.adopt_practice_as(self.automaton, earnable[index]);
+    }
+
+    /// **INVENT A PRACTICE** — mint a new discipline into THIS line's own
+    /// fold, derived from what it has actually lived, never a random draw:
+    /// - the FRICTION (`CHANNEL_TEMPER`) is the line's own weathered hardship
+    ///   count — an invented discipline demands proof of exactly the trial
+    ///   this line has already survived, not an arbitrary number;
+    /// - the BENEFIT (`CHANNEL_DEMURRAGE`) relieves decay in proportion to
+    ///   how deep the still-unspanned residual runs — the same shape the
+    ///   seeded Hoard practice already wears (`CHANNEL_DEMURRAGE` < 1), so
+    ///   an invented discipline is recognizably the SAME kind of thing a
+    ///   progenitor would have authored, not a foreign mechanic.
+    /// Refuses (no-op) when there is no residual to name a discipline after —
+    /// a covered economy has nothing left to invent a cure for.
+    fn invent_practice(&mut self, seed: [u8; 32]) {
+        let Some(peel) = self.civic_peel() else {
+            return;
+        };
+        let ext = civic::residual_extent(&peel);
+        if ext == 0 {
+            return;
+        }
+        let hardships = self
+            .world
+            .chronicle()
+            .receipts()
+            .iter()
+            .filter(|receipt| {
+                matches!(
+                    receipt.event(),
+                    cfe::dop::ClosureEvent::FamineStruck { .. }
+                        | cfe::dop::ClosureEvent::OverheatStruck { .. }
+                        | cfe::dop::ClosureEvent::VentSettled { .. }
+                        | cfe::dop::ClosureEvent::DemurrageSettled { .. }
+                        | cfe::dop::ClosureEvent::DemurrageTouched { .. }
+                )
+            })
+            .count();
+        let temper = ratio(hardships as i64, 1);
+        // Bounded relief: deeper residual buys more, but the well-formed
+        // channel table (`vocabulary::channel_valid`'s own trading law) keeps
+        // any single channel inside its lawful range — never overflows past
+        // full retention, only approaches it.
+        let relief = ratio(1, 1) - ratio(1, (ext.min(15) + 2) as i64);
+        let Ok(binding) = cfe::vocabulary::TradingBinding::new(vec![
+            (cfe::vocabulary::CHANNEL_DEMURRAGE, relief),
+            (cfe::vocabulary::CHANNEL_TEMPER, temper),
+        ]) else {
+            return;
+        };
+        let mut hasher = blake3::Hasher::new();
+        hasher.update(&seed);
+        hasher.update(b"invent-practice");
+        let name_seed = *hasher.finalize().as_bytes();
+        let word_text = cfe::dop::tech_node_name(7, &name_seed);
+        let Some(word) = cfe::dop::Name::new(&word_text) else {
+            return;
+        };
+        let sigil = format!("prac-{}", &hex(&name_seed)[..6]);
+        let _ = self.world.mint_vocabulary_as(
+            self.automaton,
+            &self.spec.civilization.sigil,
+            cfe::vocabulary::Axis::Practice,
+            &sigil,
+            word,
+            binding,
+        );
     }
 
     /// The DEEPEN act — seat one unseated hard-cognitive science (Math, Physics,
