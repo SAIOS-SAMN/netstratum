@@ -58,7 +58,7 @@ impl World {
                     .chronicle
                     .receipts()
                     .last()
-                    .map(|receipt| receipt.own.0)
+                    .map(|receipt| receipt.own().0)
                     .unwrap_or([0u8; 32]);
                 let mut hasher = blake3::Hasher::new();
                 hasher.update(b"netstratum.place.theta.v1");
@@ -238,8 +238,8 @@ impl World {
             .chronicle
             .receipts()
             .iter()
-            .find(|receipt| matches!(receipt.event, ClosureEvent::ColonyFounded { .. }))
-            .map(|receipt| receipt.own.0)
+            .find(|receipt| matches!(receipt.event(), ClosureEvent::ColonyFounded { .. }))
+            .map(|receipt| receipt.own().0)
         else {
             return;
         };

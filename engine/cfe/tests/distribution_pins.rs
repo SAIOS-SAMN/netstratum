@@ -627,7 +627,7 @@ fn a_population_burns_its_trace_and_the_larder_depletes_to_the_penalty_floor() {
     let after_one = bank(&world);
     assert!(after_one < ratio(20, 1), "the population burned some of its trace: {after_one}");
     assert!(
-        world.chronicle().receipts().iter().any(|r| matches!(r.event, ClosureEvent::TraceConsumed { .. })),
+        world.chronicle().receipts().iter().any(|r| matches!(r.event(), ClosureEvent::TraceConsumed { .. })),
         "the burn is receipted"
     );
 
@@ -653,7 +653,7 @@ fn a_world_with_no_veins_burns_no_trace_and_is_byte_identical() {
     for _ in 0..8 { world.tick(); }
     world.collect().expect("collects");
     assert!(
-        !world.chronicle().receipts().iter().any(|r| matches!(r.event, ClosureEvent::TraceConsumed { .. })),
+        !world.chronicle().receipts().iter().any(|r| matches!(r.event(), ClosureEvent::TraceConsumed { .. })),
         "no veins → no trace burn → byte-identical"
     );
 }

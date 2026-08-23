@@ -99,7 +99,7 @@ fn the_fence_passes_listed_and_refuses_unlisted() {
     }
     // The refusal wrote NOTHING — no receipt on either book.
     assert!(!a.chronicle().receipts().iter().any(|r| {
-        matches!(r.event, ClosureEvent::ElementApertureSent { deal: 101, .. })
+        matches!(r.event(), ClosureEvent::ElementApertureSent { deal: 101, .. })
     }));
     assert_eq!(replay(a.chronicle()), a.committed(), "SEAL B src");
     assert_eq!(replay(b.chronicle()), b.committed(), "SEAL B dst");

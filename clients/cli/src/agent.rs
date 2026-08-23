@@ -169,7 +169,7 @@ pub fn handle(world: &mut World, actor_handle: &str, line: &str) -> Response {
                     .chronicle()
                     .receipts()
                     .last()
-                    .map(|held| crate::hex(&held.own.0)),
+                    .map(|held| crate::hex(&held.own().0)),
                 false => None,
             };
             Response { ok: true, deed, receipt, detail: String::from("sealed") }
@@ -253,7 +253,7 @@ mod tests {
         let receipt = answer.receipt.expect("a sealed deed names its receipt");
         assert_eq!(
             receipt,
-            crate::hex(&world.chronicle().receipts().last().expect("sealed").own.0),
+            crate::hex(&world.chronicle().receipts().last().expect("sealed").own().0),
             "the answer names what the CHAIN holds"
         );
         // And the receipt carries the AGENT's tag, not the sovereign's.
@@ -263,7 +263,7 @@ mod tests {
                 .receipts()
                 .last()
                 .expect("sealed")
-                .provenance
+                .provenance()
                 .contains(&agent),
             "the deed is tagged to whoever did it"
         );

@@ -126,7 +126,7 @@ pub fn fold(var_root: &str) -> std::io::Result<(u64, Ratio)> {
         Err(_) => Chronicle::new(),
     };
     let gauge = cfe::world::wrap_gauge(ratio(era as i64, 12));
-    let stamp = ledger.receipts().iter().map(|r| r.stamp).max().unwrap_or(0);
+    let stamp = ledger.receipts().iter().map(|r| r.stamp()).max().unwrap_or(0);
     ledger.append(
         cfe::dop::ClosureEvent::EraFolded { era, gauge: gauge.clone() },
         stamp,
@@ -1032,7 +1032,7 @@ fn office_evidence(world: &World) -> OfficeEvidence {
         evidence.element_kinds = orb.elements.len() as u64;
     }
     for receipt in world.chronicle().receipts() {
-        match &receipt.event {
+        match receipt.event() {
             // ONT-2b: eating-mining is still mining — a staple pull counts
             // toward the ground evidence beside the geometric assay.
             ClosureEvent::AssayStruck { .. } | ClosureEvent::StapleMined { .. } => {
@@ -1227,7 +1227,7 @@ impl Polity {
                     // is the same era — the receipt remembers.
                     let cleaved = world.chronicle().receipts().iter().any(|receipt| {
                         matches!(
-                            receipt.event,
+                            receipt.event(),
                             cfe::dop::ClosureEvent::Diverged { .. }
                         )
                     });
@@ -1327,7 +1327,7 @@ impl Polity {
             .receipts()
             .last()
             .expect("genesis receipts exist")
-            .own
+            .own()
             .0;
         let beacon = Beacon::from_digest(digest);
         let (derived_star, derived_albedo, derived_orbit) =
@@ -1940,7 +1940,7 @@ impl Polity {
             .receipts()
             .iter()
             .rev()
-            .find_map(|receipt| match &receipt.event {
+            .find_map(|receipt| match receipt.event() {
                 cfe::dop::ClosureEvent::EstateSurveyed { covered, .. } => {
                     Some(covered.iter().map(|(orb, _)| *orb).collect::<Vec<u64>>())
                 }
@@ -2079,7 +2079,7 @@ impl Polity {
             return;
         };
         let mut hasher = blake3::Hasher::new();
-        hasher.update(&receipt.own.0);
+        hasher.update(&receipt.own().0);
         hasher.update(b"abundance-resolve");
         let seed = *hasher.finalize().as_bytes();
         // SOC-5 — THE COLLECTIVE RESOLVE. The society's self-organisation
@@ -2289,8 +2289,8 @@ impl Polity {
             receipts
                 .iter()
                 .rev()
-                .find(|r| matches(&r.event))
-                .map_or(now, |r| now.saturating_sub(r.stamp))
+                .find(|r| matches(r.event()))
+                .map_or(now, |r| now.saturating_sub(r.stamp()))
         };
         let found = since(&|e| {
             matches!(
@@ -2326,7 +2326,7 @@ impl Polity {
         // 6000, and it introduces no number to tune. The two windows it
         // replaces are gone rather than re-picked.
         let count = |matches: &dyn Fn(&cfe::dop::ClosureEvent) -> bool| -> u64 {
-            receipts.iter().filter(|r| matches(&r.event)).count() as u64
+            receipts.iter().filter(|r| matches(r.event())).count() as u64
         };
         let is_find = |e: &cfe::dop::ClosureEvent| {
             matches!(
@@ -2546,7 +2546,7 @@ impl Polity {
             .chronicle()
             .receipts()
             .last()
-            .map(|receipt| receipt.own.0)
+            .map(|receipt| receipt.own().0)
             .unwrap_or([0u8; 32]);
         soc::caste_census(&peel.residual, members, seed)
     }
@@ -3189,7 +3189,7 @@ impl Polity {
         let Some(receipt) = self.world.chronicle().receipts().last() else {
             return;
         };
-        let digest = receipt.own.0;
+        let digest = receipt.own().0;
         // CAPTURED BEFORE THE BEAT MOVES ANYTHING. Promotion reads both,
         // and reading either afterwards would be vacuous: a close always
         // advances the trajectory to Growth.
@@ -3668,7 +3668,7 @@ impl Polity {
             return None;
         }
         let receipt = self.world.chronicle().receipts().last()?;
-        let beacon = Beacon::from_digest(receipt.own.0);
+        let beacon = Beacon::from_digest(receipt.own().0);
         let parent = &self.spec.civilization;
         // The cleave IS a key change (11 §3): delta in 1/12..=5/12,
         // beacon-drawn; the branches take opposite gauge phases.
@@ -3718,7 +3718,7 @@ impl Polity {
         // old era hands lines a class that did not exist when they
         // cleaved — a SEAL B violation that fails SILENTLY, because the
         // replay still terminates and still looks like a world.
-        let stamp = receipt.stamp;
+        let stamp = receipt.stamp();
         let words = |axis: cfe::vocabulary::Axis| -> Vec<String> {
             cfe::vocabulary::fold_at(self.world.chronicle(), axis, stamp)
                 .into_iter()
@@ -3872,7 +3872,7 @@ impl Polity {
         let Some(receipt) = self.world.chronicle().receipts().last() else {
             return false;
         };
-        let beacon = Beacon::from_digest(receipt.own.0);
+        let beacon = Beacon::from_digest(receipt.own().0);
         // The next grade above what already stands.
         let next = self.world.key().len();
         let value = ratio(beacon.uniform_index("unfold.plane", 12) as i64, 12);
@@ -4054,7 +4054,7 @@ impl Polity {
                     self.chained = watermark;
                     for sequence in refused_seqs {
                         if let Some(at) =
-                            receipts.iter().position(|r| r.sequence == sequence)
+                            receipts.iter().position(|r| r.sequence() == sequence)
                         {
                             let prior = cfe::world::replay(
                                 &cfe::vrp::Chronicle::from_receipts(receipts[..at].to_vec())
@@ -4068,16 +4068,16 @@ impl Polity {
                             );
                             let receipt = &receipts[at];
                             let step = kernel::Step {
-                                event: receipt.event.clone(),
+                                event: receipt.event().clone(),
                                 actor: receipt
-                                    .provenance
+                                    .provenance()
                                     .first()
                                     .copied()
                                     .unwrap_or(cfe::world::SOVEREIGN),
-                                stamp: receipt.stamp,
+                                stamp: receipt.stamp(),
                             };
                             if let Err(unlawful) = kernel::admits(&prior, &next, &step) {
-                                self.refused.push((receipt.sequence, unlawful));
+                                self.refused.push((receipt.sequence(), unlawful));
                             }
                         }
                     }
@@ -4124,9 +4124,9 @@ impl Polity {
         let mut still_admitting = true;
         for receipt in &receipts[self.chained..] {
             let step = kernel::Step {
-                event: receipt.event.clone(),
-                actor: receipt.provenance.first().copied().unwrap_or(cfe::world::SOVEREIGN),
-                stamp: receipt.stamp,
+                event: receipt.event().clone(),
+                actor: receipt.provenance().first().copied().unwrap_or(cfe::world::SOVEREIGN),
+                stamp: receipt.stamp(),
             };
             let prior = stepper.state().clone();
             stepper.apply(receipt);
@@ -4135,7 +4135,7 @@ impl Polity {
                 Ok(()) => {
                     if still_admitting {
                         let sub = match arbor.head("") {
-                            Some(head) if head.coordinate.t == receipt.stamp => {
+                            Some(head) if head.coordinate.t == receipt.stamp() => {
                                 head.coordinate.sub + 1
                             }
                             _ => 0,
@@ -4144,7 +4144,7 @@ impl Polity {
                             branch: String::new(),
                             s: seat.clone(),
                             g: self.world.gauge().clone(),
-                            t: receipt.stamp,
+                            t: receipt.stamp(),
                             sub,
                         };
                         match arbor.extend(coordinate, &codec::state_bytes(next), Some(&step)) {
@@ -4159,7 +4159,7 @@ impl Polity {
                     }
                 }
                 Err(unlawful) => {
-                    self.refused.push((receipt.sequence, unlawful));
+                    self.refused.push((receipt.sequence(), unlawful));
                     still_admitting = false;
                 }
             }
@@ -4975,7 +4975,7 @@ pub fn incursion(
         .chronicle()
         .receipts()
         .last()
-        .map(|receipt| receipt.own.0)
+        .map(|receipt| receipt.own().0)
         .unwrap_or([0u8; 32]);
     let beacon = Beacon::from_digest(terminal);
     let name = format!("{world_name} Returned");

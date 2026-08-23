@@ -67,7 +67,7 @@ fn nodes(world: &World) -> Vec<(u8, String)> {
         .chronicle()
         .receipts()
         .iter()
-        .filter_map(|receipt| match &receipt.event {
+        .filter_map(|receipt| match receipt.event() {
             ClosureEvent::TechDiscovered { condition, name, .. } if *condition > 0 => {
                 Some((*condition, name.clone()))
             }
@@ -162,7 +162,7 @@ fn survived_cold_crystallizes_insulation() {
     assert!(struck, "the cold bites — joule famine strikes");
     let insulated = world.chronicle().receipts().iter().any(|receipt| {
         matches!(
-            &receipt.event,
+            receipt.event(),
             ClosureEvent::TechDiscovered { condition: 1, magnitude, name, .. }
                 if *magnitude == ratio(3, 4) && name.ends_with(" insulation")
         )
@@ -191,7 +191,7 @@ fn the_state_carries_what_the_receipts_asserted() {
             .chronicle()
             .receipts()
             .iter()
-            .find_map(|receipt| match &receipt.event {
+            .find_map(|receipt| match receipt.event() {
                 ClosureEvent::TechDiscovered {
                     orb_id, condition: held, node: id, magnitude, ..
                 } if orb_id == orb && held == condition && id == node => Some(magnitude.clone()),

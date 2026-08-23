@@ -32,7 +32,7 @@ fn the_board_remembers_across_restarts() {
             let last = e.world.chronicle().receipts().last().expect("receipts");
             (
                 e.spec.world_name.clone(),
-                last.own.0,
+                last.own().0,
                 e.world.chronicle().receipts().len(),
                 // THE SOLAR LEAP IS CAPTURED, NOT ASSUMED (2026-08-05).
                 // This pin used to assert every resumed world knows its
@@ -75,7 +75,7 @@ fn the_board_remembers_across_restarts() {
             polity.spec.world_name
         );
         assert_eq!(
-            resumed.last().expect("receipts").own.0,
+            resumed.last().expect("receipts").own().0,
             *terminal,
             "{} continues the SAME chain — resumption, never a refound",
             polity.spec.world_name

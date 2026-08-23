@@ -157,9 +157,9 @@ impl World {
         let (from, to) = (route.from(), route.to());
         let amount: Ratio = amount.value().clone();
         let Some((survey, seed, covered)) =
-            self.chronicle.receipts().iter().rev().find_map(|receipt| match &receipt.event {
+            self.chronicle.receipts().iter().rev().find_map(|receipt| match receipt.event() {
                 ClosureEvent::EstateSurveyed { seed, covered, .. } => Some((
-                    receipt.own.0,
+                    receipt.own().0,
                     *seed,
                     covered.iter().map(|(orb, _)| *orb).collect::<Vec<u64>>(),
                 )),
@@ -1173,7 +1173,7 @@ impl World {
         let mut held: Vec<(Resource, Ratio)> = Vec::new();
         for receipt in self.chronicle().receipts() {
             if let ClosureEvent::TitheReceipted { to_seat: seat, resource, amount, .. } =
-                &receipt.event
+                receipt.event()
             {
                 if *seat == to_seat {
                     match held.iter_mut().find(|(r, _)| r == resource) {
@@ -1215,7 +1215,7 @@ impl World {
         self.chronicle
             .receipts()
             .iter()
-            .fold(ratio(0, 1), |carried, receipt| match &receipt.event {
+            .fold(ratio(0, 1), |carried, receipt| match receipt.event() {
                 ClosureEvent::DemurrageSettled { orb_id, amount, .. }
                 | ClosureEvent::UpkeepSettled { orb_id, amount, .. } if *orb_id == orb => {
                     carried + amount.clone()
@@ -1234,7 +1234,7 @@ impl World {
     pub fn value_lost_split_of(&self, orb: u64) -> (Ratio, Ratio) {
         self.chronicle.receipts().iter().fold(
             (ratio(0, 1), ratio(0, 1)),
-            |(decay, upkeep), receipt| match &receipt.event {
+            |(decay, upkeep), receipt| match receipt.event() {
                 ClosureEvent::DemurrageSettled { orb_id, amount, .. } if *orb_id == orb => {
                     (decay + amount.clone(), upkeep)
                 }
@@ -1275,14 +1275,14 @@ impl World {
             .receipts()
             .iter()
             .find(|receipt| {
-                matches!(receipt.event, ClosureEvent::SovereignUnionSealed { .. })
+                matches!(receipt.event(), ClosureEvent::SovereignUnionSealed { .. })
             })
             .map(|receipt| {
-                let horizon = match &receipt.event {
+                let horizon = match receipt.event() {
                     ClosureEvent::SovereignUnionSealed { term_stamps, .. } => *term_stamps,
                     _ => crate::dop::UNION_REVIEW_HORIZON,
                 };
-                (receipt.stamp, stamp >= receipt.stamp.saturating_add(horizon))
+                (receipt.stamp(), stamp >= receipt.stamp().saturating_add(horizon))
             })
     }
 
@@ -1323,7 +1323,7 @@ impl World {
         self.chronicle
             .receipts()
             .iter()
-            .filter_map(|receipt| match &receipt.event {
+            .filter_map(|receipt| match receipt.event() {
                 ClosureEvent::YieldCollected { orb_id, resource: Resource::Joule, amount }
                     if *orb_id == orb =>
                 {

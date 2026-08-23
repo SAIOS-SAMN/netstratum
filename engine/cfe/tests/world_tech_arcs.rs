@@ -70,7 +70,7 @@ fn lattice_deepening_crystallizes_and_never_outruns_headroom() {
         .receipts()
         .iter()
         .any(|receipt| matches!(
-            &receipt.event,
+            receipt.event(),
             ClosureEvent::TechDiscovered { condition: 3, magnitude, name, .. }
                 if *magnitude == ratio(5, 4) && name.ends_with(" deepening")
         ));
@@ -124,7 +124,7 @@ fn long_stores_halves_the_decay_measured_on_the_receipt() {
         .receipts()
         .iter()
         .any(|receipt| matches!(
-            &receipt.event,
+            receipt.event(),
             ClosureEvent::TechDiscovered { condition: 5, magnitude, name, .. }
                 if *magnitude == ratio(1, 2) && name.ends_with(" stores")
         ));
@@ -143,7 +143,7 @@ fn long_stores_halves_the_decay_measured_on_the_receipt() {
         .receipts()
         .iter()
         .rev()
-        .find_map(|receipt| match &receipt.event {
+        .find_map(|receipt| match receipt.event() {
             ClosureEvent::DemurrageTouched { decays, .. } => decays
                 .iter()
                 .find(|(resource, _)| *resource == Resource::Joule)

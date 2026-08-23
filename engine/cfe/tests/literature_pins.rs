@@ -41,7 +41,7 @@ fn literate_world() -> (World, u64) {
 }
 
 fn a_receipt(world: &World) -> [u8; 32] {
-    world.chronicle().receipts().first().expect("a receipt").own.0
+    world.chronicle().receipts().first().expect("a receipt").own().0
 }
 
 // ── LITERACY IS DERIVED ───────────────────────────────────────────────
@@ -229,7 +229,7 @@ fn cited_evidence_is_canonical() {
         .chronicle()
         .receipts()
         .iter()
-        .map(|receipt| receipt.own.0)
+        .map(|receipt| receipt.own().0)
         .collect();
     assert!(receipts.len() >= 2, "the fixture sealed several receipts");
     world.aspire(orb, "COMMITMENT").expect("aspires");

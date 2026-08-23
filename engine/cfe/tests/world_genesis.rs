@@ -48,7 +48,7 @@ fn genesis_seals_at_founding_and_replays() {
     );
     assert!(
         world.chronicle().receipts().iter().any(|receipt| matches!(
-            &receipt.event,
+            receipt.event(),
             ClosureEvent::GenesisSealed { civilization, .. } if civilization == "deep-chorus"
         )),
         "the binding copy is the receipt in the world's chronicle"

@@ -176,7 +176,7 @@ fn the_crossing_relieves_the_freeze() {
     // Both books carry the clear; replay reproduces the rescue.
     for polity in &board {
         let cleared_receipt = polity.world.chronicle().receipts().iter().any(|r| {
-            matches!(r.event, ClosureEvent::OfferCleared { .. })
+            matches!(r.event(), ClosureEvent::OfferCleared { .. })
         });
         assert!(cleared_receipt, "the clear is a receipt in both books");
         let committed = replay(polity.world.chronicle());

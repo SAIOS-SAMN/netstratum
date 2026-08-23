@@ -50,7 +50,7 @@ fn re_seating_replaces_and_the_chain_keeps_the_history() {
         .chronicle()
         .receipts()
         .iter()
-        .filter(|r| matches!(r.event, ClosureEvent::StationSeated { .. }))
+        .filter(|r| matches!(r.event(), ClosureEvent::StationSeated { .. }))
         .count();
     assert_eq!(seatings, 2, "both seatings stand in the record — nothing overwritten");
 }

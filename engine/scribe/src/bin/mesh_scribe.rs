@@ -36,8 +36,9 @@ use mycelium::sdk::{CrystalId, KernelRef, Session};
 
 const WORLDS: &str = "/opt/netstratum/var/worlds";
 // Any node: the mesh is symmetric; MYCELIUM_ADDR selects the door.
+// TRANSPORT CUTOVER (mycelium relay 2026-08-23): Noise, +10 from plaintext.
 fn addr() -> String {
-    std::env::var("MYCELIUM_ADDR").unwrap_or_else(|_| "hypha://127.0.0.1:7420".into())
+    std::env::var("MYCELIUM_ADDR").unwrap_or_else(|_| "hyphas://127.0.0.1:7430".into())
 }
 const KERNEL: &str = "net";
 const BEAT_SECS: u64 = 5;

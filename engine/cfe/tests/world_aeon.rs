@@ -51,7 +51,7 @@ fn divergence_and_confluence_are_key_changes() {
 
     let branch_named = world.chronicle().receipts().iter().any(|receipt| {
         matches!(
-            &receipt.event,
+            receipt.event(),
             ClosureEvent::Diverged { branch, .. } if branch == "the-severed-chord"
         )
     });
@@ -136,7 +136,7 @@ fn the_fold_seats_a_new_sheet() {
     world.seal_fold(1, ratio(5, 4));
     assert_eq!(world.gauge(), &ratio(1, 4), "the base advanced and wrapped");
     let folded = world.chronicle().receipts().iter().any(|receipt| {
-        matches!(&receipt.event, ClosureEvent::EraFolded { era: 1, .. })
+        matches!(receipt.event(), ClosureEvent::EraFolded { era: 1, .. })
     });
     assert!(folded, "the fold is a receipt, not a deletion");
     assert_eq!(replay(world.chronicle()).gauge[0], ratio(1, 4));

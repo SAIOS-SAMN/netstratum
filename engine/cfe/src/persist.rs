@@ -36,7 +36,7 @@ pub fn load(path: &Path) -> Result<Chronicle, PersistRefused> {
     })?;
     let mut receipts = Vec::new();
     for (frame, (tag, value)) in tlv::records(&bytes).enumerate() {
-        if tag == crate::vrp::RECEIPT_FRAME_TAG {
+        if tag == crate::vrp::RECEIPT_FRAME_TAG || tag == crate::vrp::RECEIPT_FRAME_TAG_V2 {
             let receipt =
                 Receipt::from_wire(tag, value).ok_or(PersistRefused::Malformed { frame })?;
             receipts.push(receipt);

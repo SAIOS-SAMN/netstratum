@@ -78,9 +78,9 @@ fn main() {
         );
         let receipt = &receipts[cut];
         let step = kernel::Step {
-            event: receipt.event.clone(),
-            actor: receipt.provenance.first().copied().unwrap_or(cfe::world::SOVEREIGN),
-            stamp: receipt.stamp,
+            event: receipt.event().clone(),
+            actor: receipt.provenance().first().copied().unwrap_or(cfe::world::SOVEREIGN),
+            stamp: receipt.stamp(),
         };
         // The verdict is not the probe's business — only its cost is.
         let _ = kernel::admits(&prior, &next, &step);

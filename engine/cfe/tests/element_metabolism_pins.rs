@@ -371,7 +371,7 @@ fn a_stone_eater_synthesizes_its_food_from_energy_and_unfreezes() {
     assert!(stone_after > ratio(0, 1), "the stone-eater synthesized its food: {stone_after}");
     assert!(joule_after < joule_before, "it SPENT energy to do so (a conserved transmutation)");
     assert!(
-        world.chronicle().receipts().iter().any(|r| matches!(r.event, ClosureEvent::ElementFarmed { .. })),
+        world.chronicle().receipts().iter().any(|r| matches!(r.event(), ClosureEvent::ElementFarmed { .. })),
         "the synthesis is receipted as ElementFarmed"
     );
     assert_eq!(replay(world.chronicle()), world.committed(), "element-farm replay MATCHES");
@@ -393,7 +393,7 @@ fn a_stone_eater_without_a_sun_cannot_farm_and_stays_frozen() {
     let _ = world.collect();
     assert_eq!(stone_bank(&world, &stone), ratio(0, 1), "no sun, no synthesis");
     assert!(
-        !world.chronicle().receipts().iter().any(|r| matches!(r.event, ClosureEvent::ElementFarmed { .. })),
+        !world.chronicle().receipts().iter().any(|r| matches!(r.event(), ClosureEvent::ElementFarmed { .. })),
         "no farm deed without a star — byte-identical"
     );
 }
@@ -417,7 +417,7 @@ fn a_biotic_world_never_farms_an_element() {
     for _ in 0..4 { world.tick(); }
     let _ = world.collect();
     assert!(
-        !world.chronicle().receipts().iter().any(|r| matches!(r.event, ClosureEvent::ElementFarmed { .. })),
+        !world.chronicle().receipts().iter().any(|r| matches!(r.event(), ClosureEvent::ElementFarmed { .. })),
         "a biotic world never emits ElementFarmed — byte-identical"
     );
 }
@@ -443,7 +443,7 @@ fn the_food_cycle_burns_energy_and_starves_when_the_joule_runs_dry() {
     // The joule was SPENT on food (ElementFarmed deeds carry the burn).
     assert!(
         world.chronicle().receipts().iter().any(|r| matches!(
-            r.event, ClosureEvent::ElementFarmed { ref minted, ref eaten, .. } if *minted > ratio(0, 1) && *eaten > ratio(0, 1)
+            r.event(), ClosureEvent::ElementFarmed { ref minted, ref eaten, .. } if *minted > ratio(0, 1) && *eaten > ratio(0, 1)
         )),
         "the receipts show the farm-and-eat cycle"
     );

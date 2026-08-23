@@ -44,7 +44,7 @@ impl World {
                 .iter()
                 .filter(|receipt| {
                     matches!(
-                        &receipt.event,
+                        receipt.event(),
                         ClosureEvent::TechDiscovered { condition: 1.., .. }
                             | ClosureEvent::Diverged { .. }
                             | ClosureEvent::Confluent { .. }

@@ -59,9 +59,9 @@ fn lapse_stamps(world: &World) -> Vec<(u64, Ratio, u64)> {
         .chronicle()
         .receipts()
         .iter()
-        .filter_map(|r| match &r.event {
+        .filter_map(|r| match r.event() {
             ClosureEvent::AbsorptionLapsed { debtor_orb, amount, .. } => {
-                Some((*debtor_orb, amount.clone(), r.stamp))
+                Some((*debtor_orb, amount.clone(), r.stamp()))
             }
             _ => None,
         })
@@ -170,8 +170,8 @@ fn three_resolutions_share_one_lane_and_one_stamp() {
         .chronicle()
         .receipts()
         .iter()
-        .filter(|r| r.stamp == 27)
-        .filter_map(|r| match &r.event {
+        .filter(|r| r.stamp() == 27)
+        .filter_map(|r| match r.event() {
             ClosureEvent::AbsorptionLapsed { .. } => Some("lapse"),
             ClosureEvent::BondSettled { .. } => Some("bond"),
             ClosureEvent::ForwardSlashed { .. } => Some("slash"),

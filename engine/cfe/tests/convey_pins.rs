@@ -73,7 +73,7 @@ fn the_free_portion_stays_home() {
         .receipts()
         .iter()
         .rev()
-        .find_map(|r| match &r.event {
+        .find_map(|r| match r.event() {
             ClosureEvent::EstateSurveyed { seed, .. } => Some(*seed),
             _ => None,
         })
@@ -142,7 +142,7 @@ fn postage_is_metered_and_the_amount_arrives_whole() {
     );
 
     let receipt = world.chronicle().receipts().last().expect("conveyed");
-    let ClosureEvent::ParcelConveyed { postage: declared, .. } = &receipt.event else {
+    let ClosureEvent::ParcelConveyed { postage: declared, .. } = receipt.event() else {
         panic!("the last receipt is the conveyance");
     };
     assert_eq!(declared, &postage, "the receipt declares what the meter drew");

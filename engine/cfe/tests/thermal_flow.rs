@@ -98,7 +98,7 @@ fn the_furnace_mints_and_only_the_overflow_vents() {
         .chronicle()
         .receipts()
         .iter()
-        .filter(|r| matches!(r.event, ClosureEvent::OverheatStruck { .. }))
+        .filter(|r| matches!(r.event(), ClosureEvent::OverheatStruck { .. }))
         .count();
     assert_eq!(strikes, 1);
 
@@ -114,7 +114,7 @@ fn the_furnace_mints_and_only_the_overflow_vents() {
         .chronicle()
         .receipts()
         .iter()
-        .filter(|r| matches!(r.event, ClosureEvent::OverheatCleared { .. }))
+        .filter(|r| matches!(r.event(), ClosureEvent::OverheatCleared { .. }))
         .count();
     assert_eq!(cleared, 1);
 }
@@ -226,7 +226,7 @@ fn the_vent_ledger_conserves_and_seals_at_collect() {
         .chronicle()
         .receipts()
         .iter()
-        .filter(|r| matches!(r.event, ClosureEvent::VentSettled { .. }))
+        .filter(|r| matches!(r.event(), ClosureEvent::VentSettled { .. }))
         .count();
     assert_eq!(vents, 1, "one receipt, no per-tick bloat");
 }
@@ -292,7 +292,7 @@ fn the_vault_captures_sink_and_charges_no_demurrage() {
         .iter()
         .filter(|r| {
             matches!(
-                r.event,
+                r.event(),
                 ClosureEvent::DemurrageSettled { .. } | ClosureEvent::DemurrageTouched { .. }
             )
         })
@@ -331,7 +331,7 @@ fn warm_banked_joules_pay_receipted_demurrage_at_touch() {
         .chronicle()
         .receipts()
         .iter()
-        .find_map(|r| match &r.event {
+        .find_map(|r| match r.event() {
             ClosureEvent::DemurrageTouched { decays, .. } => decays
                 .iter()
                 .find(|(resource, _)| *resource == Resource::Joule)

@@ -48,10 +48,10 @@ fn main() {
     for receipt in world.chronicle().receipts() {
         println!(
             "receipt {} stamp {} parent {} own {}",
-            receipt.sequence,
-            receipt.stamp,
-            hex(&receipt.parent.0),
-            hex(&receipt.own.0)
+            receipt.sequence(),
+            receipt.stamp(),
+            hex(&receipt.parent().0),
+            hex(&receipt.own().0)
         );
     }
     println!("replay matches committed: {}", replay(world.chronicle()) == world.committed());

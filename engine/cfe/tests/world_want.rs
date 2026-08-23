@@ -53,7 +53,7 @@ fn a_harmonic_mind_starves_without_links() {
     }
     assert!(world.wants().is_empty(), "the mind is fed; the want relieved");
     let relieved = world.chronicle().receipts().iter().any(|r| {
-        matches!(r.event, ClosureEvent::WantRelieved { kind: 2, .. })
+        matches!(r.event(), ClosureEvent::WantRelieved { kind: 2, .. })
     });
     assert!(relieved, "relief is a receipt");
     assert_eq!(replay(world.chronicle()).wants, world.wants().to_vec());
@@ -89,7 +89,7 @@ fn a_starving_mind_mints_no_nodes() {
         }
     }
     let crystallized = world.chronicle().receipts().iter().any(|r| {
-        matches!(&r.event, ClosureEvent::TechDiscovered { condition: 1.., .. })
+        matches!(r.event(), ClosureEvent::TechDiscovered { condition: 1.., .. })
     });
     assert!(!crystallized, "a starving mind mints no nodes");
 
@@ -121,7 +121,7 @@ fn a_starving_mind_mints_no_nodes() {
         "the licensed leap fed the mind"
     );
     let crystallized_now = world.chronicle().receipts().iter().any(|r| {
-        matches!(&r.event, ClosureEvent::TechDiscovered { condition: 4, .. })
+        matches!(r.event(), ClosureEvent::TechDiscovered { condition: 4, .. })
     });
     assert!(crystallized_now, "fed, the tree resumes — the doctrine crystallizes");
 }

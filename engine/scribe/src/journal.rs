@@ -309,9 +309,9 @@ pub fn journal(world_name: &str, world: &World, voice: &Voice, year_ticks: u64) 
     for year in 1..=years {
         let boundary = year * year_ticks;
         let window_start = fed;
-        while fed < receipts.len() && receipts[fed].stamp < boundary {
+        while fed < receipts.len() && receipts[fed].stamp() < boundary {
             let held = &receipts[fed];
-            partial.append(held.event.clone(), held.stamp, held.provenance.clone());
+            partial.append(held.event().clone(), held.stamp(), held.provenance().to_vec());
             fed += 1;
         }
         let window = &receipts[window_start..fed];
@@ -351,7 +351,7 @@ fn narrate(
 ) -> JournalEntry {
     use cfe::thermal::{cryo_vault_max4, t_eq4, SubstrateBand};
     let zero = ratio(0, 1);
-    let beacon = Beacon::from_digest(seed.own.0);
+    let beacon = Beacon::from_digest(seed.own().0);
 
     // ---- the boundary reads (committed state only) ----
     let banked_joules: Ratio = committed
@@ -409,7 +409,7 @@ fn narrate(
     let mut chartered: Vec<String> = Vec::new();
     let mut registered: u64 = 0;
     for receipt in window {
-        match &receipt.event {
+        match receipt.event() {
             ClosureEvent::ZoneBuilt { kind, .. } => {
                 built += 1;
                 let word = zone_word(*kind);

@@ -487,7 +487,7 @@ impl World {
         touch(held, star, &mut self.chronicle, stamp, &ease, &supply);
         held.bank(Resource::Crystal, -draw.clone());
         self.close(ClosureEvent::CrystalDrawn { orb_id: prober, amount: draw }, actor);
-        let stamp = self.chronicle.receipts().last().expect("just closed").stamp;
+        let stamp = self.chronicle.receipts().last().expect("just closed").stamp();
         let exemplar_orb = self.orb_by_id(exemplar).expect("judged above");
         let (probed, hits, refusals) = crate::query::resonance_read(exemplar_orb, &self.orbs, star);
         // G3 (NS-2 §4): the translation annotation — every candidate
@@ -563,9 +563,9 @@ impl World {
             .chronicle
             .receipts()
             .iter()
-            .find(|receipt| matches!(receipt.event, ClosureEvent::ColonyFounded { .. }))
+            .find(|receipt| matches!(receipt.event(), ClosureEvent::ColonyFounded { .. }))
             .expect("a founded world holds its founding")
-            .own
+            .own()
             .0;
         let mut seed = root.to_vec();
         // GALACTIC-1: fold the world's regional weighting seed in — same-
@@ -635,7 +635,7 @@ impl World {
         let Some(founding) = self.chronicle.receipts().first() else {
             return Err(ActionRefused::NoColony);
         };
-        let seed = founding.own.0;
+        let seed = founding.own().0;
         self.close(ClosureEvent::WorldCharted { seed }, actor);
         self.terrain_seed = Some(seed);
         Ok(seed)
@@ -701,12 +701,12 @@ impl World {
                 .chronicle
                 .receipts()
                 .iter()
-                .find(|receipt| match &receipt.event {
+                .find(|receipt| match receipt.event() {
                     ClosureEvent::ColonyFounded { orb_id, .. }
                     | ClosureEvent::ColonyCharted { orb_id, .. } => *orb_id == held.orb_id,
                     _ => false,
                 })
-                .map(|receipt| receipt.own.0)
+                .map(|receipt| receipt.own().0)
                 .ok_or(ActionRefused::ClaimWithoutWitness { name: held.name.clone() })?;
             covered.push((held.orb_id, witness));
         }
@@ -717,7 +717,7 @@ impl World {
             .chronicle
             .receipts()
             .last()
-            .map(|receipt| receipt.own.0)
+            .map(|receipt| receipt.own().0)
             .expect("a world with orbs has receipts");
         let held = peel(&mut self.orbs, payer).ok_or(ActionRefused::NoSuchOrb { orb: payer })?;
         let have = held.banked_amount(resource);
@@ -744,7 +744,7 @@ impl World {
     /// an unmetered survey.
     pub fn parcels(&self) -> Option<Vec<crate::dop::Parcel>> {
         self.chronicle.receipts().iter().rev().find_map(|receipt| {
-            match &receipt.event {
+            match receipt.event() {
                 ClosureEvent::EstateSurveyed { seed, covered, .. } => {
                     let orbs: Vec<u64> = covered.iter().map(|(orb, _)| *orb).collect();
                     Some(crate::dop::parcels_of(seed, &orbs))
@@ -779,9 +779,9 @@ impl World {
         use crate::dop::Holding;
         self.permitted(actor, Scope::Build)?;
         let Some((survey, seed, covered)) =
-            self.chronicle.receipts().iter().rev().find_map(|receipt| match &receipt.event {
+            self.chronicle.receipts().iter().rev().find_map(|receipt| match receipt.event() {
                 ClosureEvent::EstateSurveyed { seed, covered, .. } => Some((
-                    receipt.own.0,
+                    receipt.own().0,
                     *seed,
                     covered.iter().map(|(orb, _)| *orb).collect::<Vec<u64>>(),
                 )),
@@ -872,8 +872,8 @@ impl World {
     pub fn appraisal_stale(&self, appraisal: &[u8; 32]) -> Option<bool> {
         let receipts = self.chronicle.receipts();
         let at = receipts.iter().position(|receipt| {
-            receipt.own.0 == *appraisal
-                && matches!(receipt.event, ClosureEvent::AppraisalStruck { .. })
+            receipt.own().0 == *appraisal
+                && matches!(receipt.event(), ClosureEvent::AppraisalStruck { .. })
         })?;
         Some(at + 1 < receipts.len())
     }

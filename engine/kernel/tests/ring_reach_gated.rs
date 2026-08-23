@@ -35,7 +35,7 @@ fn the_gate_holds_the_ring_rule() {
     world.site_planet(ids[2], cfe::dop::unit(1, 2), cfe::dop::positive(1, 1), None, None).expect("fills ring one");
     let next = world.committed();
     let receipt = world.chronicle().receipts().last().expect("siting").clone();
-    let step = Step { event: receipt.event, actor: SOVEREIGN, stamp: receipt.stamp };
+    let step = Step { event: receipt.event().clone(), actor: SOVEREIGN, stamp: receipt.stamp() };
     assert_eq!(admits(&prior, &next, &step), Ok(()), "an anchored ring fills lawfully");
 
     // The SAME transition claimed as a THIRD ring refuses — the gate

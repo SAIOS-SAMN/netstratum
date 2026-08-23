@@ -242,7 +242,7 @@ fn note_default_posts_to_the_severance_book() {
         .receipts()
         .iter()
         .rev()
-        .find_map(|r| match &r.event {
+        .find_map(|r| match r.event() {
             ClosureEvent::NoteRedeemed { note_id, paid, seized, .. }
                 if *note_id == id =>
             {
@@ -287,8 +287,8 @@ fn margin_breach_refuses_funding_and_liquidation_closes() {
     assert!(w.perps().iter().any(|p| p.perp_id == pid && !p.open));
     let liquidated = w.chronicle().receipts().iter().any(|r| {
         matches!(
-            r.event,
-            ClosureEvent::PerpClosed { perp_id, liquidated: true, .. } if perp_id == pid
+            r.event(),
+            ClosureEvent::PerpClosed { perp_id, liquidated: true, .. } if *perp_id == pid
         )
     });
     assert!(liquidated, "the close receipt carries the liquidation flag");

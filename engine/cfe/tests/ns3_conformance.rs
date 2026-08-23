@@ -174,18 +174,21 @@ fn the_chain_links_and_names_its_first_break() {
     );
     assert_eq!(chronicle.verify_chain(), ChainRead::Intact);
     assert_eq!(
-        chronicle.receipts()[0].parent,
+        chronicle.receipts()[0].parent(),
         ReceiptHash::GENESIS,
         "sequence 0 carries the genesis parent"
     );
     assert_eq!(
-        chronicle.receipts()[1].parent, chronicle.receipts()[0].own,
+        chronicle.receipts()[1].parent(), chronicle.receipts()[0].own(),
         "the chain is parent-linked"
     );
 
     // A receipt list a peer hands us with one altered stamp: the
     // verification read names the first broken sequence.
     let mut forged: Vec<Receipt> = chronicle.receipts().to_vec();
-    forged[1].stamp = 9;
+    match &mut forged[1] {
+        Receipt::V1(r) => r.stamp = 9,
+        Receipt::V2(r) => r.stamp = 9,
+    }
     assert_eq!(verify_receipts(&forged), ChainRead::Broken { at: 1 });
 }

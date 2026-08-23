@@ -165,7 +165,7 @@ fn the_caravan_bridges_the_walled_pair_at_a_profit() {
     let void_shares = board
         .iter()
         .flat_map(|e| e.world.chronicle().receipts())
-        .filter(|r| matches!(r.event, ClosureEvent::VoidShare { .. }))
+        .filter(|r| matches!(r.event(), ClosureEvent::VoidShare { .. }))
         .count();
     assert!(void_shares >= 4, "every melted leg receipts the void's share");
 

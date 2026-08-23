@@ -142,7 +142,7 @@ fn friction_prices_divergence_exactly() {
     // shell gives throughput 2; the friction is 1/4; `min(1/4, 2)` is
     // the whole of it, so the overflow is zero and NO `FrictionSettled`
     // is written at all.
-    let vented_arm = world.chronicle().receipts().iter().find_map(|r| match &r.event {
+    let vented_arm = world.chronicle().receipts().iter().find_map(|r| match r.event() {
         ClosureEvent::FrictionSettled { orb_id, amount } if *orb_id == FIRST_ORB => {
             Some(amount.clone())
         }
@@ -166,7 +166,7 @@ fn friction_prices_divergence_exactly() {
         .chronicle()
         .receipts()
         .iter()
-        .filter_map(|r| match &r.event {
+        .filter_map(|r| match r.event() {
             ClosureEvent::YieldCollected { orb_id, resource: Resource::Joule, amount }
                 if *orb_id == FIRST_ORB =>
             {
@@ -195,7 +195,7 @@ fn friction_prices_divergence_exactly() {
     let source = world.orb_by_id(FIRST_ORB).expect("orb");
     let vent_receipts = world.chronicle().receipts().iter().fold(
         ratio(0, 1),
-        |acc, r| match &r.event {
+        |acc, r| match r.event() {
             ClosureEvent::VentSettled { orb_id, amount } if *orb_id == FIRST_ORB => {
                 acc + amount.clone()
             }
@@ -240,7 +240,7 @@ fn aligned_partners_generate_exactly_zero() {
         .chronicle()
         .receipts()
         .iter()
-        .filter(|r| matches!(r.event, ClosureEvent::FrictionSettled { .. }))
+        .filter(|r| matches!(r.event(), ClosureEvent::FrictionSettled { .. }))
         .count();
     assert_eq!(frictions, 0, "alignment costs nothing — the engine judges nothing");
     assert_eq!(

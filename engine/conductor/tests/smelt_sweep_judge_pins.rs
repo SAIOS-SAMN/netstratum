@@ -63,7 +63,7 @@ fn the_smelt_sweep_is_lawful_under_the_kernel_judge() {
     let receipts = resumed.chronicle().receipts().to_vec();
     let sweep_at = receipts
         .iter()
-        .position(|r| matches!(r.event, ClosureEvent::ElementStocksSwept { .. }))
+        .position(|r| matches!(r.event(), ClosureEvent::ElementStocksSwept { .. }))
         .expect("resume minted the sweep deed");
 
     // Drive the judge over EVERY step, exactly as the conductor does.
@@ -77,12 +77,12 @@ fn the_smelt_sweep_is_lawful_under_the_kernel_judge() {
         );
         let receipt = &receipts[at];
         let step = kernel::Step {
-            event: receipt.event.clone(),
-            actor: receipt.provenance.first().copied().unwrap_or(cfe::world::SOVEREIGN),
-            stamp: receipt.stamp,
+            event: receipt.event().clone(),
+            actor: receipt.provenance().first().copied().unwrap_or(cfe::world::SOVEREIGN),
+            stamp: receipt.stamp(),
         };
         kernel::admits(&prior, &next, &step).unwrap_or_else(|refused| {
-            panic!("step {at} ({:?}) refused by the judge: {refused:?}", receipt.event)
+            panic!("step {at} ({:?}) refused by the judge: {refused:?}", receipt.event())
         });
         judged += 1;
     }
@@ -122,7 +122,7 @@ fn the_resource_smelt_sweep_is_lawful_under_the_kernel_judge() {
     let receipts = resumed.chronicle().receipts().to_vec();
     let sweep_at = receipts
         .iter()
-        .position(|r| matches!(r.event, ClosureEvent::ResourceStocksSwept { .. }))
+        .position(|r| matches!(r.event(), ClosureEvent::ResourceStocksSwept { .. }))
         .expect("resume minted the resource sweep deed");
 
     let mut judged = 0u64;
@@ -135,12 +135,12 @@ fn the_resource_smelt_sweep_is_lawful_under_the_kernel_judge() {
         );
         let receipt = &receipts[at];
         let step = kernel::Step {
-            event: receipt.event.clone(),
-            actor: receipt.provenance.first().copied().unwrap_or(cfe::world::SOVEREIGN),
-            stamp: receipt.stamp,
+            event: receipt.event().clone(),
+            actor: receipt.provenance().first().copied().unwrap_or(cfe::world::SOVEREIGN),
+            stamp: receipt.stamp(),
         };
         kernel::admits(&prior, &next, &step).unwrap_or_else(|refused| {
-            panic!("step {at} ({:?}) refused by the judge: {refused:?}", receipt.event)
+            panic!("step {at} ({:?}) refused by the judge: {refused:?}", receipt.event())
         });
         judged += 1;
     }

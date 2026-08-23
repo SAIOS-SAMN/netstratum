@@ -82,11 +82,11 @@ fn a_licensed_leap_lands_in_the_far_sky() {
     license_tech(&mut grantor, FIRST_ORB, &mut receiver, FIRST_ORB, Leap { condition: 3, name: "radiator doctrine".into(), deal: 7, council: 1 })
         .expect("the leap licenses");
 
-    let issued = grantor.chronicle().receipts().iter().find_map(|r| match &r.event {
+    let issued = grantor.chronicle().receipts().iter().find_map(|r| match r.event() {
         ClosureEvent::TechLicensed { deal, node, .. } => Some((*deal, *node)),
         _ => None,
     });
-    let arrived = receiver.chronicle().receipts().iter().find_map(|r| match &r.event {
+    let arrived = receiver.chronicle().receipts().iter().find_map(|r| match r.event() {
         ClosureEvent::TechDiscovered { condition: 3, node, .. } => Some(*node),
         _ => None,
     });

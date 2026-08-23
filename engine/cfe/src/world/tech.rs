@@ -92,7 +92,7 @@ impl World {
         seed.extend_from_slice(&orb.to_le_bytes());
         seed.push(condition);
         if let Some(receipt) = self.chronicle.receipts().last() {
-            seed.extend_from_slice(&receipt.own.0);
+            seed.extend_from_slice(&receipt.own().0);
         }
         let node: [u8; 32] = blake3::hash(&seed).into();
         let name = format!("gifted {}", crate::dop::tech_node_name(condition, &node));
@@ -284,7 +284,7 @@ impl World {
         }
         let known = self.chronicle.receipts().iter().any(|receipt| {
             matches!(
-                &receipt.event,
+                receipt.event(),
                 ClosureEvent::SolverWordMinted { orbit: held, .. } if *held == orbit
             )
         });
@@ -327,7 +327,7 @@ impl World {
         }
         let built = self.chronicle.receipts().iter().any(|receipt| {
             matches!(
-                &receipt.event,
+                receipt.event(),
                 ClosureEvent::RecipeBuilt { orb_id: held_orb, inputs: held, role: held_role, .. }
                     if *held_orb == orb_id && *held == inputs && *held_role == role
             )
@@ -363,7 +363,7 @@ impl World {
         }
         let known = self.chronicle.receipts().iter().any(|receipt| {
             matches!(
-                &receipt.event,
+                receipt.event(),
                 ClosureEvent::KnowledgeConverged { signature: held, .. } if *held == signature
             )
         });
@@ -399,7 +399,7 @@ impl World {
         }
         let held = self.chronicle.receipts().iter().any(|receipt| {
             matches!(
-                &receipt.event,
+                receipt.event(),
                 ClosureEvent::SolverWordMinted { orbit: held, .. }
                     | ClosureEvent::KnowledgeLicensed { orbit: held, .. }
                     if *held == orbit
@@ -453,7 +453,7 @@ impl World {
                 .iter()
                 .filter(|receipt| {
                     matches!(
-                        receipt.event,
+                        receipt.event(),
                         ClosureEvent::FamineStruck { .. }
                             | ClosureEvent::OverheatStruck { .. }
                             | ClosureEvent::VentSettled { .. }
@@ -489,12 +489,12 @@ impl World {
             .receipts()
             .iter()
             .rposition(|receipt| {
-                matches!(receipt.event, ClosureEvent::PracticeAdopted { practice: held } if held == practice)
+                matches!(receipt.event(), ClosureEvent::PracticeAdopted { practice: held } if *held == practice)
             })
             .expect("the adoption receipted");
         let rediscovered = self.chronicle.receipts()[adopted_at..]
             .iter()
-            .any(|receipt| matches!(receipt.event, ClosureEvent::TechDiscovered { .. }));
+            .any(|receipt| matches!(receipt.event(), ClosureEvent::TechDiscovered { .. }));
         if !rediscovered {
             return Err(ActionRefused::ReleaseUnearned { practice });
         }
@@ -507,7 +507,7 @@ impl World {
             .chronicle
             .receipts()
             .last()
-            .map(|receipt| receipt.own.0)
+            .map(|receipt| receipt.own().0)
             .expect("the release receipted");
         let mut seed = [0u8; 32];
         seed.copy_from_slice(&root);

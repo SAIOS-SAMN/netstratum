@@ -55,7 +55,7 @@ fn the_fold_seals_rotates_and_the_next_aeon_converges_it() {
         .expect("the sealed ledger reads");
     let folded = ledger.receipts().iter().any(|receipt| {
         matches!(
-            &receipt.event,
+            receipt.event(),
             ClosureEvent::EraFolded { era: 1, gauge } if *gauge == ratio(1, 12)
         )
     });

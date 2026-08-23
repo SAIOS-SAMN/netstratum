@@ -148,11 +148,11 @@ fn pure_npc_beat_populates_elements_and_tag_72_and_replays() {
 
     // AssayStruck receipt exists (the deed that banks).
     let assayed = polity.world.chronicle().receipts().iter().any(|r| {
-        matches!(r.event, ClosureEvent::AssayStruck { .. })
+        matches!(r.event(), ClosureEvent::AssayStruck { .. })
     });
     assert!(assayed, "AssayStruck must stand in the chronicle");
     let prospected = polity.world.chronicle().receipts().iter().any(|r| {
-        matches!(r.event, ClosureEvent::ProspectStruck { .. })
+        matches!(r.event(), ClosureEvent::ProspectStruck { .. })
     });
     assert!(prospected, "ProspectStruck must stand in the chronicle");
 

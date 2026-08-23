@@ -146,7 +146,7 @@ impl World {
             .iter()
             .filter(|r| {
                 matches!(
-                    r.event,
+                    r.event(),
                     ClosureEvent::SolverWordMinted { .. } | ClosureEvent::KnowledgeLicensed { .. }
                 )
             })

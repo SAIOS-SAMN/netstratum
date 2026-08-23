@@ -87,11 +87,11 @@ fn the_deed_mints_by_seed_and_everything_derives() {
     use cfe::world::{replay, World};
     let mut world = World::new();
     world.found("cradle").expect("founds");
-    let before = world.chronicle().receipts().last().expect("founded").own.0;
+    let before = world.chronicle().receipts().last().expect("founded").own().0;
 
     let first = world.mint_line().expect("a people enters");
     let ClosureEvent::LineMinted { seed, ceilings } =
-        &world.chronicle().receipts().last().expect("minted").event
+        world.chronicle().receipts().last().expect("minted").event()
     else {
         panic!("the last receipt is the mint");
     };
@@ -149,7 +149,7 @@ fn a_minted_class_is_drawable_and_the_receipt_declares_it() {
 
     world.mint_line().expect("a people enters the grown space");
     let ClosureEvent::LineMinted { seed, ceilings } =
-        &world.chronicle().receipts().last().expect("minted").event
+        world.chronicle().receipts().last().expect("minted").event()
     else {
         panic!("the last receipt is the mint");
     };

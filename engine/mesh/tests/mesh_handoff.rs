@@ -68,8 +68,8 @@ fn the_handoff_walks() {
     .expect("the cited append");
     assert_eq!(at, 4);
     let receipt = &chronicle.receipts()[4];
-    assert!(receipt.provenance.contains(&9), "the hand is carried");
-    assert!(receipt.provenance.contains(&seal), "the seal is cited");
+    assert!(receipt.provenance().contains(&9), "the hand is carried");
+    assert!(receipt.provenance().contains(&seal), "the seal is cited");
 
     // The new hand yields onward; a fresh seal standing last is lawful
     // with its citation outstanding.

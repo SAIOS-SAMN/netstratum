@@ -24,7 +24,7 @@ fn appraised_transition() -> (cfe::world::Committed, cfe::world::Committed, Step
     world.appraise(Holding::Estate).expect("appraises");
     let next = world.committed();
     let receipt = world.chronicle().receipts().last().expect("appraisal").clone();
-    (prior, next, Step { event: receipt.event, actor: SOVEREIGN, stamp: receipt.stamp })
+    (prior, next, Step { event: receipt.event().clone(), actor: SOVEREIGN, stamp: receipt.stamp() })
 }
 
 #[test]

@@ -64,7 +64,7 @@ fn archive(era_root: &std::path::Path, world_name: &str, world: &World) -> u64 {
         .chronicle()
         .receipts()
         .iter()
-        .map(|r| r.stamp)
+        .map(|r| r.stamp())
         .max()
         .unwrap_or(0)
 }
@@ -100,14 +100,14 @@ fn the_archived_timelines_annex_onto_one_axis() {
     let offsets: Vec<u64> = ledger
         .receipts()
         .iter()
-        .map(|r| match &r.event {
+        .map(|r| match r.event() {
             ClosureEvent::EraAnnexed { offset, .. } => *offset,
             other => panic!("only annexations in the ledger, got {other:?}"),
         })
         .collect();
     assert_eq!(offsets, vec![0, t1]);
     // TUniversal stamps: offset + local terminal.
-    let stamps: Vec<u64> = ledger.receipts().iter().map(|r| r.stamp).collect();
+    let stamps: Vec<u64> = ledger.receipts().iter().map(|r| r.stamp()).collect();
     assert_eq!(stamps, vec![t1, t1 + t2]);
 
     // The universe card (TLV) persisted at the epoch base.

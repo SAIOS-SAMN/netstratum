@@ -96,10 +96,10 @@ fn rotate_divergent(dir: &std::path::Path, world: &World) -> std::io::Result<()>
         return Ok(());
     }
     let check = res.len().min(receipts.len()) - 1;
-    if res[check].own.0 == receipts[check].own.0 {
+    if res[check].own().0 == receipts[check].own().0 {
         return Ok(());
     }
-    let terminal = hex_digest(&res.last().expect("nonempty").own.0);
+    let terminal = hex_digest(&res.last().expect("nonempty").own().0);
     rotate_world_dir(dir, &terminal)
 }
 

@@ -49,7 +49,7 @@ fn a_payload_that_is_not_a_proof_never_reaches_the_chronicle() {
             .chronicle()
             .receipts()
             .iter()
-            .filter(|r| matches!(r.event, ClosureEvent::DiscoveryMinted { .. }))
+            .filter(|r| matches!(r.event(), ClosureEvent::DiscoveryMinted { .. }))
             .count(),
         0,
         "a refused mint leaves no receipt behind"
@@ -163,7 +163,7 @@ fn a_deed_the_judge_refuses_leaves_no_receipt() {
             .chronicle()
             .receipts()
             .iter()
-            .filter(|r| matches!(r.event, ClosureEvent::DiscoveryMinted { .. }))
+            .filter(|r| matches!(r.event(), ClosureEvent::DiscoveryMinted { .. }))
             .count(),
         0,
         "ESCROW: a refused transition leaves no receipt — it was never in the record"

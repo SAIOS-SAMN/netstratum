@@ -44,29 +44,29 @@ fn main() {
             );
             let receipt = &receipts[at];
             let step = kernel::Step {
-                event: receipt.event.clone(),
+                event: receipt.event().clone(),
                 actor: receipt
-                    .provenance
+                    .provenance()
                     .first()
                     .copied()
                     .unwrap_or(cfe::world::SOVEREIGN),
-                stamp: receipt.stamp,
+                stamp: receipt.stamp(),
             };
             if let Err(unlawful) = kernel::admits(&prior, &next, &step) {
                 shown += 1;
                 let world_name = dir.file_name().and_then(|s| s.to_str()).unwrap_or("?");
                 println!(
                     "{world_name} · seq {} · stamp {} · {:?}\n    deed: {:?}\n    prior: entities={} orbs={} star={:?}",
-                    receipt.sequence,
-                    receipt.stamp,
+                    receipt.sequence(),
+                    receipt.stamp(),
                     unlawful,
-                    brief(&receipt.event),
+                    brief(receipt.event()),
                     prior.entities.len(),
                     prior.orbs.len(),
                     prior.star,
                 );
                 if let cfe::dop::ClosureEvent::DemurrageTouched { orb_id, .. }
-                | cfe::dop::ClosureEvent::DemurrageSettled { orb_id, .. } = &receipt.event
+                | cfe::dop::ClosureEvent::DemurrageSettled { orb_id, .. } = receipt.event()
                 {
                     if let Some(orb) = prior.orbs.iter().find(|o| o.orb_id == *orb_id) {
                         println!(

@@ -64,7 +64,7 @@ fn the_venture_composes_whole_under_one_deal() {
             .chronicle()
             .receipts()
             .iter()
-            .filter_map(|receipt| match &receipt.event {
+            .filter_map(|receipt| match receipt.event() {
                 ClosureEvent::TechLicensed { deal, .. } => Some(*deal),
                 ClosureEvent::TechDiscovered { .. } if !want_out => None,
                 ClosureEvent::ApertureSent { deal, .. } => Some(*deal),
@@ -86,11 +86,11 @@ fn the_venture_composes_whole_under_one_deal() {
     );
     // The same node derived on both sides — the venture teaches ONE
     // technology, not two copies.
-    let node_out = grantor.chronicle().receipts().iter().find_map(|r| match &r.event {
+    let node_out = grantor.chronicle().receipts().iter().find_map(|r| match r.event() {
         ClosureEvent::TechLicensed { deal: 21, node, .. } => Some(*node),
         _ => None,
     });
-    let node_in = receiver.chronicle().receipts().iter().find_map(|r| match &r.event {
+    let node_in = receiver.chronicle().receipts().iter().find_map(|r| match r.event() {
         ClosureEvent::TechDiscovered { condition: 3, node, .. } => Some(*node),
         _ => None,
     });

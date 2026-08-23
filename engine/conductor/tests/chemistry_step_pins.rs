@@ -62,7 +62,7 @@ fn chem_receipts(polity: &Polity) -> usize {
         .iter()
         .filter(|r| {
             matches!(
-                r.event,
+                r.event(),
                 ClosureEvent::ScienceSeated { .. }
                     | ClosureEvent::ChemCataloged { .. }
                     | ClosureEvent::GemCompounded { .. }

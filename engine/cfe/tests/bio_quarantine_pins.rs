@@ -160,7 +160,7 @@ fn a_quarantined_world_recovers_a_step_at_the_touch_and_lifts() {
             .chronicle()
             .receipts()
             .iter()
-            .any(|r| matches!(r.event, ClosureEvent::PressureEbbed { .. })),
+            .any(|r| matches!(r.event(), ClosureEvent::PressureEbbed { .. })),
         "the recovery is receipted"
     );
     assert_eq!(replay(world.chronicle()), world.committed(), "pressure-relief replay MATCHES");
@@ -183,7 +183,7 @@ fn a_sub_threshold_pressure_never_ebbs_so_it_is_byte_identical() {
             .chronicle()
             .receipts()
             .iter()
-            .any(|r| matches!(r.event, ClosureEvent::PressureEbbed { .. })),
+            .any(|r| matches!(r.event(), ClosureEvent::PressureEbbed { .. })),
         "no quarantine → no relief deed → byte-identical"
     );
 }

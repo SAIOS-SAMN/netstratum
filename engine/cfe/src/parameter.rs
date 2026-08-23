@@ -155,7 +155,7 @@ pub fn table_of(chronicle: &crate::vrp::Chronicle) -> Table {
         if missing == 0 {
             break;
         }
-        if let crate::dop::ClosureEvent::ParameterChartered { key, value } = &receipt.event {
+        if let crate::dop::ClosureEvent::ParameterChartered { key, value } = receipt.event() {
             let at = (*key as usize).wrapping_sub(1);
             if at < found.len() && found[at].is_none() {
                 found[at] = Some(value.clone());
@@ -176,7 +176,7 @@ pub fn of(chronicle: &crate::vrp::Chronicle, key: Parameter) -> Ratio {
         .receipts()
         .iter()
         .rev()
-        .find_map(|receipt| match &receipt.event {
+        .find_map(|receipt| match receipt.event() {
             crate::dop::ClosureEvent::ParameterChartered { key: held, value }
                 if *held == key.code() =>
             {

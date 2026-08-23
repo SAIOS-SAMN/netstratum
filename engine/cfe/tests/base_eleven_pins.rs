@@ -41,7 +41,7 @@ fn literate_world() -> (World, u64) {
 }
 
 fn a_receipt(world: &World) -> [u8; 32] {
-    world.chronicle().receipts().first().expect("a receipt").own.0
+    world.chronicle().receipts().first().expect("a receipt").own().0
 }
 
 /// The stack is eleven wide, and every node reports.

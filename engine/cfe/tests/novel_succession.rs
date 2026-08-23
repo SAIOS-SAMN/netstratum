@@ -107,7 +107,7 @@ fn the_successor_inherits_the_chronicle_not_the_tree() {
         .chronicle()
         .receipts()
         .iter()
-        .filter_map(|receipt| match &receipt.event {
+        .filter_map(|receipt| match receipt.event() {
             ClosureEvent::TechDiscovered { condition: 1, node, .. } => Some(*node),
             _ => None,
         })
@@ -119,7 +119,7 @@ fn the_successor_inherits_the_chronicle_not_the_tree() {
     );
     assert!(
         world.chronicle().receipts().iter().any(|receipt| matches!(
-            &receipt.event,
+            receipt.event(),
             ClosureEvent::LineSucceeded { successor } if successor == "mycelial-chord"
         )),
         "the deed is receipted"
@@ -160,7 +160,7 @@ fn a_second_succession_moves_the_boundary_again() {
         .chronicle()
         .receipts()
         .iter()
-        .filter_map(|receipt| match &receipt.event {
+        .filter_map(|receipt| match receipt.event() {
             ClosureEvent::TechDiscovered { condition: 1, node, .. } => Some(*node),
             _ => None,
         })
@@ -200,7 +200,7 @@ fn the_successor_seals_its_own_axes() {
         .chronicle()
         .receipts()
         .iter()
-        .filter_map(|receipt| match &receipt.event {
+        .filter_map(|receipt| match receipt.event() {
             ClosureEvent::GenesisSealed { civilization, .. } => Some(civilization.clone()),
             _ => None,
         })

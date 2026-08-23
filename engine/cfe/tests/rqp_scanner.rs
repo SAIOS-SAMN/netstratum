@@ -192,7 +192,7 @@ fn the_scan_finds_the_match_and_refuses_the_near_misses_delta_whole() {
         "the crystal is spent on the looking"
     );
     // The reading is dated by its own power draw.
-    assert_eq!(read.stamp, world.chronicle().receipts().last().expect("draws").stamp);
+    assert_eq!(read.stamp, world.chronicle().receipts().last().expect("draws").stamp());
     assert_eq!(world.chronicle().verify_chain(), ChainRead::Intact);
     assert_eq!(
         replay(world.chronicle()),

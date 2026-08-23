@@ -1656,20 +1656,20 @@ fn deposit_receipt(sheet: &mut Vec<(u64, CrystalDeposit)>, receipt: &crate::vrp:
         sheet.push((orb, CrystalDeposit::default()));
         &mut sheet.last_mut().expect("just pushed").1
     }
-    match &receipt.event {
+    match receipt.event() {
         ClosureEvent::FamineStruck { orb_id, resource: Resource::Joule, .. } => {
             let held = deposit(sheet, *orb_id);
-            held.famine_open = held.famine_open.or(Some(receipt.stamp));
+            held.famine_open = held.famine_open.or(Some(receipt.stamp()));
         }
         ClosureEvent::FamineRelieved { orb_id, resource: Resource::Joule } => {
             let held = deposit(sheet, *orb_id);
             if let Some(struck) = held.famine_open.take() {
-                held.famine_total += receipt.stamp.saturating_sub(struck);
+                held.famine_total += receipt.stamp().saturating_sub(struck);
             }
         }
         ClosureEvent::OverheatStruck { orb_id, .. } => {
             let held = deposit(sheet, *orb_id);
-            held.overheat_open = held.overheat_open.or(Some(receipt.stamp));
+            held.overheat_open = held.overheat_open.or(Some(receipt.stamp()));
         }
         ClosureEvent::OverheatCleared { orb_id } => {
             deposit(sheet, *orb_id).overheat_open = None;
@@ -1677,21 +1677,21 @@ fn deposit_receipt(sheet: &mut Vec<(u64, CrystalDeposit)>, receipt: &crate::vrp:
         ClosureEvent::VentSettled { orb_id, amount } => {
             deposit(sheet, *orb_id)
                 .vented_entries
-                .push((receipt.stamp, amount.clone()));
+                .push((receipt.stamp(), amount.clone()));
         }
         ClosureEvent::YieldCollected { orb_id, resource: Resource::Joule, amount } => {
             deposit(sheet, *orb_id)
                 .encased_entries
-                .push((receipt.stamp, amount.clone()));
+                .push((receipt.stamp(), amount.clone()));
         }
         ClosureEvent::ApertureSent { from_orb: orb_id, .. }
         | ClosureEvent::ApertureReceived { to_orb: orb_id, .. }
         | ClosureEvent::BondSealed { source_orb: orb_id, .. }
         | ClosureEvent::BondSettled { source_orb: orb_id, .. } => {
-            deposit(sheet, *orb_id).last_link = Some(receipt.stamp);
+            deposit(sheet, *orb_id).last_link = Some(receipt.stamp());
         }
         ClosureEvent::TechDiscovered { orb_id, .. } => {
-            deposit(sheet, *orb_id).last_node = Some(receipt.stamp);
+            deposit(sheet, *orb_id).last_node = Some(receipt.stamp());
         }
         _ => {}
     }

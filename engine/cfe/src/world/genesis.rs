@@ -79,7 +79,7 @@ impl World {
         let stamp = chronicle
             .receipts()
             .iter()
-            .map(|receipt| receipt.stamp)
+            .map(|receipt| receipt.stamp())
             .max()
             .unwrap_or(0);
         let mut world = World {
@@ -193,8 +193,8 @@ impl World {
             .all(|(_, pending)| *pending == ratio(0, 1));
         let year_floor = stamp.saturating_sub(60);
         let coherent = self.chronicle.receipts().iter().any(|receipt| {
-            receipt.stamp >= year_floor
-                && matches!(receipt.event, ClosureEvent::YieldCollected { .. })
+            receipt.stamp() >= year_floor
+                && matches!(receipt.event(), ClosureEvent::YieldCollected { .. })
         });
         let crossed = self.crossed;
         // CHANNEL_ALIGN (operator-ruled): an adopted discipline must
@@ -451,7 +451,20 @@ impl World {
         }
         self.close(ClosureEvent::RegionCharted { seed }, actor);
         self.region_seed = Some(seed);
+        // TU-1: the sealing receipt itself predates the seal (V1 — the
+        // region isn't established until this deed closes); every
+        // receipt from here forward carries it (V2).
+        self.chronicle.set_region_seed(seed);
         Ok(())
+    }
+    /// TU-1 / G: cache this beat's gauge-direction sample (raw index
+    /// bytes — see `vrp::ManifoldReceipt`). Called once per beat by the
+    /// caller that owns `reduct::GaugeDirection` (this crate does not
+    /// depend on `reduct`); every receipt closed within the beat reads
+    /// this same snapshot (TU-1c: gauge settles at the beat boundary,
+    /// never mid-beat).
+    pub fn observe_gauge(&mut self, sample: Vec<u8>) {
+        self.chronicle.set_gauge_sample(sample);
     }
     /// **MINT A LINE** (tag 101, 2026-08-06): the engine mints its
     /// peoples — the standing ruling that retired the author. The seed
@@ -469,7 +482,7 @@ impl World {
         actor: u64,
     ) -> Result<crate::dop::LineDraw, ActionRefused> {
         self.permitted(actor, Scope::Build)?;
-        let Some(seed) = self.chronicle.receipts().last().map(|receipt| receipt.own.0)
+        let Some(seed) = self.chronicle.receipts().last().map(|receipt| receipt.own().0)
         else {
             return Err(ActionRefused::NoColony);
         };

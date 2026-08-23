@@ -45,7 +45,7 @@ fn the_seal_is_once_and_in_vocabulary() {
         .chronicle()
         .receipts()
         .iter()
-        .filter(|receipt| matches!(receipt.event, ClosureEvent::TaxonSealed { .. }))
+        .filter(|receipt| matches!(receipt.event(), ClosureEvent::TaxonSealed { .. }))
         .count();
     assert_eq!(seals, 1, "one seal per star, forever");
 

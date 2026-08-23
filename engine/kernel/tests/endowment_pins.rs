@@ -32,12 +32,12 @@ fn judge_whole(world: &World) -> Vec<(u64, Refused)> {
         );
         let receipt = &receipts[at];
         let step = Step {
-            event: receipt.event.clone(),
-            actor: receipt.provenance.first().copied().unwrap_or(SOVEREIGN),
-            stamp: receipt.stamp,
+            event: receipt.event().clone(),
+            actor: receipt.provenance().first().copied().unwrap_or(SOVEREIGN),
+            stamp: receipt.stamp(),
         };
         if let Err(unlawful) = admits(&prior, &next, &step) {
-            refused.push((receipt.sequence, unlawful));
+            refused.push((receipt.sequence(), unlawful));
         }
         prior = next;
     }
@@ -86,13 +86,13 @@ fn a_forged_top_up_refuses_by_value() {
         .receipts()
         .iter()
         .rev()
-        .find(|r| matches!(r.event, ClosureEvent::StarCommissioned { .. }))
+        .find(|r| matches!(r.event(), ClosureEvent::StarCommissioned { .. }))
         .expect("the commissioning receipted")
         .clone();
     let step = Step {
-        event: receipt.event,
+        event: receipt.event().clone(),
         actor: SOVEREIGN,
-        stamp: receipt.stamp,
+        stamp: receipt.stamp(),
     };
     assert!(
         matches!(

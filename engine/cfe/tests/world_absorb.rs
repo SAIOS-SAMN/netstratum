@@ -115,7 +115,7 @@ fn the_absorption_invariant_measures_across_two_orbs() {
         .chronicle()
         .receipts()
         .iter()
-        .filter(|r| matches!(r.event, ClosureEvent::OverheatCleared { .. }))
+        .filter(|r| matches!(r.event(), ClosureEvent::OverheatCleared { .. }))
         .count();
     assert_eq!(cleared, 1);
     // Compassion: the absorber gave while the source stood struck.
@@ -145,7 +145,7 @@ fn the_absorption_invariant_measures_across_two_orbs() {
         .chronicle()
         .receipts()
         .iter()
-        .filter(|r| matches!(r.event, ClosureEvent::VentSettled { .. }))
+        .filter(|r| matches!(r.event(), ClosureEvent::VentSettled { .. }))
         .count();
     assert_eq!(vents, 1);
     let rebuilt = replay(world.chronicle());
@@ -177,9 +177,9 @@ fn an_unpaid_window_lapses_to_the_extraction_book() {
         .chronicle()
         .receipts()
         .iter()
-        .find_map(|r| match &r.event {
+        .find_map(|r| match r.event() {
             ClosureEvent::AbsorptionLapsed { debtor_orb, amount, .. } => {
-                Some((*debtor_orb, amount.clone(), r.stamp))
+                Some((*debtor_orb, amount.clone(), r.stamp()))
             }
             _ => None,
         })

@@ -25,7 +25,7 @@ fn surveyed_transition() -> (cfe::world::Committed, cfe::world::Committed, Step)
     world.survey_estate(FIRST_ORB).expect("surveys");
     let next = world.committed();
     let receipt = world.chronicle().receipts().last().expect("the survey").clone();
-    let step = Step { event: receipt.event, actor: SOVEREIGN, stamp: receipt.stamp };
+    let step = Step { event: receipt.event().clone(), actor: SOVEREIGN, stamp: receipt.stamp() };
     (prior, next, step)
 }
 

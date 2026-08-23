@@ -56,7 +56,7 @@ impl Ledger {
         ledger
             .receipts()
             .iter()
-            .filter_map(|receipt| match &receipt.event {
+            .filter_map(|receipt| match receipt.event() {
                 ClosureEvent::GalaxyObserved { name, center, reach, .. } => Some(Galaxy {
                     name: name.clone(),
                     center: center.clone(),

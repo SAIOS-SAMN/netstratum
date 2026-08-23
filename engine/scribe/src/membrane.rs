@@ -34,7 +34,13 @@ use mycelium::sdk::{CrystalId, KernelRef, Session};
 pub type Grid = Vec<Vec<u8>>;
 
 const ADDR_ENV: &str = "MYCELIUM_ADDR";
-const ADDR_DEFAULT: &str = "hypha://127.0.0.1:7420";
+// TRANSPORT CUTOVER (mycelium relay 2026-08-23): Noise on node A, +10
+// from the old plaintext port. hyphas:// is TOFU pinned first-connect,
+// handled transparently by the SDK (net::Kind::Noise). Plaintext
+// 7420 stays live during the migration window but every admission
+// there is now receipted (court.plaintext) — this kernel no longer
+// appears in it once this default lands.
+const ADDR_DEFAULT: &str = "hyphas://127.0.0.1:7430";
 const KERNEL: &str = "net";
 const BEAT_SECS: u64 = 5;
 

@@ -1233,7 +1233,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                             evidence.element_kinds = orb.elements.len() as u64;
                         }
                         for receipt in world.chronicle().receipts() {
-                            match &receipt.event {
+                            match receipt.event() {
                                 ClosureEvent::AssayStruck { .. } => evidence.assays_struck += 1,
                                 ClosureEvent::RouteChartered { .. } => {
                                     evidence.routes_chartered += 1
@@ -1292,10 +1292,10 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
             for receipt in world.chronicle().receipts() {
                 if let cfe::dop::ClosureEvent::TechDiscovered {
                     orb_id, condition, name, ..
-                } = &receipt.event
+                } = receipt.event()
                 {
                     if *orb_id == *current {
-                        voices.push((*condition, name.clone(), receipt.stamp));
+                        voices.push((*condition, name.clone(), receipt.stamp()));
                     }
                 }
             }
@@ -1528,7 +1528,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                             .chronicle()
                             .receipts()
                             .last()
-                            .map(|receipt| receipt.stamp)
+                            .map(|receipt| receipt.stamp())
                             .unwrap_or(0);
                         match mesh::yield_authority(
                             far.chronicle_mut(),
@@ -4538,18 +4538,18 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
             let mut count = 0usize;
             for receipt in receipts {
                 count += 1;
-                match &receipt.event {
+                match receipt.event() {
                     cfe::dop::ClosureEvent::EraFolded { era: folded, gauge } => {
                         println!(
                             "  era {} — stamps {}..{} · {} receipts · folded at gauge {}",
                             style.strong(&era.to_string()),
                             opened,
-                            receipt.stamp,
+                            receipt.stamp(),
                             count,
                             amount(gauge)
                         );
                         era = *folded;
-                        opened = receipt.stamp;
+                        opened = receipt.stamp();
                         count = 0;
                     }
                     cfe::dop::ClosureEvent::Diverged { branch, gauge } => println!(
@@ -4596,13 +4596,13 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 let mut replica = cfe::vrp::Chronicle::new();
                 let mut kept = 0usize;
                 for receipt in world.chronicle().receipts() {
-                    if receipt.stamp > stamp {
+                    if receipt.stamp() > stamp {
                         break;
                     }
                     replica.append(
-                        receipt.event.clone(),
-                        receipt.stamp,
-                        receipt.provenance.clone(),
+                        receipt.event().clone(),
+                        receipt.stamp(),
+                        receipt.provenance().to_vec(),
                     );
                     kept += 1;
                 }
@@ -4834,7 +4834,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
             let mut councils: std::collections::BTreeSet<u64> = Default::default();
             let mut pens = 0u32;
             for receipt in world.chronicle().receipts() {
-                match &receipt.event {
+                match receipt.event() {
                     cfe::dop::ClosureEvent::ApertureSent { deal, .. }
                     | cfe::dop::ClosureEvent::ApertureReceived { deal, .. } => {
                         deals.insert(*deal);
@@ -4951,7 +4951,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 .chronicle()
                 .receipts()
                 .iter()
-                .filter_map(|receipt| match &receipt.event {
+                .filter_map(|receipt| match receipt.event() {
                     cfe::dop::ClosureEvent::DiscoveryMinted { work, .. } => Some(work.as_slice()),
                     _ => None,
                 })
@@ -4971,7 +4971,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 .chronicle()
                 .receipts()
                 .iter()
-                .filter_map(|receipt| match &receipt.event {
+                .filter_map(|receipt| match receipt.event() {
                     cfe::dop::ClosureEvent::DiscoveryMinted { work, .. } => {
                         Some(work.as_slice())
                     }
@@ -6797,7 +6797,7 @@ fn solve_task(
 fn is_gem(world: &cfe::world::World, element: &[u8; 32]) -> bool {
     world.chronicle().receipts().iter().any(|receipt| {
         matches!(
-            &receipt.event,
+            receipt.event(),
             cfe::dop::ClosureEvent::GemCompounded { gem, .. } if gem == element
         )
     })
@@ -8210,7 +8210,7 @@ fn workbench_panel(world: &World, style: &Style, current: u64) {
 
 fn chronicle(world: &World, style: &Style) {
     for receipt in world.chronicle().receipts() {
-        let described = match &receipt.event {
+        let described = match receipt.event() {
             cfe::dop::ClosureEvent::ColonyFounded { name, .. } => {
                 format!("⚑ colony {} founded", style.strong(name))
             }
@@ -9303,15 +9303,15 @@ fn chronicle(world: &World, style: &Style) {
             ),
         };
         let tag = receipt
-            .provenance
+            .provenance()
             .first()
             .map(|entity| style.dim(&format!("by#{entity}")))
             .unwrap_or_else(|| style.dim("world"));
         println!(
             "  {} stamp {} {} {}  {}",
-            style.dim(&format!("#{}", receipt.sequence)),
-            receipt.stamp,
-            style.dim(&hex(&receipt.own.0[..8])),
+            style.dim(&format!("#{}", receipt.sequence())),
+            receipt.stamp(),
+            style.dim(&hex(&receipt.own().0[..8])),
             tag,
             described
         );
@@ -9341,7 +9341,7 @@ fn resolve_witness(world: &World, word: &str) -> Result<[u8; 32], String> {
         .chronicle()
         .receipts()
         .iter()
-        .map(|receipt| receipt.own.0)
+        .map(|receipt| receipt.own().0)
         .filter(|digest| digest.starts_with(&prefix))
         .collect();
     match matches.len() {

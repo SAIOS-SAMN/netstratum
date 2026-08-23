@@ -41,7 +41,7 @@ fn era(tag: &str, beats: u32) -> Vec<(String, Vec<String>)> {
                     .chronicle()
                     .receipts()
                     .iter()
-                    .map(|r| format!("{}:{:?}", r.sequence, r.event))
+                    .map(|r| format!("{}:{:?}", r.sequence(), r.event()))
                     .collect(),
             )
         })

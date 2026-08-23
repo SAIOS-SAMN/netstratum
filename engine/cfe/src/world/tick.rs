@@ -722,7 +722,7 @@ impl World {
                         .receipts()
                         .last()
                         .expect("a ticking world has receipts")
-                        .own
+                        .own()
                         .0
                         .to_vec();
                     seed.extend_from_slice(&orb.to_le_bytes());

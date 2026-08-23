@@ -45,7 +45,7 @@ fn a_counter_amends_the_resting_terms() {
     assert_eq!(held.give_amount, ratio(4, 1), "the give side stands as posted");
 
     let receipt = world.chronicle().receipts().last().expect("countered");
-    let ClosureEvent::OfferCountered { offer: 7, want_amount, appraisal } = &receipt.event
+    let ClosureEvent::OfferCountered { offer: 7, want_amount, appraisal } = receipt.event()
     else {
         panic!("the last receipt is the counter");
     };
@@ -62,7 +62,7 @@ fn a_stale_cited_counter_refuses_and_a_fresh_one_stands() {
     let mut world = market_world();
     world.survey_estate(FIRST_ORB).expect("surveys");
     world.appraise(Holding::Estate).expect("appraises");
-    let stale = world.chronicle().receipts().last().expect("appraisal").own.0;
+    let stale = world.chronicle().receipts().last().expect("appraisal").own().0;
     world.tick();
     world.collect().expect("the world moves — the appraisal dates");
     assert_eq!(world.appraisal_stale(&stale), Some(true), "measurably stale");
@@ -76,7 +76,7 @@ fn a_stale_cited_counter_refuses_and_a_fresh_one_stands() {
 
     // Re-appraise — fresh evidence — and the same counter stands.
     world.appraise(Holding::Estate).expect("re-appraises");
-    let fresh = world.chronicle().receipts().last().expect("appraisal").own.0;
+    let fresh = world.chronicle().receipts().last().expect("appraisal").own().0;
     world
         .counter_offer(7, positive(5, 2), Some(fresh))
         .expect("the renegotiation proceeds on fresh evidence");

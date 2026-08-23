@@ -45,7 +45,7 @@ fn posture_reorients_doctrine_not_anatomy() {
     assert_eq!(after.primary, DefenseDomain::Kin);
     assert!(after.reoriented);
     assert!(w.chronicle().receipts().iter().any(|r| {
-        matches!(r.event, cfe::dop::ClosureEvent::PostureReoriented { .. })
+        matches!(r.event(), cfe::dop::ClosureEvent::PostureReoriented { .. })
     }));
     assert_eq!(replay(w.chronicle()), w.committed());
 }
@@ -344,7 +344,7 @@ fn interdiction_receipts_typed_residual() {
     assert_eq!(lost, ratio(1, 2));
     assert!(w.chronicle().receipts().iter().any(|r| {
         matches!(
-            r.event,
+            r.event(),
             cfe::dop::ClosureEvent::InterdictionStruck { .. }
         )
     }));
@@ -357,7 +357,7 @@ fn mark_convoy_risk_receipts() {
     let r = w.mark_convoy_risk(3).expect("mark");
     assert!(r > ratio(0, 1));
     assert!(w.chronicle().receipts().iter().any(|r| {
-        matches!(r.event, cfe::dop::ClosureEvent::ConvoyRiskMarked { .. })
+        matches!(r.event(), cfe::dop::ClosureEvent::ConvoyRiskMarked { .. })
     }));
     assert_eq!(replay(w.chronicle()), w.committed());
 }
@@ -419,7 +419,7 @@ fn clear_seal_blocks_poison_then_admits_mark() {
         Err(cfe::world::ActionRefused::ClearSealUnmet { .. })
     ));
     assert!(w.chronicle().receipts().iter().any(|r| {
-        matches!(r.event, cfe::dop::ClosureEvent::ClearPoisonRefused { .. })
+        matches!(r.event(), cfe::dop::ClosureEvent::ClearPoisonRefused { .. })
     }));
     // Honest clears build depth; at seal, last clear sticks.
     for _ in 0..CLEAR_SEAL_DEPTH {
@@ -524,7 +524,7 @@ fn covert_tamper_and_medium_reinforce() {
     }
     assert!(p >= cfe::world::tamper_threshold());
     assert!(w.chronicle().receipts().iter().any(|r| {
-        matches!(r.event, cfe::dop::ClosureEvent::TamperDetected { .. })
+        matches!(r.event(), cfe::dop::ClosureEvent::TamperDetected { .. })
     }));
     let after = w.medium_reinforce(FIRST_ORB).expect("reinforce");
     assert!(after < p);
@@ -551,7 +551,7 @@ fn liquidity_raid_burns_fee_and_voids_offer() {
     assert_eq!(after, before - ratio(1, 1));
     assert!(w.chronicle().receipts().iter().any(|r| {
         matches!(
-            r.event,
+            r.event(),
             cfe::dop::ClosureEvent::LiquidityRaidStruck {
                 offers_voided: 1,
                 ..

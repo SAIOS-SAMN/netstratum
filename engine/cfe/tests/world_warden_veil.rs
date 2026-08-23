@@ -52,7 +52,7 @@ fn the_ward_refuses_both_ways_until_the_depth_gate_opens() {
     aperture_transfer(&mut visitor, FIRST_ORB, &mut elder, FIRST_ORB, Resource::Iron, cfe::dop::positive(1, 1), 9)
         .expect("the aperture opens");
     let lifted = elder.chronicle().receipts().iter().any(|receipt| {
-        matches!(&receipt.event, ClosureEvent::WardLifted { claimer } if claimer == "the-visitor")
+        matches!(receipt.event(), ClosureEvent::WardLifted { claimer } if claimer == "the-visitor")
     });
     assert!(lifted, "the gate names its opener");
     assert_eq!(replay(elder.chronicle()), elder.committed(), "replay MATCHES");
@@ -75,7 +75,7 @@ fn an_unpayable_veil_lifts_by_receipt() {
     world.collect().expect("collects");
     assert!(!world.is_veiled(), "the toll went unpaid — the veil lifted");
     let starved = world.chronicle().receipts().iter().any(|receipt| {
-        matches!(receipt.event, ClosureEvent::VeilLifted { starved: true })
+        matches!(receipt.event(), ClosureEvent::VeilLifted { starved: true })
     });
     assert!(starved, "the lift is receipted STARVED");
     assert_eq!(replay(world.chronicle()), world.committed(), "replay MATCHES");
@@ -112,7 +112,7 @@ fn a_funded_veil_pays_its_toll_and_stands() {
     world.collect().expect("collects under the veil");
     assert!(world.is_veiled(), "the funded veil stands");
     let tolled = world.chronicle().receipts().iter().any(|receipt| {
-        matches!(&receipt.event,
+        matches!(receipt.event(),
             ClosureEvent::UpkeepSettled { resource: Resource::Joule, amount, .. }
                 if *amount == ratio(1, 4))
     });

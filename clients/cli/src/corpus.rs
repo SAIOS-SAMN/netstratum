@@ -202,7 +202,7 @@ pub fn payload(proof: &CorpusProof) -> Option<Vec<u8>> {
 /// amendment and its own landing.
 pub fn already_earned(chronicle: &cfe::vrp::Chronicle, task_id: &[u8; 32]) -> bool {
     chronicle.receipts().iter().any(|receipt| {
-        let cfe::dop::ClosureEvent::DiscoveryMinted { work, .. } = &receipt.event else {
+        let cfe::dop::ClosureEvent::DiscoveryMinted { work, .. } = receipt.event() else {
             return false;
         };
         matches!(

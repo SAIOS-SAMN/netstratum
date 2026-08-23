@@ -87,7 +87,7 @@ fn the_pen_passes_writes_and_returns() {
     assert_eq!(mesh::authority(held.chronicle()), Ok(Some(hand)), "the deeds walk lawful");
 
     // The yield back, synced to the file.
-    let stamp = held.chronicle().receipts().last().unwrap().stamp;
+    let stamp = held.chronicle().receipts().last().unwrap().stamp();
     mesh::yield_authority(held.chronicle_mut(), hand, CONDUCTOR_HAND, stamp)
         .expect("the return seal");
     let deeds_len = held.chronicle().receipts().len();

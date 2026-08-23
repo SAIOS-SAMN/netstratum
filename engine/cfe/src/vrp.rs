@@ -122,16 +122,220 @@ impl ReceiptHash {
     pub const GENESIS: Self = Self([0u8; 32]);
 }
 
-/// One receipt (NS-3 §1.1). Fields are readable; the chronicle is the
-/// only constructor path that yields a chained receipt.
+/// The pre-TU-1 receipt shape (NS-3 §1.1) — kept byte-identical so the
+/// historical chronicle (every receipt written before the {S,G,T}
+/// amendment) replays exactly. Never constructed by new code; `V1` reads
+/// old chronicles, `Chronicle::append` only ever writes `V2` going
+/// forward (TU-1a ruling 2026-08-22: a direct restructure, not additive
+/// optional fields — the ledger trunk carries no structural ambiguity).
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Receipt {
+pub struct LegacyReceipt {
     pub sequence: u64,
     pub stamp: u64,
     pub parent: ReceiptHash,
     pub own: ReceiptHash,
     pub event: ClosureEvent,
     pub provenance: Vec<u64>,
+}
+
+/// The {S,G,T} receipt (doc 55, TU-1). `stamp` stays T's local-clock
+/// half (unchanged). `region_seed` is S — the COARSE galactic cell
+/// (GALACTIC-1's `dop::region_seed_of`), never exact `(x,y,z)`: Čech
+/// cohomology is about which cover a civilization overlaps, not point
+/// masses (TU-1b ruling). `gauge` is G — a beat-level snapshot (never
+/// per-deed: `reduct::GaugeDirection` is a live, freshly-recomputed
+/// cohomology peel with no stable per-world identity, and a beat is
+/// this engine's indivisible quantum of macro-time, so gauge formally
+/// settles at the beat boundary, not mid-beat — TU-1c ruling). Carried
+/// as raw index bytes (never the `reduct::GaugeDirection` type itself)
+/// because `cfe` does not and should not depend on `reduct` — the
+/// cognition crate stays downstream of the world crate, not beside it.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ManifoldReceipt {
+    pub sequence: u64,
+    pub stamp: u64,
+    pub parent: ReceiptHash,
+    pub own: ReceiptHash,
+    pub event: ClosureEvent,
+    pub provenance: Vec<u64>,
+    pub region_seed: [u8; 32],
+    pub gauge: Vec<u8>,
+}
+
+/// One receipt (NS-3 §1.1). A direct restructure (TU-1a), not additive
+/// versioning: `V1` is every receipt ever written before this
+/// amendment, byte-identical on the wire and in the digest; `V2` is
+/// every receipt `Chronicle::append` writes from here forward. Use the
+/// accessor methods (`.stamp()`, `.event()`, …) for the fields both
+/// variants share — they read as fields did before this change, just
+/// through one extra dispatch. `.region_seed()`/`.gauge()` are `None`
+/// for `V1` (a world that predates the regional/gauge axes).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Receipt {
+    V1(LegacyReceipt),
+    V2(ManifoldReceipt),
+}
+
+impl Receipt {
+    pub fn sequence(&self) -> u64 {
+        match self {
+            Receipt::V1(r) => r.sequence,
+            Receipt::V2(r) => r.sequence,
+        }
+    }
+    pub fn stamp(&self) -> u64 {
+        match self {
+            Receipt::V1(r) => r.stamp,
+            Receipt::V2(r) => r.stamp,
+        }
+    }
+    pub fn parent(&self) -> ReceiptHash {
+        match self {
+            Receipt::V1(r) => r.parent,
+            Receipt::V2(r) => r.parent,
+        }
+    }
+    pub fn own(&self) -> ReceiptHash {
+        match self {
+            Receipt::V1(r) => r.own,
+            Receipt::V2(r) => r.own,
+        }
+    }
+    pub fn event(&self) -> &ClosureEvent {
+        match self {
+            Receipt::V1(r) => &r.event,
+            Receipt::V2(r) => &r.event,
+        }
+    }
+    pub fn provenance(&self) -> &[u64] {
+        match self {
+            Receipt::V1(r) => &r.provenance,
+            Receipt::V2(r) => &r.provenance,
+        }
+    }
+    /// S — the coarse galactic cell, or `None` for a `V1` (pre-TU-1)
+    /// receipt.
+    pub fn region_seed(&self) -> Option<[u8; 32]> {
+        match self {
+            Receipt::V1(_) => None,
+            Receipt::V2(r) => Some(r.region_seed),
+        }
+    }
+    /// G — the beat's cached gauge-direction sample, or `None` for a
+    /// `V1` receipt.
+    pub fn gauge(&self) -> Option<&[u8]> {
+        match self {
+            Receipt::V1(_) => None,
+            Receipt::V2(r) => Some(&r.gauge),
+        }
+    }
+
+    /// The receipt's on-disk frame (NS-3 §2.4). `V1` is tag 20, byte-
+    /// identical to every receipt ever written: `LE64(sequence) ‖
+    /// LE64(stamp) ‖ parent[32] ‖ own[32] ‖ LE32(provenance count) ‖
+    /// LE64(k)… ‖ event TLV record`. `V2` is tag 21 (TU-1, new,
+    /// permanent — additive at the FRAME level even though the receipt
+    /// itself is a direct restructure, so a `V1`-only reader skips `V2`
+    /// frames under SEAL A rather than refusing the whole file): the
+    /// same layout with `region_seed[32] ‖ LE32(gauge count) ‖ gauge
+    /// bytes…` inserted after the provenance list, before the event.
+    pub fn wire_bytes(&self) -> Vec<u8> {
+        match self {
+            Receipt::V1(r) => {
+                let mut value = r.sequence.to_le_bytes().to_vec();
+                value.extend_from_slice(&r.stamp.to_le_bytes());
+                value.extend_from_slice(&r.parent.0);
+                value.extend_from_slice(&r.own.0);
+                value.extend_from_slice(&(r.provenance.len() as u32).to_le_bytes());
+                for k in &r.provenance {
+                    value.extend_from_slice(&k.to_le_bytes());
+                }
+                value.extend_from_slice(&r.event.wire_bytes());
+                let mut out = Vec::new();
+                crate::tlv::put(RECEIPT_FRAME_TAG, &value, &mut out);
+                out
+            }
+            Receipt::V2(r) => {
+                let mut value = r.sequence.to_le_bytes().to_vec();
+                value.extend_from_slice(&r.stamp.to_le_bytes());
+                value.extend_from_slice(&r.parent.0);
+                value.extend_from_slice(&r.own.0);
+                value.extend_from_slice(&(r.provenance.len() as u32).to_le_bytes());
+                for k in &r.provenance {
+                    value.extend_from_slice(&k.to_le_bytes());
+                }
+                value.extend_from_slice(&r.region_seed);
+                value.extend_from_slice(&(r.gauge.len() as u32).to_le_bytes());
+                value.extend_from_slice(&r.gauge);
+                value.extend_from_slice(&r.event.wire_bytes());
+                let mut out = Vec::new();
+                crate::tlv::put(RECEIPT_FRAME_TAG_V2, &value, &mut out);
+                out
+            }
+        }
+    }
+
+    /// Decode one framed receipt; `None` on an unknown tag or a
+    /// malformed frame (the caller skips unknown tags — SEAL A).
+    pub fn from_wire(tag: u8, value: &[u8]) -> Option<Self> {
+        match tag {
+            RECEIPT_FRAME_TAG => {
+                let sequence = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let stamp = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
+                let parent = ReceiptHash(value.get(16..48)?.try_into().ok()?);
+                let own = ReceiptHash(value.get(48..80)?.try_into().ok()?);
+                let count = u32::from_le_bytes(value.get(80..84)?.try_into().ok()?) as usize;
+                let mut at = 84usize;
+                let mut provenance = Vec::with_capacity(count);
+                for _ in 0..count {
+                    provenance.push(u64::from_le_bytes(value.get(at..at + 8)?.try_into().ok()?));
+                    at += 8;
+                }
+                let (event_tag, event_value) = crate::tlv::records(value.get(at..)?).next()?;
+                let event = ClosureEvent::from_wire(event_tag, event_value)?;
+                Some(Receipt::V1(LegacyReceipt {
+                    sequence,
+                    stamp,
+                    parent,
+                    own,
+                    event,
+                    provenance,
+                }))
+            }
+            RECEIPT_FRAME_TAG_V2 => {
+                let sequence = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let stamp = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
+                let parent = ReceiptHash(value.get(16..48)?.try_into().ok()?);
+                let own = ReceiptHash(value.get(48..80)?.try_into().ok()?);
+                let count = u32::from_le_bytes(value.get(80..84)?.try_into().ok()?) as usize;
+                let mut at = 84usize;
+                let mut provenance = Vec::with_capacity(count);
+                for _ in 0..count {
+                    provenance.push(u64::from_le_bytes(value.get(at..at + 8)?.try_into().ok()?));
+                    at += 8;
+                }
+                let region_seed: [u8; 32] = value.get(at..at + 32)?.try_into().ok()?;
+                at += 32;
+                let gauge_len = u32::from_le_bytes(value.get(at..at + 4)?.try_into().ok()?) as usize;
+                at += 4;
+                let gauge = value.get(at..at + gauge_len)?.to_vec();
+                at += gauge_len;
+                let (event_tag, event_value) = crate::tlv::records(value.get(at..)?).next()?;
+                let event = ClosureEvent::from_wire(event_tag, event_value)?;
+                Some(Receipt::V2(ManifoldReceipt {
+                    sequence,
+                    stamp,
+                    parent,
+                    own,
+                    event,
+                    provenance,
+                    region_seed,
+                    gauge,
+                }))
+            }
+            _ => None,
+        }
+    }
 }
 
 /// The chain's typed verification read (NS-3 §1.4).
@@ -142,57 +346,12 @@ pub enum ChainRead {
 }
 
 /// The receipt FRAME tag (NS-3 §2.4, P2): the on-disk framing of one
-/// whole receipt. Permanent, like every tag.
+/// whole `V1` receipt. Permanent, like every tag — untouched by TU-1,
+/// so every historical chronicle decodes byte-identically.
 pub const RECEIPT_FRAME_TAG: u8 = 20;
-
-impl Receipt {
-    /// The receipt's on-disk frame (NS-3 §2.4): one TLV record, tag 20,
-    /// value = `LE64(sequence) ‖ LE64(stamp) ‖ parent[32] ‖ own[32] ‖
-    /// LE32(provenance count) ‖ LE64(k)… ‖ event TLV record`.
-    pub fn wire_bytes(&self) -> Vec<u8> {
-        let mut value = self.sequence.to_le_bytes().to_vec();
-        value.extend_from_slice(&self.stamp.to_le_bytes());
-        value.extend_from_slice(&self.parent.0);
-        value.extend_from_slice(&self.own.0);
-        value.extend_from_slice(&(self.provenance.len() as u32).to_le_bytes());
-        for k in &self.provenance {
-            value.extend_from_slice(&k.to_le_bytes());
-        }
-        value.extend_from_slice(&self.event.wire_bytes());
-        let mut out = Vec::new();
-        crate::tlv::put(RECEIPT_FRAME_TAG, &value, &mut out);
-        out
-    }
-
-    /// Decode one framed receipt; `None` on an unknown tag or a
-    /// malformed frame (the caller skips unknown tags — SEAL A).
-    pub fn from_wire(tag: u8, value: &[u8]) -> Option<Self> {
-        if tag != RECEIPT_FRAME_TAG {
-            return None;
-        }
-        let sequence = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
-        let stamp = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
-        let parent = ReceiptHash(value.get(16..48)?.try_into().ok()?);
-        let own = ReceiptHash(value.get(48..80)?.try_into().ok()?);
-        let count = u32::from_le_bytes(value.get(80..84)?.try_into().ok()?) as usize;
-        let mut at = 84usize;
-        let mut provenance = Vec::with_capacity(count);
-        for _ in 0..count {
-            provenance.push(u64::from_le_bytes(value.get(at..at + 8)?.try_into().ok()?));
-            at += 8;
-        }
-        let (event_tag, event_value) = crate::tlv::records(value.get(at..)?).next()?;
-        let event = ClosureEvent::from_wire(event_tag, event_value)?;
-        Some(Receipt {
-            sequence,
-            stamp,
-            parent,
-            own,
-            event,
-            provenance,
-        })
-    }
-}
+/// The `V2` ({S,G,T}) receipt frame tag (TU-1, new 2026-08-22).
+/// Permanent from here forward.
+pub const RECEIPT_FRAME_TAG_V2: u8 = 21;
 
 /// MESH-1b (NS-5 §7.5): the conductor's hand. Every other seat
 /// derives its hand from its name via `hand_of`; 0 stays unclaimed.
@@ -215,6 +374,17 @@ pub struct Chronicle {
     /// MESH-1b consumer funnel: the held pen. Workspace only — never
     /// serialized; the receipts' provenance is the record.
     hand: Option<u64>,
+    /// TU-1 / S: the world's coarse galactic cell, set once (mirrors
+    /// `World::region_seed`, GALACTIC-1's `chart_region`). `None` until
+    /// charted — every `append` before that point still writes `V1`
+    /// (a world with no region is a world TU-1 does not yet describe,
+    /// not an error).
+    region_seed: Option<[u8; 32]>,
+    /// TU-1 / G: this beat's cached gauge-direction sample (raw index
+    /// bytes — `cfe` does not depend on `reduct`). Set once per beat by
+    /// the caller (mirrors `set_hand`); every `append` within that beat
+    /// reads the same snapshot, never recomputing mid-beat (TU-1c).
+    gauge_cache: Vec<u8>,
 }
 
 impl Chronicle {
@@ -228,7 +398,7 @@ impl Chronicle {
     /// across the process boundary because this is the one door back in.
     pub fn from_receipts(receipts: Vec<Receipt>) -> Result<Self, ChainRead> {
         match verify_receipts(&receipts) {
-            ChainRead::Intact => Ok(Self { receipts, hand: None }),
+            ChainRead::Intact => Ok(Self { receipts, hand: None, region_seed: None, gauge_cache: Vec::new() }),
             broken => Err(broken),
         }
     }
@@ -248,18 +418,39 @@ impl Chronicle {
         self.hand
     }
 
+    /// TU-1 / S: seal the world's coarse galactic cell — once (mirrors
+    /// `chart_region`'s sealed-once law at the `World` layer). Every
+    /// `append` from this point forward writes `V2`.
+    pub fn set_region_seed(&mut self, seed: [u8; 32]) {
+        self.region_seed = Some(seed);
+    }
+
+    pub fn region_seed(&self) -> Option<[u8; 32]> {
+        self.region_seed
+    }
+
+    /// TU-1 / G: cache this beat's gauge-direction sample. Called once
+    /// per beat (TU-1c) — every `append` within the beat reads this same
+    /// snapshot.
+    pub fn set_gauge_sample(&mut self, sample: Vec<u8>) {
+        self.gauge_cache = sample;
+    }
+
     /// The one write. Parent link and own digest are computed here.
     /// A held pen (MESH-1b) stamps the hand at the provenance head
     /// and cites a seal standing last (NS-5 §7.1); pre-stamped
     /// provenance (the mesh doors) and unheld chronicles pass
-    /// through untouched.
+    /// through untouched. TU-1: once a region is charted, every append
+    /// writes `V2` (S = the sealed cell, G = the beat's cached sample);
+    /// before that, `V1` — byte-identical to every receipt this engine
+    /// has ever written.
     pub fn append(&mut self, event: ClosureEvent, stamp: u64, provenance: Vec<u64>) -> &Receipt {
         let provenance = match self.hand {
             Some(hand) if provenance.first() != Some(&hand) => {
                 let mut carried = vec![hand];
                 if let Some(last) = self.receipts.last() {
-                    if matches!(last.event, ClosureEvent::HandoffSealed { .. }) {
-                        carried.push(last.sequence);
+                    if matches!(last.event(), ClosureEvent::HandoffSealed { .. }) {
+                        carried.push(last.sequence());
                     }
                 }
                 carried.extend(provenance);
@@ -271,17 +462,37 @@ impl Chronicle {
         let parent = self
             .receipts
             .last()
-            .map(|receipt| receipt.own)
+            .map(|receipt| receipt.own())
             .unwrap_or(ReceiptHash::GENESIS);
-        let own = receipt_digest(sequence, stamp, &parent, &event.wire_bytes(), &provenance);
-        self.receipts.push(Receipt {
-            sequence,
-            stamp,
-            parent,
-            own,
-            event,
-            provenance,
-        });
+        let event_bytes = event.wire_bytes();
+        let receipt = match self.region_seed {
+            Some(region_seed) => {
+                let gauge = self.gauge_cache.clone();
+                let own = receipt_digest_v2(sequence, stamp, &parent, &event_bytes, &provenance, &region_seed, &gauge);
+                Receipt::V2(ManifoldReceipt {
+                    sequence,
+                    stamp,
+                    parent,
+                    own,
+                    event,
+                    provenance,
+                    region_seed,
+                    gauge,
+                })
+            }
+            None => {
+                let own = receipt_digest(sequence, stamp, &parent, &event_bytes, &provenance);
+                Receipt::V1(LegacyReceipt {
+                    sequence,
+                    stamp,
+                    parent,
+                    own,
+                    event,
+                    provenance,
+                })
+            }
+        };
+        self.receipts.push(receipt);
         self.receipts.last().expect("just appended")
     }
 
@@ -296,18 +507,23 @@ impl Chronicle {
 pub fn verify_receipts(receipts: &[Receipt]) -> ChainRead {
     let mut parent = ReceiptHash::GENESIS;
     for receipt in receipts {
-        let expected = receipt_digest(
-            receipt.sequence,
-            receipt.stamp,
-            &parent,
-            &receipt.event.wire_bytes(),
-            &receipt.provenance,
-        );
-        match receipt.parent == parent && receipt.own == expected {
-            true => parent = receipt.own,
+        let expected = match receipt {
+            Receipt::V1(r) => receipt_digest(r.sequence, r.stamp, &parent, &r.event.wire_bytes(), &r.provenance),
+            Receipt::V2(r) => receipt_digest_v2(
+                r.sequence,
+                r.stamp,
+                &parent,
+                &r.event.wire_bytes(),
+                &r.provenance,
+                &r.region_seed,
+                &r.gauge,
+            ),
+        };
+        match receipt.parent() == parent && receipt.own() == expected {
+            true => parent = receipt.own(),
             false => {
                 return ChainRead::Broken {
-                    at: receipt.sequence,
+                    at: receipt.sequence(),
                 }
             }
         }
@@ -315,7 +531,7 @@ pub fn verify_receipts(receipts: &[Receipt]) -> ChainRead {
     ChainRead::Intact
 }
 
-/// The normative digest layout (NS-3 §2.1):
+/// The normative digest layout (NS-3 §2.1), `V1` — UNCHANGED by TU-1:
 /// `BLAKE3( LE64(sequence) ‖ LE64(stamp) ‖ parent[32] ‖ event_bytes ‖ LE64(k)… )`.
 /// Public over raw event bytes so the NS-3 §3 vectors — whose event
 /// bytes come from the v0.4 ancestor — verify against this exact
@@ -335,5 +551,34 @@ pub fn receipt_digest(
     for k in provenance {
         hasher.update(&k.to_le_bytes());
     }
+    ReceiptHash(*hasher.finalize().as_bytes())
+}
+
+/// The `V2` digest layout (TU-1): `receipt_digest`'s exact formula, with
+/// `region_seed` and `gauge` folded in AFTER provenance and BEFORE
+/// nothing else changes — S and G are attested facts, so a tampered
+/// region or gauge sample breaks the chain exactly like a tampered event
+/// would (the whole point of stamping them: an untrusted claim about a
+/// civilization's position or orientation must be checkable, not just
+/// carried).
+pub fn receipt_digest_v2(
+    sequence: u64,
+    stamp: u64,
+    parent: &ReceiptHash,
+    event_bytes: &[u8],
+    provenance: &[u64],
+    region_seed: &[u8; 32],
+    gauge: &[u8],
+) -> ReceiptHash {
+    let mut hasher = blake3::Hasher::new();
+    hasher.update(&sequence.to_le_bytes());
+    hasher.update(&stamp.to_le_bytes());
+    hasher.update(&parent.0);
+    hasher.update(event_bytes);
+    for k in provenance {
+        hasher.update(&k.to_le_bytes());
+    }
+    hasher.update(region_seed);
+    hasher.update(gauge);
     ReceiptHash(*hasher.finalize().as_bytes())
 }

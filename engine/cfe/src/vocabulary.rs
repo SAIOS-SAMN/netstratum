@@ -649,7 +649,7 @@ pub fn solver_words(
         // LICENSED from the roster's pool (ARC C — knowledge circulates,
         // not just matter). Both enter the library identically: same
         // orbit, same expansion, same certificate.
-        match &receipt.event {
+        match receipt.event() {
             crate::dop::ClosureEvent::SolverWordMinted { orbit, expansion, cited }
             | crate::dop::ClosureEvent::KnowledgeLicensed { orbit, expansion, cited } => {
                 out.push((*orbit, expansion.clone(), cited.clone()));
@@ -684,7 +684,7 @@ pub fn recipes_built(chronicle: &crate::vrp::Chronicle) -> Vec<BuiltRecipe> {
     let mut out = Vec::new();
     for receipt in chronicle.receipts() {
         if let crate::dop::ClosureEvent::RecipeBuilt { orb_id, inputs, role, yield_of_role } =
-            &receipt.event
+            receipt.event()
         {
             out.push(BuiltRecipe {
                 orb_id: *orb_id,
@@ -714,7 +714,7 @@ pub fn fold(chronicle: &crate::vrp::Chronicle, axis: Axis) -> Vec<Entry> {
             binding,
             base,
             ration,
-        } = &receipt.event
+        } = receipt.event()
         {
             if Axis::from_code(*on) == Some(axis) {
                 out.push(Entry {
@@ -752,7 +752,7 @@ pub fn ceiling(chronicle: &crate::vrp::Chronicle, axis: Axis) -> u8 {
 pub fn fold_at(chronicle: &crate::vrp::Chronicle, axis: Axis, stamp: u64) -> Vec<Entry> {
     let mut out = seed(axis);
     for receipt in chronicle.receipts() {
-        if receipt.stamp > stamp {
+        if receipt.stamp() > stamp {
             break;
         }
         if let crate::dop::ClosureEvent::VocabularyMinted {
@@ -763,7 +763,7 @@ pub fn fold_at(chronicle: &crate::vrp::Chronicle, axis: Axis, stamp: u64) -> Vec
             binding,
             base,
             ration,
-        } = &receipt.event
+        } = receipt.event()
         {
             if Axis::from_code(*on) == Some(axis) {
                 out.push(Entry {

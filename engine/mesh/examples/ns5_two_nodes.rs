@@ -98,7 +98,7 @@ fn take(file: &Path) {
     let mut chronicle = receive(&bytes, Side::B).expect("intact through the door");
     let hand = authority(&chronicle).expect("lawful arbor").expect("sealed arbor");
     assert_eq!(hand, HAND_B, "the pen arrived with the bytes");
-    let stamp = chronicle.receipts().last().map(|r| r.stamp).unwrap_or(0);
+    let stamp = chronicle.receipts().last().map(|r| r.stamp()).unwrap_or(0);
     let at = append_as(
         &mut chronicle,
         HAND_B,
@@ -143,7 +143,10 @@ fn usurp(file: &Path) {
 /// law cannot be recomputed on their side of the wire.
 fn tamper(src: &Path, dst: &Path) {
     let mut receipts = load(src).expect("src returns").receipts().to_vec();
-    receipts[2].stamp += 1;
+    match &mut receipts[2] {
+        cfe::vrp::Receipt::V1(r) => r.stamp += 1,
+        cfe::vrp::Receipt::V2(r) => r.stamp += 1,
+    }
     let mut bytes = Vec::new();
     for receipt in &receipts {
         bytes.extend_from_slice(&receipt.wire_bytes());

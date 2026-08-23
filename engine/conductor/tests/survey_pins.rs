@@ -158,7 +158,7 @@ fn the_survey_charters_the_sector_and_the_spent_lens_idles() {
 
     let receipts = polity.world.chronicle().receipts();
     assert!(
-        receipts.iter().any(|r| matches!(r.event, ClosureEvent::CrystalDrawn { .. })),
+        receipts.iter().any(|r| matches!(r.event(), ClosureEvent::CrystalDrawn { .. })),
         "the draw receipted — the survey was paid for"
     );
     // THE SURVEY ARC'S OWN RESPONSIBILITY (re-scoped 2026-08-15): assert the
@@ -172,7 +172,7 @@ fn the_survey_charters_the_sector_and_the_spent_lens_idles() {
     // by native surplus, are tolerated.
     let survey_orb_id = receipts
         .iter()
-        .find_map(|r| match &r.event {
+        .find_map(|r| match r.event() {
             ClosureEvent::ColonyCharted { orb_id, name, .. } if name == "first-lens-survey" => {
                 Some(*orb_id)
             }
@@ -201,7 +201,7 @@ fn the_survey_charters_the_sector_and_the_spent_lens_idles() {
         .chronicle()
         .receipts()
         .iter()
-        .filter(|r| matches!(r.event, ClosureEvent::CrystalDrawn { .. }))
+        .filter(|r| matches!(r.event(), ClosureEvent::CrystalDrawn { .. }))
         .count();
     assert_eq!(draws, 1, "one survey, one draw");
     // THE DRAW-BOUND, SCOPED TO THE SURVEY: one crystal draw funds exactly one
@@ -214,7 +214,7 @@ fn the_survey_charters_the_sector_and_the_spent_lens_idles() {
         .receipts()
         .iter()
         .filter(|r| {
-            matches!(&r.event, ClosureEvent::ColonyCharted { name, .. } if name.ends_with("-survey"))
+            matches!(r.event(), ClosureEvent::ColonyCharted { name, .. } if name.ends_with("-survey"))
         })
         .count();
     assert_eq!(survey_charters, 1, "one draw funds exactly one survey charter");

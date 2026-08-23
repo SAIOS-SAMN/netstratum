@@ -107,7 +107,7 @@ impl World {
         self.chronicle
             .receipts()
             .iter()
-            .filter(|r| r.stamp >= start && receipt_ap_cost(r) > 0)
+            .filter(|r| r.stamp() >= start && receipt_ap_cost(r) > 0)
             .map(receipt_ap_cost)
             .sum()
     }
@@ -164,7 +164,7 @@ impl World {
 
 /// How much AP a receipt spent (0 if not a gated family).
 fn receipt_ap_cost(receipt: &Receipt) -> u64 {
-    match &receipt.event {
+    match receipt.event() {
         ClosureEvent::ZoneBuilt { .. } => ApKind::Build.cost(),
         ClosureEvent::ProspectStruck { .. } => ApKind::Prospect.cost(),
         ClosureEvent::InstrumentForged { .. } | ClosureEvent::PracticeAdopted { .. } => {

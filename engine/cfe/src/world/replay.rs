@@ -167,7 +167,7 @@ impl Replayer {
             rogue_pressure,
             element_allowlists,
         } = &mut self.state;
-    match &receipt.event {
+    match receipt.event() {
         // NOVELTY-GATE (tag 166): the solver library is a FOLD of
         // these receipts (`vocabulary::solver_words`) — no committed
         // field moves, so replay carries nothing for it.
@@ -315,7 +315,7 @@ impl Replayer {
                 if *resource == Resource::Joule {
                     held.syntropy_contained += amount.clone();
                 }
-                held.last_touch = receipt.stamp;
+                held.last_touch = receipt.stamp();
             }
         }
         // U1: the discovery mint banks like a yield; the work
@@ -324,7 +324,7 @@ impl Replayer {
         ClosureEvent::DiscoveryMinted { orb_id, resource, amount, .. } => {
             if let Some(held) = peel(&mut *orbs, *orb_id) {
                 held.bank(*resource, amount.clone());
-                held.last_touch = receipt.stamp;
+                held.last_touch = receipt.stamp();
             }
         }
         ClosureEvent::UpkeepSettled { orb_id, resource, amount } => {
@@ -333,7 +333,7 @@ impl Replayer {
                 // TRADE-1 truth-update: every settle is a touch —
                 // the demurrage anchor replays for upkeep-only
                 // collects too, exactly as the live path set it.
-                held.last_touch = receipt.stamp;
+                held.last_touch = receipt.stamp();
             }
         }
         // THE ESTATE SURVEY (tag 97): the meter's draw replays
@@ -344,7 +344,7 @@ impl Replayer {
             if let Some(held) = peel(&mut *orbs, *payer) {
                 let (resource, _) = crate::dop::survey_meter();
                 held.bank(resource, -cost.clone());
-                held.last_touch = receipt.stamp;
+                held.last_touch = receipt.stamp();
             }
         }
         // THE APPRAISAL (tag 98): a valuation reading, receipted.
@@ -367,11 +367,11 @@ impl Replayer {
             if let Some(held) = peel(&mut *orbs, *from_orb) {
                 held.bank(*resource, -amount.clone());
                 held.bank(stamp, -postage.clone());
-                held.last_touch = receipt.stamp;
+                held.last_touch = receipt.stamp();
             }
             if let Some(dest) = peel(&mut *orbs, *to_orb) {
                 dest.bank(*resource, amount.clone());
-                dest.last_touch = receipt.stamp;
+                dest.last_touch = receipt.stamp();
             }
         }
         // THE MINTED LINE (tag 101): identity, never matter — the
@@ -439,7 +439,7 @@ impl Replayer {
                     kind,
                     partner: partner.clone(),
                     terms: terms.clone(),
-                    sealed: receipt.stamp,
+                    sealed: receipt.stamp(),
                     term: *term,
                 });
             }
@@ -571,7 +571,7 @@ impl Replayer {
         ClosureEvent::VentSettled { orb_id, amount } => {
             if let Some(held) = peel(&mut *orbs, *orb_id) {
                 held.entropy_vented += amount.clone();
-                held.last_touch = receipt.stamp;
+                held.last_touch = receipt.stamp();
             }
         }
         // SINK-1: receipted demurrage replays as a bank draw.
@@ -579,7 +579,7 @@ impl Replayer {
         ClosureEvent::DemurrageSettled { orb_id, resource, amount } => {
             if let Some(held) = peel(&mut *orbs, *orb_id) {
                 held.bank(*resource, -amount.clone());
-                held.last_touch = receipt.stamp;
+                held.last_touch = receipt.stamp();
             }
         }
         // SINK-1: the ATOMIC touch (tag 102) — every settled
@@ -589,7 +589,7 @@ impl Replayer {
                 for (resource, amount) in decays {
                     held.bank(*resource, -amount.clone());
                 }
-                held.last_touch = receipt.stamp;
+                held.last_touch = receipt.stamp();
             }
         }
         // TRADE-1: the move replays with the SAME crisis reads the
@@ -604,14 +604,14 @@ impl Replayer {
             let value = amount.clone() * crate::dop::commensurate_weight(*resource);
             if let Some(held) = peel(&mut *orbs, *from_orb) {
                 held.bank(*resource, -amount.clone());
-                held.last_touch = receipt.stamp;
+                held.last_touch = receipt.stamp();
                 if to_crisis {
                     held.given_in_crisis += value.clone();
                 }
             }
             if let Some(held) = peel(&mut *orbs, *to_orb) {
                 held.bank(*resource, amount.clone());
-                held.last_touch = receipt.stamp;
+                held.last_touch = receipt.stamp();
                 if from_crisis {
                     held.drawn_in_crisis += value.clone();
                 }
@@ -626,7 +626,7 @@ impl Replayer {
         ClosureEvent::ApertureSent { from_orb, resource, amount, .. } => {
             if let Some(held) = peel(&mut *orbs, *from_orb) {
                 held.bank(*resource, -amount.clone());
-                held.last_touch = receipt.stamp;
+                held.last_touch = receipt.stamp();
             }
             *crossed = true;
         }
@@ -635,7 +635,7 @@ impl Replayer {
         ClosureEvent::ApertureReceived { to_orb, resource, amount, .. } => {
             if let Some(held) = peel(&mut *orbs, *to_orb) {
                 held.bank(*resource, amount.clone());
-                held.last_touch = receipt.stamp;
+                held.last_touch = receipt.stamp();
             }
             *crossed = true;
         }
@@ -685,7 +685,7 @@ impl Replayer {
         ClosureEvent::CrystalDrawn { orb_id, amount } => {
             if let Some(held) = peel(&mut *orbs, *orb_id) {
                 held.bank(Resource::Crystal, -amount.clone());
-                held.last_touch = receipt.stamp;
+                held.last_touch = receipt.stamp();
             }
         }
         // NOVEL-1 (10 §3c): the succession boundary replays — the
@@ -716,7 +716,7 @@ impl Replayer {
                 extracted: ratio(0, 1),
                 // ONT-3: nothing recovered yet.
                 rejuvenated: ratio(0, 1),
-                last_assay: receipt.stamp,
+                last_assay: receipt.stamp(),
             });
         }
         // #27: a dying star scatters a vein — the same push a prospect makes.
@@ -729,7 +729,7 @@ impl Replayer {
                 extracted: ratio(0, 1),
                 // ONT-3: nothing recovered yet.
                 rejuvenated: ratio(0, 1),
-                last_assay: receipt.stamp,
+                last_assay: receipt.stamp(),
             });
         }
         // ELEMENT-CHEMISTRY (#37): the bond replays by re-deriving
@@ -765,7 +765,7 @@ impl Replayer {
                 .iter_mut()
                 .find(|held| held.orb == *orb_id && held.element == *element)
             {
-                vein.last_assay = receipt.stamp;
+                vein.last_assay = receipt.stamp();
                 // ONT-2: fold the receipt's Δ into the extraction integral —
                 // replay reads, never re-derives. Richness is a projection of
                 // (geometry − this sum), so re-derivation is free and exact.
@@ -803,7 +803,7 @@ impl Replayer {
                 .iter_mut()
                 .find(|held| held.orb == *orb_id && held.element == *element)
             {
-                vein.last_assay = receipt.stamp;
+                vein.last_assay = receipt.stamp();
                 vein.extracted += eaten.clone();
             }
         }
@@ -818,7 +818,7 @@ impl Replayer {
                 .iter_mut()
                 .find(|held| held.orb == *orb_id && held.element == *element)
             {
-                vein.last_assay = receipt.stamp;
+                vein.last_assay = receipt.stamp();
                 vein.rejuvenated += injected.clone();
             }
         }
@@ -838,7 +838,7 @@ impl Replayer {
             {
                 held.bank(Resource::Sink, -amount.clone());
                 held.entropy_vented += amount.clone();
-                held.last_touch = receipt.stamp;
+                held.last_touch = receipt.stamp();
                 if source_crisis {
                     held.given_in_crisis += value.clone();
                 }
@@ -854,7 +854,7 @@ impl Replayer {
                 debtor: *source_orb,
                 creditor: *absorber_orb,
                 remainder: amount.clone(),
-                opened: receipt.stamp,
+                opened: receipt.stamp(),
             });
         }
         // ABSORB-1: the lapse replays — extraction posts, the
@@ -879,8 +879,8 @@ impl Replayer {
                 resource: *resource,
                 rate: rate.clone(),
                 term: *term,
-                sealed: receipt.stamp,
-                anchored: receipt.stamp,
+                sealed: receipt.stamp(),
+                anchored: receipt.stamp(),
             });
         }
         // BOND-1: one settle receipt moves the span, posts the
@@ -894,13 +894,13 @@ impl Replayer {
                 if let Some(held) = peel(&mut *orbs, *source_orb)
                 {
                     held.bank(*resource, -amount.clone());
-                    held.last_touch = receipt.stamp;
+                    held.last_touch = receipt.stamp();
                     held.bond_flow += value.clone();
                 }
                 if let Some(held) = peel(&mut *orbs, *target_orb)
                 {
                     held.bank(*resource, amount.clone());
-                    held.last_touch = receipt.stamp;
+                    held.last_touch = receipt.stamp();
                 }
                 settle_debts(&mut *debts, &mut *orbs, *source_orb, *target_orb, value);
                 credit_forwards(&mut *forwards, *source_orb, *target_orb, *resource, amount);
@@ -929,7 +929,7 @@ impl Replayer {
                             && bond.target == *target_orb
                             && bond.resource == *resource
                     }) {
-                        bond.anchored = receipt.stamp;
+                        bond.anchored = receipt.stamp();
                     }
                 }
             }
@@ -954,7 +954,7 @@ impl Replayer {
                 quota: quota.clone(),
                 delivered: ratio(0, 1),
                 collateral: collateral.clone(),
-                sealed: receipt.stamp,
+                sealed: receipt.stamp(),
                 window: *window,
             });
         }
@@ -998,7 +998,7 @@ impl Replayer {
         ClosureEvent::FrictionSettled { orb_id, amount } => {
             if let Some(held) = peel(&mut *orbs, *orb_id) {
                 held.entropy_vented += amount.clone();
-                held.last_touch = receipt.stamp;
+                held.last_touch = receipt.stamp();
             }
         }
         // TECH-1a: a discovered node replays into the tech list —
@@ -1026,7 +1026,7 @@ impl Replayer {
                 quota: quota.clone(),
                 delivered: vec![ratio(0, 1); members.len()],
                 collateral: collateral.clone(),
-                sealed: receipt.stamp,
+                sealed: receipt.stamp(),
                 window: *window,
             });
         }
@@ -1148,7 +1148,7 @@ impl Replayer {
         // state, world-scoped and one-way — replay sets the stamp it
         // fired at and never clears it.
         ClosureEvent::CivilizationCollapsed { .. } => {
-            *collapsed = Some(receipt.stamp);
+            *collapsed = Some(receipt.stamp());
         }
         // MARKET-1 / E-MKT-1: the intent rests; the clear removes it.
         ClosureEvent::OfferPosted {
@@ -1161,7 +1161,7 @@ impl Replayer {
                 give_amount: give_amount.clone(),
                 want: want.clone(),
                 want_amount: want_amount.clone(),
-                posted: receipt.stamp,
+                posted: receipt.stamp(),
             });
         }
         ClosureEvent::OfferCleared { offer, .. } => {

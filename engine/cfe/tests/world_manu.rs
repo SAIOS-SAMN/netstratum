@@ -71,7 +71,7 @@ fn the_forge_gates_then_holds() {
     assert_eq!(world.instruments().len(), 1);
     assert_eq!(world.instruments()[0].2, 1, "grade IS the condition");
     let receipted = world.chronicle().receipts().iter().any(|receipt| {
-        matches!(receipt.event, ClosureEvent::InstrumentForged { grade: 1, .. })
+        matches!(receipt.event(), ClosureEvent::InstrumentForged { grade: 1, .. })
     });
     assert!(receipted, "the forge is a receipt");
     // Replay rebuilds the held instrument — the file is the world.

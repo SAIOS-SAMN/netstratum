@@ -176,7 +176,7 @@ fn the_gap_melts_the_cargo_and_distance_walls() {
         ratio(3335, 2048),
         "the void takes φ·D and the uncovered convoy pays its residual"
     );
-    let received = d.chronicle().receipts().iter().find_map(|r| match &r.event {
+    let received = d.chronicle().receipts().iter().find_map(|r| match r.event() {
         ClosureEvent::ApertureReceived { resource: Resource::Iron, amount, .. } => {
             Some(amount.clone())
         }
@@ -185,7 +185,7 @@ fn the_gap_melts_the_cargo_and_distance_walls() {
     assert_eq!(received, Some(ratio(3335, 2048)), "the receipt speaks what LANDED");
     // P5-A: the interdiction residual is receipted on the SENDING
     // book, wearing its risk.
-    let interdicted = c.chronicle().receipts().iter().find_map(|r| match &r.event {
+    let interdicted = c.chronicle().receipts().iter().find_map(|r| match r.event() {
         ClosureEvent::InterdictionStruck { resource: Resource::Iron, amount, risk, .. } => {
             Some((amount.clone(), risk.clone()))
         }
@@ -199,7 +199,7 @@ fn the_gap_melts_the_cargo_and_distance_walls() {
     // THE CONFORM RULING: the void's share is a first-class receipt
     // on the receiving book — sent = received + void share; every
     // deal sums to zero under ONE rule, and the gate only sums.
-    let void_share = d.chronicle().receipts().iter().find_map(|r| match &r.event {
+    let void_share = d.chronicle().receipts().iter().find_map(|r| match r.event() {
         ClosureEvent::VoidShare { resource: Resource::Iron, amount, .. } => Some(amount.clone()),
         _ => None,
     });
@@ -343,7 +343,7 @@ fn the_lane_bends_the_melt_then_lapses() {
     assert_eq!(lapsed, vec![40], "the unpaid lane lapses by receipt");
     assert!(b.routes().is_empty(), "raw space takes the path back");
     let receipted = b.chronicle().receipts().iter().any(|r| {
-        matches!(r.event, ClosureEvent::RouteLapsed { deal: 40 })
+        matches!(r.event(), ClosureEvent::RouteLapsed { deal: 40 })
     });
     assert!(receipted);
     // Replay MATCHES on both books.

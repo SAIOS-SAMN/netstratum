@@ -131,6 +131,6 @@ fn shifts(world: &World) -> usize {
         .chronicle()
         .receipts()
         .iter()
-        .filter(|receipt| matches!(receipt.event, ClosureEvent::GaugeShifted { .. }))
+        .filter(|receipt| matches!(receipt.event(), ClosureEvent::GaugeShifted { .. }))
         .count()
 }

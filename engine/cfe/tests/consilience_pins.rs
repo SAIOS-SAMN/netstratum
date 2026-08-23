@@ -30,7 +30,7 @@ fn the_axiom_records_once_and_a_lone_line_is_no_consilience() {
         .receipts()
         .iter()
         .filter(|r| matches!(
-            &r.event,
+            r.event(),
             ClosureEvent::KnowledgeConverged { signature: held, mass: 3, hardness: 2 } if *held == signature
         ))
         .count();

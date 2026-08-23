@@ -51,7 +51,7 @@ fn value_lost_is_the_sum_of_its_receipts() {
         .chronicle()
         .receipts()
         .iter()
-        .fold(ratio(0, 1), |carried, r| match &r.event {
+        .fold(ratio(0, 1), |carried, r| match r.event() {
             ClosureEvent::DemurrageSettled { orb_id, amount, .. }
             | ClosureEvent::UpkeepSettled { orb_id, amount, .. } if *orb_id == orb => {
                 carried + amount.clone()

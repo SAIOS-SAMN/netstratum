@@ -502,7 +502,7 @@ impl World {
         let mut discovery = ratio(0, 1);
         let mut consumed = ratio(0, 1);
         for receipt in self.chronicle.receipts() {
-            match &receipt.event {
+            match receipt.event() {
                 ClosureEvent::ZoneBuilt { .. } => territory += ratio(1, 1),
                 ClosureEvent::TechDiscovered { .. } => discovery += ratio(1, 1),
                 ClosureEvent::YieldCollected { amount, .. } => consumed += amount.clone(),

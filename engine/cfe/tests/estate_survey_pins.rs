@@ -50,19 +50,19 @@ fn the_survey_is_witnessed_by_the_founding_receipts() {
                 .chronicle()
                 .receipts()
                 .iter()
-                .find(|receipt| match &receipt.event {
+                .find(|receipt| match receipt.event() {
                     ClosureEvent::ColonyFounded { orb_id, .. }
                     | ClosureEvent::ColonyCharted { orb_id, .. } => *orb_id == orb.orb_id,
                     _ => false,
                 })
-                .map(|receipt| receipt.own.0)
+                .map(|receipt| receipt.own().0)
                 .expect("every orb was founded by receipt");
             (orb.orb_id, digest)
         })
         .collect();
 
     let receipt = world.chronicle().receipts().last().expect("the survey receipt");
-    let ClosureEvent::EstateSurveyed { covered, .. } = &receipt.event else {
+    let ClosureEvent::EstateSurveyed { covered, .. } = receipt.event() else {
         panic!("the last receipt is the survey");
     };
     assert_eq!(covered, &expected, "one witness per orb: its own founding receipt");
@@ -84,7 +84,7 @@ fn the_meter_charges_the_volume_and_an_unpayable_survey_leaves_nothing() {
         "the meter drew rate × volume, exactly"
     );
     let ClosureEvent::EstateSurveyed { cost: declared, .. } =
-        &world.chronicle().receipts().last().expect("receipt").event
+        world.chronicle().receipts().last().expect("receipt").event()
     else {
         panic!("survey receipt");
     };

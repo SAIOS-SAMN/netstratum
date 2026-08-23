@@ -19,7 +19,7 @@ fn leaps(world: &World) -> usize {
         .iter()
         .filter(|receipt| {
             matches!(
-                &receipt.event,
+                receipt.event(),
                 ClosureEvent::TechDiscovered { condition: 0, .. }
             )
         })

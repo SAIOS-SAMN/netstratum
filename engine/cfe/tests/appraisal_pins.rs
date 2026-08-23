@@ -80,7 +80,7 @@ fn one_rule_every_scale_and_the_parcels_denominate() {
 
     // And the receipt cites the survey it stands on (T1's custody).
     let receipt = world.chronicle().receipts().last().expect("appraisal");
-    let cfe::dop::ClosureEvent::AppraisalStruck { survey, value, .. } = &receipt.event else {
+    let cfe::dop::ClosureEvent::AppraisalStruck { survey, value, .. } = receipt.event() else {
         panic!("the last receipt is the appraisal");
     };
     let survey_digest = world
@@ -88,8 +88,8 @@ fn one_rule_every_scale_and_the_parcels_denominate() {
         .receipts()
         .iter()
         .rev()
-        .find(|r| matches!(r.event, cfe::dop::ClosureEvent::EstateSurveyed { .. }))
-        .map(|r| r.own.0)
+        .find(|r| matches!(r.event(), cfe::dop::ClosureEvent::EstateSurveyed { .. }))
+        .map(|r| r.own().0)
         .expect("the survey stands");
     assert_eq!(survey, &survey_digest, "the appraisal cites its survey");
     assert_eq!(value, &estate, "and declares the value the rule computed");
@@ -103,7 +103,7 @@ fn one_rule_every_scale_and_the_parcels_denominate() {
 fn staleness_is_decidable_and_triggers_renegotiation_never_blocks() {
     let mut world = surveyed_pair();
     world.appraise(Holding::Estate).expect("appraises");
-    let appraisal = world.chronicle().receipts().last().expect("receipt").own.0;
+    let appraisal = world.chronicle().receipts().last().expect("receipt").own().0;
     assert_eq!(
         world.appraisal_stale(&appraisal),
         Some(false),

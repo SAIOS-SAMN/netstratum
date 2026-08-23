@@ -56,7 +56,7 @@ fn the_deed_is_once_and_the_seed_is_the_founding_digest() {
     let (mut world, seed) = charted();
     assert_eq!(
         seed,
-        world.chronicle().receipts()[0].own.0,
+        world.chronicle().receipts()[0].own().0,
         "the seed IS the founding receipt's digest — chronicle-seeded"
     );
     assert!(matches!(
@@ -67,7 +67,7 @@ fn the_deed_is_once_and_the_seed_is_the_founding_digest() {
         .chronicle()
         .receipts()
         .iter()
-        .filter(|r| matches!(r.event, ClosureEvent::WorldCharted { .. }))
+        .filter(|r| matches!(r.event(), ClosureEvent::WorldCharted { .. }))
         .count();
     assert_eq!(charters, 1, "one chart per star, forever");
 

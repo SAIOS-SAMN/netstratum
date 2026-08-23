@@ -30,9 +30,9 @@ fn founding_pays_a_tithe_in_the_lines_own_ration() {
         .chronicle()
         .receipts()
         .iter()
-        .find(|r| matches!(r.event, ClosureEvent::TitheReceipted { .. }))
+        .find(|r| matches!(r.event(), ClosureEvent::TitheReceipted { .. }))
         .expect("a TitheReceipted receipt was chronicled");
-    match &receipt.event {
+    match receipt.event() {
         ClosureEvent::TitheReceipted { orb_id, to_seat, resource, .. } => {
             assert_eq!(*orb_id, FIRST_ORB);
             assert_eq!(*to_seat, SEAT_ANCIENT, "fallback siting always tithes the ancient today");
@@ -53,9 +53,9 @@ fn a_biotic_line_tithes_biomass_not_iron() {
         .chronicle()
         .receipts()
         .iter()
-        .find(|r| matches!(r.event, ClosureEvent::TitheReceipted { .. }))
+        .find(|r| matches!(r.event(), ClosureEvent::TitheReceipted { .. }))
         .expect("chronicled");
-    match &receipt.event {
+    match receipt.event() {
         ClosureEvent::TitheReceipted { resource, .. } => {
             assert_eq!(*resource, Resource::Biomass, "a biotic line tithes its own ration, biomass");
         }

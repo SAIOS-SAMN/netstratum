@@ -26,7 +26,7 @@ use kernel::motion::{move_of, project, Move, Slot, Standing};
 
 /// Every receipt the world wrote after `from`, in chain order.
 fn receipts_after(world: &World, from: usize) -> Vec<ClosureEvent> {
-    world.chronicle().receipts().iter().skip(from).map(|r| r.event.clone()).collect()
+    world.chronicle().receipts().iter().skip(from).map(|r| r.event().clone()).collect()
 }
 
 /// Compose every expressible deed in `events` onto `before`, and report
@@ -222,8 +222,8 @@ fn the_schedule_recovers_the_world_from_shuffled_real_receipts() {
         .iter()
         .skip(mark)
         .filter_map(|receipt| {
-            move_of(&receipt.event)
-                .map(|step| (Slot { stamp: receipt.stamp, sequence: receipt.sequence }, step))
+            move_of(receipt.event())
+                .map(|step| (Slot { stamp: receipt.stamp(), sequence: receipt.sequence() }, step))
         })
         .collect();
 

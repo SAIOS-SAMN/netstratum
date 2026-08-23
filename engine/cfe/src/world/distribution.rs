@@ -247,7 +247,7 @@ impl World {
             .chronicle
             .receipts()
             .first()
-            .map(|receipt| receipt.own.0)
+            .map(|receipt| receipt.own().0)
             .unwrap_or([0u8; 32]);
         let mut hasher = blake3::Hasher::new();
         hasher.update(salt);

@@ -17,7 +17,7 @@ use cfe::world::wrap_gauge;
 use cfe::persist;
 use cfe::ratio::{ratio, Ratio};
 use cfe::tlv;
-use cfe::vrp::{receipt_digest, ReceiptHash};
+use cfe::vrp::{receipt_digest, receipt_digest_v2, ReceiptHash};
 use num_traits::Zero;
 use physics::{AxisVector, Triple};
 
@@ -33,6 +33,9 @@ struct RawReceipt {
     digest: [u8; 32],
     by: Vec<u64>,
     event_bytes: Vec<u8>,
+    /// `Some` for a `V2` ({S,G,T}) receipt, `None` for a `V1` — picks
+    /// which digest formula `first_break` re-derives (TU-1a).
+    manifold: Option<([u8; 32], Vec<u8>)>,
 }
 
 /// A world excluded from the timeline: left on disk, named here.
@@ -111,7 +114,7 @@ pub fn converge(book: &Ledger, eras: &[(String, PathBuf)]) -> std::io::Result<Co
     let mut seen: HashSet<(String, String)> = ledger
         .receipts()
         .iter()
-        .filter_map(|receipt| match &receipt.event {
+        .filter_map(|receipt| match receipt.event() {
             ClosureEvent::EraAnnexed { era, world, .. } => {
                 Some((era.clone(), world.clone()))
             }
@@ -144,12 +147,15 @@ pub fn converge(book: &Ledger, eras: &[(String, PathBuf)]) -> std::io::Result<Co
                     .receipts()
                     .iter()
                     .map(|r| RawReceipt {
-                        sequence: r.sequence,
-                        stamp: r.stamp,
-                        parent: r.parent.0,
-                        digest: r.own.0,
-                        by: r.provenance.clone(),
-                        event_bytes: r.event.wire_bytes(),
+                        sequence: r.sequence(),
+                        stamp: r.stamp(),
+                        parent: r.parent().0,
+                        digest: r.own().0,
+                        by: r.provenance().to_vec(),
+                        event_bytes: r.event().wire_bytes(),
+                        manifold: r
+                            .region_seed()
+                            .map(|region_seed| (region_seed, r.gauge().unwrap_or(&[]).to_vec())),
                     })
                     .collect::<Vec<_>>(),
                 Err(_) => {
@@ -434,13 +440,24 @@ fn write_fiber_card(
 fn first_break(receipts: &[RawReceipt]) -> Option<u64> {
     let mut parent = ReceiptHash::GENESIS;
     for receipt in receipts {
-        let expected = receipt_digest(
-            receipt.sequence,
-            receipt.stamp,
-            &parent,
-            &receipt.event_bytes,
-            &receipt.by,
-        );
+        let expected = match &receipt.manifold {
+            None => receipt_digest(
+                receipt.sequence,
+                receipt.stamp,
+                &parent,
+                &receipt.event_bytes,
+                &receipt.by,
+            ),
+            Some((region_seed, gauge)) => receipt_digest_v2(
+                receipt.sequence,
+                receipt.stamp,
+                &parent,
+                &receipt.event_bytes,
+                &receipt.by,
+                region_seed,
+                gauge,
+            ),
+        };
         if receipt.parent != parent.0 || receipt.digest != expected.0 {
             return Some(receipt.sequence);
         }

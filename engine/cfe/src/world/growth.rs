@@ -24,7 +24,7 @@ impl World {
         let mut postings = 0u64;
         let mut empty = 0u64;
         for receipt in self.chronicle.receipts() {
-            let ClosureEvent::BookPosted { orb_id, kept, lost, .. } = &receipt.event else {
+            let ClosureEvent::BookPosted { orb_id, kept, lost, .. } = receipt.event() else {
                 continue;
             };
             if *orb_id != orb {
@@ -42,8 +42,8 @@ impl World {
             // could post zeros across a long life and read as practised
             // — padding buying literacy, which is the leap re-entering
             // through the axis built to close it.
-            first = Some(first.map_or(receipt.stamp, |held| held.min(receipt.stamp)));
-            last = Some(last.map_or(receipt.stamp, |held| held.max(receipt.stamp)));
+            first = Some(first.map_or(receipt.stamp(), |held| held.min(receipt.stamp())));
+            last = Some(last.map_or(receipt.stamp(), |held| held.max(receipt.stamp())));
         }
 
         // PRACTICE — the span the writing covers, against the age of the

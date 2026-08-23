@@ -42,7 +42,7 @@ fn a_transfer_conserves_and_refuses_typed() {
         .chronicle()
         .receipts()
         .iter()
-        .filter(|r| matches!(r.event, ClosureEvent::ResourceTransferred { .. }))
+        .filter(|r| matches!(r.event(), ClosureEvent::ResourceTransferred { .. }))
         .count();
     assert_eq!(transfers, 1);
 
@@ -137,9 +137,9 @@ fn a_transfer_into_famine_relieves_at_the_law() {
         .iter()
         .filter(|r| {
             matches!(
-                r.event,
+                r.event(),
                 ClosureEvent::FamineRelieved { orb_id, resource: Resource::Biomass }
-                    if orb_id == charted
+                    if *orb_id == charted
             )
         })
         .count();
@@ -234,7 +234,7 @@ fn demurrage_settles_both_sides_at_the_transfer_touch() {
         .iter()
         .filter(|r| {
             matches!(
-                r.event,
+                r.event(),
                 ClosureEvent::DemurrageSettled { .. } | ClosureEvent::DemurrageTouched { .. }
             )
         })
@@ -256,7 +256,7 @@ fn demurrage_settles_both_sides_at_the_transfer_touch() {
         .chronicle()
         .receipts()
         .iter()
-        .filter_map(|r| match &r.event {
+        .filter_map(|r| match r.event() {
             // The atomic touch (tag 102): each side's settlement rides
             // one receipt; the joule row is read out of it.
             ClosureEvent::DemurrageTouched { orb_id, decays } => decays

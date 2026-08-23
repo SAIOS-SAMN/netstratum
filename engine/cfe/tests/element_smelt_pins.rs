@@ -134,7 +134,7 @@ fn the_smelt_sweep_floors_and_conserves_with_dust() {
     assert!(dust >= ratio(0, 1), "the dust is a shaving, never a mint");
 
     // The sweep is a receipted deed carrying that same dust.
-    match &world.chronicle().receipts().last().expect("a deed landed").event {
+    match world.chronicle().receipts().last().expect("a deed landed").event() {
         ClosureEvent::ElementStocksSwept { dust: recorded } => {
             assert_eq!(*recorded, dust, "the deed records the swept dust")
         }
@@ -172,7 +172,7 @@ fn the_smelt_sweep_migrates_a_resumed_chronicle() {
     assert!(on_grain(&migrated), "the resumed stock is migrated onto the grain: {migrated}");
     assert!(
         matches!(
-            resumed.chronicle().receipts().last().expect("a deed").event,
+            resumed.chronicle().receipts().last().expect("a deed").event(),
             ClosureEvent::ElementStocksSwept { .. }
         ),
         "resume minted the migration deed"

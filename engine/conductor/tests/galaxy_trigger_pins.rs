@@ -130,9 +130,9 @@ fn the_crossing_observes_and_the_observation_creates() {
     // executed the deed, at the sweep's universal stamp.
     let ledger = cfe::persist::load(&root.join("worlds/convergence.tlv")).expect("ledger");
     assert!(ledger.receipts().iter().any(|receipt| {
-        receipt.stamp == 60
+        receipt.stamp() == 60
             && matches!(
-                &receipt.event,
+                receipt.event(),
                 ClosureEvent::GalaxyObserved { creator, name, observer, .. }
                     if creator == "tunborn" && observer == "slagborn" && name == "slagborn-sky-1"
             )

@@ -41,7 +41,7 @@ fn the_staple_food_economy_mines_the_vein_by_eating() {
             .chronicle()
             .receipts()
             .iter()
-            .filter(|r| matches!(r.event, cfe::dop::ClosureEvent::StapleMined { .. }))
+            .filter(|r| matches!(r.event(), cfe::dop::ClosureEvent::StapleMined { .. }))
             .count();
         if mines == 0 {
             continue;

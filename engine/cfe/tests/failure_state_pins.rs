@@ -31,9 +31,9 @@ fn population_reaching_zero_collapses_the_line() {
         .chronicle()
         .receipts()
         .iter()
-        .find(|r| matches!(r.event, cfe::dop::ClosureEvent::CivilizationCollapsed { .. }))
+        .find(|r| matches!(r.event(), cfe::dop::ClosureEvent::CivilizationCollapsed { .. }))
         .expect("a CivilizationCollapsed receipt was chronicled");
-    match &receipt.event {
+    match receipt.event() {
         cfe::dop::ClosureEvent::CivilizationCollapsed { orb_id } => {
             assert_eq!(*orb_id, FIRST_ORB);
         }
@@ -82,7 +82,7 @@ fn collapse_never_reduces_population_below_zero_and_never_refires() {
         .chronicle()
         .receipts()
         .iter()
-        .filter(|r| matches!(r.event, cfe::dop::ClosureEvent::CivilizationCollapsed { .. }))
+        .filter(|r| matches!(r.event(), cfe::dop::ClosureEvent::CivilizationCollapsed { .. }))
         .count();
     assert_eq!(collapsed_receipts_before, 1);
 }

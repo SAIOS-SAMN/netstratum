@@ -58,7 +58,7 @@ fn a_bond_streams_and_settles_in_one_receipt() {
         .chronicle()
         .receipts()
         .iter()
-        .filter_map(|r| match &r.event {
+        .filter_map(|r| match r.event() {
             ClosureEvent::BondSettled { amount, .. } => Some(amount.clone()),
             _ => None,
         })
@@ -165,7 +165,7 @@ fn an_orderly_term_bond_expires_posting_nothing() {
         .chronicle()
         .receipts()
         .iter()
-        .filter_map(|r| match &r.event {
+        .filter_map(|r| match r.event() {
             ClosureEvent::BondSettled { severed: true, amount, load, .. } => {
                 Some((amount.clone(), load.clone()))
             }
@@ -211,7 +211,7 @@ fn an_insolvent_settle_breaks_the_bond_as_default() {
         .iter()
         .any(|r| {
             matches!(
-                &r.event,
+                r.event(),
                 ClosureEvent::BondSettled { severed: true, amount, load, .. }
                     if *amount == ratio(15, 1) && *load == ratio(32, 1)
             )

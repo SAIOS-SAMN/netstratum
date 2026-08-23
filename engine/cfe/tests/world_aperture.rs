@@ -30,7 +30,7 @@ fn sunlit(name: &str) -> World {
 }
 
 fn count<F: Fn(&ClosureEvent) -> bool>(world: &World, pred: F) -> usize {
-    world.chronicle().receipts().iter().filter(|r| pred(&r.event)).count()
+    world.chronicle().receipts().iter().filter(|r| pred(r.event())).count()
 }
 
 /// Conservation across the pair: value leaves the source world and
@@ -71,7 +71,7 @@ fn an_aperture_conserves_across_two_worlds() {
         .chronicle()
         .receipts()
         .iter()
-        .find_map(|r| match &r.event {
+        .find_map(|r| match r.event() {
             ClosureEvent::ApertureSent { deal, .. } => Some(*deal),
             _ => None,
         })
@@ -80,7 +80,7 @@ fn an_aperture_conserves_across_two_worlds() {
         .chronicle()
         .receipts()
         .iter()
-        .find_map(|r| match &r.event {
+        .find_map(|r| match r.event() {
             ClosureEvent::ApertureReceived { deal, .. } => Some(*deal),
             _ => None,
         })

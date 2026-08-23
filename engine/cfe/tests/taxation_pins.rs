@@ -234,7 +234,7 @@ fn a_touch_without_an_office_collects_no_levy_and_is_byte_identical() {
             .chronicle()
             .receipts()
             .iter()
-            .any(|r| matches!(r.event, ClosureEvent::TreasurySettled { .. })),
+            .any(|r| matches!(r.event(), ClosureEvent::TreasurySettled { .. })),
         "no reach → no receipt: the untaxed collect is byte-identical"
     );
     assert_eq!(replay(bare.chronicle()), bare.committed(), "untaxed replay MATCHES");
@@ -337,7 +337,7 @@ fn a_generation_turns_without_an_office_and_the_treasury_stays_empty() {
             .chronicle()
             .receipts()
             .iter()
-            .any(|r| matches!(r.event, ClosureEvent::TreasurySettled { .. })),
+            .any(|r| matches!(r.event(), ClosureEvent::TreasurySettled { .. })),
         "no reach, no boundary receipt: byte-identical to the pre-taxation era"
     );
 }
@@ -394,7 +394,7 @@ fn a_short_lived_line_forgets_its_practices_at_the_turnover() {
             .chronicle()
             .receipts()
             .iter()
-            .any(|r| matches!(r.event, ClosureEvent::PracticesLapsed { .. })),
+            .any(|r| matches!(r.event(), ClosureEvent::PracticesLapsed { .. })),
         "the lapse is receipted"
     );
     assert_eq!(replay(locust.chronicle()), locust.committed(), "continuity-lapse replay MATCHES");
@@ -410,7 +410,7 @@ fn a_line_with_no_practices_or_no_lifespan_class_never_lapses() {
             .chronicle()
             .receipts()
             .iter()
-            .any(|r| matches!(r.event, ClosureEvent::PracticesLapsed { .. })),
+            .any(|r| matches!(r.event(), ClosureEvent::PracticesLapsed { .. })),
         "no practices → no lapse deed → byte-identical"
     );
 }

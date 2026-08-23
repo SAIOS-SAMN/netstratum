@@ -87,11 +87,11 @@ fn the_door_wakes_the_derelict_and_only_the_derelict() {
     // The continuation carries the whole record + the succession.
     let receipts = woken.world.chronicle().receipts();
     assert!(receipts.iter().any(|receipt| {
-        matches!(&receipt.event,
+        matches!(receipt.event(),
             ClosureEvent::LineSucceeded { successor } if successor == "doomed-returned")
     }), "the succession names the woken line");
     assert!(
-        receipts.iter().any(|receipt| matches!(receipt.event, ClosureEvent::FamineStruck { .. })),
+        receipts.iter().any(|receipt| matches!(receipt.event(), ClosureEvent::FamineStruck { .. })),
         "the derelict's own famine rides the continuation"
     );
     // The woken line is registered, revenant-claded.
@@ -102,8 +102,8 @@ fn the_door_wakes_the_derelict_and_only_the_derelict() {
     // The door receipts on the universe ledger, naming all three.
     let ledger = persist::load(&root.join("var/worlds/convergence.tlv")).expect("ledger");
     assert!(ledger.receipts().iter().any(|receipt| {
-        receipt.stamp == 60
-            && matches!(&receipt.event,
+        receipt.stamp() == 60
+            && matches!(receipt.event(),
                 ClosureEvent::IncursionStruck { era, world, line }
                     if era == "var-era1" && world == "doomed" && line == "doomed-returned")
     }));

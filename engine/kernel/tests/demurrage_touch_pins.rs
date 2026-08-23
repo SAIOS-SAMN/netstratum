@@ -190,7 +190,7 @@ fn a_real_touch_emits_one_receipt_and_replays() {
             .chronicle()
             .receipts()
             .iter()
-            .filter_map(|receipt| match &receipt.event {
+            .filter_map(|receipt| match receipt.event() {
                 ClosureEvent::DemurrageTouched { decays, .. } => Some(decays.len()),
                 _ => None,
             })

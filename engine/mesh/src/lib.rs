@@ -191,10 +191,10 @@ impl MeshRefused {
 pub fn head(chronicle: &Chronicle) -> MeshHead {
     let receipts = chronicle.receipts();
     MeshHead {
-        genesis: receipts.first().map(|receipt| receipt.own.0).unwrap_or([0u8; 32]),
+        genesis: receipts.first().map(|receipt| receipt.own().0).unwrap_or([0u8; 32]),
         length: receipts.len() as u64,
-        stamp: receipts.last().map(|receipt| receipt.stamp).unwrap_or(0),
-        head: receipts.last().map(|receipt| receipt.own.0).unwrap_or([0u8; 32]),
+        stamp: receipts.last().map(|receipt| receipt.stamp()).unwrap_or(0),
+        head: receipts.last().map(|receipt| receipt.own().0).unwrap_or([0u8; 32]),
     }
 }
 
@@ -235,26 +235,26 @@ fn walk(receipts: &[Receipt]) -> Result<WalkState, MeshRefused> {
     let mut state = WalkState { hand: None, pending_cite: None };
     for receipt in receipts {
         if let Some(lawful) = state.hand {
-            if !receipt.provenance.contains(&lawful) {
-                return Err(MeshRefused::Usurped { at: receipt.sequence, lawful });
+            if !receipt.provenance().contains(&lawful) {
+                return Err(MeshRefused::Usurped { at: receipt.sequence(), lawful });
             }
             if let Some(handoff) = state.pending_cite {
-                if !receipt.provenance.contains(&handoff) {
-                    return Err(MeshRefused::Uncited { at: receipt.sequence, handoff });
+                if !receipt.provenance().contains(&handoff) {
+                    return Err(MeshRefused::Uncited { at: receipt.sequence(), handoff });
                 }
                 state.pending_cite = None;
             }
         }
-        if let ClosureEvent::HandoffSealed { from, to } = &receipt.event {
+        if let ClosureEvent::HandoffSealed { from, to } = receipt.event() {
             if let Some(lawful) = state.hand {
                 if *from != lawful {
-                    return Err(MeshRefused::Usurped { at: receipt.sequence, lawful });
+                    return Err(MeshRefused::Usurped { at: receipt.sequence(), lawful });
                 }
             }
             // The first seal self-declares its incumbent (nothing
             // earlier could attest it — the provenance law).
             state.hand = Some(*to);
-            state.pending_cite = Some(receipt.sequence);
+            state.pending_cite = Some(receipt.sequence());
         }
     }
     Ok(state)
@@ -291,7 +291,7 @@ pub fn yield_authority(
         provenance.push(handoff);
     }
     let receipt = chronicle.append(ClosureEvent::HandoffSealed { from, to }, stamp, provenance);
-    Ok(receipt.sequence)
+    Ok(receipt.sequence())
 }
 
 /// The guarded write door (NS-5 §7.3): refuses USURPED before
@@ -320,5 +320,5 @@ pub fn append_as(
     }
     carried.extend(provenance);
     let receipt = chronicle.append(event, stamp, carried);
-    Ok(receipt.sequence)
+    Ok(receipt.sequence())
 }

@@ -74,7 +74,7 @@ fn a_fulfilled_forward_releases_exactly() {
         .chronicle()
         .receipts()
         .iter()
-        .filter(|r| matches!(r.event, ClosureEvent::ForwardReleased { .. }))
+        .filter(|r| matches!(r.event(), ClosureEvent::ForwardReleased { .. }))
         .count();
     assert_eq!(released, 1);
     let rebuilt = replay(world.chronicle());
@@ -106,9 +106,9 @@ fn a_missed_deadline_slashes_to_the_aggrieved() {
         .chronicle()
         .receipts()
         .iter()
-        .find_map(|r| match &r.event {
+        .find_map(|r| match r.event() {
             ClosureEvent::ForwardSlashed { collateral, .. } => {
-                Some((collateral.clone(), r.stamp))
+                Some((collateral.clone(), r.stamp()))
             }
             _ => None,
         })
@@ -165,7 +165,7 @@ fn the_collateral_curve_reads_the_books() {
         .receipts()
         .iter()
         .rev()
-        .find_map(|r| match &r.event {
+        .find_map(|r| match r.event() {
             ClosureEvent::ForwardSealed { collateral, .. } => Some(collateral.clone()),
             _ => None,
         })

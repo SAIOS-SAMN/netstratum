@@ -16,12 +16,29 @@ fiber bundle**:
 - **S — the base manifold.** The shared spatial substrate (a galaxy's star/orbit
   field). Today each world sites planets on its own private frame; convergence
   makes S one manifold that every world is a region of.
-- **G — the gauge fiber.** The internal symmetry the reduce organ already
-  measures as `reduct::GaugeDirection` — a principal bundle `P → S` with structure
-  group the gauge group. A civilization's orientation lives in the fiber over its
-  point of S, not in S itself.
+- **G — the gauge fiber, a PRODUCT group (amended 2026-08-22).** Originally
+  named as a single symmetry (`reduct::GaugeDirection`, the reduce organ's
+  cognitive orientation); that scoped it to cognition alone and would have
+  forced any physical gauge — a planet's orbital phase, a material's
+  thermodynamic phase state — to either overload the SAME fiber (a category
+  error: cognition and geology are unrelated symmetries) or bolt on a second
+  {S,G,T} system beside this one (exactly what §8 forbids). Neither is
+  correct. The fiber is a **product of independent structure groups**,
+  `G = G_cognition × G_physics × …`, over the SAME base S and the SAME flow
+  T — the Standard Model's pattern (`SU(3)×SU(2)×U(1)` over one shared
+  spacetime) for exactly this situation: multiple unrelated internal
+  symmetries, one geometry. `G_cognition = reduct::GaugeDirection` (already
+  live). `G_physics` is UNDEFINED until its own slice lands (candidate:
+  orbital phase / a material's thermodynamic phase state, GALACTIC-2's
+  territory) — this amendment reserves the SHAPE, not the content. Each
+  factor transports independently (§6): curvature in one factor (a
+  civilization's unglueable structural cohort) must never leak into or be
+  conflated with curvature in another (an orbital resonance, a phase
+  transition) — the connection stays BLOCK-DIAGONAL across factors, so S2's
+  cocycle witness is checked per-factor, never summed across them.
 - **T — the flow.** The k-step beat is the parameter that transports sections
-  along the bundle. `TUniversal` ticks are the arc length.
+  along the bundle. `TUniversal` ticks are the arc length. Shared by every
+  factor of G — one clock, not one per domain.
 
 A civilization is therefore a **section** `σ: U ⊂ S → P` over its region, read at
 step T — one point of the total space `E = P ×_G F`, whose position, symmetry,
@@ -171,12 +188,18 @@ connection in parallel per overlap rather than through central O(n²) trade.
 ## 8 · What this is not
 
 Not a new coordinate system bolted beside the engine — `{S,G,T}` IS the reduce
-organ's existing (site, gauge, step) data, read as a bundle. Not a scalar
-intelligence score — cognition stays exact cohomology (Betti + torsion), never a
-float (54_THE_NO_SCALAR_LAW). Not a replacement for private clocks — TU is the
-shared comparability axis; a world's own evolution stays its own. And not optional
-in its gates: soundness (§4) and provable increase (§5) are the two witnesses that
-make this physics rather than plumbing.
+organ's existing (site, gauge, step) data, read as a bundle. This cuts BOTH
+ways after the §1 amendment: a physical gauge (orbital phase, material phase
+state) is a NEW FACTOR of the existing G, not a second `{S,G,T}` system next
+to this one, and it is equally wrong to force it into `G_cognition`
+(`reduct::GaugeDirection`) — an unrelated symmetry is a new factor, never an
+overload. Not a scalar intelligence score — cognition stays exact cohomology
+(Betti + torsion), never a float (54_THE_NO_SCALAR_LAW); the same law binds any
+physical gauge factor — exact-rational, never a float. Not a replacement for
+private clocks — TU is the shared comparability axis; a world's own evolution
+stays its own. And not optional in its gates: soundness (§4) and provable
+increase (§5) are the two witnesses that make this physics rather than
+plumbing — a new G-factor is held to S1–S4 exactly like `G_cognition` was.
 
 ## 9 · The Ignition Law of collective cognition (MEASURED, 2026-08-21)
 

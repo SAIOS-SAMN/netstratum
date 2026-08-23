@@ -24,7 +24,7 @@ fn enrichments(world: &World) -> usize {
         .chronicle()
         .receipts()
         .iter()
-        .filter(|r| matches!(r.event, ClosureEvent::EnrichmentStruck { .. }))
+        .filter(|r| matches!(r.event(), ClosureEvent::EnrichmentStruck { .. }))
         .count()
 }
 
@@ -43,10 +43,10 @@ fn a_main_sequence_star_forges_no_enrichment() {
     // A living star moving among main-sequence classes seeds nothing —
     // byte-identical to the pre-enrichment law.
     let mut world = sited();
-    let veins_before = world.chronicle().receipts().iter().filter(|r| matches!(r.event, ClosureEvent::ProspectStruck { .. } | ClosureEvent::EnrichmentStruck { .. })).count();
+    let veins_before = world.chronicle().receipts().iter().filter(|r| matches!(r.event(), ClosureEvent::ProspectStruck { .. } | ClosureEvent::EnrichmentStruck { .. })).count();
     world.age_star(StarClass::K).expect("ages");
     assert_eq!(enrichments(&world), 0, "a main-sequence move forges no vein");
-    let veins_after = world.chronicle().receipts().iter().filter(|r| matches!(r.event, ClosureEvent::ProspectStruck { .. } | ClosureEvent::EnrichmentStruck { .. })).count();
+    let veins_after = world.chronicle().receipts().iter().filter(|r| matches!(r.event(), ClosureEvent::ProspectStruck { .. } | ClosureEvent::EnrichmentStruck { .. })).count();
     assert_eq!(veins_before, veins_after, "the vein registry is untouched");
 }
 
@@ -58,7 +58,7 @@ fn a_dying_star_scatters_a_heavy_vein_onto_every_sited_orb() {
     world.age_star(StarClass::NeutronStar).expect("collapses");
     assert_eq!(enrichments(&world), 1, "the death seeded a vein on the sited orb");
     // The vein stands in the world's prospects, ready to mine.
-    let struck: Vec<_> = world.chronicle().receipts().iter().filter_map(|r| match &r.event {
+    let struck: Vec<_> = world.chronicle().receipts().iter().filter_map(|r| match r.event() {
         ClosureEvent::EnrichmentStruck { orb_id, element, .. } => Some((*orb_id, *element)),
         _ => None,
     }).collect();

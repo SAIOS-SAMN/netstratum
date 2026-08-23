@@ -62,7 +62,7 @@ fn the_shield_refuses_both_directions_and_moves_nothing() {
     assert!(!deepmat.has_crossed());
     assert!(sunward.chronicle().receipts().iter().all(|r| {
         !matches!(
-            r.event,
+            r.event(),
             cfe::dop::ClosureEvent::ApertureSent { .. }
                 | cfe::dop::ClosureEvent::ApertureReceived { .. }
         )

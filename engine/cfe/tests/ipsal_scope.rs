@@ -14,12 +14,12 @@ fn the_sovereign_is_registered_and_tags_every_receipt() {
     world.zone(0, ZoneKind::Extractor).expect("builds");
     let receipts = world.chronicle().receipts();
     assert!(matches!(
-        receipts[0].event,
+        receipts[0].event(),
         cfe::dop::ClosureEvent::EntityRegistered { entity_id: SOVEREIGN, principal: 0, .. }
     ));
     for receipt in receipts {
         assert_eq!(
-            receipt.provenance,
+            receipt.provenance(),
             vec![SOVEREIGN],
             "the generation tag rides every sovereign closure"
         );
@@ -55,7 +55,7 @@ fn an_agent_acts_only_inside_its_grant() {
     );
     // The agent's receipts carry ITS tag, not the sovereign's.
     let last = world.chronicle().receipts().last().expect("collected");
-    assert_eq!(last.provenance, vec![bot], "generation-tagged to the forging agent");
+    assert_eq!(last.provenance(), vec![bot], "generation-tagged to the forging agent");
 }
 
 #[test]

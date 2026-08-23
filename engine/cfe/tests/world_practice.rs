@@ -108,7 +108,7 @@ fn release_is_a_rediscovery_and_the_lesson_re_emerges() {
         .collect();
     assert_eq!(relearned, vec![7], "one re-emergence node, condition 7");
     let named = world.chronicle().receipts().iter().any(|receipt| {
-        matches!(&receipt.event,
+        matches!(receipt.event(),
             ClosureEvent::TechDiscovered { condition: 7, name, .. } if name.contains("re-emergence"))
     });
     assert!(named, "the node speaks its concept in the line's tongue");

@@ -78,7 +78,7 @@ fn a_solving_line_mints_against_its_own_verified_work() {
     let mut carried_proof = 0usize;
     for polity in &worlds {
         for receipt in polity.world.chronicle().receipts() {
-            if let ClosureEvent::DiscoveryMinted { amount, work, .. } = &receipt.event {
+            if let ClosureEvent::DiscoveryMinted { amount, work, .. } = receipt.event() {
                 minted += 1;
                 earned_total += amount.clone();
                 if !work.is_empty() {
@@ -138,7 +138,7 @@ fn the_saturated_rungs_pay_nothing_even_when_solved() {
     let mut examined = 0usize;
     for polity in &worlds {
         for receipt in polity.world.chronicle().receipts() {
-            if let ClosureEvent::DiscoveryMinted { amount, .. } = &receipt.event {
+            if let ClosureEvent::DiscoveryMinted { amount, .. } = receipt.event() {
                 examined += 1;
                 assert!(
                     *amount > cfe::ratio::ratio(0, 1),

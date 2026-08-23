@@ -92,7 +92,7 @@ fn the_reckoning_judges_all_together() {
         .chronicle()
         .receipts()
         .iter()
-        .filter(|r| matches!(r.event, ClosureEvent::CouncilClosed { .. }))
+        .filter(|r| matches!(r.event(), ClosureEvent::CouncilClosed { .. }))
         .count();
     assert_eq!(closes, 3, "every member's reckoning is its own receipt");
     let held = world.orb_by_id(c).expect("orb");

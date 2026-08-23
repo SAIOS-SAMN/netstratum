@@ -78,7 +78,7 @@ fn refined_kinds(polity: &Polity) -> usize {
         .chronicle()
         .receipts()
         .iter()
-        .filter(|r| matches!(r.event, ClosureEvent::ElementRefined { .. }))
+        .filter(|r| matches!(r.event(), ClosureEvent::ElementRefined { .. }))
         .count()
 }
 
@@ -144,13 +144,13 @@ fn pure_npc_seats_caravan_and_exchange() {
     // Chain carries the seat (StationSeated), not only the registry card.
     let caravan_receipted = caravan.world.chronicle().receipts().iter().any(|r| {
         matches!(
-            &r.event,
+            r.event(),
             ClosureEvent::StationSeated { station: 5, .. }
         )
     });
     let exchange_receipted = exchange.world.chronicle().receipts().iter().any(|r| {
         matches!(
-            &r.event,
+            r.event(),
             ClosureEvent::StationSeated { station: 7, .. }
         )
     });
@@ -253,9 +253,9 @@ fn pure_npc_element_route_clears() {
         importer = pair.pop().expect("importer");
         exporter = pair.pop().expect("exporter");
         let received = importer.world.chronicle().receipts().iter().any(|r| {
-            matches!(r.event, ClosureEvent::ElementApertureReceived { .. })
+            matches!(r.event(), ClosureEvent::ElementApertureReceived { .. })
         }) || exporter.world.chronicle().receipts().iter().any(|r| {
-            matches!(r.event, ClosureEvent::ElementApertureReceived { .. })
+            matches!(r.event(), ClosureEvent::ElementApertureReceived { .. })
         });
         if received || !hits.is_empty() {
             cleared_on = Some(beat);
@@ -270,15 +270,15 @@ fn pure_npc_element_route_clears() {
         element_kinds(&importer),
     );
     let received = importer.world.chronicle().receipts().iter().any(|r| {
-        matches!(r.event, ClosureEvent::ElementApertureReceived { .. })
+        matches!(r.event(), ClosureEvent::ElementApertureReceived { .. })
     }) || exporter.world.chronicle().receipts().iter().any(|r| {
-        matches!(r.event, ClosureEvent::ElementApertureReceived { .. })
+        matches!(r.event(), ClosureEvent::ElementApertureReceived { .. })
     });
     assert!(received, "ElementApertureReceived must stand after trade");
     let sent = exporter.world.chronicle().receipts().iter().any(|r| {
-        matches!(r.event, ClosureEvent::ElementApertureSent { .. })
+        matches!(r.event(), ClosureEvent::ElementApertureSent { .. })
     }) || importer.world.chronicle().receipts().iter().any(|r| {
-        matches!(r.event, ClosureEvent::ElementApertureSent { .. })
+        matches!(r.event(), ClosureEvent::ElementApertureSent { .. })
     });
     assert!(sent, "ElementApertureSent must stand after trade");
     assert_eq!(
@@ -323,14 +323,14 @@ fn pure_npc_stamp_spot_clears() {
         seller = pair.pop().expect("seller");
         buyer = pair.pop().expect("buyer");
         let minted = buyer.world.chronicle().receipts().iter().any(|r| {
-            matches!(r.event, ClosureEvent::StampMinted { .. })
+            matches!(r.event(), ClosureEvent::StampMinted { .. })
         }) || seller.world.chronicle().receipts().iter().any(|r| {
-            matches!(r.event, ClosureEvent::StampMinted { .. })
+            matches!(r.event(), ClosureEvent::StampMinted { .. })
         });
         let received = buyer.world.chronicle().receipts().iter().any(|r| {
-            matches!(r.event, ClosureEvent::StampApertureReceived { .. })
+            matches!(r.event(), ClosureEvent::StampApertureReceived { .. })
         }) || seller.world.chronicle().receipts().iter().any(|r| {
-            matches!(r.event, ClosureEvent::StampApertureReceived { .. })
+            matches!(r.event(), ClosureEvent::StampApertureReceived { .. })
         });
         if minted && (received || !hits.is_empty()) {
             cleared_on = Some(beat);
@@ -347,20 +347,20 @@ fn pure_npc_stamp_spot_clears() {
         seller.world.orb().map(|o| o.banked_amount(cfe::dop::Resource::Crystal)),
     );
     let minted = buyer.world.chronicle().receipts().iter().any(|r| {
-        matches!(r.event, ClosureEvent::StampMinted { .. })
+        matches!(r.event(), ClosureEvent::StampMinted { .. })
     }) || seller.world.chronicle().receipts().iter().any(|r| {
-        matches!(r.event, ClosureEvent::StampMinted { .. })
+        matches!(r.event(), ClosureEvent::StampMinted { .. })
     });
     assert!(minted, "StampMinted must stand after mint phase");
     let sent = buyer.world.chronicle().receipts().iter().any(|r| {
-        matches!(r.event, ClosureEvent::StampApertureSent { .. })
+        matches!(r.event(), ClosureEvent::StampApertureSent { .. })
     }) || seller.world.chronicle().receipts().iter().any(|r| {
-        matches!(r.event, ClosureEvent::StampApertureSent { .. })
+        matches!(r.event(), ClosureEvent::StampApertureSent { .. })
     });
     let received = buyer.world.chronicle().receipts().iter().any(|r| {
-        matches!(r.event, ClosureEvent::StampApertureReceived { .. })
+        matches!(r.event(), ClosureEvent::StampApertureReceived { .. })
     }) || seller.world.chronicle().receipts().iter().any(|r| {
-        matches!(r.event, ClosureEvent::StampApertureReceived { .. })
+        matches!(r.event(), ClosureEvent::StampApertureReceived { .. })
     });
     assert!(sent, "StampApertureSent must stand after spot");
     assert!(received, "StampApertureReceived must stand after spot");
@@ -407,9 +407,9 @@ fn pure_npc_fleet_hauls() {
             hull_on = Some(beat);
         }
         let hauled = a.world.chronicle().receipts().iter().any(|r| {
-            matches!(r.event, ClosureEvent::ElementApertureSent { .. } | ClosureEvent::ApertureSent { .. })
+            matches!(r.event(), ClosureEvent::ElementApertureSent { .. } | ClosureEvent::ApertureSent { .. })
         }) || b.world.chronicle().receipts().iter().any(|r| {
-            matches!(r.event, ClosureEvent::ElementApertureSent { .. } | ClosureEvent::ApertureSent { .. })
+            matches!(r.event(), ClosureEvent::ElementApertureSent { .. } | ClosureEvent::ApertureSent { .. })
         });
         if hull_on.is_some() && hauled {
             haul_on = Some(beat);

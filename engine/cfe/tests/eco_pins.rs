@@ -160,7 +160,7 @@ fn a_worked_vein_rejuvenates_at_a_collect_touch() {
         .chronicle()
         .receipts()
         .iter()
-        .any(|r| matches!(r.event, cfe::dop::ClosureEvent::VeinRejuvenated { .. }));
+        .any(|r| matches!(r.event(), cfe::dop::ClosureEvent::VeinRejuvenated { .. }));
     assert!(receipted, "a VeinRejuvenated receipt stands");
     assert_eq!(replay(world.chronicle()), world.committed(), "replay MATCHES");
 }

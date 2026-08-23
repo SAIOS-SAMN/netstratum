@@ -276,7 +276,7 @@ fn a_cleave_walks_the_manifold_not_one_axis_at_a_time() {
         .find(|b| {
             b.world.chronicle().receipts().iter().any(|r| {
                 matches!(
-                    &r.event,
+                    r.event(),
                     cfe::dop::ClosureEvent::Diverged { branch, .. }
                         if *branch == newborn.spec.civilization.sigil
                 )
@@ -308,7 +308,7 @@ fn a_cleave_walks_the_manifold_not_one_axis_at_a_time() {
         .chronicle()
         .receipts()
         .iter()
-        .find_map(|r| match &r.event {
+        .find_map(|r| match r.event() {
             cfe::dop::ClosureEvent::Diverged { branch, gauge }
                 if *branch == newborn.spec.civilization.sigil =>
             {
