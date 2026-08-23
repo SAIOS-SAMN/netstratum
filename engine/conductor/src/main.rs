@@ -446,6 +446,13 @@ fn main() {
             });
         }
         if beat.is_multiple_of(10) || (cycles > 0 && beat == cycles) {
+            // Re-announce the roster count periodically, not just at boot: the
+            // per-beat COG-* instrumentation volume rotates a one-time boot
+            // line out of journald's ring buffer within minutes, which blanked
+            // this process's own "N civilizations" line the mycelium monitor's
+            // civs column depends on (`engine_stats()`'s `(\d+) civilizations`
+            // regex, tools/observe.py) long before an operator could read it.
+            println!("conductor: {} civilizations live — beat {beat}", worlds.len());
             let summary: Vec<String> = worlds
                 .iter()
                 .map(|b| {

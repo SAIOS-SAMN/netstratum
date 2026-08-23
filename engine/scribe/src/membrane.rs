@@ -488,6 +488,14 @@ fn run(rx: mpsc::Receiver<SolveOffer>) {
     // barrier-id this mouth attested (never re-attest within a window).
     let mut certified: Vec<[u8; 32]> = Vec::new();
     let mut last_barrier: Option<u64> = None;
+    // The mycelium monitor's "seated" reading (tools/observe.py's
+    // `engine_stats()`) only looks back 1 hour for a "seated at" line —
+    // and `attach()` prints it exactly once, at first connect. A stable,
+    // healthy, long-lived connection eventually ages that line out of the
+    // window and reads as unseated even though the socket is fine. Re-affirm
+    // periodically so the reading tracks the connection's actual liveness.
+    let mut last_seated_announce = std::time::Instant::now();
+    const SEATED_ANNOUNCE_EVERY: std::time::Duration = std::time::Duration::from_secs(300);
     loop {
         // Drain what arrived; block only when there is nothing to do.
         let disconnected = if pending.is_empty() {
@@ -656,6 +664,10 @@ fn run(rx: mpsc::Receiver<SolveOffer>) {
                 // closes on the same TAG_TU pull this uses for barrier-id).
                 maybe_attest(s, Some(me), &certified, &mut last_barrier);
             }
+        }
+        if session.is_some() && last_seated_announce.elapsed() >= SEATED_ANNOUNCE_EVERY {
+            eprintln!("membrane: kernel '{KERNEL}' seated at {addr}");
+            last_seated_announce = std::time::Instant::now();
         }
     }
 }
