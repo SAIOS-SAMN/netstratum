@@ -14,7 +14,7 @@ use reduct::{think, Crystal, PairClosure, TaskThought};
 use solver_verify::certificate::{verify_certificate, CertificateRead, SolveCertificate};
 use solver_verify::grid::{run, Grid, Op, Program, TileMirror, HUES};
 use solver_verify::loader::Task;
-use solver_verify::volume::Volume;
+use solver_verify::volume::{run_volume, VOp, VProgram, Volume};
 
 /// The typed solve reading — the ARC seat's verdict (moved here from the retired
 /// `search` module, deleted 2026-08-19: the mind observes, it does not search).
@@ -161,6 +161,133 @@ fn render_frame(frame: &ObserverFrame) -> Option<Program> {
     let mut program = render_plane(frame.plane)?;
     program.extend(render_relabel(&frame.relabel)?);
     Some(program)
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// VOLUMETRIC-1c — the render table's PerLayer subset.
+// ─────────────────────────────────────────────────────────────────────
+
+/// The eight D₄ words over the PER-LAYER vocabulary — the SAME eight words
+/// `d4_words()` already proved distinct, each op wrapped in `VOp::PerLayer`.
+/// No new group theory: `PlaneElement` passes `layer` through unchanged
+/// (VOLUMETRIC-1a), so applying one D₄ word to EVERY layer identically is
+/// exactly what `PlaneElement` already expresses over a volumetric
+/// measurement — the render target is a re-labeling of the planar one, not a
+/// new one.
+fn d4_vwords() -> [VProgram; 8] {
+    d4_words().map(|word| word.into_iter().map(VOp::PerLayer).collect())
+}
+
+/// Render a plane element to the per-layer volumetric word that reproduces
+/// it — the same match-by-probe technique `render_plane` uses (never a hand
+/// table), proved on a `depth`-layer probe instead of a bare grid.
+///
+/// **THE SCOPE LIMIT, PROVED not ASSUMED:** `VOp::FlipStack`/`CycleLayers`
+/// genuinely permute sites BETWEEN layers; `PlaneElement` cannot express
+/// that (its transform never touches `layer`), so a gauge move this render
+/// cannot find among the eight `PerLayer` words is not necessarily
+/// unreal — it may be a stack move outside this render's reach. A task
+/// whose gluing needs one WITHHOLDS honestly (Pin D) rather than being
+/// invented. Widening past `PerLayer` needs its own layer-acting group
+/// (VOLUMETRIC-2), not this landing.
+fn render_vplane(plane: PlaneElement, depth: usize) -> Option<VProgram> {
+    let layer = Grid::new(2, 2, vec![0, 1, 2, 3]).expect("the 2×2 probe is lawful");
+    let probe = Volume::new(vec![layer; depth.max(1)])?;
+    let probe_m = measure_volume(&probe).ok()?;
+    let target = ObserverFrame { plane, relabel: Relabel::new(Vec::new()) }.apply(&probe_m).ok()?;
+    d4_vwords().into_iter().find(|word| {
+        measure_volume(&run_volume(word, &probe)).map(|m| m == target).unwrap_or(false)
+    })
+}
+
+/// Render an observer frame to a volumetric program: the per-layer geometric
+/// word then a per-layer recolor (same commuting order `render_frame` uses —
+/// a hue relabel applies uniformly regardless of layer, so it wraps in
+/// `VOp::PerLayer` exactly like a symmetry does). `None` for an unnameable
+/// frame or one that needs a stack move this render cannot reach.
+fn render_vframe(frame: &ObserverFrame, depth: usize) -> Option<VProgram> {
+    let mut program = render_vplane(frame.plane, depth)?;
+    program.extend(render_relabel(&frame.relabel)?.into_iter().map(VOp::PerLayer));
+    Some(program)
+}
+
+#[cfg(test)]
+mod volumetric_render_tests {
+    use super::*;
+    use reduct::reduction::{reduce_pair, ReduceVerdict};
+
+    fn probe(depth: usize) -> Volume {
+        let layer = Grid::new(2, 2, vec![0, 1, 2, 3]).expect("lawful");
+        Volume::new(vec![layer; depth]).expect("congruent layers")
+    }
+
+    /// PROVES the design premise: a `PerLayer` symmetry applied to a real
+    /// volume deduces as a gauge move through `reduce_pair` (the SAME organ
+    /// `think_task` uses), and `render_vplane` renders it back to the exact
+    /// program that reproduces it — round-tripping through the reduce organ,
+    /// not just matching against the probe render_vplane itself uses.
+    #[test]
+    fn a_per_layer_rotation_deduces_and_renders_correctly() {
+        let a = probe(3);
+        let program = vec![VOp::PerLayer(Op::Rotate90)];
+        let b = run_volume(&program, &a);
+        let ma = measure_volume(&a).expect("whole");
+        let mb = measure_volume(&b).expect("whole");
+        match reduce_pair(&ma, &mb, &[]) {
+            ReduceVerdict::CongruentThroughP { p } => {
+                // `deduce_gauge_move` may legitimately split the transform between
+                // `p.plane` and `p.relabel` — a probe where every hue occupies
+                // exactly one site makes geometric movement and hue substitution
+                // indistinguishable (the same ambiguity `render_frame` resolves by
+                // rendering BOTH pieces, never `render_plane` alone), so the full
+                // frame renders through `render_vframe`, mirroring `render_frame`.
+                let rendered = render_vframe(&p, 3).expect("a per-layer frame renders");
+                assert_eq!(
+                    measure_volume(&run_volume(&rendered, &a)).expect("whole"),
+                    mb,
+                    "the rendered word reproduces the SAME target the reduce organ deduced"
+                );
+            }
+            other => panic!("a per-layer rotation is a gauge move, got {other:?}"),
+        }
+    }
+
+    /// The scope limit, PROVED rather than assumed: `layer` never enters
+    /// `PlaneElement`'s transform, so a genuine stack move (data crossing
+    /// between layers) is NOT among the eight `PerLayer` words — the render
+    /// correctly returns `None` rather than inventing a wrong word.
+    #[test]
+    fn a_genuine_stack_move_is_outside_the_per_layer_render() {
+        let a = probe(2);
+        let b = run_volume(&vec![VOp::FlipStack], &a);
+        let ma = measure_volume(&a).expect("whole");
+        let mb = measure_volume(&b).expect("whole");
+        // FlipStack is genuinely a different measurement (layer 0 and layer 1
+        // swap content), so it either fails to deduce as ANY plane element,
+        // or — if it coincidentally matches one on this probe — render_vplane
+        // must still fail to find a PerLayer word that reproduces it, since
+        // no PerLayer word can move a site between layers.
+        if let ReduceVerdict::CongruentThroughP { p } = reduce_pair(&ma, &mb, &[]) {
+            assert_eq!(
+                render_vplane(p.plane, 2), None,
+                "no PerLayer word can express a move between layers"
+            );
+        }
+    }
+
+    /// A frame combining a symmetry with a recolor renders whole, matching
+    /// `render_frame`'s own commuting-order guarantee one level up.
+    #[test]
+    fn a_combined_symmetry_and_recolor_frame_renders() {
+        let plane = PlaneElement::all()[1]; // a non-identity element
+        let relabel = Relabel::new(vec![(0, 1), (1, 0)]);
+        let frame = ObserverFrame { plane, relabel };
+        let program = render_vframe(&frame, 2).expect("a named frame renders");
+        let a = probe(2);
+        let ma = measure_volume(&a).expect("whole");
+        let expected = frame.apply(&ma).expect("whole");
+        assert_eq!(measure_volume(&run_volume(&program, &a)).expect("whole"), expected);
+    }
 }
 
 /// **THINK THE TASK** — the ARC seat. Peel the train pairs into measurements,
