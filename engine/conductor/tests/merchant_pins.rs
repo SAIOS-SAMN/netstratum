@@ -146,18 +146,21 @@ fn the_caravan_bridges_the_walled_pair_at_a_profit() {
     //
     // #138 THE RESOURCE GRAIN — the aperture delivery now floors to the 1/1024
     // resource grain (`smelt_resource`), so each melted leg lands on the grain
-    // and the round-trip profits at ON-GRAIN rationals: biomass 55/64 (was the
-    // off-grain 543/640, itself stale after the orbital-phase term), iron 437/512
-    // (was 4431/5120). Both still strictly POSITIVE — the law is unmoved; only
-    // the exact value re-seats on the grain, which is the migration working.
+    // and the round-trip profits at ON-GRAIN rationals. GALACTIC-1's regional
+    // gradient re-seated the melt route's terms again after #138 landed (its
+    // own 55/64 pin went stale the same way #138's landing re-seated the pin
+    // before it, per the law-witness-over-exact-pins ruling: an exact pin
+    // tracks a derivation, not an invariant, and re-seats when the derivation
+    // does) — this pin is the CURRENT on-grain measurement. Both legs still
+    // strictly POSITIVE — the law is unmoved; only the exact value re-seats.
     assert_eq!(
         banked(caravan, Resource::Biomass) - stake_biomass,
-        ratio(55, 64),
+        ratio(469, 512),
         "the biomass round-trip profits exactly, on the grain"
     );
     assert_eq!(
         banked(caravan, Resource::Iron) - stake_iron,
-        ratio(437, 512),
+        ratio(459, 512),
         "the iron leftover is inventory, banked on the grain"
     );
     // Both legs are ordinary law: the void's share receipted on the

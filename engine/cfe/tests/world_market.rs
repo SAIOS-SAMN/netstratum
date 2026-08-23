@@ -11,7 +11,7 @@ use cfe::dop::{exchange, positive, unit};
 use cfe::dop::Resource;
 use cfe::ratio::ratio;
 use cfe::thermal::StarClass;
-use cfe::world::{clear_trade, replay, ActionRefused, World, FIRST_ORB};
+use cfe::world::{clear_trade, replay, smelt_resource, ActionRefused, World, FIRST_ORB};
 
 fn sunlit(name: &str) -> World {
     let mut world = World::new();
@@ -170,10 +170,13 @@ fn the_gap_melts_the_cargo_and_distance_walls() {
     //                  escort on the deal)        = 345/2048
     //   delivered    = 115/64 − 345/2048         = 3335/2048
     // Every term is receipted: melt in VoidShare, the residual in
-    // InterdictionStruck, and sent = delivered + void, exactly.
+    // InterdictionStruck, and sent = delivered + void, exactly. #138 —
+    // the bank is on the 1/1024 resource-ledger grain; the delivered
+    // amount smelts down to it at the fill (the receipt below still
+    // speaks the exact unsmelted delivery).
     assert_eq!(
         d.orb().unwrap().banked_amount(Resource::Iron) - d_iron,
-        ratio(3335, 2048),
+        smelt_resource(&ratio(3335, 2048)),
         "the void takes φ·D and the uncovered convoy pays its residual"
     );
     let received = d.chronicle().receipts().iter().find_map(|r| match r.event() {
@@ -182,7 +185,7 @@ fn the_gap_melts_the_cargo_and_distance_walls() {
         }
         _ => None,
     });
-    assert_eq!(received, Some(ratio(3335, 2048)), "the receipt speaks what LANDED");
+    assert_eq!(received, Some(smelt_resource(&ratio(3335, 2048))), "the receipt speaks what LANDED");
     // P5-A: the interdiction residual is receipted on the SENDING
     // book, wearing its risk.
     let interdicted = c.chronicle().receipts().iter().find_map(|r| match r.event() {
@@ -203,9 +206,19 @@ fn the_gap_melts_the_cargo_and_distance_walls() {
         ClosureEvent::VoidShare { resource: Resource::Iron, amount, .. } => Some(amount.clone()),
         _ => None,
     });
-    assert_eq!(void_share, Some(ratio(761, 2048)), "the void's share is receipted, never silent");
+    // #138 — void_share = sent − delivered, and delivered is what
+    // ACTUALLY landed (smelted to the 1/1024 grain above), not the
+    // exact unsmelted fraction — so the void absorbs the grain dust
+    // too (the same first-class melt-loss receipt, per the ruling
+    // above).
+    let delivered = smelt_resource(&ratio(3335, 2048));
     assert_eq!(
-        ratio(3335, 2048) + ratio(761, 2048),
+        void_share,
+        Some(ratio(2, 1) - delivered.clone()),
+        "the void's share is receipted, never silent"
+    );
+    assert_eq!(
+        delivered + void_share.unwrap(),
         ratio(2, 1),
         "sent = received + void share — zero-sum stays universal"
     );

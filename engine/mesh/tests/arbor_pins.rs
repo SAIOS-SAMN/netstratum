@@ -317,8 +317,8 @@ fn the_record_speaks_the_blobs_schema() {
     );
     assert_eq!(
         genesis.schema,
-        codec::SCHEMA_V19,
-        "the codec emits v19 today — E3.9 appended element_allowlists \
+        codec::SCHEMA_V26,
+        "the codec emits v26 today — GALACTIC-1 appended region_seed \
          (a deliberate version tripwire: bump this WITH the codec)"
     );
 }

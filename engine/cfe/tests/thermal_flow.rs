@@ -5,7 +5,7 @@
 use cfe::dop::{positive, unit, ClosureEvent, Resource, ZoneKind};
 use cfe::ratio::{ratio, Ratio};
 use cfe::thermal::{self, StarClass};
-use cfe::world::{replay, ActionRefused, World, FIRST_ORB};
+use cfe::world::{replay, smelt_resource, ActionRefused, World, FIRST_ORB};
 
 fn joules(world: &World) -> Ratio {
     world
@@ -278,9 +278,11 @@ fn the_vault_captures_sink_and_charges_no_demurrage() {
     world.collect().expect("collects");
     // ORBIT-ENDOW-1: siting a cryogenic band gifted 2 sink into the
     // bank at founding; the first settle adds the captured headroom.
+    // #138 — the bank is on the 1/1024 resource-ledger grain; the raw
+    // sum smelts down to it at the fill.
     assert_eq!(
         world.orb().expect("orb").banked_amount(Resource::Sink),
-        ratio(2, 1) + ratio(19_999, 10_000)
+        smelt_resource(&(ratio(2, 1) + ratio(19_999, 10_000)))
     );
     // Let time pass; a second settle in the vault charges no demurrage.
     world.tick();

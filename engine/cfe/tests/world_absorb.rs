@@ -10,7 +10,7 @@
 use cfe::dop::{positive, unit, ClosureEvent, Resource, ZoneKind};
 use cfe::ratio::{ratio, Ratio};
 use cfe::thermal::StarClass;
-use cfe::world::{replay, ActionRefused, World, FIRST_ORB, SOVEREIGN};
+use cfe::world::{replay, smelt_resource, ActionRefused, World, FIRST_ORB, SOVEREIGN};
 
 fn banked(world: &World, orb: u64, resource: Resource) -> Ratio {
     world
@@ -73,10 +73,12 @@ fn the_absorption_invariant_measures_across_two_orbs() {
     let (mut world, charted) = furnace_and_coldstore();
     // 59997/10000 captured + the ORBIT-ENDOW-1 cryogenic band gift
     // (2 sink at siting, c2242de) — re-derived 2026-08-12; the gift
-    // landed unratified behind the fail-fast blindness.
+    // landed unratified behind the fail-fast blindness. #138 — the
+    // bank is on the 1/1024 resource-ledger grain; the raw sum smelts
+    // down to it at the fill.
     assert_eq!(
         banked(&world, charted, Resource::Sink),
-        ratio(59_997, 10_000) + ratio(2, 1)
+        smelt_resource(&(ratio(59_997, 10_000) + ratio(2, 1)))
     );
     assert_eq!(world.vent_pending_of(FIRST_ORB), ratio(1, 1));
     assert!(world.orb_by_id(FIRST_ORB).expect("orb").overheat);
@@ -95,7 +97,7 @@ fn the_absorption_invariant_measures_across_two_orbs() {
     // sink_consumed = 1 (the band gift rides the bank unchanged):
     assert_eq!(
         banked(&world, charted, Resource::Sink),
-        ratio(49_997, 10_000) + ratio(2, 1)
+        smelt_resource(&(ratio(49_997, 10_000) + ratio(2, 1)))
     );
     // vented_after_shed = 1, on the ABSORBER's ledger:
     assert_eq!(
