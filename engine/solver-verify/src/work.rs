@@ -422,7 +422,7 @@ impl<'a> Reader<'a> {
     }
     fn program(&mut self) -> Option<Program> {
         let op_count = self.u16()?;
-        let mut program: Program = Vec::with_capacity(op_count);
+        let mut program: Program = Vec::new();
         for _ in 0..op_count {
             program.push(self.op()?);
         }
@@ -430,7 +430,7 @@ impl<'a> Reader<'a> {
     }
     fn volume(&mut self) -> Option<Volume> {
         let depth = self.u16()?;
-        let mut layers = Vec::with_capacity(depth);
+        let mut layers = Vec::new();
         for _ in 0..depth {
             layers.push(self.grid()?);
         }
@@ -440,7 +440,7 @@ impl<'a> Reader<'a> {
     }
     fn vprogram(&mut self) -> Option<VProgram> {
         let op_count = self.u16()?;
-        let mut program: VProgram = Vec::with_capacity(op_count);
+        let mut program: VProgram = Vec::new();
         for _ in 0..op_count {
             program.push(match self.byte()? {
                 1 => VOp::PerLayer(self.op()?),
@@ -454,7 +454,7 @@ impl<'a> Reader<'a> {
     fn certificate(&mut self) -> Option<SolveCertificate> {
         let genesis = self.digest()?;
         let step_count = self.u16()?;
-        let mut steps = Vec::with_capacity(step_count);
+        let mut steps = Vec::new();
         for _ in 0..step_count {
             steps.push(self.digest()?);
         }
@@ -551,7 +551,7 @@ pub fn decode_volume_work(bytes: &[u8]) -> Option<VolumeProof> {
     let output = r.volume()?;
     let genesis = r.digest()?;
     let step_count = r.u16()?;
-    let mut steps = Vec::with_capacity(step_count);
+    let mut steps = Vec::new();
     for _ in 0..step_count {
         steps.push(r.digest()?);
     }
@@ -629,7 +629,7 @@ pub fn decode_corpus_work(bytes: &[u8]) -> Option<CorpusProof> {
     if train_len == 0 {
         return None;
     }
-    let mut train = Vec::with_capacity(train_len);
+    let mut train = Vec::new();
     for _ in 0..train_len {
         let input = r.grid()?;
         let output = r.grid()?;

@@ -790,7 +790,7 @@ impl<F: Field> Multivector<F> {
             .map_err(|_| MultivectorWireError::InvalidHorizon { depth })?;
         let plane_count = u32::from_le_bytes([bytes[9], bytes[10], bytes[11], bytes[12]]) as usize;
         let mut cursor = 13usize;
-        let mut planes: Vec<(PlaneIndex, VectorModule<F>)> = Vec::with_capacity(plane_count);
+        let mut planes: Vec<(PlaneIndex, VectorModule<F>)> = Vec::new();
         for _ in 0..plane_count {
             if cursor + 12 > bytes.len() {
                 return Err(MultivectorWireError::Truncated {

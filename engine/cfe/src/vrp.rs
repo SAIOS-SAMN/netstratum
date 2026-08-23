@@ -286,7 +286,17 @@ impl Receipt {
                 let own = ReceiptHash(value.get(48..80)?.try_into().ok()?);
                 let count = u32::from_le_bytes(value.get(80..84)?.try_into().ok()?) as usize;
                 let mut at = 84usize;
-                let mut provenance = Vec::with_capacity(count);
+                // NEVER pre-allocate on an untrusted count (SEAL A): a
+                // torn or corrupted frame's `count` is unbounded
+                // attacker/corruption-controlled bytes, and
+                // `Vec::with_capacity(count)` tries the allocation
+                // BEFORE the bounds-checked reads below ever get a
+                // chance to fail safely on `?` — the crash is the
+                // allocation itself, not a read. Growing a `Vec::new()`
+                // costs nothing extra for the tiny counts every real
+                // receipt carries; a bogus count still refuses, just
+                // via the read that actually runs out of bytes.
+                let mut provenance = Vec::new();
                 for _ in 0..count {
                     provenance.push(u64::from_le_bytes(value.get(at..at + 8)?.try_into().ok()?));
                     at += 8;
@@ -309,7 +319,9 @@ impl Receipt {
                 let own = ReceiptHash(value.get(48..80)?.try_into().ok()?);
                 let count = u32::from_le_bytes(value.get(80..84)?.try_into().ok()?) as usize;
                 let mut at = 84usize;
-                let mut provenance = Vec::with_capacity(count);
+                // Same law as the V1 arm above: never pre-allocate on
+                // an untrusted count.
+                let mut provenance = Vec::new();
                 for _ in 0..count {
                     provenance.push(u64::from_le_bytes(value.get(at..at + 8)?.try_into().ok()?));
                     at += 8;

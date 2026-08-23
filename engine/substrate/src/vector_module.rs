@@ -214,7 +214,7 @@ impl<F: Field> VectorModule<F> {
             Some(u32::from_le_bytes([b[0], b[1], b[2], b[3]]) as usize)
         };
         let count = u32_at(at)?;
-        let mut components = Vec::with_capacity(count);
+        let mut components = Vec::new();
         for _ in 0..count {
             let n_len = u32_at(at)?;
             let numer = num_bigint::BigInt::from_signed_bytes_le(take(at, n_len)?);

@@ -5575,7 +5575,7 @@ impl ClosureEvent {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let count = *value.get(8)? as usize;
                 let mut at = 9usize;
-                let mut decays = Vec::with_capacity(count);
+                let mut decays = Vec::new() /* SEAL A: never pre-allocate on an untrusted wire count */;
                 for _ in 0..count {
                     let resource = Resource::from_wire(*value.get(at)?)?;
                     at += 1;
@@ -5602,7 +5602,7 @@ impl ClosureEvent {
                 let term = u64::from_le_bytes(value.get(9..17)?.try_into().ok()?);
                 let count = *value.get(17)? as usize;
                 let mut at = 18usize;
-                let mut terms = Vec::with_capacity(count);
+                let mut terms = Vec::new() /* SEAL A: never pre-allocate on an untrusted wire count */;
                 for _ in 0..count {
                     let channel = *value.get(at)?;
                     at += 1;
@@ -5623,7 +5623,7 @@ impl ClosureEvent {
                 let deal = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let count = u16::from_le_bytes(value.get(8..10)?.try_into().ok()?) as usize;
                 let mut at = 10usize;
-                let mut elements = Vec::with_capacity(count);
+                let mut elements = Vec::new() /* SEAL A: never pre-allocate on an untrusted wire count */;
                 for _ in 0..count {
                     let element: [u8; 32] = value.get(at..at + 32)?.try_into().ok()?;
                     at += 32;
@@ -5636,7 +5636,7 @@ impl ClosureEvent {
                 let orbit: [u8; 32] = value.get(..32)?.try_into().ok()?;
                 let count = *value.get(32)? as usize;
                 let mut at = 33usize;
-                let mut cited = Vec::with_capacity(count);
+                let mut cited = Vec::new() /* SEAL A: never pre-allocate on an untrusted wire count */;
                 for _ in 0..count {
                     let digest: [u8; 32] = value.get(at..at + 32)?.try_into().ok()?;
                     at += 32;
@@ -5655,7 +5655,7 @@ impl ClosureEvent {
                 let orbit: [u8; 32] = value.get(..32)?.try_into().ok()?;
                 let count = *value.get(32)? as usize;
                 let mut at = 33usize;
-                let mut cited = Vec::with_capacity(count);
+                let mut cited = Vec::new() /* SEAL A: never pre-allocate on an untrusted wire count */;
                 for _ in 0..count {
                     let digest: [u8; 32] = value.get(at..at + 32)?.try_into().ok()?;
                     at += 32;
@@ -5855,7 +5855,7 @@ impl ClosureEvent {
                 let role = *value.get(8)? as usize;
                 let count = *value.get(9)? as usize;
                 let mut at = 10usize;
-                let mut inputs = Vec::with_capacity(count);
+                let mut inputs = Vec::new() /* SEAL A: never pre-allocate on an untrusted wire count */;
                 for _ in 0..count {
                     let element: [u8; 32] = value.get(at..at + 32)?.try_into().ok()?;
                     at += 32;
@@ -6750,7 +6750,7 @@ impl ClosureEvent {
                 let word = take_text(&mut at)?;
                 let count = *value.get(at)? as usize;
                 at += 1;
-                let mut binding = Vec::with_capacity(count);
+                let mut binding = Vec::new() /* SEAL A: never pre-allocate on an untrusted wire count */;
                 for _ in 0..count {
                     let channel = *value.get(at)?;
                     at += 1;
@@ -6778,7 +6778,7 @@ impl ClosureEvent {
                 let count =
                     u32::from_le_bytes(value.get(40..44)?.try_into().ok()?) as usize;
                 let mut at = 44usize;
-                let mut covered = Vec::with_capacity(count);
+                let mut covered = Vec::new() /* SEAL A: never pre-allocate on an untrusted wire count */;
                 for _ in 0..count {
                     let orb = u64::from_le_bytes(value.get(at..at + 8)?.try_into().ok()?);
                     at += 8;
@@ -6796,7 +6796,7 @@ impl ClosureEvent {
                 let count =
                     u32::from_le_bytes(value.get(75..79)?.try_into().ok()?) as usize;
                 let mut at = 79usize;
-                let mut covered = Vec::with_capacity(count);
+                let mut covered = Vec::new() /* SEAL A: never pre-allocate on an untrusted wire count */;
                 for _ in 0..count {
                     covered.push(u64::from_le_bytes(value.get(at..at + 8)?.try_into().ok()?));
                     at += 8;
@@ -6830,7 +6830,7 @@ impl ClosureEvent {
                 let count =
                     u32::from_le_bytes(value.get(at..at + 4)?.try_into().ok()?) as usize;
                 at += 4;
-                let mut covered = Vec::with_capacity(count);
+                let mut covered = Vec::new() /* SEAL A: never pre-allocate on an untrusted wire count */;
                 for _ in 0..count {
                     covered.push(u64::from_le_bytes(value.get(at..at + 8)?.try_into().ok()?));
                     at += 8;
@@ -7302,7 +7302,7 @@ impl ColonyOrb {
                     let work: [u8; 32] = value.get(..32)?.try_into().ok()?;
                     let count =
                         u32::from_le_bytes(value.get(32..36)?.try_into().ok()?) as usize;
-                    let mut witnesses = Vec::with_capacity(count);
+                    let mut witnesses = Vec::new() /* SEAL A: never pre-allocate on an untrusted wire count */;
                     for at in 0..count {
                         let from = 36 + at * 32;
                         witnesses.push(value.get(from..from + 32)?.try_into().ok()?);

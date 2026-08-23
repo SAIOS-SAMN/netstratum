@@ -932,7 +932,7 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
                 return None;
             }
             let len = usize::from(take.u8()?);
-            let mut name = Vec::with_capacity(len);
+            let mut name = Vec::new();
             for _ in 0..len {
                 name.push(take.u8()?);
             }
