@@ -115,8 +115,16 @@ fn pure_npc_beat_populates_elements_and_tag_72_and_replays() {
         "genesis opens no veins"
     );
 
-    // Pure NPC: cycle only. Beat 1 opens the lowest stratum (prospect);
-    // tick advances the clock; beat 2 assays the open vein.
+    // Pure NPC: cycle only. Beat 1 opens the lowest stratum (prospect) —
+    // ONT-2b: this line's STAPLE resolves to exactly this first vein (the
+    // only candidate `morphogen::staple` has to read), and the staple is
+    // permanently exempt from span-based assay (`ground_step`'s assay
+    // loop skips it — it mines only by demand-driven eating at collect,
+    // never the geometric span). Beat 2 opens the SECOND stratum
+    // (prospect's one-per-beat capacity); that vein is not the staple,
+    // so it assays on its own span — but its `last_assay` seats at beat
+    // 2's pre-tick stamp, so the span (`now > last_assay`) is not open
+    // until beat 3.
     let mut populated_on = None;
     for beat in 1u32..=4 {
         let _ = polity.cycle(&book, &registry);
@@ -130,8 +138,10 @@ fn pure_npc_beat_populates_elements_and_tag_72_and_replays() {
          (prospect on beat 1, assay after tick span on beat 2+)",
     );
     assert!(
-        beat <= 2,
-        "transition must complete by the second beat under the span law; got beat {beat}"
+        beat <= 3,
+        "transition must complete by the third beat under the span law \
+         (ONT-2b excludes the staple vein from span assay; the second, \
+         non-staple vein opens beat 2 and its span clears beat 3); got beat {beat}"
     );
 
     // ELEMENTS ledger: non-empty kinds and positive mass.

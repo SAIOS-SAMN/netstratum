@@ -478,7 +478,25 @@ impl World {
             .as_ref()
             .map(|(_, draw)| *draw > ratio(0, 1))
             .unwrap_or(false);
-        if settleable.is_empty() && farm.is_none() && !staple_mines {
+        // #138 THE RESOURCE GRAIN, THE GATE'S OWN GRAIN — `settleable`
+        // being non-empty is not enough: every entry in it (yield OR
+        // upkeep draw) smelts to the 1/1024 grain below, and a sub-grain
+        // entry banks nothing and receipts nothing. `touch()` anchors
+        // `last_touch` unconditionally the moment it is called — its own
+        // law is "a zero-due touch still anchors silently, the CARRIER
+        // DEED'S OWN REPLAY ARM carries the anchor" — so calling it over
+        // a `settleable` that smelts to nothing entirely breaks that
+        // promise: no receipt follows, live marches on, replay never
+        // hears it (the last_touch divergence `lineage_pins` pinned).
+        // Gate on SURVIVES-THE-GRAIN, not merely non-empty.
+        let settles_on_grain = settleable.iter().any(|(_, amount)| {
+            let magnitude = match *amount >= ratio(0, 1) {
+                true => amount.clone(),
+                false => -amount.clone(),
+            };
+            smelt_resource(&magnitude) != ratio(0, 1)
+        });
+        if !settles_on_grain && farm.is_none() && !staple_mines {
             return Err(ActionRefused::NothingAccrued);
         }
         // TAXATION (49 §5): the taxable throughput this touch — the net
