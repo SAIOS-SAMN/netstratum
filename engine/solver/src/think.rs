@@ -14,6 +14,7 @@ use reduct::{think, Crystal, PairClosure, TaskThought};
 use solver_verify::certificate::{verify_certificate, CertificateRead, SolveCertificate};
 use solver_verify::grid::{run, Grid, Op, Program, TileMirror, HUES};
 use solver_verify::loader::Task;
+use solver_verify::volume::Volume;
 
 /// The typed solve reading — the ARC seat's verdict (moved here from the retired
 /// `search` module, deleted 2026-08-19: the mind observes, it does not search).
@@ -55,6 +56,40 @@ pub fn measure_grid(grid: &Grid) -> Result<FullMeasurement, MeasurementRefusal> 
     FullMeasurement::try_new(
         HUES,
         CellFrame { rows: grid.rows as u32, cols: grid.cols as u32, layers: 1 },
+        occupancy,
+    )
+}
+
+/// VOLUMETRIC-1b — the `measure_grid` counterpart for a stack of congruent
+/// layers: every cell of every layer is a site carrying its hue, `layer`
+/// riding the stack index. Same fixed ten-hue fiber as `measure_grid` — a
+/// volumetric task lives in the SAME gauge fiber a planar one does (there is
+/// nothing about stacking layers that widens the hue ladder), so the two
+/// seats' measurements are directly comparable at the fiber. `Volume::new`
+/// already guarantees every layer shares one (rows, cols); this only reads
+/// that guarantee, never re-derives it.
+pub fn measure_volume(volume: &Volume) -> Result<FullMeasurement, MeasurementRefusal> {
+    let layers = volume.layers();
+    let Some(first) = layers.first() else {
+        // An empty stack has no frame to measure — the same "nothing to
+        // measure" case `Volume::new` itself already refuses to construct
+        // (`layers.first()?` there), so this arm is unreachable through the
+        // public API; kept as an explicit, honest refusal rather than a panic.
+        return FullMeasurement::try_new(HUES, CellFrame { rows: 0, cols: 0, layers: 0 }, Vec::new());
+    };
+    let (rows, cols) = (first.rows, first.cols);
+    let occupancy = (0..layers.len())
+        .flat_map(|l| (0..rows).flat_map(move |r| (0..cols).map(move |c| (l, r, c))))
+        .map(|(l, r, c)| {
+            (
+                Site { row: r as i64, col: c as i64, layer: l as i64 },
+                GaugeDirection { index: layers[l].at(r, c) },
+            )
+        })
+        .collect();
+    FullMeasurement::try_new(
+        HUES,
+        CellFrame { rows: rows as u32, cols: cols as u32, layers: layers.len() as u32 },
         occupancy,
     )
 }
