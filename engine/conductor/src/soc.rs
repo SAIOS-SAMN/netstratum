@@ -109,7 +109,7 @@ pub fn gauge_occupancy(
         .map(|(i, (id, _amount))| {
             let (family, _tier, _richness) = cfe::dop::element_properties(id, class);
             (
-                Site { row: 0, col: i as i64 },
+                Site { row: 0, col: i as i64, layer: 0 },
                 GaugeDirection { index: family.saturating_sub(1) },
             )
         })
@@ -131,7 +131,7 @@ pub fn observe_direction(
     // so `try_new` admits it.
     let occupancy = gauge_occupancy(holdings, class);
     let measurement =
-        FullMeasurement::try_new(5, CellFrame { rows: 1, cols: cols as u32 }, occupancy).ok()?;
+        FullMeasurement::try_new(5, CellFrame { rows: 1, cols: cols as u32, layers: 1 }, occupancy).ok()?;
     let cover = peel(&measurement);
     let families = cover.value.supports.len();
     let bodies = cover.object.bodies.len();

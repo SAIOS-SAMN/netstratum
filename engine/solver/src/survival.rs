@@ -52,15 +52,15 @@ pub enum RationRead {
 pub fn ration_reads(mouths: u64, fed: u64, ration_dir: u8) -> RationRead {
     debug_assert!(ration_dir != UNFED, "the ration direction must be distinct from UNFED");
     let fed = fed.min(mouths);
-    let frame = CellFrame { rows: 1, cols: mouths as u32 };
+    let frame = CellFrame { rows: 1, cols: mouths as u32, layers: 1 };
     let fiber = ration_dir.saturating_add(1);
     let owe_occ: Vec<(Site, GaugeDirection)> = (0..mouths as i64)
-        .map(|c| (Site { row: 0, col: c }, GaugeDirection { index: ration_dir }))
+        .map(|c| (Site { row: 0, col: c, layer: 0 }, GaugeDirection { index: ration_dir }))
         .collect();
     let have_occ: Vec<(Site, GaugeDirection)> = (0..mouths as i64)
         .map(|c| {
             let index = if (c as u64) < fed { ration_dir } else { UNFED };
-            (Site { row: 0, col: c }, GaugeDirection { index })
+            (Site { row: 0, col: c, layer: 0 }, GaugeDirection { index })
         })
         .collect();
     let owe = FullMeasurement::try_new(fiber, frame, owe_occ).expect("owe is whole (dense mouths)");

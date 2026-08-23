@@ -86,7 +86,7 @@ impl CongruenceReading {
             present.extend(asymmetry.arrived.iter().copied());
             if !present.is_empty() {
                 let mut sites: Vec<Site> = present.into_iter().collect();
-                sites.sort_by_key(|s| (s.row, s.col));
+                sites.sort_by_key(|s| (s.layer, s.row, s.col));
                 supports.push(DirectionSupport { direction: asymmetry.direction, sites });
             }
         }
@@ -143,7 +143,11 @@ fn support_sites(value: &ValueManifold, direction: GaugeDirection) -> &[Site] {
 fn difference(left: &[Site], right: &[Site]) -> Vec<Site> {
     left.iter()
         .filter(|site| {
-            right.binary_search_by_key(&(site.row, site.col), |s| (s.row, s.col)).is_err()
+            right
+                .binary_search_by_key(&(site.layer, site.row, site.col), |s| {
+                    (s.layer, s.row, s.col)
+                })
+                .is_err()
         })
         .copied()
         .collect()
@@ -220,13 +224,13 @@ impl ChainDelta {
 }
 
 /// The accumulation carrier — the CALL SITE the chains expand into. Keyed by
-/// `(row, col, direction)` in a `BTreeMap`, so accumulation is O(log n) per
+/// `(row, col, layer, direction)` in a `BTreeMap`, so accumulation is O(log n) per
 /// contribution, not the linear slot-scan it was (a 30×30, 10-hue wall makes
 /// ~9000 possible entries — the scan was O(entries²)). `into_entries` sorts the
 /// output canonically REGARDLESS of insertion order, so this is output-identical
 /// (the map's own key order is normalised away — SEAL-B untouched).
 pub struct Ledger {
-    slots: BTreeMap<(i64, i64, u8), BigInt>,
+    slots: BTreeMap<(i64, i64, i64, u8), BigInt>,
 }
 
 impl Ledger {
@@ -234,9 +238,11 @@ impl Ledger {
         Self { slots: BTreeMap::new() }
     }
 
-    /// One signed exact contribution at (site, direction).
+    /// One signed exact contribution at (site, direction). VOLUMETRIC-1a: keyed
+    /// on the whole site (layer included) — output-identical for every 2-D
+    /// caller, whose sites all carry `layer: 0`.
     pub fn add(&mut self, site: Site, direction: GaugeDirection, value: BigInt) {
-        let key = (site.row, site.col, direction.index);
+        let key = (site.row, site.col, site.layer, direction.index);
         self.slots
             .entry(key)
             .and_modify(|coefficient| *coefficient += &value)
@@ -249,13 +255,13 @@ impl Ledger {
             .slots
             .into_iter()
             .filter(|(_, coefficient)| coefficient != &BigInt::from(0))
-            .map(|((row, col, index), coefficient)| ChainEntry {
-                site: Site { row, col },
+            .map(|((row, col, layer, index), coefficient)| ChainEntry {
+                site: Site { row, col, layer },
                 direction: GaugeDirection { index },
                 coefficient,
             })
             .collect();
-        entries.sort_by_key(|e| (e.direction.index, e.site.row, e.site.col));
+        entries.sort_by_key(|e| (e.direction.index, e.site.layer, e.site.row, e.site.col));
         entries
     }
 }
@@ -334,7 +340,7 @@ pub enum CongruenceRefusal {
     #[error("frames disagree: from {from:?}, to {to:?}")]
     FramesDisagree { from: CellFrame, to: CellFrame },
 
-    #[error("departure from a site the source does not carry: direction {}, site ({}, {})", direction.index, site.row, site.col)]
+    #[error("departure from a site the source does not carry: direction {}, site ({}, {}, layer {})", direction.index, site.row, site.col, site.layer)]
     DepartureFromAbsentSite { direction: GaugeDirection, site: Site },
 
     #[error("the chains do not compose a→b→c")]

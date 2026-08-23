@@ -12,7 +12,7 @@ fn occupancy(rows: i64, cols: i64, hues: &[u8]) -> Vec<(Site, GaugeDirection)> {
     (0..rows)
         .flat_map(|row| (0..cols).map(move |col| (row, col)))
         .enumerate()
-        .map(|(i, (row, col))| (Site { row, col }, GaugeDirection { index: hues[i] }))
+        .map(|(i, (row, col))| (Site { row, col, layer: 0 }, GaugeDirection { index: hues[i] }))
         .collect()
 }
 
@@ -20,7 +20,7 @@ fn occupancy(rows: i64, cols: i64, hues: &[u8]) -> Vec<(Site, GaugeDirection)> {
 fn a_whole_measurement_admits_and_its_cover_re_forms_it() {
     // A 2×2 with two hues (background 0, one body of hue 1) — every site once,
     // fiber_rank 2 covers the hues.
-    let frame = CellFrame { rows: 2, cols: 2 };
+    let frame = CellFrame { rows: 2, cols: 2, layers: 1 };
     let measurement =
         FullMeasurement::try_new(2, frame, occupancy(2, 2, &[0, 1, 1, 0])).expect("whole admits");
     // THE SEED LAW: the cover lifts back to the input exactly. A cover that
@@ -37,12 +37,12 @@ fn a_whole_measurement_admits_and_its_cover_re_forms_it() {
 
 #[test]
 fn a_partial_or_over_carried_measurement_cannot_exist() {
-    let frame = CellFrame { rows: 2, cols: 2 };
+    let frame = CellFrame { rows: 2, cols: 2, layers: 1 };
     // MISSING a site — (1,1) never carried.
     let missing = vec![
-        (Site { row: 0, col: 0 }, GaugeDirection { index: 0 }),
-        (Site { row: 0, col: 1 }, GaugeDirection { index: 0 }),
-        (Site { row: 1, col: 0 }, GaugeDirection { index: 0 }),
+        (Site { row: 0, col: 0, layer: 0 }, GaugeDirection { index: 0 }),
+        (Site { row: 0, col: 1, layer: 0 }, GaugeDirection { index: 0 }),
+        (Site { row: 1, col: 0, layer: 0 }, GaugeDirection { index: 0 }),
     ];
     assert!(
         matches!(
@@ -53,10 +53,10 @@ fn a_partial_or_over_carried_measurement_cannot_exist() {
     );
     // A site carried TWICE — (0,0) doubled, (1,1) dropped.
     let doubled = vec![
-        (Site { row: 0, col: 0 }, GaugeDirection { index: 0 }),
-        (Site { row: 0, col: 0 }, GaugeDirection { index: 1 }),
-        (Site { row: 0, col: 1 }, GaugeDirection { index: 0 }),
-        (Site { row: 1, col: 0 }, GaugeDirection { index: 0 }),
+        (Site { row: 0, col: 0, layer: 0 }, GaugeDirection { index: 0 }),
+        (Site { row: 0, col: 0, layer: 0 }, GaugeDirection { index: 1 }),
+        (Site { row: 0, col: 1, layer: 0 }, GaugeDirection { index: 0 }),
+        (Site { row: 1, col: 0, layer: 0 }, GaugeDirection { index: 0 }),
     ];
     assert!(
         matches!(

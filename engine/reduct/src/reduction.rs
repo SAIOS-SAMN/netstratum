@@ -89,16 +89,18 @@ impl PlaneElement {
         out
     }
 
-    /// The transformed frame (Swap transposes rows↔cols).
+    /// The transformed frame (Swap transposes rows↔cols; `layers` is
+    /// untouched — VOLUMETRIC-1a: the plane group acts on the 2-D cell only).
     pub fn frame(&self, frame: CellFrame) -> CellFrame {
         match self.exchange {
             Exchange::Keep => frame,
-            Exchange::Swap => CellFrame { rows: frame.cols, cols: frame.rows },
+            Exchange::Swap => CellFrame { rows: frame.cols, cols: frame.rows, layers: frame.layers },
         }
     }
 
     /// The transformed site (exchange first, then mirrors on the post-exchange
-    /// frame).
+    /// frame). `layer` passes through unchanged (VOLUMETRIC-1a: a per-layer
+    /// symmetry never moves a site between layers).
     pub fn site(&self, site: Site, frame: CellFrame) -> Site {
         let (mut r, mut c, out_frame) = match self.exchange {
             Exchange::Keep => (site.row, site.col, frame),
@@ -112,7 +114,7 @@ impl PlaneElement {
             Flip::Keep => c,
             Flip::Mirror => i64::from(out_frame.cols) - 1 - c,
         };
-        Site { row: r, col: c }
+        Site { row: r, col: c, layer: site.layer }
     }
 
     /// Group composition `self ∘ other` (other applies first). The exchange of
@@ -521,14 +523,19 @@ pub enum ReduceVerdict {
 /// same canonical order `into_entries` uses. Output-identical; SEAL-B untouched.
 pub(crate) fn drain_exact(residual: ChainDelta, basis: &[Crystal]) -> (ChainDelta, Vec<BoundingRecord>) {
     let (from, to) = (residual.from, residual.to);
-    let mut index: BTreeMap<(i64, i64, u8), BigInt> = residual
+    // VOLUMETRIC-1a: keyed on the WHOLE site (layer included) — a 2-D
+    // residual's sites all carry `layer: 0`, so this is output-identical to
+    // the prior (row, col, direction) key for every planar caller; a
+    // volumetric residual now keys distinct layers distinctly instead of
+    // silently conflating them at the same (row, col).
+    let mut index: BTreeMap<(i64, i64, i64, u8), BigInt> = residual
         .entries
         .into_iter()
-        .map(|e| ((e.site.row, e.site.col, e.direction.index), e.coefficient))
+        .map(|e| ((e.site.row, e.site.col, e.site.layer, e.direction.index), e.coefficient))
         .collect();
     let mut bounding: Vec<BoundingRecord> = Vec::new();
     for (basis_at, crystal) in basis.iter().enumerate() {
-        let key = |e: &ChainEntry| (e.site.row, e.site.col, e.direction.index);
+        let key = |e: &ChainEntry| (e.site.row, e.site.col, e.site.layer, e.direction.index);
         let accounts = !crystal.class.entries.is_empty()
             && crystal
                 .class
@@ -545,13 +552,13 @@ pub(crate) fn drain_exact(residual: ChainDelta, basis: &[Crystal]) -> (ChainDelt
     let mut entries: Vec<ChainEntry> = index
         .into_iter()
         .filter(|(_, coefficient)| coefficient != &BigInt::from(0))
-        .map(|((row, col, idx), coefficient)| ChainEntry {
-            site: Site { row, col },
+        .map(|((row, col, layer, idx), coefficient)| ChainEntry {
+            site: Site { row, col, layer },
             direction: GaugeDirection { index: idx },
             coefficient,
         })
         .collect();
-    entries.sort_by_key(|e| (e.direction.index, e.site.row, e.site.col));
+    entries.sort_by_key(|e| (e.direction.index, e.site.layer, e.site.row, e.site.col));
     (ChainDelta { from, to, entries }, bounding)
 }
 

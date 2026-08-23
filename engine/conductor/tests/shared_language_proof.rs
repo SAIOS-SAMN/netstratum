@@ -11,10 +11,10 @@ use reduct::{assemble, AuticSentence, ChainDelta, Crystal};
 
 fn class(row: i64, col: i64, dir: u8) -> ChainDelta {
     ChainDelta {
-        from: CellFrame { rows: 8, cols: 8 },
-        to: CellFrame { rows: 8, cols: 8 },
+        from: CellFrame { rows: 8, cols: 8, layers: 1 },
+        to: CellFrame { rows: 8, cols: 8, layers: 1 },
         entries: vec![ChainEntry {
-            site: Site { row, col },
+            site: Site { row, col, layer: 0 },
             direction: GaugeDirection { index: dir },
             coefficient: num_bigint::BigInt::from(1),
         }],

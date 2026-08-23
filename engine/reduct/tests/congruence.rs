@@ -10,9 +10,9 @@ fn measurement(rows: i64, cols: i64, fiber: u8, hues: &[u8]) -> FullMeasurement 
     let occupancy = (0..rows)
         .flat_map(|row| (0..cols).map(move |col| (row, col)))
         .enumerate()
-        .map(|(i, (row, col))| (Site { row, col }, GaugeDirection { index: hues[i] }))
+        .map(|(i, (row, col))| (Site { row, col, layer: 0 }, GaugeDirection { index: hues[i] }))
         .collect();
-    FullMeasurement::try_new(fiber, CellFrame { rows: rows as u32, cols: cols as u32 }, occupancy)
+    FullMeasurement::try_new(fiber, CellFrame { rows: rows as u32, cols: cols as u32, layers: 1 }, occupancy)
         .expect("whole admits")
 }
 
@@ -33,9 +33,9 @@ fn a_recolor_is_a_signed_chain_that_re_forms_the_target() {
         .iter()
         .find(|e| e.direction == GaugeDirection { index: 2 })
         .expect("hue 2 arrived (0,1)");
-    assert_eq!(departed.site, Site { row: 0, col: 1 });
+    assert_eq!(departed.site, Site { row: 0, col: 1, layer: 0 });
     assert_eq!(departed.coefficient, BigInt::from(-1));
-    assert_eq!(arrived.site, Site { row: 0, col: 1 });
+    assert_eq!(arrived.site, Site { row: 0, col: 1, layer: 0 });
     assert_eq!(arrived.coefficient, BigInt::from(1));
     // THE RIDING INVERSE: applying the chain to A re-forms B exactly.
     assert_eq!(re_form_with(&a, &chain).expect("the chain re-forms"), b, "Δ carries A → B");

@@ -16,11 +16,17 @@
 
 use thiserror::Error;
 
-/// A site — an element of ℤ² (translations act here).
+/// A site — an element of ℤ³ (translations act here). `layer` is the
+/// volumetric stack coordinate (VOLUMETRIC-1a): a planar measurement is the
+/// `layers == 1` case, `layer` always `0`. The plane group (D₄) acts on
+/// `(row, col)` only and passes `layer` through unchanged — a per-layer
+/// symmetry never moves a site between layers (`solver_verify::volume`'s own
+/// vocabulary: planar ops applied per layer, plus separate stack ops).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Site {
     pub row: i64,
     pub col: i64,
+    pub layer: i64,
 }
 
 /// A direction of the gauge fiber — WHICH basis direction (a hue at the ARC
@@ -32,11 +38,13 @@ pub struct GaugeDirection {
     pub index: u8,
 }
 
-/// The cell manifold's exact 2-D frame.
+/// The cell manifold's exact frame — 2-D (`layers == 1`) or a volumetric
+/// stack of congruent 2-D layers (VOLUMETRIC-1a).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CellFrame {
     pub rows: u32,
     pub cols: u32,
+    pub layers: u32,
 }
 
 /// A FULL measurement: every site of the frame carried exactly once with its
@@ -77,6 +85,7 @@ impl FullMeasurement {
     ) -> Result<Self, MeasurementRefusal> {
         let area = (frame.rows as usize)
             .checked_mul(frame.cols as usize)
+            .and_then(|rc| rc.checked_mul(frame.layers as usize))
             .ok_or(MeasurementRefusal::FrameOverflow { frame })?;
         let mut carried: Vec<u8> = vec![0; area];
         for (site, _) in &occupancy {
@@ -101,7 +110,7 @@ impl FullMeasurement {
                 // same measurement however their occupancy was assembled (the
                 // re-form's remove-then-push must not read as a different value).
                 let mut occupancy = occupancy;
-                occupancy.sort_by_key(|(site, _)| (site.row, site.col));
+                occupancy.sort_by_key(|(site, _)| (site.layer, site.row, site.col));
                 Ok(Self { fiber_rank, frame, occupancy })
             }
         }
@@ -181,7 +190,7 @@ impl Cover {
             .iter()
             .flat_map(|support| support.sites.iter().map(|site| (*site, support.direction)))
             .collect();
-        occupancy.sort_by_key(|(site, _)| (site.row, site.col));
+        occupancy.sort_by_key(|(site, _)| (site.layer, site.row, site.col));
         FullMeasurement::try_new(self.fiber_rank, self.cell.frame, occupancy)
     }
 }
@@ -200,14 +209,21 @@ pub fn peel(measurement: &FullMeasurement) -> Cover {
     }
 }
 
-/// The frame-lattice index of an in-frame site.
+/// The frame-lattice index of an in-frame site — layer-major, then row-major
+/// within a layer (a planar `layers == 1` frame reduces to the original 2-D
+/// index exactly, so every existing planar measurement is unaffected).
 fn frame_index(site: Site, frame: CellFrame) -> Option<usize> {
     let inside = site.row >= 0
         && site.col >= 0
+        && site.layer >= 0
         && site.row < i64::from(frame.rows)
-        && site.col < i64::from(frame.cols);
+        && site.col < i64::from(frame.cols)
+        && site.layer < i64::from(frame.layers);
     match inside {
-        true => usize::try_from(site.row * i64::from(frame.cols) + site.col).ok(),
+        true => usize::try_from(
+            (site.layer * i64::from(frame.rows) + site.row) * i64::from(frame.cols) + site.col,
+        )
+        .ok(),
         false => None,
     }
 }
@@ -215,19 +231,30 @@ fn frame_index(site: Site, frame: CellFrame) -> Option<usize> {
 /// The site of a frame-lattice index.
 fn site_of(index: usize, frame: CellFrame) -> Site {
     let position = i64::try_from(index).expect("frames are boundedly small");
+    let cols = i64::from(frame.cols).max(1);
+    let rows = i64::from(frame.rows).max(1);
+    let per_layer = rows * cols;
     Site {
-        row: position / i64::from(frame.cols).max(1),
-        col: position % i64::from(frame.cols).max(1),
+        layer: position / per_layer,
+        row: (position % per_layer) / cols,
+        col: position % cols,
     }
 }
 
-/// The 4-neighbors of a lattice index, staying in frame.
+/// The 4-neighbors of a lattice index, staying IN FRAME AND IN LAYER — a
+/// per-layer symmetry (`solver_verify::volume::VOp::PerLayer`) never moves a
+/// site between layers, so the object manifold's connectivity does not
+/// either; layer-crossing connectivity is not part of this peel (VOLUMETRIC-1
+/// keeps the vocabulary "planar ops per layer, plus separate stack ops").
 fn neighbors(index: usize, frame: CellFrame) -> Vec<usize> {
     let here = site_of(index, frame);
     [(-1i64, 0i64), (1, 0), (0, -1), (0, 1)]
         .iter()
         .filter_map(|(dr, dc)| {
-            frame_index(Site { row: here.row + dr, col: here.col + dc }, frame)
+            frame_index(
+                Site { row: here.row + dr, col: here.col + dc, layer: here.layer },
+                frame,
+            )
         })
         .collect()
 }
@@ -266,12 +293,12 @@ fn connected_bodies(measurement: &FullMeasurement) -> Vec<Body> {
                 frontier.push(neighbor);
             }
         }
-        sites.sort_by_key(|s| (s.row, s.col));
+        sites.sort_by_key(|s| (s.layer, s.row, s.col));
         bodies.push(Body { direction, sites });
     }
     bodies.sort_by_key(|b| {
-        let first = b.sites.first().copied().unwrap_or(Site { row: 0, col: 0 });
-        (b.direction.index, first.row, first.col)
+        let first = b.sites.first().copied().unwrap_or(Site { row: 0, col: 0, layer: 0 });
+        (b.direction.index, first.layer, first.row, first.col)
     });
     bodies
 }
@@ -290,7 +317,7 @@ fn direction_supports(bodies: &[Body]) -> Vec<DirectionSupport> {
         }
     }
     for support in &mut supports {
-        support.sites.sort_by_key(|s| (s.row, s.col));
+        support.sites.sort_by_key(|s| (s.layer, s.row, s.col));
     }
     supports.sort_by_key(|s| s.direction.index);
     supports
@@ -305,12 +332,12 @@ pub enum MeasurementRefusal {
     #[error("frame {frame:?} overflows the lattice")]
     FrameOverflow { frame: CellFrame },
 
-    #[error("site ({0}, {1}) lies outside the frame", site.row, site.col)]
+    #[error("site ({0}, {1}, layer {2}) lies outside the frame", site.row, site.col, site.layer)]
     SiteOutsideFrame { site: Site },
 
-    #[error("site ({0}, {1}) carried twice — a measurement is whole", site.row, site.col)]
+    #[error("site ({0}, {1}, layer {2}) carried twice — a measurement is whole", site.row, site.col, site.layer)]
     SiteCarriedTwice { site: Site },
 
-    #[error("site ({0}, {1}) never carried — a measurement is whole", site.row, site.col)]
+    #[error("site ({0}, {1}, layer {2}) never carried — a measurement is whole", site.row, site.col, site.layer)]
     SiteUncarried { site: Site },
 }

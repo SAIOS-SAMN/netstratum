@@ -15,9 +15,9 @@ fn measurement(rows: i64, cols: i64, fiber: u8, hues: &[u8]) -> FullMeasurement 
     let occupancy = (0..rows)
         .flat_map(|row| (0..cols).map(move |col| (row, col)))
         .enumerate()
-        .map(|(i, (row, col))| (Site { row, col }, GaugeDirection { index: hues[i] }))
+        .map(|(i, (row, col))| (Site { row, col, layer: 0 }, GaugeDirection { index: hues[i] }))
         .collect();
-    FullMeasurement::try_new(fiber, CellFrame { rows: rows as u32, cols: cols as u32 }, occupancy)
+    FullMeasurement::try_new(fiber, CellFrame { rows: rows as u32, cols: cols as u32, layers: 1 }, occupancy)
         .expect("whole admits")
 }
 

@@ -452,9 +452,9 @@ fn to_reduct_fm(m: &mycelium::iae::peel::FullMeasurement) -> Option<reduct::peel
     let occ: Vec<(Site, GaugeDirection)> = m
         .occupancy()
         .iter()
-        .map(|(s, d)| (Site { row: s.row, col: s.col }, GaugeDirection { index: d.index }))
+        .map(|(s, d)| (Site { row: s.row, col: s.col, layer: 0 }, GaugeDirection { index: d.index }))
         .collect();
-    FullMeasurement::try_new(10, CellFrame { rows: frame.rows, cols: frame.cols }, occ).ok()
+    FullMeasurement::try_new(10, CellFrame { rows: frame.rows, cols: frame.cols, layers: 1 }, occ).ok()
 }
 
 pub fn family_rank(pairs: &[(Grid, Grid)]) -> u8 {

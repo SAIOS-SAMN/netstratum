@@ -43,8 +43,8 @@ impl AuticSentence {
     pub fn composed(&self) -> ChainDelta {
         match self.words.first() {
             None => ChainDelta {
-                from: crate::peel::CellFrame { rows: 0, cols: 0 },
-                to: crate::peel::CellFrame { rows: 0, cols: 0 },
+                from: crate::peel::CellFrame { rows: 0, cols: 0, layers: 0 },
+                to: crate::peel::CellFrame { rows: 0, cols: 0, layers: 0 },
                 entries: Vec::new(),
             },
             Some(first) => {
@@ -86,10 +86,10 @@ pub fn probe_class(seed: i64, dir: u8) -> ChainDelta {
     use crate::congruence::ChainEntry;
     use crate::peel::{CellFrame, GaugeDirection, Site};
     ChainDelta {
-        from: CellFrame { rows: 1, cols: 1 },
-        to: CellFrame { rows: 1, cols: 1 },
+        from: CellFrame { rows: 1, cols: 1, layers: 1 },
+        to: CellFrame { rows: 1, cols: 1, layers: 1 },
         entries: vec![ChainEntry {
-            site: Site { row: seed, col: seed },
+            site: Site { row: seed, col: seed, layer: 0 },
             direction: GaugeDirection { index: dir },
             coefficient: num_bigint::BigInt::from(1),
         }],
@@ -116,10 +116,10 @@ mod tests {
 
     fn word(site: (i64, i64), dir: u8, coeff: i64) -> ChainDelta {
         ChainDelta {
-            from: CellFrame { rows: 1, cols: 1 },
-            to: CellFrame { rows: 1, cols: 1 },
+            from: CellFrame { rows: 1, cols: 1, layers: 1 },
+            to: CellFrame { rows: 1, cols: 1, layers: 1 },
             entries: vec![crate::congruence::ChainEntry {
-                site: Site { row: site.0, col: site.1 },
+                site: Site { row: site.0, col: site.1, layer: 0 },
                 direction: GaugeDirection { index: dir },
                 coefficient: BigInt::from(coeff),
             }],

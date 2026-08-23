@@ -8,10 +8,10 @@ use reduct::{ChainDelta, Crystal};
 
 fn crystal(row: i64, col: i64, dir: u8) -> Crystal {
     Crystal::seal(ChainDelta {
-        from: CellFrame { rows: 3, cols: 3 },
-        to: CellFrame { rows: 3, cols: 3 },
+        from: CellFrame { rows: 3, cols: 3, layers: 1 },
+        to: CellFrame { rows: 3, cols: 3, layers: 1 },
         entries: vec![ChainEntry {
-            site: Site { row, col },
+            site: Site { row, col, layer: 0 },
             direction: GaugeDirection { index: dir },
             coefficient: num_bigint::BigInt::from(1),
         }],
@@ -21,12 +21,12 @@ fn crystal(row: i64, col: i64, dir: u8) -> Crystal {
 fn measurement(dir_at_00: u8) -> FullMeasurement {
     // Total coverage: every cell of the 2x2 frame carried exactly once.
     let occ = vec![
-        (Site { row: 0, col: 0 }, GaugeDirection { index: dir_at_00 }),
-        (Site { row: 0, col: 1 }, GaugeDirection { index: 1 }),
-        (Site { row: 1, col: 0 }, GaugeDirection { index: 2 }),
-        (Site { row: 1, col: 1 }, GaugeDirection { index: 3 }),
+        (Site { row: 0, col: 0, layer: 0 }, GaugeDirection { index: dir_at_00 }),
+        (Site { row: 0, col: 1, layer: 0 }, GaugeDirection { index: 1 }),
+        (Site { row: 1, col: 0, layer: 0 }, GaugeDirection { index: 2 }),
+        (Site { row: 1, col: 1, layer: 0 }, GaugeDirection { index: 3 }),
     ];
-    FullMeasurement::try_new(10, CellFrame { rows: 2, cols: 2 }, occ).expect("measurement")
+    FullMeasurement::try_new(10, CellFrame { rows: 2, cols: 2, layers: 1 }, occ).expect("measurement")
 }
 
 #[test]

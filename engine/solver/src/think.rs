@@ -49,12 +49,12 @@ pub fn measure_grid(grid: &Grid) -> Result<FullMeasurement, MeasurementRefusal> 
     let occupancy = (0..grid.rows)
         .flat_map(|r| (0..grid.cols).map(move |c| (r, c)))
         .map(|(r, c)| {
-            (Site { row: r as i64, col: c as i64 }, GaugeDirection { index: grid.at(r, c) })
+            (Site { row: r as i64, col: c as i64, layer: 0 }, GaugeDirection { index: grid.at(r, c) })
         })
         .collect();
     FullMeasurement::try_new(
         HUES,
-        CellFrame { rows: grid.rows as u32, cols: grid.cols as u32 },
+        CellFrame { rows: grid.rows as u32, cols: grid.cols as u32, layers: 1 },
         occupancy,
     )
 }
