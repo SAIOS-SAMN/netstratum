@@ -416,6 +416,16 @@ impl World {
         self.evolution_stage
     }
 
+    /// **THE FAILURE STATE** (`50_WIN_CONDITIONS`, tag 172) — `Some(stamp)`
+    /// once every orb has settled to true zero population (no headcount, no
+    /// fractional carry anywhere); `None` while the line stands. A cheap
+    /// `Copy` read, distinct from `committed()` — a per-beat roster check
+    /// (`run_era_inner`) must not pay a full-state clone just to ask whether
+    /// a line can still act.
+    pub fn collapsed(&self) -> Option<u64> {
+        self.collapsed
+    }
+
     /// **DOES THIS LINE'S DISPOSITION CARRY A TRAIT?** (`44_LINEAGES`) — the
     /// generic reader that replaces the scattered `disposition == N` checks.
     /// A seeded disposition carries the traits its table declares; a MINTED

@@ -5670,6 +5670,19 @@ fn run_era_inner(
                         s.spawn(move || {
                             let mut local = Vec::new();
                             for (idx, polity) in bucket {
+                                // 50_WIN_CONDITIONS: a collapsed line (every
+                                // orb at zero population) already refuses
+                                // every scoped action (`permitted`) — but
+                                // nothing stopped the beat loop from still
+                                // paying its FULL pipeline forever on a world
+                                // that can no longer act. THE ONLY CLOSURE
+                                // THIS GAME HAS gets no exit from the roster:
+                                // retire it from cycling the instant it
+                                // closes, symmetric to how `divergence_step`
+                                // ADDS a line the instant one is born.
+                                if polity.world.collapsed().is_some() {
+                                    continue;
+                                }
                                 if let Some(spec) = polity.cycle(book, registry) {
                                     local.push((idx, spec));
                                 }
