@@ -14,7 +14,11 @@ use reduct::{think, Crystal, PairClosure, TaskThought};
 use solver_verify::certificate::{verify_certificate, CertificateRead, SolveCertificate};
 use solver_verify::grid::{run, Grid, Op, Program, TileMirror, HUES};
 use solver_verify::loader::Task;
-use solver_verify::volume::{run_volume, VOp, VProgram, Volume};
+use solver_verify::volume::{
+    run_volume, verify_volume_certificate, VOp, VProgram, Volume, VolumeCertificate,
+    VolumeCertificateRead, VolumeTask,
+};
+use crate::volume::VolumeSolveRead;
 
 /// The typed solve reading — the ARC seat's verdict (moved here from the retired
 /// `search` module, deleted 2026-08-19: the mind observes, it does not search).
@@ -209,6 +213,69 @@ fn render_vframe(frame: &ObserverFrame, depth: usize) -> Option<VProgram> {
     let mut program = render_vplane(frame.plane, depth)?;
     program.extend(render_relabel(&frame.relabel)?.into_iter().map(VOp::PerLayer));
     Some(program)
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// VOLUMETRIC-1d — the volumetric seat conductor.
+// ─────────────────────────────────────────────────────────────────────
+
+/// The volumetric `recognize_frame`: peel every pair, hand the family to the
+/// SAME reduce organ (`think`) the planar seat uses — `think`/`TaskThought`/
+/// `PairClosure` are generic over `FullMeasurement`, never grid-specific —
+/// and render the glued frame. `VOp` has no tile or object operator (only
+/// `PerLayer` + the two stack ops, per `solver_verify::volume`'s own
+/// vocabulary), so unlike `think_task` there is no frame-change/tile/object
+/// path to try: every volumetric task IS the same-frame case.
+fn recognize_vframe(
+    pairs: &[(&Volume, &Volume)],
+    grown: &mut Vec<Crystal>,
+    depth: usize,
+) -> Option<VProgram> {
+    let mut observations = Vec::with_capacity(pairs.len());
+    for (input, output) in pairs {
+        match (measure_volume(input), measure_volume(output)) {
+            (Ok(a), Ok(b)) => observations.push((a, b)),
+            _ => return None,
+        }
+    }
+    match think(&observations, grown) {
+        TaskThought::Glued(PairClosure::Frame(frame)) => render_vframe(&frame, depth),
+        // ByDrain / Unglueable / Withheld — including every task whose
+        // gluing needs FlipStack/CycleLayers, which this render cannot
+        // reach (VOLUMETRIC-1c) — close no single renderable frame.
+        _ => None,
+    }
+}
+
+/// **THINK THE VOLUMETRIC TASK** — the volumetric mirror of `think_task`,
+/// same law: peel, read through the ONE reduce organ, render only when the
+/// task glues a nameable frame, seal a re-derivable certificate. Every other
+/// verdict WITHHOLDS (Pin D). This calls neither `solve_volume` (the
+/// RETIRED search prover, kept prover-side and non-constitutional) nor any
+/// enumeration — `research_step`'s volumetric civs reach this exactly the
+/// way its planar civs reach `think_task`.
+pub fn think_volume_task(task: &VolumeTask, grown: &mut Vec<Crystal>) -> VolumeSolveRead {
+    let Some((first_in, _)) = task.train.first() else {
+        return VolumeSolveRead::Unsolved; // no pairs proves nothing
+    };
+    let depth = first_in.depth();
+    let pairs: Vec<(&Volume, &Volume)> = task.train.iter().map(|(i, o)| (i, o)).collect();
+    let Some(program) = recognize_vframe(&pairs, grown, depth) else {
+        return VolumeSolveRead::Unsolved;
+    };
+    // Pin A: the program must reproduce EVERY train output exactly.
+    if task.train.iter().any(|(input, expected)| &run_volume(&program, input) != expected) {
+        return VolumeSolveRead::Unsolved;
+    }
+    let test_output = run_volume(&program, &task.test_in);
+    let certificate = VolumeCertificate::seal(task, &program, &test_output);
+    if verify_volume_certificate(&certificate, task, &program, &test_output)
+        != VolumeCertificateRead::Intact
+    {
+        return VolumeSolveRead::Unsolved;
+    }
+    let matches_expected = task.test_expected.as_ref().map(|expected| expected == &test_output);
+    VolumeSolveRead::Solved { program, test_output, matches_expected, certificate }
 }
 
 #[cfg(test)]
