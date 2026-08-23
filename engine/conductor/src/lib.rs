@@ -3304,7 +3304,7 @@ impl Polity {
             // place in its cohort. The absolute 1/2 threshold is the FALLBACK for a
             // sparse cohort (< 3 warm lines, no band). Withhold law intact: cold books
             // (cohesion None) hold the prior trajectory, never a verdict from absence.
-            let derived = if read.families < 2 {
+            let derived_solo = if read.families < 2 {
                 Trajectory::Decline
             } else {
                 match (read.cohesion.as_ref(), self.pop_cohesion_band.as_ref()) {
@@ -3322,6 +3322,28 @@ impl Polity {
                     (Some(c), None) if *c > cfe::ratio::ratio(1, 2) => Trajectory::Growth,
                     (Some(_), None) => Trajectory::Stagnation,
                 }
+            };
+            // #146 MANIFOLD-5 FOLLOW-UP — CONNECTIVITY RELIEVES THE TRAP (doc 55 §9's
+            // own design consequence: "raise CONNECTIVITY... NOT the private minds —
+            // which is what the instinct::choose connection sampler + 3b selection
+            // already push toward"). dH>0 is not a guess at fitness — it is the
+            // Mayer-Vietoris connecting-map rank PROVING a genuinely shared class
+            // exists this beat across ≥2 of this civ's own vessels (the Ignition Law's
+            // ΔH≈connectivity−1: a mind alone or merely adjacent never sees dH>0). A
+            // proven collective idea is a strictly positive signal that must never
+            // DOWNGRADE the cohesion-tertile verdict, only promote it one tier
+            // (Decline→Stagnation→Growth) — cohesion stays the primary read; the
+            // atlas is the tie-break connectivity already earns, not a second dial.
+            let coherence = read.cohesion.as_ref().map(atlas_permille).unwrap_or(0);
+            let (vessels, contacts, flat, dh) = self.cognition_atlas(coherence, self.world.now());
+            let derived = if dh > 0 {
+                match derived_solo {
+                    Trajectory::Decline => Trajectory::Stagnation,
+                    Trajectory::Stagnation => Trajectory::Growth,
+                    Trajectory::Growth => Trajectory::Growth,
+                }
+            } else {
+                derived_solo
             };
             // The per-beat FLOW — WITNESSED ONLY (Slice 3a's input; drives nothing yet).
             // A zero flow is NO SIGNAL (a hold), printed `0` for the discrimination
@@ -3366,10 +3388,9 @@ impl Polity {
             );
             // COG-ATLAS — the emergent, value-preserving entity-atlas cognition:
             // this civilization's collective ΔH over its own minds, the connection
-            // sampled probabilistically at its cohesion coherence. Emergent, not
-            // hardcoded; observation only.
-            let coherence = read.cohesion.as_ref().map(atlas_permille).unwrap_or(0);
-            let (vessels, contacts, flat, dh) = self.cognition_atlas(coherence, self.world.now());
+            // sampled probabilistically at its cohesion coherence (computed above,
+            // where dH already fed the Slice 3b trajectory promotion — not
+            // observation-only anymore, see the comment there).
             eprintln!(
                 "COG-ATLAS clock {} {}: vessels={} contacts={} flat={} dH={} coherence={}permille (emergent)",
                 self.world.now(),
