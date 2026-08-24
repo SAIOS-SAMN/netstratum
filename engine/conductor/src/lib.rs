@@ -833,6 +833,16 @@ const AUTIC_BASIN_CAP: usize = 4096;
 /// already O(new) via the high-water mark).
 const AUTIC_STRIDE: u64 = 4;
 
+/// ENTITY-ALIGN-2 (docs/56 §4, piece a) — how often (in world beats) the
+/// SIBLING forges its OWN task off its OWN basin instead of confirming the
+/// automaton's. Rare (once every 4 beats, like `AUTIC_STRIDE`): confirmation
+/// is what actually mints words today (COMM-1), so self-selection must stay
+/// a minority of beats or consilience collapses (neither vessel ever closes
+/// the SAME orbit the other did). Occasional is the whole point of this
+/// slice — the first beat a vessel's OWN choice, not the civ's, decides what
+/// it thinks about.
+const SIBLING_AUTONOMY_STRIDE: u64 = 4;
+
 /// BEAT-PARALLEL — serialises the one non-isolated per-civ op (`registry.seat`,
 /// which reads the whole roster and enforces a global seat-width limit). Rare
 /// (once per line), so it does not gate the parallel cognition.
@@ -1220,6 +1230,31 @@ pub fn confirmation_hardness(
         }
     }
     distinct.len() as u32
+}
+
+/// ENTITY-ALIGN-2 (docs/56 §4, piece a, pure) — the digest a vessel chooses
+/// its own problem from: a hash of the LATEST crystal in its own basin, never
+/// the civ's chronicle digest. `None` for an empty or absent basin — nothing
+/// grown yet means nothing to derive a problem from, so autonomy is not yet
+/// earned.
+pub fn basin_digest(basin: Option<&Vec<solver::Crystal>>) -> Option<[u8; 32]> {
+    let latest = basin?.last()?;
+    let mut hasher = blake3::Hasher::new();
+    hasher.update(atlas_crystal_key(latest).as_bytes());
+    Some(*hasher.finalize().as_bytes())
+}
+
+/// ENTITY-ALIGN-2 (docs/56 §4, piece a, pure) — whether THIS beat is one
+/// where the sibling self-selects rather than confirms: hash-seeded per
+/// (vessel, beat) so it is emergent (a different vessel's self-select beats
+/// land on different world beats) rather than a synchronized global tick like
+/// `AUTIC_STRIDE`'s `is_multiple_of`. Fires on roughly `1/stride` of beats.
+pub fn sibling_self_select_beat(sibling: u64, beat: u64, stride: u64) -> bool {
+    let seed = sibling
+        .wrapping_mul(0x9E37_79B9_7F4A_7C15)
+        .wrapping_add(beat)
+        .wrapping_mul(0xD1B5_4A32_D192_ED03);
+    seed % stride == 0
 }
 
 fn banked(world: &World, resource: Resource) -> Ratio {
@@ -3607,6 +3642,53 @@ impl Polity {
         self.author_variation(self.automaton);
     }
 
+    /// ENTITY-ALIGN-2 (docs/56 §4, piece a) — occasionally, the SIBLING
+    /// chooses its OWN problem instead of confirming the automaton's: it
+    /// forges a task off `basin_digest`'s reading of ITS OWN basin, never the
+    /// civ's chronicle digest, and thinks it as a genuine discovery, priced at
+    /// the FULL `observe_price` (COMM-1's discount prices CONFIRMING a known
+    /// program; this is the automaton's own kind of look — first, unconfirmed
+    /// — so it pays the same). Returns `false` (self-select declined; the
+    /// caller falls back to confirming) when the sibling has nothing grown to
+    /// derive from yet, or cannot afford the full look — autonomy is earned
+    /// by having thought something first, never granted free.
+    fn sibling_self_select(&mut self) -> bool {
+        let sibling = self.sibling;
+        let Some(seed_digest) = basin_digest(self.grown.get(&sibling)) else {
+            return false;
+        };
+        let orb = cfe::world::FIRST_ORB;
+        let price = Self::observe_price();
+        if self.world.leisure_bank_of(orb) < price {
+            return false;
+        }
+        self.world.settle_leisure(orb, -price);
+        self.absorb_autic(sibling);
+        self.practise_autic_wall(sibling);
+        let difficulty = Difficulty::level(self.level);
+        let task = forge_task(seed_digest, difficulty);
+        let read = solver::think_task(&task, self.grown.entry(sibling).or_default());
+        if let SolveRead::Solved {
+            program,
+            matches_expected: Some(true),
+            ..
+        } = read
+        {
+            if program.len() >= 2 {
+                let standing = solver::mint::standing_orbits(&solver::mint::sweep_vocabulary(&task));
+                if let Some(orbit) = solver::mint::consider(&program, &self.library, &standing) {
+                    self.deposit_toward_word(orbit, &program, sibling, seed_digest);
+                }
+            }
+        }
+        // Culture propagation is orthogonal to WHICH problem the sibling
+        // chose — a self-selecting vessel still hears and speaks.
+        self.sibling_hear();
+        self.speak_and_hear(self.automaton, self.sibling);
+        self.author_variation(self.automaton);
+        true
+    }
+
     /// N-I10 — the sibling HEARS one folded word from the sun each beat it can
     /// afford: it drains the word (understood) or WALLS and adopts it (learns a
     /// shared/inherited word its basin lacked). Hearing is looking — it pays
@@ -4109,7 +4191,24 @@ impl Polity {
             // automaton, so a line with one look's surplus funds the automaton
             // first and the sibling fasts. When both close the same orbit, the
             // second deposit reaches two distinct vessels and the word mints.
-            self.sibling_deposit(&task, digest);
+            //
+            // ENTITY-ALIGN-2 (docs/56 §4, piece a) — a MINORITY of beats,
+            // hash-seeded per (sibling, beat) so it is emergent rather than a
+            // synchronized global tick, the sibling instead CHOOSES its own
+            // problem (`sibling_self_select`) — the first entity-initiated
+            // agency in this civ's cognition, rather than dispatch deciding
+            // "we think about X now" for both vessels. It falls back to
+            // confirming when self-select declines (no basin yet, or cannot
+            // afford the full discovering look), so this is additive: no
+            // beat that used to confirm loses its confirmation entirely.
+            let self_select_beat = sibling_self_select_beat(
+                self.sibling,
+                self.world.now(),
+                SIBLING_AUTONOMY_STRIDE,
+            );
+            if !self_select_beat || !self.sibling_self_select() {
+                self.sibling_deposit(&task, digest);
+            }
             auto
         };
         match solved {
