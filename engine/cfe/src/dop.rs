@@ -399,7 +399,15 @@
 //!         only at landing: replay records it, nothing prunes or verifies
 //!         against it yet (CHRONICLE-COMPACT-3). folded_hash[32] ‖
 //!         receipt_count u64 le.)
-//!    Phase-5 claim ledger: next free **189** (186 ResourceStocksSwept, 184 VeinRejuvenated —
+//!    189  ClosureEvent::SolverWordHardness (ENTITY-ALIGN-1, docs/56 §3 —
+//!         a SEPARATE receipt closed alongside a SolverWordMinted mint,
+//!         never a field on it (that payload is opaque-to-end on the
+//!         wire, no safe trailing slot). hardness is the count of
+//!         DISTINCT knowledge-readings among the confirming vessels — the
+//!         same algorithm solver::consilience already uses for cross-line
+//!         agreement, read at vessel scope. Recorded only; nothing reads
+//!         it yet. orbit[32] ‖ hardness u32 le.)
+//!    Phase-5 claim ledger: next free **190** (186 ResourceStocksSwept, 184 VeinRejuvenated —
 //!    ONT-3 resource rejuvenation as derivation: a worked vein RECOVERS at a
 //!    collect touch, its inverse-receipt integral `rejuvenated` growing by the
 //!    KEPLERIAN orbital-forcing quantum (one `natural/REGROWTH_GRAIN` per
@@ -3249,6 +3257,22 @@ pub enum ClosureEvent {
     /// carries this receipt) replays byte-identical to today, and this
     /// receipt itself only ever ADDS information, never removes any.
     ChronicleCheckpointed { folded_hash: [u8; 32], receipt_count: u64 },
+    /// **ENTITY-ALIGN-1 (tag 189, docs/56 §3)** — a SEPARATE receipt from
+    /// the `SolverWordMinted` it accompanies, closed right after that mint
+    /// succeeds, never a field bolted onto it: `SolverWordMinted.expansion`
+    /// is opaque-to-end on the wire (`value.get(at..)?.to_vec()`, no length
+    /// prefix), so there is no safe trailing slot, and reshaping tag 166's
+    /// payload would break "one tag, one meaning, forever" outright.
+    /// `hardness` is the count of DISTINCT knowledge-readings among the
+    /// vessels that confirmed `orbit` — the SAME algorithm
+    /// `solver::consilience` already uses for cross-LINE agreement
+    /// (`orders.dedup().len()`), read at vessel scope instead: two vessels
+    /// whose grown basins hold exactly the same crystal classes bridge
+    /// nothing (hardness 1); vessels with genuinely different basins bridge
+    /// a real gap (hardness up to the confirming vessel count). Recorded
+    /// only — nothing yet reads or spends this field; the mint gate
+    /// (`cited.len() >= 2`) is untouched.
+    SolverWordHardness { orbit: [u8; 32], hardness: u32 },
     /// **TAXATION (49_TAXATION §3, tag 172)** — the CONTINUITY levy at a
     /// generation turnover: `count` of the line's most-recently adopted
     /// practices LAPSE to the void (its unconfirmed knowledge, unkept as
@@ -4533,6 +4557,14 @@ impl ClosureEvent {
                 value.extend_from_slice(folded_hash);
                 value.extend_from_slice(&receipt_count.to_le_bytes());
                 tlv::put(188, &value, &mut out);
+            }
+            Self::SolverWordHardness { orbit, hardness } => {
+                // orbit[32] ‖ hardness u32 le — a fixed shape (no opaque
+                // tail), so this cannot collide with SolverWordMinted's
+                // own opaque-to-end expansion.
+                let mut value = orbit.to_vec();
+                value.extend_from_slice(&hardness.to_le_bytes());
+                tlv::put(189, &value, &mut out);
             }
             Self::PracticesLapsed { count } => {
                 tlv::put(172, &[*count], &mut out);
@@ -5926,6 +5958,11 @@ impl ClosureEvent {
                 let folded_hash: [u8; 32] = value.get(..32)?.try_into().ok()?;
                 let receipt_count = u64::from_le_bytes(value.get(32..40)?.try_into().ok()?);
                 Some(Self::ChronicleCheckpointed { folded_hash, receipt_count })
+            }
+            189 => {
+                let orbit: [u8; 32] = value.get(..32)?.try_into().ok()?;
+                let hardness = u32::from_le_bytes(value.get(32..36)?.try_into().ok()?);
+                Some(Self::SolverWordHardness { orbit, hardness })
             }
             172 => Some(Self::PracticesLapsed { count: *value.first()? }),
             168 => Some(Self::PressureEbbed {

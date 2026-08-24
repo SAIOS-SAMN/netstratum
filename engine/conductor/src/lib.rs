@@ -1180,6 +1180,48 @@ pub fn consilience_deposit(
     Some(cited)
 }
 
+/// ENTITY-ALIGN-1 (docs/56 §3, pure) — mirrors `solver::consilience`'s
+/// ALREADY-DEPLOYED hardness measure (`orders.dedup().len()`,
+/// `selfmap.rs:225-231`) at vessel scope instead of line scope: the count
+/// of DISTINCT knowledge-readings among `vessels`, each read from `grown`
+/// and reduced to a SET of classes (order and duplicate count ignored — a
+/// basin is a proven set, not a sequence; `ChainDelta` derives
+/// `PartialEq, Eq` but not `Hash`, so this is a linear `contains` scan,
+/// bounded by `AUTIC_BASIN_CAP` per vessel). Identical knowledge from
+/// every vessel bridges nothing (hardness 1); the more genuinely
+/// different the vessels' own bases, the harder-won the agreement.
+pub fn confirmation_hardness(
+    grown: &std::collections::BTreeMap<u64, Vec<solver::Crystal>>,
+    vessels: &[u64],
+) -> u32 {
+    fn basin_classes_of(
+        grown: &std::collections::BTreeMap<u64, Vec<solver::Crystal>>,
+        vessel: u64,
+    ) -> Vec<reduct::ChainDelta> {
+        let mut classes: Vec<reduct::ChainDelta> = Vec::new();
+        if let Some(basin) = grown.get(&vessel) {
+            for crystal in basin {
+                if !classes.contains(&crystal.class) {
+                    classes.push(crystal.class.clone());
+                }
+            }
+        }
+        classes
+    }
+    fn same_basin_knowledge(a: &[reduct::ChainDelta], b: &[reduct::ChainDelta]) -> bool {
+        a.len() == b.len() && a.iter().all(|c| b.contains(c))
+    }
+    let readings: Vec<Vec<reduct::ChainDelta>> =
+        vessels.iter().map(|&v| basin_classes_of(grown, v)).collect();
+    let mut distinct: Vec<&Vec<reduct::ChainDelta>> = Vec::new();
+    for reading in &readings {
+        if !distinct.iter().any(|held| same_basin_knowledge(held, reading)) {
+            distinct.push(reading);
+        }
+    }
+    distinct.len() as u32
+}
+
 fn banked(world: &World, resource: Resource) -> Ratio {
     world
         .orb()
@@ -3420,6 +3462,18 @@ impl Polity {
     /// consilient word stays pending (fasting), a starving line may burn people
     /// (COG-3). A lone vessel never reaches two (C−): pending is a wait, not an
     /// install. The mint DEED (`mint_solver_word_as`) is unchanged.
+    /// ENTITY-ALIGN-1 (docs/56 §3) — the vessel ids that have deposited
+    /// toward `orbit` so far, read from `word_pending`'s own per-vessel
+    /// slots (see `consilience_deposit`'s doc comment: one slot per
+    /// distinct vessel, never per attempt).
+    fn vessels_confirming(&self, orbit: [u8; 32]) -> Vec<u64> {
+        self.word_pending
+            .iter()
+            .find(|(held, _, _)| *held == orbit)
+            .map(|(_, _, deposits)| deposits.iter().map(|(v, _)| *v).collect())
+            .unwrap_or_default()
+    }
+
     fn deposit_toward_word(
         &mut self,
         orbit: [u8; 32],
@@ -3478,6 +3532,16 @@ impl Polity {
                 } else if can_burn {
                     self.world.settle_population_exact(primary, -burn);
                 }
+                // ENTITY-ALIGN-1 (docs/56 §3) — read the confirming vessels'
+                // basins BEFORE the pending entry is retained below, then
+                // close the hardness reading as its own receipt alongside
+                // the mint. Recorded only; the mint above already succeeded
+                // on identity alone (cited.len() >= 2), unchanged.
+                let vessels = self.vessels_confirming(orbit);
+                let hardness = confirmation_hardness(&self.grown, &vessels);
+                let _ = self
+                    .world
+                    .record_word_hardness_as(self.automaton, orbit, hardness);
                 self.library.adopt(solver::mint::MintedWord {
                     orbit,
                     expansion,

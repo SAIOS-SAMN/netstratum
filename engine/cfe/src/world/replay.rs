@@ -491,6 +491,11 @@ impl Replayer {
         // genesis) is CHRONICLE-COMPACT-3's job, done ABOVE this apply loop,
         // not inside it.
         ClosureEvent::ChronicleCheckpointed { .. } => {}
+        // ENTITY-ALIGN-1 (docs/56 §3): a bookkeeping fact about which
+        // vessels bridged how much diversity — carries no committed-state
+        // effect (it does not touch the library fold or anything else
+        // `Committed` reads).
+        ClosureEvent::SolverWordHardness { .. } => {}
         ClosureEvent::EvolutionAdvanced { stage } => *evolution_stage = *stage,
         // #32, 20_FOUNDING §3: the tithe leaves the founding orb's
         // bank. One-sided (the DemurrageSettled precedent) — no

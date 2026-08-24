@@ -8791,6 +8791,11 @@ fn chronicle(world: &World, style: &Style) {
                 style.strong(&hex(orbit)[..8]),
                 style.strong(&cited.len().to_string())
             ),
+            cfe::dop::ClosureEvent::SolverWordHardness { orbit, hardness } => format!(
+                "◈ that WORD's confirmation reads hardness {} — orbit {} bridged by that much diversity",
+                style.strong(&hardness.to_string()),
+                style.strong(&hex(orbit)[..8])
+            ),
             cfe::dop::ClosureEvent::KnowledgeConverged { signature, mass, hardness } => format!(
                 "◈ a shared TRUTH — {} lines resolved to invariant {} (hardness {}); no one line owns it",
                 style.strong(&mass.to_string()),

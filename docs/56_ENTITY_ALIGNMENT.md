@@ -75,35 +75,44 @@ for the harder N-vessel case `#195` introduces.
 
 ## 3. #194 DESIGN — GRADED CONSOLIDATION
 
-**The measure.** Define `origin_drift(a, b)` between two confirming
-vessels as a function of what's already resident and cheap to read: the
-SYMMETRIC DIFFERENCE of their grown basins (`self.grown.get(&vessel)` is
-`Vec<Crystal>`, `Crystal { class: ChainDelta }` — `ChainDelta` derives
-`PartialEq, Eq` but not `Hash`, so the set operation is a linear
-`contains` scan, not a `HashSet`, bounded by `AUTIC_BASIN_CAP = 4096` per
-vessel). Two vessels that have independently proven mostly-disjoint
-crystal sets have genuinely diverged; two vessels whose basins are
-near-identical (e.g. one only ever confirms, never discovers anything
-the other didn't already have) drifted less.
-
-```text
-drift(a, b) = |basin(a) Δ basin(b)| / |basin(a) ∪ basin(b)|   ∈ [0, 1]
-```
-
-Exact-rational (a ratio of set sizes, both `usize` — no float, matching
-[[no-scalar-law]]).
+**The measure.** Corrected during implementation to mirror
+`solver::consilience`'s ALREADY-DEPLOYED algorithm exactly
+(`selfmap.rs:225-231`: `hardness = orders.dedup().len()` — the count of
+DISTINCT curiosity-orders among the converged lines), rather than a
+freshly-invented continuous ratio. At vessel scope: read each confirming
+vessel's grown basin (`self.grown.get(&vessel)` is `Vec<Crystal>`,
+`Crystal { class: ChainDelta }`), reduce it to its DISTINCT classes (a
+linear `contains` scan — `ChainDelta` derives `PartialEq, Eq` but not
+`Hash`, bounded by `AUTIC_BASIN_CAP = 4096` per vessel), then count how
+many vessels among the group carry a genuinely DIFFERENT set of classes
+(`same_basin_knowledge`: two readings are the same iff they contain
+exactly the same classes, order and duplicate count ignored — a basin is
+a proven SET, not a sequence). `hardness: u32`, matching
+`KnowledgeConverged`'s own field type exactly — no float, no Ratio, an
+integer count like its precedent. For today's two-vessel population this
+is always 1 (identical knowledge, no diversity bridged) or 2 (genuinely
+different knowledge) — it generalizes to `[1, vessel_count]` once #195
+grows the population.
 
 **The gate, extended not replaced.** `mint_solver_word_as` keeps its
 `cited.len() >= 2` floor (identity still gates whether a mint is even
 POSSIBLE — #194 does not relax that). What changes: the CALLER
-(`deposit_toward_word`) computes `drift` between the two confirming
-vessels and threads it onto the `SolverWordMinted` receipt as a new
-field (`hardness: Ratio`, next-free tag — claim before landing, mirroring
-[[register-claim-discipline]]). This is purely ADDITIVE to the wire (a
-new field on an existing receipt, not a new gate), so it cannot break
-replay of any existing chronicle — old receipts simply have no
-`hardness` reading (or a schema migration default), matching every prior
-additive landing this session (`RegionCharted`, `ChronicleCheckpointed`).
+(`deposit_toward_word`) computes hardness between the confirming vessels
+and closes it as a SEPARATE receipt alongside the mint — **NOT** a new
+field on `SolverWordMinted` itself. Corrected during implementation
+(2026-08-24): `SolverWordMinted`'s `expansion` is encoded as "everything
+remaining in the record, opaque, no length prefix" (`dop.rs:5673`,
+`value.get(at..)?.to_vec()`) — there is no safe place to append a
+trailing field without either being silently swallowed into `expansion`
+or shifting the read offset for every OLD receipt already on disk. It
+also collides with the wire law directly: "tags are permanent: one tag,
+one meaning, forever" (`tlv.rs:4`) — reshaping tag 166's payload IS
+changing its meaning. `hardness` lands as its OWN new tag
+(`SolverWordHardness { orbit: [u8; 32], hardness: u32 }`), closed as a
+second deed right after the mint succeeds — purely additive, cannot
+touch any existing receipt's bytes, matching how `KnowledgeConverged`
+(tag 177) already keeps its own `hardness: u32` as a field on ITS OWN
+event rather than retrofitted onto something else's.
 
 **What hardness DOES, once it exists.** Not scoped for #194 itself
 (mint still succeeds identically) — but the field becomes the resource a
@@ -115,10 +124,12 @@ measurement is #194's whole job; spending it is deliberately deferred so
 #194 stays small and independently testable.
 
 **Test shape** (mirrors this session's `crossing_candidates_pins.rs`
-reference-oracle discipline): a fixture with two vessels sharing an
-IDENTICAL basin should measure `drift ≈ 0`; two vessels with disjoint
-basins should measure `drift ≈ 1`; a differential test against a naive
-set-difference reference, not a re-derivation of the same formula.
+reference-oracle discipline): two vessels sharing an IDENTICAL basin
+measure `hardness == 1`; two vessels with any genuinely different class
+between them measure `hardness == 2`; the wire round-trips
+(`SolverWordHardness` encode/decode); `SolverWordMinted`'s own bytes are
+BYTE-IDENTICAL before and after this landing, proven by re-running the
+existing mint-shape tests unchanged.
 
 ## 4. #195 DESIGN — ENTITY TIERS
 

@@ -1502,6 +1502,11 @@ fn covered(event: &ClosureEvent) -> bool {
         // later enables are judged at tag 86 by verify_work as ever.
         // {I2 containment, I3 exactness} complete it. BY HAND.
         | E::SolverWordMinted { .. }
+        // ENTITY-ALIGN-1 (tag 189) — banked-neutral like the mint it
+        // accompanies: a hardness reading is identity vocabulary about
+        // WHICH VESSELS bridged HOW MUCH diversity, never matter. {I2
+        // containment, I3 exactness} complete it. BY HAND.
+        | E::SolverWordHardness { .. }
         // CROSS-LINE CONSILIENCE (tag 177) — banked-neutral: a shared
         // knowledge axiom is identity, never matter; it records that
         // lines converged, moving nothing bankable. BY HAND.
@@ -2664,6 +2669,9 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         // NOVELTY-GATE (tag 166): a solver word is a LINE's own
         // instrument — identity vocabulary in the axis mint's class.
         | E::SolverWordMinted { .. }
+        // ENTITY-ALIGN-1 (tag 189): a hardness reading rides alongside
+        // the mint it accompanies, same layer, same reasoning.
+        | E::SolverWordHardness { .. }
         // CONSILIENCE (tag 177): a shared knowledge axiom is keyed on the
         // LINE that reached it — its own knowledge, the same layer.
         | E::KnowledgeConverged { .. }
@@ -2888,6 +2896,9 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         // NOVELTY-GATE: a solver-word mint extends what the LINE can
         // reach — the same founding class.
         | E::SolverWordMinted { .. }
+        // ENTITY-ALIGN-1 (tag 189): the hardness reading closed alongside
+        // a mint extends the same record — the same founding class.
+        | E::SolverWordHardness { .. }
         // RCP-2 (tag 181): raising an emergent recipe EXTENDS what the
         // world can express — it opens the society's doing-layer over the
         // open almanac and banks nothing at the build itself (the yield

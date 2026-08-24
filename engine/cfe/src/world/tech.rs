@@ -298,6 +298,23 @@ impl World {
         Ok(())
     }
 
+    /// **ENTITY-ALIGN-1 (tag 189, docs/56 §3) — RECORD A WORD'S HARDNESS.**
+    /// Closed alongside a successful `mint_solver_word_as`, never instead of
+    /// it: the mint gate (`cited.len() >= 2`) is untouched, this only
+    /// records HOW diverse the confirming vessels' own knowledge was when
+    /// they agreed. Purely additive bookkeeping — nothing yet reads or
+    /// spends this field.
+    pub fn record_word_hardness_as(
+        &mut self,
+        actor: u64,
+        orbit: [u8; 32],
+        hardness: u32,
+    ) -> Result<(), ActionRefused> {
+        self.permitted(actor, Scope::Build)?;
+        self.close(ClosureEvent::SolverWordHardness { orbit, hardness }, actor);
+        Ok(())
+    }
+
     /// **RCP-2 (tag 181) — RAISE AN EMERGENT RECIPE.** A society builds a
     /// recipe its discovery engine (`conductor::recipe::discover`) minted: a
     /// hashed transformation `∏ inputs → role` over the OPEN almanac, priced
