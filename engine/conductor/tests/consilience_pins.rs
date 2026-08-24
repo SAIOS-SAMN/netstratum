@@ -60,3 +60,28 @@ fn a_vessel_cannot_manufacture_a_second_vantage_from_itself() {
     );
     assert_eq!(pending[0].2.len(), 1, "the duplicate deposit was ignored");
 }
+
+#[test]
+fn one_vessels_repeated_deposits_stay_bounded_by_vessel_not_by_attempt() {
+    // MEASURED LEAK, FIXED 2026-08-24: research_step stamps every deposit
+    // with the BEAT'S OWN receipt digest, so a vessel re-confirming an
+    // orbit that never reaches consilience carries a NEW digest every beat
+    // -- (vessel, digest) never repeats even though it's the same vessel.
+    // Appending one entry per attempt grew this WITHOUT BOUND for any
+    // orbit only one vessel ever visits. Only vessel diversity gates the
+    // mint, so one vessel's repeated attempts must occupy exactly one slot
+    // -- bounded by vessel count, not by how many beats it kept trying.
+    let mut pending = Vec::new();
+    let orbit = [5u8; 32];
+    let expansion = vec![Op::Rotate90];
+    let v = 11u64;
+    for beat in 0..500u32 {
+        let digest = *blake3::hash(&beat.to_le_bytes()).as_bytes();
+        assert!(consilience_deposit(&mut pending, orbit, &expansion, v, digest).is_none());
+    }
+    assert_eq!(
+        pending[0].2.len(),
+        1,
+        "500 beats of one vessel re-confirming still occupies exactly one slot"
+    );
+}

@@ -1121,6 +1121,18 @@ fn office_evidence(world: &World) -> OfficeEvidence {
 /// word stays pending (fasting). One vessel confirming many digests never reaches
 /// two distinct vessel_ids (C−).
 ///
+/// **BOUNDED BY VESSEL, NOT BY ATTEMPT** (fixed 2026-08-24 — a real, measured
+/// leak): a vessel that keeps re-depositing the same unconfirmed orbit across
+/// beats carries a NEW digest every time (`research_step`'s digest is the
+/// beat's own receipt hash), so `(vessel, digest)` never repeats even though
+/// it is the same vessel re-confirming the same finding. Appending one entry
+/// per attempt made this grow WITHOUT BOUND for any orbit only one vessel
+/// ever visits — exactly the shape `pin_c_two_vessels_mint...`'s own fixture
+/// exercises (one vessel deposits three distinct digests before giving up).
+/// Only vessel DIVERSITY ever gates the mint, never the attempt history, so
+/// each vessel gets ONE slot, updated in place — bounded by the vessel
+/// count (two, in practice), never by beats elapsed.
+///
 /// **IDENTITY AND CONTENT ARE SEPARATE AXES.** `mint_solver_word_as` gates on
 /// `cited.len()` alone, so this list's LENGTH must track vessel-diversity — the
 /// identity axis two distinct minds prove by both showing up — never digest
@@ -1147,8 +1159,9 @@ pub fn consilience_deposit(
             pending.last_mut().expect("just pushed")
         }
     };
-    if !entry.2.iter().any(|(v, d)| *v == vessel && *d == digest) {
-        entry.2.push((vessel, digest));
+    match entry.2.iter_mut().find(|(v, _)| *v == vessel) {
+        Some((_, held)) => *held = digest,
+        None => entry.2.push((vessel, digest)),
     }
     let mut vessels: Vec<u64> = entry.2.iter().map(|(v, _)| *v).collect();
     vessels.sort_unstable();
