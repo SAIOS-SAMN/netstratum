@@ -48,8 +48,8 @@ use cfe::thermal::StarClass;
 use cfe::world::World;
 use ledger::galaxy::Galaxy;
 use ledger::registry::{
-    lineage_domain, office_preconditions, Civilization, OfficeEvidence, Registry,
-    DISPOSITIONS, METABOLISMS, PERCEPTIONS,
+    lineage_domain, office_preconditions, Civilization, OfficeEvidence, Registry, DISPOSITIONS,
+    METABOLISMS, PERCEPTIONS,
 };
 use ledger::{Directive, Disposition, Ledger};
 use physics::Beacon;
@@ -127,9 +127,17 @@ pub fn fold(var_root: &str) -> std::io::Result<(u64, Ratio)> {
         Err(_) => Chronicle::new(),
     };
     let gauge = cfe::world::wrap_gauge(ratio(era as i64, 12));
-    let stamp = ledger.receipts().iter().map(|r| r.stamp()).max().unwrap_or(0);
+    let stamp = ledger
+        .receipts()
+        .iter()
+        .map(|r| r.stamp())
+        .max()
+        .unwrap_or(0);
     ledger.append(
-        cfe::dop::ClosureEvent::EraFolded { era, gauge: gauge.clone() },
+        cfe::dop::ClosureEvent::EraFolded {
+            era,
+            gauge: gauge.clone(),
+        },
         stamp,
         vec![],
     );
@@ -192,7 +200,11 @@ pub fn deck_band4(metabolism: &str, t4: Ratio) -> Ratio {
         return t4;
     }
     let (_, mesic_hi) = cfe::thermal::SubstrateBand::Mesic.bounds4();
-    if t4 > mesic_hi { mesic_hi } else { t4 }
+    if t4 > mesic_hi {
+        mesic_hi
+    } else {
+        t4
+    }
 }
 
 pub fn industry_relevant(metabolism: &str, kind: ZoneKind) -> bool {
@@ -266,10 +278,7 @@ fn relaxed_want(give: &Ratio, reserve: &Ratio) -> Ratio {
 /// (ruling 2026-07-31). Amounts are halves of the held stock, never
 /// the whole (guardrail 1's spirit: no world corners itself). The
 /// metabolism rides in for the relevance evaluation (the aeric deck).
-pub fn trade_intent(
-    world: &World,
-    metabolism: &str,
-) -> Option<(Resource, Ratio, Resource, Ratio)> {
+pub fn trade_intent(world: &World, metabolism: &str) -> Option<(Resource, Ratio, Resource, Ratio)> {
     let orb = world.orb()?;
     let half = |amount: Ratio| amount / ratio(2, 1);
     let severity = orb.famine.len() as u32;
@@ -348,11 +357,12 @@ pub fn trade_intent(
 
 /// E3.7: when an orb hungers for a prospected ElementId, offer half
 /// the largest closed-carrier bank for a unit of that element.
-fn element_want_intent(
-    world: &World,
-) -> Option<(cfe::dop::Cargo, Ratio, cfe::dop::Cargo, Ratio)> {
+fn element_want_intent(world: &World) -> Option<(cfe::dop::Cargo, Ratio, cfe::dop::Cargo, Ratio)> {
     let orb = world.orb()?;
-    let (_, element) = world.element_wants().iter().find(|(o, _)| *o == orb.orb_id)?;
+    let (_, element) = world
+        .element_wants()
+        .iter()
+        .find(|(o, _)| *o == orb.orb_id)?;
     let biggest = Resource::ALL
         .iter()
         .max_by_key(|r| orb.banked_amount(**r))?;
@@ -377,9 +387,7 @@ fn element_want_intent(
 /// largest element bank for the leanest closed carrier its zones burn
 /// (or iron if no upkeep map). Never invents element ids — only banked
 /// identities.
-fn element_trade_intent(
-    world: &World,
-) -> Option<(cfe::dop::Cargo, Ratio, cfe::dop::Cargo, Ratio)> {
+fn element_trade_intent(world: &World) -> Option<(cfe::dop::Cargo, Ratio, cfe::dop::Cargo, Ratio)> {
     let orb = world.orb()?;
     let (element, stock) = orb
         .elements
@@ -435,6 +443,60 @@ pub static COGNITION_CHOICE_POINTS: std::sync::atomic::AtomicU64 =
 pub static COGNITION_LOOKAHEAD_DECIDED: std::sync::atomic::AtomicU64 =
     std::sync::atomic::AtomicU64::new(0);
 
+/// **PEEL, NOT SWEEP** (operator ruling 2026-07-30: no cartesian find-scan
+/// repetition). `clear_trade`'s own FIRST check refuses any pair whose
+/// cargos are not exact mirrors (`held_a.give != held_b.want || held_a.want
+/// != held_b.give` — `cfe::world::mod.rs`) — that mirror condition IS the
+/// market's own partition, not an approximation of one. Bucket every open
+/// offer by its `(give, want)` key in ONE pass (O(total offers)), then a
+/// civ pair is a candidate ONLY if one holds a key the other holds the
+/// mirror of — a pair sharing no complementary key can be PROVEN to never
+/// cross, for any combination of their offers, without touching it. The
+/// output is a `BTreeSet`, so its iteration order is always ascending
+/// `(a, b)` regardless of the (randomized) `HashMap` build order — the
+/// same relative visiting order the retired cartesian sweep walked, so the
+/// per-beat `seq`/`deal` numbering this beat assigns stays internally
+/// deterministic (replay never re-derives a deal id — it reads whatever
+/// this beat actually recorded — so this only has to be deterministic
+/// with itself, not bit-identical to the sweep it replaces).
+pub fn crossing_candidates(worlds: &[Polity]) -> Vec<(usize, usize)> {
+    use std::collections::{BTreeSet, HashMap};
+    let cargo_bytes = |c: &cfe::dop::Cargo| -> Vec<u8> {
+        let mut b = Vec::new();
+        c.encode(&mut b);
+        b
+    };
+    let mut by_key: HashMap<(Vec<u8>, Vec<u8>), Vec<usize>> = HashMap::new();
+    for (idx, polity) in worlds.iter().enumerate() {
+        if polity.penned {
+            continue;
+        }
+        for offer in polity.world.offers() {
+            let key = (cargo_bytes(&offer.give), cargo_bytes(&offer.want));
+            let bucket = by_key.entry(key).or_default();
+            if !bucket.contains(&idx) {
+                bucket.push(idx);
+            }
+        }
+    }
+    let mut pairs: BTreeSet<(usize, usize)> = BTreeSet::new();
+    for ((give, want), holders) in &by_key {
+        let mirror = (want.clone(), give.clone());
+        let Some(others) = by_key.get(&mirror) else {
+            continue;
+        };
+        for &a in holders {
+            for &b in others {
+                if a == b {
+                    continue;
+                }
+                pairs.insert(if a < b { (a, b) } else { (b, a) });
+            }
+        }
+    }
+    pairs.into_iter().collect()
+}
+
 pub fn market_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, String)> {
     // Post intents. NO SINGLES (ruling 2026-07-31): the book is
     // open-ended — a fresh intent posts BESIDE what rests; only an
@@ -444,9 +506,7 @@ pub fn market_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, String)> {
             continue;
         }
         // E3.7: demand first — element_wants bid resource for open matter.
-        if let Some((give, give_amount, want, want_amount)) =
-            element_want_intent(&polity.world)
-        {
+        if let Some((give, give_amount, want, want_amount)) = element_want_intent(&polity.world) {
             if !polity
                 .world
                 .offers()
@@ -466,9 +526,7 @@ pub fn market_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, String)> {
         }
         // E-MKT-1: element surplus before closed-carrier intents when
         // the line holds banked open matter above a floor.
-        if let Some((give, give_amount, want, want_amount)) =
-            element_trade_intent(&polity.world)
-        {
+        if let Some((give, give_amount, want, want_amount)) = element_trade_intent(&polity.world) {
             if !polity
                 .world
                 .offers()
@@ -513,99 +571,94 @@ pub fn market_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, String)> {
                 .post_offer(orb, pair, give_amount, want_amount, offer);
         }
     }
-    // Clear crossings: EVERY resting combination on every pair — no
-    // first-match single. Deal ids stride 4 (haul takes deal/deal+1,
-    // the wear-charter deal+2) from a per-beat sequence.
+    // Clear crossings: EVERY resting combination on every CANDIDATE pair —
+    // no first-match single. Deal ids stride 4 (haul takes deal/deal+1, the
+    // wear-charter deal+2) from a per-beat sequence. Candidates are peeled
+    // by their own (give, want) key (`crossing_candidates`), never swept
+    // cartesian over every pair the roster could form.
     let mut cleared = Vec::new();
     let mut seq: u64 = 0;
-    for a in 0..worlds.len() {
-        for b in (a + 1)..worlds.len() {
-            let (left, right) = worlds.split_at_mut(b);
-            let one = &mut left[a];
-            let two = &mut right[0];
-            if one.penned || two.penned {
-                continue;
-            }
-            // MARKET-2: the transit's spatial L1 — supply melts with
-            // distance; the engine refuses walled pairs itself.
-            let distance = spatial_l1(&one.spec.position, &two.spec.position);
-            let offers_a: Vec<u64> = one.world.offers().iter().map(|o| o.offer).collect();
-            let offers_b: Vec<u64> = two.world.offers().iter().map(|o| o.offer).collect();
-            let mut crossed_here = false;
-            for offer_a in &offers_a {
-                for offer_b in &offers_b {
-                    let deal = beat * 100_000 + seq * 4;
-                    seq += 1;
-                    if cfe::world::clear_trade(
-                        &mut one.world,
-                        *offer_a,
-                        &mut two.world,
-                        *offer_b,
-                        deal,
-                        distance.clone(),
-                    )
-                    .is_ok()
-                    {
-                        crossed_here = true;
-                        cleared.push((
-                            one.spec.world_name.clone(),
-                            two.spec.world_name.clone(),
-                        ));
-                    }
+    for (a, b) in crossing_candidates(worlds) {
+        let (left, right) = worlds.split_at_mut(b);
+        let one = &mut left[a];
+        let two = &mut right[0];
+        if one.penned || two.penned {
+            continue;
+        }
+        // MARKET-2: the transit's spatial L1 — supply melts with
+        // distance; the engine refuses walled pairs itself.
+        let distance = spatial_l1(&one.spec.position, &two.spec.position);
+        let offers_a: Vec<u64> = one.world.offers().iter().map(|o| o.offer).collect();
+        let offers_b: Vec<u64> = two.world.offers().iter().map(|o| o.offer).collect();
+        let mut crossed_here = false;
+        for offer_a in &offers_a {
+            for offer_b in &offers_b {
+                let deal = beat * 100_000 + seq * 4;
+                seq += 1;
+                if cfe::world::clear_trade(
+                    &mut one.world,
+                    *offer_a,
+                    &mut two.world,
+                    *offer_b,
+                    deal,
+                    distance.clone(),
+                )
+                .is_ok()
+                {
+                    crossed_here = true;
+                    cleared.push((one.spec.world_name.clone(), two.spec.world_name.clone()));
                 }
             }
-            // ROUTE-1 + NO SINGLES: trade wears the path, and a
-            // better lane ANNEXES the pair — chartered when no lane
-            // stands, or when the pair's technology now supports a
-            // deeper suppression than the best lane held.
-            if crossed_here {
-                let best_held: Option<cfe::dop::Unit> = one
-                    .world
-                    .routes()
-                    .iter()
-                    .filter(|(held, _)| {
-                        two.world.routes().iter().any(|(other, _)| other == held)
-                    })
-                    .map(|(_, eta)| eta.clone())
-                    .max();
-                let best_grade = one
-                    .world
-                    .instruments()
-                    .iter()
-                    .chain(two.world.instruments().iter())
-                    .map(|(_, _, grade)| *grade)
-                    .max()
-                    .unwrap_or(0);
-                // (1+grade)/8 is the PICKUP-flagged placeholder (C2's
-                // cluster). At grade >= 7 it reaches 1, which is out of
-                // [0,1) — the dead BadEta used to refuse that at the
-                // verb; the Unit door now says it at construction, and
-                // an unconstructible efficiency charters no lane, which
-                // is the same observable outcome.
-                let Some(eta) = cfe::dop::Unit::new(ratio(1 + i64::from(best_grade), 8)) else {
-                    continue;
-                };
-                if best_held.is_none_or(|held| eta > held) {
-                    let deal = beat * 100_000 + seq * 4;
-                    seq += 1;
-                    // THE REFUSAL IS CARRIED, NEVER SWALLOWED (operator
-                    // ruling 2026-08-02). `let _ =` here hid the whole
-                    // cross-book economy: measured, 17 crossings cleared
-                    // and 0 lanes chartered, because every charter
-                    // refused CannotAfford{Alloy, need 4, have 0} — and
-                    // no lane means no cross-book capacity reading at
-                    // all. An economic gate read as a topological limit
-                    // for exactly as long as nobody could see it.
-                    if let Err(refusal) = cfe::world::charter_route(
-                        &mut one.world,
-                        cfe::world::FIRST_ORB,
-                        &mut two.world,
-                        cfe::world::FIRST_ORB,
-                        eta,
-                        deal,
-                    ) {
-                        one.lane_refused.push(refusal);
-                    }
+        }
+        // ROUTE-1 + NO SINGLES: trade wears the path, and a
+        // better lane ANNEXES the pair — chartered when no lane
+        // stands, or when the pair's technology now supports a
+        // deeper suppression than the best lane held.
+        if crossed_here {
+            let best_held: Option<cfe::dop::Unit> = one
+                .world
+                .routes()
+                .iter()
+                .filter(|(held, _)| two.world.routes().iter().any(|(other, _)| other == held))
+                .map(|(_, eta)| eta.clone())
+                .max();
+            let best_grade = one
+                .world
+                .instruments()
+                .iter()
+                .chain(two.world.instruments().iter())
+                .map(|(_, _, grade)| *grade)
+                .max()
+                .unwrap_or(0);
+            // (1+grade)/8 is the PICKUP-flagged placeholder (C2's
+            // cluster). At grade >= 7 it reaches 1, which is out of
+            // [0,1) — the dead BadEta used to refuse that at the
+            // verb; the Unit door now says it at construction, and
+            // an unconstructible efficiency charters no lane, which
+            // is the same observable outcome.
+            let Some(eta) = cfe::dop::Unit::new(ratio(1 + i64::from(best_grade), 8)) else {
+                continue;
+            };
+            if best_held.is_none_or(|held| eta > held) {
+                let deal = beat * 100_000 + seq * 4;
+                seq += 1;
+                // THE REFUSAL IS CARRIED, NEVER SWALLOWED (operator
+                // ruling 2026-08-02). `let _ =` here hid the whole
+                // cross-book economy: measured, 17 crossings cleared
+                // and 0 lanes chartered, because every charter
+                // refused CannotAfford{Alloy, need 4, have 0} — and
+                // no lane means no cross-book capacity reading at
+                // all. An economic gate read as a topological limit
+                // for exactly as long as nobody could see it.
+                if let Err(refusal) = cfe::world::charter_route(
+                    &mut one.world,
+                    cfe::world::FIRST_ORB,
+                    &mut two.world,
+                    cfe::world::FIRST_ORB,
+                    eta,
+                    deal,
+                ) {
+                    one.lane_refused.push(refusal);
                 }
             }
         }
@@ -658,7 +711,6 @@ pub enum Trajectory {
 // deriving; a miss asserts a cokernel failure.
 
 impl Trajectory {
-
     /// The reach this trajectory buys, when it is reading. Unused on
     /// the sweep path, which has no need to order.
     pub fn need(&self, starved: u64) -> Need {
@@ -979,7 +1031,6 @@ pub struct Polity {
     /// (`Default`) and pays one full check on its first beat, exactly
     /// like today.
     sync_cursor: cfe::persist::SyncCursor,
-
 }
 
 /// The smelter's (iron, biomass) gate — bound ONCE, read by the
@@ -1025,12 +1076,18 @@ fn atlas_contacts(n: usize) -> reduct::sheaf::CellSheaf {
     reduct::sheaf::CellSheaf::new(vec![vec![1; n.max(1)]], vec![]).expect("contact overlap")
 }
 fn atlas_restr(n: usize) -> Vec<Vec<Vec<num_bigint::BigInt>>> {
-    vec![(0..n.max(1)).map(|_| vec![num_bigint::BigInt::from(1)]).collect()]
+    vec![(0..n.max(1))
+        .map(|_| vec![num_bigint::BigInt::from(1)])
+        .collect()]
 }
 /// A cohesion ratio in `[0,1]` as a per-mille connection coherence, clamped.
 fn atlas_permille(c: &Ratio) -> u64 {
     let scaled = (c.numer() * num_bigint::BigInt::from(1000)) / c.denom();
-    scaled.to_string().parse::<i64>().unwrap_or(0).clamp(0, 1000) as u64
+    scaled
+        .to_string()
+        .parse::<i64>()
+        .unwrap_or(0)
+        .clamp(0, 1000) as u64
 }
 
 /// Evidence the ascend gates read — folded from the live world
@@ -1162,7 +1219,11 @@ fn regime(world: &World, metabolism: &str) -> Option<(Regime, Ratio)> {
     let site = world.orb()?.thermal.clone()?;
     let t4 = deck_band4(
         metabolism,
-        cfe::thermal::t_eq4(&class.luminosity(), site.albedo.value(), site.orbit_r.value()),
+        cfe::thermal::t_eq4(
+            &class.luminosity(),
+            site.albedo.value(),
+            site.orbit_r.value(),
+        ),
     );
     let (mesic_lo, mesic_hi) = cfe::thermal::SubstrateBand::Mesic.bounds4();
     if t4 < mesic_lo {
@@ -1201,8 +1262,7 @@ impl Polity {
                         .map(|held| held.entity_id)
                 };
                 let sibling0 = by_handle("sibling");
-                if let (Some(automaton), Some(steward)) =
-                    (by_handle(&handle), by_handle("steward"))
+                if let (Some(automaton), Some(steward)) = (by_handle(&handle), by_handle("steward"))
                 {
                     // MESH-1b: the walk decides whose pen this is.
                     // Lawful conductor hand → held and stamped from
@@ -1241,23 +1301,18 @@ impl Polity {
                         .max(1);
                     // The tally keeps its own honest count (.sol, the
                     // format actually written) for streak/solved.
-                    let solved = std::fs::read_dir(
-                        book.world_dir(&spec.world_name).join("solves"),
-                    )
-                    .map(|entries| {
-                        entries
-                            .filter_map(|e| e.ok())
-                            .filter(|e| e.path().extension().is_some_and(|x| x == "sol"))
-                            .count() as u32
-                    })
-                    .unwrap_or(0);
+                    let solved = std::fs::read_dir(book.world_dir(&spec.world_name).join("solves"))
+                        .map(|entries| {
+                            entries
+                                .filter_map(|e| e.ok())
+                                .filter(|e| e.path().extension().is_some_and(|x| x == "sol"))
+                                .count() as u32
+                        })
+                        .unwrap_or(0);
                     // One divergence per era: a resumed continuation
                     // is the same era — the receipt remembers.
                     let cleaved = world.chronicle().receipts().iter().any(|receipt| {
-                        matches!(
-                            receipt.event(),
-                            cfe::dop::ClosureEvent::Diverged { .. }
-                        )
+                        matches!(receipt.event(), cfe::dop::ClosureEvent::Diverged { .. })
                     });
                     return Polity {
                         chained: 0,
@@ -1277,7 +1332,7 @@ impl Polity {
                         autic_seen: std::collections::BTreeMap::new(),
                         autic_authored: 0,
                         reported: 0,
-            sync_cursor: cfe::persist::SyncCursor::default(),
+                        sync_cursor: cfe::persist::SyncCursor::default(),
                         trajectory: Trajectory::Growth,
                         prev_order: None,
                         pop_cohesion_band: None,
@@ -1317,7 +1372,8 @@ impl Polity {
         // charted position — derived here (the caller holds the ledger's
         // position), recorded into the chronicle as the DERIVED seed only,
         // so replay never needs the starchart back.
-        let region_seed = cfe::dop::region_seed_of(&spec.position.0, &spec.position.1, &spec.position.2);
+        let region_seed =
+            cfe::dop::region_seed_of(&spec.position.0, &spec.position.1, &spec.position.2);
         let _ = world.chart_region(region_seed);
         if opening != ratio(0, 1) {
             world.shift_gauge(opening.clone());
@@ -1364,7 +1420,9 @@ impl Polity {
         let class = spec.star.unwrap_or(derived_star);
         let albedo = spec.albedo.clone().unwrap_or(derived_albedo);
         let orbit = spec.orbit.clone().unwrap_or(derived_orbit);
-        world.commission_star(class).expect("a fresh world has no sun yet");
+        world
+            .commission_star(class)
+            .expect("a fresh world has no sun yet");
         // An unlawful operator-pinned siting (albedo ≥ 1, orbit ≤ 0)
         // leaves the orb thermally DORMANT (the engine's opt-in guard)
         // instead of killing the board; derived seats are always lawful.
@@ -1433,7 +1491,9 @@ impl Polity {
             // The climb resumes from the kernel's own paper — a
             // restart is a reboot, not an amnesia (scribe::resume_level;
             // the ladder saturates on its own, no cap needed here).
-            level: scribe::resume_level(book, &world_name_for_level).unwrap_or(1).max(1),
+            level: scribe::resume_level(book, &world_name_for_level)
+                .unwrap_or(1)
+                .max(1),
             streak: 0,
             solved: 0,
             cleaved: false,
@@ -1498,8 +1558,10 @@ impl Polity {
         // cartesian re-scan of the book per vein — the sweep the standing
         // ruling forbids. `orbs` is the polity's few orbs, so this is one
         // projection per orb and the assay walk below stays linear.
-        let staples: Vec<(u64, Option<[u8; 32]>)> =
-            orbs.iter().map(|&orb| (orb, self.world.staple_diet_of(orb))).collect();
+        let staples: Vec<(u64, Option<[u8; 32]>)> = orbs
+            .iter()
+            .map(|&orb| (orb, self.world.staple_diet_of(orb)))
+            .collect();
 
         // ASSAY — every open vein with a positive span.
         // Snapshot (orb, element, last_assay): assay mutates prospects.
@@ -1522,7 +1584,10 @@ impl Polity {
             // attempt hit). Every NON-staple vein (industry, trade, trace) still
             // assays on its geometric span. The staple is read from the per-orb
             // peel above, an O(1) lookup in the polity's small orb set.
-            let staple = staples.iter().find(|(o, _)| *o == orb).and_then(|(_, s)| *s);
+            let staple = staples
+                .iter()
+                .find(|(o, _)| *o == orb)
+                .and_then(|(_, s)| *s);
             if staple == Some(element) {
                 continue;
             }
@@ -1661,11 +1726,7 @@ impl Polity {
             return; // starving lines do not play alchemy
         }
         let automaton = self.automaton;
-        let dis = self
-            .world
-            .genesis()
-            .map(|g| g.disposition)
-            .unwrap_or(1);
+        let dis = self.world.genesis().map(|g| g.disposition).unwrap_or(1);
         // disposition wire: 1 expansionist · 2 empiricist · 3 epicurean
         // (and others default expansionist-ish yield path).
         let chem = cfe::almanac::ScienceDiscipline::Chem;
@@ -1770,11 +1831,7 @@ impl Polity {
             rows.sort_by(|a, b| b.6.cmp(&a.6)); // net
         }
         for (members, _, _, _, _, _, _) in rows.into_iter().take(8) {
-            if self
-                .world
-                .compound_as(actor, orb, &members)
-                .is_ok()
-            {
+            if self.world.compound_as(actor, orb, &members).is_ok() {
                 return true;
             }
         }
@@ -1794,9 +1851,10 @@ impl Polity {
         let labor = self.world.labor_board(primary);
         // No habitat labor yet — try to seat one habitat when affordable.
         if labor.habitats == 0 {
-            let can_pay = ZoneKind::Habitat.cost().into_iter().all(|(resource, need)| {
-                banked(&self.world, resource) >= need
-            });
+            let can_pay = ZoneKind::Habitat
+                .cost()
+                .into_iter()
+                .all(|(resource, need)| banked(&self.world, resource) >= need);
             if can_pay {
                 if let Some(tile) = next_free_tile(&self.world) {
                     if self
@@ -1834,11 +1892,7 @@ impl Polity {
         for i in 0..ids.len() {
             for j in (i + 1)..ids.len() {
                 if cfe::almanac::isomorphic(&ids[i], &ids[j]) {
-                    if self
-                        .world
-                        .iso_union_as(actor, orb, ids[i], ids[j])
-                        .is_ok()
-                    {
+                    if self.world.iso_union_as(actor, orb, ids[i], ids[j]).is_ok() {
                         return true;
                     }
                 }
@@ -1882,7 +1936,13 @@ impl Polity {
         let Ok(read) = self.world.scan_as(self.automaton, primary, primary) else {
             return; // no crystal, no survey — the draw gates the lens
         };
-        let orbs: Vec<u64> = self.world.committed().orbs.iter().map(|o| o.orb_id).collect();
+        let orbs: Vec<u64> = self
+            .world
+            .committed()
+            .orbs
+            .iter()
+            .map(|o| o.orb_id)
+            .collect();
         if orbs.len() == 1 {
             // The expansion: the survey confirms the home sigil and
             // the charter plants its next sector. DERIVED (P2): the
@@ -1892,13 +1952,13 @@ impl Polity {
             // restated exactly this.
             let launches = cfe::dop::founding_reserves()
                 .into_iter()
-                .all(|(resource, moved)| {
-                    banked(&self.world, resource) >= moved * ratio(2, 1)
-                });
+                .all(|(resource, moved)| banked(&self.world, resource) >= moved * ratio(2, 1));
             if launches {
                 let site_name = format!("{}-survey", self.spec.colony);
                 if let Ok(site) = self.world.chart_as(self.automaton, &site_name, primary) {
-                    let _ = self.world.zone_as(self.automaton, site, 0, ZoneKind::Extractor);
+                    let _ = self
+                        .world
+                        .zone_as(self.automaton, site, 0, ZoneKind::Extractor);
                 }
             }
             return;
@@ -1927,7 +1987,9 @@ impl Polity {
         let Some(tile) = (0..64u16).find(|t| !taken.contains(t)) else {
             return;
         };
-        let _ = self.world.zone_as(self.automaton, target, tile, ZoneKind::Extractor);
+        let _ = self
+            .world
+            .zone_as(self.automaton, target, tile, ZoneKind::Extractor);
     }
 
     /// **THE FORGE GATHERS** (the G2 relay's second arm, 2026-08-06 —
@@ -2053,7 +2115,10 @@ impl Polity {
         const SYSTEM_CAP: u64 = 4; // a star system holds a handful of worlds (expand_step)
         let l = civic::LATTICE as u64;
         let primary = cfe::world::FIRST_ORB;
-        let ext = self.civic_peel().map(|p| civic::residual_extent(&p)).unwrap_or(0);
+        let ext = self
+            .civic_peel()
+            .map(|p| civic::residual_extent(&p))
+            .unwrap_or(0);
         // DEEPEN: the void weighed against the mind's remaining depth. The base
         // γ saturates at the FRONTIER (by design — the no-overfit ceiling), but
         // that saturation triggers the instant ONE hard science seats, long
@@ -2141,8 +2206,13 @@ impl Polity {
     /// honest hole, never counted — `discover` itself is the single source of
     /// truth on workability, never re-derived here.
     fn craftable_roles(&self) -> Vec<usize> {
-        let held: Vec<[u8; 32]> =
-            self.world.committed().prospects.iter().map(|p| p.element).collect();
+        let held: Vec<[u8; 32]> = self
+            .world
+            .committed()
+            .prospects
+            .iter()
+            .map(|p| p.element)
+            .collect();
         if held.is_empty() {
             return Vec::new();
         }
@@ -2206,14 +2276,23 @@ impl Polity {
         // dissolves the caste that formed on it.
         let convergence = soc::caste_convergence(&self.caste_partition());
         match soc::resolve_investment(
-            &reach, cognitive, expansion, synthesis, culture, craft, convergence, seed,
+            &reach,
+            cognitive,
+            expansion,
+            synthesis,
+            culture,
+            craft,
+            convergence,
+            seed,
         ) {
             soc::Investment::Deepen => self.invest_cognition(primary, seed),
             soc::Investment::Expand => self.invest_expansion(),
             soc::Investment::Synthesize => {
-                let _ = self
-                    .world
-                    .seat_science_as(self.automaton, primary, cfe::almanac::ScienceDiscipline::Chem);
+                let _ = self.world.seat_science_as(
+                    self.automaton,
+                    primary,
+                    cfe::almanac::ScienceDiscipline::Chem,
+                );
             }
             soc::Investment::Culture => self.invest_culture(seed),
             soc::Investment::Craft => self.invest_craft(primary, seed),
@@ -2247,9 +2326,11 @@ impl Polity {
         hasher.update(&seed);
         hasher.update(b"culture");
         let draw = *hasher.finalize().as_bytes();
-        let index = (u64::from_le_bytes(draw[..8].try_into().expect("8 bytes")) as usize)
-            % earnable.len();
-        let _ = self.world.adopt_practice_as(self.automaton, earnable[index]);
+        let index =
+            (u64::from_le_bytes(draw[..8].try_into().expect("8 bytes")) as usize) % earnable.len();
+        let _ = self
+            .world
+            .adopt_practice_as(self.automaton, earnable[index]);
     }
 
     /// **THE CRAFT ACT** (RCP-2 F4) — raise one earned-but-unbuilt recipe:
@@ -2272,8 +2353,13 @@ impl Polity {
         let index =
             (u64::from_le_bytes(draw[..8].try_into().expect("8 bytes")) as usize) % roles.len();
         let role = roles[index];
-        let held: Vec<[u8; 32]> =
-            self.world.committed().prospects.iter().map(|p| p.element).collect();
+        let held: Vec<[u8; 32]> = self
+            .world
+            .committed()
+            .prospects
+            .iter()
+            .map(|p| p.element)
+            .collect();
         let (species, reach) = self.species_and_reach();
         if let Some(minted) = recipe::discover(role, &held, &species, &reach) {
             let _ = self.world.build_recipe_as(
@@ -2411,7 +2497,13 @@ impl Polity {
         if self.level < 3 {
             return;
         }
-        let orbs: Vec<u64> = self.world.committed().orbs.iter().map(|o| o.orb_id).collect();
+        let orbs: Vec<u64> = self
+            .world
+            .committed()
+            .orbs
+            .iter()
+            .map(|o| o.orb_id)
+            .collect();
         if orbs.len() >= SYSTEM_CAP {
             return; // the system is full — a physical cap
         }
@@ -2482,14 +2574,23 @@ impl Polity {
         };
         match (directive.verb.as_str(), directive.args.as_slice()) {
             ("zone", [tile, kind]) => match (parse_tile(tile), parse_kind(kind)) {
-                (Some(tile), Some(kind)) => self.world.zone_as(self.steward, cfe::world::FIRST_ORB, tile, kind).is_ok(),
+                (Some(tile), Some(kind)) => self
+                    .world
+                    .zone_as(self.steward, cfe::world::FIRST_ORB, tile, kind)
+                    .is_ok(),
                 _ => false,
             },
             ("raze", [tile]) => match parse_tile(tile) {
-                Some(tile) => self.world.raze_as(self.steward, cfe::world::FIRST_ORB, tile).is_ok(),
+                Some(tile) => self
+                    .world
+                    .raze_as(self.steward, cfe::world::FIRST_ORB, tile)
+                    .is_ok(),
                 None => false,
             },
-            ("collect", []) => self.world.collect_as(self.steward, cfe::world::FIRST_ORB).is_ok(),
+            ("collect", []) => self
+                .world
+                .collect_as(self.steward, cfe::world::FIRST_ORB)
+                .is_ok(),
             // #40: the t0 gift petition — a receipted grant under
             // steward containment; the crown law holds in the engine.
             ("gift", [condition]) => match condition.parse::<u8>() {
@@ -2618,7 +2719,13 @@ impl Polity {
             true => 0,
             false => found.max(linked),
         };
-        Need { hungers, starved_for, thin: Vec::new(), reach_bonus: 0, capacity: 0 }
+        Need {
+            hungers,
+            starved_for,
+            thin: Vec::new(),
+            reach_bonus: 0,
+            capacity: 0,
+        }
     }
 
     /// **MULTI-ORB EXPANSION** (INTELLIGENCE ARC A1) — a matured
@@ -2656,8 +2763,13 @@ impl Polity {
         // (settle_bond floors delivery at zero) — never a negative
         // transfer — so the ring is safe to seal whole; the cycles it
         // closes are the rank the mind stands on.
-        let orbs: Vec<u64> =
-            self.world.committed().orbs.iter().map(|o| o.orb_id).collect();
+        let orbs: Vec<u64> = self
+            .world
+            .committed()
+            .orbs
+            .iter()
+            .map(|o| o.orb_id)
+            .collect();
         if orbs.len() >= 2 {
             if let Some(rate) = cfe::dop::Positive::new(ratio(1, 1)) {
                 for i in 0..orbs.len() {
@@ -2864,7 +2976,10 @@ impl Polity {
             .unwrap_or(mouths)
             .min(mouths);
         let ration_dir = Self::ration_direction(&self.world.ration_of(orb));
-        matches!(solver::ration_reads(mouths, fed, ration_dir), solver::RationRead::Fed)
+        matches!(
+            solver::ration_reads(mouths, fed, ration_dir),
+            solver::RationRead::Fed
+        )
     }
 
     /// N-I6 — peel the survival book for one orb: the exact integer readings the
@@ -2875,8 +2990,12 @@ impl Polity {
         let world = &self.world;
         let ration = world.ration_of(orb);
         let ration_dir = Self::ration_direction(&ration);
-        let metabolism =
-            world.committed().genesis.as_ref().map(|g| g.metabolism).unwrap_or(2);
+        let metabolism = world
+            .committed()
+            .genesis
+            .as_ref()
+            .map(|g| g.metabolism)
+            .unwrap_or(2);
         let ration_resource = match &ration {
             cfe::dop::Ration::Resource(r) => Some(*r),
             cfe::dop::Ration::Element(_) => None,
@@ -2891,7 +3010,8 @@ impl Polity {
             .unwrap_or(0);
         let mouths = world.labor_force(orb);
         let per_capita = world.per_capita_ration();
-        let to_u64 = |r: Ratio| num_traits::ToPrimitive::to_u64(&r.to_integer()).unwrap_or(u64::MAX);
+        let to_u64 =
+            |r: Ratio| num_traits::ToPrimitive::to_u64(&r.to_integer()).unwrap_or(u64::MAX);
         let (fed, accrued, habitat_support) = if per_capita <= ratio(0, 1) {
             (mouths, mouths, mouths) // a rate-0 line (plasmoid, #29) has no farmed ration gate
         } else {
@@ -2903,7 +3023,11 @@ impl Polity {
             let fed = to_u64(available / per_capita.clone()).min(mouths);
             let accrued_amt = ration_resource
                 .and_then(|r| {
-                    world.accrued_of(orb).into_iter().find(|(res, _)| *res == r).map(|(_, a)| a)
+                    world
+                        .accrued_of(orb)
+                        .into_iter()
+                        .find(|(res, _)| *res == r)
+                        .map(|(_, a)| a)
                 })
                 .unwrap_or_else(|| ratio(0, 1));
             let accrued = to_u64(accrued_amt / per_capita.clone());
@@ -2929,8 +3053,13 @@ impl Polity {
     /// founding): Habitat for a biomass line, Extractor for a mineral/element
     /// line. Resolved from `zone_yield`, never hardcoded.
     fn ration_source_zone(&self, orb: u64) -> ZoneKind {
-        let metabolism =
-            self.world.committed().genesis.as_ref().map(|g| g.metabolism).unwrap_or(2);
+        let metabolism = self
+            .world
+            .committed()
+            .genesis
+            .as_ref()
+            .map(|g| g.metabolism)
+            .unwrap_or(2);
         if let cfe::dop::Ration::Resource(r) = self.world.ration_of(orb) {
             for kind in [ZoneKind::Habitat, ZoneKind::Extractor] {
                 if cfe::dop::zone_yield(kind, metabolism).0 == r {
@@ -2986,13 +3115,14 @@ impl Polity {
     /// gate). Checked here, ADDITIONALLY to the ordinary cost gate —
     /// never in place of it.
     fn seat_zone(&mut self, orb: u64, kind: ZoneKind) {
-        let can_pay = kind.cost().into_iter().all(|(res, need)| banked(&self.world, res) >= need);
+        let can_pay = kind
+            .cost()
+            .into_iter()
+            .all(|(res, need)| banked(&self.world, res) >= need);
         if !can_pay {
             return;
         }
-        if let Some((Regime::Frost, _)) =
-            regime(&self.world, &self.spec.civilization.metabolism)
-        {
+        if let Some((Regime::Frost, _)) = regime(&self.world, &self.spec.civilization.metabolism) {
             let zones_now = self.world.orb().map(|o| o.zones.len()).unwrap_or(0);
             if !joule_runway_allows(&banked(&self.world, Resource::Joule), zones_now) {
                 return;
@@ -3007,7 +3137,8 @@ impl Polity {
                 // THE FOUNDING BAND, carried from the retired build_step: the
                 // FIRST Habitat seeds the initial population (else no mouths ever
                 // rise and the board never comes alive).
-                self.world.settle_population(cfe::world::FIRST_ORB, FOUNDING_BAND);
+                self.world
+                    .settle_population(cfe::world::FIRST_ORB, FOUNDING_BAND);
             }
         }
     }
@@ -3030,8 +3161,10 @@ impl Polity {
     /// residual extent); it moves automatically if the seated cost law moves.
     pub fn observe_price() -> Ratio {
         let bill = civic::mint_cost(&[num_bigint::BigInt::from(1)], &[]);
-        ratio(num_traits::ToPrimitive::to_i64(&bill).unwrap_or(i64::MAX), 1)
-            * civic::metabolic_exchange()
+        ratio(
+            num_traits::ToPrimitive::to_i64(&bill).unwrap_or(i64::MAX),
+            1,
+        ) * civic::metabolic_exchange()
     }
 
     /// AUTIC-1 Slice 1b — THE VESSEL ABSORBS THE SHARED TONGUE. Draw a
@@ -3254,8 +3387,7 @@ impl Polity {
         // Prove the variant on a canonical probe grid — the authored word is a
         // lawful (input -> output) claim the mesh door can replay. Build the
         // sealed-math Grid, run, then cast both to the membrane's row-vectors.
-        let Some(probe) =
-            solver_verify::grid::Grid::new(3, 3, vec![1, 2, 3, 4, 5, 6, 7, 8, 9])
+        let Some(probe) = solver_verify::grid::Grid::new(3, 3, vec![1, 2, 3, 4, 5, 6, 7, 8, 9])
         else {
             return;
         };
@@ -3294,8 +3426,10 @@ impl Polity {
         // COG-11: an EVOLVED line thinks more on less — the price is discounted by
         // `cognitive_efficiency(evolution_stage)` (1/(1+stage), exactly 1 at the
         // founding stage so an un-evolved line pays the same as before).
-        let price = ratio(num_traits::ToPrimitive::to_i64(&bill).unwrap_or(i64::MAX), 1)
-            * civic::metabolic_exchange()
+        let price = ratio(
+            num_traits::ToPrimitive::to_i64(&bill).unwrap_or(i64::MAX),
+            1,
+        ) * civic::metabolic_exchange()
             * civic::cognitive_efficiency(self.world.evolution_stage());
         // COG-13 EROI gate; `afford` survives only as the desperation-burn floor.
         let afford = self.world.leisure_bank_of(primary) >= price;
@@ -3331,7 +3465,11 @@ impl Polity {
                 } else if can_burn {
                     self.world.settle_population_exact(primary, -burn);
                 }
-                self.library.adopt(solver::mint::MintedWord { orbit, expansion, cited });
+                self.library.adopt(solver::mint::MintedWord {
+                    orbit,
+                    expansion,
+                    cited,
+                });
                 self.word_pending.retain(|(held, _, _)| *held != orbit);
             }
         }
@@ -3366,10 +3504,14 @@ impl Polity {
         let sibling = self.sibling;
         self.absorb_autic(sibling); // think in the shared tongue net has learned
         let read = solver::think_task(task, self.grown.entry(sibling).or_default());
-        if let SolveRead::Solved { program, matches_expected: Some(true), .. } = read {
+        if let SolveRead::Solved {
+            program,
+            matches_expected: Some(true),
+            ..
+        } = read
+        {
             if program.len() >= 2 {
-                let standing =
-                    solver::mint::standing_orbits(&solver::mint::sweep_vocabulary(task));
+                let standing = solver::mint::standing_orbits(&solver::mint::sweep_vocabulary(task));
                 if let Some(orbit) = solver::mint::consider(&program, &self.library, &standing) {
                     self.deposit_toward_word(orbit, &program, sibling, digest);
                 }
@@ -3434,20 +3576,27 @@ impl Polity {
             return (vessels, 0, 0, 0);
         }
         // Emergent overlap: the value-preserving classes held by ≥ 2 vessels.
-        let mut counts: std::collections::BTreeMap<&String, usize> = std::collections::BTreeMap::new();
+        let mut counts: std::collections::BTreeMap<&String, usize> =
+            std::collections::BTreeMap::new();
         for h in &houses {
             for k in h {
                 *counts.entry(k).or_default() += 1;
             }
         }
-        let contacts: Vec<&String> = counts.into_iter().filter(|(_, c)| *c >= 2).map(|(k, _)| k).collect();
+        let contacts: Vec<&String> = counts
+            .into_iter()
+            .filter(|(_, c)| *c >= 2)
+            .map(|(k, _)| k)
+            .collect();
         let n_contacts = contacts.len();
         // Probabilistic connection: each shared class transports flatly this beat
         // with the civ's coherence (seeded by civ+beat+the class's own value).
         let civ_seed = atlas_seed(self.spec.civilization.sigil.as_bytes());
         let flat = contacts
             .iter()
-            .filter(|k| atlas_draw(civ_seed ^ (beat << 20) ^ atlas_seed(k.as_bytes())) < coherence_permille)
+            .filter(|k| {
+                atlas_draw(civ_seed ^ (beat << 20) ^ atlas_seed(k.as_bytes())) < coherence_permille
+            })
             .count();
         let dh = if flat == 0 {
             0
@@ -3521,7 +3670,11 @@ impl Polity {
                     &orb.entropy_vented,
                 )
                 .map(|read| {
-                    (read, orb.syntropy_contained.clone(), orb.entropy_vented.clone())
+                    (
+                        read,
+                        orb.syntropy_contained.clone(),
+                        orb.entropy_vented.clone(),
+                    )
                 }),
                 _ => None,
             };
@@ -3601,7 +3754,13 @@ impl Polity {
             let flow = match self.prev_order.as_ref() {
                 Some((psyn, pent, _)) => {
                     let d = (syn.clone() - psyn.clone()) - (ent.clone() - pent.clone());
-                    if d > zero { "+" } else if d < zero { "-" } else { "0" }
+                    if d > zero {
+                        "+"
+                    } else if d < zero {
+                        "-"
+                    } else {
+                        "0"
+                    }
                 }
                 None => "?",
             };
@@ -3734,9 +3893,7 @@ impl Polity {
             // from this line's own receipts — the chronicle is the
             // register, this cache only spares the re-read.
             if !self.library_folded {
-                for (orbit, bytes, cited) in
-                    cfe::vocabulary::solver_words(self.world.chronicle())
-                {
+                for (orbit, bytes, cited) in cfe::vocabulary::solver_words(self.world.chronicle()) {
                     if let Some(expansion) = solver_verify::program_from_bytes(&bytes) {
                         self.library.adopt(solver::mint::MintedWord {
                             orbit,
@@ -3756,8 +3913,7 @@ impl Polity {
                 for op in &expansion {
                     output = op.apply(&output);
                 }
-                let certificate =
-                    solver_verify::SolveCertificate::seal(&task, &expansion, &output);
+                let certificate = solver_verify::SolveCertificate::seal(&task, &expansion, &output);
                 let matches = task
                     .test_expected
                     .as_ref()
@@ -3826,9 +3982,8 @@ impl Polity {
                         // CONSILIENCE (a second vessel independently closes the
                         // same orbit) — `deposit_toward_word` gates that and bills
                         // the mint (`mint_cost`, COG-2/4/5, unchanged).
-                        let standing = solver::mint::standing_orbits(
-                            &solver::mint::sweep_vocabulary(&task),
-                        );
+                        let standing =
+                            solver::mint::standing_orbits(&solver::mint::sweep_vocabulary(&task));
                         if let Some(orbit) =
                             solver::mint::consider(&program, &self.library, &standing)
                         {
@@ -3979,7 +4134,6 @@ impl Polity {
                 let ladder_still_climbs =
                     Difficulty::level(self.level + 1) != Difficulty::level(self.level);
                 if mastered && ladder_still_climbs {
-
                     self.level += 1;
                     self.streak = 0;
                 }
@@ -4027,9 +4181,7 @@ impl Polity {
             let others: Vec<&String> = options.iter().filter(|o| o.as_str() != current).collect();
             match others.is_empty() {
                 true => current.to_string(),
-                false => others
-                    [beacon.uniform_index(domain, others.len() as u64) as usize]
-                    .clone(),
+                false => others[beacon.uniform_index(domain, others.len() as u64) as usize].clone(),
             }
         };
         // MULTI-AXIAL (operator ruling 2026-08-02: *unpin unary, and
@@ -4105,8 +4257,8 @@ impl Polity {
         };
         // Deterministic collision walk: start at the drawn combo,
         // scan forward; if every themed name is taken, the line waits.
-        let start = beacon.uniform_index("growth.name", (heads.len() * tails.len()) as u64)
-            as usize;
+        let start =
+            beacon.uniform_index("growth.name", (heads.len() * tails.len()) as u64) as usize;
         let mut chosen: Option<(String, &str, &str)> = None;
         for offset in 0..heads.len() * tails.len() {
             let k = (start + offset) % (heads.len() * tails.len());
@@ -4151,9 +4303,7 @@ impl Polity {
         // The new branch settles ADJACENT: origin position plus a small
         // beacon-drawn displacement in the exact rationals per spatial axis (half-unit
         // grain, never the zero vector).
-        let step = |domain: &str| -> Ratio {
-            ratio(beacon.uniform_index(domain, 9) as i64 - 4, 2)
-        };
+        let step = |domain: &str| -> Ratio { ratio(beacon.uniform_index(domain, 9) as i64 - 4, 2) };
         let (mut dx, dy, dz) = (step("chart.dx"), step("chart.dy"), step("chart.dz"));
         if dx == ratio(0, 1) && dy == ratio(0, 1) && dz == ratio(0, 1) {
             dx = ratio(1, 1);
@@ -4278,8 +4428,13 @@ impl Polity {
         // Every settled orb collects — a chartered survey site left
         // uncollected would starve at its own upkeep.
         profile::timed("collect", || {
-            let orbs: Vec<u64> =
-                self.world.committed().orbs.iter().map(|o| o.orb_id).collect();
+            let orbs: Vec<u64> = self
+                .world
+                .committed()
+                .orbs
+                .iter()
+                .map(|o| o.orb_id)
+                .collect();
             for orb in orbs {
                 let _ = self.world.collect_as(self.automaton, orb);
             }
@@ -4313,9 +4468,7 @@ impl Polity {
         let synced_clean = profile::timed("persist_sync", || {
             cfe::persist::sync_from(
                 self.world.chronicle(),
-                &book
-                    .world_dir(&self.spec.world_name)
-                    .join("chronicle.tlv"),
+                &book.world_dir(&self.spec.world_name).join("chronicle.tlv"),
                 &mut self.sync_cursor,
             )
             .is_ok()
@@ -4431,18 +4584,14 @@ impl Polity {
                 if watermark <= receipts.len() {
                     self.chained = watermark;
                     for sequence in refused_seqs {
-                        if let Some(at) =
-                            receipts.iter().position(|r| r.sequence() == sequence)
-                        {
+                        if let Some(at) = receipts.iter().position(|r| r.sequence() == sequence) {
                             let prior = cfe::world::replay(
                                 &cfe::vrp::Chronicle::from_receipts(receipts[..at].to_vec())
                                     .map_err(|_| mesh::arbor::ArborRefused::StateUndecodable)?,
                             );
                             let next = cfe::world::replay(
-                                &cfe::vrp::Chronicle::from_receipts(
-                                    receipts[..=at].to_vec(),
-                                )
-                                .map_err(|_| mesh::arbor::ArborRefused::StateUndecodable)?,
+                                &cfe::vrp::Chronicle::from_receipts(receipts[..=at].to_vec())
+                                    .map_err(|_| mesh::arbor::ArborRefused::StateUndecodable)?,
                             );
                             let receipt = &receipts[at];
                             let step = kernel::Step {
@@ -4473,9 +4622,8 @@ impl Polity {
         // integrity of that prefix is still proven by from_receipts.
         if self.stepper.is_none() {
             let mut stepper = cfe::world::Replayer::new();
-            let verified =
-                cfe::vrp::Chronicle::from_receipts(receipts[..self.chained].to_vec())
-                    .map_err(|_| mesh::arbor::ArborRefused::StateUndecodable)?;
+            let verified = cfe::vrp::Chronicle::from_receipts(receipts[..self.chained].to_vec())
+                .map_err(|_| mesh::arbor::ArborRefused::StateUndecodable)?;
             for receipt in verified.receipts() {
                 stepper.apply(receipt);
             }
@@ -4503,7 +4651,11 @@ impl Polity {
         for receipt in &receipts[self.chained..] {
             let step = kernel::Step {
                 event: receipt.event().clone(),
-                actor: receipt.provenance().first().copied().unwrap_or(cfe::world::SOVEREIGN),
+                actor: receipt
+                    .provenance()
+                    .first()
+                    .copied()
+                    .unwrap_or(cfe::world::SOVEREIGN),
                 stamp: receipt.stamp(),
             };
             let prior = stepper.state().clone();
@@ -4574,7 +4726,6 @@ impl Polity {
         self.reported = self.refused.len();
         &self.refused[from..]
     }
-
 }
 
 /// MARKET-2: plain L1 between two charted positions — the transit
@@ -4582,7 +4733,11 @@ impl Polity {
 pub fn spatial_l1(a: &(Ratio, Ratio, Ratio), b: &(Ratio, Ratio, Ratio)) -> Ratio {
     let leg = |p: &Ratio, q: &Ratio| {
         let d = p.clone() - q.clone();
-        if d < ratio(0, 1) { -d } else { d }
+        if d < ratio(0, 1) {
+            -d
+        } else {
+            d
+        }
     };
     leg(&a.0, &b.0) + leg(&a.1, &b.1) + leg(&a.2, &b.2)
 }
@@ -4659,11 +4814,7 @@ pub fn element_trade_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, Stri
                 continue;
             }
             let distance = spatial_l1(&worlds[a].spec.position, &worlds[b].spec.position);
-            let melt = cfe::world::route_melt(
-                &worlds[a].world,
-                &worlds[b].world,
-                &distance,
-            );
+            let melt = cfe::world::route_melt(&worlds[a].world, &worlds[b].world, &distance);
             if melt >= ratio(1, 1) {
                 continue; // walled direct — merchant territory, not element haul
             }
@@ -4703,10 +4854,7 @@ pub fn element_trade_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, Stri
             )
             .is_ok()
             {
-                cleared.push((
-                    ex.spec.world_name.clone(),
-                    im.spec.world_name.clone(),
-                ));
+                cleared.push((ex.spec.world_name.clone(), im.spec.world_name.clone()));
                 // The clear moved matter: refresh exactly the two
                 // touched readings (the cache's whole bargain).
                 masses[exporter] = mass_of(&worlds[exporter]);
@@ -4777,19 +4925,13 @@ pub fn stamp_market_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, Strin
             for i in [a, b] {
                 if !worlds[i].world.knows_its_sun() {
                     let steward = worlds[i].steward;
-                    let _ = worlds[i].world.grant_tech_as(
-                        steward,
-                        cfe::world::FIRST_ORB,
-                        0,
-                    );
+                    let _ = worlds[i]
+                        .world
+                        .grant_tech_as(steward, cfe::world::FIRST_ORB, 0);
                 }
             }
             let distance = spatial_l1(&worlds[a].spec.position, &worlds[b].spec.position);
-            let melt = cfe::world::route_melt(
-                &worlds[a].world,
-                &worlds[b].world,
-                &distance,
-            );
+            let melt = cfe::world::route_melt(&worlds[a].world, &worlds[b].world, &distance);
             if melt >= ratio(1, 1) {
                 continue;
             }
@@ -4887,10 +5029,7 @@ pub fn stamp_market_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, Strin
                 let _ = residual;
                 continue;
             }
-            clears.push((
-                buy.spec.world_name.clone(),
-                sell.spec.world_name.clone(),
-            ));
+            clears.push((buy.spec.world_name.clone(), sell.spec.world_name.clone()));
         }
     }
     clears
@@ -4940,8 +5079,12 @@ pub fn merchant_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, String, S
                 if b == m || b == a || worlds[b].penned {
                     continue;
                 }
-                let Some(ask_a) = worlds[a].world.offers().first().cloned() else { continue };
-                let Some(ask_b) = worlds[b].world.offers().first().cloned() else { continue };
+                let Some(ask_a) = worlds[a].world.offers().first().cloned() else {
+                    continue;
+                };
+                let Some(ask_b) = worlds[b].world.offers().first().cloned() else {
+                    continue;
+                };
                 // The triangle in one quote: B wants what A sells,
                 // and pays in what A asks.
                 if ask_b.want != ask_a.give || ask_b.give != ask_a.want {
@@ -4955,10 +5098,7 @@ pub fn merchant_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, String, S
                     let key = (x.min(y), x.max(y));
                     memo.entry(key)
                         .or_insert_with(|| {
-                            let d = spatial_l1(
-                                &worlds[x].spec.position,
-                                &worlds[y].spec.position,
-                            );
+                            let d = spatial_l1(&worlds[x].spec.position, &worlds[y].spec.position);
                             cfe::world::route_melt(&worlds[x].world, &worlds[y].world, &d)
                         })
                         .clone()
@@ -4988,7 +5128,9 @@ pub fn merchant_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, String, S
                 }
                 // Merchant arbitrage stays on closed carriers for now
                 // (element triangles need element banks on the middle).
-                let Some(want_a) = ask_a.want.as_resource() else { continue };
+                let Some(want_a) = ask_a.want.as_resource() else {
+                    continue;
+                };
                 let held = worlds[m]
                     .world
                     .orb()
@@ -5010,7 +5152,13 @@ pub fn merchant_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, String, S
                 };
                 if worlds[m]
                     .world
-                    .post_offer(cfe::world::FIRST_ORB, pair, give_amount, want_amount, counter)
+                    .post_offer(
+                        cfe::world::FIRST_ORB,
+                        pair,
+                        give_amount,
+                        want_amount,
+                        counter,
+                    )
                     .is_err()
                 {
                     continue;
@@ -5020,7 +5168,12 @@ pub fn merchant_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, String, S
                 {
                     let (merchant, seller) = two_mut(worlds, m, a);
                     if cfe::world::clear_trade(
-                        &mut merchant.world, counter, &mut seller.world, ask_a.offer, deal, d_am,
+                        &mut merchant.world,
+                        counter,
+                        &mut seller.world,
+                        ask_a.offer,
+                        deal,
+                        d_am,
                     )
                     .is_err()
                     {
@@ -5039,7 +5192,13 @@ pub fn merchant_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, String, S
                 };
                 if worlds[m]
                     .world
-                    .post_offer(cfe::world::FIRST_ORB, pair, give_amount, want_amount, counter)
+                    .post_offer(
+                        cfe::world::FIRST_ORB,
+                        pair,
+                        give_amount,
+                        want_amount,
+                        counter,
+                    )
                     .is_err()
                 {
                     continue;
@@ -5047,7 +5206,12 @@ pub fn merchant_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, String, S
                 let sold = {
                     let (merchant, buyer) = two_mut(worlds, m, b);
                     cfe::world::clear_trade(
-                        &mut merchant.world, counter, &mut buyer.world, ask_b.offer, deal + 2, d_mb,
+                        &mut merchant.world,
+                        counter,
+                        &mut buyer.world,
+                        ask_b.offer,
+                        deal + 2,
+                        d_mb,
                     )
                     .is_ok()
                 };
@@ -5197,7 +5361,12 @@ pub fn knowledge_market_step(worlds: &mut [Polity], _beat: u64) -> Vec<(String, 
         if let Some((price, orbit, expansion, cited)) = pick {
             if worlds[buyer]
                 .world
-                .license_knowledge_as(worlds[buyer].automaton, *orbit, expansion.clone(), cited.clone())
+                .license_knowledge_as(
+                    worlds[buyer].automaton,
+                    *orbit,
+                    expansion.clone(),
+                    cited.clone(),
+                )
                 .is_ok()
             {
                 licensed.push((worlds[buyer].spec.world_name.clone(), price));
@@ -5235,10 +5404,7 @@ pub fn pen_service(
             };
             consumed = true;
             let hand = cfe::vrp::hand_of(seat);
-            match worlds
-                .iter_mut()
-                .find(|e| e.spec.world_name == world_name)
-            {
+            match worlds.iter_mut().find(|e| e.spec.world_name == world_name) {
                 Some(polity) if !polity.penned => {
                     match mesh::yield_authority(
                         polity.world.chronicle_mut(),
@@ -5264,9 +5430,9 @@ pub fn pen_service(
                                 "HANDOFF — {world_name}: the pen passes to {seat} (seal {sequence}); beats wait"
                             ));
                         }
-                        Err(refused) => log.push(format!(
-                            "HANDOFF REFUSED — {world_name}: {refused:?}"
-                        )),
+                        Err(refused) => {
+                            log.push(format!("HANDOFF REFUSED — {world_name}: {refused:?}"))
+                        }
                     }
                 }
                 Some(_) => log.push(format!(
@@ -5417,9 +5583,7 @@ pub fn incursion(
     // it as the incursion polity.
     let _ = std::fs::create_dir_all(live_carrier.parent().expect("world dir"));
     let _ = cfe::persist::sync(world.chronicle(), &live_carrier);
-    let coordinate = |axis: &str| -> Ratio {
-        ratio(beacon.uniform_index(axis, 64) as i64, 1)
-    };
+    let coordinate = |axis: &str| -> Ratio { ratio(beacon.uniform_index(axis, 64) as i64, 1) };
     let spec = PolitySpec {
         civilization,
         world_name: woken_world.clone(),
@@ -5468,9 +5632,12 @@ pub fn observe_crossings(
             continue;
         };
         let creator = galaxy_creator(registry, &polity.spec.civilization);
-        if let Ok(Some(galaxy)) =
-            book.observe_galaxy(&polity.spec.civilization.sigil, &creator, (&x, &y, &z), stamp)
-        {
+        if let Ok(Some(galaxy)) = book.observe_galaxy(
+            &polity.spec.civilization.sigil,
+            &creator,
+            (&x, &y, &z),
+            stamp,
+        ) {
             created.push(galaxy);
         }
     }
@@ -5848,7 +6015,9 @@ fn run_era_inner(
         }
         let _ = cfe::persist::sync(
             polity.world.chronicle(),
-            &book.world_dir(&polity.spec.world_name).join("chronicle.tlv"),
+            &book
+                .world_dir(&polity.spec.world_name)
+                .join("chronicle.tlv"),
         );
     }
     worlds
@@ -5871,7 +6040,11 @@ fn read_judged_sidecar(dir: &std::path::Path) -> Option<(usize, Vec<u64>)> {
     Some((watermark, refused))
 }
 
-fn write_judged_sidecar(dir: &std::path::Path, watermark: usize, refused: &[(u64, kernel::Refused)]) {
+fn write_judged_sidecar(
+    dir: &std::path::Path,
+    watermark: usize,
+    refused: &[(u64, kernel::Refused)],
+) {
     // UNION with what already stands: the narrator DRAINS the
     // in-memory record for its ten-beat tally, so the sidecar is the
     // permanent copy and must never shrink by a display read.
@@ -6001,8 +6174,7 @@ fn ensure_npc_kin(world: &mut cfe::world::World, actor: u64) {
             .hulls()
             .iter()
             .filter(|h| {
-                h.assigned_route == 0
-                    && HullRole::from_wire(h.role) == Some(HullRole::Escort)
+                h.assigned_route == 0 && HullRole::from_wire(h.role) == Some(HullRole::Escort)
             })
             .map(|h| h.hull_id)
             .collect();
@@ -6020,8 +6192,7 @@ fn ensure_npc_kin(world: &mut cfe::world::World, actor: u64) {
             let band = world.convoy_risk_band(deal);
             if band == cfe::world::RiskBand::Contested {
                 let idle = world.hulls().iter().find(|h| {
-                    h.assigned_route == 0
-                        && HullRole::from_wire(h.role) == Some(HullRole::Escort)
+                    h.assigned_route == 0 && HullRole::from_wire(h.role) == Some(HullRole::Escort)
                 });
                 if let Some(h) = idle {
                     let id = h.hull_id;
@@ -6144,8 +6315,7 @@ fn ensure_npc_instruments(world: &mut cfe::world::World, actor: u64) {
     // Honest clear path (P5-M Q-S4): record spot clears; depth≥8 seals last-clear.
     if !world.market_sealed()
         && (world.futures_listable() || world.notes_listable())
-        && (orb.banked_amount(Resource::Crystal) > ratio(0, 1)
-            || orb.stamp_amount() > ratio(0, 1))
+        && (orb.banked_amount(Resource::Crystal) > ratio(0, 1) || orb.stamp_amount() > ratio(0, 1))
     {
         if let Some(p) = Positive::new(ratio(1, 1)) {
             let _ = world.record_spot_clear_as(actor, orb_id, Resource::Crystal, p);
@@ -6206,10 +6376,7 @@ fn ensure_npc_instruments(world: &mut cfe::world::World, actor: u64) {
     if world.shares_listable() && world.shares().iter().all(|s| !s.open) {
         let empiricist = world.genesis().is_some_and(|g| g.disposition == 2);
         if empiricist || world.exchange_seated() {
-            if let (Some(u), Some(p)) = (
-                Positive::new(ratio(1, 1)),
-                Positive::new(ratio(1, 1)),
-            ) {
+            if let (Some(u), Some(p)) = (Positive::new(ratio(1, 1)), Positive::new(ratio(1, 1))) {
                 let _ = world.issue_share_as(actor, orb_id, actor, Resource::Iron, u, p);
             }
         }
@@ -6235,7 +6402,10 @@ fn ensure_npc_fleet(world: &mut cfe::world::World, actor: u64) {
         return;
     };
     let orb_id = cfe::world::FIRST_ORB;
-    let has_yard = orb.zones.iter().any(|z| z.kind == cfe::dop::ZoneKind::ShipYard);
+    let has_yard = orb
+        .zones
+        .iter()
+        .any(|z| z.kind == cfe::dop::ZoneKind::ShipYard);
     if !has_yard {
         let cost_ok = cfe::dop::ZoneKind::ShipYard
             .cost()
@@ -6250,7 +6420,11 @@ fn ensure_npc_fleet(world: &mut cfe::world::World, actor: u64) {
     let Some(orb) = world.orb() else {
         return;
     };
-    if !orb.zones.iter().any(|z| z.kind == cfe::dop::ZoneKind::ShipYard) {
+    if !orb
+        .zones
+        .iter()
+        .any(|z| z.kind == cfe::dop::ZoneKind::ShipYard)
+    {
         return;
     }
     // Target total fleet capacity (all hulls), not free_capacity(0).
