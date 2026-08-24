@@ -27,10 +27,17 @@ fn pin_c_two_vessels_mint_and_pin_c_minus_one_vessel_does_not() {
     );
 
     // C: a SECOND distinct vessel closes the SAME orbit → cited returned to mint.
+    // Deliberately reuses `d1` (the SAME digest `v` already deposited) — the
+    // shape `research_step` produces every beat (one chronicle digest stamped
+    // on both the automaton's and the sibling's deposit). `cited` must carry
+    // ONE entry PER DISTINCT VESSEL, never collapse on shared digest content,
+    // or `mint_solver_word_as`'s `cited.len() < 2` gate silently starves every
+    // same-beat consilience forever.
     let cited = consilience_deposit(&mut pending, orbit, &expansion, w, d1);
-    assert!(
-        cited.is_some(),
-        "two distinct vessels independently closing one orbit → VocabularyMinted (Pin C)",
+    assert_eq!(
+        cited.as_ref().map(Vec::len),
+        Some(2),
+        "two distinct vessels sharing the SAME digest still cite 2 — identity, not content, gates the mint",
     );
     // The helper does NOT remove — the caller clears pending on a successful mint
     // (so a consilient-but-unaffordable word stays pending, fasting).

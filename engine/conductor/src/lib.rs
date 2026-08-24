@@ -1063,6 +1063,19 @@ fn office_evidence(world: &World) -> OfficeEvidence {
 /// removes it only on a SUCCESSFUL (affordable) mint, so a consilient-but-unpaid
 /// word stays pending (fasting). One vessel confirming many digests never reaches
 /// two distinct vessel_ids (C−).
+///
+/// **IDENTITY AND CONTENT ARE SEPARATE AXES.** `mint_solver_word_as` gates on
+/// `cited.len()` alone, so this list's LENGTH must track vessel-diversity — the
+/// identity axis two distinct minds prove by both showing up — never digest
+/// agreement, the content axis. A digest is deterministic on WHAT was closed
+/// (`research_step` stamps every deposit this beat with the SAME chronicle
+/// digest), so two distinct vessels closing the same orbit in the same beat
+/// legitimately carry the identical digest — real consilience that a naive
+/// digest-dedup would collapse to one entry and silently starve forever
+/// (`SolverWordUnconfirmed` on every attempt). One digest PER DISTINCT VESSEL,
+/// never per distinct digest VALUE — the digest itself rides along only as
+/// per-vessel provenance for the receipt, exactly as `entity_id` rides beside
+/// (never inside) a content hash in the mesh's own orbit-congruence law.
 pub fn consilience_deposit(
     pending: &mut Vec<([u8; 32], Vec<solver_verify::grid::Op>, Vec<(u64, [u8; 32])>)>,
     orbit: [u8; 32],
@@ -1086,9 +1099,14 @@ pub fn consilience_deposit(
     if vessels.len() < 2 {
         return None; // Horizon — one vantage waiting, not a mint (C−)
     }
-    let mut cited: Vec<[u8; 32]> = entry.2.iter().map(|(_, d)| *d).collect();
-    cited.sort_unstable();
-    cited.dedup();
+    // One digest per DISTINCT VESSEL (first deposit wins) — `cited.len()` must
+    // equal `vessels.len()`, the identity count, never collapse on shared content.
+    let mut cited: Vec<[u8; 32]> = Vec::with_capacity(vessels.len());
+    for &v in &vessels {
+        if let Some((_, d)) = entry.2.iter().find(|(ev, _)| *ev == v) {
+            cited.push(*d);
+        }
+    }
     Some(cited)
 }
 
