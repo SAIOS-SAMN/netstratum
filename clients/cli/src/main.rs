@@ -8414,6 +8414,13 @@ fn chronicle(world: &World, style: &Style) {
                 "◈ region CHARTED — seed {} (identity, forever)",
                 style.strong(&hex(seed))
             ),
+            cfe::dop::ClosureEvent::ChronicleCheckpointed { folded_hash, receipt_count } => {
+                format!(
+                    "◈ chronicle CHECKPOINTED — {} receipts folded to {}",
+                    style.strong(&receipt_count.to_string()),
+                    style.strong(&hex(folded_hash))
+                )
+            }
             cfe::dop::ClosureEvent::EvolutionAdvanced { stage } => format!(
                 "⇑ the line EVOLVES — stage {} (the arc advances)",
                 style.strong(&stage.to_string())

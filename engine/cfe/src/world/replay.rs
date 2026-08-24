@@ -484,6 +484,13 @@ impl Replayer {
         ClosureEvent::TaxonSealed { class, clade } => *taxon = Some((*class, *clade)),
         // GALACTIC-1: the regional seed replays — sealed once, forever.
         ClosureEvent::RegionCharted { seed } => *region_seed = Some(*seed),
+        // CHRONICLE-COMPACT-1: schema only — the checkpoint itself carries no
+        // committed-state effect (it is a bookkeeping fact about the
+        // chronicle, not a change to the world). The load-bearing use
+        // (skip straight to a verified checkpoint instead of replaying from
+        // genesis) is CHRONICLE-COMPACT-3's job, done ABOVE this apply loop,
+        // not inside it.
+        ClosureEvent::ChronicleCheckpointed { .. } => {}
         ClosureEvent::EvolutionAdvanced { stage } => *evolution_stage = *stage,
         // #32, 20_FOUNDING §3: the tithe leaves the founding orb's
         // bank. One-sided (the DemurrageSettled precedent) — no

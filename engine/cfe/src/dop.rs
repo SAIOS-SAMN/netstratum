@@ -393,7 +393,13 @@
 //!    187  ClosureEvent::RegionCharted (GALACTIC-1 — a world's charted
 //!         (X,Y,Z) quantized onto a coarse galactic grid cell, hashed once
 //!         at genesis into a regional resource-weighting seed. seed[32].)
-//!    Phase-5 claim ledger: next free **188** (186 ResourceStocksSwept, 184 VeinRejuvenated —
+//!    188  ClosureEvent::ChronicleCheckpointed (CHRONICLE-COMPACT-1 — a
+//!         world folds its history and commits a content hash of its
+//!         Committed state, plus the receipt count at that point. Schema
+//!         only at landing: replay records it, nothing prunes or verifies
+//!         against it yet (CHRONICLE-COMPACT-3). folded_hash[32] ‖
+//!         receipt_count u64 le.)
+//!    Phase-5 claim ledger: next free **189** (186 ResourceStocksSwept, 184 VeinRejuvenated —
 //!    ONT-3 resource rejuvenation as derivation: a worked vein RECOVERS at a
 //!    collect touch, its inverse-receipt integral `rejuvenated` growing by the
 //!    KEPLERIAN orbital-forcing quantum (one `natural/REGROWTH_GRAIN` per
@@ -3229,6 +3235,20 @@ pub enum ClosureEvent {
     /// once (the `StarCommissioned`/`TaxonSealed` precedent): the position
     /// a system charts at is fixed at founding, never travels.
     RegionCharted { seed: [u8; 32] },
+    /// **CHRONICLE-COMPACT-1 (tag 188)** — a world folds its history to this
+    /// point and commits `folded_hash`, a content hash of its `Committed`
+    /// state at the moment of closing, plus `receipt_count`, how many
+    /// receipts (including this one) stand in the chronicle so far. SCHEMA
+    /// ONLY at this landing: `replay` records it and moves on (a no-op
+    /// beyond bookkeeping) — nothing prunes, nothing verifies against it
+    /// yet. The load-bearing use (a checkpoint-aware `replay` that trusts a
+    /// verified `folded_hash` and skips straight to the post-checkpoint
+    /// suffix, so a long-lived world's resident chronicle stops growing
+    /// without breaking SEAL B) is CHRONICLE-COMPACT-3. Landed additively
+    /// and non-breaking on purpose: every existing chronicle (none of which
+    /// carries this receipt) replays byte-identical to today, and this
+    /// receipt itself only ever ADDS information, never removes any.
+    ChronicleCheckpointed { folded_hash: [u8; 32], receipt_count: u64 },
     /// **TAXATION (49_TAXATION §3, tag 172)** — the CONTINUITY levy at a
     /// generation turnover: `count` of the line's most-recently adopted
     /// practices LAPSE to the void (its unconfirmed knowledge, unkept as
@@ -4505,6 +4525,14 @@ impl ClosureEvent {
             Self::RegionCharted { seed } => {
                 // seed[32] alone — a world-wide identity fact, no orb key.
                 tlv::put(187, seed, &mut out);
+            }
+            Self::ChronicleCheckpointed { folded_hash, receipt_count } => {
+                // folded_hash[32] ‖ receipt_count u64 le — a world-wide
+                // bookkeeping fact, no orb key.
+                let mut value = Vec::with_capacity(40);
+                value.extend_from_slice(folded_hash);
+                value.extend_from_slice(&receipt_count.to_le_bytes());
+                tlv::put(188, &value, &mut out);
             }
             Self::PracticesLapsed { count } => {
                 tlv::put(172, &[*count], &mut out);
@@ -5893,6 +5921,11 @@ impl ClosureEvent {
             187 => {
                 let seed: [u8; 32] = value.get(..32)?.try_into().ok()?;
                 Some(Self::RegionCharted { seed })
+            }
+            188 => {
+                let folded_hash: [u8; 32] = value.get(..32)?.try_into().ok()?;
+                let receipt_count = u64::from_le_bytes(value.get(32..40)?.try_into().ok()?);
+                Some(Self::ChronicleCheckpointed { folded_hash, receipt_count })
             }
             172 => Some(Self::PracticesLapsed { count: *value.first()? }),
             168 => Some(Self::PressureEbbed {

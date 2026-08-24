@@ -1669,6 +1669,11 @@ fn covered(event: &ClosureEvent) -> bool {
         // element, no key; {I2 containment (Build), I3 exactness} complete
         // it).
         | E::RegionCharted { .. }
+        // CHRONICLE-COMPACT-1 (tag 188): a checkpoint is banked-neutral
+        // exactly like the regional seed above — it moves no bank, no
+        // element, no key, a pure bookkeeping fact about the chronicle
+        // itself. {I2 containment, I3 exactness} complete it.
+        | E::ChronicleCheckpointed { .. }
         | E::EvolutionAdvanced { .. }
         // THE VERTICAL AXIS (tag 89): the seat is banked-neutral — it
         // moves no value, no element and no key — so {I2 containment,
@@ -2646,6 +2651,7 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         | E::LineMinted { .. }         // a people enters — line-keyed by nature
         | E::TaxonSealed { .. }        // class, clade
         | E::RegionCharted { .. }      // GALACTIC-1: the regional seed, identity not ledger
+        | E::ChronicleCheckpointed { .. } // CHRONICLE-COMPACT-1: a bookkeeping fact, identity not ledger
         | E::EvolutionAdvanced { .. }  // the arc advances — identity, not ledger
         // THE VOCABULARY MINT is CIVILIZATIONAL, and the row is keyed on
         // what the deed CARRIES rather than on what it enables. It is
@@ -2864,6 +2870,10 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         // GALACTIC-1: chart_region_as gates on Scope::Build, the same as
         // seal_taxon_as.
         | E::RegionCharted { .. }
+        // CHRONICLE-COMPACT-1: schema only at this landing (no door yet —
+        // CHRONICLE-COMPACT-4 wires the beat-cadence trigger), classed
+        // Build like the RegionCharted precedent it mirrors.
+        | E::ChronicleCheckpointed { .. }
         | E::EvolutionAdvanced { .. }
         // #32, 20_FOUNDING §3: the tithe fires from seal_genesis_as,
         // the same Build-class act that seals the axes — actor-scoped,
