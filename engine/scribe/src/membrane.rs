@@ -460,12 +460,13 @@ pub fn measure_at(grid: &Grid, rank: u8) -> Option<mycelium::iae::peel::FullMeas
                 Site {
                     row: i64::try_from(r).ok()?,
                     col: i64::try_from(c).ok()?,
+                    layer: 0,
                 },
                 GaugeDirection { index: h },
             ));
         }
     }
-    FullMeasurement::try_new(rank, CellFrame { rows, cols }, occ).ok()
+    FullMeasurement::try_new(rank, CellFrame::planar(rows, cols), occ).ok()
 }
 
 /// **THE CLAIMANT'S BRIDGE** (#132) — carry a wall's measurement from mycelium's
@@ -481,9 +482,16 @@ fn to_reduct_fm(m: &mycelium::iae::peel::FullMeasurement) -> Option<reduct::peel
     let occ: Vec<(Site, GaugeDirection)> = m
         .occupancy()
         .iter()
-        .map(|(s, d)| (Site { row: s.row, col: s.col, layer: 0 }, GaugeDirection { index: d.index }))
+        // DIM-1: mycelium sites now carry their layer — the bridge
+        // passes it through instead of flattening the stack.
+        .map(|(s, d)| (Site { row: s.row, col: s.col, layer: s.layer }, GaugeDirection { index: d.index }))
         .collect();
-    FullMeasurement::try_new(10, CellFrame { rows: frame.rows, cols: frame.cols, layers: 1 }, occ).ok()
+    FullMeasurement::try_new(
+        10,
+        CellFrame { rows: frame.rows, cols: frame.cols, layers: frame.layers.max(1) },
+        occ,
+    )
+    .ok()
 }
 
 pub fn family_rank(pairs: &[(Grid, Grid)]) -> u8 {
