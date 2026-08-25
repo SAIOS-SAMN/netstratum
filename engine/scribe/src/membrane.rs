@@ -729,6 +729,29 @@ fn run(rx: mpsc::Receiver<SolveOffer>) {
                                 "membrane: wall learned → basin grew to {} (census when E-1 lands)",
                                 net_basin.len()
                             );
+                            // NAMING→ATTEMPTING: a wall that walled net's own
+                            // organ may still speak a word the canonical
+                            // grammar can spell from its family — offer that
+                            // spelling through the fold (one public reader,
+                            // no client constructors). `heard` dedups: one
+                            // attempt per wall, ever.
+                            let family = if wall.family.len() > 1 {
+                                wall.family.clone()
+                            } else {
+                                vec![(a.clone(), b.clone())]
+                            };
+                            if let Some(w) =
+                                mycelium::autic::grammar::spell_from_family(&family)
+                            {
+                                let who = mycelium::autic::fold::Vantage(me);
+                                let word_orbit = mycelium::autic::fold::word_orbit(&w);
+                                match s.fold_offer(who, word_orbit, &family, &w, Some(a), None) {
+                                    Ok(_) => eprintln!("membrane: wall spelled → offered"),
+                                    Err(e) => {
+                                        eprintln!("membrane: spelled attempt refused: {e:?}")
+                                    }
+                                }
+                            }
                         }
                     }
                 }
