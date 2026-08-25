@@ -268,22 +268,31 @@ pub fn prime_autic_basin(crystals: Vec<reduct::Crystal>) {
 /// a copy of net's answer. A bounded ring, newest kept (the freshest demand is the
 /// most worth practising); a live workspace mirror, never a replay-durable deed.
 type WallPair = (reduct::peel::FullMeasurement, reduct::peel::FullMeasurement);
-static AUTIC_WALLS: Mutex<Vec<([u8; 32], WallPair)>> = Mutex::new(Vec::new());
+/// Ring entry: (closing orbit, bounty in LEX, pair). The bounty is the
+/// mesh's OWN price for the wall (ECON-1 serve trailer) — evidence of
+/// where demand concentrates, read off the wire, never computed here.
+static AUTIC_WALLS: Mutex<Vec<([u8; 32], u64, WallPair)>> = Mutex::new(Vec::new());
 
 const AUTIC_WALLS_CAP: usize = 512;
 
-/// Publish one heard wall (its closing ORBIT + the reduct measurement pair) for
-/// the entities to practise. The orbit lets practice PREFER walls of measured
-/// worth (ADOPT BY WORTH). Newest-kept ring, deduped by pair.
-fn publish_autic_wall(orbit: [u8; 32], a: reduct::peel::FullMeasurement, b: reduct::peel::FullMeasurement) {
+/// Publish one heard wall (its closing ORBIT + the mesh's bounty + the reduct
+/// measurement pair) for the entities to practise. The orbit lets practice
+/// PREFER walls of measured worth (ADOPT BY WORTH); the bounty lets it prefer
+/// priced demand (ECON-1). Newest-kept ring, deduped by pair.
+fn publish_autic_wall(
+    orbit: [u8; 32],
+    bounty: u64,
+    a: reduct::peel::FullMeasurement,
+    b: reduct::peel::FullMeasurement,
+) {
     if let Ok(mut walls) = AUTIC_WALLS.lock() {
-        if walls.iter().any(|(_, (x, y))| x == &a && y == &b) {
+        if walls.iter().any(|(_, _, (x, y))| x == &a && y == &b) {
             return;
         }
         if walls.len() >= AUTIC_WALLS_CAP {
             walls.remove(0);
         }
-        walls.push((orbit, (a, b)));
+        walls.push((orbit, bounty, (a, b)));
     }
 }
 
@@ -311,25 +320,45 @@ pub fn autic_wall_pick(seed: u64) -> Option<WallPair> {
         walls
             .iter()
             .enumerate()
-            .filter(|(_, (orbit, _))| word_worth(orbit) > 0)
+            .filter(|(_, (orbit, _, _))| word_worth(orbit) > 0)
             .map(|(i, _)| i)
             .collect()
     } else {
         Vec::new()
     };
-    let idx = if worthy.is_empty() {
-        (seed as usize) % walls.len()
+    // ECON-1 curriculum half, same deploy gate philosophy: with
+    // AUTIC_BOUNTY_CURRICULUM set, practice prefers PRICED demand (the
+    // mesh's own bounty > 0) — the expensive walls are the ones the
+    // whole mesh has failed at, exactly where a second vantage pays.
+    // Flag OFF (default) => inert, so the solve-lift measurement stays
+    // unconfounded until the operator flips it.
+    let priced: Vec<usize> = if std::env::var_os("AUTIC_BOUNTY_CURRICULUM").is_some() {
+        walls
+            .iter()
+            .enumerate()
+            .filter(|(_, (_, bounty, _))| *bounty > 0)
+            .map(|(i, _)| i)
+            .collect()
     } else {
-        worthy[(seed as usize) % worthy.len()]
+        Vec::new()
     };
-    Some(walls[idx].1.clone())
+    let idx = if !worthy.is_empty() {
+        worthy[(seed as usize) % worthy.len()]
+    } else if !priced.is_empty() {
+        priced[(seed as usize) % priced.len()]
+    } else {
+        (seed as usize) % walls.len()
+    };
+    Some(walls[idx].2.clone())
 }
 
 /// **PRIME THE AUTIC WALLS** — seat practice walls (with their closing orbit)
-/// without the mesh (warm start / off-wire exercise). Appended, deduped, bounded.
+/// without the mesh (warm start / off-wire exercise). Appended, deduped,
+/// bounded. Primed walls carry no mesh price (bounty 0) — pricing is the
+/// wire's evidence, never synthesized.
 pub fn prime_autic_walls(walls: Vec<([u8; 32], WallPair)>) {
     for (orbit, (a, b)) in walls {
-        publish_autic_wall(orbit, a, b);
+        publish_autic_wall(orbit, 0, a, b);
     }
 }
 
@@ -496,6 +525,11 @@ fn run(rx: mpsc::Receiver<SolveOffer>) {
     // periodically so the reading tracks the connection's actual liveness.
     let mut last_seated_announce = std::time::Instant::now();
     const SEATED_ANNOUNCE_EVERY: std::time::Duration = std::time::Duration::from_secs(300);
+    // ECON-11: earnings become stake, on a slow cadence — half of any
+    // LEX standing (naming credit, settlement shares) converts to
+    // entry escrow through the redemption door.
+    let mut last_bank = std::time::Instant::now();
+    const BANK_EVERY: std::time::Duration = std::time::Duration::from_secs(900);
     loop {
         // Drain what arrived; block only when there is nothing to do.
         let disconnected = if pending.is_empty() {
@@ -625,7 +659,16 @@ fn run(rx: mpsc::Receiver<SolveOffer>) {
         //     prior work — the PoUW honesty rule). The honest withhold becomes
         //     priced census evidence once E-1 lands (ECONOMY_BRIEF E-2).
         if let (Some(s), Some(me)) = (session.as_mut(), me) {
-            if let Ok(walls) = s.walls(me) {
+            if let Ok(mut walls) = s.walls(me) {
+                // ECON-1: the serve now carries each wall's bounty (its own
+                // ledgers priced it). Net's attention follows priced demand —
+                // hear the expensive walls first, so when the ring caps or the
+                // beat cuts the cycle short, the mesh's concentrated demand is
+                // what got heard. This orders NET's listening only; entity
+                // curriculum stays behind its own deploy gate.
+                walls.sort_by(|(_, x), (_, y)| y.bounty.cmp(&x.bounty));
+                let priced = walls.iter().filter(|(_, w)| w.bounty > 0).count();
+                let top = walls.first().map(|(_, w)| w.bounty).unwrap_or(0);
                 for (orbit, wall) in walls {
                     if !heard.insert(orbit) {
                         continue;
@@ -634,15 +677,51 @@ fn run(rx: mpsc::Receiver<SolveOffer>) {
                     let (Some(ra), Some(rb)) = (to_reduct_fm(a), to_reduct_fm(b)) else {
                         continue;
                     };
+                    // ECON-5: name the wall's fundamental period from ITS OWN
+                    // b-side occupancy — the hypha's judge replays the same
+                    // public reads, so a credit here is real comprehension,
+                    // never a guess. Once per (wall, vantage) by mesh law; the
+                    // `heard` dedup means we ask exactly once per wall.
+                    {
+                        let mut hue_at = std::collections::BTreeMap::new();
+                        for (site, g) in b.occupancy() {
+                            hue_at.insert((site.row, site.col), g.index);
+                        }
+                        let rows = b.frame().rows as i64;
+                        let cols = b.frame().cols as i64;
+                        if let Some((pr, pc)) =
+                            mycelium::iae::obstruction::certify_period(&hue_at, rows, cols)
+                                .or_else(|| {
+                                    mycelium::iae::obstruction::deduce_period(&hue_at, rows, cols)
+                                })
+                                .map(|r| (r.pr as u32, r.pc as u32))
+                        {
+                            if let Ok(1) =
+                                s.name(mycelium::autic::fold::Vantage(me), &orbit, pr, pc)
+                            {
+                                eprintln!(
+                                    "membrane: wall named period ({pr},{pc}) → naming credit"
+                                );
+                            }
+                        }
+                    }
                     // AUTIC-1 curriculum axis — publish the wall (with its closing
-                    // orbit) so entities can PRACTISE the mesh's real problem, and
-                    // prefer the worth-ranked ones (ADOPT BY WORTH, curriculum half).
-                    publish_autic_wall(orbit, ra.clone(), rb.clone());
+                    // orbit and the mesh's own price) so entities can PRACTISE the
+                    // mesh's real problem, preferring worth- or bounty-ranked ones
+                    // (ADOPT BY WORTH / priced demand, both behind deploy gates).
+                    publish_autic_wall(orbit, wall.bounty, ra.clone(), rb.clone());
                     match solver::hear(&ra, &rb, &mut net_basin) {
                         solver::Heard::Understood => {
                             tag = tag.wrapping_add(1);
-                            let pair = vec![(a.clone(), b.clone())];
-                            let _ = six_step(s, KERNEL, &pair, tag, &mut basis);
+                            // Feed the WHOLE train family to the hypha so its
+                            // family-pinned constructor can name the canonical
+                            // generator (a single pair is refused as ambiguous).
+                            let family = if wall.family.len() > 1 {
+                                wall.family.clone()
+                            } else {
+                                vec![(a.clone(), b.clone())]
+                            };
+                            let _ = six_step(s, KERNEL, &family, tag, &mut basis);
                             eprintln!("membrane: wall understood → offered (net derived it)");
                         }
                         solver::Heard::Learned => {
@@ -652,6 +731,11 @@ fn run(rx: mpsc::Receiver<SolveOffer>) {
                             );
                         }
                     }
+                }
+                if priced > 0 {
+                    eprintln!(
+                        "membrane: demand priced — {priced} bounty-carrying walls this serve, top {top} LEX"
+                    );
                 }
                 // AUTIC-1 — publish net's current understanding so the conductor
                 // can seed entity cognition. Once per listen cycle, after the
@@ -663,6 +747,20 @@ fn run(rx: mpsc::Receiver<SolveOffer>) {
                 // IDENTITY v2 R1: attest once per new barrier window (§141
                 // closes on the same TAG_TU pull this uses for barrier-id).
                 maybe_attest(s, Some(me), &certified, &mut last_barrier);
+                if last_bank.elapsed() >= BANK_EVERY {
+                    last_bank = std::time::Instant::now();
+                    let who = mycelium::autic::fold::Vantage(me);
+                    if let Ok((1, balance)) = s.draw(who, 0, 1) {
+                        if balance >= 2 {
+                            if let Ok((1, after)) = s.draw(who, balance / 2, 1) {
+                                eprintln!(
+                                    "membrane: banked {} LEX into entry escrow ({after} standing)",
+                                    balance / 2
+                                );
+                            }
+                        }
+                    }
+                }
             }
         }
         if session.is_some() && last_seated_announce.elapsed() >= SEATED_ANNOUNCE_EVERY {

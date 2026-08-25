@@ -58,6 +58,81 @@ use solver::{forge_volume, think_volume_task, VolDifficulty};
 
 use std::path::Path;
 
+/// R4 (demand delivery): a solved program that CHANGES FRAME — a tiling
+/// or a non-square rotation — hides same-frame sub-transforms the mesh
+/// *can* found. The hypha's `on_sentence` founding is same-frame only
+/// (a reshape carries no chain-form residual); but every maximal run of
+/// dimension-PRESERVING ops inside the program is a genuine same-frame
+/// `(before, after)` pair the hypha founds as a generator. Walk the
+/// program forward on each example, emit each same-frame run as its own
+/// proved offer, and leave the frame-changing steps (tile/reshape) as a
+/// known operator — never founded. No-op when the whole program is
+/// already same-frame (the primary `offer_proved` already carries that
+/// pair). Frame membership is decided by DIMENSIONS, not op type, so a
+/// square transpose/rotate (in-frame, content-permuting) is founded while
+/// a non-square rotate (frame-changing) is skipped as structural.
+fn same_frame_founding_offers(
+    name: &str,
+    program: &[solver_verify::Op],
+    inputs: &[solver_verify::Grid],
+) {
+    fn rows(g: &solver_verify::Grid) -> Vec<Vec<u8>> {
+        g.cells.chunks(g.cols).map(|r| r.to_vec()).collect()
+    }
+    // The program is the SAME for every example, so segment k is the
+    // same sub-word in each — group by k and offer ONE FAMILY per
+    // segment (all examples' pairs), not one thin pair per example.
+    // A single observation is exactly what the tongue's canonical
+    // readers refuse as under-determined; the family pins it.
+    let mut segs: Vec<(String, Vec<(Vec<Vec<u8>>, Vec<Vec<u8>>)>)> = Vec::new();
+    for input in inputs.iter() {
+        let mut g = input.clone();
+        let mut seg_start = g.clone();
+        let mut seg_ops: Vec<solver_verify::Op> = Vec::new();
+        let mut k = 0usize;
+        let mut saw_change = false;
+        let mut push = |k: usize,
+                        seg_ops: &[solver_verify::Op],
+                        a: &solver_verify::Grid,
+                        b: &solver_verify::Grid,
+                        segs: &mut Vec<(String, Vec<(Vec<Vec<u8>>, Vec<Vec<u8>>)>)>| {
+            let word = seg_ops
+                .iter()
+                .map(|o| o.describe())
+                .collect::<Vec<_>>()
+                .join(" → ");
+            if segs.len() <= k {
+                segs.push((word, Vec::new()));
+            }
+            segs[k].1.push((rows(a), rows(b)));
+        };
+        for op in program {
+            let g2 = op.apply(&g);
+            if g2.rows == g.rows && g2.cols == g.cols {
+                seg_ops.push(op.clone());
+                g = g2;
+            } else {
+                saw_change = true;
+                if !seg_ops.is_empty() {
+                    push(k, &seg_ops, &seg_start, &g, &mut segs);
+                    k += 1;
+                }
+                g = g2;
+                seg_start = g.clone();
+                seg_ops.clear();
+            }
+        }
+        if saw_change && !seg_ops.is_empty() {
+            push(k, &seg_ops, &seg_start, &g, &mut segs);
+        }
+    }
+    for (k, (word, family)) in segs.into_iter().enumerate() {
+        if !family.is_empty() {
+            scribe::membrane::offer_proved(&format!("{name}#s{k}"), &word, family);
+        }
+    }
+}
+
 // COG (doc 52): the homological economy — the deficit peeled through the same
 // `overlay` the cognition uses; coefficients drive production, residual drives
 // research. Replaces the cartesian build cascade with the peel.
@@ -3577,6 +3652,18 @@ impl Polity {
                 let _ = self
                     .world
                     .record_word_hardness_as(self.automaton, orbit, hardness);
+                // ENTITY-ALIGN-1 — WITNESSED ON THE WIRE, not only in the
+                // receipt: the same live signal COG-DIR/COG-ATLAS/COG-LEX
+                // already print every beat, so the graded-consolidation
+                // measure is directly observable on a running board.
+                eprintln!(
+                    "ENTITY-ALIGN-1 clock {} {}: orbit={} hardness={} vessels={:?}",
+                    self.world.now(),
+                    self.spec.civilization.sigil,
+                    hex(&orbit)[..8].to_string(),
+                    hardness,
+                    vessels,
+                );
                 self.library.adopt(solver::mint::MintedWord {
                     orbit,
                     expansion,
@@ -3645,24 +3732,46 @@ impl Polity {
     /// ENTITY-ALIGN-2 (docs/56 §4, piece a) — occasionally, the SIBLING
     /// chooses its OWN problem instead of confirming the automaton's: it
     /// forges a task off `basin_digest`'s reading of ITS OWN basin, never the
-    /// civ's chronicle digest, and thinks it as a genuine discovery, priced at
-    /// the FULL `observe_price` (COMM-1's discount prices CONFIRMING a known
-    /// program; this is the automaton's own kind of look — first, unconfirmed
-    /// — so it pays the same). Returns `false` (self-select declined; the
-    /// caller falls back to confirming) when the sibling has nothing grown to
-    /// derive from yet, or cannot afford the full look — autonomy is earned
-    /// by having thought something first, never granted free.
+    /// civ's chronicle digest.
+    ///
+    /// **CORRECTED AFTER LIVE MEASUREMENT** (2026-08-24): originally priced
+    /// at the FULL `observe_price`, reasoning that a self-selected problem is
+    /// a genuine discovery and should cost what the automaton's own discovery
+    /// costs. Run live against 22 founding civs for 480 beats — this NEVER
+    /// once fired (zero `ENTITY-ALIGN-2` witness lines; every mint's hardness
+    /// stayed 1). The full price is exactly the bar COMM-1's own doc comment
+    /// already names as unaffordable in practice ("priced at full
+    /// observe_price the sibling always fasts under scarcity... measured: 0
+    /// VocabularyMinted / 0 KnowledgeConverged across 8 mature worlds") — I
+    /// re-introduced the identical dead-code bar COMM-1 exists to avoid.
+    /// Priced at the SAME discount as confirming (COMM-1's `1/4`): the
+    /// distinction this slice adds is WHICH problem the sibling pursues, not
+    /// a stiffer economic bar on pursuing one — a look the sibling could
+    /// already afford to spend confirming, it can spend choosing instead.
+    /// Returns `false` (self-select declined; the caller falls back to
+    /// confirming) when the sibling has nothing grown to derive from yet, or
+    /// cannot afford even the discounted look — autonomy is earned by having
+    /// thought something first, never granted free.
     fn sibling_self_select(&mut self) -> bool {
         let sibling = self.sibling;
         let Some(seed_digest) = basin_digest(self.grown.get(&sibling)) else {
             return false;
         };
         let orb = cfe::world::FIRST_ORB;
-        let price = Self::observe_price();
+        let price = Self::observe_price() * cfe::ratio::ratio(1, 4);
         if self.world.leisure_bank_of(orb) < price {
             return false;
         }
         self.world.settle_leisure(orb, -price);
+        // ENTITY-ALIGN-2 — WITNESSED ON THE WIRE: the sibling chose its own
+        // problem THIS beat, off ITS OWN basin, not the civ's dispatch.
+        eprintln!(
+            "ENTITY-ALIGN-2 clock {} {}: sibling {} self-selected off its own basin (seed={}), not confirming",
+            self.world.now(),
+            self.spec.civilization.sigil,
+            sibling,
+            hex(&seed_digest)[..8].to_string(),
+        );
         self.absorb_autic(sibling);
         self.practise_autic_wall(sibling);
         let difficulty = Difficulty::level(self.level);
@@ -4165,6 +4274,14 @@ impl Polity {
                         .map(|p| (rows(&p.input), rows(&p.output)))
                         .collect();
                     proved.push((rows(&task.test_in), rows(&test_output)));
+                    // R4: if this program changes frame, also offer its
+                    // same-frame sub-transforms so the mesh founds the base
+                    // ops the reshape hides (the tiling itself stays a known
+                    // operator, never founded).
+                    let mut sf_inputs: Vec<solver_verify::Grid> =
+                        task.train.iter().map(|p| p.input.clone()).collect();
+                    sf_inputs.push(task.test_in.clone());
+                    same_frame_founding_offers(&task.name, &program, &sf_inputs);
                     // THE PROOF, riding WHOLE (the opaque-payload law):
                     // the deed carries what the kernel re-runs.
                     let proof = solver_verify::WorkProof {
@@ -4199,7 +4316,7 @@ impl Polity {
             // agency in this civ's cognition, rather than dispatch deciding
             // "we think about X now" for both vessels. It falls back to
             // confirming when self-select declines (no basin yet, or cannot
-            // afford the full discovering look), so this is additive: no
+            // afford even the discounted look), so this is additive: no
             // beat that used to confirm loses its confirmation entirely.
             let self_select_beat = sibling_self_select_beat(
                 self.sibling,

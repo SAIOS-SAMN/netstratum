@@ -14,8 +14,8 @@ fn climbs_is_exactly_what_the_constant_said() {
     for level in 0..12u32 {
         assert_eq!(
             Difficulty::climbs(level),
-            level < 5,
-            "rung {level}: the derived ceiling must agree with the constant it replaced"
+            level < 8,
+            "rung {level}: the derived ceiling must agree with saturation (word_len climbs through 6)"
         );
     }
 }
@@ -37,13 +37,13 @@ fn the_doubled_opening_rung_is_not_mistaken_for_the_top() {
 #[test]
 fn the_ladder_saturates_and_that_is_where_the_climb_stops() {
     assert_eq!(
-        Difficulty::level(5),
-        Difficulty::level(6),
-        "the catch-all arm makes 6 structurally identical to 5"
+        Difficulty::level(8),
+        Difficulty::level(9),
+        "the catch-all arm makes 9 structurally identical to 8"
     );
-    assert_eq!(Difficulty::level(6), Difficulty::level(60), "and 60, and every rung after");
-    assert!(!Difficulty::climbs(5), "so nothing rises above 5");
-    assert!(Difficulty::climbs(4), "and 5 does rise above 4");
+    assert_eq!(Difficulty::level(9), Difficulty::level(60), "and 60, and every rung after");
+    assert!(!Difficulty::climbs(8), "so nothing rises above 8");
+    assert!(Difficulty::climbs(7), "and 8 does rise above 7");
 }
 
 /// EVERY RUNG BELOW THE TOP GENUINELY DIFFERS — otherwise `climbs`
@@ -52,7 +52,7 @@ fn the_ladder_saturates_and_that_is_where_the_climb_stops() {
 /// assumed.
 #[test]
 fn no_two_adjacent_rungs_below_the_top_are_equal() {
-    for level in 0..5u32 {
+    for level in 0..8u32 {
         if level == 0 {
             // 0 and 1 are deliberately the same opening rung.
             assert_eq!(Difficulty::level(0), Difficulty::level(1));
@@ -72,8 +72,8 @@ fn no_two_adjacent_rungs_below_the_top_are_equal() {
 /// deliberate rather than an oversight.
 #[test]
 fn the_volumetric_ladder_saturates_on_the_same_shape() {
-    assert_eq!(VolDifficulty::level(5), VolDifficulty::level(6));
-    assert_ne!(VolDifficulty::level(4), VolDifficulty::level(5));
+    assert_eq!(VolDifficulty::level(8), VolDifficulty::level(9));
+    assert_ne!(VolDifficulty::level(7), VolDifficulty::level(8));
 }
 
 /// **THE RUNG IS THE PRICING KEY, AND THE MATRIX IS NOT.**

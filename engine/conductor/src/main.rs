@@ -163,7 +163,14 @@ fn main() {
         let _ = std::fs::write(&control_path, text);
     };
 
-    let mut beat: u64 = 0;
+    let beat_path = PathBuf::from(&var_root).join("conductor.beat");
+    let mut beat: u64 = std::fs::read_to_string(&beat_path)
+        .ok()
+        .and_then(|s| s.trim().parse().ok())
+        .unwrap_or(0);
+    if beat > 0 {
+        println!("conductor: resumed beat {beat} from {}", beat_path.display());
+    }
     let mut total_cleaves: u64 = 0;
     let mut announced_pause = false;
     loop {
@@ -194,6 +201,7 @@ fn main() {
         }
         announced_pause = false;
         beat += 1;
+        let _ = std::fs::write(&beat_path, format!("{beat}\n"));
         // TUniversal T = epoch base + this era's beat (07 §1.3): live
         // ticks stack on the converged timeline, never restart it.
         let _ = book.set_universal_clock(epoch_base + beat);

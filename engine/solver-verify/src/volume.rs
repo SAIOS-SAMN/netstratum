@@ -138,7 +138,11 @@ impl VolDifficulty {
             2 => VolDifficulty { layers: 3, word_len: 2, rows: 3, cols: 3, train_pairs: 2 },
             3 => VolDifficulty { layers: 3, word_len: 2, rows: 4, cols: 4, train_pairs: 3 },
             4 => VolDifficulty { layers: 4, word_len: 3, rows: 4, cols: 4, train_pairs: 3 },
-            _ => VolDifficulty { layers: 5, word_len: 3, rows: 4, cols: 5, train_pairs: 3 },
+            5 => VolDifficulty { layers: 5, word_len: 3, rows: 4, cols: 5, train_pairs: 3 },
+            6 => VolDifficulty { layers: 5, word_len: 4, rows: 4, cols: 5, train_pairs: 3 },
+            7 => VolDifficulty { layers: 5, word_len: 5, rows: 5, cols: 5, train_pairs: 3 },
+            8 => VolDifficulty { layers: 5, word_len: 6, rows: 5, cols: 5, train_pairs: 3 },
+            _ => VolDifficulty { layers: 5, word_len: 6, rows: 5, cols: 5, train_pairs: 3 },
         }
     }
 

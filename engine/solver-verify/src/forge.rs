@@ -44,7 +44,11 @@ impl Difficulty {
             2 => Difficulty { tier: 1, word_len: 2, rows: 4, cols: 4, train_pairs: 2 },
             3 => Difficulty { tier: 2, word_len: 2, rows: 4, cols: 5, train_pairs: 3 },
             4 => Difficulty { tier: 3, word_len: 2, rows: 3, cols: 3, train_pairs: 3 },
-            _ => Difficulty { tier: 3, word_len: 3, rows: 4, cols: 4, train_pairs: 3 },
+            5 => Difficulty { tier: 3, word_len: 3, rows: 4, cols: 4, train_pairs: 3 },
+            6 => Difficulty { tier: 3, word_len: 4, rows: 4, cols: 4, train_pairs: 3 },
+            7 => Difficulty { tier: 3, word_len: 5, rows: 4, cols: 5, train_pairs: 3 },
+            8 => Difficulty { tier: 3, word_len: 6, rows: 5, cols: 5, train_pairs: 3 },
+            _ => Difficulty { tier: 3, word_len: 6, rows: 5, cols: 5, train_pairs: 3 },
         }
     }
 
@@ -132,7 +136,7 @@ impl Difficulty {
     /// Every coefficient is a placeholder parameter.
     pub fn from_key(planes: usize, doctrine: usize, crossed: bool) -> Difficulty {
         let tier = 1 + (planes.saturating_sub(1)).min(2) as u8;
-        let word_len = (1 + doctrine / 2 + usize::from(crossed)).min(4);
+        let word_len = (1 + doctrine / 2 + usize::from(crossed)).min(6);
         let span = (3 + planes.saturating_sub(1)).min(6);
         Difficulty {
             tier,
