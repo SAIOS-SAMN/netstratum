@@ -1,9 +1,0 @@
-# N-I1 drain census fixtures — the named Pin A pairs (2×2 unless noted), empty basis.
-# One reduce_pair(a, b, []) per row; the arm/route are the census columns.
-#
-# name              a                    b                    expected arm / route
-identical           [0,1,2,3]            [0,1,2,3]            Congruent
-rotation            [0,1,2,3]            rot90(a)             CongruentThroughP
-hue_permutation     all 5s               all 6s              CongruentThroughP   (0d3d703e wall = gauge)
-novel_hue           [0,1,0,1]            [0,1,0,2]            Remainder / GenerationGap
-frame_change        2×2 all 0            3×3 all 0           Remainder / CategoryError

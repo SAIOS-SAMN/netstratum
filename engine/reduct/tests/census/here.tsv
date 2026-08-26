@@ -1,6 +1,0 @@
-name	arm	route	bounding_len	remainder_terms	inverse_carried
-identical	Congruent	-	0	-	-
-rotation	CongruentThroughP	-	-	-	true
-hue_permutation	CongruentThroughP	-	-	-	true
-novel_hue	Remainder	GenerationGap	-	2	-
-frame_change	Remainder	CategoryError	-	-	-
