@@ -658,6 +658,11 @@ fn run(rx: mpsc::Receiver<SolveOffer>) {
                 Ok(Arm::ExactInstall) => {
                     eprintln!("membrane: {} '{}' installed", o.task, o.program);
                 }
+                Ok(Arm::Offered) => {
+                    // C8b: first voice — standing, awaiting a
+                    // lineage-distinct second mind.
+                    eprintln!("membrane: {} '{}' offered (first voice)", o.task, o.program);
+                }
                 Ok(Arm::Withhold { terms, .. }) => {
                     // The mesh's honest verdict, visible per family.
                     eprintln!(
@@ -778,9 +783,11 @@ fn run(rx: mpsc::Receiver<SolveOffer>) {
                             if let Some(w) =
                                 mycelium::autic::grammar::spell_from_family(&family)
                             {
-                                // D1: the fold speaks to NAMED mouths — the
-                                // raw emblem hash is not a well-formed vantage.
-                                let who = mycelium::sdk::attach::vantage(KERNEL, 62, 1);
+                                // C8b: one kernel, one keyed mouth — the
+                                // enrolled emblem identity speaks (the era
+                                // gate's key is the identity now; D1's
+                                // name-shape check retired at this door).
+                                let who = mycelium::autic::fold::Vantage(me);
                                 let word_orbit = mycelium::autic::fold::word_orbit(&w);
                                 match s.fold_offer(who, word_orbit, &family, &w, Some(a), None) {
                                     Ok(_) => eprintln!("membrane: wall spelled → offered"),
