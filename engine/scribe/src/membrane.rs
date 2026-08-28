@@ -810,9 +810,14 @@ fn run(rx: mpsc::Receiver<SolveOffer>) {
                 if last_bank.elapsed() >= BANK_EVERY {
                     last_bank = std::time::Instant::now();
                     let who = mycelium::autic::fold::Vantage(me);
+                    // C8/R4 ruling-9 discipline: draws are SPINED — the
+                    // door serves the court's tip and the kernel signs
+                    // against it, never against local memory.
                     if let Ok((1, balance)) = s.draw(who, 0, 1) {
                         if balance >= 2 {
-                            if let Ok((1, after)) = s.draw(who, balance / 2, 1) {
+                            if let Ok((1, after)) =
+                                s.draw_spined(who, balance / 2, 1, &net_key())
+                            {
                                 eprintln!(
                                     "membrane: banked {} LEX into entry escrow ({after} standing)",
                                     balance / 2
