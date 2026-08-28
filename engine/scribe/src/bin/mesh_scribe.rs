@@ -261,8 +261,7 @@ fn main() {
                 (Some(a), Some(b)) => vec![(a, b)],
                 _ => continue,
             };
-            let tag = u16::try_from(n).unwrap_or(u16::MAX);
-            match six_step(s, KERNEL, &pair, tag, &mut basis) {
+            match six_step(s, KERNEL, &pair, &mut basis) {
                 Ok(Arm::ExactInstall) => {
                     spoken.insert(name.clone(), (0, words_now));
                     sung += 1;

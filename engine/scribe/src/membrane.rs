@@ -537,7 +537,6 @@ fn run(rx: mpsc::Receiver<SolveOffer>) {
     let mut session: Option<Session> = None;
     let mut basis: Vec<CrystalId> = Vec::new();
     let mut pending: VecDeque<SolveOffer> = VecDeque::new();
-    let mut tag: u16 = 0;
     // #132 — the listening half's state (side-channel; never touches the beat).
     // `me` routes `walls` by net's certificates — the SAME emblem the membrane
     // enrols with. `net_basin` is net's own claimant mind (independent of the
@@ -653,8 +652,7 @@ fn run(rx: mpsc::Receiver<SolveOffer>) {
                 still.push_back(o); // mesh unreachable: keep owing
                 continue;
             };
-            tag = tag.wrapping_add(1);
-            match six_step(s, KERNEL, &pair, tag, &mut basis) {
+            match six_step(s, KERNEL, &pair, &mut basis) {
                 Ok(Arm::ExactInstall) => {
                     eprintln!("membrane: {} '{}' installed", o.task, o.program);
                 }
@@ -752,7 +750,6 @@ fn run(rx: mpsc::Receiver<SolveOffer>) {
                     publish_autic_wall(orbit, wall.bounty, ra.clone(), rb.clone());
                     match solver::hear(&ra, &rb, &mut net_basin) {
                         solver::Heard::Understood => {
-                            tag = tag.wrapping_add(1);
                             // Feed the WHOLE train family to the hypha so its
                             // family-pinned constructor can name the canonical
                             // generator (a single pair is refused as ambiguous).
@@ -761,7 +758,7 @@ fn run(rx: mpsc::Receiver<SolveOffer>) {
                             } else {
                                 vec![(a.clone(), b.clone())]
                             };
-                            let _ = six_step(s, KERNEL, &family, tag, &mut basis);
+                            let _ = six_step(s, KERNEL, &family, &mut basis);
                             eprintln!("membrane: wall understood → offered (net derived it)");
                         }
                         solver::Heard::Learned => {
