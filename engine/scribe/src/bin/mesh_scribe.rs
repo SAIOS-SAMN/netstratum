@@ -267,6 +267,10 @@ fn main() {
                     spoken.insert(name.clone(), (0, words_now));
                     sung += 1;
                 }
+                Ok(Arm::Offered) => {
+                    // C8b: first voice — re-speaks when the sun grows.
+                    spoken.insert(name.clone(), (1, words_now));
+                }
                 Ok(Arm::Withhold { .. }) => {
                     spoken.insert(name.clone(), (1, words_now));
                 }
