@@ -433,12 +433,39 @@ impl Membrane {
 fn attach(addr: &str, occ: &mycelium::iae::peel::FullMeasurement) -> Option<Session> {
     let inv = Word::new(vec![LetterId::IDENTITY]);
     match Session::connect(addr, KernelRef::of(occ, None), occ, &inv, None) {
-        Ok(s) => {
+        Ok(mut s) => {
+            // C8: the era admits only keyed mouths — the key rides
+            // every attach (the seat outlives the socket, and so
+            // must the key). Enrollment binds it at the door.
+            s.sign_as(net_key());
             eprintln!("membrane: kernel '{KERNEL}' seated at {addr}");
             Some(s)
         }
         Err(_) => None,
     }
+}
+
+/// C8: net's one durable signing key — minted once (32-byte seed,
+/// 0600) beside the kernel's own state. The same seed every boot,
+/// so first-bind-wins holds across restarts and re-enrollments.
+fn net_key() -> mycelium::ed25519_dalek::SigningKey {
+    let path = std::path::Path::new("/opt/netstratum/var/membrane.key");
+    if let Ok(b) = std::fs::read(path) {
+        if let Ok(seed) = <[u8; 32]>::try_from(b.as_slice()) {
+            return mycelium::ed25519_dalek::SigningKey::from_bytes(&seed);
+        }
+    }
+    let mut seed = [0u8; 32];
+    use std::io::Read;
+    let _ = std::fs::File::open("/dev/urandom").and_then(|mut f| f.read_exact(&mut seed));
+    let sk = mycelium::ed25519_dalek::SigningKey::from_bytes(&seed);
+    let _ = std::fs::write(path, seed);
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        let _ = std::fs::set_permissions(path, std::fs::Permissions::from_mode(0o600));
+    }
+    sk
 }
 
 /// Measure one grid at a FAMILY rank: the fiber must be uniform
