@@ -4,18 +4,42 @@
 //!   head₀ = 32 zero bytes
 //!   headₙ = payload_hash("mycelium tier line v1" ‖ headₙ₋₁ ‖ entryₙ)
 //!
-//! where `entryₙ` is the fold's rows and declared written canonically
-//! (`TierFold::rows_bytes`). A fold's prefix is the head after its last
-//! entry, so the court's seal commits to the whole line, and an availability
-//! challenge is answered by replaying it: the tier HOLDS its rows, here.
+//! where `entryₙ` is ONE UNDERLYING BATCH — for the `colonies` tier, one
+//! chronicle receipt's net change per holding and its declared emission —
+//! written canonically (`put_nets(rows) ‖ put_nets(declared)`, children
+//! never included). A fold is the sum of every entry since the tier's last
+//! admitted fold and its prefix is the head after the last of them, so a
+//! challenge re-derives the fold from what it nets: the tier HOLDS its
+//! entries, here. A fold nets at most `census::MAX_SPAN` entries, so an
+//! availability demand never asks for more than ~1.1 MB.
+//!
+//! The colonies line's history, as ruled by the coordinator 2026-10-07:
+//!   * entries 0 and 1 (deepmat-veil h 243590, rivergate-hearth h 243591)
+//!     are COARSE, PRE-CORRECTION: whole-window batches, each equal to its
+//!     fold. Grandfathered, never re-folded (there is no supersede act); a
+//!     challenge on them is weak, not refused.
+//!   * entries 2..23626 (alignment h 243597, understory h 243599) are
+//!     per-receipt, but understory's fold nets 23614 of them — it predates
+//!     the span bound. Left as admitted.
+//!   * the two folds before the line existed (bloomcall-hearth h 203172,
+//!     glyph-sky h 203174) are not on it at all: grandfathered "unchallenged,
+//!     pre-line".
+//!
+//! OWED: prune by finality — entries netted only by folds that read FINAL
+//! (challenge window passed, nothing open) are archived out of the hot file,
+//! keeping the head chain and cursors. Waits on mycelium 2(c), which is what
+//! makes a fold's finality readable.
 //!
 //! On disk (`home/line-<tier>`): one record per entry, appended only after
 //! the court admits the fold —
 //!   `[head 32][cite 32][len u32 LE][entry len]`
-//! — where `cite` is netstratum's own chronicle head the entry was read at.
-//! The cite is not hashed into the line (the court's line format names only
-//! the rows); it is the tier's pointer back to the receipts that ground them.
+//! — where `cite` is the hash of the netstratum receipt the entry was read
+//! from. The cite is not hashed into the line (v1 names only the rows; a
+//! source commitment would come as a law for every domain, never a
+//! netstratum field); it is the tier's pointer back to the receipt.
 
+use mycelium::anastome::dialogue::uplink::{Net, TierFold};
+use std::collections::BTreeMap;
 use std::fs::{self, OpenOptions};
 use std::io::{self, Write};
 use std::path::{Path, PathBuf};
@@ -91,20 +115,98 @@ impl TierLine {
         next_head(&self.head(), entry)
     }
 
-    /// Append `entry` (read at chronicle head `cite`) and return its head.
-    pub fn append(&mut self, entry: Vec<u8>, cite: [u8; 32]) -> io::Result<[u8; 32]> {
-        let head = self.peek(&entry);
-        let len = u32::try_from(entry.len()).map_err(|_| io::Error::new(io::ErrorKind::InvalidInput, "an entry past 4 GiB"))?;
-        let mut record = Vec::with_capacity(68 + entry.len());
-        record.extend_from_slice(&head);
-        record.extend_from_slice(&cite);
-        record.extend_from_slice(&len.to_le_bytes());
-        record.extend_from_slice(&entry);
+    /// The head the line WOULD have after every entry in `batch`.
+    pub fn peek_all(&self, batch: &[(Vec<u8>, [u8; 32])]) -> [u8; 32] {
+        batch.iter().fold(self.head(), |head, (entry, _)| next_head(&head, entry))
+    }
+
+    /// Append every entry in `batch`, in order, as ONE write and one sync —
+    /// a fold's entries land together or not at all as far as one write can
+    /// promise; returns the final head.
+    pub fn append_all(&mut self, batch: Vec<(Vec<u8>, [u8; 32])>) -> io::Result<[u8; 32]> {
+        let mut head = self.head();
+        let mut bytes = Vec::new();
+        let mut landed = Vec::with_capacity(batch.len());
+        for (entry, cite) in batch {
+            head = next_head(&head, &entry);
+            let len = u32::try_from(entry.len()).map_err(|_| io::Error::new(io::ErrorKind::InvalidInput, "an entry past 4 GiB"))?;
+            bytes.extend_from_slice(&head);
+            bytes.extend_from_slice(&cite);
+            bytes.extend_from_slice(&len.to_le_bytes());
+            bytes.extend_from_slice(&entry);
+            landed.push(Entry { head, cite, entry });
+        }
         let mut f = OpenOptions::new().create(true).append(true).open(&self.path)?;
-        f.write_all(&record)?;
+        f.write_all(&bytes)?;
         f.sync_data()?;
-        self.entries.push(Entry { head, cite, entry });
+        self.entries.extend(landed);
         Ok(head)
+    }
+
+    /// Append `entry` (cited locally by `cite`) and return its head.
+    pub fn append(&mut self, entry: Vec<u8>, cite: [u8; 32]) -> io::Result<[u8; 32]> {
+        self.append_all(vec![(entry, cite)])
+    }
+}
+
+/// An entry's canonical bytes: `put_nets(rows) ‖ put_nets(declared)`, each
+/// list in its identities' ascending order — the court's own writing
+/// (`TierFold::rows_bytes`), so the line and the court can never disagree on
+/// an encoding.
+pub fn entry_bytes(mut rows: Vec<Net>, mut declared: Vec<Net>) -> Vec<u8> {
+    rows.sort_by_key(|(who, _)| *who);
+    declared.sort_by_key(|(who, _)| *who);
+    TierFold { tier: [0; 32], prefix: [0; 32], rows, declared, children: Vec::new() }.rows_bytes()
+}
+
+/// HOW FAR EACH PEOPLE'S CHRONICLE HAS BEEN FOLDED on a tier — so no
+/// receipt is netted twice. `home/cursor-<tier>`, one line per people:
+/// `people<TAB>receipts folded<TAB>hex hash of the last receipt folded`.
+/// The hash is checked against the chronicle before a census resumes from
+/// it: a chronicle that no longer holds that receipt there is refused.
+pub struct Cursors {
+    path: PathBuf,
+    pub at: BTreeMap<String, (usize, [u8; 32])>,
+}
+
+impl Cursors {
+    pub fn open(home: &Path, tier: &str) -> io::Result<Cursors> {
+        let path = home.join(format!("cursor-{tier}"));
+        let text = match fs::read_to_string(&path) {
+            Ok(t) => t,
+            Err(e) if e.kind() == io::ErrorKind::NotFound => String::new(),
+            Err(e) => return Err(e),
+        };
+        let bad = |line: &str| io::Error::new(io::ErrorKind::InvalidData, format!("{}: unreadable cursor {line:?}", path.display()));
+        let mut at = BTreeMap::new();
+        for line in text.lines().filter(|l| !l.is_empty()) {
+            let mut f = line.split('\t');
+            let (Some(people), Some(n), Some(hex)) = (f.next(), f.next(), f.next()) else { return Err(bad(line)) };
+            let n: usize = n.parse().map_err(|_| bad(line))?;
+            let mut hash = [0u8; 32];
+            if hex.len() != 64 {
+                return Err(bad(line));
+            }
+            for (i, b) in hash.iter_mut().enumerate() {
+                *b = u8::from_str_radix(&hex[2 * i..2 * i + 2], 16).map_err(|_| bad(line))?;
+            }
+            at.insert(people.to_string(), (n, hash));
+        }
+        Ok(Cursors { path, at })
+    }
+
+    /// Record `people` as folded through `n` receipts, the last hashing to
+    /// `last`, and write the whole file (small: one line per people).
+    pub fn set(&mut self, people: &str, n: usize, last: [u8; 32]) -> io::Result<()> {
+        self.at.insert(people.to_string(), (n, last));
+        let mut text = String::new();
+        for (p, (n, h)) in &self.at {
+            let hex: String = h.iter().map(|b| format!("{b:02x}")).collect();
+            text.push_str(&format!("{p}\t{n}\t{hex}\n"));
+        }
+        let tmp = self.path.with_extension("tmp");
+        fs::write(&tmp, text)?;
+        fs::rename(&tmp, &self.path)
     }
 }
 
@@ -139,5 +241,31 @@ mod tests {
         fs::write(&path, bytes).unwrap();
         assert!(TierLine::open(&home, "colonies").is_err());
         let _ = fs::remove_dir_all(&home);
+    }
+
+    #[test]
+    fn a_batch_peeks_the_head_it_appends_and_cursors_round_trip() {
+        let home = scratch("batch");
+        let mut line = TierLine::open(&home, "colonies").unwrap();
+        let batch = vec![(b"a".to_vec(), [1; 32]), (b"b".to_vec(), [2; 32])];
+        let peeked = line.peek_all(&batch);
+        assert_eq!(line.append_all(batch).unwrap(), peeked);
+        assert_eq!(line.entries.len(), 2);
+
+        let mut c = Cursors::open(&home, "colonies").unwrap();
+        c.set("amber-veil", 81, [9; 32]).unwrap();
+        c.set("glyph-sky", 16597, [10; 32]).unwrap();
+        let back = Cursors::open(&home, "colonies").unwrap();
+        assert_eq!(back.at.get("amber-veil"), Some(&(81, [9; 32])));
+        assert_eq!(back.at.len(), 2);
+        let _ = fs::remove_dir_all(&home);
+    }
+
+    #[test]
+    fn an_entry_writes_as_the_court_writes_a_fold_rows() {
+        let rows = vec![([2; 32], [5, 0, 0, 0]), ([1; 32], [-5, 0, 0, 0])];
+        let sorted = vec![([1; 32], [-5, 0, 0, 0]), ([2; 32], [5, 0, 0, 0])];
+        let court = TierFold { tier: [7; 32], prefix: [8; 32], rows: sorted, declared: vec![], children: vec![] };
+        assert_eq!(entry_bytes(rows, vec![]), court.rows_bytes());
     }
 }
