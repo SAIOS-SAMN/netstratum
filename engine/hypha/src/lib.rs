@@ -8,7 +8,7 @@
 //!     same verifier (law 12 — one reader), so the two can only disagree if
 //!     the builds differ.
 //!   * FOLD: a tier's net positions per identity per lane over a prefix of
-//!     netstratum's own receipt chain, signed by the tier, admitted by
+//!     the tier's own line ([`line`]), signed by the tier, admitted by
 //!     continuity (78.119). [`census`] derives those folds from a colony's
 //!     chronicle exactly.
 //!
@@ -25,6 +25,7 @@ pub use mycelium;
 
 pub mod census;
 pub mod fold;
+pub mod line;
 pub mod probe;
 
 /// The court netstratum speaks to unless told otherwise

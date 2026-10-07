@@ -13,6 +13,7 @@
 
 use ns_hypha::census::{self, grains};
 use ns_hypha::fold::{fold, tier_key};
+use ns_hypha::line::TierLine;
 use ns_hypha::mycelium::anastome::dialogue::uplink::Uplinked;
 use ns_hypha::{laws_of, probe, Uplink, DEFAULT_AT};
 use std::path::{Path, PathBuf};
@@ -161,24 +162,45 @@ fn census_cmd(args: &[String], up: Option<&Uplink>, home: &Path) -> ExitCode {
         }
     };
     let (rows, declared) = c.nets();
-    let signed = fold(&key, c.head, rows, declared);
+    let mut line = match TierLine::open(home, "colonies") {
+        Ok(l) => l,
+        Err(e) => {
+            eprintln!("ns-hypha: the colonies line: {e}");
+            return ExitCode::from(2);
+        }
+    };
+    // The prefix is the line's head after this entry: signed first, appended
+    // only once the court admits it.
+    let unsigned = fold(&key, [0; 32], rows, declared);
+    let entry = unsigned.fold.rows_bytes();
+    let signed = fold(&key, line.peek(&entry), unsigned.fold.rows, unsigned.fold.declared);
     if let Err(d) = signed.fold.continuity() {
         println!("  local continuity: BROKEN {d:?}");
         return ExitCode::from(1);
     }
-    println!("  local continuity: holds");
+    println!("  local continuity: holds; colonies line at {} entries", line.entries.len());
     let Some(up) = up else {
         println!("  (not sent: pass --send to put the fold to the court)");
         return ExitCode::SUCCESS;
     };
     match up.uplink_fold(&signed) {
+        Ok(u @ Uplinked::Admitted { .. }) => {
+            println!("  court: {u:?}");
+            match line.append(entry, c.head) {
+                Ok(h) => {
+                    let h: String = h.iter().take(6).map(|b| format!("{b:02x}")).collect();
+                    println!("  colonies line: entry {} appended, head {h}…", line.entries.len() - 1);
+                    ExitCode::SUCCESS
+                }
+                Err(e) => {
+                    eprintln!("  ADMITTED BUT NOT HELD: the line did not take the entry: {e}");
+                    ExitCode::from(1)
+                }
+            }
+        }
         Ok(u) => {
             println!("  court: {u:?}");
-            if matches!(u, Uplinked::Admitted { .. }) {
-                ExitCode::SUCCESS
-            } else {
-                ExitCode::from(1)
-            }
+            ExitCode::from(1)
         }
         Err(e) => {
             eprintln!("  the court did not answer: {e}");

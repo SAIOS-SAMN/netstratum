@@ -28,14 +28,16 @@ use std::path::Path;
 /// The tiers netstratum's domain names at its founding.
 pub const TIERS: [&str; 2] = ["colonies", "union"];
 
-/// The lanes of a fold row, as netstratum fills them. μ is never summed
-/// across lanes, and neither is anything here: matter and money are kept
-/// apart exactly as the court keeps S apart from G.
+/// The lanes of a fold row, by MU-LEXICON v2's fold-lane law: S matter,
+/// G value (the only lane a parent may translate), T duration, H
+/// information. μ is never summed across lanes, and neither is anything
+/// here. Netstratum fills S and G; T and H stay zero until it folds them.
 pub mod lane {
     /// Banked matter (iron, biomass, alloy, diamond, joule, sink, crystal),
     /// in units of the resource ledger's 1/1024 grain.
     pub const MATTER: usize = 0;
-    /// STAMP, the unit of account, in the same grain.
+    /// STAMP, netstratum's unit of account, on the value lane, in the same
+    /// grain.
     pub const MONEY: usize = 1;
 }
 
@@ -70,13 +72,14 @@ pub fn identity(kind: &str, name: &str) -> [u8; 32] {
         .as_bytes()
 }
 
-/// A fold of `rows` and `declared` over the prefix whose head is `prefix`,
-/// signed by `key`. Both lists are sorted by identity, as continuity
-/// requires; the caller hands each identity once.
+/// A single-level fold of `rows` and `declared` over the tier line whose
+/// head is `prefix` ([`crate::line`]), signed by `key`. Both lists are
+/// sorted by identity, as continuity requires; the caller hands each
+/// identity once.
 pub fn fold(key: &ed25519_dalek::SigningKey, prefix: [u8; 32], mut rows: Vec<Net>, mut declared: Vec<Net>) -> SignedFold {
     rows.sort_by_key(|(who, _)| *who);
     declared.sort_by_key(|(who, _)| *who);
-    TierFold { tier: key.verifying_key().to_bytes(), prefix, rows, declared }.sign(key)
+    TierFold { tier: key.verifying_key().to_bytes(), prefix, rows, declared, children: Vec::new() }.sign(key)
 }
 
 impl Uplink {

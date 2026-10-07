@@ -19,7 +19,8 @@
 //! law says it only moves value shows up by name in the declared list.
 //! Continuity holds by construction (both lists sum the same per-receipt
 //! changes); what the court's admission adds is a signed, sealed commitment
-//! to the window's positions and to the chronicle head they were read at.
+//! to the window's positions on the `colonies` tier's line, whose record
+//! cites the chronicle head they were read at ([`crate::line`]).
 
 use crate::fold::lane;
 use cfe::dop::{ColonyOrb, Resource};
@@ -119,7 +120,7 @@ pub struct Census {
     pub people: String,
     pub from: usize,
     pub to: usize,
-    /// The chronicle head at `to` — the prefix the fold nets.
+    /// The chronicle head at `to` — the receipts the census was read from.
     pub head: [u8; 32],
     /// (orb, holding, net change in grain units).
     pub rows: Vec<(u64, Holding, i128)>,
