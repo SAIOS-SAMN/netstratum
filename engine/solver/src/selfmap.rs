@@ -31,7 +31,7 @@
 
 use crate::mint::Library;
 use crate::need::{family_of, Family};
-use rfa_core::{forest_potentials, holonomies, ratio, rcf_hash, Delta, Holonomy, Ratio, Support};
+use rfa_core::{forest_potentials, holonomies, ratio, rcf_hash_skew_bipartite, Delta, Holonomy, Ratio, Support};
 
 /// The families in declaration order — the anchor nodes of the map and
 /// the deterministic tie-break of last resort.
@@ -86,6 +86,21 @@ fn project(library: &Library) -> (Delta, Support) {
         }
     }
     (delta, support)
+}
+
+/// The family block `M` of the projected Delta: `M[f][w]` is word `w`'s
+/// draw on family `f` — the same weights `project` writes, rows = families.
+fn family_block(library: &Library) -> Vec<Vec<Ratio>> {
+    let words = library.words();
+    let mut m = vec![vec![ratio(0, 1); words.len()]; FAMILIES.len()];
+    for (w, word) in words.iter().enumerate() {
+        for op in &word.expansion {
+            let family = family_of(op);
+            let fidx = FAMILIES.iter().position(|f| *f == family).expect("family is one of four");
+            m[fidx][w] = m[fidx][w].clone() + ratio(1, 1);
+        }
+    }
+    m
 }
 
 /// How many minted words touch each family — the census count, kept as
@@ -158,7 +173,12 @@ pub fn knowledge_map(library: &Library) -> SelfMap {
     SelfMap {
         order: knowledge_order(library),
         tension: holonomies(&delta, &support),
-        signature: rcf_hash(&delta),
+        // The map's only relations run family ↔ word, antisymmetrically, so
+        // its RCF signature is read from the 4×W family block exactly
+        // (`rcf_hash_skew_bipartite`, byte-identical to `rcf_hash` of the
+        // projected Delta — witnessed in rfa-core): k×k algebra, not a
+        // dim² Smith form. Measured: 118 s → milliseconds at 467 words.
+        signature: rcf_hash_skew_bipartite(FAMILIES.len(), &family_block(library)),
     }
 }
 
@@ -367,5 +387,28 @@ mod tests {
         let mb = knowledge_map(&b);
         assert!(consilience(&[(1, &ma), (2, &mb)]).is_empty(), "no two share a shape");
         assert!(consilience(&[]).is_empty(), "an empty roster converges nothing");
+    }
+}
+
+#[cfg(test)]
+mod signature_witness {
+    use super::*;
+
+    #[test]
+    fn the_fast_signature_is_the_projected_deltas_rcf_hash() {
+        // A library built from real families, with repeats and mixed words.
+        use solver_verify::grid::{Op, TileMirror};
+        let mut map = [0u8; 10];
+        map[1] = 2;
+        let tile = Op::Tile { down: 2, across: 1, odd_row: TileMirror::Rows, odd_col: TileMirror::None };
+        let ops = vec![Op::Rotate90, Op::Recolor(map), Op::FlipH, tile.clone(), Op::Transpose, Op::Recolor(map), Op::Rotate180, tile, Op::FlipV, Op::Rotate270, Op::Recolor(map), Op::FlipH, Op::Rotate90];
+        let mut library = Library::new();
+        for (n, window) in ops.windows(2).enumerate().take(12) {
+            let mut orbit = [0u8; 32];
+            orbit[0] = n as u8;
+            library.adopt(crate::mint::MintedWord { orbit, expansion: window.to_vec(), cited: Vec::new() });
+        }
+        let (delta, _) = project(&library);
+        assert_eq!(knowledge_map(&library).signature, rfa_core::rcf_hash(&delta));
     }
 }

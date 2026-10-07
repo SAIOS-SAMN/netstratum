@@ -53,7 +53,7 @@ pub use gates::{validate_step, GateReading, StepBound};
 // first-class reading for THE SIGN LAW and is what `capacity.rs` splits
 // against.
 pub use boundary::{boundary_form, Flow, BoundaryForm};
-pub use rcf::{invariant_factors, rcf_hash, rcf_signature, RatPoly, RcfSignature};
+pub use rcf::{invariant_factors, rcf_hash, rcf_hash_skew_bipartite, rcf_signature, RatPoly, RcfSignature};
 pub use reduce::{coboundary_reduce, forest_potentials, holonomies, Holonomy, Support};
 // THE CARRIER, re-exported. A crate that builds a Delta through this
 // algebra must name its exact-rational entries; re-exporting `Ratio`

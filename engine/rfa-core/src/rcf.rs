@@ -436,3 +436,228 @@ pub fn rcf_hash(delta: &Delta) -> [u8; 32] {
     }
     *blake3::hash(&buf).as_bytes()
 }
+
+// ─── The skew-bipartite fast path ───────────────────────────────────────
+
+/// `p'` — the formal derivative.
+fn derivative(p: &RatPoly) -> RatPoly {
+    RatPoly::from_coeffs(
+        p.coeffs
+            .iter()
+            .enumerate()
+            .skip(1)
+            .map(|(i, c)| c * Ratio::from_integer((i as i64).into()))
+            .collect(),
+    )
+}
+
+/// The exact quotient `p / q` (the remainder must be zero — a caller bug
+/// otherwise, since every use divides by a known factor).
+fn exact_div(p: &RatPoly, q: &RatPoly) -> RatPoly {
+    let (quotient, remainder) = p.div_rem(q);
+    debug_assert!(remainder.is_zero(), "an exact division left a remainder");
+    quotient
+}
+
+/// YUN'S SQUAREFREE DECOMPOSITION over `Rat[x]` (characteristic zero):
+/// monic, pairwise-coprime, squarefree `s_j` with `f = c · ∏ s_jʲ`, listed
+/// as `(j, s_j)` for every non-constant `s_j`. Gcds and exact divisions
+/// only — nothing is factored.
+fn squarefree(f: &RatPoly) -> Vec<(usize, RatPoly)> {
+    let mut out = Vec::new();
+    if f.degree().is_none_or(|d| d == 0) {
+        return out;
+    }
+    let f = f.clone().monic();
+    let df = derivative(&f);
+    let a0 = f.gcd(&df);
+    let mut b = exact_div(&f, &a0);
+    let c = exact_div(&df, &a0);
+    let mut d = c.sub(&derivative(&b));
+    let mut j = 1;
+    while b.degree().is_some_and(|deg| deg > 0) {
+        let a = b.gcd(&d);
+        let next_b = exact_div(&b, &a);
+        let next_c = exact_div(&d, &a);
+        if a.degree().is_some_and(|deg| deg > 0) {
+            out.push((j, a.monic()));
+        }
+        d = next_c.sub(&derivative(&next_b));
+        b = next_b;
+        j += 1;
+    }
+    out
+}
+
+/// `det` of a small square matrix over `Rat[x]`, by the Leibniz sum — for
+/// the k×k block of the skew-bipartite path (k is the number of anchor
+/// nodes: four for a knowledge map), where k! terms are nothing.
+fn small_det(m: &[Vec<RatPoly>]) -> RatPoly {
+    let k = m.len();
+    let mut perm: Vec<usize> = (0..k).collect();
+    let mut total = RatPoly::zero();
+    // Heap's algorithm over every permutation, tracking its sign.
+    fn sign_of(p: &[usize]) -> bool {
+        let mut inversions = 0;
+        for i in 0..p.len() {
+            for j in (i + 1)..p.len() {
+                if p[i] > p[j] {
+                    inversions += 1;
+                }
+            }
+        }
+        inversions % 2 == 0
+    }
+    fn walk(n: usize, perm: &mut Vec<usize>, m: &[Vec<RatPoly>], total: &mut RatPoly) {
+        if n <= 1 {
+            let mut term = RatPoly::from_coeffs(vec![Ratio::one()]);
+            for (row, &col) in perm.iter().enumerate() {
+                term = term.mul(&m[row][col]);
+            }
+            *total = if sign_of(perm) { total.add(&term) } else { total.sub(&term) };
+            return;
+        }
+        for i in 0..n {
+            walk(n - 1, perm, m, total);
+            let swap = if n % 2 == 0 { i } else { 0 };
+            perm.swap(swap, n - 1);
+        }
+    }
+    if k == 0 {
+        return RatPoly::from_coeffs(vec![Ratio::one()]);
+    }
+    walk(k, &mut perm, m, &mut total);
+    total
+}
+
+/// **THE SKEW-BIPARTITE RCF HASH** — [`rcf_hash`] for the one-layer Delta
+/// whose only relations run between `k` ANCHOR nodes and `w` LEAF nodes,
+/// antisymmetrically: `A = [[0, M], [−Mᵀ, 0]]`, `M` the `k×w` block given
+/// as `m` (rows = anchors). The SAME 32 bytes as `rcf_hash` of that Delta,
+/// computed from `k×k` algebra instead of a `(k+w)²` Smith normal form over
+/// `Rat[x]` (measured: 118 s → milliseconds for a 467-word knowledge map).
+///
+/// Why it is exact, not an approximation:
+///   * `χ_A(x) = x^{w−k} · det(x²I_k + MMᵀ)` — the Schur complement of the
+///     `xI_k` block with Sylvester's identity, a `k×k` determinant.
+///   * `A` is real skew-symmetric, hence NORMAL, hence diagonalizable over
+///     ℂ: every elementary divisor is linear, so the invariant factors are
+///     read off the SQUAREFREE decomposition of `χ` — `d_t = ∏_{j ≥ t} s_j`
+///     (with `x` at its own multiplicity), smallest first, as the Smith form
+///     lists them. No factoring over ℚ is needed.
+pub fn rcf_hash_skew_bipartite(k: usize, m: &[Vec<Ratio>]) -> [u8; 32] {
+    let w = m.first().map_or(0, Vec::len);
+    let dim = k + w;
+    // G = M·Mᵀ (k×k).
+    let g: Vec<Vec<Ratio>> = (0..k)
+        .map(|i| (0..k).map(|j| (0..w).fold(Ratio::zero(), |acc, c| acc + &m[i][c] * &m[j][c])).collect())
+        .collect();
+    // det(x²I + G) over Rat[x].
+    let poly: Vec<Vec<RatPoly>> = (0..k)
+        .map(|i| {
+            (0..k)
+                .map(|j| {
+                    let lead = if i == j { Ratio::one() } else { Ratio::zero() };
+                    RatPoly::from_coeffs(vec![g[i][j].clone(), Ratio::zero(), lead])
+                })
+                .collect()
+        })
+        .collect();
+    let det = small_det(&poly);
+    // χ = x^{w−k} · det: strip every factor of x from det into the x power.
+    let mut h = det;
+    let mut x_power: i64 = w as i64 - k as i64;
+    while h.coeffs.first().is_some_and(|c| c.is_zero()) {
+        h = RatPoly::from_coeffs(h.coeffs[1..].to_vec());
+        x_power += 1;
+    }
+    let x_mult = usize::try_from(x_power).expect("χ is a polynomial: the x power is never negative");
+    let parts = squarefree(&h);
+    let top = parts.iter().map(|(j, _)| *j).max().unwrap_or(0).max(x_mult);
+    let x = RatPoly::from_coeffs(vec![Ratio::zero(), Ratio::one()]);
+    // d_t for t = top..1 — smallest (fewest components) first.
+    let factors: Vec<RatPoly> = (1..=top)
+        .rev()
+        .map(|t| {
+            let mut d = RatPoly::from_coeffs(vec![Ratio::one()]);
+            if x_mult >= t {
+                d = d.mul(&x);
+            }
+            for (j, s) in &parts {
+                if *j >= t {
+                    d = d.mul(s);
+                }
+            }
+            d.monic()
+        })
+        .collect();
+    let mut buf = Vec::new();
+    buf.extend_from_slice(b"netstratum-rcf-v1");
+    buf.extend_from_slice(&(dim as u32).to_be_bytes());
+    buf.extend_from_slice(&1u32.to_be_bytes());
+    buf.extend_from_slice(&(factors.len() as u32).to_be_bytes());
+    for factor in &factors {
+        factor.canonical_bytes(&mut buf);
+    }
+    *blake3::hash(&buf).as_bytes()
+}
+
+#[cfg(test)]
+mod skew_bipartite_tests {
+    use super::*;
+    use crate::delta::Delta;
+
+    fn delta_of(k: usize, m: &[Vec<Ratio>]) -> Delta {
+        let w = m.first().map_or(0, Vec::len);
+        let mut d = Delta::zero(k + w, 1);
+        for (i, row) in m.iter().enumerate() {
+            for (c, v) in row.iter().enumerate() {
+                if !v.is_zero() {
+                    d.set_antisym(i, k + c, vec![v.clone()]);
+                }
+            }
+        }
+        d
+    }
+
+    /// A tiny deterministic generator, so the differential sweep is
+    /// reproducible without a dependency.
+    fn lcg(seed: &mut u64) -> u64 {
+        *seed = seed.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
+        *seed >> 33
+    }
+
+    #[test]
+    fn the_fast_path_is_byte_identical_to_the_smith_form() {
+        let mut seed = 7u64;
+        for case in 0..120 {
+            let k = 1 + (lcg(&mut seed) % 4) as usize;
+            let w = (lcg(&mut seed) % 7) as usize;
+            let m: Vec<Vec<Ratio>> = (0..k)
+                .map(|_| {
+                    (0..w)
+                        .map(|_| {
+                            // Mostly small integers and zeros, with repeats, so
+                            // repeated eigenvalues (multiplicities) occur.
+                            let v = (lcg(&mut seed) % 4) as i64;
+                            Ratio::from_integer(v.into())
+                        })
+                        .collect()
+                })
+                .collect();
+            let slow = rcf_hash(&delta_of(k, &m));
+            let fast = rcf_hash_skew_bipartite(k, &m);
+            assert_eq!(fast, slow, "case {case}: k={k} w={w} m={m:?}");
+        }
+    }
+
+    #[test]
+    fn duplicated_leaves_and_the_empty_map_agree_too() {
+        let one = Ratio::from_integer(1.into());
+        let two = Ratio::from_integer(2.into());
+        let m = vec![vec![one.clone(), one.clone(), one.clone()], vec![two.clone(), two.clone(), two.clone()], vec![one.clone(), Ratio::zero(), one.clone()], vec![Ratio::zero(); 3]];
+        assert_eq!(rcf_hash_skew_bipartite(4, &m), rcf_hash(&delta_of(4, &m)));
+        let empty: Vec<Vec<Ratio>> = vec![Vec::new(); 4];
+        assert_eq!(rcf_hash_skew_bipartite(4, &empty), rcf_hash(&Delta::zero(4, 1)));
+    }
+}
