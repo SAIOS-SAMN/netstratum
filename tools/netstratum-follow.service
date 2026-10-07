@@ -1,0 +1,17 @@
+# NETSTRATUM ON THE HYPHA — the follower tails G2's chronicles and folds every
+# people's new receipts onto the :7520 court at play rate (engine/hypha
+# follow.rs): per-receipt line entries, self-published folds, prune by
+# finality, line-head check before every round. Coordinator: xylarium-kernel.
+[Unit]
+Description=netstratum follower (G2 folds to the :7520 court)
+After=netstratum-conductor.service
+[Service]
+WorkingDirectory=/opt/netstratum
+ExecStart=/opt/netstratum/target/release/ns-hypha follow var-g2 --every 60 --per-round 8
+Nice=10
+MemoryHigh=2G
+MemoryMax=3G
+Restart=on-failure
+RestartSec=60
+[Install]
+WantedBy=default.target

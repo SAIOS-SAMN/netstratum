@@ -7237,6 +7237,10 @@ fn refuse_text(world: &World, refusal: &ActionRefused, style: &Style) -> String 
             "the work earns {} — {claimed} was claimed",
             style.strong(&bound.to_string())
         ),
+        ActionRefused::OffGrain { amount } => format!(
+            "{} is off the resource ledger's 1/1024 grain — the ledger moves only on its grain; ask a multiple of 1/1024",
+            style.strong(&amount.to_string())
+        ),
         ActionRefused::ConveyExceedsMonetary { asked, monetary } => format!(
             "{asked} outruns the parcel's monetary portion ({monetary}) — the free \
              portion stays home; convey less, or re-survey after the estate grows"

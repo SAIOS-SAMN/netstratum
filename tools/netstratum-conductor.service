@@ -1,14 +1,16 @@
-# THE BOARD'S HEARTBEAT — netstratum's civilizations think forever;
-# every proved solve offers itself to the mycelium through the
-# membrane (Law II). This is the kernel: not a bridge, the game.
+# THE BOARD'S HEARTBEAT — G2, netstratum's fresh universe (docs/57_GENESIS_G2.md).
+# Civilizations found, think, trade and cleave in var-g2; the archive (var/)
+# is never touched. The network link is netstratum-follow.service, not this.
 [Unit]
-Description=netstratum conductor (civilizations thinking, membrane speaking)
-After=mycelium-hypha.service
+Description=netstratum conductor (G2 universe heartbeat)
 [Service]
 WorkingDirectory=/opt/netstratum
-Environment=MYCELIUM_ADDR=hypha://127.0.0.1:7420
-ExecStart=/opt/netstratum/target/release/conductor --cadence 2
+Environment=NETSTRATUM_PROFILE=1
+ExecStart=/opt/netstratum/target/release/conductor --var var-g2 --cadence 2
+Nice=10
+MemoryHigh=3G
+MemoryMax=4G
 Restart=on-failure
-RestartSec=10
+RestartSec=30
 [Install]
 WantedBy=default.target
