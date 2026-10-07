@@ -4921,7 +4921,10 @@ impl Polity {
             )?);
         }
         let arbor = self.arbor.as_mut().expect("held or just opened");
-        let receipts = self.world.chronicle().receipts().to_vec();
+        // Borrowed, not cloned: the whole history used to be copied here
+        // EVERY beat (O(history) per beat per world, growing without bound);
+        // only the unjudged tail is ever walked below.
+        let receipts: &[cfe::vrp::Receipt] = self.world.chronicle().receipts();
         let seat = [
             self.spec.position.0.clone(),
             self.spec.position.1.clone(),
