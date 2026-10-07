@@ -98,18 +98,11 @@ fn grain_k(k: &Ratio) -> Ratio {
     (k.clone() * ratio(g, 1)).round() / ratio(g, 1)
 }
 
-/// **THE DIOPHANTINE SITING** — replaces the old hand-picked seat table
-/// (05 §3.1) with a continuous exact-rational track, scored by η.
+/// **THE DIOPHANTINE SITING** — the first viable continuous draw of a
+/// line's regime (05 §3.1), kept as the reference reading. Genesis no longer
+/// imposes it: the band chooses among [`founding_options`] instead.
 ///
-/// A mesic metabolism draws `k` from a temperate window centred just below
-/// `k = 1` (warm-biased: closer is brighter and feeds more, cf. the measured
-/// board of 2026-08-16 that starved the cold tail); a furnace metabolism
-/// (mineral/plasmic, 12_UNION §5a) draws from a HOTTER window (smaller `k`,
-/// closer orbit). The draw is CONTINUOUS across the window; a draw that lands
-/// non-viable re-rolls deterministically until η clears the derived floor.
-///
-/// Returns `(StarClass, albedo, orbit_r)` — the same shape the old
-/// `derived_siting` returned, so the genesis caller is unchanged.
+/// Returns `(StarClass, albedo, orbit_r)`.
 pub(crate) fn diophantine_siting(
     civilization: &Civilization,
     beacon: &Beacon,
@@ -119,59 +112,89 @@ pub(crate) fn diophantine_siting(
     // mass() so the generator is star-general the moment the class changes.
     let class = StarClass::G;
     let mass = class.mass();
-    let luminosity = class.luminosity();
+    let (albedo, k_center, _) = regime(civilization, beacon);
 
-    // Albedo + the continuous k-window, per regime. The window is
-    // (center, half_width) in units of k, both built from `twelfths` of a
-    // bound integer so no literal dial enters.
+    // THE VIABILITY FLOOR, DERIVED (not tuned): at least 1/HALVING of the
+    // band optimum. A reading, not a dial.
+    let floor = ratio(1, HALVING);
+
+    // A draw that lands non-viable advances its domain and re-rolls, finite
+    // and replay-exact; after REROLL_LIMIT the window center is taken.
+    let mut chosen_k = k_center.clone();
+    for (attempt, k) in draws(civilization, beacon).into_iter().enumerate() {
+        let Some(k) = k else { continue };
+        let (r, _p) = track(&mass, &k);
+        if viability_at(civilization, class, &albedo, &r) >= floor {
+            chosen_k = k;
+            break;
+        }
+        if attempt as u64 + 1 == REROLL_LIMIT {
+            chosen_k = k_center.clone();
+        }
+    }
+
+    let (r, _p) = track(&mass, &chosen_k);
+    (class, albedo, r)
+}
+
+/// Albedo + the continuous k-window, per regime: `(albedo, k_center,
+/// k_half)`. A mesic metabolism draws `k` from a temperate window centred
+/// just below `k = 1`; a furnace metabolism (mineral/plasmic, 12_UNION §5a)
+/// from a HOTTER window. Every bound is `twelfths` of a bound integer, so no
+/// literal dial enters.
+fn regime(civilization: &Civilization, beacon: &Beacon) -> (Ratio, Ratio, Ratio) {
     let plasmic = civilization.metabolism.as_str() == "plasmic";
     let furnace = matches!(civilization.metabolism.as_str(), "mineral" | "plasmic");
-    let (albedo, k_center, k_half) = if plasmic {
+    if plasmic {
         // ONT-1d part 3 — THE PLASMA NICHE, DERIVED FROM THE GATE. Measured
         // 2026-08-18: a plasmiform line (HyperThermal clade band × plasma phase
         // feasibility) clears its `substrate_viability` floor (1/HALVING) only
         // for r ≲ 1/9 — k ≲ 4/12 — and reads exactly ZERO past k = 10/12 (a
-        // world too cold has no plasma). The old shared furnace window (centred
-        // k = 8/12) sat the plasma at viability ≈ 0.32, below floor, so every
-        // re-roll failed and it fell back to a non-viable centre. The plasma's
-        // OWN window: centre k = GRAIN/4 = 3/12 (r ≈ 1/16), half 1/12, so
-        // k ∈ [2/12, 4/12] — the band, verified end to end, where every draw is
-        // viable (0.73 → 0.51) and the gate clears on the first roll.
+        // world too cold has no plasma). The plasma's OWN window: centre
+        // k = GRAIN/4 = 3/12 (r ≈ 1/16), half 1/12, so k ∈ [2/12, 4/12].
         let albedos = [ratio(1, 2), ratio(9, 20), ratio(2, 5)];
         let drawn = beacon.uniform_index("genesis.plasmic.albedo", albedos.len() as u64) as usize;
         (albedos[drawn].clone(), twelfths(GRAIN / 4), twelfths(1))
     } else if furnace {
         // Mineral furnace: the old hot albedo set; a window centred at k = 8/12
-        // (r ≈ 0.44) with a 2/12 half-width. NO roster line derives a mineral
-        // orbit (every mineral seat is thermally PINNED in `polities.rs`), so
-        // this path is unexercised and kept byte-identical; the mineral-cold
-        // niche waits on a mineral line that actually derives (or a mineral
-        // phase-cull) to be MEASURED rather than guessed.
+        // (r ≈ 0.44) with a 2/12 half-width.
         let albedos = [ratio(1, 2), ratio(9, 20), ratio(2, 5)];
         let drawn = beacon.uniform_index("genesis.furnace.albedo", albedos.len() as u64) as usize;
         (albedos[drawn].clone(), twelfths(GRAIN - 4), twelfths(2))
     } else {
         // Mesic: a small mostly-dark albedo set; a window centred at k =
         // 11/12 (warm side of unity, r ≈ 0.84) with a 2/12 half-width, so
-        // k ∈ [9/12 .. 13/12] — real orbital spread, warm-biased, that keeps
-        // the founding band fed (the cold tail beyond +1/12 starved it).
+        // k ∈ [9/12 .. 13/12].
         let albedos = [ratio(0, 1), ratio(1, 10), ratio(0, 1)];
         let drawn = beacon.uniform_index("genesis.mesic.albedo", albedos.len() as u64) as usize;
         (albedos[drawn].clone(), twelfths(GRAIN - 1), twelfths(2))
-    };
+    }
+}
 
-    // THE VIABILITY FLOOR, DERIVED (not tuned): at least 1/HALVING of the
-    // band optimum. A reading, not a dial.
-    let floor = ratio(1, HALVING);
+/// THE CONTINUOUS DRAWS — `REROLL_LIMIT` grained `k` across the regime's
+/// window, each from its own beacon domain (`genesis.diophantine.k.{n}`), in
+/// order; `None` where a draw lands non-positive. `k = center + (draw −
+/// 1/2)·(2·half)` sweeps `[center − half, center + half)`.
+fn draws(civilization: &Civilization, beacon: &Beacon) -> Vec<Option<Ratio>> {
+    let (_, k_center, k_half) = regime(civilization, beacon);
+    let full_width = k_half.clone() + k_half;
+    let half = ratio(1, HALVING);
+    (0..REROLL_LIMIT)
+        .map(|attempt| {
+            let unit = beacon.draw(&format!("genesis.diophantine.k.{attempt}")); // ∈ [0, 1)
+            // Grain k HERE — before track() exponentiates it (see grain_k).
+            let k = grain_k(&(k_center.clone() + (unit - half.clone()) * full_width.clone()));
+            (k > ratio(0, 1)).then_some(k)
+        })
+        .collect()
+}
 
-    // ONT-1d part 3 — SITING READS THE ONE VIABILITY PRODUCTION READS. The old
-    // gate scored a shared thermal-coverage η (a mesic tent, blind to species);
-    // now the draw is scored by `cfe::almanac::substrate_viability` — the SAME
-    // `habitability_flux(clade) · phase_feasibility(metabolism)` product
-    // `carrying_capacity` uses — so a line is sited where it can PRODUCE and
-    // culled where it cannot, one geometry. The clade band pulls the niche
-    // (cold-clade → cold orbit); the metabolism's phase gates it (plasmic needs
-    // a hot world for its plasma structure). No two-viabilities seam.
+/// ONT-1d part 3 — THE ONE VIABILITY a line reads at an orbit: its clade's
+/// band × its metabolism's phase, at the incident flux of `class` through
+/// `albedo` at `r` (`cfe::almanac::substrate_viability`, the SAME product
+/// `carrying_capacity` reads). A fresh siting has no world yet, so aridity is
+/// neutral (the solid/organic phases ignore it).
+fn viability_at(civilization: &Civilization, class: StarClass, albedo: &Ratio, r: &Ratio) -> Ratio {
     let clade = cfe::almanac::table_clade_from_word(&civilization.clade)
         .unwrap_or(cfe::almanac::FLATLANDER_CLADE as u16);
     let metab: u8 = match civilization.metabolism.as_str() {
@@ -179,44 +202,91 @@ pub(crate) fn diophantine_siting(
         "plasmic" => 3,
         _ => 2,
     };
-    // A fresh siting has no world yet; a neutral aridity (the solid/organic
-    // phases ignore it, plasmic reads it for its dry-hot plasma window).
-    let aridity = ratio(1, 1);
+    let t_eq4 = thermal::t_eq4(&class.luminosity(), albedo, r);
+    cfe::almanac::substrate_viability(clade, metab, &t_eq4, &ratio(1, 1))
+}
 
-    // THE CONTINUOUS DRAW. k = center + (draw − 1/2)·(2·half) sweeps the whole
-    // window [center − half, center + half) as `draw` ranges over [0, 1). A
-    // draw that lands non-viable advances its domain and re-rolls, finite and
-    // replay-exact; after REROLL_LIMIT the window center (always viable by
-    // construction) is taken.
-    // Full window width = twice the half-width (doubled by addition, not a
-    // literal ratio(2,1) dial); the centering offset is 1/HALVING = 1/2, the
-    // same derived fraction the viability floor uses — neither mints a dial.
-    let full_width = k_half.clone() + k_half.clone();
-    let half = ratio(1, HALVING);
-    let mut chosen_k = k_center.clone();
-    for attempt in 0..REROLL_LIMIT {
-        let domain = format!("genesis.diophantine.k.{attempt}");
-        let unit = beacon.draw(&domain); // ∈ [0, 1)
-        // Grain k HERE — before track() exponentiates it — so r and P inherit a
-        // bounded denominator instead of the draw's 2^128 basis (see grain_k).
-        let k = grain_k(&(k_center.clone() + (unit - half.clone()) * full_width.clone()));
-        if k <= ratio(0, 1) {
-            continue; // k must be strictly positive
-        }
-        let (r, _p) = track(&mass, &k);
-        let t_eq4 = thermal::t_eq4(&luminosity, &albedo, &r);
-        let viability = cfe::almanac::substrate_viability(clade, metab, &t_eq4, &aridity);
-        if viability >= floor {
-            chosen_k = k;
-            break;
-        }
-        if attempt + 1 == REROLL_LIMIT {
-            chosen_k = k_center.clone();
+/// ONE PLACE A FOUNDING BAND COULD SETTLE, as the physics reads it.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) struct SiteOption {
+    pub class: StarClass,
+    pub albedo: Ratio,
+    pub orbit: Ratio,
+    /// `substrate_viability` there — the physics' reading, never a verdict.
+    pub viability: Ratio,
+    /// The line's compiled home (a pinned seat), as opposed to a derived draw.
+    pub home: bool,
+}
+
+/// **THE FOUNDING OPTIONS** (G2, operator 2026-10-07: "only give them
+/// options, freedom, and agency"). Where a band COULD settle: its compiled
+/// home when the line has one and the physics admits it (albedo in `[0, 1)`,
+/// orbit `> 0` — the `Unit`/`Positive` doors), and every continuous derived
+/// draw of its regime around every main-sequence sun. Each carries its viability reading.
+/// Returns the options and, when a compiled home exists but the physics
+/// refuses it, why — reported, never silently left unsited.
+pub(crate) fn founding_options(
+    civilization: &Civilization,
+    beacon: &Beacon,
+    home: Option<(StarClass, Ratio, Ratio)>,
+) -> (Vec<SiteOption>, Option<String>) {
+    let mut options = Vec::new();
+    let mut refused = None;
+    if let Some((class, albedo, orbit)) = home {
+        let lawful = cfe::dop::Unit::new(albedo.clone()).is_some() && cfe::dop::Positive::new(orbit.clone()).is_some();
+        if lawful {
+            let viability = viability_at(civilization, class, &albedo, &orbit);
+            options.push(SiteOption { class, albedo, orbit, viability, home: true });
+        } else {
+            refused = Some(format!("{class:?} albedo {albedo} orbit {orbit}"));
         }
     }
+    // Every main-sequence sun (O..M, the codes the wire reads 1..=7) offers
+    // the regime's continuous draws on its own Keplerian track `r = M·k²` —
+    // the galaxy holds more than one kind of star, so a line whose clade band
+    // sits far from a G sun's temperate window still has living land to
+    // choose. Remnants and the lore exotics are not founding places.
+    //
+    // Beside the regime's continuous draws (the line's native window), the
+    // OPEN ORBITS: every twelfth of `k` out to `GRAIN/4` whole units
+    // (`k = n/GRAIN`, `n ∈ 1..=GRAIN·GRAIN/4`), so a line whose clade band
+    // lies outside its metabolism's window — a cryogenic biotic, say — can
+    // still reach the cold. The window is a bound on the search, not a
+    // prescription; viability alone weights the choice.
+    let (albedo, _, _) = regime(civilization, beacon);
+    let mut ks: Vec<Ratio> = draws(civilization, beacon).into_iter().flatten().collect();
+    ks.extend((1..=GRAIN * GRAIN / 4).map(twelfths));
+    for class in (1u8..=7).filter_map(StarClass::from_wire) {
+        for k in &ks {
+            let (orbit, _p) = track(&class.mass(), k);
+            let viability = viability_at(civilization, class, &albedo, &orbit);
+            options.push(SiteOption { class, albedo: albedo.clone(), orbit, viability, home: false });
+        }
+    }
+    (options, refused)
+}
 
-    let (r, _p) = track(&mass, &chosen_k);
-    (class, albedo, r)
+/// **THE BAND CHOOSES** — a chronicle-seeded proportional draw over the
+/// options, weighted by viability on the civic lattice
+/// (`⌊viability · LATTICE⌋`, `soc::partition_draw`, salted `founding.site`).
+/// Better land is likelier, never guaranteed; a site the physics reads at
+/// zero carries no weight. When NO option is viable the band still settles
+/// somewhere — the draw goes uniform and the physics decides what follows.
+/// `None` only for an empty option list. Exact-integer, replay-exact.
+pub(crate) fn choose_site(options: &[SiteOption], seed: [u8; 32]) -> Option<usize> {
+    use num_traits::ToPrimitive;
+    let lattice = ratio(crate::civic::LATTICE, 1);
+    let mut weights: Vec<u64> = options
+        .iter()
+        .map(|o| (o.viability.clone() * lattice.clone()).floor().to_integer().to_u64().unwrap_or(0))
+        .collect();
+    if weights.iter().all(|w| *w == 0) {
+        weights.iter_mut().for_each(|w| *w = 1);
+    }
+    let mut hasher = blake3::Hasher::new();
+    hasher.update(&seed);
+    hasher.update(b"founding.site");
+    crate::soc::partition_draw(&weights, *hasher.finalize().as_bytes())
 }
 
 #[cfg(test)]
@@ -306,6 +376,84 @@ mod tests {
         let a = diophantine_siting(&civ("biotic"), &Beacon::from_digest([1u8; 32]));
         let b = diophantine_siting(&civ("biotic"), &Beacon::from_digest([2u8; 32]));
         assert_ne!(a.2, b.2, "distinct digests draw distinct continuous orbits");
+    }
+
+    #[test]
+    fn a_lawful_home_is_one_option_and_an_unlawful_home_is_reported() {
+        let beacon = Beacon::from_digest([5u8; 32]);
+        let home = Some((StarClass::M, ratio(1, 2), ratio(1, 1)));
+        let (options, refused) = founding_options(&civ("biotic"), &beacon, home);
+        assert!(refused.is_none());
+        assert!(options[0].home, "the compiled home leads the options");
+        assert!(options.len() > 1, "the derived draws stand beside it");
+        // albedo 1 fails the Unit door: no home option, and the refusal is named.
+        let (options, refused) = founding_options(&civ("biotic"), &beacon, Some((StarClass::G, ratio(1, 1), ratio(1, 1))));
+        assert!(refused.is_some(), "an unlawful home is reported, never silently unsited");
+        assert!(options.iter().all(|o| !o.home));
+        assert!(!options.is_empty(), "the band still has derived places to go");
+    }
+
+    #[test]
+    fn a_dead_site_is_never_chosen_while_living_land_exists() {
+        let dead = SiteOption { class: StarClass::B, albedo: ratio(1, 4), orbit: ratio(1, 1), viability: ratio(0, 1), home: true };
+        let alive = SiteOption { class: StarClass::G, albedo: ratio(0, 1), orbit: ratio(1, 1), viability: ratio(3, 4), home: false };
+        for n in 0..64u8 {
+            let pick = choose_site(&[dead.clone(), alive.clone()], [n; 32]);
+            assert_eq!(pick, Some(1), "seed {n}: zero viability carries no weight");
+        }
+    }
+
+    #[test]
+    fn the_choice_replays_and_a_band_with_no_living_land_still_settles() {
+        let a = SiteOption { class: StarClass::M, albedo: ratio(0, 1), orbit: ratio(2, 1), viability: ratio(0, 1), home: true };
+        let b = SiteOption { class: StarClass::G, albedo: ratio(0, 1), orbit: ratio(9, 1), viability: ratio(0, 1), home: false };
+        let options = [a, b];
+        assert_eq!(choose_site(&options, [9u8; 32]), choose_site(&options, [9u8; 32]), "same seed, same choice");
+        let picks: std::collections::BTreeSet<_> = (0..64u8).filter_map(|n| choose_site(&options, [n; 32])).collect();
+        assert_eq!(picks.len(), 2, "with nothing viable the draw is free across every option");
+        assert_eq!(choose_site(&[], [0u8; 32]), None);
+    }
+
+    #[test]
+    fn the_better_site_is_likelier_never_certain() {
+        let good = SiteOption { class: StarClass::G, albedo: ratio(0, 1), orbit: ratio(1, 1), viability: ratio(1, 1), home: false };
+        let poor = SiteOption { class: StarClass::K, albedo: ratio(0, 1), orbit: ratio(1, 1), viability: ratio(1, 8), home: true };
+        let (mut g, mut p) = (0, 0);
+        for n in 0..=255u8 {
+            let mut seed = [0u8; 32];
+            seed[0] = n;
+            seed[1] = n.wrapping_mul(31);
+            match choose_site(&[good.clone(), poor.clone()], seed) {
+                Some(0) => g += 1,
+                Some(1) => p += 1,
+                _ => unreachable!(),
+            }
+        }
+        assert!(g > p, "viability weights the draw: good {g} vs poor {p}");
+        assert!(p > 0, "a poorer place is still a free choice: poor {p}");
+    }
+
+    #[test]
+    fn every_compiled_line_has_living_land_among_its_options() {
+        // The law the choice rests on: the band is never left with only dead
+        // places by the option set itself. Measured across many genesis digests.
+        for spec in crate::polities::founding_polities() {
+            let home = match (spec.star, spec.albedo.clone(), spec.orbit.clone()) {
+                (Some(c), Some(a), Some(o)) => Some((c, a, o)),
+                _ => None,
+            };
+            for n in 0..8u8 {
+                let (options, _) = founding_options(&spec.civilization, &Beacon::from_digest([n; 32]), home.clone());
+                assert!(
+                    options.iter().any(|o| o.viability > ratio(0, 1)),
+                    "{} (clade {}, {}) has no living land among {} options at digest {n}",
+                    spec.civilization.sigil,
+                    spec.civilization.clade,
+                    spec.civilization.metabolism,
+                    options.len()
+                );
+            }
+        }
     }
 
     #[test]

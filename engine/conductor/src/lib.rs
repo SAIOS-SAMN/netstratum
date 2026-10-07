@@ -309,6 +309,20 @@ pub const TARGET_RESERVE: (i64, i64) = (8, 1);
 /// GROWS up to its limit rather than being culled down to it.
 pub const FOUNDING_BAND: i64 = 4;
 
+/// **THE FOUNDING BAND, BOUNDED BY THE LAND** (G2). How many of the band the
+/// chosen site feeds before anything is built: `⌊K_pop⌋` read off the world
+/// at genesis (the syntropic wild flow over the per-capita ration), clamped
+/// to `[1, FOUNDING_BAND]`. A rate-0 capture line (a plasmoid draws no
+/// ration) has no ration-bound ceiling and arrives whole.
+pub fn founding_band(world: &World) -> i64 {
+    use num_traits::ToPrimitive;
+    if world.per_capita_ration() <= ratio(0, 1) {
+        return FOUNDING_BAND;
+    }
+    let k = world.population_ceiling(cfe::world::FIRST_ORB).floor().to_integer();
+    k.to_i64().unwrap_or(FOUNDING_BAND).clamp(1, FOUNDING_BAND)
+}
+
 /// The archetype CLASS a founding line seals at genesis (DIO-3a). The roster
 /// declares each line's CLADE (the species — soniform, cnidiform) but no
 /// class; 7 is the neutral baseline `science_lab` already reads for an
@@ -1580,11 +1594,42 @@ impl Polity {
             .own()
             .0;
         let beacon = Beacon::from_digest(digest);
-        let (derived_star, derived_albedo, derived_orbit) =
-            siting::diophantine_siting(&spec.civilization, &beacon);
-        let class = spec.star.unwrap_or(derived_star);
-        let albedo = spec.albedo.clone().unwrap_or(derived_albedo);
-        let orbit = spec.orbit.clone().unwrap_or(derived_orbit);
+        // THE BAND CHOOSES WHERE IT SETTLES (G2, operator 2026-10-07: "only
+        // give them options, freedom, and agency"). A pinned seat is the
+        // line's compiled HOME — one option, not an order — beside every
+        // continuous draw of its regime; the physics reads each option's
+        // viability and the band draws among them, viability-weighted and
+        // chronicle-seeded (`siting::choose_site`). Better land is likelier,
+        // never guaranteed. A home the physics refuses is REPORTED, never
+        // silently left unsited.
+        let home = match (spec.star, spec.albedo.clone(), spec.orbit.clone()) {
+            (Some(class), Some(albedo), Some(orbit)) => Some((class, albedo, orbit)),
+            _ => None,
+        };
+        let (options, refused) = siting::founding_options(&spec.civilization, &beacon, home);
+        if let Some(why) = refused {
+            eprintln!(
+                "genesis {}: the compiled home ({why}) is refused by the physics; the band chooses among {} derived sites",
+                spec.civilization.sigil,
+                options.len()
+            );
+        }
+        let pick = siting::choose_site(&options, digest).unwrap_or(0);
+        let chosen = options.get(pick).cloned().unwrap_or_else(|| {
+            let (class, albedo, orbit) = siting::diophantine_siting(&spec.civilization, &beacon);
+            siting::SiteOption { class, albedo, orbit, viability: ratio(0, 1), home: false }
+        });
+        eprintln!(
+            "genesis {}: the band settles {} — {:?} orbit {} albedo {} (viability {}, one of {} options)",
+            spec.civilization.sigil,
+            if chosen.home { "its compiled home" } else { "a derived site" },
+            chosen.class,
+            chosen.orbit,
+            chosen.albedo,
+            chosen.viability,
+            options.len()
+        );
+        let (class, albedo, orbit) = (chosen.class, chosen.albedo, chosen.orbit);
         world
             .commission_star(class)
             .expect("a fresh world has no sun yet");
@@ -1601,10 +1646,16 @@ impl Polity {
         // The spec's siting is Ratio-typed data; the doors prove it here.
         // `let _ =` already discarded refusals on this path, so an
         // unconstructible spec value sites nothing — same as before.
-        if let (Some(albedo), Some(orbit)) =
-            (cfe::dop::Unit::new(albedo), cfe::dop::Positive::new(orbit))
-        {
-            let _ = world.site_planet(cfe::world::FIRST_ORB, albedo, orbit, None, None);
+        match (cfe::dop::Unit::new(albedo.clone()), cfe::dop::Positive::new(orbit.clone())) {
+            (Some(albedo), Some(orbit)) => {
+                if let Err(refusal) = world.site_planet(cfe::world::FIRST_ORB, albedo, orbit, None, None) {
+                    eprintln!("genesis {}: the planet was NOT sited — {refusal:?}", spec.civilization.sigil);
+                }
+            }
+            _ => eprintln!(
+                "genesis {}: the planet was NOT sited — albedo {albedo} / orbit {orbit} fail the physics' doors",
+                spec.civilization.sigil
+            ),
         }
         // **DIO-3a: SEAL THE CLADE AT GENESIS** (operator ruling 2026-08-16). Until
         // sealed, every founding line reads the flatlander default (clade 2,
@@ -1622,6 +1673,17 @@ impl Polity {
         if let Some(clade) = cfe::almanac::table_clade_from_word(&spec.civilization.clade) {
             let _ = world.seal_taxon(NEUTRAL_ARCHETYPE_CLASS, clade);
         }
+        // THE FOUNDING BAND ARRIVES WITH THE COLONY, BOUNDED BY THE LAND (G2).
+        // The band founds the settlement; it is not a reward for raising a
+        // Habitat (that coupling let a first non-habitat build's famine lock
+        // the band out forever — every G2 cleave was born empty). Its size is
+        // the physics' reading of what this land feeds wild, before anything
+        // is built (`population_ceiling`, the syntropic flow over the ration),
+        // never more than FOUNDING_BAND and never less than one: a band does
+        // arrive, and what follows is the physics'.
+        let band = founding_band(&world);
+        world.settle_population(cfe::world::FIRST_ORB, band);
+        eprintln!("genesis {}: a founding band of {band} settles", spec.civilization.sigil);
         let world_name_for_level = spec.world_name.clone();
         Polity {
             chained: 0,
@@ -2022,20 +2084,10 @@ impl Polity {
                 .all(|(resource, need)| banked(&self.world, resource) >= need);
             if can_pay {
                 if let Some(tile) = next_free_tile(&self.world) {
-                    if self
-                        .world
-                        .zone_as(self.automaton, primary, tile, ZoneKind::Habitat)
-                        .is_ok()
-                    {
-                        // **THE AWAKENING** (COG Slice 2 activation). This is
-                        // the dedicated first-habitat seat (`labor.habitats ==
-                        // 0`), so it is a genuine 0→1 transition — the founding
-                        // band takes residence exactly once, and the population
-                        // goes LIVE. (build_step's own first-habitat path seeds
-                        // the same way; the two are mutually exclusive within a
-                        // beat, so a colony seeds a single band.)
-                        self.world.settle_population(primary, FOUNDING_BAND);
-                    }
+                    // The founding band arrived with the colony at genesis
+                    // (`founding_band`); a first Habitat raises living
+                    // capacity, it does not seed people.
+                    let _ = self.world.zone_as(self.automaton, primary, tile, ZoneKind::Habitat);
                 }
             }
         }
@@ -3293,18 +3345,10 @@ impl Polity {
                 return;
             }
         }
-        let hab_before = self.world.habitat_count(orb);
         if let Some(tile) = next_free_tile(&self.world) {
-            if self.world.zone_as(self.automaton, orb, tile, kind).is_ok()
-                && kind == ZoneKind::Habitat
-                && hab_before == 0
-            {
-                // THE FOUNDING BAND, carried from the retired build_step: the
-                // FIRST Habitat seeds the initial population (else no mouths ever
-                // rise and the board never comes alive).
-                self.world
-                    .settle_population(cfe::world::FIRST_ORB, FOUNDING_BAND);
-            }
+            // The founding band arrived with the colony at genesis
+            // (`founding_band`); a Habitat raises capacity, never seeds people.
+            let _ = self.world.zone_as(self.automaton, orb, tile, kind);
         }
     }
 
@@ -4142,6 +4186,17 @@ impl Polity {
             // `self.grown` (the vessel cognition COG-ATLAS/ΔH reads) fills for a
             // volumetric line exactly the way it does for a planar one, which is
             // the actual thing #173 exists to unblock.
+            //
+            // A CONFIRMED VOLUMETRIC CLOSE COUNTS (G2, operator 2026-10-07: "only
+            // give them options, freedom, and agency"). The thought used to be
+            // discarded here, so a volumetric line could never close, climb or
+            // cleave — a dead end written into the dispatch, not an outcome. A
+            // `Solved` whose certificate `think_volume_task` already verified
+            // (`verify_volume_certificate`, Pin A on every train pair) and whose
+            // test output matches now closes exactly as a planar solve does: the
+            // solve is recorded, counted, and the line climbs on mastery. The
+            // MINT stays deferred as documented above (no `WorkProof` — the
+            // proof slot is `None`), and the membrane's planar pairs are empty.
             let orb = cfe::world::FIRST_ORB;
             let price = Self::observe_price();
             if self.world.leisure_bank_of(orb) >= price {
@@ -4151,9 +4206,16 @@ impl Polity {
                 self.practise_autic_wall(vessel);
                 let vdifficulty = VolDifficulty::level(self.level);
                 let vtask = forge_volume(digest, vdifficulty);
-                let _ = think_volume_task(&vtask, self.grown.entry(vessel).or_default());
+                match think_volume_task(&vtask, self.grown.entry(vessel).or_default()) {
+                    solver::VolumeSolveRead::Solved { program, matches_expected: Some(true), certificate, .. } => {
+                        let word: Vec<String> = program.iter().map(|op| op.describe()).collect();
+                        Some((vtask.name.clone(), word.join(" → "), hex(&certificate.output), None, Vec::new()))
+                    }
+                    _ => None,
+                }
+            } else {
+                None
             }
-            None
         } else {
             let difficulty = Difficulty::level(self.level);
             let task = forge_task(digest, difficulty);
@@ -4424,8 +4486,7 @@ impl Polity {
                 // implies the cheap reach anyway, so this subsumes the
                 // path test rather than weakening it.
                 let mastered = trajectory_before == Trajectory::Growth;
-                let ladder_still_climbs =
-                    Difficulty::level(self.level + 1) != Difficulty::level(self.level);
+                let ladder_still_climbs = self.ladder_climbs(self.level);
                 if mastered && ladder_still_climbs {
                     self.level += 1;
                     self.streak = 0;
@@ -4452,10 +4513,21 @@ impl Polity {
     /// The mutation stays chronicle-seeded: the line's own history
     /// decides where its branches land on the manifold. The lineage
     /// pointer records LINE membership (LINEAGE-1), never parenthood.
+    /// Does THIS line's ladder still differentiate above `level`? A planar
+    /// line climbs the planar forge ladder, a volumetric line the volumetric
+    /// one — each read off its own saturation, never a remembered top.
+    fn ladder_climbs(&self, level: u32) -> bool {
+        if self.spec.civilization.perception == "volumetric" {
+            VolDifficulty::level(level) != VolDifficulty::level(u32::MAX)
+        } else {
+            Difficulty::climbs(level)
+        }
+    }
+
     fn divergence_step(&mut self, registry: &Registry) -> Option<PolitySpec> {
         // Divergence waits for the TOP of the ladder — derived from
         // the ladder, not from a remembered 5.
-        if self.cleaved || Difficulty::climbs(self.level) || self.solved < 20 {
+        if self.cleaved || self.ladder_climbs(self.level) || self.solved < 20 {
             return None;
         }
         let receipt = self.world.chronicle().receipts().last()?;
