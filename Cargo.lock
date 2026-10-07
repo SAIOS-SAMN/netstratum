@@ -547,8 +547,10 @@ name = "mycelium"
 version = "0.1.0"
 dependencies = [
  "blake3",
+ "ctrlc",
  "ed25519-dalek 2.2.0",
  "fs2",
+ "getrandom 0.2.17",
  "num-bigint",
  "num-integer",
  "num-rational",
@@ -557,15 +559,9 @@ dependencies = [
  "serde",
  "serde_json",
  "thiserror",
+ "tikv-jemalloc-ctl",
  "tikv-jemallocator",
  "tiny-keccak",
-]
-
-[[package]]
-name = "mycelium-uplink"
-version = "0.1.0"
-dependencies = [
- "mycelium 0.1.0",
 ]
 
 [[package]]
@@ -593,6 +589,19 @@ dependencies = [
  "cfg-if",
  "cfg_aliases",
  "libc",
+]
+
+[[package]]
+name = "ns-hypha"
+version = "0.1.0"
+dependencies = [
+ "blake3",
+ "cfe",
+ "ed25519-dalek 2.2.0",
+ "mycelium 0.1.0",
+ "num-bigint",
+ "num-rational",
+ "num-traits",
 ]
 
 [[package]]
@@ -656,6 +665,12 @@ name = "opaque-debug"
 version = "0.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c08d65885ee38876c4f86fa503fb49d7b507c2b62552df7c70b2fce627e06381"
+
+[[package]]
+name = "paste"
+version = "1.0.15"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "57c0d7b74b563b49d38dae00a0c37d4d6de9b432382b2892f0574ddcae73fd0a"
 
 [[package]]
 name = "physics"
@@ -981,6 +996,17 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.119",
+]
+
+[[package]]
+name = "tikv-jemalloc-ctl"
+version = "0.6.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "661f1f6a57b3a36dc9174a2c10f19513b4866816e13425d3e418b11cc37bc24c"
+dependencies = [
+ "libc",
+ "paste",
+ "tikv-jemalloc-sys",
 ]
 
 [[package]]

@@ -6,3 +6,6 @@ __pycache__/
 
 # Test scratch redirected off the 7.7G tmpfs (see memory: tmpfs-scratch-trap)
 .testtmp/
+
+# Pinned mycelium-v0.1.0 worktree (see engine/hypha/Cargo.toml)
+vendor/

@@ -1,0 +1,24 @@
+[package]
+name = "ns-hypha"
+version = "0.1.0"
+edition = "2021"
+description = "Netstratum's uplink to a mycelium hypha: the law register, the domain's founding, and the census folds of every colony's holdings, admitted by continuity on the court"
+
+[[bin]]
+name = "ns-hypha"
+path = "src/main.rs"
+
+[dependencies]
+# Pinned: vendor/mycelium is a git worktree of /opt/mycelium-v0.1.0 at a
+# stated commit (`git -C vendor/mycelium log -1`), the same build the
+# court we speak to runs. Bumping it is a deliberate act, never a side
+# effect of the mycelium tree moving (it lands WIRE- and LAYOUT-CHANGEs
+# several times a day).
+mycelium = { path = "../../vendor/mycelium" }
+cfe = { path = "../cfe" }
+# The signature crate mycelium signs folds with (a tier is its key).
+ed25519-dalek = "2.1"
+blake3.workspace = true
+num-bigint.workspace = true
+num-rational.workspace = true
+num-traits.workspace = true

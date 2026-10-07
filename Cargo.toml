@@ -1,7 +1,8 @@
 [workspace]
 resolver = "2"
+exclude = ["vendor"]
 members = [
-    "engine/ratio","engine/cfe", "engine/kernel", "engine/codec", "engine/rfa-core", "engine/physics", "engine/solver", "engine/solver-verify", "engine/scribe", "engine/ledger", "engine/lens", "engine/conductor", "engine/mesh", "engine/substrate", "engine/reduct", "clients/cli", "clients/mycelium-uplink", "xtask"]
+    "engine/ratio","engine/cfe", "engine/kernel", "engine/codec", "engine/rfa-core", "engine/physics", "engine/solver", "engine/solver-verify", "engine/scribe", "engine/ledger", "engine/lens", "engine/conductor", "engine/mesh", "engine/substrate", "engine/reduct", "clients/cli", "engine/hypha", "xtask"]
 
 [workspace.dependencies]
 blake3 = "1.5"
