@@ -203,12 +203,36 @@ pub fn fold(var_root: &str) -> std::io::Result<(u64, Ratio)> {
         Err(_) => Chronicle::new(),
     };
     let gauge = cfe::world::wrap_gauge(ratio(era as i64, 12));
+    // THE ANCIENT, read at the era's close (docs/58 §4): the living lines are
+    // the worlds whose chronicles have not collapsed, and their sigils the
+    // registry's; sealed before the era folds.
+    let registry = Registry::at(root.join("registry"));
+    let mut living = std::collections::BTreeSet::new();
+    for dir in std::fs::read_dir(&worlds).into_iter().flatten().flatten().map(|e| e.path()) {
+        let Ok(chronicle) = cfe::persist::load(&dir.join("chronicle.tlv")) else { continue };
+        let world = cfe::world::World::resume(chronicle);
+        if world.collapsed().is_some() {
+            continue;
+        }
+        // A world's line is named by its conductor's handle, `<sigil>-conductor`.
+        if let Some(sigil) = world.committed().entities.iter().find_map(|e| e.handle.strip_suffix("-conductor").map(str::to_string)) {
+            living.insert(sigil);
+        }
+    }
+    let ancient = ancient_of(&registry, &living);
     let stamp = ledger
         .receipts()
         .iter()
         .map(|r| r.stamp())
         .max()
         .unwrap_or(0);
+    if let Some((sigil, tree)) = ancient {
+        ledger.append(
+            cfe::dop::ClosureEvent::AncientArose { sigil, tree, living: living.len() as u64 },
+            stamp,
+            vec![],
+        );
+    }
     ledger.append(
         cfe::dop::ClosureEvent::EraFolded {
             era,
@@ -231,6 +255,46 @@ pub fn fold(var_root: &str) -> std::io::Result<(u64, Ratio)> {
     // exists. The era's roster is the roster the binary that sealed it
     // was compiled with — recorded by the commit, not by a copy.
     Ok((era, gauge))
+}
+
+/// **THE ANCIENT, BY LINEAGE** (docs/58 §4, accepted by the coordinator
+/// 2026-10-08). Every LIVING line's tree is itself and every living line
+/// whose lineage (the registry's DAG, `Civilization.lineage`, followed
+/// transitively) leads back to it. The ancient is the living line whose tree
+/// is STRICTLY the largest; `(sigil, tree size)`. No threshold and no
+/// tie-break: when two trees are equal, convergence has singled out no one,
+/// and no ancient stands. It may change hands as clades rise and fall.
+pub fn ancient_of(registry: &Registry, living: &std::collections::BTreeSet<String>) -> Option<(String, u64)> {
+    let parents: std::collections::BTreeMap<String, Vec<String>> =
+        registry.list().into_iter().map(|c| (c.sigil, c.lineage)).collect();
+    let mut tree: std::collections::BTreeMap<String, u64> = std::collections::BTreeMap::new();
+    for line in living {
+        // Every ancestor of a living line (and the line itself) counts it once.
+        let mut seen = std::collections::BTreeSet::new();
+        let mut walk = vec![line.clone()];
+        while let Some(at) = walk.pop() {
+            if !seen.insert(at.clone()) {
+                continue;
+            }
+            *tree.entry(at.clone()).or_default() += 1;
+            if let Some(up) = parents.get(&at) {
+                walk.extend(up.iter().cloned());
+            }
+        }
+    }
+    let mut best: Option<(String, u64)> = None;
+    let mut tied = false;
+    for (line, size) in tree.into_iter().filter(|(line, _)| living.contains(line)) {
+        match &best {
+            Some((_, top)) if size < *top => {}
+            Some((_, top)) if size == *top => tied = true,
+            _ => {
+                best = Some((line, size));
+                tied = false;
+            }
+        }
+    }
+    best.filter(|_| !tied)
 }
 
 /// SCIENCE-1 (10 §3d): the RELEVANCE table — which industries exist

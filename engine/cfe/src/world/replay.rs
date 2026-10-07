@@ -487,7 +487,7 @@ impl Replayer {
         // docs/58 — the Big Bang and a world's citation of it are IDENTITY:
         // they enter the hash chain (so everything after descends from the
         // origin) and move nothing in committed state.
-        ClosureEvent::UniverseFounded { .. } | ClosureEvent::UniverseCited { .. } => {}
+        ClosureEvent::UniverseFounded { .. } | ClosureEvent::UniverseCited { .. } | ClosureEvent::AncientArose { .. } => {}
         // CHRONICLE-COMPACT-1: schema only — the checkpoint itself carries no
         // committed-state effect (it is a bookkeeping fact about the
         // chronicle, not a change to the world). The load-bearing use

@@ -8422,6 +8422,10 @@ fn chronicle(world: &World, style: &Style) {
                 "✶ born of the universe {} (its Big Bang, cited first)",
                 style.strong(&hex(universe))
             ),
+            cfe::dop::ClosureEvent::AncientArose { sigil, tree, living } => format!(
+                "✶ THE ANCIENT ARISES — {} (its line holds {tree} of {living} living)",
+                style.strong(sigil)
+            ),
             cfe::dop::ClosureEvent::UniverseFounded { topology, span, over, .. } => format!(
                 "✶ THE BIG BANG — a {topology} of span {span}{}",
                 if over.is_some() { " (re-founded over an older ledger)" } else { "" }

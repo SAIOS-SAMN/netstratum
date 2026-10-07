@@ -407,7 +407,7 @@
 //!         same algorithm solver::consilience already uses for cross-line
 //!         agreement, read at vessel scope. Recorded only; nothing reads
 //!         it yet. orbit[32] ‖ hardness u32 le.)
-//!    Phase-5 claim ledger: next free **192** (190 UniverseFounded, 191 UniverseCited — docs/58; 186 ResourceStocksSwept, 184 VeinRejuvenated —
+//!    Phase-5 claim ledger: next free **193** (190 UniverseFounded, 191 UniverseCited, 192 AncientArose — docs/58; 186 ResourceStocksSwept, 184 VeinRejuvenated —
 //!    ONT-3 resource rejuvenation as derivation: a worked vein RECOVERS at a
 //!    collect touch, its inverse-receipt integral `rejuvenated` growing by the
 //!    KEPLERIAN orbital-forcing quantum (one `natural/REGROWTH_GRAIN` per
@@ -3251,6 +3251,13 @@ pub enum ClosureEvent {
     /// digest and every matter identity derived from it — descends from the
     /// universe's origin. Identity only: nothing moves.
     UniverseCited { universe: [u8; 32] },
+    /// **THE ANCIENT ARISES (tag 192, docs/58 §4)** — read at an era's close
+    /// and sealed on the universe ledger: the living line whose living
+    /// descendant tree is STRICTLY the largest (`tree` of `living` lines). It
+    /// holds the universe's reserve, keys and mouth from here (until then the
+    /// conductor holds them in trust). By lineage, never by appointment; it
+    /// may change hands at a later close. Identity only: nothing moves.
+    AncientArose { sigil: String, tree: u64, living: u64 },
     /// **THE GALACTIC REGION (GALACTIC-1, tag 187)** — a world's charted
     /// `(X,Y,Z)` quantized onto a coarse galactic grid cell and hashed once
     /// at genesis into a REGIONAL weighting seed. Purely additive: an old
@@ -4591,6 +4598,13 @@ impl ClosureEvent {
             }
             Self::UniverseCited { universe } => {
                 tlv::put(191, universe, &mut out);
+            }
+            Self::AncientArose { sigil, tree, living } => {
+                let mut value = (sigil.len() as u16).to_le_bytes().to_vec();
+                value.extend_from_slice(sigil.as_bytes());
+                value.extend_from_slice(&tree.to_le_bytes());
+                value.extend_from_slice(&living.to_le_bytes());
+                tlv::put(192, &value, &mut out);
             }
             Self::ChronicleCheckpointed { folded_hash, receipt_count } => {
                 // folded_hash[32] ‖ receipt_count u64 le — a world-wide
@@ -6026,6 +6040,13 @@ impl ClosureEvent {
             191 => {
                 let universe: [u8; 32] = value.get(..32)?.try_into().ok()?;
                 (value.len() == 32).then_some(Self::UniverseCited { universe })
+            }
+            192 => {
+                let len = u16::from_le_bytes(value.get(..2)?.try_into().ok()?) as usize;
+                let sigil = String::from_utf8(value.get(2..2 + len)?.to_vec()).ok()?;
+                let tree = u64::from_le_bytes(value.get(2 + len..10 + len)?.try_into().ok()?);
+                let living = u64::from_le_bytes(value.get(10 + len..18 + len)?.try_into().ok()?);
+                (value.len() == 18 + len).then_some(Self::AncientArose { sigil, tree, living })
             }
             172 => Some(Self::PracticesLapsed { count: *value.first()? }),
             168 => Some(Self::PressureEbbed {

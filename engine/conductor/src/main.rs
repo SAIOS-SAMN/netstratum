@@ -191,6 +191,7 @@ fn main() {
         println!("conductor: resumed beat {beat} from {}", beat_path.display());
     }
     let mut total_cleaves: u64 = 0;
+    let mut ancient: Option<(String, u64)> = None;
     let mut announced_pause = false;
     loop {
         let (paused, cadence, advance) = read_control(cadence_secs);
@@ -325,6 +326,21 @@ fn main() {
         for name in conductor::retire_collapsed(&mut worlds, &book) {
             println!("beat {beat}: COLLAPSE — {name} has no people left; it leaves the roster, its chronicle kept whole");
         }
+        // THE ANCIENT, read live (docs/58 §4) and announced when it changes;
+        // it is SEALED only at an era's close (`fold`).
+        let living: std::collections::BTreeSet<String> =
+            worlds.iter().map(|p| p.spec.civilization.sigil.clone()).collect();
+        let now_ancient = conductor::ancient_of(&registry, &living);
+        if now_ancient.as_ref().map(|(s, _)| s) != ancient.as_ref().map(|(s, _)| s) {
+            match &now_ancient {
+                Some((sigil, tree)) => println!(
+                    "beat {beat}: THE ANCIENT — {sigil}'s line holds {tree} of {} living lines (sealed at the era's close)",
+                    living.len()
+                ),
+                None => println!("beat {beat}: no ancient stands — no line's living tree is the strict largest"),
+            }
+        }
+        ancient = now_ancient;
         total_cleaves += newborns.len() as u64;
         for spec in newborns {
             println!(

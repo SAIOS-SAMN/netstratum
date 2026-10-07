@@ -1680,6 +1680,7 @@ fn covered(event: &ClosureEvent) -> bool {
         // seed above and the universe ledger's GalaxyObserved.
         | E::UniverseCited { .. }
         | E::UniverseFounded { .. }
+        | E::AncientArose { .. }
         // CHRONICLE-COMPACT-1 (tag 188): a checkpoint is banked-neutral
         // exactly like the regional seed above — it moves no bank, no
         // element, no key, a pure bookkeeping fact about the chronicle
@@ -2701,6 +2702,7 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         E::EntityRegistered { .. } | E::ScopeGranted { .. } | E::ScopeRevoked { .. }
         | E::EraAnnexed { .. } | E::EraFolded { .. } | E::GalaxyObserved { .. }
         | E::UniverseFounded { .. }    // docs/58: the universe's origin
+        | E::AncientArose { .. }       // docs/58: the universe's keeper
         | E::HandoffSealed { .. }
         | E::ResourceTransferred { .. } | E::ApertureSent { .. } | E::ApertureReceived { .. }
         | E::DiscoveryMinted { .. } | E::SovereignUnionSealed { .. }
@@ -2996,7 +2998,7 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         // and universe-ledger entries: no actor scope. Governed by other
         // invariants (conservation, decay) or their own protocol law.
         E::FamineStruck { .. } | E::FamineRelieved { .. } | E::EraAnnexed { .. }
-        | E::GalaxyObserved { .. } | E::UniverseFounded { .. } | E::OverheatStruck { .. } | E::OverheatCleared { .. }
+        | E::GalaxyObserved { .. } | E::UniverseFounded { .. } | E::AncientArose { .. } | E::OverheatStruck { .. } | E::OverheatCleared { .. }
         | E::VentSettled { .. } | E::DemurrageSettled { .. } | E::DemurrageTouched { .. }
         // #136 — the smelt-sweep is a world-ledger migration (a one-time grain floor),
         // no actor scope; governed by conservation, like the demurrage settle beside it.
