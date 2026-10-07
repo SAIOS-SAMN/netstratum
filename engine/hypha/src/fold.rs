@@ -41,6 +41,10 @@ pub mod lane {
     pub const MONEY: usize = 1;
 }
 
+/// A streamed publication's part bound, under the court's 786,432-byte
+/// encoded limit with room for the frame around it.
+pub const PART_BYTES: usize = 700_000;
+
 /// The tier's signing key, from `home/tier-<name>.key` (minted on first use).
 pub fn tier_key(home: &Path, name: &str) -> io::Result<ed25519_dalek::SigningKey> {
     std::fs::create_dir_all(home)?;
@@ -83,6 +87,54 @@ pub fn fold(key: &ed25519_dalek::SigningKey, prefix: [u8; 32], mut rows: Vec<Net
 }
 
 impl Uplink {
+    /// 78.125 — a fold's finality at the court's head, by its receipt's
+    /// stamp. A reading: nothing is sealed by it.
+    pub fn finality(&self, at: mycelium::chronometry::Stamp) -> io::Result<mycelium::anastome::dialogue::challenge::Finality> {
+        self.session.finality(at)
+    }
+
+    /// PUBLISH A FOLD'S PREFIX to the court for replay (78.125 evidence):
+    /// opened with the fold's own rows and declared, then its entries in
+    /// parts of at most [`PART_BYTES`] encoded, so a fold of any span
+    /// streams. Signed by `key` (any filer may publish). Returns the court's
+    /// last answer — `Upheld` when the replay reaches the cited prefix.
+    pub fn publish(
+        &self,
+        key: &ed25519_dalek::SigningKey,
+        at: mycelium::chronometry::Stamp,
+        entries: Vec<mycelium::anastome::dialogue::challenge::Entry>,
+    ) -> io::Result<mycelium::anastome::dialogue::challenge::Challenged> {
+        use mycelium::anastome::dialogue::challenge::{Challenge, Challenged};
+        let (rows, declared) = crate::line::fold_of(&entries);
+        let opened = self.session.challenge(&Challenge::Open { fold: at, rows, declared, children: Vec::new() }.sign(key))?;
+        if !matches!(opened, Challenged::Streaming { .. }) {
+            return Ok(opened);
+        }
+        let mut last = opened;
+        let mut part = Vec::new();
+        let mut bytes = 0usize;
+        let mut parts: Vec<Vec<_>> = Vec::new();
+        for e in entries {
+            let size = 2 + (e.rows.len() + e.declared.len()) * (32 + 64) + 4;
+            if !part.is_empty() && bytes + size > PART_BYTES {
+                parts.push(std::mem::take(&mut part));
+                bytes = 0;
+            }
+            bytes += size;
+            part.push(e);
+        }
+        if !part.is_empty() {
+            parts.push(part);
+        }
+        for entries in parts {
+            last = self.session.challenge(&Challenge::Part { fold: at, entries }.sign(key))?;
+            if !matches!(last, Challenged::Streaming { .. } | Challenged::Upheld { .. }) {
+                break;
+            }
+        }
+        Ok(last)
+    }
+
     /// Put a signed fold to the court for admission.
     pub fn uplink_fold(&self, f: &SignedFold) -> io::Result<Uplinked> {
         self.session.uplink_fold(f)

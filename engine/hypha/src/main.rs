@@ -8,6 +8,13 @@
 //!   ns-hypha found                      found netstratum's domain on the court (once)
 //!   ns-hypha mark <world-dir>           record a people as folded through its chronicle's end
 //!   ns-hypha epoch <name>               set the hot colonies line aside, restart it at zero
+//!   ns-hypha prune                      archive hot entries whose folds the court reads settled
+//!   ns-hypha publish                    put every provisional hot fold's prefix to replay
+//!
+//! `census --send` then publishes the folds it had admitted (`--no-publish`
+//! to skip): an upheld fold cannot be demanded, so no deadline can default
+//! it. One stream at a time, in fold order; `Refused(Published)` is answered.
+//! (Coordinator ruling 2026-10-07: self-publication is the default.)
 //!
 //! A census resumes from the people's cursor (`var/uplink/cursor-colonies`),
 //! so no receipt is ever netted twice; `--last N` bounds only a people's
@@ -124,9 +131,11 @@ fn main() -> ExitCode {
             }
         },
         Some("census") => census_cmd(&args, Some(&up), &home),
+        Some("prune") => prune_cmd(&up, &home),
+        Some("publish") => publish_cmd(&up, &home),
         Some("mark") => mark_cmd(&args, &home),
         _ => {
-            eprintln!("usage: ns-hypha laws|lexicon|probe|found|mark <world-dir>|epoch <name>|census <world-dir> [--last N] [--send] [--at host:port] [--home dir]");
+            eprintln!("usage: ns-hypha laws|lexicon|probe|found|mark <world-dir>|epoch <name>|prune|publish|census <world-dir> [--last N] [--send] [--at host:port] [--home dir]");
             ExitCode::from(2)
         }
     }
@@ -139,6 +148,108 @@ fn load(dir: &Path) -> Result<(String, cfe::vrp::Chronicle), ExitCode> {
         Err(e) => {
             eprintln!("ns-hypha: {}: the chronicle did not load: {e:?}", dir.display());
             Err(ExitCode::from(1))
+        }
+    }
+}
+
+/// PUBLISH every hot fold the court still reads Provisional: its entries
+/// streamed for replay, so it is upheld before anyone can demand it.
+fn publish_cmd(up: &Uplink, home: &Path) -> ExitCode {
+    use ns_hypha::mycelium::anastome::dialogue::challenge::{ChallengeRefusal, Challenged, Finality};
+    use ns_hypha::mycelium::chronometry::Stamp;
+    let (line, log, key) = match TierLine::open(home, "colonies").and_then(|l| Ok((l, FoldLog::open(home, "colonies")?, tier_key(home, "colonies")?))) {
+        Ok(x) => x,
+        Err(e) => {
+            eprintln!("ns-hypha: the colonies line: {e}");
+            return ExitCode::from(2);
+        }
+    };
+    let mut ok = true;
+    for f in log.folds.iter().filter(|f| f.first >= line.offset && f.first + f.count <= line.total()) {
+        let Some(at) = Stamp::from_key(&f.at) else {
+            eprintln!("  fold at entry {}: an unreadable stamp", f.first);
+            ok = false;
+            continue;
+        };
+        match up.finality(at) {
+            Ok(Finality::Provisional { .. }) => {}
+            Ok(other) => {
+                println!("  fold at entries [{}, {}): {other:?}; nothing to publish", f.first, f.first + f.count);
+                continue;
+            }
+            Err(e) => {
+                eprintln!("  fold at entry {}: finality not read: {e}", f.first);
+                ok = false;
+                continue;
+            }
+        }
+        let lo = (f.first - line.offset) as usize;
+        let entries: Option<Vec<_>> = line.entries[lo..lo + f.count as usize].iter().map(|e| ns_hypha::line::decode_entry(&e.entry)).collect();
+        let Some(entries) = entries else {
+            eprintln!("  fold at entry {}: an entry on the line does not read", f.first);
+            ok = false;
+            continue;
+        };
+        match up.publish(&key, at, entries) {
+            Ok(c @ Challenged::Upheld { .. }) => println!("  fold at entries [{}, {}): {c:?}", f.first, f.first + f.count),
+            // Upheld before: the court holds the replay, and no demand can
+            // be made on it — the fold is answered.
+            Ok(Challenged::Refused(ChallengeRefusal::Published)) => println!("  fold at entries [{}, {}): already upheld", f.first, f.first + f.count),
+            Ok(c) => {
+                println!("  fold at entries [{}, {}): NOT UPHELD {c:?}", f.first, f.first + f.count);
+                ok = false;
+            }
+            Err(e) => {
+                eprintln!("  fold at entry {}: the court did not answer: {e}", f.first);
+                ok = false;
+            }
+        }
+    }
+    if ok {
+        ExitCode::SUCCESS
+    } else {
+        ExitCode::from(1)
+    }
+}
+
+/// PRUNE BY FINALITY: archive the hot entries netted only by folds the
+/// court reads `Final` or `PreLine` — never Provisional, Blocked, Falsified,
+/// Unwound or Unrecorded — walking the folds in order and stopping at the
+/// first that is not settled.
+fn prune_cmd(up: &Uplink, home: &Path) -> ExitCode {
+    use ns_hypha::mycelium::anastome::dialogue::challenge::Finality;
+    use ns_hypha::mycelium::chronometry::Stamp;
+    let (mut line, log) = match TierLine::open(home, "colonies").and_then(|l| Ok((l, FoldLog::open(home, "colonies")?))) {
+        Ok(x) => x,
+        Err(e) => {
+            eprintln!("ns-hypha: the colonies line: {e}");
+            return ExitCode::from(2);
+        }
+    };
+    let mut unread = None;
+    let n = log.prunable(&line, |f| {
+        let read = Stamp::from_key(&f.at).ok_or_else(|| "an unreadable stamp".to_string()).and_then(|at| up.finality(at).map_err(|e| e.to_string()));
+        println!("  fold at entries [{}, {}): {read:?}", f.first, f.first + f.count);
+        match read {
+            Ok(Finality::Final { .. } | Finality::PreLine) => true,
+            Ok(_) => false,
+            Err(e) => {
+                unread = Some(e);
+                false
+            }
+        }
+    });
+    if let Some(e) = unread {
+        eprintln!("ns-hypha: a finality was not read ({e}); pruned only what was read settled");
+    }
+    match line.prune_through(n) {
+        Ok(()) => {
+            println!("prune: {n} entries archived; hot line now {} entries from entry {}", line.entries.len(), line.offset);
+            ExitCode::SUCCESS
+        }
+        Err(e) => {
+            eprintln!("ns-hypha: the prune did not land: {e}");
+            ExitCode::from(1)
         }
     }
 }
@@ -308,8 +419,12 @@ fn census_cmd(args: &[String], up: Option<&Uplink>, home: &Path) -> ExitCode {
             }
         }
     }
-    if up.is_none() {
-        println!("  (not sent: pass --send to put the folds to the court)");
+    match up {
+        None => {
+            println!("  (not sent: pass --send to put the folds to the court)");
+            ExitCode::SUCCESS
+        }
+        Some(up) if !args.iter().any(|a| a == "--no-publish") => publish_cmd(up, home),
+        Some(_) => ExitCode::SUCCESS,
     }
-    ExitCode::SUCCESS
 }

@@ -51,6 +51,7 @@
 //! source commitment would come as a law for every domain, never a
 //! netstratum field); it is the tier's pointer back to the receipt.
 
+use mycelium::anastome::dialogue::challenge::Entry as CourtEntry;
 use mycelium::anastome::dialogue::uplink::{Net, TierFold};
 use std::collections::BTreeMap;
 use std::fs::{self, OpenOptions};
@@ -339,6 +340,50 @@ pub fn entry_bytes(mut rows: Vec<Net>, mut declared: Vec<Net>) -> Vec<u8> {
     TierFold { tier: [0; 32], prefix: [0; 32], rows, declared, children: Vec::new() }.rows_bytes()
 }
 
+fn take_nets(b: &[u8], p: &mut usize) -> Option<Vec<Net>> {
+    let n = mycelium::transducer::address::take_key_count(b, p)?;
+    (0..n)
+        .map(|_| {
+            let who: [u8; 32] = b.get(*p..*p + 32)?.try_into().ok()?;
+            *p += 32;
+            let mut lanes = [0i128; 4];
+            for l in &mut lanes {
+                *l = i128::from_le_bytes(b.get(*p..*p + 16)?.try_into().ok()?);
+                *p += 16;
+            }
+            Some((who, lanes))
+        })
+        .collect()
+}
+
+/// An entry's bytes read back as the court's [`CourtEntry`] — whole, or
+/// `None` (a byte left over is no entry).
+pub fn decode_entry(b: &[u8]) -> Option<CourtEntry> {
+    let mut p = 0;
+    let rows = take_nets(b, &mut p)?;
+    let declared = take_nets(b, &mut p)?;
+    (p == b.len()).then_some(CourtEntry { rows, declared })
+}
+
+/// A fold's own rows and declared, re-derived from the entries it nets:
+/// per identity per lane, summed, all-zero identities dropped, ascending —
+/// exactly how the census wrote the fold, so it proves against the receipt.
+pub fn fold_of(entries: &[CourtEntry]) -> (Vec<Net>, Vec<Net>) {
+    let sum = |pick: &dyn Fn(&CourtEntry) -> &Vec<Net>| {
+        let mut by: BTreeMap<[u8; 32], [i128; 4]> = BTreeMap::new();
+        for e in entries {
+            for (who, lanes) in pick(e) {
+                let at = by.entry(*who).or_default();
+                for (a, v) in at.iter_mut().zip(lanes) {
+                    *a += v;
+                }
+            }
+        }
+        by.into_iter().filter(|(_, l)| l.iter().any(|v| *v != 0)).collect::<Vec<Net>>()
+    };
+    (sum(&|e| &e.rows), sum(&|e| &e.declared))
+}
+
 /// HOW FAR EACH PEOPLE'S CHRONICLE HAS BEEN FOLDED on a tier — so no
 /// receipt is netted twice. `home/cursor-<tier>`, one line per people:
 /// `people<TAB>receipts folded<TAB>hex hash of the last receipt folded`.
@@ -467,6 +512,31 @@ mod tests {
         assert_eq!((fresh.base, fresh.offset, fresh.entries.len()), ([0; 32], 6, 0));
         assert_eq!(fresh.peek(b"x"), next_head(&[0; 32], b"x"));
         let _ = fs::remove_dir_all(&home);
+    }
+
+    #[test]
+    fn an_entry_reads_back_whole_and_a_fold_re_derives_from_its_entries() {
+        let a = entry_bytes(vec![([2; 32], [5, 0, 0, 0]), ([1; 32], [-5, 0, 0, 0])], vec![]);
+        let b = entry_bytes(vec![([1; 32], [5, 0, 0, 0]), ([4; 32], [0, 3, 0, 0])], vec![([7; 32], [0, 3, 0, 0])]);
+        let (ea, eb) = (decode_entry(&a).unwrap(), decode_entry(&b).unwrap());
+        assert_eq!(entry_bytes(ea.rows.clone(), ea.declared.clone()), a);
+        let mut long = a.clone();
+        long.push(0);
+        assert!(decode_entry(&long).is_none());
+        let (rows, declared) = fold_of(&[ea, eb]);
+        assert_eq!(rows, vec![([2; 32], [5, 0, 0, 0]), ([4; 32], [0, 3, 0, 0])], "identity 1 nets to zero and drops");
+        assert_eq!(declared, vec![([7; 32], [0, 3, 0, 0])]);
+    }
+
+    #[test]
+    fn the_line_steps_exactly_as_the_court_replays_it() {
+        use mycelium::anastome::dialogue::challenge::{line_head, Entry as CourtEntry};
+        let rows = vec![([2; 32], [5, 0, 0, 0]), ([1; 32], [-5, 0, 0, 0])];
+        let declared = vec![([3; 32], [0, 7, 0, 0])];
+        let ours = next_head(&[9; 32], &entry_bytes(rows.clone(), declared.clone()));
+        let mut sorted = rows;
+        sorted.sort_by_key(|(w, _)| *w);
+        assert_eq!(ours, line_head([9; 32], &[CourtEntry { rows: sorted, declared }]));
     }
 
     #[test]
