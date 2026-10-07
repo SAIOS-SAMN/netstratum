@@ -123,3 +123,64 @@ defines it as one that opens the ROOM (creates capacity) rather than appointing.
 3. Does netstratum's reserve (2(e), μ conversion) hold μ, or is it held in
    netstratum's own money (STAMP) and translated only at a wormhole mouth? The
    coordinator ruled reserve and bonds opt-in; nothing is posted.
+
+## 6. Rulings received (coordinator, for the operator, 2026-10-08)
+
+1. **One network universe = one Big Bang = one domain.** Each netstratum
+   universe root with its own origin is its own universe (78.86) and gets its
+   own domain on the court, founded FROM its `UniverseFounded` record through a
+   shared UNIVERSE GENESIS act that mycelium-opus is building (a sub-kind of
+   ACT_DOMAIN). Not an H-lane word: the domain's root. Nothing goes to the
+   court for the origin until that act lands.
+2. **The ancient by lineage is ACCEPTED** as netstratum's design (§4). Until
+   one arises, the keys stay in trust with the conductor, ON RECORD.
+3. **The reserve holds μ** (2(e)): μ only moves key to key. STAMP stays
+   netstratum's in-game value on G, crossing to μ only by conversion against
+   the reserve at the ancient's rate.
+4. **The operator's universe principle:** spheres, manifolds and tubes, joined
+   by fibres, strings and tethers. FLUID, never rigid, with no straight-line
+   motion. Mass orbits stars, stars orbit cores, and cores are Einstein–Cartan
+   bounces that RECYCLE matter and energy. A self-maintaining, growing
+   universe, not a heat sink. Close every matter-destroying sink.
+
+## 7. The universe's matter budget, MEASURED (G2, 2026-10-08)
+
+Every world's census summed by receipt kind
+(`cargo run --release -p ns-hypha --example sinks -- var-g2`), with aperture
+legs paired by deal across the universe (`g2_legs`). These are the places
+netstratum's own physics destroys matter today (amounts in whole units):
+
+| Sink | What vanishes | G2 total |
+|---|---|---|
+| Aperture MELT (transit) | `amount × melt` leaves the sender and reaches no one (`stamp_aperture_transfer`, `aperture_transfer`); every leg pairs | STAMP 3,535 · Iron 65.1 · Biomass 6.8 |
+| `UpkeepSettled` | zone upkeep, burned | Iron 2,206 · Biomass 112 · Alloy 95 |
+| `FamineStruck` | the draw on a starving bank | Iron 552 · Alloy 52 · Biomass 15 |
+| `ZoneBuilt` | build cost, embodied (a raze refunds half; the other half is gone) | Biomass 435 · Iron 240 · Alloy 100 |
+| `ScrapSalvaged`, `ScienceSeated`, `ChemCataloged`, `EstateSurveyed`, `ParcelConveyed` postage | fees, burned | Iron ~181 · Crystal ~43 · Biomass ~13 |
+| `TitheReceipted` (founding tithe to the ancient) | debited, lands nowhere (§2) | — |
+
+Sources, for contrast: `YieldCollected` (the stars' light made into Biomass,
+Iron, Alloy and Diamond: 35,898 in all), `DiscoveryMinted` (Crystal from
+proved work: 5,468), and founding endowments.
+
+### PROPOSED: the core recycles
+
+- **The universe's core** is a black hole at the galactic centre (the
+  "Black hole" of MU-LEXICON §1: a sink of mass and value at its place). It
+  is a universe-ledger account, exact and receipted. Every sink above
+  deposits there instead of vanishing:
+  - the melt in transit;
+  - upkeep and fees burned;
+  - the unrefunded half of a raze;
+  - the ancient's tithe, held for the ancient once one arises.
+- **The core's bounce** is the era fold (11_AEON §5) that netstratum already
+  has. When an era closes, everything the core accrued re-enters the next era
+  through its white hole (MU-LEXICON §1: a source returning what the black
+  hole took). It goes as the new sheet's founding endowments and its veins'
+  richness, so matter is conserved across eras exactly. Within an era it flows
+  core-ward, as the principle says ("stars orbit cores").
+- **No rate is chosen:** the core holds what it took, and the bounce returns
+  all of it. The open question for the operator is whether the bounce is ONLY
+  the era fold (an operator act today), or also a continuous white-hole flow
+  within an era. A continuous flow would need a rate, which this design
+  declines to invent.
