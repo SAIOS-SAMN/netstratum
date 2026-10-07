@@ -4,10 +4,15 @@
 #
 # A universe is ONE directory (its "var root"):
 #
-#   polities.json   the NPC roster the conductor seats at genesis
-#   registry/        one file per civilization
+#   registry/        one card per civilization registered — the compiled
+#                    seats at genesis, every cleave, every registration
+#                    (`<sigil>.civ`), and where a cleave was founded
+#                    (`<sigil>.seat`)
 #   worlds/          one directory per world — chronicle, receipts, lens exports
 #   conductor.ctl    the operator control line (paused / cadence N)
+#
+# The founding roster is COMPILED (engine/conductor/src/polities.rs, 22
+# seats); no roster file is read. New civilizations arise by divergence.
 #
 # Nothing here leaves a process running. `install` prepares the directory
 # and founds the worlds with a single bounded beat, then exits. `run` is
@@ -20,14 +25,9 @@
 #   ./install.sh wipe  --var demo      remove ./demo
 #   ./install.sh status --var demo     what stands at ./demo
 #   ./install.sh run   --var demo      start the conductor against ./demo
-#   ./install.sh export-roster --var demo
-#                                      re-emit ./demo's roster into seeds/
 #
 # Options:
 #   --var ROOT       universe root, repo-relative unless absolute (default: var)
-#   --roster FILE    NPC roster to seat. Default: seeds/aeon1-polities.json.
-#                    Pass "founding" to let the conductor write the five
-#                    polities built into the binary instead.
 #   --no-build       skip cargo build; use whatever already sits in target/
 #   --no-genesis     prepare files only, do not found the worlds
 #   --cadence N      seconds between beats, for `run` (default: 2)
@@ -39,11 +39,9 @@
 set -euo pipefail
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DEFAULT_ROSTER="seeds/aeon1-polities.json"
 
 command_name="install"
 var_root="var"
-roster=""
 do_build=1
 do_genesis=1
 cadence=2
@@ -64,12 +62,9 @@ netstratum install.sh — stand up a clean universe
   ./install.sh wipe             remove a universe root
   ./install.sh status           report what stands at a root
   ./install.sh run              start the conductor against a root
-  ./install.sh export-roster    re-emit a root's roster into seeds/
 
 Options:
   --var ROOT      universe root, repo-relative unless absolute (default: var)
-  --roster FILE   roster to seat (default: seeds/aeon1-polities.json;
-                  "founding" = the five polities built into the binary)
   --no-build      skip cargo build
   --no-genesis    prepare files only; do not found the worlds
   --cadence N     seconds between beats, for run (default: 2)
@@ -82,7 +77,7 @@ USAGE
 parse_args() {
   if [ $# -gt 0 ]; then
     case "$1" in
-      install|fresh|wipe|status|run|export-roster)
+      install|fresh|wipe|status|run)
         command_name="$1"; shift ;;
       -h|--help)
         usage 0 ;;
@@ -91,7 +86,7 @@ parse_args() {
   while [ $# -gt 0 ]; do
     case "$1" in
       --var)     [ $# -ge 2 ] || die "--var needs a directory"; var_root="$2"; shift 2 ;;
-      --roster)  [ $# -ge 2 ] || die "--roster needs a file"; roster="$2"; shift 2 ;;
+      --roster)  die "--roster is gone: the founding roster is compiled (engine/conductor/src/polities.rs)" ;;
       --cadence) [ $# -ge 2 ] || die "--cadence needs a number"; cadence="$2"; shift 2 ;;
       --no-build)   do_build=0; shift ;;
       --no-genesis) do_genesis=0; shift ;;
@@ -145,7 +140,7 @@ world_count() {
 registry_count() {
   local root="$1" n=0 entry
   if [ -d "$root/registry" ]; then
-    for entry in "$root/registry"/*.json; do
+    for entry in "$root/registry"/*.civ; do
       [ -f "$entry" ] && n=$((n + 1))
     done
   fi
@@ -178,47 +173,16 @@ preflight() {
 # variable instead of on the terminal.
 ensure_build() {
   [ "$do_build" -eq 1 ] || return 0
-  step "Building the workspace binaries (the first run compiles from scratch)"
-  ( cd "$REPO" && cargo build -p conductor -p netstratum-cli )
+  step "Building the workspace binaries, release (the first run compiles from scratch)"
+  ( cd "$REPO" && cargo build --release -p conductor -p netstratum-cli -p ns-hypha )
 }
 
 # The conductor binary. Prints the path and nothing else.
 conductor_bin() {
-  local built="$REPO/target/debug/conductor"
+  local built="$REPO/target/release/conductor"
   [ -x "$built" ] \
-    || die "no conductor binary at target/debug/conductor — re-run without --no-build"
+    || die "no conductor binary at target/release/conductor — re-run without --no-build"
   printf '%s' "$built"
-}
-
-# Which roster file gets copied in. "founding" means: place nothing, and
-# let the conductor write its own five-polity default on first boot.
-resolve_roster() {
-  if [ "$roster" = "founding" ]; then
-    printf 'founding'
-    return 0
-  fi
-  local candidate="${roster:-$DEFAULT_ROSTER}"
-  case "$candidate" in
-    /*) : ;;
-    *)  candidate="$REPO/$candidate" ;;
-  esac
-  [ -f "$candidate" ] || die "roster not found: $candidate"
-  printf '%s' "$candidate"
-}
-
-roster_entries() {
-  local file="$1"
-  if command -v python3 >/dev/null 2>&1; then
-    python3 - "$file" <<'PY' 2>/dev/null || printf 'unknown'
-import json, sys
-try:
-    print(len(json.load(open(sys.argv[1]))))
-except Exception:
-    print("unknown")
-PY
-  else
-    printf 'unknown'
-  fi
 }
 
 cmd_install() {
@@ -235,20 +199,12 @@ cmd_install() {
     fi
   fi
 
-  local chosen; chosen="$(resolve_roster)"
   ensure_build
   local bin; bin="$(conductor_bin)"
 
   step "Preparing $root"
   mkdir -p "$root"
-  if [ "$chosen" = "founding" ]; then
-    say "roster: the five founding polities (written by the conductor on first boot)"
-  else
-    # write_default_polities refuses to overwrite, so the roster must be
-    # in place BEFORE the conductor's first boot or the defaults win.
-    cp "$chosen" "$root/polities.json"
-    say "roster: $(roster_entries "$root/polities.json") civilizations from ${chosen#"$REPO"/}"
-  fi
+  say "roster: the 22 compiled founding seats; each band chooses where it settles"
 
   if [ "$do_genesis" -eq 1 ]; then
     step "Founding the worlds (one bounded beat, then exit)"
@@ -262,7 +218,8 @@ cmd_install() {
   say "  ./install.sh run    --var $var_root      start the heartbeat"
   say "  python3 tools/observer.py --root $var_root --watch 2"
   say "  python3 tools/webserve.py --root $var_root --port 8081"
-  say "  cargo run -p netstratum-cli              the hands-on client"
+  say "  target/release/netstratum                the hands-on client"
+  say "  target/release/ns-hypha follow $var_root  fold this universe onto the :7520 court"
   say ""
   say "  ./install.sh fresh  --var $var_root      wipe and start over"
 }
@@ -317,12 +274,8 @@ cmd_status() {
 
   local worlds; worlds="$(world_count "$root")"
   say "state:        $( [ "$worlds" -gt 0 ] && echo founded || echo "prepared, not founded" )"
-  if [ -f "$root/polities.json" ]; then
-    say "roster:       $(roster_entries "$root/polities.json") civilizations"
-  else
-    say "roster:       none placed (the conductor will write its founding five)"
-  fi
-  say "registry:     $(registry_count "$root") civilizations"
+  say "roster:       22 compiled founding seats"
+  say "registry:     $(registry_count "$root") civilizations registered (founding seats, cleaves, registrations)"
   say "worlds:       $worlds"
   [ -f "$root/conductor.ctl" ] && say "control:      $(cat "$root/conductor.ctl")"
   [ -d "$root/spine" ] && say "spine:        present"
@@ -341,34 +294,6 @@ cmd_run() {
   exec "$bin" --var "$root" --cadence "$cadence"
 }
 
-# The live roster drifts as waves are seated; seeds/ is the only copy that
-# git tracks (var*/ is ignored). This brings the tracked roster current
-# deliberately, never silently.
-#
-# THE OLD IMPLEMENTATION WAS A `cp` AND IT COULD NOT DO THIS JOB
-# (docs/ENDOWMENTS.md E4, measured 2026-08-03). It read
-# `<root>/polities.json`, which has not existed since 2026-07-30, so it
-# died before doing anything; the live civilizations are in
-# `<root>/registry/`, which it never looked at; and a straight overwrite
-# DELETED the roster-only lines — the three that exist nowhere else.
-# The merge is keyed on `slug`, unions both directions, and refuses any
-# entry it cannot complete from real data, so it lives in Python beside
-# the other tools rather than in brace-counting shell.
-cmd_export_roster() {
-  local root; root="$(resolve_root)"
-  local claim="$REPO/tools/claim_roster.py"
-  [ -f "$claim" ] || die "no claim path at $claim"
-  looks_like_universe "$root" || die "no universe at $root"
-
-  # Dry run first, always: the operator sees what would be claimed,
-  # preserved and refused BEFORE anything is written.
-  python3 "$claim" --var "$root" --roster "$REPO/$DEFAULT_ROSTER" \
-    || die "claim path refused — nothing written"
-  confirm "Merge the live record into the git-tracked roster?" \
-    || die "export cancelled — $REPO/$DEFAULT_ROSTER untouched"
-  python3 "$claim" --var "$root" --roster "$REPO/$DEFAULT_ROSTER" --write
-}
-
 main() {
   parse_args "$@"
   case "$command_name" in
@@ -377,7 +302,6 @@ main() {
     wipe)          cmd_wipe ;;
     status)        cmd_status ;;
     run)           cmd_run ;;
-    export-roster) cmd_export_roster ;;
     *)             die "unknown command '$command_name'" ;;
   esac
 }
