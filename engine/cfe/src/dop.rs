@@ -407,7 +407,7 @@
 //!         same algorithm solver::consilience already uses for cross-line
 //!         agreement, read at vessel scope. Recorded only; nothing reads
 //!         it yet. orbit[32] ‖ hardness u32 le.)
-//!    Phase-5 claim ledger: next free **190** (186 ResourceStocksSwept, 184 VeinRejuvenated —
+//!    Phase-5 claim ledger: next free **192** (190 UniverseFounded, 191 UniverseCited — docs/58; 186 ResourceStocksSwept, 184 VeinRejuvenated —
 //!    ONT-3 resource rejuvenation as derivation: a worked vein RECOVERS at a
 //!    collect touch, its inverse-receipt integral `rejuvenated` growing by the
 //!    KEPLERIAN orbital-forcing quantum (one `natural/REGROWTH_GRAIN` per
@@ -3238,6 +3238,19 @@ pub enum ClosureEvent {
     /// off-grain, so a board already on the grain emits nothing and a second boot
     /// re-floors during replay and adds no new deed.
     ResourceStocksSwept { dust: Ratio },
+    /// **THE BIG BANG (tag 190, docs/58 §3)** — a universe's ORIGIN, the
+    /// first receipt of its universe ledger (`convergence.tlv`): its
+    /// topology and span, the digest of the compiled founding roster, and the
+    /// digest of its matter law. The receipt's own hash IS the universe's
+    /// seed. `over` is `None` for a true first receipt; a universe founded
+    /// before this law is RE-FOUNDED once, late, naming the ledger head it was
+    /// written over — honest about the order. Identity only: nothing moves.
+    UniverseFounded { topology: String, span: Ratio, roster: [u8; 32], matter: [u8; 32], over: Option<[u8; 32]> },
+    /// **THE CITATION (tag 191, docs/58 §3)** — a world's FIRST receipt names
+    /// its universe's Big Bang, so the world's hash chain — its founding
+    /// digest and every matter identity derived from it — descends from the
+    /// universe's origin. Identity only: nothing moves.
+    UniverseCited { universe: [u8; 32] },
     /// **THE GALACTIC REGION (GALACTIC-1, tag 187)** — a world's charted
     /// `(X,Y,Z)` quantized onto a coarse galactic grid cell and hashed once
     /// at genesis into a REGIONAL weighting seed. Purely additive: an old
@@ -4558,6 +4571,26 @@ impl ClosureEvent {
             Self::RegionCharted { seed } => {
                 // seed[32] alone — a world-wide identity fact, no orb key.
                 tlv::put(187, seed, &mut out);
+            }
+            Self::UniverseFounded { topology, span, roster, matter, over } => {
+                // topology (u16-prefixed) ‖ span ‖ roster[32] ‖ matter[32] ‖
+                // over-flag u8 ‖ over[32]?
+                let mut value = (topology.len() as u16).to_le_bytes().to_vec();
+                value.extend_from_slice(topology.as_bytes());
+                ratio::encode(span, &mut value);
+                value.extend_from_slice(roster);
+                value.extend_from_slice(matter);
+                match over {
+                    Some(head) => {
+                        value.push(1);
+                        value.extend_from_slice(head);
+                    }
+                    None => value.push(0),
+                }
+                tlv::put(190, &value, &mut out);
+            }
+            Self::UniverseCited { universe } => {
+                tlv::put(191, universe, &mut out);
             }
             Self::ChronicleCheckpointed { folded_hash, receipt_count } => {
                 // folded_hash[32] ‖ receipt_count u64 le — a world-wide
@@ -5972,6 +6005,27 @@ impl ClosureEvent {
                 let orbit: [u8; 32] = value.get(..32)?.try_into().ok()?;
                 let hardness = u32::from_le_bytes(value.get(32..36)?.try_into().ok()?);
                 Some(Self::SolverWordHardness { orbit, hardness })
+            }
+            190 => {
+                let len = u16::from_le_bytes(value.get(..2)?.try_into().ok()?) as usize;
+                let topology = String::from_utf8(value.get(2..2 + len)?.to_vec()).ok()?;
+                let mut at = 2 + len;
+                let (span, used) = ratio::decode(value.get(at..)?)?;
+                at += used;
+                let roster: [u8; 32] = value.get(at..at + 32)?.try_into().ok()?;
+                at += 32;
+                let matter: [u8; 32] = value.get(at..at + 32)?.try_into().ok()?;
+                at += 32;
+                let over = match *value.get(at)? {
+                    0 if value.len() == at + 1 => None,
+                    1 if value.len() == at + 33 => Some(value.get(at + 1..at + 33)?.try_into().ok()?),
+                    _ => return None,
+                };
+                Some(Self::UniverseFounded { topology, span, roster, matter, over })
+            }
+            191 => {
+                let universe: [u8; 32] = value.get(..32)?.try_into().ok()?;
+                (value.len() == 32).then_some(Self::UniverseCited { universe })
             }
             172 => Some(Self::PracticesLapsed { count: *value.first()? }),
             168 => Some(Self::PressureEbbed {

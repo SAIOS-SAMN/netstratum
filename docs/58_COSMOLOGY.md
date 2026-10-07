@@ -85,11 +85,10 @@ its Big Bang receipt is.
   It is written once, at the next boot, as the universe's RE-FOUNDING: same
   fields, citing the ledger head it was written over. It is honest about
   being late.
-- **On the network**, netstratum's domain was founded on :7520 at h 203170
-  with keys alone. A universe's Big Bang becomes the first H-lane entry on
-  the colonies line after it: one unit of information (the universe's
-  existence), declared by the universe and delivered to its core. That needs
-  no new court act, and the court seals it like any fold.
+- **On the network** — SUPERSEDED by §6 ruling 1. A universe's Big Bang
+  founds its own DOMAIN through the shared universe genesis act, rather than
+  becoming an H-lane word on another domain's line. Nothing goes to the court
+  for an origin until that act lands.
 
 ## 4. PROPOSED: the keeper of the core is the ANCIENT seat, and it ARISES
 

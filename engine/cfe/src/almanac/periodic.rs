@@ -106,3 +106,23 @@ pub fn periodic_of(element: &[u8; 32]) -> Periodic {
         },
     }
 }
+
+/// **THE MATTER LAW'S DIGEST** (docs/58 §3) — what a universe's Big Bang
+/// records of its matter: the periodic table's five axes, the resource
+/// ledger's grain, the base resources by wire code and the star classes by
+/// wire code. Two universes carry the same digest exactly when their matter
+/// obeys the same law; a change to any axis is a different physics.
+pub fn matter_law_digest() -> [u8; 32] {
+    let mut h = blake3::Hasher::new_derive_key("netstratum matter law v1");
+    h.update(&[LINES, LANES, SHELLS, PHASES, SPINS]);
+    h.update(&crate::world::RESOURCE_LEDGER_GRAIN.to_le_bytes());
+    for code in 1u8..=u8::MAX {
+        if crate::dop::Resource::from_wire(code).is_some() {
+            h.update(&[b'R', code]);
+        }
+        if crate::thermal::StarClass::from_wire(code).is_some() {
+            h.update(&[b'S', code]);
+        }
+    }
+    *h.finalize().as_bytes()
+}

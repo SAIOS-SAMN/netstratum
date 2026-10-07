@@ -154,7 +154,7 @@ pub mod soc;
 // discovered against a deficit and gated by TOPOLOGICAL reach, never a ZoneKind
 // enum variant or an integer level. See recipe.rs.
 pub mod recipe;
-pub use polities::{founding_polities, registered_polities, roster};
+pub use polities::{founding_polities, registered_polities, roster, roster_digest};
 
 /// AEON-1b (11 §5): THE FOLD — seal the live era and rotate it into
 /// the archive sequence. `EraFolded` (tag 46) appends to the universe
@@ -1554,6 +1554,13 @@ impl Polity {
             &opening,
         );
         let mut world = World::new();
+        // docs/58 §3 — THE CITATION: a freshly founded world's FIRST receipt
+        // names its universe's Big Bang, so its whole hash chain (its
+        // founding digest, and every matter identity derived from it)
+        // descends from the universe's origin.
+        if let Some(universe) = book.universe_seed() {
+            world.chronicle_mut().append(cfe::dop::ClosureEvent::UniverseCited { universe }, 0, vec![cfe::world::SOVEREIGN]);
+        }
         world.found(&spec.colony).expect("a fresh world founds");
         // GALACTIC-1: seal the regional resource-weighting seed from the
         // charted position — derived here (the caller holds the ledger's

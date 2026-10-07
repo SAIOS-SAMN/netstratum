@@ -33,7 +33,7 @@ pub use compound::{compounds, gem_of, knowledge_of, recipe_of, Compoundable};
 pub use locality::{
     civ_may_work, civ_reach, lines_of, local_to, pressure, refines, strata_lines, workable_in,
 };
-pub use periodic::{periodic_of, Periodic, CELLS, LANES, LINES, PHASES, SHELLS, SPINS};
+pub use periodic::{matter_law_digest, periodic_of, Periodic, CELLS, LANES, LINES, PHASES, SHELLS, SPINS};
 pub use rejuvenation::{
     carrying_capacity, grained_logistic, habitability, habitability_flux, intrinsic_rate,
     morphodynamic_thermal, rejuvenated_richness, rejuvenation_quantum, substrate_viability,

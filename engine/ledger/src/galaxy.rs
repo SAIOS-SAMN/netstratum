@@ -173,6 +173,52 @@ impl Ledger {
         Ok(created)
     }
 
+    /// **THE UNIVERSE'S SEED** (docs/58 §3) — the own-hash of its Big Bang
+    /// (`UniverseFounded`) on the universe ledger, or `None` before one is
+    /// recorded. A reading: nothing is written.
+    pub fn universe_seed(&self) -> Option<[u8; 32]> {
+        let path = self.ledger_path();
+        let ledger = persist::load(&path).ok()?;
+        ledger
+            .receipts()
+            .iter()
+            .find(|r| matches!(r.event(), ClosureEvent::UniverseFounded { .. }))
+            .map(|r| r.own().0)
+    }
+
+    /// **THE BIG BANG** (docs/58 §3) — record this universe's origin ONCE on
+    /// its universe ledger and return its seed. On an empty ledger it is the
+    /// FIRST receipt; on a ledger that already holds history (a universe
+    /// founded before this law) it is written once, late, as a RE-FOUNDING
+    /// naming the head it was written over. Called again, it returns the seed
+    /// already recorded and writes nothing.
+    pub fn found_universe(&self, roster: [u8; 32], matter: [u8; 32], stamp: u64) -> std::io::Result<([u8; 32], bool)> {
+        if let Some(seed) = self.universe_seed() {
+            return Ok((seed, false));
+        }
+        fs::create_dir_all(&self.root)?;
+        let path = self.ledger_path();
+        let mut ledger = match path.exists() {
+            true => persist::load(&path).map_err(io_error)?,
+            false => Chronicle::new(),
+        };
+        let over = ledger.receipts().last().map(|r| r.own().0);
+        ledger.append(
+            ClosureEvent::UniverseFounded {
+                topology: "torus".into(),
+                span: self.universe_span(),
+                roster,
+                matter,
+                over,
+            },
+            stamp,
+            vec![],
+        );
+        let seed = ledger.receipts().last().map(|r| r.own().0).expect("just appended");
+        persist::sync(&ledger, &path).map_err(io_error)?;
+        Ok((seed, true))
+    }
+
     /// INCURSION-1a (07 §3.1): the door's receipt on the universe
     /// ledger — era, world, and the woken line, beside EraAnnexed and
     /// GalaxyObserved.

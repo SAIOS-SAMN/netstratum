@@ -469,6 +469,29 @@ pub fn registered_polities(registry: &ledger::registry::Registry) -> Vec<PolityS
     grown
 }
 
+/// **THE COMPILED ROSTER'S DIGEST** (docs/58 §3) — what a universe's Big Bang
+/// records of who was seated at its founding: every compiled seat's
+/// identity, world and siting, in roster order. A change to any seat is a
+/// different founding.
+pub fn roster_digest() -> [u8; 32] {
+    let mut h = blake3::Hasher::new_derive_key("netstratum founding roster v1");
+    for spec in founding_polities() {
+        let c = &spec.civilization;
+        for field in [&c.name, &c.sigil, &c.species, &c.clade, &c.disposition, &c.metabolism, &c.perception, &spec.world_name, &spec.planet, &spec.colony] {
+            h.update(&(field.len() as u32).to_le_bytes());
+            h.update(field.as_bytes());
+        }
+        h.update(c.station.as_deref().unwrap_or("").as_bytes());
+        h.update(spec.policy.describe().as_bytes());
+        h.update(format!("{}|{}|{}", spec.position.0, spec.position.1, spec.position.2).as_bytes());
+        match (spec.star, &spec.albedo, &spec.orbit) {
+            (Some(class), Some(a), Some(o)) => h.update(format!("{class:?}|{a}|{o}").as_bytes()),
+            _ => h.update(b"derived"),
+        };
+    }
+    *h.finalize().as_bytes()
+}
+
 /// **THE ROSTER** — the compiled founding lines, then every registered
 /// line the operator has raised since. One call, one truth, no file.
 pub fn roster(registry: &ledger::registry::Registry) -> Vec<PolitySpec> {

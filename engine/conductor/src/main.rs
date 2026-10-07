@@ -84,6 +84,20 @@ fn main() {
     // the base; without this the live board would stack onto the
     // folded aeons' height and recur.
     let live_base = cfe::world::wrap_gauge(cfe::ratio::ratio(eras.len() as i64, 12));
+    // docs/58 §3 — THE BIG BANG, recorded once on this universe's ledger
+    // before any world is founded (or, for a universe that predates the law,
+    // once and late as its re-founding).
+    match book.found_universe(conductor::roster_digest(), cfe::almanac::matter_law_digest(), epoch_base) {
+        Ok((seed, true)) => println!(
+            "conductor: THE BIG BANG — this universe is {} (recorded now)",
+            seed.iter().take(8).map(|b| format!("{b:02x}")).collect::<String>()
+        ),
+        Ok((seed, false)) => println!(
+            "conductor: the universe is {}",
+            seed.iter().take(8).map(|b| format!("{b:02x}")).collect::<String>()
+        ),
+        Err(e) => eprintln!("conductor: the Big Bang was not recorded: {e}"),
+    }
     let mut worlds: Vec<Polity> = specs
         .into_iter()
         .map(|mut spec| {

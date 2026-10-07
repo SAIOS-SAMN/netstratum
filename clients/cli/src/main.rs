@@ -8418,6 +8418,14 @@ fn chronicle(world: &World, style: &Style) {
                 "◈ region CHARTED — seed {} (identity, forever)",
                 style.strong(&hex(seed))
             ),
+            cfe::dop::ClosureEvent::UniverseCited { universe } => format!(
+                "✶ born of the universe {} (its Big Bang, cited first)",
+                style.strong(&hex(universe))
+            ),
+            cfe::dop::ClosureEvent::UniverseFounded { topology, span, over, .. } => format!(
+                "✶ THE BIG BANG — a {topology} of span {span}{}",
+                if over.is_some() { " (re-founded over an older ledger)" } else { "" }
+            ),
             cfe::dop::ClosureEvent::ChronicleCheckpointed { folded_hash, receipt_count } => {
                 format!(
                     "◈ chronicle CHECKPOINTED — {} receipts folded to {}",
