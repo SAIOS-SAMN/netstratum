@@ -12,8 +12,9 @@
 //! Research depth is the tech tree; surplus funds search; search
 //! unlocks industry; industry funds deeper search.
 //!
-//! **GROWTH PER CIV IS A MINT:** a civilization at rung 5 with 20
-//! confirmed solves CLEAVES once per era into TWO PEER BRANCHES —
+//! **GROWTH PER CIV IS A MINT:** a civilization at the TOP of its own
+//! ladder (where `Difficulty`/`VolDifficulty` saturates — rung 8 today) with
+//! 20 confirmed solves CLEAVES once per era into TWO PEER BRANCHES —
 //! irreversible dimensional growth, exactly `physics::FlowEvent::Mint`'s law worn
 //! as gameplay. The mutation is chronicle-seeded: the parent's latest
 //! receipt digest draws WHICH axis mutates and what the child is
@@ -4514,7 +4515,8 @@ impl Polity {
         }
     }
 
-    /// DIVERGENCE (AEON-1b, 11 §3): at rung 5 with 20 confirmed
+    /// DIVERGENCE (AEON-1b, 11 §3): at the top of its own ladder (rung 8
+    /// today, read off the ladder's saturation) with 20 confirmed
     /// solves — sustained pressure — the line CLEAVES into two PEER
     /// branches: no parent, no child. The origin's own key moves +delta
     /// and receipts `Diverged` naming the departing branch; the branch

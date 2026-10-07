@@ -9,13 +9,14 @@ STRUCK — not deferred, not "later," struck — a "number go up" or
 ruling names as the point. The game has a way to fail and no way to
 "beat" it.
 
-A grep across `engine/`, `clients/`, and `docs/` for
-`win_condition|game_over|victory|end_game` still returns nothing —
-there is currently no way for a playthrough to conclude, in either
-direction. §2's option A is now the whole spec for what needs building;
-this doc stays live as the design record, no longer as an open
-proposal. See `docs/GAME_SPEC.md`'s open-work queue for the tracked
-implementation task.
+**Built (corrected 2026-10-08, measured in G2).** Option A's population
+arm is LIVE: `CivilizationCollapsed` (tag 174) closes a line once every
+orb holds zero people and no fractional carry
+(`cfe/src/world/science_lab.rs`), the world refuses every scoped act
+after it, and `conductor::retire_collapsed` takes the line out of the
+roster, its chronicle synced whole, so it is never again a party to
+trade. The stability arm ("stability below a threshold for N beats") is
+NOT built. That remains the open half of this spec.
 
 ## 1. What already exists to build a condition FROM
 
