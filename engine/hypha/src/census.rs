@@ -38,6 +38,8 @@ use std::collections::BTreeMap;
 pub enum Holding {
     Matter(Resource),
     Stamp,
+    /// A people's lexicon: the words it has minted (information, lane H).
+    Words,
 }
 
 impl Holding {
@@ -45,6 +47,7 @@ impl Holding {
         match self {
             Holding::Matter(_) => lane::MATTER,
             Holding::Stamp => lane::MONEY,
+            Holding::Words => lane::INFORMATION,
         }
     }
 
@@ -52,6 +55,7 @@ impl Holding {
         match self {
             Holding::Matter(r) => format!("{r:?}"),
             Holding::Stamp => "STAMP".to_string(),
+            Holding::Words => "words".to_string(),
         }
     }
 }
@@ -126,6 +130,21 @@ fn change(before: &Positions, after: &Positions) -> BTreeMap<(u64, Holding), Big
 fn kind_of(event: &cfe::dop::ClosureEvent) -> String {
     let debug = format!("{event:?}");
     debug.split(|c: char| !c.is_ascii_alphanumeric()).next().unwrap_or("").to_string()
+}
+
+/// THE WORD A RECEIPT ISSUES, if it mints one — its label on the information
+/// lane. A solver word is named by its content-addressed orbit (the same word
+/// minted by two lines is one word); a civic vocabulary word by its axis and
+/// spelling. Domain-local names: a word that may ever cross domains is named by
+/// the hash of its mycelium address instead (coordinator ruling 2026-10-07),
+/// and none crosses yet.
+fn word_issued(event: &cfe::dop::ClosureEvent) -> Option<String> {
+    use cfe::dop::ClosureEvent as E;
+    match event {
+        E::SolverWordMinted { orbit, .. } => Some(format!("SolverWordMinted:{}", orbit.iter().map(|b| format!("{b:02x}")).collect::<String>())),
+        E::VocabularyMinted { axis, word, .. } => Some(format!("VocabularyMinted:{axis}:{word}")),
+        _ => None,
+    }
 }
 
 /// ONE RECEIPT'S NET CHANGE — a line entry (78.123's tier line: an entry is
@@ -210,7 +229,8 @@ impl Stepper {
         let after = positions(&self.replay.state().orbs, i, &mut self.off_grain, &mut self.held_off);
         let moved = change(&self.before, &after);
         self.before = after;
-        if moved.is_empty() {
+        let word = word_issued(r.event());
+        if moved.is_empty() && word.is_none() {
             return Ok(None);
         }
         let mut net: BTreeMap<Holding, BigInt> = BTreeMap::new();
@@ -223,10 +243,17 @@ impl Stepper {
             .filter(|(_, d)| !d.is_zero())
             .map(|(holding, d)| Ok((kind.clone(), holding, small(&d, 0, holding)?)))
             .collect::<Result<Vec<_>, _>>()?;
-        let rows = moved
+        let mut rows = moved
             .iter()
             .map(|((orb, holding), d)| Ok((*orb, *holding, small(d, *orb, *holding)?)))
             .collect::<Result<Vec<_>, _>>()?;
+        let mut declared = declared;
+        if let Some(word) = word {
+            // ISSUED: the word is a declared source of one unit of information;
+            // DELIVERED: the people's lexicon (orb 0, the line itself) takes it.
+            declared.push((word, Holding::Words, 1));
+            rows.push((0, Holding::Words, 1));
+        }
         Ok(Some(Step { receipt: i, cite: r.own().0, rows, declared }))
     }
 }
@@ -261,7 +288,10 @@ pub fn take(people: &str, chronicle: &Chronicle, from: usize, to: usize) -> Resu
         .into_iter()
         .map(|((orb, holding), d)| Ok(((orb, holding), small(&d, orb, holding)?)))
         .collect::<Result<_, CensusRefused>>()?;
-    let summed: BTreeMap<(u64, Holding), i128> = census.rows.iter().map(|(o, h, v)| ((*o, *h), *v)).collect();
+    // Words are issued by receipts, not held in a colony's bank: the
+    // start-to-end check reads the banked holdings only.
+    let summed: BTreeMap<(u64, Holding), i128> =
+        census.rows.iter().filter(|(_, h, _)| *h != Holding::Words).map(|(o, h, v)| ((*o, *h), *v)).collect();
     if held != summed {
         return Err(CensusRefused::EntriesDisagree);
     }
@@ -432,6 +462,17 @@ mod tests {
         assert_eq!(units(&on), (BigInt::from(5094), false));
         let off = cfe::ratio::ratio(161293, 8192); // 20161.625/1024
         assert_eq!(units(&off), (BigInt::from(20161), true), "floored to the grain, and flagged");
+    }
+
+    #[test]
+    fn a_minted_word_is_an_information_source_delivered_to_the_lexicon() {
+        let word = "SolverWordMinted:ab".to_string();
+        let c = census(vec![(0, Holding::Words, 1)], vec![(word, Holding::Words, 1)]);
+        let (rows, declared) = c.nets();
+        assert_eq!(rows[0].1, [0, 0, 0, 1], "the lexicon row rides H");
+        assert_eq!(declared[0].1, [0, 0, 0, 1], "the issued word is an H source");
+        let key = ed25519_dalek::SigningKey::from_bytes(&[3; 32]);
+        assert_eq!(fold(&key, c.head, rows, declared).fold.continuity(), Ok(()));
     }
 
     #[test]

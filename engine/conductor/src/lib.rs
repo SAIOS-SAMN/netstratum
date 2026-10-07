@@ -988,6 +988,12 @@ pub struct Polity {
     /// workspace cache of the `SolverWordMinted` fold, seeded lazily
     /// at the first research beat of a process.
     library: solver::mint::Library,
+    /// The line's resolved knowledge map, cached against its library's size
+    /// (the library only ever grows by `adopt`, so its word count is an exact
+    /// fingerprint). `solver::knowledge_map` is exact algebra over every word;
+    /// recomputed for every line every beat it was 99% of a G2 beat (154 s at
+    /// beat 1005). It is recomputed now only when the library grew.
+    knowledge: Option<(usize, solver::SelfMap)>,
     library_folded: bool,
     /// N-I8 — words seeking CONSILIENCE: (orbit, expansion, deposits). Each
     /// deposit is `(vessel_id, digest)`; the word mints only when two DISTINCT
@@ -1498,6 +1504,7 @@ impl Polity {
                         arbor_committed: 0,
                         stepper: None,
                         library: solver::mint::Library::new(),
+                        knowledge: None,
                         library_folded: false,
                         word_pending: Vec::new(),
                         refused: Vec::new(),
@@ -1690,6 +1697,7 @@ impl Polity {
             arbor_committed: 0,
             stepper: None,
             library: solver::mint::Library::new(),
+            knowledge: None,
             library_folded: false,
             word_pending: Vec::new(),
             refused: Vec::new(),
@@ -5628,20 +5636,29 @@ pub fn merchant_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, String, S
 /// lines begin to learn. Returns the crystallizations struck THIS beat,
 /// each `(world, mass, hardness)`.
 pub fn consilience_step(worlds: &mut [Polity], _beat: u64) -> Vec<(String, u32, u32)> {
-    // Each learning line's crystallized knowledge, keyed by board seat.
-    let maps: Vec<(u64, solver::SelfMap)> = worlds
-        .iter()
-        .enumerate()
-        .filter(|(_, polity)| !polity.library.words().is_empty())
-        .map(|(seat, polity)| (seat as u64, solver::knowledge_map(&polity.library)))
-        .collect();
-    if maps.len() < 2 {
-        return Vec::new(); // one learning line is no agreement
+    // Each learning line's crystallized knowledge, keyed by board seat —
+    // resolved again only for a line whose library grew since its last map.
+    for polity in worlds.iter_mut() {
+        let words = polity.library.words().len();
+        if words > 0 && polity.knowledge.as_ref().map(|(n, _)| *n) != Some(words) {
+            polity.knowledge = Some((words, solver::knowledge_map(&polity.library)));
+        }
     }
-    let refs: Vec<(u64, &solver::SelfMap)> = maps.iter().map(|(seat, map)| (*seat, map)).collect();
+    let consiliences = {
+        let refs: Vec<(u64, &solver::SelfMap)> = worlds
+            .iter()
+            .enumerate()
+            .filter(|(_, polity)| !polity.library.words().is_empty())
+            .filter_map(|(seat, polity)| polity.knowledge.as_ref().map(|(_, map)| (seat as u64, map)))
+            .collect();
+        if refs.len() < 2 {
+            return Vec::new(); // one learning line is no agreement
+        }
+        solver::consilience(&refs)
+    };
 
     let mut recorded = Vec::new();
-    for consilience in solver::consilience(&refs) {
+    for consilience in consiliences {
         for seat in &consilience.lines {
             let polity = &mut worlds[*seat as usize];
             if polity

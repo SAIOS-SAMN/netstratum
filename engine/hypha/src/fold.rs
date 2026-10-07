@@ -31,7 +31,7 @@ pub const TIERS: [&str; 2] = ["colonies", "union"];
 /// The lanes of a fold row, by MU-LEXICON v2's fold-lane law: S matter,
 /// G value (the only lane a parent may translate), T duration, H
 /// information. μ is never summed across lanes, and neither is anything
-/// here. Netstratum fills S and G; T and H stay zero until it folds them.
+/// here. Netstratum fills S (matter), G (STAMP) and H (words); T stays zero.
 pub mod lane {
     /// Banked matter (iron, biomass, alloy, diamond, joule, sink, crystal),
     /// in units of the resource ledger's 1/1024 grain.
@@ -39,6 +39,10 @@ pub mod lane {
     /// STAMP, netstratum's unit of account, on the value lane, in the same
     /// grain.
     pub const MONEY: usize = 1;
+    /// Words a people mints — each one issued is a declared source on the
+    /// information lane, delivered to the people's lexicon as a row
+    /// (MU-LEXICON v2). Counted whole: one word, one unit.
+    pub const INFORMATION: usize = 3;
 }
 
 /// A streamed publication's part bound, under the court's 786,432-byte
