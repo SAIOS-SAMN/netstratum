@@ -7,6 +7,7 @@
 //!                                       fold a people's chronicle; --send puts it to the court
 //!   ns-hypha found                      found netstratum's domain on the court (once)
 //!   ns-hypha mark <world-dir>           record a people as folded through its chronicle's end
+//!   ns-hypha epoch <name>               set the hot colonies line aside, restart it at zero
 //!
 //! A census resumes from the people's cursor (`var/uplink/cursor-colonies`),
 //! so no receipt is ever netted twice; `--last N` bounds only a people's
@@ -18,7 +19,7 @@
 
 use ns_hypha::census::{self, grains};
 use ns_hypha::fold::{fold, tier_key};
-use ns_hypha::line::{Cursors, TierLine};
+use ns_hypha::line::{Cursors, FoldLog, FoldMark, TierLine};
 use ns_hypha::mycelium::anastome::dialogue::uplink::Uplinked;
 use ns_hypha::{laws_of, probe, Uplink, DEFAULT_AT};
 use std::path::{Path, PathBuf};
@@ -38,6 +39,9 @@ fn main() -> ExitCode {
     }
     if cmd == Some("mark") {
         return mark_cmd(&args, &home);
+    }
+    if cmd == Some("epoch") {
+        return epoch_cmd(&args, &home);
     }
     let up = match Uplink::open(&at, &home) {
         Ok(u) => u,
@@ -122,7 +126,7 @@ fn main() -> ExitCode {
         Some("census") => census_cmd(&args, Some(&up), &home),
         Some("mark") => mark_cmd(&args, &home),
         _ => {
-            eprintln!("usage: ns-hypha laws|lexicon|probe|found|mark <world-dir>|census <world-dir> [--last N] [--send] [--at host:port] [--home dir]");
+            eprintln!("usage: ns-hypha laws|lexicon|probe|found|mark <world-dir>|epoch <name>|census <world-dir> [--last N] [--send] [--at host:port] [--home dir]");
             ExitCode::from(2)
         }
     }
@@ -135,6 +139,30 @@ fn load(dir: &Path) -> Result<(String, cfe::vrp::Chronicle), ExitCode> {
         Err(e) => {
             eprintln!("ns-hypha: {}: the chronicle did not load: {e:?}", dir.display());
             Err(ExitCode::from(1))
+        }
+    }
+}
+
+/// Set the whole hot colonies line aside as an epoch and restart it at the
+/// zero head (78.125: a tier's first fold under the challenge law starts its
+/// line at zero; every fold before reads PreLine).
+fn epoch_cmd(args: &[String], home: &Path) -> ExitCode {
+    let Some(name) = args.get(2).filter(|a| !a.starts_with("--")) else {
+        eprintln!("usage: ns-hypha epoch <name>");
+        return ExitCode::from(2);
+    };
+    match TierLine::open(home, "colonies").and_then(|mut l| {
+        let (n, head) = (l.entries.len(), l.head());
+        l.restart(name).map(|kept| (n, head, kept, l.offset))
+    }) {
+        Ok((n, head, kept, offset)) => {
+            let h: String = head.iter().take(6).map(|b| format!("{b:02x}")).collect();
+            println!("colonies line: {n} entries (head {h}…) set aside as {}; hot line restarted at the zero head, next entry {offset}", kept.display());
+            ExitCode::SUCCESS
+        }
+        Err(e) => {
+            eprintln!("ns-hypha: the epoch was not started: {e}");
+            ExitCode::from(1)
         }
     }
 }
@@ -176,7 +204,8 @@ fn census_cmd(args: &[String], up: Option<&Uplink>, home: &Path) -> ExitCode {
         Ok(x) => x,
         Err(code) => return code,
     };
-    let (mut cursors, mut line) = match Cursors::open(home, "colonies").and_then(|c| Ok((c, TierLine::open(home, "colonies")?))) {
+    let opened = Cursors::open(home, "colonies").and_then(|c| Ok((c, TierLine::open(home, "colonies")?, FoldLog::open(home, "colonies")?)));
+    let (mut cursors, mut line, mut folds) = match opened {
         Ok(x) => x,
         Err(e) => {
             eprintln!("ns-hypha: the colonies line: {e}");
@@ -260,7 +289,9 @@ fn census_cmd(args: &[String], up: Option<&Uplink>, home: &Path) -> ExitCode {
         }
         match up.uplink_fold(&signed) {
             Ok(Uplinked::Admitted { at, .. }) => {
-                if let Err(e) = line.append_all(batch).and_then(|_| cursors.set(&people, chunk.to, chunk.head)) {
+                let mark = FoldMark { at: at.key(), first: line.total(), count: batch.len() as u64 };
+                let held = line.append_all(batch).and_then(|_| folds.push(mark)).and_then(|()| cursors.set(&people, chunk.to, chunk.head));
+                if let Err(e) = held {
                     eprintln!("  fold {n}: ADMITTED BUT NOT HELD: the line or cursor did not take it: {e}");
                     return ExitCode::from(1);
                 }
