@@ -60,7 +60,7 @@ implement; G2 does not test those.
 | 2 | Founding band | exactly one `PopulationSettled{+band}` per colony at genesis, band = clamp(⌊K_pop⌋, 1, 4) | chronicle, `genesis <sigil>: a founding band of N settles` | `conductor/src/lib.rs` `founding_band` |
 | 3 | Population | logistic toward K, never above K; births scaled by contentment and cognition share | `PopulationSettled` / `PopulationAccrued` | `cfe/src/almanac/rejuvenation.rs:51-60` |
 | 4 | Old-age deaths | none until a headcount reaches L (64; 256 for classes 2/6/10/12) | `PopulationSettled` < 0 while fed | `world/rejuvenation.rs:443`, `science_lab.rs:205` |
-| 5 | The plasmic seat | headcount 4 forever: no harvest, never starves, always fed | its census | `dop.rs:1837`, `lib.rs:3127` |
+| 5 | The plasmic seat | grows by the logistic toward its own K, like every line: it eats through the element-eater path, and its hyperthermal clade band sits at ~(T_hot/T_mesic)⁴ the mesic flux, so its wild food and K run ~100× a mesic world's. Measured G2: 25,342 people under K = 58,782. (An earlier reading here, "4 forever", was wrong.) | `g2_k` | `world/distribution.rs` `primary_production`, `population_ceiling` |
 | 6 | Famine | every `FamineStruck` paired by a `FamineRelieved`, unless the line is dying | chronicle | `world/tick.rs:575-596`, `:764-808` |
 | 7 | Research | starts at L1; at most one solve per beat; climbs at most one rung per solve | `beat N: sigil(... sS LL)` every 10 beats | `lib.rs:4386`, `:4426-4431` |
 | 8 | Volumetric seats (5) | close and climb their own ladder like planar lines; no crystal mint (deferred) | beat log | `lib.rs` volumetric arm, `ladder_climbs` |
@@ -68,7 +68,7 @@ implement; G2 does not test those.
 | 10 | STAMP | rises, always ≤ crystal ever held; in code it only moves between lines, so total STAMP never falls | `StampMinted`, apertures | `lib.rs:5189-5215`, `world/mod.rs:663`, `:705` |
 | 11 | First cleave | no sooner than 19 beats after the line's first solve, and only at L8 | `beat N: DIVERGENCE — X cleaves from the line of Y`, `Diverged` (tag 43) | `lib.rs:4458` |
 | 12 | Cleave ceiling | at most 22 first-generation cleaves (one per line), fewer as name pools run dry | roster count | `lib.rs:4553-4565` |
-| 13 | Collapse | none in a healthy run (starvation deaths are fractional) | `CivilizationCollapsed` (tag 174) | `world/science_lab.rs:309-321` |
+| 13 | Collapse | possible, by a band's own poor choice of land; a collapsed line LEAVES THE ROSTER (its chronicle synced whole) and is never again a party to trade | `CivilizationCollapsed` (tag 174), `beat N: COLLAPSE — …` | `world/science_lab.rs:309-321`, `conductor::retire_collapsed` |
 | 14 | Restart | resumes, never refounds: same worlds, cleaves not repeated, solves and levels kept | world dirs, `Diverged` count | `lib.rs:1477-1481`, `.seat` cards |
 
 Stale docs found while writing this: 11_AEON §3 and the comment at

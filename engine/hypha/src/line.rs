@@ -337,7 +337,7 @@ impl FoldLog {
 pub fn entry_bytes(mut rows: Vec<Net>, mut declared: Vec<Net>) -> Vec<u8> {
     rows.sort_by_key(|(who, _)| *who);
     declared.sort_by_key(|(who, _)| *who);
-    TierFold { tier: [0; 32], prefix: [0; 32], rows, declared, children: Vec::new() }.rows_bytes()
+    TierFold { tier: [0; 32], prefix: [0; 32], rows, declared, children: Vec::new(), handoffs: Vec::new() }.rows_bytes()
 }
 
 fn take_nets(b: &[u8], p: &mut usize) -> Option<Vec<Net>> {
@@ -543,7 +543,7 @@ mod tests {
     fn an_entry_writes_as_the_court_writes_a_fold_rows() {
         let rows = vec![([2; 32], [5, 0, 0, 0]), ([1; 32], [-5, 0, 0, 0])];
         let sorted = vec![([1; 32], [-5, 0, 0, 0]), ([2; 32], [5, 0, 0, 0])];
-        let court = TierFold { tier: [7; 32], prefix: [8; 32], rows: sorted, declared: vec![], children: vec![] };
+        let court = TierFold { tier: [7; 32], prefix: [8; 32], rows: sorted, declared: vec![], children: vec![], handoffs: vec![] };
         assert_eq!(entry_bytes(rows, vec![]), court.rows_bytes());
     }
 }

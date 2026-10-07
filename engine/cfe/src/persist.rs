@@ -111,6 +111,54 @@ pub struct SyncCursor {
     bytes: u64,
 }
 
+/// A READER'S place in a chronicle file another process writes: the bytes
+/// and receipts already proved, and the own-hash of the last of them.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct TailCursor {
+    pub bytes: u64,
+    pub receipts: u64,
+    pub head: Option<crate::vrp::ReceiptHash>,
+}
+
+/// READ ONLY THE NEW TAIL of a chronicle file, verified against what was
+/// already proved: the receipts appended since `cursor`, each chained from
+/// the cursor's head (`vrp::verify_from`). A frame still being written (a
+/// truncated tail) is left for the next read, never half-taken. A file
+/// shorter than the cursor, or a tail that does not chain, REFUSES — a
+/// reader never follows a rewritten past. A missing file reads empty.
+pub fn read_tail(path: &Path, cursor: &mut TailCursor) -> Result<Vec<Receipt>, PersistRefused> {
+    let mut file = match fs::File::open(path) {
+        Ok(f) => f,
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(Vec::new()),
+        Err(error) => return Err(PersistRefused::Io { message: error.to_string() }),
+    };
+    let len = file.metadata().map(|m| m.len()).map_err(|error| PersistRefused::Io { message: error.to_string() })?;
+    if len < cursor.bytes {
+        return Err(PersistRefused::HistoryDiverged { at: cursor.receipts });
+    }
+    file.seek(SeekFrom::Start(cursor.bytes)).map_err(|error| PersistRefused::Io { message: error.to_string() })?;
+    let mut tail = Vec::new();
+    file.read_to_end(&mut tail).map_err(|error| PersistRefused::Io { message: error.to_string() })?;
+    let mut receipts = Vec::new();
+    let mut consumed = 0usize;
+    for (frame, (tag, value)) in tlv::records(&tail).enumerate() {
+        consumed += 5 + value.len();
+        if tag == crate::vrp::RECEIPT_FRAME_TAG || tag == crate::vrp::RECEIPT_FRAME_TAG_V2 {
+            receipts.push(Receipt::from_wire(tag, value).ok_or(PersistRefused::Malformed { frame })?);
+        }
+    }
+    let parent = cursor.head.unwrap_or(crate::vrp::ReceiptHash::GENESIS);
+    if let ChainRead::Broken { at } = crate::vrp::verify_from(parent, &receipts) {
+        return Err(PersistRefused::Broken { at });
+    }
+    cursor.bytes += consumed as u64;
+    cursor.receipts += receipts.len() as u64;
+    if let Some(last) = receipts.last() {
+        cursor.head = Some(last.own());
+    }
+    Ok(receipts)
+}
+
 /// Sync a chronicle to its file, ADDITIONALLY caching how much of it
 /// this process has already proved (`cursor`) so a later call in the
 /// SAME process skips straight to the unread tail — never reloads or

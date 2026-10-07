@@ -25,6 +25,7 @@ pub use mycelium;
 
 pub mod census;
 pub mod fold;
+pub mod follow;
 pub mod line;
 pub mod probe;
 

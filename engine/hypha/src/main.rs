@@ -10,6 +10,8 @@
 //!   ns-hypha epoch <name>               set the hot colonies line aside, restart it at zero
 //!   ns-hypha prune                      archive hot entries whose folds the court reads settled
 //!   ns-hypha publish                    put every provisional hot fold's prefix to replay
+//!   ns-hypha follow <var-root> [--every S] [--rounds N] [--per-round F]
+//!                                       tail a universe's chronicles and fold them at play rate
 //!
 //! `census --send` then publishes the folds it had admitted (`--no-publish`
 //! to skip): an upheld fold cannot be demanded, so no deadline can default
@@ -133,30 +135,17 @@ fn main() -> ExitCode {
         Some("census") => census_cmd(&args, Some(&up), &home),
         Some("prune") => prune_cmd(&up, &home),
         Some("publish") => publish_cmd(&up, &home),
+        Some("follow") => follow_cmd(&up, &args, &home),
         Some("mark") => mark_cmd(&args, &home),
         _ => {
-            eprintln!("usage: ns-hypha laws|lexicon|probe|found|mark <world-dir>|epoch <name>|prune|publish|census <world-dir> [--last N] [--send] [--at host:port] [--home dir]");
+            eprintln!("usage: ns-hypha laws|lexicon|probe|found|mark <world-dir>|epoch <name>|prune|publish|follow <var-root>|census <world-dir> [--last N] [--send] [--at host:port] [--home dir]");
             ExitCode::from(2)
         }
     }
 }
 
-/// A people's name on the network: its world's name, namespaced by the
-/// universe (var root) it lives in — `var-g2/tun-reach` — so two universes
-/// founding the same compiled seat never share an identity, a cursor or a
-/// line entry. The archive's root, `var`, keeps its bare names (its folds
-/// were sealed under them).
-fn people_of(dir: &Path) -> String {
-    let world = dir.file_name().and_then(|n| n.to_str()).unwrap_or("unnamed");
-    let root = dir.parent().and_then(Path::parent).and_then(|r| r.file_name()).and_then(|n| n.to_str());
-    match root {
-        Some(r) if r != "var" => format!("{r}/{world}"),
-        _ => world.to_string(),
-    }
-}
-
 fn load(dir: &Path) -> Result<(String, cfe::vrp::Chronicle), ExitCode> {
-    let people = people_of(dir);
+    let people = ns_hypha::follow::people_of(dir);
     match cfe::persist::load(&dir.join("chronicle.tlv")) {
         Ok(c) => Ok((people, c)),
         Err(e) => {
@@ -169,7 +158,7 @@ fn load(dir: &Path) -> Result<(String, cfe::vrp::Chronicle), ExitCode> {
 /// PUBLISH every hot fold the court still reads Provisional: its entries
 /// streamed for replay, so it is upheld before anyone can demand it.
 fn publish_cmd(up: &Uplink, home: &Path) -> ExitCode {
-    use ns_hypha::mycelium::anastome::dialogue::challenge::{ChallengeRefusal, Challenged, Finality};
+    use ns_hypha::mycelium::anastome::dialogue::challenge::Finality;
     use ns_hypha::mycelium::chronometry::Stamp;
     let (line, log, key) = match TierLine::open(home, "colonies").and_then(|l| Ok((l, FoldLog::open(home, "colonies")?, tier_key(home, "colonies")?))) {
         Ok(x) => x,
@@ -180,41 +169,32 @@ fn publish_cmd(up: &Uplink, home: &Path) -> ExitCode {
     };
     let mut ok = true;
     for f in log.folds.iter().filter(|f| f.first >= line.offset && f.first + f.count <= line.total()) {
-        let Some(at) = Stamp::from_key(&f.at) else {
-            eprintln!("  fold at entry {}: an unreadable stamp", f.first);
-            ok = false;
-            continue;
-        };
-        match up.finality(at) {
-            Ok(Finality::Provisional { .. }) => {}
-            Ok(other) => {
-                println!("  fold at entries [{}, {}): {other:?}; nothing to publish", f.first, f.first + f.count);
+        let span = format!("[{}, {})", f.first, f.first + f.count);
+        match Stamp::from_key(&f.at).map(|at| up.finality(at)) {
+            Some(Ok((Finality::Provisional { .. }, _))) => {}
+            Some(Ok((other, _))) => {
+                println!("  fold at entries {span}: {other:?}; nothing to publish");
                 continue;
             }
-            Err(e) => {
-                eprintln!("  fold at entry {}: finality not read: {e}", f.first);
+            Some(Err(e)) => {
+                eprintln!("  fold at entries {span}: finality not read: {e}");
+                ok = false;
+                continue;
+            }
+            None => {
+                eprintln!("  fold at entries {span}: an unreadable stamp");
                 ok = false;
                 continue;
             }
         }
-        let lo = (f.first - line.offset) as usize;
-        let entries: Option<Vec<_>> = line.entries[lo..lo + f.count as usize].iter().map(|e| ns_hypha::line::decode_entry(&e.entry)).collect();
-        let Some(entries) = entries else {
-            eprintln!("  fold at entry {}: an entry on the line does not read", f.first);
-            ok = false;
-            continue;
-        };
-        match up.publish(&key, at, entries) {
-            Ok(c @ Challenged::Upheld { .. }) => println!("  fold at entries [{}, {}): {c:?}", f.first, f.first + f.count),
-            // Upheld before: the court holds the replay, and no demand can
-            // be made on it — the fold is answered.
-            Ok(Challenged::Refused(ChallengeRefusal::Published)) => println!("  fold at entries [{}, {}): already upheld", f.first, f.first + f.count),
+        match ns_hypha::follow::publish_fold(up, &key, &line, f) {
+            Ok(c) if ns_hypha::follow::answered(&c) => println!("  fold at entries {span}: answered — {c:?}"),
             Ok(c) => {
-                println!("  fold at entries [{}, {}): NOT UPHELD {c:?}", f.first, f.first + f.count);
+                println!("  fold at entries {span}: NOT UPHELD {c:?}");
                 ok = false;
             }
             Err(e) => {
-                eprintln!("  fold at entry {}: the court did not answer: {e}", f.first);
+                eprintln!("  fold at entries {span}: {e}");
                 ok = false;
             }
         }
@@ -226,38 +206,21 @@ fn publish_cmd(up: &Uplink, home: &Path) -> ExitCode {
     }
 }
 
-/// PRUNE BY FINALITY: archive the hot entries netted only by folds the
-/// court reads `Final` or `PreLine` — never Provisional, Blocked, Falsified,
-/// Unwound or Unrecorded — walking the folds in order and stopping at the
-/// first that is not settled.
+/// PRUNE BY FINALITY (see `ns_hypha::follow::prune`).
 fn prune_cmd(up: &Uplink, home: &Path) -> ExitCode {
-    use ns_hypha::mycelium::anastome::dialogue::challenge::Finality;
-    use ns_hypha::mycelium::chronometry::Stamp;
-    let (mut line, log) = match TierLine::open(home, "colonies").and_then(|l| Ok((l, FoldLog::open(home, "colonies")?))) {
+    let opened = TierLine::open(home, "colonies").and_then(|l| Ok((l, FoldLog::open(home, "colonies")?)));
+    let (mut line, log) = match opened {
         Ok(x) => x,
         Err(e) => {
             eprintln!("ns-hypha: the colonies line: {e}");
             return ExitCode::from(2);
         }
     };
-    let mut unread = None;
-    let n = log.prunable(&line, |f| {
-        let read = Stamp::from_key(&f.at).ok_or_else(|| "an unreadable stamp".to_string()).and_then(|at| up.finality(at).map_err(|e| e.to_string()));
-        println!("  fold at entries [{}, {}): {read:?}", f.first, f.first + f.count);
-        match read {
-            Ok(Finality::Final { .. } | Finality::PreLine) => true,
-            Ok(_) => false,
-            Err(e) => {
-                unread = Some(e);
-                false
+    match ns_hypha::follow::prune(up, &mut line, &log) {
+        Ok((n, unread)) => {
+            if let Some(e) = unread {
+                eprintln!("ns-hypha: a finality was not read ({e}); pruned only what was read settled");
             }
-        }
-    });
-    if let Some(e) = unread {
-        eprintln!("ns-hypha: a finality was not read ({e}); pruned only what was read settled");
-    }
-    match line.prune_through(n) {
-        Ok(()) => {
             println!("prune: {n} entries archived; hot line now {} entries from entry {}", line.entries.len(), line.offset);
             ExitCode::SUCCESS
         }
@@ -265,6 +228,55 @@ fn prune_cmd(up: &Uplink, home: &Path) -> ExitCode {
             eprintln!("ns-hypha: the prune did not land: {e}");
             ExitCode::from(1)
         }
+    }
+}
+
+/// FOLLOW a universe: tail every people's chronicle and fold its new
+/// receipts onto the court at play rate (see `ns_hypha::follow`). A court
+/// that does not answer backs the rounds off, doubling to ten minutes.
+fn follow_cmd(up: &Uplink, args: &[String], home: &Path) -> ExitCode {
+    let Some(root) = args.get(2).filter(|a| !a.starts_with("--")) else {
+        eprintln!("usage: ns-hypha follow <var-root> [--every SECS] [--rounds N]");
+        return ExitCode::from(2);
+    };
+    let every: u64 = flag(args, "--every").and_then(|n| n.parse().ok()).unwrap_or(60).max(1);
+    let rounds: Option<u64> = flag(args, "--rounds").and_then(|n| n.parse().ok());
+    let per_round: Option<usize> = flag(args, "--per-round").and_then(|n| n.parse().ok());
+    let mut follower = match ns_hypha::follow::Follower::new(Path::new(root), home) {
+        Ok(f) => f,
+        Err(e) => {
+            eprintln!("ns-hypha: the follower did not open: {e}");
+            return ExitCode::from(2);
+        }
+    };
+    if let Some(p) = per_round {
+        follower.per_round = p.max(1);
+    }
+    let mut wait = every;
+    let mut n = 0u64;
+    loop {
+        n += 1;
+        match follower.round(up) {
+            Ok(r) => {
+                let (followed, halted) = follower.standing();
+                println!(
+                    "follow round {n}: {followed} peoples, {} receipts read, {} folds ({} entries) admitted, {} published, {} pruned, {} halted",
+                    r.read, r.folds, r.entries, r.published, r.pruned, halted.len()
+                );
+                for note in r.notes {
+                    println!("  {note}");
+                }
+                wait = every;
+            }
+            Err(e) => {
+                wait = (wait * 2).min(600);
+                eprintln!("follow round {n}: the court did not answer ({e}); nothing lost, next round in {wait}s");
+            }
+        }
+        if rounds.is_some_and(|r| n >= r) {
+            return ExitCode::SUCCESS;
+        }
+        std::thread::sleep(std::time::Duration::from_secs(wait));
     }
 }
 
@@ -391,6 +403,12 @@ fn census_cmd(args: &[String], up: Option<&Uplink>, home: &Path) -> ExitCode {
     if chunks.len() > 1 {
         println!("  {} folds of at most {} entries", chunks.len(), census::MAX_SPAN);
     }
+    if let Some(up) = up {
+        if let Err(e) = up.check_line_head(&key, line.head()) {
+            eprintln!("  {e}");
+            return ExitCode::from(1);
+        }
+    }
     for (n, chunk) in chunks.into_iter().enumerate() {
         let batch = chunk.entries();
         let (rows, declared) = chunk.nets();
@@ -440,18 +458,5 @@ fn census_cmd(args: &[String], up: Option<&Uplink>, home: &Path) -> ExitCode {
         }
         Some(up) if !args.iter().any(|a| a == "--no-publish") => publish_cmd(up, home),
         Some(_) => ExitCode::SUCCESS,
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::people_of;
-    use std::path::Path;
-
-    #[test]
-    fn a_people_is_namespaced_by_its_universe_and_the_archive_keeps_bare_names() {
-        assert_eq!(people_of(Path::new("var/worlds/tun-reach")), "tun-reach");
-        assert_eq!(people_of(Path::new("/opt/netstratum/var-g2/worlds/tun-reach")), "var-g2/tun-reach");
-        assert_eq!(people_of(Path::new("var-g2/worlds/tun-reach/")), "var-g2/tun-reach");
     }
 }

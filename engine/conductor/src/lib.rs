@@ -2286,7 +2286,8 @@ impl Polity {
             if surplus <= ratio(0, 1) {
                 continue;
             }
-            let ask = surplus.min(need.clone());
+            // The ledger moves on its grain: the ask is smelted to it.
+            let ask = cfe::world::smelt_resource(&surplus.min(need.clone()));
             let Some(amount) = cfe::dop::Positive::new(ask.clone()) else {
                 continue;
             };
@@ -6348,6 +6349,9 @@ fn run_era_inner(
             results.sort_by_key(|(idx, _)| *idx);
             results.into_iter().map(|(_, spec)| spec).collect()
         };
+        // A line that collapsed this cycle leaves the roster before the
+        // cross-world steps can name it as a party (`retire_collapsed`).
+        retire_collapsed(&mut worlds, &book);
         for spec in newborns {
             worlds.push(Polity::genesis(spec, &registry, &book));
         }
@@ -6402,6 +6406,30 @@ fn run_era_inner(
         );
     }
     worlds
+}
+
+/// **THE ONE CLOSURE'S EXIT** (50_WIN_CONDITIONS). A collapsed line (every
+/// orb at zero population, `CivilizationCollapsed`) refuses every scoped act,
+/// but a dead world left in the roster is still a PARTY to every cross-world
+/// step: measured in G2's baseline, dimlight-hold traded 4,485 apertures after
+/// it collapsed at receipt 112. Retiring it here — its chronicle synced whole
+/// first, so the carrier holds every receipt it ever took — removes it from
+/// every step at once, symmetric to how `divergence_step` ADDS a line the
+/// instant one is born. Returns the retired world names, in roster order.
+pub fn retire_collapsed(worlds: &mut Vec<Polity>, book: &Ledger) -> Vec<String> {
+    let mut retired = Vec::new();
+    worlds.retain(|polity| {
+        if polity.world.collapsed().is_none() {
+            return true;
+        }
+        let _ = cfe::persist::sync(
+            polity.world.chronicle(),
+            &book.world_dir(&polity.spec.world_name).join("chronicle.tlv"),
+        );
+        retired.push(polity.spec.world_name.clone());
+        false
+    });
+    retired
 }
 
 /// PHASE-4 — pure NPC instrument lifecycle (P4.7): honest spot clears,

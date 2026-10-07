@@ -156,6 +156,9 @@ impl World {
         self.permitted(actor, Scope::Collect)?;
         let (from, to) = (route.from(), route.to());
         let amount: Ratio = amount.value().clone();
+        if smelt_resource(&amount) != amount {
+            return Err(ActionRefused::OffGrain { amount: Box::new(amount) });
+        }
         let Some((survey, seed, covered)) =
             self.chronicle.receipts().iter().rev().find_map(|receipt| match receipt.event() {
                 ClosureEvent::EstateSurveyed { seed, covered, .. } => Some((
@@ -191,8 +194,8 @@ impl World {
                 monetary: Box::new(cap),
             });
         }
-        let (stamp, rate) = crate::dop::postal_meter();
-        let postage = rate * amount.clone();
+        let (stamp, _) = crate::dop::postal_meter();
+        let postage = crate::dop::postage(&amount);
         let have = sender.banked_amount(stamp);
         let need = match stamp == resource {
             true => amount.clone() + postage.clone(),

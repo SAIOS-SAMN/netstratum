@@ -17,6 +17,10 @@ pub enum ActionRefused {
     /// the kernel refused it afterwards, by which point the receipt
     /// stood and `replay` granted the value.
     WorkRefused,
+    /// #138 THE RESOURCE GRAIN: an amount asked of the resource ledger that
+    /// is not on its 1/1024 grain. The ledger moves only on its grain; an
+    /// off-grain ask is refused at the door, never floored silently.
+    OffGrain { amount: Box<Ratio> },
     /// K4: the amount exceeds what the verified work earns. Bounded at
     /// the emitter, both sides carried.
     MintExceedsWork { bound: Box<Ratio>, claimed: Box<Ratio> },

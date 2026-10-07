@@ -83,14 +83,37 @@ pub fn identity(kind: &str, name: &str) -> [u8; 32] {
 pub fn fold(key: &ed25519_dalek::SigningKey, prefix: [u8; 32], mut rows: Vec<Net>, mut declared: Vec<Net>) -> SignedFold {
     rows.sort_by_key(|(who, _)| *who);
     declared.sort_by_key(|(who, _)| *who);
-    TierFold { tier: key.verifying_key().to_bytes(), prefix, rows, declared, children: Vec::new() }.sign(key)
+    TierFold { tier: key.verifying_key().to_bytes(), prefix, rows, declared, children: Vec::new(), handoffs: Vec::new() }.sign(key)
 }
 
 impl Uplink {
     /// 78.125 — a fold's finality at the court's head, by its receipt's
-    /// stamp. A reading: nothing is sealed by it.
-    pub fn finality(&self, at: mycelium::chronometry::Stamp) -> io::Result<mycelium::anastome::dialogue::challenge::Finality> {
+    /// stamp, and (78.129) whether its tier was bonded. A reading: nothing is
+    /// sealed by it.
+    pub fn finality(&self, at: mycelium::chronometry::Stamp) -> io::Result<(mycelium::anastome::dialogue::challenge::Finality, bool)> {
         self.session.finality(at)
+    }
+
+    /// 78.125 — the tier's LINE HEAD on the court: where its next fold's span
+    /// replays from. A client whose own line head disagrees would be
+    /// falsified on demand, so it must not fold until they agree.
+    pub fn line_head(&self, tier: [u8; 32]) -> io::Result<[u8; 32]> {
+        self.session.line_head(tier).map(|(head, _)| head)
+    }
+
+    /// THE STARTUP CHECK (coordinator 2026-10-07): the local line's head must
+    /// equal the court's for this tier before any fold is sent. `Err` names
+    /// both heads when they disagree; nothing is sent on a disagreement.
+    pub fn check_line_head(&self, key: &ed25519_dalek::SigningKey, local: [u8; 32]) -> io::Result<()> {
+        let court = self.line_head(key.verifying_key().to_bytes())?;
+        if court == local {
+            return Ok(());
+        }
+        let hex = |h: &[u8; 32]| h.iter().take(8).map(|b| format!("{b:02x}")).collect::<String>();
+        Err(io::Error::new(
+            io::ErrorKind::InvalidData,
+            format!("the court's line head {}… is not this line's {}…; refusing to fold until they agree", hex(&court), hex(&local)),
+        ))
     }
 
     /// PUBLISH A FOLD'S PREFIX to the court for replay (78.125 evidence):

@@ -2005,8 +2005,8 @@ fn admitted_deltas(
                     return Err(Refused::ConveyOutsideSurvey { orb: *endpoint });
                 }
             }
-            let (stamp, rate) = cfe::dop::postal_meter();
-            let metered = rate * amount.clone();
+            let (stamp, _) = cfe::dop::postal_meter();
+            let metered = cfe::dop::postage(amount);
             if *postage != metered {
                 return Err(Refused::PostageMismatch {
                     declared: Box::new(postage.clone()),

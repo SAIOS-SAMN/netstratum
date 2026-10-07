@@ -95,6 +95,10 @@ fn main() {
             Polity::genesis(spec, &registry, &book)
         })
         .collect();
+    // A line resumed already collapsed never re-enters the beat.
+    for name in conductor::retire_collapsed(&mut worlds, &book) {
+        println!("conductor: {name} resumed collapsed; it stays out of the roster");
+    }
     println!(
         "conductor: {} civilizations from the compiled roster — {}",
         worlds.len(),
@@ -300,6 +304,12 @@ fn main() {
                     "beat {beat}: THE JUDGE REFUSES — {world_name}: deed {sequence} is unlawful ({unlawful:?}); the deed stands, the verdict is on record"
                 );
             }
+        }
+        // THE ONE CLOSURE'S EXIT: a line that collapsed this cycle leaves the
+        // roster now, its chronicle synced whole, before any cross-world step
+        // can name it as a party.
+        for name in conductor::retire_collapsed(&mut worlds, &book) {
+            println!("beat {beat}: COLLAPSE — {name} has no people left; it leaves the roster, its chronicle kept whole");
         }
         total_cleaves += newborns.len() as u64;
         for spec in newborns {

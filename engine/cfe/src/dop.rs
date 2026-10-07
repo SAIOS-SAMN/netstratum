@@ -1422,6 +1422,15 @@ pub fn postal_meter() -> (Resource, Ratio) {
     (Resource::Iron, ratio(1, 16))
 }
 
+/// **THE POSTAGE ON A CONVEYANCE** — the meter's rate on the amount, landed
+/// on the resource ledger's 1/1024 grain (#138: every fill smelts at its
+/// carrier). The ONE reading both the live convey and the kernel's gate
+/// call, so the postage cannot be charged one way and verified another.
+/// Measured in G2: `1/16 × 2547/512` banked iron at `/8192`, off the grain.
+pub fn postage(amount: &Ratio) -> Ratio {
+    crate::world::smelt_resource(&(postal_meter().1 * amount.clone()))
+}
+
 /// **THE SURVEY METER** (E5b, 2026-08-05: *surveys must be metered*).
 /// The sealed charging rule: what one survey costs, PER ORB COVERED —
 /// `cost = rate × volume`, exact, flat, never compounding (the 2^1100

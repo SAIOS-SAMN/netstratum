@@ -25,7 +25,7 @@
 use crate::fold::lane;
 use cfe::dop::{ColonyOrb, Resource};
 use cfe::ratio::Ratio;
-use cfe::vrp::Chronicle;
+use cfe::vrp::{Chronicle, Receipt};
 use cfe::world::replay::Replayer;
 use cfe::world::RESOURCE_LEDGER_GRAIN;
 use mycelium::anastome::dialogue::uplink::Net;
@@ -61,8 +61,6 @@ impl Holding {
 pub enum CensusRefused {
     /// The window does not lie inside the chronicle.
     Window { from: usize, to: usize, len: usize },
-    /// A holding is not on the 1/1024 grain, so it has no integer count.
-    OffGrain { receipt: usize, orb: u64, holding: Holding, amount: String },
     /// A count passes the court's i128 carrier: refused, never wrapped.
     Overflow { orb: u64, holding: Holding },
     /// The per-receipt entries do not sum to the window's totals, so the
@@ -70,31 +68,45 @@ pub enum CensusRefused {
     EntriesDisagree,
 }
 
-/// One holding's count in grain units.
-fn units(amount: &Ratio) -> Option<BigInt> {
+/// One holding's count in grain units — the amount READ AT the resource
+/// ledger's 1/1024 grain (floored), and whether it sat off the grain. The
+/// grain is the ledger's own law (#138): sub-grain dust is not ledger value,
+/// so a fold never carries it; but an off-grain holding means some fill site
+/// broke that law, and the census reports every one (`Stepper::off_grain`)
+/// instead of hiding it. Floored positions telescope exactly, so per-receipt
+/// changes still sum to the window's change and continuity holds.
+fn units(amount: &Ratio) -> (BigInt, bool) {
     let scaled = amount * Ratio::from_integer(BigInt::from(RESOURCE_LEDGER_GRAIN));
-    scaled.is_integer().then(|| scaled.to_integer())
+    (scaled.floor().to_integer(), !scaled.is_integer())
 }
 
 type Positions = BTreeMap<(u64, Holding), BigInt>;
 
-fn positions(orbs: &[ColonyOrb], receipt: usize) -> Result<Positions, CensusRefused> {
+/// An off-grain holding the census read: receipt index, orb, holding, amount.
+pub type OffGrain = (usize, u64, Holding, String);
+
+fn positions(orbs: &[ColonyOrb], receipt: usize, off: &mut Vec<OffGrain>, held_off: &mut std::collections::BTreeSet<(u64, Holding)>) -> Positions {
     let mut at = Positions::new();
+    let mut now_off = std::collections::BTreeSet::new();
     for orb in orbs {
         let held = orb.banked.iter().map(|(r, a)| (Holding::Matter(*r), a)).chain(std::iter::once((Holding::Stamp, &orb.stamp)));
         for (holding, amount) in held {
-            let n = units(amount).ok_or_else(|| CensusRefused::OffGrain {
-                receipt,
-                orb: orb.orb_id,
-                holding,
-                amount: amount.to_string(),
-            })?;
+            let (n, off_grain) = units(amount);
+            if off_grain {
+                // Reported once, where the breach begins; a holding that stays
+                // off the grain is not re-reported on every receipt.
+                if !held_off.contains(&(orb.orb_id, holding)) {
+                    off.push((receipt, orb.orb_id, holding, amount.to_string()));
+                }
+                now_off.insert((orb.orb_id, holding));
+            }
             if !n.is_zero() {
                 at.insert((orb.orb_id, holding), n);
             }
         }
     }
-    Ok(at)
+    *held_off = now_off;
+    at
 }
 
 /// Every key's change from `before` to `after`, zero changes omitted.
@@ -152,56 +164,105 @@ fn small(n: &BigInt, orb: u64, holding: Holding) -> Result<i128, CensusRefused> 
     n.to_i128().ok_or(CensusRefused::Overflow { orb, holding })
 }
 
-/// Take the census of `chronicle[from..to]`. The replay runs from the first
-/// receipt (the state at `from` is the replay of everything before it).
-pub fn take(people: &str, chronicle: &Chronicle, from: usize, to: usize) -> Result<Census, CensusRefused> {
-    let receipts = chronicle.receipts();
-    if from > to || to > receipts.len() || to == 0 {
-        return Err(CensusRefused::Window { from, to, len: receipts.len() });
+/// THE INCREMENTAL CENSUS — a people's replay held open across reads, so a
+/// follower that tails a live chronicle steps each NEW receipt once and
+/// never replays from genesis again. `skip` catches up over receipts
+/// already folded (no step emitted); `step` emits the receipt's own change.
+pub struct Stepper {
+    replay: Replayer,
+    before: Positions,
+    applied: usize,
+    /// Every off-grain BREACH read so far, newest last — where a holding left
+    /// the ledger's grain (a fill site broke #138; reported, never folded).
+    pub off_grain: Vec<OffGrain>,
+    held_off: std::collections::BTreeSet<(u64, Holding)>,
+}
+
+impl Stepper {
+    /// The empty book, before the first receipt.
+    pub fn new() -> Stepper {
+        Stepper { replay: Replayer::new(), before: Positions::new(), applied: 0, off_grain: Vec::new(), held_off: std::collections::BTreeSet::new() }
     }
-    let mut replay = Replayer::new();
-    for r in &receipts[..from] {
-        replay.apply(r);
+
+    /// How many receipts this stepper has applied.
+    pub fn applied(&self) -> usize {
+        self.applied
     }
-    let start = positions(&replay.state().orbs, from)?;
-    let mut before = start.clone();
-    let mut emitted: BTreeMap<(String, Holding), BigInt> = BTreeMap::new();
-    let mut steps = Vec::new();
-    for (i, r) in receipts.iter().enumerate().take(to).skip(from) {
-        replay.apply(r);
-        let after = positions(&replay.state().orbs, i)?;
-        let moved = change(&before, &after);
+
+    /// Apply receipts already folded, emitting nothing; the holdings are
+    /// read once at the end, so a long catch-up pays one census, not one
+    /// per receipt.
+    pub fn skip(&mut self, receipts: &[Receipt]) -> Result<(), CensusRefused> {
+        for r in receipts {
+            self.replay.apply(r);
+        }
+        self.applied += receipts.len();
+        self.before = positions(&self.replay.state().orbs, self.applied.saturating_sub(1), &mut self.off_grain, &mut self.held_off);
+        Ok(())
+    }
+
+    /// Apply one receipt and return its own net change, or `None` when it
+    /// moved no holding (no line entry is written for it).
+    pub fn step(&mut self, r: &Receipt) -> Result<Option<Step>, CensusRefused> {
+        let i = self.applied;
+        self.replay.apply(r);
+        self.applied += 1;
+        let after = positions(&self.replay.state().orbs, i, &mut self.off_grain, &mut self.held_off);
+        let moved = change(&self.before, &after);
+        self.before = after;
         if moved.is_empty() {
-            continue;
+            return Ok(None);
         }
         let mut net: BTreeMap<Holding, BigInt> = BTreeMap::new();
         for ((_, holding), d) in &moved {
             *net.entry(*holding).or_default() += d;
         }
         let kind = kind_of(r.event());
-        let mut declared = Vec::new();
-        for (holding, d) in net.into_iter().filter(|(_, d)| !d.is_zero()) {
-            declared.push((kind.clone(), holding, small(&d, 0, holding)?));
-            *emitted.entry((kind.clone(), holding)).or_default() += d;
-        }
+        let declared = net
+            .into_iter()
+            .filter(|(_, d)| !d.is_zero())
+            .map(|(holding, d)| Ok((kind.clone(), holding, small(&d, 0, holding)?)))
+            .collect::<Result<Vec<_>, _>>()?;
         let rows = moved
             .iter()
             .map(|((orb, holding), d)| Ok((*orb, *holding, small(d, *orb, *holding)?)))
             .collect::<Result<Vec<_>, _>>()?;
-        steps.push(Step { receipt: i, cite: r.own().0, rows, declared });
-        before = after;
+        Ok(Some(Step { receipt: i, cite: r.own().0, rows, declared }))
     }
-    let rows = change(&start, &before)
+}
+
+impl Default for Stepper {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+/// Take the census of `chronicle[from..to]`. The replay runs from the first
+/// receipt (the state at `from` is the replay of everything before it). The
+/// window's totals are read twice — as the start-to-end change of holdings
+/// and as the sum of its steps — and a census whose two readings disagree is
+/// refused, so a fold is never signed over entries that cannot re-derive it.
+pub fn take(people: &str, chronicle: &Chronicle, from: usize, to: usize) -> Result<Census, CensusRefused> {
+    let receipts = chronicle.receipts();
+    if from > to || to > receipts.len() || to == 0 {
+        return Err(CensusRefused::Window { from, to, len: receipts.len() });
+    }
+    let mut stepper = Stepper::new();
+    stepper.skip(&receipts[..from])?;
+    let start = stepper.before.clone();
+    let mut steps = Vec::new();
+    for r in &receipts[from..to] {
+        if let Some(step) = stepper.step(r)? {
+            steps.push(step);
+        }
+    }
+    let census = Census::from_steps(people, from, to, receipts[to - 1].own().0, steps);
+    let held: BTreeMap<(u64, Holding), i128> = change(&start, &stepper.before)
         .into_iter()
-        .map(|((orb, holding), d)| Ok((orb, holding, small(&d, orb, holding)?)))
-        .collect::<Result<Vec<_>, _>>()?;
-    let declared = emitted
-        .into_iter()
-        .filter(|(_, d)| !d.is_zero())
-        .map(|((kind, holding), d)| Ok((kind, holding, small(&d, 0, holding)?)))
-        .collect::<Result<Vec<_>, _>>()?;
-    let census = Census { people: people.to_string(), from, to, head: receipts[to - 1].own().0, rows, declared, steps };
-    if !census.entries_sum_to_totals() {
+        .map(|((orb, holding), d)| Ok(((orb, holding), small(&d, orb, holding)?)))
+        .collect::<Result<_, CensusRefused>>()?;
+    let summed: BTreeMap<(u64, Holding), i128> = census.rows.iter().map(|(o, h, v)| ((*o, *h), *v)).collect();
+    if held != summed {
         return Err(CensusRefused::EntriesDisagree);
     }
     Ok(census)
@@ -257,29 +318,35 @@ impl Census {
                     (false, Some(s)) => (s.receipt + 1, s.cite),
                     _ => (to, head),
                 };
-                let mut rows: BTreeMap<(u64, Holding), i128> = BTreeMap::new();
-                let mut declared: BTreeMap<(String, Holding), i128> = BTreeMap::new();
-                for s in &steps {
-                    for (orb, h, v) in &s.rows {
-                        *rows.entry((*orb, *h)).or_default() += v;
-                    }
-                    for (k, h, v) in &s.declared {
-                        *declared.entry((k.clone(), *h)).or_default() += v;
-                    }
-                }
-                let c = Census {
-                    people: people.clone(),
-                    from: start,
-                    to: end,
-                    head: end_head,
-                    rows: rows.into_iter().filter(|(_, v)| *v != 0).map(|((o, h), v)| (o, h, v)).collect(),
-                    declared: declared.into_iter().filter(|(_, v)| *v != 0).map(|((k, h), v)| (k, h, v)).collect(),
-                    steps,
-                };
+                let c = Census::from_steps(&people, start, end, end_head, steps);
                 start = end;
                 c
             })
             .collect()
+    }
+
+    /// A census whose totals are the sums of `steps`, key by key, zero nets
+    /// dropped — the window `[from, to)` ending at chronicle head `head`.
+    pub fn from_steps(people: &str, from: usize, to: usize, head: [u8; 32], steps: Vec<Step>) -> Census {
+        let mut rows: BTreeMap<(u64, Holding), i128> = BTreeMap::new();
+        let mut declared: BTreeMap<(String, Holding), i128> = BTreeMap::new();
+        for s in &steps {
+            for (orb, h, v) in &s.rows {
+                *rows.entry((*orb, *h)).or_default() += v;
+            }
+            for (k, h, v) in &s.declared {
+                *declared.entry((k.clone(), *h)).or_default() += v;
+            }
+        }
+        Census {
+            people: people.to_string(),
+            from,
+            to,
+            head,
+            rows: rows.into_iter().filter(|(_, v)| *v != 0).map(|((o, h), v)| (o, h, v)).collect(),
+            declared: declared.into_iter().filter(|(_, v)| *v != 0).map(|((k, h), v)| (k, h, v)).collect(),
+            steps,
+        }
     }
 
     /// What a challenge checks: the steps, summed key by key, are exactly the
@@ -357,6 +424,14 @@ mod tests {
         assert_eq!(parts[2].head, [99; 32]);
         assert!(parts.iter().all(Census::entries_sum_to_totals));
         assert_eq!(parts.iter().map(|c| c.rows[0].2).sum::<i128>(), 30);
+    }
+
+    #[test]
+    fn a_holding_is_read_at_the_grain_and_an_off_grain_one_is_flagged() {
+        let on = cfe::ratio::ratio(2547, 512); // 5094/1024
+        assert_eq!(units(&on), (BigInt::from(5094), false));
+        let off = cfe::ratio::ratio(161293, 8192); // 20161.625/1024
+        assert_eq!(units(&off), (BigInt::from(20161), true), "floored to the grain, and flagged");
     }
 
     #[test]

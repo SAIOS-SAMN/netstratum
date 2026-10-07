@@ -517,7 +517,15 @@ impl Chronicle {
 /// link is named. Public so a replayer or a peer can verify receipts it
 /// received over the wire, outside any chronicle.
 pub fn verify_receipts(receipts: &[Receipt]) -> ChainRead {
-    let mut parent = ReceiptHash::GENESIS;
+    verify_from(ReceiptHash::GENESIS, receipts)
+}
+
+/// The same verification read over a TAIL: `receipts` must chain from
+/// `parent` (the own-hash of the receipt before them), each link re-derived
+/// from its content exactly as [`verify_receipts`] does from genesis. A
+/// reader that already proved a prefix verifies only what follows it.
+pub fn verify_from(parent: ReceiptHash, receipts: &[Receipt]) -> ChainRead {
+    let mut parent = parent;
     for receipt in receipts {
         let expected = match receipt {
             Receipt::V1(r) => receipt_digest(r.sequence, r.stamp, &parent, &r.event.wire_bytes(), &r.provenance),
