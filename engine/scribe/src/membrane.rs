@@ -448,8 +448,18 @@ fn attach(addr: &str, occ: &mycelium::iae::peel::FullMeasurement) -> Option<Sess
 /// C8: net's one durable signing key — minted once (32-byte seed,
 /// 0600) beside the kernel's own state. The same seed every boot,
 /// so first-bind-wins holds across restarts and re-enrollments.
+/// The var root net's membrane key lives in — set once by the conductor
+/// from its `--var`, so two universes never share one signing key.
+static HOME: OnceLock<std::path::PathBuf> = OnceLock::new();
+
+/// Seat the membrane's key beside this universe's state. First call wins.
+pub fn set_home(root: &std::path::Path) {
+    let _ = HOME.set(root.to_path_buf());
+}
+
 fn net_key() -> mycelium::ed25519_dalek::SigningKey {
-    let path = std::path::Path::new("/opt/netstratum/var/membrane.key");
+    let home = HOME.get().cloned().unwrap_or_else(|| std::path::PathBuf::from("/opt/netstratum/var"));
+    let path = &home.join("membrane.key");
     if let Ok(b) = std::fs::read(path) {
         if let Ok(seed) = <[u8; 32]>::try_from(b.as_slice()) {
             return mycelium::ed25519_dalek::SigningKey::from_bytes(&seed);

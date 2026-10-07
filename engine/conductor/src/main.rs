@@ -52,6 +52,7 @@ fn main() {
         }
     }
     std::fs::create_dir_all(&var_root).expect("var root");
+    scribe::membrane::set_home(std::path::Path::new(&var_root));
     // THE DEFINITION LAW: the roster compiles. The legacy-adoption shim
     // for `egregores.json`/`bots.json` is struck with the file itself —
     // there is no longer a roster on disk for a legacy name to become.

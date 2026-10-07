@@ -4601,7 +4601,7 @@ impl Polity {
         if dx == ratio(0, 1) && dy == ratio(0, 1) && dz == ratio(0, 1) {
             dx = ratio(1, 1);
         }
-        Some(PolitySpec {
+        let spec = PolitySpec {
             civilization: branch,
             // Fresh themed world and planet — provenance is a registry
             // fact and a star-chart adjacency, never a name chain.
@@ -4622,7 +4622,23 @@ impl Polity {
             orbit: None,
             // The opposite phase of the cleave (11 §3), wrapped.
             gauge: Some(cfe::world::wrap_gauge(origin_key - delta)),
-        })
+        };
+        // THE SEAT, recorded once beside the card: the boot roster reads it,
+        // so a restart resumes this branch in the world it was founded in,
+        // at the same chart point under the same temperament — never a
+        // second founding under a derived `{sigil}-hearth`. (The gauge is
+        // read only at founding; the resumed chronicle carries it.)
+        let seat = ledger::registry::Seat {
+            world: spec.world_name.clone(),
+            planet: spec.planet.clone(),
+            colony: spec.colony.clone(),
+            position: spec.position.clone(),
+            policy: spec.policy.describe().to_string(),
+        };
+        if let Err(e) = registry.write_founded_at(&spec.civilization.sigil, &seat) {
+            eprintln!("divergence: {} seated without a seat card ({e}); a restart would found it again", spec.civilization.sigil);
+        }
+        Some(spec)
     }
 
     /// THE UNFOLD (GAUGE-N, `11` §2.1) — a line OPENS the plane it has

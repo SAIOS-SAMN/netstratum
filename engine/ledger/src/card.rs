@@ -100,6 +100,23 @@ pub mod civ {
     pub const STATION: u8 = 11;
 }
 
+/// Seat card (`registry/<sigil>.seat`): where a line that was NOT compiled
+/// in was seated at its founding — a cleave's themed world, planet and
+/// colony and its adjacent chart position. Written once by the founding
+/// act; read on every boot, so a restart resumes the line where it was
+/// founded instead of founding it again under a derived name.
+pub mod seat {
+    pub const WORLD: u8 = 1;
+    pub const PLANET: u8 = 2;
+    pub const COLONY: u8 = 3;
+    /// Exact rationals, `ratio::encode`.
+    pub const X: u8 = 4;
+    pub const Y: u8 = 5;
+    pub const Z: u8 = 6;
+    /// The build temperament, as its word.
+    pub const POLICY: u8 = 7;
+}
+
 /// Universe card (`var/worlds/universe.card`).
 pub mod uni {
     pub const TOPOLOGY: u8 = 1;

@@ -426,6 +426,24 @@ pub fn registered_polities(registry: &ledger::registry::Registry) -> Vec<PolityS
         if founding.iter().any(|spec| spec.civilization.sigil == card.sigil) {
             continue;
         }
+        // A line seated by a founding act (a cleave) resumes exactly where
+        // it was seated: its world, planet, colony, chart point and
+        // temperament are a recorded fact, never re-derived.
+        if let Some(seat) = registry.founded_at(&card.sigil) {
+            grown.push(PolitySpec {
+                world_name: seat.world,
+                planet: seat.planet,
+                colony: seat.colony,
+                civilization: card,
+                policy: Policy::parse(&seat.policy).unwrap_or(Policy::Steady),
+                position: seat.position,
+                star: None,
+                albedo: None,
+                orbit: None,
+                gauge: None,
+            });
+            continue;
+        }
         let (mut x, y, z) = placement(&card.sigil);
         while taken.contains(&(x, y, z)) {
             x += 1;

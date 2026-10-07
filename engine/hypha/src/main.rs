@@ -141,8 +141,22 @@ fn main() -> ExitCode {
     }
 }
 
+/// A people's name on the network: its world's name, namespaced by the
+/// universe (var root) it lives in — `var-g2/tun-reach` — so two universes
+/// founding the same compiled seat never share an identity, a cursor or a
+/// line entry. The archive's root, `var`, keeps its bare names (its folds
+/// were sealed under them).
+fn people_of(dir: &Path) -> String {
+    let world = dir.file_name().and_then(|n| n.to_str()).unwrap_or("unnamed");
+    let root = dir.parent().and_then(Path::parent).and_then(|r| r.file_name()).and_then(|n| n.to_str());
+    match root {
+        Some(r) if r != "var" => format!("{r}/{world}"),
+        _ => world.to_string(),
+    }
+}
+
 fn load(dir: &Path) -> Result<(String, cfe::vrp::Chronicle), ExitCode> {
-    let people = dir.file_name().and_then(|n| n.to_str()).unwrap_or("unnamed").to_string();
+    let people = people_of(dir);
     match cfe::persist::load(&dir.join("chronicle.tlv")) {
         Ok(c) => Ok((people, c)),
         Err(e) => {
@@ -426,5 +440,18 @@ fn census_cmd(args: &[String], up: Option<&Uplink>, home: &Path) -> ExitCode {
         }
         Some(up) if !args.iter().any(|a| a == "--no-publish") => publish_cmd(up, home),
         Some(_) => ExitCode::SUCCESS,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::people_of;
+    use std::path::Path;
+
+    #[test]
+    fn a_people_is_namespaced_by_its_universe_and_the_archive_keeps_bare_names() {
+        assert_eq!(people_of(Path::new("var/worlds/tun-reach")), "tun-reach");
+        assert_eq!(people_of(Path::new("/opt/netstratum/var-g2/worlds/tun-reach")), "var-g2/tun-reach");
+        assert_eq!(people_of(Path::new("var-g2/worlds/tun-reach/")), "var-g2/tun-reach");
     }
 }

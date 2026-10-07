@@ -299,6 +299,18 @@ pub struct Civilization {
     pub station: Option<String>,
 }
 
+/// WHERE A LINE WAS SEATED at its founding — the half of its spec the
+/// `.civ` card does not carry (see [`Registry::write_founded_at`]).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Seat {
+    pub world: String,
+    pub planet: String,
+    pub colony: String,
+    pub position: (ratio::Ratio, ratio::Ratio, ratio::Ratio),
+    /// The build temperament's word (the conductor's `Policy`).
+    pub policy: String,
+}
+
 /// Typed refusals of registration.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum RegistryRefused {
@@ -403,6 +415,48 @@ impl Registry {
             card::put_str(card::civ::STATION, station, &mut out);
         }
         card::write_atomic(path, &out)
+    }
+
+    /// Record where `sigil` was seated at its founding (`<sigil>.seat`).
+    /// Once: a seat already written is never moved.
+    pub fn write_founded_at(&self, sigil: &str, seat: &Seat) -> std::io::Result<()> {
+        let path = self.root.join(format!("{sigil}.seat"));
+        if path.exists() {
+            return Err(std::io::Error::new(std::io::ErrorKind::AlreadyExists, format!("{sigil} is already seated")));
+        }
+        let mut out = Vec::new();
+        card::put_str(card::seat::WORLD, &seat.world, &mut out);
+        card::put_str(card::seat::PLANET, &seat.planet, &mut out);
+        card::put_str(card::seat::COLONY, &seat.colony, &mut out);
+        card::put_str(card::seat::POLICY, &seat.policy, &mut out);
+        for (tag, r) in [(card::seat::X, &seat.position.0), (card::seat::Y, &seat.position.1), (card::seat::Z, &seat.position.2)] {
+            let mut v = Vec::new();
+            ratio::encode(r, &mut v);
+            card::put(tag, &v, &mut out);
+        }
+        card::write_atomic(&path, &out)
+    }
+
+    /// Where `sigil` was seated at its founding, if it was recorded. A card
+    /// missing any field reads as unrecorded, never as a partial seat.
+    pub fn founded_at(&self, sigil: &str) -> Option<Seat> {
+        let data = card::read(&self.root.join(format!("{sigil}.seat")))?;
+        let (mut world, mut planet, mut colony, mut policy) = (None, None, None, None);
+        let (mut x, mut y, mut z) = (None, None, None);
+        for (tag, value) in card::records(&data) {
+            let r = || ratio::decode(value).filter(|(_, n)| *n == value.len()).map(|(r, _)| r);
+            match tag {
+                card::seat::WORLD => world = card::str_of(value),
+                card::seat::PLANET => planet = card::str_of(value),
+                card::seat::COLONY => colony = card::str_of(value),
+                card::seat::POLICY => policy = card::str_of(value),
+                card::seat::X => x = r(),
+                card::seat::Y => y = r(),
+                card::seat::Z => z = r(),
+                _ => {}
+            }
+        }
+        Some(Seat { world: world?, planet: planet?, colony: colony?, position: (x?, y?, z?), policy: policy? })
     }
 
     /// Load one entry by sigil (`.civ` TLV only).
