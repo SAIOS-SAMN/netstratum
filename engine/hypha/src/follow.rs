@@ -173,10 +173,25 @@ impl Follower {
         let mut line = TierLine::open(&self.home, "colonies")?;
         let mut log = FoldLog::open(&self.home, "colonies")?;
         // THE STARTUP CHECK, every round: fold only on a line the court agrees
-        // on. A disagreement is not the court being away — it halts the round.
-        if let Err(e) = up.check_line_head(&self.key, line.head()) {
-            round.notes.push(format!("NOT FOLDING — {e}"));
-            return Ok(round);
+        // on. A court that is away backs the round off (`Err`). A court whose
+        // head stands EARLIER on this line (it restarted without its latest
+        // admissions) is the authority: the line rolls back to it and the
+        // receipts behind the lost entries fold again (`resync`). A head that
+        // is not on this line at all halts the round, loudly.
+        let court = up.line_head(self.key.verifying_key().to_bytes())?;
+        if court != line.head() {
+            match self.resync(court, &mut line, &mut log, &mut cursors)? {
+                Some(note) => round.notes.push(note),
+                None => {
+                    let hex = |h: &[u8; 32]| h.iter().take(8).map(|b| format!("{b:02x}")).collect::<String>();
+                    round.notes.push(format!(
+                        "NOT FOLDING — the court's line head {}… is not on this line (head {}…); an operator must look",
+                        hex(&court),
+                        hex(&line.head())
+                    ));
+                    return Ok(round);
+                }
+            }
         }
 
         // READ. New worlds (a cleave founds one live) are seated on sight.
@@ -307,6 +322,59 @@ impl Follower {
             round.notes.push(format!("a finality was not read: {e}"));
         }
         Ok(round)
+    }
+
+    /// ROLL BACK TO THE COURT'S HEAD when it stands earlier on this line:
+    /// truncate the hot line to it, drop the logged folds after it, and send
+    /// every people whose receipts those entries netted back to its first
+    /// such receipt (cursor rolled back, held replay dropped, re-seated next
+    /// round). `None` when the court's head is not on the hot line.
+    fn resync(
+        &mut self,
+        court: [u8; 32],
+        line: &mut TierLine,
+        log: &mut FoldLog,
+        cursors: &mut crate::line::Cursors,
+    ) -> io::Result<Option<String>> {
+        let keep = if court == line.base {
+            0
+        } else {
+            match line.entries.iter().position(|e| e.head == court) {
+                Some(i) => i + 1,
+                None => return Ok(None),
+            }
+        };
+        let cut = line.offset + keep as u64;
+        let removed = line.truncate_to(keep)?;
+        let folds_before = log.folds.len();
+        log.truncate_from(cut)?;
+        let dropped = folds_before - log.folds.len();
+        let lost: std::collections::BTreeSet<[u8; 32]> = removed.iter().map(|e| e.cite).collect();
+        // Which people wrote each lost receipt, and where it sits in its chronicle.
+        let mut rolled = Vec::new();
+        for dir in std::fs::read_dir(self.root.join("worlds"))?.flatten().map(|e| e.path()) {
+            if dir.file_name().and_then(|n| n.to_str()).is_some_and(|n| n.contains("--closed-")) {
+                continue;
+            }
+            let Ok(chronicle) = cfe::persist::load(&dir.join("chronicle.tlv")) else { continue };
+            let receipts = chronicle.receipts();
+            if let Some(first) = receipts.iter().position(|r| lost.contains(&r.own().0)) {
+                let people = people_of(&dir);
+                if first == 0 {
+                    cursors.clear(&people)?;
+                } else {
+                    cursors.set(&people, first, receipts[first - 1].own().0)?;
+                }
+                self.peoples.remove(&people);
+                rolled.push(format!("{people}@{first}"));
+            }
+        }
+        Ok(Some(format!(
+            "RESYNC — the court's head stands {} entries back on this line (it restarted without them); rolled back, {} folds dropped, refolding: {}",
+            removed.len(),
+            dropped,
+            rolled.join(", ")
+        )))
     }
 
     /// Peoples followed, and those halted with why.

@@ -238,6 +238,25 @@ impl TierLine {
         Ok(())
     }
 
+    /// ROLL THE HOT LINE BACK to its first `keep` entries — the court is the
+    /// line's authority, and a court that restarted without its latest
+    /// admissions stands at an EARLIER head of this line; the entries after
+    /// it were never sealed there. Returns the entries removed, oldest first
+    /// (their cites name the receipts to fold again). The chronicles keep
+    /// those receipts; nothing of the record is lost.
+    pub fn truncate_to(&mut self, keep: usize) -> io::Result<Vec<Entry>> {
+        if keep >= self.entries.len() {
+            return Ok(Vec::new());
+        }
+        let removed = self.entries.split_off(keep);
+        let mut bytes = Vec::new();
+        for e in &self.entries {
+            put_record(&mut bytes, e)?;
+        }
+        write_atomic(&self.path, &bytes)?;
+        Ok(removed)
+    }
+
     /// START AN EPOCH: the whole hot line set aside as `line-<tier>.<epoch>`
     /// (kept whole, its own chain from its own base) and the hot line
     /// restarted at the zero head, its indices continuing. Refuses to
@@ -313,6 +332,21 @@ impl FoldLog {
         f.sync_data()?;
         self.folds.push(mark);
         Ok(())
+    }
+
+    /// Drop every logged fold that starts at or after line index `from` —
+    /// folds the court no longer holds after a roll-back.
+    pub fn truncate_from(&mut self, from: u64) -> io::Result<()> {
+        self.folds.retain(|f| f.first < from);
+        let mut b = Vec::new();
+        for mark in &self.folds {
+            let klen = u16::try_from(mark.at.len()).map_err(|_| io::Error::new(io::ErrorKind::InvalidInput, "a stamp key past 64 KiB"))?;
+            b.extend_from_slice(&klen.to_le_bytes());
+            b.extend_from_slice(&mark.at);
+            b.extend_from_slice(&mark.first.to_le_bytes());
+            b.extend_from_slice(&mark.count.to_le_bytes());
+        }
+        write_atomic(&self.path, &b)
     }
 
     /// The hot entries that may be pruned: walking the folds over the hot
@@ -422,8 +456,19 @@ impl Cursors {
 
     /// Record `people` as folded through `n` receipts, the last hashing to
     /// `last`, and write the whole file (small: one line per people).
+    /// Forget `people`'s cursor (its next census starts from its chronicle's
+    /// first receipt) — written through like `set`.
+    pub fn clear(&mut self, people: &str) -> io::Result<()> {
+        self.at.remove(people);
+        self.rewrite()
+    }
+
     pub fn set(&mut self, people: &str, n: usize, last: [u8; 32]) -> io::Result<()> {
         self.at.insert(people.to_string(), (n, last));
+        self.rewrite()
+    }
+
+    fn rewrite(&self) -> io::Result<()> {
         let mut text = String::new();
         for (p, (n, h)) in &self.at {
             let hex: String = h.iter().map(|b| format!("{b:02x}")).collect();
@@ -526,6 +571,30 @@ mod tests {
         let (rows, declared) = fold_of(&[ea, eb]);
         assert_eq!(rows, vec![([2; 32], [5, 0, 0, 0]), ([4; 32], [0, 3, 0, 0])], "identity 1 nets to zero and drops");
         assert_eq!(declared, vec![([7; 32], [0, 3, 0, 0])]);
+    }
+
+    #[test]
+    fn a_roll_back_to_an_earlier_head_keeps_the_chain_and_drops_the_lost_folds() {
+        let home = scratch("rollback");
+        let mut line = TierLine::open(&home, "colonies").unwrap();
+        let mut log = FoldLog::open(&home, "colonies").unwrap();
+        for (i, n) in [3usize, 2, 2].into_iter().enumerate() {
+            let first = line.total();
+            line.append_all((0..n).map(|j| (vec![i as u8, j as u8], [i as u8; 32])).collect()).unwrap();
+            log.push(FoldMark { at: vec![i as u8], first, count: n as u64 }).unwrap();
+        }
+        let court_head = line.entries[2].head; // the court kept only the first fold
+        let removed = line.truncate_to(3).unwrap();
+        assert_eq!(removed.len(), 4);
+        log.truncate_from(3).unwrap();
+        let back = TierLine::open(&home, "colonies").unwrap();
+        assert_eq!((back.head(), back.entries.len()), (court_head, 3), "the line re-verifies at the court's head");
+        assert_eq!(FoldLog::open(&home, "colonies").unwrap().folds.len(), 1);
+        let mut c = Cursors::open(&home, "colonies").unwrap();
+        c.set("p", 9, [1; 32]).unwrap();
+        c.clear("p").unwrap();
+        assert!(Cursors::open(&home, "colonies").unwrap().at.is_empty());
+        let _ = fs::remove_dir_all(&home);
     }
 
     #[test]
