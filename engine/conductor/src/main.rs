@@ -52,7 +52,6 @@ fn main() {
         }
     }
     std::fs::create_dir_all(&var_root).expect("var root");
-    scribe::membrane::set_home(std::path::Path::new(&var_root));
     // THE DEFINITION LAW: the roster compiles. The legacy-adoption shim
     // for `egregores.json`/`bots.json` is struck with the file itself —
     // there is no longer a roster on disk for a legacy name to become.
@@ -225,6 +224,8 @@ fn main() {
         // TUniversal T = epoch base + this era's beat (07 §1.3): live
         // ticks stack on the converged timeline, never restart it.
         let _ = book.set_universal_clock(epoch_base + beat);
+        // docs/61 G1: every line's place at this beat, on its orbit.
+        conductor::orbit_step(&mut worlds, &book);
         // MESH-1b (#2): the pen door — yields seal at the beat
         // boundary; penned worlds wait, and the file poll notices
         // the pen coming home.

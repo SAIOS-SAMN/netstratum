@@ -20,6 +20,8 @@ ledger = { path = "../ledger" }
 mesh = { path = "../mesh" }
 physics = { path = "../physics" }
 scribe = { path = "../scribe" }
+# docs/60 D10b: lines' words stated in the fleet's v0.1.0 tongue.
+tongue = { path = "../tongue" }
 solver = { path = "../solver" }
 # COG (doc 52): the thought engine is now a LIVE dependency — the beat peels
 # the economy's deficit through the same `overlay` the cognition uses, so

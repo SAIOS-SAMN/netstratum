@@ -73,9 +73,9 @@ moves the cadence.
 | D7 | layered peel, slice 1: object op, then the frame through the reduce organ | landed |
 | D8 | partials seed the next look | exists (held conjectures, restore 1); a found-how record has no reader and is not built |
 | D9 | the dead's held conjectures ride the core's bell into living lines' held | landed |
-| D7b | layered peel, frame then object; cell layer | open |
+| D7b | layered peel, frame then object (direct, bounded) | landed; the cell layer is open |
 | D10a | the conductor stops offering to the legacy uplink (pre-v0.1.0 `/opt/mycelium`, 127.0.0.1:7430, nothing listens; an unbounded queue) | landed; the legacy AUTIC readers go with D10b |
-| D10b | lines mint words as v0.1.0 elements over the seventeen (the seat's translator, shared) | open |
+| D10b | lines' words stated in the v0.1.0 tongue (`tongue` crate, shared with the seat); legacy AUTIC readers removed; COG-LEX `autic=` counts statable words | landed |
 
 ## Measured at landing (D1-D4, 2026-10-08, beat 8220-8240)
 
@@ -90,3 +90,12 @@ Solves per beat fell from about 4.7 (beats 6270-6720, before D1) to about
 have derived (D1). Learned words still close tasks whole; the market and
 speech are now the only way across a perception gap. Resident memory flat
 at 1.62-1.66 GB over six minutes.
+
+## Measured at D10b (2026-10-08)
+
+One line's 350 words (spore-march), each stated on the ramp probe: 339
+carry a tiling (no form in the court's language until mycelium 78.150, the
+coordinator's ruling: repetition as the orbit of a translator or screw), 4
+stated, 7 refused at the mint (`MintVertexNotCarried`, sent to mycelium to
+reproduce). The low `autic=` count is the missing repetition form, not the
+translator.

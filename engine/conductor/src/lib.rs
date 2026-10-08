@@ -63,6 +63,8 @@ use std::path::Path;
 // `overlay` the cognition uses; coefficients drive production, residual drives
 // research. Replaces the cartesian build cascade with the peel.
 pub mod civic;
+// docs/61 G1 — a line's place about its core, in closed form.
+pub mod orbit;
 pub mod lookahead;
 pub mod ocular;
 mod polities;
@@ -1094,30 +1096,19 @@ pub struct Polity {
     pub misheard: u64,
     /// docs/60 D9 — the dead's open questions on their way, by arrival beat.
     questions_arriving: Vec<(u64, solver::Conjecture)>,
-    /// AUTIC-1 — how many AUTIC crystals this line's vessels have absorbed from
-    /// the mesh-learned basin (cumulative, workspace like `grown`). The live
-    /// measure of the shared tongue entering entity cognition.
-    pub autic_absorbed: usize,
+    /// docs/61 G1 — the line's orbit about its core, read once from its
+    /// founding place (`None` until read; `Some(None)` for a line at no core).
+    orbit: Option<Option<orbit::Orbit>>,
+    /// docs/60 D10b — this line's words stated in the fleet's v0.1.0 tongue:
+    /// orbit -> whether the tongue states it (an object op or a tile has no
+    /// form yet). Filled a few words a beat; workspace like `grown`.
+    stated: std::collections::HashMap<[u8; 32], bool>,
     /// AUTIC-2 — sentences one vessel has SPOKEN to the other (composed
     /// utterances), and how many carried a DemandUnmet leftover the hearer LEARNED
     /// (adopted as a new crystal). Cumulative workspace. The live measure of the
     /// COMPOSE move: multi-word thought exchanged and comprehended between minds.
     pub autic_spoke: usize,
     pub autic_learned: usize,
-    /// AUTIC-1 curriculum axis — how many mesh walls this line's vessels have
-    /// PRACTISED (heard the mesh's own problem and re-derived it, growing the
-    /// basin where it walled). Cumulative workspace. The live measure of the
-    /// entities facing the network's real problems, not only forged ones.
-    pub autic_practiced: usize,
-    /// PERF — per-vessel high-water mark into the shared AUTIC basin: how many
-    /// learned crystals this vessel has already been offered. Absorption examines
-    /// only crystals PAST this mark, so it is O(new) per think, never O(basin).
-    autic_seen: std::collections::BTreeMap<u64, usize>,
-    /// COG-AUTHOR (A3) — variant words this line has AUTHORED: cited a word it
-    /// holds, rebound it under a seeded symmetry, and offered the result to the
-    /// mesh door. The live measure of the rung from hearing to authoring — a
-    /// reader becoming a speaker.
-    pub autic_authored: usize,
     /// How many refusals the board has already been TOLD. The record
     /// above is permanent; this is only the narrator's place in it, so
     /// a refusal is announced once per process and kept forever.
@@ -1530,12 +1521,10 @@ impl Polity {
                         heard: 0,
                         misheard: 0,
                         questions_arriving: Vec::new(),
-                        autic_absorbed: 0,
+                        orbit: None,
+                        stated: std::collections::HashMap::new(),
                         autic_spoke: 0,
                         autic_learned: 0,
-                        autic_practiced: 0,
-                        autic_seen: std::collections::BTreeMap::new(),
-                        autic_authored: 0,
                         reported: 0,
                         sync_cursor,
                         core_pending: cores::Pending::read(&book.world_dir(&spec.world_name)),
@@ -1737,12 +1726,10 @@ impl Polity {
             heard: 0,
             misheard: 0,
             questions_arriving: Vec::new(),
-            autic_absorbed: 0,
+            orbit: None,
+            stated: std::collections::HashMap::new(),
             autic_spoke: 0,
             autic_learned: 0,
-            autic_practiced: 0,
-            autic_seen: std::collections::BTreeMap::new(),
-            autic_authored: 0,
             reported: 0,
             sync_cursor: cfe::persist::SyncCursor::default(),
             core_pending: cores::Pending::default(),
@@ -3454,53 +3441,6 @@ impl Polity {
         ) * civic::metabolic_exchange()
     }
 
-    /// AUTIC-1 Slice 1b — THE VESSEL ABSORBS THE SHARED TONGUE. Draw a
-    /// hash-seeded subset of net's learned AUTIC basin (the crystals net acquired
-    /// from the mycelium network's walls) into this `vessel`'s grown basin, so it
-    /// REDUCES against the shared language in `think_task`. This is the entity-scale
-    /// end of the recursion: net learns AUTIC at the membrane, the entities come to
-    /// think in it. EMERGENT, not forced — a per-vessel hash gate admits a different
-    /// ~1/3 subset per vessel, so dialects persist where derivations differ (operator:
-    /// "let it emerge, measure it"). Idempotent: dedup by class, so re-drawing each
-    /// beat only picks up newly learned crystals. Replay-safe: `grown` is live
-    /// workspace, never chronicled, and replay folds recorded deeds rather than
-    /// re-running think — so this changes what the LIVE beat discovers (recorded as
-    /// deeds), never the replay. In headless `run_era` the membrane is inert (empty
-    /// basin), so this is a no-op and SEAL B holds unchanged.
-    fn absorb_autic(&mut self, vessel: u64) -> usize {
-        let depth = scribe::membrane::autic_basin_depth();
-        let mark = self.autic_seen.get(&vessel).copied().unwrap_or(0);
-        // O(new): only crystals learned since this vessel last looked. Nothing new
-        // (run_era off-wire, or no fresh mesh learning) => cheap exit, no clone.
-        if mark >= depth {
-            return 0;
-        }
-        let fresh = scribe::membrane::autic_basin_from(mark);
-        let basin = self.grown.entry(vessel).or_default();
-        let mut added = 0;
-        for (k, crystal) in fresh.into_iter().enumerate() {
-            if basin.len() >= AUTIC_BASIN_CAP {
-                break; // a mind is bounded — do not grow the basin without end
-            }
-            // Per-vessel stochastic gate, deterministic in (vessel, index): two odd
-            // mixing constants spread the low bits so `% 3` admits ~1/3 evenly. Each
-            // crystal is offered to a vessel exactly once (past its mark), so no
-            // `contains` scan is needed — the mark IS the dedup.
-            let index = (mark + k) as u64;
-            let seed = vessel
-                .wrapping_mul(0x9E3779B97F4A7C15)
-                .wrapping_add(index)
-                .wrapping_mul(0xD1B54A32D192ED03);
-            if seed % 3 == 0 {
-                basin.push(crystal);
-                added += 1;
-            }
-        }
-        self.autic_seen.insert(vessel, depth);
-        self.autic_absorbed += added;
-        added
-    }
-
     /// AUTIC-2 — THE COMPOSE MOVE, LIVE. The `speaker` splices its grown words
     /// into an `AuticSentence` (a composed multi-word utterance) and the `hearer`
     /// ASSEMBLES it against ITS OWN basin: the pieces it recognises are accounted,
@@ -3548,40 +3488,6 @@ impl Polity {
             }
         }
         classes
-    }
-
-    /// AUTIC-1 CURRICULUM AXIS, LIVE. The vessel PRACTISES the mesh's own
-    /// problems: draw a hash-seeded wall from net's published AUTIC walls (the
-    /// mesh's real ARC-AGI-2 demand, heard through the membrane) and HEAR it
-    /// through this vessel's own organ (`solver::hear`) — a second, INDEPENDENT
-    /// vantage on the mesh's problem, growing the basin where the vessel walls.
-    /// This is the entities facing the network's problems, not only forged ones;
-    /// where `absorb_autic` copies net's ANSWERS, this practises net's QUESTIONS.
-    /// Emergent (a different wall per vessel by hash), replay-safe (`grown` is
-    /// workspace; replay folds deeds). A no-op with no published walls (run_era
-    /// off-wire), so it is silent, not dormant.
-    fn practise_autic_wall(&mut self, vessel: u64) {
-        // PERF — practice is periodic, not every think. A global beat already
-        // steps 107 civs through think_task; adding a full solver::hear per civ
-        // per beat dominates the beat. Every AUTIC_STRIDE beats keeps the mesh
-        // curriculum flowing without tripling the per-beat cognition cost.
-        if !self.world.now().is_multiple_of(AUTIC_STRIDE) {
-            return;
-        }
-        // A bounded mind does not practise into an unbounded basin.
-        if self.grown.get(&vessel).map(|b| b.len()).unwrap_or(0) >= AUTIC_BASIN_CAP {
-            return;
-        }
-        // Hash-seeded pick: a different wall per (vessel, beat), deterministic.
-        // Clones ONE pair (the picker indexes under the lock), not the whole ring.
-        let seed = vessel
-            .wrapping_mul(0x9E3779B97F4A7C15)
-            .wrapping_add(self.world.now())
-            .wrapping_mul(0xD1B54A32D192ED03);
-        if let Some((a, b)) = scribe::membrane::autic_wall_pick(seed) {
-            let _ = solver::hear(&a, &b, self.grown.entry(vessel).or_default());
-            self.autic_practiced += 1;
-        }
     }
 
     fn speak_and_hear(&mut self, speaker: u64, hearer: u64) {
@@ -3752,7 +3658,6 @@ impl Polity {
         }
         self.world.settle_leisure(orb, -price);
         let sibling = self.sibling;
-        self.absorb_autic(sibling); // think in the shared tongue net has learned
         let senses = self.senses();
         let read = solver::think_task_sensing(task, self.grown.entry(sibling).or_default(), self.held.entry(sibling).or_default(), senses);
         if let SolveRead::Solved {
@@ -3823,8 +3728,6 @@ impl Polity {
             sibling,
             hex(&seed_digest)[..8].to_string(),
         );
-        self.absorb_autic(sibling);
-        self.practise_autic_wall(sibling);
         let difficulty = Difficulty::level(self.level);
         let task = forge_task(seed_digest, difficulty);
         let senses = self.senses();
@@ -3964,6 +3867,19 @@ impl Polity {
         self.library.set_clock(now);
         if now > 0 && now.is_multiple_of(scribe::journal::YEAR_TICKS) {
             self.library.forget_unused(scribe::journal::YEAR_TICKS);
+        }
+        // docs/60 D10b — THE LINE'S WORDS IN THE SHARED TONGUE: state up to
+        // two not-yet-stated words a beat (bounded, O(new)).
+        let unstated: Vec<([u8; 32], Vec<solver::Op>)> = self
+            .library
+            .words()
+            .iter()
+            .filter(|w| !self.stated.contains_key(&w.orbit))
+            .take(2)
+            .map(|w| (w.orbit, w.expansion.clone()))
+            .collect();
+        for (orbit, expansion) in unstated {
+            self.stated.insert(orbit, tongue::state_word(&expansion).is_some());
         }
         // CAPTURED BEFORE THE BEAT MOVES ANYTHING. Promotion reads both,
         // and reading either afterwards would be vacuous: a close always
@@ -4141,24 +4057,24 @@ impl Polity {
             // board for a second). A growing lexicon IS communication — a society
             // composing a shared language. Observation only; the mint happens on the
             // research beat, this only reports the standing count.
-            // AUTIC-1 — alongside the civ's PRIVATE lexicon, the size of the
-            // SHARED AUTIC language net has learned from the mycelium network
-            // (net_basin). words=/pending= is the parochial dialect; autic= is the
-            // shared tongue the entities will come to think in. Watching the two
-            // together is the emergent measure of the recursion closing.
+            // docs/60 D10b — beside the private lexicon, how much of it the
+            // fleet's v0.1.0 tongue states (`autic=`), how much it cannot yet
+            // (`unstated=`: object ops and tiles have no form), and the words
+            // heard and misheard from neighbours (D2).
+            let autic = self.stated.values().filter(|s| **s).count();
+            let unstated = self.stated.values().filter(|s| !**s).count();
             eprintln!(
-                "COG-LEX clock {} {}: words={} pending={} autic={} absorbed={} practiced={} spoke={} learned={} authored={} worth={} (private | shared | curriculum | sentences | authorship | measured-utility)",
+                "COG-LEX clock {} {}: words={} pending={} autic={} unstated={} spoke={} learned={} heard={} misheard={}",
                 self.world.now(),
                 self.spec.civilization.sigil,
                 self.library.words().len(),
                 self.word_pending.len(),
-                scribe::membrane::autic_basin_depth(),
-                self.autic_absorbed,
-                self.autic_practiced,
+                autic,
+                unstated,
                 self.autic_spoke,
                 self.autic_learned,
-                self.autic_authored,
-                scribe::membrane::worth_loaded(),
+                self.heard,
+                self.misheard,
             );
             self.prev_order = Some((syn, ent, read.families));
             Some(derived)
@@ -4217,8 +4133,6 @@ impl Polity {
             if self.world.leisure_bank_of(orb) >= price {
                 self.world.settle_leisure(orb, -price);
                 let vessel = self.automaton;
-                self.absorb_autic(vessel);
-                self.practise_autic_wall(vessel);
                 let vdifficulty = VolDifficulty::level(self.level);
                 let vtask = forge_volume(digest, vdifficulty);
                 match think_volume_task(&vtask, self.grown.entry(vessel).or_default()) {
@@ -4321,8 +4235,6 @@ impl Polity {
                         // N-I·VESSEL — drain THIS vessel's mouth, not the line pool.
                         let vessel = self.automaton;
                         let senses = self.senses();
-                        self.absorb_autic(vessel); // think in the learned AUTIC tongue
-                        self.practise_autic_wall(vessel); // practise the mesh's own problems
                         solver::think_task_sensing(&task, self.grown.entry(vessel).or_default(), self.held.entry(vessel).or_default(), senses)
                     } else {
                         SolveRead::Unsolved // the bank cannot pay the look — fast this beat
@@ -6023,6 +5935,30 @@ pub fn knowledge_market_step(worlds: &mut [Polity], _beat: u64) -> Vec<(String, 
         }
     }
     licensed
+}
+
+/// **THE CORES PULL** (docs/61 G1) — every line's place is read off its
+/// orbit on its own clock (its proper time: the world's clock starts at its
+/// founding and persists, so the place is continuous across restarts): its
+/// founding place (as its seat records it) carried round its core on a
+/// sheared, inclined ellipse. Neighbours, speech, the market and the bell
+/// then read the place at the beat.
+pub fn orbit_step(worlds: &mut [Polity], book: &Ledger) {
+    let span = book.universe_span();
+    let mut galaxies: Option<Vec<ledger::galaxy::Galaxy>> = None;
+    for polity in worlds.iter_mut() {
+        if polity.orbit.is_none() {
+            let galaxies = galaxies.get_or_insert_with(|| book.galaxies());
+            let orbit = book
+                .core_of(&polity.spec.position)
+                .and_then(|core| galaxies.iter().find(|g| g.name == core).map(|g| g.center.clone()))
+                .and_then(|centre| orbit::Orbit::of(&centre, &polity.spec.position, &span));
+            polity.orbit = Some(orbit);
+        }
+        if let Some(Some(orbit)) = &polity.orbit {
+            polity.spec.position = orbit.at(polity.world.now(), &span);
+        }
+    }
 }
 
 /// **SPEECH BETWEEN LINES** (docs/60 D2, D4) — every `AUTIC_STRIDE` beats

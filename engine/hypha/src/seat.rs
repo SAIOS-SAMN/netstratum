@@ -81,64 +81,9 @@ fn back(g: &solver::Grid) -> Vec<Vec<u8>> {
     g.cells.chunks(g.cols.max(1)).map(|r| r.to_vec()).collect()
 }
 
-/// THE TRANSLATOR (Concordance 1.9/1.10; mycelium 78.142 `sdk::rule`): a
-/// netstratum program as the court's rule, built ONLY through mycelium's own
-/// constructors — never forged bytes. Each of the six symmetries is the
-/// centred rigid motion `Step::grid_motion` builds for the shapes it acts
-/// between (traced through the program on the family's first input);
-/// `Recolor` is a hue step naming every hue it moves. A program with an
-/// object op or a tile has no form yet: `Err(NotARule)`, counted, never
-/// dropped. The steps are minted through the one mint over the family
-/// (`rule::sentence`).
-pub fn translate(
-    program: &solver::Program,
-    train: &[(Vec<Vec<u8>>, Vec<Vec<u8>>)],
-    crystal: &dyn mycelium::transducer::family::Crystal,
-) -> Result<mycelium::transducer::element::Element, Untranslated> {
-    use mycelium::sdk::rule::{sentence, Step, Symmetry};
-    use solver::Op;
-    let first = train.first().and_then(|(a, _)| grid(a)).ok_or(Untranslated::NoFamily)?;
-    let mut at = first;
-    let mut steps = Vec::with_capacity(program.len());
-    for op in program {
-        let next = solver::grid::run(&vec![op.clone()], &at);
-        let kind = match op {
-            Op::Rotate90 => Some(Symmetry::Rotate90),
-            Op::Rotate180 => Some(Symmetry::Rotate180),
-            Op::Rotate270 => Some(Symmetry::Rotate270),
-            Op::FlipH => Some(Symmetry::FlipH),
-            Op::FlipV => Some(Symmetry::FlipV),
-            Op::Transpose => Some(Symmetry::Transpose),
-            Op::Recolor(_) | Op::Object(_) | Op::Tile { .. } => None,
-        };
-        match (kind, op) {
-            (Some(kind), _) => {
-                let step = Step::grid_motion(kind, (at.rows, at.cols), (next.rows, next.cols)).ok_or(Untranslated::Shape)?;
-                steps.push(step);
-            }
-            (None, Op::Recolor(map)) => {
-                let moved: Vec<(u8, u8)> = (0u8..10).filter(|&h| map[h as usize] != h).map(|h| (h, map[h as usize])).collect();
-                steps.push(Step::Hue(moved));
-            }
-            (None, _) => return Err(Untranslated::NotARule),
-        }
-        at = next;
-    }
-    sentence(&steps, train, crystal).map_err(|why| Untranslated::Refused(format!("{why:?}")))
-}
-
-/// Why a program could not be stated as a court rule.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum Untranslated {
-    /// An object op or a tile: no form in the court's language yet.
-    NotARule,
-    /// The family has no first pair to trace shapes on.
-    NoFamily,
-    /// A symmetry met shapes it cannot act between.
-    Shape,
-    /// The seam refused it, by name.
-    Refused(String),
-}
+/// THE TRANSLATOR, shared with the conductor (docs/60 D10b): it lives in
+/// the `tongue` crate.
+pub use tongue::{translate, Untranslated};
 
 /// One grid as plain text: rows of hue digits, one row per line.
 fn grid_text(g: &[Vec<u8>]) -> String {

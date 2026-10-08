@@ -686,6 +686,24 @@ fn recognize_object_then_frame(pairs: &[(&Grid, &Grid)], grown: &mut Vec<Crystal
     None
 }
 
+/// **THE LAYERED SEAT, FRAME THEN OBJECT** (docs/60 D7b): a plane motion
+/// first, then an object op on what it made. A bounded walk over the seven
+/// non-identity D4 words and the fixed object vocabulary, each candidate
+/// checked by direct application on every pair (no think, no search beyond
+/// the two finite carriers); Pin A (the caller) is the authority.
+fn recognize_frame_then_object(pairs: &[(&Grid, &Grid)]) -> Option<Program> {
+    for motion in d4_words().into_iter().filter(|w| !w.is_empty()) {
+        for objop in solver_verify::objects::OBJ_OPS {
+            let mut program = motion.clone();
+            program.push(Op::Object(objop));
+            if pairs.iter().all(|&(input, output)| run(&program, input) == *output) {
+                return Some(program);
+            }
+        }
+    }
+    None
+}
+
 /// **THINK THE TASK** — the ARC seat. Read the train pairs through the ONE
 /// reduce organ and render its verdict to a program, or WITHHOLD. Dispatch on
 /// the frame: when the output shares the input's frame (up to a D₄ transpose)
@@ -749,6 +767,7 @@ pub fn think_task_sensing(
     .or_else(|| recognize_object(&pairs))
     // docs/60 D7: a body changed AND moved or recoloured — layered.
     .or_else(|| recognize_object_then_frame(&pairs, grown))
+    .or_else(|| recognize_frame_then_object(&pairs))
     .filter(|program| senses.covers(Senses::of_word(program)));
     let Some(program) = program else {
         fresh.retain(|c| senses.covers(Senses::of_word(&c.program)));
