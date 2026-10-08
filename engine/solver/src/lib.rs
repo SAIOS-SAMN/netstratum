@@ -30,6 +30,7 @@ pub mod selfmap;
 // `reduct::FullMeasurement`, read them through the ONE reduce organ (`reduct::think`),
 // render a glued frame to a program, seal the proof. NOT a search path.
 pub mod think;
+pub mod percept;
 // N-I5 (THE INTELLIGENCE PORT) — the survival seat: peel the ration book
 // (HAVE|OWE, mouths as sites) through the SAME reduce organ. The observation
 // that gates the beat (Pin G); naming a survival deed is N-I6.

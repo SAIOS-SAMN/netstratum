@@ -35,6 +35,8 @@ pub struct Tally {
     pub unminted: u64,
     /// Solved at home with an object op or a tile: no form yet, counted.
     pub not_a_rule: u64,
+    /// Closed at home by an object rule (restore 10): select, then act.
+    pub closed_by_objects: u64,
     pub submitted: u64,
     pub closed_first: u64,
     pub closed_again: u64,
@@ -205,6 +207,14 @@ impl Seat {
         self.tally.thought += 1;
         let local = solver::Task { name: name.clone(), train, test_in, test_expected: None };
         let SolveRead::Solved { program, .. } = think_task_held(&local, &mut self.grown, &mut self.held) else {
+            // RESTORE 10: perceive bodies, counts and extrema, and read the
+            // selection the pairs show. A closed object rule is counted; it is
+            // stated to the court once 78.143's steps land in the translator.
+            let pairs: Vec<(solver::Grid, solver::Grid)> = local.train.iter().map(|p| (p.input.clone(), p.output.clone())).collect();
+            if let Some(rule) = solver::percept::learn(&pairs) {
+                self.tally.closed_by_objects += 1;
+                return Ok(Some(format!("task {name}: closed at home by an OBJECT rule ({:?} -> {:?}); awaiting 78.143 to state it", rule.select, rule.act)));
+            }
             return Ok(Some(format!("task {name}: {} pairs, not closed at home", local.train.len())));
         };
         self.tally.solved_at_home += 1;
