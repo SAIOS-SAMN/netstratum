@@ -86,8 +86,7 @@ impl World {
     /// exists, the council holds.
     pub fn council_breaches(&self, orb: u64) -> usize {
         self.chronicle
-            .receipts()
-            .iter()
+            .history()
             .filter(|receipt| {
                 matches!(
                     receipt.event(),

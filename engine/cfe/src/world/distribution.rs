@@ -245,8 +245,8 @@ impl World {
     fn planet_geometry_seed(&self, orb: u64, salt: &[u8]) -> u64 {
         let founding = self
             .chronicle
-            .receipts()
-            .first()
+            .history()
+            .next()
             .map(|receipt| receipt.own().0)
             .unwrap_or([0u8; 32]);
         let mut hasher = blake3::Hasher::new();

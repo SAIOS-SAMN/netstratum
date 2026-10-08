@@ -282,7 +282,7 @@ impl World {
         if cited.len() < 2 {
             return Err(ActionRefused::SolverWordUnconfirmed { confirms: cited.len() as u8 });
         }
-        let known = self.chronicle.receipts().iter().any(|receipt| {
+        let known = self.chronicle.history().any(|receipt| {
             matches!(
                 receipt.event(),
                 ClosureEvent::SolverWordMinted { orbit: held, .. } if *held == orbit
@@ -342,7 +342,7 @@ impl World {
         if yield_of_role <= ratio(0, 1) {
             return Err(ActionRefused::RecipeYieldEmpty);
         }
-        let built = self.chronicle.receipts().iter().any(|receipt| {
+        let built = self.chronicle.history().any(|receipt| {
             matches!(
                 receipt.event(),
                 ClosureEvent::RecipeBuilt { orb_id: held_orb, inputs: held, role: held_role, .. }
@@ -378,7 +378,7 @@ impl World {
         if mass < 2 {
             return Err(ActionRefused::ConsilienceAlone { mass });
         }
-        let known = self.chronicle.receipts().iter().any(|receipt| {
+        let known = self.chronicle.history().any(|receipt| {
             matches!(
                 receipt.event(),
                 ClosureEvent::KnowledgeConverged { signature: held, .. } if *held == signature
@@ -414,7 +414,7 @@ impl World {
         if expansion.is_empty() {
             return Err(ActionRefused::SolverWordEmpty);
         }
-        let held = self.chronicle.receipts().iter().any(|receipt| {
+        let held = self.chronicle.history().any(|receipt| {
             matches!(
                 receipt.event(),
                 ClosureEvent::SolverWordMinted { orbit: held, .. }
@@ -466,8 +466,7 @@ impl World {
         {
             let hardships = self
                 .chronicle
-                .receipts()
-                .iter()
+                .history()
                 .filter(|receipt| {
                     matches!(
                         receipt.event(),
@@ -501,17 +500,21 @@ impl World {
         if !self.practices.contains(&practice) {
             return Err(ActionRefused::PracticeNotHeld { practice });
         }
-        let adopted_at = self
-            .chronicle
-            .receipts()
-            .iter()
-            .rposition(|receipt| {
-                matches!(receipt.event(), ClosureEvent::PracticeAdopted { practice: held } if *held == practice)
-            })
-            .expect("the adoption receipted");
-        let rediscovered = self.chronicle.receipts()[adopted_at..]
-            .iter()
-            .any(|receipt| matches!(receipt.event(), ClosureEvent::TechDiscovered { .. }));
+        // Walk the history back to the practice's latest adoption; any
+        // discovery met on the way came after it (both kinds are carried).
+        let mut rediscovered = false;
+        let mut adopted = false;
+        for receipt in self.chronicle.history().rev() {
+            match receipt.event() {
+                ClosureEvent::TechDiscovered { .. } => rediscovered = true,
+                ClosureEvent::PracticeAdopted { practice: held } if *held == practice => {
+                    adopted = true;
+                    break;
+                }
+                _ => {}
+            }
+        }
+        assert!(adopted, "the adoption receipted");
         if !rediscovered {
             return Err(ActionRefused::ReleaseUnearned { practice });
         }

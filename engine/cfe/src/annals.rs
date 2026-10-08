@@ -1,0 +1,154 @@
+//! **THE CARRIED ANNALS** (memory bound, slice 2; the coordinator's history
+//! rule: in memory, only the receipts after each world's snapshot — the whole
+//! chronicle stays on disk as the annals).
+//!
+//! When a chronicle DRAINS the receipts a snapshot already carried, what the
+//! live world still reads of them is kept here, nothing more:
+//!
+//!   * every receipt NOT of a [`bulk`] kind, verbatim — the vocabulary, the
+//!     solver words and recipes, surveys, parameters, practices, techs,
+//!     unions, foundings, famines, yields, vents, upkeep… the kinds history
+//!     readers fold over (measured in G2: ~15% of all receipts);
+//!   * the own-hash of every drained receipt, in order — a literature claim
+//!     may cite ANY receipt the world sealed (claims are rare; the list is
+//!     scanned, 32 bytes a receipt, no hashed index);
+//!   * the latest aperture stamp per orb (the crystal sheet's `last_link`)
+//!     and the count of drained assays (the office evidence) — the only two
+//!     things any reader takes from a bulk kind.
+//!
+//! The bulk kinds are the market's per-beat traffic: the four aperture legs,
+//! the leisure and population-accrual settles, assays, element wants and STAMP
+//! mints — measured at ~85% of G2's 4.0M receipts, read by no history reader
+//! beyond the two values above.
+
+use crate::dop::ClosureEvent;
+use crate::vrp::Receipt;
+use std::collections::BTreeMap;
+
+/// Is this a BULK kind — dropped from memory once drained, its record on disk?
+pub fn bulk(event: &ClosureEvent) -> bool {
+    matches!(
+        event,
+        ClosureEvent::ApertureSent { .. }
+            | ClosureEvent::ApertureReceived { .. }
+            | ClosureEvent::StampApertureSent { .. }
+            | ClosureEvent::StampApertureReceived { .. }
+            | ClosureEvent::LeisureSettled { .. }
+            | ClosureEvent::PopulationAccrued { .. }
+            | ClosureEvent::AssayStruck { .. }
+            | ClosureEvent::ElementWantStruck { .. }
+            | ClosureEvent::ElementWantRelieved { .. }
+            | ClosureEvent::StampMinted { .. }
+    )
+}
+
+/// What a chronicle still carries of the receipts it drained.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct Annals {
+    kept: Vec<Receipt>,
+    digests: Vec<[u8; 32]>,
+    last_link: BTreeMap<u64, u64>,
+    assays: u64,
+}
+
+impl Annals {
+    /// Absorb receipts drained from the chronicle, oldest first.
+    pub fn absorb(&mut self, drained: Vec<Receipt>) {
+        for r in drained {
+            self.digests.push(r.own().0);
+            match r.event() {
+                ClosureEvent::ApertureSent { from_orb: orb, .. } | ClosureEvent::ApertureReceived { to_orb: orb, .. } => {
+                    self.last_link.insert(*orb, r.stamp());
+                }
+                ClosureEvent::AssayStruck { .. } => self.assays += 1,
+                _ => {}
+            }
+            if !bulk(r.event()) {
+                self.kept.push(r);
+            }
+        }
+    }
+
+    /// The drained receipts of every non-bulk kind, oldest first.
+    pub fn kept(&self) -> &[Receipt] {
+        &self.kept
+    }
+
+    /// Did the world ever seal a drained receipt with this own-hash?
+    pub fn sealed(&self, digest: &[u8; 32]) -> bool {
+        self.digests.contains(digest)
+    }
+
+    /// The own-hash of the first receipt drained (the chronicle's genesis
+    /// once anything drained).
+    pub fn first_digest(&self) -> Option<[u8; 32]> {
+        self.digests.first().copied()
+    }
+
+    /// The latest drained aperture stamp per orb.
+    pub fn last_links(&self) -> &BTreeMap<u64, u64> {
+        &self.last_link
+    }
+
+    /// How many assays were drained.
+    pub fn assays(&self) -> u64 {
+        self.assays
+    }
+
+    /// Plain bytes for the snapshot beside it:
+    /// `kept count u32 ‖ frames ‖ digests u32 ‖ 32·n ‖ links u32 ‖ (orb,stamp)·n ‖ assays u64`,
+    /// every integer little-endian, each kept receipt one TLV frame.
+    pub fn to_bytes(&self) -> Vec<u8> {
+        let mut out = (self.kept.len() as u32).to_le_bytes().to_vec();
+        for r in &self.kept {
+            out.extend_from_slice(&r.wire_bytes());
+        }
+        out.extend_from_slice(&(self.digests.len() as u32).to_le_bytes());
+        for d in &self.digests {
+            out.extend_from_slice(d);
+        }
+        out.extend_from_slice(&(self.last_link.len() as u32).to_le_bytes());
+        for (orb, stamp) in &self.last_link {
+            out.extend_from_slice(&orb.to_le_bytes());
+            out.extend_from_slice(&stamp.to_le_bytes());
+        }
+        out.extend_from_slice(&self.assays.to_le_bytes());
+        out
+    }
+
+    /// Read [`Annals::to_bytes`] back whole, or `None`.
+    pub fn from_bytes(b: &[u8]) -> Option<Annals> {
+        let mut p = 0usize;
+        let u32_at = |p: &mut usize| -> Option<u32> {
+            let v = u32::from_le_bytes(b.get(*p..*p + 4)?.try_into().ok()?);
+            *p += 4;
+            Some(v)
+        };
+        let u64_at = |p: &mut usize| -> Option<u64> {
+            let v = u64::from_le_bytes(b.get(*p..*p + 8)?.try_into().ok()?);
+            *p += 8;
+            Some(v)
+        };
+        let n = u32_at(&mut p)? as usize;
+        let mut kept = Vec::with_capacity(n.min(1 << 20));
+        for _ in 0..n {
+            let (tag, value) = crate::tlv::records(b.get(p..)?).next()?;
+            p += 5 + value.len();
+            kept.push(Receipt::from_wire(tag, value)?);
+        }
+        let n = u32_at(&mut p)? as usize;
+        let mut digests = Vec::with_capacity(n.min(1 << 24));
+        for _ in 0..n {
+            digests.push(b.get(p..p + 32)?.try_into().ok()?);
+            p += 32;
+        }
+        let n = u32_at(&mut p)? as usize;
+        let mut last_link = BTreeMap::new();
+        for _ in 0..n {
+            let orb = u64_at(&mut p)?;
+            last_link.insert(orb, u64_at(&mut p)?);
+        }
+        let assays = u64_at(&mut p)?;
+        (p == b.len()).then_some(Annals { kept, digests, last_link, assays })
+    }
+}

@@ -8140,7 +8140,10 @@ fn journal_feed(world: &World, style: &Style) {
         metabolism: "biotic".into(),
         perception: "planar".into(),
     };
-    let entries = scribe::journal::journal(&orb.name, world, &voice, scribe::journal::YEAR_TICKS);
+    // The year just closed, narrated from the live state (no replay of past
+    // years — the conductor keeps each year's entry as it closes).
+    let entries: Vec<_> =
+        scribe::journal::narrate_year(&orb.name, world, &voice, scribe::journal::YEAR_TICKS, 0).into_iter().collect();
     if entries.is_empty() {
         println!(
             "{} no completed year yet — a year is {} ticks; the clock stands at {}",

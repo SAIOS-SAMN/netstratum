@@ -236,8 +236,7 @@ impl World {
         let stratum = class as u8;
         let Some(root) = self
             .chronicle
-            .receipts()
-            .iter()
+            .history()
             .find(|receipt| matches!(receipt.event(), ClosureEvent::ColonyFounded { .. }))
             .map(|receipt| receipt.own().0)
         else {

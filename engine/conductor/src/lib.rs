@@ -210,8 +210,7 @@ pub fn fold(var_root: &str) -> std::io::Result<(u64, Ratio)> {
     let ancient: Option<(String, u64)> = None;
     let living: std::collections::BTreeSet<String> = std::collections::BTreeSet::new();
     let stamp = ledger
-        .receipts()
-        .iter()
+        .history()
         .map(|r| r.stamp())
         .max()
         .unwrap_or(0);
@@ -1262,7 +1261,7 @@ fn office_evidence(world: &World) -> OfficeEvidence {
     if let Some(orb) = world.orb() {
         evidence.element_kinds = orb.elements.len() as u64;
     }
-    for receipt in world.chronicle().receipts() {
+    for receipt in world.chronicle().history() {
         match receipt.event() {
             // ONT-2b: eating-mining is still mining — a staple pull counts
             // toward the ground evidence beside the geometric assay.
@@ -1274,6 +1273,8 @@ fn office_evidence(world: &World) -> OfficeEvidence {
             _ => {}
         }
     }
+    // Assays drained into the carried annals still count as struck.
+    evidence.assays_struck += world.chronicle().annals().assays();
     evidence.has_crossed = world.has_crossed();
     evidence
 }
@@ -1492,12 +1493,11 @@ impl Polity {
         // broken carrier founds fresh (a broken one rotates aside as
         // the ledger's divergence law already provides). NPC progress
         // survives every restart without an operator fold.
-        let carrier = book.world_dir(&spec.world_name).join("chronicle.tlv");
-        if let Ok(chronicle) = cfe::persist::load(&carrier) {
-            // CARRY STATE FORWARD: from the world's snapshot plus the
-            // receipts written after it — never replayed from genesis once a
-            // snapshot stands (`snapshot::resume`).
-            let (world, _resumed) = snapshot::resume(&book.world_dir(&spec.world_name), chronicle);
+        // CARRY STATE FORWARD: from the world's snapshot plus the receipts
+        // written after it — never replayed from genesis once a snapshot
+        // stands, and only the chronicle tail it names read into memory
+        // (`snapshot::boot`).
+        if let Some((world, _resumed, sync_cursor)) = snapshot::boot(&book.world_dir(&spec.world_name)) {
             if world.orb().is_some() {
                 let handle = format!("{}-conductor", spec.civilization.sigil);
                 let by_handle = |name: &str| {
@@ -1558,7 +1558,7 @@ impl Polity {
                         .unwrap_or(0);
                     // One divergence per era: a resumed continuation
                     // is the same era — the receipt remembers.
-                    let cleaved = world.chronicle().receipts().iter().any(|receipt| {
+                    let cleaved = world.chronicle().history().any(|receipt| {
                         matches!(receipt.event(), cfe::dop::ClosureEvent::Diverged { .. })
                     });
                     return Polity {
@@ -1580,7 +1580,7 @@ impl Polity {
                         autic_seen: std::collections::BTreeMap::new(),
                         autic_authored: 0,
                         reported: 0,
-                        sync_cursor: cfe::persist::SyncCursor::default(),
+                        sync_cursor,
                         trajectory: Trajectory::Growth,
                         prev_order: None,
                         pop_cohesion_band: None,
@@ -2323,8 +2323,7 @@ impl Polity {
         let covered = self
             .world
             .chronicle()
-            .receipts()
-            .iter()
+            .history()
             .rev()
             .find_map(|receipt| match receipt.event() {
                 cfe::dop::ClosureEvent::EstateSurveyed { covered, .. } => {
@@ -2690,8 +2689,7 @@ impl Polity {
         let hardships = self
             .world
             .chronicle()
-            .receipts()
-            .iter()
+            .history()
             .filter(|receipt| {
                 matches!(
                     receipt.event(),
@@ -4988,7 +4986,12 @@ impl Polity {
         let dir = book.world_dir(&self.spec.world_name);
         cfe::persist::sync_from(self.world.chronicle(), &dir.join("chronicle.tlv"), &mut self.sync_cursor)
             .map_err(|e| std::io::Error::other(format!("{e:?}")))?;
-        snapshot::write(&dir, &self.world)
+        // THE MEMORY BOUND: what the snapshot now carries leaves memory —
+        // every receipt the judge has walked (`chained`), short of the head,
+        // drains to the annals; its record stays whole on disk.
+        let upto = (self.chained as u64).min(self.world.chronicle().total().saturating_sub(1));
+        self.world.drain_chronicle_to(upto);
+        snapshot::write(&dir, &self.world, self.sync_cursor.bytes())
     }
 
     fn chain_beat(&mut self, book: &Ledger) -> Result<(), mesh::arbor::ArborRefused> {

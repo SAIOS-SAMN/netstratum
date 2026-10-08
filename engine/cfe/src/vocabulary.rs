@@ -644,7 +644,7 @@ pub fn solver_words(
     chronicle: &crate::vrp::Chronicle,
 ) -> Vec<([u8; 32], Vec<u8>, Vec<[u8; 32]>)> {
     let mut out = Vec::new();
-    for receipt in chronicle.receipts() {
+    for receipt in chronicle.history() {
         // A line's vocabulary is the words it MINTED plus the words it
         // LICENSED from the roster's pool (ARC C — knowledge circulates,
         // not just matter). Both enter the library identically: same
@@ -682,7 +682,7 @@ pub struct BuiltRecipe {
 /// folds to the same recipes forever. The caller filters by orb.
 pub fn recipes_built(chronicle: &crate::vrp::Chronicle) -> Vec<BuiltRecipe> {
     let mut out = Vec::new();
-    for receipt in chronicle.receipts() {
+    for receipt in chronicle.history() {
         if let crate::dop::ClosureEvent::RecipeBuilt { orb_id, inputs, role, yield_of_role } =
             receipt.event()
         {
@@ -705,7 +705,7 @@ pub fn recipes_built(chronicle: &crate::vrp::Chronicle) -> Vec<BuiltRecipe> {
 /// where a filed one was not.
 pub fn fold(chronicle: &crate::vrp::Chronicle, axis: Axis) -> Vec<Entry> {
     let mut out = seed(axis);
-    for receipt in chronicle.receipts() {
+    for receipt in chronicle.history() {
         if let crate::dop::ClosureEvent::VocabularyMinted {
             axis: on,
             code,
@@ -751,7 +751,7 @@ pub fn ceiling(chronicle: &crate::vrp::Chronicle, axis: Axis) -> u8 {
 /// it correctly rather than of a new rule.
 pub fn fold_at(chronicle: &crate::vrp::Chronicle, axis: Axis, stamp: u64) -> Vec<Entry> {
     let mut out = seed(axis);
-    for receipt in chronicle.receipts() {
+    for receipt in chronicle.history() {
         if receipt.stamp() > stamp {
             break;
         }

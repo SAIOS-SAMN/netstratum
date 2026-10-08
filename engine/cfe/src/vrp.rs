@@ -405,6 +405,10 @@ pub struct Chronicle {
     /// The own-hash of the last drained receipt (the held tail chains from
     /// it); `GENESIS` when nothing is drained.
     base_parent: ReceiptHash,
+    /// What the live world still reads of the drained receipts
+    /// (`crate::annals`): the non-bulk kinds verbatim, every drained digest,
+    /// and the two values taken from bulk kinds.
+    annals: crate::annals::Annals,
 }
 
 impl Chronicle {
@@ -417,7 +421,7 @@ impl Chronicle {
     /// the same door as [`Chronicle::from_receipts`].
     pub fn from_tail(base: u64, base_parent: ReceiptHash, receipts: Vec<Receipt>) -> Result<Self, ChainRead> {
         match verify_from(base_parent, &receipts) {
-            ChainRead::Intact => Ok(Self { receipts, hand: None, region_seed: None, gauge_cache: Vec::new(), base, base_parent }),
+            ChainRead::Intact => Ok(Self { receipts, hand: None, region_seed: None, gauge_cache: Vec::new(), base, base_parent, annals: crate::annals::Annals::default() }),
             broken => Err(broken),
         }
     }
@@ -450,7 +454,31 @@ impl Chronicle {
         let drained: Vec<Receipt> = self.receipts.drain(..n).collect();
         self.base += n as u64;
         self.base_parent = drained.last().map(|r| r.own()).unwrap_or(self.base_parent);
+        self.annals.absorb(drained.clone());
         drained
+    }
+
+    /// THE WORLD'S HISTORY as the live world reads it: the drained receipts
+    /// the annals keep (every non-bulk kind), then every held receipt — in
+    /// order. A history reader iterates this, never `receipts()`.
+    pub fn history(&self) -> impl DoubleEndedIterator<Item = &Receipt> + Clone {
+        self.annals.kept().iter().chain(self.receipts.iter())
+    }
+
+    /// The carried annals.
+    pub fn annals(&self) -> &crate::annals::Annals {
+        &self.annals
+    }
+
+    /// Restore carried annals (a resume from a snapshot that carries them).
+    pub fn set_annals(&mut self, annals: crate::annals::Annals) {
+        self.annals = annals;
+    }
+
+    /// Did this world ever seal a receipt with this own-hash — held or
+    /// drained?
+    pub fn sealed(&self, digest: &[u8; 32]) -> bool {
+        self.receipts.iter().any(|r| r.own().0 == *digest) || self.annals.sealed(digest)
     }
 
     /// Reconstitute a chronicle from stored receipts — ONLY through the
@@ -459,7 +487,7 @@ impl Chronicle {
     /// across the process boundary because this is the one door back in.
     pub fn from_receipts(receipts: Vec<Receipt>) -> Result<Self, ChainRead> {
         match verify_receipts(&receipts) {
-            ChainRead::Intact => Ok(Self { receipts, hand: None, region_seed: None, gauge_cache: Vec::new(), base: 0, base_parent: ReceiptHash::GENESIS }),
+            ChainRead::Intact => Ok(Self { receipts, hand: None, region_seed: None, gauge_cache: Vec::new(), base: 0, base_parent: ReceiptHash::GENESIS, annals: crate::annals::Annals::default() }),
             broken => Err(broken),
         }
     }

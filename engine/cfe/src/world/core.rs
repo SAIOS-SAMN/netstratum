@@ -71,6 +71,12 @@ impl World {
     pub fn chronicle(&self) -> &Chronicle {
         &self.chronicle
     }
+    /// THE MEMORY BOUND: drain the held receipts below absolute position
+    /// `upto` into the chronicle's annals (the head always stays held).
+    /// Only a carrier whose snapshot already holds them calls this.
+    pub fn drain_chronicle_to(&mut self, upto: u64) {
+        self.chronicle.drain_to(upto);
+    }
     /// MESH-1b: hold or release the writing pen — every internal
     /// append then carries the hand (the chronicle funnel stamps it).
     pub fn hold_pen(&mut self, hand: Option<u64>) {
@@ -501,7 +507,7 @@ impl World {
         let mut territory = ratio(0, 1);
         let mut discovery = ratio(0, 1);
         let mut consumed = ratio(0, 1);
-        for receipt in self.chronicle.receipts() {
+        for receipt in self.chronicle.history() {
             match receipt.event() {
                 ClosureEvent::ZoneBuilt { .. } => territory += ratio(1, 1),
                 ClosureEvent::TechDiscovered { .. } => discovery += ratio(1, 1),

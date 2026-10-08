@@ -151,7 +151,7 @@ impl Table {
 pub fn table_of(chronicle: &crate::vrp::Chronicle) -> Table {
     let mut found: [Option<Ratio>; 7] = Default::default();
     let mut missing = found.len();
-    for receipt in chronicle.receipts().iter().rev() {
+    for receipt in chronicle.history().rev() {
         if missing == 0 {
             break;
         }
@@ -173,8 +173,7 @@ pub fn table_of(chronicle: &crate::vrp::Chronicle) -> Table {
 /// value, on every node, forever.
 pub fn of(chronicle: &crate::vrp::Chronicle, key: Parameter) -> Ratio {
     chronicle
-        .receipts()
-        .iter()
+        .history()
         .rev()
         .find_map(|receipt| match receipt.event() {
             crate::dop::ClosureEvent::ParameterChartered { key: held, value }

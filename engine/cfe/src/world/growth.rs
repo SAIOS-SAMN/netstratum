@@ -23,7 +23,7 @@ impl World {
         let mut last: Option<u64> = None;
         let mut postings = 0u64;
         let mut empty = 0u64;
-        for receipt in self.chronicle.receipts() {
+        for receipt in self.chronicle.history() {
             let ClosureEvent::BookPosted { orb_id, kept, lost, .. } = receipt.event() else {
                 continue;
             };

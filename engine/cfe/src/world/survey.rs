@@ -259,25 +259,38 @@ impl World {
     /// sheet is a pure cache — same receipts, same sheet as the
     /// full scan, by construction (both run deposit_receipt).
     pub(super) fn crystal_deposits_at(&mut self, now: u64) -> Vec<(u64, CrystalDeposit)> {
+        // The cursor counts ABSOLUTE receipts deposited. A cursor behind the
+        // drained base (a resumed world: the sheet starts empty) rebuilds
+        // from the carried history, with the annals' last aperture stamps.
         let (cursor, mut sheet) = std::mem::take(&mut self.shear_cursor);
         let receipts = self.chronicle.receipts();
-        for receipt in &receipts[cursor.min(receipts.len())..] {
-            deposit_receipt(&mut sheet, receipt);
+        let base = self.chronicle.base() as usize;
+        if cursor < base {
+            sheet = Vec::new();
+            for receipt in self.chronicle.history() {
+                deposit_receipt(&mut sheet, receipt);
+            }
+            deposit_last_links(&mut sheet, self.chronicle.annals().last_links());
+        } else {
+            for receipt in &receipts[(cursor - base).min(receipts.len())..] {
+                deposit_receipt(&mut sheet, receipt);
+            }
         }
         let floor = now.saturating_sub(self.deposit_window());
         for (_, held) in sheet.iter_mut() {
             held.vented_entries.retain(|(stamp, _)| *stamp >= floor);
             held.encased_entries.retain(|(stamp, _)| *stamp >= floor);
         }
-        self.shear_cursor = (receipts.len(), sheet.clone());
+        self.shear_cursor = (base + receipts.len(), sheet.clone());
         sheet
     }
     fn crystal_deposits(&self, now: u64) -> Vec<(u64, CrystalDeposit)> {
         let _ = now;
         let mut sheet: Vec<(u64, CrystalDeposit)> = Vec::new();
-        for receipt in self.chronicle.receipts() {
+        for receipt in self.chronicle.history() {
             deposit_receipt(&mut sheet, receipt);
         }
+        deposit_last_links(&mut sheet, self.chronicle.annals().last_links());
         sheet
     }
     /// THE CONSTELLATION (operator ruling 2026-07-30): the base-7
@@ -561,8 +574,7 @@ impl World {
         // world's seed is its own.
         let root = self
             .chronicle
-            .receipts()
-            .iter()
+            .history()
             .find(|receipt| matches!(receipt.event(), ClosureEvent::ColonyFounded { .. }))
             .expect("a founded world holds its founding")
             .own()
@@ -632,7 +644,7 @@ impl World {
         if self.terrain_seed.is_some() {
             return Err(ActionRefused::TerrainAlreadyCharted);
         }
-        let Some(founding) = self.chronicle.receipts().first() else {
+        let Some(founding) = self.chronicle.history().next() else {
             return Err(ActionRefused::NoColony);
         };
         let seed = founding.own().0;
@@ -699,8 +711,7 @@ impl World {
         for held in &self.orbs {
             let witness = self
                 .chronicle
-                .receipts()
-                .iter()
+                .history()
                 .find(|receipt| match receipt.event() {
                     ClosureEvent::ColonyFounded { orb_id, .. }
                     | ClosureEvent::ColonyCharted { orb_id, .. } => *orb_id == held.orb_id,
@@ -743,7 +754,7 @@ impl World {
     /// unsurveyed estate has no parcels, because deriving one would be
     /// an unmetered survey.
     pub fn parcels(&self) -> Option<Vec<crate::dop::Parcel>> {
-        self.chronicle.receipts().iter().rev().find_map(|receipt| {
+        self.chronicle.history().rev().find_map(|receipt| {
             match receipt.event() {
                 ClosureEvent::EstateSurveyed { seed, covered, .. } => {
                     let orbs: Vec<u64> = covered.iter().map(|(orb, _)| *orb).collect();
@@ -779,7 +790,7 @@ impl World {
         use crate::dop::Holding;
         self.permitted(actor, Scope::Build)?;
         let Some((survey, seed, covered)) =
-            self.chronicle.receipts().iter().rev().find_map(|receipt| match receipt.event() {
+            self.chronicle.history().rev().find_map(|receipt| match receipt.event() {
                 ClosureEvent::EstateSurveyed { seed, covered, .. } => Some((
                     receipt.own().0,
                     *seed,
@@ -870,12 +881,17 @@ impl World {
     /// moment ANY receipt follows it — any motion of the world dates a
     /// valuation. `None` where no such appraisal stands.
     pub fn appraisal_stale(&self, appraisal: &[u8; 32]) -> Option<bool> {
+        // An appraisal among the held receipts is stale once any receipt
+        // follows it; one already drained to the annals is stale by
+        // construction (the held receipts all follow it).
         let receipts = self.chronicle.receipts();
-        let at = receipts.iter().position(|receipt| {
-            receipt.own().0 == *appraisal
-                && matches!(receipt.event(), ClosureEvent::AppraisalStruck { .. })
-        })?;
-        Some(at + 1 < receipts.len())
+        let is_it = |receipt: &&crate::vrp::Receipt| {
+            receipt.own().0 == *appraisal && matches!(receipt.event(), ClosureEvent::AppraisalStruck { .. })
+        };
+        if let Some(at) = receipts.iter().position(|r| is_it(&r)) {
+            return Some(at + 1 < receipts.len());
+        }
+        self.chronicle.annals().kept().iter().any(|r| is_it(&r)).then_some(true)
     }
 }
 

@@ -40,8 +40,7 @@ impl World {
         if at >= self.gauge.len() {
             let mints = self
                 .chronicle
-                .receipts()
-                .iter()
+                .history()
                 .filter(|receipt| {
                     matches!(
                         receipt.event(),

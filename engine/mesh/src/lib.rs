@@ -191,8 +191,12 @@ impl MeshRefused {
 pub fn head(chronicle: &Chronicle) -> MeshHead {
     let receipts = chronicle.receipts();
     MeshHead {
-        genesis: receipts.first().map(|receipt| receipt.own().0).unwrap_or([0u8; 32]),
-        length: receipts.len() as u64,
+        genesis: chronicle
+            .annals()
+            .first_digest()
+            .or_else(|| receipts.first().map(|receipt| receipt.own().0))
+            .unwrap_or([0u8; 32]),
+        length: chronicle.total(),
         stamp: receipts.last().map(|receipt| receipt.stamp()).unwrap_or(0),
         head: receipts.last().map(|receipt| receipt.own().0).unwrap_or([0u8; 32]),
     }
@@ -231,9 +235,23 @@ struct WalkState {
 /// (a seal moves the pen and opens a citation). Before the first seal
 /// every append is lawful; a seal standing last is lawful with its
 /// citation outstanding.
-fn walk(receipts: &[Receipt]) -> Result<WalkState, MeshRefused> {
+fn walk(chronicle: &Chronicle) -> Result<WalkState, MeshRefused> {
+    // THE HAND CARRIED FORWARD: the drained prefix was walked live when it
+    // was written, so the walk starts from what it left — the last seal the
+    // annals keep names the hand, and a seal that closed the drained prefix
+    // still owes its citation to the first held receipt.
     let mut state = WalkState { hand: None, pending_cite: None };
-    for receipt in receipts {
+    let base = chronicle.base();
+    for receipt in chronicle.annals().kept().iter().rev() {
+        if let ClosureEvent::HandoffSealed { to, .. } = receipt.event() {
+            state.hand = Some(*to);
+            if receipt.sequence() + 1 == base {
+                state.pending_cite = Some(receipt.sequence());
+            }
+            break;
+        }
+    }
+    for receipt in chronicle.receipts() {
         if let Some(lawful) = state.hand {
             if !receipt.provenance().contains(&lawful) {
                 return Err(MeshRefused::Usurped { at: receipt.sequence(), lawful });
@@ -264,7 +282,7 @@ fn walk(receipts: &[Receipt]) -> Result<WalkState, MeshRefused> {
 /// seals, or the walk's first violation refused typed. A pure read —
 /// never a flag, never consulted by any game rule.
 pub fn authority(chronicle: &Chronicle) -> Result<Option<u64>, MeshRefused> {
-    walk(chronicle.receipts()).map(|state| state.hand)
+    walk(chronicle).map(|state| state.hand)
 }
 
 /// The seal door (NS-5 §7.3): the yielding hand names the successor.
@@ -277,7 +295,7 @@ pub fn yield_authority(
     to: u64,
     stamp: u64,
 ) -> Result<u64, MeshRefused> {
-    let state = walk(chronicle.receipts())?;
+    let state = walk(chronicle)?;
     if let Some(lawful) = state.hand {
         if from != lawful {
             return Err(MeshRefused::Usurped {
@@ -305,7 +323,7 @@ pub fn append_as(
     stamp: u64,
     provenance: Vec<u64>,
 ) -> Result<u64, MeshRefused> {
-    let state = walk(chronicle.receipts())?;
+    let state = walk(chronicle)?;
     if let Some(lawful) = state.hand {
         if hand != lawful {
             return Err(MeshRefused::Usurped {

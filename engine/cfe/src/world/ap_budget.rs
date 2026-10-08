@@ -105,8 +105,7 @@ impl World {
     pub fn ap_spent(&self) -> u64 {
         let start = self.ap_window_start();
         self.chronicle
-            .receipts()
-            .iter()
+            .history()
             .filter(|r| r.stamp() >= start && receipt_ap_cost(r) > 0)
             .map(receipt_ap_cost)
             .sum()

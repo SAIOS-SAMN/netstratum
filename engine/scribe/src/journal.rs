@@ -30,8 +30,8 @@
 
 use cfe::dop::{ClosureEvent, Resource, ZoneKind};
 use cfe::ratio::{ratio, Ratio};
-use cfe::vrp::{Chronicle, Receipt};
-use cfe::world::{replay, Committed, World};
+use cfe::vrp::Receipt;
+use cfe::world::{Committed, World};
 use physics::Beacon;
 use std::fs;
 
@@ -289,51 +289,40 @@ fn zone_word(kind: ZoneKind) -> &'static str {
     }
 }
 
-/// Generate the full journal of a world: one entry per completed year
-/// (08 §1.5), derived from the chronicle + committed prefixes only.
-/// Pure and deterministic — same chronicle ⇒ same entries, bytes and
-/// all. A zero `year_ticks` measures no year and yields no entries.
-pub fn journal(world_name: &str, world: &World, voice: &Voice, year_ticks: u64) -> Vec<JournalEntry> {
+/// Narrate the year a world has just closed (08 §1.5) from the state it
+/// carries now — the live committed state at the boundary — and that
+/// year's receipts in its history. NO REPLAY (the 2026-10-08 directive and
+/// the reconstruct-not-replay recast (vi)): each year is narrated once, live,
+/// as it closes, and kept in `journal.jrn`; nothing re-derives past years.
+/// `zones_before` is the zone count the previous year's entry recorded.
+/// `None` at year 0, with a zero `year_ticks`, or with no history yet.
+pub fn narrate_year(
+    world_name: &str,
+    world: &World,
+    voice: &Voice,
+    year_ticks: u64,
+    zones_before: u64,
+) -> Option<JournalEntry> {
     if year_ticks == 0 {
-        return Vec::new();
+        return None;
     }
-    let receipts = world.chronicle().receipts();
-    let years = world.now() / year_ticks;
-    let mut out = Vec::new();
-    // The committed prefix replays through the REAL chain machinery:
-    // events re-append into a partial chronicle and `replay` grounds
-    // the boundary state — no shadow fold to drift from `cfe::world`.
-    let mut partial = Chronicle::new();
-    let mut fed = 0usize;
-    let mut zones_before: u64 = 0;
-    for year in 1..=years {
-        let boundary = year * year_ticks;
-        let window_start = fed;
-        while fed < receipts.len() && receipts[fed].stamp() < boundary {
-            let held = &receipts[fed];
-            partial.append(held.event().clone(), held.stamp(), held.provenance().to_vec());
-            fed += 1;
-        }
-        let window = &receipts[window_start..fed];
-        // A year with no history before it has no one to speak.
-        let Some(seed) = receipts[..fed].last() else {
-            continue;
-        };
-        let committed = replay(&partial);
-        let entry = narrate(
-            world_name,
-            voice,
-            year,
-            year_ticks,
-            &committed,
-            window,
-            zones_before,
-            seed,
-        );
-        zones_before = committed.orbs.iter().map(|orb| orb.zones.len() as u64).sum();
-        out.push(entry);
+    let year = world.now() / year_ticks;
+    if year == 0 {
+        return None;
     }
-    out
+    let boundary = year * year_ticks;
+    let opened = boundary - year_ticks;
+    // The non-bulk kinds the window reads (builds, razes, vents, routes,
+    // registrations) are all in the history, drained or held.
+    let window: Vec<Receipt> = world
+        .chronicle()
+        .history()
+        .filter(|receipt| receipt.stamp() >= opened && receipt.stamp() < boundary)
+        .cloned()
+        .collect();
+    let seed = world.chronicle().history().rev().find(|receipt| receipt.stamp() < boundary)?;
+    let committed = world.committed();
+    Some(narrate(world_name, voice, year, year_ticks, &committed, &window, zones_before, seed))
 }
 
 /// Narrate one completed year from its boundary state and window
@@ -696,7 +685,8 @@ pub fn render_entry_tlv(entry: &JournalEntry) -> Vec<u8> {
 }
 
 /// Reflect one world's journal to `journal.jrn` (framed TLV, not JSON).
-/// Idempotent append; regenerates byte-identically. Returns years appended.
+/// Appends the year the world has just closed, once (a year already kept is
+/// never re-narrated). Returns years appended (0 or 1).
 pub fn record_journal(
     book: &Ledger,
     world_name: &str,
@@ -704,26 +694,42 @@ pub fn record_journal(
     voice: &Voice,
 ) -> std::io::Result<usize> {
     use ledger::card;
-    let entries = journal(world_name, world, voice, YEAR_TICKS);
     let dir = book.world_dir(world_name);
     fs::create_dir_all(&dir)?;
     let path = dir.join("journal.jrn");
     // Hygiene: non-architecture residue is not a carrier.
     let _ = fs::remove_file(dir.join("journal.jsonl"));
-    let already = match path.exists() {
-        true => card::count_frames(&fs::read(&path)?),
-        false => 0,
+    // The last year already kept, and the zones it recorded.
+    let (kept_year, zones_before) = match path.exists() {
+        true => last_kept(&fs::read(&path)?),
+        false => (0, 0),
     };
     let mut appended = 0usize;
-    if entries.len() > already {
-        for entry in &entries[already..] {
-            let payload = render_entry_tlv(entry);
-            card::append_frame(&path, &payload)?;
-            appended += 1;
+    if let Some(entry) = narrate_year(world_name, world, voice, YEAR_TICKS, zones_before) {
+        if entry.year > kept_year {
+            card::append_frame(&path, &render_entry_tlv(&entry))?;
+            appended = 1;
         }
     }
     render_wall(book)?;
     Ok(appended)
+}
+
+/// The year and zone count of the last entry a `journal.jrn` keeps.
+fn last_kept(data: &[u8]) -> (u64, u64) {
+    use ledger::card::{self, jrn};
+    let Some(last) = card::frames(data).last() else {
+        return (0, 0);
+    };
+    let (mut year, mut zones) = (0, 0);
+    for (tag, value) in card::records(last) {
+        match tag {
+            jrn::YEAR => year = card::u64_of(value).unwrap_or(0),
+            jrn::ZONES => zones = card::u64_of(value).unwrap_or(0),
+            _ => {}
+        }
+    }
+    (year, zones)
 }
 
 /// Regenerate the Terminal Wall from every world's `journal.jrn`.

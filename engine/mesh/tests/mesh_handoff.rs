@@ -138,3 +138,27 @@ fn the_refusal_kinds_round_trip() {
         assert_eq!(decoded.wire_bytes(), bytes, "equal values, equal bytes");
     }
 }
+
+#[test]
+fn the_hand_carries_across_a_drained_prefix() {
+    // A seal drained as the LAST receipt of the prefix still owes its
+    // citation to the first held receipt after it.
+    let mut chronicle = a_premesh_chronicle();
+    yield_authority(&mut chronicle, 7, 9, 3).expect("the first seal");
+    append_as(&mut chronicle, 9, ClosureEvent::VeilDrawn {}, 4, vec![]).expect("cites");
+    let mut owed = chronicle.clone();
+    owed.drain_to(4);
+    assert_eq!(authority(&owed), Ok(Some(9)), "the hand survives the drain");
+    let mut usurper = owed.clone();
+    usurper.append(ClosureEvent::VeilDrawn {}, 5, vec![7]);
+    assert!(matches!(authority(&usurper), Err(MeshRefused::Usurped { lawful: 9, .. })));
+
+    // Drained up to the seal: the citation is still owed by the held head.
+    let mut fresh = a_premesh_chronicle();
+    yield_authority(&mut fresh, 7, 9, 3).expect("the first seal");
+    fresh.append(ClosureEvent::VeilDrawn {}, 4, vec![9]);
+    let mut drained = fresh.clone();
+    drained.drain_to(4);
+    assert_eq!(authority(&fresh), authority(&drained), "the uncited head refuses alike");
+    assert!(authority(&drained).is_err());
+}

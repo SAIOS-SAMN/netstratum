@@ -142,8 +142,7 @@ impl World {
         const WORDS_PER_RUNG: usize = 8;
         let vocabulary = self
             .chronicle
-            .receipts()
-            .iter()
+            .history()
             .filter(|r| {
                 matches!(
                     r.event(),

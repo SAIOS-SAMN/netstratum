@@ -120,6 +120,24 @@ pub struct SyncCursor {
     bytes: u64,
 }
 
+impl SyncCursor {
+    /// A cursor standing on a proved position: `receipts` absolute receipts
+    /// end at byte `bytes` of the file (a snapshot's carried tail read).
+    pub fn proved(receipts: usize, bytes: u64) -> SyncCursor {
+        SyncCursor { receipts, bytes }
+    }
+
+    /// Absolute receipts proved.
+    pub fn receipts(&self) -> usize {
+        self.receipts
+    }
+
+    /// Bytes of the file proved.
+    pub fn bytes(&self) -> u64 {
+        self.bytes
+    }
+}
+
 /// A READER'S place in a chronicle file another process writes: the bytes
 /// and receipts already proved, and the own-hash of the last of them.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]

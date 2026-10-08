@@ -160,7 +160,7 @@ impl World {
             return Err(ActionRefused::OffGrain { amount: Box::new(amount) });
         }
         let Some((survey, seed, covered)) =
-            self.chronicle.receipts().iter().rev().find_map(|receipt| match receipt.event() {
+            self.chronicle.history().rev().find_map(|receipt| match receipt.event() {
                 ClosureEvent::EstateSurveyed { seed, covered, .. } => Some((
                     receipt.own().0,
                     *seed,
@@ -1192,7 +1192,7 @@ impl World {
     /// treasury settles nothing and mints nothing.
     pub fn seat_treasury(&self, to_seat: u8) -> Vec<(Resource, Ratio)> {
         let mut held: Vec<(Resource, Ratio)> = Vec::new();
-        for receipt in self.chronicle().receipts() {
+        for receipt in self.chronicle().history() {
             if let ClosureEvent::TitheReceipted { to_seat: seat, resource, amount, .. } =
                 receipt.event()
             {
@@ -1234,8 +1234,7 @@ impl World {
     /// syntropy ratio takes.
     pub fn value_lost_of(&self, orb: u64) -> Ratio {
         self.chronicle
-            .receipts()
-            .iter()
+            .history()
             .fold(ratio(0, 1), |carried, receipt| match receipt.event() {
                 ClosureEvent::DemurrageSettled { orb_id, amount, .. }
                 | ClosureEvent::UpkeepSettled { orb_id, amount, .. } if *orb_id == orb => {
@@ -1253,7 +1252,7 @@ impl World {
     /// caller that needs the split reads this; a caller that needs the
     /// total reads [`World::value_lost_of`].
     pub fn value_lost_split_of(&self, orb: u64) -> (Ratio, Ratio) {
-        self.chronicle.receipts().iter().fold(
+        self.chronicle.history().fold(
             (ratio(0, 1), ratio(0, 1)),
             |(decay, upkeep), receipt| match receipt.event() {
                 ClosureEvent::DemurrageSettled { orb_id, amount, .. } if *orb_id == orb => {
@@ -1293,8 +1292,7 @@ impl World {
     /// resonates (`18` Article III LAW 8).
     pub fn union_review(&self, stamp: u64) -> Option<(u64, bool)> {
         self.chronicle
-            .receipts()
-            .iter()
+            .history()
             .find(|receipt| {
                 matches!(receipt.event(), ClosureEvent::SovereignUnionSealed { .. })
             })
@@ -1342,8 +1340,7 @@ impl World {
     /// is to add the arm, never to disturb the one that stands.
     pub fn heat_encased_of(&self, orb: u64) -> Ratio {
         self.chronicle
-            .receipts()
-            .iter()
+            .history()
             .filter_map(|receipt| match receipt.event() {
                 ClosureEvent::YieldCollected { orb_id, resource: Resource::Joule, amount }
                     if *orb_id == orb =>

@@ -88,8 +88,7 @@ impl World {
     /// the receipts prove.
     pub fn resume_from(committed: crate::world::state::Committed, chronicle: Chronicle) -> World {
         let stamp = chronicle
-            .receipts()
-            .iter()
+            .history()
             .map(|receipt| receipt.stamp())
             .max()
             .unwrap_or(0);
@@ -203,7 +202,7 @@ impl World {
             .iter()
             .all(|(_, pending)| *pending == ratio(0, 1));
         let year_floor = stamp.saturating_sub(60);
-        let coherent = self.chronicle.receipts().iter().any(|receipt| {
+        let coherent = self.chronicle.history().any(|receipt| {
             receipt.stamp() >= year_floor
                 && matches!(receipt.event(), ClosureEvent::YieldCollected { .. })
         });

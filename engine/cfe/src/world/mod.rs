@@ -1648,6 +1648,22 @@ fn terrain_boost(
 /// and the pure full scan (same receipts, same sheet, by
 /// construction). Window filtering happens at READ (condition 4) and
 /// by pruning; the rule itself deposits everything typed.
+/// The carried annals' last aperture stamp per orb (the one value the sheet
+/// takes from the drained bulk kinds), folded into a sheet built from the
+/// kept history — the latest stamp wins, as `deposit_receipt` would have set.
+fn deposit_last_links(sheet: &mut Vec<(u64, CrystalDeposit)>, links: &std::collections::BTreeMap<u64, u64>) {
+    for (orb, stamp) in links {
+        let held = match sheet.iter().position(|(held, _)| held == orb) {
+            Some(at) => &mut sheet[at].1,
+            None => {
+                sheet.push((*orb, CrystalDeposit::default()));
+                &mut sheet.last_mut().expect("just pushed").1
+            }
+        };
+        held.last_link = Some(held.last_link.map_or(*stamp, |s| s.max(*stamp)));
+    }
+}
+
 fn deposit_receipt(sheet: &mut Vec<(u64, CrystalDeposit)>, receipt: &crate::vrp::Receipt) {
     fn deposit(sheet: &mut Vec<(u64, CrystalDeposit)>, orb: u64) -> &mut CrystalDeposit {
         if let Some(at) = sheet.iter().position(|(held, _)| *held == orb) {
