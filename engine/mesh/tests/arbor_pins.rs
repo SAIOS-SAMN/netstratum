@@ -447,3 +447,29 @@ fn the_judged_door_carries_a_verdict_only_from_the_head_it_was_reached_on() {
     let back = Arbor::open(&root).unwrap();
     assert_eq!(back.head("").unwrap().state, committed.state);
 }
+
+#[test]
+fn a_heads_only_arbor_verifies_whole_and_holds_one_record_a_branch() {
+    // THE MEMORY BOUND: the live judge reads heads alone.
+    let root = scratch("heads-only");
+    let mut full = Arbor::open(&root).unwrap();
+    let genesis = two_orb_state((10, 1), (0, 1));
+    full.extend(coord(0), &genesis, None).unwrap();
+    let mut prior = full.head("").unwrap().state;
+    for t in 1..6u64 {
+        let next = two_orb_state((10 - t as i64, 1), (t as i64, 1));
+        prior = full.extend_judged(coord(t), &next, prior).unwrap().state;
+    }
+    let head = full.head("").unwrap().clone();
+    drop(full);
+    let mut heads = Arbor::open_heads(&root).unwrap();
+    assert_eq!(heads.records().len(), 1, "one record a branch");
+    assert_eq!(heads.head("").unwrap(), &head);
+    let next = two_orb_state((1, 1), (9, 1));
+    let appended = heads.extend_judged(coord(6), &next, head.state).unwrap().clone();
+    assert_eq!(heads.records().len(), 1, "an append replaces the head");
+    assert!(matches!(heads.extend_judged(coord(6), &next, appended.state), Err(ArborRefused::Occupied | ArborRefused::ArrowBroken { .. })), "a position is never written twice");
+    drop(heads);
+    // the file stayed whole: a full open walks all seven
+    assert_eq!(Arbor::open(&root).unwrap().records().len(), 7);
+}

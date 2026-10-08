@@ -240,6 +240,10 @@ impl Commitment {
 pub struct Arbor {
     root: PathBuf,
     records: Vec<Commitment>,
+    /// THE MEMORY BOUND (opened with [`Arbor::open_heads`]): `records` holds
+    /// only each branch's HEAD, verified whole at open; appends replace the
+    /// head. For the live judge, which reads nothing but heads.
+    heads_only: bool,
 }
 
 impl Arbor {
@@ -247,6 +251,78 @@ impl Arbor {
     /// every parent links, the arrow ascends per branch, and every
     /// address holds one value — or the whole file refuses typed.
     pub fn open(root: impl AsRef<Path>) -> Result<Self, ArborRefused> {
+        Self::open_with(root, false)
+    }
+
+    /// [`Arbor::open`] verifying the whole file exactly as ever, then keeping
+    /// only each branch's head in memory (the memory bound: a live judge reads
+    /// heads alone). `resolve` and `records` then see heads only.
+    pub fn open_heads(root: impl AsRef<Path>) -> Result<Self, ArborRefused> {
+        let root = root.as_ref().to_path_buf();
+        fs::create_dir_all(root.join("store")).map_err(io)?;
+        let stream_path = root.join("arbor.tlv");
+        if !stream_path.exists() {
+            return Ok(Self { root, records: Vec::new(), heads_only: true });
+        }
+        // STREAMED, frame by frame: every record recomputes, its parent is
+        // its branch's head, and the arrow ascends — the same checks as
+        // `open`, holding ONE head per branch and never the file. (Within a
+        // branch the strict arrow makes every address distinct; a branch's
+        // name is part of its address.) A named branch's birth needs its
+        // fork's record, which a stream no longer holds: such an arbor is
+        // opened whole instead.
+        use std::io::Read;
+        let file = fs::File::open(&stream_path).map_err(io)?;
+        let mut remaining = file.metadata().map_err(io)?.len();
+        let mut reader = std::io::BufReader::new(file);
+        let mut heads: Vec<Commitment> = Vec::new();
+        let mut frame = 0usize;
+        loop {
+            let mut header = [0u8; 5];
+            match reader.read_exact(&mut header) {
+                Ok(()) => {}
+                Err(e) if e.kind() == std::io::ErrorKind::UnexpectedEof => break,
+                Err(e) => return Err(io(e)),
+            }
+            let len = u32::from_le_bytes(header[1..5].try_into().expect("four bytes")) as u64;
+            // A length is never trusted past what the file holds.
+            remaining = remaining.saturating_sub(5);
+            if len > remaining {
+                return Err(ArborRefused::Malformed { frame });
+            }
+            remaining -= len;
+            let mut value = vec![0u8; len as usize];
+            reader.read_exact(&mut value).map_err(|_| ArborRefused::Malformed { frame })?;
+            let record = Commitment::from_wire(header[0], &value).ok_or(ArborRefused::Malformed { frame })?;
+            let resealed = seal(record.coordinate.clone(), record.schema, record.kernel, record.judged, record.state, record.parent);
+            if resealed.commit != record.commit {
+                return Err(ArborRefused::Forged { frame });
+            }
+            match heads.iter().position(|h| h.coordinate.branch == record.coordinate.branch) {
+                Some(at) => {
+                    let head = &heads[at];
+                    if record.parent != head.commit {
+                        return Err(ArborRefused::Forged { frame });
+                    }
+                    if !ascends(&record.coordinate, &head.coordinate) {
+                        return Err(ArborRefused::ArrowBroken { t: record.coordinate.t, head: head.coordinate.t });
+                    }
+                    heads[at] = record;
+                }
+                None if record.coordinate.branch.is_empty() => {
+                    if record.parent != [0u8; 32] {
+                        return Err(ArborRefused::Forged { frame });
+                    }
+                    heads.push(record);
+                }
+                None => return Self::open_with(root, true),
+            }
+            frame += 1;
+        }
+        Ok(Self { root, records: heads, heads_only: true })
+    }
+
+    fn open_with(root: impl AsRef<Path>, heads_only: bool) -> Result<Self, ArborRefused> {
         let root = root.as_ref().to_path_buf();
         fs::create_dir_all(root.join("store")).map_err(io)?;
         let stream_path = root.join("arbor.tlv");
@@ -315,7 +391,17 @@ impl Arbor {
                 records.push(record);
             }
         }
-        Ok(Self { root, records })
+        if heads_only {
+            let mut kept: Vec<Commitment> = Vec::new();
+            for record in records.into_iter().rev() {
+                if !kept.iter().any(|h| h.coordinate.branch == record.coordinate.branch) {
+                    kept.push(record);
+                }
+            }
+            kept.reverse();
+            records = kept;
+        }
+        Ok(Self { root, records, heads_only })
     }
 
     /// Where the universe stands at one coordinate.
@@ -697,6 +783,9 @@ impl Arbor {
             .map_err(io)?;
         stream.write_all(&record.wire_bytes()).map_err(io)?;
         stream.flush().map_err(io)?;
+        if self.heads_only {
+            self.records.retain(|h| h.coordinate.branch != record.coordinate.branch);
+        }
         self.records.push(record);
         Ok(self.records.last().expect("just appended"))
     }

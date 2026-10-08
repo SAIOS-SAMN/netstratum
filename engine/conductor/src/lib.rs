@@ -5009,7 +5009,7 @@ impl Polity {
         // is paid at first sight (or on resume, where it re-verifies
         // the prior life's chain), then every beat is one append.
         if self.arbor.is_none() {
-            self.arbor = Some(mesh::arbor::Arbor::open(
+            self.arbor = Some(mesh::arbor::Arbor::open_heads(
                 book.world_dir(&self.spec.world_name).join("spine"),
             )?);
         }
