@@ -43,3 +43,9 @@ The coordinator approved this order:
 2. Draw the sample before looking at any verdict: every k-th proof by seal order, across all worlds, including the zero-word worlds.
 3. Run the judge offline and post nothing. Report refused, closed and paid-would-be per world, with coverage beside them.
 4. Repeat the reading after each cores slice lands. The cores (consilience among the dead's words at a core, and the winding loop) are netstratum's first non-grid mechanisms, and the first place a measured gain could show.
+
+## Findings recorded with reading 1 (coordinator rulings, 2026-10-08)
+
+- **The volumetric forge is unsolvable by construction.** It draws `FlipStack` or `CycleLayers` in 2 of every 3 word slots (`solver-verify/src/volume.rs:210-217`). The live render can express only `PerLayer` D4 and recolour (`solver/src/think.rs:189-196`). The volumetric branch also never deposits or mints (`conductor/src/lib.rs:4259-4271`). Volumetric forge outcomes are therefore **not counted as research in any reading**. The forge is left as it is: ARC viability (Concordance 6.2a) is measured on outside tasks, not forged ones.
+- **The minds do not search.** Each runs one fixed reduction-and-render pass, rendering at most 4 ops from the table: D4, one Recolor, Tile, and 8 ObjOps. For ARC-AGI-2 the binding limit is REPRESENTATION, not search: the table cannot state object, relation, count or conditional rules. Estimate: about 0 on ARC-AGI-2 at any search depth.
+- **AUTIC is stale and inactive.** It comes from the frozen `/opt/mycelium` path dependency, and `reduct` was last committed 2026-08-26. It is not kept as a separate language. Speaking anastome means re-founding the membrane on mycelium-v0.1.0, starting with the 78.142 rule seam. The old AUTIC code stays in place until the new membrane works, then retires with a note.
