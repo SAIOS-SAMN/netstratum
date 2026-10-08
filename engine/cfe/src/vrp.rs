@@ -114,7 +114,7 @@ impl WorldClock {
 }
 
 /// The chain identity — a BLAKE3 digest, lawful at this layer only.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct ReceiptHash(pub [u8; 32]);
 
 impl ReceiptHash {
@@ -397,11 +397,60 @@ pub struct Chronicle {
     /// the caller (mirrors `set_hand`); every `append` within that beat
     /// reads the same snapshot, never recomputing mid-beat (TU-1c).
     gauge_cache: Vec<u8>,
+    /// CARRY STATE FORWARD (operator directive 2026-10-08): how many
+    /// receipts precede the ones held here — drained to the cold annals on
+    /// disk after a snapshot carried their state. `0` for a chronicle that
+    /// holds its whole history.
+    base: u64,
+    /// The own-hash of the last drained receipt (the held tail chains from
+    /// it); `GENESIS` when nothing is drained.
+    base_parent: ReceiptHash,
 }
 
 impl Chronicle {
     pub fn new() -> Self {
-        Self::default()
+        Self { base_parent: ReceiptHash::GENESIS, ..Self::default() }
+    }
+
+    /// A chronicle that holds only a TAIL: `receipts` follow `base` drained
+    /// ones, the last of which hashed to `base_parent`. Verified from there,
+    /// the same door as [`Chronicle::from_receipts`].
+    pub fn from_tail(base: u64, base_parent: ReceiptHash, receipts: Vec<Receipt>) -> Result<Self, ChainRead> {
+        match verify_from(base_parent, &receipts) {
+            ChainRead::Intact => Ok(Self { receipts, hand: None, region_seed: None, gauge_cache: Vec::new(), base, base_parent }),
+            broken => Err(broken),
+        }
+    }
+
+    /// How many receipts precede the held ones (drained to the annals).
+    pub fn base(&self) -> u64 {
+        self.base
+    }
+
+    /// The own-hash the held receipts chain from.
+    pub fn base_parent(&self) -> ReceiptHash {
+        self.base_parent
+    }
+
+    /// Every receipt this chronicle has ever closed: drained and held.
+    pub fn total(&self) -> u64 {
+        self.base + self.receipts.len() as u64
+    }
+
+    /// DRAIN the held receipts below absolute position `upto` (always
+    /// keeping the last one, so the head stays readable) and return them,
+    /// oldest first. Their record stays on disk as the annals; what the live
+    /// world still needs of them is carried elsewhere.
+    pub fn drain_to(&mut self, upto: u64) -> Vec<Receipt> {
+        let held = self.receipts.len() as u64;
+        let n = upto.saturating_sub(self.base).min(held.saturating_sub(1)) as usize;
+        if n == 0 {
+            return Vec::new();
+        }
+        let drained: Vec<Receipt> = self.receipts.drain(..n).collect();
+        self.base += n as u64;
+        self.base_parent = drained.last().map(|r| r.own()).unwrap_or(self.base_parent);
+        drained
     }
 
     /// Reconstitute a chronicle from stored receipts — ONLY through the
@@ -410,7 +459,7 @@ impl Chronicle {
     /// across the process boundary because this is the one door back in.
     pub fn from_receipts(receipts: Vec<Receipt>) -> Result<Self, ChainRead> {
         match verify_receipts(&receipts) {
-            ChainRead::Intact => Ok(Self { receipts, hand: None, region_seed: None, gauge_cache: Vec::new() }),
+            ChainRead::Intact => Ok(Self { receipts, hand: None, region_seed: None, gauge_cache: Vec::new(), base: 0, base_parent: ReceiptHash::GENESIS }),
             broken => Err(broken),
         }
     }
@@ -470,12 +519,12 @@ impl Chronicle {
             }
             _ => provenance,
         };
-        let sequence = self.receipts.len() as u64;
+        let sequence = self.total();
         let parent = self
             .receipts
             .last()
             .map(|receipt| receipt.own())
-            .unwrap_or(ReceiptHash::GENESIS);
+            .unwrap_or(self.base_parent);
         let event_bytes = event.wire_bytes();
         let receipt = match self.region_seed {
             Some(region_seed) => {
@@ -509,7 +558,7 @@ impl Chronicle {
     }
 
     pub fn verify_chain(&self) -> ChainRead {
-        verify_receipts(&self.receipts)
+        verify_from(self.base_parent, &self.receipts)
     }
 }
 

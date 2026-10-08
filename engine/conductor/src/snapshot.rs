@@ -40,7 +40,7 @@ pub fn write(dir: &Path, world: &World) -> io::Result<()> {
         return Ok(()); // an empty chronicle carries nothing
     };
     let mut bytes = MAGIC.to_vec();
-    bytes.extend_from_slice(&(receipts.len() as u64).to_le_bytes());
+    bytes.extend_from_slice(&world.chronicle().total().to_le_bytes());
     bytes.extend_from_slice(&last.own().0);
     bytes.extend_from_slice(&codec::state_bytes(&world.committed()));
     let path = dir.join("state.snap");
@@ -74,14 +74,17 @@ pub enum Resumed {
 /// hashes to the snapshot's head), applying only the receipts after it.
 pub fn resume(dir: &Path, chronicle: Chronicle) -> (World, Resumed) {
     if let Some(snap) = read(dir) {
+        // Positions are ABSOLUTE; the chronicle may hold only a tail from `base`.
         let receipts = chronicle.receipts();
-        let belongs = snap.receipts > 0
-            && snap.receipts <= receipts.len()
-            && receipts[snap.receipts - 1].own().0 == snap.head;
+        let base = chronicle.base() as usize;
+        let total = base + receipts.len();
+        let belongs = snap.receipts > base
+            && snap.receipts <= total
+            && receipts[snap.receipts - 1 - base].own().0 == snap.head;
         if belongs {
-            let tail = receipts.len() - snap.receipts;
+            let tail = total - snap.receipts;
             let mut stepper = Replayer::from_state(snap.state);
-            for receipt in &receipts[snap.receipts..] {
+            for receipt in &receipts[snap.receipts - base..] {
                 stepper.apply(receipt);
             }
             return (World::resume_from(stepper.into_committed(), chronicle), Resumed::Carried { tail });

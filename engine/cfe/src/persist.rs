@@ -63,18 +63,27 @@ pub fn sync(chronicle: &Chronicle, path: &Path) -> Result<usize, PersistRefused>
         true => load(path)?.receipts().to_vec(),
         false => Vec::new(),
     };
+    // The held receipts start at absolute position `base` (the ones before
+    // were drained to the annals); the file must hold that prefix, agree
+    // where the two overlap, and end where the drained prefix ended.
     let held = chronicle.receipts();
-    if on_disk.len() > held.len() {
-        return Err(PersistRefused::HistoryDiverged {
-            at: held.len() as u64,
-        });
+    let base = chronicle.base() as usize;
+    let total = base + held.len();
+    if on_disk.len() > total {
+        return Err(PersistRefused::HistoryDiverged { at: total as u64 });
     }
-    for (at, stored) in on_disk.iter().enumerate() {
-        if stored != &held[at] {
+    if on_disk.len() < base {
+        return Err(PersistRefused::HistoryDiverged { at: on_disk.len() as u64 });
+    }
+    if base > 0 && on_disk[base - 1].own() != chronicle.base_parent() {
+        return Err(PersistRefused::HistoryDiverged { at: (base - 1) as u64 });
+    }
+    for (at, stored) in on_disk.iter().enumerate().skip(base) {
+        if stored != &held[at - base] {
             return Err(PersistRefused::HistoryDiverged { at: at as u64 });
         }
     }
-    let tail = &held[on_disk.len()..];
+    let tail = &held[on_disk.len() - base..];
     let mut file = fs::OpenOptions::new()
         .create(true)
         .append(true)
@@ -174,10 +183,12 @@ pub fn sync_from(
     cursor: &mut SyncCursor,
 ) -> Result<usize, PersistRefused> {
     let held = chronicle.receipts();
+    let base = chronicle.base() as usize;
+    let total = base + held.len();
     let cold = |cursor: &mut SyncCursor| -> Result<usize, PersistRefused> {
         let appended = sync(chronicle, path)?;
         let bytes = fs::metadata(path).map(|m| m.len()).unwrap_or(0);
-        *cursor = SyncCursor { receipts: held.len(), bytes };
+        *cursor = SyncCursor { receipts: total, bytes };
         Ok(appended)
     };
     if cursor.receipts == 0 || !path.exists() {
@@ -209,8 +220,13 @@ pub fn sync_from(
             on_disk_tail.push(receipt);
         }
     }
-    let proved = cursor.receipts.min(held.len());
-    let held_from_cursor = &held[proved..];
+    // The cursor counts ABSOLUTE receipts proved; a cursor behind the
+    // drained base (it never proved what was drained) re-derives cold.
+    let proved = cursor.receipts.min(total);
+    if proved < base {
+        return cold(cursor);
+    }
+    let held_from_cursor = &held[proved - base..];
     if on_disk_tail.len() > held_from_cursor.len() {
         return Err(PersistRefused::HistoryDiverged { at: proved as u64 });
     }
@@ -236,6 +252,6 @@ pub fn sync_from(
             message: error.to_string(),
         })?;
     }
-    *cursor = SyncCursor { receipts: held.len(), bytes: file_len + appended_bytes };
+    *cursor = SyncCursor { receipts: total, bytes: file_len + appended_bytes };
     Ok(to_write.len())
 }

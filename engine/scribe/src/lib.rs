@@ -125,8 +125,19 @@ fn rotate_divergent(dir: &std::path::Path, world: &World) -> std::io::Result<()>
     if res.is_empty() {
         return Ok(());
     }
-    let check = res.len().min(receipts.len()) - 1;
-    if res[check].own().0 == receipts[check].own().0 {
+    // The live chronicle may hold only a TAIL (receipts from absolute
+    // position `base`; the rest drained to these annals). Compare at the last
+    // position both sides hold; a file that ends exactly at the drained base
+    // agrees when its last receipt is the base parent.
+    let base = world.chronicle().base() as usize;
+    let total = base + receipts.len();
+    let check = res.len().min(total) - 1;
+    let agrees = if check >= base {
+        res[check].own().0 == receipts[check - base].own().0
+    } else {
+        res.len() == base && res[base - 1].own() == world.chronicle().base_parent()
+    };
+    if agrees {
         return Ok(());
     }
     let terminal = hex_digest(&res.last().expect("nonempty").own().0);

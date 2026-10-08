@@ -281,7 +281,7 @@ pub fn yield_authority(
     if let Some(lawful) = state.hand {
         if from != lawful {
             return Err(MeshRefused::Usurped {
-                at: chronicle.receipts().len() as u64,
+                at: chronicle.total(),
                 lawful,
             });
         }
@@ -309,7 +309,7 @@ pub fn append_as(
     if let Some(lawful) = state.hand {
         if hand != lawful {
             return Err(MeshRefused::Usurped {
-                at: chronicle.receipts().len() as u64,
+                at: chronicle.total(),
                 lawful,
             });
         }

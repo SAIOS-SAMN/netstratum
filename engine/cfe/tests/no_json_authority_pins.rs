@@ -4,7 +4,7 @@
 
 use cfe::dop::{positive, unit, ZoneKind};
 use cfe::thermal::StarClass;
-use cfe::world::{replay, World, FIRST_ORB};
+use cfe::world::{World, FIRST_ORB};
 use std::path::PathBuf;
 
 #[test]

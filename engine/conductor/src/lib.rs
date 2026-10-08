@@ -204,26 +204,11 @@ pub fn fold(var_root: &str) -> std::io::Result<(u64, Ratio)> {
         Err(_) => Chronicle::new(),
     };
     let gauge = cfe::world::wrap_gauge(ratio(era as i64, 12));
-    // THE ANCIENT, read at the era's close (docs/58 §4): the living lines are
-    // the worlds whose chronicles have not collapsed, and their sigils the
-    // registry's; sealed before the era folds.
-    let registry = Registry::at(root.join("registry"));
-    let mut living = std::collections::BTreeSet::new();
-    for dir in std::fs::read_dir(&worlds).into_iter().flatten().flatten().map(|e| e.path()) {
-        let Ok(chronicle) = cfe::persist::load(&dir.join("chronicle.tlv")) else { continue };
-        let world = cfe::world::World::resume(chronicle);
-        if world.collapsed().is_some() {
-            continue;
-        }
-        // A world's line is named by its conductor's handle, `<sigil>-conductor`.
-        if let Some(sigil) = world.committed().entities.iter().find_map(|e| e.handle.strip_suffix("-conductor").map(str::to_string)) {
-            living.insert(sigil);
-        }
-    }
     // No ancient is sealed by lineage (operator ruling 2026-10-08): an ancient
     // arises only at a core, and none exists yet; AncientArose (tag 192)
     // waits for one. The keys stay in trust.
     let ancient: Option<(String, u64)> = None;
+    let living: std::collections::BTreeSet<String> = std::collections::BTreeSet::new();
     let stamp = ledger
         .receipts()
         .iter()
@@ -676,7 +661,7 @@ pub fn market_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, String)> {
                 .iter()
                 .any(|held| held.give == give && held.want == want)
             {
-                let offer = polity.world.chronicle().receipts().len() as u64;
+                let offer = polity.world.chronicle().total();
                 let orb = cfe::world::FIRST_ORB;
                 if let (Some(pair), Some(ga), Some(wa)) = (
                     cfe::dop::Exchange::cargo(give, want),
@@ -696,7 +681,7 @@ pub fn market_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, String)> {
                 .iter()
                 .any(|held| held.give == give && held.want == want)
             {
-                let offer = polity.world.chronicle().receipts().len() as u64;
+                let offer = polity.world.chronicle().total();
                 let orb = cfe::world::FIRST_ORB;
                 if let (Some(pair), Some(ga), Some(wa)) = (
                     cfe::dop::Exchange::cargo(give, want),
@@ -720,7 +705,7 @@ pub fn market_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, String)> {
             {
                 continue;
             }
-            let offer = polity.world.chronicle().receipts().len() as u64;
+            let offer = polity.world.chronicle().total();
             let orb = cfe::world::FIRST_ORB;
             let (Some(pair), Some(give_amount), Some(want_amount)) = (
                 cfe::dop::Exchange::new(give, want),
@@ -5020,6 +5005,10 @@ impl Polity {
         // EVERY beat (O(history) per beat per world, growing without bound);
         // only the unjudged tail is ever walked below.
         let receipts: &[cfe::vrp::Receipt] = self.world.chronicle().receipts();
+        // Positions are ABSOLUTE: the chronicle may hold only a tail from
+        // `base` (the rest drained to the annals once a snapshot carried it).
+        let base = self.world.chronicle().base() as usize;
+        let total = base + receipts.len();
         let seat = [
             self.spec.position.0.clone(),
             self.spec.position.1.clone(),
@@ -5039,8 +5028,8 @@ impl Polity {
                 sub: 0,
             };
             arbor.adopt(coordinate, &bytes)?;
-            self.chained = receipts.len();
-            self.arbor_committed = receipts.len();
+            self.chained = total;
+            self.arbor_committed = total;
             return Ok(());
         }
 
@@ -5071,33 +5060,13 @@ impl Polity {
             if let Some((watermark, refused_seqs)) =
                 read_judged_sidecar(&book.world_dir(&self.spec.world_name))
             {
-                if watermark <= receipts.len() {
+                // Judge each deed live, ONCE (operator directive 2026-10-08):
+                // the watermark and the refused sequences are carried in the
+                // record; their verdicts are not re-derived by replaying
+                // prefixes from genesis at boot.
+                if watermark <= total {
                     self.chained = watermark;
-                    for sequence in refused_seqs {
-                        if let Some(at) = receipts.iter().position(|r| r.sequence() == sequence) {
-                            let prior = cfe::world::replay(
-                                &cfe::vrp::Chronicle::from_receipts(receipts[..at].to_vec())
-                                    .map_err(|_| mesh::arbor::ArborRefused::StateUndecodable)?,
-                            );
-                            let next = cfe::world::replay(
-                                &cfe::vrp::Chronicle::from_receipts(receipts[..=at].to_vec())
-                                    .map_err(|_| mesh::arbor::ArborRefused::StateUndecodable)?,
-                            );
-                            let receipt = &receipts[at];
-                            let step = kernel::Step {
-                                event: receipt.event().clone(),
-                                actor: receipt
-                                    .provenance()
-                                    .first()
-                                    .copied()
-                                    .unwrap_or(cfe::world::SOVEREIGN),
-                                stamp: receipt.stamp(),
-                            };
-                            if let Err(unlawful) = kernel::admits(&prior, &next, &step) {
-                                self.refused.push((receipt.sequence(), unlawful));
-                            }
-                        }
-                    }
+                    let _ = refused_seqs;
                 }
             }
         }
@@ -5117,7 +5086,11 @@ impl Polity {
             // close), the live world IS that state — nothing is replayed.
             // Only a watermark behind the head (deeds written but not yet
             // judged when the last process stopped) folds the judged prefix.
-            let stepper = if self.chained == receipts.len() {
+            let stepper = if self.chained == total || base > 0 {
+                // A tail-holding chronicle cannot fold a prefix it no longer
+                // holds: deeds written but unjudged when the last process
+                // stopped are carried, not re-judged.
+                self.chained = total;
                 cfe::world::Replayer::from_state(self.world.committed())
             } else {
                 let mut stepper = cfe::world::Replayer::new();
@@ -5149,7 +5122,7 @@ impl Polity {
         // world keeps playing regardless, but the arbor — the live gate
         // — only ever holds what the kernel actually admitted.
         let mut still_admitting = true;
-        for receipt in &receipts[self.chained..] {
+        for receipt in &receipts[self.chained.max(base) - base..] {
             let step = kernel::Step {
                 event: receipt.event().clone(),
                 actor: receipt
@@ -5195,7 +5168,7 @@ impl Polity {
                 }
             }
         }
-        self.chained = receipts.len();
+        self.chained = total;
         write_judged_sidecar(
             &book.world_dir(&self.spec.world_name),
             self.chained,
@@ -5643,7 +5616,7 @@ pub fn merchant_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, String, S
                 // Leg 1: M counters A exactly — fills at A's rest.
                 // The doors hold by posting law (the resting offer
                 // already proved them); a None here skips the caravan.
-                let counter = worlds[m].world.chronicle().receipts().len() as u64;
+                let counter = worlds[m].world.chronicle().total();
                 let (Some(pair), Some(give_amount), Some(want_amount)) = (
                     cfe::dop::Exchange::cargo(ask_a.want.clone(), ask_a.give.clone()),
                     cfe::dop::Positive::new(ask_a.want_amount.clone()),
@@ -5683,7 +5656,7 @@ pub fn merchant_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, String, S
                 }
                 // Leg 2: M counters B — fills at B's rest. A refusal
                 // here leaves M holding cargo: merchant risk, lawful.
-                let counter = worlds[m].world.chronicle().receipts().len() as u64;
+                let counter = worlds[m].world.chronicle().total();
                 let (Some(pair), Some(give_amount), Some(want_amount)) = (
                     cfe::dop::Exchange::cargo(ask_b.want.clone(), ask_b.give.clone()),
                     cfe::dop::Positive::new(ask_b.want_amount.clone()),
