@@ -8,6 +8,7 @@
 //!   ns-hypha found                      found netstratum's domain on the court (once)
 //!   ns-hypha reserve <tier>             designate one of the domain's tiers its reserve (in trust)
 //!   ns-hypha originate [<var-root>]     state the universe's origin once: its Big Bang, its torus
+//!   ns-hypha seat [--every S]            netstratum's client kernel on the fleet: pull, think, file
 //!   ns-hypha mark <world-dir>           record a people as folded through its chronicle's end
 //!   ns-hypha epoch <name>               set the hot colonies line aside, restart it at zero
 //!   ns-hypha prune                      archive hot entries whose folds the court reads settled
@@ -53,6 +54,9 @@ fn main() -> ExitCode {
     }
     if cmd == Some("epoch") {
         return epoch_cmd(&args, &home);
+    }
+    if cmd == Some("seat") {
+        return seat_cmd(&args, &at, &home);
     }
     let up = match Uplink::open(&at, &home) {
         Ok(u) => u,
@@ -509,5 +513,33 @@ fn census_cmd(args: &[String], up: Option<&Uplink>, home: &Path) -> ExitCode {
         }
         Some(up) if !args.iter().any(|a| a == "--no-publish") => publish_cmd(up, home),
         Some(_) => ExitCode::SUCCESS,
+    }
+}
+
+/// THE SEAT (`ns_hypha::seat`): netstratum's one client kernel on the fleet,
+/// one task a stroke, a stroke every `--every` seconds (default 2), its tally
+/// printed every 20 strokes. Runs until stopped.
+fn seat_cmd(args: &[String], at: &str, home: &Path) -> ExitCode {
+    let every: u64 = flag(args, "--every").and_then(|s| s.parse().ok()).unwrap_or(2);
+    let mut seat = match ns_hypha::seat::Seat::open(at, home) {
+        Ok(s) => s,
+        Err(e) => {
+            eprintln!("ns-hypha: the seat did not open at {at}: {e}");
+            return ExitCode::from(2);
+        }
+    };
+    println!("seat: netstratum's client kernel at {at}, a stroke every {every}s");
+    let mut strokes = 0u64;
+    loop {
+        match seat.stroke() {
+            Ok(Some(line)) => println!("seat: {line}"),
+            Ok(None) => {}
+            Err(e) => eprintln!("seat: the stroke did not complete: {e}"),
+        }
+        strokes += 1;
+        if strokes.is_multiple_of(20) {
+            println!("seat: tally {:?}", seat.tally);
+        }
+        std::thread::sleep(std::time::Duration::from_secs(every));
     }
 }

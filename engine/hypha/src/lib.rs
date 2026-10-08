@@ -28,6 +28,7 @@ pub mod fold;
 pub mod follow;
 pub mod line;
 pub mod probe;
+pub mod seat;
 
 /// The court netstratum speaks to unless told otherwise
 /// (`--at` / `NS_HYPHA`).
