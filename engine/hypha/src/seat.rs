@@ -44,6 +44,7 @@ pub struct Tally {
 /// netstratum's seat on the fleet.
 pub struct Seat {
     entity: Entity,
+    home: Option<std::path::PathBuf>,
     grown: Vec<Crystal>,
     held: Vec<Conjecture>,
     pub tally: Tally,
@@ -123,7 +124,39 @@ pub enum Untranslated {
     Refused(String),
 }
 
+/// One grid as plain text: rows of hue digits, one row per line.
+fn grid_text(g: &[Vec<u8>]) -> String {
+    g.iter().map(|r| r.iter().map(|h| char::from(b'0' + h.min(&35)) ).collect::<String>()).collect::<Vec<_>>().join("\n")
+}
+
 impl Seat {
+    /// THE TASK ARCHIVE: every task the court hands this seat, kept once as
+    /// plain text (`home/tasks/<id>.task`: `train` pairs then `test` inputs,
+    /// grids as hue digits), so netstratum's minds can be measured on the
+    /// court's own tasks offline, never only on self-forged ones.
+    fn keep(&self, id: &[u8], task: &mycelium::anastome::dialogue::TaskEnvelope) {
+        let Some(home) = &self.home else { return };
+        let dir = home.join("tasks");
+        let hex: String = id.iter().map(|b| format!("{b:02x}")).collect();
+        // Named by the id's hash (an address can outrun a file name); the
+        // whole id rides inside.
+        let named: String = blake3::hash(id).as_bytes()[..16].iter().map(|b| format!("{b:02x}")).collect();
+        let path = dir.join(format!("{named}.task"));
+        if path.exists() || std::fs::create_dir_all(&dir).is_err() {
+            return;
+        }
+        let mut out = format!("id {hex}\n");
+        for (a, b) in &task.train {
+            out.push_str(&format!("train\n{}\n--\n{}\n", grid_text(a), grid_text(b)));
+        }
+        for t in &task.tests {
+            out.push_str(&format!("test\n{}\n", grid_text(t)));
+        }
+        if let Err(e) = std::fs::write(&path, out) {
+            eprintln!("seat: task {named} not kept: {e}");
+        }
+    }
+
     /// Seat netstratum at `addr` under the voice at `home/voice.key`, its
     /// court-admitted words restored from `home/genome`.
     pub fn open(addr: &str, home: &Path) -> io::Result<Seat> {
@@ -147,7 +180,7 @@ impl Seat {
         let genome = home.join("genome");
         let genome = genome.to_str().ok_or_else(|| io::Error::new(io::ErrorKind::InvalidInput, "the genome path is not UTF-8"))?;
         let entity = Entity::open_persistent(addr, Kernel::from_key(key.sk.clone()), genome);
-        Ok(Seat { entity, grown: Vec::new(), held: Vec::new(), tally: Tally::default() })
+        Ok(Seat { entity, home: Some(home.to_path_buf()), grown: Vec::new(), held: Vec::new(), tally: Tally::default() })
     }
 
     /// ONE STROKE: pull a task, think it, file what can be filed. `Ok(None)`
@@ -157,6 +190,7 @@ impl Seat {
         self.tally.pulled += 1;
         let id = task.id.as_bytes().to_vec();
         let name: String = id.iter().take(6).map(|b| format!("{b:02x}")).collect();
+        self.keep(&id, &task);
         let train: Option<Vec<solver::TaskPair>> =
             task.train.iter().map(|(a, b)| Some(solver::TaskPair { input: grid(a)?, output: grid(b)? })).collect();
         let tests: Option<Vec<solver::Grid>> = task.tests.iter().map(|t| grid(t)).collect();
