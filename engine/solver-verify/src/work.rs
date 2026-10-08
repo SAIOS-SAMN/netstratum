@@ -354,6 +354,63 @@ fn put_op(op: &Op, out: &mut Vec<u8>) -> Option<()> {
             out.push(mirror_code(*odd_row));
             out.push(mirror_code(*odd_col));
         }
+        // docs/62 L1, appended: one code one meaning for ever.
+        Op::Shift { dr, dc } => {
+            out.push(10);
+            out.push(dr.to_le_bytes()[0]);
+            out.push(dc.to_le_bytes()[0]);
+        }
+        Op::Dilate { up, down } => {
+            out.push(11);
+            out.push(*up);
+            out.push(*down);
+        }
+        Op::Project(rule) => {
+            out.push(12);
+            put_select(&rule.select, out)?;
+            match rule.act {
+                crate::project::Act::Recolor(h) => {
+                    out.push(0);
+                    out.push(h);
+                }
+                crate::project::Act::Remove => out.push(1),
+            }
+        }
+    }
+    Some(())
+}
+
+/// A projector's predicate on the wire (docs/62 L7), structural: a tag, then
+/// its arguments; `Not` and `And` nest. Append-only like the op table.
+fn put_select(select: &crate::project::Select, out: &mut Vec<u8>) -> Option<()> {
+    use crate::project::Select;
+    match select {
+        Select::Hue(h) => out.extend([0, *h]),
+        Select::Size(k) => {
+            out.push(1);
+            put_u16(*k, out)?;
+        }
+        Select::Largest => out.push(2),
+        Select::Smallest => out.push(3),
+        Select::Border(on) => out.extend([4, u8::from(*on)]),
+        Select::TwinOfOtherHue => out.push(5),
+        Select::Shape(cells) => {
+            out.push(6);
+            put_u16(cells.len(), out)?;
+            for (r, c) in cells {
+                out.push(u8::try_from(*r).ok()?);
+                out.push(u8::try_from(*c).ok()?);
+            }
+        }
+        Select::Not(inner) => {
+            out.push(7);
+            put_select(inner, out)?;
+        }
+        Select::And(a, b) => {
+            out.push(8);
+            put_select(a, out)?;
+            put_select(b, out)?;
+        }
     }
     Some(())
 }
@@ -501,6 +558,51 @@ impl<'a> Reader<'a> {
                 odd_row: mirror_from(self.byte()?)?,
                 odd_col: mirror_from(self.byte()?)?,
             },
+            10 => Op::Shift { dr: i8::from_le_bytes([self.byte()?]), dc: i8::from_le_bytes([self.byte()?]) },
+            11 => {
+                let (up, down) = (self.byte()?, self.byte()?);
+                // One of the two is 1, and neither is 0: a dilator is one scale.
+                if up == 0 || down == 0 || (up > 1 && down > 1) {
+                    return None;
+                }
+                Op::Dilate { up, down }
+            }
+            12 => {
+                let select = self.select(0)?;
+                let act = match self.byte()? {
+                    0 => crate::project::Act::Recolor(self.byte()?),
+                    1 => crate::project::Act::Remove,
+                    _ => return None,
+                };
+                Op::Project(crate::project::ObjectRule { select, act })
+            }
+            _ => return None,
+        })
+    }
+    /// A projector's predicate; nesting bounded so a hostile tape cannot
+    /// recurse without end.
+    fn select(&mut self, depth: usize) -> Option<crate::project::Select> {
+        use crate::project::Select;
+        if depth > 8 {
+            return None;
+        }
+        Some(match self.byte()? {
+            0 => Select::Hue(self.byte()?),
+            1 => Select::Size(self.u16()?),
+            2 => Select::Largest,
+            3 => Select::Smallest,
+            4 => Select::Border(self.byte()? != 0),
+            5 => Select::TwinOfOtherHue,
+            6 => {
+                let n = self.u16()?;
+                let mut cells = Vec::with_capacity(n.min(self.bytes.len()));
+                for _ in 0..n {
+                    cells.push((usize::from(self.byte()?), usize::from(self.byte()?)));
+                }
+                Select::Shape(cells)
+            }
+            7 => Select::Not(Box::new(self.select(depth + 1)?)),
+            8 => Select::And(Box::new(self.select(depth + 1)?), Box::new(self.select(depth + 1)?)),
             _ => return None,
         })
     }

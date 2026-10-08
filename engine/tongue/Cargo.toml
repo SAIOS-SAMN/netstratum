@@ -9,6 +9,8 @@ description = "netstratum's words stated in the fleet's tongue: the translator f
 mycelium = { path = "../../vendor/mycelium" }
 solver = { path = "../solver" }
 blake3.workspace = true
+num-bigint.workspace = true
+num-rational.workspace = true
 
 [dev-dependencies]
 cfe = { path = "../cfe" }

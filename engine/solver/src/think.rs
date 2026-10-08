@@ -9,7 +9,7 @@
 //! Slice 3 adds `think_task`, the render table, and the certificate.
 
 use reduct::peel::{CellFrame, FullMeasurement, GaugeDirection, MeasurementRefusal, Site};
-use reduct::reduction::{ObserverFrame, PlaneElement, Relabel};
+use reduct::reduction::{Exchange, Flip, ObserverFrame, PlaneElement, Relabel};
 use reduct::{think, Crystal, PairClosure, TaskThought};
 use solver_verify::certificate::{verify_certificate, CertificateRead, SolveCertificate};
 use solver_verify::grid::{run, Grid, Op, Program, TileMirror, HUES};
@@ -102,38 +102,42 @@ pub fn measure_volume(volume: &Volume) -> Result<FullMeasurement, MeasurementRef
 // SLICE 3 — the render table and the seat conductor.
 // ─────────────────────────────────────────────────────────────────────
 
-/// The eight D₄ words over the grid vocabulary — the RENDER TARGET. A complete
-/// set of DISTINCT plane-group representatives (verified distinct on a 2×2
-/// probe): the empty word, the six single-op symmetries, and the anti-diagonal
-/// as a two-op word. A structural constant (group order eight), NEVER a content
-/// search over programs.
-fn d4_words() -> [Program; 8] {
-    [
-        Vec::new(),
-        vec![Op::Rotate90],
-        vec![Op::Rotate180],
-        vec![Op::Rotate270],
-        vec![Op::FlipH],
-        vec![Op::FlipV],
-        vec![Op::Transpose],
-        vec![Op::Rotate90, Op::FlipV],
-    ]
+/// **THE WORD A PLANE ELEMENT IS** (docs/62 L3), read off its components:
+/// the exchange is the diagonal reflection (`Transpose`), a row mirror the
+/// horizontal-axis reflection (`FlipV`), a column mirror the vertical one
+/// (`FlipH`), in the element's own order (exchange, then the mirrors on the
+/// exchanged frame). The plane group's generators, never a table of named
+/// rotations: a quarter turn is the product of two reflections.
+fn plane_word(p: PlaneElement) -> Program {
+    let mut word = Vec::new();
+    if p.exchange == Exchange::Swap {
+        word.push(Op::Transpose);
+    }
+    if p.row == Flip::Mirror {
+        word.push(Op::FlipV);
+    }
+    if p.col == Flip::Mirror {
+        word.push(Op::FlipH);
+    }
+    word
 }
 
-/// Render a plane element to the grid word that reproduces it — by MATCHING
-/// against a probe, never a hand table that could silently invert a Swap/Mirror
-/// convention. A 2×2 probe with four distinct hues separates all eight D₄
-/// elements; the word whose application equals the plane's action on the probe
-/// IS the render. Exactly one matches (a bijection of one group onto its
-/// representatives); a plane with no match is impossible for D₄ — withhold, not
-/// invent. The certificate (Pin A) re-checks the render on the real train sizes.
+/// The plane group's eight words, each read off its element (a structural
+/// constant, group order eight; never a content search over programs).
+fn d4_words() -> [Program; 8] {
+    PlaneElement::all().map(plane_word)
+}
+
+/// Render a plane element to its word, checked against a probe: the word's
+/// action must reproduce the element's on a 2x2 probe of four distinct hues
+/// (where a silent convention would show). A word that does not is withheld,
+/// never invented; the certificate (Pin A) re-checks on the real train sizes.
 fn render_plane(plane: PlaneElement) -> Option<Program> {
     let probe = Grid::new(2, 2, vec![0, 1, 2, 3]).expect("the 2×2 probe is lawful");
     let probe_m = measure_grid(&probe).ok()?;
     let target = ObserverFrame { plane, relabel: Relabel::new(Vec::new()) }.apply(&probe_m).ok()?;
-    d4_words()
-        .into_iter()
-        .find(|word| measure_grid(&run(word, &probe)).map(|m| m == target).unwrap_or(false))
+    let word = plane_word(plane);
+    (measure_grid(&run(&word, &probe)).ok()? == target).then_some(word)
 }
 
 /// Render a relabel (a hue permutation carried as its moved points) to a single
@@ -704,6 +708,52 @@ fn recognize_frame_then_object(pairs: &[(&Grid, &Grid)]) -> Option<Program> {
     None
 }
 
+/// **THE AFFINE SEAT** (docs/62 L2): a translator or a dilator DEDUCED from
+/// the pairs, then what is left read through the ONE reduce organ. The
+/// generator's arguments are read off the observation, one derived candidate
+/// each, never swept:
+/// - a dilator where every pair's output frame is the input's times one
+///   whole scale `k` on both axes (or the input's the output's);
+/// - a translator where the frames agree: the vector from the first
+///   non-background cell of the first input to that of its output.
+/// The staged grids are paired with the outputs and the organ is asked once
+/// for the frame; the word is the generator followed by it. Pin A (the
+/// caller) is the authority.
+fn recognize_affine_then_frame(pairs: &[(&Grid, &Grid)], grown: &mut Vec<Crystal>) -> Option<Program> {
+    let (in0, out0) = *pairs.first()?;
+    let scale = |a: usize, b: usize| (a > 0 && b > a && b % a == 0).then(|| b / a);
+    let generator = match (scale(in0.rows, out0.rows), scale(in0.cols, out0.cols), scale(out0.rows, in0.rows), scale(out0.cols, in0.cols)) {
+        (Some(k), Some(l), _, _) if k == l => Op::Dilate { up: u8::try_from(k).ok()?, down: 1 },
+        (_, _, Some(k), Some(l)) if k == l => Op::Dilate { up: 1, down: u8::try_from(k).ok()? },
+        _ if (in0.rows, in0.cols) == (out0.rows, out0.cols) => {
+            let first = |g: &Grid| {
+                let bg = solver_verify::objects::background(g);
+                g.cells.iter().position(|&h| h != bg).map(|i| ((i / g.cols) as i64, (i % g.cols) as i64))
+            };
+            let ((r0, c0), (r1, c1)) = (first(in0)?, first(out0)?);
+            let (dr, dc) = (i8::try_from(r1 - r0).ok()?, i8::try_from(c1 - c0).ok()?);
+            if (dr, dc) == (0, 0) {
+                return None;
+            }
+            Op::Shift { dr, dc }
+        }
+        _ => return None,
+    };
+    let first = vec![generator];
+    let staged: Vec<Grid> = pairs.iter().map(|(input, _)| run(&first, input)).collect();
+    if !pairs.iter().zip(&staged).all(|((_, output), s)| (s.rows, s.cols) == (output.rows, output.cols)) {
+        return None;
+    }
+    if pairs.iter().zip(&staged).all(|((_, output), s)| s == *output) {
+        return Some(first);
+    }
+    let staged_pairs: Vec<(&Grid, &Grid)> = staged.iter().zip(pairs).map(|(s, (_, output))| (s, *output)).collect();
+    let rest = recognize_frame(&staged_pairs, grown)?;
+    let mut word = first;
+    word.extend(rest);
+    Some(word)
+}
+
 /// **THINK THE TASK** — the ARC seat. Read the train pairs through the ONE
 /// reduce organ and render its verdict to a program, or WITHHOLD. Dispatch on
 /// the frame: when the output shares the input's frame (up to a D₄ transpose)
@@ -768,6 +818,13 @@ pub fn think_task_sensing(
     // docs/60 D7: a body changed AND moved or recoloured — layered.
     .or_else(|| recognize_object_then_frame(&pairs, grown))
     .or_else(|| recognize_frame_then_object(&pairs))
+    // docs/62 L2: a deduced translator or dilator, then the frame.
+    .or_else(|| recognize_affine_then_frame(&pairs, grown))
+    // docs/62 L7: the selection the pairs show, as a projector.
+    .or_else(|| {
+        let owned: Vec<(Grid, Grid)> = pairs.iter().map(|(i, o)| ((*i).clone(), (*o).clone())).collect();
+        crate::percept::learn(&owned).map(|rule| vec![Op::Project(rule)])
+    })
     .filter(|program| senses.covers(Senses::of_word(program)));
     let Some(program) = program else {
         fresh.retain(|c| senses.covers(Senses::of_word(&c.program)));

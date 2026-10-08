@@ -51,12 +51,38 @@ pub fn translate(
             Op::FlipH => Some(Symmetry::FlipH),
             Op::FlipV => Some(Symmetry::FlipV),
             Op::Transpose => Some(Symmetry::Transpose),
-            Op::Recolor(_) | Op::Object(_) | Op::Tile { .. } => None,
+            Op::Recolor(_) | Op::Object(_) | Op::Tile { .. } | Op::Shift { .. } | Op::Dilate { .. } | Op::Project(_) => None,
         };
         match (kind, op) {
             (Some(kind), _) => {
                 let step = Step::grid_motion(kind, (at.rows, at.cols), (next.rows, next.cols)).ok_or(Untranslated::Shape)?;
                 steps.push(step);
+            }
+            // docs/62 L4: a dilator is the court's Scale; a translator its
+            // motion by the cell vector (the grid's own sites, no centring).
+            (None, Op::Dilate { up, down }) => steps.push(Step::Scale { up: *up, down: *down }),
+            (None, Op::Shift { dr, dc }) => {
+                use num_rational::BigRational;
+                let d = [BigRational::from_integer(num_bigint::BigInt::from(*dr)), BigRational::from_integer(num_bigint::BigInt::from(*dc))];
+                steps.push(Step::Motion(mycelium::transducer::cga::translator_at(&d)));
+            }
+            // docs/62 L7: a projector is the court's SELECT and a hue step
+            // on what it selects (a hue sent to 0 under a selection is erased).
+            (None, Op::Project(rule)) => {
+                steps.push(Step::Select(court_pred(&rule.select).ok_or(Untranslated::NotARule)?));
+                let to = match rule.act {
+                    solver::percept::Act::Recolor(h) => h,
+                    solver::percept::Act::Remove => 0,
+                };
+                steps.push(Step::Hue((1u8..10).filter(|&k| k != to).map(|k| (k, to)).collect()));
+            }
+            // The court's sensor reads hue 0 as the background, not a body:
+            // a map that moves 0, or sends a hue to 0, creates or erases
+            // bodies and is no gauge on them (mycelium, confirmed at
+            // family/perceive.rs). Painting the background is a creation;
+            // erasing is a selection's complement.
+            (None, Op::Recolor(map)) if map[0] != 0 || map[1..].contains(&0) => {
+                return Err(Untranslated::Background);
             }
             (None, Op::Recolor(map)) => {
                 let moved: Vec<(u8, u8)> = (0u8..10).filter(|&h| map[h as usize] != h).map(|h| (h, map[h as usize])).collect();
@@ -69,6 +95,23 @@ pub fn translate(
     sentence(&steps, train, crystal).map_err(|why| Untranslated::Refused(format!("{why:?}")))
 }
 
+/// A projector's predicate in the court's SELECT language, where it has one:
+/// size is the body's cell count (the court's Shell); the frame-contact,
+/// twin and exact-shape predicates have no court form yet.
+fn court_pred(select: &solver::percept::Select) -> Option<mycelium::sdk::rule::Pred> {
+    use mycelium::sdk::rule::{Coord, Order, Pred, Tie};
+    use solver::percept::Select;
+    Some(match select {
+        Select::Hue(h) => Pred::Hue(*h),
+        Select::Size(k) => Pred::count(Coord::Shell, i64::try_from(*k).ok()?),
+        Select::Largest => Pred::extremum(Coord::Shell, Order::Greatest, Tie::Hold),
+        Select::Smallest => Pred::extremum(Coord::Shell, Order::Least, Tie::Hold),
+        Select::Not(inner) => Pred::Not(Box::new(court_pred(inner)?)),
+        Select::And(a, b) => Pred::And(vec![court_pred(a)?, court_pred(b)?]),
+        Select::Border(_) | Select::TwinOfOtherHue | Select::Shape(_) => return None,
+    })
+}
+
 /// Why a program could not be stated as a court rule.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Untranslated {
@@ -78,6 +121,9 @@ pub enum Untranslated {
     NoFamily,
     /// A symmetry met shapes it cannot act between.
     Shape,
+    /// A hue map that moves the background (hue 0) or sends a hue to it:
+    /// a creation or an erasure, not a gauge on bodies.
+    Background,
     /// The seam refused it, by name.
     Refused(String),
 }

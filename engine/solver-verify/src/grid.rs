@@ -95,6 +95,17 @@ pub enum Op {
         /// Mirror applied inside tiles on odd tile COLUMNS.
         odd_col: TileMirror,
     },
+    /// A TRANSLATOR (docs/62 L1): every cell carried by `(dr, dc)`; a cell
+    /// the motion vacates takes the grid's background. A generator of the
+    /// algebra, not a named transform: its arguments are the motion.
+    Shift { dr: i8, dc: i8 },
+    /// A DILATOR (docs/62 L1): each cell becomes an `up x up` block, or each
+    /// `down x down` block is read as its top-left cell. One of `up`, `down`
+    /// is 1.
+    Dilate { up: u8, down: u8 },
+    /// A PROJECTOR (docs/62 L7): the bodies a predicate picks, recoloured
+    /// or removed. Learned from the pairs, never a named object op.
+    Project(crate::project::ObjectRule),
 }
 
 /// The in-tile mirror an odd row/column band carries.
@@ -161,6 +172,9 @@ impl Op {
                 odd_row.label(),
                 odd_col.label()
             ),
+            Op::Shift { dr, dc } => format!("shift({dr},{dc})"),
+            Op::Dilate { up, down } => format!("dilate({up}/{down})"),
+            Op::Project(rule) => format!("project({:?}->{:?})", rule.select, rule.act),
         }
     }
 
@@ -215,6 +229,24 @@ impl Op {
                     }
                     g.at(rr, cc)
                 })
+            }
+            Op::Shift { dr, dc } => {
+                let bg = crate::objects::background(g);
+                let (dr, dc) = (i64::from(*dr), i64::from(*dc));
+                let (rows, cols) = (g.rows as i64, g.cols as i64);
+                out.fill_from(g.rows, g.cols, |r, c| {
+                    let (sr, sc) = (r as i64 - dr, c as i64 - dc);
+                    if sr >= 0 && sr < rows && sc >= 0 && sc < cols {
+                        g.at(sr as usize, sc as usize)
+                    } else {
+                        bg
+                    }
+                })
+            }
+            Op::Project(rule) => *out = crate::project::apply(rule, g),
+            Op::Dilate { up, down } => {
+                let (up, down) = (usize::from((*up).max(1)), usize::from((*down).max(1)));
+                out.fill_from(g.rows * up / down, g.cols * up / down, |r, c| g.at(r * down / up, c * down / up))
             }
         }
     }

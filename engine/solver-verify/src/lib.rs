@@ -21,6 +21,8 @@ pub mod forge;
 pub mod grid;
 pub mod loader;
 pub mod objects;
+// docs/62 L7 — selection as a projector.
+pub mod project;
 pub mod rung;
 pub mod shell;
 pub mod volume;

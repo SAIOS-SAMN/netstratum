@@ -207,7 +207,9 @@ pub fn family_of(op: &solver_verify::grid::Op) -> Family {
             Family::Symmetry
         }
         Op::Recolor(_) => Family::Recolor,
-        Op::Tile { .. } => Family::Tile,
+        Op::Tile { .. } | Op::Dilate { .. } => Family::Tile,
+        Op::Shift { .. } => Family::Symmetry,
+        Op::Project(_) => Family::Object,
         Op::Object(_) => Family::Object,
     }
 }

@@ -38,7 +38,13 @@ impl Senses {
         Senses(match op {
             Op::Rotate90 | Op::Rotate180 | Op::Rotate270 | Op::FlipH | Op::FlipV | Op::Transpose => SIGHT,
             Op::Recolor(_) => HUE,
-            Op::Tile { .. } => RHYTHM,
+            Op::Tile { .. } | Op::Dilate { .. } => RHYTHM,
+            Op::Shift { .. } => SIGHT,
+            // A projector touches bodies; recolouring them is heard too.
+            Op::Project(rule) => match rule.act {
+                solver_verify::project::Act::Recolor(_) => TOUCH | HUE,
+                solver_verify::project::Act::Remove => TOUCH,
+            },
             Op::Object(_) => TOUCH,
         })
     }
