@@ -420,3 +420,30 @@ fn several_deeds_share_one_tick_addressed_by_sub() {
         ArborRefused::ArrowBroken { .. }
     ));
 }
+
+#[test]
+fn the_judged_door_carries_a_verdict_only_from_the_head_it_was_reached_on() {
+    // RECONSTRUCT (iii): the judge's prior must BE the head (by digest);
+    // then the arbor appends judged without fetching, decoding or
+    // re-admitting. A prior the arbor does not hold refuses.
+    let root = scratch("judged-door");
+    let mut arbor = Arbor::open(&root).unwrap();
+    let genesis = two_orb_state((10, 1), (0, 1));
+    let next = two_orb_state((7, 1), (3, 1));
+    let head = arbor.extend(coord(0), &genesis, None).unwrap().clone();
+    assert_eq!(head.state, *blake3::hash(&genesis).as_bytes());
+
+    let stranger = *blake3::hash(&next).as_bytes();
+    assert!(matches!(arbor.extend_judged(coord(1), &next, stranger), Err(ArborRefused::PriorDiverged)));
+    let committed = arbor.extend_judged(coord(1), &next, head.state).unwrap().clone();
+    assert!(committed.judged, "a carried verdict is stamped judged");
+    assert_eq!(committed.parent, head.commit);
+    assert_eq!(arbor.fetch(&committed.state).unwrap(), next);
+    // the arrow and the address still hold at this door
+    assert!(matches!(arbor.extend_judged(coord(1), &genesis, committed.state), Err(ArborRefused::Occupied)));
+    assert!(matches!(arbor.extend_judged(coord(0), &genesis, committed.state), Err(_)));
+    // and it reloads whole
+    drop(arbor);
+    let back = Arbor::open(&root).unwrap();
+    assert_eq!(back.head("").unwrap().state, committed.state);
+}

@@ -203,6 +203,21 @@ impl Stepper {
         Stepper { replay: Replayer::new(), before: Positions::new(), applied: 0, off_grain: Vec::new(), held_off: std::collections::BTreeSet::new() }
     }
 
+    /// A stepper resumed from CARRIED state (RECONSTRUCT v): the committed
+    /// state after `applied` receipts, read from a position record — never
+    /// rebuilt by replaying the receipts before it.
+    pub fn from_state(state: cfe::world::state::Committed, applied: usize) -> Stepper {
+        let mut stepper = Stepper { replay: Replayer::from_state(state), ..Stepper::new() };
+        stepper.applied = applied;
+        stepper.before = positions(&stepper.replay.state().orbs, applied.saturating_sub(1), &mut stepper.off_grain, &mut stepper.held_off);
+        stepper
+    }
+
+    /// The committed state after the receipts applied.
+    pub fn state(&self) -> &cfe::world::state::Committed {
+        self.replay.state()
+    }
+
     /// How many receipts this stepper has applied.
     pub fn applied(&self) -> usize {
         self.applied

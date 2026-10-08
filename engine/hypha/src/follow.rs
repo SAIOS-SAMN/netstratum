@@ -96,6 +96,49 @@ pub fn prune(up: &Uplink, line: &mut TierLine, log: &FoldLog) -> io::Result<(usi
     Ok((n, unread))
 }
 
+/// **THE CARRIED POSITION** (RECONSTRUCT v): beside the cursors, one record
+/// a people — `positions-<tier>/<people with '/' as '~'>.pos`:
+///
+/// ```text
+/// "netstratum census position v1" ‖ applied u64 ‖ head[32] ‖ bytes u64 ‖ codec::state_bytes
+/// ```
+///
+/// written when every receipt read is folded: the census state after
+/// `applied` receipts, the last of them hashing to `head` and ending at byte
+/// `bytes` of the chronicle. A people is re-seated from it, reading only the
+/// chronicle after `bytes` — never replayed from genesis.
+const POSITION: &[u8] = b"netstratum census position v1";
+
+fn position_path(home: &Path, people: &str) -> PathBuf {
+    home.join("positions-colonies").join(format!("{}.pos", people.replace('/', "~")))
+}
+
+fn write_position(home: &Path, people: &str, f: &Followed) -> io::Result<()> {
+    let path = position_path(home, people);
+    if let Some(parent) = path.parent() {
+        std::fs::create_dir_all(parent)?;
+    }
+    let mut bytes = POSITION.to_vec();
+    bytes.extend_from_slice(&(f.stepper.applied() as u64).to_le_bytes());
+    bytes.extend_from_slice(&f.head);
+    bytes.extend_from_slice(&f.cursor.bytes.to_le_bytes());
+    bytes.extend_from_slice(&codec::state_bytes(f.stepper.state()));
+    let tmp = path.with_extension("pos.tmp");
+    std::fs::write(&tmp, &bytes)?;
+    std::fs::rename(&tmp, &path)
+}
+
+/// A people's carried position: (applied, head, bytes, state).
+fn read_position(home: &Path, people: &str) -> Option<(usize, [u8; 32], u64, cfe::world::state::Committed)> {
+    let bytes = std::fs::read(position_path(home, people)).ok()?;
+    let rest = bytes.strip_prefix(POSITION)?;
+    let applied = u64::from_le_bytes(rest.get(..8)?.try_into().ok()?) as usize;
+    let head: [u8; 32] = rest.get(8..40)?.try_into().ok()?;
+    let at = u64::from_le_bytes(rest.get(40..48)?.try_into().ok()?);
+    let state = codec::from_state_bytes(rest.get(48..)?)?;
+    Some((applied, head, at, state))
+}
+
 /// One people as the follower holds it.
 struct Followed {
     dir: PathBuf,
@@ -111,6 +154,8 @@ struct Followed {
     halted: Option<String>,
     /// Off-grain breaches already reported.
     reported_off: usize,
+    /// The receipt count the carried position record last stood at.
+    recorded: usize,
 }
 
 /// What a round did, for the log.
@@ -146,6 +191,9 @@ impl Follower {
     /// cursor's receipt hash against the chronicle), and step the rest.
     fn seat(&self, dir: &Path, cursors: &crate::line::Cursors) -> Result<Followed, String> {
         let people = people_of(dir);
+        if let Some(f) = self.seat_carried(dir, &people, cursors) {
+            return Ok(f);
+        }
         let mut cursor = TailCursor::default();
         let receipts = read_tail(&dir.join("chronicle.tlv"), &mut cursor).map_err(|e| format!("{people}: the chronicle did not read: {e:?}"))?;
         let (folded, folded_head) = cursors.at.get(&people).copied().unwrap_or((0, [0; 32]));
@@ -161,7 +209,41 @@ impl Follower {
             }
         }
         let head = receipts.last().map(|r| r.own().0).unwrap_or([0; 32]);
-        Ok(Followed { dir: dir.to_path_buf(), cursor, stepper, pending, folded, head, halted: None, reported_off: 0 })
+        Ok(Followed { dir: dir.to_path_buf(), cursor, stepper, pending, folded, head, halted: None, reported_off: 0, recorded: 0 })
+    }
+
+    /// Seat a people from its CARRIED POSITION: the census state the record
+    /// holds, and only the chronicle after it (verified from the record's
+    /// head). `None` — and the whole read above, once — when there is no
+    /// record, or it stands past the cursor (the line rolled back behind it),
+    /// or the tail after it does not read or does not hold the cursor's
+    /// receipt where the cursor names it.
+    fn seat_carried(&self, dir: &Path, people: &str, cursors: &crate::line::Cursors) -> Option<Followed> {
+        let (applied, head, at, state) = read_position(&self.home, people)?;
+        let (folded, folded_head) = cursors.at.get(people).copied().unwrap_or((0, [0; 32]));
+        if applied == 0 || applied > folded {
+            return None;
+        }
+        let mut cursor = TailCursor { bytes: at, receipts: applied as u64, head: Some(cfe::vrp::ReceiptHash(head)) };
+        let tail = read_tail(&dir.join("chronicle.tlv"), &mut cursor).ok()?;
+        let caught = folded - applied;
+        let folded_at = match caught {
+            0 => head,
+            n => tail.get(n - 1)?.own().0,
+        };
+        if folded_at != folded_head {
+            return None;
+        }
+        let mut stepper = Stepper::from_state(state, applied);
+        stepper.skip(&tail[..caught]).ok()?;
+        let mut pending = Vec::new();
+        for r in &tail[caught..] {
+            if let Some(step) = stepper.step(r).ok()? {
+                pending.push(step);
+            }
+        }
+        let last = tail.last().map(|r| r.own().0).unwrap_or(head);
+        Some(Followed { dir: dir.to_path_buf(), cursor, stepper, pending, folded, head: last, halted: None, reported_off: 0, recorded: applied })
     }
 
     /// ONE ROUND: read every chronicle's new tail, fold what moved, publish
@@ -315,6 +397,16 @@ impl Follower {
             }
         }
 
+        // CARRY each fully folded people's position forward (RECONSTRUCT v).
+        for (people, f) in self.peoples.iter_mut() {
+            if f.halted.is_none() && f.pending.is_empty() && f.folded == f.stepper.applied() && f.folded > f.recorded {
+                match write_position(&self.home, people, f) {
+                    Ok(()) => f.recorded = f.folded,
+                    Err(e) => round.notes.push(format!("{people}: position not carried: {e}")),
+                }
+            }
+        }
+
         // PRUNE what the court reads settled.
         let (pruned, unread) = prune(up, &mut line, &log)?;
         round.pruned = pruned;
@@ -386,8 +478,63 @@ impl Follower {
 
 #[cfg(test)]
 mod tests {
-    use super::people_of;
+    use super::{people_of, position_path, write_position, Follower};
+    use crate::line::Cursors;
+    use cfe::dop::ZoneKind;
+    use cfe::world::World;
     use std::path::Path;
+
+    #[test]
+    fn a_people_reseats_from_its_carried_position_reading_only_the_tail() {
+        let base = std::env::temp_dir().join(format!("hypha-position-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&base);
+        let (root, home) = (base.join("u1"), base.join("home"));
+        let dir = root.join("worlds").join("meridian");
+        std::fs::create_dir_all(&dir).unwrap();
+        let carrier = dir.join("chronicle.tlv");
+        let mut world = World::new();
+        world.found("meridian").expect("founds");
+        world.zone(4, ZoneKind::Extractor).expect("builds");
+        for _ in 0..3 {
+            world.tick();
+        }
+        world.collect().expect("settles");
+        cfe::persist::sync(world.chronicle(), &carrier).unwrap();
+
+        let follower = Follower::new(&root, &home).unwrap();
+        let people = people_of(&dir);
+        let mut cursors = Cursors::open(&home, "colonies").unwrap();
+        let total = world.chronicle().total() as usize;
+        let head = world.chronicle().receipts().last().unwrap().own().0;
+        cursors.set(&people, total, head).unwrap();
+        let seated = follower.seat(&dir, &cursors).unwrap();
+        assert_eq!(seated.recorded, 0, "no record yet: the whole read, once");
+        write_position(&home, &people, &seated).unwrap();
+
+        // The world plays on; a re-seat resumes from the record.
+        world.zone(9, ZoneKind::Habitat).expect("builds");
+        world.tick();
+        world.collect().expect("settles");
+        cfe::persist::sync(world.chronicle(), &carrier).unwrap();
+        let carried = follower.seat(&dir, &cursors).unwrap();
+        assert_eq!(carried.recorded, total, "seated from the carried position");
+        std::fs::remove_file(position_path(&home, &people)).unwrap();
+        let whole = follower.seat(&dir, &cursors).unwrap();
+        assert_eq!(whole.recorded, 0);
+        assert_eq!(carried.stepper.applied(), whole.stepper.applied());
+        assert_eq!(carried.stepper.state(), whole.stepper.state());
+        assert_eq!(carried.head, whole.head);
+        assert_eq!(carried.cursor, whole.cursor);
+        let cites = |f: &super::Followed| f.pending.iter().map(|s| (s.receipt, s.cite, s.rows.clone())).collect::<Vec<_>>();
+        assert_eq!(cites(&carried), cites(&whole));
+        assert!(!carried.pending.is_empty(), "the new receipts moved holdings");
+
+        // A record standing past the cursor (the line rolled back) is not used.
+        write_position(&home, &people, &whole).unwrap();
+        let prior = world.chronicle().receipts()[total - 2].own().0;
+        cursors.set(&people, total - 1, prior).unwrap();
+        assert_eq!(follower.seat(&dir, &cursors).unwrap().recorded, 0);
+    }
 
     #[test]
     fn a_people_is_namespaced_by_its_universe_and_the_archive_keeps_bare_names() {

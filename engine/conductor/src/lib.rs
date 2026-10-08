@@ -5076,31 +5076,44 @@ impl Polity {
         // committed state, O(state) — never a prefix replay. The old
         // form here was O(deeds × history) per beat and O(history²)
         // at boot; measured at 402s of a 430s beat before the
-        // watermark, ~20s/beat after it, ~0 now. The stepper seeds
-        // once per process by folding the already-judged prefix
-        // (O(history), the price of one replay), and the chain-hash
-        // integrity of that prefix is still proven by from_receipts.
+        // watermark, ~20s/beat after it, ~0 now. The stepper seeds once
+        // per process from CARRIED state, never from genesis.
         if self.stepper.is_none() {
             // Every deed up to the watermark was judged live already; the
             // stepper carries the LIVE state forward from there. When the
             // watermark is the chronicle's head (the boot after a clean
             // close), the live world IS that state — nothing is replayed.
-            // Only a watermark behind the head (deeds written but not yet
-            // judged when the last process stopped) folds the judged prefix.
-            let stepper = if self.chained == total || base > 0 {
-                // A tail-holding chronicle cannot fold a prefix it no longer
-                // holds: deeds written but unjudged when the last process
-                // stopped are carried, not re-judged.
-                self.chained = total;
-                cfe::world::Replayer::from_state(self.world.committed())
-            } else {
-                let mut stepper = cfe::world::Replayer::new();
-                let verified = cfe::vrp::Chronicle::from_receipts(receipts[..self.chained].to_vec())
-                    .map_err(|_| mesh::arbor::ArborRefused::StateUndecodable)?;
-                for receipt in verified.receipts() {
-                    stepper.apply(receipt);
+            // SEEDED FROM THE SNAPSHOT, NEVER FROM GENESIS (RECONSTRUCT iii):
+            // a watermark behind the head steps the snapshot's carried state
+            // over the held receipts from its position to the watermark. A
+            // watermark behind the snapshot (deeds the last process wrote but
+            // never judged, then carried) starts at the snapshot; with no
+            // snapshot of this chronicle, the unjudged deeds are carried.
+            let snap = match self.chained == total {
+                true => None,
+                false => snapshot::read(&book.world_dir(&self.spec.world_name)).filter(|snap| {
+                    snap.receipts > base
+                        && snap.receipts <= total
+                        && receipts[snap.receipts - 1 - base].own().0 == snap.head
+                }),
+            };
+            let stepper = match snap {
+                Some(snap) => {
+                    let from = snap.receipts;
+                    let mut stepper = cfe::world::Replayer::from_state(snap.state);
+                    if from <= self.chained {
+                        for receipt in &receipts[from - base..self.chained - base] {
+                            stepper.apply(receipt);
+                        }
+                    } else {
+                        self.chained = from;
+                    }
+                    stepper
                 }
-                stepper
+                None => {
+                    self.chained = total;
+                    cfe::world::Replayer::from_state(self.world.committed())
+                }
             };
             self.stepper = Some(stepper);
         }
@@ -5123,6 +5136,12 @@ impl Polity {
         // world keeps playing regardless, but the arbor — the live gate
         // — only ever holds what the kernel actually admitted.
         let mut still_admitting = true;
+        // RECONSTRUCT (iii): the judge applies each deed ONCE and admits it
+        // ONCE; the arbor carries the verdict through its judged door, which
+        // checks only that the judge's prior IS its head (by digest) — no
+        // blob fetched, decoded or re-admitted. The prior's digest rides
+        // forward from each committed `next`.
+        let mut prior_digest: Option<[u8; 32]> = None;
         for receipt in &receipts[self.chained.max(base) - base..] {
             let step = kernel::Step {
                 event: receipt.event().clone(),
@@ -5152,20 +5171,33 @@ impl Polity {
                             t: receipt.stamp(),
                             sub,
                         };
-                        match arbor.extend(coordinate, &codec::state_bytes(next), Some(&step)) {
-                            Ok(_) => self.arbor_committed += 1,
-                            // The judge admitted it live but the arbor's
-                            // own re-derivation (from ITS head, which may
-                            // sit behind `next` if an earlier deed this
-                            // call never reached its extend()) disagrees
-                            // — stop committing, keep judging/reporting.
-                            Err(_) => still_admitting = false,
+                        let prior = match prior_digest {
+                            Some(held) => held,
+                            None => *blake3::hash(&codec::state_bytes(&prior)).as_bytes(),
+                        };
+                        let bytes = codec::state_bytes(next);
+                        match arbor.extend_judged(coordinate, &bytes, prior) {
+                            Ok(_) => {
+                                self.arbor_committed += 1;
+                                prior_digest = Some(*blake3::hash(&bytes).as_bytes());
+                            }
+                            // The judge admitted it live but on a prior the
+                            // arbor does not hold (its head sits behind, an
+                            // earlier deed never committed) — stop
+                            // committing, keep judging/reporting.
+                            Err(_) => {
+                                still_admitting = false;
+                                prior_digest = None;
+                            }
                         }
+                    } else {
+                        prior_digest = None;
                     }
                 }
                 Err(unlawful) => {
                     self.refused.push((receipt.sequence(), unlawful));
                     still_admitting = false;
+                    prior_digest = None;
                 }
             }
         }

@@ -140,6 +140,10 @@ pub enum ArborRefused {
     /// re-judging, never trust; a judgment you cannot re-run is a
     /// judgment you do not have.
     JudgedWithoutProof { frame: usize },
+    /// [`Arbor::extend_judged`]: the judge's prior state is not this
+    /// branch's head (its digest differs) — the verdict was reached on a
+    /// state the arbor does not hold, so it does not carry here.
+    PriorDiverged,
     /// SPINE-UPLINK: a received record references a blob absent from
     /// the segment and from the local store — the geometry is unheld,
     /// the record unverifiable.
@@ -401,6 +405,41 @@ impl Arbor {
             state,
             parent,
         );
+        self.append(record)
+    }
+
+    /// **THE JUDGED DOOR** (RECONSTRUCT iii, Concordance 4.4 annex): a
+    /// step the caller ALREADY judged with `kernel::admits` on a prior
+    /// state whose digest is `prior` (BLAKE3 of its state bytes). The arbor
+    /// carries that verdict instead of re-deriving it: it checks `prior` is
+    /// its branch head's own state digest — the one thing it must not take
+    /// on trust — and appends `state_bytes` judged, with no blob fetched,
+    /// decoded or re-admitted. [`Arbor::extend`] stays the door for steps
+    /// nobody here judged (received work re-judges, never trusts).
+    pub fn extend_judged(
+        &mut self,
+        coordinate: Coordinate,
+        state_bytes: &[u8],
+        prior: [u8; 32],
+    ) -> Result<&Commitment, ArborRefused> {
+        let schema = *state_bytes.first().ok_or(ArborRefused::StateUndecodable)?;
+        if self.resolve(&coordinate).is_some() {
+            return Err(ArborRefused::Occupied);
+        }
+        let head = self.head(&coordinate.branch).ok_or(ArborRefused::GenesisJudged)?;
+        if !ascends(&coordinate, &head.coordinate) {
+            return Err(ArborRefused::ArrowBroken { t: coordinate.t, head: head.coordinate.t });
+        }
+        if head.state != prior {
+            return Err(ArborRefused::PriorDiverged);
+        }
+        let parent = head.commit;
+        let state = *blake3::hash(state_bytes).as_bytes();
+        let blob = self.blob_path(&state);
+        if !blob.exists() {
+            fs::write(&blob, state_bytes).map_err(io)?;
+        }
+        let record = seal(coordinate, schema, kernel::VERSION, true, state, parent);
         self.append(record)
     }
 
