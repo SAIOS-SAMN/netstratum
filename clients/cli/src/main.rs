@@ -8432,6 +8432,14 @@ fn chronicle(world: &World, style: &Style) {
                 "✶ THE ANCIENT ARISES — {} (its line holds {tree} of {living} living)",
                 style.strong(sigil)
             ),
+            cfe::dop::ClosureEvent::CoreDeposited { core, world, resource, amount } => format!(
+                "⊙ {} of {world}'s sinks reaches the core {}",
+                match resource {
+                    Some(r) => format!("{amount} {r:?}"),
+                    None => format!("{amount} STAMP"),
+                },
+                style.strong(core)
+            ),
             cfe::dop::ClosureEvent::UniverseFounded { topology, span, over, .. } => format!(
                 "✶ THE BIG BANG — a {topology} of span {span}{}",
                 if over.is_some() { " (re-founded over an older ledger)" } else { "" }

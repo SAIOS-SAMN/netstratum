@@ -407,7 +407,7 @@
 //!         same algorithm solver::consilience already uses for cross-line
 //!         agreement, read at vessel scope. Recorded only; nothing reads
 //!         it yet. orbit[32] ‖ hardness u32 le.)
-//!    Phase-5 claim ledger: next free **193** (190 UniverseFounded, 191 UniverseCited, 192 AncientArose — docs/58; 186 ResourceStocksSwept, 184 VeinRejuvenated —
+//!    Phase-5 claim ledger: next free **194** (193 CoreDeposited — the cores design; 190 UniverseFounded, 191 UniverseCited, 192 AncientArose — docs/58; 186 ResourceStocksSwept, 184 VeinRejuvenated —
 //!    ONT-3 resource rejuvenation as derivation: a worked vein RECOVERS at a
 //!    collect touch, its inverse-receipt integral `rejuvenated` growing by the
 //!    KEPLERIAN orbital-forcing quantum (one `natural/REGROWTH_GRAIN` per
@@ -3258,6 +3258,15 @@ pub enum ClosureEvent {
     /// conductor holds them in trust). By lineage, never by appointment; it
     /// may change hands at a later close. Identity only: nothing moves.
     AncientArose { sigil: String, tree: u64, living: u64 },
+    /// **A SINK REACHES ITS CORE (tag 193, docs/58 §6 ruling 9; the cores
+    /// design approved 2026-10-08)** — sealed on the universe ledger: what
+    /// `world`'s deeds unmade since its last deposit (upkeep burned, famine
+    /// draws, build costs embodied, the raze's unrefunded half, fees and
+    /// postage, transit melt, tithes) lands at `core`, its galaxy's throat,
+    /// instead of vanishing. `resource` is the banked holding, `None` for
+    /// STAMP. The core's holding is the sum of its deposits (less what it
+    /// re-emits). Nothing moves in any world: the debit already happened there.
+    CoreDeposited { core: String, world: String, resource: Option<Resource>, amount: Ratio },
     /// **THE GALACTIC REGION (GALACTIC-1, tag 187)** — a world's charted
     /// `(X,Y,Z)` quantized onto a coarse galactic grid cell and hashed once
     /// at genesis into a REGIONAL weighting seed. Purely additive: an old
@@ -4605,6 +4614,17 @@ impl ClosureEvent {
                 value.extend_from_slice(&tree.to_le_bytes());
                 value.extend_from_slice(&living.to_le_bytes());
                 tlv::put(192, &value, &mut out);
+            }
+            Self::CoreDeposited { core, world, resource, amount } => {
+                // core (u16-prefixed) ‖ world (u16-prefixed) ‖ resource u8
+                // (0 = STAMP) ‖ amount
+                let mut value = (core.len() as u16).to_le_bytes().to_vec();
+                value.extend_from_slice(core.as_bytes());
+                value.extend_from_slice(&(world.len() as u16).to_le_bytes());
+                value.extend_from_slice(world.as_bytes());
+                value.push(resource.map_or(0, |r| r as u8));
+                ratio::encode(amount, &mut value);
+                tlv::put(193, &value, &mut out);
             }
             Self::ChronicleCheckpointed { folded_hash, receipt_count } => {
                 // folded_hash[32] ‖ receipt_count u64 le — a world-wide
@@ -6047,6 +6067,23 @@ impl ClosureEvent {
                 let tree = u64::from_le_bytes(value.get(2 + len..10 + len)?.try_into().ok()?);
                 let living = u64::from_le_bytes(value.get(10 + len..18 + len)?.try_into().ok()?);
                 (value.len() == 18 + len).then_some(Self::AncientArose { sigil, tree, living })
+            }
+            193 => {
+                let text = |at: &mut usize| -> Option<String> {
+                    let len = u16::from_le_bytes(value.get(*at..*at + 2)?.try_into().ok()?) as usize;
+                    let s = String::from_utf8(value.get(*at + 2..*at + 2 + len)?.to_vec()).ok()?;
+                    *at += 2 + len;
+                    Some(s)
+                };
+                let mut at = 0usize;
+                let core = text(&mut at)?;
+                let world = text(&mut at)?;
+                let resource = match *value.get(at)? {
+                    0 => None,
+                    code => Some(Resource::from_wire(code)?),
+                };
+                let (amount, used) = ratio::decode(value.get(at + 1..)?)?;
+                (value.len() == at + 1 + used).then_some(Self::CoreDeposited { core, world, resource, amount })
             }
             172 => Some(Self::PracticesLapsed { count: *value.first()? }),
             168 => Some(Self::PressureEbbed {

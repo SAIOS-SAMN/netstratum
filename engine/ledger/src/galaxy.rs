@@ -173,6 +173,53 @@ impl Ledger {
         Ok(created)
     }
 
+    /// **THE CORE A PLACE'S SINKS REACH** (the cores design, slice 1): its
+    /// galaxy's — the charted centre nearest by the torus's own distance
+    /// within reach (`galaxy_of`'s law) — and, outside every reach, still the
+    /// NEAREST core: nothing lands nowhere. Ties go to the earlier name.
+    /// `None` only before any galaxy is charted.
+    pub fn core_of(&self, position: &(Ratio, Ratio, Ratio)) -> Option<String> {
+        let span = self.universe_span();
+        let ranked = self.galaxies().into_iter().map(|galaxy| {
+            let distance = l1_wrapped(position, &galaxy.center, &span);
+            (distance > galaxy.reach, distance, galaxy.name)
+        });
+        ranked.min().map(|(_, _, name)| name)
+    }
+
+    /// Append events to the universe ledger at `stamp`, in order, and sync.
+    pub fn append_universe(&self, events: Vec<ClosureEvent>, stamp: u64) -> std::io::Result<()> {
+        if events.is_empty() {
+            return Ok(());
+        }
+        fs::create_dir_all(&self.root)?;
+        let path = self.ledger_path();
+        let mut ledger = match path.exists() {
+            true => persist::load(&path).map_err(io_error)?,
+            false => Chronicle::new(),
+        };
+        for event in events {
+            ledger.append(event, stamp, vec![]);
+        }
+        persist::sync(&ledger, &path).map_err(io_error)?;
+        Ok(())
+    }
+
+    /// What each core holds: the sum of its `CoreDeposited` receipts, per
+    /// holding (`None` = STAMP). A reading: nothing is written.
+    pub fn core_holdings(&self) -> std::collections::BTreeMap<(String, Option<cfe::dop::Resource>), Ratio> {
+        let mut held = std::collections::BTreeMap::new();
+        let Ok(ledger) = persist::load(&self.ledger_path()) else {
+            return held;
+        };
+        for receipt in ledger.receipts() {
+            if let ClosureEvent::CoreDeposited { core, resource, amount, .. } = receipt.event() {
+                *held.entry((core.clone(), *resource)).or_insert_with(|| ratio(0, 1)) += amount.clone();
+            }
+        }
+        held
+    }
+
     /// **THE UNIVERSE'S SEED** (docs/58 §3) — the own-hash of its Big Bang
     /// (`UniverseFounded`) on the universe ledger, or `None` before one is
     /// recorded. A reading: nothing is written.

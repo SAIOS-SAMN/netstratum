@@ -421,6 +421,11 @@ fn main() {
                 "beat {beat}: year {} journaled — the wall is fresh (var/worlds/wall.html)",
                 beat / scribe::journal::YEAR_TICKS
             );
+            // THE CORES (slice 1): every sink of the year reaches its core.
+            let deposits = conductor::core_step(&mut worlds, &book, epoch_base + beat);
+            if !deposits.is_empty() {
+                println!("beat {beat}: {} worlds' sinks reached their cores", deposits.len());
+            }
             // CARRY STATE FORWARD: every world's snapshot at the year's close,
             // so a boot resumes from here, never from genesis.
             for polity in worlds.iter_mut().filter(|e| !e.penned) {

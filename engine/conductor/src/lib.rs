@@ -145,6 +145,7 @@ mod polities;
 // Diophantine tracks (r = M·k², P = M·k³ off the (M,M) base). See siting.rs.
 mod siting;
 pub mod snapshot;
+pub mod cores;
 // SOC-1 (operator directive 2026-08-16): the open build workbench — the surplus
 // phase of `build_step` draws its next building from a disposition-weighted
 // partition function seeded by the chronicle digest, in place of the fixed
@@ -1194,6 +1195,9 @@ pub struct Polity {
     /// (`Default`) and pays one full check on its first beat, exactly
     /// like today.
     sync_cursor: cfe::persist::SyncCursor,
+    /// THE CORES (slice 1): this world's sinks read by the judge and not yet
+    /// deposited at its core, kept durable beside it (`core.pending`).
+    core_pending: cores::Pending,
 }
 
 /// The smelter's (iron, biomass) gate — bound ONCE, read by the
@@ -1581,6 +1585,7 @@ impl Polity {
                         autic_authored: 0,
                         reported: 0,
                         sync_cursor,
+                        core_pending: cores::Pending::read(&book.world_dir(&spec.world_name)),
                         trajectory: Trajectory::Growth,
                         prev_order: None,
                         pop_cohesion_band: None,
@@ -1781,6 +1786,7 @@ impl Polity {
             autic_authored: 0,
             reported: 0,
             sync_cursor: cfe::persist::SyncCursor::default(),
+            core_pending: cores::Pending::default(),
             trajectory: Trajectory::Growth,
             prev_order: None,
             pop_cohesion_band: None,
@@ -5142,6 +5148,7 @@ impl Polity {
         // blob fetched, decoded or re-admitted. The prior's digest rides
         // forward from each committed `next`.
         let mut prior_digest: Option<[u8; 32]> = None;
+        let mut core_moved = false;
         for receipt in &receipts[self.chained.max(base) - base..] {
             let step = kernel::Step {
                 event: receipt.event().clone(),
@@ -5155,6 +5162,13 @@ impl Polity {
             let prior = stepper.state().clone();
             stepper.apply(receipt);
             let next = stepper.state();
+            // THE CORES (slice 1): what this deed unmade, read from the world's
+            // own holdings around it — once, past what the pending record
+            // already counts.
+            if receipt.sequence() as usize >= self.core_pending.through && cores::reaches(receipt.event()) {
+                let sunk = cores::sunk(receipt.event(), &cores::holdings(&prior), &cores::holdings(next));
+                core_moved |= self.core_pending.take(sunk);
+            }
             match kernel::admits(&prior, next, &step) {
                 Ok(()) => {
                     if still_admitting {
@@ -5202,6 +5216,13 @@ impl Polity {
             }
         }
         self.chained = total;
+        // The pending sinks are written BEFORE the watermark, naming how far
+        // they count: a restart between the two re-judges those deeds but
+        // does not count them again.
+        if core_moved || self.core_pending.through < total {
+            self.core_pending.through = total;
+            let _ = self.core_pending.write(&book.world_dir(&self.spec.world_name));
+        }
         write_judged_sidecar(
             &book.world_dir(&self.spec.world_name),
             self.chained,
@@ -5233,6 +5254,56 @@ impl Polity {
         self.reported = self.refused.len();
         &self.refused[from..]
     }
+}
+
+/// **THE CORES, slice (1): every sink reaches its core** — at the year's
+/// close. The aperture legs every world's judge holds are paired by deal
+/// across the universe (the melt goes to the SENDER's core); then each world's
+/// unmade amounts are deposited at the core its charted place reaches
+/// (`Ledger::core_of`), one `CoreDeposited` receipt per holding on the
+/// universe ledger. A world whose universe has no core yet keeps its pending
+/// sinks until one is charted: nothing lands nowhere. Returns (world, core)
+/// for every deposit made.
+pub fn core_step(worlds: &mut [Polity], book: &Ledger, stamp: u64) -> Vec<(String, String)> {
+    let melts = {
+        let mut pending: Vec<&mut cores::Pending> = worlds.iter_mut().map(|p| &mut p.core_pending).collect();
+        cores::pair_legs(&mut pending)
+    };
+    for (sender, holding, melt) in melts {
+        let lost = &mut worlds[sender].core_pending.lost;
+        *lost.entry(holding).or_insert_with(|| ratio(0, 1)) += melt;
+    }
+    let mut events = Vec::new();
+    let mut deposited = Vec::new();
+    for (i, polity) in worlds.iter().enumerate() {
+        if polity.core_pending.lost.is_empty() {
+            continue;
+        }
+        let Some(core) = book.core_of(&polity.spec.position) else { continue };
+        for (resource, amount) in &polity.core_pending.lost {
+            events.push(cfe::dop::ClosureEvent::CoreDeposited {
+                core: core.clone(),
+                world: polity.spec.world_name.clone(),
+                resource: *resource,
+                amount: amount.clone(),
+            });
+        }
+        deposited.push((i, core));
+    }
+    if book.append_universe(events, stamp).is_err() {
+        return Vec::new(); // nothing written: every pending sink stays pending
+    }
+    let mut out = Vec::new();
+    for (i, core) in deposited {
+        worlds[i].core_pending.deposited();
+        let _ = worlds[i].core_pending.write(&book.world_dir(&worlds[i].spec.world_name));
+        out.push((worlds[i].spec.world_name.clone(), core));
+    }
+    // Paired legs left every pending set: write the ones that held only legs.
+    for polity in worlds.iter() {
+        let _ = polity.core_pending.write(&book.world_dir(&polity.spec.world_name));
+    }
+    out
 }
 
 /// MARKET-2: the transit distance the iceberg law melts against — the

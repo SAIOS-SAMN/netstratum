@@ -339,7 +339,7 @@ pub fn torus_distance(a: &(Ratio, Ratio, Ratio), b: &(Ratio, Ratio, Ratio), span
 }
 
 /// Parse the ledger's exact rendering back: `p/q` or a plain integer.
-fn parse_ratio(text: &str) -> Option<Ratio> {
+pub fn parse_ratio(text: &str) -> Option<Ratio> {
     use num_bigint::BigInt;
     use std::str::FromStr;
     let (numer, denom) = match text.split_once('/') {
@@ -467,5 +467,34 @@ mod torus_tests {
         assert_eq!(torus_distance(&a, &b, &span), torus_distance(&b, &a, &span));
         assert_eq!(torus_distance(&a, &a, &span), ratio(0, 1));
         assert_eq!(torus_distance(&a, &b, &span), ratio(4, 3) + ratio(1, 1) + ratio(5, 7));
+    }
+}
+
+#[cfg(test)]
+mod core_tests {
+    use super::Ledger;
+    use cfe::ratio::ratio;
+
+    #[test]
+    fn every_place_reaches_a_core_nearest_by_the_torus() {
+        let root = std::env::temp_dir().join(format!("ledger-cores-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&root);
+        let book = Ledger::at(&root);
+        let p = |x: i64, y: i64, z: i64| (ratio(x, 1), ratio(y, 1), ratio(z, 1));
+        assert_eq!(book.core_of(&p(0, 0, 0)), None, "no core before any galaxy is charted");
+        // the founding galaxy at the origin, then a far one at (32, 0, 0)
+        book.observe_galaxy("a", "seat", (&ratio(0, 1), &ratio(0, 1), &ratio(0, 1)), 1).unwrap();
+        book.observe_galaxy("b", "seat", (&ratio(32, 1), &ratio(0, 1), &ratio(0, 1)), 2).unwrap();
+        assert_eq!(book.core_of(&p(30, 0, 0)).as_deref(), Some("b-sky-1"));
+        // across the torus's edge, the origin's core is the near one
+        assert_eq!(book.core_of(&p(62, 0, 0)).as_deref(), Some("the-founding"));
+        // outside every reach (16), still the nearest core: nothing lands nowhere
+        assert_eq!(book.core_of(&p(14, 30, 0)).as_deref(), Some("the-founding"));
+        book.append_universe(
+            vec![cfe::dop::ClosureEvent::CoreDeposited { core: "b-sky-1".into(), world: "w".into(), resource: None, amount: ratio(3, 2) }],
+            3,
+        )
+        .unwrap();
+        assert_eq!(book.core_holdings().get(&("b-sky-1".to_string(), None)), Some(&ratio(3, 2)));
     }
 }
