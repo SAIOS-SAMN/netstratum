@@ -44,14 +44,26 @@ pub struct MintedWord {
 /// A line's own minted library — the fold of its `SolverWordMinted`
 /// receipts. Never persisted here: the chronicle is the register and
 /// the conductor re-folds it (the vocabulary fold's own law).
+///
+/// WORDS COMPETE (docs/60 D6): each word carries the beat it last closed a
+/// task (or was adopted); [`Library::forget_unused`] lets a word unused for
+/// a span give way. Only the working library forgets: the chronicle keeps
+/// every word, and a process re-fold restores them all.
 #[derive(Debug, Clone, Default)]
 pub struct Library {
     words: Vec<MintedWord>,
+    /// The beat each word last closed a task, parallel to `words`.
+    used: Vec<u64>,
+    /// The owner's clock: what an adoption or a use is stamped with.
+    clock: u64,
+    /// Bumped on every adoption and every forgetting: the fingerprint a
+    /// cache keyed on this library reads.
+    generation: u64,
 }
 
 impl Library {
     pub fn new() -> Library {
-        Library { words: Vec::new() }
+        Library::default()
     }
     pub fn holds(&self, orbit: &[u8; 32]) -> bool {
         self.words.iter().any(|w| &w.orbit == orbit)
@@ -59,10 +71,47 @@ impl Library {
     pub fn adopt(&mut self, word: MintedWord) {
         if !self.holds(&word.orbit) {
             self.words.push(word);
+            self.used.push(self.clock);
+            self.generation += 1;
         }
     }
     pub fn words(&self) -> &[MintedWord] {
         &self.words
+    }
+    /// Set the owner's clock (the beat).
+    pub fn set_clock(&mut self, beat: u64) {
+        self.clock = beat;
+    }
+    /// The word spelling `expansion` closed a task now.
+    pub fn touch(&mut self, expansion: &[Op]) {
+        if let Some(at) = self.words.iter().position(|w| w.expansion == expansion) {
+            self.used[at] = self.clock;
+        }
+    }
+    /// Let every word unused for `span` beats give way; how many did.
+    pub fn forget_unused(&mut self, span: u64) -> usize {
+        let clock = self.clock;
+        let before = self.words.len();
+        let mut used = std::mem::take(&mut self.used).into_iter();
+        let mut kept_used = Vec::with_capacity(before);
+        self.words.retain(|_| {
+            let at = used.next().unwrap_or(clock);
+            let keep = clock.saturating_sub(at) < span;
+            if keep {
+                kept_used.push(at);
+            }
+            keep
+        });
+        self.used = kept_used;
+        let gone = before - self.words.len();
+        if gone > 0 {
+            self.generation += 1;
+        }
+        gone
+    }
+    /// The fingerprint of the library's contents.
+    pub fn generation(&self) -> u64 {
+        self.generation
     }
 }
 

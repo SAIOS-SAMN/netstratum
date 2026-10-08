@@ -31,6 +31,8 @@ pub mod selfmap;
 // render a glued frame to a program, seal the proof. NOT a search path.
 pub mod think;
 pub mod percept;
+// docs/60 D1 — the channels a word acts in and a mind perceives.
+pub mod senses;
 // N-I5 (THE INTELLIGENCE PORT) — the survival seat: peel the ration book
 // (HAVE|OWE, mouths as sites) through the SAME reduce organ. The observation
 // that gates the beat (Pin G); naming a survival deed is N-I6.
@@ -52,10 +54,10 @@ pub use solver_verify::{
 
 pub use derive::{derive, Candidate};
 pub use need::{Family, Hunger, Need};
-pub use selfmap::{consilience, knowledge_map, knowledge_order, knowledge_tension, Consilience, SelfMap};
+pub use selfmap::{consilience, consilience_sensed, knowledge_map, knowledge_order, knowledge_tension, Consilience, SelfMap};
 pub use think::{
     hear, hear_word, hold_conjectures, measure_grid, measure_volume, think_task, think_task_held,
-    think_volume_task, Conjecture, Heard, SolveRead, HELD_CONJECTURES,
+    think_task_sensing, think_volume_task, Conjecture, Heard, SolveRead, HELD_CONJECTURES,
 };
 pub use survival::{ration_reads, think_survival, RationRead, SurvivalBook, SurvivalDeed};
 // N-I4 — the cognitive basin's element, re-exported for the vessel layer

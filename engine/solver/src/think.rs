@@ -638,6 +638,54 @@ fn recognize_object(pairs: &[(&Grid, &Grid)]) -> Option<Program> {
     None
 }
 
+/// A grid's hue profile: the counts of the hues it carries, sorted. A plane
+/// motion and a hue relabel both preserve it, so two grids whose profiles
+/// differ cannot be one D4 x recolor apart.
+fn hue_profile(g: &Grid) -> Vec<usize> {
+    let mut counts = [0usize; HUES as usize];
+    for &h in &g.cells {
+        if let Some(c) = counts.get_mut(h as usize) {
+            *c += 1;
+        }
+    }
+    let mut profile: Vec<usize> = counts.into_iter().filter(|&c| c > 0).collect();
+    profile.sort_unstable();
+    profile
+}
+
+/// **THE LAYERED SEAT, OBJECT THEN FRAME** (docs/60 D7, slice 1): the bodies
+/// first, then what is left of the change read through the ONE reduce organ.
+/// For each object op that ACTS on the family, the staged grids (`op(input)`)
+/// are paired with the outputs; where every staged grid could be one plane
+/// motion and hue relabel from its output (same frame up to a transpose, the
+/// same hue profile), the organ is asked once for that frame, and the word is
+/// the object op followed by it. A bounded walk over the fixed object
+/// vocabulary with a cheap structural check before each think; Pin A (the
+/// caller) is the authority.
+fn recognize_object_then_frame(pairs: &[(&Grid, &Grid)], grown: &mut Vec<Crystal>) -> Option<Program> {
+    for objop in solver_verify::objects::OBJ_OPS {
+        let first = vec![Op::Object(objop)];
+        let staged: Vec<Grid> = pairs.iter().map(|(input, _)| run(&first, input)).collect();
+        if pairs.iter().zip(&staged).all(|((input, _), s)| s == *input) {
+            continue; // the op does nothing to this family
+        }
+        let fits = pairs.iter().zip(&staged).all(|((_, output), s)| {
+            ((s.rows, s.cols) == (output.rows, output.cols) || (s.rows, s.cols) == (output.cols, output.rows))
+                && hue_profile(s) == hue_profile(output)
+        });
+        if !fits {
+            continue;
+        }
+        let staged_pairs: Vec<(&Grid, &Grid)> = staged.iter().zip(pairs).map(|(s, (_, output))| (s, *output)).collect();
+        if let Some(rest) = recognize_frame(&staged_pairs, grown) {
+            let mut word = first;
+            word.extend(rest);
+            return Some(word);
+        }
+    }
+    None
+}
+
 /// **THINK THE TASK** — the ARC seat. Read the train pairs through the ONE
 /// reduce organ and render its verdict to a program, or WITHHOLD. Dispatch on
 /// the frame: when the output shares the input's frame (up to a D₄ transpose)
@@ -658,6 +706,20 @@ pub fn think_task(task: &Task, grown: &mut Vec<Crystal>) -> SolveRead {
 /// answer still passes Pin A and its certificate — a claim closes or it is
 /// none.
 pub fn think_task_held(task: &Task, grown: &mut Vec<Crystal>, held: &mut Vec<Conjecture>) -> SolveRead {
+    think_task_sensing(task, grown, held, crate::senses::Senses::ALL)
+}
+
+/// [`think_task_held`] by a mind with `senses` (docs/60 D1): a program the
+/// mind could not have perceived (it acts in a channel these senses lack) is
+/// withheld, and never held as a conjecture. A sense bounds derivation only;
+/// the caller's library words are used whole before this is reached.
+pub fn think_task_sensing(
+    task: &Task,
+    grown: &mut Vec<Crystal>,
+    held: &mut Vec<Conjecture>,
+    senses: crate::senses::Senses,
+) -> SolveRead {
+    use crate::senses::Senses;
     let Some(first) = task.train.first() else {
         return SolveRead::Unsolved; // no pairs proves nothing
     };
@@ -684,8 +746,12 @@ pub fn think_task_held(task: &Task, grown: &mut Vec<Crystal>, held: &mut Vec<Con
     }
     // A pure object op (segmentation morphism) is neither a plane word nor a
     // tiling — try it when the frame/tile seats withhold, in either frame regime.
-    .or_else(|| recognize_object(&pairs));
+    .or_else(|| recognize_object(&pairs))
+    // docs/60 D7: a body changed AND moved or recoloured — layered.
+    .or_else(|| recognize_object_then_frame(&pairs, grown))
+    .filter(|program| senses.covers(Senses::of_word(program)));
     let Some(program) = program else {
+        fresh.retain(|c| senses.covers(Senses::of_word(&c.program)));
         hold_conjectures(held, fresh);
         return SolveRead::Unsolved;
     };

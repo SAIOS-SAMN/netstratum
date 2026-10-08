@@ -59,81 +59,6 @@ use solver::{forge_volume, think_volume_task, VolDifficulty};
 
 use std::path::Path;
 
-/// R4 (demand delivery): a solved program that CHANGES FRAME — a tiling
-/// or a non-square rotation — hides same-frame sub-transforms the mesh
-/// *can* found. The hypha's `on_sentence` founding is same-frame only
-/// (a reshape carries no chain-form residual); but every maximal run of
-/// dimension-PRESERVING ops inside the program is a genuine same-frame
-/// `(before, after)` pair the hypha founds as a generator. Walk the
-/// program forward on each example, emit each same-frame run as its own
-/// proved offer, and leave the frame-changing steps (tile/reshape) as a
-/// known operator — never founded. No-op when the whole program is
-/// already same-frame (the primary `offer_proved` already carries that
-/// pair). Frame membership is decided by DIMENSIONS, not op type, so a
-/// square transpose/rotate (in-frame, content-permuting) is founded while
-/// a non-square rotate (frame-changing) is skipped as structural.
-fn same_frame_founding_offers(
-    name: &str,
-    program: &[solver_verify::Op],
-    inputs: &[solver_verify::Grid],
-) {
-    fn rows(g: &solver_verify::Grid) -> Vec<Vec<u8>> {
-        g.cells.chunks(g.cols).map(|r| r.to_vec()).collect()
-    }
-    // The program is the SAME for every example, so segment k is the
-    // same sub-word in each — group by k and offer ONE FAMILY per
-    // segment (all examples' pairs), not one thin pair per example.
-    // A single observation is exactly what the tongue's canonical
-    // readers refuse as under-determined; the family pins it.
-    let mut segs: Vec<(String, Vec<(Vec<Vec<u8>>, Vec<Vec<u8>>)>)> = Vec::new();
-    for input in inputs.iter() {
-        let mut g = input.clone();
-        let mut seg_start = g.clone();
-        let mut seg_ops: Vec<solver_verify::Op> = Vec::new();
-        let mut k = 0usize;
-        let mut saw_change = false;
-        let mut push = |k: usize,
-                        seg_ops: &[solver_verify::Op],
-                        a: &solver_verify::Grid,
-                        b: &solver_verify::Grid,
-                        segs: &mut Vec<(String, Vec<(Vec<Vec<u8>>, Vec<Vec<u8>>)>)>| {
-            let word = seg_ops
-                .iter()
-                .map(|o| o.describe())
-                .collect::<Vec<_>>()
-                .join(" → ");
-            if segs.len() <= k {
-                segs.push((word, Vec::new()));
-            }
-            segs[k].1.push((rows(a), rows(b)));
-        };
-        for op in program {
-            let g2 = op.apply(&g);
-            if g2.rows == g.rows && g2.cols == g.cols {
-                seg_ops.push(op.clone());
-                g = g2;
-            } else {
-                saw_change = true;
-                if !seg_ops.is_empty() {
-                    push(k, &seg_ops, &seg_start, &g, &mut segs);
-                    k += 1;
-                }
-                g = g2;
-                seg_start = g.clone();
-                seg_ops.clear();
-            }
-        }
-        if saw_change && !seg_ops.is_empty() {
-            push(k, &seg_ops, &seg_start, &g, &mut segs);
-        }
-    }
-    for (k, (word, family)) in segs.into_iter().enumerate() {
-        if !family.is_empty() {
-            scribe::membrane::offer_proved(&format!("{name}#s{k}"), &word, family);
-        }
-    }
-}
-
 // COG (doc 52): the homological economy — the deficit peeled through the same
 // `overlay` the cognition uses; coefficients drive production, residual drives
 // research. Replaces the cartesian build cascade with the peel.
@@ -1047,9 +972,8 @@ pub struct Polity {
     /// workspace cache of the `SolverWordMinted` fold, seeded lazily
     /// at the first research beat of a process.
     library: solver::mint::Library,
-    /// The line's resolved knowledge map, cached against its library's size
-    /// (the library only ever grows by `adopt`, so its word count is an exact
-    /// fingerprint). `solver::knowledge_map` is exact algebra over every word;
+    /// The line's resolved knowledge map, cached against its library's
+    /// generation (bumped by every adoption and forgetting, docs/60 D6). `solver::knowledge_map` is exact algebra over every word;
     /// recomputed for every line every beat it was 99% of a G2 beat (154 s at
     /// beat 1005). It is recomputed now only when the library grew.
     knowledge: Option<(usize, solver::SelfMap)>,
@@ -1164,6 +1088,12 @@ pub struct Polity {
     inherited: solver::mint::Library,
     /// Dead words on their way, with the universal beat each arrives.
     arriving: Vec<(u64, solver::mint::MintedWord)>,
+    /// docs/60 D2 — words this line HEARD from a neighbour (wholly inside its
+    /// senses) and MISHEARD (a channel it lacks), cumulative workspace.
+    pub heard: u64,
+    pub misheard: u64,
+    /// docs/60 D9 — the dead's open questions on their way, by arrival beat.
+    questions_arriving: Vec<(u64, solver::Conjecture)>,
     /// AUTIC-1 — how many AUTIC crystals this line's vessels have absorbed from
     /// the mesh-learned basin (cumulative, workspace like `grown`). The live
     /// measure of the shared tongue entering entity cognition.
@@ -1496,6 +1426,12 @@ fn regime(world: &World, metabolism: &str) -> Option<(Regime, Ratio)> {
 }
 
 impl Polity {
+    /// docs/60 D1 — what this line's minds perceive, read off its register
+    /// perception.
+    pub fn senses(&self) -> solver::senses::Senses {
+        solver::senses::Senses::of_perception(&self.spec.civilization.perception)
+    }
+
     /// Found the era: registry entry (join if present), the colony,
     /// the contained polity actor, the steward entity, and the world's
     /// place on the star-chart.
@@ -1591,6 +1527,9 @@ impl Polity {
                         held: std::collections::BTreeMap::new(),
                         inherited: solver::mint::Library::new(),
                         arriving: Vec::new(),
+                        heard: 0,
+                        misheard: 0,
+                        questions_arriving: Vec::new(),
                         autic_absorbed: 0,
                         autic_spoke: 0,
                         autic_learned: 0,
@@ -1795,6 +1734,9 @@ impl Polity {
             held: std::collections::BTreeMap::new(),
             inherited: solver::mint::Library::new(),
             arriving: Vec::new(),
+            heard: 0,
+            misheard: 0,
+            questions_arriving: Vec::new(),
             autic_absorbed: 0,
             autic_spoke: 0,
             autic_learned: 0,
@@ -3675,77 +3617,6 @@ impl Polity {
         self.autic_spoke += 1;
     }
 
-    /// COG-AUTHOR (A3) — THE VARIATION VERB. The rung between hearing and
-    /// authoring: a line CITES a word it already holds, REBINDS it (composes the
-    /// cited program with a seeded D4 symmetry — role/quantifier re-aim), PROVES
-    /// the variant on a probe grid, and OFFERS it to the mesh door, which judges
-    /// it like any word (installs the real ones, withholds noise). The civ's own
-    /// beat seeds the choice (replayable, divergent across lines), so the variant
-    /// is AUTHORED, not searched — cheaper than deriving from scratch, more than
-    /// hearing. This is net CLAIMING (the judge/claimant seam): net authors and
-    /// proves; mycelium's grammar is the sole judge. Periodic (AUTIC_STRIDE) and
-    /// only when the library is non-empty — a line with nothing to cite is silent.
-    fn author_variation(&mut self, vessel: u64) {
-        if !self.world.now().is_multiple_of(AUTIC_STRIDE) {
-            return;
-        }
-        let words = self.library.words();
-        if words.is_empty() {
-            return; // nothing to cite — no authorship without a vocabulary
-        }
-        // Seed on the civ's own beat + vessel: replayable, divergent across lines.
-        let seed = self
-            .world
-            .now()
-            .wrapping_mul(0x9E3779B97F4A7C15)
-            .wrapping_add(vessel)
-            .wrapping_mul(0xD1B54A32D192ED03);
-        // ADOPT BY WORTH — cite the word of GREATEST measured utility (distinct
-        // walls it has closed, per the mesh's lexicon.worth), not a hash-random one.
-        // A line authors variations of what actually WORKS, so its offers are worth
-        // the mesh's judgment. A library with no worth yet (young line, off-wire)
-        // falls back to the seeded pick, so authorship never stalls.
-        let worthiest = words
-            .iter()
-            .max_by_key(|w| scribe::membrane::word_worth(&w.orbit))
-            .filter(|w| scribe::membrane::word_worth(&w.orbit) > 0);
-        let word = worthiest.unwrap_or(&words[(seed as usize) % words.len()]);
-        // The six D4 rebinds; the seed picks one.
-        use solver_verify::grid::Op;
-        const D4: [Op; 6] = [
-            Op::Rotate90,
-            Op::Rotate180,
-            Op::Rotate270,
-            Op::FlipH,
-            Op::FlipV,
-            Op::Transpose,
-        ];
-        let g = D4[((seed >> 8) as usize) % D4.len()].clone();
-        let mut variant = word.expansion.clone();
-        variant.push(g);
-        let name = format!("net_var_{:016x}", seed);
-        let program: String = variant
-            .iter()
-            .map(|op| op.describe())
-            .collect::<Vec<_>>()
-            .join(" -> ");
-        // Prove the variant on a canonical probe grid — the authored word is a
-        // lawful (input -> output) claim the mesh door can replay. Build the
-        // sealed-math Grid, run, then cast both to the membrane's row-vectors.
-        let Some(probe) = solver_verify::grid::Grid::new(3, 3, vec![1, 2, 3, 4, 5, 6, 7, 8, 9])
-        else {
-            return;
-        };
-        let out = solver_verify::grid::run(&variant, &probe);
-        let rows = |g: &solver_verify::grid::Grid| -> Vec<Vec<u8>> {
-            (0..g.rows)
-                .map(|r| g.cells[r * g.cols..(r + 1) * g.cols].to_vec())
-                .collect()
-        };
-        scribe::membrane::offer_proved(&name, &program, vec![(rows(&probe), rows(&out))]);
-        self.autic_authored += 1;
-    }
-
     /// N-I8 — deposit `vessel`'s closure of `orbit` toward a shared word, and
     /// MINT it iff two DISTINCT vessels have now closed it (consilience). The
     /// mint bills `mint_cost` in leisure (COG-2/4/5, unchanged) — an unaffordable
@@ -3882,7 +3753,8 @@ impl Polity {
         self.world.settle_leisure(orb, -price);
         let sibling = self.sibling;
         self.absorb_autic(sibling); // think in the shared tongue net has learned
-        let read = solver::think_task_held(task, self.grown.entry(sibling).or_default(), self.held.entry(sibling).or_default());
+        let senses = self.senses();
+        let read = solver::think_task_sensing(task, self.grown.entry(sibling).or_default(), self.held.entry(sibling).or_default(), senses);
         if let SolveRead::Solved {
             program,
             matches_expected: Some(true),
@@ -3906,7 +3778,6 @@ impl Polity {
         self.speak_and_hear(self.automaton, self.sibling);
         // COG-AUTHOR (A3) — and the automaton AUTHORS: cites a word, rebinds it,
         // offers the variant to the mesh door. The rung from hearing to authoring.
-        self.author_variation(self.automaton);
     }
 
     /// ENTITY-ALIGN-2 (docs/56 §4, piece a) — occasionally, the SIBLING
@@ -3956,7 +3827,8 @@ impl Polity {
         self.practise_autic_wall(sibling);
         let difficulty = Difficulty::level(self.level);
         let task = forge_task(seed_digest, difficulty);
-        let read = solver::think_task_held(&task, self.grown.entry(sibling).or_default(), self.held.entry(sibling).or_default());
+        let senses = self.senses();
+        let read = solver::think_task_sensing(&task, self.grown.entry(sibling).or_default(), self.held.entry(sibling).or_default(), senses);
         if let SolveRead::Solved {
             program,
             matches_expected: Some(true),
@@ -3974,7 +3846,6 @@ impl Polity {
         // chose — a self-selecting vessel still hears and speaks.
         self.sibling_hear();
         self.speak_and_hear(self.automaton, self.sibling);
-        self.author_variation(self.automaton);
         true
     }
 
@@ -4087,6 +3958,13 @@ impl Polity {
             return;
         };
         let digest = receipt.own().0;
+        // docs/60 D6 — WORDS COMPETE: the library is stamped on this line's
+        // clock; once a year the words unused for a year give way.
+        let now = self.world.now();
+        self.library.set_clock(now);
+        if now > 0 && now.is_multiple_of(scribe::journal::YEAR_TICKS) {
+            self.library.forget_unused(scribe::journal::YEAR_TICKS);
+        }
         // CAPTURED BEFORE THE BEAT MOVES ANYTHING. Promotion reads both,
         // and reading either afterwards would be vacuous: a close always
         // advances the trajectory to Growth.
@@ -4382,6 +4260,9 @@ impl Polity {
             // citing the dead line's proofs. A word that does not close for
             // the reader stays heard, unadopted.
             let own = solver::mint::pre_reach(&task, &self.library);
+            if let Some(expansion) = &own {
+                self.library.touch(expansion);
+            }
             let reached = own.or_else(|| {
                 let expansion = solver::mint::pre_reach(&task, &self.inherited)?;
                 let word = self.inherited.words().iter().find(|w| w.expansion == expansion)?.clone();
@@ -4439,9 +4320,10 @@ impl Polity {
                         self.world.settle_leisure(orb, -price);
                         // N-I·VESSEL — drain THIS vessel's mouth, not the line pool.
                         let vessel = self.automaton;
+                        let senses = self.senses();
                         self.absorb_autic(vessel); // think in the learned AUTIC tongue
                         self.practise_autic_wall(vessel); // practise the mesh's own problems
-                        solver::think_task_held(&task, self.grown.entry(vessel).or_default(), self.held.entry(vessel).or_default())
+                        solver::think_task_sensing(&task, self.grown.entry(vessel).or_default(), self.held.entry(vessel).or_default(), senses)
                     } else {
                         SolveRead::Unsolved // the bank cannot pay the look — fast this beat
                     }
@@ -4490,14 +4372,6 @@ impl Polity {
                         .map(|p| (rows(&p.input), rows(&p.output)))
                         .collect();
                     proved.push((rows(&task.test_in), rows(&test_output)));
-                    // R4: if this program changes frame, also offer its
-                    // same-frame sub-transforms so the mesh founds the base
-                    // ops the reshape hides (the tiling itself stays a known
-                    // operator, never founded).
-                    let mut sf_inputs: Vec<solver_verify::Grid> =
-                        task.train.iter().map(|p| p.input.clone()).collect();
-                    sf_inputs.push(task.test_in.clone());
-                    same_frame_founding_offers(&task.name, &program, &sf_inputs);
                     // THE PROOF, riding WHOLE (the opaque-payload law): the
                     // CARRIED DERIVATION (schema v4, Concordance 4.4 annex) —
                     // the forged task's samples and both words' per-step
@@ -4591,12 +4465,12 @@ impl Polity {
                     &cert_hex,
                     self.level,
                 );
-                // Law II (mycelium 23_RESIDENCY): the solve offers
-                // ITSELF — the proved pairs, same moment, non-blocking;
-                // the resident membrane thread speaks MY-K while the
-                // world beat moves on. The mesh judges by replay, so
-                // every program family the forge proves is speakable.
-                scribe::membrane::offer_proved(&name, &word, proved_pairs);
+                // docs/60 D10a: the legacy membrane's uplink (pre-v0.1.0,
+                // 127.0.0.1:7430, nothing listens) is no longer offered to:
+                // it held every offer in an unbounded queue for the life
+                // of the process. The proved pairs are what D10b states as
+                // v0.1.0 elements; the seat is the one relay to the fleet.
+                let _ = proved_pairs;
                 self.solved += 1;
                 self.streak += 1;
                 // THE COUPLING CLOSES HERE. A close returns the line to
@@ -5484,6 +5358,14 @@ pub fn inheritance_step(worlds: &mut [Polity], stamp: u64) -> usize {
             polity.inherited.adopt(word);
             arrived += 1;
         }
+        // docs/60 D9: the dead's open questions join the automaton's held
+        // conjectures, tried first on its next tasks.
+        let (now, later): (Vec<_>, Vec<_>) = polity.questions_arriving.drain(..).partition(|(at, _)| *at <= stamp);
+        polity.questions_arriving = later;
+        if !now.is_empty() {
+            let vessel = polity.automaton;
+            solver::hold_conjectures(polity.held.entry(vessel).or_default(), now.into_iter().map(|(_, c)| c).collect());
+        }
     }
     arrived
 }
@@ -6003,22 +5885,23 @@ pub fn consilience_step(worlds: &mut [Polity], _beat: u64) -> Vec<(String, u32, 
     // Each learning line's crystallized knowledge, keyed by board seat —
     // resolved again only for a line whose library grew since its last map.
     for polity in worlds.iter_mut() {
-        let words = polity.library.words().len();
-        if words > 0 && polity.knowledge.as_ref().map(|(n, _)| *n) != Some(words) {
-            polity.knowledge = Some((words, solver::knowledge_map(&polity.library)));
+        let generation = polity.library.generation() as usize;
+        if !polity.library.words().is_empty() && polity.knowledge.as_ref().map(|(n, _)| *n) != Some(generation) {
+            polity.knowledge = Some((generation, solver::knowledge_map(&polity.library)));
         }
     }
     let consiliences = {
-        let refs: Vec<(u64, &solver::SelfMap)> = worlds
+        let refs: Vec<(u64, &solver::SelfMap, solver::senses::Senses)> = worlds
             .iter()
             .enumerate()
             .filter(|(_, polity)| !polity.library.words().is_empty())
-            .filter_map(|(seat, polity)| polity.knowledge.as_ref().map(|(_, map)| (seat as u64, map)))
+            .filter_map(|(seat, polity)| polity.knowledge.as_ref().map(|(_, map)| (seat as u64, map, polity.senses())))
             .collect();
         if refs.len() < 2 {
             return Vec::new(); // one learning line is no agreement
         }
-        solver::consilience(&refs)
+        // docs/60 D5: a route is an order and the senses that walked it.
+        solver::consilience_sensed(&refs)
     };
 
     let mut recorded = Vec::new();
@@ -6095,9 +5978,11 @@ pub fn knowledge_market_step(worlds: &mut [Polity], _beat: u64) -> Vec<(String, 
     }
     // The price of a listing: the DEPTH of the word it spells (program
     // length), derived from the word itself, never a dial.
-    let price_of = |expansion: &[u8]| -> usize {
+    // docs/60 D3 — TRANSLATION LOSS IS PRICE: one more per channel of the
+    // word the buyer cannot perceive (it can never re-derive that part).
+    let price_of = |expansion: &[u8], senses: solver::senses::Senses| -> usize {
         solver_verify::program_from_bytes(expansion)
-            .map(|program| program.len())
+            .map(|program| program.len() + senses.missing(solver::senses::Senses::of_word(&program)) as usize)
             .unwrap_or(0)
             .max(1)
     };
@@ -6108,6 +5993,7 @@ pub fn knowledge_market_step(worlds: &mut [Polity], _beat: u64) -> Vec<(String, 
                 .into_iter()
                 .map(|(orbit, _, _)| orbit)
                 .collect();
+        let senses = worlds[buyer].senses();
         let crystal = worlds[buyer]
             .world
             .orb()
@@ -6118,7 +6004,7 @@ pub fn knowledge_market_step(worlds: &mut [Polity], _beat: u64) -> Vec<(String, 
         let pick = pool
             .iter()
             .filter(|(orbit, _, _)| !own.contains(orbit))
-            .map(|(orbit, expansion, cited)| (price_of(expansion), orbit, expansion, cited))
+            .map(|(orbit, expansion, cited)| (price_of(expansion, senses), orbit, expansion, cited))
             .filter(|(price, _, _, _)| crystal >= ratio(*price as i64, 1))
             .min_by_key(|(price, _, _, _)| *price);
         if let Some((price, orbit, expansion, cited)) = pick {
@@ -6137,6 +6023,61 @@ pub fn knowledge_market_step(worlds: &mut [Polity], _beat: u64) -> Vec<(String, 
         }
     }
     licensed
+}
+
+/// **SPEECH BETWEEN LINES** (docs/60 D2, D4) — every `AUTIC_STRIDE` beats
+/// each line hears one word from its nearest living neighbour on the torus
+/// (the speaker's words in turn). A word wholly inside the hearer's senses is
+/// HEARD: it joins the line's heard library, and is licensed into its own
+/// when the line reconstructs it on its own task (the cores' inheritance by
+/// reconstruction). A word in a channel the hearer lacks is MISHEARD:
+/// counted, never adopted. Returns the board's COG-DIALECT line.
+pub fn conversation_step(worlds: &mut [Polity], beat: u64, span: &Ratio) -> Option<String> {
+    use solver::senses::Senses;
+    if !beat.is_multiple_of(AUTIC_STRIDE) || worlds.len() < 2 {
+        return None;
+    }
+    // Each hearer's nearest speaking neighbour, read before anything moves.
+    let n = worlds.len();
+    let mut pairs = Vec::new();
+    for h in (0..n).filter(|&h| !worlds[h].penned) {
+        let near = (0..n)
+            .filter(|&s| s != h && !worlds[s].penned && !worlds[s].library.words().is_empty())
+            .map(|s| (spatial_l1(&worlds[h].spec.position, &worlds[s].spec.position, span), s))
+            .min();
+        if let Some((_, s)) = near {
+            pairs.push((h, s));
+        }
+    }
+    let (mut heard, mut misheard) = (0u64, 0u64);
+    for (h, s) in pairs {
+        let words = worlds[s].library.words();
+        let word = words[(beat / AUTIC_STRIDE) as usize % words.len()].clone();
+        let hearer = &mut worlds[h];
+        if hearer.library.holds(&word.orbit) || hearer.inherited.holds(&word.orbit) {
+            continue; // already known: nothing to hear
+        }
+        if hearer.senses().covers(Senses::of_word(&word.expansion)) {
+            hearer.inherited.adopt(word);
+            hearer.heard += 1;
+            heard += 1;
+        } else {
+            hearer.misheard += 1;
+            misheard += 1;
+        }
+    }
+    // DIVERSITY: the perceptions present among the living.
+    let mut perceptions: std::collections::BTreeMap<&str, usize> = std::collections::BTreeMap::new();
+    for polity in worlds.iter() {
+        *perceptions.entry(polity.spec.civilization.perception.as_str()).or_default() += 1;
+    }
+    let (all_heard, all_misheard) = worlds.iter().fold((0, 0), |(a, b), p| (a + p.heard, b + p.misheard));
+    let present: Vec<String> = perceptions.iter().map(|(k, v)| format!("{k}:{v}")).collect();
+    Some(format!(
+        "COG-DIALECT beat {beat}: heard={heard} misheard={misheard} (total heard={all_heard} misheard={all_misheard}) lines={} perceptions={}",
+        worlds.len(),
+        present.join(",")
+    ))
 }
 
 /// MESH-1b (#2, the consumer slice): the conductor's side of the
@@ -6821,6 +6762,38 @@ pub fn retire_collapsed(worlds: &mut Vec<Polity>, book: &Ledger, stamp: u64) -> 
         }
     }
     let _ = book.append_universe(deposits, stamp);
+    // docs/60 D9 — THE DEAD'S OPEN QUESTIONS ride the core's bell beside its
+    // words: every conjecture a dying line still held (frames that closed
+    // some pairs, never all) reaches each living line its core reaches, one
+    // cell a beat, into that line's held conjectures. Workspace like the
+    // conjectures themselves: carried in memory, never receipted.
+    let galaxies = book.galaxies();
+    let span = book.universe_span();
+    let mut carried: Vec<(String, Vec<solver::Conjecture>)> = Vec::new();
+    for polity in worlds.iter().filter(|p| p.world.collapsed().is_some()) {
+        let Some(core) = book.core_of(&polity.spec.position) else { continue };
+        let open: Vec<solver::Conjecture> = polity.held.values().flatten().cloned().collect();
+        if !open.is_empty() {
+            carried.push((core, open));
+        }
+    }
+    for (core, open) in &carried {
+        let Some(galaxy) = galaxies.iter().find(|g| &g.name == core) else { continue };
+        let mut reached = 0;
+        for polity in worlds.iter_mut().filter(|p| p.world.collapsed().is_none()) {
+            if book.core_of(&polity.spec.position).as_ref() != Some(core) {
+                continue;
+            }
+            let distance = ledger::torus_distance(&polity.spec.position, &galaxy.center, &span);
+            if distance > galaxy.reach {
+                continue;
+            }
+            let cells = num_traits::ToPrimitive::to_u64(&distance.ceil().to_integer()).unwrap_or(u64::MAX);
+            polity.questions_arriving.extend(open.iter().map(|c| (stamp.saturating_add(cells), c.clone())));
+            reached += 1;
+        }
+        eprintln!("CORE-QUESTIONS {core}: {} open questions of the dead carried to {reached} lines", open.len());
+    }
     let mut retired = Vec::new();
     worlds.retain(|polity| {
         if polity.world.collapsed().is_none() {

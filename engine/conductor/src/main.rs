@@ -401,6 +401,11 @@ fn main() {
                 "beat {beat}: KNOWLEDGE MARKET — {world} licenses an idea (depth {price}); vocabulary spreads"
             );
         }
+        // SPEECH BETWEEN LINES (docs/60 D2): each line hears its nearest
+        // neighbour; a word outside its senses is misheard.
+        if let Some(line) = conductor::profile::timed("conversation_step", || conductor::conversation_step(&mut worlds, beat, &span)) {
+            println!("beat {beat}: {line}");
+        }
         // JOURNAL-1 (08 §3): on year boundaries every civilization
         // speaks — journals + the Terminal Wall regenerate lens-side.
         if beat.is_multiple_of(scribe::journal::YEAR_TICKS) {

@@ -310,8 +310,20 @@ impl Seat {
         let verdict = self.entity.solve_task(id, &train, outputs, Some(rule), &mut budget);
         if verdict.is_some_and(|(code, _)| code == mycelium::anastome::dialogue::SOLVE_BOUNTY || code == mycelium::anastome::dialogue::SOLVE_FLOOR) {
             self.tally.answered_closed += 1;
+            self.save_genome();
         }
         verdict
+    }
+
+    /// THE HOUSE REMEMBERS (docs/60 D0): the genome — the words a court
+    /// admitted — written to `home/genome` after a closure, which
+    /// `open_persistent` restores at the next start.
+    fn save_genome(&mut self) {
+        let Some(path) = self.home.as_ref().map(|h| h.join("genome")) else { return };
+        let Some(path) = path.to_str().map(str::to_string) else { return };
+        if let Err(e) = self.entity.save_genome(&path) {
+            eprintln!("seat: the genome was not saved: {e}");
+        }
     }
 
     /// The court's verdict on a filed solve, counted and told.
@@ -319,10 +331,12 @@ impl Seat {
         match verdict {
             Some((code, mu)) if code == mycelium::anastome::dialogue::SOLVE_BOUNTY => {
                 self.tally.closed_first += 1;
+                self.save_genome();
                 format!("task {name}: CLOSED FIRST ({what}), paid {mu:?}")
             }
             Some((code, _)) if code == mycelium::anastome::dialogue::SOLVE_FLOOR => {
                 self.tally.closed_again += 1;
+                self.save_genome();
                 format!("task {name}: closed again ({what})")
             }
             Some(_) => {

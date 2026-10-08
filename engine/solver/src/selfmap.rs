@@ -287,26 +287,37 @@ pub struct Consilience {
 /// Deterministic: groups are returned in ascending signature order, each
 /// naming its lines in ascending id order.
 pub fn consilience(maps: &[(u64, &SelfMap)]) -> Vec<Consilience> {
+    let sensed: Vec<(u64, &SelfMap, crate::senses::Senses)> =
+        maps.iter().map(|&(line, map)| (line, map, crate::senses::Senses::ALL)).collect();
+    consilience_sensed(&sensed)
+}
+
+/// [`consilience`] where each line also carries its SENSES (docs/60 D5): a
+/// route is a curiosity order AND a way of perceiving, so a truth lines of
+/// different perceptions reach is harder than one alike lines reach.
+pub fn consilience_sensed(maps: &[(u64, &SelfMap, crate::senses::Senses)]) -> Vec<Consilience> {
     let empty = knowledge_map(&Library::new()).signature;
-    let mut groups: std::collections::BTreeMap<[u8; 32], Vec<(u64, &SelfMap)>> =
+    let mut groups: std::collections::BTreeMap<[u8; 32], Vec<(u64, &SelfMap, crate::senses::Senses)>> =
         std::collections::BTreeMap::new();
-    for &(line, map) in maps {
+    for &(line, map, senses) in maps {
         if map.signature == empty {
             continue; // nothing known is nothing shared
         }
-        groups.entry(map.signature).or_default().push((line, map));
+        groups.entry(map.signature).or_default().push((line, map, senses));
     }
     let mut found = Vec::new();
     for (signature, mut members) in groups {
         if members.len() < 2 {
             continue; // one line is not a consilience
         }
-        members.sort_by_key(|(line, _)| *line);
-        let lines: Vec<u64> = members.iter().map(|(line, _)| *line).collect();
-        // Diversity bridged: the count of DISTINCT curiosity-orders among
-        // the converged lines. Same knowledge from the same frontier
-        // bridges nothing; the more distinct the routes, the harder-won.
-        let mut orders: Vec<&Vec<Family>> = members.iter().map(|(_, m)| &m.order).collect();
+        members.sort_by_key(|(line, _, _)| *line);
+        let lines: Vec<u64> = members.iter().map(|(line, _, _)| *line).collect();
+        // Diversity bridged: the count of DISTINCT routes among the
+        // converged lines, a route being a curiosity order and the senses
+        // that walked it. Same knowledge from the same frontier, seen the
+        // same way, bridges nothing; the more distinct the routes, the
+        // harder-won.
+        let mut orders: Vec<(&Vec<Family>, u8)> = members.iter().map(|(_, m, senses)| (&m.order, senses.0)).collect();
         orders.sort();
         orders.dedup();
         found.push(Consilience {
