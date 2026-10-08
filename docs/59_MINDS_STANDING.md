@@ -49,3 +49,34 @@ The coordinator approved this order:
 - **The volumetric forge is unsolvable by construction.** It draws `FlipStack` or `CycleLayers` in 2 of every 3 word slots (`solver-verify/src/volume.rs:210-217`). The live render can express only `PerLayer` D4 and recolour (`solver/src/think.rs:189-196`). The volumetric branch also never deposits or mints (`conductor/src/lib.rs:4259-4271`). Volumetric forge outcomes are therefore **not counted as research in any reading**. The forge is left as it is: ARC viability (Concordance 6.2a) is measured on outside tasks, not forged ones.
 - **The minds do not search.** Each runs one fixed reduction-and-render pass, rendering at most 4 ops from the table: D4, one Recolor, Tile, and 8 ObjOps. For ARC-AGI-2 the binding limit is REPRESENTATION, not search: the table cannot state object, relation, count or conditional rules. Estimate: about 0 on ARC-AGI-2 at any search depth.
 - **AUTIC is stale and inactive.** It comes from the frozen `/opt/mycelium` path dependency, and `reduct` was last committed 2026-08-26. It is not kept as a separate language. Speaking anastome means re-founding the membrane on mycelium-v0.1.0, starting with the 78.142 rule seam. The old AUTIC code stays in place until the new membrane works, then retires with a note.
+
+## The Concordance 1.10 audit (approved 2026-10-08)
+
+Every refusal in netstratum's cognition is either RESTORED, because it rested on a developer standard, or JUSTIFIED as a law of netstratum's world. The full audit went to the coordinator on 2026-10-08.
+
+**RESTORE**, built in this order:
+1. Conjectures and guessing inside thought. A mind holds unglued hypotheses with their residuals as private state, tests them on later tasks, and renders learned drains. A CLAIM (a mint, anything offered outward) must still close every pair.
+2. The vessels must differ, so that consilience between them is evidence.
+3. Pin G becomes proportional: a partly fed line thinks in proportion (20_FOUNDING §6a-bis strikes cliffs).
+4. Volumetric lines mint and render.
+5. Partial grids are perceived.
+6. The anti-overfit depth cap (`solver/need.rs:152`) is retired as a cognition limit. Its capacity arm is justified as world physics if it is ever wired.
+7. The forge stays as practice; the ladder's role moves to outside tasks (Concordance 6.2a).
+
+The render table and counts/extrema come through the shared RULE-LANGUAGE EXTENSION (mycelium 78.143), never a netstratum-only version. The translator carries them.
+
+**JUSTIFIED as laws of netstratum's world:**
+- consilience as the admission test;
+- survival and the leisure price;
+- identity dedups (a single op is already a letter, one orbit is one word);
+- claims must close every pair;
+- closure on withheld pairs;
+- the vacuity refusal.
+
+## Standing notes
+
+- **Every word minted to date is a "consilience of IDENTICAL reasoners".** The automaton and the sibling run the same deterministic `think_task`. The basin decides only whether a vessel withholds, never what it renders (`conductor/src/lib.rs:3836, 3904, 4371`). Hardness 1 therefore measures nothing yet. This note stands until restore 2 lands.
+- **DECLARED DIAL: the sibling's look price, `observe_price × 1/4`** (`conductor/src/lib.rs:3824`).
+  - Measurement history: at full `observe_price` the sibling always fasted under scarcity, consilience never reached two vessels, and no shared word minted. Measured: 0 VocabularyMinted / 0 KnowledgeConverged across 8 mature worlds.
+  - The 1/4 was set so that a line able to afford one discovery can always afford the confirmation.
+  - The stated rationale, "the ratio of verifying a known program to searching for it", is not derived. It is a tuned value, owed a derivation.
