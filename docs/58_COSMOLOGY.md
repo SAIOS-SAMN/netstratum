@@ -209,3 +209,11 @@ proved work: 5,468), and founding endowments.
   the era fold (an operator act today), or also a continuous white-hole flow
   within an era. A continuous flow would need a rate, which this design
   declines to invent.
+
+## 8. The torus in geometrized units (Concordance 1.8/2.3, 2026-10-08)
+
+**One cell = 1/32 Mpc** (geometrized, G = c = 1). netstratum's universe is a non-expanding 3-torus with periods **(2, 2, 2) Mpc** (64 cells per axis) and the **L1 metric**: wrapped per-axis distance, summed. The scale comes from the universe's own measures:
+- a galaxy's reach of 16 cells is 1/2 Mpc, a galaxy halo's radius;
+- the mean spacing of G2's 14 charted galaxies, about 39 cells, is about 1.2 Mpc.
+
+Any mass placed on a tube is stated in the same unit, as GM/c² in Mpc.
