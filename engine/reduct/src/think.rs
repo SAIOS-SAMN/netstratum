@@ -37,7 +37,13 @@ pub enum TaskThought {
     Glued(PairClosure),
     /// The observations closed differently, or a composition/frame remainder
     /// survived — no single rule generalizes. Residuals carried whole.
-    UnglueableAcrossObservations { residuals: Vec<Remainder> },
+    ///
+    /// CONJECTURES (Concordance 1.10, the audit's restore 1): every frame that
+    /// closed SOME of the pairs, with how many it closed — a mind's own
+    /// unglued hypotheses, kept rather than discarded, in first-seen order.
+    /// A conjecture is private thought: it is never a claim until it closes
+    /// every pair of a task.
+    UnglueableAcrossObservations { residuals: Vec<Remainder>, conjectures: Vec<(ObserverFrame, usize)> },
     /// A GenerationGap wall was minted and ADOPTED this pass — the task learned
     /// but did not close; the next think of the same class drains.
     Withheld,
@@ -90,9 +96,25 @@ pub fn think(
         return TaskThought::Withheld;
     }
     if !residuals.is_empty() {
-        return TaskThought::UnglueableAcrossObservations { residuals };
+        let conjectures = conjectures(&closures);
+        return TaskThought::UnglueableAcrossObservations { residuals, conjectures };
     }
     glue(closures)
+}
+
+/// Every frame that closed at least one pair, with its support, first-seen
+/// order — the hypotheses an unglued thought leaves behind.
+fn conjectures(closures: &[PairClosure]) -> Vec<(ObserverFrame, usize)> {
+    let mut held: Vec<(ObserverFrame, usize)> = Vec::new();
+    for closure in closures {
+        if let PairClosure::Frame(frame) = closure {
+            match held.iter_mut().find(|(f, _)| f == frame) {
+                Some((_, n)) => *n += 1,
+                None => held.push((frame.clone(), 1)),
+            }
+        }
+    }
+    held
 }
 
 /// GLUE across observations: every pair must have closed the SAME way — the same
@@ -100,12 +122,12 @@ pub fn think(
 /// from one pair did not generalize).
 fn glue(closures: Vec<PairClosure>) -> TaskThought {
     match closures.first() {
-        None => TaskThought::UnglueableAcrossObservations { residuals: Vec::new() },
+        None => TaskThought::UnglueableAcrossObservations { residuals: Vec::new(), conjectures: Vec::new() },
         Some(first) => {
             if closures.iter().all(|c| c == first) {
                 TaskThought::Glued(first.clone())
             } else {
-                TaskThought::UnglueableAcrossObservations { residuals: Vec::new() }
+                TaskThought::UnglueableAcrossObservations { residuals: Vec::new(), conjectures: conjectures(&closures) }
             }
         }
     }

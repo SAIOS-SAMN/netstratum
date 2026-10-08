@@ -53,7 +53,8 @@ pub use derive::{derive, Candidate};
 pub use need::{Family, Hunger, Need};
 pub use selfmap::{consilience, knowledge_map, knowledge_order, Consilience, SelfMap};
 pub use think::{
-    hear, hear_word, measure_grid, measure_volume, think_task, think_volume_task, Heard, SolveRead,
+    hear, hear_word, hold_conjectures, measure_grid, measure_volume, think_task, think_task_held,
+    think_volume_task, Conjecture, Heard, SolveRead, HELD_CONJECTURES,
 };
 pub use survival::{ration_reads, think_survival, RationRead, SurvivalBook, SurvivalDeed};
 // N-I4 — the cognitive basin's element, re-exported for the vessel layer

@@ -7,6 +7,7 @@
 //!                                       fold a people's chronicle; --send puts it to the court
 //!   ns-hypha found                      found netstratum's domain on the court (once)
 //!   ns-hypha reserve <tier>             designate one of the domain's tiers its reserve (in trust)
+//!   ns-hypha originate [<var-root>]     state the universe's origin once: its Big Bang, its torus
 //!   ns-hypha mark <world-dir>           record a people as folded through its chronicle's end
 //!   ns-hypha epoch <name>               set the hot colonies line aside, restart it at zero
 //!   ns-hypha prune                      archive hot entries whose folds the court reads settled
@@ -24,7 +25,7 @@
 //! first census.
 //!
 //! Flags: `--at host:port` (or `NS_HYPHA`, default 127.0.0.1:7520),
-//! `--home dir` (default var/uplink). Only `found`, `reserve` and `census --send` write
+//! `--home dir` (default var/uplink). Only `found`, `reserve`, `originate` and `census --send` write
 //! anything on the court; every other command is a reading.
 
 use ns_hypha::census::{self, grains};
@@ -133,6 +134,39 @@ fn main() -> ExitCode {
                 ExitCode::from(1)
             }
         },
+        Some("originate") => {
+            // The universe's seed: the own-hash of its Big Bang on the universe
+            // ledger, read from the var root named (default var-g2).
+            let root = args.get(2).filter(|a| !a.starts_with("--")).cloned().unwrap_or_else(|| "var-g2".into());
+            let ledger = match cfe::persist::load(&Path::new(&root).join("worlds/convergence.tlv")) {
+                Ok(l) => l,
+                Err(e) => {
+                    eprintln!("ns-hypha: {root}'s universe ledger did not read: {e:?}");
+                    return ExitCode::from(1);
+                }
+            };
+            let Some(seed) = ledger
+                .receipts()
+                .iter()
+                .find(|r| matches!(r.event(), cfe::dop::ClosureEvent::UniverseFounded { .. }))
+                .map(|r| r.own().0)
+            else {
+                eprintln!("ns-hypha: {root} has no Big Bang on its universe ledger");
+                return ExitCode::from(1);
+            };
+            // docs/58 §8: 1 cell = 1/32 Mpc; 64 cells per axis = 2 Mpc.
+            let periods = vec![(2, 1), (2, 1), (2, 1)];
+            match up.originate(&home, seed, periods) {
+                Ok(f) => {
+                    println!("origin: {f:?}");
+                    ExitCode::SUCCESS
+                }
+                Err(e) => {
+                    eprintln!("ns-hypha: the origin was not recorded: {e}");
+                    ExitCode::from(1)
+                }
+            }
+        }
         Some("reserve") => {
             let Some(tier) = args.get(2) else {
                 eprintln!("usage: ns-hypha reserve <tier>");

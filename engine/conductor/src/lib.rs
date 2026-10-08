@@ -1153,6 +1153,10 @@ pub struct Polity {
     /// pre-grown receipt still matches. Seed vessel is the line's `automaton`;
     /// the map admits many (population individuation is a later cut).
     grown: std::collections::BTreeMap<u64, Vec<solver::Crystal>>,
+    /// Each vessel's HELD CONJECTURES (Concordance 1.10, restore 1): the
+    /// frames its unglued thoughts closed some pairs with, tried first on
+    /// later tasks. Private workspace, like `grown`; never receipted.
+    held: std::collections::BTreeMap<u64, Vec<solver::Conjecture>>,
     /// AUTIC-1 — how many AUTIC crystals this line's vessels have absorbed from
     /// the mesh-learned basin (cumulative, workspace like `grown`). The live
     /// measure of the shared tongue entering entity cognition.
@@ -1577,6 +1581,8 @@ impl Polity {
                         unfolded: 0,
                         lane_refused: Vec::new(),
                         grown: std::collections::BTreeMap::new(),
+            held: std::collections::BTreeMap::new(),
+                        held: std::collections::BTreeMap::new(),
                         autic_absorbed: 0,
                         autic_spoke: 0,
                         autic_learned: 0,
@@ -3828,7 +3834,7 @@ impl Polity {
         self.world.settle_leisure(orb, -price);
         let sibling = self.sibling;
         self.absorb_autic(sibling); // think in the shared tongue net has learned
-        let read = solver::think_task(task, self.grown.entry(sibling).or_default());
+        let read = solver::think_task_held(task, self.grown.entry(sibling).or_default(), self.held.entry(sibling).or_default());
         if let SolveRead::Solved {
             program,
             matches_expected: Some(true),
@@ -3902,7 +3908,7 @@ impl Polity {
         self.practise_autic_wall(sibling);
         let difficulty = Difficulty::level(self.level);
         let task = forge_task(seed_digest, difficulty);
-        let read = solver::think_task(&task, self.grown.entry(sibling).or_default());
+        let read = solver::think_task_held(&task, self.grown.entry(sibling).or_default(), self.held.entry(sibling).or_default());
         if let SolveRead::Solved {
             program,
             matches_expected: Some(true),
@@ -4369,7 +4375,7 @@ impl Polity {
                         let vessel = self.automaton;
                         self.absorb_autic(vessel); // think in the learned AUTIC tongue
                         self.practise_autic_wall(vessel); // practise the mesh's own problems
-                        solver::think_task(&task, self.grown.entry(vessel).or_default())
+                        solver::think_task_held(&task, self.grown.entry(vessel).or_default(), self.held.entry(vessel).or_default())
                     } else {
                         SolveRead::Unsolved // the bank cannot pay the look — fast this beat
                     }

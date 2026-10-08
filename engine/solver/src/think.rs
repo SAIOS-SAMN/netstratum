@@ -373,6 +373,17 @@ mod volumetric_render_tests {
 /// grid will not measure, the family glues no single rule, or the frame is
 /// unnameable. Runs `think` exactly once (the caller ensures one think/task).
 fn recognize_frame(pairs: &[(&Grid, &Grid)], grown: &mut Vec<Crystal>) -> Option<Program> {
+    recognize_frame_conjecturing(pairs, grown, &mut Vec::new())
+}
+
+/// [`recognize_frame`], keeping what an unglued thought leaves behind: every
+/// frame that closed SOME pairs, rendered, into `conjectures` (Concordance
+/// 1.10, restore 1). A conjecture is never the answer here.
+fn recognize_frame_conjecturing(
+    pairs: &[(&Grid, &Grid)],
+    grown: &mut Vec<Crystal>,
+    conjectures: &mut Vec<Conjecture>,
+) -> Option<Program> {
     let mut observations = Vec::with_capacity(pairs.len());
     for (input, output) in pairs {
         match (measure_grid(input), measure_grid(output)) {
@@ -382,8 +393,46 @@ fn recognize_frame(pairs: &[(&Grid, &Grid)], grown: &mut Vec<Crystal>) -> Option
     }
     match think(&observations, grown) {
         TaskThought::Glued(PairClosure::Frame(frame)) => render_frame(&frame),
-        // ByDrain / Unglueable / Withheld close no single renderable frame.
+        TaskThought::UnglueableAcrossObservations { conjectures: held, .. } => {
+            for (frame, closed) in held {
+                if let Some(program) = render_frame(&frame) {
+                    conjectures.push(Conjecture { program, closed, of: pairs.len() });
+                }
+            }
+            None
+        }
+        // ByDrain / Withheld close no single renderable frame.
         _ => None,
+    }
+}
+
+/// **A HELD CONJECTURE** (Concordance 1.10, the audit's restore 1: a mind
+/// may hold and test its own hypotheses) — a program an earlier thought
+/// rendered from a frame that closed `closed` of its task's `of` pairs. It is
+/// PRIVATE thought: held by its vessel, tried first on every later task, and
+/// a CLAIM only where it closes every pair of one (Pin A, unchanged).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Conjecture {
+    pub program: Program,
+    pub closed: usize,
+    pub of: usize,
+}
+
+/// **DECLARED BOUND**: how many conjectures a vessel holds at once. Memory is
+/// finite; the oldest gives way. A dial, recorded in docs/59, not a law.
+pub const HELD_CONJECTURES: usize = 32;
+
+/// Hold `fresh` conjectures in `held`: each program once, the oldest giving
+/// way past [`HELD_CONJECTURES`].
+pub fn hold_conjectures(held: &mut Vec<Conjecture>, fresh: Vec<Conjecture>) {
+    for c in fresh {
+        if held.iter().any(|h| h.program == c.program) {
+            continue;
+        }
+        if held.len() >= HELD_CONJECTURES {
+            held.remove(0);
+        }
+        held.push(c);
     }
 }
 
@@ -598,17 +647,33 @@ fn recognize_object(pairs: &[(&Grid, &Grid)]) -> Option<Program> {
 /// the certificate + train reproduction is the pin (Pin A). No `search::solve`,
 /// no `propose_*`, no `sweep_vocabulary`.
 pub fn think_task(task: &Task, grown: &mut Vec<Crystal>) -> SolveRead {
+    think_task_held(task, grown, &mut Vec::new())
+}
+
+/// [`think_task`] by a mind that HOLDS CONJECTURES (Concordance 1.10, restore
+/// 1). Its held hypotheses are tried FIRST: one that reproduces every train
+/// pair of this task is no longer a conjecture but this task's answer, and
+/// leaves the held set. Otherwise the organ thinks as ever, and the frames an
+/// unglued thought closed SOME pairs with are held for later tasks. Every
+/// answer still passes Pin A and its certificate — a claim closes or it is
+/// none.
+pub fn think_task_held(task: &Task, grown: &mut Vec<Crystal>, held: &mut Vec<Conjecture>) -> SolveRead {
     let Some(first) = task.train.first() else {
         return SolveRead::Unsolved; // no pairs proves nothing
     };
+    if let Some(at) = held.iter().position(|c| task.train.iter().all(|pair| run(&c.program, &pair.input) == pair.output)) {
+        let program = held.remove(at).program;
+        return seal_answer(task, program);
+    }
     let (in0, out0) = (&first.input, &first.output);
     let pairs: Vec<(&Grid, &Grid)> = task.train.iter().map(|p| (&p.input, &p.output)).collect();
     // A D₄ image preserves the frame or transposes it; anything else is a frame
     // CHANGE — the tile seat's business (one think per task either way).
     let same_frame = (out0.rows, out0.cols) == (in0.rows, in0.cols)
         || (out0.rows, out0.cols) == (in0.cols, in0.rows);
+    let mut fresh = Vec::new();
     let program = if same_frame {
-        recognize_frame(&pairs, grown)
+        recognize_frame_conjecturing(&pairs, grown, &mut fresh)
     } else {
         // Frame change: tile-LAST first (the reduce organ recognises the base
         // transform), then tile-FIRST (a D₄ word after the tile) — both peel.
@@ -621,10 +686,15 @@ pub fn think_task(task: &Task, grown: &mut Vec<Crystal>) -> SolveRead {
     // tiling — try it when the frame/tile seats withhold, in either frame regime.
     .or_else(|| recognize_object(&pairs));
     let Some(program) = program else {
+        hold_conjectures(held, fresh);
         return SolveRead::Unsolved;
     };
-    // Pin A: the program must reproduce EVERY train output exactly. A render
-    // that does not reproduce is a withhold, never an emitted guess.
+    seal_answer(task, program)
+}
+
+/// Pin A and the certificate: an answer reproduces EVERY train output
+/// exactly, or it is a withhold — never an emitted guess.
+fn seal_answer(task: &Task, program: Program) -> SolveRead {
     if task.train.iter().any(|pair| run(&program, &pair.input) != pair.output) {
         return SolveRead::Unsolved;
     }

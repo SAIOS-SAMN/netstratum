@@ -25,6 +25,10 @@ use mycelium::anastome::dialogue::uplink::{FoldAt, Net, SignedFold, TierFold, Up
 use std::io::{self, Read};
 use std::path::Path;
 
+/// The kind of record netstratum's origin commits to: its universe ledger's
+/// Big Bang (`UniverseFounded`, tag 190), the receipt whose own-hash is the seed.
+pub const ORIGIN_KIND: u8 = 190;
+
 /// The tiers netstratum's domain names at its founding.
 pub const TIERS: [&str; 2] = ["colonies", "union"];
 
@@ -181,6 +185,26 @@ impl Uplink {
         tiers.dedup();
         let signed = DomainGenesis { domain: domain.verifying_key().to_bytes(), tiers }.sign(&domain);
         self.session.found_domain(&signed)
+    }
+
+    /// **THE ORIGIN** (78.132/78.139/78.140): netstratum's universe stated
+    /// ONCE on this court, signed by the domain key — version 2, a ROOT
+    /// (parent face unwitnessed), its space a TORUS in geometrized Mpc with
+    /// the L1 metric (docs/58 §8: 1 cell = 1/32 Mpc, 64 cells per axis =
+    /// periods (2, 2, 2) Mpc). The commitment is the universe's Big Bang: the
+    /// own-hash of its `UniverseFounded` receipt (its seed). Never edited.
+    pub fn originate(&self, home: &Path, seed: [u8; 32], periods: Vec<(u64, u64)>) -> io::Result<Founded> {
+        use mycelium::anastome::dialogue::domain::Origin;
+        use mycelium::anastome::dialogue::universe::{Genesis, Geometry, Metric, Parent};
+        let domain = tier_key(home, "domain")?;
+        let origin = Origin {
+            domain: domain.verifying_key().to_bytes(),
+            kind: ORIGIN_KIND,
+            version: 2,
+            commitment: seed,
+            universe: Some(Genesis { geometry: Geometry::Torus { periods, metric: Metric::L1 }, parent: Parent::Unwitnessed }),
+        };
+        self.session.originate(&origin.sign(&domain))
     }
 
     /// Designate `tier` (one of [`TIERS`]) as the domain's RESERVE on this
