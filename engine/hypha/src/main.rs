@@ -6,6 +6,7 @@
 //!   ns-hypha census <world-dir> [--last N] [--send]
 //!                                       fold a people's chronicle; --send puts it to the court
 //!   ns-hypha found                      found netstratum's domain on the court (once)
+//!   ns-hypha reserve <tier>             designate one of the domain's tiers its reserve (in trust)
 //!   ns-hypha mark <world-dir>           record a people as folded through its chronicle's end
 //!   ns-hypha epoch <name>               set the hot colonies line aside, restart it at zero
 //!   ns-hypha prune                      archive hot entries whose folds the court reads settled
@@ -23,7 +24,7 @@
 //! first census.
 //!
 //! Flags: `--at host:port` (or `NS_HYPHA`, default 127.0.0.1:7520),
-//! `--home dir` (default var/uplink). Only `found` and `census --send` write
+//! `--home dir` (default var/uplink). Only `found`, `reserve` and `census --send` write
 //! anything on the court; every other command is a reading.
 
 use ns_hypha::census::{self, grains};
@@ -132,6 +133,22 @@ fn main() -> ExitCode {
                 ExitCode::from(1)
             }
         },
+        Some("reserve") => {
+            let Some(tier) = args.get(2) else {
+                eprintln!("usage: ns-hypha reserve <tier>");
+                return ExitCode::from(2);
+            };
+            match up.designate_reserve(&home, tier) {
+                Ok(f) => {
+                    println!("reserve: {f:?}");
+                    ExitCode::SUCCESS
+                }
+                Err(e) => {
+                    eprintln!("ns-hypha: the reserve was not designated: {e}");
+                    ExitCode::from(1)
+                }
+            }
+        }
         Some("census") => census_cmd(&args, Some(&up), &home),
         Some("prune") => prune_cmd(&up, &home),
         Some("publish") => publish_cmd(&up, &home),

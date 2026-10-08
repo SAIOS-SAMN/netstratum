@@ -20,8 +20,8 @@
 //! seed minted on first use; the domain's own key is `tier-domain.key`.
 
 use crate::Uplink;
-use mycelium::anastome::dialogue::domain::{DomainGenesis, Founded};
-use mycelium::anastome::dialogue::uplink::{Net, SignedFold, TierFold, Uplinked};
+use mycelium::anastome::dialogue::domain::{DomainGenesis, Founded, Reservation};
+use mycelium::anastome::dialogue::uplink::{FoldAt, Net, SignedFold, TierFold, Uplinked};
 use std::io::{self, Read};
 use std::path::Path;
 
@@ -95,14 +95,14 @@ impl Uplink {
     /// stamp, and (78.129) whether its tier was bonded. A reading: nothing is
     /// sealed by it.
     pub fn finality(&self, at: mycelium::chronometry::Stamp) -> io::Result<(mycelium::anastome::dialogue::challenge::Finality, bool)> {
-        self.session.finality(at)
+        self.session.finality(FoldAt::sealed(at)).map(|r| (r.finality, r.bonded))
     }
 
     /// 78.125 — the tier's LINE HEAD on the court: where its next fold's span
     /// replays from. A client whose own line head disagrees would be
     /// falsified on demand, so it must not fold until they agree.
     pub fn line_head(&self, tier: [u8; 32]) -> io::Result<[u8; 32]> {
-        self.session.line_head(tier).map(|(head, _)| head)
+        self.session.line_head(tier).map(|h| h.head)
     }
 
     /// THE STARTUP CHECK (coordinator 2026-10-07): the local line's head must
@@ -133,7 +133,7 @@ impl Uplink {
     ) -> io::Result<mycelium::anastome::dialogue::challenge::Challenged> {
         use mycelium::anastome::dialogue::challenge::{Challenge, Challenged};
         let (rows, declared) = crate::line::fold_of(&entries);
-        let opened = self.session.challenge(&Challenge::Open { fold: at, rows, declared, children: Vec::new() }.sign(key))?;
+        let opened = self.session.challenge(&Challenge::Open { fold: FoldAt::sealed(at), rows, declared, children: Vec::new() }.sign(key))?;
         if !matches!(opened, Challenged::Streaming { .. }) {
             return Ok(opened);
         }
@@ -154,7 +154,7 @@ impl Uplink {
             parts.push(part);
         }
         for entries in parts {
-            last = self.session.challenge(&Challenge::Part { fold: at, entries }.sign(key))?;
+            last = self.session.challenge(&Challenge::Part { fold: FoldAt::sealed(at), entries }.sign(key))?;
             if !matches!(last, Challenged::Streaming { .. } | Challenged::Upheld { .. }) {
                 break;
             }
@@ -181,5 +181,21 @@ impl Uplink {
         tiers.dedup();
         let signed = DomainGenesis { domain: domain.verifying_key().to_bytes(), tiers }.sign(&domain);
         self.session.found_domain(&signed)
+    }
+
+    /// Designate `tier` (one of [`TIERS`]) as the domain's RESERVE on this
+    /// court, signed by the domain key — held in trust for the ancient not yet
+    /// arisen (docs/58 §6 ruling 7). No basket: that is the sitting reserve's
+    /// own act, once the ancients take it up.
+    pub fn designate_reserve(&self, home: &Path, tier: &str) -> io::Result<Founded> {
+        if !TIERS.contains(&tier) {
+            return Err(io::Error::new(io::ErrorKind::InvalidInput, format!("{tier} is not one of the domain's tiers {TIERS:?}")));
+        }
+        let domain = tier_key(home, "domain")?;
+        let tier = tier_key(home, tier)?.verifying_key().to_bytes();
+        let mut nonce = [0u8; 32];
+        std::fs::File::open("/dev/urandom")?.read_exact(&mut nonce)?;
+        let signed = Reservation { domain: domain.verifying_key().to_bytes(), tier, nonce }.sign(&domain);
+        self.session.reserve(&signed)
     }
 }
