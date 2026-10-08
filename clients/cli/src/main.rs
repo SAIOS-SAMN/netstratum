@@ -325,7 +325,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
             match (tile, kind) {
                 (Some(tile), Some(kind)) if tile < GRID * GRID => match world.zone_as(SOVEREIGN, *current, tile, kind) {
                     Ok(()) => {
-                        let sequence = world.chronicle().receipts().len() - 1;
+                        let sequence = (world.chronicle().total() - 1) as usize;
                         println!(
                             "{} tile {} ({}) zoned {} — receipt {} sealed",
                             style.ok("✓"),
