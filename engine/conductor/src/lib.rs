@@ -1157,6 +1157,13 @@ pub struct Polity {
     /// frames its unglued thoughts closed some pairs with, tried first on
     /// later tasks. Private workspace, like `grown`; never receipted.
     held: std::collections::BTreeMap<u64, Vec<solver::Conjecture>>,
+    /// THE DEAD'S LIBRARY this line has HEARD (cores slice 3): the words dead
+    /// lines deposited at its core that the core's bell has carried here.
+    /// Tried after the line's own words; one the line reconstructs on its own
+    /// task is licensed into its library.
+    inherited: solver::mint::Library,
+    /// Dead words on their way, with the universal beat each arrives.
+    arriving: Vec<(u64, solver::mint::MintedWord)>,
     /// AUTIC-1 — how many AUTIC crystals this line's vessels have absorbed from
     /// the mesh-learned basin (cumulative, workspace like `grown`). The live
     /// measure of the shared tongue entering entity cognition.
@@ -1582,6 +1589,8 @@ impl Polity {
                         lane_refused: Vec::new(),
                         grown: std::collections::BTreeMap::new(),
                         held: std::collections::BTreeMap::new(),
+                        inherited: solver::mint::Library::new(),
+                        arriving: Vec::new(),
                         autic_absorbed: 0,
                         autic_spoke: 0,
                         autic_learned: 0,
@@ -1784,6 +1793,8 @@ impl Polity {
             lane_refused: Vec::new(),
             grown: std::collections::BTreeMap::new(),
             held: std::collections::BTreeMap::new(),
+            inherited: solver::mint::Library::new(),
+            arriving: Vec::new(),
             autic_absorbed: 0,
             autic_spoke: 0,
             autic_learned: 0,
@@ -4364,7 +4375,24 @@ impl Polity {
             // search. A hit is a full lawful proof — the certificate
             // seals the EXPANSION and `verify_work` re-derives it at
             // the gate exactly as a searched program.
-            let pre_reached = solver::mint::pre_reach(&task, &self.library).map(|expansion| {
+            // CORES SLICE 3 — INHERITANCE BY RECONSTRUCTION (4.4): on a miss of
+            // the line's own words, the dead's words this line has heard are
+            // tried on THIS task; one that closes it (the line reconstructed
+            // it on its own task) is LICENSED into the line's own library,
+            // citing the dead line's proofs. A word that does not close for
+            // the reader stays heard, unadopted.
+            let own = solver::mint::pre_reach(&task, &self.library);
+            let reached = own.or_else(|| {
+                let expansion = solver::mint::pre_reach(&task, &self.inherited)?;
+                let word = self.inherited.words().iter().find(|w| w.expansion == expansion)?.clone();
+                let bytes = solver_verify::program_bytes(&expansion)?;
+                // Licensed citing the dead line's own proofs: its derivation.
+                if self.world.license_knowledge_as(self.automaton, word.orbit, bytes, word.cited.clone()).is_ok() {
+                    self.library.adopt(word);
+                }
+                Some(expansion)
+            });
+            let pre_reached = reached.map(|expansion| {
                 let mut output = task.test_in.clone();
                 for op in &expansion {
                     output = op.apply(&output);
@@ -5366,6 +5394,44 @@ pub fn core_step(worlds: &mut [Polity], book: &Ledger, stamp: u64) -> Vec<(Strin
 pub fn core_bounce(worlds: &mut [Polity], book: &Ledger, stamp: u64) -> Vec<(String, String)> {
     let grain = ratio(1, cfe::world::RESOURCE_LEDGER_GRAIN);
     let reached: Vec<Option<String>> = worlds.iter().map(|p| book.core_of(&p.spec.position)).collect();
+    // CORES SLICE 3 — THE CORE'S BELL CARRIES THE WORDS (ruling: time as the
+    // bell, not a yearly timer). Each dead word rides the core's pulse out at
+    // one cell a beat (a declared carrier speed, docs/59): a line hears it
+    // `distance` beats after its deposit — near lines early, rim lines late —
+    // and beyond the galaxy's reach only faintly (heard on a draw whose
+    // chance is reach / distance). The heard words wait in `arriving` until
+    // their beat; `inheritance_step` moves them into the line's library to try.
+    let libraries = book.core_libraries();
+    let galaxies = book.galaxies();
+    let span = book.universe_span();
+    for (polity, core) in worlds.iter_mut().zip(&reached) {
+        let Some(core) = core else { continue };
+        let Some(galaxy) = galaxies.iter().find(|g| &g.name == core) else { continue };
+        let Some(entries) = libraries.get(core) else { continue };
+        let distance = ledger::torus_distance(&polity.spec.position, &galaxy.center, &span);
+        let cells = num_traits::ToPrimitive::to_u64(&distance.ceil().to_integer()).unwrap_or(u64::MAX);
+        let beyond = distance > galaxy.reach;
+        for entry in entries {
+            if polity.inherited.words().iter().any(|w| w.orbit == entry.orbit)
+                || polity.arriving.iter().any(|(_, w)| w.orbit == entry.orbit)
+            {
+                continue;
+            }
+            if beyond {
+                let reach = num_traits::ToPrimitive::to_u64(&galaxy.reach.floor().to_integer()).unwrap_or(0);
+                let mut seed = blake3::Hasher::new();
+                seed.update(b"netstratum.core.bell.v1");
+                seed.update(polity.spec.world_name.as_bytes());
+                seed.update(&entry.orbit);
+                if soc::partition_draw(&[reach, cells.saturating_sub(reach)], *seed.finalize().as_bytes()) != Some(0) {
+                    continue; // too faint to hear at this distance
+                }
+            }
+            let Some(expansion) = solver_verify::program_from_bytes(&entry.expansion) else { continue };
+            let word = solver::mint::MintedWord { orbit: entry.orbit, expansion, cited: entry.cited.clone() };
+            polity.arriving.push((entry.stamp.saturating_add(cells), word));
+        }
+    }
     let mut pulses = Vec::new();
     for ((core, resource), held) in book.core_holdings() {
         // On the grain: whole grains only; the dust stays at the core.
@@ -5404,6 +5470,22 @@ pub fn core_bounce(worlds: &mut [Polity], book: &Ledger, stamp: u64) -> Vec<(Str
         }
     }
     out
+}
+
+/// THE BELL ARRIVES (cores slice 3): every dead word whose beat has come
+/// joins the hearing line's inheritance, to be tried on its tasks. Returns
+/// how many words arrived this beat.
+pub fn inheritance_step(worlds: &mut [Polity], stamp: u64) -> usize {
+    let mut arrived = 0;
+    for polity in worlds.iter_mut() {
+        let (now, later): (Vec<_>, Vec<_>) = polity.arriving.drain(..).partition(|(at, _)| *at <= stamp);
+        polity.arriving = later;
+        for (_, word) in now {
+            polity.inherited.adopt(word);
+            arrived += 1;
+        }
+    }
+    arrived
 }
 
 /// MARKET-2: the transit distance the iceberg law melts against — the
@@ -6650,7 +6732,7 @@ fn run_era_inner(
         };
         // A line that collapsed this cycle leaves the roster before the
         // cross-world steps can name it as a party (`retire_collapsed`).
-        retire_collapsed(&mut worlds, &book);
+        retire_collapsed(&mut worlds, &book, u64::from(beat));
         for spec in newborns {
             worlds.push(Polity::genesis(spec, &registry, &book));
         }
@@ -6715,7 +6797,30 @@ fn run_era_inner(
 /// first, so the carrier holds every receipt it ever took — removes it from
 /// every step at once, symmetric to how `divergence_step` ADDS a line the
 /// instant one is born. Returns the retired world names, in roster order.
-pub fn retire_collapsed(worlds: &mut Vec<Polity>, book: &Ledger) -> Vec<String> {
+pub fn retire_collapsed(worlds: &mut Vec<Polity>, book: &Ledger, stamp: u64) -> Vec<String> {
+    // CORES SLICE 3: a dying line's words reach its core before it leaves —
+    // each with its derivation (the proofs it minted on), its own claim — so
+    // the dead's knowledge is the living's inheritance, never lost. Once per
+    // dead line: a line already deposited (resumed collapsed) is not again.
+    let deposited: std::collections::BTreeSet<String> =
+        book.core_libraries().values().flatten().map(|entry| entry.world.clone()).collect();
+    let mut deposits = Vec::new();
+    for polity in worlds.iter().filter(|p| p.world.collapsed().is_some()) {
+        if deposited.contains(&polity.spec.world_name) {
+            continue;
+        }
+        let Some(core) = book.core_of(&polity.spec.position) else { continue };
+        for (orbit, expansion, cited) in cfe::vocabulary::solver_words(polity.world.chronicle()) {
+            deposits.push(cfe::dop::ClosureEvent::CoreWordDeposited {
+                core: core.clone(),
+                world: polity.spec.world_name.clone(),
+                orbit,
+                expansion,
+                cited,
+            });
+        }
+    }
+    let _ = book.append_universe(deposits, stamp);
     let mut retired = Vec::new();
     worlds.retain(|polity| {
         if polity.world.collapsed().is_none() {

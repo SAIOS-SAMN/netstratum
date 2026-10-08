@@ -26,6 +26,17 @@ pub struct Galaxy {
     pub reach: Ratio,
 }
 
+/// One dead line's word at a core: its own claim, citing the line and the
+/// proofs it was minted on, and the universal stamp it was deposited at.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CoreWord {
+    pub world: String,
+    pub orbit: [u8; 32],
+    pub expansion: Vec<u8>,
+    pub cited: Vec<[u8; 32]>,
+    pub stamp: u64,
+}
+
 /// The placeholder reach — both the founding galaxy's and a newly
 /// observed one's, until the fiber-growth reading lands.
 fn reach_constant() -> Ratio {
@@ -225,6 +236,29 @@ impl Ledger {
             }
         }
         held
+    }
+
+    /// **THE CORES' LIBRARIES** (the cores design, slice 3): every word the
+    /// dead deposited at each core, by core, in deposit order — each dead
+    /// line's word its OWN claim, citing the line and its proofs (conflicting
+    /// words stay distinct). A reading: nothing is written.
+    pub fn core_libraries(&self) -> std::collections::BTreeMap<String, Vec<CoreWord>> {
+        let mut libraries: std::collections::BTreeMap<String, Vec<CoreWord>> = std::collections::BTreeMap::new();
+        let Ok(ledger) = persist::load(&self.ledger_path()) else {
+            return libraries;
+        };
+        for receipt in ledger.receipts() {
+            if let ClosureEvent::CoreWordDeposited { core, world, orbit, expansion, cited } = receipt.event() {
+                libraries.entry(core.clone()).or_default().push(CoreWord {
+                    world: world.clone(),
+                    orbit: *orbit,
+                    expansion: expansion.clone(),
+                    cited: cited.clone(),
+                    stamp: receipt.stamp(),
+                });
+            }
+        }
+        libraries
     }
 
     /// **THE UNIVERSE'S SEED** (docs/58 §3) — the own-hash of its Big Bang

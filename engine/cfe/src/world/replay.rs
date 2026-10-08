@@ -494,7 +494,7 @@ impl Replayer {
         // docs/58 — the Big Bang and a world's citation of it are IDENTITY:
         // they enter the hash chain (so everything after descends from the
         // origin) and move nothing in committed state.
-        ClosureEvent::UniverseFounded { .. } | ClosureEvent::UniverseCited { .. } | ClosureEvent::AncientArose { .. } | ClosureEvent::CoreDeposited { .. } | ClosureEvent::CoreEmitted { .. } => {}
+        ClosureEvent::UniverseFounded { .. } | ClosureEvent::UniverseCited { .. } | ClosureEvent::AncientArose { .. } | ClosureEvent::CoreDeposited { .. } | ClosureEvent::CoreEmitted { .. } | ClosureEvent::CoreWordDeposited { .. } => {}
         // THE BOUNCE (tag 195): the core's pulse arrives, credited whole.
         ClosureEvent::CoreReturned { orb_id, resource, amount, .. } => {
             if let Some(held) = peel(&mut *orbs, *orb_id) {

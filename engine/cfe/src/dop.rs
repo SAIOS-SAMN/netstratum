@@ -407,7 +407,7 @@
 //!         same algorithm solver::consilience already uses for cross-line
 //!         agreement, read at vessel scope. Recorded only; nothing reads
 //!         it yet. orbit[32] ‖ hardness u32 le.)
-//!    Phase-5 claim ledger: next free **196** (193 CoreDeposited, 194 CoreEmitted, 195 CoreReturned — the cores design; 190 UniverseFounded, 191 UniverseCited, 192 AncientArose — docs/58; 186 ResourceStocksSwept, 184 VeinRejuvenated —
+//!    Phase-5 claim ledger: next free **197** (193 CoreDeposited, 194 CoreEmitted, 195 CoreReturned, 196 CoreWordDeposited — the cores design; 190 UniverseFounded, 191 UniverseCited, 192 AncientArose — docs/58; 186 ResourceStocksSwept, 184 VeinRejuvenated —
 //!    ONT-3 resource rejuvenation as derivation: a worked vein RECOVERS at a
 //!    collect touch, its inverse-receipt integral `rejuvenated` growing by the
 //!    KEPLERIAN orbital-forcing quantum (one `natural/REGROWTH_GRAIN` per
@@ -3278,6 +3278,14 @@ pub enum ClosureEvent {
     /// the twin of the universe ledger's `CoreEmitted`. A declared source, the
     /// core's return of what the universe's sinks gave it.
     CoreReturned { orb_id: u64, core: String, resource: Option<Resource>, amount: Ratio },
+    /// **THE DEAD'S LEXICON REACHES ITS CORE (tag 196; the cores design,
+    /// slice 3)** — sealed on the universe ledger when a line dies: one of
+    /// its words (`orbit`, its program's wire `expansion`) deposited at
+    /// `core`, its galaxy's throat, WITH ITS DERIVATION: `cited`, the proofs
+    /// the line minted it on. Each dead line's word is its own claim (never
+    /// merged with another line's). A living line adopts it only by
+    /// RECONSTRUCTING it on one of its own tasks (4.4). Identity only.
+    CoreWordDeposited { core: String, world: String, orbit: [u8; 32], expansion: Vec<u8>, cited: Vec<[u8; 32]> },
     /// **THE GALACTIC REGION (GALACTIC-1, tag 187)** — a world's charted
     /// `(X,Y,Z)` quantized onto a coarse galactic grid cell and hashed once
     /// at genesis into a REGIONAL weighting seed. Purely additive: an old
@@ -4655,6 +4663,22 @@ impl ClosureEvent {
                 value.push(resource.map_or(0, |r| r as u8));
                 ratio::encode(amount, &mut value);
                 tlv::put(195, &value, &mut out);
+            }
+            Self::CoreWordDeposited { core, world, orbit, expansion, cited } => {
+                // core (u16-prefixed) ‖ world (u16-prefixed) ‖ orbit[32] ‖
+                // expansion (u32-prefixed) ‖ cited (u32 count ‖ 32·n)
+                let mut value = (core.len() as u16).to_le_bytes().to_vec();
+                value.extend_from_slice(core.as_bytes());
+                value.extend_from_slice(&(world.len() as u16).to_le_bytes());
+                value.extend_from_slice(world.as_bytes());
+                value.extend_from_slice(orbit);
+                value.extend_from_slice(&(expansion.len() as u32).to_le_bytes());
+                value.extend_from_slice(expansion);
+                value.extend_from_slice(&(cited.len() as u32).to_le_bytes());
+                for c in cited {
+                    value.extend_from_slice(c);
+                }
+                tlv::put(196, &value, &mut out);
             }
             Self::ChronicleCheckpointed { folded_hash, receipt_count } => {
                 // folded_hash[32] ‖ receipt_count u64 le — a world-wide
@@ -6143,6 +6167,31 @@ impl ClosureEvent {
                 };
                 let (amount, used) = ratio::decode(value.get(at + 1..)?)?;
                 (value.len() == at + 1 + used).then_some(Self::CoreReturned { orb_id, core, resource, amount })
+            }
+            196 => {
+                let text = |at: &mut usize| -> Option<String> {
+                    let len = u16::from_le_bytes(value.get(*at..*at + 2)?.try_into().ok()?) as usize;
+                    let s = String::from_utf8(value.get(*at + 2..*at + 2 + len)?.to_vec()).ok()?;
+                    *at += 2 + len;
+                    Some(s)
+                };
+                let mut at = 0usize;
+                let core = text(&mut at)?;
+                let world = text(&mut at)?;
+                let orbit: [u8; 32] = value.get(at..at + 32)?.try_into().ok()?;
+                at += 32;
+                let len = u32::from_le_bytes(value.get(at..at + 4)?.try_into().ok()?) as usize;
+                at += 4;
+                let expansion = value.get(at..at.checked_add(len)?)?.to_vec();
+                at += len;
+                let n = u32::from_le_bytes(value.get(at..at + 4)?.try_into().ok()?) as usize;
+                at += 4;
+                let mut cited = Vec::with_capacity(n.min(value.len() / 32));
+                for _ in 0..n {
+                    cited.push(value.get(at..at + 32)?.try_into().ok()?);
+                    at += 32;
+                }
+                (value.len() == at).then_some(Self::CoreWordDeposited { core, world, orbit, expansion, cited })
             }
             172 => Some(Self::PracticesLapsed { count: *value.first()? }),
             168 => Some(Self::PressureEbbed {

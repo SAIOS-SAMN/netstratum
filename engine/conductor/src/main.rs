@@ -110,7 +110,7 @@ fn main() {
         })
         .collect();
     // A line resumed already collapsed never re-enters the beat.
-    for name in conductor::retire_collapsed(&mut worlds, &book) {
+    for name in conductor::retire_collapsed(&mut worlds, &book, epoch_base) {
         println!("conductor: {name} resumed collapsed; it stays out of the roster");
     }
     println!(
@@ -323,7 +323,7 @@ fn main() {
         // THE ONE CLOSURE'S EXIT: a line that collapsed this cycle leaves the
         // roster now, its chronicle synced whole, before any cross-world step
         // can name it as a party.
-        for name in conductor::retire_collapsed(&mut worlds, &book) {
+        for name in conductor::retire_collapsed(&mut worlds, &book, epoch_base + beat) {
             println!("beat {beat}: COLLAPSE — {name} has no people left; it leaves the roster, its chronicle kept whole");
         }
         // THE LARGEST LIVING LINEAGE, read live and announced when it
@@ -355,6 +355,11 @@ fn main() {
         }
         // FLEET-1: salvage/mint/assign before hauls need capacity.
         conductor::profile::timed("fleet_step", || conductor::fleet_step(&mut worlds));
+        // CORES SLICE 3: the core's bell delivers the dead's words that are due.
+        let heard = conductor::inheritance_step(&mut worlds, epoch_base + beat);
+        if heard > 0 {
+            println!("beat {beat}: {heard} words of the dead reach the living");
+        }
         // The universe's carried span: every distance below wraps on it.
         let span = book.universe_span();
         // OFFER-1a: the market beat — intents post, crossings clear

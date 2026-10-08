@@ -1698,6 +1698,7 @@ fn covered(event: &ClosureEvent) -> bool {
         // identity of a debit that already happened in its world.
         | E::CoreDeposited { .. }
         | E::CoreEmitted { .. }
+        | E::CoreWordDeposited { .. }
         // CHRONICLE-COMPACT-1 (tag 188): a checkpoint is banked-neutral
         // exactly like the regional seed above — it moves no bank, no
         // element, no key, a pure bookkeeping fact about the chronicle
@@ -2729,6 +2730,7 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         | E::AncientArose { .. }       // docs/58: the universe's keeper
         | E::CoreDeposited { .. }      // the cores design: a sink at its throat
         | E::CoreEmitted { .. }        // the bounce, the core's side
+        | E::CoreWordDeposited { .. }  // the dead's lexicon at its core
         | E::CoreReturned { .. }       // the bounce arrives
         | E::HandoffSealed { .. }
         | E::ResourceTransferred { .. } | E::ApertureSent { .. } | E::ApertureReceived { .. }
@@ -3025,7 +3027,7 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         // and universe-ledger entries: no actor scope. Governed by other
         // invariants (conservation, decay) or their own protocol law.
         E::FamineStruck { .. } | E::FamineRelieved { .. } | E::EraAnnexed { .. }
-        | E::GalaxyObserved { .. } | E::UniverseFounded { .. } | E::AncientArose { .. } | E::CoreDeposited { .. } | E::CoreEmitted { .. } | E::CoreReturned { .. } | E::OverheatStruck { .. } | E::OverheatCleared { .. }
+        | E::GalaxyObserved { .. } | E::UniverseFounded { .. } | E::AncientArose { .. } | E::CoreDeposited { .. } | E::CoreEmitted { .. } | E::CoreReturned { .. } | E::CoreWordDeposited { .. } | E::OverheatStruck { .. } | E::OverheatCleared { .. }
         | E::VentSettled { .. } | E::DemurrageSettled { .. } | E::DemurrageTouched { .. }
         // #136 — the smelt-sweep is a world-ledger migration (a one-time grain floor),
         // no actor scope; governed by conservation, like the demurrage settle beside it.

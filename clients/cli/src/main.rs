@@ -8456,6 +8456,10 @@ fn chronicle(world: &World, style: &Style) {
                     None => format!("{amount} STAMP"),
                 }
             ),
+            cfe::dop::ClosureEvent::CoreWordDeposited { core, world, .. } => format!(
+                "⊙ a word of the dead line {world} reaches the core {}",
+                style.strong(core)
+            ),
             cfe::dop::ClosureEvent::UniverseFounded { topology, span, over, .. } => format!(
                 "✶ THE BIG BANG — a {topology} of span {span}{}",
                 if over.is_some() { " (re-founded over an older ledger)" } else { "" }

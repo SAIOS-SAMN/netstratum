@@ -211,9 +211,16 @@ impl Seat {
             // selection the pairs show. A closed object rule is counted; it is
             // stated to the court once 78.143's steps land in the translator.
             let pairs: Vec<(solver::Grid, solver::Grid)> = local.train.iter().map(|p| (p.input.clone(), p.output.clone())).collect();
-            if let Some(rule) = solver::percept::learn(&pairs) {
-                self.tally.closed_by_objects += 1;
-                return Ok(Some(format!("task {name}: closed at home by an OBJECT rule ({:?} -> {:?}); awaiting 78.143 to state it", rule.select, rule.act)));
+            // THE PROPOSER (78.143): the mind speaks the court's own steps,
+            // each checked by the judge's own steps on the train pairs, the
+            // look bounded in time. A closed proposal is filed natively.
+            if let Some(p) = crate::propose::propose_within(&task.train, &task.tests, 400, std::time::Duration::from_secs(20)) {
+                self.tally.solved_at_home += 1;
+                self.tally.closed_by_objects += u64::from(solver::percept::learn(&pairs).is_some());
+                let mut budget = self.entity.physics_mut().stroke();
+                self.tally.submitted += 1;
+                let verdict = self.entity.solve_task(&id, &task.train, &p.outputs, Some(&p.rule), &mut budget);
+                return Ok(Some(self.verdict_line(&name, verdict, &format!("{:?}", p.steps))));
             }
             return Ok(Some(format!("task {name}: {} pairs, not closed at home", local.train.len())));
         };
@@ -233,20 +240,25 @@ impl Seat {
         let mut budget = self.entity.physics_mut().stroke();
         self.tally.submitted += 1;
         let verdict = self.entity.solve_task(&id, &task.train, &outputs, Some(&rule), &mut budget);
-        Ok(Some(match verdict {
+        Ok(Some(self.verdict_line(&name, verdict, &format!("{} ops", program.len()))))
+    }
+
+    /// The court's verdict on a filed solve, counted and told.
+    fn verdict_line(&mut self, name: &str, verdict: Option<(u8, [u64; 4])>, what: &str) -> String {
+        match verdict {
             Some((code, mu)) if code == mycelium::anastome::dialogue::SOLVE_BOUNTY => {
                 self.tally.closed_first += 1;
-                format!("task {name}: CLOSED FIRST, paid {mu:?}")
+                format!("task {name}: CLOSED FIRST ({what}), paid {mu:?}")
             }
             Some((code, _)) if code == mycelium::anastome::dialogue::SOLVE_FLOOR => {
                 self.tally.closed_again += 1;
-                format!("task {name}: closed again")
+                format!("task {name}: closed again ({what})")
             }
             Some(_) => {
                 self.tally.refused += 1;
-                format!("task {name}: refused by the court")
+                format!("task {name}: refused by the court ({what})")
             }
-            None => format!("task {name}: withheld at home (refuted, or refused before)"),
-        }))
+            None => format!("task {name}: withheld at home ({what}: refuted, or refused before)"),
+        }
     }
 }

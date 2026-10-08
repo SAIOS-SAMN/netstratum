@@ -333,6 +333,7 @@ mod tests {
                 ClosureEvent::CoreDeposited { core: "the-founding".into(), world: "forge-reach".into(), resource, amount: ratio(3535, 1024) },
                 ClosureEvent::CoreEmitted { core: "the-founding".into(), world: "forge-reach".into(), resource, amount: ratio(3, 1024) },
                 ClosureEvent::CoreReturned { orb_id: 1, core: "corebound-sky-1".into(), resource, amount: ratio(9, 2) },
+                ClosureEvent::CoreWordDeposited { core: "the-founding".into(), world: "tun-reach".into(), orbit: [4; 32], expansion: vec![2, 0, 1, 4], cited: vec![[5; 32], [6; 32]] },
             ]
         });
         for event in events {

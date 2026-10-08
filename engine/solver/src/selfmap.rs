@@ -31,7 +31,7 @@
 
 use crate::mint::Library;
 use crate::need::{family_of, Family};
-use rfa_core::{forest_potentials, holonomies, ratio, rcf_hash_skew_bipartite, Delta, Holonomy, Ratio, Support};
+use rfa_core::{holonomies, ratio, rcf_hash_skew_bipartite, Delta, Holonomy, Ratio, Support};
 
 /// The families in declaration order — the anchor nodes of the map and
 /// the deterministic tie-break of last resort.
@@ -322,6 +322,7 @@ pub fn consilience(maps: &[(u64, &SelfMap)]) -> Vec<Consilience> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use rfa_core::forest_potentials;
 
     #[test]
     fn the_sparse_forest_reads_exactly_what_the_dense_one_did() {

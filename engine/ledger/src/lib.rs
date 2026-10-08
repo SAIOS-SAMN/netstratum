@@ -502,5 +502,18 @@ mod core_tests {
         )
         .unwrap();
         assert_eq!(book.core_holdings().get(&("b-sky-1".to_string(), None)), Some(&ratio(1, 1)), "deposits less emissions");
+        // the dead's library: each line's word its own claim, conflicts kept
+        let word = |world: &str, orbit: u8| cfe::dop::ClosureEvent::CoreWordDeposited {
+            core: "b-sky-1".into(),
+            world: world.into(),
+            orbit: [orbit; 32],
+            expansion: vec![1, 2],
+            cited: vec![[orbit; 32]],
+        };
+        book.append_universe(vec![word("dead-a", 7), word("dead-b", 7), word("dead-b", 8)], 5).unwrap();
+        let library = &book.core_libraries()["b-sky-1"];
+        assert_eq!(library.len(), 3, "two lines' same word stays two claims");
+        assert_eq!(library[0].world, "dead-a");
+        assert_eq!(library[0].stamp, 5);
     }
 }
