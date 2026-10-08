@@ -52,7 +52,7 @@ pub use solver_verify::{
 
 pub use derive::{derive, Candidate};
 pub use need::{Family, Hunger, Need};
-pub use selfmap::{consilience, knowledge_map, knowledge_order, Consilience, SelfMap};
+pub use selfmap::{consilience, knowledge_map, knowledge_order, knowledge_tension, Consilience, SelfMap};
 pub use think::{
     hear, hear_word, hold_conjectures, measure_grid, measure_volume, think_task, think_task_held,
     think_volume_task, Conjecture, Heard, SolveRead, HELD_CONJECTURES,

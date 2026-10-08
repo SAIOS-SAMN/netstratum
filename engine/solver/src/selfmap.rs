@@ -47,9 +47,6 @@ pub struct SelfMap {
     /// The families, MOST-PERIPHERAL FIRST — the curiosity order a
     /// novelty-struck mind reaches by.
     pub order: Vec<Family>,
-    /// The irreducible tensions: cycles of affinity the coherent frame
-    /// could not explain away. Empty means the knowledge composes.
-    pub tension: Vec<Holonomy>,
     /// The crystallized invariant of the whole map — the same 32 bytes
     /// for two knowledge-webs that are one shape up to a frame change.
     pub signature: [u8; 32],
@@ -160,7 +157,7 @@ pub fn knowledge_order(library: &Library) -> Vec<Family> {
     order.into_iter().map(|i| FAMILIES[i]).collect()
 }
 
-/// **THE FULL MAP** — the curiosity order, the irreducible tensions, and
+/// **THE FULL MAP** — the curiosity order and
 /// the crystallized invariant, in one reading.
 ///
 /// The signature runs `rcf_hash` (invariant factors, `O(dim³)` in the
@@ -169,10 +166,8 @@ pub fn knowledge_order(library: &Library) -> Vec<Family> {
 /// the cross-line consilience that mints when two lines' maps carry the
 /// same signature — not the per-beat reach.
 pub fn knowledge_map(library: &Library) -> SelfMap {
-    let (delta, support) = project(library);
     SelfMap {
         order: knowledge_order(library),
-        tension: holonomies(&delta, &support),
         // The map's only relations run family ↔ word, antisymmetrically, so
         // its RCF signature is read from the 4×W family block exactly
         // (`rcf_hash_skew_bipartite`, byte-identical to `rcf_hash` of the
@@ -180,6 +175,18 @@ pub fn knowledge_map(library: &Library) -> SelfMap {
         // dim² Smith form. Measured: 118 s → milliseconds at 467 words.
         signature: rcf_hash_skew_bipartite(FAMILIES.len(), &family_block(library)),
     }
+}
+
+/// **THE IRREDUCIBLE TENSIONS** of a line's knowledge: cycles of affinity
+/// the coherent frame could not explain away (empty means the knowledge
+/// composes). A reading on demand, no longer part of [`knowledge_map`]:
+/// it projects the library onto a DENSE `(4 + words)²` Delta of exact
+/// rationals — over 16 million entries at 4,000 words — which every line
+/// rebuilt at every boot while nothing read it (measured 2026-10-08: the
+/// conductor's 3G heap at its first beat, `consilience_step`).
+pub fn knowledge_tension(library: &Library) -> Vec<Holonomy> {
+    let (delta, support) = project(library);
+    holonomies(&delta, &support)
 }
 
 /// **CROSS-LINE CONSILIENCE** (38 §5) — the shared knowledge no single

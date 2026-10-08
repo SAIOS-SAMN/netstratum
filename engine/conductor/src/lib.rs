@@ -6756,6 +6756,14 @@ pub mod profile {
         *TRACED.get_or_init(|| std::env::var_os("NETSTRATUM_TRACE").is_some())
     }
 
+    /// Resident memory in MB (Linux `/proc/self/statm`), for the trace.
+    fn rss_mb() -> u64 {
+        std::fs::read_to_string("/proc/self/statm")
+            .ok()
+            .and_then(|s| s.split_whitespace().nth(1)?.parse::<u64>().ok())
+            .map_or(0, |pages| pages * 4096 / 1_048_576)
+    }
+
     pub fn timed<T>(name: &'static str, run: impl FnOnce() -> T) -> T {
         if traced() {
             use std::io::Write;
@@ -6776,7 +6784,7 @@ pub mod profile {
         let spent = at.elapsed();
         if traced() {
             use std::io::Write;
-            eprintln!("trace: <- {name} {}ms", spent.as_millis());
+            eprintln!("trace: <- {name} {}ms rss {}MB", spent.as_millis(), rss_mb());
             let _ = std::io::stderr().flush();
         }
         let mut book = BOOK.lock().expect("profile book");
