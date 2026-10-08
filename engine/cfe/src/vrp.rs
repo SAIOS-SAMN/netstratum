@@ -452,6 +452,8 @@ impl Chronicle {
             return Vec::new();
         }
         let drained: Vec<Receipt> = self.receipts.drain(..n).collect();
+        // `drain` keeps the buffer's capacity; the bound is the point.
+        self.receipts.shrink_to_fit();
         self.base += n as u64;
         self.base_parent = drained.last().map(|r| r.own()).unwrap_or(self.base_parent);
         self.annals.absorb(drained.clone());
