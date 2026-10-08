@@ -895,10 +895,11 @@ pub struct PolitySpec {
 }
 
 /// One live polity world: the sim, its contained actor, its research rung.
-/// PERF — the ceiling on a vessel's grown basin. A mind is finite: absorption and
-/// practice stop growing it past this, so memory stays bounded over a long run
-/// (the basin is live workspace, never pruned by replay). Far above any real
-/// working vocabulary, so cognition is unaffected; it only stops a runaway.
+/// PERF — the ceiling on a vessel's grown basin. A mind is finite: past this
+/// the OLDEST crystals give way (every think, not only speech: the layered
+/// and affine seats think more often, and an unbounded basin grew the
+/// conductor ~20 MB a minute, measured 2026-10-09). The basin is live
+/// workspace, never pruned by replay.
 const AUTIC_BASIN_CAP: usize = 4096;
 
 /// PERF — how often (in world beats) a vessel PRACTISES a mesh wall and SPEAKS a
@@ -3861,6 +3862,14 @@ impl Polity {
             return;
         };
         let digest = receipt.own().0;
+        // A bounded mind: each vessel's basin keeps its newest
+        // AUTIC_BASIN_CAP crystals.
+        for basin in self.grown.values_mut() {
+            if basin.len() > AUTIC_BASIN_CAP {
+                let over = basin.len() - AUTIC_BASIN_CAP;
+                basin.drain(..over);
+            }
+        }
         // docs/60 D6 — WORDS COMPETE: the library is stamped on this line's
         // clock; once a year the words unused for a year give way.
         let now = self.world.now();
@@ -4064,7 +4073,7 @@ impl Polity {
             let autic = self.stated.values().filter(|s| **s).count();
             let unstated = self.stated.values().filter(|s| !**s).count();
             eprintln!(
-                "COG-LEX clock {} {}: words={} pending={} autic={} unstated={} spoke={} learned={} heard={} misheard={}",
+                "COG-LEX clock {} {}: words={} pending={} autic={} unstated={} spoke={} learned={} heard={} misheard={} basin={}",
                 self.world.now(),
                 self.spec.civilization.sigil,
                 self.library.words().len(),
@@ -4075,6 +4084,7 @@ impl Polity {
                 self.autic_learned,
                 self.heard,
                 self.misheard,
+                self.max_basin(),
             );
             self.prev_order = Some((syn, ent, read.families));
             Some(derived)
