@@ -185,6 +185,12 @@ impl Seat {
         Ok(Seat { entity, home: Some(home.to_path_buf()), grown: Vec::new(), held: Vec::new(), tally: Tally::default() })
     }
 
+    /// The session this seat speaks through: the house tends its mail on
+    /// it (a house and its minds speak to the same hypha, 78.145).
+    pub fn session(&self) -> &mycelium::sdk::Session {
+        self.entity.relay()
+    }
+
     /// ONE STROKE: pull a task, think it, file what can be filed. `Ok(None)`
     /// when the registry holds nothing for this voice.
     pub fn stroke(&mut self) -> io::Result<Option<String>> {
@@ -214,7 +220,7 @@ impl Seat {
             // THE PROPOSER (78.143): the mind speaks the court's own steps,
             // each checked by the judge's own steps on the train pairs, the
             // look bounded in time. A closed proposal is filed natively.
-            if let Some(p) = crate::propose::propose_within(&task.train, &task.tests, 400, std::time::Duration::from_secs(20)) {
+            if let Some(p) = crate::propose::propose_within(&task.train, &task.tests, 3000, std::time::Duration::from_secs(20)) {
                 self.tally.solved_at_home += 1;
                 self.tally.closed_by_objects += u64::from(solver::percept::learn(&pairs).is_some());
                 let mut budget = self.entity.physics_mut().stroke();

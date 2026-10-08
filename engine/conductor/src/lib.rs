@@ -6826,10 +6826,11 @@ pub fn retire_collapsed(worlds: &mut Vec<Polity>, book: &Ledger, stamp: u64) -> 
         if polity.world.collapsed().is_none() {
             return true;
         }
-        let _ = cfe::persist::sync(
-            polity.world.chronicle(),
-            &book.world_dir(&polity.spec.world_name).join("chronicle.tlv"),
-        );
+        let dir = book.world_dir(&polity.spec.world_name);
+        let _ = cfe::persist::sync(polity.world.chronicle(), &dir.join("chronicle.tlv"));
+        // The line's death, on disk: what outside readers (the house's
+        // seats) see without opening the ledger.
+        let _ = std::fs::write(dir.join("collapsed"), format!("{stamp}\n"));
         retired.push(polity.spec.world_name.clone());
         false
     });

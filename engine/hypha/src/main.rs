@@ -8,7 +8,7 @@
 //!   ns-hypha found                      found netstratum's domain on the court (once)
 //!   ns-hypha reserve <tier>             designate one of the domain's tiers its reserve (in trust)
 //!   ns-hypha originate [<var-root>]     state the universe's origin once: its Big Bang, its torus
-//!   ns-hypha seat [--every S] [--key F]  netstratum's client kernel on the fleet: pull, think, file (signed with the house key)
+//!   ns-hypha seat [--every S] [--key F] [--worlds D] netstratum's client kernel on the fleet: pull, think, file (signed with the house key)
 //!   ns-hypha mark <world-dir>           record a people as folded through its chronicle's end
 //!   ns-hypha epoch <name>               set the hot colonies line aside, restart it at zero
 //!   ns-hypha prune                      archive hot entries whose folds the court reads settled
@@ -537,6 +537,16 @@ fn seat_cmd(args: &[String], at: &str, home: &Path) -> ExitCode {
         return ExitCode::from(2);
     }
     println!("seat: netstratum's client kernel at {}, a stroke every {every}s", hyphae.join(", "));
+    // THE HOUSE (78.145) on the FIRST hypha named: a house and the minds it
+    // seats share one hypha's mail. `--worlds` names the universe's lines.
+    let worlds = std::path::PathBuf::from(flag(args, "--worlds").unwrap_or_else(|| "var-g2/worlds".to_string()));
+    let mut house = match ns_hypha::house::House::open(home, &worlds) {
+        Ok(h) => Some(h),
+        Err(e) => {
+            eprintln!("ns-hypha: the house did not open: {e}");
+            None
+        }
+    };
     let mut strokes = 0u64;
     // A hypha that DEFERS a stroke (the judge's deficit: the voice asked
     // faster than its budget) is left to rest, doubling each time it defers
@@ -549,6 +559,12 @@ fn seat_cmd(args: &[String], at: &str, home: &Path) -> ExitCode {
             strokes += 1;
             std::thread::sleep(std::time::Duration::from_secs(every));
             continue;
+        }
+        if let Some(h) = house.as_mut() {
+            match h.tend(seats[0].1.session()) {
+                Ok(said) => said.iter().for_each(|l| println!("house [{}]: {l}", seats[0].0)),
+                Err(e) => eprintln!("house [{}]: the tend did not complete: {e}", seats[0].0),
+            }
         }
         let (addr, seat) = &mut seats[at];
         match seat.stroke() {

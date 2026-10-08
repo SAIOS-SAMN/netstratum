@@ -10,7 +10,7 @@
 //! not close; the court judges again when it is filed.
 
 use mycelium::sdk::rule::{
-    sentence, would_judge, Coord, Create, Extent, Order, Paint, Pred, Region, Step, Stop, Symmetry, Tie,
+    sentence, would_judge, Cmp, Coord, Create, Extent, Order, Paint, Pred, Region, Step, Stop, Symmetry, Tie, Value,
 };
 use mycelium::transducer::element::Element;
 use mycelium::transducer::family::{self, NoCrystal};
@@ -43,7 +43,10 @@ fn shape(g: &G) -> (usize, usize) {
 }
 
 /// The selections a mind tries, in a stated order: everything; each hue it
-/// sees; each hue's complement; the largest and smallest bodies (ties held).
+/// sees; each hue's complement; the largest and smallest bodies (ties held);
+/// then COUNT and COMPARE (78.143 slice 2): the extremum of each body
+/// coordinate in both orders, the bodies whose shape is unique in the scene
+/// or that carry several hues, and the bodies touching each hue.
 fn selections(input_hues: &[u8]) -> Vec<Pred> {
     let mut out = vec![Pred::All];
     for &h in input_hues.iter().filter(|&&h| h != 0) {
@@ -54,6 +57,16 @@ fn selections(input_hues: &[u8]) -> Vec<Pred> {
     }
     out.push(Pred::extremum(Coord::Tally, Order::Greatest, Tie::Hold));
     out.push(Pred::extremum(Coord::Tally, Order::Least, Tie::Hold));
+    for coord in [Coord::Shell, Coord::Height, Coord::Width, Coord::Enclosed, Coord::Contacts, Coord::Hues, Coord::Peers] {
+        for order in [Order::Greatest, Order::Least] {
+            out.push(Pred::extremum(coord, order, Tie::Hold));
+        }
+    }
+    out.push(Pred::count(Coord::Peers, 1));
+    out.push(Pred::Cmp { coord: Coord::Hues, cmp: Cmp::Greater, to: Value::Integer(1) });
+    for &h in input_hues.iter().filter(|&&h| h != 0) {
+        out.push(Pred::Touches(Box::new(Pred::Hue(h))));
+    }
     out
 }
 
