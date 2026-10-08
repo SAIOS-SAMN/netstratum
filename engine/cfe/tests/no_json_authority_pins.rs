@@ -1,6 +1,6 @@
 //! JSON is display-only — authority is chronicle + wire (docs/JSON_DISPLAY_ONLY.md).
 //!
-//! These pins prove SEAL B resume does not depend on state.json.
+//! These pins prove a JSON-free resume does not depend on state.json.
 
 use cfe::dop::{positive, unit, ZoneKind};
 use cfe::thermal::StarClass;
@@ -32,7 +32,6 @@ fn resume_from_chronicle_ignores_missing_state_json() {
 
     let chronicle = cfe::persist::load(&path).expect("load verifies chain");
     let resumed = World::resume(chronicle);
-    assert_eq!(replay(resumed.chronicle()), resumed.committed());
     assert_eq!(resumed.habitat_count(FIRST_ORB), 1);
     assert_eq!(resumed.labor_force(FIRST_ORB), 1);
     // Banks match without any JSON in the tree.

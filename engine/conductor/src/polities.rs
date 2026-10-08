@@ -469,6 +469,18 @@ pub fn registered_polities(registry: &ledger::registry::Registry) -> Vec<PolityS
     grown
 }
 
+/// **IS THIS WORLD NAME TAKEN?** A world directory belongs to exactly one
+/// line. A name is taken when a compiled seat founds there or any line's seat
+/// card records it. Measured 2026-10-08: a cleave named `forge-reach` (head
+/// "forge", tail "reach") was seated in Forgeborn's compiled world; the two
+/// lines wrote one directory, the scribe read each other's writes as
+/// divergence and rotated the directory aside every beat (869 copies, 9.7 GB)
+/// until the host ran out of resources.
+pub fn world_name_taken(registry: &ledger::registry::Registry, world: &str) -> bool {
+    founding_polities().iter().any(|spec| spec.world_name == world)
+        || registry.list().iter().any(|card| registry.founded_at(&card.sigil).is_some_and(|seat| seat.world == world))
+}
+
 /// **THE COMPILED ROSTER'S DIGEST** (docs/58 §3) — what a universe's Big Bang
 /// records of who was seated at its founding: every compiled seat's
 /// identity, world and siting, in roster order. A change to any seat is a
@@ -497,5 +509,19 @@ pub fn roster_digest() -> [u8; 32] {
 pub fn roster(registry: &ledger::registry::Registry) -> Vec<PolitySpec> {
     let mut all = founding_polities();
     all.extend(registered_polities(registry));
+    // ONE LINE PER WORLD: a spec whose world another line already holds is
+    // not seated there (two lines writing one directory is the failure
+    // `world_name_taken` now prevents at the cleave); it is reported, loudly.
+    let mut held = std::collections::BTreeSet::new();
+    all.retain(|spec| {
+        if held.insert(spec.world_name.clone()) {
+            return true;
+        }
+        eprintln!(
+            "roster: {} is NOT seated — its world {} already belongs to another line",
+            spec.civilization.sigil, spec.world_name
+        );
+        false
+    });
     all
 }

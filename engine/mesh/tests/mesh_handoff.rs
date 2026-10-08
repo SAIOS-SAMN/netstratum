@@ -76,7 +76,7 @@ fn the_handoff_walks() {
     yield_authority(&mut chronicle, 9, 12, 5).expect("the second seal");
     assert_eq!(authority(&chronicle), Ok(Some(12)));
 
-    // SEAL B: the walk derives identically across the file boundary.
+    // The authority walk survives the file: what was sealed is read back.
     let path = scratch("walks").join("chronicle.tlv");
     sync(&chronicle, &path).expect("syncs");
     let resumed = load(&path).expect("returns");

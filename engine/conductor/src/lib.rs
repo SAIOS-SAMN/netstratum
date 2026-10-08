@@ -144,6 +144,7 @@ mod polities;
 // DIO-1 (operator-ruled 2026-08-16): planetary siting on exact rational
 // Diophantine tracks (r = M·k², P = M·k³ off the (M,M) base). See siting.rs.
 mod siting;
+pub mod snapshot;
 // SOC-1 (operator directive 2026-08-16): the open build workbench — the surplus
 // phase of `build_step` draws its next building from a disposition-weighted
 // partition function seeded by the chronicle digest, in place of the fixed
@@ -154,7 +155,7 @@ pub mod soc;
 // discovered against a deficit and gated by TOPOLOGICAL reach, never a ZoneKind
 // enum variant or an integer level. See recipe.rs.
 pub mod recipe;
-pub use polities::{founding_polities, registered_polities, roster, roster_digest};
+pub use polities::{founding_polities, registered_polities, roster, roster_digest, world_name_taken};
 
 /// AEON-1b (11 §5): THE FOLD — seal the live era and rotate it into
 /// the archive sequence. `EraFolded` (tag 46) appends to the universe
@@ -219,7 +220,10 @@ pub fn fold(var_root: &str) -> std::io::Result<(u64, Ratio)> {
             living.insert(sigil);
         }
     }
-    let ancient = ancient_of(&registry, &living);
+    // No ancient is sealed by lineage (operator ruling 2026-10-08): an ancient
+    // arises only at a core, and none exists yet; AncientArose (tag 192)
+    // waits for one. The keys stay in trust.
+    let ancient: Option<(String, u64)> = None;
     let stamp = ledger
         .receipts()
         .iter()
@@ -257,14 +261,19 @@ pub fn fold(var_root: &str) -> std::io::Result<(u64, Ratio)> {
     Ok((era, gauge))
 }
 
-/// **THE ANCIENT, BY LINEAGE** (docs/58 §4, accepted by the coordinator
-/// 2026-10-08). Every LIVING line's tree is itself and every living line
-/// whose lineage (the registry's DAG, `Civilization.lineage`, followed
-/// transitively) leads back to it. The ancient is the living line whose tree
-/// is STRICTLY the largest; `(sigil, tree size)`. No threshold and no
-/// tie-break: when two trees are equal, convergence has singled out no one,
-/// and no ancient stands. It may change hands as clades rise and fall.
-pub fn ancient_of(registry: &Registry, living: &std::collections::BTreeSet<String>) -> Option<(String, u64)> {
+/// **THE LARGEST LIVING LINEAGE** (docs/58 §4 as amended by the operator's
+/// ruling 2026-10-08). Every LIVING line's tree is itself and every living
+/// line whose lineage (the registry's DAG, `Civilization.lineage`, followed
+/// transitively) leads back to it; this returns the living line whose tree is
+/// STRICTLY the largest, `(sigil, tree size)` — no threshold, no tie-break.
+///
+/// LINEAGE DOES NOT CROWN AN ANCIENT. An ancient is PRODUCED by netstratum's
+/// physics at a galactic core (the core-dwelling minds that wake first there,
+/// or a people that comes to fold space — the shared definition), and the
+/// cores do not exist yet. The strongest surface lineage is the natural
+/// PROGENITOR candidate: the ancients' partner, who builds the highways and
+/// wormholes. That is what this reads.
+pub fn largest_lineage(registry: &Registry, living: &std::collections::BTreeSet<String>) -> Option<(String, u64)> {
     let parents: std::collections::BTreeMap<String, Vec<String>> =
         registry.list().into_iter().map(|c| (c.sigil, c.lineage)).collect();
     let mut tree: std::collections::BTreeMap<String, u64> = std::collections::BTreeMap::new();
@@ -1500,7 +1509,10 @@ impl Polity {
         // survives every restart without an operator fold.
         let carrier = book.world_dir(&spec.world_name).join("chronicle.tlv");
         if let Ok(chronicle) = cfe::persist::load(&carrier) {
-            let world = World::resume(chronicle);
+            // CARRY STATE FORWARD: from the world's snapshot plus the
+            // receipts written after it — never replayed from genesis once a
+            // snapshot stands (`snapshot::resume`).
+            let (world, _resumed) = snapshot::resume(&book.world_dir(&spec.world_name), chronicle);
             if world.orb().is_some() {
                 let handle = format!("{}-conductor", spec.civilization.sigil);
                 let by_handle = |name: &str| {
@@ -4711,7 +4723,9 @@ impl Polity {
             let k = (start + offset) % (heads.len() * tails.len());
             let (head, tail) = (heads[k / tails.len()], tails[k % tails.len()]);
             let sigil = format!("{head}{tail}");
-            if registry.load(&sigil).is_none() {
+            // Both the line AND its world must be new: a world directory
+            // belongs to one line (`polities::world_name_taken`).
+            if registry.load(&sigil).is_none() && !polities::world_name_taken(registry, &format!("{head}-{tail}")) {
                 chosen = Some((sigil, head, tail));
                 break;
             }
@@ -4982,6 +4996,16 @@ impl Polity {
     /// world tick}` on the mainline. The tick advanced this cycle, so
     /// the arrow ascends structurally; the adoption door shuts itself
     /// after the first pass.
+    /// **CARRY THIS WORLD FORWARD** — sync its chronicle to disk (the tail
+    /// only, through the polity's own cursor), then write its snapshot at that
+    /// head, so the next boot resumes from here instead of from genesis.
+    pub fn carry(&mut self, book: &Ledger) -> std::io::Result<()> {
+        let dir = book.world_dir(&self.spec.world_name);
+        cfe::persist::sync_from(self.world.chronicle(), &dir.join("chronicle.tlv"), &mut self.sync_cursor)
+            .map_err(|e| std::io::Error::other(format!("{e:?}")))?;
+        snapshot::write(&dir, &self.world)
+    }
+
     fn chain_beat(&mut self, book: &Ledger) -> Result<(), mesh::arbor::ArborRefused> {
         // The handle opens once and holds: the open's full re-verify
         // is paid at first sight (or on resume, where it re-verifies
@@ -5087,12 +5111,23 @@ impl Polity {
         // (O(history), the price of one replay), and the chain-hash
         // integrity of that prefix is still proven by from_receipts.
         if self.stepper.is_none() {
-            let mut stepper = cfe::world::Replayer::new();
-            let verified = cfe::vrp::Chronicle::from_receipts(receipts[..self.chained].to_vec())
-                .map_err(|_| mesh::arbor::ArborRefused::StateUndecodable)?;
-            for receipt in verified.receipts() {
-                stepper.apply(receipt);
-            }
+            // Every deed up to the watermark was judged live already; the
+            // stepper carries the LIVE state forward from there. When the
+            // watermark is the chronicle's head (the boot after a clean
+            // close), the live world IS that state — nothing is replayed.
+            // Only a watermark behind the head (deeds written but not yet
+            // judged when the last process stopped) folds the judged prefix.
+            let stepper = if self.chained == receipts.len() {
+                cfe::world::Replayer::from_state(self.world.committed())
+            } else {
+                let mut stepper = cfe::world::Replayer::new();
+                let verified = cfe::vrp::Chronicle::from_receipts(receipts[..self.chained].to_vec())
+                    .map_err(|_| mesh::arbor::ArborRefused::StateUndecodable)?;
+                for receipt in verified.receipts() {
+                    stepper.apply(receipt);
+                }
+                stepper
+            };
             self.stepper = Some(stepper);
         }
         let stepper = self.stepper.as_mut().expect("seeded above");

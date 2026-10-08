@@ -100,6 +100,13 @@ impl Replayer {
         }
     }
 
+    /// A stepper that starts from a CARRIED state — a checkpoint's snapshot
+    /// — rather than the empty book, so the receipts after it are applied
+    /// once, forward, and nothing before it is replayed.
+    pub fn from_state(state: Committed) -> Replayer {
+        Replayer { state }
+    }
+
     /// The state after every receipt applied so far.
     pub fn state(&self) -> &Committed {
         &self.state

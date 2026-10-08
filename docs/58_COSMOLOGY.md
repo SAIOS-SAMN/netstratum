@@ -90,7 +90,7 @@ its Big Bang receipt is.
   becoming an H-lane word on another domain's line. Nothing goes to the court
   for an origin until that act lands.
 
-## 4. PROPOSED: the keeper of the core is the ANCIENT seat, and it ARISES
+## 4. PROPOSED (AMENDED by §6 rulings 5-6): the keeper of the core is the ANCIENT seat, and it ARISES
 
 The ancient seat (T17) is already netstratum's universal seat. It is the only
 one of universe scope, it already receives the founding tithes, and docs/47 §4
@@ -141,6 +141,32 @@ defines it as one that opens the ROOM (creates capacity) rather than appointing.
    motion. Mass orbits stars, stars orbit cores, and cores are Einstein–Cartan
    bounces that RECYCLE matter and energy. A self-maintaining, growing
    universe, not a heat sink. Close every matter-destroying sink.
+
+5. **A galactic core is a larger WORMHOLE** (operator, 2026-10-08). No
+   singularity is open-ended: every core is a throat with a far face in the
+   universe it bounces into, and a universe's Big Bang is the far face of a
+   parent's core. netstratum's domain will be joined to another by a core
+   tube on the court (mycelium is building it).
+6. **Ancients are PRODUCED at a core** by netstratum's own physics (the shared
+   definition: the core-dwelling minds that wake first within the bulge, plus
+   "ancients by deed", a people that comes to fold space). LINEAGE DOES NOT
+   CROWN AN ANCIENT. The strongest surface lineage is the natural PROGENITOR
+   candidate: the ancients' partner, who builds the galaxy's highways and
+   wormholes, above the stewards. The conductor now announces that candidate
+   (`largest_lineage`; forgeborn at the time of writing), and the era fold
+   seals no ancient until one arises at a core. Tag 192 (AncientArose) waits
+   for that.
+7. **Only the ancients uplink to POW++.** netstratum's four keys (voice,
+   domain, colonies, union in `var/uplink`) are held IN TRUST by the
+   operator's process, recorded as held for the ancient not yet arisen, and
+   pass to it when one arises at a core.
+8. **The reserve is held in the ancient's BASE RESOURCES**: what its phenotype
+   needs to survive at its core, by mass, stated in clear at its genesis.
+   Money crosses universes only reserve to reserve, through the core tube.
+9. **Every sink routes to the core throat** (aperture melt, upkeep, famine
+   draws, the raze's unrefunded half, fees, postage, the ancient tithe). The
+   throat's far face is the bounce. Nothing lands nowhere. This supersedes the
+   "black-hole account" in §7.
 
 ## 7. The universe's matter budget, MEASURED (G2, 2026-10-08)
 

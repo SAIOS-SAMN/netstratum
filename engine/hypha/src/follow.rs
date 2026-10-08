@@ -184,6 +184,9 @@ impl Follower {
             .flatten()
             .map(|e| e.path())
             .filter(|p| p.join("chronicle.tlv").exists())
+            // A rotated `<world>--closed-*` directory is an archived copy, not
+            // a people: following one would hold a whole replay for nothing.
+            .filter(|p| !p.file_name().and_then(|n| n.to_str()).is_some_and(|n| n.contains("--closed-")))
             .collect();
         dirs.sort();
         for dir in dirs {

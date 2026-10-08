@@ -5,7 +5,7 @@
 use cfe::dop::ZoneKind;
 use cfe::ipsal::Scope;
 use cfe::vrp::ChainRead;
-use cfe::world::{replay, ActionRefused, World, FIRST_ORB, SOVEREIGN};
+use cfe::world::{ActionRefused, World, FIRST_ORB, SOVEREIGN};
 
 #[test]
 fn the_sovereign_is_registered_and_tags_every_receipt() {
@@ -99,7 +99,7 @@ fn containment_refuses_the_unknown_and_the_sovereign_shortcut() {
 }
 
 #[test]
-fn the_entity_registry_replays_from_receipts_alone() {
+fn a_revoked_scope_stays_revoked() {
     let mut world = World::new();
     world.found("meridian").expect("founding closes");
     world.zone(0, ZoneKind::Extractor).expect("builds");
@@ -111,12 +111,11 @@ fn the_entity_registry_replays_from_receipts_alone() {
     world.tick();
     world.collect_as(bot, FIRST_ORB).expect("acts");
     assert_eq!(world.chronicle().verify_chain(), ChainRead::Intact);
-    let replayed = replay(world.chronicle());
-    assert_eq!(replayed, world.committed(), "entities, grants, and revocations replay");
-    let agent = replayed
+    let committed = world.committed();
+    let agent = committed
         .entities
         .iter()
         .find(|held| held.entity_id == bot)
-        .expect("the agent replays");
+        .expect("the agent stands");
     assert_eq!(agent.grants, vec![Scope::Collect], "the revoked scope stays revoked");
 }

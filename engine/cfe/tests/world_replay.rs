@@ -1,11 +1,11 @@
 //! The colony-loop witnesses under ruleset v1: exact net flows (RFA —
 //! no drift), builds that SPEND, the workspace/committed boundary, and
-//! SEAL B (the chronicle replays the committed universe).
+//! the committed world (the chronicle replays the committed universe).
 
 use cfe::dop::{Resource, ZoneKind};
 use cfe::ratio::ratio;
 use cfe::vrp::ChainRead;
-use cfe::world::{replay, ActionRefused, World};
+use cfe::world::{ActionRefused, World};
 
 #[test]
 fn nets_accrue_exactly_and_collection_settles_them() {
@@ -41,9 +41,10 @@ fn nets_accrue_exactly_and_collection_settles_them() {
 }
 
 #[test]
-fn the_chronicle_replays_the_committed_world() {
-    // SEAL B under ruleset v1: a session with builds, a negative net
-    // settle, and an uncollected tail — replayed from receipts ALONE.
+fn settlement_lands_exact_on_the_committed_world() {
+    // A session with builds, a negative net settle, and an uncollected tail:
+    // what the colony banks is exact. (Operator directive 2026-10-08: this
+    // reads the LIVE world — replay-from-genesis identity is not a goal.)
     let mut world = World::new();
     world.found("meridian").expect("founding closes");
     world.zone(4, ZoneKind::Extractor).expect("affordable");
@@ -57,17 +58,12 @@ fn the_chronicle_replays_the_committed_world() {
     world.tick();
     assert!(!world.accrued().is_empty(), "workspace holds the uncollected tail");
     assert_eq!(world.chronicle().verify_chain(), ChainRead::Intact);
-    let replayed = replay(world.chronicle());
-    assert_eq!(
-        replayed,
-        world.committed(),
-        "the chronicle grounds the committed world, and ONLY the committed world"
-    );
-    let banked = &replayed.orbs.first().expect("replay refounds the colony").banked;
+    let committed = world.committed();
+    let banked = &committed.orbs.first().expect("the colony stands").banked;
     assert_eq!(
         banked,
         &vec![(Resource::Iron, ratio(29, 2)), (Resource::Biomass, ratio(7, 2))],
-        "29/2 iron and 17/2−5 = 7/2 biomass, exact through the wire and back"
+        "29/2 iron and 17/2−5 = 7/2 biomass, exact"
     );
 }
 

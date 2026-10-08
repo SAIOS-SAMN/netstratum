@@ -76,6 +76,17 @@ impl World {
     /// era had no receipts, so they honestly do not persist.
     pub fn resume(chronicle: Chronicle) -> World {
         let committed = replay(&chronicle);
+        Self::resume_from(committed, chronicle)
+    }
+
+    /// **CARRY STATE FORWARD** (operator directive 2026-10-08: judge each
+    /// deed live once; carry state forward instead of replaying from
+    /// genesis). The world from a CARRIED committed state — a checkpoint's
+    /// snapshot brought up to the chronicle's head — and its chronicle, with
+    /// no replay. The caller vouches that `committed` is the state at the
+    /// chronicle's last receipt; the clock reinstates at the highest stamp
+    /// the receipts prove.
+    pub fn resume_from(committed: crate::world::state::Committed, chronicle: Chronicle) -> World {
         let stamp = chronicle
             .receipts()
             .iter()

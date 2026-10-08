@@ -326,18 +326,18 @@ fn main() {
         for name in conductor::retire_collapsed(&mut worlds, &book) {
             println!("beat {beat}: COLLAPSE — {name} has no people left; it leaves the roster, its chronicle kept whole");
         }
-        // THE ANCIENT, read live (docs/58 §4) and announced when it changes;
-        // it is SEALED only at an era's close (`fold`).
+        // THE LARGEST LIVING LINEAGE, read live and announced when it
+        // changes: the progenitor candidate (an ancient arises only at a core).
         let living: std::collections::BTreeSet<String> =
             worlds.iter().map(|p| p.spec.civilization.sigil.clone()).collect();
-        let now_ancient = conductor::ancient_of(&registry, &living);
+        let now_ancient = conductor::largest_lineage(&registry, &living);
         if now_ancient.as_ref().map(|(s, _)| s) != ancient.as_ref().map(|(s, _)| s) {
             match &now_ancient {
                 Some((sigil, tree)) => println!(
-                    "beat {beat}: THE ANCIENT — {sigil}'s line holds {tree} of {} living lines (sealed at the era's close)",
+                    "beat {beat}: THE PROGENITOR CANDIDATE — {sigil}'s line holds {tree} of {} living lines (an ancient arises only at a core)",
                     living.len()
                 ),
-                None => println!("beat {beat}: no ancient stands — no line's living tree is the strict largest"),
+                None => println!("beat {beat}: no progenitor candidate — no line's living tree is the strict largest"),
             }
         }
         ancient = now_ancient;
@@ -419,6 +419,13 @@ fn main() {
                 "beat {beat}: year {} journaled — the wall is fresh (var/worlds/wall.html)",
                 beat / scribe::journal::YEAR_TICKS
             );
+            // CARRY STATE FORWARD: every world's snapshot at the year's close,
+            // so a boot resumes from here, never from genesis.
+            for polity in worlds.iter_mut().filter(|e| !e.penned) {
+                if let Err(e) = polity.carry(&book) {
+                    eprintln!("beat {beat}: {} was not carried forward: {e}", polity.spec.world_name);
+                }
+            }
             // GALAXY-1b: the observation sweep rides the year voice.
             for galaxy in observe_crossings(&worlds, &registry, &book, epoch_base + beat) {
                 println!(

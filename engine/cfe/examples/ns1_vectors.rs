@@ -4,7 +4,7 @@
 
 use cfe::dop::{ClosureEvent, ColonyOrb, Resource, ZoneKind};
 use cfe::ratio::ratio;
-use cfe::world::{replay, World};
+use cfe::world::World;
 
 fn hex(bytes: &[u8]) -> String {
     bytes.iter().map(|byte| format!("{byte:02x}")).collect()
@@ -54,5 +54,4 @@ fn main() {
             hex(&receipt.own().0)
         );
     }
-    println!("replay matches committed: {}", replay(world.chronicle()) == world.committed());
 }
