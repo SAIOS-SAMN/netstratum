@@ -11,7 +11,9 @@
 //!     readers fold over (measured in G2: ~15% of all receipts);
 //!   * the own-hash of every drained receipt, in order — a literature claim
 //!     may cite ANY receipt the world sealed (claims are rare; the list is
-//!     scanned, 32 bytes a receipt, no hashed index);
+//!     scanned, 32 bytes a receipt, no hashed index). On disk they are an
+//!     APPEND-ONLY file beside the chronicle (the snapshot names how many
+//!     it holds), never rewritten;
 //!   * the latest aperture stamp per orb (the crystal sheet's `last_link`)
 //!     and the count of drained assays (the office evidence) — the only two
 //!     things any reader takes from a bulk kind.
@@ -93,6 +95,81 @@ impl Annals {
     /// How many assays were drained.
     pub fn assays(&self) -> u64 {
         self.assays
+    }
+
+    /// Every drained own-hash, oldest first.
+    pub fn digests(&self) -> &[[u8; 32]] {
+        &self.digests
+    }
+
+    /// Plain bytes for the snapshot, the digests LEFT OUT (they live in their
+    /// append-only file): `kept count u32 ‖ frames ‖ digest count u64 ‖
+    /// links u32 ‖ (orb,stamp)·n ‖ assays u64`, little-endian.
+    pub fn to_carried_bytes(&self) -> Vec<u8> {
+        let mut out = (self.kept.len() as u32).to_le_bytes().to_vec();
+        for r in &self.kept {
+            out.extend_from_slice(&r.wire_bytes());
+        }
+        out.extend_from_slice(&(self.digests.len() as u64).to_le_bytes());
+        self.put_tail(&mut out);
+        out
+    }
+
+    /// Read [`Annals::to_carried_bytes`] back with its digests, or `None`
+    /// (the digest count must match).
+    pub fn from_carried_bytes(b: &[u8], digests: Vec<[u8; 32]>) -> Option<Annals> {
+        let (kept, mut p) = Self::read_kept(b)?;
+        let count = u64::from_le_bytes(b.get(p..p + 8)?.try_into().ok()?);
+        p += 8;
+        if count != digests.len() as u64 {
+            return None;
+        }
+        let (last_link, assays) = Self::read_tail(b, &mut p)?;
+        (p == b.len()).then_some(Annals { kept, digests, last_link, assays })
+    }
+
+    /// How many digests a [`Annals::to_carried_bytes`] payload names (so its
+    /// reader knows how much of the digest file to take).
+    pub fn carried_digest_count(b: &[u8]) -> Option<usize> {
+        let (_, p) = Self::read_kept(b)?;
+        usize::try_from(u64::from_le_bytes(b.get(p..p + 8)?.try_into().ok()?)).ok()
+    }
+
+    fn put_tail(&self, out: &mut Vec<u8>) {
+        out.extend_from_slice(&(self.last_link.len() as u32).to_le_bytes());
+        for (orb, stamp) in &self.last_link {
+            out.extend_from_slice(&orb.to_le_bytes());
+            out.extend_from_slice(&stamp.to_le_bytes());
+        }
+        out.extend_from_slice(&self.assays.to_le_bytes());
+    }
+
+    fn read_kept(b: &[u8]) -> Option<(Vec<Receipt>, usize)> {
+        let n = u32::from_le_bytes(b.get(..4)?.try_into().ok()?) as usize;
+        let mut p = 4usize;
+        let mut kept = Vec::with_capacity(n.min(1 << 20));
+        for _ in 0..n {
+            let (tag, value) = crate::tlv::records(b.get(p..)?).next()?;
+            p += 5 + value.len();
+            kept.push(Receipt::from_wire(tag, value)?);
+        }
+        Some((kept, p))
+    }
+
+    fn read_tail(b: &[u8], p: &mut usize) -> Option<(BTreeMap<u64, u64>, u64)> {
+        let u64_at = |p: &mut usize| -> Option<u64> {
+            let v = u64::from_le_bytes(b.get(*p..*p + 8)?.try_into().ok()?);
+            *p += 8;
+            Some(v)
+        };
+        let n = u32::from_le_bytes(b.get(*p..*p + 4)?.try_into().ok()?) as usize;
+        *p += 4;
+        let mut last_link = BTreeMap::new();
+        for _ in 0..n {
+            let orb = u64_at(p)?;
+            last_link.insert(orb, u64_at(p)?);
+        }
+        Some((last_link, u64_at(p)?))
     }
 
     /// Plain bytes for the snapshot beside it:

@@ -55,3 +55,42 @@ fn a_carried_world_boots_from_its_tail_alone() {
     assert_eq!(on_disk.total(), back.chronicle().total());
     assert_eq!(on_disk.receipts().last(), back.chronicle().receipts().last());
 }
+
+#[test]
+fn the_digests_append_and_are_never_rewritten() {
+    let dir = std::env::temp_dir().join(format!("conductor-digests-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&dir);
+    std::fs::create_dir_all(&dir).unwrap();
+    let carrier = dir.join("chronicle.tlv");
+    let digests = dir.join("annals.dig");
+
+    let mut world = grown();
+    let mut cursor = SyncCursor::default();
+    sync_from(world.chronicle(), &carrier, &mut cursor).unwrap();
+    world.drain_chronicle_to(world.chronicle().total() - 1);
+    snapshot::write(&dir, &world, cursor.bytes()).unwrap();
+    let first = std::fs::read(&digests).unwrap();
+    assert_eq!(first.len(), world.chronicle().annals().digests().len() * 32);
+
+    // A second carry appends only the newly drained hashes.
+    world.zone(9, ZoneKind::Habitat).expect("affordable");
+    world.zone(14, ZoneKind::Extractor).expect("affordable");
+    sync_from(world.chronicle(), &carrier, &mut cursor).unwrap();
+    world.drain_chronicle_to(world.chronicle().total() - 1);
+    snapshot::write(&dir, &world, cursor.bytes()).unwrap();
+    let second = std::fs::read(&digests).unwrap();
+    assert_eq!(&second[..first.len()], &first[..], "nothing already written moves");
+    assert_eq!(second.len(), world.chronicle().annals().digests().len() * 32);
+
+    // A file left longer than its snapshot (a crash before the snapshot
+    // landed) still boots: the snapshot takes only its own count.
+    let mut longer = second.clone();
+    longer.extend_from_slice(&[9u8; 32]);
+    std::fs::write(&digests, &longer).unwrap();
+    let (back, _, _) = snapshot::boot(&dir).expect("boots");
+    assert_eq!(back.chronicle().annals(), world.chronicle().annals());
+    assert!(back.chronicle().sealed(&world.chronicle().annals().digests()[0]));
+    // and the next carry cuts it back before appending
+    snapshot::write(&dir, &world, cursor.bytes()).unwrap();
+    assert_eq!(std::fs::read(&digests).unwrap(), second);
+}
