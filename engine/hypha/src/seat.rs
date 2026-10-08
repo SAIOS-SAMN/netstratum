@@ -127,8 +127,17 @@ impl Seat {
     /// Seat netstratum at `addr` under the voice at `home/voice.key`, its
     /// court-admitted words restored from `home/genome`.
     pub fn open(addr: &str, home: &Path) -> io::Result<Seat> {
+        Self::open_as(addr, home, "voice.key")
+    }
+
+    /// Seat under the key file `key` in `home`. Concordance 6.2a (operator
+    /// ruling 24fdc48): only the ANCIENTS are connected to the tubes, so a
+    /// mu-earning solve is signed with the ancients' HOUSE key: netstratum's
+    /// union tier, its reserve, held in trust for the ancient not yet arisen
+    /// (`tier-union.key`).
+    pub fn open_as(addr: &str, home: &Path, key: &str) -> io::Result<Seat> {
         std::fs::create_dir_all(home)?;
-        let key = home.join("voice.key");
+        let key = home.join(key);
         let key = key.to_str().ok_or_else(|| io::Error::new(io::ErrorKind::InvalidInput, "the key path is not UTF-8"))?;
         // SIGNED (78.141): the seat signs its solves with netstratum's voice
         // key — held in trust, never minted here (a missing key is an error,

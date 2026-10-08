@@ -8,7 +8,7 @@
 //!   ns-hypha found                      found netstratum's domain on the court (once)
 //!   ns-hypha reserve <tier>             designate one of the domain's tiers its reserve (in trust)
 //!   ns-hypha originate [<var-root>]     state the universe's origin once: its Big Bang, its torus
-//!   ns-hypha seat [--every S]            netstratum's client kernel on the fleet: pull, think, file
+//!   ns-hypha seat [--every S] [--key F]  netstratum's client kernel on the fleet: pull, think, file (signed with the house key)
 //!   ns-hypha mark <world-dir>           record a people as folded through its chronicle's end
 //!   ns-hypha epoch <name>               set the hot colonies line aside, restart it at zero
 //!   ns-hypha prune                      archive hot entries whose folds the court reads settled
@@ -521,12 +521,14 @@ fn census_cmd(args: &[String], up: Option<&Uplink>, home: &Path) -> ExitCode {
 /// printed every 20 strokes. Runs until stopped.
 fn seat_cmd(args: &[String], at: &str, home: &Path) -> ExitCode {
     let every: u64 = flag(args, "--every").and_then(|s| s.parse().ok()).unwrap_or(2);
+    // The signing key in `home` (default the house key, Concordance 6.2a).
+    let key = flag(args, "--key").unwrap_or_else(|| "tier-union.key".to_string());
     // The seat speaks to EVERY hypha named (`--at a,b,c`), one stroke each in
     // turn, so the work is spread across the fleet rather than one server.
     let hyphae: Vec<String> = at.split(',').map(str::trim).filter(|a| !a.is_empty()).map(String::from).collect();
     let mut seats = Vec::new();
     for addr in &hyphae {
-        match ns_hypha::seat::Seat::open(addr, home) {
+        match ns_hypha::seat::Seat::open_as(addr, home, &key) {
             Ok(s) => seats.push((addr.clone(), s)),
             Err(e) => eprintln!("ns-hypha: the seat did not open at {addr}: {e}"),
         }
