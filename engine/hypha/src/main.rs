@@ -560,8 +560,10 @@ fn seat_cmd(args: &[String], at: &str, home: &Path) -> ExitCode {
             std::thread::sleep(std::time::Duration::from_secs(every));
             continue;
         }
-        if let Some(h) = house.as_mut() {
-            match h.tend(seats[0].1.session()) {
+        // The house tends every tenth stroke: its reads share the voice's
+        // budget, and the relay exempts one read per window.
+        if let Some(h) = house.as_mut().filter(|_| strokes.is_multiple_of(10)) {
+            match h.tend(&mut seats[0].1) {
                 Ok(said) => said.iter().for_each(|l| println!("house [{}]: {l}", seats[0].0)),
                 Err(e) => eprintln!("house [{}]: the tend did not complete: {e}", seats[0].0),
             }

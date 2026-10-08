@@ -41,7 +41,17 @@ pub struct Tally {
     pub closed_first: u64,
     pub closed_again: u64,
     pub refused: u64,
+    /// Tasks not closed at home, put before a seated mind (the mind-link).
+    pub handed: u64,
+    /// A seated mind's answers the house filed under the reserve's key.
+    pub answered: u64,
+    /// ...and the court closed (first or again).
+    pub answered_closed: u64,
 }
+
+/// The tasks the seat remembers, so the house can file a seated mind's
+/// answer against its train (bounded: the oldest is let go).
+const KNOWN: usize = 256;
 
 /// netstratum's seat on the fleet.
 pub struct Seat {
@@ -49,6 +59,10 @@ pub struct Seat {
     home: Option<std::path::PathBuf>,
     grown: Vec<Crystal>,
     held: Vec<Conjecture>,
+    /// Tasks the seat pulled, by citation, oldest first.
+    known: std::collections::VecDeque<([u8; 32], Vec<mycelium::transducer::family::TrainPair>)>,
+    /// Tasks not closed at home, waiting to be put before a seated mind.
+    before: std::collections::VecDeque<[u8; 32]>,
     pub tally: Tally,
 }
 
@@ -182,7 +196,15 @@ impl Seat {
         let genome = home.join("genome");
         let genome = genome.to_str().ok_or_else(|| io::Error::new(io::ErrorKind::InvalidInput, "the genome path is not UTF-8"))?;
         let entity = Entity::open_persistent(addr, Kernel::from_key(key.sk.clone()), genome);
-        Ok(Seat { entity, home: Some(home.to_path_buf()), grown: Vec::new(), held: Vec::new(), tally: Tally::default() })
+        Ok(Seat {
+            entity,
+            home: Some(home.to_path_buf()),
+            grown: Vec::new(),
+            held: Vec::new(),
+            known: std::collections::VecDeque::new(),
+            before: std::collections::VecDeque::new(),
+            tally: Tally::default(),
+        })
     }
 
     /// The session this seat speaks through: the house tends its mail on
@@ -196,9 +218,15 @@ impl Seat {
     pub fn stroke(&mut self) -> io::Result<Option<String>> {
         let Some(task) = self.entity.pull_task()? else { return Ok(None) };
         self.tally.pulled += 1;
-        let id = task.id.as_bytes().to_vec();
+        let id = task.id;
         let name: String = id.iter().take(6).map(|b| format!("{b:02x}")).collect();
         self.keep(&id, &task);
+        if !self.known.iter().any(|(k, _)| *k == id) {
+            if self.known.len() >= KNOWN {
+                self.known.pop_front();
+            }
+            self.known.push_back((id, task.train.clone()));
+        }
         let train: Option<Vec<solver::TaskPair>> =
             task.train.iter().map(|(a, b)| Some(solver::TaskPair { input: grid(a)?, output: grid(b)? })).collect();
         let tests: Option<Vec<solver::Grid>> = task.tests.iter().map(|t| grid(t)).collect();
@@ -228,7 +256,15 @@ impl Seat {
                 let verdict = self.entity.solve_task(&id, &task.train, &p.outputs, Some(&p.rule), &mut budget);
                 return Ok(Some(self.verdict_line(&name, verdict, &format!("{:?}", p.steps))));
             }
-            return Ok(Some(format!("task {name}: {} pairs, not closed at home", local.train.len())));
+            // THE MIND-LINK: a task this mind did not close goes before a
+            // seated mind (the line's sibling vessel), once.
+            if !self.before.contains(&id) {
+                if self.before.len() >= KNOWN {
+                    self.before.pop_front();
+                }
+                self.before.push_back(id);
+            }
+            return Ok(Some(format!("task {name}: {} pairs, not closed at home; before the seated minds", local.train.len())));
         };
         self.tally.solved_at_home += 1;
         let outputs: Vec<Vec<Vec<u8>>> = tests.iter().map(|t| back(&solver::grid::run(&program, t))).collect();
@@ -247,6 +283,35 @@ impl Seat {
         self.tally.submitted += 1;
         let verdict = self.entity.solve_task(&id, &task.train, &outputs, Some(&rule), &mut budget);
         Ok(Some(self.verdict_line(&name, verdict, &format!("{} ops", program.len()))))
+    }
+
+    /// The next task not closed at home, for the house to put before a
+    /// seated mind.
+    pub fn next_before(&mut self) -> Option<[u8; 32]> {
+        self.before.pop_front()
+    }
+
+    /// A task given back (its mind let it go unanswered): before the next.
+    pub fn give_back(&mut self, id: [u8; 32]) {
+        if !self.before.contains(&id) {
+            self.before.push_back(id);
+        }
+    }
+
+    /// FILE A SEATED MIND'S ANSWER under the house's key (wire v1.2, fn 1):
+    /// its rule and outputs for a task this seat pulled, crossed and
+    /// replayed at home exactly as the seat's own (`Entity::solve_task`).
+    /// The court's verdict, or `None` where the task is no longer known or
+    /// the answer was withheld at home.
+    pub fn file_answer(&mut self, id: &[u8; 32], rule: &mycelium::transducer::element::Element, outputs: &[Vec<Vec<u8>>]) -> Option<(u8, [u64; 4])> {
+        let train = self.known.iter().find(|(k, _)| k == id)?.1.clone();
+        let mut budget = self.entity.physics_mut().stroke();
+        self.tally.answered += 1;
+        let verdict = self.entity.solve_task(id, &train, outputs, Some(rule), &mut budget);
+        if verdict.is_some_and(|(code, _)| code == mycelium::anastome::dialogue::SOLVE_BOUNTY || code == mycelium::anastome::dialogue::SOLVE_FLOOR) {
+            self.tally.answered_closed += 1;
+        }
+        verdict
     }
 
     /// The court's verdict on a filed solve, counted and told.
