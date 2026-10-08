@@ -911,6 +911,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                                 let distance = conductor::spatial_l1(
                                     &charted_position(&my_name),
                                     &charted_position(&target),
+                                &desk::universe_span(),
                                 );
                                 match cfe::world::clear_trade(
                                     world, mine, &mut far, theirs, deal, distance,
@@ -5540,6 +5541,7 @@ fn stamp_command(
                         let distance = conductor::spatial_l1(
                             &charted_position(&my_name),
                             &charted_position(&target),
+                                &desk::universe_span(),
                         );
                         let melt = cfe::world::route_melt(world, &far, &distance);
                         match cfe::world::stamp_aperture_transfer(
@@ -5864,6 +5866,7 @@ fn element_command(
                             let distance = conductor::spatial_l1(
                                 &charted_position(&my_name),
                                 &charted_position(&target),
+                                &desk::universe_span(),
                             );
                             let melt = cfe::world::route_melt(world, &far, &distance);
                             match cfe::world::element_aperture_transfer(

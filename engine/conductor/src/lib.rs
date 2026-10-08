@@ -644,7 +644,7 @@ pub fn crossing_candidates(worlds: &[Polity]) -> Vec<(usize, usize)> {
     pairs.into_iter().collect()
 }
 
-pub fn market_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, String)> {
+pub fn market_step(worlds: &mut [Polity], beat: u64, span: &Ratio) -> Vec<(String, String)> {
     // Post intents. NO SINGLES (ruling 2026-07-31): the book is
     // open-ended — a fresh intent posts BESIDE what rests; only an
     // identical pair (same give, same want) holds its place.
@@ -734,7 +734,7 @@ pub fn market_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, String)> {
         }
         // MARKET-2: the transit's spatial L1 — supply melts with
         // distance; the engine refuses walled pairs itself.
-        let distance = spatial_l1(&one.spec.position, &two.spec.position);
+        let distance = spatial_l1(&one.spec.position, &two.spec.position, span);
         let offers_a: Vec<u64> = one.world.offers().iter().map(|o| o.offer).collect();
         let offers_b: Vec<u64> = two.world.offers().iter().map(|o| o.offer).collect();
         let mut crossed_here = false;
@@ -5235,18 +5235,12 @@ impl Polity {
     }
 }
 
-/// MARKET-2: plain L1 between two charted positions — the transit
-/// distance the iceberg law melts against.
-pub fn spatial_l1(a: &(Ratio, Ratio, Ratio), b: &(Ratio, Ratio, Ratio)) -> Ratio {
-    let leg = |p: &Ratio, q: &Ratio| {
-        let d = p.clone() - q.clone();
-        if d < ratio(0, 1) {
-            -d
-        } else {
-            d
-        }
-    };
-    leg(&a.0, &b.0) + leg(&a.1, &b.1) + leg(&a.2, &b.2)
+/// MARKET-2: the transit distance the iceberg law melts against — the
+/// universe's own torus distance (`ledger::torus_distance`), WRAPPED against
+/// the carried `span`. It summed unwrapped |Δ| until 2026-10-08: two worlds
+/// beside opposite faces of the torus read as the universe's width apart.
+pub fn spatial_l1(a: &(Ratio, Ratio, Ratio), b: &(Ratio, Ratio, Ratio), span: &Ratio) -> Ratio {
+    ledger::torus_distance(a, b, span)
 }
 
 /// Two disjoint mutable seats out of one board.
@@ -5270,7 +5264,7 @@ fn two_mut<T>(slice: &mut [T], i: usize, j: usize) -> (&mut T, &mut T) {
 /// `ElementApertureSent` / `ElementApertureReceived`. Never invents
 /// element ids. One successful clear per pair per call is enough for
 /// the done bar; more pairs still run (no singles on the board).
-pub fn element_trade_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, String)> {
+pub fn element_trade_step(worlds: &mut [Polity], beat: u64, span: &Ratio) -> Vec<(String, String)> {
     let mut cleared = Vec::new();
     let mut seq: u64 = 0;
     let n = worlds.len();
@@ -5320,7 +5314,7 @@ pub fn element_trade_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, Stri
             if worlds[a].penned || worlds[b].penned {
                 continue;
             }
-            let distance = spatial_l1(&worlds[a].spec.position, &worlds[b].spec.position);
+            let distance = spatial_l1(&worlds[a].spec.position, &worlds[b].spec.position, span);
             let melt = cfe::world::route_melt(&worlds[a].world, &worlds[b].world, &distance);
             if melt >= ratio(1, 1) {
                 continue; // walled direct — merchant territory, not element haul
@@ -5384,7 +5378,7 @@ pub fn element_trade_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, Stri
 ///    aperture one way + resource aperture the other (spot clear,
 ///    zero player). Pre-checked so a partial clear never strands
 ///    STAMP mid-deal.
-pub fn stamp_market_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, String)> {
+pub fn stamp_market_step(worlds: &mut [Polity], beat: u64, span: &Ratio) -> Vec<(String, String)> {
     let mut clears = Vec::new();
     let half = |amount: Ratio| amount / (ratio(1, 1) + ratio(1, 1));
     // Mint phase — convert half of surplus crystal (identity rate).
@@ -5437,7 +5431,7 @@ pub fn stamp_market_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, Strin
                         .grant_tech_as(steward, cfe::world::FIRST_ORB, 0);
                 }
             }
-            let distance = spatial_l1(&worlds[a].spec.position, &worlds[b].spec.position);
+            let distance = spatial_l1(&worlds[a].spec.position, &worlds[b].spec.position, span);
             let melt = cfe::world::route_melt(&worlds[a].world, &worlds[b].world, &distance);
             if melt >= ratio(1, 1) {
                 continue;
@@ -5557,7 +5551,7 @@ pub fn stamp_market_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, Strin
 /// a merchant whose second leg refuses HOLDS inventory — that risk
 /// is the trade. Every leg is an ordinary clear_trade: melt, void
 /// share, and both books' receipts all land by the one law.
-pub fn merchant_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, String, String)> {
+pub fn merchant_step(worlds: &mut [Polity], beat: u64, span: &Ratio) -> Vec<(String, String, String)> {
     let one = || ratio(1, 1);
     let n = worlds.len();
     // NO SINGLES (ruling 2026-07-31): every profitable triangle runs
@@ -5605,7 +5599,7 @@ pub fn merchant_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, String, S
                     let key = (x.min(y), x.max(y));
                     memo.entry(key)
                         .or_insert_with(|| {
-                            let d = spatial_l1(&worlds[x].spec.position, &worlds[y].spec.position);
+                            let d = spatial_l1(&worlds[x].spec.position, &worlds[y].spec.position, span);
                             cfe::world::route_melt(&worlds[x].world, &worlds[y].world, &d)
                         })
                         .clone()
@@ -5620,8 +5614,8 @@ pub fn merchant_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, String, S
                     continue;
                 }
                 // The clear legs still carry their chart distances.
-                let d_am = spatial_l1(&worlds[a].spec.position, &worlds[m].spec.position);
-                let d_mb = spatial_l1(&worlds[m].spec.position, &worlds[b].spec.position);
+                let d_am = spatial_l1(&worlds[a].spec.position, &worlds[m].spec.position, span);
+                let d_mb = spatial_l1(&worlds[m].spec.position, &worlds[b].spec.position, span);
                 // The profit test, exact: bought must fill B's ask,
                 // and the quote coming back must exceed the quote
                 // paid — else the caravan stays home.
@@ -6492,10 +6486,10 @@ fn run_era_inner(
         // OFFER-1a + MERCHANT-1 + E3.3: market, caravan, element haul.
         fleet_step(&mut worlds);
         kin_step(&mut worlds);
-        let _ = market_step(&mut worlds, u64::from(beat));
-        let _ = merchant_step(&mut worlds, u64::from(beat));
-        let _ = element_trade_step(&mut worlds, u64::from(beat));
-        let _ = stamp_market_step(&mut worlds, u64::from(beat));
+        let _ = market_step(&mut worlds, u64::from(beat), &book.universe_span());
+        let _ = merchant_step(&mut worlds, u64::from(beat), &book.universe_span());
+        let _ = element_trade_step(&mut worlds, u64::from(beat), &book.universe_span());
+        let _ = stamp_market_step(&mut worlds, u64::from(beat), &book.universe_span());
         instrument_step(&mut worlds);
         market_war_step(&mut worlds);
         espionage_step(&mut worlds);

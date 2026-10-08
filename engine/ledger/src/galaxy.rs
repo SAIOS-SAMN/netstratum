@@ -13,7 +13,7 @@ use cfe::persist;
 use cfe::ratio::{ratio, Ratio};
 use cfe::vrp::Chronicle;
 
-use crate::{card, ratio_str, sanitize, wrapped_abs, Ledger};
+use crate::{card, ratio_str, sanitize, Ledger};
 
 /// A charted galaxy: a named region of the ONE torus — center S in
 /// exact rationals, reach an L1 radius. Reach is a placeholder
@@ -269,5 +269,5 @@ fn l1_wrapped(
     b: &(Ratio, Ratio, Ratio),
     span: &Ratio,
 ) -> Ratio {
-    wrapped_abs(&a.0, &b.0, span) + wrapped_abs(&a.1, &b.1, span) + wrapped_abs(&a.2, &b.2, span)
+    crate::torus_distance(a, b, span)
 }

@@ -293,9 +293,7 @@ impl Ledger {
     pub fn l1_distance(&self, a: &str, b: &str) -> Option<Ratio> {
         let ((ax, ay, az), _) = self.charted_position(a)?;
         let ((bx, by, bz), _) = self.charted_position(b)?;
-        let span = self.universe_span();
-        let leg = |u: &Ratio, v: &Ratio| -> Ratio { wrapped_abs(u, v, &span) };
-        Some(leg(&ax, &bx) + leg(&ay, &by) + leg(&az, &bz))
+        Some(torus_distance(&(ax, ay, az), &(bx, by, bz), &self.universe_span()))
     }
 
 }
@@ -317,17 +315,27 @@ pub fn sanitize(name: &str) -> String {
         .collect()
 }
 
-/// The wrapped per-axis |Δ| — the short way around the torus.
+/// The wrapped per-axis |Δ| — the short way around the torus. Either
+/// coordinate may sit outside `[0, span)` (an uncharted spec position): the
+/// difference is wrapped onto `[0, span)` first, then the shorter arc taken.
 pub(crate) fn wrapped_abs(a: &Ratio, b: &Ratio, span: &Ratio) -> Ratio {
-    use num_traits::Signed;
-    let mut d = (a - b).abs();
-    // Both coordinates live in [0, span), so d < span already; take
-    // the shorter arc.
+    let raw = a - b;
+    let d = &raw - (&raw / span).floor() * span;
     let around = span - &d;
     if around < d {
-        d = around;
+        around
+    } else {
+        d
     }
-    d
+}
+
+/// **THE TORUS DISTANCE** — the one distance between two points of the
+/// universe: the L1 law on the 3-torus (wrapped |Δ| per axis, the short way
+/// around, summed), against the universe's carried `span`. Every distance in
+/// the game (melt, logistics, routes, the desk) reads THIS; a sum of unwrapped
+/// |Δ| flattens the torus into a board with edges.
+pub fn torus_distance(a: &(Ratio, Ratio, Ratio), b: &(Ratio, Ratio, Ratio), span: &Ratio) -> Ratio {
+    wrapped_abs(&a.0, &b.0, span) + wrapped_abs(&a.1, &b.1, span) + wrapped_abs(&a.2, &b.2, span)
 }
 
 /// Parse the ledger's exact rendering back: `p/q` or a plain integer.
@@ -435,4 +443,29 @@ pub fn write_directive_tlv(path: &std::path::Path, d: &Directive) -> std::io::Re
     }
     card::put_str(card::dir::ACTING_AS, &d.acting_as, &mut out);
     card::write_atomic(path, &out)
+}
+
+#[cfg(test)]
+mod torus_tests {
+    use super::torus_distance;
+    use cfe::ratio::ratio;
+
+    #[test]
+    fn the_torus_has_no_edge_the_short_way_is_taken_on_every_axis() {
+        let span = ratio(64, 1);
+        let p = |x, y, z| (ratio(x, 1), ratio(y, 1), ratio(z, 1));
+        // opposite faces are neighbours
+        assert_eq!(torus_distance(&p(1, 0, 0), &p(63, 0, 0), &span), ratio(2, 1));
+        // a coordinate outside [0, span) wraps first
+        assert_eq!(torus_distance(&p(-1, 0, 0), &p(1, 0, 0), &span), ratio(2, 1));
+        assert_eq!(torus_distance(&p(65, 0, 0), &p(0, 0, 0), &span), ratio(1, 1));
+        // the long way is never taken: at most half the span per axis
+        assert_eq!(torus_distance(&p(0, 0, 0), &p(32, 40, 10), &span), ratio(32 + 24 + 10, 1));
+        // symmetric, zero on itself, exact on rationals
+        let a = (ratio(1, 3), ratio(127, 2), ratio(0, 1));
+        let b = (ratio(63, 1), ratio(1, 2), ratio(5, 7));
+        assert_eq!(torus_distance(&a, &b, &span), torus_distance(&b, &a, &span));
+        assert_eq!(torus_distance(&a, &a, &span), ratio(0, 1));
+        assert_eq!(torus_distance(&a, &b, &span), ratio(4, 3) + ratio(1, 1) + ratio(5, 7));
+    }
 }

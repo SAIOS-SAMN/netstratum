@@ -355,27 +355,29 @@ fn main() {
         }
         // FLEET-1: salvage/mint/assign before hauls need capacity.
         conductor::profile::timed("fleet_step", || conductor::fleet_step(&mut worlds));
+        // The universe's carried span: every distance below wraps on it.
+        let span = book.universe_span();
         // OFFER-1a: the market beat — intents post, crossings clear
         // (one aperture pair each way, receipted both sides).
-        for (seller, buyer) in conductor::profile::timed("market_step", || conductor::market_step(&mut worlds, beat)) {
+        for (seller, buyer) in conductor::profile::timed("market_step", || conductor::market_step(&mut worlds, beat, &span)) {
             println!(
                 "beat {beat}: THE CROSSING CLEARS — {seller} ⇌ {buyer}; the autarkies trade"
             );
         }
         // MERCHANT-1: the caravan bridges what the void walled.
-        for (m, a, b) in conductor::profile::timed("merchant_step", || conductor::merchant_step(&mut worlds, beat)) {
+        for (m, a, b) in conductor::profile::timed("merchant_step", || conductor::merchant_step(&mut worlds, beat, &span)) {
             println!(
                 "beat {beat}: THE CARAVAN — {m} bridges {a} ⇌ {b}; the walled trade flows"
             );
         }
         // E3.3: pure NPC element aperture hauls (Wave-2).
-        for (from, to) in conductor::profile::timed("element_trade_step", || conductor::element_trade_step(&mut worlds, beat)) {
+        for (from, to) in conductor::profile::timed("element_trade_step", || conductor::element_trade_step(&mut worlds, beat, &span)) {
             println!(
                 "beat {beat}: ELEMENT CROSSING — {from} → {to}; open matter rides the void"
             );
         }
         // STAMP MM-1: mint + spot clear (Wave-4).
-        for (buyer, seller) in conductor::profile::timed("stamp_market_step", || conductor::stamp_market_step(&mut worlds, beat)) {
+        for (buyer, seller) in conductor::profile::timed("stamp_market_step", || conductor::stamp_market_step(&mut worlds, beat, &span)) {
             println!(
                 "beat {beat}: STAMP SPOT — {buyer} ⇌ {seller}; crystal clears for STAMP"
             );

@@ -152,6 +152,11 @@ pub fn charted_position(name: &str) -> (Ratio, Ratio, Ratio) {
     }
 }
 
+/// The universe's carried span — every desk distance wraps on it.
+pub fn universe_span() -> Ratio {
+    ledger::Ledger::at("var/worlds").universe_span()
+}
+
 pub fn peer_world_names(exclude: Option<&str>) -> Vec<String> {
     let root = PathBuf::from("var/worlds");
     let Ok(entries) = std::fs::read_dir(&root) else {
@@ -223,7 +228,7 @@ pub fn trade_peers(home: &World) -> Vec<PeerRow> {
         let Ok(peer) = load_peer_read(&name) else {
             continue;
         };
-        let d_chart = spatial_l1(&home_pos, &charted_position(&name));
+        let d_chart = spatial_l1(&home_pos, &charted_position(&name), &universe_span());
         let orbit = d_orbit(home, &peer);
         let d_eff = effective_distance(home, &peer, &d_chart);
         let melt = desk_route_melt(home, &peer, &d_chart);
@@ -944,9 +949,10 @@ fn render_arb(style: Style, home: &World) -> Vec<String> {
     )];
     let mut found = 0usize;
     let n = worlds.len();
+    let span = universe_span();
     for a in 0..n {
         for b in (a + 1)..n {
-            let d_ab = spatial_l1(&worlds[a].2, &worlds[b].2);
+            let d_ab = spatial_l1(&worlds[a].2, &worlds[b].2, &span);
             let melt_ab = desk_route_melt(&worlds[a].1, &worlds[b].1, &d_ab);
             if melt_ab < ratio(1, 1) {
                 continue;
@@ -955,8 +961,8 @@ fn render_arb(style: Style, home: &World) -> Vec<String> {
                 if m == a || m == b {
                     continue;
                 }
-                let d_am = spatial_l1(&worlds[a].2, &worlds[m].2);
-                let d_mb = spatial_l1(&worlds[m].2, &worlds[b].2);
+                let d_am = spatial_l1(&worlds[a].2, &worlds[m].2, &span);
+                let d_mb = spatial_l1(&worlds[m].2, &worlds[b].2, &span);
                 let melt_am = desk_route_melt(&worlds[a].1, &worlds[m].1, &d_am);
                 let melt_mb = desk_route_melt(&worlds[m].1, &worlds[b].1, &d_mb);
                 if melt_am < ratio(1, 1) && melt_mb < ratio(1, 1) {
