@@ -129,9 +129,7 @@ fn word_counts(library: &Library) -> [usize; FAMILIES.len()] {
 /// of a tally. Exact rational; ties break to the fewer-word family, then
 /// to declaration order.
 pub fn knowledge_order(library: &Library) -> Vec<Family> {
-    let (delta, support) = project(library);
-    let potentials = forest_potentials(&delta, &support);
-    let frame = &potentials[0];
+    let frame = sparse_potentials(library);
     let dim = frame.len();
     // The knowledge centroid — the mean potential over every concept.
     let sum = frame.iter().fold(ratio(0, 1), |acc, p| acc + p);
@@ -155,6 +153,65 @@ pub fn knowledge_order(library: &Library) -> Vec<Family> {
             .then(a.cmp(&b)) // then declaration order — deterministic
     });
     order.into_iter().map(|i| FAMILIES[i]).collect()
+}
+
+/// THE FOREST POTENTIALS of the family↔word graph, SPARSE: exactly what
+/// `forest_potentials(project(library))` reads (roots in index order, each
+/// node's neighbours scanned ascending, a potential set as its node is
+/// pushed, the frontier a stack), walked on adjacency lists instead of a
+/// dense `(4 + words)²` Delta — which every growing library rebuilt, at
+/// gigabytes and seconds a time (measured 2026-10-08: the conductor's
+/// consilience_step peaking at 3.8G). The graph is bipartite: a family links
+/// only words that draw on it, a word only its families.
+fn sparse_potentials(library: &Library) -> Vec<Ratio> {
+    let words = library.words();
+    let dim = FAMILIES.len() + words.len();
+    // weight[w][f]: how much word w draws on family f.
+    let weights: Vec<[i64; FAMILIES.len()]> = words
+        .iter()
+        .map(|word| {
+            let mut weight = [0i64; FAMILIES.len()];
+            for op in &word.expansion {
+                let family = family_of(op);
+                let fidx = FAMILIES.iter().position(|f| *f == family).expect("family is one of four");
+                weight[fidx] += 1;
+            }
+            weight
+        })
+        .collect();
+    // Neighbours, ascending: a family's words (4 + w), a word's families.
+    let neighbours = |node: usize| -> Vec<(usize, Ratio)> {
+        if node < FAMILIES.len() {
+            weights
+                .iter()
+                .enumerate()
+                .filter(|(_, w)| w[node] > 0)
+                .map(|(w, weight)| (FAMILIES.len() + w, ratio(weight[node], 1)))
+                .collect()
+        } else {
+            let weight = &weights[node - FAMILIES.len()];
+            (0..FAMILIES.len()).filter(|&f| weight[f] > 0).map(|f| (f, ratio(-weight[f], 1))).collect()
+        }
+    };
+    let mut potential: Vec<Option<Ratio>> = vec![None; dim];
+    for root in 0..dim {
+        if potential[root].is_some() {
+            continue;
+        }
+        potential[root] = Some(ratio(0, 1));
+        let mut frontier = vec![root];
+        while let Some(here) = frontier.pop() {
+            let base = potential[here].clone().unwrap_or_else(|| ratio(0, 1));
+            for (next, entry) in neighbours(here) {
+                if next == here || potential[next].is_some() {
+                    continue;
+                }
+                potential[next] = Some(base.clone() + entry);
+                frontier.push(next);
+            }
+        }
+    }
+    potential.into_iter().map(|p| p.unwrap_or_else(|| ratio(0, 1))).collect()
 }
 
 /// **THE FULL MAP** — the curiosity order and
@@ -265,6 +322,27 @@ pub fn consilience(maps: &[(u64, &SelfMap)]) -> Vec<Consilience> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn the_sparse_forest_reads_exactly_what_the_dense_one_did() {
+        let mut lib = Library::new();
+        for (i, expansion) in [
+            vec![Op::Rotate90, Op::FlipH],
+            vec![Op::Recolor([0, 2, 1, 3, 4, 5, 6, 7, 8, 9]), Op::Transpose],
+            vec![Op::Tile { down: 2, across: 1, odd_row: TileMirror::None, odd_col: TileMirror::None }, Op::Rotate180, Op::Rotate180],
+            vec![Op::FlipV, Op::Recolor([1, 0, 2, 3, 4, 5, 6, 7, 8, 9])],
+        ]
+        .into_iter()
+        .enumerate()
+        {
+            let mut w = word(expansion);
+            w.orbit = [i as u8 + 1; 32];
+            lib.adopt(w);
+            let (delta, support) = project(&lib);
+            assert_eq!(sparse_potentials(&lib), forest_potentials(&delta, &support)[0], "after {} words", i + 1);
+        }
+        assert!(sparse_potentials(&Library::new()).len() == FAMILIES.len());
+    }
     use crate::mint::MintedWord;
     use solver_verify::grid::{Op, TileMirror};
 

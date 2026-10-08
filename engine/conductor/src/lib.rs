@@ -6799,6 +6799,19 @@ pub mod profile {
         *TRACED.get_or_init(|| std::env::var_os("NETSTRATUM_TRACE").is_some())
     }
 
+    /// The PEAK resident memory since the last reset, in MB (`VmHWM`), and
+    /// the reset (`clear_refs` 5) — so a phase's own transient peak is read.
+    fn peak_mb() -> u64 {
+        std::fs::read_to_string("/proc/self/status")
+            .ok()
+            .and_then(|s| s.lines().find(|l| l.starts_with("VmHWM:")).and_then(|l| l.split_whitespace().nth(1)?.parse::<u64>().ok()))
+            .map_or(0, |kb| kb / 1024)
+    }
+
+    fn reset_peak() {
+        let _ = std::fs::write("/proc/self/clear_refs", "5");
+    }
+
     /// Resident memory in MB (Linux `/proc/self/statm`), for the trace.
     fn rss_mb() -> u64 {
         std::fs::read_to_string("/proc/self/statm")
@@ -6822,12 +6835,15 @@ pub mod profile {
             }
             return out;
         }
+        if traced() {
+            reset_peak();
+        }
         let at = Instant::now();
         let out = run();
         let spent = at.elapsed();
         if traced() {
             use std::io::Write;
-            eprintln!("trace: <- {name} {}ms rss {}MB", spent.as_millis(), rss_mb());
+            eprintln!("trace: <- {name} {}ms rss {}MB peak {}MB", spent.as_millis(), rss_mb(), peak_mb());
             let _ = std::io::stderr().flush();
         }
         let mut book = BOOK.lock().expect("profile book");
