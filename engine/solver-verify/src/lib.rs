@@ -42,6 +42,12 @@ pub use volume::{
 pub use work::{decode_work, encode_work, verify_work, WorkBroken, WorkProof, WORK_SCHEMA_V1};
 pub use work::{program_bytes, program_from_bytes};
 pub use work::{
+    decode_carried_work, encode_carried_work, verify_carried_work, CarriedProof,
+    WORK_SCHEMA_V4_CARRIED,
+};
+pub use certificate::{derive, state_digest, walk, Derivation, STATE_DOMAIN};
+pub use forge::{forge_input, forge_word};
+pub use work::{
     canonical_name, decode_corpus_work, encode_corpus_work, verify_corpus_work,
     verify_work_class,
     CorpusProof, WorkClass, WORK_SCHEMA_V2_CORPUS,

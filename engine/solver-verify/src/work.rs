@@ -18,6 +18,11 @@
 //!      `test_expected` must agree;
 //!   3. re-chain — the certificate re-derives Intact.
 //!
+//! Schema v4 (THE CARRIED DERIVATION, Concordance 4.4 annex) replaces the
+//! replay for forge work: the payload carries the forged task's samples and
+//! both words' per-step state digests, and [`verify_carried_work`] walks them
+//! locally — no re-forge, no re-seal. v1-v3 stay readable as records.
+//!
 //! The op-code vocabulary below is wire law — append-only, one code
 //! one meaning forever: 1 Rotate90 · 2 Rotate180 · 3 Rotate270 ·
 //! 4 FlipH · 5 FlipV · 6 Transpose · 7 Recolor+map[10] ·
@@ -26,8 +31,10 @@
 //! 7 PaintAllMajority · 8 GravityDown) · 9 Tile+down,across,odd_row,
 //! odd_col (TileMirror: 0 None · 1 Rows · 2 Cols · 3 Both).
 
-use crate::certificate::{verify_certificate, CertificateRead, SolveCertificate};
-use crate::forge::{forge_task, Difficulty};
+use crate::certificate::{
+    derive, verify_certificate, walk, CertificateRead, Derivation, SolveCertificate,
+};
+use crate::forge::{forge_input, forge_task, forge_word, Difficulty};
 use crate::grid::{run, Grid, Op, Program, TileMirror};
 use crate::loader::{Task, TaskPair};
 use crate::objects::ObjOp;
@@ -55,6 +62,31 @@ pub const WORK_SCHEMA_V2_CORPUS: u8 = 2;
 /// payload carries only the digest, the rung, the word and the proof —
 /// no task content at all.
 pub const WORK_SCHEMA_V3_VOLUME: u8 = 3;
+
+/// Work-shapes v4 — THE CARRIED DERIVATION (Concordance 4.4 annex, ruled
+/// 2026-10-08). Forge work whose proof is checked step by step, never by
+/// re-running the forge or re-sealing a certificate. The payload, in order
+/// (integers little-endian; grids as everywhere on this wire, `rows u16 ‖
+/// cols u16 ‖ cells`; a program as `count u16 ‖ ops` in the op table above;
+/// a derivation as `count u16 ‖ state digests[32]`, see
+/// [`crate::certificate::STATE_DOMAIN`]):
+///
+/// ```text
+/// 4 ‖ forge_digest[32] ‖ tier u8 ‖ word_len u8 ‖ rows u8 ‖ cols u8 ‖ train_pairs u8
+///   ‖ inputs:  (train_pairs + 1) grids — every training input, then the test input
+///   ‖ forge word: program
+///   ‖ forge derivation: (word_len + 1) digests
+///   ‖ outputs: (train_pairs + 1) grids — every training output, then the test answer
+///   ‖ solve: program
+///   ‖ solve derivation: (solve length + 1) digests
+/// ```
+///
+/// STATE 0 is the inputs, each cell checked against its beacon sample under
+/// the digest; the forge word is checked against its own samples slot by
+/// slot. The forge derivation walked over state 0 must end at the outputs;
+/// the solve derivation walked over state 0 must end at the same outputs —
+/// so it maps every training pair and renders the test answer.
+pub const WORK_SCHEMA_V4_CARRIED: u8 = 4;
 
 /// The decoded proof: everything the replay needs, nothing else.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -98,6 +130,51 @@ pub struct VolumeProof {
     pub program: VProgram,
     pub output: Volume,
     pub certificate: VolumeCertificate,
+}
+
+/// A CARRIED-DERIVATION proof (schema v4): forge work, every step carried.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CarriedProof {
+    pub forge_digest: [u8; 32],
+    pub difficulty: Difficulty,
+    /// State 0: every training input, then the test input.
+    pub inputs: Vec<Grid>,
+    /// The forge's word and its carried derivation over state 0.
+    pub forge_word: Program,
+    pub forge_derivation: Derivation,
+    /// Every training output, then the test answer.
+    pub outputs: Vec<Grid>,
+    /// The solve and its carried derivation over state 0.
+    pub program: Program,
+    pub derivation: Derivation,
+}
+
+impl CarriedProof {
+    /// Seal a solve of the task forged from `digest` at `difficulty`: the
+    /// forge's samples, both words and both derivations. `None` when the
+    /// program does not close the task or a dimension exceeds the wire.
+    pub fn seal(forge_digest: [u8; 32], difficulty: Difficulty, program: &Program) -> Option<CarriedProof> {
+        let inputs: Vec<Grid> =
+            (0..=difficulty.train_pairs).map(|pair| forge_input(forge_digest, difficulty, pair)).collect();
+        let forge_word = forge_word(forge_digest, difficulty);
+        let (forge_derivation, outputs) = derive(&forge_word, &inputs)?;
+        let (derivation, closed) = derive(program, &inputs)?;
+        (closed == outputs).then_some(CarriedProof {
+            forge_digest,
+            difficulty,
+            inputs,
+            forge_word,
+            forge_derivation,
+            outputs,
+            program: program.clone(),
+            derivation,
+        })
+    }
+
+    /// The test answer the solve renders.
+    pub fn output(&self) -> Option<&Grid> {
+        self.outputs.last()
+    }
 }
 
 /// What a verified payload turned out to BE. v1 returns a ladder rung;
@@ -183,6 +260,13 @@ pub enum WorkBroken {
     /// identity, so a task whose pairs happen to be identity would
     /// otherwise verify having proven nothing.
     PathAbsent,
+    /// v4 — state 0 or the forge word is not what the digest's beacon
+    /// samples draw: a carried input (`pair`, the test input at
+    /// `train_pairs`) or the forge word (`pair: None`) diverges.
+    SampleDiverged { pair: Option<usize> },
+    /// v4 — the forge's carried derivation breaks at `at_step` (0 = state 0,
+    /// k = the k-th op, word_len + 1 = it does not end at the outputs).
+    ForgeDiverged { at_step: usize },
 }
 
 fn mirror_code(m: TileMirror) -> u8 {
@@ -451,6 +535,14 @@ impl<'a> Reader<'a> {
         }
         Some(program)
     }
+    fn derivation(&mut self) -> Option<Derivation> {
+        let count = self.u16()?;
+        let mut states = Vec::new();
+        for _ in 0..count {
+            states.push(self.digest()?);
+        }
+        Some(Derivation { states })
+    }
     fn certificate(&mut self) -> Option<SolveCertificate> {
         let genesis = self.digest()?;
         let step_count = self.u16()?;
@@ -502,6 +594,120 @@ pub fn decode_work(bytes: &[u8]) -> Option<WorkProof> {
         output,
         certificate,
     })
+}
+
+fn put_derivation(derivation: &Derivation, out: &mut Vec<u8>) -> Option<()> {
+    put_u16(derivation.states.len(), out)?;
+    for state in &derivation.states {
+        out.extend_from_slice(state);
+    }
+    Some(())
+}
+
+/// Encode a CARRIED-DERIVATION proof (schema v4; the layout is documented at
+/// [`WORK_SCHEMA_V4_CARRIED`]).
+pub fn encode_carried_work(proof: &CarriedProof) -> Option<Vec<u8>> {
+    let d = proof.difficulty;
+    let pairs = d.train_pairs.checked_add(1)?;
+    if proof.inputs.len() != pairs || proof.outputs.len() != pairs {
+        return None;
+    }
+    let mut out = vec![WORK_SCHEMA_V4_CARRIED];
+    out.extend_from_slice(&proof.forge_digest);
+    out.push(d.tier);
+    out.push(u8::try_from(d.word_len).ok()?);
+    out.push(u8::try_from(d.rows).ok()?);
+    out.push(u8::try_from(d.cols).ok()?);
+    out.push(u8::try_from(d.train_pairs).ok()?);
+    for g in &proof.inputs {
+        put_grid(g, &mut out)?;
+    }
+    put_program(&proof.forge_word, &mut out)?;
+    put_derivation(&proof.forge_derivation, &mut out)?;
+    for g in &proof.outputs {
+        put_grid(g, &mut out)?;
+    }
+    put_program(&proof.program, &mut out)?;
+    put_derivation(&proof.derivation, &mut out)?;
+    Some(out)
+}
+
+/// Decode a CARRIED-DERIVATION proof (schema v4) — the FORM only.
+pub fn decode_carried_work(bytes: &[u8]) -> Option<CarriedProof> {
+    let mut r = Reader { bytes, at: 0 };
+    if r.byte()? != WORK_SCHEMA_V4_CARRIED {
+        return None;
+    }
+    let forge_digest = r.digest()?;
+    let difficulty = Difficulty {
+        tier: r.byte()?,
+        word_len: r.byte()? as usize,
+        rows: r.byte()? as usize,
+        cols: r.byte()? as usize,
+        train_pairs: r.byte()? as usize,
+    };
+    // The degeneracy law, at this door too (no forge call can panic, and
+    // "every training pair" is never vacuous).
+    if !difficulty.well_formed() {
+        return None;
+    }
+    let pairs = difficulty.train_pairs + 1;
+    let inputs = (0..pairs).map(|_| r.grid()).collect::<Option<Vec<_>>>()?;
+    let forge_word = r.program()?;
+    let forge_derivation = r.derivation()?;
+    let outputs = (0..pairs).map(|_| r.grid()).collect::<Option<Vec<_>>>()?;
+    let program = r.program()?;
+    let derivation = r.derivation()?;
+    if r.at != bytes.len() {
+        return None;
+    }
+    Some(CarriedProof { forge_digest, difficulty, inputs, forge_word, forge_derivation, outputs, program, derivation })
+}
+
+/// **THE CARRIED-DERIVATION JUDGE** (schema v4, Concordance 4.4 annex). Every
+/// leg is LOCAL — nothing re-runs the forge, nothing re-seals:
+///
+///   0. the path is carried (a claim states its resolution);
+///   1. STATE 0 — every carried input is the beacon's own sample under the
+///      digest, cell by cell, and the forge word is its own samples, slot
+///      by slot;
+///   2. THE TASK — the forge word's carried derivation walks from state 0,
+///      step by step, to the carried outputs;
+///   3. THE SOLVE — the solve's carried derivation walks from the same
+///      state 0, step by step, to the same outputs: every training pair
+///      maps exactly and the test input renders the test answer.
+pub fn verify_carried_work(bytes: &[u8]) -> Result<Difficulty, WorkBroken> {
+    let proof = decode_carried_work(bytes).ok_or(WorkBroken::Malformed)?;
+    if proof.program.is_empty() {
+        return Err(WorkBroken::PathAbsent);
+    }
+    let (digest, difficulty) = (proof.forge_digest, proof.difficulty);
+    // 1. State 0 and the forge word, checked against their samples.
+    for (pair, input) in proof.inputs.iter().enumerate() {
+        if *input != forge_input(digest, difficulty, pair) {
+            return Err(WorkBroken::SampleDiverged { pair: Some(pair) });
+        }
+    }
+    if proof.forge_word != forge_word(digest, difficulty) {
+        return Err(WorkBroken::SampleDiverged { pair: None });
+    }
+    // 2. The task: the forge's derivation, walked to the carried outputs.
+    let forged = walk(&proof.forge_derivation, &proof.forge_word, &proof.inputs)
+        .map_err(|at_step| WorkBroken::ForgeDiverged { at_step })?;
+    if forged != proof.outputs {
+        return Err(WorkBroken::ForgeDiverged { at_step: proof.forge_word.len() + 1 });
+    }
+    // 3. The solve: its derivation, walked to the same outputs.
+    let closed = walk(&proof.derivation, &proof.program, &proof.inputs)
+        .map_err(|at_step| WorkBroken::ChainDiverged { at_step })?;
+    let tested = difficulty.train_pairs;
+    if let Some(pair) = (0..tested).find(|&pair| closed[pair] != proof.outputs[pair]) {
+        return Err(WorkBroken::TrainingMiss { pair });
+    }
+    if closed[tested] != proof.outputs[tested] {
+        return Err(WorkBroken::OutputMismatch);
+    }
+    Ok(difficulty)
 }
 
 /// Encode a VOLUMETRIC proof (schema v3).
@@ -665,6 +871,7 @@ pub fn decode_corpus_work(bytes: &[u8]) -> Option<CorpusProof> {
 pub fn verify_work_class(bytes: &[u8]) -> Result<WorkClass, WorkBroken> {
     match bytes.first() {
         Some(&WORK_SCHEMA_V1) => verify_work(bytes).map(WorkClass::Forge),
+        Some(&WORK_SCHEMA_V4_CARRIED) => verify_carried_work(bytes).map(WorkClass::Forge),
         Some(&WORK_SCHEMA_V2_CORPUS) => verify_corpus_work(bytes),
         Some(&WORK_SCHEMA_V3_VOLUME) => verify_volume_work(bytes),
         _ => Err(WorkBroken::Malformed),
@@ -754,6 +961,10 @@ pub fn verify_work(bytes: &[u8]) -> Result<Difficulty, WorkBroken> {
         Some(&WORK_SCHEMA_V2_CORPUS) | Some(&WORK_SCHEMA_V3_VOLUME)
     ) {
         return Err(WorkBroken::UnsupportedShape);
+    }
+    // v4 is forge work too, proved by its carried derivation.
+    if bytes.first() == Some(&WORK_SCHEMA_V4_CARRIED) {
+        return verify_carried_work(bytes);
     }
     let proof = decode_work(bytes).ok_or(WorkBroken::Malformed)?;
     // 0. THE PATH IS CARRIED, OR THERE IS NO CLAIM (operator directive

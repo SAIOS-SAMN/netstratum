@@ -4420,20 +4420,18 @@ impl Polity {
                         task.train.iter().map(|p| p.input.clone()).collect();
                     sf_inputs.push(task.test_in.clone());
                     same_frame_founding_offers(&task.name, &program, &sf_inputs);
-                    // THE PROOF, riding WHOLE (the opaque-payload law):
-                    // the deed carries what the kernel re-runs.
-                    let proof = solver_verify::WorkProof {
-                        forge_digest: digest,
-                        difficulty,
-                        program: program.clone(),
-                        output: test_output,
-                        certificate,
-                    };
+                    // THE PROOF, riding WHOLE (the opaque-payload law): the
+                    // CARRIED DERIVATION (schema v4, Concordance 4.4 annex) —
+                    // the forged task's samples and both words' per-step
+                    // state digests, which the kernel walks, never re-runs.
+                    let _ = (test_output, certificate);
+                    let bytes = solver_verify::CarriedProof::seal(digest, difficulty, &program)
+                        .and_then(|proof| solver_verify::encode_carried_work(&proof));
                     Some((
                         task.name.clone(),
                         word.join(" → "),
                         cert_hex,
-                        solver_verify::encode_work(&proof).map(|bytes| (bytes, difficulty)),
+                        bytes.map(|bytes| (bytes, difficulty)),
                         proved,
                     ))
                 }

@@ -210,6 +210,21 @@ fn sample_grid(beacon: &Beacon, difficulty: &Difficulty, pair: usize) -> Grid {
     Grid::new(rows, cols, cells).expect("forged dimensions are consistent")
 }
 
+/// The forge's secret word for a digest: each op drawn from its own beacon
+/// samples (`forge.family.{slot}`, then the family's own labels). A carried
+/// word is CHECKED against its digest by drawing the same samples, slot by
+/// slot — the samples, never the task, are what is re-read.
+pub fn forge_word(digest: [u8; 32], difficulty: Difficulty) -> Program {
+    let beacon = Beacon::from_digest(digest);
+    (0..difficulty.word_len).map(|slot| sample_op(&beacon, &difficulty, slot)).collect()
+}
+
+/// The forge's input grid `pair` for a digest (`train_pairs` = the test
+/// input): every cell its own beacon sample `forge.cell.{pair}.{i}`.
+pub fn forge_input(digest: [u8; 32], difficulty: Difficulty, pair: usize) -> Grid {
+    sample_grid(&Beacon::from_digest(digest), &difficulty, pair)
+}
+
 /// Forge one task from a chronicle digest. The secret word is sampled,
 /// applied to freshly sampled inputs, then DISCARDED — the task
 /// carries only observations; finding A word that closes them is the
@@ -217,9 +232,7 @@ fn sample_grid(beacon: &Beacon, difficulty: &Difficulty, pair: usize) -> Grid {
 /// authority either way).
 pub fn forge_task(digest: [u8; 32], difficulty: Difficulty) -> Task {
     let beacon = Beacon::from_digest(digest);
-    let word: Program = (0..difficulty.word_len)
-        .map(|slot| sample_op(&beacon, &difficulty, slot))
-        .collect();
+    let word = forge_word(digest, difficulty);
 
     let render = |g: &Grid| run(&word, g);
     let train: Vec<TaskPair> = (0..difficulty.train_pairs)

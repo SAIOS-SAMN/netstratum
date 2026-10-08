@@ -105,3 +105,78 @@ pub fn verify_certificate(
     }
     CertificateRead::Intact
 }
+
+/// **THE CARRIED DERIVATION** (Concordance 4.4 annex, ruled 2026-10-08;
+/// shared by every kernel and the court): a word's proof is a sequence of
+/// steps `(constructor_k, digest of the state after step k)`. Step k is
+/// valid when constructor_k applied to state k-1 yields a state whose digest
+/// is the carried one. A checker walks the steps locally — it never re-seals
+/// a certificate to compare, and a divergence names its step.
+///
+/// THE STATE, plainly: the ordered grids a word acts on (for a task: every
+/// training input, then the test input). Its digest is
+///
+/// ```text
+/// BLAKE3( "netstratum.state.v1" ‖ count u16 ‖ (rows u16 ‖ cols u16 ‖ cells)·count )
+/// ```
+///
+/// integers little-endian, one byte a cell (hue 0-9) in row-major order — the
+/// same grid bytes as the work wire. A constructor is one op in the work
+/// wire's op table, applied to every grid of the state.
+pub const STATE_DOMAIN: &[u8] = b"netstratum.state.v1";
+
+/// The digest of a state (see [`STATE_DOMAIN`]). `None` if a count or a
+/// dimension exceeds u16 — the encoding never clamps.
+pub fn state_digest(grids: &[Grid]) -> Option<[u8; 32]> {
+    let mut hasher = blake3::Hasher::new();
+    hasher.update(STATE_DOMAIN);
+    hasher.update(&u16::try_from(grids.len()).ok()?.to_le_bytes());
+    for g in grids {
+        hasher.update(&u16::try_from(g.rows).ok()?.to_le_bytes());
+        hasher.update(&u16::try_from(g.cols).ok()?.to_le_bytes());
+        hasher.update(&g.cells);
+    }
+    Some(*hasher.finalize().as_bytes())
+}
+
+/// A word's carried derivation: `states[0]` is the digest of the state the
+/// word starts from, `states[k]` the digest after its k-th op.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Derivation {
+    pub states: Vec<[u8; 32]>,
+}
+
+/// Derive a word over `start`: the carried derivation and the final state.
+pub fn derive(program: &Program, start: &[Grid]) -> Option<(Derivation, Vec<Grid>)> {
+    let mut state = start.to_vec();
+    let mut states = vec![state_digest(&state)?];
+    for op in program {
+        state = state.iter().map(|g| op.apply(g)).collect();
+        states.push(state_digest(&state)?);
+    }
+    Some((Derivation { states }, state))
+}
+
+/// Walk a carried derivation from `start`, one step at a time: state 0 must
+/// hash to `states[0]`, and each op applied to the state before it must hash
+/// to the carried digest after it. The final state, or the first diverged
+/// step (`0` = the start state, `k` = the k-th op; a derivation whose length
+/// does not match the word diverges at the first step it lacks or exceeds).
+pub fn walk(derivation: &Derivation, program: &Program, start: &[Grid]) -> Result<Vec<Grid>, usize> {
+    match (derivation.states.first(), state_digest(start)) {
+        (Some(carried), Some(start)) if *carried == start => {}
+        _ => return Err(0),
+    }
+    let mut state = start.to_vec();
+    for (k, op) in program.iter().enumerate() {
+        let carried = derivation.states.get(k + 1).ok_or(k + 1)?;
+        state = state.iter().map(|g| op.apply(g)).collect();
+        if state_digest(&state).as_ref() != Some(carried) {
+            return Err(k + 1);
+        }
+    }
+    if derivation.states.len() != program.len() + 1 {
+        return Err(program.len() + 1);
+    }
+    Ok(state)
+}
