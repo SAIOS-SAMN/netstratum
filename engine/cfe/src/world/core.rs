@@ -77,6 +77,33 @@ impl World {
     pub fn drain_chronicle_to(&mut self, upto: u64) {
         self.chronicle.drain_to(upto);
     }
+    /// THE MEMORY BOUND: file the chronicle's drained own-hashes not yet in
+    /// the digest file at `path` (append-only), then let memory release them.
+    /// A file holding more than the annals have filed (appended, then the
+    /// snapshot naming it never landed) is cut back first; nothing already
+    /// filed moves.
+    pub fn file_annals(&mut self, path: &std::path::Path) -> std::io::Result<()> {
+        use std::io::Write;
+        let annals = self.chronicle.annals_mut();
+        let (_, filed) = annals.filed();
+        let file = std::fs::OpenOptions::new().create(true).append(true).open(path)?;
+        let len = file.metadata()?.len();
+        if len != filed * 32 {
+            if len < filed * 32 {
+                return Err(std::io::Error::other("the digest file is shorter than what it has filed"));
+            }
+            file.set_len(filed * 32)?;
+        }
+        let mut file = file;
+        let mut out = Vec::with_capacity(annals.unfiled().len() * 32);
+        for d in annals.unfiled() {
+            out.extend_from_slice(d);
+        }
+        file.write_all(&out)?;
+        file.flush()?;
+        annals.mark_filed(path.to_path_buf());
+        Ok(())
+    }
     /// MESH-1b: hold or release the writing pen — every internal
     /// append then carries the hand (the chronicle funnel stamps it).
     pub fn hold_pen(&mut self, hand: Option<u64>) {

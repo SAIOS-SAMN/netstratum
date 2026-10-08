@@ -32,7 +32,7 @@ fn a_carried_world_boots_from_its_tail_alone() {
     let total = world.chronicle().total();
     world.drain_chronicle_to(total - 1);
     assert_eq!(world.chronicle().receipts().len(), 1, "only the head stays held");
-    snapshot::write(&dir, &world, cursor.bytes()).unwrap();
+    snapshot::write(&dir, &mut world, cursor.bytes()).unwrap();
 
     // The world plays on past its snapshot; the tail reaches the file.
     world.zone(9, ZoneKind::Habitat).expect("affordable");
@@ -68,19 +68,20 @@ fn the_digests_append_and_are_never_rewritten() {
     let mut cursor = SyncCursor::default();
     sync_from(world.chronicle(), &carrier, &mut cursor).unwrap();
     world.drain_chronicle_to(world.chronicle().total() - 1);
-    snapshot::write(&dir, &world, cursor.bytes()).unwrap();
+    snapshot::write(&dir, &mut world, cursor.bytes()).unwrap();
     let first = std::fs::read(&digests).unwrap();
-    assert_eq!(first.len(), world.chronicle().annals().digests().len() * 32);
+    assert_eq!(first.len() as u64, world.chronicle().annals().digest_count() * 32);
+    assert!(world.chronicle().annals().unfiled().is_empty(), "filed digests leave memory");
 
     // A second carry appends only the newly drained hashes.
     world.zone(9, ZoneKind::Habitat).expect("affordable");
     world.zone(14, ZoneKind::Extractor).expect("affordable");
     sync_from(world.chronicle(), &carrier, &mut cursor).unwrap();
     world.drain_chronicle_to(world.chronicle().total() - 1);
-    snapshot::write(&dir, &world, cursor.bytes()).unwrap();
+    snapshot::write(&dir, &mut world, cursor.bytes()).unwrap();
     let second = std::fs::read(&digests).unwrap();
     assert_eq!(&second[..first.len()], &first[..], "nothing already written moves");
-    assert_eq!(second.len(), world.chronicle().annals().digests().len() * 32);
+    assert_eq!(second.len() as u64, world.chronicle().annals().digest_count() * 32);
 
     // A file left longer than its snapshot (a crash before the snapshot
     // landed) still boots: the snapshot takes only its own count.
@@ -89,8 +90,10 @@ fn the_digests_append_and_are_never_rewritten() {
     std::fs::write(&digests, &longer).unwrap();
     let (back, _, _) = snapshot::boot(&dir).expect("boots");
     assert_eq!(back.chronicle().annals(), world.chronicle().annals());
-    assert!(back.chronicle().sealed(&world.chronicle().annals().digests()[0]));
+    let cited = world.chronicle().annals().first_digest().expect("a filed digest");
+    assert!(back.chronicle().sealed(&cited), "a filed digest is still citable, read from the file");
+    assert!(!back.chronicle().sealed(&[7u8; 32]));
     // and the next carry cuts it back before appending
-    snapshot::write(&dir, &world, cursor.bytes()).unwrap();
+    snapshot::write(&dir, &mut world, cursor.bytes()).unwrap();
     assert_eq!(std::fs::read(&digests).unwrap(), second);
 }

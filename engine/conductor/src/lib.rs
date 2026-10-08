@@ -1581,7 +1581,6 @@ impl Polity {
                         unfolded: 0,
                         lane_refused: Vec::new(),
                         grown: std::collections::BTreeMap::new(),
-            held: std::collections::BTreeMap::new(),
                         held: std::collections::BTreeMap::new(),
                         autic_absorbed: 0,
                         autic_spoke: 0,
@@ -1784,6 +1783,7 @@ impl Polity {
             unfolded: 0,
             lane_refused: Vec::new(),
             grown: std::collections::BTreeMap::new(),
+            held: std::collections::BTreeMap::new(),
             autic_absorbed: 0,
             autic_spoke: 0,
             autic_learned: 0,
@@ -5001,7 +5001,7 @@ impl Polity {
         // drains to the annals; its record stays whole on disk.
         let upto = (self.chained as u64).min(self.world.chronicle().total().saturating_sub(1));
         self.world.drain_chronicle_to(upto);
-        snapshot::write(&dir, &self.world, self.sync_cursor.bytes())
+        snapshot::write(&dir, &mut self.world, self.sync_cursor.bytes())
     }
 
     fn chain_beat(&mut self, book: &Ledger) -> Result<(), mesh::arbor::ArborRefused> {
@@ -5103,16 +5103,15 @@ impl Polity {
             // snapshot of this chronicle, the unjudged deeds are carried.
             let snap = match self.chained == total {
                 true => None,
-                false => snapshot::read(&book.world_dir(&self.spec.world_name)).filter(|snap| {
-                    snap.receipts > base
-                        && snap.receipts <= total
-                        && receipts[snap.receipts - 1 - base].own().0 == snap.head
+                // State only: the annals are not re-read (the memory bound).
+                false => snapshot::read_state(&book.world_dir(&self.spec.world_name)).filter(|(at, head, _)| {
+                    *at > base && *at <= total && receipts[*at - 1 - base].own().0 == *head
                 }),
             };
             let stepper = match snap {
-                Some(snap) => {
-                    let from = snap.receipts;
-                    let mut stepper = cfe::world::Replayer::from_state(snap.state);
+                Some((at, _, state)) => {
+                    let from = at;
+                    let mut stepper = cfe::world::Replayer::from_state(state);
                     if from <= self.chained {
                         for receipt in &receipts[from - base..self.chained - base] {
                             stepper.apply(receipt);

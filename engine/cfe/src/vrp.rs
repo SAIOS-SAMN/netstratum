@@ -477,6 +477,11 @@ impl Chronicle {
         self.annals = annals;
     }
 
+    /// The carried annals, to file their drained own-hashes.
+    pub fn annals_mut(&mut self) -> &mut crate::annals::Annals {
+        &mut self.annals
+    }
+
     /// Did this world ever seal a receipt with this own-hash — held or
     /// drained?
     pub fn sealed(&self, digest: &[u8; 32]) -> bool {

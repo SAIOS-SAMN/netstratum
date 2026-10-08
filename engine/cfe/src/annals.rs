@@ -48,9 +48,14 @@ pub fn bulk(event: &ClosureEvent) -> bool {
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct Annals {
     kept: Vec<Receipt>,
+    /// Drained own-hashes NOT YET FILED in the digest file — the only ones
+    /// memory holds (the memory bound: the file is the record).
     digests: Vec<[u8; 32]>,
     last_link: BTreeMap<u64, u64>,
     assays: u64,
+    /// How many own-hashes the digest file already holds, and where it is.
+    filed: u64,
+    file: Option<std::path::PathBuf>,
 }
 
 impl Annals {
@@ -76,14 +81,59 @@ impl Annals {
         &self.kept
     }
 
-    /// Did the world ever seal a drained receipt with this own-hash?
+    /// Did the world ever seal a drained receipt with this own-hash? The
+    /// unfiled ones in memory first, then the digest file, streamed — claims
+    /// are rare, and the file is never held whole.
     pub fn sealed(&self, digest: &[u8; 32]) -> bool {
-        self.digests.contains(digest)
+        if self.digests.contains(digest) {
+            return true;
+        }
+        let Some(path) = &self.file else { return false };
+        let Ok(file) = std::fs::File::open(path) else { return false };
+        use std::io::Read;
+        let mut reader = std::io::BufReader::new(file).take(self.filed * 32);
+        let mut one = [0u8; 32];
+        while reader.read_exact(&mut one).is_ok() {
+            if one == *digest {
+                return true;
+            }
+        }
+        false
+    }
+
+    /// Every own-hash drained so far, filed or not.
+    pub fn digest_count(&self) -> u64 {
+        self.filed + self.digests.len() as u64
+    }
+
+    /// The own-hashes not yet filed, oldest first.
+    pub fn unfiled(&self) -> &[[u8; 32]] {
+        &self.digests
+    }
+
+    /// Where the digest file stands and how much of it is this annals'.
+    pub fn filed(&self) -> (Option<&std::path::Path>, u64) {
+        (self.file.as_deref(), self.filed)
+    }
+
+    /// The unfiled own-hashes have reached `path` (which now holds
+    /// `digest_count()` of them): memory lets them go.
+    pub fn mark_filed(&mut self, path: std::path::PathBuf) {
+        self.filed += self.digests.len() as u64;
+        self.digests = Vec::new();
+        self.file = Some(path);
     }
 
     /// The own-hash of the first receipt drained (the chronicle's genesis
     /// once anything drained).
     pub fn first_digest(&self) -> Option<[u8; 32]> {
+        if self.filed > 0 {
+            let mut one = [0u8; 32];
+            use std::io::Read;
+            let path = self.file.as_ref()?;
+            std::fs::File::open(path).ok()?.read_exact(&mut one).ok()?;
+            return Some(one);
+        }
         self.digests.first().copied()
     }
 
@@ -97,11 +147,6 @@ impl Annals {
         self.assays
     }
 
-    /// Every drained own-hash, oldest first.
-    pub fn digests(&self) -> &[[u8; 32]] {
-        &self.digests
-    }
-
     /// Plain bytes for the snapshot, the digests LEFT OUT (they live in their
     /// append-only file): `kept count u32 ‖ frames ‖ digest count u64 ‖
     /// links u32 ‖ (orb,stamp)·n ‖ assays u64`, little-endian.
@@ -110,22 +155,22 @@ impl Annals {
         for r in &self.kept {
             out.extend_from_slice(&r.wire_bytes());
         }
-        out.extend_from_slice(&(self.digests.len() as u64).to_le_bytes());
+        out.extend_from_slice(&self.digest_count().to_le_bytes());
         self.put_tail(&mut out);
         out
     }
 
-    /// Read [`Annals::to_carried_bytes`] back with its digests, or `None`
-    /// (the digest count must match).
-    pub fn from_carried_bytes(b: &[u8], digests: Vec<[u8; 32]>) -> Option<Annals> {
+    /// Read [`Annals::to_carried_bytes`] back, its digests left IN THE FILE at
+    /// `file` (which must hold at least the count the bytes name), or `None`.
+    pub fn from_carried_bytes(b: &[u8], file: std::path::PathBuf) -> Option<Annals> {
         let (kept, mut p) = Self::read_kept(b)?;
         let count = u64::from_le_bytes(b.get(p..p + 8)?.try_into().ok()?);
         p += 8;
-        if count != digests.len() as u64 {
+        if std::fs::metadata(&file).map(|m| m.len()).unwrap_or(0) < count * 32 {
             return None;
         }
         let (last_link, assays) = Self::read_tail(b, &mut p)?;
-        (p == b.len()).then_some(Annals { kept, digests, last_link, assays })
+        (p == b.len()).then_some(Annals { kept, digests: Vec::new(), last_link, assays, filed: count, file: Some(file) })
     }
 
     /// How many digests a [`Annals::to_carried_bytes`] payload names (so its
@@ -226,6 +271,6 @@ impl Annals {
             last_link.insert(orb, u64_at(&mut p)?);
         }
         let assays = u64_at(&mut p)?;
-        (p == b.len()).then_some(Annals { kept, digests, last_link, assays })
+        (p == b.len()).then_some(Annals { kept, digests, last_link, assays, filed: 0, file: None })
     }
 }
