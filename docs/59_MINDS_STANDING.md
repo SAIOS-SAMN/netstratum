@@ -55,11 +55,11 @@ The coordinator approved this order:
 Every refusal in netstratum's cognition is either RESTORED, because it rested on a developer standard, or JUSTIFIED as a law of netstratum's world. The full audit went to the coordinator on 2026-10-08.
 
 **RESTORE**, built in this order:
-1. Conjectures and guessing inside thought. A mind holds unglued hypotheses with their residuals as private state, tests them on later tasks, and renders learned drains. A CLAIM (a mint, anything offered outward) must still close every pair.
+1. Conjectures and guessing inside thought. **LANDED** (restore 1: held conjectures per vessel, tried first on later tasks). A mind holds unglued hypotheses with their residuals as private state, tests them on later tasks, and renders learned drains. A CLAIM (a mint, anything offered outward) must still close every pair.
 2. The vessels must differ, so that consilience between them is evidence.
-3. Pin G becomes proportional: a partly fed line thinks in proportion (20_FOUNDING §6a-bis strikes cliffs).
+3. Pin G becomes proportional: a partly fed line thinks in proportion (20_FOUNDING §6a-bis strikes cliffs). **LANDED**: a line its larder does not wholly feed thinks on a seeded draw whose chance is its fed share of mouths (`Polity::thinks_in_proportion`).
 4. Volumetric lines mint and render.
-5. Partial grids are perceived.
+5. Partial grids are perceived. **MOOT**: a `Grid` is dense by construction, so `measure_grid`'s whole-or-refused never refuses a real grid. There is nothing partial to perceive.
 6. The anti-overfit depth cap (`solver/need.rs:152`) is retired as a cognition limit. Its capacity arm is justified as world physics if it is ever wired.
 7. The forge stays as practice; the ladder's role moves to outside tasks (Concordance 6.2a).
 

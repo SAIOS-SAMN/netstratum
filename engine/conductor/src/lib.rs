@@ -3258,6 +3258,43 @@ impl Polity {
     /// with no farmed ration (plasmoid, #29) — trivially survives: there is no
     /// book to peel. A pure deterministic read (labor, sustenance, ration), so
     /// replay reads the same verdict and SEAL-B is untouched.
+    /// RESTORE 3: whether a line its larder only PARTLY feeds thinks this
+    /// beat — a draw by the society's own partition draw over (fed, unfed)
+    /// mouths, seeded by the line and the beat, so its chance is exactly the
+    /// fed share. A line with no fed mouth does not think.
+    pub fn thinks_in_proportion(&self, orb: u64) -> bool {
+        let (fed, mouths) = self.ration_share(orb);
+        if fed == 0 || mouths == 0 {
+            return false;
+        }
+        let mut seed = blake3::Hasher::new();
+        seed.update(b"netstratum.pin-g.proportional.v1");
+        seed.update(self.spec.world_name.as_bytes());
+        seed.update(&self.world.now().to_le_bytes());
+        soc::partition_draw(&[fed, mouths.saturating_sub(fed)], *seed.finalize().as_bytes()) == Some(0)
+    }
+
+    /// How many of the line's working mouths the larder feeds this beat, and
+    /// how many there are (Pin G's own reading, as counts).
+    pub fn ration_share(&self, orb: u64) -> (u64, u64) {
+        let mouths = self.world.labor_force(orb);
+        let per_capita = self.world.per_capita_ration();
+        if mouths == 0 || per_capita <= ratio(0, 1) {
+            return (mouths, mouths);
+        }
+        let stamp = self.world.now();
+        let available: Ratio = self
+            .world
+            .sustenance_sources(orb, stamp)
+            .iter()
+            .map(|source| source.available())
+            .fold(ratio(0, 1), |sum, amount| sum + amount);
+        let fed = num_traits::ToPrimitive::to_u64(&(available / per_capita).to_integer())
+            .unwrap_or(mouths)
+            .min(mouths);
+        (fed, mouths)
+    }
+
     pub fn ration_survives(&self, orb: u64) -> bool {
         let mouths = self.world.labor_force(orb);
         if mouths == 0 {
@@ -4034,7 +4071,7 @@ impl Polity {
         self.world.observe_gauge(sample);
     }
 
-    fn research_step(&mut self, book: &Ledger, survives: bool) {
+    fn research_step(&mut self, book: &Ledger, thinks: bool) {
         let Some(receipt) = self.world.chronicle().receipts().last() else {
             return;
         };
@@ -4247,9 +4284,10 @@ impl Polity {
         // labor_force × the line's ration (mouths eat — buildings' upkeep is not
         // the pair), the have is the derived sustenance, and the owed DIRECTION
         // is the species's ration (a plasmoid owes joule, not biomass — no
-        // hardcode). The SAME reduce organ the grid seat runs. `survives` was
-        // read in `cycle` after regrowth and before collect drained the larder.
-        let solved = if !survives {
+        // hardcode). The SAME reduce organ the grid seat runs. Pin G was read
+        // in `cycle` after regrowth and before collect drained the larder; since
+        // restore 3 a partly fed line thinks in proportion (`thinks`).
+        let solved = if !thinks {
             // The book did not close — withhold the beat, call no think_task.
             None
         } else if self.spec.civilization.perception == "volumetric" {
@@ -4888,6 +4926,11 @@ impl Polity {
         let survives = profile::timed("survival_read", || {
             self.ration_survives(cfe::world::FIRST_ORB)
         });
+        // RESTORE 3 (Concordance 1.10; 20_FOUNDING §6a-bis strikes cliffs): a
+        // line its larder does not wholly feed still THINKS IN PROPORTION — on
+        // a draw whose chance is the share of its mouths the larder feeds.
+        // One unfed mouth no longer silences the whole line.
+        let thinks = survives || self.thinks_in_proportion(cfe::world::FIRST_ORB);
         // N-I6 — THE SURVIVAL EXPRESS: the residual names ≤1 deed, expressed in
         // this same post-tick / pre-collect window (the sole zone-raiser now).
         // A Fed book may open matter (Pin F); a Short book still thinks — that is
@@ -4922,7 +4965,7 @@ impl Polity {
         // choice (the will stays the line's own). Replaces cognitive_investment_
         // step + expand_step's charter + chemistry_step's seat.
         profile::timed("abundance_step", || self.abundance_step());
-        profile::timed("research_step", || self.research_step(book, survives));
+        profile::timed("research_step", || self.research_step(book, thinks));
         let newborn = profile::timed("divergence_step", || self.divergence_step(registry));
         // THE RESUME CARRIER (task 25, 2026-07-30): every polity
         // world syncs its tlv chronicle beside the ledger exports — an
