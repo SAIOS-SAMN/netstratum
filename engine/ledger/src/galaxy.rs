@@ -205,16 +205,23 @@ impl Ledger {
         Ok(())
     }
 
-    /// What each core holds: the sum of its `CoreDeposited` receipts, per
-    /// holding (`None` = STAMP). A reading: nothing is written.
+    /// What each core holds: its `CoreDeposited` receipts less its
+    /// `CoreEmitted` ones, per holding (`None` = STAMP). A reading: nothing
+    /// is written.
     pub fn core_holdings(&self) -> std::collections::BTreeMap<(String, Option<cfe::dop::Resource>), Ratio> {
         let mut held = std::collections::BTreeMap::new();
         let Ok(ledger) = persist::load(&self.ledger_path()) else {
             return held;
         };
         for receipt in ledger.receipts() {
-            if let ClosureEvent::CoreDeposited { core, resource, amount, .. } = receipt.event() {
-                *held.entry((core.clone(), *resource)).or_insert_with(|| ratio(0, 1)) += amount.clone();
+            match receipt.event() {
+                ClosureEvent::CoreDeposited { core, resource, amount, .. } => {
+                    *held.entry((core.clone(), *resource)).or_insert_with(|| ratio(0, 1)) += amount.clone();
+                }
+                ClosureEvent::CoreEmitted { core, resource, amount, .. } => {
+                    *held.entry((core.clone(), *resource)).or_insert_with(|| ratio(0, 1)) -= amount.clone();
+                }
+                _ => {}
             }
         }
         held

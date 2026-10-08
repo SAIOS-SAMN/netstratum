@@ -585,4 +585,32 @@ impl World {
         let stamp = self.clock.now();
         self.chronicle.append(event, stamp, vec![actor]);
     }
+
+    /// **THE BOUNCE ARRIVES** (the cores design, slice 2): `core`'s yearly
+    /// pulse of a holding (`None` = STAMP) credited to this world's first
+    /// orb, receipted `CoreReturned`. The universe is the actor (the
+    /// sovereign seat), as it is for every world-driven consequence.
+    pub fn receive_from_core(
+        &mut self,
+        core: &str,
+        resource: Option<crate::dop::Resource>,
+        amount: crate::dop::Positive,
+    ) -> Result<(), super::ActionRefused> {
+        let orb_id = super::FIRST_ORB;
+        let held = self
+            .orbs
+            .iter_mut()
+            .find(|orb| orb.orb_id == orb_id)
+            .ok_or(super::ActionRefused::NoSuchOrb { orb: orb_id })?;
+        let amount = amount.value().clone();
+        match resource {
+            Some(resource) => held.bank(resource, amount.clone()),
+            None => held.bank_stamp(amount.clone()),
+        }
+        self.close(
+            ClosureEvent::CoreReturned { orb_id, core: core.to_string(), resource, amount },
+            super::SOVEREIGN,
+        );
+        Ok(())
+    }
 }

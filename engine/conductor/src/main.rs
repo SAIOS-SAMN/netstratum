@@ -426,6 +426,10 @@ fn main() {
             if !deposits.is_empty() {
                 println!("beat {beat}: {} worlds' sinks reached their cores", deposits.len());
             }
+            // THE BOUNCE (slice 2): every core re-emits what it holds.
+            for (core, world) in conductor::core_bounce(&mut worlds, &book, epoch_base + beat) {
+                println!("beat {beat}: the core {core} returns a pulse to {world}");
+            }
             // CARRY STATE FORWARD: every world's snapshot at the year's close,
             // so a boot resumes from here, never from genesis.
             for polity in worlds.iter_mut().filter(|e| !e.penned) {

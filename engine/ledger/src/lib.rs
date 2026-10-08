@@ -496,5 +496,11 @@ mod core_tests {
         )
         .unwrap();
         assert_eq!(book.core_holdings().get(&("b-sky-1".to_string(), None)), Some(&ratio(3, 2)));
+        book.append_universe(
+            vec![cfe::dop::ClosureEvent::CoreEmitted { core: "b-sky-1".into(), world: "w".into(), resource: None, amount: ratio(1, 2) }],
+            4,
+        )
+        .unwrap();
+        assert_eq!(book.core_holdings().get(&("b-sky-1".to_string(), None)), Some(&ratio(1, 1)), "deposits less emissions");
     }
 }

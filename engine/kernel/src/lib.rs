@@ -532,6 +532,17 @@ fn stamp_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Re
             }
             amount.clone()
         }
+        // THE BOUNCE (tag 195): a core's STAMP pulse arrives — a declared
+        // credit, sign-guarded like the aperture's receive leg.
+        ClosureEvent::CoreReturned { resource: None, amount, .. } => {
+            if *amount < ratio(0, 1) {
+                return Err(Refused::ElementNotPositive {
+                    element: [0u8; 32],
+                    amount: Box::new(amount.clone()),
+                });
+            }
+            amount.clone()
+        }
         // P5-M / P5-M2: raids and cascades burn fee STAMP (typed residual).
         ClosureEvent::LiquidityRaidStruck { fee, .. }
         | ClosureEvent::NoteCascadeStruck { fee, .. } => {
@@ -1424,6 +1435,8 @@ fn covered(event: &ClosureEvent) -> bool {
         // legs (the convergence seam): a leg debits/credits exactly its
         // declared amount, the local half of pair conservation.
         E::ResourceTransferred { .. } | E::ApertureSent { .. } | E::ApertureReceived { .. }
+        // The bounce's arrival is the receive leg's shape: declared, credited.
+        | E::CoreReturned { .. }
         // I4 creation / I5 decay (declaration==effect + sign) fully cover
         // the mint and the demurrage decay — per-row (sealed) and the
         // atomic touch alike.
@@ -1684,6 +1697,7 @@ fn covered(event: &ClosureEvent) -> bool {
         // The cores design (tag 193): a core deposit is universe-ledger
         // identity of a debit that already happened in its world.
         | E::CoreDeposited { .. }
+        | E::CoreEmitted { .. }
         // CHRONICLE-COMPACT-1 (tag 188): a checkpoint is banked-neutral
         // exactly like the regional seed above — it moves no bank, no
         // element, no key, a pure bookkeeping fact about the chronicle
@@ -1837,6 +1851,13 @@ fn admitted_deltas(
             non_negative(*resource, amount)?;
             vec![(*resource, amount.clone())]
         }
+        // THE BOUNCE (tag 195): a core's matter pulse arrives — declared,
+        // sign-guarded; its STAMP twin is judged in stamp_move.
+        E::CoreReturned { resource: Some(resource), amount, .. } => {
+            non_negative(*resource, amount)?;
+            vec![(*resource, amount.clone())]
+        }
+        E::CoreReturned { resource: None, .. } => Vec::new(),
         // STAMP-1: crystal spent for identity mint — resource debit only;
         // STAMP balance is judged in stamp_move.
         E::StampMinted { crystal_spent, amount, .. } => {
@@ -2707,6 +2728,8 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         | E::UniverseFounded { .. }    // docs/58: the universe's origin
         | E::AncientArose { .. }       // docs/58: the universe's keeper
         | E::CoreDeposited { .. }      // the cores design: a sink at its throat
+        | E::CoreEmitted { .. }        // the bounce, the core's side
+        | E::CoreReturned { .. }       // the bounce arrives
         | E::HandoffSealed { .. }
         | E::ResourceTransferred { .. } | E::ApertureSent { .. } | E::ApertureReceived { .. }
         | E::DiscoveryMinted { .. } | E::SovereignUnionSealed { .. }
@@ -3002,7 +3025,7 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         // and universe-ledger entries: no actor scope. Governed by other
         // invariants (conservation, decay) or their own protocol law.
         E::FamineStruck { .. } | E::FamineRelieved { .. } | E::EraAnnexed { .. }
-        | E::GalaxyObserved { .. } | E::UniverseFounded { .. } | E::AncientArose { .. } | E::CoreDeposited { .. } | E::OverheatStruck { .. } | E::OverheatCleared { .. }
+        | E::GalaxyObserved { .. } | E::UniverseFounded { .. } | E::AncientArose { .. } | E::CoreDeposited { .. } | E::CoreEmitted { .. } | E::CoreReturned { .. } | E::OverheatStruck { .. } | E::OverheatCleared { .. }
         | E::VentSettled { .. } | E::DemurrageSettled { .. } | E::DemurrageTouched { .. }
         // #136 — the smelt-sweep is a world-ledger migration (a one-time grain floor),
         // no actor scope; governed by conservation, like the demurrage settle beside it.

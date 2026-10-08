@@ -494,7 +494,16 @@ impl Replayer {
         // docs/58 — the Big Bang and a world's citation of it are IDENTITY:
         // they enter the hash chain (so everything after descends from the
         // origin) and move nothing in committed state.
-        ClosureEvent::UniverseFounded { .. } | ClosureEvent::UniverseCited { .. } | ClosureEvent::AncientArose { .. } | ClosureEvent::CoreDeposited { .. } => {}
+        ClosureEvent::UniverseFounded { .. } | ClosureEvent::UniverseCited { .. } | ClosureEvent::AncientArose { .. } | ClosureEvent::CoreDeposited { .. } | ClosureEvent::CoreEmitted { .. } => {}
+        // THE BOUNCE (tag 195): the core's pulse arrives, credited whole.
+        ClosureEvent::CoreReturned { orb_id, resource, amount, .. } => {
+            if let Some(held) = peel(&mut *orbs, *orb_id) {
+                match resource {
+                    Some(resource) => held.bank(*resource, amount.clone()),
+                    None => held.bank_stamp(amount.clone()),
+                }
+            }
+        }
         // CHRONICLE-COMPACT-1: schema only — the checkpoint itself carries no
         // committed-state effect (it is a bookkeeping fact about the
         // chronicle, not a change to the world). The load-bearing use

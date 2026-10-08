@@ -8440,6 +8440,22 @@ fn chronicle(world: &World, style: &Style) {
                 },
                 style.strong(core)
             ),
+            cfe::dop::ClosureEvent::CoreEmitted { core, world, resource, amount } => format!(
+                "⊙ the core {} returns {} to {world}",
+                style.strong(core),
+                match resource {
+                    Some(r) => format!("{amount} {r:?}"),
+                    None => format!("{amount} STAMP"),
+                }
+            ),
+            cfe::dop::ClosureEvent::CoreReturned { core, resource, amount, .. } => format!(
+                "⊙ a pulse arrives from the core {}: {}",
+                style.strong(core),
+                match resource {
+                    Some(r) => format!("{amount} {r:?}"),
+                    None => format!("{amount} STAMP"),
+                }
+            ),
             cfe::dop::ClosureEvent::UniverseFounded { topology, span, over, .. } => format!(
                 "✶ THE BIG BANG — a {topology} of span {span}{}",
                 if over.is_some() { " (re-founded over an older ledger)" } else { "" }

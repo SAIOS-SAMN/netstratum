@@ -300,14 +300,42 @@ mod tests {
     }
 
     #[test]
+    fn the_bounce_arrives_lawfully_and_a_forged_one_is_refused() {
+        use cfe::world::{Replayer, World};
+        let mut world = World::new();
+        world.found("meridian").expect("founds");
+        for resource in [Some(Resource::Iron), None] {
+            let prior = world.committed();
+            world.receive_from_core("the-founding", resource, cfe::dop::positive(7, 4)).expect("arrives");
+            let receipt = world.chronicle().receipts().last().unwrap().clone();
+            // the replay of the receipt is the live credit
+            let mut stepper = Replayer::from_state(prior.clone());
+            stepper.apply(&receipt);
+            assert_eq!(stepper.state(), &world.committed());
+            assert_eq!(change(&holdings(&prior), &holdings(&world.committed())), [(resource, ratio(7, 4))].into_iter().collect());
+            // the kernel admits it as a declared source
+            let step = kernel::Step { event: receipt.event().clone(), actor: cfe::world::SOVEREIGN, stamp: receipt.stamp() };
+            assert_eq!(kernel::admits(&prior, stepper.state(), &step), Ok(()));
+            // a credit larger than it declares is refused
+            let mut forged = stepper.state().clone();
+            match resource {
+                Some(r) => forged.orbs[0].bank(r, ratio(1, 1)),
+                None => forged.orbs[0].bank_stamp(ratio(1, 1)),
+            }
+            assert!(kernel::admits(&prior, &forged, &step).is_err());
+        }
+    }
+
+    #[test]
     fn a_core_deposit_crosses_the_wire_whole() {
-        for resource in [None, Some(Resource::Crystal)] {
-            let event = ClosureEvent::CoreDeposited {
-                core: "the-founding".into(),
-                world: "forge-reach".into(),
-                resource,
-                amount: ratio(3535, 1024),
-            };
+        let events = [None, Some(Resource::Crystal)].into_iter().flat_map(|resource| {
+            [
+                ClosureEvent::CoreDeposited { core: "the-founding".into(), world: "forge-reach".into(), resource, amount: ratio(3535, 1024) },
+                ClosureEvent::CoreEmitted { core: "the-founding".into(), world: "forge-reach".into(), resource, amount: ratio(3, 1024) },
+                ClosureEvent::CoreReturned { orb_id: 1, core: "corebound-sky-1".into(), resource, amount: ratio(9, 2) },
+            ]
+        });
+        for event in events {
             let mut c = cfe::vrp::Chronicle::new();
             c.append(event.clone(), 1, vec![]);
             let r = &c.receipts()[0];

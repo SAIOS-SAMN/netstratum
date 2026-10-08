@@ -5306,6 +5306,58 @@ pub fn core_step(worlds: &mut [Polity], book: &Ledger, stamp: u64) -> Vec<(Strin
     out
 }
 
+/// **THE CORES, slice (2): THE BOUNCE** — at the year's close, after the
+/// year's deposits, every core re-emits each holding it holds as ONE pulse
+/// into one living world its throat reaches (`Ledger::core_of`), drawn by the
+/// society's own partition draw weighted by population (the living draw the
+/// return; a core whose reach holds no one keeps its pulse for a later year).
+/// The pulse is the holding on the ledger grain; dust below the grain stays
+/// at the core. Two receipts per pulse: `CoreReturned` in the world (the
+/// credit, a declared source) and `CoreEmitted` on the universe ledger, so a
+/// core never emits what it does not hold. Returns (core, world) per pulse.
+pub fn core_bounce(worlds: &mut [Polity], book: &Ledger, stamp: u64) -> Vec<(String, String)> {
+    let grain = ratio(1, cfe::world::RESOURCE_LEDGER_GRAIN);
+    let reached: Vec<Option<String>> = worlds.iter().map(|p| book.core_of(&p.spec.position)).collect();
+    let mut pulses = Vec::new();
+    for ((core, resource), held) in book.core_holdings() {
+        // On the grain: whole grains only; the dust stays at the core.
+        let Some(pulse) = cfe::dop::Positive::new((held / grain.clone()).floor() * grain.clone()) else { continue };
+        let candidates: Vec<usize> = (0..worlds.len())
+            .filter(|&i| !worlds[i].penned && worlds[i].world.orb().is_some() && reached[i].as_deref() == Some(core.as_str()))
+            .collect();
+        let weights: Vec<u64> =
+            candidates.iter().map(|&i| worlds[i].world.population_of(cfe::world::FIRST_ORB)).collect();
+        let mut seed = blake3::Hasher::new();
+        seed.update(b"netstratum.core.bounce.v1");
+        seed.update(core.as_bytes());
+        seed.update(&[resource.map_or(0, |r| r as u8)]);
+        seed.update(&stamp.to_le_bytes());
+        let Some(drawn) = soc::partition_draw(&weights, *seed.finalize().as_bytes()) else { continue };
+        pulses.push((candidates[drawn], core, resource, pulse));
+    }
+    // The core's side is sealed FIRST: a pulse the ledger did not record is
+    // never credited, so a core can never emit the same holding twice.
+    let emitted = pulses
+        .iter()
+        .map(|(i, core, resource, pulse)| cfe::dop::ClosureEvent::CoreEmitted {
+            core: core.clone(),
+            world: worlds[*i].spec.world_name.clone(),
+            resource: *resource,
+            amount: pulse.value().clone(),
+        })
+        .collect();
+    if book.append_universe(emitted, stamp).is_err() {
+        return Vec::new();
+    }
+    let mut out = Vec::new();
+    for (i, core, resource, pulse) in pulses {
+        if worlds[i].world.receive_from_core(&core, resource, pulse).is_ok() {
+            out.push((core, worlds[i].spec.world_name.clone()));
+        }
+    }
+    out
+}
+
 /// MARKET-2: the transit distance the iceberg law melts against — the
 /// universe's own torus distance (`ledger::torus_distance`), WRAPPED against
 /// the carried `span`. It summed unwrapped |Δ| until 2026-10-08: two worlds
