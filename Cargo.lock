@@ -603,6 +603,7 @@ dependencies = [
  "num-bigint",
  "num-rational",
  "num-traits",
+ "solver",
 ]
 
 [[package]]

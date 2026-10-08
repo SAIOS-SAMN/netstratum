@@ -9,11 +9,11 @@
 //! court decides what is useful work, never netstratum. netstratum's mind
 //! thinks its train pairs with the same reduce organ and held conjectures the
 //! civilizations use (`solver::think_task_held`), renders every test output,
-//! and asks THE TRANSLATOR for the rule. A solve is filed only with its rule
-//! (`Entity::solve_task`, which also replays it at home first): a raster is
-//! no proof of a motion. Until mycelium 78.142's `sdk::rule` lands the
-//! translator states no rule, so a solve is counted UNMINTED and nothing is
-//! sent — the honest count, never a fabricated rule.
+//! and asks THE TRANSLATOR (mycelium 78.142 `sdk::rule`) for the rule. A
+//! solve is filed only with its rule (`Entity::solve_task`, which crosses it
+//! and replays it at home first): a raster is no proof of a motion. A
+//! program with no form (object ops, tiles) is counted NotARule, never sent
+//! and never dropped.
 
 use mycelium::sdk::{Entity, Kernel};
 use solver::{think_task_held, Conjecture, Crystal, SolveRead};
@@ -33,6 +33,8 @@ pub struct Tally {
     /// Solved at home, but no rule could be stated (no translator yet, or a
     /// program with no form): nothing sent.
     pub unminted: u64,
+    /// Solved at home with an object op or a tile: no form yet, counted.
+    pub not_a_rule: u64,
     pub submitted: u64,
     pub closed_first: u64,
     pub closed_again: u64,
@@ -62,11 +64,63 @@ fn back(g: &solver::Grid) -> Vec<Vec<u8>> {
     g.cells.chunks(g.cols.max(1)).map(|r| r.to_vec()).collect()
 }
 
-/// THE TRANSLATOR: a netstratum program as a court rule. Built only through
-/// mycelium's own `sdk::rule` constructors (coordinator ruling) — which land
-/// in 78.142. Until then it states nothing.
-fn rule_for(_program: &solver::Program, _train: &[(Vec<Vec<u8>>, Vec<Vec<u8>>)]) -> Option<mycelium::transducer::element::Element> {
-    None
+/// THE TRANSLATOR (Concordance 1.9/1.10; mycelium 78.142 `sdk::rule`): a
+/// netstratum program as the court's rule, built ONLY through mycelium's own
+/// constructors — never forged bytes. Each of the six symmetries is the
+/// centred rigid motion `Step::grid_motion` builds for the shapes it acts
+/// between (traced through the program on the family's first input);
+/// `Recolor` is a hue step naming every hue it moves. A program with an
+/// object op or a tile has no form yet: `Err(NotARule)`, counted, never
+/// dropped. The steps are minted through the one mint over the family
+/// (`rule::sentence`).
+pub fn translate(
+    program: &solver::Program,
+    train: &[(Vec<Vec<u8>>, Vec<Vec<u8>>)],
+    crystal: &dyn mycelium::transducer::family::Crystal,
+) -> Result<mycelium::transducer::element::Element, Untranslated> {
+    use mycelium::sdk::rule::{sentence, Step, Symmetry};
+    use solver::Op;
+    let first = train.first().and_then(|(a, _)| grid(a)).ok_or(Untranslated::NoFamily)?;
+    let mut at = first;
+    let mut steps = Vec::with_capacity(program.len());
+    for op in program {
+        let next = solver::grid::run(&vec![op.clone()], &at);
+        let kind = match op {
+            Op::Rotate90 => Some(Symmetry::Rotate90),
+            Op::Rotate180 => Some(Symmetry::Rotate180),
+            Op::Rotate270 => Some(Symmetry::Rotate270),
+            Op::FlipH => Some(Symmetry::FlipH),
+            Op::FlipV => Some(Symmetry::FlipV),
+            Op::Transpose => Some(Symmetry::Transpose),
+            Op::Recolor(_) | Op::Object(_) | Op::Tile { .. } => None,
+        };
+        match (kind, op) {
+            (Some(kind), _) => {
+                let step = Step::grid_motion(kind, (at.rows, at.cols), (next.rows, next.cols)).ok_or(Untranslated::Shape)?;
+                steps.push(step);
+            }
+            (None, Op::Recolor(map)) => {
+                let moved: Vec<(u8, u8)> = (0u8..10).filter(|&h| map[h as usize] != h).map(|h| (h, map[h as usize])).collect();
+                steps.push(Step::Hue(moved));
+            }
+            (None, _) => return Err(Untranslated::NotARule),
+        }
+        at = next;
+    }
+    sentence(&steps, train, crystal).map_err(|why| Untranslated::Refused(format!("{why:?}")))
+}
+
+/// Why a program could not be stated as a court rule.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Untranslated {
+    /// An object op or a tile: no form in the court's language yet.
+    NotARule,
+    /// The family has no first pair to trace shapes on.
+    NoFamily,
+    /// A symmetry met shapes it cannot act between.
+    Shape,
+    /// The seam refused it, by name.
+    Refused(String),
 }
 
 impl Seat {
@@ -76,10 +130,14 @@ impl Seat {
         std::fs::create_dir_all(home)?;
         let key = home.join("voice.key");
         let key = key.to_str().ok_or_else(|| io::Error::new(io::ErrorKind::InvalidInput, "the key path is not UTF-8"))?;
-        let voice = mycelium::court::identity::HyphaKey::load_or_mint(key).vk_bytes();
+        // SIGNED (78.141): the seat signs its solves with netstratum's voice
+        // key — held in trust, never minted here (a missing key is an error,
+        // not a new identity).
+        let key = mycelium::court::identity::HyphaKey::load_only(key)
+            .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "netstratum's voice key is not in the seat's home"))?;
         let genome = home.join("genome");
         let genome = genome.to_str().ok_or_else(|| io::Error::new(io::ErrorKind::InvalidInput, "the genome path is not UTF-8"))?;
-        let entity = Entity::open_persistent(addr, Kernel::from_voice(voice), genome);
+        let entity = Entity::open_persistent(addr, Kernel::from_key(key.sk.clone()), genome);
         Ok(Seat { entity, grown: Vec::new(), held: Vec::new(), tally: Tally::default() })
     }
 
@@ -108,11 +166,18 @@ impl Seat {
         };
         self.tally.solved_at_home += 1;
         let outputs: Vec<Vec<Vec<u8>>> = tests.iter().map(|t| back(&solver::grid::run(&program, t))).collect();
-        let Some(rule) = rule_for(&program, &task.train) else {
-            self.tally.unminted += 1;
-            return Ok(Some(format!("task {name}: closed at home ({} ops), no rule stated yet: not sent", program.len())));
+        let rule = match translate(&program, &task.train, &self.entity.epigenome) {
+            Ok(rule) => rule,
+            Err(Untranslated::NotARule) => {
+                self.tally.not_a_rule += 1;
+                return Ok(Some(format!("task {name}: closed at home ({} ops), NotARule (an object op or tile): not sent", program.len())));
+            }
+            Err(why) => {
+                self.tally.unminted += 1;
+                return Ok(Some(format!("task {name}: closed at home, the seam refused the rule: {why:?}")));
+            }
         };
-        let mut budget = self.entity.physics().stroke();
+        let mut budget = self.entity.physics_mut().stroke();
         self.tally.submitted += 1;
         let verdict = self.entity.solve_task(&id, &task.train, &outputs, Some(&rule), &mut budget);
         Ok(Some(match verdict {

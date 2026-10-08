@@ -521,24 +521,51 @@ fn census_cmd(args: &[String], up: Option<&Uplink>, home: &Path) -> ExitCode {
 /// printed every 20 strokes. Runs until stopped.
 fn seat_cmd(args: &[String], at: &str, home: &Path) -> ExitCode {
     let every: u64 = flag(args, "--every").and_then(|s| s.parse().ok()).unwrap_or(2);
-    let mut seat = match ns_hypha::seat::Seat::open(at, home) {
-        Ok(s) => s,
-        Err(e) => {
-            eprintln!("ns-hypha: the seat did not open at {at}: {e}");
-            return ExitCode::from(2);
+    // The seat speaks to EVERY hypha named (`--at a,b,c`), one stroke each in
+    // turn, so the work is spread across the fleet rather than one server.
+    let hyphae: Vec<String> = at.split(',').map(str::trim).filter(|a| !a.is_empty()).map(String::from).collect();
+    let mut seats = Vec::new();
+    for addr in &hyphae {
+        match ns_hypha::seat::Seat::open(addr, home) {
+            Ok(s) => seats.push((addr.clone(), s)),
+            Err(e) => eprintln!("ns-hypha: the seat did not open at {addr}: {e}"),
         }
-    };
-    println!("seat: netstratum's client kernel at {at}, a stroke every {every}s");
+    }
+    if seats.is_empty() {
+        return ExitCode::from(2);
+    }
+    println!("seat: netstratum's client kernel at {}, a stroke every {every}s", hyphae.join(", "));
     let mut strokes = 0u64;
+    // A hypha that DEFERS a stroke (the judge's deficit: the voice asked
+    // faster than its budget) is left to rest, doubling each time it defers
+    // again (to 64 strokes) and reset when a stroke completes.
+    let mut rest: Vec<(u64, u64)> = vec![(0, 0); seats.len()];
     loop {
+        let at = (strokes as usize) % seats.len();
+        let (until, backoff) = rest[at];
+        if strokes < until {
+            strokes += 1;
+            std::thread::sleep(std::time::Duration::from_secs(every));
+            continue;
+        }
+        let (addr, seat) = &mut seats[at];
         match seat.stroke() {
-            Ok(Some(line)) => println!("seat: {line}"),
-            Ok(None) => {}
-            Err(e) => eprintln!("seat: the stroke did not complete: {e}"),
+            Ok(Some(line)) => {
+                rest[at] = (0, 0);
+                println!("seat [{addr}]: {line}");
+            }
+            Ok(None) => rest[at] = (0, 0),
+            Err(e) if e.to_string().contains("deferred") => {
+                let backoff = (backoff.max(1) * 2).min(64);
+                rest[at] = (strokes + backoff * seats.len() as u64, backoff);
+            }
+            Err(e) => eprintln!("seat [{addr}]: the stroke did not complete: {e}"),
         }
         strokes += 1;
-        if strokes.is_multiple_of(20) {
-            println!("seat: tally {:?}", seat.tally);
+        if strokes.is_multiple_of(30) {
+            for (addr, seat) in &seats {
+                println!("seat [{addr}]: tally {:?}", seat.tally);
+            }
         }
         std::thread::sleep(std::time::Duration::from_secs(every));
     }
