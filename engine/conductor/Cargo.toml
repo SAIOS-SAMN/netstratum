@@ -5,6 +5,7 @@ edition = "2021"
 description = "The heartbeat — autonomous civilizations play their colonies, grind the forge, drain the steward inbox, and keep the ledger; the board lives before the first human arrives"
 
 [dependencies]
+libc = "0.2"
 cfe = { path = "../cfe" }
 # A1 — CLOSING THE PoUW LOOP (2026-08-01). The conductor is a CLIENT of
 # units (16_UNIT §2), and clients import the kernel. It reads

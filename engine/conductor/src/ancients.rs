@@ -305,3 +305,21 @@ pub fn step(
     }
     (keepers, arisen)
 }
+
+/// THE COUNCILS (Concordance 3.9): each arisen ancient's house seats a council
+/// of the mycelium client minds, and client minds seat there and nowhere
+/// else. The house (ns-hypha) lists council seats on exactly the worlds named
+/// in `<var>/council.bin`: binary records, tag 1 an ancient's world.
+pub fn write_council(worlds: &[Polity], var_root: &Path) -> std::io::Result<()> {
+    let mut out = Vec::new();
+    for (_, sigil) in arisen(var_root) {
+        if let Some(p) = worlds.iter().find(|p| !p.penned && p.spec.civilization.sigil == sigil) {
+            cfe::tlv::put(1, p.spec.world_name.as_bytes(), &mut out);
+        }
+    }
+    let path = var_root.join("council.bin");
+    let staged = path.with_extension("staged");
+    std::fs::write(&staged, out)?;
+    std::fs::rename(staged, path)
+}
+

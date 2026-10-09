@@ -57,6 +57,12 @@ pub enum Select {
     Largest,
     /// Every body of the smallest count (ties included).
     Smallest,
+    /// THE CENTRAL BODIES (docs/66 Y2, the first commission's generator): every
+    /// body whose L1 distance to all the others, summed, is least (ties
+    /// included). A body's distance to another is the least L1 distance
+    /// between their cells. Declared by the hub-siting commission as its
+    /// judge's own measure; in the algebra from then on, for every line.
+    Central,
     /// Touching the frame, or not.
     Border(bool),
     /// Of the same shape (up to translation) as some OTHER body of another
@@ -78,6 +84,10 @@ impl Select {
             Select::Size(k) => b.size() == *k,
             Select::Largest => p.bodies.iter().map(Body::size).max() == Some(b.size()),
             Select::Smallest => p.bodies.iter().map(Body::size).min() == Some(b.size()),
+            Select::Central => {
+                let spread: Vec<usize> = (0..p.bodies.len()).map(|k| spread(p, k)).collect();
+                spread.iter().min() == Some(&spread[i])
+            }
             Select::Border(on) => b.border == *on,
             Select::TwinOfOtherHue => p.bodies.iter().enumerate().any(|(j, o)| j != i && o.hue != b.hue && o.shape == b.shape),
             Select::Shape(s) => &b.shape == s,
@@ -85,6 +95,20 @@ impl Select {
             Select::And(a, b) => a.picks(p, i) && b.picks(p, i),
         }
     }
+}
+
+/// The L1 distance between two bodies: the least over their cells.
+fn gap(a: &Body, b: &Body) -> usize {
+    a.cells
+        .iter()
+        .flat_map(|&(r, c)| b.cells.iter().map(move |&(s, d)| r.abs_diff(s) + c.abs_diff(d)))
+        .min()
+        .unwrap_or(0)
+}
+
+/// Body `i`'s L1 distance to every other body, summed (`Select::Central`).
+pub fn spread(p: &Percept, i: usize) -> usize {
+    p.bodies.iter().enumerate().filter(|(j, _)| *j != i).map(|(_, o)| gap(&p.bodies[i], o)).sum()
 }
 
 /// WHAT A RULE DOES to the bodies it selects.

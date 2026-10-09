@@ -459,9 +459,20 @@ fn main() {
             dilation_from = Some((beat, h));
         }
         hubs_cleared_at = point;
-        let spots = conductor::profile::timed("stamp_market_step", || conductor::stamp_market_step(&mut worlds, &book, beat, &span));
+        let spots = conductor::profile::timed("stamp_market_step", || conductor::stamp_market_step(&mut worlds, &book, std::path::Path::new(&var_root), beat, &span));
         if !spots.is_empty() {
             println!("beat {beat}: HUB — {} galaxies cleared at their hubs (STAMP for cargo, one price each)", spots.len());
+        }
+        // Concordance 3.9: the councils the house seats, published for it.
+        if beat.is_multiple_of(10) {
+            let _ = conductor::ancients::write_council(&worlds, std::path::Path::new(&var_root));
+        }
+        // docs/66 Y2 — COMMISSIONS: one attempt a beat at an open need.
+        let commission = conductor::profile::timed("commissions_step", || {
+            conductor::commissions::step(&mut worlds, &book, std::path::Path::new(&var_root), beat)
+        });
+        if let Some((core, world, arrived)) = &commission.closed {
+            println!("beat {beat}: COMMISSION CLOSED — {world} sites the hub of {core} by its own word; bounty {arrived} STAMP arrived");
         }
         // docs/69 — THE SPACING GUILD in the substrata: the ancients' tubes
         // open, and one task a beat is traversed below.
@@ -547,6 +558,24 @@ fn main() {
                     a.world,
                     if a.by_birth { "birth" } else { "deed" }
                 );
+            }
+            // MEMORY (operator 2026-10-09): what the allocator holds freed but
+            // unreturned is given back at the year's close, and the RSS read
+            // before and after says how much of the process was live data.
+            {
+                let rss = || {
+                    std::fs::read_to_string("/proc/self/statm")
+                        .ok()
+                        .and_then(|t| t.split_whitespace().nth(1).and_then(|p| p.parse::<u64>().ok()))
+                        .map(|pages| pages * 4)
+                        .unwrap_or(0)
+                };
+                let before = rss();
+                // SAFETY: malloc_trim only returns free heap pages to the system.
+                unsafe {
+                    libc::malloc_trim(0);
+                }
+                println!("beat {beat}: MEMORY — rss {} MB before the trim, {} MB after", before / 1024, rss() / 1024);
             }
             // CARRY STATE FORWARD: every world's snapshot at the year's close,
             // so a boot resumes from here, never from genesis.

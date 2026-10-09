@@ -64,7 +64,7 @@ fn fates(input: &Grid, output: &Grid, p: &Percept) -> Option<Vec<Fate>> {
 
 /// The predicates a mind tries, in order, built from what the pairs show.
 fn candidates(seen: &[(Percept, Vec<Fate>)]) -> Vec<Select> {
-    let mut base = vec![Select::Largest, Select::Smallest, Select::Border(true), Select::Border(false), Select::TwinOfOtherHue];
+    let mut base = vec![Select::Largest, Select::Smallest, Select::Central, Select::Border(true), Select::Border(false), Select::TwinOfOtherHue];
     for h in 0..10u8 {
         base.push(Select::Hue(h));
     }
@@ -190,6 +190,23 @@ mod tests {
         let rule = learn(&[(a, a2), (b, b2)]).expect("learned");
         assert_eq!(rule.act, Act::Recolor(2));
         assert_eq!(rule.select, Select::Largest);
+    }
+
+    #[test]
+    fn the_central_body_is_learned_as_a_commission_marks_it() {
+        // docs/66 Y2: lone hue-1 cells spaced apart; the judge marks the one
+        // whose L1 distance to the others is least. Learned, and it crosses
+        // the wire whole.
+        let mark = |x: &Grid| apply(&ObjectRule { select: Select::Central, act: Act::Recolor(2) }, x);
+        let a = g(5, 5, &[1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0]);
+        let b = g(5, 7, &[0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]);
+        let (a2, b2) = (mark(&a), mark(&b));
+        assert_eq!(a2.at(2, 2), 2);
+        let rule = learn(&[(a, a2), (b, b2)]).expect("learned");
+        assert_eq!(rule.select, Select::Central);
+        let program = vec![solver_verify::grid::Op::Project(rule)];
+        let bytes = solver_verify::program_bytes(&program).expect("encodes");
+        assert_eq!(solver_verify::program_from_bytes(&bytes), Some(program));
     }
 
     #[test]

@@ -77,6 +77,7 @@ pub mod snapshot;
 pub mod cores;
 pub mod ancients;
 pub mod substrata;
+pub mod commissions;
 // SOC-1 (operator directive 2026-08-16): the open build workbench — the surplus
 // phase of `build_step` draws its next building from a disposition-weighted
 // partition function seeded by the chronicle digest, in place of the fixed
@@ -906,6 +907,12 @@ pub struct PolitySpec {
 /// workspace, never pruned by replay.
 const AUTIC_BASIN_CAP: usize = 4096;
 
+/// **DECLARED BOUND** (memory, 2026-10-09): the chain entries a vessel's basin
+/// keeps, newest crystals first. An entry is a site, a direction and an exact
+/// coefficient (~60 bytes held), so a basin holds about 1 MB and the
+/// universe's 146 vessels about 150 MB. A memory bound, recorded in docs/59.
+const BASIN_ENTRY_CAP: usize = 16_384;
+
 /// PERF — how often (in world beats) a vessel PRACTISES a mesh wall and SPEAKS a
 /// sentence. Every beat would put two extra reduce ops per civ on top of the
 /// existing think_task, dominating a 107-civ global beat. Periodic keeps both
@@ -1531,6 +1538,17 @@ impl Polity {
     /// How many words this line owns, as last folded.
     pub fn owned_count(&self) -> usize {
         self.owned_words.len()
+    }
+
+    /// docs/66 Y2 — this line's own words tried whole on a commission.
+    pub fn try_words(&self, task: &solver::Task) -> Option<solver::Program> {
+        solver::mint::pre_reach(task, &self.library)
+    }
+
+    /// docs/66 Y2 — a word that closed a commission joins this line's working
+    /// library (the language grew by the commission's generator).
+    pub fn adopt_word(&mut self, word: solver::mint::MintedWord) {
+        self.library.adopt(word);
     }
 
     /// docs/69 — the laws a substratum opened by this line carries: its
@@ -4033,11 +4051,22 @@ impl Polity {
         let digest = receipt.own().0;
         // A bounded mind: each vessel's basin keeps its newest
         // AUTIC_BASIN_CAP crystals.
+        // MEMORY (2026-10-09): a crystal's size is its chain's entries, and a
+        // basin's newest crystals are kept within BASIN_ENTRY_CAP entries too
+        // (the count cap alone let 146 vessels reach tens of GB: measured
+        // ~60 KB a crystal, the conductor grew ~3.5 MB a beat).
         for basin in self.grown.values_mut() {
             if basin.len() > AUTIC_BASIN_CAP {
                 let over = basin.len() - AUTIC_BASIN_CAP;
                 basin.drain(..over);
             }
+            let mut entries: usize = basin.iter().map(|c| c.class.entries.len()).sum();
+            let mut over = 0;
+            while entries > BASIN_ENTRY_CAP && over < basin.len() {
+                entries -= basin[over].class.entries.len();
+                over += 1;
+            }
+            basin.drain(..over);
         }
         // docs/60 D6 — WORDS COMPETE: the library is stamped on this line's
         // clock; once a year the words unused for a year give way.
@@ -5630,7 +5659,7 @@ pub fn element_trade_step(worlds: &mut [Polity], beat: u64, span: &Ratio) -> Vec
 ///    aperture one way + resource aperture the other (spot clear,
 ///    zero player). Pre-checked so a partial clear never strands
 ///    STAMP mid-deal.
-pub fn stamp_market_step(worlds: &mut [Polity], book: &Ledger, beat: u64, span: &Ratio) -> Vec<(String, String)> {
+pub fn stamp_market_step(worlds: &mut [Polity], book: &Ledger, var_root: &std::path::Path, beat: u64, span: &Ratio) -> Vec<(String, String)> {
     let mut clears = Vec::new();
     let half = |amount: Ratio| amount / (ratio(1, 1) + ratio(1, 1));
     // Mint phase — convert half of surplus crystal (identity rate).
@@ -5709,14 +5738,20 @@ pub fn stamp_market_step(worlds: &mut [Polity], book: &Ledger, beat: u64, span: 
         if members.len() < 2 {
             continue;
         }
-        let hub = *members
-            .iter()
-            .min_by_key(|&&i| {
-                members
-                    .iter()
-                    .fold(ratio(0, 1), |sum, &j| sum + spatial_l1(&worlds[i].spec.position, &worlds[j].spec.position, span))
-            })
-            .expect("two or more members");
+        // docs/66 Y2: where a line's word closes the galaxy's commission, the
+        // hub stands where the word marks; otherwise the medoid stands in.
+        let centre = book.galaxies().into_iter().find(|g| g.name == core).map(|g| g.center);
+        let worded = centre.and_then(|c| commissions::hub_of(worlds, var_root, &core, &members, &c, span));
+        let hub = worded.unwrap_or_else(|| {
+            *members
+                .iter()
+                .min_by_key(|&&i| {
+                    members
+                        .iter()
+                        .fold(ratio(0, 1), |sum, &j| sum + spatial_l1(&worlds[i].spec.position, &worlds[j].spec.position, span))
+                })
+                .expect("two or more members")
+        });
         for &i in &members {
             if !worlds[i].world.knows_its_sun() {
                 let steward = worlds[i].steward;
@@ -6855,7 +6890,7 @@ fn run_era_inner(
         let _ = market_step(&mut worlds, u64::from(beat), &book.universe_span());
         let _ = merchant_step(&mut worlds, u64::from(beat), &book.universe_span());
         let _ = element_trade_step(&mut worlds, u64::from(beat), &book.universe_span());
-        let _ = stamp_market_step(&mut worlds, &book, u64::from(beat), &book.universe_span());
+        let _ = stamp_market_step(&mut worlds, &book, std::path::Path::new(var_root), u64::from(beat), &book.universe_span());
         instrument_step(&mut worlds);
         market_war_step(&mut worlds);
         espionage_step(&mut worlds);

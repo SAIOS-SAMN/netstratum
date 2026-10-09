@@ -18,15 +18,15 @@
 //!   thought with its laws first, then the opener's own minds; judged as every
 //!   synthesis is (the sealed answer must hold on the pairs).
 //! - **The float**, the throats' own synthetic currency (operator: "your own
-//!   internal synthetic float"): a closure pays the traverser the full rung
-//!   (`mint_bound`) if no one has closed that action in this substratum, the
-//!   quarter otherwise (docs/66 Y1's law, one level down). It never converts
+//!   internal synthetic float"), counted in discoveries: a closure pays the
+//!   traverser 1 if no one has closed that action in this substratum, the
+//!   quarter otherwise (docs/66 Y1's ratio, one level down). It never converts
 //!   into STAMP, Crystal or μ (boundary 1, coordinator 2026-10-09): it is spent
 //!   only on opening further tubes.
 //! - **Opening**: each ancient's core throat opens its first tube at its
-//!   arising. A further tube costs one first closure's worth at its own level
-//!   in float and opens beneath the tube its float was earned in, one level
-//!   deeper and harder, so depth and number are bounded by work done below.
+//!   arising. A further tube costs as many discoveries as its depth and opens
+//!   beneath the tube its float was earned in, one level deeper and harder (to
+//!   the forge's top), so depth and number are bounded by work done below.
 //! - **Upward**: a word first closed below becomes a law of that substratum
 //!   and reaches the opener's line as HEARD; the line adopts it only by
 //!   reconstructing it on its own task (docs/66 Y3). Nothing else crosses up.
@@ -205,9 +205,17 @@ fn level_of(level: u32) -> u32 {
     level.min(Difficulty::top())
 }
 
-/// The bound a closure at `level` pays: the synthesis rung's own.
-fn bound(level: u32) -> Ratio {
-    kernel::mint_bound(Difficulty::level(level_of(level)).rung())
+/// THE FLOAT'S UNIT is one discovery: a first closure below earns 1, a repeat
+/// the quarter (docs/66 Y1's ratio). Not the kernel's ladder price, which pays
+/// zero at the saturated rungs by ruling (and the guild works there).
+fn earned(first: bool) -> Ratio {
+    if first { ratio(1, 1) } else { ratio(1, 4) }
+}
+
+/// What a tube at `depth` costs to open, in discoveries: its depth. A deeper
+/// universe needs more work done below to reach.
+fn cost(depth: u32) -> Ratio {
+    ratio(i64::from(depth), 1)
 }
 
 /// Open a tube: its origin, its receipt on the universe ledger, its record.
@@ -287,7 +295,7 @@ pub fn step(worlds: &mut [Polity], book: &Ledger, var_root: &Path, beat: u64, st
     if let Some(program) = program {
         let orbit = solver::mint::word_orbit(&program);
         let first = !tube.closed.contains(&orbit);
-        let earned = if first { bound(tube.level) } else { bound(tube.level) * ratio(1, 4) };
+        let earned = earned(first);
         let mut float = floats(var_root);
         *float.entry(sigil.clone()).or_insert_with(|| ratio(0, 1)) += earned;
         if first {
@@ -303,7 +311,7 @@ pub fn step(worlds: &mut [Polity], book: &Ledger, var_root: &Path, beat: u64, st
         }
         done.closed = Some((hex(&tube.origin[..6]), tube.depth, first));
         // A further tube, beneath this one, once the float pays for it.
-        let cost = bound(tube.level + 1);
+        let cost = cost(tube.depth + 1);
         if float.get(sigil).is_some_and(|f| *f >= cost) {
             if let Some(child) = open(var_root, book, &worlds[at], &tube.core, Some(&tube), stamp) {
                 *float.get_mut(sigil).expect("held") -= cost;

@@ -136,3 +136,20 @@ kind 8, `[domain][u][commitment 32][EVENTS 32][cited final TPoint 84][parent 32]
   entity path). The checkpoints (`ancients.bin`, `substrata/*.tube`,
   `float.bin`, the worlds' snapshots) are what the commitment will cover; the
   inputs (decisions, crossings, tube openings) are the events.
+
+## 78.154 as built (coordinator 2026-10-09; 6b7dca7a, merging when memory allows)
+
+ACT_DOMAIN sub-kinds: LEDGER 12, READ-LEDGER 13, MAP 14, READ-MAP 15,
+TRAVERSE 16 (8-11 already live).
+
+- LEDGER carries the applied crossings after the signature, also signed:
+  `[count][(crossing 32, u_applied u64 LE)...]`.
+- TRAVERSE carries both reserves' signed debit and credit ("mycelium crossing
+  debit v1" / "credit v1" ‖ crossing ‖ lanes). Refusals: 10 one-sided,
+  11 mismatched, 12[side] not its reserve's, [8][side] stale.
+- MAP records: a mouth `[0][mouth][side][N u64]`; a segment
+  `[1][kind tube/core/throat][mouth][side][mouth][side][span n][span d][keeper?]`.
+- Commitment: the sparse Merkle tree plus the positional events digest.
+
+N7 targets these once merged: mouths at netstratum's cores, mapped by the
+arisen ancient's reserve (stillcold, docs/68).

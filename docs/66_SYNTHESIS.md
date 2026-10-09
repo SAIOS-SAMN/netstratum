@@ -35,7 +35,7 @@ reward; they meet only through the seats.
 |---|---|---|
 | Y0 | the name: Synthesis in what people read (logs, docs, new modules); long-standing identifiers stay | landed |
 | Y1 | first-closure bounty, as the court pays: a synthesis that mints a word no line in the universe holds earns the full rung (`mint_bound`); one that mints a word some line already holds (an independent re-derivation) earns the floor, the rung's quarter (the declared sibling dial, docs/59) | landed: live from beat 10591, years 177-179 closed clean |
-| Y2 | commissions: the universe's real needs as tasks (a hub's siting, a route's folding, a recipe, the biosphere's sustainable yield), each with its own judge, bountied by the lines that need them; the forged grids stay as practice | open (with docs/67) |
+| Y2 | commissions: the universe's real needs as tasks, each with its own judge, bountied by the lines that need them; a commission declares its judge's measure as a generator (operator 2026-10-09, option 2) | slice 1 built: hub siting (`conductor/src/commissions.rs`), generator `Select::Central` (wire select code 9) |
 | Y3 | the higher order reaches the lower: a court closure a seated mind files for a line's seat is announced to that line as a higher-order word it may reconstruct (the cores' inheritance-by-reconstruction door) | open |
 | Y4 | the lower order reaches the higher: what a line knows of its world (its words as perception, its world's records) offered to its seated mind as WORLD records in its percepts. Never a candidate rule or output for a court task before the mind: that would be solving by proxy, which ruling 7 forbids (coordinator review 2026-10-09). The mind does its own solving; counsel feeds its perception | open |
 
@@ -61,7 +61,18 @@ put to the minds in that form would never close. Two ways forward:
    the judge's exact answer on the need's pairs. The need teaches the
    language the word it lacks, and the word then serves every line.
 
-Y2 waits on that choice.
+**Ruled (operator 2026-10-09): option 2.** Slice 1, hub siting, as built:
+the need is read off the world (a galaxy's open lines on its disc plane, one
+hue-1 body a line, spaced so none touch); the judge marks the central bodies
+(`Select::Central`: least summed L1 distance to the others) in hue 2; the
+train pairs are two other galaxies' planes with their judged answers, the test
+is this galaxy's. One attempt a beat across the universe, the galaxies and
+their lines in turn; the line tries its own words, then thinks. A word that
+reproduces the judge on every pair closes the commission: the line adopts it,
+the galaxy's other open lines pay the closer's rung in STAMP over the iceberg,
+and from then on the hub stands where that word marks while it still holds
+(otherwise the medoid stands in). The book is a binary checkpoint
+(`<var>/commissions.bin`).
 
 ## The inner network (a test run under consideration, not built)
 

@@ -108,7 +108,7 @@ fn court_pred(select: &solver::percept::Select) -> Option<mycelium::sdk::rule::P
         Select::Smallest => Pred::extremum(Coord::Shell, Order::Least, Tie::Hold),
         Select::Not(inner) => Pred::Not(Box::new(court_pred(inner)?)),
         Select::And(a, b) => Pred::And(vec![court_pred(a)?, court_pred(b)?]),
-        Select::Border(_) | Select::TwinOfOtherHue | Select::Shape(_) => return None,
+        Select::Border(_) | Select::TwinOfOtherHue | Select::Shape(_) | Select::Central => return None,
     })
 }
 

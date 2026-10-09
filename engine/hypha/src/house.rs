@@ -5,8 +5,10 @@
 //! hypha only holds and forwards.
 //!
 //! The seats: seat 0 is the house's own (role Ancients, on the house key);
-//! seat i >= 1 is one living line of the universe (role Steward, on the
-//! line's name as a key: lines are keyless, Concordance 6.2a). A line's seat
+//! seat i >= 1 is a COUNCIL seat at one arisen ancient's line (Concordance
+//! 3.9: client minds seat at the ancients and nowhere else; role Ancients, on
+//! the line's name as a key: lines are keyless, Concordance 6.2a). A
+//! steward's line is not listed: no network mind sits in a steward's seat. A line's seat
 //! id is its own for good (`home/house/seats`, appended as lines are born; a
 //! dead line's id is retired, never reused), so a death moves no mind. A mind seated
 //! on a line is that line's second vessel (the mind-link, restore 2).
@@ -21,7 +23,7 @@
 //! Every take is kept (`home/house/takes`).
 
 use ed25519_dalek::SigningKey;
-use mycelium::anastome::dialogue::seat::{Arg, Outcome, Percept, Record, Role, Seat, SeatFn, Seats, Taken};
+use mycelium::anastome::dialogue::seat::{Arg, Outcome, Percept, Post, Record, Role, Seat, SeatFn, Seats, Taken};
 use mycelium::client::sdk::seat_mind::task::{FN_SOLVE, KIND_TASK};
 use mycelium::sdk::seat::HouseMail;
 use std::collections::BTreeMap;
@@ -115,6 +117,9 @@ pub struct House {
     seated_before: BTreeMap<String, [u8; 32]>,
     tends: u64,
     percepts: u64,
+    /// Seat-wire v1.4: the relay epoch the mail cursor `after` was read under
+    /// (a restarted relay draws a new one; the cursor is then no progress).
+    relay_epoch: Option<u64>,
     /// Seat -> an answer filed and not judged yet, re-filed each tend (78.153).
     refile: BTreeMap<u32, (mycelium::transducer::element::Element, Vec<Vec<Vec<u8>>>)>,
 }
@@ -169,13 +174,25 @@ impl House {
             tends: 0,
             percepts: 0,
             refile: BTreeMap::new(),
+            relay_epoch: None,
         })
     }
 
     /// The living lines with their seats, a newborn line given the next id.
+    /// THE COUNCILS (Concordance 3.9): the living lines that are arisen
+    /// ancients, as the conductor publishes them (`<var>/council.bin`). Client
+    /// minds seat at the ancients and nowhere else; a steward's seat holds no
+    /// network mind.
+    fn council(&self) -> Vec<String> {
+        let path = self.worlds.parent().map(|p| p.join("council.bin")).unwrap_or_default();
+        let bytes = std::fs::read(path).unwrap_or_default();
+        cfe::tlv::records(&bytes).filter(|(tag, _)| *tag == 1).filter_map(|(_, v)| String::from_utf8(v.to_vec()).ok()).collect()
+    }
+
     fn seated(&mut self) -> io::Result<Vec<(u32, String)>> {
         let mut out = Vec::new();
-        for name in living_lines(&self.worlds) {
+        let council = self.council();
+        for name in living_lines(&self.worlds).into_iter().filter(|n| council.contains(n)) {
             let id = match self.ids.get(&name) {
                 Some(&id) => id,
                 None => {
@@ -206,9 +223,10 @@ impl House {
         // fn 1 SOLVE: the rule's tape and the outputs (the steps ride after).
         let solve = SeatFn { id: FN_SOLVE, tags: vec![Arg::Bytes(Vec::new()).tag(), Arg::Bytes(Vec::new()).tag()] };
         for (id, name) in &self.lines {
-            seats.push(Seat { seat: *id, role: Role::Steward, on: line_key(name), beat: beat.clone(), fns: vec![solve.clone()] });
+            // A council seat at an ancient's house (Concordance 3.9).
+            seats.push(Seat { seat: *id, role: Role::Ancients, on: line_key(name), beat: beat.clone(), fns: vec![solve.clone()] });
         }
-        Seats { domain: self.domain, epoch: self.epoch, seats }
+        Seats { domain: self.domain, sub_origin: None, epoch: self.epoch, seats }
     }
 
     /// One tend: list the seats again when the living lines changed, then
@@ -229,6 +247,12 @@ impl House {
         Ok(said)
     }
 
+    /// The world's axis coordinate u: the conductor's beat beside the worlds.
+    fn u(&self) -> u64 {
+        let beat = self.worlds.parent().map(|p| p.join("conductor.beat")).unwrap_or_default();
+        std::fs::read_to_string(beat).ok().and_then(|t| t.trim().parse().ok()).unwrap_or(self.tends)
+    }
+
     /// Put the tasks netstratum's mind did not close before free seated
     /// minds, one each; a task past its patience goes back.
     fn hand_tasks(&mut self, seat: &mut crate::seat::Seat) -> io::Result<Vec<String>> {
@@ -245,10 +269,13 @@ impl House {
             let Some(id) = seat.next_before() else { break };
             self.percepts += 1;
             let p = Percept {
+                sub_origin: None,
                 domain: self.domain,
                 seat: s,
                 mind,
-                local_time: Arg::Q { num: i64::try_from(tends).unwrap_or(i64::MAX), den: 1 },
+                // 78.156 / seat-wire v1.4: the world's axis coordinate u (the
+                // conductor's beat), so a seated mind reads its dilation du/dh.
+                local_time: Arg::Q { num: i64::try_from(self.u()).unwrap_or(i64::MAX), den: 1 },
                 seq: self.percepts,
                 records: vec![Record::Plain { kind: KIND_TASK, args: vec![Arg::Key(id)] }],
                 // 78.152: the percept is stamped with the house's last final point.
@@ -329,19 +356,45 @@ impl House {
                 }
             }
         }
-        let mail = match seat.session().house_mail(&self.key, self.after)? {
+        // Seat-wire v1.4: the mail read at the relay's standing, the cursor
+        // kept with the epoch it was read under; a new epoch is a restart.
+        let read = match seat.session().read_mail(&self.key, self.after, self.relay_epoch.unwrap_or(0))? {
             Ok(m) => m,
             Err(why) => {
                 said.push(format!("mail refused: {why:?}"));
                 return Ok(said);
             }
         };
+        let cursor = read.cursor(self.relay_epoch, self.after);
+        if cursor != self.after {
+            said.push(format!("the relay restarted (epoch {:x}): the mail is read from its start", read.epoch));
+        }
+        // A restarted relay is volatile: its listing is gone, so the seats are
+        // listed again next tend (mycelium 2026-10-09).
+        if self.relay_epoch.is_some_and(|e| e != read.epoch) {
+            self.lines.clear();
+        }
+        self.after = cursor;
+        self.relay_epoch = Some(read.epoch);
+        let mut mail = Vec::new();
+        for m in read.mail {
+            let Some(s) = m.post() else { continue };
+            match &s.post {
+                Post::Take(t) => mail.push(HouseMail::Take(m.seq, t.clone())),
+                Post::Call(c) => {
+                    if let Some(reference) = s.reference() {
+                        mail.push(HouseMail::Call { seq: m.seq, call: c.clone(), reference });
+                    }
+                }
+                _ => {}
+            }
+        }
         for piece in mail {
             match piece {
                 HouseMail::Take(seq, t) => {
                     self.after = self.after.max(seq);
                     let line = self.line_on(t.seat);
-                    let reason = if t.domain != self.domain || line.is_none() {
+                    let reason = if t.domain != self.domain || t.sub_origin.is_some() || line.is_none() {
                         NO_SEAT
                     } else if self.held.get(&t.seat).is_some_and(|m| *m != t.mind) {
                         SEAT_HELD
@@ -357,7 +410,7 @@ impl House {
                             let _ = writeln!(f, "{seq} {} {} {line} {}", self.epoch, t.seat, hex(&t.mind));
                         }
                     }
-                    let answer = seat.session().post_taken(&self.key, Taken { domain: t.domain, seat: t.seat, mind: t.mind, ok, reason })?;
+                    let answer = seat.session().post_taken(&self.key, Taken { domain: t.domain, sub_origin: t.sub_origin, seat: t.seat, mind: t.mind, ok, reason })?;
                     said.push(format!("TAKE seq {seq} seat {} by {}: {} ({answer:?})", t.seat, hex(&t.mind[..4]), if ok { "taken" } else { "refused" }));
                 }
                 HouseMail::Call { seq, call, reference } => {
@@ -369,7 +422,7 @@ impl House {
                     } else {
                         self.file(seat, call.seat, &call.args)
                     };
-                    let o = Outcome { domain: call.domain, seat: call.seat, mind: call.mind, call: reference, applied: reason == CLOSED, reason, deed };
+                    let o = Outcome { domain: call.domain, sub_origin: call.sub_origin, seat: call.seat, mind: call.mind, call: reference, applied: reason == CLOSED, reason, deed };
                     let answer = seat.session().post_outcome(&self.key, o)?;
                     said.push(format!("CALL seq {seq} seat {} fn {}: {what} ({answer:?})", call.seat, call.fn_id));
                 }

@@ -392,6 +392,7 @@ fn put_select(select: &crate::project::Select, out: &mut Vec<u8>) -> Option<()> 
         }
         Select::Largest => out.push(2),
         Select::Smallest => out.push(3),
+        Select::Central => out.push(9),
         Select::Border(on) => out.extend([4, u8::from(*on)]),
         Select::TwinOfOtherHue => out.push(5),
         Select::Shape(cells) => {
@@ -603,6 +604,7 @@ impl<'a> Reader<'a> {
             }
             7 => Select::Not(Box::new(self.select(depth + 1)?)),
             8 => Select::And(Box::new(self.select(depth + 1)?), Box::new(self.select(depth + 1)?)),
+            9 => Select::Central,
             _ => return None,
         })
     }
