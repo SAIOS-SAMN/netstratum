@@ -49,6 +49,8 @@ fn both_events_round_trip_the_wire() {
         ClosureEvent::UniverseFounded { topology: "torus".into(), span: cfe::ratio::ratio(64, 1), roster: [3; 32], matter: [4; 32], over: Some([5; 32]) },
         ClosureEvent::UniverseCited { universe: [6; 32] },
         ClosureEvent::AncientArose { sigil: "tallykeep".into(), tree: 5, living: 41 },
+        ClosureEvent::SubstratumOpened { core: "stillcold-sky-3".into(), origin: [7; 32], parent: [0; 32], depth: 1, level: 4, opener: "stillcold".into() },
+        ClosureEvent::SubstratumOpened { core: "the-founding".into(), origin: [8; 32], parent: [7; 32], depth: 2, level: 5, opener: "slagborn".into() },
     ] {
         let bytes = event.wire_bytes();
         let (tag, value) = tlv::records(&bytes).next().unwrap();

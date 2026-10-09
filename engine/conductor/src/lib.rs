@@ -76,6 +76,7 @@ mod siting;
 pub mod snapshot;
 pub mod cores;
 pub mod ancients;
+pub mod substrata;
 // SOC-1 (operator directive 2026-08-16): the open build workbench — the surplus
 // phase of `build_step` draws its next building from a disposition-weighted
 // partition function seeded by the chronicle digest, in place of the fixed
@@ -1530,6 +1531,24 @@ impl Polity {
     /// How many words this line owns, as last folded.
     pub fn owned_count(&self) -> usize {
         self.owned_words.len()
+    }
+
+    /// docs/69 — the laws a substratum opened by this line carries: its
+    /// working library's newest words, at most `limit`.
+    pub fn laws_for_below(&self, limit: usize) -> Vec<solver::mint::MintedWord> {
+        let words = self.library.words();
+        words[words.len().saturating_sub(limit)..].to_vec()
+    }
+
+    /// docs/69 — a word closed in a substratum reaches this line as HEARD,
+    /// never adopted: the line adopts it only by reconstructing it on one of
+    /// its own tasks (the inheritance-by-reconstruction door, docs/66 Y3).
+    pub fn hear_from_below(&mut self, word: solver::mint::MintedWord) -> bool {
+        if self.library.holds(&word.orbit) || self.inherited.holds(&word.orbit) {
+            return false;
+        }
+        self.inherited.adopt(word);
+        true
     }
 
     /// The sizes of what this line holds in memory that can grow, for the

@@ -48,6 +48,13 @@ pub const WITHHELD: u16 = 4;
 pub const UNREAD: u16 = 5;
 /// An answer with no task before the seat.
 pub const NO_TASK: u16 = 6;
+/// An answer filed and not judged yet (the court's stroke ran out, 78.153):
+/// the task stays before the seat and the house re-files the same answer.
+pub const PENDING: u16 = 7;
+
+/// The court's "not judged yet" (78.153 SOLVE_UNREAD, on the wire as 3): a
+/// RETRY, never a refusal. Named here until the vendored tree carries it.
+pub const SOLVE_UNREAD: u8 = 3;
 
 /// Tends a seat's task may wait for its answer before it goes back.
 const PATIENCE: u64 = 300;
@@ -108,6 +115,8 @@ pub struct House {
     seated_before: BTreeMap<String, [u8; 32]>,
     tends: u64,
     percepts: u64,
+    /// Seat -> an answer filed and not judged yet, re-filed each tend (78.153).
+    refile: BTreeMap<u32, (mycelium::transducer::element::Element, Vec<Vec<Vec<u8>>>)>,
 }
 
 fn hex(b: &[u8]) -> String {
@@ -159,6 +168,7 @@ impl House {
             seated_before,
             tends: 0,
             percepts: 0,
+            refile: BTreeMap::new(),
         })
     }
 
@@ -208,6 +218,13 @@ impl House {
         // A deferred read leaves the mail for the next tend; the tasks are
         // still handed.
         let mut said = self.answer_mail(seat).unwrap_or_else(|e| vec![format!("mail not read: {e}")]);
+        // 78.153: the answers not judged yet are filed again, the same answer.
+        let waiting: Vec<u32> = self.refile.keys().copied().collect();
+        for s in waiting {
+            let (Some((id, _)), Some((rule, outputs))) = (self.task.get(&s).copied(), self.refile.remove(&s)) else { continue };
+            let (_, _, line) = self.judge(seat, s, id, rule, outputs);
+            said.push(format!("REFILED seat {s} task {}: {line}", hex(&id[..6])));
+        }
         said.extend(self.hand_tasks(seat).unwrap_or_else(|e| vec![format!("tasks not handed: {e}")]));
         Ok(said)
     }
@@ -262,8 +279,22 @@ impl House {
         let rule = mycelium::transducer::element::Element::from_bytes(tape, &mut at).filter(|_| at == tape.len());
         let outputs = mycelium::anastome::dialogue::decode_grids(outs);
         let (Some(rule), Some(outputs)) = (rule, outputs) else { return (UNREAD, id, "the tape or the grids do not read whole".into()) };
+        self.judge(seat, s, id, rule, outputs)
+    }
+
+    /// File an answer and read the court's verdict. Not judged yet (78.153):
+    /// the task stays before its seat and the same answer waits to be re-filed;
+    /// every other verdict lets the task go.
+    fn judge(&mut self, seat: &mut crate::seat::Seat, s: u32, id: [u8; 32], rule: mycelium::transducer::element::Element, outputs: Vec<Vec<Vec<u8>>>) -> (u16, [u8; 32], String) {
+        let verdict = seat.file_answer(&id, &rule, &outputs);
+        if verdict.is_some_and(|(code, _)| code == SOLVE_UNREAD) {
+            self.task.insert(s, (id, self.tends));
+            self.refile.insert(s, (rule, outputs));
+            return (PENDING, id, "not judged yet; re-filed next tend".into());
+        }
         self.task.remove(&s);
-        match seat.file_answer(&id, &rule, &outputs) {
+        self.refile.remove(&s);
+        match verdict {
             Some((code, mu)) if code == mycelium::anastome::dialogue::SOLVE_BOUNTY => (CLOSED, id, format!("CLOSED FIRST, paid {mu:?} to the house")),
             Some((code, _)) if code == mycelium::anastome::dialogue::SOLVE_FLOOR => (CLOSED, id, "closed again".into()),
             Some((code, _)) => (COURT_REFUSED, id, format!("refused by the court (code {code})")),

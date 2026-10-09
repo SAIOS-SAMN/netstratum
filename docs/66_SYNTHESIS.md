@@ -42,6 +42,27 @@ reward; they meet only through the seats.
 Coordinator review (2026-10-09): aligned with the higher order; Y1 judged a
 faithful model of the court's bounty and floor in in-universe value.
 
+## Y2, the finding before it is built (2026-10-09)
+
+The minds' working vocabulary is the forge's grid transforms (symmetries,
+recolours, object selection and moves, shifts, dilations) on 3x3 to 4x4
+grids. A real need, such as where a galaxy's hub stands, is a weighted median
+over 3D positions: no composition of those words states it, so a commission
+put to the minds in that form would never close. Two ways forward:
+
+1. **Translate the need into the minds' reach**: only needs whose answer is a
+   grid transform of a grid read off the world (selecting by size, hue or
+   depth; moving; recolouring) become commissions. Honest, but few real needs
+   have that form.
+2. **Grow the vocabulary toward the need (recommended)**: a commission
+   declares its judge's own relation (here, the L1 distance sum) as a new
+   generator in the constructors (docs/62), so the minds can compose it with
+   what they hold; the commission closes when a mind's composition matches
+   the judge's exact answer on the need's pairs. The need teaches the
+   language the word it lacks, and the word then serves every line.
+
+Y2 waits on that choice.
+
 ## The inner network (a test run under consideration, not built)
 
 The operator is considering netstratum as the test run for synthetic in-game

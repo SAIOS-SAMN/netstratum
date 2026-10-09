@@ -307,6 +307,8 @@ impl Seat {
                 self.save_genome();
                 format!("task {name}: closed again ({what})")
             }
+            // 78.153: not judged yet is a retry, never a refusal.
+            Some((3, _)) => format!("task {name}: not judged yet ({what}); asked again"),
             Some(_) => {
                 self.tally.refused += 1;
                 format!("task {name}: refused by the court ({what})")

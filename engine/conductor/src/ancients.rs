@@ -27,9 +27,10 @@
 //!
 //! What arises is recorded on the universe ledger (`AncientArose`, tag 192:
 //! the line's sigil, the systems its group holds at the core as `tree`, the
-//! living lines at the core as `living`) and in `<var>/ancients`, one line a
-//! core, so a core's ancient arises once. The first to arise ends the trust
-//! (docs/58 §6.7): `<var>/trust` names it, the core, and its reserve basket.
+//! living lines at the core as `living`) and in `<var>/ancients.bin` (binary
+//! records, Concordance 1.13), so a core's ancient arises once. The first to
+//! arise ends the trust (docs/58 §6.7): `<var>/trust.bin` names it, the core,
+//! and its reserve basket.
 use crate::Polity;
 use cfe::ratio::{ratio, Ratio};
 use ledger::registry::Registry;
@@ -112,16 +113,47 @@ pub struct CoreBook {
     pub kept: Option<(String, u64)>,
 }
 
-fn read_books(path: &Path) -> BTreeMap<String, CoreBook> {
+fn put_text(text: &str, out: &mut Vec<u8>) {
+    out.extend_from_slice(&(text.len() as u16).to_le_bytes());
+    out.extend_from_slice(text.as_bytes());
+}
+
+fn get_text(value: &[u8], at: &mut usize) -> Option<String> {
+    let len = u16::from_le_bytes(value.get(*at..*at + 2)?.try_into().ok()?) as usize;
+    let s = String::from_utf8(value.get(*at + 2..*at + 2 + len)?.to_vec()).ok()?;
+    *at += 2 + len;
+    Some(s)
+}
+
+/// The cores' books, a CHECKPOINT of binary records (Concordance 1.13): tag 1
+/// an ancient arisen (core, sigil), tag 2 a keeper's tenure (core, root, the
+/// bounce since). A text book written before 1.13 is read once, then rewritten.
+fn read_books(var_root: &Path) -> BTreeMap<String, CoreBook> {
     let mut books: BTreeMap<String, CoreBook> = BTreeMap::new();
-    for line in std::fs::read_to_string(path).unwrap_or_default().lines() {
-        let parts: Vec<&str> = line.split_whitespace().collect();
-        match parts.as_slice() {
-            ["arose", core, sigil] => books.entry(core.to_string()).or_default().arisen = Some(sigil.to_string()),
-            ["kept", core, root, since] => {
-                if let Ok(since) = since.parse() {
-                    books.entry(core.to_string()).or_default().kept = Some((root.to_string(), since));
+    let Ok(bytes) = std::fs::read(var_root.join("ancients.bin")) else {
+        for line in std::fs::read_to_string(var_root.join("ancients")).unwrap_or_default().lines() {
+            let parts: Vec<&str> = line.split_whitespace().collect();
+            match parts.as_slice() {
+                ["arose", core, sigil] => books.entry(core.to_string()).or_default().arisen = Some(sigil.to_string()),
+                ["kept", core, root, since] => {
+                    if let Ok(since) = since.parse() {
+                        books.entry(core.to_string()).or_default().kept = Some((root.to_string(), since));
+                    }
                 }
+                _ => {}
+            }
+        }
+        return books;
+    };
+    for (tag, value) in cfe::tlv::records(&bytes) {
+        let mut at = 0;
+        let Some(core) = get_text(value, &mut at) else { continue };
+        match tag {
+            1 => books.entry(core).or_default().arisen = get_text(value, &mut at),
+            2 => {
+                let Some(root) = get_text(value, &mut at) else { continue };
+                let Some(since) = value.get(at..at + 8).and_then(|b| b.try_into().ok()).map(u64::from_le_bytes) else { continue };
+                books.entry(core).or_default().kept = Some((root, since));
             }
             _ => {}
         }
@@ -129,19 +161,32 @@ fn read_books(path: &Path) -> BTreeMap<String, CoreBook> {
     books
 }
 
-fn write_books(path: &Path, books: &BTreeMap<String, CoreBook>) -> std::io::Result<()> {
-    let mut text = String::new();
+fn write_books(var_root: &Path, books: &BTreeMap<String, CoreBook>) -> std::io::Result<()> {
+    let mut out = Vec::new();
     for (core, book) in books {
         if let Some(sigil) = &book.arisen {
-            text.push_str(&format!("arose {core} {sigil}\n"));
+            let mut value = Vec::new();
+            put_text(core, &mut value);
+            put_text(sigil, &mut value);
+            cfe::tlv::put(1, &value, &mut out);
         }
         if let Some((root, since)) = &book.kept {
-            text.push_str(&format!("kept {core} {root} {since}\n"));
+            let mut value = Vec::new();
+            put_text(core, &mut value);
+            put_text(root, &mut value);
+            value.extend_from_slice(&since.to_le_bytes());
+            cfe::tlv::put(2, &value, &mut out);
         }
     }
+    let path = var_root.join("ancients.bin");
     let staged = path.with_extension("staged");
-    std::fs::write(&staged, text)?;
+    std::fs::write(&staged, out)?;
     std::fs::rename(staged, path)
+}
+
+/// The arisen ancients, `(core, sigil)`, in core order.
+pub fn arisen(var_root: &Path) -> Vec<(String, String)> {
+    read_books(var_root).into_iter().filter_map(|(core, book)| book.arisen.map(|sigil| (core, sigil))).collect()
 }
 
 /// An ancient as it arose: the core, the line, and by which rule.
@@ -166,8 +211,7 @@ pub fn step(
     stamp: u64,
 ) -> (BTreeMap<String, Keeper>, Vec<Arisen>) {
     let span = book.universe_span();
-    let path = var_root.join("ancients");
-    let mut books = read_books(&path);
+    let mut books = read_books(var_root);
     let keepers = keepers(worlds, book, registry);
     let parents: BTreeMap<String, Vec<String>> = registry.list().into_iter().map(|c| (c.sigil, c.lineage)).collect();
     let mut arisen = Vec::new();
@@ -222,31 +266,41 @@ pub fn step(
         entry.arisen = Some(sigil.clone());
         arisen.push(Arisen { core: core.clone(), sigil, world: polity.spec.world_name.clone(), by_birth });
     }
-    let _ = write_books(&path, &books);
+    let _ = write_books(var_root, &books);
     // THE TRUST ENDS at the first ancient (docs/58 §6.7-6.8): the oldest of
     // those arising now, then by name. Its reserve basket is stated by mass:
     // what its phenotype eats, and how much a beat its working mouths need.
-    let trust = var_root.join("trust");
-    if !trust.exists() {
+    // The trust's passing is an INPUT (Concordance 1.13), stored once as binary
+    // records in `<var>/trust.bin`: tag 1 the ancient, 2 its world, 3 its core,
+    // 4 the rule (1 birth, 2 deed), 5 the stamp, 6 the basket (its ration on
+    // the receipt codec's carrier: 0 ‖ resource code, or 1 ‖ element id), 7 its
+    // working mouths' need a beat (ratio codec). A text trust written before
+    // 1.13 stands as the same passing.
+    let trust = var_root.join("trust.bin");
+    if !trust.exists() && !var_root.join("trust").exists() {
         let first = arisen
             .iter()
             .filter_map(|a| worlds.iter().find(|p| p.spec.world_name == a.world).map(|p| (a, p)))
             .max_by(|(a, p), (b, q)| p.world.now().cmp(&q.world.now()).then(b.sigil.cmp(&a.sigil)));
         if let Some((a, p)) = first {
             let orb = cfe::world::FIRST_ORB;
-            let ration = match p.world.ration_of(orb) {
-                cfe::dop::Ration::Resource(r) => format!("{r:?}"),
-                cfe::dop::Ration::Element(id) => format!("element {}", id.iter().map(|b| format!("{b:02x}")).collect::<String>()),
+            let mut out = Vec::new();
+            for (tag, text) in [(1u8, &a.sigil), (2, &a.world), (3, &a.core)] {
+                let mut value = Vec::new();
+                put_text(text, &mut value);
+                cfe::tlv::put(tag, &value, &mut out);
+            }
+            cfe::tlv::put(4, &[if a.by_birth { 1 } else { 2 }], &mut out);
+            cfe::tlv::put(5, &stamp.to_le_bytes(), &mut out);
+            let basket = match p.world.ration_of(orb) {
+                cfe::dop::Ration::Resource(r) => vec![0, r as u8],
+                cfe::dop::Ration::Element(id) => [&[1u8][..], &id[..]].concat(),
             };
-            let need = p.world.per_capita_ration() * ratio(p.world.labor_force(orb) as i64, 1);
-            let text = format!(
-                "ancient {}\nworld {}\ncore {}\nby {}\nstamp {stamp}\nreserve basket {ration}\nneed per beat {need}\nheld: netstratum's domain keys and reserve pass to this ancient (Concordance 3.1); the house holds them for it\n",
-                a.sigil,
-                a.world,
-                a.core,
-                if a.by_birth { "birth" } else { "deed" },
-            );
-            let _ = std::fs::write(&trust, text);
+            cfe::tlv::put(6, &basket, &mut out);
+            let mut need = Vec::new();
+            cfe::ratio::encode(&(p.world.per_capita_ration() * ratio(p.world.labor_force(orb) as i64, 1)), &mut need);
+            cfe::tlv::put(7, &need, &mut out);
+            let _ = std::fs::write(&trust, out);
         }
     }
     (keepers, arisen)

@@ -208,8 +208,10 @@ fn main() {
     let mut last_living: std::collections::BTreeSet<String> = std::collections::BTreeSet::new();
     // docs/66 Y1: every action any line has closed this process.
     let mut universe_closed: std::collections::HashSet<[u8; 32]> = std::collections::HashSet::new();
-    // docs/67 N8: the final point the hubs last cleared at.
+    // docs/67 N8 / 78.156: the last final point read, and where the dilation
+    // reading starts (beat, h).
     let mut hubs_cleared_at: Option<String> = None;
+    let mut dilation_from: Option<(u64, u64)> = None;
     let mut announced_pause = false;
     loop {
         let (paused, cadence, advance) = read_control(cadence_secs);
@@ -446,20 +448,31 @@ fn main() {
         }
         // STAMP MM-1: mint + spot clear (Wave-4).
         // One line per beat, not one per clear (it was ~90 lines a second).
-        // docs/67 N8 — THE ONE CLOCK (Concordance 1.11): the final TUniversal
-        // point the seat relays (78.152). Hubs clear once per final point; a
-        // point unchanged since the last clearing is a hold. Before the first
-        // point is relayed, the beat stands in.
+        // docs/67 N8, as 78.156 binds it: the world runs FREE on its own axis
+        // u (the beat) at its own pace; TUniversal is met only through ledger
+        // entries. The hubs clear once a beat of u. The final point the seat
+        // relays is read for what is bound to the fleet (substratum origins,
+        // percepts) and for the dilation reading, du/dh, never a fault.
         let point = std::fs::read_to_string(format!("{var_root}/tuniversal")).ok().map(|p| p.trim().to_string());
-        let hubs_due = point.is_none() || point != hubs_cleared_at;
-        let spots = if hubs_due {
-            hubs_cleared_at = point.clone();
-            conductor::profile::timed("stamp_market_step", || conductor::stamp_market_step(&mut worlds, &book, beat, &span))
-        } else {
-            Vec::new()
-        };
+        let h_now = point.as_deref().and_then(|p| p.split('/').nth(1)).and_then(|l| l.split(':').next()).and_then(|h| u64::from_str_radix(h, 16).ok());
+        if let (Some(h), None) = (h_now, dilation_from) {
+            dilation_from = Some((beat, h));
+        }
+        hubs_cleared_at = point;
+        let spots = conductor::profile::timed("stamp_market_step", || conductor::stamp_market_step(&mut worlds, &book, beat, &span));
         if !spots.is_empty() {
             println!("beat {beat}: HUB — {} galaxies cleared at their hubs (STAMP for cargo, one price each)", spots.len());
+        }
+        // docs/69 — THE SPACING GUILD in the substrata: the ancients' tubes
+        // open, and one task a beat is traversed below.
+        let below = conductor::profile::timed("substrata_step", || {
+            conductor::substrata::step(&mut worlds, &book, std::path::Path::new(&var_root), beat, epoch_base + beat)
+        });
+        for (sigil, origin, depth) in &below.opened {
+            println!("beat {beat}: A TUBE OPENS — {sigil} opens a substratum {origin} at depth {depth}");
+        }
+        if let Some((origin, depth, first)) = &below.closed {
+            println!("beat {beat}: BELOW — substratum {origin} (depth {depth}) closed {}", if *first { "a first action" } else { "an action again" });
         }
         // CONSILIENCE (38 §5): independent lines that resolved their
         // knowledge to the same invariant crystallize a shared axiom.
@@ -588,6 +601,11 @@ fn main() {
                 sizes[0], sizes[1] / 1024, sizes[2], sizes[3], sizes[4], sizes[5], sizes[6], sizes[7], sizes[8], universe_closed.len(),
                 hubs_cleared_at.as_deref().and_then(|p| p.split('/').nth(1)).unwrap_or("none")
             );
+            // 78.156: the dilation du/dh since the first point read, a reading.
+            let h = hubs_cleared_at.as_deref().and_then(|p| p.split('/').nth(1)).and_then(|l| l.split(':').next()).and_then(|h| u64::from_str_radix(h, 16).ok());
+            if let (Some((b0, h0)), Some(h)) = (dilation_from, h) {
+                eprintln!("census beat {beat}: dilation du/dh = {}/{}", beat - b0, h.saturating_sub(h0));
+            }
             let _ = std::io::stderr().flush();
         }
         // THE REFUSALS SPEAK (operator ruling 2026-08-02: stop

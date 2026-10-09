@@ -407,7 +407,7 @@
 //!         same algorithm solver::consilience already uses for cross-line
 //!         agreement, read at vessel scope. Recorded only; nothing reads
 //!         it yet. orbit[32] ‖ hardness u32 le.)
-//!    Phase-5 claim ledger: next free **197** (193 CoreDeposited, 194 CoreEmitted, 195 CoreReturned, 196 CoreWordDeposited — the cores design; 190 UniverseFounded, 191 UniverseCited, 192 AncientArose — docs/58; 186 ResourceStocksSwept, 184 VeinRejuvenated —
+//!    Phase-5 claim ledger: next free **198** (197 SubstratumOpened — docs/69; 193 CoreDeposited, 194 CoreEmitted, 195 CoreReturned, 196 CoreWordDeposited — the cores design; 190 UniverseFounded, 191 UniverseCited, 192 AncientArose — docs/58; 186 ResourceStocksSwept, 184 VeinRejuvenated —
 //!    ONT-3 resource rejuvenation as derivation: a worked vein RECOVERS at a
 //!    collect touch, its inverse-receipt integral `rejuvenated` growing by the
 //!    KEPLERIAN orbital-forcing quantum (one `natural/REGROWTH_GRAIN` per
@@ -3286,6 +3286,15 @@ pub enum ClosureEvent {
     /// merged with another line's). A living line adopts it only by
     /// RECONSTRUCTING it on one of its own tasks (4.4). Identity only.
     CoreWordDeposited { core: String, world: String, orbit: [u8; 32], expansion: Vec<u8>, cited: Vec<[u8; 32]> },
+    /// **A TUBE OPENS TO A SUBSTRATUM (tag 197, docs/69)** — sealed on the
+    /// universe ledger when the spacing guild opens an internal tube from
+    /// `core`'s throat to a sub-universe: its `origin` (the fleet's final
+    /// TUniversal point, the opener's chronicle head and the parent's origin,
+    /// hashed), its `parent` substratum's origin (zero for a tube from the core
+    /// itself), its `depth` below the base universe, the `level` of the tasks
+    /// it forges, and the `opener`, the ancient whose guild opened it.
+    /// Identity only: nothing in the base universe moves.
+    SubstratumOpened { core: String, origin: [u8; 32], parent: [u8; 32], depth: u32, level: u32, opener: String },
     /// **THE GALACTIC REGION (GALACTIC-1, tag 187)** — a world's charted
     /// `(X,Y,Z)` quantized onto a coarse galactic grid cell and hashed once
     /// at genesis into a REGIONAL weighting seed. Purely additive: an old
@@ -4679,6 +4688,19 @@ impl ClosureEvent {
                     value.extend_from_slice(c);
                 }
                 tlv::put(196, &value, &mut out);
+            }
+            Self::SubstratumOpened { core, origin, parent, depth, level, opener } => {
+                // core (u16-prefixed) ‖ origin[32] ‖ parent[32] ‖ depth u32 ‖
+                // level u32 ‖ opener (u16-prefixed)
+                let mut value = (core.len() as u16).to_le_bytes().to_vec();
+                value.extend_from_slice(core.as_bytes());
+                value.extend_from_slice(origin);
+                value.extend_from_slice(parent);
+                value.extend_from_slice(&depth.to_le_bytes());
+                value.extend_from_slice(&level.to_le_bytes());
+                value.extend_from_slice(&(opener.len() as u16).to_le_bytes());
+                value.extend_from_slice(opener.as_bytes());
+                tlv::put(197, &value, &mut out);
             }
             Self::ChronicleCheckpointed { folded_hash, receipt_count } => {
                 // folded_hash[32] ‖ receipt_count u64 le — a world-wide
@@ -6192,6 +6214,23 @@ impl ClosureEvent {
                     at += 32;
                 }
                 (value.len() == at).then_some(Self::CoreWordDeposited { core, world, orbit, expansion, cited })
+            }
+            197 => {
+                let text = |at: &mut usize| -> Option<String> {
+                    let len = u16::from_le_bytes(value.get(*at..*at + 2)?.try_into().ok()?) as usize;
+                    let s = String::from_utf8(value.get(*at + 2..*at + 2 + len)?.to_vec()).ok()?;
+                    *at += 2 + len;
+                    Some(s)
+                };
+                let mut at = 0usize;
+                let core = text(&mut at)?;
+                let origin: [u8; 32] = value.get(at..at + 32)?.try_into().ok()?;
+                let parent: [u8; 32] = value.get(at + 32..at + 64)?.try_into().ok()?;
+                let depth = u32::from_le_bytes(value.get(at + 64..at + 68)?.try_into().ok()?);
+                let level = u32::from_le_bytes(value.get(at + 68..at + 72)?.try_into().ok()?);
+                at += 72;
+                let opener = text(&mut at)?;
+                (value.len() == at).then_some(Self::SubstratumOpened { core, origin, parent, depth, level, opener })
             }
             172 => Some(Self::PracticesLapsed { count: *value.first()? }),
             168 => Some(Self::PressureEbbed {

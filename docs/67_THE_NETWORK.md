@@ -39,7 +39,11 @@ and orbits, exact rationals):
 
 ## Every cadence on TUniversal (Concordance 1.11)
 
-Every cadence below is stated on TUniversal's final points, never on a
+SUPERSEDED IN PART by mycelium 78.156 (the clock binding, 2026-10-09): the
+world is free on its own axis u and meets TUniversal only through ledger
+entries; the hubs clear on u. What follows holds for what is bound to the
+fleet (map acts, recalibrations against mapped points). As first written:
+every cadence below is stated on TUniversal's final points, never on a
 private beat: a hub clears once per final point the conductor reads; a
 mouth's drift is measured between final points; a recalibration is due when
 the drift between the mouth's mapped point and the current final point
@@ -109,8 +113,26 @@ take its trade.
 | N5 | surplus spending: leisure spent on synthesis, technology, content, craft by the line's own instincts | open |
 | N6 | progenitors fold wormholes between hubs and to the cores' throats; mouths drift with the orbits; recalibration on tolerance | open |
 | N7 | the map: MAP acts by the domain reserve, the map fee in μ via the ancients' reserve, road tolls in STAMP (on mycelium 78.154) | waiting on 78.154 (the toll ruling given, Concordance 5.8) |
-| N8 | TUniversal as the clock of routes and recalibrations (on 78.152) | building: vendor at 290907a7; the seat relays the greatest final point to `<var>/tuniversal` when it advances; hubs clear once per final point, a hold otherwise; the beat stands in before the first point |
+| N8 | TUniversal as the clock of routes and recalibrations (on 78.152) | landed as 78.156 binds it: the world runs free on its own axis u (the beat); the seat relays the final point to `<var>/tuniversal`, read for what is bound to the fleet (substratum origins, percept stamps) and for the dilation du/dh in the census; TUniversal is met only by ledger entries (ACT_DOMAIN kind 8, with 78.154). Hubs clear once a beat of u |
 
 Coordinator review (2026-10-09): aligned with the higher order, with the
 three adjustments now written in (toll shares are the progenitors' own;
 every cadence on TUniversal; who pays the map's posting).
+
+## The ledger entry (78.154, relayed by the coordinator 2026-10-09; not built)
+
+How netstratum's world meets TUniversal (78.156): LEDGER = ACT_DOMAIN 0x3E
+kind 8, `[domain][u][commitment 32][EVENTS 32][cited final TPoint 84][parent 32][nonce 32][sig 64]`.
+
+- **EVENTS**: a positional Merkle root over the input events since the parent,
+  in applied order. Leaf = `derive_key("mycelium ledger event v1")` over
+  `TPoint 84 ‖ u u64 LE ‖ key_len u16 LE ‖ coordinate-path key ‖ put_args(values)`;
+  zero = no events.
+- **COMMITMENT** (proposed to mycelium, pending its confirmation): a sparse
+  Merkle tree over `blake3(key)`, 256 levels, empty = zeros, node =
+  `derive_key("mycelium ledger node v1")` over `l ‖ r` unless both are zero,
+  leaf = `derive_key("mycelium ledger leaf v1")` over `u16 key_len ‖ key ‖ put_args`.
+- **Keys** are netstratum's coordinate paths (Concordance 1.13: origin, u,
+  entity path). The checkpoints (`ancients.bin`, `substrata/*.tube`,
+  `float.bin`, the worlds' snapshots) are what the commitment will cover; the
+  inputs (decisions, crossings, tube openings) are the events.

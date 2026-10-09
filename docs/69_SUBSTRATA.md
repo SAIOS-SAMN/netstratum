@@ -1,4 +1,4 @@
-# 69 — Substrata: universes made by Synthesis (PROPOSAL, nothing built)
+# 69 — Substrata: universes made by Synthesis, reached through the ancients' tubes
 
 Coordinator rulings (2026-10-09, for the operator's test run): (1) substrata
 ARE the inner network boundary 1 governs: the mote never converts into STAMP,
@@ -17,6 +17,39 @@ perspectives that, by their work, move the base universe's positions.
 
 Mycelium's own universe is a separate matter (78.155, ruled a peer universe
 joined by a mouth at a core). This is netstratum's side.
+
+## The operator's correction (2026-10-09), and what is built
+
+"You would open internal tubes to sub-universes that would have a subsect of
+the ancients / spacing guild that would traverse those throats, and you would
+use either μ internal to your throats as the ancients' currency or your own
+internal synthetic float." Authorized to proceed: the minds and intelligences
+inside may produce any number of universes, at any level of intelligence.
+
+Built (`engine/conductor/src/substrata.rs`, tag 197 `SubstratumOpened`):
+
+- **Tubes from the cores.** Each arisen ancient's core throat opens its first
+  tube at its arising. Every tube is recorded on the universe ledger (tag 197)
+  and as a compact record in `<var>/substrata/<origin>.tube`: its laws, origin,
+  parent, depth, level, opener, cursor and the actions closed inside it.
+- **The spacing guild traverses.** One task a beat across the guild, round
+  robin over the ancients, each in its least recently observed tube: forged
+  from the tube's own origin and cursor at its level, thought with its laws
+  first and then the ancient's own minds' senses.
+- **The float is the throats' own synthetic currency**, chosen over μ so the
+  coordinator's boundary 1 holds: a closure pays the traverser the full rung
+  if no one has closed that action in that substratum, the quarter otherwise
+  (Y1's law, one level down). It is spent only on opening tubes and never
+  converts into STAMP, Crystal or μ.
+- **Any number, any level, funded by work.** A further tube costs one first
+  closure's worth at its own level and opens beneath the tube its float was
+  earned in, one level deeper and harder (the forge's ladder, to its top).
+- **Upward by reconstruction.** A word first closed below becomes a law of
+  its substratum (the newest 64 kept) and reaches the ancient's line as heard;
+  the line adopts it only by closing its own task with it.
+- **Still to come**: S4 (words from below placing mouths and hubs through
+  commissions), S5 (the cross-level residual), scoped seats (seat-wire v1.4)
+  for mycelium minds to sit synthetic seats below.
 
 ## The name
 
@@ -86,9 +119,9 @@ crossing, then the slices below.
 
 | id | slice | status |
 |---|---|---|
-| S0 | the founding act: a receipt kind (tag claimed in the register first), the compact record | proposed |
-| S1 | the inner forge from a substratum's laws; the mote | proposed |
-| S2 | synthetic minds: the founding line's vessels seated below | proposed |
-| S3 | recursion: a substratum founds its own | proposed |
+| S0 | the founding act: a receipt kind (tag claimed in the register first), the compact record | landed: tag 197, `<var>/substrata` |
+| S1 | the inner forge from a substratum's laws; the float | landed |
+| S2 | synthetic minds: the guild traverses with its own minds; mycelium minds on scoped seats | partly: the guild's minds; scoped seats wait on seat-wire v1.4 |
+| S3 | recursion: a substratum founds its own | landed: tubes beneath tubes, paid in float |
 | S4 | upward by commissions: words reconstructed above place mouths and hubs | proposed |
 | S5 | the measure: the cross-level residual per line | proposed |
