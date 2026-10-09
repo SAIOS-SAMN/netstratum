@@ -242,13 +242,10 @@ fn walk(chronicle: &Chronicle) -> Result<WalkState, MeshRefused> {
     // still owes its citation to the first held receipt.
     let mut state = WalkState { hand: None, pending_cite: None };
     let base = chronicle.base();
-    for receipt in chronicle.annals().kept().iter().rev() {
-        if let ClosureEvent::HandoffSealed { to, .. } = receipt.event() {
-            state.hand = Some(*to);
-            if receipt.sequence() + 1 == base {
-                state.pending_cite = Some(receipt.sequence());
-            }
-            break;
+    if let Some((to, sequence)) = chronicle.annals().last_seal() {
+        state.hand = Some(to);
+        if sequence + 1 == base {
+            state.pending_cite = Some(sequence);
         }
     }
     for receipt in chronicle.receipts() {

@@ -104,10 +104,14 @@ impl World {
     /// Count of AP-costing receipts in the current window.
     pub fn ap_spent(&self) -> u64 {
         let start = self.ap_window_start();
+        // Backward from the head, only the current window: the history is in
+        // stamp order, so the walk stops at the window's start (nothing
+        // older is decoded).
         self.chronicle
             .history()
-            .filter(|r| r.stamp() >= start && receipt_ap_cost(r) > 0)
-            .map(receipt_ap_cost)
+            .rev()
+            .take_while(|r| r.stamp() >= start)
+            .map(|r| receipt_ap_cost(&r))
             .sum()
     }
 

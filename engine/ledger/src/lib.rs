@@ -89,12 +89,17 @@ pub enum Disposition {
 
 pub struct Ledger {
     root: PathBuf,
+    /// The universe ledger read once per change (it is append-only, so its
+    /// length is its version): the galaxies and the cores' libraries from one
+    /// parse, and the span, which is fixed at the Big Bang.
+    cache: std::sync::Mutex<galaxy::UniverseRead>,
+    span: std::sync::OnceLock<Ratio>,
 }
 
 impl Ledger {
     /// The ledger rooted at `<root>/` (conventionally `var/worlds`).
     pub fn at(root: impl Into<PathBuf>) -> Self {
-        Self { root: root.into() }
+        Self { root: root.into(), cache: Default::default(), span: std::sync::OnceLock::new() }
     }
 
     /// The directory for one world (created on first touch).
@@ -164,8 +169,14 @@ impl Ledger {
     ///
     /// The span (default 64) reads from `<root>/universe.card` (TLV).
     pub fn universe_span(&self) -> Ratio {
-        self.read_universe_span()
-            .unwrap_or_else(|| Ratio::from(num_bigint::BigInt::from(64)))
+        if let Some(span) = self.span.get() {
+            return span.clone();
+        }
+        match self.read_universe_span() {
+            // Fixed once written: held from the first reading on.
+            Some(span) => self.span.get_or_init(|| span).clone(),
+            None => Ratio::from(num_bigint::BigInt::from(64)),
+        }
     }
 
     fn universe_card_path(&self) -> PathBuf {

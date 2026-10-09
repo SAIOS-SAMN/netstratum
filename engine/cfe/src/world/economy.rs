@@ -160,9 +160,9 @@ impl World {
             return Err(ActionRefused::OffGrain { amount: Box::new(amount) });
         }
         let Some((survey, seed, covered)) =
-            self.chronicle.history().rev().find_map(|receipt| match receipt.event() {
+            self.chronicle.last_survey().and_then(|(own, event)| match event {
                 ClosureEvent::EstateSurveyed { seed, covered, .. } => Some((
-                    receipt.own().0,
+                    *own,
                     *seed,
                     covered.iter().map(|(orb, _)| *orb).collect::<Vec<u64>>(),
                 )),

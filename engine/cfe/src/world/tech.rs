@@ -282,12 +282,7 @@ impl World {
         if cited.len() < 2 {
             return Err(ActionRefused::SolverWordUnconfirmed { confirms: cited.len() as u8 });
         }
-        let known = self.chronicle.history().any(|receipt| {
-            matches!(
-                receipt.event(),
-                ClosureEvent::SolverWordMinted { orbit: held, .. } if *held == orbit
-            )
-        });
+        let known = self.chronicle.minted_word(&orbit);
         if known {
             return Err(ActionRefused::SolverWordKnown { orbit });
         }
@@ -378,12 +373,7 @@ impl World {
         if mass < 2 {
             return Err(ActionRefused::ConsilienceAlone { mass });
         }
-        let known = self.chronicle.history().any(|receipt| {
-            matches!(
-                receipt.event(),
-                ClosureEvent::KnowledgeConverged { signature: held, .. } if *held == signature
-            )
-        });
+        let known = self.chronicle.converged_on(&signature);
         if known {
             return Err(ActionRefused::KnowledgeKnown { signature });
         }
@@ -414,14 +404,7 @@ impl World {
         if expansion.is_empty() {
             return Err(ActionRefused::SolverWordEmpty);
         }
-        let held = self.chronicle.history().any(|receipt| {
-            matches!(
-                receipt.event(),
-                ClosureEvent::SolverWordMinted { orbit: held, .. }
-                    | ClosureEvent::KnowledgeLicensed { orbit: held, .. }
-                    if *held == orbit
-            )
-        });
+        let held = self.chronicle.holds_word(&orbit);
         if held {
             return Err(ActionRefused::SolverWordKnown { orbit });
         }

@@ -409,9 +409,135 @@ pub struct Chronicle {
     /// (`crate::annals`): the non-bulk kinds verbatim, every drained digest,
     /// and the two values taken from bulk kinds.
     annals: crate::annals::Annals,
+    /// The last charter of each parameter in the history (key 1..=7 at
+    /// index key-1), kept as receipts are appended and rebuilt in history
+    /// order whenever the history is reconstituted: a parameter read never
+    /// walks the history.
+    params: [Option<crate::ratio::Ratio>; 7],
+    /// The word orbits the history minted, and those it minted or licensed,
+    /// and the knowledge signatures it converged on: kept like `params`, so
+    /// a deed's "already held?" never walks the history.
+    minted: std::collections::HashSet<[u8; 32]>,
+    held_words: std::collections::HashSet<[u8; 32]>,
+    converged: std::collections::HashSet<[u8; 32]>,
+    /// Every `VocabularyMinted` receipt's (stamp, event), in history order:
+    /// the axis vocabularies fold from this, never from the history.
+    vocabulary: Vec<(u64, ClosureEvent)>,
+    /// Every `RecipeBuilt` event, in history order.
+    recipes: Vec<ClosureEvent>,
+    /// How many receipts minted or licensed a word (a count of receipts,
+    /// as the cognitive capacity reads it).
+    word_receipts: u64,
+    /// The last `EstateSurveyed` receipt: its own-hash and its event.
+    last_survey: Option<([u8; 32], ClosureEvent)>,
 }
 
 impl Chronicle {
+    /// The last charter of a parameter key in the history, if any.
+    pub fn chartered(&self, key: u8) -> Option<&crate::ratio::Ratio> {
+        self.params.get((key as usize).wrapping_sub(1))?.as_ref()
+    }
+
+    /// Whether the history minted a word of this orbit.
+    pub fn minted_word(&self, orbit: &[u8; 32]) -> bool {
+        self.minted.contains(orbit)
+    }
+
+    /// Whether the history minted or licensed a word of this orbit.
+    pub fn holds_word(&self, orbit: &[u8; 32]) -> bool {
+        self.held_words.contains(orbit)
+    }
+
+    /// Whether the history converged on this knowledge signature.
+    pub fn converged_on(&self, signature: &[u8; 32]) -> bool {
+        self.converged.contains(signature)
+    }
+
+    /// Every recipe built, oldest first.
+    pub fn recipes(&self) -> &[ClosureEvent] {
+        &self.recipes
+    }
+
+    /// How many receipts minted or licensed a word.
+    pub fn word_receipts(&self) -> u64 {
+        self.word_receipts
+    }
+
+    /// The last estate survey: its own-hash and its event.
+    pub fn last_survey(&self) -> Option<&([u8; 32], ClosureEvent)> {
+        self.last_survey.as_ref()
+    }
+
+    /// The vocabulary mints, (stamp, event), oldest first.
+    pub fn vocabulary_minted(&self) -> &[(u64, ClosureEvent)] {
+        &self.vocabulary
+    }
+
+    /// Fold one receipt's event into the kept readings (parameters, words,
+    /// knowledge, vocabulary).
+    fn note(&mut self, stamp: u64, own: [u8; 32], event: &ClosureEvent) {
+        match event {
+            ClosureEvent::VocabularyMinted { .. } => {
+                self.vocabulary.push((stamp, event.clone()));
+            }
+            ClosureEvent::RecipeBuilt { .. } => self.recipes.push(event.clone()),
+            ClosureEvent::EstateSurveyed { .. } => self.last_survey = Some((own, event.clone())),
+            _ => {}
+        }
+        if matches!(event, ClosureEvent::SolverWordMinted { .. } | ClosureEvent::KnowledgeLicensed { .. }) {
+            self.word_receipts += 1;
+        }
+        match event {
+            ClosureEvent::ParameterChartered { key, value } => {
+                if let Some(slot) = self.params.get_mut((*key as usize).wrapping_sub(1)) {
+                    *slot = Some(value.clone());
+                }
+            }
+            ClosureEvent::SolverWordMinted { orbit, .. } => {
+                self.minted.insert(*orbit);
+                self.held_words.insert(*orbit);
+            }
+            ClosureEvent::KnowledgeLicensed { orbit, .. } => {
+                self.held_words.insert(*orbit);
+            }
+            ClosureEvent::KnowledgeConverged { signature, .. } => {
+                self.converged.insert(*signature);
+            }
+            _ => {}
+        }
+    }
+
+    /// Rebuild the kept readings from the history, oldest first.
+    fn refresh_params(&mut self) {
+        self.params = Default::default();
+        self.minted.clear();
+        self.held_words.clear();
+        self.converged.clear();
+        self.vocabulary.clear();
+        self.recipes.clear();
+        self.word_receipts = 0;
+        self.last_survey = None;
+        let events: Vec<(u64, [u8; 32], ClosureEvent)> = self
+            .history()
+            .filter(|r| {
+                matches!(
+                    r.event(),
+                    ClosureEvent::ParameterChartered { .. }
+                        | ClosureEvent::SolverWordMinted { .. }
+                        | ClosureEvent::KnowledgeLicensed { .. }
+                        | ClosureEvent::KnowledgeConverged { .. }
+                        | ClosureEvent::VocabularyMinted { .. }
+                        | ClosureEvent::RecipeBuilt { .. }
+                        | ClosureEvent::EstateSurveyed { .. }
+                )
+            })
+            .map(|r| (r.stamp(), r.own().0, r.event().clone()))
+            .collect();
+        for (stamp, own, event) in &events {
+            self.note(*stamp, *own, event);
+        }
+    }
+
     pub fn new() -> Self {
         Self { base_parent: ReceiptHash::GENESIS, ..Self::default() }
     }
@@ -421,7 +547,11 @@ impl Chronicle {
     /// the same door as [`Chronicle::from_receipts`].
     pub fn from_tail(base: u64, base_parent: ReceiptHash, receipts: Vec<Receipt>) -> Result<Self, ChainRead> {
         match verify_from(base_parent, &receipts) {
-            ChainRead::Intact => Ok(Self { receipts, hand: None, region_seed: None, gauge_cache: Vec::new(), base, base_parent, annals: crate::annals::Annals::default() }),
+            ChainRead::Intact => {
+                let mut chronicle = Self { receipts, hand: None, region_seed: None, gauge_cache: Vec::new(), base, base_parent, annals: crate::annals::Annals::default(), params: Default::default(), minted: Default::default(), held_words: Default::default(), converged: Default::default(), vocabulary: Vec::new(), recipes: Vec::new(), word_receipts: 0, last_survey: None };
+                chronicle.refresh_params();
+                Ok(chronicle)
+            }
             broken => Err(broken),
         }
     }
@@ -463,8 +593,13 @@ impl Chronicle {
     /// THE WORLD'S HISTORY as the live world reads it: the drained receipts
     /// the annals keep (every non-bulk kind), then every held receipt — in
     /// order. A history reader iterates this, never `receipts()`.
-    pub fn history(&self) -> impl DoubleEndedIterator<Item = &Receipt> + Clone {
-        self.annals.kept().iter().chain(self.receipts.iter())
+    pub fn history(&self) -> impl DoubleEndedIterator<Item = std::borrow::Cow<'_, Receipt>> + Clone {
+        // The drained receipts are kept as frames and decoded as reached; the
+        // held tail is borrowed. Walk backward to read only the recent past.
+        self.annals
+            .kept_iter()
+            .map(std::borrow::Cow::Owned)
+            .chain(self.receipts.iter().map(std::borrow::Cow::Borrowed))
     }
 
     /// The carried annals.
@@ -475,6 +610,7 @@ impl Chronicle {
     /// Restore carried annals (a resume from a snapshot that carries them).
     pub fn set_annals(&mut self, annals: crate::annals::Annals) {
         self.annals = annals;
+        self.refresh_params();
     }
 
     /// The carried annals, to file their drained own-hashes.
@@ -494,7 +630,11 @@ impl Chronicle {
     /// across the process boundary because this is the one door back in.
     pub fn from_receipts(receipts: Vec<Receipt>) -> Result<Self, ChainRead> {
         match verify_receipts(&receipts) {
-            ChainRead::Intact => Ok(Self { receipts, hand: None, region_seed: None, gauge_cache: Vec::new(), base: 0, base_parent: ReceiptHash::GENESIS, annals: crate::annals::Annals::default() }),
+            ChainRead::Intact => {
+                let mut chronicle = Self { receipts, hand: None, region_seed: None, gauge_cache: Vec::new(), base: 0, base_parent: ReceiptHash::GENESIS, annals: crate::annals::Annals::default(), params: Default::default(), minted: Default::default(), held_words: Default::default(), converged: Default::default(), vocabulary: Vec::new(), recipes: Vec::new(), word_receipts: 0, last_survey: None };
+                chronicle.refresh_params();
+                Ok(chronicle)
+            }
             broken => Err(broken),
         }
     }
@@ -588,6 +728,8 @@ impl Chronicle {
                 })
             }
         };
+        let event = receipt.event().clone();
+        self.note(stamp, receipt.own().0, &event);
         self.receipts.push(receipt);
         self.receipts.last().expect("just appended")
     }

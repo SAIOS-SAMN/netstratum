@@ -120,7 +120,6 @@ impl World {
     /// deeper. (COG-8 gives the conductor the drive to build this apparatus.)
     pub fn cognitive_capacity(&self, orb: u64) -> usize {
         use crate::almanac::science::ScienceDiscipline::{Math, Physics, Research};
-        use crate::dop::ClosureEvent;
         let brain = [Math, Physics, Research]
             .into_iter()
             .map(|d| self.science_rank(orb, d))
@@ -140,16 +139,7 @@ impl World {
         // 3, so a second, capacity-scaled consumer is what a beyond-3 gradient
         // would need; wiring cognition to the frontier is this slice.)
         const WORDS_PER_RUNG: usize = 8;
-        let vocabulary = self
-            .chronicle
-            .history()
-            .filter(|r| {
-                matches!(
-                    r.event(),
-                    ClosureEvent::SolverWordMinted { .. } | ClosureEvent::KnowledgeLicensed { .. }
-                )
-            })
-            .count();
+        let vocabulary = self.chronicle.word_receipts() as usize;
         let condensed = vocabulary / WORDS_PER_RUNG;
         (2 + brain.max(condensed)).min(3)
     }

@@ -737,7 +737,6 @@ impl World {
     }
 
     pub fn settle_leisure(&mut self, orb: u64, delta: Ratio) {
-        let zero = ratio(0, 1);
         // ONT-4 — FLOOR THE FLOW, never the accumulator. The bank is a running SUM
         // of per-beat deltas (surplus in, decay and mint-cost out); summing
         // rationals of differing denominators compounds the LCM without bound, and
@@ -752,22 +751,75 @@ impl World {
         // SEAL-B is a theorem again, not a truncation coincidence. Signed floor
         // (toward −∞): a spend rounds slightly larger, an inflow slightly smaller,
         // deterministic either way.
+        // docs/64 P1 — a SPEND is a touch: the live bank moves and the receipt
+        // carries everything since the bank was last receipted.
+        if self.move_leisure(orb, delta) {
+            self.receipt_leisure(orb);
+        }
+    }
+
+    /// **ACCRUE LEISURE** (docs/64 P1) — the per-beat flow (surplus in, decay
+    /// out) moves the LIVE bank exactly as a settle does, but writes no
+    /// receipt: it is integration, not a deed. The next touch (a spend, or
+    /// the carry) receipts the difference, so replay and the judge stand on
+    /// the same bank at every deed.
+    pub fn accrue_leisure(&mut self, orb: u64, delta: Ratio) {
+        self.move_leisure(orb, delta);
+    }
+
+    /// The live move, floored on the flow (the ONT-4 law); whether it moved.
+    fn move_leisure(&mut self, orb: u64, delta: Ratio) -> bool {
+        let zero = ratio(0, 1);
         let grid = ratio(LEISURE_GRAIN, 1);
         let flowed = (delta * grid.clone()).floor() / grid;
         if flowed == zero {
-            return;
+            return false;
         }
-        let next = (self.leisure_bank_of(orb) + flowed.clone()).max(zero.clone());
+        let next = (self.leisure_bank_of(orb) + flowed).max(zero.clone());
         self.leisure_banks.retain(|(o, _)| *o != orb);
         if next > zero {
             self.leisure_banks.push((orb, next));
         }
+        true
+    }
+
+    /// Receipt the live bank against the bank as last receipted: the delta is
+    /// `live - receipted`, so replay's `max(receipted + delta, 0)` is the live
+    /// bank exactly (it is never negative). Nothing when they agree.
+    fn receipt_leisure(&mut self, orb: u64) {
+        let zero = ratio(0, 1);
+        let live = self.leisure_bank_of(orb);
+        let held = self
+            .leisure_receipted
+            .iter()
+            .find(|(o, _)| *o == orb)
+            .map(|(_, b)| b.clone())
+            .unwrap_or_else(|| zero.clone());
+        if live == held {
+            return;
+        }
+        self.leisure_receipted.retain(|(o, _)| *o != orb);
+        self.leisure_receipted.push((orb, live.clone()));
         let stamp = self.clock.now();
         self.chronicle.append(
-            crate::dop::ClosureEvent::LeisureSettled { orb_id: orb, delta: flowed },
+            crate::dop::ClosureEvent::LeisureSettled { orb_id: orb, delta: live - held },
             stamp,
             vec![],
         );
+    }
+
+    /// **FLUSH THE LEISURE BOOKS** (docs/64 P1) — every bank whose live value
+    /// moved since its last receipt is receipted now: the carry calls this
+    /// before the snapshot, so a snapshot's bank and the receipts after it
+    /// never count the same flow twice.
+    pub fn flush_leisure(&mut self) {
+        let mut orbs: Vec<u64> = self.leisure_banks.iter().map(|(o, _)| *o).collect();
+        orbs.extend(self.leisure_receipted.iter().map(|(o, _)| *o));
+        orbs.sort_unstable();
+        orbs.dedup();
+        for orb in orbs {
+            self.receipt_leisure(orb);
+        }
     }
 
     /// **THE ECONOMIC CONTENTMENT** (TFR term III — the Demographic Stress

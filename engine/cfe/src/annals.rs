@@ -41,13 +41,40 @@ pub fn bulk(event: &ClosureEvent) -> bool {
             | ClosureEvent::ElementWantStruck { .. }
             | ClosureEvent::ElementWantRelieved { .. }
             | ClosureEvent::StampMinted { .. }
+            // docs/64 P2b: read by replay alone (the population settle, the
+            // upkeep toll) or by the crystal sheet's last link, which the
+            // annals keep per orb.
+            | ClosureEvent::PopulationSettled { .. }
+            | ClosureEvent::UpkeepSettled { .. }
+            | ClosureEvent::BondSettled { .. }
+            | ClosureEvent::BondSealed { .. }
     )
 }
+
+/// THE WINDOWED KINDS (docs/64 P2): drained receipts every reader wants only
+/// within a recent window — the collected yields and the vents, read by the
+/// crystal deposit sheet over its deposit window and by the elevation's year.
+/// The annals keep them only within [`WINDOW`] stamps of the newest drained
+/// receipt; older ones are on disk.
+pub fn windowed(event: &ClosureEvent) -> bool {
+    matches!(event, ClosureEvent::YieldCollected { .. } | ClosureEvent::VentSettled { .. })
+}
+
+/// The longest window any reader of a windowed kind takes: the crystal sheet's
+/// deposit window at its widest (`World::deposit_window`).
+pub const WINDOW: u64 = 240;
 
 /// What a chronicle still carries of the receipts it drained.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct Annals {
-    kept: Vec<Receipt>,
+    /// The kept receipts as their wire frames, concatenated (the snapshot's
+    /// own encoding), and where each frame starts: a lifetime of receipts is
+    /// never held as objects; a reader decodes the ones it walks.
+    kept_wire: Vec<u8>,
+    kept_at: Vec<u32>,
+    /// The last handoff seal drained (the hand it named, its sequence): the
+    /// mesh's walk starts from it without decoding the kept history.
+    last_seal: Option<(u64, u64)>,
     /// Drained own-hashes NOT YET FILED in the digest file — the only ones
     /// memory holds (the memory bound: the file is the record).
     digests: Vec<[u8; 32]>,
@@ -59,26 +86,88 @@ pub struct Annals {
 }
 
 impl Annals {
-    /// Absorb receipts drained from the chronicle, oldest first.
+    /// Absorb receipts drained from the chronicle, oldest first; then the
+    /// windowed kinds older than the window let go.
     pub fn absorb(&mut self, drained: Vec<Receipt>) {
+        let newest = drained.last().map(|r| r.stamp());
+        self.absorb_all(drained);
+        if let Some(newest) = newest {
+            self.prune_windowed(newest.saturating_sub(WINDOW));
+        }
+    }
+
+    /// Keep the windowed kinds from `floor` on; every other kept frame stays.
+    fn prune_windowed(&mut self, floor: u64) {
+        let mut wire = Vec::with_capacity(self.kept_wire.len());
+        let mut at = Vec::with_capacity(self.kept_at.len());
+        for i in 0..self.kept_at.len() {
+            let start = self.kept_at[i] as usize;
+            let end = self.kept_at.get(i + 1).map_or(self.kept_wire.len(), |n| *n as usize);
+            let keep = match self.kept_receipt(i) {
+                // A kind now bulk leaves the kept frames (older snapshots
+                // carried it); a windowed kind leaves once outside the window.
+                Some(r) => !(bulk(r.event()) || (windowed(r.event()) && r.stamp() < floor)),
+                None => true,
+            };
+            if keep {
+                at.push(wire.len() as u32);
+                wire.extend_from_slice(&self.kept_wire[start..end]);
+            }
+        }
+        self.kept_wire = wire;
+        self.kept_at = at;
+    }
+
+    fn absorb_all(&mut self, drained: Vec<Receipt>) {
         for r in drained {
             self.digests.push(r.own().0);
             match r.event() {
-                ClosureEvent::ApertureSent { from_orb: orb, .. } | ClosureEvent::ApertureReceived { to_orb: orb, .. } => {
+                ClosureEvent::ApertureSent { from_orb: orb, .. }
+                | ClosureEvent::ApertureReceived { to_orb: orb, .. }
+                | ClosureEvent::BondSealed { source_orb: orb, .. }
+                | ClosureEvent::BondSettled { source_orb: orb, .. } => {
                     self.last_link.insert(*orb, r.stamp());
                 }
                 ClosureEvent::AssayStruck { .. } => self.assays += 1,
                 _ => {}
             }
+            if let ClosureEvent::HandoffSealed { to, .. } = r.event() {
+                self.last_seal = Some((*to, r.sequence()));
+            }
             if !bulk(r.event()) {
-                self.kept.push(r);
+                self.kept_at.push(self.kept_wire.len() as u32);
+                self.kept_wire.extend_from_slice(&r.wire_bytes());
             }
         }
     }
 
-    /// The drained receipts of every non-bulk kind, oldest first.
-    pub fn kept(&self) -> &[Receipt] {
-        &self.kept
+    /// How many drained receipts of non-bulk kinds are kept.
+    pub fn kept_len(&self) -> usize {
+        self.kept_at.len()
+    }
+
+    /// The `i`-th kept receipt, decoded from its frame.
+    pub fn kept_receipt(&self, i: usize) -> Option<Receipt> {
+        let at = *self.kept_at.get(i)? as usize;
+        let (tag, value) = crate::tlv::records(self.kept_wire.get(at..)?).next()?;
+        Receipt::from_wire(tag, value)
+    }
+
+    /// The drained receipts of every non-bulk kind, oldest first, each
+    /// decoded as it is reached (walk backward from the end to read only the
+    /// recent ones).
+    pub fn kept_iter(&self) -> impl DoubleEndedIterator<Item = Receipt> + Clone + '_ {
+        (0..self.kept_at.len()).filter_map(move |i| self.kept_receipt(i))
+    }
+
+    /// The last handoff seal among the drained receipts: (hand, sequence).
+    pub fn last_seal(&self) -> Option<(u64, u64)> {
+        self.last_seal
+    }
+
+    /// The kept frames' bytes, held.
+    pub fn kept_bytes(&self) -> usize {
+        self.kept_wire.len()
     }
 
     /// Did the world ever seal a drained receipt with this own-hash? The
@@ -151,10 +240,8 @@ impl Annals {
     /// append-only file): `kept count u32 ‖ frames ‖ digest count u64 ‖
     /// links u32 ‖ (orb,stamp)·n ‖ assays u64`, little-endian.
     pub fn to_carried_bytes(&self) -> Vec<u8> {
-        let mut out = (self.kept.len() as u32).to_le_bytes().to_vec();
-        for r in &self.kept {
-            out.extend_from_slice(&r.wire_bytes());
-        }
+        let mut out = (self.kept_at.len() as u32).to_le_bytes().to_vec();
+        out.extend_from_slice(&self.kept_wire);
         out.extend_from_slice(&self.digest_count().to_le_bytes());
         self.put_tail(&mut out);
         out
@@ -163,14 +250,14 @@ impl Annals {
     /// Read [`Annals::to_carried_bytes`] back, its digests left IN THE FILE at
     /// `file` (which must hold at least the count the bytes name), or `None`.
     pub fn from_carried_bytes(b: &[u8], file: std::path::PathBuf) -> Option<Annals> {
-        let (kept, mut p) = Self::read_kept(b)?;
+        let ((kept_wire, kept_at, last_seal), mut p) = Self::read_kept(b)?;
         let count = u64::from_le_bytes(b.get(p..p + 8)?.try_into().ok()?);
         p += 8;
         if std::fs::metadata(&file).map(|m| m.len()).unwrap_or(0) < count * 32 {
             return None;
         }
         let (last_link, assays) = Self::read_tail(b, &mut p)?;
-        (p == b.len()).then_some(Annals { kept, digests: Vec::new(), last_link, assays, filed: count, file: Some(file) })
+        (p == b.len()).then_some(Annals { kept_wire, kept_at, last_seal, digests: Vec::new(), last_link, assays, filed: count, file: Some(file) })
     }
 
     /// How many digests a [`Annals::to_carried_bytes`] payload names (so its
@@ -189,16 +276,24 @@ impl Annals {
         out.extend_from_slice(&self.assays.to_le_bytes());
     }
 
-    fn read_kept(b: &[u8]) -> Option<(Vec<Receipt>, usize)> {
+    /// The kept frames, each verified to decode (the object is dropped at
+    /// once: memory keeps only the bytes), and where they end.
+    fn read_kept(b: &[u8]) -> Option<((Vec<u8>, Vec<u32>, Option<(u64, u64)>), usize)> {
         let n = u32::from_le_bytes(b.get(..4)?.try_into().ok()?) as usize;
         let mut p = 4usize;
-        let mut kept = Vec::with_capacity(n.min(1 << 20));
+        let start = p;
+        let mut at = Vec::with_capacity(n.min(1 << 20));
+        let mut seal = None;
         for _ in 0..n {
             let (tag, value) = crate::tlv::records(b.get(p..)?).next()?;
+            let r = Receipt::from_wire(tag, value)?;
+            if let ClosureEvent::HandoffSealed { to, .. } = r.event() {
+                seal = Some((*to, r.sequence()));
+            }
+            at.push((p - start) as u32);
             p += 5 + value.len();
-            kept.push(Receipt::from_wire(tag, value)?);
         }
-        Some((kept, p))
+        Some(((b.get(start..p)?.to_vec(), at, seal), p))
     }
 
     fn read_tail(b: &[u8], p: &mut usize) -> Option<(BTreeMap<u64, u64>, u64)> {
@@ -221,10 +316,8 @@ impl Annals {
     /// `kept count u32 ‖ frames ‖ digests u32 ‖ 32·n ‖ links u32 ‖ (orb,stamp)·n ‖ assays u64`,
     /// every integer little-endian, each kept receipt one TLV frame.
     pub fn to_bytes(&self) -> Vec<u8> {
-        let mut out = (self.kept.len() as u32).to_le_bytes().to_vec();
-        for r in &self.kept {
-            out.extend_from_slice(&r.wire_bytes());
-        }
+        let mut out = (self.kept_at.len() as u32).to_le_bytes().to_vec();
+        out.extend_from_slice(&self.kept_wire);
         out.extend_from_slice(&(self.digests.len() as u32).to_le_bytes());
         for d in &self.digests {
             out.extend_from_slice(d);
@@ -240,7 +333,6 @@ impl Annals {
 
     /// Read [`Annals::to_bytes`] back whole, or `None`.
     pub fn from_bytes(b: &[u8]) -> Option<Annals> {
-        let mut p = 0usize;
         let u32_at = |p: &mut usize| -> Option<u32> {
             let v = u32::from_le_bytes(b.get(*p..*p + 4)?.try_into().ok()?);
             *p += 4;
@@ -251,13 +343,7 @@ impl Annals {
             *p += 8;
             Some(v)
         };
-        let n = u32_at(&mut p)? as usize;
-        let mut kept = Vec::with_capacity(n.min(1 << 20));
-        for _ in 0..n {
-            let (tag, value) = crate::tlv::records(b.get(p..)?).next()?;
-            p += 5 + value.len();
-            kept.push(Receipt::from_wire(tag, value)?);
-        }
+        let ((kept_wire, kept_at, last_seal), mut p) = Self::read_kept(b)?;
         let n = u32_at(&mut p)? as usize;
         let mut digests = Vec::with_capacity(n.min(1 << 24));
         for _ in 0..n {
@@ -271,6 +357,6 @@ impl Annals {
             last_link.insert(orb, u64_at(&mut p)?);
         }
         let assays = u64_at(&mut p)?;
-        (p == b.len()).then_some(Annals { kept, digests, last_link, assays, filed: 0, file: None })
+        (p == b.len()).then_some(Annals { kept_wire, kept_at, last_seal, digests, last_link, assays, filed: 0, file: None })
     }
 }

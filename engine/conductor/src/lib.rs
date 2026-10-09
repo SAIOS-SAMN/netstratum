@@ -65,6 +65,8 @@ use std::path::Path;
 pub mod civic;
 // docs/61 G1 — a line's place about its core, in closed form.
 pub mod orbit;
+// docs/63 — a world is unrolled only while it is observed.
+pub mod observe;
 pub mod lookahead;
 pub mod ocular;
 mod polities;
@@ -1097,6 +1099,18 @@ pub struct Polity {
     pub misheard: u64,
     /// docs/60 D9 — the dead's open questions on their way, by arrival beat.
     questions_arriving: Vec<(u64, solver::Conjecture)>,
+    /// The words this line OWNS (minted or licensed), folded from its
+    /// chronicle once and then only from receipts past `word_cursor` (an
+    /// absolute receipt index): the market and the census read this, never
+    /// a fold of the whole history each beat.
+    owned_words: Vec<([u8; 32], Vec<u8>, Vec<[u8; 32]>)>,
+    owned_set: std::collections::HashSet<[u8; 32]>,
+    word_cursor: u64,
+    /// The office evidence's counts (assays struck, routes chartered, market
+    /// clears), folded like the owned words: once whole, then only the
+    /// receipts past `office_cursor`.
+    office_tally: (u64, u64, u64),
+    office_cursor: u64,
     /// docs/61 G1 — the line's orbit about its core, read once from its
     /// founding place (`None` until read; `Some(None)` for a line at no core).
     orbit: Option<Option<orbit::Orbit>>,
@@ -1418,6 +1432,88 @@ fn regime(world: &World, metabolism: &str) -> Option<(Regime, Ratio)> {
 }
 
 impl Polity {
+    /// Bring the owned words up to the chronicle's head: the receipts past
+    /// the cursor only; the whole history when the cursor has never read, or
+    /// a drain carried receipts past it unread.
+    pub fn fold_owned_words(&mut self) {
+        let chronicle = self.world.chronicle();
+        let (total, base) = (chronicle.total(), chronicle.base());
+        if self.word_cursor == total {
+            return;
+        }
+        if self.word_cursor == 0 || self.word_cursor < base {
+            self.owned_words.clear();
+            self.owned_set.clear();
+            for word in cfe::vocabulary::solver_words(chronicle) {
+                if self.owned_set.insert(word.0) {
+                    self.owned_words.push(word);
+                }
+            }
+        } else {
+            for receipt in chronicle.receipts().iter().skip((self.word_cursor - base) as usize) {
+                match receipt.event() {
+                    cfe::dop::ClosureEvent::SolverWordMinted { orbit, expansion, cited }
+                    | cfe::dop::ClosureEvent::KnowledgeLicensed { orbit, expansion, cited } => {
+                        if self.owned_set.insert(*orbit) {
+                            self.owned_words.push((*orbit, expansion.clone(), cited.clone()));
+                        }
+                    }
+                    _ => {}
+                }
+            }
+        }
+        self.word_cursor = total;
+    }
+
+    /// The office evidence, its counts brought to the chronicle's head by
+    /// reading only the receipts past the cursor (the whole history once, or
+    /// when a drain carried receipts past the cursor unread).
+    fn office_evidence_now(&mut self) -> OfficeEvidence {
+        use cfe::dop::ClosureEvent;
+        let (total, base) = (self.world.chronicle().total(), self.world.chronicle().base());
+        if self.office_cursor == 0 || self.office_cursor < base {
+            let whole = office_evidence(&self.world);
+            self.office_tally = (whole.assays_struck, whole.routes_chartered, whole.market_clears);
+        } else {
+            for receipt in self.world.chronicle().receipts().iter().skip((self.office_cursor - base) as usize) {
+                match receipt.event() {
+                    ClosureEvent::AssayStruck { .. } | ClosureEvent::StapleMined { .. } => self.office_tally.0 += 1,
+                    ClosureEvent::RouteChartered { .. } => self.office_tally.1 += 1,
+                    ClosureEvent::OfferCleared { .. } => self.office_tally.2 += 1,
+                    _ => {}
+                }
+            }
+        }
+        self.office_cursor = total;
+        OfficeEvidence {
+            element_kinds: self.world.orb().map_or(0, |orb| orb.elements.len() as u64),
+            assays_struck: self.office_tally.0,
+            routes_chartered: self.office_tally.1,
+            market_clears: self.office_tally.2,
+            has_crossed: self.world.has_crossed(),
+        }
+    }
+
+    /// COMPACT a line no one observes (docs/63): its state carried to its
+    /// snapshot and chronicle, its pending sinks written, and its spec handed
+    /// back at its founding place (its orbit is read from there again when
+    /// it is unrolled, on its own clock, which stood while it was unwatched).
+    pub fn compact(mut self, book: &Ledger) -> PolitySpec {
+        if let Err(e) = self.carry(book) {
+            eprintln!("{} was not carried before compacting: {e}", self.spec.world_name);
+        }
+        let _ = self.core_pending.write(&book.world_dir(&self.spec.world_name));
+        if let Some(Some(orbit)) = &self.orbit {
+            self.spec.position = orbit.at(0, &book.universe_span());
+        }
+        self.spec
+    }
+
+    /// How many words this line owns, as last folded.
+    pub fn owned_count(&self) -> usize {
+        self.owned_words.len()
+    }
+
     /// docs/60 D1 — what this line's minds perceive, read off its register
     /// perception.
     pub fn senses(&self) -> solver::senses::Senses {
@@ -1523,6 +1619,11 @@ impl Polity {
                         misheard: 0,
                         questions_arriving: Vec::new(),
                         orbit: None,
+                        owned_words: Vec::new(),
+                        owned_set: std::collections::HashSet::new(),
+                        word_cursor: 0,
+                        office_tally: (0, 0, 0),
+                        office_cursor: 0,
                         stated: std::collections::HashMap::new(),
                         autic_spoke: 0,
                         autic_learned: 0,
@@ -1728,6 +1829,11 @@ impl Polity {
             misheard: 0,
             questions_arriving: Vec::new(),
             orbit: None,
+            owned_words: Vec::new(),
+            owned_set: std::collections::HashSet::new(),
+            word_cursor: 0,
+            office_tally: (0, 0, 0),
+            office_cursor: 0,
             stated: std::collections::HashMap::new(),
             autic_spoke: 0,
             autic_learned: 0,
@@ -1868,7 +1974,7 @@ impl Polity {
         if held.is_some() {
             return;
         }
-        let evidence = office_evidence(&self.world);
+        let evidence = self.office_evidence_now();
         // **THE OFFICE DERIVES FROM THE OPPORTUNITY** (INTELLIGENCE ARC B,
         // business-development made cognition-driven). A line no longer
         // takes the office a fixed `disposition → office` dial assigns it;
@@ -3066,7 +3172,9 @@ impl Polity {
         let decay = self.world.leisure_bank_of(primary) * self.world.leisure_decay_rate(primary);
         let delta = fill - decay;
         if delta != ratio(0, 1) {
-            self.world.settle_leisure(primary, delta);
+            // docs/64 P1: the per-beat flow accrues; a spend or the carry
+            // receipts it.
+            self.world.accrue_leisure(primary, delta);
         }
     }
 
@@ -4861,6 +4969,8 @@ impl Polity {
     /// head, so the next boot resumes from here instead of from genesis.
     pub fn carry(&mut self, book: &Ledger) -> std::io::Result<()> {
         let dir = book.world_dir(&self.spec.world_name);
+        // docs/64 P1: the leisure books are receipted before the snapshot.
+        self.world.flush_leisure();
         cfe::persist::sync_from(self.world.chronicle(), &dir.join("chronicle.tlv"), &mut self.sync_cursor)
             .map_err(|e| std::io::Error::other(format!("{e:?}")))?;
         // THE MEMORY BOUND: what the snapshot now carries leaves memory —
@@ -5207,10 +5317,17 @@ pub fn core_bounce(worlds: &mut [Polity], book: &Ledger, stamp: u64) -> Vec<(Str
         let distance = ledger::torus_distance(&polity.spec.position, &galaxy.center, &span);
         let cells = num_traits::ToPrimitive::to_u64(&distance.ceil().to_integer()).unwrap_or(u64::MAX);
         let beyond = distance > galaxy.reach;
+        // docs/64 P0: what the line already heard or has in flight, as a set
+        // (was a scan of both per dead word: lines x words x words a year).
+        let known: std::collections::HashSet<[u8; 32]> = polity
+            .inherited
+            .words()
+            .iter()
+            .map(|w| w.orbit)
+            .chain(polity.arriving.iter().map(|(_, w)| w.orbit))
+            .collect();
         for entry in entries {
-            if polity.inherited.words().iter().any(|w| w.orbit == entry.orbit)
-                || polity.arriving.iter().any(|(_, w)| w.orbit == entry.orbit)
-            {
+            if known.contains(&entry.orbit) {
                 continue;
             }
             if beyond {
@@ -5885,13 +6002,17 @@ pub fn consilience_step(worlds: &mut [Polity], _beat: u64) -> Vec<(String, u32, 
 /// the payment to the seller (the conserved buyer→seller settlement is
 /// the two-sided follow-up). The prosperity gate is the throttle.
 pub fn knowledge_market_step(worlds: &mut [Polity], _beat: u64) -> Vec<(String, usize)> {
-    // The roster's pool of words, deduped by orbit.
+    // The roster's pool of words, deduped by orbit: each line's owned words,
+    // folded only past its cursor (never the whole history each beat).
+    for polity in worlds.iter_mut() {
+        polity.fold_owned_words();
+    }
     let mut pool: Vec<([u8; 32], Vec<u8>, Vec<[u8; 32]>)> = Vec::new();
     let mut seen: std::collections::HashSet<[u8; 32]> = std::collections::HashSet::new();
     for polity in worlds.iter() {
-        for (orbit, expansion, cited) in cfe::vocabulary::solver_words(polity.world.chronicle()) {
-            if seen.insert(orbit) {
-                pool.push((orbit, expansion, cited));
+        for word in &polity.owned_words {
+            if seen.insert(word.0) {
+                pool.push(word.clone());
             }
         }
     }
@@ -5910,11 +6031,7 @@ pub fn knowledge_market_step(worlds: &mut [Polity], _beat: u64) -> Vec<(String, 
     };
     let mut licensed = Vec::new();
     for buyer in 0..worlds.len() {
-        let own: std::collections::HashSet<[u8; 32]> =
-            cfe::vocabulary::solver_words(worlds[buyer].world.chronicle())
-                .into_iter()
-                .map(|(orbit, _, _)| orbit)
-                .collect();
+        let own = &worlds[buyer].owned_set;
         let senses = worlds[buyer].senses();
         let crystal = worlds[buyer]
             .world
@@ -6645,6 +6762,7 @@ fn run_era_inner(
                     &scribe::journal::Voice::of(&polity.spec.civilization),
                 );
             }
+            let _ = scribe::render_wall(&book);
             // GALAXY-1b: the observation sweep rides the year voice
             // (11 §1 — board-scale shifts read yearly).
             let _ = observe_crossings(&worlds, &registry, &book, epoch_base + u64::from(beat) + 1);
@@ -6689,8 +6807,12 @@ pub fn retire_collapsed(worlds: &mut Vec<Polity>, book: &Ledger, stamp: u64) -> 
     // each with its derivation (the proofs it minted on), its own claim — so
     // the dead's knowledge is the living's inheritance, never lost. Once per
     // dead line: a line already deposited (resumed collapsed) is not again.
-    let deposited: std::collections::BTreeSet<String> =
-        book.core_libraries().values().flatten().map(|entry| entry.world.clone()).collect();
+    // Nothing to do on a beat no line collapsed (the common beat): no ledger
+    // reading at all.
+    if !worlds.iter().any(|p| p.world.collapsed().is_some()) {
+        return Vec::new();
+    }
+    let deposited = book.deposited_worlds();
     let mut deposits = Vec::new();
     for polity in worlds.iter().filter(|p| p.world.collapsed().is_some()) {
         if deposited.contains(&polity.spec.world_name) {
@@ -6713,8 +6835,6 @@ pub fn retire_collapsed(worlds: &mut Vec<Polity>, book: &Ledger, stamp: u64) -> 
     // some pairs, never all) reaches each living line its core reaches, one
     // cell a beat, into that line's held conjectures. Workspace like the
     // conjectures themselves: carried in memory, never receipted.
-    let galaxies = book.galaxies();
-    let span = book.universe_span();
     let mut carried: Vec<(String, Vec<solver::Conjecture>)> = Vec::new();
     for polity in worlds.iter().filter(|p| p.world.collapsed().is_some()) {
         let Some(core) = book.core_of(&polity.spec.position) else { continue };
@@ -6723,6 +6843,8 @@ pub fn retire_collapsed(worlds: &mut Vec<Polity>, book: &Ledger, stamp: u64) -> 
             carried.push((core, open));
         }
     }
+    let galaxies = if carried.is_empty() { Vec::new() } else { book.galaxies() };
+    let span = book.universe_span();
     for (core, open) in &carried {
         let Some(galaxy) = galaxies.iter().find(|g| &g.name == core) else { continue };
         let mut reached = 0;

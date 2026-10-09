@@ -682,10 +682,9 @@ pub struct BuiltRecipe {
 /// folds to the same recipes forever. The caller filters by orb.
 pub fn recipes_built(chronicle: &crate::vrp::Chronicle) -> Vec<BuiltRecipe> {
     let mut out = Vec::new();
-    for receipt in chronicle.history() {
-        if let crate::dop::ClosureEvent::RecipeBuilt { orb_id, inputs, role, yield_of_role } =
-            receipt.event()
-        {
+    // The chronicle keeps its recipes as they are appended.
+    for event in chronicle.recipes() {
+        if let crate::dop::ClosureEvent::RecipeBuilt { orb_id, inputs, role, yield_of_role } = event {
             out.push(BuiltRecipe {
                 orb_id: *orb_id,
                 inputs: inputs.clone(),
@@ -705,7 +704,9 @@ pub fn recipes_built(chronicle: &crate::vrp::Chronicle) -> Vec<BuiltRecipe> {
 /// where a filed one was not.
 pub fn fold(chronicle: &crate::vrp::Chronicle, axis: Axis) -> Vec<Entry> {
     let mut out = seed(axis);
-    for receipt in chronicle.history() {
+    // The chronicle keeps its vocabulary mints as they are appended: the
+    // fold reads those, never the whole history.
+    for (_, event) in chronicle.vocabulary_minted() {
         if let crate::dop::ClosureEvent::VocabularyMinted {
             axis: on,
             code,
@@ -714,7 +715,7 @@ pub fn fold(chronicle: &crate::vrp::Chronicle, axis: Axis) -> Vec<Entry> {
             binding,
             base,
             ration,
-        } = receipt.event()
+        } = event
         {
             if Axis::from_code(*on) == Some(axis) {
                 out.push(Entry {
@@ -751,8 +752,8 @@ pub fn ceiling(chronicle: &crate::vrp::Chronicle, axis: Axis) -> u8 {
 /// it correctly rather than of a new rule.
 pub fn fold_at(chronicle: &crate::vrp::Chronicle, axis: Axis, stamp: u64) -> Vec<Entry> {
     let mut out = seed(axis);
-    for receipt in chronicle.history() {
-        if receipt.stamp() > stamp {
+    for (at, event) in chronicle.vocabulary_minted() {
+        if *at > stamp {
             break;
         }
         if let crate::dop::ClosureEvent::VocabularyMinted {
@@ -763,7 +764,7 @@ pub fn fold_at(chronicle: &crate::vrp::Chronicle, axis: Axis, stamp: u64) -> Vec
             binding,
             base,
             ration,
-        } = receipt.event()
+        } = event
         {
             if Axis::from_code(*on) == Some(axis) {
                 out.push(Entry {

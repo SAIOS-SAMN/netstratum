@@ -423,6 +423,11 @@ pub struct World {
     /// COG-1 (doc 52 §7): leisure banks — replay of `LeisureSettled`
     /// (cascade surplus in, minting out; floored at zero).
     pub(super) leisure_banks: Vec<(u64, Ratio)>,
+    /// docs/64 P1 — the leisure banks as last RECEIPTED (what replay and the
+    /// judge stand on). The live bank accrues each beat without a receipt;
+    /// a spend, or the carry, receipts the difference. Workspace: set from
+    /// the banks on every resume, never committed.
+    pub(super) leisure_receipted: Vec<(u64, Ratio)>,
     /// LAB: synth mod grades.
     pub(super) synth_mods: Vec<(u64, u8)>,
     /// LAB: skin mod grades.

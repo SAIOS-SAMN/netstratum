@@ -26,6 +26,42 @@ pub struct Galaxy {
     pub reach: Ratio,
 }
 
+/// The universe ledger's readings, from one parse.
+#[derive(Debug, Default)]
+pub struct UniverseRead {
+    /// The ledger length these were read at; `None` before any reading.
+    len: Option<u64>,
+    galaxies: Vec<Galaxy>,
+    libraries: std::collections::BTreeMap<String, Vec<CoreWord>>,
+}
+
+impl UniverseRead {
+    fn parse(path: &std::path::Path, len: u64) -> UniverseRead {
+        let mut read = UniverseRead { len: Some(len), ..Default::default() };
+        let Ok(ledger) = persist::load(path) else { return read };
+        for receipt in ledger.receipts() {
+            match receipt.event() {
+                ClosureEvent::GalaxyObserved { name, center, reach, .. } => read.galaxies.push(Galaxy {
+                    name: name.clone(),
+                    center: center.clone(),
+                    reach: reach.clone(),
+                }),
+                ClosureEvent::CoreWordDeposited { core, world, orbit, expansion, cited } => {
+                    read.libraries.entry(core.clone()).or_default().push(CoreWord {
+                        world: world.clone(),
+                        orbit: *orbit,
+                        expansion: expansion.clone(),
+                        cited: cited.clone(),
+                        stamp: receipt.stamp(),
+                    })
+                }
+                _ => {}
+            }
+        }
+        read
+    }
+}
+
 /// One dead line's word at a core: its own claim, citing the line and the
 /// proofs it was minted on, and the universal stamp it was deposited at.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -57,25 +93,20 @@ impl Ledger {
     /// this reading never needs the card, and a reader writes nothing
     /// (the lens discipline).
     pub fn galaxies(&self) -> Vec<Galaxy> {
+        self.universe_read(|read| read.galaxies.clone())
+    }
+
+    /// The universe ledger's readings, parsed once per change: the file is
+    /// append-only, so its length is its version (a stat, never a parse, on
+    /// every call that finds it unchanged).
+    fn universe_read<T>(&self, take: impl FnOnce(&UniverseRead) -> T) -> T {
         let path = self.ledger_path();
-        if !path.exists() {
-            return Vec::new();
+        let len = fs::metadata(&path).map(|m| m.len()).unwrap_or(0);
+        let mut cache = self.cache.lock().unwrap_or_else(|poisoned| poisoned.into_inner());
+        if cache.len != Some(len) {
+            *cache = UniverseRead::parse(&path, len);
         }
-        let Ok(ledger) = persist::load(&path) else {
-            return Vec::new();
-        };
-        ledger
-            .receipts()
-            .iter()
-            .filter_map(|receipt| match receipt.event() {
-                ClosureEvent::GalaxyObserved { name, center, reach, .. } => Some(Galaxy {
-                    name: name.clone(),
-                    center: center.clone(),
-                    reach: reach.clone(),
-                }),
-                _ => None,
-            })
-            .collect()
+        take(&cache)
     }
 
     /// Derived membership (13_GALAXY §4): the galaxy whose center
@@ -191,11 +222,16 @@ impl Ledger {
     /// `None` only before any galaxy is charted.
     pub fn core_of(&self, position: &(Ratio, Ratio, Ratio)) -> Option<String> {
         let span = self.universe_span();
-        let ranked = self.galaxies().into_iter().map(|galaxy| {
-            let distance = l1_wrapped(position, &galaxy.center, &span);
-            (distance > galaxy.reach, distance, galaxy.name)
-        });
-        ranked.min().map(|(_, _, name)| name)
+        self.universe_read(|read| {
+            read.galaxies
+                .iter()
+                .map(|galaxy| {
+                    let distance = l1_wrapped(position, &galaxy.center, &span);
+                    (distance > galaxy.reach, distance, &galaxy.name)
+                })
+                .min()
+                .map(|(_, _, name)| name.clone())
+        })
     }
 
     /// Append events to the universe ledger at `stamp`, in order, and sync.
@@ -243,22 +279,12 @@ impl Ledger {
     /// line's word its OWN claim, citing the line and its proofs (conflicting
     /// words stay distinct). A reading: nothing is written.
     pub fn core_libraries(&self) -> std::collections::BTreeMap<String, Vec<CoreWord>> {
-        let mut libraries: std::collections::BTreeMap<String, Vec<CoreWord>> = std::collections::BTreeMap::new();
-        let Ok(ledger) = persist::load(&self.ledger_path()) else {
-            return libraries;
-        };
-        for receipt in ledger.receipts() {
-            if let ClosureEvent::CoreWordDeposited { core, world, orbit, expansion, cited } = receipt.event() {
-                libraries.entry(core.clone()).or_default().push(CoreWord {
-                    world: world.clone(),
-                    orbit: *orbit,
-                    expansion: expansion.clone(),
-                    cited: cited.clone(),
-                    stamp: receipt.stamp(),
-                });
-            }
-        }
-        libraries
+        self.universe_read(|read| read.libraries.clone())
+    }
+
+    /// The dead lines whose words already reached a core.
+    pub fn deposited_worlds(&self) -> std::collections::BTreeSet<String> {
+        self.universe_read(|read| read.libraries.values().flatten().map(|word| word.world.clone()).collect())
     }
 
     /// **THE UNIVERSE'S SEED** (docs/58 §3) — the own-hash of its Big Bang

@@ -97,7 +97,12 @@ fn main() {
         ),
         Err(e) => eprintln!("conductor: the Big Bang was not recorded: {e}"),
     }
-    let mut worlds: Vec<Polity> = specs
+    // docs/63 — OBSERVATION: only the observed lines are unrolled; the rest
+    // stay compact (their snapshots on disk, their specs here) until an
+    // observer arrives.
+    let takes = PathBuf::from(std::env::var("NETSTRATUM_HOUSE").unwrap_or_else(|_| "var/uplink/house".into())).join("takes");
+    let watch = PathBuf::from(&var_root).join("watch");
+    let specs: Vec<conductor::PolitySpec> = specs
         .into_iter()
         .map(|mut spec| {
             let opening = spec
@@ -105,9 +110,18 @@ fn main() {
                 .take()
                 .unwrap_or_else(|| cfe::ratio::ratio(0, 1));
             spec.gauge = Some(cfe::world::wrap_gauge(opening + live_base.clone()));
-            Polity::genesis(spec, &registry, &book)
+            spec
         })
+        .filter(|spec| !book.world_dir(&spec.world_name).join("collapsed").exists())
         .collect();
+    let observed = {
+        let refs: Vec<&conductor::PolitySpec> = specs.iter().collect();
+        conductor::observe::observed(&refs, &registry, &takes, &watch, &book.universe_span())
+    };
+    let (awake, mut dormant): (Vec<conductor::PolitySpec>, Vec<conductor::PolitySpec>) =
+        specs.into_iter().partition(|spec| observed.contains(&spec.world_name));
+    println!("conductor: {} lines observed and unrolled, {} compact", awake.len(), dormant.len());
+    let mut worlds: Vec<Polity> = awake.into_iter().map(|spec| Polity::genesis(spec, &registry, &book)).collect();
     // A line resumed already collapsed never re-enters the beat.
     for name in conductor::retire_collapsed(&mut worlds, &book, epoch_base) {
         println!("conductor: {name} resumed collapsed; it stays out of the roster");
@@ -191,6 +205,7 @@ fn main() {
     }
     let mut total_cleaves: u64 = 0;
     let mut ancient: Option<(String, u64)> = None;
+    let mut last_living: std::collections::BTreeSet<String> = std::collections::BTreeSet::new();
     let mut announced_pause = false;
     loop {
         let (paused, cadence, advance) = read_control(cadence_secs);
@@ -224,6 +239,30 @@ fn main() {
         // TUniversal T = epoch base + this era's beat (07 §1.3): live
         // ticks stack on the converged timeline, never restart it.
         let _ = book.set_universal_clock(epoch_base + beat);
+        // docs/63 — every 10 beats, the observed set: an unobserved line is
+        // compacted (carried and unloaded), an observed compact line unrolled.
+        if beat.is_multiple_of(10) {
+            let observed = {
+                let refs: Vec<&conductor::PolitySpec> = worlds.iter().map(|p| &p.spec).chain(dormant.iter()).collect();
+                conductor::observe::observed(&refs, &registry, &takes, &watch, &book.universe_span())
+            };
+            let mut at = 0;
+            while at < worlds.len() {
+                if !worlds[at].penned && !observed.contains(&worlds[at].spec.world_name) {
+                    let spec = worlds.remove(at).compact(&book);
+                    println!("beat {beat}: COMPACT — {} has no observer; its state carried, its world unloaded", spec.world_name);
+                    dormant.push(spec);
+                } else {
+                    at += 1;
+                }
+            }
+            let (wake, still): (Vec<_>, Vec<_>) = dormant.into_iter().partition(|spec| observed.contains(&spec.world_name));
+            dormant = still;
+            for spec in wake {
+                println!("beat {beat}: UNROLLED — {} is observed; its world runs", spec.world_name);
+                worlds.push(Polity::genesis(spec, &registry, &book));
+            }
+        }
         // docs/61 G1: every line's place at this beat, on its orbit.
         conductor::orbit_step(&mut worlds, &book);
         // MESH-1b (#2): the pen door — yields seal at the beat
@@ -331,7 +370,10 @@ fn main() {
         // changes: the progenitor candidate (an ancient arises only at a core).
         let living: std::collections::BTreeSet<String> =
             worlds.iter().map(|p| p.spec.civilization.sigil.clone()).collect();
-        let now_ancient = conductor::largest_lineage(&registry, &living);
+        // The lineage reads the whole registry from disk: only when the
+        // living set changed (a birth or a death), never on a quiet beat.
+        let now_ancient = if living == last_living { ancient.clone() } else { conductor::largest_lineage(&registry, &living) };
+        last_living = living.clone();
         if now_ancient.as_ref().map(|(s, _)| s) != ancient.as_ref().map(|(s, _)| s) {
             match &now_ancient {
                 Some((sigil, tree)) => println!(
@@ -383,10 +425,10 @@ fn main() {
             );
         }
         // STAMP MM-1: mint + spot clear (Wave-4).
-        for (buyer, seller) in conductor::profile::timed("stamp_market_step", || conductor::stamp_market_step(&mut worlds, beat, &span)) {
-            println!(
-                "beat {beat}: STAMP SPOT — {buyer} ⇌ {seller}; crystal clears for STAMP"
-            );
+        // One line per beat, not one per clear (it was ~90 lines a second).
+        let spots = conductor::profile::timed("stamp_market_step", || conductor::stamp_market_step(&mut worlds, beat, &span));
+        if !spots.is_empty() {
+            println!("beat {beat}: STAMP SPOT — {} clears (crystal for STAMP)", spots.len());
         }
         // CONSILIENCE (38 §5): independent lines that resolved their
         // knowledge to the same invariant crystallize a shared axiom.
@@ -428,6 +470,7 @@ fn main() {
                     &scribe::journal::Voice::of(&polity.spec.civilization),
                 );
             }
+            let _ = scribe::journal::render_wall(&book);
             println!(
                 "beat {beat}: year {} journaled — the wall is fresh (var/worlds/wall.html)",
                 beat / scribe::journal::YEAR_TICKS
@@ -473,14 +516,15 @@ fn main() {
             let live: Vec<&Polity> = worlds.iter().filter(|p| !p.penned).collect();
             for polity in &live {
                 pop += polity.world.population_of(cfe::world::FIRST_ORB);
-                words += cfe::vocabulary::solver_words(polity.world.chronicle()).len();
+                words += polity.owned_count();
                 if polity.ration_survives(cfe::world::FIRST_ORB) {
                     fed += 1;
                 }
             }
             let n = live.len();
             eprintln!(
-                "census beat {beat}: lines={n} pop={pop} words_minted={words} cleaved={total_cleaves} fed={fed}/{n}"
+                "census beat {beat}: lines={n} compact={} pop={pop} words_minted={words} cleaved={total_cleaves} fed={fed}/{n}",
+                dormant.len()
             );
             let _ = std::io::stderr().flush();
         }

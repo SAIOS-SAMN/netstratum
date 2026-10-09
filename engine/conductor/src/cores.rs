@@ -227,16 +227,23 @@ pub fn pair_legs(pending: &mut [&mut Pending]) -> Vec<(usize, Holding, Ratio)> {
         }
     }
     let mut melts = Vec::new();
+    // The paired deals, then ONE pass over each line's legs (was a pass over
+    // every line's legs per paired deal: a year's ~10^5 deals times ~10^5
+    // legs at every year close, docs/64).
+    let mut paired: std::collections::BTreeSet<(u64, Holding)> = std::collections::BTreeSet::new();
     for ((deal, h), (sum, sender, sent, received)) in deals {
         if !(sent && received) {
             continue;
         }
-        for p in pending.iter_mut() {
-            p.legs.retain(|(d, held, _)| !(*d == deal && *held == h));
-        }
+        paired.insert((deal, h));
         let melt = -sum;
         if melt > zero {
             melts.push((sender.expect("a sent leg names its sender"), h, melt));
+        }
+    }
+    if !paired.is_empty() {
+        for p in pending.iter_mut() {
+            p.legs.retain(|(d, held, _)| !paired.contains(&(*d, *held)));
         }
     }
     melts

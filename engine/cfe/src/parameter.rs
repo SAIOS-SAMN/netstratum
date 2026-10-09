@@ -149,22 +149,9 @@ impl Table {
 }
 
 pub fn table_of(chronicle: &crate::vrp::Chronicle) -> Table {
-    let mut found: [Option<Ratio>; 7] = Default::default();
-    let mut missing = found.len();
-    for receipt in chronicle.history().rev() {
-        if missing == 0 {
-            break;
-        }
-        if let crate::dop::ClosureEvent::ParameterChartered { key, value } = receipt.event() {
-            let at = (*key as usize).wrapping_sub(1);
-            if at < found.len() && found[at].is_none() {
-                found[at] = Some(value.clone());
-                missing -= 1;
-            }
-        }
-    }
+    // The chronicle keeps each key's last charter as it is appended: no walk.
     Table(core::array::from_fn(|at| {
-        found[at].clone().unwrap_or_else(|| Parameter::ALL[at].seed())
+        chronicle.chartered(at as u8 + 1).cloned().unwrap_or_else(|| Parameter::ALL[at].seed())
     }))
 }
 
@@ -172,16 +159,5 @@ pub fn table_of(chronicle: &crate::vrp::Chronicle) -> Table {
 /// for the key, or the seed where none stands. Same chain, same
 /// value, on every node, forever.
 pub fn of(chronicle: &crate::vrp::Chronicle, key: Parameter) -> Ratio {
-    chronicle
-        .history()
-        .rev()
-        .find_map(|receipt| match receipt.event() {
-            crate::dop::ClosureEvent::ParameterChartered { key: held, value }
-                if *held == key.code() =>
-            {
-                Some(value.clone())
-            }
-            _ => None,
-        })
-        .unwrap_or_else(|| key.seed())
+    chronicle.chartered(key.code()).cloned().unwrap_or_else(|| key.seed())
 }

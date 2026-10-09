@@ -314,15 +314,20 @@ pub fn narrate_year(
     let opened = boundary - year_ticks;
     // The non-bulk kinds the window reads (builds, razes, vents, routes,
     // registrations) are all in the history, drained or held.
-    let window: Vec<Receipt> = world
+    // Backward from the head, the closing year's window only: the history is
+    // in stamp order, so nothing older than the window is decoded.
+    let mut window: Vec<Receipt> = world
         .chronicle()
         .history()
-        .filter(|receipt| receipt.stamp() >= opened && receipt.stamp() < boundary)
-        .cloned()
+        .rev()
+        .skip_while(|receipt| receipt.stamp() >= boundary)
+        .take_while(|receipt| receipt.stamp() >= opened)
+        .map(|receipt| receipt.into_owned())
         .collect();
+    window.reverse();
     let seed = world.chronicle().history().rev().find(|receipt| receipt.stamp() < boundary)?;
     let committed = world.committed();
-    Some(narrate(world_name, voice, year, year_ticks, &committed, &window, zones_before, seed))
+    Some(narrate(world_name, voice, year, year_ticks, &committed, &window, zones_before, &seed))
 }
 
 /// Narrate one completed year from its boundary state and window
@@ -711,7 +716,10 @@ pub fn record_journal(
             appended = 1;
         }
     }
-    render_wall(book)?;
+    // The wall is rebuilt ONCE per year by the caller (`render_wall`), after
+    // every world has journaled: rebuilt here it re-read every journal and
+    // rewrote the whole wall once per world (~70 x 8.5 MB a year).
+    let _ = book;
     Ok(appended)
 }
 

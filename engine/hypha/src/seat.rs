@@ -172,6 +172,23 @@ impl Seat {
             }
             self.known.push_back((id, task.train.clone()));
         }
+        // OPERATOR RULING 7 (2026-10-09): all puzzle solving is the seated
+        // minds'. The house solves nothing: every court task it pulls goes
+        // before a seated mind, and the house files the answer under its
+        // reserve.
+        if !self.before.contains(&id) {
+            if self.before.len() >= KNOWN {
+                self.before.pop_front();
+            }
+            self.before.push_back(id);
+        }
+        Ok(Some(format!("task {name}: {} pairs, before the seated minds", task.train.len())))
+    }
+
+    /// The house's own think of a court task, RETIRED by ruling 7 (kept for
+    /// the offline measures in `examples/`; never called by the live stroke).
+    #[allow(dead_code)]
+    fn think_retired(&mut self, task: mycelium::anastome::dialogue::TaskEnvelope, id: [u8; 32], name: String) -> io::Result<Option<String>> {
         let train: Option<Vec<solver::TaskPair>> =
             task.train.iter().map(|(a, b)| Some(solver::TaskPair { input: grid(a)?, output: grid(b)? })).collect();
         let tests: Option<Vec<solver::Grid>> = task.tests.iter().map(|t| grid(t)).collect();

@@ -63,6 +63,7 @@ impl World {
             pop_accrued: Vec::new(),
             treasury_balances: Vec::new(),
             leisure_banks: Vec::new(),
+            leisure_receipted: Vec::new(),
             synth_mods: Vec::new(),
             skin_mods: Vec::new(),
             rogue_pressure: Vec::new(),
@@ -149,6 +150,7 @@ impl World {
             clone_counts: committed.clone_counts,
             pop_accrued: committed.pop_accrued,
             treasury_balances: committed.treasury_balances,
+            leisure_receipted: committed.leisure_banks.clone(),
             leisure_banks: committed.leisure_banks,
             synth_mods: committed.synth_mods,
             skin_mods: committed.skin_mods,
@@ -202,10 +204,13 @@ impl World {
             .iter()
             .all(|(_, pending)| *pending == ratio(0, 1));
         let year_floor = stamp.saturating_sub(60);
-        let coherent = self.chronicle.history().any(|receipt| {
-            receipt.stamp() >= year_floor
-                && matches!(receipt.event(), ClosureEvent::YieldCollected { .. })
-        });
+        // Backward from the head over the last year only (docs/64 P2).
+        let coherent = self
+            .chronicle
+            .history()
+            .rev()
+            .take_while(|receipt| receipt.stamp() >= year_floor)
+            .any(|receipt| matches!(receipt.event(), ClosureEvent::YieldCollected { .. }));
         let crossed = self.crossed;
         // CHANNEL_ALIGN (operator-ruled): an adopted discipline must
         // stand ALIGNED — the syntropy ratio (09 §2.5, engine read)

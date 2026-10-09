@@ -268,7 +268,7 @@ impl World {
         if cursor < base {
             sheet = Vec::new();
             for receipt in self.chronicle.history() {
-                deposit_receipt(&mut sheet, receipt);
+                deposit_receipt(&mut sheet, &receipt);
             }
             deposit_last_links(&mut sheet, self.chronicle.annals().last_links());
         } else {
@@ -288,7 +288,7 @@ impl World {
         let _ = now;
         let mut sheet: Vec<(u64, CrystalDeposit)> = Vec::new();
         for receipt in self.chronicle.history() {
-            deposit_receipt(&mut sheet, receipt);
+            deposit_receipt(&mut sheet, &receipt);
         }
         deposit_last_links(&mut sheet, self.chronicle.annals().last_links());
         sheet
@@ -669,7 +669,9 @@ impl World {
         if relearned && aligned {
             180
         } else {
-            240
+            // The widest window: the annals keep the windowed kinds this far
+            // (docs/64 P2), so the two never disagree.
+            crate::annals::WINDOW
         }
     }
 
@@ -891,7 +893,7 @@ impl World {
         if let Some(at) = receipts.iter().position(|r| is_it(&r)) {
             return Some(at + 1 < receipts.len());
         }
-        self.chronicle.annals().kept().iter().any(|r| is_it(&r)).then_some(true)
+        self.chronicle.annals().kept_iter().any(|r| is_it(&&r)).then_some(true)
     }
 }
 
