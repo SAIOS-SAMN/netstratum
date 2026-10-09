@@ -1111,6 +1111,14 @@ pub struct Polity {
     /// receipts past `office_cursor`.
     office_tally: (u64, u64, u64),
     office_cursor: u64,
+    /// docs/66 Y1 — SYNTHESIS'S FIRST-CLOSURE BOUNTY, as the court pays: the
+    /// action orbit of the synthesis closing this beat (read at its mint),
+    /// the orbits this line closed since the board last merged them, and
+    /// every orbit any line in the universe has closed (shared, read-only,
+    /// merged after each beat).
+    closing: Option<[u8; 32]>,
+    pub fresh_closed: Vec<[u8; 32]>,
+    pub universe_closed: std::sync::Arc<std::collections::HashSet<[u8; 32]>>,
     /// docs/61 G1 — the line's orbit about its core, read once from its
     /// founding place (`None` until read; `Some(None)` for a line at no core).
     orbit: Option<Option<orbit::Orbit>>,
@@ -1514,6 +1522,24 @@ impl Polity {
         self.owned_words.len()
     }
 
+    /// The sizes of what this line holds in memory that can grow, for the
+    /// census: the chronicle's tail, the annals' kept bytes, the working and
+    /// inherited libraries, the owned and stated words, the pending words,
+    /// the minds' basins and conjectures, what is arriving.
+    pub fn sizes(&self) -> [usize; 9] {
+        [
+            self.world.chronicle().receipts().len(),
+            self.world.chronicle().annals().kept_bytes(),
+            self.library.words().len(),
+            self.inherited.words().len(),
+            self.owned_words.len(),
+            self.stated.len(),
+            self.word_pending.len(),
+            self.grown.values().map(Vec::len).sum::<usize>() + self.held.values().map(Vec::len).sum::<usize>(),
+            self.arriving.len() + self.questions_arriving.len(),
+        ]
+    }
+
     /// docs/60 D1 — what this line's minds perceive, read off its register
     /// perception.
     pub fn senses(&self) -> solver::senses::Senses {
@@ -1624,6 +1650,9 @@ impl Polity {
                         word_cursor: 0,
                         office_tally: (0, 0, 0),
                         office_cursor: 0,
+                        closing: None,
+                        fresh_closed: Vec::new(),
+                        universe_closed: Default::default(),
                         stated: std::collections::HashMap::new(),
                         autic_spoke: 0,
                         autic_learned: 0,
@@ -1834,6 +1863,9 @@ impl Polity {
             word_cursor: 0,
             office_tally: (0, 0, 0),
             office_cursor: 0,
+            closing: None,
+            fresh_closed: Vec::new(),
+            universe_closed: Default::default(),
             stated: std::collections::HashMap::new(),
             autic_spoke: 0,
             autic_learned: 0,
@@ -4386,6 +4418,8 @@ impl Polity {
                             self.deposit_toward_word(orbit, &program, self.automaton, digest);
                         }
                     }
+                    // docs/66 Y1: the action this synthesis closed, for its bounty.
+                    self.closing = Some(solver::mint::word_orbit(&program));
                     let word: Vec<String> = program.iter().map(|op| op.describe()).collect();
                     let cert_hex = hex(&certificate.output);
                     // Law II in full: the pairs the solve was PROVED
@@ -4465,7 +4499,22 @@ impl Polity {
                     // to entity and is recycled WITHOUT bonds, so a
                     // standing test read off relational structure
                     // refused the lawful recycled line by construction.
-                    let earned = kernel::mint_bound(difficulty.rung());
+                    let bound = kernel::mint_bound(difficulty.rung());
+                    // docs/66 Y1 — THE FIRST-CLOSURE BOUNTY, as the court pays
+                    // it: the first synthesis in the universe of an action
+                    // earns the full rung; an independent re-derivation of an
+                    // action some line already closed earns the floor (the
+                    // rung's quarter, the declared sibling dial, docs/59).
+                    // Within the gate's bound either way.
+                    let first = match self.closing.take() {
+                        Some(orbit) => {
+                            let first = !self.universe_closed.contains(&orbit) && !self.fresh_closed.contains(&orbit);
+                            self.fresh_closed.push(orbit);
+                            first
+                        }
+                        None => true,
+                    };
+                    let earned = if first { bound } else { bound * cfe::ratio::ratio(1, 4) };
                     if earned > cfe::ratio::ratio(0, 1) {
                         // The bound is the kernel's own reading and is
                         // non-negative by its ladder; the door proves it
@@ -5552,7 +5601,7 @@ pub fn element_trade_step(worlds: &mut [Polity], beat: u64, span: &Ratio) -> Vec
 ///    aperture one way + resource aperture the other (spot clear,
 ///    zero player). Pre-checked so a partial clear never strands
 ///    STAMP mid-deal.
-pub fn stamp_market_step(worlds: &mut [Polity], beat: u64, span: &Ratio) -> Vec<(String, String)> {
+pub fn stamp_market_step(worlds: &mut [Polity], book: &Ledger, beat: u64, span: &Ratio) -> Vec<(String, String)> {
     let mut clears = Vec::new();
     let half = |amount: Ratio| amount / (ratio(1, 1) + ratio(1, 1));
     // Mint phase — convert half of surplus crystal (identity rate).
@@ -5579,132 +5628,147 @@ pub fn stamp_market_step(worlds: &mut [Polity], beat: u64, span: &Ratio) -> Vec<
             }
         }
     }
-    // Spot clear: STAMP for cargo across unwalled pairs.
-    let mut seq = 0u64;
-    let n = worlds.len();
+    // docs/67 N1 — THE HUBS. The all-pairs spot sweep (every pair of lines,
+    // every beat, four receipts a pair) is retired: each galaxy's trade
+    // clears at ONE place, its hub, once a beat (the stand-in for a final
+    // TUniversal point until 78.152). The hub is the galaxy's medoid line (the
+    // one nearest, by the torus's L1, to all the others): it emerges from
+    // where the lines stand and moves with their orbits. Each participant
+    // moves two legs with the hub, never one per partner: a buyer's STAMP in
+    // (melting by its distance to the hub, the iceberg law) and its cargo out;
+    // a seller's cargo in and its STAMP out. The clearing is one uniform
+    // price: every unit of cargo is worth the STAMP that arrived over the
+    // cargo that arrived; what does not divide on the grain stays at the hub.
+    // docs/67 N4 — THE SUSTAINABLE OFFER. A seller brings half what it
+    // holds, but of its own regrowing ration never more than its biosphere
+    // spares (`World::sustainable_offer`: the stock above the curve's half
+    // point, or one beat's growth below it). The hub prices the rest.
     let cargo_of = |p: &Polity| -> Option<(Resource, Ratio)> {
         let orb = p.world.orb()?;
         for resource in [Resource::Crystal, Resource::Iron, Resource::Biomass] {
             let have = orb.banked_amount(resource);
-            if have > ratio(0, 1) {
-                return Some((resource, have));
+            if have <= ratio(0, 1) {
+                continue;
+            }
+            let offer = match p.world.sustainable_offer(cfe::world::FIRST_ORB, resource) {
+                Some(spare) => spare.min(half(have)),
+                None => half(have),
+            };
+            if offer > ratio(0, 1) {
+                return Some((resource, offer));
             }
         }
         None
     };
-    for a in 0..n {
-        for b in (a + 1)..n {
-            if worlds[a].penned || worlds[b].penned {
-                continue;
+    let stamp_of = |p: &Polity| p.world.orb().map(|o| o.stamp_amount()).unwrap_or_else(|| ratio(0, 1));
+    let banked_of = |p: &Polity, r: Resource| p.world.orb().map(|o| o.banked_amount(r)).unwrap_or_else(|| ratio(0, 1));
+    let mut galaxies: std::collections::BTreeMap<String, Vec<usize>> = std::collections::BTreeMap::new();
+    for (i, polity) in worlds.iter().enumerate() {
+        if polity.penned {
+            continue;
+        }
+        if let Some(core) = book.core_of(&polity.spec.position) {
+            galaxies.entry(core).or_default().push(i);
+        }
+    }
+    let mut seq = 0u64;
+    let mut next_deal = || {
+        seq += 1;
+        beat.saturating_mul(100_000).saturating_add(80_000 + seq)
+    };
+    for (core, members) in galaxies {
+        if members.len() < 2 {
+            continue;
+        }
+        let hub = *members
+            .iter()
+            .min_by_key(|&&i| {
+                members
+                    .iter()
+                    .fold(ratio(0, 1), |sum, &j| sum + spatial_l1(&worlds[i].spec.position, &worlds[j].spec.position, span))
+            })
+            .expect("two or more members");
+        for &i in &members {
+            if !worlds[i].world.knows_its_sun() {
+                let steward = worlds[i].steward;
+                let _ = worlds[i].world.grant_tech_as(steward, cfe::world::FIRST_ORB, 0);
             }
-            for i in [a, b] {
-                if !worlds[i].world.knows_its_sun() {
-                    let steward = worlds[i].steward;
-                    let _ = worlds[i]
-                        .world
-                        .grant_tech_as(steward, cfe::world::FIRST_ORB, 0);
+        }
+        // IN: each buyer's half STAMP, each seller's half cargo, to the hub.
+        let mut paid: Vec<(usize, Ratio)> = Vec::new();
+        let mut gave: Vec<(usize, Resource, Ratio)> = Vec::new();
+        for &i in members.iter().filter(|&&i| i != hub) {
+            let (stamp, cargo) = (stamp_of(&worlds[i]), cargo_of(&worlds[i]));
+            if stamp > ratio(0, 1) {
+                let distance = spatial_l1(&worlds[i].spec.position, &worlds[hub].spec.position, span);
+                let melt = cfe::world::route_melt(&worlds[i].world, &worlds[hub].world, &distance);
+                if let Some(pay) = cfe::dop::Positive::new(half(stamp)) {
+                    let deal = next_deal();
+                    let (from, house) = two_mut(worlds, i, hub);
+                    let before = stamp_of(house);
+                    if cfe::world::stamp_aperture_transfer(&mut from.world, cfe::world::FIRST_ORB, &mut house.world, cfe::world::FIRST_ORB, pay, deal, &melt).is_ok() {
+                        let arrived = stamp_of(house) - before;
+                        if arrived > ratio(0, 1) {
+                            paid.push((i, arrived));
+                        }
+                    }
                 }
             }
-            let distance = spatial_l1(&worlds[a].spec.position, &worlds[b].spec.position, span);
-            let melt = cfe::world::route_melt(&worlds[a].world, &worlds[b].world, &distance);
-            if melt >= ratio(1, 1) {
-                continue;
+            // A line with both brings both sides, as it bought in some pairs
+            // and sold in others under the old sweep.
+            if let Some((resource, offer)) = cargo {
+                if let Some(cargo) = cfe::dop::Positive::new(cfe::world::smelt_resource(&offer)) {
+                    let deal = next_deal();
+                    let (from, house) = two_mut(worlds, i, hub);
+                    let before = banked_of(house, resource);
+                    if cfe::world::aperture_transfer(&mut from.world, cfe::world::FIRST_ORB, &mut house.world, cfe::world::FIRST_ORB, resource, cargo, deal).is_ok() {
+                        let arrived = banked_of(house, resource) - before;
+                        if arrived > ratio(0, 1) {
+                            gave.push((i, resource, arrived));
+                        }
+                    }
+                }
             }
-            let stamp_a = worlds[a]
-                .world
-                .orb()
-                .map(|o| o.stamp_amount())
-                .unwrap_or_else(|| ratio(0, 1));
-            let stamp_b = worlds[b]
-                .world
-                .orb()
-                .map(|o| o.stamp_amount())
-                .unwrap_or_else(|| ratio(0, 1));
-            // Buyer has STAMP, seller has a cargo resource.
-            let (buyer, seller) = if stamp_a > ratio(0, 1) && cargo_of(&worlds[b]).is_some() {
-                (a, b)
-            } else if stamp_b > ratio(0, 1) && cargo_of(&worlds[a]).is_some() {
-                (b, a)
-            } else {
-                continue;
-            };
-            let Some((cargo_resource, cargo_have)) = cargo_of(&worlds[seller]) else {
-                continue;
-            };
-            let pay_have = if buyer == a {
-                stamp_a.clone()
-            } else {
-                stamp_b.clone()
-            };
-            let pay = half(pay_have);
-            let cargo = half(cargo_have);
-            if pay <= ratio(0, 1) || cargo <= ratio(0, 1) {
-                continue;
+        }
+        let stamp_in = paid.iter().fold(ratio(0, 1), |s, (_, a)| s + a.clone());
+        let cargo_in = gave.iter().fold(ratio(0, 1), |s, (_, _, a)| s + a.clone());
+        // OUT: one uniform price. Each buyer takes every cargo pool in
+        // proportion to the STAMP it brought; each seller takes the STAMP in
+        // proportion to the cargo it brought. A side with nothing to meet is
+        // returned what it brought (the hub holds no one's goods unmet).
+        let mut pools: std::collections::BTreeMap<Resource, Ratio> = std::collections::BTreeMap::new();
+        for (_, r, a) in &gave {
+            *pools.entry(*r).or_insert_with(|| ratio(0, 1)) += a.clone();
+        }
+        let matched = stamp_in > ratio(0, 1) && cargo_in > ratio(0, 1);
+        for (i, brought) in &paid {
+            let deal_base = next_deal();
+            let (to, house) = two_mut(worlds, *i, hub);
+            if matched {
+                for (k, (r, pool)) in pools.iter().enumerate() {
+                    let share = cfe::world::smelt_resource(&(pool.clone() * brought.clone() / stamp_in.clone()));
+                    if let Some(share) = cfe::dop::Positive::new(share) {
+                        let _ = cfe::world::aperture_transfer(&mut house.world, cfe::world::FIRST_ORB, &mut to.world, cfe::world::FIRST_ORB, *r, share, deal_base.saturating_add(k as u64 * 7));
+                    }
+                }
+            } else if let Some(back) = cfe::dop::Positive::new(brought.clone()) {
+                let _ = cfe::world::stamp_aperture_transfer(&mut house.world, cfe::world::FIRST_ORB, &mut to.world, cfe::world::FIRST_ORB, back, deal_base, &ratio(0, 1));
             }
-            let Some(pay_p) = cfe::dop::Positive::new(pay) else {
-                continue;
-            };
-            let Some(cargo_p) = cfe::dop::Positive::new(cargo) else {
-                continue;
-            };
-            let deal = beat.saturating_mul(100_000).saturating_add(80_000 + seq);
-            seq += 1;
-            let (buy, sell) = two_mut(worlds, buyer, seller);
-            // Pre-check both legs can afford before either mutates.
-            let buy_stamp = buy
-                .world
-                .orb()
-                .map(|o| o.stamp_amount())
-                .unwrap_or_else(|| ratio(0, 1));
-            let sell_cargo = sell
-                .world
-                .orb()
-                .map(|o| o.banked_amount(cargo_resource))
-                .unwrap_or_else(|| ratio(0, 1));
-            if buy_stamp < pay_p.value().clone() || sell_cargo < cargo_p.value().clone() {
-                continue;
+        }
+        for (i, r, brought) in &gave {
+            let deal = next_deal();
+            let (to, house) = two_mut(worlds, *i, hub);
+            if matched {
+                let share = cfe::world::smelt_resource(&(stamp_in.clone() * brought.clone() / cargo_in.clone()));
+                if let Some(share) = cfe::dop::Positive::new(share) {
+                    let _ = cfe::world::stamp_aperture_transfer(&mut house.world, cfe::world::FIRST_ORB, &mut to.world, cfe::world::FIRST_ORB, share, deal, &ratio(0, 1));
+                }
+            } else if let Some(back) = cfe::dop::Positive::new(brought.clone()) {
+                let _ = cfe::world::aperture_transfer(&mut house.world, cfe::world::FIRST_ORB, &mut to.world, cfe::world::FIRST_ORB, *r, back, deal);
             }
-            // STAMP pays the distance tax; cargo rides the local door
-            // (zero melt aperture) — simplified spot, same deal pair.
-            if cfe::world::stamp_aperture_transfer(
-                &mut buy.world,
-                cfe::world::FIRST_ORB,
-                &mut sell.world,
-                cfe::world::FIRST_ORB,
-                pay_p,
-                deal,
-                &melt,
-            )
-            .is_err()
-            {
-                continue;
-            }
-            if cfe::world::aperture_transfer(
-                &mut sell.world,
-                cfe::world::FIRST_ORB,
-                &mut buy.world,
-                cfe::world::FIRST_ORB,
-                cargo_resource,
-                cargo_p,
-                deal + 1,
-            )
-            .is_err()
-            {
-                // STAMP already moved; reverse via counter-aperture so
-                // the board is not stranded mid-clear. Melt already
-                // burned on the first leg — reverse residual at zero melt.
-                let residual = buy
-                    .world
-                    .orb()
-                    .map(|o| o.stamp_amount())
-                    .unwrap_or_else(|| ratio(0, 1));
-                // No clean reverse amount if melt burned; leave residual
-                // on seller as inventory risk (merchant spirit). Clear
-                // is NOT counted.
-                let _ = residual;
-                continue;
-            }
-            clears.push((buy.spec.world_name.clone(), sell.spec.world_name.clone()));
+        }
+        if matched {
+            clears.push((core, worlds[hub].spec.world_name.clone()));
         }
     }
     clears
@@ -6746,7 +6810,7 @@ fn run_era_inner(
         let _ = market_step(&mut worlds, u64::from(beat), &book.universe_span());
         let _ = merchant_step(&mut worlds, u64::from(beat), &book.universe_span());
         let _ = element_trade_step(&mut worlds, u64::from(beat), &book.universe_span());
-        let _ = stamp_market_step(&mut worlds, u64::from(beat), &book.universe_span());
+        let _ = stamp_market_step(&mut worlds, &book, u64::from(beat), &book.universe_span());
         instrument_step(&mut worlds);
         market_war_step(&mut worlds);
         espionage_step(&mut worlds);

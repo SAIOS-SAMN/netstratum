@@ -206,6 +206,8 @@ fn main() {
     let mut total_cleaves: u64 = 0;
     let mut ancient: Option<(String, u64)> = None;
     let mut last_living: std::collections::BTreeSet<String> = std::collections::BTreeSet::new();
+    // docs/66 Y1: every action any line has closed this process.
+    let mut universe_closed: std::collections::HashSet<[u8; 32]> = std::collections::HashSet::new();
     let mut announced_pause = false;
     loop {
         let (paused, cadence, advance) = read_control(cadence_secs);
@@ -345,6 +347,22 @@ fn main() {
             results.sort_by_key(|(idx, _)| *idx);
             results.into_iter().map(|(_, spec)| spec).collect()
         };
+        // docs/66 Y1: the universe's closed actions, merged after the beat and
+        // shared read-only with every line for the next.
+        {
+            let mut fresh = 0;
+            for polity in worlds.iter_mut() {
+                for orbit in polity.fresh_closed.drain(..) {
+                    fresh += usize::from(universe_closed.insert(orbit));
+                }
+            }
+            if fresh > 0 || beat == 1 {
+                let shared = std::sync::Arc::new(universe_closed.clone());
+                for polity in worlds.iter_mut() {
+                    polity.universe_closed = shared.clone();
+                }
+            }
+        }
         // DIRECTIVE 19: the gate speaks on the board — SEQUENTIAL after the parallel
         // phase, so verdicts are not interleaved and each line drains once. The
         // deed still STANDS in the chronicle (`replay` is the live transition until
@@ -426,9 +444,9 @@ fn main() {
         }
         // STAMP MM-1: mint + spot clear (Wave-4).
         // One line per beat, not one per clear (it was ~90 lines a second).
-        let spots = conductor::profile::timed("stamp_market_step", || conductor::stamp_market_step(&mut worlds, beat, &span));
+        let spots = conductor::profile::timed("stamp_market_step", || conductor::stamp_market_step(&mut worlds, &book, beat, &span));
         if !spots.is_empty() {
-            println!("beat {beat}: STAMP SPOT — {} clears (crystal for STAMP)", spots.len());
+            println!("beat {beat}: HUB — {} galaxies cleared at their hubs (STAMP for cargo, one price each)", spots.len());
         }
         // CONSILIENCE (38 §5): independent lines that resolved their
         // knowledge to the same invariant crystallize a shared axiom.
@@ -525,6 +543,16 @@ fn main() {
             eprintln!(
                 "census beat {beat}: lines={n} compact={} pop={pop} words_minted={words} cleaved={total_cleaves} fed={fed}/{n}",
                 dormant.len()
+            );
+            let mut sizes = [0usize; 9];
+            for polity in &live {
+                for (sum, n) in sizes.iter_mut().zip(polity.sizes()) {
+                    *sum += n;
+                }
+            }
+            eprintln!(
+                "census beat {beat}: held tail={} kept={}KB library={} inherited={} owned={} stated={} pending={} minds={} arriving={} closed={}",
+                sizes[0], sizes[1] / 1024, sizes[2], sizes[3], sizes[4], sizes[5], sizes[6], sizes[7], sizes[8], universe_closed.len()
             );
             let _ = std::io::stderr().flush();
         }

@@ -225,6 +225,34 @@ impl World {
         (grown > ratio(0, 1)).then_some((ration, grown))
     }
 
+    /// **docs/67 N4 — THE SUSTAINABLE OFFER, a scan.** How much of
+    /// `resource` this orb may put on a market without fracturing its
+    /// biosphere. `None` where `resource` is not the orb's regrowing ration
+    /// (mined ore, banked crystal: not the biosphere's to keep). Where it is,
+    /// the line keeps its stock at the curve's half point `K/2`, where the
+    /// logistic regrows fastest: it may offer what it holds above `K/2`,
+    /// and below `K/2` only the one beat's growth its stock makes now
+    /// (harvest within regrowth keeps the stock, the regrowth law).
+    /// Lattice-floored like every regrowth read.
+    pub fn sustainable_offer(&self, orb: u64, resource: Resource) -> Option<Ratio> {
+        let ration = self.ration_of(orb);
+        if ration != Ration::Resource(resource) {
+            return None;
+        }
+        let held = self.orb_by_id(orb)?;
+        let stock = held.ration_amount(&ration);
+        let k = self.ration_capacity_of(orb);
+        let half_k = k.clone() / ratio(2, 1);
+        let lattice = crate::world::stock::lattice();
+        let floor = |x: Ratio| (x * lattice.clone()).floor() / lattice.clone();
+        if stock > half_k {
+            return Some(floor(stock - half_k));
+        }
+        let metabolism = self.genesis.as_ref().map(|held| held.metabolism).unwrap_or(2);
+        let next = grained_logistic(&stock, &k, &intrinsic_rate(metabolism, self.metabolic_element()), 1);
+        Some(floor(next - stock).max(ratio(0, 1)))
+    }
+
     /// **ONT-3 — THE VEIN REJUVENATION SETTLE.** At a collect touch every worked
     /// vein on the orb RECOVERS. The injection is Keplerian: one
     /// `natural/REGROWTH_GRAIN` quantum per LOCAL YEAR elapsed since the vein's
