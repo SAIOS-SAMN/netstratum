@@ -550,6 +550,10 @@ fn main() {
                 epoch_base + beat,
             );
             println!("beat {beat}: KEEPERS — {} cores kept", keepers.len());
+            // Concordance 3.9 (docs/70 P1): the parliaments carry the councils' words.
+            for (core, line, reached, heard) in conductor::parliaments::carry(&mut worlds, &book, &registry, std::path::Path::new(&var_root)) {
+                println!("beat {beat}: PARLIAMENT — {line} at {core} carries the council's words to {reached} lines ({heard} heard)");
+            }
             for a in &arisen {
                 println!(
                     "beat {beat}: AN ANCIENT ARISES at {} — {} of {} (by {})",

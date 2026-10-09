@@ -47,7 +47,7 @@ pub fn in_bulge(position: &(Ratio, Ratio, Ratio), centre: &(Ratio, Ratio, Ratio)
 }
 
 /// The root of a line's lineage: its first parent followed to the end.
-fn root_of(sigil: &str, parents: &BTreeMap<String, Vec<String>>) -> String {
+pub(crate) fn root_of(sigil: &str, parents: &BTreeMap<String, Vec<String>>) -> String {
     let mut at = sigil.to_string();
     let mut seen = std::collections::BTreeSet::new();
     while let Some(up) = parents.get(&at).and_then(|p| p.first()) {

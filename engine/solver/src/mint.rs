@@ -88,6 +88,17 @@ impl Library {
             self.used[at] = self.clock;
         }
     }
+    /// Keep the newest `n` words; the oldest give way. How many did.
+    pub fn keep_newest(&mut self, n: usize) -> usize {
+        let over = self.words.len().saturating_sub(n);
+        if over > 0 {
+            self.words.drain(..over);
+            self.used.drain(..over);
+            self.generation += 1;
+        }
+        over
+    }
+
     /// Let every word unused for `span` beats give way; how many did.
     pub fn forget_unused(&mut self, span: u64) -> usize {
         let clock = self.clock;

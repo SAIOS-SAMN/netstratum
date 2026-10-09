@@ -78,6 +78,7 @@ pub mod cores;
 pub mod ancients;
 pub mod substrata;
 pub mod commissions;
+pub mod parliaments;
 // SOC-1 (operator directive 2026-08-16): the open build workbench — the surplus
 // phase of `build_step` draws its next building from a disposition-weighted
 // partition function seeded by the chronicle digest, in place of the fixed
@@ -907,6 +908,11 @@ pub struct PolitySpec {
 /// workspace, never pruned by replay.
 const AUTIC_BASIN_CAP: usize = 4096;
 
+/// **DECLARED BOUND** (memory, 2026-10-09): the heard words a line holds to try
+/// (`inherited`: from the dead at its core, from below, carried by its
+/// parliament); the oldest give way. Recorded in docs/59.
+const INHERITED_CAP: usize = 256;
+
 /// **DECLARED BOUND** (memory, 2026-10-09): the chain entries a vessel's basin
 /// keeps, newest crystals first. An entry is a site, a direction and an exact
 /// coefficient (~60 bytes held), so a basin holds about 1 MB and the
@@ -1566,6 +1572,7 @@ impl Polity {
             return false;
         }
         self.inherited.adopt(word);
+        self.inherited.keep_newest(INHERITED_CAP);
         true
     }
 
@@ -5502,6 +5509,7 @@ pub fn inheritance_step(worlds: &mut [Polity], stamp: u64) -> usize {
         polity.arriving = later;
         for (_, word) in now {
             polity.inherited.adopt(word);
+            polity.inherited.keep_newest(INHERITED_CAP);
             arrived += 1;
         }
         // docs/60 D9: the dead's open questions join the automaton's held
@@ -6266,6 +6274,7 @@ pub fn conversation_step(worlds: &mut [Polity], beat: u64, span: &Ratio) -> Opti
         }
         if hearer.senses().covers(Senses::of_word(&word.expansion)) {
             hearer.inherited.adopt(word);
+            hearer.inherited.keep_newest(INHERITED_CAP);
             hearer.heard += 1;
             heard += 1;
         } else {

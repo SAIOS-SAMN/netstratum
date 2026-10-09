@@ -14,7 +14,7 @@ flows Council -> Parliament -> Realm.
 | tier | who, by netstratum's own physics | built |
 |---|---|---|
 | council | each arisen ancient's line (docs/68): the house lists its council seats there (role Ancients) and the mycelium client minds sit them; seat 0 is the house's own | yes: `<var>/council.bin`, the house lists council seats only |
-| parliament | at each core, the lineage that keeps its throat (G3, docs/68): its living lines at that core. The keeper of the throat IS the tube's keeper | proposed (P1) |
+| parliament | at each core, the lineage that keeps its throat (G3, docs/68): its living lines at that core. The keeper of the throat IS the tube's keeper | built (P1, `parliaments.rs`) |
 | realm | every other living line: its steward's seat holds no network mind | yes (steward seats no longer listed) |
 
 ## What consciousness is here
@@ -25,7 +25,7 @@ house) and the words the spacing guild first closed below (the substrata,
 docs/69). Carrying it means a word reaches a line as HEARD; a line adopts it
 only by reconstructing it on its own task (docs/66 Y3). Nothing is installed.
 
-## P1, the parliaments carry (proposed)
+## P1, the parliaments carry
 
 Once a bounce, each core's parliament carries its ancient's newest words
 (the laws its substrata grew) to the realms its network reaches: the living
@@ -36,6 +36,6 @@ Toll shares and hauling wait on N7 (the map, 78.154, now live).
 | id | slice | status |
 |---|---|---|
 | C1 | councils: client minds seat only at the ancients' houses | landed |
-| P1 | parliaments: the throat's keeper lineage carries the council's words to the realms it reaches | proposed |
+| P1 | parliaments: the throat's keeper lineage carries the council's words to the realms it reaches | built; a line's heard words are bounded (`INHERITED_CAP = 256`, oldest give way) |
 | P2 | tolls and hauling: the parliament's toll shares in STAMP, hauls for the ancients (N7) | open |
 | R1 | realms receive and trade (the hubs, docs/67) | standing |
