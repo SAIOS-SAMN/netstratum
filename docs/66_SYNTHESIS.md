@@ -74,6 +74,33 @@ and from then on the hub stands where that word marks while it still holds
 (otherwise the medoid stands in). The book is a binary checkpoint
 (`<var>/commissions.bin`).
 
+**The audit and the faculty (coordinator, 2026-10-09).** All 11 first
+closures were the one supplied word `Select::Central`: commission bodies are
+alike in hue, size and shape, and no predicate read a position or a relation,
+so the minds could not have deduced it. Ruled: keep it, marked SUPPLIED, and
+build two pieces netstratum's way. Built:
+- **The sense**: each body's raw L1 relations to every other body, sorted,
+  never pre-summed (`project::relations`).
+- **The faculty**: where no property of a body's own separates the treated
+  bodies, the mind integrates each body's sorted relations (partial sums, the
+  coboundary run backwards) and reads the integral at every cut the
+  relations have (whole, the k nearest, the k farthest); a pair admits the
+  cut and extreme whose end of the order is exactly its treated bodies, the
+  train admits what every pair admits, and the first admitted is the rule
+  (`Select::Ordered { cut, extreme }`, wire select code 10). Central is its
+  case `Ordered { All, Least }`; the learner no longer offers Central.
+The measure that says the minds use it as a word: whether `Ordered` appears
+composed in words that are not hub commissions.
+
+**Caveat, recorded honestly (coordinator 2026-10-09):** the FAMILY the
+faculty reads (partial-sum integrals of sorted L1 relations, at cuts and
+extremes) is still developer-defined, one level lower than a supplied
+predicate. Elimination by intersection is the right shape; the next step is a
+cut family the mind holds and grows, never a fixed one. Watched: false
+admissions on small galaxies, where few bodies let several (cut, extreme)
+survive and "the first admitted" decides. Each closure logs the predicate
+that closed it and how many orders its train admitted (`COMMISSION CLOSED`).
+
 ## The inner network (a test run under consideration, not built)
 
 The operator is considering netstratum as the test run for synthetic in-game

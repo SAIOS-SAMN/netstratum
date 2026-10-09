@@ -57,6 +57,15 @@ pub enum Select {
     Largest,
     /// Every body of the smallest count (ties included).
     Smallest,
+    /// THE ORDER A RELATION SHOWS (docs/66 Y2, the faculty; coordinator ruling
+    /// 2026-10-09): every body extreme (`Extreme`) in the integral of its
+    /// SORTED L1 relations to the other bodies, read at a `Cut`. Deduced by
+    /// `solver::percept`, never supplied: `Central` is its case
+    /// `Ordered { cut: All, extreme: Least }`.
+    Ordered { cut: Cut, extreme: Extreme },
+    /// SUPPLIED (coordinator audit 2026-10-09): the hub-siting commission's
+    /// measure handed to the language before the minds could deduce it. Kept so
+    /// the words minted with it still read; the learner no longer offers it.
     /// THE CENTRAL BODIES (docs/66 Y2, the first commission's generator): every
     /// body whose L1 distance to all the others, summed, is least (ties
     /// included). A body's distance to another is the least L1 distance
@@ -84,6 +93,14 @@ impl Select {
             Select::Size(k) => b.size() == *k,
             Select::Largest => p.bodies.iter().map(Body::size).max() == Some(b.size()),
             Select::Smallest => p.bodies.iter().map(Body::size).min() == Some(b.size()),
+            Select::Ordered { cut, extreme } => {
+                let values: Vec<usize> = relations(p).iter().map(|r| integral(r, *cut)).collect();
+                let target = match extreme {
+                    Extreme::Least => values.iter().min(),
+                    Extreme::Most => values.iter().max(),
+                };
+                target == Some(&values[i])
+            }
             Select::Central => {
                 let spread: Vec<usize> = (0..p.bodies.len()).map(|k| spread(p, k)).collect();
                 spread.iter().min() == Some(&spread[i])
@@ -104,6 +121,44 @@ fn gap(a: &Body, b: &Body) -> usize {
         .flat_map(|&(r, c)| b.cells.iter().map(move |&(s, d)| r.abs_diff(s) + c.abs_diff(d)))
         .min()
         .unwrap_or(0)
+}
+
+/// WHERE AN ORDERED READING IS CUT: the integral of a body's sorted relations
+/// taken whole, over its `k` nearest, or over its `k` farthest.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum Cut {
+    All,
+    Nearest(u16),
+    Farthest(u16),
+}
+
+/// Which end of an order a rule selects (ties kept).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum Extreme {
+    Least,
+    Most,
+}
+
+/// THE SENSE (coordinator ruling 2026-10-09): each body's raw L1 relations to
+/// every other body, as measured, sorted nearest first. Never pre-summed.
+pub fn relations(p: &Percept) -> Vec<Vec<usize>> {
+    (0..p.bodies.len())
+        .map(|i| {
+            let mut r: Vec<usize> = p.bodies.iter().enumerate().filter(|(j, _)| *j != i).map(|(_, o)| gap(&p.bodies[i], o)).collect();
+            r.sort_unstable();
+            r
+        })
+        .collect()
+}
+
+/// The integral (the partial sum, the coboundary run backwards) of one body's
+/// sorted relations, read at `cut`.
+pub fn integral(relation: &[usize], cut: Cut) -> usize {
+    match cut {
+        Cut::All => relation.iter().sum(),
+        Cut::Nearest(k) => relation.iter().take(usize::from(k)).sum(),
+        Cut::Farthest(k) => relation.iter().rev().take(usize::from(k)).sum(),
+    }
 }
 
 /// Body `i`'s L1 distance to every other body, summed (`Select::Central`).

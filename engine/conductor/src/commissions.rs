@@ -171,8 +171,9 @@ pub fn hub_of(worlds: &[Polity], var_root: &Path, core: &str, members: &[usize],
 /// What a beat of commissions did.
 #[derive(Debug, Clone, Default)]
 pub struct Commissioned {
-    /// (galaxy, the closer's world, the bounty arrived).
-    pub closed: Option<(String, String, Ratio)>,
+    /// (galaxy, the closer's world, the bounty arrived, the predicate that
+    /// closed it, how many orders the train admitted).
+    pub closed: Option<(String, String, Ratio, String, usize)>,
 }
 
 /// ONE ATTEMPT A BEAT: the galaxy whose turn it is, if its commission is open,
@@ -225,7 +226,7 @@ pub fn step(worlds: &mut [Polity], ledger: &Ledger, var_root: &Path, beat: u64) 
         return done;
     }
     worlds[at].adopt_word(solver::mint::MintedWord { orbit: solver::mint::word_orbit(&program), expansion: program.clone(), cited: Vec::new() });
-    book.insert(core.clone(), (worlds[at].spec.civilization.sigil.clone(), program));
+    book.insert(core.clone(), (worlds[at].spec.civilization.sigil.clone(), program.clone()));
     let _ = write_book(var_root, &book);
     // The bounty: the closer's rung, shared by the galaxy's other open lines.
     // A commission is not on the forge's ladder: it pays the ladder's dearest
@@ -250,6 +251,12 @@ pub fn step(worlds: &mut [Polity], ledger: &Ledger, var_root: &Path, beat: u64) 
             arrived += worlds[at].world.orb().map(|o| o.stamp_amount()).unwrap_or_else(|| ratio(0, 1)) - before;
         }
     }
-    done.closed = Some((core.clone(), worlds[at].spec.world_name.clone(), arrived));
+    let pairs: Vec<(Grid, Grid)> = task.train.iter().map(|p| (p.input.clone(), p.output.clone())).collect();
+    let admitted = solver::percept::orders_admitted(&pairs).unwrap_or(0);
+    let by = match program.as_slice() {
+        [solver_verify::grid::Op::Project(rule)] => format!("{:?}", rule.select),
+        other => format!("a word of {} steps", other.len()),
+    };
+    done.closed = Some((core.clone(), worlds[at].spec.world_name.clone(), arrived, by, admitted));
     done
 }

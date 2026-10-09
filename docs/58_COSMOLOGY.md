@@ -190,6 +190,15 @@ proved work: 5,468), and founding endowments.
 
 ### PROPOSED: the core recycles
 
+**Decided (netstratum, 2026-10-09, under the operator's standing authority to
+proceed on its own recommendations): the bounce is a CONTINUOUS flow, once a
+year at each core** (`core_bounce`, live since the cores' slice 2: every sink
+of the year reaches its core, and every core re-emits what it holds to the
+lines it reaches, weighted by population). The era fold remains the
+universe-scale bounce; the yearly bounce is the galaxy-scale one. The
+operator's principle (a fluid, recycling universe; docs/58 §6.4) asks for
+both.
+
 - **The universe's core** is a black hole at the galactic centre (the
   "Black hole" of MU-LEXICON §1: a sink of mass and value at its place). It
   is a universe-ledger account, exact and receipted. Every sink above

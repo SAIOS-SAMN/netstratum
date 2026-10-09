@@ -393,6 +393,25 @@ fn put_select(select: &crate::project::Select, out: &mut Vec<u8>) -> Option<()> 
         Select::Largest => out.push(2),
         Select::Smallest => out.push(3),
         Select::Central => out.push(9),
+        Select::Ordered { cut, extreme } => {
+            use crate::project::{Cut, Extreme};
+            out.push(10);
+            match cut {
+                Cut::All => out.push(0),
+                Cut::Nearest(k) => {
+                    out.push(1);
+                    out.extend(k.to_le_bytes());
+                }
+                Cut::Farthest(k) => {
+                    out.push(2);
+                    out.extend(k.to_le_bytes());
+                }
+            }
+            out.push(match extreme {
+                Extreme::Least => 0,
+                Extreme::Most => 1,
+            });
+        }
         Select::Border(on) => out.extend([4, u8::from(*on)]),
         Select::TwinOfOtherHue => out.push(5),
         Select::Shape(cells) => {
@@ -605,6 +624,21 @@ impl<'a> Reader<'a> {
             7 => Select::Not(Box::new(self.select(depth + 1)?)),
             8 => Select::And(Box::new(self.select(depth + 1)?), Box::new(self.select(depth + 1)?)),
             9 => Select::Central,
+            10 => {
+                use crate::project::{Cut, Extreme};
+                let cut = match self.byte()? {
+                    0 => Cut::All,
+                    1 => Cut::Nearest(u16::try_from(self.u16()?).ok()?),
+                    2 => Cut::Farthest(u16::try_from(self.u16()?).ok()?),
+                    _ => return None,
+                };
+                let extreme = match self.byte()? {
+                    0 => Extreme::Least,
+                    1 => Extreme::Most,
+                    _ => return None,
+                };
+                Select::Ordered { cut, extreme }
+            }
             _ => return None,
         })
     }

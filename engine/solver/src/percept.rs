@@ -64,7 +64,7 @@ fn fates(input: &Grid, output: &Grid, p: &Percept) -> Option<Vec<Fate>> {
 
 /// The predicates a mind tries, in order, built from what the pairs show.
 fn candidates(seen: &[(Percept, Vec<Fate>)]) -> Vec<Select> {
-    let mut base = vec![Select::Largest, Select::Smallest, Select::Central, Select::Border(true), Select::Border(false), Select::TwinOfOtherHue];
+    let mut base = vec![Select::Largest, Select::Smallest, Select::Border(true), Select::Border(false), Select::TwinOfOtherHue];
     for h in 0..10u8 {
         base.push(Select::Hue(h));
     }
@@ -157,7 +157,7 @@ pub fn learn(train: &[(Grid, Grid)]) -> Option<ObjectRule> {
         seen.push((p, fate));
     }
     let act = act?; // nothing changed anywhere: no rule to learn
-    for select in candidates(&seen) {
+    for select in candidates(&seen).into_iter().chain(order_shown(&seen)) {
         let holds = seen.iter().all(|(p, fate)| {
             (0..p.bodies.len()).all(|i| select.picks(p, i) == (fate[i] != Fate::Kept))
         });
@@ -170,6 +170,66 @@ pub fn learn(train: &[(Grid, Grid)]) -> Option<ObjectRule> {
         }
     }
     None
+}
+
+/// THE FACULTY (docs/66 Y2; coordinator ruling 2026-10-09): where no property
+/// of a body's own separates the treated bodies, the mind reads the ORDER its
+/// relations show. Each body's sorted L1 relations to the others (the sense,
+/// `project::relations`) are integrated (partial sums: the coboundary run
+/// backwards), and the integral is read at every cut the relations have:
+/// whole, over the k nearest, over the k farthest. A pair ADMITS a cut and an
+/// extreme when that end of the order is exactly its treated bodies, ties
+/// kept; the train ADMITS what every informative pair admits (the
+/// intersection, closure on the pairs). The rule is the first admitted: the
+/// whole integral before its cuts, nearest before farthest, least before
+/// most. Nothing is a candidate list: the cuts are the reading's own, and
+/// what survives is what the pairs show.
+fn order_shown(seen: &[(Percept, Vec<Fate>)]) -> Option<Select> {
+    let (cut, extreme) = *orders_admitted_seen(seen)?.first()?;
+    Some(Select::Ordered { cut, extreme })
+}
+
+/// How many (cut, extreme) orders a train admits, for the census (where more
+/// than one survives, "the first admitted" decides). `None` where the pairs do
+/// not read as one object rule.
+pub fn orders_admitted(train: &[(Grid, Grid)]) -> Option<usize> {
+    let mut seen = Vec::with_capacity(train.len());
+    for (input, output) in train {
+        let p = perceive(input);
+        let fate = fates(input, output, &p)?;
+        seen.push((p, fate));
+    }
+    Some(orders_admitted_seen(&seen).map_or(0, |a| a.len()))
+}
+
+fn orders_admitted_seen(seen: &[(Percept, Vec<Fate>)]) -> Option<Vec<(solver_verify::project::Cut, solver_verify::project::Extreme)>> {
+    use solver_verify::project::{integral, relations, Cut, Extreme};
+    let reach = seen.iter().map(|(p, _)| p.bodies.len()).max()?.saturating_sub(1);
+    let reach = u16::try_from(reach).ok()?;
+    let mut admitted: Option<Vec<(Cut, Extreme)>> = None;
+    for (p, fate) in seen {
+        let treated: Vec<bool> = fate.iter().map(|f| *f != Fate::Kept).collect();
+        if treated.iter().all(|t| *t) || !treated.iter().any(|t| *t) {
+            continue; // a pair that treats all or none shows no order
+        }
+        let rel = relations(p);
+        let cuts = std::iter::once(Cut::All).chain((1..=reach).map(Cut::Nearest)).chain((1..=reach).map(Cut::Farthest));
+        let mut here = Vec::new();
+        for cut in cuts {
+            let values: Vec<usize> = rel.iter().map(|r| integral(r, cut)).collect();
+            for (extreme, end) in [(Extreme::Least, values.iter().min()), (Extreme::Most, values.iter().max())] {
+                let end = *end?;
+                if values.iter().zip(&treated).all(|(v, t)| (*v == end) == *t) {
+                    here.push((cut, extreme));
+                }
+            }
+        }
+        admitted = Some(match admitted {
+            None => here,
+            Some(before) => before.into_iter().filter(|c| here.contains(c)).collect(),
+        });
+    }
+    admitted
 }
 
 #[cfg(test)]
@@ -193,7 +253,7 @@ mod tests {
     }
 
     #[test]
-    fn the_central_body_is_learned_as_a_commission_marks_it() {
+    fn the_central_body_is_deduced_from_the_relations_not_supplied() {
         // docs/66 Y2: lone hue-1 cells spaced apart; the judge marks the one
         // whose L1 distance to the others is least. Learned, and it crosses
         // the wire whole.
@@ -203,7 +263,8 @@ mod tests {
         let (a2, b2) = (mark(&a), mark(&b));
         assert_eq!(a2.at(2, 2), 2);
         let rule = learn(&[(a, a2), (b, b2)]).expect("learned");
-        assert_eq!(rule.select, Select::Central);
+        // Deduced, not supplied: the order the relations show.
+        assert_eq!(rule.select, Select::Ordered { cut: solver_verify::project::Cut::All, extreme: solver_verify::project::Extreme::Least });
         let program = vec![solver_verify::grid::Op::Project(rule)];
         let bytes = solver_verify::program_bytes(&program).expect("encodes");
         assert_eq!(solver_verify::program_from_bytes(&bytes), Some(program));

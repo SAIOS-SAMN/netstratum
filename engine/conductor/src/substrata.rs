@@ -25,8 +25,8 @@
 //!   only on opening further tubes.
 //! - **Opening**: each ancient's core throat opens its first tube at its
 //!   arising. A further tube costs as many discoveries as its depth and opens
-//!   beneath the tube its float was earned in, one level deeper and harder (to
-//!   the forge's top), so depth and number are bounded by work done below.
+//!   beneath the tube its float was earned in, one level deeper and harder (the
+//!   ladder extended past the forge's top, to a word of 12 on 12x12), so depth and number are bounded by work done below.
 //! - **Upward**: a word first closed below becomes a law of that substratum
 //!   and reaches the opener's line as HEARD; the line adopts it only by
 //!   reconstructing it on its own task (docs/66 Y3). Nothing else crosses up.
@@ -201,8 +201,27 @@ fn save_floats(var_root: &Path, floats: &BTreeMap<String, Ratio>) -> std::io::Re
     write_atomic(&dir(var_root).join("float.bin"), &out)
 }
 
+/// A substratum's level: the opener's, then one deeper each tube down, with no
+/// ceiling (a deeper universe is harder: "any level of intelligence").
 fn level_of(level: u32) -> u32 {
-    level.min(Difficulty::top())
+    level
+}
+
+/// THE LADDER EXTENDED, for the substrata only (the lines' forge stays as it
+/// is: carried work replays on it). Past the forge's top each level adds one
+/// to the secret word's length and one row and one column, up to a word of 12
+/// on a 12x12 grid, where the ladder stands; the vocabulary tier stays the
+/// top's.
+fn difficulty(level: u32) -> Difficulty {
+    let top = Difficulty::top();
+    let base = Difficulty::level(level.min(top));
+    let past = usize::try_from(level.saturating_sub(top)).unwrap_or(usize::MAX);
+    Difficulty {
+        word_len: (base.word_len + past).min(12),
+        rows: (base.rows + past).min(12),
+        cols: (base.cols + past).min(12),
+        ..base
+    }
 }
 
 /// THE FLOAT'S UNIT is one discovery: a first closure below earns 1, a repeat
@@ -278,7 +297,7 @@ pub fn step(worlds: &mut [Polity], book: &Ledger, var_root: &Path, beat: u64, st
     let mut seed = blake3::Hasher::new();
     seed.update(&tube.origin);
     seed.update(&tube.cursor.to_le_bytes());
-    let task = forge_task(*seed.finalize().as_bytes(), Difficulty::level(tube.level));
+    let task = forge_task(*seed.finalize().as_bytes(), difficulty(tube.level));
     tube.cursor += 1;
     tube.seen = beat;
     let mut library = solver::mint::Library::new();

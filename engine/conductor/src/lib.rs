@@ -5667,7 +5667,7 @@ pub fn element_trade_step(worlds: &mut [Polity], beat: u64, span: &Ratio) -> Vec
 ///    aperture one way + resource aperture the other (spot clear,
 ///    zero player). Pre-checked so a partial clear never strands
 ///    STAMP mid-deal.
-pub fn stamp_market_step(worlds: &mut [Polity], book: &Ledger, var_root: &std::path::Path, beat: u64, span: &Ratio) -> Vec<(String, String)> {
+pub fn stamp_market_step(worlds: &mut [Polity], book: &Ledger, var_root: &std::path::Path, keepers: &std::collections::BTreeMap<String, ancients::Keeper>, beat: u64, span: &Ratio) -> Vec<(String, String, Ratio)> {
     let mut clears = Vec::new();
     let half = |amount: Ratio| amount / (ratio(1, 1) + ratio(1, 1));
     // Mint phase — convert half of surplus crystal (identity rate).
@@ -5787,6 +5787,7 @@ pub fn stamp_market_step(worlds: &mut [Polity], book: &Ledger, var_root: &std::p
         // IN: each buyer's half STAMP, each seller's offer, to the hub.
         let mut paid: Vec<(usize, Ratio)> = Vec::new();
         let mut gave: Vec<(usize, Resource, Ratio)> = Vec::new();
+        let open_melt = open.clone();
         for (i, melt) in open {
             let (stamp, cargo) = (stamp_of(&worlds[i]), cargo_of(&worlds[i]));
             if stamp > ratio(0, 1) {
@@ -5855,8 +5856,37 @@ pub fn stamp_market_step(worlds: &mut [Polity], book: &Ledger, var_root: &std::p
                 let _ = cfe::world::aperture_transfer(&mut house.world, cfe::world::FIRST_ORB, &mut to.world, cfe::world::FIRST_ORB, *r, back, deal);
             }
         }
+        // docs/70 P2 — THE ROAD TOLL (Concordance 5.4, 5.8): charged per unit
+        // CARRIED, on mass, never on value; paid in the realm's own money
+        // (STAMP) to the keeper of the core's throat (the G3 keeper's rider,
+        // its parliament's line). The rate is the road's own: the melt
+        // fraction the iceberg already takes from money on that leg, so cargo
+        // pays for the road as money melts on it. A walled payer pays nothing.
+        let mut toll_paid = ratio(0, 1);
         if matched {
-            clears.push((core, worlds[hub].spec.world_name.clone()));
+            if let Some(keeper) = keepers.get(&core).and_then(|k| worlds.iter().position(|p| !p.penned && p.spec.civilization.sigil == k.rider)) {
+                for (i, _, brought) in &gave {
+                    if *i == keeper {
+                        continue;
+                    }
+                    let melt = open_melt.iter().find(|(j, _)| j == i).map(|(_, m)| m.clone()).unwrap_or_else(|| ratio(0, 1));
+                    let have = stamp_of(&worlds[*i]);
+                    let toll = cfe::world::smelt_resource(&(brought.clone() * melt).min(have));
+                    let Some(toll) = cfe::dop::Positive::new(toll) else { continue };
+                    let distance = spatial_l1(&worlds[*i].spec.position, &worlds[keeper].spec.position, span);
+                    let road = cfe::world::route_melt(&worlds[*i].world, &worlds[keeper].world, &distance);
+                    if road >= ratio(1, 1) {
+                        continue;
+                    }
+                    let deal = next_deal();
+                    let before = stamp_of(&worlds[keeper]);
+                    let (from, to) = two_mut(worlds, *i, keeper);
+                    if cfe::world::stamp_aperture_transfer(&mut from.world, cfe::world::FIRST_ORB, &mut to.world, cfe::world::FIRST_ORB, toll, deal, &road).is_ok() {
+                        toll_paid += stamp_of(&worlds[keeper]) - before;
+                    }
+                }
+            }
+            clears.push((core, worlds[hub].spec.world_name.clone(), toll_paid));
         }
     }
     clears
@@ -6899,7 +6929,8 @@ fn run_era_inner(
         let _ = market_step(&mut worlds, u64::from(beat), &book.universe_span());
         let _ = merchant_step(&mut worlds, u64::from(beat), &book.universe_span());
         let _ = element_trade_step(&mut worlds, u64::from(beat), &book.universe_span());
-        let _ = stamp_market_step(&mut worlds, &book, std::path::Path::new(var_root), u64::from(beat), &book.universe_span());
+        let keepers = ancients::keepers(&worlds, &book, &registry);
+        let _ = stamp_market_step(&mut worlds, &book, std::path::Path::new(var_root), &keepers, u64::from(beat), &book.universe_span());
         instrument_step(&mut worlds);
         market_war_step(&mut worlds);
         espionage_step(&mut worlds);

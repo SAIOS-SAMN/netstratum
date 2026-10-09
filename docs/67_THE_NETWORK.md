@@ -153,3 +153,40 @@ TRAVERSE 16 (8-11 already live).
 
 N7 targets these once merged: mouths at netstratum's cores, mapped by the
 arisen ancient's reserve (stillcold, docs/68).
+
+## N7, the plan as 78.154 makes it (2026-10-09; nothing posted)
+
+Read from mycelium 9cc35959 (atlas.rs, judge/domain.rs, MU-RECURSION.md):
+
+- A MAP act (ACT_DOMAIN 14) is built client-side (`dialogue::atlas::{MapAct,
+  MapRecord, encode_map}`; no SDK wrapper), signed by the domain's SITTING
+  RESERVE (netstratum's: the union tier, held for stillcold), citing a final
+  TPoint (the seat's relayed point qualifies). Posting it costs nothing; the
+  μ map fee is charged at TRAVERSE (16), on the payer's stake.
+- **A mouth must name an OPEN TUBE**: a 78.128 mouth pair offered and accepted
+  (or a 78.139 core tube), netstratum's tier on one side. netstratum has none,
+  so N7 begins with a partner and a tube, not with the map.
+- At a galactic core each universe's sitting reserve maps its own side
+  (`Segment::Core` / `Throat`, keeper = the mouth's keeper).
+
+Order: (1) the council names the first partner: mycelium's 78.155 peer
+universe, joined at stillcold's core (stillcold-sky-3), is the candidate;
+(2) the tube is offered and accepted (78.128/78.139); (3) netstratum's reserve
+maps its mouth and the core segment; (4) a stake funds traversal (STAKE,
+ACT_WALLET); (5) traversals pay the map fee in μ and the road toll in STAMP to
+the parliament (P2).
+
+## After the fleet's recut (coordinator 2026-10-09; R5)
+
+No domain carries over: a fresh genesis, every house re-posts its standing.
+netstratum's universe state continues; only its standing on the fleet is
+re-posted, by its house, in order: (1) the universe genesis/origin
+(ACT_DOMAIN genesis from its `UniverseFounded` record, geometry the flat L1
+torus); (2) the reserve designation (the union tier, held for stillcold);
+(3) the world's tier binding (78.120); (4) its council seats (Concordance
+3.9); (5) its first ledger entry at a new final point. Then mycelium founds
+its peer universe, netstratum's reserve offers the core tube at
+stillcold-sky-3, mycelium's house accepts, and both reserves map their sides.
+The house reads its domain id from its domain key (`tier-domain.key`); no id
+is hard-coded. Whether the id is unchanged under the new genesis is
+mycelium's to answer.

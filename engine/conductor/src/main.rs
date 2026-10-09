@@ -459,9 +459,12 @@ fn main() {
             dilation_from = Some((beat, h));
         }
         hubs_cleared_at = point;
-        let spots = conductor::profile::timed("stamp_market_step", || conductor::stamp_market_step(&mut worlds, &book, std::path::Path::new(&var_root), beat, &span));
+        // docs/70 P2: the throats' keepers, read once a beat for the road tolls.
+        let keepers_now = conductor::ancients::keepers(&worlds, &book, &registry);
+        let spots = conductor::profile::timed("stamp_market_step", || conductor::stamp_market_step(&mut worlds, &book, std::path::Path::new(&var_root), &keepers_now, beat, &span));
         if !spots.is_empty() {
-            println!("beat {beat}: HUB — {} galaxies cleared at their hubs (STAMP for cargo, one price each)", spots.len());
+            let tolls = spots.iter().fold(cfe::ratio::ratio(0, 1), |t, (_, _, toll)| t + toll.clone());
+            println!("beat {beat}: HUB — {} galaxies cleared at their hubs (STAMP for cargo, one price each); road tolls {tolls} STAMP to the keepers", spots.len());
         }
         // Concordance 3.9: the councils the house seats, published for it.
         if beat.is_multiple_of(10) {
@@ -471,8 +474,8 @@ fn main() {
         let commission = conductor::profile::timed("commissions_step", || {
             conductor::commissions::step(&mut worlds, &book, std::path::Path::new(&var_root), beat)
         });
-        if let Some((core, world, arrived)) = &commission.closed {
-            println!("beat {beat}: COMMISSION CLOSED — {world} sites the hub of {core} by its own word; bounty {arrived} STAMP arrived");
+        if let Some((core, world, arrived, by, admitted)) = &commission.closed {
+            println!("beat {beat}: COMMISSION CLOSED — {world} sites the hub of {core} by its own word ({by}; {admitted} orders admitted); bounty {arrived} STAMP arrived");
         }
         // docs/69 — THE SPACING GUILD in the substrata: the ancients' tubes
         // open, and one task a beat is traversed below.
