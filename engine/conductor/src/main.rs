@@ -515,6 +515,26 @@ fn main() {
             for (core, world) in conductor::core_bounce(&mut worlds, &book, epoch_base + beat) {
                 println!("beat {beat}: the core {core} returns a pulse to {world}");
             }
+            // THE ANCIENTS ARISE (Concordance 3.1, docs/68): once a bounce, the
+            // throat's keepers (G3) are read and every ancient now due arises.
+            let (keepers, arisen) = conductor::ancients::step(
+                &worlds,
+                &book,
+                &registry,
+                std::path::Path::new(&var_root),
+                beat / scribe::journal::YEAR_TICKS,
+                epoch_base + beat,
+            );
+            println!("beat {beat}: KEEPERS — {} cores kept", keepers.len());
+            for a in &arisen {
+                println!(
+                    "beat {beat}: AN ANCIENT ARISES at {} — {} of {} (by {})",
+                    a.core,
+                    a.sigil,
+                    a.world,
+                    if a.by_birth { "birth" } else { "deed" }
+                );
+            }
             // CARRY STATE FORWARD: every world's snapshot at the year's close,
             // so a boot resumes from here, never from genesis.
             for polity in worlds.iter_mut().filter(|e| !e.penned) {

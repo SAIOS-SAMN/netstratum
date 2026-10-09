@@ -53,7 +53,7 @@ points of the circle, never a float angle.
 |---|---|---|
 | G1 | lines orbit their core on sheared, inclined ellipses in 3D, closed form, exact | landed |
 | G2 | elements sorted by gravity: deposits by distance to the core | open |
-| G3 | the throat's keeper: largest network among hub-bearers; depth picks the rider | open |
+| G3 | the throat's keeper: largest network among hub-bearers; depth picks the rider | landed (docs/68, `ancients.rs`) |
 | G4 | the field law's pulse: bell screws from the bounce, closed-form arrivals, the star re-locks its worlds with exact books, anchors carry unlocked shear (spec below, from the coordinator 2026-10-09) | open |
 
 ## The field law (G4), as the coordinator built it (2026-10-09, relayed as text)
