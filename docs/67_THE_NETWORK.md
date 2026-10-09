@@ -109,7 +109,7 @@ take its trade.
 | N5 | surplus spending: leisure spent on synthesis, technology, content, craft by the line's own instincts | open |
 | N6 | progenitors fold wormholes between hubs and to the cores' throats; mouths drift with the orbits; recalibration on tolerance | open |
 | N7 | the map: MAP acts by the domain reserve, the map fee in μ via the ancients' reserve, road tolls in STAMP (on mycelium 78.154) | waiting on 78.154 (the toll ruling given, Concordance 5.8) |
-| N8 | TUniversal as the clock of routes and recalibrations (on 78.152) | waiting on 78.152 |
+| N8 | TUniversal as the clock of routes and recalibrations (on 78.152) | building: vendor at 290907a7; the seat relays the greatest final point to `<var>/tuniversal` when it advances; hubs clear once per final point, a hold otherwise; the beat stands in before the first point |
 
 Coordinator review (2026-10-09): aligned with the higher order, with the
 three adjustments now written in (toll shares are the progenitors' own;

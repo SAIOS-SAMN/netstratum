@@ -25,7 +25,7 @@
 //! so no receipt is ever netted twice; `--last N` bounds only a people's
 //! first census.
 //!
-//! Flags: `--at host:port` (or `NS_HYPHA`, default 127.0.0.1:7520),
+//! Flags: `--at host:port` (or `NS_HYPHA`; required, no default court),
 //! `--home dir` (default var/uplink). Only `found`, `reserve`, `originate` and `census --send` write
 //! anything on the court; every other command is a reading.
 
@@ -33,7 +33,7 @@ use ns_hypha::census::{self, grains};
 use ns_hypha::fold::{fold, tier_key};
 use ns_hypha::line::{Cursors, FoldLog, FoldMark, TierLine};
 use ns_hypha::mycelium::anastome::dialogue::uplink::Uplinked;
-use ns_hypha::{laws_of, probe, Uplink, DEFAULT_AT};
+use ns_hypha::{laws_of, probe, Uplink};
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
@@ -43,7 +43,7 @@ fn flag(args: &[String], name: &str) -> Option<String> {
 
 fn main() -> ExitCode {
     let args: Vec<String> = std::env::args().collect();
-    let at = flag(&args, "--at").or_else(|| std::env::var("NS_HYPHA").ok()).unwrap_or_else(|| DEFAULT_AT.to_string());
+    let named = flag(&args, "--at").or_else(|| std::env::var("NS_HYPHA").ok());
     let home = PathBuf::from(flag(&args, "--home").unwrap_or_else(|| "var/uplink".to_string()));
     let cmd = args.get(1).map(String::as_str);
     if cmd == Some("census") && !args.iter().any(|a| a == "--send") {
@@ -55,6 +55,11 @@ fn main() -> ExitCode {
     if cmd == Some("epoch") {
         return epoch_cmd(&args, &home);
     }
+    // Every command from here speaks to a hypha, and there is no default court.
+    let Some(at) = named else {
+        eprintln!("ns-hypha: name the hypha with --at host:port (or NS_HYPHA); there is no default court");
+        return ExitCode::from(2);
+    };
     if cmd == Some("seat") {
         return seat_cmd(&args, &at, &home);
     }
@@ -552,6 +557,8 @@ fn seat_cmd(args: &[String], at: &str, home: &Path) -> ExitCode {
     // faster than its budget) is left to rest, doubling each time it defers
     // again (to 64 strokes) and reset when a stroke completes.
     let mut rest: Vec<(u64, u64)> = vec![(0, 0); seats.len()];
+    let mut final_point: Option<ns_hypha::mycelium::chronometry::tuniversal::TPoint> = None;
+    let mut written: Option<ns_hypha::mycelium::chronometry::tuniversal::TPoint> = None;
     loop {
         let at = (strokes as usize) % seats.len();
         let (until, backoff) = rest[at];
@@ -580,6 +587,23 @@ fn seat_cmd(args: &[String], at: &str, home: &Path) -> ExitCode {
                 rest[at] = (strokes + backoff * seats.len() as u64, backoff);
             }
             Err(e) => eprintln!("seat [{addr}]: the stroke did not complete: {e}"),
+        }
+        // docs/67 N8 — THE CLOCK RELAYED: the greatest final TUniversal point
+        // any seat has read, written whole beside the worlds whenever it
+        // advances (a temporary file renamed, so a reader sees one point or
+        // the last). The conductor reads it per beat; no point, or no advance,
+        // is a hold, never a zero (Concordance 1.11).
+        for (_, seat) in &seats {
+            if let Some(point) = seat.tuniversal().filter(|p| p.advances(final_point.as_ref())) {
+                final_point = Some(point);
+            }
+        }
+        if let Some(point) = final_point.filter(|p| Some(*p) != written) {
+            let path = worlds.parent().unwrap_or(Path::new(".")).join("tuniversal");
+            let staged = path.with_extension("staged");
+            if std::fs::write(&staged, point.print()).and_then(|_| std::fs::rename(&staged, &path)).is_ok() {
+                written = Some(point);
+            }
         }
         strokes += 1;
         if strokes.is_multiple_of(30) {

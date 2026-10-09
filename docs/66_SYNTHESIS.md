@@ -41,3 +41,28 @@ reward; they meet only through the seats.
 
 Coordinator review (2026-10-09): aligned with the higher order; Y1 judged a
 faithful model of the court's bounty and floor in in-universe value.
+
+## The inner network (a test run under consideration, not built)
+
+The operator is considering netstratum as the test run for synthetic in-game
+universes, with a subordinate in-game hypha network running on Synthesis
+under its own name. Three boundaries (coordinator 2026-10-09; the operator may
+amend):
+
+1. **No inner value becomes μ.** The inner network mints its OWN token,
+   distinct from STAMP and from Crystal-as-money, and that token never
+   converts into STAMP, Crystal or μ, directly or through a market. Only the
+   real economy's flows touch an ancients' reserve: the progenitors' toll
+   shares and haul contracts paid in local money (Concordance 5.8). Synthesis
+   bounties paid in the universe's money today are that money; the inner
+   network's bounty must be its own token for the boundary to hold.
+2. **Inner clocks are branches of TUniversal** (docs/67 N8): an inner epoch is
+   stamped by the final point it branched at.
+3. **Words cross up only by reconstruction through a seat.** A word reaches
+   the fleet only when a seated mind re-derives it from the inner
+   certificate's pairs and the court judges it; never imported as a rule. The
+   seat is the single relay and only the house signs.
+
+What it needs before it is built: bounded memory, N8 live, Y2 commissions as
+the inner court's registry (`verify_work` the judge, consilience across lines
+the second vantage), Y3 and Y4, and a name of its own.

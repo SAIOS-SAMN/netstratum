@@ -249,6 +249,12 @@ impl Seat {
 
     /// The next task not closed at home, for the house to put before a
     /// seated mind.
+    /// docs/67 N8 — the last FINAL TUniversal point this seat's session read
+    /// off a door reply (78.152), or `None` before the first.
+    pub fn tuniversal(&self) -> Option<mycelium::chronometry::tuniversal::TPoint> {
+        self.entity.tuniversal()
+    }
+
     pub fn next_before(&mut self) -> Option<[u8; 32]> {
         self.before.pop_front()
     }

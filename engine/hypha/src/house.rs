@@ -234,6 +234,8 @@ impl House {
                 local_time: Arg::Q { num: i64::try_from(tends).unwrap_or(i64::MAX), den: 1 },
                 seq: self.percepts,
                 records: vec![Record::Plain { kind: KIND_TASK, args: vec![Arg::Key(id)] }],
+                // 78.152: the percept is stamped with the house's last final point.
+                point: seat.tuniversal(),
             };
             match seat.session().post_percept(&self.key, p)? {
                 Ok(seq) => {

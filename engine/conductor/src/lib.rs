@@ -1238,6 +1238,11 @@ fn office_evidence(world: &World) -> OfficeEvidence {
     evidence
 }
 
+/// **DECLARED BOUND**: how many words a line holds waiting for a second
+/// vantage (`consilience_deposit`). Memory is finite; the oldest gives way. A
+/// dial, recorded in docs/59, not a law (as `solver::HELD_CONJECTURES`).
+pub const WORD_PENDING_CAP: usize = 64;
+
 /// N-I8 — CONSILIENCE deposit (pure). Record `vessel`'s closure of `orbit` in the
 /// pending board (idempotent per vessel+digest), and return the cited digests IFF
 /// two DISTINCT vessels have now closed it. Does NOT remove the entry — the caller
@@ -1279,6 +1284,10 @@ pub fn consilience_deposit(
     let entry = match pending.iter_mut().find(|(held, _, _)| *held == orbit) {
         Some(e) => e,
         None => {
+            // A bounded wait: the oldest single-vantage word gives way.
+            if pending.len() >= WORD_PENDING_CAP {
+                pending.remove(0);
+            }
             pending.push((orbit, expansion.to_vec(), Vec::new()));
             pending.last_mut().expect("just pushed")
         }
@@ -5694,14 +5703,30 @@ pub fn stamp_market_step(worlds: &mut [Polity], book: &Ledger, beat: u64, span: 
                 let _ = worlds[i].world.grant_tech_as(steward, cfe::world::FIRST_ORB, 0);
             }
         }
-        // IN: each buyer's half STAMP, each seller's half cargo, to the hub.
-        let mut paid: Vec<(usize, Ratio)> = Vec::new();
-        let mut gave: Vec<(usize, Resource, Ratio)> = Vec::new();
-        for &i in members.iter().filter(|&&i| i != hub) {
-            let (stamp, cargo) = (stamp_of(&worlds[i]), cargo_of(&worlds[i]));
-            if stamp > ratio(0, 1) {
+        // THE WALL (the iceberg law, as the old sweep kept it): a line whose
+        // road to the hub melts whole sits out, both sides; and a galaxy whose
+        // unwalled lines bring no STAMP or no cargo does not open, so no one
+        // pays the melt to a hub with nothing to meet it.
+        let open: Vec<(usize, Ratio)> = members
+            .iter()
+            .filter(|&&i| i != hub)
+            .filter_map(|&i| {
                 let distance = spatial_l1(&worlds[i].spec.position, &worlds[hub].spec.position, span);
                 let melt = cfe::world::route_melt(&worlds[i].world, &worlds[hub].world, &distance);
+                (melt < ratio(1, 1)).then_some((i, melt))
+            })
+            .collect();
+        let buyers = open.iter().any(|(i, _)| stamp_of(&worlds[*i]) > ratio(0, 1));
+        let sellers = open.iter().any(|(i, _)| cargo_of(&worlds[*i]).is_some());
+        if open.len() < 2 || !buyers || !sellers {
+            continue;
+        }
+        // IN: each buyer's half STAMP, each seller's offer, to the hub.
+        let mut paid: Vec<(usize, Ratio)> = Vec::new();
+        let mut gave: Vec<(usize, Resource, Ratio)> = Vec::new();
+        for (i, melt) in open {
+            let (stamp, cargo) = (stamp_of(&worlds[i]), cargo_of(&worlds[i]));
+            if stamp > ratio(0, 1) {
                 if let Some(pay) = cfe::dop::Positive::new(half(stamp)) {
                     let deal = next_deal();
                     let (from, house) = two_mut(worlds, i, hub);

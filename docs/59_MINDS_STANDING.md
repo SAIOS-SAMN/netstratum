@@ -80,3 +80,4 @@ The render table and counts/extrema come through the shared RULE-LANGUAGE EXTENS
   - Measurement history: at full `observe_price` the sibling always fasted under scarcity, consilience never reached two vessels, and no shared word minted. Measured: 0 VocabularyMinted / 0 KnowledgeConverged across 8 mature worlds.
   - The 1/4 was set so that a line able to afford one discovery can always afford the confirmation.
   - The stated rationale, "the ratio of verifying a known program to searching for it", is not derived. It is a tuned value, owed a derivation.
+- **DECLARED BOUND: the words a line holds waiting for a second vantage, `WORD_PENDING_CAP = 64`** (`conductor::consilience_deposit`); the oldest gives way. Measured 2026-10-09: with no bound the waiting list grew ~2 words a beat across the universe and none ever left unconfirmed. A bound on memory, the same class as `solver::HELD_CONJECTURES = 32`; not derived.

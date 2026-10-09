@@ -208,6 +208,8 @@ fn main() {
     let mut last_living: std::collections::BTreeSet<String> = std::collections::BTreeSet::new();
     // docs/66 Y1: every action any line has closed this process.
     let mut universe_closed: std::collections::HashSet<[u8; 32]> = std::collections::HashSet::new();
+    // docs/67 N8: the final point the hubs last cleared at.
+    let mut hubs_cleared_at: Option<String> = None;
     let mut announced_pause = false;
     loop {
         let (paused, cadence, advance) = read_control(cadence_secs);
@@ -444,7 +446,18 @@ fn main() {
         }
         // STAMP MM-1: mint + spot clear (Wave-4).
         // One line per beat, not one per clear (it was ~90 lines a second).
-        let spots = conductor::profile::timed("stamp_market_step", || conductor::stamp_market_step(&mut worlds, &book, beat, &span));
+        // docs/67 N8 — THE ONE CLOCK (Concordance 1.11): the final TUniversal
+        // point the seat relays (78.152). Hubs clear once per final point; a
+        // point unchanged since the last clearing is a hold. Before the first
+        // point is relayed, the beat stands in.
+        let point = std::fs::read_to_string(format!("{var_root}/tuniversal")).ok().map(|p| p.trim().to_string());
+        let hubs_due = point.is_none() || point != hubs_cleared_at;
+        let spots = if hubs_due {
+            hubs_cleared_at = point.clone();
+            conductor::profile::timed("stamp_market_step", || conductor::stamp_market_step(&mut worlds, &book, beat, &span))
+        } else {
+            Vec::new()
+        };
         if !spots.is_empty() {
             println!("beat {beat}: HUB — {} galaxies cleared at their hubs (STAMP for cargo, one price each)", spots.len());
         }
@@ -551,8 +564,9 @@ fn main() {
                 }
             }
             eprintln!(
-                "census beat {beat}: held tail={} kept={}KB library={} inherited={} owned={} stated={} pending={} minds={} arriving={} closed={}",
-                sizes[0], sizes[1] / 1024, sizes[2], sizes[3], sizes[4], sizes[5], sizes[6], sizes[7], sizes[8], universe_closed.len()
+                "census beat {beat}: held tail={} kept={}KB library={} inherited={} owned={} stated={} pending={} minds={} arriving={} closed={} tuniversal={}",
+                sizes[0], sizes[1] / 1024, sizes[2], sizes[3], sizes[4], sizes[5], sizes[6], sizes[7], sizes[8], universe_closed.len(),
+                hubs_cleared_at.as_deref().and_then(|p| p.split('/').nth(1)).unwrap_or("none")
             );
             let _ = std::io::stderr().flush();
         }

@@ -32,9 +32,9 @@ pub mod probe;
 pub mod seat;
 pub mod propose;
 
-/// The court netstratum speaks to unless told otherwise
-/// (`--at` / `NS_HYPHA`).
-pub const DEFAULT_AT: &str = "127.0.0.1:7520";
+/// No default court: the standalone :7520 court is retired (coordinator
+/// 2026-10-09, docs/PORT.md) and the fleet's hyphae are real tiers, so every
+/// command names its hypha (`--at` / `NS_HYPHA`).
 
 /// One session to one hypha, under netstratum's own voice.
 pub struct Uplink {
