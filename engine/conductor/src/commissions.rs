@@ -186,14 +186,14 @@ pub fn step(worlds: &mut [Polity], ledger: &Ledger, var_root: &Path, beat: u64) 
     let mut done = Commissioned::default();
     let span = ledger.universe_span();
     let centres: BTreeMap<String, (Ratio, Ratio, Ratio)> = ledger.galaxies().into_iter().map(|g| (g.name, g.center)).collect();
-    let planes: Vec<(String, Vec<usize>, Plane)> = galaxies(worlds, ledger)
+    let planes: Vec<(String, Vec<usize>, Plane)> = crate::profile::timed("commission:planes", || galaxies(worlds, ledger)
         .into_iter()
         .filter_map(|(core, members)| {
             let centre = centres.get(&core)?;
             let plane = plane(worlds, &members, centre, &span)?;
             Some((core, members, plane))
         })
-        .collect();
+        .collect());
     if planes.len() < 3 {
         return done; // two train pairs and a test, or no commission
     }
@@ -216,13 +216,13 @@ pub fn step(worlds: &mut [Polity], ledger: &Ledger, var_root: &Path, beat: u64) 
     let mut sorted = members.clone();
     sorted.sort_by(|a, b| worlds[*a].spec.world_name.cmp(&worlds[*b].spec.world_name));
     let at = sorted[(beat as usize / planes.len()) % sorted.len()];
-    let program = worlds[at].try_words(&task).or_else(|| {
+    let program = crate::profile::timed("commission:think", || worlds[at].try_words(&task).or_else(|| {
         let (mut basin, mut held) = (Vec::new(), Vec::new());
         match solver::think_task_sensing(&task, &mut basin, &mut held, worlds[at].senses()) {
             SolveRead::Solved { program, .. } => Some(program),
             _ => None,
         }
-    });
+    }));
     // The judge: the word must reproduce the exact answer on every pair.
     let Some(program) = program else { return done };
     let holds = task.train.iter().all(|p| solver_verify::grid::run(&program, &p.input) == p.output)

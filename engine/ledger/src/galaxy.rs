@@ -33,7 +33,17 @@ pub struct UniverseRead {
     len: Option<u64>,
     galaxies: Vec<Galaxy>,
     libraries: std::collections::BTreeMap<String, Vec<CoreWord>>,
+    /// `core_of`'s answers for the places asked since this read, bounded
+    /// (optimization sweep, 2026-10-13): within a beat every step asks the
+    /// same places, and each answer is exact-rational distances to every
+    /// core. A place's core is a function of the place and this read, so a
+    /// remembered answer is the answer; a new read (a new galaxy) starts empty.
+    cores: std::collections::HashMap<(Ratio, Ratio, Ratio), Option<String>>,
 }
+
+/// The most places `core_of` remembers before it starts over: a beat's
+/// worlds many times over.
+const CORES_REMEMBERED: usize = 4096;
 
 impl UniverseRead {
     fn parse(path: &std::path::Path, len: u64) -> UniverseRead {
@@ -222,17 +232,31 @@ impl Ledger {
     /// `None` only before any galaxy is charted.
     pub fn core_of(&self, position: &(Ratio, Ratio, Ratio)) -> Option<String> {
         let span = self.universe_span();
-        self.universe_read(|read| {
-            read.galaxies
-                .iter()
-                .map(|galaxy| {
-                    let distance = l1_wrapped(position, &galaxy.center, &span);
-                    (distance > galaxy.reach, distance, &galaxy.name)
-                })
-                .min()
-                .map(|(_, _, name)| name.clone())
-        })
+        let path = self.ledger_path();
+        let len = fs::metadata(&path).map(|m| m.len()).unwrap_or(0);
+        let mut read = self.cache.lock().unwrap_or_else(|poisoned| poisoned.into_inner());
+        if read.len != Some(len) {
+            *read = UniverseRead::parse(&path, len);
+        }
+        if let Some(core) = read.cores.get(position) {
+            return core.clone();
+        }
+        let core = read
+            .galaxies
+            .iter()
+            .map(|galaxy| {
+                let distance = l1_wrapped(position, &galaxy.center, &span);
+                (distance > galaxy.reach, distance, &galaxy.name)
+            })
+            .min()
+            .map(|(_, _, name)| name.clone());
+        if read.cores.len() >= CORES_REMEMBERED {
+            read.cores.clear();
+        }
+        read.cores.insert(position.clone(), core.clone());
+        core
     }
+
 
     /// Append events to the universe ledger at `stamp`, in order, and sync.
     pub fn append_universe(&self, events: Vec<ClosureEvent>, stamp: u64) -> std::io::Result<()> {

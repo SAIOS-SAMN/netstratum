@@ -661,7 +661,8 @@ pub fn market_step(worlds: &mut [Polity], beat: u64, span: &Ratio) -> Vec<(Strin
     // cartesian over every pair the roster could form.
     let mut cleared = Vec::new();
     let mut seq: u64 = 0;
-    for (a, b) in crossing_candidates(worlds) {
+    let candidates = profile::timed("market:candidates", || crossing_candidates(worlds));
+    for (a, b) in candidates {
         let (left, right) = worlds.split_at_mut(b);
         let one = &mut left[a];
         let two = &mut right[0];
@@ -670,7 +671,7 @@ pub fn market_step(worlds: &mut [Polity], beat: u64, span: &Ratio) -> Vec<(Strin
         }
         // MARKET-2: the transit's spatial L1 — supply melts with
         // distance; the engine refuses walled pairs itself.
-        let distance = spatial_l1(&one.spec.position, &two.spec.position, span);
+        let distance = profile::timed("market:distance", || spatial_l1(&one.spec.position, &two.spec.position, span));
         let offers_a: Vec<u64> = one.world.offers().iter().map(|o| o.offer).collect();
         let offers_b: Vec<u64> = two.world.offers().iter().map(|o| o.offer).collect();
         let mut crossed_here = false;
@@ -5867,10 +5868,12 @@ pub fn stamp_market_step(
     let banked_of = |p: &Polity, r: Resource| p.world.orb().map(|o| o.banked_amount(r)).unwrap_or_else(|| ratio(0, 1));
     let one = || ratio(1, 1);
     let galaxies = galaxy_members(worlds, book);
-    let hubs: std::collections::BTreeMap<String, usize> = galaxies
-        .iter()
-        .filter_map(|(core, members)| galaxy_hub(worlds, book, var_root, core, members, span).map(|h| (core.clone(), h)))
-        .collect();
+    let hubs: std::collections::BTreeMap<String, usize> = profile::timed("hub:choose", || {
+        galaxies
+            .iter()
+            .filter_map(|(core, members)| galaxy_hub(worlds, book, var_root, core, members, span).map(|h| (core.clone(), h)))
+            .collect()
+    });
     // docs/72 — THE GATES' ROADS. A galaxy joined to another galaxy's core by
     // a MAPPED gate (5.9) clears at that core's hub: each of its lines runs its
     // leg to its own galaxy's hub and through the gate, and the gate's span
@@ -5918,7 +5921,7 @@ pub fn stamp_market_step(
         // pays the melt to a hub with nothing to meet it. A line joined by a
         // gate takes the cheaper of its two roads: open space to the hub, or
         // its own hub and the gate (what survives is what survives both legs).
-        let open: Vec<(usize, Ratio, Option<&ascension::Road>)> = members
+        let open: Vec<(usize, Ratio, Option<&ascension::Road>)> = profile::timed("hub:legs", || members
             .iter()
             .filter(|(i, _)| *i != hub)
             .filter_map(|&(i, via)| {
@@ -5936,7 +5939,7 @@ pub fn stamp_market_step(
                 };
                 (melt < one()).then_some((i, melt, via))
             })
-            .collect();
+            .collect());
         let buyers = open.iter().any(|(i, _, _)| stamp_of(&worlds[*i]) > ratio(0, 1));
         let sellers = open.iter().any(|(i, _, _)| cargo_of(&worlds[*i]).is_some());
         if open.len() < 2 || !buyers || !sellers {
