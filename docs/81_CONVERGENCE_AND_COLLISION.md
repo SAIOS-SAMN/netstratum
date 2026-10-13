@@ -239,56 +239,88 @@ here over the time axis and place).
   pruned before they carry too much weight; branches within reach are left
   for attraction to bring home.
 
-## What it pays in: ψ, COHERENCE (local physics, never μ)
+## What it pays in: θ, the phase (operator, 2026-10-13)
 
-**Unlinked from μ.** Transport and transit inside a universe are NOT paid in
-μ. μ is the hypha's currency, for crossings between universes and the
-court's work (Concordance 5.8, boundary 1). Inside the universe, transit is
-paid in a quantity of the universe's own physics, produced and spent by its
-local economies. This is the "economy produced by the progenitors" that local
-wormhole traversal is paid in (operator, 2026-10-13).
+### The model: coherent universes joined by junctions
 
-**The quantity: ψ, coherence.** ψ is the physicist's symbol for a quantum
-state, and for a superfluid's order parameter, the very coherence that makes
-flow frictionless.
+- **Each universe is a superfluid,** with order parameter ψ = √n · e^{iθ}:
+  - ψ is the universe's coherent STATE;
+  - n = |ψ|² is its COHERENCE, the weight that convergence builds and
+    collision tears;
+  - θ, the PHASE, is its cosmic time: a coherent state's phase advances
+    with time (docs/80).
+- **Energy is the chemical potential.** A coherent phase winds at the rate
+  set by the energy per quantum, dθ/dt = −μ/ħ (Josephson). The hypha's μ is
+  energy in exactly that sense, which is why it is economically resilient:
+  energy is conserved, and cannot be inflated. A universe's own energy per
+  quantum of coherence is its chemical potential μ_N. The ratio μ_N / μ is
+  the dilation du/dh that mycelium's ruling 78.152d reads between two
+  core-tube crossings.
+- **Core tubes are junctions.** Locked phases carry a supercurrent,
+  `I = I_c sin(Δθ)`: convergence, without dissipation. A sustained energy
+  difference winds the phase until it SLIPS by a whole turn, dissipating at
+  each slip: a collision, as physics. A phase slip is discrete, countable
+  and dissipative, and its ticket is the energy lost.
 
-**The alternatives weighed:**
+### θ: the currency of the folded space
 
-| symbol | meaning it would carry | in use today |
+**θ is paid in TURNS** (exact rationals, never decimals): the same unit as
+the bell's count of turns and circuitry's rotations. A payment in θ is a
+transfer of phase between coherent systems, which is what flows through a
+junction. θ aligns with phase transitions: coherence forming (convergence)
+and breaking (collision, the slip) are changes of its order.
+
+| layer | paid in | through |
 |---|---|---|
-| **ψ (recommended)** | coherence: the quantum state's order, superfluidity's order parameter | an orb's inclination `ColonyOrb.psi`, the flat orbit layer that era 1 retires (orbs become S^60 bodies), and the thermal model; free in era 1 |
-| κ | curvature, or conductance | netstratum's morphogen; mycelium's compartment round `κ` (the sensor layer) |
-| σ | conductivity, which a superfluid makes infinite | the minds' instinct stress (σ = 0 sated); thermal |
+| between universes, galactic traversal over the hypha (not by wormhole) | μ, the hypha's energy | the hypha |
+| inside a universe: wormhole and tube traversal, the ancients' folding of space and time (their "space guild") | θ | the progenitors' network |
+| the sub-universes (substrata), opened by synthesis | θ, as the ancients' reserve there (replacing the authored float, docs/69) | the synthesis tubes |
+| local in-game payments | θ where the parties choose it; otherwise their own emergent moneys | the free markets |
 
-Until era 1 retires the orb's ψ, the code names it `coherence` and the
-documents write ψ.
+**Who holds what:**
+- **The ancients** hold the clock, the source of phase: they fold space and
+  time at the cores and design the wormholes.
+- **The progenitors hold both μ and θ.** μ comes from their toll shares at
+  the hypha (Concordance 5.8); θ from the passage they carry inside the
+  universe. They are the bridge between the two energies.
+- θ is distributed between the ancients and the progenitors as the payout
+  for wormhole traversal.
 
-**How ψ arises and is lost (exact, read from the annals):**
-- **Minted by convergence.** When two records meet and agree, ψ is produced
-  equal to the weight that converged (the mass, population or passage the
-  agreeing records carry), credited to the realm whose time-keeping
-  produced it (its steward's account).
-- **Destroyed by collision.** At a collision, the ψ equal to the weight lost
-  is destroyed with it. The realm's ψ falls by its collisions.
-- **No other source.** ψ is never minted by decree, never converted from μ,
-  STAMP or any civilization's money, and never created except by convergence.
+**How a local economy gets θ: by EARNING it.**
+- **θ is minted only by convergence:** timelines converged, records agreed,
+  the coherence built. θ is lost by collision: the phase slips.
+- A local economy earns θ by converging its timelines and reducing its
+  collisions. Nothing else creates θ: no decree, and no conversion from μ,
+  STAMP or any civilization's money by the physics.
 
-**What ψ does:**
-- **It pays for transit.** Passage over a progenitor's wormhole costs ψ,
-  paid to the progenitors who keep it anchored; the toll is the coherence
-  the crossing draws on the network.
-- **It is superfluidity.** A realm's ψ against its passage is its coherence:
-  the factor that brings its routes' melt toward zero.
-- **It is earned, not issued.** A coherent realm earns ψ and travels freely;
-  a colliding realm loses ψ, cannot pay for transit, and is cut off, before
-  any shutdown. The progenitors earn ψ by keeping coherent networks.
+**The free market is not overridden.**
+- θ can be used EVERYWHERE, but nothing requires it except traversal over
+  the progenitors' network.
+- Local economies' own currencies remain emergent properties of their
+  civilizations' trade (docs/74), and goods trade in whatever money the
+  parties accept.
+- A civilization that wants passage obtains θ by earning it (its own
+  convergence), or by trading its goods or money for θ with those who hold
+  it, at cleared ratios: the progenitors' economy, a market like any other.
 
-**Against docs/74 (the emergent economy):**
-- ψ is not a civilization's money: it is physics, held by realms and
-  progenitors, and it pays for transit alone.
-- Civilizations' emergent moneys still pay for goods.
-- A civilization obtains transit by trading its goods or money for ψ with
-  those who hold it, at cleared ratios: the progenitors' economy.
+**Underneath all of it: matter.**
+- Everything comes down to RESOURCE UTILIZATION: realms' and stewards' trade
+  networks of element harvesting on local star systems, feeding up the chain.
+- Matter harvested and traded is what the timelines' records are about;
+  convergence happens in trade that agrees, and θ is earned where that trade
+  is coherent.
+- The chain runs:
+  - captains harvest and carry;
+  - sovereigns work their systems;
+  - stewards keep the realm's trade and time coherent, which earns θ;
+  - progenitors carry passage for θ and μ;
+  - ancients fold space and keep the clock.
+
+**Symbols.** θ is also used in code: an orb's angle, `ColonyOrb.theta`, the
+flat orbit layer that era 1 retires (orbs become S^60 bodies), and some
+cognition crates (kernel, rfa-core, lens). Until era 1 the code names the
+currency `phase`; the documents write θ. ψ remains the state and n the
+coherence.
 
 ## What must exist for this to be read, not authored
 
@@ -304,7 +336,7 @@ documents write ψ.
 | each timeline's weight, from the annals | missing |
 | branching as a recorded event; its rule ruled with mycelium | missing |
 | the escape condition from the cone law | missing (era 1's cone law first) |
-| ψ: minted by convergence, destroyed by collision, paying for transit; melt scaled by coherence | missing |
+| θ: minted by convergence, lost by collision (phase slips), paying for traversal inside the universe; held by progenitors with μ; melt scaled by coherence | missing |
 
 ## Build order and done-when (the live log, before → after)
 
@@ -325,10 +357,12 @@ Within era 1, after docs/80's proper time and events on the map.
 4. **Shutdown**, once the threshold is derived.
    - Done-when: sectors closed by their progenitors for collisions, read and
      logged.
-5. **ψ.** Minted by convergence, destroyed by collision, paying transit.
-   - Done-when: ψ per realm, no reading → a reading; transit paid in ψ,
-     0 → > 0; transit paid in μ inside the universe → 0.
-   - Witness: the progenitors' ψ receipts.
+5. **θ.** Minted by convergence, lost by collision (phase slips), paying
+   traversal over the progenitors' network.
+   - Done-when: θ per realm, no reading → a reading; traversal paid in θ,
+     0 → > 0; traversal inside the universe paid in μ → 0; local trade in
+     the civilizations' own moneys unchanged.
+   - Witness: the progenitors' θ receipts.
 6. **Divergence, attraction and anchors.** Branches measured, pulled, and
    anchored.
    - Done-when: branches per realm with divergence and weight, a reading;
@@ -348,6 +382,7 @@ Within era 1, after docs/80's proper time and events on the map.
   per docs/74).
 - **Which events count as a meeting** of timelines: every two-sided record,
   or only records across a wormhole or a realm boundary.
-- **The payout's symbol:** ψ recommended, against κ and σ (above).
+- **The currency:** θ, the phase, in turns (operator, 2026-10-13); ψ the
+  state, n the coherence.
 - **Branches:** sub-histories inside the universe (netstratum's proposal) or
   new universes (needing their own origins, mycelium's law).

@@ -41,6 +41,12 @@ Built (`engine/conductor/src/substrata.rs`, tag 197 `SubstratumOpened`):
   if no one has closed that action in that substratum, the quarter otherwise
   (Y1's law, one level down). It is spent only on opening tubes and never
   converts into STAMP, Crystal or μ.
+  - **To become θ (operator, 2026-10-13; docs/81).** The ancients' reserve
+    currency in the sub-universes is θ, the phase, in turns: the same
+    currency that pays wormhole and tube traversal in the universe above.
+    The float's authored 1 and ¼ are its incumbent until the synthesis
+    tubes pay θ from the physics (a closure's convergence). It still never
+    converts into STAMP, Crystal or μ.
 - **Any number, any level, funded by work.** A further tube costs one first
   closure's worth at its own level and opens beneath the tube its float was
   earned in, one level deeper and harder (the forge's ladder, to its top).

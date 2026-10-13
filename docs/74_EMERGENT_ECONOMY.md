@@ -167,6 +167,25 @@ in docs/59.
 | WINDOW 64 | docs/73 | declared; a memory bound |
 | the float's 1 and ¼ | `substrata` | learned, when a population lives below |
 
+## θ, μ and the free market (operator, 2026-10-13; docs/81)
+
+- **Traversal inside the universe** (wormholes and tubes, the ancients'
+  folding of space and time) is paid in θ, the phase, in turns. Galactic
+  traversal between universes over the hypha is paid in μ. Nothing inside
+  the universe is paid in μ.
+- **The progenitors hold both μ and θ:** μ from their toll shares at the
+  hypha, θ from the passage they carry.
+- **Local economies EARN θ** by converging their timelines and reducing
+  their collisions. θ is minted only by convergence and lost by collision.
+- **The free market stands.**
+  - θ may be used everywhere, and is required only for traversal.
+  - Each civilization's currency remains an emergent property of its own
+    trade (above).
+  - θ is obtained by earning it or by trading for it at cleared ratios,
+    never by decree.
+- **Underneath:** realms' and stewards' resource utilization, the trade
+  networks of element harvesting on local star systems, feeds up the chain.
+
 ## STAMP's retirement, and what pays obligations
 
 1. **Settle in kind.** The road toll on mass is paid as a share of the mass
