@@ -33,12 +33,11 @@
 //! awaiting adoption; lens exports are for eyes; the mesh carries
 //! neither, and a peer that offers them is offering nothing.
 
-pub mod agree;
 pub mod arbor;
 
 use cfe::dop::ClosureEvent;
 use cfe::tlv;
-use cfe::vrp::{ChainRead, Chronicle, Receipt, RECEIPT_FRAME_TAG};
+use cfe::vrp::Chronicle;
 
 /// Tag 64 — the mesh head announcement (NS-5 §3.1).
 pub const MESH_HEAD_TAG: u8 = 64;
@@ -200,26 +199,6 @@ pub fn head(chronicle: &Chronicle) -> MeshHead {
         stamp: receipts.last().map(|receipt| receipt.stamp()).unwrap_or(0),
         head: receipts.last().map(|receipt| receipt.own().0).unwrap_or([0u8; 32]),
     }
-}
-
-/// The integrity door: parse the framed receipts out of bytes
-/// (unknown tags skip — SEAL A), then re-verify the chain from its
-/// own content. ONE chain, gated against itself — never against a
-/// copy. A frame that does not parse refuses MALFORMED; a chain that
-/// does not recompute refuses FORGED with its break named.
-pub fn receive(bytes: &[u8], side: Side) -> Result<Chronicle, MeshRefused> {
-    let mut receipts = Vec::new();
-    for (frame, (tag, value)) in tlv::records(bytes).enumerate() {
-        if tag == RECEIPT_FRAME_TAG {
-            let receipt = Receipt::from_wire(tag, value)
-                .ok_or(MeshRefused::Malformed { side, frame: frame as u64 })?;
-            receipts.push(receipt);
-        }
-    }
-    Chronicle::from_receipts(receipts).map_err(|read| match read {
-        ChainRead::Broken { at } => MeshRefused::Forged { side, at },
-        ChainRead::Intact => unreachable!("from_receipts errs only on breaks"),
-    })
 }
 
 /// The walk's resting state: the hand that holds the pen (None in the

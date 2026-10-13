@@ -576,34 +576,6 @@ impl Arbor {
         self.append(record)
     }
 
-    /// PRESENT (SPINE-UPLINK, NS-5 §9): this arbor as a replication
-    /// SEGMENT — every record (tag 84) followed by each unique
-    /// referenced blob (tag 87, `state ‖ bytes`). Only chain-verified
-    /// bytes ride (THE UPLINK LAW): records recompute, blobs are
-    /// content-addressed. NOTE: a JUDGED record needs its step (tag 88)
-    /// to be re-gated on arrival, and the arbor stores NO steps — so a
-    /// arbor carrying gated records is not fully presentable through
-    /// this door alone (the Phase-3 seam: per-deed threading brings the
-    /// step storage that makes gated records re-presentable). Today
-    /// every record is `gated = false`, so `present` is complete.
-    pub fn present(&self) -> Vec<u8> {
-        let mut out = Vec::new();
-        for record in &self.records {
-            out.extend_from_slice(&record.wire_bytes());
-        }
-        let mut seen: HashSet<[u8; 32]> = HashSet::new();
-        for record in &self.records {
-            if seen.insert(record.state) {
-                if let Ok(bytes) = self.fetch(&record.state) {
-                    let mut frame = record.state.to_vec();
-                    frame.extend_from_slice(&bytes);
-                    tlv::put(SEGMENT_BLOB_TAG, &frame, &mut out);
-                }
-            }
-        }
-        out
-    }
-
     /// RECEIVE (SPINE-UPLINK): admit a replication segment onto THIS
     /// arbor. Admission IS verification — the receiver trusts nothing:
     /// every record must reseal (its commit recomputes), extend this
