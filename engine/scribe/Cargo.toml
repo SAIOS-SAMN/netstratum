@@ -10,21 +10,3 @@ cfe = { path = "../cfe" }
 ledger = { path = "../ledger" }
 lens = { path = "../lens" }
 physics = { path = "../physics" }
-# The mesh membrane: the kernel attaches as a peer over MY-K via the
-# shared attach loop (sdk::attach) — no exporter, no bespoke wire code.
-mycelium = { path = "/opt/mycelium" }
-# The listening half of the membrane (#132): net HEARS mesh walls through its
-# OWN reduce organ (claimant, independent of the mesh's judge) — Understood →
-# offer, Learned → grow. Solver carries `hear`; reduct carries the measurement.
-solver = { path = "../solver" }
-reduct = { path = "../reduct" }
-# IDENTITY v2 R1: the deterministic attest-sample seed (mirrors
-# Hypha::attest_sample, mycelium's src/wire/myk.rs).
-blake3.workspace = true
-
-# THE MESH SCRIBE — the kernel's resident pen for the mycelium
-# membrane (replaces tools/mesh_feed.py). Peels solve records into
-# var/mesh-feed claims; the uniform door does all the speaking.
-[[bin]]
-name = "mesh-scribe"
-path = "src/bin/mesh_scribe.rs"
