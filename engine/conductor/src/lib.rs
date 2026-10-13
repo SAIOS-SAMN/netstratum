@@ -7286,13 +7286,16 @@ pub mod profile {
 /// scrap from iron, hauler grade 0 until idle capacity ≥ 4, assign
 /// idle hulls onto the first live route deal.
 /// The incumbent's act (docs/73): the hulls each line built this beat, by
-/// world, for DECIDE's hull book.
-pub fn fleet_step(worlds: &mut [Polity]) -> std::collections::BTreeMap<String, u8> {
+/// world, for DECIDE's hull book; and the hulls returned to the idle pool
+/// from routes that had lapsed.
+pub fn fleet_step(worlds: &mut [Polity]) -> (std::collections::BTreeMap<String, u8>, usize) {
     let mut built = std::collections::BTreeMap::new();
+    let mut released = 0;
     for polity in worlds.iter_mut() {
         if polity.penned {
             continue;
         }
+        released += release_lapsed_hulls(&mut polity.world, polity.automaton);
         let before = polity.world.hulls().len();
         ensure_npc_fleet(&mut polity.world, polity.automaton);
         let after = polity.world.hulls().len();
@@ -7300,7 +7303,22 @@ pub fn fleet_step(worlds: &mut [Polity]) -> std::collections::BTreeMap<String, u
             built.insert(polity.spec.world_name.clone(), (after - before).min(255) as u8);
         }
     }
-    built
+    (built, released)
+}
+
+/// A hull on a route that has lapsed (ROUTE-1: unpaid upkeep) serves no
+/// lane, yet `free_capacity` counts only idle hulls and the deal's own, so it
+/// was held out of every haul for good. It returns to the idle pool by the
+/// ordinary assignment receipt (deal 0).
+fn release_lapsed_hulls(world: &mut cfe::world::World, actor: u64) -> usize {
+    let live: std::collections::BTreeSet<u64> = world
+        .routes()
+        .iter()
+        .map(|(d, _)| *d)
+        .chain(world.element_routes().iter().map(|(d, _, _, _)| *d))
+        .collect();
+    let stranded: Vec<u64> = world.hulls().iter().filter(|h| h.assigned_route != 0 && !live.contains(&h.assigned_route)).map(|h| h.hull_id).collect();
+    stranded.into_iter().filter(|&id| world.assign_hull_as(actor, id, 0).is_ok()).count()
 }
 
 fn ensure_npc_fleet(world: &mut cfe::world::World, actor: u64) {

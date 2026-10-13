@@ -426,7 +426,10 @@ fn main() {
             worlds.push(Polity::genesis(spec, &registry, &book));
         }
         // FLEET-1: salvage/mint/assign before hauls need capacity.
-        let built = conductor::profile::timed("fleet_step", || conductor::fleet_step(&mut worlds));
+        let (built, released) = conductor::profile::timed("fleet_step", || conductor::fleet_step(&mut worlds));
+        if released > 0 {
+            println!("beat {beat}: FLEET — {released} hulls return to the idle pool from lapsed routes");
+        }
         // CORES SLICE 3: the core's bell delivers the dead's words that are due.
         let heard = conductor::inheritance_step(&mut worlds, epoch_base + beat);
         if heard > 0 {
