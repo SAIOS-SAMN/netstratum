@@ -24,28 +24,4 @@
 //! organ up and witnesses it names the same deficit the old path found, without
 //! the loss. OCULAR-2..4 migrate the consumers onto it and delete the scalars.
 
-use cfe::ratio::{ratio, Ratio};
-use rfa_core::{Delta, Support};
-
-/// Build the economy as an exact-rational connection over the resource axes.
-/// `demand[i]` and `supply[i]` are the exact per-axis loads (NOT quantized).
-/// Node 0 is the environment; axis `i` is node `i + 1`. The single fiber carries
-/// the one flow coordinate. `Delta[0][i+1] = supply[i] - demand[i]`.
-pub fn economy_connection(demand: &[Ratio], supply: &[Ratio]) -> (Delta, Support) {
-    let axes = demand.len().max(supply.len());
-    let dim = axes + 1; // +1 for the environment reservoir at node 0
-    let fiber = 1;
-    let mut delta = Delta::zero(dim, fiber);
-    let mut support = Support::new(dim, fiber);
-    let zero = ratio(0, 1);
-    for a in 0..axes {
-        let d = demand.get(a).cloned().unwrap_or_else(|| zero.clone());
-        let s = supply.get(a).cloned().unwrap_or_else(|| zero.clone());
-        // Net flow from the environment (node 0) INTO the axis (node a + 1).
-        // set_antisym writes the (0, a+1) edge and its negated twin in one stroke.
-        delta.set_antisym(0, a + 1, vec![s - d]);
-        support.connect(0, a + 1, 0);
-    }
-    (delta, support)
-}
 

@@ -213,11 +213,6 @@ impl Shell {
         Shell { bands, slots, cells }
     }
 
-    /// How many whole ring-slots one cell of this shell spans.
-    pub fn slot_width(&self) -> i64 {
-        TURN_SLOTS / self.slots as i64
-    }
-
 }
 
 /// A transform of the shell. Every one is a PERMUTATION of cells (or a

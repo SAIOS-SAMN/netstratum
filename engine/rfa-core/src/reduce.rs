@@ -61,36 +61,6 @@ impl Support {
         }
     }
 
-    /// THE GROWTH TEST (DIRECTIVE 16, operator ruling 2026-08-01) —
-    /// which relations exist here that did NOT exist in `prior`.
-    ///
-    /// Returns the new edges as POSITIONS, never a count and never a
-    /// bool: under THE BIFURCATION LAW a verdict must name what it
-    /// found, so a caller minting against expansion can point at the
-    /// relations it is minting for.
-    ///
-    /// **This is the only thing that distinguishes growth from
-    /// shuffling.** A fixed tensor wearing two hats — `grad(p) ⊕
-    /// circulation` — can be re-split endlessly, moving content between
-    /// the poles while forming no new relation. That is an internal
-    /// zero-sum redistribution, and it must yield `ΔD ≡ 0`. Genuine work
-    /// EXPANDS THE SUPPORT: `Δ' = Δ + δΔ` with
-    /// `Support(E') ⊃ Support(E)`. Everything else is
-    /// `Δ' = Q · Δ` — pure coordinate gauge, and gauge never mints.
-    pub fn new_edges_since(&self, prior: &Support) -> Vec<(usize, usize, usize)> {
-        let mut fresh = Vec::new();
-        for i in 0..self.dim {
-            for j in (i + 1)..self.dim {
-                for l in 0..self.fiber {
-                    if self.has(i, j, l) && !prior.has(i, j, l) {
-                        fresh.push((i, j, l));
-                    }
-                }
-            }
-        }
-        fresh
-    }
-
     pub fn dim(&self) -> usize {
         self.dim
     }

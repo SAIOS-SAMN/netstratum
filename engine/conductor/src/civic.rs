@@ -60,25 +60,6 @@ pub fn zone_capacity(kind: ZoneKind, metabolism: u8, axes: &[Resource]) -> Vec<B
     v
 }
 
-/// **THE EXACT NET CAPACITY** (OCULAR, doc 54) — a zone's yield MINUS its upkeep
-/// as an exact-rational field over `axes`, NOT quantized onto the lattice. The
-/// same `zone_yield`/`zone_upkeep` reading `zone_capacity` uses, kept exact so
-/// the ocular organ reads the true rate and nothing rounds. A field, never a
-/// scalar; no `quantize`.
-pub fn zone_capacity_exact(kind: ZoneKind, metabolism: u8, axes: &[Resource]) -> Vec<Ratio> {
-    let mut v = vec![ratio(0, 1); axes.len()];
-    let (yield_res, yield_rate) = zone_yield(kind, metabolism);
-    if let Some(i) = axes.iter().position(|r| *r == yield_res) {
-        v[i] += yield_rate;
-    }
-    for (upkeep_res, upkeep_rate) in zone_upkeep(kind, metabolism) {
-        if let Some(i) = axes.iter().position(|r| *r == upkeep_res) {
-            v[i] -= upkeep_rate;
-        }
-    }
-    v
-}
-
 /// THE GENERATORS ARE THE FOLD (doc 52 / operator ruling). Map a species'
 /// `Axis::Zone` fold (`seed ∪ minted`) into the buildable capacity generators
 /// the peel reduces against — one net-capacity vector per structure the

@@ -118,12 +118,6 @@ fn transforms(row: u8, col: u8) -> [(u8, u8); 8] {
     ]
 }
 
-/// The orb's sigil with no star context (unsited semantics): the pure
-/// form the witnesses measure. Inside a world, prefer `sigil_of`.
-pub fn orb_sigil(orb: &ColonyOrb) -> Sigil {
-    sigil_of(orb, None)
-}
-
 /// The orb's sigil under a world's star: the joint shadow and its two
 /// address projections (NS-2 §1.1).
 pub fn sigil_of(orb: &ColonyOrb, star: Option<StarClass>) -> Sigil {

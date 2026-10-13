@@ -62,43 +62,6 @@ impl World {
         );
         Ok(())
     }
-    pub fn counter_offer_as(
-        &mut self,
-        actor: u64,
-        offer: u64,
-        want_amount: crate::dop::Positive,
-        appraisal: Option<[u8; 32]>,
-    ) -> Result<(), ActionRefused> {
-        self.permitted(actor, Scope::Collect)?;
-        // The non-positive ask died at the `Positive` door; the missing
-        // offer is a FACT of this book, named as one.
-        let want_amount = want_amount.value().clone();
-        if !self.offers.iter().any(|held| held.offer == offer) {
-            return Err(ActionRefused::NoSuchOffer { offer });
-        }
-        if let Some(cited) = &appraisal {
-            match self.appraisal_stale(cited) {
-                Some(false) => {}
-                Some(true) => {
-                    return Err(ActionRefused::StaleAppraisalCited { appraisal: *cited })
-                }
-                None => {
-                    return Err(ActionRefused::ClaimWithoutWitness {
-                        name: "cited appraisal is not on this chronicle".into(),
-                    })
-                }
-            }
-        }
-        let held = self
-            .offers
-            .iter_mut()
-            .find(|held| held.offer == offer)
-            .expect("checked above");
-        held.want_amount = want_amount.clone();
-        self.close(ClosureEvent::OfferCountered { offer, want_amount, appraisal }, actor);
-        Ok(())
-    }
-
     /// **CONVEY** (tag 100, 2026-08-06): the postal deed — the estate
     /// chain's last link. World-contained (cross-world rides the
     /// aperture pair). Refusal-pure, checks in address → cap → afford
@@ -1326,34 +1289,5 @@ impl World {
         (self.heat_encased_of(orb), vented)
     }
 
-
-    /// **RECIPROCITY — the orb's own measured conduct, surfaced.**
-    ///
-    /// `returned_across / (returned_across + extracted_across)`: of the
-    /// value this orb drew across a boundary, how much it closed the
-    /// loop on. `09` §2.4's measured boundary policy, and the quantity
-    /// `FrictionSettled` is priced from.
-    ///
-    /// **`None` MEANS NO BASIS, and that is the whole point of this
-    /// return type.** The private reading friction uses answers `1/1`
-    /// when an orb has no cross-orb history at all — a sensible default
-    /// for pricing a cost (charge nothing when there is nothing to
-    /// compare), and a TRAP for anything that reads alignment as merit:
-    /// **two orbs that have never traded read as perfectly aligned.**
-    /// Absence would present as agreement, which is the same shape as
-    /// the borne share's farming-by-absence. Here the absence is named
-    /// instead of being dressed as a perfect score.
-    ///
-    /// The private `reciprocity_reading` is NOT changed: friction is
-    /// consensus law and its `1/1` default is correct for pricing. This
-    /// adds a reading; it moves nothing.
-    pub fn reciprocity_of(&self, orb: u64) -> Option<Ratio> {
-        let held = self.orbs.iter().find(|held| held.orb_id == orb)?;
-        let denominator = held.returned_across.clone() + held.extracted_across.clone();
-        match denominator > ratio(0, 1) {
-            true => Some(held.returned_across.clone() / denominator),
-            false => None,
-        }
-    }
 
 }

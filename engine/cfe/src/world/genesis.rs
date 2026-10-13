@@ -481,32 +481,6 @@ impl World {
     pub fn observe_gauge(&mut self, sample: Vec<u8>) {
         self.chronicle.set_gauge_sample(sample);
     }
-    pub fn mint_line_as(
-        &mut self,
-        actor: u64,
-    ) -> Result<crate::dop::LineDraw, ActionRefused> {
-        self.permitted(actor, Scope::Build)?;
-        let Some(seed) = self.chronicle.receipts().last().map(|receipt| receipt.own().0)
-        else {
-            return Err(ActionRefused::NoColony);
-        };
-        // FOLD-AWARE (operator ruling 2026-08-06): the draw runs under
-        // the FOLD's ceilings — a minted class or clade is drawable the
-        // moment its receipt stands — and the receipt DECLARES the
-        // ceilings it drew under, so every reader re-derives this exact
-        // draw from the receipt alone (receipt authority; the ordering
-        // law holds by declaration).
-        // Class from fold; clade from open table (not fold u8 length).
-        let ceilings = (
-            crate::vocabulary::ceiling(self.chronicle(), crate::vocabulary::Axis::Class)
-                .max(crate::dop::class_ceiling()),
-            crate::dop::clade_ceiling(),
-        );
-        let draw = crate::dop::line_synthesis_at(&seed, ceilings.0, ceilings.1);
-        self.close(ClosureEvent::LineMinted { seed, ceilings: Some(ceilings) }, actor);
-        Ok(draw)
-    }
-
     pub fn seat_station_as(
         &mut self,
         actor: u64,

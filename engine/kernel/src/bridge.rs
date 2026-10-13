@@ -482,26 +482,6 @@ pub struct Refold {
     pub potentials: Vec<Vec<Ratio>>,
 }
 
-/// Undo a certified fold: re-add the frame the fold took. Exact — the
-/// blanket unfolds whole.
-pub fn refold(core: &Delta, cert: &Refold) -> Delta {
-    let dim = core.dim();
-    let fiber = core.fiber();
-    let mut whole = Delta::zero(dim, fiber);
-    for i in 0..dim {
-        for j in (i + 1)..dim {
-            let coords: Vec<Ratio> = (0..fiber)
-                .map(|l| {
-                    core.entry(i, j, l).clone() + cert.potentials[j][l].clone()
-                        - cert.potentials[i][l].clone()
-                })
-                .collect();
-            whole.set_antisym(i, j, coords);
-        }
-    }
-    whole
-}
-
 /// What is KNOWN about the relation between two orbs on one channel,
 /// within ONE committed book.
 ///
@@ -612,18 +592,6 @@ pub fn borne_by_orb_axial(state: &Committed) -> Vec<(u64, Vec<Ratio>)> {
             (held.orb_id, share)
         })
         .collect()
-}
-
-/// THE ONE ORB'S STANDING, PER CHANNEL. An orb the world has never
-/// seated stands at the ground on every channel — the same answer as an
-/// orb seated but holding nothing, because in neither case is there
-/// structure to attribute.
-pub fn standing_axial_of(state: &Committed, orb: u64) -> Vec<Ratio> {
-    borne_by_orb_axial(state)
-        .into_iter()
-        .find(|(id, _)| *id == orb)
-        .map(|(_, share)| share)
-        .unwrap_or_else(|| vec![ratio(0, 1); CHANNELS])
 }
 
 /// The cross-book door: the same one-pass read, carrying the count of

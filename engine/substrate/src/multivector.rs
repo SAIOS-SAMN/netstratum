@@ -443,20 +443,6 @@ impl<F: Field> Multivector<F> {
         self.planes.iter().map(|(_, p)| p.dim()).max().unwrap_or(0)
     }
 
-    /// Project onto grade `k` — keep only planes of grade exactly `k`.
-    pub fn grade_project(&self, k: u8) -> Self {
-        Self {
-            planes: self
-                .planes
-                .iter()
-                .filter(|(idx, _)| idx.grade() == k)
-                .cloned()
-                .collect(),
-            active_rank: self.active_rank,
-            horizon: self.horizon,
-        }
-    }
-
     /// **Reverse** `Ã` — applies the per-plane reverse sign to every
     /// plane's polynomial coefficient.
     pub fn reverse(&self) -> Self {

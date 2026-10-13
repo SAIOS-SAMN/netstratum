@@ -17,8 +17,8 @@
 //! residual, and its harmonic `H¹` reduction, is what the resolver (IAE-4)
 //! must explain.
 
-use crate::mat::{matvec, Mat};
-use crate::sheaf::{CellSheaf, Incidence};
+use crate::mat::matvec;
+use crate::sheaf::CellSheaf;
 use num_bigint::BigInt;
 
 /// A minimal ARC grid observation — row-major integer colors. `iae` stays
@@ -40,56 +40,6 @@ impl GridObs {
     pub fn at(&self, r: usize, c: usize) -> i64 {
         self.cells[r * self.cols + c]
     }
-}
-
-/// `m × m` identity as an exact integer matrix.
-fn identity(m: usize) -> Mat {
-    (0..m)
-        .map(|i| (0..m).map(|j| BigInt::from((i == j) as i64)).collect())
-        .collect()
-}
-
-/// THE RELATIONAL DEFECT COMPLEX 𝒟 on `n` entities with coordinate module
-/// `ℤᵐ`: the 2-skeleton of the (n−1)-simplex — all vertices, edges (pairs),
-/// and triangles (triples) — with constant stalk `ℤᵐ` and identity restriction
-/// morphisms, simplicial incidence signs. Its `H¹`/triple-residual is where
-/// the obstruction lives. (Heterogeneous stalks in [`CellSheaf`] are for the
-/// cross-shell transduction; within one shell the coordinate module is a
-/// uniform `ℤᵐ`, which is not the homogeneous-collapse flaw — that was forcing
-/// DISTINCT strata into one type.)
-///
-/// Edges are ordered lexicographically `(i<j)`, triangles `(i<j<k)`; the
-/// measurement in [`measure`] follows the same order.
-pub fn relational_complex(n: usize, m: usize) -> CellSheaf {
-    let edges: Vec<(usize, usize)> =
-        (0..n).flat_map(|i| ((i + 1)..n).map(move |j| (i, j))).collect();
-    let tris: Vec<(usize, usize, usize)> = (0..n)
-        .flat_map(|i| ((i + 1)..n).flat_map(move |j| ((j + 1)..n).map(move |k| (i, j, k))))
-        .collect();
-    let edge_idx = |i: usize, j: usize| edges.iter().position(|&e| e == (i, j)).expect("edge present");
-
-    let id = identity(m);
-    let mut inc = Vec::new();
-    // vertex ◁ edge: δ⁰f(i,j) = f_j − f_i.
-    for (e, &(i, j)) in edges.iter().enumerate() {
-        inc.push(Incidence { face_grade: 0, face_idx: i, coface_idx: e, sign: BigInt::from(-1), restriction: id.clone() });
-        inc.push(Incidence { face_grade: 0, face_idx: j, coface_idx: e, sign: BigInt::from(1), restriction: id.clone() });
-    }
-    // edge ◁ triangle: ∂(i,j,k) = (j,k) − (i,k) + (i,j).
-    for (t, &(i, j, k)) in tris.iter().enumerate() {
-        inc.push(Incidence { face_grade: 1, face_idx: edge_idx(i, j), coface_idx: t, sign: BigInt::from(1), restriction: id.clone() });
-        inc.push(Incidence { face_grade: 1, face_idx: edge_idx(i, k), coface_idx: t, sign: BigInt::from(-1), restriction: id.clone() });
-        inc.push(Incidence { face_grade: 1, face_idx: edge_idx(j, k), coface_idx: t, sign: BigInt::from(1), restriction: id.clone() });
-    }
-
-    let mut dims = vec![vec![m; n]];
-    if !edges.is_empty() {
-        dims.push(vec![m; edges.len()]);
-    }
-    if !tris.is_empty() {
-        dims.push(vec![m; tris.len()]);
-    }
-    CellSheaf::new(dims, inc).expect("the relational 2-skeleton is a valid simplicial complex")
 }
 
 /// The entity potential as a 0-cochain on 𝒟 (the entities flattened in order).
