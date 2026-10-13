@@ -53,44 +53,63 @@ court re-derives the phase advance from them.
    - Netstratum takes the pilot-wave shape: a deterministic universe whose
      quantum outcomes are fixed by a hidden variable no observer inside it
      can read.
-3. **The mathematics is era 1's.** A quantum state is a unit vector, a point
-   on a sphere in the space of modes, and era 1 already holds such points
-   exactly. A quantum rotation is a reflection product, which era 1 already
-   computes exactly. No new arithmetic is needed.
+3. **The mathematics is era 1's, and curved.** A quantum state is a point of
+   a curved state space, held by its geodesic angles and phases (rational
+   half-angle parameters), and a quantum rotation is a reflection product,
+   which era 1 already computes exactly. No flat norm is used anywhere.
 
 ## The definitions
 
 - **Modes.** A system's quantum modes are a finite set, its basis. Which modes
   exist is fixed by the bounce's compact manifold (below). Each mode is a
   resonance of the compact space.
-- **A state** is a rational point of the unit sphere over the modes:
-  amplitudes `a_1 … a_n`, rational, with `Σ a_i² = 1`, reached by inverse
-  stereographic projection of a rational point (exact, and dense among all
-  states).
-  - Superposition is any such point with more than one nonzero amplitude.
-  - Phase is carried by sign and by pairing modes (a complex amplitude as two
-    real ones).
-- **Evolution** is a rotation of the state sphere by a factored product of
+- **A state is a point of the curved state space** over the modes (the
+  projective space of states, positively curved), never a vector normalised
+  by a flat square. Remediated 2026-10-13 (operator): no quadratic norm,
+  `^2` or modulus squared defines a state or its outcomes.
+  - **Intrinsic coordinates.** For each mode i, the state carries:
+    - `β_i`, its geodesic angle to the mode on the curved state space;
+    - `φ_i`, the mode's own phase, so that states can interfere.
+  - **Exact.** Each angle is held by its rational half-angle parameter `t`,
+    with `cos β = (1 − t²)/(1 + t²)` and `sin β = 2t/(1 + t²)`: rational, no
+    root, no decimal. That `t²` is the stereographic algebra of the curved
+    space itself, not a flat norm.
+  - **Superposition** is a state at a nonzero angle from every mode it
+    involves. **Interference** is the relative phases `φ_i` acting when modes
+    recombine; it is kept, because a state without per-mode phase would be a
+    classical distribution and not quantum.
+- **Evolution** is a rotation of the state space by a factored product of
   rational reflections. It is a closed form at t: the rotation for a span of
-  time is the generator's reflection product raised to that span, read at t.
-  No stepping (circuitry, docs/78).
-- **Probabilities** are the squared amplitudes: rational, summing to 1.
-- **Entanglement.** Two systems' joint state is a point of the sphere over the
-  product of their modes; it is entangled when it is not a product of two
-  states. Exact, and decidable on rationals.
+  time is the generator's product raised to that span, read at t. No
+  stepping (circuitry, docs/78).
+- **Outcome weights** are read from the geometry: the weight of mode i is
+  LINEAR in the cosine of the state's geodesic angle to it,
+
+      w_i = (1 + cos β_i) / 2,
+
+  rational, the weights together summing to one. This is the Born rule read
+  geometrically, as the curved state space's own transition measure, not as
+  an amplitude squared in a flat space. It is netstratum's physics, recorded
+  as such.
+- **Entanglement.** Two systems' joint state is a point of the curved state
+  space over the product of their modes; it is entangled when it is not a
+  product of two states. Exact, and decidable on rationals.
 - **Measurement is an annal event.** When a quantum system's modes couple to a
   macroscopic record (a mind's reading, an instrument, a world's chemistry, a
   body's surface), ONE outcome happens and is written into the annals.
-  - **The hidden variable:** `u ∈ [0, 1)`, rational, the phase of the
-    bounce's torsion at that place and time. It is deterministic, set by the
-    bounce, and unreadable from inside the universe.
-  - **The outcome** is the mode `j` whose cumulative probability interval
-    holds `u`: `Σ_{i<j} a_i² ≤ u < Σ_{i≤j} a_i²` (modes in their fixed
-    order). Where the bounce's phases are equidistributed across events,
-    outcomes follow the Born frequencies, as quantum equilibrium does in
-    pilot-wave mechanics.
-  - **After measurement** the state is the outcome's mode. The pre-measurement
-    state is not kept in memory; the annals hold the outcome and the event.
+  - **The hidden variable:** `u ∈ [0, 1)`, rational, in turns: the TORSION
+    ENCLOSED `Φ` by the anchor-closed loop through the event (docs/81: a
+    loop's holonomy is `W + Φ`, W its windings, Φ its enclosed torsion). It
+    is deterministic, set by the bounce's torsion, and unreadable from
+    inside the universe. One equation joins the quantum layer to coherence.
+  - **The outcome** is the mode `j` whose cumulative weight interval holds
+    `u`: `Σ_{i<j} w_i ≤ u < Σ_{i≤j} w_i` (modes in their fixed order). Where
+    the enclosed torsion is equidistributed across events, outcomes follow
+    the weights' frequencies, as quantum equilibrium does in pilot-wave
+    mechanics.
+  - **After measurement** the state is the outcome's mode. The
+    pre-measurement state is not kept in memory; the annals hold the outcome
+    and the event.
 
 ## The hypothesis: the bounce as compactified quantum torsion (unproven)
 
@@ -105,8 +124,8 @@ court re-derives the phase advance from them.
   - the families of the elements the bounce distributes (in string
     compactifications `|χ|/2` counts generations), so that the almanac's
     families are derived, not authored;
-  - the bounce's torsion phase, the hidden variable `u`, from the torsion's
-    holonomy around the compact cycles.
+  - the bounce's torsion, whose enclosed part `Φ` on each anchor-closed loop
+    is the hidden variable `u` (docs/81).
 - **The manifold's own numbers** are chosen once, at era 1's founding, as the
   universe's one choice of vacuum. They are recorded in its origin, and every
   consequence is derived from them.
@@ -131,7 +150,7 @@ Within era 1 (docs/78), after its geometry library (mycelium A1).
 2. **Measurement as annal events.** The hidden phase from the bounce; the
    outcome rule.
    - Done-when: measurement events in the annals 0 → > 0, and their outcome
-     frequencies against the squared amplitudes, logged.
+     frequencies against the geometric weights `w_i`, logged.
    - Witness: the annals.
 3. **The compact manifold.** Its integers recorded at founding; modes and
    element families derived from them.

@@ -208,6 +208,7 @@ here over the time axis and place).
   diverge.
 - **The law** (to derive exactly in era 1): a route's melt is its
   geometric melt (distance, technology, hulls) scaled down by the coherence
+  (windings W)
   of the timelines it joins, reaching zero for a perfectly coherent pair.
 - **So convergence pays automatically.** Coherent realms move goods almost
   freely; divergent ones bleed melt. This is the economic force behind
@@ -241,26 +242,53 @@ here over the time axis and place).
 
 ## What it pays in: θ, the phase (operator, 2026-10-13)
 
-### The model: coherent universes joined by junctions
+### The model: coherent universes joined by junctions (no flat norms)
 
-- **Each universe is a superfluid,** with order parameter ψ = √n · e^{iθ}:
-  - ψ is the universe's coherent STATE;
-  - n = |ψ|² is its COHERENCE, the weight that convergence builds and
-    collision tears;
-  - θ, the PHASE, is its cosmic time: a coherent state's phase advances
-    with time (docs/80).
+Remediated 2026-10-13 (operator): no quadratic norm, `^2` or modulus squared
+appears here. Those measure correctly only on flat space, and would put the
+box back inside a curved universe.
+
+- **The state is the phase field θ:** the phase at every place of the
+  universe's network, counted in turns. θ is its cosmic time: a coherent
+  phase advances with time (docs/80).
+- **HOLONOMY.** Around a closed loop, θ returns changed by its holonomy:
+
+      hol(loop) = W + Φ
+
+  - `W`, the WINDINGS: an integer number of whole turns;
+  - `Φ`, the TORSION ENCLOSED: a rational fraction of a turn, the bounce's
+    torsion threaded through the loop (the cones' twist, xylarium §10.3's
+    torsion as holonomy).
+
+  In flat space Φ would vanish and only W would remain; in our curved
+  universe both are present, and they are read apart.
+- **COHERENCE is W.** It is counted on the network's loops, exact and an
+  integer.
+- **Loops close through the ANCHORS.** Every anchor (a core's clock, a
+  synchronised mouth, a LEDGER crossing pair) reads the common reference
+  phase, so any path between two anchors, completed by the clock, is a loop.
+  A realm whose gates form a tree still has coherence, counted on its
+  anchor-closed loops.
+- **Φ is the hidden phase.** The torsion each loop encloses is the source of
+  docs/79's hidden variable: one equation joins the quantum layer to
+  coherence.
 - **Energy is the chemical potential.** A coherent phase winds at the rate
-  set by the energy per quantum, dθ/dt = −μ/ħ (Josephson). The hypha's μ is
-  energy in exactly that sense, which is why it is economically resilient:
-  energy is conserved, and cannot be inflated. A universe's own energy per
-  quantum of coherence is its chemical potential μ_N. The ratio μ_N / μ is
-  the dilation du/dh that mycelium's ruling 78.152d reads between two
-  core-tube crossings.
-- **Core tubes are junctions.** Locked phases carry a supercurrent,
-  `I = I_c sin(Δθ)`: convergence, without dissipation. A sustained energy
-  difference winds the phase until it SLIPS by a whole turn, dissipating at
-  each slip: a collision, as physics. A phase slip is discrete, countable
-  and dissipative, and its ticket is the energy lost.
+  set by the energy per turn, dθ/dt = −μ/ħ (Josephson). The hypha's μ is
+  energy in that sense, which is why it is economically resilient: energy is
+  conserved, and cannot be inflated. A universe's own energy per turn of
+  coherence is μ_N. The ratio μ_N / μ is the dilation du/dh that mycelium's
+  ruling 78.152d reads between two core-tube crossings.
+- **Core tubes are junctions.** Locked phases carry a current
+  `I = I_c sin(Δθ)`: convergence, without dissipation. `sin` is computed
+  exactly from the rational half-angle parameter `t`, with
+  `sin = 2t/(1+t²)`: no root, and no decimal. A sustained energy difference
+  winds the phase until it SLIPS by one whole turn, dissipating at each
+  slip: a collision, as physics.
+- **A COLLISION is one slip:** W on that loop falls by one turn. k slips are k
+  collisions. The ticket is topological (a turn of coherence lost) and
+  physical (the loop's weight, below, lost with it).
+- **A CONVERGENCE** keeps a loop's windings intact, or locks a new
+  anchor-closed loop into phase, adding windings.
 
 ### θ: the currency of the folded space
 
@@ -269,6 +297,12 @@ the bell's count of turns and circuitry's rotations. A payment in θ is a
 transfer of phase between coherent systems, which is what flows through a
 junction. θ aligns with phase transitions: coherence forming (convergence)
 and breaking (collision, the slip) are changes of its order.
+
+**A turn is worth the weight flowing around its loop:** the mass, population
+and passage carried on that loop, read from receipts. A turn on a heavy loop
+is worth more than a turn on a light one: turns times weight, LINEAR, no
+square. So a large convergence (a heavy loop locked) earns more than a small
+one, and a slip on a heavy loop costs that loop's weight.
 
 | layer | paid in | through |
 |---|---|---|
@@ -287,8 +321,9 @@ and breaking (collision, the slip) are changes of its order.
   for wormhole traversal.
 
 **How a local economy gets θ: by EARNING it.**
-- **θ is minted only by convergence:** timelines converged, records agreed,
-  the coherence built. θ is lost by collision: the phase slips.
+- **θ is minted only by convergence:** windings gained on anchor-closed
+  loops, each turn valued by its loop's weight. θ is lost by collision: one
+  turn per slip, at that loop's weight.
 - A local economy earns θ by converging its timelines and reducing its
   collisions. Nothing else creates θ: no decree, and no conversion from μ,
   STAMP or any civilization's money by the physics.
@@ -319,8 +354,8 @@ and breaking (collision, the slip) are changes of its order.
 **Symbols.** θ is also used in code: an orb's angle, `ColonyOrb.theta`, the
 flat orbit layer that era 1 retires (orbs become S^60 bodies), and some
 cognition crates (kernel, rfa-core, lens). Until era 1 the code names the
-currency `phase`; the documents write θ. ψ remains the state and n the
-coherence.
+currency `phase`; the documents write θ. Coherence is the windings W; the
+torsion enclosed is Φ.
 
 ## What must exist for this to be read, not authored
 
@@ -382,7 +417,7 @@ Within era 1, after docs/80's proper time and events on the map.
   per docs/74).
 - **Which events count as a meeting** of timelines: every two-sided record,
   or only records across a wormhole or a realm boundary.
-- **The currency:** θ, the phase, in turns (operator, 2026-10-13); ψ the
-  state, n the coherence.
+- **The currency:** θ, the phase, in turns (operator, 2026-10-13); coherence
+  the windings W on anchor-closed loops; Φ the enclosed torsion.
 - **Branches:** sub-histories inside the universe (netstratum's proposal) or
   new universes (needing their own origins, mycelium's law).
