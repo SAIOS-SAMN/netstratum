@@ -112,6 +112,11 @@ pub struct House {
     after: u64,
     /// Seat -> the mind holding it.
     held: BTreeMap<u32, [u8; 32]>,
+    /// Seat -> the tend its holder was last heard on it (a take or a call).
+    /// A hold whose holder has not been heard within a task's patience, or a
+    /// hold restored from the takes log and not yet heard in this run, yields
+    /// to a mind that takes the seat now (exclusivity binds a LIVE holder).
+    heard: BTreeMap<u32, u64>,
     /// Seat -> the task before it and the tend it was put there.
     task: BTreeMap<u32, ([u8; 32], u64)>,
     /// The minds the takes log names, by line (the latest take wins): a
@@ -176,6 +181,7 @@ impl House {
             epoch: 0,
             after: 0,
             held: BTreeMap::new(),
+            heard: BTreeMap::new(),
             task: BTreeMap::new(),
             seated_before,
             tends: 0,
@@ -450,7 +456,9 @@ impl House {
                     let line = self.line_on(t.seat);
                     let reason = if t.domain != self.domain || t.sub_origin.is_some() || line.is_none() {
                         NO_SEAT
-                    } else if self.held.get(&t.seat).is_some_and(|m| *m != t.mind) {
+                    } else if self.held.get(&t.seat).is_some_and(|m| *m != t.mind)
+                        && self.heard.get(&t.seat).is_some_and(|at| self.tends.saturating_sub(*at) <= PATIENCE)
+                    {
                         SEAT_HELD
                     } else {
                         TAKEN_OK
@@ -458,6 +466,7 @@ impl House {
                     let ok = reason == TAKEN_OK;
                     if ok {
                         self.held.insert(t.seat, t.mind);
+                        self.heard.insert(t.seat, self.tends);
                         let line = line.unwrap_or_default();
                         self.seated_before.insert(line.clone(), t.mind);
                         if let Ok(mut f) = std::fs::OpenOptions::new().create(true).append(true).open(&self.log) {
@@ -470,6 +479,9 @@ impl House {
                 }
                 HouseMail::Call { seq, call, reference } => {
                     self.after = self.after.max(seq);
+                    if self.held.get(&call.seat) == Some(&call.mind) {
+                        self.heard.insert(call.seat, self.tends);
+                    }
                     let (reason, deed, what) = if self.held.get(&call.seat) != Some(&call.mind) {
                         (NOT_SEATED, [0u8; 32], "the caller does not hold the seat".to_string())
                     } else if call.fn_id != FN_SOLVE || call.seat == 0 {
