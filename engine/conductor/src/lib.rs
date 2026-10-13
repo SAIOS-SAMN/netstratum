@@ -4906,11 +4906,21 @@ impl Polity {
             planet: format!("{tail}fall"),
             colony: format!("{sigil}-landing"),
             policy: self.spec.policy,
-            position: (
-                &self.spec.position.0 + dx,
-                &self.spec.position.1 + dy,
-                &self.spec.position.2 + dz,
-            ),
+            // On the half-cell lattice the step is drawn on (optimization
+            // sweep, 2026-10-13): the parent's current orbit point is an exact
+            // rational whose size grows with each generation derived from it
+            // (founding coordinates had reached 4,160 characters, and every
+            // distance read paid for them). The branch is founded at the
+            // lattice point under its parent's place, plus its step: within
+            // half a cell of where it was founded before, never compounding.
+            position: {
+                let lattice = |x: &Ratio| (x * ratio(2, 1)).floor() / ratio(2, 1);
+                (
+                    lattice(&self.spec.position.0) + dx,
+                    lattice(&self.spec.position.1) + dy,
+                    lattice(&self.spec.position.2) + dz,
+                )
+            },
             // BOT-THERM: a branch's seat is never inherited — it is
             // drawn from its OWN genesis chronicle (the mutated axes
             // may prefer another regime entirely).
@@ -6382,9 +6392,11 @@ pub fn consilience_step(worlds: &mut [Polity], _beat: u64) -> Vec<(String, u32, 
 pub fn knowledge_market_step(worlds: &mut [Polity], _beat: u64) -> Vec<(String, usize)> {
     // The roster's pool of words, deduped by orbit: each line's owned words,
     // folded only past its cursor (never the whole history each beat).
-    for polity in worlds.iter_mut() {
-        polity.fold_owned_words();
-    }
+    profile::timed("knowledge:fold", || {
+        for polity in worlds.iter_mut() {
+            polity.fold_owned_words();
+        }
+    });
     let mut pool: Vec<([u8; 32], Vec<u8>, Vec<[u8; 32]>)> = Vec::new();
     let mut seen: std::collections::HashSet<[u8; 32]> = std::collections::HashSet::new();
     for polity in worlds.iter() {
@@ -6401,11 +6413,17 @@ pub fn knowledge_market_step(worlds: &mut [Polity], _beat: u64) -> Vec<(String, 
     // length), derived from the word itself, never a dial.
     // docs/60 D3 — TRANSLATION LOSS IS PRICE: one more per channel of the
     // word the buyer cannot perceive (it can never re-derive that part).
-    let price_of = |expansion: &[u8], senses: solver::senses::Senses| -> usize {
-        solver_verify::program_from_bytes(expansion)
-            .map(|program| program.len() + senses.missing(solver::senses::Senses::of_word(&program)) as usize)
-            .unwrap_or(0)
-            .max(1)
+    // PEELED (optimization sweep, 2026-10-13): each word is decoded ONCE a
+    // beat (its length and the senses it needs), not once per buyer; a
+    // buyer's price is that length plus the senses it lacks. The same prices:
+    // a word that does not decode prices at 1, as before.
+    let read: Vec<Option<(usize, solver::senses::Senses)>> = profile::timed("knowledge:decode", || {
+        pool.iter()
+            .map(|(_, expansion, _)| solver_verify::program_from_bytes(expansion).map(|program| (program.len(), solver::senses::Senses::of_word(&program))))
+            .collect()
+    });
+    let price_at = |k: usize, senses: solver::senses::Senses| -> usize {
+        read[k].map(|(len, needs)| len + senses.missing(needs) as usize).unwrap_or(0).max(1)
     };
     let mut licensed = Vec::new();
     for buyer in 0..worlds.len() {
@@ -6418,11 +6436,15 @@ pub fn knowledge_market_step(worlds: &mut [Polity], _beat: u64) -> Vec<(String, 
             .unwrap_or_else(|| ratio(0, 1));
         // The cheapest lacked word this line can afford — its first
         // reachable idea.
+        // A price is whole, so `crystal >= price` exactly when
+        // `floor(crystal) >= price`: one floor a buyer, integer compares after.
+        let can_pay = num_traits::ToPrimitive::to_u64(&crystal.floor().to_integer()).unwrap_or(if crystal > ratio(0, 1) { u64::MAX } else { 0 });
         let pick = pool
             .iter()
-            .filter(|(orbit, _, _)| !own.contains(orbit))
-            .map(|(orbit, expansion, cited)| (price_of(expansion, senses), orbit, expansion, cited))
-            .filter(|(price, _, _, _)| crystal >= ratio(*price as i64, 1))
+            .enumerate()
+            .filter(|(_, (orbit, _, _))| !own.contains(orbit))
+            .map(|(k, (orbit, expansion, cited))| (price_at(k, senses), orbit, expansion, cited))
+            .filter(|(price, _, _, _)| *price as u64 <= can_pay)
             .min_by_key(|(price, _, _, _)| *price);
         if let Some((price, orbit, expansion, cited)) = pick {
             if worlds[buyer]
@@ -6481,10 +6503,17 @@ pub fn conversation_step(worlds: &mut [Polity], beat: u64, span: &Ratio) -> Opti
     // Each hearer's nearest speaking neighbour, read before anything moves.
     let n = worlds.len();
     let mut pairs = Vec::new();
+    // The torus distance is symmetric: each unordered pair is measured once
+    // (optimization sweep, 2026-10-13), the same nearest speaker found.
+    let mut measured: std::collections::HashMap<(usize, usize), Ratio> = std::collections::HashMap::new();
     for h in (0..n).filter(|&h| !worlds[h].penned) {
         let near = (0..n)
             .filter(|&s| s != h && !worlds[s].penned && !worlds[s].library.words().is_empty())
-            .map(|s| (spatial_l1(&worlds[h].spec.position, &worlds[s].spec.position, span), s))
+            .map(|s| {
+                let key = (h.min(s), h.max(s));
+                let d = measured.entry(key).or_insert_with(|| spatial_l1(&worlds[h].spec.position, &worlds[s].spec.position, span)).clone();
+                (d, s)
+            })
             .min();
         if let Some((_, s)) = near {
             pairs.push((h, s));
