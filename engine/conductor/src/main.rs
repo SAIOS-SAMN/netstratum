@@ -211,6 +211,11 @@ fn main() {
     // docs/67 N8 / 78.156: the last final point read, and where the dilation
     // reading starts (beat, h).
     let mut hubs_cleared_at: Option<String> = None;
+    // docs/75: the term's completed exchanges between lines, for the realms.
+    let mut contacts = conductor::realms::Contacts::default();
+    let mut passages = conductor::realms::Passages::default();
+    // docs/77: the road tolls each gate earned this term.
+    let mut gate_tolls: std::collections::BTreeMap<(String, String), cfe::ratio::Ratio> = std::collections::BTreeMap::new();
     let mut dilation_from: Option<(u64, u64)> = None;
     let mut announced_pause = false;
     loop {
@@ -432,18 +437,22 @@ fn main() {
         // OFFER-1a: the market beat — intents post, crossings clear
         // (one aperture pair each way, receipted both sides).
         for (seller, buyer) in conductor::profile::timed("market_step", || conductor::market_step(&mut worlds, beat, &span)) {
+            contacts.add(&seller, &buyer);
             println!(
                 "beat {beat}: THE CROSSING CLEARS — {seller} ⇌ {buyer}; the autarkies trade"
             );
         }
         // MERCHANT-1: the caravan bridges what the void walled.
         for (m, a, b) in conductor::profile::timed("merchant_step", || conductor::merchant_step(&mut worlds, beat, &span)) {
+            contacts.add(&m, &a);
+            contacts.add(&m, &b);
             println!(
                 "beat {beat}: THE CARAVAN — {m} bridges {a} ⇌ {b}; the walled trade flows"
             );
         }
         // E3.3: pure NPC element aperture hauls (Wave-2).
         for (from, to) in conductor::profile::timed("element_trade_step", || conductor::element_trade_step(&mut worlds, beat, &span)) {
+            contacts.add(&from, &to);
             println!(
                 "beat {beat}: ELEMENT CROSSING — {from} → {to}; open matter rides the void"
             );
@@ -468,6 +477,15 @@ fn main() {
         let (spots, hubs) = conductor::profile::timed("stamp_market_step", || conductor::stamp_market_step(&mut worlds, &book, std::path::Path::new(&var_root), &keepers_now, &roads, beat, &span));
         let tolls = spots.iter().fold(cfe::ratio::ratio(0, 1), |t, (_, _, toll, _)| t + toll.clone());
         let gated = spots.iter().fold(cfe::ratio::ratio(0, 1), |t, (_, _, _, gate)| t + gate.clone());
+        for (line, hub) in &hubs.met {
+            contacts.add(line, hub);
+        }
+        for (line, core) in &hubs.passed {
+            passages.add(line, core);
+        }
+        for (from, core, arrived) in &hubs.gate_tolls {
+            *gate_tolls.entry((from.clone(), core.clone())).or_insert_with(|| cfe::ratio::ratio(0, 1)) += arrived.clone();
+        }
         let refused: Vec<String> = hubs.refused.iter().map(|(why, n)| format!("{n} {why}")).collect();
         println!(
             "beat {beat}: HUB — {} galaxies cleared at their hubs (STAMP for cargo, one price each); road tolls {tolls} STAMP to the keepers, gate tolls {gated} STAMP to the builders; not cleared: {} alone, {} closed, {} unmet; buyers' STAMP legs: {} carried in part, refused [{}]",
@@ -553,6 +571,17 @@ fn main() {
             for line in conductor::year_bounce(&mut worlds, &book, &registry, std::path::Path::new(&var_root), beat, epoch_base) {
                 println!("beat {beat}: {line}");
             }
+            // docs/75: the term's realms, read from its contacts, then a new term.
+            for line in conductor::realms::bounce(&worlds, &registry, std::path::Path::new(&var_root), &contacts, &passages, beat / scribe::journal::YEAR_TICKS) {
+                println!("beat {beat}: {line}");
+            }
+            contacts.clear();
+            passages.clear();
+            // docs/77: each gate's account, its term's road tolls added.
+            for line in conductor::ascension::accounts(std::path::Path::new(&var_root), &gate_tolls) {
+                println!("beat {beat}: {line}");
+            }
+            gate_tolls.clear();
             // MEMORY (operator 2026-10-09): what the allocator holds freed but
             // unreturned is given back at the year's close, and the RSS read
             // before and after says how much of the process was live data.

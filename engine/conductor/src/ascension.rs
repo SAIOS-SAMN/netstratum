@@ -426,6 +426,79 @@ fn lineage_systems(worlds: &[Polity], cores: &[Option<String>], parents: &BTreeM
     living + if away { worlds[envoy].world.orbs().len() as u64 } else { 0 }
 }
 
+/// docs/77 — A GATE'S ACCOUNT: what it cost its parliament and what passage
+/// over it earned its builders (road tolls on the trade that rode it, and the
+/// envoys' passage tolls), keyed by (galaxy, core). `<var>/gate-accounts.bin`
+/// (Concordance 1.13): tag 1 (galaxy, core, cost ratio, earned ratio).
+fn read_accounts(var_root: &Path) -> BTreeMap<(String, String), (Ratio, Ratio)> {
+    let bytes = std::fs::read(var_root.join("gate-accounts.bin")).unwrap_or_default();
+    cfe::tlv::records(&bytes)
+        .filter(|(t, _)| *t == 1)
+        .filter_map(|(_, v)| {
+            let mut at = 0;
+            let (from, core) = (get_text(v, &mut at)?, get_text(v, &mut at)?);
+            let (cost, used) = v.get(at..).and_then(cfe::ratio::decode)?;
+            at += used;
+            let (earned, _) = v.get(at..).and_then(cfe::ratio::decode)?;
+            Some(((from, core), (cost, earned)))
+        })
+        .collect()
+}
+
+fn write_accounts(var_root: &Path, accounts: &BTreeMap<(String, String), (Ratio, Ratio)>) {
+    let mut out = Vec::new();
+    for ((from, core), (cost, earned)) in accounts {
+        let mut v = Vec::new();
+        put_text(from, &mut v);
+        put_text(core, &mut v);
+        cfe::ratio::encode(cost, &mut v);
+        cfe::ratio::encode(earned, &mut v);
+        cfe::tlv::put(1, &v, &mut out);
+    }
+    let path = var_root.join("gate-accounts.bin");
+    let staged = path.with_extension("staged");
+    if std::fs::write(&staged, out).is_ok() {
+        let _ = std::fs::rename(staged, path);
+    }
+}
+
+/// Add to a gate's account (`cost` at its folding, `earned` as passage pays).
+fn credit(var_root: &Path, from: &str, core: &str, cost: &Ratio, earned: &Ratio) {
+    let mut accounts = read_accounts(var_root);
+    let entry = accounts.entry((from.to_string(), core.to_string())).or_insert_with(|| (ratio(0, 1), ratio(0, 1)));
+    entry.0 += cost.clone();
+    entry.1 += earned.clone();
+    write_accounts(var_root, &accounts);
+}
+
+/// docs/77 — THE GATES' ACCOUNTS at a term's close: the term's road tolls
+/// added to each gate's earnings, and each standing gate's cost, earnings and
+/// payback (earned over cost) for the log. A gate folded before its account
+/// was kept is booked at the cost every gate paid (`gate_cost`).
+pub fn accounts(var_root: &Path, road_tolls: &BTreeMap<(String, String), Ratio>) -> Vec<String> {
+    let mut accounts = read_accounts(var_root);
+    for ((from, core), arrived) in road_tolls {
+        accounts.entry((from.clone(), core.clone())).or_insert_with(|| (ratio(0, 1), ratio(0, 1))).1 += arrived.clone();
+    }
+    let mut said = Vec::new();
+    for g in read(var_root).0 {
+        let entry = accounts.entry((g.from.clone(), g.core.clone())).or_insert_with(|| (ratio(0, 1), ratio(0, 1)));
+        if entry.0 == ratio(0, 1) {
+            entry.0 = cfe::world::smelt_resource(&gate_cost());
+        }
+        let (cost, earned) = entry.clone();
+        let payback = if cost > ratio(0, 1) { earned.clone() / cost.clone() } else { ratio(0, 1) };
+        said.push(format!(
+            "GATE ACCOUNT {} — cost {cost} STAMP, earned {earned} STAMP by its builders ({}), payback {payback}{}",
+            g.id(),
+            g.builder,
+            if g.mapped { "" } else { "; unmapped" }
+        ));
+    }
+    write_accounts(var_root, &accounts);
+    said
+}
+
 /// THE ASCENSION STEP, once a bounce, after the ancients' step, with the
 /// bounce's one reading of the keepers. Returns what happened, for the log.
 pub fn step(worlds: &mut [Polity], book: &Ledger, registry: &Registry, var_root: &Path, keepers: &BTreeMap<String, Keeper>, bounce: u64, stamp: u64) -> Vec<String> {
@@ -589,6 +662,7 @@ pub fn step(worlds: &mut [Polity], book: &Ledger, registry: &Registry, var_root:
             "A GATE IS FOLDED {label} by the parliament of {} for {} in {} trips (span {cells}); unmapped until the house maps it",
             f.builder, f.master, f.trips
         ));
+        credit(var_root, &f.from, &f.core, &total, &ratio(0, 1));
         gates.push(Gate { from: f.from, core: f.core, builder: f.builder, span: cells, mapped: false, built: bounce, place, freshness: FRESHNESS_CELLS });
     }
     foldings = paying;
@@ -645,7 +719,10 @@ pub fn step(worlds: &mut [Polity], book: &Ledger, registry: &Registry, var_root:
         // The toll is one trip: carried whole, or unpaid.
         let toll = cfe::world::smelt_resource(&gate_melt(gate.span));
         match trip(worlds, at, payee, &toll, deal(), &melt) {
-            Ok((carried, _)) if carried == toll => kept.push(e),
+            Ok((carried, arrived)) if carried == toll => {
+                credit(var_root, &gate.from, &gate.core, &ratio(0, 1), &arrived);
+                kept.push(e);
+            }
             Ok((carried, _)) => said.push(format!("AN ENVOY IS RECALLED — {} from {} (the passage toll unpaid: its hulls carried {carried} of {toll})", e.line, e.core)),
             Err(why) => said.push(format!("AN ENVOY IS RECALLED — {} from {} (the passage toll unpaid: {why})", e.line, e.core)),
         }

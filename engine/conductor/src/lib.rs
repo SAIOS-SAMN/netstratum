@@ -80,6 +80,7 @@ pub mod substrata;
 pub mod commissions;
 pub mod parliaments;
 pub mod ascension;
+pub mod realms;
 // SOC-1 (operator directive 2026-08-16): the open build workbench — the surplus
 // phase of `build_step` draws its next building from a disposition-weighted
 // partition function seeded by the chronicle digest, in place of the fixed
@@ -5788,6 +5789,15 @@ pub struct HubCensus {
     pub partial: usize,
     /// Buyers' STAMP legs refused, by their refusal's name.
     pub refused: std::collections::BTreeMap<String, usize>,
+    /// docs/75: the exchanges completed in a cleared hub, each (the line's
+    /// world, its hub line's world), for the realms' contact.
+    pub met: Vec<(String, String)>,
+    /// docs/75: the legs that rode a mapped gate in a cleared hub, each (the
+    /// line's world, the gate's core): passage over a progenitor network.
+    pub passed: Vec<(String, String)>,
+    /// docs/77: the road tolls each gate earned its builders, each (the
+    /// gate's galaxy, its core, the STAMP that arrived).
+    pub gate_tolls: Vec<(String, String, Ratio)>,
 }
 
 /// STAMP-1 / MM-1 — pure NPC mint and spot clear (Wave-4 minimal).
@@ -6018,6 +6028,12 @@ pub fn stamp_market_step(
         let matched = stamp_in > ratio(0, 1) && cargo_in > ratio(0, 1);
         if matched {
             census.cleared += 1;
+            for i in paid.iter().map(|(i, _)| *i).chain(gave.iter().map(|(i, _, _)| *i)) {
+                census.met.push((worlds[i].spec.world_name.clone(), worlds[hub].spec.world_name.clone()));
+                if let Some((_, _, Some(road))) = open.iter().find(|(j, _, _)| *j == i) {
+                    census.passed.push((worlds[i].spec.world_name.clone(), road.core.clone()));
+                }
+            }
         } else {
             census.unmet += 1;
         }
@@ -6084,7 +6100,8 @@ pub fn stamp_market_step(
                 let (from, to) = two_mut(worlds, *i, payee);
                 if cfe::world::stamp_aperture_transfer(&mut from.world, cfe::world::FIRST_ORB, &mut to.world, cfe::world::FIRST_ORB, toll, deal, &road).is_ok() {
                     let arrived = stamp_of(&worlds[payee]) - before;
-                    if via.is_some() {
+                    if let Some(road) = via {
+                        census.gate_tolls.push((road.from.clone(), road.core.clone(), arrived.clone()));
                         gate_paid += arrived;
                     } else {
                         toll_paid += arrived;
