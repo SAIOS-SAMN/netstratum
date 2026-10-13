@@ -3,20 +3,28 @@
 Operator (2026-10-13): netstratum's space is a box of squares, a 64-cell
 cube with its faces glued, measured by summed axis distance (L1), and called a
 "torus". That is a misalignment: the universe is non-Euclidean. Netstratum
-moves to the geometry xylarium-kernel and barren-realms adopted: an S^360
-universe, S^60 bodies, cone manifolds (xylarium `docs/XYLARIUM-KERNEL.md` §10,
-tracker W8). One geometry across the games lets tiers and core tubes bridge
-between universes.
+moves to an S^360 universe, S^60 bodies and cone manifolds: its OWN
+physics, matching the shared MODEL xylarium-kernel and barren-realms adopted
+(xylarium `docs/XYLARIUM-KERNEL.md` §10, tracker W8) at the boundary, so tiers
+and core tubes can bridge between universes. No code is shared with
+xylarium; the shared mathematics (sphere points, reflection products) is
+mycelium's (A1), from the pinned `vendor/mycelium`.
 
 Status: scoped 2026-10-13; not built. Facts were read from the code that day.
 
-## The geometry adopted (from xylarium §10, not reinvented)
+## The geometry (the shared model; netstratum's own physics)
 
 - **Space: S^360** of radius R, the Big Bang's curvature.
   - A place is a rational point (361 rationals, by inverse stereographic
     projection: exact, dense).
-  - Distance is the exact squared chord; the arc is enclosed only when a
-    length is reported.
+  - **Distance is the GEODESIC ANGLE,** intrinsic to the sphere, held
+    exactly by its rational half-angle parameter `t` (`cos = (1−t²)/(1+t²)`,
+    `sin = 2t/(1+t²)`). Netstratum's physics never measures through the flat
+    space around the sphere (operator, 2026-10-13).
+  - **The squared chord** (xylarium's and the court's form) is used ONLY at
+    the boundary: the core-tube mouths' coordinates are stated in the form
+    the court reads (`Sphere { n, R }`, exact chord form). The translation is
+    exact: chord = 2R·sin(angle/2).
 - **Measure concentrates.** Two unrelated places stand about a quarter
   circumference apart. Nearness exists only along CONES between masses.
 - **Masses are cone points; cones carry gravity.** Gravity between two masses
@@ -40,7 +48,7 @@ Status: scoped 2026-10-13; not built. Facts were read from the code that day.
 | flat today | where (count of sites) | becomes |
 |---|---|---|
 | positions as 3 rationals in a 64-cell box | `spec.position` (50), `registry` position, `starchart.card` (19), `galaxies.card` (9) | a rational point of S^360 per world and core; the cards retired for binary checkpoints |
-| L1 distance summed per axis, wrapped at the faces | `ledger::torus_distance` (22), `l1_wrapped`/`wrapped_abs` (6), `conductor::spatial_l1` (14), `universe_span` (27) | the exact squared chord on S^360; no span, no wrap |
+| L1 distance summed per axis, wrapped at the faces | `ledger::torus_distance` (22), `l1_wrapped`/`wrapped_abs` (6), `conductor::spatial_l1` (14), `universe_span` (27) | the geodesic angle on S^360 (rational half-angle); no span, no wrap; chord form only at core-tube mouths |
 | a line's core: the nearest core within a reach in cells | `Ledger::core_of` (20) | the core whose cone the world lies on (the strongest flux), read from the cones |
 | the bulge as one cell | `ancients::in_bulge` (3) | the core's throat region, from its cone (the core as cone point) |
 | melt from summed distance | `cfe::world::route_melt`, `pair_melt`, `effective_distance` (12) | melt along the geodesic, and along cones (where locality lives) |
@@ -85,8 +93,9 @@ They are puzzle frames, not space.
 
 ## Build order (after the rulings and A1/A2)
 
-1. **The geometry library** (shared, from mycelium A1): places, chords,
-   reflections, cones. Netstratum writes none of its own (as xylarium W10).
+1. **The geometry library** (mycelium's A1, from `vendor/mycelium`): places,
+   reflections, cones; netstratum adds the geodesic angle by half-angle
+   parameters, and chord form only for the court.
 2. **The migration of places:** every world and core mapped onto S^360 so
    that today's neighbourhoods are kept as cone relations (each world on its
    core's cone). It is checkpointed, and the cards retired.

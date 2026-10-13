@@ -164,8 +164,9 @@ gates.
 The separation, on the map, between a branch's records and the main
 timeline's: the interval between corresponding events (the same subject's
 records on each side). Time is a coordinate (docs/80), so divergence is a
-distance, measured exactly as era 1 measures distances (the squared chord,
-here over the time axis and place).
+distance, measured exactly as era 1 measures distances: the GEODESIC ANGLE,
+held by its rational half-angle parameter, here over the time axis and
+place (never a squared chord, which measures through flat space).
 
 ### Temporal attraction: gravity along the time axis
 
@@ -217,9 +218,11 @@ here over the time axis and place).
 ### The point of no return: TERMINAL NODES
 
 - A branch ESCAPES when it diverges faster than the main timeline's pull can
-  bring it back: the escape condition of the cone law (its rate of
-  divergence at `D` exceeds the escape rate `sqrt(2 · ∫ g dD)`, kept exact by
-  comparing squares). Derived, not a dial.
+  bring it back: the escape condition of the cone law. Its divergence rate
+  at `D` exceeds what the pull can still reverse, the work `∫ g dD` from `D`
+  outward. It is read as a comparison of the branch's divergence against
+  that work, in the geodesic measure, without a flat kinetic square.
+  Derived, not a dial; its exact form is fixed with era 1's cone law.
 - An escaped branch is a TERMINAL NODE: it has no path back to the forward
   positions.
 - **The danger is weight.** A terminal node carrying great weight
