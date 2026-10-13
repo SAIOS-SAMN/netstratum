@@ -298,15 +298,6 @@ impl Ledger {
         None
     }
 
-    /// The L1 toroidal distance between two charted worlds — wrapped
-    /// |Δ| summed over the spatial axes, exact. NO SQUARING (the L1
-    /// law): the short way around, per axis, added whole.
-    pub fn l1_distance(&self, a: &str, b: &str) -> Option<Ratio> {
-        let ((ax, ay, az), _) = self.charted_position(a)?;
-        let ((bx, by, bz), _) = self.charted_position(b)?;
-        Some(torus_distance(&(ax, ay, az), &(bx, by, bz), &self.universe_span()))
-    }
-
 }
 
 /// Filesystem-safe names (worlds, planets, civilizations, tasks):

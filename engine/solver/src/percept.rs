@@ -97,40 +97,6 @@ fn candidates(seen: &[(Percept, Vec<Fate>)]) -> Vec<Select> {
     all
 }
 
-/// WHY a task has no object rule, by its first stage that fails — the
-/// diagnostic face of [`learn`].
-pub fn why_not(train: &[(Grid, Grid)]) -> &'static str {
-    let mut act: Option<Act> = None;
-    for (input, output) in train {
-        if (input.rows, input.cols) != (output.rows, output.cols) {
-            return "the frame changes";
-        }
-        let p = perceive(input);
-        let Some(fate) = fates(input, output, &p) else {
-            return "a body changes unevenly, or a cell outside every body changes";
-        };
-        for f in fate {
-            let this = match f {
-                Fate::Kept => continue,
-                Fate::Recolored(h) => Act::Recolor(h),
-                Fate::Removed => Act::Remove,
-            };
-            match &act {
-                None => act = Some(this),
-                Some(a) if *a == this => {}
-                Some(_) => return "the bodies change in more than one way",
-            }
-        }
-    }
-    if act.is_none() {
-        return "no body changes";
-    }
-    if learn(train).is_some() {
-        return "closed";
-    }
-    "no predicate picks the changed bodies"
-}
-
 /// THE SELECTION A TASK SHOWS: the object rule every training pair agrees
 /// on, closing every pair exactly, or `None`.
 pub fn learn(train: &[(Grid, Grid)]) -> Option<ObjectRule> {

@@ -8432,6 +8432,10 @@ fn chronicle(world: &World, style: &Style) {
                 "✶ THE ANCIENT ARISES — {} (its line holds {tree} of {living} living)",
                 style.strong(sigil)
             ),
+            cfe::dop::ClosureEvent::SubstratumOpened { core, depth, level, opener, .. } => format!(
+                "⇣ {} opens a substratum beneath {core} (depth {depth}, level {level})",
+                style.strong(opener)
+            ),
             cfe::dop::ClosureEvent::CoreDeposited { core, world, resource, amount } => format!(
                 "⊙ {} of {world}'s sinks reaches the core {}",
                 match resource {

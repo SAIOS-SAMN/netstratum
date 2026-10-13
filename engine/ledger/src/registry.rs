@@ -152,17 +152,6 @@ pub fn tier_of(station: Option<&str>) -> Option<Tier> {
     }
 }
 
-/// Is this line seated in an office that serves everyone?
-///
-/// Any seated office (T0–T2, T4–T9) is a public function — not a
-/// lifestyle instrument. **Only T3 (no seat) is non-serving.**
-///
-/// Returns `None` when the tier cannot be read, so a gate refuses
-/// instead of guessing.
-pub fn holds_a_serving_seat(station: Option<&str>) -> Option<bool> {
-    tier_of(station).map(|tier| tier != Tier::T3)
-}
-
 /// T1.2 — typed preconditions for economic offices (facts of the
 /// chain, not doors). Callers pass what the world has already done;
 /// this function never invents history.

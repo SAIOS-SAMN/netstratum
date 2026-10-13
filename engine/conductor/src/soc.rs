@@ -398,25 +398,6 @@ impl SpeciesManifold {
         }
     }
 
-    /// **THE ALGEBRAIC RANK** — read the intelligence as the SNF invariant PAIR
-    /// (generators ⊕ relations) rather than the collapsed `genus` scalar. Free
-    /// ranks straight off the factored boundary: `β₀ = rows − rank`,
-    /// `β₁ = cols − rank`; torsion = the invariant factors `> 1`. Exact, and no
-    /// new computation — `∂₁` was already factored in `of`. `dimension()` recovers
-    /// `genus`, so the draw is untouched; this only makes the presentation legible.
-    pub fn algebraic_rank(&self) -> AlgebraicRank {
-        let rank = self.boundary.rank();
-        AlgebraicRank {
-            components: (self.boundary.rows - rank) as u64,
-            cycles: (self.boundary.cols - rank) as u64,
-            relations: self
-                .boundary
-                .invariant_factors()
-                .into_iter()
-                .filter(|d| *d > BigInt::from(1))
-                .collect(),
-        }
-    }
 }
 
 /// Exact integer `A · x`.
@@ -486,40 +467,6 @@ pub fn zone_weight(
     manifold
         .affinity(kind)
         .saturating_mul(lattice.saturating_add(tilt))
-}
-
-/// **A ROLE CLOSES A DRIVE** (RCP-2 F4) — the recipe analogue of `serves`: does a
-/// recipe delivering `role` relieve the `binding` drive? A supply-starved line
-/// (Metabolic/Cognitive) is closed by FOOD or COGNITION; a Homeostatic one by a
-/// SINK; an Expansive one by the ENERGY/STRUCT that reaches new niches. Mirrors
-/// the zone `serves` map so a recipe and a building compete on equal footing.
-fn role_serves(role: usize, binding: Drive) -> bool {
-    use cfe::morphogen::{COGNITION, ENERGY, FOOD, SINK, STRUCT};
-    match binding {
-        Drive::Metabolic | Drive::Cognitive => role == FOOD || role == COGNITION,
-        Drive::Homeostatic => role == SINK,
-        Drive::Expansive => role == ENERGY || role == STRUCT,
-    }
-}
-
-/// **A RECIPE'S WORKBENCH WEIGHT** (RCP-2 F4) — a minted recipe competes in the
-/// SAME partition as the zones, weighted by the manifold's topological REACH
-/// (`Σβ_k`, the algebraic dimension — the recipe's analogue of a zone's genus
-/// affinity) tilted toward the binding drive when the recipe's role closes it:
-/// `reach · (L + γ·[role serves])`. A society of greater reach raises richer
-/// recipes more readily, exactly as a stronger affinity raises a native building.
-pub fn recipe_weight(
-    role: usize,
-    rank: &AlgebraicRank,
-    binding: Option<Drive>,
-    gamma_num: u64,
-) -> u64 {
-    let lattice = LATTICE as u64;
-    let tilt = match binding {
-        Some(drive) if role_serves(role, drive) => gamma_num,
-        _ => 0,
-    };
-    (rank.dimension() as u64).saturating_mul(lattice.saturating_add(tilt))
 }
 
 /// **THE PARTITION DRAW** — the shared engine under the workbench: sample an index
@@ -817,35 +764,6 @@ mod tests {
             regenerative.genus,
             extractive.genus
         );
-    }
-
-    #[test]
-    fn intelligence_reads_as_the_algebraic_presentation_not_a_scalar() {
-        // OPERATOR RULING: reach reports the SNF invariant PAIR — free generators
-        // (algebraic dimension) ⊕ relations (torsion) — the two projections of the
-        // chain complex's free-resolution presentation, on the boundary already
-        // factored in `of`.
-        let extractive = SpeciesManifold::of(2, "aqueous", false);
-        let regenerative = SpeciesManifold::of(2, "aqueous", true);
-        let ext = extractive.algebraic_rank();
-        let reg = regenerative.algebraic_rank();
-
-        // The dimension scalar equals the genus the draw uses — nothing lost, the
-        // split just made explicit.
-        assert_eq!(ext.dimension(), extractive.genus);
-        assert_eq!(reg.dimension(), regenerative.genus);
-
-        // Regeneration is a RELATION, not a new generator: it adds a metabolic
-        // CYCLE (β₁), the syzygy a recycling loop introduces — the component count
-        // is unchanged, only the cycle rank rises. Krull dimension alone (free
-        // generators) would miss it; the pair does not.
-        assert_eq!(reg.components, ext.components, "recycling adds no new capability axis");
-        assert!(reg.cycles > ext.cycles, "it adds an independent cycle ({} > {})", reg.cycles, ext.cycles);
-
-        // A metabolic graph is torsion-free, so the relation coefficients are
-        // empty — the seam higher cells (the RCP-2 / DIO-3b nonlinear frontier)
-        // enter through.
-        assert!(ext.relations.is_empty() && reg.relations.is_empty(), "graph homology carries no torsion yet");
     }
 
     #[test]

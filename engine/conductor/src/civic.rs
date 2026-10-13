@@ -514,65 +514,6 @@ impl LeisureManifold {
             .unwrap_or_else(|| ratio(0, 1))
     }
 
-    /// Set a stratum's balance, dropping it when empty (so the manifold carries
-    /// no zero rows and two equal manifolds compare equal).
-    fn set(&mut self, drive: Drive, bal: Ratio) {
-        self.strata.retain(|(d, _)| *d != drive);
-        if bal > ratio(0, 1) {
-            self.strata.push((drive, bal));
-        }
-    }
-}
-
-/// Floor a flow onto `1/grain` — the ONT-2b discipline (floor the FLOW at the
-/// source, NEVER the accumulator), so each stratum stays a bounded `1/grain`
-/// multiple forever and its denominator cannot explode. `grain` is a bound
-/// variable, so `ratio(grain, 1)` mints no tuned dial.
-fn floor_flow(x: &Ratio, grain: i64) -> Ratio {
-    let g = ratio(grain, 1);
-    (x.clone() * g.clone()).floor() / g
-}
-
-/// **SETTLE THE LEISURE MANIFOLD** (ONT-4) — fold one beat into the per-stratum
-/// banks: each tier's `surplus` IN, its `spend` OUT, and a FLAT `decay` (a
-/// bounded per-beat drain, NOT `bank × d`) — every flow floored to `1/grain` and
-/// the balance floored at zero. No stratum multiplies its own balance, so the
-/// geometric recurrence that detonated is gone by construction and replay
-/// recomputes the identical banks. Attribution — how the beat's surplus splits
-/// across tiers — is the CALLER's (it reads the live cascade); this is the pure
-/// bounded accounting the wire settles against.
-pub fn settle_leisure_manifold(
-    prior: &LeisureManifold,
-    surplus: &[(Drive, Ratio)],
-    spend: &[(Drive, Ratio)],
-    flat_decay: &Ratio,
-    grain: i64,
-) -> LeisureManifold {
-    let zero = ratio(0, 1);
-    let decay = floor_flow(&flat_decay.clone().max(zero.clone()), grain);
-    let read = |list: &[(Drive, Ratio)], drive: Drive| {
-        list.iter()
-            .find(|(d, _)| *d == drive)
-            .map(|(_, v)| v.clone())
-            .unwrap_or_else(|| zero.clone())
-    };
-    // Every tier named by the prior manifold or this beat's flows.
-    let mut tiers: Vec<Drive> = prior.strata.iter().map(|(d, _)| *d).collect();
-    for (drive, _) in surplus.iter().chain(spend.iter()) {
-        if !tiers.contains(drive) {
-            tiers.push(*drive);
-        }
-    }
-    let mut next = LeisureManifold::default();
-    for drive in tiers {
-        let inflow = floor_flow(&read(surplus, drive), grain);
-        let outflow = floor_flow(&read(spend, drive), grain);
-        // FLAT decay, not geometric: a bounded per-beat drain the stratum sheds,
-        // so a want cannot hoard a lifetime's surplus, without a self-multiply.
-        let bal = (prior.of(drive) + inflow - outflow - decay.clone()).max(zero.clone());
-        next.set(drive, bal);
-    }
-    next
 }
 
 /// The EROI friction margin μ (> 1): a thought must return MORE than it costs,
@@ -707,17 +648,6 @@ pub fn stress(world: &cfe::world::World, orb: u64) -> Ratio {
         }
     }
     ratio(0, 1) // sated
-}
-
-/// σ quantised onto a 64-lattice as `(numerator, 64)`, for the exact-integer
-/// blend — the same melt grid the rest of the economy speaks. A caller with no
-/// world clock hands this straight to [`instinct::blend`].
-pub fn stress_quantized(world: &cfe::world::World, orb: u64) -> (u64, u64) {
-    // Quantise onto the existing melt lattice (no new dial — the same grid the
-    // market and the peel already speak).
-    let scaled = (stress(world, orb) * ratio(LATTICE, 1)).round().to_integer();
-    let num = scaled.to_u64().unwrap_or(0).min(LATTICE as u64);
-    (num, LATTICE as u64)
 }
 
 /// A BLAKE3-seeded index in `[0, bound)` — the Mind's chance, replayable.

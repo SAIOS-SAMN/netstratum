@@ -200,22 +200,6 @@ pub mod fiber {
     pub const GAUGE: u8 = 4;
 }
 
-/// Count LE32-framed records in a journal.jrn file (for append cursor).
-pub fn count_frames(data: &[u8]) -> usize {
-    let mut at = 0usize;
-    let mut n = 0usize;
-    while at + 4 <= data.len() {
-        let len = u32::from_le_bytes(data[at..at + 4].try_into().unwrap()) as usize;
-        at += 4;
-        if at + len > data.len() {
-            break; // torn tail — stop
-        }
-        at += len;
-        n += 1;
-    }
-    n
-}
-
 /// Append one framed payload to a journal file (LE32 len ‖ payload).
 pub fn append_frame(path: &Path, payload: &[u8]) -> std::io::Result<()> {
     use std::io::Write;

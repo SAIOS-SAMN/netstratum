@@ -126,18 +126,6 @@ pub const fn gcd(a: i64, b: i64) -> i64 {
     a
 }
 
-/// The least common multiple of `1..=n` — the smallest ring on which
-/// every subdivision up to `n` lands exactly on a slot.
-pub const fn lcm_through(n: i64) -> i64 {
-    let mut held = 1i64;
-    let mut k = 2i64;
-    while k <= n {
-        held = held / gcd(held, k) * k;
-        k += 1;
-    }
-    held
-}
-
 /// **THE REQUIREMENT THE RING ANSWERS, and it is not a number either**
 /// (operator ruling 2026-08-05: *all of the constants here need to be
 /// derived dynamically*).

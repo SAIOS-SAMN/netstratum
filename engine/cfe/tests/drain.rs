@@ -90,7 +90,7 @@ fn the_annals_keep_what_the_live_world_reads_of_a_drained_prefix() {
     let whole: Vec<_> = c.receipts().to_vec();
     c.drain_to(6);
     // history = the drained non-bulk kinds, then everything held
-    let history: Vec<_> = c.history().cloned().collect();
+    let history: Vec<_> = c.history().map(|r| r.into_owned()).collect();
     let expect: Vec<_> = whole[..6]
         .iter()
         .filter(|r| !cfe::annals::bulk(r.event()))
@@ -98,7 +98,7 @@ fn the_annals_keep_what_the_live_world_reads_of_a_drained_prefix() {
         .cloned()
         .collect();
     assert_eq!(history, expect);
-    assert_eq!(c.history().rev().next(), whole.last(), "the history walks backward too");
+    assert_eq!(c.history().rev().next().as_deref(), whole.last(), "the history walks backward too");
     // every receipt the world sealed is still citable
     for r in &whole {
         assert!(c.sealed(&r.own().0));

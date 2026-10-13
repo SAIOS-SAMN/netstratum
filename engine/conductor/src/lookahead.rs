@@ -49,18 +49,6 @@ pub fn project(
     read_projection(&shadow)
 }
 
-/// Clone `world` and tick `depth` times with no build — "if this line
-/// does nothing more, where does it stand." Used where no candidate is
-/// affordable yet doom may already be underway (a starving line that
-/// cannot build its way out this beat still deserves to know it).
-pub fn project_passive(world: &World, depth: u32) -> Option<Projection> {
-    let mut shadow = world.clone();
-    for _ in 0..depth {
-        shadow.tick();
-    }
-    read_projection(&shadow)
-}
-
 fn read_projection(world: &World) -> Option<Projection> {
     let held = world.orb()?;
     Some(Projection {
@@ -92,14 +80,6 @@ mod tests {
         let mut world = World::new();
         world.found("shadow-test").expect("founds");
         world
-    }
-
-    #[test]
-    fn project_passive_ticks_without_building() {
-        let world = founded_world();
-        let zones_before = world.orb().expect("orb").zones.len();
-        let projection = project_passive(&world, 2).expect("a founded orb stands");
-        assert_eq!(projection.zones_total, zones_before);
     }
 
     #[test]

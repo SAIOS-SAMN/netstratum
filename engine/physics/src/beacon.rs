@@ -49,13 +49,6 @@ impl Beacon {
         Ratio::new(BigInt::from(k), BigInt::from(1u8) << 128)
     }
 
-    /// A Bernoulli trial with EXACT rational probability `p` (e.g.
-    /// 3/16): true with probability exactly `p`, decided by exact
-    /// comparison — no rounding anywhere.
-    pub fn bernoulli(&self, domain: &str, p: &Ratio) -> bool {
-        self.draw(domain) < *p
-    }
-
     /// An exactly-uniform index in `0..n` — rejection-sampled, so there
     /// is NO modulo bias: expansions falling in the biased tail are
     /// discarded and the counter advances (deterministically — replay

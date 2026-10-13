@@ -3376,39 +3376,6 @@ impl Polity {
         Some(civic::civic_reading(&fold, metabolism, &standing, &demand, [0u8; 32]).peel)
     }
 
-    /// **WHAT THE SOCIETY SEES** (OCULAR-2, doc 54) — the same live economy the
-    /// civic peel reads, but through the ocular organ instead of the lattice: the
-    /// exact-rational DIVERGENCE FIELD of the economic connection. `field[i] =
-    /// demand_i - supply_i`, the signed per-axis deficit, exact and unrounded — a
-    /// positive entry is unmet need, a negative one surplus. A graded field, never
-    /// summed or normed. `None` when there is no world. This is the loss-free
-    /// reading the abundance drives migrate onto (OCULAR-3): no `quantize`, no
-    /// `residual_extent`. A DERIVED read (pure over committed state), so SEAL-B is
-    /// untouched while it stands alongside the lattice peel.
-    pub fn ocular_deficit(&self) -> Option<Vec<cfe::ratio::Ratio>> {
-        let world = &self.world;
-        let orb = world.orb()?;
-        let metabolism = world
-            .committed()
-            .genesis
-            .as_ref()
-            .map(|g| g.metabolism)
-            .unwrap_or(2);
-        let axes = civic::resource_axes();
-        let standing: Vec<cfe::dop::ZoneKind> = orb.zones.iter().map(|z| z.kind).collect();
-        let primary = cfe::world::FIRST_ORB;
-        let pop = world.population_of(primary);
-        let demand_loads: Vec<(cfe::dop::Resource, cfe::ratio::Ratio)> = if pop > 0 {
-            let carrier = cfe::dop::metabolic_ration(metabolism);
-            vec![(carrier, ratio(pop as i64, 1) * world.per_capita_ration())]
-        } else {
-            Vec::new()
-        };
-        let demand = civic::demand_exact(&demand_loads, &axes);
-        let supply = civic::standing_supply_exact(&standing, metabolism, &axes);
-        Some(ocular::seen_deficit(&demand, &supply))
-    }
-
     /// **THE LIVE CASTE CENSUS** (SOC-4b) — the society self-organises this beat.
     /// Partition the working population across the unspanned residual axes the
     /// live civic peel reads (`civic_peel().residual`, the void no standing
@@ -7009,63 +6976,6 @@ pub fn shared_language_census(worlds: &[Polity], beat: u64) {
 /// beat. Returns the live worlds.
 pub fn run_era(var_root: &str, cycles: u32) -> Vec<Polity> {
     run_era_inner(var_root, cycles, None, None, None)
-}
-
-/// **THE CONDITION-DRIVEN ERA** (wedge removal, 2026-08-12): run at
-/// most `cycles` beats, stopping EARLY once `arrived` reads true on
-/// the board — checked at each beat's close. The era pins wait for a
-/// CONDITION (a cleave, an unlocked smelter), and a fixed 45-beat run
-/// wedges in debug builds as divergence multiplies worlds (measured:
-/// pre-existing at 4a37e53, >10 min; the condition itself arrives by
-/// ~beat 13). Stopping when the witnessed thing has happened keeps
-/// every assertion's meaning and cuts the dead tail. The full-length
-/// form remains `run_era` — production pacing is the binary's, not
-/// this runner's.
-pub fn run_era_until(
-    var_root: &str,
-    cycles: u32,
-    arrived: impl Fn(&[Polity]) -> bool,
-) -> Vec<Polity> {
-    run_era_inner(var_root, cycles, None, Some(&arrived), None)
-}
-
-/// The condition-driven era over a SEATED PREFIX of the founding
-/// roster — a fixture scale for pins whose law is per-line (a smelter
-/// rising, a rung earned): a smaller board proves the same claim at a
-/// fraction of the beat cost, and the full-roster form stays for the
-/// pins whose law is board-wide.
-pub fn run_era_until_among(
-    var_root: &str,
-    cycles: u32,
-    seats: usize,
-    arrived: impl Fn(&[Polity]) -> bool,
-) -> Vec<Polity> {
-    run_era_inner(var_root, cycles, Some(seats), Some(&arrived), None)
-}
-
-/// **THE UNIVERSE'S OWN LOOP over its registered lines** (docs/72 tests): the
-/// same beat as `run_era`, booted from every line the registry holds whose
-/// world stands in `var_root` (resumed from its snapshot), with the year's
-/// bounce (`year_bounce`) at each year's close. Stops early once `arrived`.
-pub fn run_universe(var_root: &str, cycles: u32, arrived: &dyn Fn(&[Polity]) -> bool) -> Vec<Polity> {
-    let registry = Registry::at(format!("{var_root}/registry"));
-    let book = Ledger::at(format!("{var_root}/worlds"));
-    let specs: Vec<PolitySpec> = roster(&registry)
-        .into_iter()
-        .filter(|s| book.world_dir(&s.world_name).join("state.snap").exists() && !book.world_dir(&s.world_name).join("collapsed").exists())
-        .collect();
-    // The universe's own beat carries on from where it stands (`conductor.beat`),
-    // so core periods and tenures read as they do live.
-    let beat_file = std::path::Path::new(var_root).join("conductor.beat");
-    let beat0: u64 = std::fs::read_to_string(&beat_file).ok().and_then(|t| t.trim().parse().ok()).unwrap_or(0);
-    let ran = std::cell::Cell::new(0u64);
-    let counted = |w: &[Polity]| {
-        ran.set(ran.get() + 1);
-        arrived(w)
-    };
-    let worlds = run_era_inner(var_root, cycles, None, Some(&counted), Some((specs, beat0)));
-    let _ = std::fs::write(&beat_file, format!("{}\n", beat0 + ran.get()));
-    worlds
 }
 
 fn run_era_inner(

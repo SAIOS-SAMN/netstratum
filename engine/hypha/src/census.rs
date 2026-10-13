@@ -394,26 +394,6 @@ impl Census {
         }
     }
 
-    /// What a challenge checks: the steps, summed key by key, are exactly the
-    /// window's rows and declared.
-    pub fn entries_sum_to_totals(&self) -> bool {
-        let mut rows: BTreeMap<(u64, Holding), i128> = BTreeMap::new();
-        let mut declared: BTreeMap<(String, Holding), i128> = BTreeMap::new();
-        for s in &self.steps {
-            for (orb, h, v) in &s.rows {
-                *rows.entry((*orb, *h)).or_default() += v;
-            }
-            for (k, h, v) in &s.declared {
-                *declared.entry((k.clone(), *h)).or_default() += v;
-            }
-        }
-        rows.retain(|_, v| *v != 0);
-        declared.retain(|_, v| *v != 0);
-        let want_rows: BTreeMap<_, _> = self.rows.iter().map(|(o, h, v)| ((*o, *h), *v)).collect();
-        let want_declared: BTreeMap<_, _> = self.declared.iter().map(|(k, h, v)| ((k.clone(), *h), *v)).collect();
-        rows == want_rows && declared == want_declared
-    }
-
     /// The window's totals as the court reads them — the fold's rows.
     pub fn nets(&self) -> (Vec<Net>, Vec<Net>) {
         nets(&self.people, &self.rows, &self.declared)
@@ -450,26 +430,6 @@ mod tests {
     use super::*;
     use crate::fold::{fold, identity};
     use mycelium::anastome::dialogue::uplink::Discontinuous;
-
-    fn step(receipt: usize, orb: u64, v: i128) -> Step {
-        let iron = Holding::Matter(Resource::Iron);
-        Step { receipt, cite: [receipt as u8; 32], rows: vec![(orb, iron, v)], declared: vec![("YieldCollected".into(), iron, v)] }
-    }
-
-    #[test]
-    fn a_long_window_cuts_into_bounded_folds_that_sum_to_it_and_tile_it() {
-        let iron = Holding::Matter(Resource::Iron);
-        let steps: Vec<Step> = (0..10).map(|i| step(i * 2, 1, 3)).collect();
-        let whole = Census { people: "p".into(), from: 0, to: 25, head: [99; 32], rows: vec![(1, iron, 30)], declared: vec![("YieldCollected".into(), iron, 30)], steps };
-        assert!(whole.entries_sum_to_totals());
-        let parts = whole.chunks(4);
-        assert_eq!(parts.iter().map(|c| c.steps.len()).collect::<Vec<_>>(), vec![4, 4, 2]);
-        assert_eq!(parts.iter().map(|c| (c.from, c.to)).collect::<Vec<_>>(), vec![(0, 7), (7, 15), (15, 25)]);
-        assert_eq!(parts[0].head, [6; 32]);
-        assert_eq!(parts[2].head, [99; 32]);
-        assert!(parts.iter().all(Census::entries_sum_to_totals));
-        assert_eq!(parts.iter().map(|c| c.rows[0].2).sum::<i128>(), 30);
-    }
 
     #[test]
     fn a_holding_is_read_at_the_grain_and_an_off_grain_one_is_flagged() {

@@ -101,58 +101,6 @@ impl Need {
         Need { hungers: vec![hunger], starved_for, thin: Vec::new(), reach_bonus: 0, capacity: 0 }
     }
 
-    /// Map the chronicle's `(kind, reading)` wants into a reach.
-    /// Unknown kinds are dropped, never guessed.
-    pub fn from_wants(wants: &[(u8, u64)]) -> Need {
-        let mut hungers = Vec::new();
-        let mut starved_for = 0u64;
-        for &(kind, reading) in wants {
-            if let Some(hunger) = Hunger::from_kind(kind) {
-                if !hungers.contains(&hunger) {
-                    hungers.push(hunger);
-                }
-                starved_for = starved_for.max(reading);
-            }
-        }
-        Need { hungers, starved_for, thin: Vec::new(), reach_bonus: 0, capacity: 0 }
-    }
-
-    /// THE DEPTH THE NEED WILL COMPOSE TO.
-    ///
-    /// A sated mind takes single derived operators; a starving one will
-    /// compose two, and a long-starved one three — the HUNGER baseline.
-    /// On top of that a line composes as much DEEPER as its structure has
-    /// earned it (`reach_bonus`, A2): a developed, multi-orb civilization
-    /// holds more of a composition in view and so finds — and mints —
-    /// longer words a shallow mind never reaches. Hunger buys breadth over
-    /// DERIVED candidates; advancement buys DEPTH. The observation still
-    /// supplies every candidate.
-    pub fn compose_limit(&self) -> usize {
-        let hunger = match (self.hungers.is_empty(), self.starved_for) {
-            (true, _) => 1,
-            (false, r) if r >= 480 => 3,
-            (false, _) => 2,
-        };
-        // THE NO-OVERFIT CEILING. Depth 3 is the measured frontier: a
-        // composition of four or more DERIVED operators was measured to
-        // overfit the train pairs and fail the held-out test (33 solves
-        // confirmed at ≤3, 4 false beyond it). Advancement buys depth UP
-        // TO that frontier — a shallow-hunger line its structure earned it
-        // climbs to 3 — but never PAST it, where the reach stops finding
-        // real structure and starts memorising noise. Beyond 3, capability
-        // grows only by CONDENSATION (a composed word becoming one deeper
-        // letter), not by reaching further into the closed algebra.
-        //
-        // **THE INFRASTRUCTURE CEILING** (COG-6) — the mind composes only as
-        // deep as its built apparatus contains, never past it, however much
-        // leisure or rank it has. `capacity == 0` is uncapped (the standing
-        // frontier); a set capacity caps below it, so a mud-hut line (no
-        // research seated) is held to the shallowest thought until it builds a
-        // bigger brain. Leisure buys the time; infrastructure bounds the size.
-        let frontier = if self.capacity == 0 { 3 } else { self.capacity.min(3) };
-        (hunger + self.reach_bonus).min(frontier)
-    }
-
     /// Does this need reach for `family` before the others?
     ///
     /// Ordering only. Every family stays reachable — a resonance-struck
@@ -179,23 +127,6 @@ impl Need {
 mod tests {
     use super::*;
 
-    #[test]
-    fn infrastructure_caps_the_mind() {
-        // A long-starved, structurally deep line WANTS the frontier...
-        let mut deep = Need::struck(Hunger::Novelty, 500);
-        deep.reach_bonus = 2;
-        assert_eq!(deep.compose_limit(), 3, "uncapped (capacity 0), it reaches the no-overfit frontier");
-        // ...but a mud hut (no brain built, capacity 1) holds it to the
-        // shallowest thought, however starved or developed it is.
-        deep.capacity = 1;
-        assert_eq!(deep.compose_limit(), 1, "no apparatus, no deep thought");
-        // A built brain lifts the ceiling one rung at a time.
-        deep.capacity = 2;
-        assert_eq!(deep.compose_limit(), 2, "a bigger brain contains a bigger thought");
-        // But infrastructure can never buy PAST the overfit frontier.
-        deep.capacity = 9;
-        assert_eq!(deep.compose_limit(), 3, "the no-overfit frontier still stands above any apparatus");
-    }
 }
 
 /// The family an operator belongs to — the census's classifier, one

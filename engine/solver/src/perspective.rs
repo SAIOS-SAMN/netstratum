@@ -64,10 +64,6 @@ impl Perspective {
         Perspective { line, derived, residual, silhouettes }
     }
 
-    /// Exact when a known answer left no residual.
-    pub fn is_exact(&self) -> bool {
-        matches!(&self.residual, Some(cells) if cells.is_empty())
-    }
 }
 
 /// The cells `derived` got wrong against `want`. A dimension mismatch
