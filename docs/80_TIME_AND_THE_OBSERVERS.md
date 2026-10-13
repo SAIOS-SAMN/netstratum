@@ -159,28 +159,23 @@ stated.
   would be a lane of no kind. A count of measurement events is a ledger
   coordinate (like K), never a lane. Pricing torsion later is a mode ruling
   on H.
-- **(c) The crossing statement: KIND_CROSSING = 12** (its read: 13), a
-  statement of the universe's domain, signed by the domain key, sealed as
-  `Cite::Stated` (as geometry and join are). Fields, in order:
-  1. domain (32);
-  2. the core tube crossed (its parent face, as Genesis names one);
-  3. the TUniversal point crossed at (`TPoint::LEN`);
-  4. cosmic time (u64, the bounce's returns);
-  5. the TORSION as its coordinates, per hole: canonical generator, rational
-     point c and side λ exact; winding t/ℓ where finite, else named by
-     (c, λ); never a decimal;
-  6. MEASUREMENTS n (u64);
-  7. sig 64.
-
-  The phase advance is never stored: it is the torsion's n-th member, read
-  by its certificate (`Theorem::at`), so the court re-derives it.
-- **Owed:** kinds 12/13 are not built; they come with A2 (`Sphere { n, R }`),
-  after the peer universe's founding.
+- **(c) Superseded (commit 821841cf): no new statement kind.** Kind 12 is
+  already ACT_DOMAIN's LEDGER. Netstratum's LEDGER entry (sub-kind 12) already
+  carries the crossing pair: the universe's committed cycle `u` (its cosmic
+  time) beside the mesh's final point (`refound::ledger_frame`). The
+  torsion's exact coordinates (per hole: canonical generator, rational point
+  c and side λ, winding t/ℓ where finite) and the measurement count n will
+  ride the LEDGER entry as an OPTIONAL TRAILING FIELD. Entries without it are
+  unchanged. The phase advance is never stored; the court re-derives it.
+- **Owed:** the trailing field's byte layout, with the build after the peer
+  universe's founding.
 
 **What changes here:**
-- Item 3 of the proposal (a Q lane) is replaced by the crossing statement.
+- Item 3 of the proposal (a Q lane) is replaced by the LEDGER entry's
+  trailing field.
 - Item 1 (an origin in the point) is replaced by crossing pairs.
-- Build step 3 becomes "the crossing statement":
-  - done-when: crossing statements sealed for netstratum era 1's domain,
-    0 → > 0, each with its cosmic time and point; dilation read between two;
-  - witness: the court's sealed statement.
+- Build step 3 becomes "the LEDGER entry's torsion field":
+  - done-when: LEDGER entries for era 1's domain sealed with the torsion
+    field and n, 0 → > 0, each with its cosmic time u and point; dilation
+    read between two;
+  - witness: the court's sealed LEDGER entries.
