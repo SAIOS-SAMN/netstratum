@@ -203,13 +203,6 @@ impl<F: Field> Rational<F> {
         self.value.denom()
     }
 
-    /// Borrowed `BigRational` for direct delegation (callers prefer the
-    /// `try_*` methods to retain `OverflowError` discipline).
-    #[inline]
-    pub fn as_bigrational(&self) -> &BigRational {
-        &self.value
-    }
-
     /// Negate (consumes).
     pub fn negate(self) -> Self {
         Self {

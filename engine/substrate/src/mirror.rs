@@ -68,14 +68,6 @@ impl<F: Field> SingularityMirror<F> {
         _field: core::marker::PhantomData,
     };
 
-    /// Construct at an explicit horizon.
-    pub fn at_horizon(horizon: HorizonContext) -> Self {
-        Self {
-            horizon,
-            _field: core::marker::PhantomData,
-        }
-    }
-
     /// Borrowed horizon context.
     #[inline]
     pub fn horizon(&self) -> HorizonContext {

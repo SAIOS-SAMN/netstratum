@@ -102,12 +102,6 @@ impl MatrixFiber2x2 {
         self.matmul(other).minus(&other.matmul(self))
     }
 
-    /// Do these two connections commute? `[A, B] = 0` is the abelian
-    /// case — the flat, dead circle.
-    pub fn commutes_with(&self, other: &Self) -> bool {
-        self.commutator(other).is_zero()
-    }
-
     /// Transpose — the congruence law's right factor.
     pub fn transpose(&self) -> Self {
         Self::new(
@@ -116,14 +110,6 @@ impl MatrixFiber2x2 {
             self.m[0][1].clone(),
             self.m[1][1].clone(),
         )
-    }
-
-    /// **THE CONGRUENCE LAW** — a gauge change acts as
-    /// `Δ'_ij = g_i · Δ_ij · g_jᵀ`, never as conjugation. Congruence
-    /// preserves the symmetric form the relation carries; conjugation
-    /// would treat the fiber as an endomorphism it is not.
-    pub fn congruate(&self, left: &Self, right: &Self) -> Self {
-        left.matmul(self).matmul(&right.transpose())
     }
 
     /// L1 magnitude — the taxicab sum of entries. Squares stay barred as

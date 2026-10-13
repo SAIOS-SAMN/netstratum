@@ -4,8 +4,8 @@ use super::*;
 use crate::dop::Rail;
 use crate::ratio::Ratio;
 use crate::xrail::{
-    decode_isthmus, decode_strand, encode_court_claim, encode_isthmus, encode_stamp_packet,
-    verify_court_claim, CourtClaim, StrandKind, STRAND_MAGIC,
+    decode_isthmus, decode_strand, encode_stamp_packet,
+    verify_court_claim, StrandKind,
 };
 
 fn strand_enabled() -> bool {
@@ -193,18 +193,4 @@ impl World {
         Ok(amt)
     }
 
-    /// Wrap a valid court claim in an isthmus frame (pure helper for tests/CLI).
-    pub fn wrap_court_claim_isthmus(
-        axes: [u8; 3],
-        work: [u8; 32],
-        amount: Ratio,
-    ) -> Vec<u8> {
-        let payload = encode_court_claim(&CourtClaim { axes, work, amount });
-        encode_isthmus(&payload)
-    }
-
-    /// Re-export magic for CLI smoke.
-    pub fn strand_magic() -> &'static [u8] {
-        STRAND_MAGIC
-    }
 }

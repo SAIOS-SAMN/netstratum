@@ -62,25 +62,6 @@ impl World {
         );
         Ok(())
     }
-    /// **THE COUNTER-OFFER** (tag 99, 2026-08-06): the RENEGOTIATE arm
-    /// of refuse/accept/renegotiate. Amends the resting offer's ask in
-    /// committed state — so acceptance (the clear) honors the countered
-    /// terms by construction, and each round is a receipt.
-    ///
-    /// THE STALENESS LAW, encoded where the ruling put it: a counter
-    /// citing a STALE appraisal refuses — the market moved, re-appraise
-    /// first. An uncited counter is lawful (evidence is optional); a
-    /// fresh citation is lawful; and NOTHING ELSE reads staleness —
-    /// acceptance is consent and never re-checks.
-    pub fn counter_offer(
-        &mut self,
-        offer: u64,
-        want_amount: crate::dop::Positive,
-        appraisal: Option<[u8; 32]>,
-    ) -> Result<(), ActionRefused> {
-        self.counter_offer_as(SOVEREIGN, offer, want_amount, appraisal)
-    }
-
     pub fn counter_offer_as(
         &mut self,
         actor: u64,
@@ -1247,31 +1228,6 @@ impl World {
             })
     }
 
-    /// The same book, per feeder, carried WHOLE rather than summed into
-    /// one figure — which of the two costs took it, and how much. A
-    /// caller that needs the split reads this; a caller that needs the
-    /// total reads [`World::value_lost_of`].
-    pub fn value_lost_split_of(&self, orb: u64) -> (Ratio, Ratio) {
-        self.chronicle.history().fold(
-            (ratio(0, 1), ratio(0, 1)),
-            |(decay, upkeep), receipt| match receipt.event() {
-                ClosureEvent::DemurrageSettled { orb_id, amount, .. } if *orb_id == orb => {
-                    (decay + amount.clone(), upkeep)
-                }
-                ClosureEvent::DemurrageTouched { orb_id, decays } if *orb_id == orb => {
-                    let touched = decays
-                        .iter()
-                        .fold(decay, |sum, (_, amount)| sum + amount.clone());
-                    (touched, upkeep)
-                }
-                ClosureEvent::UpkeepSettled { orb_id, amount, .. } if *orb_id == orb => {
-                    (decay, upkeep + amount.clone())
-                }
-                _ => (decay, upkeep),
-            },
-        )
-    }
-
     /// **THE UNION REVIEW — derived, never stored** (D5, operator
     /// ruling 2026-08-02). When the sovereign union was struck, and
     /// whether its review has fallen due at `stamp`.
@@ -1398,55 +1354,6 @@ impl World {
             true => Some(held.returned_across.clone() / denominator),
             false => None,
         }
-    }
-
-    /// **CONVERGENCE — the syntropic arm of `FrictionSettled`,
-    /// derived, never stored.**
-    ///
-    /// ```text
-    ///     convergence(a, b) = 1 − |reciprocity(a) − reciprocity(b)|
-    /// ```
-    ///
-    /// **THE ENGINE ALREADY COMPUTES THIS AND THROWS IT AWAY.** On
-    /// every cross-orb transfer it evaluates
-    /// `divergence = |recip(from) − recip(to)|`, prices friction from
-    /// it, and then:
-    ///
-    /// ```text
-    ///     if friction > 0 { ...receipt... }
-    /// ```
-    ///
-    /// When conduct MATCHES, divergence is zero, friction is zero, and
-    /// nothing is receipted. The syntropic half is calculated and
-    /// destroyed in the same expression, every time, and no caller
-    /// could even ask for it — `reciprocity_reading` was private. That
-    /// is the one-legged dual at its sharpest: not an arm that was
-    /// never built, but one built and discarded on each use.
-    ///
-    /// **Stated positively, as a magnitude.** Convergence is HIGH when
-    /// conduct agrees, rather than friction being ABSENT. "The reward
-    /// for alignment is the absence of a penalty" is the negentropic
-    /// shape this work exists to refuse — good defined as the lack of
-    /// bad.
-    ///
-    /// **`None` when either party has no basis** (see
-    /// [`Self::reciprocity_of`]): two orbs that have never traded have
-    /// nothing to agree ABOUT, and reading that as perfect alignment
-    /// would pay the inert exactly what it pays the reciprocal. This
-    /// reading refuses to; it is a precondition for any rule that ever
-    /// pays on convergence, not a payment itself.
-    ///
-    /// **THIS PAYS NOTHING AND MINTS NOTHING.** Whether convergence
-    /// should EARN is an economic ruling that creates value, and it is
-    /// not taken here (`17_CAPACITY` §3d.3).
-    pub fn convergence_between(&self, a: u64, b: u64) -> Option<Ratio> {
-        let left = self.reciprocity_of(a)?;
-        let right = self.reciprocity_of(b)?;
-        let spread = match left >= right {
-            true => left - right,
-            false => right - left,
-        };
-        Some(ratio(1, 1) - spread)
     }
 
 }

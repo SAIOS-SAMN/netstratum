@@ -28,8 +28,7 @@
 //! on which family the Workbench tries first. The observation still supplies every
 //! candidate; instinct never invents an operator the observation cannot support.
 
-use crate::mint::Library;
-use crate::need::{family_of, Family};
+use crate::need::Family;
 
 /// The four generator families, in declaration order — the axes an instinct
 /// weights. (Mirrors `selfmap`'s private census order.)
@@ -117,8 +116,8 @@ pub fn blend(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::mint::MintedWord;
-    use solver_verify::grid::Op;
+    
+    
 
     #[test]
     fn stress_blends_exploit_against_explore() {

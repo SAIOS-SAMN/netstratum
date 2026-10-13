@@ -71,7 +71,7 @@
 //! fiber)` over the committed relation and calls no search.
 
 use crate::delta::Delta;
-use crate::reduce::{coboundary_reduce, Support};
+use crate::reduce::Support;
 use cfe::ratio::Ratio;
 use num_traits::{Signed, Zero};
 
@@ -390,34 +390,6 @@ pub struct Flux {
 }
 
 impl Flux {
-    /// **Is the relation DIVERGENCE-FREE — `div Δ = 0` at every vertex?**
-    ///
-    /// Equivalently: pure circulation. Nothing sources, nothing sinks,
-    /// and every content is holonomic.
-    ///
-    /// **This replaces a cosmological predicate name that overclaimed
-    /// twice** (operator ratification 2026-08-01). The fault was never
-    /// the borrowed word's provenance — it was LAW 8: the predicate did
-    /// not compute the object it named.
-    ///
-    /// The proof it could not. The books close, `Σ_i div_i = 0`, so
-    /// letting `V⁺ = {i : div_i > 0}` and `V⁻ = {i : div_i < 0}`:
-    ///
-    /// ```text
-    ///     Σ_{V⁺} div_i  =  Σ_{V⁻} |div_i|
-    ///     |V⁻| = 0   ⟹   Σ_{V⁺} div_i = 0   ⟹   |V⁺| = 0
-    /// ```
-    ///
-    /// So `sinks == 0` forces `sources == 0` and every vertex
-    /// balanced. The predicate could never distinguish an emitting
-    /// region from ordinary balanced circulation — an anti-trapped
-    /// configuration does not exist in a closed antisymmetric relation.
-    /// It now carries the name of what it actually decides. (It reads
-    /// both counts rather than `sinks == 0` alone, so the meaning is
-    /// legible without the reader having to re-derive the conservation.)
-    pub fn is_pure_circulation(&self) -> bool {
-        self.sources == 0 && self.sinks == 0
-    }
 }
 
 /// THE FLUX CENSUS — both poles of the divergence, counted and
@@ -825,14 +797,6 @@ pub fn preserves_hodge_split(matrix: &[Vec<Ratio>]) -> bool {
         return false; // A1 = 0 — the constants are annihilated, not preserved
     }
     rows.all(|s| s == first)
-}
-
-/// The former reading, kept for the drift record: `ext_x( Π_G( Δ ) )`
-/// over the ANCHORED representative. Agrees with [`capacity`] on
-/// whether capacity exists, and disagrees on its extent, because the
-/// anchor concentrates the class onto the pairs that miss vertex 0.
-pub fn capacity_anchored(delta: &Delta) -> Extent {
-    ext_x(&coboundary_reduce(delta))
 }
 
 /// The GROUND extent — what a state carrying nothing above the point

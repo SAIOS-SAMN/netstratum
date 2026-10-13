@@ -314,10 +314,6 @@ pub struct CanonicalForm {
 }
 
 impl CanonicalForm {
-    /// The form IS a measurement — whole, re-liftable.
-    pub fn to_measurement(&self) -> FullMeasurement {
-        self.measurement.clone()
-    }
 }
 
 /// The canonicalization emission: the form and the achieving frame (the chart

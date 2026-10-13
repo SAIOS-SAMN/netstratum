@@ -93,15 +93,6 @@ impl BoundaryForm {
         self.flows.len()
     }
 
-    /// **THE NON-VACUITY READ (DIRECTIVE 10).** `dV ≢ 0` iff some
-    /// vertex carries net flow.
-    ///
-    /// A structural emptiness question about a set of positions, never
-    /// a numeric comparison against zero. A form with no components IS
-    /// pure circulation; nothing is measured to discover it.
-    pub fn is_non_vacuous(&self) -> bool {
-        !self.flows.is_empty()
-    }
 }
 
 /// Derive `∂Δ` from a state and its support — the divergence at every

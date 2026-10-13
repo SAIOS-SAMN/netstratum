@@ -42,37 +42,6 @@ impl GridObs {
     }
 }
 
-/// The color entities of a grid: one per distinct non-background color, each
-/// an exact integer coordinate vector `(value, count, Σrow, Σcol)`. Sorted by
-/// color value — deterministic, no float. This is the "value shell" (k ≈ 10
-/// colors); the object/cell shells are coarser/finer strata of the same
-/// construction.
-pub fn color_entities(grid: &GridObs, background: i64) -> Vec<Vec<BigInt>> {
-    // Gather per color: count, Σrow, Σcol. A flat associative scan keeps the
-    // result an exact function of the grid (no hashing nondeterminism).
-    let mut acc: Vec<(i64, i64, i64, i64)> = Vec::new(); // (value, count, Σrow, Σcol)
-    for r in 0..grid.rows {
-        for c in 0..grid.cols {
-            let v = grid.at(r, c);
-            if v == background {
-                continue;
-            }
-            match acc.iter_mut().find(|e| e.0 == v) {
-                Some(e) => {
-                    e.1 += 1;
-                    e.2 += r as i64;
-                    e.3 += c as i64;
-                }
-                None => acc.push((v, 1, r as i64, c as i64)),
-            }
-        }
-    }
-    acc.sort_by_key(|e| e.0);
-    acc.into_iter()
-        .map(|(v, n, sr, sc)| vec![BigInt::from(v), BigInt::from(n), BigInt::from(sr), BigInt::from(sc)])
-        .collect()
-}
-
 /// `m × m` identity as an exact integer matrix.
 fn identity(m: usize) -> Mat {
     (0..m)

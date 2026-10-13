@@ -161,15 +161,6 @@ impl World {
         Ok(())
     }
 
-    /// All seats on an orb (discipline wire, rank).
-    pub fn science_seats_of(&self, orb: u64) -> Vec<(ScienceDiscipline, u8)> {
-        self.science_seats
-            .iter()
-            .filter(|(_, o, _)| *o == orb)
-            .filter_map(|(d, _, r)| ScienceDiscipline::from_wire(*d).map(|dd| (dd, *r)))
-            .collect()
-    }
-
     pub fn clone_count_of(&self, orb: u64) -> u64 {
         self.clone_counts
             .iter()

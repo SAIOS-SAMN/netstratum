@@ -85,24 +85,6 @@ impl<F: Field> Transport<F> {
         }
     }
 
-    /// The lawful full-content pair from real content: `N = (1−P)·X·P`
-    /// (nilpotent by the e₀ split), `Φ = 1+N`, `Φ⁻¹ = 1−N` — the exact,
-    /// profile-free inverse `(1+N)(1−N) = 1` verified on entry like every
-    /// other construction.
-    pub fn unipotent_from(x: &Multivector<F>) -> Result<Self, TransportError<F>> {
-        let n = x
-            .unipotent_generator()
-            .map_err(|source| TransportError::Arithmetic { source })?;
-        let one = Multivector::<F>::identity(n.active_rank(), n.horizon());
-        let phi = one
-            .try_add(&n)
-            .map_err(|source| TransportError::Arithmetic { source })?;
-        let phi_inverse = one
-            .try_sub(&n)
-            .map_err(|source| TransportError::Arithmetic { source })?;
-        Self::try_new(phi, phi_inverse)
-    }
-
     /// Φ — the up-stroke operator.
     #[inline]
     pub fn phi(&self) -> &Multivector<F> {

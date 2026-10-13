@@ -68,14 +68,6 @@ impl Smith {
             .collect()
     }
 
-    /// A basis of `Ker(A)` — the last `cols − rank` columns of `V`, returned
-    /// as column vectors. Empty iff `A` has full column rank (trivial kernel).
-    pub fn kernel_basis(&self) -> Vec<Vec<BigInt>> {
-        let r = self.rank();
-        (r..self.cols)
-            .map(|j| (0..self.cols).map(|i| self.v[i][j].clone()).collect())
-            .collect()
-    }
 }
 
 /// Identity matrix of order `n`.
@@ -313,22 +305,6 @@ mod tests {
             s.invariant_factors(),
             vec![BigInt::from(2), BigInt::from(2), BigInt::from(156)]
         );
-    }
-
-    #[test]
-    fn a_rank_deficient_matrix_exposes_its_kernel() {
-        // Rank 1: every row a multiple of (1,2,3). Kernel is 2-dimensional.
-        let a = m(&[&[1, 2, 3], &[2, 4, 6], &[3, 6, 9]]);
-        let s = assert_smith(&a);
-        assert_eq!(s.rank(), 1);
-        assert_eq!(s.invariant_factors(), vec![BigInt::one()]);
-        let ker = s.kernel_basis();
-        assert_eq!(ker.len(), 2, "cols − rank = 3 − 1");
-        // Each kernel column really is annihilated by A.
-        for col in &ker {
-            let prod = matmul(&a, &col.iter().map(|x| vec![x.clone()]).collect::<Mat>());
-            assert!(prod.iter().all(|r| r[0].is_zero()), "A·k = 0");
-        }
     }
 
     #[test]

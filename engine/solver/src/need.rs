@@ -41,15 +41,6 @@ pub enum Hunger {
 }
 
 impl Hunger {
-    /// From the wire's want kind. Kind 1 is reserved board-side and
-    /// names no reach yet; unknown kinds are not guessed at.
-    pub fn from_kind(kind: u8) -> Option<Hunger> {
-        match kind {
-            2 => Some(Hunger::Resonance),
-            3 => Some(Hunger::Novelty),
-            _ => None,
-        }
-    }
 }
 
 /// THE NEED a solve is answering.
@@ -125,7 +116,7 @@ impl Need {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    
 
 }
 

@@ -20,18 +20,6 @@ impl World {
             self.techs.iter().any(|(_, held, _, _)| *held == condition)
         })
     }
-    /// **THE FULL BASE-11 STACK** (operator ruling 2026-08-02) — the
-    /// base tier complete AND every chartered work claimed on evidence.
-    ///
-    /// [`Self::base_seven_complete`] is deliberately left exactly as it
-    /// landed: the crown's gate does not move, and every law that binds
-    /// to it reads the same thing it always did.
-    pub fn base_eleven_complete(&self, orb: u64) -> bool {
-        self.base_seven_complete()
-            && (crate::world::survey::first_work()..=crate::world::survey::last_condition())
-                .all(|condition| self.work_claimed(orb, condition))
-    }
-
     /// WANT-1: the struck cognitive wants — (orb, kind).
     pub fn wants(&self) -> &[(u64, u8)] {
         &self.wants
@@ -40,30 +28,6 @@ impl World {
     /// E3.7: material wants — (orb, ElementId).
     pub fn element_wants(&self) -> &[(u64, [u8; 32])] {
         &self.element_wants
-    }
-    /// COUNCIL-1 (12_UNION §7) — the WARRING IMPERIUM reading, derived
-    /// from the landed books and never stored: an orb whose extraction
-    /// runs past double its reciprocity while its breaches outweigh
-    /// its fulfilments has stepped outside the council's protection by
-    /// its own receipted conduct. Thresholds are placeholder
-    /// parameters (the 06 discipline).
-    pub fn is_imperial(&self, orb: u64) -> bool {
-        let Some(held) = peek(&self.orbs, orb) else {
-            return false;
-        };
-        held.extracted_across > ratio(0, 1)
-            && held.extracted_across
-                > (ratio(1, 1) + ratio(1, 1)) * held.returned_across.clone()
-            && held.forwards_breached > held.forwards_fulfilled
-    }
-    /// AEON-1a (11 §5): the FOLD — seal this world's part in the
-    /// closing era and seat it on the new aeon's G-sheet (`base` is
-    /// the advanced base gauge). Archival by construction: the receipt
-    /// is the seal; rotation of the var root is the conductor's deed.
-    pub fn seal_fold(&mut self, era: u64, base: Ratio) {
-        let gauge = wrap_gauge(base);
-        self.gauge[0] = gauge.clone();
-        self.close(ClosureEvent::EraFolded { era, gauge }, SOVEREIGN);
     }
     pub fn now(&self) -> u64 {
         self.clock.now()
@@ -127,13 +91,6 @@ impl World {
     }
     pub fn orbs(&self) -> &[ColonyOrb] {
         &self.orbs
-    }
-    /// Mutable orb access — the mirror of [`Self::orbs`] (as `chronicle_mut`
-    /// mirrors `chronicle`). Used to stage a legacy off-grain fixture for the
-    /// #136 smelt-sweep witnesses; the live kernel mutates orbs through receipted
-    /// actions, never this.
-    pub fn orbs_mut(&mut self) -> &mut Vec<ColonyOrb> {
-        &mut self.orbs
     }
     pub fn orb_by_id(&self, orb: u64) -> Option<&ColonyOrb> {
         peek(&self.orbs, orb)

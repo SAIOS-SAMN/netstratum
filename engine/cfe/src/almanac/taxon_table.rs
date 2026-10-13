@@ -9,7 +9,6 @@
 //! codes 21..=345
 //! ```
 
-use crate::ratio::{ratio, Ratio};
 
 /// Lawful class codes 1..=13 (0 = unclassed). u8 today; raise by amendment.
 pub fn class_ceiling() -> u8 {
@@ -205,7 +204,3 @@ pub fn office_seat_bonus() -> u64 {
     25
 }
 
-/// Pure research weight grain for expansion class.
-pub fn expansion_research_weight(class: u8) -> Ratio {
-    ratio(i64::from(class.max(1)), 1) * ratio(1, 8)
-}

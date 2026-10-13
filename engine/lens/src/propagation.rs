@@ -285,10 +285,6 @@ impl Resonance {
         }
     }
 
-    /// Did the medium change what the motion amounted to?
-    pub fn medium_mattered(&self) -> bool {
-        self.modulated != self.motion.signed()
-    }
 }
 
 /// ALIGNMENT — the static depth-indexed match, renamed to what it does.

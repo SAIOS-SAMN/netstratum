@@ -925,25 +925,6 @@ impl World {
         Some(dust)
     }
 
-    /// #138 — THE RESOURCE LEDGER'S OWN GRAIN PROJECTION. The first banked
-    /// resource (`Some(resource)`) or STAMP (`None`) on this world that is off
-    /// the 1/1024 grain, with its amount — or `None` when the whole ledger is on
-    /// the grain. The carrier reports its OWN residual: a witness asks the world
-    /// "are you on grain?" and never walks the board itself. A leaked fill site
-    /// surfaces HERE, co-located with the ledger law it broke.
-    pub fn off_grain_stock(&self) -> Option<(u64, Option<Resource>, Ratio)> {
-        self.orbs.iter().find_map(|orb| {
-            orb.banked
-                .iter()
-                .find(|(_, amount)| smelt_resource(amount) != *amount)
-                .map(|(resource, amount)| (orb.orb_id, Some(*resource), amount.clone()))
-                .or_else(|| {
-                    (smelt_resource(&orb.stamp) != orb.stamp)
-                        .then(|| (orb.orb_id, None, orb.stamp.clone()))
-                })
-        })
-    }
-
     /// ROUTE-1: the year-voice maintenance draw — 1/4 joule per live
     /// lane (v1 placeholder). An unaffordable lane LAPSES by receipt
     /// on this book; the pair dies with either leg. Returns the

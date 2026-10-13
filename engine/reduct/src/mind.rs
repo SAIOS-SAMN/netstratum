@@ -83,15 +83,6 @@ impl Mind {
         self.harmonic.len() + self.luminal.len() + self.holonomic.len()
     }
 
-    /// How many generators a manifold carries.
-    pub fn manifold_rank(&self, m: Manifold) -> usize {
-        match m {
-            Manifold::Harmonic => self.harmonic.len(),
-            Manifold::Luminal => self.luminal.len(),
-            Manifold::Holonomic => self.holonomic.len(),
-        }
-    }
-
     /// Every learned generator as the COLUMNS of a `dim × rank` matrix — the
     /// O(n) reduction basis, ordered inner → outer.
     pub fn generators(&self) -> Vec<Vec<BigInt>> {

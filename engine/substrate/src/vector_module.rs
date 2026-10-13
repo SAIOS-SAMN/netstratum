@@ -122,14 +122,6 @@ impl<F: Field> VectorModule<F> {
         }
     }
 
-    /// Build from a slice of coefficients (low-to-high degree).
-    pub fn from_slice(values: &[Rational<F>]) -> Self {
-        Self {
-            components: values.to_vec(),
-            _field: PhantomData,
-        }
-    }
-
     /// Build by owning a `Vec<Rational<F>>` of coefficients
     /// (low-to-high degree).
     pub fn from_vec(components: Vec<Rational<F>>) -> Self {
@@ -176,27 +168,6 @@ impl<F: Field> VectorModule<F> {
     #[inline]
     pub fn dim(&self) -> usize {
         self.components.len()
-    }
-
-    /// Slice view of the coefficients (low-to-high degree).
-    #[inline]
-    /// THE WIRE FORM at the storage boundary — the carrier OWNS its expansion
-    /// loop (LAW XXIII): count, then per component the numerator and
-    /// denominator as length-prefixed signed-LE bytes. Exact-the exact rationals, no loss.
-    pub fn to_wire(&self) -> Vec<u8> {
-        let mut buf = Vec::new();
-        let count = u32::try_from(self.components.len())
-            .expect("a carrier's width fits the wire count at the storage boundary");
-        buf.extend_from_slice(&count.to_le_bytes());
-        for component in &self.components {
-            for half in [component.numer(), component.denom()] {
-                let bytes = half.to_signed_bytes_le();
-                let len = u32::try_from(bytes.len()).expect("a bounded wire length");
-                buf.extend_from_slice(&len.to_le_bytes());
-                buf.extend_from_slice(&bytes);
-            }
-        }
-        buf
     }
 
     /// Re-lift from the wire, advancing `at`; every component re-validates
@@ -404,24 +375,6 @@ impl<F: Field> VectorModule<F> {
         let kick = magnitude.try_mul(&v_j)?;
         out.components[i] = v_i.try_add(&kick)?;
         Ok(out)
-    }
-
-    /// **Degree re-seat (shift down)** — drop the lowest `n` coefficients and
-    /// re-index the remainder to degree 0 (`Σ_{d≥n} c_d x^d ↦ Σ c_{d+n} x^d`).
-    /// A VectorModule→VectorModule transform: the carrier shifts ITSELF, so no
-    /// bare coefficient `Vec<Rational<F>>` is exposed at the call site (LAW XIV —
-    /// the per-axis polynomial stays the multi-axial carrier end to end, never a
-    /// loose scalar list). `n ≥ dim` yields the zero polynomial.
-    pub fn shift_down_degrees(&self, n: usize) -> Self {
-        let mut components = Vec::with_capacity(self.dim().saturating_sub(n));
-        for c in self.components.iter().skip(n) {
-            components.push(c.clone());
-        }
-        Self {
-            components,
-            _field: PhantomData,
-        }
-        .trim_trailing_zeros()
     }
 
     /// The constant-1 polynomial — multiplicative identity in `F[x]`.

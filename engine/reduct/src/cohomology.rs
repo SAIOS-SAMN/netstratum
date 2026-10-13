@@ -18,7 +18,7 @@
 use crate::mat::matvec;
 use crate::sheaf::CellSheaf;
 use num_bigint::BigInt;
-use num_traits::{One, Signed, Zero};
+use num_traits::{One, Signed};
 use substrate::snf::smith_normal_form;
 
 /// The cohomology of one grade: free rank and exact torsion coefficients.
@@ -54,11 +54,6 @@ impl CellSheaf {
         Cohomology { grade: k, betti: ker_dim - rank_prev, torsion }
     }
 
-    /// Is `c ∈ Cᵏ` a cocycle (`δᵏ c = 0`)?
-    pub fn is_cocycle(&self, k: usize, c: &[BigInt]) -> bool {
-        matvec(&self.coboundary(k), c).iter().all(|x| x.is_zero())
-    }
-
     /// THE PEEL. Reduce `c ∈ Cᵏ` to its canonical representative in
     /// `Cᵏ / Im(δᵏ⁻¹)` — the exact ℤ-module quotient. A `c` that lies in
     /// `Im(δᵏ⁻¹)` (a coboundary) reduces to zero; a cocycle reduces to its
@@ -82,19 +77,4 @@ impl CellSheaf {
         matvec(&s.u_inv, &coords)
     }
 
-    /// The Euler characteristic `Σ (−1)ᵏ dim Cᵏ` — an integer-conservation
-    /// invariant: it must equal `Σ (−1)ᵏ betti_k` (homological exactness,
-    /// torsion-blind), a cross-check the tests assert on every complex.
-    pub fn euler_characteristic(&self) -> i64 {
-        (0..self.grades())
-            .map(|k| {
-                let dim = self.dim_cochain(k) as i64;
-                if k % 2 == 0 {
-                    dim
-                } else {
-                    -dim
-                }
-            })
-            .sum()
-    }
 }

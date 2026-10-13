@@ -62,10 +62,6 @@ pub enum BookId {
 }
 
 impl BookId {
-    /// Chartered books are the law's own and outlive any civilization.
-    pub fn is_chartered(&self) -> bool {
-        matches!(self, BookId::Chartered(_))
-    }
 }
 
 /// ONE BOOK — a dual account: what stood, against what did not.

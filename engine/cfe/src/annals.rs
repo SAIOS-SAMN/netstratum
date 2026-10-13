@@ -141,11 +141,6 @@ impl Annals {
         }
     }
 
-    /// How many drained receipts of non-bulk kinds are kept.
-    pub fn kept_len(&self) -> usize {
-        self.kept_at.len()
-    }
-
     /// The `i`-th kept receipt, decoded from its frame.
     pub fn kept_receipt(&self, i: usize) -> Option<Receipt> {
         let at = *self.kept_at.get(i)? as usize;
@@ -258,13 +253,6 @@ impl Annals {
         }
         let (last_link, assays) = Self::read_tail(b, &mut p)?;
         (p == b.len()).then_some(Annals { kept_wire, kept_at, last_seal, digests: Vec::new(), last_link, assays, filed: count, file: Some(file) })
-    }
-
-    /// How many digests a [`Annals::to_carried_bytes`] payload names (so its
-    /// reader knows how much of the digest file to take).
-    pub fn carried_digest_count(b: &[u8]) -> Option<usize> {
-        let (_, p) = Self::read_kept(b)?;
-        usize::try_from(u64::from_le_bytes(b.get(p..p + 8)?.try_into().ok()?)).ok()
     }
 
     fn put_tail(&self, out: &mut Vec<u8>) {

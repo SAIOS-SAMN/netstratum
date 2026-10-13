@@ -154,12 +154,6 @@ impl ResourceStock {
         self.rate = Self::onto_lattice(&(self.rate.clone() + gain.clone()));
     }
 
-    /// RESEARCH — expand the carrying ceiling, lifting the bound the
-    /// curve saturates against.
-    pub fn research_ceiling(&mut self, gain: &Ratio) {
-        self.ceiling = Self::onto_lattice(&(self.ceiling.clone() + gain.clone()));
-    }
-
     /// FLOURISH (§6f.3) — reinvest surplus directly into the stock, so
     /// abundance becomes productive base instead of a number that sits.
     pub fn reinvest(&mut self, surplus: &Ratio) {
@@ -169,18 +163,6 @@ impl ResourceStock {
             false => raised,
         };
         self.current = Self::onto_lattice(&capped);
-    }
-
-    /// THE RECURRING CEILING — the most this stock can EVER yield per
-    /// tick, at any stock level and on the best world.
-    ///
-    /// `R(S) = r·S·(1 − S/S_max)` peaks at `S = S_max/2`, where it
-    /// equals `r·S_max/4`. Coverage only multiplies by something in
-    /// `(0,1]`, so **no civilization on any world can draw more than
-    /// this from this deposit without shrinking it.** It is the hard
-    /// bound on recurring value.
-    pub fn recurring_ceiling(&self) -> Ratio {
-        self.rate.clone() * self.ceiling.clone() / ratio(4, 1)
     }
 
     /// THE SLOW CLOCK — an unclean harvest lowers what the land can
@@ -231,38 +213,4 @@ impl ResourceStock {
         }
     }
 
-    /// RECURRING VALUE — what this stock yields per tick, forever,
-    /// on a world of the given thermal `coverage`.
-    ///
-    /// **This is the number a claim is priced on.** A stock's worth is
-    /// not what sits in it; it is what it keeps producing without
-    /// shrinking, and where it sits decides how much of that a
-    /// civilization can actually take. `coverage` comes from
-    /// `cfe::thermal::coverage` and is defined everywhere on the
-    /// positive line, so EVERY world yields something — a gap world
-    /// yields poorly rather than not at all.
-    ///
-    /// ```text
-    /// recurring = regeneration(S) × coverage(T)
-    /// ```
-    ///
-    /// Two worlds holding identical deposits are worth different
-    /// amounts because one of them is somewhere better, which is the
-    /// whole of why location is an asset. It also gives §6h.2's claim
-    /// wrapper something to be a claim ON, and §6h.3's GDP its
-    /// per-deposit term.
-    pub fn recurring_value(&self, coverage: &Ratio) -> Ratio {
-        Self::onto_lattice(&(self.regeneration() * coverage.clone()))
-    }
-
-    /// The extraction this stock can support without shrinking — its
-    /// sustainable flow, which is exactly its regeneration.
-    ///
-    /// This is the operand `20_FOUNDING` §6a wants for a ward's capture
-    /// capacity and `19_REGISTRY` §4b wants for opening a room: both
-    /// name a growth built from a regenerating base, and this is that
-    /// base's flux.
-    pub fn sustainable_draw(&self) -> Ratio {
-        self.regeneration()
-    }
 }

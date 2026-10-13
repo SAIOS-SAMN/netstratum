@@ -56,7 +56,7 @@
 //! caged, rendered, never returned as a number.
 
 use cfe::ratio::{ratio, Ratio};
-use rfa_core::{loop_holonomy, plaquette_curvature, Lens, MatrixFiber2x2};
+use rfa_core::{loop_holonomy, plaquette_curvature, MatrixFiber2x2};
 
 /// THE PRESSURE OF A TWIST — the curvature of a plaquette, carried
 /// whole.
@@ -78,21 +78,6 @@ impl Pressure {
         Pressure { curvature: plaquette_curvature(a, b) }
     }
 
-    /// **Does this cell strain at all?** True when the two directions
-    /// commute — the flat case, and the only one a scalar fiber could
-    /// ever have produced.
-    pub fn is_slack(&self) -> bool {
-        self.curvature.is_zero()
-    }
-
-    /// The strain, rendered for an operator surface and CAGED.
-    ///
-    /// An L1 magnitude, lawful here and nowhere else (§1.0): it enters
-    /// exact and leaves only as text, with no accessor and no ordering,
-    /// so no rule can ever branch on how hard something is pushing.
-    pub fn strain_shown(&self) -> String {
-        Lens::of(self.curvature.l1_norm()).show()
-    }
 }
 
 /// THE PHASE LOCK — what a closed walk is holding.
@@ -122,16 +107,6 @@ impl PhaseLock {
         self.holonomy.is_identity()
     }
 
-    /// The pressure required to HOLD this lock: how far the accumulated
-    /// transport sits from having closed.
-    ///
-    /// Carried whole, per component. This is the reading the layer
-    /// existed for — *the force required to maintain the phase lock* —
-    /// and it is the difference between the holonomy and the identity,
-    /// never its length.
-    pub fn holding_pressure(&self) -> MatrixFiber2x2 {
-        self.holonomy.minus(&MatrixFiber2x2::identity())
-    }
 }
 
 /// THE DRIFT — how a reading moved between two points on the chain.
@@ -155,13 +130,6 @@ impl Drift {
     /// caller supplies both readings; this holds neither.
     pub fn between(earlier: &MatrixFiber2x2, later: &MatrixFiber2x2) -> Self {
         Drift { delta: later.minus(earlier) }
-    }
-
-    /// **Did anything move?** Still, not "converged" — a structure that
-    /// did not move may be at rest or may be stuck, and this reading does
-    /// not presume which.
-    pub fn is_still(&self) -> bool {
-        self.delta.is_zero()
     }
 
     /// One component of the movement, exact. `(row, col)` outside the

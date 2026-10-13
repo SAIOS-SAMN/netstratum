@@ -79,32 +79,6 @@ pub fn zone_capacity_exact(kind: ZoneKind, metabolism: u8, axes: &[Resource]) ->
     v
 }
 
-/// **THE EXACT STANDING SUPPLY** (OCULAR) — the summed exact net capacity of the
-/// zones already standing, as a field over `axes`. The loss-free twin of
-/// `standing_supply`; no lattice.
-pub fn standing_supply_exact(kinds: &[ZoneKind], metabolism: u8, axes: &[Resource]) -> Vec<Ratio> {
-    let mut sum = vec![ratio(0, 1); axes.len()];
-    for &kind in kinds {
-        for (i, c) in zone_capacity_exact(kind, metabolism, axes).into_iter().enumerate() {
-            sum[i] += c;
-        }
-    }
-    sum
-}
-
-/// **THE EXACT DEMAND** (OCULAR) — the population's metabolic loads summed onto
-/// their axes as an exact-rational field, no lattice. Each `(carrier, rate)` is
-/// an exact `Ratio` already; this places it, unrounded.
-pub fn demand_exact(demand_loads: &[(Resource, Ratio)], axes: &[Resource]) -> Vec<Ratio> {
-    let mut demand = vec![ratio(0, 1); axes.len()];
-    for (res, rate) in demand_loads {
-        if let Some(i) = axes.iter().position(|r| r == res) {
-            demand[i] += rate.clone();
-        }
-    }
-    demand
-}
-
 /// THE GENERATORS ARE THE FOLD (doc 52 / operator ruling). Map a species'
 /// `Axis::Zone` fold (`seed ∪ minted`) into the buildable capacity generators
 /// the peel reduces against — one net-capacity vector per structure the

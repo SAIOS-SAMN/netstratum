@@ -481,17 +481,6 @@ impl World {
     pub fn observe_gauge(&mut self, sample: Vec<u8>) {
         self.chronicle.set_gauge_sample(sample);
     }
-    /// **MINT A LINE** (tag 101, 2026-08-06): the engine mints its
-    /// peoples — the standing ruling that retired the author. The seed
-    /// is the chronicle's terminal digest (CHARTER §9); the whole line
-    /// derives from it through `dop::line_synthesis`, so the receipt
-    /// carries the seed alone and every reader derives the same people.
-    /// Build scope, refusal-pure. Successive mints draw different
-    /// lines, because each receipt moves the terminal digest.
-    pub fn mint_line(&mut self) -> Result<crate::dop::LineDraw, ActionRefused> {
-        self.mint_line_as(SOVEREIGN)
-    }
-
     pub fn mint_line_as(
         &mut self,
         actor: u64,
@@ -518,26 +507,6 @@ impl World {
         Ok(draw)
     }
 
-    /// THE VERTICAL AXIS (tag 89) — seat a line in an office.
-    ///
-    /// A station GATES AUTHORITY (the tier-0 verbs check it), and until
-    /// this deed existed it lived only in `var/registry/<sigil>.json` —
-    /// a file anyone with a shell could edit. `KERNEL_RELAY` §1.5 named
-    /// the hole exactly: *the game is constitutional; the universe is
-    /// not*. The seat is now receipted and committed, and the registry
-    /// is a CACHE from this receipt on — precisely what `GenesisSealed`
-    /// did for the axes at G1.
-    ///
-    /// Build-scoped. `station` is a [`crate::dop::Station`] — the BAND-1
-    /// vocabulary AS A TYPE, so an off-band index is unrepresentable and
-    /// the old range check is dead (29_CONSTRUCTION C1).
-    pub fn seat_station(
-        &mut self,
-        line: crate::dop::Name,
-        station: crate::dop::Station,
-    ) -> Result<(), ActionRefused> {
-        self.seat_station_as(SOVEREIGN, line, station)
-    }
     pub fn seat_station_as(
         &mut self,
         actor: u64,
@@ -597,26 +566,6 @@ impl World {
         binding: crate::vocabulary::TradingBinding,
     ) -> Result<u8, ActionRefused> {
         self.mint_vocabulary_based_as(actor, line, axis, sigil, word, binding, None)
-    }
-
-    /// **THE METABOLISM ELEMENT MINT (G2 hook, ruled 2026-08-12)** — a
-    /// minted metabolism value that eats a periodic ELEMENT rather than
-    /// a closed resource. The element rides the same [`ClosureEvent::VocabularyMinted`]
-    /// deed as any vocabulary (no new deed, no new gate); it is
-    /// meaningful only on [`crate::vocabulary::Axis::Metabolism`], and
-    /// it never co-occurs with a Zone `base`.
-    #[allow(clippy::too_many_arguments)]
-    pub fn mint_vocabulary_ration_as(
-        &mut self,
-        actor: u64,
-        line: &str,
-        axis: crate::vocabulary::Axis,
-        sigil: &str,
-        word: crate::dop::Name,
-        binding: crate::vocabulary::TradingBinding,
-        ration: [u8; 32],
-    ) -> Result<u8, ActionRefused> {
-        self.mint_vocabulary_full_as(actor, line, axis, sigil, word, binding, None, Some(ration))
     }
 
     /// **THE ZONE MINT'S FULL FORM (#41)** — the same deed carrying a

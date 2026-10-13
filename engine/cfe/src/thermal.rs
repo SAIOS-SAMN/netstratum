@@ -314,23 +314,6 @@ pub fn orbital_period_squared(orbit_r: &Ratio, mass: &Ratio) -> Ratio {
     (base.clone() * base) * r3 / mass.clone()
 }
 
-/// **THE ORBITAL-PLANE NORMAL** (the galactic frame) — each solar system tilts
-/// its own way relative to the galactic plane, so planets are NOT all drawn on
-/// one flat sheet. The galactic position of a system is the S of the universal
-/// `{S, G, T}` (a 3-vector already), and this normal `N` gives its orbital track
-/// a 3D inclination off galactic-up `[0, 1, 0]`. Derived EXACTLY from the
-/// system's founding digest — no stored state, deterministic, replayable: the
-/// tilts are small signed rationals in `(-1/2, 1/2)` from disjoint digest bytes,
-/// so most systems sit near the plane and some lean hard. The tilt shapes the
-/// LOCAL orbit (insolation geometry, and seasons if ever); at galactic scale a
-/// planet's orbital displacement (~AU) is sub-resolution against its star's
-/// position (~parsecs), so a planet's `{S, G, T}` IS its star's.
-pub fn orbital_normal(seed: [u8; 32]) -> (Ratio, Ratio, Ratio) {
-    // A signed tilt in (-1/2, 1/2): byte 128 is flat, the extremes lean ±1/2.
-    let tilt = |byte: u8| ratio(byte as i64 - 128, 256);
-    (tilt(seed[0]), ratio(1, 1), tilt(seed[16]))
-}
-
 /// The EXACT rational square root of `x`, or `None` when `x` is not a perfect
 /// rational square. `√(p/q) = √p/√q` is exact iff both the numerator and
 /// denominator (of the reduced fraction) are perfect integer squares — the
@@ -410,24 +393,6 @@ mod tests {
         assert_eq!(StarClass::G.mass(), r(1, 1), "G is the solar unit");
         assert!(StarClass::G.mass() > StarClass::M.mass(), "the Sun outweighs a red dwarf");
         assert_eq!(StarClass::M.mass(), r(1, 5), "M is the tiny red dwarf");
-    }
-
-    #[test]
-    fn each_system_tilts_its_own_orbital_plane() {
-        use crate::thermal::orbital_normal;
-        // The median digest sits flat on the galactic plane: N = [0, 1, 0].
-        let mut flat = [128u8; 32];
-        assert_eq!(orbital_normal(flat), (r(0, 1), r(1, 1), r(0, 1)), "the median digest is flat");
-        // Galactic-up is never lost — the plane leans, the Y reference holds.
-        let mut leaning = [128u8; 32];
-        leaning[0] = 255;
-        let n = orbital_normal(leaning);
-        assert_eq!(n.1, r(1, 1), "galactic-up (Y) holds; the lean is in X/Z");
-        assert!(n.0 > r(0, 1), "a high digest byte leans the plane one way");
-        // Distinct systems tilt distinctly (deterministic per digest).
-        flat[16] = 40;
-        assert_ne!(orbital_normal(flat), orbital_normal([128u8; 32]), "distinct digests, distinct tilt");
-        assert_eq!(orbital_normal([200u8; 32]), orbital_normal([200u8; 32]), "same digest → same tilt (replayable)");
     }
 
     #[test]

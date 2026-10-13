@@ -66,35 +66,6 @@ impl World {
         }
     }
 
-    /// **P8.2 ARC READING** — trajectory band derived from world state.
-    ///
-    /// Conductor `Trajectory` is polity-local (not chronicle); the
-    /// observer reads this pure stand-in so boards stay SEAL B pure:
-    /// decline if famine, stagnation if cognitive wants, else growth.
-    pub fn arc_band(&self) -> &'static str {
-        let famished = self.orb().is_some_and(|o| !o.famine.is_empty());
-        if famished {
-            return "decline";
-        }
-        if !self.wants.is_empty() {
-            return "stagnation";
-        }
-        "growth"
-    }
-
-    /// Hunger kinds struck (WANT-1 wire names).
-    pub fn hunger_words(&self) -> Vec<&'static str> {
-        self.wants
-            .iter()
-            .filter_map(|(_, k)| match k {
-                1 => Some("epistemological"),
-                2 => Some("resonance"),
-                3 => Some("novelty"),
-                _ => Some("want"),
-            })
-            .collect()
-    }
-
     /// Rail word for max open element rail (R1–R4).
     pub fn max_rail_word(&self) -> &'static str {
         match self.max_rail() {

@@ -247,15 +247,6 @@ pub fn subsistence(metabolism: &Metabolism, role: usize) -> Ratio {
     ceiling(metabolism, role) / ratio(HALVING, 1)
 }
 
-/// The roles a species can FILL on a planet at or above subsistence — the `C₀`
-/// generators of its `M_civ`.
-pub fn viable_roles(metabolism: &Metabolism, substrate: &[Ratio]) -> Vec<usize> {
-    let u = project(metabolism, substrate);
-    (0..ROLE_DIM)
-        .filter(|r| u[*r] >= subsistence(metabolism, *r))
-        .collect()
-}
-
 /// **THE SUBSTRATE BOUNDARY CONDITION, GRADED** (ONT-1b, operator refinement: a
 /// marginal world is a proportional penalty, not binary death). The morphodynamic
 /// fitness `η_m`:

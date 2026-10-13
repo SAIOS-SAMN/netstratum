@@ -62,14 +62,6 @@ pub fn committed(arbor: &Arbor) -> Result<Committed, LensRefused> {
     codec::from_state_bytes(&bytes).ok_or(LensRefused::Undecodable)
 }
 
-/// The orb's house wire — the same bytes the display's `state.tlv`
-/// carries, re-served from the chain instead of a file. `None` when
-/// the world holds no orb yet (the display writes nothing then too).
-pub fn state_tlv(arbor: &Arbor) -> Result<Option<Vec<u8>>, LensRefused> {
-    let state = committed(arbor)?;
-    Ok(state.orbs.first().map(|orb| orb.wire_bytes()))
-}
-
 /// The replay-grounded projection: rebuild the live World from its
 /// chronicle (`chronicle.tlv` — chain-verified bytes, every link
 /// recomputed on load; the lawful read, never an export). Journals and

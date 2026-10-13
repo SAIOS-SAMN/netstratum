@@ -54,12 +54,6 @@ pub fn is_zero(a: &Mat) -> bool {
     a.iter().all(|row| row.iter().all(|x| x.is_zero()))
 }
 
-/// The transpose — the carried adjoint of a linear map over ℤ.
-pub fn transpose(a: &Mat) -> Mat {
-    let (r, c) = shape(a);
-    (0..c).map(|j| (0..r).map(|i| a[i][j].clone()).collect()).collect()
-}
-
 /// Exact matrix–vector product `a · x` (length `rows(a)`).
 pub fn matvec(a: &Mat, x: &[BigInt]) -> Vec<BigInt> {
     let (r, k) = shape(a);

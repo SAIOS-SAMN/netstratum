@@ -48,12 +48,6 @@ impl SeededRng {
     }
 }
 
-/// Derive a proposer seed from any state digest — `BLAKE3(digest)`. The entity
-/// seeds from its chronicle digest so the proposal is a function of state.
-pub fn seed_from(digest: &[u8]) -> [u8; 32] {
-    *blake3::hash(digest).as_bytes()
-}
-
 /// A minted generator: the candidate that passed exact verification, the
 /// integer weights that formed it over the base, and how many guesses it took.
 #[derive(Debug, Clone, PartialEq, Eq)]

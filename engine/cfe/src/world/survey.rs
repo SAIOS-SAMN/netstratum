@@ -115,13 +115,6 @@ impl ForgeableGrade {
     }
 }
 
-/// The literal door — a malformed literal is a build error in a
-/// runtime coat.
-pub fn forgeable_grade(condition: u8) -> ForgeableGrade {
-    ForgeableGrade::new(condition)
-        .expect("a forgeable grade must be a crystallized or crown condition")
-}
-
 /// How many conditions are of a kind — counted, never asserted.
 pub fn count_of(kind: NodeKind) -> u8 {
     (0u8..=u8::MAX)
@@ -146,10 +139,6 @@ pub fn works() -> u8 {
     crate::literature::WORKS.len() as u8
 }
 
-/// One, because a world has ONE star to make the leap to.
-pub const fn solar_leap() -> u8 {
-    1
-}
 /// The BASE tier — what the crown completes and `base_seven_complete`
 /// waits for. Its gate does not move.
 /// The BASE tier, COUNTED: the leap, every crystallized condition, and

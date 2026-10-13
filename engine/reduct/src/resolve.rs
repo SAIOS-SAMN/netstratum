@@ -14,7 +14,6 @@
 //! (value/row/col) are coboundaries and resolve to nothing on their own; the
 //! LOCAL adjacency coordinate is what fails to close and drives the solve.
 
-use crate::bridge::{relational_complex, GridObs};
 use crate::mat::{matvec, Mat};
 use crate::sheaf::CellSheaf;
 use num_bigint::BigInt;
@@ -129,28 +128,3 @@ pub fn resolve(complex: &CellSheaf, field: &[BigInt], vocabulary: &[Vec<BigInt>]
     Resolution { residual, solved }
 }
 
-/// THE LOCALITY MEASUREMENT (`encode_grid_objects`): the relational field on
-/// the grid cells, `m = 4` coordinates per pair — value difference, Δrow,
-/// Δcol, and the ADJACENCY boundary (nonzero only for Manhattan-adjacent
-/// cells). Coords 0–2 are coboundaries; coord 3 is the local, non-coboundary
-/// signal. Returns the relational complex and the field as a `C¹` cochain
-/// (edges lexicographic, matching [`relational_complex`]).
-pub fn measure_relational(grid: &GridObs) -> (CellSheaf, Vec<BigInt>) {
-    let n = grid.rows * grid.cols;
-    let complex = relational_complex(n, RELATIONAL_M);
-    let mut field = Vec::with_capacity(n * (n.saturating_sub(1)) / 2 * RELATIONAL_M);
-    for i in 0..n {
-        let (ri, ci) = ((i / grid.cols) as i64, (i % grid.cols) as i64);
-        for j in (i + 1)..n {
-            let (rj, cj) = ((j / grid.cols) as i64, (j % grid.cols) as i64);
-            let vdiff = grid.cells[j] - grid.cells[i];
-            let manhattan = (ri - rj).abs() + (ci - cj).abs();
-            let adj = if manhattan == 1 { vdiff } else { 0 };
-            field.push(BigInt::from(vdiff)); // 0: value difference (coboundary)
-            field.push(BigInt::from(rj - ri)); // 1: Δrow (coboundary)
-            field.push(BigInt::from(cj - ci)); // 2: Δcol (coboundary)
-            field.push(BigInt::from(adj)); // 3: adjacency boundary (LOCAL, not a coboundary)
-        }
-    }
-    (complex, field)
-}

@@ -173,25 +173,6 @@ pub fn canonical(binding: &Binding) -> Vec<(u8, Ratio)> {
     out
 }
 
-/// **THE BINDING LAW — one benefit, one friction** (`28_VOCABULARY`
-/// §4a; PRACTICE-1 generalized).
-///
-/// PRACTICE-1 rules that a discipline carries *one benefit, one
-/// friction, exact, per discipline*, and all five landed practices obey
-/// it. Promoted here from a property of those five to the law every
-/// vocabulary entry must satisfy, so a strictly-dominant archetype is
-/// UNMINTABLE BY CONSTRUCTION rather than by a balance patch applied
-/// after someone finds it.
-///
-/// **The empty binding is lawful and claims nothing.** That is class 0,
-/// the unclassed — and it is Article II's ground state in vocabulary
-/// form: *it holds its place, keeps its structural existence, is never
-/// deleted and never barred — and it is paid nothing.* A binding is
-/// either empty, or it trades.
-pub fn binding_trades(binding: &Binding) -> bool {
-    TradingBinding::new(binding.to_vec()).is_ok()
-}
-
 /// The named fault a refused binding carries — each names the exact
 /// term that broke the trade, because the way up is the point.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

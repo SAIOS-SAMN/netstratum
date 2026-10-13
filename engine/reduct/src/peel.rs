@@ -179,20 +179,6 @@ pub struct Cover {
 }
 
 impl Cover {
-    /// **The lift back (the seed law):** re-form the FULL measurement from the
-    /// cover alone — the value supports carry every (site, direction) whole; the
-    /// constructor re-verifies wholeness. A cover that could not re-form its
-    /// measurement would be a projection without its inverse — a key, and banned.
-    pub fn re_form_measurement(&self) -> Result<FullMeasurement, MeasurementRefusal> {
-        let mut occupancy: Vec<(Site, GaugeDirection)> = self
-            .value
-            .supports
-            .iter()
-            .flat_map(|support| support.sites.iter().map(|site| (*site, support.direction)))
-            .collect();
-        occupancy.sort_by_key(|(site, _)| (site.layer, site.row, site.col));
-        FullMeasurement::try_new(self.fiber_rank, self.cell.frame, occupancy)
-    }
 }
 
 /// Peel a full measurement into its cover. Pure measurement — no judgment, no

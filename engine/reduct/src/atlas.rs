@@ -17,7 +17,7 @@ use num_bigint::BigInt;
 use num_traits::Zero;
 use substrate::snf::smith_normal_form;
 
-use crate::mat::{is_zero, matmul, matvec, sub, Mat};
+use crate::mat::{matmul, matvec, sub, Mat};
 use crate::sheaf::CellSheaf;
 
 /// The kernel of `δ^k` (the `k`-cocycles) as a basis of column vectors in `C^k`.
@@ -161,63 +161,6 @@ pub fn delta_h(u: &CellSheaf, v: &CellSheaf, w: &CellSheaf, r_u: &[Mat], r_v: &[
         .sum()
 }
 
-/// **THE ΔH SPECTRUM — collective cognition per grade (dimensionally fluid).**
-/// `spectrum[k]` is the number of shared classes born in cohomological grade `k`
-/// (the connecting map `δ: H^{k-1}(W) → H^k(X)` lifts overlap classes one grade
-/// up). Unlike the scalar [`delta_h`] (= the spectrum's sum), this keeps the
-/// COHERENCE dimensionally FLUID: a civilization's cognition can live in `H¹`,
-/// `H²`, … at once, and houses of DIFFERENT intrinsic dimension each contribute in
-/// their own grade with NO collapse to a common dimension (the sheaf's
-/// heterogeneous stalks, one law up). Circle-glue ⇒ `[0,1]`; sphere-glue ⇒
-/// `[0,0,1]`; a mixed-dimension cover carries cognition in several grades at once.
-pub fn delta_h_spectrum(u: &CellSheaf, v: &CellSheaf, w: &CellSheaf, r_u: &[Mat], r_v: &[Mat]) -> Vec<usize> {
-    let grades = u.grades().max(v.grades()).max(w.grades() + 1);
-    (0..grades)
-        .map(|k| {
-            if k == 0 {
-                0
-            } else {
-                w.cohomology(k - 1)
-                    .betti
-                    .saturating_sub(rank_j(u, v, w, r_u, r_v, k - 1))
-            }
-        })
-        .collect()
-}
-
-/// The **full cohomology spectrum of the glued atlas**, `betti_k(X)` for each
-/// grade, derived from the Mayer–Vietoris long exact sequence WITHOUT building the
-/// union complex:
-///
-/// ```text
-///   betti_k(X) = [betti_k(U)+betti_k(V) − rank j_k] + [betti_{k-1}(W) − rank j_{k-1}]
-/// ```
-///
-/// (the `ker i_k` term from the two charts, plus the connecting-map term from the
-/// previous overlap grade). This is `H*(atlas)`. A test that builds the same glued
-/// space directly and matches this spectrum is the ground-truth soundness witness;
-/// its alternating sum satisfies Euler additivity `χ(X)=χ(U)+χ(V)−χ(W)` (S4).
-pub fn atlas_betti(u: &CellSheaf, v: &CellSheaf, w: &CellSheaf, r_u: &[Mat], r_v: &[Mat]) -> Vec<usize> {
-    // The connecting map lifts H^k(W) to H^{k+1}(X), so the atlas can carry a class
-    // one grade above the overlap's top — span there (e.g. two point-arcs glued on
-    // a two-point overlap mint an H^1 the charts never reach).
-    let grades = u.grades().max(v.grades()).max(w.grades() + 1);
-    (0..grades)
-        .map(|k| {
-            let charts = (u.cohomology(k).betti + v.cohomology(k).betti)
-                .saturating_sub(rank_j(u, v, w, r_u, r_v, k));
-            let connecting = if k == 0 {
-                0
-            } else {
-                w.cohomology(k - 1)
-                    .betti
-                    .saturating_sub(rank_j(u, v, w, r_u, r_v, k - 1))
-            };
-            charts + connecting
-        })
-        .collect()
-}
-
 /// The identity transition on a fiber of dimension `n`.
 pub fn identity(n: usize) -> Mat {
     (0..n)
@@ -249,10 +192,3 @@ pub fn curvature(loop_transitions: &[Mat], fiber_dim: usize) -> Mat {
     sub(&holonomy(loop_transitions), &identity(fiber_dim))
 }
 
-/// **§4 S3 — is the connection FLAT around this loop?** Identity holonomy ⇒ a
-/// class parallel-transports intact. This is the cocycle condition made dynamic:
-/// flatness around ANY loop, not just a triple. A class survives convergence iff
-/// its loops are flat; where they curve, the reduce organ reads the torsion.
-pub fn transports_flatly(loop_transitions: &[Mat], fiber_dim: usize) -> bool {
-    is_zero(&curvature(loop_transitions, fiber_dim))
-}

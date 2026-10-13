@@ -233,10 +233,6 @@ impl Move {
         self.then_free(other).then_free(&self.inverse()).then_free(&other.inverse())
     }
 
-    /// Do these two moves commute?
-    pub fn commutes_with(&self, other: &Self) -> bool {
-        self.commutator(other).is_identity()
-    }
 }
 
 /// A STANDING POSITION — what a move is applied TO. Sparse and
@@ -351,14 +347,6 @@ pub struct Slot {
     pub stamp: u64,
     /// The receipt's position in its chain — total, unique, hashed.
     pub sequence: u64,
-}
-
-/// Compose a set of moves under the schedule. The input order is
-/// IRRELEVANT: the schedule sorts, so two nodes handed the same moves
-/// in any arrangement reach the same standing.
-pub fn compose_scheduled(standing: &Standing, mut moves: Vec<(Slot, Move)>) -> Standing {
-    moves.sort_by(|a, b| a.0.cmp(&b.0));
-    moves.iter().fold(standing.clone(), |held, (_, step)| held.then(step))
 }
 
 /// THE COST ENVELOPE — `O(n^D)`, replacing the flat `O(1)` bound

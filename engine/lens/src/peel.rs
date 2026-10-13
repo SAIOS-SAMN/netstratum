@@ -157,16 +157,4 @@ impl View {
         }
     }
 
-    /// How many items this view MATERIALISED. The honest cost reading:
-    /// `Far` is one, and `Near` grows with the relation.
-    ///
-    /// This is a property of the view already in hand — it computes no
-    /// second reading and consults no state.
-    pub fn materialised(&self) -> usize {
-        match self {
-            View::Far(_) => 1,
-            View::Mid(charges) => charges.len(),
-            View::Near(entries) => entries.len(),
-        }
-    }
 }

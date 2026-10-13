@@ -41,7 +41,7 @@
 
 use cfe::ratio::{ratio, Ratio};
 use cfe::world::Committed;
-use rfa_core::capacity::{borne_axial, borne};
+use rfa_core::capacity::borne_axial;
 use rfa_core::{
     holonomies, boundary_form, Degree, Delta, Flow, Support, Holonomy,};
 
@@ -326,17 +326,6 @@ impl EntangledRead {
 }
 
 
-/// Which dimensions carry any relation at all. A channel no deed has
-/// ever used is UNOCCUPIED — it reads `Void`, and that is a fact about
-/// the world's shape rather than a failure of it.
-pub fn occupied_dimensions(state: &Committed) -> Vec<usize> {
-    let (_, support) = project_complex(state);
-    let dim = state.orbs.len();
-    (0..CHANNELS)
-        .filter(|&l| (0..dim).any(|i| (0..dim).any(|j| j != i && support.has(i, j, l))))
-        .collect()
-}
-
 /// Project committed state onto the relational tensor: `Δ(V)`.
 ///
 /// Pure and total. Orbs are entities in `Committed::orbs` order;
@@ -467,68 +456,6 @@ pub fn project_complex_across(books: &[&Committed]) -> (Delta, Support) {
     (delta, support)
 }
 
-/// The cross-book entangled read — the counterpart of
-/// [`read_entangled`], taken over
-/// [`project_complex_across`]. Same poles, same laws, wider complex.
-pub fn read_entangled_across(books: &[&Committed], unknown: usize) -> EntangledRead {
-    let (delta, support) = project_complex_across(books);
-    // The estate observed across books IS all their orbs — one law,
-    // no per-instrument special case (the opened ground, 2026-08-05).
-    let volume = books.iter().map(|b| b.orbs.len()).sum::<usize>().max(1);
-    let symmetry_foundation = symmetry_foundation(&delta, &support);
-    let flows = boundary_form(&delta, &support).flows;
-    let holonomy = holonomies(&delta, &support);
-    let rank = holonomy.len();
-    EntangledRead { rank, holonomy, symmetry_foundation, flows, unknown, volume }
-}
-
-/// Per-channel RANK and FLOW for ONE book — the surviving half of the
-/// struck `verdict_per_dimension`.
-///
-/// The four-row verdict over these two numbers was the struck
-/// authority; the numbers themselves are facts about the complex and
-/// the anti-collapse law still holds over them: a book can carry rank
-/// in one channel and flow in another and stand in NEITHER, which the
-/// aggregate would hide.
-pub fn poles_per_dimension(state: &Committed) -> Vec<(usize, usize)> {
-    let (delta, support) = project_complex(state);
-    let charges = holonomies(&delta, &support);
-    let form = boundary_form(&delta, &support);
-    (0..CHANNELS)
-        .map(|l| {
-            let rank = charges.iter().filter(|held| held.l == l).count();
-            let flows = form.flows.iter().filter(|flow| flow.l == l).count();
-            (rank, flows)
-        })
-        .collect()
-}
-
-/// Per-channel RANK and FLOW on the CROSS-BOOK complex.
-///
-/// **The verdict form of this reading is STRUCK** (operator ruling
-/// 2026-08-04, the vacuity removal): it returned `Vacuity` per channel,
-/// and the whole dual-pole verdict vocabulary went with the gate that
-/// consumed it. The single-book `verdict_per_dimension` went the same
-/// way.
-///
-/// What survives is the MEASUREMENT the verdict was collapsing — the
-/// cross-book lane's real contribution. Rank and flow per channel are
-/// facts about the complex; only the four-row judgement over them was
-/// the struck authority. Composed at the merge rather than deleting one
-/// lane's work to honour another's.
-pub fn poles_per_dimension_across(books: &[&Committed]) -> Vec<(usize, usize)> {
-    let (delta, support) = project_complex_across(books);
-    let charges = holonomies(&delta, &support);
-    let form = boundary_form(&delta, &support);
-    (0..CHANNELS)
-        .map(|l| {
-            let rank = charges.iter().filter(|held| held.l == l).count();
-            let flows = form.flows.iter().filter(|flow| flow.l == l).count();
-            (rank, flows)
-        })
-        .collect()
-}
-
 /// THE REFOLD CERTIFICATE — what the fold took, kept exactly, so the
 /// fold can be undone (operator ruling 2026-08-01: *fold is too flat —
 /// this is folding a BLANKET, not a piece of paper*).
@@ -553,33 +480,6 @@ pub struct Refold {
     /// the one shape that carries no structural content (witnessed in
     /// `bridge_pins`).
     pub potentials: Vec<Vec<Ratio>>,
-}
-
-/// Fold with a certificate: strip the frame anchored at entity 0 and
-/// KEEP what was stripped. The returned core is the projection before
-/// integer normalization, so the pair is exactly invertible by
-/// [`refold`]. For the canonical scale-normalized representative the
-/// caller still uses the sealed `coboundary_reduce` — this door exists
-/// to make the fold reversible, never to replace it.
-pub fn fold_certified(delta: &Delta) -> (Delta, Refold) {
-    let dim = delta.dim();
-    let fiber = delta.fiber();
-    let potentials: Vec<Vec<Ratio>> = (0..dim)
-        .map(|i| (0..fiber).map(|l| delta.entry(0, i, l).clone()).collect())
-        .collect();
-    let mut core = Delta::zero(dim, fiber);
-    for i in 0..dim {
-        for j in (i + 1)..dim {
-            let coords: Vec<Ratio> = (0..fiber)
-                .map(|l| {
-                    delta.entry(i, j, l).clone() - potentials[j][l].clone()
-                        + potentials[i][l].clone()
-                })
-                .collect();
-            core.set_antisym(i, j, coords);
-        }
-    }
-    (core, Refold { potentials })
 }
 
 /// Undo a certified fold: re-add the frame the fold took. Exact — the
@@ -689,31 +589,6 @@ pub fn read_entangled(state: &Committed) -> EntangledRead {
     read_entangled_observed(state, 0)
 }
 
-/// **THE STANDING OF EACH ORB** — `D`'s circulation, attributed. `D`
-/// says how much room the world stands in; this says WHO IS STANDING
-/// IN IT, keyed by `orb_id` rather than by seat.
-///
-/// Derived, never stored (`09_LEDGER` §1.2): read from committed state
-/// on demand, so there is no field to drift and no schema to migrate.
-///
-/// **The seat is not the orb.** [`rfa_core::capacity::borne`] answers
-/// per SEAT, and a seat is an index into `state.orbs` — an artifact of
-/// insertion order that changes when an orb is added or removed. An
-/// economy keyed on seats would pay a different orb after any
-/// reseating. The share itself is relabelling-invariant, and this is
-/// where that invariance is spent: the seat is translated back to the
-/// identity before anything economic reads it.
-pub fn borne_by_orb(state: &Committed) -> Vec<(u64, Ratio)> {
-    let (delta, support) = project_complex(state);
-    let shares = borne(&delta, &support);
-    state
-        .orbs
-        .iter()
-        .enumerate()
-        .map(|(seat, held)| (held.orb_id, shares.get(seat).cloned().unwrap_or_else(|| ratio(0, 1))))
-        .collect()
-}
-
 /// **THE STANDING, AXIS BY AXIS** — the reading a GATE consults
 /// (operator ruling 2026-08-02: *multi-axial on vertices towards
 /// uplift*).
@@ -749,40 +624,6 @@ pub fn standing_axial_of(state: &Committed, orb: u64) -> Vec<Ratio> {
         .find(|(id, _)| *id == orb)
         .map(|(_, share)| share)
         .unwrap_or_else(|| vec![ratio(0, 1); CHANNELS])
-}
-
-/// **THE OPEN AXES — TOWARD UPLIFT.** The channels on which this orb
-/// stands at the ground.
-///
-/// This is the syntropic half of the reading and the reason it is kept
-/// multi-axial. A channel at the ground is not a deficiency to be
-/// scored; it is the DIRECTION A NEW RELATION WOULD EARN ON. Summed
-/// away, the same orb learns only that it is short. Read per axis, it
-/// learns where to grow — a reading that gives rather than withholds
-/// (`18` Article II).
-///
-/// An orb standing on every channel returns empty: nothing is open
-/// because nothing is unoccupied, which is a full answer and not a
-/// refusal.
-pub fn open_axes_of(state: &Committed, orb: u64) -> Vec<usize> {
-    let ground = ratio(0, 1);
-    standing_axial_of(state, orb)
-        .into_iter()
-        .enumerate()
-        .filter(|(_, share)| *share == ground)
-        .map(|(channel, _)| channel)
-        .collect()
-}
-
-/// THE ONE ORB'S STANDING, AS ONE NUMBER — **the lens form**. The L1
-/// over [`standing_axial_of`], permitted at a human lens and barred
-/// where the system computes (`18` §2b). Totals that must reconcile
-/// read this; GATES READ THE AXIAL FORM.
-///
-/// Never negative — a share is a magnitude — so this reads as a floor
-/// an orb can rise from, not a penalty it must avoid.
-pub fn standing_of(state: &Committed, orb: u64) -> Ratio {
-    standing_axial_of(state, orb).into_iter().fold(ratio(0, 1), |a, b| a + b)
 }
 
 /// The cross-book door: the same one-pass read, carrying the count of
@@ -867,61 +708,5 @@ pub enum FoldGuard {
 }
 
 impl FoldGuard {
-    /// Only the two lawful shapes admit.
-    pub fn is_admitted(&self) -> bool {
-        matches!(self, FoldGuard::Total | FoldGuard::CarriedWithinFloor)
-    }
 }
 
-/// Gate a fold against the occupancy floor. `archived` names the orbs
-/// the fold sealed into the era record; a TOTAL fold archives every orb
-/// the prior universe held.
-pub fn fold_guard(prior: &Committed, next: &Committed, archived: &[u64]) -> FoldGuard {
-    let held = |state: &Committed| -> Vec<u64> {
-        state.orbs.iter().map(|orb| orb.orb_id).collect()
-    };
-    let before = held(prior);
-    let after = held(next);
-
-    // V's half first: nothing admitted may cease unaccounted. An orb
-    // that left the live universe must appear in the archive.
-    let dropped = before
-        .iter()
-        .filter(|id| !after.contains(id) && !archived.contains(id))
-        .count();
-    if dropped > 0 {
-        return FoldGuard::StandingDroppedWithoutAccount { orbs: dropped };
-    }
-
-    // TOTAL: nothing crossed. Nothing carried can be under-roomed.
-    let carried: Vec<u64> = before.into_iter().filter(|id| after.contains(id)).collect();
-    if carried.is_empty() {
-        return FoldGuard::Total;
-    }
-
-    // D's half: the carried structure must keep its tones. The rank the
-    // carried pairs bore before is the room the successor owes them.
-    let carried_rank = read_entangled(&restrict(prior, &carried)).rank;
-    let successor = read_entangled(next);
-    // Compared on the CIRCULATION, never the weighted degree: with the
-    // ground opened into the estate's volume (2026-08-05), a magnitude
-    // comparison would let a wide successor's floor pad over lost tones.
-    // Rank against rank is verdict-identical to the old floor-to-floor
-    // read and volume-proof by construction.
-    if successor.rank < carried_rank {
-        let successor_degree = successor.degree().get();
-        return FoldGuard::RoomBelowOccupancy { carried_rank, successor_degree };
-    }
-    FoldGuard::CarriedWithinFloor
-}
-
-/// The prior universe seen through only the orbs that crossed — what
-/// the carried structure was, in its own right.
-fn restrict(state: &Committed, keep: &[u64]) -> Committed {
-    let mut cut = state.clone();
-    cut.orbs.retain(|orb| keep.contains(&orb.orb_id));
-    cut.bonds.retain(|b| keep.contains(&b.source) && keep.contains(&b.target));
-    cut.forwards.retain(|c| keep.contains(&c.obligor) && keep.contains(&c.beneficiary));
-    cut.debts.retain(|d| keep.contains(&d.debtor) && keep.contains(&d.creditor));
-    cut
-}

@@ -183,12 +183,6 @@ impl World {
         self.governance_reach(orb) * taxable.clone()
     }
 
-    /// How many practices the line currently holds — the knowledge the
-    /// continuity levy taxes.
-    pub fn practice_count(&self) -> usize {
-        self.practices.len()
-    }
-
     /// **THE CONTINUITY LAPSE at a turnover** (`49_TAXATION` §3) — how
     /// many of the line's adopted practices lapse to the void for the
     /// `boundaries` generation turnovers crossed this span. Per boundary

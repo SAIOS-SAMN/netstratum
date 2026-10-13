@@ -25,7 +25,7 @@
 //! the loss. OCULAR-2..4 migrate the consumers onto it and delete the scalars.
 
 use cfe::ratio::{ratio, Ratio};
-use rfa_core::{divergence, Delta, Support};
+use rfa_core::{Delta, Support};
 
 /// Build the economy as an exact-rational connection over the resource axes.
 /// `demand[i]` and `supply[i]` are the exact per-axis loads (NOT quantized).
@@ -49,17 +49,3 @@ pub fn economy_connection(demand: &[Ratio], supply: &[Ratio]) -> (Delta, Support
     (delta, support)
 }
 
-/// **WHAT THE SOCIETY SEES** -- the signed deficit as a graded field, exact and
-/// per-axis, never a norm. `seen[i] = demand_i - supply_i` (the axis node's
-/// divergence): positive is an unmet need, negative a surplus, zero balanced.
-/// This is the loss-free replacement for the old quantized `deficit` vector and
-/// its `residual_extent` collapse -- the direction and the exact magnitude both
-/// survive, and a deficit finer than the retired 1/64 grain is still seen.
-pub fn seen_deficit(demand: &[Ratio], supply: &[Ratio]) -> Vec<Ratio> {
-    let (delta, _support) = economy_connection(demand, supply);
-    let div = divergence(&delta); // [node][fiber]
-    // The axis nodes are 1..=axes; their divergence on the single fiber is the
-    // signed deficit. (Node 0, the environment, carries the closing balance.)
-    let axes = demand.len().max(supply.len());
-    (0..axes).map(|a| div[a + 1][0].clone()).collect()
-}

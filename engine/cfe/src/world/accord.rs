@@ -100,16 +100,6 @@ impl World {
     pub fn bonds(&self) -> &[Bond] {
         &self.bonds
     }
-    /// Seal a bond as the sovereign.
-    pub fn seal_bond(
-        &mut self,
-        pair: crate::dop::Between,
-        resource: Resource,
-        rate: crate::dop::Positive,
-        term: u64,
-    ) -> Result<(), ActionRefused> {
-        self.seal_bond_as(SOVEREIGN, pair, resource, rate, term)
-    }
     /// BOND-1 (09 §2.2) — seal a standing order: source streams `rate`
     /// of `resource` per tick to target, non-transactional, settled by
     /// ONE receipt at each touch. One bond per (source, target,
@@ -165,15 +155,6 @@ impl World {
             vec![actor],
         );
         Ok(())
-    }
-    /// Sever a bond as the sovereign.
-    pub fn sever_bond(
-        &mut self,
-        source: u64,
-        target: u64,
-        resource: Resource,
-    ) -> Result<(), ActionRefused> {
-        self.sever_bond_as(SOVEREIGN, source, target, resource)
     }
     /// BOND-1 — cut a standing bond (v1 ruling: the SOURCE side cuts;
     /// the load posts to it — the giver stopped giving without the
@@ -312,16 +293,6 @@ impl World {
         if pay > ratio(0, 1) {
             self.relieve_recovered(target);
         }
-    }
-    /// Seal a forward as the sovereign.
-    pub fn seal_forward(
-        &mut self,
-        pair: crate::dop::Between,
-        resource: Resource,
-        quota: crate::dop::Positive,
-        window: crate::dop::Window,
-    ) -> Result<(), ActionRefused> {
-        self.seal_forward_as(SOVEREIGN, pair, resource, quota, window)
     }
     /// FORWARD-1 (01 §7, 09 §2.3) — seal a vitrified delivery pact:
     /// the obligor locks collateral (the fidelity curve prices it —

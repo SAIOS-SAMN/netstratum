@@ -91,13 +91,6 @@ pub fn kind_of(name: &str) -> BookKind {
     BookKind(blake3::hash(normalize(name).as_bytes()).into())
 }
 
-/// Is this name one the charter keeps? Compared in normal form, so
-/// `" trade-1 "` cannot slip past as a mintable name.
-pub fn is_charter(name: &str) -> bool {
-    let normal = normalize(name);
-    CHARTER_BOOKS.iter().any(|held| normalize(held) == normal)
-}
-
 /// **A MINTABLE BOOK NAME, proven at construction** (P1,
 /// 29_CONSTRUCTION). Two arms died at this door, both decidable from
 /// the text alone: a name whose normal form is empty addresses
@@ -135,13 +128,6 @@ impl BookName {
     pub fn kind(&self) -> BookKind {
         kind_of(&self.0)
     }
-}
-
-/// The literal door — a malformed literal is a build error in a
-/// runtime coat.
-pub fn book_name(text: &str) -> BookName {
-    BookName::new(text)
-        .expect("a book-name literal must normalize to something and must not be chartered")
 }
 
 /// ONE MINTED ACCOUNT — committed state, rebuilt from receipts on

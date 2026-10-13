@@ -66,7 +66,6 @@
 //! "human" was struck as a SEAT. Two correct uses in two layers is not
 //! a defect; the defect would be a third that conflates them.
 
-use crate::ratio::Ratio;
 
 /// The works the charter names. Content vocabulary — a line aspires to
 /// these; it does not invent them (that is what BOOK-1 is for).
@@ -126,11 +125,3 @@ pub struct WorkView {
     pub witnesses: usize,
 }
 
-/// The share of the chartered works a line has claimed. Exact rational,
-/// and deliberately NOT a score of standing: it says how much of the
-/// literature has been reached for with evidence, nothing about how
-/// well.
-pub fn claimed_share(views: &[WorkView]) -> Ratio {
-    let claimed = views.iter().filter(|held| held.claimed).count();
-    crate::ratio::ratio(claimed as i64, WORKS.len() as i64)
-}

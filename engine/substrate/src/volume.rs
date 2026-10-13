@@ -26,7 +26,7 @@ use crate::rational::{
     Field, Gauge, GaugeRational, OverflowError, Space, SpatialRational, Temporal, TemporalRational,
 };
 use crate::vector_module::{VectorModule, VectorModuleError};
-use crate::wire::{read_bigint_le, write_bigint_le};
+use crate::wire::write_bigint_le;
 
 /// Map a `VectorModuleError` from polynomial add/sub back to the canonical
 /// `OverflowError`. `try_add`/`try_sub` use no axis-indexed access; the
@@ -83,13 +83,6 @@ impl Volume {
             temporal: VectorModule::<Temporal>::singleton(TemporalRational::one()),
             gauge: VectorModule::<Gauge>::singleton(GaugeRational::one()),
         }
-    }
-
-    /// True iff every per-axis polynomial equals the constant `1/1` in its
-    /// own field.
-    pub fn is_unity(&self) -> bool {
-        let unity = Self::unity();
-        self == &unity
     }
 
     /// True iff every per-axis polynomial is the field's zero.
@@ -154,34 +147,6 @@ impl Volume {
         buf
     }
 
-    /// Deserialize from the wire format. Returns `(value, bytes_consumed)`;
-    /// per-field smooth-prime validation runs inside each `Rational::try_new`.
-    pub fn from_bytes_with_len(bytes: &[u8]) -> Result<(Self, usize), OverflowError> {
-        let mut cursor = 0;
-        let (spatial, n) = read_vector_module::<Space>(&bytes[cursor..])?;
-        cursor = cursor.checked_add(n).ok_or(OverflowError::CursorOverflow {
-            offset: cursor,
-            advance: n,
-        })?;
-        let (temporal, n) = read_vector_module::<Temporal>(&bytes[cursor..])?;
-        cursor = cursor.checked_add(n).ok_or(OverflowError::CursorOverflow {
-            offset: cursor,
-            advance: n,
-        })?;
-        let (gauge, n) = read_vector_module::<Gauge>(&bytes[cursor..])?;
-        cursor = cursor.checked_add(n).ok_or(OverflowError::CursorOverflow {
-            offset: cursor,
-            advance: n,
-        })?;
-        Ok((
-            Self {
-                spatial,
-                temporal,
-                gauge,
-            },
-            cursor,
-        ))
-    }
 }
 
 impl Default for Volume {
@@ -201,37 +166,6 @@ fn write_vector_module<F: Field>(buf: &mut Vec<u8>, value: &VectorModule<F>) {
         write_bigint_le(buf, coeff.numer());
         write_bigint_le(buf, coeff.denom());
     }
-}
-
-/// Read a `VectorModule<F>` polynomial from the canonical layout.
-fn read_vector_module<F: Field>(bytes: &[u8]) -> Result<(VectorModule<F>, usize), OverflowError> {
-    if bytes.len() < 4 {
-        return Err(OverflowError::BufferTooShort {
-            needed: 4,
-            actual: bytes.len(),
-        });
-    }
-    let dim = u32::from_le_bytes([bytes[0], bytes[1], bytes[2], bytes[3]]) as usize;
-    let mut cursor: usize = 4;
-    let mut coefficients = Vec::with_capacity(dim);
-    for _ in 0..dim {
-        let (numer, end) = read_bigint_le(&bytes[cursor..])?;
-        cursor = cursor
-            .checked_add(end)
-            .ok_or(OverflowError::CursorOverflow {
-                offset: cursor,
-                advance: end,
-            })?;
-        let (denom, end) = read_bigint_le(&bytes[cursor..])?;
-        cursor = cursor
-            .checked_add(end)
-            .ok_or(OverflowError::CursorOverflow {
-                offset: cursor,
-                advance: end,
-            })?;
-        coefficients.push(crate::rational::Rational::<F>::try_new(numer, denom)?);
-    }
-    Ok((VectorModule::<F>::from_vec(coefficients), cursor))
 }
 
 /// Block-diagonal per-axis transformation witness. Three per-axis
@@ -296,27 +230,6 @@ pub fn identity() -> BlockDiagonalOperator<
 mod tests {
     use super::*;
     use num_bigint::BigInt;
-
-    #[test]
-    fn zero_round_trips_through_wire() {
-        let z = Volume::zero();
-        let bytes = z.to_bytes();
-        let (back, consumed) = Volume::from_bytes_with_len(&bytes).expect("ok");
-        assert_eq!(back, z);
-        assert_eq!(consumed, bytes.len());
-    }
-
-    #[test]
-    fn unity_is_unity_per_field() {
-        let u = Volume::unity();
-        assert!(u.is_unity());
-        let c0_s = u.spatial.coefficient_at(0);
-        let c0_t = u.temporal.coefficient_at(0);
-        let c0_g = u.gauge.coefficient_at(0);
-        assert!(c0_s.numerator() == &BigInt::from(1) && c0_s.denominator() == &BigInt::from(1));
-        assert!(c0_t.numerator() == &BigInt::from(1) && c0_t.denominator() == &BigInt::from(1));
-        assert!(c0_g.numerator() == &BigInt::from(1) && c0_g.denominator() == &BigInt::from(1));
-    }
 
     #[test]
     fn add_per_axis_independent_fields() {

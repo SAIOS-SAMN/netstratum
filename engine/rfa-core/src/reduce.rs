@@ -91,12 +91,6 @@ impl Support {
         fresh
     }
 
-    /// Did the support genuinely expand? A capacity increment is lawful
-    /// only where this holds (DIRECTIVE 16).
-    pub fn expanded_from(&self, prior: &Support) -> bool {
-        !self.new_edges_since(prior).is_empty()
-    }
-
     pub fn dim(&self) -> usize {
         self.dim
     }

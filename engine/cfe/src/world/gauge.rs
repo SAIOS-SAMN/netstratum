@@ -85,18 +85,6 @@ impl World {
             SOVEREIGN,
         );
     }
-    /// AEON-1a (11 §3): CONFLUENCE — this line combines with a bonded
-    /// partner; the key moves to the interference of both (the caller
-    /// computes the torus midpoint from both chronicles and passes it;
-    /// the receipt carries the wrapped result verbatim).
-    pub fn conflue(&mut self, partner: &str, midpoint: Ratio) {
-        let gauge = wrap_gauge(midpoint);
-        self.gauge[0] = gauge.clone();
-        self.close(
-            ClosureEvent::Confluent { partner: partner.into(), gauge },
-            SOVEREIGN,
-        );
-    }
     /// MASK-1a (14 §4) — draw the veil: renders cloud from here on
     /// (the chronicle never lies; the Watchers read through). A
     /// standing joule toll settles at every collect; an unpayable

@@ -5,7 +5,7 @@
 //! undervied stat block. Hauls with positive melt require free capacity.
 
 use super::*;
-use crate::dop::{hull_capacity, hull_eta, hull_scrap_cost, Hull, HullRole};
+use crate::dop::{hull_capacity, hull_scrap_cost, Hull, HullRole};
 
 impl World {
     /// Free haul capacity available for `deal` (0 = idle pool only).
@@ -16,16 +16,6 @@ impl World {
             .filter(|h| h.assigned_route == 0 || h.assigned_route == deal)
             .map(|h| hull_capacity(h.role, h.grade))
             .fold(ratio(0, 1), |s, c| s + c)
-    }
-
-    /// Best η among hulls available for `deal` (idle or assigned).
-    pub fn best_hull_eta(&self, deal: u64) -> Ratio {
-        self.hulls
-            .iter()
-            .filter(|h| h.assigned_route == 0 || h.assigned_route == deal)
-            .map(|h| hull_eta(h.role, h.grade))
-            .max()
-            .unwrap_or_else(|| ratio(0, 1))
     }
 
     pub fn hulls(&self) -> &[Hull] {

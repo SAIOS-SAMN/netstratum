@@ -623,12 +623,6 @@ impl Cargo {
             Cargo::Element(_) => None,
         }
     }
-    pub fn as_element(&self) -> Option<[u8; 32]> {
-        match self {
-            Cargo::Resource(_) => None,
-            Cargo::Element(id) => Some(*id),
-        }
-    }
     /// Wire: Resource → code 1..=7; Element → 0 ‖ id[32].
     pub fn encode(&self, out: &mut Vec<u8>) {
         match self {
@@ -680,12 +674,6 @@ impl Exchange {
     }
     pub fn want(&self) -> Cargo {
         self.want.clone()
-    }
-    pub fn give_resource(&self) -> Option<Resource> {
-        self.give.as_resource()
-    }
-    pub fn want_resource(&self) -> Option<Resource> {
-        self.want.as_resource()
     }
 }
 
@@ -1126,33 +1114,10 @@ pub fn apply_endowment_add(orb: &mut ColonyOrb, kit: &[(Resource, Ratio)]) {
     }
 }
 
-/// THERMAL-1 (05 §1.2, placeholder): joules one active encasement
-/// shell can capture per tick.
-pub fn encasement_throughput() -> Ratio {
-    crate::parameter::Parameter::EncasementThroughput.seed()
-}
-
-/// THERMAL-1 (05 §1.2, placeholder): the orb's base radiator capacity.
-pub fn radiator_base() -> Ratio {
-    crate::parameter::Parameter::RadiatorBase.seed()
-}
-
-/// THERMAL-1 (05 §1.2, placeholder): the per-tick leak on ACCRUED
-/// joules outside the cryo vault — the D3 spoilage shape.
-pub fn joule_leak_per_tick() -> Ratio {
-    crate::parameter::Parameter::JouleLeakPerTick.seed()
-}
-
 /// ECON-J (05 §1.2, placeholder): joules one active zone burns per
 /// tick for heating on a sub-mesic sited orb.
 pub fn heating_per_zone() -> Ratio {
     crate::parameter::Parameter::HeatingPerZone.seed()
-}
-
-/// SINK-1 (05 §1.4, placeholder): sink capacity one active cryo-lattice
-/// array captures per tick from vault-band headroom.
-pub fn sink_throughput() -> Ratio {
-    crate::parameter::Parameter::SinkThroughput.seed()
 }
 
 /// P2 (`21_KERNEL_PARAMETERS` §2): the per-elapsed-tick decay rate on
@@ -1673,19 +1638,6 @@ pub fn scan_draw() -> Ratio {
     ratio(1, 1)
 }
 
-/// G1 (04 §1): the axis vocabulary, closed and append-only (the
-/// registry lists the words; these are their wire codes). Axis 1
-/// disposition (1 expansionist ‖ 2 empiricist ‖ 3 epicurean); axis 2
-/// metabolism (1 mineral ‖ 2 biotic ‖ 3 plasmic); axis 3 perception
-/// (1 planar ‖ 2 volumetric ‖ 3 harmonic ‖ 4 umbral).
-pub fn axis_valid(axis: u8, code: u8) -> bool {
-    match axis {
-        1 | 2 => (1..=3).contains(&code),
-        3 => (1..=4).contains(&code),
-        _ => false,
-    }
-}
-
 /// G2 (04 §1.2): the ration law — the resource filling the FOOD slot
 /// in every flow, keyed by the SEALED metabolism (biotic is the
 /// ruleset-v1 default). Mineral eats iron; plasmic eats joules — and
@@ -1995,14 +1947,6 @@ fn spine_bands(class: crate::thermal::StarClass) -> [u32; 4] {
         S::WhiteDwarf | S::RedGiant | S::NeutronStar | S::WolfRayet | S::LuminalWhiteHole => {
             [0, 2, 1, 2]
         }
-    }
-}
-
-/// The arbor weight as the exact rational the tables speak.
-pub fn spine_weight(class: crate::thermal::StarClass, family: u8) -> Ratio {
-    match (1..=4).contains(&family) {
-        true => ratio(i64::from(spine_bands(class)[family as usize - 1]), 1),
-        false => ratio(0, 1),
     }
 }
 

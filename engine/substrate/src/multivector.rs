@@ -88,10 +88,6 @@ impl PairPlane {
             .ok_or(MultivectorError::InvalidPairPlane { i, j })
     }
 
-    /// Underlying `PlaneIndex`.
-    pub fn as_plane(&self) -> PlaneIndex {
-        self.0
-    }
 }
 
 /// **`PLUS_SIG_BIT`** — conformal-extension positive-signature basis
@@ -130,12 +126,6 @@ impl PlaneIndex {
     #[inline]
     pub const fn from_raw(bits: u64) -> Self {
         Self(bits)
-    }
-
-    /// Underlying bitmask.
-    #[inline]
-    pub const fn as_u64(self) -> u64 {
-        self.0
     }
 
     /// **Grade** — popcount of the bitmask. The `as u8` cast is
@@ -453,18 +443,6 @@ impl<F: Field> Multivector<F> {
         self.planes.iter().map(|(_, p)| p.dim()).max().unwrap_or(0)
     }
 
-    /// Highest geometric grade present (the top plane's grade), or `0`
-    /// for an empty / scalar-only multivector. Distinct from `dim`:
-    /// this is the BLADE-rank extent (how many geometric dimensions the
-    /// manifold occupies), the measure the grade-0 collapse destroyed.
-    pub fn top_grade(&self) -> u8 {
-        self.planes
-            .iter()
-            .map(|(idx, _)| idx.grade())
-            .max()
-            .unwrap_or(0)
-    }
-
     /// Project onto grade `k` — keep only planes of grade exactly `k`.
     pub fn grade_project(&self, k: u8) -> Self {
         Self {
@@ -673,46 +651,6 @@ impl<F: Field> Multivector<F> {
             horizon,
         )
         .expect("identity [1] at the grade-0 coordinate is in-rank and in-profile")
-    }
-
-    /// **`e₀ ∧ self`** — wedge the split axis `e₀` with this carrier: the
-    /// gauge-covariant rotation-plane generator the unipotent flow requires.
-    /// For a grade-1 content vector `v = Σ vᵢ·e_i` (i≠0), `e₀∧v = e₀·v` (the
-    /// geometric product — `e₀ ⟂ e_i`, so the product is the pure wedge) lands
-    /// on the grade-2 `e₀∧e_i` planes, each carrying `vᵢ`'s FULL polynomial.
-    ///
-    /// This is the unique family meeting the four-fold collapse-gate:
-    ///   * **even-grade** → `(1+N)·Ψ` stays a proper even-grade carrier;
-    ///   * **anticommutes with `e₀`** (1 non-e₀ factor) → survives
-    ///     `N=(1−P)·X·P` (scalars and `e_ij`,i,j≠0 commute → kernel → dormant);
-    ///   * **content-derived** → the plane is `v`'s own direction, not a fixed
-    ///     basis plane (gauge-covariant; keeps `Hⁿ` a class, not a representative);
-    ///   * **rank-preserving** → `vᵢ`'s polynomial rides its own `e₀∧e_i`
-    ///     coordinate, never collapsed to a scalar.
-    pub fn e0_wedge(&self) -> Result<Self, MultivectorError> {
-        let e0_idx = PlaneIndex::single(0).expect("e₀ (bit 0) is the lowest basis vector");
-        // **Precondition enforced HERE, not on the caller.** Wedge ONLY the
-        // grade-1 part with the e₀ component removed, so the product lands
-        // purely on grade-2 `e₀∧e_i` (i≠0): even-grade (proper carrier),
-        // anticommuting with e₀ (survives N). Without this guard the carrier
-        // silently breaks the four-fold invariant: grade-0 input → `e₀·scalar`
-        // = grade-1 (ODD → corrupts the even-grade carrier, the step_7 cross-cycle break),
-        // and an e₀ component → `e₀·e₀` = scalar (RE-COLLAPSE). When the
-        // grade-1-non-e₀ part is empty the result is zero — the orb rests (no
-        // morphic motion on this axis), never odd-grade contamination.
-        let g1 = self.grade_project(1);
-        let vectors: Vec<(PlaneIndex, VectorModule<F>)> = g1
-            .iter_planes()
-            .filter(|(idx, _)| *idx != e0_idx)
-            .map(|(idx, coeff)| (idx, coeff.clone()))
-            .collect();
-        let v = Self::from_planes(&vectors, self.active_rank(), self.horizon())?;
-        let e0 = Self::from_planes(
-            &[(e0_idx, VectorModule::<F>::singleton(Rational::<F>::one()))],
-            self.active_rank(),
-            self.horizon(),
-        )?;
-        e0.geometric_product(&v)
     }
 
     /// **#40 Fork-2 — unipotent generator** `N = (1−P)·X·P` from the residual
@@ -1177,100 +1115,4 @@ mod tests {
         assert!(n.is_zero(), "scalar content must be in the kernel of N");
     }
 
-    #[test]
-    fn e0_wedge_of_vector_survives_unipotent_and_stays_even_grade() {
-        // The four-fold-invariant carrier: a content vector v → e₀∧v →
-        // survives N (non-zero), stays even-grade (proper carrier), and the
-        // unipotent closes (1+N)(1−N)=1.
-        let v = Multivector::<Space>::from_planes(
-            &[(
-                PlaneIndex::single(1).unwrap(),
-                VectorModule::<Space>::singleton(r(1, 2)),
-            )],
-            4,
-            HorizonContext::default(),
-        )
-        .unwrap();
-        let x = v.e0_wedge().unwrap();
-        // e₀∧e_1 = bits {0,1} = grade 2 (even), non-scalar.
-        for (idx, _) in x.iter_planes() {
-            assert_eq!(idx.grade() % 2, 0, "e₀∧v must be even-grade");
-            assert_ne!(idx, PlaneIndex::SCALAR, "e₀∧v must not be scalar");
-        }
-        let n = x.unipotent_generator().unwrap();
-        assert!(!n.is_zero(), "e₀∧v must survive N (not in the kernel)");
-        // Native closure gate: (1+N)(1−N) == 1.
-        let one = Multivector::<Space>::identity(4, HorizonContext::default());
-        let one_plus_n = one.try_add(&n).unwrap();
-        let one_minus_n = one.try_sub(&n).unwrap();
-        assert_eq!(one_plus_n.geometric_product(&one_minus_n).unwrap(), one);
-    }
-
-    #[test]
-    fn e0_wedge_preserves_the_per_plane_polynomial() {
-        // Rank preservation: v's full polynomial rides its own e₀∧e_1 plane,
-        // never collapsed to a scalar coefficient.
-        let poly = VectorModule::<Space>::from_vec(vec![r(2, 3), r(4, 5)]);
-        let v = Multivector::<Space>::from_planes(
-            &[(PlaneIndex::single(1).unwrap(), poly.clone())],
-            4,
-            HorizonContext::default(),
-        )
-        .unwrap();
-        let x = v.e0_wedge().unwrap();
-        let plane = x.iter_planes().next().expect("e₀∧e_1 present");
-        assert_eq!(plane.1.dim(), poly.dim(), "polynomial degree preserved");
-    }
-
-    #[test]
-    fn e0_wedge_strips_scalar_input_to_rest() {
-        // Precondition guard: grade-0 (scalar) input has no grade-1-non-e₀
-        // part → e0_wedge rests (zero), NEVER the odd-grade `e₀·scalar` that
-        // would corrupt the even-grade carrier.
-        let scalar_x = Multivector::<Space>::from_planes(
-            &[(
-                PlaneIndex::SCALAR,
-                VectorModule::<Space>::singleton(r(5, 1)),
-            )],
-            4,
-            HorizonContext::default(),
-        )
-        .unwrap();
-        assert!(scalar_x.e0_wedge().unwrap().is_zero());
-    }
-
-    #[test]
-    fn e0_wedge_strips_e0_component_and_keeps_only_even_grade() {
-        // Mixed input (scalar + e₀ + e_1): e0_wedge drops the scalar and the
-        // e₀ component (which would re-collapse via e₀²), keeping ONLY the
-        // grade-2 e₀∧e_1 plane. Output is purely even-grade, non-scalar.
-        let mixed = Multivector::<Space>::from_planes(
-            &[
-                (
-                    PlaneIndex::SCALAR,
-                    VectorModule::<Space>::singleton(r(7, 1)),
-                ),
-                (
-                    PlaneIndex::single(0).unwrap(),
-                    VectorModule::<Space>::singleton(r(3, 1)),
-                ),
-                (
-                    PlaneIndex::single(1).unwrap(),
-                    VectorModule::<Space>::singleton(r(1, 2)),
-                ),
-            ],
-            4,
-            HorizonContext::default(),
-        )
-        .unwrap();
-        let x = mixed.e0_wedge().unwrap();
-        assert!(!x.is_zero(), "the e_1 component must survive");
-        for (idx, _) in x.iter_planes() {
-            assert_eq!(idx.grade() % 2, 0, "output must be even-grade");
-            assert_ne!(idx, PlaneIndex::SCALAR, "output must be non-scalar");
-        }
-        // And it still survives the unipotent (non-zero N, closes).
-        let n = x.unipotent_generator().unwrap();
-        assert!(!n.is_zero());
-    }
 }

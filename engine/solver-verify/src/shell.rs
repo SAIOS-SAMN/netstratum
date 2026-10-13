@@ -70,7 +70,7 @@
 //! rounding.
 
 use crate::field::HUES;
-use ratio::{ratio, slot_angle, Ratio, TURN_SLOTS};
+use ratio::TURN_SLOTS;
 
 /// **THE POLAR SPAN IS A HALF TURN.** Longitude closes at a full turn;
 /// latitude runs pole to pole and stops. So the bands divide THIRTY
@@ -183,12 +183,6 @@ impl Shell {
         Some(Shell { bands, slots, cells })
     }
 
-    /// The proof that admitted THIS shell — available after the fact, so
-    /// a reader never has to re-derive why it stands.
-    pub fn shape_proof(&self) -> ShapeReading {
-        Shell::examine(self.bands, self.slots, self.cells.len())
-    }
-
     pub fn bands(&self) -> usize {
         self.bands
     }
@@ -224,30 +218,6 @@ impl Shell {
         TURN_SLOTS / self.slots as i64
     }
 
-    /// The LATITUDE of a band as an exact turn-fraction in `[0, 1/2]` —
-    /// `0` at one pole, `1/2` at the other.
-    pub fn band_angle(&self, band: usize) -> Option<Ratio> {
-        (band < self.bands).then(|| {
-            slot_angle(band as i64 * (BAND_SLOTS / self.bands as i64)) * ratio(1, 1)
-        })
-    }
-
-    /// The LONGITUDE of a slot as an exact turn-fraction in `[0, 1)`.
-    pub fn slot_that(&self, slot: usize) -> Option<Ratio> {
-        (slot < self.slots).then(|| slot_angle(slot as i64 * self.slot_width()))
-    }
-
-    /// **THE HOLONOMY OF A LATITUDE RING** — how many steps transport
-    /// takes to close, at this band.
-    ///
-    /// It is `slots` at EVERY band, which is the whole no-distortion
-    /// claim in one function: a polar ring and an equatorial ring are
-    /// the same loop. In a Euclidean embedding the polar ring is
-    /// physically shorter; the carrier has no embedding and therefore no
-    /// shorter.
-    pub fn ring_closure(&self, band: usize) -> Option<usize> {
-        (band < self.bands).then_some(self.slots)
-    }
 }
 
 /// A transform of the shell. Every one is a PERMUTATION of cells (or a
@@ -460,25 +430,6 @@ impl FrameProof {
             ),
         }
     }
-}
-
-/// Prove the frame map, from the bases themselves.
-pub fn frame_proof() -> FrameProof {
-    FrameProof {
-        ring: TURN_SLOTS,
-        stack: STACK_NODES,
-        common: ratio::gcd(TURN_SLOTS, STACK_NODES),
-        period: FRAME_PERIOD,
-        ring_carrier: 121,
-        stack_carrier: 540,
-    }
-}
-
-/// The orbital slot and stack node a frame index came from — the
-/// inverse, and the reason the map is a bijection rather than a hash.
-pub fn frame_parts(index: i64) -> (i64, i64) {
-    let index = index.rem_euclid(FRAME_PERIOD);
-    (index.rem_euclid(TURN_SLOTS), index.rem_euclid(STACK_NODES))
 }
 
 impl Shell {

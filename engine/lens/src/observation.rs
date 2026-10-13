@@ -50,10 +50,8 @@ use crate::books::Regard;
 use crate::luminal::{emerge, Aperture, Luminal, Phase};
 use crate::observer::Capacity;
 use crate::peel::{Depth, View};
-use crate::propagation::{Medium, Resonance};
 use cfe::dop::ColonyOrb;
 
-use cfe::ratio::Ratio;
 use rfa_core::capacity::{flux, Degree, Flux};
 use rfa_core::{holonomies, Delta, Support};
 
@@ -105,18 +103,6 @@ impl<'a> Observation<'a> {
     /// Change instrument.
     pub fn through(mut self, aperture: Aperture) -> Self {
         self.aperture = aperture;
-        self
-    }
-
-    /// **STAND AS A PARTICULAR OBSERVER.** Holds a BORROW, never a
-    /// derived instrument — the regard is ground at read time from that
-    /// observer's own committed books (`19_LENS` §16).
-    ///
-    /// Storing the ground instrument here would have been a reading
-    /// retained on the position, which §1a forbids for the same reason
-    /// it forbids every cache: two things that can disagree.
-    pub fn seen_by(mut self, orb: &'a ColonyOrb) -> Self {
-        self.observer = Some(orb);
         self
     }
 
@@ -195,27 +181,4 @@ impl<'a> Observation<'a> {
         }
     }
 
-    /// ARM — propagation. How this volume moved from a prior position,
-    /// through a medium, across a span.
-    ///
-    /// Takes the PRIOR observation rather than a remembered one: the
-    /// caller holds both committed points, and this holds neither
-    /// (§1a — no private history).
-    pub fn propagation_from(
-        &self,
-        prior: &Observation<'_>,
-        steps: u64,
-        medium: &Medium,
-        decay_consumed: Ratio,
-        separation: Ratio,
-    ) -> Resonance {
-        Resonance::across(
-            prior.degree(),
-            self.degree(),
-            steps,
-            medium,
-            decay_consumed,
-            separation,
-        )
-    }
 }
