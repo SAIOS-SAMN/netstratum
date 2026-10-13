@@ -23,8 +23,12 @@ possible. Any constant is a placeholder for undefined physics.
   - War walls every aperture between the pair (`at_war_with`).
 
   No conductor step calls `treaty`: diplomacy is orphaned.
-- **Conflict is authored.** `espionage_step` and `market_war_step` act by a
-  line's disposition (if/else), not by a decision.
+- **Conflict did not run.** `espionage_step`, `market_war_step`,
+  `kin_step` and `instrument_step` (authored disposition branches) were
+  called only by the dead test loop `run_era`, never by the live conductor;
+  removed 2026-10-13 (the no-live-callers sweep). The cfe deeds beneath
+  them (spying, sabotage, raids, notes, escorts) remain, for the decisions
+  below.
 
 ## The derivation (operator, 2026-10-13: no realm by default)
 
@@ -112,8 +116,8 @@ Roles are positions read from the physics, never checklists or milestones
   for one hub's cargo and one left unmet) or a war between them; the steward
   rules.
   - Loss: the dispute recurs.
-- Espionage and market war leave the disposition branches and become
-  decisions of the same kind.
+- Espionage and market war, which never ran live, enter as decisions of
+  the same kind over the cfe deeds.
 
 Each is learned, scored before the outcome, and incumbent until a word beats
 persistence (docs/73).
