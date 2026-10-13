@@ -140,6 +140,11 @@ impl Pending {
                 }
                 moved
             }
+            // A leg of nothing carries no melt and can never pair (pairing
+            // needs a sent leg, below zero): it is not kept. Kept, they grew
+            // without bound, 9.7M of 9.7M+2,968 legs (optimization sweep,
+            // 2026-10-13), rewritten every beat.
+            Sunk::Leg { amount, .. } if amount == ratio(0, 1) => false,
             Sunk::Leg { deal, holding, amount } => {
                 self.legs.push((deal, holding, amount));
                 true
@@ -188,7 +193,13 @@ impl Pending {
                 ["L", c, v] => {
                     p.lost.insert(holding(c)?, ledger::parse_ratio(v)?);
                 }
-                ["A", deal, c, v] => p.legs.push((deal.parse().ok()?, holding(c)?, ledger::parse_ratio(v)?)),
+                ["A", deal, c, v] => {
+                    let amount = ledger::parse_ratio(v)?;
+                    // Zero legs written before the fix are dropped on read.
+                    if amount != ratio(0, 1) {
+                        p.legs.push((deal.parse().ok()?, holding(c)?, amount));
+                    }
+                }
                 _ => return None,
             }
         }

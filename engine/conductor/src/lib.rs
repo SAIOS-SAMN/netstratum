@@ -5307,20 +5307,20 @@ impl Polity {
                     .unwrap_or(cfe::world::SOVEREIGN),
                 stamp: receipt.stamp(),
             };
-            let prior = stepper.state().clone();
-            stepper.apply(receipt);
+            let prior = profile::timed("chain:clone", || stepper.state().clone());
+            profile::timed("chain:apply", || stepper.apply(receipt));
             let next = stepper.state();
             // THE CORES (slice 1): what this deed unmade, read from the world's
             // own holdings around it — once, past what the pending record
             // already counts.
             if receipt.sequence() as usize >= self.core_pending.through && cores::reaches(receipt.event()) {
-                let sunk = cores::sunk(receipt.event(), &cores::holdings(&prior), &cores::holdings(next));
+                let sunk = profile::timed("chain:cores", || cores::sunk(receipt.event(), &cores::holdings(&prior), &cores::holdings(next)));
                 core_moved |= self.core_pending.take(sunk);
             }
-            match kernel::admits(&prior, next, &step) {
+            match profile::timed("chain:admit", || kernel::admits(&prior, next, &step)) {
                 Ok(()) => {
                     if still_admitting {
-                        let sub = match arbor.head("") {
+                        let sub = match profile::timed("chain:head", || arbor.head("")) {
                             Some(head) if head.coordinate.t == receipt.stamp() => {
                                 head.coordinate.sub + 1
                             }
@@ -5335,10 +5335,10 @@ impl Polity {
                         };
                         let prior = match prior_digest {
                             Some(held) => held,
-                            None => *blake3::hash(&codec::state_bytes(&prior)).as_bytes(),
+                            None => profile::timed("chain:encode", || *blake3::hash(&codec::state_bytes(&prior)).as_bytes()),
                         };
-                        let bytes = codec::state_bytes(next);
-                        match arbor.extend_judged(coordinate, &bytes, prior) {
+                        let bytes = profile::timed("chain:encode", || codec::state_bytes(next));
+                        match profile::timed("chain:extend", || arbor.extend_judged(coordinate, &bytes, prior)) {
                             Ok(_) => {
                                 self.arbor_committed += 1;
                                 prior_digest = Some(*blake3::hash(&bytes).as_bytes());
@@ -5367,15 +5367,13 @@ impl Polity {
         // The pending sinks are written BEFORE the watermark, naming how far
         // they count: a restart between the two re-judges those deeds but
         // does not count them again.
-        if core_moved || self.core_pending.through < total {
-            self.core_pending.through = total;
-            let _ = self.core_pending.write(&book.world_dir(&self.spec.world_name));
-        }
-        write_judged_sidecar(
-            &book.world_dir(&self.spec.world_name),
-            self.chained,
-            &self.refused,
-        );
+        profile::timed("chain:writes", || {
+            if core_moved || self.core_pending.through < total {
+                self.core_pending.through = total;
+                let _ = self.core_pending.write(&book.world_dir(&self.spec.world_name));
+            }
+            write_judged_sidecar(&book.world_dir(&self.spec.world_name), self.chained, &self.refused);
+        });
         Ok(())
     }
 
