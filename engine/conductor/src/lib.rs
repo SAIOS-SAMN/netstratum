@@ -5683,11 +5683,12 @@ pub fn element_trade_step(worlds: &mut [Polity], beat: u64, span: &Ratio) -> Vec
             if worlds[a].penned || worlds[b].penned {
                 continue;
             }
-            let distance = spatial_l1(&worlds[a].spec.position, &worlds[b].spec.position, span);
-            let melt = cfe::world::route_melt(&worlds[a].world, &worlds[b].world, &distance);
-            if melt >= ratio(1, 1) {
-                continue; // walled direct — merchant territory, not element haul
-            }
+            // PEELS BEFORE THE SWEEP (optimization sweep, 2026-10-13): the
+            // cheap readings first. A pair whose exporter holds no element, or
+            // whose half smelts to nothing, ships nothing whatever the road, so
+            // its distance and melt are never computed. Exactly the same pairs
+            // clear: distance and melt have no side effects, and the masses and
+            // tops read here are the ones the old order read.
             // Prefer shipping from the side with more total element mass.
             let (exporter, importer) = if masses[a] >= masses[b] {
                 (a, b)
@@ -5709,28 +5710,37 @@ pub fn element_trade_step(worlds: &mut [Polity], beat: u64, span: &Ratio) -> Vec
             let Some(amount) = cfe::dop::Positive::new(ship) else {
                 continue;
             };
+            let distance = profile::timed("element_trade:distance", || spatial_l1(&worlds[a].spec.position, &worlds[b].spec.position, span));
+            let melt = profile::timed("element_trade:melt", || cfe::world::route_melt(&worlds[a].world, &worlds[b].world, &distance));
+            if melt >= ratio(1, 1) {
+                continue; // walled direct — merchant territory, not element haul
+            }
             let deal = beat.saturating_mul(100_000).saturating_add(70_000 + seq);
             seq += 1;
             let (ex, im) = two_mut(worlds, exporter, importer);
-            if cfe::world::element_aperture_transfer(
-                &mut ex.world,
-                cfe::world::FIRST_ORB,
-                &mut im.world,
-                cfe::world::FIRST_ORB,
-                element,
-                amount,
-                deal,
-                &melt,
-            )
-            .is_ok()
-            {
+            let moved = profile::timed("element_trade:transfer", || {
+                cfe::world::element_aperture_transfer(
+                    &mut ex.world,
+                    cfe::world::FIRST_ORB,
+                    &mut im.world,
+                    cfe::world::FIRST_ORB,
+                    element,
+                    amount,
+                    deal,
+                    &melt,
+                )
+                .is_ok()
+            });
+            if moved {
                 cleared.push((ex.spec.world_name.clone(), im.spec.world_name.clone()));
                 // The clear moved matter: refresh exactly the two
                 // touched readings (the cache's whole bargain).
                 masses[exporter] = mass_of(&worlds[exporter]);
                 masses[importer] = mass_of(&worlds[importer]);
-                top[exporter] = top_of(&worlds[exporter]);
-                top[importer] = top_of(&worlds[importer]);
+                profile::timed("element_trade:refresh", || {
+                    top[exporter] = top_of(&worlds[exporter]);
+                    top[importer] = top_of(&worlds[importer]);
+                });
             }
         }
     }
