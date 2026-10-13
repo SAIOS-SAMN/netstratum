@@ -23,7 +23,7 @@
 //! Every take is kept (`home/house/takes`).
 
 use ed25519_dalek::SigningKey;
-use mycelium::anastome::dialogue::seat::{Arg, Outcome, Percept, Post, Record, Role, Seat, SeatFn, Seats, Taken};
+use mycelium::anastome::dialogue::seat::{Arg, Outcome, Percept, Post, Record, Refusal, Role, Seat, SeatFn, Seats, Taken};
 use mycelium::client::sdk::seat_mind::task::{FN_SOLVE, KIND_TASK};
 use mycelium::sdk::seat::HouseMail;
 use std::collections::BTreeMap;
@@ -98,6 +98,8 @@ fn held_key(home: &Path, file: &str) -> io::Result<SigningKey> {
 pub struct House {
     domain: [u8; 32],
     key: SigningKey,
+    /// The uplink home (the keys, the re-founding's marker).
+    home: PathBuf,
     worlds: PathBuf,
     log: PathBuf,
     /// Every line ever seated, by its seat id (persisted, append-only).
@@ -122,6 +124,10 @@ pub struct House {
     relay_epoch: Option<u64>,
     /// Seat -> an answer filed and not judged yet, re-filed each tend (78.153).
     refile: BTreeMap<u32, (mycelium::transducer::element::Element, Vec<Vec<Vec<u8>>>)>,
+    /// The court refused an act of this tend as an unknown domain (the recut).
+    unknown_domain: bool,
+    /// The origin the re-founding was last tried under, and the tend.
+    refound_tried: Option<(String, u64)>,
 }
 
 fn hex(b: &[u8]) -> String {
@@ -161,6 +167,7 @@ impl House {
         Ok(House {
             domain,
             key,
+            home: home.to_path_buf(),
             worlds: worlds.to_path_buf(),
             log,
             ids,
@@ -175,6 +182,8 @@ impl House {
             percepts: 0,
             refile: BTreeMap::new(),
             relay_epoch: None,
+            unknown_domain: false,
+            refound_tried: None,
         })
     }
 
@@ -244,7 +253,49 @@ impl House {
             said.push(format!("REFILED seat {s} task {}: {line}", hex(&id[..6])));
         }
         said.extend(self.hand_tasks(seat).unwrap_or_else(|e| vec![format!("tasks not handed: {e}")]));
+        let Some(var_root) = self.worlds.parent().map(Path::to_path_buf) else { return Ok(said) };
+        // docs/72 A4: after the re-founding, the gates the conductor built are
+        // mapped as local throats (5.9: no crossing on a private map).
+        match crate::refound::map_gates(seat.session(), &self.home, &var_root) {
+            Ok((lines, unknown)) => {
+                said.extend(lines);
+                self.unknown_domain |= unknown;
+            }
+            Err(e) => said.push(format!("gates not mapped: {e}")),
+        }
+        // THE RE-FOUNDING, BY THE HOUSE ITSELF (docs/67, docs/72 A4): the court
+        // refused an act as an unknown domain, so the fleet was recut. Once per
+        // new origin (a sealed `refounded` under it stands), with the keys
+        // already held; a try the court stopped is tried again only after a
+        // task's patience. The gates map from the next tend.
+        if std::mem::take(&mut self.unknown_domain) {
+            said.extend(self.refound(seat, &var_root));
+        }
         Ok(said)
+    }
+
+    fn refound(&mut self, seat: &crate::seat::Seat, var_root: &Path) -> Vec<String> {
+        let Some(point) = seat.session().tuniversal() else { return vec!["REFOUND waits: the court refused the domain, and no final point is read yet".into()] };
+        let origin = crate::refound::origin_of(&point);
+        if crate::refound::refounded_under(&self.home).as_deref() == Some(origin.as_str()) {
+            return Vec::new();
+        }
+        if self.refound_tried.as_ref().is_some_and(|(o, at)| *o == origin && self.tends - at <= PATIENCE) {
+            return Vec::new();
+        }
+        self.refound_tried = Some((origin.clone(), self.tends));
+        let mut said = vec![format!("REFOUND — the court does not know the domain: re-founding under {origin} with the held keys")];
+        match crate::refound::refound(seat.session(), &self.home, var_root) {
+            Ok((sealed, lines)) => {
+                said.extend(lines.into_iter().map(|l| format!("REFOUND {l}")));
+                if sealed {
+                    // The listing is posted again under the founded domain.
+                    self.lines.clear();
+                }
+            }
+            Err(e) => said.push(format!("REFOUND stopped: {e}")),
+        }
+        said
     }
 
     /// The world's axis coordinate u: the conductor's beat beside the worlds.
@@ -288,6 +339,7 @@ impl House {
                     said.push(format!("PERCEPT seq {seq}: task {} before seat {s} ({})", hex(&id[..6]), self.line_on(s).unwrap_or_default()));
                 }
                 Err(why) => {
+                    self.unknown_domain |= why == Refusal::UnknownDomain;
                     seat.give_back(id);
                     said.push(format!("PERCEPT refused: {why:?}"));
                 }
@@ -350,6 +402,7 @@ impl House {
             match seat.session().post_seats(&self.key, self.listing())? {
                 Ok(seq) => said.push(format!("SEATS seq {seq}: domain {}, epoch {}, {} seats (the house and {} lines)", hex(&self.domain), self.epoch, n + 1, n)),
                 Err(why) => {
+                    self.unknown_domain |= why == Refusal::UnknownDomain;
                     self.lines.clear(); // listed again next tend
                     said.push(format!("SEATS refused: {why:?}"));
                     return Ok(said);
@@ -361,6 +414,7 @@ impl House {
         let read = match seat.session().read_mail(&self.key, self.after, self.relay_epoch.unwrap_or(0))? {
             Ok(m) => m,
             Err(why) => {
+                self.unknown_domain |= why == Refusal::UnknownDomain;
                 said.push(format!("mail refused: {why:?}"));
                 return Ok(said);
             }
@@ -411,6 +465,7 @@ impl House {
                         }
                     }
                     let answer = seat.session().post_taken(&self.key, Taken { domain: t.domain, sub_origin: t.sub_origin, seat: t.seat, mind: t.mind, ok, reason })?;
+                    self.unknown_domain |= answer == Err(Refusal::UnknownDomain);
                     said.push(format!("TAKE seq {seq} seat {} by {}: {} ({answer:?})", t.seat, hex(&t.mind[..4]), if ok { "taken" } else { "refused" }));
                 }
                 HouseMail::Call { seq, call, reference } => {
@@ -424,6 +479,7 @@ impl House {
                     };
                     let o = Outcome { domain: call.domain, sub_origin: call.sub_origin, seat: call.seat, mind: call.mind, call: reference, applied: reason == CLOSED, reason, deed };
                     let answer = seat.session().post_outcome(&self.key, o)?;
+                    self.unknown_domain |= answer == Err(Refusal::UnknownDomain);
                     said.push(format!("CALL seq {seq} seat {} fn {}: {what} ({answer:?})", call.seat, call.fn_id));
                 }
             }

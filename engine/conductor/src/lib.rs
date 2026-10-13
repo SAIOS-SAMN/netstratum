@@ -79,6 +79,7 @@ pub mod ancients;
 pub mod substrata;
 pub mod commissions;
 pub mod parliaments;
+pub mod ascension;
 // SOC-1 (operator directive 2026-08-16): the open build workbench — the surplus
 // phase of `build_step` draws its next building from a disposition-weighted
 // partition function seeded by the chronicle digest, in place of the fixed
@@ -913,11 +914,73 @@ const AUTIC_BASIN_CAP: usize = 4096;
 /// parliament); the oldest give way. Recorded in docs/59.
 const INHERITED_CAP: usize = 256;
 
-/// **DECLARED BOUND** (memory, 2026-10-09): the chain entries a vessel's basin
-/// keeps, newest crystals first. An entry is a site, a direction and an exact
-/// coefficient (~60 bytes held), so a basin holds about 1 MB and the
-/// universe's 146 vessels about 150 MB. A memory bound, recorded in docs/59.
-const BASIN_ENTRY_CAP: usize = 16_384;
+/// **THE BYTE WITNESS** (docs/71): no vessel's basin may hold more chain
+/// entries than this, ~16 MB. Since M1 the bound is the line's share of the
+/// universe's memory (`memory_budget`); this binds only if that physics is
+/// broken, and every time it binds it is counted (`memory_witness_hits`, the
+/// census alarm).
+const BASIN_ENTRY_CAP: usize = 262_144;
+
+/// **DECLARED** (docs/71 M1, coordinator 2026-10-09: a dial until a law derives
+/// it): the chain entries all of the universe's minds may keep together, about
+/// 150 MB at ~60 bytes an entry. Each line keeps its share by its share of the
+/// universe's wealth.
+pub const MIND_ENTRY_BUDGET: usize = 2_400_000;
+
+/// THE YEAR'S BOUNCE, once a year at its close (the conductor's year voice and
+/// the test loop alike): the year's sinks reach their cores, every core
+/// re-emits what it holds, the ancients and the throats' keepers are read
+/// (docs/68), ascension advances (docs/72: gates, envoys, ascension by deed),
+/// the parliaments carry the councils' words (docs/70), and the councils are
+/// published for the house (Concordance 3.9). Returns what happened, for the log.
+pub fn year_bounce(worlds: &mut Vec<Polity>, book: &Ledger, registry: &Registry, var_root: &std::path::Path, beat: u64, epoch_base: u64) -> Vec<String> {
+    let mut said = Vec::new();
+    let deposits = core_step(worlds, book, epoch_base + beat);
+    if !deposits.is_empty() {
+        said.push(format!("{} worlds' sinks reached their cores", deposits.len()));
+    }
+    for (core, world) in core_bounce(worlds, book, epoch_base + beat) {
+        said.push(format!("the core {core} returns a pulse to {world}"));
+    }
+    let bounce = beat / scribe::journal::YEAR_TICKS;
+    // docs/72: the bounce's ONE reading of the throats' keepers (G3, the
+    // envoys counted), passed to the ancients, ascension and the parliaments.
+    let keepers = ancients::keepers(worlds, book, registry, var_root);
+    said.push(format!("KEEPERS — {} cores kept", keepers.len()));
+    for a in ancients::step(worlds, book, registry, var_root, &keepers, bounce, epoch_base + beat) {
+        said.push(format!("AN ANCIENT ARISES at {} — {} of {} (by {})", a.core, a.sigil, a.world, if a.by_birth { "birth" } else { "deed" }));
+    }
+    said.extend(ascension::step(worlds, book, registry, var_root, &keepers, bounce, epoch_base + beat));
+    for (core, line, reached, heard) in parliaments::carry(worlds, book, registry, var_root, &keepers) {
+        said.push(format!("PARLIAMENT — {line} at {core} carries the council's words to {reached} lines ({heard} heard)"));
+    }
+    let _ = ancients::write_council(worlds, var_root);
+    said
+}
+
+/// docs/71 M1 — THE MEMORY SHARE: each line may keep its share of the
+/// universe's memory (`MIND_ENTRY_BUDGET`) by its share of the universe's
+/// wealth (banked Crystal and STAMP). The shares sum to at most one, so the
+/// minds' memory is bounded by construction however the economy grows; a line
+/// remembers what its wealth can hold. With no wealth anywhere, equal shares.
+pub fn assign_memory(worlds: &mut [Polity]) {
+    let wealth: Vec<Ratio> = worlds
+        .iter()
+        .map(|p| {
+            p.world
+                .orb()
+                .map(|o| o.banked_amount(Resource::Crystal) + o.stamp_amount())
+                .unwrap_or_else(|| ratio(0, 1))
+        })
+        .collect();
+    let total = wealth.iter().fold(ratio(0, 1), |t, w| t + w.clone());
+    let n = worlds.iter().filter(|p| !p.penned).count().max(1);
+    for (p, w) in worlds.iter_mut().zip(wealth) {
+        let share = if total > ratio(0, 1) { w / total.clone() } else { ratio(1, n as i64) };
+        let entries = (share * ratio(MIND_ENTRY_BUDGET as i64, 1)).floor().to_integer();
+        p.memory_budget = Some(num_traits::ToPrimitive::to_usize(&entries).unwrap_or(0));
+    }
+}
 
 /// PERF — how often (in world beats) a vessel PRACTISES a mesh wall and SPEAKS a
 /// sentence. Every beat would put two extra reduce ops per civ on top of the
@@ -1147,6 +1210,11 @@ pub struct Polity {
     /// COMPOSE move: multi-word thought exchanged and comprehended between minds.
     pub autic_spoke: usize,
     pub autic_learned: usize,
+    /// docs/71 M1: the chain entries this line's minds may keep, its share of
+    /// the universe's memory by its share of the universe's wealth.
+    pub memory_budget: Option<usize>,
+    /// docs/71: how often a basin met the byte witness (should stay 0).
+    pub memory_witness_hits: u64,
     /// How many refusals the board has already been TOLD. The record
     /// above is permanent; this is only the narrator's place in it, so
     /// a refusal is announced once per process and kept forever.
@@ -1576,6 +1644,11 @@ impl Polity {
         true
     }
 
+    /// docs/71: the chain entries this line's minds hold now.
+    pub fn memory_held(&self) -> usize {
+        self.grown.values().flatten().map(|c| c.class.entries.len()).sum()
+    }
+
     /// The sizes of what this line holds in memory that can grow, for the
     /// census: the chronicle's tail, the annals' kept bytes, the working and
     /// inherited libraries, the owned and stated words, the pending words,
@@ -1710,6 +1783,8 @@ impl Polity {
                         stated: std::collections::HashMap::new(),
                         autic_spoke: 0,
                         autic_learned: 0,
+                        memory_budget: None,
+                        memory_witness_hits: 0,
                         reported: 0,
                         sync_cursor,
                         core_pending: cores::Pending::read(&book.world_dir(&spec.world_name)),
@@ -1923,6 +1998,8 @@ impl Polity {
             stated: std::collections::HashMap::new(),
             autic_spoke: 0,
             autic_learned: 0,
+            memory_budget: None,
+            memory_witness_hits: 0,
             reported: 0,
             sync_cursor: cfe::persist::SyncCursor::default(),
             core_pending: cores::Pending::default(),
@@ -4062,14 +4139,22 @@ impl Polity {
         // basin's newest crystals are kept within BASIN_ENTRY_CAP entries too
         // (the count cap alone let 146 vessels reach tens of GB: measured
         // ~60 KB a crystal, the conductor grew ~3.5 MB a beat).
+        let vessels = self.grown.len().max(1);
         for basin in self.grown.values_mut() {
             if basin.len() > AUTIC_BASIN_CAP {
                 let over = basin.len() - AUTIC_BASIN_CAP;
                 basin.drain(..over);
             }
             let mut entries: usize = basin.iter().map(|c| c.class.entries.len()).sum();
+            // docs/71 M1: the line's share, split among its vessels; the byte
+            // witness above it, counted whenever it would be the one to bind.
+            let share = self.memory_budget.map(|b| b / vessels).unwrap_or(BASIN_ENTRY_CAP);
+            if share > BASIN_ENTRY_CAP && entries > BASIN_ENTRY_CAP {
+                self.memory_witness_hits += 1;
+            }
+            let keep = share.min(BASIN_ENTRY_CAP);
             let mut over = 0;
-            while entries > BASIN_ENTRY_CAP && over < basin.len() {
+            while entries > keep && over < basin.len() {
                 entries -= basin[over].class.entries.len();
                 over += 1;
             }
@@ -5524,6 +5609,34 @@ pub fn inheritance_step(worlds: &mut [Polity], stamp: u64) -> usize {
     arrived
 }
 
+/// The living lines of each galaxy, by its core.
+pub fn galaxy_members(worlds: &[Polity], book: &Ledger) -> std::collections::BTreeMap<String, Vec<usize>> {
+    let mut galaxies: std::collections::BTreeMap<String, Vec<usize>> = std::collections::BTreeMap::new();
+    for (i, polity) in worlds.iter().enumerate() {
+        if polity.penned {
+            continue;
+        }
+        if let Some(core) = book.core_of(&polity.spec.position) {
+            galaxies.entry(core).or_default().push(i);
+        }
+    }
+    galaxies
+}
+
+/// A GALAXY'S HUB (docs/67 N1, docs/66 Y2): where a line's word closes the
+/// galaxy's commission the hub stands where the word marks; otherwise the
+/// medoid line (the one nearest, by the torus's L1, to all the others). The
+/// hub clearing and the gates (docs/72) read this one hub.
+pub fn galaxy_hub(worlds: &[Polity], book: &Ledger, var_root: &std::path::Path, core: &str, members: &[usize], span: &Ratio) -> Option<usize> {
+    let centre = book.galaxies().into_iter().find(|g| g.name == core).map(|g| g.center);
+    centre.and_then(|c| commissions::hub_of(worlds, var_root, core, members, &c, span)).or_else(|| {
+        members
+            .iter()
+            .copied()
+            .min_by_key(|&i| members.iter().fold(ratio(0, 1), |sum, &j| sum + spatial_l1(&worlds[i].spec.position, &worlds[j].spec.position, span)))
+    })
+}
+
 /// MARKET-2: the transit distance the iceberg law melts against — the
 /// universe's own torus distance (`ledger::torus_distance`), WRAPPED against
 /// the carried `span`. It summed unwrapped |Δ| until 2026-10-08: two worlds
@@ -5657,6 +5770,26 @@ pub fn element_trade_step(worlds: &mut [Polity], beat: u64, span: &Ratio) -> Vec
     cleared
 }
 
+/// What the hubs did in one beat, galaxy by galaxy (the HUB line's reading):
+/// how many cleared, why the others did not, and the buyers' STAMP legs the
+/// hulls cut short or refused.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct HubCensus {
+    /// Clearings (a galaxy, or galaxies joined by gates) with fewer than two lines.
+    pub alone: usize,
+    /// Fewer than two unwalled lines, or no STAMP or no cargo among them.
+    pub closed: usize,
+    /// Opened, but nothing met: no STAMP or no cargo arrived at the hub.
+    pub unmet: usize,
+    /// Cleared at one price.
+    pub cleared: usize,
+    /// Buyers' STAMP legs carried in part (the hulls held less than half the
+    /// buyer's STAMP: FLEET-1's partial fill).
+    pub partial: usize,
+    /// Buyers' STAMP legs refused, by their refusal's name.
+    pub refused: std::collections::BTreeMap<String, usize>,
+}
+
 /// STAMP-1 / MM-1 — pure NPC mint and spot clear (Wave-4 minimal).
 ///
 /// 1. Each unpenned line with surplus crystal mints **half** of the
@@ -5667,8 +5800,18 @@ pub fn element_trade_step(worlds: &mut [Polity], beat: u64, span: &Ratio) -> Vec
 ///    aperture one way + resource aperture the other (spot clear,
 ///    zero player). Pre-checked so a partial clear never strands
 ///    STAMP mid-deal.
-pub fn stamp_market_step(worlds: &mut [Polity], book: &Ledger, var_root: &std::path::Path, keepers: &std::collections::BTreeMap<String, ancients::Keeper>, beat: u64, span: &Ratio) -> Vec<(String, String, Ratio)> {
+#[allow(clippy::too_many_arguments)]
+pub fn stamp_market_step(
+    worlds: &mut [Polity],
+    book: &Ledger,
+    var_root: &std::path::Path,
+    keepers: &std::collections::BTreeMap<String, ancients::Keeper>,
+    roads: &[ascension::Road],
+    beat: u64,
+    span: &Ratio,
+) -> (Vec<(String, String, Ratio, Ratio)>, HubCensus) {
     let mut clears = Vec::new();
+    let mut census = HubCensus::default();
     let half = |amount: Ratio| amount / (ratio(1, 1) + ratio(1, 1));
     // Mint phase — convert half of surplus crystal (identity rate).
     for polity in worlds.iter_mut() {
@@ -5728,39 +5871,48 @@ pub fn stamp_market_step(worlds: &mut [Polity], book: &Ledger, var_root: &std::p
     };
     let stamp_of = |p: &Polity| p.world.orb().map(|o| o.stamp_amount()).unwrap_or_else(|| ratio(0, 1));
     let banked_of = |p: &Polity, r: Resource| p.world.orb().map(|o| o.banked_amount(r)).unwrap_or_else(|| ratio(0, 1));
-    let mut galaxies: std::collections::BTreeMap<String, Vec<usize>> = std::collections::BTreeMap::new();
-    for (i, polity) in worlds.iter().enumerate() {
-        if polity.penned {
-            continue;
+    let one = || ratio(1, 1);
+    let galaxies = galaxy_members(worlds, book);
+    let hubs: std::collections::BTreeMap<String, usize> = galaxies
+        .iter()
+        .filter_map(|(core, members)| galaxy_hub(worlds, book, var_root, core, members, span).map(|h| (core.clone(), h)))
+        .collect();
+    // docs/72 — THE GATES' ROADS. A galaxy joined to another galaxy's core by
+    // a MAPPED gate (5.9) clears at that core's hub: each of its lines runs its
+    // leg to its own galaxy's hub and through the gate, and the gate's span
+    // melt replaces the open-space distance. Of several mapped gates a galaxy
+    // takes the one that melts least (then by name); a galaxy whose own core
+    // clears elsewhere takes none in (one road, no chains).
+    let mut route: std::collections::BTreeMap<String, &ascension::Road> = std::collections::BTreeMap::new();
+    for road in roads.iter().filter(|r| r.from != r.core && hubs.contains_key(&r.from) && hubs.contains_key(&r.core)) {
+        let better = route.get(&road.from).is_none_or(|have| (&road.melt, &road.core) < (&have.melt, &have.core));
+        if better {
+            route.insert(road.from.clone(), road);
         }
-        if let Some(core) = book.core_of(&polity.spec.position) {
-            galaxies.entry(core).or_default().push(i);
-        }
+    }
+    let away: Vec<String> = route.keys().cloned().collect();
+    route.retain(|_, r| !away.contains(&r.core));
+    let mut clearings: std::collections::BTreeMap<String, Vec<(usize, Option<&ascension::Road>)>> = std::collections::BTreeMap::new();
+    for (core, members) in &galaxies {
+        let via = route.get(core).copied();
+        let at = via.map(|r| r.core.clone()).unwrap_or_else(|| core.clone());
+        clearings.entry(at).or_default().extend(members.iter().map(|&i| (i, via)));
     }
     let mut seq = 0u64;
     let mut next_deal = || {
         seq += 1;
         beat.saturating_mul(100_000).saturating_add(80_000 + seq)
     };
-    for (core, members) in galaxies {
+    for (core, members) in clearings {
         if members.len() < 2 {
+            census.alone += 1;
             continue;
         }
-        // docs/66 Y2: where a line's word closes the galaxy's commission, the
-        // hub stands where the word marks; otherwise the medoid stands in.
-        let centre = book.galaxies().into_iter().find(|g| g.name == core).map(|g| g.center);
-        let worded = centre.and_then(|c| commissions::hub_of(worlds, var_root, &core, &members, &c, span));
-        let hub = worded.unwrap_or_else(|| {
-            *members
-                .iter()
-                .min_by_key(|&&i| {
-                    members
-                        .iter()
-                        .fold(ratio(0, 1), |sum, &j| sum + spatial_l1(&worlds[i].spec.position, &worlds[j].spec.position, span))
-                })
-                .expect("two or more members")
-        });
-        for &i in &members {
+        let Some(&hub) = hubs.get(&core) else {
+            census.alone += 1;
+            continue;
+        };
+        for &(i, _) in &members {
             if !worlds[i].world.knows_its_sun() {
                 let steward = worlds[i].steward;
                 let _ = worlds[i].world.grant_tech_as(steward, cfe::world::FIRST_ORB, 0);
@@ -5769,36 +5921,70 @@ pub fn stamp_market_step(worlds: &mut [Polity], book: &Ledger, var_root: &std::p
         // THE WALL (the iceberg law, as the old sweep kept it): a line whose
         // road to the hub melts whole sits out, both sides; and a galaxy whose
         // unwalled lines bring no STAMP or no cargo does not open, so no one
-        // pays the melt to a hub with nothing to meet it.
-        let open: Vec<(usize, Ratio)> = members
+        // pays the melt to a hub with nothing to meet it. A line joined by a
+        // gate takes the cheaper of its two roads: open space to the hub, or
+        // its own hub and the gate (what survives is what survives both legs).
+        let open: Vec<(usize, Ratio, Option<&ascension::Road>)> = members
             .iter()
-            .filter(|&&i| i != hub)
-            .filter_map(|&i| {
+            .filter(|(i, _)| *i != hub)
+            .filter_map(|&(i, via)| {
                 let distance = spatial_l1(&worlds[i].spec.position, &worlds[hub].spec.position, span);
-                let melt = cfe::world::route_melt(&worlds[i].world, &worlds[hub].world, &distance);
-                (melt < ratio(1, 1)).then_some((i, melt))
+                let direct = cfe::world::route_melt(&worlds[i].world, &worlds[hub].world, &distance);
+                let gated = via.and_then(|road| {
+                    let home = *hubs.get(&road.from)?;
+                    let leg = spatial_l1(&worlds[i].spec.position, &worlds[home].spec.position, span);
+                    let leg = cfe::world::route_melt(&worlds[i].world, &worlds[home].world, &leg);
+                    Some(one() - (one() - leg) * (one() - road.melt.clone()))
+                });
+                let (melt, via) = match gated {
+                    Some(g) if g < direct => (g, via),
+                    _ => (direct, None),
+                };
+                (melt < one()).then_some((i, melt, via))
             })
             .collect();
-        let buyers = open.iter().any(|(i, _)| stamp_of(&worlds[*i]) > ratio(0, 1));
-        let sellers = open.iter().any(|(i, _)| cargo_of(&worlds[*i]).is_some());
+        let buyers = open.iter().any(|(i, _, _)| stamp_of(&worlds[*i]) > ratio(0, 1));
+        let sellers = open.iter().any(|(i, _, _)| cargo_of(&worlds[*i]).is_some());
         if open.len() < 2 || !buyers || !sellers {
+            census.closed += 1;
             continue;
         }
         // IN: each buyer's half STAMP, each seller's offer, to the hub.
         let mut paid: Vec<(usize, Ratio)> = Vec::new();
         let mut gave: Vec<(usize, Resource, Ratio)> = Vec::new();
-        let open_melt = open.clone();
-        for (i, melt) in open {
+        for (i, melt, _) in &open {
+            let (i, melt) = (*i, melt.clone());
             let (stamp, cargo) = (stamp_of(&worlds[i]), cargo_of(&worlds[i]));
             if stamp > ratio(0, 1) {
-                if let Some(pay) = cfe::dop::Positive::new(half(stamp)) {
-                    let deal = next_deal();
+                // FLEET-1 PARTIAL FILL, as `clear_trade` keeps it: on a melting
+                // road a hull carries what it CAN. Half the buyer's STAMP was
+                // sent whole or refused whole (HullCapacityShort), the hub's
+                // silent stall: a buyer richer than its hulls never paid in,
+                // and a galaxy whose buyers all were never met. A road that
+                // does not melt asks no hull.
+                let deal = next_deal();
+                let mut send = half(stamp);
+                if melt > ratio(0, 1) {
+                    let hold = cfe::world::smelt_resource(&worlds[i].world.free_capacity(deal));
+                    if hold > ratio(0, 1) && hold < send {
+                        send = hold;
+                        census.partial += 1;
+                    }
+                }
+                if let Some(pay) = cfe::dop::Positive::new(cfe::world::smelt_resource(&send)) {
                     let (from, house) = two_mut(worlds, i, hub);
                     let before = stamp_of(house);
-                    if cfe::world::stamp_aperture_transfer(&mut from.world, cfe::world::FIRST_ORB, &mut house.world, cfe::world::FIRST_ORB, pay, deal, &melt).is_ok() {
-                        let arrived = stamp_of(house) - before;
-                        if arrived > ratio(0, 1) {
-                            paid.push((i, arrived));
+                    match cfe::world::stamp_aperture_transfer(&mut from.world, cfe::world::FIRST_ORB, &mut house.world, cfe::world::FIRST_ORB, pay, deal, &melt) {
+                        Ok(()) => {
+                            let arrived = stamp_of(house) - before;
+                            if arrived > ratio(0, 1) {
+                                paid.push((i, arrived));
+                            }
+                        }
+                        Err(why) => {
+                            let name = format!("{why:?}");
+                            let name = name.split([' ', '{', '(']).next().unwrap_or_default().to_string();
+                            *census.refused.entry(name).or_insert(0) += 1;
                         }
                     }
                 }
@@ -5830,6 +6016,11 @@ pub fn stamp_market_step(worlds: &mut [Polity], book: &Ledger, var_root: &std::p
             *pools.entry(*r).or_insert_with(|| ratio(0, 1)) += a.clone();
         }
         let matched = stamp_in > ratio(0, 1) && cargo_in > ratio(0, 1);
+        if matched {
+            census.cleared += 1;
+        } else {
+            census.unmet += 1;
+        }
         for (i, brought) in &paid {
             let deal_base = next_deal();
             let (to, house) = two_mut(worlds, *i, hub);
@@ -5858,38 +6049,52 @@ pub fn stamp_market_step(worlds: &mut [Polity], book: &Ledger, var_root: &std::p
         }
         // docs/70 P2 — THE ROAD TOLL (Concordance 5.4, 5.8): charged per unit
         // CARRIED, on mass, never on value; paid in the realm's own money
-        // (STAMP) to the keeper of the core's throat (the G3 keeper's rider,
-        // its parliament's line). The rate is the road's own: the melt
-        // fraction the iceberg already takes from money on that leg, so cargo
-        // pays for the road as money melts on it. A walled payer pays nothing.
+        // (STAMP). The rate is the road's own: the melt fraction the iceberg
+        // already takes from money on that leg, so cargo pays for the road as
+        // money melts on it. A walled payer pays nothing. On the open road the
+        // toll is the keeper's of the core's throat (the G3 keeper's rider, the
+        // one reading); on a gate's road (docs/72) it is the gate's builders'
+        // (`ascension::Road::payee`), carried back over the same road.
         let mut toll_paid = ratio(0, 1);
+        let mut gate_paid = ratio(0, 1);
         if matched {
-            if let Some(keeper) = keepers.get(&core).and_then(|k| worlds.iter().position(|p| !p.penned && p.spec.civilization.sigil == k.rider)) {
-                for (i, _, brought) in &gave {
-                    if *i == keeper {
-                        continue;
+            let keeper = keepers.get(&core).and_then(|k| worlds.iter().position(|p| !p.penned && p.spec.civilization.sigil == k.rider));
+            for (i, _, brought) in &gave {
+                let Some((_, melt, via)) = open.iter().find(|(j, _, _)| j == i) else { continue };
+                let payee = match via {
+                    Some(road) => road.payee,
+                    None => keeper,
+                };
+                let Some(payee) = payee.filter(|p| p != i) else { continue };
+                let have = stamp_of(&worlds[*i]);
+                let toll = cfe::world::smelt_resource(&(brought.clone() * melt.clone()).min(have));
+                let Some(toll) = cfe::dop::Positive::new(toll) else { continue };
+                let road = match via {
+                    Some(_) => melt.clone(),
+                    None => {
+                        let distance = spatial_l1(&worlds[*i].spec.position, &worlds[payee].spec.position, span);
+                        cfe::world::route_melt(&worlds[*i].world, &worlds[payee].world, &distance)
                     }
-                    let melt = open_melt.iter().find(|(j, _)| j == i).map(|(_, m)| m.clone()).unwrap_or_else(|| ratio(0, 1));
-                    let have = stamp_of(&worlds[*i]);
-                    let toll = cfe::world::smelt_resource(&(brought.clone() * melt).min(have));
-                    let Some(toll) = cfe::dop::Positive::new(toll) else { continue };
-                    let distance = spatial_l1(&worlds[*i].spec.position, &worlds[keeper].spec.position, span);
-                    let road = cfe::world::route_melt(&worlds[*i].world, &worlds[keeper].world, &distance);
-                    if road >= ratio(1, 1) {
-                        continue;
-                    }
-                    let deal = next_deal();
-                    let before = stamp_of(&worlds[keeper]);
-                    let (from, to) = two_mut(worlds, *i, keeper);
-                    if cfe::world::stamp_aperture_transfer(&mut from.world, cfe::world::FIRST_ORB, &mut to.world, cfe::world::FIRST_ORB, toll, deal, &road).is_ok() {
-                        toll_paid += stamp_of(&worlds[keeper]) - before;
+                };
+                if road >= one() {
+                    continue;
+                }
+                let deal = next_deal();
+                let before = stamp_of(&worlds[payee]);
+                let (from, to) = two_mut(worlds, *i, payee);
+                if cfe::world::stamp_aperture_transfer(&mut from.world, cfe::world::FIRST_ORB, &mut to.world, cfe::world::FIRST_ORB, toll, deal, &road).is_ok() {
+                    let arrived = stamp_of(&worlds[payee]) - before;
+                    if via.is_some() {
+                        gate_paid += arrived;
+                    } else {
+                        toll_paid += arrived;
                     }
                 }
             }
-            clears.push((core, worlds[hub].spec.world_name.clone(), toll_paid));
+            clears.push((core, worlds[hub].spec.world_name.clone(), toll_paid, gate_paid));
         }
     }
-    clears
+    (clears, census)
 }
 
 /// MERCHANT-1 (the MARKET-2 sequence) — THE ARBITRAGE PASS, the
@@ -6786,7 +6991,7 @@ pub fn shared_language_census(worlds: &[Polity], beat: u64) {
 /// every polity, then `cycles` heartbeats; branches born mid-era join the
 /// beat. Returns the live worlds.
 pub fn run_era(var_root: &str, cycles: u32) -> Vec<Polity> {
-    run_era_inner(var_root, cycles, None, None)
+    run_era_inner(var_root, cycles, None, None, None)
 }
 
 /// **THE CONDITION-DRIVEN ERA** (wedge removal, 2026-08-12): run at
@@ -6804,7 +7009,7 @@ pub fn run_era_until(
     cycles: u32,
     arrived: impl Fn(&[Polity]) -> bool,
 ) -> Vec<Polity> {
-    run_era_inner(var_root, cycles, None, Some(&arrived))
+    run_era_inner(var_root, cycles, None, Some(&arrived), None)
 }
 
 /// The condition-driven era over a SEATED PREFIX of the founding
@@ -6818,7 +7023,32 @@ pub fn run_era_until_among(
     seats: usize,
     arrived: impl Fn(&[Polity]) -> bool,
 ) -> Vec<Polity> {
-    run_era_inner(var_root, cycles, Some(seats), Some(&arrived))
+    run_era_inner(var_root, cycles, Some(seats), Some(&arrived), None)
+}
+
+/// **THE UNIVERSE'S OWN LOOP over its registered lines** (docs/72 tests): the
+/// same beat as `run_era`, booted from every line the registry holds whose
+/// world stands in `var_root` (resumed from its snapshot), with the year's
+/// bounce (`year_bounce`) at each year's close. Stops early once `arrived`.
+pub fn run_universe(var_root: &str, cycles: u32, arrived: &dyn Fn(&[Polity]) -> bool) -> Vec<Polity> {
+    let registry = Registry::at(format!("{var_root}/registry"));
+    let book = Ledger::at(format!("{var_root}/worlds"));
+    let specs: Vec<PolitySpec> = roster(&registry)
+        .into_iter()
+        .filter(|s| book.world_dir(&s.world_name).join("state.snap").exists() && !book.world_dir(&s.world_name).join("collapsed").exists())
+        .collect();
+    // The universe's own beat carries on from where it stands (`conductor.beat`),
+    // so core periods and tenures read as they do live.
+    let beat_file = std::path::Path::new(var_root).join("conductor.beat");
+    let beat0: u64 = std::fs::read_to_string(&beat_file).ok().and_then(|t| t.trim().parse().ok()).unwrap_or(0);
+    let ran = std::cell::Cell::new(0u64);
+    let counted = |w: &[Polity]| {
+        ran.set(ran.get() + 1);
+        arrived(w)
+    };
+    let worlds = run_era_inner(var_root, cycles, None, Some(&counted), Some((specs, beat0)));
+    let _ = std::fs::write(&beat_file, format!("{}\n", beat0 + ran.get()));
+    worlds
 }
 
 fn run_era_inner(
@@ -6826,6 +7056,7 @@ fn run_era_inner(
     cycles: u32,
     seats: Option<usize>,
     arrived: Option<&dyn Fn(&[Polity]) -> bool>,
+    specs: Option<(Vec<PolitySpec>, u64)>,
 ) -> Vec<Polity> {
     let registry = Registry::at(format!("{var_root}/registry"));
     let book = Ledger::at(format!("{var_root}/worlds"));
@@ -6835,7 +7066,8 @@ fn run_era_inner(
         .unwrap_or(0);
     // 11 §5.2: the live aeon's G-sheet (see main.rs — same law).
     let live_base = cfe::world::wrap_gauge(ratio(eras.len() as i64, 12));
-    let roster = polities::founding_polities();
+    let booted = specs.is_some();
+    let (roster, beat0) = specs.unwrap_or_else(|| (polities::founding_polities(), 0));
     let take = seats.unwrap_or(roster.len()).min(roster.len());
     let mut worlds: Vec<Polity> = roster
         .into_iter()
@@ -6929,8 +7161,9 @@ fn run_era_inner(
         let _ = market_step(&mut worlds, u64::from(beat), &book.universe_span());
         let _ = merchant_step(&mut worlds, u64::from(beat), &book.universe_span());
         let _ = element_trade_step(&mut worlds, u64::from(beat), &book.universe_span());
-        let keepers = ancients::keepers(&worlds, &book, &registry);
-        let _ = stamp_market_step(&mut worlds, &book, std::path::Path::new(var_root), &keepers, u64::from(beat), &book.universe_span());
+        let keepers = ancients::keepers(&worlds, &book, &registry, std::path::Path::new(var_root));
+        let roads = ascension::roads(&worlds, &book, &registry, std::path::Path::new(var_root), &keepers);
+        let _ = stamp_market_step(&mut worlds, &book, std::path::Path::new(var_root), &keepers, &roads, u64::from(beat), &book.universe_span());
         instrument_step(&mut worlds);
         market_war_step(&mut worlds);
         espionage_step(&mut worlds);
@@ -6950,6 +7183,15 @@ fn run_era_inner(
             // GALAXY-1b: the observation sweep rides the year voice
             // (11 §1 — board-scale shifts read yearly).
             let _ = observe_crossings(&worlds, &registry, &book, epoch_base + u64::from(beat) + 1);
+            // The year's bounce, as the conductor's year voice runs it.
+        }
+        // The year's bounce on the universe's own beat, as the conductor's year
+        // voice runs it.
+        let universal = beat0 + u64::from(beat) + 1;
+        if booted && universal.is_multiple_of(scribe::journal::YEAR_TICKS) {
+            for line in year_bounce(&mut worlds, &book, &registry, std::path::Path::new(var_root), universal, epoch_base) {
+                println!("year {}: {line}", universal / scribe::journal::YEAR_TICKS);
+            }
         }
         if arrived.is_some_and(|done| done(&worlds)) {
             break;

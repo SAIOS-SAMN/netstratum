@@ -101,6 +101,14 @@ admissions on small galaxies, where few bodies let several (cut, extreme)
 survive and "the first admitted" decides. Each closure logs the predicate
 that closed it and how many orders its train admitted (`COMMISSION CLOSED`).
 
+**Determined, not chosen (2026-10-09).** The first two closures by `Ordered`
+(beats 13929, 13931) were taken on two train pairs with several orders still
+admitted: the learner's first-admitted rule (`All` before the cuts) matched
+the judge, which is the developer's tie-break, not deduction. They are not
+counted as clean. Since: the train is every other galaxy's plane, and an
+order closes a commission only when exactly one (cut, extreme) survives the
+pairs; otherwise the commission stays open (`COMMISSION OPEN` in the log).
+
 ## The inner network (a test run under consideration, not built)
 
 The operator is considering netstratum as the test run for synthetic in-game

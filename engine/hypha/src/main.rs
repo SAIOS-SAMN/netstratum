@@ -8,6 +8,8 @@
 //!   ns-hypha found                      found netstratum's domain on the court (once)
 //!   ns-hypha reserve <tier>             designate one of the domain's tiers its reserve (in trust)
 //!   ns-hypha originate [<var-root>]     state the universe's origin once: its Big Bang, its torus
+//!   ns-hypha refound [<var-root>]       after the fleet's recut: found, originate, reserve union,
+//!                                       the first ledger entry; then the house maps the gates
 //!   ns-hypha seat [--every S] [--key F] [--worlds D] netstratum's client kernel on the fleet: pull, think, file (signed with the house key)
 //!   ns-hypha mark <world-dir>           record a people as folded through its chronicle's end
 //!   ns-hypha epoch <name>               set the hot colonies line aside, restart it at zero
@@ -26,7 +28,7 @@
 //! first census.
 //!
 //! Flags: `--at host:port` (or `NS_HYPHA`; required, no default court),
-//! `--home dir` (default var/uplink). Only `found`, `reserve`, `originate` and `census --send` write
+//! `--home dir` (default var/uplink). Only `found`, `reserve`, `originate`, `refound` and `census --send` write
 //! anything on the court; every other command is a reading.
 
 use ns_hypha::census::{self, grains};
@@ -192,6 +194,7 @@ fn main() -> ExitCode {
                 }
             }
         }
+        Some("refound") => refound_cmd(&up, &args, &home),
         Some("census") => census_cmd(&args, Some(&up), &home),
         Some("prune") => prune_cmd(&up, &home),
         Some("publish") => publish_cmd(&up, &home),
@@ -612,5 +615,29 @@ fn seat_cmd(args: &[String], at: &str, home: &Path) -> ExitCode {
             }
         }
         std::thread::sleep(std::time::Duration::from_secs(every));
+    }
+}
+
+/// THE RE-FOUNDING (docs/67, docs/72 A4) by hand: the same steps the house
+/// runs itself when the court no longer knows the domain
+/// (`ns_hypha::refound::refound`): the domain, its origin, its reserve, its
+/// first ledger entry, then the marker. Keys are loaded, never minted.
+fn refound_cmd(up: &Uplink, args: &[String], home: &Path) -> ExitCode {
+    let root = args.get(2).filter(|a| !a.starts_with("--")).cloned().unwrap_or_else(|| "var-g2".into());
+    match ns_hypha::refound::refound(up.session(), home, Path::new(&root)) {
+        Ok((sealed, said)) => {
+            for line in said {
+                println!("{line}");
+            }
+            if sealed {
+                ExitCode::SUCCESS
+            } else {
+                ExitCode::from(1)
+            }
+        }
+        Err(e) => {
+            eprintln!("ns-hypha: the re-founding stops: {e} (a missing key is never minted: a new key is a new domain)");
+            ExitCode::from(1)
+        }
     }
 }

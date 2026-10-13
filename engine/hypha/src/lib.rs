@@ -31,6 +31,7 @@ pub mod line;
 pub mod probe;
 pub mod seat;
 pub mod propose;
+pub mod refound;
 
 /// No default court: the standalone :7520 court is retired (coordinator
 /// 2026-10-09, docs/PORT.md) and the fleet's hyphae are real tiers, so every
@@ -118,6 +119,12 @@ impl Uplink {
     }
 
     /// The register the hypha holds: every law at its coordinate.
+    /// The session this uplink speaks through (docs/72 A4: the re-founding's
+    /// ledger entry is sent on it).
+    pub fn session(&self) -> &Session {
+        &self.session
+    }
+
     pub fn laws(&self) -> io::Result<Vec<mycelium::physics::laws::codec::Served>> {
         self.session.laws()
     }

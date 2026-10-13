@@ -309,6 +309,8 @@ fn main() {
             // each result carries its ORIGINAL index, and results are
             // sorted back into world order before use — the same guarantee
             // the old chunk-order trick gave, robust to reassignment.
+            // docs/71 M1: each line's share of the universe's memory, by wealth.
+            conductor::assign_memory(&mut worlds);
             let mut indexed: Vec<(usize, &mut conductor::Polity)> =
                 worlds.iter_mut().enumerate().collect();
             indexed.sort_by_key(|(_, p)| std::cmp::Reverse(p.spent + p.swept));
@@ -459,13 +461,23 @@ fn main() {
             dilation_from = Some((beat, h));
         }
         hubs_cleared_at = point;
-        // docs/70 P2: the throats' keepers, read once a beat for the road tolls.
-        let keepers_now = conductor::ancients::keepers(&worlds, &book, &registry);
-        let spots = conductor::profile::timed("stamp_market_step", || conductor::stamp_market_step(&mut worlds, &book, std::path::Path::new(&var_root), &keepers_now, beat, &span));
-        if !spots.is_empty() {
-            let tolls = spots.iter().fold(cfe::ratio::ratio(0, 1), |t, (_, _, toll)| t + toll.clone());
-            println!("beat {beat}: HUB — {} galaxies cleared at their hubs (STAMP for cargo, one price each); road tolls {tolls} STAMP to the keepers", spots.len());
-        }
+        // docs/70 P2, docs/72: the beat's ONE reading of the throats' keepers
+        // (G3, the envoys counted) and the mapped gates' roads, for the hubs.
+        let keepers_now = conductor::ancients::keepers(&worlds, &book, &registry, std::path::Path::new(&var_root));
+        let roads = conductor::ascension::roads(&worlds, &book, &registry, std::path::Path::new(&var_root), &keepers_now);
+        let (spots, hubs) = conductor::profile::timed("stamp_market_step", || conductor::stamp_market_step(&mut worlds, &book, std::path::Path::new(&var_root), &keepers_now, &roads, beat, &span));
+        let tolls = spots.iter().fold(cfe::ratio::ratio(0, 1), |t, (_, _, toll, _)| t + toll.clone());
+        let gated = spots.iter().fold(cfe::ratio::ratio(0, 1), |t, (_, _, _, gate)| t + gate.clone());
+        let refused: Vec<String> = hubs.refused.iter().map(|(why, n)| format!("{n} {why}")).collect();
+        println!(
+            "beat {beat}: HUB — {} galaxies cleared at their hubs (STAMP for cargo, one price each); road tolls {tolls} STAMP to the keepers, gate tolls {gated} STAMP to the builders; not cleared: {} alone, {} closed, {} unmet; buyers' STAMP legs: {} carried in part, refused [{}]",
+            spots.len(),
+            hubs.alone,
+            hubs.closed,
+            hubs.unmet,
+            hubs.partial,
+            refused.join(", ")
+        );
         // Concordance 3.9: the councils the house seats, published for it.
         if beat.is_multiple_of(10) {
             let _ = conductor::ancients::write_council(&worlds, std::path::Path::new(&var_root));
@@ -474,6 +486,9 @@ fn main() {
         let commission = conductor::profile::timed("commissions_step", || {
             conductor::commissions::step(&mut worlds, &book, std::path::Path::new(&var_root), beat)
         });
+        if let Some((core, admitted)) = &commission.ambiguous {
+            println!("beat {beat}: COMMISSION OPEN — {core}: the pairs still admit {admitted} orders; no closure by a tie-break");
+        }
         if let Some((core, world, arrived, by, admitted)) = &commission.closed {
             println!("beat {beat}: COMMISSION CLOSED — {world} sites the hub of {core} by its own word ({by}; {admitted} orders admitted); bounty {arrived} STAMP arrived");
         }
@@ -533,38 +548,10 @@ fn main() {
                 "beat {beat}: year {} journaled — the wall is fresh (var/worlds/wall.html)",
                 beat / scribe::journal::YEAR_TICKS
             );
-            // THE CORES (slice 1): every sink of the year reaches its core.
-            let deposits = conductor::core_step(&mut worlds, &book, epoch_base + beat);
-            if !deposits.is_empty() {
-                println!("beat {beat}: {} worlds' sinks reached their cores", deposits.len());
-            }
-            // THE BOUNCE (slice 2): every core re-emits what it holds.
-            for (core, world) in conductor::core_bounce(&mut worlds, &book, epoch_base + beat) {
-                println!("beat {beat}: the core {core} returns a pulse to {world}");
-            }
-            // THE ANCIENTS ARISE (Concordance 3.1, docs/68): once a bounce, the
-            // throat's keepers (G3) are read and every ancient now due arises.
-            let (keepers, arisen) = conductor::ancients::step(
-                &worlds,
-                &book,
-                &registry,
-                std::path::Path::new(&var_root),
-                beat / scribe::journal::YEAR_TICKS,
-                epoch_base + beat,
-            );
-            println!("beat {beat}: KEEPERS — {} cores kept", keepers.len());
-            // Concordance 3.9 (docs/70 P1): the parliaments carry the councils' words.
-            for (core, line, reached, heard) in conductor::parliaments::carry(&mut worlds, &book, &registry, std::path::Path::new(&var_root)) {
-                println!("beat {beat}: PARLIAMENT — {line} at {core} carries the council's words to {reached} lines ({heard} heard)");
-            }
-            for a in &arisen {
-                println!(
-                    "beat {beat}: AN ANCIENT ARISES at {} — {} of {} (by {})",
-                    a.core,
-                    a.sigil,
-                    a.world,
-                    if a.by_birth { "birth" } else { "deed" }
-                );
+            // THE YEAR'S BOUNCE (cores, ancients, ascension, parliaments,
+            // councils): one library function, the same the test loop drives.
+            for line in conductor::year_bounce(&mut worlds, &book, &registry, std::path::Path::new(&var_root), beat, epoch_base) {
+                println!("beat {beat}: {line}");
             }
             // MEMORY (operator 2026-10-09): what the allocator holds freed but
             // unreturned is given back at the year's close, and the RSS read
@@ -636,6 +623,14 @@ fn main() {
                 "census beat {beat}: held tail={} kept={}KB library={} inherited={} owned={} stated={} pending={} minds={} arriving={} closed={} tuniversal={}",
                 sizes[0], sizes[1] / 1024, sizes[2], sizes[3], sizes[4], sizes[5], sizes[6], sizes[7], sizes[8], universe_closed.len(),
                 hubs_cleared_at.as_deref().and_then(|p| p.split('/').nth(1)).unwrap_or("none")
+            );
+            // docs/71: the minds' memory against its budget, and the witness alarm.
+            let held: usize = live.iter().map(|p| p.memory_held()).sum();
+            let hits: u64 = live.iter().map(|p| p.memory_witness_hits).sum();
+            eprintln!(
+                "census beat {beat}: memory entries={held} budget={} witness={hits}{}",
+                conductor::MIND_ENTRY_BUDGET,
+                if hits > 0 { " ALARM: a basin met the byte witness" } else { "" }
             );
             // 78.156: the dilation du/dh since the first point read, a reading.
             let h = hubs_cleared_at.as_deref().and_then(|p| p.split('/').nth(1)).and_then(|l| l.split(':').next()).and_then(|h| u64::from_str_radix(h, 16).ok());

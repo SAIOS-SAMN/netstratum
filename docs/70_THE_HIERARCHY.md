@@ -63,3 +63,7 @@ meet, and they meet only through seats and percepts.
    at MemoryHigh 1 GB, MemoryMax 1.5 GB (today ~8 MB).
 
 Wiring waits on mycelium's crate split and API.
+
+Standing note (mycelium via the coordinator, 2026-10-09): the house lists its
+seats under its RESERVE key (the union tier). Listing seats under any other
+key needs a delegation act on the relay: ask mycelium first.

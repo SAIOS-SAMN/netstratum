@@ -213,7 +213,9 @@ fn orders_admitted_seen(seen: &[(Percept, Vec<Fate>)]) -> Option<Vec<(solver_ver
             continue; // a pair that treats all or none shows no order
         }
         let rel = relations(p);
-        let cuts = std::iter::once(Cut::All).chain((1..=reach).map(Cut::Nearest)).chain((1..=reach).map(Cut::Farthest));
+        // A cut of `reach` or more reads the whole relation in every pair: it is
+        // `All` under another name, so the cuts stop short of it.
+        let cuts = std::iter::once(Cut::All).chain((1..reach).map(Cut::Nearest)).chain((1..reach).map(Cut::Farthest));
         let mut here = Vec::new();
         for cut in cuts {
             let values: Vec<usize> = rel.iter().map(|r| integral(r, cut)).collect();

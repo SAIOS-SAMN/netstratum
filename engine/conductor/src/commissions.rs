@@ -13,6 +13,8 @@
 //!
 //! - **One attempt a beat** across the universe: the galaxies in turn, and in
 //!   each its lines in turn. The line tries its own words first, then thinks.
+//!   The train is every other galaxy's plane; an order closes only when exactly
+//!   one (cut, extreme) survives the pairs (determined, never a tie-break).
 //! - **The bounty**: a closure is paid by the galaxy's other open lines, the
 //!   ladder's dearest closure price (the greatest `mint_bound`; a commission is
 //!   not on the forge's ladder) shared among them, in STAMP over the iceberg (a
@@ -174,6 +176,8 @@ pub struct Commissioned {
     /// (galaxy, the closer's world, the bounty arrived, the predicate that
     /// closed it, how many orders the train admitted).
     pub closed: Option<(String, String, Ratio, String, usize)>,
+    /// A closure withheld: (galaxy, how many orders its pairs still admit).
+    pub ambiguous: Option<(String, usize)>,
 }
 
 /// ONE ATTEMPT A BEAT: the galaxy whose turn it is, if its commission is open,
@@ -202,8 +206,9 @@ pub fn step(worlds: &mut [Polity], ledger: &Ledger, var_root: &Path, beat: u64) 
             return done; // closed, and its word still holds here
         }
     }
-    // The train: the next two galaxies' planes and their judged answers.
-    let train: Vec<TaskPair> = (1..=2)
+    // The train: every other galaxy's plane and its judged answer (as many
+    // pairs as the universe shows, so the order is determined, not chosen).
+    let train: Vec<TaskPair> = (1..planes.len())
         .map(|k| &planes[(turn + k) % planes.len()].2)
         .map(|p| TaskPair { input: p.grid.clone(), output: judged(&p.grid) })
         .collect();
@@ -223,6 +228,17 @@ pub fn step(worlds: &mut [Polity], ledger: &Ledger, var_root: &Path, beat: u64) 
     let holds = task.train.iter().all(|p| solver_verify::grid::run(&program, &p.input) == p.output)
         && solver_verify::grid::run(&program, &plane.grid) == expected;
     if !holds {
+        return done;
+    }
+    // DETERMINED, NOT CHOSEN (2026-10-09): an order closes the commission only
+    // when exactly one (cut, extreme) survives the pairs; while several do, the
+    // learner's first-admitted rule would be the developer's tie-break, not
+    // the minds' deduction, and the commission stays open.
+    let pairs: Vec<(Grid, Grid)> = task.train.iter().map(|p| (p.input.clone(), p.output.clone())).collect();
+    let admitted = solver::percept::orders_admitted(&pairs).unwrap_or(0);
+    let ordered = matches!(program.as_slice(), [solver_verify::grid::Op::Project(r)] if matches!(r.select, solver_verify::project::Select::Ordered { .. }));
+    if ordered && admitted != 1 {
+        done.ambiguous = Some((core.clone(), admitted));
         return done;
     }
     worlds[at].adopt_word(solver::mint::MintedWord { orbit: solver::mint::word_orbit(&program), expansion: program.clone(), cited: Vec::new() });
@@ -251,8 +267,6 @@ pub fn step(worlds: &mut [Polity], ledger: &Ledger, var_root: &Path, beat: u64) 
             arrived += worlds[at].world.orb().map(|o| o.stamp_amount()).unwrap_or_else(|| ratio(0, 1)) - before;
         }
     }
-    let pairs: Vec<(Grid, Grid)> = task.train.iter().map(|p| (p.input.clone(), p.output.clone())).collect();
-    let admitted = solver::percept::orders_admitted(&pairs).unwrap_or(0);
     let by = match program.as_slice() {
         [solver_verify::grid::Op::Project(rule)] => format!("{:?}", rule.select),
         other => format!("a word of {} steps", other.len()),

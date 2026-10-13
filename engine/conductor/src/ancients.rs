@@ -66,49 +66,102 @@ pub struct Keeper {
     pub line: String,
     /// The systems the group holds at this core.
     pub systems: u64,
+    /// The group's size there (population), G3's first tie-break.
+    pub size: u64,
     /// The people it keeps it through: the group's line nearest the core.
     pub rider: String,
 }
 
-/// Every core's keeper, read from where the living lines stand now (G3).
-pub fn keepers(worlds: &[Polity], book: &Ledger, registry: &Registry) -> BTreeMap<String, Keeper> {
+/// THE ONE READING of every core's keeper (docs/72 A2, one keeper
+/// everywhere): G3 over where the living lines stand now, with the envoys
+/// that crossed a gate (`<var>/ascension.bin`). Read once a beat (the hub's
+/// road tolls) and once a bounce (the ancients, ascension, the parliaments)
+/// and passed down; nothing reads the throat another way.
+pub fn keepers(worlds: &[Polity], book: &Ledger, registry: &Registry, var_root: &Path) -> BTreeMap<String, Keeper> {
+    keepers_with(worlds, book, registry, &crate::ascension::envoys(var_root))
+}
+
+/// G3 with ENVOYS (docs/72 A2): an envoy `(line sigil, core)` that crossed a
+/// gate makes its lineage a bearer of that core's wave, its line the rider, and
+/// adds its line's systems to its lineage's count there: an envoy keeps the
+/// throat only by out-holding the incumbents.
+pub fn keepers_with(worlds: &[Polity], book: &Ledger, registry: &Registry, envoys: &[(String, String)]) -> BTreeMap<String, Keeper> {
     let parents: BTreeMap<String, Vec<String>> = registry.list().into_iter().map(|c| (c.sigil, c.lineage)).collect();
-    let span = book.universe_span();
+    let cores = cores_of(worlds, book);
     let mut out = BTreeMap::new();
     for galaxy in book.galaxies() {
-        // (systems, population, riders as (distance, sigil)) per lineage root.
-        let mut groups: BTreeMap<String, (u64, u64, Vec<(Ratio, String)>)> = BTreeMap::new();
-        for polity in worlds.iter().filter(|p| !p.penned) {
-            if book.core_of(&polity.spec.position).as_deref() != Some(galaxy.name.as_str()) {
-                continue;
-            }
-            let sigil = &polity.spec.civilization.sigil;
-            let entry = groups.entry(root_of(sigil, &parents)).or_insert_with(|| (0, 0, Vec::new()));
-            entry.0 += polity.world.orbs().len() as u64;
-            entry.1 += polity.world.population_of(cfe::world::FIRST_ORB);
-            if in_bulge(&polity.spec.position, &galaxy.center, &span) {
-                entry.2.push((ledger::torus_distance(&polity.spec.position, &galaxy.center, &span), sigil.clone()));
-            }
-        }
-        let best = groups
-            .into_iter()
-            .filter_map(|(line, (systems, size, mut riders))| {
-                riders.sort();
-                let rider = riders.into_iter().next()?.1;
-                Some((systems, size, line, rider))
-            })
-            .max_by(|a, b| a.0.cmp(&b.0).then(a.1.cmp(&b.1)).then(b.2.cmp(&a.2)));
-        if let Some((systems, _, line, rider)) = best {
-            out.insert(galaxy.name.clone(), Keeper { line, systems, rider });
+        if let Some(k) = keeper_at(worlds, book, &cores, &parents, envoys, &galaxy.name, &galaxy.center) {
+            out.insert(galaxy.name.clone(), k);
         }
     }
     out
+}
+
+/// Each line's core (`Ledger::core_of`), read once: a line's galaxy does not
+/// change within a step, and each reading measures exact-rational distances to
+/// every core, so the contest reads this list instead of measuring again.
+pub(crate) fn cores_of(worlds: &[Polity], book: &Ledger) -> Vec<Option<String>> {
+    worlds.iter().map(|p| if p.penned { None } else { book.core_of(&p.spec.position) }).collect()
+}
+
+/// G3 at one core, with the envoys `(line sigil, core)` given; `cores` is
+/// `cores_of(worlds, book)`.
+pub(crate) fn keeper_at(
+    worlds: &[Polity],
+    book: &Ledger,
+    cores: &[Option<String>],
+    parents: &BTreeMap<String, Vec<String>>,
+    envoys: &[(String, String)],
+    core: &str,
+    centre: &(Ratio, Ratio, Ratio),
+) -> Option<Keeper> {
+    let span = book.universe_span();
+    // (systems, population, riders as (distance, sigil)) per lineage root.
+    let mut groups: BTreeMap<String, (u64, u64, Vec<(Ratio, String)>)> = BTreeMap::new();
+    for (i, polity) in worlds.iter().enumerate().filter(|(_, p)| !p.penned) {
+        if cores[i].as_deref() != Some(core) {
+            continue;
+        }
+        let sigil = &polity.spec.civilization.sigil;
+        let entry = groups.entry(root_of(sigil, parents)).or_insert_with(|| (0, 0, Vec::new()));
+        entry.0 += polity.world.orbs().len() as u64;
+        entry.1 += polity.world.population_of(cfe::world::FIRST_ORB);
+        if in_bulge(&polity.spec.position, centre, &span) {
+            entry.2.push((ledger::torus_distance(&polity.spec.position, centre, &span), sigil.clone()));
+        }
+    }
+    let mut counted: Vec<&str> = Vec::new();
+    for (sigil, _) in envoys.iter().filter(|(_, c)| c == core) {
+        let Some(at) = worlds.iter().position(|p| !p.penned && &p.spec.civilization.sigil == sigil) else { continue };
+        let polity = &worlds[at];
+        let entry = groups.entry(root_of(sigil, parents)).or_insert_with(|| (0, 0, Vec::new()));
+        // A line that already lives at this core was counted above: its
+        // envoy adds presence (the rider at the core), never its systems twice.
+        if cores[at].as_deref() != Some(core) && !counted.contains(&sigil.as_str()) {
+            entry.0 += polity.world.orbs().len() as u64;
+            entry.1 += polity.world.population_of(cfe::world::FIRST_ORB);
+            counted.push(sigil.as_str());
+        }
+        // The envoy stands at the core itself.
+        entry.2.push((ratio(0, 1), sigil.clone()));
+    }
+    groups
+        .into_iter()
+        .filter_map(|(line, (systems, size, mut riders))| {
+            riders.sort();
+            let rider = riders.into_iter().next()?.1;
+            Some(Keeper { line, systems, size, rider })
+        })
+        .max_by(|a, b| a.systems.cmp(&b.systems).then(a.size.cmp(&b.size)).then(b.line.cmp(&a.line)))
 }
 
 /// What a core's book holds: its ancient once arisen, and its keeper's tenure.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct CoreBook {
     pub arisen: Option<String>,
+    /// docs/72 A3: the lines that ascended to this core's ancients by deed,
+    /// after its first (several ancients a core).
+    pub ascended: Vec<String>,
     /// The keeping lineage root and the bounce it has kept the throat since.
     pub kept: Option<(String, u64)>,
 }
@@ -128,7 +181,7 @@ fn get_text(value: &[u8], at: &mut usize) -> Option<String> {
 /// The cores' books, a CHECKPOINT of binary records (Concordance 1.13): tag 1
 /// an ancient arisen (core, sigil), tag 2 a keeper's tenure (core, root, the
 /// bounce since). A text book written before 1.13 is read once, then rewritten.
-fn read_books(var_root: &Path) -> BTreeMap<String, CoreBook> {
+pub(crate) fn read_books(var_root: &Path) -> BTreeMap<String, CoreBook> {
     let mut books: BTreeMap<String, CoreBook> = BTreeMap::new();
     let Ok(bytes) = std::fs::read(var_root.join("ancients.bin")) else {
         for line in std::fs::read_to_string(var_root.join("ancients")).unwrap_or_default().lines() {
@@ -150,6 +203,11 @@ fn read_books(var_root: &Path) -> BTreeMap<String, CoreBook> {
         let Some(core) = get_text(value, &mut at) else { continue };
         match tag {
             1 => books.entry(core).or_default().arisen = get_text(value, &mut at),
+            3 => {
+                if let Some(sigil) = get_text(value, &mut at) {
+                    books.entry(core).or_default().ascended.push(sigil);
+                }
+            }
             2 => {
                 let Some(root) = get_text(value, &mut at) else { continue };
                 let Some(since) = value.get(at..at + 8).and_then(|b| b.try_into().ok()).map(u64::from_le_bytes) else { continue };
@@ -161,7 +219,7 @@ fn read_books(var_root: &Path) -> BTreeMap<String, CoreBook> {
     books
 }
 
-fn write_books(var_root: &Path, books: &BTreeMap<String, CoreBook>) -> std::io::Result<()> {
+pub(crate) fn write_books(var_root: &Path, books: &BTreeMap<String, CoreBook>) -> std::io::Result<()> {
     let mut out = Vec::new();
     for (core, book) in books {
         if let Some(sigil) = &book.arisen {
@@ -169,6 +227,12 @@ fn write_books(var_root: &Path, books: &BTreeMap<String, CoreBook>) -> std::io::
             put_text(core, &mut value);
             put_text(sigil, &mut value);
             cfe::tlv::put(1, &value, &mut out);
+        }
+        for sigil in &book.ascended {
+            let mut value = Vec::new();
+            put_text(core, &mut value);
+            put_text(sigil, &mut value);
+            cfe::tlv::put(3, &value, &mut out);
         }
         if let Some((root, since)) = &book.kept {
             let mut value = Vec::new();
@@ -186,7 +250,16 @@ fn write_books(var_root: &Path, books: &BTreeMap<String, CoreBook>) -> std::io::
 
 /// The arisen ancients, `(core, sigil)`, in core order.
 pub fn arisen(var_root: &Path) -> Vec<(String, String)> {
-    read_books(var_root).into_iter().filter_map(|(core, book)| book.arisen.map(|sigil| (core, sigil))).collect()
+    let mut out = Vec::new();
+    for (core, book) in read_books(var_root) {
+        if let Some(sigil) = book.arisen {
+            out.push((core.clone(), sigil));
+        }
+        for sigil in book.ascended {
+            out.push((core.clone(), sigil));
+        }
+    }
+    out
 }
 
 /// An ancient as it arose: the core, the line, and by which rule.
@@ -198,21 +271,21 @@ pub struct Arisen {
     pub by_birth: bool,
 }
 
-/// THE ANCIENTS' STEP, once a bounce (`bounce` counts the core periods): read
-/// the keepers, advance their tenure, raise every ancient now due, record each
-/// on the universe ledger, and end the trust at the first. Returns the keepers
-/// and what arose.
+/// THE ANCIENTS' STEP, once a bounce (`bounce` counts the core periods): with
+/// the bounce's one reading of the keepers (`keepers`), advance their tenure,
+/// raise every ancient now due, record each on the universe ledger, and end
+/// the trust at the first. Returns what arose.
 pub fn step(
     worlds: &[Polity],
     book: &Ledger,
     registry: &Registry,
     var_root: &Path,
+    keepers: &BTreeMap<String, Keeper>,
     bounce: u64,
     stamp: u64,
-) -> (BTreeMap<String, Keeper>, Vec<Arisen>) {
+) -> Vec<Arisen> {
     let span = book.universe_span();
     let mut books = read_books(var_root);
-    let keepers = keepers(worlds, book, registry);
     let parents: BTreeMap<String, Vec<String>> = registry.list().into_iter().map(|c| (c.sigil, c.lineage)).collect();
     let mut arisen = Vec::new();
     for galaxy in book.galaxies() {
@@ -303,7 +376,7 @@ pub fn step(
             let _ = std::fs::write(&trust, out);
         }
     }
-    (keepers, arisen)
+    arisen
 }
 
 /// THE COUNCILS (Concordance 3.9): each arisen ancient's house seats a council
