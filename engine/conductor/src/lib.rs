@@ -81,6 +81,7 @@ pub mod commissions;
 pub mod parliaments;
 pub mod ascension;
 pub mod realms;
+pub mod decide;
 // SOC-1 (operator directive 2026-08-16): the open build workbench — the surplus
 // phase of `build_step` draws its next building from a disposition-weighted
 // partition function seeded by the chronicle digest, in place of the fixed
@@ -936,23 +937,23 @@ pub const MIND_ENTRY_BUDGET: usize = 2_400_000;
 /// published for the house (Concordance 3.9). Returns what happened, for the log.
 pub fn year_bounce(worlds: &mut Vec<Polity>, book: &Ledger, registry: &Registry, var_root: &std::path::Path, beat: u64, epoch_base: u64) -> Vec<String> {
     let mut said = Vec::new();
-    let deposits = core_step(worlds, book, epoch_base + beat);
+    let deposits = profile::timed("year:core_step", || core_step(worlds, book, epoch_base + beat));
     if !deposits.is_empty() {
         said.push(format!("{} worlds' sinks reached their cores", deposits.len()));
     }
-    for (core, world) in core_bounce(worlds, book, epoch_base + beat) {
+    for (core, world) in profile::timed("year:core_bounce", || core_bounce(worlds, book, epoch_base + beat)) {
         said.push(format!("the core {core} returns a pulse to {world}"));
     }
     let bounce = beat / scribe::journal::YEAR_TICKS;
     // docs/72: the bounce's ONE reading of the throats' keepers (G3, the
     // envoys counted), passed to the ancients, ascension and the parliaments.
-    let keepers = ancients::keepers(worlds, book, registry, var_root);
+    let keepers = profile::timed("year:keepers", || ancients::keepers(worlds, book, registry, var_root));
     said.push(format!("KEEPERS — {} cores kept", keepers.len()));
-    for a in ancients::step(worlds, book, registry, var_root, &keepers, bounce, epoch_base + beat) {
+    for a in profile::timed("year:ancients", || ancients::step(worlds, book, registry, var_root, &keepers, bounce, epoch_base + beat)) {
         said.push(format!("AN ANCIENT ARISES at {} — {} of {} (by {})", a.core, a.sigil, a.world, if a.by_birth { "birth" } else { "deed" }));
     }
-    said.extend(ascension::step(worlds, book, registry, var_root, &keepers, bounce, epoch_base + beat));
-    for (core, line, reached, heard) in parliaments::carry(worlds, book, registry, var_root, &keepers) {
+    said.extend(profile::timed("year:ascension", || ascension::step(worlds, book, registry, var_root, &keepers, bounce, epoch_base + beat)));
+    for (core, line, reached, heard) in profile::timed("year:parliaments", || parliaments::carry(worlds, book, registry, var_root, &keepers)) {
         said.push(format!("PARLIAMENT — {line} at {core} carries the council's words to {reached} lines ({heard} heard)"));
     }
     let _ = ancients::write_council(worlds, var_root);
@@ -5783,6 +5784,12 @@ pub struct HubCensus {
     /// docs/77: the road tolls each gate earned its builders, each (the
     /// gate's galaxy, its core, the STAMP that arrived).
     pub gate_tolls: Vec<(String, String, Ratio)>,
+    /// docs/73 DECIDE step 1: the hull decisions resolved this beat.
+    pub decided: decide::Resolved,
+    /// The hull books' persistence record over their windows, (correct, rows).
+    pub persistence: (u32, u32),
+    /// Hull books, and triples across them.
+    pub books: (usize, usize),
 }
 
 /// STAMP-1 / MM-1 — pure NPC mint and spot clear (Wave-4 minimal).
@@ -5804,8 +5811,10 @@ pub fn stamp_market_step(
     roads: &[ascension::Road],
     beat: u64,
     span: &Ratio,
+    built: &std::collections::BTreeMap<String, u8>,
 ) -> (Vec<(String, String, Ratio, Ratio)>, HubCensus) {
     let mut clears = Vec::new();
+    let mut books = decide::read(var_root);
     let mut census = HubCensus::default();
     let half = |amount: Ratio| amount / (ratio(1, 1) + ratio(1, 1));
     // Mint phase — convert half of surplus crystal (identity rate).
@@ -5946,6 +5955,20 @@ pub fn stamp_market_step(
             census.closed += 1;
             continue;
         }
+        // docs/73 DECIDE (hull), SEE: the clearing's lines by name, each by its
+        // STAMP, its cargo offer, its free hull and its melt to the hub, seen
+        // before anything moves. A line LOSES when a STAMP leg of its own is
+        // refused for want of hull this beat.
+        let mut seen: Vec<(String, usize, Vec<Ratio>)> = open
+            .iter()
+            .map(|(i, melt, _)| {
+                let p = &worlds[*i];
+                let offer = cargo_of(p).map(|(_, a)| a).unwrap_or_else(|| ratio(0, 1));
+                (p.spec.world_name.clone(), *i, vec![stamp_of(p), offer, p.world.free_capacity(0), melt.clone()])
+            })
+            .collect();
+        seen.sort_by(|a, b| a.0.cmp(&b.0));
+        let mut short: std::collections::BTreeSet<String> = std::collections::BTreeSet::new();
         // IN: each buyer's half STAMP, each seller's offer, to the hub.
         let mut paid: Vec<(usize, Ratio)> = Vec::new();
         let mut gave: Vec<(usize, Resource, Ratio)> = Vec::new();
@@ -5981,6 +6004,9 @@ pub fn stamp_market_step(
                         Err(why) => {
                             let name = format!("{why:?}");
                             let name = name.split([' ', '{', '(']).next().unwrap_or_default().to_string();
+                            if name == "HullCapacityShort" {
+                                short.insert(worlds[i].spec.world_name.clone());
+                            }
                             *census.refused.entry(name).or_insert(0) += 1;
                         }
                     }
@@ -6085,7 +6111,11 @@ pub fn stamp_market_step(
                 let deal = next_deal();
                 let before = stamp_of(&worlds[payee]);
                 let (from, to) = two_mut(worlds, *i, payee);
-                if cfe::world::stamp_aperture_transfer(&mut from.world, cfe::world::FIRST_ORB, &mut to.world, cfe::world::FIRST_ORB, toll, deal, &road).is_ok() {
+                let sent = cfe::world::stamp_aperture_transfer(&mut from.world, cfe::world::FIRST_ORB, &mut to.world, cfe::world::FIRST_ORB, toll, deal, &road);
+                if matches!(sent, Err(cfe::world::ActionRefused::HullCapacityShort { .. })) {
+                    short.insert(worlds[*i].spec.world_name.clone());
+                }
+                if sent.is_ok() {
                     let arrived = stamp_of(&worlds[payee]) - before;
                     if let Some(road) = via {
                         census.gate_tolls.push((road.from.clone(), road.core.clone(), arrived.clone()));
@@ -6095,9 +6125,30 @@ pub fn stamp_market_step(
                     }
                 }
             }
-            clears.push((core, worlds[hub].spec.world_name.clone(), toll_paid, gate_paid));
+            clears.push((core.clone(), worlds[hub].spec.world_name.clone(), toll_paid, gate_paid));
+        }
+        // DECIDE (hull), RECORD: the triple, persistence scored on it.
+        let names: Vec<String> = seen.iter().map(|(n, _, _)| n.clone()).collect();
+        let action: Vec<u8> = names.iter().map(|n| built.get(n).copied().unwrap_or(0)).collect();
+        let features: Vec<Vec<Ratio>> = seen.drain(..).map(|(_, _, f)| f).collect();
+        if let Some(state) = decide::see(&features) {
+            let done = books.entry(("hull".to_string(), core)).or_default().resolve(&names, state, action, &short);
+            census.decided.rows += done.rows;
+            census.decided.lost += done.lost;
+            census.decided.correct += done.correct;
+            census.decided.scored += done.scored;
         }
     }
+    for ((kind, _), book) in &books {
+        if kind == "hull" {
+            let (c, r) = book.persistence_record();
+            census.persistence.0 += c;
+            census.persistence.1 += r;
+            census.books.0 += 1;
+            census.books.1 += book.triples.len();
+        }
+    }
+    decide::write(var_root, &books);
     (clears, census)
 }
 
@@ -7234,13 +7285,22 @@ pub mod profile {
 /// Ensures each unpenned line can haul: ShipYard when iron affords,
 /// scrap from iron, hauler grade 0 until idle capacity ≥ 4, assign
 /// idle hulls onto the first live route deal.
-pub fn fleet_step(worlds: &mut [Polity]) {
+/// The incumbent's act (docs/73): the hulls each line built this beat, by
+/// world, for DECIDE's hull book.
+pub fn fleet_step(worlds: &mut [Polity]) -> std::collections::BTreeMap<String, u8> {
+    let mut built = std::collections::BTreeMap::new();
     for polity in worlds.iter_mut() {
         if polity.penned {
             continue;
         }
+        let before = polity.world.hulls().len();
         ensure_npc_fleet(&mut polity.world, polity.automaton);
+        let after = polity.world.hulls().len();
+        if after > before {
+            built.insert(polity.spec.world_name.clone(), (after - before).min(255) as u8);
+        }
     }
+    built
 }
 
 fn ensure_npc_fleet(world: &mut cfe::world::World, actor: u64) {

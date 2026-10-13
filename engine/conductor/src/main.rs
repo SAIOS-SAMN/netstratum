@@ -426,7 +426,7 @@ fn main() {
             worlds.push(Polity::genesis(spec, &registry, &book));
         }
         // FLEET-1: salvage/mint/assign before hauls need capacity.
-        conductor::profile::timed("fleet_step", || conductor::fleet_step(&mut worlds));
+        let built = conductor::profile::timed("fleet_step", || conductor::fleet_step(&mut worlds));
         // CORES SLICE 3: the core's bell delivers the dead's words that are due.
         let heard = conductor::inheritance_step(&mut worlds, epoch_base + beat);
         if heard > 0 {
@@ -474,7 +474,7 @@ fn main() {
         // (G3, the envoys counted) and the mapped gates' roads, for the hubs.
         let keepers_now = conductor::ancients::keepers(&worlds, &book, &registry, std::path::Path::new(&var_root));
         let roads = conductor::ascension::roads(&worlds, &book, &registry, std::path::Path::new(&var_root), &keepers_now);
-        let (spots, hubs) = conductor::profile::timed("stamp_market_step", || conductor::stamp_market_step(&mut worlds, &book, std::path::Path::new(&var_root), &keepers_now, &roads, beat, &span));
+        let (spots, hubs) = conductor::profile::timed("stamp_market_step", || conductor::stamp_market_step(&mut worlds, &book, std::path::Path::new(&var_root), &keepers_now, &roads, beat, &span, &built));
         let tolls = spots.iter().fold(cfe::ratio::ratio(0, 1), |t, (_, _, toll, _)| t + toll.clone());
         let gated = spots.iter().fold(cfe::ratio::ratio(0, 1), |t, (_, _, _, gate)| t + gate.clone());
         for (line, hub) in &hubs.met {
@@ -495,6 +495,12 @@ fn main() {
             hubs.unmet,
             hubs.partial,
             refused.join(", ")
+        );
+        // docs/73 DECIDE step 1: the hull decisions captured this beat.
+        let d = &hubs.decided;
+        println!(
+            "beat {beat}: DECIDE hull — {} lines seen, {} lost for want of hull; persistence {} of {} rows this beat, {} of {} over the books' windows; {} books, {} triples",
+            d.rows, d.lost, d.correct, d.scored, hubs.persistence.0, hubs.persistence.1, hubs.books.0, hubs.books.1
         );
         // Concordance 3.9: the councils the house seats, published for it.
         if beat.is_multiple_of(10) {
@@ -553,26 +559,28 @@ fn main() {
                     );
                 }
             }
-            for polity in worlds.iter().filter(|e| !e.penned) {
-                let _ = scribe::record_journal(
-                    &book,
-                    &polity.spec.world_name,
-                    &polity.world,
-                    &scribe::journal::Voice::of(&polity.spec.civilization),
-                );
-            }
-            let _ = scribe::journal::render_wall(&book);
+            conductor::profile::timed("year:journals", || {
+                for polity in worlds.iter().filter(|e| !e.penned) {
+                    let _ = scribe::record_journal(
+                        &book,
+                        &polity.spec.world_name,
+                        &polity.world,
+                        &scribe::journal::Voice::of(&polity.spec.civilization),
+                    );
+                }
+            });
+            let _ = conductor::profile::timed("year:wall", || scribe::journal::render_wall(&book));
             println!(
                 "beat {beat}: year {} journaled — the wall is fresh (var/worlds/wall.html)",
                 beat / scribe::journal::YEAR_TICKS
             );
             // THE YEAR'S BOUNCE (cores, ancients, ascension, parliaments,
-            // councils): one library function, the same the test loop drives.
-            for line in conductor::year_bounce(&mut worlds, &book, &registry, std::path::Path::new(&var_root), beat, epoch_base) {
+            // councils): one library function.
+            for line in conductor::profile::timed("year:bounce", || conductor::year_bounce(&mut worlds, &book, &registry, std::path::Path::new(&var_root), beat, epoch_base)) {
                 println!("beat {beat}: {line}");
             }
             // docs/75: the term's realms, read from its contacts, then a new term.
-            for line in conductor::realms::bounce(&worlds, &registry, std::path::Path::new(&var_root), &contacts, &passages, beat / scribe::journal::YEAR_TICKS) {
+            for line in conductor::profile::timed("year:realms", || conductor::realms::bounce(&worlds, &registry, std::path::Path::new(&var_root), &contacts, &passages, beat / scribe::journal::YEAR_TICKS)) {
                 println!("beat {beat}: {line}");
             }
             contacts.clear();

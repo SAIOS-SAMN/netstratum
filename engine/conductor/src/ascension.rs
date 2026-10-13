@@ -718,6 +718,11 @@ pub fn step(worlds: &mut [Polity], book: &Ledger, registry: &Registry, var_root:
         let melt = hubs.get(&gate.from).map(|&h| through(worlds, at, h, gate, &span)).unwrap_or_else(|| gate_melt(gate.span));
         // The toll is one trip: carried whole, or unpaid.
         let toll = cfe::world::smelt_resource(&gate_melt(gate.span));
+        // A passage that costs nothing is owed nothing.
+        if toll <= ratio(0, 1) {
+            kept.push(e);
+            continue;
+        }
         match trip(worlds, at, payee, &toll, deal(), &melt) {
             Ok((carried, arrived)) if carried == toll => {
                 credit(var_root, &gate.from, &gate.core, &ratio(0, 1), &arrived);
