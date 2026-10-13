@@ -41,7 +41,6 @@
 
 use cfe::ratio::{ratio, Ratio};
 use cfe::world::Committed;
-use rfa_core::capacity::borne_axial;
 use rfa_core::{
     holonomies, boundary_form, Degree, Delta, Flow, Support, Holonomy,};
 
@@ -567,31 +566,6 @@ fn symmetry_foundation(delta: &Delta, support: &Support) -> Vec<Residual> {
 /// [`read_entangled_observed`].
 pub fn read_entangled(state: &Committed) -> EntangledRead {
     read_entangled_observed(state, 0)
-}
-
-/// **THE STANDING, AXIS BY AXIS** — the reading a GATE consults
-/// (operator ruling 2026-08-02: *multi-axial on vertices towards
-/// uplift*).
-///
-/// One share per CHANNEL — [`CHANNEL_BOND`], [`CHANNEL_FORWARD`],
-/// [`CHANNEL_DEBT`] — never summed. `24_FORM` §2b bars collapsing a
-/// directional quantity to a scalar wherever the system computes, and
-/// the collapse costs the only thing an orb can act on: two orbs
-/// reading the same total may stand on one channel each or on all
-/// three, and those are different worlds.
-pub fn borne_by_orb_axial(state: &Committed) -> Vec<(u64, Vec<Ratio>)> {
-    let (delta, support) = project_complex(state);
-    let axial = borne_axial(&delta, &support);
-    state
-        .orbs
-        .iter()
-        .enumerate()
-        .map(|(seat, held)| {
-            let share =
-                axial.get(seat).cloned().unwrap_or_else(|| vec![ratio(0, 1); CHANNELS]);
-            (held.orb_id, share)
-        })
-        .collect()
 }
 
 /// The cross-book door: the same one-pass read, carrying the count of
