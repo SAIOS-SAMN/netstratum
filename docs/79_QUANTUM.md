@@ -11,8 +11,11 @@ Status: scoped 2026-10-13; not built. It belongs to era 1 (docs/78). Time
 is docs/80's: a measurement is an EVENT on the map (a place and its cosmic
 time); the hidden phase is read there; the annals record its map coordinate
 and the observer's proper time. The singularity's bounce, which drives this
-layer, is proposed as the origin of netstratum's own TUniversal, with a
-quantum lane Q (docs/80, relayed 2026-10-13).
+layer, keeps the universe's own cosmic time (its returns). Per mycelium's
+ruling (78.152d, docs/80) there is no quantum lane: each crossing of the
+core tube is sealed as a crossing statement (kind 12) carrying the cosmic
+time, the TUniversal point, the torsion's exact coordinates and the
+measurement count n, and the court re-derives the phase advance from them.
 
 ## Facts (read from the code)
 

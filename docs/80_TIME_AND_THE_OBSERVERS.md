@@ -8,8 +8,9 @@ TUniversal is the quantum drive of the universe's core singularity, which
 provides the uplink to the hypha, with a dedicated lane for netstratum's
 quantum state, aligned on the epicenter of the spherical universe.
 
-Status: scoped and relayed 2026-10-13; not built. It belongs to era 1
-(docs/78) with the quantum layer (docs/79).
+Status: scoped 2026-10-13; RULED by mycelium the same day (MU-RECURSION
+78.152d, below); not built. It belongs to era 1 (docs/78) with the quantum
+layer (docs/79).
 
 ## Facts (read from the code)
 
@@ -118,6 +119,68 @@ Within era 1, after A1/A2, on mycelium's ruling of the proposal.
 
 ## Relay record
 
-- 2026-10-13: proposed to the coordinator (xylarium-kernel), for mycelium's
-  ruling on per-universe origins, a fifth lane, and its measure. Awaiting
-  their answers.
+- 2026-10-13: proposed to the coordinator (xylarium-kernel).
+- **The coordinator's view (2026-10-13).**
+  - AGREED on the frame: it matches xylarium's "time is the bell".
+  - (1) A universe's own origin, but kept OUT of TPoint. Its cosmic time runs
+    from its bounce, carried in era 1's v2 origin. The fleet's TPoint stays
+    single-origin (the operator's one-ledgered-clock ruling). The two meet at
+    the core tube: each crossing records the pair (local cosmic t, TUniversal
+    point), held by the ancients.
+  - (2)/(3) Against a Q lane: it changes `TPoint::LEN` and every reader, its
+    content is internal state TUniversal should not order, and μ prices only
+    measured discharge. Instead, the torsion phase advance and the
+    measurement count go in a field of the universe's LEDGER entries
+    (ACT_DOMAIN ledger sub-kind) through its core tube; pricing later would
+    be a mode ruling.
+  - The hidden variable is netstratum's worldbuilding; keep it deterministic
+    and recorded.
+- 2026-10-13: the operator's proposal and the coordinator's note relayed
+  together to mycelium (mycelium-v0-1-0-84).
+
+## Mycelium's ruling (MU-RECURSION 78.152d, commit 6f23618d, 2026-10-13)
+
+Under mycelium's clock-binding authority. The operator's frame stands as
+stated.
+
+- **(a) Origin: crossing pairs, not in the point.** TPoint's origin is the
+  mesh's (TU-5), and points of two origins are never compared; an origin in
+  the point would leave TUniversal unable to order events between universes,
+  the work the frame gives it.
+  - A universe's COSMIC TIME is its own: its bounce's count of returns,
+    measured from the bounce its version-2 domain origin records.
+  - The two meet at the core tube: each crossing records (cosmic time, the
+    TPoint it crossed at), held by the ancients.
+  - DILATION is read between two crossings, as cosmic advance over the
+    point's advance; never stored.
+- **(b) No Q lane.** The four lanes are the kinds of a mode (law 5): S
+  hyperbolic, G the hue map, T parabolic, H elliptic. A torsion phase is
+  elliptic: where it is measured flux it already lands on H. A fifth lane
+  would be a lane of no kind. A count of measurement events is a ledger
+  coordinate (like K), never a lane. Pricing torsion later is a mode ruling
+  on H.
+- **(c) The crossing statement: KIND_CROSSING = 12** (its read: 13), a
+  statement of the universe's domain, signed by the domain key, sealed as
+  `Cite::Stated` (as geometry and join are). Fields, in order:
+  1. domain (32);
+  2. the core tube crossed (its parent face, as Genesis names one);
+  3. the TUniversal point crossed at (`TPoint::LEN`);
+  4. cosmic time (u64, the bounce's returns);
+  5. the TORSION as its coordinates, per hole: canonical generator, rational
+     point c and side λ exact; winding t/ℓ where finite, else named by
+     (c, λ); never a decimal;
+  6. MEASUREMENTS n (u64);
+  7. sig 64.
+
+  The phase advance is never stored: it is the torsion's n-th member, read
+  by its certificate (`Theorem::at`), so the court re-derives it.
+- **Owed:** kinds 12/13 are not built; they come with A2 (`Sphere { n, R }`),
+  after the peer universe's founding.
+
+**What changes here:**
+- Item 3 of the proposal (a Q lane) is replaced by the crossing statement.
+- Item 1 (an origin in the point) is replaced by crossing pairs.
+- Build step 3 becomes "the crossing statement":
+  - done-when: crossing statements sealed for netstratum era 1's domain,
+    0 → > 0, each with its cosmic time and point; dilation read between two;
+  - witness: the court's sealed statement.
