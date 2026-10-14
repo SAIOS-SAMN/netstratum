@@ -62,7 +62,7 @@ the outer rim cannot imagine" (docs/76). The rim ages faster than the core.
 
 | tier | holds | duty |
 |---|---|---|
-| ANCIENTS | the reference clock | at the cores, the cone points where the bounce's torsion originates; each core's bell keeps cosmic time for its galaxy, and the cores together keep it for the universe |
+| ANCIENTS | the reference clock | at the cores, the throats where the bounce's torsion originates (docs/78: the deepest masses the pulse deploys); each core's bell keeps cosmic time for its galaxy, and the cores together keep it for the universe |
 | PROGENITORS | synchronisation | a wormhole joins two places, so its mouths must agree on cosmic time, or a crossing could arrive before it left (a causal loop); progenitors keep the mouths synchronised to the ancients' clock: chronology protection as a duty |
 | STEWARDS | translation | a realm spans depths in the wells, so its members' proper times differ; the steward places each member's events on cosmic time and settles order by causal order first, then cosmic time |
 | SOVEREIGNS, CAPTAINS | proper time | they live and decide by their own clocks; reports up carry proper time and map coordinates, and the tier above places them |
@@ -72,7 +72,8 @@ the outer rim cannot imagine" (docs/76). The rim ages faster than the core.
 
 1. **The universe's own origin.** Netstratum era 1's singularity, the bounce
    at the epicenter of its S^360, is the ORIGIN of its TUniversal points: its
-   time starts there, distinct from the fleet's. Era 1's new domain and its
+   time starts there, distinct from the fleet's. The same pulse deploys the
+   universe's mass (docs/78, "The bounce"). Era 1's new domain and its
    version-2 origin (docs/78) carry it.
 2. **The singularity as quantum drive and uplink.** The core singularity's
    bounce drives the universe's quantum layer (docs/79: its torsion phase is

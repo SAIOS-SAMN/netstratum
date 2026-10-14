@@ -170,17 +170,19 @@ place (never a squared chord, which measures through flat space).
 
 ### Temporal attraction: gravity along the time axis
 
-- Branches are pulled back toward the main timeline by the same law as
-  masses in era 1's geometry (xylarium §10.3, docs/78), the flux through the
-  cone joining them:
+- Branches are turned back toward the main timeline by the same law as
+  masses in era 1's geometry (docs/78, remediated 2026-10-14: no power law,
+  no fixed dimension): each beat, a branch's divergence turns toward the main
+  timeline by the rotation whose half-angle parameter is
 
-      g(D) = G_k W / (|S^k| D^k)
+      s(D) = c · W / (W_all · D)
 
   - `W`: the main timeline's WEIGHT, the records that converge on it (mass,
-    population and passage carried, read from the annals);
-  - `D`: the branch's divergence;
-  - `k`: the cone's dimension at that divergence, from the bounce's torsion
-    as in space (k = 2 close, toward 1 across many pitches).
+    population and passage carried, read from the annals); `W_all` the
+    universe's total;
+  - `D`: the branch's divergence, held by its half-angle parameter;
+  - `c`: docs/78's one scale. The dimension is read from how W gathers,
+    never set.
 - **Close branches are pulled hard; far ones barely at all.** No new force:
   time's attraction is gravity along the time axis of the map.
 

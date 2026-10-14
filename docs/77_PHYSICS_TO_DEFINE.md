@@ -37,6 +37,8 @@ needs shared space first.
 ## 2. Control of a system's mass (needs 1)
 
 - A system's mass is its star's orbs: their banked matter and their veins.
+  - Era 1: the star's own mass and the cores' masses come from the pulse's
+    deployment (docs/78, "The bounce"); a core has no mass in era 0.
 - **Control** is the share of that mass a line holds or works, measured from
   the chronicle.
 - **The sovereign** of a system is the line with the greatest control.

@@ -168,4 +168,5 @@ Within era 1 (docs/78), after its geometry library (mycelium A1).
 - **Coupling.** The coupling that counts as measurement: any macroscopic
   record, or only a mind's?
 - **The vacuum.** The compact manifold's integers for era 1: chosen once, by
-  whom (the operator, or derived from the Big Bang's seed)?
+  whom (the operator, or derived from the Big Bang's seed)? The same choice
+  sets the pulse's spectrum, which deploys every mass (docs/78, "The bounce").
