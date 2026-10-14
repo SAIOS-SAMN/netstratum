@@ -195,17 +195,18 @@ event deploys them all, and everything after is a closed form of t from it
     lengths by the same factor keeps its turning rates, so siblings scale
     with no root (xylarium's lengths go by the cube root of mass under
     their law).
-  - **Radii from periods, not dials.** Satellite k's period is
-    `P_k = P_(k−1) · (q_k + 1) / q_k` beats of its centre's bell (a
-    resonance chain, `q_k` a seed draw from 1 to 60), the first `P_1` one
-    unit of the tier in xylarium's powers of sixty: 60 bells for orbs about
-    a star, 60² for systems about a core.
-    Its radius follows from the law: ω = 1/P_k turns a bell, so
+  - **Spacing by reach; periods follow from mass** (amended 2026-10-14: an
+    authored resonance chain of periods made every galaxy's year near the
+    tier's unit, so the story set the year). The innermost orbit turns in
+    one unit of the tier, xylarium's powers of sixty (60 bells for orbs
+    about a star, 60² for systems about a core): the bell ladder's one
+    anchor, `r_1 = M(<r_1) · unit`. Each next satellite stands where its
+    reach just meets the last one's, so no two reaches overlap:
 
-        r_k = M(<r_k) · P_k
+        r_k (1 − m_k / M(<r_k)) = r_(k−1) + r_d,(k−1)
 
-    with `M(<r_k)` the centre plus the satellites already placed inside.
-    Periods and enclosed mass both grow outward, so radii do too.
+    A satellite outweighing all it would orbit is no satellite. Its period
+    follows from the law, `P_k = r_k / M(<r_k)`.
   - **The count emerges.** Satellites are placed until the next radius
     would pass the centre's `r_d`, or the next share falls below its
     minimum. The tier's MEDIUM (its set-aside share and what the satellites
@@ -229,8 +230,20 @@ event deploys them all, and everything after is a closed form of t from it
   phase. Each
   body reads the mass its own orbit encloses, so orbits are closed; the
   bodies' pull on each other is left out.
-- **The galactic year** is one completed turn of the galaxy's hub about its
-  core, `⌊φ + n·ω⌋` on its core's bell.
+- **The galactic year** is one completed turn of the orbit at the galaxy's
+  HALF-MASS radius (the first system whose orbit encloses half its bound
+  mass; era 1 has no hubs before places), `⌊φ + n·ω⌋` on its core's bell
+  (`conductor::motion`, built 2026-10-14). φ at the pulse is 0 until the
+  quantum layer gives it (design law 7); the bell is the universal beat
+  until the clock's rate law (docs/80).
+  - **Reading** (the `motion` binary on the stand-in): motion is exact and
+    closed (completed turns by any bell, denominators fixed), but 10 of 13
+    galaxies' half-mass orbit is their FIRST system, so their year is the
+    tier's unit, 3,600 bells. The cause is the satellites' shares: each
+    takes `q/60` of what remains, so the first holds about half its
+    galaxy. Real systems are each a small part of a galaxy. A physical law
+    for satellite masses (fragmentation, a feeding zone) is owed; until
+    then the galactic years read the share law, not the physics.
   Each galaxy closes its own year at its own pace. The universal 60-beat
   close (`scribe::journal::YEAR_TICKS`, a placeholder) retires, and the
   core's yearly re-emission (`core_bounce`) becomes the core's echo of the

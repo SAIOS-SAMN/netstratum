@@ -37,7 +37,7 @@ fn grain(x: &Ratio) -> Ratio {
 /// Mass for the turning law: each grain of Z weighs its nucleus's mass
 /// number (`cfe::almanac::atom::mass_number`); a key that is no Z (era 0's
 /// kinds, before they cross) weighs one.
-fn mass(m: &Manifest) -> Ratio {
+pub fn mass(m: &Manifest) -> Ratio {
     m.iter().fold(ratio(0, 1), |s, (k, a)| {
         let weight = k.strip_prefix('Z').and_then(|z| z.parse::<u32>().ok()).map(cfe::almanac::atom::mass_number).unwrap_or(1);
         s + a.clone() * ratio(i64::from(weight), 1)
@@ -203,12 +203,6 @@ fn share(seed: &[u8; 32], path: &[u32], j: u32) -> Ratio {
     ratio(1 + (draw(seed, path, "share", j) % 59) as i64, 60)
 }
 
-/// The resonance step `(q+1)/q`, q from 1 to 60.
-fn resonance(seed: &[u8; 32], path: &[u32], j: u32) -> Ratio {
-    let q = 1 + (draw(seed, path, "period", j) % 60) as i64;
-    ratio(q + 1, q)
-}
-
 /// `f` of each element, floored to the grain.
 fn take(from: &Manifest, f: &Ratio) -> Manifest {
     from.iter().map(|(k, a)| (k.clone(), grain(&(a.clone() * f.clone())))).filter(|(_, a)| *a > ratio(0, 1)).collect()
@@ -265,7 +259,8 @@ fn split(seed: &[u8; 32], path: Vec<u32>, mut grains: Manifest, reach: Option<Ra
     let mut medium = take(&grains, &law.medium);
     less(&mut grains, &medium);
     let mut enclosed = mass(&kept) / unit_mass.clone();
-    let mut period = unit.clone();
+    // The edge of the last satellite's reach: the next stands just beyond it.
+    let mut edge: Option<Ratio> = None;
     for k in 1u32.. {
         let m = take(&grains, &share(seed, &path, k));
         let m_mass = mass(&m) / unit_mass.clone();
@@ -274,22 +269,31 @@ fn split(seed: &[u8; 32], path: Vec<u32>, mut grains: Manifest, reach: Option<Ra
         }
         // A star or an orb below a grain is not formed (the stand-in
         // manifest's scale sets no finer floor; roundness replaces it).
-        if k > 1 {
-            period = period * resonance(seed, &path, k);
-        }
-        // A centre whose share floored to nothing encloses no mass: its
-        // first satellite stands at its period's length.
-        let radius = if enclosed.is_zero() { period.clone() } else { enclosed.clone() * period.clone() };
+        // SPACING BY REACH (amended 2026-10-14: an authored period chain
+        // made every galaxy's year near the tier's unit). The innermost
+        // orbit turns in one unit of the tier (the bell ladder's anchor);
+        // each next stands where its reach just meets the last one's,
+        // `r (1 − m / M(<r)) = r_last + r_d,last`, so no two reaches
+        // overlap. A satellite outweighing all it would orbit is no
+        // satellite. Its period follows from the law, `P = r / M(<r)`.
+        let radius = match &edge {
+            None if enclosed.is_zero() => unit.clone(),
+            None => enclosed.clone() * unit.clone(),
+            Some(_) if enclosed.is_zero() || m_mass >= enclosed => break,
+            Some(e) => e.clone() / (ratio(1, 1) - m_mass.clone() / enclosed.clone()),
+        };
         if reach.as_ref().is_some_and(|r| radius > *r) {
             break;
         }
+        let period = if enclosed.is_zero() { unit.clone() } else { radius.clone() / enclosed.clone() };
         less(&mut grains, &m);
         let mut at = path.clone();
         at.push(k);
         // The satellite's own reach: r_d = r · m / M(<r).
         let own_reach = (!enclosed.is_zero()).then(|| radius.clone() * m_mass.clone() / enclosed.clone());
+        edge = Some(radius.clone() + own_reach.clone().unwrap_or_else(|| ratio(0, 1)));
         let (s_kept, s_sats, s_medium) = split(seed, at.clone(), m, own_reach, unit.clone() / ratio(60, 1), unit_mass, depth - 1);
-        satellites.push(Body { path: at, radius, period: period.clone(), kept: s_kept, satellites: s_sats, medium: s_medium });
+        satellites.push(Body { path: at, radius, period, kept: s_kept, satellites: s_sats, medium: s_medium });
         enclosed += m_mass;
     }
     for (k, a) in grains {
@@ -402,6 +406,67 @@ pub fn write(var_root: &Path, seed: &[u8; 32], u: &Universe) -> std::io::Result<
     std::fs::rename(staged, path)
 }
 
+fn get_manifest(v: &[u8], at: &mut usize) -> Option<Manifest> {
+    let n = u32::from_le_bytes(v.get(*at..*at + 4)?.try_into().ok()?);
+    *at += 4;
+    let mut m = Manifest::new();
+    for _ in 0..n {
+        let len = u16::from_le_bytes(v.get(*at..*at + 2)?.try_into().ok()?) as usize;
+        let key = String::from_utf8(v.get(*at + 2..*at + 2 + len)?.to_vec()).ok()?;
+        *at += 2 + len;
+        let (a, used) = cfe::ratio::decode(v.get(*at..)?)?;
+        *at += used;
+        m.insert(key, a);
+    }
+    Some(m)
+}
+
+fn get_body(v: &[u8]) -> Option<Body> {
+    let mut at = 0;
+    let depth = *v.first()? as usize;
+    at += 1;
+    let mut path = Vec::with_capacity(depth.min(8));
+    for _ in 0..depth {
+        path.push(u32::from_le_bytes(v.get(at..at + 4)?.try_into().ok()?));
+        at += 4;
+    }
+    let (radius, used) = cfe::ratio::decode(v.get(at..)?)?;
+    at += used;
+    let (period, used) = cfe::ratio::decode(v.get(at..)?)?;
+    at += used;
+    let kept = get_manifest(v, &mut at)?;
+    let medium = get_manifest(v, &mut at)?;
+    Some(Body { path, radius, period, kept, satellites: Vec::new(), medium })
+}
+
+/// Read `<var>/pulse.bin` back: the seed and the universe (bodies are
+/// written parents first, so each attaches under the last body one level up).
+pub fn read(var_root: &Path) -> Option<([u8; 32], Universe)> {
+    let bytes = std::fs::read(var_root.join("pulse.bin")).ok()?;
+    let mut seed = None;
+    let mut medium = Manifest::new();
+    let mut flat: Vec<Body> = Vec::new();
+    for (t, v) in cfe::tlv::records(&bytes) {
+        match t {
+            3 => seed = v.try_into().ok(),
+            2 => medium = get_manifest(v, &mut 0)?,
+            1 => flat.push(get_body(v)?),
+            _ => {}
+        }
+    }
+    // Rebuild the tree: depth 1 cores, 2 systems, 3 orbs.
+    let mut cores: Vec<Body> = Vec::new();
+    for b in flat {
+        match b.path.len() {
+            1 => cores.push(b),
+            2 => cores.last_mut()?.satellites.push(b),
+            3 => cores.last_mut()?.satellites.last_mut()?.satellites.push(b),
+            _ => return None,
+        }
+    }
+    Some((seed?, Universe { cores, medium }))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -413,5 +478,9 @@ mod tests {
         assert_eq!(u.total(), manifest);
         assert!(!u.cores.is_empty());
         assert_eq!(deploy(&[7; 32], &manifest), u, "one seed, one universe");
+        let dir = std::env::temp_dir().join(format!("pulse-{}", std::process::id()));
+        write(&dir, &[7; 32], &u).unwrap();
+        assert_eq!(read(&dir), Some(([7; 32], u)), "the file gives the universe back");
+        let _ = std::fs::remove_dir_all(dir);
     }
 }
