@@ -12,6 +12,16 @@ laws: exact, square-free, a construction, no tables of Earth's world).
 Status: designed 2026-10-14, reviewed by xylarium-kernel the same day (its
 changes taken in below); not built.
 
+## Assume nothing (operator, 2026-10-14)
+
+Life is emergent from the QUANTUM STATE BETWEEN A PLANET AND ITS STAR,
+shaped by the planet's elements, its atmosphere and the core of its mass.
+Life takes many forms (the tardigrade, the plasmic, consciousness itself),
+and none is privileged: chemical, geologic, plasmic, informational. No law
+here assumes water, a solvent, carbon, a habitable zone or biology. A world
+offers MEDIA; any medium that can carry a pattern against its own noise can
+carry life, and a world may carry several forms at once.
+
 ## What a world gives (built)
 
 - **Its matter:** grains per Z (the pulse's split and the breath).
@@ -36,36 +46,57 @@ changes taken in below); not built.
    reaches apart, below about 3.5 they are unstable on short times; touching
    reaches put every world in one climate). The next world stands at
    `r · (1 + 10s) / (1 − 10s)`.
-2. **The solvent.** Of the compounds the world's own elements close (docs/78),
-   the most abundant whose grip holds at its temperature
-   (`τ_min · 157,800 K > T`, the hydrogen anchor). No compound holds: no
-   solvent, no life (a plasma world, a world of bare metal).
-3. **Fidelity: Boltzmann, held as halvings** (xylarium's review: a linear
-   ratio never falls below about 1e-3, since τ runs 1/P to 2, and minds
-   would almost never wake). A copy fails where heat beats the solvent's
-   cohesion, `ε = e^(−x)` with `x = τ_min · 157,800 K / T`. The exponential
+2. **The coupling.** The root of every form: the quantum state between the
+   planet and its star. The planet's clock runs at `r / (r + M(<r))` of its
+   star's, so it SLIPS against the star and RECOHERES on whole turns (docs/78,
+   the breath): each recoherence is a moment the coupling locks, when a
+   pattern in any medium can be written. Emergence happens at those rungs,
+   never at a draw.
+3. **The media,** each read from the world, none assumed:
+   - **chemical:** the compounds its elements close (the atom law) whose grip
+     holds at its temperature (`τ_min · 157,800 K > T`, the hydrogen
+     anchor), as liquid, gas or ice alike;
+   - **geologic:** the lattices of its core and crust, its own mass and
+     deepest elements: patterns held in mineral order, slow and long-lived;
+   - **plasmic:** where heat beats every bond, its ionised atmosphere and
+     the field its star's coupling sets: patterns held in the field, fast;
+   - **informational:** the coupling's coherence itself: a pattern held in
+     the phase between planet and star.
+   A world with no chemistry is not lifeless: a plasma world, a world of
+   bare rock, may carry life in another medium.
+4. **Fidelity, per medium: Boltzmann, held as halvings** (xylarium's review:
+   a linear ratio never falls below about 1e-3, and minds would almost never
+   wake). A copy fails where the medium's agitation beats its carrier's
+   cohesion, `ε = e^(−x)`, x the cohesion over the agitation in that
+   medium's own terms: a bond's grip over heat (chemical,
+   `x = τ_min · 157,800 K / T`), a lattice's over heat and tremor
+   (geologic), a field's confinement over its turbulence (plasmic), the
+   coupling's coherence over its slip (informational). The exponential
    is no power and no square: it is a count of HALVINGS, `ε = 2^(−x/ln 2)`.
    It is held exactly as a certified enclosure: the halvings bounded below
    and above by rational bounds of `1/ln 2`, and the ceiling read from the
-   bound that errs toward fewer minds. Water at 300 K gives about 1e-4.
-4. **The ceiling.** A lineage holds `b / ε` bits; each rung of error
+   bound that errs toward fewer minds. (A chemical example: water at 300 K
+   gives about 1e-4.)
+5. **The ceiling.** A lineage holds `b / ε` bits; each rung of error
    correction multiplies what it holds by `1 / ε`. A MIND needs the rung that
    holds a mind's blueprint, `B` bits (an anchor, of order a genome). The
    rungs a world needs are the least s with `b / ε^(s+1) ≥ B`: a count, by
-   repeated multiplication, read from the chemistry.
-5. **The climb.** Each rung is climbed by selection writing at most one bit
+   repeated multiplication, read from the medium.
+6. **The climb.** Each rung is climbed by selection writing at most one bit
    a generation, and fewer in a small population (`N · ε · L` mutations a
-   generation). A generation is one of the world's own PIVOTS, on its own
-   proper clock (xylarium's review: copying is chemistry, not orbits):
-   - one local DAY (a turn of its spin) while the genome fits one copier;
-   - one local YEAR (a turn of its orbit) once a body carries it.
+   generation). A generation is the medium's own pivot, on the world's
+   proper clock (xylarium's review: copying is the medium's, not the
+   orbit's): a plasmic pattern copies on the coupling's fastest turn, a
+   chemical one on a local DAY (a turn of its spin) while one copier holds
+   it and a local YEAR once a body does, a geologic one on many years, an
+   informational one on the coupling's rungs.
    A world's spin is not yet physics (docs/78, S^60 bodies): until it is,
    its day is a declared share of its year (an anchor). A slower, deeper
    clock climbs slower against the universe.
    - **Decay:** stored information breaks while it waits to be copied. Hot
      media copy fast and forget fast; cold media keep. Without it, hot
      worlds win too easily.
-6. **The window and erasure.** A world can climb while its star holds,
+7. **The window and erasure.** A world can climb while its star holds,
    until the star dissolves (docs/78, the breath sheds it).
    - **An impact sends a lineage back to the START of its rung, and that
      rung's need is kept, not redrawn** (xylarium: a fresh draw forgets
@@ -74,9 +105,9 @@ changes taken in below); not built.
    - **Sterilisation:** a dying star's collapse sterilises open surfaces,
      more often where dying stars crowd; seas under ice or deep are
      shielded.
-7. **Transfer.** Life (never a mind) may carry between neighbouring worlds of
+8. **Transfer.** Life (never a mind) may carry between neighbouring worlds of
    one system, never between stars.
-8. **A mind wakes** where the ladder is climbed within the window and the
+9. **A mind wakes,** in any medium, where the ladder is climbed within the window and the
    world can feed a viable people (its biomass, an anchor of order Franklin's
    500 individuals). It is an EVENT, written to the annals at the bell it
    happens: a perpendicular write up, from the world to its galaxy. The run
@@ -85,9 +116,9 @@ changes taken in below); not built.
 
 ## A people is read from its world
 
-- **Its solvent and medium** define it: the compound it lives in and the
-  thermal band it works in (docs/78's workability). Names are spoken from
-  the seed's syllables, flavour only.
+- **Its medium** defines it: chemical (the compound it lives in), geologic
+  (the lattice), plasmic (the field), informational (the coupling), and the
+  band it works in. Names are spoken from the seed's syllables, flavour only.
 - **No catalogue, no types.** Era 0's 22 named species stay in era 0's
   record. What carries is the LAW of how a lineage forms, splits and
   specialises (the conductor's cleave, lineage and caste machinery), applied
@@ -130,9 +161,10 @@ radius.
 
 ## Done-when (the live log, before → after)
 
-1. Worlds with a solvent: 0 → read, by climate.
+1. Worlds with a medium that can carry a pattern: 0 → read, by medium and
+   by climate.
 2. Minds woken: 0 → greater than 0, each an annal event with its world, bell,
-   solvent and rungs climbed.
+   medium and rungs climbed.
 3. The first ancients, progenitors and sovereigns read from the wakings.
 4. Lines in the conductor from wakings: 0 → greater than 0, and the per-beat
    machinery acting on them (HUB, research, markets reading non-zero).

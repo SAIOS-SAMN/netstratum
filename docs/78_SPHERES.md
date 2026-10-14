@@ -48,6 +48,11 @@ breaks one of them is wrong before it is built.
    grow with time; a representation is measured over long t before it is
    adopted (caught 2026-10-14: half-angle composition grew 2.9 bits a beat).
 9. **Construction, never search.**
+10. **Assume nothing about life** (caught 2026-10-14: a ladder that required
+    a solvent ruled out plasmic and geologic life). Life emerges from the
+    quantum state between a planet and its star, in any medium the world
+    offers: chemical, geologic, plasmic, informational. No law assumes
+    water, carbon, a habitable zone or biology.
 
 ## The geometry (the shared model; netstratum's own physics)
 
