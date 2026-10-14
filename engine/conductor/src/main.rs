@@ -76,14 +76,20 @@ fn main() {
         Err(e) => eprintln!("conductor: the galaxies were not charted: {e}"),
     }
     conductor::seating::seat(&universe, &mut specs);
-    // LIFE (docs/82): every world's earliest waking, by the gated climb on
-    // the shared ruler; each wakes at its bell and founds a line.
-    let mut pending: std::collections::VecDeque<conductor::life::Waking> = conductor::life::wakings(&universe, &pulse_seed, T_U).into();
-    let mut woken_galaxies: std::collections::BTreeSet<u32> = std::collections::BTreeSet::new();
+    // LIFE (docs/82 step 3b): every world's climb is state, advanced by the
+    // system's activity at its own coupling's recoherences; its reading is
+    // refreshed when the universe changes. A mind wakes when its climb is
+    // written, and founds a line.
+    let mut climbs = conductor::life::read_climbs(std::path::Path::new(&var_root));
+    let mut life_readings = conductor::life::readings(&universe);
+    let mut readings_at: u64 = 0;
+    let mut woken_galaxies: std::collections::BTreeSet<u32> =
+        climbs.iter().filter(|(_, c)| c.woken).filter_map(|(p, _)| p.first().copied()).collect();
     println!(
-        "conductor: {} minds due to wake (the first at bell {:?})",
-        pending.len(),
-        pending.front().map(|w| w.bell)
+        "conductor: life — {} worlds read, {} climbing, {} minds woken",
+        life_readings.len(),
+        life_readings.values().filter(|r| r.climb.is_some()).count(),
+        climbs.values().filter(|c| c.woken).count()
     );
     println!("conductor: the pulse universe — {} cores, {} systems; T_u {T_U} bells", universe.cores.len(), universe.cores.iter().map(|c| c.satellites.len()).sum::<usize>());
 
@@ -297,8 +303,17 @@ fn main() {
                 breath_reading.echoes, breath_reading.births, breath_reading.returned.clone().round(), breath_reading.dissolved
             );
         }
-        while pending.front().is_some_and(|w| w.bell <= beat) {
-            let Some(w) = pending.pop_front() else { break };
+        // The readings follow the universe: refreshed when the breath changed
+        // it, at most once a pulse.
+        if !events.is_empty() && beat >= readings_at + T_U {
+            life_readings = conductor::profile::timed("life:read", || conductor::life::readings(&universe));
+            readings_at = beat;
+        }
+        let woke = conductor::profile::timed("life:climb", || conductor::life::advance(&life_readings, &mut climbs, &pulse_seed, T_U, beat));
+        if beat.is_multiple_of(10) || !woke.is_empty() {
+            conductor::life::write_climbs(std::path::Path::new(&var_root), &climbs);
+        }
+        for w in woke {
             let galaxy = w.path.first().copied().unwrap_or(0);
             let first = woken_galaxies.insert(galaxy);
             if let Some(spec) = conductor::waking::found(&universe, &pulse_seed, &w, &registry, first) {

@@ -310,33 +310,148 @@ pub struct Waking {
     pub medium: &'static str,
 }
 
-/// Every world's earliest waking (by any material medium), in bell order:
-/// the gated climb on the shared ruler.
-pub fn wakings(u: &Universe, seed: &[u8; 32], t_u: u64) -> Vec<Waking> {
+/// THE CLIMB AS STATE (docs/82 step 3b, operator 2026-10-14: wakings come
+/// from the system's activity, never a boot-time schedule). Each world
+/// keeps its climb: the share of its climb written, its recoherence count,
+/// the bell of its last and next recoherence. At each recoherence of its
+/// coupling the world reads its CURRENT state and writes the bells since
+/// its last over its climb's length now (an impact there writes nothing,
+/// the rung's need kept); it wakes when the share reaches one, within its
+/// star's window.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Climb {
+    pub written: Ratio,
+    pub k: u64,
+    pub last: u64,
+    pub next: u64,
+    pub woken: bool,
+}
+
+pub type Climbs = std::collections::BTreeMap<Vec<u32>, Climb>;
+
+/// One world's current reading for the climb: the world, its compression,
+/// and its fastest medium's climb length in bells (none: it cannot climb).
+pub struct Reading {
+    pub world: World,
+    pub compression: Ratio,
+    pub climb: Option<(Ratio, &'static str)>,
+}
+
+/// Every world's current reading (refreshed when the universe changes).
+pub fn readings(u: &Universe) -> std::collections::BTreeMap<Vec<u32>, Reading> {
     let worlds = worlds(u);
-    let Some(home) = home(u) else { return Vec::new() };
+    let mut out = std::collections::BTreeMap::new();
+    let Some(home) = home(u) else { return out };
     let mut pressures: Vec<Ratio> = worlds.iter().map(|w| w.pressure.clone()).collect();
     pressures.sort();
     let reference = pressures.get(pressures.len() / 2).cloned().filter(|p| *p > ratio(0, 1)).unwrap_or_else(|| ratio(1, 1));
-    let period_of = |path: &[u32]| -> Option<Ratio> {
-        let core = u.cores.iter().find(|c| c.path.first() == path.first())?;
-        let sys = core.satellites.iter().find(|s| s.path.get(1) == path.get(1))?;
-        sys.satellites.iter().find(|o| o.path.get(2) == path.get(2)).map(|o| o.period.clone())
-    };
-    let mut out = Vec::new();
-    for w in &worlds {
-        let Some(period) = period_of(&w.path) else { continue };
-        let c = w.pressure.clone() / reference.clone();
-        let best = [("chemical", &w.chemical), ("geologic", &w.geologic), ("plasmic", &w.plasmic)]
-            .into_iter()
-            .filter_map(|(m, x)| x.as_ref().and_then(|x| climb(w, x, &c, seed, m, t_u, &period, &home.year_bells)).map(|b| (b, m)))
-            .min();
-        if let Some((bell, medium)) = best {
-            out.push(Waking { bell, path: w.path.clone(), medium });
+    for w in worlds {
+        let period = (|| {
+            let core = u.cores.iter().find(|c| c.path.first() == w.path.first())?;
+            let sys = core.satellites.iter().find(|s| s.path.get(1) == w.path.get(1))?;
+            sys.satellites.iter().find(|o| o.path.get(2) == w.path.get(2)).map(|o| o.period.clone())
+        })();
+        let compression = w.pressure.clone() / reference.clone();
+        let climb = period.and_then(|p| {
+            [("chemical", &w.chemical), ("geologic", &w.geologic), ("plasmic", &w.plasmic)]
+                .into_iter()
+                .filter_map(|(m, x)| x.as_ref().and_then(|x| climb_bells(&p, &home.year_bells, x, &compression)).map(|b| (b, m)))
+                .min_by(|a, b| a.0.cmp(&b.0))
+        });
+        out.insert(w.path.clone(), Reading { world: w, compression, climb });
+    }
+    out
+}
+
+/// Advance every world's climb to `bell`, reading each at its own
+/// recoherences; returns the minds that wake.
+pub fn advance(readings: &std::collections::BTreeMap<Vec<u32>, Reading>, climbs: &mut Climbs, seed: &[u8; 32], t_u: u64, bell: u64) -> Vec<Waking> {
+    let mut woke = Vec::new();
+    for (path, r) in readings {
+        let w = &r.world;
+        let climb = climbs.entry(path.clone()).or_insert_with(|| Climb { written: ratio(0, 1), k: 1, last: w.delay, next: wake_bell(w, 1, t_u).unwrap_or(u64::MAX), woken: false });
+        if climb.woken {
+            continue;
+        }
+        let close = w.delay.saturating_add(w.window.saturating_mul(t_u));
+        while climb.next <= bell && climb.next <= close {
+            let at = climb.next;
+            if let Some((length, medium)) = &r.climb {
+                let p = w.belts.clone() / (ratio(1, 1) + r.compression.clone());
+                let threshold: u64 = (p * ratio(1_000_000, 1)).floor().to_integer().try_into().unwrap_or(0);
+                let mut ipath = path.clone();
+                ipath.push(medium.len() as u32);
+                let struck = crate::pulse::draw(seed, &ipath, "impact", climb.k as u32) % 1_000_000 < threshold;
+                if !struck && *length > ratio(0, 1) {
+                    climb.written += ratio(at.saturating_sub(climb.last) as i64, 1) / length.clone();
+                }
+                if climb.written >= ratio(1, 1) {
+                    climb.woken = true;
+                    woke.push(Waking { bell: at, path: path.clone(), medium });
+                }
+            }
+            climb.last = at;
+            climb.k += 1;
+            climb.next = wake_bell(w, climb.k, t_u).unwrap_or(u64::MAX);
+            if climb.woken {
+                break;
+            }
         }
     }
-    out.sort_by(|a, b| a.bell.cmp(&b.bell).then(a.path.cmp(&b.path)));
-    out
+    woke.sort_by(|a, b| a.bell.cmp(&b.bell).then(a.path.cmp(&b.path)));
+    woke
+}
+
+fn put_path(path: &[u32], out: &mut Vec<u8>) {
+    out.push(path.len() as u8);
+    for p in path {
+        out.extend_from_slice(&p.to_le_bytes());
+    }
+}
+
+/// `<var>/climbs.bin`: tag 1 per world (path, written, k, last, next, woken).
+pub fn write_climbs(var_root: &std::path::Path, climbs: &Climbs) {
+    let mut out = Vec::new();
+    for (path, c) in climbs {
+        let mut v = Vec::new();
+        put_path(path, &mut v);
+        cfe::ratio::encode(&c.written, &mut v);
+        for n in [c.k, c.last, c.next] {
+            v.extend_from_slice(&n.to_le_bytes());
+        }
+        v.push(c.woken as u8);
+        cfe::tlv::put(1, &v, &mut out);
+    }
+    let path = var_root.join("climbs.bin");
+    let staged = path.with_extension("staged");
+    if std::fs::write(&staged, out).is_ok() {
+        let _ = std::fs::rename(staged, path);
+    }
+}
+
+pub fn read_climbs(var_root: &std::path::Path) -> Climbs {
+    let bytes = std::fs::read(var_root.join("climbs.bin")).unwrap_or_default();
+    cfe::tlv::records(&bytes)
+        .filter(|(t, _)| *t == 1)
+        .filter_map(|(_, v)| {
+            let n = *v.first()? as usize;
+            let mut at = 1;
+            let mut path = Vec::with_capacity(n.min(8));
+            for _ in 0..n {
+                path.push(u32::from_le_bytes(v.get(at..at + 4)?.try_into().ok()?));
+                at += 4;
+            }
+            let (written, used) = cfe::ratio::decode(v.get(at..)?)?;
+            at += used;
+            let mut u = [0u64; 3];
+            for x in u.iter_mut() {
+                *x = u64::from_le_bytes(v.get(at..at + 8)?.try_into().ok()?);
+                at += 8;
+            }
+            let woken = *v.get(at)? == 1;
+            Some((path, Climb { written, k: u[0], last: u[1], next: u[2], woken }))
+        })
+        .collect()
 }
 
 /// Every world of the universe, read.

@@ -222,9 +222,17 @@ carry life, and a world may carry several forms at once.
   its place its system's. The first mind of each galaxy takes a PROGENITOR
   seat; every other people is a sovereign. Each waking is counted in the
   universe journal (tag 57).
-- Live: 200 minds due to wake, the first at bell 62,460 (the conductor at
-  beat 1,763). Wakings are read at boot; worlds the breath forms later are
-  read at the next boot (a per-term re-read is owed).
+- **Step 3b (operator, 2026-10-14): wakings come from the system's
+  activity, never a boot-time schedule.** Each world's climb is STATE
+  (`<var>/climbs.bin`: the share written, its recoherence count, its last
+  and next recoherence). At each recoherence of its coupling a world reads
+  its CURRENT state (heat, pressure, media, belts, its star's window) and
+  writes the bells since its last over its climb's length now; an impact
+  there writes nothing (the need kept); it wakes when the share reaches one,
+  within its star's window. The readings refresh when the breath changes
+  the universe (at most once a pulse); a world the breath forms starts
+  climbing at its first recoherence. Live: 5,730 worlds read, 5,487
+  climbing, the climb 1.4 ms a beat (88 ms catching up at the first boot).
 
 ## A people is read from its world
 
