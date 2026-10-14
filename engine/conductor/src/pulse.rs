@@ -181,6 +181,24 @@ fn draw(seed: &[u8; 32], path: &[u32], field: &str, j: u32) -> u64 {
 struct Tier {
     centre: Ratio,
     medium: Ratio,
+    /// A satellite's tidal reach as a share of its radius, `s = ρ / r`
+    /// (docs/78, "The mass split"), rational by its half-angle `t`:
+    /// `s = 2t / (1 + t²)`.
+    reach: Ratio,
+}
+
+/// A core's hole: its tier's share (1/1000) times `h`, h a seed draw from
+/// 1/4 to 2 (15/60 to 120/60) as xylarium draws a sibling's hole against
+/// the home's. Under ω = M/r a galaxy scaled whole is a copy of another
+/// (its turnings kept), so its hole's share is what makes galaxies differ.
+/// A placeholder until the pulse's physics sets it.
+fn hole_share(seed: &[u8; 32], path: &[u32]) -> Ratio {
+    tier(2).centre * ratio(15 + (draw(seed, path, "hole", 0) % 106) as i64, 60)
+}
+
+/// `2t / (1 + t²)`: a rational reach share from a rational half-angle.
+fn reach_of(t: Ratio) -> Ratio {
+    ratio(2, 1) * t.clone() / (ratio(1, 1) + t.clone() * t)
 }
 
 /// By depth: 3 the epicenter (no mass; the intergalactic medium; its cores
@@ -191,16 +209,16 @@ struct Tier {
 /// order 1/100 of the rest), 0 an orb (keeps all).
 fn tier(depth: u8) -> Tier {
     match depth {
-        3 => Tier { centre: ratio(0, 1), medium: ratio(1, 2) },
-        2 => Tier { centre: ratio(1, 1000), medium: ratio(1, 10) },
-        1 => Tier { centre: ratio(9986, 10000), medium: ratio(1, 100) },
-        _ => Tier { centre: ratio(1, 1), medium: ratio(0, 1) },
+        3 => Tier { centre: ratio(0, 1), medium: ratio(1, 2), reach: ratio(0, 1) },
+        // Systems about a core: s = 12/37 (t = 1/6), each system about 0.235
+        // of the mass it orbits. A placeholder sized to the stand-in's
+        // grains (tens of systems a galaxy); a real galaxy's is far smaller.
+        2 => Tier { centre: ratio(1, 1000), medium: ratio(1, 10), reach: reach_of(ratio(1, 6)) },
+        // Orbs about a star: t = 1/283, each orb about 1e-4 of what it
+        // orbits, the order of the Solar System's planets against the Sun.
+        1 => Tier { centre: ratio(9986, 10000), medium: ratio(1, 100), reach: reach_of(ratio(1, 283)) },
+        _ => Tier { centre: ratio(1, 1), medium: ratio(0, 1), reach: ratio(0, 1) },
     }
-}
-
-/// A share `q/60`, q from 1 to 59 (one field of the base-60 odometer).
-fn share(seed: &[u8; 32], path: &[u32], j: u32) -> Ratio {
-    ratio(1 + (draw(seed, path, "share", j) % 59) as i64, 60)
 }
 
 /// `f` of each element, floored to the grain.
@@ -250,7 +268,8 @@ impl Body {
 /// `unit`, then one tier down. What they leave joins the medium.
 fn split(seed: &[u8; 32], path: Vec<u32>, mut grains: Manifest, reach: Option<Ratio>, unit: Ratio, unit_mass: &Ratio, depth: u8) -> (Manifest, Vec<Body>, Manifest) {
     let law = tier(depth);
-    let kept = take(&grains, &law.centre);
+    let centre = if depth == 2 { hole_share(seed, &path) } else { law.centre.clone() };
+    let kept = take(&grains, &centre);
     less(&mut grains, &kept);
     let mut satellites = Vec::new();
     if depth == 0 {
@@ -259,41 +278,47 @@ fn split(seed: &[u8; 32], path: Vec<u32>, mut grains: Manifest, reach: Option<Ra
     let mut medium = take(&grains, &law.medium);
     less(&mut grains, &medium);
     let mut enclosed = mass(&kept) / unit_mass.clone();
-    // The edge of the last satellite's reach: the next stands just beyond it.
-    let mut edge: Option<Ratio> = None;
+    // THE TIDAL REACH (operator, 2026-10-14, xylarium's law): a body's reach
+    // is where its own turning matches the shear of its anchor's across it,
+    // `ρ² = r² m / (2M + m)`. Held as its share of radius, `s = ρ / r`, the
+    // feeding zone closes on one mass, `m = μ · M(<r)` with
+    // `μ = 2s² / (1 − s²)`, exact; reaches just touching place each next
+    // satellite at `r · (1 + s) / (1 − s)`. The innermost orbit turns in one
+    // unit of the tier (the bell ladder's anchor); each period follows from
+    // the law, `P = r / M(<r)`. Satellites form until the formed matter is
+    // spent or the next stands beyond the centre's reach; what remains is
+    // the medium. Nothing is drawn.
+    let s_ = law.reach.clone();
+    let mu = ratio(2, 1) * s_.clone() * s_.clone() / (ratio(1, 1) - s_.clone() * s_.clone());
+    let step = (ratio(1, 1) + s_.clone()) / (ratio(1, 1) - s_.clone());
+    let mut radius: Option<Ratio> = None;
     for k in 1u32.. {
-        let m = take(&grains, &share(seed, &path, k));
+        let left = mass(&grains) / unit_mass.clone();
+        let want = if enclosed.is_zero() { left.clone() } else { mu.clone() * enclosed.clone() };
+        if left.is_zero() || want > left {
+            break;
+        }
+        let m = take(&grains, &(want / left));
         let m_mass = mass(&m) / unit_mass.clone();
         if m_mass.is_zero() {
             break;
         }
-        // A star or an orb below a grain is not formed (the stand-in
-        // manifest's scale sets no finer floor; roundness replaces it).
-        // SPACING BY REACH (amended 2026-10-14: an authored period chain
-        // made every galaxy's year near the tier's unit). The innermost
-        // orbit turns in one unit of the tier (the bell ladder's anchor);
-        // each next stands where its reach just meets the last one's,
-        // `r (1 − m / M(<r)) = r_last + r_d,last`, so no two reaches
-        // overlap. A satellite outweighing all it would orbit is no
-        // satellite. Its period follows from the law, `P = r / M(<r)`.
-        let radius = match &edge {
+        let r = match &radius {
             None if enclosed.is_zero() => unit.clone(),
             None => enclosed.clone() * unit.clone(),
-            Some(_) if enclosed.is_zero() || m_mass >= enclosed => break,
-            Some(e) => e.clone() / (ratio(1, 1) - m_mass.clone() / enclosed.clone()),
+            Some(last) => last.clone() * step.clone(),
         };
-        if reach.as_ref().is_some_and(|r| radius > *r) {
+        if reach.as_ref().is_some_and(|bound| r > *bound) {
             break;
         }
-        let period = if enclosed.is_zero() { unit.clone() } else { radius.clone() / enclosed.clone() };
+        let period = if enclosed.is_zero() { unit.clone() } else { r.clone() / enclosed.clone() };
         less(&mut grains, &m);
         let mut at = path.clone();
         at.push(k);
-        // The satellite's own reach: r_d = r · m / M(<r).
-        let own_reach = (!enclosed.is_zero()).then(|| radius.clone() * m_mass.clone() / enclosed.clone());
-        edge = Some(radius.clone() + own_reach.clone().unwrap_or_else(|| ratio(0, 1)));
+        let own_reach = Some(r.clone() * s_.clone());
         let (s_kept, s_sats, s_medium) = split(seed, at.clone(), m, own_reach, unit.clone() / ratio(60, 1), unit_mass, depth - 1);
-        satellites.push(Body { path: at, radius, period, kept: s_kept, satellites: s_sats, medium: s_medium });
+        satellites.push(Body { path: at, radius: r.clone(), period, kept: s_kept, satellites: s_sats, medium: s_medium });
+        radius = Some(r);
         enclosed += m_mass;
     }
     for (k, a) in grains {
@@ -327,7 +352,7 @@ pub fn deploy(seed: &[u8; 32], manifest: &Manifest) -> Universe {
     let mut shares: Vec<(u32, Manifest)> = Vec::new();
     for (i, a) in (1..=modes).zip(&strengths) {
         let m = take(&formed, &ratio(*a, sum));
-        if take(&m, &tier(2).centre).is_empty() {
+        if take(&m, &hole_share(seed, &[i])).is_empty() {
             continue;
         }
         shares.push((i, m));
@@ -339,7 +364,7 @@ pub fn deploy(seed: &[u8; 32], manifest: &Manifest) -> Universe {
         *medium.entry(k).or_insert_with(|| ratio(0, 1)) += a;
     }
     // The unit: the deepest core's hole (`M_core = 1`).
-    let deepest = shares.iter().map(|(_, m)| mass(&take(m, &tier(2).centre))).max().unwrap_or_else(|| ratio(1, 1));
+    let deepest = shares.iter().map(|(i, m)| mass(&take(m, &hole_share(seed, &[*i])))).max().unwrap_or_else(|| ratio(1, 1));
     // A core's reach waits for the cores' places (A1): until then its
     // systems are bounded by their minimum alone.
     let cores = shares

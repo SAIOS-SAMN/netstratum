@@ -244,8 +244,7 @@ event deploys them all, and everything after is a closed form of t from it
     galaxy. Real systems are each a small part of a galaxy. A physical law
     for satellite masses (fragmentation, a feeding zone) is owed; until
     then the galactic years read the share law, not the physics.
-  - **The law proposed** (xylarium, 2026-10-14; awaiting the operator,
-    because it brings a root and squares under design law 2). Our reach
+  - **The law, adopted** (operator, 2026-10-14; xylarium's). Our reach
     `r_d = r·m/M` compares turnings; the TIDAL reach compares a body's own
     turning with the change of its anchor's turning across it, by the same
     law: `m/ρ = M·(1/(r−ρ) − 1/(r+ρ))`, so `ρ = r·√(m/(2M+m))`. With it the
@@ -254,8 +253,34 @@ event deploys them all, and everything after is a closed form of t from it
     satellite takes its zone's mass and stands at the next reach boundary
     until the formed matter is spent; the count and the masses emerge from
     the profile λ(r). Its squares come from the difference of `1/r`, a
-    consequence of the turning law, not a flat norm; but the reach itself
-    is irrational, so places would need its square held exactly.
+    consequence of the turning law, not a flat norm.
+  - **Built exactly, with no root formed.** Each tier holds its reach as a
+    rational share of radius, `s = ρ / r = 2t / (1 + t²)` (t a rational
+    half-angle). Then a satellite's mass is `m = μ · M(<r)` with
+    `μ = 2s² / (1 − s²)`, and reaches just touching place the next at
+    `r · (1 + s) / (1 − s)`. All exact, a construction with no search.
+    Satellites form until the formed matter is spent or the next would pass
+    the centre's reach; the rest is the medium. The share draws are gone.
+    Placeholders: systems about a core `t = 1/6` (each about 0.235 of what
+    it orbits, sized to the stand-in's grains); orbs about a star
+    `t = 1/283` (about 1e-4, the Solar System's order).
+  - **Homology makes galaxies copies.** Under `ω = M/r` a galaxy scaled
+    whole keeps its turnings, so with one law and one set of shares every
+    galaxy read the same year (32 systems each, about 1.49e9 bells). What
+    differs between real galaxies is their hole: a core's share is drawn
+    from the seed at 1/4 to 2 of 1/1000, as xylarium draws a sibling's
+    hole against the home's (a placeholder until the pulse's physics sets
+    it).
+  - **Reading:** 13 cores, 413 systems, 5,607 orbs (about 14 a star);
+    conservation exact; galactic years at 13 distinct bells, from about
+    3.7e8 to 9.4e9 bells, against orbs' local years from 60 bells. The
+    ratio is the real one's order (a galactic year 225 Myr, a planet's 1).
+  - **So the clocks divide.** A galactic year is far longer than any run:
+    the duties the 60-beat close carries (journals, keepers, the realms'
+    term, ascension) cannot wait on it. Each belongs on the clock of what it
+    reads: a world's journal on its own local year, a realm's term and a
+    keeper's judgement on their systems' turns, the core's echo alone on the
+    galactic year. Which duty rides which clock is the next design step.
   Each galaxy closes its own year at its own pace. The universal 60-beat
   close (`scribe::journal::YEAR_TICKS`, a placeholder) retires, and the
   core's yearly re-emission (`core_bounce`) becomes the core's echo of the
