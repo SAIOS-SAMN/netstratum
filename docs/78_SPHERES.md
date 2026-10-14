@@ -13,6 +13,42 @@ mycelium's (A1), from the pinned `vendor/mycelium`.
 Status: scoped 2026-10-13, the pulse and the mass and motion laws added
 2026-10-14; not built. Facts were read from the code those days.
 
+## Design laws (standing; read before adding any physics)
+
+Each was learned from a misalignment caught by the operator. A new law that
+breaks one of them is wrong before it is built.
+
+1. **Physics defines; the story emerges.** No table of Earth's measured
+   world stands in for a law we can derive (caught 2026-10-14: a 118-row
+   periodic table imported as netstratum's chemistry). A measured value may
+   stand only as a declared placeholder for physics not yet defined, cited
+   and of order, and marked for replacement.
+2. **No flat laws.** No square states a law, and no dimension is fixed: no
+   `^2` norm (docs/79), no `P²` or `r^k` (Kepler, caught 2026-10-14), no
+   `2n²` shell capacities. The dimensions are fluid; an effective dimension
+   is read from how matter gathers, never set.
+3. **No slots, no fill orders.** Nothing is a cell in a fixed grid filled in
+   order, or an index running one way (caught 2026-10-14: "Z fills the table
+   line by line"; earlier, the box of squares). A thing is a system that
+   turns.
+4. **One law at every tier:** epicenter, core, star, orb, atom. A centre
+   keeps its share; satellites turn about it at `ω = M(<r)/r` inside its
+   reach.
+5. **Frame by frame.** Each tick is one 3-D frame of every turning at once:
+   orbits, spins, bounces. The sequence of frames is the continuous 4-D
+   flow. A state at t is its closed form (`φ + ω·t`), never stepped.
+6. **Both senses.** Turning runs both ways; spin is the sense of a turning.
+   Opposite senses pair, and pairing is what closes.
+7. **Motion rises from below.** The quantum state's wavefronts (docs/79)
+   kick the atoms into their orbits and spins, and that motion expands
+   upward: atoms, bodies, systems, galaxies. The pulse deploys WHERE mass
+   lands (by containment, from the epicenter down); the phases of motion
+   come UP from the quantum layer.
+8. **Exact and bounded.** Exact rationals with denominators that do not
+   grow with time; a representation is measured over long t before it is
+   adopted (caught 2026-10-14: half-angle composition grew 2.9 bits a beat).
+9. **Construction, never search.**
+
 ## The geometry (the shared model; netstratum's own physics)
 
 - **Space: S^360** of radius R, the Big Bang's curvature.
@@ -101,8 +137,9 @@ event deploys them all, and everything after is a closed form of t from it
     hypha tube;
   - **the spectrum,** a short list of modes, each `(n_i, d_i, a_i, φ_i)`: a
     reflection product `n_i` (its direction from the epicenter), a rational
-    half-angle `d_i` (its distance), a whole-number strength `a_i`, and a
-    rational phase `φ_i` in turns (docs/79's torsion, docs/81's Φ).
+    half-angle `d_i` (its distance), a whole-number strength `a_i`, and its
+    torsion phase `φ_i` in turns (docs/79's torsion, docs/81's Φ): the
+    wavefront that sets its matter moving (design law 7).
 - **The spectrum is derived from era 1's genesis seed** along fixed stream
   paths, tilted by operator dials (exact per-element recipe weights,
   renormalised to keep the metals' mass), as xylarium does. It is
@@ -185,8 +222,11 @@ event deploys them all, and everything after is a closed form of t from it
     version-2 origin. Fixed paths: the same seed deploys the same universe.
   - **The unit.** Masses are in the deepest core's grains (core 1 =
     `M_core = 1`, xylarium's anchor), so ω and r are exact rationals.
-- **Motion.** Every body turns about its centre by the law above, from its
-  mode's phase `φ` at t = 0, in the plane its mode's reflections give. Each
+- **Motion.** Every body turns about its centre by the law above, in the
+  plane its mode's reflections give. Its phase at t = 0 is not drawn: it
+  rises from below (design law 7), the quantum wavefront having set its
+  atoms turning, their motion summed into the body's spin and its orbit's
+  phase. Each
   body reads the mass its own orbit encloses, so orbits are closed; the
   bodies' pull on each other is left out.
 - **The galactic year** is one completed turn of the galaxy's hub about its
@@ -241,10 +281,8 @@ event deploys them all, and everything after is a closed form of t from it
     byte layout with the build.
   - **So the grain is netstratum's internal unit,** converted through the Z
     map (below) in and out.
-- **The Z map's tables** (to build, each value cited: period, group and
-  block from the IUPAC table; metal or nonmetal; the commonest oxidation
-  state; melting point; standard atomic weight, CIAAW). The lane of the
-  noble gases is a known misfit (below).
+- **The atom tier's reading** (above): whether the law gives a periodic
+  chemistry, measured before the manifest relies on it.
 - **Roundness** (xylarium's statement, adopted when its angles are
   declared): a body is round when `M / r ≥ θ_rigid(material)` in the planet
   tier's units; linear, no square. Below it, rubble: matter in a field, the
@@ -262,56 +300,51 @@ event deploys them all, and everything after is a closed form of t from it
   enclosed mass and radius with no square and no root (the flat-space
   `√(1 − 2GM/rc²)` is not used).
 
-## The Z map: matter at the boundary
+## The atom: matter at the boundary (the lowest tier)
 
-Mycelium's manifest counts nuclei per Z; netstratum's almanac places matter
-on its own five axes (`cfe::almanac::periodic`: line, lane, shell, phase,
-spin, read from an element id's bytes 3 to 7). The map joins them, declared
-and exact.
+Mycelium's manifest counts nuclei per Z. Z, the count of a nucleus's
+charges, means the same in every universe; what it becomes is netstratum's
+own physics. An atom is NOT a cell of a table (design laws 1 and 3). It is
+the lowest tier of the one law (design law 4), a small system that turns.
 
-- **Era 1's elements are one per Z.** All of era 1's matter arrives by
-  manifest, so every element in it is the CANONICAL element of some Z. Era
-  0's 855 hash-drawn kinds stay era 0's. The map is a bijection, and a
-  manifest converts out exactly as it came in.
-- **The canonical id of Z** is `blake3` derived from ("netstratum element
-  Z v1", Z), with bytes 3 to 7 set to its cell (below). The cell is read
-  back by `periodic_of` unchanged, so the matter law and its digest stay as
-  they are. Bytes 1 and 2 (`dop::element_properties`) stay the hash's.
-- **The cell, from real chemistry:**
-  - **line = period** (1 to 7). The law already has seven lines.
-  - **lane from the commonest valence v** (capped at 5) on the law's fold:
-    a DONOR (a metal, and hydrogen) takes the rising half, lane v; an
-    ACCEPTOR (a nonmetal) takes the falling half, lane 11 − v. The fold's
-    two halves are the giving and the taking of bonds.
-  - **shell from the block:** s 1, p 2, d 3, f 4, so arity (1 + shell) runs
-    2 to 5 as the orbitals widen.
-  - **phase from the melting point,** on the law's own thermal bands:
-    below 250 K, 1 (cryogenic); 250 to 600 K, 2 (mesic); 600 K to 2273 K,
-    3 (hyperthermal); above 2273 K (2000 °C, the refractory metals'
-    definition), 4 (refractory, workable anywhere).
-  - **spin = Z mod 2,** the even/odd-Z distinction of nuclear abundance
-    (Oddo–Harkins). The law's handedness is not an ordering, nor is parity.
+- **The nucleus is the centre.** It keeps the atom's mass share, by the
+  tier's centre-keeps law, and holds Z charges.
+- **Electrons are satellites,** placed inside out by the same law. What an
+  electron feels is the charge its orbit encloses, `Q(<r) = Z − (electrons
+  further in)`, so inner electrons shield outer ones. Nothing writes that
+  in; it is enclosure.
+- **Frame by frame** (design law 5): at tick t every electron's phase is
+  `φ + ω·t`. The atom at t is one frame of all its turnings; its character
+  is how it moves through the frames.
+- **Both senses** (design law 6): electrons on one orbit turn either way.
+  Two in opposite senses pair; an atom with every orbit paired is closed,
+  and inert. Nothing "fills": a count closes when the senses balance.
+- **Set moving from below** (design law 7): the quantum state's wavefront
+  gives each atom its initial phases and senses.
+- **Chemistry is read from the motion,** never looked up:
+  - depth (the almanac's line): how many resonance steps out the outermost
+    electron turns;
+  - bonding (the lane): the count of unpaired outer electrons;
+  - how many join a compound (the shell): the electrons sharing the
+    outermost band;
+  - where it is workable (the phase): how fast its outermost electron turns,
+    against the thermal bands.
+- **Era 1's elements are one per Z,** each the atom the law builds from Z,
+  so a manifest converts out exactly as it came in. Era 0's 855 hash-drawn
+  kinds stay era 0's; the stand-in maps each to the Z whose atom reads the
+  same line and lane.
 - **A grain counts nuclei.** One grain (1/1024 of an amount) of Z is 60^30
-  nuclei of Z, a power of sixty. A manifest's count enters as
-  `⌊count / 60^30⌋` grains, and the remainder (fewer than one grain's
-  nuclei) stays as an integer in the universe's unformed ledger, per Z. It
-  leaves as `grains × 60^30` nuclei, an integer. Exact both ways.
-- **Mass for the turning law** weights each grain by its mass number A (the
-  standard atomic weight, rounded; for elements with none, the mass number
-  of the longest-lived isotope): `M = Σ grains × A`. The isotopes are ours,
-  as mycelium ruled.
-- **Bulk resources** are compositions of canonical elements, by atom count:
-  iron and scrap Fe; diamond C; crystal SiO2 (Si 1/3, O 2/3); biomass CH2O
-  (C 1/4, H 1/2, O 1/4); alloy steel (Fe 99/100, C 1/100). A share's floor
-  remainder stays with the first component.
-- **The stand-in** (era 0's matter) maps each era-0 kind to the canonical
-  element of the same cell, else the same line and lane, else the same
-  line, taking the lowest Z when several match. It is internal and never
-  crosses, so it needs no nuclei.
-- **The known misfit: the noble gases.** The law has no inert lane (every
-  lane binds at least once). Until it gains one, which would change the
-  matter law and its digest, the noble gases take lane 10 (binds 1), the
-  weakest acceptors.
+  nuclei of Z. A count enters as `⌊count / 60^30⌋` grains; the remainder
+  (under a grain's nuclei) stays as an integer in the universe's unformed
+  ledger, per Z. It leaves as `grains × 60^30` nuclei. Exact both ways.
+- **Mass for the turning law** is the nucleus's own mass number, by the
+  same law (isotopes are each universe's own, as mycelium ruled), never a
+  table of atomic weights.
+- **Bulk resources** (iron, crystal, biomass) are not fixed formulas; they
+  become the compounds the law forms.
+- **To measure before it is relied on:** build Z = 1 to 118 by the law and
+  read whether the unpaired counts recur from depth to depth, a periodic
+  chemistry, or do not.
 
 ## Every flat site in netstratum (inventory, 2026-10-13)
 
