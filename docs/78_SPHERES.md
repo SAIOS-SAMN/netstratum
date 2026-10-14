@@ -281,8 +281,9 @@ event deploys them all, and everything after is a closed form of t from it
     byte layout with the build.
   - **So the grain is netstratum's internal unit,** converted through the Z
     map (below) in and out.
-- **The atom tier's reading** (above): whether the law gives a periodic
-  chemistry, measured before the manifest relies on it.
+- **The atom's further readings:** the nucleus's mass number (the same law,
+  one tier in), the tightness-to-workability bands, and compounds read from
+  atoms in place of the almanac's fixed cells.
 - **Roundness** (xylarium's statement, adopted when its angles are
   declared): a body is round when `M / r ≥ θ_rigid(material)` in the planet
   tier's units; linear, no square. Below it, rubble: matter in a field, the
@@ -342,9 +343,34 @@ the lowest tier of the one law (design law 4), a small system that turns.
   table of atomic weights.
 - **Bulk resources** (iron, crystal, biomass) are not fixed formulas; they
   become the compounds the law forms.
-- **To measure before it is relied on:** build Z = 1 to 118 by the law and
-  read whether the unpaired counts recur from depth to depth, a periodic
-  chemistry, or do not.
+- **Scoped and built (2026-10-14, `cfe::almanac::atom`).** Two rules are
+  authored, the rest is the turning law:
+  - **an orbit closes in a whole number of ticks:** band P turns once in P
+    ticks, so `r = Q·P` and its speed `v = Q`;
+  - **a new electron takes a free frame before it pairs.**
+
+  A band of period P passes P frames a turn, one electron per sense in
+  each, so it holds 2P (linear, no square). Electrons sharing a band share
+  its radius and do not enclose each other. Read: depth (the outermost
+  band), unpaired (bonding), outer electrons (a compound's share), closed
+  (every frame paired: inert), tightness `Q_out / P_out`.
+- **Reading, Z = 1 to 118** (the `atoms` binary): a periodic chemistry with
+  no table.
+  - Closed (inert) at Z = 2, 6, 12, 20, 30, 42, 56, 72, 90, 110.
+  - Every depth's bonding rises and falls back (depth 4: 1, 2, 3, 4, 3, 2,
+    1, 0), the almanac's fold, now emerging rather than authored.
+  - Each bonding count recurs at every depth from its first.
+  - Across each depth an atom is held tighter (1/P rising to 2); closed
+    atoms are held tightest.
+  - It is netstratum's own: 11 depths by Z = 118 and bonding up to 10,
+    where the almanac's fixed axes have 7 lines and bind at most 5. Era 1's
+    chemistry (compounds, workability) reads the atom, so the almanac's
+    fixed cells are era 0's.
+- **The stand-in through the boundary** (the `pulse` binary): era 0's 860
+  kinds, each mapped to the Z whose atom reads its line and binding, cross
+  as nuclei per Z (13 Zs) and enter as grains, nuclei in equal to nuclei
+  held. The stand-in's map folds era 0's variety into few Zs; a real grant
+  carries its own.
 
 ## Every flat site in netstratum (inventory, 2026-10-13)
 

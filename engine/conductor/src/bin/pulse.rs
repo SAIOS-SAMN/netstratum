@@ -7,9 +7,15 @@ use std::path::Path;
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     let (era0, era1) = (args.get(1).map(String::as_str).unwrap_or("var-g2"), args.get(2).map(String::as_str).unwrap_or("var-e1"));
-    let (manifest, worlds) = pulse::stand_in(Path::new(era0));
-    let total = manifest.values().fold(cfe::ratio::ratio(0, 1), |s, a| s + a.clone());
-    println!("STAND-IN MANIFEST — {} elements from {worlds} worlds of era 0, {} grains in all", manifest.len(), total);
+    let (kinds, worlds) = pulse::stand_in(Path::new(era0));
+    let total = kinds.values().fold(cfe::ratio::ratio(0, 1), |s, a| s + a.clone());
+    println!("STAND-IN — {} kinds from {worlds} worlds of era 0, {} grains in all", kinds.len(), total);
+    // Through the boundary as mycelium rules it: nuclei per Z, and back in.
+    let nuclei = pulse::to_nuclei(&kinds);
+    let (manifest, unformed) = pulse::from_nuclei(&nuclei);
+    let zs: Vec<String> = nuclei.keys().map(|z| z.to_string()).collect();
+    println!("MANIFEST — nuclei per Z at {} Zs [{}]; entering as {} grains, {} Zs with an unformed remainder", nuclei.len(), zs.join(","), manifest.values().fold(cfe::ratio::ratio(0, 1), |s, a| s + a.clone()), unformed.len());
+    println!("BOUNDARY — nuclei in equal nuclei held (grains and unformed): {}", pulse::out_nuclei(&manifest, &unformed) == nuclei);
     // The stand-in seed until era 1's version-2 origin is founded.
     let seed = *blake3::hash(b"netstratum era 1, unfounded stand-in").as_bytes();
     let u = pulse::deploy(&seed, &manifest);

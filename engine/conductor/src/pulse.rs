@@ -77,6 +77,85 @@ pub fn stand_in(era0: &Path) -> (Manifest, usize) {
     (manifest, read)
 }
 
+/// The nuclei in one grain of any Z (docs/78, "The atom"): 60^30.
+pub fn nuclei_per_grain() -> num_bigint::BigInt {
+    num_bigint::BigInt::from(60u32).pow(30)
+}
+
+/// A manifest as mycelium rules it (MANIFEST, ACT_DOMAIN 17): nuclei per Z.
+pub type Nuclei = BTreeMap<u16, num_bigint::BigInt>;
+
+/// The Z whose atom (`cfe::almanac::atom`) reads an era-0 kind's line and
+/// binding: the lowest Z at that depth with that unpaired count, else the
+/// nearest unpaired count at that depth (lowest Z on a tie). The stand-in's
+/// map only; era 1's own elements are one per Z.
+fn z_of_kind(id: &[u8; 32]) -> u16 {
+    let cell = cfe::almanac::periodic::periodic_of(id);
+    let (line, binds) = (u32::from(cell.line), u32::from(cell.binds));
+    (1u32..=118)
+        .filter_map(cfe::almanac::atom::atom)
+        .filter(|a| a.depth == line)
+        .min_by_key(|a| (a.unpaired.abs_diff(binds), a.z))
+        .map(|a| a.z as u16)
+        .unwrap_or(1)
+}
+
+/// An era-0 manifest key's id: an almanac element's own, or a bulk
+/// resource's derived from its name (so it too reads a cell by the same
+/// law, with no formula of ours).
+fn kind_id(key: &str) -> [u8; 32] {
+    if let Some(name) = key.strip_prefix("resource:") {
+        return *blake3::Hasher::new_derive_key("netstratum era 0 resource").update(name.as_bytes()).finalize().as_bytes();
+    }
+    let mut id = [0u8; 32];
+    for (i, b) in id.iter_mut().enumerate() {
+        *b = key.get(2 * i..2 * i + 2).and_then(|h| u8::from_str_radix(h, 16).ok()).unwrap_or(0);
+    }
+    id
+}
+
+/// The stand-in as nuclei per Z: each era-0 kind's grains, at its Z, times
+/// the nuclei in a grain. Exact (the amounts lie on the 1/1024 grain).
+pub fn to_nuclei(kinds: &Manifest) -> Nuclei {
+    let mut out = Nuclei::new();
+    for (key, amount) in kinds {
+        let grains = amount.clone() * ratio(1024, 1);
+        let count = grains.to_integer() * nuclei_per_grain();
+        *out.entry(z_of_kind(&kind_id(key))).or_default() += count;
+    }
+    out.retain(|_, c| *c > num_bigint::BigInt::from(0));
+    out
+}
+
+/// A manifest of nuclei entering: per Z, whole grains (`Z<n>` keys) and the
+/// remainder, under a grain's nuclei, kept in the unformed ledger.
+pub fn from_nuclei(nuclei: &Nuclei) -> (Manifest, Nuclei) {
+    let per = nuclei_per_grain();
+    let mut grains = Manifest::new();
+    let mut unformed = Nuclei::new();
+    for (z, count) in nuclei {
+        let (whole, rest) = (count / &per, count % &per);
+        if whole > num_bigint::BigInt::from(0) {
+            grains.insert(format!("Z{z:03}"), Ratio::new(whole, num_bigint::BigInt::from(1024)));
+        }
+        if rest > num_bigint::BigInt::from(0) {
+            unformed.insert(*z, rest);
+        }
+    }
+    (grains, unformed)
+}
+
+/// Grains back out as nuclei per Z (the unformed added), for the
+/// conservation reading.
+pub fn out_nuclei(grains: &Manifest, unformed: &Nuclei) -> Nuclei {
+    let mut out = unformed.clone();
+    for (key, amount) in grains {
+        let Some(z) = key.strip_prefix('Z').and_then(|z| z.parse::<u16>().ok()) else { continue };
+        *out.entry(z).or_default() += (amount.clone() * ratio(1024, 1)).to_integer() * nuclei_per_grain();
+    }
+    out
+}
+
 /// The seed's fixed paths: draw `j` of `field` for the body at `path`.
 fn draw(seed: &[u8; 32], path: &[u32], field: &str, j: u32) -> u64 {
     let mut h = blake3::Hasher::new();

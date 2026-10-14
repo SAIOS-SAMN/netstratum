@@ -20,6 +20,7 @@
 //! `site_planet` are all untouched, so nothing that has replayed
 //! replays differently.
 
+pub mod atom;
 pub mod compound;
 pub mod locality;
 pub mod periodic;
