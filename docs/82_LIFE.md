@@ -99,11 +99,17 @@ carry life, and a world may carry several forms at once.
      5,703 worlds airless (no gas among their atoms); light gases (A ≤ 4)
      on 765; the cores hold a median 91% of a world's mass. Every world
      with gas keeps nearly all of it: the stand-in's gases are mostly heavy,
-     and its gravity barely varies (3.19 to 5.33): with sizes packed
-     linearly, `g = M/R` depends on a world's COMPOSITION, not its mass, so
-     a large world and a small one of the same matter hold their air alike.
-     That is the linear homology at the planet tier; whether a world's size
-     should pack linearly is open for the operator.
+     and its gravity barely varied (3.19 to 5.33): with sizes packed
+     linearly, `g = M/R` depended on a world's composition, not its mass.
+   - **Compression** (operator, 2026-10-14: change it; and no caps on heat,
+     a cap is undefined physics). Linear homology made every body a scaled
+     copy: gravity fixed by composition, and every star's innermost world at
+     one heat (1,000 K, so no plasma anywhere). A body's own weight squeezes
+     it: `R = R_loose / (1 + M / M_a)`, `M_a` its tier's compression scale
+     (the median body of the tier, a placeholder). A compressed star burns
+     harder: `T = (K / P) · (1 + M_star / M_a)`. Reading: gravity 3.35 to
+     316, growing with mass; heat 27 K to 74,424 K (median 941 K); 1,628
+     refractory worlds, 67 of them carrying a pattern in plasma.
    A medium holds a pattern when its cohesion and its compression together
    beat its agitation: `x = cohesion · (1 + compression) / agitation`. An
    airless world has only its media's own cohesion; a deep atmosphere
@@ -202,6 +208,7 @@ radius.
 | impacts, sterilisations | rates per local year | a dynamics not yet stated |
 | a viable people | of order 500 | Franklin's minimum |
 | the reference pressure | declared (Earth's surface, 1 bar, stands for it) | a unit of pressure not yet stated |
+| `M_a`, compression's scale | the median body of its tier (stars, worlds) | how matter resists its own weight, not yet stated |
 | `K`, read as heat per turning | the innermost world of a star (one tier unit, 60 bells) at 1,000 K | a radiation law not yet stated (replaces the Earth anchor, whose units the orb tier lacks) |
 
 ## Done-when (the live log, before → after)

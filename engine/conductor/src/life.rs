@@ -4,11 +4,16 @@
 //! how well that medium carries a pattern, in HALVINGS of its copy error.
 //! Nothing is assumed about life's form (docs/78, design law 10).
 //!
-//! - Heat: `T = K / P`, P the world's turn in bells, K = 60,000 K·bells
-//!   (the innermost world of a star, one tier unit, at 1,000 K; an anchor).
-//! - Size: each nucleus's atomic size (the atom law's outer orbit,
-//!   `Q_out · P_out`) summed over the world's grains; gravity `g = M / R`
-//!   (mass by `A = 2Z`).
+//! - COMPRESSION (operator 2026-10-14: no caps, a world's gravity must grow
+//!   with it): a body's own weight squeezes it, `R = R_loose / (1 + M/M_a)`,
+//!   R_loose its nuclei's atomic sizes summed (the atom law's outer orbit,
+//!   `Q_out · P_out`), `M_a` its tier's compression scale (the median body
+//!   of the tier, a placeholder). Linear homology made every body a scaled
+//!   copy (gravity fixed by composition, every star's innermost world at
+//!   one heat); compression breaks it.
+//! - Heat: `T = (K / P) · (1 + M_star / M_a)`, P the world's turn in bells
+//!   (K = 60,000 K·bells): a compressed star burns harder, so no cap.
+//! - Gravity `g = M / R` (mass by `A = 2Z`), growing with the world's mass.
 //! - Core: its network formers (two or more bonds) sink and shield; their
 //!   share of its mass is `κ`.
 //! - Atmosphere (Jeans escape, linear in every term): of each gas it holds
@@ -68,16 +73,17 @@ fn grip(a: &Atom) -> Ratio {
 
 /// Read one world: its matter, its turn (bells), and its clock against its
 /// star (the coupling's rate).
-pub fn read(path: Vec<u32>, matter: &Manifest, period: &Ratio, coupling: &Ratio) -> Option<World> {
+pub fn read(path: Vec<u32>, matter: &Manifest, period: &Ratio, coupling: &Ratio, star_burn: &Ratio, world_scale: &Ratio) -> Option<World> {
     if period.is_zero() || matter.is_empty() {
         return None;
     }
-    let heat = ratio(K, 1) / period.clone();
+    let heat = ratio(K, 1) / period.clone() * star_burn.clone();
     let atoms: Vec<(Atom, Ratio)> = matter.iter().filter_map(|(k, g)| z_of(k).and_then(atom).map(|a| (a, g.clone()))).collect();
-    let size = atoms.iter().fold(ratio(0, 1), |s, (a, g)| s + g.clone() * ratio(i64::from(a.enclosed * a.depth), 1));
-    if size.is_zero() {
+    let loose = atoms.iter().fold(ratio(0, 1), |s, (a, g)| s + g.clone() * ratio(i64::from(a.enclosed * a.depth), 1));
+    if loose.is_zero() {
         return None;
     }
+    let size = loose / (ratio(1, 1) + mass(matter) / world_scale.clone());
     let gravity = mass(matter) / size.clone();
     let plasma = |a: &Atom| grip(a) < heat;
     let volatile = |a: &Atom| !plasma(a) && a.unpaired <= 1;
@@ -141,14 +147,21 @@ pub fn halvings(x: &Ratio, compression: &Ratio) -> Ratio {
 
 /// Every world of the universe, read.
 pub fn worlds(u: &Universe) -> Vec<World> {
+    let median = |mut v: Vec<Ratio>| -> Ratio {
+        v.sort();
+        v.get(v.len() / 2).cloned().filter(|m| !m.is_zero()).unwrap_or_else(|| ratio(1, 1))
+    };
+    let star_scale = median(u.cores.iter().flat_map(|c| &c.satellites).map(|s| mass(&s.kept)).collect());
+    let world_scale = median(u.cores.iter().flat_map(|c| &c.satellites).flat_map(|s| &s.satellites).map(|o| mass(&o.kept)).collect());
     let mut out = Vec::new();
     for core in &u.cores {
         for sys in &core.satellites {
             let star = mass(&sys.kept);
+            let star_burn = ratio(1, 1) + star.clone() / star_scale.clone();
             let mut inside = star.clone();
             for orb in &sys.satellites {
                 let coupling = crate::breath::rate(&orb.radius, &(inside.clone() / crate::breath::unit_mass(u)));
-                if let Some(w) = read(orb.path.clone(), &orb.kept, &orb.period, &coupling) {
+                if let Some(w) = read(orb.path.clone(), &orb.kept, &orb.period, &coupling, &star_burn, &world_scale) {
                     out.push(w);
                 }
                 inside += mass(&orb.total());
@@ -175,8 +188,11 @@ mod tests {
     fn a_world_reads_its_heat_and_media() {
         // Hydrogen (single bond) and oxygen-like Z = 4 (two bonds) at 60 bells.
         let matter: Manifest = [("Z001".to_string(), ratio(10, 1)), ("Z004".to_string(), ratio(5, 1))].into();
-        let w = read(vec![1, 1, 1], &matter, &ratio(60, 1), &ratio(59, 60)).unwrap();
+        let w = read(vec![1, 1, 1], &matter, &ratio(60, 1), &ratio(59, 60), &ratio(1, 1), &ratio(1_000_000, 1)).unwrap();
         assert_eq!(w.heat, ratio(1000, 1));
+        let heavy = read(vec![1, 1, 1], &matter, &ratio(60, 1), &ratio(59, 60), &ratio(3, 1), &ratio(1, 1)).unwrap();
+        assert_eq!(heavy.heat, ratio(3000, 1), "a burning star, no cap");
+        assert!(heavy.gravity > w.gravity, "a compressed world pulls harder");
         assert!(w.chemical.is_some(), "1 + 4 close and hold at 1,000 K");
         assert!(w.geologic.is_some());
         assert_eq!(w.informational, Some(ratio(59, 1)));
