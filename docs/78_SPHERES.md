@@ -264,7 +264,11 @@ event deploys them all, and everything after is a closed form of t from it
   Keplerian clock (`cfe::thermal::orbital_period_squared`, `local_years`,
   and `siting.rs`'s Diophantine tracks `r = M·k²`, which exist only to make a
   square root exact) does not carry into era 1.
-- **Arrivals.** A later galaxy package is deployed the same way, as a new
+- **Arrivals.** Packages are bought with μ (the hypha side, mycelium's,
+  shared by every kernel; xylarium 2026-10-14). The galaxy count at the
+  pulse stays netstratum's own (seed-drawn, as ruled); xylarium's two per
+  Big Bang is its kernel default and does not bind us. A later galaxy
+  package is deployed the same way, as a new
   core and its systems, by the progenitors who receive it; the bodies it
   encloses re-read `M(<r)` at that event.
 - **Time.** Every clock starts at the pulse; each runs at the rate the mass
