@@ -5868,6 +5868,11 @@ pub fn stamp_market_step(
                 Some(spare) => spare.min(half(have)),
                 None => half(have),
             };
+            // On the grain, or not an offer: a crystal stock of one grain
+            // offered half a grain, floored to nothing at the transfer, and
+            // hid the iron and biomass behind it (2026-10-14: 68 cargo legs
+            // a beat below the grain, 10 hubs unmet).
+            let offer = cfe::world::smelt_resource(&offer);
             if offer > ratio(0, 1) {
                 return Some((resource, offer));
             }
@@ -5950,7 +5955,9 @@ pub fn stamp_market_step(
                 (melt < one()).then_some((i, melt, via))
             })
             .collect());
-        let buyers = open.iter().any(|(i, _, _)| stamp_of(&worlds[*i]) > ratio(0, 1));
+        // A buyer brings half its STAMP, on the grain: one holding a single
+        // grain brings nothing and is no buyer.
+        let buyers = open.iter().any(|(i, _, _)| cfe::world::smelt_resource(&half(stamp_of(&worlds[*i]))) > ratio(0, 1));
         let sellers = open.iter().any(|(i, _, _)| cargo_of(&worlds[*i]).is_some());
         if open.len() < 2 || !buyers || !sellers {
             census.closed += 1;
@@ -5992,6 +5999,9 @@ pub fn stamp_market_step(
                         census.partial += 1;
                     }
                 }
+                if cfe::world::smelt_resource(&send) <= ratio(0, 1) {
+                    *census.refused.entry("STAMP below the grain".to_string()).or_insert(0) += 1;
+                }
                 if let Some(pay) = cfe::dop::Positive::new(cfe::world::smelt_resource(&send)) {
                     let (from, house) = two_mut(worlds, i, hub);
                     let before = stamp_of(house);
@@ -6015,15 +6025,27 @@ pub fn stamp_market_step(
             }
             // A line with both brings both sides, as it bought in some pairs
             // and sold in others under the old sweep.
+            if let Some((_, offer)) = &cargo {
+                if cfe::world::smelt_resource(offer) <= ratio(0, 1) {
+                    *census.refused.entry("cargo below the grain".to_string()).or_insert(0) += 1;
+                }
+            }
             if let Some((resource, offer)) = cargo {
                 if let Some(cargo) = cfe::dop::Positive::new(cfe::world::smelt_resource(&offer)) {
                     let deal = next_deal();
                     let (from, house) = two_mut(worlds, i, hub);
                     let before = banked_of(house, resource);
-                    if cfe::world::aperture_transfer(&mut from.world, cfe::world::FIRST_ORB, &mut house.world, cfe::world::FIRST_ORB, resource, cargo, deal).is_ok() {
-                        let arrived = banked_of(house, resource) - before;
-                        if arrived > ratio(0, 1) {
-                            gave.push((i, resource, arrived));
+                    match cfe::world::aperture_transfer(&mut from.world, cfe::world::FIRST_ORB, &mut house.world, cfe::world::FIRST_ORB, resource, cargo, deal) {
+                        Ok(()) => {
+                            let arrived = banked_of(house, resource) - before;
+                            if arrived > ratio(0, 1) {
+                                gave.push((i, resource, arrived));
+                            }
+                        }
+                        Err(why) => {
+                            let name = format!("{why:?}");
+                            let name = name.split([' ', '{', '(']).next().unwrap_or_default().to_string();
+                            *census.refused.entry(format!("cargo {name}")).or_insert(0) += 1;
                         }
                     }
                 }
@@ -6040,6 +6062,14 @@ pub fn stamp_market_step(
             *pools.entry(*r).or_insert_with(|| ratio(0, 1)) += a.clone();
         }
         let matched = stamp_in > ratio(0, 1) && cargo_in > ratio(0, 1);
+        if !matched {
+            let side = match (stamp_in > ratio(0, 1), cargo_in > ratio(0, 1)) {
+                (false, false) => "unmet: nothing arrived",
+                (false, true) => "unmet: no STAMP arrived",
+                _ => "unmet: no cargo arrived",
+            };
+            *census.refused.entry(side.to_string()).or_insert(0) += 1;
+        }
         if matched {
             census.cleared += 1;
             for i in paid.iter().map(|(i, _)| *i).chain(gave.iter().map(|(i, _, _)| *i)) {
