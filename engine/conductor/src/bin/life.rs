@@ -36,7 +36,17 @@ fn main() {
             any += 1;
         }
     }
-    println!("WORLDS — {} read; {airless} airless; {any} carry a pattern in at least one medium", worlds.len());
+    let mut kept_share: Vec<Ratio> = worlds.iter().filter(|w| !w.gases.is_empty()).map(|w| {
+        let held = w.gases.iter().fold(ratio(0, 1), |s, (a, g)| s + g.clone() * ratio(i64::from(*a), 1));
+        w.atmosphere.clone() / held
+    }).collect();
+    kept_share.sort();
+    let grav: Vec<Ratio> = { let mut g: Vec<Ratio> = worlds.iter().map(|w| w.gravity.clone()).collect(); g.sort(); g };
+    let light: Vec<usize> = worlds.iter().map(|w| w.gases.iter().filter(|(a, _)| *a <= 4).count()).collect();
+    println!("GRAVITY — least {}, median {}, most {} (hundredths); worlds holding a light gas (A ≤ 4): {}", grav.first().map(|g| (g.clone() * ratio(100, 1)).round()).unwrap_or_default(), grav.get(grav.len() / 2).map(|g| (g.clone() * ratio(100, 1)).round()).unwrap_or_default(), grav.last().map(|g| (g.clone() * ratio(100, 1)).round()).unwrap_or_default(), light.iter().filter(|&&n| n > 0).count());
+    let cores: Vec<Ratio> = { let mut c: Vec<Ratio> = worlds.iter().map(|w| w.core.clone()).collect(); c.sort(); c };
+    println!("WORLDS — {} read; {airless} airless (no gas kept); {any} carry a pattern in at least one medium", worlds.len());
+    println!("ATMOSPHERE — gas kept (share of what the world holds as gas): least {}%, median {}%, most {}%; core share median {}%", kept_share.first().map(|k| (k.clone() * ratio(100, 1)).round()).unwrap_or_default(), kept_share.get(kept_share.len() / 2).map(|k| (k.clone() * ratio(100, 1)).round()).unwrap_or_default(), kept_share.last().map(|k| (k.clone() * ratio(100, 1)).round()).unwrap_or_default(), cores.get(cores.len() / 2).map(|c| (c.clone() * ratio(100, 1)).round()).unwrap_or_default());
     for (b, row) in by_band.iter().enumerate() {
         println!("  {:20} {:5} worlds: chemical {:5}, geologic {:5}, plasmic {:5}, informational {:5}", names[b], row[0], row[1], row[2], row[3], row[4]);
     }

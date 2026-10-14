@@ -9,10 +9,17 @@
 //! - Size: each nucleus's atomic size (the atom law's outer orbit,
 //!   `Q_out · P_out`) summed over the world's grains; gravity `g = M / R`
 //!   (mass by `A = 2Z`).
-//! - Atmosphere: its volatile atoms (closed, or bonding once: they close in
-//!   pairs) and its plasma (atoms whose own grip the heat beats); pressure
-//!   `P = m_atm · g`, read as COMPRESSION against the median world's (a
-//!   placeholder until pressure has a unit).
+//! - Core: its network formers (two or more bonds) sink and shield; their
+//!   share of its mass is `κ`.
+//! - Atmosphere (Jeans escape, linear in every term): of each gas it holds
+//!   (volatile atoms: closed, or bonding once, so they close in pairs; and
+//!   plasma, atoms whose own grip the heat beats), the world keeps
+//!   `1 − e^(−λ)`, `λ = A · g · (1 + κ) / (k · T)`: heavy gases on massive,
+//!   cool, shielded worlds hold; light ones on small, hot, bare worlds go.
+//!   `k` is calibrated on the median world: a hydrogen-weight gas (A = 2)
+//!   there has λ = 1 (a placeholder until escape has a unit).
+//! - Pressure `P = m_atm · g`, read as COMPRESSION against the median
+//!   world's (a placeholder until pressure has a unit).
 //! - A medium carries a pattern where `x = cohesion · (1 + compression) /
 //!   agitation`, and its copy error is `e^(−x)`: held as halvings, `x/ln 2`,
 //!   read by the lower bound `1/ln 2 ≥ 1442/1000` (toward fewer minds). A
@@ -34,7 +41,15 @@ pub struct World {
     pub heat: Ratio,
     pub size: Ratio,
     pub gravity: Ratio,
+    /// The core's share of the world's mass, κ.
+    pub core: Ratio,
+    /// The hold on a gas of mass 2: `g · (1 + κ) / T`.
+    pub hold: Ratio,
+    /// The atmosphere kept (filled by `worlds`, after calibration).
+    pub atmosphere: Ratio,
     pub pressure: Ratio,
+    /// The world's gases: (mass number, grains).
+    pub gases: Vec<(u32, Ratio)>,
     /// x before compression, per medium, if the world holds it.
     pub chemical: Option<Ratio>,
     pub geologic: Option<Ratio>,
@@ -66,8 +81,10 @@ pub fn read(path: Vec<u32>, matter: &Manifest, period: &Ratio, coupling: &Ratio)
     let gravity = mass(matter) / size.clone();
     let plasma = |a: &Atom| grip(a) < heat;
     let volatile = |a: &Atom| !plasma(a) && a.unpaired <= 1;
-    let atmosphere: Manifest = matter.iter().filter(|(k, _)| z_of(k).and_then(atom).is_some_and(|a| volatile(&a) || plasma(&a))).map(|(k, g)| (k.clone(), g.clone())).collect();
-    let pressure = mass(&atmosphere) * gravity.clone();
+    let gases: Vec<(u32, Ratio)> = atoms.iter().filter(|(a, _)| volatile(a) || plasma(a)).map(|(a, g)| (cfe::almanac::atom::mass_number(a.z), g.clone())).collect();
+    let core_matter: Manifest = matter.iter().filter(|(k, _)| z_of(k).and_then(atom).is_some_and(|a| !plasma(&a) && a.unpaired >= 2)).map(|(k, g)| (k.clone(), g.clone())).collect();
+    let core = mass(&core_matter) / mass(matter);
+    let hold = gravity.clone() * (ratio(1, 1) + core.clone()) / heat.clone();
     // CHEMICAL: the most abundant closing pair whose weaker grip holds.
     let bonders: Vec<&(Atom, Ratio)> = atoms.iter().filter(|(a, _)| !plasma(a) && a.unpaired > 0).collect();
     let mut chemical: Option<(Ratio, Ratio)> = None;
@@ -98,7 +115,23 @@ pub fn read(path: Vec<u32>, matter: &Manifest, period: &Ratio, coupling: &Ratio)
         if all.is_zero() { ratio(0, 1) } else { mass(&ionised) / all }
     };
     let plasmic = informational.clone().filter(|_| plasma_share > ratio(0, 1)).map(|x| x * plasma_share);
-    Some(World { path, heat, size, gravity, pressure, chemical: chemical.map(|(_, x)| x), geologic, plasmic, informational })
+    Some(World { path, heat, size, gravity, core, hold, atmosphere: ratio(0, 1), pressure: ratio(0, 1), gases, chemical: chemical.map(|(_, x)| x), geologic, plasmic, informational })
+}
+
+/// `e^(−λ)` bounded above by whole halvings, `2^(−⌊λ · 1442/1000⌋)` (so the
+/// kept share errs toward a thinner atmosphere).
+fn lost(lambda: &Ratio) -> Ratio {
+    let n: u32 = (lambda.clone() * ratio(1442, 1000)).floor().to_integer().try_into().unwrap_or(u32::MAX).min(64);
+    Ratio::new(num_bigint::BigInt::from(1), num_bigint::BigInt::from(2u8).pow(n))
+}
+
+/// The atmosphere a world keeps, its hold calibrated by `k` (the median
+/// world's hold: there a gas of mass 2 has λ = 1).
+pub fn atmosphere(w: &World, hold_ref: &Ratio) -> Ratio {
+    w.gases.iter().fold(ratio(0, 1), |s, (a, g)| {
+        let lambda = ratio(i64::from(*a), 2) * w.hold.clone() / hold_ref.clone();
+        s + g.clone() * ratio(i64::from(*a), 1) * (ratio(1, 1) - lost(&lambda))
+    })
 }
 
 /// Halvings of a medium's copy error at compression c: `x · (1 + c) · 1442/1000`.
@@ -122,6 +155,15 @@ pub fn worlds(u: &Universe) -> Vec<World> {
             }
         }
     }
+    // Calibrate the escape scale on the median world's hold, then keep each
+    // world's atmosphere and its pressure.
+    let mut holds: Vec<Ratio> = out.iter().map(|w| w.hold.clone()).collect();
+    holds.sort();
+    let hold_ref = holds.get(holds.len() / 2).cloned().filter(|h| !h.is_zero()).unwrap_or_else(|| ratio(1, 1));
+    for w in out.iter_mut() {
+        w.atmosphere = atmosphere(w, &hold_ref);
+        w.pressure = w.atmosphere.clone() * w.gravity.clone();
+    }
     out
 }
 
@@ -138,6 +180,10 @@ mod tests {
         assert!(w.chemical.is_some(), "1 + 4 close and hold at 1,000 K");
         assert!(w.geologic.is_some());
         assert_eq!(w.informational, Some(ratio(59, 1)));
-        assert!(w.pressure > ratio(0, 1), "hydrogen is volatile");
+        assert_eq!(w.gases, vec![(2, ratio(10, 1))], "hydrogen is the volatile");
+        assert!(w.core > ratio(0, 1), "Z = 4 forms the core");
+        // At its own hold as the reference, hydrogen has λ = 1: one halving
+        // lost is the bound, so half is kept.
+        assert_eq!(atmosphere(&w, &w.hold), ratio(10, 1));
     }
 }

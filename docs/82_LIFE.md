@@ -79,9 +79,31 @@ carry life, and a world may carry several forms at once.
      closes in a pair, so both stand as gas; an atom of two or more bonds
      builds a network, solid or liquid; any atom whose own grip the heat
      beats (`τ · 157,800 K < T`) is plasma;
-   - **pressure:** the atmosphere's mass under the gravity,
-     `P = m_atm · M_p / R_p`, linear and exact; read as COMPRESSION against
-     one declared reference (a placeholder until pressure has a unit).
+   - **core:** its network formers (two or more bonds) sink; their share of
+     its mass, `κ`, is the core's SHIELD, the field that guards its air from
+     its star;
+   - **atmosphere kept: Jeans escape,** linear in every term (the escape
+     parameter `G·M·m / (R·k·T)` has no square): of each gas the world holds
+     (its volatile atoms and its plasma), it keeps `1 − e^(−λ)` with
+
+         λ_Z = A_Z · g · (1 + κ) / (k · T)
+
+     the star in T, the world in g, the core in κ, the gas in A_Z = 2Z.
+     Held as halvings, erring toward a thinner atmosphere. `k` is one
+     anchor, calibrated on the median world: a hydrogen-weight gas (A = 2)
+     there has λ = 1;
+   - **pressure:** the atmosphere kept under the gravity,
+     `P = m_atm · g`, linear and exact; read as COMPRESSION against the
+     median world's (a placeholder until pressure has a unit).
+   - **Reading** (built, `conductor::life`, the stand-in universe): 761 of
+     5,703 worlds airless (no gas among their atoms); light gases (A ≤ 4)
+     on 765; the cores hold a median 91% of a world's mass. Every world
+     with gas keeps nearly all of it: the stand-in's gases are mostly heavy,
+     and its gravity barely varies (3.19 to 5.33): with sizes packed
+     linearly, `g = M/R` depends on a world's COMPOSITION, not its mass, so
+     a large world and a small one of the same matter hold their air alike.
+     That is the linear homology at the planet tier; whether a world's size
+     should pack linearly is open for the operator.
    A medium holds a pattern when its cohesion and its compression together
    beat its agitation: `x = cohesion · (1 + compression) / agitation`. An
    airless world has only its media's own cohesion; a deep atmosphere
