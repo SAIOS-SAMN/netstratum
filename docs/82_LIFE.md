@@ -38,9 +38,10 @@ carry life, and a world may carry several forms at once.
 1. **Temperature.** A world's heat is its star's agitation at its radius,
    the same enclosure law that turns it: `T = K · M(<r) / r`. It is linear
    (flux through a fluid-dimension shell, design law 2), so a world's heat
-   and its turning come from one source. `K` is the orb tier's one anchor,
-   declared from one measured world: Earth, 1 AU about one Sun, about 255 K
-   in equilibrium. Before this can spread worlds across climates, the orbs'
+   and its turning come from one source. Since a world turns once in
+   `P = r / M(<r)` bells, `T = K / P`. `K` is the orb tier's one anchor:
+   the innermost world of a star (one tier unit, 60 bells) at 1,000 K, so
+   `K = 60,000 K·bells` (the Earth anchor needs units the orb tier lacks). Before this can spread worlds across climates, the orbs'
    SPACING must be physical: neighbours stand ten reaches apart, not with
    reaches just touching (xylarium: Gyr-stable systems sit 7 to 10 mutual
    reaches apart, below about 3.5 they are unstable on short times; touching
@@ -64,7 +65,28 @@ carry life, and a world may carry several forms at once.
      the phase between planet and star.
    A world with no chemistry is not lifeless: a plasma world, a world of
    bare rock, may carry life in another medium.
-4. **Fidelity, per medium: Boltzmann, held as halvings** (xylarium's review:
+4. **Pressure: the coupling compressed** (operator, 2026-10-14: life is the
+   compression of the quantum state as gravity pressurises it through the
+   atmosphere; pressure is a physics component of its own). From what the
+   world holds, with no table:
+   - **size:** its radius is its nuclei's atomic sizes summed (each atom's
+     outer orbit, `r = Q_out · P_out`, the atom law), packed linearly: heavy
+     worlds compact, light ones puffy;
+   - **gravity:** the turning law at its surface, `g = M_p / R_p` (mass by
+     the nucleus law, `A = 2Z`), varying by composition;
+   - **atmosphere:** its VOLATILE atoms, read from the atom law's structure:
+     a closed atom (none unpaired) holds to nothing, and a single-bond atom
+     closes in a pair, so both stand as gas; an atom of two or more bonds
+     builds a network, solid or liquid; any atom whose own grip the heat
+     beats (`τ · 157,800 K < T`) is plasma;
+   - **pressure:** the atmosphere's mass under the gravity,
+     `P = m_atm · M_p / R_p`, linear and exact; read as COMPRESSION against
+     one declared reference (a placeholder until pressure has a unit).
+   A medium holds a pattern when its cohesion and its compression together
+   beat its agitation: `x = cohesion · (1 + compression) / agitation`. An
+   airless world has only its media's own cohesion; a deep atmosphere
+   compresses every medium alike, whatever its form.
+5. **Fidelity, per medium: Boltzmann, held as halvings** (xylarium's review:
    a linear ratio never falls below about 1e-3, and minds would almost never
    wake). A copy fails where the medium's agitation beats its carrier's
    cohesion, `ε = e^(−x)`, x the cohesion over the agitation in that
@@ -77,12 +99,12 @@ carry life, and a world may carry several forms at once.
    and above by rational bounds of `1/ln 2`, and the ceiling read from the
    bound that errs toward fewer minds. (A chemical example: water at 300 K
    gives about 1e-4.)
-5. **The ceiling.** A lineage holds `b / ε` bits; each rung of error
+6. **The ceiling.** A lineage holds `b / ε` bits; each rung of error
    correction multiplies what it holds by `1 / ε`. A MIND needs the rung that
    holds a mind's blueprint, `B` bits (an anchor, of order a genome). The
    rungs a world needs are the least s with `b / ε^(s+1) ≥ B`: a count, by
    repeated multiplication, read from the medium.
-6. **The climb.** Each rung is climbed by selection writing at most one bit
+7. **The climb.** Each rung is climbed by selection writing at most one bit
    a generation, and fewer in a small population (`N · ε · L` mutations a
    generation). A generation is the medium's own pivot, on the world's
    proper clock (xylarium's review: copying is the medium's, not the
@@ -96,7 +118,7 @@ carry life, and a world may carry several forms at once.
    - **Decay:** stored information breaks while it waits to be copied. Hot
      media copy fast and forget fast; cold media keep. Without it, hot
      worlds win too easily.
-7. **The window and erasure.** A world can climb while its star holds,
+8. **The window and erasure.** A world can climb while its star holds,
    until the star dissolves (docs/78, the breath sheds it).
    - **An impact sends a lineage back to the START of its rung, and that
      rung's need is kept, not redrawn** (xylarium: a fresh draw forgets
@@ -105,9 +127,9 @@ carry life, and a world may carry several forms at once.
    - **Sterilisation:** a dying star's collapse sterilises open surfaces,
      more often where dying stars crowd; seas under ice or deep are
      shielded.
-8. **Transfer.** Life (never a mind) may carry between neighbouring worlds of
+9. **Transfer.** Life (never a mind) may carry between neighbouring worlds of
    one system, never between stars.
-9. **A mind wakes,** in any medium, where the ladder is climbed within the window and the
+10. **A mind wakes,** in any medium, where the ladder is climbed within the window and the
    world can feed a viable people (its biomass, an anchor of order Franklin's
    500 individuals). It is an EVENT, written to the annals at the bell it
    happens: a perpendicular write up, from the world to its galaxy. The run
@@ -149,7 +171,6 @@ radius.
 
 | anchor | value | stands for |
 |---|---|---|
-| `K`, the orb tier's heat | Earth: 1 AU, 1 Sun, ~255 K | a radiation law not yet stated |
 | spacing between worlds | ~10 reaches | orbital stability (dynamics not yet stated) |
 | `B`, a mind's blueprint | of order a genome (~6e9 bits) | what a mind must hold |
 | `b`, a bare lineage | of order a first replicator | the ladder's foot |
@@ -158,6 +179,8 @@ radius.
 | `1/ln 2` | certified rational bounds | the halvings of Boltzmann |
 | impacts, sterilisations | rates per local year | a dynamics not yet stated |
 | a viable people | of order 500 | Franklin's minimum |
+| the reference pressure | declared (Earth's surface, 1 bar, stands for it) | a unit of pressure not yet stated |
+| `K`, read as heat per turning | the innermost world of a star (one tier unit, 60 bells) at 1,000 K | a radiation law not yet stated (replaces the Earth anchor, whose units the orb tier lacks) |
 
 ## Done-when (the live log, before → after)
 
