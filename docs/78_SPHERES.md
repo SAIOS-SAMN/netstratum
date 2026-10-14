@@ -281,9 +281,8 @@ event deploys them all, and everything after is a closed form of t from it
     byte layout with the build.
   - **So the grain is netstratum's internal unit,** converted through the Z
     map (below) in and out.
-- **The atom's further readings:** a bond's preference (the partners'
-  tightness), workability from tightness, the heavy nuclei's neutron
-  excess, and era 1's economy reading compounds from atoms in place of the
+- **The atom's further readings:** the bond preference and workability laws
+  above, built and read; the heavy nuclei's neutron excess; and era 1's economy reading compounds from atoms in place of the
   almanac's fixed cells.
 - **Roundness** (xylarium's statement, adopted when its angles are
   declared): a body is round when `M / r ≥ θ_rigid(material)` in the planet
@@ -378,10 +377,21 @@ the lowest tier of the one law (design law 4), a small system that turns.
   the others, at least one bond fewer than atoms. Exact, no search.
   - Reading among the 25 open atoms of Z 1 to 30: 95 two-atom and 1,222
     three-atom compounds close.
-  - The law so far reads only the unpaired count, so atoms of one count are
-    interchangeable in bonding. What should make a bond prefer a partner
-    (their tightness against each other) and where a compound is workable
-    are the next readings.
+  - **A bond's preference** (xylarium's proposal, 2026-10-14, adopted to
+    build): read from the partners' tightnesses τ as a RATIO, never a
+    squared difference. The shared share `s = τ_min / τ_max` (1 shared, near
+    0 transferred, the rest `1 − s` going to the tighter atom); the bond's
+    grip is `τ_min`, the weaker hold. A bond prefers the partner that gives
+    its closed set the most total grip (the sum of `τ_min` over its bonds),
+    ties to the larger s. An ordering like electronegativity should emerge
+    from τ rising across a depth.
+  - **Workability** (the thermal ruler; its form shared with xylarium, its
+    value per universe): temperature is a turning rate of agitation,
+    `T = k_T · ω`. `k_T` is fixed by one atom: Z = 1's outer tightness
+    against hydrogen's binding, 13.6 eV ≈ 157,800 K, a cited placeholder
+    (design law 1), the anchor xylarium will share. A compound is workable
+    while its weakest grip `τ_min` holds against `T / k_T`, read as a smooth
+    share, not a cutoff.
 - **The stand-in through the boundary** (the `pulse` binary): era 0's 860
   kinds, each mapped to the Z whose atom reads its line and binding, cross
   as nuclei per Z (13 Zs) and enter as grains, nuclei in equal to nuclei
