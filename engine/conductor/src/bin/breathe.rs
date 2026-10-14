@@ -21,14 +21,16 @@ fn main() {
     let returned = events.iter().fold(cfe::ratio::ratio(0, 1), |s, e| s + e.returned.clone());
     println!("BREATH — {} bells, T_u {t_u}: {} echoes (perpendicular writes down); recohered {births} systems born, decohered {} returned and {dissolved} stars dissolved (writes up)", until, events.len(), returned.round());
     for (i, c) in u.cores.iter().enumerate() {
-        let rungs = events.iter().filter(|e| e.galaxy == c.path[0]).count();
+        let echoes = events.iter().filter(|e| e.galaxy == c.path[0]).count();
         let born = c.satellites.len();
         let orbs: usize = c.satellites.iter().map(|s| s.satellites.len()).sum();
         let g_rate = breath::galaxy_rate(&u, i, &unit);
-        let aeon = g_rate.clone() * cfe::ratio::ratio((rungs as u64 * t_u) as i64, 1);
+        let aeon = g_rate.clone() * cfe::ratio::ratio(until as i64, 1);
+        let rungs = breath::rungs(&breath::slip(&g_rate, until, t_u));
+        let coh = breath::coherence(&breath::slip(&g_rate, until, t_u));
         let year = motion::galactic_year(c).map(|(k, t)| format!("half-mass system {}, year {} bells", k + 1, t.period.round())).unwrap_or_else(|| "no year yet".into());
         let medium = pulse::mass(&c.medium) / unit.clone();
-        println!("  galaxy {:?} at {} bells out: {rungs} rungs, aeon {} bells of proper time (rate {}); {born} systems, {orbs} orbs; medium left {}; {year}", c.path, c.radius, aeon.round(), g_rate, medium.round());
+        println!("  galaxy {:?} at {} bells out: {echoes} echoes, {rungs} rungs (recoherences), coherence now {}%, aeon {} bells (rate {}); {born} systems, {orbs} orbs; medium left {}; {year}", c.path, c.radius, (coh * cfe::ratio::ratio(100, 1)).round(), aeon.round(), g_rate, medium.round());
     }
     println!("CONSERVATION — the breath created nothing: {}", u.total() == before);
 }

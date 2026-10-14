@@ -395,24 +395,36 @@ Operator, 2026-10-14. Built: `conductor::breath`, the `breathe` binary.
   systems born (416 loops closed) and about 6,000 orbs; the breath creates
   nothing (conservation exact). Each galaxy's rungs and aeon differ by its
   distance and its depth in the universal well (rates from 1 to about 1/4).
-- **Elastic: decohere and recohere** (operator, 2026-10-14: consumption
-  alone is pure entropy, with no syntropic regeneration or rejuvenation).
-  On each echo every star returns to its galaxy's medium `ε · rate` of what
-  it holds: ε the star tier's medium share (1/100, a placeholder until
-  stellar lifetimes are physics), rate its nested clock against the
-  universal pulse. A star spent below a grain dissolves and all it held
-  returns. Echoes recohere the medium into new systems, and every period
-  re-reads the law after each echo. Births run on the universal echo,
-  returns on each layer's own proper time, so a galaxy's dilation sets its
-  own balance of birth and return.
-- **Reading** (`breathe var-e1 36000 60`): 7,437 echoes; 549 systems
-  recohered; 13,592 (deepest-hole units) decohered back to the media;
-  conservation exact. The galaxies now differ in SHAPE by their own
-  physics, no dial: 39 to 60 systems each, galactic years from 1.7e11 to
-  2.2e17 bells. The galaxy with no cores nearer the universal core (clock
-  rate 1, the fastest) breathed most: 60 systems against about 40 for the
-  rest. (Cost: about 27 ms an echo, 3.4 minutes for 36,000 bells; the
-  era-1 conductor will need it read as a closed form between events.)
+- **Elastic: decohere and recohere, by the quantum phase** (operator,
+  2026-10-14: consumption alone is pure entropy, with no syntropic
+  regeneration; then, the first build, which shed matter by clock rate,
+  needed physics alignment). Decoherence is a PHASE relation (docs/79,
+  docs/81), and matter follows it:
+  - **Slip.** A layer's phase runs at its proper rate, so a dilated layer
+    slips behind the universal echo, `Δ = (1 − rate) · t / T_u` turns.
+  - **Coherence** is how near Δ stands to a whole turn,
+    `c = 1 − 2·|Δ − round Δ|`: 1 in phase, 0 opposed. Linear and exact; it
+    equals docs/79's `(1 + cos)/2` at 0, ½ and 1 turn.
+  - **Recoherence** is a slip completing a whole turn; each is a RUNG,
+    `⌊Δ⌋`. Deeper wells slip faster and climb more rungs; an undilated
+    layer climbs none.
+  - **Entropy:** a star sheds `ε · (1 − c)` of what it holds to its
+    galaxy's medium, the more the further out of phase (ε the star tier's
+    medium share, a placeholder). A star spent below a grain dissolves.
+  - **Syntropy:** an echo compresses only the coherent part of a galaxy's
+    medium, `c_g · medium`; a system is born where that part holds a clump
+    of its own reach. Periods re-read the law after each echo.
+- **Reading** (`breathe var-e1 36000 60`): 7,437 echoes; 578 systems
+  recohered; 12,944 (deepest-hole units) decohered back; conservation
+  exact. The galaxies differ by their own physics:
+  - the twelve dilated galaxies climbed 369 to 439 rungs, their coherence
+    now anywhere from 2% to 91%, and grew 45 to 46 systems, galactic years
+    8.7e12 to 1.8e13 bells;
+  - the one undilated galaxy (no cores nearer the universal core, rate 1)
+    climbed no rungs, stays fully coherent, sheds little, and stopped at 32
+    systems (year 1.49e9 bells): without slip there is no breath back.
+  - Cost: about 31 ms an echo (3.9 minutes for 36,000 bells); the era-1
+    conductor needs this as a closed form between events.
 
 ## The atom: matter at the boundary (the lowest tier)
 

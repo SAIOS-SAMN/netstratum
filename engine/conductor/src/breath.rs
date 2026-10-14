@@ -13,14 +13,18 @@
 //!   runs at `r / (r + M(<r))` of the layer above: linear, exact, the
 //!   weak-field dilation `1 − GM/rc²` to first order. Nested wells multiply.
 //!   Each echo a layer receives is one RUNG; its proper time is its AEON.
-//! - **Elastic: decohere and recohere** (operator: consumption alone is pure
-//!   entropy, with no syntropic regeneration). On each echo every star
-//!   returns to its galaxy's medium a share of what it holds, scaled by its
-//!   own clock against the universal pulse: `ε · rate`, ε the star tier's
-//!   medium share (a placeholder until stellar lifetimes are physics), rate
-//!   its nested dilation. A star spent below a grain dissolves, all it held
-//!   returning. Echoes recohere the medium into new systems. Periods re-read
-//!   the law after each echo, `P = r / M(<r)`.
+//! - **Decohere and recohere, by the phase** (operator: consumption alone is
+//!   pure entropy; aligned to the quantum phase, docs/79 and docs/81). A
+//!   layer's phase runs at its proper rate, so a dilated layer SLIPS behind
+//!   the universal echo, `Δ = (1 − rate) · t / T_u` turns. Its COHERENCE is
+//!   how near Δ stands to a whole turn, `c = 1 − 2·|Δ − round Δ|` (1 in
+//!   phase, 0 opposed; linear, exact, docs/79's `(1 + cos)/2` at 0, ½, 1).
+//!   Each completed slip is a RECOHERENCE, a rung: `⌊Δ⌋`. Matter follows
+//!   the phase: a star sheds `ε · (1 − c)` of what it holds to the medium
+//!   (entropy; ε the star tier's medium share, a placeholder), and an echo
+//!   compresses only the coherent part of a galaxy's medium, `c_g · medium`
+//!   (syntropy). A star spent below a grain dissolves. Periods re-read the
+//!   law after each echo, `P = r / M(<r)`.
 //! - **Time writes.** A write within a layer, on its own clock, is PARALLEL;
 //!   a write across layers is PERPENDICULAR: an echo coming down, a birth
 //!   changing the mass above. A perpendicular write down answered by one up
@@ -48,6 +52,24 @@ pub fn galaxy_rate(u: &Universe, i: usize, unit: &Ratio) -> Ratio {
     let d = &u.cores[i].radius;
     let nearer = u.cores.iter().filter(|c| c.radius < *d).fold(ratio(0, 1), |s, c| s + mass(&c.total()) / unit.clone());
     rate(d, &nearer)
+}
+
+/// A layer's slip behind the universal echo at bell `b`, in turns:
+/// `(1 − rate) · b / T_u`.
+pub fn slip(rate_: &Ratio, b: u64, t_u: u64) -> Ratio {
+    (ratio(1, 1) - rate_.clone()) * ratio(b as i64, t_u as i64)
+}
+
+/// Coherence: `1 − 2·|Δ − round Δ|`, 1 in phase, 0 opposed.
+pub fn coherence(delta: &Ratio) -> Ratio {
+    let frac = delta.clone() - delta.floor();
+    let off = if frac > ratio(1, 2) { ratio(1, 1) - frac } else { frac };
+    ratio(1, 1) - ratio(2, 1) * off
+}
+
+/// Rungs climbed: completed slips, `⌊Δ⌋`.
+pub fn rungs(delta: &Ratio) -> u64 {
+    delta.floor().to_integer().try_into().unwrap_or(0)
 }
 
 /// What a write crossed.
@@ -100,18 +122,19 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, until: u64) -> Vec<E
     let mut events = Vec::new();
     let epsilon = tier(1).medium;
     for (bell, i, rung) in arrivals {
-        // DECOHERE: each star returns `ε · rate` of what it holds, rate its
-        // nested clock (the galaxy's about the universal core, times its own
-        // about the galaxy).
+        // DECOHERE: each star sheds `ε · (1 − c)` of what it holds, c its
+        // coherence with the echo at this bell (its nested clock's slip).
         let g_rate = galaxy_rate(u, i, &unit);
+        let g_coherence = coherence(&slip(&g_rate, bell, t_u));
         let core = &mut u.cores[i];
         let mut returned = ratio(0, 1);
         let mut dissolved = 0;
         let mut enclosed_in = mass(&core.kept) / unit.clone();
         let mut keep: Vec<Body> = Vec::new();
         for mut sys in std::mem::take(&mut core.satellites) {
-            let own = rate(&sys.radius, &enclosed_in);
-            let back = take(&sys.kept, &(epsilon.clone() * g_rate.clone() * own));
+            let own = g_rate.clone() * rate(&sys.radius, &enclosed_in);
+            let out_of_phase = ratio(1, 1) - coherence(&slip(&own, bell, t_u));
+            let back = take(&sys.kept, &(epsilon.clone() * out_of_phase));
             less(&mut sys.kept, &back);
             returned += mass(&back) / unit.clone();
             for (k, a) in back {
@@ -133,14 +156,15 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, until: u64) -> Vec<E
         core.satellites = keep;
         let enclosed = core.satellites.iter().fold(mass(&core.kept), |acc, sys| acc + mass(&sys.total())) / unit.clone();
         let want = mu.clone() * enclosed.clone();
-        let left = mass(&core.medium) / unit.clone();
+        // RECOHERE: the echo compresses only the coherent part of the medium.
+        let left = mass(&core.medium) / unit.clone() * g_coherence.clone();
         let r = match core.satellites.last() {
             None => enclosed.clone() * ratio(60 * 60, 1),
             Some(last) => last.radius.clone() * step.clone(),
         };
         let mut born = None;
         if !enclosed.is_zero() && !left.is_zero() && want <= left {
-            let clump = take(&core.medium, &(want / left));
+            let clump = take(&core.medium, &(want / (mass(&core.medium) / unit.clone())));
             if !mass(&clump).is_zero() {
                 less(&mut core.medium, &clump);
                 let k = core.satellites.last().map(|l| l.path[1] + 1).unwrap_or(1);
@@ -177,5 +201,10 @@ mod tests {
         assert!(events.iter().any(|e| e.born.is_some()), "echoes give birth");
         assert_eq!(u.total(), manifest, "the medium is consumed, nothing created");
         assert_eq!(rate(&ratio(3, 1), &ratio(1, 1)), ratio(3, 4));
+        // A clock at 3/4 slips a quarter turn each echo: opposed at two
+        // echoes, recohered (one rung) at four.
+        let r = ratio(3, 4);
+        assert_eq!(coherence(&slip(&r, 120, 60)), ratio(0, 1));
+        assert_eq!((coherence(&slip(&r, 240, 60)), rungs(&slip(&r, 240, 60))), (ratio(1, 1), 1));
     }
 }
