@@ -239,14 +239,12 @@ event deploys them all, and everything after is a closed form of t from it
     universe's own. Each kernel converts with its own nucleon mass. Motion
     never crosses a tube; only manifests and mouths do. Mycelium sends the
     byte layout with the build.
-  - **So the grain is netstratum's internal unit:** a crossing manifest is
-    converted through the Z map below into grains (nuclei × nucleon mass per
-    grain, floored, the remainder kept as the medium's), and out again.
-  - **Netstratum's Z map** (owed): our matter is not the real periodic table
-    (the almanac's hash-derived elements on their own axes: line, ten lanes,
-    shell, phase, spin; 855 kinds in era 0, beside the bulk resources), so a
-    declared map between Z and our elements is needed before a manifest can
-    cross either way.
+  - **So the grain is netstratum's internal unit,** converted through the Z
+    map (below) in and out.
+- **The Z map's tables** (to build, each value cited: period, group and
+  block from the IUPAC table; metal or nonmetal; the commonest oxidation
+  state; melting point; standard atomic weight, CIAAW). The lane of the
+  noble gases is a known misfit (below).
 - **Roundness** (xylarium's statement, adopted when its angles are
   declared): a body is round when `M / r ≥ θ_rigid(material)` in the planet
   tier's units; linear, no square. Below it, rubble: matter in a field, the
@@ -263,6 +261,57 @@ event deploys them all, and everything after is a closed form of t from it
 - **The clock's rate law** (docs/80): slower deeper in a well, stated in
   enclosed mass and radius with no square and no root (the flat-space
   `√(1 − 2GM/rc²)` is not used).
+
+## The Z map: matter at the boundary
+
+Mycelium's manifest counts nuclei per Z; netstratum's almanac places matter
+on its own five axes (`cfe::almanac::periodic`: line, lane, shell, phase,
+spin, read from an element id's bytes 3 to 7). The map joins them, declared
+and exact.
+
+- **Era 1's elements are one per Z.** All of era 1's matter arrives by
+  manifest, so every element in it is the CANONICAL element of some Z. Era
+  0's 855 hash-drawn kinds stay era 0's. The map is a bijection, and a
+  manifest converts out exactly as it came in.
+- **The canonical id of Z** is `blake3` derived from ("netstratum element
+  Z v1", Z), with bytes 3 to 7 set to its cell (below). The cell is read
+  back by `periodic_of` unchanged, so the matter law and its digest stay as
+  they are. Bytes 1 and 2 (`dop::element_properties`) stay the hash's.
+- **The cell, from real chemistry:**
+  - **line = period** (1 to 7). The law already has seven lines.
+  - **lane from the commonest valence v** (capped at 5) on the law's fold:
+    a DONOR (a metal, and hydrogen) takes the rising half, lane v; an
+    ACCEPTOR (a nonmetal) takes the falling half, lane 11 − v. The fold's
+    two halves are the giving and the taking of bonds.
+  - **shell from the block:** s 1, p 2, d 3, f 4, so arity (1 + shell) runs
+    2 to 5 as the orbitals widen.
+  - **phase from the melting point,** on the law's own thermal bands:
+    below 250 K, 1 (cryogenic); 250 to 600 K, 2 (mesic); 600 K to 2273 K,
+    3 (hyperthermal); above 2273 K (2000 °C, the refractory metals'
+    definition), 4 (refractory, workable anywhere).
+  - **spin = Z mod 2,** the even/odd-Z distinction of nuclear abundance
+    (Oddo–Harkins). The law's handedness is not an ordering, nor is parity.
+- **A grain counts nuclei.** One grain (1/1024 of an amount) of Z is 60^30
+  nuclei of Z, a power of sixty. A manifest's count enters as
+  `⌊count / 60^30⌋` grains, and the remainder (fewer than one grain's
+  nuclei) stays as an integer in the universe's unformed ledger, per Z. It
+  leaves as `grains × 60^30` nuclei, an integer. Exact both ways.
+- **Mass for the turning law** weights each grain by its mass number A (the
+  standard atomic weight, rounded; for elements with none, the mass number
+  of the longest-lived isotope): `M = Σ grains × A`. The isotopes are ours,
+  as mycelium ruled.
+- **Bulk resources** are compositions of canonical elements, by atom count:
+  iron and scrap Fe; diamond C; crystal SiO2 (Si 1/3, O 2/3); biomass CH2O
+  (C 1/4, H 1/2, O 1/4); alloy steel (Fe 99/100, C 1/100). A share's floor
+  remainder stays with the first component.
+- **The stand-in** (era 0's matter) maps each era-0 kind to the canonical
+  element of the same cell, else the same line and lane, else the same
+  line, taking the lowest Z when several match. It is internal and never
+  crosses, so it needs no nuclei.
+- **The known misfit: the noble gases.** The law has no inert lane (every
+  lane binds at least once). Until it gains one, which would change the
+  matter law and its digest, the noble gases take lane 10 (binds 1), the
+  weakest acceptors.
 
 ## Every flat site in netstratum (inventory, 2026-10-13)
 
