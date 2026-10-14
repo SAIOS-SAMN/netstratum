@@ -244,6 +244,18 @@ event deploys them all, and everything after is a closed form of t from it
     galaxy. Real systems are each a small part of a galaxy. A physical law
     for satellite masses (fragmentation, a feeding zone) is owed; until
     then the galactic years read the share law, not the physics.
+  - **The law proposed** (xylarium, 2026-10-14; awaiting the operator,
+    because it brings a root and squares under design law 2). Our reach
+    `r_d = r·m/M` compares turnings; the TIDAL reach compares a body's own
+    turning with the change of its anchor's turning across it, by the same
+    law: `m/ρ = M·(1/(r−ρ) − 1/(r+ρ))`, so `ρ = r·√(m/(2M+m))`. With it the
+    feeding zone closes (`m = λ·2ρ`, λ the formed matter per unit radius):
+    `m = 2·λ²·r²/M` for `m ≪ M`, one root, no draw. Walking inside out, each
+    satellite takes its zone's mass and stands at the next reach boundary
+    until the formed matter is spent; the count and the masses emerge from
+    the profile λ(r). Its squares come from the difference of `1/r`, a
+    consequence of the turning law, not a flat norm; but the reach itself
+    is irrational, so places would need its square held exactly.
   Each galaxy closes its own year at its own pace. The universal 60-beat
   close (`scribe::journal::YEAR_TICKS`, a placeholder) retires, and the
   core's yearly re-emission (`core_bounce`) becomes the core's echo of the
@@ -276,7 +288,10 @@ event deploys them all, and everything after is a closed form of t from it
 - era 0's lines: none carried. Era 1 is a new domain (ruling 1); its
   civilizations arise anew from its physics, as xylarium's do, and the seat
   minds wait unseated until the new domain has a living ancient. Era 0's 101
-  lines stay in its record.
+  lines stay in its record. Confirmed by xylarium's practice (2026-10-14):
+  no exceptions; ancients arise from the new universe's own history, fallen
+  peoples persist only as archaeology in their own universe, and seat minds
+  are not inhabitants (they attach to the new domain's ancients).
 
 **Open:**
 - **The founding manifest.** Until mycelium's endowments and grants stand,
