@@ -164,6 +164,30 @@ carry life, and a world may carry several forms at once.
    is the draw: each world climbs once, by its own seed (xylarium estimates
    by independent replays; we need no estimate, we live the one history).
 
+## Step 2, built (2026-10-14): the climb and the wakings
+
+- **A contact, not a grip.** A copy fails on a contact far weaker than a
+  bond's grip: cohesion `τ · 2,760 K` (anchored on water's copy error, about
+  1e-4 at 300 K, xylarium's life.rs); a lattice holds by as many contacts as
+  its former bonds.
+- **The rungs are written at the coupling's recoherences:** a medium of h
+  halvings writes h doublings a rung, so a mind needs `⌈26 / h⌉` rungs (26
+  doublings from a first replicator, ~100 bits, to a genome, ~6e9); DECAY
+  makes it `⌈rungs / (1 − 1/x)⌉` recoherences; under a halving, nothing.
+- **A mind wakes** at the universal bell of that recoherence (the world's
+  slip per echo, after its galaxy's delay).
+- **Reading** (`life var-e1`): minds could wake (chemical) on 37 worlds by
+  bell 10,000, 2,353 by 100,000, 5,291 by 1,000,000; geologic 88, 5,412,
+  5,716; plasmic 31, 67, 67; the first at bell 7,560 in the galaxy nearest
+  the universal core. Informational is read, not climbed: its coherence is
+  whole at every recoherence (open).
+- **Too many.** Nearly every world wakes a mind eventually; xylarium's
+  universe has about 2% (45 peoples on 2,110 worlds). What makes minds rare
+  is not built yet: ERASURE (impacts resetting a rung, its need kept;
+  sterilisation), the WINDOW (the star dissolving first) and a VIABLE
+  PEOPLE (Franklin's ~500 fed by the world's medium). They come before any
+  waking is seated as a line.
+
 ## A people is read from its world
 
 - **Its medium** defines it: chemical (the compound it lives in), geologic

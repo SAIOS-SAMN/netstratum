@@ -36,8 +36,17 @@ use num_traits::Zero;
 
 /// The heat anchor: K·bells.
 pub const K: i64 = 60_000;
-/// The hydrogen anchor: an atom of tightness 1 holds to 157,800 K.
+/// The hydrogen anchor: an atom of tightness 1 holds to 157,800 K (its
+/// grip: what a bond holds against heat, for phase and plasma).
 pub const HYDROGEN_K: i64 = 157_800;
+/// A CONTACT, what a copy fails on (docs/82 step 2): far weaker than a
+/// bond's grip. Anchored on water's copy error, about 1e-4 at 300 K
+/// (xylarium's life.rs): a contact of tightness 1 holds about 2,760 K.
+pub const CONTACT_K: i64 = 2_760;
+/// The doublings from a bare lineage to a mind's blueprint, `log2(B / b)`:
+/// B of order a genome (6e9 bits), b of order a first replicator (100
+/// bits), so 26 (anchors).
+pub const BLUEPRINT_DOUBLINGS: i64 = 26;
 
 /// What a world offers.
 #[derive(Debug, Clone)]
@@ -60,6 +69,10 @@ pub struct World {
     pub geologic: Option<Ratio>,
     pub plasmic: Option<Ratio>,
     pub informational: Option<Ratio>,
+    /// The planet's clock against its star's (the coupling), and its
+    /// galaxy's echo delay in bells.
+    pub coupling: Ratio,
+    pub delay: u64,
 }
 
 fn z_of(key: &str) -> Option<u32> {
@@ -73,7 +86,8 @@ fn grip(a: &Atom) -> Ratio {
 
 /// Read one world: its matter, its turn (bells), and its clock against its
 /// star (the coupling's rate).
-pub fn read(path: Vec<u32>, matter: &Manifest, period: &Ratio, coupling: &Ratio, star_burn: &Ratio, world_scale: &Ratio) -> Option<World> {
+#[allow(clippy::too_many_arguments)]
+pub fn read(path: Vec<u32>, matter: &Manifest, period: &Ratio, coupling: &Ratio, star_burn: &Ratio, world_scale: &Ratio, delay: u64) -> Option<World> {
     if period.is_zero() || matter.is_empty() {
         return None;
     }
@@ -105,13 +119,15 @@ pub fn read(path: Vec<u32>, matter: &Manifest, period: &Ratio, coupling: &Ratio,
             }
             let share = ga.clone().min(gb.clone());
             if chemical.as_ref().is_none_or(|(s, _)| share > *s) {
-                chemical = Some((share, hold / heat.clone()));
+                let contact = a.tightness.clone().min(b.tightness.clone()) * ratio(CONTACT_K, 1);
+                chemical = Some((share, contact / heat.clone()));
             }
         }
     }
     // GEOLOGIC: the most abundant network former (two or more bonds) the
     // heat does not melt to plasma.
-    let geologic = atoms.iter().filter(|(a, _)| !plasma(a) && a.unpaired >= 2).max_by(|x, y| x.1.cmp(&y.1)).map(|(a, _)| grip(a) / heat.clone());
+    // A lattice holds a pattern by as many contacts as the former bonds.
+    let geologic = atoms.iter().filter(|(a, _)| !plasma(a) && a.unpaired >= 2).max_by(|x, y| x.1.cmp(&y.1)).map(|(a, _)| a.tightness.clone() * ratio(CONTACT_K * i64::from(a.unpaired), 1) / heat.clone());
     // INFORMATIONAL: the coupling's coherence over its slip, `rate / (1 − rate)`.
     let informational = (*coupling < ratio(1, 1)).then(|| coupling.clone() / (ratio(1, 1) - coupling.clone()));
     // PLASMIC: the field the coupling sets holding the ionised share.
@@ -121,7 +137,7 @@ pub fn read(path: Vec<u32>, matter: &Manifest, period: &Ratio, coupling: &Ratio,
         if all.is_zero() { ratio(0, 1) } else { mass(&ionised) / all }
     };
     let plasmic = informational.clone().filter(|_| plasma_share > ratio(0, 1)).map(|x| x * plasma_share);
-    Some(World { path, heat, size, gravity, core, hold, atmosphere: ratio(0, 1), pressure: ratio(0, 1), gases, chemical: chemical.map(|(_, x)| x), geologic, plasmic, informational })
+    Some(World { path, heat, size, gravity, core, hold, atmosphere: ratio(0, 1), pressure: ratio(0, 1), gases, chemical: chemical.map(|(_, x)| x), geologic, plasmic, informational, coupling: coupling.clone(), delay })
 }
 
 /// `e^(−λ)` bounded above by whole halvings, `2^(−⌊λ · 1442/1000⌋)` (so the
@@ -145,6 +161,40 @@ pub fn halvings(x: &Ratio, compression: &Ratio) -> Ratio {
     x.clone() * (ratio(1, 1) + compression.clone()) * ratio(1442, 1000)
 }
 
+/// STEP 2, THE CLIMB (docs/82). The ladder's rungs are written at the
+/// coupling's RECOHERENCES (each time the planet's slip against its star
+/// completes a turn, the coupling locks and a pattern can be written): a
+/// medium of halvings h writes a rung of `h` doublings, so a mind's
+/// blueprint needs `⌈D / h⌉` rungs (D the blueprint's doublings). DECAY: a
+/// medium of cohesion x forgets `1/x` of its progress while it waits, so it
+/// needs `⌈rungs / (1 − 1/x)⌉` recoherences. A medium with less than a
+/// halving (x ≤ ln 2) carries nothing. Returns the recoherences needed.
+pub fn recoherences_needed(x: &Ratio, compression: &Ratio) -> Option<u64> {
+    let h = halvings(x, compression);
+    if h < ratio(1, 1) {
+        return None;
+    }
+    let rungs = (ratio(BLUEPRINT_DOUBLINGS, 1) / h).ceil();
+    let effective = x.clone() * (ratio(1, 1) + compression.clone());
+    let keep = ratio(1, 1) - ratio(1, 1) / effective;
+    if keep <= ratio(0, 1) {
+        return None;
+    }
+    (rungs / keep).ceil().to_integer().try_into().ok()
+}
+
+/// The universal bell a mind wakes: the k-th recoherence of the world's
+/// coupling (its slip per echo `1 − coupling`), echoes `t_u` apart after
+/// its galaxy's delay. None when the coupling never slips.
+pub fn wake_bell(w: &World, k: u64, t_u: u64) -> Option<u64> {
+    let slip = ratio(1, 1) - w.coupling.clone();
+    if slip <= ratio(0, 1) {
+        return None;
+    }
+    let echoes: u64 = (ratio(k as i64, 1) / slip).ceil().to_integer().try_into().ok()?;
+    Some(w.delay + echoes.checked_mul(t_u)?)
+}
+
 /// Every world of the universe, read.
 pub fn worlds(u: &Universe) -> Vec<World> {
     let median = |mut v: Vec<Ratio>| -> Ratio {
@@ -159,9 +209,10 @@ pub fn worlds(u: &Universe) -> Vec<World> {
             let star = mass(&sys.kept);
             let star_burn = ratio(1, 1) + star.clone() / star_scale.clone();
             let mut inside = star.clone();
+            let delay: u64 = core.radius.floor().to_integer().try_into().unwrap_or(0);
             for orb in &sys.satellites {
                 let coupling = crate::breath::rate(&orb.radius, &(inside.clone() / crate::breath::unit_mass(u)));
-                if let Some(w) = read(orb.path.clone(), &orb.kept, &orb.period, &coupling, &star_burn, &world_scale) {
+                if let Some(w) = read(orb.path.clone(), &orb.kept, &orb.period, &coupling, &star_burn, &world_scale, delay) {
                     out.push(w);
                 }
                 inside += mass(&orb.total());
@@ -188,11 +239,15 @@ mod tests {
     fn a_world_reads_its_heat_and_media() {
         // Hydrogen (single bond) and oxygen-like Z = 4 (two bonds) at 60 bells.
         let matter: Manifest = [("Z001".to_string(), ratio(10, 1)), ("Z004".to_string(), ratio(5, 1))].into();
-        let w = read(vec![1, 1, 1], &matter, &ratio(60, 1), &ratio(59, 60), &ratio(1, 1), &ratio(1_000_000, 1)).unwrap();
+        let w = read(vec![1, 1, 1], &matter, &ratio(60, 1), &ratio(59, 60), &ratio(1, 1), &ratio(1_000_000, 1), 240).unwrap();
         assert_eq!(w.heat, ratio(1000, 1));
-        let heavy = read(vec![1, 1, 1], &matter, &ratio(60, 1), &ratio(59, 60), &ratio(3, 1), &ratio(1, 1)).unwrap();
+        let heavy = read(vec![1, 1, 1], &matter, &ratio(60, 1), &ratio(59, 60), &ratio(3, 1), &ratio(1, 1), 240).unwrap();
         assert_eq!(heavy.heat, ratio(3000, 1), "a burning star, no cap");
         assert!(heavy.gravity > w.gravity, "a compressed world pulls harder");
+        // A coupling at 59/60 slips 1/60 a echo: its first recoherence at
+        // echo 60, after the galaxy's 240-bell delay.
+        assert_eq!(wake_bell(&w, 1, 60), Some(240 + 60 * 60));
+        assert_eq!(recoherences_needed(&ratio(1, 2), &ratio(0, 1)), None, "under a halving, nothing carries");
         assert!(w.chemical.is_some(), "1 + 4 close and hold at 1,000 K");
         assert!(w.geologic.is_some());
         assert_eq!(w.informational, Some(ratio(59, 1)));

@@ -50,6 +50,24 @@ fn main() {
     for (b, row) in by_band.iter().enumerate() {
         println!("  {:20} {:5} worlds: chemical {:5}, geologic {:5}, plasmic {:5}, informational {:5}", names[b], row[0], row[1], row[2], row[3], row[4]);
     }
+    // STEP 2: when each medium's mind would wake (informational is read, not
+    // climbed: its coherence is near whole at every recoherence, open).
+    let marks = [10_000u64, 100_000, 1_000_000];
+    for (name, pick) in [("chemical", 0usize), ("geologic", 1), ("plasmic", 2)] {
+        let mut bells: Vec<(u64, Vec<u32>)> = Vec::new();
+        for w in &worlds {
+            let c = w.pressure.clone() / reference.clone();
+            let x = match pick { 0 => &w.chemical, 1 => &w.geologic, _ => &w.plasmic };
+            if let Some(k) = x.as_ref().and_then(|x| life::recoherences_needed(x, &c)) {
+                if let Some(b) = life::wake_bell(w, k, 60) {
+                    bells.push((b, w.path.clone()));
+                }
+            }
+        }
+        bells.sort();
+        let counts: Vec<String> = marks.iter().map(|m| format!("{} by bell {m}", bells.iter().filter(|(b, _)| b <= m).count())).collect();
+        println!("MINDS ({name}) — {} worlds can climb; {}; first at bell {:?} on {:?}", bells.len(), counts.join(", "), bells.first().map(|b| b.0), bells.first().map(|b| b.1.clone()));
+    }
     let heats: Vec<Ratio> = { let mut h: Vec<Ratio> = worlds.iter().map(|w| w.heat.clone()).collect(); h.sort(); h };
     println!("HEAT — coldest {} K, median {} K, hottest {} K; pressure reference (the median world) {}", heats.first().map(|h| h.round()).unwrap_or_default(), heats.get(heats.len() / 2).map(|h| h.round()).unwrap_or_default(), heats.last().map(|h| h.round()).unwrap_or_default(), reference.round());
 }
