@@ -232,6 +232,19 @@ pub const GENOME_BITS: i64 = 6_000_000_000;
 /// A world's day as a share of its year, until S^60 bodies spin (an anchor:
 /// the base-60 circle).
 pub const DAYS_A_YEAR: i64 = 360;
+/// A VIABLE PEOPLE (Franklin's ~500), counted in nuclei (operator
+/// 2026-10-14): a mind's carrier needs about a nucleus of its medium a bit of
+/// its blueprint, so 500 minds need `500 · GENOME_BITS` nuclei of it. A grain
+/// is 60^30 nuclei, so matter never limits a people; its energy (its star's
+/// flux) does, in the economy (docs/74). The gate is exact and kept.
+pub const VIABLE_PEOPLE: i64 = 500;
+
+/// Whether a world's matter can carry a viable people (exact, in nuclei).
+pub fn viable(matter: &Manifest) -> bool {
+    let grains = matter.values().fold(ratio(0, 1), |s, a| s + a.clone() * ratio(1024, 1));
+    let nuclei = grains.floor().to_integer() * crate::pulse::nuclei_per_grain();
+    nuclei >= num_bigint::BigInt::from(VIABLE_PEOPLE) * num_bigint::BigInt::from(GENOME_BITS)
+}
 
 /// The bells a medium's climb takes on a world (docs/82, with xylarium's
 /// ruler): selection writes at most a bit a generation, cells a local day a
@@ -352,7 +365,12 @@ pub fn readings(u: &Universe) -> std::collections::BTreeMap<Vec<u32>, Reading> {
             sys.satellites.iter().find(|o| o.path.get(2) == w.path.get(2)).map(|o| o.period.clone())
         })();
         let compression = w.pressure.clone() / reference.clone();
-        let climb = period.and_then(|p| {
+        let matter = (|| {
+            let core = u.cores.iter().find(|c| c.path.first() == w.path.first())?;
+            let sys = core.satellites.iter().find(|s| s.path.get(1) == w.path.get(1))?;
+            sys.satellites.iter().find(|o| o.path.get(2) == w.path.get(2)).map(|o| o.kept.clone())
+        })();
+        let climb = period.filter(|_| matter.as_ref().is_some_and(viable)).and_then(|p| {
             [("chemical", &w.chemical), ("geologic", &w.geologic), ("plasmic", &w.plasmic)]
                 .into_iter()
                 .filter_map(|(m, x)| x.as_ref().and_then(|x| climb_bells(&p, &home.year_bells, x, &compression)).map(|b| (b, m)))

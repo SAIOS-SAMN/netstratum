@@ -209,8 +209,20 @@ carry life, and a world may carry several forms at once.
   (geologic) and 193 (plasmic) of 5,716, about 2% to 7%, near xylarium's
   2%; the first at bell 62,460, in the galaxy nearest the universal core.
   The body rungs are the bottleneck, as xylarium found.
-- **Still open:** the informational medium (whole coherence at every
-  recoherence; not climbed), and a viable people's scale.
+- **Ruled (operator, 2026-10-14; starts, to be measured and tuned):**
+  - **The informational medium is where minds GO, not where life starts.**
+    No pattern is written into a phase without something to write it from:
+    it takes a mind already woken in a material medium (chemical, geologic,
+    plasmic) whose records keep coherent with its star across full rungs,
+    and carries it on. It is the physical path to ancienthood (docs/74:
+    ancients are pure intelligence; docs/78: ascension by deed keeps a
+    throat a full rung). It wakes no life of its own.
+  - **A viable people is counted in nuclei:** a mind's carrier needs about a
+    nucleus of its medium a bit of its blueprint, so 500 minds need
+    `500 · 6e9` nuclei of it; a grain is 60^30 nuclei, so matter never
+    limits a people (the gate is exact, kept, and always passes). What limits
+    a people is ENERGY, its star's flux on its world: demography and the
+    economy (docs/74), not the ladder.
 
 ## Step 3, built (2026-10-14): wakings found lines
 
