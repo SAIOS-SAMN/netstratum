@@ -76,6 +76,15 @@ fn main() {
         Err(e) => eprintln!("conductor: the galaxies were not charted: {e}"),
     }
     conductor::seating::seat(&universe, &mut specs);
+    // LIFE (docs/82): every world's earliest waking, by the gated climb on
+    // the shared ruler; each wakes at its bell and founds a line.
+    let mut pending: std::collections::VecDeque<conductor::life::Waking> = conductor::life::wakings(&universe, &pulse_seed, T_U).into();
+    let mut woken_galaxies: std::collections::BTreeSet<u32> = std::collections::BTreeSet::new();
+    println!(
+        "conductor: {} minds due to wake (the first at bell {:?})",
+        pending.len(),
+        pending.front().map(|w| w.bell)
+    );
     println!("conductor: the pulse universe — {} cores, {} systems; T_u {T_U} bells", universe.cores.len(), universe.cores.iter().map(|c| c.satellites.len()).sum::<usize>());
 
     // CONVERGE-1 (07 §1.6): converge the archived eras BEFORE genesis —
@@ -287,6 +296,23 @@ fn main() {
                 "beat {beat}: BREATH — {} echoes, {} systems born, {} returned to the media, {} stars dissolved",
                 breath_reading.echoes, breath_reading.births, breath_reading.returned.clone().round(), breath_reading.dissolved
             );
+        }
+        while pending.front().is_some_and(|w| w.bell <= beat) {
+            let Some(w) = pending.pop_front() else { break };
+            let galaxy = w.path.first().copied().unwrap_or(0);
+            let first = woken_galaxies.insert(galaxy);
+            if let Some(spec) = conductor::waking::found(&universe, &pulse_seed, &w, &registry, first) {
+                println!(
+                    "beat {beat}: A MIND WAKES — {} ({}, {} medium) on world {:?}{}",
+                    spec.civilization.name,
+                    spec.civilization.species,
+                    w.medium,
+                    w.path,
+                    spec.civilization.station.as_deref().map(|s| format!("; the {s} of its galaxy")).unwrap_or_default()
+                );
+                breath_reading.wakings += 1;
+                worlds.push(Polity::genesis(spec, &registry, &book));
+            }
         }
         conductor::profile::timed("clocks", || {
             for i in 0..universe.cores.len() {

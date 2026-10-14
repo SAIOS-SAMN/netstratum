@@ -41,6 +41,15 @@ fn by_distance(u: &Universe) -> Vec<usize> {
     order
 }
 
+/// The stand-in place of the system at `path` ([core, system, ...]).
+pub fn place_of(u: &Universe, path: &[u32]) -> Option<Place> {
+    let order = by_distance(u);
+    let i = u.cores.iter().position(|c| c.path.first() == path.first())?;
+    let k = order.iter().position(|&o| o == i)?;
+    let j = u.cores[i].satellites.iter().position(|s| s.path.get(1) == path.get(1))?;
+    Some(system_place(&galaxy_place(k), j))
+}
+
 /// Chart the pulse's cores as galaxies on the universe ledger, once (the
 /// first charters the founding galaxy at the origin; each next stands past
 /// every reach, so each is created).

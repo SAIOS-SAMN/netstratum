@@ -47,6 +47,8 @@ pub mod tag {
     pub const TERMS: u8 = 54;
     pub const EPOCHS: u8 = 55;
     pub const LOCAL_YEARS: u8 = 56;
+    /// Minds that woke this beat (docs/82), each founding a line.
+    pub const WAKINGS: u8 = 57;
     /// A year's close: one record a line read at it.
     pub const LINE: u8 = 40;
 }
@@ -64,6 +66,7 @@ pub struct BreathReading {
     pub terms: u64,
     pub epochs: u64,
     pub local_years: u64,
+    pub wakings: u64,
 }
 
 /// The journal at `var_root`, and the last beat it keeps of each kind.
@@ -128,6 +131,7 @@ impl Annal {
         card::put_u64(tag::TERMS, breath.terms, &mut b);
         card::put_u64(tag::EPOCHS, breath.epochs, &mut b);
         card::put_u64(tag::LOCAL_YEARS, breath.local_years, &mut b);
+        card::put_u64(tag::WAKINGS, breath.wakings, &mut b);
         card::put_u64(tag::CLEARED, cleared as u64, &mut b);
         card::put_u64(tag::ALONE, hubs.alone as u64, &mut b);
         card::put_u64(tag::CLOSED, hubs.closed as u64, &mut b);

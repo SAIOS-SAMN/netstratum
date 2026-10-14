@@ -302,6 +302,43 @@ pub fn climb(w: &World, x: &Ratio, compression: &Ratio, seed: &[u8; 32], medium:
     None
 }
 
+/// A mind due to wake: its bell, its world and its medium.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Waking {
+    pub bell: u64,
+    pub path: Vec<u32>,
+    pub medium: &'static str,
+}
+
+/// Every world's earliest waking (by any material medium), in bell order:
+/// the gated climb on the shared ruler.
+pub fn wakings(u: &Universe, seed: &[u8; 32], t_u: u64) -> Vec<Waking> {
+    let worlds = worlds(u);
+    let Some(home) = home(u) else { return Vec::new() };
+    let mut pressures: Vec<Ratio> = worlds.iter().map(|w| w.pressure.clone()).collect();
+    pressures.sort();
+    let reference = pressures.get(pressures.len() / 2).cloned().filter(|p| *p > ratio(0, 1)).unwrap_or_else(|| ratio(1, 1));
+    let period_of = |path: &[u32]| -> Option<Ratio> {
+        let core = u.cores.iter().find(|c| c.path.first() == path.first())?;
+        let sys = core.satellites.iter().find(|s| s.path.get(1) == path.get(1))?;
+        sys.satellites.iter().find(|o| o.path.get(2) == path.get(2)).map(|o| o.period.clone())
+    };
+    let mut out = Vec::new();
+    for w in &worlds {
+        let Some(period) = period_of(&w.path) else { continue };
+        let c = w.pressure.clone() / reference.clone();
+        let best = [("chemical", &w.chemical), ("geologic", &w.geologic), ("plasmic", &w.plasmic)]
+            .into_iter()
+            .filter_map(|(m, x)| x.as_ref().and_then(|x| climb(w, x, &c, seed, m, t_u, &period, &home.year_bells)).map(|b| (b, m)))
+            .min();
+        if let Some((bell, medium)) = best {
+            out.push(Waking { bell, path: w.path.clone(), medium });
+        }
+    }
+    out.sort_by(|a, b| a.bell.cmp(&b.bell).then(a.path.cmp(&b.path)));
+    out
+}
+
 /// Every world of the universe, read.
 pub fn worlds(u: &Universe) -> Vec<World> {
     let median = |mut v: Vec<Ratio>| -> Ratio {

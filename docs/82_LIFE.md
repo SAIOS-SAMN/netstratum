@@ -212,6 +212,20 @@ carry life, and a world may carry several forms at once.
 - **Still open:** the informational medium (whole coherence at every
   recoherence; not climbed), and a viable people's scale.
 
+## Step 3, built (2026-10-14): wakings found lines
+
+- At boot the conductor reads every world's earliest waking (the gated
+  climb on the shared ruler, by any material medium); each wakes at its
+  bell and founds a line (`conductor::waking`): its metabolism its medium's
+  (geologic mineral, chemical biotic, plasmic plasmic, the registry's
+  vocabulary), its name, disposition and perception spoken from the seed,
+  its place its system's. The first mind of each galaxy takes a PROGENITOR
+  seat; every other people is a sovereign. Each waking is counted in the
+  universe journal (tag 57).
+- Live: 200 minds due to wake, the first at bell 62,460 (the conductor at
+  beat 1,763). Wakings are read at boot; worlds the breath forms later are
+  read at the next boot (a per-term re-read is owed).
+
 ## A people is read from its world
 
 - **Its medium** defines it: chemical (the compound it lives in), geologic
