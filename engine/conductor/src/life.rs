@@ -348,10 +348,14 @@ pub struct Reading {
     pub world: World,
     pub compression: Ratio,
     pub climb: Option<(Ratio, &'static str)>,
+    /// Its turn about its star (bells) and its galaxy's torsion phase: the
+    /// hidden phase of its interactions (docs/79).
+    pub period: Ratio,
+    pub torsion: Ratio,
 }
 
 /// Every world's current reading (refreshed when the universe changes).
-pub fn readings(u: &Universe) -> std::collections::BTreeMap<Vec<u32>, Reading> {
+pub fn readings(u: &Universe, seed: &[u8; 32]) -> std::collections::BTreeMap<Vec<u32>, Reading> {
     let worlds = worlds(u);
     let mut out = std::collections::BTreeMap::new();
     let Some(home) = home(u) else { return out };
@@ -370,21 +374,24 @@ pub fn readings(u: &Universe) -> std::collections::BTreeMap<Vec<u32>, Reading> {
             let sys = core.satellites.iter().find(|s| s.path.get(1) == w.path.get(1))?;
             sys.satellites.iter().find(|o| o.path.get(2) == w.path.get(2)).map(|o| o.kept.clone())
         })();
+        let torsion = crate::quantum::torsion_phase(seed, w.path.first().copied().unwrap_or(0));
+        let turn = period.clone().unwrap_or_else(|| ratio(0, 1));
         let climb = period.filter(|_| matter.as_ref().is_some_and(viable)).and_then(|p| {
             [("chemical", &w.chemical), ("geologic", &w.geologic), ("plasmic", &w.plasmic)]
                 .into_iter()
                 .filter_map(|(m, x)| x.as_ref().and_then(|x| climb_bells(&p, &home.year_bells, x, &compression)).map(|b| (b, m)))
                 .min_by(|a, b| a.0.cmp(&b.0))
         });
-        out.insert(w.path.clone(), Reading { world: w, compression, climb });
+        out.insert(w.path.clone(), Reading { world: w, compression, climb, period: turn, torsion });
     }
     out
 }
 
 /// Advance every world's climb to `bell`, reading each at its own
 /// recoherences; returns the minds that wake.
-pub fn advance(readings: &std::collections::BTreeMap<Vec<u32>, Reading>, climbs: &mut Climbs, seed: &[u8; 32], t_u: u64, bell: u64) -> Vec<Waking> {
+pub fn advance(readings: &std::collections::BTreeMap<Vec<u32>, Reading>, climbs: &mut Climbs, t_u: u64, bell: u64) -> (Vec<Waking>, u64) {
     let mut woke = Vec::new();
+    let mut measured = 0u64;
     for (path, r) in readings {
         let w = &r.world;
         let climb = climbs.entry(path.clone()).or_insert_with(|| Climb { written: ratio(0, 1), k: 1, last: w.delay, next: wake_bell(w, 1, t_u).unwrap_or(u64::MAX), woken: false });
@@ -395,11 +402,12 @@ pub fn advance(readings: &std::collections::BTreeMap<Vec<u32>, Reading>, climbs:
         while climb.next <= bell && climb.next <= close {
             let at = climb.next;
             if let Some((length, medium)) = &r.climb {
+                // THE IMPACT IS A MEASUREMENT (docs/79): it strikes when the
+                // hidden phase at this recoherence falls below its chance.
                 let p = w.belts.clone() / (ratio(1, 1) + r.compression.clone());
-                let threshold: u64 = (p * ratio(1_000_000, 1)).floor().to_integer().try_into().unwrap_or(0);
-                let mut ipath = path.clone();
-                ipath.push(medium.len() as u32);
-                let struck = crate::pulse::draw(seed, &ipath, "impact", climb.k as u32) % 1_000_000 < threshold;
+                let u = crate::quantum::hidden_phase(&r.torsion, at, &r.period);
+                let struck = crate::quantum::measure(&u, &p);
+                measured += 1;
                 if !struck && *length > ratio(0, 1) {
                     climb.written += ratio(at.saturating_sub(climb.last) as i64, 1) / length.clone();
                 }
@@ -417,7 +425,7 @@ pub fn advance(readings: &std::collections::BTreeMap<Vec<u32>, Reading>, climbs:
         }
     }
     woke.sort_by(|a, b| a.bell.cmp(&b.bell).then(a.path.cmp(&b.path)));
-    woke
+    (woke, measured)
 }
 
 fn put_path(path: &[u32], out: &mut Vec<u8>) {

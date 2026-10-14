@@ -81,7 +81,7 @@ fn main() {
     // refreshed when the universe changes. A mind wakes when its climb is
     // written, and founds a line.
     let mut climbs = conductor::life::read_climbs(std::path::Path::new(&var_root));
-    let mut life_readings = conductor::life::readings(&universe);
+    let mut life_readings = conductor::life::readings(&universe, &pulse_seed);
     let mut readings_at: u64 = 0;
     let mut woken_galaxies: std::collections::BTreeSet<u32> =
         climbs.iter().filter(|(_, c)| c.woken).filter_map(|(p, _)| p.first().copied()).collect();
@@ -309,10 +309,11 @@ fn main() {
         // The readings follow the universe: refreshed when the breath changed
         // it, at most once a pulse.
         if !events.is_empty() && beat >= readings_at + T_U {
-            life_readings = conductor::profile::timed("life:read", || conductor::life::readings(&universe));
+            life_readings = conductor::profile::timed("life:read", || conductor::life::readings(&universe, &pulse_seed));
             readings_at = beat;
         }
-        let woke = conductor::profile::timed("life:climb", || conductor::life::advance(&life_readings, &mut climbs, &pulse_seed, T_U, beat));
+        let (woke, measured) = conductor::profile::timed("life:climb", || conductor::life::advance(&life_readings, &mut climbs, T_U, beat));
+        breath_reading.measurements += measured;
         if beat.is_multiple_of(10) || !woke.is_empty() {
             conductor::life::write_climbs(std::path::Path::new(&var_root), &climbs);
         }
