@@ -3,13 +3,14 @@
 //! Usage:
 //!   conductor [--var var] [--cycles N] [--cadence SECONDS] [--fold]
 //!
-//! ERA 1 (docs/78): the universe is the pulse's (`<var>/pulse.bin`, deployed
-//! by the `pulse` binary), breathed a bell a beat. No founding lines are
-//! compiled in; a line stands only if registered in this universe.
+//! ERA 1 (docs/78, docs/82): the universe is the pulse's (`<var>/pulse.bin`,
+//! deployed by the `pulse` binary), breathed a bell a beat; the original
+//! civilizations are brought over as its first peoples, each on its own star
+//! system.
 //! `--cycles 0` (default) beats forever at the cadence. Watch live:
 //!   python3 tools/observer.py --watch 2
 
-use conductor::{observe_crossings, registered_polities, Polity};
+use conductor::{observe_crossings, roster, Polity};
 use ledger::registry::Registry;
 use ledger::Ledger;
 use std::path::PathBuf;
@@ -53,11 +54,12 @@ fn main() {
     }
     std::fs::create_dir_all(&var_root).expect("var root");
     let registry = Registry::at(format!("{var_root}/registry"));
-    // ERA 1 (docs/78): no compiled founding lines are carried; a line
-    // stands only if registered in this universe (life arises from its
-    // physics). The universe itself is the pulse's, deployed beforehand
-    // (the `pulse` binary) into `<var>/pulse.bin`.
-    let specs = registered_polities(&registry);
+    // ERA 1 (docs/82, operator 2026-10-14): the original civilizations and
+    // polities are brought over as the universe's first peoples (the
+    // compiled founding lines and every registered line), each seated on an
+    // era-1 star system below; life also arises by the ladder. The universe
+    // itself is the pulse's, deployed beforehand (the `pulse` binary).
+    let mut specs = roster(&registry);
     let book = Ledger::at(format!("{var_root}/worlds"));
     let Some((pulse_seed, mut universe)) = conductor::pulse::read(std::path::Path::new(&var_root)) else {
         eprintln!("conductor: no universe at {var_root}/pulse.bin — deploy it first (the pulse binary)");
@@ -67,6 +69,13 @@ fn main() {
     // One beat is one bell.
     const T_U: u64 = 60;
     let unit = conductor::breath::unit_mass(&universe);
+    // The pulse's cores charted as galaxies, and every line seated on its
+    // own star system (stand-in places until the sphere, A1).
+    match conductor::seating::chart(&universe, &book, 0) {
+        Ok(n) => println!("conductor: {n} galaxies charted from the pulse's cores"),
+        Err(e) => eprintln!("conductor: the galaxies were not charted: {e}"),
+    }
+    conductor::seating::seat(&universe, &mut specs);
     println!("conductor: the pulse universe — {} cores, {} systems; T_u {T_U} bells", universe.cores.len(), universe.cores.iter().map(|c| c.satellites.len()).sum::<usize>());
 
     // CONVERGE-1 (07 §1.6): converge the archived eras BEFORE genesis —
@@ -94,7 +103,7 @@ fn main() {
     // docs/58 §3 — THE BIG BANG, recorded once on this universe's ledger
     // before any world is founded (or, for a universe that predates the law,
     // once and late as its re-founding).
-    match book.found_universe(pulse_seed, cfe::almanac::matter_law_digest(), epoch_base) {
+    match book.found_universe(conductor::roster_digest(), cfe::almanac::matter_law_digest(), epoch_base) {
         Ok((seed, true)) => println!(
             "conductor: THE BIG BANG — this universe is {} (recorded now)",
             seed.iter().take(8).map(|b| format!("{b:02x}")).collect::<String>()
@@ -135,7 +144,7 @@ fn main() {
         println!("conductor: {name} resumed collapsed; it stays out of the roster");
     }
     println!(
-        "conductor: {} registered civilizations — {}",
+        "conductor: {} civilizations seated on the pulse's systems — {}",
         worlds.len(),
         if cycles == 0 {
             format!("beating every {cadence_secs}s (Ctrl-C to stop)")

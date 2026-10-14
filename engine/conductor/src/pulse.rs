@@ -280,7 +280,12 @@ pub(crate) fn split(seed: &[u8; 32], path: Vec<u32>, mut grains: Manifest, reach
     // the medium. Nothing is drawn.
     let s_ = law.reach.clone();
     let mu = ratio(2, 1) * s_.clone() * s_.clone() / (ratio(1, 1) - s_.clone() * s_.clone());
-    let step = (ratio(1, 1) + s_.clone()) / (ratio(1, 1) - s_.clone());
+    // Worlds about a star stand TEN reaches apart (docs/82; xylarium:
+    // Gyr-stable systems sit 7 to 10 mutual reaches apart, touching reaches
+    // put every world in one climate). Systems about a core keep touching
+    // reaches (ten would exceed the radius).
+    let spacing = if depth == 1 { ratio(10, 1) * s_.clone() } else { s_.clone() };
+    let step = (ratio(1, 1) + spacing.clone()) / (ratio(1, 1) - spacing);
     let mut radius: Option<Ratio> = None;
     for k in 1u32.. {
         let left = mass(&grains) / unit_mass.clone();
