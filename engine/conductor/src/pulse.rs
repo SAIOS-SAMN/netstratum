@@ -353,20 +353,20 @@ pub fn deploy(seed: &[u8; 32], manifest: &Manifest) -> Universe {
     for (k, a) in formed {
         *medium.entry(k).or_insert_with(|| ratio(0, 1)) += a;
     }
-    // THE PULSE LAYS DOWN ONLY THE START (docs/78, "The breath"): each core
-    // keeps its hole and the rest of its galaxy is its MEDIUM, gas. Star
-    // systems are born by the breath, as echoes compress it. A core stands
-    // at its mode's distance from the universal core, `d_i`, a seed draw
-    // (60 to 3,600 bells of light travel), the spectrum's own field; its
-    // echoes arrive that much later.
+    // THE BIG BANG POPULATES THE UNIVERSE (docs/78): each core keeps its hole,
+    // and its galaxy's first generation of star systems and their planets is
+    // laid down by the tidal law; what forms no system is the galaxy's medium,
+    // gas the breath later forms into new systems. A core stands at its mode's
+    // distance from the universal core, `d_i`, a seed draw (60 to 3,600 bells
+    // of light travel), the spectrum's own field; its echoes arrive that much
+    // later.
+    let unit = shares.iter().map(|(_, m)| mass(&take(m, &tier(2).centre))).max().filter(|m| !m.is_zero()).unwrap_or_else(|| ratio(1, 1));
     let cores = shares
         .into_iter()
         .map(|(i, m)| {
-            let kept = take(&m, &tier(2).centre);
-            let mut rest = m;
-            less(&mut rest, &kept);
+            let (kept, satellites, medium) = split(seed, vec![i], m, None, ratio(60 * 60, 1), &unit, 2);
             let distance = ratio(60 * (1 + (draw(seed, &[i], "distance", 0) % 60) as i64), 1);
-            Body { path: vec![i], radius: distance, period: ratio(0, 1), kept, satellites: Vec::new(), medium: rest }
+            Body { path: vec![i], radius: distance, period: ratio(0, 1), kept, satellites, medium }
         })
         .collect();
     Universe { cores, medium }

@@ -199,7 +199,7 @@ mod tests {
     fn the_breath_forms_systems_and_keeps_every_grain() {
         let manifest: crate::pulse::Manifest = [("Z001".to_string(), ratio(4_000_000, 1)), ("Z008".to_string(), ratio(1_000_000, 1))].into();
         let mut u = crate::pulse::deploy(&[3; 32], &manifest);
-        assert!(u.cores.iter().all(|c| c.satellites.is_empty()), "the pulse lays down no systems");
+        assert!(u.cores.iter().any(|c| !c.satellites.is_empty()), "the Big Bang lays down a first generation");
         let events = breathe(&mut u, &[3; 32], 60, 0, 6000);
         assert!(events.iter().any(|e| e.born.is_some()), "echoes give birth");
         assert_eq!(u.total(), manifest, "the medium is consumed, nothing created");
