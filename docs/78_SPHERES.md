@@ -130,10 +130,34 @@ event deploys them all, and everything after is a closed form of t from it
     Its satellites lie inside `r_d`. Linear, from ω alone: the square-free
     Hill radius. A core's own `r_d` is read the same way from the cores
     nearer the epicenter (the innermost core is bounded by the sphere).
-  - **Shares, inside out** (a stick broken from the seed). The centre keeps
-    `f_0` of the tier's grains; satellite k then takes `f_k` of what
-    remains. Each `f` is a seed draw `q / 60`, q from 1 to 59 (one field of
-    the base-60 odometer), tilted by the operator's dials.
+  - **The centre's share and the medium are laws of the tier, never draws**
+    (amended 2026-10-14 with xylarium's guidance, after the first
+    deployment: an even draw left core 1 keeping 95% of its galaxy). The
+    centre keeps its tier's share; of the rest, the tier's medium (what
+    physics leaves unformed) is set aside; the satellites break what
+    remains. Anchors, of order, to be cited before era 1's founding:
+
+    | tier | centre keeps | medium, of the rest |
+    |---|---|---|
+    | the epicenter | nothing (no mass) | 1/2 (intergalactic gas) |
+    | a core | 1/1000 (its hole: the hole-to-bulge relation) | 1/10 (interstellar gas: the Milky Way's gas to stars) |
+    | a star | 9986/10000 (the Sun's share of its system) | 1/100 (belts and comet clouds) |
+    | an orb | all | none |
+
+  - **Satellites, inside out** (a stick broken from the seed): satellite k
+    takes `f_k` of what remains, `f_k` a seed draw `q / 60`, q from 1 to 59
+    (one field of the base-60 odometer), tilted by the operator's dials.
+    What they leave joins the medium.
+  - **Minimum bodies.** A body below its minimum is not formed, and its
+    share joins the medium. A core needs a hole of at least a grain (no
+    hole, no core; xylarium: a core comes only from a package); a star or an
+    orb, a grain, until the founding manifest's scale gives physical floors
+    (xylarium's: 0.08 suns for a star; roundness for a world, which ours
+    must state without a square).
+  - **Homology is linear.** Under ω = M/r, scaling a galaxy's masses and
+    lengths by the same factor keeps its turning rates, so siblings scale
+    with no root (xylarium's lengths go by the cube root of mass under
+    their law).
   - **Radii from periods, not dials.** Satellite k's period is
     `P_k = P_(k−1) · (q_k + 1) / q_k` beats of its centre's bell (a
     resonance chain, `q_k` a seed draw from 1 to 60), the first `P_1` one
@@ -146,10 +170,11 @@ event deploys them all, and everything after is a closed form of t from it
     with `M(<r_k)` the centre plus the satellites already placed inside.
     Periods and enclosed mass both grow outward, so radii do too.
   - **The count emerges.** Satellites are placed until the next radius
-    would pass the centre's `r_d`, or the remainder falls below the grain.
-    What remains is the tier's MEDIUM: unbound grains held at the centre's
-    tier beyond its last orbit, enclosed by no orbit, there for later
-    accretion (the radial law, Open) and for the lines to work.
+    would pass the centre's `r_d`, or the next share falls below its
+    minimum. The tier's MEDIUM (its set-aside share and what the satellites
+    leave) is held at the centre's tier beyond its last orbit, enclosed by
+    no orbit, there for later accretion (the radial law, Open) and for the
+    lines to work.
   - **Elements.** Every share carries the manifest's composition in
     proportion, each element floored to the grain; what an element does not
     divide stays with the centre. A tier's operator recipe may tilt the
@@ -196,9 +221,13 @@ event deploys them all, and everything after is a closed form of t from it
   a stand-in: era 0's element totals read from its record, so the stand-in
   is a measured universe, not an invented one. Replaced by the grant when
   it crosses.
-- **The split's dials.** The base-60 draws and the resonance chain are
-  authored; the operator's recipes may tilt the shares. Measured on the
-  first deployment: systems per galaxy, orbs per star, the medium's share.
+- **The split's anchors and dials.** The tier anchors above are of order and
+  owe citations (the anchor provenance law). The base-60 draws and the
+  resonance chain are authored; the operator's recipes may tilt the shares.
+- **The galaxies' sizes.** The epicenter's stick gives galaxies falling
+  geometrically (core 1 about nine tenths of the formed matter); xylarium's
+  siblings draw their hole within 1/4 to 2 of the home's, so galaxies are
+  comparable. Whether ours should be bounded the same way is open.
 - **Radial motion.** The law turns bodies; it does not move them in or out.
   Radii are the deployment's, so infall, accretion and escape are not yet
   physics. A square-free radial law is owed before any body changes orbit.

@@ -9,6 +9,10 @@
 //! remainder falls below the grain. What remains is the tier's medium.
 //! Every draw is read from the seed along a fixed path; nothing is searched.
 //!
+//! A centre keeps its tier's share and physics leaves a share unformed (the
+//! medium), both laws of the tier, never draws; a body below its minimum is
+//! not formed and its share joins the medium.
+//!
 //! The tiers: the epicenter (no mass) deploys the cores; a core its systems
 //! (unit period 60² bells); a star its orbs (unit 60 bells). Masses are in
 //! units of core 1's mass (`M_core = 1`), radii in its gravitational
@@ -86,6 +90,28 @@ fn draw(seed: &[u8; 32], path: &[u32], field: &str, j: u32) -> u64 {
     u64::from_le_bytes(h.finalize().as_bytes()[..8].try_into().expect("8 bytes"))
 }
 
+/// A tier's laws (docs/78, "The mass split", amended with xylarium's
+/// guidance 2026-10-14): the share its centre keeps, and the share of the
+/// rest physics leaves unformed (the medium). Anchors, not draws.
+struct Tier {
+    centre: Ratio,
+    medium: Ratio,
+}
+
+/// By depth: 3 the epicenter (no mass; the intergalactic medium), 2 a core
+/// (its hole, of order 1/1000 of its galaxy, the hole-to-bulge relation; the
+/// interstellar medium, of order 1/10, the Milky Way's gas to stars), 1 a
+/// star (99.86% of its system, the Sun's share; belts and comet clouds, of
+/// order 1/100 of the rest), 0 an orb (keeps all).
+fn tier(depth: u8) -> Tier {
+    match depth {
+        3 => Tier { centre: ratio(0, 1), medium: ratio(1, 2) },
+        2 => Tier { centre: ratio(1, 1000), medium: ratio(1, 10) },
+        1 => Tier { centre: ratio(9986, 10000), medium: ratio(1, 100) },
+        _ => Tier { centre: ratio(1, 1), medium: ratio(0, 1) },
+    }
+}
+
 /// A share `q/60`, q from 1 to 59 (one field of the base-60 odometer).
 fn share(seed: &[u8; 32], path: &[u32], j: u32) -> Ratio {
     ratio(1 + (draw(seed, path, "share", j) % 59) as i64, 60)
@@ -138,22 +164,33 @@ impl Body {
     }
 }
 
-/// One tier: the centre at `path` with `grains`, keeping `f_0` first (none
-/// for the epicenter), its satellites inside `reach` (none: bounded by the
-/// grain alone), the first period `unit`, then one tier down to `depth`.
-fn split(seed: &[u8; 32], path: Vec<u32>, mut grains: Manifest, keeps: bool, reach: Option<Ratio>, unit: Ratio, unit_mass: &Ratio, depth: u8) -> (Manifest, Vec<Body>, Manifest) {
-    let kept = if keeps { take(&grains, &share(seed, &path, 0)) } else { Manifest::new() };
+/// One tier: the centre at `path` with `grains` keeps its tier's share, the
+/// medium is set aside from the rest, and the satellites break what remains
+/// inside `reach` (none: bounded by the grain alone), the first period
+/// `unit`, then one tier down. What they leave joins the medium.
+fn split(seed: &[u8; 32], path: Vec<u32>, mut grains: Manifest, reach: Option<Ratio>, unit: Ratio, unit_mass: &Ratio, depth: u8) -> (Manifest, Vec<Body>, Manifest) {
+    let law = tier(depth);
+    let kept = take(&grains, &law.centre);
     less(&mut grains, &kept);
     let mut satellites = Vec::new();
     if depth == 0 {
         return (kept, satellites, grains);
     }
+    let mut medium = take(&grains, &law.medium);
+    less(&mut grains, &medium);
     let mut enclosed = mass(&kept) / unit_mass.clone();
     let mut period = unit.clone();
     for k in 1u32.. {
         let m = take(&grains, &share(seed, &path, k));
         let m_mass = mass(&m) / unit_mass.clone();
         if m_mass.is_zero() {
+            break;
+        }
+        // A body below its minimum is not formed; its share stays unformed.
+        // A core must hold a hole of at least a grain (no hole, no core); a
+        // star or an orb a grain (the stand-in manifest's scale sets no finer
+        // floor).
+        if depth == 3 && take(&m, &tier(2).centre).is_empty() {
             break;
         }
         if k > 1 {
@@ -170,12 +207,15 @@ fn split(seed: &[u8; 32], path: Vec<u32>, mut grains: Manifest, keeps: bool, rea
         at.push(k);
         // The satellite's own reach: r_d = r · m / M(<r).
         let own_reach = (!enclosed.is_zero()).then(|| radius.clone() * m_mass.clone() / enclosed.clone());
-        let (s_kept, s_sats, s_medium) = split(seed, at.clone(), m, true, own_reach, unit.clone() / ratio(60, 1), unit_mass, depth - 1);
+        let (s_kept, s_sats, s_medium) = split(seed, at.clone(), m, own_reach, unit.clone() / ratio(60, 1), unit_mass, depth - 1);
         let cores = path.is_empty();
         satellites.push(Body { path: at, radius: if cores { ratio(0, 1) } else { radius }, period: if cores { ratio(0, 1) } else { period.clone() }, kept: s_kept, satellites: s_sats, medium: s_medium });
         enclosed += m_mass;
     }
-    (kept, satellites, grains)
+    for (k, a) in grains {
+        *medium.entry(k).or_insert_with(|| ratio(0, 1)) += a;
+    }
+    (kept, satellites, medium)
 }
 
 /// The universe the pulse deploys: its cores, and the intergalactic medium.
@@ -188,11 +228,14 @@ pub struct Universe {
 /// THE PULSE: the manifest deployed from `seed`. The unit of mass is core 1's
 /// own (its kept grains), read first from the same draws.
 pub fn deploy(seed: &[u8; 32], manifest: &Manifest) -> Universe {
-    // Core 1's grains: the epicenter's first share, of which core 1 keeps its own.
-    let first = take(manifest, &share(seed, &[], 1));
-    let core_one = mass(&take(&first, &share(seed, &[1], 0)));
+    // Core 1's grains: the epicenter's first share of the formed part, of
+    // which core 1 keeps its tier's share.
+    let mut formed = manifest.clone();
+    less(&mut formed, &take(manifest, &tier(3).medium));
+    let first = take(&formed, &share(seed, &[], 1));
+    let core_one = mass(&take(&first, &tier(2).centre));
     let unit_mass = if core_one.is_zero() { ratio(1, 1) } else { core_one };
-    let (_, cores, medium) = split(seed, Vec::new(), manifest.clone(), false, None, ratio(60 * 60 * 60, 1), &unit_mass, 3);
+    let (_, cores, medium) = split(seed, Vec::new(), manifest.clone(), None, ratio(60 * 60 * 60, 1), &unit_mass, 3);
     Universe { cores, medium }
 }
 
