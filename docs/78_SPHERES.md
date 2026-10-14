@@ -115,10 +115,51 @@ event deploys them all, and everything after is a closed form of t from it
      reflections (the geometry's own operation, A1). Its share of each
      element is the manifest's `· a_i / Σa`, floored to the grain; what does
      not divide goes to the lowest mode.
-  2. **Systems.** About each core, its mode's systems at rational half-angle
-     radii, each with its share of the core's tier of grains.
-  3. **Bodies (S^60).** About each star, its orbs at rational half-angle
-     radii, as `siting.rs` sites orbs today.
+  2. **Systems.** About each core, its systems, by the mass split below.
+  3. **Bodies (S^60).** About each star, its orbs, by the same split one
+     tier down.
+- **The mass split** (one law at every tier: a core and its systems, a star
+  and its orbs). Everything below follows from the turning law and the seed;
+  nothing is searched.
+  - **Dominance.** A body of mass m at radius r about a centre enclosing
+    `M(<r)` turns its own satellites faster than its centre turns them out
+    to the radius where `m / r_d = M(<r) / r`:
+
+        r_d = r · m / M(<r)
+
+    Its satellites lie inside `r_d`. Linear, from ω alone: the square-free
+    Hill radius. A core's own `r_d` is read the same way from the cores
+    nearer the epicenter (the innermost core is bounded by the sphere).
+  - **Shares, inside out** (a stick broken from the seed). The centre keeps
+    `f_0` of the tier's grains; satellite k then takes `f_k` of what
+    remains. Each `f` is a seed draw `q / 60`, q from 1 to 59 (one field of
+    the base-60 odometer), tilted by the operator's dials.
+  - **Radii from periods, not dials.** Satellite k's period is
+    `P_k = P_(k−1) · (q_k + 1) / q_k` beats of its centre's bell (a
+    resonance chain, `q_k` a seed draw from 1 to 60), the first `P_1` one
+    unit of the tier in xylarium's powers of sixty: 60 bells for orbs about
+    a star, 60² for systems about a core.
+    Its radius follows from the law: ω = 1/P_k turns a bell, so
+
+        r_k = M(<r_k) · P_k
+
+    with `M(<r_k)` the centre plus the satellites already placed inside.
+    Periods and enclosed mass both grow outward, so radii do too.
+  - **The count emerges.** Satellites are placed until the next radius
+    would pass the centre's `r_d`, or the remainder falls below the grain.
+    What remains is the tier's MEDIUM: unbound grains held at the centre's
+    tier beyond its last orbit, enclosed by no orbit, there for later
+    accretion (the radial law, Open) and for the lines to work.
+  - **Elements.** Every share carries the manifest's composition in
+    proportion, each element floored to the grain; what an element does not
+    divide stays with the centre. A tier's operator recipe may tilt the
+    proportions (xylarium's dials), renormalised so every element's total is
+    kept exactly.
+  - **The seed's paths.** Draw j of field `x` at tier τ for body b is read
+    from `blake3(origin hash ‖ τ ‖ b ‖ x ‖ j)`, the origin hash being era 1's
+    version-2 origin. Fixed paths: the same seed deploys the same universe.
+  - **The unit.** Masses are in the deepest core's grains (core 1 =
+    `M_core = 1`, xylarium's anchor), so ω and r are exact rationals.
 - **Motion.** Every body turns about its centre by the law above, from its
   mode's phase `φ` at t = 0, in the plane its mode's reflections give. Each
   body reads the mass its own orbit encloses, so orbits are closed; the
@@ -142,6 +183,7 @@ event deploys them all, and everything after is a closed form of t from it
   the element almanac's inventory an origin; today it is a table.
 
 **Ruled with xylarium's guidance (2026-10-14), within netstratum's remit:**
+- the mass split: netstratum's own (tubes need no match), designed above;
 - the spectrum: seed-derived, dial-tilted (above);
 - the scale: xylarium's anchor (above);
 - era 0's lines: none carried. Era 1 is a new domain (ruling 1); its
@@ -150,9 +192,13 @@ event deploys them all, and everything after is a closed form of t from it
   lines stay in its record.
 
 **Open:**
-- **The tiers' split** (netstratum's own; tubes need no match): how a core's
-  grains divide between the core and its systems, and how many systems and
-  orbs each mode deploys.
+- **The founding manifest.** Until mycelium's endowments and grants stand,
+  a stand-in: era 0's element totals read from its record, so the stand-in
+  is a measured universe, not an invented one. Replaced by the grant when
+  it crosses.
+- **The split's dials.** The base-60 draws and the resonance chain are
+  authored; the operator's recipes may tilt the shares. Measured on the
+  first deployment: systems per galaxy, orbs per star, the medium's share.
 - **Radial motion.** The law turns bodies; it does not move them in or out.
   Radii are the deployment's, so infall, accretion and escape are not yet
   physics. A square-free radial law is owed before any body changes orbit.
