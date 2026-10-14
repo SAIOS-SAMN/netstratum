@@ -103,7 +103,9 @@ pub fn read(path: Vec<u32>, matter: &Manifest, period: &Ratio, coupling: &Ratio,
     if loose.is_zero() {
         return None;
     }
-    let size = loose / (ratio(1, 1) + mass(matter) / world_scale.clone());
+    // Normalised to the home world (xylarium's ruler, shared 2026-10-14):
+    // `R = 2 · R_loose / (1 + r)`, r its mass over the home world's.
+    let size = ratio(2, 1) * loose / (ratio(1, 1) + mass(matter) / world_scale.clone());
     let gravity = mass(matter) / size.clone();
     let plasma = |a: &Atom| grip(a) < heat;
     let volatile = |a: &Atom| !plasma(a) && a.unpaired <= 1;
@@ -201,6 +203,54 @@ pub fn wake_bell(w: &World, k: u64, t_u: u64) -> Option<u64> {
     Some(w.delay + echoes.checked_mul(t_u)?)
 }
 
+/// The home reference bodies (masses) and the home world's turn (bells).
+pub struct Home {
+    pub star: Ratio,
+    pub world: Ratio,
+    pub year_bells: Ratio,
+}
+
+/// The home galaxy is the deepest core (the largest hole, the unit of mass);
+/// its innermost star and that star's innermost world are the rulers.
+pub fn home(u: &Universe) -> Option<Home> {
+    let core = u.cores.iter().max_by(|a, b| mass(&a.kept).cmp(&mass(&b.kept)))?;
+    let sys = core.satellites.first()?;
+    let orb = sys.satellites.first()?;
+    Some(Home { star: mass(&sys.kept), world: mass(&orb.kept), year_bells: orb.period.clone() })
+}
+
+/// THE BELL (xylarium's ladder, shared): the home core's ring, the pulse's
+/// round trip to the disc's edge and back at light speed, about 97,850
+/// standard years. The standard year is the home world's local year (the
+/// system ruler).
+pub const BELL_YEARS: i64 = 97_850;
+/// What one copier carries before a body must (cells: a generation is a
+/// local day), and a mind's blueprint (bodies: a generation is a local
+/// year): of order a cell's genome and an animal's (anchors).
+pub const CELL_BITS: i64 = 10_000_000;
+pub const GENOME_BITS: i64 = 6_000_000_000;
+/// A world's day as a share of its year, until S^60 bodies spin (an anchor:
+/// the base-60 circle).
+pub const DAYS_A_YEAR: i64 = 360;
+
+/// The bells a medium's climb takes on a world (docs/82, with xylarium's
+/// ruler): selection writes at most a bit a generation, cells a local day a
+/// generation up to a copier's capacity, bodies a local year for the rest;
+/// decay stretches it by `1 / (1 − 1/x)`. Its local year in standard years
+/// is its turn over the home world's; a bell is BELL_YEARS of them.
+pub fn climb_bells(period_bells: &Ratio, home_year_bells: &Ratio, x: &Ratio, compression: &Ratio) -> Option<Ratio> {
+    let _rungs = recoherences_needed(x, compression)?;
+    let year = period_bells.clone() / home_year_bells.clone();
+    let cells = ratio(CELL_BITS, 1) * year.clone() / ratio(DAYS_A_YEAR, 1);
+    let bodies = ratio(GENOME_BITS - CELL_BITS, 1) * year;
+    let effective = x.clone() * (ratio(1, 1) + compression.clone());
+    let keep = ratio(1, 1) - ratio(1, 1) / effective;
+    if keep <= ratio(0, 1) {
+        return None;
+    }
+    Some((cells + bodies) / keep / ratio(BELL_YEARS, 1))
+}
+
 /// THE WINDOW: a star sheds about `ε/2` of itself an echo (its coherence
 /// averaging a half; docs/78, the breath), so it stays above its worlds'
 /// mass for `log2(M_star / M_worlds) · ln 2 · 2/ε` echoes: counted in whole
@@ -221,26 +271,33 @@ pub fn window_echoes(star: &Ratio, worlds: &Ratio) -> u64 {
 /// drawn from the seed) — an impact wastes that recoherence, the rung's need
 /// kept, life never undone. The mind wakes at the recoherence its last rung
 /// is written, if within the star's window; else never.
-pub fn climb(w: &World, x: &Ratio, compression: &Ratio, seed: &[u8; 32], medium: &str, t_u: u64) -> Option<u64> {
-    let needed = recoherences_needed(x, compression)?;
+#[allow(clippy::too_many_arguments)]
+pub fn climb(w: &World, x: &Ratio, compression: &Ratio, seed: &[u8; 32], medium: &str, t_u: u64, period_bells: &Ratio, home_year_bells: &Ratio) -> Option<u64> {
+    let bells = climb_bells(period_bells, home_year_bells, x, compression)?;
     let slip = ratio(1, 1) - w.coupling.clone();
     if slip <= ratio(0, 1) {
         return None;
     }
-    let last: u64 = (ratio(w.window.min(u32::MAX as u64) as i64, 1) * slip).floor().to_integer().try_into().unwrap_or(0);
+    // The mind is LOCKED in at a recoherence of the coupling: the first
+    // after its climb completes, each impact at a recoherence before then
+    // costing that interval again (the rung's need kept). Within the star's
+    // window, or never.
+    let last: u64 = (ratio(w.window.min(u32::MAX as u64) as i64, 1) * slip.clone()).floor().to_integer().try_into().unwrap_or(0);
     let p = w.belts.clone() / (ratio(1, 1) + compression.clone());
     let threshold: u64 = (p * ratio(1_000_000, 1)).floor().to_integer().try_into().unwrap_or(0);
     let mut path = w.path.clone();
     path.push(medium.len() as u32);
-    let mut written = 0u64;
+    let mut due = ratio(w.delay as i64, 1) + bells;
     for k in 1..=last {
-        let struck = crate::pulse::draw(seed, &path, "impact", k as u32) % 1_000_000 < threshold;
-        if !struck {
-            written += 1;
-            if written >= needed {
-                return wake_bell(w, k, t_u);
+        let at = wake_bell(w, k, t_u)?;
+        if ratio(at as i64, 1) < due {
+            if crate::pulse::draw(seed, &path, "impact", k as u32) % 1_000_000 < threshold {
+                let next = wake_bell(w, k + 1, t_u)?;
+                due += ratio((next - at) as i64, 1);
             }
+            continue;
         }
+        return Some(at);
     }
     None
 }
@@ -251,13 +308,18 @@ pub fn worlds(u: &Universe) -> Vec<World> {
         v.sort();
         v.get(v.len() / 2).cloned().filter(|m| !m.is_zero()).unwrap_or_else(|| ratio(1, 1))
     };
-    let star_scale = median(u.cores.iter().flat_map(|c| &c.satellites).map(|s| mass(&s.kept)).collect());
-    let world_scale = median(u.cores.iter().flat_map(|c| &c.satellites).flat_map(|s| &s.satellites).map(|o| mass(&o.kept)).collect());
+    // ONE RULER PER TIER (shared with xylarium, 2026-10-14): the HOME
+    // reference body: the home galaxy (the deepest core), its innermost
+    // star, and that star's innermost world.
+    let _ = median;
+    let home = home(u);
+    let star_scale = home.as_ref().map(|h| h.star.clone()).unwrap_or_else(|| ratio(1, 1));
+    let world_scale = home.as_ref().map(|h| h.world.clone()).unwrap_or_else(|| ratio(1, 1));
     let mut out = Vec::new();
     for core in &u.cores {
         for sys in &core.satellites {
             let star = mass(&sys.kept);
-            let star_burn = ratio(1, 1) + star.clone() / star_scale.clone();
+            let star_burn = (ratio(1, 1) + star.clone() / star_scale.clone()) / ratio(2, 1);
             let mut inside = star.clone();
             let delay: u64 = core.radius.floor().to_integer().try_into().unwrap_or(0);
             let system = mass(&sys.total());

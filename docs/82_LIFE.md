@@ -188,6 +188,30 @@ carry life, and a world may carry several forms at once.
   PEOPLE (Franklin's ~500 fed by the world's medium). They come before any
   waking is seated as a line.
 
+## The shared ruler and the climb in generations (2026-10-14, with xylarium)
+
+- **One ruler per tier:** compression's `M_a` is the HOME reference body
+  (the home galaxy, the deepest core; its innermost star; that star's
+  innermost world), normalised `R = 2 · R_loose / (1 + r)` and a star's burn
+  `(1 + r) / 2`, r the mass over the home body's.
+- **The bell:** the home core's ring, about 97,850 standard years
+  (xylarium's ladder). The standard year is the home world's local year
+  (the system ruler); a world's local year in standard years is its turn
+  over the home world's.
+- **The climb in generations** (selection writes at most a bit a
+  generation): cells a local day a generation up to a copier's capacity
+  (~1e7 bits), bodies a local year a generation for the rest (to ~6e9
+  bits); decay stretches it by `1/(1 − 1/x)`. The mind is LOCKED in at the
+  first coupling recoherence after its climb, each impact at a recoherence
+  before then costing that interval again, within the star's window or
+  never.
+- **Reading** (`life var-e1`): minds wake on 93 worlds (chemical), 103
+  (geologic) and 193 (plasmic) of 5,716, about 2% to 7%, near xylarium's
+  2%; the first at bell 62,460, in the galaxy nearest the universal core.
+  The body rungs are the bottleneck, as xylarium found.
+- **Still open:** the informational medium (whole coherence at every
+  recoherence; not climbed), and a viable people's scale.
+
 ## A people is read from its world
 
 - **Its medium** defines it: chemical (the compound it lives in), geologic

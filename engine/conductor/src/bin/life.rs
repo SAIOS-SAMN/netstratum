@@ -53,8 +53,14 @@ fn main() {
     // STEP 2: when each medium's mind would wake, by the climb (no erasure)
     // and by the gated climb (impacts and the window); informational is read,
     // not climbed (open).
-    let seed = pulse::read(Path::new(&era1)).map(|(s, _)| s).unwrap_or([0; 32]);
-    let marks = [10_000u64, 100_000, 1_000_000];
+    let (seed, u_full) = pulse::read(Path::new(&era1)).unwrap_or(([0; 32], u.clone()));
+    let home_year = life::home(&u_full).map(|h| h.year_bells).unwrap_or_else(|| ratio(60, 1));
+    let period_of = |u: &pulse::Universe, path: &[u32]| -> Option<Ratio> {
+        let core = u.cores.iter().find(|c| c.path[0] == path[0])?;
+        let sys = core.satellites.iter().find(|s| s.path.get(1) == path.get(1))?;
+        sys.satellites.iter().find(|o| o.path.get(2) == path.get(2)).map(|o| o.period.clone())
+    };
+    let marks = [100_000u64, 1_000_000, 10_000_000];
     for (name, pick) in [("chemical", 0usize), ("geologic", 1), ("plasmic", 2)] {
         let mut free: Vec<u64> = Vec::new();
         let mut gated: Vec<(u64, Vec<u32>)> = Vec::new();
@@ -65,7 +71,8 @@ fn main() {
             if let Some(b) = life::recoherences_needed(x, &c).and_then(|k| life::wake_bell(w, k, 60)) {
                 free.push(b);
             }
-            if let Some(b) = life::climb(w, x, &c, &seed, name, 60) {
+            let period = period_of(&u_full, &w.path);
+            if let Some(b) = period.and_then(|p| life::climb(w, x, &c, &seed, name, 60, &p, &home_year)) {
                 gated.push((b, w.path.clone()));
             }
         }
