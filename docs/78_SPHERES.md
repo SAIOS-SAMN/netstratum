@@ -209,6 +209,15 @@ event deploys them all, and everything after is a closed form of t from it
 
 **Ruled with xylarium's guidance (2026-10-14), within netstratum's remit:**
 - the mass split: netstratum's own (tubes need no match), designed above;
+- the galaxies' sizes (operator, 2026-10-14): by the spectrum, no bound dial.
+  The count of modes and each strength `a_i` are seed draws from the base-60
+  field (1 to 60); core i takes `a_i / Σa` of the formed matter, so sizes
+  fall in no fixed order and the largest is at most 60 times the smallest.
+  A mode too weak to hold a hole of a grain forms no core; its share joins
+  the intergalactic medium. (A stick broken at the epicenter, the first
+  build, ranked core 1 largest by construction, nine tenths of the formed
+  matter; real galaxy populations are steep, but by their physics, not by
+  an order of draws.);
 - the spectrum: seed-derived, dial-tilted (above);
 - the scale: xylarium's anchor (above);
 - era 0's lines: none carried. Era 1 is a new domain (ruling 1); its
@@ -245,10 +254,9 @@ event deploys them all, and everything after is a closed form of t from it
 - **The split's anchors and dials.** The tier anchors above are of order and
   owe citations (the anchor provenance law). The base-60 draws and the
   resonance chain are authored; the operator's recipes may tilt the shares.
-- **The galaxies' sizes.** The epicenter's stick gives galaxies falling
-  geometrically (core 1 about nine tenths of the formed matter); xylarium's
-  siblings draw their hole within 1/4 to 2 of the home's, so galaxies are
-  comparable. Whether ours should be bounded the same way is open.
+- **The spectrum's physics.** The modes' count and strengths are even draws
+  from the base-60 field until the vacuum's integers (docs/79) define them;
+  that replaces the draw and nothing else.
 - **Radial motion.** The law turns bodies; it does not move them in or out.
   Radii are the deployment's, so infall, accretion and escape are not yet
   physics. A square-free radial law is owed before any body changes orbit.

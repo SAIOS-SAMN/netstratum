@@ -15,7 +15,7 @@
 //!
 //! The tiers: the epicenter (no mass) deploys the cores; a core its systems
 //! (unit period 60² bells); a star its orbs (unit 60 bells). Masses are in
-//! units of core 1's mass (`M_core = 1`), radii in its gravitational
+//! units of the deepest core's hole (`M_core = 1`), radii in its gravitational
 //! lengths. A core's place on S^360 is formed at the place step (A1); here
 //! it is its draw path.
 
@@ -98,7 +98,8 @@ struct Tier {
     medium: Ratio,
 }
 
-/// By depth: 3 the epicenter (no mass; the intergalactic medium), 2 a core
+/// By depth: 3 the epicenter (no mass; the intergalactic medium; its cores
+/// by the spectrum's strengths, `deploy`), 2 a core
 /// (its hole, of order 1/1000 of its galaxy, the hole-to-bulge relation; the
 /// interstellar medium, of order 1/10, the Milky Way's gas to stars), 1 a
 /// star (99.86% of its system, the Sun's share; belts and comet clouds, of
@@ -186,18 +187,13 @@ fn split(seed: &[u8; 32], path: Vec<u32>, mut grains: Manifest, reach: Option<Ra
         if m_mass.is_zero() {
             break;
         }
-        // A body below its minimum is not formed; its share stays unformed.
-        // A core must hold a hole of at least a grain (no hole, no core); a
-        // star or an orb a grain (the stand-in manifest's scale sets no finer
-        // floor).
-        if depth == 3 && take(&m, &tier(2).centre).is_empty() {
-            break;
-        }
+        // A star or an orb below a grain is not formed (the stand-in
+        // manifest's scale sets no finer floor; roundness replaces it).
         if k > 1 {
             period = period * resonance(seed, &path, k);
         }
-        // The epicenter encloses no mass: its cores stand at their periods'
-        // lengths (they do not orbit; their places are formed at A1).
+        // A centre whose share floored to nothing encloses no mass: its
+        // first satellite stands at its period's length.
         let radius = if enclosed.is_zero() { period.clone() } else { enclosed.clone() * period.clone() };
         if reach.as_ref().is_some_and(|r| radius > *r) {
             break;
@@ -208,8 +204,7 @@ fn split(seed: &[u8; 32], path: Vec<u32>, mut grains: Manifest, reach: Option<Ra
         // The satellite's own reach: r_d = r · m / M(<r).
         let own_reach = (!enclosed.is_zero()).then(|| radius.clone() * m_mass.clone() / enclosed.clone());
         let (s_kept, s_sats, s_medium) = split(seed, at.clone(), m, own_reach, unit.clone() / ratio(60, 1), unit_mass, depth - 1);
-        let cores = path.is_empty();
-        satellites.push(Body { path: at, radius: if cores { ratio(0, 1) } else { radius }, period: if cores { ratio(0, 1) } else { period.clone() }, kept: s_kept, satellites: s_sats, medium: s_medium });
+        satellites.push(Body { path: at, radius, period: period.clone(), kept: s_kept, satellites: s_sats, medium: s_medium });
         enclosed += m_mass;
     }
     for (k, a) in grains {
@@ -225,17 +220,46 @@ pub struct Universe {
     pub medium: Manifest,
 }
 
-/// THE PULSE: the manifest deployed from `seed`. The unit of mass is core 1's
-/// own (its kept grains), read first from the same draws.
+/// THE PULSE: the manifest deployed from `seed`. The unit of mass is the
+/// deepest core's hole.
 pub fn deploy(seed: &[u8; 32], manifest: &Manifest) -> Universe {
-    // Core 1's grains: the epicenter's first share of the formed part, of
-    // which core 1 keeps its tier's share.
+    // The epicenter keeps nothing; the intergalactic medium is set aside.
+    let mut medium = take(manifest, &tier(3).medium);
     let mut formed = manifest.clone();
-    less(&mut formed, &take(manifest, &tier(3).medium));
-    let first = take(&formed, &share(seed, &[], 1));
-    let core_one = mass(&take(&first, &tier(2).centre));
-    let unit_mass = if core_one.is_zero() { ratio(1, 1) } else { core_one };
-    let (_, cores, medium) = split(seed, Vec::new(), manifest.clone(), None, ratio(60 * 60 * 60, 1), &unit_mass, 3);
+    less(&mut formed, &medium);
+    // THE SPECTRUM (docs/78): the count of modes and each mode's strength
+    // `a_i`, seed draws from the base-60 field (1 to 60). Core i takes
+    // `a_i / Σa` of the formed matter, so sizes fall in no fixed order and
+    // the largest is at most 60 times the smallest. A mode too weak to hold
+    // a hole of a grain forms no core; its share stays unformed.
+    let modes = 1 + (draw(seed, &[], "modes", 0) % 60) as u32;
+    let strengths: Vec<i64> = (1..=modes).map(|i| 1 + (draw(seed, &[i], "strength", 0) % 60) as i64).collect();
+    let sum: i64 = strengths.iter().sum();
+    let mut shares: Vec<(u32, Manifest)> = Vec::new();
+    for (i, a) in (1..=modes).zip(&strengths) {
+        let m = take(&formed, &ratio(*a, sum));
+        if take(&m, &tier(2).centre).is_empty() {
+            continue;
+        }
+        shares.push((i, m));
+    }
+    for (_, m) in &shares {
+        less(&mut formed, m);
+    }
+    for (k, a) in formed {
+        *medium.entry(k).or_insert_with(|| ratio(0, 1)) += a;
+    }
+    // The unit: the deepest core's hole (`M_core = 1`).
+    let deepest = shares.iter().map(|(_, m)| mass(&take(m, &tier(2).centre))).max().unwrap_or_else(|| ratio(1, 1));
+    // A core's reach waits for the cores' places (A1): until then its
+    // systems are bounded by their minimum alone.
+    let cores = shares
+        .into_iter()
+        .map(|(i, m)| {
+            let (kept, satellites, medium) = split(seed, vec![i], m, None, ratio(60 * 60, 1), &deepest, 2);
+            Body { path: vec![i], radius: ratio(0, 1), period: ratio(0, 1), kept, satellites, medium }
+        })
+        .collect();
     Universe { cores, medium }
 }
 
