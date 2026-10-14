@@ -32,5 +32,13 @@ fn main() {
         let medium = pulse::mass(&c.medium) / unit.clone();
         println!("  galaxy {:?} at {} bells out: {echoes} echoes, {rungs} rungs (recoherences), coherence now {}%, aeon {} bells (rate {}); {born} systems, {orbs} orbs; medium left {}; {year}", c.path, c.radius, (coh * cfe::ratio::ratio(100, 1)).round(), aeon.round(), g_rate, medium.round());
     }
+    // THE CLOCKS (docs/78): which duty comes due how often, by layer.
+    let terms: Vec<u64> = (0..u.cores.len()).map(|i| conductor::clocks::galaxy_terms(&u, i, t_u, 0, until)).collect();
+    let epochs: Vec<u64> = (0..u.cores.len()).map(|i| conductor::clocks::galaxy_epochs(&u, i, &unit, t_u, 0, until)).collect();
+    let worlds: Vec<u64> = u.cores.iter().flat_map(|c| &c.satellites).flat_map(|s| &s.satellites).map(|o| conductor::clocks::local_years(&o.period, 0, until)).collect();
+    let journaled = worlds.iter().filter(|&&y| y > 0).count();
+    let mut w = worlds.clone();
+    w.sort();
+    println!("CLOCKS — over {until} bells: galaxy terms (echoes received) {terms:?}; galaxy epochs (half-mass rungs) {epochs:?}; worlds' journals: {} worlds, {journaled} with a completed local year (most years {:?}, median {:?}); universal echoes {}", worlds.len(), w.last(), w.get(w.len() / 2), until / t_u);
     println!("CONSERVATION — the breath created nothing: {}", u.total() == before);
 }

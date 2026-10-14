@@ -86,6 +86,7 @@ pub mod annal;
 pub mod pulse;
 pub mod motion;
 pub mod breath;
+pub mod clocks;
 // SOC-1 (operator directive 2026-08-16): the open build workbench — the surplus
 // phase of `build_step` draws its next building from a disposition-weighted
 // partition function seeded by the chronicle digest, in place of the fixed

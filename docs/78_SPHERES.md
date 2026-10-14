@@ -426,6 +426,31 @@ Operator, 2026-10-14. Built: `conductor::breath`, the `breathe` binary.
   - Cost: about 31 ms an echo (3.9 minutes for 36,000 bells); the era-1
     conductor needs this as a closed form between events.
 
+## The clocks: which duty rides which clock
+
+A duty rides the clock of the layer it reads, never one shared year (the
+60-beat close retires). Built: `conductor::clocks`; counts are closed forms
+between two bells, never stepped.
+
+| layer | its clock | its duties |
+|---|---|---|
+| the universal core | the echo, every `T_u` bells | the breath (births, shedding) |
+| a galaxy, operational | each echo it receives (`T_u`, after its distance) | the realms' term, parliaments, keepers' judgement, gate accounts |
+| a galaxy, epochal | the RUNGS of its half-mass layer (its recoherences) | ascension by deed (a full rung kept), the core's re-emission, the aeon's marks |
+| a star system | its own rungs (its nested slip) | the system's epochs |
+| a world (orb) | its LOCAL YEAR (one turn about its star) | its journal, upkeep, demography |
+| the process | a count of echoes | memory, profiling (not physics) |
+
+- **Why a galaxy has two clocks.** Every galaxy must keep its ordinary
+  business, but the galaxy nearest the universal core runs at rate 1 and
+  never slips, and its orbits' own dilation is weak-field (about 1/3,600):
+  it climbs no rungs. So business rides the echoes, and EPOCHS happen only
+  where time layers. An undilated galaxy has no epochs: its ancients cannot
+  arise by deed there.
+- **Reading** (36,000 bells): galaxy terms 542 to 596 (echoes received);
+  epochs 369 to 439 for the twelve dilated galaxies, 0 for the undilated
+  one; all 7,823 worlds completed local years (most 600, median 543).
+
 ## The atom: matter at the boundary (the lowest tier)
 
 Mycelium's manifest counts nuclei per Z. Z, the count of a nucleus's
