@@ -14,7 +14,7 @@ fn main() {
         return;
     };
     let before = u.total();
-    let events = breath::breathe(&mut u, &seed, t_u, until);
+    let events = breath::breathe(&mut u, &seed, t_u, 0, until);
     let unit = breath::unit_mass(&u);
     let births = events.iter().filter(|e| e.born.is_some()).count();
     let dissolved: usize = events.iter().map(|e| e.dissolved).sum();

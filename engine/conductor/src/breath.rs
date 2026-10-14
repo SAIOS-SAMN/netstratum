@@ -98,11 +98,12 @@ pub struct Event {
     pub dissolved: usize,
 }
 
-/// Breathe the universe from bell 0 to `until`, echoes every `t_u` bells.
+/// Breathe the universe over bells `from` (exclusive) to `until`, echoes
+/// every `t_u` bells (the conductor calls it once a beat, `(beat − 1, beat]`).
 /// Events in time order. Each echo is a perpendicular write down; each birth
 /// answers it with a perpendicular write up (the galaxy's mass within the
 /// new orbit changes), closing a loop.
-pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, until: u64) -> Vec<Event> {
+pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u64) -> Vec<Event> {
     let unit = unit_mass(u);
     let law = tier(2);
     let s = law.reach.clone();
@@ -114,7 +115,9 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, until: u64) -> Vec<E
         let delay: u64 = c.radius.floor().to_integer().try_into().unwrap_or(0);
         let mut k = 1u64;
         while k * t_u + delay <= until {
-            arrivals.push((k * t_u + delay, i, k));
+            if k * t_u + delay > from {
+                arrivals.push((k * t_u + delay, i, k));
+            }
             k += 1;
         }
     }
@@ -197,7 +200,7 @@ mod tests {
         let manifest: crate::pulse::Manifest = [("Z001".to_string(), ratio(4_000_000, 1)), ("Z008".to_string(), ratio(1_000_000, 1))].into();
         let mut u = crate::pulse::deploy(&[3; 32], &manifest);
         assert!(u.cores.iter().all(|c| c.satellites.is_empty()), "the pulse lays down no systems");
-        let events = breathe(&mut u, &[3; 32], 60, 6000);
+        let events = breathe(&mut u, &[3; 32], 60, 0, 6000);
         assert!(events.iter().any(|e| e.born.is_some()), "echoes give birth");
         assert_eq!(u.total(), manifest, "the medium is consumed, nothing created");
         assert_eq!(rate(&ratio(3, 1), &ratio(1, 1)), ratio(3, 4));

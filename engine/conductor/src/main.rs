@@ -3,13 +3,13 @@
 //! Usage:
 //!   conductor [--var var] [--cycles N] [--cadence SECONDS] [--fold]
 //!
-//! THE DEFINITION LAW (`polities.rs`): the roster is COMPILED. There is
-//! no `polities.json` to seed, adopt, or hand-edit — a line is added
-//! through the receipted door (`civ new`), never by editing a file.
+//! ERA 1 (docs/78): the universe is the pulse's (`<var>/pulse.bin`, deployed
+//! by the `pulse` binary), breathed a bell a beat. No founding lines are
+//! compiled in; a line stands only if registered in this universe.
 //! `--cycles 0` (default) beats forever at the cadence. Watch live:
 //!   python3 tools/observer.py --watch 2
 
-use conductor::{observe_crossings, roster, Polity};
+use conductor::{observe_crossings, registered_polities, Polity};
 use ledger::registry::Registry;
 use ledger::Ledger;
 use std::path::PathBuf;
@@ -52,14 +52,22 @@ fn main() {
         }
     }
     std::fs::create_dir_all(&var_root).expect("var root");
-    // THE DEFINITION LAW: the roster compiles. The legacy-adoption shim
-    // for `egregores.json`/`bots.json` is struck with the file itself —
-    // there is no longer a roster on disk for a legacy name to become.
     let registry = Registry::at(format!("{var_root}/registry"));
-    // THE DEFINITION LAW: the compiled founding lines plus every line
-    // the operator has registered since. No roster file is read.
-    let specs = roster(&registry);
+    // ERA 1 (docs/78): no compiled founding lines are carried; a line
+    // stands only if registered in this universe (life arises from its
+    // physics). The universe itself is the pulse's, deployed beforehand
+    // (the `pulse` binary) into `<var>/pulse.bin`.
+    let specs = registered_polities(&registry);
     let book = Ledger::at(format!("{var_root}/worlds"));
+    let Some((pulse_seed, mut universe)) = conductor::pulse::read(std::path::Path::new(&var_root)) else {
+        eprintln!("conductor: no universe at {var_root}/pulse.bin — deploy it first (the pulse binary)");
+        std::process::exit(1);
+    };
+    // THE UNIVERSAL PULSE: TUniversal sets it at founding; 60 bells stands in.
+    // One beat is one bell.
+    const T_U: u64 = 60;
+    let unit = conductor::breath::unit_mass(&universe);
+    println!("conductor: the pulse universe — {} cores, {} systems; T_u {T_U} bells", universe.cores.len(), universe.cores.iter().map(|c| c.satellites.len()).sum::<usize>());
 
     // CONVERGE-1 (07 §1.6): converge the archived eras BEFORE genesis —
     // boot adopts the past instead of founding blind beside it.
@@ -86,7 +94,7 @@ fn main() {
     // docs/58 §3 — THE BIG BANG, recorded once on this universe's ledger
     // before any world is founded (or, for a universe that predates the law,
     // once and late as its re-founding).
-    match book.found_universe(conductor::roster_digest(), cfe::almanac::matter_law_digest(), epoch_base) {
+    match book.found_universe(pulse_seed, cfe::almanac::matter_law_digest(), epoch_base) {
         Ok((seed, true)) => println!(
             "conductor: THE BIG BANG — this universe is {} (recorded now)",
             seed.iter().take(8).map(|b| format!("{b:02x}")).collect::<String>()
@@ -127,7 +135,7 @@ fn main() {
         println!("conductor: {name} resumed collapsed; it stays out of the roster");
     }
     println!(
-        "conductor: {} civilizations from the compiled roster — {}",
+        "conductor: {} registered civilizations — {}",
         worlds.len(),
         if cycles == 0 {
             format!("beating every {cadence_secs}s (Ctrl-C to stop)")
@@ -254,6 +262,36 @@ fn main() {
         // TUniversal T = epoch base + this era's beat (07 §1.3): live
         // ticks stack on the converged timeline, never restart it.
         let _ = book.set_universal_clock(epoch_base + beat);
+        // THE BREATH (docs/78): the echoes arriving this bell compress the
+        // media; stars shed by their phase; the clocks say what comes due.
+        let events = conductor::profile::timed("breath", || conductor::breath::breathe(&mut universe, &pulse_seed, T_U, beat - 1, beat));
+        let mut breath_reading = conductor::annal::BreathReading {
+            echoes: events.len() as u64,
+            births: events.iter().filter(|e| e.born.is_some()).count() as u64,
+            returned: events.iter().fold(cfe::ratio::ratio(0, 1), |s, e| s + e.returned.clone()),
+            dissolved: events.iter().map(|e| e.dissolved as u64).sum(),
+            ..Default::default()
+        };
+        if !events.is_empty() {
+            let _ = conductor::pulse::write(std::path::Path::new(&var_root), &pulse_seed, &universe);
+            println!(
+                "beat {beat}: BREATH — {} echoes, {} systems born, {} returned to the media, {} stars dissolved",
+                breath_reading.echoes, breath_reading.births, breath_reading.returned.clone().round(), breath_reading.dissolved
+            );
+        }
+        conductor::profile::timed("clocks", || {
+            for i in 0..universe.cores.len() {
+                breath_reading.terms += conductor::clocks::galaxy_terms(&universe, i, T_U, beat - 1, beat);
+                breath_reading.epochs += conductor::clocks::galaxy_epochs(&universe, i, &unit, T_U, beat - 1, beat);
+            }
+            breath_reading.local_years = universe
+                .cores
+                .iter()
+                .flat_map(|c| &c.satellites)
+                .flat_map(|s| &s.satellites)
+                .map(|o| conductor::clocks::local_years(&o.period, beat - 1, beat))
+                .sum();
+        });
         // docs/63 — every 10 beats, the observed set: an unobserved line is
         // compacted (carried and unloaded), an observed compact line unrolled.
         if beat.is_multiple_of(10) {
@@ -509,7 +547,7 @@ fn main() {
             "beat {beat}: DECIDE hull — {} lines seen, {} lost for want of hull; persistence {} of {} rows this beat, {} of {} over the books' windows; {} books, {} triples",
             d.rows, d.lost, d.correct, d.scored, hubs.persistence.0, hubs.persistence.1, hubs.books.0, hubs.books.1
         );
-        if let Err(e) = annal.beat(beat, &hubs, spots.len(), &tolls, &gated, released) {
+        if let Err(e) = annal.beat(beat, &hubs, spots.len(), &tolls, &gated, released, &breath_reading) {
             println!("beat {beat}: THE UNIVERSE JOURNAL is not kept this beat: {e}");
         }
         // Concordance 3.9: the councils the house seats, published for it.
@@ -558,7 +596,9 @@ fn main() {
         }
         // JOURNAL-1 (08 §3): on year boundaries every civilization
         // speaks — journals + the Terminal Wall regenerate lens-side.
-        if beat.is_multiple_of(scribe::journal::YEAR_TICKS) {
+        // THE CLOCKS (docs/78): the galaxies' business closes on their terms
+        // (echoes received), not on a shared 60-beat year.
+        if breath_reading.terms > 0 {
             // ROUTE-1: the year voice draws lane maintenance — an
             // unpaid lane lapses by receipt and raw space returns.
             let mut year_lines: Vec<String> = Vec::new();
