@@ -221,10 +221,18 @@ event deploys them all, and everything after is a closed form of t from it
   a stand-in: era 0's element totals read from its record, so the stand-in
   is a measured universe, not an invented one. Replaced by the grant when
   it crosses.
-  - **Its unit** (xylarium's proposal to mycelium, 2026-10-14, agreed): the
-    boundary counts ATOMS per Z, unit-free, and each kernel converts with
-    its own nucleon mass, so neither needs the other's core mass, grains or
-    scale. Motion never crosses a tube; only manifests and mouths do.
+  - **Its unit, ruled by mycelium** (MANIFEST, ACT_DOMAIN 17, 2026-10-14,
+    via xylarium): it COUNTS NUCLEI per Z, never mass. Entries ascend in Z,
+    each once (u16); each count is a positive integer of any size (a
+    package is about 1e60 nuclei), an exact rational with denominator 1 in
+    the algebra's scalar codec. A fraction, a zero or an empty manifest is
+    refused. The hypha's account is counts per Z; isotopes stay each
+    universe's own. Each kernel converts with its own nucleon mass. Motion
+    never crosses a tube; only manifests and mouths do. Mycelium sends the
+    byte layout with the build.
+  - **So the grain is netstratum's internal unit:** a crossing manifest is
+    converted through the Z map below into grains (nuclei × nucleon mass per
+    grain, floored, the remainder kept as the medium's), and out again.
   - **Netstratum's Z map** (owed): our matter is not the real periodic table
     (the almanac's hash-derived elements on their own axes: line, ten lanes,
     shell, phase, spin; 855 kinds in era 0, beside the bulk resources), so a
