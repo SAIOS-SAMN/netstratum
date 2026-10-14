@@ -163,7 +163,7 @@ pub fn out_nuclei(grains: &Manifest, unformed: &Nuclei) -> Nuclei {
 }
 
 /// The seed's fixed paths: draw `j` of `field` for the body at `path`.
-pub(crate) fn draw(seed: &[u8; 32], path: &[u32], field: &str, j: u32) -> u64 {
+pub fn draw(seed: &[u8; 32], path: &[u32], field: &str, j: u32) -> u64 {
     let mut h = blake3::Hasher::new();
     h.update(seed);
     h.update(&(path.len() as u32).to_le_bytes());
@@ -178,13 +178,13 @@ pub(crate) fn draw(seed: &[u8; 32], path: &[u32], field: &str, j: u32) -> u64 {
 /// A tier's laws (docs/78, "The mass split", amended with xylarium's
 /// guidance 2026-10-14): the share its centre keeps, and the share of the
 /// rest physics leaves unformed (the medium). Anchors, not draws.
-pub(crate) struct Tier {
-    pub(crate) centre: Ratio,
-    pub(crate) medium: Ratio,
+pub struct Tier {
+    pub centre: Ratio,
+    pub medium: Ratio,
     /// A satellite's tidal reach as a share of its radius, `s = ρ / r`
     /// (docs/78, "The mass split"), rational by its half-angle `t`:
     /// `s = 2t / (1 + t²)`.
-    pub(crate) reach: Ratio,
+    pub reach: Ratio,
 }
 
 /// `2t / (1 + t²)`: a rational reach share from a rational half-angle.
@@ -198,7 +198,7 @@ fn reach_of(t: Ratio) -> Ratio {
 /// interstellar medium, of order 1/10, the Milky Way's gas to stars), 1 a
 /// star (99.86% of its system, the Sun's share; belts and comet clouds, of
 /// order 1/100 of the rest), 0 an orb (keeps all).
-pub(crate) fn tier(depth: u8) -> Tier {
+pub fn tier(depth: u8) -> Tier {
     match depth {
         3 => Tier { centre: ratio(0, 1), medium: ratio(1, 2), reach: ratio(0, 1) },
         // Systems about a core: s = 12/37 (t = 1/6), each system about 0.235

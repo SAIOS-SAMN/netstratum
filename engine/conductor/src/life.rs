@@ -73,6 +73,12 @@ pub struct World {
     /// galaxy's echo delay in bells.
     pub coupling: Ratio,
     pub delay: u64,
+    /// The system's belts and comet clouds (its medium) as a share of the
+    /// system: the impacts' source.
+    pub belts: Ratio,
+    /// The echoes before the star no longer dominates its system (the
+    /// climb's window).
+    pub window: u64,
 }
 
 fn z_of(key: &str) -> Option<u32> {
@@ -137,7 +143,7 @@ pub fn read(path: Vec<u32>, matter: &Manifest, period: &Ratio, coupling: &Ratio,
         if all.is_zero() { ratio(0, 1) } else { mass(&ionised) / all }
     };
     let plasmic = informational.clone().filter(|_| plasma_share > ratio(0, 1)).map(|x| x * plasma_share);
-    Some(World { path, heat, size, gravity, core, hold, atmosphere: ratio(0, 1), pressure: ratio(0, 1), gases, chemical: chemical.map(|(_, x)| x), geologic, plasmic, informational, coupling: coupling.clone(), delay })
+    Some(World { path, heat, size, gravity, core, hold, atmosphere: ratio(0, 1), pressure: ratio(0, 1), gases, chemical: chemical.map(|(_, x)| x), geologic, plasmic, informational, coupling: coupling.clone(), delay, belts: ratio(0, 1), window: u64::MAX })
 }
 
 /// `e^(−λ)` bounded above by whole halvings, `2^(−⌊λ · 1442/1000⌋)` (so the
@@ -195,6 +201,50 @@ pub fn wake_bell(w: &World, k: u64, t_u: u64) -> Option<u64> {
     Some(w.delay + echoes.checked_mul(t_u)?)
 }
 
+/// THE WINDOW: a star sheds about `ε/2` of itself an echo (its coherence
+/// averaging a half; docs/78, the breath), so it stays above its worlds'
+/// mass for `log2(M_star / M_worlds) · ln 2 · 2/ε` echoes: counted in whole
+/// halvings (`⌊log2⌋`) with `ln 2 ≥ 693/1000`, erring short.
+pub fn window_echoes(star: &Ratio, worlds: &Ratio) -> u64 {
+    if worlds.is_zero() || star <= worlds {
+        return 0;
+    }
+    let q = (star.clone() / worlds.clone()).floor().to_integer();
+    let halvings = q.bits().saturating_sub(1);
+    let epsilon = crate::pulse::tier(1).medium;
+    (ratio(halvings as i64, 1) * ratio(693, 1000) * ratio(2, 1) / epsilon).floor().to_integer().try_into().unwrap_or(0)
+}
+
+/// THE CLIMB WITH ERASURE (docs/82): recoherence by recoherence, each
+/// writing a rung unless an IMPACT strikes there (its chance the system's
+/// belt share, shielded by the atmosphere: `belts / (1 + compression)`,
+/// drawn from the seed) — an impact wastes that recoherence, the rung's need
+/// kept, life never undone. The mind wakes at the recoherence its last rung
+/// is written, if within the star's window; else never.
+pub fn climb(w: &World, x: &Ratio, compression: &Ratio, seed: &[u8; 32], medium: &str, t_u: u64) -> Option<u64> {
+    let needed = recoherences_needed(x, compression)?;
+    let slip = ratio(1, 1) - w.coupling.clone();
+    if slip <= ratio(0, 1) {
+        return None;
+    }
+    let last: u64 = (ratio(w.window.min(u32::MAX as u64) as i64, 1) * slip).floor().to_integer().try_into().unwrap_or(0);
+    let p = w.belts.clone() / (ratio(1, 1) + compression.clone());
+    let threshold: u64 = (p * ratio(1_000_000, 1)).floor().to_integer().try_into().unwrap_or(0);
+    let mut path = w.path.clone();
+    path.push(medium.len() as u32);
+    let mut written = 0u64;
+    for k in 1..=last {
+        let struck = crate::pulse::draw(seed, &path, "impact", k as u32) % 1_000_000 < threshold;
+        if !struck {
+            written += 1;
+            if written >= needed {
+                return wake_bell(w, k, t_u);
+            }
+        }
+    }
+    None
+}
+
 /// Every world of the universe, read.
 pub fn worlds(u: &Universe) -> Vec<World> {
     let median = |mut v: Vec<Ratio>| -> Ratio {
@@ -210,9 +260,15 @@ pub fn worlds(u: &Universe) -> Vec<World> {
             let star_burn = ratio(1, 1) + star.clone() / star_scale.clone();
             let mut inside = star.clone();
             let delay: u64 = core.radius.floor().to_integer().try_into().unwrap_or(0);
+            let system = mass(&sys.total());
+            let belts = if system.is_zero() { ratio(0, 1) } else { mass(&sys.medium) / system };
+            let worlds_mass = sys.satellites.iter().fold(ratio(0, 1), |s, o| s + mass(&o.total()));
+            let window = window_echoes(&star, &worlds_mass);
             for orb in &sys.satellites {
                 let coupling = crate::breath::rate(&orb.radius, &(inside.clone() / crate::breath::unit_mass(u)));
-                if let Some(w) = read(orb.path.clone(), &orb.kept, &orb.period, &coupling, &star_burn, &world_scale, delay) {
+                if let Some(mut w) = read(orb.path.clone(), &orb.kept, &orb.period, &coupling, &star_burn, &world_scale, delay) {
+                    w.belts = belts.clone();
+                    w.window = window;
                     out.push(w);
                 }
                 inside += mass(&orb.total());
