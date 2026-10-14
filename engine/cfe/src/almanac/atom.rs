@@ -73,6 +73,38 @@ pub fn atom(z: u32) -> Option<Atom> {
     })
 }
 
+/// THE NUCLEUS (the same law one tier in): its Z protons and its neutrons
+/// pair, one of each kind to a frame, and pairing is what closes (design law
+/// 6), so a closed nucleus holds as many neutrons as protons: `A = 2Z`.
+/// The neutron excess of heavy nuclei, which charge's push would bring, is
+/// not yet law (docs/78, Open).
+pub fn mass_number(z: u32) -> u32 {
+    2 * z
+}
+
+/// A COMPOUND (design law 6 across atoms): a bond is an unpaired electron of
+/// one atom paired with one of another, turning the other way. A set of
+/// atoms (by Z, with repeats) closes when every unpaired electron in it
+/// pairs with one in ANOTHER atom of the set and the set holds together:
+/// - a closed atom (none unpaired) bonds nothing;
+/// - the unpaired count is even (every bond takes two);
+/// - no atom has more unpaired than all the others together (its partners
+///   must be elsewhere);
+/// - the bonds can join every atom (at least one fewer than the atoms).
+/// Exact conditions for a connected bond graph with those counts; nothing
+/// is searched.
+pub fn closes(zs: &[u32]) -> bool {
+    let Some(counts) = zs.iter().map(|&z| atom(z).map(|a| a.unpaired)).collect::<Option<Vec<u32>>>() else {
+        return false;
+    };
+    if zs.len() < 2 || counts.iter().any(|&u| u == 0) {
+        return false;
+    }
+    let total: u32 = counts.iter().sum();
+    let most = counts.iter().copied().max().unwrap_or(0);
+    total % 2 == 0 && most <= total - most && total / 2 + 1 >= zs.len() as u32
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -86,5 +118,14 @@ mod tests {
         // In band 2: 1, 2 unpaired rising, then pairing down.
         let unpaired: Vec<u32> = (3..=6).map(|z| atom(z).unwrap().unpaired).collect();
         assert_eq!(unpaired, vec![1, 2, 1, 0]);
+    }
+
+    #[test]
+    fn compounds_close_by_pairing_across_atoms() {
+        assert!(closes(&[1, 1]), "two single bonders pair");
+        assert!(closes(&[4, 1, 1]), "a double bonder with two singles");
+        assert!(!closes(&[4, 1]), "one bond left open");
+        assert!(!closes(&[2, 1]), "a closed atom bonds nothing");
+        assert!(!closes(&[1]), "no partner");
     }
 }

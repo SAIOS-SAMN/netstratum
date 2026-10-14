@@ -281,9 +281,10 @@ event deploys them all, and everything after is a closed form of t from it
     byte layout with the build.
   - **So the grain is netstratum's internal unit,** converted through the Z
     map (below) in and out.
-- **The atom's further readings:** the nucleus's mass number (the same law,
-  one tier in), the tightness-to-workability bands, and compounds read from
-  atoms in place of the almanac's fixed cells.
+- **The atom's further readings:** a bond's preference (the partners'
+  tightness), workability from tightness, the heavy nuclei's neutron
+  excess, and era 1's economy reading compounds from atoms in place of the
+  almanac's fixed cells.
 - **Roundness** (xylarium's statement, adopted when its angles are
   declared): a body is round when `M / r ≥ θ_rigid(material)` in the planet
   tier's units; linear, no square. Below it, rubble: matter in a field, the
@@ -366,6 +367,21 @@ the lowest tier of the one law (design law 4), a small system that turns.
     where the almanac's fixed axes have 7 lines and bind at most 5. Era 1's
     chemistry (compounds, workability) reads the atom, so the almanac's
     fixed cells are era 0's.
+- **The nucleus** (`atom::mass_number`): the same pairing one tier in, a
+  proton and a neutron to a frame, so a closed nucleus is `A = 2Z`. Mass
+  for the turning law weights each grain of Z by it. The neutron excess of
+  heavy nuclei (charge's push) is not yet law.
+- **Compounds** (`atom::closes`): a bond is an unpaired electron of one atom
+  paired with one of another, turning the other way. A set of atoms closes
+  when every unpaired electron pairs across atoms and the bonds hold the
+  set together: no closed atom, an even count, no atom with more than all
+  the others, at least one bond fewer than atoms. Exact, no search.
+  - Reading among the 25 open atoms of Z 1 to 30: 95 two-atom and 1,222
+    three-atom compounds close.
+  - The law so far reads only the unpaired count, so atoms of one count are
+    interchangeable in bonding. What should make a bond prefer a partner
+    (their tightness against each other) and where a compound is workable
+    are the next readings.
 - **The stand-in through the boundary** (the `pulse` binary): era 0's 860
   kinds, each mapped to the Z whose atom reads its line and binding, cross
   as nuclei per Z (13 Zs) and enter as grains, nuclei in equal to nuclei
