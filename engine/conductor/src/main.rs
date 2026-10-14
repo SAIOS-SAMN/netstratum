@@ -252,6 +252,9 @@ fn main() {
     // relay handed off by the file (a resumed conductor writes after the
     // last beat kept).
     let mut annal = conductor::annal::Annal::open(std::path::Path::new(&var_root));
+    // CHRONOMETRY (one law with xylarium): the keepers' chain, committed
+    // every pulse.
+    let mut chain = conductor::chronometry::Chain::open(std::path::Path::new(&var_root));
     let mut dilation_from: Option<(u64, u64)> = None;
     let mut announced_pause = false;
     loop {
@@ -560,6 +563,16 @@ fn main() {
         // relays is read for what is bound to the fleet (substratum origins,
         // percepts) and for the dilation reading, du/dh, never a fault.
         let point = std::fs::read_to_string(format!("{var_root}/tuniversal")).ok().map(|p| p.trim().to_string());
+        if beat.is_multiple_of(T_U) {
+            let heard = point.as_deref().and_then(|p| p.split('/').nth(1)).and_then(|l| l.split(':').next()).and_then(|h| u64::from_str_radix(h, 16).ok());
+            match conductor::profile::timed("chronometry", || chain.commit(&universe, beat, heard)) {
+                Ok(rims) => {
+                    let out_of_phase = rims.iter().filter(|(_, r)| *r != cfe::ratio::ratio(0, 1)).count();
+                    println!("beat {beat}: CHRONOMETRY — committed {} entries in all; {} rims, {out_of_phase} with a residual against their mantle; point {:?}", chain.entries, rims.len(), heard);
+                }
+                Err(e) => println!("beat {beat}: CHRONOMETRY — not committed: {e}"),
+            }
+        }
         let h_now = point.as_deref().and_then(|p| p.split('/').nth(1)).and_then(|l| l.split(':').next()).and_then(|h| u64::from_str_radix(h, 16).ok());
         if let (Some(h), None) = (h_now, dilation_from) {
             dilation_from = Some((beat, h));

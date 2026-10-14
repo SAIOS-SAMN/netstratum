@@ -103,6 +103,22 @@ the outer rim cannot imagine" (docs/76). The rim ages faster than the core.
 - **Quantum measurement (docs/79) happens at an event:** the bounce's hidden
   phase is read at that point's cosmic time.
 
+## Chronometry inside the universe, built (2026-10-14; one law with xylarium)
+
+`engine/conductor/src/chronometry.rs`, the shared law of xylarium's
+11.4d. KEEPERS: the epicenter, then per galactic core its deep core
+(innermost system), inner mantle (half-mass radius) and outer rim
+(outermost system). Each runs at the wells' rate `r / (r + M(<r))`, nested,
+from its delay (its galaxy's distance plus its radius at the ring's light,
+the home rim half a bell). At the epicenter's count N it reads local
+`rate (N − delay)`, slip, coherence and rung. Every pulse every keeper
+appends a hashed entry to `<var>/chrono.jrn` citing its own last entry and
+the keeper inside it, its slip against that keeper kept as the RESIDUAL,
+never averaged; the epicenter's entry carries the last TUniversal final
+point heard (the bridge). Live at beat 1,980: 40 entries (the epicenter and
+13 galaxies' three shells), 8 of 13 rims with a residual against their
+mantle; point None (the house unlinked while the courts are down).
+
 ## Build order and done-when (the live log, before → after)
 
 Within era 1, after A1/A2, on mycelium's ruling of the proposal.
