@@ -29,9 +29,14 @@ Status: scoped 2026-10-13, the pulse and the mass and motion laws added
 - **Measure concentrates.** Two unrelated places stand about a quarter
   circumference apart. Nearness exists only along CONES: a cone is the reach
   of a mass's flux, the region where that mass dominates.
-- **Mass is a conserved count of grains,** deployed once by the pulse (below)
-  and never created after. The total is a ledger law, conserved exactly as the
-  1/1024 resource grain is.
+- **Mass is a conserved count of grains,** never created inside the universe.
+  It ARRIVES only as element MANIFESTS (an exact amount of each element)
+  granted from the hypha's endowments and crossing the universe's one hypha
+  tube as TRAVERSE crossings, debit equal to credit (xylarium, by the
+  operator's ruling 2026-10-14; mycelium is designing the endowments and
+  grants). The founding manifest is deployed by the pulse (below); later
+  galaxy packages are deployed by progenitors as new cores. Conservation
+  holds across the network, exactly as the 1/1024 resource grain is held.
   - Corrected 2026-10-14. This line said masses are cone points whose total
     deficit Gauss–Bonnet–Chern fixes. That holds only on a 2-dimensional
     surface (where it gives no attraction): on S^360 a cone manifold's
@@ -41,26 +46,34 @@ Status: scoped 2026-10-13, the pulse and the mass and motion laws added
   fixed dimension: those are flat laws (Kepler's `P² ∝ r³` holds in flat
   3-space only). Remediated 2026-10-14 (operator): the dimensions are fluid,
   never rigid, and no square states a law.
-  - **The law:** a body at radius r from its centre turns, each beat, by the
-    rotation whose half-angle parameter is
+  - **The law:** a body at radius r from its centre turns, each beat of its
+    core's bell, by
 
-        s(r) = c · M(<r) / (M · r)
+        ω(r) = M(<r) / r   turns
 
-    with `M(<r)` the grains enclosed by its orbit, `M` the universe's total,
-    `r` the orbit's radius held by its own half-angle parameter, and `c` the
-    universe's one scale (Open). Linear in the enclosed mass, as a frame
-    turned by the flux it encloses (the Larmor form; docs/81's holonomy).
+    with `M(<r)` the grains its orbit encloses, in units of the universe
+    core's own mass, and `r` the orbit's radius held by its half-angle
+    parameter. The units are xylarium's anchor, so two universes compare by
+    exact ratios at a tube: G = c = M_core = 1, time the core's bell, read
+    per tier in exact powers of sixty. Linear in the enclosed mass, as a
+    frame turned by the flux it encloses (the Larmor form; docs/81's
+    holonomy).
   - **The dimension is read, never set.** How `M(<r)` grows with r IS the
-    flux's effective dimension at that scale: where one mass dominates, s
+    flux's effective dimension at that scale: where one mass dominates, ω
     falls as 1/r and the orbital speed holds constant (a flat rotation
-    curve); where `M(<r)` grows in step with r, s is constant and the region
+    curve); where `M(<r)` grows in step with r, ω is constant and the region
     turns as one body (a galaxy's bulge). Both emerge from where the pulse put the
     grains.
-  - **Exact without a root.** Rotations compose by the half-angle addition
-    `(a + b) / (1 − a·b)`, a product and never a square, and the half-turns
-    passed are counted exactly from the sign of `1 − a·b`. A body's place at
-    t is its per-beat rotation raised to t (by repeated composition, about
-    log t steps): a closed form, and completed turns counted exactly.
+  - **Exact and bounded, in turns.** A body's phase at beat n is
+    `φ + n·ω` turns and its completed turns `⌊φ + n·ω⌋`: a closed form whose
+    denominator never grows. Measured 2026-10-14: the per-beat turn held
+    instead as a half-angle rotation and composed (`(a + b)/(1 − a·b)`)
+    grows about 2.9 bits a beat, 172,000-bit numbers and 5.9 s for one body
+    at 60,000 beats, the denominator explosion of a stepped scalar. So a
+    moving body's place is held as (its centre, its radius by half-angle,
+    its phase in turns); its point on the sphere is not formed (a rational
+    fraction of a turn has a rational sine only at quarter turns). Sphere
+    points are held for what does not orbit: the cores and the tube mouths.
   - **Mass moves, the law re-reads.** When grains move between bodies (trade,
     mining, a collapse), `M(<r)` changes: the orbit's phase is fixed at that
     event (an annal entry) and the new rotation runs from it. A closed form
@@ -84,18 +97,24 @@ event deploys them all, and everything after is a closed form of t from it
 
 - **The pulse at t = 0:** the singularity's bounce, at the epicenter. It
   carries:
-  - **the mass,** a total `M` of grains;
+  - **the founding manifest,** its grains by element, crossed in through the
+    hypha tube;
   - **the spectrum,** a short list of modes, each `(n_i, d_i, a_i, φ_i)`: a
     reflection product `n_i` (its direction from the epicenter), a rational
     half-angle `d_i` (its distance), a whole-number strength `a_i`, and a
     rational phase `φ_i` in turns (docs/79's torsion, docs/81's Φ).
+- **The spectrum is derived from era 1's genesis seed** along fixed stream
+  paths, tilted by operator dials (exact per-element recipe weights,
+  renormalised to keep the metals' mass), as xylarium does. It is
+  netstratum's own: only the manifest and the mouths' coordinates cross the
+  boundary, never the galaxy count, modes or strengths.
 - **The deployment** is a construction, never a search (finding interference
   peaks over S^360 is a global search with no exact answer). In tiers:
   1. **Cores.** Mode i places core i at distance `d_i` from the epicenter
      along the direction `n_i`: the epicenter's point carried by the mode's
-     reflections (the geometry's own operation, A1). Its grains are
-     `M · a_i / Σa`, floored to the grain; what does not divide goes to the
-     lowest mode.
+     reflections (the geometry's own operation, A1). Its share of each
+     element is the manifest's `· a_i / Σa`, floored to the grain; what does
+     not divide goes to the lowest mode.
   2. **Systems.** About each core, its mode's systems at rational half-angle
      radii, each with its share of the core's tier of grains.
   3. **Bodies (S^60).** About each star, its orbs at rational half-angle
@@ -105,7 +124,7 @@ event deploys them all, and everything after is a closed form of t from it
   body reads the mass its own orbit encloses, so orbits are closed; the
   bodies' pull on each other is left out.
 - **The galactic year** is one completed turn of the galaxy's hub about its
-  core, counted exactly (half-turns passed, from the composed rotation at t).
+  core, `⌊φ + n·ω⌋` on its core's bell.
   Each galaxy closes its own year at its own pace. The universal 60-beat
   close (`scribe::journal::YEAR_TICKS`, a placeholder) retires, and the
   core's yearly re-emission (`core_bounce`) becomes the core's echo of the
@@ -114,29 +133,32 @@ event deploys them all, and everything after is a closed form of t from it
   Keplerian clock (`cfe::thermal::orbital_period_squared`, `local_years`,
   and `siting.rs`'s Diophantine tracks `r = M·k²`, which exist only to make a
   square root exact) does not carry into era 1.
+- **Arrivals.** A later galaxy package is deployed the same way, as a new
+  core and its systems, by the progenitors who receive it; the bodies it
+  encloses re-read `M(<r)` at that event.
 - **Time.** Every clock starts at the pulse; each runs at the rate the mass
   around it sets (docs/80).
-- **Matter.** The element families the pulse distributes (docs/79) give the
-  element almanac's inventory an origin; today it is a table.
+- **Matter.** The founding manifest's elements, deployed by the pulse, give
+  the element almanac's inventory an origin; today it is a table.
 
-**Open, for the operator:**
-- **The spectrum.** Its modes decide the whole universe: chosen once by the
-  operator, or derived from era 1's genesis seed (the same question as
-  docs/79's vacuum integers).
-- **The tiers' split.** How a core's grains divide between the core and its
-  systems, and how many systems and orbs each mode deploys.
-- **The scale c.** One rational for the universe: how far the whole mass
-  turns a body at unit radius in one beat.
+**Ruled with xylarium's guidance (2026-10-14), within netstratum's remit:**
+- the spectrum: seed-derived, dial-tilted (above);
+- the scale: xylarium's anchor (above);
+- era 0's lines: none carried. Era 1 is a new domain (ruling 1); its
+  civilizations arise anew from its physics, as xylarium's do, and the seat
+  minds wait unseated until the new domain has a living ancient. Era 0's 101
+  lines stay in its record.
+
+**Open:**
+- **The tiers' split** (netstratum's own; tubes need no match): how a core's
+  grains divide between the core and its systems, and how many systems and
+  orbs each mode deploys.
 - **Radial motion.** The law turns bodies; it does not move them in or out.
   Radii are the deployment's, so infall, accretion and escape are not yet
   physics. A square-free radial law is owed before any body changes orbit.
 - **The clock's rate law** (docs/80): slower deeper in a well, stated in
   enclosed mass and radius with no square and no root (the flat-space
   `√(1 − 2GM/rc²)` is not used).
-- **Era 0's lines in era 1.** The pulse deploys masses, not civilizations.
-  Either era 1 begins with no lines (they arise as era 0's did), or each of
-  era 0's 101 lines is seated on a deployed system at the founding (keyed
-  anew, as ruling 1 requires). Build step 2 below depends on the answer.
 
 ## Every flat site in netstratum (inventory, 2026-10-13)
 
@@ -151,7 +173,7 @@ event deploys them all, and everything after is a closed form of t from it
 | hubs as the medoid by L1 | `galaxy_hub`, `commissions::hub_of` | the hub at the cone junction of a galaxy's worlds |
 | the commission's disc plane: a 2-D projection of a galaxy onto a ≤29-cell grid | `commissions::plane` | an anti-flattening problem: the commission poses the galaxy as it is (its cone graph), not a flat plane |
 | orbs around a star at (r, θ, ψ) with wrapped-L1 separation | `ColonyOrb.theta/psi`, `cfe::dop::separation`, `ThermalSite` (orbit_r) | orbs as S^60 bodies turning by the enclosed-mass law ("The bounce") |
-| insolation, habitats, the thermal model on flat orbits | `cfe` thermal, Keplerian local years (27) | S^60 insolation (the terminator band); local years counted from the composed rotation, no `P²` |
+| insolation, habitats, the thermal model on flat orbits | `cfe` thermal, Keplerian local years (27) | S^60 insolation (the terminator band); local years `⌊φ + n·ω⌋` about the star, no `P²` |
 | a year of 60 beats for every galaxy | `scribe::journal::YEAR_TICKS`, `year_bounce`, `core_bounce`, the realms' term | each galaxy's own year, its hub's completed turn; the core's echo at it |
 | no mass for a core, a star's mass from a cited table | `ledger::galaxy::Galaxy {name, center, reach}`, `StarClass::mass` | grains deployed by the pulse, conserved |
 | one universal beat stepping every system | `main.rs`: 13 `*_step` calls and `year_bounce` each beat | ruled: circuitry, never steps (W21); state carried beat to beat becomes closed forms at t, layer by layer |
@@ -195,8 +217,8 @@ They are puzzle frames, not space.
    parameters, and chord form only for the court.
 2. **The pulse and its deployment** ("The bounce"): the spectrum read, cores,
    systems and orbs placed with their grains, checkpointed; the cards
-   retired. Era 0's lines are seated on it or not, by the open ruling.
-3. **Motion:** the enclosed-mass rotation law and its exact turn count; each
+   retired. No lines are carried; they arise.
+3. **Motion:** the enclosed-mass turning law, phases in turns; each
    galaxy's year and the core's echo replace the 60-beat close.
 4. **Distance, cores, melt, hubs, gates** moved to geodesic angles and
    cones, one site group at a time (the table above); chord form only at the
@@ -207,9 +229,9 @@ They are puzzle frames, not space.
 
 ## Done-when (the live log, before → after)
 
-1. The pulse: cores and systems with deployed grains, 0 → all; the grain
-   total read at each year close equal to the pulse's M (witness: the
-   conservation line).
+1. The pulse: cores and systems with deployed grains, 0 → all; the grains
+   by element read at each year close equal to the manifests crossed in
+   (witness: the conservation line against the tube's TRAVERSE records).
 2. Motion: galaxies closing their own years, 0 → every galaxy, at differing
    beats; the 60-beat close's call sites, 4 → 0.
 3. Places on S^360: places held as sphere points, 0 → all; `torus_distance`

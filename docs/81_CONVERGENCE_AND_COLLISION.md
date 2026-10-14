@@ -173,16 +173,15 @@ place (never a squared chord, which measures through flat space).
 - Branches are turned back toward the main timeline by the same law as
   masses in era 1's geometry (docs/78, remediated 2026-10-14: no power law,
   no fixed dimension): each beat, a branch's divergence turns toward the main
-  timeline by the rotation whose half-angle parameter is
+  timeline by
 
-      s(D) = c · W / (W_all · D)
+      ω(D) = W / D   turns
 
   - `W`: the main timeline's WEIGHT, the records that converge on it (mass,
-    population and passage carried, read from the annals); `W_all` the
-    universe's total;
+    population and passage carried, read from the annals), in docs/78's
+    units;
   - `D`: the branch's divergence, held by its half-angle parameter;
-  - `c`: docs/78's one scale. The dimension is read from how W gathers,
-    never set.
+  - the dimension is read from how W gathers, never set.
 - **Close branches are pulled hard; far ones barely at all.** No new force:
   time's attraction is gravity along the time axis of the map.
 
