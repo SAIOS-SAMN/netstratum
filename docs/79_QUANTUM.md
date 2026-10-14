@@ -168,12 +168,25 @@ Within era 1 (docs/78), after its geometry library (mycelium A1).
    - Done-when: the universe's reads take history from the annals, with no
      universe-side replay of quantum outcomes.
 
+## Ruled: quantum in matter (operator, 2026-10-14, option B)
+
+- **Matter carries the quantum modes.** An atom's electrons (docs/78, the
+  atom tier) hold their frames and senses undecided until they interact.
+  The wavefronts give the atoms their phases, and that motion rises upward
+  (docs/78, design law 7).
+- **Any recorded interaction is a measurement:** a bond forming, a trade,
+  an annal entry. The bounce's hidden phase decides the outcome,
+  deterministically and unreadably from inside, and the annals keep it;
+  nothing is replayed. Minds are not special in measurement.
+- **Toward cognition (direction, not yet built).** The quantum state between
+  a star and a mind is to be the FUEL of cognition: the star's spin and
+  magnetism pull on its local minds. A mind thinks on the coupling its star
+  gives it. Not designed yet; every law built now must leave room for it
+  (a star's spin and field are carried, not discarded).
+
 ## Open, for the operator
 
-- **What is quantum.** Which systems carry quantum modes: elementary matter
-  only, or also bodies, minds' perceptions, the cores?
-- **Coupling.** The coupling that counts as measurement: any macroscopic
-  record, or only a mind's?
+- ~~What is quantum; coupling~~: ruled 2026-10-14 (below).
 - **The vacuum.** The compact manifold's integers for era 1: chosen once, by
   whom (the operator, or derived from the Big Bang's seed)? The same choice
   sets the pulse's spectrum, which deploys every mass (docs/78, "The bounce").
