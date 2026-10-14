@@ -152,12 +152,12 @@ gates.
   and a branch carries the incompatible records.
 - **The split is an event**, at a point on the map, recorded in both annals,
   each append-only.
-- **Open:** whether a branch is a new universe (a new origin, which by
-  mycelium's law is a new domain) or a sub-history within this universe's
-  domain, held by its annals. Netstratum's proposal is the latter, so
-  branches stay inside the universe and can come back. To be ruled with
-  mycelium, since a branch that leaves its universe would need its own
-  origin.
+- **Ruled (operator, 2026-10-14): no new universe at the parallel level.**
+  A branch is a sub-history inside this universe's domain, held by its
+  annals, and it can come back (temporal attraction). It never founds a
+  parallel universe. All sub-universes (the substrata, docs/69) are
+  unlocked only by SYNTHESIS: a universe below is opened by what is made,
+  never by a timeline splitting.
 
 ### DIVERGENCE
 
@@ -423,5 +423,5 @@ Within era 1, after docs/80's proper time and events on the map.
   or only records across a wormhole or a realm boundary.
 - **The currency:** θ, the phase, in turns (operator, 2026-10-13); coherence
   the windings W on anchor-closed loops; Φ the enclosed torsion.
-- **Branches:** sub-histories inside the universe (netstratum's proposal) or
-  new universes (needing their own origins, mycelium's law).
+- ~~Branches~~: ruled 2026-10-14, sub-histories inside the universe; no
+  parallel universes; sub-universes only by synthesis.
