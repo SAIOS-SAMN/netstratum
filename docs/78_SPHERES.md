@@ -221,6 +221,19 @@ event deploys them all, and everything after is a closed form of t from it
   a stand-in: era 0's element totals read from its record, so the stand-in
   is a measured universe, not an invented one. Replaced by the grant when
   it crosses.
+  - **Its unit** (xylarium's proposal to mycelium, 2026-10-14, agreed): the
+    boundary counts ATOMS per Z, unit-free, and each kernel converts with
+    its own nucleon mass, so neither needs the other's core mass, grains or
+    scale. Motion never crosses a tube; only manifests and mouths do.
+  - **Netstratum's Z map** (owed): our matter is not the real periodic table
+    (the almanac's hash-derived elements on their own axes: line, ten lanes,
+    shell, phase, spin; 855 kinds in era 0, beside the bulk resources), so a
+    declared map between Z and our elements is needed before a manifest can
+    cross either way.
+- **Roundness** (xylarium's statement, adopted when its angles are
+  declared): a body is round when `M / r ≥ θ_rigid(material)` in the planet
+  tier's units; linear, no square. Below it, rubble: matter in a field, the
+  medium, not a body. It replaces the grain as the orb floor.
 - **The split's anchors and dials.** The tier anchors above are of order and
   owe citations (the anchor provenance law). The base-60 draws and the
   resonance chain are authored; the operator's recipes may tilt the shares.
