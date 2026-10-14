@@ -216,6 +216,10 @@ fn main() {
     let mut passages = conductor::realms::Passages::default();
     // docs/77: the road tolls each gate earned this term.
     let mut gate_tolls: std::collections::BTreeMap<(String, String), cfe::ratio::Ratio> = std::collections::BTreeMap::new();
+    // THE UNIVERSE JOURNAL: the readings below kept in `universe.jrn`, the
+    // relay handed off by the file (a resumed conductor writes after the
+    // last beat kept).
+    let mut annal = conductor::annal::Annal::open(std::path::Path::new(&var_root));
     let mut dilation_from: Option<(u64, u64)> = None;
     let mut announced_pause = false;
     loop {
@@ -505,6 +509,9 @@ fn main() {
             "beat {beat}: DECIDE hull — {} lines seen, {} lost for want of hull; persistence {} of {} rows this beat, {} of {} over the books' windows; {} books, {} triples",
             d.rows, d.lost, d.correct, d.scored, hubs.persistence.0, hubs.persistence.1, hubs.books.0, hubs.books.1
         );
+        if let Err(e) = annal.beat(beat, &hubs, spots.len(), &tolls, &gated, released) {
+            println!("beat {beat}: THE UNIVERSE JOURNAL is not kept this beat: {e}");
+        }
         // Concordance 3.9: the councils the house seats, published for it.
         if beat.is_multiple_of(10) {
             let _ = conductor::ancients::write_council(&worlds, std::path::Path::new(&var_root));
@@ -554,12 +561,10 @@ fn main() {
         if beat.is_multiple_of(scribe::journal::YEAR_TICKS) {
             // ROUTE-1: the year voice draws lane maintenance — an
             // unpaid lane lapses by receipt and raw space returns.
+            let mut year_lines: Vec<String> = Vec::new();
             for polity in worlds.iter_mut().filter(|e| !e.penned) {
                 for deal in polity.world.maintain_routes(cfe::world::FIRST_ORB) {
-                    println!(
-                        "beat {beat}: LANE {deal} LAPSES on {} — raw space takes the path back",
-                        polity.spec.world_name
-                    );
+                    year_lines.push(format!("LANE {deal} LAPSES on {} — raw space takes the path back", polity.spec.world_name));
                 }
             }
             conductor::profile::timed("year:journals", || {
@@ -579,20 +584,20 @@ fn main() {
             );
             // THE YEAR'S BOUNCE (cores, ancients, ascension, parliaments,
             // councils): one library function.
-            for line in conductor::profile::timed("year:bounce", || conductor::year_bounce(&mut worlds, &book, &registry, std::path::Path::new(&var_root), beat, epoch_base)) {
-                println!("beat {beat}: {line}");
-            }
+            year_lines.extend(conductor::profile::timed("year:bounce", || conductor::year_bounce(&mut worlds, &book, &registry, std::path::Path::new(&var_root), beat, epoch_base)));
             // docs/75: the term's realms, read from its contacts, then a new term.
-            for line in conductor::profile::timed("year:realms", || conductor::realms::bounce(&worlds, &registry, std::path::Path::new(&var_root), &contacts, &passages, beat / scribe::journal::YEAR_TICKS)) {
-                println!("beat {beat}: {line}");
-            }
+            year_lines.extend(conductor::profile::timed("year:realms", || conductor::realms::bounce(&worlds, &registry, std::path::Path::new(&var_root), &contacts, &passages, beat / scribe::journal::YEAR_TICKS)));
             contacts.clear();
             passages.clear();
             // docs/77: each gate's account, its term's road tolls added.
-            for line in conductor::ascension::accounts(std::path::Path::new(&var_root), &gate_tolls) {
+            year_lines.extend(conductor::ascension::accounts(std::path::Path::new(&var_root), &gate_tolls));
+            gate_tolls.clear();
+            for line in &year_lines {
                 println!("beat {beat}: {line}");
             }
-            gate_tolls.clear();
+            if let Err(e) = annal.year(beat, &year_lines) {
+                println!("beat {beat}: THE UNIVERSE JOURNAL did not keep the year's close: {e}");
+            }
             // MEMORY (operator 2026-10-09): what the allocator holds freed but
             // unreturned is given back at the year's close, and the RSS read
             // before and after says how much of the process was live data.
