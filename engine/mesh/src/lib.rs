@@ -287,32 +287,3 @@ pub fn yield_authority(
     let receipt = chronicle.append(ClosureEvent::HandoffSealed { from, to }, stamp, provenance);
     Ok(receipt.sequence())
 }
-
-/// The guarded write door (NS-5 §7.3): refuses USURPED before
-/// writing; injects the hand at the provenance head and the citation
-/// when one is pending. Seals go through `yield_authority` — the walk
-/// gates whatever enters by any door.
-pub fn append_as(
-    chronicle: &mut Chronicle,
-    hand: u64,
-    event: ClosureEvent,
-    stamp: u64,
-    provenance: Vec<u64>,
-) -> Result<u64, MeshRefused> {
-    let state = walk(chronicle)?;
-    if let Some(lawful) = state.hand {
-        if hand != lawful {
-            return Err(MeshRefused::Usurped {
-                at: chronicle.total(),
-                lawful,
-            });
-        }
-    }
-    let mut carried = vec![hand];
-    if let Some(handoff) = state.pending_cite {
-        carried.push(handoff);
-    }
-    carried.extend(provenance);
-    let receipt = chronicle.append(event, stamp, carried);
-    Ok(receipt.sequence())
-}

@@ -12,7 +12,7 @@ use cfe::persist::{load, sync};
 use cfe::ratio::ratio;
 use cfe::tlv;
 use cfe::vrp::Chronicle;
-use mesh::{append_as, authority, yield_authority, MeshRefused};
+use mesh::{authority, yield_authority, MeshRefused};
 
 /// A per-test scratch directory (deterministic name, cleaned before use).
 fn scratch(name: &str) -> PathBuf {
@@ -58,15 +58,9 @@ fn the_handoff_walks() {
     assert_eq!(authority(&chronicle), Ok(Some(9)), "the pen moved");
 
     // The taking hand's first append carries the hand AND cites the seal.
-    let at = append_as(
-        &mut chronicle,
-        9,
-        ClosureEvent::ZoneRazed { orb_id: 1, tile: 4 },
-        4,
-        Vec::new(),
-    )
-    .expect("the cited append");
+    let at = chronicle.append(ClosureEvent::ZoneRazed { orb_id: 1, tile: 4 }, 4, vec![9, seal]).sequence();
     assert_eq!(at, 4);
+    assert_eq!(authority(&chronicle), Ok(Some(9)), "the cited append is lawful");
     let receipt = &chronicle.receipts()[4];
     assert!(receipt.provenance().contains(&9), "the hand is carried");
     assert!(receipt.provenance().contains(&seal), "the seal is cited");
@@ -113,9 +107,8 @@ fn a_stale_hand_refuses() {
 #[test]
 fn a_stale_seal_refuses_at_the_door() {
     let mut chronicle = a_premesh_chronicle();
-    yield_authority(&mut chronicle, 7, 9, 3).expect("the first seal");
-    append_as(&mut chronicle, 9, ClosureEvent::ZoneRazed { orb_id: 1, tile: 4 }, 4, Vec::new())
-        .expect("the cited append");
+    let seal = yield_authority(&mut chronicle, 7, 9, 3).expect("the first seal");
+    chronicle.append(ClosureEvent::ZoneRazed { orb_id: 1, tile: 4 }, 4, vec![9, seal]);
     let held = chronicle.receipts().len();
 
     // The yielded hand tries to seal onward; the door refuses BEFORE
@@ -144,8 +137,8 @@ fn the_hand_carries_across_a_drained_prefix() {
     // A seal drained as the LAST receipt of the prefix still owes its
     // citation to the first held receipt after it.
     let mut chronicle = a_premesh_chronicle();
-    yield_authority(&mut chronicle, 7, 9, 3).expect("the first seal");
-    append_as(&mut chronicle, 9, ClosureEvent::VeilDrawn {}, 4, vec![]).expect("cites");
+    let seal = yield_authority(&mut chronicle, 7, 9, 3).expect("the first seal");
+    chronicle.append(ClosureEvent::VeilDrawn {}, 4, vec![9, seal]);
     let mut owed = chronicle.clone();
     owed.drain_to(4);
     assert_eq!(authority(&owed), Ok(Some(9)), "the hand survives the drain");
