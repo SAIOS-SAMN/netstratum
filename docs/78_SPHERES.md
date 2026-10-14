@@ -395,14 +395,24 @@ Operator, 2026-10-14. Built: `conductor::breath`, the `breathe` binary.
   systems born (416 loops closed) and about 6,000 orbs; the breath creates
   nothing (conservation exact). Each galaxy's rungs and aeon differ by its
   distance and its depth in the universal well (rates from 1 to about 1/4).
-- **Not yet elastic.** The breath only consumes: every galaxy forms its 32
-  systems within about 32 echoes, spends its medium, and then is still,
-  and under linear homology every galaxy ends the same shape (one year,
-  about 1.49e9 bells). The breathing the operator named is elastic: stars
-  DECOHERE (return matter to the medium) and echoes RECOHERE it. A return
-  law is owed, and its rungs counted on each layer's own proper time, so
-  that each galaxy's dilation sets its own balance of birth and return:
-  that, not a drawn dial, is what would make galaxies differ in shape.
+- **Elastic: decohere and recohere** (operator, 2026-10-14: consumption
+  alone is pure entropy, with no syntropic regeneration or rejuvenation).
+  On each echo every star returns to its galaxy's medium `ε · rate` of what
+  it holds: ε the star tier's medium share (1/100, a placeholder until
+  stellar lifetimes are physics), rate its nested clock against the
+  universal pulse. A star spent below a grain dissolves and all it held
+  returns. Echoes recohere the medium into new systems, and every period
+  re-reads the law after each echo. Births run on the universal echo,
+  returns on each layer's own proper time, so a galaxy's dilation sets its
+  own balance of birth and return.
+- **Reading** (`breathe var-e1 36000 60`): 7,437 echoes; 549 systems
+  recohered; 13,592 (deepest-hole units) decohered back to the media;
+  conservation exact. The galaxies now differ in SHAPE by their own
+  physics, no dial: 39 to 60 systems each, galactic years from 1.7e11 to
+  2.2e17 bells. The galaxy with no cores nearer the universal core (clock
+  rate 1, the fastest) breathed most: 60 systems against about 40 for the
+  rest. (Cost: about 27 ms an echo, 3.4 minutes for 36,000 bells; the
+  era-1 conductor will need it read as a closed form between events.)
 
 ## The atom: matter at the boundary (the lowest tier)
 

@@ -13,6 +13,14 @@
 //!   runs at `r / (r + M(<r))` of the layer above: linear, exact, the
 //!   weak-field dilation `1 − GM/rc²` to first order. Nested wells multiply.
 //!   Each echo a layer receives is one RUNG; its proper time is its AEON.
+//! - **Elastic: decohere and recohere** (operator: consumption alone is pure
+//!   entropy, with no syntropic regeneration). On each echo every star
+//!   returns to its galaxy's medium a share of what it holds, scaled by its
+//!   own clock against the universal pulse: `ε · rate`, ε the star tier's
+//!   medium share (a placeholder until stellar lifetimes are physics), rate
+//!   its nested dilation. A star spent below a grain dissolves, all it held
+//!   returning. Echoes recohere the medium into new systems. Periods re-read
+//!   the law after each echo, `P = r / M(<r)`.
 //! - **Time writes.** A write within a layer, on its own clock, is PARALLEL;
 //!   a write across layers is PERPENDICULAR: an echo coming down, a birth
 //!   changing the mass above. A perpendicular write down answered by one up
@@ -61,6 +69,11 @@ pub struct Event {
     /// A system born (its index in the galaxy), or none: the echo found no
     /// clump that could hold its reach.
     pub born: Option<usize>,
+    /// The mass the galaxy's stars returned to its medium at this echo
+    /// (perpendicular writes up), in units of the deepest hole.
+    pub returned: Ratio,
+    /// Stars dissolved at this echo.
+    pub dissolved: usize,
 }
 
 /// Breathe the universe from bell 0 to `until`, echoes every `t_u` bells.
@@ -85,8 +98,39 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, until: u64) -> Vec<E
     }
     arrivals.sort();
     let mut events = Vec::new();
+    let epsilon = tier(1).medium;
     for (bell, i, rung) in arrivals {
+        // DECOHERE: each star returns `ε · rate` of what it holds, rate its
+        // nested clock (the galaxy's about the universal core, times its own
+        // about the galaxy).
+        let g_rate = galaxy_rate(u, i, &unit);
         let core = &mut u.cores[i];
+        let mut returned = ratio(0, 1);
+        let mut dissolved = 0;
+        let mut enclosed_in = mass(&core.kept) / unit.clone();
+        let mut keep: Vec<Body> = Vec::new();
+        for mut sys in std::mem::take(&mut core.satellites) {
+            let own = rate(&sys.radius, &enclosed_in);
+            let back = take(&sys.kept, &(epsilon.clone() * g_rate.clone() * own));
+            less(&mut sys.kept, &back);
+            returned += mass(&back) / unit.clone();
+            for (k, a) in back {
+                *core.medium.entry(k).or_insert_with(|| ratio(0, 1)) += a;
+            }
+            if mass(&sys.kept).is_zero() {
+                // Spent: all it held returns.
+                let all = sys.total();
+                returned += mass(&all) / unit.clone();
+                for (k, a) in all {
+                    *core.medium.entry(k).or_insert_with(|| ratio(0, 1)) += a;
+                }
+                dissolved += 1;
+                continue;
+            }
+            enclosed_in += mass(&sys.total()) / unit.clone();
+            keep.push(sys);
+        }
+        core.satellites = keep;
         let enclosed = core.satellites.iter().fold(mass(&core.kept), |acc, sys| acc + mass(&sys.total())) / unit.clone();
         let want = mu.clone() * enclosed.clone();
         let left = mass(&core.medium) / unit.clone();
@@ -99,7 +143,7 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, until: u64) -> Vec<E
             let clump = take(&core.medium, &(want / left));
             if !mass(&clump).is_zero() {
                 less(&mut core.medium, &clump);
-                let k = core.satellites.len() as u32 + 1;
+                let k = core.satellites.last().map(|l| l.path[1] + 1).unwrap_or(1);
                 let path = vec![core.path[0], k];
                 let (kept, orbs, medium) = split(seed, path.clone(), clump, Some(r.clone() * s.clone()), ratio(60, 1), &unit, 1);
                 let period = r.clone() / enclosed.clone();
@@ -107,7 +151,15 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, until: u64) -> Vec<E
                 born = Some(core.satellites.len() - 1);
             }
         }
-        events.push(Event { bell, galaxy: core.path[0], rung, write: Write::Perpendicular, born });
+        // The law re-read: every period from the mass now enclosed.
+        let mut inside = mass(&core.kept) / unit.clone();
+        for sys in core.satellites.iter_mut() {
+            if !inside.is_zero() {
+                sys.period = sys.radius.clone() / inside.clone();
+            }
+            inside += mass(&sys.total()) / unit.clone();
+        }
+        events.push(Event { bell, galaxy: core.path[0], rung, write: Write::Perpendicular, born, returned, dissolved });
     }
     events
 }
