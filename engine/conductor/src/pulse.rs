@@ -163,7 +163,7 @@ pub fn out_nuclei(grains: &Manifest, unformed: &Nuclei) -> Nuclei {
 }
 
 /// The seed's fixed paths: draw `j` of `field` for the body at `path`.
-fn draw(seed: &[u8; 32], path: &[u32], field: &str, j: u32) -> u64 {
+pub(crate) fn draw(seed: &[u8; 32], path: &[u32], field: &str, j: u32) -> u64 {
     let mut h = blake3::Hasher::new();
     h.update(seed);
     h.update(&(path.len() as u32).to_le_bytes());
@@ -178,22 +178,13 @@ fn draw(seed: &[u8; 32], path: &[u32], field: &str, j: u32) -> u64 {
 /// A tier's laws (docs/78, "The mass split", amended with xylarium's
 /// guidance 2026-10-14): the share its centre keeps, and the share of the
 /// rest physics leaves unformed (the medium). Anchors, not draws.
-struct Tier {
-    centre: Ratio,
-    medium: Ratio,
+pub(crate) struct Tier {
+    pub(crate) centre: Ratio,
+    pub(crate) medium: Ratio,
     /// A satellite's tidal reach as a share of its radius, `s = ρ / r`
     /// (docs/78, "The mass split"), rational by its half-angle `t`:
     /// `s = 2t / (1 + t²)`.
-    reach: Ratio,
-}
-
-/// A core's hole: its tier's share (1/1000) times `h`, h a seed draw from
-/// 1/4 to 2 (15/60 to 120/60) as xylarium draws a sibling's hole against
-/// the home's. Under ω = M/r a galaxy scaled whole is a copy of another
-/// (its turnings kept), so its hole's share is what makes galaxies differ.
-/// A placeholder until the pulse's physics sets it.
-fn hole_share(seed: &[u8; 32], path: &[u32]) -> Ratio {
-    tier(2).centre * ratio(15 + (draw(seed, path, "hole", 0) % 106) as i64, 60)
+    pub(crate) reach: Ratio,
 }
 
 /// `2t / (1 + t²)`: a rational reach share from a rational half-angle.
@@ -207,7 +198,7 @@ fn reach_of(t: Ratio) -> Ratio {
 /// interstellar medium, of order 1/10, the Milky Way's gas to stars), 1 a
 /// star (99.86% of its system, the Sun's share; belts and comet clouds, of
 /// order 1/100 of the rest), 0 an orb (keeps all).
-fn tier(depth: u8) -> Tier {
+pub(crate) fn tier(depth: u8) -> Tier {
     match depth {
         3 => Tier { centre: ratio(0, 1), medium: ratio(1, 2), reach: ratio(0, 1) },
         // Systems about a core: s = 12/37 (t = 1/6), each system about 0.235
@@ -222,11 +213,11 @@ fn tier(depth: u8) -> Tier {
 }
 
 /// `f` of each element, floored to the grain.
-fn take(from: &Manifest, f: &Ratio) -> Manifest {
+pub(crate) fn take(from: &Manifest, f: &Ratio) -> Manifest {
     from.iter().map(|(k, a)| (k.clone(), grain(&(a.clone() * f.clone())))).filter(|(_, a)| *a > ratio(0, 1)).collect()
 }
 
-fn less(from: &mut Manifest, by: &Manifest) {
+pub(crate) fn less(from: &mut Manifest, by: &Manifest) {
     for (k, a) in by {
         if let Some(have) = from.get_mut(k) {
             *have -= a.clone();
@@ -266,10 +257,9 @@ impl Body {
 /// medium is set aside from the rest, and the satellites break what remains
 /// inside `reach` (none: bounded by the grain alone), the first period
 /// `unit`, then one tier down. What they leave joins the medium.
-fn split(seed: &[u8; 32], path: Vec<u32>, mut grains: Manifest, reach: Option<Ratio>, unit: Ratio, unit_mass: &Ratio, depth: u8) -> (Manifest, Vec<Body>, Manifest) {
+pub(crate) fn split(seed: &[u8; 32], path: Vec<u32>, mut grains: Manifest, reach: Option<Ratio>, unit: Ratio, unit_mass: &Ratio, depth: u8) -> (Manifest, Vec<Body>, Manifest) {
     let law = tier(depth);
-    let centre = if depth == 2 { hole_share(seed, &path) } else { law.centre.clone() };
-    let kept = take(&grains, &centre);
+    let kept = take(&grains, &law.centre);
     less(&mut grains, &kept);
     let mut satellites = Vec::new();
     if depth == 0 {
@@ -352,7 +342,7 @@ pub fn deploy(seed: &[u8; 32], manifest: &Manifest) -> Universe {
     let mut shares: Vec<(u32, Manifest)> = Vec::new();
     for (i, a) in (1..=modes).zip(&strengths) {
         let m = take(&formed, &ratio(*a, sum));
-        if take(&m, &hole_share(seed, &[i])).is_empty() {
+        if take(&m, &tier(2).centre).is_empty() {
             continue;
         }
         shares.push((i, m));
@@ -363,15 +353,20 @@ pub fn deploy(seed: &[u8; 32], manifest: &Manifest) -> Universe {
     for (k, a) in formed {
         *medium.entry(k).or_insert_with(|| ratio(0, 1)) += a;
     }
-    // The unit: the deepest core's hole (`M_core = 1`).
-    let deepest = shares.iter().map(|(i, m)| mass(&take(m, &hole_share(seed, &[*i])))).max().unwrap_or_else(|| ratio(1, 1));
-    // A core's reach waits for the cores' places (A1): until then its
-    // systems are bounded by their minimum alone.
+    // THE PULSE LAYS DOWN ONLY THE START (docs/78, "The breath"): each core
+    // keeps its hole and the rest of its galaxy is its MEDIUM, gas. Star
+    // systems are born by the breath, as echoes compress it. A core stands
+    // at its mode's distance from the universal core, `d_i`, a seed draw
+    // (60 to 3,600 bells of light travel), the spectrum's own field; its
+    // echoes arrive that much later.
     let cores = shares
         .into_iter()
         .map(|(i, m)| {
-            let (kept, satellites, medium) = split(seed, vec![i], m, None, ratio(60 * 60, 1), &deepest, 2);
-            Body { path: vec![i], radius: ratio(0, 1), period: ratio(0, 1), kept, satellites, medium }
+            let kept = take(&m, &tier(2).centre);
+            let mut rest = m;
+            less(&mut rest, &kept);
+            let distance = ratio(60 * (1 + (draw(seed, &[i], "distance", 0) % 60) as i64), 1);
+            Body { path: vec![i], radius: distance, period: ratio(0, 1), kept, satellites: Vec::new(), medium: rest }
         })
         .collect();
     Universe { cores, medium }

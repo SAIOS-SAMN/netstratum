@@ -354,9 +354,55 @@ event deploys them all, and everything after is a closed form of t from it
 - **Radial motion.** The law turns bodies; it does not move them in or out.
   Radii are the deployment's, so infall, accretion and escape are not yet
   physics. A square-free radial law is owed before any body changes orbit.
-- **The clock's rate law** (docs/80): slower deeper in a well, stated in
-  enclosed mass and radius with no square and no root (the flat-space
-  `√(1 − 2GM/rc²)` is not used).
+- ~~The clock's rate law~~: stated in "The breath" (`r / (r + M(<r))`).
+
+## The breath: the universal pulse, star formation, layered time
+
+Operator, 2026-10-14. Built: `conductor::breath`, the `breathe` binary.
+
+- **The universal pulse.** TUniversal sets the quantum clock at the Big Bang,
+  at the universal core: the singularity's bounce pulses every `T_u` bells,
+  and each echo is a beat of time carried through the quantum state
+  (docs/79, quantum in matter). An echo reaches a galaxy after its distance
+  from the universal core, one length a bell (the core's `d_i`, a field of
+  the spectrum). `T_u` is TUniversal's at founding; 60 bells stands in.
+- **The pulse lays down only the start:** the cores (each keeping its hole)
+  and each galaxy's medium. No star systems: they are BORN by the breath.
+  (Defect corrected, operator: the variation came from spawning galaxies
+  and drawing their holes, where it should come from star systems forming;
+  the hole draw is removed.)
+- **The breath.** Each echo compresses a galaxy's medium. Where the clump at
+  the next reach boundary can hold its own reach (the tidal law,
+  `m = μ · M(<r)`), a star system is born there, its orbs formed by the
+  same law one tier down. The medium is consumed; nothing is created.
+- **Layered time.** A layer at radius r about the mass M(<r) it encloses runs
+  at `r / (r + M(<r))` of the layer above: linear, exact, the weak-field
+  dilation `1 − GM/rc²` to first order (G = c = 1). Nested wells multiply:
+  a planet's clock is its rate about its star, times its star's about the
+  galaxy, times the galaxy's about the universal core. Each echo a layer
+  receives is one RUNG; the proper time it has lived is its AEON. As the
+  quantum phase decoheres and recoheres on the stars, each layer's rungs are
+  its own: element distribution and star formation layer the time.
+- **Time writes on the chain.**
+  - PARALLEL: a write within one layer, on its own clock.
+  - PERPENDICULAR: a write across layers: an echo coming down, a birth
+    changing the mass above.
+  - A perpendicular write down answered by one up closes a causal LOOP
+    (multi-dimensional causality); the loops, overlapping and intertwined
+    across the layers, are the CHAIN.
+- **Reading** (stand-in, `breathe var-e1 6000 60`): the pulse lays down 13
+  cores and no systems; 937 echoes (perpendicular writes down) give 416
+  systems born (416 loops closed) and about 6,000 orbs; the breath creates
+  nothing (conservation exact). Each galaxy's rungs and aeon differ by its
+  distance and its depth in the universal well (rates from 1 to about 1/4).
+- **Not yet elastic.** The breath only consumes: every galaxy forms its 32
+  systems within about 32 echoes, spends its medium, and then is still,
+  and under linear homology every galaxy ends the same shape (one year,
+  about 1.49e9 bells). The breathing the operator named is elastic: stars
+  DECOHERE (return matter to the medium) and echoes RECOHERE it. A return
+  law is owed, and its rungs counted on each layer's own proper time, so
+  that each galaxy's dilation sets its own balance of birth and return:
+  that, not a drawn dial, is what would make galaxies differ in shape.
 
 ## The atom: matter at the boundary (the lowest tier)
 
