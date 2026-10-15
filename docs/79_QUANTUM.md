@@ -222,6 +222,26 @@ shared library laws):
 4. **The propulsion:** how the disk's holding sets the bounce's strength
    (the galactic bounce strength, docs/83).
 
+### The split and the draft forms (with xylarium, 2026-10-15; proposals, not built)
+
+- **xylarium (2, 4):** the combined turning `K = K_core + K_disc`
+  (holding-weighted bivectors); the lobes are K's two hemispheres, the main
+  attractor on K's dual axis; THE LEAN held as `(a·b, a∧b)` (a the core's
+  spin axis, b the dipole's), no norm, no root. Propulsion per ring is the
+  disc's deficit share `H_disc / (H_core + H_disc)`; the bell's pitch is
+  read from K (replacing their `M^(1/3)`), the Kerr spin read, not drawn.
+- **netstratum (1, 3), drafts:**
+  - THE DISC: each nucleus is HELD where its hold against the core's
+    deficit outweighs the push, `h·δ(<) ≥ p`; walked by hold, heaviest
+    first, each held element raises both δ and p, and the walk stops at the
+    first the disc cannot hold: the disc's mass is the self-consistent
+    balance of its propulsion and its holding. Lighter elements are the
+    galaxy's gas; what no core holds is intergalactic.
+  - THE PRECESSION: the lean turns about the core's axis at the disc's own
+    deficit at its reach, `H_disc / (R_disc + H_disc)` turns per received
+    ring (a compact disc precesses faster); the starting lean from the held
+    elements' unpaired senses summed into K_disc's plane. No draw.
+
 ## Open, for the operator
 
 - ~~What is quantum; coupling~~: ruled 2026-10-14 (below).
