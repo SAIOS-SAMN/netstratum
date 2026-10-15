@@ -62,6 +62,12 @@ misaligned with docs/78's design laws, and none of it is adopted:
    layer (design law 7): a speed is a phase turning per bell, read off the
    law.
 
+xylarium concurs (2026-10-15, their operator's ruling): what the two
+universes share is the laws' FORMS only (the turning law, `v = c·δ`,
+`L = r·v`, the radial balance, the bond law, the chronometry chain). Each
+universe derives its own rulers from its own physics, including the
+home-body compression reference.
+
 What actually blocked Phase 1 is missing physics, not missing units: the
 THERMAL MOTION of matter was never derived from our own atom tier (where
 temperature is a rate, `T = k_T·ω`). Derived there, on the same turning

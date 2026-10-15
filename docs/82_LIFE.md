@@ -190,6 +190,12 @@ carry life, and a world may carry several forms at once.
 
 ## The shared ruler and the climb in generations (2026-10-14, with xylarium)
 
+Amended 2026-10-15 (both operators): only the FORMS are shared; each
+universe derives its rulers from its own physics. The home reference body
+below is ours to choose, and the bell's "97,850 standard years" is
+xylarium's ladder, not a ruler of ours. The home star and world are read
+off the inverted galaxy layer (docs/83, "Corrections") until it is rebuilt.
+
 - **One ruler per tier:** compression's `M_a` is the HOME reference body
   (the home galaxy, the deepest core; its innermost star; that star's
   innermost world), normalised `R = 2 · R_loose / (1 + r)` and a star's burn

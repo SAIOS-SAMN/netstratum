@@ -94,8 +94,8 @@ breaks one of them is wrong before it is built.
 
     with `M(<r)` the grains its orbit encloses, in units of the universe
     core's own mass, and `r` the orbit's radius held by its half-angle
-    parameter. The units are xylarium's anchor, so two universes compare by
-    exact ratios at a tube: G = c = M_core = 1, time the core's bell, read
+    parameter. The units are our own universe's (the form shared with
+    xylarium, the rulers each universe's own, 2026-10-15): G = c = M_core = 1, time the core's bell, read
     per tier in exact powers of sixty. Linear in the enclosed mass, as a
     frame turned by the flux it encloses (the Larmor form; docs/81's
     holonomy).
@@ -227,7 +227,7 @@ event deploys them all, and everything after is a closed form of t from it
     from `blake3(origin hash ‖ τ ‖ b ‖ x ‖ j)`, the origin hash being era 1's
     version-2 origin. Fixed paths: the same seed deploys the same universe.
   - **The unit.** Masses are in the deepest core's grains (core 1 =
-    `M_core = 1`, xylarium's anchor), so ω and r are exact rationals.
+    `M_core = 1`, our own core), so ω and r are exact rationals.
 - **Motion.** Every body turns about its centre by the law above, in the
   plane its mode's reflections give. Its phase at t = 0 is not drawn: it
   rises from below (design law 7), the quantum wavefront having set its
@@ -330,7 +330,7 @@ event deploys them all, and everything after is a closed form of t from it
   matter; real galaxy populations are steep, but by their physics, not by
   an order of draws.);
 - the spectrum: seed-derived, dial-tilted (above);
-- the scale: xylarium's anchor (above);
+- the scale: our own deepest core (above; the form shared with xylarium, never its rulers);
 - era 0's lines: none carried. Era 1 is a new domain (ruling 1); its
   civilizations arise anew from its physics, as xylarium's do, and the seat
   minds wait unseated until the new domain has a living ancient. Era 0's 101
