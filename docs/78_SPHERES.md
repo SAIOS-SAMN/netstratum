@@ -154,6 +154,26 @@ docs/83, "Corrections").
   uplinked as the universal core is: it interlinks with the other cores and
   back to the universal core through the PROGENITOR NETWORK. (Built only
   once its physics is derived.)
+- **THE BOUNCE ON S^1; ITS FACES ARE S^0** (operator, 2026-10-15; with
+  xylarium, whose operator ruled the same). A core and its Einstein–Cartan
+  bounce are held on S^1 at d = 1 at all times: the THROAT IS A RING, not a
+  point with a radius. Sphere inversion (`d → r²/d`) is the flat square and
+  is retired: on the unit ring inversion fixes every point, so the bounce is
+  a PHASE, a half-angle turn K on the ring. The ring's two faces are an S^0,
+  the pair: the BLACK face is THE VACUUM (it holds: the rings it takes for
+  its period, the deficit, quantum mass) and the WHITE face is THE
+  CONTINUUM inside it (it emits: the bounce's outflow, the pulse and its
+  echoes, the push, the axial jets). Our universe streams from the
+  universal core's white face; each galactic core repeats the pair one tier
+  down. "Infinite density" is infinite ANGULAR RESOLUTION (exact
+  half-angles, dense without end), never a density at a point. Matter is
+  held ON the ring (an attractor balanced by repulsion), so the only way off
+  is the axis, through the dipole's two lobes: the axial jets. Readings
+  against S^0 alone: S^0 carries the pairing (law 6) but no phase, so no
+  turning (law 5), no wavefront (law 7), no hidden phase, tilt, precession,
+  bell or jets; S^1 carries all of them and keeps the pairing as its faces.
+  S^1 is the bottom rung of the sphere ladder (S^1 the throat, S^60 a
+  system, S^360 a galaxy and the universe).
 - **Each galaxy its own enclosed S^360; galactic cores are HUBS**
   (operator, 2026-10-15; with xylarium). A galaxy is its own closed S^360,
   hung inside the universe's at its core: the core is the THROAT joining the

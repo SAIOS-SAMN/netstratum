@@ -203,9 +203,12 @@ precession and its propulsion are owed together.
 
 ### The core holds as a state (2026-10-15; with xylarium, proposed)
 
-- **The core's reach is its echo:** its ring goes out and returns once a
-  ring, so its reach is half a light-ring in its own units (xylarium; their
-  GR horizon `r = 2M` is not used: imported and circular).
+- **The core's reach is its ring** (operator, 2026-10-15, superseding "its
+  echo, half a light-ring"): the throat is S^1 at d = 1 (docs/78, "The
+  bounce on S^1"), so the core's reach is 1 in its own units. Pending with
+  xylarium: whether the core's state spin `R_core·H_core` becomes 1 (from ½),
+  which doubles the push's carried spin in the disc's cut and the gas
+  shells (`ℓ_z = p·(w̄/w)/s_g`).
 - **The core's own hold:** a bell holds each ring for its own period, so
   counted in its own rings the core holds one ring; at its reach its
   deficit is `1 / (½ + 1) = ⅔`. Fixed by the bell, no constant.

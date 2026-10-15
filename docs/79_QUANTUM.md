@@ -256,6 +256,10 @@ shared library laws):
 ## Open, for the operator
 
 - ~~What is quantum; coupling~~: ruled 2026-10-14 (below).
-- **The vacuum.** The compact manifold's integers for era 1: chosen once, by
+- **The vacuum** (answered in part, operator 2026-10-15): the vacuum is the
+  BLACK face of the throat ring (S^1 at d = 1; its faces an S^0), the
+  continuum its WHITE face inside it (docs/78, "The bounce on S^1"). Still
+  open below: the compact manifold's integers.
+- **The vacuum's integers.** The compact manifold's integers for era 1: chosen once, by
   whom (the operator, or derived from the Big Bang's seed)? The same choice
   sets the pulse's spectrum, which deploys every mass (docs/78, "The bounce").
