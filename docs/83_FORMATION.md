@@ -136,7 +136,7 @@ law's MOTION was wired (period `r·(r + H)/H`, the balance
   (its spin, read from the turning without a flat square) is owed before
   the motion goes live, shared with xylarium (`L = r·v` is a shared form).
 
-### The nappe law and the dance (with xylarium, 2026-10-15; awaiting the operator's ruling)
+### The nappe law (rejected) and the dance (with xylarium, 2026-10-15)
 
 - **The nappe law** (xylarium's, remediated by ours): spin is the inversion
   between the nappes, `ℓ·ℓ = r·H`. The specific spin ℓ is the primitive,
@@ -145,9 +145,13 @@ law's MOTION was wired (period `r·(r + H)/H`, the balance
   exact. Measured on the test breath (6,000 bells), against `ℓ = r·δ`: 0
   escaped (was 1,894), 29 born (was 0), the spin ledger exact, 35 s (was
   754 s; the old motion 23 s); orbits widen smoothly as stars shed.
-  OPEN for the operator: its readings reproduce Kepler's form
-  (`P² = r³/H`), which design law 2 names as a caught flat law; stated as
-  an inversion between nappes, Kepler is a reading, not the law.
+  REJECTED by the operator (2026-10-15): "`P² = r³/H` is not a valid
+  formula: squares in spherical computations." Calling `ℓ·ℓ = r·H` an
+  inversion does not make it other than a square, and its readings
+  (`r = ℓ²/H`, `P = ℓ³/H²`) are Kepler's flat powers. Not adopted. The
+  saturation it fixed (`ℓ = r·δ` reaches H) stands open: the spin law must
+  be stated in the sphere's own terms (angles and turns, design law 2),
+  with no power of a length.
 - **The dance, not Hill spheres** (xylarium's operator; their 11.0): a
   star and EVERYTHING that orbits it are ONE system turning about one
   centre of conservation (every holding, every quantum state). STABILITY
