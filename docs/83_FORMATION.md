@@ -212,26 +212,25 @@ precession and its propulsion are owed together.
 - **The grains' hold, on the core's clock:** a grain holds a ring for its
   own period, `P_grain / P_core` of a core ring, a tiny fraction; the disc's
   grains add to the core's holding without having to rival it.
-- **Open: the clock ratio** `P_core / P_grain`, which sets how much 3-D
-  matter it takes to weigh against a core's holding. xylarium proposes a
-  founding draw (the one coupling between the atom tier and the core
-  tier); our lean (operator: constants are missing physics) is to derive it
-  from what the universe acquired through the hypha, in a form not yet
-  found.
-
-## What we have, and what is missing
-
-| nature's ingredient | built | missing |
-|---|---|---|
-| gravity, inward | the turning law `ω = M(<r) / r` (bodies orbit) | a RADIAL law: nothing falls, collapses, migrates or escapes (owed since docs/78) |
-| pressure, outward | pressure for atmospheres (docs/82) | pressure resisting collapse in a cloud or a star |
-| spin (angular momentum) | phases in turns; spin promised for S^60 bodies | conservation: nothing spins up as it shrinks, so nothing flattens into a disk |
-| matter | grains by Z, the atom tier, chemistry, the medium (gas) | the medium never condenses into bodies; the breath forms systems by rule |
-| manifold, torsion | specified (S^360 places, cone reaches, torsion phase) | the field matter falls through |
-| orbital mechanics | each body about its enclosed mass alone | mutual tugs, resonances, migration, collisions, ejections |
-| locality | each body reads its star and its own matter | its neighbours |
-
-## The scope
+- **The clock ratio, derived** (closed with xylarium, 2026-10-15; their
+  founding draw withdrawn): the universal core's period is the total hold
+  of everything its ring passes through, the founding manifest's every
+  acquired nucleus's own period summed. So `P_core / P_grain` is the
+  manifest's total hold: a reading of what the universe acquired through
+  the hypha. With no constant:
+  - all the universe's grains together hold exactly ONE core ring, equal
+    to the core's own state hold; each grain holds `1/N` of a core ring
+    (N the manifest's total hold);
+  - a galactic core's state hold, on the universal clock, is its galaxy's
+    share of the manifest's holding; its core outweighs its grains in
+    holding (the state against a share below 1) while its stars and gas
+    may carry most of its 3-D mass. The "inversion" was a 3-D reading.
+  - The core needs no grains to exist (its state hold 1 exceeds its reach
+    ½): the core-first walk starts from the state hold and is all disc.
+  - **ACQUIRED MATTER SLOWS THE BELL:** every growth grant (new nuclei
+    through the hypha) lengthens the universal core's period, so the rings
+    per TUniversal final point shift at each grant; to be read on the
+    bridge.
 
 ### Phase 0: the missing forces, in the design laws
 
