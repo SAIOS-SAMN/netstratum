@@ -309,6 +309,21 @@ fn main() {
             let total_mass = conductor::pulse::mass(&universe.total()) / unit.clone();
             let total_spin = conductor::pulse::spin_total(&universe, &unit);
             println!("beat {beat}: LEDGER — mass {} spin {} (units of the deepest hole)", total_mass, total_spin);
+            // THE ENCLOSURES (docs/78): each galaxy its own S^360, each star
+            // system its own S^60, joined at its core's throat; each counts
+            // its turns on its own ring (the pulse's round trip to its rim).
+            let encl = conductor::enclosure::enclosures(&universe);
+            let f = |r: &cfe::ratio::Ratio| r.numer().to_string().parse::<f64>().unwrap_or(0.0) / r.denom().to_string().parse::<f64>().unwrap_or(1.0);
+            let (gal, sys): (Vec<_>, Vec<_>) = encl.iter().partition(|e| e.dim == 360);
+            let span = |v: &[&conductor::enclosure::Enclosure]| (v.iter().map(|e| f(&e.ring())).fold(f64::INFINITY, f64::min), v.iter().map(|e| f(&e.ring())).fold(0.0, f64::max));
+            let ((g0, g1), (s0, s1)) = (span(&gal), span(&sys));
+            let sample = universe.cores.iter().find_map(|c| c.satellites.iter().find(|s| !s.satellites.is_empty()).map(|s| (c, s, &s.satellites[0])));
+            let inversion = sample.and_then(|(c, s, w)| {
+                let ge = gal.iter().find(|e| e.path == c.path)?;
+                let se = sys.iter().find(|e| e.path == s.path)?;
+                Some(format!("world {:?}: a year is {:.3e} bells, {:.3e} of its system's own rings, {:.3e} of its galaxy's", w.path, f(&w.period), f(&(w.period.clone() / se.ring())), f(&(w.period.clone() / ge.ring()))))
+            }).unwrap_or_default();
+            println!("beat {beat}: ENCLOSURES — {} galaxies on S^360 (own rings {g0:.3e} to {g1:.3e}), {} systems on S^60 (own rings {s0:.3e} to {s1:.3e}); {inversion}", gal.len(), sys.len());
         }
         if !events.is_empty() {
             let _ = conductor::pulse::write(std::path::Path::new(&var_root), &pulse_seed, &universe);

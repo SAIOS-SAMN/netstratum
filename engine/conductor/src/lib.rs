@@ -87,6 +87,7 @@ pub mod pulse;
 pub mod motion;
 pub mod breath;
 pub mod ring;
+pub mod enclosure;
 pub mod clocks;
 pub mod seating;
 pub mod life;
