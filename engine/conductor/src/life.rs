@@ -111,7 +111,7 @@ pub fn read(path: Vec<u32>, matter: &Manifest, period: &Ratio, coupling: &Ratio,
     let gravity = mass(matter) / size.clone();
     let plasma = |a: &Atom| grip(a) < heat;
     let volatile = |a: &Atom| !plasma(a) && a.unpaired <= 1;
-    let gases: Vec<(u32, Ratio)> = atoms.iter().filter(|(a, _)| volatile(a) || plasma(a)).map(|(a, g)| (cfe::almanac::atom::mass_number(a.z), g.clone())).collect();
+    let gases: Vec<(u32, Ratio)> = atoms.iter().filter(|(a, _)| volatile(a) || plasma(a)).map(|(a, g)| (cfe::almanac::atom::hold(a.z), g.clone())).collect();
     let core_matter: Manifest = matter.iter().filter(|(k, _)| z_of(k).and_then(atom).is_some_and(|a| !plasma(&a) && a.unpaired >= 2)).map(|(k, g)| (k.clone(), g.clone())).collect();
     let core = mass(&core_matter) / mass(matter);
     let hold = gravity.clone() * (ratio(1, 1) + core.clone()) / heat.clone();
@@ -507,7 +507,7 @@ pub fn worlds(u: &Universe) -> Vec<World> {
             let worlds_mass = sys.satellites.iter().fold(ratio(0, 1), |s, o| s + mass(&o.total()));
             let window = window_echoes(&star, &worlds_mass);
             for orb in &sys.satellites {
-                let coupling = crate::breath::rate(&orb.radius, &(inside.clone() / crate::breath::unit_mass(u)));
+                let coupling = crate::ring::rate(&orb.radius, &(inside.clone() / crate::breath::unit_mass(u)));
                 if let Some(mut w) = read(orb.path.clone(), &orb.kept, &orb.period, &coupling, &star_burn, &world_scale, delay) {
                     w.belts = belts.clone();
                     w.window = window;

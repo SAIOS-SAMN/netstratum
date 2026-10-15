@@ -24,7 +24,8 @@
 //!   keeper inside it is the entry's RESIDUAL, kept, never averaged. The
 //!   epicenter's entry carries the last TUniversal final point heard (the
 //!   bridge: rings per final-point advance, measured). `<var>/chrono.jrn`.
-use crate::breath::{galaxy_rate, rate, unit_mass};
+use crate::breath::{galaxy_rate, unit_mass};
+use crate::ring::rate;
 use crate::motion::galactic_year;
 use crate::pulse::{mass, Universe};
 use cfe::ratio::{ratio, Ratio};

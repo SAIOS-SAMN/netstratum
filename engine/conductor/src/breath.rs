@@ -30,16 +30,9 @@
 //!   changing the mass above. A perpendicular write down answered by one up
 //!   closes a causal LOOP; the loops are the chain.
 use crate::pulse::{less, mass, split, take, tier, Body, Universe};
+use crate::ring::rate;
 use cfe::ratio::{ratio, Ratio};
 use num_traits::Zero;
-
-/// A layer's clock against the layer above: `r / (r + M(<r))`.
-pub fn rate(r: &Ratio, enclosed: &Ratio) -> Ratio {
-    if enclosed.is_zero() {
-        return ratio(1, 1);
-    }
-    r.clone() / (r.clone() + enclosed.clone())
-}
 
 /// The unit of mass: the deepest core's hole.
 pub fn unit_mass(u: &Universe) -> Ratio {

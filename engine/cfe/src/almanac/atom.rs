@@ -93,11 +93,19 @@ pub fn z_of(id: &[u8; 32]) -> Option<u32> {
 
 /// THE NUCLEUS (the same law one tier in): its Z protons and its neutrons
 /// pair, one of each kind to a frame, and pairing is what closes (design law
-/// 6), so a closed nucleus holds as many neutrons as protons: `A = 2Z`.
+/// 6), so a closed nucleus holds as many neutrons as protons, 2Z nucleons.
 /// The neutron excess of heavy nuclei, which charge's push would bring, is
 /// not yet law (docs/78, Open).
-pub fn mass_number(z: u32) -> u32 {
-    2 * z
+///
+/// A GRAIN'S OWN RING (docs/83 "The derivation", netstratum's share of the
+/// ring-density law; operator 2026-10-15): an atom is a small bell, its tick
+/// a ring received. HOLDING BELONGS TO CLOSED PAIRS: every paired member (a
+/// nucleon, an electron in a paired frame) holds each passing ring one tick;
+/// an unpaired electron is open, free to bond, and holds nothing. So bonding
+/// and weight are two sides of pairing, and an atom's mass reading is its
+/// hold: `2Z + (Z − unpaired)` rings. The mass number is this reading.
+pub fn hold(z: u32) -> u32 {
+    atom(z).map(|a| 2 * z + (z - a.unpaired)).unwrap_or(0)
 }
 
 /// A COMPOUND (design law 6 across atoms): a bond is an unpaired electron of
@@ -136,6 +144,16 @@ mod tests {
         // In band 2: 1, 2 unpaired rising, then pairing down.
         let unpaired: Vec<u32> = (3..=6).map(|z| atom(z).unwrap().unpaired).collect();
         assert_eq!(unpaired, vec![1, 2, 1, 0]);
+    }
+
+    #[test]
+    fn holding_belongs_to_closed_pairs() {
+        // Hydrogen: 2 nucleons hold, its lone electron is open.
+        assert_eq!(hold(1), 2);
+        // Helium closes its band: 4 nucleons and 2 paired electrons.
+        assert_eq!(hold(2), 6);
+        // Z = 4: 8 nucleons; band 1's pair holds, band 2's two are open.
+        assert_eq!(hold(4), 8 + 2);
     }
 
     #[test]

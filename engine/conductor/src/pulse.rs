@@ -34,12 +34,12 @@ fn grain(x: &Ratio) -> Ratio {
     cfe::world::smelt_resource(x)
 }
 
-/// Mass for the turning law: each grain of Z weighs its nucleus's mass
-/// number (`cfe::almanac::atom::mass_number`); a key that is no Z (era 0's
-/// kinds, before they cross) weighs one.
+/// Mass for the turning law: each grain of Z holds its atom's rings
+/// (`cfe::almanac::atom::hold`, mass is holding); a key that is no Z (era
+/// 0's kinds, before they cross) holds one.
 pub fn mass(m: &Manifest) -> Ratio {
     m.iter().fold(ratio(0, 1), |s, (k, a)| {
-        let weight = k.strip_prefix('Z').and_then(|z| z.parse::<u32>().ok()).map(cfe::almanac::atom::mass_number).unwrap_or(1);
+        let weight = k.strip_prefix('Z').and_then(|z| z.parse::<u32>().ok()).map(cfe::almanac::atom::hold).unwrap_or(1);
         s + a.clone() * ratio(i64::from(weight), 1)
     })
 }

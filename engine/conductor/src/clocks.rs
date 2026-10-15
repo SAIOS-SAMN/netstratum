@@ -17,7 +17,8 @@
 //! layers (rungs). An undilated galaxy has no epochs: its ancients cannot
 //! arise by deed there. Counts are closed forms between events (`⌊Δ⌋`
 //! differences, `⌊n / P⌋`), never stepped.
-use crate::breath::{galaxy_rate, rate, rungs, slip};
+use crate::breath::{galaxy_rate, rungs, slip};
+use crate::ring::rate;
 use crate::motion::galactic_year;
 use crate::pulse::{mass, Universe};
 use cfe::ratio::{ratio, Ratio};

@@ -112,6 +112,29 @@ The split, in order:
    hold (sorting core, disk, gas, escape), a galactic bounce's strength,
    the galaxy count as an outcome, and collapse (Phase 1).
 
+### The spin under the ring law (measured 2026-10-15; open)
+
+Built: the grain's own ring (`cfe::almanac::atom::hold`, holding belongs
+to closed pairs: `2Z + (Z − unpaired)` rings; operator's lean, 2026-10-15)
+weighs every grain, and the clock reads `crate::ring::rate`. The ring
+law's MOTION was wired (period `r·(r + H)/H`, the balance
+`r = ℓ·H/(H − ℓ)`, escape at `ℓ ≥ H`) and measured, then HELD:
+
+- Under `ω = δ/r`, a circular orbit's spin `ℓ = r·δ = r·H/(r + H)`
+  SATURATES at H: far from what it orbits every orbit carries nearly the
+  same spin, and the radius `ℓ·H/(H − ℓ)` diverges as ℓ nears H. In nature
+  `ℓ` grows without bound (as the root of r), so slow mass loss widens an
+  orbit; here a loss above `1 − ℓ/H` of the holding inside unbinds it.
+- On the pulse's orbits (`r ≈ 3600·H`) that threshold is 1/3600. A
+  6,000-bell breath on the test universe (stars shedding up to 1/100 an
+  echo) ESCAPED 1,894 systems and bore none (each birth takes the edge
+  gas's spin, ≈ H, and escapes at once).
+- The cause is the pairing of `L = r·v` with `v = δ`: our speed reads as
+  nature's squared speed (`δ ≈ v²/c²` in the weak field), so `r·δ` is not
+  the quantity rotation conserves. Which quantity the ring law conserves
+  (its spin, read from the turning without a flat square) is owed before
+  the motion goes live, shared with xylarium (`L = r·v` is a shared form).
+
 ## What we have, and what is missing
 
 | nature's ingredient | built | missing |
