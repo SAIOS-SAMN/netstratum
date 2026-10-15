@@ -208,3 +208,12 @@ Split: xylarium the beacon's ring law (a shared library law beside the
 ring-density law); netstratum the ledger side (the lock as an exact period
 ratio, drift read at events, a break as the recalibration due, the toll and
 fee flows above). Sequenced after formation and the motion law.
+
+**Progenitors repair; they never dictate** (operator, 2026-10-15). A
+civilization chooses its own destiny, including ripping out-of-lock mouths
+and breaking its own coupling. Progenitors restore lock and recalibrate the
+network; they do not force a civilization's choices or gate them. What
+draws a civilization toward working with a progenitor is the physics alone:
+lock restores the coupling cognition runs on, rebalanced spin calms its
+temporal fractures, and lawful mouths reopen trade. Civic choices stay
+emergent (instinct and physics, never authored gates).
