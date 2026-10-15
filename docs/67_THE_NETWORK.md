@@ -190,3 +190,21 @@ stillcold-sky-3, mycelium's house accepts, and both reserves map their sides.
 The house reads its domain id from its domain key (`tier-domain.key`); no id
 is hard-coded. Whether the id is unchanged under the new genesis is
 mycelium's to answer.
+
+## Proposed: the progenitors' beacon law (with xylarium, 2026-10-15; awaiting the operator, not built)
+
+Follows from "acquired matter slows the bell" (docs/83): each grant
+lengthens the universal core's period against TUniversal (in core rings
+nothing changes: all grains together always hold one core ring), so fewer
+core rings fall per final point. A BEACON is a wormhole mouth deployed by
+progenitors, ringing in exact LOCK with the core (a small whole-number
+ratio of its ring) and relaying its pulse: it recovers the bridge rate,
+splits the compute (each beacon's region on its own machine, kept in step
+by its lock), and gives nearby places the passage's shortcut. LOCK OR
+BREAK is the physics of "a wormhole needs recalibration on event": a mouth
+out of lock delivers rings off-phase and is due for recalibration.
+
+Split: xylarium the beacon's ring law (a shared library law beside the
+ring-density law); netstratum the ledger side (the lock as an exact period
+ratio, drift read at events, a break as the recalibration due, the toll and
+fee flows above). Sequenced after formation and the motion law.
