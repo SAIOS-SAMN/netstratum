@@ -59,7 +59,7 @@ pub fn composition_of(u: &Universe, path: &[u32]) -> Option<Vec<(u16, cfe::ratio
 }
 
 /// Each system's stand-in place and its galactic period (bells a turn about
-/// its core, the turning law's `P = r / M(<r)`): what a line's orbit reads.
+/// its core, the motion law's `P = 1 + R / H`): what a line's orbit reads.
 pub fn periods(u: &Universe) -> std::collections::BTreeMap<Place, cfe::ratio::Ratio> {
     let mut out = std::collections::BTreeMap::new();
     for (k, &i) in by_distance(u).iter().enumerate() {

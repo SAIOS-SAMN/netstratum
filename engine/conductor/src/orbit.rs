@@ -11,7 +11,7 @@
 //!
 //! ERA 1 (the refactor onto era 1's physics, 2026-10-15): the arc's pace is
 //! the turning law's, one circuit in its system's galactic period
-//! (`P = r / M(<r)`, `motion`), never a shared flat-curve speed.
+//! (`P = 1 + R / H`, `ring`), never a shared flat-curve speed.
 
 use cfe::ratio::{ratio, Ratio};
 

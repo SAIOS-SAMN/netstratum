@@ -241,8 +241,8 @@ pub struct Body {
     /// The tier's unbound grains, beyond its last orbit.
     pub medium: Manifest,
     /// docs/83 Phase 0, THE SPIN LEDGER: the body's specific spin about its
-    /// centre, `ℓ = r · v` with `v = M(<r)` (the speed law, c = 1); its
-    /// angular momentum is its mass times ℓ. Zero for a core (it does not
+    /// centre, `ℓ = R · H` (reach times the holding inside it,
+    /// `crate::ring`); its angular momentum is its mass times ℓ. Zero for a core (it does not
     /// orbit).
     pub ell: Ratio,
     /// The medium's total angular momentum (gas carries spin too).
@@ -282,7 +282,7 @@ pub(crate) fn split(seed: &[u8; 32], path: Vec<u32>, mut grains: Manifest, reach
     // `μ = 2s² / (1 − s²)`, exact; reaches just touching place each next
     // satellite at `r · (1 + s) / (1 − s)`. The innermost orbit turns in one
     // unit of the tier (the bell ladder's anchor); each period follows from
-    // the law, `P = r / M(<r)`. Satellites form until the formed matter is
+    // the motion law, `P = 1 + R / H` (`crate::ring`). Satellites form until the formed matter is
     // spent or the next stands beyond the centre's reach; what remains is
     // the medium. Nothing is drawn.
     let s_ = law.reach.clone();
@@ -313,13 +313,13 @@ pub(crate) fn split(seed: &[u8; 32], path: Vec<u32>, mut grains: Manifest, reach
         if reach.as_ref().is_some_and(|bound| r > *bound) {
             break;
         }
-        let period = if enclosed.is_zero() { unit.clone() } else { r.clone() / enclosed.clone() };
+        let period = if enclosed.is_zero() { unit.clone() } else { crate::ring::period(&r, &enclosed) };
         less(&mut grains, &m);
         let mut at = path.clone();
         at.push(k);
         let own_reach = Some(r.clone() * s_.clone());
         let (s_kept, s_sats, s_medium, s_medium_spin) = split(seed, at.clone(), m, own_reach, unit.clone() / ratio(60, 1), unit_mass, depth - 1);
-        let ell = r.clone() * enclosed.clone();
+        let ell = crate::ring::spin(&r, &enclosed);
         satellites.push(Body { path: at, radius: r.clone(), period, kept: s_kept, satellites: s_sats, medium: s_medium, ell, medium_spin: s_medium_spin });
         radius = Some(r);
         enclosed += m_mass;
@@ -334,7 +334,7 @@ pub(crate) fn split(seed: &[u8; 32], path: Vec<u32>, mut grains: Manifest, reach
         None if enclosed.is_zero() => unit,
         None => enclosed.clone() * unit,
     };
-    let medium_spin = mass(&medium) / unit_mass.clone() * edge * enclosed;
+    let medium_spin = mass(&medium) / unit_mass.clone() * crate::ring::spin(&edge, &enclosed);
     (kept, satellites, medium, medium_spin)
 }
 

@@ -1,6 +1,6 @@
 //! docs/78 era 1, build step 3: MOTION. Every body turns about its centre by
-//! the one law, `ω = M(<r) / r` turns a bell, so its turn takes
-//! `P = r / M(<r)` bells (the pulse records P beside r). A body's phase at bell n is
+//! the motion law, `ω = δ` turns a received ring with `δ = H / (R + H)`
+//! (`crate::ring`), so its turn takes `P = 1 + R / H` rings (the pulse records P beside r). A body's phase at bell n is
 //! `φ + n / P` turns, its completed turns `⌊φ + n / P⌋`: a closed form whose
 //! denominator never grows (design laws 5 and 8). Nothing is stepped.
 //!

@@ -24,7 +24,7 @@
 //!   (entropy; ε the star tier's medium share, a placeholder), and an echo
 //!   compresses only the coherent part of a galaxy's medium, `c_g · medium`
 //!   (syntropy). A star spent below a grain dissolves. Periods re-read the
-//!   law after each echo, `P = r / M(<r)`.
+//!   motion law after each echo (`crate::ring`).
 //! - **Time writes.** A write within a layer, on its own clock, is PARALLEL;
 //!   a write across layers is PERPENDICULAR: an echo coming down, a birth
 //!   changing the mass above. A perpendicular write down answered by one up
@@ -179,7 +179,7 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
                 let taken = core.medium_spin.clone() * m_u.clone() / medium_mass.clone();
                 core.medium_spin -= taken.clone();
                 let ell_med = taken.clone() / m_u.clone();
-                let r_guess = ell_med.clone() / enclosed.clone();
+                let r_guess = crate::ring::radius(&ell_med, &enclosed).unwrap_or_else(|| ell_med.clone());
                 let k = core.satellites.iter().map(|l| l.path[1] + 1).max().unwrap_or(1);
                 let path = vec![core.path[0], k];
                 let (kept, orbs, medium, medium_spin) = split(seed, path.clone(), clump, Some(r_guess.clone() * s.clone()), ratio(60, 1), &unit, 1);
@@ -190,16 +190,19 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
                 born = Some(core.satellites.len() - 1);
             }
         }
-        // THE BALANCE (docs/83 Phase 0; cold bodies, v_th = 0): each system
-        // stands where its spin meets the speed its enclosed mass gives,
-        // `r = ℓ / M(<r)`, read inside out by spin; its period follows,
-        // `P = r / M(<r)`. A birth or a loss inside an orbit moves it.
+        // THE BALANCE (the motion law, `crate::ring`; cold bodies): each
+        // system stands where its spin meets the holding inside it,
+        // `R = ℓ / H`, read inside out by spin; its period follows,
+        // `P = 1 + R / H`. Orbits breathe: a birth or a loss inside an
+        // orbit moves it, the ledger deciding which way.
         core.satellites.sort_by(|a, b| a.ell.cmp(&b.ell));
         let mut inside = mass(&core.kept) / unit.clone();
         for sys in core.satellites.iter_mut() {
             if !inside.is_zero() && sys.ell > ratio(0, 1) {
-                sys.radius = sys.ell.clone() / inside.clone();
-                sys.period = sys.radius.clone() / inside.clone();
+                if let Some(r) = crate::ring::radius(&sys.ell, &inside) {
+                    sys.period = crate::ring::period(&r, &inside);
+                    sys.radius = r;
+                }
             }
             inside += mass(&sys.total()) / unit.clone();
         }
