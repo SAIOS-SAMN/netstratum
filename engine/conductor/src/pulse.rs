@@ -240,6 +240,13 @@ pub struct Body {
     pub satellites: Vec<Body>,
     /// The tier's unbound grains, beyond its last orbit.
     pub medium: Manifest,
+    /// docs/83 Phase 0, THE SPIN LEDGER: the body's specific spin about its
+    /// centre, `ℓ = r · v` with `v = M(<r)` (the speed law, c = 1); its
+    /// angular momentum is its mass times ℓ. Zero for a core (it does not
+    /// orbit).
+    pub ell: Ratio,
+    /// The medium's total angular momentum (gas carries spin too).
+    pub medium_spin: Ratio,
 }
 
 impl Body {
@@ -257,13 +264,13 @@ impl Body {
 /// medium is set aside from the rest, and the satellites break what remains
 /// inside `reach` (none: bounded by the grain alone), the first period
 /// `unit`, then one tier down. What they leave joins the medium.
-pub(crate) fn split(seed: &[u8; 32], path: Vec<u32>, mut grains: Manifest, reach: Option<Ratio>, unit: Ratio, unit_mass: &Ratio, depth: u8) -> (Manifest, Vec<Body>, Manifest) {
+pub(crate) fn split(seed: &[u8; 32], path: Vec<u32>, mut grains: Manifest, reach: Option<Ratio>, unit: Ratio, unit_mass: &Ratio, depth: u8) -> (Manifest, Vec<Body>, Manifest, Ratio) {
     let law = tier(depth);
     let kept = take(&grains, &law.centre);
     less(&mut grains, &kept);
     let mut satellites = Vec::new();
     if depth == 0 {
-        return (kept, satellites, grains);
+        return (kept, satellites, grains, ratio(0, 1));
     }
     let mut medium = take(&grains, &law.medium);
     less(&mut grains, &medium);
@@ -311,15 +318,24 @@ pub(crate) fn split(seed: &[u8; 32], path: Vec<u32>, mut grains: Manifest, reach
         let mut at = path.clone();
         at.push(k);
         let own_reach = Some(r.clone() * s_.clone());
-        let (s_kept, s_sats, s_medium) = split(seed, at.clone(), m, own_reach, unit.clone() / ratio(60, 1), unit_mass, depth - 1);
-        satellites.push(Body { path: at, radius: r.clone(), period, kept: s_kept, satellites: s_sats, medium: s_medium });
+        let (s_kept, s_sats, s_medium, s_medium_spin) = split(seed, at.clone(), m, own_reach, unit.clone() / ratio(60, 1), unit_mass, depth - 1);
+        let ell = r.clone() * enclosed.clone();
+        satellites.push(Body { path: at, radius: r.clone(), period, kept: s_kept, satellites: s_sats, medium: s_medium, ell, medium_spin: s_medium_spin });
         radius = Some(r);
         enclosed += m_mass;
     }
     for (k, a) in grains {
         *medium.entry(k).or_insert_with(|| ratio(0, 1)) += a;
     }
-    (kept, satellites, medium)
+    // The medium's spin: gas standing at the tier's edge, one step beyond
+    // its last orbit, turning at the speed the whole tier encloses.
+    let edge = match &radius {
+        Some(last) => last.clone() * step,
+        None if enclosed.is_zero() => unit,
+        None => enclosed.clone() * unit,
+    };
+    let medium_spin = mass(&medium) / unit_mass.clone() * edge * enclosed;
+    (kept, satellites, medium, medium_spin)
 }
 
 /// The universe the pulse deploys: its cores, and the intergalactic medium.
@@ -369,12 +385,23 @@ pub fn deploy(seed: &[u8; 32], manifest: &Manifest) -> Universe {
     let cores = shares
         .into_iter()
         .map(|(i, m)| {
-            let (kept, satellites, medium) = split(seed, vec![i], m, None, ratio(60 * 60, 1), &unit, 2);
+            let (kept, satellites, medium, medium_spin) = split(seed, vec![i], m, None, ratio(60 * 60, 1), &unit, 2);
             let distance = ratio(60 * (1 + (draw(seed, &[i], "distance", 0) % 60) as i64), 1);
-            Body { path: vec![i], radius: distance, period: ratio(0, 1), kept, satellites, medium }
+            Body { path: vec![i], radius: distance, period: ratio(0, 1), kept, satellites, medium, ell: ratio(0, 1), medium_spin }
         })
         .collect();
     Universe { cores, medium }
+}
+
+/// THE SPIN LEDGER's total (docs/83 Phase 0): every orbiting body's mass
+/// times its specific spin, and every medium's spin, in units of the unit
+/// mass. Conserved exactly across the breath.
+pub fn spin_total(u: &Universe, unit: &Ratio) -> Ratio {
+    fn of(b: &Body, unit: &Ratio) -> Ratio {
+        let own = mass(&b.total()) / unit.clone() * b.ell.clone();
+        b.satellites.iter().fold(own + b.medium_spin.clone(), |s, x| s + of(x, unit))
+    }
+    u.cores.iter().fold(ratio(0, 1), |s, c| s + of(c, unit))
 }
 
 impl Universe {
@@ -404,6 +431,8 @@ fn put_body(b: &Body, out: &mut Vec<u8>) {
     }
     cfe::ratio::encode(&b.radius, &mut v);
     cfe::ratio::encode(&b.period, &mut v);
+    cfe::ratio::encode(&b.ell, &mut v);
+    cfe::ratio::encode(&b.medium_spin, &mut v);
     put_manifest(&b.kept, &mut v);
     put_manifest(&b.medium, &mut v);
     cfe::tlv::put(1, &v, out);
@@ -417,6 +446,7 @@ fn put_body(b: &Body, out: &mut Vec<u8>) {
 /// seed.
 pub fn write(var_root: &Path, seed: &[u8; 32], u: &Universe) -> std::io::Result<()> {
     let mut out = Vec::new();
+    cfe::tlv::put(5, &[2], &mut out);
     cfe::tlv::put(3, seed, &mut out);
     for c in &u.cores {
         put_body(c, &mut out);
@@ -446,7 +476,7 @@ fn get_manifest(v: &[u8], at: &mut usize) -> Option<Manifest> {
     Some(m)
 }
 
-fn get_body(v: &[u8]) -> Option<Body> {
+fn get_body(v: &[u8], spun: bool) -> Option<Body> {
     let mut at = 0;
     let depth = *v.first()? as usize;
     at += 1;
@@ -459,9 +489,18 @@ fn get_body(v: &[u8]) -> Option<Body> {
     at += used;
     let (period, used) = cfe::ratio::decode(v.get(at..)?)?;
     at += used;
+    let (ell, medium_spin) = if spun {
+        let (ell, used) = cfe::ratio::decode(v.get(at..)?)?;
+        at += used;
+        let (medium_spin, used) = cfe::ratio::decode(v.get(at..)?)?;
+        at += used;
+        (ell, medium_spin)
+    } else {
+        (ratio(0, 1), ratio(0, 1))
+    };
     let kept = get_manifest(v, &mut at)?;
     let medium = get_manifest(v, &mut at)?;
-    Some(Body { path, radius, period, kept, satellites: Vec::new(), medium })
+    Some(Body { path, radius, period, kept, satellites: Vec::new(), medium, ell, medium_spin })
 }
 
 /// Read `<var>/pulse.bin` back: the seed and the universe (bodies are
@@ -471,11 +510,14 @@ pub fn read(var_root: &Path) -> Option<([u8; 32], Universe)> {
     let mut seed = None;
     let mut medium = Manifest::new();
     let mut flat: Vec<Body> = Vec::new();
+    // Tag 5 marks the spin ledger's format (docs/83 Phase 0); a file without
+    // it reads with no spin (a redeploy gives it its spin).
+    let spun = cfe::tlv::records(&bytes).any(|(t, _)| t == 5);
     for (t, v) in cfe::tlv::records(&bytes) {
         match t {
             3 => seed = v.try_into().ok(),
             2 => medium = get_manifest(v, &mut 0)?,
-            1 => flat.push(get_body(v)?),
+            1 => flat.push(get_body(v, spun)?),
             _ => {}
         }
     }

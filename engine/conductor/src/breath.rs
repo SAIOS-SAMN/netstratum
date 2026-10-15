@@ -72,6 +72,13 @@ pub fn rungs(delta: &Ratio) -> u64 {
     delta.floor().to_integer().try_into().unwrap_or(0)
 }
 
+/// The spin a body carries with everything inside it: its orbit's (its mass
+/// times its specific spin), its medium's, and every satellite's within.
+pub fn subtree_spin(b: &Body, unit: &Ratio) -> Ratio {
+    let own = mass(&b.total()) / unit.clone() * b.ell.clone();
+    b.satellites.iter().fold(own + b.medium_spin.clone(), |s, x| s + subtree_spin(x, unit))
+}
+
 /// What a write crossed.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Write {
@@ -108,7 +115,6 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
     let law = tier(2);
     let s = law.reach.clone();
     let mu = ratio(2, 1) * s.clone() * s.clone() / (ratio(1, 1) - s.clone() * s.clone());
-    let step = (ratio(1, 1) + s.clone()) / (ratio(1, 1) - s.clone());
     // Every echo's arrival, in time order.
     let mut arrivals: Vec<(u64, usize, u64)> = Vec::new();
     for (i, c) in u.cores.iter().enumerate() {
@@ -140,11 +146,16 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
             let back = take(&sys.kept, &(epsilon.clone() * out_of_phase));
             less(&mut sys.kept, &back);
             returned += mass(&back) / unit.clone();
+            // THE SPIN LEDGER (docs/83 Phase 0): shed matter carries its
+            // system's specific spin into the medium.
+            core.medium_spin += mass(&back) / unit.clone() * sys.ell.clone();
             for (k, a) in back {
                 *core.medium.entry(k).or_insert_with(|| ratio(0, 1)) += a;
             }
             if mass(&sys.kept).is_zero() {
-                // Spent: all it held returns.
+                // Spent: all it held returns, with all its spin (its orbit's
+                // and everything turning inside it).
+                core.medium_spin += subtree_spin(&sys, &unit);
                 let all = sys.total();
                 returned += mass(&all) / unit.clone();
                 for (k, a) in all {
@@ -160,28 +171,41 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
         let enclosed = core.satellites.iter().fold(mass(&core.kept), |acc, sys| acc + mass(&sys.total())) / unit.clone();
         let want = mu.clone() * enclosed.clone();
         // RECOHERE: the echo compresses only the coherent part of the medium.
-        let left = mass(&core.medium) / unit.clone() * g_coherence.clone();
-        let r = match core.satellites.last() {
-            None => enclosed.clone() * ratio(60 * 60, 1),
-            Some(last) => last.radius.clone() * step.clone(),
-        };
+        let medium_mass = mass(&core.medium) / unit.clone();
+        let left = medium_mass.clone() * g_coherence.clone();
         let mut born = None;
         if !enclosed.is_zero() && !left.is_zero() && want <= left {
-            let clump = take(&core.medium, &(want / (mass(&core.medium) / unit.clone())));
-            if !mass(&clump).is_zero() {
+            let clump = take(&core.medium, &(want / medium_mass.clone()));
+            let m_u = mass(&clump) / unit.clone();
+            if !m_u.is_zero() {
                 less(&mut core.medium, &clump);
-                let k = core.satellites.last().map(|l| l.path[1] + 1).unwrap_or(1);
+                // The clump takes its share of the medium's spin; what spins
+                // inside it (its orbs and its belts, about its star) is paid
+                // from that spin, and the rest is its orbit's: it settles
+                // where the balance puts it (below).
+                let taken = core.medium_spin.clone() * m_u.clone() / medium_mass.clone();
+                core.medium_spin -= taken.clone();
+                let ell_med = taken.clone() / m_u.clone();
+                let r_guess = ell_med.clone() / enclosed.clone();
+                let k = core.satellites.iter().map(|l| l.path[1] + 1).max().unwrap_or(1);
                 let path = vec![core.path[0], k];
-                let (kept, orbs, medium) = split(seed, path.clone(), clump, Some(r.clone() * s.clone()), ratio(60, 1), &unit, 1);
-                let period = r.clone() / enclosed.clone();
-                core.satellites.push(Body { path, radius: r, period, kept, satellites: orbs, medium });
+                let (kept, orbs, medium, medium_spin) = split(seed, path.clone(), clump, Some(r_guess.clone() * s.clone()), ratio(60, 1), &unit, 1);
+                let mut sys = Body { path, radius: r_guess, period: ratio(0, 1), kept, satellites: orbs, medium, ell: ratio(0, 1), medium_spin };
+                let internal = subtree_spin(&sys, &unit);
+                sys.ell = (taken - internal) / m_u;
+                core.satellites.push(sys);
                 born = Some(core.satellites.len() - 1);
             }
         }
-        // The law re-read: every period from the mass now enclosed.
+        // THE BALANCE (docs/83 Phase 0; cold bodies, v_th = 0): each system
+        // stands where its spin meets the speed its enclosed mass gives,
+        // `r = ℓ / M(<r)`, read inside out by spin; its period follows,
+        // `P = r / M(<r)`. A birth or a loss inside an orbit moves it.
+        core.satellites.sort_by(|a, b| a.ell.cmp(&b.ell));
         let mut inside = mass(&core.kept) / unit.clone();
         for sys in core.satellites.iter_mut() {
-            if !inside.is_zero() {
+            if !inside.is_zero() && sys.ell > ratio(0, 1) {
+                sys.radius = sys.ell.clone() / inside.clone();
                 sys.period = sys.radius.clone() / inside.clone();
             }
             inside += mass(&sys.total()) / unit.clone();
@@ -200,9 +224,12 @@ mod tests {
         let manifest: crate::pulse::Manifest = [("Z001".to_string(), ratio(4_000_000, 1)), ("Z008".to_string(), ratio(1_000_000, 1))].into();
         let mut u = crate::pulse::deploy(&[3; 32], &manifest);
         assert!(u.cores.iter().any(|c| !c.satellites.is_empty()), "the Big Bang lays down a first generation");
+        let unit = unit_mass(&u);
+        let spin0 = crate::pulse::spin_total(&u, &unit);
         let events = breathe(&mut u, &[3; 32], 60, 0, 6000);
         assert!(events.iter().any(|e| e.born.is_some()), "echoes give birth");
         assert_eq!(u.total(), manifest, "the medium is consumed, nothing created");
+        assert_eq!(crate::pulse::spin_total(&u, &unit), spin0, "the spin ledger is conserved exactly");
         assert_eq!(rate(&ratio(3, 1), &ratio(1, 1)), ratio(3, 4));
         // A clock at 3/4 slips a quarter turn each echo: opposed at two
         // echoes, recohered (one rung) at four.

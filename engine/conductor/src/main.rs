@@ -304,6 +304,12 @@ fn main() {
             dissolved: events.iter().map(|e| e.dissolved as u64).sum(),
             ..Default::default()
         };
+        if beat.is_multiple_of(T_U) {
+            // THE LEDGER (docs/83 Phase 0): mass and spin, conserved exactly.
+            let total_mass = conductor::pulse::mass(&universe.total()) / unit.clone();
+            let total_spin = conductor::pulse::spin_total(&universe, &unit);
+            println!("beat {beat}: LEDGER — mass {} spin {} (units of the deepest hole)", total_mass, total_spin);
+        }
         if !events.is_empty() {
             let _ = conductor::pulse::write(std::path::Path::new(&var_root), &pulse_seed, &universe);
             println!(

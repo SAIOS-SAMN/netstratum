@@ -7,6 +7,23 @@ use std::path::Path;
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     let (era0, era1) = (args.get(1).map(String::as_str).unwrap_or("var-g2"), args.get(2).map(String::as_str).unwrap_or("var-e1"));
+    // Without an era-0 record, the stand-in is the existing universe's own
+    // matter, redeployed (test data; docs/78).
+    if !Path::new(era0).join("worlds").exists() {
+        let Some((seed, old)) = pulse::read(Path::new(era1)) else {
+            println!("no era-0 worlds at {era0} and no universe at {era1}");
+            return;
+        };
+        let manifest = old.total();
+        let u = pulse::deploy(&seed, &manifest);
+        let unit = conductor::breath::unit_mass(&u);
+        println!("REDEPLOYED — {} cores, {} systems from the universe's own matter; conservation {}; spin {}", u.cores.len(), u.cores.iter().map(|c| c.satellites.len()).sum::<usize>(), u.total() == manifest, pulse::spin_total(&u, &unit));
+        match pulse::write(Path::new(era1), &seed, &u) {
+            Ok(()) => println!("written {era1}/pulse.bin"),
+            Err(e) => println!("not written: {e}"),
+        }
+        return;
+    }
     let (kinds, worlds) = pulse::stand_in(Path::new(era0));
     let total = kinds.values().fold(cfe::ratio::ratio(0, 1), |s, a| s + a.clone());
     println!("STAND-IN — {} kinds from {worlds} worlds of era 0, {} grains in all", kinds.len(), total);
