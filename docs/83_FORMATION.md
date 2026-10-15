@@ -93,12 +93,23 @@ part built. One formation law for both, stated square-free here.
   `r_c` is the second pivot (its stretch e); ESCAPE is the crossing at
   e → 1. Infall, orbit and escape are one closed form with events at
   crossings.
-- **Collapse (Jeans, square-free).** A clump of mass m and radius R
-  collapses where its own surface turning beats its agitation and its spin:
-  `c·δ(m) / R ≥ T / k_T + ω_spin` (the roundness law's form; the shared
-  thermal ruler `T = k_T·ω`, hydrogen's anchor). Its spin then rises as it
-  shrinks, `v = L / R`; what its surface cannot hold (`L/R > c·δ(m)`) is
-  SHED to the disk, which is how the disk forms.
+- **The thermal ruler as a speed.** Temperature reads as a thermal
+  agitation SPEED `v_th`, anchored on hydrogen (13.6 eV ↔ the speed that
+  energy gives a proton): `T = k_T·ω` at the atom tier and `v_th` at the
+  gas tier are one ruler read at two tiers.
+- **The balance (pressure support; closes Open 1).** Every term a speed:
+  `c·δ(<r) = L / r + v_th`. A parcel's enclosed-mass speed is held by its
+  spin speed plus its thermal speed. Gas with no spin falls until its
+  thermal speed holds it: the STAR. Gas with spin settles at `r_c`: the
+  DISK. Infall, pressure support and orbit are one exact linear balance;
+  its crossings are the events.
+- **Collapse (Jeans, square-free, every term a speed;** corrected by
+  xylarium: the first statement mixed rates of different things). A clump
+  of mass m and radius R collapses where its own surface speed beats its
+  thermal and spin speeds: `c·δ(m) ≥ v_th + L / R`. Its spin speed rises as
+  it shrinks, `v = L / R`; what its surface cannot hold (`L/R > c·δ(m)`) is
+  SHED to the disk as L on the ledger, so the disk's L is the sum of what
+  was shed, conserved exactly. That is how the disk forms.
 - **Fragmentation.** The disk fragments where a clump inside it passes the
   same test against the disk's shear across its reach; planets grow by
   accretion events, their masses and the stars' (the IMF) read as OUTCOMES,
@@ -117,13 +128,13 @@ part built. One formation law for both, stated square-free here.
 
 ## Open
 
-1. **The radial law's form:** what pulls inward under the linear turning
-   law, and how pressure and spin hold against it.
-2. **Event granularity:** which interactions are events, and at what reach
-   two bodies interact.
-3. **Shared with xylarium:** their formation (packages, disc profiles, the
-   initial mass function) is further along; one formation law, as with the
-   turning law.
+1. ~~The radial law's form~~: closed by the balance above.
+2. ~~Event granularity~~: bodies interact at reach-cap share ½ and nowhere
+   else; a resonance is an event read from exact rate ratios, not a
+   proximity.
+3. **Shared with xylarium:** the same place on both sides (placement today,
+   the IMF and disk profile catalogue); one formation law, adopted by
+   xylarium's package B once ruled.
 4. **Cost:** formation is the heaviest physics so far; closed forms between
    events keep it bounded, but it must be measured early.
 
