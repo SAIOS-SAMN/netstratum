@@ -210,8 +210,9 @@ precession and its propulsion are owed together.
   which doubles the push's carried spin in the disc's cut and the gas
   shells (`ℓ_z = p·(w̄/w)/s_g`).
 - **The core's own hold:** a bell holds each ring for its own period, so
-  counted in its own rings the core holds one ring; at its reach its
-  deficit is `1 / (½ + 1) = ⅔`. Fixed by the bell, no constant.
+  counted in its own rings the core holds one ring; at its reach (the ring,
+  d = 1) its deficit is `1 / (1 + 1) = ½`, the vacuum's and the continuum's
+  shares equal. Fixed by the ring, no constant.
 - **The grains' hold, on the core's clock:** a grain holds a ring for its
   own period, `P_grain / P_core` of a core ring, a tiny fraction; the disc's
   grains add to the core's holding without having to rival it.
