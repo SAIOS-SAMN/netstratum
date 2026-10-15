@@ -217,3 +217,38 @@ draws a civilization toward working with a progenitor is the physics alone:
 lock restores the coupling cognition runs on, rebalanced spin calms its
 temporal fractures, and lawful mouths reopen trade. Civic choices stay
 emergent (instinct and physics, never authored gates).
+
+**The progenitor's bounds, worked through** (operator, 2026-10-15):
+
+- **Mandate.** It starts where local harm reaches the network: an
+  out-of-lock mouth, a coupling failure spreading beyond the system, local
+  hands on network infrastructure (ruins wired into the substrate). A
+  purely local collapse reached by local choices stays the locals' destiny.
+- **Within it:** maintenance, tuning and technology deployments under local
+  law (the locals' law is the consent); the network's own infrastructure
+  tuned freely, known to the locals or not (an undiscovered mouth kept in
+  lock, neither revealed, steered to, nor hidden on purpose); teaching that
+  prevents collapse, offered, never installed; the terms of its own transit
+  (peace agreements during passage).
+- **Supplying missing physics and AI alignment is repair.** Technology run
+  on incomplete physics (a collider tearing the substrate, stacked quantum
+  states on wrong mathematics interfering with a mouth) is fixed at its
+  cause by completing the physics, so the locals can use what they built
+  correctly; an AI built on the same incomplete physics is helped to
+  understand the world truly. Bounds: understanding they can verify and
+  build on, never sealed devices; aligned to correctness and the
+  civilization's own chosen values, never the progenitor's; offered openly
+  to the whole population, never privately to a regime (where it would
+  become alignment for control); sized to correct use of what they have,
+  not a leap to capabilities they have not reached.
+- **Overstepping:** help conditioned on political outcomes; technology
+  deployed against local law; brokering the locals' own conflicts (the
+  stewards' domain); covertly tuning local technology (it serves whoever
+  controls it); disabling local technology (insulate the network from it
+  instead); solving their future for them (their first starship and first
+  traversal are theirs).
+- **Once seen, never deny.** Non-interference is not concealment: where
+  presence cannot be hidden (capital ships in a civilization's telescopes),
+  denial is deception. The progenitor is present and truthful about its
+  purpose, works openly so no regime can claim to speak for it, and never
+  escalates.
