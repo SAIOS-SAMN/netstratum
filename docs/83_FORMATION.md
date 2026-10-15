@@ -128,7 +128,8 @@ law's MOTION was wired (period `r·(r + H)/H`, the balance
 - On the pulse's orbits (`r ≈ 3600·H`) that threshold is 1/3600. A
   6,000-bell breath on the test universe (stars shedding up to 1/100 an
   echo) ESCAPED 1,894 systems and bore none (each birth takes the edge
-  gas's spin, ≈ H, and escapes at once).
+  gas's spin, ≈ H, and escapes at once). It also cost 754 s against
+  23 s under the held law (the balance near `ℓ → H` grows the rationals).
 - The cause is the pairing of `L = r·v` with `v = δ`: our speed reads as
   nature's squared speed (`δ ≈ v²/c²` in the weak field), so `r·δ` is not
   the quantity rotation conserves. Which quantity the ring law conserves
