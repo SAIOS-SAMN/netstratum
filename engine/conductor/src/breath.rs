@@ -40,10 +40,11 @@ pub fn unit_mass(u: &Universe) -> Ratio {
 }
 
 /// A galaxy's clock against the universal core's: its distance against the
-/// cores' mass nearer the epicenter.
+/// holding nearer the epicenter: the universal core's state, and each nearer
+/// galaxy's (its core's state and its grains).
 pub fn galaxy_rate(u: &Universe, i: usize, unit: &Ratio) -> Ratio {
     let d = &u.cores[i].radius;
-    let nearer = u.cores.iter().filter(|c| c.radius < *d).fold(ratio(0, 1), |s, c| s + mass(&c.total()) / unit.clone());
+    let nearer = u.cores.iter().filter(|c| c.radius < *d).fold(crate::pulse::universal_state(u) / unit.clone(), |s, c| s + (crate::pulse::core_state(c) + mass(&c.total())) / unit.clone());
     rate(d, &nearer)
 }
 
@@ -131,7 +132,10 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
         let core = &mut u.cores[i];
         let mut returned = ratio(0, 1);
         let mut dissolved = 0;
-        let mut enclosed_in = mass(&core.kept) / unit.clone();
+        // The galaxy's holding constant through the echo (its grains only
+        // move within it), so its core's state is read once.
+        let state = crate::pulse::core_state(core) / unit.clone();
+        let mut enclosed_in = mass(&core.kept) / unit.clone() + state.clone();
         let mut keep: Vec<Body> = Vec::new();
         for mut sys in std::mem::take(&mut core.satellites) {
             let own = g_rate.clone() * rate(&sys.radius, &enclosed_in);
@@ -179,10 +183,11 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
                 let taken = core.medium_spin.clone() * m_u.clone() / medium_mass.clone();
                 core.medium_spin -= taken.clone();
                 let ell_med = taken.clone() / m_u.clone();
-                let r_guess = crate::ring::radius(&ell_med, &enclosed).unwrap_or_else(|| ell_med.clone());
+                let held = enclosed.clone() + state.clone();
+                let r_guess = crate::ring::radius(&ell_med, &held).unwrap_or_else(|| ell_med.clone());
                 let k = core.satellites.iter().map(|l| l.path[1] + 1).max().unwrap_or(1);
                 let path = vec![core.path[0], k];
-                let (kept, orbs, medium, medium_spin) = split(seed, path.clone(), clump, Some(r_guess.clone() * s.clone()), ratio(60, 1), &unit, 1);
+                let (kept, orbs, medium, medium_spin) = split(seed, path.clone(), clump, Some(r_guess.clone() * s.clone()), ratio(60, 1), &unit, 1, ratio(0, 1));
                 let mut sys = Body { path, radius: r_guess, period: ratio(0, 1), kept, satellites: orbs, medium, ell: ratio(0, 1), medium_spin };
                 let internal = subtree_spin(&sys, &unit);
                 sys.ell = (taken - internal) / m_u;
@@ -196,7 +201,7 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
         // `P = 1 + R / H`. Orbits breathe: a birth or a loss inside an
         // orbit moves it, the ledger deciding which way.
         core.satellites.sort_by(|a, b| a.ell.cmp(&b.ell));
-        let mut inside = mass(&core.kept) / unit.clone();
+        let mut inside = mass(&core.kept) / unit.clone() + state.clone();
         for sys in core.satellites.iter_mut() {
             if !inside.is_zero() && sys.ell > ratio(0, 1) {
                 if let Some(r) = crate::ring::radius(&sys.ell, &inside) {

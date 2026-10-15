@@ -212,6 +212,15 @@ precession and its propulsion are owed together.
 - **The grains' hold, on the core's clock:** a grain holds a ring for its
   own period, `P_grain / P_core` of a core ring, a tiny fraction; the disc's
   grains add to the core's holding without having to rival it.
+- **Built 2026-10-15 (on the ledger, transition units):** a galactic
+  core's state hold is its galaxy's grain total (`pulse::core_state`), the
+  universal core's is all grains (`pulse::universal_state`); the motion
+  and clock readings about a core (the pulse's placement, the breath's
+  balance and clocks, the chronometry keepers, the half-mass clock) read
+  its holding as state plus kept grains, and a galaxy's clock reads the
+  universal state and each nearer galaxy's (state plus grains). 3-D
+  readings (the births' clump size, the galactic year's half-mass) stay on
+  grains.
 - **The clock ratio, derived** (closed with xylarium, 2026-10-15; their
   founding draw withdrawn): the universal core's period is the total hold
   of everything its ring passes through, the founding manifest's every

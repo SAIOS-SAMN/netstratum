@@ -28,7 +28,7 @@ use cfe::ratio::{ratio, Ratio};
 pub fn half_mass_rate(u: &Universe, i: usize, unit: &Ratio) -> Option<Ratio> {
     let core = &u.cores[i];
     let (k, _) = galactic_year(core)?;
-    let enclosed = core.satellites[..k].iter().fold(mass(&core.kept), |s, sys| s + mass(&sys.total())) / unit.clone();
+    let enclosed = core.satellites[..k].iter().fold(mass(&core.kept) + crate::pulse::core_state(core), |s, sys| s + mass(&sys.total())) / unit.clone();
     Some(galaxy_rate(u, i, unit) * rate(&core.satellites[k].radius, &enclosed))
 }
 

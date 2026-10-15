@@ -264,7 +264,7 @@ impl Body {
 /// medium is set aside from the rest, and the satellites break what remains
 /// inside `reach` (none: bounded by the grain alone), the first period
 /// `unit`, then one tier down. What they leave joins the medium.
-pub(crate) fn split(seed: &[u8; 32], path: Vec<u32>, mut grains: Manifest, reach: Option<Ratio>, unit: Ratio, unit_mass: &Ratio, depth: u8) -> (Manifest, Vec<Body>, Manifest, Ratio) {
+pub(crate) fn split(seed: &[u8; 32], path: Vec<u32>, mut grains: Manifest, reach: Option<Ratio>, unit: Ratio, unit_mass: &Ratio, depth: u8, state: Ratio) -> (Manifest, Vec<Body>, Manifest, Ratio) {
     let law = tier(depth);
     let kept = take(&grains, &law.centre);
     less(&mut grains, &kept);
@@ -313,13 +313,16 @@ pub(crate) fn split(seed: &[u8; 32], path: Vec<u32>, mut grains: Manifest, reach
         if reach.as_ref().is_some_and(|bound| r > *bound) {
             break;
         }
-        let period = if enclosed.is_zero() { unit.clone() } else { crate::ring::period(&r, &enclosed) };
+        // Motion reads the HOLDING inside the orbit: the centre's state hold
+        // (a galactic core's) and the grains (`crate::ring`).
+        let held = enclosed.clone() + state.clone();
+        let period = if enclosed.is_zero() { unit.clone() } else { crate::ring::period(&r, &held) };
         less(&mut grains, &m);
         let mut at = path.clone();
         at.push(k);
         let own_reach = Some(r.clone() * s_.clone());
-        let (s_kept, s_sats, s_medium, s_medium_spin) = split(seed, at.clone(), m, own_reach, unit.clone() / ratio(60, 1), unit_mass, depth - 1);
-        let ell = crate::ring::spin(&r, &enclosed);
+        let (s_kept, s_sats, s_medium, s_medium_spin) = split(seed, at.clone(), m, own_reach, unit.clone() / ratio(60, 1), unit_mass, depth - 1, ratio(0, 1));
+        let ell = crate::ring::spin(&r, &held);
         satellites.push(Body { path: at, radius: r.clone(), period, kept: s_kept, satellites: s_sats, medium: s_medium, ell, medium_spin: s_medium_spin });
         radius = Some(r);
         enclosed += m_mass;
@@ -334,8 +337,24 @@ pub(crate) fn split(seed: &[u8; 32], path: Vec<u32>, mut grains: Manifest, reach
         None if enclosed.is_zero() => unit,
         None => enclosed.clone() * unit,
     };
-    let medium_spin = mass(&medium) / unit_mass.clone() * crate::ring::spin(&edge, &enclosed);
+    let medium_spin = mass(&medium) / unit_mass.clone() * crate::ring::spin(&edge, &(enclosed + state));
     (kept, satellites, medium, medium_spin)
+}
+
+/// THE CORE HOLDS AS A STATE (docs/83, "The core holds as a state";
+/// operator and xylarium, 2026-10-15): a galactic core is a bell whose state
+/// holds, on the universal clock, its galaxy's share of the manifest's
+/// holding, the same as all its galaxy's grains together. Its holding is
+/// that state plus the grains it keeps, so it dominates its galaxy's holding
+/// (quantum mass) whatever its 3-D grains. In the grains' holds.
+pub fn core_state(core: &Body) -> Ratio {
+    mass(&core.total())
+}
+
+/// The universal core's state hold: all the universe's grains together hold
+/// exactly one of its rings, so its state equals their total holding.
+pub fn universal_state(u: &Universe) -> Ratio {
+    mass(&u.total())
 }
 
 /// The universe the pulse deploys: its cores, and the intergalactic medium.
@@ -385,7 +404,8 @@ pub fn deploy(seed: &[u8; 32], manifest: &Manifest) -> Universe {
     let cores = shares
         .into_iter()
         .map(|(i, m)| {
-            let (kept, satellites, medium, medium_spin) = split(seed, vec![i], m, None, ratio(60 * 60, 1), &unit, 2);
+            let state = mass(&m) / unit.clone();
+            let (kept, satellites, medium, medium_spin) = split(seed, vec![i], m, None, ratio(60 * 60, 1), &unit, 2, state);
             let distance = ratio(60 * (1 + (draw(seed, &[i], "distance", 0) % 60) as i64), 1);
             Body { path: vec![i], radius: distance, period: ratio(0, 1), kept, satellites, medium, ell: ratio(0, 1), medium_spin }
         })
