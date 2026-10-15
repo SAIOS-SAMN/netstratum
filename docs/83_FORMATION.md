@@ -276,6 +276,35 @@ precession and its propulsion are owed together.
   CROSSING on the cumulative gas, compared as products of distinct sums,
   never solving for a squared reading (`(R + H)²`).
 
+### Formation live: the chain to stars, ignition and the coupling (operator 2026-10-15; built)
+
+Live from 21:41 on a re-founded universe (the pairing distribution): the
+deploy lays down each core's disc and its galaxy's GAS as parcels, no
+placed systems; the core's AXIAL JETS land at the rim; at each echo (the
+universal core's pulse reaching the galaxy after its light-travel delay,
+bells 300 to 3,540) the gas that has cooled enough is PARTITIONED by the
+galaxy's shear into clumps (`⌊W/w*⌋`, by the echo's coherent share), and
+each clump IGNITES:
+
+- **The quantum heart** (operator; with xylarium): a star is the core's
+  pair one tier down, a containment ring at its centre holding its body's
+  grains as one ring of its own. A collapsing clump runs away to the
+  throat condition `w = m` (deficit ½), where the heart forms, and the star
+  holds `(1 − 2a)/(1 + 2a)` of its clump (a the agitation at ignition); at
+  `a ≥ ½` light pushes back first and the clump stays gas.
+- **The coupling, derived** (operator: derived, never founding): read at
+  each star's interface, its heart's hold (the star's share of the
+  universe's holding on the core's clock) against its atoms' charge hold
+  (each nucleus's outer band's enclosed charge, over its nuclei):
+  `κ = (star_hold / universe_hold) / Σ nuclei·Q_out`. The universe's nucleus
+  count survives in it. Read in the FORMATION observer line; it enters
+  fusion's yield and burn (the heartbeat, with xylarium, next), not the
+  star's size.
+- **Atom size** (the opacity question) is set aside: a star's size comes
+  from ignition and its clump (where it stands), not opacity.
+- **Tests:** universe-building tests removed (operator: the binary run is
+  the witness; pure guards only).
+
 ### The motion law (adopted, operator 2026-10-15; built)
 
 `crate::ring`, replacing the held ring motion in place: each received ring
