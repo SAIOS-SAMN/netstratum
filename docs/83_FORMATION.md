@@ -136,6 +136,28 @@ law's MOTION was wired (period `r·(r + H)/H`, the balance
   (its spin, read from the turning without a flat square) is owed before
   the motion goes live, shared with xylarium (`L = r·v` is a shared form).
 
+### The nappe law and the dance (with xylarium, 2026-10-15; awaiting the operator's ruling)
+
+- **The nappe law** (xylarium's, remediated by ours): spin is the inversion
+  between the nappes, `ℓ·ℓ = r·H`. The specific spin ℓ is the primitive,
+  held rational; the conserved, additive quantity is `Σ m·ℓ`. Bodies are
+  placed by ℓ and read `r = ℓ²/H`, `v = H/ℓ`, `ω = H²/ℓ³`, `P = ℓ³/H²`, all
+  exact. Measured on the test breath (6,000 bells), against `ℓ = r·δ`: 0
+  escaped (was 1,894), 29 born (was 0), the spin ledger exact, 35 s (was
+  754 s; the old motion 23 s); orbits widen smoothly as stars shed.
+  OPEN for the operator: its readings reproduce Kepler's form
+  (`P² = r³/H`), which design law 2 names as a caught flat law; stated as
+  an inversion between nappes, Kepler is a reading, not the law.
+- **The dance, not Hill spheres** (xylarium's operator; their 11.0): a
+  star and EVERYTHING that orbits it are ONE system turning about one
+  centre of conservation (every holding, every quantum state). STABILITY
+  IS ALIGNMENT, NOT DISTANCE: worlds hold where their turns lock into
+  small whole-number ratios (exact, since periods are), with the dominant
+  body setting the ladder; spacing is an outcome. The many-body centre and
+  the locks are read at events. This retires our reach law's spacing
+  ("worlds ten reaches apart", the tidal reach `s`), which is a Hill
+  sphere by another name.
+
 ## What we have, and what is missing
 
 | nature's ingredient | built | missing |
