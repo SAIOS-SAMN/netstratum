@@ -78,6 +78,9 @@ fn main() {
     let era1_worlds: std::collections::BTreeMap<Vec<u32>, conductor::life::World> =
         conductor::life::worlds(&universe).into_iter().map(|w| (w.path.clone(), w)).collect();
     conductor::seating::seat(&universe, &era1_worlds, &mut specs);
+    // Motion (era 1): each system's galactic period, which its lines' orbits
+    // read; refreshed when the breath changes the universe.
+    let mut system_periods = conductor::seating::periods(&universe);
     // LIFE (docs/82 step 3b): every world's climb is state, advanced by the
     // system's activity at its own coupling's recoherences; its reading is
     // refreshed when the universe changes. A mind wakes when its climb is
@@ -312,6 +315,7 @@ fn main() {
         // it, at most once a pulse.
         if !events.is_empty() && beat >= readings_at + T_U {
             life_readings = conductor::profile::timed("life:read", || conductor::life::readings(&universe, &pulse_seed));
+            system_periods = conductor::seating::periods(&universe);
             readings_at = beat;
         }
         let (woke, measured) = conductor::profile::timed("life:climb", || conductor::life::advance(&life_readings, &mut climbs, T_U, beat));
@@ -374,7 +378,7 @@ fn main() {
             }
         }
         // docs/61 G1: every line's place at this beat, on its orbit.
-        conductor::orbit_step(&mut worlds, &book);
+        conductor::orbit_step(&mut worlds, &book, &system_periods);
         // MESH-1b (#2): the pen door — yields seal at the beat
         // boundary; penned worlds wait, and the file poll notices
         // the pen coming home.

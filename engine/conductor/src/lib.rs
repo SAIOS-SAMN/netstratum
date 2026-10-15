@@ -6565,16 +6565,20 @@ pub fn knowledge_market_step(worlds: &mut [Polity], _beat: u64) -> Vec<(String, 
 /// founding place (as its seat records it) carried round its core on a
 /// sheared, inclined ellipse. Neighbours, speech, the market and the bell
 /// then read the place at the beat.
-pub fn orbit_step(worlds: &mut [Polity], book: &Ledger) {
+/// Each line's place on its orbit about its core. ERA 1: a line turns at its
+/// era-1 system's galactic period (`periods`, by its founding place); a line
+/// with no era-1 system (a cleave until it settles one) holds its place.
+pub fn orbit_step(worlds: &mut [Polity], book: &Ledger, periods: &std::collections::BTreeMap<(Ratio, Ratio, Ratio), Ratio>) {
     let span = book.universe_span();
     let mut galaxies: Option<Vec<ledger::galaxy::Galaxy>> = None;
     for polity in worlds.iter_mut() {
         if polity.orbit.is_none() {
             let galaxies = galaxies.get_or_insert_with(|| book.galaxies());
-            let orbit = book
-                .core_of(&polity.spec.position)
-                .and_then(|core| galaxies.iter().find(|g| g.name == core).map(|g| g.center.clone()))
-                .and_then(|centre| orbit::Orbit::of(&centre, &polity.spec.position, &span));
+            let orbit = periods.get(&polity.spec.position).and_then(|period| {
+                book.core_of(&polity.spec.position)
+                    .and_then(|core| galaxies.iter().find(|g| g.name == core).map(|g| g.center.clone()))
+                    .and_then(|centre| orbit::Orbit::of(&centre, &polity.spec.position, &span, period))
+            });
             polity.orbit = Some(orbit);
         }
         if let Some(Some(orbit)) = &polity.orbit {

@@ -8,14 +8,12 @@
 //! inclined). Everything is derived from the line's founding offset; every
 //! coordinate is piecewise linear in the beat, so its denominators stay
 //! bounded for ever.
+//!
+//! ERA 1 (the refactor onto era 1's physics, 2026-10-15): the arc's pace is
+//! the turning law's, one circuit in its system's galactic period
+//! (`P = r / M(<r)`, `motion`), never a shared flat-curve speed.
 
 use cfe::ratio::{ratio, Ratio};
-
-/// The flat rotation curve's speed over light (220 km/s / c ~ 11/15000),
-/// in Mpc a beat: the bell, light, runs one cell (1/32 Mpc) a beat.
-fn speed() -> Ratio {
-    ratio(11, 15000 * 32)
-}
 
 /// A line's orbit about its core.
 #[derive(Debug, Clone, PartialEq)]
@@ -31,6 +29,8 @@ pub struct Orbit {
     /// The diamond's L1 radius, and the founding arc.
     r: Ratio,
     s0: Ratio,
+    /// The arc a beat: one circuit (8r) in the system's galactic period.
+    per_beat: Ratio,
 }
 
 fn arr(p: &(Ratio, Ratio, Ratio)) -> [Ratio; 3] {
@@ -95,7 +95,10 @@ fn arc_of(r: &Ratio, u: &Ratio, w: &Ratio) -> Ratio {
 impl Orbit {
     /// The orbit of a line founded at `founded` about the core at `centre`,
     /// on a torus of side `span`; `None` for a line at its core.
-    pub fn of(centre: &(Ratio, Ratio, Ratio), founded: &(Ratio, Ratio, Ratio), span: &Ratio) -> Option<Orbit> {
+    pub fn of(centre: &(Ratio, Ratio, Ratio), founded: &(Ratio, Ratio, Ratio), span: &Ratio, period: &Ratio) -> Option<Orbit> {
+        if *period <= ratio(0, 1) {
+            return None;
+        }
         let centre = arr(centre);
         let founded = arr(founded);
         let d: Vec<Ratio> = (0..3).map(|i| wrapped(&founded[i], &centre[i], span)).collect();
@@ -117,13 +120,14 @@ impl Orbit {
             return None;
         }
         let s0 = arc_of(&r, &u, &w);
-        Some(Orbit { centre, axes: [a, b, c], h, k, lift, r, s0 })
+        let per_beat = &r * ratio(8, 1) / period;
+        Some(Orbit { centre, axes: [a, b, c], h, k, lift, r, s0, per_beat })
     }
 
     /// The line's place at beat `beat` of its own clock, on the torus of side `span`.
     pub fn at(&self, beat: u64, span: &Ratio) -> (Ratio, Ratio, Ratio) {
         let perimeter = &self.r * ratio(8, 1);
-        let s = &self.s0 + speed() * Ratio::from_integer(beat.into());
+        let s = &self.s0 + &self.per_beat * Ratio::from_integer(beat.into());
         let s = &s - (&s / &perimeter).floor() * &perimeter;
         let (u, w) = diamond(&self.r, &s);
         let mut x = [ratio(0, 1), ratio(0, 1), ratio(0, 1)];
@@ -144,12 +148,10 @@ mod tests {
         let span = ratio(2, 1);
         let centre = (ratio(1, 2), ratio(1, 2), ratio(1, 2));
         let founded = (ratio(1, 2) + ratio(3, 32), ratio(1, 2) - ratio(2, 32), ratio(1, 2) + ratio(1, 32));
-        let orbit = Orbit::of(&centre, &founded, &span).expect("off its core");
+        let orbit = Orbit::of(&centre, &founded, &span, &ratio(360, 1)).expect("off its core");
         assert_eq!(orbit.at(0, &span), founded, "beat 0 is the founding place");
-        // A whole number of circuits later it is back: 8r / v as a reduced
-        // fraction p/q is q circuits in p beats.
-        let circuit = &orbit.r * ratio(8, 1) / speed();
-        let beats: u64 = circuit.numer().clone().try_into().expect("a beat count");
+        // One circuit in its period: back at 360 beats.
+        let beats: u64 = 360;
         assert_eq!(orbit.at(beats, &span), founded, "the orbit closes");
         assert_ne!(orbit.at(beats / 3, &span), founded, "and moves between");
     }

@@ -50,6 +50,20 @@ pub fn place_of(u: &Universe, path: &[u32]) -> Option<Place> {
     Some(system_place(&galaxy_place(k), j))
 }
 
+/// Each system's stand-in place and its galactic period (bells a turn about
+/// its core, the turning law's `P = r / M(<r)`): what a line's orbit reads.
+pub fn periods(u: &Universe) -> std::collections::BTreeMap<Place, cfe::ratio::Ratio> {
+    let mut out = std::collections::BTreeMap::new();
+    for (k, &i) in by_distance(u).iter().enumerate() {
+        for (j, sys) in u.cores[i].satellites.iter().enumerate() {
+            if sys.period > ratio(0, 1) {
+                out.insert(system_place(&galaxy_place(k), j), sys.period.clone());
+            }
+        }
+    }
+    out
+}
+
 /// Chart the pulse's cores as galaxies on the universe ledger, once (the
 /// first charters the founding galaxy at the origin; each next stands past
 /// every reach, so each is created).
