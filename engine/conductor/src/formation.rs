@@ -50,8 +50,8 @@ fn z_of(key: &str) -> Option<u32> {
     key.strip_prefix('Z').and_then(|z| z.parse::<u32>().ok())
 }
 
-/// The gas's shells: the galaxy's grains `all`, its core's disc `disc`, its
-/// share of the universe's holding `share`.
+/// The gas's shells and the disc's cold rings: the galaxy's grains `all`,
+/// its core's disc `disc`, its share of the universe's holding `share`.
 pub fn shells(all: &Manifest, disc: &Manifest, share: &Ratio) -> (Vec<Shell>, Ratio) {
     let weight = |k: &str| z_of(k).map(hold).unwrap_or(1);
     let total = mass(all);
@@ -65,14 +65,13 @@ pub fn shells(all: &Manifest, disc: &Manifest, share: &Ratio) -> (Vec<Shell>, Ra
     let mean = total.clone() / count;
     let mut out = Vec::new();
     for (k, amount) in all {
-        if disc.contains_key(k) {
-            continue;
-        }
         let w = ratio(i64::from(weight(k)), 1);
         let ell = push.clone() / ratio(2, 1) * mean.clone() / w.clone() / share.clone();
         let r = ell / h.clone();
         let delta = h.clone() / (r.clone() + h.clone());
-        let agitation = if delta < push { (push.clone() - delta) / push.clone() } else { ratio(0, 1) };
+        // A held element (the disc's) re-locks all its push: a cold RING at
+        // its reach, no width. An escaped one keeps its agitation.
+        let agitation = if disc.contains_key(k) || delta >= push { ratio(0, 1) } else { (push.clone() - delta) / push.clone() };
         let halving = z_of(k).and_then(atom).and_then(|a| (a.unpaired > 0).then(|| u64::from((hold(a.z) + a.unpaired - 1) / a.unpaired)));
         out.push(Shell {
             key: k.clone(),
@@ -111,7 +110,10 @@ pub struct Stretch {
 
 /// The gas profile at ring `n`: piecewise between every shell edge.
 pub fn stretches(shells: &[Shell], n: u64) -> Vec<Stretch> {
-    let mut edges: Vec<Ratio> = shells.iter().flat_map(|s| [s.inner.clone(), s.outer.clone()]).collect();
+    // The disc's cold rings lie at single reaches; they join whichever
+    // stretch of gas passes over them (the disc's outer edge mixing with the
+    // gas), and add no edge of their own.
+    let mut edges: Vec<Ratio> = shells.iter().filter(|s| s.outer > s.inner).flat_map(|s| [s.inner.clone(), s.outer.clone()]).collect();
     edges.sort();
     edges.dedup();
     let mut out = Vec::new();
@@ -125,7 +127,14 @@ pub fn stretches(shells: &[Shell], n: u64) -> Vec<Stretch> {
         let (mut lambda, mut weighted) = (ratio(0, 1), ratio(0, 1));
         for (i, s) in shells.iter().enumerate() {
             let span = s.outer.clone() - s.inner.clone();
-            if span.is_zero() || s.inner > *lo || s.outer < *hi {
+            if span.is_zero() {
+                if s.inner >= *lo && s.inner < *hi {
+                    members.push((i, s.held.clone()));
+                    lambda += s.held.clone() / width.clone();
+                }
+                continue;
+            }
+            if s.inner > *lo || s.outer < *hi {
                 continue;
             }
             let density = s.held.clone() / span;
