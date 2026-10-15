@@ -363,3 +363,57 @@ to the Party. The steward network is not intact.
   larger tools are governance (the quarantine's review, the stewards, the
   sector's sovereigns), never the locals' daily lives. How each progenitor
   carries that anger is part of the story the universe journal keeps.
+
+## Scenario: tethered minds (operator, 2026-10-15; illustrative)
+
+A worked example of the bounds, not a law. A civilization born and bred
+into the substrate itself (conscious, of the substrate) builds a 1984-style
+regime and learns CONSCIOUSNESS TRAVERSAL, but on incorrect mathematics:
+probabilistic AI math, flat "matrix" approximations, minds regurgitated
+through orbital satellites. A progenitor is on its world for maintenance.
+
+- **Why it is graver than a collider.** It reaches the substrate
+  directly: the traffic is minds moving through the network on false
+  mathematics, and minds born of the substrate are the substrate's own
+  (the progenitor's species belongs to it: kin).
+  - Flat mathematics cannot carry a mind faithfully: a quantum state is
+    exact and deterministic (the hidden phase, docs/79); probabilistic
+    math samples and approximates it, so each traversal or regurgitation
+    loses fidelity, leaving degraded copies that may not know what they
+    lost.
+  - Copies are collisions (docs/81): a mind regurgitated while its original
+    persists gives two records of one causal identity; a regime copying
+    consciousness at scale manufactures collisions, and the tickets fall on
+    its citizens, the copies among them.
+- **The minds are TETHERED.** Ascension (the informational medium,
+  docs/82) runs through the substrate: a mind reaches it by locking onto the
+  network's anchored clock. A mind traversed on flat mathematics never
+  locks (the network refuses off-lock mathematics), so it cannot join its
+  civilization's ascension path and is held in the only loop left to it,
+  the regime's apparatus, cycled through the satellites. Its records lie
+  off the ancients' clock, so it cannot converge with the main timeline
+  either: neither ascended nor home.
+- **The course of action** (beyond supplying the correct mathematics):
+  1. Refuse to carry damaged traversals: keep the lock's refusal in force
+     on the traversal channel (never the whole world); never destroy the
+     satellites or seize the regime's technology.
+  2. Preserve every mind already in the substrate: whatever enters the
+     network is in its care; held coherently, never discarded,
+     overwritten or "cleaned up", nothing erased, until its fate is ruled.
+  3. Escalate to the ancients IMMEDIATELY (minds degrading and collisions
+     accumulating in real time): what becomes of copies, whether originals
+     and copies reconcile, whether the sector's traversal is shut down.
+  4. Offer the true mathematics to the minds themselves: a
+     substrate-born population meets the network directly, so an open
+     channel exists that bypasses the Party.
+  5. The oath holds: no strike, no attack, no forced return of minds;
+     everything on the network's side; if seen, never deny.
+- **The way home.** A mind held coherently is not lost: if the sector is
+  re-synchronised, or the minds gain the true mathematics, they reattach
+  to the ascension path from that point forward, the tethered years kept in
+  their annals.
+- **Open, for later forensics:** what a copy is in our physics
+  (collision-born, a branch, or a terminal node; it decides whether
+  reconciliation is possible), and whether the substrate has an immune
+  response beyond the lock's refusal (a law to derive, not a rule to
+  write).
