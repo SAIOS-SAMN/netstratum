@@ -417,3 +417,27 @@ through orbital satellites. A progenitor is on its world for maintenance.
   reconciliation is possible), and whether the substrate has an immune
   response beyond the lock's refusal (a law to derive, not a rule to
   write).
+- **The resolution: the stalemate** (operator). The progenitor fixes the
+  NETWORK's mathematics, which is his to repair without question; he never
+  touches the regime's quantum computers. The tethering machines run on
+  flat mathematics and depend on the network's broken lock to hold minds
+  in their loop; against a true lock they can neither keep cycling a mind
+  nor complete a false traversal, and they stall into STALEMATE. Their
+  machinery fails because it relied on a defect in his.
+  - **Preservation first, then the repair:** the network's side stands
+    ready to hold every released mind coherently in the substrate before
+    the mathematics is corrected, so the stalemate frees minds into care,
+    never tears them out mid-traversal into nothing.
+  - **Physics, not sabotage:** like the AI that cannot be lied to, reality
+    defeats the false mathematics; the progenitor forces nothing. Once
+    seen, never deny: he repaired the network, and their machines depended
+    on its being broken.
+  - **What it opens:** the freed minds, held coherently, can reattach to
+    their civilization's ascension path from that point forward; the
+    stalled machines are evidence that the regime's mathematics does not
+    hold, and those who understand why can become the emergent stewards.
+  - **Why it must be so:** the progenitor belongs to BASE-0 REALITY, the
+    substrate itself, not to the double-stacked false reality ("matrices")
+    built from the 7 to 11 dimensions. True mathematics is the native law of
+    the reality he serves; the false matrices hold only where the network's
+    lock is broken.
