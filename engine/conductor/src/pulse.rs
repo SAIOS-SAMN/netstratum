@@ -162,6 +162,29 @@ pub fn out_nuclei(grains: &Manifest, unformed: &Nuclei) -> Nuclei {
     out
 }
 
+/// THE FOUNDING DISTRIBUTION (docs/78; operator 2026-10-15, option B): the
+/// shape of the universe's founding manifest, derived from pairing (design
+/// law 6: opposite senses pair, and pairing is what closes). A nucleus one
+/// step heavier adds one proton–neutron frame, which closes only when its
+/// sense opposes, one of two: each step closes half of what tries, so the
+/// bounce's nuclei fall off by halving, `count(Z) = N · 2^−Z`, until a Z
+/// falls below one nucleus (no cap). Light-dominated by mass, read, never
+/// fitted. It is the SHAPE the universe requests: the composition of the
+/// signed MANIFEST its reserve sends the court (mycelium 78.155b), which
+/// records and grants it and never reshapes it.
+pub fn founding_shape(nuclei: &num_bigint::BigInt) -> Nuclei {
+    let mut out = Nuclei::new();
+    let mut count = nuclei.clone();
+    for z in 1u16..=118 {
+        count /= 2;
+        if count <= num_bigint::BigInt::from(0) {
+            break;
+        }
+        out.insert(z, count.clone());
+    }
+    out
+}
+
 /// The seed's fixed paths: draw `j` of `field` for the body at `path`.
 pub fn draw(seed: &[u8; 32], path: &[u32], field: &str, j: u32) -> u64 {
     let mut h = blake3::Hasher::new();
@@ -264,9 +287,11 @@ impl Body {
 /// medium is set aside from the rest, and the satellites break what remains
 /// inside `reach` (none: bounded by the grain alone), the first period
 /// `unit`, then one tier down. What they leave joins the medium.
-pub(crate) fn split(seed: &[u8; 32], path: Vec<u32>, mut grains: Manifest, reach: Option<Ratio>, unit: Ratio, unit_mass: &Ratio, depth: u8, state: Ratio) -> (Manifest, Vec<Body>, Manifest, Ratio) {
+pub(crate) fn split(seed: &[u8; 32], path: Vec<u32>, mut grains: Manifest, reach: Option<Ratio>, unit: Ratio, unit_mass: &Ratio, depth: u8, state: Ratio, disc: Option<Manifest>) -> (Manifest, Vec<Body>, Manifest, Ratio) {
     let law = tier(depth);
-    let kept = take(&grains, &law.centre);
+    // A galactic core keeps what its bounce holds (`disc_cut`); other
+    // centres keep their tier's share.
+    let kept = disc.unwrap_or_else(|| take(&grains, &law.centre));
     less(&mut grains, &kept);
     let mut satellites = Vec::new();
     if depth == 0 {
@@ -321,7 +346,7 @@ pub(crate) fn split(seed: &[u8; 32], path: Vec<u32>, mut grains: Manifest, reach
         let mut at = path.clone();
         at.push(k);
         let own_reach = Some(r.clone() * s_.clone());
-        let (s_kept, s_sats, s_medium, s_medium_spin) = split(seed, at.clone(), m, own_reach, unit.clone() / ratio(60, 1), unit_mass, depth - 1, ratio(0, 1));
+        let (s_kept, s_sats, s_medium, s_medium_spin) = split(seed, at.clone(), m, own_reach, unit.clone() / ratio(60, 1), unit_mass, depth - 1, ratio(0, 1), None);
         let ell = crate::ring::spin(&r, &held);
         satellites.push(Body { path: at, radius: r.clone(), period, kept: s_kept, satellites: s_sats, medium: s_medium, ell, medium_spin: s_medium_spin });
         radius = Some(r);
@@ -355,6 +380,54 @@ pub fn core_state(core: &Body) -> Ratio {
 /// exactly one of its rings, so its state equals their total holding.
 pub fn universal_state(u: &Universe) -> Ratio {
     mass(&u.total())
+}
+
+/// THE DISC'S CUT (docs/79 and docs/83; the push law with xylarium,
+/// 2026-10-15): what a galactic core's bounce HOLDS. In the galaxy's own
+/// units its core's state holds 1 and its grains together 1; the core's echo
+/// reach is ½. The bounce gives every nucleus the same impulse, and its
+/// budget is the UNIVERSAL state, re-pulsed down the hub and shared over the
+/// galaxy's nuclei, so a nucleus of weight w (`atom::hold`) is carried the
+/// spin `ℓ = (p/2)·(w̄/w)/s_g` (w̄ the galaxy's mean weight a nucleus, s_g its
+/// share of the universe's holding, p the push share
+/// `H_disc / (H_core + H_disc)` with `H_disc` the hold of everything heavier),
+/// settles at `R = ℓ / H` (the motion law) and is HELD where the deficit
+/// there beats the push, `H / (R + H) ≥ p`. Ordered by weight once, the
+/// criterion moves monotonically (each heavier nucleus held raises H and p),
+/// so the held set is everything above ONE weight w*: a single certified
+/// crossing on the cumulative hold, read again only when accretion or
+/// shedding changes the manifest. Nothing is stepped. Above the cut is the
+/// core's disc; below it, the galaxy's gas. Sorting reads where the galaxy
+/// stands in the universe (a small galaxy is pushed harder, keeps less).
+pub fn disc_cut(grains: &Manifest, share: &Ratio) -> Manifest {
+    let weight = |k: &str| k.strip_prefix('Z').and_then(|z| z.parse::<u32>().ok()).map(cfe::almanac::atom::hold).unwrap_or(1);
+    let total = mass(grains);
+    let count = grains.values().fold(ratio(0, 1), |s, a| s + a.clone());
+    if total.is_zero() || count.is_zero() || share.is_zero() {
+        return Manifest::new();
+    }
+    let mean = total.clone() / count;
+    let mut order: Vec<(&String, &Ratio)> = grains.iter().collect();
+    order.sort_by(|a, b| weight(b.0).cmp(&weight(a.0)).then(a.0.cmp(b.0)));
+    // The cumulative hold of everything heavier than each element.
+    let above: Vec<Ratio> = order
+        .iter()
+        .scan(ratio(0, 1), |held, (k, amount)| {
+            let before = held.clone();
+            *held += (*amount).clone() * ratio(i64::from(weight(k)), 1) / total.clone();
+            Some(before)
+        })
+        .collect();
+    let holds = |idx: usize| {
+        let held = &above[idx];
+        let push = held.clone() / (ratio(1, 1) + held.clone());
+        let ell = push.clone() / ratio(2, 1) * mean.clone() / ratio(i64::from(weight(order[idx].0)), 1) / share.clone();
+        let h = ratio(1, 1) + held.clone();
+        h.clone() / (ell / h.clone() + h) >= push
+    };
+    // The crossing: the first element the disc cannot hold.
+    let cut = (0..order.len()).collect::<Vec<_>>().partition_point(|&idx| holds(idx));
+    order[..cut].iter().map(|(k, a)| ((*k).clone(), (*a).clone())).collect()
 }
 
 /// The universe the pulse deploys: its cores, and the intergalactic medium.
@@ -393,19 +466,24 @@ pub fn deploy(seed: &[u8; 32], manifest: &Manifest) -> Universe {
     for (k, a) in formed {
         *medium.entry(k).or_insert_with(|| ratio(0, 1)) += a;
     }
-    // THE BIG BANG POPULATES THE UNIVERSE (docs/78): each core keeps its hole,
+    // THE BIG BANG POPULATES THE UNIVERSE (docs/78): each core keeps its disc,
     // and its galaxy's first generation of star systems and their planets is
     // laid down by the tidal law; what forms no system is the galaxy's medium,
     // gas the breath later forms into new systems. A core stands at its mode's
     // distance from the universal core, `d_i`, a seed draw (60 to 3,600 bells
     // of light travel), the spectrum's own field; its echoes arrive that much
     // later.
-    let unit = shares.iter().map(|(_, m)| mass(&take(m, &tier(2).centre))).max().filter(|m| !m.is_zero()).unwrap_or_else(|| ratio(1, 1));
+    // Each core keeps what its bounce holds (`disc_cut`), its galaxy's
+    // share of the universe's holding the push's reading.
+    let universe_mass = mass(manifest);
+    let discs: Vec<Manifest> = shares.iter().map(|(_, m)| disc_cut(m, &(mass(m) / universe_mass.clone()))).collect();
+    let unit = discs.iter().map(mass).max().filter(|m| !m.is_zero()).unwrap_or_else(|| ratio(1, 1));
     let cores = shares
         .into_iter()
-        .map(|(i, m)| {
+        .zip(discs)
+        .map(|((i, m), disc)| {
             let state = mass(&m) / unit.clone();
-            let (kept, satellites, medium, medium_spin) = split(seed, vec![i], m, None, ratio(60 * 60, 1), &unit, 2, state);
+            let (kept, satellites, medium, medium_spin) = split(seed, vec![i], m, None, ratio(60 * 60, 1), &unit, 2, state, Some(disc));
             let distance = ratio(60 * (1 + (draw(seed, &[i], "distance", 0) % 60) as i64), 1);
             Body { path: vec![i], radius: distance, period: ratio(0, 1), kept, satellites, medium, ell: ratio(0, 1), medium_spin }
         })

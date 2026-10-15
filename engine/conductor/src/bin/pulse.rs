@@ -14,7 +14,17 @@ fn main() {
             println!("no era-0 worlds at {era0} and no universe at {era1}");
             return;
         };
-        let manifest = old.total();
+        let mut manifest = old.total();
+        // `pulse <era0> <era1> found`: re-found on THE FOUNDING DISTRIBUTION
+        // (`pulse::founding_shape`), as many nucleons as the old universe.
+        if args.get(3).map(String::as_str) == Some("found") {
+            let nucleons = pulse::out_nuclei(&manifest, &pulse::Nuclei::new()).iter().fold(num_bigint::BigInt::from(0), |s, (z, c)| s + c * num_bigint::BigInt::from(2 * u32::from(*z)));
+            let per: num_bigint::BigInt = (1u32..=118).map(|z| num_bigint::BigInt::from(2 * z) * num_bigint::BigInt::from(2).pow(118 - z)).sum();
+            let n = nucleons * num_bigint::BigInt::from(2).pow(118) / per;
+            let (grains, unformed) = pulse::from_nuclei(&pulse::founding_shape(&n));
+            println!("FOUNDING — {} Zs as grains, {} with an unformed remainder", grains.len(), unformed.len());
+            manifest = grains;
+        }
         let u = pulse::deploy(&seed, &manifest);
         let unit = conductor::breath::unit_mass(&u);
         println!("REDEPLOYED — {} cores, {} systems from the universe's own matter; conservation {}; spin {}", u.cores.len(), u.cores.iter().map(|c| c.satellites.len()).sum::<usize>(), u.total() == manifest, pulse::spin_total(&u, &unit));

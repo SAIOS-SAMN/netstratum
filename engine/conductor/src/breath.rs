@@ -187,7 +187,7 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
                 let r_guess = crate::ring::radius(&ell_med, &held).unwrap_or_else(|| ell_med.clone());
                 let k = core.satellites.iter().map(|l| l.path[1] + 1).max().unwrap_or(1);
                 let path = vec![core.path[0], k];
-                let (kept, orbs, medium, medium_spin) = split(seed, path.clone(), clump, Some(r_guess.clone() * s.clone()), ratio(60, 1), &unit, 1, ratio(0, 1));
+                let (kept, orbs, medium, medium_spin) = split(seed, path.clone(), clump, Some(r_guess.clone() * s.clone()), ratio(60, 1), &unit, 1, ratio(0, 1), None);
                 let mut sys = Body { path, radius: r_guess, period: ratio(0, 1), kept, satellites: orbs, medium, ell: ratio(0, 1), medium_spin };
                 let internal = subtree_spin(&sys, &unit);
                 sys.ell = (taken - internal) / m_u;
