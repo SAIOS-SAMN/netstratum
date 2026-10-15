@@ -154,6 +154,19 @@ docs/83, "Corrections").
   uplinked as the universal core is: it interlinks with the other cores and
   back to the universal core through the PROGENITOR NETWORK. (Built only
   once its physics is derived.)
+- **Each galaxy its own enclosed S^360; galactic cores are HUBS**
+  (operator, 2026-10-15; with xylarium). A galaxy is its own closed S^360,
+  hung inside the universe's at its core: the core is the THROAT joining the
+  two spheres. The core's pulse refocuses on the galaxy's far side; that
+  round trip is the galaxy's own ring, and the rim is where it refocuses (a
+  formation reading). Each tier counts its turns on its own enclosed echo,
+  chained through the chronometry keepers (each galaxy its own epicenter),
+  so galaxies read slow and worlds fast, from enclosure, nothing fitted.
+  - Only the universal core is uplinked to the hypha (kept there for now).
+    A galactic core is a HUB with UPLINKS (to the universal core) and
+    DOWNLINKS (to sub-galaxies), interlinked with the universal core: room
+    for expansion later. No galaxy has a tube of its own; a sub-universe is
+    unlocked only by synthesis.
 - **The state is the primitive; mass is a reading** (operator and
   xylarium, 2026-10-15). A core is a quantum state, not a three-dimensional
   object: its pulse (the bell's ring rate), its phase and its twist (the
