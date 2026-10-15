@@ -1,47 +1,43 @@
 //! The thermal core (05_THERMAL_BALANCE.md §1–§3): the exact-rational
 //! equilibrium baseline and substrate-band membership.
 //!
-//! **The law (05 §1.1):** the CFE never takes the fourth root and never
-//! approximates. The canonical quantity is `T_eq⁴` — with `L`, albedo `A`,
-//! and orbit radius `r` all exact rationals and the folded constant `K`
-//! (= 1/(16πσ), the π carried in the symbolic-π extension, σ a rational
-//! placeholder) inscribed as one exact rational, `T_eq⁴` is exact.
-//! `T_eq` itself is display-only. Band thresholds are stored as fourth
-//! powers, so band membership is an exact rational comparison — no root is
-//! ever evaluated.
+//! **The law, era 1 (docs/78 design law 2, refactored in place 2026-10-15):**
+//! no square and no fixed dimension states a law. Flux through a
+//! fluid-dimension shell falls LINEARLY, `I = L (1 − A) / r`, and the
+//! equilibrium temperature is held as `T` itself, in kelvin, `T = K · I`:
+//! exact for rational inputs, with no root anywhere. (Era 0 held `T⁴` from
+//! a `1/r²` flux, a flat 3-dimensional law; the names `t_eq4`, `bounds4`
+//! and `ceiling4` keep their call sites but now carry `T`.)
 //!
-//! All numbers here are PLACEHOLDER PARAMETERS (05 status header): `K` is
-//! anchored so a Sol-type body (G star, `L`=1) at `r`=1, albedo 0 sits at
-//! `T_eq`=279 K (mesic), i.e. `K = 279⁴`.
+//! All numbers here are PLACEHOLDER PARAMETERS: `K` is anchored so a
+//! Sol-type body (G star, `L` = 1) at `r` = 1, albedo 0 sits at
+//! `T` = 279 K (mesic), i.e. `K = 279`.
 
 use crate::ratio::{ratio, Ratio};
 use num_traits::ToPrimitive;
 
-/// The fourth power of a CITED kelvin anchor, exact — the ONLY way a
-/// band bound or the folded constant enters this module (P2, operator
-/// ruling 2026-08-05): the parameter is a [`crate::anchor::KelvinAnchor`]
-/// — a typed declaration carrying its empirical citation — so a bare
-/// number cannot become a thermal bound, and a flattened quartic
-/// cannot drift from the anchor it encodes.
+/// A CITED kelvin anchor, exact — the ONLY way a band bound or the folded
+/// constant enters this module (P2, operator ruling 2026-08-05): the
+/// parameter is a [`crate::anchor::KelvinAnchor`], a typed declaration
+/// carrying its empirical citation. Era 1 holds temperature itself (no
+/// fourth power).
 fn kelvin4(anchor: crate::anchor::KelvinAnchor) -> Ratio {
-    let kelvin = anchor.kelvin();
-    ratio(kelvin * kelvin * kelvin * kelvin, 1)
+    ratio(anchor.kelvin(), 1)
 }
 
-/// The folded thermal constant `K = 1/(16πσ)` as one exact rational:
-/// the fourth power of the Sol-equilibrium anchor, so
-/// `T_eq⁴(L=1, A=0, r=1) = K` lands mesic by calibration.
+/// The thermal constant `K`: the Sol-equilibrium anchor in kelvin, so
+/// `T(L=1, A=0, r=1) = K` lands mesic by calibration.
 pub fn thermal_k() -> Ratio {
     kelvin4(crate::anchor::KelvinAnchor::SolEquilibrium)
 }
 
-/// `T_eq⁴ = L (1 − A) K / r²` — the equilibrium baseline in flux space
-/// (05 §1.1). Exact for rational inputs; the root is never taken.
+/// `T = K · L (1 − A) / r` — the equilibrium temperature, in kelvin, from
+/// the linear flux (era 1). Exact for rational inputs.
 pub fn t_eq4(luminosity: &Ratio, albedo: &Ratio, orbit_r: &Ratio) -> Ratio {
     insolation(luminosity, albedo, orbit_r) * thermal_k()
 }
 
-/// **THE CONTINUOUS INSOLATION** `I = L·(1−A)/r²` — the absorbed stellar
+/// **THE CONTINUOUS INSOLATION** `I = L·(1−A)/r` (era 1: linear) — the absorbed stellar
 /// flux per unit area, an EXACT rational (COG Slice 2b). This is the
 /// physical vector the 8-way [`ThermalRegion`](crate::almanac::ThermalRegion)
 /// buckets discard: `t_eq4` collapses it into a temperature and bins it, but
@@ -53,12 +49,11 @@ pub fn t_eq4(luminosity: &Ratio, albedo: &Ratio, orbit_r: &Ratio) -> Ratio {
 /// magnitude of the light.
 pub fn insolation(luminosity: &Ratio, albedo: &Ratio, orbit_r: &Ratio) -> Ratio {
     let one_minus_a = ratio(1, 1) - albedo.clone();
-    let r2 = orbit_r.clone() * orbit_r.clone();
-    luminosity.clone() * one_minus_a / r2
+    luminosity.clone() * one_minus_a / orbit_r.clone()
 }
 
 /// The substrate equilibrium bands (05 §2): each is an inclusive interval
-/// in `T⁴` (K⁴). A body's occupant substrate must match its band.
+/// in kelvin. A body's occupant substrate must match its band.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SubstrateBand {
     /// 10 K – 100 K: quantum/superconducting/high-density compute.
@@ -70,9 +65,7 @@ pub enum SubstrateBand {
 }
 
 impl SubstrateBand {
-    /// The inclusive `[lo⁴, hi⁴]` bounds in K⁴ — DERIVED from the
-    /// CITED kelvin anchors, never stored flattened (the anchors are
-    /// the parameters; the quartics cannot drift from them).
+    /// The inclusive `[lo, hi]` bounds in kelvin, from the CITED anchors.
     pub fn bounds4(self) -> (Ratio, Ratio) {
         use crate::anchor::KelvinAnchor as At;
         match self {
@@ -85,7 +78,7 @@ impl SubstrateBand {
     }
 }
 
-/// The falloff length for [`coverage`], in `K⁴`.
+/// The falloff length for [`coverage`], in kelvin.
 ///
 /// **Derived, not chosen.** It is the width of the mesic band — the
 /// span a temperate world already occupies — so a world one band-width
@@ -102,7 +95,7 @@ pub fn coverage_scale4() -> Ratio {
 ///
 /// **This replaces a wall with a slope.** [`band_of`] answers whether a
 /// world falls inside one of three disjoint windows, so a world one
-/// K⁴ outside a bound reads NOTHING while one K⁴ inside reads
+/// kelvin outside a bound reads NOTHING while one kelvin inside reads
 /// everything — and the three windows do not cover the line, leaving
 /// 320–600 K supported by nothing at all. The derived furnace seats
 /// (mineral and plasmic foundings) land in that gap, which made a whole
@@ -113,7 +106,7 @@ pub fn coverage_scale4() -> Ratio {
 ///
 /// ```text
 /// inside any band          coverage = 1        a plateau, not a peak
-/// outside every band       1 / (1 + d/scale)   d = K⁴ to the nearest edge
+/// outside every band       1 / (1 + d/scale)   d = kelvin to the nearest edge
 /// ```
 ///
 /// **Monotone in distance, strictly positive everywhere, and free of
@@ -154,19 +147,19 @@ pub fn coverage(t_eq4: &Ratio) -> Ratio {
     }
 }
 
-/// THERMAL-1, the cryo law (05 §1.2): at or below this `T⁴` the store
-/// is a lossless vault — the cryogenic band's ceiling, `100⁴ K⁴`.
+/// THERMAL-1, the cryo law (05 §1.2): at or below this temperature the
+/// store is a lossless vault — the cryogenic band's ceiling, 100 K.
 pub fn cryo_vault_max4() -> Ratio {
     SubstrateBand::Cryogenic.bounds4().1
 }
 
-/// Does an accrued joule store LEAK at this `T⁴`? False in the vault
+/// Does an accrued joule store LEAK at this temperature? False in the vault
 /// (cryo band and colder), true everywhere warmer (05 §1.2).
 pub fn leaks(t_eq4: &Ratio) -> bool {
     *t_eq4 > cryo_vault_max4()
 }
 
-/// The band a `T_eq⁴` falls in, or `None` when it sits between/outside the
+/// The band a temperature falls in, or `None` when it sits between/outside the
 /// known substrate bands (no known substrate holds equilibrium there).
 pub fn band_of(t_eq4: &Ratio) -> Option<SubstrateBand> {
     for band in [
@@ -444,10 +437,10 @@ mod tests {
     }
 
     #[test]
-    fn sol_type_body_sits_mesic_at_exactly_279k_fourth() {
-        // G star, L=1, albedo 0, r=1 → T_eq⁴ == K == 279⁴, the mesic anchor.
+    fn sol_type_body_sits_mesic_at_exactly_279k() {
+        // G star, L=1, albedo 0, r=1 → T == K == 279 K, the mesic anchor.
         let t = t_eq4(&StarClass::G.luminosity(), &r(0, 1), &r(1, 1));
-        assert_eq!(t, r(6_059_221_281, 1));
+        assert_eq!(t, r(279, 1));
         assert_eq!(band_of(&t), Some(SubstrateBand::Mesic));
     }
 
@@ -459,18 +452,19 @@ mod tests {
     }
 
     #[test]
-    fn inverse_square_in_orbit_radius() {
+    fn linear_in_orbit_radius() {
+        // Era 1 (design law 2): flux falls linearly, no square.
         let near = t_eq4(&r(1, 1), &r(0, 1), &r(1, 1));
         let far = t_eq4(&r(1, 1), &r(0, 1), &r(2, 1));
-        assert_eq!(far, near / r(4, 1)); // r doubles ⇒ flux quarters, exact
+        assert_eq!(far, near / r(2, 1)); // r doubles ⇒ flux halves, exact
     }
 
     #[test]
     fn red_dwarf_at_one_unit_is_cold() {
-        // M star (L=1/100) at r=1 → cryogenic, not mesic: the band hugs the
-        // star, so an Earth-distance body is frozen (05 §2.1, §3.3).
+        // A red dwarf's world at r=1 is far colder than mesic: the warm
+        // orbits hug a dim star.
         let t = t_eq4(&StarClass::M.luminosity(), &r(0, 1), &r(1, 1));
-        assert_eq!(band_of(&t), Some(SubstrateBand::Cryogenic));
+        assert!(t < SubstrateBand::Mesic.bounds4().0);
     }
 
     #[test]
@@ -485,9 +479,9 @@ mod tests {
 
     #[test]
     fn band_boundaries_are_exact_and_inclusive() {
-        assert_eq!(band_of(&r(3_906_250_000, 1)), Some(SubstrateBand::Mesic)); // 250⁴ lo
-        assert_eq!(band_of(&r(10_485_760_000, 1)), Some(SubstrateBand::Mesic)); // 320⁴ hi
-        assert_eq!(band_of(&r(10_485_760_001, 1)), None); // one K⁴ above ⇒ no band
+        assert_eq!(band_of(&r(250, 1)), Some(SubstrateBand::Mesic)); // 250 K lo
+        assert_eq!(band_of(&r(320, 1)), Some(SubstrateBand::Mesic)); // 320 K hi
+        assert_eq!(band_of(&r(321, 1)), None); // one kelvin above ⇒ no band
     }
 
     #[test]

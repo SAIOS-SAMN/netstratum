@@ -194,7 +194,7 @@ fn draws(civilization: &Civilization, beacon: &Beacon) -> Vec<Option<Ratio>> {
 /// `albedo` at `r` (`cfe::almanac::substrate_viability`, the SAME product
 /// `carrying_capacity` reads). A fresh siting has no world yet, so aridity is
 /// neutral (the solid/organic phases ignore it).
-fn viability_at(civilization: &Civilization, class: StarClass, albedo: &Ratio, r: &Ratio) -> Ratio {
+pub(crate) fn viability_at(civilization: &Civilization, class: StarClass, albedo: &Ratio, r: &Ratio) -> Ratio {
     let clade = cfe::almanac::table_clade_from_word(&civilization.clade)
         .unwrap_or(cfe::almanac::FLATLANDER_CLADE as u16);
     let metab: u8 = match civilization.metabolism.as_str() {

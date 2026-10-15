@@ -53,6 +53,8 @@ pub const BLUEPRINT_DOUBLINGS: i64 = 26;
 pub struct World {
     pub path: Vec<u32>,
     pub heat: Ratio,
+    /// Its star's burn against the home star (a luminosity, home = 1).
+    pub burn: Ratio,
     pub size: Ratio,
     pub gravity: Ratio,
     /// The core's share of the world's mass, κ.
@@ -145,7 +147,7 @@ pub fn read(path: Vec<u32>, matter: &Manifest, period: &Ratio, coupling: &Ratio,
         if all.is_zero() { ratio(0, 1) } else { mass(&ionised) / all }
     };
     let plasmic = informational.clone().filter(|_| plasma_share > ratio(0, 1)).map(|x| x * plasma_share);
-    Some(World { path, heat, size, gravity, core, hold, atmosphere: ratio(0, 1), pressure: ratio(0, 1), gases, chemical: chemical.map(|(_, x)| x), geologic, plasmic, informational, coupling: coupling.clone(), delay, belts: ratio(0, 1), window: u64::MAX })
+    Some(World { path, heat, burn: star_burn.clone(), size, gravity, core, hold, atmosphere: ratio(0, 1), pressure: ratio(0, 1), gases, chemical: chemical.map(|(_, x)| x), geologic, plasmic, informational, coupling: coupling.clone(), delay, belts: ratio(0, 1), window: u64::MAX })
 }
 
 /// `e^(−λ)` bounded above by whole halvings, `2^(−⌊λ · 1442/1000⌋)` (so the

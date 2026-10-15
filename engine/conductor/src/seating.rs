@@ -64,21 +64,61 @@ pub fn chart(u: &Universe, book: &Ledger, stamp: u64) -> std::io::Result<usize> 
     Ok(book.galaxies().len())
 }
 
-/// Seat each spec on its own system (see the module note); specs beyond the
-/// systems available keep their place.
-pub fn seat(u: &Universe, specs: &mut [PolitySpec]) {
-    let order = by_distance(u);
-    let mut systems: Vec<Place> = Vec::new();
-    let most = u.cores.iter().map(|c| c.satellites.len()).max().unwrap_or(0);
-    for j in 0..most {
-        for (k, &i) in order.iter().enumerate() {
-            if j < u.cores[i].satellites.len() {
-                systems.push(system_place(&galaxy_place(k), j));
-            }
-        }
+/// A world's era-1 siting in cfe's terms (the refactor onto era 1's physics,
+/// 2026-10-15): the star class nearest its star's burn by luminosity, albedo
+/// 0, and the orbit at which cfe's linear law gives the world's own heat,
+/// `r = K · L / T` (K the Sol anchor, 279 K): exact, no root.
+pub fn site_of(heat: &cfe::ratio::Ratio, burn: &cfe::ratio::Ratio) -> Option<(cfe::thermal::StarClass, cfe::ratio::Ratio, cfe::ratio::Ratio)> {
+    use cfe::thermal::StarClass as C;
+    if *heat <= ratio(0, 1) {
+        return None;
     }
-    for (spec, place) in specs.iter_mut().zip(systems) {
-        spec.position = place;
+    let distance = |c: &C| { let d = c.luminosity() - burn.clone(); if d < ratio(0, 1) { -d } else { d } };
+    let class = [C::O, C::B, C::A, C::F, C::G, C::K, C::M].into_iter().min_by(|a, b| distance(a).cmp(&distance(b)))?;
+    let orbit = cfe::thermal::thermal_k() * class.luminosity() / heat.clone();
+    Some((class, ratio(0, 1), orbit))
+}
+
+/// Seat each spec on the unclaimed era-1 world, anywhere, where the physics
+/// reads its life most VIABLE (`siting::viability_at`: its clade and
+/// metabolism at that world's siting; ties to the galaxy holding the fewest
+/// lines so far): a line lands where its life can live (2026-10-15: one
+/// system per line, and then heat alone, left 67 then 78 of 157 collapsed at
+/// founding). The spec takes that world's era-1 siting and its
+/// system's place. A line with no world left keeps its place.
+pub fn seat(u: &Universe, worlds: &std::collections::BTreeMap<Vec<u32>, crate::life::World>, specs: &mut [PolitySpec]) {
+    let order = by_distance(u);
+    let rank: std::collections::BTreeMap<u32, usize> = order.iter().enumerate().filter_map(|(k, &i)| u.cores[i].path.first().map(|g| (*g, k))).collect();
+    let mut claimed: std::collections::BTreeSet<Vec<u32>> = std::collections::BTreeSet::new();
+    let mut per_galaxy: std::collections::BTreeMap<u32, usize> = std::collections::BTreeMap::new();
+    let sited: Vec<(&crate::life::World, (cfe::thermal::StarClass, cfe::ratio::Ratio, cfe::ratio::Ratio))> =
+        worlds.values().filter_map(|w| site_of(&w.heat, &w.burn).map(|s| (w, s))).collect();
+    let mut viability: std::collections::BTreeMap<(String, String), Vec<cfe::ratio::Ratio>> = std::collections::BTreeMap::new();
+    for spec in specs.iter_mut() {
+        let key = (spec.civilization.clade.clone(), spec.civilization.metabolism.clone());
+        let civ = spec.civilization.clone();
+        let v = viability.entry(key).or_insert_with(|| sited.iter().map(|(_, (c, a, o))| crate::siting::viability_at(&civ, *c, a, o)).collect());
+        let best = sited
+            .iter()
+            .enumerate()
+            .filter(|(_, (w, _))| !claimed.contains(&w.path))
+            .max_by(|(ia, (a, _)), (ib, (b, _))| {
+                let ga = per_galaxy.get(&a.path[0]).copied().unwrap_or(0);
+                let gb = per_galaxy.get(&b.path[0]).copied().unwrap_or(0);
+                v[*ia].cmp(&v[*ib]).then(gb.cmp(&ga)).then(b.path.cmp(&a.path))
+            })
+            .map(|(_, (w, _))| *w);
+        let Some(w) = best else { continue };
+        let Some((class, albedo, orbit)) = site_of(&w.heat, &w.burn) else { continue };
+        let Some(k) = rank.get(&w.path[0]).copied() else { continue };
+        let Some(i) = order.get(k).copied() else { continue };
+        let Some(j) = u.cores[i].satellites.iter().position(|s| s.path.get(1) == w.path.get(1)) else { continue };
+        spec.position = system_place(&galaxy_place(k), j);
+        spec.star = Some(class);
+        spec.albedo = Some(albedo);
+        spec.orbit = Some(orbit);
+        claimed.insert(w.path.clone());
+        *per_galaxy.entry(w.path[0]).or_insert(0) += 1;
     }
 }
 

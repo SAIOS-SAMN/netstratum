@@ -1901,28 +1901,29 @@ impl Polity {
             (Some(class), Some(albedo), Some(orbit)) => Some((class, albedo, orbit)),
             _ => None,
         };
-        let (options, refused) = siting::founding_options(&spec.civilization, &beacon, home);
-        if let Some(why) = refused {
-            eprintln!(
-                "genesis {}: the compiled home ({why}) is refused by the physics; the band chooses among {} derived sites",
-                spec.civilization.sigil,
-                options.len()
-            );
-        }
-        let pick = siting::choose_site(&options, digest).unwrap_or(0);
-        let chosen = options.get(pick).cloned().unwrap_or_else(|| {
-            let (class, albedo, orbit) = siting::diophantine_siting(&spec.civilization, &beacon);
-            siting::SiteOption { class, albedo, orbit, viability: ratio(0, 1), home: false }
-        });
+        // ERA 1 (the refactor onto era 1's physics, 2026-10-15): a line seated
+        // on an era-1 world carries that world's siting (its star class, its
+        // orbit at its own heat) and settles there, no draw. Only a line with
+        // no world (a cleave, until it settles one) draws from the derived
+        // sites.
+        let chosen = match home {
+            Some((class, albedo, orbit)) => siting::SiteOption { class, albedo, orbit, viability: ratio(0, 1), home: true },
+            None => {
+                let (options, _) = siting::founding_options(&spec.civilization, &beacon, None);
+                let pick = siting::choose_site(&options, digest).unwrap_or(0);
+                options.get(pick).cloned().unwrap_or_else(|| {
+                    let (class, albedo, orbit) = siting::diophantine_siting(&spec.civilization, &beacon);
+                    siting::SiteOption { class, albedo, orbit, viability: ratio(0, 1), home: false }
+                })
+            }
+        };
         eprintln!(
-            "genesis {}: the band settles {} — {:?} orbit {} albedo {} (viability {}, one of {} options)",
+            "genesis {}: the band settles {} — {:?} orbit {} albedo {}",
             spec.civilization.sigil,
-            if chosen.home { "its compiled home" } else { "a derived site" },
+            if chosen.home { "its era-1 world" } else { "a derived site" },
             chosen.class,
             chosen.orbit,
             chosen.albedo,
-            chosen.viability,
-            options.len()
         );
         let (class, albedo, orbit) = (chosen.class, chosen.albedo, chosen.orbit);
         world

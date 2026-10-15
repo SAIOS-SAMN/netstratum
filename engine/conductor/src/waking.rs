@@ -29,7 +29,7 @@ fn spoken(seed: &[u8; 32], path: &[u32], salt: u32) -> String {
 
 /// The line a waking founds, registered and seated, or None if no free name
 /// (or the world already holds a line).
-pub fn found(u: &Universe, seed: &[u8; 32], w: &Waking, registry: &Registry, first_in_galaxy: bool) -> Option<PolitySpec> {
+pub fn found(u: &Universe, seed: &[u8; 32], w: &Waking, registry: &Registry, first_in_galaxy: bool, world: Option<&crate::life::World>) -> Option<PolitySpec> {
     let world_name = format!("w{}", w.path.iter().map(|p| p.to_string()).collect::<Vec<_>>().join("-"));
     if crate::polities::world_name_taken(registry, &world_name) {
         return None;
@@ -72,6 +72,13 @@ pub fn found(u: &Universe, seed: &[u8; 32], w: &Waking, registry: &Registry, fir
         orbit: None,
         gauge: None,
     };
+    // Its own world's era-1 siting (the refactor onto era 1's physics).
+    let mut spec = spec;
+    if let Some((class, albedo, orbit)) = world.and_then(|x| crate::seating::site_of(&x.heat, &x.burn)) {
+        spec.star = Some(class);
+        spec.albedo = Some(albedo);
+        spec.orbit = Some(orbit);
+    }
     let seat = ledger::registry::Seat { world: world_name, planet: spec.planet.clone(), colony: spec.colony.clone(), position, policy: spec.policy.describe().to_string() };
     let _ = registry.write_founded_at(&sigil, &seat);
     Some(spec)

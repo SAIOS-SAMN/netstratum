@@ -456,6 +456,32 @@ between two bells, never stepped.
   epochs 369 to 439 for the twelve dilated galaxies, 0 for the undilated
   one; all 7,823 worlds completed local years (most 600, median 543).
 
+## The refactor onto era 1's physics (2026-10-15; operator: no parallel machinery)
+
+The civilizations ran on era 0's physics beside era 1's (their star tables,
+orbits and the `1/r²` flux). Refactored IN PLACE, layer by layer:
+
+1. **Climate.** cfe's thermal law is the era-1 law where it lives
+   (`cfe::thermal`): flux falls linearly, `I = L (1 − A) / r`, and
+   temperature is held as T in kelvin, `T = 279 K · I` (no fourth power,
+   no square); every site that reads it follows (~300). Pins written for
+   the flat law were restated; era 0's siting-determinism pins removed.
+2. **Seating.** Each line is seated on an era-1 WORLD, the unclaimed one
+   where the physics reads its clade and metabolism most viable
+   (`siting::viability_at`), spread across galaxies, and takes that
+   world's siting: the star class nearest its star's burn by luminosity
+   and the orbit `r = 279 · L / T` at which cfe's law gives the world's own
+   heat (exact, no root). Wakings take their own world. Genesis uses the
+   siting directly; era 0's siting draws remain only for a line with no
+   world (a cleave, until it settles one).
+3. **Reading.** One system per line, then heat alone, left 67 and 78 of 157
+   collapsed at founding (biotic lines on worlds too hot to feed them);
+   by viability, 155 of 156 live at beat 20, every founding band full, all
+   13 galaxies clearing at their hubs.
+
+Still on era 0's machinery: compounds (the almanac's fixed cells), motion
+(`orbit_step` on box positions), the economy (STAMP). Next layers.
+
 ## The atom: matter at the boundary (the lowest tier)
 
 Mycelium's manifest counts nuclei per Z. Z, the count of a nucleus's

@@ -75,7 +75,9 @@ fn main() {
         Ok(n) => println!("conductor: {n} galaxies charted from the pulse's cores"),
         Err(e) => eprintln!("conductor: the galaxies were not charted: {e}"),
     }
-    conductor::seating::seat(&universe, &mut specs);
+    let era1_worlds: std::collections::BTreeMap<Vec<u32>, conductor::life::World> =
+        conductor::life::worlds(&universe).into_iter().map(|w| (w.path.clone(), w)).collect();
+    conductor::seating::seat(&universe, &era1_worlds, &mut specs);
     // LIFE (docs/82 step 3b): every world's climb is state, advanced by the
     // system's activity at its own coupling's recoherences; its reading is
     // refreshed when the universe changes. A mind wakes when its climb is
@@ -320,7 +322,8 @@ fn main() {
         for w in woke {
             let galaxy = w.path.first().copied().unwrap_or(0);
             let first = woken_galaxies.insert(galaxy);
-            if let Some(spec) = conductor::waking::found(&universe, &pulse_seed, &w, &registry, first) {
+            let world = life_readings.get(&w.path).map(|r| &r.world);
+            if let Some(spec) = conductor::waking::found(&universe, &pulse_seed, &w, &registry, first, world) {
                 println!(
                     "beat {beat}: A MIND WAKES — {} ({}, {} medium) on world {:?}{}",
                     spec.civilization.name,
