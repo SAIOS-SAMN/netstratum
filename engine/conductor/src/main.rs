@@ -299,7 +299,7 @@ fn main() {
         let events = conductor::profile::timed("breath", || conductor::breath::breathe(&mut universe, &pulse_seed, T_U, beat - 1, beat));
         let mut breath_reading = conductor::annal::BreathReading {
             echoes: events.len() as u64,
-            births: events.iter().filter(|e| e.born.is_some()).count() as u64,
+            births: events.iter().map(|e| e.stars as u64).sum(),
             returned: events.iter().fold(cfe::ratio::ratio(0, 1), |s, e| s + e.returned.clone()),
             dissolved: events.iter().map(|e| e.dissolved as u64).sum(),
             ..Default::default()
@@ -323,6 +323,15 @@ fn main() {
                 let se = sys.iter().find(|e| e.path == s.path)?;
                 Some(format!("world {:?}: a year is {:.3e} bells, {:.3e} of its system's own rings, {:.3e} of its galaxy's", w.path, f(&w.period), f(&(w.period.clone() / se.ring())), f(&(w.period.clone() / ge.ring()))))
             }).unwrap_or_default();
+            // THE FORMATION OBSERVER (docs/83): what the gas has become.
+            let stars: usize = universe.cores.iter().map(|c| c.satellites.len()).sum();
+            let worlds: usize = universe.cores.iter().flat_map(|c| &c.satellites).map(|s| s.satellites.len()).sum();
+            let lit = universe.cores.iter().filter(|c| !c.satellites.is_empty()).count();
+            let gas_share = universe.cores.iter().map(|c| conductor::pulse::mass(&c.medium)).fold(cfe::ratio::ratio(0, 1), |a, b| a + b) / conductor::pulse::mass(&universe.total());
+            let discs = universe.cores.iter().map(|c| conductor::pulse::mass(&c.kept)).fold(cfe::ratio::ratio(0, 1), |a, b| a + b) / conductor::pulse::mass(&universe.total());
+            let parcels: usize = universe.cores.iter().map(|c| c.gas.len()).sum();
+            let metal_stars = universe.cores.iter().flat_map(|c| &c.satellites).filter(|s| s.kept.keys().any(|k| k != "Z001" && k != "Z002")).count();
+            println!("beat {beat}: FORMATION — {stars} stars ({metal_stars} with metals) and {worlds} worlds in {lit} of {} galaxies; discs {:.3}, gas {:.3} of the universe in {parcels} parcels", universe.cores.len(), f(&discs), f(&gas_share));
             println!("beat {beat}: ENCLOSURES — {} galaxies on S^360 (own rings {g0:.3e} to {g1:.3e}), {} systems on S^60 (own rings {s0:.3e} to {s1:.3e}); {inversion}", gal.len(), sys.len());
         }
         if !events.is_empty() {

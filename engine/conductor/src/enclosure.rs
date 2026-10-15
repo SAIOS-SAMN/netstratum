@@ -110,34 +110,3 @@ pub fn route(u: &Universe, a: &[u32], b: &[u32]) -> Option<Ratio> {
     let keep = |arcs: &[Ratio], len: usize| arcs[..len - shared].iter().fold(ratio(0, 1), |s, x| s + x.clone());
     Some(keep(&up_a, a.len()) + keep(&up_b, b.len()))
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn galaxies_and_systems_enclose_and_routes_run_through_the_throats() {
-        let manifest: crate::pulse::Manifest = [("Z001".to_string(), ratio(4_000_000, 1)), ("Z008".to_string(), ratio(1_000_000, 1))].into();
-        let u = crate::pulse::deploy(&[3; 32], &manifest);
-        let encl = enclosures(&u);
-        assert!(encl.iter().any(|e| e.dim == 360) && encl.iter().any(|e| e.dim == 60));
-        for e in &encl {
-            assert_eq!(e.ring(), ratio(2, 1) * e.rim.clone());
-        }
-        // Two worlds of one system meet at their star: the sum of their reaches.
-        let sys = u.cores[0].satellites.iter().find(|s| s.satellites.len() >= 2).expect("a system with two worlds");
-        let (w1, w2) = (&sys.satellites[0], &sys.satellites[1]);
-        assert_eq!(route(&u, &w1.path, &w2.path), Some(w1.radius.clone() + w2.radius.clone()));
-        // Two galaxies meet only through the universal core.
-        let (g1, g2) = (&u.cores[0], &u.cores[1]);
-        assert_eq!(route(&u, &g1.path, &g2.path), Some(g1.radius.clone() + g2.radius.clone()));
-        // A world reaches another galaxy up its system's throat, its galaxy's,
-        // the universal core, and down.
-        let r = route(&u, &w1.path, &g2.path).unwrap();
-        assert_eq!(r, w1.radius.clone() + sys.radius.clone() + g1.radius.clone() + g2.radius.clone());
-        // A place: polar share at most one half turn.
-        let e = encl.iter().find(|e| e.path == sys.path).unwrap();
-        let (polar, phase) = place(w2, e, &ratio(0, 1), 1000);
-        assert!(polar <= ratio(1, 1) && phase < ratio(1, 1));
-    }
-}

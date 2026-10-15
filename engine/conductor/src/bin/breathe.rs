@@ -16,7 +16,7 @@ fn main() {
     let before = u.total();
     let events = breath::breathe(&mut u, &seed, t_u, 0, until);
     let unit = breath::unit_mass(&u);
-    let births = events.iter().filter(|e| e.born.is_some()).count();
+    let births: usize = events.iter().map(|e| e.stars).sum();
     let dissolved: usize = events.iter().map(|e| e.dissolved).sum();
     let returned = events.iter().fold(cfe::ratio::ratio(0, 1), |s, e| s + e.returned.clone());
     println!("BREATH — {} bells, T_u {t_u}: {} echoes (perpendicular writes down); recohered {births} systems born, decohered {} returned and {dissolved} stars dissolved (writes up)", until, events.len(), returned.round());

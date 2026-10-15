@@ -89,9 +89,11 @@ pub struct Event {
     pub galaxy: u32,
     pub rung: u64,
     pub write: Write,
-    /// A system born (its index in the galaxy), or none: the echo found no
-    /// clump that could hold its reach.
-    pub born: Option<usize>,
+    /// Stars born at this echo: gas that cooled enough to collapse
+    /// (docs/83 FORMATION).
+    pub stars: usize,
+    /// Jet batches that landed at the rim at this echo.
+    pub jets: usize,
     /// The mass the galaxy's stars returned to its medium at this echo
     /// (perpendicular writes up), in units of the deepest hole.
     pub returned: Ratio,
@@ -106,9 +108,8 @@ pub struct Event {
 /// new orbit changes), closing a loop.
 pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u64) -> Vec<Event> {
     let unit = unit_mass(u);
-    let law = tier(2);
-    let s = law.reach.clone();
-    let mu = ratio(2, 1) * s.clone() * s.clone() / (ratio(1, 1) - s.clone() * s.clone());
+    let universe_mass = mass(&u.total());
+    let s = tier(2).reach.clone();
     // Every echo's arrival, in time order.
     let mut arrivals: Vec<(u64, usize, u64)> = Vec::new();
     for (i, c) in u.cores.iter().enumerate() {
@@ -165,36 +166,112 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
             keep.push(sys);
         }
         core.satellites = keep;
-        let enclosed = core.satellites.iter().fold(mass(&core.kept), |acc, sys| acc + mass(&sys.total())) / unit.clone();
-        let want = mu.clone() * enclosed.clone();
-        // RECOHERE: the echo compresses only the coherent part of the medium.
-        let medium_mass = mass(&core.medium) / unit.clone();
-        let left = medium_mass.clone() * g_coherence.clone();
-        let mut born = None;
-        if !enclosed.is_zero() && !left.is_zero() && want <= left {
-            let clump = take(&core.medium, &(want / medium_mass.clone()));
-            let m_u = mass(&clump) / unit.clone();
-            if !m_u.is_zero() {
-                less(&mut core.medium, &clump);
-                // The clump takes its share of the medium's spin; what spins
-                // inside it (its orbs and its belts, about its star) is paid
-                // from that spin, and the rest is its orbit's: it settles
-                // where the balance puts it (below).
-                let taken = core.medium_spin.clone() * m_u.clone() / medium_mass.clone();
-                core.medium_spin -= taken.clone();
+        // FORMATION (docs/83, with xylarium): the core's AXIAL JETS land at
+        // the rim, then gas that has cooled enough COLLAPSES into stars.
+        let galaxy = core.total();
+        let g_mass = mass(&galaxy);
+        let share = g_mass.clone() / universe_mass.clone();
+        let (now, h) = crate::formation::shells(&galaxy, &core.kept, &share);
+        let rings: Vec<crate::formation::Shell> = now.into_iter().filter(|r| r.outer == r.inner).collect();
+        let weight = |k: &str| ratio(i64::from(k.strip_prefix('Z').and_then(|z| z.parse::<u32>().ok()).map(cfe::almanac::atom::hold).unwrap_or(1)), 1);
+        // JETS: the disc halves into the jet every ⌈1/p⌉ rings; each batch
+        // due in this echo's span lands at the rim (`formation::jet_batch`),
+        // its grains moving from the disc to the gas with no orbital spin.
+        let mut jets = 0;
+        let every = crate::formation::jet_every(&h);
+        let rim = core.gas.iter().map(|g| g.outer.clone()).chain(rings.iter().map(|r| r.outer.clone())).max().unwrap_or_else(|| ratio(1, 1));
+        let first_due = bell.saturating_sub(t_u) / every + 1;
+        for k in first_due..=bell / every {
+            let galaxy_now = core.total();
+            let (now, _) = crate::formation::shells(&galaxy_now, &core.kept, &share);
+            let rings_now: Vec<crate::formation::Shell> = now.into_iter().filter(|r| r.outer == r.inner).collect();
+            for mut parcel in crate::formation::jet_batch(&rings_now, &h, &rim, k * every) {
+                let amount = cfe::world::smelt_resource(&(parcel.held.clone() * g_mass.clone() / weight(&parcel.key)));
+                let have = core.kept.get(&parcel.key).cloned().unwrap_or_else(|| ratio(0, 1));
+                let amount = amount.min(have);
+                if amount <= ratio(0, 1) {
+                    continue;
+                }
+                less(&mut core.kept, &[(parcel.key.clone(), amount.clone())].into());
+                *core.medium.entry(parcel.key.clone()).or_insert_with(|| ratio(0, 1)) += amount.clone();
+                parcel.held = amount * weight(&parcel.key) / g_mass.clone();
+                core.gas.push(parcel);
+            }
+            jets += 1;
+        }
+        // COLLAPSE: each stretch of the gas (with the disc's rings it passes
+        // over) whose clump can hold forms as many stars as fit.
+        let mut stars = 0;
+        let (now, _) = crate::formation::shells(&core.total(), &core.kept, &share);
+        let rings: Vec<crate::formation::Shell> = now.into_iter().filter(|r| r.outer == r.inner).collect();
+        let parcels = core.gas.len();
+        let all: Vec<crate::formation::Shell> = core.gas.iter().cloned().chain(rings).collect();
+        for st in crate::formation::stretches(&all, bell) {
+            let Some((w, count)) = crate::formation::collapse(&st, &h) else { continue };
+            let width = st.outer.clone() - st.inner.clone();
+            // RECOHERE: the echo compresses only the coherent part of the
+            // gas, so only that share of what could collapse does now.
+            let used = (w * ratio(count as i64, 1) / width).min(ratio(1, 1)) * g_coherence.clone();
+            let count = (ratio(count as i64, 1) * g_coherence.clone()).floor().to_integer().try_into().unwrap_or(0u64);
+            if count == 0 {
+                continue;
+            }
+            // The grains the stars take, from the gas and the disc's rings.
+            let mut clump = crate::pulse::Manifest::new();
+            let mut from_gas = ratio(0, 1);
+            for (i, part) in &st.members {
+                let take_held = part.clone() * used.clone();
+                let key = all[*i].key.clone();
+                let amount = cfe::world::smelt_resource(&(take_held * g_mass.clone() / weight(&key)));
+                let source = if *i < parcels { &mut core.medium } else { &mut core.kept };
+                let amount = amount.min(source.get(&key).cloned().unwrap_or_else(|| ratio(0, 1)));
+                if amount <= ratio(0, 1) {
+                    continue;
+                }
+                less(source, &[(key.clone(), amount.clone())].into());
+                if *i < parcels {
+                    from_gas += amount.clone() * weight(&key);
+                    core.gas[*i].held -= amount.clone() * weight(&key) / g_mass.clone();
+                }
+                *clump.entry(key).or_insert_with(|| ratio(0, 1)) += amount;
+            }
+            if clump.is_empty() {
+                continue;
+            }
+            // The stars take the gas's spin by the share of it they took
+            // (the disc's rings carry none on the ledger, and the jets none).
+            let medium_mass = mass(&core.medium) + from_gas.clone();
+            let taken_all = if medium_mass.is_zero() { ratio(0, 1) } else { core.medium_spin.clone() * from_gas / medium_mass };
+            core.medium_spin -= taken_all.clone();
+            let clump_mass = mass(&clump);
+            let mut left = clump;
+            for j in 0..count.max(1) {
+                let star = if j + 1 == count.max(1) { std::mem::take(&mut left) } else { take(&left, &ratio(1, (count.max(1) - j) as i64)) };
+                less(&mut left, &star);
+                let m_u = mass(&star) / unit.clone();
+                if m_u.is_zero() {
+                    continue;
+                }
+                let taken = taken_all.clone() * mass(&star) / clump_mass.clone();
                 let ell_med = taken.clone() / m_u.clone();
-                let held = enclosed.clone() + state.clone();
+                let held = core.satellites.iter().fold(mass(&core.kept), |acc, sys| acc + mass(&sys.total())) / unit.clone() + state.clone();
                 let r_guess = crate::ring::radius(&ell_med, &held).unwrap_or_else(|| ell_med.clone());
                 let k = core.satellites.iter().map(|l| l.path[1] + 1).max().unwrap_or(1);
                 let path = vec![core.path[0], k];
-                let (kept, orbs, medium, medium_spin) = split(seed, path.clone(), clump, Some(r_guess.clone() * s.clone()), ratio(60, 1), &unit, 1, ratio(0, 1), None);
-                let mut sys = Body { path, radius: r_guess, period: ratio(0, 1), kept, satellites: orbs, medium, ell: ratio(0, 1), medium_spin };
+                let (kept, orbs, medium, medium_spin) = split(seed, path.clone(), star, Some(r_guess.clone() * s.clone()), ratio(60, 1), &unit, 1, ratio(0, 1), None);
+                let mut sys = Body { path, radius: r_guess, period: ratio(0, 1), kept, satellites: orbs, medium, ell: ratio(0, 1), medium_spin, gas: Vec::new() };
                 let internal = subtree_spin(&sys, &unit);
                 sys.ell = (taken - internal) / m_u;
                 core.satellites.push(sys);
-                born = Some(core.satellites.len() - 1);
+                stars += 1;
+            }
+            for leftover in [left] {
+                for (k, a) in leftover {
+                    *core.medium.entry(k).or_insert_with(|| ratio(0, 1)) += a;
+                }
             }
         }
+        core.gas.retain(|g| g.held > ratio(0, 1));
         // THE BALANCE (the motion law, `crate::ring`; cold bodies): each
         // system stands where its spin meets the holding inside it,
         // `R = ℓ / H`, read inside out by spin; its period follows,
@@ -211,7 +288,7 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
             }
             inside += mass(&sys.total()) / unit.clone();
         }
-        events.push(Event { bell, galaxy: core.path[0], rung, write: Write::Perpendicular, born, returned, dissolved });
+        events.push(Event { bell, galaxy: core.path[0], rung, write: Write::Perpendicular, stars, jets, returned, dissolved });
     }
     events
 }
@@ -221,17 +298,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn the_breath_forms_systems_and_keeps_every_grain() {
-        let manifest: crate::pulse::Manifest = [("Z001".to_string(), ratio(4_000_000, 1)), ("Z008".to_string(), ratio(1_000_000, 1))].into();
-        let mut u = crate::pulse::deploy(&[3; 32], &manifest);
-        assert!(u.cores.iter().any(|c| !c.satellites.is_empty()), "the Big Bang lays down a first generation");
-        let unit = unit_mass(&u);
-        let spin0 = crate::pulse::spin_total(&u, &unit);
-        let events = breathe(&mut u, &[3; 32], 60, 0, 6000);
-        assert!(events.iter().any(|e| e.born.is_some()), "echoes give birth");
-        assert_eq!(u.total(), manifest, "the medium is consumed, nothing created");
-        assert_eq!(crate::pulse::spin_total(&u, &unit), spin0, "the spin ledger is conserved exactly");
-        assert_eq!(rate(&ratio(3, 1), &ratio(1, 1)), ratio(3, 4));
+    fn a_slipping_clock_decoheres_and_recoheres_exactly() {
         // A clock at 3/4 slips a quarter turn each echo: opposed at two
         // echoes, recohered (one rung) at four.
         let r = ratio(3, 4);

@@ -9,7 +9,7 @@
 //! core's state plus its disc, `1 + H_disc`.
 //!
 //! - **Shells.** Each escaped element z is carried the spin
-//!   `ℓ_z = (p/2)·(w̄/w_z)/s_g` (`pulse::disc_cut`) and stands at
+//!   `ℓ_z = p·(w̄/w_z)/s_g` (`pulse::disc_cut`) and stands at
 //!   `R_z = ℓ_z / H`, where it re-locks only the deficit
 //!   `δ_z = H / (R_z + H) < p`; the rest of the push is its AGITATION,
 //!   `a_z = (p − δ_z) / p` (absorbed less re-locked, over absorbed).
@@ -33,7 +33,7 @@ use cfe::ratio::{ratio, Ratio};
 use num_traits::Zero;
 
 /// A shell of one escaped element, in the galaxy's own units.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Shell {
     pub key: String,
     /// Its holding, a share of the galaxy's grains.
@@ -69,7 +69,7 @@ pub fn shells(all: &Manifest, disc: &Manifest, share: &Ratio) -> (Vec<Shell>, Ra
     let mut out = Vec::new();
     for (k, amount) in all {
         let w = ratio(i64::from(weight(k)), 1);
-        let ell = push.clone() / ratio(2, 1) * mean.clone() / w.clone() / share.clone();
+        let ell = push.clone() * mean.clone() / w.clone() / share.clone();
         let r = ell / h.clone();
         let delta = h.clone() / (r.clone() + h.clone());
         // A held element (the disc's) re-locks all its push: a cold RING at
@@ -239,6 +239,48 @@ pub fn jets(rings: &[Shell], h: &Ratio, horizon: u64) -> Vec<Shell> {
             });
         }
         k += 1;
+    }
+    out
+}
+
+/// Rings between jet batches: `⌈1/p⌉`, p the push share `(H − 1)/H`.
+pub fn jet_every(h: &Ratio) -> u64 {
+    let push = (h.clone() - ratio(1, 1)) / h.clone();
+    if push <= ratio(0, 1) {
+        return u64::MAX;
+    }
+    (ratio(1, 1) / push).ceil().to_integer().try_into().unwrap_or(u64::MAX).max(1)
+}
+
+/// ONE JET BATCH, landing at ring `born`: half of the disc's holding, taken
+/// innermost (heaviest) first from its rings, landing hot at the rim.
+pub fn jet_batch(rings: &[Shell], h: &Ratio, rim: &Ratio, born: u64) -> Vec<Shell> {
+    let mut disc: Vec<&Shell> = rings.iter().filter(|s| s.outer == s.inner).collect();
+    disc.sort_by(|a, b| a.inner.cmp(&b.inner));
+    let total = disc.iter().fold(ratio(0, 1), |s, r| s + r.held.clone());
+    let push = (h.clone() - ratio(1, 1)) / h.clone();
+    if total.is_zero() || push <= ratio(0, 1) {
+        return Vec::new();
+    }
+    let delta = h.clone() / (rim.clone() + h.clone());
+    let agitation = if delta < push { (push.clone() - delta) / push.clone() } else { ratio(0, 1) };
+    let mut want = total / ratio(2, 1);
+    let mut out = Vec::new();
+    for ring in disc {
+        if want <= ratio(0, 1) {
+            break;
+        }
+        let part = ring.held.clone().min(want.clone());
+        want -= part.clone();
+        out.push(Shell {
+            key: ring.key.clone(),
+            held: part,
+            inner: rim.clone() * (ratio(1, 1) - agitation.clone()),
+            outer: rim.clone() * (ratio(1, 1) + agitation.clone()),
+            agitation: agitation.clone(),
+            halving: ring.halving,
+            born,
+        });
     }
     out
 }

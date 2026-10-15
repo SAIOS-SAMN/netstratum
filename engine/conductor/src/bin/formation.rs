@@ -39,6 +39,7 @@ fn main() {
             first_all = first_all.min(n);
         }
         stars_all += stars;
+        println!("  galaxy {:?}: first echo at bell {}", core.path, 60 + f(&core.radius) as u64);
         println!(
             "galaxy {:?}: share {:.3}, disc {:.3}, gas {:.3} in {} shells ({} closed-shell, never cool); {} collapse events, first at ring {:?}, {} stars, star holding {:.2e}..{:.2e} of the galaxy, gas collapsed {:.3}",
             core.path, f(&share), f(&(pulse::mass(&core.kept) / pulse::mass(&all))), gas, shells.len(), hot, events.len(), first, stars,

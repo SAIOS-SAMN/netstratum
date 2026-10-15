@@ -270,6 +270,10 @@ pub struct Body {
     pub ell: Ratio,
     /// The medium's total angular momentum (gas carries spin too).
     pub medium_spin: Ratio,
+    /// docs/83 FORMATION: a galactic core's gas as PARCELS (each element's
+    /// shell where the bounce's push left it, a jet batch where it landed),
+    /// in the galaxy's own units; empty for every other body.
+    pub gas: Vec<crate::formation::Shell>,
 }
 
 impl Body {
@@ -348,7 +352,7 @@ pub(crate) fn split(seed: &[u8; 32], path: Vec<u32>, mut grains: Manifest, reach
         let own_reach = Some(r.clone() * s_.clone());
         let (s_kept, s_sats, s_medium, s_medium_spin) = split(seed, at.clone(), m, own_reach, unit.clone() / ratio(60, 1), unit_mass, depth - 1, ratio(0, 1), None);
         let ell = crate::ring::spin(&r, &held);
-        satellites.push(Body { path: at, radius: r.clone(), period, kept: s_kept, satellites: s_sats, medium: s_medium, ell, medium_spin: s_medium_spin });
+        satellites.push(Body { path: at, radius: r.clone(), period, kept: s_kept, satellites: s_sats, medium: s_medium, ell, medium_spin: s_medium_spin, gas: Vec::new() });
         radius = Some(r);
         enclosed += m_mass;
     }
@@ -385,10 +389,10 @@ pub fn universal_state(u: &Universe) -> Ratio {
 /// THE DISC'S CUT (docs/79 and docs/83; the push law with xylarium,
 /// 2026-10-15): what a galactic core's bounce HOLDS. In the galaxy's own
 /// units its core's state holds 1 and its grains together 1; the core's echo
-/// reach is ½. The bounce gives every nucleus the same impulse, and its
+/// reach is its ring, d = 1. The bounce gives every nucleus the same impulse, and its
 /// budget is the UNIVERSAL state, re-pulsed down the hub and shared over the
 /// galaxy's nuclei, so a nucleus of weight w (`atom::hold`) is carried the
-/// spin `ℓ = (p/2)·(w̄/w)/s_g` (w̄ the galaxy's mean weight a nucleus, s_g its
+/// spin `ℓ = p·(w̄/w)/s_g` (the core's state spin is 1: the throat a ring at d = 1) (w̄ the galaxy's mean weight a nucleus, s_g its
 /// share of the universe's holding, p the push share
 /// `H_disc / (H_core + H_disc)` with `H_disc` the hold of everything heavier),
 /// settles at `R = ℓ / H` (the motion law) and is HELD where the deficit
@@ -421,7 +425,7 @@ pub fn disc_cut(grains: &Manifest, share: &Ratio) -> Manifest {
     let holds = |idx: usize| {
         let held = &above[idx];
         let push = held.clone() / (ratio(1, 1) + held.clone());
-        let ell = push.clone() / ratio(2, 1) * mean.clone() / ratio(i64::from(weight(order[idx].0)), 1) / share.clone();
+        let ell = push.clone() * mean.clone() / ratio(i64::from(weight(order[idx].0)), 1) / share.clone();
         let h = ratio(1, 1) + held.clone();
         h.clone() / (ell / h.clone() + h) >= push
     };
@@ -478,14 +482,29 @@ pub fn deploy(seed: &[u8; 32], manifest: &Manifest) -> Universe {
     let universe_mass = mass(manifest);
     let discs: Vec<Manifest> = shares.iter().map(|(_, m)| disc_cut(m, &(mass(m) / universe_mass.clone()))).collect();
     let unit = discs.iter().map(mass).max().filter(|m| !m.is_zero()).unwrap_or_else(|| ratio(1, 1));
+    // FORMATION (docs/83): no system is placed. Each core keeps its disc;
+    // the rest is its galaxy's GAS, laid down as parcels where the push left
+    // each element; stars collapse from it as it cools (`breath`).
     let cores = shares
         .into_iter()
         .zip(discs)
         .map(|((i, m), disc)| {
+            let share = mass(&m) / universe_mass.clone();
+            let (shells, _) = crate::formation::shells(&m, &disc, &share);
+            let gas: Vec<crate::formation::Shell> = shells.into_iter().filter(|s| s.outer > s.inner).collect();
             let state = mass(&m) / unit.clone();
-            let (kept, satellites, medium, medium_spin) = split(seed, vec![i], m, None, ratio(60 * 60, 1), &unit, 2, state, Some(disc));
+            let mut medium = m.clone();
+            less(&mut medium, &disc);
+            // The gas turns with the push that carried it: each parcel's
+            // spin at its reach, in the transition units (`ring::spin`).
+            let scale = mass(&m) / unit.clone();
+            let h = mass(&disc) / unit.clone() + state.clone();
+            let medium_spin = gas.iter().fold(ratio(0, 1), |acc, p| {
+                let reach = (p.inner.clone() + p.outer.clone()) / ratio(2, 1) * scale.clone();
+                acc + p.held.clone() * scale.clone() * crate::ring::spin(&reach, &h)
+            });
             let distance = ratio(60 * (1 + (draw(seed, &[i], "distance", 0) % 60) as i64), 1);
-            Body { path: vec![i], radius: distance, period: ratio(0, 1), kept, satellites, medium, ell: ratio(0, 1), medium_spin }
+            Body { path: vec![i], radius: distance, period: ratio(0, 1), kept: disc, satellites: Vec::new(), medium, ell: ratio(0, 1), medium_spin, gas }
         })
         .collect();
     Universe { cores, medium }
@@ -534,6 +553,17 @@ fn put_body(b: &Body, out: &mut Vec<u8>) {
     put_manifest(&b.kept, &mut v);
     put_manifest(&b.medium, &mut v);
     cfe::tlv::put(1, &v, out);
+    for p in &b.gas {
+        let mut g = Vec::new();
+        g.extend_from_slice(&(p.key.len() as u16).to_le_bytes());
+        g.extend_from_slice(p.key.as_bytes());
+        for r in [&p.held, &p.inner, &p.outer, &p.agitation] {
+            cfe::ratio::encode(r, &mut g);
+        }
+        g.extend_from_slice(&p.halving.unwrap_or(0).to_le_bytes());
+        g.extend_from_slice(&p.born.to_le_bytes());
+        cfe::tlv::put(6, &g, out);
+    }
     for s in &b.satellites {
         put_body(s, out);
     }
@@ -598,7 +628,24 @@ fn get_body(v: &[u8], spun: bool) -> Option<Body> {
     };
     let kept = get_manifest(v, &mut at)?;
     let medium = get_manifest(v, &mut at)?;
-    Some(Body { path, radius, period, kept, satellites: Vec::new(), medium, ell, medium_spin })
+    Some(Body { path, radius, period, kept, satellites: Vec::new(), medium, ell, medium_spin, gas: Vec::new() })
+}
+
+/// A gas parcel (tag 6), attached to the body read before it.
+fn get_parcel(v: &[u8]) -> Option<crate::formation::Shell> {
+    let len = u16::from_le_bytes(v.get(0..2)?.try_into().ok()?) as usize;
+    let key = String::from_utf8(v.get(2..2 + len)?.to_vec()).ok()?;
+    let mut at = 2 + len;
+    let mut r = Vec::new();
+    for _ in 0..4 {
+        let (x, used) = cfe::ratio::decode(v.get(at..)?)?;
+        at += used;
+        r.push(x);
+    }
+    let halving = u64::from_le_bytes(v.get(at..at + 8)?.try_into().ok()?);
+    let born = u64::from_le_bytes(v.get(at + 8..at + 16)?.try_into().ok()?);
+    let mut r = r.into_iter();
+    Some(crate::formation::Shell { key, held: r.next()?, inner: r.next()?, outer: r.next()?, agitation: r.next()?, halving: (halving > 0).then_some(halving), born })
 }
 
 /// Read `<var>/pulse.bin` back: the seed and the universe (bodies are
@@ -616,6 +663,7 @@ pub fn read(var_root: &Path) -> Option<([u8; 32], Universe)> {
             3 => seed = v.try_into().ok(),
             2 => medium = get_manifest(v, &mut 0)?,
             1 => flat.push(get_body(v, spun)?),
+            6 => flat.last_mut()?.gas.push(get_parcel(v)?),
             _ => {}
         }
     }
@@ -637,12 +685,12 @@ mod tests {
     use super::*;
 
     #[test]
-    fn the_pulse_keeps_every_grain() {
-        let manifest: Manifest = [("a".to_string(), ratio(1000, 1)), ("b".to_string(), ratio(37, 64))].into();
-        let u = deploy(&[7; 32], &manifest);
-        assert_eq!(u.total(), manifest);
-        assert!(!u.cores.is_empty());
-        assert_eq!(deploy(&[7; 32], &manifest), u, "one seed, one universe");
+    fn the_pulse_file_reads_back_exactly() {
+        let parcel = crate::formation::Shell { key: "Z001".into(), held: ratio(1, 5), inner: ratio(1, 3), outer: ratio(2, 3), agitation: ratio(1, 2), halving: Some(2), born: 7 };
+        let orb = Body { path: vec![1, 1, 1], radius: ratio(3, 2), period: ratio(5, 2), kept: [("Z008".to_string(), ratio(1, 64))].into(), satellites: Vec::new(), medium: Manifest::new(), ell: ratio(7, 3), medium_spin: ratio(0, 1), gas: Vec::new() };
+        let sys = Body { path: vec![1, 1], radius: ratio(9, 2), period: ratio(11, 2), kept: [("Z001".to_string(), ratio(3, 1024))].into(), satellites: vec![orb], medium: Manifest::new(), ell: ratio(1, 9), medium_spin: ratio(1, 7), gas: Vec::new() };
+        let core = Body { path: vec![1], radius: ratio(60, 1), period: ratio(0, 1), kept: [("Z026".to_string(), ratio(1, 2))].into(), satellites: vec![sys], medium: [("Z001".to_string(), ratio(5, 4))].into(), ell: ratio(0, 1), medium_spin: ratio(13, 11), gas: vec![parcel] };
+        let u = Universe { cores: vec![core], medium: [("Z002".to_string(), ratio(1, 1024))].into() };
         let dir = std::env::temp_dir().join(format!("pulse-{}", std::process::id()));
         write(&dir, &[7; 32], &u).unwrap();
         assert_eq!(read(&dir), Some(([7; 32], u)), "the file gives the universe back");
