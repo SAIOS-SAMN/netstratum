@@ -24,9 +24,19 @@ exactly 1,000 holes. The galaxy is a weak hole circled by a handful of
 galaxy-sized stars: galaxies orbiting stars. The whole systems-about-a-core
 layer is wrong.
 
-- A galaxy is its hole, its gas and a POPULATION of stars, each a vanishing
-  share of the galaxy, formed from the gas by collapse (Phase 1). The
-  galaxy's mass lies in the population and the gas, never in a few bodies.
+- A galaxy is its CORE: the singularity and the accretion disc of the
+  heaviest elements its bounce held. Its stars form from the light gas the
+  bounce sends farthest, each small, turning about the core.
+- **Two readings of mass** (operator, 2026-10-15; correcting "the galaxy's
+  mass lies in the population and the gas", Earth's 3-D picture of the
+  Milky Way). 3-D MASS is matter counted (grains, nuclei); most of a
+  galaxy's may lie in its stars and gas. QUANTUM MASS is HOLDING, how long
+  states hold the pulse (the ring-density law's H), which sets clocks,
+  deficits and turning; a core is a singularity whose bell holds every
+  ring that reaches it, so it dominates a galaxy's holding whatever its
+  grains. The measurement above compared 3-D grains only. The code's H
+  counts grains alone: the core's own holding as a STATE is the missing
+  component (below, "The core holds as a state").
 - The reach law (`m = μ·M(<r)`, worlds ten reaches apart) is how a disk
   fragments about ONE star. It never makes the stars of a galaxy.
 - A population of stars is not a list of explicit bodies: it is the gas's
@@ -190,6 +200,24 @@ the disk's matter (docs/79, "The torsion phase is the tilt of a core's
 disk"). Formation's bounce-hold law therefore also sets the bell's
 strength and the quantum layer's phase: the disk's mass, its dipole, its
 precession and its propulsion are owed together.
+
+### The core holds as a state (2026-10-15; with xylarium, proposed)
+
+- **The core's reach is its echo:** its ring goes out and returns once a
+  ring, so its reach is half a light-ring in its own units (xylarium; their
+  GR horizon `r = 2M` is not used: imported and circular).
+- **The core's own hold:** a bell holds each ring for its own period, so
+  counted in its own rings the core holds one ring; at its reach its
+  deficit is `1 / (½ + 1) = ⅔`. Fixed by the bell, no constant.
+- **The grains' hold, on the core's clock:** a grain holds a ring for its
+  own period, `P_grain / P_core` of a core ring, a tiny fraction; the disc's
+  grains add to the core's holding without having to rival it.
+- **Open: the clock ratio** `P_core / P_grain`, which sets how much 3-D
+  matter it takes to weigh against a core's holding. xylarium proposes a
+  founding draw (the one coupling between the atom tier and the core
+  tier); our lean (operator: constants are missing physics) is to derive it
+  from what the universe acquired through the hypha, in a form not yet
+  found.
 
 ## What we have, and what is missing
 

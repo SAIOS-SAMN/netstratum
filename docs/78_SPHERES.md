@@ -349,8 +349,10 @@ event deploys them all, and everything after is a closed form of t from it
     holds 32 stars, the median about 7 times its hole, the largest about
     163 times its hole and 16% of its galaxy, and every galaxy is exactly
     1,000 holes. The galaxy is a weak hole circled by galaxy-sized "stars":
-    galaxies orbiting stars. A galaxy is a population of stars, each a
-    vanishing share of it, FORMED from its gas (docs/83); the reach law
+    galaxies orbiting stars. A galaxy is its core (the singularity and
+    its disc); its stars, each small, are FORMED from its gas (docs/83; in
+    3-D grains stars may outweigh the core, in holding the core dominates:
+    docs/83, "Two readings of mass"); the reach law
     belongs where a disk fragments about one star, never between a galaxy
     and its stars. Replaced by docs/83's formation; everything read off
     these stars (the galactic year's half-mass system, life's heat and
