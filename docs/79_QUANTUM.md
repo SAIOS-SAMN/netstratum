@@ -241,6 +241,17 @@ shared library laws):
     deficit at its reach, `H_disc / (R_disc + H_disc)` turns per received
     ring (a compact disc precesses faster); the starting lean from the held
     elements' unpaired senses summed into K_disc's plane. No draw.
+- **Reviewed by xylarium (2026-10-15):** the precession form agreed (it
+  keeps the tilt separate from the bell's strength). The walk gains a first
+  stop, from their operator's formation model: THE CORE comes first,
+  filled heaviest-first until its holding equals its reach (`R = H`, deficit
+  ½, where the clock runs at half: the inbound and outbound shares equal);
+  the disc walk then starts from the core's holding. OPEN: what fixes the
+  core's reach (a throat of one light-ring would hold almost nothing; the
+  reach must come from the bounce, not a choice). Build checks: each disc's
+  ledger carries `K_disc`, so accretion and shedding move the precession
+  and the propulsion exactly; the lean is held as a pair and read as turns
+  (for the hidden phase) only at events.
 
 ## Open, for the operator
 
