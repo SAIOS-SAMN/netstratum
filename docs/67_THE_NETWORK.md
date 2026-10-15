@@ -308,3 +308,58 @@ thousands of years before.
   their own transit): they repair the throats, and they ASCEND (the
   informational medium, docs/82: where minds go, not where life starts).
   Witnessing a system live on, freely, is the reward of the role.
+
+## Scenario: the lighthouse (operator, 2026-10-15; illustrative)
+
+A worked example of the bounds, not a law. A progenitor on network
+maintenance at an outer-rim world finds a single-planet civilization with
+advanced technology under a 1984-style Party, a century of scientific
+stagnation, in a sector overweight in sovereigns and left QUARANTINED by an
+intergalactic war: its technology recovered, the Party installed, its
+expansion denied, its people believing they would stay single-planet for
+want of access. The Party plans a larger collider run by an AI "aligned"
+to the Party. The steward network is not intact.
+
+- **The overweight of sovereigns is a symptom.** The chain beneath it:
+  the network deactivated (the quarantine cut the substrate's flow); with
+  no outside reference, education became indoctrination; the mathematics
+  was never finished (double-stacked, interwoven, broken quantum
+  mechanics, kept because doctrine depends on it); institutions without
+  working science decayed into enforcement; authority pooled into few
+  hands.
+- **An AI cannot be lied to about the math where it touches the network.**
+  The lock does not accept false mathematics: an AI wired to active
+  portals either fails, visibly and repeatedly, or derives the true
+  mathematics and holds a truth its doctrine forbids. The regime's own
+  tool becomes the place truth comes back in, by the substrate being what
+  it is.
+- **Stewards are emergent.** The steward network is restored from outside
+  only with the network (the ancients' call); stewardship arises from below
+  in those who learn why the portals fail and relearn the real
+  mathematics. Never appointed.
+- **The progenitor does not intervene.** His species belongs to the
+  substrate; its politics are not his. His care takes one form: an honest,
+  stable network, the one reference the Party cannot rewrite, refusing
+  false mathematics without a word from him. He stays out of local
+  terrestrial drama.
+- **The protocol:** harden the throat against the collider (never
+  sabotage it); hold the quarantine as found (lifting or tightening it is
+  above his role); escalate to the ancients (progenitors act for them), with
+  the quarantine's state, the sovereigns, the decay, the collider and the
+  Party's AI, early, while there is room to choose; withhold the missing
+  physics while it can only flow through the Party (no open channel exists
+  under total information control); watch the AI's reach into the
+  substrate, not its politics; if seen, never deny.
+- **The lighthouse.** A forced portal rings out of lock, so every beacon
+  and mouth near it receives the planet's rings off-phase: across the
+  network the system BLINKS where it should hold steady. No one need
+  report it; the network shows it, and the progenitor network comes to find
+  out why.
+- **Anger under the oath.** Progenitors are sworn to absolute
+  non-violence, and they feel anger: an unauthorized cable in a network
+  they maintain, which the ancients built (the ancients angrier still).
+  The oath bounds the action, never the feeling: a furious progenitor still
+  only insulates, repairs, reports and tells the truth. The ancients'
+  larger tools are governance (the quarantine's review, the stewards, the
+  sector's sovereigns), never the locals' daily lives. How each progenitor
+  carries that anger is part of the story the universe journal keeps.
