@@ -21,6 +21,17 @@ fn main() {
             None => println!("galaxy {:?}: no bound systems, no year", c.path),
         }
     }
+    // MASSES: each galaxy's hole, its stars (each system's star) and orbs,
+    // against the hole and against the galaxy.
+    for c in &u.cores {
+        let hole = pulse::mass(&c.kept);
+        let galaxy = pulse::mass(&c.total());
+        let mut stars: Vec<cfe::ratio::Ratio> = c.satellites.iter().map(|s| pulse::mass(&s.kept) / hole.clone()).collect();
+        stars.sort();
+        let to_f = |r: &cfe::ratio::Ratio| r.numer().to_string().parse::<f64>().unwrap_or(0.0) / r.denom().to_string().parse::<f64>().unwrap_or(1.0);
+        let biggest_share = c.satellites.iter().map(|s| pulse::mass(&s.total())).max().map(|m| to_f(&(m / galaxy.clone()))).unwrap_or(0.0);
+        println!("MASSES galaxy {:?}: galaxy/hole {:.3e}; {} stars, star/hole smallest {:.3e} median {:.3e} largest {:.3e}; largest system {:.3} of its galaxy", c.path, to_f(&(galaxy.clone() / hole.clone())), stars.len(), stars.first().map(to_f).unwrap_or(0.0), stars.get(stars.len() / 2).map(to_f).unwrap_or(0.0), stars.last().map(to_f).unwrap_or(0.0), biggest_share);
+    }
     closes.sort();
     closes.dedup();
     println!("YEARS — {} galaxies with a year; their first closes fall at {} distinct bells", u.cores.iter().filter(|c| motion::galactic_year(c).is_some()).count(), closes.len());

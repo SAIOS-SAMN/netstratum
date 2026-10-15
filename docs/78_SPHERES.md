@@ -269,6 +269,18 @@ event deploys them all, and everything after is a closed form of t from it
     Placeholders: systems about a core `t = 1/6` (each about 0.235 of what
     it orbits, sized to the stand-in's grains); orbs about a star
     `t = 1/283` (about 1e-4, the Solar System's order).
+  - **DEFECT, the systems-about-a-core layer is wrong** (operator,
+    2026-10-15; measured by `motion var-e1`). The tidal law applied
+    galaxy → star makes each star a quarter of what it orbits: every galaxy
+    holds 32 stars, the median about 7 times its hole, the largest about
+    163 times its hole and 16% of its galaxy, and every galaxy is exactly
+    1,000 holes. The galaxy is a weak hole circled by galaxy-sized "stars":
+    galaxies orbiting stars. A galaxy is a population of stars, each a
+    vanishing share of it, FORMED from its gas (docs/83); the reach law
+    belongs where a disk fragments about one star, never between a galaxy
+    and its stars. Replaced by docs/83's formation; everything read off
+    these stars (the galactic year's half-mass system, life's heat and
+    burn, the bell) is read off the wrong layer until then.
   - **Homology makes galaxies copies.** Under `ω = M/r` a galaxy scaled
     whole keeps its turnings, so with one law and one set of shares every
     galaxy read the same year (32 systems each, about 1.49e9 bells). What

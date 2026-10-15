@@ -9,7 +9,64 @@ only turns about its centre. This document scopes the change to bottom-up
 FORMATION.
 
 Status: scoped 2026-10-15; to be designed with xylarium-kernel (the
-formation law shared, as the turning law is); not built.
+formation law shared, as the turning law is). Phase 0's spin ledger built
+(a265022: mass and spin exact across 420 live beats). Phase 1 held on the
+corrections below.
+
+## Corrections (operator, 2026-10-15)
+
+### The galaxy layer is inverted
+
+Measured (`motion var-e1`): the deployment's tidal law applied galaxy →
+star gives every galaxy 32 stars, the median about 7 times its hole, the
+largest about 163 times its hole and 16% of its galaxy, and every galaxy
+exactly 1,000 holes. The galaxy is a weak hole circled by a handful of
+galaxy-sized stars: galaxies orbiting stars. The whole systems-about-a-core
+layer is wrong.
+
+- A galaxy is its hole, its gas and a POPULATION of stars, each a vanishing
+  share of the galaxy, formed from the gas by collapse (Phase 1). The
+  galaxy's mass lies in the population and the gas, never in a few bodies.
+- The reach law (`m = μ·M(<r)`, worlds ten reaches apart) is how a disk
+  fragments about ONE star. It never makes the stars of a galaxy.
+- A population of stars is not a list of explicit bodies: it is the gas's
+  collapse read as a distribution, and a star (with its disk and worlds) is
+  formed as a body only where something observes it (compact until
+  observed, below).
+- Read off the wrong layer until this is rebuilt: the galactic year (its
+  half-mass "system"), life's heat and burn (star masses of whole holes),
+  the systems' clocks and the 416 bodies the breath carries.
+
+### Our rulers are our own
+
+The first ruling asked xylarium for physical unit rulers (suns, metres,
+km/s, one speed constant per tier fixed by the Sun's galactic orbit, Earth's
+year and the Moon's month; a thermal speed from hydrogen's 13.6 eV and the
+proton's mass, growing as the root of temperature). Every part of that was
+misaligned with docs/78's design laws, and none of it is adopted:
+
+1. **No imported rulers.** The universe has its own: the bell, light travel
+   of one length a bell, the deepest hole, the grain, the atom tier. Suns,
+   metres and eV are Earth's measures, an Earth table (design law 1).
+2. **No constants per tier.** A tier is where structure formed, not a
+   compartment with its own physics; one law reads at every tier with one
+   set of rulers (design law 4).
+3. **"No squares" is about geometry, not arithmetic.** A square states a
+   flat, rigid dimension; ours are fluid. A thermal speed taken from
+   ½mv² carries that flat geometry however its arithmetic is written
+   (design law 2).
+4. **Outcomes are read, never scored against nature.** The masses that
+   collapse are what our physics gives; "a hundredth of a sun" is not a
+   target.
+5. **Speeds are readings, not primitives.** Motion rises from the quantum
+   layer (design law 7): a speed is a phase turning per bell, read off the
+   law.
+
+What actually blocked Phase 1 is missing physics, not missing units: the
+THERMAL MOTION of matter was never derived from our own atom tier (where
+temperature is a rate, `T = k_T·ω`). Derived there, on the same turning
+law and rulers as an orbit, a gas's agitation and an orbit's turning are
+comparable by construction. That derivation is Phase 1's first step.
 
 ## What we have, and what is missing
 
@@ -38,6 +95,10 @@ Linear, exact, closed forms between events (docs/78 design laws).
 
 ### Phase 1: formation from the medium
 
+0. **Thermal motion from the atom tier** (corrections above): a gas's
+   agitation derived on our own rulers, comparable with an orbit's turning.
+   Then the galaxy layer is rebuilt: a galaxy is its hole, its gas and the
+   population of stars its gas collapses into, no tidal-law systems.
 1. **Collapse:** a clump of medium collapses where its own gravity beats its
    pressure and spin (a Jeans criterion, square-free), replacing the
    breath's births by rule.
@@ -94,9 +155,10 @@ part built. One formation law for both, stated square-free here.
   e → 1. Infall, orbit and escape are one closed form with events at
   crossings.
 - **The thermal ruler as a speed.** Temperature reads as a thermal
-  agitation SPEED `v_th`, anchored on hydrogen (13.6 eV ↔ the speed that
-  energy gives a proton): `T = k_T·ω` at the atom tier and `v_th` at the
-  gas tier are one ruler read at two tiers.
+  agitation `v_th`: `T = k_T·ω` at the atom tier and `v_th` at the gas tier
+  are one ruler read at two tiers. (Its anchor on hydrogen's 13.6 eV and
+  the proton's mass, with `v_th ∝ √T`, is withdrawn; see "Our rulers are
+  our own": `v_th` is derived from the atom tier's own turning.)
 - **The balance (pressure support; closes Open 1).** Every term a speed:
   `c·δ(<r) = L / r + v_th`. A parcel's enclosed-mass speed is held by its
   spin speed plus its thermal speed. Gas with no spin falls until its
