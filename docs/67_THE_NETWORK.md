@@ -302,3 +302,9 @@ thousands of years before.
   rules "for their own good" is its clearest cautionary tale. The physics
   must allow both, and the progenitors, like the civilizations, show which
   way they go.
+- **It is not all loss** (operator). The progenitor gets to watch new life
+  take over his home system and make the choices it wants. Progenitors are
+  neither rulers nor diplomats (their only agreements are the terms of
+  their own transit): they repair the throats, and they ASCEND (the
+  informational medium, docs/82: where minds go, not where life starts).
+  Witnessing a system live on, freely, is the reward of the role.
