@@ -73,6 +73,48 @@ they were made: life (docs/82), chemistry and the atom tier, climate,
 atmospheres, chronometry, and the civilizations seated on worlds. The pulse
 shrinks to what only it should do: deploy the founding gas and the cores.
 
+## The proposed laws (with xylarium-kernel, 2026-10-15; to be ruled)
+
+xylarium's formation is also mostly placement today (golden-angle stars, a
+catalogue IMF and disc profile, moons stick-broken on a 2:1 chain); its
+package B (isolation-mass fragmentation, ~10 reaches apart) is designed and
+part built. One formation law for both, stated square-free here.
+
+- **The speed law.** Under the turning law a body's orbital SPEED is
+  `v = ω·r = c·δ(<r)`: linear, the enclosed mass alone.
+- **Spin (angular momentum)** is held as `L = r·v`, a product of two
+  readings, conserved exactly on a ledger through every collapse, accretion
+  and event. (xylarium writes it `ω·r²`, Kepler's swept area; held as `r·v`
+  no square is formed.)
+- **The radial law.** A body of spin L has its circular radius where its
+  own speed meets the law's: `L / r = c·δ(<r)`, so `r_c = L / (c·δ(<r))`,
+  linear in L and in `1/δ`. A clump that loses spin falls inward to its new
+  `r_c`; one that gains mass inside its orbit tightens. Radial motion about
+  `r_c` is the second pivot (its stretch e); ESCAPE is the crossing at
+  e → 1. Infall, orbit and escape are one closed form with events at
+  crossings.
+- **Collapse (Jeans, square-free).** A clump of mass m and radius R
+  collapses where its own surface turning beats its agitation and its spin:
+  `c·δ(m) / R ≥ T / k_T + ω_spin` (the roundness law's form; the shared
+  thermal ruler `T = k_T·ω`, hydrogen's anchor). Its spin then rises as it
+  shrinks, `v = L / R`; what its surface cannot hold (`L/R > c·δ(m)`) is
+  SHED to the disk, which is how the disk forms.
+- **Fragmentation.** The disk fragments where a clump inside it passes the
+  same test against the disk's shear across its reach; planets grow by
+  accretion events, their masses and the stars' (the IMF) read as OUTCOMES,
+  never a catalogue.
+- **Orbital events** are certified CROSSINGS: two bodies interact when their
+  reach caps cross (share ½), never by pairwise integration; resonances are
+  exact small-integer period ratios (rates are exact rationals). Each event
+  re-bases what it touches; closed forms between.
+- **Compact until observed** (xylarium 11.4f): a region forms its stars and
+  worlds only when something with sight of it observes it, deterministic
+  from its seed and medium, so unobserved regions cost nothing (theirs: a
+  cold forecast 3,736 s → 110 s).
+- **Advice kept:** mass and L conserved exactly across every event; no
+  N-body stepping; no catalogue fits; the homology trap kept broken; no
+  caps.
+
 ## Open
 
 1. **The radial law's form:** what pulls inward under the linear turning
