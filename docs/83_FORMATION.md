@@ -241,6 +241,37 @@ precession and its propulsion are owed together.
     per TUniversal final point shift at each grant; to be read on the
     bridge.
 
+### Formation's derivation, measured on scratch (2026-10-15; operator: derive with xylarium before building)
+
+- **THE DISC'S CUT** (built on scratch, saved in `.testtmp/formation_b.diff`,
+  not live): the push's budget is the UNIVERSAL state re-pulsed down the hub
+  and shared over the galaxy's nuclei, `ℓ_z = (p/2)·(w̄/w_z)/s_g`; a nucleus
+  is held where `H/(R_z + H) ≥ p`, `p = H_disc/(1 + H_disc)`; one crossing
+  on the cumulative hold (bisection), never stepped. Measured: on the era-0
+  stand-in (99.9 % heavy by weight) the cores hold ~91 %; re-founded on the
+  pairing distribution, ~80 % held and ~20 % released as gas, the light
+  elements. Hydrogen escapes only once `p²/(2(1 − p)) ≥ s_g·(w/w̄)`. The cut
+  is the FOUNDING split: stars' returns and the core's jets feed the gas
+  back over time as ledger flows (xylarium).
+- **THE FOUNDING DISTRIBUTION** (option B, operator; built on scratch): from
+  pairing (design law 6), each heavier step closes half of what tries,
+  `count(Z) = N·2^−Z`, light-dominated by mass, no cap. It is the
+  composition of the universe's signed founding MANIFEST to the court
+  (mycelium 78.155b, built and live: the universe sets the composition, the
+  court records and grants μ per kind and never reshapes it; our vendored
+  mycelium predates it, so the reserve's submission needs a re-pin).
+- **FRAGMENTATION, the crux.** Under `ℓ = R·H` the shear `dℓ/dR = H` is the
+  same at every reach, so a clump read with the orbital spin difference
+  needs a core-sized mass to collapse (the inverted galaxy from the law;
+  the tidal placeholder fails the same way: 20 systems in the universe).
+  Fixed with xylarium's 11.4: a clump's own spin is the SHEAR IN TURNING,
+  `σ = δ(R) − δ(R + w) = H·w / ((R + H)(R + w + H))`, falling with reach;
+  collapse `m/(w + m) ≥ a + σ`. Open, sent to xylarium: the gas's WIDTH
+  (each escaped element otherwise a zero-width shell: draft, agitation
+  `a_z = (p − δ_z)/p` spreading `ℓ_z(1 ± a_z)`); fragmentation as a
+  CROSSING on the cumulative gas, compared as products of distinct sums,
+  never solving for a squared reading (`(R + H)²`).
+
 ### The motion law (adopted, operator 2026-10-15; built)
 
 `crate::ring`, replacing the held ring motion in place: each received ring
