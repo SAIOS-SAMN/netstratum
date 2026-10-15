@@ -167,10 +167,17 @@ law's MOTION was wired (period `r·(r + H)/H`, the balance
 xylarium's "sphere's spin law" (place as a cap angle, spin as the cap's
 rim over its share) is under joint work. Operator rulings so far:
 
-- MASS LOSS PULLING ORBITS INWARD IS A DEFECT (2026-10-15). Under that law
-  fixed spin fixes the cap angle, so the place's reach scales WITH the
-  holding and a shedding star draws its worlds in. The law must widen an
-  orbit when the holding inside it falls, spin conserved.
+- ORBITS BREATHE (operator, 2026-10-15; replacing a misread relay that
+  "mass loss must widen orbits"). A law never fixes a direction: orbits
+  expand AND contract as matter is brought in and released and as spin
+  moves, and the answer to "expand or contract?" is both. DEFECTS ARE NOT
+  ERRORS: matter naturally loses components as it orbits. What moves an
+  orbit is the ledger: the holding inside it, the spin the matter brings or
+  carries away, and spin exchanged between a body's own rotation (its
+  planetary core spinning or stagnant; tidal locking) and its orbit, and
+  the quantum pulses of nearby galactic cores. These are universal laws set
+  in motion, and the levers civilizations may later learn to move (a
+  planetary core's spin deflected by technology).
 - No power of a length or of an angle (the rim's `sin^(n−1)θ` is in
   question), and the turning must be a stated law, not "a reading".
 
