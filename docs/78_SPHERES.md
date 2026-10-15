@@ -154,15 +154,50 @@ docs/83, "Corrections").
   uplinked as the universal core is: it interlinks with the other cores and
   back to the universal core through the PROGENITOR NETWORK. (Built only
   once its physics is derived.)
-- **A core's mass is derived, never a share.** The bounce gives every
-  nucleus the same kick, so its reach goes as `1 / A` (the mass number,
-  linear). The HEAVIEST elements travel least: what lands inside the radius
-  where the enclosed mass turns at light speed (`M(<r) = r`, G = c = 1) is
-  the core's mass; the next heaviest form its innermost accretion disk;
-  the light elements travel farthest and are the gas stars form from
-  (docs/83). A galaxy's enclosed-mass profile is its manifest sorted by A,
-  so its effective dimension is read, never set, and galaxies differ as
-  their manifests differ.
+- **The state is the primitive; mass is a reading** (operator and
+  xylarium, 2026-10-15). A core is a quantum state, not a three-dimensional
+  object: its pulse (the bell's ring rate), its phase and its twist (the
+  bounce's torsion winding). What a distant observer calls its "mass" is
+  the DEFICIT its echo leaves in each well, `δ`, the share the well takes
+  from the clock, so `δ ≤ 1` by construction; read as a mass,
+  `M = r·δ / (1 − δ)`, equivalently `δ = M / (r + M)`. Spin needs no mass:
+  in Einstein–Cartan, spin sources torsion in its own right.
+  - **No constants.** A constant is missing physics. Time is one ring of
+    the universal core's bell; length is light's travel in one ring, so c
+    is a reading of the bell; turning is in turns. No coupling constant
+    (G) and no mass unit exist: the borrowed `M_core = 1` retires.
+  - **Corrected 2026-10-15:** the first statement here read the core as
+    "the heaviest elements inside `M(<r) = r`" with "reach as `1 / A`".
+    Both were wrong under our own laws: `ω = M(<r) / r` makes speed
+    `v = M(<r)`, radius-free (so unbounded, no horizon, no runaway
+    collapse, and at odds with the clock law `r / (r + M)`), and an equal
+    kick fixes a nucleus's speed, not where it orbits (that needs spin,
+    `r = L / v`). Under the deficit, speed reads `v / c = δ`, bounded, with
+    a horizon at `δ → 1`, and the clock and the motion become one law
+    (rate `= 1 − δ`).
+- **A core's matter is sorted by its bounce.** The heavy elements are held
+  nearest (the universal core's accretion disk; a galactic core's
+  innermost disk), the light elements reach farthest and are the gas stars
+  form from (docs/83), and what no bounce holds is the intergalactic gas.
+  A galaxy's matter profile is its manifest sorted by its bounce, so its
+  effective dimension is read, never set, and galaxies differ as their
+  manifests differ. The laws owed (docs/83, "The derivation"):
+  - **the ring-density law** (xylarium derives, shared form): how a bell's
+    ring density at a place sets its clock rate and its deficit `δ`, exact
+    in rationals (ring counts are whole numbers), read frame by frame;
+  - **a grain's own ring** (netstratum): an atom is a small bell (one law
+    at every tier), and a grain's mass reading is the deficit its ring
+    carves; the mass number A becomes a reading;
+  - **thermal motion on the bell's clock** (netstratum): temperature is a
+    rate at the atom tier (`T = k_T·ω`), so a gas's agitation and an
+    orbit's turning compare by construction;
+  - **the bounce's spin and hold:** the torsion winding gives matter its
+    spin, and an element is held where its kick does not exceed the local
+    turning; built inside out, this sorts core, disk, gas and escape;
+  - **a galactic bounce's strength** against the universal echo, so a
+    galaxy keeps its light gas;
+  - **the galaxy count** as an outcome: the universal outflow fragments
+    where a clump holds itself (today: 1 to 60 modes drawn from the seed).
 - **One law at every tier:** the same sorting wherever matter collapses and
   bounces: a star's heavy core under its light envelope, a disk's heavy
   inner worlds and light outer ones. (Unlike nature's Big Bang, which makes

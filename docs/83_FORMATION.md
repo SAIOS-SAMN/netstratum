@@ -45,8 +45,9 @@ year and the Moon's month; a thermal speed from hydrogen's 13.6 eV and the
 proton's mass, growing as the root of temperature). Every part of that was
 misaligned with docs/78's design laws, and none of it is adopted:
 
-1. **No imported rulers.** The universe has its own: the bell, light travel
-   of one length a bell, the deepest hole, the grain, the atom tier. Suns,
+1. **No imported rulers.** The universe has its own: the bell (one ring of
+   the universal core), light per ring, turns, the grain, the atom tier
+   (the deepest hole as a mass unit is withdrawn too: "The derivation"). Suns,
    metres and eV are Earth's measures, an Earth table (design law 1).
 2. **No constants per tier.** A tier is where structure formed, not a
    compartment with its own physics; one law reads at every tier with one
@@ -73,6 +74,32 @@ THERMAL MOTION of matter was never derived from our own atom tier (where
 temperature is a rate, `T = k_T·ω`). Derived there, on the same turning
 law and rulers as an orbit, a gas's agitation and an orbit's turning are
 comparable by construction. That derivation is Phase 1's first step.
+
+### The derivation (operator and xylarium, 2026-10-15)
+
+Constants are missing physics. The speed law `ω = M(<r) / r` makes speed
+`v = M(<r)`, radius-free: unbounded (the 0.1 to 100 c measured), no
+horizon, no runaway collapse, and at odds with the breath's clock law
+`r / (r + M)`. The fix is not a ruler but the primitive: the STATE (a
+bell's ring rate, phase and torsion winding) is primitive and mass is a
+reading, the deficit `δ` a state's echo leaves in each well (docs/78, "The
+singularities"). Then `v / c = δ = M / (r + M)` (xylarium's
+`M = r·δ / (1 − δ)` inverted; reached independently here), bounded, with a
+horizon at `δ → 1`, compactness restored (a clump's surface speed rises as
+it shrinks, so collapse runs away and a Jeans length returns), and one law
+for the clock (rate `1 − δ`) and the motion. c is light per ring; no G, no
+mass unit.
+
+The split, in order:
+
+1. **xylarium:** the ring-density law (a bell's ring density at a place
+   sets its clock rate and `δ`), exact, frame by frame. We adopt the form;
+   the breath swaps its rate `r / (r + M)` for it.
+2. **netstratum:** a grain's own ring (its mass reading from the atom
+   tier's turning; A a reading) and thermal motion on the bell's clock.
+3. **Then formation:** the bounce's spin (from the torsion winding) and
+   hold (sorting core, disk, gas, escape), a galactic bounce's strength,
+   the galaxy count as an outcome, and collapse (Phase 1).
 
 ## What we have, and what is missing
 
@@ -101,12 +128,13 @@ Linear, exact, closed forms between events (docs/78 design laws).
 
 ### Phase 1: formation from the medium
 
-0. **Thermal motion from the atom tier** (corrections above): a gas's
-   agitation derived on our own rulers, comparable with an orbit's turning.
+0. **The derivation first** ("The derivation" above): the ring-density
+   law (xylarium), a grain's ring and thermal motion on the bell's clock
+   (ours).
    Then the galaxy layer is rebuilt from the bounce (docs/78, "The
-   singularities"): each galaxy's manifest sorted by mass number, the
-   heaviest inside `M(<r) = r` its core, the next its innermost accretion
-   disk, the light elements its gas, and the population of stars that gas
+   singularities"): each galaxy's manifest sorted by its bounce's hold,
+   the heaviest held nearest its core (its innermost accretion disk), the
+   light elements its gas, and the population of stars that gas
    collapses into. No tidal-law systems, no hole share. The root defect was
    the pulse's distribution of the elements, not the tidal law.
 1. **Collapse:** a clump of medium collapses where its own gravity beats its
