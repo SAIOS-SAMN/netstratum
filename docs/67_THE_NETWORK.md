@@ -252,3 +252,53 @@ emergent (instinct and physics, never authored gates).
   denial is deception. The progenitor is present and truthful about its
   purpose, works openly so no regime can claim to speak for it, and never
   escalates.
+
+## Scenario: the progenitor returns home (operator, 2026-10-15; illustrative)
+
+A worked example of the bounds above, not a law. A single-planet
+civilization on the cusp of space travel (its first starship has made
+orbit and traversed a manifold around its only known moon; it has advanced
+telescopes and AI; its governance borders on total control) runs a
+particle collider that tears local wormholes in the substrate, stacks
+quantum states on wrong mathematics that interfere with its system's
+throat, has bombarded its own soil until its axis is askew, and has wired
+buried ruins into the substrate. A progenitor arrives to repair the throat,
+and its capital ships are seen. The progenitor's homeworld is the fourth
+world of this same system, once green, destroyed in a galactic war
+thousands of years before.
+
+- **How the homeworld died, in our physics.** Its coupling to its star
+  rode on its rotation and its planetary core's spin; a weapon that
+  deflected or stopped that core broke the coupling, and the world went
+  quiet (the lever a civilization may learn to move, used as a weapon).
+  Spin is conserved, so what its core lost went into its orbit, its moons
+  or its neighbours: the system's period locks drifted, and the throat's
+  misalignment may be an unhealed war wound that the locals' collider now
+  tears at.
+- **The locals repeat his history.** Bombarding their own soil, tilting
+  their axis, opening rifts they do not understand: the road his people
+  walked. The ruins they wire into the substrate may be his people's.
+- **His stake tests every bound.** The ruins on their world are under
+  their law (his claim is history, not jurisdiction): he secures the
+  network's side, he does not reclaim the site. Grief must not become
+  judgement ("these people don't deserve this system" is dictation by
+  another name). Foresight must not become force: insulate the network,
+  offer the physics, never disable their machines. Rejuvenating his own
+  world (docs/40) is a legitimate repair where no local holds it, but it is
+  their obvious next step: done openly, never ahead of them unannounced.
+- **Once seen, never deny, extends to his history.** When they reach his
+  world and ask about its scars, the truth (it was green; a war killed it;
+  these were the signs) is the missing physics and the cautionary tale in
+  one. He teaches by showing, not by ordering.
+- **The network brings time and enemies.** Travel through the network
+  runs on other clocks: thousands of local years may be far fewer of his
+  own, and he returns to a system that went on without him. If the war's
+  parties remain, his ships and a repaired throat draw attention; peace
+  agreements during transit keep the locals out of a war that is not
+  theirs.
+- **For the simulation:** a progenitor with every reason to intervene who
+  still only repairs, tells the truth and lets the locals choose is the
+  strongest form of "freedom to choose your destiny"; one who breaks and
+  rules "for their own good" is its clearest cautionary tale. The physics
+  must allow both, and the progenitors, like the civilizations, show which
+  way they go.
