@@ -217,10 +217,12 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
             // pushes back before the heart forms and the clump stays gas.
             let Some(ignited) = crate::formation::ignition_share(&st.agitation) else { continue };
             let used = (w * ratio(count as i64, 1) / width).min(ratio(1, 1)) * g_coherence.clone() * ignited;
-            let count = (ratio(count as i64, 1) * g_coherence.clone()).floor().to_integer().try_into().unwrap_or(0u64);
-            if count == 0 {
+            // The coherent share shrinks what the echo takes, never rounds a
+            // holding clump away: at least one star where any gas is taken.
+            if g_coherence.is_zero() {
                 continue;
             }
+            let count = (ratio(count as i64, 1) * g_coherence.clone()).floor().to_integer().try_into().unwrap_or(0u64).max(1);
             // The grains the stars take, from the gas and the disc's rings.
             let mut clump = crate::pulse::Manifest::new();
             let mut from_gas = ratio(0, 1);
