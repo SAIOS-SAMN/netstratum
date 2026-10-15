@@ -95,6 +95,17 @@ The split, in order:
 1. **xylarium:** the ring-density law (a bell's ring density at a place
    sets its clock rate and `δ`), exact, frame by frame. We adopt the form;
    the breath swaps its rate `r / (r + M)` for it.
+   DELIVERED (xylarium 11.0, "THE RING-DENSITY LAW", 2026-10-15): every
+   bell (a core, a star, a grain) HOLDS each ring that reaches it for its
+   own period, then passes it on as its echo. A ring crosses empty space to
+   r (in light-rings) in r and is held by every bell inside r for their
+   periods together, `H(<r)`, so it arrives after `r + H(<r)`:
+   `rate(r) = r / (r + H(<r))`, `δ(<r) = H(<r) / (r + H(<r))`. MASS IS
+   HOLDING, `M = H`. Whole rings, so exact rationals, read ring by ring.
+   Checked against the design laws: no square (linear-fractional), no
+   constant (time a ring, length light per ring), construction (a ring is
+   a spherical wavefront, so it crosses every bell inside r), frame by
+   frame (ring counts), one law at every tier (core, star, grain).
 2. **netstratum:** a grain's own ring (its mass reading from the atom
    tier's turning; A a reading) and thermal motion on the bell's clock.
 3. **Then formation:** the bounce's spin (from the torsion winding) and
