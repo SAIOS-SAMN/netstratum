@@ -162,6 +162,18 @@ law's MOTION was wired (period `r·(r + H)/H`, the balance
   ("worlds ten reaches apart", the tidal reach `s`), which is a Hill
   sphere by another name.
 
+### The spin law in angles and turns (open, with xylarium)
+
+xylarium's "sphere's spin law" (place as a cap angle, spin as the cap's
+rim over its share) is under joint work. Operator rulings so far:
+
+- MASS LOSS PULLING ORBITS INWARD IS A DEFECT (2026-10-15). Under that law
+  fixed spin fixes the cap angle, so the place's reach scales WITH the
+  holding and a shedding star draws its worlds in. The law must widen an
+  orbit when the holding inside it falls, spin conserved.
+- No power of a length or of an angle (the rim's `sin^(n−1)θ` is in
+  question), and the turning must be a stated law, not "a reading".
+
 ## What we have, and what is missing
 
 | nature's ingredient | built | missing |
