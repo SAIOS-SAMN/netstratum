@@ -211,7 +211,12 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
             let width = st.outer.clone() - st.inner.clone();
             // RECOHERE: the echo compresses only the coherent part of the
             // gas, so only that share of what could collapse does now.
-            let used = (w * ratio(count as i64, 1) / width).min(ratio(1, 1)) * g_coherence.clone();
+            // IGNITION (the quantum heart, docs/83): each clump runs away to
+            // the throat condition w = m, where its heart forms, and the star
+            // holds its share `(1 − 2a)/(1 + 2a)` of it; at a ≥ ½ light
+            // pushes back before the heart forms and the clump stays gas.
+            let Some(ignited) = crate::formation::ignition_share(&st.agitation) else { continue };
+            let used = (w * ratio(count as i64, 1) / width).min(ratio(1, 1)) * g_coherence.clone() * ignited;
             let count = (ratio(count as i64, 1) * g_coherence.clone()).floor().to_integer().try_into().unwrap_or(0u64);
             if count == 0 {
                 continue;

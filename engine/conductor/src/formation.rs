@@ -243,6 +243,38 @@ pub fn jets(rings: &[Shell], h: &Ratio, horizon: u64) -> Vec<Shell> {
     out
 }
 
+/// IGNITION, THE QUANTUM HEART (operator 2026-10-15; with xylarium): a
+/// star is the core's pair one tier down, a containment ring at its centre
+/// (its heart) holding its body's grains as one ring of its own, at reach =
+/// hold. A collapsing clump runs away (its deficit `m/(w + m)` rising as its
+/// width falls) to the throat condition `w = m`, deficit ½, where the heart
+/// forms. There `λ = 1`, and the largest part that holds about the heart
+/// (`½ ≥ a + x/(x + m)`) is `x* = m (½ − a)/(½ + a)`: the star holds the
+/// share `(1 − 2a)/(1 + 2a)` of its clump, a the agitation at ignition.
+/// None at `a ≥ ½`: light pushes back before the heart forms.
+pub fn ignition_share(agitation: &Ratio) -> Option<Ratio> {
+    let half = ratio(1, 2);
+    (*agitation < half).then(|| (ratio(1, 1) - ratio(2, 1) * agitation.clone()) / (ratio(1, 1) + ratio(2, 1) * agitation.clone()))
+}
+
+/// THE COUPLING, DERIVED at a star's interface (operator 2026-10-15): its
+/// heart's hold against its atoms' charge hold. Gravity is the star's share
+/// of the universe's holding on the core's clock (`star_hold / universe_hold`,
+/// the weights `atom::hold`); charge is each nucleus's outer band's enclosed
+/// charge, counted over the star's nuclei (`nuclei_per_grain` a grain). So
+/// `κ = (star_hold / universe_hold) / Σ nuclei·Q_out`: gravity is counted as
+/// a share of the whole, charge per nucleus, and the universe's nucleus
+/// count survives in their ratio (the scale no holding-only law carries).
+/// Exact, from the manifest and the atom tier; no constant drawn.
+pub fn coupling(star: &Manifest, universe_hold: &Ratio) -> Option<Ratio> {
+    let per_grain = Ratio::from_integer(crate::pulse::nuclei_per_grain() * num_bigint::BigInt::from(1024));
+    let charge = star.iter().fold(ratio(0, 1), |s, (k, a)| s + a.clone() * per_grain.clone() * ratio(i64::from(z_of(k).and_then(atom).map(|x| x.enclosed).unwrap_or(0)), 1));
+    if charge.is_zero() || universe_hold.is_zero() {
+        return None;
+    }
+    Some(mass(star) / universe_hold.clone() / charge)
+}
+
 /// Rings between jet batches: `⌈1/p⌉`, p the push share `(H − 1)/H`.
 pub fn jet_every(h: &Ratio) -> u64 {
     let push = (h.clone() - ratio(1, 1)) / h.clone();

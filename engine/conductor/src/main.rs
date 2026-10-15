@@ -331,7 +331,11 @@ fn main() {
             let discs = universe.cores.iter().map(|c| conductor::pulse::mass(&c.kept)).fold(cfe::ratio::ratio(0, 1), |a, b| a + b) / conductor::pulse::mass(&universe.total());
             let parcels: usize = universe.cores.iter().map(|c| c.gas.len()).sum();
             let metal_stars = universe.cores.iter().flat_map(|c| &c.satellites).filter(|s| s.kept.keys().any(|k| k != "Z001" && k != "Z002")).count();
-            println!("beat {beat}: FORMATION — {stars} stars ({metal_stars} with metals) and {worlds} worlds in {lit} of {} galaxies; discs {:.3}, gas {:.3} of the universe in {parcels} parcels", universe.cores.len(), f(&discs), f(&gas_share));
+            // THE COUPLING at each star's interface (`formation::coupling`).
+            let universe_hold = conductor::pulse::mass(&universe.total());
+            let kappas: Vec<f64> = universe.cores.iter().flat_map(|c| &c.satellites).filter_map(|s| conductor::formation::coupling(&s.kept, &universe_hold)).map(|k| f(&k)).collect();
+            let (k0, k1) = (kappas.iter().cloned().fold(f64::INFINITY, f64::min), kappas.iter().cloned().fold(0.0, f64::max));
+            println!("beat {beat}: FORMATION — {stars} stars ({metal_stars} with metals) and {worlds} worlds in {lit} of {} galaxies; discs {:.3}, gas {:.3} of the universe in {parcels} parcels; coupling κ {k0:.3e}..{k1:.3e}", universe.cores.len(), f(&discs), f(&gas_share));
             println!("beat {beat}: ENCLOSURES — {} galaxies on S^360 (own rings {g0:.3e} to {g1:.3e}), {} systems on S^60 (own rings {s0:.3e} to {s1:.3e}); {inversion}", gal.len(), sys.len());
         }
         if !events.is_empty() {
