@@ -80,6 +80,13 @@ pub struct Periodic {
 /// Read an element's position. Pure: the same id always reads the same
 /// cell, so the table is stable across every world that meets it.
 pub fn periodic_of(element: &[u8; 32]) -> Periodic {
+    // ERA 1 (2026-10-15): a canonical element's cell is READ FROM ITS ATOM
+    // (docs/78, the atom tier), never drawn from its bytes.
+    if let Some(z) = super::atom::z_of(element) {
+        if let Some(cell) = atom_cell(z) {
+            return cell;
+        }
+    }
     // Bytes 3..=7, one per axis, so no two axes are correlated by
     // construction. Bytes 1 and 2 belong to `dop::element_properties`
     // and are untouched — this table is independent of that draw rather
@@ -105,6 +112,30 @@ pub fn periodic_of(element: &[u8; 32]) -> Periodic {
             l => LANES + 1 - l,
         },
     }
+}
+
+/// An atom's cell on the five axes: line its depth (the deepest lines folded
+/// into the last), lane its unpaired count (the bonding half of the fold),
+/// shell its outer band's electrons (one to four), phase where its contact
+/// grip (`τ · 2,760 K`, life's contact anchor) holds against the thermal
+/// bands, spin the parity of Z.
+fn atom_cell(z: u32) -> Option<Periodic> {
+    let a = super::atom::atom(z)?;
+    let line = a.depth.clamp(1, u32::from(LINES)) as u8;
+    let lane = a.unpaired.clamp(1, u32::from(LANES / 2)) as u8;
+    let shell = a.outer.clamp(1, u32::from(SHELLS)) as u8;
+    let grip = a.tightness.clone() * ratio(2760, 1);
+    let phase = if grip < ratio(250, 1) { 1 } else if grip < ratio(600, 1) { 2 } else if grip <= ratio(2273, 1) { 3 } else { PHASES };
+    Some(Periodic {
+        line,
+        lane,
+        shell,
+        arity: 1 + shell,
+        phase,
+        spin: (z % 2) as u8,
+        refines_at: ratio(i64::from(line), i64::from(LINES)),
+        binds: lane,
+    })
 }
 
 /// **THE MATTER LAW'S DIGEST** (docs/58 §3) — what a universe's Big Bang

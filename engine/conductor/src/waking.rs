@@ -71,6 +71,7 @@ pub fn found(u: &Universe, seed: &[u8; 32], w: &Waking, registry: &Registry, fir
         albedo: None,
         orbit: None,
         gauge: None,
+        composition: None,
     };
     // Its own world's era-1 siting (the refactor onto era 1's physics).
     let mut spec = spec;
@@ -79,6 +80,7 @@ pub fn found(u: &Universe, seed: &[u8; 32], w: &Waking, registry: &Registry, fir
         spec.albedo = Some(albedo);
         spec.orbit = Some(orbit);
     }
+    spec.composition = crate::seating::composition_of(u, &w.path);
     let seat = ledger::registry::Seat { world: world_name, planet: spec.planet.clone(), colony: spec.colony.clone(), position, policy: spec.policy.describe().to_string() };
     let _ = registry.write_founded_at(&sigil, &seat);
     Some(spec)

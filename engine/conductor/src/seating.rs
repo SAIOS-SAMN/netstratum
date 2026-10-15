@@ -50,6 +50,14 @@ pub fn place_of(u: &Universe, path: &[u32]) -> Option<Place> {
     Some(system_place(&galaxy_place(k), j))
 }
 
+/// A world's composition, its grains by Z (the pulse's `Z###` keys).
+pub fn composition_of(u: &Universe, path: &[u32]) -> Option<Vec<(u16, cfe::ratio::Ratio)>> {
+    let core = u.cores.iter().find(|c| c.path.first() == path.first())?;
+    let sys = core.satellites.iter().find(|s| s.path.get(1) == path.get(1))?;
+    let orb = sys.satellites.iter().find(|o| o.path.get(2) == path.get(2))?;
+    Some(orb.kept.iter().filter_map(|(k, a)| k.strip_prefix('Z').and_then(|z| z.parse::<u16>().ok()).map(|z| (z, a.clone()))).collect())
+}
+
 /// Each system's stand-in place and its galactic period (bells a turn about
 /// its core, the turning law's `P = r / M(<r)`): what a line's orbit reads.
 pub fn periods(u: &Universe) -> std::collections::BTreeMap<Place, cfe::ratio::Ratio> {
@@ -131,6 +139,7 @@ pub fn seat(u: &Universe, worlds: &std::collections::BTreeMap<Vec<u32>, crate::l
         spec.star = Some(class);
         spec.albedo = Some(albedo);
         spec.orbit = Some(orbit);
+        spec.composition = composition_of(u, &w.path);
         claimed.insert(w.path.clone());
         *per_galaxy.entry(w.path[0]).or_insert(0) += 1;
     }

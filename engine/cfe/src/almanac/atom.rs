@@ -73,6 +73,24 @@ pub fn atom(z: u32) -> Option<Atom> {
     })
 }
 
+/// A CANONICAL ELEMENT (the refactor onto era 1, 2026-10-15): era 1's matter
+/// is one element per Z. Its id carries the mark `Zatm` at bytes 8..12 and
+/// Z at 12..14 (little-endian); bytes 1 and 2 stay a hash of Z (the
+/// element's family and tier, `dop::element_properties`).
+const MARK: [u8; 4] = *b"Zatm";
+
+pub fn canonical(z: u32) -> [u8; 32] {
+    let mut id = *blake3::Hasher::new_derive_key("netstratum element Z v1").update(&z.to_le_bytes()).finalize().as_bytes();
+    id[8..12].copy_from_slice(&MARK);
+    id[12..14].copy_from_slice(&(z as u16).to_le_bytes());
+    id
+}
+
+/// The Z of a canonical element, or None for an era-0 hash-drawn kind.
+pub fn z_of(id: &[u8; 32]) -> Option<u32> {
+    (id[8..12] == MARK).then(|| u32::from(u16::from_le_bytes([id[12], id[13]])))
+}
+
 /// THE NUCLEUS (the same law one tier in): its Z protons and its neutrons
 /// pair, one of each kind to a frame, and pairing is what closes (design law
 /// 6), so a closed nucleus holds as many neutrons as protons: `A = 2Z`.

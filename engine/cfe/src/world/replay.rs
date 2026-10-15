@@ -491,6 +491,8 @@ impl Replayer {
         ClosureEvent::TaxonSealed { class, clade } => *taxon = Some((*class, *clade)),
         // GALACTIC-1: the regional seed replays — sealed once, forever.
         ClosureEvent::RegionCharted { seed } => *region_seed = Some(*seed),
+        // Era 1: the composition is identity, read from the chronicle.
+        ClosureEvent::CompositionSealed { .. } => {}
         // docs/58 — the Big Bang and a world's citation of it are IDENTITY:
         // they enter the hash chain (so everything after descends from the
         // origin) and move nothing in committed state.

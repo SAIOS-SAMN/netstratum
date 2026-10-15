@@ -113,6 +113,7 @@ fn seat(
         albedo: siting.as_ref().map(|(_, albedo, _)| albedo.clone()),
         orbit: siting.map(|(_, _, orbit)| orbit),
         gauge: None,
+        composition: None,
     }
 }
 
@@ -441,6 +442,7 @@ pub fn registered_polities(registry: &ledger::registry::Registry) -> Vec<PolityS
                 albedo: None,
                 orbit: None,
                 gauge: None,
+                composition: None,
             });
             continue;
         }
@@ -464,6 +466,7 @@ pub fn registered_polities(registry: &ledger::registry::Registry) -> Vec<PolityS
             albedo: None,
             orbit: None,
             gauge: None,
+            composition: None,
         });
     }
     grown

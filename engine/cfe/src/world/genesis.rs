@@ -472,6 +472,23 @@ impl World {
         self.chronicle.set_region_seed(seed);
         Ok(())
     }
+    /// THE COMPOSITION (tag 198, the refactor onto era 1): seal the world's
+    /// planet composition, its grains by Z, once. A second seal is a no-op.
+    pub fn seal_composition(&mut self, nuclei: Vec<(u16, Ratio)>) -> Result<(), ActionRefused> {
+        self.permitted(SOVEREIGN, Scope::Build)?;
+        if self.composition().is_some() {
+            return Ok(());
+        }
+        self.close(ClosureEvent::CompositionSealed { nuclei }, SOVEREIGN);
+        Ok(())
+    }
+    /// The sealed composition, read from the chronicle.
+    pub fn composition(&self) -> Option<Vec<(u16, Ratio)>> {
+        self.chronicle.history().find_map(|r| match r.event() {
+            ClosureEvent::CompositionSealed { nuclei } => Some(nuclei.clone()),
+            _ => None,
+        })
+    }
     /// TU-1 / G: cache this beat's gauge-direction sample (raw index
     /// bytes — see `vrp::ManifoldReceipt`). Called once per beat by the
     /// caller that owns `reduct::GaugeDirection` (this crate does not

@@ -912,6 +912,9 @@ pub struct PolitySpec {
     /// AEON-1b: the world's opening gauge key, wrapped [0, 1); `None`
     /// founds at zero. A divergence branch carries its cleaved key.
     pub gauge: Option<Ratio>,
+    /// ERA 1: the planet composition, grains by Z, sealed into the world at
+    /// founding (tag 198); its veins are drawn from it. None: era 0's draws.
+    pub composition: Option<Vec<(u16, Ratio)>>,
 }
 
 /// One live polity world: the sim, its contained actor, its research rung.
@@ -1952,6 +1955,13 @@ impl Polity {
                 "genesis {}: the planet was NOT sited — albedo {albedo} / orbit {orbit} fail the physics' doors",
                 spec.civilization.sigil
             ),
+        }
+        // ERA 1: the world's planet composition, sealed once (tag 198); its
+        // veins are drawn from it as canonical elements.
+        if let Some(composition) = spec.composition.clone() {
+            if let Err(refusal) = world.seal_composition(composition) {
+                eprintln!("genesis {}: the composition was NOT sealed — {refusal:?}", spec.civilization.sigil);
+            }
         }
         // **DIO-3a: SEAL THE CLADE AT GENESIS** (operator ruling 2026-08-16). Until
         // sealed, every founding line reads the flatlander default (clade 2,
@@ -4942,6 +4952,7 @@ impl Polity {
             orbit: None,
             // The opposite phase of the cleave (11 §3), wrapped.
             gauge: Some(cfe::world::wrap_gauge(origin_key - delta)),
+            composition: None,
         };
         // THE SEAT, recorded once beside the card: the boot roster reads it,
         // so a restart resumes this branch in the world it was founded in,
@@ -6873,6 +6884,7 @@ pub fn incursion(
         albedo: None,
         orbit: None,
         gauge: None,
+        composition: None,
     };
     let polity = Polity::genesis(spec, registry, book);
     // The door receipts on the universe ledger (ledger-side, the

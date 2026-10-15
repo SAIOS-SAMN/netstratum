@@ -407,7 +407,9 @@
 //!         same algorithm solver::consilience already uses for cross-line
 //!         agreement, read at vessel scope. Recorded only; nothing reads
 //!         it yet. orbit[32] ‖ hardness u32 le.)
-//!    Phase-5 claim ledger: next free **198** (197 SubstratumOpened — docs/69; 193 CoreDeposited, 194 CoreEmitted, 195 CoreReturned, 196 CoreWordDeposited — the cores design; 190 UniverseFounded, 191 UniverseCited, 192 AncientArose — docs/58; 186 ResourceStocksSwept, 184 VeinRejuvenated —
+//!    Phase-5 claim ledger: next free **199** (198 CompositionSealed — the
+//!    refactor onto era 1: a world's planet composition, its shares by Z,
+//!    sealed once at founding; its veins are drawn from it; 197 SubstratumOpened — docs/69; 193 CoreDeposited, 194 CoreEmitted, 195 CoreReturned, 196 CoreWordDeposited — the cores design; 190 UniverseFounded, 191 UniverseCited, 192 AncientArose — docs/58; 186 ResourceStocksSwept, 184 VeinRejuvenated —
 //!    ONT-3 resource rejuvenation as derivation: a worked vein RECOVERS at a
 //!    collect touch, its inverse-receipt integral `rejuvenated` growing by the
 //!    KEPLERIAN orbital-forcing quantum (one `natural/REGROWTH_GRAIN` per
@@ -3253,6 +3255,12 @@ pub enum ClosureEvent {
     /// once (the `StarCommissioned`/`TaxonSealed` precedent): the position
     /// a system charts at is fixed at founding, never travels.
     RegionCharted { seed: [u8; 32] },
+    /// **COMPOSITION (tag 198, the refactor onto era 1, 2026-10-15)** — the
+    /// world's planet composition, its grains by Z, sealed once at founding.
+    /// The world's veins are drawn from it as canonical elements
+    /// (`almanac::atom::canonical`). Identity: replay moves nothing; the
+    /// prospect reads it from the chronicle (the founding root's precedent).
+    CompositionSealed { nuclei: Vec<(u16, Ratio)> },
     /// **CHRONICLE-COMPACT-1 (tag 188)** — a world folds its history to this
     /// point and commits `folded_hash`, a content hash of its `Committed`
     /// state at the moment of closing, plus `receipt_count`, how many
@@ -4559,6 +4567,15 @@ impl ClosureEvent {
             Self::RegionCharted { seed } => {
                 // seed[32] alone — a world-wide identity fact, no orb key.
                 tlv::put(187, seed, &mut out);
+            }
+            Self::CompositionSealed { nuclei } => {
+                // count u16 ‖ (z u16 ‖ share ratio)*.
+                let mut value = (nuclei.len() as u16).to_le_bytes().to_vec();
+                for (z, share) in nuclei {
+                    value.extend_from_slice(&z.to_le_bytes());
+                    ratio::encode(share, &mut value);
+                }
+                tlv::put(198, &value, &mut out);
             }
             Self::UniverseFounded { topology, span, roster, matter, over } => {
                 // topology (u16-prefixed) ‖ span ‖ roster[32] ‖ matter[32] ‖
@@ -6049,6 +6066,19 @@ impl ClosureEvent {
             187 => {
                 let seed: [u8; 32] = value.get(..32)?.try_into().ok()?;
                 Some(Self::RegionCharted { seed })
+            }
+            198 => {
+                let n = u16::from_le_bytes(value.get(..2)?.try_into().ok()?) as usize;
+                let mut at = 2;
+                let mut nuclei = Vec::with_capacity(n.min(256));
+                for _ in 0..n {
+                    let z = u16::from_le_bytes(value.get(at..at + 2)?.try_into().ok()?);
+                    at += 2;
+                    let (share, used) = ratio::decode(value.get(at..)?)?;
+                    at += used;
+                    nuclei.push((z, share));
+                }
+                Some(Self::CompositionSealed { nuclei })
             }
             188 => {
                 let folded_hash: [u8; 32] = value.get(..32)?.try_into().ok()?;

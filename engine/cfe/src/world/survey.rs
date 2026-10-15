@@ -589,6 +589,29 @@ impl World {
         // line mid-growth (stratum 3 under G can hold line 4), so the
         // ASSAY / REFINE ceilings keep their teeth.
         element[3] %= crate::almanac::strata_lines(stratum, class);
+        // ERA 1 (2026-10-15): a world with a sealed composition draws its vein
+        // from its own matter, a canonical element weighted by its share and
+        // within what this stratum's pressure deposits (the deposit law, by
+        // the atom's depth).
+        if let Some(composition) = self.composition() {
+            let lines = u32::from(crate::almanac::strata_lines(stratum, class).max(1));
+            let open: Vec<&(u16, Ratio)> = composition.iter().filter(|(z, _)| crate::almanac::atom::atom(u32::from(*z)).is_some_and(|a| a.depth <= lines)).collect();
+            let pool = if open.is_empty() { composition.iter().collect::<Vec<_>>() } else { open };
+            let total = pool.iter().fold(ratio(0, 1), |s, (_, w)| s + w.clone());
+            if total > ratio(0, 1) {
+                let draw = ratio(i64::from(u32::from_le_bytes([element[16], element[17], element[18], element[19]]) % 1_000_000), 1_000_000) * total;
+                let mut acc = ratio(0, 1);
+                let mut pick = pool[0].0;
+                for (z, w) in &pool {
+                    acc += w.clone();
+                    if draw < acc {
+                        pick = *z;
+                        break;
+                    }
+                }
+                element = crate::almanac::atom::canonical(u32::from(pick));
+            }
+        }
         let (family, tier, richness) = crate::dop::element_properties(&element, class);
         let name = crate::dop::element_name(family, &element);
         let stamp = self.clock.now();

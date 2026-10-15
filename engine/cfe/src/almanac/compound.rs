@@ -24,6 +24,12 @@ use crate::ratio::{ratio, Ratio};
 /// `arity · 5 / 2` and odd arities were unreachable in whole binds; the
 /// widening to 10 makes it `arity · 3`. See [`super::periodic::LANES`].
 pub fn compounds(elements: &[[u8; 32]]) -> bool {
+    // ERA 1: canonical elements compound by the atom tier's law (a bond is
+    // unpaired electrons pairing across atoms; `atom::closes`).
+    let zs: Option<Vec<u32>> = elements.iter().map(super::atom::z_of).collect();
+    if let Some(zs) = zs.filter(|z| !z.is_empty()) {
+        return super::atom::closes(&zs);
+    }
     let Some(first) = elements.first().map(periodic_of) else {
         return false;
     };

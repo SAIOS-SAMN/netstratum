@@ -1687,6 +1687,7 @@ fn covered(event: &ClosureEvent) -> bool {
         // element, no key; {I2 containment (Build), I3 exactness} complete
         // it).
         | E::RegionCharted { .. }
+        | E::CompositionSealed { .. }
         // docs/58 (tags 190/191): the Big Bang and a world's citation of it
         // are identity — they move no bank, no element and no key, so
         // {I2 containment, I3 exactness} complete them, like the regional
@@ -2690,6 +2691,7 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         | E::LineMinted { .. }         // a people enters — line-keyed by nature
         | E::TaxonSealed { .. }        // class, clade
         | E::RegionCharted { .. }      // GALACTIC-1: the regional seed, identity not ledger
+        | E::CompositionSealed { .. }  // era 1: the planet composition, identity not ledger
         | E::UniverseCited { .. }      // docs/58: the world names its universe's origin
         | E::ChronicleCheckpointed { .. } // CHRONICLE-COMPACT-1: a bookkeeping fact, identity not ledger
         | E::EvolutionAdvanced { .. }  // the arc advances — identity, not ledger
@@ -2920,6 +2922,7 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         // GALACTIC-1: chart_region_as gates on Scope::Build, the same as
         // seal_taxon_as.
         | E::RegionCharted { .. }
+        | E::CompositionSealed { .. }
         // docs/58: a world's citation of its universe, written at its
         // founding beside the other genesis identity deeds.
         | E::UniverseCited { .. }
