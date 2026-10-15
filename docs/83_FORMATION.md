@@ -103,8 +103,12 @@ Linear, exact, closed forms between events (docs/78 design laws).
 
 0. **Thermal motion from the atom tier** (corrections above): a gas's
    agitation derived on our own rulers, comparable with an orbit's turning.
-   Then the galaxy layer is rebuilt: a galaxy is its hole, its gas and the
-   population of stars its gas collapses into, no tidal-law systems.
+   Then the galaxy layer is rebuilt from the bounce (docs/78, "The
+   singularities"): each galaxy's manifest sorted by mass number, the
+   heaviest inside `M(<r) = r` its core, the next its innermost accretion
+   disk, the light elements its gas, and the population of stars that gas
+   collapses into. No tidal-law systems, no hole share. The root defect was
+   the pulse's distribution of the elements, not the tidal law.
 1. **Collapse:** a clump of medium collapses where its own gravity beats its
    pressure and spin (a Jeans criterion, square-free), replacing the
    breath's births by rule.

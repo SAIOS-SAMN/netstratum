@@ -130,6 +130,45 @@ breaks one of them is wrong before it is built.
   rationals checked exactly and a frame as a factored reflection product. No
   2-dimensional cross-section (the anti-flattening law).
 
+## The singularities: the universal core and the galactic cores (operator, 2026-10-15)
+
+Supersedes the mass split below for galaxies and their centres (its
+tidal-law systems about a core and its 1/1000 hole share are retired;
+docs/83, "Corrections").
+
+- **The Big Bang seeds the universe.** The number of galaxies follows from
+  the elements the universe has acquired from the mycelium network through
+  the hypha (granted, endowed, bought or traded). Nothing is created inside.
+- **The universal core** is the one singularity UPLINKED to the hypha: it
+  alone transports and uplinks into the mycelium network. It is the transit
+  hub of HYPHA SPACE (hyperspace in our world), where data crosses and is
+  coordinated through the hypha. It has mass: the heavy elements caught in
+  its accretion disk, continually pulsed and re-pulsed by the outbound and
+  inbound bells of the quantum state as it is created and sent to the
+  galactic cores.
+- **Galactic cores are smaller singularities,** Einstein–Cartan torsion
+  bounces: resonators that ring as bells and re-pulse the universal core's
+  resonance through their galaxies. They are smaller because the elements
+  that make them are distributed IN the universe, not crossed in from the
+  hypha. A galactic core is linked to the hypha only indirectly, never
+  uplinked as the universal core is: it interlinks with the other cores and
+  back to the universal core through the PROGENITOR NETWORK. (Built only
+  once its physics is derived.)
+- **A core's mass is derived, never a share.** The bounce gives every
+  nucleus the same kick, so its reach goes as `1 / A` (the mass number,
+  linear). The HEAVIEST elements travel least: what lands inside the radius
+  where the enclosed mass turns at light speed (`M(<r) = r`, G = c = 1) is
+  the core's mass; the next heaviest form its innermost accretion disk;
+  the light elements travel farthest and are the gas stars form from
+  (docs/83). A galaxy's enclosed-mass profile is its manifest sorted by A,
+  so its effective dimension is read, never set, and galaxies differ as
+  their manifests differ.
+- **One law at every tier:** the same sorting wherever matter collapses and
+  bounces: a star's heavy core under its light envelope, a disk's heavy
+  inner worlds and light outer ones. (Unlike nature's Big Bang, which makes
+  only the lightest elements, our founding manifest carries every element,
+  so the bounce sorts heavy matter inward from the start.)
+
 ## The bounce: the pulse and the deployment
 
 Without an origin every mass, place and orbit would be placed by hand. One
