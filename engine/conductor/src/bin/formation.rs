@@ -17,8 +17,11 @@ fn main() {
     for core in &u.cores {
         let all = core.total();
         let share = pulse::mass(&all) / universe.clone();
-        let (shells, h) = formation::shells(&all, &core.kept, &share);
-        let gas: f64 = shells.iter().filter(|s| s.outer > s.inner).map(|s| f(&s.held)).sum();
+        let (mut shells, h) = formation::shells(&all, &core.kept, &share);
+        let jetted = formation::jets(&shells, &h, horizon);
+        let jet_count = jetted.len();
+        shells.extend(jetted);
+        let gas: f64 = shells.iter().filter(|s| s.outer > s.inner && s.born == 0).map(|s| f(&s.held)).sum();
         let hot = shells.iter().filter(|s| s.halving.is_none()).count();
         let events = formation::first_collapse(&shells, &h, horizon);
         let stars: u64 = events.iter().map(|e| e.3).sum();
@@ -28,12 +31,10 @@ fn main() {
         // Stars born where gas passes over the disc's rings carry its elements.
         let mixed: Vec<String> = events
             .iter()
-            .filter(|(_, st, _, _)| st.members.iter().any(|(i, _)| shells[*i].outer == shells[*i].inner))
-            .map(|(_, st, _, c)| format!("{}×[{}]", c, st.members.iter().map(|(i, _)| shells[*i].key.as_str()).collect::<Vec<_>>().join(",")))
+            .filter(|(_, st, _, _)| st.members.iter().any(|(i, _)| shells[*i].born > 0 || shells[*i].outer == shells[*i].inner))
+            .map(|(n, st, _, c)| format!("ring {n}: {}×[{}]", c, st.members.iter().map(|(i, _)| shells[*i].key.as_str()).collect::<Vec<_>>().join(",")))
             .collect();
-        if !mixed.is_empty() {
-            println!("  galaxy {:?} MIXED stars: {}", core.path, mixed.join("  "));
-        }
+        println!("  galaxy {:?}: {} jet batches landed; MIXED stars: {}", core.path, jet_count, if mixed.is_empty() { "none".to_string() } else { mixed.join("  ") });
         if let Some(n) = first {
             first_all = first_all.min(n);
         }
