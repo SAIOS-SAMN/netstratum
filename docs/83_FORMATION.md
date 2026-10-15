@@ -232,6 +232,36 @@ precession and its propulsion are owed together.
     per TUniversal final point shift at each grant; to be read on the
     bridge.
 
+### The motion law (adopted, operator 2026-10-15; built)
+
+`crate::ring`, replacing the held ring motion in place: each received ring
+turns a place by its deficit, `ω = δ = H / (R + H)`, so a turn takes
+`P = 1 + R / H` received rings; spin is reach × holding, `ℓ = R · H`
+(products of distinct readings, no power); the balance stands a body at
+`R = ℓ / H`. Orbits breathe, the ledger deciding the direction; escape is
+read at events. Measured on the 6,000-bell test breath: 0 escaped, 29 born,
+the spin ledger exact; the first generation moved out (589) and none in,
+because the breath's ledger has only shedding and outermost births so far
+(accretion, the rotation ↔ orbit exchange and galactic pulses are owed).
+Rotation on the same ledger (xylarium's form, `L_rot = Σ_layers m_i·ρ_i·
+H_rot,i`) lands with the tidal coupling rate, which moves it. Live from
+2026-10-15 14:16 on a redeployed universe (13 cores, 416 systems,
+conservation exact).
+
+## What we have, and what is missing
+
+| nature's ingredient | built | missing |
+|---|---|---|
+| gravity, inward | the motion law (`ω = δ` a received ring, `R = ℓ / H`; orbits breathe with the ledger) | infall and collapse; escape read at events |
+| pressure, outward | pressure for atmospheres (docs/82) | pressure resisting collapse in a cloud or a star |
+| spin (angular momentum) | phases in turns; spin promised for S^60 bodies | conservation: nothing spins up as it shrinks, so nothing flattens into a disk |
+| matter | grains by Z, the atom tier, chemistry, the medium (gas) | the medium never condenses into bodies; the breath forms systems by rule |
+| manifold, torsion | specified (S^360 places, cone reaches, torsion phase) | the field matter falls through |
+| orbital mechanics | each body about its enclosed mass alone | mutual tugs, resonances, migration, collisions, ejections |
+| locality | each body reads its star and its own matter | its neighbours |
+
+## The scope
+
 ### Phase 0: the missing forces, in the design laws
 
 Linear, exact, closed forms between events (docs/78 design laws).
