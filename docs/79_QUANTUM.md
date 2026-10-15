@@ -184,6 +184,44 @@ Within era 1 (docs/78), after its geometry library (mycelium A1).
   gives it. Not designed yet; every law built now must leave room for it
   (a star's spin and field are carried, not discarded).
 
+## The torsion phase is the tilt of a core's disk (operator, 2026-10-15)
+
+Built today (`conductor::quantum`): the hidden phase where a world
+interacts at bell b is `u = frac(φ_galaxy + b / P_world)`, and a
+measurement of chance p happens when `u < p` (live in `life.rs`, impacts on
+a world's climb). Its galaxy term `φ_galaxy` is a seed draw in 3,600ths of
+a turn, frozen for all time: a placeholder. Its physical meaning:
+
+- **The disk.** A galactic core sits in its accretion disk, the heaviest
+  elements its bounce held (docs/78, "The singularities"), so the disk's
+  mass follows from the elements the galaxy received at the Big Bang.
+- **The dipole.** The disk's surrounding density presses in equally from
+  every side (isomorphic pressure); against the core's own pull it gives
+  the field two lobes, one for each sense of the turning (design law 6).
+  The main attractor lies on the axis between them.
+- **The propulsion.** The disk's holding is what drives the
+  Einstein–Cartan bounce: a heavier disk, a harder bounce, a stronger bell.
+- **The tilt is the torsion.** The dipole's axis leans from the core's spin
+  axis, and the lean turns (precesses). The torsion at any moment is that
+  lean, so the galaxy's torsion phase is a TURNING, not a number:
+  `tilt(t) = tilt₀ + t · ω_precession` (closed form, design law 5), and the
+  hidden phase reads `u = frac(tilt(t) + b / P_world)`. The disk's matter
+  (accretion; the breath's shedding and births) moves the precession, so a
+  galaxy's chance follows its singularity's disk.
+
+Owed, in angles and turns (with xylarium; the bells and EC torsion are
+shared library laws):
+
+1. **The disk's mass** from the bounce's hold (already owed for formation,
+   docs/83).
+2. **The dipole:** how the surrounding density under isomorphic pressure
+   sets an axis and its two lobes, with no flat norm.
+3. **The precession:** the lean's rate from the disk's holding against the
+   core's, in turns per received ring, and its starting lean from the
+   disk's composition at the bounce.
+4. **The propulsion:** how the disk's holding sets the bounce's strength
+   (the galactic bounce strength, docs/83).
+
 ## Open, for the operator
 
 - ~~What is quantum; coupling~~: ruled 2026-10-14 (below).

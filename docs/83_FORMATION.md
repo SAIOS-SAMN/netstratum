@@ -181,6 +181,16 @@ rim over its share) is under joint work. Operator rulings so far:
 - No power of a length or of an angle (the rim's `sin^(n−1)θ` is in
   question), and the turning must be a stated law, not "a reading".
 
+### The core's disk drives the bounce and sets the torsion (operator, 2026-10-15)
+
+A galactic core's accretion disk (the heaviest elements its bounce held)
+is the propulsion of its Einstein–Cartan bounce, and the tilt of the
+disk's dipole is the galaxy's torsion phase, a turning that precesses with
+the disk's matter (docs/79, "The torsion phase is the tilt of a core's
+disk"). Formation's bounce-hold law therefore also sets the bell's
+strength and the quantum layer's phase: the disk's mass, its dipole, its
+precession and its propulsion are owed together.
+
 ## What we have, and what is missing
 
 | nature's ingredient | built | missing |
