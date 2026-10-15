@@ -97,13 +97,17 @@ pub fn z_of(id: &[u8; 32]) -> Option<u32> {
 /// The neutron excess of heavy nuclei, which charge's push would bring, is
 /// not yet law (docs/78, Open).
 ///
-/// A GRAIN'S OWN RING (docs/83 "The derivation", netstratum's share of the
-/// ring-density law; operator 2026-10-15): an atom is a small bell, its tick
-/// a ring received. HOLDING BELONGS TO CLOSED PAIRS: every paired member (a
-/// nucleon, an electron in a paired frame) holds each passing ring one tick;
-/// an unpaired electron is open, free to bond, and holds nothing. So bonding
-/// and weight are two sides of pairing, and an atom's mass reading is its
-/// hold: `2Z + (Z − unpaired)` rings. The mass number is this reading.
+/// A GRAIN'S OWN HOLD (docs/83 "The derivation", netstratum's share of the
+/// ring-density law; operator 2026-10-15). HOLDING BELONGS TO CLOSED PAIRS:
+/// every paired member (a nucleon, an electron in a paired frame) holds a
+/// passing ring; an unpaired electron is open, free to bond, and holds
+/// nothing. So bonding and weight are two sides of pairing, and an atom's
+/// mass reading is its hold, `2Z + (Z − unpaired)`: the mass number is this
+/// reading. It is a relative WEIGHT, never an atomic beat: on the core's
+/// clock it is normalised by the derived clock ratio (all the universe's
+/// grains together hold exactly one core ring), so a grain's hold in core
+/// rings is its weight over the manifest's total weight, the gravitational
+/// hold, linear and additive.
 pub fn hold(z: u32) -> u32 {
     atom(z).map(|a| 2 * z + (z - a.unpaired)).unwrap_or(0)
 }
