@@ -510,6 +510,21 @@ pub fn deploy(seed: &[u8; 32], manifest: &Manifest) -> Universe {
     Universe { cores, medium }
 }
 
+/// MAGNETISM (operator 2026-10-15, "transduction via magnetism"): an
+/// atom's open frames (its unpaired electrons) are its magnetic moments, so
+/// a manifest's magnetism is its grains' unpaired counts. Holding is
+/// `3Z − unpaired` a nucleus (`atom::hold`), so HOLDING + MAGNETISM = 3Z,
+/// which fusion conserves (it conserves Z): pairing frames TRANSDUCES
+/// magnetism into holding, unpairing holding into magnetism, and the light
+/// a fusion releases is that transduction's flux through the continuum
+/// face, never mass.
+pub fn magnetism(m: &Manifest) -> Ratio {
+    m.iter().fold(ratio(0, 1), |s, (k, a)| {
+        let open = k.strip_prefix('Z').and_then(|z| z.parse::<u32>().ok()).and_then(cfe::almanac::atom::atom).map(|x| x.unpaired).unwrap_or(0);
+        s + a.clone() * ratio(i64::from(open), 1)
+    })
+}
+
 /// THE SPIN LEDGER's total (docs/83 Phase 0): every orbiting body's mass
 /// times its specific spin, and every medium's spin, in units of the unit
 /// mass. Conserved exactly across the breath.

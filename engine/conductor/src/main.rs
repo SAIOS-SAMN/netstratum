@@ -308,7 +308,10 @@ fn main() {
             // THE LEDGER (docs/83 Phase 0): mass and spin, conserved exactly.
             let total_mass = conductor::pulse::mass(&universe.total()) / unit.clone();
             let total_spin = conductor::pulse::spin_total(&universe, &unit);
-            println!("beat {beat}: LEDGER — mass {} spin {} (units of the deepest hole)", total_mass, total_spin);
+            // Transduction via magnetism: holding + magnetism (3Z a nucleus)
+            // is what fusion conserves; light carries the transduction.
+            let total_magnetism = conductor::pulse::magnetism(&universe.total()) / unit.clone();
+            println!("beat {beat}: LEDGER — mass {} spin {} magnetism {} mass+magnetism {} (units of the deepest hole)", total_mass, total_spin, total_magnetism, total_mass.clone() + total_magnetism.clone());
             // THE ENCLOSURES (docs/78): each galaxy its own S^360, each star
             // system its own S^60, joined at its core's throat; each counts
             // its turns on its own ring (the pulse's round trip to its rim).

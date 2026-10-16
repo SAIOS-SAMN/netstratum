@@ -305,6 +305,22 @@ each clump IGNITES:
 - **Tests:** universe-building tests removed (operator: the binary run is
   the witness; pure guards only).
 
+### Transduction via magnetism (operator 2026-10-16)
+
+Burning met two conflicts: fusion changed the ledger's mass the wrong way
+(H + H → He raises the weight 4 → 6 while releasing light), and it
+transmutes. The operator's answer: TRANSDUCTION VIA MAGNETISM. An atom's
+open frames (unpaired electrons) are its magnetic moments; its holding is
+`3Z − unpaired`; so HOLDING + MAGNETISM = 3Z a nucleus, conserved through
+every fusion (Z is conserved). Pairing frames transduces magnetism into
+holding (H + H → He: holding +2, magnetism −2); unpairing transduces holding
+into magnetism (He + He → Be: holding −2, magnetism +2). The light a fusion
+releases is the transduction's flux through the continuum face, never
+mass. The LEDGER line carries magnetism and the conserved sum
+(`pulse::magnetism`). Open: the burning rate (the heartbeat, with
+xylarium); transmutation against mycelium's element account (nuclei per Z
+as granted).
+
 ### The motion law (adopted, operator 2026-10-15; built)
 
 `crate::ring`, replacing the held ring motion in place: each received ring
