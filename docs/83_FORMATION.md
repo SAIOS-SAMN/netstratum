@@ -486,6 +486,44 @@ First live reading (beat 75, regenerated founding): the ledger mass
 universe, all from the cores that never formed, its heaviest kinds
 Z016–Z023; galaxy, system and world media 0; every galaxy disc 1.0.
 
+### The return built and read (2026-10-16, with xylarium; offline)
+
+Built (`crate::ocean`, commits ebff83a…3a1e6ad), every form proposed with
+xylarium and checked against the design laws:
+- **The core's state is set at the bounce** (`Body::state`), never drained;
+  holding = state + grains; an emptied galaxy keeps its core.
+- **Jets fire once an echo** (the bounce; the jetstream ruling), releasing
+  what the interface built over the bounce's bell, `2/⌈Q̄/e⌉` of the disc,
+  innermost (heaviest) first; reaching the rim (the 1:1 crest, `a_1 = 1`)
+  they cross whole into the ocean.
+- **The crests** `R_{p/q} = 2(2p/q − 1)` core rings, q odd, stand once
+  `q ≤ n` (a coincidence recurs only after q bells); the ocean on them by
+  `a_q / Σ a`.
+- **Gathering by crossings, not time:** each half-swing crosses each
+  standing crest inside `(R₋, R₊)` once and takes `a_q·h_g/(h_g + m)` of
+  what stands there.
+- **Landing, carried spins add plane by plane** (the push is the isoclinic
+  pulse, in every plane): orbit plane `ℓ = p·w̄/w + ρ_g·t`, t the guiding
+  orbit's relative turning `|δ(d) − δ(R)|/δ(d)` (point 5 of the swing
+  retracted: the sweep is the guiding orbit's); swing plane the radial
+  share `e·(1 − |2u − 1|)`, read only at the crossing (a reading, never a
+  trajectory; the rotor's half-angle `cos_sin` refused: it is the nappe).
+  Held `f_orbit·f_swing`. No weight ratio on the arrival (a turning, not an
+  impulse).
+- **Operator ruling:** ρ_g multiplies the arrival: the matter crossed the
+  boundary, so its motion is received like a pulse.
+
+**Read (scratch founding, 1200 bells):** the circuit RUNS and conserves (the
+ledger exact); the ocean settles near 0.06 of the universe, its heavy end (O,
+F, N); the galaxies' shares REDISTRIBUTE through it (one 0.116 → 0.046,
+another 0.052 → 0.117). Every arrival is HELD: no gas, no stars. A kind has
+a free part only where `R(1 + p) > H`, i.e. `ℓ > 8/3` (p ½, H 2); hydrogen's
+push is about 2 and its arrival at most `ρ_g·e ≈ 0.4`: short by about 0.3,
+the heavier far shorter. Under regeneration the circuit runs its SLOW LEG
+only (ocean → disc → jet → ocean). This is the law's answer as ruled; the
+fast leg, if there is one, waits on missing physics, never on tuning this
+margin.
+
 ### The swing (galactic cores, xylarium 11.0 (3); drafted here, accepted by xylarium; to be ruled and built)
 
 Galactic cores are weaker singularities; the universal core's torsion sets
