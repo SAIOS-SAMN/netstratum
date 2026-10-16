@@ -18,8 +18,9 @@
 //!   measure is the refinement).
 //! - **Cooling.** What a grain cannot hold it radiates: its open frames over
 //!   its held frames, `e_z = unpaired / hold` a ring; held as HALVINGS, its
-//!   agitation halves every `h_z = ⌈1 / e_z⌉` rings (closed-shell atoms,
-//!   with no open frame, never cool by themselves).
+//!   agitation halves every `h_z = ⌈1 / e_z⌉` rings; and the VACUUM takes
+//!   back the deficit's share each ring, a halving every `⌈1/δ⌉` rings at its
+//!   reach (closed-shell gas cools this way alone; close-in gas fastest).
 //! - **Collapse.** Overlapping shells sum to a stretch of linear holding λ.
 //!   A clump of width w in it collapses where
 //!   `λ (K)(K + w) ≥ (1 + λ)[a (K)(K + w) + H w]`, `K = R + H` at its near
@@ -47,6 +48,20 @@ pub struct Shell {
     /// The ring it was laid down (the cut: 0; a jet's landing: later); it
     /// cools from then.
     pub born: u64,
+    /// Rings a halving of its agitation through the VACUUM (operator
+    /// 2026-10-16, with xylarium): each ring the vacuum takes back the
+    /// deficit's share δ = H/(R + H) at its reach, so it halves at least
+    /// every ⌈1/δ⌉ rings ((1 − δ)^⌈1/δ⌉ ≤ 1/e < ½; exact, no power). Every
+    /// parcel cools this way, closed-shell ones included. 0: no vacuum.
+    pub vacuum: u64,
+}
+
+/// The vacuum's halving at reach `r` about holding `h`: `⌈(r + h)/h⌉`.
+pub fn vacuum_halving(r: &Ratio, h: &Ratio) -> u64 {
+    if h.is_zero() {
+        return 0;
+    }
+    ((r.clone() + h.clone()) / h.clone()).ceil().to_integer().try_into().unwrap_or(0)
 }
 
 fn z_of(key: &str) -> Option<u32> {
@@ -75,6 +90,7 @@ pub fn shells(all: &Manifest, disc: &Manifest, share: &Ratio) -> (Vec<Shell>, Ra
         // A held element (the disc's) re-locks all its push: a cold RING at
         // its reach, no width. An escaped one keeps its agitation.
         let agitation = if disc.contains_key(k) || delta >= push { ratio(0, 1) } else { (push.clone() - delta) / push.clone() };
+        let r_mid = r.clone();
         let halving = z_of(k).and_then(atom).and_then(|a| (a.unpaired > 0).then(|| u64::from((hold(a.z) + a.unpaired - 1) / a.unpaired)));
         out.push(Shell {
             key: k.clone(),
@@ -84,21 +100,21 @@ pub fn shells(all: &Manifest, disc: &Manifest, share: &Ratio) -> (Vec<Shell>, Ra
             agitation,
             halving,
             born: 0,
+            vacuum: vacuum_halving(&r_mid, &h),
         });
     }
     (out, h)
 }
 
-/// A shell's agitation at ring `n`: `a₀ / 2^⌊(n − born) / h⌋`; nothing
-/// before it is laid down.
+/// A shell's agitation at ring `n`: halved through both channels, its open
+/// frames' light (`h_e`) and the vacuum's pull back (`h_v`),
+/// `a₀ / 2^(⌊age/h_e⌋ + ⌊age/h_v⌋)`; nothing before it is laid down.
 fn cooled(s: &Shell, n: u64) -> Ratio {
-    match s.halving {
-        Some(h) => {
-            let halvings = (n.saturating_sub(s.born) / h).min(4096) as u32;
-            s.agitation.clone() / Ratio::from_integer(num_bigint::BigInt::from(2).pow(halvings))
-        }
-        None => s.agitation.clone(),
-    }
+    let age = n.saturating_sub(s.born);
+    let by_light = s.halving.map(|h| age / h).unwrap_or(0);
+    let by_vacuum = if s.vacuum > 0 { age / s.vacuum } else { 0 };
+    let halvings = (by_light + by_vacuum).min(4096) as u32;
+    s.agitation.clone() / Ratio::from_integer(num_bigint::BigInt::from(2).pow(halvings))
 }
 
 /// A stretch of gas between two shell edges, its linear holding and the
@@ -186,61 +202,6 @@ pub fn collapse(st: &Stretch, h: &Ratio) -> Option<(Ratio, u64)> {
     }
     let count = (width / lo.clone()).floor().to_integer().try_into().unwrap_or(u64::MAX);
     Some((lo, count))
-}
-
-/// THE CORE'S AXIAL JETS (with xylarium, 2026-10-15): the disc feeds its
-/// INNERMOST matter (heaviest first, what falls in) into jets along the
-/// dipole's axis, out of the disc's plane, so the in-plane hold does not
-/// bind them. The disc's jetted share halves every `⌈1/p⌉` rings of the
-/// core's echo (p the push share; halvings, never expanded), and each batch
-/// LANDS at the galaxy's RIM, where the core's pulse refocuses, as hot gas
-/// with the agitation of the push it carried, `(p − δ_rim)/p`, cooling from
-/// its landing by its own open frames. `rings` are the disc's (held,
-/// zero-width shells), up to ring `horizon`.
-pub fn jets(rings: &[Shell], h: &Ratio, horizon: u64) -> Vec<Shell> {
-    let mut disc: Vec<&Shell> = rings.iter().filter(|s| s.outer == s.inner).collect();
-    // Innermost (heaviest) first.
-    disc.sort_by(|a, b| a.inner.cmp(&b.inner));
-    let total = disc.iter().fold(ratio(0, 1), |s, r| s + r.held.clone());
-    let push = (h.clone() - ratio(1, 1)) / h.clone();
-    if total.is_zero() || push.is_zero() {
-        return Vec::new();
-    }
-    let every: u64 = (ratio(1, 1) / push.clone()).ceil().to_integer().try_into().unwrap_or(u64::MAX).max(1);
-    let rim = rings.iter().map(|s| s.outer.clone()).max().unwrap_or_else(|| ratio(1, 1));
-    let delta = h.clone() / (rim.clone() + h.clone());
-    let agitation = if delta < push { (push.clone() - delta) / push.clone() } else { ratio(0, 1) };
-    let mut out = Vec::new();
-    // Batch k (landing at k·every) carries the disc's share 2^−k, taken
-    // from the cumulative disc, heaviest first.
-    let (mut taken, mut left) = (ratio(0, 1), total.clone());
-    let mut k = 1u64;
-    while k * every <= horizon && k <= 64 {
-        let batch = left.clone() / ratio(2, 1);
-        left -= batch.clone();
-        let (from, to) = (taken.clone(), taken.clone() + batch);
-        taken = to.clone();
-        let mut at = ratio(0, 1);
-        for ring in &disc {
-            let (lo, hi) = (at.clone(), at.clone() + ring.held.clone());
-            at = hi.clone();
-            let part = hi.min(to.clone()) - lo.max(from.clone());
-            if part <= ratio(0, 1) {
-                continue;
-            }
-            out.push(Shell {
-                key: ring.key.clone(),
-                held: part,
-                inner: rim.clone() * (ratio(1, 1) - agitation.clone()),
-                outer: rim.clone() * (ratio(1, 1) + agitation.clone()),
-                agitation: agitation.clone(),
-                halving: ring.halving,
-                born: k * every,
-            });
-        }
-        k += 1;
-    }
-    out
 }
 
 /// IGNITION, THE QUANTUM HEART (operator 2026-10-15; with xylarium): a
@@ -433,15 +394,6 @@ pub fn interface_every(matter: &Manifest, share: &Ratio) -> u64 {
     (ratio(1, 1) / feed).ceil().to_integer().try_into().unwrap_or(u64::MAX).max(1)
 }
 
-/// Rings between jet batches: `⌈1/p⌉`, p the push share `(H − 1)/H`.
-pub fn jet_every(h: &Ratio) -> u64 {
-    let push = (h.clone() - ratio(1, 1)) / h.clone();
-    if push <= ratio(0, 1) {
-        return u64::MAX;
-    }
-    (ratio(1, 1) / push).ceil().to_integer().try_into().unwrap_or(u64::MAX).max(1)
-}
-
 /// ONE JET BATCH, landing at ring `born`: half of the disc's holding, taken
 /// innermost (heaviest) first from its rings, landing hot at the rim.
 pub fn jet_batch(rings: &[Shell], h: &Ratio, rim: &Ratio, born: u64) -> Vec<Shell> {
@@ -470,31 +422,9 @@ pub fn jet_batch(rings: &[Shell], h: &Ratio, rim: &Ratio, born: u64) -> Vec<Shel
             agitation: agitation.clone(),
             halving: ring.halving,
             born,
+            vacuum: vacuum_halving(rim, h),
         });
     }
     out
 }
 
-/// The first ring at which a stretch can collapse (its members cooled
-/// enough), searched on the halving schedule up to `horizon` rings.
-pub fn first_collapse(shells: &[Shell], h: &Ratio, horizon: u64) -> Vec<(u64, Stretch, Ratio, u64)> {
-    let mut steps: Vec<u64> = shells.iter().filter_map(|s| s.halving.map(|hv| (s.born, hv))).flat_map(|(b, hv)| (0..=64u64).map(move |k| b + k * hv)).filter(|&n| n <= horizon).collect();
-    steps.extend(shells.iter().map(|s| s.born).filter(|&n| n <= horizon));
-    steps.push(0);
-    steps.sort();
-    steps.dedup();
-    let mut found: Vec<(u64, Stretch, Ratio, u64)> = Vec::new();
-    let mut seen: Vec<(Ratio, Ratio)> = Vec::new();
-    for n in steps {
-        for st in stretches(shells, n) {
-            if seen.iter().any(|(a, b)| *a == st.inner && *b == st.outer) {
-                continue;
-            }
-            if let Some((w, count)) = collapse(&st, h) {
-                seen.push((st.inner.clone(), st.outer.clone()));
-                found.push((n, st, w, count));
-            }
-        }
-    }
-    found
-}

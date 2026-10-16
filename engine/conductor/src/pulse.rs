@@ -497,6 +497,7 @@ fn put_body(b: &Body, out: &mut Vec<u8>) {
         }
         g.extend_from_slice(&p.halving.unwrap_or(0).to_le_bytes());
         g.extend_from_slice(&p.born.to_le_bytes());
+        g.extend_from_slice(&p.vacuum.to_le_bytes());
         cfe::tlv::put(6, &g, out);
     }
     if b.born > 0 {
@@ -582,8 +583,10 @@ fn get_parcel(v: &[u8]) -> Option<crate::formation::Shell> {
     }
     let halving = u64::from_le_bytes(v.get(at..at + 8)?.try_into().ok()?);
     let born = u64::from_le_bytes(v.get(at + 8..at + 16)?.try_into().ok()?);
+    // The vacuum's halving (absent in parcels written before it: none).
+    let vacuum = v.get(at + 16..at + 24).and_then(|b| b.try_into().ok()).map(u64::from_le_bytes).unwrap_or(0);
     let mut r = r.into_iter();
-    Some(crate::formation::Shell { key, held: r.next()?, inner: r.next()?, outer: r.next()?, agitation: r.next()?, halving: (halving > 0).then_some(halving), born })
+    Some(crate::formation::Shell { key, held: r.next()?, inner: r.next()?, outer: r.next()?, agitation: r.next()?, halving: (halving > 0).then_some(halving), born, vacuum })
 }
 
 /// Read `<var>/pulse.bin` back: the seed and the universe (bodies are
@@ -625,7 +628,7 @@ mod tests {
 
     #[test]
     fn the_pulse_file_reads_back_exactly() {
-        let parcel = crate::formation::Shell { key: "Z001".into(), held: ratio(1, 5), inner: ratio(1, 3), outer: ratio(2, 3), agitation: ratio(1, 2), halving: Some(2), born: 7 };
+        let parcel = crate::formation::Shell { key: "Z001".into(), held: ratio(1, 5), inner: ratio(1, 3), outer: ratio(2, 3), agitation: ratio(1, 2), halving: Some(2), born: 7, vacuum: 3 };
         let orb = Body { path: vec![1, 1, 1], radius: ratio(3, 2), period: ratio(5, 2), kept: [("Z008".to_string(), ratio(1, 64))].into(), satellites: Vec::new(), medium: Manifest::new(), ell: ratio(7, 3), medium_spin: ratio(0, 1), gas: Vec::new(), born: 0 };
         let sys = Body { path: vec![1, 1], radius: ratio(9, 2), period: ratio(11, 2), kept: [("Z001".to_string(), ratio(3, 1024))].into(), satellites: vec![orb], medium: Manifest::new(), ell: ratio(1, 9), medium_spin: ratio(1, 7), gas: Vec::new(), born: 0 };
         let core = Body { path: vec![1], radius: ratio(60, 1), period: ratio(0, 1), kept: [("Z026".to_string(), ratio(1, 2))].into(), satellites: vec![sys], medium: [("Z001".to_string(), ratio(5, 4))].into(), ell: ratio(0, 1), medium_spin: ratio(13, 11), gas: vec![parcel] };
