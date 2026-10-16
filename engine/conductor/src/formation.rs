@@ -308,6 +308,67 @@ pub fn heartbeat(star: &Manifest, universe_hold: &Ratio, rings: u64) -> Option<(
     Some((every, left, light))
 }
 
+/// A STAR'S SYSTEM AT IGNITION (docs/83; planets from the star's own disc):
+/// in the clump's own units (holding 1, its ignition extent w = m = 1), the
+/// heart holds the star, the share `x* = (½ − a)/(½ + a)` within reach x*;
+/// what lies between the heart's reach and the clump's edge, `[x*, 1]`, is
+/// the star's DISC (the clump's own mix, `λ = 1`), anchored on the star
+/// (H = x*). It fragments by the same collapse test (`collapse`): as many
+/// worlds of holding `w*` as fit, standing at their places in the annulus;
+/// what does not fragment stays as the system's medium (its belts). Read in
+/// the transition units by the clump's holding; orbits by the motion law.
+pub fn system(clump: &Manifest, agitation: &Ratio, path: &[u32], unit: &Ratio) -> Option<(Manifest, Vec<crate::pulse::Body>, Manifest, Ratio)> {
+    let x = ignition_share(agitation)?;
+    let star = crate::pulse::take(clump, &x);
+    let mut disc = clump.clone();
+    crate::pulse::less(&mut disc, &star);
+    let scale = mass(clump) / unit.clone();
+    let star_hold = mass(&star) / unit.clone();
+    let annulus = Stretch { inner: x.clone(), outer: ratio(1, 1), lambda: ratio(1, 1), agitation: agitation.clone(), members: Vec::new() };
+    let mut worlds = Vec::new();
+    let mut inside = star_hold.clone();
+    if let Some((w, count)) = collapse(&annulus, &x) {
+        let width = ratio(1, 1) - x.clone();
+        let share = w.clone() / width;
+        for i in 0..count {
+            let left_share = ratio(1, 1) - share.clone() * ratio(i as i64, 1);
+            if left_share <= ratio(0, 1) {
+                break;
+            }
+            let part = crate::pulse::take(&disc, &(share.clone() / left_share));
+            if part.is_empty() {
+                continue;
+            }
+            crate::pulse::less(&mut disc, &part);
+            let reach = (x.clone() + w.clone() * (ratio(i as i64, 1) + ratio(1, 2))) * scale.clone();
+            let mut at = path.to_vec();
+            at.push(i as u32 + 1);
+            let period = crate::ring::period(&reach, &inside);
+            let ell = crate::ring::spin(&reach, &inside);
+            inside += mass(&part) / unit.clone();
+            worlds.push(crate::pulse::Body { path: at, radius: reach, period, kept: part, satellites: Vec::new(), medium: Manifest::new(), ell, medium_spin: ratio(0, 1), gas: Vec::new(), born: 0 });
+        }
+    }
+    let belts_spin = mass(&disc) / unit.clone() * crate::ring::spin(&scale, &inside);
+    Some((star, worlds, disc, belts_spin))
+}
+
+/// The interface clock of a centre and the matter it feeds on (one law at
+/// every tier: a star's heartbeat, a galactic core's jets): rings a halving,
+/// `⌈Q̄ / (e · s)⌉`, s the centre's share of the universe's holding, Q̄ the
+/// matter's mean outer charge, e its open share (open frames over held).
+pub fn interface_every(matter: &Manifest, share: &Ratio) -> u64 {
+    let count = matter.values().fold(ratio(0, 1), |s, a| s + a.clone());
+    let charge = matter.iter().fold(ratio(0, 1), |s, (k, a)| s + a.clone() * ratio(i64::from(z_of(k).and_then(atom).map(|x| x.enclosed).unwrap_or(0)), 1));
+    let open = crate::pulse::magnetism(matter);
+    let held = mass(matter);
+    if count.is_zero() || charge.is_zero() || open.is_zero() || held.is_zero() || share.is_zero() {
+        return u64::MAX;
+    }
+    let feed = open / held * share.clone() / (charge / count);
+    (ratio(1, 1) / feed).ceil().to_integer().try_into().unwrap_or(u64::MAX).max(1)
+}
+
 /// Rings between jet batches: `⌈1/p⌉`, p the push share `(H − 1)/H`.
 pub fn jet_every(h: &Ratio) -> u64 {
     let push = (h.clone() - ratio(1, 1)) / h.clone();

@@ -29,7 +29,7 @@
 //!   a write across layers is PERPENDICULAR: an echo coming down, a birth
 //!   changing the mass above. A perpendicular write down answered by one up
 //!   closes a causal LOOP; the loops are the chain.
-use crate::pulse::{less, mass, split, take, tier, Body, Universe};
+use crate::pulse::{less, mass, take, tier, Body, Universe};
 use crate::ring::rate;
 use cfe::ratio::{ratio, Ratio};
 use num_traits::Zero;
@@ -106,11 +106,10 @@ pub struct Event {
 /// Events in time order. Each echo is a perpendicular write down; each birth
 /// answers it with a perpendicular write up (the galaxy's mass within the
 /// new orbit changes), closing a loop.
-pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u64) -> Vec<Event> {
+pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u64) -> Vec<Event> {
     let unit = unit_mass(u);
     let universe_mass = mass(&u.total());
     use num_traits::Zero as _;
-    let s = tier(2).reach.clone();
     // Every echo's arrival, in time order.
     let mut arrivals: Vec<(u64, usize, u64)> = Vec::new();
     for (i, c) in u.cores.iter().enumerate() {
@@ -205,7 +204,10 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
         // due in this echo's span lands at the rim (`formation::jet_batch`),
         // its grains moving from the disc to the gas with no orbital spin.
         let mut jets = 0;
-        let every = crate::formation::jet_every(&h);
+        // The jets run on the core's INTERFACE CLOCK (one law at every tier:
+        // the core is a heart one tier up): the disc halves into the jet
+        // every `⌈Q̄/(e·s_g)⌉` rings, not every `⌈1/p⌉`.
+        let every = crate::formation::interface_every(&core.kept, &share);
         let rim = core.gas.iter().map(|g| g.outer.clone()).chain(rings.iter().map(|r| r.outer.clone())).max().unwrap_or_else(|| ratio(1, 1));
         let first_due = bell.saturating_sub(t_u) / every + 1;
         for k in first_due..=bell / every {
@@ -243,7 +245,10 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
             // holds its share `(1 − 2a)/(1 + 2a)` of it; at a ≥ ½ light
             // pushes back before the heart forms and the clump stays gas.
             let Some(ignited) = crate::formation::ignition_share(&st.agitation) else { continue };
-            let used = (w * ratio(count as i64, 1) / width).min(ratio(1, 1)) * g_coherence.clone() * ignited;
+            let _ = &ignited;
+            // The whole clump is taken: its heart's share becomes the star,
+            // the rest its disc and worlds (`formation::system`).
+            let used = (w * ratio(count as i64, 1) / width).min(ratio(1, 1)) * g_coherence.clone();
             // The coherent share shrinks what the echo takes, never rounds a
             // holding clump away: at least one star where any gas is taken.
             if g_coherence.is_zero() {
@@ -292,7 +297,7 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
                 let r_guess = crate::ring::radius(&ell_med, &held).unwrap_or_else(|| ell_med.clone());
                 let k = core.satellites.iter().map(|l| l.path[1] + 1).max().unwrap_or(1);
                 let path = vec![core.path[0], k];
-                let (kept, orbs, medium, medium_spin) = split(seed, path.clone(), star, Some(r_guess.clone() * s.clone()), ratio(60, 1), &unit, 1, ratio(0, 1), None);
+                let Some((kept, orbs, medium, medium_spin)) = crate::formation::system(&star, &st.agitation, &path, &unit) else { continue };
                 let mut sys = Body { path, radius: r_guess, period: ratio(0, 1), kept, satellites: orbs, medium, ell: ratio(0, 1), medium_spin, gas: Vec::new(), born: bell };
                 let internal = subtree_spin(&sys, &unit);
                 sys.ell = (taken - internal) / m_u;
