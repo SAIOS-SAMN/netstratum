@@ -68,6 +68,8 @@ fn main() {
     // THE UNIVERSAL PULSE: TUniversal sets it at founding; 60 bells stands in.
     // One beat is one bell.
     const T_U: u64 = 60;
+    // Operator 2026-10-16: pause the economics until the universe is stable.
+    const ECONOMY_PAUSED: bool = true;
     let unit = conductor::breath::unit_mass(&universe);
     // The pulse's cores charted as galaxies, and every line seated on its
     // own star system (stand-in places until the sphere, A1).
@@ -590,7 +592,12 @@ fn main() {
             worlds.push(Polity::genesis(spec, &registry, &book));
         }
         // FLEET-1: salvage/mint/assign before hauls need capacity.
-        let (built, released) = conductor::profile::timed("fleet_step", || conductor::fleet_step(&mut worlds));
+        // THE ECONOMY IS PAUSED (operator 2026-10-16: "pause the economics
+        // until we have a stable universe"; it is era 0's, a building set for
+        // demolition, and it cost ~117 s a beat). Fleets, crossings,
+        // caravans, element hauls, the hubs' STAMP clearing, commissions and
+        // the knowledge market do not run; cognition, life and physics do.
+        let (built, released) = if ECONOMY_PAUSED { (std::collections::BTreeMap::new(), 0) } else { conductor::profile::timed("fleet_step", || conductor::fleet_step(&mut worlds)) };
         if released > 0 {
             println!("beat {beat}: FLEET — {released} hulls return to the idle pool from lapsed routes");
         }
@@ -603,14 +610,14 @@ fn main() {
         let span = book.universe_span();
         // OFFER-1a: the market beat — intents post, crossings clear
         // (one aperture pair each way, receipted both sides).
-        for (seller, buyer) in conductor::profile::timed("market_step", || conductor::market_step(&mut worlds, beat, &span)) {
+        for (seller, buyer) in if ECONOMY_PAUSED { Vec::new() } else { conductor::profile::timed("market_step", || conductor::market_step(&mut worlds, beat, &span)) } {
             contacts.add(&seller, &buyer);
             println!(
                 "beat {beat}: THE CROSSING CLEARS — {seller} ⇌ {buyer}; the autarkies trade"
             );
         }
         // MERCHANT-1: the caravan bridges what the void walled.
-        for (m, a, b) in conductor::profile::timed("merchant_step", || conductor::merchant_step(&mut worlds, beat, &span)) {
+        for (m, a, b) in if ECONOMY_PAUSED { Vec::new() } else { conductor::profile::timed("merchant_step", || conductor::merchant_step(&mut worlds, beat, &span)) } {
             contacts.add(&m, &a);
             contacts.add(&m, &b);
             println!(
@@ -618,7 +625,7 @@ fn main() {
             );
         }
         // E3.3: pure NPC element aperture hauls (Wave-2).
-        for (from, to) in conductor::profile::timed("element_trade_step", || conductor::element_trade_step(&mut worlds, beat, &span)) {
+        for (from, to) in if ECONOMY_PAUSED { Vec::new() } else { conductor::profile::timed("element_trade_step", || conductor::element_trade_step(&mut worlds, beat, &span)) } {
             contacts.add(&from, &to);
             println!(
                 "beat {beat}: ELEMENT CROSSING — {from} → {to}; open matter rides the void"
@@ -649,9 +656,13 @@ fn main() {
         hubs_cleared_at = point;
         // docs/70 P2, docs/72: the beat's ONE reading of the throats' keepers
         // (G3, the envoys counted) and the mapped gates' roads, for the hubs.
-        let keepers_now = conductor::ancients::keepers(&worlds, &book, &registry, std::path::Path::new(&var_root));
-        let roads = conductor::ascension::roads(&worlds, &book, &registry, std::path::Path::new(&var_root), &keepers_now);
-        let (spots, hubs) = conductor::profile::timed("stamp_market_step", || conductor::stamp_market_step(&mut worlds, &book, std::path::Path::new(&var_root), &keepers_now, &roads, beat, &span, &built));
+        let (spots, hubs) = if ECONOMY_PAUSED {
+            (Vec::new(), conductor::HubCensus::default())
+        } else {
+            let keepers_now = conductor::ancients::keepers(&worlds, &book, &registry, std::path::Path::new(&var_root));
+            let roads = conductor::ascension::roads(&worlds, &book, &registry, std::path::Path::new(&var_root), &keepers_now);
+            conductor::profile::timed("stamp_market_step", || conductor::stamp_market_step(&mut worlds, &book, std::path::Path::new(&var_root), &keepers_now, &roads, beat, &span, &built))
+        };
         let tolls = spots.iter().fold(cfe::ratio::ratio(0, 1), |t, (_, _, toll, _)| t + toll.clone());
         let gated = spots.iter().fold(cfe::ratio::ratio(0, 1), |t, (_, _, _, gate)| t + gate.clone());
         for (line, hub) in &hubs.met {
@@ -687,14 +698,16 @@ fn main() {
             let _ = conductor::ancients::write_council(&worlds, std::path::Path::new(&var_root));
         }
         // docs/66 Y2 — COMMISSIONS: one attempt a beat at an open need.
-        let commission = conductor::profile::timed("commissions_step", || {
-            conductor::commissions::step(&mut worlds, &book, std::path::Path::new(&var_root), beat)
-        });
-        if let Some((core, admitted)) = &commission.ambiguous {
-            println!("beat {beat}: COMMISSION OPEN — {core}: the pairs still admit {admitted} orders; no closure by a tie-break");
-        }
-        if let Some((core, world, arrived, by, admitted)) = &commission.closed {
-            println!("beat {beat}: COMMISSION CLOSED — {world} sites the hub of {core} by its own word ({by}; {admitted} orders admitted); bounty {arrived} STAMP arrived");
+        if !ECONOMY_PAUSED {
+            let commission = conductor::profile::timed("commissions_step", || {
+                conductor::commissions::step(&mut worlds, &book, std::path::Path::new(&var_root), beat)
+            });
+            if let Some((core, admitted)) = &commission.ambiguous {
+                println!("beat {beat}: COMMISSION OPEN — {core}: the pairs still admit {admitted} orders; no closure by a tie-break");
+            }
+            if let Some((core, world, arrived, by, admitted)) = &commission.closed {
+                println!("beat {beat}: COMMISSION CLOSED — {world} sites the hub of {core} by its own word ({by}; {admitted} orders admitted); bounty {arrived} STAMP arrived");
+            }
         }
         // docs/69 — THE SPACING GUILD in the substrata: the ancients' tubes
         // open, and one task a beat is traversed below.
@@ -716,7 +729,7 @@ fn main() {
         }
         // THE KNOWLEDGE MARKET (ARC C): a prosperous line licenses a word
         // it lacks from the roster's pool — ideas circulate, not just matter.
-        for (world, price) in conductor::profile::timed("knowledge_market_step", || conductor::knowledge_market_step(&mut worlds, beat)) {
+        for (world, price) in if ECONOMY_PAUSED { Vec::new() } else { conductor::profile::timed("knowledge_market_step", || conductor::knowledge_market_step(&mut worlds, beat)) } {
             println!(
                 "beat {beat}: KNOWLEDGE MARKET — {world} licenses an idea (depth {price}); vocabulary spreads"
             );
