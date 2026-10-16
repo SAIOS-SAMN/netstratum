@@ -247,7 +247,13 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // the throat condition w = m, where its heart forms, and the star
             // holds its share `(1 − 2a)/(1 + 2a)` of it; at a ≥ ½ light
             // pushes back before the heart forms and the clump stays gas.
-            let Some(ignited) = crate::formation::ignition_share(&st.agitation) else { continue };
+            // THE CLUMP'S AGITATION AT IGNITION (with xylarium): its cooled
+            // residue PLUS the galactic tide it stands in, unlocked at its own
+            // throat condition (rate ½ at w = m): `a = a_cooled + ½·δ_gal`.
+            // Two channels, summed, as the cooling channels are.
+            let tide = crate::ring::deficit(&st.inner, &h);
+            let a_clump = st.agitation.clone() + tide.clone() / ratio(2, 1);
+            let Some(ignited) = crate::formation::ignition_share(&a_clump) else { continue };
             let _ = &ignited;
             // The whole clump is taken: its heart's share becomes the star,
             // the rest its disc and worlds (`formation::system`).
@@ -301,7 +307,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 // Its identity: its birth reading, never a row number.
                 let siblings: Vec<u64> = core.satellites.iter().map(|l| l.path[1]).collect();
                 let path = vec![core.path[0], crate::ring::birth_key(bell, &r_guess, &held, &siblings)];
-                let Some((kept, orbs, medium, medium_spin)) = crate::formation::system(&star, &st.agitation, &path, &unit, &universe_mass, &crate::ring::deficit(&r_guess, &held)) else { continue };
+                let Some((kept, orbs, medium, medium_spin)) = crate::formation::system(&star, &a_clump, &path, &unit, &universe_mass, &tide) else { continue };
                 let mut sys = Body { path, radius: r_guess, period: ratio(0, 1), kept, satellites: orbs, medium, ell: ratio(0, 1), medium_spin, gas: Vec::new(), born: bell };
                 let internal = subtree_spin(&sys, &unit);
                 let own = taken - internal;

@@ -301,7 +301,9 @@ pub fn system(clump: &Manifest, agitation: &Ratio, path: &[u64], unit: &Ratio, u
     // the annulus (`R/(R + x*)`): `a_disc = δ_gal · rate_star`. Deep systems
     // run hot (many worlds, or all belts past ½), far ones cold (one world).
     let flux = tide.clone() * unlocked;
-    let disc_agitation = heat.max(flux).max(agitation.clone());
+    // Channels add (the first light and the tide's unlocked share); the
+    // clump's own agitation is the floor the disc inherits.
+    let disc_agitation = (heat + flux).max(agitation.clone());
     let annulus = Stretch { inner: x.clone(), outer: ratio(1, 1), lambda: ratio(1, 1), agitation: disc_agitation, members: Vec::new() };
     let mut worlds = Vec::new();
     let mut inside = star_hold.clone();
