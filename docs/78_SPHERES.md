@@ -174,6 +174,29 @@ docs/83, "Corrections").
   bell or jets; S^1 carries all of them and keeps the pairing as its faces.
   S^1 is the bottom rung of the sphere ladder (S^1 the throat, S^60 a
   system, S^360 a galaxy and the universe).
+- **THE GALAXIES ORBIT THE UNIVERSAL SINGULARITY, DENSEST AT THE FIRST RING**
+  (operator 2026-10-16; with xylarium, building offline). The universe's
+  singularity is the S^1 throat (faces S^0); the galactic cores ring it:
+  - **Placed by the cut one tier up:** the epicentre's bounce sorts the
+    cores as a galaxy's sorts its nuclei; a core of weight w_i is carried
+    `ℓ_i = p_u·(w̄/w_i)` and stands at `d_i = ℓ_i/H_u`, the heaviest nearest
+    the throat, so density rises inward to the FIRST RING (a reading, never
+    placed; replaces the drawn distances).
+  - **THE RIM LAW, every tier:** an enclosure's rim (its half
+    circumference, where the pulse refocuses) is its own holding, `rim = H`,
+    deficit ½ there, as at the throat; with the state hold equal to the
+    grains' (the derived clock ratio) every enclosure spans exactly
+    [throat 1, rim 2] of its own units. Nothing stands beyond its rim: cores
+    carried past `rim_u` never form galaxies and stay intergalactic, so the
+    GALAXY COUNT is a reading. Replaces the transitional "rim = the
+    outermost member's reach".
+  - **Galactic cores ORBIT** the universal singularity by the motion law
+    (spin `R·H(<R)` on the ledger, the inner rings fastest and
+    slowest-clocked), the holding inside each ring the universal state plus
+    the cores within it.
+  - **Each galaxy's gas ARRIVES from the epicentre** across d_i, its push
+    the continuum's share there, widened in flight by agitation × distance,
+    re-read inside the galaxy's own [1, 2].
 - **Each galaxy its own enclosed S^360; galactic cores are HUBS**
   (operator, 2026-10-15; with xylarium). A galaxy is its own closed S^360,
   hung inside the universe's at its core: the core is the THROAT joining the
