@@ -339,6 +339,30 @@ fn main() {
             let kappas: Vec<f64> = universe.cores.iter().flat_map(|c| &c.satellites).filter_map(|s| conductor::formation::coupling(&s.kept, &universe_hold)).map(|k| f(&k)).collect();
             let (k0, k1) = (kappas.iter().cloned().fold(f64::INFINITY, f64::min), kappas.iter().cloned().fold(0.0, f64::max));
             println!("beat {beat}: FORMATION — {stars} stars ({metal_stars} with metals) and {worlds} worlds in {lit} of {} galaxies; discs {:.3}, gas {:.3} of the universe in {parcels} parcels; coupling κ {k0:.3e}..{k1:.3e}", universe.cores.len(), f(&discs), f(&gas_share));
+            // THE HEARTBEAT OBSERVER (docs/83): each star's interface burn
+            // on the rings it has received since its heart formed (its
+            // nested clock: the galaxy's rate times its orbit's).
+            let mut lives: Vec<f64> = Vec::new();
+            let (mut burning, mut spent) = (0usize, 0usize);
+            for (i, core) in universe.cores.iter().enumerate() {
+                let g_rate = conductor::breath::galaxy_rate(&universe, i, &unit);
+                let mut inside = conductor::pulse::mass(&core.kept) + conductor::pulse::core_state(core);
+                for sys in &core.satellites {
+                    let rate = g_rate.clone() * conductor::ring::rate(&sys.radius, &(inside.clone() / unit.clone()));
+                    let received = (rate.clone() * cfe::ratio::ratio(beat.saturating_sub(sys.born) as i64, 1)).floor().to_integer().try_into().unwrap_or(0u64);
+                    if let Some((every, left, _)) = conductor::formation::heartbeat(&sys.kept, &universe_hold, received) {
+                        // A life: the halvings until less than a grain of fuel
+                        // in 2^30 is left, read in bells on its clock.
+                        lives.push(30.0 * every as f64 / f(&rate).max(1e-300));
+                        if left < cfe::ratio::ratio(1, 1 << 30) { spent += 1 } else { burning += 1 }
+                    }
+                    inside += conductor::pulse::mass(&sys.total());
+                }
+            }
+            lives.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
+            if !lives.is_empty() {
+                println!("beat {beat}: HEARTBEAT — {burning} stars burning, {spent} spent; lifetimes {:.3e}..{:.3e} bells (median {:.3e})", lives[0], lives[lives.len() - 1], lives[lives.len() / 2]);
+            }
             println!("beat {beat}: ENCLOSURES — {} galaxies on S^360 (own rings {g0:.3e} to {g1:.3e}), {} systems on S^60 (own rings {s0:.3e} to {s1:.3e}); {inversion}", gal.len(), sys.len());
         }
         if !events.is_empty() {

@@ -274,6 +274,9 @@ pub struct Body {
     /// shell where the bounce's push left it, a jet batch where it landed),
     /// in the galaxy's own units; empty for every other body.
     pub gas: Vec<crate::formation::Shell>,
+    /// The bell a star was born (its heart formed, docs/83); 0 for bodies
+    /// laid down at the founding and for every other body.
+    pub born: u64,
 }
 
 impl Body {
@@ -352,7 +355,7 @@ pub(crate) fn split(seed: &[u8; 32], path: Vec<u32>, mut grains: Manifest, reach
         let own_reach = Some(r.clone() * s_.clone());
         let (s_kept, s_sats, s_medium, s_medium_spin) = split(seed, at.clone(), m, own_reach, unit.clone() / ratio(60, 1), unit_mass, depth - 1, ratio(0, 1), None);
         let ell = crate::ring::spin(&r, &held);
-        satellites.push(Body { path: at, radius: r.clone(), period, kept: s_kept, satellites: s_sats, medium: s_medium, ell, medium_spin: s_medium_spin, gas: Vec::new() });
+        satellites.push(Body { path: at, radius: r.clone(), period, kept: s_kept, satellites: s_sats, medium: s_medium, ell, medium_spin: s_medium_spin, gas: Vec::new(), born: 0 });
         radius = Some(r);
         enclosed += m_mass;
     }
@@ -504,7 +507,7 @@ pub fn deploy(seed: &[u8; 32], manifest: &Manifest) -> Universe {
                 acc + p.held.clone() * scale.clone() * crate::ring::spin(&reach, &h)
             });
             let distance = ratio(60 * (1 + (draw(seed, &[i], "distance", 0) % 60) as i64), 1);
-            Body { path: vec![i], radius: distance, period: ratio(0, 1), kept: disc, satellites: Vec::new(), medium, ell: ratio(0, 1), medium_spin, gas }
+            Body { path: vec![i], radius: distance, period: ratio(0, 1), kept: disc, satellites: Vec::new(), medium, ell: ratio(0, 1), medium_spin, gas, born: 0 }
         })
         .collect();
     Universe { cores, medium }
@@ -579,6 +582,9 @@ fn put_body(b: &Body, out: &mut Vec<u8>) {
         g.extend_from_slice(&p.born.to_le_bytes());
         cfe::tlv::put(6, &g, out);
     }
+    if b.born > 0 {
+        cfe::tlv::put(7, &b.born.to_le_bytes(), out);
+    }
     for s in &b.satellites {
         put_body(s, out);
     }
@@ -643,7 +649,7 @@ fn get_body(v: &[u8], spun: bool) -> Option<Body> {
     };
     let kept = get_manifest(v, &mut at)?;
     let medium = get_manifest(v, &mut at)?;
-    Some(Body { path, radius, period, kept, satellites: Vec::new(), medium, ell, medium_spin, gas: Vec::new() })
+    Some(Body { path, radius, period, kept, satellites: Vec::new(), medium, ell, medium_spin, gas: Vec::new(), born: 0 })
 }
 
 /// A gas parcel (tag 6), attached to the body read before it.
@@ -679,6 +685,7 @@ pub fn read(var_root: &Path) -> Option<([u8; 32], Universe)> {
             2 => medium = get_manifest(v, &mut 0)?,
             1 => flat.push(get_body(v, spun)?),
             6 => flat.last_mut()?.gas.push(get_parcel(v)?),
+            7 => flat.last_mut()?.born = u64::from_le_bytes(v.try_into().ok()?),
             _ => {}
         }
     }
@@ -702,8 +709,8 @@ mod tests {
     #[test]
     fn the_pulse_file_reads_back_exactly() {
         let parcel = crate::formation::Shell { key: "Z001".into(), held: ratio(1, 5), inner: ratio(1, 3), outer: ratio(2, 3), agitation: ratio(1, 2), halving: Some(2), born: 7 };
-        let orb = Body { path: vec![1, 1, 1], radius: ratio(3, 2), period: ratio(5, 2), kept: [("Z008".to_string(), ratio(1, 64))].into(), satellites: Vec::new(), medium: Manifest::new(), ell: ratio(7, 3), medium_spin: ratio(0, 1), gas: Vec::new() };
-        let sys = Body { path: vec![1, 1], radius: ratio(9, 2), period: ratio(11, 2), kept: [("Z001".to_string(), ratio(3, 1024))].into(), satellites: vec![orb], medium: Manifest::new(), ell: ratio(1, 9), medium_spin: ratio(1, 7), gas: Vec::new() };
+        let orb = Body { path: vec![1, 1, 1], radius: ratio(3, 2), period: ratio(5, 2), kept: [("Z008".to_string(), ratio(1, 64))].into(), satellites: Vec::new(), medium: Manifest::new(), ell: ratio(7, 3), medium_spin: ratio(0, 1), gas: Vec::new(), born: 0 };
+        let sys = Body { path: vec![1, 1], radius: ratio(9, 2), period: ratio(11, 2), kept: [("Z001".to_string(), ratio(3, 1024))].into(), satellites: vec![orb], medium: Manifest::new(), ell: ratio(1, 9), medium_spin: ratio(1, 7), gas: Vec::new(), born: 0 };
         let core = Body { path: vec![1], radius: ratio(60, 1), period: ratio(0, 1), kept: [("Z026".to_string(), ratio(1, 2))].into(), satellites: vec![sys], medium: [("Z001".to_string(), ratio(5, 4))].into(), ell: ratio(0, 1), medium_spin: ratio(13, 11), gas: vec![parcel] };
         let u = Universe { cores: vec![core], medium: [("Z002".to_string(), ratio(1, 1024))].into() };
         let dir = std::env::temp_dir().join(format!("pulse-{}", std::process::id()));

@@ -275,6 +275,39 @@ pub fn coupling(star: &Manifest, universe_hold: &Ratio) -> Option<Ratio> {
     Some(mass(star) / universe_hold.clone() / charge)
 }
 
+/// THE HEARTBEAT (with xylarium, 2026-10-16): a star burns at its
+/// INTERFACE, where its heart's gravity matches its atoms' charge: the share
+/// `κ · n_star = s_star / Q̄` of its fuel (s_star its share of the universe's
+/// holding, Q̄ its nuclei's mean outer charge). Each received ring feeds the
+/// fuel's open share e of that interface: held as HALVINGS, the fuel halves
+/// every `⌈Q̄ / (e · s_star)⌉` received rings. Each fusion closes Δu open
+/// frames, transducing magnetism into holding, its light the transduction's
+/// flux. The first rung here: hydrogen to helium (Δu = 2, e = ½).
+/// Returns the rings per halving, the fuel's share left after `rings`
+/// received rings, and the light per received ring (`feed × fuel × Δu`).
+pub fn heartbeat(star: &Manifest, universe_hold: &Ratio, rings: u64) -> Option<(u64, Ratio, Ratio)> {
+    let fuel = star.get("Z001")?.clone();
+    let total = mass(star);
+    if total.is_zero() || universe_hold.is_zero() {
+        return None;
+    }
+    let count = star.values().fold(ratio(0, 1), |s, a| s + a.clone());
+    let charge = star.iter().fold(ratio(0, 1), |s, (k, a)| s + a.clone() * ratio(i64::from(z_of(k).and_then(atom).map(|x| x.enclosed).unwrap_or(0)), 1));
+    let q_mean = charge / count;
+    let share = total.clone() / universe_hold.clone();
+    let e = ratio(1, 2);
+    if q_mean.is_zero() {
+        return None;
+    }
+    // The interface feed per received ring, `e · s_star / Q̄`.
+    let feed = e * share / q_mean;
+    let every: u64 = (ratio(1, 1) / feed.clone()).ceil().to_integer().try_into().unwrap_or(u64::MAX).max(1);
+    let halvings = (rings / every).min(4096) as u32;
+    let left = ratio(1, 1) / Ratio::from_integer(num_bigint::BigInt::from(2).pow(halvings));
+    let light = feed * fuel / total * left.clone() * ratio(2, 1);
+    Some((every, left, light))
+}
+
 /// Rings between jet batches: `⌈1/p⌉`, p the push share `(H − 1)/H`.
 pub fn jet_every(h: &Ratio) -> u64 {
     let push = (h.clone() - ratio(1, 1)) / h.clone();

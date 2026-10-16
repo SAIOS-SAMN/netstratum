@@ -321,6 +321,19 @@ mass. The LEDGER line carries magnetism and the conserved sum
 xylarium); transmutation against mycelium's element account (nuclei per Z
 as granted).
 
+**Resolved and built (2026-10-16).** THE HEARTBEAT (with xylarium): a
+star burns at its INTERFACE, the share `κ·n_star = s_star/Q̄` its heart's
+gravity reaches against its atoms' charge; each received ring feeds the
+fuel's open share e of it, held as halvings (`⌈Q̄/(e·s_star)⌉` rings a
+halving); heavier stars burn faster, deeper ones faster still; the share is
+scale-free and the absolute rate comes through the ring flow. Built for the
+first rung, H + H → He, on each echo (`formation::heartbeat`; a star's birth
+bell persisted). TRANSMUTATION (mycelium, 78.155b): the element account
+stays the CROSSING record; fusion is the universe's own physics, never
+reported; a crossing out is checked by nucleon and Z-weighted totals only.
+Observers: HEARTBEAT (burning, spent, lifetimes) and the LEDGER's
+mass + magnetism.
+
 ### The motion law (adopted, operator 2026-10-15; built)
 
 `crate::ring`, replacing the held ring motion in place: each received ring

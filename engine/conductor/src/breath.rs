@@ -109,6 +109,7 @@ pub struct Event {
 pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u64) -> Vec<Event> {
     let unit = unit_mass(u);
     let universe_mass = mass(&u.total());
+    use num_traits::Zero as _;
     let s = tier(2).reach.clone();
     // Every echo's arrival, in time order.
     let mut arrivals: Vec<(u64, usize, u64)> = Vec::new();
@@ -161,6 +162,32 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
                 }
                 dissolved += 1;
                 continue;
+            }
+            // BURNING (the heartbeat, docs/83; mycelium: transmutation is the
+            // universe's own physics): the halvings of its hydrogen due since
+            // the last echo, on the rings its nested clock received, fuse
+            // H + H → He. Holding + magnetism (3Z) is conserved; the system's
+            // spin is kept exact as its holding transduces.
+            if sys.born > 0 || sys.kept.contains_key("Z001") {
+                let since = |at: u64| (own.clone() * ratio(at.saturating_sub(sys.born) as i64, 1)).floor().to_integer().try_into().unwrap_or(0u64);
+                let (now_rings, then_rings) = (since(bell), since(bell.saturating_sub(t_u)));
+                if let (Some((every, _, _)), Some(fuel)) = (crate::formation::heartbeat(&sys.kept, &universe_mass, now_rings), sys.kept.get("Z001").cloned()) {
+                    let due = (now_rings / every).saturating_sub(then_rings / every).min(64) as u32;
+                    if due > 0 {
+                        let left = fuel.clone() / Ratio::from_integer(num_bigint::BigInt::from(2).pow(due));
+                        // Whole grains of helium: two hydrogen grains each.
+                        let helium = cfe::world::smelt_resource(&((fuel.clone() - left) / ratio(2, 1)));
+                        if helium > ratio(0, 1) {
+                            let spin = mass(&sys.total()) * sys.ell.clone();
+                            less(&mut sys.kept, &[("Z001".to_string(), helium.clone() * ratio(2, 1))].into());
+                            *sys.kept.entry("Z002".to_string()).or_insert_with(|| ratio(0, 1)) += helium;
+                            let after = mass(&sys.total());
+                            if !after.is_zero() {
+                                sys.ell = spin / after;
+                            }
+                        }
+                    }
+                }
             }
             enclosed_in += mass(&sys.total()) / unit.clone();
             keep.push(sys);
@@ -266,7 +293,7 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
                 let k = core.satellites.iter().map(|l| l.path[1] + 1).max().unwrap_or(1);
                 let path = vec![core.path[0], k];
                 let (kept, orbs, medium, medium_spin) = split(seed, path.clone(), star, Some(r_guess.clone() * s.clone()), ratio(60, 1), &unit, 1, ratio(0, 1), None);
-                let mut sys = Body { path, radius: r_guess, period: ratio(0, 1), kept, satellites: orbs, medium, ell: ratio(0, 1), medium_spin, gas: Vec::new() };
+                let mut sys = Body { path, radius: r_guess, period: ratio(0, 1), kept, satellites: orbs, medium, ell: ratio(0, 1), medium_spin, gas: Vec::new(), born: bell };
                 let internal = subtree_spin(&sys, &unit);
                 sys.ell = (taken - internal) / m_u;
                 core.satellites.push(sys);
