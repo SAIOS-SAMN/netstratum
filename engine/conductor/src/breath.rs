@@ -199,7 +199,6 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         // the rim, then gas that has cooled enough COLLAPSES into stars.
         let galaxy = core.total();
         let g_mass = mass(&galaxy);
-        let share = g_mass.clone() / universe_mass.clone();
         let (now, h) = crate::formation::shells(&galaxy, &core.kept);
         let rings: Vec<crate::formation::Shell> = now.into_iter().filter(|r| r.outer == r.inner).collect();
         let weight = |k: &str| ratio(i64::from(k.strip_prefix('Z').and_then(|z| z.parse::<u32>().ok()).map(cfe::almanac::atom::hold).unwrap_or(1)), 1);
@@ -209,8 +208,10 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         let mut jets = 0;
         // The jets run on the core's INTERFACE CLOCK (one law at every tier:
         // the core is a heart one tier up): the disc halves into the jet
-        // every `⌈Q̄/(e·s_g)⌉` rings, not every `⌈1/p⌉`.
-        let every = crate::formation::interface_every(&core.kept, &share);
+        // every `⌈Q̄/(e·s)⌉` rings, not every `⌈1/p⌉`. REGENERATION
+        // (operator ruling (i), with xylarium): the core runs on its own
+        // holding, s = 1; no share of the universe enters its clock.
+        let every = crate::formation::interface_every(&core.kept, &ratio(1, 1));
         let rim = core.gas.iter().map(|g| g.outer.clone()).chain(rings.iter().map(|r| r.outer.clone())).max().unwrap_or_else(|| ratio(1, 1));
         let first_due = bell.saturating_sub(t_u) / every + 1;
         for k in first_due..=bell / every {

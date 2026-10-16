@@ -1,5 +1,6 @@
 //! docs/78 "The breath": breathe the pulse universe and read it.
-//! `breathe <era1 var> [bells] [T_u]`.
+//! `breathe <era1 var> [bells] [T_u] [write]`: `write` saves the breathed
+//! universe back (scratch vars only), for `observe --var`.
 use conductor::{breath, motion, pulse};
 use std::path::Path;
 
@@ -41,4 +42,8 @@ fn main() {
     w.sort();
     println!("CLOCKS — over {until} bells: galaxy terms (echoes received) {terms:?}; galaxy epochs (half-mass rungs) {epochs:?}; worlds' journals: {} worlds, {journaled} with a completed local year (most years {:?}, median {:?}); universal echoes {}", worlds.len(), w.last(), w.get(w.len() / 2), until / t_u);
     println!("CONSERVATION — the breath created nothing: {}", u.total() == before);
+    if args.get(4).map(String::as_str) == Some("write") {
+        let _ = pulse::write(Path::new(era1), &seed, &u);
+        let _ = std::fs::write(Path::new(era1).join("conductor.beat"), until.to_string());
+    }
 }

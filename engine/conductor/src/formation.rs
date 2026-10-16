@@ -444,7 +444,8 @@ pub fn dance(worlds: &mut [crate::pulse::Body], star_hold: &Ratio, unit: &Ratio)
 
 /// The interface clock of a centre and the matter it feeds on (one law at
 /// every tier: a star's heartbeat, a galactic core's jets): rings a halving,
-/// `⌈Q̄ / (e · s)⌉`, s the centre's share of the universe's holding, Q̄ the
+/// `⌈Q̄ / (e · s)⌉`, s the centre's share (a core: 1, its own holding, under
+/// regeneration; a star: still its share of the universe's, open), Q̄ the
 /// matter's mean outer charge, e its open share (open frames over held).
 pub fn interface_every(matter: &Manifest, share: &Ratio) -> u64 {
     let count = matter.values().fold(ratio(0, 1), |s, a| s + a.clone());
