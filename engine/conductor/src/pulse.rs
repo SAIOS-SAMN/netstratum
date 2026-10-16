@@ -96,8 +96,8 @@ pub type Nuclei = BTreeMap<u16, num_bigint::BigInt>;
 /// nearest unpaired count at that depth (lowest Z on a tie). The stand-in's
 /// map only; era 1's own elements are one per Z.
 fn z_of_kind(id: &[u8; 32]) -> u16 {
-    let cell = cfe::almanac::periodic::periodic_of(id);
-    let (line, binds) = (u32::from(cell.line), u32::from(cell.binds));
+    let place = cfe::almanac::periodic::periodic_of(id);
+    let (line, binds) = (u32::from(place.line), u32::from(place.binds));
     (1u32..=118)
         .filter_map(cfe::almanac::atom::atom)
         .filter(|a| a.depth == line)
@@ -107,7 +107,7 @@ fn z_of_kind(id: &[u8; 32]) -> u16 {
 }
 
 /// An era-0 manifest key's id: an almanac element's own, or a bulk
-/// resource's derived from its name (so it too reads a cell by the same
+/// resource's derived from its name (so it too reads its line by the same
 /// law, with no formula of ours).
 fn kind_id(key: &str) -> [u8; 32] {
     if let Some(name) = key.strip_prefix("resource:") {

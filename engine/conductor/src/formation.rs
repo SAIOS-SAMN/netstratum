@@ -279,7 +279,7 @@ pub fn heartbeat(star: &Manifest, universe_hold: &Ratio, rings: u64) -> Option<(
 /// worlds of holding `w*` as fit, standing at their places in the annulus;
 /// what does not fragment stays as the system's medium (its belts). Read in
 /// the transition units by the clump's holding; orbits by the motion law.
-pub fn system(clump: &Manifest, agitation: &Ratio, cell: &Ratio, path: &[u64], unit: &Ratio, universe_hold: &Ratio, tide: &Ratio) -> Option<(Manifest, Vec<crate::pulse::Body>, Manifest, Ratio)> {
+pub fn system(clump: &Manifest, agitation: &Ratio, circulation: &Ratio, path: &[u64], unit: &Ratio, universe_hold: &Ratio, tide: &Ratio) -> Option<(Manifest, Vec<crate::pulse::Body>, Manifest, Ratio)> {
     // Ignition: a clump at a ≥ ½ never forms a heart.
     ignition_share(agitation)?;
     // THE HEART'S TORSION, THE CUT ONE TIER DOWN (operator, with xylarium,
@@ -312,10 +312,10 @@ pub fn system(clump: &Manifest, agitation: &Ratio, cell: &Ratio, path: &[u64], u
         .map(|(k, a)| {
             let w = ratio(i64::from(z_of(k).map(hold).unwrap_or(1)), 1);
             let open = ratio(i64::from(z_of(k).and_then(atom).map(|x| x.unpaired).unwrap_or(0)), 1) / w.clone();
-            // CARRIED SPINS ADD (with xylarium): the convection cell's
+            // CARRIED SPINS ADD (with xylarium): the convection's
             // circulation, in the plane orthogonal to the orbit (the
             // rotoreflection), turns every kind alike, no weight ratio.
-            let ell = if open_mean.is_zero() { ratio(0, 1) } else { push.clone() * open / open_mean.clone() * mean_weight.clone() / w.clone() } + cell.clone();
+            let ell = if open_mean.is_zero() { ratio(0, 1) } else { push.clone() * open / open_mean.clone() * mean_weight.clone() / w.clone() } + circulation.clone();
             (k.clone(), ell, a.clone() * w / total.clone())
         })
         .collect();

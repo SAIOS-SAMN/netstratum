@@ -204,12 +204,12 @@ pub fn pump(r: &Ratio, h_g: &Ratio) -> Ratio {
 /// the orthogonal plane): a held ring of the disc at reach R (own units,
 /// core holding H) churns with agitation `a = ρ_g·π·R/(R + H)`, the pump
 /// received at the galaxy's share times the share its core leaves unlocked
-/// there: quiet at the core, churning outward. The cell circulates in the
+/// there: quiet at the core, churning outward. It CIRCULATES, a turning in the
 /// radial–axial plane, its radial footprint `R(1 ± a)`, still inside the
-/// throat; it cools by both channels from `born`, and where cells overlap
+/// throat; it cools by both channels from `born`, and where circulations overlap
 /// and hold they collapse (`formation::stretches`, `formation::collapse`).
 pub fn convect(ring: &crate::formation::Shell, drive: &Ratio, h: &Ratio, born: u64) -> crate::formation::Shell {
-    // A held band churns about its middle; its cell widens it by `1 ± a`.
+    // A held band churns about its middle; its circulation widens it by `1 ± a`.
     let r = (ring.inner.clone() + ring.outer.clone()) / ratio(2, 1);
     if r.is_zero() || drive.is_zero() {
         return ring.clone();

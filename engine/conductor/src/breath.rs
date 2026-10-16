@@ -283,7 +283,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         // over) whose clump can hold forms as many stars as fit.
         let mut stars = 0;
         let (now, _, h_now) = crate::formation::shells(&core.total(), &core.kept);
-        // CONVECTION (`crate::ocean::convect`): the held rings churn in cells
+        // CONVECTION (`crate::ocean::convect`): the held bands circulate
         // driven by the swing's pump, renewed each echo.
         let rings: Vec<crate::formation::Shell> = now.into_iter().map(|r| crate::ocean::convect(&r, &drive, &h_now, bell)).collect();
         let parcels = core.gas.len();
