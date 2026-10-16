@@ -69,15 +69,15 @@ fn z_of(key: &str) -> Option<u32> {
 }
 
 /// The gas's shells and the disc's cold rings: the galaxy's grains `all`,
-/// its core's disc `disc`, its share of the universe's holding `share`.
-pub fn shells(all: &Manifest, disc: &Manifest, share: &Ratio) -> (Vec<Shell>, Ratio) {
+/// its core's disc `disc`, in its own units (regeneration).
+pub fn shells(all: &Manifest, disc: &Manifest) -> (Vec<Shell>, Ratio) {
     let weight = |k: &str| z_of(k).map(hold).unwrap_or(1);
     let total = mass(all);
-    let Some((push, h, mean)) = crate::pulse::galaxy_push(all, share) else { return (Vec::new(), ratio(1, 1)) };
+    let Some((push, h, mean)) = crate::pulse::galaxy_push(all) else { return (Vec::new(), ratio(1, 1)) };
     let mut out = Vec::new();
     for (k, amount) in all {
         let w = ratio(i64::from(weight(k)), 1);
-        let ell = push.clone() * mean.clone() / w.clone() / share.clone();
+        let ell = push.clone() * mean.clone() / w.clone();
         let r = ell / h.clone();
         let delta = h.clone() / (r.clone() + h.clone());
         let halving = z_of(k).and_then(atom).and_then(|a| (a.unpaired > 0).then(|| u64::from((hold(a.z) + a.unpaired - 1) / a.unpaired)));

@@ -147,8 +147,7 @@ fn main() {
             let bell = args.get(2).and_then(|b| b.parse().ok()).unwrap_or(now);
             let c = &u.cores[i];
             let all = c.total();
-            let share = pulse::mass(&all) / universe_hold.clone();
-            let (shells, h) = formation::shells(&all, &c.kept, &share);
+            let (shells, h) = formation::shells(&all, &c.kept);
             let rings: Vec<formation::Shell> = shells.into_iter().filter(|r| r.outer == r.inner).collect();
             let gas: Vec<formation::Shell> = c.gas.iter().cloned().chain(rings).collect();
             let stretches = formation::stretches(&gas, bell);

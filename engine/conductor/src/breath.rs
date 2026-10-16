@@ -200,7 +200,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         let galaxy = core.total();
         let g_mass = mass(&galaxy);
         let share = g_mass.clone() / universe_mass.clone();
-        let (now, h) = crate::formation::shells(&galaxy, &core.kept, &share);
+        let (now, h) = crate::formation::shells(&galaxy, &core.kept);
         let rings: Vec<crate::formation::Shell> = now.into_iter().filter(|r| r.outer == r.inner).collect();
         let weight = |k: &str| ratio(i64::from(k.strip_prefix('Z').and_then(|z| z.parse::<u32>().ok()).map(cfe::almanac::atom::hold).unwrap_or(1)), 1);
         // JETS: the disc halves into the jet every ⌈1/p⌉ rings; each batch
@@ -215,7 +215,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         let first_due = bell.saturating_sub(t_u) / every + 1;
         for k in first_due..=bell / every {
             let galaxy_now = core.total();
-            let (now, _) = crate::formation::shells(&galaxy_now, &core.kept, &share);
+            let (now, _) = crate::formation::shells(&galaxy_now, &core.kept);
             let rings_now: Vec<crate::formation::Shell> = now.into_iter().filter(|r| r.outer == r.inner).collect();
             for mut parcel in crate::formation::jet_batch(&rings_now, &h, &rim, k * every) {
                 let amount = cfe::world::smelt_resource(&(parcel.held.clone() * g_mass.clone() / weight(&parcel.key)));
@@ -234,7 +234,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         // COLLAPSE: each stretch of the gas (with the disc's rings it passes
         // over) whose clump can hold forms as many stars as fit.
         let mut stars = 0;
-        let (now, _) = crate::formation::shells(&core.total(), &core.kept, &share);
+        let (now, _) = crate::formation::shells(&core.total(), &core.kept);
         let rings: Vec<crate::formation::Shell> = now.into_iter().filter(|r| r.outer == r.inner).collect();
         let parcels = core.gas.len();
         let all: Vec<crate::formation::Shell> = core.gas.iter().cloned().chain(rings).collect();

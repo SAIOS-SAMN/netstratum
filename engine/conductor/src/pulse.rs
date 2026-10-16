@@ -312,22 +312,22 @@ pub fn universal_state(u: &Universe) -> Ratio {
 /// reach is its ring, d = 1. The bounce gives every nucleus the same impulse, and its
 /// budget is the UNIVERSAL state, re-pulsed down the hub and shared over the
 /// galaxy's nuclei, so a nucleus of weight w (`atom::hold`) is carried the
-/// spin `ℓ = p·(w̄/w)/s_g` (the core's state spin is 1: the throat a ring at d = 1) (w̄ the galaxy's mean weight a nucleus, s_g its
-/// share of the universe's holding, p the push share
+/// spin `ℓ = p·(w̄/w)` (the core's state spin is 1: the throat a ring at d = 1) (w̄ the galaxy's mean weight a nucleus, p the push share
 /// `H_disc / (H_core + H_disc)` with `H_disc` the hold of everything heavier),
 /// settles at `R = ℓ / H` (the motion law) and is HELD where the deficit
 /// there beats the push, `H / (R + H) ≥ p`. Ordered by weight once, the
 /// criterion moves monotonically (each heavier nucleus held raises H and p),
 /// so the held set is everything above ONE weight w*: a single certified
 /// crossing on the cumulative hold, read again only when accretion or
-/// shedding changes the manifest. Nothing is stepped. Above the cut is the
-/// core's disc; below it, the galaxy's gas. Sorting reads where the galaxy
-/// stands in the universe (a small galaxy is pushed harder, keeps less).
-pub fn galaxy_push(grains: &Manifest, share: &Ratio) -> Option<(Ratio, Ratio, Ratio)> {
+/// shedding changes the manifest. Nothing is stepped. REGENERATION (operator
+/// 2026-10-16): each core re-pulses at full strength in its own units, so no
+/// share of the universe enters the push; a galaxy's gas comes from outside
+/// (the ocean), not from its own bounce.
+pub fn galaxy_push(grains: &Manifest) -> Option<(Ratio, Ratio, Ratio)> {
     let weight = |k: &str| k.strip_prefix('Z').and_then(|z| z.parse::<u32>().ok()).map(cfe::almanac::atom::hold).unwrap_or(1);
     let total = mass(grains);
     let count = grains.values().fold(ratio(0, 1), |s, a| s + a.clone());
-    if total.is_zero() || count.is_zero() || share.is_zero() {
+    if total.is_zero() || count.is_zero() {
         return None;
     }
     let mean = total.clone() / count;
@@ -345,7 +345,7 @@ pub fn galaxy_push(grains: &Manifest, share: &Ratio) -> Option<(Ratio, Ratio, Ra
     let holds = |idx: usize| {
         let held = &above[idx];
         let push = held.clone() / (ratio(1, 1) + held.clone());
-        let ell = push.clone() * mean.clone() / ratio(i64::from(weight(order[idx].0)), 1) / share.clone();
+        let ell = push.clone() * mean.clone() / ratio(i64::from(weight(order[idx].0)), 1);
         let h = ratio(1, 1) + held.clone();
         h.clone() / (ell / h.clone() + h) >= push
     };
@@ -360,20 +360,20 @@ pub fn galaxy_push(grains: &Manifest, share: &Ratio) -> Option<(Ratio, Ratio, Ra
 /// THE DISPERSAL (operator 2026-10-16: "we shouldn't be sorting anything,
 /// we should be dispersing and letting the physics do the distribution").
 /// The bounce pushes every kind out and SPREADS it, never sorting it into a
-/// slot: kind z is carried `ℓ_z = p·(w̄/w_z)/s_g` and stands about
+/// slot: kind z is carried `ℓ_z = p·(w̄/w_z)` (regeneration: own units) and stands about
 /// `R_z = ℓ_z/H`, spread by the push across `R_z(1 − p) … R_z(1 + p)`. The
 /// part of its spread within the core's throat (`R ≤ H`) is HELD (the disc),
 /// the rest disperses as gas: every kind partly held and partly free, the
 /// heavy leaning inward, the light outward, the disc and the gas both mixed.
 /// The distribution keeps moving after (the waves, the breath): this is
 /// only where the founding pulse leaves it.
-pub fn disperse(grains: &Manifest, share: &Ratio) -> Manifest {
+pub fn disperse(grains: &Manifest) -> Manifest {
     let weight = |k: &str| k.strip_prefix('Z').and_then(|z| z.parse::<u32>().ok()).map(cfe::almanac::atom::hold).unwrap_or(1);
-    let Some((p, h, mean)) = galaxy_push(grains, share) else { return Manifest::new() };
+    let Some((p, h, mean)) = galaxy_push(grains) else { return Manifest::new() };
     grains
         .iter()
         .filter_map(|(k, amount)| {
-            let ell = p.clone() * mean.clone() / ratio(i64::from(weight(k)), 1) / share.clone();
+            let ell = p.clone() * mean.clone() / ratio(i64::from(weight(k)), 1);
             let r = ell / h.clone();
             let lo = r.clone() * (ratio(1, 1) - p.clone());
             let span = ratio(2, 1) * p.clone() * r;
@@ -440,10 +440,8 @@ pub fn deploy(seed: &[u8; 32], manifest: &Manifest) -> Universe {
     // laid down by the tidal law; what forms no system is the galaxy's medium,
     // gas the breath later forms into new systems. A core stands where the cut
     // one tier up holds it (above); its echoes arrive that many bells later.
-    // Each core keeps what its bounce holds (`disperse`), its galaxy's
-    // share of the universe's holding the push's reading.
-    let universe_mass = mass(manifest);
-    let discs: Vec<Manifest> = shares.iter().map(|(_, m, _)| disperse(m, &(mass(m) / universe_mass.clone()))).collect();
+    // Each core keeps what its bounce holds (`disperse`), in its own units.
+    let discs: Vec<Manifest> = shares.iter().map(|(_, m, _)| disperse(m)).collect();
     let unit = discs.iter().map(mass).max().filter(|m| !m.is_zero()).unwrap_or_else(|| ratio(1, 1));
     // FORMATION (docs/83): no system is placed. Each core keeps its disc;
     // the rest is its galaxy's GAS, laid down as parcels where the push left
@@ -476,8 +474,7 @@ pub fn deploy(seed: &[u8; 32], manifest: &Manifest) -> Universe {
         .zip(discs)
         .zip(orbits)
         .map(|(((i, m, _), disc), (radius, period, ell))| {
-            let share = mass(&m) / universe_mass.clone();
-            let (shells, _) = crate::formation::shells(&m, &disc, &share);
+            let (shells, _) = crate::formation::shells(&m, &disc);
             let gas: Vec<crate::formation::Shell> = shells.into_iter().filter(|s| s.outer > s.inner).collect();
             let state = mass(&m) / unit.clone();
             let mut medium = m.clone();
