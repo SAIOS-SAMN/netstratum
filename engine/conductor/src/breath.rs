@@ -220,12 +220,15 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         let mut to_ocean = crate::pulse::Manifest::new();
         // The INTERFACE CLOCK (one law at every tier: the core is a heart
         // one tier up) says HOW MUCH leaves a bounce, not how often: the
-        // share `1/⌈Q̄/(e·s)⌉` of the disc (closed-shell discs barely jet).
+        // share `P_b/⌈Q̄/(e·s)⌉` of the disc, what the interface built up
+        // over the bounce's own bell (`P_b = 2` own rings; with xylarium:
+        // rings in = passed on + absorbed, released at the bounce);
+        // closed-shell discs barely jet.
         // REGENERATION (operator ruling (i)): the core runs on its own
         // holding, s = 1; no share of the universe enters it.
         let every = crate::formation::interface_every(&core.kept, &ratio(1, 1));
         let rim = core.gas.iter().map(|g| g.outer.clone()).chain(rings.iter().map(|r| r.outer.clone())).max().unwrap_or_else(|| ratio(1, 1));
-        let jet_share = ratio(1, every.min(i64::MAX as u64) as i64);
+        let jet_share = ratio(2, every.min(i64::MAX as u64) as i64).min(ratio(1, 1));
         for k in [bell] {
             let galaxy_now = core.total();
             let (now, _) = crate::formation::shells(&galaxy_now, &core.kept);
