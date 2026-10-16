@@ -297,10 +297,11 @@ pub fn system(clump: &Manifest, agitation: &Ratio, path: &[u64], unit: &Ratio, u
         return None;
     }
     let open_mean = crate::pulse::magnetism(clump) / total.clone();
-    // The heart's push restarts its normalization at its own point (with
-    // xylarium): its own pair (½) times the share of the galactic pulse it
-    // receives where it stands, `ρ_sys = 1 − δ_gal`: deep stars push weakly.
-    let push = ratio(1, 2) * (ratio(1, 1) - tide.clone());
+    // REGENERATION (operator ruling (i), with xylarium): the heart pushes
+    // at full amplitude in its own units, its pair's ½; the galactic tide
+    // enters as the clump's AGITATION (`a_clump`), never as a weaker push,
+    // or it would be counted twice.
+    let push = ratio(1, 2);
     let mean_weight = total.clone() / count;
     let mut kinds: Vec<(String, Ratio, Ratio)> = clump
         .iter()
