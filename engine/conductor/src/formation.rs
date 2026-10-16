@@ -248,26 +248,55 @@ pub fn coupling(star: &Manifest, universe_hold: &Ratio) -> Option<Ratio> {
 /// Returns the rings per halving, the fuel's share left after `rings`
 /// received rings, and the light per received ring (`feed × fuel × Δu`).
 pub fn heartbeat(star: &Manifest, universe_hold: &Ratio, rings: u64) -> Option<(u64, Ratio, Ratio)> {
-    let fuel = star.get("Z001")?.clone();
+    let (every, light) = burn(star, universe_hold, 1, &ratio(1, 1))?;
+    let halvings = (rings / every).min(4096) as u32;
+    let left = ratio(1, 1) / Ratio::from_integer(num_bigint::BigInt::from(2).pow(halvings));
+    Some((every, left.clone(), light * left))
+}
+
+/// The kind a burn rung makes from fuel `z`: two nuclei meet, `z + z → 2z`.
+pub fn product(z: u32) -> String {
+    format!("Z{:03}", 2 * z)
+}
+
+/// THE BURN RATE (W31(a) steps 1–2, with xylarium; derived 2026-10-16), the
+/// rung fusing fuel Z into 2Z:
+/// - the BARRIER is the charge the two nuclei bring, `Z + Z` (enclosed
+///   charges add; never `Z·Z`, a reading times itself);
+/// - TUNNELLING is the heart's hold against it, a pair share,
+///   `τ = h/(h + 2Z)` (h = 1 regenerated): H + H 1/3, He + He 1/5;
+/// - the DRIVER is the magnetism the reaction transduces (3Z conserved),
+///   `|Δm|/3Z_product`: H + H → He closes 2 of 6, 1/3; He + He → Be opens 2
+///   of 12, 1/6. A rung that transduces nothing does not burn;
+/// - the INTERFACE share as the heartbeat carries it, `s_star/Q̄`;
+/// - its RHYTHM the heart's coherence c with the echo (a reading of phase).
+/// The fuel halves every `⌈1/feed⌉` received rings, `feed =
+/// (|Δm|/3Z_p)·τ·s/Q̄·c`; the light per received ring is the transduced
+/// flux, `feed × fuel share × |Δm|`. Returns (rings a halving, light a ring).
+pub fn burn(star: &Manifest, universe_hold: &Ratio, z: u32, coherence: &Ratio) -> Option<(u64, Ratio)> {
+    let fuel = star.get(&format!("Z{z:03}"))?.clone();
     let total = mass(star);
-    if total.is_zero() || universe_hold.is_zero() {
+    if total.is_zero() || universe_hold.is_zero() || coherence.is_zero() {
         return None;
     }
+    let open = |z: u32| i64::from(atom(z).map(|a| a.unpaired).unwrap_or(0));
+    let dm = (open(2 * z) - 2 * open(z)).abs();
+    if dm == 0 {
+        return None;
+    }
+    let driver = ratio(dm, 3 * 2 * i64::from(z));
+    let tau = ratio(1, 1 + 2 * i64::from(z));
     let count = star.values().fold(ratio(0, 1), |s, a| s + a.clone());
     let charge = star.iter().fold(ratio(0, 1), |s, (k, a)| s + a.clone() * ratio(i64::from(z_of(k).and_then(atom).map(|x| x.enclosed).unwrap_or(0)), 1));
     let q_mean = charge / count;
-    let share = total.clone() / universe_hold.clone();
-    let e = ratio(1, 2);
     if q_mean.is_zero() {
         return None;
     }
-    // The interface feed per received ring, `e · s_star / Q̄`.
-    let feed = e * share / q_mean;
+    let share = total.clone() / universe_hold.clone();
+    let feed = driver * tau * share / q_mean * coherence.clone();
     let every: u64 = (ratio(1, 1) / feed.clone()).ceil().to_integer().try_into().unwrap_or(u64::MAX).max(1);
-    let halvings = (rings / every).min(4096) as u32;
-    let left = ratio(1, 1) / Ratio::from_integer(num_bigint::BigInt::from(2).pow(halvings));
-    let light = feed * fuel / total * left.clone() * ratio(2, 1);
-    Some((every, left, light))
+    let fuel_share = fuel * ratio(i64::from(hold(z)), 1) / total;
+    Some((every, feed * fuel_share * ratio(dm, 1)))
 }
 
 /// A STAR'S SYSTEM AT IGNITION (docs/83; planets from the star's own disc):

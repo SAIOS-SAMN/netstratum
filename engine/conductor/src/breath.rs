@@ -202,24 +202,31 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 dissolved += 1;
                 continue;
             }
-            // BURNING (the heartbeat, docs/83; mycelium: transmutation is the
-            // universe's own physics): the halvings of its hydrogen due since
-            // the last echo, on the rings its nested clock received, fuse
-            // H + H → He. Holding + magnetism (3Z) is conserved; the system's
-            // spin is kept exact as its holding transduces.
-            if sys.born > 0 || sys.kept.contains_key("Z001") {
+            // BURNING (the burn rate, `formation::burn`; mycelium:
+            // transmutation is the universe's own physics): for each rung,
+            // the halvings of its fuel due since the last echo, on the rings
+            // its nested clock received, at its coherence with the echo,
+            // fuse Z + Z → 2Z (H + H → He, He + He → Be). Holding +
+            // magnetism (3Z) is conserved; the system's spin is kept exact as
+            // its holding transduces.
+            let in_phase = coherence(&slip(&own, bell, t_u));
+            for z in [1u32, 2] {
+                let key = format!("Z{z:03}");
+                if !sys.kept.contains_key(&key) {
+                    continue;
+                }
                 let since = |at: u64| (own.clone() * ratio(at.saturating_sub(sys.born) as i64, 1)).floor().to_integer().try_into().unwrap_or(0u64);
                 let (now_rings, then_rings) = (since(bell), since(bell.saturating_sub(t_u)));
-                if let (Some((every, _, _)), Some(fuel)) = (crate::formation::heartbeat(&sys.kept, &universe_mass, now_rings), sys.kept.get("Z001").cloned()) {
+                if let (Some((every, _)), Some(fuel)) = (crate::formation::burn(&sys.kept, &universe_mass, z, &in_phase), sys.kept.get(&key).cloned()) {
                     let due = (now_rings / every).saturating_sub(then_rings / every).min(64) as u32;
                     if due > 0 {
                         let left = fuel.clone() / Ratio::from_integer(num_bigint::BigInt::from(2).pow(due));
-                        // Whole grains of helium: two hydrogen grains each.
-                        let helium = cfe::world::smelt_resource(&((fuel.clone() - left) / ratio(2, 1)));
-                        if helium > ratio(0, 1) {
+                        // Whole grains of the product: two fuel grains each.
+                        let made = cfe::world::smelt_resource(&((fuel.clone() - left) / ratio(2, 1)));
+                        if made > ratio(0, 1) {
                             let spin = mass(&sys.total()) * sys.ell.clone();
-                            less(&mut sys.kept, &[("Z001".to_string(), helium.clone() * ratio(2, 1))].into());
-                            *sys.kept.entry("Z002".to_string()).or_insert_with(|| ratio(0, 1)) += helium;
+                            less(&mut sys.kept, &[(key.clone(), made.clone() * ratio(2, 1))].into());
+                            *sys.kept.entry(crate::formation::product(z)).or_insert_with(|| ratio(0, 1)) += made;
                             let after = mass(&sys.total());
                             if !after.is_zero() {
                                 // The spin grain: the floored remainder goes
