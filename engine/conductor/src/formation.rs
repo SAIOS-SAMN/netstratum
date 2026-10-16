@@ -279,36 +279,78 @@ pub fn heartbeat(star: &Manifest, universe_hold: &Ratio, rings: u64) -> Option<(
 /// what does not fragment stays as the system's medium (its belts). Read in
 /// the transition units by the clump's holding; orbits by the motion law.
 pub fn system(clump: &Manifest, agitation: &Ratio, path: &[u64], unit: &Ratio, universe_hold: &Ratio, tide: &Ratio) -> Option<(Manifest, Vec<crate::pulse::Body>, Manifest, Ratio)> {
-    let x = ignition_share(agitation)?;
-    let star = crate::pulse::take(clump, &x);
-    let mut disc = clump.clone();
-    crate::pulse::less(&mut disc, &star);
-    let scale = mass(clump) / unit.clone();
+    // Ignition: a clump at a ≥ ½ never forms a heart.
+    ignition_share(agitation)?;
+    // THE HEART'S TORSION, THE CUT ONE TIER DOWN (operator, with xylarium,
+    // 2026-10-16): a heart has no bounce but twists; its push is the
+    // electromagnetic repulsion, which grips the OPEN frames (the magnetic
+    // moments). In the clump's own units (its grains hold 1, the heart's
+    // state holds 1) the push share is the pair law's ½ restarted at the
+    // star's point (`½·ρ_sys`), and each kind is carried
+    // `ℓ_z = p·(e_z/ē)·(w̄/w_z)` (e_z its open share, unpaired over
+    // hold; ē the clump's). Read in order of the spin carried (the noble
+    // first: carried none), the heart's hold grows, `H = 1 + held`, and a
+    // kind is HELD in the star where it stands within the throat,
+    // `R_z = ℓ_z/H ≤ H`; past it, it is the DISC, spun to orbit. One
+    // crossing on the cumulative hold. A clump with no open frames (ē = 0)
+    // is all star, no disc: a reading.
+    let total = mass(clump);
+    let count = clump.values().fold(ratio(0, 1), |s, a| s + a.clone());
+    if total.is_zero() || count.is_zero() {
+        return None;
+    }
+    let open_mean = crate::pulse::magnetism(clump) / total.clone();
+    // The heart's push restarts its normalization at its own point (with
+    // xylarium): its own pair (½) times the share of the galactic pulse it
+    // receives where it stands, `ρ_sys = 1 − δ_gal`: deep stars push weakly.
+    let push = ratio(1, 2) * (ratio(1, 1) - tide.clone());
+    let mean_weight = total.clone() / count;
+    let mut kinds: Vec<(String, Ratio, Ratio)> = clump
+        .iter()
+        .map(|(k, a)| {
+            let w = ratio(i64::from(z_of(k).map(hold).unwrap_or(1)), 1);
+            let open = ratio(i64::from(z_of(k).and_then(atom).map(|x| x.unpaired).unwrap_or(0)), 1) / w.clone();
+            let ell = if open_mean.is_zero() { ratio(0, 1) } else { push.clone() * open / open_mean.clone() * mean_weight.clone() / w.clone() };
+            (k.clone(), ell, a.clone() * w / total.clone())
+        })
+        .collect();
+    kinds.sort_by(|a, b| a.1.cmp(&b.1).then(a.0.cmp(&b.0)));
+    let mut held = ratio(0, 1);
+    let mut star = Manifest::new();
+    let mut disc = Manifest::new();
+    let mut crossed = false;
+    for (k, ell, share) in kinds {
+        let h = ratio(1, 1) + held.clone();
+        if !crossed && ell.clone() / h.clone() <= h {
+            held += share;
+            star.insert(k.clone(), clump[&k].clone());
+        } else {
+            crossed = true;
+            disc.insert(k.clone(), clump[&k].clone());
+        }
+    }
+    if star.is_empty() {
+        return None;
+    }
+    // The throat at the heart's hold, the rim at the system's (state 1 plus
+    // grains 1: rim 2); the disc's annulus between, `λ = 1`.
+    let x = ratio(1, 1) + held.clone();
+    let scale = total / unit.clone();
     let star_hold = mass(&star) / unit.clone();
-    // THE DISC'S OWN HEAT (with xylarium, 2026-10-16): the new star's first
-    // light that the disc cannot re-lock at its reach, the continuum's share
-    // there, `a_disc(R) = L·R/(R + x*)` (L the light of the heart's first
-    // beat, `heartbeat`); it rises outward, against the vacuum's pull that
-    // is strongest inward. Read at the annulus's middle; the cloud's own
-    // agitation if hotter.
     let light = heartbeat(&star, universe_hold, 0).map(|(_, _, l)| l).unwrap_or_else(|| ratio(0, 1));
-    let mid = (x.clone() + ratio(1, 1)) / ratio(2, 1);
+    let mid = (x.clone() + ratio(2, 1)) / ratio(2, 1);
     let unlocked = mid.clone() / (mid + x.clone());
     let heat = light * unlocked.clone();
-    // THE RECEIVED FLUX (with xylarium, their absorb books' "received minus
-    // re-locked"): the galactic core's pulse WITHHELD where the system stands
-    // (its tide, `δ_gal(R_sys)`), times the share the star leaves unlocked at
-    // the annulus (`R/(R + x*)`): `a_disc = δ_gal · rate_star`. Deep systems
-    // run hot (many worlds, or all belts past ½), far ones cold (one world).
+    // THE RECEIVED FLUX (with xylarium): the galactic tide withheld where
+    // the system stands, times the share the star leaves unlocked at the
+    // annulus; the channels add, the clump's own agitation the floor.
     let flux = tide.clone() * unlocked;
-    // Channels add (the first light and the tide's unlocked share); the
-    // clump's own agitation is the floor the disc inherits.
     let disc_agitation = (heat + flux).max(agitation.clone());
-    let annulus = Stretch { inner: x.clone(), outer: ratio(1, 1), lambda: ratio(1, 1), agitation: disc_agitation, members: Vec::new() };
+    let annulus = Stretch { inner: x.clone(), outer: ratio(2, 1), lambda: ratio(1, 1), agitation: disc_agitation, members: Vec::new() };
     let mut worlds = Vec::new();
     let mut inside = star_hold.clone();
     if let Some((w, count)) = collapse(&annulus, &x) {
-        let width = ratio(1, 1) - x.clone();
+        let width = ratio(2, 1) - x.clone();
         let share = w.clone() / width;
         for i in 0..count {
             let left_share = ratio(1, 1) - share.clone() * ratio(i as i64, 1);
