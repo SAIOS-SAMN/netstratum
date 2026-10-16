@@ -319,6 +319,13 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // The grains the stars take, from the gas and the disc's rings.
             let mut clump = crate::pulse::Manifest::new();
             let mut from_gas = ratio(0, 1);
+            // THE HELD DISC'S SPIN (the motion law): a held ring at reach R
+            // orbits, `ℓ = R·H`; it is implicit while held (read from its
+            // place, in the founding's transition units) and is carried onto
+            // the ledger by what a star takes from it.
+            let mut from_rings = ratio(0, 1);
+            let scale = g_mass.clone() / unit.clone();
+            let h_units = mass(&core.kept) / unit.clone() + state.clone();
             for (i, part) in &st.members {
                 let take_held = part.clone() * used.clone();
                 let key = all[*i].key.clone();
@@ -332,17 +339,21 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 if *i < parcels {
                     from_gas += amount.clone() * weight(&key);
                     core.gas[*i].held -= amount.clone() * weight(&key) / g_mass.clone();
+                } else {
+                    let reach = (all[*i].inner.clone() + all[*i].outer.clone()) / ratio(2, 1) * scale.clone();
+                    from_rings += amount.clone() * weight(&key) / unit.clone() * crate::ring::spin(&reach, &h_units);
                 }
                 *clump.entry(key).or_insert_with(|| ratio(0, 1)) += amount;
             }
             if clump.is_empty() {
                 continue;
             }
-            // The stars take the gas's spin by the share of it they took
-            // (the disc's rings carry none on the ledger, and the jets none).
+            // The stars take the gas's spin by the share of it they took, and
+            // the held rings' by their place (the jets carry none).
             let medium_mass = mass(&core.medium) + from_gas.clone();
-            let taken_all = if medium_mass.is_zero() { ratio(0, 1) } else { core.medium_spin.clone() * from_gas / medium_mass };
-            core.medium_spin -= taken_all.clone();
+            let taken_gas = if medium_mass.is_zero() { ratio(0, 1) } else { core.medium_spin.clone() * from_gas / medium_mass };
+            core.medium_spin -= taken_gas.clone();
+            let taken_all = taken_gas + from_rings;
             let clump_mass = mass(&clump);
             let mut left = clump;
             for j in 0..count.max(1) {
