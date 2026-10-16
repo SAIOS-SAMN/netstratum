@@ -21,7 +21,7 @@ fn main() {
     let returned = events.iter().fold(cfe::ratio::ratio(0, 1), |s, e| s + e.returned.clone());
     println!("BREATH — {} bells, T_u {t_u}: {} echoes (perpendicular writes down); recohered {births} systems born, decohered {} returned and {dissolved} stars dissolved (writes up)", until, events.len(), returned.round());
     for (i, c) in u.cores.iter().enumerate() {
-        let echoes = events.iter().filter(|e| e.galaxy == c.path[0]).count();
+        let echoes = events.iter().filter(|e| u64::from(e.galaxy) == c.path[0]).count();
         let born = c.satellites.len();
         let orbs: usize = c.satellites.iter().map(|s| s.satellites.len()).sum();
         let g_rate = breath::galaxy_rate(&u, i, &unit);

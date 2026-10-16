@@ -63,7 +63,7 @@ fn main() {
         args.remove(i);
     }
     let view = args.first().cloned().unwrap_or_else(|| "universe".into());
-    let num = |i: usize| args.get(i).and_then(|a| a.parse::<u32>().ok());
+    let num = |i: usize| args.get(i).and_then(|a| a.parse::<u64>().ok());
     // Views read from the journal need no universe.
     match view.as_str() {
         "events" => return events(num(1).unwrap_or(40) as usize),
@@ -78,7 +78,7 @@ fn main() {
     let now = beat(&var);
     let unit = breath::unit_mass(&u);
     let universe_hold = pulse::mass(&u.total());
-    let galaxy = |g: u32| u.cores.iter().position(|c| c.path[0] == g);
+    let galaxy = |g: u64| u.cores.iter().position(|c| c.path[0] == g);
     match view.as_str() {
         "universe" => {
             let stars: usize = u.cores.iter().map(|c| c.satellites.len()).sum();
@@ -127,7 +127,7 @@ fn main() {
             }
         }
         "world" => {
-            let path: Vec<u32> = (1..=3).filter_map(num).collect();
+            let path: Vec<u64> = (1..=3).filter_map(num).collect();
             if path.len() != 3 {
                 return println!("world G S W");
             }

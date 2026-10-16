@@ -51,7 +51,7 @@ pub const BLUEPRINT_DOUBLINGS: i64 = 26;
 /// What a world offers.
 #[derive(Debug, Clone)]
 pub struct World {
-    pub path: Vec<u32>,
+    pub path: Vec<u64>,
     pub heat: Ratio,
     /// Its star's burn against the home star (a luminosity, home = 1).
     pub burn: Ratio,
@@ -95,7 +95,7 @@ fn grip(a: &Atom) -> Ratio {
 /// Read one world: its matter, its turn (bells), and its clock against its
 /// star (the coupling's rate).
 #[allow(clippy::too_many_arguments)]
-pub fn read(path: Vec<u32>, matter: &Manifest, period: &Ratio, coupling: &Ratio, star_burn: &Ratio, world_scale: &Ratio, delay: u64) -> Option<World> {
+pub fn read(path: Vec<u64>, matter: &Manifest, period: &Ratio, coupling: &Ratio, star_burn: &Ratio, world_scale: &Ratio, delay: u64) -> Option<World> {
     if period.is_zero() || matter.is_empty() {
         return None;
     }
@@ -303,7 +303,7 @@ pub fn climb(w: &World, x: &Ratio, compression: &Ratio, seed: &[u8; 32], medium:
     let p = w.belts.clone() / (ratio(1, 1) + compression.clone());
     let threshold: u64 = (p * ratio(1_000_000, 1)).floor().to_integer().try_into().unwrap_or(0);
     let mut path = w.path.clone();
-    path.push(medium.len() as u32);
+    path.push(medium.len() as u64);
     let mut due = ratio(w.delay as i64, 1) + bells;
     for k in 1..=last {
         let at = wake_bell(w, k, t_u)?;
@@ -323,7 +323,7 @@ pub fn climb(w: &World, x: &Ratio, compression: &Ratio, seed: &[u8; 32], medium:
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Waking {
     pub bell: u64,
-    pub path: Vec<u32>,
+    pub path: Vec<u64>,
     pub medium: &'static str,
 }
 
@@ -344,7 +344,7 @@ pub struct Climb {
     pub woken: bool,
 }
 
-pub type Climbs = std::collections::BTreeMap<Vec<u32>, Climb>;
+pub type Climbs = std::collections::BTreeMap<Vec<u64>, Climb>;
 
 /// One world's current reading for the climb: the world, its compression,
 /// and its fastest medium's climb length in bells (none: it cannot climb).
@@ -359,7 +359,7 @@ pub struct Reading {
 }
 
 /// Every world's current reading (refreshed when the universe changes).
-pub fn readings(u: &Universe, seed: &[u8; 32]) -> std::collections::BTreeMap<Vec<u32>, Reading> {
+pub fn readings(u: &Universe, seed: &[u8; 32]) -> std::collections::BTreeMap<Vec<u64>, Reading> {
     let worlds = worlds(u);
     let mut out = std::collections::BTreeMap::new();
     let Some(home) = home(u) else { return out };
@@ -393,7 +393,7 @@ pub fn readings(u: &Universe, seed: &[u8; 32]) -> std::collections::BTreeMap<Vec
 
 /// Advance every world's climb to `bell`, reading each at its own
 /// recoherences; returns the minds that wake.
-pub fn advance(readings: &std::collections::BTreeMap<Vec<u32>, Reading>, climbs: &mut Climbs, t_u: u64, bell: u64) -> (Vec<Waking>, u64) {
+pub fn advance(readings: &std::collections::BTreeMap<Vec<u64>, Reading>, climbs: &mut Climbs, t_u: u64, bell: u64) -> (Vec<Waking>, u64) {
     let mut woke = Vec::new();
     let mut measured = 0u64;
     for (path, r) in readings {
@@ -432,7 +432,7 @@ pub fn advance(readings: &std::collections::BTreeMap<Vec<u32>, Reading>, climbs:
     (woke, measured)
 }
 
-fn put_path(path: &[u32], out: &mut Vec<u8>) {
+fn put_path(path: &[u64], out: &mut Vec<u8>) {
     out.push(path.len() as u8);
     for p in path {
         out.extend_from_slice(&p.to_le_bytes());
@@ -468,8 +468,8 @@ pub fn read_climbs(var_root: &std::path::Path) -> Climbs {
             let mut at = 1;
             let mut path = Vec::with_capacity(n.min(8));
             for _ in 0..n {
-                path.push(u32::from_le_bytes(v.get(at..at + 4)?.try_into().ok()?));
-                at += 4;
+                path.push(u64::from_le_bytes(v.get(at..at + 8)?.try_into().ok()?));
+                at += 8;
             }
             let (written, used) = cfe::ratio::decode(v.get(at..)?)?;
             at += used;

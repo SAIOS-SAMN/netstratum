@@ -25,7 +25,7 @@ use cfe::ratio::{ratio, Ratio};
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Enclosure {
     /// Its core's path: `[g]` a galaxy, `[g, s]` a star system.
-    pub path: Vec<u32>,
+    pub path: Vec<u64>,
     /// 360 for a galaxy, 60 for a star system.
     pub dim: u32,
     /// The half circumference, in light-rings (where the pulse refocuses).
@@ -42,7 +42,7 @@ impl Enclosure {
     }
 
     /// The enclosure above (empty: the universe's).
-    pub fn parent(&self) -> &[u32] {
+    pub fn parent(&self) -> &[u64] {
         &self.path[..self.path.len() - 1]
     }
 }
@@ -80,7 +80,7 @@ pub fn place(body: &Body, enclosure: &Enclosure, phase0: &Ratio, bell: u64) -> (
 
 /// The reach of the body at `path` up to its enclosure's core, then each
 /// throat up to the universal core: the arcs it climbs, innermost first.
-fn climb(u: &Universe, path: &[u32]) -> Option<Vec<Ratio>> {
+fn climb(u: &Universe, path: &[u64]) -> Option<Vec<Ratio>> {
     let core = u.cores.iter().find(|c| c.path.first() == path.first())?;
     let mut arcs = Vec::new();
     match path.len() {
@@ -103,7 +103,7 @@ fn climb(u: &Universe, path: &[u32]) -> Option<Vec<Ratio>> {
 /// climbs to the deepest enclosure they share (the universal core for two
 /// galaxies) and the arcs are summed; within a shared enclosure the arcs to
 /// its core are added (the hub route through the throat). Exact.
-pub fn route(u: &Universe, a: &[u32], b: &[u32]) -> Option<Ratio> {
+pub fn route(u: &Universe, a: &[u64], b: &[u64]) -> Option<Ratio> {
     let shared = a.iter().zip(b).take_while(|(x, y)| x == y).count();
     let (up_a, up_b) = (climb(u, a)?, climb(u, b)?);
     // Climb only to the shared enclosure: drop the arcs above it.

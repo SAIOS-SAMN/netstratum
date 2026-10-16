@@ -186,7 +186,7 @@ pub fn founding_shape(nuclei: &num_bigint::BigInt) -> Nuclei {
 }
 
 /// The seed's fixed paths: draw `j` of `field` for the body at `path`.
-pub fn draw(seed: &[u8; 32], path: &[u32], field: &str, j: u32) -> u64 {
+pub fn draw(seed: &[u8; 32], path: &[u64], field: &str, j: u32) -> u64 {
     let mut h = blake3::Hasher::new();
     h.update(seed);
     h.update(&(path.len() as u32).to_le_bytes());
@@ -253,7 +253,7 @@ pub(crate) fn less(from: &mut Manifest, by: &Manifest) {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Body {
     /// The draw path: `[core]`, `[core, system]`, `[core, system, orb]`.
-    pub path: Vec<u32>,
+    pub path: Vec<u64>,
     /// Its radius about its centre and its period (bells a turn); zero for a
     /// core (cores do not orbit).
     pub radius: Ratio,
@@ -374,7 +374,7 @@ pub fn deploy(seed: &[u8; 32], manifest: &Manifest) -> Universe {
     // the largest is at most 60 times the smallest. A mode too weak to hold
     // a hole of a grain forms no core; its share stays unformed.
     let modes = 1 + (draw(seed, &[], "modes", 0) % 60) as u32;
-    let strengths: Vec<i64> = (1..=modes).map(|i| 1 + (draw(seed, &[i], "strength", 0) % 60) as i64).collect();
+    let strengths: Vec<i64> = (1..=modes).map(|i| 1 + (draw(seed, &[u64::from(i)], "strength", 0) % 60) as i64).collect();
     let sum: i64 = strengths.iter().sum();
     let mut shares: Vec<(u32, Manifest)> = Vec::new();
     for (i, a) in (1..=modes).zip(&strengths) {
@@ -423,8 +423,8 @@ pub fn deploy(seed: &[u8; 32], manifest: &Manifest) -> Universe {
                 let reach = (p.inner.clone() + p.outer.clone()) / ratio(2, 1) * scale.clone();
                 acc + p.held.clone() * scale.clone() * crate::ring::spin(&reach, &h)
             });
-            let distance = ratio(60 * (1 + (draw(seed, &[i], "distance", 0) % 60) as i64), 1);
-            Body { path: vec![i], radius: distance, period: ratio(0, 1), kept: disc, satellites: Vec::new(), medium, ell: ratio(0, 1), medium_spin, gas, born: 0 }
+            let distance = ratio(60 * (1 + (draw(seed, &[u64::from(i)], "distance", 0) % 60) as i64), 1);
+            Body { path: vec![u64::from(i)], radius: distance, period: ratio(0, 1), kept: disc, satellites: Vec::new(), medium, ell: ratio(0, 1), medium_spin, gas, born: 0 }
         })
         .collect();
     Universe { cores, medium }
@@ -549,8 +549,8 @@ fn get_body(v: &[u8], spun: bool) -> Option<Body> {
     at += 1;
     let mut path = Vec::with_capacity(depth.min(8));
     for _ in 0..depth {
-        path.push(u32::from_le_bytes(v.get(at..at + 4)?.try_into().ok()?));
-        at += 4;
+        path.push(u64::from_le_bytes(v.get(at..at + 8)?.try_into().ok()?));
+        at += 8;
     }
     let (radius, used) = cfe::ratio::decode(v.get(at..)?)?;
     at += used;

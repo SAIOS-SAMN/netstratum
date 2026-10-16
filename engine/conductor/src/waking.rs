@@ -17,7 +17,7 @@ use ledger::registry::{Civilization, Registry};
 const ONSETS: [&str; 12] = ["k", "t", "v", "r", "s", "m", "n", "th", "z", "l", "dr", "sh"];
 const VOWELS: [&str; 6] = ["a", "e", "i", "o", "u", "ae"];
 
-fn spoken(seed: &[u8; 32], path: &[u32], salt: u32) -> String {
+fn spoken(seed: &[u8; 32], path: &[u64], salt: u32) -> String {
     let n = 2 + (draw(seed, path, "name.len", salt) % 2) as u32;
     (0..n)
         .map(|i| {

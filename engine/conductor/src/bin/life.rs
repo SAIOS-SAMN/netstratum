@@ -55,7 +55,7 @@ fn main() {
     // not climbed (open).
     let (seed, u_full) = pulse::read(Path::new(&era1)).unwrap_or(([0; 32], u.clone()));
     let home_year = life::home(&u_full).map(|h| h.year_bells).unwrap_or_else(|| ratio(60, 1));
-    let period_of = |u: &pulse::Universe, path: &[u32]| -> Option<Ratio> {
+    let period_of = |u: &pulse::Universe, path: &[u64]| -> Option<Ratio> {
         let core = u.cores.iter().find(|c| c.path[0] == path[0])?;
         let sys = core.satellites.iter().find(|s| s.path.get(1) == path.get(1))?;
         sys.satellites.iter().find(|o| o.path.get(2) == path.get(2)).map(|o| o.period.clone())
@@ -63,7 +63,7 @@ fn main() {
     let marks = [100_000u64, 1_000_000, 10_000_000];
     for (name, pick) in [("chemical", 0usize), ("geologic", 1), ("plasmic", 2)] {
         let mut free: Vec<u64> = Vec::new();
-        let mut gated: Vec<(u64, Vec<u32>)> = Vec::new();
+        let mut gated: Vec<(u64, Vec<u64>)> = Vec::new();
         for w in &worlds {
             let c = w.pressure.clone() / reference.clone();
             let x = match pick { 0 => &w.chemical, 1 => &w.geologic, _ => &w.plasmic };

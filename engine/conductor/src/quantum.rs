@@ -15,7 +15,7 @@
 use cfe::ratio::{ratio, Ratio};
 
 /// A galaxy's torsion phase, in turns (3,600ths: the base-60 circle).
-pub fn torsion_phase(seed: &[u8; 32], galaxy: u32) -> Ratio {
+pub fn torsion_phase(seed: &[u8; 32], galaxy: u64) -> Ratio {
     ratio((crate::pulse::draw(seed, &[galaxy], "torsion", 0) % 3600) as i64, 3600)
 }
 

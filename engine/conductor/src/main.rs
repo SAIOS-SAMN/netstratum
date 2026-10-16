@@ -77,7 +77,7 @@ fn main() {
         Ok(n) => println!("conductor: {n} galaxies charted from the pulse's cores"),
         Err(e) => eprintln!("conductor: the galaxies were not charted: {e}"),
     }
-    let era1_worlds: std::collections::BTreeMap<Vec<u32>, conductor::life::World> =
+    let era1_worlds: std::collections::BTreeMap<Vec<u64>, conductor::life::World> =
         conductor::life::worlds(&universe).into_iter().map(|w| (w.path.clone(), w)).collect();
     conductor::seating::seat(&universe, &era1_worlds, &mut specs);
     // Motion (era 1): each system's galactic period, which its lines' orbits
@@ -90,7 +90,7 @@ fn main() {
     let mut climbs = conductor::life::read_climbs(std::path::Path::new(&var_root));
     let mut life_readings = conductor::life::readings(&universe, &pulse_seed);
     let mut readings_at: u64 = 0;
-    let mut woken_galaxies: std::collections::BTreeSet<u32> =
+    let mut woken_galaxies: std::collections::BTreeSet<u64> =
         climbs.iter().filter(|(_, c)| c.woken).filter_map(|(p, _)| p.first().copied()).collect();
     println!(
         "conductor: life — {} worlds read, {} climbing, {} minds woken",

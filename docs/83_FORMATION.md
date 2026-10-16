@@ -334,6 +334,31 @@ reported; a crossing out is checked by nucleon and Z-weighted totals only.
 Observers: HEARTBEAT (burning, spent, lifetimes) and the LEDGER's
 mass + magnetism.
 
+### Built offline after the host crash (2026-10-16; services down by the operator's ruling)
+
+- **Vacuum cooling** (with xylarium): every parcel halves its agitation
+  through the vacuum every `⌈1/δ⌉` rings at its reach (δ = H/(R + H);
+  `(1 − δ)^⌈1/δ⌉ ≤ 1/e < ½`, exact, no power), beside its open frames'
+  light; closed-shell gas cools; close-in gas fastest.
+- **The disc's own heat** at ignition (with xylarium): the new star's first
+  light its disc cannot re-lock, `a_disc(R) = L·R/(R + x*)`, rising outward
+  against the vacuum's pull, strongest inward. (Before it, a cold clump's
+  disc held whole: one world per system.)
+- **The spin grain** (design law 8): stars had grown 1,700–3,300-bit reaches
+  (the observer read NaN); a body's spin and a world's place are floored to
+  `60⁻⁶`, the remainder returned to the medium it came from: the ledger
+  exact, every body bounded.
+- **Identity by birth** (operator: a row number is "spreadsheet logic"): a
+  star's and a world's identity is its birth reading, `born · 2³⁶ +
+  sector`, the sector its holding share at birth on the 60⁶ protractor
+  (the TUniversal coordinate's G lane); paths are `u64`. The saved universe's
+  format changed, so the restart re-founds it.
+- **The jets on the core's interface clock** and **planets from the star's
+  own disc** with **the dance** (resonance locks within the dominant
+  world's deficit) were built just before the crash; their first live
+  reading (beat 780) showed one world per system, which the disc heat
+  answers.
+
 ### The motion law (adopted, operator 2026-10-15; built)
 
 `crate::ring`, replacing the held ring motion in place: each received ring

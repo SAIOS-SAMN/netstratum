@@ -42,7 +42,7 @@ fn by_distance(u: &Universe) -> Vec<usize> {
 }
 
 /// The stand-in place of the system at `path` ([core, system, ...]).
-pub fn place_of(u: &Universe, path: &[u32]) -> Option<Place> {
+pub fn place_of(u: &Universe, path: &[u64]) -> Option<Place> {
     let order = by_distance(u);
     let i = u.cores.iter().position(|c| c.path.first() == path.first())?;
     let k = order.iter().position(|&o| o == i)?;
@@ -51,7 +51,7 @@ pub fn place_of(u: &Universe, path: &[u32]) -> Option<Place> {
 }
 
 /// A world's composition, its grains by Z (the pulse's `Z###` keys).
-pub fn composition_of(u: &Universe, path: &[u32]) -> Option<Vec<(u16, cfe::ratio::Ratio)>> {
+pub fn composition_of(u: &Universe, path: &[u64]) -> Option<Vec<(u16, cfe::ratio::Ratio)>> {
     let core = u.cores.iter().find(|c| c.path.first() == path.first())?;
     let sys = core.satellites.iter().find(|s| s.path.get(1) == path.get(1))?;
     let orb = sys.satellites.iter().find(|o| o.path.get(2) == path.get(2))?;
@@ -108,11 +108,11 @@ pub fn site_of(heat: &cfe::ratio::Ratio, burn: &cfe::ratio::Ratio) -> Option<(cf
 /// system per line, and then heat alone, left 67 then 78 of 157 collapsed at
 /// founding). The spec takes that world's era-1 siting and its
 /// system's place. A line with no world left keeps its place.
-pub fn seat(u: &Universe, worlds: &std::collections::BTreeMap<Vec<u32>, crate::life::World>, specs: &mut [PolitySpec]) {
+pub fn seat(u: &Universe, worlds: &std::collections::BTreeMap<Vec<u64>, crate::life::World>, specs: &mut [PolitySpec]) {
     let order = by_distance(u);
-    let rank: std::collections::BTreeMap<u32, usize> = order.iter().enumerate().filter_map(|(k, &i)| u.cores[i].path.first().map(|g| (*g, k))).collect();
-    let mut claimed: std::collections::BTreeSet<Vec<u32>> = std::collections::BTreeSet::new();
-    let mut per_galaxy: std::collections::BTreeMap<u32, usize> = std::collections::BTreeMap::new();
+    let rank: std::collections::BTreeMap<u64, usize> = order.iter().enumerate().filter_map(|(k, &i)| u.cores[i].path.first().map(|g| (*g, k))).collect();
+    let mut claimed: std::collections::BTreeSet<Vec<u64>> = std::collections::BTreeSet::new();
+    let mut per_galaxy: std::collections::BTreeMap<u64, usize> = std::collections::BTreeMap::new();
     let sited: Vec<(&crate::life::World, (cfe::thermal::StarClass, cfe::ratio::Ratio, cfe::ratio::Ratio))> =
         worlds.values().filter_map(|w| site_of(&w.heat, &w.burn).map(|s| (w, s))).collect();
     let mut viability: std::collections::BTreeMap<(String, String), Vec<cfe::ratio::Ratio>> = std::collections::BTreeMap::new();

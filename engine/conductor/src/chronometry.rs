@@ -92,7 +92,7 @@ pub fn keepers(u: &Universe) -> Vec<(Keeper, Option<usize>)> {
             let Some(sys) = core.satellites.get(k) else { continue };
             let inside = core.satellites[..k].iter().fold(mass(&core.kept) + crate::pulse::core_state(core), |s, o| s + mass(&o.total())) / unit.clone();
             let keeper = Keeper {
-                galaxy: core.path.first().copied(),
+                galaxy: core.path.first().map(|g| *g as u32),
                 shell,
                 rate: g_rate.clone() * rate(&sys.radius, &inside),
                 delay: core.radius.clone() + sys.radius.clone() / light.clone(),

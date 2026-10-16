@@ -278,7 +278,7 @@ pub fn heartbeat(star: &Manifest, universe_hold: &Ratio, rings: u64) -> Option<(
 /// worlds of holding `w*` as fit, standing at their places in the annulus;
 /// what does not fragment stays as the system's medium (its belts). Read in
 /// the transition units by the clump's holding; orbits by the motion law.
-pub fn system(clump: &Manifest, agitation: &Ratio, path: &[u32], unit: &Ratio, universe_hold: &Ratio) -> Option<(Manifest, Vec<crate::pulse::Body>, Manifest, Ratio)> {
+pub fn system(clump: &Manifest, agitation: &Ratio, path: &[u64], unit: &Ratio, universe_hold: &Ratio) -> Option<(Manifest, Vec<crate::pulse::Body>, Manifest, Ratio)> {
     let x = ignition_share(agitation)?;
     let star = crate::pulse::take(clump, &x);
     let mut disc = clump.clone();
@@ -314,8 +314,11 @@ pub fn system(clump: &Manifest, agitation: &Ratio, path: &[u32], unit: &Ratio, u
             // Places on the spin grain (`ring::grain`), so no world's numbers
             // carry the cloud's cooling history.
             let reach = crate::ring::grain(&((x.clone() + w.clone() * (ratio(i as i64, 1) + ratio(1, 2))) * scale.clone()));
+            // Its identity: its birth reading about its star (the system's
+            // birth bell is the star's, already in the path above it).
+            let siblings: Vec<u64> = worlds.iter().map(|o: &crate::pulse::Body| o.path[path.len()]).collect();
             let mut at = path.to_vec();
-            at.push(i as u32 + 1);
+            at.push(crate::ring::birth_key(0, &reach, &inside, &siblings));
             let period = crate::ring::period(&reach, &inside);
             let ell = crate::ring::spin(&reach, &inside);
             inside += mass(&part) / unit.clone();

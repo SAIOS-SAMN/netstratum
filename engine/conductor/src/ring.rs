@@ -79,6 +79,26 @@ pub fn grain(x: &Ratio) -> Ratio {
     (x.clone() * places.clone()).floor() / places
 }
 
+/// A share's SECTOR on the 60⁶-mark protractor (the TUniversal coordinate's
+/// six sexagesimal places, docs/78): which sector holds it, by exact floor.
+pub fn sector(share: &Ratio) -> u64 {
+    let places = Ratio::from_integer(num_bigint::BigInt::from(60).pow(6));
+    (share.clone() * places).floor().to_integer().try_into().unwrap_or(0)
+}
+
+/// A BODY'S IDENTITY is its birth reading, never a row number (operator
+/// 2026-10-16: "that's spreadsheet logic"): the bell it was born and the
+/// sector of its holding share (the deficit `H/(R + H)` at its reach, the
+/// coordinate's G lane) where it was born, `born · 2³⁶ + sector`. Unique
+/// among its siblings; on an exact tie the next sector is taken.
+pub fn birth_key(born: u64, reach: &Ratio, held: &Ratio, siblings: &[u64]) -> u64 {
+    let mut key = (born << 36) | sector(&deficit(reach, held));
+    while siblings.contains(&key) {
+        key += 1;
+    }
+    key
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

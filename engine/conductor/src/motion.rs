@@ -64,7 +64,7 @@ pub fn galactic_year(core: &Body) -> Option<(usize, Turning)> {
 pub fn years_closing(u: &Universe, n: u64) -> Vec<u32> {
     u.cores
         .iter()
-        .filter_map(|c| galactic_year(c).map(|(_, t)| (c.path[0], t)))
+        .filter_map(|c| galactic_year(c).map(|(_, t)| (c.path[0] as u32, t)))
         .filter(|(_, t)| n > 0 && t.turns(n) > t.turns(n - 1))
         .map(|(p, _)| p)
         .collect()
