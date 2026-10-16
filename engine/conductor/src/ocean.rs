@@ -187,3 +187,42 @@ pub fn land(galaxy: &Manifest, arriving: &Manifest, rho: &Ratio, turning: &(Rati
     }
     (held, free, parcels)
 }
+
+/// THE PUMP (convection, with xylarium; docs/83): the universal tide a
+/// swinging galaxy feels differs between its turnings,
+/// `π = δ_u(R₋) − δ_u(R₊)`, zero for a circle. The outside tide enters the
+/// galaxy as one received quantity, so it varies only in time, with the
+/// swing.
+pub fn pump(r: &Ratio, h_g: &Ratio) -> Ratio {
+    let h = universe_hold();
+    let (lo, hi) = swing(r, h_g);
+    let d = |x: &Ratio| h.clone() / (x.clone() + h.clone());
+    d(&lo) - d(&hi)
+}
+
+/// THE CONVECTION CURRENT (xylarium 11.0, the tide's antipole turned into
+/// the orthogonal plane): a held ring of the disc at reach R (own units,
+/// core holding H) churns with agitation `a = ρ_g·π·R/(R + H)`, the pump
+/// received at the galaxy's share times the share its core leaves unlocked
+/// there: quiet at the core, churning outward. The cell circulates in the
+/// radial–axial plane, its radial footprint `R(1 ± a)`, still inside the
+/// throat; it cools by both channels from `born`, and where cells overlap
+/// and hold they collapse (`formation::stretches`, `formation::collapse`).
+pub fn convect(ring: &crate::formation::Shell, drive: &Ratio, h: &Ratio, born: u64) -> crate::formation::Shell {
+    let r = ring.inner.clone();
+    if r.is_zero() || drive.is_zero() {
+        return ring.clone();
+    }
+    let a = (drive.clone() * r.clone() / (r.clone() + h.clone())).min(ratio(1, 1));
+    let outer = r.clone() * (ratio(1, 1) + a.clone());
+    crate::formation::Shell {
+        key: ring.key.clone(),
+        held: ring.held.clone(),
+        inner: r.clone() * (ratio(1, 1) - a.clone()),
+        outer: outer.clone(),
+        agitation: a,
+        halving: ring.halving,
+        born,
+        vacuum: crate::formation::vacuum_halving(&outer, h),
+    }
+}

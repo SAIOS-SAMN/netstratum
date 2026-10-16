@@ -149,9 +149,12 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             let half_swings = halves(bell).saturating_sub(halves(bell.saturating_sub(t_u)));
             let m = mass(&u.medium) / whole;
             let share = crate::ocean::gathered(rung, &reach, &h_g, &m, half_swings);
-            (crate::ocean::take(&u.medium, &share), crate::ocean::arrival_turning(rung, &reach, &h_g, &m))
+            (crate::ocean::take(&u.medium, &share), crate::ocean::arrival_turning(rung, &reach, &h_g, &m), crate::ocean::pump(&reach, &h_g))
         };
-        let (gathered, turning) = gathered;
+        let (gathered, turning, pump) = gathered;
+        // CONVECTION's drive, received at the galaxy's share (the tide crosses
+        // the boundary like a pulse).
+        let drive = g_rate.clone() * pump;
         less(&mut u.medium, &gathered);
         let core = &mut u.cores[i];
         // Where it lands (carried spins add): held joins the disc, the rest
@@ -281,8 +284,10 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         // COLLAPSE: each stretch of the gas (with the disc's rings it passes
         // over) whose clump can hold forms as many stars as fit.
         let mut stars = 0;
-        let (now, _) = crate::formation::shells(&core.total(), &core.kept);
-        let rings: Vec<crate::formation::Shell> = now.into_iter().filter(|r| r.outer == r.inner).collect();
+        let (now, h_now) = crate::formation::shells(&core.total(), &core.kept);
+        // CONVECTION (`crate::ocean::convect`): the held rings churn in cells
+        // driven by the swing's pump, renewed each echo.
+        let rings: Vec<crate::formation::Shell> = now.into_iter().filter(|r| r.outer == r.inner).map(|r| crate::ocean::convect(&r, &drive, &h_now, bell)).collect();
         let parcels = core.gas.len();
         let all: Vec<crate::formation::Shell> = core.gas.iter().cloned().chain(rings).collect();
         for st in crate::formation::stretches(&all, bell) {
