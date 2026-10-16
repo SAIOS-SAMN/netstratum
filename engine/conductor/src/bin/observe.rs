@@ -124,7 +124,7 @@ fn main() {
             println!("STAR {:?} at beat {now}: born bell {}, holding {:.4e} (units of the deepest hole), magnetism {:.3e}", sys.path, sys.born, f(&(pulse::mass(&sys.kept) / unit.clone())), f(&(pulse::magnetism(&sys.kept) / unit.clone())));
             println!("  matter: {}", composition(&sys.kept, 8));
             println!("  orbit: reach {:.4e}, period {:.4e} rings, spin ℓ {:.4e}; clock {:.6}, {received} rings received since birth", f(&sys.radius), f(&sys.period), f(&sys.ell), f(&rate));
-            match formation::heartbeat(&sys.kept, &universe_hold, received) {
+            match formation::heartbeat(&sys.kept, &(pulse::mass(&sys.kept) / pulse::mass(&sys.total())), received) {
                 Some((every, left, light)) => println!("  HEARTBEAT: fuel halves every {every} received rings; fuel left {:.4}; light {:.3e} per received ring", f(&left), f(&light)),
                 None => println!("  HEARTBEAT: no hydrogen fuel"),
             }
@@ -170,6 +170,29 @@ fn main() {
                 );
             }
         }
+        "crests" => {
+            // THE GALAXY'S OWN CRESTS (docs/83): each crest ring, the matter
+            // the kick collects on it, its binding against its floor.
+            let Some(i) = num(1).and_then(galaxy) else { return println!("crests G") };
+            let c = &u.cores[i];
+            let (_, _, h) = formation::shells(&c.total(), &c.kept);
+            let mut matter = c.kept.clone();
+            for (k, a) in &c.medium {
+                *matter.entry(k.clone()).or_insert_with(|| ratio(0, 1)) += a.clone();
+            }
+            let g = pulse::mass(&c.total());
+            let m_all = if g == ratio(0, 1) { ratio(0, 1) } else { pulse::mass(&matter) / g };
+            let e = if pulse::mass(&matter) == ratio(0, 1) { ratio(0, 1) } else { pulse::magnetism(&matter) / pulse::mass(&matter) };
+            let n = now.saturating_sub(60 + f(&c.radius) as u64) / 60 + 1;
+            let all = conductor::ocean::crests(n, &h);
+            let sum = all.iter().fold(ratio(0, 1), |s, (_, a)| s + a.clone());
+            println!("CRESTS {:?} at beat {now}: H {:.3}, {} crests standing (q ≤ {n}), matter {:.3} of the galaxy", c.path, f(&h), all.len(), f(&m_all));
+            for (r, a) in all.iter().take(24) {
+                let m = m_all.clone() * a.clone() / sum.clone();
+                let mu = m.clone() * e.clone();
+                println!("  crest at {:.4} (a {}): m {:.4e}, μ {:.4e} → {:?}", f(r), a, f(&m), f(&mu), formation::crest_collapse(&m, &mu, &ratio(0, 1), r, &h).map(|(w, k)| (format!("{:.3e}", f(&w)), k)));
+            }
+        }
         "formation" => {
             for c in &u.cores {
                 let total = pulse::mass(&c.total());
@@ -204,7 +227,7 @@ fn main() {
                 for (k, sys) in c.satellites.iter().enumerate() {
                     let rate = system_rate(&u, i, k, &unit);
                     let received: u64 = (rate.clone() * ratio(now.saturating_sub(sys.born) as i64, 1)).floor().to_integer().try_into().unwrap_or(0);
-                    if let Some((every, left, light)) = formation::heartbeat(&sys.kept, &universe_hold, received) {
+                    if let Some((every, left, light)) = formation::heartbeat(&sys.kept, &(pulse::mass(&sys.kept) / pulse::mass(&sys.total())), received) {
                         println!("  star {:?}: born {}, {received} rings, halves every {every}, fuel left {:.4}, light {:.3e}, He {:.3}", sys.path, sys.born, f(&left), f(&light), f(&(sys.kept.get("Z002").cloned().unwrap_or_else(|| ratio(0, 1)) * ratio(6, 1) / pulse::mass(&sys.kept))));
                     }
                 }

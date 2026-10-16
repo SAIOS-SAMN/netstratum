@@ -122,6 +122,11 @@ pub struct Stretch {
     pub inner: Ratio,
     pub outer: Ratio,
     pub lambda: Ratio,
+    /// Its MAGNETISM per unit reach (`μ = Σ λ_z·e_z`, e_z a kind's open
+    /// share, unpaired over hold): the open frames that attract each other in
+    /// free gas, opposite spins pairing (operator: "full spin magnetism
+    /// attractors in the gases"; the antipole of the heart's push on them).
+    pub mu: Ratio,
     pub agitation: Ratio,
     /// The members' holding shares of this stretch: (shell index, holding).
     pub members: Vec<(usize, Ratio)>,
@@ -143,13 +148,15 @@ pub fn stretches(shells: &[Shell], n: u64) -> Vec<Stretch> {
             continue;
         }
         let mut members = Vec::new();
-        let (mut lambda, mut weighted) = (ratio(0, 1), ratio(0, 1));
+        let (mut lambda, mut weighted, mut mu) = (ratio(0, 1), ratio(0, 1), ratio(0, 1));
+        let open = |k: &str| z_of(k).and_then(atom).map(|a| ratio(i64::from(a.unpaired), i64::from(hold(a.z)))).unwrap_or_else(|| ratio(0, 1));
         for (i, s) in shells.iter().enumerate() {
             let span = s.outer.clone() - s.inner.clone();
             if span.is_zero() {
                 if s.inner >= *lo && s.inner < *hi && s.born <= n {
                     members.push((i, s.held.clone()));
                     lambda += s.held.clone() / width.clone();
+                    mu += s.held.clone() / width.clone() * open(&s.key);
                 }
                 continue;
             }
@@ -159,50 +166,101 @@ pub fn stretches(shells: &[Shell], n: u64) -> Vec<Stretch> {
             let density = s.held.clone() / span;
             members.push((i, density.clone() * width.clone()));
             weighted += density.clone() * cooled(s, n);
+            mu += density.clone() * open(&s.key);
             lambda += density;
         }
         if lambda.is_zero() {
             continue;
         }
         let agitation = weighted / lambda.clone();
-        out.push(Stretch { inner: lo.clone(), outer: hi.clone(), lambda, agitation, members });
+        out.push(Stretch { inner: lo.clone(), outer: hi.clone(), lambda, mu, agitation, members });
     }
     out
 }
 
-/// Does a clump of width `w` at the stretch's near side collapse?
+/// Does a clump of width `w` at the stretch's near side collapse? (with
+/// xylarium, 2026-10-16) The CLUMP IS ITS OWN ENCLOSURE: of width w it holds
+/// `H_c = λ·w`, and seen from its reach `k = R + H` its hold is the deficit
+/// law's `λw/(k + λw)`, growing with its size (no square); it binds by its
+/// WHOLE 3Z, holding and magnetism, `(λ + μ)w/(k + (λ + μ)w)` (the same rule
+/// as the universal core's hold: the open frames attract). It collapses where
+/// that beats its agitation and the shear across it, `σ = h·w/(k(k + w))`.
+/// Its agitation is ONE for the clump, the same ignition reads: its cooled
+/// residue plus half the enclosing centre's UNLOCKED face at its place,
+/// `½·(1 − δ)`, `δ = h/(R + h)` (operator: the face the core does not lock
+/// heats; the galaxy's for a star's clump, the star's for a world's).
 fn holds(st: &Stretch, h: &Ratio, w: &Ratio) -> bool {
     let k = st.inner.clone() + h.clone();
-    let kw = k.clone() * (k + w.clone());
-    st.lambda.clone() * kw.clone() >= (ratio(1, 1) + st.lambda.clone()) * (st.agitation.clone() * kw + h.clone() * w.clone())
+    let unlocked = ratio(1, 1) - h.clone() / k.clone();
+    let a = st.agitation.clone() + unlocked / ratio(2, 1);
+    let own = (st.lambda.clone() + st.mu.clone()) * w.clone();
+    let kw = k.clone() * (k.clone() + w.clone());
+    // λw/(k + λw) ≥ a + h·w/(k(k + w)), cleared of denominators.
+    own.clone() * kw.clone() >= (k + own) * (a * kw + h.clone() * w.clone())
 }
 
-/// THE COLLAPSE: the largest clump width that holds, as one crossing found
-/// by bisection on the comparison (None: no clump holds, the gas stays hot),
-/// and the stars that fit.
+/// THE COLLAPSE: the SMALLEST clump width that holds (the self-binding
+/// grows with size, so thin gas holds only from a larger width: fewer,
+/// larger clumps), found as one crossing by bisection between 0 (no clump
+/// of no width holds while the agitation is above 0) and the stretch's
+/// width; None where even the whole stretch does not hold. The stars that
+/// fit: `⌊width/w_J⌋`; one, the whole stretch, where `w_J` is the width.
 pub fn collapse(st: &Stretch, h: &Ratio) -> Option<(Ratio, u64)> {
     let width = st.outer.clone() - st.inner.clone();
-    if width <= ratio(0, 1) {
+    if width <= ratio(0, 1) || !holds(st, h, &width) {
         return None;
     }
-    let tiny = width.clone() / ratio(1 << 20, 1);
-    if !holds(st, h, &tiny) {
-        return None;
-    }
-    if holds(st, h, &width) {
-        return Some((width, 1));
-    }
-    let (mut lo, mut hi) = (tiny, width.clone());
+    let (mut lo, mut hi) = (ratio(0, 1), width.clone());
     for _ in 0..24 {
         let mid = (lo.clone() + hi.clone()) / ratio(2, 1);
         if holds(st, h, &mid) {
-            lo = mid;
-        } else {
             hi = mid;
+        } else {
+            lo = mid;
         }
     }
-    let count = (width / lo.clone()).floor().to_integer().try_into().unwrap_or(u64::MAX);
-    Some((lo, count))
+    let count = (width / hi.clone()).floor().to_integer().try_into().unwrap_or(u64::MAX).max(1);
+    Some((hi, count))
+}
+
+/// COLLAPSE ON A CREST (with xylarium; docs/83, "the ocean view one tier
+/// down"): a galaxy's own bell lays crests as on the universe's, and the
+/// kick collects the galaxy's matter on them; the tidal wave's crest
+/// COMPRESSES what stands there (the tide's other face). A crest ring at
+/// reach R (own units, the core's holding H) carries `m` of the galaxy's
+/// holding and `μ` of its magnetism; its length is R (one turn, no π). A
+/// clump of length w along it binds by its whole 3Z read as its own
+/// enclosure, `x/(k + x)`, `x = (m + μ)·w/R`, `k = R + H`, against its
+/// agitation, half the tide's UNLOCKED face `½·(1 − H/k)` (operator
+/// 2026-10-16: the core HOLDS δ and leaves 1 − δ unlocked; held matter is
+/// heated by the face the core does not lock, never one face for both) and
+/// the shear `H·w/(k(k + w))`. None
+/// where the whole ring does not hold; else the smallest holding length
+/// `w_J` by one crossing and `⌊R/w_J⌋` clumps along the ring.
+pub fn crest_collapse(m: &Ratio, mu: &Ratio, a: &Ratio, r: &Ratio, h: &Ratio) -> Option<(Ratio, u64)> {
+    if r.is_zero() || (m.clone() + mu.clone()).is_zero() {
+        return None;
+    }
+    let k = r.clone() + h.clone();
+    let floor = a.clone() + (ratio(1, 1) - h.clone() / k.clone()) / ratio(2, 1);
+    let holds = |w: &Ratio| {
+        let x = (m.clone() + mu.clone()) * w.clone() / r.clone();
+        x.clone() / (k.clone() + x) >= floor.clone() + h.clone() * w.clone() / (k.clone() * (k.clone() + w.clone()))
+    };
+    if !holds(r) {
+        return None;
+    }
+    let (mut lo, mut hi) = (ratio(0, 1), r.clone());
+    for _ in 0..24 {
+        let mid = (lo.clone() + hi.clone()) / ratio(2, 1);
+        if holds(&mid) {
+            hi = mid;
+        } else {
+            lo = mid;
+        }
+    }
+    let count = (r.clone() / hi.clone()).floor().to_integer().try_into().unwrap_or(u64::MAX).max(1);
+    Some((hi, count))
 }
 
 /// IGNITION, THE QUANTUM HEART (operator 2026-10-15; with xylarium): a
@@ -247,8 +305,8 @@ pub fn coupling(star: &Manifest, universe_hold: &Ratio) -> Option<Ratio> {
 /// flux. The first rung here: hydrogen to helium (Δu = 2, e = ½).
 /// Returns the rings per halving, the fuel's share left after `rings`
 /// received rings, and the light per received ring (`feed × fuel × Δu`).
-pub fn heartbeat(star: &Manifest, universe_hold: &Ratio, rings: u64) -> Option<(u64, Ratio, Ratio)> {
-    let (every, light) = burn(star, universe_hold, 1, &ratio(1, 1))?;
+pub fn heartbeat(star: &Manifest, share: &Ratio, rings: u64) -> Option<(u64, Ratio, Ratio)> {
+    let (every, light) = burn(star, share, 1, &ratio(1, 1))?;
     let halvings = (rings / every).min(4096) as u32;
     let left = ratio(1, 1) / Ratio::from_integer(num_bigint::BigInt::from(2).pow(halvings));
     Some((every, left.clone(), light * left))
@@ -268,15 +326,18 @@ pub fn product(z: u32) -> String {
 /// - the DRIVER is the magnetism the reaction transduces (3Z conserved),
 ///   `|Δm|/3Z_product`: H + H → He closes 2 of 6, 1/3; He + He → Be opens 2
 ///   of 12, 1/6. A rung that transduces nothing does not burn;
-/// - the INTERFACE share as the heartbeat carries it, `s_star/Q̄`;
+/// - the INTERFACE share `s/Q̄`, s the star's share of ITS OWN SYSTEM's
+///   holding (operator: every share is read in the body's own enclosure; a
+///   star is a tiny part of the universe, a large part of its galaxy, the
+///   greater part of its system), never of the universe's;
 /// - its RHYTHM the heart's coherence c with the echo (a reading of phase).
 /// The fuel halves every `⌈1/feed⌉` received rings, `feed =
 /// (|Δm|/3Z_p)·τ·s/Q̄·c`; the light per received ring is the transduced
 /// flux, `feed × fuel share × |Δm|`. Returns (rings a halving, light a ring).
-pub fn burn(star: &Manifest, universe_hold: &Ratio, z: u32, coherence: &Ratio) -> Option<(u64, Ratio)> {
+pub fn burn(star: &Manifest, share: &Ratio, z: u32, coherence: &Ratio) -> Option<(u64, Ratio)> {
     let fuel = star.get(&format!("Z{z:03}"))?.clone();
     let total = mass(star);
-    if total.is_zero() || universe_hold.is_zero() || coherence.is_zero() {
+    if total.is_zero() || coherence.is_zero() {
         return None;
     }
     let open = |z: u32| i64::from(atom(z).map(|a| a.unpaired).unwrap_or(0));
@@ -292,8 +353,7 @@ pub fn burn(star: &Manifest, universe_hold: &Ratio, z: u32, coherence: &Ratio) -
     if q_mean.is_zero() {
         return None;
     }
-    let share = total.clone() / universe_hold.clone();
-    let feed = driver * tau * share / q_mean * coherence.clone();
+    let feed = driver * tau * share.clone() / q_mean * coherence.clone();
     let every: u64 = (ratio(1, 1) / feed.clone()).ceil().to_integer().try_into().unwrap_or(u64::MAX).max(1);
     let fuel_share = fuel * ratio(i64::from(hold(z)), 1) / total;
     Some((every, feed * fuel_share * ratio(dm, 1)))
@@ -367,7 +427,7 @@ pub fn lightest(m: &Manifest) -> Option<String> {
     m.iter().filter(|(_, a)| **a > ratio(0, 1)).min_by_key(|(k, _)| (z_of(k).map(hold).unwrap_or(0), z_of(k))).map(|(k, _)| k.clone())
 }
 
-pub fn system(clump: &Manifest, agitation: &Ratio, circulation: &Ratio, path: &[u64], unit: &Ratio, universe_hold: &Ratio, tide: &Ratio) -> Option<(Manifest, Vec<crate::pulse::Body>, Manifest, Ratio)> {
+pub fn system(clump: &Manifest, agitation: &Ratio, circulation: &Ratio, path: &[u64], unit: &Ratio, tide: &Ratio) -> Option<(Manifest, Vec<crate::pulse::Body>, Manifest, Ratio)> {
     // Ignition: a clump at a ≥ ½ never forms a heart.
     ignition_share(agitation)?;
     // THE HEART'S TORSION, THE CUT ONE TIER DOWN (operator, with xylarium,
@@ -388,9 +448,10 @@ pub fn system(clump: &Manifest, agitation: &Ratio, circulation: &Ratio, path: &[
     // The throat at the heart's hold, the rim at the system's (state 1 plus
     // grains 1: rim 2); the disc's annulus between, `λ = 1`.
     let x = ratio(1, 1) + held.clone();
-    let scale = total / unit.clone();
+    let scale = total.clone() / unit.clone();
     let star_hold = mass(&star) / unit.clone();
-    let light = heartbeat(&star, universe_hold, 0).map(|(_, _, l)| l).unwrap_or_else(|| ratio(0, 1));
+    // At ignition the system is the clump: the star's share of it.
+    let light = heartbeat(&star, &(mass(&star) / total.clone()), 0).map(|(_, _, l)| l).unwrap_or_else(|| ratio(0, 1));
     let mid = (x.clone() + ratio(2, 1)) / ratio(2, 1);
     let unlocked = mid.clone() / (mid + x.clone());
     let heat = light * unlocked.clone();
@@ -399,7 +460,8 @@ pub fn system(clump: &Manifest, agitation: &Ratio, circulation: &Ratio, path: &[
     // annulus; the channels add, the clump's own agitation the floor.
     let flux = tide.clone() * unlocked;
     let disc_agitation = (heat + flux).max(agitation.clone());
-    let annulus = Stretch { inner: x.clone(), outer: ratio(2, 1), lambda: ratio(1, 1), agitation: disc_agitation, members: Vec::new() };
+    let disc_mu = if mass(&disc).is_zero() { ratio(0, 1) } else { crate::pulse::magnetism(&disc) / mass(&disc) };
+    let annulus = Stretch { inner: x.clone(), outer: ratio(2, 1), mu: disc_mu, lambda: ratio(1, 1), agitation: disc_agitation, members: Vec::new() };
     let mut worlds = Vec::new();
     let mut inside = star_hold.clone();
     // A star that held every kind has no disc (its annulus has no width).

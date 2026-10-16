@@ -41,7 +41,11 @@ fn main() {
     let mut w = worlds.clone();
     w.sort();
     println!("CLOCKS — over {until} bells: galaxy terms (echoes received) {terms:?}; galaxy epochs (half-mass rungs) {epochs:?}; worlds' journals: {} worlds, {journaled} with a completed local year (most years {:?}, median {:?}); universal echoes {}", worlds.len(), w.last(), w.get(w.len() / 2), until / t_u);
-    println!("CONSERVATION — the breath created nothing: {}", u.total() == before);
+    // Fusion transmutes kinds (H + H → He), so the manifest itself changes;
+    // what the breath conserves is each nucleus's 3Z, holding plus
+    // magnetism (transduction via magnetism).
+    let three_z = |m: &pulse::Manifest| pulse::mass(m) + pulse::magnetism(m);
+    println!("CONSERVATION — the breath created nothing (holding + magnetism, 3Z): {}; the manifest unchanged: {}", three_z(&u.total()) == three_z(&before), u.total() == before);
     if args.get(4).map(String::as_str) == Some("write") {
         let _ = pulse::write(Path::new(era1), &seed, &u);
         let _ = std::fs::write(Path::new(era1).join("conductor.beat"), until.to_string());

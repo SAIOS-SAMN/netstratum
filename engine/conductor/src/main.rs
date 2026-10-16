@@ -352,7 +352,7 @@ fn main() {
                 for sys in &core.satellites {
                     let rate = g_rate.clone() * conductor::ring::rate(&sys.radius, &(inside.clone() / unit.clone()));
                     let received = (rate.clone() * cfe::ratio::ratio(beat.saturating_sub(sys.born) as i64, 1)).floor().to_integer().try_into().unwrap_or(0u64);
-                    if let Some((every, left, _)) = conductor::formation::heartbeat(&sys.kept, &universe_hold, received) {
+                    if let Some((every, left, _)) = conductor::formation::heartbeat(&sys.kept, &(conductor::pulse::mass(&sys.kept) / conductor::pulse::mass(&sys.total())), received) {
                         // A life: the halvings until less than a grain of fuel
                         // in 2^30 is left, read in bells on its clock.
                         lives.push(30.0 * every as f64 / f(&rate).max(1e-300));

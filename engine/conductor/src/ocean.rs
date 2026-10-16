@@ -2,9 +2,9 @@
 //! and recyclotronic propulsion"; with xylarium, proposed, to be tested).
 //!
 //! - **The crests.** The universal core regenerates its pulse at full
-//!   strength (operator ruling (i)); in universe units `H_u = 2` (its state 1,
-//!   all grains 1) and its bell rings once in `P_b = P(H_u) = 2` own rings, so
-//!   the crests stand at `R_{p/q} = H_u(P_b·p/q − 1) = 2(2p/q − 1)` core rings
+//!   strength (operator ruling (i)); in universe units `H_u` (`universe_hold`:
+//!   its state 1 and every galactic core with its galaxy) and its bell rings once in `P_b = P(H_u) = 2` own rings, so
+//!   the crests stand at `R_{p/q} = H_u(P_b·p/q − 1) = H_u(2p/q − 1)` core rings
 //!   for `½ < p/q ≤ 1`. A crest couples to the kick by `a_q = 1/q` for odd q,
 //!   0 for even (xylarium's ruling).
 //! - **Crests form with age** (proposed): a crest of order q is in phase only
@@ -25,9 +25,28 @@ use crate::pulse::{mass, Manifest};
 use cfe::ratio::{ratio, Ratio};
 use num_traits::Zero;
 
-/// The universe's holding in its own units: its state 1 and its grains 1.
-pub fn universe_hold() -> Ratio {
-    ratio(2, 1)
+/// THE UNIVERSAL CORE'S HOLDING (operator: it must be strong enough to
+/// contain every galaxy's orbit, the load distributed between the galactic
+/// cores; with xylarium): one law at every tier, a core holds its state and
+/// what it holds. In universe units (the founding's grains 1) its state is
+/// 1, set at the bounce and never drained, and it holds every galactic core
+/// with its galaxy: `H_u = 1 + Σ_g (state_g + grains_g)` (3 at a founding
+/// with no ocean). Matter in the ocean is not held by a galaxy, so the hold
+/// breathes with the circuit. THE MAGNETISM COUNTS TOO (operator
+/// 2026-10-16; xylarium 11.0 (1), the galaxies' magnetism sets the core's
+/// strength): each held nucleus bears on the universal core at its WHOLE
+/// 3Z, holding plus magnetism (its unpaired frames), not its holding face
+/// alone: `H_u = 1 + Σ_g (state_g + (holding_g + magnetism_g))`, read in the
+/// founding's unit (the universe's grains' holding 1).
+pub fn universe_hold(u: &crate::pulse::Universe) -> Ratio {
+    let whole = mass(&u.total());
+    if whole.is_zero() {
+        return ratio(2, 1);
+    }
+    u.cores.iter().fold(ratio(1, 1), |s, c| {
+        let all = c.total();
+        s + (crate::pulse::core_state(c) + mass(&all) + crate::pulse::magnetism(&all)) / whole.clone()
+    })
 }
 
 fn gcd(a: i64, b: i64) -> i64 {
@@ -35,8 +54,8 @@ fn gcd(a: i64, b: i64) -> i64 {
 }
 
 /// The coupled crests standing at echo `n`: `(reach in core rings, a_q)`.
-pub fn crests(n: u64) -> Vec<(Ratio, Ratio)> {
-    let h = universe_hold();
+pub fn crests(n: u64, h_u: &Ratio) -> Vec<(Ratio, Ratio)> {
+    let h = h_u.clone();
     let mut out = Vec::new();
     let mut q: i64 = 1;
     while q as u64 <= n.max(1) {
@@ -54,8 +73,8 @@ pub fn crests(n: u64) -> Vec<(Ratio, Ratio)> {
 
 /// A galaxy's swing about reach `r` (core rings), its holding `h_g` in
 /// universe units: `(R₋, R₊)`.
-pub fn swing(r: &Ratio, h_g: &Ratio) -> (Ratio, Ratio) {
-    let h_u = universe_hold();
+pub fn swing(r: &Ratio, h_g: &Ratio, h_u: &Ratio) -> (Ratio, Ratio) {
+    let h_u = h_u.clone();
     let tau = r.clone() / (r.clone() + h_u);
     if (tau.clone() + h_g.clone()).is_zero() {
         return (r.clone(), r.clone());
@@ -68,13 +87,13 @@ pub fn swing(r: &Ratio, h_g: &Ratio) -> (Ratio, Ratio) {
 /// echo `n`: its reach `r` (core rings), its holding `h_g` and the ocean's
 /// `m` (both in universe units). Each crest within the swing is crossed
 /// once a half-swing; the take from a crest never exceeds what stands there.
-pub fn gathered(n: u64, r: &Ratio, h_g: &Ratio, m: &Ratio, half_swings: u64) -> Ratio {
+pub fn gathered(n: u64, r: &Ratio, h_g: &Ratio, m: &Ratio, half_swings: u64, h_u: &Ratio) -> Ratio {
     if half_swings == 0 || m.is_zero() || h_g.is_zero() {
         return ratio(0, 1);
     }
-    let all = crests(n);
+    let all = crests(n, h_u);
     let sum = all.iter().fold(ratio(0, 1), |s, (_, a)| s + a.clone());
-    let (lo, hi) = swing(r, h_g);
+    let (lo, hi) = swing(r, h_g, h_u);
     all.iter().filter(|(at, _)| *at >= lo && *at <= hi).fold(ratio(0, 1), |s, (_, a)| {
         let on = a.clone() / sum.clone();
         let m_q = m.clone() * on.clone();
@@ -95,8 +114,8 @@ pub fn take(ocean: &Manifest, share: &Ratio) -> Manifest {
 /// orbit's turning, `δ` at its guiding reach `r` (its spin `ℓ = r·H` carried
 /// through the swing), while the crest's ring at `at` turns at `δ(at)`; the
 /// share `|δ(r) − δ(at)| / δ(r)`, about the universe's holding.
-pub fn relative_turning(r: &Ratio, at: &Ratio) -> Ratio {
-    let h = universe_hold();
+pub fn relative_turning(r: &Ratio, at: &Ratio, h_u: &Ratio) -> Ratio {
+    let h = h_u.clone();
     let d = |x: &Ratio| h.clone() / (x.clone() + h.clone());
     let (dr, da) = (d(r), d(at));
     let diff = if dr > da { dr.clone() - da } else { da - dr.clone() };
@@ -108,8 +127,8 @@ pub fn relative_turning(r: &Ratio, at: &Ratio) -> Ratio {
 /// share `u = (at − R₋)/(R₊ − R₋)`, read by the coherence form
 /// `e·(1 − |2u − 1|)`: zero at the turnings, e at the guiding reach, never
 /// more than e; no square, no root.
-pub fn radial_share(r: &Ratio, h_g: &Ratio, at: &Ratio) -> Ratio {
-    let (lo, hi) = swing(r, h_g);
+pub fn radial_share(r: &Ratio, h_g: &Ratio, at: &Ratio, h_u: &Ratio) -> Ratio {
+    let (lo, hi) = swing(r, h_g, h_u);
     if hi <= lo {
         return ratio(0, 1);
     }
@@ -123,16 +142,16 @@ pub fn radial_share(r: &Ratio, h_g: &Ratio, at: &Ratio) -> Ratio {
 /// The crossings' turning in the two planes (the bivector, never reduced to
 /// a magnitude), each weighted by what its crest gave: (the orbit's plane,
 /// tangential; the swing's plane, radial).
-pub fn arrival_turning(n: u64, r: &Ratio, h_g: &Ratio, m: &Ratio) -> (Ratio, Ratio) {
-    let all = crests(n);
+pub fn arrival_turning(n: u64, r: &Ratio, h_g: &Ratio, m: &Ratio, h_u: &Ratio) -> (Ratio, Ratio) {
+    let all = crests(n, h_u);
     let sum = all.iter().fold(ratio(0, 1), |s, (_, a)| s + a.clone());
-    let (lo, hi) = swing(r, h_g);
+    let (lo, hi) = swing(r, h_g, h_u);
     let (mut w, mut t, mut rad) = (ratio(0, 1), ratio(0, 1), ratio(0, 1));
     for (at, a) in all.iter().filter(|(at, _)| *at >= lo && *at <= hi) {
         let m_q = m.clone() * a.clone() / sum.clone();
         let each = a.clone() * h_g.clone() / (h_g.clone() + m_q) * a.clone() / sum.clone();
-        t += each.clone() * relative_turning(r, at);
-        rad += each.clone() * radial_share(r, h_g, at);
+        t += each.clone() * relative_turning(r, at, h_u);
+        rad += each.clone() * radial_share(r, h_g, at, h_u);
         w += each;
     }
     if w.is_zero() { (ratio(0, 1), ratio(0, 1)) } else { (t / w.clone(), rad / w) }
@@ -193,37 +212,9 @@ pub fn land(galaxy: &Manifest, arriving: &Manifest, rho: &Ratio, turning: &(Rati
 /// `π = δ_u(R₋) − δ_u(R₊)`, zero for a circle. The outside tide enters the
 /// galaxy as one received quantity, so it varies only in time, with the
 /// swing.
-pub fn pump(r: &Ratio, h_g: &Ratio) -> Ratio {
-    let h = universe_hold();
-    let (lo, hi) = swing(r, h_g);
+pub fn pump(r: &Ratio, h_g: &Ratio, h_u: &Ratio) -> Ratio {
+    let h = h_u.clone();
+    let (lo, hi) = swing(r, h_g, h_u);
     let d = |x: &Ratio| h.clone() / (x.clone() + h.clone());
     d(&lo) - d(&hi)
-}
-
-/// THE CONVECTION CURRENT (xylarium 11.0, the tide's antipole turned into
-/// the orthogonal plane): a held ring of the disc at reach R (own units,
-/// core holding H) churns with agitation `a = ρ_g·π·R/(R + H)`, the pump
-/// received at the galaxy's share times the share its core leaves unlocked
-/// there: quiet at the core, churning outward. It CIRCULATES, a turning in the
-/// radial–axial plane, its radial footprint `R(1 ± a)`, still inside the
-/// throat; it cools by both channels from `born`, and where circulations overlap
-/// and hold they collapse (`formation::stretches`, `formation::collapse`).
-pub fn convect(ring: &crate::formation::Shell, drive: &Ratio, h: &Ratio, born: u64) -> crate::formation::Shell {
-    // A held band churns about its middle; its circulation widens it by `1 ± a`.
-    let r = (ring.inner.clone() + ring.outer.clone()) / ratio(2, 1);
-    if r.is_zero() || drive.is_zero() {
-        return ring.clone();
-    }
-    let a = (drive.clone() * r.clone() / (r.clone() + h.clone())).min(ratio(1, 1));
-    let outer = ring.outer.clone() * (ratio(1, 1) + a.clone());
-    crate::formation::Shell {
-        key: ring.key.clone(),
-        held: ring.held.clone(),
-        inner: ring.inner.clone() * (ratio(1, 1) - a.clone()),
-        outer: outer.clone(),
-        agitation: a,
-        halving: ring.halving,
-        born,
-        vacuum: crate::formation::vacuum_halving(&outer, h),
-    }
 }
