@@ -184,6 +184,9 @@ fn holds(st: &Stretch, h: &Ratio, w: &Ratio) -> bool {
 /// and the stars that fit.
 pub fn collapse(st: &Stretch, h: &Ratio) -> Option<(Ratio, u64)> {
     let width = st.outer.clone() - st.inner.clone();
+    if width <= ratio(0, 1) {
+        return None;
+    }
     let tiny = width.clone() / ratio(1 << 20, 1);
     if !holds(st, h, &tiny) {
         return None;
@@ -349,7 +352,8 @@ pub fn system(clump: &Manifest, agitation: &Ratio, path: &[u64], unit: &Ratio, u
     let annulus = Stretch { inner: x.clone(), outer: ratio(2, 1), lambda: ratio(1, 1), agitation: disc_agitation, members: Vec::new() };
     let mut worlds = Vec::new();
     let mut inside = star_hold.clone();
-    if let Some((w, count)) = collapse(&annulus, &x) {
+    // A star that held every kind has no disc (its annulus has no width).
+    if let Some((w, count)) = if disc.is_empty() { None } else { collapse(&annulus, &x) } {
         let width = ratio(2, 1) - x.clone();
         let share = w.clone() / width;
         for i in 0..count {
