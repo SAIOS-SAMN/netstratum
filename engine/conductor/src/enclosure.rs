@@ -5,9 +5,9 @@
 //! to what they enclose); only the universal core is uplinked to the hypha.
 //!
 //! - **The rim** is where the core's pulse refocuses, on the enclosure's far
-//!   side: held as the sphere's HALF CIRCUMFERENCE, in light-rings, so its
-//!   radius (rim / π) is never formed (a reading, like a sine). Transitional:
-//!   the outermost member's reach, until formation reads the refocus.
+//!   side: held as the sphere's HALF CIRCUMFERENCE, so its radius (rim / π)
+//!   is never formed (a reading, like a sine). THE RIM LAW: it is the
+//!   enclosure's own holding (`rim_of`).
 //! - **The enclosure's own ring** is the pulse's round trip, core to rim and
 //!   back: `2 · rim` light-rings. Each tier counts its turns on its own ring,
 //!   so the same turning reads few turns on a large enclosure's ring and many
@@ -47,21 +47,29 @@ impl Enclosure {
     }
 }
 
-/// The rim of a centre's enclosure: its outermost member's reach.
-fn rim_of(centre: &Body) -> Option<Ratio> {
-    centre.satellites.iter().map(|s| s.radius.clone()).max().filter(|r| *r > ratio(0, 1))
+/// THE RIM LAW (operator 2026-10-16, with xylarium): an enclosure's rim, its
+/// half circumference where the pulse refocuses, is its own HOLDING, where the
+/// vacuum's hold equals the continuum's push (deficit ½, as at the throat):
+/// a galaxy's its core's state plus its grains, a star system's its heart's
+/// state (its grains) plus its grains. With the state equal to the grains,
+/// every enclosure spans [throat 1, rim 2] of its own units.
+fn rim_of(centre: &Body, galaxy: bool, unit: &Ratio) -> Option<Ratio> {
+    let grains = crate::pulse::mass(&centre.total());
+    let state = if galaxy { crate::pulse::core_state(centre) } else { grains.clone() };
+    Some((state + grains) / unit.clone()).filter(|r| *r > ratio(0, 1) && !centre.satellites.is_empty())
 }
 
 /// Every enclosure of the universe: each galaxy with a member, and each
 /// star system with a world.
 pub fn enclosures(u: &Universe) -> Vec<Enclosure> {
     let mut out = Vec::new();
+    let unit = crate::breath::unit_mass(u);
     for core in &u.cores {
-        if let Some(rim) = rim_of(core) {
+        if let Some(rim) = rim_of(core, true, &unit) {
             out.push(Enclosure { path: core.path.clone(), dim: 360, rim, throat: core.radius.clone() });
         }
         for sys in &core.satellites {
-            if let Some(rim) = rim_of(sys) {
+            if let Some(rim) = rim_of(sys, false, &unit) {
                 out.push(Enclosure { path: sys.path.clone(), dim: 60, rim, throat: sys.radius.clone() });
             }
         }

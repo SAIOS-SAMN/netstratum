@@ -361,13 +361,17 @@ pub struct Universe {
     pub medium: Manifest,
 }
 
+/// The universal echo, in bells: the universe's own ring, the pulse's round
+/// trip to its rim and back (rim 2 core rings, so 4 core rings).
+pub const T_U: u64 = 60;
+
 /// THE PULSE: the manifest deployed from `seed`. The unit of mass is the
 /// deepest core's hole.
 pub fn deploy(seed: &[u8; 32], manifest: &Manifest) -> Universe {
-    // The epicenter keeps nothing; the intergalactic medium is set aside.
-    let mut medium = take(manifest, &tier(3).medium);
+    // The intergalactic medium is what no core holds (the cut one tier up,
+    // below); nothing is set aside by a share.
+    let mut medium = Manifest::new();
     let mut formed = manifest.clone();
-    less(&mut formed, &medium);
     // THE SPECTRUM (docs/78): the count of modes and each mode's strength
     // `a_i`, seed draws from the base-60 field (1 to 60). Core i takes
     // `a_i / Σa` of the formed matter, so sizes fall in no fixed order and
@@ -376,15 +380,26 @@ pub fn deploy(seed: &[u8; 32], manifest: &Manifest) -> Universe {
     let modes = 1 + (draw(seed, &[], "modes", 0) % 60) as u32;
     let strengths: Vec<i64> = (1..=modes).map(|i| 1 + (draw(seed, &[u64::from(i)], "strength", 0) % 60) as i64).collect();
     let sum: i64 = strengths.iter().sum();
-    let mut shares: Vec<(u32, Manifest)> = Vec::new();
+    // THE CUT ONE TIER UP (operator 2026-10-16, with xylarium): the
+    // epicentre's bounce sorts the candidate cores as a galaxy's sorts its
+    // nuclei. In universe units (its state 1, all grains 1, H_u = 2, the push
+    // share p_u = ½) a core of weight `w_i = a_i/Σa` (N candidates, mean
+    // weight 1/N) is carried `ℓ_i = 1/(2N·w_i)` and stands at
+    // `d_i = 1/(4N·w_i)` core rings. HELD as a galaxy iff `d_i ≤ rim_u = 2`
+    // (the rim law), i.e. `a_i ≥ Σa/(8N)`; lighter cores never form and stay
+    // intergalactic. A core reaching inside the throat (`d_i < 1`) is held AT
+    // the throat's first ring, d = 1: the heaviest crowd the first ring.
+    let n = i64::from(modes);
+    let mut shares: Vec<(u32, Manifest, Ratio)> = Vec::new();
     for (i, a) in (1..=modes).zip(&strengths) {
         let m = take(&formed, &ratio(*a, sum));
-        if take(&m, &tier(2).centre).is_empty() {
+        if *a * 8 * n < sum || take(&m, &tier(2).centre).is_empty() {
             continue;
         }
-        shares.push((i, m));
+        let d = ratio(sum, 4 * n * *a).max(ratio(1, 1));
+        shares.push((i, m, d));
     }
-    for (_, m) in &shares {
+    for (_, m, _) in &shares {
         less(&mut formed, m);
     }
     for (k, a) in formed {
@@ -393,22 +408,44 @@ pub fn deploy(seed: &[u8; 32], manifest: &Manifest) -> Universe {
     // THE BIG BANG POPULATES THE UNIVERSE (docs/78): each core keeps its disc,
     // and its galaxy's first generation of star systems and their planets is
     // laid down by the tidal law; what forms no system is the galaxy's medium,
-    // gas the breath later forms into new systems. A core stands at its mode's
-    // distance from the universal core, `d_i`, a seed draw (60 to 3,600 bells
-    // of light travel), the spectrum's own field; its echoes arrive that much
-    // later.
+    // gas the breath later forms into new systems. A core stands where the cut
+    // one tier up holds it (above); its echoes arrive that many bells later.
     // Each core keeps what its bounce holds (`disc_cut`), its galaxy's
     // share of the universe's holding the push's reading.
     let universe_mass = mass(manifest);
-    let discs: Vec<Manifest> = shares.iter().map(|(_, m)| disc_cut(m, &(mass(m) / universe_mass.clone()))).collect();
+    let discs: Vec<Manifest> = shares.iter().map(|(_, m, _)| disc_cut(m, &(mass(m) / universe_mass.clone()))).collect();
     let unit = discs.iter().map(mass).max().filter(|m| !m.is_zero()).unwrap_or_else(|| ratio(1, 1));
     // FORMATION (docs/83): no system is placed. Each core keeps its disc;
     // the rest is its galaxy's GAS, laid down as parcels where the push left
     // each element; stars collapse from it as it cools (`breath`).
+    // THE GALAXIES ORBIT THE UNIVERSAL SINGULARITY (operator): inside out,
+    // each about the universal state plus every core inside it (each core
+    // its galaxy's state and grains, 2·w_j), by the motion law, in core
+    // rings; a core ring is `T_U / 4` bells (the universe's own echo is the
+    // round trip to its rim 2). The first ring is the deepest well.
+    let mut order: Vec<usize> = (0..shares.len()).collect();
+    order.sort_by(|&a, &b| shares[a].2.cmp(&shares[b].2));
+    let mut orbits: Vec<(Ratio, Ratio, Ratio)> = vec![(ratio(0, 1), ratio(0, 1), ratio(0, 1)); shares.len()];
+    let mut inside = ratio(1, 1);
+    let bells = ratio((T_U / 4) as i64, 1);
+    let mut k = 0;
+    while k < order.len() {
+        // A ring: every core at the same reach orbits about what is inside it.
+        let d = shares[order[k]].2.clone();
+        let ring: Vec<usize> = order[k..].iter().copied().take_while(|&j| shares[j].2 == d).collect();
+        for &j in &ring {
+            orbits[j] = (d.clone() * bells.clone(), crate::ring::period(&d, &inside) * bells.clone(), crate::ring::spin(&d, &inside));
+        }
+        for &j in &ring {
+            inside += ratio(2 * strengths[(shares[j].0 - 1) as usize], sum);
+        }
+        k += ring.len();
+    }
     let cores = shares
         .into_iter()
         .zip(discs)
-        .map(|((i, m), disc)| {
+        .zip(orbits)
+        .map(|(((i, m, _), disc), (radius, period, ell))| {
             let share = mass(&m) / universe_mass.clone();
             let (shells, _) = crate::formation::shells(&m, &disc, &share);
             let gas: Vec<crate::formation::Shell> = shells.into_iter().filter(|s| s.outer > s.inner).collect();
@@ -423,8 +460,7 @@ pub fn deploy(seed: &[u8; 32], manifest: &Manifest) -> Universe {
                 let reach = (p.inner.clone() + p.outer.clone()) / ratio(2, 1) * scale.clone();
                 acc + p.held.clone() * scale.clone() * crate::ring::spin(&reach, &h)
             });
-            let distance = ratio(60 * (1 + (draw(seed, &[u64::from(i)], "distance", 0) % 60) as i64), 1);
-            Body { path: vec![u64::from(i)], radius: distance, period: ratio(0, 1), kept: disc, satellites: Vec::new(), medium, ell: ratio(0, 1), medium_spin, gas, born: 0 }
+            Body { path: vec![u64::from(i)], radius, period, kept: disc, satellites: Vec::new(), medium, ell, medium_spin, gas, born: 0 }
         })
         .collect();
     Universe { cores, medium }

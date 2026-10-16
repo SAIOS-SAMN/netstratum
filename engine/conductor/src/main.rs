@@ -67,7 +67,7 @@ fn main() {
     };
     // THE UNIVERSAL PULSE: TUniversal sets it at founding; 60 bells stands in.
     // One beat is one bell.
-    const T_U: u64 = 60;
+    const T_U: u64 = conductor::pulse::T_U;
     // Operator 2026-10-16: pause the economics until the universe is stable.
     const ECONOMY_PAUSED: bool = true;
     let unit = conductor::breath::unit_mass(&universe);
