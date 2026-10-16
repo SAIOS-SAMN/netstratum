@@ -1,0 +1,281 @@
+//! THE OBSERVER: read the live universe on demand, never write. The binary
+//! run is the witness (operator); this is how it is read.
+//!
+//! `observe [--var var-e1] <view> [args]`, views:
+//! - `universe`               the whole: galaxies, stars, worlds, gas, ledger
+//! - `galaxy G`               one galaxy: its core, disc, gas, systems, clock
+//! - `star G S`               one star: matter, orbit, heartbeat, coupling
+//! - `world G S W`            one world: matter, orbit, what it offers life
+//! - `gas G [bell]`           a galaxy's gas, stretch by stretch: why it
+//!                            does or does not collapse
+//! - `formation`              each galaxy's cut, gas, echo and stars
+//! - `heartbeat`              every star's burn: fuel left, life, light
+//! - `clock`                  the keepers, epicenter to rims; the time
+//!                            inversion through the enclosures
+//! - `ledger`                 mass, spin, magnetism, conserved sums
+//! - `civs`                   the civilizations: live and collapsed
+//! - `events [N]`             the last N creation/collapse events (journal)
+//! - `pace [N]`               beat pace and the top costs over the last N
+//!                            beats; who holds the build lock (contention)
+use cfe::ratio::{ratio, Ratio};
+use conductor::{breath, chronometry, enclosure, formation, life, pulse};
+use std::path::Path;
+use std::process::Command;
+
+fn f(r: &Ratio) -> f64 {
+    r.numer().to_string().parse::<f64>().unwrap_or(0.0) / r.denom().to_string().parse::<f64>().unwrap_or(1.0)
+}
+
+/// The heaviest elements of a manifest by holding, as `Z:share`.
+fn composition(m: &pulse::Manifest, top: usize) -> String {
+    let total = pulse::mass(m);
+    if total == ratio(0, 1) {
+        return "—".into();
+    }
+    let mut parts: Vec<(String, f64)> = m.iter().map(|(k, a)| (k.clone(), f(&(pulse::mass(&[(k.clone(), a.clone())].into()) / total.clone())))).collect();
+    parts.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
+    parts.iter().take(top).map(|(k, s)| format!("{k}:{s:.3}")).collect::<Vec<_>>().join(" ")
+}
+
+fn beat(var: &str) -> u64 {
+    std::fs::read_to_string(Path::new(var).join("conductor.beat")).ok().and_then(|s| s.trim().parse().ok()).unwrap_or(0)
+}
+
+fn journal(lines: usize) -> Vec<String> {
+    let out = Command::new("journalctl").args(["--user", "-u", "netstratum-conductor", "--no-pager", "-o", "short-iso", "-n", &lines.to_string()]).output();
+    out.map(|o| String::from_utf8_lossy(&o.stdout).lines().map(String::from).collect()).unwrap_or_default()
+}
+
+/// A system's nested clock: its galaxy's rate times its orbit's.
+fn system_rate(u: &pulse::Universe, g: usize, s: usize, unit: &Ratio) -> Ratio {
+    let core = &u.cores[g];
+    let inside = core.satellites[..s].iter().fold(pulse::mass(&core.kept) + pulse::core_state(core), |a, sys| a + pulse::mass(&sys.total()));
+    breath::galaxy_rate(u, g, unit) * conductor::ring::rate(&core.satellites[s].radius, &(inside / unit.clone()))
+}
+
+fn main() {
+    let mut args: Vec<String> = std::env::args().skip(1).collect();
+    let mut var = String::from("var-e1");
+    if let Some(i) = args.iter().position(|a| a == "--var") {
+        if i + 1 < args.len() {
+            var = args.remove(i + 1);
+        }
+        args.remove(i);
+    }
+    let view = args.first().cloned().unwrap_or_else(|| "universe".into());
+    let num = |i: usize| args.get(i).and_then(|a| a.parse::<u32>().ok());
+    // Views read from the journal need no universe.
+    match view.as_str() {
+        "events" => return events(num(1).unwrap_or(40) as usize),
+        "pace" => return pace(num(1).unwrap_or(30) as u64),
+        "civs" => return civs(&var),
+        _ => {}
+    }
+    let Some((seed, u)) = pulse::read(Path::new(&var)) else {
+        println!("no universe at {var}/pulse.bin");
+        return;
+    };
+    let now = beat(&var);
+    let unit = breath::unit_mass(&u);
+    let universe_hold = pulse::mass(&u.total());
+    let galaxy = |g: u32| u.cores.iter().position(|c| c.path[0] == g);
+    match view.as_str() {
+        "universe" => {
+            let stars: usize = u.cores.iter().map(|c| c.satellites.len()).sum();
+            let worlds: usize = u.cores.iter().flat_map(|c| &c.satellites).map(|s| s.satellites.len()).sum();
+            println!("UNIVERSE at beat {now}: {} galaxies, {stars} stars, {worlds} worlds; intergalactic medium {:.3} of the whole", u.cores.len(), f(&(pulse::mass(&u.medium) / universe_hold.clone())));
+            for (i, c) in u.cores.iter().enumerate() {
+                let total = pulse::mass(&c.total());
+                println!(
+                    "  galaxy {:>2}: share {:.3}, disc {:.3}, gas {:.3} ({} parcels), {} stars; distance {} (first echo at bell {}); clock {:.6}",
+                    c.path[0], f(&(total.clone() / universe_hold.clone())), f(&(pulse::mass(&c.kept) / total.clone())), f(&(pulse::mass(&c.medium) / total.clone())),
+                    c.gas.len(), c.satellites.len(), c.radius, 60 + f(&c.radius) as u64, f(&breath::galaxy_rate(&u, i, &unit))
+                );
+            }
+        }
+        "galaxy" => {
+            let Some(i) = num(1).and_then(galaxy) else { return println!("galaxy G: no such galaxy") };
+            let c = &u.cores[i];
+            let total = pulse::mass(&c.total());
+            println!("GALAXY {:?} at beat {now}: share {:.4} of the universe; distance {} light-rings, first echo at bell {}", c.path, f(&(total.clone() / universe_hold.clone())), c.radius, 60 + f(&c.radius) as u64);
+            println!("  core state hold {:.3e} (units of the deepest hole), disc {:.3e}: {}", f(&(pulse::core_state(c) / unit.clone())), f(&(pulse::mass(&c.kept) / unit.clone())), composition(&c.kept, 6));
+            println!("  gas {:.3} of the galaxy in {} parcels: {}; gas spin {:.3e}", f(&(pulse::mass(&c.medium) / total.clone())), c.gas.len(), composition(&c.medium, 6), f(&c.medium_spin));
+            println!("  clock against the universal core {:.6}", f(&breath::galaxy_rate(&u, i, &unit)));
+            for (s, sys) in c.satellites.iter().enumerate() {
+                println!("  star {:?}: holding {:.3e}, born bell {}, reach {:.3e}, {} worlds, clock {:.6}; {}", sys.path, f(&(pulse::mass(&sys.kept) / unit.clone())), sys.born, f(&sys.radius), sys.satellites.len(), f(&system_rate(&u, i, s, &unit)), composition(&sys.kept, 3));
+            }
+        }
+        "star" => {
+            let (Some(i), Some(s)) = (num(1).and_then(galaxy), num(2)) else { return println!("star G S") };
+            let Some(k) = u.cores[i].satellites.iter().position(|x| x.path[1] == s) else { return println!("no such star") };
+            let sys = &u.cores[i].satellites[k];
+            let rate = system_rate(&u, i, k, &unit);
+            let received: u64 = (rate.clone() * ratio(now.saturating_sub(sys.born) as i64, 1)).floor().to_integer().try_into().unwrap_or(0);
+            println!("STAR {:?} at beat {now}: born bell {}, holding {:.4e} (units of the deepest hole), magnetism {:.3e}", sys.path, sys.born, f(&(pulse::mass(&sys.kept) / unit.clone())), f(&(pulse::magnetism(&sys.kept) / unit.clone())));
+            println!("  matter: {}", composition(&sys.kept, 8));
+            println!("  orbit: reach {:.4e}, period {:.4e} rings, spin ℓ {:.4e}; clock {:.6}, {received} rings received since birth", f(&sys.radius), f(&sys.period), f(&sys.ell), f(&rate));
+            match formation::heartbeat(&sys.kept, &universe_hold, received) {
+                Some((every, left, light)) => println!("  HEARTBEAT: fuel halves every {every} received rings; fuel left {:.4}; light {:.3e} per received ring", f(&left), f(&light)),
+                None => println!("  HEARTBEAT: no hydrogen fuel"),
+            }
+            println!("  coupling κ {:.4e}", formation::coupling(&sys.kept, &universe_hold).map(|k| f(&k)).unwrap_or(0.0));
+            for o in &sys.satellites {
+                println!("  world {:?}: reach {:.3e}, period {:.3e}; {}", o.path, f(&o.radius), f(&o.period), composition(&o.kept, 4));
+            }
+        }
+        "world" => {
+            let path: Vec<u32> = (1..=3).filter_map(num).collect();
+            if path.len() != 3 {
+                return println!("world G S W");
+            }
+            let Some(o) = u.cores.iter().flat_map(|c| &c.satellites).flat_map(|s| &s.satellites).find(|o| o.path == path) else { return println!("no such world") };
+            println!("WORLD {:?} at beat {now}: reach {:.4e}, period {:.4e} rings, holding {:.3e}; {}", o.path, f(&o.radius), f(&o.period), f(&(pulse::mass(&o.kept) / unit.clone())), composition(&o.kept, 8));
+            match life::readings(&u, &seed).get(&path) {
+                Some(r) => {
+                    let w = &r.world;
+                    println!("  heat {:.1} K, burn {:.3}, gravity {:.3e}, core κ {:.3}, atmosphere {:.3e}, pressure {:.3e}, coupling {:.6}, window {} echoes", f(&w.heat), f(&w.burn), f(&w.gravity), f(&w.core), f(&w.atmosphere), f(&w.pressure), f(&w.coupling), w.window);
+                    println!("  media: chemical {:?} geologic {:?} plasmic {:?} informational {:?}; climb {:?}", w.chemical.as_ref().map(f), w.geologic.as_ref().map(f), w.plasmic.as_ref().map(f), w.informational.as_ref().map(f), r.climb.as_ref().map(|(c, m)| (f(c), *m)));
+                }
+                None => println!("  no life reading (no star burn or no matter)"),
+            }
+        }
+        "gas" => {
+            let Some(i) = num(1).and_then(galaxy) else { return println!("gas G [bell]") };
+            let bell = args.get(2).and_then(|b| b.parse().ok()).unwrap_or(now);
+            let c = &u.cores[i];
+            let all = c.total();
+            let share = pulse::mass(&all) / universe_hold.clone();
+            let (shells, h) = formation::shells(&all, &c.kept, &share);
+            let rings: Vec<formation::Shell> = shells.into_iter().filter(|r| r.outer == r.inner).collect();
+            let gas: Vec<formation::Shell> = c.gas.iter().cloned().chain(rings).collect();
+            let stretches = formation::stretches(&gas, bell);
+            println!("GAS {:?} at bell {bell}: H {:.3}, push share {:.3}, {} parcels, {} stretches", c.path, f(&h), f(&((h.clone() - ratio(1, 1)) / h.clone())), c.gas.len(), stretches.len());
+            for st in &stretches {
+                let ignite = formation::ignition_share(&st.agitation).map(|s| format!("{:.3}", f(&s))).unwrap_or_else(|| "too hot".into());
+                println!(
+                    "  [{:.3e}..{:.3e}] λ {:.3e} a {:.3e} self-deficit {:.3e} → collapse {:?}, ignition share {ignite}",
+                    f(&st.inner), f(&st.outer), f(&st.lambda), f(&st.agitation), f(&st.lambda) / (1.0 + f(&st.lambda)),
+                    formation::collapse(st, &h).map(|(w, n)| (format!("{:.3e}", f(&w)), n))
+                );
+            }
+        }
+        "formation" => {
+            for c in &u.cores {
+                let total = pulse::mass(&c.total());
+                let metal = c.satellites.iter().filter(|s| s.kept.keys().any(|k| k != "Z001" && k != "Z002")).count();
+                println!(
+                    "  galaxy {:>2}: disc {:.3} gas {:.3} ({} parcels, {} jet batches); first echo bell {}; {} stars ({metal} with metals), {} worlds",
+                    c.path[0], f(&(pulse::mass(&c.kept) / total.clone())), f(&(pulse::mass(&c.medium) / total.clone())), c.gas.len(), c.gas.iter().filter(|g| g.born > 0).count(),
+                    60 + f(&c.radius) as u64, c.satellites.len(), c.satellites.iter().map(|s| s.satellites.len()).sum::<usize>()
+                );
+            }
+        }
+        "heartbeat" => {
+            for (i, c) in u.cores.iter().enumerate() {
+                for (k, sys) in c.satellites.iter().enumerate() {
+                    let rate = system_rate(&u, i, k, &unit);
+                    let received: u64 = (rate.clone() * ratio(now.saturating_sub(sys.born) as i64, 1)).floor().to_integer().try_into().unwrap_or(0);
+                    if let Some((every, left, light)) = formation::heartbeat(&sys.kept, &universe_hold, received) {
+                        println!("  star {:?}: born {}, {received} rings, halves every {every}, fuel left {:.4}, light {:.3e}, He {:.3}", sys.path, sys.born, f(&left), f(&light), f(&(sys.kept.get("Z002").cloned().unwrap_or_else(|| ratio(0, 1)) * ratio(6, 1) / pulse::mass(&sys.kept))));
+                    }
+                }
+            }
+        }
+        "clock" => {
+            let n = ratio(now as i64, 1);
+            for (keeper, inner) in chronometry::keepers(&u) {
+                let r = keeper.read(&n);
+                println!("  keeper {:?} {:?}: rate {:.6}, delay {:.1}, local {:.2}, rung {}, coherence {:.3}, inside {:?}", keeper.galaxy, keeper.shell, f(&keeper.rate), f(&keeper.delay), f(&r.local), r.rung, f(&r.coherence), inner);
+            }
+            for e in enclosure::enclosures(&u) {
+                println!("  enclosure {:?} on S^{}: rim {:.3e}, own ring {:.3e}, throat {:.3e}", e.path, e.dim, f(&e.rim), f(&e.ring()), f(&e.throat));
+            }
+        }
+        "ledger" => {
+            let mass = pulse::mass(&u.total()) / unit.clone();
+            let magnetism = pulse::magnetism(&u.total()) / unit.clone();
+            println!("LEDGER at beat {now}: mass {:.6e} spin {:.6e} magnetism {:.6e} mass+magnetism {:.6e}", f(&mass), f(&pulse::spin_total(&u, &unit)), f(&magnetism), f(&(mass + magnetism)));
+        }
+        other => println!("unknown view {other}; see the source's header for the views"),
+    }
+}
+
+/// The last N creation, collapse and conservation lines from the running
+/// conductor's journal.
+fn events(n: usize) {
+    let keys = ["A MIND WAKES", "COLLAPSE", "FORMATION", "HEARTBEAT", "LEDGER", "ENCLOSURES", "BREATH", "panicked", "error"];
+    let lines: Vec<String> = journal(40_000).into_iter().filter(|l| keys.iter().any(|k| l.contains(k))).collect();
+    for l in lines.iter().skip(lines.len().saturating_sub(n)) {
+        println!("{}", l.chars().take(260).collect::<String>());
+    }
+}
+
+/// Beat pace and contention: seconds a beat over the last N beats, the top
+/// PROFILE costs, and who holds the shared build lock.
+fn pace(n: u64) {
+    let lines = journal(60_000);
+    let mut beats: Vec<(String, u64)> = Vec::new();
+    let mut costs: std::collections::BTreeMap<String, f64> = std::collections::BTreeMap::new();
+    for l in &lines {
+        if let Some(rest) = l.split("civilizations live — beat ").nth(1) {
+            if let Ok(b) = rest.trim().parse::<u64>() {
+                beats.push((l.split_whitespace().next().unwrap_or("").to_string(), b));
+            }
+        }
+    }
+    let since = beats.last().map(|(_, b)| b.saturating_sub(n)).unwrap_or(0);
+    for l in &lines {
+        let Some(rest) = l.split("PROFILE ").nth(1) else { continue };
+        let Some(b) = l.split("beat ").nth(1).and_then(|r| r.split(':').next()).and_then(|b| b.parse::<u64>().ok()) else { continue };
+        if b < since {
+            continue;
+        }
+        let mut it = rest.split_whitespace();
+        let (Some(name), Some(t)) = (it.next(), it.next()) else { continue };
+        let secs = if let Some(v) = t.strip_suffix("ms") { v.parse::<f64>().unwrap_or(0.0) / 1e3 } else if let Some(v) = t.strip_suffix("µs") { v.parse::<f64>().unwrap_or(0.0) / 1e6 } else if let Some(v) = t.strip_suffix("ns") { v.parse::<f64>().unwrap_or(0.0) / 1e9 } else { t.trim_end_matches('s').parse::<f64>().unwrap_or(0.0) };
+        *costs.entry(name.to_string()).or_insert(0.0) += secs;
+    }
+    let recent: Vec<&(String, u64)> = beats.iter().filter(|(_, b)| *b >= since).collect();
+    if let (Some(first), Some(last)) = (recent.first(), recent.last()) {
+        let secs = |t: &str| chrono_secs(t);
+        let span = secs(&last.0) - secs(&first.0);
+        let n_beats = last.1.saturating_sub(first.1).max(1);
+        println!("PACE: beats {}..{}, {:.1} s a beat", first.1, last.1, span / n_beats as f64);
+    }
+    let mut top: Vec<(String, f64)> = costs.into_iter().collect();
+    top.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
+    for (name, s) in top.iter().take(10) {
+        println!("  {s:>9.2} s  {name}");
+    }
+    let locks = Command::new("lslocks").args(["-n", "-o", "PID,PATH"]).output().map(|o| String::from_utf8_lossy(&o.stdout).to_string()).unwrap_or_default();
+    let holders: Vec<&str> = locks.lines().filter(|l| l.contains("xyl-heavy.lock")).collect();
+    if holders.is_empty() {
+        println!("BUILD LOCK: free");
+    }
+    for h in holders {
+        let pid = h.split_whitespace().next().unwrap_or("");
+        let cmd = std::fs::read_to_string(format!("/proc/{pid}/cmdline")).unwrap_or_default().replace('\0', " ");
+        println!("BUILD LOCK: held by pid {pid}: {}", cmd.chars().take(160).collect::<String>());
+    }
+}
+
+/// Seconds of an ISO journal timestamp's time of day.
+fn chrono_secs(t: &str) -> f64 {
+    let time = t.split('T').nth(1).unwrap_or("");
+    let hms: Vec<f64> = time.split(['+', '-']).next().unwrap_or("").split(':').filter_map(|x| x.parse().ok()).collect();
+    let day: f64 = t.split('T').next().and_then(|d| d.rsplit('-').next()).and_then(|d| d.parse().ok()).unwrap_or(0.0);
+    day * 86400.0 + hms.first().copied().unwrap_or(0.0) * 3600.0 + hms.get(1).copied().unwrap_or(0.0) * 60.0 + hms.get(2).copied().unwrap_or(0.0)
+}
+
+/// The civilizations: each world directory, live or collapsed.
+fn civs(var: &str) {
+    let Ok(dirs) = std::fs::read_dir(Path::new(var).join("worlds")) else { return println!("no worlds at {var}") };
+    let mut names: Vec<(String, bool)> = dirs.filter_map(|d| d.ok()).map(|d| (d.file_name().to_string_lossy().to_string(), d.path().join("collapsed").exists())).collect();
+    names.sort();
+    let live = names.iter().filter(|(_, c)| !c).count();
+    println!("CIVILIZATIONS: {live} live, {} collapsed", names.len() - live);
+    let collapsed: Vec<&str> = names.iter().filter(|(_, c)| *c).map(|(n, _)| n.as_str()).collect();
+    if !collapsed.is_empty() {
+        println!("  collapsed: {}", collapsed.join(", "));
+    }
+}
