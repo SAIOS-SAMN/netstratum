@@ -170,27 +170,51 @@ fn main() {
                 );
             }
         }
-        "crests" => {
-            // THE GALAXY'S OWN CRESTS (docs/83): each crest ring, the matter
-            // the kick collects on it, its binding against its floor.
-            let Some(i) = num(1).and_then(galaxy) else { return println!("crests G") };
+        "flows" => {
+            // THE FLOWS (docs/83): a galaxy's parcels, held vs gas, the spread
+            // of their reaches and phases, and the best clump candidate's
+            // terms (binding vs agitation + the unlocked face + the shear).
+            let Some(i) = num(1).and_then(galaxy) else { return println!("flows G") };
             let c = &u.cores[i];
-            let (_, _, h) = formation::shells(&c.total(), &c.kept);
-            let mut matter = c.kept.clone();
-            for (k, a) in &c.medium {
-                *matter.entry(k.clone()).or_insert_with(|| ratio(0, 1)) += a.clone();
+            let Some((p, h, _)) = pulse::galaxy_push(&c.total()) else { return println!("no matter") };
+            let total = pulse::mass(&c.total());
+            let held = c.flows.iter().filter(|x| conductor::flows::held(x, &h, &p) == ratio(1, 1)).count();
+            let gas = c.flows.iter().filter(|x| conductor::flows::held(x, &h, &p) == ratio(0, 1)).count();
+            let reaches: Vec<f64> = c.flows.iter().map(|x| f(&(x.ell_o.clone() / h.clone()))).collect();
+            let (r0, r1) = (reaches.iter().cloned().fold(f64::INFINITY, f64::min), reaches.iter().cloned().fold(0.0, f64::max));
+            let phases: Vec<String> = (0..conductor::flows::PLANES).map(|k| {
+                let ph: Vec<f64> = c.flows.iter().map(|x| f(&x.phase[k])).collect();
+                format!("{:.3}..{:.3}", ph.iter().cloned().fold(f64::INFINITY, f64::min), ph.iter().cloned().fold(0.0, f64::max))
+            }).collect();
+            let circ: f64 = c.flows.iter().map(|x| f(&x.ell_c)).fold(0.0, f64::max);
+            println!("FLOWS {:?} at beat {now}: H {:.3}, {} parcels ({held} wholly held, {gas} wholly gas), reach {r0:.3}..{r1:.3}, phases {phases:?}, max ℓ_c {circ:.3e}, reservoir {:.3e}", c.path, f(&h), c.flows.len(), f(&c.reservoir));
+            let mut best: Option<(f64, String)> = None;
+            let mut fil_best: Option<(f64, String)> = None;
+            let mut fil_hold = 0;
+            for j in 0..c.flows.len() {
+                if let Some((members, [_, a, face, _])) = conductor::flows::candidate(&c.flows, &h, &p, &total, j) {
+                    let fb = conductor::flows::filament(&c.flows, &h, &total, j, &members);
+                    let m = f(&fb) - f(&a) - f(&face);
+                    if m >= 0.0 {
+                        fil_hold += 1;
+                    }
+                    if fil_best.as_ref().map(|(x, _)| m > *x).unwrap_or(true) {
+                        fil_best = Some((m, format!("  best FILAMENT about {} at R {:.3}: {} members, λ/(1+λ) {:.4} vs agitation {:.4} + face {:.4}, margin {:.4}", c.flows[j].key, f(&(c.flows[j].ell_o.clone() / h.clone())), members.len(), f(&fb), f(&a), f(&face), m)));
+                    }
+                }
+                if let Some((members, [bind, a, face, shear])) = conductor::flows::candidate(&c.flows, &h, &p, &total, j) {
+                    let margin = f(&bind) - f(&a) - f(&face) - f(&shear);
+                    let line = format!("  best clump about {} at R {:.3}: {} members, binding {:.4} vs agitation {:.4} + face {:.4} + shear {:.4}, margin {:.4}", c.flows[j].key, f(&(c.flows[j].ell_o.clone() / h.clone())), members.len(), f(&bind), f(&a), f(&face), f(&shear), margin);
+                    if best.as_ref().map(|(m, _)| margin > *m).unwrap_or(true) {
+                        best = Some((margin, line));
+                    }
+                }
             }
-            let g = pulse::mass(&c.total());
-            let m_all = if g == ratio(0, 1) { ratio(0, 1) } else { pulse::mass(&matter) / g };
-            let e = if pulse::mass(&matter) == ratio(0, 1) { ratio(0, 1) } else { pulse::magnetism(&matter) / pulse::mass(&matter) };
-            let n = now.saturating_sub(60 + f(&c.radius) as u64) / 60 + 1;
-            let all = conductor::ocean::crests(n, &h);
-            let sum = all.iter().fold(ratio(0, 1), |s, (_, a)| s + a.clone());
-            println!("CRESTS {:?} at beat {now}: H {:.3}, {} crests standing (q ≤ {n}), matter {:.3} of the galaxy", c.path, f(&h), all.len(), f(&m_all));
-            for (r, a) in all.iter().take(24) {
-                let m = m_all.clone() * a.clone() / sum.clone();
-                let mu = m.clone() * e.clone();
-                println!("  crest at {:.4} (a {}): m {:.4e}, μ {:.4e} → {:?}", f(r), a, f(&m), f(&mu), formation::crest_collapse(&m, &mu, &ratio(0, 1), r, &h).map(|(w, k)| (format!("{:.3e}", f(&w)), k)));
+            if let Some((_, line)) = best {
+                println!("{line}");
+            }
+            if let Some((_, line)) = fil_best {
+                println!("{line}; {fil_hold} of {} parcels' filaments hold", c.flows.len());
             }
         }
         "formation" => {
