@@ -206,8 +206,9 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         let (now, h) = crate::formation::shells(&galaxy, &core.kept);
         let rings: Vec<crate::formation::Shell> = now.into_iter().filter(|r| r.outer == r.inner).collect();
         let weight = |k: &str| ratio(i64::from(k.strip_prefix('Z').and_then(|z| z.parse::<u32>().ok()).map(cfe::almanac::atom::hold).unwrap_or(1)), 1);
-        // JETS: the disc halves into the jet every ⌈1/p⌉ rings; each batch
-        // due in this echo's span reaches the rim (`formation::jet_batch`)
+        // JETS: the core fires on its own BELL, the bounce (the jetstream
+        // ruling: the bounce's pressure ejects; with xylarium), once an
+        // echo it regenerates; the batch reaches the rim (`formation::jet_batch`)
         // cold, where the push and the deficit balance (δ = p = ½). THE
         // RECYCLING CIRCUIT (docs/83, with xylarium): the rim is the 1:1
         // crest (`P_b = P(H) = 2`, `R_{1/1} = H(2 − 1) = 2`), where the
@@ -217,19 +218,19 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         // back in from the ocean (owed: the universe's crests).
         let mut jets = 0;
         let mut to_ocean = crate::pulse::Manifest::new();
-        // The jets run on the core's INTERFACE CLOCK (one law at every tier:
-        // the core is a heart one tier up): the disc halves into the jet
-        // every `⌈Q̄/(e·s)⌉` rings, not every `⌈1/p⌉`. REGENERATION
-        // (operator ruling (i), with xylarium): the core runs on its own
-        // holding, s = 1; no share of the universe enters its clock.
+        // The INTERFACE CLOCK (one law at every tier: the core is a heart
+        // one tier up) says HOW MUCH leaves a bounce, not how often: the
+        // share `1/⌈Q̄/(e·s)⌉` of the disc (closed-shell discs barely jet).
+        // REGENERATION (operator ruling (i)): the core runs on its own
+        // holding, s = 1; no share of the universe enters it.
         let every = crate::formation::interface_every(&core.kept, &ratio(1, 1));
         let rim = core.gas.iter().map(|g| g.outer.clone()).chain(rings.iter().map(|r| r.outer.clone())).max().unwrap_or_else(|| ratio(1, 1));
-        let first_due = bell.saturating_sub(t_u) / every + 1;
-        for k in first_due..=bell / every {
+        let jet_share = ratio(1, every.min(i64::MAX as u64) as i64);
+        for k in [bell] {
             let galaxy_now = core.total();
             let (now, _) = crate::formation::shells(&galaxy_now, &core.kept);
             let rings_now: Vec<crate::formation::Shell> = now.into_iter().filter(|r| r.outer == r.inner).collect();
-            for parcel in crate::formation::jet_batch(&rings_now, &h, &rim, k * every) {
+            for parcel in crate::formation::jet_batch(&rings_now, &h, &rim, k, &jet_share) {
                 let amount = cfe::world::smelt_resource(&(parcel.held.clone() * g_mass.clone() / weight(&parcel.key)));
                 let have = core.kept.get(&parcel.key).cloned().unwrap_or_else(|| ratio(0, 1));
                 let amount = amount.min(have);
@@ -318,7 +319,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 let siblings: Vec<u64> = core.satellites.iter().map(|l| l.path[1]).collect();
                 let path = vec![core.path[0], crate::ring::birth_key(bell, &r_guess, &held, &siblings)];
                 let Some((kept, orbs, medium, medium_spin)) = crate::formation::system(&star, &a_clump, &path, &unit, &universe_mass, &tide) else { continue };
-                let mut sys = Body { path, radius: r_guess, period: ratio(0, 1), kept, satellites: orbs, medium, ell: ratio(0, 1), medium_spin, gas: Vec::new(), born: bell };
+                let mut sys = Body { path, radius: r_guess, period: ratio(0, 1), kept, satellites: orbs, medium, ell: ratio(0, 1), medium_spin, gas: Vec::new(), born: bell, state: ratio(0, 1) };
                 let internal = subtree_spin(&sys, &unit);
                 let own = taken - internal;
                 sys.ell = crate::ring::grain(&(own.clone() / m_u.clone()));

@@ -371,7 +371,7 @@ pub fn system(clump: &Manifest, agitation: &Ratio, path: &[u64], unit: &Ratio, u
             let period = crate::ring::period(&reach, &inside);
             let ell = crate::ring::spin(&reach, &inside);
             inside += mass(&part) / unit.clone();
-            worlds.push(crate::pulse::Body { path: at, radius: reach, period, kept: part, satellites: Vec::new(), medium: Manifest::new(), ell, medium_spin: ratio(0, 1), gas: Vec::new(), born: 0 });
+            worlds.push(crate::pulse::Body { path: at, radius: reach, period, kept: part, satellites: Vec::new(), medium: Manifest::new(), ell, medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: ratio(0, 1) });
         }
     }
     let mut belts_spin = mass(&disc) / unit.clone() * crate::ring::spin(&scale, &inside);
@@ -459,9 +459,9 @@ pub fn interface_every(matter: &Manifest, share: &Ratio) -> u64 {
     (ratio(1, 1) / feed).ceil().to_integer().try_into().unwrap_or(u64::MAX).max(1)
 }
 
-/// ONE JET BATCH, landing at ring `born`: half of the disc's holding, taken
-/// innermost (heaviest) first from its rings, landing hot at the rim.
-pub fn jet_batch(rings: &[Shell], h: &Ratio, rim: &Ratio, born: u64) -> Vec<Shell> {
+/// ONE JET BATCH, at ring `born`: the share `share` of the disc's holding,
+/// taken innermost (heaviest) first from its rings, reaching the rim.
+pub fn jet_batch(rings: &[Shell], h: &Ratio, rim: &Ratio, born: u64, share: &Ratio) -> Vec<Shell> {
     let mut disc: Vec<&Shell> = rings.iter().filter(|s| s.outer == s.inner).collect();
     disc.sort_by(|a, b| a.inner.cmp(&b.inner));
     let total = disc.iter().fold(ratio(0, 1), |s, r| s + r.held.clone());
@@ -471,7 +471,7 @@ pub fn jet_batch(rings: &[Shell], h: &Ratio, rim: &Ratio, born: u64) -> Vec<Shel
     }
     let delta = h.clone() / (rim.clone() + h.clone());
     let agitation = if delta < push { (push.clone() - delta) / push.clone() } else { ratio(0, 1) };
-    let mut want = total / ratio(2, 1);
+    let mut want = total * share.clone();
     let mut out = Vec::new();
     for ring in disc {
         if want <= ratio(0, 1) {
