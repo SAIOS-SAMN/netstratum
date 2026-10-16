@@ -279,6 +279,65 @@ pub fn heartbeat(star: &Manifest, universe_hold: &Ratio, rings: u64) -> Option<(
 /// worlds of holding `w*` as fit, standing at their places in the annulus;
 /// what does not fragment stays as the system's medium (its belts). Read in
 /// the transition units by the clump's holding; orbits by the motion law.
+/// THE HEART'S CUT, one law for a star and a world (with xylarium; W1–W4):
+/// a heart pushes by the electromagnetic repulsion gripping open frames, at
+/// full amplitude in its own units (½, regenerated; its state holds 1), so
+/// kind z is carried `ℓ_z = p·(e_z/ē)·(w̄/w_z) + turning`, the turning the
+/// place adds to every kind alike (a star's convection circulation; a
+/// world's place's heat), no weight ratio. Read in order of the spin
+/// carried, the hold grows, `H = 1 + held`, and a kind is HELD where it
+/// stands within the throat, `ℓ_z/H ≤ H`; past it, it is released. One
+/// crossing on the cumulative hold (the runaway inside it: every kind held
+/// raises H for the next). Returns (held, released, the held share).
+pub fn heart_cut(clump: &Manifest, turning: &Ratio) -> Option<(Manifest, Manifest, Ratio)> {
+    let total = mass(clump);
+    let count = clump.values().fold(ratio(0, 1), |s, a| s + a.clone());
+    if total.is_zero() || count.is_zero() {
+        return None;
+    }
+    let open_mean = crate::pulse::magnetism(clump) / total.clone();
+    // REGENERATION (operator ruling (i), with xylarium): the heart pushes
+    // at full amplitude in its own units, its pair's ½; a tide enters as
+    // AGITATION, never as a weaker push, or it would be counted twice.
+    let push = ratio(1, 2);
+    let mean_weight = total.clone() / count;
+    let mut kinds: Vec<(String, Ratio, Ratio)> = clump
+        .iter()
+        .map(|(k, a)| {
+            let w = ratio(i64::from(z_of(k).map(hold).unwrap_or(1)), 1);
+            let open = ratio(i64::from(z_of(k).and_then(atom).map(|x| x.unpaired).unwrap_or(0)), 1) / w.clone();
+            // CARRIED SPINS ADD (with xylarium): the place's turning (in
+            // the plane orthogonal to the orbit, the rotoreflection) turns
+            // every kind alike, no weight ratio.
+            let ell = if open_mean.is_zero() { ratio(0, 1) } else { push.clone() * open / open_mean.clone() * mean_weight.clone() / w.clone() } + turning.clone();
+            (k.clone(), ell, a.clone() * w / total.clone())
+        })
+        .collect();
+    kinds.sort_by(|a, b| a.1.cmp(&b.1).then(a.0.cmp(&b.0)));
+    let mut held = ratio(0, 1);
+    let (mut kept, mut released) = (Manifest::new(), Manifest::new());
+    let mut crossed = false;
+    for (k, ell, share) in kinds {
+        let h = ratio(1, 1) + held.clone();
+        if !crossed && ell.clone() / h.clone() <= h {
+            held += share;
+            kept.insert(k.clone(), clump[&k].clone());
+        } else {
+            crossed = true;
+            released.insert(k.clone(), clump[&k].clone());
+        }
+    }
+    if kept.is_empty() {
+        return None;
+    }
+    Some((kept, released, held))
+}
+
+/// The lightest kind a body holds, by hold (`atom::hold`): "held down to Z".
+pub fn lightest(m: &Manifest) -> Option<String> {
+    m.iter().filter(|(_, a)| **a > ratio(0, 1)).min_by_key(|(k, _)| (z_of(k).map(hold).unwrap_or(0), z_of(k))).map(|(k, _)| k.clone())
+}
+
 pub fn system(clump: &Manifest, agitation: &Ratio, circulation: &Ratio, path: &[u64], unit: &Ratio, universe_hold: &Ratio, tide: &Ratio) -> Option<(Manifest, Vec<crate::pulse::Body>, Manifest, Ratio)> {
     // Ignition: a clump at a ≥ ½ never forms a heart.
     ignition_share(agitation)?;
@@ -296,47 +355,7 @@ pub fn system(clump: &Manifest, agitation: &Ratio, circulation: &Ratio, path: &[
     // crossing on the cumulative hold. A clump with no open frames (ē = 0)
     // is all star, no disc: a reading.
     let total = mass(clump);
-    let count = clump.values().fold(ratio(0, 1), |s, a| s + a.clone());
-    if total.is_zero() || count.is_zero() {
-        return None;
-    }
-    let open_mean = crate::pulse::magnetism(clump) / total.clone();
-    // REGENERATION (operator ruling (i), with xylarium): the heart pushes
-    // at full amplitude in its own units, its pair's ½; the galactic tide
-    // enters as the clump's AGITATION (`a_clump`), never as a weaker push,
-    // or it would be counted twice.
-    let push = ratio(1, 2);
-    let mean_weight = total.clone() / count;
-    let mut kinds: Vec<(String, Ratio, Ratio)> = clump
-        .iter()
-        .map(|(k, a)| {
-            let w = ratio(i64::from(z_of(k).map(hold).unwrap_or(1)), 1);
-            let open = ratio(i64::from(z_of(k).and_then(atom).map(|x| x.unpaired).unwrap_or(0)), 1) / w.clone();
-            // CARRIED SPINS ADD (with xylarium): the convection's
-            // circulation, in the plane orthogonal to the orbit (the
-            // rotoreflection), turns every kind alike, no weight ratio.
-            let ell = if open_mean.is_zero() { ratio(0, 1) } else { push.clone() * open / open_mean.clone() * mean_weight.clone() / w.clone() } + circulation.clone();
-            (k.clone(), ell, a.clone() * w / total.clone())
-        })
-        .collect();
-    kinds.sort_by(|a, b| a.1.cmp(&b.1).then(a.0.cmp(&b.0)));
-    let mut held = ratio(0, 1);
-    let mut star = Manifest::new();
-    let mut disc = Manifest::new();
-    let mut crossed = false;
-    for (k, ell, share) in kinds {
-        let h = ratio(1, 1) + held.clone();
-        if !crossed && ell.clone() / h.clone() <= h {
-            held += share;
-            star.insert(k.clone(), clump[&k].clone());
-        } else {
-            crossed = true;
-            disc.insert(k.clone(), clump[&k].clone());
-        }
-    }
-    if star.is_empty() {
-        return None;
-    }
+    let (star, mut disc, held) = heart_cut(clump, circulation)?;
     // The throat at the heart's hold, the rim at the system's (state 1 plus
     // grains 1: rim 2); the disc's annulus between, `λ = 1`.
     let x = ratio(1, 1) + held.clone();
@@ -363,11 +382,29 @@ pub fn system(clump: &Manifest, agitation: &Ratio, circulation: &Ratio, path: &[
             if left_share <= ratio(0, 1) {
                 break;
             }
-            let part = crate::pulse::take(&disc, &(share.clone() / left_share));
-            if part.is_empty() {
+            let fragment = crate::pulse::take(&disc, &(share.clone() / left_share));
+            if fragment.is_empty() {
                 continue;
             }
-            crate::pulse::less(&mut disc, &part);
+            crate::pulse::less(&mut disc, &fragment);
+            // THE PLANETARY CORE (xylarium W1–W4): the fragment is a heart
+            // one tier down, its state holding one ring in its own units,
+            // its holding its matter. Its place adds a turning, the star's
+            // light reaching it at the star's deficit `δ_s(r) = x*/(r + x*)`
+            // times the disc's agitation (the vacuum takes the antipole),
+            // hot inward, cold outward. The cut keeps the WORLD; what it
+            // releases rejoins the system's medium (recycling, one tier up).
+            let r_own = x.clone() + w.clone() * (ratio(i as i64, 1) + ratio(1, 2));
+            let place = x.clone() / (r_own + x.clone()) * annulus.agitation.clone();
+            let Some((part, released, _)) = heart_cut(&fragment, &place) else {
+                for (k, a) in fragment {
+                    *disc.entry(k).or_insert_with(|| ratio(0, 1)) += a;
+                }
+                continue;
+            };
+            for (k, a) in released {
+                *disc.entry(k).or_insert_with(|| ratio(0, 1)) += a;
+            }
             // Places on the spin grain (`ring::grain`), so no world's numbers
             // carry the cloud's cooling history.
             let reach = crate::ring::grain(&((x.clone() + w.clone() * (ratio(i as i64, 1) + ratio(1, 2))) * scale.clone()));
@@ -379,7 +416,8 @@ pub fn system(clump: &Manifest, agitation: &Ratio, circulation: &Ratio, path: &[
             let period = crate::ring::period(&reach, &inside);
             let ell = crate::ring::spin(&reach, &inside);
             inside += mass(&part) / unit.clone();
-            worlds.push(crate::pulse::Body { path: at, radius: reach, period, kept: part, satellites: Vec::new(), medium: Manifest::new(), ell, medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: ratio(0, 1) });
+            let state = mass(&part);
+            worlds.push(crate::pulse::Body { path: at, radius: reach, period, kept: part, satellites: Vec::new(), medium: Manifest::new(), ell, medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state });
         }
     }
     let mut belts_spin = mass(&disc) / unit.clone() * crate::ring::spin(&scale, &inside);

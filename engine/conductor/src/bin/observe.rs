@@ -10,6 +10,8 @@
 //!                            does or does not collapse
 //! - `formation`              each galaxy's cut, gas, echo and stars
 //! - `heartbeat`              every star's burn: fuel left, life, light
+//! - `worlds`                 every world "held down to Z" (the planetary
+//!                            cores' cut): how many worlds hold down to each
 //! - `clock`                  the keepers, epicenter to rims; the time
 //!                            inversion through the enclosures
 //! - `ledger`                 mass, spin, magnetism, conserved sums
@@ -131,7 +133,7 @@ fn main() {
             let dom = sys.satellites.iter().max_by(|a, b| pulse::mass(&a.kept).cmp(&pulse::mass(&b.kept))).map(|o| o.period.clone());
             for o in &sys.satellites {
                 let lock = dom.as_ref().filter(|p| **p > ratio(0, 1)).map(|p| o.period.clone() / p.clone()).map(|x| if x.denom() < &num_bigint::BigInt::from(1000) { format!("{x}") } else { format!("{:.4} (free)", f(&x)) }).unwrap_or_default();
-                println!("  world {:?}: reach {:.3e}, period {:.3e}, against the dominant {lock}; {}", o.path, f(&o.radius), f(&o.period), composition(&o.kept, 4));
+                println!("  world {:?}: reach {:.3e}, period {:.3e}, against the dominant {lock}; held down to {}; {}", o.path, f(&o.radius), f(&o.period), formation::lightest(&o.kept).unwrap_or_default(), composition(&o.kept, 4));
             }
         }
         "world" => {
@@ -177,6 +179,24 @@ fn main() {
                     c.path[0], of(&pulse::mass(&c.kept), &total), of(&pulse::mass(&c.medium), &total), c.gas.len(), c.gas.iter().filter(|g| g.born > 0).count(),
                     60 + f(&c.radius) as u64, c.satellites.len(), c.satellites.iter().map(|s| s.satellites.len()).sum::<usize>()
                 );
+            }
+        }
+        "worlds" => {
+            // THE PLANETARY CORES (xylarium W1–W4): each world read by the
+            // lightest kind its cut kept; rocky and giant are readings of it.
+            let mut by: std::collections::BTreeMap<(u32, String), (usize, Ratio)> = std::collections::BTreeMap::new();
+            let mut n = 0;
+            for o in u.cores.iter().flat_map(|c| &c.satellites).flat_map(|s| &s.satellites) {
+                n += 1;
+                let k = formation::lightest(&o.kept).unwrap_or_default();
+                let w = k.strip_prefix('Z').and_then(|z| z.parse::<u32>().ok()).map(cfe::almanac::atom::hold).unwrap_or(0);
+                let e = by.entry((w, k)).or_insert((0, ratio(0, 1)));
+                e.0 += 1;
+                e.1 += pulse::mass(&o.kept) / unit.clone();
+            }
+            println!("WORLDS at beat {now}: {n}, by the lightest kind each holds (hold, Z: worlds, their holding)");
+            for ((w, k), (count, m)) in &by {
+                println!("  held down to {k} (hold {w}): {count} worlds, holding {:.3e}", f(m));
             }
         }
         "heartbeat" => {
