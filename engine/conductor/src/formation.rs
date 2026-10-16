@@ -349,8 +349,72 @@ pub fn system(clump: &Manifest, agitation: &Ratio, path: &[u32], unit: &Ratio) -
             worlds.push(crate::pulse::Body { path: at, radius: reach, period, kept: part, satellites: Vec::new(), medium: Manifest::new(), ell, medium_spin: ratio(0, 1), gas: Vec::new(), born: 0 });
         }
     }
-    let belts_spin = mass(&disc) / unit.clone() * crate::ring::spin(&scale, &inside);
+    let mut belts_spin = mass(&disc) / unit.clone() * crate::ring::spin(&scale, &inside);
+    belts_spin += dance(&mut worlds, &star_hold, unit);
     Some((star, worlds, disc, belts_spin))
+}
+
+/// The convergents `p/q` of a positive rational, in order.
+fn convergents(x: &Ratio) -> Vec<Ratio> {
+    let mut out = Vec::new();
+    let (mut h0, mut h1) = (num_bigint::BigInt::from(0), num_bigint::BigInt::from(1));
+    let (mut k0, mut k1) = (num_bigint::BigInt::from(1), num_bigint::BigInt::from(0));
+    let mut rest = x.clone();
+    for _ in 0..64 {
+        let a = rest.floor().to_integer();
+        let (h2, k2) = (&a * &h1 + &h0, &a * &k1 + &k0);
+        out.push(Ratio::new(h2.clone(), k2.clone()));
+        (h0, h1, k0, k1) = (h1, h2, k1, k2);
+        let frac = rest.clone() - rest.floor();
+        if frac.is_zero() {
+            break;
+        }
+        rest = ratio(1, 1) / frac;
+    }
+    out
+}
+
+/// THE DANCE (with xylarium, 2026-10-16): a system's worlds lock into
+/// resonance with its DOMINANT world (the largest holding), which sets the
+/// ladder. World k reads its period ratio to the dominant, `P_k / P_dom`
+/// (exact: `P = 1 + R/H`), and LOCKS to the convergent `p/q` of that ratio
+/// with the smallest q whose distance from it is within the dominant world's
+/// deficit at k's separation, `δ = H_dom / (|R_k − R_dom| + H_dom)` (a heavy
+/// dominant captures wide, a light one only near-exact ratios; no integer is
+/// chosen and no constant set). The lock moves `R_k` to the convergent's
+/// exact period about the holding inside it; the spin it gives up or takes
+/// is exchanged with the system's belts, so `Σ m·ℓ` is conserved. A world no
+/// convergent reaches stays free. Returns the spin the belts gain.
+pub fn dance(worlds: &mut [crate::pulse::Body], star_hold: &Ratio, unit: &Ratio) -> Ratio {
+    let Some(dom) = (0..worlds.len()).max_by(|&a, &b| mass(&worlds[a].kept).cmp(&mass(&worlds[b].kept))) else { return ratio(0, 1) };
+    let (p_dom, r_dom, h_dom) = (worlds[dom].period.clone(), worlds[dom].radius.clone(), mass(&worlds[dom].kept) / unit.clone());
+    let mut exchanged = ratio(0, 1);
+    let mut inside = star_hold.clone();
+    for k in 0..worlds.len() {
+        let m_k = mass(&worlds[k].kept) / unit.clone();
+        if k != dom && !p_dom.is_zero() && !inside.is_zero() {
+            let x = worlds[k].period.clone() / p_dom.clone();
+            let gap = if worlds[k].radius > r_dom { worlds[k].radius.clone() - r_dom.clone() } else { r_dom.clone() - worlds[k].radius.clone() };
+            let width = h_dom.clone() / (gap + h_dom.clone());
+            let lock = convergents(&x).into_iter().find(|c| {
+                let d = if *c > x { c.clone() - x.clone() } else { x.clone() - c.clone() };
+                d <= width
+            });
+            if let Some(c) = lock {
+                let period = p_dom.clone() * c;
+                if period > ratio(1, 1) {
+                    let reach = inside.clone() * (period.clone() - ratio(1, 1));
+                    let ell = crate::ring::spin(&reach, &inside);
+                    exchanged += m_k.clone() * (worlds[k].ell.clone() - ell.clone());
+                    worlds[k].radius = reach;
+                    worlds[k].period = period;
+                    worlds[k].ell = ell;
+                }
+            }
+        }
+        inside += m_k;
+    }
+    exchanged
 }
 
 /// The interface clock of a centre and the matter it feeds on (one law at

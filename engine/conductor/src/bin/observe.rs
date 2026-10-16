@@ -119,8 +119,11 @@ fn main() {
                 None => println!("  HEARTBEAT: no hydrogen fuel"),
             }
             println!("  coupling κ {:.4e}", formation::coupling(&sys.kept, &universe_hold).map(|k| f(&k)).unwrap_or(0.0));
+            // The dance: each world's period against the dominant world's.
+            let dom = sys.satellites.iter().max_by(|a, b| pulse::mass(&a.kept).cmp(&pulse::mass(&b.kept))).map(|o| o.period.clone());
             for o in &sys.satellites {
-                println!("  world {:?}: reach {:.3e}, period {:.3e}; {}", o.path, f(&o.radius), f(&o.period), composition(&o.kept, 4));
+                let lock = dom.as_ref().filter(|p| **p > ratio(0, 1)).map(|p| o.period.clone() / p.clone()).map(|x| if x.denom() < &num_bigint::BigInt::from(1000) { format!("{x}") } else { format!("{:.4} (free)", f(&x)) }).unwrap_or_default();
+                println!("  world {:?}: reach {:.3e}, period {:.3e}, against the dominant {lock}; {}", o.path, f(&o.radius), f(&o.period), composition(&o.kept, 4));
             }
         }
         "world" => {
