@@ -29,6 +29,11 @@ fn f(r: &Ratio) -> f64 {
     r.numer().to_string().parse::<f64>().unwrap_or(0.0) / r.denom().to_string().parse::<f64>().unwrap_or(1.0)
 }
 
+/// `a / b`, 0 where `b` holds nothing (a galaxy whose matter all left).
+fn of(a: &Ratio, b: &Ratio) -> f64 {
+    if *b == ratio(0, 1) { 0.0 } else { f(&(a.clone() / b.clone())) }
+}
+
 /// The heaviest elements of a manifest by holding, as `Z:share`.
 fn composition(m: &pulse::Manifest, top: usize) -> String {
     let total = pulse::mass(m);
@@ -91,7 +96,7 @@ fn main() {
                 let total = pulse::mass(&c.total());
                 println!(
                     "  galaxy {:>2}: share {:.3}, disc {:.3}, gas {:.3} ({} parcels), {} stars; distance {} (first echo at bell {}); clock {:.6}",
-                    c.path[0], f(&(total.clone() / universe_hold.clone())), f(&(pulse::mass(&c.kept) / total.clone())), f(&(pulse::mass(&c.medium) / total.clone())),
+                    c.path[0], f(&(total.clone() / universe_hold.clone())), of(&pulse::mass(&c.kept), &total), of(&pulse::mass(&c.medium), &total),
                     c.gas.len(), c.satellites.len(), c.radius, 60 + f(&c.radius) as u64, f(&breath::galaxy_rate(&u, i, &unit))
                 );
             }
@@ -102,7 +107,7 @@ fn main() {
             let total = pulse::mass(&c.total());
             println!("GALAXY {:?} at beat {now}: share {:.4} of the universe; distance {} light-rings, first echo at bell {}", c.path, f(&(total.clone() / universe_hold.clone())), c.radius, 60 + f(&c.radius) as u64);
             println!("  core state hold {:.3e} (units of the deepest hole), disc {:.3e}: {}", f(&(pulse::core_state(c) / unit.clone())), f(&(pulse::mass(&c.kept) / unit.clone())), composition(&c.kept, 6));
-            println!("  gas {:.3} of the galaxy in {} parcels: {}; gas spin {:.3e}", f(&(pulse::mass(&c.medium) / total.clone())), c.gas.len(), composition(&c.medium, 6), f(&c.medium_spin));
+            println!("  gas {:.3} of the galaxy in {} parcels: {}; gas spin {:.3e}", of(&pulse::mass(&c.medium), &total), c.gas.len(), composition(&c.medium, 6), f(&c.medium_spin));
             println!("  clock against the universal core {:.6}", f(&breath::galaxy_rate(&u, i, &unit)));
             for (s, sys) in c.satellites.iter().enumerate() {
                 println!("  star {:?}: holding {:.3e}, born bell {}, reach {:.3e}, {} worlds, clock {:.6}; {}", sys.path, f(&(pulse::mass(&sys.kept) / unit.clone())), sys.born, f(&sys.radius), sys.satellites.len(), f(&system_rate(&u, i, s, &unit)), composition(&sys.kept, 3));
@@ -170,7 +175,7 @@ fn main() {
                 let metal = c.satellites.iter().filter(|s| s.kept.keys().any(|k| k != "Z001" && k != "Z002")).count();
                 println!(
                     "  galaxy {:>2}: disc {:.3} gas {:.3} ({} parcels, {} jet batches); first echo bell {}; {} stars ({metal} with metals), {} worlds",
-                    c.path[0], f(&(pulse::mass(&c.kept) / total.clone())), f(&(pulse::mass(&c.medium) / total.clone())), c.gas.len(), c.gas.iter().filter(|g| g.born > 0).count(),
+                    c.path[0], of(&pulse::mass(&c.kept), &total), of(&pulse::mass(&c.medium), &total), c.gas.len(), c.gas.iter().filter(|g| g.born > 0).count(),
                     60 + f(&c.radius) as u64, c.satellites.len(), c.satellites.iter().map(|s| s.satellites.len()).sum::<usize>()
                 );
             }
@@ -255,7 +260,7 @@ fn main() {
             for c in &u.cores {
                 let total = pulse::mass(&c.total());
                 let worlds: usize = c.satellites.iter().map(|s| s.satellites.len()).sum();
-                println!("  RETURN galaxy {:>2}: disc {:.4}, gas {:.4} ({} parcels), {} stars, {worlds} worlds", c.path[0], f(&(pulse::mass(&c.kept) / total.clone())), f(&(pulse::mass(&c.medium) / total.clone())), c.gas.len(), c.satellites.len());
+                println!("  RETURN galaxy {:>2}: disc {:.4}, gas {:.4} ({} parcels), {} stars, {worlds} worlds", c.path[0], of(&pulse::mass(&c.kept), &total), of(&pulse::mass(&c.medium), &total), c.gas.len(), c.satellites.len());
             }
             println!("  CRESTS: owed (the gain a pass on a crest, (medium in band) × a_q × the kick, with xylarium); read once derived");
         }

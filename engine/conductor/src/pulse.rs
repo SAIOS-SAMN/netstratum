@@ -389,6 +389,11 @@ pub fn disperse(grains: &Manifest) -> Manifest {
 pub struct Universe {
     pub cores: Vec<Body>,
     pub medium: Manifest,
+    /// The unit of mass: the deepest core's hole AT THE FOUNDING. A hole is
+    /// set by the bounce and does not drain when its disc jets away
+    /// (regeneration; with xylarium: the unit is the core's state, never its
+    /// current disc). Tag 8.
+    pub unit: Ratio,
 }
 
 /// The universal echo, in bells: the universe's own ring, the pulse's round
@@ -490,7 +495,7 @@ pub fn deploy(seed: &[u8; 32], manifest: &Manifest) -> Universe {
             Body { path: vec![u64::from(i)], radius, period, kept: disc, satellites: Vec::new(), medium, ell, medium_spin, gas, born: 0 }
         })
         .collect();
-    Universe { cores, medium }
+    Universe { cores, medium, unit }
 }
 
 /// MAGNETISM (operator 2026-10-15, "transduction via magnetism"): an
@@ -584,6 +589,9 @@ pub fn write(var_root: &Path, seed: &[u8; 32], u: &Universe) -> std::io::Result<
     let mut v = Vec::new();
     put_manifest(&u.medium, &mut v);
     cfe::tlv::put(2, &v, &mut out);
+    let mut w = Vec::new();
+    cfe::ratio::encode(&u.unit, &mut w);
+    cfe::tlv::put(8, &w, &mut out);
     std::fs::create_dir_all(var_root)?;
     let path = var_root.join("pulse.bin");
     let staged = path.with_extension("staged");
@@ -658,6 +666,7 @@ pub fn read(var_root: &Path) -> Option<([u8; 32], Universe)> {
     let bytes = std::fs::read(var_root.join("pulse.bin")).ok()?;
     let mut seed = None;
     let mut medium = Manifest::new();
+    let mut unit = ratio(0, 1);
     let mut flat: Vec<Body> = Vec::new();
     // Tag 5 marks the spin ledger's format (docs/83 Phase 0); a file without
     // it reads with no spin (a redeploy gives it its spin).
@@ -669,6 +678,7 @@ pub fn read(var_root: &Path) -> Option<([u8; 32], Universe)> {
             1 => flat.push(get_body(v, spun)?),
             6 => flat.last_mut()?.gas.push(get_parcel(v)?),
             7 => flat.last_mut()?.born = u64::from_le_bytes(v.try_into().ok()?),
+            8 => unit = cfe::ratio::decode(v)?.0,
             _ => {}
         }
     }
@@ -682,7 +692,7 @@ pub fn read(var_root: &Path) -> Option<([u8; 32], Universe)> {
             _ => return None,
         }
     }
-    Some((seed?, Universe { cores, medium }))
+    Some((seed?, Universe { cores, medium, unit }))
 }
 
 #[cfg(test)]
@@ -695,7 +705,7 @@ mod tests {
         let orb = Body { path: vec![1, 1, 1], radius: ratio(3, 2), period: ratio(5, 2), kept: [("Z008".to_string(), ratio(1, 64))].into(), satellites: Vec::new(), medium: Manifest::new(), ell: ratio(7, 3), medium_spin: ratio(0, 1), gas: Vec::new(), born: 0 };
         let sys = Body { path: vec![1, 1], radius: ratio(9, 2), period: ratio(11, 2), kept: [("Z001".to_string(), ratio(3, 1024))].into(), satellites: vec![orb], medium: Manifest::new(), ell: ratio(1, 9), medium_spin: ratio(1, 7), gas: Vec::new(), born: 0 };
         let core = Body { path: vec![1], radius: ratio(60, 1), period: ratio(0, 1), kept: [("Z026".to_string(), ratio(1, 2))].into(), satellites: vec![sys], medium: [("Z001".to_string(), ratio(5, 4))].into(), ell: ratio(0, 1), medium_spin: ratio(13, 11), gas: vec![parcel] };
-        let u = Universe { cores: vec![core], medium: [("Z002".to_string(), ratio(1, 1024))].into() };
+        let u = Universe { cores: vec![core], medium: [("Z002".to_string(), ratio(1, 1024))].into(), unit: ratio(1, 2) };
         let dir = std::env::temp_dir().join(format!("pulse-{}", std::process::id()));
         write(&dir, &[7; 32], &u).unwrap();
         assert_eq!(read(&dir), Some(([7; 32], u)), "the file gives the universe back");

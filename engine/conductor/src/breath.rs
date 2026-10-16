@@ -34,8 +34,12 @@ use crate::ring::rate;
 use cfe::ratio::{ratio, Ratio};
 use num_traits::Zero;
 
-/// The unit of mass: the deepest core's hole.
+/// The unit of mass: the deepest core's hole, as founded (`Universe::unit`);
+/// a universe saved before it was kept reads its deepest disc.
 pub fn unit_mass(u: &Universe) -> Ratio {
+    if !u.unit.is_zero() {
+        return u.unit.clone();
+    }
     u.cores.iter().map(|c| mass(&c.kept)).max().filter(|m| !m.is_zero()).unwrap_or_else(|| ratio(1, 1))
 }
 
@@ -203,9 +207,16 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         let rings: Vec<crate::formation::Shell> = now.into_iter().filter(|r| r.outer == r.inner).collect();
         let weight = |k: &str| ratio(i64::from(k.strip_prefix('Z').and_then(|z| z.parse::<u32>().ok()).map(cfe::almanac::atom::hold).unwrap_or(1)), 1);
         // JETS: the disc halves into the jet every ⌈1/p⌉ rings; each batch
-        // due in this echo's span lands at the rim (`formation::jet_batch`),
-        // its grains moving from the disc to the gas with no orbital spin.
+        // due in this echo's span reaches the rim (`formation::jet_batch`)
+        // cold, where the push and the deficit balance (δ = p = ½). THE
+        // RECYCLING CIRCUIT (docs/83, with xylarium): the rim is the 1:1
+        // crest (`P_b = P(H) = 2`, `R_{1/1} = H(2 − 1) = 2`), where the
+        // regenerated kick couples at full strength (`a_1 = 1`), so the batch
+        // crosses the boundary WHOLE into the medium one tier up, the ocean,
+        // along the jet's axis with no orbital spin. The galaxy's gas comes
+        // back in from the ocean (owed: the universe's crests).
         let mut jets = 0;
+        let mut to_ocean = crate::pulse::Manifest::new();
         // The jets run on the core's INTERFACE CLOCK (one law at every tier:
         // the core is a heart one tier up): the disc halves into the jet
         // every `⌈Q̄/(e·s)⌉` rings, not every `⌈1/p⌉`. REGENERATION
@@ -218,7 +229,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             let galaxy_now = core.total();
             let (now, _) = crate::formation::shells(&galaxy_now, &core.kept);
             let rings_now: Vec<crate::formation::Shell> = now.into_iter().filter(|r| r.outer == r.inner).collect();
-            for mut parcel in crate::formation::jet_batch(&rings_now, &h, &rim, k * every) {
+            for parcel in crate::formation::jet_batch(&rings_now, &h, &rim, k * every) {
                 let amount = cfe::world::smelt_resource(&(parcel.held.clone() * g_mass.clone() / weight(&parcel.key)));
                 let have = core.kept.get(&parcel.key).cloned().unwrap_or_else(|| ratio(0, 1));
                 let amount = amount.min(have);
@@ -226,9 +237,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     continue;
                 }
                 less(&mut core.kept, &[(parcel.key.clone(), amount.clone())].into());
-                *core.medium.entry(parcel.key.clone()).or_insert_with(|| ratio(0, 1)) += amount.clone();
-                parcel.held = amount * weight(&parcel.key) / g_mass.clone();
-                core.gas.push(parcel);
+                *to_ocean.entry(parcel.key.clone()).or_insert_with(|| ratio(0, 1)) += amount;
             }
             jets += 1;
         }
@@ -340,7 +349,11 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             }
             inside += mass(&sys.total()) / unit.clone();
         }
-        events.push(Event { bell, galaxy: core.path[0] as u32, rung, write: Write::Perpendicular, stars, jets, returned, dissolved });
+        let galaxy_id = core.path[0] as u32;
+        for (k, a) in to_ocean {
+            *u.medium.entry(k).or_insert_with(|| ratio(0, 1)) += a;
+        }
+        events.push(Event { bell, galaxy: galaxy_id, rung, write: Write::Perpendicular, stars, jets, returned, dissolved });
     }
     events
 }
