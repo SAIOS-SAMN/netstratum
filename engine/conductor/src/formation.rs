@@ -73,35 +73,29 @@ fn z_of(key: &str) -> Option<u32> {
 pub fn shells(all: &Manifest, disc: &Manifest, share: &Ratio) -> (Vec<Shell>, Ratio) {
     let weight = |k: &str| z_of(k).map(hold).unwrap_or(1);
     let total = mass(all);
-    let count = all.values().fold(ratio(0, 1), |s, a| s + a.clone());
-    let h_disc = mass(disc) / total.clone();
-    let h = ratio(1, 1) + h_disc.clone();
-    let push = h_disc.clone() / h.clone();
-    if total.is_zero() || share.is_zero() || push.is_zero() {
-        return (Vec::new(), h);
-    }
-    let mean = total.clone() / count;
+    let Some((push, h, mean)) = crate::pulse::galaxy_push(all, share) else { return (Vec::new(), ratio(1, 1)) };
     let mut out = Vec::new();
     for (k, amount) in all {
         let w = ratio(i64::from(weight(k)), 1);
         let ell = push.clone() * mean.clone() / w.clone() / share.clone();
         let r = ell / h.clone();
         let delta = h.clone() / (r.clone() + h.clone());
-        // A held element (the disc's) re-locks all its push: a cold RING at
-        // its reach, no width. An escaped one keeps its agitation.
-        let agitation = if disc.contains_key(k) || delta >= push { ratio(0, 1) } else { (push.clone() - delta) / push.clone() };
-        let r_mid = r.clone();
         let halving = z_of(k).and_then(atom).and_then(|a| (a.unpaired > 0).then(|| u64::from((hold(a.z) + a.unpaired - 1) / a.unpaired)));
-        out.push(Shell {
-            key: k.clone(),
-            held: amount.clone() * w / total.clone(),
-            inner: r.clone() * (ratio(1, 1) - agitation.clone()),
-            outer: r * (ratio(1, 1) + agitation.clone()),
-            agitation,
-            halving,
-            born: 0,
-            vacuum: vacuum_halving(&r_mid, &h),
-        });
+        // THE DISPERSAL (`pulse::disperse`): the held part of the kind is a
+        // cold ring at its reach (the disc); the rest spreads as gas beyond
+        // the throat, its agitation the push it absorbed and could not
+        // re-lock there.
+        let held_part = disc.get(k).cloned().unwrap_or_else(|| ratio(0, 1));
+        if held_part > ratio(0, 1) {
+            out.push(Shell { key: k.clone(), held: held_part.clone() * w.clone() / total.clone(), inner: r.clone(), outer: r.clone(), agitation: ratio(0, 1), halving, born: 0, vacuum: vacuum_halving(&r, &h) });
+        }
+        let free = amount.clone() - held_part;
+        let inner = (r.clone() * (ratio(1, 1) - push.clone())).max(h.clone());
+        let outer = r.clone() * (ratio(1, 1) + push.clone());
+        if free > ratio(0, 1) && outer > inner {
+            let agitation = if delta < push { (push.clone() - delta) / push.clone() } else { ratio(0, 1) };
+            out.push(Shell { key: k.clone(), held: free * w / total.clone(), inner, outer: outer.clone(), agitation, halving, born: 0, vacuum: vacuum_halving(&outer, &h) });
+        }
     }
     (out, h)
 }

@@ -323,12 +323,12 @@ pub fn universal_state(u: &Universe) -> Ratio {
 /// shedding changes the manifest. Nothing is stepped. Above the cut is the
 /// core's disc; below it, the galaxy's gas. Sorting reads where the galaxy
 /// stands in the universe (a small galaxy is pushed harder, keeps less).
-pub fn disc_cut(grains: &Manifest, share: &Ratio) -> Manifest {
+pub fn galaxy_push(grains: &Manifest, share: &Ratio) -> Option<(Ratio, Ratio, Ratio)> {
     let weight = |k: &str| k.strip_prefix('Z').and_then(|z| z.parse::<u32>().ok()).map(cfe::almanac::atom::hold).unwrap_or(1);
     let total = mass(grains);
     let count = grains.values().fold(ratio(0, 1), |s, a| s + a.clone());
     if total.is_zero() || count.is_zero() || share.is_zero() {
-        return Manifest::new();
+        return None;
     }
     let mean = total.clone() / count;
     let mut order: Vec<(&String, &Ratio)> = grains.iter().collect();
@@ -349,9 +349,39 @@ pub fn disc_cut(grains: &Manifest, share: &Ratio) -> Manifest {
         let h = ratio(1, 1) + held.clone();
         h.clone() / (ell / h.clone() + h) >= push
     };
-    // The crossing: the first element the disc cannot hold.
+    // The crossing sets the push (transitional: the galaxy tier's p awaits
+    // the arriving ocean, docs/83).
     let cut = (0..order.len()).collect::<Vec<_>>().partition_point(|&idx| holds(idx));
-    order[..cut].iter().map(|(k, a)| ((*k).clone(), (*a).clone())).collect()
+    let held = above.get(cut).cloned().unwrap_or_else(|| above.last().cloned().unwrap_or_else(|| ratio(0, 1)) + order.last().map(|(k, a)| (*a).clone() * ratio(i64::from(weight(k)), 1) / total.clone()).unwrap_or_else(|| ratio(0, 1)));
+    let h = ratio(1, 1) + held.clone();
+    Some((held / h.clone(), h, mean))
+}
+
+/// THE DISPERSAL (operator 2026-10-16: "we shouldn't be sorting anything,
+/// we should be dispersing and letting the physics do the distribution").
+/// The bounce pushes every kind out and SPREADS it, never sorting it into a
+/// slot: kind z is carried `ℓ_z = p·(w̄/w_z)/s_g` and stands about
+/// `R_z = ℓ_z/H`, spread by the push across `R_z(1 − p) … R_z(1 + p)`. The
+/// part of its spread within the core's throat (`R ≤ H`) is HELD (the disc),
+/// the rest disperses as gas: every kind partly held and partly free, the
+/// heavy leaning inward, the light outward, the disc and the gas both mixed.
+/// The distribution keeps moving after (the waves, the breath): this is
+/// only where the founding pulse leaves it.
+pub fn disperse(grains: &Manifest, share: &Ratio) -> Manifest {
+    let weight = |k: &str| k.strip_prefix('Z').and_then(|z| z.parse::<u32>().ok()).map(cfe::almanac::atom::hold).unwrap_or(1);
+    let Some((p, h, mean)) = galaxy_push(grains, share) else { return Manifest::new() };
+    grains
+        .iter()
+        .filter_map(|(k, amount)| {
+            let ell = p.clone() * mean.clone() / ratio(i64::from(weight(k)), 1) / share.clone();
+            let r = ell / h.clone();
+            let lo = r.clone() * (ratio(1, 1) - p.clone());
+            let span = ratio(2, 1) * p.clone() * r;
+            let f = if span.is_zero() { if lo <= h { ratio(1, 1) } else { ratio(0, 1) } } else { ((h.clone() - lo) / span).max(ratio(0, 1)).min(ratio(1, 1)) };
+            let held = grain(&(amount.clone() * f));
+            (held > ratio(0, 1)).then(|| (k.clone(), held))
+        })
+        .collect()
 }
 
 /// The universe the pulse deploys: its cores, and the intergalactic medium.
@@ -410,10 +440,10 @@ pub fn deploy(seed: &[u8; 32], manifest: &Manifest) -> Universe {
     // laid down by the tidal law; what forms no system is the galaxy's medium,
     // gas the breath later forms into new systems. A core stands where the cut
     // one tier up holds it (above); its echoes arrive that many bells later.
-    // Each core keeps what its bounce holds (`disc_cut`), its galaxy's
+    // Each core keeps what its bounce holds (`disperse`), its galaxy's
     // share of the universe's holding the push's reading.
     let universe_mass = mass(manifest);
-    let discs: Vec<Manifest> = shares.iter().map(|(_, m, _)| disc_cut(m, &(mass(m) / universe_mass.clone()))).collect();
+    let discs: Vec<Manifest> = shares.iter().map(|(_, m, _)| disperse(m, &(mass(m) / universe_mass.clone()))).collect();
     let unit = discs.iter().map(mass).max().filter(|m| !m.is_zero()).unwrap_or_else(|| ratio(1, 1));
     // FORMATION (docs/83): no system is placed. Each core keeps its disc;
     // the rest is its galaxy's GAS, laid down as parcels where the push left
