@@ -68,26 +68,30 @@ fn z_of(key: &str) -> Option<u32> {
     key.strip_prefix('Z').and_then(|z| z.parse::<u32>().ok())
 }
 
-/// The gas's shells and the disc's cold rings: the galaxy's grains `all`,
-/// its core's disc `disc`, in its own units (regeneration).
-pub fn shells(all: &Manifest, disc: &Manifest) -> (Vec<Shell>, Ratio) {
+/// The disc's cold bands and the gas's shells: the galaxy's grains `all`,
+/// its core's disc `disc`, in its own units (regeneration). Returns (held,
+/// free, H).
+pub fn shells(all: &Manifest, disc: &Manifest) -> (Vec<Shell>, Vec<Shell>, Ratio) {
     let weight = |k: &str| z_of(k).map(hold).unwrap_or(1);
     let total = mass(all);
-    let Some((push, h, mean)) = crate::pulse::galaxy_push(all) else { return (Vec::new(), ratio(1, 1)) };
-    let mut out = Vec::new();
+    let Some((push, h, mean)) = crate::pulse::galaxy_push(all) else { return (Vec::new(), Vec::new(), ratio(1, 1)) };
+    let (mut held_out, mut out) = (Vec::new(), Vec::new());
     for (k, amount) in all {
         let w = ratio(i64::from(weight(k)), 1);
         let ell = push.clone() * mean.clone() / w.clone();
         let r = ell / h.clone();
         let delta = h.clone() / (r.clone() + h.clone());
         let halving = z_of(k).and_then(atom).and_then(|a| (a.unpaired > 0).then(|| u64::from((hold(a.z) + a.unpaired - 1) / a.unpaired)));
-        // THE DISPERSAL (`pulse::disperse`): the held part of the kind is a
-        // cold ring at its reach (the disc); the rest spreads as gas beyond
-        // the throat, its agitation the push it absorbed and could not
-        // re-lock there.
+        // THE DISPERSAL (`pulse::disperse`; operator: "disc and gas both
+        // mixed"): the held part of the kind is the part of its spread
+        // within the throat, a COLD BAND `[R(1 − p), min(R(1 + p), H)]` (the
+        // disc); the rest spreads as gas beyond the throat, its agitation the
+        // push it absorbed and could not re-lock there.
         let held_part = disc.get(k).cloned().unwrap_or_else(|| ratio(0, 1));
         if held_part > ratio(0, 1) {
-            out.push(Shell { key: k.clone(), held: held_part.clone() * w.clone() / total.clone(), inner: r.clone(), outer: r.clone(), agitation: ratio(0, 1), halving, born: 0, vacuum: vacuum_halving(&r, &h) });
+            let lo = r.clone() * (ratio(1, 1) - push.clone());
+            let hi = (r.clone() * (ratio(1, 1) + push.clone())).min(h.clone()).max(lo.clone());
+            held_out.push(Shell { key: k.clone(), held: held_part.clone() * w.clone() / total.clone(), inner: lo, outer: hi.clone(), agitation: ratio(0, 1), halving, born: 0, vacuum: vacuum_halving(&hi, &h) });
         }
         let free = amount.clone() - held_part;
         let inner = (r.clone() * (ratio(1, 1) - push.clone())).max(h.clone());
@@ -97,7 +101,7 @@ pub fn shells(all: &Manifest, disc: &Manifest) -> (Vec<Shell>, Ratio) {
             out.push(Shell { key: k.clone(), held: free * w / total.clone(), inner, outer: outer.clone(), agitation, halving, born: 0, vacuum: vacuum_halving(&outer, &h) });
         }
     }
-    (out, h)
+    (held_out, out, h)
 }
 
 /// A shell's agitation at ring `n`: halved through both channels, its open
@@ -275,7 +279,7 @@ pub fn heartbeat(star: &Manifest, universe_hold: &Ratio, rings: u64) -> Option<(
 /// worlds of holding `w*` as fit, standing at their places in the annulus;
 /// what does not fragment stays as the system's medium (its belts). Read in
 /// the transition units by the clump's holding; orbits by the motion law.
-pub fn system(clump: &Manifest, agitation: &Ratio, path: &[u64], unit: &Ratio, universe_hold: &Ratio, tide: &Ratio) -> Option<(Manifest, Vec<crate::pulse::Body>, Manifest, Ratio)> {
+pub fn system(clump: &Manifest, agitation: &Ratio, cell: &Ratio, path: &[u64], unit: &Ratio, universe_hold: &Ratio, tide: &Ratio) -> Option<(Manifest, Vec<crate::pulse::Body>, Manifest, Ratio)> {
     // Ignition: a clump at a ≥ ½ never forms a heart.
     ignition_share(agitation)?;
     // THE HEART'S TORSION, THE CUT ONE TIER DOWN (operator, with xylarium,
@@ -308,7 +312,10 @@ pub fn system(clump: &Manifest, agitation: &Ratio, path: &[u64], unit: &Ratio, u
         .map(|(k, a)| {
             let w = ratio(i64::from(z_of(k).map(hold).unwrap_or(1)), 1);
             let open = ratio(i64::from(z_of(k).and_then(atom).map(|x| x.unpaired).unwrap_or(0)), 1) / w.clone();
-            let ell = if open_mean.is_zero() { ratio(0, 1) } else { push.clone() * open / open_mean.clone() * mean_weight.clone() / w.clone() };
+            // CARRIED SPINS ADD (with xylarium): the convection cell's
+            // circulation, in the plane orthogonal to the orbit (the
+            // rotoreflection), turns every kind alike, no weight ratio.
+            let ell = if open_mean.is_zero() { ratio(0, 1) } else { push.clone() * open / open_mean.clone() * mean_weight.clone() / w.clone() } + cell.clone();
             (k.clone(), ell, a.clone() * w / total.clone())
         })
         .collect();
@@ -463,7 +470,7 @@ pub fn interface_every(matter: &Manifest, share: &Ratio) -> u64 {
 /// ONE JET BATCH, at ring `born`: the share `share` of the disc's holding,
 /// taken innermost (heaviest) first from its rings, reaching the rim.
 pub fn jet_batch(rings: &[Shell], h: &Ratio, rim: &Ratio, born: u64, share: &Ratio) -> Vec<Shell> {
-    let mut disc: Vec<&Shell> = rings.iter().filter(|s| s.outer == s.inner).collect();
+    let mut disc: Vec<&Shell> = rings.iter().collect();
     disc.sort_by(|a, b| a.inner.cmp(&b.inner));
     let total = disc.iter().fold(ratio(0, 1), |s, r| s + r.held.clone());
     let push = (h.clone() - ratio(1, 1)) / h.clone();

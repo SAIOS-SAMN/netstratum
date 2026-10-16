@@ -209,16 +209,17 @@ pub fn pump(r: &Ratio, h_g: &Ratio) -> Ratio {
 /// throat; it cools by both channels from `born`, and where cells overlap
 /// and hold they collapse (`formation::stretches`, `formation::collapse`).
 pub fn convect(ring: &crate::formation::Shell, drive: &Ratio, h: &Ratio, born: u64) -> crate::formation::Shell {
-    let r = ring.inner.clone();
+    // A held band churns about its middle; its cell widens it by `1 ± a`.
+    let r = (ring.inner.clone() + ring.outer.clone()) / ratio(2, 1);
     if r.is_zero() || drive.is_zero() {
         return ring.clone();
     }
     let a = (drive.clone() * r.clone() / (r.clone() + h.clone())).min(ratio(1, 1));
-    let outer = r.clone() * (ratio(1, 1) + a.clone());
+    let outer = ring.outer.clone() * (ratio(1, 1) + a.clone());
     crate::formation::Shell {
         key: ring.key.clone(),
         held: ring.held.clone(),
-        inner: r.clone() * (ratio(1, 1) - a.clone()),
+        inner: ring.inner.clone() * (ratio(1, 1) - a.clone()),
         outer: outer.clone(),
         agitation: a,
         halving: ring.halving,

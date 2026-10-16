@@ -239,8 +239,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         // the rim, then gas that has cooled enough COLLAPSES into stars.
         let galaxy = core.total();
         let g_mass = mass(&galaxy);
-        let (now, h) = crate::formation::shells(&galaxy, &core.kept);
-        let rings: Vec<crate::formation::Shell> = now.into_iter().filter(|r| r.outer == r.inner).collect();
+        let (rings, _, h) = crate::formation::shells(&galaxy, &core.kept);
         let weight = |k: &str| ratio(i64::from(k.strip_prefix('Z').and_then(|z| z.parse::<u32>().ok()).map(cfe::almanac::atom::hold).unwrap_or(1)), 1);
         // JETS: the core fires on its own BELL, the bounce (the jetstream
         // ruling: the bounce's pressure ejects; with xylarium), once an
@@ -267,8 +266,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         let jet_share = ratio(2, every.min(i64::MAX as u64) as i64).min(ratio(1, 1));
         for k in [bell] {
             let galaxy_now = core.total();
-            let (now, _) = crate::formation::shells(&galaxy_now, &core.kept);
-            let rings_now: Vec<crate::formation::Shell> = now.into_iter().filter(|r| r.outer == r.inner).collect();
+            let (rings_now, _, _) = crate::formation::shells(&galaxy_now, &core.kept);
             for parcel in crate::formation::jet_batch(&rings_now, &h, &rim, k, &jet_share) {
                 let amount = cfe::world::smelt_resource(&(parcel.held.clone() * g_mass.clone() / weight(&parcel.key)));
                 let have = core.kept.get(&parcel.key).cloned().unwrap_or_else(|| ratio(0, 1));
@@ -284,10 +282,10 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         // COLLAPSE: each stretch of the gas (with the disc's rings it passes
         // over) whose clump can hold forms as many stars as fit.
         let mut stars = 0;
-        let (now, h_now) = crate::formation::shells(&core.total(), &core.kept);
+        let (now, _, h_now) = crate::formation::shells(&core.total(), &core.kept);
         // CONVECTION (`crate::ocean::convect`): the held rings churn in cells
         // driven by the swing's pump, renewed each echo.
-        let rings: Vec<crate::formation::Shell> = now.into_iter().filter(|r| r.outer == r.inner).map(|r| crate::ocean::convect(&r, &drive, &h_now, bell)).collect();
+        let rings: Vec<crate::formation::Shell> = now.into_iter().map(|r| crate::ocean::convect(&r, &drive, &h_now, bell)).collect();
         let parcels = core.gas.len();
         let all: Vec<crate::formation::Shell> = core.gas.iter().cloned().chain(rings).collect();
         for st in crate::formation::stretches(&all, bell) {
@@ -370,7 +368,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 // Its identity: its birth reading, never a row number.
                 let siblings: Vec<u64> = core.satellites.iter().map(|l| l.path[1]).collect();
                 let path = vec![core.path[0], crate::ring::birth_key(bell, &r_guess, &held, &siblings)];
-                let Some((kept, orbs, medium, medium_spin)) = crate::formation::system(&star, &a_clump, &path, &unit, &universe_mass, &tide) else { continue };
+                let Some((kept, orbs, medium, medium_spin)) = crate::formation::system(&star, &a_clump, &st.agitation, &path, &unit, &universe_mass, &tide) else { continue };
                 let mut sys = Body { path, radius: r_guess, period: ratio(0, 1), kept, satellites: orbs, medium, ell: ratio(0, 1), medium_spin, gas: Vec::new(), born: bell, state: ratio(0, 1) };
                 let internal = subtree_spin(&sys, &unit);
                 let own = taken - internal;

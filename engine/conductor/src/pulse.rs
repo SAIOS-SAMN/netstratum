@@ -488,8 +488,7 @@ pub fn deploy(seed: &[u8; 32], manifest: &Manifest) -> Universe {
         .zip(discs)
         .zip(orbits)
         .map(|(((i, m, _), disc), (radius, period, ell))| {
-            let (shells, _) = crate::formation::shells(&m, &disc);
-            let gas: Vec<crate::formation::Shell> = shells.into_iter().filter(|s| s.outer > s.inner).collect();
+            let (_, gas, _) = crate::formation::shells(&m, &disc);
             let state = mass(&m) / unit.clone();
             let mut medium = m.clone();
             less(&mut medium, &disc);
