@@ -134,7 +134,40 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         // coherence with the echo at this bell (its nested clock's slip).
         let g_rate = galaxy_rate(u, i, &unit);
         let g_coherence = coherence(&slip(&g_rate, bell, t_u));
+        // THE RETURN (`crate::ocean`, proposed with xylarium): the galaxy's
+        // swing crosses the ocean's standing crests; what it gathers at the
+        // crossings since its last echo comes in from the ocean. Where it
+        // lands in the galaxy, and how hot, is owed (docs/83): until then it
+        // is the galaxy's gas on the ledger, unshaped.
+        let gathered = {
+            let c = &u.cores[i];
+            let whole = mass(&u.total());
+            let h_g = (crate::pulse::core_state(c) + mass(&c.total())) / whole.clone();
+            let ring_bells = ratio((t_u / 4) as i64, 1);
+            let reach = c.radius.clone() / ring_bells;
+            let halves = |b: u64| if c.period.is_zero() { 0 } else { (ratio(2 * b as i64, 1) / c.period.clone()).floor().to_integer().try_into().unwrap_or(0u64) };
+            let half_swings = halves(bell).saturating_sub(halves(bell.saturating_sub(t_u)));
+            let m = mass(&u.medium) / whole;
+            let share = crate::ocean::gathered(rung, &reach, &h_g, &m, half_swings);
+            (crate::ocean::take(&u.medium, &share), crate::ocean::arrival_turning(rung, &reach, &h_g, &m))
+        };
+        let (gathered, turning) = gathered;
+        less(&mut u.medium, &gathered);
         let core = &mut u.cores[i];
+        // Where it lands (carried spins add): held joins the disc, the rest
+        // is gas, parcels cooling from this echo.
+        let mut with = core.total();
+        for (k, a) in &gathered {
+            *with.entry(k.clone()).or_insert_with(|| ratio(0, 1)) += a.clone();
+        }
+        let (held_in, free_in, parcels_in) = crate::ocean::land(&with, &gathered, &g_rate, &turning, bell);
+        for (k, a) in held_in {
+            *core.kept.entry(k).or_insert_with(|| ratio(0, 1)) += a;
+        }
+        for (k, a) in free_in {
+            *core.medium.entry(k).or_insert_with(|| ratio(0, 1)) += a;
+        }
+        core.gas.extend(parcels_in);
         let mut returned = ratio(0, 1);
         let mut dissolved = 0;
         // The galaxy's holding constant through the echo (its grains only
