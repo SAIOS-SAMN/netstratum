@@ -194,6 +194,19 @@ fn main() {
                 println!("  enclosure {:?} on S^{}: rim {:.3e}, own ring {:.3e}, throat {:.3e}", e.path, e.dim, f(&e.rim), f(&e.ring()), f(&e.throat));
             }
         }
+        "bits" => {
+            // The exact rationals' sizes (design law 8): the widest radius,
+            // period and spin among the stars.
+            let bits = |r: &Ratio| r.numer().bits().max(r.denom().bits());
+            let mut rows: Vec<(u64, String)> = u.cores.iter().flat_map(|c| &c.satellites).map(|s| {
+                let b = bits(&s.radius).max(bits(&s.period)).max(bits(&s.ell));
+                (b, format!("star {:?} (born {}): radius {} bits, period {} bits, spin {} bits", s.path, s.born, bits(&s.radius), bits(&s.period), bits(&s.ell)))
+            }).collect();
+            rows.sort();
+            for (_, r) in rows.iter().rev().take(8) {
+                println!("  {r}");
+            }
+        }
         "ledger" => {
             let mass = pulse::mass(&u.total()) / unit.clone();
             let magnetism = pulse::magnetism(&u.total()) / unit.clone();

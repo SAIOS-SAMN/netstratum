@@ -278,14 +278,24 @@ pub fn heartbeat(star: &Manifest, universe_hold: &Ratio, rings: u64) -> Option<(
 /// worlds of holding `w*` as fit, standing at their places in the annulus;
 /// what does not fragment stays as the system's medium (its belts). Read in
 /// the transition units by the clump's holding; orbits by the motion law.
-pub fn system(clump: &Manifest, agitation: &Ratio, path: &[u32], unit: &Ratio) -> Option<(Manifest, Vec<crate::pulse::Body>, Manifest, Ratio)> {
+pub fn system(clump: &Manifest, agitation: &Ratio, path: &[u32], unit: &Ratio, universe_hold: &Ratio) -> Option<(Manifest, Vec<crate::pulse::Body>, Manifest, Ratio)> {
     let x = ignition_share(agitation)?;
     let star = crate::pulse::take(clump, &x);
     let mut disc = clump.clone();
     crate::pulse::less(&mut disc, &star);
     let scale = mass(clump) / unit.clone();
     let star_hold = mass(&star) / unit.clone();
-    let annulus = Stretch { inner: x.clone(), outer: ratio(1, 1), lambda: ratio(1, 1), agitation: agitation.clone(), members: Vec::new() };
+    // THE DISC'S OWN HEAT (with xylarium, 2026-10-16): the new star's first
+    // light that the disc cannot re-lock at its reach, the continuum's share
+    // there, `a_disc(R) = L·R/(R + x*)` (L the light of the heart's first
+    // beat, `heartbeat`); it rises outward, against the vacuum's pull that
+    // is strongest inward. Read at the annulus's middle; the cloud's own
+    // agitation if hotter.
+    let light = heartbeat(&star, universe_hold, 0).map(|(_, _, l)| l).unwrap_or_else(|| ratio(0, 1));
+    let mid = (x.clone() + ratio(1, 1)) / ratio(2, 1);
+    let heat = light * mid.clone() / (mid + x.clone());
+    let disc_agitation = heat.max(agitation.clone());
+    let annulus = Stretch { inner: x.clone(), outer: ratio(1, 1), lambda: ratio(1, 1), agitation: disc_agitation, members: Vec::new() };
     let mut worlds = Vec::new();
     let mut inside = star_hold.clone();
     if let Some((w, count)) = collapse(&annulus, &x) {
@@ -301,7 +311,9 @@ pub fn system(clump: &Manifest, agitation: &Ratio, path: &[u32], unit: &Ratio) -
                 continue;
             }
             crate::pulse::less(&mut disc, &part);
-            let reach = (x.clone() + w.clone() * (ratio(i as i64, 1) + ratio(1, 2))) * scale.clone();
+            // Places on the spin grain (`ring::grain`), so no world's numbers
+            // carry the cloud's cooling history.
+            let reach = crate::ring::grain(&((x.clone() + w.clone() * (ratio(i as i64, 1) + ratio(1, 2))) * scale.clone()));
             let mut at = path.to_vec();
             at.push(i as u32 + 1);
             let period = crate::ring::period(&reach, &inside);

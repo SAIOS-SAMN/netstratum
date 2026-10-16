@@ -69,6 +69,16 @@ pub fn radius(ell: &Ratio, held: &Ratio) -> Option<Ratio> {
     Some(ell.clone() / held.clone())
 }
 
+/// THE SPIN GRAIN (design law 8, exact and bounded): a body's specific spin
+/// and its place are held on 60⁻⁶ (six sexagesimal places, the TUniversal
+/// coordinate's), floored; what flooring leaves goes back to the medium the
+/// spin came from, so the ledger stays exact while no body's numbers grow
+/// with the births and echoes that made it.
+pub fn grain(x: &Ratio) -> Ratio {
+    let places = Ratio::from_integer(num_bigint::BigInt::from(60).pow(6));
+    (x.clone() * places.clone()).floor() / places
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

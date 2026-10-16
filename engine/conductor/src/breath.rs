@@ -182,7 +182,10 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                             *sys.kept.entry("Z002".to_string()).or_insert_with(|| ratio(0, 1)) += helium;
                             let after = mass(&sys.total());
                             if !after.is_zero() {
-                                sys.ell = spin / after;
+                                // The spin grain: the floored remainder goes
+                                // to the galaxy's gas (`ring::grain`).
+                                sys.ell = crate::ring::grain(&(spin.clone() / after.clone()));
+                                core.medium_spin += (spin - after * sys.ell.clone()) / unit.clone();
                             }
                         }
                     }
@@ -297,10 +300,12 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 let r_guess = crate::ring::radius(&ell_med, &held).unwrap_or_else(|| ell_med.clone());
                 let k = core.satellites.iter().map(|l| l.path[1] + 1).max().unwrap_or(1);
                 let path = vec![core.path[0], k];
-                let Some((kept, orbs, medium, medium_spin)) = crate::formation::system(&star, &st.agitation, &path, &unit) else { continue };
+                let Some((kept, orbs, medium, medium_spin)) = crate::formation::system(&star, &st.agitation, &path, &unit, &universe_mass) else { continue };
                 let mut sys = Body { path, radius: r_guess, period: ratio(0, 1), kept, satellites: orbs, medium, ell: ratio(0, 1), medium_spin, gas: Vec::new(), born: bell };
                 let internal = subtree_spin(&sys, &unit);
-                sys.ell = (taken - internal) / m_u;
+                let own = taken - internal;
+                sys.ell = crate::ring::grain(&(own.clone() / m_u.clone()));
+                core.medium_spin += own - m_u * sys.ell.clone();
                 core.satellites.push(sys);
                 stars += 1;
             }
