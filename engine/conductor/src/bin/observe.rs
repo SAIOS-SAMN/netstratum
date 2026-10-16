@@ -13,6 +13,9 @@
 //! - `clock`                  the keepers, epicenter to rims; the time
 //!                            inversion through the enclosures
 //! - `ledger`                 mass, spin, magnetism, conserved sums
+//! - `recycle [N]`            the recycling circuit (docs/83): the ledger,
+//!                            the media tier by tier, what the last N
+//!                            echo-beats shed, and each galaxy's return
 //! - `civs`                   the civilizations: live and collapsed
 //! - `events [N]`             the last N creation/collapse events (journal)
 //! - `pace [N]`               beat pace and the top costs over the last N
@@ -210,6 +213,51 @@ fn main() {
             let mass = pulse::mass(&u.total()) / unit.clone();
             let magnetism = pulse::magnetism(&u.total()) / unit.clone();
             println!("LEDGER at beat {now}: mass {:.6e} spin {:.6e} magnetism {:.6e} mass+magnetism {:.6e}", f(&mass), f(&pulse::spin_total(&u, &unit)), f(&magnetism), f(&(mass + magnetism)));
+        }
+        "recycle" => {
+            // THE RECYCLING CIRCUIT (docs/83, proposed with xylarium): what
+            // is shed crosses outward whole into the medium one tier up; the
+            // regenerated pulse kicks it along the crests; the return is gas
+            // arriving where a galaxy held everything. Read only, the
+            // quantities both nodes read; no outcome assumed.
+            let mass = pulse::mass(&u.total());
+            let magnetism = pulse::magnetism(&u.total());
+            println!("RECYCLE at beat {now}");
+            println!("  LEDGER: mass {:.9e}, mass+magnetism {:.9e} (units of the deepest hole; exact sums, compare across beats)", f(&(mass.clone() / unit.clone())), f(&((mass.clone() + magnetism) / unit.clone())));
+            // The media, tier by tier: the ocean (intergalactic), each
+            // galaxy's gas, each system's, each world's.
+            let systems: Vec<&pulse::Body> = u.cores.iter().flat_map(|c| &c.satellites).collect();
+            let worlds: Vec<&pulse::Body> = systems.iter().flat_map(|s| &s.satellites).collect();
+            let sum = |bodies: &[&pulse::Body]| bodies.iter().fold(pulse::Manifest::new(), |mut m, b| {
+                for (k, a) in &b.medium {
+                    *m.entry(k.clone()).or_insert_with(|| ratio(0, 1)) += a.clone();
+                }
+                m
+            });
+            let galaxies: Vec<&pulse::Body> = u.cores.iter().collect();
+            for (name, m) in [("ocean", u.medium.clone()), ("galaxy gas", sum(&galaxies)), ("system media", sum(&systems)), ("world media", sum(&worlds))] {
+                println!("  MEDIUM {name:<13} {:.6e} of the universe; {}", f(&(pulse::mass(&m) / mass.clone())), composition(&m, 5));
+            }
+            // SHED: what the stars returned to their galaxy's gas, echo by
+            // echo (the conductor's BREATH lines).
+            let n = num(1).unwrap_or(12) as usize;
+            // This conductor's run only (its process), not an earlier founding's.
+            let pid = Command::new("systemctl").args(["--user", "show", "netstratum-conductor", "-p", "MainPID", "--value"]).output().map(|o| String::from_utf8_lossy(&o.stdout).trim().to_string()).unwrap_or_default();
+            let shed: Vec<String> = journal(40_000).into_iter().filter(|l| l.contains("BREATH —") && l.contains(&format!("[{pid}]"))).collect();
+            if shed.is_empty() {
+                println!("  SHED: no echo has reached a galaxy yet in this run");
+            }
+            for l in shed.iter().skip(shed.len().saturating_sub(n)) {
+                println!("  SHED {}", l.split("conductor").last().unwrap_or(l).chars().take(200).collect::<String>());
+            }
+            // RETURN: per galaxy, what it holds as disc, what it has as gas,
+            // and what formed from it.
+            for c in &u.cores {
+                let total = pulse::mass(&c.total());
+                let worlds: usize = c.satellites.iter().map(|s| s.satellites.len()).sum();
+                println!("  RETURN galaxy {:>2}: disc {:.4}, gas {:.4} ({} parcels), {} stars, {worlds} worlds", c.path[0], f(&(pulse::mass(&c.kept) / total.clone())), f(&(pulse::mass(&c.medium) / total.clone())), c.gas.len(), c.satellites.len());
+            }
+            println!("  CRESTS: owed (the gain a pass on a crest, (medium in band) × a_q × the kick, with xylarium); read once derived");
         }
         other => println!("unknown view {other}; see the source's header for the views"),
     }

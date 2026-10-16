@@ -370,8 +370,8 @@ fn main() {
         if !events.is_empty() {
             let _ = conductor::pulse::write(std::path::Path::new(&var_root), &pulse_seed, &universe);
             println!(
-                "beat {beat}: BREATH — {} echoes, {} systems born, {} returned to the media, {} stars dissolved",
-                breath_reading.echoes, breath_reading.births, breath_reading.returned.clone().round(), breath_reading.dissolved
+                "beat {beat}: BREATH — {} echoes, {} systems born, {:.6e} returned to the media (units of the deepest hole), {} stars dissolved",
+                breath_reading.echoes, breath_reading.births, breath_reading.returned.numer().to_string().parse::<f64>().unwrap_or(0.0) / breath_reading.returned.denom().to_string().parse::<f64>().unwrap_or(1.0), breath_reading.dissolved
             );
         }
         // The readings follow the universe: refreshed when the breath changed

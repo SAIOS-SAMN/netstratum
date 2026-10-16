@@ -467,6 +467,57 @@ crest's width (the collected medium's deficit, the open fixed point).
 - the RETURN: gas arriving in a galaxy that held everything, then clumps,
   then stars, then worlds: 0 → read, none stated in advance.
 
+Read with `observe recycle [N]` (LEDGER, MEDIUM by tier, SHED from the
+breath's lines, RETURN by galaxy; CRESTS once derived). xylarium mirrors the
+same readings. **xylarium's answers (proposed):** (a) the gain on a crest is
+(medium in band) × `a_q` × the kick; the enclosure's OWN core family is
+kicked at full amplitude (1, regenerated), ρ multiplies only the PARENT's
+family: ρ appears only where a boundary is crossed. (b) Shed matter goes one
+tier up WHOLE, undivided; ρ governs pulses received inward, never matter
+leaving; the enclosing tier's crests then decide where it lands. (c) The
+crest width stays open: the candidate is the fixed point where the in-phase
+gain a pass balances the spread between crests, both shares. (d)
+Anticipated: the same circuit seen from the core, their jetstream ruling
+(recycled elements feed in, the bounce's pressure ejects them): the heavy
+end's return holding the throat open, its magnetism the core's strength.
+
+First live reading (beat 75, regenerated founding): the ledger mass
+9.000139832 (units of the deepest hole); the ocean `1.92e-5` of the
+universe, all from the cores that never formed, its heaviest kinds
+Z016–Z023; galaxy, system and world media 0; every galaxy disc 1.0.
+
+### The swing (galactic cores, xylarium 11.0 (3); drafted here, accepted by xylarium; to be ruled and built)
+
+Galactic cores are weaker singularities; the universal core's torsion sets
+them SWINGING about it, never on circles. In the motion law's own terms
+(`ℓ = R·H`, `P = 1 + R/H`, `ω = δ` a received ring), shares, sums and
+products of distinct readings only:
+
+1. **The torsion.** Holding and torsion are the two faces of c → 1 − c: the
+   universal core HOLDS `δ_u(R) = H_u/(R + H_u)` at a core's reach and
+   TWISTS the other face, `τ_u = 1 − δ_u(R) = R/(R + H_u)`.
+2. **The eccentricity, a share:** `e = τ_u/(τ_u + h_g)`, the torsion
+   against the galactic core's own holding `h_g` (its state and grains);
+   e < 1 always, no escape by the swing.
+3. **The turning reaches, linear:** `R₋ = R(1 − e)`, `R₊ = R(1 + e)` about
+   the reach the cut sets (the spread form of dispersal, with e).
+4. **The period, nested in T_U:** P is linear in R, so the mean of the
+   turning periods `½(P(R₋) + P(R₊)) = 1 + R/H`, the circle's, in core
+   rings (`T_U/4` bells each). No Kepler.
+5. **The sweep:** `ω = δ(R(t))` a received ring: faster at R₋, slower at
+   R₊; the ellipse's sweep from δ alone, no area law.
+6. **The phase:** a core is born at R₋ (the bounce's own point; the
+   white-hole outflow carries it out), so the swing starts at its deepest
+   reach. xylarium carries `frac(i·golden)` into the phase along the swing;
+   **not adopted here**: the golden ratio is a constant (missing physics)
+   and an index is spreadsheet identity; netstratum's phase is the core's
+   birth reading (its sector at birth, as every body's identity).
+
+Refused: turning points from `δ(R₋) = 1 − δ(R₊)` (gives `R₊·R₋ = H·H`, a
+square in disguise); any energy integral (v²). Owed: the galaxies'
+magnetism setting the universal core's strength (11.0 (1)) feeds `H_u` and
+so e; anticipated to be the recycling circuit seen from the core.
+
 ## What we have, and what is missing
 
 | nature's ingredient | built | missing |
