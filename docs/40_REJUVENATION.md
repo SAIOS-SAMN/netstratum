@@ -1,5 +1,14 @@
 # 40 — PLANETARY REJUVENATION (the regrowth law)
 
+**Era 1 (operator 2026-10-16), PROPOSED:** rejuvenation becomes the RETURN
+leg of the recycling circuit: shed matter recycles into the enclosing
+medium, the regenerated pulse kicks it along the resonant crests
+(recyclotronic propulsion), and what it carries back to a world is its
+regrowth. The rate r becomes the world's intake from its crest, the ceiling
+K its own holding; rejuvenation mints no matter. See docs/83, "Recycling and
+recyclotronic propulsion". The era-0 law below stands until that is
+derived and tested.
+
 **Status:** DESIGN, ruled 2026-08-12 (operator, Gemini relay). Growth
 form RULED: **(B) rational sigmoid on a grain** (§4) — preserve the
 S-curve so collapse from near-zero is genuinely expensive to recover.

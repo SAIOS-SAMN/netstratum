@@ -375,6 +375,98 @@ H_rot,i`) lands with the tidal coupling rate, which moves it. Live from
 2026-10-15 14:16 on a redeployed universe (13 cores, 416 systems,
 conservation exact).
 
+### Dispersal, not sorting (operator 2026-10-16; built, 5deec46)
+
+"We shouldn't be sorting anything, we should be dispersing and letting the
+physics do the distribution." The cut's all-or-nothing verdict per kind
+retires. The bounce pushes every kind out and SPREADS it: kind z is carried
+`ℓ_z`, stands about `R_z = ℓ_z/H`, and is spread by the push across
+`R_z(1 − p) … R_z(1 + p)`. Its HELD share is the part of that spread within
+the throat, `(H − R_z(1 − p))/(2p·R_z)` taken between 0 and 1: a share,
+never a verdict (xylarium agrees; their ruling "nothing boolean: outcomes
+are shares and rates"). Every kind is partly held and partly free, the disc
+and the gas both mixed (`pulse::disperse`, `formation::shells`).
+
+Witnessed live (re-founded 14:18, beat 112), with the push still divided by
+the galaxy's share of the universe: 97 stars in 13 galaxies, mixed discs
+(0.46–0.57 in the large galaxies), mixed gas, and **0 worlds**: every star
+held its whole clump. The star tier's push carried no share, the galaxy
+tier's did; the two tiers were not one law. That raised the ruling below.
+
+### Regeneration (operator ruling (i), 2026-10-16; built, 41c231e)
+
+Each core re-pulses the echo at FULL STRENGTH in its own units (s = 1). No
+share of the enclosing body enters the push at any tier: `1/s_g` retires
+from `galaxy_push`, `disperse` and `shells` (xylarium's operator agrees; it
+comes out of theirs too). Rejected: (ii) budget division, a conserved push
+handed down the tiers, under which cores would only redistribute the
+amplitude.
+
+What regeneration renews is the DRIVE (the push, the amplitude), never
+matter. In its own units a body holds all its own matter: read offline and
+live (re-founded 15:25), every galaxy holds its whole manifest as disc
+(push ½, H 2), no gas, no stars, no worlds. A galaxy's gas must ARRIVE from
+outside. That is the next section's job. Still carrying `s_g`: the jets'
+interface clock `⌈Q̄/(e·s_g)⌉` (not the push; to be re-read with the
+ocean).
+
+### Recycling and recyclotronic propulsion (operator 2026-10-16; PROPOSED, with xylarium, to be tested)
+
+The operator ties regeneration (the drive, physics) and rejuvenation (a
+world's regrowth, docs/40) together through RECYCLING. One closed circuit,
+one law every tier; nothing below is derived yet, and no outcome is stated.
+
+1. **Shedding (outflow).** Every body loses kinds as it orbits and burns:
+   defects (never errors), the jets off the disc, a star's burn, the
+   vacuum's take-back. This is the circuit's input.
+2. **Recycling.** Shed matter is never lost. It enters the MEDIUM of the
+   enclosure one tier up: a world's losses the system's gas, a system's the
+   galaxy's gas, a galaxy's the ocean. The ledger's total is fixed; matter
+   only circulates.
+3. **Recyclotronic propulsion (the kick).** A cyclotron bends charges into
+   orbit with a magnetic field and kicks them on each pass. Here:
+   - the BENDING FIELD is the tier's two-charge magnetism (xylarium 11.0,
+     "two charges, reflected the whole way": the faces c → 1 − c, the
+     rotoreflection at every tier);
+   - the KICK is the regenerated pulse, renewed at full strength by each
+     core on every echo;
+   - medium matter gains only where it orbits IN STEP with the echo: the
+     ocean's crests `R_{p/q} = H(P_b·p/q − 1)`, the orbits whose period is a
+     whole ratio of the echo. On a crest the kick lands in phase every pass;
+     between crests it nets nothing. The crests are the recyclotron's
+     resonant orbits, the spirals from the echo delay the paths matter climbs
+     along them.
+4. **Rejuvenation (return).** What the recyclotron carries back to a world
+   is its regrowth (docs/40 re-read): the rate r is the world's intake from
+   the crest it sits on; the ceiling K is its own holding (the rim law's span
+   [1, 2]); settlement stays lazy, settled at the touch, never stepped.
+   Rejuvenation mints no matter: a world exhausted is re-driven; a world
+   stripped recovers only by arrival.
+
+**What it resolves.** Under regeneration a galaxy's gas must come from
+outside: the OCEAN is the recycled medium, kicked out from the universal
+core along its crests. One mechanism, not a separate build. Rejuvenation's
+ceiling stops being a dial and gains a physical source.
+
+**Design-law check.** The resonance is a period ratio p/q, linear, no root
+or square; the gain is an in-phase share a pass, never ½mv²; no constant:
+the kick's strength is the core's own amplitude, the field the tier's own
+two charges.
+
+**Owed (with xylarium):** the per-pass gain on a crest (the in-phase share
+times the received pulse); how shed matter divides between tiers; whether
+`a_q = 1/q` (odd q, 0 even) is the crest's coupling to the kick; the
+crest's width (the collected medium's deficit, the open fixed point).
+
+**The test (offline first, then live):**
+- the LEDGER: total mass, and mass + magnetism, unchanged across every
+  shed, recycle and kick (exact);
+- the SHED: what each tier loses an echo, by kind, and where it lands;
+- the CRESTS: medium on resonant orbits gains, medium between them does
+  not (read as gain a pass against `p/q`);
+- the RETURN: gas arriving in a galaxy that held everything, then clumps,
+  then stars, then worlds: 0 → read, none stated in advance.
+
 ## What we have, and what is missing
 
 | nature's ingredient | built | missing |
