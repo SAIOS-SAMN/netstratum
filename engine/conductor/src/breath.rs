@@ -301,7 +301,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 // Its identity: its birth reading, never a row number.
                 let siblings: Vec<u64> = core.satellites.iter().map(|l| l.path[1]).collect();
                 let path = vec![core.path[0], crate::ring::birth_key(bell, &r_guess, &held, &siblings)];
-                let Some((kept, orbs, medium, medium_spin)) = crate::formation::system(&star, &st.agitation, &path, &unit, &universe_mass) else { continue };
+                let Some((kept, orbs, medium, medium_spin)) = crate::formation::system(&star, &st.agitation, &path, &unit, &universe_mass, &crate::ring::deficit(&r_guess, &held)) else { continue };
                 let mut sys = Body { path, radius: r_guess, period: ratio(0, 1), kept, satellites: orbs, medium, ell: ratio(0, 1), medium_spin, gas: Vec::new(), born: bell };
                 let internal = subtree_spin(&sys, &unit);
                 let own = taken - internal;

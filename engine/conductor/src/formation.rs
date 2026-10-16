@@ -278,7 +278,7 @@ pub fn heartbeat(star: &Manifest, universe_hold: &Ratio, rings: u64) -> Option<(
 /// worlds of holding `w*` as fit, standing at their places in the annulus;
 /// what does not fragment stays as the system's medium (its belts). Read in
 /// the transition units by the clump's holding; orbits by the motion law.
-pub fn system(clump: &Manifest, agitation: &Ratio, path: &[u64], unit: &Ratio, universe_hold: &Ratio) -> Option<(Manifest, Vec<crate::pulse::Body>, Manifest, Ratio)> {
+pub fn system(clump: &Manifest, agitation: &Ratio, path: &[u64], unit: &Ratio, universe_hold: &Ratio, tide: &Ratio) -> Option<(Manifest, Vec<crate::pulse::Body>, Manifest, Ratio)> {
     let x = ignition_share(agitation)?;
     let star = crate::pulse::take(clump, &x);
     let mut disc = clump.clone();
@@ -293,8 +293,15 @@ pub fn system(clump: &Manifest, agitation: &Ratio, path: &[u64], unit: &Ratio, u
     // agitation if hotter.
     let light = heartbeat(&star, universe_hold, 0).map(|(_, _, l)| l).unwrap_or_else(|| ratio(0, 1));
     let mid = (x.clone() + ratio(1, 1)) / ratio(2, 1);
-    let heat = light * mid.clone() / (mid + x.clone());
-    let disc_agitation = heat.max(agitation.clone());
+    let unlocked = mid.clone() / (mid + x.clone());
+    let heat = light * unlocked.clone();
+    // THE RECEIVED FLUX (with xylarium, their absorb books' "received minus
+    // re-locked"): the galactic core's pulse WITHHELD where the system stands
+    // (its tide, `δ_gal(R_sys)`), times the share the star leaves unlocked at
+    // the annulus (`R/(R + x*)`): `a_disc = δ_gal · rate_star`. Deep systems
+    // run hot (many worlds, or all belts past ½), far ones cold (one world).
+    let flux = tide.clone() * unlocked;
+    let disc_agitation = heat.max(flux).max(agitation.clone());
     let annulus = Stretch { inner: x.clone(), outer: ratio(1, 1), lambda: ratio(1, 1), agitation: disc_agitation, members: Vec::new() };
     let mut worlds = Vec::new();
     let mut inside = star_hold.clone();
