@@ -61,6 +61,11 @@ pub struct Parcel {
     pub phase: Vec<Ratio>,
     pub agitation: Ratio,
     pub born: u64,
+    /// Its STREAM KIND, inherited from where it entered and carried
+    /// forward, never reassigned: false the continuum (the core's founding
+    /// outflow, a star's outbursts and wind), true the vacuum (ocean
+    /// arrivals).
+    pub vacuum: bool,
 }
 
 fn z_of(k: &str) -> Option<u32> {
@@ -337,19 +342,39 @@ pub fn clumps(parcels: &[Parcel], h: &Ratio, p: &Ratio, total: &Ratio) -> Vec<(R
 /// Merge parcels whose states coincide on the coordinate's grain (`60⁻⁶`
 /// a plane, the carrier's resolution, never law): same kind, same spins and
 /// phases on the grain, their amounts added.
-pub fn merge(parcels: &mut Vec<Parcel>) {
+pub fn merge(parcels: &mut Vec<Parcel>, total: &Ratio) -> Ratio {
+    // The merge rule (with xylarium; the carrier's resolution, never law):
+    // same kind, same stream, the same 60⁶ sector in every phase and in the
+    // reach's share `ℓ/(ℓ + 1)`. Holding sums exactly; spins and agitation
+    // merge by holding onto the grid, the floored spin's remainder returned
+    // for the core's reservoir so the spin ledger stays exact.
     let g = |x: &Ratio| crate::ring::grain(x);
+    let key = |y: &Parcel| (y.key.clone(), y.vacuum, g(&(y.ell_o.clone() / (y.ell_o.clone() + ratio(1, 1)))), y.phase.iter().map(g).collect::<Vec<_>>());
     let mut out: Vec<Parcel> = Vec::new();
+    let mut remainder = ratio(0, 1);
     for x in std::mem::take(parcels) {
-        let key = |y: &Parcel| (y.key.clone(), g(&y.ell_o), g(&y.ell_c), y.phase.iter().map(g).collect::<Vec<_>>());
         if let Some(y) = out.iter_mut().find(|y| key(y) == key(&x)) {
-            y.amount += x.amount;
-            y.agitation = y.agitation.clone().max(x.agitation);
+            let (my, mx) = (y.amount.clone(), x.amount.clone());
+            let both = my.clone() + mx.clone();
+            if both.is_zero() {
+                continue;
+            }
+            let exact_o = (my.clone() * y.ell_o.clone() + mx.clone() * x.ell_o.clone()) / both.clone();
+            let exact_c = (my.clone() * y.ell_c.clone() + mx.clone() * x.ell_c.clone()) / both.clone();
+            let (go, gc) = (g(&exact_o), g(&exact_c));
+            if !total.is_zero() {
+                remainder += both.clone() * weight(&x.key) / total.clone() * ((exact_o - go.clone()) + (exact_c - gc.clone()));
+            }
+            y.agitation = g(&((my * y.agitation.clone() + mx * x.agitation.clone()) / both.clone()));
+            y.ell_o = go;
+            y.ell_c = gc;
+            y.amount = both;
         } else {
             out.push(x);
         }
     }
     *parcels = out;
+    remainder
 }
 
 /// The founding's parcels for a galaxy: each kind of its grains carried by
@@ -373,7 +398,7 @@ pub fn founding(grains: &Manifest) -> Vec<Parcel> {
         .map(|(k, a)| {
             let turn = ratio(i64::from(z_of(k).unwrap_or(0)), 2);
             let phase = vec![frac(&(source[0].clone() + turn.clone())), frac(&(ratio(1, 2) + turn))];
-            Parcel { key: k.clone(), amount: a.clone(), ell_o: crate::ring::grain(&(p.clone() * mean.clone() / weight(k))), ell_c: ratio(0, 1), phase, agitation: ratio(0, 1), born: 0 }
+            Parcel { key: k.clone(), amount: a.clone(), ell_o: crate::ring::grain(&(p.clone() * mean.clone() / weight(k))), ell_c: ratio(0, 1), phase, agitation: ratio(0, 1), born: 0, vacuum: false }
         })
         .collect()
 }

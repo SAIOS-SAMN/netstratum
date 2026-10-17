@@ -603,6 +603,7 @@ fn put_body(b: &Body, out: &mut Vec<u8>) {
             cfe::ratio::encode(r, &mut w);
         }
         w.extend_from_slice(&x.born.to_le_bytes());
+        w.push(u8::from(x.vacuum));
         cfe::tlv::put(10, &w, out);
     }
     if !b.reservoir.is_zero() {
@@ -700,8 +701,9 @@ fn get_flow(v: &[u8]) -> Option<crate::flows::Parcel> {
         phase.push(x);
     }
     let born = u64::from_le_bytes(v.get(at..at + 8)?.try_into().ok()?);
+    let vacuum = v.get(at + 8).copied().unwrap_or(0) == 1;
     let mut r = r.into_iter();
-    Some(crate::flows::Parcel { key, amount: r.next()?, ell_o: r.next()?, ell_c: r.next()?, agitation: r.next()?, phase, born })
+    Some(crate::flows::Parcel { key, amount: r.next()?, ell_o: r.next()?, ell_c: r.next()?, agitation: r.next()?, phase, born, vacuum })
 }
 
 /// A gas parcel (tag 6), attached to the body read before it.

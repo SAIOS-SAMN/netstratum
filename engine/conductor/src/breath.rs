@@ -248,13 +248,13 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             for (k, a) in gathered {
                 let ell_o = p.clone() * mean.clone() / crate::flows::weight(&k) + g_rate.clone() * turning.0.clone();
                 let ell_c = g_rate.clone() * turning.1.clone();
-                core.flows.push(crate::flows::Parcel { key: k, amount: a, ell_o: crate::ring::grain(&ell_o), ell_c: crate::ring::grain(&ell_c), phase: zero_phase.clone(), agitation: ratio(0, 1), born: bell });
+                core.flows.push(crate::flows::Parcel { key: k, amount: a, ell_o: crate::ring::grain(&ell_o), ell_c: crate::ring::grain(&ell_c), phase: zero_phase.clone(), agitation: ratio(0, 1), born: bell, vacuum: true });
             }
             // Shed matter crosses whole with its star's orbit (`ℓ = R·H`).
             for (m, r) in shed {
                 let r_own = if scale.is_zero() { ratio(0, 1) } else { crate::ring::grain(&(r / scale.clone())) };
                 for (k, a) in m {
-                    core.flows.push(crate::flows::Parcel { key: k, amount: a, ell_o: r_own.clone() * h.clone(), ell_c: ratio(0, 1), phase: zero_phase.clone(), agitation: ratio(0, 1), born: bell });
+                    core.flows.push(crate::flows::Parcel { key: k, amount: a, ell_o: r_own.clone() * h.clone(), ell_c: ratio(0, 1), phase: zero_phase.clone(), agitation: ratio(0, 1), born: bell, vacuum: false });
                 }
             }
             // THE KICK, its spin from the core's reservoir (the antipole).
@@ -315,7 +315,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 let Some((kept, orbs, medium, medium_spin)) = lit else {
                     // No heart: the matter stays a parcel where it was.
                     for (k, a) in star {
-                        core.flows.push(crate::flows::Parcel { key: k, amount: a, ell_o: reach.clone() * h.clone(), ell_c: ratio(0, 1), phase: vec![ratio(0, 1); crate::flows::PLANES], agitation: a_own.clone(), born: bell });
+                        core.flows.push(crate::flows::Parcel { key: k, amount: a, ell_o: reach.clone() * h.clone(), ell_c: ratio(0, 1), phase: vec![ratio(0, 1); crate::flows::PLANES], agitation: a_own.clone(), born: bell, vacuum: false });
                     }
                     continue;
                 };
@@ -328,7 +328,8 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 stars += 1;
             }
             core.flows.retain(|x| x.amount > ratio(0, 1));
-            crate::flows::merge(&mut core.flows);
+            let remainder = crate::flows::merge(&mut core.flows, &g_mass);
+            core.reservoir += remainder;
             let (kept, free) = crate::flows::read_cut(&core.flows, &h, &p);
             core.kept = kept;
             core.medium = free;
