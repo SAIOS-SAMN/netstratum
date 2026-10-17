@@ -53,6 +53,32 @@ breaks one of them is wrong before it is built.
     quantum state between a planet and its star, in any medium the world
     offers: chemical, geologic, plasmic, informational. No law assumes
     water, carbon, a habitable zone or biology.
+11. **The number grammar: ℤ and ℚ are the singularity's two poles, ℝ the
+    span between them (operator, 2026-10-17).** The singularity holds two
+    opposing, magnetised attractors on its axis: the **ℤ pole**, what closes
+    and is counted whole (pairs that close, whole ticks of a band, nuclei,
+    grains on the ledger, rungs; a nucleus's HOLDING, `3Z − unpaired`), and
+    the **ℚ pole**, what flows and is passed on as a share (every deficit
+    `H/(R + H)`, the push ½, the unlocked face, `a_q = 1/q`, phases in turns;
+    a nucleus's MAGNETISM, its open frames). The distance between the poles
+    is **ℝ**, the span that fills between the rationals; the core's
+    STRENGTH is that span's extent, read exactly at its ends: holding plus
+    magnetism, `3Z` a nucleus (the ruling `H_u = 1 + Σ(state + holding +
+    magnetism)` is this, read numerically). The balance between the poles is
+    a second reading: burning moves magnetism into holding with `3Z` fixed,
+    so a core hardens toward the ℤ pole (the closed limit) while its span
+    stays. **ℝ feeds AGENCY:** a mind acts in the open span between what is
+    closed and what flows; a choice made there collapses to a deed in ℚ or
+    ℤ the moment it touches the world (the shape of coherence collapsing to
+    a lock). The same word is the same thing at every tier: R, a body's reach
+    `ℓ/H`, is its distance from its core; ℝ is the distance between the
+    singularity's poles. **The condition:** ℝ is a SPAN, never a stored
+    value. Every quantity in a law is a count (ℤ), a share (ℚ), or a span
+    read only by its exact bounds (ℚ endpoints; anything read inside it a
+    certified enclosure, an exact rational interval narrowed until it
+    decides). No real number and no float stands in a law or on the ledger.
+    A quantity that is neither a count, nor a share, nor a mind's open
+    choice, is in the wrong place.
 
 ## The geometry (the shared model; netstratum's own physics)
 
