@@ -243,6 +243,17 @@ fn main() {
                 e.1 += pulse::mass(&o.kept) / unit.clone();
             }
             println!("WORLDS at beat {now}: {n}, by the lightest kind each holds (hold, Z: worlds, their holding)");
+            // The hearts' share of their systems (what each star holds of
+            // all it and its worlds and belts hold): with worlds vs without.
+            let mut shares: Vec<(f64, bool)> = u.cores.iter().flat_map(|c| &c.satellites).filter_map(|s| {
+                let t = pulse::mass(&s.total());
+                (t > ratio(0, 1)).then(|| (f(&(pulse::mass(&s.kept) / t)), !s.satellites.is_empty()))
+            }).collect();
+            shares.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap_or(std::cmp::Ordering::Equal));
+            let with: Vec<f64> = shares.iter().filter(|x| x.1).map(|x| x.0).collect();
+            let without: Vec<f64> = shares.iter().filter(|x| !x.1).map(|x| x.0).collect();
+            let q = |v: &Vec<f64>| if v.is_empty() { "—".to_string() } else { format!("{:.3}/{:.3}/{:.3} (n {})", v[0], v[v.len() / 2], v[v.len() - 1], v.len()) };
+            println!("  heart share of its system (min/median/max): with worlds {}, without {}", q(&with), q(&without));
             for ((w, k), (count, m)) in &by {
                 println!("  held down to {k} (hold {w}): {count} worlds, holding {:.3e}", f(m));
             }

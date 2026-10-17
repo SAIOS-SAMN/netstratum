@@ -391,7 +391,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 // members' spread, is the turning its heart cut adds to every
                 // kind (no weight ratio).
                 let lit = crate::formation::ignition_share(&a_clump).and_then(|_| crate::formation::system(&star, &a_clump, &spin_own, &path, &unit, &tide));
-                let Some((kept, orbs, medium, medium_spin)) = lit else {
+                let Some((kept, orbs, medium, medium_spin, world_load)) = lit else {
                     // No heart: the matter stays a parcel where it was.
                     for (k, a) in star {
                         core.flows.push(crate::flows::Parcel { key: k, amount: a, ell_o: reach.clone() * h.clone(), ell_c: ratio(0, 1), phase: vec![ratio(0, 1); crate::flows::PLANES], agitation: a_own.clone(), born: bell, vacuum: false });
@@ -401,7 +401,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 // Its STATE is its holding at birth (a heart's state, set at
                 // its forming, never drained); its own spin and phases.
                 let held_at_birth = mass(&kept);
-                let mut sys = Body { path, radius: r_guess, period: ratio(0, 1), kept, satellites: orbs, medium, ell: ratio(0, 1), medium_spin, gas: Vec::new(), born: bell, state: held_at_birth, flows: Vec::new(), reservoir: ratio(0, 1), turning: spin_own, phase: phases_own };
+                let mut sys = Body { path, radius: r_guess, period: ratio(0, 1), kept, satellites: orbs, medium, ell: ratio(0, 1), medium_spin, gas: Vec::new(), born: bell, state: held_at_birth, flows: Vec::new(), reservoir: ratio(0, 1), turning: spin_own, phase: phases_own, load: world_load };
                 let internal = subtree_spin(&sys, &unit);
                 let own = taken - internal;
                 sys.ell = crate::ring::grain(&(own.clone() / m_u.clone()));
@@ -427,7 +427,14 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         for sys in core.satellites.iter_mut() {
             if !inside.is_zero() && sys.ell > ratio(0, 1) {
                 if let Some(r) = crate::ring::radius(&sys.ell, &inside) {
-                    sys.period = crate::ring::period(&r, &inside);
+                    // THE STAR'S VELOCITY (xylarium's operator, 2026-10-17:
+                    // "the inverse of the drag on the planets"): its pull
+                    // through the galaxy, shared against its worlds' load,
+                    // `v = δ_gal·H/(H + d·Σx)` (H its system's own hold, 1
+                    // in its units; d its torsion `r/(r + H_gal)`): a loaded
+                    // star turns slower, its period stretched by `1 + d·Σx`.
+                    let d = r.clone() / (r.clone() + inside.clone());
+                    sys.period = crate::ring::period(&r, &inside) * (ratio(1, 1) + d * sys.load.clone());
                     sys.radius = r;
                 }
             }
