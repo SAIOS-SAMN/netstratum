@@ -298,9 +298,15 @@ pub fn clumps(parcels: &[Parcel], h: &Ratio, p: &Ratio, total: &Ratio) -> Vec<(R
         if !on_disc_leg(&parcels[i]) {
             continue;
         }
-        if let Some((members, [bind, a, face, shear])) = candidate(parcels, h, p, total, i) {
+        if let Some((members, [_, a, face, _])) = candidate(parcels, h, p, total, i) {
             let members: Vec<(usize, Ratio)> = members.into_iter().filter(|(j, _)| on_disc_leg(&parcels[*j])).collect();
-            if bind >= a + face + shear {
+            // THE FILAMENT LAW (with xylarium; the clump read in its OWN
+            // enclosure, operator: shares in the body's own enclosure): its
+            // line holding binds against its agitation and the unlocked face;
+            // the core enters only as the shear capping a fragment (the
+            // fragment spacing from the filament's width is owed: one clump
+            // a holding filament until then).
+            if filament(parcels, h, total, i, &members) >= a + face {
                 holding.push((i, members));
             }
         }
