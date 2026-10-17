@@ -29,7 +29,7 @@
 //!   a write across layers is PERPENDICULAR: an echo coming down, a birth
 //!   changing the mass above. A perpendicular write down answered by one up
 //!   closes a causal LOOP; the loops are the chain.
-use crate::pulse::{less, mass, take, tier, Body, Universe};
+use crate::pulse::{less, mass, Body, Universe};
 use crate::ring::rate;
 use cfe::ratio::{ratio, Ratio};
 use num_traits::Zero;
@@ -127,7 +127,6 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
     }
     arrivals.sort();
     let mut events = Vec::new();
-    let epsilon = tier(1).medium;
     for (bell, i, rung) in arrivals {
         // DECOHERE: each star sheds `ε · (1 − c)` of what it holds, c its
         // coherence with the echo at this bell (its nested clock's slip).
@@ -164,8 +163,13 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         let mut shed: Vec<(crate::pulse::Manifest, Ratio)> = Vec::new();
         for mut sys in std::mem::take(&mut core.satellites) {
             let own = g_rate.clone() * rate(&sys.radius, &enclosed_in);
-            let out_of_phase = ratio(1, 1) - coherence(&slip(&own, bell, t_u));
-            let back = take(&sys.kept, &(epsilon.clone() * out_of_phase));
+            // THE WIND (operators 2026-10-17, with xylarium; replaces the
+            // placeholder shedding share): the star's OWN jetstream loops,
+            // one grammar one tier down. Its heart cut, re-read on what it
+            // holds now (burning changes its mix, so the open shares shift),
+            // releases what its loops carry past its throat: that crosses
+            // into the system's medium and on outward, whole.
+            let back = crate::formation::heart_cut(&sys.kept, &ratio(0, 1)).map(|(_, released, _)| released).unwrap_or_default();
             less(&mut sys.kept, &back);
             returned += mass(&back) / unit.clone();
             // THE SPIN LEDGER (docs/83 Phase 0): shed matter carries its

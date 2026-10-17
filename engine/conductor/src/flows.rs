@@ -168,8 +168,11 @@ pub fn kick(parcels: &mut [Parcel], h: &Ratio, p: &Ratio, rho: &Ratio, delta_u: 
     for x in parcels.iter_mut() {
         let r_o = x.ell_o.clone() / h.clone();
         let d_o = h.clone() / (r_o + h.clone());
-        let r_c = x.ell_c.clone() / h.clone();
-        let d_c = h.clone() / (r_c + h.clone());
+        // THE LOOP'S RATE (with xylarium): the jetstream turns by the
+        // motion law AT THE PARCEL'S REACH, δ(R) a ring, two rings a bell,
+        // continuously; inner matter circulates faster than outer. (At
+        // R = H it is one turn a bell, a 1:1 lock with the bell: the rim.)
+        let d_c = d_o.clone();
         // On the coordinate's grain (`60⁻⁶`, the carrier's resolution, as
         // every spin and place): exact sums of exact rationals otherwise
         // compound their denominators each bell without bound.
@@ -189,20 +192,34 @@ pub fn kick(parcels: &mut [Parcel], h: &Ratio, p: &Ratio, rho: &Ratio, delta_u: 
     given
 }
 
-/// The exits, by state: parcels whose circulation spin carries them past
-/// the throat along the axis (the jet) or whose reach stands at or past it
-/// (radial escape) leave whole. Returns the parcels that left; the rest stay.
+/// THE JETSTREAM IS A CONTINUOUS LOOP (operators 2026-10-16/17: "a
+/// continuous flow, inbound and outbound"): the circulation's plane IS the
+/// loop, a parcel's phase in it its place on the loop. The AXIAL leg (out
+/// along the torsion axis and over: phase in `[½, 1)`) carries matter in
+/// transit; the DISC leg (down at the rim and home through the disc: phase
+/// in `[0, ½)`) is where the cut and collapse are read. No jet batch, no jet
+/// exit: matter goes round, out and back at once.
+pub fn on_disc_leg(x: &Parcel) -> bool {
+    frac(&x.phase[1]) < ratio(1, 2)
+}
+
+/// The one exit, by state: a parcel whose loop OVERREACHES THE RIM (its
+/// reach at or past the throat, `R ≥ H`) crosses whole into the medium one
+/// tier up, where the enclosing core's loops carry it round the same way.
+/// Returns the parcels that left; the rest stay.
 pub fn exits(parcels: &mut Vec<Parcel>, h: &Ratio) -> Vec<Parcel> {
-    let (gone, stay): (Vec<Parcel>, Vec<Parcel>) = std::mem::take(parcels).into_iter().partition(|x| x.ell_c.clone() / h.clone() >= *h || x.ell_o.clone() / h.clone() >= *h);
+    let (gone, stay): (Vec<Parcel>, Vec<Parcel>) = std::mem::take(parcels).into_iter().partition(|x| x.ell_o.clone() / h.clone() >= *h);
     *parcels = stay;
     gone
 }
 
-/// The galaxy's held and free manifests, read from its parcels.
+/// The galaxy's held and free manifests, read from its parcels: on the
+/// disc leg by the cut; on the axial leg, in transit, never held.
 pub fn read_cut(parcels: &[Parcel], h: &Ratio, p: &Ratio) -> (Manifest, Manifest) {
     let (mut kept, mut free) = (Manifest::new(), Manifest::new());
     for x in parcels {
-        let k = crate::ring::grain(&(x.amount.clone() * held(x, h, p))).min(x.amount.clone());
+        let share = if on_disc_leg(x) { held(x, h, p) } else { ratio(0, 1) };
+        let k = crate::ring::grain(&(x.amount.clone() * share)).min(x.amount.clone());
         let f = x.amount.clone() - k.clone();
         if k > ratio(0, 1) {
             *kept.entry(x.key.clone()).or_insert_with(|| ratio(0, 1)) += k;
@@ -276,7 +293,13 @@ pub fn filament(parcels: &[Parcel], h: &Ratio, total: &Ratio, i: usize, members:
 pub fn clumps(parcels: &[Parcel], h: &Ratio, p: &Ratio, total: &Ratio) -> Vec<(Ratio, Vec<(usize, Ratio)>)> {
     let mut holding: Vec<(usize, Vec<(usize, Ratio)>)> = Vec::new();
     for i in 0..parcels.len() {
+        // Collapse is read on the disc leg only (matter in transit on the
+        // axial leg does not settle).
+        if !on_disc_leg(&parcels[i]) {
+            continue;
+        }
         if let Some((members, [bind, a, face, shear])) = candidate(parcels, h, p, total, i) {
+            let members: Vec<(usize, Ratio)> = members.into_iter().filter(|(j, _)| on_disc_leg(&parcels[*j])).collect();
             if bind >= a + face + shear {
                 holding.push((i, members));
             }
