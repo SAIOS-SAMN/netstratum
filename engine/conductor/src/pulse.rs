@@ -162,25 +162,29 @@ pub fn out_nuclei(grains: &Manifest, unformed: &Nuclei) -> Nuclei {
     out
 }
 
-/// THE FOUNDING DISTRIBUTION (docs/78; operator 2026-10-15, option B): the
-/// shape of the universe's founding manifest, derived from pairing (design
-/// law 6: opposite senses pair, and pairing is what closes). A nucleus one
-/// step heavier adds one proton–neutron frame, which closes only when its
-/// sense opposes, one of two: each step closes half of what tries, so the
-/// bounce's nuclei fall off by halving, `count(Z) = N · 2^−Z`, until a Z
-/// falls below one nucleus (no cap). Light-dominated by mass, read, never
-/// fitted. It is the SHAPE the universe requests: the composition of the
+/// THE FOUNDING DISTRIBUTION (docs/78; the capture law, operator 2026-10-16
+/// "derive a", with xylarium): the bounce's white-face outflow leaves along
+/// the outbound continuum jetstream, and each pass through the throat is ONE
+/// CAPTURE, kind Z built from Z − 1 by the share the stream carries on,
+/// `count_Z = count_{Z−1} · a · h_Z`. `a` is DERIVED, never drawn: what the
+/// throat does not hold at the crossing, its unlocked face, `1 − δ(H, H) =
+/// ½` (the same face that heats held matter); `h_Z = (3Z − unpaired)/3Z`,
+/// the atom tier's holding share (paired nuclei hold better). From the
+/// bounce's nucleons (`count_0 = N`) until a Z falls below one nucleus (no
+/// cap). It is the SHAPE the universe requests: the composition of the
 /// signed MANIFEST its reserve sends the court (mycelium 78.155b), which
 /// records and grants it and never reshapes it.
 pub fn founding_shape(nuclei: &num_bigint::BigInt) -> Nuclei {
     let mut out = Nuclei::new();
-    let mut count = nuclei.clone();
+    let mut count = Ratio::from_integer(nuclei.clone());
     for z in 1u16..=118 {
-        count /= 2;
-        if count <= num_bigint::BigInt::from(0) {
+        let held = cfe::almanac::atom::atom(u32::from(z)).map(|a| ratio(i64::from(3 * u32::from(z) - a.unpaired), i64::from(3 * u32::from(z)))).unwrap_or_else(|| ratio(1, 1));
+        count = count * ratio(1, 2) * held;
+        let whole = count.floor().to_integer();
+        if whole <= num_bigint::BigInt::from(0) {
             break;
         }
-        out.insert(z, count.clone());
+        out.insert(z, whole);
     }
     out
 }

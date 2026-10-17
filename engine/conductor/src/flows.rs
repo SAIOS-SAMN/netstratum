@@ -323,13 +323,24 @@ pub fn merge(parcels: &mut Vec<Parcel>) {
 /// circulation yet, the founding's phases, cold.
 pub fn founding(grains: &Manifest) -> Vec<Parcel> {
     let Some((p, _, mean)) = crate::pulse::galaxy_push(grains) else { return Vec::new() };
-    // The source's phases; refused only off the axes, where the founding
-    // carries no offset until the sector reading lands (stated, never a draw).
-    let phases = founding_phases().unwrap_or_else(|| vec![ratio(0, 1); PLANES]);
+    // The source's phases (refused only off the axes, where the founding
+    // carries no offset until the sector reading lands; stated, never a
+    // draw). THE CAPTURES TURN THEM (with xylarium): each pass of the
+    // outbound stream through the throat is one capture and turns the
+    // crossing point by a = ½, so kind Z leaves at the source's phase plus
+    // `Z·½`, and on the loop it starts on the AXIAL leg, outbound (`½ +
+    // Z·½`). Two groups at the founding, parted by each kind's own loop rate
+    // `δ(R_z)` at its own reach thereafter. (The per-universe offset, the
+    // hypha-assigned TUniversal position, is owed with mycelium.)
+    let source = founding_phases().unwrap_or_else(|| vec![ratio(0, 1); PLANES]);
     grains
         .iter()
         .filter(|(_, a)| **a > ratio(0, 1))
-        .map(|(k, a)| Parcel { key: k.clone(), amount: a.clone(), ell_o: crate::ring::grain(&(p.clone() * mean.clone() / weight(k))), ell_c: ratio(0, 1), phase: phases.clone(), agitation: ratio(0, 1), born: 0 })
+        .map(|(k, a)| {
+            let turn = ratio(i64::from(z_of(k).unwrap_or(0)), 2);
+            let phase = vec![frac(&(source[0].clone() + turn.clone())), frac(&(ratio(1, 2) + turn))];
+            Parcel { key: k.clone(), amount: a.clone(), ell_o: crate::ring::grain(&(p.clone() * mean.clone() / weight(k))), ell_c: ratio(0, 1), phase, agitation: ratio(0, 1), born: 0 }
+        })
         .collect()
 }
 
