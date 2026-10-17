@@ -378,6 +378,27 @@ pub fn burn(star: &Manifest, share: &Ratio, z: u32, coherence: &Ratio) -> Option
 /// stands within the throat, `ℓ_z/H ≤ H`; past it, it is released. One
 /// crossing on the cumulative hold (the runaway inside it: every kind held
 /// raises H for the next). Returns (held, released, the held share).
+/// Each kind's CARRIED SPIN in a heart's clump (own units), the push on its
+/// open frames plus the place's turning: `ℓ_z = p·(e_z/ē)·(w̄/w_z) + turning`.
+pub fn carried(clump: &Manifest, turning: &Ratio) -> Vec<(String, Ratio)> {
+    let total = mass(clump);
+    let count = clump.values().fold(ratio(0, 1), |s, a| s + a.clone());
+    if total.is_zero() || count.is_zero() {
+        return Vec::new();
+    }
+    let open_mean = crate::pulse::magnetism(clump) / total.clone();
+    let mean_weight = total / count;
+    clump
+        .keys()
+        .map(|k| {
+            let w = ratio(i64::from(z_of(k).map(hold).unwrap_or(1)), 1);
+            let open = ratio(i64::from(z_of(k).and_then(atom).map(|x| x.unpaired).unwrap_or(0)), 1) / w.clone();
+            let ell = if open_mean.is_zero() { ratio(0, 1) } else { ratio(1, 2) * open / open_mean.clone() * mean_weight.clone() / w } + turning.clone();
+            (k.clone(), ell)
+        })
+        .collect()
+}
+
 pub fn heart_cut(clump: &Manifest, turning: &Ratio) -> Option<(Manifest, Manifest, Ratio)> {
     let total = mass(clump);
     let count = clump.values().fold(ratio(0, 1), |s, a| s + a.clone());
@@ -432,7 +453,7 @@ pub fn lightest(m: &Manifest) -> Option<String> {
     m.iter().filter(|(_, a)| **a > ratio(0, 1)).min_by_key(|(k, _)| (z_of(k).map(hold).unwrap_or(0), z_of(k))).map(|(k, _)| k.clone())
 }
 
-pub fn system(clump: &Manifest, agitation: &Ratio, circulation: &Ratio, path: &[u64], unit: &Ratio, tide: &Ratio) -> Option<(Manifest, Vec<crate::pulse::Body>, Manifest, Ratio, Ratio)> {
+pub fn system(clump: &Manifest, agitation: &Ratio, circulation: &Ratio, path: &[u64], unit: &Ratio, tide: &Ratio) -> Option<(Manifest, Vec<crate::pulse::Body>, Manifest, Ratio, Ratio, Vec<crate::flows::Parcel>)> {
     // Ignition: a clump at a ≥ ½ never forms a heart.
     ignition_share(agitation)?;
     // THE HEART'S TORSION, THE CUT ONE TIER DOWN (operator, with xylarium,
@@ -471,71 +492,28 @@ pub fn system(clump: &Manifest, agitation: &Ratio, circulation: &Ratio, path: &[
     // the clump's own agitation the floor.
     let flux = (ratio(1, 1) - tide.clone()) * unlocked;
     let disc_agitation = (heat + flux).max(agitation.clone());
-    let mut worlds = Vec::new();
-    let mut inside = star_hold.clone();
-    let mut load = ratio(0, 1);
-    // THE DEPTH MANIFOLDS (xylarium's operator, 2026-10-17; all linear): each
-    // world owns where its pull beats the star's, `x = r·H_w/(H_w + H_s +
-    // d·x)`, the star's ORTHOGONAL DRAG `d = 1 − δ_gal` (its torsion in its
-    // galaxy) dragging each manifold in its own plane; its core from its own
-    // sphere, `H_w = 2λx`, so `x = (2λr − H_s)/(2λ + d)`. THE CHAIN: the
-    // first world's inner edge at the star (`r₁ = H_s(2λ + d − 1)/d`), each
-    // manifold meeting the next, `r_{k+1} = ((r_k + x_k)(2λ + d) − H_s)/d`.
-    // A world holds `2λx` of the disc (what remains, never more); the rest
-    // is belts. A disc too agitated (`2a ≥ 1`) is all belts.
-    let lambda = ratio(1, 1);
-    let d = ratio(1, 1) - tide.clone();
-    let mut remaining = ratio(1, 1) - h_s.clone();
-    if !disc.is_empty() && d > ratio(0, 1) && ratio(2, 1) * disc_agitation.clone() < ratio(1, 1) && remaining > ratio(0, 1) {
-        let two_l = ratio(2, 1) * lambda.clone();
-        let mut r = h_s.clone() * (two_l.clone() + d.clone() - ratio(1, 1)) / d.clone();
-        let mut guard = 0;
-        while remaining > ratio(0, 1) && guard < 4096 {
-            guard += 1;
-            let x_k = (two_l.clone() * r.clone() - h_s.clone()) / (two_l.clone() + d.clone());
-            // A world's WHOLE SPHERE stands inside its system's rim (the rim
-            // law: nothing beyond the rim; with xylarium).
-            if x_k <= ratio(0, 1) || r.clone() + x_k.clone() > rim {
-                break;
-            }
-            let take_share = (two_l.clone() * x_k.clone()).min(remaining.clone());
-            let disc_mass = mass(&disc);
-            let fragment = if disc_mass.is_zero() { Manifest::new() } else { crate::pulse::take(&disc, &(take_share.clone() * total.clone() / disc_mass).min(ratio(1, 1))) };
-            remaining -= take_share;
-            load += x_k.clone();
-            let next = ((r.clone() + x_k.clone()) * (two_l.clone() + d.clone()) - h_s.clone()) / d.clone();
-            let r_here = r.clone();
-            r = next;
-            if fragment.is_empty() {
-                continue;
-            }
-            crate::pulse::less(&mut disc, &fragment);
-            // THE PLANETARY CORE (W1–W4; no throat, `H = held`): the place's
-            // turning, the star's deficit at it times the disc's agitation.
-            let place = h_s.clone() / (r_here.clone() + h_s.clone()) * disc_agitation.clone();
-            let Some((part, released, _)) = heart_cut(&fragment, &place) else {
-                for (k, a) in fragment {
-                    *disc.entry(k).or_insert_with(|| ratio(0, 1)) += a;
-                }
-                continue;
-            };
-            for (k, a) in released {
-                *disc.entry(k).or_insert_with(|| ratio(0, 1)) += a;
-            }
-            let reach = crate::ring::grain(&(r_here * scale.clone()));
-            let siblings: Vec<u64> = worlds.iter().map(|o: &crate::pulse::Body| o.path[path.len()]).collect();
-            let mut at = path.to_vec();
-            at.push(crate::ring::birth_key(0, &reach, &inside, &siblings));
-            let period = crate::ring::period(&reach, &inside);
-            let ell = crate::ring::spin(&reach, &inside);
-            inside += mass(&part) / unit.clone();
-            let state = mass(&part);
-            worlds.push(crate::pulse::Body { path: at, radius: reach, period, kept: part, satellites: Vec::new(), medium: Manifest::new(), ell, medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state, flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1) });
-        }
-    }
-    let mut belts_spin = mass(&disc) / unit.clone() * crate::ring::spin(&scale, &inside);
-    belts_spin += dance(&mut worlds, &star_hold, unit);
-    Some((star, worlds, disc, belts_spin, crate::ring::grain(&load)))
+    // WORLDS ARE GROWN, NEVER PLACED (operators 2026-10-17; with xylarium):
+    // the disc the heart releases becomes the system's OWN MEDIUM, parcels
+    // carrying their state (each kind's carried spin, the star's phases, the
+    // disc's agitation), which collide over time (`collide_system`) and grow
+    // bodies; the depth-manifold chain is the ORDER that emerges, never a
+    // placement at birth.
+    let worlds: Vec<crate::pulse::Body> = Vec::new();
+    let inside = star_hold.clone();
+    let load = ratio(0, 1);
+    let spins = carried(clump, circulation);
+    let _ = (&h_s, &rim, &disc_agitation, &x);
+    let belts_spin = mass(&disc) / unit.clone() * crate::ring::spin(&scale, &inside);
+    let parcels: Vec<crate::flows::Parcel> = disc
+        .iter()
+        .filter(|(_, a)| **a > ratio(0, 1))
+        .map(|(k, a)| {
+            let ell = spins.iter().find(|(kk, _)| kk == k).map(|(_, l)| crate::ring::grain(l)).unwrap_or_else(|| ratio(0, 1));
+            crate::flows::Parcel { key: k.clone(), amount: a.clone(), ell_o: ell, ell_c: ratio(0, 1), phase: vec![ratio(0, 1); crate::flows::PLANES], agitation: crate::ring::grain(&disc_agitation), born: path.len() as u64, vacuum: false }
+        })
+        .collect();
+    let _ = &worlds;
+    Some((star, worlds, disc, belts_spin, crate::ring::grain(&load), parcels))
 }
 
 /// The convergents `p/q` of a positive rational, in order.
@@ -652,3 +630,163 @@ pub fn jet_batch(rings: &[Shell], h: &Ratio, rim: &Ratio, born: u64, share: &Rat
     out
 }
 
+
+/// A body's holding-weighted TIGHTNESS (`atom::tightness`, its outer band's
+/// grip), the ground of its bonding.
+fn grip(m: &Manifest) -> Ratio {
+    let total = mass(m);
+    if total.is_zero() {
+        return ratio(0, 1);
+    }
+    m.iter().fold(ratio(0, 1), |s, (k, a)| {
+        let t = z_of(k).and_then(atom).map(|x| x.tightness).unwrap_or_else(|| ratio(0, 1));
+        s + a.clone() * ratio(i64::from(z_of(k).map(hold).unwrap_or(1)), 1) * t
+    }) / total
+}
+
+/// COLLISIONS IN A STAR SYSTEM'S OWN MEDIUM (operators 2026-10-17, with
+/// xylarium: "run it into collisions over time: activity, spin, bounce,
+/// bonding … and as the matter gets bigger you'll get form and order").
+/// Every parcel and world turns about the star by the motion law in the
+/// system's own units (`R = ℓ/H_s`, `δ = H_s/(R + H_s)`, two rings a bell).
+/// Two COINCIDE where they stand within each other's dispersal band in reach
+/// and on the same hemisphere in every plane. They STICK where the pair's
+/// bond share times their combined deficit across the gap reaches their
+/// relative turning, `s·D ≥ T` (`s = τ_min/τ_max` of their grips, `D = (mᵢ +
+/// mⱼ)/(g + mᵢ + mⱼ)`, `T = |δᵢ − δⱼ|/(δᵢ + δⱼ)`); stuck groups (read all at
+/// once, no order) become one body, spins added exactly, the unkept motion
+/// heat; otherwise they BOUNCE, both heated. Returns (sticks, bounces).
+pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio) -> (usize, usize) {
+    let total = mass(&sys.total());
+    if total.is_zero() || sys.flows.is_empty() {
+        return (0, 0);
+    }
+    let h_s = mass(&sys.kept) / total.clone();
+    if h_s.is_zero() {
+        return (0, 0);
+    }
+    let scale = total.clone() / unit.clone();
+    let planes = crate::flows::PLANES;
+    let frac = |x: &Ratio| x.clone() - x.floor();
+    // Items: every parcel and every world, (manifest, ℓ, phases, agitation).
+    let mut items: Vec<(Manifest, Ratio, Vec<Ratio>, Ratio)> = Vec::new();
+    let n_parcels = sys.flows.len();
+    for x in std::mem::take(&mut sys.flows) {
+        items.push(([(x.key.clone(), x.amount.clone())].into(), x.ell_o.clone(), x.phase.clone(), x.agitation.clone()));
+    }
+    for w in std::mem::take(&mut sys.satellites) {
+        let r_own = if scale.is_zero() { ratio(0, 1) } else { w.radius.clone() / scale.clone() };
+        let ph = if w.phase.len() == planes { w.phase.clone() } else { vec![ratio(0, 1); planes] };
+        items.push((w.kept.clone(), r_own * h_s.clone(), ph, ratio(0, 1)));
+    }
+    // Advance: each turns by its own deficit, two rings a bell.
+    let delta = |ell: &Ratio| { let r = ell.clone() / h_s.clone(); h_s.clone() / (r + h_s.clone()) };
+    for it in items.iter_mut() {
+        let d = delta(&it.1);
+        for k in 0..planes {
+            it.2[k] = crate::ring::grain(&frac(&(it.2[k].clone() + ratio(2, 1) * d.clone())));
+        }
+    }
+    let n = items.len();
+    let reach = |it: &(Manifest, Ratio, Vec<Ratio>, Ratio)| it.1.clone() / h_s.clone();
+    let share = |it: &(Manifest, Ratio, Vec<Ratio>, Ratio)| mass(&it.0) / total.clone();
+    let mut parent: Vec<usize> = (0..n).collect();
+    fn root(p: &mut Vec<usize>, i: usize) -> usize {
+        let mut i = i;
+        while p[i] != i {
+            p[i] = p[p[i]];
+            i = p[i];
+        }
+        i
+    }
+    let (mut sticks, mut bounces) = (0, 0);
+    let mut heat = vec![ratio(0, 1); n];
+    let half = ratio(1, 2);
+    for i in 0..n {
+        for j in (i + 1)..n {
+            let (ri, rj) = (reach(&items[i]), reach(&items[j]));
+            let (lo, hi) = if ri < rj { (ri.clone(), rj.clone()) } else { (rj.clone(), ri.clone()) };
+            if hi > lo.clone() * ratio(3, 1) {
+                continue;
+            }
+            if !(0..planes).all(|k| (frac(&items[i].2[k]) < half) == (frac(&items[j].2[k]) < half)) {
+                continue;
+            }
+            let (gi, gj) = (grip(&items[i].0), grip(&items[j].0));
+            let s = if gi.is_zero() || gj.is_zero() { ratio(0, 1) } else if gi < gj { gi / gj } else { gj / gi };
+            let (mi, mj) = (share(&items[i]), share(&items[j]));
+            let gap = hi - lo;
+            let d_pair = (mi.clone() + mj.clone()) / (gap + mi + mj);
+            let (di, dj) = (delta(&items[i].1), delta(&items[j].1));
+            let t = if di > dj { di.clone() - dj.clone() } else { dj.clone() - di.clone() } / (di + dj);
+            let bind = s * d_pair;
+            if bind >= t {
+                let (a, b) = (root(&mut parent, i), root(&mut parent, j));
+                if a != b {
+                    parent[a] = b;
+                }
+                heat[i] += t.clone() - bind.clone().min(t.clone());
+                sticks += 1;
+            } else {
+                heat[i] += t.clone();
+                heat[j] += t;
+                bounces += 1;
+            }
+        }
+    }
+    // Groups: one body each, spins added exactly (holding-weighted ℓ).
+    let mut groups: std::collections::BTreeMap<usize, Vec<usize>> = std::collections::BTreeMap::new();
+    for i in 0..n {
+        let r = root(&mut parent, i);
+        groups.entry(r).or_default().push(i);
+    }
+    let mut worlds = Vec::new();
+    let mut parcels = Vec::new();
+    let mut inside = mass(&sys.kept) / unit.clone();
+    for (_, g) in groups {
+        // A parcel that met nothing stays a parcel; a world stays a world.
+        if g.len() == 1 && g[0] < n_parcels {
+            let it = &items[g[0]];
+            let (k, a) = it.0.iter().next().map(|(k, a)| (k.clone(), a.clone())).unwrap_or_default();
+            parcels.push(crate::flows::Parcel { key: k, amount: a, ell_o: it.1.clone(), ell_c: ratio(0, 1), phase: it.2.clone(), agitation: crate::ring::grain(&(it.3.clone() + heat[g[0]].clone())), born: 0, vacuum: false });
+            continue;
+        }
+        let mut kept = Manifest::new();
+        let (mut m, mut ml) = (ratio(0, 1), ratio(0, 1));
+        let mut ph = vec![ratio(0, 1); planes];
+        for &i in &g {
+            let mi = mass(&items[i].0);
+            ml += mi.clone() * items[i].1.clone();
+            for k in 0..planes {
+                ph[k] += mi.clone() * items[i].2[k].clone();
+            }
+            m += mi;
+            for (k, a) in &items[i].0 {
+                *kept.entry(k.clone()).or_insert_with(|| ratio(0, 1)) += a.clone();
+            }
+        }
+        if m.is_zero() {
+            continue;
+        }
+        let ell = crate::ring::grain(&(ml / m.clone()));
+        let phase: Vec<Ratio> = ph.into_iter().map(|x| crate::ring::grain(&(x / m.clone()))).collect();
+        let r_own = ell.clone() / h_s.clone();
+        let radius = crate::ring::grain(&(r_own * scale.clone()));
+        let period = crate::ring::period(&radius, &inside);
+        let spin = crate::ring::spin(&radius, &inside);
+        inside += m.clone() / unit.clone();
+        let siblings: Vec<u64> = worlds.iter().map(|w: &crate::pulse::Body| w.path[sys.path.len()]).collect();
+        let mut path = sys.path.clone();
+        path.push(crate::ring::birth_key(0, &radius, &inside, &siblings));
+        worlds.push(crate::pulse::Body { path, radius, period, kept, satellites: Vec::new(), medium: Manifest::new(), ell: spin, medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: m, flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase, load: ratio(0, 1) });
+    }
+    // The medium is what the parcels hold.
+    let mut medium = Manifest::new();
+    for x in &parcels {
+        *medium.entry(x.key.clone()).or_insert_with(|| ratio(0, 1)) += x.amount.clone();
+    }
+    sys.medium = medium;
+    sys.flows = parcels;
+    sys.satellites = worlds;
+    (sticks, bounces)
+}

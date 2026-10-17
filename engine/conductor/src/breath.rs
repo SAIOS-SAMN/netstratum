@@ -275,6 +275,8 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     }
                 }
             }
+            // COLLISIONS in the system's own medium: worlds grow.
+            let _ = crate::formation::collide_system(&mut sys, &unit);
             enclosed_in += mass(&sys.total()) / unit.clone();
             keep.push(sys);
         }
@@ -391,7 +393,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 // members' spread, is the turning its heart cut adds to every
                 // kind (no weight ratio).
                 let lit = crate::formation::ignition_share(&a_clump).and_then(|_| crate::formation::system(&star, &a_clump, &spin_own, &path, &unit, &tide));
-                let Some((kept, orbs, medium, medium_spin, world_load)) = lit else {
+                let Some((kept, orbs, medium, medium_spin, world_load, disc_parcels)) = lit else {
                     // No heart: the matter stays a parcel where it was.
                     for (k, a) in star {
                         core.flows.push(crate::flows::Parcel { key: k, amount: a, ell_o: reach.clone() * h.clone(), ell_c: ratio(0, 1), phase: vec![ratio(0, 1); crate::flows::PLANES], agitation: a_own.clone(), born: bell, vacuum: false });
@@ -401,7 +403,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 // Its STATE is its holding at birth (a heart's state, set at
                 // its forming, never drained); its own spin and phases.
                 let held_at_birth = mass(&kept);
-                let mut sys = Body { path, radius: r_guess, period: ratio(0, 1), kept, satellites: orbs, medium, ell: ratio(0, 1), medium_spin, gas: Vec::new(), born: bell, state: held_at_birth, flows: Vec::new(), reservoir: ratio(0, 1), turning: spin_own, phase: phases_own, load: world_load };
+                let mut sys = Body { path, radius: r_guess, period: ratio(0, 1), kept, satellites: orbs, medium, ell: ratio(0, 1), medium_spin, gas: Vec::new(), born: bell, state: held_at_birth, flows: disc_parcels, reservoir: ratio(0, 1), turning: spin_own, phase: phases_own, load: world_load };
                 let internal = subtree_spin(&sys, &unit);
                 let own = taken - internal;
                 sys.ell = crate::ring::grain(&(own.clone() / m_u.clone()));
