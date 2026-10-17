@@ -464,10 +464,12 @@ pub fn system(clump: &Manifest, agitation: &Ratio, circulation: &Ratio, path: &[
     let mid = (x.clone() + rim.clone()) / ratio(2, 1);
     let unlocked = mid.clone() / (mid + x.clone());
     let heat = light * unlocked.clone();
-    // THE RECEIVED FLUX (with xylarium): the galactic tide withheld where
-    // the system stands, times the share the star leaves unlocked at the
-    // annulus; the channels add, the clump's own agitation the floor.
-    let flux = tide.clone() * unlocked;
+    // THE RECEIVED FLUX (with xylarium): the galaxy's UNLOCKED face where
+    // the system stands, `1 − δ_gal` (operator: heat comes from the face the
+    // core does not lock, never the held face; it had read `δ_gal`), times
+    // the share the star leaves unlocked at the annulus; the channels add,
+    // the clump's own agitation the floor.
+    let flux = (ratio(1, 1) - tide.clone()) * unlocked;
     let disc_agitation = (heat + flux).max(agitation.clone());
     let mut worlds = Vec::new();
     let mut inside = star_hold.clone();
@@ -491,7 +493,9 @@ pub fn system(clump: &Manifest, agitation: &Ratio, circulation: &Ratio, path: &[
         while remaining > ratio(0, 1) && guard < 4096 {
             guard += 1;
             let x_k = (two_l.clone() * r.clone() - h_s.clone()) / (two_l.clone() + d.clone());
-            if x_k <= ratio(0, 1) || r.clone() - x_k.clone() >= rim {
+            // A world's WHOLE SPHERE stands inside its system's rim (the rim
+            // law: nothing beyond the rim; with xylarium).
+            if x_k <= ratio(0, 1) || r.clone() + x_k.clone() > rim {
                 break;
             }
             let take_share = (two_l.clone() * x_k.clone()).min(remaining.clone());
