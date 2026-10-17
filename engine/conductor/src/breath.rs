@@ -131,7 +131,6 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         // DECOHERE: each star sheds `ε · (1 − c)` of what it holds, c its
         // coherence with the echo at this bell (its nested clock's slip).
         let g_rate = galaxy_rate(u, i, &unit);
-        let g_coherence = coherence(&slip(&g_rate, bell, t_u));
         // THE RETURN (`crate::ocean`, with xylarium): the galaxy's swing
         // crosses the ocean's standing crests and gathers there (STAGED: the
         // ocean is not yet parcels, so its gathering is still a share of it,
@@ -338,15 +337,12 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // Each take: (reach, clump, agitation, the star's own spin, phases).
             let mut takes: Vec<(Ratio, crate::pulse::Manifest, Ratio, Ratio, Vec<Ratio>)> = Vec::new();
             for (reach, shares) in clumps {
-                if g_coherence.is_zero() {
-                    break;
-                }
                 let mut clump = crate::pulse::Manifest::new();
                 let (mut heat, mut amt) = (ratio(0, 1), ratio(0, 1));
                 let mut members: Vec<(Ratio, Ratio, Vec<Ratio>)> = Vec::new();
                 for (j, s) in shares {
                     let x = &mut core.flows[j];
-                    let amount = cfe::world::smelt_resource(&(x.amount.clone() * s * g_coherence.clone())).min(x.amount.clone());
+                    let amount = cfe::world::smelt_resource(&(x.amount.clone() * s)).min(x.amount.clone());
                     if amount <= ratio(0, 1) {
                         continue;
                     }

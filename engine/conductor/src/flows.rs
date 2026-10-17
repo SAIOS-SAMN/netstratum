@@ -257,7 +257,12 @@ pub fn candidate(parcels: &[Parcel], h: &Ratio, p: &Ratio, total: &Ratio, i: usi
         if rj < r.clone() * (ratio(1, 1) - p.clone()) || rj > r.clone() * (ratio(1, 1) + p.clone()) {
             return ratio(0, 1);
         }
-        (0..PLANES).fold(ratio(1, 1), |s, k| s * in_step(&parcels[i].phase[k], &parcels[j].phase[k]))
+        // MEMBERSHIP (with xylarium): on the same hemisphere as the centre
+        // in every plane (the S⁰ face test), whole; coincidence decides who
+        // belongs, not how much is taken.
+        let half = ratio(1, 2);
+        let same = (0..PLANES).all(|k| (frac(&parcels[i].phase[k]) < half) == (frac(&parcels[j].phase[k]) < half));
+        if same { ratio(1, 1) } else { ratio(0, 1) }
     };
     let members: Vec<(usize, Ratio)> = (0..parcels.len()).map(|j| (j, near(j))).filter(|(_, c)| *c > ratio(0, 1)).collect();
     let (mut x, mut a_w, mut held_part) = (ratio(0, 1), ratio(0, 1), ratio(0, 1));
@@ -321,19 +326,32 @@ pub fn clumps(parcels: &[Parcel], h: &Ratio, p: &Ratio, total: &Ratio) -> Vec<(R
             }
         }
     }
-    let mut claimed: Vec<Ratio> = vec![ratio(0, 1); parcels.len()];
+    // A parcel claimed by several holding filaments divides among them.
+    let mut claimed: Vec<i64> = vec![0; parcels.len()];
     for (_, members) in &holding {
-        for (j, c) in members {
-            claimed[*j] += c.clone();
+        for (j, _) in members {
+            claimed[*j] += 1;
         }
     }
     holding
         .into_iter()
         .map(|(i, members)| {
-            let shares = members.into_iter().map(|(j, c)| {
-                let s = if claimed[j] > ratio(1, 1) { c / claimed[j].clone() } else { c };
-                (j, s)
-            });
+            // THE FILAMENT'S COHERENCE WITH THE BELL (with xylarium; the
+            // recoherence ruling, "an echo compresses only the coherent
+            // part", now the filament's own): the product over planes of the
+            // in-step share of its holding-weighted phase against the bell;
+            // ONE share, taken from every member alike, so a star's mix is
+            // its filament's mix.
+            let m = members.iter().fold(ratio(0, 1), |s, (j, _)| s + parcels[*j].amount.clone() * weight(&parcels[*j].key));
+            let coherence = if m.is_zero() {
+                ratio(0, 1)
+            } else {
+                (0..PLANES).fold(ratio(1, 1), |c, k| {
+                    let phase = members.iter().fold(ratio(0, 1), |s, (j, _)| s + parcels[*j].amount.clone() * weight(&parcels[*j].key) * parcels[*j].phase[k].clone()) / m.clone();
+                    c * in_step(&phase, &ratio(0, 1))
+                })
+            };
+            let shares = members.into_iter().map(|(j, _)| (j, coherence.clone() / ratio(claimed[j].max(1), 1)));
             (parcels[i].ell_o.clone() / h.clone(), shares.collect())
         })
         .collect()
