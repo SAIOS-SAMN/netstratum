@@ -158,7 +158,8 @@ pub fn held(parcel: &Parcel, h: &Ratio, p: &Ratio) -> Ratio {
 }
 
 /// One bell's kicks on every parcel: the own family in the orbit's plane
-/// (`κ_o = p·δ(R)`), the parent's in the circulation's (`κ_c = p·ρ·δ_u`).
+/// (`κ_o = p·δ(R)`, a spin); the parent's moves the parcel along the loop
+/// (`p·ρ·δ_u`, a phase).
 /// Each plane's phase first advances by its own turning over the bell's two
 /// rings (`2·δ` turns, the motion law's `ω = δ`; the bell's own turn is
 /// whole, so the phase against it moves by `2δ` mod 1). Returns the spin
@@ -177,17 +178,21 @@ pub fn kick(parcels: &mut [Parcel], h: &Ratio, p: &Ratio, rho: &Ratio, delta_u: 
         // every spin and place): exact sums of exact rationals otherwise
         // compound their denominators each bell without bound.
         x.phase[0] = crate::ring::grain(&frac(&(x.phase[0].clone() + ratio(2, 1) * d_o.clone())));
-        x.phase[1] = crate::ring::grain(&frac(&(x.phase[1].clone() + ratio(2, 1) * d_c)));
+        let loop_phase = frac(&(x.phase[1].clone() + ratio(2, 1) * d_c));
         let dl_o = p.clone() * d_o * response(&x.phase[0]);
-        let dl_c = p.clone() * rho.clone() * delta_u.clone() * response(&x.phase[1]);
+        // THE PARENT'S PULSE MOVES MATTER ALONG THE LOOP (operator: "the
+        // pulse moves matter along the loop"; with xylarium): absorbed in
+        // step it ADVANCES the loop's phase, `p·ρ·δ_u` × the hemisphere's
+        // signed share, on top of the loop's own rate; nothing accumulates
+        // as a spin in the loop's plane.
+        let advance = p.clone() * rho.clone() * delta_u.clone() * response(&loop_phase);
+        x.phase[1] = crate::ring::grain(&frac(&(loop_phase + advance)));
         // Spin cannot carry a parcel through zero reach: a turning is a
         // magnitude in its plane; a kick past zero stops at the core.
         let new_o = crate::ring::grain(&(x.ell_o.clone() + dl_o)).max(ratio(0, 1));
-        let new_c = crate::ring::grain(&(x.ell_c.clone() + dl_c)).max(ratio(0, 1));
         let m = if total.is_zero() { ratio(0, 1) } else { x.amount.clone() * weight(&x.key) / total.clone() };
-        given += m.clone() * (new_o.clone() - x.ell_o.clone()) + m * (new_c.clone() - x.ell_c.clone());
+        given += m * (new_o.clone() - x.ell_o.clone());
         x.ell_o = new_o;
-        x.ell_c = new_c;
     }
     given
 }
