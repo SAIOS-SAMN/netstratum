@@ -188,7 +188,19 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // THE OUTBURST (operator: made IN the star; with xylarium): on
             // its bell, the heart re-cut on its burning mix throws out what
             // the new cut no longer holds.
-            let mut back = if rang { crate::formation::heart_cut(&sys.kept, &ratio(0, 1)).map(|(_, released, _)| released).unwrap_or_default() } else { crate::pulse::Manifest::new() };
+            // The outburst lands in the system's OWN MEDIUM (with xylarium):
+            // parcels at each kind's carried spin and the star's phases.
+            let burst = if rang { crate::formation::heart_cut(&sys.kept, &ratio(0, 1)).map(|(_, released, _)| released).unwrap_or_default() } else { crate::pulse::Manifest::new() };
+            if !burst.is_empty() {
+                let spins = crate::formation::carried(&sys.kept, &ratio(0, 1));
+                less(&mut sys.kept, &burst);
+                for (k, a) in burst {
+                    let ell = spins.iter().find(|(kk, _)| *kk == k).map(|(_, l)| crate::ring::grain(l)).unwrap_or_else(|| ratio(0, 1));
+                    *sys.medium.entry(k.clone()).or_insert_with(|| ratio(0, 1)) += a.clone();
+                    sys.flows.push(crate::flows::Parcel { key: k, amount: a, ell_o: ell, ell_c: ratio(0, 1), phase: sys.phase.clone(), agitation: ratio(0, 1), born: bell, vacuum: false });
+                }
+            }
+            let mut back = crate::pulse::Manifest::new();
             // THE WIND (operator: made at the INTERFACE): the star's
             // outbound continuum meets the medium's counter-moving vacuum
             // stream. The counterflow is the vacuum-stream parcels within the
@@ -275,8 +287,12 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     }
                 }
             }
-            // COLLISIONS in the system's own medium: worlds grow.
-            let _ = crate::formation::collide_system(&mut sys, &unit);
+            // COLLISIONS in the system's own medium: worlds grow; what
+            // overreaches the system's rim crosses into the galaxy.
+            let (_, _, escaped) = crate::formation::collide_system(&mut sys, &unit, bell);
+            if !escaped.is_empty() {
+                shed.push((escaped, sys.radius.clone(), sys.phase.clone()));
+            }
             enclosed_in += mass(&sys.total()) / unit.clone();
             keep.push(sys);
         }

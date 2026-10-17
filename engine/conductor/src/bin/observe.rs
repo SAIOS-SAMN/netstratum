@@ -234,7 +234,8 @@ fn main() {
             // lightest kind its cut kept; rocky and giant are readings of it.
             let mut by: std::collections::BTreeMap<(u32, String), (usize, Ratio)> = std::collections::BTreeMap::new();
             let mut n = 0;
-            for o in u.cores.iter().flat_map(|c| &c.satellites).flat_map(|s| &s.satellites) {
+            let companions = u.cores.iter().flat_map(|c| &c.satellites).flat_map(|s| &s.satellites).filter(|o| o.born > 0).count();
+            for o in u.cores.iter().flat_map(|c| &c.satellites).flat_map(|s| &s.satellites).filter(|o| o.born == 0) {
                 n += 1;
                 let k = formation::lightest(&o.kept).unwrap_or_default();
                 let w = k.strip_prefix('Z').and_then(|z| z.parse::<u32>().ok()).map(cfe::almanac::atom::hold).unwrap_or(0);
@@ -242,7 +243,7 @@ fn main() {
                 e.0 += 1;
                 e.1 += pulse::mass(&o.kept) / unit.clone();
             }
-            println!("WORLDS at beat {now}: {n}, by the lightest kind each holds (hold, Z: worlds, their holding)");
+            println!("WORLDS at beat {now}: {n} (and {companions} grown bodies ignited as companion stars), by the lightest kind each holds (hold, Z: worlds, their holding)");
             // The hearts' share of their systems (what each star holds of
             // all it and its worlds and belts hold): with worlds vs without.
             let mut shares: Vec<(f64, bool)> = u.cores.iter().flat_map(|c| &c.satellites).filter_map(|s| {

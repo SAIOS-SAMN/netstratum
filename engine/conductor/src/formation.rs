@@ -656,28 +656,32 @@ fn grip(m: &Manifest) -> Ratio {
 /// mⱼ)/(g + mᵢ + mⱼ)`, `T = |δᵢ − δⱼ|/(δᵢ + δⱼ)`); stuck groups (read all at
 /// once, no order) become one body, spins added exactly, the unkept motion
 /// heat; otherwise they BOUNCE, both heated. Returns (sticks, bounces).
-pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio) -> (usize, usize) {
+pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64) -> (usize, usize, Manifest) {
     let total = mass(&sys.total());
-    if total.is_zero() || sys.flows.is_empty() {
-        return (0, 0);
+    if total.is_zero() || (sys.flows.is_empty() && sys.satellites.is_empty()) {
+        return (0, 0, Manifest::new());
     }
     let h_s = mass(&sys.kept) / total.clone();
     if h_s.is_zero() {
-        return (0, 0);
+        return (0, 0, Manifest::new());
     }
+    // The system's parcels merge by the shared rule (same kind, stream and
+    // sectors; the carrier's resolution), so returns don't multiply.
+    let _ = crate::flows::merge(&mut sys.flows, &total);
     let scale = total.clone() / unit.clone();
     let planes = crate::flows::PLANES;
     let frac = |x: &Ratio| x.clone() - x.floor();
     // Items: every parcel and every world, (manifest, ℓ, phases, agitation).
-    let mut items: Vec<(Manifest, Ratio, Vec<Ratio>, Ratio)> = Vec::new();
+    // Items: (matter, ℓ, phases, agitation, whether it is a star).
+    let mut items: Vec<(Manifest, Ratio, Vec<Ratio>, Ratio, bool)> = Vec::new();
     let n_parcels = sys.flows.len();
     for x in std::mem::take(&mut sys.flows) {
-        items.push(([(x.key.clone(), x.amount.clone())].into(), x.ell_o.clone(), x.phase.clone(), x.agitation.clone()));
+        items.push(([(x.key.clone(), x.amount.clone())].into(), x.ell_o.clone(), x.phase.clone(), x.agitation.clone(), false));
     }
     for w in std::mem::take(&mut sys.satellites) {
         let r_own = if scale.is_zero() { ratio(0, 1) } else { w.radius.clone() / scale.clone() };
         let ph = if w.phase.len() == planes { w.phase.clone() } else { vec![ratio(0, 1); planes] };
-        items.push((w.kept.clone(), r_own * h_s.clone(), ph, ratio(0, 1)));
+        items.push((w.kept.clone(), r_own * h_s.clone(), ph, ratio(0, 1), w.born > 0));
     }
     // Advance: each turns by its own deficit, two rings a bell.
     let delta = |ell: &Ratio| { let r = ell.clone() / h_s.clone(); h_s.clone() / (r + h_s.clone()) };
@@ -688,8 +692,8 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio) -> (usize, usi
         }
     }
     let n = items.len();
-    let reach = |it: &(Manifest, Ratio, Vec<Ratio>, Ratio)| it.1.clone() / h_s.clone();
-    let share = |it: &(Manifest, Ratio, Vec<Ratio>, Ratio)| mass(&it.0) / total.clone();
+    let reach = |it: &(Manifest, Ratio, Vec<Ratio>, Ratio, bool)| it.1.clone() / h_s.clone();
+    let share = |it: &(Manifest, Ratio, Vec<Ratio>, Ratio, bool)| mass(&it.0) / total.clone();
     let mut parent: Vec<usize> = (0..n).collect();
     fn root(p: &mut Vec<usize>, i: usize) -> usize {
         let mut i = i;
@@ -743,7 +747,23 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio) -> (usize, usi
     let mut worlds = Vec::new();
     let mut parcels = Vec::new();
     let mut inside = mass(&sys.kept) / unit.clone();
+    // What overreaches the system's rim (reach past 1, its grains' holding;
+    // the rim law) crosses whole into the galaxy.
+    let mut escaped = Manifest::new();
+    let rim = ratio(1, 1);
     for (_, g) in groups {
+        let r_group = {
+            let m: Ratio = g.iter().map(|&i| mass(&items[i].0)).fold(ratio(0, 1), |a, b| a + b);
+            if m.is_zero() { ratio(0, 1) } else { g.iter().fold(ratio(0, 1), |a, &i| a + mass(&items[i].0) * items[i].1.clone()) / m / h_s.clone() }
+        };
+        if r_group > rim {
+            for &i in &g {
+                for (k, a) in &items[i].0 {
+                    *escaped.entry(k.clone()).or_insert_with(|| ratio(0, 1)) += a.clone();
+                }
+            }
+            continue;
+        }
         // A parcel that met nothing stays a parcel; a world stays a world.
         if g.len() == 1 && g[0] < n_parcels {
             let it = &items[g[0]];
@@ -770,6 +790,42 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio) -> (usize, usi
         }
         let ell = crate::ring::grain(&(ml / m.clone()));
         let phase: Vec<Ratio> = ph.into_iter().map(|x| crate::ring::grain(&(x / m.clone()))).collect();
+        // THE PLANETARY CORE (no throat, H = held): the grown body keeps what
+        // its core holds; what it releases returns to the system's medium as
+        // parcels at the body's place. A body whose core holds nothing is no
+        // world: its matter stays the medium.
+        let heat_g = g.iter().fold(ratio(0, 1), |a, &i| a + heat[i].clone() + items[i].3.clone()) / ratio(g.len() as i64, 1);
+        // IGNITION OF A GROWN BODY (one accretion path; with xylarium): it
+        // becomes a STAR of its system where its own matter binds as a
+        // filament, `λ/(1 + λ)` with `λ` its holding and magnetism over its
+        // reach, against its agitation and the unlocked face, and passes the
+        // ignition test (`2(a + face) < 1`). It keeps its matter whole.
+        let r_body = ell.clone() / h_s.clone();
+        let was_star = g.iter().any(|&i| i >= n_parcels && items[i].4);
+        let ignites = was_star || (kept.len() > 1 && !r_body.is_zero() && {
+            let own = (mass(&kept) + crate::pulse::magnetism(&kept)) / total.clone();
+            let lambda = own / r_body.clone();
+            let face = (ratio(1, 1) - h_s.clone() / (r_body.clone() + h_s.clone())) / ratio(2, 1);
+            lambda.clone() / (ratio(1, 1) + lambda) >= heat_g.clone() + face.clone() && ratio(2, 1) * (heat_g.clone() + face) < ratio(1, 1)
+        });
+        // Otherwise THE PLANETARY CORE cuts it, its heat the added turning.
+        let (kept, released) = if ignites {
+            (kept, Manifest::new())
+        } else {
+            match heart_cut(&kept, &heat_g) {
+                Some((k, r, _)) => (k, r),
+                None => (Manifest::new(), kept),
+            }
+        };
+        for (k, a) in released {
+            if a > ratio(0, 1) {
+                parcels.push(crate::flows::Parcel { key: k, amount: a, ell_o: ell.clone(), ell_c: ratio(0, 1), phase: phase.clone(), agitation: crate::ring::grain(&heat_g), born: 0, vacuum: false });
+            }
+        }
+        if kept.is_empty() {
+            continue;
+        }
+        let m = mass(&kept);
         let r_own = ell.clone() / h_s.clone();
         let radius = crate::ring::grain(&(r_own * scale.clone()));
         let period = crate::ring::period(&radius, &inside);
@@ -779,6 +835,12 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio) -> (usize, usi
         let mut path = sys.path.clone();
         path.push(crate::ring::birth_key(0, &radius, &inside, &siblings));
         worlds.push(crate::pulse::Body { path, radius, period, kept, satellites: Vec::new(), medium: Manifest::new(), ell: spin, medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: m, flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase, load: ratio(0, 1) });
+        if ignites {
+            // A star of its system: born marks it (worlds are born 0).
+            if let Some(w) = worlds.last_mut() {
+                w.born = bell.max(1);
+            }
+        }
     }
     // The medium is what the parcels hold.
     let mut medium = Manifest::new();
@@ -788,5 +850,5 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio) -> (usize, usi
     sys.medium = medium;
     sys.flows = parcels;
     sys.satellites = worlds;
-    (sticks, bounces)
+    (sticks, bounces, escaped)
 }
