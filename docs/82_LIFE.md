@@ -343,7 +343,12 @@ and high σ mean. Its numbers are never fitted; the levels are read for
 every world and lifeform by the same formula.
 
 **Owed to test it:** worlds forming under the flows (0 in the current
-reads); worlds carrying their phases and locks (the star's bell is built);
+reads: read 2026-10-17 with xylarium, the founding's capture phases put odd
+and even Z on the loop's opposite legs, and with only two planes staged the
+stars form from one parity group, single-kind hearts holding everything;
+both nodes read worlds as WAITING ON mycelium's n-dimensional source, the
+per-plane phases on S^60/S^360 mixing kinds that share most planes, not on
+a law change); worlds carrying their phases and locks (the star's bell is built);
 the star's light per world (xylarium); the galaxy-tier lock of each star.
 
 ## Anchors (declared placeholders, design law 1)
