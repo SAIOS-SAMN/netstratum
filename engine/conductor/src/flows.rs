@@ -86,6 +86,24 @@ fn frac(x: &Ratio) -> Ratio {
     x.clone() - x.floor()
 }
 
+/// THE MEAN OF PHASES ON THE CIRCLE, never on the line (a line mean of
+/// 0.95 and 0.05 is ½, the far face): each phase's signed offset from a
+/// member's, `(−½, ½]`, weighted, added back on the ring. Exact; the same
+/// for any member as reference while the members share a hemisphere.
+pub fn circle_mean(members: &[(Ratio, Ratio)]) -> Ratio {
+    let m = members.iter().fold(ratio(0, 1), |s, (w, _)| s + w.clone());
+    let Some((_, at)) = members.first() else { return ratio(0, 1) };
+    if m.is_zero() {
+        return frac(at);
+    }
+    let signed = |x: &Ratio| {
+        let f = frac(x);
+        if f > ratio(1, 2) { f - ratio(1, 1) } else { f }
+    };
+    let d = members.iter().fold(ratio(0, 1), |s, (w, ph)| s + w.clone() * signed(&(ph.clone() - at.clone()))) / m;
+    frac(&(at.clone() + d))
+}
+
 /// The distance of a phase from the bell on the circle, `|ψ|` in `[0, ½]`.
 fn off(psi: &Ratio) -> Ratio {
     let f = frac(psi);
@@ -347,7 +365,7 @@ pub fn clumps(parcels: &[Parcel], h: &Ratio, p: &Ratio, total: &Ratio) -> Vec<(R
                 ratio(0, 1)
             } else {
                 (0..PLANES).fold(ratio(1, 1), |c, k| {
-                    let phase = members.iter().fold(ratio(0, 1), |s, (j, _)| s + parcels[*j].amount.clone() * weight(&parcels[*j].key) * parcels[*j].phase[k].clone()) / m.clone();
+                    let phase = circle_mean(&members.iter().map(|(j, _)| (parcels[*j].amount.clone() * weight(&parcels[*j].key), parcels[*j].phase[k].clone())).collect::<Vec<_>>());
                     c * in_step(&phase, &ratio(0, 1))
                 })
             };

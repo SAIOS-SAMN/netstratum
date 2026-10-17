@@ -729,7 +729,10 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64) -> 
                 if a != b {
                     parent[a] = b;
                 }
-                heat[i] += t.clone() - bind.clone().min(t.clone());
+                // The unkept relative motion heats the body both join.
+                let unkept = t.clone() - bind.clone().min(t.clone());
+                heat[i] += unkept.clone();
+                heat[j] += unkept;
                 sticks += 1;
             } else {
                 heat[i] += t.clone();
@@ -773,12 +776,12 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64) -> 
         }
         let mut kept = Manifest::new();
         let (mut m, mut ml) = (ratio(0, 1), ratio(0, 1));
-        let mut ph = vec![ratio(0, 1); planes];
+        let mut ph: Vec<Vec<(Ratio, Ratio)>> = vec![Vec::new(); planes];
         for &i in &g {
             let mi = mass(&items[i].0);
             ml += mi.clone() * items[i].1.clone();
             for k in 0..planes {
-                ph[k] += mi.clone() * items[i].2[k].clone();
+                ph[k].push((mi.clone(), items[i].2[k].clone()));
             }
             m += mi;
             for (k, a) in &items[i].0 {
@@ -789,12 +792,14 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64) -> 
             continue;
         }
         let ell = crate::ring::grain(&(ml / m.clone()));
-        let phase: Vec<Ratio> = ph.into_iter().map(|x| crate::ring::grain(&(x / m.clone()))).collect();
+        let phase: Vec<Ratio> = ph.iter().map(|x| crate::ring::grain(&crate::flows::circle_mean(x))).collect();
         // THE PLANETARY CORE (no throat, H = held): the grown body keeps what
         // its core holds; what it releases returns to the system's medium as
         // parcels at the body's place. A body whose core holds nothing is no
         // world: its matter stays the medium.
-        let heat_g = g.iter().fold(ratio(0, 1), |a, &i| a + heat[i].clone() + items[i].3.clone()) / ratio(g.len() as i64, 1);
+        // The body's heat: what its members carried plus all the unkept
+        // motion of its sticking, summed (heat adds, it is not averaged away).
+        let heat_g = g.iter().fold(ratio(0, 1), |a, &i| a + heat[i].clone() + items[i].3.clone());
         // IGNITION OF A GROWN BODY (one accretion path; with xylarium): it
         // becomes a STAR of its system where its own matter binds as a
         // filament, `λ/(1 + λ)` with `λ` its holding and magnetism over its

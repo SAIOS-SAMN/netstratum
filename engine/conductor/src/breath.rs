@@ -180,6 +180,8 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             let rings = rings_at(bell).saturating_sub(rings_at(bell.saturating_sub(t_u)));
             let turned = omega * ratio(rings as i64, 1);
             let rang = (sys.phase[0].clone() + turned.clone()).floor() > sys.phase[0].floor();
+            // Its coherence with the galaxy's bell BEFORE this echo's turn.
+            let c_before = (0..planes).fold(ratio(1, 1), |c, k| c * crate::flows::in_step(&sys.phase[k], &ratio(0, 1)));
             for k in 0..planes {
                 let f = sys.phase[k].clone() + turned.clone();
                 sys.phase[k] = crate::ring::grain(&(f.clone() - f.floor()));
@@ -234,6 +236,40 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // SPIN-DOWN: what leaves carries its share of the star's spin.
             if !kept_before.is_zero() {
                 sys.turning = crate::ring::grain(&(sys.turning.clone() * (ratio(1, 1) - mass(&back) / kept_before)));
+            }
+            // DECOHERENCE (operator: "coherence holds, decoherence splits";
+            // with xylarium): the star's coherence with its GALAXY'S BELL,
+            // the product over planes of its phases' in-step shares against
+            // the bell, `C_sg`. As it slips it SHEDS GRADUALLY, the share
+            // `1 − C_sg` of what its heart holds above its ignition share;
+            // where `C_sg` falls below its heart's hold share (what it holds
+            // of its system), the DECOHERENCE FRONT: it comes apart whole and
+            // everything returns to the galaxy's flows with its state.
+            let c_sg = (0..planes).fold(ratio(1, 1), |c, k| c * crate::flows::in_step(&sys.phase[k], &ratio(0, 1)));
+            let sys_total = mass(&sys.total());
+            let heart_share = if sys_total.is_zero() { ratio(0, 1) } else { mass(&sys.kept) / sys_total };
+            // The front needs the slip HELD across a full bell of the star's
+            // own (with xylarium): out of step at both ends of a ring it
+            // completed, never an instantaneous dip.
+            if rang && c_before < heart_share && c_sg < heart_share {
+                core.medium_spin += subtree_spin(&sys, &unit);
+                let all = sys.total();
+                returned += mass(&all) / unit.clone();
+                shed.push((all, sys.radius.clone(), sys.phase.clone()));
+                dissolved += 1;
+                continue;
+            }
+            // It sheds by what it SLIPPED this echo (the fall in its
+            // coherence since the last), once, not by its whole distance
+            // from step every echo (with xylarium).
+            let above = (ratio(1, 1) - sys.reservoir.clone()).max(ratio(0, 1));
+            let slipped = (c_before - c_sg).max(ratio(0, 1)) * above;
+            for (k, a) in sys.kept.clone() {
+                let left = a.clone() - back.get(&k).cloned().unwrap_or_else(|| ratio(0, 1));
+                let d = cfe::world::smelt_resource(&(left.clone() * slipped.clone())).min(left);
+                if d > ratio(0, 1) {
+                    *back.entry(k).or_insert_with(|| ratio(0, 1)) += d;
+                }
             }
             less(&mut sys.kept, &back);
             returned += mass(&back) / unit.clone();
@@ -385,7 +421,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                             let d = l.clone() - mean.clone();
                             s + w.clone() * if d < ratio(0, 1) { -d } else { d }
                         }) / m.clone();
-                        let phases = (0..crate::flows::PLANES).map(|k| crate::ring::grain(&(members.iter().fold(ratio(0, 1), |s, (w, _, ph)| s + w.clone() * ph[k].clone()) / m.clone()))).collect();
+                        let phases = (0..crate::flows::PLANES).map(|k| crate::ring::grain(&crate::flows::circle_mean(&members.iter().map(|(w, _, ph)| (w.clone(), ph[k].clone())).collect::<Vec<_>>()))).collect();
                         (crate::ring::grain(&spread), phases)
                     };
                     takes.push((reach, clump, a, spin, phases));
@@ -419,7 +455,11 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 // Its STATE is its holding at birth (a heart's state, set at
                 // its forming, never drained); its own spin and phases.
                 let held_at_birth = mass(&kept);
-                let mut sys = Body { path, radius: r_guess, period: ratio(0, 1), kept, satellites: orbs, medium, ell: ratio(0, 1), medium_spin, gas: Vec::new(), born: bell, state: held_at_birth, flows: disc_parcels, reservoir: ratio(0, 1), turning: spin_own, phase: phases_own, load: world_load };
+                // A star keeps its IGNITION SHARE (the heart's share at its
+                // throat condition) in `reservoir`: decoherence sheds only
+                // what it holds above it.
+                let ignition = crate::formation::ignition_share(&a_clump).unwrap_or_else(|| ratio(0, 1));
+                let mut sys = Body { path, radius: r_guess, period: ratio(0, 1), kept, satellites: orbs, medium, ell: ratio(0, 1), medium_spin, gas: Vec::new(), born: bell, state: held_at_birth, flows: disc_parcels, reservoir: ignition, turning: spin_own, phase: phases_own, load: world_load };
                 let internal = subtree_spin(&sys, &unit);
                 let own = taken - internal;
                 sys.ell = crate::ring::grain(&(own.clone() / m_u.clone()));
