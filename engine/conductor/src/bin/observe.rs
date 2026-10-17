@@ -199,7 +199,8 @@ fn main() {
                         fil_hold += 1;
                     }
                     if fil_best.as_ref().map(|(x, _)| m > *x).unwrap_or(true) {
-                        fil_best = Some((m, format!("  best FILAMENT about {} at R {:.3}: {} members, λ/(1+λ) {:.4} vs agitation {:.4} + face {:.4}, margin {:.4}", c.flows[j].key, f(&(c.flows[j].ell_o.clone() / h.clone())), members.len(), f(&fb), f(&a), f(&face), m)));
+                        let kinds: Vec<String> = members.iter().map(|(k, w)| format!("{}{}:{:.2}", c.flows[*k].key, if conductor::flows::on_disc_leg(&c.flows[*k]) { "" } else { "*" }, f(w))).collect();
+                        fil_best = Some((m, format!("  best FILAMENT about {} at R {:.3}: {} members [{}], λ/(1+λ) {:.4} vs agitation {:.4} + face {:.4}, margin {:.4}", c.flows[j].key, f(&(c.flows[j].ell_o.clone() / h.clone())), members.len(), kinds.join(" "), f(&fb), f(&a), f(&face), m)));
                     }
                 }
                 if let Some((members, [bind, a, face, shear])) = conductor::flows::candidate(&c.flows, &h, &p, &total, j) {

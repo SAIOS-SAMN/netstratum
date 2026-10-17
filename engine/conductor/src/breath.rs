@@ -391,7 +391,10 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 let r_guess = crate::ring::radius(&(taken.clone() / m_u.clone()), &held).unwrap_or_else(|| reach.clone() * scale.clone());
                 let siblings: Vec<u64> = core.satellites.iter().map(|l| l.path[1]).collect();
                 let path = vec![core.path[0], crate::ring::birth_key(bell, &r_guess, &held, &siblings)];
-                let lit = crate::formation::ignition_share(&a_clump).and_then(|_| crate::formation::system(&star, &a_clump, &ratio(0, 1), &path, &unit, &tide));
+                // CARRIED SPINS ADD: the star's own spin, captured from its
+                // members' spread, is the turning its heart cut adds to every
+                // kind (no weight ratio).
+                let lit = crate::formation::ignition_share(&a_clump).and_then(|_| crate::formation::system(&star, &a_clump, &spin_own, &path, &unit, &tide));
                 let Some((kept, orbs, medium, medium_spin)) = lit else {
                     // No heart: the matter stays a parcel where it was.
                     for (k, a) in star {
