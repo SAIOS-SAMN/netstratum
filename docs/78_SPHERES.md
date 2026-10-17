@@ -67,8 +67,11 @@ breaks one of them is wrong before it is built.
     magnetism)` is this, read numerically). The balance between the poles is
     a second reading: burning moves magnetism into holding with `3Z` fixed,
     so a core hardens toward the ℤ pole (the closed limit) while its span
-    stays. **ℝ feeds AGENCY:** a mind acts in the open span between what is
-    closed and what flows; a choice made there collapses to a deed in ℚ or
+    stays. **ℝ feeds AGENCY, as the STRETCH OF ANTIPOLES** (xylarium's
+    operator's refinement, adopted): every pair of antipoles (push/hold,
+    tide/convection, continuum/vacuum, coherence/decoherence) stretches a
+    span, and a mind's agency works in that whole family of spans; a mind
+    acts in the open span between what is closed and what flows; a choice made there collapses to a deed in ℚ or
     ℤ the moment it touches the world (the shape of coherence collapsing to
     a lock). The same word is the same thing at every tier: R, a body's reach
     `ℓ/H`, is its distance from its core; ℝ is the distance between the
