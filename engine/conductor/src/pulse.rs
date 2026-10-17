@@ -293,6 +293,13 @@ pub struct Body {
     /// The core's turning reservoir, the kicks' antipole (tag 11): what it
     /// gave its parcels' spin, taken from it, so `Σ m·ℓ + reservoir` holds.
     pub reservoir: Ratio,
+    /// A STAR'S OWN SPIN `ℓ_s` (tag 12; with xylarium): captured at birth
+    /// from its members' spread of orbital spin; its bell `ω_s = δ(ℓ_s/H_s)`
+    /// is the system's time. Zero for every other body.
+    pub turning: Ratio,
+    /// A star's phases on its S^n, one per plane (tag 13): its members'
+    /// holding-weighted phases at birth, advancing by its bell.
+    pub phase: Vec<Ratio>,
 }
 
 impl Body {
@@ -507,7 +514,7 @@ pub fn deploy(seed: &[u8; 32], manifest: &Manifest) -> Universe {
                 Some((p, h, _)) => crate::flows::read_cut(&flows, &h, &p),
                 None => (m.clone(), Manifest::new()),
             };
-            Body { path: vec![u64::from(i)], radius, period, kept, satellites: Vec::new(), medium, ell, medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: mass(&m), flows, reservoir: ratio(0, 1) }
+            Body { path: vec![u64::from(i)], radius, period, kept, satellites: Vec::new(), medium, ell, medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: mass(&m), flows, reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new() }
         })
         .collect();
     Universe { cores, medium, unit }
@@ -611,6 +618,18 @@ fn put_body(b: &Body, out: &mut Vec<u8>) {
         cfe::ratio::encode(&b.reservoir, &mut w);
         cfe::tlv::put(11, &w, out);
     }
+    if !b.turning.is_zero() {
+        let mut w = Vec::new();
+        cfe::ratio::encode(&b.turning, &mut w);
+        cfe::tlv::put(12, &w, out);
+    }
+    if !b.phase.is_empty() {
+        let mut w = vec![b.phase.len() as u8];
+        for r in &b.phase {
+            cfe::ratio::encode(r, &mut w);
+        }
+        cfe::tlv::put(13, &w, out);
+    }
     for s in &b.satellites {
         put_body(s, out);
     }
@@ -678,7 +697,7 @@ fn get_body(v: &[u8], spun: bool) -> Option<Body> {
     };
     let kept = get_manifest(v, &mut at)?;
     let medium = get_manifest(v, &mut at)?;
-    Some(Body { path, radius, period, kept, satellites: Vec::new(), medium, ell, medium_spin, gas: Vec::new(), born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1) })
+    Some(Body { path, radius, period, kept, satellites: Vec::new(), medium, ell, medium_spin, gas: Vec::new(), born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new() })
 }
 
 /// A flow parcel (tag 10), attached to the body read before it.
@@ -747,6 +766,18 @@ pub fn read(var_root: &Path) -> Option<([u8; 32], Universe)> {
             9 => flat.last_mut()?.state = cfe::ratio::decode(v)?.0,
             10 => flat.last_mut()?.flows.push(get_flow(v)?),
             11 => flat.last_mut()?.reservoir = cfe::ratio::decode(v)?.0,
+            12 => flat.last_mut()?.turning = cfe::ratio::decode(v)?.0,
+            13 => {
+                let n = *v.first()? as usize;
+                let mut at = 1;
+                let mut ph = Vec::with_capacity(n.min(16));
+                for _ in 0..n {
+                    let (x, used) = cfe::ratio::decode(v.get(at..)?)?;
+                    at += used;
+                    ph.push(x);
+                }
+                flat.last_mut()?.phase = ph;
+            }
             _ => {}
         }
     }
@@ -770,9 +801,9 @@ mod tests {
     #[test]
     fn the_pulse_file_reads_back_exactly() {
         let parcel = crate::formation::Shell { key: "Z001".into(), held: ratio(1, 5), inner: ratio(1, 3), outer: ratio(2, 3), agitation: ratio(1, 2), halving: Some(2), born: 7, vacuum: 3 };
-        let orb = Body { path: vec![1, 1, 1], radius: ratio(3, 2), period: ratio(5, 2), kept: [("Z008".to_string(), ratio(1, 64))].into(), satellites: Vec::new(), medium: Manifest::new(), ell: ratio(7, 3), medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1) };
-        let sys = Body { path: vec![1, 1], radius: ratio(9, 2), period: ratio(11, 2), kept: [("Z001".to_string(), ratio(3, 1024))].into(), satellites: vec![orb], medium: Manifest::new(), ell: ratio(1, 9), medium_spin: ratio(1, 7), gas: Vec::new(), born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1) };
-        let core = Body { path: vec![1], radius: ratio(60, 1), period: ratio(0, 1), kept: [("Z026".to_string(), ratio(1, 2))].into(), satellites: vec![sys], medium: [("Z001".to_string(), ratio(5, 4))].into(), ell: ratio(0, 1), medium_spin: ratio(13, 11), gas: vec![parcel], born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1) };
+        let orb = Body { path: vec![1, 1, 1], radius: ratio(3, 2), period: ratio(5, 2), kept: [("Z008".to_string(), ratio(1, 64))].into(), satellites: Vec::new(), medium: Manifest::new(), ell: ratio(7, 3), medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new() };
+        let sys = Body { path: vec![1, 1], radius: ratio(9, 2), period: ratio(11, 2), kept: [("Z001".to_string(), ratio(3, 1024))].into(), satellites: vec![orb], medium: Manifest::new(), ell: ratio(1, 9), medium_spin: ratio(1, 7), gas: Vec::new(), born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new() };
+        let core = Body { path: vec![1], radius: ratio(60, 1), period: ratio(0, 1), kept: [("Z026".to_string(), ratio(1, 2))].into(), satellites: vec![sys], medium: [("Z001".to_string(), ratio(5, 4))].into(), ell: ratio(0, 1), medium_spin: ratio(13, 11), gas: vec![parcel], born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new() };
         let u = Universe { cores: vec![core], medium: [("Z002".to_string(), ratio(1, 1024))].into(), unit: ratio(1, 2) };
         let dir = std::env::temp_dir().join(format!("pulse-{}", std::process::id()));
         write(&dir, &[7; 32], &u).unwrap();
