@@ -314,6 +314,18 @@ fn main() {
             // is what fusion conserves; light carries the transduction.
             let total_magnetism = conductor::pulse::magnetism(&universe.total()) / unit.clone();
             println!("beat {beat}: LEDGER — mass {} spin {} magnetism {} mass+magnetism {} (units of the deepest hole)", total_mass, total_spin, total_magnetism, total_mass.clone() + total_magnetism.clone());
+            // THE POLES (docs/78 law 11): the universal core's strength, the
+            // span between its ℤ pole (holding) and ℚ pole (magnetism), and
+            // its balance, the share at the ℤ pole (1: hardened).
+            let held = universe.cores.iter().fold(conductor::pulse::Manifest::new(), |mut m, c| {
+                for (k, a) in c.total() {
+                    *m.entry(k).or_insert_with(|| cfe::ratio::ratio(0, 1)) += a;
+                }
+                m
+            });
+            let (_, balance) = cfe::ratio::poles(&conductor::pulse::mass(&held), &conductor::pulse::magnetism(&held));
+            let fl = |r: &cfe::ratio::Ratio| r.numer().to_string().parse::<f64>().unwrap_or(0.0) / r.denom().to_string().parse::<f64>().unwrap_or(1.0);
+            println!("beat {beat}: POLES — universal core strength H_u {:.6e}, balance {:.6} (the share at the ℤ pole)", fl(&conductor::ocean::universe_hold(&universe)), fl(&balance));
             // THE ENCLOSURES (docs/78): each galaxy its own S^360, each star
             // system its own S^60, joined at its core's throat; each counts
             // its turns on its own ring (the pulse's round trip to its rim).

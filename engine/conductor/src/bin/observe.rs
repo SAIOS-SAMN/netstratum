@@ -285,6 +285,20 @@ fn main() {
             let mass = pulse::mass(&u.total()) / unit.clone();
             let magnetism = pulse::magnetism(&u.total()) / unit.clone();
             println!("LEDGER at beat {now}: mass {:.6e} spin {:.6e} magnetism {:.6e} mass+magnetism {:.6e}", f(&mass), f(&pulse::spin_total(&u, &unit)), f(&magnetism), f(&(mass + magnetism)));
+            // THE POLES (docs/78 law 11): each core's strength is the span
+            // between its ℤ pole (holding) and its ℚ pole (magnetism); its
+            // balance the share at the ℤ pole (1: hardened, closed).
+            let h_u = conductor::ocean::universe_hold(&u);
+            let held: Vec<pulse::Manifest> = u.cores.iter().map(|c| c.total()).collect();
+            let (hold_all, mag_all) = held.iter().fold((ratio(0, 1), ratio(0, 1)), |(h, m), x| (h + pulse::mass(x), m + pulse::magnetism(x)));
+            let (_, bal_u) = cfe::ratio::poles(&hold_all, &mag_all);
+            println!("POLES universal core: strength H_u {:.6e} (1 + Σ state + holding + magnetism, founding units), balance {:.6}", f(&h_u), f(&bal_u));
+            for (c, x) in u.cores.iter().zip(&held) {
+                let (span, bal) = cfe::ratio::poles(&pulse::mass(x), &pulse::magnetism(x));
+                let stars: Vec<Ratio> = c.satellites.iter().map(|sys| cfe::ratio::poles(&pulse::mass(&sys.kept), &pulse::magnetism(&sys.kept)).1).collect();
+                let (s0, s1) = (stars.iter().min().cloned().unwrap_or_else(|| ratio(0, 1)), stars.iter().max().cloned().unwrap_or_else(|| ratio(0, 1)));
+                println!("  galaxy {:>2}: strength {:.6e}, balance {:.6}; its {} stars' balance {:.4}..{:.4}", c.path[0], f(&(span.extent() / unit.clone())), f(&bal), stars.len(), f(&s0), f(&s1));
+            }
         }
         "recycle" => {
             // THE RECYCLING CIRCUIT (docs/83, proposed with xylarium): what

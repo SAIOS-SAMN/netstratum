@@ -39,7 +39,11 @@ use num_traits::Zero;
 /// alone: `H_u = 1 + Σ_g (state_g + (holding_g + magnetism_g))`, read in the
 /// founding's unit (the universe's grains' holding 1).
 pub fn universe_hold(u: &crate::pulse::Universe) -> Ratio {
-    let whole = mass(&u.total());
+    // The founding's unit, FIXED: the galaxies' states (their grains at the
+    // bounce, never drained). The current total holding rises as burning
+    // transduces magnetism into holding, so it would drift the strength the
+    // span (3Z, conserved) already holds (read 2026-10-17: 3.162 -> 3.060).
+    let whole = u.cores.iter().fold(Ratio::from_integer(0.into()), |s, c| s + crate::pulse::core_state(c));
     if whole.is_zero() {
         return ratio(2, 1);
     }

@@ -9,6 +9,10 @@ use num_traits::One;
 
 pub type Ratio = BigRational;
 
+/// The number grammar's ℝ: a span held by its exact bounds (docs/78 law 11).
+pub mod span;
+pub use span::{poles, Span};
+
 /// Build a ratio from small integers (test and rate literals).
 pub fn ratio(numer: i64, denom: i64) -> Ratio {
     BigRational::new(BigInt::from(numer), BigInt::from(denom))

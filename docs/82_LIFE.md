@@ -330,6 +330,17 @@ across tiers, no squares, no gates, no habitable zone drawn):**
    species' own future deficit represented and reasoned over by the reduce
    engine) runs the σ share.
 
+**Agency (operator 2026-10-17).** Agency is the STRETCHING OF THE PLASMA
+BOND between the gravitational tug on the planet and the star, through
+consciousness. In the forms: the bond is `Ψ_w`; its antipoles are the
+star's tug on the world (the face its hold locks, `δ_s`) and the world's
+release (the unlocked face, `1 − δ_s`); agency is the SPAN the bond
+stretches between them (docs/78 law 11: ℝ, the stretch of antipoles,
+never a stored value), entered through σ: a species' deliberate choices
+range over the part of that span its consciousness reaches, and each
+collapses to a deed in ℚ or ℤ when it touches the world. (Proposed; to be
+scoped with worlds.)
+
 **Level and type.** σ is the LEVEL. The TYPE is the rhythm of the lock on
 the orthogonal temporal plane: an inner star's bell rings fast on a deep,
 slow clock, a rim star's slowly on a faster one, and a world's coherence
