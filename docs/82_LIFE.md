@@ -283,6 +283,69 @@ from its galaxy and system and marked in docs/78's flat-site table for
 replacement. Its star class is read from its star's mass, its orbit from its
 radius.
 
+## Consciousness: coherence, the lock between a world and its star (operator 2026-10-17; proposed, to be tested)
+
+Consciousness is tied to COHERENCE, the inverse of decoherence: the LOCK
+between a planet and its star, fed by the star's coherent output. It is
+LOCAL: a star and what orbits it. There is no network of consciousness
+toward a galaxy's centre and no traversal of black holes (not now).
+
+**The geometry (operator).** A star's REACH is its S^360: the sphere its
+release fills. The star and everything that orbits it live on its S^60.
+Each orbiting mass is joined to the higher mass it orbits by its own
+NON-EUCLIDEAN DOUBLE-CONE manifold (a moon to its planet, a planet to its
+star). The release travels through these manifolds, which REFRACT it; it
+does not fall off with distance.
+
+**The law, in the forms already ruled (shares and pair shares, products
+across tiers, no squares, no gates, no habitable zone drawn):**
+
+1. **The source:** `L_s`, the star's coherent output, its light: the flux
+   of magnetism transduced into holding through the continuum face (the
+   2026-10-15 ruling; xylarium builds the flux per star). A star that
+   decoheres breaks it.
+2. **Refraction into an orbit:** a world on the star's crest `p/q` (the
+   orbits whose period is a whole ratio of the star's bell) receives the
+   release coupled `a_q = 1/q` for odd q, 0 for even (the ruled harmonic
+   coupling, one tier down); crossing into the world's own enclosure,
+   down its double cone, only the received share passes (the restart
+   rule: products across tiers).
+3. **The lock:** a world whose orbit is locked to the star's bell at `p/q`
+   repeats its relative phase every q turns, so its lasting coherence is
+   `C_ws = 1/q` (odd q); an unlocked world drifts toward 0 (the dance's
+   resonance locks, with the star as the partner).
+4. **The coupled tier:** the star's own lock to its galaxy's bell, `C_sg`,
+   multiplies in. A star deep in its galaxy and one at its rim ring in
+   different bell rings, so they feed their worlds differently.
+5. **What a world holds:** `Ψ_w = L_s · a_crest · C_ws · C_sg`.
+6. **Uptake by the world's type:** plasma couples to open frames, so
+   `q_w = Ψ_w·e_w / (1 + Ψ_w·e_w)`, `e_w` the world's open (magnetic) share
+   from its planetary-core cut; rocky and giant take in differently.
+7. **The conscious share of a species:** `σ = q_w·n / (1 + q_w·n)`, n its
+   cognitive rungs. Without locked plasma there is no consciousness however
+   deep the mind; without depth (a monkey) it stays small though alive.
+8. **The decision:** instinct (the unconscious survival drive, the deficit
+   felt now, `instinct::choose`) runs the `1 − σ` share of a species'
+   choices; deliberation ("I don't want to die, so I will decide": the
+   species' own future deficit represented and reasoned over by the reduce
+   engine) runs the σ share.
+
+**Level and type.** σ is the LEVEL. The TYPE is the rhythm of the lock on
+the orthogonal temporal plane: an inner star's bell rings fast on a deep,
+slow clock, a rim star's slowly on a faster one, and a world's coherence
+recurs on its `p/q` within that rhythm. Equal σ in different rhythms is a
+different consciousness.
+
+**Earth gives the meaning, never a check.** Life on Earth exists in a
+state (a magnetised rocky world locked into a steady relation with a
+coherent star, carrying deep life); that names what high `Ψ_w`, high `e_w`
+and high σ mean. Its numbers are never fitted; the levels are read for
+every world and lifeform by the same formula.
+
+**Owed to test it:** worlds forming under the flows (0 in the current
+reads); worlds carrying their phases and locks (the star's bell is built);
+the star's light per world (xylarium); the galaxy-tier lock of each star.
+
 ## Anchors (declared placeholders, design law 1)
 
 | anchor | value | stands for |
