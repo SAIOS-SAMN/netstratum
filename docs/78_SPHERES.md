@@ -657,6 +657,11 @@ Still on era 0's machinery: compounds (the almanac's fixed cells), motion
 
 ## The atom: matter at the boundary (the lowest tier)
 
+Superseded in part (2026-10-18): the band law below (band P holds 2P, the
+reading Z = 1 to 118, and the 1/1024 grain) is replaced by "The harmonic
+atom on S^11" and "The package is an element recipe" (next section). The
+nucleus, the compounds law and the workability form stand.
+
 Mycelium's manifest counts nuclei per Z. Z, the count of a nucleus's
 charges, means the same in every universe; what it becomes is netstratum's
 own physics. An atom is NOT a cell of a table (design laws 1 and 3). It is
@@ -751,6 +756,113 @@ the lowest tier of the one law (design law 4), a small system that turns.
   as nuclei per Z (13 Zs) and enter as grains, nuclei in equal to nuclei
   held. The stand-in's map folds era 0's variety into few Zs; a real grant
   carries its own.
+
+## Rulings of 2026-10-18 (operators, with xylarium)
+
+### The harmonic atom on S^11 (built, 6c311c1)
+
+Operator: "keep atomic at S^11 - so it fits the harmonic model"; "hopf
+fibrations are absolutely required"; and, of a first draft, "why are we
+using a lattice: that is a rigid 'box' of 'tensors': it's not a natural
+structure". Count the windings, flow the phases: no frames, no lattice.
+
+- **The atom turns on S^11:** twelve dimensions, six turning planes, no
+  axis (an odd sphere).
+- **Spin is the Hopf fibre.** S^11 is a bundle of circles over CP^5, so
+  every point has its own S^1. Spin is the turning along it. A pair is two
+  counter-turning flows on one fibre; an unpaired turning runs uncancelled,
+  and that is what it bonds and its magnetism. The fibre is also where a
+  bounce's torsion lead enters the atom.
+- **Shells and shapes.** A shell is the windings that close with count n. A
+  winding's shape l (0 ≤ l < n) is its eccentricity, a share: its axes in
+  the ratio `(l + 1)/n`.
+- **Orientations are topological:** the degree-l harmonics in twelve
+  dimensions, `C(l + 11, 11) − C(l + 9, 11)` = 1, 12, 77, 352 for l = 0..3,
+  each holding one counter-turning pair. Shells hold 2, 26, 180. Earth's
+  `2l + 1` is refused.
+- **Filling, inside out:** the lowest shell with room; within it the most
+  penetrating shape (low l) first; a free orientation before pairing.
+  Earth's n + l order (Madelung) is refused, an Earth table and a fill
+  order.
+- **The crossing order is owed.** Read from tightness (the charge enclosed
+  at a winding's closest approach, `(l + 1)/n` of its shell's reach, over
+  its period), it opens shell 3 at Z = 5: under `r = Q·n` with shielding an
+  outer shell (radius 3) can stand inside an inner one (radius 6). The
+  radius law does not keep shells nested, so crossings wait on a nested
+  radius law and are never stated.
+- **An element is a turning,** its electrons on nested spheres, its place
+  its phases on its own sphere: where its shells stand, how its windings are
+  turned, whether its outer turning is paired. Two kinds interlock where
+  their outer spheres meet in step at a shared tangent, never at a face.
+- **Reading, Z = 1 to 150:** closed at Z = 2 and 28 (next 208); Z 3 to 28
+  are shell 2, Z 29 to 150 shell 3; sub-closures (none unpaired) at Z = 4,
+  30 and 54; unpaired peaks at 12 (Z = 16, 42) and 77 (Z = 131). Few noble
+  kinds, wide open shells, much magnetism. Hold (`2Z + (Z − unpaired)`),
+  bonding, the burn ladder and every heart's cut read it; era 0's readings
+  moved with it (operator: "tests can move"). xylarium reads the same table
+  (c985228).
+
+### No straight lines: straightness is tension (2026-10-18)
+
+Operator: "the only straight lines should be wormholes, and even those
+aren't straight - why would we have straight lines unless operating at a
+planetary level?"; and "a straight line would be stretching a flexible
+fiber 'as hard as it can be' to create firmness or taut - all are
+measurable - but you don't just draw a straight line, otherwise it will
+break".
+
+- **No length is summed in a line.** A gap between two bodies is never
+  `|Δr|` or `|Δr| + r·Δφ`.
+- **Closeness is a share on the sphere:** how in step two bodies stand in
+  every plane, `Π in_step(Δφ)`, and apart is `1 − closeness`. How they move
+  (their deficits' contrast T) stays apart from where they stand.
+- **Straightness is a TENSION reading** on a flexible fibre with a breaking
+  point. Collision is a tether test: `T/(s·D)` is the bond's tautness,
+  holding below 1 and snapping above. A fold is as straight as its tension
+  makes it, its capacity the hold at its mouths, and stretched past that it
+  breaks (the Woronin seal's place).
+- **Twist is tension too:** the wound lead's mismatch between two bodies,
+  `1 − in_step(Δlead)`, adds to the motion a tether must hold.
+
+### The package is an element recipe (built, f2299bc)
+
+Operator: "we are selling universes as real estate ... a package of
+elements that constructs a universe in such a way that is appealing to the
+client ... different elements produce different universes in different
+shapes that will support different types of life".
+
+- **The founding manifest is the purchase:** its nuclei count and its mix.
+  Everything after it is derived. The catalogue of recipes is deferred.
+- **Every kind is carried, never grain-dropped.** The carrier's grain is
+  ONE NUCLEUS (`pulse::nucleus`, `1024 · 60³⁰` nuclei an amount unit).
+  Matter is counted in nuclei and nothing smaller exists, so it is exact and
+  bounded. The founding carries every kind's exact count; the unformed
+  ledger stays empty; every era-1 transfer floors to whole nuclei. Era 0's
+  economy keeps its own 1/1024.
+- **The table ends where the recipe and the chain do.** The capture chain
+  runs until a Z falls below one nucleus; its hidden `Z ≤ 118` bound
+  retired. On the default stand-in (100,000 grains of nucleons) the
+  founding carries Z 1 to 171 (Z 1 to 23 under the old grain).
+- **No draws** (standing; restated): the count of cores comes from the
+  package and their strengths from the bounce's own beads. The spectrum's
+  seed draws (modes 1 to 60, strengths 1 to 60, "Arrivals" and "Ruled with
+  xylarium's guidance" above) are owed for retirement.
+
+### Metabolism and observation (2026-10-18)
+
+Operator: "every single bond in this entire universe operates on some level
+of a 'metabolism' as the cumulative collection of energy rises and falls
+strictly upon observation".
+
+- Between meetings everything is closed form and nothing is exchanged.
+  Energy changes hands only at COINCIDENCE (contact, an in-step passage, a
+  crossing), so a meeting IS an observation.
+- A bond's metabolism is the turning exchanged at its meetings an echo; the
+  universe's is their sum.
+- A core's metabolic rate is the residual drift of its reservoir once its
+  orbits are closed: measured, never assumed (docs/83, "The shear"). It is
+  refilled down its partner face (strand, cords, Wellspring, rhizomorph,
+  hypha, in mu).
 
 ## Every flat site in netstratum (inventory, 2026-10-13)
 

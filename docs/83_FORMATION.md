@@ -674,6 +674,157 @@ tier up, with no new physics: a collection in the universe's medium
 reaching its own throat condition, with galaxies sharing their orbits
 between the two cores.
 
+### Stars in their galaxy: reference, ride, collisions (operators 2026-10-18; built, with xylarium)
+
+1. **The reference and the ride** (363396f). A star's coherence is read
+   against its galaxy's own phase at its place, one per plane (Body.bell,
+   tag 15), born at the star's own phases and turning as the galaxy's flows
+   do at its reach (flows::turn). The star RIDES it: it orbits with what it
+   was born of. Its own spin `ω_s` only rings its bell and times its
+   outbursts, never moving its phase against its galaxy. Operator: "this is
+   how you get stars colliding, or random strange star events".
+2. **The attractors and the gyroscope return.** Operator (with xylarium):
+   "add an axis to the spin so it has an orbit and a tilt as attractors".
+   The orbit and the born tilt are the attractors; the founding's plane gap
+   is the tilt, a reading, never incoherence. Each echo the galaxy gives
+   back `d/(d + turned)` of each displacement (d = 1 − δ_gal the star's
+   drag, turned its own spin's turns), so a fast spinner returns slowly.
+3. **Stars collide by the one law** (8d3f946). Where `s·D ≥ T` they stick
+   and merge: mixes, systems, media, spins and states added exactly, place
+   and phases by holding on the circle. Otherwise they bounce. At every
+   tier T splits into heat, `min(s·D, T)` to each by the other's mass
+   share, and parting, `(T − s·D)⁺`. The parting is a conserved spin
+   exchange: the outer gains and the inner gives, each by the other's mass
+   share; `Σ m·ℓ` is unchanged; the inner never gives more than it carries
+   (both sides scaled by one k). A merger's heat is read back into its
+   ignition share. Coincidence is standing together, never a hemisphere
+   (hemispheres decide filament membership only); bodies meet only their
+   neighbours by reach.
+4. **Meetings by contact** (fa48eda; operator: "it's not a walk, it's a
+   dance"). Snapshot sectors alias, and crossing-only conjunctions miss
+   co-moving matter (worlds fell to 0). Every neighbour pair is in CONTACT
+   over the echo by how much it stands in line: the exact mean of
+   `in_step` while their phase difference runs at their rates. `in_step` is
+   linear between its kinks, so the mean is duration × the ends' mean, with
+   no square. A pair at rest in line has contact 1; a whole passage ½.
+   Closeness is contact × the other planes' in-step. Every pair is read at
+   once from the echo's start, with no order.
+5. **The enclosed holding** (fa48eda). Operator: "anchor the inner core to
+   the singularity with enough gravitational strength to support the
+   lighter elements on the later rungs coupled with the force of the
+   continuum and vacuum jetstreams". By the ring-density law every bell
+   inside a reach holds its rings, and every grain is a bell. So
+   `H(<ℓ)` = the singularity's own state plus every mote and star turning
+   with less spin, strictly inside, read once an echo and on the grain
+   (flows::Enclosed). Motes' kicks, stars' references, their meeting rates
+   and their return read δ from it. The throat still sets the cut.
+
+Read (2 galaxies, 3Z conserved), echo 9: contact alone, 15 + 13 stars and
+97 worlds; with the enclosed holding, 48 + 44 stars, 155 worlds, the disc
+held 0.68 (from 0.51), and bounces about 1 in 2.5.
+
+### Filaments: chains and beads (operators 2026-10-18; built)
+
+1. **Chains, read whole** (b4a813a). Membership is the CHAIN, never a
+   centre. Motes on one face whose dispersal bands overlap link
+   transitively into a run, with no centre chosen and no order (each face
+   class sorted by its bands' inner edges, n·log n). A chain binds by its
+   holding and magnetism over its EXTENT as a share on the sphere, edge to
+   edge: `apart = 1 − in_step(orbit extent)·(1 − T_edges)`, T read from its
+   innermost inner edge to its outermost outer edge. A point has its own
+   dispersal, so a lone mote's apartness is its own band's; a chain with no
+   extent does not bind. Read: one chain spanned nearly a face, so each
+   galaxy made one star an echo.
+2. **Beads** (7367e54). Operator: "halving is a human derived measure,
+   whereas anything in nature is measured itself". A holding filament beads
+   like a stream pinching into drops. Each member's local hold is its
+   holding over its own band's share. Every local maximum is a PINCH, where
+   matter gathers (the same pinch as a planetary core's), and beads part at
+   the minima between. A bead that does not hold rejoins its neighbour
+   across the shallower parting, until every bead holds or the filament is
+   one bead. Read: echo 24, 197 worlds and 71 companions (from 29 and 13).
+
+### The jetstream as an orbit; the metabolic rate (operators 2026-10-18; built)
+
+1. **The kick over its passage** (d9b6c8b). A mote sweeps near a whole turn
+   a bell, so a kick read at one instant lands on one hemisphere every time
+   and the core pays without end. The kick (and the loop's pulse advance) is
+   the exact mean of the signed sawtooth `1 − 2·frac(ψ)` over the arc swept,
+   piece by piece within each turn, `1 − (f₀ + f₁)`, with no square. A whole
+   turn averages 0.
+2. **The shear** (edb2dd4). Operator: "shear the kinematic pressure as an
+   attractor on opposing hemispheres to provide the shear on the orbit ...
+   this turns your 'loop' into an 'orbit'". Neighbouring rings turn at
+   different rates; where they stand in contact the pressure between them
+   moves turning OUTWARD: the inner falls in, the outer moves out, and the
+   disc accretes. Inbound and outbound are one closed orbit, with nothing
+   absorbed or re-launched. Neighbours by spin across every face, each pair
+   weighed by its contact; the unkept motion is contact × T (gas has no
+   grip); the conserved exchange, each mote's whole outflow scaled by one k.
+3. **The metabolic rate, measured.** With the orbit closed, a core's
+   reservoir drift is its metabolism (docs/78, "Metabolism and
+   observation"). Read (2 galaxies), echo 24: `−3.9e−3 / −3.2e−3`, about a
+   tenth of the drift before the shear (`−4.2e−2 / −3.5e−2`), and swinging
+   through zero.
+
+### The cyclotronic chain (operator 2026-10-18; xylarium 11.0; PROPOSED, to be built)
+
+Operator: "we need to see this as a cyclotronic functional system - you
+can't distribute elements via singularity and then say the outer rim is
+going to have a manifold on a little yellow star in the outer rim".
+
+- A galactic core's manifold is the sheaf of its stars' double cones, the
+  core their shared apex. Each cone's strength is the BOND between core and
+  star; the star's orbit is that bond in motion.
+- **Bonds as exact shares:** the core's bond is its held face at the star's
+  reach times the star's own hold share; an inner star's bond is its hold
+  share times their contact. RSI = core bond / (core bond + the inner
+  bonds); a star is the core's own while RSI ≥ ½. A depth-manifold `x` on
+  both sides of its own equation is refused (it needs a root).
+- Past that a star is CHAINED out: its anchor is the inner star whose bond
+  dominates. It rides the anchor (the tether) and is driven by the inner
+  stars' wind and the continuum they drive (streaming, a separate push).
+  The rate itself is the enclosed holding above, so changing an inner star
+  re-reads everything outside it, and chain events cascade without a rule.
+- **Twist and torsion on the jets.** Operator: "don't forget the twist and
+  torsion on the jetstreams as they are expunged from the singularities /
+  cores at the quantum level". A core's winding is its PUSH SHARE p at
+  expulsion: ½ at the founding (the orbit plane at Z·½, the loop at
+  ½ + Z·½), rewritten each bell by the kick's extra loop term (torsion
+  coupling to spin, Einstein–Cartan). Nothing new is stored. A star's born
+  tilt is the twist it inherited from the jets that fed it; expelled matter
+  leaves with phase_c = phase_o + p.
+- **The pinch** is where matter gathers at every tier: the star's and the
+  planet's cones meet at the planetary core; worlds gather by enclosure;
+  moons are nested enclosures.
+
+### The closed limit, the founding and the Wellspring (operator 2026-10-18)
+
+- **A spent star becomes a REMNANT, ruled (a).** Operator: "keep the stars
+  recycling as accurate as possible ... so that we can have this universe be
+  self sustaining". A closed star falls to its throat condition and becomes
+  a small throat whose other face is its own galactic core. What falls in
+  comes out in the core's jetstream. It closes when the heart's push no
+  longer meets its hold (the ignition test read backwards), never at exact
+  zero flux. Its throat is its own pinch, read from its push, never from its
+  held share. Released worlds re-anchor to the anchor's system. Built by
+  xylarium; owed here.
+- **The Wellspring holds its share at the bang, ruled yes.** By the same
+  capture law, heaviest deepest, the galaxies getting what it pushes out;
+  its disc is the central galaxy. The throat's cut over a whole manifest
+  holds every kind (p ½, H 2, read: `observe founding`), so the split is
+  SCALE: dispersal in the universe's own enclosure.
+- **The harmonic founding, ruled; its reading owed.** Operator: "a periodic
+  table of elements is not a 2D piece of paper - each element fits together
+  orthogonally ... as you fold/twist the table of elements the connection
+  will fall by weight on the bond". Each kind is carried by its in-step
+  share with the bounce's twist, as the product over its planes of its
+  phases on its own sphere (shell depth on the orbit plane; its winding and
+  pairing on the loop), then dispersal decides held and out. A heavier
+  turning resists the twist more. First step: each kind's carriage and held
+  share at the bang, printed per Z, before anything is wired. No draws:
+  cores from the package and the bounce's beads.
+
 ## What we have, and what is missing
 
 | nature's ingredient | built | missing |
