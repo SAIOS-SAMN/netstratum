@@ -223,10 +223,13 @@ impl Enclosed {
     pub fn new(base: Ratio, mut bodies: Vec<(Ratio, Ratio)>) -> Enclosed {
         bodies.sort_by(|a, b| a.0.cmp(&b.0));
         let mut held = Vec::with_capacity(bodies.len() + 1);
-        let mut run = base;
+        let mut run = crate::ring::grain(&base);
         held.push(run.clone());
+        // On the coordinate's grain (the carrier, never law): an exact sum of
+        // thousands of holdings otherwise grows its denominators without
+        // bound, and every reach, contact and kick inherits them.
         for (_, h) in &bodies {
-            run += h.clone();
+            run += crate::ring::grain(h);
             held.push(run.clone());
         }
         Enclosed { spins: bodies.into_iter().map(|(l, _)| l).collect(), held }
@@ -240,8 +243,8 @@ impl Enclosed {
     /// A body's reach and deficit at spin ℓ: `R = ℓ/H(<ℓ)`, `δ = H/(R + H)`.
     pub fn reach(&self, ell: &Ratio) -> (Ratio, Ratio) {
         let h = self.hold(ell);
-        let r = ell.clone() / h.clone();
-        (r.clone(), h.clone() / (r + h))
+        let r = crate::ring::grain(&(ell.clone() / h.clone()));
+        (r.clone(), crate::ring::grain(&(h.clone() / (r + h))))
     }
 }
 
@@ -295,6 +298,92 @@ pub fn kick(motes: &mut [Mote], enc: &Enclosed, p: &Ratio, rho: &Ratio, delta_u:
         x.ell_o = new_o;
     }
     given
+}
+
+/// THE CONTACT OF A PAIR over one echo (operators 2026-10-18, with
+/// xylarium: interaction is continuous, "not a walk, a dance"): the mean of
+/// their orbit planes' in-step share while their phase difference runs from
+/// `ψ0` at the rate `d` a whole echo. `in_step` is linear between its kinks
+/// (`ψ` on the half-turns), so each piece's exact mean is the mean of its
+/// ends: duration × ½(in-step at entry + at exit), no square. A pair at rest
+/// in line has contact 1; a whole passage gives ½; a crossing is the
+/// weight's peak, never the only moment they meet.
+pub fn contact(psi0: &Ratio, d: &Ratio) -> Ratio {
+    let f = |x: &Ratio| in_step(x, &ratio(0, 1));
+    if d.is_zero() {
+        return f(psi0);
+    }
+    let psi1 = psi0.clone() + d.clone();
+    let (lo, hi) = if psi1 > *psi0 { (psi0.clone(), psi1) } else { (psi1, psi0.clone()) };
+    let span = hi.clone() - lo.clone();
+    // The half-turns strictly inside, in order.
+    let mut cuts = vec![lo.clone()];
+    let mut k = (lo.clone() * ratio(2, 1)).floor() + ratio(1, 1);
+    while k.clone() / ratio(2, 1) < hi {
+        cuts.push(k.clone() / ratio(2, 1));
+        k += ratio(1, 1);
+    }
+    cuts.push(hi);
+    cuts.windows(2).fold(ratio(0, 1), |acc, w| acc + (w[1].clone() - w[0].clone()) / span.clone() * (f(&w[0]) + f(&w[1])) / ratio(2, 1))
+}
+
+/// THE SHEAR (operator 2026-10-18: "shear the kinematic pressure as an
+/// attractor on opposing hemispheres to provide the shear on the orbit …
+/// this turns your 'loop' into an 'orbit'"; with xylarium): neighbouring
+/// rings of the flow turn at different rates, and where they stand in
+/// contact the pressure between them moves turning OUTWARD. The inner falls
+/// in, the outer moves out, and the disc accretes, so inbound and outbound are
+/// one closed orbit. Neighbours by spin across every face (faces decide who
+/// belongs to a filament, never who meets), each pair weighed by its contact
+/// over the bell at the kick's own rates (`2δ`, enclosed). The unkept motion
+/// is `contact × T`, with `T` the deficits' contrast; gas has no grip, so it is
+/// the tether law without the bond. The conserved spin exchange: the outer
+/// gains, the inner gives, each by the other's mass share. All pairs are read
+/// at once, then each mote's whole outflow is scaled by one k so it never
+/// gives more than it carries (exact, no order). Returns the spin moved.
+pub fn shear(motes: &mut [Mote], enc: &Enclosed, total: &Ratio) -> Ratio {
+    let n = motes.len();
+    if n < 2 || total.is_zero() {
+        return ratio(0, 1);
+    }
+    let mut order: Vec<usize> = (0..n).collect();
+    order.sort_by(|a, b| motes[*a].ell_o.cmp(&motes[*b].ell_o).then(a.cmp(b)));
+    let m: Vec<Ratio> = motes.iter().map(|x| x.amount.clone() * weight(&x.key) / total.clone()).collect();
+    let d: Vec<Ratio> = motes.iter().map(|x| enc.reach(&x.ell_o).1).collect();
+    // (outer, inner, the outer's gain, the inner's give), all from the start.
+    let mut moves: Vec<(usize, usize, Ratio, Ratio)> = Vec::new();
+    let mut out = vec![ratio(0, 1); n];
+    for w in order.windows(2) {
+        let (n_, o) = (w[0], w[1]);
+        let gap = motes[o].ell_o.clone() - motes[n_].ell_o.clone();
+        let m_ij = m[o].clone() + m[n_].clone();
+        if gap <= ratio(0, 1) || m_ij.is_zero() {
+            continue;
+        }
+        let c = contact(&(motes[o].phase[0].clone() - motes[n_].phase[0].clone()), &(ratio(2, 1) * (d[o].clone() - d[n_].clone())));
+        let t = if d[o] > d[n_] { d[o].clone() - d[n_].clone() } else { d[n_].clone() - d[o].clone() } / (d[o].clone() + d[n_].clone());
+        let u = c * t * gap / m_ij;
+        if u.is_zero() {
+            continue;
+        }
+        let give = u.clone() * m[o].clone();
+        out[n_] += give.clone();
+        moves.push((o, n_, u * m[n_].clone(), give));
+    }
+    let k: Vec<Ratio> = (0..n).map(|i| if out[i] > motes[i].ell_o && !out[i].is_zero() { motes[i].ell_o.clone() / out[i].clone() } else { ratio(1, 1) }).collect();
+    let mut dl = vec![ratio(0, 1); n];
+    let mut moved = ratio(0, 1);
+    for (o, n_, gain, give) in moves {
+        dl[o] += gain.clone() * k[n_].clone();
+        dl[n_] -= give * k[n_].clone();
+        moved += m[o].clone() * gain * k[n_].clone();
+    }
+    for i in 0..n {
+        if !dl[i].is_zero() {
+            motes[i].ell_o = crate::ring::grain(&(motes[i].ell_o.clone() + dl[i].clone())).max(ratio(0, 1));
+        }
+    }
+    moved
 }
 
 /// THE JETSTREAM IS A CONTINUOUS LOOP (operators 2026-10-16/17: "a
@@ -542,6 +631,25 @@ pub fn manifest(motes: &[Mote]) -> Manifest {
 mod passage_tests {
     use super::mean_response;
     use cfe::ratio::ratio;
+
+    #[test]
+    fn the_shear_moves_turning_outward_and_keeps_the_books() {
+        use super::{shear, weight, Enclosed, Mote};
+        let mote = |ell: (i64, i64), ph: (i64, i64)| Mote { key: "Z001".into(), amount: ratio(1, 8), ell_o: ratio(ell.0, ell.1), ell_c: ratio(0, 1), phase: vec![ratio(ph.0, ph.1), ratio(0, 1)], agitation: ratio(0, 1), born: 0, vacuum: false };
+        let mut motes = vec![mote((1, 4), (0, 1)), mote((1, 2), (1, 60)), mote((3, 4), (1, 30))];
+        let total = ratio(1, 1);
+        let book = |ms: &[Mote]| ms.iter().fold(ratio(0, 1), |s, x| s + x.amount.clone() * weight(&x.key) * x.ell_o.clone());
+        let before = book(&motes);
+        let (inner, outer) = (motes[0].ell_o.clone(), motes[2].ell_o.clone());
+        let moved = shear(&mut motes, &Enclosed::new(ratio(1, 1), Vec::new()), &total);
+        assert!(moved > ratio(0, 1));
+        // The inner falls in, the outer moves out.
+        assert!(motes[0].ell_o < inner && motes[2].ell_o > outer);
+        // Σ m·ℓ within the grain (each spin lands on the coordinate's grain).
+        let drift = book(&motes) - before;
+        let drift = if drift < ratio(0, 1) { -drift } else { drift };
+        assert!(drift <= ratio(3, 1) / ratio(60, 1).pow(6));
+    }
 
     #[test]
     fn a_whole_turn_averages_nothing_and_half_turns_sign_the_hemisphere() {

@@ -427,6 +427,9 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             let throat = crate::flows::Enclosed::new(h.clone(), Vec::new());
             let given = crate::flows::kick(&mut core.flows, enc.as_ref().unwrap_or(&throat), &p, &g_rate, &delta_u, &ledger_unit);
             core.reservoir -= given;
+            // THE SHEAR: neighbouring rings pass turning outward; the inner
+            // falls in (the loop becomes an orbit). Σ m·ℓ unchanged.
+            let _ = crate::flows::shear(&mut core.flows, enc.as_ref().unwrap_or(&throat), &ledger_unit);
             // THE EXITS: the jet (along the axis) and radial escape cross
             // whole into the ocean (their state's onward carriage owed: the
             // ocean is not yet motes).

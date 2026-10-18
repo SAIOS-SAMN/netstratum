@@ -654,33 +654,6 @@ fn root(p: &mut [usize], i: usize) -> usize {
     i
 }
 
-/// THE CONTACT OF A PAIR over one echo (operators 2026-10-18, with
-/// xylarium: interaction is continuous, "not a walk, a dance"): the mean of
-/// their orbit planes' in-step share while their phase difference runs from
-/// `ψ0` at the rate `d` a whole echo. `in_step` is linear between its kinks
-/// (`ψ` on the half-turns), so each piece's exact mean is the mean of its
-/// ends: duration × ½(in-step at entry + at exit), no square. A pair at rest
-/// in line has contact 1; a whole passage gives ½; a crossing is the
-/// weight's peak, never the only moment they meet.
-pub fn contact(psi0: &Ratio, d: &Ratio) -> Ratio {
-    let f = |x: &Ratio| crate::flows::in_step(x, &ratio(0, 1));
-    if d.is_zero() {
-        return f(psi0);
-    }
-    let psi1 = psi0.clone() + d.clone();
-    let (lo, hi) = if psi1 > *psi0 { (psi0.clone(), psi1) } else { (psi1, psi0.clone()) };
-    let span = hi.clone() - lo.clone();
-    // The half-turns strictly inside, in order.
-    let mut cuts = vec![lo.clone()];
-    let mut k = (lo.clone() * ratio(2, 1)).floor() + ratio(1, 1);
-    while k.clone() / ratio(2, 1) < hi {
-        cuts.push(k.clone() / ratio(2, 1));
-        k += ratio(1, 1);
-    }
-    cuts.push(hi);
-    cuts.windows(2).fold(ratio(0, 1), |acc, w| acc + (w[1].clone() - w[0].clone()) / span.clone() * (f(&w[0]) + f(&w[1])) / ratio(2, 1))
-}
-
 /// ONE ECHO'S MEETINGS (with xylarium): every neighbour pair is read at once
 /// from the echo's start (no order), each with its contact over the echo,
 /// each body turning along its orbit at `rate(ℓ)`; `meet` reads a pair and
@@ -689,7 +662,7 @@ fn meetings(phase0: &[Ratio], ell: &[Ratio], rate: &dyn Fn(&Ratio) -> Ratio, pai
     let rt: Vec<Ratio> = ell.iter().map(|l| rate(l)).collect();
     let mut dl = vec![ratio(0, 1); ell.len()];
     for &(i, j) in pairs {
-        let c = contact(&(phase0[j].clone() - phase0[i].clone()), &(rt[j].clone() - rt[i].clone()));
+        let c = crate::flows::contact(&(phase0[j].clone() - phase0[i].clone()), &(rt[j].clone() - rt[i].clone()));
         meet(i, j, &c, &mut dl);
     }
     (rt, dl)
@@ -1113,7 +1086,7 @@ pub fn collide_stars(stars: Vec<crate::pulse::Body>, c_pre: Vec<Ratio>, scale: &
 
 #[cfg(test)]
 mod tests {
-    use super::contact;
+    use crate::flows::contact;
     use cfe::ratio::ratio;
 
     #[test]
