@@ -495,7 +495,8 @@ pub fn chains(motes: &[Mote], h: &Ratio, p: &Ratio, total: &Ratio) -> Vec<Chain>
             }
             runs.last_mut().expect("pushed").push(i);
         }
-        for members in runs {
+        // A run judged whole by the filament law, edge to edge.
+        let judge = |members: Vec<usize>| -> Option<Chain> {
             let (mut x, mut held, mut a_w, mut r_w) = (ratio(0, 1), ratio(0, 1), ratio(0, 1), ratio(0, 1));
             for &j in &members {
                 let m = motes[j].amount.clone() * weight(&motes[j].key) / total.clone();
@@ -505,7 +506,7 @@ pub fn chains(motes: &[Mote], h: &Ratio, p: &Ratio, total: &Ratio) -> Vec<Chain>
                 held += m;
             }
             if held.is_zero() {
-                continue;
+                return None;
             }
             let inner = members.iter().map(|&j| lo(&motes[j])).min().expect("a member");
             let outer = members.iter().map(|&j| hi(&motes[j])).max().expect("a member");
@@ -519,7 +520,76 @@ pub fn chains(motes: &[Mote], h: &Ratio, p: &Ratio, total: &Ratio) -> Vec<Chain>
             // A chain with no extent at all (no push to spread it) is not
             // read as infinitely dense: it does not bind.
             let bind = if apart.is_zero() { ratio(0, 1) } else { let lambda = x / apart.clone(); lambda.clone() / (ratio(1, 1) + lambda) };
-            out.push(Chain { members, reach: reach_w, bind, agitation: a_w / held, face, apart });
+            Some(Chain { members, reach: reach_w, bind, agitation: a_w / held, face, apart })
+        };
+        for members in runs {
+            let Some(whole) = judge(members) else { continue };
+            if !whole.holds() || whole.members.len() < 2 {
+                out.push(whole);
+                continue;
+            }
+            // THE BEADS (operator 2026-10-18: "halving is a human derived
+            // measure, whereas anything in nature is measured itself"): a
+            // holding filament beads like a stream pinching into drops. Along
+            // it by reach, each member's LOCAL HOLD (its holding over its
+            // own band's share); every local maximum is a pinch where matter
+            // gathers, and beads part at the minima between. A bead that
+            // does not hold rejoins its neighbour across the shallower of
+            // its partings (the higher minimum), until every bead holds or
+            // the filament is one bead.
+            let mut along = whole.members.clone();
+            along.sort_by(|a, b| reach(&motes[*a]).cmp(&reach(&motes[*b])).then(a.cmp(b)));
+            let local: Vec<Ratio> = along
+                .iter()
+                .map(|&j| {
+                    let (d0, d1) = (delta(&lo(&motes[j])), delta(&hi(&motes[j])));
+                    let band = (d0.clone() - d1.clone()) / (d0 + d1);
+                    let m = motes[j].amount.clone() * weight(&motes[j].key) / total.clone();
+                    if band.is_zero() { m } else { m / band }
+                })
+                .collect();
+            // Partings at the interior minima; the minimum member joins the
+            // side whose neighbour holds more. A parting carries its depth.
+            let mut cuts: Vec<(usize, Ratio)> = Vec::new();
+            for i in 1..along.len().saturating_sub(1) {
+                if local[i] < local[i - 1] && local[i] <= local[i + 1] {
+                    let at = if local[i - 1] >= local[i + 1] { i + 1 } else { i };
+                    cuts.push((at, local[i].clone()));
+                }
+            }
+            let mut beads: Vec<Vec<usize>> = Vec::new();
+            let mut partings: Vec<Ratio> = Vec::new();
+            let mut from = 0;
+            for (at, depth) in cuts {
+                if at > from && at < along.len() {
+                    beads.push(along[from..at].to_vec());
+                    partings.push(depth);
+                    from = at;
+                }
+            }
+            beads.push(along[from..].to_vec());
+            loop {
+                let judged: Vec<Option<Chain>> = beads.iter().map(|b| judge(b.clone())).collect();
+                if beads.len() == 1 || judged.iter().all(|c| c.as_ref().is_some_and(|c| c.holds())) {
+                    out.extend(judged.into_iter().flatten());
+                    break;
+                }
+                // The shallowest parting beside any bead that does not hold.
+                let mut best: Option<usize> = None;
+                for (k, depth) in partings.iter().enumerate() {
+                    let fails = |b: usize| !judged[b].as_ref().is_some_and(|c| c.holds());
+                    if (fails(k) || fails(k + 1)) && best.map_or(true, |b| *depth > partings[b]) {
+                        best = Some(k);
+                    }
+                }
+                let Some(k) = best else {
+                    out.extend(judged.into_iter().flatten());
+                    break;
+                };
+                let right = beads.remove(k + 1);
+                beads[k].extend(right);
+                partings.remove(k);
+            }
         }
     }
     out
@@ -554,16 +624,25 @@ pub fn clumps(motes: &[Mote], h: &Ratio, p: &Ratio, total: &Ratio) -> Vec<(Ratio
 /// phases on the grain, their amounts added.
 pub fn merge(motes: &mut Vec<Mote>, total: &Ratio) -> Ratio {
     // The merge rule (with xylarium; the carrier's resolution, never law):
-    // same kind, same stream, the same 60⁶ sector in every phase and in the
-    // reach's share `ℓ/(ℓ + 1)`. Holding sums exactly; spins and agitation
-    // merge by holding onto the grid, the floored spin's remainder returned
-    // for the core's reservoir so the spin ledger stays exact.
+    // same kind, same stream, the same mark in every phase (60 to the turn)
+    // and in the reach's share `ℓ/(ℓ + 1)` (360 marks). At the 60⁻⁶ grain
+    // motes almost never coincide and nothing bounds their number; the
+    // readings must not move with the marks (A/B, with xylarium). Holding
+    // sums exactly; spins and agitation merge by holding onto the grid, the
+    // floored spin's remainder returned for the core's reservoir so the spin
+    // ledger stays exact.
     let g = |x: &Ratio| crate::ring::grain(x);
-    let key = |y: &Mote| (y.key.clone(), y.vacuum, g(&(y.ell_o.clone() / (y.ell_o.clone() + ratio(1, 1)))), y.phase.iter().map(g).collect::<Vec<_>>());
+    let (phase_marks, reach_marks) = std::env::var("NS_MERGE_MARKS").ok().and_then(|v| v.split_once('/').and_then(|(a, b)| Some((a.parse::<i64>().ok()?, b.parse::<i64>().ok()?)))).unwrap_or((60, 360));
+    let mark = |x: &Ratio, n: i64| (x.clone() * ratio(n, 1)).floor();
+    let key = |y: &Mote| (y.key.clone(), y.vacuum, mark(&(y.ell_o.clone() / (y.ell_o.clone() + ratio(1, 1))), reach_marks), y.phase.iter().map(|ph| mark(&frac(ph), phase_marks)).collect::<Vec<_>>());
     let mut out: Vec<Mote> = Vec::new();
+    // Each mote's sector key read once, and found by key, never by a scan
+    // of everything kept (each group keyed where its first mote stood).
+    let mut at: std::collections::BTreeMap<(String, bool, Ratio, Vec<Ratio>), usize> = std::collections::BTreeMap::new();
     let mut remainder = ratio(0, 1);
     for x in std::mem::take(motes) {
-        if let Some(y) = out.iter_mut().find(|y| key(y) == key(&x)) {
+        let kx = key(&x);
+        if let Some(y) = at.get(&kx).map(|&i| &mut out[i]) {
             let (my, mx) = (y.amount.clone(), x.amount.clone());
             let both = my.clone() + mx.clone();
             if both.is_zero() {
@@ -580,6 +659,7 @@ pub fn merge(motes: &mut Vec<Mote>, total: &Ratio) -> Ratio {
             y.ell_c = gc;
             y.amount = both;
         } else {
+            at.insert(kx, out.len());
             out.push(x);
         }
     }

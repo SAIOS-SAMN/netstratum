@@ -49,7 +49,7 @@ pub fn universe_hold(u: &crate::pulse::Universe) -> Ratio {
     }
     u.cores.iter().fold(ratio(1, 1), |s, c| {
         let all = c.total();
-        s + (crate::pulse::core_state(c) + mass(&all) + crate::pulse::magnetism(&all)) / whole.clone()
+        s + crate::ring::grain(&((crate::pulse::core_state(c) + crate::pulse::held(&all) + crate::ring::grain(&crate::pulse::magnetism(&all))) / whole.clone()))
     })
 }
 

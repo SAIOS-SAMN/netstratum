@@ -198,6 +198,19 @@ fn main() {
                 );
             }
         }
+        "founding" => {
+            // THE WELLSPRING'S CUT (operator 2026-10-18, (12)): the galaxy
+            // throat's law over the universe's whole manifest.
+            let all = u.total();
+            let total = pulse::mass(&all);
+            let Some((p, h, mean, lightest)) = pulse::push_cut(&all) else { return println!("no matter") };
+            let kinds: Vec<u32> = all.keys().filter_map(|k| k.strip_prefix('Z').and_then(|z| z.parse().ok())).collect();
+            println!(
+                "FOUNDING CUT over the whole manifest ({} kinds, Z{}..Z{}): p {:.4}, H {:.4}, mean weight {:.4}, lightest held {}",
+                kinds.len(), kinds.iter().min().unwrap_or(&0), kinds.iter().max().unwrap_or(&0), f(&p), f(&h), f(&mean), lightest.unwrap_or_else(|| "— (every kind held)".into())
+            );
+            let _ = total;
+        }
         "formation" => {
             for c in &u.cores {
                 let total = pulse::mass(&c.total());

@@ -140,16 +140,17 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         // labelled owed). What arrives keeps its crossing's turning as state.
         let (gathered, turning, delta_u) = {
             let c = &u.cores[i];
-            let whole = mass(&u.total());
-            let h_g = (crate::pulse::core_state(c) + mass(&c.total())) / whole.clone();
+            // Read on the grain where they feed the law (the carrier).
+            let whole = u.cores.iter().fold(crate::pulse::held(&u.medium), |s, c| s + crate::pulse::held(&c.total()));
+            let h_g = crate::ring::grain(&((crate::pulse::core_state(c) + crate::pulse::held(&c.total())) / whole.clone()));
             let ring_bells = ratio((t_u / 4) as i64, 1);
             let reach = c.radius.clone() / ring_bells;
             let halves = |b: u64| if c.period.is_zero() { 0 } else { (ratio(2 * b as i64, 1) / c.period.clone()).floor().to_integer().try_into().unwrap_or(0u64) };
             let half_swings = halves(bell).saturating_sub(halves(bell.saturating_sub(t_u)));
-            let m = mass(&u.medium) / whole;
+            let m = crate::ring::grain(&(crate::pulse::held(&u.medium) / whole));
             let h_u = crate::ocean::universe_hold(u);
             let share = crate::ocean::gathered(rung, &reach, &h_g, &m, half_swings, &h_u);
-            let delta_u = h_u.clone() / (reach.clone() + h_u.clone());
+            let delta_u = crate::ring::grain(&(h_u.clone() / (reach.clone() + h_u.clone())));
             (crate::ocean::take(&u.medium, &share), crate::ocean::arrival_turning(rung, &reach, &h_g, &m, &h_u), delta_u)
         };
         less(&mut u.medium, &gathered);

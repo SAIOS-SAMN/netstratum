@@ -37,6 +37,17 @@ fn grain(x: &Ratio) -> Ratio {
 /// Mass for the turning law: each grain of Z holds its atom's rings
 /// (`cfe::almanac::atom::hold`, mass is holding); a key that is no Z (era
 /// 0's kinds, before they cross) holds one.
+/// A manifest's holding read ON THE GRAIN, term by term (the carrier,
+/// never law; with xylarium): wherever a holding feeds a law (a hold, a
+/// swing, a share), the exact sum's denominators would otherwise grow with
+/// every kind's own primes. The ledger keeps `mass`, exact.
+pub fn held(m: &Manifest) -> Ratio {
+    m.iter().fold(ratio(0, 1), |s, (k, a)| {
+        let weight = k.strip_prefix('Z').and_then(|z| z.parse::<u32>().ok()).map(cfe::almanac::atom::hold).unwrap_or(1);
+        s + crate::ring::grain(&(a.clone() * ratio(i64::from(weight), 1)))
+    })
+}
+
 pub fn mass(m: &Manifest) -> Ratio {
     m.iter().fold(ratio(0, 1), |s, (k, a)| {
         let weight = k.strip_prefix('Z').and_then(|z| z.parse::<u32>().ok()).map(cfe::almanac::atom::hold).unwrap_or(1);
@@ -359,6 +370,12 @@ pub fn universal_state(u: &Universe) -> Ratio {
 /// share of the universe enters the push; a galaxy's gas comes from outside
 /// (the ocean), not from its own bounce.
 pub fn galaxy_push(grains: &Manifest) -> Option<(Ratio, Ratio, Ratio)> {
+    push_cut(grains).map(|(p, h, mean, _)| (p, h, mean))
+}
+
+/// The push and its CUT: as `galaxy_push`, with the lightest kind the
+/// throat still holds (None: it holds every kind).
+pub fn push_cut(grains: &Manifest) -> Option<(Ratio, Ratio, Ratio, Option<String>)> {
     let weight = |k: &str| k.strip_prefix('Z').and_then(|z| z.parse::<u32>().ok()).map(cfe::almanac::atom::hold).unwrap_or(1);
     let total = mass(grains);
     let count = grains.values().fold(ratio(0, 1), |s, a| s + a.clone());
@@ -389,7 +406,8 @@ pub fn galaxy_push(grains: &Manifest) -> Option<(Ratio, Ratio, Ratio)> {
     let cut = (0..order.len()).collect::<Vec<_>>().partition_point(|&idx| holds(idx));
     let held = above.get(cut).cloned().unwrap_or_else(|| above.last().cloned().unwrap_or_else(|| ratio(0, 1)) + order.last().map(|(k, a)| (*a).clone() * ratio(i64::from(weight(k)), 1) / total.clone()).unwrap_or_else(|| ratio(0, 1)));
     let h = ratio(1, 1) + held.clone();
-    Some((held / h.clone(), h, mean))
+    let lightest = if cut >= order.len() { None } else { cut.checked_sub(1).map(|i| order[i].0.clone()) };
+    Some((held / h.clone(), h, mean, lightest))
 }
 
 /// THE DISPERSAL (operator 2026-10-16: "we shouldn't be sorting anything,
