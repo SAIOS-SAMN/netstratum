@@ -348,7 +348,9 @@ pub fn shear(motes: &mut [Mote], enc: &Enclosed, total: &Ratio) -> Ratio {
     }
     let mut order: Vec<usize> = (0..n).collect();
     order.sort_by(|a, b| motes[*a].ell_o.cmp(&motes[*b].ell_o).then(a.cmp(b)));
-    let m: Vec<Ratio> = motes.iter().map(|x| x.amount.clone() * weight(&x.key) / total.clone()).collect();
+    // Shares on the coordinate's grain (the carrier): exact shares of a
+    // large ledger carry its denominators into every pair's product.
+    let m: Vec<Ratio> = motes.iter().map(|x| crate::ring::grain(&(x.amount.clone() * weight(&x.key) / total.clone()))).collect();
     let d: Vec<Ratio> = motes.iter().map(|x| enc.reach(&x.ell_o).1).collect();
     // (outer, inner, the outer's gain, the inner's give), all from the start.
     let mut moves: Vec<(usize, usize, Ratio, Ratio)> = Vec::new();
@@ -360,12 +362,14 @@ pub fn shear(motes: &mut [Mote], enc: &Enclosed, total: &Ratio) -> Ratio {
         if gap <= ratio(0, 1) || m_ij.is_zero() {
             continue;
         }
-        let c = contact(&(motes[o].phase[0].clone() - motes[n_].phase[0].clone()), &(ratio(2, 1) * (d[o].clone() - d[n_].clone())));
-        let t = if d[o] > d[n_] { d[o].clone() - d[n_].clone() } else { d[n_].clone() - d[o].clone() } / (d[o].clone() + d[n_].clone());
-        let u = c * t * gap / m_ij;
+        let c = crate::ring::grain(&contact(&(motes[o].phase[0].clone() - motes[n_].phase[0].clone()), &(ratio(2, 1) * (d[o].clone() - d[n_].clone()))));
+        let t = crate::ring::grain(&(if d[o] > d[n_] { d[o].clone() - d[n_].clone() } else { d[n_].clone() - d[o].clone() } / (d[o].clone() + d[n_].clone())));
+        let u = crate::ring::grain(&(c * t * gap / m_ij));
         if u.is_zero() {
             continue;
         }
+        // Both sides on the grain alike, so the exchange stays conserved:
+        // m_o·gain = m_o·u·m_n = m_n·give.
         let give = u.clone() * m[o].clone();
         out[n_] += give.clone();
         moves.push((o, n_, u * m[n_].clone(), give));

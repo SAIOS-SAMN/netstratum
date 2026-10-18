@@ -421,9 +421,12 @@ pub fn push_cut(grains: &Manifest) -> Option<(Ratio, Ratio, Ratio, Option<String
     // the arriving ocean, docs/83).
     let cut = (0..order.len()).collect::<Vec<_>>().partition_point(|&idx| holds(idx));
     let held = above.get(cut).cloned().unwrap_or_else(|| above.last().cloned().unwrap_or_else(|| ratio(0, 1)) + order.last().map(|(k, a)| (*a).clone() * ratio(i64::from(weight(k)), 1) / total.clone()).unwrap_or_else(|| ratio(0, 1)));
+    // Read on the coordinate's grain where they feed the law (the carrier):
+    // the push and hold multiply every mote's kick and reach each bell.
+    let held = crate::ring::grain(&held);
     let h = ratio(1, 1) + held.clone();
     let lightest = if cut >= order.len() { None } else { cut.checked_sub(1).map(|i| order[i].0.clone()) };
-    Some((held / h.clone(), h, mean, lightest))
+    Some((crate::ring::grain(&(held / h.clone())), h, crate::ring::grain(&mean), lightest))
 }
 
 /// THE DISPERSAL (operator 2026-10-16: "we shouldn't be sorting anything,
