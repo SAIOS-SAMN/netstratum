@@ -284,6 +284,14 @@ fn main() {
                 let ins: Vec<String> = lit.iter().take(12).map(|(fl, i, k)| format!("{:.2e}/{:.2e}({}k)", fl, i, k)).collect();
                 println!("  LIGHT (star flux / world insolation (kinds)): {}", ins.join(" "));
             }
+            // CHEMISTRY: molecules in the worlds and in the systems' media,
+            // with water (O + 4H on S^11) named.
+            let in_worlds: Vec<(&String, &Ratio)> = stars.iter().flat_map(|s| &s.satellites).flat_map(|w| w.kept.iter()).filter(|(k, _)| k.contains('·')).collect();
+            let in_media: Vec<(&String, &Ratio)> = stars.iter().flat_map(|s| s.flows.iter().map(|x| (&x.key, &x.amount))).filter(|(k, _)| k.contains('·')).collect();
+            let sum = |v: &[(&String, &Ratio)], k: Option<&str>| v.iter().filter(|(kk, _)| k.map_or(true, |k| kk.as_str() == k)).fold(0.0, |a, (_, x)| a + f(x));
+            let kinds_m: std::collections::BTreeSet<&String> = in_worlds.iter().chain(in_media.iter()).map(|(k, _)| *k).collect();
+            println!("  CHEMISTRY: {} molecule kinds; water in worlds {:.3e}, in system media {:.3e}; all molecules in worlds {:.3e}, in media {:.3e}",
+                kinds_m.len(), sum(&in_worlds, Some("Z008·4Z001")), sum(&in_media, Some("Z008·4Z001")), sum(&in_worlds, None), sum(&in_media, None));
             // Resources: the worlds' mixes.
             let worlds: Vec<&pulse::Body> = stars.iter().flat_map(|s| &s.satellites).filter(|w| w.born == 0).collect();
             let mut kinds: std::collections::BTreeSet<String> = std::collections::BTreeSet::new();

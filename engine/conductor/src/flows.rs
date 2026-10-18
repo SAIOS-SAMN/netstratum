@@ -40,7 +40,7 @@
 //! circulation's, read from mycelium's 3-D `physics::source` (one plane of
 //! the S^n reading per plane); S^60/S^360 wait on the n-dimensional source.
 use crate::pulse::Manifest;
-use cfe::almanac::atom::{atom, hold};
+use cfe::almanac::atom::atom;
 use cfe::ratio::{ratio, Ratio};
 use num_traits::Zero;
 
@@ -74,12 +74,12 @@ fn z_of(k: &str) -> Option<u32> {
 
 /// A kind's weight (its hold).
 pub fn weight(k: &str) -> Ratio {
-    ratio(i64::from(z_of(k).map(hold).unwrap_or(1)), 1)
+    ratio(i64::from(crate::chem::hold(k)), 1)
 }
 
 /// A kind's open share, unpaired over hold.
 pub fn open(k: &str) -> Ratio {
-    z_of(k).and_then(atom).map(|a| ratio(i64::from(a.unpaired), i64::from(hold(a.z)))).unwrap_or_else(|| ratio(0, 1))
+    ratio(i64::from(crate::chem::unpaired(k)), i64::from(crate::chem::hold(k).max(1)))
 }
 
 fn frac(x: &Ratio) -> Ratio {
@@ -393,11 +393,11 @@ pub fn shear(motes: &mut [Mote], enc: &Enclosed, total: &Ratio) -> Ratio {
 /// THE SPRAY (with xylarium; the founding epoch one tier down): matter a
 /// heart throws out (an outburst, or the kinds a new star's heart releases)
 /// leaves TOGETHER, every kind at the mean carried reach (holding-weighted),
-/// and over directions: each kind at its own capture phase (the founding's,
-/// `Z·½` in the orbit's plane, `½ + Z·½` on the loop) about the star's. It
+/// and over directions: each kind at its own capture phase, `Z·p` with p the
+/// star's own push share (the founding's ½ one tier up), `½ + Z·p` on the loop. It
 /// sorts only as it spreads, by each kind's own inertia under the star's
 /// kick, so early meetings catch mixed matter.
-pub fn spray(released: &Manifest, spins: &[(String, Ratio)], base: &[Ratio], agitation: &Ratio, born: u64) -> Vec<Mote> {
+pub fn spray(released: &Manifest, spins: &[(String, Ratio)], base: &[Ratio], agitation: &Ratio, born: u64, push: &Ratio) -> Vec<Mote> {
     let held = released.iter().fold(ratio(0, 1), |s, (k, a)| s + a.clone() * weight(k));
     let reach = if held.is_zero() {
         ratio(0, 1)
@@ -409,7 +409,9 @@ pub fn spray(released: &Manifest, spins: &[(String, Ratio)], base: &[Ratio], agi
         .iter()
         .filter(|(_, a)| **a > ratio(0, 1))
         .map(|(k, a)| {
-            let z = ratio(i64::from(z_of(k).unwrap_or(0)), 2);
+            // The capture phase: Z × the PARENT'S push share (the star's own),
+            // so the kinds leave over the whole turn, never two antipodes.
+            let z = ratio(i64::from(crate::chem::charge(k)), 1) * push.clone();
             let phase = vec![crate::ring::grain(&frac(&(at(0) + z.clone()))), crate::ring::grain(&frac(&(at(1) + ratio(1, 2) + z)))];
             Mote { key: k.clone(), amount: a.clone(), ell_o: reach.clone(), ell_c: ratio(0, 1), phase, agitation: crate::ring::grain(agitation), born, vacuum: false }
         })
@@ -787,7 +789,7 @@ pub fn founding(grains: &Manifest) -> Vec<Mote> {
         .iter()
         .filter(|(_, a)| **a > ratio(0, 1))
         .map(|(k, a)| {
-            let turn = ratio(i64::from(z_of(k).unwrap_or(0)), 2);
+            let turn = ratio(i64::from(crate::chem::charge(k)), 2);
             let phase = vec![frac(&(source[0].clone() + turn.clone())), frac(&(ratio(1, 2) + turn))];
             Mote { key: k.clone(), amount: a.clone(), ell_o: crate::ring::grain(&(p.clone() * mean.clone() / weight(k))), ell_c: ratio(0, 1), phase, agitation: ratio(0, 1), born: 0, vacuum: false }
         })

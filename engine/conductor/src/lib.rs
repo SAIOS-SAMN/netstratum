@@ -84,6 +84,7 @@ pub mod realms;
 pub mod decide;
 pub mod annal;
 pub mod pulse;
+pub mod chem;
 pub mod motion;
 pub mod breath;
 pub mod ring;

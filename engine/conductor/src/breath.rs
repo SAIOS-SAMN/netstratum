@@ -315,7 +315,8 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     *sys.medium.entry(k.clone()).or_insert_with(|| ratio(0, 1)) += a.clone();
                 }
                 let star_phase = sys.phase.clone();
-                sys.flows.extend(crate::flows::spray(&burst, &spins, &star_phase, &ratio(0, 1), bell));
+                let push = if mass(&sys.kept).is_zero() { ratio(0, 1) } else { ratio(1, 2) * crate::pulse::magnetism(&sys.kept) / mass(&sys.kept) };
+                sys.flows.extend(crate::flows::spray(&burst, &spins, &star_phase, &ratio(0, 1), bell, &crate::ring::grain(&push)));
             }
             let mut back = crate::pulse::Manifest::new();
             // THE WIND (operator: made at the INTERFACE): the star's
@@ -616,7 +617,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 // throat condition) in `reservoir`: decoherence sheds only
                 // what it holds above it.
                 let ignition = crate::formation::ignition_share(&a_clump).unwrap_or_else(|| ratio(0, 1));
-                let mut sys = Body { path, radius: r_guess, period: ratio(0, 1), kept, satellites: orbs, medium, ell: ratio(0, 1), medium_spin, gas: Vec::new(), born: bell, state: held_at_birth, flows: disc_motes, reservoir: ignition, turning: spin_own, bell: phases_own.clone(), phase: phases_own, load: world_load, remnant: false };
+                let mut sys = Body { path, radius: r_guess, period: ratio(0, 1), kept, satellites: orbs, medium, ell: ratio(0, 1), medium_spin, gas: Vec::new(), born: bell, state: held_at_birth, flows: disc_motes, reservoir: ignition, turning: spin_own, bell: phases_own.clone(), phase: phases_own, load: world_load, remnant: false, heat: ratio(0, 1) };
                 let internal = subtree_spin(&sys, &unit);
                 let own = taken - internal;
                 sys.ell = crate::ring::grain(&(own.clone() / m_u.clone()));
