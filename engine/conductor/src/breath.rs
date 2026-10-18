@@ -169,14 +169,21 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         let g_before = mass(&core.total());
         let pre = crate::pulse::galaxy_push(&core.total());
         let scale_pre = g_before.clone() / unit.clone();
+        // THE ENCLOSED HOLDING, read once from the echo's start: the
+        // singularity's own state and every mote and star inside, by spin.
+        let enc = pre.as_ref().filter(|_| !g_before.is_zero()).map(|(_, h_g, _)| {
+            let motes = core.flows.iter().map(|x| (x.ell_o.clone(), x.amount.clone() * crate::flows::weight(&x.key) / g_before.clone()));
+            let stars = core.satellites.iter().map(|b| (b.radius.clone() / scale_pre.clone() * h_g.clone(), mass(&b.total()) / g_before.clone()));
+            crate::flows::Enclosed::new(ratio(1, 1), motes.chain(stars).collect())
+        });
         // STARS COLLIDE (operator 2026-10-18; with xylarium): the one
         // collide law among the galaxy's stars, before each reads its echo;
         // each carries the coherence it had before the encounter.
         let planes = crate::flows::PLANES;
         let c_pre: Vec<Ratio> = core.satellites.iter().map(|b| if b.phase.len() < planes || b.bell.len() < planes { ratio(1, 1) } else { (0..planes).fold(ratio(1, 1), |c, k| c * crate::flows::in_step(&b.phase[k], &b.bell[k])) }).collect();
         let (met, star_sticks, star_bounces) = match &pre {
-            Some((p_g, h_g, _)) => crate::formation::collide_stars(std::mem::take(&mut core.satellites), c_pre, &scale_pre, h_g, p_g, &g_before),
-            None => (std::mem::take(&mut core.satellites).into_iter().zip(c_pre).collect(), 0, 0),
+            Some((p_g, h_g, _)) if enc.is_some() => crate::formation::collide_stars(std::mem::take(&mut core.satellites), c_pre, &scale_pre, h_g, p_g, &g_before, enc.as_ref().expect("checked")),
+            _ => (std::mem::take(&mut core.satellites).into_iter().zip(c_pre).collect(), 0, 0),
         };
         merged += star_sticks;
         encounters += star_bounces;
@@ -206,16 +213,20 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // there, and the star RIDES it (with xylarium): it orbits with what
             // it was born of, so its coherence moves only where something
             // displaces it from its flows.
-            if let Some((p_g, h_g, _)) = &pre {
+            if let (Some((p_g, h_g, _)), Some(enc)) = (&pre, &enc) {
                 if !scale_pre.is_zero() {
-                    let r = sys.radius.clone() / scale_pre.clone();
+                    // At its reach by what is ENCLOSED inside it (the core
+                    // and every mote and star inside): the cyclotron.
+                    let ell_s = sys.radius.clone() / scale_pre.clone() * h_g.clone();
+                    let (r, d_enc) = enc.reach(&ell_s);
+                    let h_in = enc.hold(&ell_s);
                     let was = sys.bell.clone();
-                    crate::flows::turn(&mut sys.bell, &r, h_g, p_g, &g_rate, &delta_u);
+                    crate::flows::turn(&mut sys.bell, &r, &h_in, p_g, &g_rate, &delta_u);
                     // THE RETURN (with xylarium): its galaxy's torque gives
                     // back `d/(d + turned)` of its displacement in each plane,
                     // `d = 1 − δ_gal` its drag, `turned` its own spin's turns
                     // this echo: a fast spinner is a gyroscope.
-                    let d = r.clone() / (r.clone() + h_g.clone());
+                    let d = ratio(1, 1) - d_enc;
                     let turned = omega.clone() * ratio(rings_at(bell).saturating_sub(rings_at(bell.saturating_sub(t_u))) as i64, 1);
                     let keep_share = if (d.clone() + turned.clone()).is_zero() { ratio(1, 1) } else { turned.clone() / (d + turned) };
                     for k in 0..planes {
@@ -413,7 +424,8 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // core's state, never drained), one fixed unit, so its exact sum
             // never compounds denominators echo on echo.
             let ledger_unit = crate::pulse::core_state(core);
-            let given = crate::flows::kick(&mut core.flows, &h, &p, &g_rate, &delta_u, &ledger_unit);
+            let throat = crate::flows::Enclosed::new(h.clone(), Vec::new());
+            let given = crate::flows::kick(&mut core.flows, enc.as_ref().unwrap_or(&throat), &p, &g_rate, &delta_u, &ledger_unit);
             core.reservoir -= given;
             // THE EXITS: the jet (along the axis) and radial escape cross
             // whole into the ocean (their state's onward carriage owed: the

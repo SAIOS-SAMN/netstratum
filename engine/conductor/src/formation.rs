@@ -644,9 +644,74 @@ fn grip(m: &Manifest) -> Ratio {
     }) / total
 }
 
-/// One sector of the orbit's phase, in marks of the 60⁶ protractor: 60 to
-/// the turn (the carrier's resolution, never law).
-const SECTOR: u64 = 60 * 60 * 60 * 60 * 60;
+/// A group's root (bodies that stuck are one group).
+fn root(p: &mut [usize], i: usize) -> usize {
+    let mut i = i;
+    while p[i] != i {
+        p[i] = p[p[i]];
+        i = p[i];
+    }
+    i
+}
+
+/// THE CONTACT OF A PAIR over one echo (operators 2026-10-18, with
+/// xylarium: interaction is continuous, "not a walk, a dance"): the mean of
+/// their orbit planes' in-step share while their phase difference runs from
+/// `ψ0` at the rate `d` a whole echo. `in_step` is linear between its kinks
+/// (`ψ` on the half-turns), so each piece's exact mean is the mean of its
+/// ends: duration × ½(in-step at entry + at exit), no square. A pair at rest
+/// in line has contact 1; a whole passage gives ½; a crossing is the
+/// weight's peak, never the only moment they meet.
+pub fn contact(psi0: &Ratio, d: &Ratio) -> Ratio {
+    let f = |x: &Ratio| crate::flows::in_step(x, &ratio(0, 1));
+    if d.is_zero() {
+        return f(psi0);
+    }
+    let psi1 = psi0.clone() + d.clone();
+    let (lo, hi) = if psi1 > *psi0 { (psi0.clone(), psi1) } else { (psi1, psi0.clone()) };
+    let span = hi.clone() - lo.clone();
+    // The half-turns strictly inside, in order.
+    let mut cuts = vec![lo.clone()];
+    let mut k = (lo.clone() * ratio(2, 1)).floor() + ratio(1, 1);
+    while k.clone() / ratio(2, 1) < hi {
+        cuts.push(k.clone() / ratio(2, 1));
+        k += ratio(1, 1);
+    }
+    cuts.push(hi);
+    cuts.windows(2).fold(ratio(0, 1), |acc, w| acc + (w[1].clone() - w[0].clone()) / span.clone() * (f(&w[0]) + f(&w[1])) / ratio(2, 1))
+}
+
+/// ONE ECHO'S MEETINGS (with xylarium): every neighbour pair is read at once
+/// from the echo's start (no order), each with its contact over the echo,
+/// each body turning along its orbit at `rate(ℓ)`; `meet` reads a pair and
+/// may move spins into `dl`. Returns each body's turning over the echo.
+fn meetings(phase0: &[Ratio], ell: &[Ratio], rate: &dyn Fn(&Ratio) -> Ratio, pairs: &[(usize, usize)], meet: &mut dyn FnMut(usize, usize, &Ratio, &mut Vec<Ratio>)) -> (Vec<Ratio>, Vec<Ratio>) {
+    let rt: Vec<Ratio> = ell.iter().map(|l| rate(l)).collect();
+    let mut dl = vec![ratio(0, 1); ell.len()];
+    for &(i, j) in pairs {
+        let c = contact(&(phase0[j].clone() - phase0[i].clone()), &(rt[j].clone() - rt[i].clone()));
+        meet(i, j, &c, &mut dl);
+    }
+    (rt, dl)
+}
+
+/// THE BOUNCE'S SPIN EXCHANGE (one law at every tier): the outer gains and
+/// the inner gives, each by the OTHER's mass share of the unkept motion
+/// times their spin gap, `Σ m·ℓ` unchanged; the inner never gives more than
+/// it carries (both sides scaled by one k, still exact).
+fn exchange(ell: &[Ratio], dl: &mut [Ratio], i: usize, j: usize, mi: &Ratio, mj: &Ratio, unkept: &Ratio) {
+    let m_ij = mi.clone() + mj.clone();
+    if m_ij.is_zero() || *unkept <= ratio(0, 1) {
+        return;
+    }
+    let (o, n_, mo, mn) = if ell[i] > ell[j] { (i, j, mi, mj) } else { (j, i, mj, mi) };
+    let u = unkept.clone() * (ell[o].clone() - ell[n_].clone()) / m_ij;
+    let give = u.clone() * mo.clone();
+    let has = (ell[n_].clone() + dl[n_].clone()).max(ratio(0, 1));
+    let k = if give > has && !give.is_zero() { has / give.clone() } else { ratio(1, 1) };
+    dl[o] += u * mn.clone() * k.clone();
+    dl[n_] -= give * k;
+}
 
 /// COLLISIONS IN A STAR SYSTEM'S OWN MEDIUM (operators 2026-10-17, with
 /// xylarium: "run it into collisions over time: activity, spin, bounce,
@@ -687,93 +752,81 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64) -> 
         let ph = if w.phase.len() == planes { w.phase.clone() } else { vec![ratio(0, 1); planes] };
         items.push((w.kept.clone(), r_own * h_s.clone(), ph, ratio(0, 1), w.born > 0));
     }
-    // Advance: each turns by its own deficit, two rings a bell.
     let delta = |ell: &Ratio| { let r = ell.clone() / h_s.clone(); h_s.clone() / (r + h_s.clone()) };
-    for it in items.iter_mut() {
-        let d = delta(&it.1);
-        for k in 0..planes {
-            it.2[k] = crate::ring::grain(&frac(&(it.2[k].clone() + ratio(2, 1) * d.clone())));
-        }
-    }
     let n = items.len();
     let reach = |it: &(Manifest, Ratio, Vec<Ratio>, Ratio, bool)| it.1.clone() / h_s.clone();
     let share = |it: &(Manifest, Ratio, Vec<Ratio>, Ratio, bool)| mass(&it.0) / total.clone();
     let mut parent: Vec<usize> = (0..n).collect();
-    fn root(p: &mut Vec<usize>, i: usize) -> usize {
-        let mut i = i;
-        while p[i] != i {
-            p[i] = p[p[i]];
-            i = p[i];
-        }
-        i
-    }
     let (mut sticks, mut bounces) = (0, 0);
     let mut heat = vec![ratio(0, 1); n];
-    let mut dl = vec![ratio(0, 1); n];
     // NEIGHBOURS ONLY (with xylarium): by reach, each meets the ones beside
-    // it; a body cannot pass through a crowd in one echo.
+    // it; a body cannot pass through a crowd in one echo. A pair can meet
+    // where their thermal bands overlap in reach, `r(1 ± a)`.
     let mut order: Vec<usize> = (0..n).collect();
     order.sort_by(|a, b| reach(&items[*a]).cmp(&reach(&items[*b])).then(a.cmp(b)));
-    for w in order.windows(2) {
-        let (i, j) = (w[0].min(w[1]), w[0].max(w[1]));
-        {
+    let band = |r: &Ratio, a: &Ratio| (r.clone() * (ratio(1, 1) - a.clone().min(ratio(1, 1))), r.clone() * (ratio(1, 1) + a.clone()));
+    let pairs: Vec<(usize, usize)> = order
+        .windows(2)
+        .map(|w| (w[0].min(w[1]), w[0].max(w[1])))
+        .filter(|&(i, j)| {
             let (ri, rj) = (reach(&items[i]), reach(&items[j]));
-            let (lo, hi) = if ri < rj { (ri.clone(), rj.clone()) } else { (rj.clone(), ri.clone()) };
-            // COINCIDENCE IS STANDING IN ONE PLACE (with xylarium): their
-            // thermal bands overlap in reach, `r(1 ± a)`, and they stand in
-            // one sector of the orbit's phase (60 marks, the carrier's
-            // resolution, never law).
-            let band = |r: &Ratio, a: &Ratio| (r.clone() * (ratio(1, 1) - a.clone().min(ratio(1, 1))), r.clone() * (ratio(1, 1) + a.clone()));
-            let ((_, hi_i), (lo_j, _)) = if ri < rj { (band(&ri, &items[i].3), band(&rj, &items[j].3)) } else { (band(&rj, &items[j].3), band(&ri, &items[i].3)) };
-            if hi_i < lo_j {
-                continue;
-            }
-            if crate::ring::sector(&frac(&items[i].2[0])) / SECTOR != crate::ring::sector(&frac(&items[j].2[0])) / SECTOR {
-                continue;
-            }
+            let ((_, hi_lo), (lo_hi, _)) = if ri < rj { (band(&ri, &items[i].3), band(&rj, &items[j].3)) } else { (band(&rj, &items[j].3), band(&ri, &items[i].3)) };
+            hi_lo >= lo_hi
+        })
+        .collect();
+    // THE MEETINGS (operators 2026-10-18; with xylarium): each turns by its
+    // own deficit, two rings a bell, and every neighbour pair is in contact
+    // over the echo by how much it stands in line, read at once.
+    let phase0: Vec<Ratio> = items.iter().map(|it| it.2[0].clone()).collect();
+    let ell: Vec<Ratio> = items.iter().map(|it| it.1.clone()).collect();
+    let rate = |l: &Ratio| ratio(2, 1) * delta(l);
+    let (advance, dl) = {
+        let items = &items;
+        let parent = &mut parent;
+        let heat = &mut heat;
+        let (sticks, bounces) = (&mut sticks, &mut bounces);
+        let ell = &ell;
+        meetings(&phase0, ell, &rate, &pairs, &mut |i, j, c, dl| {
             let (gi, gj) = (grip(&items[i].0), grip(&items[j].0));
             let s = if gi.is_zero() || gj.is_zero() { ratio(0, 1) } else if gi < gj { gi / gj } else { gj / gi };
             let (mi, mj) = (share(&items[i]), share(&items[j]));
-            let gap = hi - lo;
-            let d_pair = (mi.clone() + mj.clone()) / (gap + mi + mj);
-            let (di, dj) = (delta(&items[i].1), delta(&items[j].1));
+            // CLOSENESS IS A SHARE ON THE SPHERE (operator 2026-10-18: "the
+            // only straight lines should be wormholes"): their contact in the
+            // orbit's plane over the echo times their in-step in the other
+            // planes, never a length; `T` stays apart as how they move.
+            let near = (1..planes).fold(c.clone(), |c, k| c * crate::flows::in_step(&items[i].2[k], &items[j].2[k]));
+            let m_ij = mi.clone() + mj.clone();
+            let bind = s * m_ij.clone() / (m_ij.clone() + ratio(1, 1) - near);
+            let (di, dj) = (delta(&ell[i]), delta(&ell[j]));
             let t = if di > dj { di.clone() - dj.clone() } else { dj.clone() - di.clone() } / (di + dj);
-            let bind = s * d_pair;
             // THE GRIP SPLIT (one law at every tier, with xylarium): the
             // relative turning T divides into what the bond gripped, heat to
-            // both, and what it did not, `(T − s·D)⁺`, which parts them.
-            // The gripped motion heats each by the OTHER's mass share (an
-            // agitation is a share of a body, never summed across bodies).
-            let m_ij = share(&items[i]) + share(&items[j]);
-            let (hi_, hj_) = if m_ij.is_zero() { (ratio(0, 1), ratio(0, 1)) } else { (share(&items[j]) / m_ij.clone(), share(&items[i]) / m_ij) };
+            // each by the OTHER's mass share, and what it did not,
+            // `(T − s·D)⁺`, carried by their contact, which parts them.
+            // Collision is a tether: `T/(s·D)` its tautness, holding below 1,
+            // snapping above (operator).
+            let (hi_, hj_) = if m_ij.is_zero() { (ratio(0, 1), ratio(0, 1)) } else { (mj.clone() / m_ij.clone(), mi.clone() / m_ij.clone()) };
             if bind >= t {
-                let (a, b) = (root(&mut parent, i), root(&mut parent, j));
+                let (a, b) = (root(parent, i), root(parent, j));
                 if a != b {
                     parent[a] = b;
                 }
                 heat[i] += t.clone() * hi_;
                 heat[j] += t * hj_;
-                sticks += 1;
+                *sticks += 1;
             } else {
-                heat[i] += bind.clone() * hi_;
-                heat[j] += bind.clone() * hj_;
-                // They part outer outward, each by the OTHER's mass share of
-                // the unkept motion times their spin gap: a spin exchange,
-                // `Σ m·ℓ` unchanged.
-                let (mi, mj) = (share(&items[i]), share(&items[j]));
-                let (o, n_) = if items[i].1 > items[j].1 { (i, j) } else { (j, i) };
-                let gap_l = items[o].1.clone() - items[n_].1.clone();
-                let u = (t - bind) * gap_l / (mi.clone() + mj.clone());
-                let (mo, mn) = if o == i { (mi, mj) } else { (mj, mi) };
-                dl[o] += u.clone() * mn;
-                dl[n_] -= u * mo;
-                bounces += 1;
+                heat[i] += bind.clone() * c.clone() * hi_;
+                heat[j] += bind.clone() * c.clone() * hj_;
+                exchange(ell, dl, i, j, &mi, &mj, &((t - bind) * c.clone()));
+                *bounces += 1;
             }
-        }
-    }
+        })
+    };
+    let ell: Vec<Ratio> = ell.iter().zip(&dl).map(|(l, d)| l.clone() + d.clone()).collect();
     for i in 0..n {
-        if !dl[i].is_zero() {
-            items[i].1 = crate::ring::grain(&(items[i].1.clone() + dl[i].clone())).max(ratio(0, 1));
+        items[i].1 = crate::ring::grain(&ell[i]).max(ratio(0, 1));
+        for k in 0..planes {
+            items[i].2[k] = crate::ring::grain(&frac(&(items[i].2[k].clone() + advance[i].clone())));
         }
     }
     // Groups: one body each, spins added exactly (holding-weighted ℓ).
@@ -906,7 +959,7 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64) -> 
 /// `c_pre` is each star's coherence before; a merger's is its members' by
 /// holding. Returns the stars, aligned with their coherences, and
 /// (sticks, bounces).
-pub fn collide_stars(stars: Vec<crate::pulse::Body>, c_pre: Vec<Ratio>, scale: &Ratio, h_g: &Ratio, p_g: &Ratio, g_total: &Ratio) -> (Vec<(crate::pulse::Body, Ratio)>, usize, usize) {
+pub fn collide_stars(stars: Vec<crate::pulse::Body>, c_pre: Vec<Ratio>, scale: &Ratio, h_g: &Ratio, p_g: &Ratio, g_total: &Ratio, enc: &crate::flows::Enclosed) -> (Vec<(crate::pulse::Body, Ratio)>, usize, usize) {
     let planes = crate::flows::PLANES;
     let n = stars.len();
     if n < 2 || scale.is_zero() || g_total.is_zero() {
@@ -916,68 +969,81 @@ pub fn collide_stars(stars: Vec<crate::pulse::Body>, c_pre: Vec<Ratio>, scale: &
     let r: Vec<Ratio> = stars.iter().map(|b| b.radius.clone() / scale.clone()).collect();
     let m: Vec<Ratio> = stars.iter().map(|b| mass(&b.total()) / g_total.clone()).collect();
     let g: Vec<Ratio> = stars.iter().map(|b| grip(&b.kept)).collect();
-    let delta = |x: &Ratio| h_g.clone() / (x.clone() + h_g.clone());
+    // Each star's deficit by what is enclosed inside it (the cyclotron).
+    let delta = |ell: &Ratio| enc.reach(ell).1;
     let mut parent: Vec<usize> = (0..n).collect();
-    fn root(p: &mut Vec<usize>, i: usize) -> usize {
-        let mut i = i;
-        while p[i] != i {
-            p[i] = p[p[i]];
-            i = p[i];
-        }
-        i
-    }
     let mut disp = vec![ratio(0, 1); n];
     let mut heat = vec![ratio(0, 1); n];
     let (mut sticks, mut bounces) = (0, 0);
-    // Neighbours only, by reach; they meet where their dispersal bands
-    // overlap, `r(1 ± p)`, and they stand in one sector of the orbit.
+    // Neighbours only, by reach; a pair can meet where their dispersal bands
+    // overlap, `r(1 ± p)`.
     let mut order: Vec<usize> = (0..n).collect();
     order.sort_by(|a, b| r[*a].cmp(&r[*b]).then(a.cmp(b)));
-    for w in order.windows(2) {
-        let (i, j) = (w[0].min(w[1]), w[0].max(w[1]));
-        if stars[i].phase.len() < planes || r[i].is_zero() || stars[j].phase.len() < planes || r[j].is_zero() {
-            continue;
-        }
-        {
+    let pairs: Vec<(usize, usize)> = order
+        .windows(2)
+        .map(|w| (w[0].min(w[1]), w[0].max(w[1])))
+        .filter(|&(i, j)| {
+            if stars[i].phase.len() < planes || r[i].is_zero() || stars[j].phase.len() < planes || r[j].is_zero() {
+                return false;
+            }
             let (lo, hi) = if r[i] < r[j] { (r[i].clone(), r[j].clone()) } else { (r[j].clone(), r[i].clone()) };
-            if lo.clone() * (ratio(1, 1) + p_g.clone()) < hi.clone() * (ratio(1, 1) - p_g.clone().min(ratio(1, 1))) {
-                continue;
-            }
-            if crate::ring::sector(&frac(&stars[i].phase[0])) / SECTOR != crate::ring::sector(&frac(&stars[j].phase[0])) / SECTOR {
-                continue;
-            }
+            lo * (ratio(1, 1) + p_g.clone()) >= hi * (ratio(1, 1) - p_g.clone().min(ratio(1, 1)))
+        })
+        .collect();
+    // THE MEETINGS: each star's orbit turns as its galaxy's flows do at its
+    // reach (the reference it rides, `2δ` an echo, flows::turn); its orbital
+    // spin is `ℓ = R·H_g`, and a bounce's exchange moves its reach.
+    let phase0: Vec<Ratio> = stars.iter().map(|b| b.phase.first().cloned().unwrap_or_else(|| ratio(0, 1))).collect();
+    let ell: Vec<Ratio> = r.iter().map(|x| x.clone() * h_g.clone()).collect();
+    let rate = |l: &Ratio| ratio(2, 1) * delta(l);
+    let (_, dl) = {
+        let stars = &stars;
+        let parent = &mut parent;
+        let (heat, disp) = (&mut heat, &mut disp);
+        let (sticks, bounces) = (&mut sticks, &mut bounces);
+        let ell = &ell;
+        meetings(&phase0, ell, &rate, &pairs, &mut |i, j, c, dl| {
             let s = if g[i].is_zero() || g[j].is_zero() { ratio(0, 1) } else if g[i] < g[j] { g[i].clone() / g[j].clone() } else { g[j].clone() / g[i].clone() };
-            let d_pair = (m[i].clone() + m[j].clone()) / (hi - lo + m[i].clone() + m[j].clone());
-            let (di, dj) = (delta(&r[i]), delta(&r[j]));
+            // Closeness a share on the sphere: their orbit contact over the
+            // echo times their in-step in the other planes.
+            let near = (1..planes).fold(c.clone(), |c, k| c * crate::flows::in_step(&stars[i].phase[k], &stars[j].phase[k]));
+            let m_ij = m[i].clone() + m[j].clone();
+            let bind = s * m_ij.clone() / (m_ij.clone() + ratio(1, 1) - near);
+            let (di, dj) = (delta(&ell[i]), delta(&ell[j]));
             let t = if di > dj { di.clone() - dj.clone() } else { dj.clone() - di.clone() } / (di + dj);
-            let bind = s * d_pair;
             if bind >= t {
-                let (a, b) = (root(&mut parent, i), root(&mut parent, j));
+                let (a, b) = (root(parent, i), root(parent, j));
                 if a != b {
                     parent[a] = b;
                 }
                 // The merger's gripped motion, `T`, heats each by the
                 // other's mass share.
-                let m_ij = m[i].clone() + m[j].clone();
                 heat[i] += t.clone() * m[j].clone() / m_ij.clone();
                 heat[j] += t * m[i].clone() / m_ij;
-                sticks += 1;
+                *sticks += 1;
             } else {
-                let m_ij = m[i].clone() + m[j].clone();
-                heat[i] += bind.clone() * m[j].clone() / m_ij.clone();
-                heat[j] += bind.clone() * m[i].clone() / m_ij;
-                let u = (t - bind) / (m[i].clone() + m[j].clone());
-                let (o, n_) = if r[i] > r[j] { (i, j) } else { (j, i) };
-                disp[o] += u.clone() * m[n_].clone();
-                disp[n_] -= u * m[o].clone();
-                bounces += 1;
+                heat[i] += bind.clone() * c.clone() * m[j].clone() / m_ij.clone();
+                heat[j] += bind.clone() * c.clone() * m[i].clone() / m_ij.clone();
+                let unkept = (t - bind) * c.clone();
+                // The tilt is pushed, outer ahead and inner behind, each by
+                // the other's mass share; the orbit by the spin exchange.
+                let (o, n_) = if ell[i] > ell[j] { (i, j) } else { (j, i) };
+                disp[o] += unkept.clone() * m[n_].clone() / m_ij.clone();
+                disp[n_] -= unkept.clone() * m[o].clone() / m_ij;
+                exchange(ell, dl, i, j, &m[i], &m[j], &unkept);
+                *bounces += 1;
             }
-        }
-    }
+        })
+    };
+    let ell: Vec<Ratio> = ell.iter().zip(&dl).map(|(l, d)| l.clone() + d.clone()).collect();
     let mut stars = stars;
     for i in 0..n {
+        let moved = ell[i].clone() / h_g.clone();
+        if moved != r[i] {
+            stars[i].radius = crate::ring::grain(&(moved * scale.clone()));
+        }
         if !disp[i].is_zero() && stars[i].phase.len() >= planes {
-            for k in 0..planes {
+            for k in 1..planes {
                 stars[i].phase[k] = crate::ring::grain(&frac(&(stars[i].phase[k].clone() + disp[i].clone())));
             }
         }
@@ -1043,4 +1109,24 @@ pub fn collide_stars(stars: Vec<crate::pulse::Body>, c_pre: Vec<Ratio>, scale: &
         out.push((head, c));
     }
     (out, sticks, bounces)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::contact;
+    use cfe::ratio::ratio;
+
+    #[test]
+    fn contact_is_the_mean_in_step_over_the_echo() {
+        // At rest in line: whole contact; at rest on the far face: none.
+        assert_eq!(contact(&ratio(0, 1), &ratio(0, 1)), ratio(1, 1));
+        assert_eq!(contact(&ratio(1, 2), &ratio(0, 1)), ratio(0, 1));
+        // A whole passage, either way round, averages one half.
+        assert_eq!(contact(&ratio(0, 1), &ratio(1, 1)), ratio(1, 2));
+        assert_eq!(contact(&ratio(1, 3), &ratio(-1, 1)), ratio(1, 2));
+        // Drifting from in line to a quarter turn: in-step 1 to ½, mean ¾.
+        assert_eq!(contact(&ratio(0, 1), &ratio(1, 4)), ratio(3, 4));
+        // Across the bell: from −¼ to ¼ passes the peak, mean ¾.
+        assert_eq!(contact(&ratio(-1, 4), &ratio(1, 2)), ratio(3, 4));
+    }
 }

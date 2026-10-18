@@ -180,6 +180,48 @@ pub fn held(mote: &Mote, h: &Ratio, p: &Ratio) -> Ratio {
     held_share(&mote.ell_o, h, p) * held_share(&mote.ell_c, h, p)
 }
 
+/// THE ENCLOSED HOLDING (the ring-density law, xylarium 11.0: a ring is
+/// held by every bell inside its reach, `H(<r)`; operators 2026-10-18, the
+/// cyclotronic chain: "anchor the inner core to the singularity with enough
+/// gravitational strength to support the lighter elements on the later
+/// rungs"). Read once from an echo's start: the singularity's own state (the
+/// base) plus the holding of every body standing inside, motes and stars
+/// alike (every grain is a bell; M = H), sorted by spin. Strictly inside: a
+/// body never encloses itself. The heavy inner disc, innermost, holds for
+/// everything beyond it; a rim body turns at what the core and all inside
+/// it hold.
+pub struct Enclosed {
+    spins: Vec<Ratio>,
+    held: Vec<Ratio>,
+}
+
+impl Enclosed {
+    /// From the base and each body's (spin ℓ, holding), in one unit.
+    pub fn new(base: Ratio, mut bodies: Vec<(Ratio, Ratio)>) -> Enclosed {
+        bodies.sort_by(|a, b| a.0.cmp(&b.0));
+        let mut held = Vec::with_capacity(bodies.len() + 1);
+        let mut run = base;
+        held.push(run.clone());
+        for (_, h) in &bodies {
+            run += h.clone();
+            held.push(run.clone());
+        }
+        Enclosed { spins: bodies.into_iter().map(|(l, _)| l).collect(), held }
+    }
+
+    /// `H(<ℓ)`: the base and everything turning with less spin.
+    pub fn hold(&self, ell: &Ratio) -> Ratio {
+        self.held[self.spins.partition_point(|l| l < ell)].clone()
+    }
+
+    /// A body's reach and deficit at spin ℓ: `R = ℓ/H(<ℓ)`, `δ = H/(R + H)`.
+    pub fn reach(&self, ell: &Ratio) -> (Ratio, Ratio) {
+        let h = self.hold(ell);
+        let r = ell.clone() / h.clone();
+        (r.clone(), h.clone() / (r + h))
+    }
+}
+
 /// THE GALAXY'S PHASES AT A REACH turned by one bell: what every mote's
 /// phases do there, and a star's reference (its galaxy's own phase at its
 /// place, operator 2026-10-18), alike.
@@ -211,12 +253,13 @@ pub fn turn(phase: &mut [Ratio], r_o: &Ratio, h: &Ratio, p: &Ratio, rho: &Ratio,
 /// rings (`2·δ` turns, the motion law's `ω = δ`; the bell's own turn is
 /// whole, so the phase against it moves by `2δ` mod 1). Returns the spin
 /// the core's reservoir gives (Σ m·Δℓ, to be taken from it).
-pub fn kick(motes: &mut [Mote], h: &Ratio, p: &Ratio, rho: &Ratio, delta_u: &Ratio, total: &Ratio) -> Ratio {
+pub fn kick(motes: &mut [Mote], enc: &Enclosed, p: &Ratio, rho: &Ratio, delta_u: &Ratio, total: &Ratio) -> Ratio {
     let mut given = ratio(0, 1);
     for x in motes.iter_mut() {
-        let r_o = x.ell_o.clone() / h.clone();
-        let d_o = h.clone() / (r_o.clone() + h.clone());
-        turn(&mut x.phase, &r_o, h, p, rho, delta_u);
+        // Each turns by what is enclosed inside it (the core and all inside).
+        let h = enc.hold(&x.ell_o);
+        let (r_o, d_o) = enc.reach(&x.ell_o);
+        turn(&mut x.phase, &r_o, &h, p, rho, delta_u);
         let dl_o = p.clone() * d_o * response(&x.phase[0]);
         // Spin cannot carry a mote through zero reach: a turning is a
         // magnitude in its plane; a kick past zero stops at the core.
