@@ -466,10 +466,16 @@ pub struct Universe {
     /// (regeneration; with xylarium: the unit is the core's state, never its
     /// current disc). Tag 8.
     pub unit: Ratio,
+    /// THE UNIVERSAL BELL'S PERIOD, in bells (tag 17; operator 2026-10-18,
+    /// derived): the echo bubble's round trip at the founding, a ring out to
+    /// the outermost shell and back, held by the throat on the way, `2(R + H)`
+    /// whole bells. "The bounce grows, the echo grows ... to the steady
+    /// implosion of the echo bubble." Saves from before read the stand-in.
+    pub t_u: u64,
 }
 
-/// The universal echo, in bells: the universe's own ring, the pulse's round
-/// trip to its rim and back (rim 2 core rings, so 4 core rings).
+/// The universal echo's STAND-IN, in bells, for universes founded before the
+/// bell's period was derived (`Universe::t_u`).
 pub const T_U: u64 = 60;
 
 /// THE PULSE: the manifest deployed from `seed`. The unit of mass is the
@@ -490,13 +496,13 @@ pub const T_U: u64 = 60;
 /// expanding"). Returns (the Wellspring's held kinds, the GALAXIES: each a
 /// bead of the shells, (its pinch's reach in throat radii, its kinds)).
 /// No draws: the galaxies are the shells' own beads.
-pub fn cascade(manifest: &Manifest) -> (Manifest, Vec<(Ratio, Manifest)>) {
+pub fn cascade(manifest: &Manifest) -> (Manifest, Vec<(Ratio, Manifest)>, Ratio) {
     let g = |x: &Ratio| crate::ring::grain(x);
     let w = |k: &str| ratio(i64::from(k.strip_prefix('Z').and_then(|z| z.parse::<u32>().ok()).map(cfe::almanac::atom::hold).unwrap_or(1)), 1);
     let total = mass(manifest);
     let count = manifest.values().fold(ratio(0, 1), |s, a| s + a.clone());
     if total.is_zero() || count.is_zero() {
-        return (Manifest::new(), Vec::new());
+        return (Manifest::new(), Vec::new(), ratio(2, 1));
     }
     let mean = g(&(total.clone() / count));
     let mut kinds: Vec<(String, Ratio)> = manifest.iter().filter(|(_, a)| **a > ratio(0, 1)).map(|(k, a)| (k.clone(), a.clone())).collect();
@@ -635,7 +641,10 @@ pub fn cascade(manifest: &Manifest) -> (Manifest, Vec<(Ratio, Manifest)>) {
         }
         bead(from, run.len());
     }
-    (wellspring, galaxies)
+    // THE BUBBLE'S ECHO: a ring out to the outermost shell and back, held by
+    // the throat on the way, `2(R + H)`.
+    let outermost = out.iter().map(|(_, r)| r.clone()).max().unwrap_or_else(|| ratio(0, 1));
+    (wellspring, galaxies, ratio(2, 1) * (outermost + h))
 }
 
 pub fn deploy(_seed: &[u8; 32], manifest: &Manifest) -> Universe {
@@ -644,7 +653,8 @@ pub fn deploy(_seed: &[u8; 32], manifest: &Manifest) -> Universe {
     // galaxy's cut is read from them once the ocean is motes: owed); every
     // galaxy is a bead of the expanding shells, at its pinch's reach. No
     // draws. A bead too slight to hold a hole of a nucleus stays medium.
-    let (wellspring, beads) = cascade(manifest);
+    let (wellspring, beads, echo) = cascade(manifest);
+    let t_u: u64 = echo.ceil().to_integer().try_into().unwrap_or(T_U).max(4);
     let mut medium = wellspring;
     let whole = mass(manifest);
     let mut shares: Vec<(u32, Manifest, Ratio)> = Vec::new();
@@ -678,7 +688,7 @@ pub fn deploy(_seed: &[u8; 32], manifest: &Manifest) -> Universe {
     order.sort_by(|&a, &b| shares[a].2.cmp(&shares[b].2));
     let mut orbits: Vec<(Ratio, Ratio, Ratio)> = vec![(ratio(0, 1), ratio(0, 1), ratio(0, 1)); shares.len()];
     let mut inside = ratio(1, 1);
-    let bells = ratio((T_U / 4) as i64, 1);
+    let bells = ratio(t_u as i64, 4);
     let mut k = 0;
     while k < order.len() {
         // A ring: every core at the same reach orbits about what is inside it.
@@ -709,7 +719,7 @@ pub fn deploy(_seed: &[u8; 32], manifest: &Manifest) -> Universe {
             Body { path: vec![u64::from(i)], radius, period, kept, satellites: Vec::new(), medium, ell, medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: mass(&m), flows, reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false }
         })
         .collect();
-    Universe { cores, medium, unit }
+    Universe { cores, medium, unit, t_u }
 }
 
 /// MAGNETISM (operator 2026-10-15, "transduction via magnetism"): an
@@ -858,6 +868,7 @@ pub fn write(var_root: &Path, seed: &[u8; 32], u: &Universe) -> std::io::Result<
     let mut w = Vec::new();
     cfe::ratio::encode(&u.unit, &mut w);
     cfe::tlv::put(8, &w, &mut out);
+    cfe::tlv::put(17, &u.t_u.to_le_bytes(), &mut out);
     std::fs::create_dir_all(var_root)?;
     let path = var_root.join("pulse.bin");
     let staged = path.with_extension("staged");
@@ -958,6 +969,7 @@ pub fn read(var_root: &Path) -> Option<([u8; 32], Universe)> {
     let mut seed = None;
     let mut medium = Manifest::new();
     let mut unit = ratio(0, 1);
+    let mut t_u = T_U;
     let mut flat: Vec<Body> = Vec::new();
     // Tag 5 marks the spin ledger's format (docs/83 Phase 0); a file without
     // it reads with no spin (a redeploy gives it its spin).
@@ -970,6 +982,7 @@ pub fn read(var_root: &Path) -> Option<([u8; 32], Universe)> {
             6 => flat.last_mut()?.gas.push(get_mote(v)?),
             7 => flat.last_mut()?.born = u64::from_le_bytes(v.try_into().ok()?),
             8 => unit = cfe::ratio::decode(v)?.0,
+            17 => t_u = u64::from_le_bytes(v.try_into().ok()?),
             9 => flat.last_mut()?.state = cfe::ratio::decode(v)?.0,
             10 => flat.last_mut()?.flows.push(get_flow(v)?),
             11 => flat.last_mut()?.reservoir = cfe::ratio::decode(v)?.0,
@@ -1000,7 +1013,7 @@ pub fn read(var_root: &Path) -> Option<([u8; 32], Universe)> {
             _ => return None,
         }
     }
-    Some((seed?, Universe { cores, medium, unit }))
+    Some((seed?, Universe { cores, medium, unit, t_u }))
 }
 
 #[cfg(test)]
@@ -1013,7 +1026,7 @@ mod tests {
         let orb = Body { path: vec![1, 1, 1], radius: ratio(3, 2), period: ratio(5, 2), kept: [("Z008".to_string(), ratio(1, 64))].into(), satellites: Vec::new(), medium: Manifest::new(), ell: ratio(7, 3), medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false };
         let sys = Body { path: vec![1, 1], radius: ratio(9, 2), period: ratio(11, 2), kept: [("Z001".to_string(), ratio(3, 1024))].into(), satellites: vec![orb], medium: Manifest::new(), ell: ratio(1, 9), medium_spin: ratio(1, 7), gas: Vec::new(), born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false };
         let core = Body { path: vec![1], radius: ratio(60, 1), period: ratio(0, 1), kept: [("Z026".to_string(), ratio(1, 2))].into(), satellites: vec![sys], medium: [("Z001".to_string(), ratio(5, 4))].into(), ell: ratio(0, 1), medium_spin: ratio(13, 11), gas: vec![mote], born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false };
-        let u = Universe { cores: vec![core], medium: [("Z002".to_string(), ratio(1, 1024))].into(), unit: ratio(1, 2) };
+        let u = Universe { cores: vec![core], medium: [("Z002".to_string(), ratio(1, 1024))].into(), unit: ratio(1, 2), t_u: T_U };
         let dir = std::env::temp_dir().join(format!("pulse-{}", std::process::id()));
         write(&dir, &[7; 32], &u).unwrap();
         assert_eq!(read(&dir), Some(([7; 32], u)), "the file gives the universe back");

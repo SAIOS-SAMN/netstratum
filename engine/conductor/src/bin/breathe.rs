@@ -1,5 +1,5 @@
 //! docs/78 "The breath": breathe the pulse universe and read it.
-//! `breathe <era1 var> [bells] [T_u] [write]`: `write` saves the breathed
+//! `breathe <era1 var> [bells] [_] [write]`: `write` saves the breathed (the third argument, once T_u, is unread: the period is derived at the founding)
 //! universe back (scratch vars only), for `observe --var`.
 use conductor::{breath, motion, pulse};
 use std::path::Path;
@@ -8,12 +8,13 @@ fn main() {
     let args: Vec<String> = std::env::args().collect();
     let era1 = args.get(1).map(String::as_str).unwrap_or("var-e1");
     let until: u64 = args.get(2).and_then(|b| b.parse().ok()).unwrap_or(36_000);
-    // The universal pulse: TUniversal sets it at founding; 60 bells stands in.
-    let t_u: u64 = args.get(3).and_then(|b| b.parse().ok()).unwrap_or(60);
     let Some((seed, mut u)) = pulse::read(Path::new(era1)) else {
         println!("no pulse at {era1}/pulse.bin");
         return;
     };
+    // The universal pulse: the bell's period derived at the founding
+    // (`Universe::t_u`); a T_u argument is no longer read.
+    let t_u: u64 = u.t_u;
     let before = u.total();
     let events = breath::breathe(&mut u, &seed, t_u, 0, until);
     let unit = breath::unit_mass(&u);

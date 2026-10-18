@@ -65,9 +65,9 @@ fn main() {
         eprintln!("conductor: no universe at {var_root}/pulse.bin — deploy it first (the pulse binary)");
         std::process::exit(1);
     };
-    // THE UNIVERSAL PULSE: TUniversal sets it at founding; 60 bells stands in.
-    // One beat is one bell.
-    const T_U: u64 = conductor::pulse::T_U;
+    // THE UNIVERSAL PULSE: the bell's period derived at the founding (the
+    // echo bubble's round trip; `Universe::t_u`). One beat is one bell.
+    let t_u_bells: u64 = universe.t_u;
     // Operator 2026-10-16: pause the economics until the universe is stable.
     const ECONOMY_PAUSED: bool = true;
     let unit = conductor::breath::unit_mass(&universe);
@@ -98,7 +98,7 @@ fn main() {
         life_readings.values().filter(|r| r.climb.is_some()).count(),
         climbs.values().filter(|c| c.woken).count()
     );
-    println!("conductor: the pulse universe — {} cores, {} systems; T_u {T_U} bells", universe.cores.len(), universe.cores.iter().map(|c| c.satellites.len()).sum::<usize>());
+    println!("conductor: the pulse universe — {} cores, {} systems; T_u {t_u_bells} bells", universe.cores.len(), universe.cores.iter().map(|c| c.satellites.len()).sum::<usize>());
 
     // CONVERGE-1 (07 §1.6): converge the archived eras BEFORE genesis —
     // boot adopts the past instead of founding blind beside it.
@@ -298,7 +298,7 @@ fn main() {
         let _ = book.set_universal_clock(epoch_base + beat);
         // THE BREATH (docs/78): the echoes arriving this bell compress the
         // media; stars shed by their phase; the clocks say what comes due.
-        let events = conductor::profile::timed("breath", || conductor::breath::breathe(&mut universe, &pulse_seed, T_U, beat - 1, beat));
+        let events = conductor::profile::timed("breath", || conductor::breath::breathe(&mut universe, &pulse_seed, t_u_bells, beat - 1, beat));
         let mut breath_reading = conductor::annal::BreathReading {
             echoes: events.len() as u64,
             births: events.iter().map(|e| e.stars as u64).sum(),
@@ -306,7 +306,7 @@ fn main() {
             dissolved: events.iter().map(|e| e.dissolved as u64).sum(),
             ..Default::default()
         };
-        if beat.is_multiple_of(T_U) {
+        if beat.is_multiple_of(t_u_bells) {
             // THE LEDGER (docs/83 Phase 0): mass and spin, conserved exactly.
             let total_mass = conductor::pulse::mass(&universe.total()) / unit.clone();
             let total_spin = conductor::pulse::spin_total(&universe, &unit);
@@ -388,12 +388,12 @@ fn main() {
         }
         // The readings follow the universe: refreshed when the breath changed
         // it, at most once a pulse.
-        if !events.is_empty() && beat >= readings_at + T_U {
+        if !events.is_empty() && beat >= readings_at + t_u_bells {
             life_readings = conductor::profile::timed("life:read", || conductor::life::readings(&universe, &pulse_seed));
             system_periods = conductor::seating::periods(&universe);
             readings_at = beat;
         }
-        let (woke, measured) = conductor::profile::timed("life:climb", || conductor::life::advance(&life_readings, &mut climbs, T_U, beat));
+        let (woke, measured) = conductor::profile::timed("life:climb", || conductor::life::advance(&life_readings, &mut climbs, t_u_bells, beat));
         breath_reading.measurements += measured;
         if beat.is_multiple_of(10) || !woke.is_empty() {
             conductor::life::write_climbs(std::path::Path::new(&var_root), &climbs);
@@ -417,8 +417,8 @@ fn main() {
         }
         conductor::profile::timed("clocks", || {
             for i in 0..universe.cores.len() {
-                breath_reading.terms += conductor::clocks::galaxy_terms(&universe, i, T_U, beat - 1, beat);
-                breath_reading.epochs += conductor::clocks::galaxy_epochs(&universe, i, &unit, T_U, beat - 1, beat);
+                breath_reading.terms += conductor::clocks::galaxy_terms(&universe, i, t_u_bells, beat - 1, beat);
+                breath_reading.epochs += conductor::clocks::galaxy_epochs(&universe, i, &unit, t_u_bells, beat - 1, beat);
             }
             breath_reading.local_years = universe
                 .cores
@@ -651,7 +651,7 @@ fn main() {
         // relays is read for what is bound to the fleet (substratum origins,
         // percepts) and for the dilation reading, du/dh, never a fault.
         let point = std::fs::read_to_string(format!("{var_root}/tuniversal")).ok().map(|p| p.trim().to_string());
-        if beat.is_multiple_of(T_U) {
+        if beat.is_multiple_of(t_u_bells) {
             let heard = point.as_deref().and_then(|p| p.split('/').nth(1)).and_then(|l| l.split(':').next()).and_then(|h| u64::from_str_radix(h, 16).ok());
             match conductor::profile::timed("chronometry", || chain.commit(&universe, beat, heard)) {
                 Ok(rims) => {
