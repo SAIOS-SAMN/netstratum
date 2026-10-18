@@ -180,6 +180,30 @@ pub fn held(parcel: &Parcel, h: &Ratio, p: &Ratio) -> Ratio {
     held_share(&parcel.ell_o, h, p) * held_share(&parcel.ell_c, h, p)
 }
 
+/// THE GALAXY'S PHASES AT A REACH turned by one bell: what every parcel's
+/// phases do there, and a star's reference (its galaxy's own phase at its
+/// place, operator 2026-10-18), alike.
+pub fn turn(phase: &mut [Ratio], r_o: &Ratio, h: &Ratio, p: &Ratio, rho: &Ratio, delta_u: &Ratio) {
+    let d_o = h.clone() / (r_o.clone() + h.clone());
+    // THE LOOP'S RATE (with xylarium): the jetstream turns by the motion law
+    // AT THE PARCEL'S REACH, δ(R) a ring, two rings a bell, continuously;
+    // inner matter circulates faster than outer. (At R = H it is one turn a
+    // bell, a 1:1 lock with the bell: the rim.)
+    let d_c = d_o.clone();
+    // On the coordinate's grain (`60⁻⁶`, the carrier's resolution, as every
+    // spin and place): exact sums of exact rationals otherwise compound
+    // their denominators each bell without bound.
+    phase[0] = crate::ring::grain(&frac(&(phase[0].clone() + ratio(2, 1) * d_o)));
+    let loop_phase = frac(&(phase[1].clone() + ratio(2, 1) * d_c));
+    // THE PARENT'S PULSE MOVES MATTER ALONG THE LOOP (operator: "the pulse
+    // moves matter along the loop"; with xylarium): absorbed in step it
+    // ADVANCES the loop's phase, `p·ρ·δ_u` × the hemisphere's signed share,
+    // on top of the loop's own rate; nothing accumulates as a spin in the
+    // loop's plane.
+    let advance = p.clone() * rho.clone() * delta_u.clone() * response(&loop_phase);
+    phase[1] = crate::ring::grain(&frac(&(loop_phase + advance)));
+}
+
 /// One bell's kicks on every parcel: the own family in the orbit's plane
 /// (`κ_o = p·δ(R)`, a spin); the parent's moves the parcel along the loop
 /// (`p·ρ·δ_u`, a phase).
@@ -191,25 +215,9 @@ pub fn kick(parcels: &mut [Parcel], h: &Ratio, p: &Ratio, rho: &Ratio, delta_u: 
     let mut given = ratio(0, 1);
     for x in parcels.iter_mut() {
         let r_o = x.ell_o.clone() / h.clone();
-        let d_o = h.clone() / (r_o + h.clone());
-        // THE LOOP'S RATE (with xylarium): the jetstream turns by the
-        // motion law AT THE PARCEL'S REACH, δ(R) a ring, two rings a bell,
-        // continuously; inner matter circulates faster than outer. (At
-        // R = H it is one turn a bell, a 1:1 lock with the bell: the rim.)
-        let d_c = d_o.clone();
-        // On the coordinate's grain (`60⁻⁶`, the carrier's resolution, as
-        // every spin and place): exact sums of exact rationals otherwise
-        // compound their denominators each bell without bound.
-        x.phase[0] = crate::ring::grain(&frac(&(x.phase[0].clone() + ratio(2, 1) * d_o.clone())));
-        let loop_phase = frac(&(x.phase[1].clone() + ratio(2, 1) * d_c));
+        let d_o = h.clone() / (r_o.clone() + h.clone());
+        turn(&mut x.phase, &r_o, h, p, rho, delta_u);
         let dl_o = p.clone() * d_o * response(&x.phase[0]);
-        // THE PARENT'S PULSE MOVES MATTER ALONG THE LOOP (operator: "the
-        // pulse moves matter along the loop"; with xylarium): absorbed in
-        // step it ADVANCES the loop's phase, `p·ρ·δ_u` × the hemisphere's
-        // signed share, on top of the loop's own rate; nothing accumulates
-        // as a spin in the loop's plane.
-        let advance = p.clone() * rho.clone() * delta_u.clone() * response(&loop_phase);
-        x.phase[1] = crate::ring::grain(&frac(&(loop_phase + advance)));
         // Spin cannot carry a parcel through zero reach: a turning is a
         // magnitude in its plane; a kick past zero stops at the core.
         let new_o = crate::ring::grain(&(x.ell_o.clone() + dl_o)).max(ratio(0, 1));

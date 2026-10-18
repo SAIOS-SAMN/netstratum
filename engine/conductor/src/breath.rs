@@ -177,14 +177,31 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             let h_s = if sys.state.is_zero() { ratio(1, 1) } else { ratio(1, 1) + mass(&sys.kept) / sys.state.clone() };
             let omega = h_s.clone() / (sys.turning.clone() / h_s.clone() + h_s.clone());
             let rings_at = |at: u64| -> u64 { (own.clone() * ratio(at.saturating_sub(sys.born) as i64, 1)).floor().to_integer().try_into().unwrap_or(0) };
-            let rings = rings_at(bell).saturating_sub(rings_at(bell.saturating_sub(t_u)));
-            let turned = omega * ratio(rings as i64, 1);
-            let rang = (sys.phase[0].clone() + turned.clone()).floor() > sys.phase[0].floor();
-            // Its coherence with the galaxy's bell BEFORE this echo's turn.
-            let c_before = (0..planes).fold(ratio(1, 1), |c, k| c * crate::flows::in_step(&sys.phase[k], &ratio(0, 1)));
-            for k in 0..planes {
-                let f = sys.phase[k].clone() + turned.clone();
-                sys.phase[k] = crate::ring::grain(&(f.clone() - f.floor()));
+            // Its own bell rings on its whole turns (its spin, ω_s): it times
+            // its outbursts and its system, never a phase against its galaxy.
+            let rang = (omega.clone() * ratio(rings_at(bell) as i64, 1)).floor() > (omega.clone() * ratio(rings_at(bell.saturating_sub(t_u)) as i64, 1)).floor();
+            // ITS REFERENCE (operator 2026-10-18: "this is how you get stars
+            // colliding, or random strange star events"): its galaxy's own
+            // phase at its place, born at the star's own phases.
+            if sys.bell.len() < planes {
+                sys.bell = sys.phase.clone();
+            }
+            // Its coherence with its galaxy BEFORE this echo's turn.
+            let c_before = (0..planes).fold(ratio(1, 1), |c, k| c * crate::flows::in_step(&sys.phase[k], &sys.bell[k]));
+            // The galaxy's phase at the star's reach turns as its flows do
+            // there, and the star RIDES it (with xylarium): it orbits with what
+            // it was born of, so its coherence moves only where something
+            // displaces it from its flows.
+            if let Some((p_g, h_g, _)) = &pre {
+                if !scale_pre.is_zero() {
+                    let r = sys.radius.clone() / scale_pre.clone();
+                    let was = sys.bell.clone();
+                    crate::flows::turn(&mut sys.bell, &r, h_g, p_g, &g_rate, &delta_u);
+                    for k in 0..planes {
+                        let f = sys.phase[k].clone() + sys.bell[k].clone() - was[k].clone();
+                        sys.phase[k] = crate::ring::grain(&(f.clone() - f.floor()));
+                    }
+                }
             }
             let kept_before = mass(&sys.kept);
             // THE OUTBURST (operator: made IN the star; with xylarium): on
@@ -245,7 +262,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // where `C_sg` falls below its heart's hold share (what it holds
             // of its system), the DECOHERENCE FRONT: it comes apart whole and
             // everything returns to the galaxy's flows with its state.
-            let c_sg = (0..planes).fold(ratio(1, 1), |c, k| c * crate::flows::in_step(&sys.phase[k], &ratio(0, 1)));
+            let c_sg = (0..planes).fold(ratio(1, 1), |c, k| c * crate::flows::in_step(&sys.phase[k], &sys.bell[k]));
             let sys_total = mass(&sys.total());
             let heart_share = if sys_total.is_zero() { ratio(0, 1) } else { mass(&sys.kept) / sys_total };
             // The front needs the slip HELD across a full bell of the star's
@@ -459,7 +476,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 // throat condition) in `reservoir`: decoherence sheds only
                 // what it holds above it.
                 let ignition = crate::formation::ignition_share(&a_clump).unwrap_or_else(|| ratio(0, 1));
-                let mut sys = Body { path, radius: r_guess, period: ratio(0, 1), kept, satellites: orbs, medium, ell: ratio(0, 1), medium_spin, gas: Vec::new(), born: bell, state: held_at_birth, flows: disc_parcels, reservoir: ignition, turning: spin_own, phase: phases_own, load: world_load };
+                let mut sys = Body { path, radius: r_guess, period: ratio(0, 1), kept, satellites: orbs, medium, ell: ratio(0, 1), medium_spin, gas: Vec::new(), born: bell, state: held_at_birth, flows: disc_parcels, reservoir: ignition, turning: spin_own, bell: phases_own.clone(), phase: phases_own, load: world_load };
                 let internal = subtree_spin(&sys, &unit);
                 let own = taken - internal;
                 sys.ell = crate::ring::grain(&(own.clone() / m_u.clone()));
