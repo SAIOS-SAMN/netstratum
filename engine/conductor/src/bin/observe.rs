@@ -198,6 +198,51 @@ fn main() {
                 );
             }
         }
+        "cascade" => {
+            // THE FOUNDING CASCADE (operators 2026-10-18; a READING only, with
+            // xylarium): the stack, heaviest first, beads by its weight profile
+            // (amount × hold per kind; pinches at maxima, partings at minima)
+            // into stacks. Bounce k releases the top stack at the full push
+            // over what is still stacked, b_k = p·M₀/M_k (regeneration (i)),
+            // each kind carried ℓ = b_k·w̄/w; the beat is the round trip to the
+            // top of what REMAINS, 1 + R_top/H, settling at the throat's own.
+            let all = u.total();
+            let w = |k: &str| k.strip_prefix('Z').and_then(|z| z.parse::<u32>().ok()).map(cfe::almanac::atom::hold).unwrap_or(1);
+            let mut kinds: Vec<(String, Ratio)> = all.iter().filter(|(_, a)| **a > ratio(0, 1)).map(|(k, a)| (k.clone(), a.clone())).collect();
+            kinds.sort_by(|a, b| w(&b.0).cmp(&w(&a.0)).then(a.0.cmp(&b.0)));
+            let total = pulse::mass(&all);
+            let count = all.values().fold(ratio(0, 1), |s, a| s + a.clone());
+            let mean = total.clone() / count;
+            let prof: Vec<Ratio> = kinds.iter().map(|(k, a)| a.clone() * ratio(i64::from(w(k)), 1)).collect();
+            let mut stacks: Vec<Vec<usize>> = vec![vec![0]];
+            for i in 1..kinds.len() {
+                let parting = i + 1 < kinds.len() && prof[i] < prof[i - 1] && prof[i] <= prof[i + 1];
+                stacks.last_mut().expect("a stack").push(i);
+                if parting {
+                    stacks.push(Vec::new());
+                }
+            }
+            stacks.retain(|s| !s.is_empty());
+            let h_u = ratio(2, 1);
+            let p = ratio(1, 2);
+            let mut left = total.clone();
+            println!("CASCADE over {} kinds: {} stacks (heaviest first), H {:.1}", kinds.len(), stacks.len(), f(&h_u));
+            for (k, st) in stacks.iter().enumerate() {
+                let m: Ratio = st.iter().map(|&i| prof[i].clone()).fold(ratio(0, 1), |a, b| a + b);
+                let b = p.clone() * total.clone() / left.clone();
+                let reach = |i: usize| b.clone() * mean.clone() / ratio(i64::from(w(&kinds[i].0)), 1) / h_u.clone();
+                let (r_in, r_out) = (reach(st[0]), reach(*st.last().expect("a kind")));
+                left -= m.clone();
+                // What remains: its top kind's reach at this push.
+                let top = stacks.get(k + 1).and_then(|s| s.first()).map(|&i| reach(i));
+                let beat = top.map(|r| ratio(1, 1) + r / h_u.clone());
+                println!(
+                    "  stack {:>2}: {}..{} ({} kinds), share {:.3e}, push {:.4}, reach {:.4}..{:.4}; next beat {}",
+                    k + 1, kinds[st[0]].0, kinds[*st.last().expect("a kind")].0, st.len(), f(&(m / total.clone())), f(&b), f(&r_in), f(&r_out),
+                    beat.map(|x| format!("{:.4}", f(&x))).unwrap_or_else(|| "— (settled: the throat's own, 1)".into())
+                );
+            }
+        }
         "founding" => {
             // THE WELLSPRING'S CUT (operator 2026-10-18, (12)): the galaxy
             // throat's law over the universe's whole manifest.
