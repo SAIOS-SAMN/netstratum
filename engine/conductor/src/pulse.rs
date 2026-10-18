@@ -474,44 +474,115 @@ pub const T_U: u64 = 60;
 
 /// THE PULSE: the manifest deployed from `seed`. The unit of mass is the
 /// deepest core's hole.
-pub fn deploy(seed: &[u8; 32], manifest: &Manifest) -> Universe {
-    // The intergalactic medium is what no core holds (the cut one tier up,
-    // below); nothing is set aside by a share.
-    let mut medium = Manifest::new();
-    let mut formed = manifest.clone();
-    // THE SPECTRUM (docs/78): the count of modes and each mode's strength
-    // `a_i`, seed draws from the base-60 field (1 to 60). Core i takes
-    // `a_i / Σa` of the formed matter, so sizes fall in no fixed order and
-    // the largest is at most 60 times the smallest. A mode too weak to hold
-    // a hole of a grain forms no core; its share stays unformed.
-    let modes = 1 + (draw(seed, &[], "modes", 0) % 60) as u32;
-    let strengths: Vec<i64> = (1..=modes).map(|i| 1 + (draw(seed, &[u64::from(i)], "strength", 0) % 60) as i64).collect();
-    let sum: i64 = strengths.iter().sum();
-    // THE CUT ONE TIER UP (operator 2026-10-16, with xylarium): the
-    // epicentre's bounce sorts the candidate cores as a galaxy's sorts its
-    // nuclei. In universe units (its state 1, all grains 1, H_u = 2, the push
-    // share p_u = ½) a core of weight `w_i = a_i/Σa` (N candidates, mean
-    // weight 1/N) is carried `ℓ_i = 1/(2N·w_i)` and stands at
-    // `d_i = 1/(4N·w_i)` core rings. HELD as a galaxy iff `d_i ≤ rim_u = 2`
-    // (the rim law), i.e. `a_i ≥ Σa/(8N)`; lighter cores never form and stay
-    // intergalactic. A core reaching inside the throat (`d_i < 1`) is held AT
-    // the throat's first ring, d = 1: the heaviest crowd the first ring.
-    let n = i64::from(modes);
+/// THE FOUNDING CASCADE (operators 2026-10-18, xylarium 11.0 (15), the
+/// equitable formula; "the unlocked face - it's a hemisphere, keep it"). The
+/// stack builds by the capture chain (Z ascending); each capture's share is
+/// the unlocked face at its own event, `s = ½·R/(R + H)` with `R = held` so
+/// far and `H = 1 + held` (a hemisphere, never a static ½). The epicentre's
+/// spin is their sum, `K = Σ s`. BURSTS empty the stack from the top
+/// (heaviest first) on one hemisphere and the EXPANSION fills from the base
+/// (lightest first) on the other, so every kind is pushed by `K + s_z`, the
+/// whole spin plus its own share once, and carried `ℓ_z = (K + s_z)·w̄/w_z`
+/// to `R_z = ℓ_z/H` (w̄ the amount-weighted mean weight). A kind whose spread
+/// stays within the throat, `R_z(1 + s_final) ≤ 1`, is HELD by the
+/// Wellspring; the rest stand in expanding shells at their own reaches, by
+/// weight ("distributed by weight orthogonally - think of a sphere
+/// expanding"). Returns (the Wellspring's held kinds, the GALAXIES: each a
+/// bead of the shells, (its pinch's reach in throat radii, its kinds)).
+/// No draws: the galaxies are the shells' own beads.
+pub fn cascade(manifest: &Manifest) -> (Manifest, Vec<(Ratio, Manifest)>) {
+    let g = |x: &Ratio| crate::ring::grain(x);
+    let w = |k: &str| ratio(i64::from(k.strip_prefix('Z').and_then(|z| z.parse::<u32>().ok()).map(cfe::almanac::atom::hold).unwrap_or(1)), 1);
+    let total = mass(manifest);
+    let count = manifest.values().fold(ratio(0, 1), |s, a| s + a.clone());
+    if total.is_zero() || count.is_zero() {
+        return (Manifest::new(), Vec::new());
+    }
+    let mean = g(&(total.clone() / count));
+    let mut kinds: Vec<(String, Ratio)> = manifest.iter().filter(|(_, a)| **a > ratio(0, 1)).map(|(k, a)| (k.clone(), a.clone())).collect();
+    kinds.sort_by_key(|(k, _)| k.strip_prefix('Z').and_then(|z| z.parse::<u32>().ok()).unwrap_or(0));
+    let face = |held: &Ratio| g(&(ratio(1, 2) * held.clone() / (held.clone() + ratio(1, 1) + held.clone())));
+    let mut held = ratio(0, 1);
+    let mut share = Vec::with_capacity(kinds.len());
+    for (k, a) in &kinds {
+        share.push(face(&held));
+        held = g(&(held + a.clone() * w(k) / total.clone()));
+    }
+    let spin = share.iter().fold(ratio(0, 1), |a, b| a + b.clone());
+    let h = ratio(1, 1) + held.clone();
+    let s_final = face(&held);
+    let mut wellspring = Manifest::new();
+    let mut out: Vec<(String, Ratio, Ratio)> = Vec::new();
+    for ((k, a), s) in kinds.into_iter().zip(share) {
+        let reach = g(&((spin.clone() + s) * mean.clone() / w(&k) / h.clone()));
+        if reach.clone() * (ratio(1, 1) + s_final.clone()) <= ratio(1, 1) {
+            wellspring.insert(k, a);
+        } else {
+            out.push((k, a, reach));
+        }
+    }
+    // THE SHELLS BEAD INTO GALAXIES: kinds whose spreads `R(1 ± s_final)`
+    // overlap link (transitively); along each, the superposed hold pinches at
+    // its maxima and parts at its minima; each bead is a galaxy at its pinch.
+    out.sort_by(|a, b| a.2.cmp(&b.2).then(a.0.cmp(&b.0)));
+    let lo = |r: &Ratio| r.clone() * (ratio(1, 1) - s_final.clone());
+    let hi = |r: &Ratio| r.clone() * (ratio(1, 1) + s_final.clone());
+    let mut runs: Vec<Vec<usize>> = Vec::new();
+    let mut edge = ratio(0, 1);
+    for (i, (_, _, r)) in out.iter().enumerate() {
+        if runs.is_empty() || lo(r) > edge {
+            runs.push(Vec::new());
+        }
+        edge = edge.max(hi(r));
+        runs.last_mut().expect("pushed").push(i);
+    }
+    let density: Vec<Ratio> = out.iter().map(|(k, a, _)| a.clone() * w(k) / total.clone() / (ratio(2, 1) * s_final.clone()).max(Ratio::new(1.into(), num_bigint::BigInt::from(60).pow(6)))).collect();
+    let mut galaxies = Vec::new();
+    for run in runs {
+        let local: Vec<Ratio> = run.iter().map(|&i| run.iter().filter(|&&j| lo(&out[j].2) <= out[i].2 && out[i].2 <= hi(&out[j].2)).fold(ratio(0, 1), |s, &j| s + density[j].clone())).collect();
+        let mut cuts = Vec::new();
+        for i in 1..run.len().saturating_sub(1) {
+            if local[i] < local[i - 1] && local[i] <= local[i + 1] {
+                cuts.push(if local[i - 1] >= local[i + 1] { i + 1 } else { i });
+            }
+        }
+        let mut from = 0;
+        let mut bead = |a: usize, b: usize| {
+            let peak = (a..b).max_by(|x, y| local[*x].cmp(&local[*y]).then(y.cmp(x))).expect("a kind");
+            let m: Manifest = run[a..b].iter().map(|&i| (out[i].0.clone(), out[i].1.clone())).collect();
+            galaxies.push((out[run[peak]].2.clone(), m));
+        };
+        for at in cuts {
+            if at > from && at < run.len() {
+                bead(from, at);
+                from = at;
+            }
+        }
+        bead(from, run.len());
+    }
+    (wellspring, galaxies)
+}
+
+pub fn deploy(_seed: &[u8; 32], manifest: &Manifest) -> Universe {
+    // THE FOUNDING CASCADE (above): the Wellspring holds what stays within its
+    // throat; its held kinds are the universe's medium about it (the central
+    // galaxy's cut is read from them once the ocean is motes: owed); every
+    // galaxy is a bead of the expanding shells, at its pinch's reach. No
+    // draws. A bead too slight to hold a hole of a nucleus stays medium.
+    let (wellspring, beads) = cascade(manifest);
+    let mut medium = wellspring;
+    let whole = mass(manifest);
     let mut shares: Vec<(u32, Manifest, Ratio)> = Vec::new();
-    for (i, a) in (1..=modes).zip(&strengths) {
-        let m = take(&formed, &ratio(*a, sum));
-        if *a * 8 * n < sum || take(&m, &tier(2).centre).is_empty() {
+    for (i, (d, m)) in beads.into_iter().enumerate() {
+        if take(&m, &tier(2).centre).is_empty() {
+            for (k, a) in m {
+                *medium.entry(k).or_insert_with(|| ratio(0, 1)) += a;
+            }
             continue;
         }
-        let d = ratio(sum, 4 * n * *a).max(ratio(1, 1));
-        shares.push((i, m, d));
+        shares.push((i as u32 + 1, m, d));
     }
-    for (_, m, _) in &shares {
-        less(&mut formed, m);
-    }
-    for (k, a) in formed {
-        *medium.entry(k).or_insert_with(|| ratio(0, 1)) += a;
-    }
+    let weight_of = |m: &Manifest| if whole.is_zero() { ratio(0, 1) } else { mass(m) / whole.clone() };
     // THE BIG BANG POPULATES THE UNIVERSE (docs/78): each core keeps its disc,
     // and its galaxy's first generation of star systems and their planets is
     // laid down by the tidal law; what forms no system is the galaxy's medium,
@@ -542,7 +613,7 @@ pub fn deploy(seed: &[u8; 32], manifest: &Manifest) -> Universe {
             orbits[j] = (d.clone() * bells.clone(), crate::ring::period(&d, &inside) * bells.clone(), crate::ring::spin(&d, &inside));
         }
         for &j in &ring {
-            inside += ratio(2 * strengths[(shares[j].0 - 1) as usize], sum);
+            inside += ratio(2, 1) * weight_of(&shares[j].1);
         }
         k += ring.len();
     }

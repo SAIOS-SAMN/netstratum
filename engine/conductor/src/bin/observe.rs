@@ -198,6 +198,13 @@ fn main() {
                 );
             }
         }
+        "manifest" => {
+            // The universe's whole manifest, one kind a line: Z, amount, hold.
+            for (k, a) in u.total() {
+                let z = k.strip_prefix('Z').and_then(|z| z.parse::<u32>().ok()).unwrap_or(0);
+                println!("{z} {:e} {}", f(&a), cfe::almanac::atom::hold(z));
+            }
+        }
         "cascade" => {
             // THE FOUNDING CASCADE (operators 2026-10-18; a READING only, with
             // xylarium): the stack, heaviest first, beads by its weight profile
