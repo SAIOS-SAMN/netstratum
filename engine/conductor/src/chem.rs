@@ -16,44 +16,80 @@
 //!   (the atom tier's `2Z + (Z − u)`, summed over the parts with the bonds
 //!   paired).
 
-/// A kind's parts: the centre's Z and the hydrogens bonded to it.
-pub fn parts(key: &str) -> Option<(u32, u32)> {
-    let rest = key.strip_prefix('Z')?;
-    match rest.split_once('·') {
-        None => Some((rest.parse().ok()?, 0)),
-        Some((z, h)) => {
-            let k = h.strip_suffix("Z001")?.parse().ok()?;
-            Some((z.parse().ok()?, k))
-        }
+/// A kind's PARTS: each `(count, Z)`, Z descending. `Zddd` is one atom;
+/// `[n]Zddd·[m]Zeee…` a cluster (counts before each part, 1 unwritten).
+pub fn components(key: &str) -> Option<Vec<(u32, u32)>> {
+    let mut out = Vec::new();
+    for part in key.split('·') {
+        let (n, z) = match part.split_once('Z') {
+            Some(("", z)) => (1, z),
+            Some((n, z)) => (n.parse().ok()?, z),
+            None => return None,
+        };
+        out.push((n, z.parse().ok()?));
     }
+    (!out.is_empty()).then_some(out)
+}
+
+/// The centre's Z and the hydrogens on it, for a plain atom or a hydride
+/// (other clusters: None).
+pub fn parts(key: &str) -> Option<(u32, u32)> {
+    match components(key)?.as_slice() {
+        [(1, z)] => Some((*z, 0)),
+        [(1, z), (k, 1)] if *z != 1 => Some((*z, *k)),
+        _ => None,
+    }
+}
+
+/// The key of a cluster of parts (counts merged, Z descending).
+pub fn cluster(parts: &[(u32, u32)]) -> String {
+    let mut by: std::collections::BTreeMap<u32, u32> = std::collections::BTreeMap::new();
+    for (n, z) in parts {
+        *by.entry(*z).or_insert(0) += n;
+    }
+    by.into_iter().rev().map(|(z, n)| if n == 1 { format!("Z{z:03}") } else { format!("{n}Z{z:03}") }).collect::<Vec<_>>().join("·")
 }
 
 /// The key of the hydride of centre `z` with `k` hydrogens (`k = 0`: the atom).
 pub fn hydride(z: u32, k: u32) -> String {
-    if k == 0 { format!("Z{z:03}") } else { format!("Z{z:03}·{k}Z001") }
+    if k == 0 { format!("Z{z:03}") } else { cluster(&[(1, z), (k, 1)]) }
 }
 
 /// A plain atom's Z (None for a molecule): what may burn, ionize or be cut
 /// by its windings.
 pub fn atom_z(key: &str) -> Option<u32> {
-    parts(key).filter(|(_, k)| *k == 0).map(|(z, _)| z)
+    match components(key)?.as_slice() {
+        [(1, z)] => Some(*z),
+        _ => None,
+    }
 }
 
-/// Its charge, `Z + k`: the protons of all its parts.
+/// Its charge, `Σ n·Z`: the protons of all its parts.
 pub fn charge(key: &str) -> u32 {
-    parts(key).map(|(z, k)| z + k).unwrap_or(0)
+    components(key).map(|ps| ps.iter().map(|(n, z)| n * z).sum()).unwrap_or(0)
 }
 
-/// Its open frames, `u(Z) − k`.
+fn atom_open(z: u32) -> u32 {
+    cfe::almanac::atom::atom(z).map(|a| a.unpaired).unwrap_or(0)
+}
+
+/// Its open frames: an atom's own; a cluster's `Σ n·u − 2·bonds`, where the
+/// hydride of k pairs k (`u(Z) − k`) and a two-part cluster closes in its
+/// smallest whole (every frame paired, 0).
 pub fn unpaired(key: &str) -> u32 {
-    parts(key).map(|(z, k)| cfe::almanac::atom::atom(z).map(|a| a.unpaired).unwrap_or(0).saturating_sub(k)).unwrap_or(0)
+    match components(key).as_deref() {
+        Some([(1, z)]) => atom_open(*z),
+        Some([(1, z), (k, 1)]) if *z != 1 => atom_open(*z).saturating_sub(*k),
+        Some(_) => 0,
+        None => 0,
+    }
 }
 
-/// Its hold, `3(Z + k) − (u(Z) − k)`: the holding of its closed pairs.
+/// Its hold, `3·charge − open`: the holding of its closed pairs.
 pub fn hold(key: &str) -> u32 {
-    match parts(key) {
-        Some((z, 0)) => cfe::almanac::atom::hold(z),
-        Some((z, k)) => 3 * (z + k) - unpaired(key),
+    match atom_z(key) {
+        Some(z) => cfe::almanac::atom::hold(z),
+        None if components(key).is_some() => 3 * charge(key) - unpaired(key),
         None => 1,
     }
 }
@@ -61,6 +97,26 @@ pub fn hold(key: &str) -> u32 {
 /// Whether it is closed (every open frame paired): inert.
 pub fn closed(key: &str) -> bool {
     unpaired(key) == 0
+}
+
+/// A kind's BOND GRIP, the tightness of its loosest winding in hydrogen's
+/// own unit (an atom's outer winding; a cluster's loosest part's).
+pub fn tightness(key: &str) -> cfe::ratio::Ratio {
+    let t = |z: u32| cfe::almanac::atom::atom(z).map(|a| a.tightness).unwrap_or_else(|| cfe::ratio::ratio(0, 1));
+    components(key).and_then(|ps| ps.iter().map(|(_, z)| t(*z)).min()).unwrap_or_else(|| cfe::ratio::ratio(0, 1))
+}
+
+/// THE SMALLEST WHOLE CLUSTER two kinds close in (with xylarium, 969536c):
+/// atoms with `u_A`, `u_B` open frames pair as `(u_B/g)·A + (u_A/g)·B`,
+/// `g = gcd(u_A, u_B)`, every frame paired. None where either has none.
+pub fn closing(a: u32, ua: u32, b: u32, ub: u32) -> Option<(u32, u32, String)> {
+    if ua == 0 || ub == 0 {
+        return None;
+    }
+    fn gcd(x: u32, y: u32) -> u32 { if y == 0 { x } else { gcd(y, x % y) } }
+    let g = gcd(ua, ub);
+    let (na, nb) = (ub / g, ua / g);
+    Some((na, nb, cluster(&[(na, a), (nb, b)])))
 }
 
 #[cfg(test)]
@@ -79,5 +135,10 @@ mod tests {
         // The 3Z ledger holds across the bond: hold + open = 3(Z + k).
         assert_eq!(hold("Z008·4Z001") + unpaired("Z008·4Z001"), 3 * 12);
         assert_eq!(hold("Z008") + 4 * hold("Z001") + unpaired("Z008") + 4 * unpaired("Z001"), 3 * 12);
+        // The smallest whole cluster: O (4) with H (1) is O·4H; a 2:3 pair.
+        assert_eq!(closing(8, 4, 1, 1).map(|c| c.2), Some("Z008·4Z001".into()));
+        assert_eq!(closing(26, 6, 8, 4).map(|c| (c.0, c.1)), Some((2, 3)));
+        assert_eq!(charge("2Z026·3Z008"), 2 * 26 + 3 * 8);
+        assert!(closed("2Z026·3Z008"));
     }
 }

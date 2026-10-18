@@ -394,10 +394,11 @@ pub fn open_mass(m: &Manifest, heat: &Ratio) -> Ratio {
 pub fn dissociate(m: &Manifest) -> Manifest {
     let mut out = Manifest::new();
     for (k, a) in m {
-        match crate::chem::parts(k) {
-            Some((z, h)) if h > 0 => {
-                *out.entry(crate::chem::hydride(z, 0)).or_insert_with(|| ratio(0, 1)) += a.clone();
-                *out.entry(crate::chem::hydride(1, 0)).or_insert_with(|| ratio(0, 1)) += a.clone() * ratio(i64::from(h), 1);
+        match crate::chem::components(k) {
+            Some(ps) if ps.len() > 1 => {
+                for (n, z) in ps {
+                    *out.entry(crate::chem::hydride(z, 0)).or_insert_with(|| ratio(0, 1)) += a.clone() * ratio(i64::from(n), 1);
+                }
             }
             _ => *out.entry(k.clone()).or_insert_with(|| ratio(0, 1)) += a.clone(),
         }
@@ -742,6 +743,7 @@ fn exchange(ell: &[Ratio], dl: &mut [Ratio], i: usize, j: usize, mi: &Ratio, mj:
 /// once, no order) become one body, spins added exactly, the unkept motion
 /// heat; otherwise they BOUNCE, both heated. Returns (sticks, bounces).
 pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, rang: bool) -> (usize, usize, Manifest) {
+
     let total = mass(&sys.total());
     if total.is_zero() || (sys.flows.is_empty() && sys.satellites.is_empty()) {
         return (0, 0, Manifest::new());
@@ -751,6 +753,19 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
         return (0, 0, Manifest::new());
     }
     // The star's kick on its system: one force, each kind by its inertia.
+    // DISSOCIATION AT THE PLACE'S OWN HEAT (with xylarium): a cluster mote
+    // whose heat reaches its looser winding (τ_min) parts back to its atoms.
+    let mut parted: Vec<crate::flows::Mote> = Vec::new();
+    for x in sys.flows.iter_mut() {
+        if crate::chem::atom_z(&x.key).is_none() && !x.agitation.is_zero() && x.agitation >= crate::chem::tightness(&x.key) {
+            for (k, a) in dissociate(&[(x.key.clone(), x.amount.clone())].into()) {
+                parted.push(crate::flows::Mote { key: k, amount: a, ..x.clone() });
+            }
+            x.amount = ratio(0, 1);
+        }
+    }
+    sys.flows.retain(|x| x.amount > ratio(0, 1));
+    sys.flows.extend(parted);
     // The star's kick on its system, on the star's own bell only (its
     // clock), never at every arrival. THE RELEASE IN FORCE (with xylarium:
     // over 200 echoes on their 45-star founding it held a ten-planet system
@@ -829,7 +844,7 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
     let rate = |l: &Ratio| ratio(2, 1) * delta(l);
     // The hydride bonds formed at this echo's meetings: (centre, hydrogen,
     // their keys, the centre's open frames, the hydrides formed).
-    let mut bonds: Vec<(usize, usize, String, String, u32, Ratio)> = Vec::new();
+    let mut bonds: Vec<(usize, usize, String, String, u32, u32, String, Ratio)> = Vec::new();
     let (advance, dl) = {
         let items = &items;
         let parent = &mut parent;
@@ -853,27 +868,44 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
             // independent of mass, `2·min(oᵢ, oⱼ)/(oᵢ + oⱼ)` times the
             // contact. Dust sticks by chemistry, large bodies by gravity's
             // share: the bind is the greater.
-            let (oi, oj) = (crate::pulse::magnetism(&items[i].0), crate::pulse::magnetism(&items[j].0));
-            let chem_grip = if (oi.clone() + oj.clone()).is_zero() { ratio(0, 1) } else { ratio(2, 1) * oi.clone().min(oj.clone()) / (oi.clone() + oj.clone()) * near.clone() };
-            let bind = (s * m_ij.clone() / (m_ij.clone() + ratio(1, 1) - near.clone())).max(chem_grip);
+            // ONE GRIP (with xylarium, 969536c): the pairable-frame share at
+            // the place's own heat times the bond's shared share (its two
+            // windings' tightness, the lesser over the greater).
+            let place_heat = items[i].3.clone().max(items[j].3.clone());
+            let open_hot = |m: &Manifest| m.iter().fold(ratio(0, 1), |s, (k, a)| s + a.clone() * ratio(i64::from(crate::chem::atom_z(k).map(|z| cfe::almanac::atom::open_at(z, &place_heat)).unwrap_or_else(|| crate::chem::unpaired(k))), 1));
+            let tight = |m: &Manifest| m.keys().map(|k| crate::chem::tightness(k)).max().unwrap_or_else(|| ratio(0, 1));
+            let (oi, oj) = (open_hot(&items[i].0), open_hot(&items[j].0));
+            let (ti, tj) = (tight(&items[i].0), tight(&items[j].0));
+            let shared = if ti.is_zero() || tj.is_zero() { ratio(0, 1) } else if ti < tj { ti.clone() / tj.clone() } else { tj.clone() / ti.clone() };
+            // The grip is the pairable share times the bond's shared share
+            // (with xylarium, 969536c); the bind is the encounter law as
+            // written, grip × D, D the pair's hold across what parts them
+            // (in full contact D is 1 whatever their mass, so dust sticks).
+            let pairable = if (oi.clone() + oj.clone()).is_zero() { ratio(0, 1) } else { ratio(2, 1) * oi.clone().min(oj.clone()) / (oi.clone() + oj.clone()) };
+            let grip_share = (pairable * shared).max(s.clone());
+            let _ = &s;
+            let bind = grip_share * m_ij.clone() / (m_ij.clone() + ratio(1, 1) - near.clone());
             let (di, dj) = (delta(&ell[i]), delta(&ell[j]));
             let t = if di > dj { di.clone() - dj.clone() } else { dj.clone() - di.clone() } / (di + dj);
-            // THE HYDRIDE BOND (the chemistry layer): where a centre atom with
-            // open frames meets hydrogen in this cool medium, the contact's
-            // share of what can pair closes into the hydride, `k = u(Z)`.
+            // THE BOND (the chemistry layer, with xylarium 969536c): any two
+            // atoms meeting, each with frames still open at the place's own
+            // heat, close in their SMALLEST WHOLE CLUSTER; of the contact,
+            // the bond holds the share `min(1, τ_min/heat)` (τ_min the looser
+            // winding, the bond's grip), and the rest parts whole.
             if i < n_motes && j < n_motes {
                 let key = |x: usize| items[x].0.keys().next().cloned();
-                for (cx, hx) in [(i, j), (j, i)] {
-                    let (Some(kc), Some(kh)) = (key(cx), key(hx)) else { continue };
-                    let (Some(zc), Some(1)) = (crate::chem::atom_z(&kc), crate::chem::atom_z(&kh)) else { continue };
-                    let u = crate::chem::unpaired(&kc);
-                    if zc <= 1 || u == 0 {
-                        continue;
-                    }
-                    let (nc, nh) = (items[cx].0[&kc].clone(), items[hx].0[&kh].clone());
-                    let formed = crate::pulse::nucleus(&(near.clone() * nc.min(nh / ratio(i64::from(u), 1))));
-                    if formed > ratio(0, 1) {
-                        bonds.push((cx, hx, kc.clone(), kh.clone(), u, formed));
+                if let (Some(ka), Some(kb)) = (key(i), key(j)) {
+                    if let (Some(za), Some(zb)) = (crate::chem::atom_z(&ka), crate::chem::atom_z(&kb)) {
+                        let (ua, ub) = (cfe::almanac::atom::open_at(za, &place_heat), cfe::almanac::atom::open_at(zb, &place_heat));
+                        if let Some((na, nb, ck)) = crate::chem::closing(za, ua, zb, ub) {
+                            let t_min = crate::chem::tightness(&ka).min(crate::chem::tightness(&kb));
+                            let held = if place_heat.is_zero() { ratio(1, 1) } else { (t_min / place_heat.clone()).min(ratio(1, 1)) };
+                            let (have_a, have_b) = (items[i].0[&ka].clone(), items[j].0[&kb].clone());
+                            let formed = crate::pulse::nucleus(&(near.clone() * held * (have_a / ratio(i64::from(na), 1)).min(have_b / ratio(i64::from(nb), 1))));
+                            if formed > ratio(0, 1) && za != zb {
+                                bonds.push((i, j, ka.clone(), kb.clone(), na, nb, ck, formed));
+                            }
+                        }
                     }
                 }
             }
@@ -910,18 +942,18 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
     // The bonds made: each takes its share from the two motes (never more than
     // they hold) and the hydride stands as a new mote at the centre's place.
     let mut bonded: Vec<crate::flows::Mote> = Vec::new();
-    for (cx, hx, kc, kh, u, formed) in bonds {
-        let have_c = items[cx].0.get(&kc).cloned().unwrap_or_else(|| ratio(0, 1));
-        let have_h = items[hx].0.get(&kh).cloned().unwrap_or_else(|| ratio(0, 1));
-        let formed = formed.min(have_c).min(have_h / ratio(i64::from(u), 1));
-        let formed = crate::pulse::nucleus(&formed);
+    for (ia, ib, ka, kb, na, nb, ck, formed) in bonds {
+        let have_a = items[ia].0.get(&ka).cloned().unwrap_or_else(|| ratio(0, 1));
+        let have_b = items[ib].0.get(&kb).cloned().unwrap_or_else(|| ratio(0, 1));
+        let formed = crate::pulse::nucleus(&formed.min(have_a / ratio(i64::from(na), 1)).min(have_b / ratio(i64::from(nb), 1)));
         if formed <= ratio(0, 1) {
             continue;
         }
-        *items[cx].0.get_mut(&kc).expect("held") -= formed.clone();
-        *items[hx].0.get_mut(&kh).expect("held") -= formed.clone() * ratio(i64::from(u), 1);
-        let zc = crate::chem::atom_z(&kc).unwrap_or(0);
-        bonded.push(crate::flows::Mote { key: crate::chem::hydride(zc, u), amount: formed, ell_o: items[cx].1.clone(), ell_c: ratio(0, 1), phase: items[cx].2.clone(), agitation: items[cx].3.clone(), born: bell, vacuum: false });
+        *items[ia].0.get_mut(&ka).expect("held") -= formed.clone() * ratio(i64::from(na), 1);
+        *items[ib].0.get_mut(&kb).expect("held") -= formed.clone() * ratio(i64::from(nb), 1);
+        // The cluster stands where its heavier part stood.
+        let at = if crate::chem::charge(&ka) >= crate::chem::charge(&kb) { ia } else { ib };
+        bonded.push(crate::flows::Mote { key: ck, amount: formed, ell_o: items[at].1.clone(), ell_c: ratio(0, 1), phase: items[at].2.clone(), agitation: items[at].3.clone(), born: bell, vacuum: false });
     }
     for it in items.iter_mut() {
         it.0.retain(|_, a| *a > ratio(0, 1));
@@ -1044,13 +1076,14 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
             }
         }
     }
+    // The bonds' clusters join the medium's motes before it is read.
+    motes.extend(bonded);
     // The medium is what the motes hold.
     let mut medium = Manifest::new();
     for x in &motes {
         *medium.entry(x.key.clone()).or_insert_with(|| ratio(0, 1)) += x.amount.clone();
     }
     sys.medium = medium;
-    motes.extend(bonded);
     sys.flows = motes;
     sys.satellites = worlds;
     (sticks, bounces, escaped)
