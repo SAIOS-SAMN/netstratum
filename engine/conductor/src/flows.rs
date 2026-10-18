@@ -539,13 +539,26 @@ pub fn chains(motes: &[Mote], h: &Ratio, p: &Ratio, total: &Ratio) -> Vec<Chain>
             // the filament is one bead.
             let mut along = whole.members.clone();
             along.sort_by(|a, b| reach(&motes[*a]).cmp(&reach(&motes[*b])).then(a.cmp(b)));
-            let local: Vec<Ratio> = along
+            // The hold AT each member's place: every mote of the filament
+            // stands spread over its own dispersal band, so the hold there is
+            // the sum of every member whose band covers that reach, each by
+            // its holding over its band's share (never one mote's own: kinds
+            // stand at their own reaches by weight, and reading each alone
+            // would part the filament kind from kind).
+            let density: Vec<Ratio> = along
                 .iter()
                 .map(|&j| {
                     let (d0, d1) = (delta(&lo(&motes[j])), delta(&hi(&motes[j])));
                     let band = (d0.clone() - d1.clone()) / (d0 + d1);
                     let m = motes[j].amount.clone() * weight(&motes[j].key) / total.clone();
                     if band.is_zero() { m } else { m / band }
+                })
+                .collect();
+            let local: Vec<Ratio> = along
+                .iter()
+                .map(|&i| {
+                    let at = reach(&motes[i]);
+                    along.iter().zip(&density).filter(|(&j, _)| lo(&motes[j]) <= at && at <= hi(&motes[j])).fold(ratio(0, 1), |s, (_, d)| s + d.clone())
                 })
                 .collect();
             // Partings at the interior minima; the minimum member joins the
