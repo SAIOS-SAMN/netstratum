@@ -383,34 +383,46 @@ pub fn burn(star: &Manifest, share: &Ratio, z: u32, coherence: &Ratio) -> Option
 /// stands within the throat, `ℓ_z/H ≤ H`; past it, it is released. One
 /// crossing on the cumulative hold (the runaway inside it: every kind held
 /// raises H for the next). Returns (held, released, the held share).
+/// A mix's open frames after IONIZATION BY HEAT (`atom::open_at`): what the
+/// heat leaves unpaired, by amount. Heat 0 is the whole atoms (magnetism).
+pub fn open_mass(m: &Manifest, heat: &Ratio) -> Ratio {
+    m.iter().fold(ratio(0, 1), |s, (k, a)| s + a.clone() * ratio(i64::from(z_of(k).map(|z| cfe::almanac::atom::open_at(z, heat)).unwrap_or(0)), 1))
+}
+
+/// A star's agitation read back from its ignition share `x = (1 − 2a)/(1 + 2a)`.
+pub fn agitation_of(ignition: &Ratio) -> Ratio {
+    let x = ignition.clone().max(ratio(0, 1)).min(ratio(1, 1));
+    (ratio(1, 1) - x.clone()) / (ratio(2, 1) * (ratio(1, 1) + x))
+}
+
 /// Each kind's CARRIED SPIN in a heart's clump (own units), the push on its
 /// open frames plus the place's turning: `ℓ_z = p·(e_z/ē)·(w̄/w_z) + turning`.
-pub fn carried(clump: &Manifest, turning: &Ratio) -> Vec<(String, Ratio)> {
+pub fn carried(clump: &Manifest, turning: &Ratio, heat: &Ratio) -> Vec<(String, Ratio)> {
     let total = mass(clump);
     let count = clump.values().fold(ratio(0, 1), |s, a| s + a.clone());
     if total.is_zero() || count.is_zero() {
         return Vec::new();
     }
-    let open_mean = crate::pulse::magnetism(clump) / total.clone();
+    let open_mean = open_mass(clump, heat) / total.clone();
     let mean_weight = total / count;
     clump
         .keys()
         .map(|k| {
             let w = ratio(i64::from(z_of(k).map(hold).unwrap_or(1)), 1);
-            let open = ratio(i64::from(z_of(k).and_then(atom).map(|x| x.unpaired).unwrap_or(0)), 1) / w.clone();
+            let open = ratio(i64::from(z_of(k).map(|z| cfe::almanac::atom::open_at(z, heat)).unwrap_or(0)), 1) / w.clone();
             let ell = if open_mean.is_zero() { ratio(0, 1) } else { ratio(1, 2) * open / open_mean.clone() * mean_weight.clone() / w } + turning.clone();
             (k.clone(), ell)
         })
         .collect()
 }
 
-pub fn heart_cut(clump: &Manifest, turning: &Ratio) -> Option<(Manifest, Manifest, Ratio)> {
+pub fn heart_cut(clump: &Manifest, turning: &Ratio, heat: &Ratio) -> Option<(Manifest, Manifest, Ratio)> {
     let total = mass(clump);
     let count = clump.values().fold(ratio(0, 1), |s, a| s + a.clone());
     if total.is_zero() || count.is_zero() {
         return None;
     }
-    let open_mean = crate::pulse::magnetism(clump) / total.clone();
+    let open_mean = open_mass(clump, heat) / total.clone();
     // REGENERATION (operator ruling (i), with xylarium): the heart pushes
     // at full amplitude in its own units, its pair's ½; a tide enters as
     // AGITATION, never as a weaker push, or it would be counted twice.
@@ -420,7 +432,7 @@ pub fn heart_cut(clump: &Manifest, turning: &Ratio) -> Option<(Manifest, Manifes
         .iter()
         .map(|(k, a)| {
             let w = ratio(i64::from(z_of(k).map(hold).unwrap_or(1)), 1);
-            let open = ratio(i64::from(z_of(k).and_then(atom).map(|x| x.unpaired).unwrap_or(0)), 1) / w.clone();
+            let open = ratio(i64::from(z_of(k).map(|z| cfe::almanac::atom::open_at(z, heat)).unwrap_or(0)), 1) / w.clone();
             // CARRIED SPINS ADD (with xylarium): the place's turning (in
             // the plane orthogonal to the orbit, the rotoreflection) turns
             // every kind alike, no weight ratio.
@@ -475,7 +487,15 @@ pub fn system(clump: &Manifest, agitation: &Ratio, circulation: &Ratio, path: &[
     // crossing on the cumulative hold. A clump with no open frames (ē = 0)
     // is all star, no disc: a reading.
     let total = mass(clump);
-    let (star, mut disc, held) = heart_cut(clump, circulation)?;
+    // The new heart is hot: its heat strips the loosest windings (hydrogen
+    // first), so it keeps its fuel.
+    // THE NEWBORN HEART IS HOT (operator 2026-10-18, "proceed with your
+    // recommendation"): its turning in whole turns of its bell, at most one;
+    // a heart that rings strips what is held as loosely as hydrogen's lone
+    // electron, so it keeps its hydrogen to burn.
+    let ionizing = ratio(1, 1);
+    let _ = agitation;
+    let (star, mut disc, held) = heart_cut(clump, circulation, &ionizing)?;
     // The star's hold, gathered (no throat): `H_s = held`, a share of the
     // clump; the disc is the rest, `1 − H_s`, over the annulus from the
     // star's hold to the system's rim (its grains' holding, 1), so its line
@@ -506,7 +526,7 @@ pub fn system(clump: &Manifest, agitation: &Ratio, circulation: &Ratio, path: &[
     let worlds: Vec<crate::pulse::Body> = Vec::new();
     let inside = star_hold.clone();
     let load = ratio(0, 1);
-    let spins = carried(clump, circulation);
+    let spins = carried(clump, circulation, &ionizing);
     let _ = (&h_s, &rim, &disc_agitation, &x);
     let belts_spin = mass(&disc) / unit.clone() * crate::ring::spin(&scale, &inside);
     // The heart's released kinds leave as a spray over directions.
@@ -894,7 +914,8 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
         let (kept, released) = if ignites {
             (kept, Manifest::new())
         } else {
-            match heart_cut(&kept, &heat_g) {
+            // A planetary core is cool: its atoms are whole (heat 0).
+            match heart_cut(&kept, &heat_g, &ratio(0, 1)) {
                 Some((k, r, _)) => (k, r),
                 None => (Manifest::new(), kept),
             }

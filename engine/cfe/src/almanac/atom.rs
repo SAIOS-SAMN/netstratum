@@ -72,8 +72,22 @@ pub fn atom(z: u32) -> Option<Atom> {
     if z == 0 {
         return None;
     }
-    static MEMO: std::sync::OnceLock<std::sync::Mutex<std::collections::BTreeMap<u32, Atom>>> = std::sync::OnceLock::new();
-    let memo = MEMO.get_or_init(|| std::sync::Mutex::new(std::collections::BTreeMap::new()));
+    windings(z).map(|(a, _)| a)
+}
+
+/// A WINDING of a built atom: its tightness (the charge it encloses at its
+/// closest approach over its period, in hydrogen's own unit: hydrogen's lone
+/// electron reads 1), its electrons, and its orientations.
+pub type Winding = (Ratio, u64, u64);
+
+/// The atom of `z` with its windings (memoised per Z).
+pub fn windings(z: u32) -> Option<(Atom, Vec<Winding>)> {
+    if z == 0 {
+        return None;
+    }
+    type Memo = std::collections::BTreeMap<u32, (Atom, Vec<Winding>)>;
+    static MEMO: std::sync::OnceLock<std::sync::Mutex<Memo>> = std::sync::OnceLock::new();
+    let memo = MEMO.get_or_init(|| std::sync::Mutex::new(Memo::new()));
     if let Some(a) = memo.lock().ok().and_then(|m| m.get(&z).cloned()) {
         return Some(a);
     }
@@ -82,6 +96,23 @@ pub fn atom(z: u32) -> Option<Atom> {
         m.insert(z, a.clone());
     }
     Some(a)
+}
+
+/// IONIZATION BY HEAT (operators 2026-10-18: the missing layer, "let there
+/// be light"; with xylarium): in a hot place (a star's heart) every winding
+/// held less tightly than the heat, both in hydrogen's own unit, is
+/// STRIPPED (at or below), its electrons gone. Returns the open (unpaired)
+/// count of what remains. Hydrogen (tightness 1) is stripped at heat 1;
+/// heavy kinds keep their deep windings. Heat 0: the whole atom.
+pub fn open_at(z: u32, heat: &Ratio) -> u32 {
+    let Some((a, ws)) = windings(z) else { return 0 };
+    if *heat <= ratio(0, 1) {
+        return a.unpaired;
+    }
+    // Stripped AT OR BELOW the heat (operator, 2026-10-18): a heart that
+    // rings strips what is held as loosely as hydrogen's lone electron.
+    let left: u64 = ws.iter().filter(|(t, _, _)| *t > *heat).map(|(_, v, o)| if *v <= *o { *v } else { 2 * o - v }).sum();
+    u32::try_from(left).unwrap_or(u32::MAX)
 }
 
 /// THE FILL (operators 2026-10-18, with xylarium; the ring-density radius
@@ -96,7 +127,7 @@ pub fn atom(z: u32) -> Option<Atom> {
 /// between shells are READ, never stated (Earth's n + l refused). On an
 /// exact tie the inner shell, then the lower shape, goes first (the
 /// carrier's choice).
-fn build(z: u32) -> Atom {
+fn build(z: u32) -> (Atom, Vec<Winding>) {
     let mut occ: std::collections::BTreeMap<(u32, u32), u64> = std::collections::BTreeMap::new();
     for _ in 0..z {
         let nmax = occ.keys().map(|(n, _)| *n).max().unwrap_or(0) + 1;
@@ -128,7 +159,17 @@ fn build(z: u32) -> Atom {
     let closed = occ.iter().all(|((_, l), v)| *v == 2 * orientations(*l)) && (0..depth).all(|l| occ.get(&(depth, l)).copied().unwrap_or(0) == 2 * orientations(l));
     let to32 = |x: u64| u32::try_from(x).unwrap_or(u32::MAX);
     let enclosed = to32(u64::from(z) - inner);
-    Atom { z, depth, outer: to32(outer), unpaired: to32(unpaired), closed, enclosed, tightness: ratio(i64::from(enclosed), i64::from(depth)) }
+    // Each occupied winding's tightness in the finished atom, as the fill
+    // reads it: the charge enclosed at its closest approach over its period.
+    let ws: Vec<Winding> = occ
+        .iter()
+        .map(|((n, l), v)| {
+            let reach = u64::from(n + 1) * u64::from(l + 1);
+            let inside: u64 = occ.iter().filter(|((m, _), _)| m != n && u64::from(*m) * u64::from(m + 1) < reach).map(|(_, v)| *v).sum();
+            (ratio(i64::from(z) - inside as i64, i64::from(*n)), *v, orientations(*l))
+        })
+        .collect();
+    (Atom { z, depth, outer: to32(outer), unpaired: to32(unpaired), closed, enclosed, tightness: ratio(i64::from(enclosed), i64::from(depth)) }, ws)
 }
 
 /// A CANONICAL ELEMENT (the refactor onto era 1, 2026-10-15): era 1's matter
@@ -213,6 +254,18 @@ mod tests {
         assert_eq!(atom(16).unwrap().unpaired, 12);
         assert_eq!(atom(28).unwrap().unpaired, 0);
         assert_eq!(atom(29).unwrap().depth, 3);
+    }
+
+    #[test]
+    fn heat_strips_the_loosest_windings_first() {
+        // Hydrogen's lone electron reads 1: whole below, stripped above.
+        assert_eq!(open_at(1, &ratio(0, 1)), 1);
+        assert_eq!(open_at(1, &ratio(1, 2)), 1);
+        assert_eq!(open_at(1, &ratio(1, 1)), 0);
+        // A heavy kind keeps its deep windings at a heat that strips hydrogen.
+        let z = 18;
+        assert!(open_at(z, &ratio(2, 1)) <= atom(z).unwrap().unpaired);
+        assert_eq!(open_at(z, &ratio(1000, 1)), 0);
     }
 
     #[test]

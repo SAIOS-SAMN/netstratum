@@ -302,9 +302,13 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // the new cut no longer holds.
             // The outburst lands in the system's OWN MEDIUM (with xylarium):
             // motes at each kind's carried spin and the star's phases.
-            let burst = if rang { crate::formation::heart_cut(&sys.kept, &ratio(0, 1)).map(|(_, released, _)| released).unwrap_or_default() } else { crate::pulse::Manifest::new() };
+            // THE OUTBURST IS THROWN COOL (operator 2026-10-18: "heat
+            // dissipates into the void/vacuum"): only the deep heart is hot;
+            // the outer layers it is thrown from hold whole atoms.
+            let heat = ratio(0, 1);
+            let burst = if rang { crate::formation::heart_cut(&sys.kept, &ratio(0, 1), &heat).map(|(_, released, _)| released).unwrap_or_default() } else { crate::pulse::Manifest::new() };
             if !burst.is_empty() {
-                let spins = crate::formation::carried(&sys.kept, &ratio(0, 1));
+                let spins = crate::formation::carried(&sys.kept, &ratio(0, 1), &heat);
                 less(&mut sys.kept, &burst);
                 // The ejecta leave together, as a spray over directions.
                 for (k, a) in &burst {
@@ -446,8 +450,12 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // than that makes nothing, ever, at its rate.
             let rings_echo = rings_at(bell).saturating_sub(rings_at(bell.saturating_sub(t_u))).max(1);
             let pair = Ratio::new(2.into(), crate::pulse::nuclei_per_grain() * num_bigint::BigInt::from(1024));
+            // It fuses at least one pair in an echo when the fuel the echo's
+            // rings take (a share `rings/every` of it, the halving's lower
+            // bound) reaches a pair; a slow halving of a large stock still
+            // fuses a great many nuclei.
             let can_burn = sys.kept.iter().any(|(k, a)| {
-                *a >= pair && k.strip_prefix('Z').and_then(|z| z.parse::<u32>().ok()).is_some_and(|z| crate::formation::burn(&sys.kept, &share_now, z, &ratio(1, 1)).is_some_and(|(every, _)| every <= rings_echo))
+                *a >= pair && k.strip_prefix('Z').and_then(|z| z.parse::<u32>().ok()).is_some_and(|z| crate::formation::burn(&sys.kept, &share_now, z, &ratio(1, 1)).is_some_and(|(every, _)| a.clone() * ratio(rings_echo as i64, 1) >= pair.clone() * ratio(every.min(i64::MAX as u64) as i64, 1)))
             });
             if !can_burn && !sys.kept.is_empty() {
                 sys.remnant = true;
