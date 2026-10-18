@@ -509,14 +509,8 @@ pub fn system(clump: &Manifest, agitation: &Ratio, circulation: &Ratio, path: &[
     let spins = carried(clump, circulation);
     let _ = (&h_s, &rim, &disc_agitation, &x);
     let belts_spin = mass(&disc) / unit.clone() * crate::ring::spin(&scale, &inside);
-    let motes: Vec<crate::flows::Mote> = disc
-        .iter()
-        .filter(|(_, a)| **a > ratio(0, 1))
-        .map(|(k, a)| {
-            let ell = spins.iter().find(|(kk, _)| kk == k).map(|(_, l)| crate::ring::grain(l)).unwrap_or_else(|| ratio(0, 1));
-            crate::flows::Mote { key: k.clone(), amount: a.clone(), ell_o: ell, ell_c: ratio(0, 1), phase: vec![ratio(0, 1); crate::flows::PLANES], agitation: crate::ring::grain(&disc_agitation), born: path.len() as u64, vacuum: false }
-        })
-        .collect();
+    // The heart's released kinds leave as a spray over directions.
+    let motes: Vec<crate::flows::Mote> = crate::flows::spray(&disc, &spins, &vec![ratio(0, 1); crate::flows::PLANES], &disc_agitation, path.len() as u64);
     let _ = &worlds;
     Some((star, worlds, disc, belts_spin, crate::ring::grain(&load), motes))
 }
@@ -712,6 +706,12 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64) -> 
     if h_s.is_zero() {
         return (0, 0, Manifest::new());
     }
+    // The star's kick on its system: one force, each kind by its inertia.
+    // The star's kick on its system: a READING for now (NS_SPRAY): read here
+    // it carried debris apart before it could stick (0 worlds against 5).
+    if std::env::var("NS_SPRAY").is_ok() {
+        crate::flows::star_kick(&mut sys.flows, &sys.kept, &h_s);
+    }
     // The system's motes merge by the shared rule (same kind, stream and
     // sectors; the carrier's resolution), so returns don't multiply.
     let _ = crate::flows::merge(&mut sys.flows, &total);
@@ -833,9 +833,17 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64) -> 
             }
             continue;
         }
-        // A mote that met nothing stays a mote; a world stays a world.
+        // A mote that met nothing stays a mote; a world stays a world. THE RIM
+        // LAW for every body (a mote too, never only a grown group): a mote
+        // past the system's rim crosses whole into the galaxy.
         if g.len() == 1 && g[0] < n_motes {
             let it = &items[g[0]];
+            if reach(it) > rim {
+                for (k, a) in &it.0 {
+                    *escaped.entry(k.clone()).or_insert_with(|| ratio(0, 1)) += a.clone();
+                }
+                continue;
+            }
             let (k, a) = it.0.iter().next().map(|(k, a)| (k.clone(), a.clone())).unwrap_or_default();
             motes.push(crate::flows::Mote { key: k, amount: a, ell_o: it.1.clone(), ell_c: ratio(0, 1), phase: it.2.clone(), agitation: crate::ring::grain(&(it.3.clone() + heat[g[0]].clone())), born: 0, vacuum: false });
             continue;

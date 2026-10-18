@@ -390,6 +390,56 @@ pub fn shear(motes: &mut [Mote], enc: &Enclosed, total: &Ratio) -> Ratio {
     moved
 }
 
+/// THE SPRAY (with xylarium; the founding epoch one tier down): matter a
+/// heart throws out (an outburst, or the kinds a new star's heart releases)
+/// leaves TOGETHER, every kind at the mean carried reach (holding-weighted),
+/// and over directions: each kind at its own capture phase (the founding's,
+/// `Z·½` in the orbit's plane, `½ + Z·½` on the loop) about the star's. It
+/// sorts only as it spreads, by each kind's own inertia under the star's
+/// kick, so early meetings catch mixed matter.
+pub fn spray(released: &Manifest, spins: &[(String, Ratio)], base: &[Ratio], agitation: &Ratio, born: u64) -> Vec<Mote> {
+    if std::env::var("NS_SPRAY").is_err() {
+        // The release in force: each kind at its own carried reach and the
+        // star's phases (the spray below is a reading, NS_SPRAY, until it is
+        // read to form worlds here).
+        return released.iter().filter(|(_, a)| **a > ratio(0, 1)).map(|(k, a)| Mote { key: k.clone(), amount: a.clone(), ell_o: crate::ring::grain(&spins.iter().find(|(kk, _)| kk == k).map(|(_, l)| l.clone()).unwrap_or_else(|| ratio(0, 1))), ell_c: ratio(0, 1), phase: base.to_vec(), agitation: crate::ring::grain(agitation), born, vacuum: false }).collect();
+    }
+    let held = released.iter().fold(ratio(0, 1), |s, (k, a)| s + a.clone() * weight(k));
+    let reach = if held.is_zero() {
+        ratio(0, 1)
+    } else {
+        crate::ring::grain(&(released.iter().fold(ratio(0, 1), |s, (k, a)| s + a.clone() * weight(k) * spins.iter().find(|(kk, _)| kk == k).map(|(_, l)| l.clone()).unwrap_or_else(|| ratio(0, 1))) / held))
+    };
+    let at = |k: usize| base.get(k).cloned().unwrap_or_else(|| ratio(0, 1));
+    released
+        .iter()
+        .filter(|(_, a)| **a > ratio(0, 1))
+        .map(|(k, a)| {
+            let z = ratio(i64::from(z_of(k).unwrap_or(0)), 2);
+            let phase = vec![crate::ring::grain(&frac(&(at(0) + z.clone()))), crate::ring::grain(&frac(&(at(1) + ratio(1, 2) + z)))];
+            Mote { key: k.clone(), amount: a.clone(), ell_o: reach.clone(), ell_c: ratio(0, 1), phase, agitation: crate::ring::grain(agitation), born, vacuum: false }
+        })
+        .collect()
+}
+
+/// THE STAR'S KICK ON ITS SYSTEM (with xylarium; the galaxy's law one tier
+/// down): each echo the star's bell pushes its system's motes with ONE force,
+/// its push on its open frames (`½ ×` the heart's open share), each kind
+/// moving by its own inertia, and the star's hold returns the held
+/// hemisphere, `½·δ(R)·ℓ` (`R = ℓ/H_s`).
+pub fn star_kick(motes: &mut [Mote], heart: &Manifest, h_s: &Ratio) {
+    let held = crate::pulse::mass(heart);
+    if held.is_zero() || h_s.is_zero() {
+        return;
+    }
+    let push = ratio(1, 2) * crate::pulse::magnetism(heart) / held;
+    for x in motes.iter_mut() {
+        let r = x.ell_o.clone() / h_s.clone();
+        let d = h_s.clone() / (r + h_s.clone());
+        x.ell_o = crate::ring::grain(&(x.ell_o.clone() + push.clone() / weight(&x.key) - ratio(1, 2) * d * x.ell_o.clone())).max(ratio(0, 1));
+    }
+}
+
 /// THE JETSTREAM IS A CONTINUOUS LOOP (operators 2026-10-16/17: "a
 /// continuous flow, inbound and outbound"): the circulation's plane IS the
 /// loop, a mote's phase in it its place on the loop. The AXIAL leg (out

@@ -238,6 +238,24 @@ fn main() {
             let with_belts = debris.iter().filter(|d| **d > 0.0).count();
             println!("  BELTS: {} systems carry debris motes, total {:.3e} (units); remnants' released systems re-anchored count in SYSTEMS",
                 with_belts, debris.iter().sum::<f64>());
+            // Where the debris stands against its system's rim (R = ℓ/H_s, rim 1).
+            let mut rs: Vec<f64> = Vec::new();
+            for s in &stars {
+                let tot = pulse::mass(&s.total());
+                if tot == ratio(0, 1) {
+                    continue;
+                }
+                let h_s = pulse::mass(&s.kept) / tot;
+                if h_s == ratio(0, 1) {
+                    continue;
+                }
+                rs.extend(s.flows.iter().map(|x| f(&(x.ell_o.clone() / h_s.clone()))));
+            }
+            rs.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
+            if !rs.is_empty() {
+                let q = |p: f64| rs[((rs.len() - 1) as f64 * p) as usize];
+                println!("  DEBRIS reach against the rim (1): {} motes, min {:.3e} median {:.3e} max {:.3e}", rs.len(), q(0.0), q(0.5), q(1.0));
+            }
             // Resources: the worlds' mixes.
             let worlds: Vec<&pulse::Body> = stars.iter().flat_map(|s| &s.satellites).filter(|w| w.born == 0).collect();
             let mut kinds: std::collections::BTreeSet<String> = std::collections::BTreeSet::new();

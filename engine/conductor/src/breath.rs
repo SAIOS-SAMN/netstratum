@@ -286,6 +286,12 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     dissolved += 1;
                     continue;
                 }
+                // Its system still moves: worlds and debris meet, and what
+                // oversteps the rim crosses into the galaxy.
+                let (_, _, escaped) = crate::formation::collide_system(&mut sys, &unit, bell);
+                if !escaped.is_empty() {
+                    shed.push((escaped, sys.radius.clone(), sys.phase.clone()));
+                }
                 enclosed_in += mass(&sys.total()) / unit.clone();
                 keep.push(sys);
                 continue;
@@ -300,11 +306,12 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             if !burst.is_empty() {
                 let spins = crate::formation::carried(&sys.kept, &ratio(0, 1));
                 less(&mut sys.kept, &burst);
-                for (k, a) in burst {
-                    let ell = spins.iter().find(|(kk, _)| *kk == k).map(|(_, l)| crate::ring::grain(l)).unwrap_or_else(|| ratio(0, 1));
+                // The ejecta leave together, as a spray over directions.
+                for (k, a) in &burst {
                     *sys.medium.entry(k.clone()).or_insert_with(|| ratio(0, 1)) += a.clone();
-                    sys.flows.push(crate::flows::Mote { key: k, amount: a, ell_o: ell, ell_c: ratio(0, 1), phase: sys.phase.clone(), agitation: ratio(0, 1), born: bell, vacuum: false });
                 }
+                let star_phase = sys.phase.clone();
+                sys.flows.extend(crate::flows::spray(&burst, &spins, &star_phase, &ratio(0, 1), bell));
             }
             let mut back = crate::pulse::Manifest::new();
             // THE WIND (operator: made at the INTERFACE): the star's
