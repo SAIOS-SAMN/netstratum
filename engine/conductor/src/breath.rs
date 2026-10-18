@@ -103,6 +103,9 @@ pub struct Event {
     pub returned: Ratio,
     /// Stars dissolved at this echo.
     pub dissolved: usize,
+    /// Star encounters at this echo: mergers (sticks) and bounces.
+    pub merged: usize,
+    pub encounters: usize,
 }
 
 /// Breathe the universe over bells `from` (exclusive) to `until`, echoes
@@ -153,6 +156,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         let core = &mut u.cores[i];
         let mut returned = ratio(0, 1);
         let mut dissolved = 0;
+        let (mut merged, mut encounters) = (0usize, 0usize);
         // The galaxy's holding constant through the echo (its grains only
         // move within it), so its core's state is read once.
         let state = crate::pulse::core_state(core) / unit.clone();
@@ -165,12 +169,22 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         let g_before = mass(&core.total());
         let pre = crate::pulse::galaxy_push(&core.total());
         let scale_pre = g_before.clone() / unit.clone();
-        for mut sys in std::mem::take(&mut core.satellites) {
+        // STARS COLLIDE (operator 2026-10-18; with xylarium): the one
+        // collide law among the galaxy's stars, before each reads its echo;
+        // each carries the coherence it had before the encounter.
+        let planes = crate::flows::PLANES;
+        let c_pre: Vec<Ratio> = core.satellites.iter().map(|b| if b.phase.len() < planes || b.bell.len() < planes { ratio(1, 1) } else { (0..planes).fold(ratio(1, 1), |c, k| c * crate::flows::in_step(&b.phase[k], &b.bell[k])) }).collect();
+        let (met, star_sticks, star_bounces) = match &pre {
+            Some((_, h_g, _)) => crate::formation::collide_stars(std::mem::take(&mut core.satellites), c_pre, &scale_pre, h_g, &g_before),
+            None => (std::mem::take(&mut core.satellites).into_iter().zip(c_pre).collect(), 0, 0),
+        };
+        merged += star_sticks;
+        encounters += star_bounces;
+        for (mut sys, c_was) in met {
             let own = g_rate.clone() * rate(&sys.radius, &enclosed_in);
             // THE STAR'S BELL (with xylarium): its own spin turns it,
             // `ω_s = δ(ℓ_s/H_s)` a ring, `H_s = 1 + held/held_at_birth`; its
             // phases advance by the rings its clock received this echo.
-            let planes = crate::flows::PLANES;
             if sys.phase.len() < planes {
                 sys.phase = vec![ratio(0, 1); planes];
             }
@@ -186,8 +200,8 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             if sys.bell.len() < planes {
                 sys.bell = sys.phase.clone();
             }
-            // Its coherence with its galaxy BEFORE this echo's turn.
-            let c_before = (0..planes).fold(ratio(1, 1), |c, k| c * crate::flows::in_step(&sys.phase[k], &sys.bell[k]));
+            // Its coherence with its galaxy BEFORE this echo's encounters.
+            let c_before = c_was;
             // The galaxy's phase at the star's reach turns as its flows do
             // there, and the star RIDES it (with xylarium): it orbits with what
             // it was born of, so its coherence moves only where something
@@ -197,9 +211,19 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     let r = sys.radius.clone() / scale_pre.clone();
                     let was = sys.bell.clone();
                     crate::flows::turn(&mut sys.bell, &r, h_g, p_g, &g_rate, &delta_u);
+                    // THE RETURN (with xylarium): its galaxy's torque gives
+                    // back `d/(d + turned)` of its displacement in each plane,
+                    // `d = 1 − δ_gal` its drag, `turned` its own spin's turns
+                    // this echo: a fast spinner is a gyroscope.
+                    let d = r.clone() / (r.clone() + h_g.clone());
+                    let turned = omega.clone() * ratio(rings_at(bell).saturating_sub(rings_at(bell.saturating_sub(t_u))) as i64, 1);
+                    let keep_share = if (d.clone() + turned.clone()).is_zero() { ratio(1, 1) } else { turned.clone() / (d + turned) };
                     for k in 0..planes {
-                        let f = sys.phase[k].clone() + sys.bell[k].clone() - was[k].clone();
-                        sys.phase[k] = crate::ring::grain(&(f.clone() - f.floor()));
+                        let off = sys.phase[k].clone() - was[k].clone();
+                        let f = off.clone() - off.floor();
+                        let signed = if f > ratio(1, 2) { f - ratio(1, 1) } else { f };
+                        let g = sys.bell[k].clone() + signed * keep_share.clone();
+                        sys.phase[k] = crate::ring::grain(&(g.clone() - g.floor()));
                     }
                 }
             }
@@ -519,7 +543,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         for (k, a) in to_ocean {
             *u.medium.entry(k).or_insert_with(|| ratio(0, 1)) += a;
         }
-        events.push(Event { bell, galaxy: galaxy_id, rung, write: Write::Perpendicular, stars, jets, returned, dissolved });
+        events.push(Event { bell, galaxy: galaxy_id, rung, write: Write::Perpendicular, stars, jets, returned, dissolved, merged, encounters });
     }
     events
 }

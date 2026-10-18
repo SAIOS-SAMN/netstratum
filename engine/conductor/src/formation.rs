@@ -705,6 +705,7 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64) -> 
     }
     let (mut sticks, mut bounces) = (0, 0);
     let mut heat = vec![ratio(0, 1); n];
+    let mut dl = vec![ratio(0, 1); n];
     let half = ratio(1, 2);
     for i in 0..n {
         for j in (i + 1)..n {
@@ -724,21 +725,37 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64) -> 
             let (di, dj) = (delta(&items[i].1), delta(&items[j].1));
             let t = if di > dj { di.clone() - dj.clone() } else { dj.clone() - di.clone() } / (di + dj);
             let bind = s * d_pair;
+            // THE GRIP SPLIT (one law at every tier, with xylarium): the
+            // relative turning T divides into what the bond gripped, heat to
+            // both, and what it did not, `(T − s·D)⁺`, which parts them.
             if bind >= t {
                 let (a, b) = (root(&mut parent, i), root(&mut parent, j));
                 if a != b {
                     parent[a] = b;
                 }
-                // The unkept relative motion heats the body both join.
-                let unkept = t.clone() - bind.clone().min(t.clone());
-                heat[i] += unkept.clone();
-                heat[j] += unkept;
-                sticks += 1;
-            } else {
                 heat[i] += t.clone();
                 heat[j] += t;
+                sticks += 1;
+            } else {
+                heat[i] += bind.clone();
+                heat[j] += bind.clone();
+                // They part outer outward, each by the OTHER's mass share of
+                // the unkept motion times their spin gap: a spin exchange,
+                // `Σ m·ℓ` unchanged.
+                let (mi, mj) = (share(&items[i]), share(&items[j]));
+                let (o, n_) = if items[i].1 > items[j].1 { (i, j) } else { (j, i) };
+                let gap_l = items[o].1.clone() - items[n_].1.clone();
+                let u = (t - bind) * gap_l / (mi.clone() + mj.clone());
+                let (mo, mn) = if o == i { (mi, mj) } else { (mj, mi) };
+                dl[o] += u.clone() * mn;
+                dl[n_] -= u * mo;
                 bounces += 1;
             }
+        }
+    }
+    for i in 0..n {
+        if !dl[i].is_zero() {
+            items[i].1 = crate::ring::grain(&(items[i].1.clone() + dl[i].clone())).max(ratio(0, 1));
         }
     }
     // Groups: one body each, spins added exactly (holding-weighted ℓ).
@@ -856,4 +873,132 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64) -> 
     sys.flows = parcels;
     sys.satellites = worlds;
     (sticks, bounces, escaped)
+}
+
+/// COLLISIONS AMONG A GALAXY'S STARS (operator 2026-10-18: "this is how you
+/// get stars colliding, or random strange star events"; with xylarium): the
+/// one collide law of `collide_system` one tier up, in the galaxy's own units
+/// (`R = radius/scale`, `δ = H_g/(R + H_g)`). Two stars coincide within each
+/// other's band in reach and on the same hemisphere in every plane; where
+/// `s·D ≥ T` they STICK and merge (mixes, systems, media, spins and states
+/// added exactly; place and phases by holding, on the circle); else they
+/// BOUNCE, each displaced off its flows in every plane by the other's mass
+/// share of the unkept motion `(T − s·D)⁺`, outer ahead and inner behind.
+/// `c_pre` is each star's coherence before; a merger's is its members' by
+/// holding. Returns the stars, aligned with their coherences, and
+/// (sticks, bounces).
+pub fn collide_stars(stars: Vec<crate::pulse::Body>, c_pre: Vec<Ratio>, scale: &Ratio, h_g: &Ratio, g_total: &Ratio) -> (Vec<(crate::pulse::Body, Ratio)>, usize, usize) {
+    let planes = crate::flows::PLANES;
+    let n = stars.len();
+    if n < 2 || scale.is_zero() || g_total.is_zero() {
+        return (stars.into_iter().zip(c_pre).collect(), 0, 0);
+    }
+    let frac = |x: &Ratio| x.clone() - x.floor();
+    let half = ratio(1, 2);
+    let r: Vec<Ratio> = stars.iter().map(|b| b.radius.clone() / scale.clone()).collect();
+    let m: Vec<Ratio> = stars.iter().map(|b| mass(&b.total()) / g_total.clone()).collect();
+    let g: Vec<Ratio> = stars.iter().map(|b| grip(&b.kept)).collect();
+    let delta = |x: &Ratio| h_g.clone() / (x.clone() + h_g.clone());
+    let mut parent: Vec<usize> = (0..n).collect();
+    fn root(p: &mut Vec<usize>, i: usize) -> usize {
+        let mut i = i;
+        while p[i] != i {
+            p[i] = p[p[i]];
+            i = p[i];
+        }
+        i
+    }
+    let mut disp = vec![ratio(0, 1); n];
+    let (mut sticks, mut bounces) = (0, 0);
+    for i in 0..n {
+        if stars[i].phase.len() < planes || r[i].is_zero() {
+            continue;
+        }
+        for j in (i + 1)..n {
+            if stars[j].phase.len() < planes || r[j].is_zero() {
+                continue;
+            }
+            let (lo, hi) = if r[i] < r[j] { (r[i].clone(), r[j].clone()) } else { (r[j].clone(), r[i].clone()) };
+            if hi > lo.clone() * ratio(3, 1) {
+                continue;
+            }
+            if !(0..planes).all(|k| (frac(&stars[i].phase[k]) < half) == (frac(&stars[j].phase[k]) < half)) {
+                continue;
+            }
+            let s = if g[i].is_zero() || g[j].is_zero() { ratio(0, 1) } else if g[i] < g[j] { g[i].clone() / g[j].clone() } else { g[j].clone() / g[i].clone() };
+            let d_pair = (m[i].clone() + m[j].clone()) / (hi - lo + m[i].clone() + m[j].clone());
+            let (di, dj) = (delta(&r[i]), delta(&r[j]));
+            let t = if di > dj { di.clone() - dj.clone() } else { dj.clone() - di.clone() } / (di + dj);
+            let bind = s * d_pair;
+            if bind >= t {
+                let (a, b) = (root(&mut parent, i), root(&mut parent, j));
+                if a != b {
+                    parent[a] = b;
+                }
+                sticks += 1;
+            } else {
+                let u = (t - bind) / (m[i].clone() + m[j].clone());
+                let (o, n_) = if r[i] > r[j] { (i, j) } else { (j, i) };
+                disp[o] += u.clone() * m[n_].clone();
+                disp[n_] -= u * m[o].clone();
+                bounces += 1;
+            }
+        }
+    }
+    let mut stars = stars;
+    for i in 0..n {
+        if !disp[i].is_zero() && stars[i].phase.len() >= planes {
+            for k in 0..planes {
+                stars[i].phase[k] = crate::ring::grain(&frac(&(stars[i].phase[k].clone() + disp[i].clone())));
+            }
+        }
+    }
+    let mut groups: std::collections::BTreeMap<usize, Vec<usize>> = std::collections::BTreeMap::new();
+    for i in 0..n {
+        let k = root(&mut parent, i);
+        groups.entry(k).or_default().push(i);
+    }
+    let mut slots: Vec<Option<crate::pulse::Body>> = stars.into_iter().map(Some).collect();
+    let mut out = Vec::new();
+    for (_, mut idx) in groups {
+        // The heaviest member is the body the others join (its name kept).
+        idx.sort_by(|a, b| m[*b].cmp(&m[*a]).then(a.cmp(b)));
+        let w: Vec<Ratio> = idx.iter().map(|&i| m[i].clone()).collect();
+        let wt = w.iter().fold(ratio(0, 1), |a, b| a + b.clone());
+        let c = if wt.is_zero() { c_pre[idx[0]].clone() } else { idx.iter().zip(&w).fold(ratio(0, 1), |a, (&i, x)| a + x.clone() * c_pre[i].clone()) / wt.clone() };
+        let mut head = slots[idx[0]].take().expect("each star once");
+        if idx.len() > 1 {
+            let members: Vec<crate::pulse::Body> = idx[1..].iter().map(|&i| slots[i].take().expect("each star once")).collect();
+            let all: Vec<&crate::pulse::Body> = std::iter::once(&head).chain(members.iter()).collect();
+            let by = |f: &dyn Fn(&crate::pulse::Body) -> Ratio| if wt.is_zero() { f(all[0]) } else { all.iter().zip(&w).fold(ratio(0, 1), |a, (b, x)| a + x.clone() * f(b)) / wt.clone() };
+            let radius = by(&|b| b.radius.clone());
+            let ell = by(&|b| b.ell.clone());
+            let reservoir = by(&|b| b.reservoir.clone());
+            let phase: Vec<Ratio> = (0..planes).map(|k| crate::ring::grain(&crate::flows::circle_mean(&all.iter().zip(&w).map(|(b, x)| (x.clone(), b.phase.get(k).cloned().unwrap_or_else(|| ratio(0, 1)))).collect::<Vec<_>>()))).collect();
+            let bell: Vec<Ratio> = (0..planes).map(|k| crate::ring::grain(&crate::flows::circle_mean(&all.iter().zip(&w).map(|(b, x)| (x.clone(), b.bell.get(k).cloned().unwrap_or_else(|| ratio(0, 1)))).collect::<Vec<_>>()))).collect();
+            for b in members {
+                for (k, a) in b.kept {
+                    *head.kept.entry(k).or_insert_with(|| ratio(0, 1)) += a;
+                }
+                for (k, a) in b.medium {
+                    *head.medium.entry(k).or_insert_with(|| ratio(0, 1)) += a;
+                }
+                head.satellites.extend(b.satellites);
+                head.flows.extend(b.flows);
+                head.gas.extend(b.gas);
+                head.state += b.state;
+                head.turning += b.turning;
+                head.medium_spin += b.medium_spin;
+                head.load += b.load;
+                head.born = head.born.min(b.born);
+            }
+            head.radius = crate::ring::grain(&radius);
+            head.ell = crate::ring::grain(&ell);
+            head.reservoir = crate::ring::grain(&reservoir);
+            head.phase = phase;
+            head.bell = bell;
+        }
+        out.push((head, c));
+    }
+    (out, sticks, bounces)
 }
