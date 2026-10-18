@@ -256,6 +256,34 @@ fn main() {
                 let q = |p: f64| rs[((rs.len() - 1) as f64 * p) as usize];
                 println!("  DEBRIS reach against the rim (1): {} motes, min {:.3e} median {:.3e} max {:.3e}", rs.len(), q(0.0), q(0.5), q(1.0));
             }
+            // LIGHT AT THE ORBIT (operator 2026-10-18: "let there be light"; with
+            // xylarium): each burning star's light a ring, the transduced flux of
+            // its rungs (formation::burn, in full step), and each world's
+            // INSOLATION, that flux times the share of directions the star
+            // covers from the world's reach, δ_s(r) = H_s/(r + H_s), never 1/r².
+            let mut lit: Vec<(f64, f64, usize)> = Vec::new();
+            for s in &stars {
+                let tot = pulse::mass(&s.total());
+                if tot == ratio(0, 1) {
+                    continue;
+                }
+                let h_s = pulse::mass(&s.kept) / tot.clone();
+                let share = h_s.clone();
+                if s.satellites.iter().any(|w| w.born == 0) {
+                    println!("  HOST star {:?}: {}, heart {:?}", s.path, if s.remnant { "a REMNANT" } else { "burning" }, s.kept.keys().take(4).collect::<Vec<_>>());
+                }
+                let flux = s.kept.keys().filter_map(|k| k.strip_prefix('Z').and_then(|z| z.parse::<u32>().ok())).filter_map(|z| formation::burn(&s.kept, &share, z, &ratio(1, 1)).map(|(_, l)| l)).fold(ratio(0, 1), |a, b| a + b);
+                let scale = tot / u.unit.clone();
+                for w in s.satellites.iter().filter(|w| w.born == 0) {
+                    let r = if scale == ratio(0, 1) { ratio(0, 1) } else { w.radius.clone() / scale.clone() };
+                    let cover = h_s.clone() / (r + h_s.clone());
+                    lit.push((f(&flux), f(&(flux.clone() * cover)), w.kept.len()));
+                }
+            }
+            if !lit.is_empty() {
+                let ins: Vec<String> = lit.iter().take(12).map(|(fl, i, k)| format!("{:.2e}/{:.2e}({}k)", fl, i, k)).collect();
+                println!("  LIGHT (star flux / world insolation (kinds)): {}", ins.join(" "));
+            }
             // Resources: the worlds' mixes.
             let worlds: Vec<&pulse::Body> = stars.iter().flat_map(|s| &s.satellites).filter(|w| w.born == 0).collect();
             let mut kinds: std::collections::BTreeSet<String> = std::collections::BTreeSet::new();
