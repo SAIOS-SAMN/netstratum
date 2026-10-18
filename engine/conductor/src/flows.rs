@@ -119,6 +119,29 @@ pub fn response(psi: &Ratio) -> Ratio {
     if f < ratio(1, 2) { share } else { -share }
 }
 
+/// THE KICK'S RESPONSE OVER ITS PASSAGE (with xylarium: a kick sampled at
+/// one instant while the mote sweeps near a whole turn falls on one
+/// hemisphere every time, and the core pays without end): the exact mean of
+/// the sawtooth `1 − 2·frac(ψ)` over the arc `[ψ, ψ + len]`. Within each
+/// turn it is linear, so a piece's mean is `1 − (f₀ + f₁)` from its ends'
+/// fractions; no square; a whole turn averages 0.
+pub fn mean_response(psi: &Ratio, len: &Ratio) -> Ratio {
+    if len.is_zero() {
+        return response(psi);
+    }
+    let end = psi.clone() + len.clone();
+    let mut at = psi.clone();
+    let mut sum = ratio(0, 1);
+    while at < end {
+        let turn = at.floor();
+        let next = (turn.clone() + ratio(1, 1)).min(end.clone());
+        let (f0, f1) = (at.clone() - turn.clone(), next.clone() - turn);
+        sum += (next.clone() - at.clone()) * (ratio(1, 1) - (f0 + f1));
+        at = next;
+    }
+    sum / len.clone()
+}
+
 /// The in-step share of two phases in one plane (S¹'s linear measure).
 pub fn in_step(a: &Ratio, b: &Ratio) -> Ratio {
     ratio(1, 1) - ratio(2, 1) * off(&(a.clone() - b.clone()))
@@ -236,13 +259,14 @@ pub fn turn(phase: &mut [Ratio], r_o: &Ratio, h: &Ratio, p: &Ratio, rho: &Ratio,
     // spin and place): exact sums of exact rationals otherwise compound
     // their denominators each bell without bound.
     phase[0] = crate::ring::grain(&frac(&(phase[0].clone() + ratio(2, 1) * d_o)));
-    let loop_phase = frac(&(phase[1].clone() + ratio(2, 1) * d_c));
+    let loop_from = phase[1].clone();
+    let loop_phase = frac(&(loop_from.clone() + ratio(2, 1) * d_c.clone()));
     // THE PARENT'S PULSE MOVES MATTER ALONG THE LOOP (operator: "the pulse
     // moves matter along the loop"; with xylarium): absorbed in step it
     // ADVANCES the loop's phase, `p·ρ·δ_u` × the hemisphere's signed share,
     // on top of the loop's own rate; nothing accumulates as a spin in the
     // loop's plane.
-    let advance = p.clone() * rho.clone() * delta_u.clone() * response(&loop_phase);
+    let advance = p.clone() * rho.clone() * delta_u.clone() * mean_response(&loop_from, &(ratio(2, 1) * d_c));
     phase[1] = crate::ring::grain(&frac(&(loop_phase + advance)));
 }
 
@@ -259,8 +283,10 @@ pub fn kick(motes: &mut [Mote], enc: &Enclosed, p: &Ratio, rho: &Ratio, delta_u:
         // Each turns by what is enclosed inside it (the core and all inside).
         let h = enc.hold(&x.ell_o);
         let (r_o, d_o) = enc.reach(&x.ell_o);
+        let from = x.phase[0].clone();
         turn(&mut x.phase, &r_o, &h, p, rho, delta_u);
-        let dl_o = p.clone() * d_o * response(&x.phase[0]);
+        // Over its whole passage this bell, never at one instant.
+        let dl_o = p.clone() * d_o.clone() * mean_response(&from, &(ratio(2, 1) * d_o));
         // Spin cannot carry a mote through zero reach: a turning is a
         // magnitude in its plane; a kick past zero stops at the core.
         let new_o = crate::ring::grain(&(x.ell_o.clone() + dl_o)).max(ratio(0, 1));
@@ -510,4 +536,19 @@ pub fn manifest(motes: &[Mote]) -> Manifest {
         *m.entry(x.key.clone()).or_insert_with(|| ratio(0, 1)) += x.amount.clone();
     }
     m
+}
+
+#[cfg(test)]
+mod passage_tests {
+    use super::mean_response;
+    use cfe::ratio::ratio;
+
+    #[test]
+    fn a_whole_turn_averages_nothing_and_half_turns_sign_the_hemisphere() {
+        assert_eq!(mean_response(&ratio(1, 3), &ratio(1, 1)), ratio(0, 1));
+        assert_eq!(mean_response(&ratio(0, 1), &ratio(1, 2)), ratio(1, 2));
+        assert_eq!(mean_response(&ratio(1, 2), &ratio(1, 2)), ratio(-1, 2));
+        // Across the bell: from ¾ to 1¼, the loss then the gain cancel.
+        assert_eq!(mean_response(&ratio(3, 4), &ratio(1, 2)), ratio(0, 1));
+    }
 }
