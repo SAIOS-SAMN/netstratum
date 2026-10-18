@@ -2,24 +2,34 @@
 //! of a table; it is a nucleus of Z charges with Z electrons turning about
 //! it, and its chemistry is read from that motion.
 //!
-//! The law, frame by frame (docs/78 design laws 4–6):
-//! - An electron turns at `ω = Q(<r) / r`, Q the charge its orbit encloses:
-//!   the nucleus less the electrons in bands further in. Electrons sharing a
-//!   band share its radius, so none encloses another.
-//! - **An orbit closes in a whole number of ticks** (authored): band P turns
-//!   once in P ticks, so its radius is `r = Q · P` and its speed `v = Q`.
-//! - **A band of period P passes P frames a turn;** each frame holds one
-//!   electron in each sense, so the band holds 2P. Linear in P, no square.
-//! - **A new electron takes a free frame before it pairs** (authored): it
-//!   joins a frame already turned the other way only when every frame of
-//!   the band is taken. Opposite senses on one frame pair; a band with every
-//!   frame paired is closed.
-//! - Electrons are placed inside out, each in the lowest band with room.
+//! THE HARMONIC ATOM (operators 2026-10-18, with xylarium: "keep atomic at
+//! S^11 - so it fits the harmonic model"; "hopf fibrations are absolutely
+//! required"). Count the windings, flow the phases: no frames, no lattice.
+//! - The atom turns on S^11: twelve dimensions, six turning planes, no axis.
+//!   By the Hopf fibration S^11 is a bundle of circles over CP^5, so every
+//!   point has its own S^1 fibre, and SPIN IS THE TURNING ALONG IT. A pair is
+//!   two counter-turning flows on one fibre; an unpaired turning runs
+//!   uncancelled (its magnetism, and what it can bond).
+//! - A SHELL is the windings that close with count n; a winding's SHAPE l
+//!   (0 ≤ l < n) is its eccentricity, axes in the ratio `(l + 1)/n`.
+//! - A shape's ORIENTATIONS are exact and topological: the degree-l
+//!   harmonics in twelve dimensions, `C(l + 11, 11) − C(l + 9, 11)` = 1, 12,
+//!   77, 352, …, each holding one counter-turning pair. Shells hold 2, 26,
+//!   180, …; Earth's `2l + 1` is refused.
+//! - Electrons are placed inside out, each in the lowest shell with room;
+//!   within a shell the most penetrating shape (low l, nearest the nucleus at
+//!   its closest approach) fills first; a new electron takes a free
+//!   orientation before it pairs. (Crossings between shells, a later shell's
+//!   penetrating winding ahead of an earlier shell's open one, are to be READ
+//!   from the enclosed charge once the radius law keeps shells nested; not
+//!   stated, and Earth's n + l order is refused.)
+//! - An orbit closes in a whole number of ticks: shell n turns once in n, so
+//!   its radius is `r = Q · n` and its speed `v = Q`, Q the charge it
+//!   encloses (the nucleus less the shells further in).
 //!
-//! What is read (never looked up): the depth (outermost band), the unpaired
-//! count in it (bonding), its electrons (the share of a compound), whether it
-//! is closed (inert), and how tightly it is held, `Q_out / P_out` (its speed
-//! over its period).
+//! What is read (never looked up): the depth (outermost shell), the unpaired
+//! count (bonding, magnetism), its electrons in the outermost shell, whether
+//! it is closed (inert), and how tightly it is held, `Q_out / n_out`.
 
 use crate::ratio::{ratio, Ratio};
 
@@ -41,33 +51,62 @@ pub struct Atom {
     pub tightness: Ratio,
 }
 
+/// The orientations of shape l on S^11: the degree-l harmonics in twelve
+/// dimensions, `C(l + 11, 11) − C(l + 9, 11)`, each holding one pair.
+pub fn orientations(l: u32) -> u64 {
+    fn c(n: u64, k: u64) -> u64 {
+        if k > n {
+            return 0;
+        }
+        (0..k).fold(1u64, |acc, i| acc * (n - i) / (i + 1))
+    }
+    let l = u64::from(l);
+    c(l + 11, 11) - if l >= 2 { c(l + 9, 11) } else { 0 }
+}
+
+/// A shell's room: twice every shape's orientations, `Σ_{l<n} 2·orient(l)`.
+pub fn shell_room(n: u32) -> u64 {
+    (0..n).map(|l| 2 * orientations(l)).sum()
+}
+
 /// The atom of `z` charges, neutral (z electrons). `None` for z = 0.
 pub fn atom(z: u32) -> Option<Atom> {
     if z == 0 {
         return None;
     }
-    // Band P holds 2P; place inside out.
-    let (mut left, mut depth, mut inner) = (z, 0u32, 0u32);
-    let mut outer = 0;
-    while left > 0 {
+    // Shells inside out; within the outermost, shapes by penetration.
+    let (mut left, mut depth, mut inner) = (u64::from(z), 0u32, 0u64);
+    loop {
         depth += 1;
-        let room = 2 * depth;
-        outer = left.min(room);
-        left -= outer;
-        if left > 0 {
-            inner += outer;
+        let room = shell_room(depth);
+        if left <= room {
+            break;
+        }
+        left -= room;
+        inner += room;
+    }
+    let outer = left;
+    // Within the outermost shell: shapes fill low l first, each taking free
+    // orientations before pairing; the full shapes are paired.
+    let (mut rest, mut unpaired) = (outer, 0u64);
+    for l in 0..depth {
+        let cap = 2 * orientations(l);
+        let here = rest.min(cap);
+        let o = orientations(l);
+        unpaired += if here <= o { here } else { cap - here };
+        rest -= here;
+        if rest == 0 {
+            break;
         }
     }
-    // Free frames first, then pairs: n ≤ P are all unpaired; past P each
-    // new electron pairs one.
-    let unpaired = if outer <= depth { outer } else { 2 * depth - outer };
-    let enclosed = z - inner;
+    let to32 = |x: u64| u32::try_from(x).unwrap_or(u32::MAX);
+    let enclosed = to32(u64::from(z) - inner);
     Some(Atom {
         z,
         depth,
-        outer,
-        unpaired,
-        closed: outer == 2 * depth,
+        outer: to32(outer),
+        unpaired: to32(unpaired),
+        closed: outer == shell_room(depth),
         enclosed,
         tightness: ratio(i64::from(enclosed), i64::from(depth)),
     })
@@ -140,31 +179,38 @@ mod tests {
     use super::*;
 
     #[test]
-    fn bands_close_at_two_p() {
-        // Band 1 holds 2, band 2 holds 4: closed at z = 2 and z = 6.
+    fn the_harmonic_shells_close_at_two_and_twenty_eight() {
+        // Orientations of the degree-l harmonics on S^11.
+        assert_eq!((0..4).map(orientations).collect::<Vec<_>>(), vec![1, 12, 77, 352]);
+        assert_eq!((1..=3).map(shell_room).collect::<Vec<_>>(), vec![2, 26, 180]);
         assert!(atom(2).unwrap().closed);
-        assert!(atom(6).unwrap().closed);
-        assert!(!atom(5).unwrap().closed);
-        // In band 2: 1, 2 unpaired rising, then pairing down.
-        let unpaired: Vec<u32> = (3..=6).map(|z| atom(z).unwrap().unpaired).collect();
-        assert_eq!(unpaired, vec![1, 2, 1, 0]);
+        assert!(atom(28).unwrap().closed);
+        assert!(!atom(27).unwrap().closed);
+        assert!(atom(208).unwrap().closed);
+        // Shell 2: its round shape pairs (Z 3, 4), then 12 free orientations
+        // of the next before pairing (Z 5..16 rising, 17..28 falling).
+        let unpaired: Vec<u32> = (3..=7).map(|z| atom(z).unwrap().unpaired).collect();
+        assert_eq!(unpaired, vec![1, 0, 1, 2, 3]);
+        assert_eq!(atom(16).unwrap().unpaired, 12);
+        assert_eq!(atom(28).unwrap().unpaired, 0);
+        assert_eq!(atom(29).unwrap().depth, 3);
     }
 
     #[test]
     fn holding_belongs_to_closed_pairs() {
         // Hydrogen: 2 nucleons hold, its lone electron is open.
         assert_eq!(hold(1), 2);
-        // Helium closes its band: 4 nucleons and 2 paired electrons.
+        // Helium closes its shell: 4 nucleons and 2 paired electrons.
         assert_eq!(hold(2), 6);
-        // Z = 4: 8 nucleons; band 1's pair holds, band 2's two are open.
-        assert_eq!(hold(4), 8 + 2);
+        // Z = 4: 8 nucleons; shell 2's round shape is paired, so all hold.
+        assert_eq!(hold(4), 8 + 4);
     }
 
     #[test]
     fn compounds_close_by_pairing_across_atoms() {
         assert!(closes(&[1, 1]), "two single bonders pair");
-        assert!(closes(&[4, 1, 1]), "a double bonder with two singles");
-        assert!(!closes(&[4, 1]), "one bond left open");
+        assert!(closes(&[6, 1, 1]), "a double bonder with two singles");
+        assert!(!closes(&[6, 1]), "one bond left open");
         assert!(!closes(&[2, 1]), "a closed atom bonds nothing");
         assert!(!closes(&[1]), "no partner");
     }

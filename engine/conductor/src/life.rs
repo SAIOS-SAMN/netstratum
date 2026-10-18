@@ -537,8 +537,9 @@ mod tests {
 
     #[test]
     fn a_world_reads_its_heat_and_media() {
-        // Hydrogen (single bond) and oxygen-like Z = 4 (two bonds) at 60 bells.
-        let matter: Manifest = [("Z001".to_string(), ratio(10, 1)), ("Z004".to_string(), ratio(5, 1))].into();
+        // Hydrogen (single bond) and a two-bond kind at 60 bells: Z = 6 on the
+        // harmonic atom (Z = 4 pairs its round shape and bonds nothing).
+        let matter: Manifest = [("Z001".to_string(), ratio(10, 1)), ("Z006".to_string(), ratio(5, 1))].into();
         let w = read(vec![1, 1, 1], &matter, &ratio(60, 1), &ratio(59, 60), &ratio(1, 1), &ratio(1_000_000, 1), 240).unwrap();
         assert_eq!(w.heat, ratio(1000, 1));
         let heavy = read(vec![1, 1, 1], &matter, &ratio(60, 1), &ratio(59, 60), &ratio(3, 1), &ratio(1, 1), 240).unwrap();
@@ -548,11 +549,11 @@ mod tests {
         // echo 60, after the galaxy's 240-bell delay.
         assert_eq!(wake_bell(&w, 1, 60), Some(240 + 60 * 60));
         assert_eq!(recoherences_needed(&ratio(1, 2), &ratio(0, 1)), None, "under a halving, nothing carries");
-        assert!(w.chemical.is_some(), "1 + 4 close and hold at 1,000 K");
+        assert!(w.chemical.is_some(), "1 + 6 close and hold at 1,000 K");
         assert!(w.geologic.is_some());
         assert_eq!(w.informational, Some(ratio(59, 1)));
         assert_eq!(w.gases, vec![(2, ratio(10, 1))], "hydrogen is the volatile");
-        assert!(w.core > ratio(0, 1), "Z = 4 forms the core");
+        assert!(w.core > ratio(0, 1), "Z = 6 forms the core");
         // At its own hold as the reference, hydrogen has λ = 1: one halving
         // lost is the bound, so half is kept.
         assert_eq!(atmosphere(&w, &w.hold), ratio(10, 1));
