@@ -278,7 +278,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     if chi > ratio(0, 1) {
                         for (k, a) in sys.kept.clone() {
                             let left = a.clone() - back.get(&k).cloned().unwrap_or_else(|| ratio(0, 1));
-                            let w = cfe::world::smelt_resource(&(left.clone() * crate::flows::open(&k) * chi.clone())).min(left);
+                            let w = crate::pulse::nucleus(&(left.clone() * crate::flows::open(&k) * chi.clone())).min(left);
                             if w > ratio(0, 1) {
                                 *back.entry(k).or_insert_with(|| ratio(0, 1)) += w;
                             }
@@ -319,7 +319,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             let slipped = (c_before - c_sg).max(ratio(0, 1)) * above;
             for (k, a) in sys.kept.clone() {
                 let left = a.clone() - back.get(&k).cloned().unwrap_or_else(|| ratio(0, 1));
-                let d = cfe::world::smelt_resource(&(left.clone() * slipped.clone())).min(left);
+                let d = crate::pulse::nucleus(&(left.clone() * slipped.clone())).min(left);
                 if d > ratio(0, 1) {
                     *back.entry(k).or_insert_with(|| ratio(0, 1)) += d;
                 }
@@ -360,7 +360,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     if due > 0 {
                         let left = fuel.clone() / Ratio::from_integer(num_bigint::BigInt::from(2).pow(due));
                         // Whole grains of the product: two fuel grains each.
-                        let made = cfe::world::smelt_resource(&((fuel.clone() - left) / ratio(2, 1)));
+                        let made = crate::pulse::nucleus(&((fuel.clone() - left) / ratio(2, 1)));
                         if made > ratio(0, 1) {
                             let spin = mass(&sys.total()) * sys.ell.clone();
                             less(&mut sys.kept, &[(key.clone(), made.clone() * ratio(2, 1))].into());
@@ -453,7 +453,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 let mut members: Vec<(Ratio, Ratio, Vec<Ratio>)> = Vec::new();
                 for (j, s) in shares {
                     let x = &mut core.flows[j];
-                    let amount = cfe::world::smelt_resource(&(x.amount.clone() * s)).min(x.amount.clone());
+                    let amount = crate::pulse::nucleus(&(x.amount.clone() * s)).min(x.amount.clone());
                     if amount <= ratio(0, 1) {
                         continue;
                     }

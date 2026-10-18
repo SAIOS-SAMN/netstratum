@@ -28,10 +28,20 @@ use std::path::Path;
 /// matter resource as `resource:<name>`.
 pub type Manifest = BTreeMap<String, Ratio>;
 
-/// The deployment's grain (the resource ledger's, 1/1024; the element
-/// stocks' 1/64 lies on it).
+/// The deployment's grain: ONE NUCLEUS (operator 2026-10-18, the package
+/// as an element recipe: "every kind in the recipe is carried, never
+/// grain-dropped"). Matter is counted in nuclei; nothing smaller exists, so
+/// an amount floors to whole nuclei, exact and bounded, and a kind of a few
+/// nuclei still moves, burns and is captured. (Era 0's resource ledger keeps
+/// its own 1/1024.)
 fn grain(x: &Ratio) -> Ratio {
-    cfe::world::smelt_resource(x)
+    nucleus(x)
+}
+
+/// An amount floored to whole nuclei (`1024 · 60³⁰` nuclei an amount unit).
+pub fn nucleus(x: &Ratio) -> Ratio {
+    let grid = nuclei_per_grain() * num_bigint::BigInt::from(1024);
+    Ratio::new(x.numer() * &grid / x.denom(), grid)
 }
 
 /// Mass for the turning law: each grain of Z holds its atom's rings
@@ -150,13 +160,12 @@ pub fn from_nuclei(nuclei: &Nuclei) -> (Manifest, Nuclei) {
     let per = nuclei_per_grain();
     let mut grains = Manifest::new();
     let mut unformed = Nuclei::new();
+    // Every kind carried in whole nuclei, however few (the package's
+    // recipe; never dropped below a grain). The unformed ledger stays empty.
+    let _ = &mut unformed;
     for (z, count) in nuclei {
-        let (whole, rest) = (count / &per, count % &per);
-        if whole > num_bigint::BigInt::from(0) {
-            grains.insert(format!("Z{z:03}"), Ratio::new(whole, num_bigint::BigInt::from(1024)));
-        }
-        if rest > num_bigint::BigInt::from(0) {
-            unformed.insert(*z, rest);
+        if *count > num_bigint::BigInt::from(0) {
+            grains.insert(format!("Z{z:03}"), Ratio::new(count.clone(), per.clone() * num_bigint::BigInt::from(1024)));
         }
     }
     (grains, unformed)
@@ -188,7 +197,9 @@ pub fn out_nuclei(grains: &Manifest, unformed: &Nuclei) -> Nuclei {
 pub fn founding_shape(nuclei: &num_bigint::BigInt) -> Nuclei {
     let mut out = Nuclei::new();
     let mut count = Ratio::from_integer(nuclei.clone());
-    for z in 1u16..=118 {
+    // No cap: the chain runs until a Z falls below one nucleus (the
+    // package's recipe ends where the chain does; no Earth table's 118).
+    for z in 1u16..=u16::MAX {
         let held = cfe::almanac::atom::atom(u32::from(z)).map(|a| ratio(i64::from(3 * u32::from(z) - a.unpaired), i64::from(3 * u32::from(z)))).unwrap_or_else(|| ratio(1, 1));
         count = count * ratio(1, 2) * held;
         let whole = count.floor().to_integer();
