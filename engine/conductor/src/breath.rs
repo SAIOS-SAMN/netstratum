@@ -186,6 +186,19 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             Some((p_g, h_g, _)) if enc.is_some() => crate::formation::collide_stars(std::mem::take(&mut core.satellites), c_pre, &scale_pre, h_g, p_g, &g_before, enc.as_ref().expect("checked")),
             _ => (std::mem::take(&mut core.satellites).into_iter().zip(c_pre).collect(), 0, 0),
         };
+        // WHERE LEAVING MATTER IS SET DOWN (with xylarium; the wind law: the
+        // outflow ends at the star's rim): at the edge of the star's own
+        // region, R_s(1 + e) with e = H_s/(H_s + H_g), never at its orbit,
+        // where the star would recapture it at once.
+        let beyond = |b: &Body| -> Ratio {
+            match &pre {
+                Some((_, h_g, _)) if !g_before.is_zero() => {
+                    let h_s = mass(&b.total()) / g_before.clone();
+                    crate::ring::grain(&(b.radius.clone() * (ratio(1, 1) + h_s.clone() / (h_s + h_g.clone()))))
+                }
+                _ => b.radius.clone(),
+            }
+        };
         // Worlds of emptied remnants, re-anchored after the stars are read.
         let mut orphans: Vec<(Body, Ratio)> = Vec::new();
         merged += star_sticks;
@@ -268,7 +281,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     less(&mut sys.kept, &out);
                     returned += mass(&out) / unit.clone();
                     let orbit = sys.phase.first().cloned().unwrap_or_else(|| ratio(0, 1));
-                    shed.push((out, sys.radius.clone(), vec![orbit, ratio(1, 2)]));
+                    shed.push((out, beyond(&sys), vec![orbit, ratio(1, 2)]));
                 }
                 if mass(&sys.kept).is_zero() {
                     // Emptied: its medium crosses whole; its worlds re-anchor.
@@ -280,7 +293,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         less(&mut left, &w.total());
                     }
                     if !left.is_empty() {
-                        shed.push((left, sys.radius.clone(), sys.phase.clone()));
+                        shed.push((left, beyond(&sys), sys.phase.clone()));
                     }
                     orphans.extend(worlds.into_iter().map(|w| (w, sys.radius.clone())));
                     dissolved += 1;
@@ -290,7 +303,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 // oversteps the rim crosses into the galaxy.
                 let (_, _, escaped) = crate::formation::collide_system(&mut sys, &unit, bell, rang);
                 if !escaped.is_empty() {
-                    shed.push((escaped, sys.radius.clone(), sys.phase.clone()));
+                    shed.push((escaped, beyond(&sys), sys.phase.clone()));
                 }
                 enclosed_in += mass(&sys.total()) / unit.clone();
                 keep.push(sys);
@@ -371,7 +384,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 core.medium_spin += subtree_spin(&sys, &unit);
                 let all = sys.total();
                 returned += mass(&all) / unit.clone();
-                shed.push((all, sys.radius.clone(), sys.phase.clone()));
+                shed.push((all, beyond(&sys), sys.phase.clone()));
                 dissolved += 1;
                 continue;
             }
@@ -392,14 +405,14 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // THE SPIN LEDGER (docs/83 Phase 0): shed matter carries its
             // system's specific spin into the medium.
             core.medium_spin += mass(&back) / unit.clone() * sys.ell.clone();
-            shed.push((back, sys.radius.clone(), sys.phase.clone()));
+            shed.push((back, beyond(&sys), sys.phase.clone()));
             if mass(&sys.kept).is_zero() {
                 // Spent: all it held returns, with all its spin (its orbit's
                 // and everything turning inside it).
                 core.medium_spin += subtree_spin(&sys, &unit);
                 let all = sys.total();
                 returned += mass(&all) / unit.clone();
-                shed.push((all, sys.radius.clone(), sys.phase.clone()));
+                shed.push((all, beyond(&sys), sys.phase.clone()));
                 dissolved += 1;
                 continue;
             }
@@ -466,7 +479,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // overreaches the system's rim crosses into the galaxy.
             let (_, _, escaped) = crate::formation::collide_system(&mut sys, &unit, bell, rang);
             if !escaped.is_empty() {
-                shed.push((escaped, sys.radius.clone(), sys.phase.clone()));
+                shed.push((escaped, beyond(&sys), sys.phase.clone()));
             }
             enclosed_in += mass(&sys.total()) / unit.clone();
             keep.push(sys);
@@ -480,6 +493,83 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 Some(h) => h.satellites.push(w),
                 None => shed.push((w.total(), at, vec![ratio(0, 1); planes])),
             }
+        }
+        // CAPTURE FROM THE GALAXY MEDIUM (with xylarium; the inbound half of a
+        // star's circulation, the wind its outbound): a star holds the
+        // galaxy's motes standing within its gravitational reach, its pinch
+        // `d = R_s·H_s/(H_s + H_g)` (operator: gravity's reach), and in
+        // contact with it by phase, by that contact's share, in whole nuclei;
+        // a mote several stars claim divides among them. What is held joins
+        // the system's own medium at its reach in the system's unit (the
+        // region's edge, d, is the system's rim, 1), its phase relative to
+        // the star's, carrying its own heat. Remnants do not capture.
+        if let (Some((_, h_g, _)), false) = (&pre, scale_pre.is_zero() || g_before.is_zero()) {
+            let reach_m = |x: &crate::flows::Mote| x.ell_o.clone() / h_g.clone();
+            let mut claims: Vec<Vec<(usize, Ratio)>> = vec![Vec::new(); core.flows.len()];
+            for (si, s) in keep.iter().enumerate() {
+                if s.remnant || s.phase.is_empty() {
+                    continue;
+                }
+                let r_s = s.radius.clone() / scale_pre.clone();
+                let h_s = mass(&s.total()) / g_before.clone();
+                let d = r_s.clone() * h_s.clone() / (h_s + h_g.clone());
+                if d.is_zero() {
+                    continue;
+                }
+                let d_s = h_g.clone() / (r_s.clone() + h_g.clone());
+                for (mi, x) in core.flows.iter().enumerate() {
+                    let r_m = reach_m(x);
+                    let gap = if r_m > r_s { r_m.clone() - r_s.clone() } else { r_s.clone() - r_m.clone() };
+                    if gap >= d {
+                        continue;
+                    }
+                    // ONCE PER PASSAGE (with xylarium): the mote is taken each
+                    // time their orbit phases' difference crosses a whole turn
+                    // this echo (the dance's conjunctions, in closed form), a
+                    // whole passage's contact (½) each time; a mote moving
+                    // with the star is never swept again.
+                    let d_m = h_g.clone() / (r_m + h_g.clone());
+                    let psi = x.phase[0].clone() - s.phase[0].clone();
+                    let turn = ratio(2, 1) * (d_m - d_s.clone());
+                    let crossed = (psi.clone() + turn).floor() - psi.floor();
+                    let crossings = if crossed < ratio(0, 1) { -crossed } else { crossed };
+                    // Each passage holds half of what still stands: k passages
+                    // hold 1 − 2^−k (with xylarium).
+                    let k: u32 = crossings.to_integer().try_into().unwrap_or(64u32).min(64);
+                    let c = ratio(1, 1) - Ratio::new(1.into(), num_bigint::BigInt::from(2).pow(k));
+                    if c > ratio(0, 1) {
+                        claims[mi].push((si, c));
+                    }
+                }
+            }
+            for (mi, cl) in claims.into_iter().enumerate() {
+                if cl.is_empty() {
+                    continue;
+                }
+                let n = ratio(cl.len() as i64, 1);
+                let r_m = reach_m(&core.flows[mi]);
+                for (si, c) in cl {
+                    let take = crate::pulse::nucleus(&(core.flows[mi].amount.clone() * c / n.clone())).min(core.flows[mi].amount.clone());
+                    if take <= ratio(0, 1) {
+                        continue;
+                    }
+                    core.flows[mi].amount -= take.clone();
+                    let s = &mut keep[si];
+                    let r_s = s.radius.clone() / scale_pre.clone();
+                    let h_s_g = mass(&s.total()) / g_before.clone();
+                    let d = r_s.clone() * h_s_g.clone() / (h_s_g + h_g.clone());
+                    let gap = if r_m > r_s { r_m.clone() - r_s } else { r_s - r_m.clone() };
+                    let tot = mass(&s.total());
+                    let h_sys = if tot.is_zero() { ratio(1, 1) } else { mass(&s.kept) / tot };
+                    let x = &core.flows[mi];
+                    let phase: Vec<Ratio> = x.phase.iter().zip(&s.phase).map(|(a, b)| { let f = a.clone() - b.clone(); crate::ring::grain(&(f.clone() - f.floor())) }).collect();
+                    let key = x.key.clone();
+                    let mote = crate::flows::Mote { key: key.clone(), amount: take.clone(), ell_o: crate::ring::grain(&(gap / d * h_sys)), ell_c: ratio(0, 1), phase, agitation: x.agitation.clone(), born: bell, vacuum: false };
+                    *s.medium.entry(key).or_insert_with(|| ratio(0, 1)) += take;
+                    s.flows.push(mote);
+                }
+            }
+            core.flows.retain(|x| x.amount > ratio(0, 1));
         }
         core.satellites = keep;
         // THE FLOWS (`crate::flows`; docs/83, xylarium 11.0; STAGED on two

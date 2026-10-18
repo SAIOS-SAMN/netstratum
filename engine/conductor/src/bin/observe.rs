@@ -218,7 +218,8 @@ fn main() {
             println!("CENSUS at beat {now}: medium {:.3e} of the universe, {} galaxies, {} stars ({} burning, {} remnants), {} companions",
                 share(&u.medium), u.cores.len(), stars.len(), stars.len() - remnants, remnants,
                 stars.iter().map(|s| s.satellites.iter().filter(|w| w.born > 0).count()).sum::<usize>());
-            println!("  CLOUDS: hydrogen in the galaxies' and systems' gas {:.3} of all hydrogen", if all_h > 0.0 { gas_h / all_h } else { 0.0 });
+            let sys_h: f64 = stars.iter().map(|s| h_of(&s.medium)).sum();
+            println!("  CLOUDS: hydrogen in the galaxies' and systems' gas {:.3} of all hydrogen; in the SYSTEMS' media alone {:.3e} ({:.3} of all)", if all_h > 0.0 { gas_h / all_h } else { 0.0 }, sys_h, if all_h > 0.0 { sys_h / all_h } else { 0.0 });
             println!("  SYSTEMS by worlds: {}", by.iter().map(|(k, v)| format!("{k}:{v}")).collect::<Vec<_>>().join(" "));
             // Orbits of the multi-world systems: reaches and period ratios.
             let mut shown = 0;
