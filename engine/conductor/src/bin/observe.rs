@@ -211,12 +211,25 @@ fn main() {
             );
             let _ = total;
         }
+        "hearts" => {
+            // What a galaxy's stars hold: each heart's top kinds by share.
+            let Some(i) = num(1).and_then(galaxy) else { return println!("hearts G") };
+            for s in u.cores[i].satellites.iter().take(8) {
+                let m = pulse::mass(&s.kept);
+                let mut ks: Vec<(&String, &Ratio)> = s.kept.iter().collect();
+                ks.sort_by(|a, b| b.1.cmp(a.1));
+                let top: Vec<String> = ks.iter().take(6).map(|(k, a)| format!("{k}:{:.3}", f(&(Ratio::clone(a) * cfe::ratio::ratio(i64::from(k.strip_prefix('Z').and_then(|z| z.parse::<u32>().ok()).map(cfe::almanac::atom::hold).unwrap_or(1)), 1) / m.clone())))).collect();
+                println!("  star born {} remnant {} heart {:.3e}: {}", s.born, s.remnant, f(&m), top.join(" "));
+            }
+        }
         "formation" => {
             for c in &u.cores {
                 let total = pulse::mass(&c.total());
                 let metal = c.satellites.iter().filter(|s| s.kept.keys().any(|k| k != "Z001" && k != "Z002")).count();
+                let remnants = c.satellites.iter().filter(|s| s.remnant).count();
+                let with_h = c.satellites.iter().filter(|s| s.kept.get("Z001").is_some_and(|a| *a > ratio(0, 1))).count();
                 println!(
-                    "  galaxy {:>2}: disc {:.3} gas {:.3} ({} motes, {} jet batches); first echo bell {}; {} stars ({metal} with metals), {} worlds",
+                    "  galaxy {:>2}: disc {:.3} gas {:.3} ({} motes, {} jet batches); first echo bell {}; {} stars ({metal} with metals, {remnants} remnants, {with_h} holding hydrogen), {} worlds",
                     c.path[0], of(&pulse::mass(&c.kept), &total), of(&pulse::mass(&c.medium), &total), c.gas.len(), c.gas.iter().filter(|g| g.born > 0).count(),
                     60 + f(&c.radius) as u64, c.satellites.len(), c.satellites.iter().map(|s| s.satellites.len()).sum::<usize>()
                 );

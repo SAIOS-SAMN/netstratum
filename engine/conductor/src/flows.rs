@@ -600,7 +600,36 @@ pub fn chains(motes: &[Mote], h: &Ratio, p: &Ratio, total: &Ratio) -> Vec<Chain>
 /// nothing is claimed twice). Returns, per holding chain, its reach and the
 /// share of each mote it takes.
 pub fn clumps(motes: &[Mote], h: &Ratio, p: &Ratio, total: &Ratio) -> Vec<(Ratio, Vec<(usize, Ratio)>)> {
-    chains(motes, h, p, total)
+    clumps_of(motes, chains(motes, h, p, total))
+}
+
+/// STREAMING BY FORCE (operator 2026-10-18: "jetstreams depending on their
+/// force are either continuums or vacuums in the filament … analogous to the
+/// gulf stream"): a mote's stream is READ, never labelled by its origin.
+/// Where the jet's push at it (`p·ρ·δ_u`, the kick's own reading) beats the
+/// hold of the filament it stands in (`λ/(1 + λ)`), it is carried in the
+/// CONTINUUM, one moving body with the current; where the hold beats the
+/// push, the jet cannot fill the channel and it drifts in the VACUUM, the
+/// thin counter-moving flank. A mote in no filament (in transit on the
+/// axial leg) is carried. Returns how many stand in the vacuum.
+pub fn stream(motes: &mut [Mote], chains: &[Chain], push: &Ratio) -> usize {
+    let mut hold: Vec<Option<Ratio>> = vec![None; motes.len()];
+    for c in chains {
+        for &j in &c.members {
+            hold[j] = Some(c.bind.clone());
+        }
+    }
+    let mut vacuum = 0;
+    for (x, h) in motes.iter_mut().zip(hold) {
+        x.vacuum = h.is_some_and(|h| h >= *push);
+        vacuum += usize::from(x.vacuum);
+    }
+    vacuum
+}
+
+/// The clumps of chains already read: those that hold collapse.
+pub fn clumps_of(motes: &[Mote], chains: Vec<Chain>) -> Vec<(Ratio, Vec<(usize, Ratio)>)> {
+    chains
         .into_iter()
         .filter(|c| c.holds())
         .map(|c| {

@@ -16,13 +16,11 @@
 //!   harmonics in twelve dimensions, `C(l + 11, 11) − C(l + 9, 11)` = 1, 12,
 //!   77, 352, …, each holding one counter-turning pair. Shells hold 2, 26,
 //!   180, …; Earth's `2l + 1` is refused.
-//! - Electrons are placed inside out, each in the lowest shell with room;
-//!   within a shell the most penetrating shape (low l, nearest the nucleus at
-//!   its closest approach) fills first; a new electron takes a free
-//!   orientation before it pairs. (Crossings between shells, a later shell's
-//!   penetrating winding ahead of an earlier shell's open one, are to be READ
-//!   from the enclosed charge once the radius law keeps shells nested; not
-//!   stated, and Earth's n + l order is refused.)
+//! - Each electron takes the TIGHTEST open winding (the charge it encloses
+//!   at its closest approach over its period), on the ring-density radius
+//!   law, nested by construction (`build`); a free orientation before it
+//!   pairs. Crossings between shells are read, never stated; Earth's n + l
+//!   order is refused.
 //! - An orbit closes in a whole number of ticks: shell n turns once in n, so
 //!   its radius is `r = Q · n` and its speed `v = Q`, Q the charge it
 //!   encloses (the nucleus less the shells further in).
@@ -74,42 +72,63 @@ pub fn atom(z: u32) -> Option<Atom> {
     if z == 0 {
         return None;
     }
-    // Shells inside out; within the outermost, shapes by penetration.
-    let (mut left, mut depth, mut inner) = (u64::from(z), 0u32, 0u64);
-    loop {
-        depth += 1;
-        let room = shell_room(depth);
-        if left <= room {
-            break;
-        }
-        left -= room;
-        inner += room;
+    static MEMO: std::sync::OnceLock<std::sync::Mutex<std::collections::BTreeMap<u32, Atom>>> = std::sync::OnceLock::new();
+    let memo = MEMO.get_or_init(|| std::sync::Mutex::new(std::collections::BTreeMap::new()));
+    if let Some(a) = memo.lock().ok().and_then(|m| m.get(&z).cloned()) {
+        return Some(a);
     }
-    let outer = left;
-    // Within the outermost shell: shapes fill low l first, each taking free
-    // orientations before pairing; the full shapes are paired.
-    let (mut rest, mut unpaired) = (outer, 0u64);
-    for l in 0..depth {
-        let cap = 2 * orientations(l);
-        let here = rest.min(cap);
-        let o = orientations(l);
-        unpaired += if here <= o { here } else { cap - here };
-        rest -= here;
-        if rest == 0 {
-            break;
-        }
+    let a = build(z);
+    if let Ok(mut m) = memo.lock() {
+        m.insert(z, a.clone());
     }
+    Some(a)
+}
+
+/// THE FILL (operators 2026-10-18, with xylarium; the ring-density radius
+/// law, ruled): a ring reaching shell n is held by every bell inside it, the
+/// nucleus and every inner electron, so `H(<r) = Z` and each shell's reach
+/// adds `n·Z`: `R_n = Z·n(n + 1)/2`, nested by construction. A winding of
+/// shape l comes closest at `(l + 1)/n` of its shell's reach,
+/// `Z·(n + 1)(l + 1)/2`, and there it encloses the nucleus less every
+/// electron of another shell standing inside, `m(m + 1) < (n + 1)(l + 1)`.
+/// Its TIGHTNESS is that charge over its period n. Each electron takes the
+/// tightest open winding (a free orientation before it pairs); crossings
+/// between shells are READ, never stated (Earth's n + l refused). On an
+/// exact tie the inner shell, then the lower shape, goes first (the
+/// carrier's choice).
+fn build(z: u32) -> Atom {
+    let mut occ: std::collections::BTreeMap<(u32, u32), u64> = std::collections::BTreeMap::new();
+    for _ in 0..z {
+        let nmax = occ.keys().map(|(n, _)| *n).max().unwrap_or(0) + 1;
+        let mut best: Option<(Ratio, u32, u32)> = None;
+        for n in 1..=nmax {
+            for l in 0..n {
+                if occ.get(&(n, l)).copied().unwrap_or(0) >= 2 * orientations(l) {
+                    continue;
+                }
+                let reach = u64::from(n + 1) * u64::from(l + 1);
+                let inside: u64 = occ.iter().filter(|((m, _), _)| *m != n && u64::from(*m) * u64::from(m + 1) < reach).map(|(_, v)| *v).sum();
+                let t = ratio(i64::from(z) - inside as i64, i64::from(n));
+                let better = match &best {
+                    None => true,
+                    Some((bt, bn, bl)) => t > *bt || (t == *bt && (n, l) < (*bn, *bl)),
+                };
+                if better {
+                    best = Some((t, n, l));
+                }
+            }
+        }
+        let (_, n, l) = best.expect("a shell always has room");
+        *occ.entry((n, l)).or_insert(0) += 1;
+    }
+    let depth = occ.keys().map(|(n, _)| *n).max().unwrap_or(1);
+    let outer: u64 = occ.iter().filter(|((n, _), _)| *n == depth).map(|(_, v)| *v).sum();
+    let inner: u64 = occ.iter().filter(|((n, _), _)| *n < depth).map(|(_, v)| *v).sum();
+    let unpaired: u64 = occ.iter().map(|((_, l), v)| { let o = orientations(*l); if *v <= o { *v } else { 2 * o - v } }).sum();
+    let closed = occ.iter().all(|((_, l), v)| *v == 2 * orientations(*l)) && (0..depth).all(|l| occ.get(&(depth, l)).copied().unwrap_or(0) == 2 * orientations(l));
     let to32 = |x: u64| u32::try_from(x).unwrap_or(u32::MAX);
     let enclosed = to32(u64::from(z) - inner);
-    Some(Atom {
-        z,
-        depth,
-        outer: to32(outer),
-        unpaired: to32(unpaired),
-        closed: outer == shell_room(depth),
-        enclosed,
-        tightness: ratio(i64::from(enclosed), i64::from(depth)),
-    })
+    Atom { z, depth, outer: to32(outer), unpaired: to32(unpaired), closed, enclosed, tightness: ratio(i64::from(enclosed), i64::from(depth)) }
 }
 
 /// A CANONICAL ELEMENT (the refactor onto era 1, 2026-10-15): era 1's matter

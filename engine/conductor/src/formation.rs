@@ -901,7 +901,7 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64) -> 
         let siblings: Vec<u64> = worlds.iter().map(|w: &crate::pulse::Body| w.path[sys.path.len()]).collect();
         let mut path = sys.path.clone();
         path.push(crate::ring::birth_key(0, &radius, &inside, &siblings));
-        worlds.push(crate::pulse::Body { path, radius, period, kept, satellites: Vec::new(), medium: Manifest::new(), ell: spin, medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: m, flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase, load: ratio(0, 1), bell: Vec::new() });
+        worlds.push(crate::pulse::Body { path, radius, period, kept, satellites: Vec::new(), medium: Manifest::new(), ell: spin, medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: m, flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase, load: ratio(0, 1), bell: Vec::new(), remnant: false });
         if ignites {
             // A star of its system: born marks it (worlds are born 0).
             if let Some(w) = worlds.last_mut() {
@@ -1069,6 +1069,8 @@ pub fn collide_stars(stars: Vec<crate::pulse::Body>, c_pre: Vec<Ratio>, scale: &
                 head.medium_spin += b.medium_spin;
                 head.load += b.load;
                 head.born = head.born.min(b.born);
+                // A merger with a remnant is a remnant.
+                head.remnant = head.remnant || b.remnant;
             }
             head.radius = crate::ring::grain(&radius);
             head.ell = crate::ring::grain(&ell);

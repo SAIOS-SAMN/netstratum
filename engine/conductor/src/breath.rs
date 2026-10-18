@@ -186,6 +186,8 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             Some((p_g, h_g, _)) if enc.is_some() => crate::formation::collide_stars(std::mem::take(&mut core.satellites), c_pre, &scale_pre, h_g, p_g, &g_before, enc.as_ref().expect("checked")),
             _ => (std::mem::take(&mut core.satellites).into_iter().zip(c_pre).collect(), 0, 0),
         };
+        // Worlds of emptied remnants, re-anchored after the stars are read.
+        let mut orphans: Vec<(Body, Ratio)> = Vec::new();
         merged += star_sticks;
         encounters += star_bounces;
         for (mut sys, c_was) in met {
@@ -238,6 +240,55 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         sys.phase[k] = crate::ring::grain(&(g.clone() - g.floor()));
                     }
                 }
+            }
+            // THE REMNANT (the closed limit ruled (a), operator 2026-10-18:
+            // "keep the stars recycling as accurate as possible ... so that we
+            // can have this universe be self sustaining"; with xylarium): a
+            // spent star stands at its throat condition, a small throat whose
+            // other face is its galactic core. Each echo it passes `δ(r)/2` of
+            // its CLOSING mass, kind by kind as it holds them, through that
+            // face: into the galaxy's flows on the outbound axial leg (loop
+            // phase ½). It burns, bursts and sheds nothing else. Emptied, it is
+            // gone, and its worlds re-anchor on the nearest star still burning.
+            if sys.remnant {
+                let d = match (&pre, &enc) {
+                    (Some((_, h_g, _)), Some(enc)) if !scale_pre.is_zero() => enc.reach(&(sys.radius.clone() / scale_pre.clone() * h_g.clone())).1,
+                    _ => ratio(1, 2),
+                };
+                let now = mass(&sys.kept);
+                if !now.is_zero() {
+                    let share = (d / ratio(2, 1) * sys.state.clone() / now).min(ratio(1, 1));
+                    let mut out = crate::pulse::Manifest::new();
+                    for (k, a) in &sys.kept {
+                        let x = if share == ratio(1, 1) { a.clone() } else { crate::pulse::nucleus(&(a.clone() * share.clone())).min(a.clone()) };
+                        if x > ratio(0, 1) {
+                            out.insert(k.clone(), x);
+                        }
+                    }
+                    less(&mut sys.kept, &out);
+                    returned += mass(&out) / unit.clone();
+                    let orbit = sys.phase.first().cloned().unwrap_or_else(|| ratio(0, 1));
+                    shed.push((out, sys.radius.clone(), vec![orbit, ratio(1, 2)]));
+                }
+                if mass(&sys.kept).is_zero() {
+                    // Emptied: its medium crosses whole; its worlds re-anchor.
+                    let all = sys.total();
+                    let worlds = std::mem::take(&mut sys.satellites);
+                    let rest = all.into_iter().filter(|(_, a)| *a > ratio(0, 1)).collect::<crate::pulse::Manifest>();
+                    let mut left = rest;
+                    for w in &worlds {
+                        less(&mut left, &w.total());
+                    }
+                    if !left.is_empty() {
+                        shed.push((left, sys.radius.clone(), sys.phase.clone()));
+                    }
+                    orphans.extend(worlds.into_iter().map(|w| (w, sys.radius.clone())));
+                    dissolved += 1;
+                    continue;
+                }
+                enclosed_in += mass(&sys.total()) / unit.clone();
+                keep.push(sys);
+                continue;
             }
             let kept_before = mass(&sys.kept);
             // THE OUTBURST (operator: made IN the star; with xylarium): on
@@ -348,7 +399,10 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // magnetism (3Z) is conserved; the system's spin is kept exact as
             // its holding transduces.
             let in_phase = coherence(&slip(&own, bell, t_u));
-            for z in [1u32, 2] {
+            // EVERY KIND A RUNG (the law names no rungs: Z + Z → 2Z wherever
+            // the fusion changes the open count, `formation::burn`).
+            let rungs: Vec<u32> = sys.kept.keys().filter_map(|k| k.strip_prefix('Z').and_then(|z| z.parse::<u32>().ok())).collect();
+            for z in rungs {
                 let key = format!("Z{z:03}");
                 if !sys.kept.contains_key(&key) {
                     continue;
@@ -376,6 +430,22 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     }
                 }
             }
+            // THE CLOSED LIMIT: no kind it holds can burn on (whatever its
+            // rhythm), so it is spent and becomes a remnant, its closing mass
+            // recorded.
+            let share_now = if mass(&sys.total()).is_zero() { ratio(0, 1) } else { mass(&sys.kept) / mass(&sys.total()) };
+            // Spent means it cannot fuse one pair of nuclei within an echo even
+            // in full step: matter is counted in nuclei, so a burn slower
+            // than that makes nothing, ever, at its rate.
+            let rings_echo = rings_at(bell).saturating_sub(rings_at(bell.saturating_sub(t_u))).max(1);
+            let pair = Ratio::new(2.into(), crate::pulse::nuclei_per_grain() * num_bigint::BigInt::from(1024));
+            let can_burn = sys.kept.iter().any(|(k, a)| {
+                *a >= pair && k.strip_prefix('Z').and_then(|z| z.parse::<u32>().ok()).is_some_and(|z| crate::formation::burn(&sys.kept, &share_now, z, &ratio(1, 1)).is_some_and(|(every, _)| every <= rings_echo))
+            });
+            if !can_burn && !sys.kept.is_empty() {
+                sys.remnant = true;
+                sys.state = mass(&sys.kept);
+            }
             // COLLISIONS in the system's own medium: worlds grow; what
             // overreaches the system's rim crosses into the galaxy.
             let (_, _, escaped) = crate::formation::collide_system(&mut sys, &unit, bell);
@@ -384,6 +454,16 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             }
             enclosed_in += mass(&sys.total()) / unit.clone();
             keep.push(sys);
+        }
+        // RE-ANCHORING (with xylarium): an emptied remnant's worlds pass to the
+        // nearest star still burning, by reach; with none, they cross whole
+        // into the galaxy's flows.
+        for (w, at) in orphans {
+            let host = keep.iter_mut().filter(|s| !s.remnant).min_by_key(|s| if s.radius > at { s.radius.clone() - at.clone() } else { at.clone() - s.radius.clone() });
+            match host {
+                Some(h) => h.satellites.push(w),
+                None => shed.push((w.total(), at, vec![ratio(0, 1); planes])),
+            }
         }
         core.satellites = keep;
         // THE FLOWS (`crate::flows`; docs/83, xylarium 11.0; STAGED on two
@@ -408,7 +488,9 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             for (k, a) in gathered {
                 let ell_o = p.clone() * mean.clone() / crate::flows::weight(&k) + g_rate.clone() * turning.0.clone();
                 let ell_c = g_rate.clone() * turning.1.clone();
-                core.flows.push(crate::flows::Mote { key: k, amount: a, ell_o: crate::ring::grain(&ell_o), ell_c: crate::ring::grain(&ell_c), phase: zero_phase.clone(), agitation: ratio(0, 1), born: bell, vacuum: true });
+                // It arrives with the Wellspring's winding: its loop leads its orbit by
+                // the push share (½ at the universe tier), the jet's helix.
+                core.flows.push(crate::flows::Mote { key: k, amount: a, ell_o: crate::ring::grain(&ell_o), ell_c: crate::ring::grain(&ell_c), phase: vec![ratio(0, 1), ratio(1, 2)], agitation: ratio(0, 1), born: bell, vacuum: true });
             }
             // Shed matter crosses whole with its star's orbit (`ℓ = R·H`).
             for (m, r, star_phase) in shed {
@@ -444,7 +526,10 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // THE CLUMPS, where the motes are; the echo compresses only
             // its coherent part (recoherence).
             let h_units = mass(&core.kept) / unit.clone() + state.clone();
-            let clumps = crate::flows::clumps(&core.flows, &h, &p, &g_mass);
+            let chains = crate::flows::chains(&core.flows, &h, &p, &g_mass);
+            // The stream of every mote, read by force against its filament.
+            let _ = crate::flows::stream(&mut core.flows, &chains, &(p.clone() * g_rate.clone() * delta_u.clone()));
+            let clumps = crate::flows::clumps_of(&core.flows, chains);
             // Each take: (reach, clump, agitation, the star's own spin, phases).
             let mut takes: Vec<(Ratio, crate::pulse::Manifest, Ratio, Ratio, Vec<Ratio>)> = Vec::new();
             for (reach, shares) in clumps {
@@ -516,7 +601,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 // throat condition) in `reservoir`: decoherence sheds only
                 // what it holds above it.
                 let ignition = crate::formation::ignition_share(&a_clump).unwrap_or_else(|| ratio(0, 1));
-                let mut sys = Body { path, radius: r_guess, period: ratio(0, 1), kept, satellites: orbs, medium, ell: ratio(0, 1), medium_spin, gas: Vec::new(), born: bell, state: held_at_birth, flows: disc_motes, reservoir: ignition, turning: spin_own, bell: phases_own.clone(), phase: phases_own, load: world_load };
+                let mut sys = Body { path, radius: r_guess, period: ratio(0, 1), kept, satellites: orbs, medium, ell: ratio(0, 1), medium_spin, gas: Vec::new(), born: bell, state: held_at_birth, flows: disc_motes, reservoir: ignition, turning: spin_own, bell: phases_own.clone(), phase: phases_own, load: world_load, remnant: false };
                 let internal = subtree_spin(&sys, &unit);
                 let own = taken - internal;
                 sys.ell = crate::ring::grain(&(own.clone() / m_u.clone()));
