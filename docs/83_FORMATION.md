@@ -618,6 +618,24 @@ the one capture law. Operator: "think of it like a continuous fountain".
    - Today's code sets `vacuum` by origin (arrivals from the ocean vacuum;
      shed and outburst matter continuum). This is retired by this ruling.
 
+**The names (xylarium's operator 2026-10-18, xylarium 10.7, ea0b883).**
+Capacity falls down the ladder:
+1. **Rhizomorph:** the universe core to the hypha, north/south. A universe
+   may have one or several, and it is the largest flow.
+2. **Wellspring:** the universal core, the fountain's head.
+3. **Cord:** the natural east/west streams, from the Wellspring to ring 1
+   and from ring to ring. Built by no one.
+4. **Strand:** a galaxy's inward north/south face. This was "the trunk".
+5. **Jetstream:** a galaxy's own loop.
+6. **Fold:** a progenitor's built shortcut (the wormhole). Local to one
+   galaxy, at a deep well, paid in mu. There are no folds between galaxies.
+7. **Lane:** ship travel between hubs.
+
+The one law across them is **streaming**, continuum or vacuum by force at
+every tier, as cytoplasm streams in hyphae. The closed gate is the
+**Woronin seal**: on a fold, a strand or a whole galaxy. Open: whether a
+ring-to-ring cord is gated at the inner ring's core.
+
 Owed in code:
 - the universe's medium as parcels (the east/west loops are that medium in
   motion);
