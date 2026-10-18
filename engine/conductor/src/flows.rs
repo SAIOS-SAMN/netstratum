@@ -310,118 +310,126 @@ pub fn read_cut(motes: &[Mote], h: &Ratio, p: &Ratio) -> (Manifest, Manifest) {
     (kept, free)
 }
 
-/// A candidate clump about mote `i`: its members (those within its
-/// dispersal band in reach, weighted by the product over planes of their
-/// in-step shares) and its terms: (binding `x/(k + x)` of their combined
-/// holding and magnetism, their agitation, the unlocked face `½(1 − δ)`, the
-/// shear `H·w/(k(k + w))`).
-pub fn candidate(motes: &[Mote], h: &Ratio, p: &Ratio, total: &Ratio, i: usize) -> Option<(Vec<(usize, Ratio)>, [Ratio; 4])> {
+/// A FILAMENT read whole (operators 2026-10-18, the cyclotronic chain (7):
+/// "judged whole, with extent read as shares from band edge to band edge").
+pub struct Chain {
+    /// Its members, by index.
+    pub members: Vec<usize>,
+    /// Its holding-weighted reach.
+    pub reach: Ratio,
+    /// Its binding `λ/(1 + λ)`, `λ` its holding and magnetism over its apartness.
+    pub bind: Ratio,
+    /// Its holding-weighted agitation.
+    pub agitation: Ratio,
+    /// The unlocked face `½(1 − δ)` at its reach.
+    pub face: Ratio,
+    /// Its extent as a share on the sphere, edge to edge.
+    pub apart: Ratio,
+}
+
+impl Chain {
+    /// It holds where its binding meets its agitation and the unlocked face.
+    pub fn holds(&self) -> bool {
+        self.bind >= self.agitation.clone() + self.face.clone()
+    }
+}
+
+/// THE CHAINS of a galaxy's disc leg (operators 2026-10-18: membership is
+/// the CHAIN, never a centre; with xylarium). Motes on one face (the same
+/// hemisphere in every plane, the S⁰ face test) whose dispersal bands
+/// `r(1 ± p)` overlap link, and the links are TRANSITIVE: a chain is a
+/// connected run of overlapping bands on one face, read whole, no centre
+/// chosen, no order (each face class sorted by its bands' inner edges, read
+/// at n·log n). Each chain is judged by the filament law against its own
+/// EXTENT as a share on the sphere, edge to edge, never a length (operator:
+/// "the only straight lines should be wormholes"): along the ring its orbit
+/// phases' extent, `in_step`; across reach the deficit contrast of its
+/// innermost member's INNER edge and its outermost member's OUTER edge
+/// (a point has its own dispersal, so a lone mote's apartness is its own
+/// band's, never zero). `apart = 1 − in_step(extent)·(1 − T_edges)`,
+/// `λ = x/apart` with x its holding and magnetism in the galaxy's unit. A
+/// long thin chain spreads faster than it gathers and fails; a dense one
+/// binds.
+pub fn chains(motes: &[Mote], h: &Ratio, p: &Ratio, total: &Ratio) -> Vec<Chain> {
+    if total.is_zero() {
+        return Vec::new();
+    }
+    let half = ratio(1, 2);
     let reach = |x: &Mote| x.ell_o.clone() / h.clone();
-    let r = reach(&motes[i]);
-    if r.is_zero() || total.is_zero() {
-        return None;
-    }
-    let near = |j: usize| -> Ratio {
-        let rj = reach(&motes[j]);
-        if rj < r.clone() * (ratio(1, 1) - p.clone()) || rj > r.clone() * (ratio(1, 1) + p.clone()) {
-            return ratio(0, 1);
+    let lo = |x: &Mote| reach(x) * (ratio(1, 1) - p.clone().min(ratio(1, 1)));
+    let hi = |x: &Mote| reach(x) * (ratio(1, 1) + p.clone());
+    let delta = |r: &Ratio| h.clone() / (r.clone() + h.clone());
+    // Face classes: the hemisphere in every plane.
+    let mut classes: std::collections::BTreeMap<Vec<bool>, Vec<usize>> = std::collections::BTreeMap::new();
+    for (i, x) in motes.iter().enumerate() {
+        if on_disc_leg(x) && !reach(x).is_zero() {
+            classes.entry((0..PLANES).map(|k| frac(&x.phase[k]) < half).collect()).or_default().push(i);
         }
-        // MEMBERSHIP (with xylarium): on the same hemisphere as the centre
-        // in every plane (the S⁰ face test), whole; coincidence decides who
-        // belongs, not how much is taken.
-        let half = ratio(1, 2);
-        let same = (0..PLANES).all(|k| (frac(&motes[i].phase[k]) < half) == (frac(&motes[j].phase[k]) < half));
-        if same { ratio(1, 1) } else { ratio(0, 1) }
-    };
-    let members: Vec<(usize, Ratio)> = (0..motes.len()).map(|j| (j, near(j))).filter(|(_, c)| *c > ratio(0, 1)).collect();
-    let (mut x, mut a_w, mut held_part) = (ratio(0, 1), ratio(0, 1), ratio(0, 1));
-    for (j, c) in &members {
-        let m = motes[*j].amount.clone() * weight(&motes[*j].key) / total.clone() * c.clone();
-        x += m.clone() * (ratio(1, 1) + open(&motes[*j].key));
-        a_w += m.clone() * motes[*j].agitation.clone();
-        held_part += m;
     }
-    if held_part.is_zero() {
-        return None;
-    }
-    let k = r.clone() + h.clone();
-    let w = ratio(2, 1) * p.clone() * r;
-    let face = (ratio(1, 1) - h.clone() / k.clone()) / ratio(2, 1);
-    let shear = h.clone() * w.clone() / (k.clone() * (k.clone() + w));
-    Some((members, [x.clone() / (k + x), a_w / held_part, face, shear]))
-}
-
-/// THE FILAMENT'S BINDING (xylarium; the clump read in its OWN enclosure,
-/// operator: shares in the body's own enclosure): a group's line holding,
-/// its 3Z over its spread along the ring (its members' phase spread in the
-/// orbit's plane times its reach, never below the coordinate's grain),
-/// `λ/(1 + λ)`; no core in it (the core enters only as the shear capping a
-/// fragment). Diagnostic beside `candidate`.
-pub fn filament(motes: &[Mote], h: &Ratio, total: &Ratio, i: usize, members: &[(usize, Ratio)]) -> Ratio {
-    let r = motes[i].ell_o.clone() / h.clone();
-    if r.is_zero() || total.is_zero() {
-        return ratio(0, 1);
-    }
-    let x = members.iter().fold(ratio(0, 1), |s, (j, c)| s + motes[*j].amount.clone() * weight(&motes[*j].key) / total.clone() * c.clone() * (ratio(1, 1) + open(&motes[*j].key)));
-    let spread = members.iter().map(|(j, _)| ratio(2, 1) * off(&(motes[*j].phase[0].clone() - motes[i].phase[0].clone()))).max().unwrap_or_else(|| ratio(0, 1));
-    let floor = crate::ring::grain(&ratio(1, 1)).max(Ratio::new(1.into(), num_bigint::BigInt::from(60).pow(6)));
-    let lambda = x / (r * spread.max(floor));
-    lambda.clone() / (ratio(1, 1) + lambda)
-}
-
-/// THE CLUMPS, where the motes are: every mote whose candidate binds
-/// at least its agitation, the unlocked face and the shear collapses; a
-/// mote claimed by several centres divides itself by their weights (no
-/// order). Returns, per holding centre, its reach and the share of each
-/// mote it takes.
-pub fn clumps(motes: &[Mote], h: &Ratio, p: &Ratio, total: &Ratio) -> Vec<(Ratio, Vec<(usize, Ratio)>)> {
-    let mut holding: Vec<(usize, Vec<(usize, Ratio)>)> = Vec::new();
-    for i in 0..motes.len() {
-        // Collapse is read on the disc leg only (matter in transit on the
-        // axial leg does not settle).
-        if !on_disc_leg(&motes[i]) {
-            continue;
-        }
-        if let Some((members, [_, a, face, _])) = candidate(motes, h, p, total, i) {
-            let members: Vec<(usize, Ratio)> = members.into_iter().filter(|(j, _)| on_disc_leg(&motes[*j])).collect();
-            // THE FILAMENT LAW (with xylarium; the clump read in its OWN
-            // enclosure, operator: shares in the body's own enclosure): its
-            // line holding binds against its agitation and the unlocked face;
-            // the core enters only as the shear capping a fragment (the
-            // fragment spacing from the filament's width is owed: one clump
-            // a holding filament until then).
-            if filament(motes, h, total, i, &members) >= a + face {
-                holding.push((i, members));
+    let mut out = Vec::new();
+    for (_, mut idx) in classes {
+        idx.sort_by(|a, b| lo(&motes[*a]).cmp(&lo(&motes[*b])).then(a.cmp(b)));
+        let mut runs: Vec<Vec<usize>> = Vec::new();
+        let mut edge = ratio(0, 1);
+        for i in idx {
+            if runs.is_empty() || lo(&motes[i]) > edge {
+                runs.push(Vec::new());
+                edge = hi(&motes[i]);
+            } else if hi(&motes[i]) > edge {
+                edge = hi(&motes[i]);
             }
+            runs.last_mut().expect("pushed").push(i);
+        }
+        for members in runs {
+            let (mut x, mut held, mut a_w, mut r_w) = (ratio(0, 1), ratio(0, 1), ratio(0, 1), ratio(0, 1));
+            for &j in &members {
+                let m = motes[j].amount.clone() * weight(&motes[j].key) / total.clone();
+                x += m.clone() * (ratio(1, 1) + open(&motes[j].key));
+                a_w += m.clone() * motes[j].agitation.clone();
+                r_w += m.clone() * reach(&motes[j]);
+                held += m;
+            }
+            if held.is_zero() {
+                continue;
+            }
+            let inner = members.iter().map(|&j| lo(&motes[j])).min().expect("a member");
+            let outer = members.iter().map(|&j| hi(&motes[j])).max().expect("a member");
+            let (d_in, d_out) = (delta(&inner), delta(&outer));
+            let t_edges = (d_in.clone() - d_out.clone()) / (d_in + d_out);
+            let orbit: Vec<Ratio> = members.iter().map(|&j| frac(&motes[j].phase[0])).collect();
+            let extent = orbit.iter().max().expect("a member").clone() - orbit.iter().min().expect("a member").clone();
+            let apart = ratio(1, 1) - in_step(&extent, &ratio(0, 1)) * (ratio(1, 1) - t_edges);
+            let reach_w = r_w / held.clone();
+            let face = (ratio(1, 1) - delta(&reach_w)) / ratio(2, 1);
+            // A chain with no extent at all (no push to spread it) is not
+            // read as infinitely dense: it does not bind.
+            let bind = if apart.is_zero() { ratio(0, 1) } else { let lambda = x / apart.clone(); lambda.clone() / (ratio(1, 1) + lambda) };
+            out.push(Chain { members, reach: reach_w, bind, agitation: a_w / held, face, apart });
         }
     }
-    // A mote claimed by several holding filaments divides among them.
-    let mut claimed: Vec<i64> = vec![0; motes.len()];
-    for (_, members) in &holding {
-        for (j, _) in members {
-            claimed[*j] += 1;
-        }
-    }
-    holding
+    out
+}
+
+/// THE CLUMPS, where the motes are: every chain that holds collapses, each
+/// member taking its filament's coherence share (a chain is a partition, so
+/// nothing is claimed twice). Returns, per holding chain, its reach and the
+/// share of each mote it takes.
+pub fn clumps(motes: &[Mote], h: &Ratio, p: &Ratio, total: &Ratio) -> Vec<(Ratio, Vec<(usize, Ratio)>)> {
+    chains(motes, h, p, total)
         .into_iter()
-        .map(|(i, members)| {
+        .filter(|c| c.holds())
+        .map(|c| {
             // THE FILAMENT'S COHERENCE WITH THE BELL (with xylarium; the
             // recoherence ruling, "an echo compresses only the coherent
             // part", now the filament's own): the product over planes of the
             // in-step share of its holding-weighted phase against the bell;
             // ONE share, taken from every member alike, so a star's mix is
             // its filament's mix.
-            let m = members.iter().fold(ratio(0, 1), |s, (j, _)| s + motes[*j].amount.clone() * weight(&motes[*j].key));
-            let coherence = if m.is_zero() {
-                ratio(0, 1)
-            } else {
-                (0..PLANES).fold(ratio(1, 1), |c, k| {
-                    let phase = circle_mean(&members.iter().map(|(j, _)| (motes[*j].amount.clone() * weight(&motes[*j].key), motes[*j].phase[k].clone())).collect::<Vec<_>>());
-                    c * in_step(&phase, &ratio(0, 1))
-                })
-            };
-            let shares = members.into_iter().map(|(j, _)| (j, coherence.clone() / ratio(claimed[j].max(1), 1)));
-            (motes[i].ell_o.clone() / h.clone(), shares.collect())
+            let coherence = (0..PLANES).fold(ratio(1, 1), |acc, k| {
+                let phase = circle_mean(&c.members.iter().map(|&j| (motes[j].amount.clone() * weight(&motes[j].key), motes[j].phase[k].clone())).collect::<Vec<_>>());
+                acc * in_step(&phase, &ratio(0, 1))
+            });
+            (c.reach, c.members.into_iter().map(|j| (j, coherence.clone())).collect())
         })
         .collect()
 }

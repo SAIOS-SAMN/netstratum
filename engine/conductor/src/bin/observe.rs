@@ -188,34 +188,14 @@ fn main() {
             }).collect();
             let circ: f64 = c.flows.iter().map(|x| f(&x.ell_c)).fold(0.0, f64::max);
             println!("FLOWS {:?} at beat {now}: H {:.3}, {} motes ({held} wholly held, {gas} wholly gas), reach {r0:.3}..{r1:.3}, phases {phases:?}, max ℓ_c {circ:.3e}, reservoir {:.3e}", c.path, f(&h), c.flows.len(), f(&c.reservoir));
-            let mut best: Option<(f64, String)> = None;
-            let mut fil_best: Option<(f64, String)> = None;
-            let mut fil_hold = 0;
-            for j in 0..c.flows.len() {
-                if let Some((members, [_, a, face, _])) = conductor::flows::candidate(&c.flows, &h, &p, &total, j) {
-                    let fb = conductor::flows::filament(&c.flows, &h, &total, j, &members);
-                    let m = f(&fb) - f(&a) - f(&face);
-                    if m >= 0.0 {
-                        fil_hold += 1;
-                    }
-                    if fil_best.as_ref().map(|(x, _)| m > *x).unwrap_or(true) {
-                        let kinds: Vec<String> = members.iter().map(|(k, w)| format!("{}{}:{:.2}", c.flows[*k].key, if conductor::flows::on_disc_leg(&c.flows[*k]) { "" } else { "*" }, f(w))).collect();
-                        fil_best = Some((m, format!("  best FILAMENT about {} at R {:.3}: {} members [{}], λ/(1+λ) {:.4} vs agitation {:.4} + face {:.4}, margin {:.4}", c.flows[j].key, f(&(c.flows[j].ell_o.clone() / h.clone())), members.len(), kinds.join(" "), f(&fb), f(&a), f(&face), m)));
-                    }
-                }
-                if let Some((members, [bind, a, face, shear])) = conductor::flows::candidate(&c.flows, &h, &p, &total, j) {
-                    let margin = f(&bind) - f(&a) - f(&face) - f(&shear);
-                    let line = format!("  best clump about {} at R {:.3}: {} members, binding {:.4} vs agitation {:.4} + face {:.4} + shear {:.4}, margin {:.4}", c.flows[j].key, f(&(c.flows[j].ell_o.clone() / h.clone())), members.len(), f(&bind), f(&a), f(&face), f(&shear), margin);
-                    if best.as_ref().map(|(m, _)| margin > *m).unwrap_or(true) {
-                        best = Some((margin, line));
-                    }
-                }
-            }
-            if let Some((_, line)) = best {
-                println!("{line}");
-            }
-            if let Some((_, line)) = fil_best {
-                println!("{line}; {fil_hold} of {} motes' filaments hold", c.flows.len());
+            // THE CHAINS (docs/83): each read whole; the best margin shown.
+            let chains = conductor::flows::chains(&c.flows, &h, &p, &total);
+            let holding = chains.iter().filter(|x| x.holds()).count();
+            if let Some(best) = chains.iter().max_by(|a, b| (a.bind.clone() - a.agitation.clone() - a.face.clone()).cmp(&(b.bind.clone() - b.agitation.clone() - b.face.clone()))) {
+                println!(
+                    "  CHAINS {} ({holding} hold); best at R {:.3}: {} members, apart {:.4}, λ/(1+λ) {:.4} vs agitation {:.4} + face {:.4}, margin {:.4}",
+                    chains.len(), f(&best.reach), best.members.len(), f(&best.apart), f(&best.bind), f(&best.agitation), f(&best.face), f(&best.bind) - f(&best.agitation) - f(&best.face)
+                );
             }
         }
         "formation" => {
