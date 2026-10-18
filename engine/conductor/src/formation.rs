@@ -638,7 +638,7 @@ pub fn jet_batch(rings: &[Shell], h: &Ratio, rim: &Ratio, born: u64, share: &Rat
 
 /// A body's holding-weighted TIGHTNESS (`atom::tightness`, its outer band's
 /// grip), the ground of its bonding.
-fn grip(m: &Manifest) -> Ratio {
+pub fn grip(m: &Manifest) -> Ratio {
     let total = mass(m);
     if total.is_zero() {
         return ratio(0, 1);

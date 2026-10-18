@@ -511,35 +511,105 @@ pub fn cascade(manifest: &Manifest) -> (Manifest, Vec<(Ratio, Manifest)>) {
     let spin = share.iter().fold(ratio(0, 1), |a, b| a + b.clone());
     let h = ratio(1, 1) + held.clone();
     let s_final = face(&held);
-    let mut wellspring = Manifest::new();
-    let mut out: Vec<(String, Ratio, Ratio)> = Vec::new();
-    for ((k, a), s) in kinds.into_iter().zip(share) {
-        let reach = g(&((spin.clone() + s) * mean.clone() / w(&k) / h.clone()));
-        if reach.clone() * (ratio(1, 1) + s_final.clone()) <= ratio(1, 1) {
-            wellspring.insert(k, a);
-        } else {
-            out.push((k, a, reach));
-        }
-    }
-    // THE SHELLS BEAD INTO GALAXIES: kinds whose spreads `R(1 ± s_final)`
-    // overlap link (transitively); along each, the superposed hold pinches at
-    // its maxima and parts at its minima; each bead is a galaxy at its pinch.
-    out.sort_by(|a, b| a.2.cmp(&b.2).then(a.0.cmp(&b.0)));
+    // Every kind leaves as a SHELL: a mix at one reach (with xylarium: shells
+    // as mixes, so a passage adds to a mix, never a new shell).
+    let mut shells: Vec<(Manifest, Ratio)> = kinds
+        .into_iter()
+        .zip(share)
+        .map(|((k, a), s)| {
+            let reach = g(&((spin.clone() + s) * mean.clone() / w(&k) / h.clone()));
+            ([(k, a)].into_iter().collect::<Manifest>(), reach)
+        })
+        .collect();
+    // Released heaviest first (deepest reach first).
+    shells.sort_by(|a, b| a.1.cmp(&b.1));
+    // THE FILTER (operators 2026-10-18, (6) "filtered through the heaviest of
+    // heavy"; with xylarium): each later, lighter shell passes OUT THROUGH
+    // every heavier shell inside its reach, and each passage is a MEETING by
+    // the one law. Shells are isotropic, so a whole passage is contact ½ and
+    // a passage ending within the other's spread is ½ of the share crossed.
+    // The grip split as at every tier (s the tightness ratio, `D = M/(M + 1 −
+    // contact)`, T the deficits' contrast): the gripped fraction `g =
+    // min(s·D, T)/T` is CAUGHT, and the heavier shell gives `contact·g` times
+    // the lighter's mass share of its whole mix, which rides out with the
+    // lighter shell. The lighter shell pays the drag: `Σ m·ℓ` is unchanged, so
+    // its reach becomes the holding-weighted mean. Each shell's passages are
+    // read at once against the stack as it stands (no order within).
+    let delta = |r: &Ratio| h.clone() / (r.clone() + h.clone());
     let lo = |r: &Ratio| r.clone() * (ratio(1, 1) - s_final.clone());
     let hi = |r: &Ratio| r.clone() * (ratio(1, 1) + s_final.clone());
+    for i in 1..shells.len() {
+        let (mi, ri) = (mass(&shells[i].0) / total.clone(), shells[i].1.clone());
+        let mut caught: Vec<(usize, Manifest)> = Vec::new();
+        for j in 0..i {
+            let (mj, rj) = (mass(&shells[j].0) / total.clone(), shells[j].1.clone());
+            if mj.is_zero() || mi.is_zero() || ri <= lo(&rj) {
+                continue;
+            }
+            let crossed = if ri >= hi(&rj) { ratio(1, 1) } else { (ri.clone() - lo(&rj)) / (hi(&rj) - lo(&rj)) };
+            let contact = ratio(1, 2) * crossed;
+            let (gi, gj) = (crate::formation::grip(&shells[i].0), crate::formation::grip(&shells[j].0));
+            let s = if gi.is_zero() || gj.is_zero() { ratio(0, 1) } else if gi < gj { gi / gj } else { gj / gi };
+            let m_ij = mi.clone() + mj.clone();
+            let bind = s * m_ij.clone() / (m_ij.clone() + ratio(1, 1) - contact.clone());
+            let (di, dj) = (delta(&ri), delta(&rj));
+            let t = (if di > dj { di.clone() - dj.clone() } else { dj.clone() - di.clone() }) / (di + dj);
+            if t.is_zero() {
+                continue;
+            }
+            let gripped = bind.min(t.clone()) / t;
+            let fraction = contact * gripped * mi.clone() / m_ij;
+            let take: Manifest = shells[j].0.iter().map(|(k, a)| (k.clone(), nucleus(&(a.clone() * fraction.clone())).min(a.clone()))).filter(|(_, a)| *a > ratio(0, 1)).collect();
+            if !take.is_empty() {
+                caught.push((j, take));
+            }
+        }
+        for (j, take) in caught {
+            let (mi, mc) = (mass(&shells[i].0), mass(&take));
+            let rj = shells[j].1.clone();
+            less(&mut shells[j].0, &take);
+            let ri = shells[i].1.clone();
+            if !(mi.clone() + mc.clone()).is_zero() {
+                shells[i].1 = g(&((mi.clone() * ri + mc.clone() * rj) / (mi + mc)));
+            }
+            for (k, a) in take {
+                *shells[i].0.entry(k).or_insert_with(|| ratio(0, 1)) += a;
+            }
+        }
+    }
+    let mut wellspring = Manifest::new();
+    let mut out: Vec<(Manifest, Ratio)> = Vec::new();
+    for (m, reach) in shells {
+        if m.is_empty() {
+            continue;
+        }
+        if reach.clone() * (ratio(1, 1) + s_final.clone()) <= ratio(1, 1) {
+            for (k, a) in m {
+                *wellspring.entry(k).or_insert_with(|| ratio(0, 1)) += a;
+            }
+        } else {
+            out.push((m, reach));
+        }
+    }
+    // THE SHELLS BEAD INTO GALAXIES: shells whose spreads `R(1 ± s_final)`
+    // overlap link (transitively); along each, the superposed hold pinches at
+    // its maxima and parts at its minima; each bead is a galaxy at its pinch,
+    // its mixes SUMMED (a kind arriving twice is added, never overwritten).
+    out.sort_by(|a, b| a.1.cmp(&b.1));
     let mut runs: Vec<Vec<usize>> = Vec::new();
     let mut edge = ratio(0, 1);
-    for (i, (_, _, r)) in out.iter().enumerate() {
+    for (i, (_, r)) in out.iter().enumerate() {
         if runs.is_empty() || lo(r) > edge {
             runs.push(Vec::new());
         }
         edge = edge.max(hi(r));
         runs.last_mut().expect("pushed").push(i);
     }
-    let density: Vec<Ratio> = out.iter().map(|(k, a, _)| a.clone() * w(k) / total.clone() / (ratio(2, 1) * s_final.clone()).max(Ratio::new(1.into(), num_bigint::BigInt::from(60).pow(6)))).collect();
+    let floor = Ratio::new(1.into(), num_bigint::BigInt::from(60).pow(6));
+    let density: Vec<Ratio> = out.iter().map(|(m, _)| mass(m) / total.clone() / (ratio(2, 1) * s_final.clone()).max(floor.clone())).collect();
     let mut galaxies = Vec::new();
     for run in runs {
-        let local: Vec<Ratio> = run.iter().map(|&i| run.iter().filter(|&&j| lo(&out[j].2) <= out[i].2 && out[i].2 <= hi(&out[j].2)).fold(ratio(0, 1), |s, &j| s + density[j].clone())).collect();
+        let local: Vec<Ratio> = run.iter().map(|&i| run.iter().filter(|&&j| lo(&out[j].1) <= out[i].1 && out[i].1 <= hi(&out[j].1)).fold(ratio(0, 1), |s, &j| s + density[j].clone())).collect();
         let mut cuts = Vec::new();
         for i in 1..run.len().saturating_sub(1) {
             if local[i] < local[i - 1] && local[i] <= local[i + 1] {
@@ -548,9 +618,14 @@ pub fn cascade(manifest: &Manifest) -> (Manifest, Vec<(Ratio, Manifest)>) {
         }
         let mut from = 0;
         let mut bead = |a: usize, b: usize| {
-            let peak = (a..b).max_by(|x, y| local[*x].cmp(&local[*y]).then(y.cmp(x))).expect("a kind");
-            let m: Manifest = run[a..b].iter().map(|&i| (out[i].0.clone(), out[i].1.clone())).collect();
-            galaxies.push((out[run[peak]].2.clone(), m));
+            let peak = (a..b).max_by(|x, y| local[*x].cmp(&local[*y]).then(y.cmp(x))).expect("a shell");
+            let mut m = Manifest::new();
+            for &i in &run[a..b] {
+                for (k, x) in &out[i].0 {
+                    *m.entry(k.clone()).or_insert_with(|| ratio(0, 1)) += x.clone();
+                }
+            }
+            galaxies.push((out[run[peak]].1.clone(), m));
         };
         for at in cuts {
             if at > from && at < run.len() {
