@@ -556,6 +556,80 @@ square in disguise); any energy integral (v²). Owed: the galaxies'
 magnetism setting the universal core's strength (11.0 (1)) feeds `H_u` and
 so e; anticipated to be the recycling circuit seen from the core.
 
+### The fountain: every core's axes, the rings, and the streams (operator 2026-10-18; to be built, with xylarium)
+
+The finding that led to it: the universal core pays every galaxy's turning
+and nothing pays it back (xylarium's read: its reservoir falls −1.3 → −9.9
+over 36 echoes). What runs short is TURNING, a spin ledger, not matter, so
+no unique dense matter is asked for. The core's density is the throat
+condition (width = holding, deficit ½), the heaviest kinds held deepest by
+the one capture law. Operator: "think of it like a continuous fountain".
+
+1. **The universal core's two axes.**
+   - **North/south, its partner face:** the uplink and downlink to the
+     hypha on opposite antipoles (the paired throat; nothing open).
+   - **East/west, its collection:** jets on opposite antipoles that loop
+     out to the FIRST RING of galaxies and back.
+   That is four jets, two pairs of antipoles, one axis per plane we read.
+   Each jet is a continuous loop, inbound and outbound at once (the galaxy
+   jetstream's law one tier up).
+2. **A galaxy at the universal core.** The universal core is the core of
+   its own central galaxy, which is new (today every galaxy orbits it and
+   none sits on it).
+3. **The return closes the books.** Where an inner galaxy's jetstream
+   overlaps a universal east/west jet, they exchange. The galaxy's outbound
+   leg feeds the universal loop, and the loop's return delivers into the
+   galaxy. Matter crossing carries its turning with it, so what the
+   universal core pays in kicks comes home as the turning of matter
+   returning from ring 1. The loop refills the reservoir, not the hypha.
+   "Innermost" is read, never counted: the galaxies whose reach falls
+   inside the jets' rim.
+4. **Rings outward, one grammar every tier.** A ring galaxy has the same
+   axes one tier down.
+   - North/south faces inward, to the core that feeds it (its TRUNK, in
+     xylarium's roads ruling: the trunks become the north/south faces).
+   - East/west collects the next ring out.
+   Ring by ring the fountain spreads to the rim. The centre is dense and
+   the rim is frontier.
+5. **Ring links are jetstreams, never wormholes.** The links between rings
+   are the cores' own east/west jets, natural flow that nobody builds. This
+   keeps xylarium's ruling: there are no galaxy-to-galaxy wormholes, and a
+   wormhole is a local, built on-ramp paid in mu that lands INSIDE a ring
+   galaxy ("potentially incoming wormhole connects").
+6. **Continuum or vacuum, by force** (operator: "jetstreams depending on
+   their force are either continuums or vacuums in the filament … analogous
+   to the gulf stream"). The stream is a READING, never a label from a
+   parcel's origin.
+   - The force is the jet's push at the parcel's reach (its pulse share
+     times the arrival strength ρ, the kick's own reading).
+   - What the force meets is the filament's hold there, `λ/(1 + λ)`.
+   - **Continuum:** where the push beats the hold, the jet carries matter
+     along the filament as one moving body (the stream's core current).
+   - **Vacuum:** where the hold beats the push, the jet cannot fill the
+     channel; it runs thin and counter-moving along the flanks (the
+     countercurrents and shed eddies).
+   - A parcel crosses between streams as the jet strengthens and weakens
+     along its loop.
+   - The wind (open share × the vacuum counterflow χ) then starts and stops
+     with the jet's strength.
+   - In the fountain, strong east/west jets near the universal core run as
+     continuums into ring 1, and weaker links outward may run as vacuum
+     channels. The rings' edges carry the turbulence.
+   - Today's code sets `vacuum` by origin (arrivals from the ocean vacuum;
+     shed and outburst matter continuum). This is retired by this ruling.
+
+Owed in code:
+- the universe's medium as parcels (the east/west loops are that medium in
+  motion);
+- the central galaxy;
+- the ring-1 exchange refilling the reservoir;
+- the stream read by force;
+- the trunk as a ring galaxy's north/south face.
+A second universal core then follows from the companion-ignition test one
+tier up, with no new physics: a collection in the universe's medium
+reaching its own throat condition, with galaxies sharing their orbits
+between the two cores.
+
 ## What we have, and what is missing
 
 | nature's ingredient | built | missing |
