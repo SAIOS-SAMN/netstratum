@@ -575,7 +575,10 @@ the one capture law. Operator: "think of it like a continuous fountain".
    jetstream's law one tier up).
 2. **A galaxy at the universal core.** The universal core is the core of
    its own central galaxy, which is new (today every galaxy orbits it and
-   none sits on it).
+   none sits on it). RULED (operator 2026-10-18): the central galaxy is the
+   core's OWN DISC, its cut read on the ocean parcels inside its throat
+   (as a galaxy's `read_cut`), never a galaxy founded or placed. Its stars
+   form there by the same clump law.
 3. **The return closes the books.** Where an inner galaxy's jetstream
    overlaps a universal east/west jet, they exchange. The galaxy's outbound
    leg feeds the universal loop, and the loop's return delivers into the
