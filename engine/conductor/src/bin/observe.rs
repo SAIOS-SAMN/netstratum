@@ -198,6 +198,65 @@ fn main() {
                 );
             }
         }
+        "census" => {
+            // THE CENSUS (operator 2026-10-18: everything the universe makes,
+            // read, never built): the medium, galaxies, stars, clouds,
+            // systems by their worlds, their orbits, belts as debris, and the
+            // worlds' resources.
+            let whole = pulse::mass(&u.total());
+            let share = |m: &pulse::Manifest| if whole == ratio(0, 1) { 0.0 } else { f(&(pulse::mass(m) / whole.clone())) };
+            let h_of = |m: &pulse::Manifest| m.get("Z001").map(|a| f(a)).unwrap_or(0.0);
+            let stars: Vec<&pulse::Body> = u.cores.iter().flat_map(|c| &c.satellites).collect();
+            let remnants = stars.iter().filter(|s| s.remnant).count();
+            let worlds_of = |s: &pulse::Body| s.satellites.iter().filter(|w| w.born == 0).count();
+            let mut by: std::collections::BTreeMap<usize, usize> = std::collections::BTreeMap::new();
+            for s in &stars {
+                *by.entry(worlds_of(s)).or_insert(0) += 1;
+            }
+            let gas_h: f64 = u.cores.iter().map(|c| h_of(&c.medium)).sum::<f64>() + stars.iter().map(|s| h_of(&s.medium)).sum::<f64>();
+            let all_h = h_of(&u.total());
+            println!("CENSUS at beat {now}: medium {:.3e} of the universe, {} galaxies, {} stars ({} burning, {} remnants), {} companions",
+                share(&u.medium), u.cores.len(), stars.len(), stars.len() - remnants, remnants,
+                stars.iter().map(|s| s.satellites.iter().filter(|w| w.born > 0).count()).sum::<usize>());
+            println!("  CLOUDS: hydrogen in the galaxies' and systems' gas {:.3} of all hydrogen", if all_h > 0.0 { gas_h / all_h } else { 0.0 });
+            println!("  SYSTEMS by worlds: {}", by.iter().map(|(k, v)| format!("{k}:{v}")).collect::<Vec<_>>().join(" "));
+            // Orbits of the multi-world systems: reaches and period ratios.
+            let mut shown = 0;
+            for s in stars.iter().filter(|s| worlds_of(s) >= 2) {
+                let mut ws: Vec<&pulse::Body> = s.satellites.iter().filter(|w| w.born == 0).collect();
+                ws.sort_by(|a, b| a.radius.cmp(&b.radius));
+                let reaches: Vec<String> = ws.iter().map(|w| format!("{:.3e}", f(&w.radius))).collect();
+                let ratios: Vec<String> = ws.windows(2).map(|p| if p[0].period == ratio(0, 1) { "-".into() } else { format!("{:.3}", f(&(p[1].period.clone() / p[0].period.clone()))) }).collect();
+                println!("  ORBITS star {:?}: {} worlds at {} (period ratios {})", s.path, ws.len(), reaches.join(" "), ratios.join(" "));
+                shown += 1;
+                if shown >= 6 {
+                    break;
+                }
+            }
+            // Belts: the debris standing in a system's own medium as motes.
+            let debris: Vec<f64> = stars.iter().map(|s| s.flows.iter().fold(0.0, |a, x| a + f(&x.amount))).collect();
+            let with_belts = debris.iter().filter(|d| **d > 0.0).count();
+            println!("  BELTS: {} systems carry debris motes, total {:.3e} (units); remnants' released systems re-anchored count in SYSTEMS",
+                with_belts, debris.iter().sum::<f64>());
+            // Resources: the worlds' mixes.
+            let worlds: Vec<&pulse::Body> = stars.iter().flat_map(|s| &s.satellites).filter(|w| w.born == 0).collect();
+            let mut kinds: std::collections::BTreeSet<String> = std::collections::BTreeSet::new();
+            let mut lightest: std::collections::BTreeMap<String, usize> = std::collections::BTreeMap::new();
+            for w in &worlds {
+                kinds.extend(w.kept.keys().cloned());
+                if let Some(k) = formation::lightest(&w.kept) {
+                    *lightest.entry(k).or_insert(0) += 1;
+                }
+            }
+            println!("  RESOURCES: {} worlds hold {} kinds between them; cores held down to {}", worlds.len(), kinds.len(), lightest.iter().map(|(k, v)| format!("{k}:{v}")).collect::<Vec<_>>().join(" "));
+            // Layers: how many kinds each world holds, and its top kind's share.
+            let layers: Vec<String> = worlds.iter().take(12).map(|w| {
+                let m = pulse::mass(&w.kept);
+                let top = w.kept.iter().map(|(k, a)| (k.clone(), if m == ratio(0, 1) { 0.0 } else { f(&(pulse::mass(&[(k.clone(), a.clone())].into()) / m.clone())) })).fold((String::new(), 0.0), |b, x| if x.1 > b.1 { x } else { b });
+                format!("{}k/{}:{:.2}", w.kept.len(), top.0, top.1)
+            }).collect();
+            println!("  LAYERS (kinds per world / top kind:share): {}", layers.join(" "));
+        }
         "manifest" => {
             // The universe's whole manifest, one kind a line: Z, amount, hold.
             for (k, a) in u.total() {

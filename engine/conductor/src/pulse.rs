@@ -504,7 +504,7 @@ pub fn cascade(manifest: &Manifest) -> (Manifest, Vec<(Ratio, Manifest)>, Ratio)
     if total.is_zero() || count.is_zero() {
         return (Manifest::new(), Vec::new(), ratio(2, 1));
     }
-    let mean = g(&(total.clone() / count));
+    let _ = count;
     let mut kinds: Vec<(String, Ratio)> = manifest.iter().filter(|(_, a)| **a > ratio(0, 1)).map(|(k, a)| (k.clone(), a.clone())).collect();
     kinds.sort_by_key(|(k, _)| k.strip_prefix('Z').and_then(|z| z.parse::<u32>().ok()).unwrap_or(0));
     let face = |held: &Ratio| g(&(ratio(1, 2) * held.clone() / (held.clone() + ratio(1, 1) + held.clone())));
@@ -523,7 +523,12 @@ pub fn cascade(manifest: &Manifest) -> (Manifest, Vec<(Ratio, Manifest)>, Ratio)
         .into_iter()
         .zip(share)
         .map(|((k, a), s)| {
-            let reach = g(&((spin.clone() + s) * mean.clone() / w(&k) / h.clone()));
+            // Element-agnostic (operator 2026-10-18: "the push must be agnostic
+            // to the element by anything other than the force produced by the
+            // bounces of the antipoles ... inertia is fine"): the one force
+            // `K + s`, each kind moving by its own inertia, never against the
+            // population's mean weight.
+            let reach = g(&((spin.clone() + s) / w(&k) / h.clone()));
             ([(k, a)].into_iter().collect::<Manifest>(), reach)
         })
         .collect();
