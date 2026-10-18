@@ -398,12 +398,6 @@ pub fn shear(motes: &mut [Mote], enc: &Enclosed, total: &Ratio) -> Ratio {
 /// sorts only as it spreads, by each kind's own inertia under the star's
 /// kick, so early meetings catch mixed matter.
 pub fn spray(released: &Manifest, spins: &[(String, Ratio)], base: &[Ratio], agitation: &Ratio, born: u64) -> Vec<Mote> {
-    if std::env::var("NS_SPRAY").is_err() {
-        // The release in force: each kind at its own carried reach and the
-        // star's phases (the spray below is a reading, NS_SPRAY, until it is
-        // read to form worlds here).
-        return released.iter().filter(|(_, a)| **a > ratio(0, 1)).map(|(k, a)| Mote { key: k.clone(), amount: a.clone(), ell_o: crate::ring::grain(&spins.iter().find(|(kk, _)| kk == k).map(|(_, l)| l.clone()).unwrap_or_else(|| ratio(0, 1))), ell_c: ratio(0, 1), phase: base.to_vec(), agitation: crate::ring::grain(agitation), born, vacuum: false }).collect();
-    }
     let held = released.iter().fold(ratio(0, 1), |s, (k, a)| s + a.clone() * weight(k));
     let reach = if held.is_zero() {
         ratio(0, 1)

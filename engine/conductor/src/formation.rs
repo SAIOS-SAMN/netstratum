@@ -707,10 +707,11 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
         return (0, 0, Manifest::new());
     }
     // The star's kick on its system: one force, each kind by its inertia.
-    // The star's kick on its system: a READING for now (NS_SPRAY): read here
-    // it carried debris apart before it could stick (0 worlds against 5).
-    // On the star's own bell only (its clock), never at every arrival.
-    if rang && std::env::var("NS_SPRAY").is_ok() {
+    // The star's kick on its system, on the star's own bell only (its
+    // clock), never at every arrival. THE RELEASE IN FORCE (with xylarium:
+    // over 200 echoes on their 45-star founding it held a ten-planet system
+    // ordered by weight, worlds 11-33, stars bounded, nothing draining).
+    if rang {
         crate::flows::star_kick(&mut sys.flows, &sys.kept, &h_s);
     }
     // The system's motes merge by the shared rule (same kind, stream and
