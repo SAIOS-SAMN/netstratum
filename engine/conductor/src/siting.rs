@@ -40,9 +40,10 @@
 //! geometry, no two-viabilities seam. (Earlier DIO-1 scored a shared, species-
 //! blind thermal-coverage η here; that mesic tent could not tell a plasma from
 //! a phototroph, and it is retired.) The k-window per regime only BOUNDS the
-//! search; the species-relative gate PLACES the niche within it — measured
-//! 2026-08-18 to seat the plasma in the furnace (r ≲ 1/9) where its clade band
-//! and plasma phase both hold, and the biotic lines mesic.
+//! search; the species-relative gate PLACES the niche within it — re-measured
+//! 2026-10-18 under the linear thermal law to seat the plasma in the furnace
+//! (k ∈ [4/12, 6/12]) where its clade band and plasma phase both hold, and the
+//! biotic lines mesic.
 //!
 //! **No new dials.** Every window bound is built from loop/anchor variables
 //! (`ratio(i, j)` with `i, j` bound), never a hand-picked `ratio(5, 4)`
@@ -146,15 +147,19 @@ fn regime(civilization: &Civilization, beacon: &Beacon) -> (Ratio, Ratio, Ratio)
     let plasmic = civilization.metabolism.as_str() == "plasmic";
     let furnace = matches!(civilization.metabolism.as_str(), "mineral" | "plasmic");
     if plasmic {
-        // ONT-1d part 3 — THE PLASMA NICHE, DERIVED FROM THE GATE. Measured
-        // 2026-08-18: a plasmiform line (HyperThermal clade band × plasma phase
-        // feasibility) clears its `substrate_viability` floor (1/HALVING) only
-        // for r ≲ 1/9 — k ≲ 4/12 — and reads exactly ZERO past k = 10/12 (a
-        // world too cold has no plasma). The plasma's OWN window: centre
-        // k = GRAIN/4 = 3/12 (r ≈ 1/16), half 1/12, so k ∈ [2/12, 4/12].
+        // ONT-1d part 3 — THE PLASMA NICHE, DERIVED FROM THE GATE. Re-measured
+        // 2026-10-18 under era 1's LINEAR thermal law (`T = K·L(1−A)/r`,
+        // bc6471f; the 2026-08-18 window [2/12, 4/12] was measured under the
+        // quartic law and now lands in dead orbit, too hot for the clade band
+        // tent): a plasmiform line (HyperThermal clade band × plasma phase
+        // feasibility) clears its `substrate_viability` floor (1/HALVING) for
+        // k ∈ [8/24, 10/24] at every albedo of its set, and reads ZERO for
+        // k ≤ 6/24 (too hot) and k ≥ 19/24 (too cold for plasma). The
+        // plasma's OWN window: centre k = 5/12 (r ≈ 0.17, clearing at every
+        // albedo), half 1/12, so k ∈ [4/12, 6/12].
         let albedos = [ratio(1, 2), ratio(9, 20), ratio(2, 5)];
         let drawn = beacon.uniform_index("genesis.plasmic.albedo", albedos.len() as u64) as usize;
-        (albedos[drawn].clone(), twelfths(GRAIN / 4), twelfths(1))
+        (albedos[drawn].clone(), twelfths(GRAIN / 2 - 1), twelfths(1))
     } else if furnace {
         // Mineral furnace: the old hot albedo set; a window centred at k = 8/12
         // (r ≈ 0.44) with a 2/12 half-width.
