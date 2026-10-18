@@ -5,32 +5,32 @@
 //! laws acting on that state; where it gathers, what is held and what is
 //! gas, where it collapses, are READINGS of the state, never placements.
 //!
-//! - **A parcel's state**, carried forward, never rebuilt: its kind and
+//! - **A mote's state**, carried forward, never rebuilt: its kind and
 //!   amount, its spin in the orbit's plane `ℓ_o` (reach `R = ℓ_o/H`, the
 //!   motion law) and in the circulation's plane `ℓ_c` (radial–axial, along
 //!   the torsion axis), its PHASES on its enclosure's S^n (one per plane,
 //!   turns against the bell), its agitation and birth.
 //! - **The kick**, once per bell of the kicking core (the core's bell is its
-//!   bounce, once an echo it regenerates), every parcel, held or not: per
-//!   plane, the HEMISPHERE the parcel's phase stands in against the bell
+//!   bounce, once an echo it regenerates), every mote, held or not: per
+//!   plane, the HEMISPHERE the mote's phase stands in against the bell
 //!   signs it (the S⁰ face; operator: coherence is a count over the S^n
 //!   hemispheres, in the sphere's own measure) and S¹'s own LINEAR measure in
 //!   turns sizes it, `1 − 2·|ψ|` (ψ the phase against the bell, |ψ| its
-//!   distance on the circle); times κ, the push's share gripping the parcel
+//!   distance on the circle); times κ, the push's share gripping the mote
 //!   by its core's hold at its reach: `κ_o = p·δ(R)` for the own family in
 //!   the orbit's plane, `κ_c = p·ρ·δ_u` for the parent's (the universal bell
 //!   received at ρ) in the circulation's plane. Off resonance the signs
 //!   alternate and cancel; on resonance they add: the cyclotron.
-//! - **The spin ledger**: every Δℓ given to a parcel of holding m is −m·Δℓ to
+//! - **The spin ledger**: every Δℓ given to a mote of holding m is −m·Δℓ to
 //!   its core's turning reservoir, so `Σ m·ℓ + reservoir` is exact.
-//! - **The cut is a reading**: a parcel's held share is the part of its
+//! - **The cut is a reading**: a mote's held share is the part of its
 //!   dispersal band (`R(1 ± p)`) within the throat, in both planes,
 //!   `f_o · f_c`; the rest is the galaxy's gas.
 //! - **Two exits, by state**: the JET, `ℓ_c` carrying the axial reading past
 //!   the throat (`ℓ_c/H ≥ H`), along the torsion axis; RADIAL ESCAPE, `R ≥ H`
-//!   in the orbit's plane. Either way the parcel crosses whole into the
+//!   in the orbit's plane. Either way the mote crosses whole into the
 //!   medium one tier up.
-//! - **Collapse where the parcels are**: a parcel and those near it in reach
+//! - **Collapse where the motes are**: a mote and those near it in reach
 //!   (within its dispersal band) and in phase (the product over planes of
 //!   the in-step shares) bind by their combined 3Z read as their own
 //!   enclosure, against their agitation, the unlocked face `½(1 − δ)` and the
@@ -47,9 +47,9 @@ use num_traits::Zero;
 /// The planes read today: the orbit's (0) and the circulation's (1).
 pub const PLANES: usize = 2;
 
-/// A PARCEL: matter as held turning, its state carried forward.
+/// A MOTE: matter as held turning, its state carried forward.
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Parcel {
+pub struct Mote {
     pub key: String,
     /// Its amount on the ledger (grains of its kind).
     pub amount: Ratio,
@@ -175,18 +175,18 @@ fn held_share(ell: &Ratio, h: &Ratio, p: &Ratio) -> Ratio {
     ((h.clone() - lo) / span).max(ratio(0, 1)).min(ratio(1, 1))
 }
 
-/// THE CUT AS A READING: a parcel's held share, `f_o·f_c`.
-pub fn held(parcel: &Parcel, h: &Ratio, p: &Ratio) -> Ratio {
-    held_share(&parcel.ell_o, h, p) * held_share(&parcel.ell_c, h, p)
+/// THE CUT AS A READING: a mote's held share, `f_o·f_c`.
+pub fn held(mote: &Mote, h: &Ratio, p: &Ratio) -> Ratio {
+    held_share(&mote.ell_o, h, p) * held_share(&mote.ell_c, h, p)
 }
 
-/// THE GALAXY'S PHASES AT A REACH turned by one bell: what every parcel's
+/// THE GALAXY'S PHASES AT A REACH turned by one bell: what every mote's
 /// phases do there, and a star's reference (its galaxy's own phase at its
 /// place, operator 2026-10-18), alike.
 pub fn turn(phase: &mut [Ratio], r_o: &Ratio, h: &Ratio, p: &Ratio, rho: &Ratio, delta_u: &Ratio) {
     let d_o = h.clone() / (r_o.clone() + h.clone());
     // THE LOOP'S RATE (with xylarium): the jetstream turns by the motion law
-    // AT THE PARCEL'S REACH, δ(R) a ring, two rings a bell, continuously;
+    // AT THE MOTE'S REACH, δ(R) a ring, two rings a bell, continuously;
     // inner matter circulates faster than outer. (At R = H it is one turn a
     // bell, a 1:1 lock with the bell: the rim.)
     let d_c = d_o.clone();
@@ -204,21 +204,21 @@ pub fn turn(phase: &mut [Ratio], r_o: &Ratio, h: &Ratio, p: &Ratio, rho: &Ratio,
     phase[1] = crate::ring::grain(&frac(&(loop_phase + advance)));
 }
 
-/// One bell's kicks on every parcel: the own family in the orbit's plane
-/// (`κ_o = p·δ(R)`, a spin); the parent's moves the parcel along the loop
+/// One bell's kicks on every mote: the own family in the orbit's plane
+/// (`κ_o = p·δ(R)`, a spin); the parent's moves the mote along the loop
 /// (`p·ρ·δ_u`, a phase).
 /// Each plane's phase first advances by its own turning over the bell's two
 /// rings (`2·δ` turns, the motion law's `ω = δ`; the bell's own turn is
 /// whole, so the phase against it moves by `2δ` mod 1). Returns the spin
 /// the core's reservoir gives (Σ m·Δℓ, to be taken from it).
-pub fn kick(parcels: &mut [Parcel], h: &Ratio, p: &Ratio, rho: &Ratio, delta_u: &Ratio, total: &Ratio) -> Ratio {
+pub fn kick(motes: &mut [Mote], h: &Ratio, p: &Ratio, rho: &Ratio, delta_u: &Ratio, total: &Ratio) -> Ratio {
     let mut given = ratio(0, 1);
-    for x in parcels.iter_mut() {
+    for x in motes.iter_mut() {
         let r_o = x.ell_o.clone() / h.clone();
         let d_o = h.clone() / (r_o.clone() + h.clone());
         turn(&mut x.phase, &r_o, h, p, rho, delta_u);
         let dl_o = p.clone() * d_o * response(&x.phase[0]);
-        // Spin cannot carry a parcel through zero reach: a turning is a
+        // Spin cannot carry a mote through zero reach: a turning is a
         // magnitude in its plane; a kick past zero stops at the core.
         let new_o = crate::ring::grain(&(x.ell_o.clone() + dl_o)).max(ratio(0, 1));
         let m = if total.is_zero() { ratio(0, 1) } else { x.amount.clone() * weight(&x.key) / total.clone() };
@@ -230,30 +230,30 @@ pub fn kick(parcels: &mut [Parcel], h: &Ratio, p: &Ratio, rho: &Ratio, delta_u: 
 
 /// THE JETSTREAM IS A CONTINUOUS LOOP (operators 2026-10-16/17: "a
 /// continuous flow, inbound and outbound"): the circulation's plane IS the
-/// loop, a parcel's phase in it its place on the loop. The AXIAL leg (out
+/// loop, a mote's phase in it its place on the loop. The AXIAL leg (out
 /// along the torsion axis and over: phase in `[½, 1)`) carries matter in
 /// transit; the DISC leg (down at the rim and home through the disc: phase
 /// in `[0, ½)`) is where the cut and collapse are read. No jet batch, no jet
 /// exit: matter goes round, out and back at once.
-pub fn on_disc_leg(x: &Parcel) -> bool {
+pub fn on_disc_leg(x: &Mote) -> bool {
     frac(&x.phase[1]) < ratio(1, 2)
 }
 
-/// The one exit, by state: a parcel whose loop OVERREACHES THE RIM (its
+/// The one exit, by state: a mote whose loop OVERREACHES THE RIM (its
 /// reach at or past the throat, `R ≥ H`) crosses whole into the medium one
 /// tier up, where the enclosing core's loops carry it round the same way.
-/// Returns the parcels that left; the rest stay.
-pub fn exits(parcels: &mut Vec<Parcel>, h: &Ratio) -> Vec<Parcel> {
-    let (gone, stay): (Vec<Parcel>, Vec<Parcel>) = std::mem::take(parcels).into_iter().partition(|x| x.ell_o.clone() / h.clone() >= *h);
-    *parcels = stay;
+/// Returns the motes that left; the rest stay.
+pub fn exits(motes: &mut Vec<Mote>, h: &Ratio) -> Vec<Mote> {
+    let (gone, stay): (Vec<Mote>, Vec<Mote>) = std::mem::take(motes).into_iter().partition(|x| x.ell_o.clone() / h.clone() >= *h);
+    *motes = stay;
     gone
 }
 
-/// The galaxy's held and free manifests, read from its parcels: on the
+/// The galaxy's held and free manifests, read from its motes: on the
 /// disc leg by the cut; on the axial leg, in transit, never held.
-pub fn read_cut(parcels: &[Parcel], h: &Ratio, p: &Ratio) -> (Manifest, Manifest) {
+pub fn read_cut(motes: &[Mote], h: &Ratio, p: &Ratio) -> (Manifest, Manifest) {
     let (mut kept, mut free) = (Manifest::new(), Manifest::new());
-    for x in parcels {
+    for x in motes {
         let share = if on_disc_leg(x) { held(x, h, p) } else { ratio(0, 1) };
         let k = crate::ring::grain(&(x.amount.clone() * share)).min(x.amount.clone());
         let f = x.amount.clone() - k.clone();
@@ -267,19 +267,19 @@ pub fn read_cut(parcels: &[Parcel], h: &Ratio, p: &Ratio) -> (Manifest, Manifest
     (kept, free)
 }
 
-/// A candidate clump about parcel `i`: its members (those within its
+/// A candidate clump about mote `i`: its members (those within its
 /// dispersal band in reach, weighted by the product over planes of their
 /// in-step shares) and its terms: (binding `x/(k + x)` of their combined
 /// holding and magnetism, their agitation, the unlocked face `½(1 − δ)`, the
 /// shear `H·w/(k(k + w))`).
-pub fn candidate(parcels: &[Parcel], h: &Ratio, p: &Ratio, total: &Ratio, i: usize) -> Option<(Vec<(usize, Ratio)>, [Ratio; 4])> {
-    let reach = |x: &Parcel| x.ell_o.clone() / h.clone();
-    let r = reach(&parcels[i]);
+pub fn candidate(motes: &[Mote], h: &Ratio, p: &Ratio, total: &Ratio, i: usize) -> Option<(Vec<(usize, Ratio)>, [Ratio; 4])> {
+    let reach = |x: &Mote| x.ell_o.clone() / h.clone();
+    let r = reach(&motes[i]);
     if r.is_zero() || total.is_zero() {
         return None;
     }
     let near = |j: usize| -> Ratio {
-        let rj = reach(&parcels[j]);
+        let rj = reach(&motes[j]);
         if rj < r.clone() * (ratio(1, 1) - p.clone()) || rj > r.clone() * (ratio(1, 1) + p.clone()) {
             return ratio(0, 1);
         }
@@ -287,15 +287,15 @@ pub fn candidate(parcels: &[Parcel], h: &Ratio, p: &Ratio, total: &Ratio, i: usi
         // in every plane (the S⁰ face test), whole; coincidence decides who
         // belongs, not how much is taken.
         let half = ratio(1, 2);
-        let same = (0..PLANES).all(|k| (frac(&parcels[i].phase[k]) < half) == (frac(&parcels[j].phase[k]) < half));
+        let same = (0..PLANES).all(|k| (frac(&motes[i].phase[k]) < half) == (frac(&motes[j].phase[k]) < half));
         if same { ratio(1, 1) } else { ratio(0, 1) }
     };
-    let members: Vec<(usize, Ratio)> = (0..parcels.len()).map(|j| (j, near(j))).filter(|(_, c)| *c > ratio(0, 1)).collect();
+    let members: Vec<(usize, Ratio)> = (0..motes.len()).map(|j| (j, near(j))).filter(|(_, c)| *c > ratio(0, 1)).collect();
     let (mut x, mut a_w, mut held_part) = (ratio(0, 1), ratio(0, 1), ratio(0, 1));
     for (j, c) in &members {
-        let m = parcels[*j].amount.clone() * weight(&parcels[*j].key) / total.clone() * c.clone();
-        x += m.clone() * (ratio(1, 1) + open(&parcels[*j].key));
-        a_w += m.clone() * parcels[*j].agitation.clone();
+        let m = motes[*j].amount.clone() * weight(&motes[*j].key) / total.clone() * c.clone();
+        x += m.clone() * (ratio(1, 1) + open(&motes[*j].key));
+        a_w += m.clone() * motes[*j].agitation.clone();
         held_part += m;
     }
     if held_part.is_zero() {
@@ -314,46 +314,46 @@ pub fn candidate(parcels: &[Parcel], h: &Ratio, p: &Ratio, total: &Ratio, i: usi
 /// orbit's plane times its reach, never below the coordinate's grain),
 /// `λ/(1 + λ)`; no core in it (the core enters only as the shear capping a
 /// fragment). Diagnostic beside `candidate`.
-pub fn filament(parcels: &[Parcel], h: &Ratio, total: &Ratio, i: usize, members: &[(usize, Ratio)]) -> Ratio {
-    let r = parcels[i].ell_o.clone() / h.clone();
+pub fn filament(motes: &[Mote], h: &Ratio, total: &Ratio, i: usize, members: &[(usize, Ratio)]) -> Ratio {
+    let r = motes[i].ell_o.clone() / h.clone();
     if r.is_zero() || total.is_zero() {
         return ratio(0, 1);
     }
-    let x = members.iter().fold(ratio(0, 1), |s, (j, c)| s + parcels[*j].amount.clone() * weight(&parcels[*j].key) / total.clone() * c.clone() * (ratio(1, 1) + open(&parcels[*j].key)));
-    let spread = members.iter().map(|(j, _)| ratio(2, 1) * off(&(parcels[*j].phase[0].clone() - parcels[i].phase[0].clone()))).max().unwrap_or_else(|| ratio(0, 1));
+    let x = members.iter().fold(ratio(0, 1), |s, (j, c)| s + motes[*j].amount.clone() * weight(&motes[*j].key) / total.clone() * c.clone() * (ratio(1, 1) + open(&motes[*j].key)));
+    let spread = members.iter().map(|(j, _)| ratio(2, 1) * off(&(motes[*j].phase[0].clone() - motes[i].phase[0].clone()))).max().unwrap_or_else(|| ratio(0, 1));
     let floor = crate::ring::grain(&ratio(1, 1)).max(Ratio::new(1.into(), num_bigint::BigInt::from(60).pow(6)));
     let lambda = x / (r * spread.max(floor));
     lambda.clone() / (ratio(1, 1) + lambda)
 }
 
-/// THE CLUMPS, where the parcels are: every parcel whose candidate binds
+/// THE CLUMPS, where the motes are: every mote whose candidate binds
 /// at least its agitation, the unlocked face and the shear collapses; a
-/// parcel claimed by several centres divides itself by their weights (no
+/// mote claimed by several centres divides itself by their weights (no
 /// order). Returns, per holding centre, its reach and the share of each
-/// parcel it takes.
-pub fn clumps(parcels: &[Parcel], h: &Ratio, p: &Ratio, total: &Ratio) -> Vec<(Ratio, Vec<(usize, Ratio)>)> {
+/// mote it takes.
+pub fn clumps(motes: &[Mote], h: &Ratio, p: &Ratio, total: &Ratio) -> Vec<(Ratio, Vec<(usize, Ratio)>)> {
     let mut holding: Vec<(usize, Vec<(usize, Ratio)>)> = Vec::new();
-    for i in 0..parcels.len() {
+    for i in 0..motes.len() {
         // Collapse is read on the disc leg only (matter in transit on the
         // axial leg does not settle).
-        if !on_disc_leg(&parcels[i]) {
+        if !on_disc_leg(&motes[i]) {
             continue;
         }
-        if let Some((members, [_, a, face, _])) = candidate(parcels, h, p, total, i) {
-            let members: Vec<(usize, Ratio)> = members.into_iter().filter(|(j, _)| on_disc_leg(&parcels[*j])).collect();
+        if let Some((members, [_, a, face, _])) = candidate(motes, h, p, total, i) {
+            let members: Vec<(usize, Ratio)> = members.into_iter().filter(|(j, _)| on_disc_leg(&motes[*j])).collect();
             // THE FILAMENT LAW (with xylarium; the clump read in its OWN
             // enclosure, operator: shares in the body's own enclosure): its
             // line holding binds against its agitation and the unlocked face;
             // the core enters only as the shear capping a fragment (the
             // fragment spacing from the filament's width is owed: one clump
             // a holding filament until then).
-            if filament(parcels, h, total, i, &members) >= a + face {
+            if filament(motes, h, total, i, &members) >= a + face {
                 holding.push((i, members));
             }
         }
     }
-    // A parcel claimed by several holding filaments divides among them.
-    let mut claimed: Vec<i64> = vec![0; parcels.len()];
+    // A mote claimed by several holding filaments divides among them.
+    let mut claimed: Vec<i64> = vec![0; motes.len()];
     for (_, members) in &holding {
         for (j, _) in members {
             claimed[*j] += 1;
@@ -368,35 +368,35 @@ pub fn clumps(parcels: &[Parcel], h: &Ratio, p: &Ratio, total: &Ratio) -> Vec<(R
             // in-step share of its holding-weighted phase against the bell;
             // ONE share, taken from every member alike, so a star's mix is
             // its filament's mix.
-            let m = members.iter().fold(ratio(0, 1), |s, (j, _)| s + parcels[*j].amount.clone() * weight(&parcels[*j].key));
+            let m = members.iter().fold(ratio(0, 1), |s, (j, _)| s + motes[*j].amount.clone() * weight(&motes[*j].key));
             let coherence = if m.is_zero() {
                 ratio(0, 1)
             } else {
                 (0..PLANES).fold(ratio(1, 1), |c, k| {
-                    let phase = circle_mean(&members.iter().map(|(j, _)| (parcels[*j].amount.clone() * weight(&parcels[*j].key), parcels[*j].phase[k].clone())).collect::<Vec<_>>());
+                    let phase = circle_mean(&members.iter().map(|(j, _)| (motes[*j].amount.clone() * weight(&motes[*j].key), motes[*j].phase[k].clone())).collect::<Vec<_>>());
                     c * in_step(&phase, &ratio(0, 1))
                 })
             };
             let shares = members.into_iter().map(|(j, _)| (j, coherence.clone() / ratio(claimed[j].max(1), 1)));
-            (parcels[i].ell_o.clone() / h.clone(), shares.collect())
+            (motes[i].ell_o.clone() / h.clone(), shares.collect())
         })
         .collect()
 }
 
-/// Merge parcels whose states coincide on the coordinate's grain (`60⁻⁶`
+/// Merge motes whose states coincide on the coordinate's grain (`60⁻⁶`
 /// a plane, the carrier's resolution, never law): same kind, same spins and
 /// phases on the grain, their amounts added.
-pub fn merge(parcels: &mut Vec<Parcel>, total: &Ratio) -> Ratio {
+pub fn merge(motes: &mut Vec<Mote>, total: &Ratio) -> Ratio {
     // The merge rule (with xylarium; the carrier's resolution, never law):
     // same kind, same stream, the same 60⁶ sector in every phase and in the
     // reach's share `ℓ/(ℓ + 1)`. Holding sums exactly; spins and agitation
     // merge by holding onto the grid, the floored spin's remainder returned
     // for the core's reservoir so the spin ledger stays exact.
     let g = |x: &Ratio| crate::ring::grain(x);
-    let key = |y: &Parcel| (y.key.clone(), y.vacuum, g(&(y.ell_o.clone() / (y.ell_o.clone() + ratio(1, 1)))), y.phase.iter().map(g).collect::<Vec<_>>());
-    let mut out: Vec<Parcel> = Vec::new();
+    let key = |y: &Mote| (y.key.clone(), y.vacuum, g(&(y.ell_o.clone() / (y.ell_o.clone() + ratio(1, 1)))), y.phase.iter().map(g).collect::<Vec<_>>());
+    let mut out: Vec<Mote> = Vec::new();
     let mut remainder = ratio(0, 1);
-    for x in std::mem::take(parcels) {
+    for x in std::mem::take(motes) {
         if let Some(y) = out.iter_mut().find(|y| key(y) == key(&x)) {
             let (my, mx) = (y.amount.clone(), x.amount.clone());
             let both = my.clone() + mx.clone();
@@ -417,14 +417,14 @@ pub fn merge(parcels: &mut Vec<Parcel>, total: &Ratio) -> Ratio {
             out.push(x);
         }
     }
-    *parcels = out;
+    *motes = out;
     remainder
 }
 
-/// The founding's parcels for a galaxy: each kind of its grains carried by
+/// The founding's motes for a galaxy: each kind of its grains carried by
 /// the bounce's push, `ℓ_o = p·w̄/w_z` (dispersal's form, own units), no
 /// circulation yet, the founding's phases, cold.
-pub fn founding(grains: &Manifest) -> Vec<Parcel> {
+pub fn founding(grains: &Manifest) -> Vec<Mote> {
     let Some((p, _, mean)) = crate::pulse::galaxy_push(grains) else { return Vec::new() };
     // The source's phases (refused only off the axes, where the founding
     // carries no offset until the sector reading lands; stated, never a
@@ -442,20 +442,20 @@ pub fn founding(grains: &Manifest) -> Vec<Parcel> {
         .map(|(k, a)| {
             let turn = ratio(i64::from(z_of(k).unwrap_or(0)), 2);
             let phase = vec![frac(&(source[0].clone() + turn.clone())), frac(&(ratio(1, 2) + turn))];
-            Parcel { key: k.clone(), amount: a.clone(), ell_o: crate::ring::grain(&(p.clone() * mean.clone() / weight(k))), ell_c: ratio(0, 1), phase, agitation: ratio(0, 1), born: 0, vacuum: false }
+            Mote { key: k.clone(), amount: a.clone(), ell_o: crate::ring::grain(&(p.clone() * mean.clone() / weight(k))), ell_c: ratio(0, 1), phase, agitation: ratio(0, 1), born: 0, vacuum: false }
         })
         .collect()
 }
 
-/// The parcels' total holding (by weight).
-pub fn holding(parcels: &[Parcel]) -> Ratio {
-    parcels.iter().fold(ratio(0, 1), |s, x| s + x.amount.clone() * weight(&x.key))
+/// The motes' total holding (by weight).
+pub fn holding(motes: &[Mote]) -> Ratio {
+    motes.iter().fold(ratio(0, 1), |s, x| s + x.amount.clone() * weight(&x.key))
 }
 
-/// The parcels' manifest.
-pub fn manifest(parcels: &[Parcel]) -> Manifest {
+/// The motes' manifest.
+pub fn manifest(motes: &[Mote]) -> Manifest {
     let mut m = Manifest::new();
-    for x in parcels {
+    for x in motes {
         *m.entry(x.key.clone()).or_insert_with(|| ratio(0, 1)) += x.amount.clone();
     }
     m

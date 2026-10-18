@@ -279,7 +279,7 @@ precession and its propulsion are owed together.
 ### Formation live: the chain to stars, ignition and the coupling (operator 2026-10-15; built)
 
 Live from 21:41 on a re-founded universe (the pairing distribution): the
-deploy lays down each core's disc and its galaxy's GAS as parcels, no
+deploy lays down each core's disc and its galaxy's GAS as motes, no
 placed systems; the core's AXIAL JETS land at the rim; at each echo (the
 universal core's pulse reaching the galaxy after its light-travel delay,
 bells 300 to 3,540) the gas that has cooled enough is PARTITIONED by the
@@ -336,7 +336,7 @@ mass + magnetism.
 
 ### Built offline after the host crash (2026-10-16; services down by the operator's ruling)
 
-- **Vacuum cooling** (with xylarium): every parcel halves its agitation
+- **Vacuum cooling** (with xylarium): every mote halves its agitation
   through the vacuum every `⌈1/δ⌉` rings at its reach (δ = H/(R + H);
   `(1 − δ)^⌈1/δ⌉ ≤ 1/e < ½`, exact, no power), beside its open frames'
   light; closed-shell gas cools; close-in gas fastest.
@@ -556,6 +556,29 @@ square in disguise); any energy integral (v²). Owed: the galaxies'
 magnetism setting the universal core's strength (11.0 (1)) feeds `H_u` and
 so e; anticipated to be the recycling circuit seen from the core.
 
+### Motes (operator 2026-10-18: "parcel" renamed)
+
+A MOTE is a portion of one element that moves with the flow: many atoms of
+one kind moving together, carrying their kind, amount, reach and spin,
+their phase in each plane, their heat and their stream. A mote is not a
+particle (atoms are the particle tier) and not a grain (the carrier's
+finest resolution). How finely matter is cut into motes is the carrier's
+resolution, never law: a reading that changes when a mote splits or merges
+is a bug. Motes have no sender and no destination; they go where the laws
+carry them.
+
+The operator's reasons, and the cautions:
+- "Parcel" was retired because it is a courier's package (a sender, an
+  address, a delivery, and a near-synonym of the universe-as-package).
+- "Mote" is a speck carried in a current and seen by light, as a star's
+  wind meets its counterflow. It sounds like "moat", water for a water
+  planet.
+- The moat image (still, guarding water) is semantics only: motes stream
+  and connect, and the guarding gate is the Woronin seal.
+- Ships traverse THROUGH the medium motes make up, never on them.
+- The era-0 economy's postage (`ParcelConveyed`, `dop::Parcel`) keeps its
+  word: that one really is a courier's package.
+
 ### The fountain: every core's axes, the rings, and the streams (operator 2026-10-18; to be built, with xylarium)
 
 The finding that led to it: the universal core pays every galaxy's turning
@@ -576,7 +599,7 @@ the one capture law. Operator: "think of it like a continuous fountain".
 2. **A galaxy at the universal core.** The universal core is the core of
    its own central galaxy, which is new (today every galaxy orbits it and
    none sits on it). RULED (operator 2026-10-18): the central galaxy is the
-   core's OWN DISC, its cut read on the ocean parcels inside its throat
+   core's OWN DISC, its cut read on the ocean motes inside its throat
    (as a galaxy's `read_cut`), never a galaxy founded or placed. Its stars
    form there by the same clump law.
 3. **The return closes the books.** Where an inner galaxy's jetstream
@@ -602,8 +625,8 @@ the one capture law. Operator: "think of it like a continuous fountain".
 6. **Continuum or vacuum, by force** (operator: "jetstreams depending on
    their force are either continuums or vacuums in the filament … analogous
    to the gulf stream"). The stream is a READING, never a label from a
-   parcel's origin.
-   - The force is the jet's push at the parcel's reach (its pulse share
+   mote's origin.
+   - The force is the jet's push at the mote's reach (its pulse share
      times the arrival strength ρ, the kick's own reading).
    - What the force meets is the filament's hold there, `λ/(1 + λ)`.
    - **Continuum:** where the push beats the hold, the jet carries matter
@@ -611,7 +634,7 @@ the one capture law. Operator: "think of it like a continuous fountain".
    - **Vacuum:** where the hold beats the push, the jet cannot fill the
      channel; it runs thin and counter-moving along the flanks (the
      countercurrents and shed eddies).
-   - A parcel crosses between streams as the jet strengthens and weakens
+   - A mote crosses between streams as the jet strengthens and weakens
      along its loop.
    - The wind (open share × the vacuum counterflow χ) then starts and stops
      with the jet's strength.
@@ -640,7 +663,7 @@ every tier, as cytoplasm streams in hyphae. The closed gate is the
 ring-to-ring cord is gated at the inner ring's core.
 
 Owed in code:
-- the universe's medium as parcels (the east/west loops are that medium in
+- the universe's medium as motes (the east/west loops are that medium in
   motion);
 - the central galaxy;
 - the ring-1 exchange refilling the reservoir;
@@ -748,7 +771,7 @@ part built. One formation law for both, stated square-free here.
   the proton's mass, with `v_th ∝ √T`, is withdrawn; see "Our rulers are
   our own": `v_th` is derived from the atom tier's own turning.)
 - **The balance (pressure support; closes Open 1).** Every term a speed:
-  `c·δ(<r) = L / r + v_th`. A parcel's enclosed-mass speed is held by its
+  `c·δ(<r) = L / r + v_th`. A mote's enclosed-mass speed is held by its
   spin speed plus its thermal speed. Gas with no spin falls until its
   thermal speed holds it: the STAR. Gas with spin settles at `r_c`: the
   DISK. Infall, pressure support and orbit are one exact linear balance;

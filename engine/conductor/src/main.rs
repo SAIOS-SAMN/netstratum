@@ -346,13 +346,13 @@ fn main() {
             let lit = universe.cores.iter().filter(|c| !c.satellites.is_empty()).count();
             let gas_share = universe.cores.iter().map(|c| conductor::pulse::mass(&c.medium)).fold(cfe::ratio::ratio(0, 1), |a, b| a + b) / conductor::pulse::mass(&universe.total());
             let discs = universe.cores.iter().map(|c| conductor::pulse::mass(&c.kept)).fold(cfe::ratio::ratio(0, 1), |a, b| a + b) / conductor::pulse::mass(&universe.total());
-            let parcels: usize = universe.cores.iter().map(|c| c.gas.len()).sum();
+            let motes: usize = universe.cores.iter().map(|c| c.gas.len()).sum();
             let metal_stars = universe.cores.iter().flat_map(|c| &c.satellites).filter(|s| s.kept.keys().any(|k| k != "Z001" && k != "Z002")).count();
             // THE COUPLING at each star's interface (`formation::coupling`).
             let universe_hold = conductor::pulse::mass(&universe.total());
             let kappas: Vec<f64> = universe.cores.iter().flat_map(|c| &c.satellites).filter_map(|s| conductor::formation::coupling(&s.kept, &universe_hold)).map(|k| f(&k)).collect();
             let (k0, k1) = (kappas.iter().cloned().fold(f64::INFINITY, f64::min), kappas.iter().cloned().fold(0.0, f64::max));
-            println!("beat {beat}: FORMATION — {stars} stars ({metal_stars} with metals) and {worlds} worlds in {lit} of {} galaxies; discs {:.3}, gas {:.3} of the universe in {parcels} parcels; coupling κ {k0:.3e}..{k1:.3e}", universe.cores.len(), f(&discs), f(&gas_share));
+            println!("beat {beat}: FORMATION — {stars} stars ({metal_stars} with metals) and {worlds} worlds in {lit} of {} galaxies; discs {:.3}, gas {:.3} of the universe in {motes} motes; coupling κ {k0:.3e}..{k1:.3e}", universe.cores.len(), f(&discs), f(&gas_share));
             // THE HEARTBEAT OBSERVER (docs/83): each star's interface burn
             // on the rings it has received since its heart formed (its
             // nested clock: the galaxy's rate times its orbit's).

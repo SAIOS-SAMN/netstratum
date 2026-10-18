@@ -274,7 +274,7 @@ pub struct Body {
     pub ell: Ratio,
     /// The medium's total angular momentum (gas carries spin too).
     pub medium_spin: Ratio,
-    /// docs/83 FORMATION: a galactic core's gas as PARCELS (each element's
+    /// docs/83 FORMATION: a galactic core's gas as MOTES (each element's
     /// shell where the bounce's push left it, a jet batch where it landed),
     /// in the galaxy's own units; empty for every other body.
     pub gas: Vec<crate::formation::Shell>,
@@ -287,11 +287,11 @@ pub struct Body {
     /// The core's HOLDING tracks what it holds, state + grains; an emptied
     /// galaxy keeps its core. Zero for every other body. Tag 9.
     pub state: Ratio,
-    /// THE FLOWS (`crate::flows`): a galaxy's matter as parcels carrying
+    /// THE FLOWS (`crate::flows`): a galaxy's matter as motes carrying
     /// their state forward (tag 10 each); empty for every other body.
-    pub flows: Vec<crate::flows::Parcel>,
+    pub flows: Vec<crate::flows::Mote>,
     /// The core's turning reservoir, the kicks' antipole (tag 11): what it
-    /// gave its parcels' spin, taken from it, so `Σ m·ℓ + reservoir` holds.
+    /// gave its motes' spin, taken from it, so `Σ m·ℓ + reservoir` holds.
     pub reservoir: Ratio,
     /// A STAR'S OWN SPIN `ℓ_s` (tag 12; with xylarium): captured at birth
     /// from its members' spread of orbital spin; its bell `ω_s = δ(ℓ_s/H_s)`
@@ -484,7 +484,7 @@ pub fn deploy(seed: &[u8; 32], manifest: &Manifest) -> Universe {
     let discs: Vec<Manifest> = shares.iter().map(|(_, m, _)| disperse(m)).collect();
     let unit = discs.iter().map(mass).max().filter(|m| !m.is_zero()).unwrap_or_else(|| ratio(1, 1));
     // FORMATION (docs/83): no system is placed. Each core keeps its disc;
-    // the rest is its galaxy's GAS, laid down as parcels where the push left
+    // the rest is its galaxy's GAS, laid down as motes where the push left
     // each element; stars collapse from it as it cools (`breath`).
     // THE GALAXIES ORBIT THE UNIVERSAL SINGULARITY (operator): inside out,
     // each about the universal state plus every core inside it (each core
@@ -514,7 +514,7 @@ pub fn deploy(seed: &[u8; 32], manifest: &Manifest) -> Universe {
         .zip(discs)
         .zip(orbits)
         .map(|(((i, m, _), _disc), (radius, period, ell))| {
-            // THE FLOWS (`crate::flows`): the galaxy's matter as parcels,
+            // THE FLOWS (`crate::flows`): the galaxy's matter as motes,
             // each kind carried by the bounce's push with the founding's
             // phases; what is held and what is gas is READ from their state
             // (the cut as a reading), never placed.
@@ -721,8 +721,8 @@ fn get_body(v: &[u8], spun: bool) -> Option<Body> {
     Some(Body { path, radius, period, kept, satellites: Vec::new(), medium, ell, medium_spin, gas: Vec::new(), born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new() })
 }
 
-/// A flow parcel (tag 10), attached to the body read before it.
-fn get_flow(v: &[u8]) -> Option<crate::flows::Parcel> {
+/// A flow mote (tag 10), attached to the body read before it.
+fn get_flow(v: &[u8]) -> Option<crate::flows::Mote> {
     let len = u16::from_le_bytes(v.get(0..2)?.try_into().ok()?) as usize;
     let key = String::from_utf8(v.get(2..2 + len)?.to_vec()).ok()?;
     let mut at = 2 + len;
@@ -743,11 +743,11 @@ fn get_flow(v: &[u8]) -> Option<crate::flows::Parcel> {
     let born = u64::from_le_bytes(v.get(at..at + 8)?.try_into().ok()?);
     let vacuum = v.get(at + 8).copied().unwrap_or(0) == 1;
     let mut r = r.into_iter();
-    Some(crate::flows::Parcel { key, amount: r.next()?, ell_o: r.next()?, ell_c: r.next()?, agitation: r.next()?, phase, born, vacuum })
+    Some(crate::flows::Mote { key, amount: r.next()?, ell_o: r.next()?, ell_c: r.next()?, agitation: r.next()?, phase, born, vacuum })
 }
 
-/// A gas parcel (tag 6), attached to the body read before it.
-fn get_parcel(v: &[u8]) -> Option<crate::formation::Shell> {
+/// A gas mote (tag 6), attached to the body read before it.
+fn get_mote(v: &[u8]) -> Option<crate::formation::Shell> {
     let len = u16::from_le_bytes(v.get(0..2)?.try_into().ok()?) as usize;
     let key = String::from_utf8(v.get(2..2 + len)?.to_vec()).ok()?;
     let mut at = 2 + len;
@@ -759,7 +759,7 @@ fn get_parcel(v: &[u8]) -> Option<crate::formation::Shell> {
     }
     let halving = u64::from_le_bytes(v.get(at..at + 8)?.try_into().ok()?);
     let born = u64::from_le_bytes(v.get(at + 8..at + 16)?.try_into().ok()?);
-    // The vacuum's halving (absent in parcels written before it: none).
+    // The vacuum's halving (absent in motes written before it: none).
     let vacuum = v.get(at + 16..at + 24).and_then(|b| b.try_into().ok()).map(u64::from_le_bytes).unwrap_or(0);
     let mut r = r.into_iter();
     Some(crate::formation::Shell { key, held: r.next()?, inner: r.next()?, outer: r.next()?, agitation: r.next()?, halving: (halving > 0).then_some(halving), born, vacuum })
@@ -781,7 +781,7 @@ pub fn read(var_root: &Path) -> Option<([u8; 32], Universe)> {
             3 => seed = v.try_into().ok(),
             2 => medium = get_manifest(v, &mut 0)?,
             1 => flat.push(get_body(v, spun)?),
-            6 => flat.last_mut()?.gas.push(get_parcel(v)?),
+            6 => flat.last_mut()?.gas.push(get_mote(v)?),
             7 => flat.last_mut()?.born = u64::from_le_bytes(v.try_into().ok()?),
             8 => unit = cfe::ratio::decode(v)?.0,
             9 => flat.last_mut()?.state = cfe::ratio::decode(v)?.0,
@@ -822,10 +822,10 @@ mod tests {
 
     #[test]
     fn the_pulse_file_reads_back_exactly() {
-        let parcel = crate::formation::Shell { key: "Z001".into(), held: ratio(1, 5), inner: ratio(1, 3), outer: ratio(2, 3), agitation: ratio(1, 2), halving: Some(2), born: 7, vacuum: 3 };
+        let mote = crate::formation::Shell { key: "Z001".into(), held: ratio(1, 5), inner: ratio(1, 3), outer: ratio(2, 3), agitation: ratio(1, 2), halving: Some(2), born: 7, vacuum: 3 };
         let orb = Body { path: vec![1, 1, 1], radius: ratio(3, 2), period: ratio(5, 2), kept: [("Z008".to_string(), ratio(1, 64))].into(), satellites: Vec::new(), medium: Manifest::new(), ell: ratio(7, 3), medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new() };
         let sys = Body { path: vec![1, 1], radius: ratio(9, 2), period: ratio(11, 2), kept: [("Z001".to_string(), ratio(3, 1024))].into(), satellites: vec![orb], medium: Manifest::new(), ell: ratio(1, 9), medium_spin: ratio(1, 7), gas: Vec::new(), born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new() };
-        let core = Body { path: vec![1], radius: ratio(60, 1), period: ratio(0, 1), kept: [("Z026".to_string(), ratio(1, 2))].into(), satellites: vec![sys], medium: [("Z001".to_string(), ratio(5, 4))].into(), ell: ratio(0, 1), medium_spin: ratio(13, 11), gas: vec![parcel], born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new() };
+        let core = Body { path: vec![1], radius: ratio(60, 1), period: ratio(0, 1), kept: [("Z026".to_string(), ratio(1, 2))].into(), satellites: vec![sys], medium: [("Z001".to_string(), ratio(5, 4))].into(), ell: ratio(0, 1), medium_spin: ratio(13, 11), gas: vec![mote], born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new() };
         let u = Universe { cores: vec![core], medium: [("Z002".to_string(), ratio(1, 1024))].into(), unit: ratio(1, 2) };
         let dir = std::env::temp_dir().join(format!("pulse-{}", std::process::id()));
         write(&dir, &[7; 32], &u).unwrap();

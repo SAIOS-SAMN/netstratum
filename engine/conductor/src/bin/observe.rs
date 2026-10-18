@@ -97,7 +97,7 @@ fn main() {
             for (i, c) in u.cores.iter().enumerate() {
                 let total = pulse::mass(&c.total());
                 println!(
-                    "  galaxy {:>2}: share {:.3}, disc {:.3}, gas {:.3} ({} parcels), {} stars; distance {} (first echo at bell {}); clock {:.6}",
+                    "  galaxy {:>2}: share {:.3}, disc {:.3}, gas {:.3} ({} motes), {} stars; distance {} (first echo at bell {}); clock {:.6}",
                     c.path[0], f(&(total.clone() / universe_hold.clone())), of(&pulse::mass(&c.kept), &total), of(&pulse::mass(&c.medium), &total),
                     c.gas.len(), c.satellites.len(), c.radius, 60 + f(&c.radius) as u64, f(&breath::galaxy_rate(&u, i, &unit))
                 );
@@ -109,7 +109,7 @@ fn main() {
             let total = pulse::mass(&c.total());
             println!("GALAXY {:?} at beat {now}: share {:.4} of the universe; distance {} light-rings, first echo at bell {}", c.path, f(&(total.clone() / universe_hold.clone())), c.radius, 60 + f(&c.radius) as u64);
             println!("  core state hold {:.3e} (units of the deepest hole), disc {:.3e}: {}", f(&(pulse::core_state(c) / unit.clone())), f(&(pulse::mass(&c.kept) / unit.clone())), composition(&c.kept, 6));
-            println!("  gas {:.3} of the galaxy in {} parcels: {}; gas spin {:.3e}", of(&pulse::mass(&c.medium), &total), c.gas.len(), composition(&c.medium, 6), f(&c.medium_spin));
+            println!("  gas {:.3} of the galaxy in {} motes: {}; gas spin {:.3e}", of(&pulse::mass(&c.medium), &total), c.gas.len(), composition(&c.medium, 6), f(&c.medium_spin));
             println!("  clock against the universal core {:.6}", f(&breath::galaxy_rate(&u, i, &unit)));
             for (s, sys) in c.satellites.iter().enumerate() {
                 println!("  star {:?}: holding {:.3e}, born bell {}, reach {:.3e}, {} worlds, clock {:.6}; {}", sys.path, f(&(pulse::mass(&sys.kept) / unit.clone())), sys.born, f(&sys.radius), sys.satellites.len(), f(&system_rate(&u, i, s, &unit)), composition(&sys.kept, 3));
@@ -160,7 +160,7 @@ fn main() {
             let (rings, _, h) = formation::shells(&all, &c.kept);
             let gas: Vec<formation::Shell> = c.gas.iter().cloned().chain(rings).collect();
             let stretches = formation::stretches(&gas, bell);
-            println!("GAS {:?} at bell {bell}: H {:.3}, push share {:.3}, {} parcels, {} stretches", c.path, f(&h), f(&((h.clone() - ratio(1, 1)) / h.clone())), c.gas.len(), stretches.len());
+            println!("GAS {:?} at bell {bell}: H {:.3}, push share {:.3}, {} motes, {} stretches", c.path, f(&h), f(&((h.clone() - ratio(1, 1)) / h.clone())), c.gas.len(), stretches.len());
             for st in &stretches {
                 let ignite = formation::ignition_share(&st.agitation).map(|s| format!("{:.3}", f(&s))).unwrap_or_else(|| "too hot".into());
                 println!(
@@ -171,7 +171,7 @@ fn main() {
             }
         }
         "flows" => {
-            // THE FLOWS (docs/83): a galaxy's parcels, held vs gas, the spread
+            // THE FLOWS (docs/83): a galaxy's motes, held vs gas, the spread
             // of their reaches and phases, and the best clump candidate's
             // terms (binding vs agitation + the unlocked face + the shear).
             let Some(i) = num(1).and_then(galaxy) else { return println!("flows G") };
@@ -187,7 +187,7 @@ fn main() {
                 format!("{:.3}..{:.3}", ph.iter().cloned().fold(f64::INFINITY, f64::min), ph.iter().cloned().fold(0.0, f64::max))
             }).collect();
             let circ: f64 = c.flows.iter().map(|x| f(&x.ell_c)).fold(0.0, f64::max);
-            println!("FLOWS {:?} at beat {now}: H {:.3}, {} parcels ({held} wholly held, {gas} wholly gas), reach {r0:.3}..{r1:.3}, phases {phases:?}, max ℓ_c {circ:.3e}, reservoir {:.3e}", c.path, f(&h), c.flows.len(), f(&c.reservoir));
+            println!("FLOWS {:?} at beat {now}: H {:.3}, {} motes ({held} wholly held, {gas} wholly gas), reach {r0:.3}..{r1:.3}, phases {phases:?}, max ℓ_c {circ:.3e}, reservoir {:.3e}", c.path, f(&h), c.flows.len(), f(&c.reservoir));
             let mut best: Option<(f64, String)> = None;
             let mut fil_best: Option<(f64, String)> = None;
             let mut fil_hold = 0;
@@ -215,7 +215,7 @@ fn main() {
                 println!("{line}");
             }
             if let Some((_, line)) = fil_best {
-                println!("{line}; {fil_hold} of {} parcels' filaments hold", c.flows.len());
+                println!("{line}; {fil_hold} of {} motes' filaments hold", c.flows.len());
             }
         }
         "formation" => {
@@ -223,7 +223,7 @@ fn main() {
                 let total = pulse::mass(&c.total());
                 let metal = c.satellites.iter().filter(|s| s.kept.keys().any(|k| k != "Z001" && k != "Z002")).count();
                 println!(
-                    "  galaxy {:>2}: disc {:.3} gas {:.3} ({} parcels, {} jet batches); first echo bell {}; {} stars ({metal} with metals), {} worlds",
+                    "  galaxy {:>2}: disc {:.3} gas {:.3} ({} motes, {} jet batches); first echo bell {}; {} stars ({metal} with metals), {} worlds",
                     c.path[0], of(&pulse::mass(&c.kept), &total), of(&pulse::mass(&c.medium), &total), c.gas.len(), c.gas.iter().filter(|g| g.born > 0).count(),
                     60 + f(&c.radius) as u64, c.satellites.len(), c.satellites.iter().map(|s| s.satellites.len()).sum::<usize>()
                 );
@@ -353,7 +353,7 @@ fn main() {
             for c in &u.cores {
                 let total = pulse::mass(&c.total());
                 let worlds: usize = c.satellites.iter().map(|s| s.satellites.len()).sum();
-                println!("  RETURN galaxy {:>2}: disc {:.4}, gas {:.4} ({} parcels), {} stars, {worlds} worlds", c.path[0], of(&pulse::mass(&c.kept), &total), of(&pulse::mass(&c.medium), &total), c.gas.len(), c.satellites.len());
+                println!("  RETURN galaxy {:>2}: disc {:.4}, gas {:.4} ({} motes), {} stars, {worlds} worlds", c.path[0], of(&pulse::mass(&c.kept), &total), of(&pulse::mass(&c.medium), &total), c.gas.len(), c.satellites.len());
             }
             println!("  CRESTS: owed (the gain a pass on a crest, (medium in band) × a_q × the kick, with xylarium); read once derived");
         }
