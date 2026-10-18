@@ -47,6 +47,11 @@ fn main() {
     // magnetism (transduction via magnetism).
     let three_z = |m: &pulse::Manifest| pulse::mass(m) + pulse::magnetism(m);
     println!("CONSERVATION — the breath created nothing (holding + magnetism, 3Z): {}; the manifest unchanged: {}", three_z(&u.total()) == three_z(&before), u.total() == before);
+    // THE HYDROGEN GUARD (operator 2026-10-18: hydrogen "must be the most
+    // abundant resource"): the commonest kind by nuclei across the universe.
+    let all = u.total();
+    let commonest = all.iter().max_by(|a, b| a.1.cmp(b.1)).map(|(k, _)| k.clone()).unwrap_or_default();
+    println!("HYDROGEN GUARD — commonest kind by nuclei: {commonest}{}", if commonest == "Z001" { "" } else { "  FLAG: not hydrogen" });
     if args.get(4).map(String::as_str) == Some("write") {
         let _ = pulse::write(Path::new(era1), &seed, &u);
         let _ = std::fs::write(Path::new(era1).join("conductor.beat"), until.to_string());

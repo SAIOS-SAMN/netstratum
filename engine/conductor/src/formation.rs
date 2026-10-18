@@ -341,8 +341,13 @@ pub fn burn(star: &Manifest, share: &Ratio, z: u32, coherence: &Ratio) -> Option
         return None;
     }
     let open = |z: u32| i64::from(atom(z).map(|a| a.unpaired).unwrap_or(0));
-    let dm = (open(2 * z) - 2 * open(z)).abs();
-    if dm == 0 {
+    // A rung runs only where PAIRING RISES (with xylarium): fusion turns
+    // magnetism into holding and sends light out, `2·u(z) > u(2z)`. Where
+    // the product is more open it would take light in, so it does not run,
+    // and the ladder stops by the law (an absolute value let it climb
+    // without end on an atom defined at every Z).
+    let dm = 2 * open(z) - open(2 * z);
+    if dm <= 0 {
         return None;
     }
     let driver = ratio(dm, 3 * 2 * i64::from(z));
