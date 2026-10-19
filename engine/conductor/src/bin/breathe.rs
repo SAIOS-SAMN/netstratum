@@ -48,11 +48,17 @@ fn main() {
     // magnetism (transduction via magnetism).
     let three_z = |m: &pulse::Manifest| pulse::mass(m) + pulse::magnetism(m);
     println!("CONSERVATION — the breath created nothing (holding + magnetism, 3Z): {}; the manifest unchanged: {}", three_z(&u.total()) == three_z(&before), u.total() == before);
-    // THE HYDROGEN GUARD (operator 2026-10-18: hydrogen "must be the most
-    // abundant resource"): the commonest kind by nuclei across the universe.
+    // THE AGE (operator 2026-10-19: "universes age from their conception on
+    // the TUniversal sexagesimal logged at their birth (distribution of
+    // resources)"; hydrogen the most abundant at the founding, then the
+    // physics of recycling): hydrogen's and helium's shares by nuclei at the
+    // founding and now, a reading of age, never a flag.
     let all = u.total();
+    let count = |m: &pulse::Manifest, k: &str| m.get(k).cloned().unwrap_or_else(|| cfe::ratio::ratio(0, 1));
+    let whole = |m: &pulse::Manifest| m.values().fold(cfe::ratio::ratio(0, 1), |s, a| s + a.clone());
+    let share = |m: &pulse::Manifest, k: &str| { use num_traits::ToPrimitive; let w = whole(m); if w == cfe::ratio::ratio(0, 1) { 0.0 } else { (count(m, k) / w).to_f64().unwrap_or(0.0) } };
     let commonest = all.iter().max_by(|a, b| a.1.cmp(b.1)).map(|(k, _)| k.clone()).unwrap_or_default();
-    println!("HYDROGEN GUARD — commonest kind by nuclei: {commonest}{}", if commonest == "Z001" { "" } else { "  FLAG: not hydrogen" });
+    println!("AGE — by nuclei, H {:.3} -> {:.3}, He {:.3} -> {:.3} (founding -> now); commonest now {commonest}", share(&before, "Z001"), share(&all, "Z001"), share(&before, "Z002"), share(&all, "Z002"));
     if args.get(4).map(String::as_str) == Some("write") {
         let _ = pulse::write(Path::new(era1), &seed, &u);
         let _ = std::fs::write(Path::new(era1).join("conductor.beat"), until.to_string());
