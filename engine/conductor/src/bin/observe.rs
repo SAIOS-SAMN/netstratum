@@ -198,6 +198,48 @@ fn main() {
                 );
             }
         }
+        "position" => {
+            // A GALACTIC CORE WEIGHED, AND THE ELEMENTS AT A POSITION IN ITS
+            // DISC (operator 2026-10-19: "use our own measurements in order
+            // to weigh the galactic core properly as a derivation ... a quick
+            // idea as to the elemental core composition in alignment with
+            // earths position"). Every reading is the galaxy's own: its
+            // core's state and what its cut holds (the kinds, heaviest and
+            // lightest, their share of the galaxy), and the kinds standing in
+            // the band about a share `f` of the way to its rim (R = ℓ/H, the
+            // rim at R = H; f given in percent, default 50, "halfway out"),
+            // the band spread by the galaxy's push, `fH(1 ± p)`.
+            let f_pct = num(1).unwrap_or(50);
+            let fr = ratio(f_pct as i64, 100);
+            for c in &u.cores {
+                let all = c.total();
+                let Some((p, h, _)) = pulse::galaxy_push(&all) else { continue };
+                let g = pulse::mass(&all);
+                let state = pulse::core_state(c);
+                let zs = |m: &pulse::Manifest| {
+                    let z: Vec<u32> = m.keys().filter_map(|k| conductor::chem::atom_z(k)).collect();
+                    (z.iter().min().copied().unwrap_or(0), z.iter().max().copied().unwrap_or(0), m.len())
+                };
+                let (klo, khi, kn) = zs(&c.kept);
+                let (_, ghi, gn) = zs(&all);
+                println!("GALAXY {:?} receives {gn} kinds, the heaviest Z{ghi}", c.path);
+                println!("GALAXY {:?}: core state {:.3e} + held {:.3e} of the galaxy's {:.3e} (core {:.1}% of it); held {kn} kinds, Z{klo}..Z{khi}; push p {:.3}, H {:.3}", c.path, f(&state), f(&pulse::mass(&c.kept)), f(&g), 100.0 * f(&((state.clone() + pulse::mass(&c.kept)) / (state + g.clone()))), f(&p), f(&h));
+                let (lo, hi) = (fr.clone() * h.clone() * (ratio(1, 1) - p.clone()), fr.clone() * h.clone() * (ratio(1, 1) + p.clone()));
+                let mut band = pulse::Manifest::new();
+                for x in &c.flows {
+                    let r = x.ell_o.clone() / h.clone();
+                    if r >= lo && r <= hi {
+                        *band.entry(x.key.clone()).or_insert_with(|| ratio(0, 1)) += x.amount.clone();
+                    }
+                }
+                let bm = pulse::mass(&band);
+                let mut top: Vec<(String, Ratio)> = band.iter().map(|(k, a)| (k.clone(), a.clone() * conductor::flows::weight(k))).collect();
+                top.sort_by(|a, b| b.1.cmp(&a.1));
+                let (blo, bhi, bn) = zs(&band);
+                let list: Vec<String> = top.iter().take(12).map(|(k, w)| format!("{k}:{:.3}", if bm == ratio(0, 1) { 0.0 } else { f(&(w.clone() / bm.clone())) })).collect();
+                println!("  AT {f_pct}% OF THE WAY TO THE RIM (R {:.3}..{:.3}): {bn} kinds, Z{blo}..Z{bhi}, {:.3e} of the galaxy; by holding: {}", f(&lo), f(&hi), if g == ratio(0, 1) { 0.0 } else { f(&(bm / g.clone())) }, list.join(" "));
+            }
+        }
         "firmament" => {
             // THE FIRMAMENT'S ORDER OVER MANY PULSES (a reading on a copy):
             // the singularity's pulses alone (`pulse::orbit_galaxies`, the

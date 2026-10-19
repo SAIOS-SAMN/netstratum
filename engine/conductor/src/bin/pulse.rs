@@ -13,13 +13,22 @@ fn main() {
         // `pulse <era0> <era1> found [grains]`: with no readable universe to
         // inherit from (its format changed), found on as many grains of
         // nucleons as given (default 100,000), on the stand-in seed.
-        let founding_grains: u64 = args.get(4).and_then(|g| g.parse().ok()).unwrap_or(100_000);
+        // The founding's size in grains, exact: a decimal, or `2^N` for a
+        // power of two (the derivations at the closed-shell weights reach
+        // past 2^600).
+        let founding_grains: num_bigint::BigInt = args
+            .get(4)
+            .and_then(|g| match g.split_once('^') {
+                Some((b, e)) => Some(b.parse::<num_bigint::BigInt>().ok()?.pow(e.parse::<u32>().ok()?)),
+                None => g.parse().ok(),
+            })
+            .unwrap_or_else(|| num_bigint::BigInt::from(100_000));
         let (seed, mut manifest) = match pulse::read(Path::new(era1)) {
             Some((seed, old)) => (seed, old.total()),
             None if args.get(3).map(String::as_str) == Some("found") => {
                 let per = pulse::nuclei_per_grain() * num_bigint::BigInt::from(1024);
                 let mut m = pulse::Manifest::new();
-                m.insert("Z001".to_string(), cfe::ratio::Ratio::from_integer(num_bigint::BigInt::from(founding_grains)));
+                m.insert("Z001".to_string(), cfe::ratio::Ratio::from_integer(founding_grains.clone()));
                 let _ = per;
                 (*blake3::hash(b"netstratum era 1, unfounded stand-in").as_bytes(), m)
             }

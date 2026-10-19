@@ -5,6 +5,16 @@ use cfe::almanac::atom::atom;
 use std::collections::BTreeMap;
 
 fn main() {
+    // `atoms tau Z…`: each kind's depth, enclosed charge and tightness.
+    let args: Vec<String> = std::env::args().skip(1).collect();
+    if args.first().map(String::as_str) == Some("tau") {
+        for z in args[1..].iter().filter_map(|a| a.parse::<u32>().ok()) {
+            if let Some(a) = atom(z) {
+                println!("Z{z}: depth {} outer {} enclosed {} unpaired {} tightness {}", a.depth, a.outer, a.enclosed, a.unpaired, a.tightness);
+            }
+        }
+        return;
+    }
     let atoms: Vec<_> = (1..=118).filter_map(atom).collect();
     let closed: Vec<u32> = atoms.iter().filter(|a| a.closed).map(|a| a.z).collect();
     println!("CLOSED (inert) at Z = {closed:?}");
