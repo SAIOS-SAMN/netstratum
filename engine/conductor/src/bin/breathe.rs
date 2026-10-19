@@ -50,7 +50,7 @@ fn main() {
     println!("CONSERVATION — the breath created nothing (holding + magnetism, 3Z): {}; the manifest unchanged: {}", three_z(&u.total()) == three_z(&before), u.total() == before);
     // THE AGE (operator 2026-10-19: "universes age from their conception on
     // the TUniversal sexagesimal logged at their birth (distribution of
-    // resources)"; hydrogen the most abundant at the founding, then the
+    // resources)"; hydrogen the commonest at the founding, a reading, then the
     // physics of recycling): hydrogen's and helium's shares by nuclei at the
     // founding and now, a reading of age, never a flag.
     let all = u.total();
