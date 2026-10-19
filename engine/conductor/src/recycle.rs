@@ -70,6 +70,9 @@ pub struct Recycled {
     pub spent: Ratio,
     /// Holding trapped at the throat (joining the container).
     pub trapped: Ratio,
+    /// The throat's net hydrogen, in grains (made by peeling, less pressed
+    /// into helium): the return as a rate.
+    pub hydrogen: Ratio,
 }
 
 fn atom_key(z: u32) -> String {
@@ -117,6 +120,7 @@ pub fn recycle(motes: &mut Vec<Mote>, at: &[usize], b: &Ratio, s: &Ratio, g: &Ra
     if *b <= ratio(0, 1) || *s <= ratio(0, 1) {
         return out;
     }
+    let h_in = at.iter().filter(|&&i| i < motes.len() && motes[i].key == "Z001").fold(ratio(0, 1), |acc, &i| acc + motes[i].amount.clone());
     let e = b.clone() * s.clone();
     let built = s.clone() / (s.clone() + e.clone());
     let mut stack: Vec<usize> = at.iter().copied().filter(|&i| i < motes.len()).collect();
@@ -265,6 +269,7 @@ pub fn recycle(motes: &mut Vec<Mote>, at: &[usize], b: &Ratio, s: &Ratio, g: &Ra
             motes.push(m);
         }
     }
+    out.hydrogen = stack.iter().filter(|&&i| motes[i].key == "Z001").fold(ratio(0, 1), |acc, &i| acc + motes[i].amount.clone()) - h_in;
     // Everything that passed leaves on the continuum (operator 2026-10-19:
     // "redistributed back via the continuum"); the trapped stand at the
     // throat, continuum matter too.

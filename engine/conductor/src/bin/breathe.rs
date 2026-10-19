@@ -18,8 +18,14 @@ fn main() {
     let before = u.total();
     // Bell by bell, as the conductor beats (the galaxies re-read their
     // orbits on each universal echo).
+    // From a CHECKPOINT (TUniversal 11.0 (23)): a universe written at a beat
+    // resumes there (`conductor.beat`), never from the founding.
+    let start: u64 = std::fs::read_to_string(Path::new(era1).join("conductor.beat")).ok().and_then(|t| t.trim().parse().ok()).unwrap_or(0).min(until);
+    if start > 0 {
+        println!("RESUMED at bell {start} (the checkpoint)");
+    }
     let mut events = Vec::new();
-    for b in 0..until {
+    for b in start..until {
         events.extend(breath::breathe(&mut u, &seed, t_u, b, b + 1));
     }
     let unit = breath::unit_mass(&u);
@@ -90,6 +96,32 @@ fn main() {
     let sum = |f: &dyn Fn(&breath::Event) -> cfe::ratio::Ratio| events.iter().fold(cfe::ratio::ratio(0, 1), |s, e| s + f(e));
     let f = |x: &cfe::ratio::Ratio| { use num_traits::ToPrimitive; x.to_f64().unwrap_or(0.0) };
     println!("RECYCLING — the throats pressed {:.3e} and peeled {:.3e} (grains of nuclei); light given {:.3e}, holding opened {:.3e}, trapped {:.3e} (units); {} echoes recycled", f(&sum(&|e| e.recycled.pressed.clone())), f(&sum(&|e| e.recycled.peeled.clone())), f(&sum(&|e| e.recycled.light.clone())), f(&sum(&|e| e.recycled.spent.clone())), f(&sum(&|e| e.recycled.trapped.clone())), events.iter().filter(|e| e.recycled != Default::default()).count());
+    // THE BURN AND THE RETURN AS RATES (TUniversal 11.0 (23)): hydrogen fused
+    // by the stars and returned net by the throats, per universal echo, as
+    // shares of the hydrogen standing now, over the run's windows (tenths).
+    // Where the two meet is the hydrogen's steady state, a fixed point; a
+    // read this early is the first instant, never a judgement.
+    {
+        use num_traits::ToPrimitive;
+        let h_now = all.get("Z001").cloned().unwrap_or_else(|| cfe::ratio::ratio(0, 1));
+        let echoes = ((until - start) / t_u.max(1)).max(1);
+        let window = (echoes / 10).max(1);
+        let mut rows: Vec<String> = Vec::new();
+        let mut w = 0;
+        while w * window < echoes {
+            let (lo, hi) = (start + w * window * t_u, (start + (w + 1) * window * t_u).min(until));
+            let sel = events.iter().filter(|e| e.bell > lo && e.bell <= hi);
+            let (mut b, mut r) = (cfe::ratio::ratio(0, 1), cfe::ratio::ratio(0, 1));
+            for e in sel {
+                b += e.burned.get("Z001").cloned().unwrap_or_else(|| cfe::ratio::ratio(0, 1));
+                r += e.recycled.hydrogen.clone();
+            }
+            let per = |x: cfe::ratio::Ratio| if h_now == cfe::ratio::ratio(0, 1) { 0.0 } else { (x / h_now.clone() / cfe::ratio::ratio(window as i64, 1)).to_f64().unwrap_or(0.0) };
+            rows.push(format!("u {}-{}: burned {:.3e} returned {:+.3e}", start / t_u.max(1) + w * window, start / t_u.max(1) + (w + 1) * window, per(b), per(r)));
+            w += 1;
+        }
+        println!("RATES — hydrogen per universal echo, as a share of the hydrogen now: {}", rows.join("; "));
+    }
     if args.get(4).map(String::as_str) == Some("write") {
         let _ = pulse::write(Path::new(era1), &seed, &u);
         let _ = std::fs::write(Path::new(era1).join("conductor.beat"), until.to_string());

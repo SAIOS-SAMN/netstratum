@@ -110,6 +110,10 @@ pub struct Event {
     /// pressed and peeled, the light given and the holding opened, and the
     /// holding trapped, in holding units of the deepest hole.
     pub recycled: crate::recycle::Recycled,
+    /// THE BURN AS A RATE (TUniversal 11.0 (23): path-dependent laws are read
+    /// as rates from a checkpoint): the fuel the galaxy's stars fused this
+    /// echo, by kind, in grains.
+    pub burned: crate::pulse::Manifest,
 }
 
 /// Breathe the universe over bells `from` (exclusive) to `until`, echoes
@@ -178,6 +182,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         // throat (recycled there, then on with the shed).
         let mut infall: Vec<(crate::pulse::Manifest, Ratio, Vec<Ratio>)> = Vec::new();
         let mut recycled = crate::recycle::Recycled::default();
+        let mut burned = crate::pulse::Manifest::new();
         // The galaxy's push and throat in its own units, for the wind's
         // meeting with the medium.
         let g_before = mass(&core.total());
@@ -456,6 +461,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         // Whole grains of the product: two fuel grains each.
                         let made = crate::pulse::nucleus(&((fuel.clone() - left) / ratio(2, 1)));
                         if made > ratio(0, 1) {
+                            *burned.entry(key.clone()).or_insert_with(|| ratio(0, 1)) += made.clone() * ratio(2, 1);
                             let spin = mass(&sys.total()) * sys.ell.clone();
                             less(&mut sys.kept, &[(key.clone(), made.clone() * ratio(2, 1))].into());
                             *sys.kept.entry(crate::formation::product(z)).or_insert_with(|| ratio(0, 1)) += made;
@@ -672,7 +678,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             for &j in &in_throat {
                 core.flows[j].vacuum = false;
             }
-            recycled = crate::recycle::Recycled { pressed: r.pressed, light: r.light / unit.clone(), peeled: r.peeled, spent: r.spent / unit.clone(), trapped: r.trapped / unit.clone() };
+            recycled = crate::recycle::Recycled { pressed: r.pressed, light: r.light / unit.clone(), peeled: r.peeled, spent: r.spent / unit.clone(), trapped: r.trapped / unit.clone(), hydrogen: r.hydrogen };
             // THE SHEAR: neighbouring rings pass turning outward; the inner
             // falls in (the loop becomes an orbit). Σ m·ℓ unchanged.
             let _ = crate::flows::shear(&mut core.flows, enc.as_ref().unwrap_or(&throat), &ledger_unit);
@@ -807,7 +813,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         for (k, a) in to_ocean {
             *u.medium.entry(k).or_insert_with(|| ratio(0, 1)) += a;
         }
-        events.push(Event { bell, galaxy: galaxy_id, rung, write: Write::Perpendicular, stars, jets, returned, dissolved, merged, encounters, recycled });
+        events.push(Event { bell, galaxy: galaxy_id, rung, write: Write::Perpendicular, stars, jets, returned, dissolved, merged, encounters, recycled, burned });
     }
     events
 }
