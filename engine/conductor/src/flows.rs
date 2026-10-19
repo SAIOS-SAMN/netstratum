@@ -260,6 +260,13 @@ impl Enclosed {
 /// (vacuum) mote turns FORWARD in every plane, at its inverted reach, where
 /// the pull reads `δ(H²/R) = 1 − δ(R)`, the continuum's push. Its stored spin
 /// is untouched (`Σ m·ℓ` exact).
+///
+/// ITS ROUTE (operator 2026-10-16, xylarium 11.0 (11): "a continuum jetstream
+/// carries matter out of the singularity along the axis and home through
+/// the disc; a vacuum jetstream draws it in along the axis and out through
+/// the disc"): the route round the loop, not the inversion. A vacuum mote's
+/// loop (the circulation's plane) runs the other way, its advance read over
+/// that passage; its orbit plane turns forward.
 pub fn turn(phase: &mut [Ratio], r_o: &Ratio, h: &Ratio, p: &Ratio, rho: &Ratio, delta_u: &Ratio, inverted: bool) {
     let pull = h.clone() / (r_o.clone() + h.clone());
     let d_o = if inverted { ratio(1, 1) - pull } else { pull };
@@ -273,14 +280,16 @@ pub fn turn(phase: &mut [Ratio], r_o: &Ratio, h: &Ratio, p: &Ratio, rho: &Ratio,
     // their denominators each bell without bound.
     phase[0] = crate::ring::grain(&frac(&(phase[0].clone() + ratio(2, 1) * d_o)));
     let loop_from = phase[1].clone();
-    let loop_phase = frac(&(loop_from.clone() + ratio(2, 1) * d_c.clone()));
+    let route = if inverted { ratio(-1, 1) } else { ratio(1, 1) };
+    let loop_phase = frac(&(loop_from.clone() + route.clone() * ratio(2, 1) * d_c.clone()));
     // THE PARENT'S PULSE MOVES MATTER ALONG THE LOOP (operator: "the pulse
     // moves matter along the loop"; with xylarium): absorbed in step it
     // ADVANCES the loop's phase, `p·ρ·δ_u` × the hemisphere's signed share,
     // on top of the loop's own rate; nothing accumulates as a spin in the
     // loop's plane.
-    let advance = p.clone() * rho.clone() * delta_u.clone() * mean_response(&loop_from, &(ratio(2, 1) * d_c));
-    phase[1] = crate::ring::grain(&frac(&(loop_phase + advance)));
+    let start = if inverted { loop_from - ratio(2, 1) * d_c.clone() } else { loop_from };
+    let advance = p.clone() * rho.clone() * delta_u.clone() * mean_response(&start, &(ratio(2, 1) * d_c));
+    phase[1] = crate::ring::grain(&frac(&(loop_phase + route * advance)));
 }
 
 /// One bell's kicks on every mote: the own family in the orbit's plane

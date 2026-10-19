@@ -635,7 +635,8 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             let throat = crate::flows::Enclosed::new(h.clone(), Vec::new());
             // A VACUUM MOTE PASSES THE THROAT (with xylarium) when its loop
             // phase crosses ½ during the kicks (both streams pass the core
-            // at loop phase ½): the inbound leg delivers it to the throat.
+            // at loop phase ½): the inbound leg (the axis, for the vacuum)
+            // delivers it to the throat.
             let loop_was: Vec<(usize, Ratio)> = core.flows.iter().enumerate().filter(|(_, x)| x.vacuum && x.phase.len() > 1).map(|(j, x)| (j, x.phase[1].clone())).collect();
             let (given, absorbed) = crate::flows::kick(&mut core.flows, enc.as_ref().unwrap_or(&throat), &p, &g_rate, &delta_u, &ledger_unit);
             core.reservoir -= given;
@@ -643,9 +644,11 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // kicks (kicks are motion, recycling the residue), the bounce the
             // container holds presses and peels the matter in the throat.
             let frac = |x: Ratio| x.clone() - x.floor();
+            // Its route runs the loop backward (drawn in along the axis, out
+            // through the disc): it reaches the throat crossing ½ from above.
             for (j, was) in loop_was {
-                let to_half = frac(ratio(1, 2) - was.clone());
-                if to_half > ratio(0, 1) && to_half <= frac(core.flows[j].phase[1].clone() - was) {
+                let to_half = frac(was.clone() - ratio(1, 2));
+                if to_half > ratio(0, 1) && to_half <= frac(was - core.flows[j].phase[1].clone()) {
                     in_throat.push(j);
                 }
             }
