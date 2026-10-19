@@ -775,6 +775,9 @@ pub fn orbit_galaxies(u: &mut Universe) {
         let held = |x: &crate::flows::Mote| x.amount.clone() * crate::flows::weight(&x.key) / whole.clone();
         let enc = crate::flows::Enclosed::new(ratio(1, 1), u.firmament.iter().map(|x| (x.ell_o.clone(), held(x))).collect());
         let _ = crate::flows::kick(&mut u.firmament, &enc, &ratio(1, 2), &ratio(1, 1), &ratio(1, 1), &whole);
+        // Its order: matter pushing matter apart by its open frames
+        // (`flows::repel`), at the bounce's push.
+        crate::flows::repel(&mut u.firmament, &ratio(1, 2));
     }
     // The singularity's state (1) and the firmament it holds (its holding
     // share, as matter: only a throat counts twice).

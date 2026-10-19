@@ -198,6 +198,49 @@ fn main() {
                 );
             }
         }
+        "firmament" => {
+            // THE FIRMAMENT'S ORDER OVER MANY PULSES (a reading on a copy):
+            // the singularity's pulses alone (`pulse::orbit_galaxies`, the
+            // kick and the repulsion), N echoes, read every N/10. Evenness:
+            // each mote's distance on the sphere to its nearest neighbour
+            // (1 − closeness, the product over planes of in-step), their
+            // mean and spread (coefficient of variation; an ordered
+            // arrangement reads near 0).
+            let echoes = num(1).unwrap_or(400);
+            let mut w = u.clone();
+            // Read for the whole firmament and for its VESSEL, the kinds at
+            // or above its heaviest seam (the twin weights where the peel
+            // releases: Z106 on S^11, found by the atom, not named).
+            let top = u.firmament.iter().filter_map(|x| conductor::chem::atom_z(&x.key)).max().unwrap_or(0);
+            let seam = (2..=top).rev().find(|&z| cfe::almanac::atom::hold(z) == cfe::almanac::atom::hold(z - 1)).unwrap_or(0);
+            let read_of = |ms: &[conductor::flows::Mote], at: u64, label: &str| {
+                let n = ms.len();
+                if n < 2 {
+                    return println!("echo {at} {label}: {n} motes");
+                }
+                let nn: Vec<f64> = (0..n).map(|i| (0..n).filter(|&j| j != i).map(|j| {
+                    let c = (0..ms[i].phase.len().min(ms[j].phase.len())).fold(ratio(1, 1), |c, k| c * conductor::flows::in_step(&ms[i].phase[k], &ms[j].phase[k]));
+                    1.0 - f(&c)
+                }).fold(f64::INFINITY, f64::min)).collect();
+                let mean = nn.iter().sum::<f64>() / n as f64;
+                let var = nn.iter().map(|d| (d - mean) * (d - mean)).sum::<f64>() / n as f64;
+                let coincide = nn.iter().filter(|d| **d == 0.0).count();
+                println!("echo {at:5} {label} ({n}): nearest-neighbour distance mean {mean:.4} cv {:.3} min {:.4} max {:.4}; {coincide} motes sitting on another", var.sqrt() / mean.max(1e-12), nn.iter().cloned().fold(f64::INFINITY, f64::min), nn.iter().cloned().fold(0.0, f64::max));
+            };
+            let read = |w: &pulse::Universe, at: u64| {
+                read_of(&w.firmament, at, "all");
+                let vessel: Vec<conductor::flows::Mote> = w.firmament.iter().filter(|x| conductor::chem::atom_z(&x.key).is_some_and(|z| z >= seam)).cloned().collect();
+                read_of(&vessel, at, &format!("vessel Z>={seam}"));
+            };
+            read(&w, 0);
+            let step = (echoes / 10).max(1);
+            for e in 1..=echoes {
+                pulse::orbit_galaxies(&mut w);
+                if e % step == 0 {
+                    read(&w, e);
+                }
+            }
+        }
         "census" => {
             // THE CENSUS (operator 2026-10-18: everything the universe makes,
             // read, never built): the medium, galaxies, stars, clouds,

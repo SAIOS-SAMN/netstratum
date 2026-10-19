@@ -146,6 +146,78 @@ pub fn in_step(a: &Ratio, b: &Ratio) -> Ratio {
     ratio(1, 1) - ratio(2, 1) * off(&(a.clone() - b.clone()))
 }
 
+/// THE FIRMAMENT'S ORDER (operator 2026-10-19: "the pulses over time and the
+/// reverberation/pulsation of the bouncing antipoles should move the
+/// firmament into order (think, dodecahedron - but that needs to be derived
+/// from the mathematics, not set as a dodecahedron)"; "build the
+/// firmament"). The heart's own law, one tier up: matter pushes matter by
+/// the ELECTROMAGNETIC REPULSION gripping its open frames. On each pulse,
+/// every mote is pushed away from every other in each plane, by the other's
+/// open charge (`a·e`, its amount times its open frames) times their
+/// closeness on the sphere (the product over planes of their in-step
+/// shares), signed away from it; summed over the whole charge, it moves by
+/// the bounce's `push` times its own carried share `(e/ē)·(w̄/w)` (its open
+/// frames over the mean, the mean weight over its own: the heaviest barely
+/// move), at most half a turn. All read at once, then moved. Equal charges
+/// pushing apart on a sphere settle into the polyhedra (the Thomson
+/// arrangements): whatever order forms is the mathematics', never set.
+pub fn repel(motes: &mut [Mote], push: &Ratio) {
+    let n = motes.len();
+    if n < 2 {
+        return;
+    }
+    let planes = motes.iter().map(|x| x.phase.len()).min().unwrap_or(0);
+    let open = |x: &Mote| ratio(i64::from(crate::chem::unpaired(&x.key)), 1);
+    let amount = motes.iter().fold(ratio(0, 1), |s, x| s + x.amount.clone());
+    let charge = motes.iter().fold(ratio(0, 1), |s, x| s + x.amount.clone() * open(x));
+    let held = motes.iter().fold(ratio(0, 1), |s, x| s + x.amount.clone() * weight(&x.key));
+    if amount.is_zero() || charge.is_zero() || held.is_zero() || planes == 0 {
+        return;
+    }
+    let (e_mean, w_mean) = (charge.clone() / amount.clone(), held / amount);
+    let half = ratio(1, 2);
+    let away = |d: &Ratio| {
+        let f = frac(d);
+        if f.is_zero() || f == half { ratio(0, 1) } else if f < half { ratio(1, 1) } else { ratio(-1, 1) }
+    };
+    let mut moves: Vec<Vec<Ratio>> = vec![vec![ratio(0, 1); planes]; n];
+    for i in 0..n {
+        let e_i = open(&motes[i]);
+        if e_i.is_zero() {
+            continue;
+        }
+        let carried = push.clone() * (e_i / e_mean.clone()) * (w_mean.clone() / weight(&motes[i].key));
+        for j in 0..n {
+            if i == j {
+                continue;
+            }
+            let q = motes[j].amount.clone() * open(&motes[j]);
+            if q.is_zero() {
+                continue;
+            }
+            let close = (0..planes).fold(ratio(1, 1), |c, k| c * in_step(&motes[i].phase[k], &motes[j].phase[k]));
+            if close.is_zero() {
+                continue;
+            }
+            for k in 0..planes {
+                let sg = away(&(motes[i].phase[k].clone() - motes[j].phase[k].clone()));
+                if !sg.is_zero() {
+                    moves[i][k] += q.clone() * close.clone() * sg;
+                }
+            }
+        }
+        for k in 0..planes {
+            let m = (carried.clone() * moves[i][k].clone() / charge.clone()).max(-half.clone()).min(half.clone());
+            moves[i][k] = m;
+        }
+    }
+    for (x, m) in motes.iter_mut().zip(moves) {
+        for k in 0..planes {
+            x.phase[k] = crate::ring::grain(&frac(&(x.phase[k].clone() + m[k].clone())));
+        }
+    }
+}
+
 /// THE FOUNDING'S PHASES, from the bounce's white-face outflow (mycelium
 /// `physics::source`): `N = P ∧ (P·K)` at the crossing point P on the
 /// horizon, the spin K turning at the regenerated push's share ½; each
