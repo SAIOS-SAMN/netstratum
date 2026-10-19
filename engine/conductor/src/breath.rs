@@ -106,6 +106,10 @@ pub struct Event {
     /// Star encounters at this echo: mergers (sticks) and bounces.
     pub merged: usize,
     pub encounters: usize,
+    /// RECYCLING at the galaxy's throat this echo (`crate::recycle`): the
+    /// holding opened (pulse spent), the holding closed by releasing splits,
+    /// and the nuclei split, in holding units of the deepest hole.
+    pub recycled: crate::recycle::Recycled,
 }
 
 /// Breathe the universe over bells `from` (exclusive) to `until`, echoes
@@ -165,6 +169,10 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         let mut keep: Vec<Body> = Vec::new();
         // What the stars shed crosses whole into the galaxy's flows.
         let mut shed: Vec<(crate::pulse::Manifest, Ratio, Vec<Ratio>)> = Vec::new();
+        // What a remnant passes through its other face, the galactic core's
+        // throat (recycled there, then on with the shed).
+        let mut infall: Vec<(crate::pulse::Manifest, Ratio, Vec<Ratio>)> = Vec::new();
+        let mut recycled = crate::recycle::Recycled::default();
         // The galaxy's push and throat in its own units, for the wind's
         // meeting with the medium.
         let g_before = mass(&core.total());
@@ -281,7 +289,9 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     less(&mut sys.kept, &out);
                     returned += mass(&out) / unit.clone();
                     let orbit = sys.phase.first().cloned().unwrap_or_else(|| ratio(0, 1));
-                    shed.push((out, beyond(&sys), vec![orbit, ratio(1, 2)]));
+                    // It passes through the galactic core's throat (its
+                    // other face): matter standing there to be recycled.
+                    infall.push((out, beyond(&sys), vec![orbit, ratio(1, 2)]));
                 }
                 if mass(&sys.kept).is_zero() {
                     // Emptied: its medium crosses whole; its worlds re-anchor.
@@ -591,6 +601,11 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // Arrivals: the push carries them as every kind, and they keep
             // the crossing's turning in each plane (carried spins add), in
             // step with the bell where the crest gathered them.
+            // THE MATTER STANDING IN THE THROAT (with xylarium): the vacuum
+            // stream's inbound leg (the arrivals) and the remnants' infall.
+            // (The arrivals ride the vacuum's loop; each passes the throat
+            // when its loop phase crosses ½ in the kicks, below.)
+            let mut in_throat: Vec<usize> = Vec::new();
             for (k, a) in gathered {
                 let ell_o = p.clone() * mean.clone() / crate::flows::weight(&k) + g_rate.clone() * turning.0.clone();
                 let ell_c = g_rate.clone() * turning.1.clone();
@@ -599,9 +614,13 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 core.flows.push(crate::flows::Mote { key: k, amount: a, ell_o: crate::ring::grain(&ell_o), ell_c: crate::ring::grain(&ell_c), phase: vec![ratio(0, 1), ratio(1, 2)], agitation: ratio(0, 1), born: bell, vacuum: true });
             }
             // Shed matter crosses whole with its star's orbit (`ℓ = R·H`).
-            for (m, r, star_phase) in shed {
+            let falling = infall.len();
+            for (n, (m, r, star_phase)) in infall.into_iter().chain(shed).enumerate() {
                 let r_own = if scale.is_zero() { ratio(0, 1) } else { crate::ring::grain(&(r / scale.clone())) };
                 for (k, a) in m {
+                    if n < falling {
+                        in_throat.push(core.flows.len());
+                    }
                     // It keeps its star's phases (state, inherited), on the
                     // star's continuum stream.
                     let phase = if star_phase.len() == crate::flows::PLANES { star_phase.clone() } else { zero_phase.clone() };
@@ -614,8 +633,36 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // never compounds denominators echo on echo.
             let ledger_unit = crate::pulse::core_state(core);
             let throat = crate::flows::Enclosed::new(h.clone(), Vec::new());
-            let given = crate::flows::kick(&mut core.flows, enc.as_ref().unwrap_or(&throat), &p, &g_rate, &delta_u, &ledger_unit);
+            // A VACUUM MOTE PASSES THE THROAT (with xylarium) when its loop
+            // phase crosses ½ during the kicks (both streams pass the core
+            // at loop phase ½): the inbound leg delivers it to the throat.
+            let loop_was: Vec<(usize, Ratio)> = core.flows.iter().enumerate().filter(|(_, x)| x.vacuum && x.phase.len() > 1).map(|(j, x)| (j, x.phase[1].clone())).collect();
+            let (given, absorbed) = crate::flows::kick(&mut core.flows, enc.as_ref().unwrap_or(&throat), &p, &g_rate, &delta_u, &ledger_unit);
             core.reservoir -= given;
+            // RECYCLING (`crate::recycle`; xylarium 11.0 (17)): AFTER the
+            // kicks (kicks are motion, splits the residue), the regenerated
+            // push's remainder, `B = p − Σ m·|Δℓ|`, in holding units by the
+            // core's state, decoheres the matter standing in the throat,
+            // cheapest split first, never overspent.
+            let frac = |x: Ratio| x.clone() - x.floor();
+            for (j, was) in loop_was {
+                let to_half = frac(ratio(1, 2) - was.clone());
+                if to_half > ratio(0, 1) && to_half <= frac(core.flows[j].phase[1].clone() - was) {
+                    in_throat.push(j);
+                }
+            }
+            // Clusters part in the throat's heat (1, as the newborn heart's
+            // cut) before they split (with xylarium).
+            in_throat = crate::recycle::part(&mut core.flows, &in_throat);
+            let budget = crate::ring::grain(&((p.clone() - absorbed) * ledger_unit.clone()));
+            let r = crate::recycle::recycle(&mut core.flows, &in_throat, &budget);
+            // Whatever passed the throat, split or not, leaves on the
+            // continuum (operator 2026-10-19: "redistributed back via the
+            // continuum"); the vacuum refills only from the ocean.
+            for &j in &in_throat {
+                core.flows[j].vacuum = false;
+            }
+            recycled = crate::recycle::Recycled { spent: r.spent / unit.clone(), released: r.released / unit.clone(), nuclei: r.nuclei };
             // THE SHEAR: neighbouring rings pass turning outward; the inner
             // falls in (the loop becomes an orbit). Σ m·ℓ unchanged.
             let _ = crate::flows::shear(&mut core.flows, enc.as_ref().unwrap_or(&throat), &ledger_unit);
@@ -750,7 +797,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         for (k, a) in to_ocean {
             *u.medium.entry(k).or_insert_with(|| ratio(0, 1)) += a;
         }
-        events.push(Event { bell, galaxy: galaxy_id, rung, write: Write::Perpendicular, stars, jets, returned, dissolved, merged, encounters });
+        events.push(Event { bell, galaxy: galaxy_id, rung, write: Write::Perpendicular, stars, jets, returned, dissolved, merged, encounters, recycled });
     }
     events
 }

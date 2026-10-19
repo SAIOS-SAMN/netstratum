@@ -278,9 +278,12 @@ pub fn turn(phase: &mut [Ratio], r_o: &Ratio, h: &Ratio, p: &Ratio, rho: &Ratio,
 /// Each plane's phase first advances by its own turning over the bell's two
 /// rings (`2·δ` turns, the motion law's `ω = δ`; the bell's own turn is
 /// whole, so the phase against it moves by `2δ` mod 1). Returns the spin
-/// the core's reservoir gives (Σ m·Δℓ, to be taken from it).
-pub fn kick(motes: &mut [Mote], enc: &Enclosed, p: &Ratio, rho: &Ratio, delta_u: &Ratio, total: &Ratio) -> Ratio {
+/// the core's reservoir gives (Σ m·Δℓ, to be taken from it), and the pulse
+/// the matter ABSORBED (Σ m·|Δℓ|, unsigned: each hemisphere's kick alike;
+/// with xylarium), what the recycling budget is read against.
+pub fn kick(motes: &mut [Mote], enc: &Enclosed, p: &Ratio, rho: &Ratio, delta_u: &Ratio, total: &Ratio) -> (Ratio, Ratio) {
     let mut given = ratio(0, 1);
+    let mut absorbed = ratio(0, 1);
     for x in motes.iter_mut() {
         // Each turns by what is enclosed inside it (the core and all inside).
         let h = enc.hold(&x.ell_o);
@@ -293,10 +296,12 @@ pub fn kick(motes: &mut [Mote], enc: &Enclosed, p: &Ratio, rho: &Ratio, delta_u:
         // magnitude in its plane; a kick past zero stops at the core.
         let new_o = crate::ring::grain(&(x.ell_o.clone() + dl_o)).max(ratio(0, 1));
         let m = if total.is_zero() { ratio(0, 1) } else { x.amount.clone() * weight(&x.key) / total.clone() };
-        given += m * (new_o.clone() - x.ell_o.clone());
+        let dl = new_o.clone() - x.ell_o.clone();
+        absorbed += m.clone() * if dl < ratio(0, 1) { -dl.clone() } else { dl.clone() };
+        given += m * dl;
         x.ell_o = new_o;
     }
-    given
+    (given, absorbed)
 }
 
 /// THE CONTACT OF A PAIR over one echo (operators 2026-10-18, with
