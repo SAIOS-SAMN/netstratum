@@ -40,7 +40,6 @@
 //! circulation's, read from mycelium's 3-D `physics::source` (one plane of
 //! the S^n reading per plane); S^60/S^360 wait on the n-dimensional source.
 use crate::pulse::Manifest;
-use cfe::almanac::atom::atom;
 use cfe::ratio::{ratio, Ratio};
 use num_traits::Zero;
 
