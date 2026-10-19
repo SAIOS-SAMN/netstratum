@@ -245,7 +245,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     let (r, d_enc) = enc.reach(&ell_s);
                     let h_in = enc.hold(&ell_s);
                     let was = sys.bell.clone();
-                    crate::flows::turn(&mut sys.bell, &r, &h_in, p_g, &g_rate, &delta_u);
+                    crate::flows::turn(&mut sys.bell, &r, &h_in, p_g, &g_rate, &delta_u, false);
                     // THE RETURN (with xylarium): its galaxy's torque gives
                     // back `d/(d + turned)` of its displacement in each plane,
                     // `d = 1 − δ_gal` its drag, `turned` its own spin's turns

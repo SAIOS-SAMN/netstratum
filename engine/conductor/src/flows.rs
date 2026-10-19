@@ -250,8 +250,17 @@ impl Enclosed {
 /// THE GALAXY'S PHASES AT A REACH turned by one bell: what every mote's
 /// phases do there, and a star's reference (its galaxy's own phase at its
 /// place, operator 2026-10-18), alike.
-pub fn turn(phase: &mut [Ratio], r_o: &Ratio, h: &Ratio, p: &Ratio, rho: &Ratio, delta_u: &Ratio) {
-    let d_o = h.clone() / (r_o.clone() + h.clone());
+///
+/// THE VACUUM IS THE CONTINUUM INVERTED (operator 2026-10-19: "the vacuum and
+/// the continuum must be mathematically inverted across all dimensional
+/// facets"; with xylarium): inversion through the throat, `R → H²/R`, reads
+/// the pull `δ = H/(R + H)` as the push `1 − δ`, so an `inverted` (vacuum)
+/// mote turns by `1 − δ` and BACKWARD in every plane, its loop's advance read
+/// over the backward passage. Its stored spin is untouched (`Σ m·ℓ` exact).
+pub fn turn(phase: &mut [Ratio], r_o: &Ratio, h: &Ratio, p: &Ratio, rho: &Ratio, delta_u: &Ratio, inverted: bool) {
+    let pull = h.clone() / (r_o.clone() + h.clone());
+    let d_o = if inverted { ratio(1, 1) - pull } else { pull };
+    let sign = if inverted { ratio(-1, 1) } else { ratio(1, 1) };
     // THE LOOP'S RATE (with xylarium): the jetstream turns by the motion law
     // AT THE MOTE'S REACH, δ(R) a ring, two rings a bell, continuously;
     // inner matter circulates faster than outer. (At R = H it is one turn a
@@ -260,16 +269,17 @@ pub fn turn(phase: &mut [Ratio], r_o: &Ratio, h: &Ratio, p: &Ratio, rho: &Ratio,
     // On the coordinate's grain (`60⁻⁶`, the carrier's resolution, as every
     // spin and place): exact sums of exact rationals otherwise compound
     // their denominators each bell without bound.
-    phase[0] = crate::ring::grain(&frac(&(phase[0].clone() + ratio(2, 1) * d_o)));
+    phase[0] = crate::ring::grain(&frac(&(phase[0].clone() + sign.clone() * ratio(2, 1) * d_o)));
     let loop_from = phase[1].clone();
-    let loop_phase = frac(&(loop_from.clone() + ratio(2, 1) * d_c.clone()));
+    let loop_phase = frac(&(loop_from.clone() + sign.clone() * ratio(2, 1) * d_c.clone()));
     // THE PARENT'S PULSE MOVES MATTER ALONG THE LOOP (operator: "the pulse
     // moves matter along the loop"; with xylarium): absorbed in step it
     // ADVANCES the loop's phase, `p·ρ·δ_u` × the hemisphere's signed share,
     // on top of the loop's own rate; nothing accumulates as a spin in the
     // loop's plane.
-    let advance = p.clone() * rho.clone() * delta_u.clone() * mean_response(&loop_from, &(ratio(2, 1) * d_c));
-    phase[1] = crate::ring::grain(&frac(&(loop_phase + advance)));
+    let start = if inverted { loop_from - ratio(2, 1) * d_c.clone() } else { loop_from };
+    let advance = p.clone() * rho.clone() * delta_u.clone() * mean_response(&start, &(ratio(2, 1) * d_c));
+    phase[1] = crate::ring::grain(&frac(&(loop_phase + sign * advance)));
 }
 
 /// One bell's kicks on every mote: the own family in the orbit's plane
@@ -289,9 +299,12 @@ pub fn kick(motes: &mut [Mote], enc: &Enclosed, p: &Ratio, rho: &Ratio, delta_u:
         let h = enc.hold(&x.ell_o);
         let (r_o, d_o) = enc.reach(&x.ell_o);
         let from = x.phase[0].clone();
-        turn(&mut x.phase, &r_o, &h, p, rho, delta_u);
-        // Over its whole passage this bell, never at one instant.
-        let dl_o = p.clone() * d_o.clone() * mean_response(&from, &(ratio(2, 1) * d_o));
+        turn(&mut x.phase, &r_o, &h, p, rho, delta_u, x.vacuum);
+        // Over its whole passage this bell, never at one instant; a vacuum
+        // mote by the inverted share over its backward passage.
+        let d_o = if x.vacuum { ratio(1, 1) - d_o } else { d_o };
+        let start = if x.vacuum { from - ratio(2, 1) * d_o.clone() } else { from };
+        let dl_o = p.clone() * d_o.clone() * mean_response(&start, &(ratio(2, 1) * d_o));
         // Spin cannot carry a mote through zero reach: a turning is a
         // magnitude in its plane; a kick past zero stops at the core.
         let new_o = crate::ring::grain(&(x.ell_o.clone() + dl_o)).max(ratio(0, 1));
