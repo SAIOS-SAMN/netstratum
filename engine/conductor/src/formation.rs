@@ -482,6 +482,123 @@ pub fn heart_cut(clump: &Manifest, turning: &Ratio, heat: &Ratio) -> Option<(Man
     Some((kept, released, held))
 }
 
+/// THE PLANET KEEPS ITS LAYERS (with xylarium, c0dbfae; 11.0 (16)): a world's
+/// layers are a READING of its kept mix by its own cut (`heart_cut`, the
+/// heart's push ½, its heat the turning, its atoms whole). The core's held
+/// kinds stand at the centre; each other kind at `R_z = ℓ_z/H` in the
+/// planet's own unit (H the held share, no throat), spread `R_z(1 ± ½)`. The
+/// share within its edge stays BOUND (mantle, crust, the lightest bound
+/// gases its atmosphere, in order of reach); the star's tide strips beyond
+/// `1 − e`, `e = m/(m + M_star)`. Returns each kind's band `(lo, hi)` (the
+/// core's at the centre, `(0, 0)`) and the held share H.
+pub fn layer_bands(kept: &Manifest, heat: &Ratio) -> Option<(Vec<(String, Ratio, Ratio)>, Ratio)> {
+    let (core, _, h) = heart_cut(kept, heat, &ratio(0, 1))?;
+    if h.is_zero() {
+        return None;
+    }
+    let push = ratio(1, 2);
+    let bands = carried(kept, heat, &ratio(0, 1))
+        .into_iter()
+        .map(|(k, ell)| {
+            if core.contains_key(&k) {
+                (k, ratio(0, 1), ratio(0, 1))
+            } else {
+                let r = ell / h.clone();
+                (k, r.clone() * (ratio(1, 1) - push.clone()), r * (ratio(1, 1) + push.clone()))
+            }
+        })
+        .collect();
+    Some((bands, h))
+}
+
+/// A forming world's bound and stripped matter: of what its core releases,
+/// each kind's band share within `1 − e` stays bound, the rest is stripped
+/// by the star's tide (in whole nuclei).
+pub fn bind_layers(kept: &Manifest, heat: &Ratio, e: &Ratio) -> (Manifest, Manifest) {
+    let Some((bands, _)) = layer_bands(kept, heat) else { return (Manifest::new(), kept.clone()) };
+    let edge = ratio(1, 1) - e.clone();
+    let (mut bound, mut stripped) = (Manifest::new(), Manifest::new());
+    for (k, lo, hi) in bands {
+        let a = kept[&k].clone();
+        let f = if hi <= edge { ratio(1, 1) } else if lo >= edge { ratio(0, 1) } else { (edge.clone() - lo.clone()) / (hi - lo) };
+        let b = if f == ratio(1, 1) { a.clone() } else { crate::pulse::nucleus(&(a.clone() * f)).min(a.clone()) };
+        if b > ratio(0, 1) {
+            bound.insert(k.clone(), b.clone());
+        }
+        if a.clone() - b.clone() > ratio(0, 1) {
+            stripped.insert(k, a - b);
+        }
+    }
+    (bound, stripped)
+}
+
+/// MEETINGS INSIDE A WORLD'S LAYERS (with xylarium, 11.0 (16) inside a
+/// world): two kinds whose bands overlap meet, their CONTACT the overlap's
+/// share of the narrower band (a share on the planet's own sphere, never a
+/// length). The heat at a layer is the world's heat carried out by the
+/// motion law, `heat(R) = heat₀·H/(R + H)`: deep hot, crust cool, nothing
+/// set. A cluster whose loosest winding the heat at its own layer reaches
+/// PARTS; two atoms with frames open there close in their smallest whole
+/// cluster, the bond holding `min(1, τ_min/heat(R))` of the contact, in
+/// whole nuclei. Read at once against the mix as it stands; 3Z exact.
+pub fn layer_chemistry(kept: &mut Manifest, heat: &Ratio) {
+    let Some((bands, h)) = layer_bands(kept, heat) else { return };
+    let at = |r: &Ratio| heat.clone() * h.clone() / (r.clone() + h.clone());
+    // Deep clusters part.
+    let mut parted = Manifest::new();
+    for (k, lo, hi) in &bands {
+        if crate::chem::atom_z(k).is_none() {
+            let mid = (lo.clone() + hi.clone()) / ratio(2, 1);
+            let t = at(&mid);
+            if !t.is_zero() && t >= crate::chem::tightness(k) {
+                if let Some(a) = kept.remove(k) {
+                    for (pk, pa) in dissociate(&[(k.clone(), a)].into()) {
+                        *parted.entry(pk).or_insert_with(|| ratio(0, 1)) += pa;
+                    }
+                }
+            }
+        }
+    }
+    for (k, a) in parted {
+        *kept.entry(k).or_insert_with(|| ratio(0, 1)) += a;
+    }
+    // Atoms meet where their bands overlap.
+    let atoms: Vec<(String, u32, Ratio, Ratio)> = bands.iter().filter_map(|(k, lo, hi)| crate::chem::atom_z(k).filter(|_| kept.contains_key(k)).map(|z| (k.clone(), z, lo.clone(), hi.clone()))).collect();
+    let mut formed: Vec<(String, String, u32, u32, String, Ratio)> = Vec::new();
+    for (i, (ka, za, la, ha)) in atoms.iter().enumerate() {
+        for (kb, zb, lb, hb) in atoms.iter().skip(i + 1) {
+            if za == zb {
+                continue;
+            }
+            let (lo, hi) = (la.clone().max(lb.clone()), ha.clone().min(hb.clone()));
+            let narrow = (ha.clone() - la.clone()).min(hb.clone() - lb.clone());
+            // Two at the centre (zero width) meet whole; else by overlap.
+            let contact = if narrow.is_zero() { if lo <= hi { ratio(1, 1) } else { continue } } else if hi <= lo { continue } else { ((hi.clone() - lo.clone()) / narrow).min(ratio(1, 1)) };
+            let t = at(&((lo + hi) / ratio(2, 1)));
+            let (ua, ub) = (cfe::almanac::atom::open_at(*za, &t), cfe::almanac::atom::open_at(*zb, &t));
+            let Some((na, nb, ck)) = crate::chem::closing(*za, ua, *zb, ub) else { continue };
+            let t_min = crate::chem::tightness(ka).min(crate::chem::tightness(kb));
+            let held = if t.is_zero() { ratio(1, 1) } else { (t_min / t).min(ratio(1, 1)) };
+            let n = crate::pulse::nucleus(&(contact * held * (kept[ka].clone() / ratio(i64::from(na), 1)).min(kept[kb].clone() / ratio(i64::from(nb), 1))));
+            if n > ratio(0, 1) {
+                formed.push((ka.clone(), kb.clone(), na, nb, ck, n));
+            }
+        }
+    }
+    for (ka, kb, na, nb, ck, n) in formed {
+        let (have_a, have_b) = (kept.get(&ka).cloned().unwrap_or_else(|| ratio(0, 1)), kept.get(&kb).cloned().unwrap_or_else(|| ratio(0, 1)));
+        let n = crate::pulse::nucleus(&n.min(have_a / ratio(i64::from(na), 1)).min(have_b / ratio(i64::from(nb), 1)));
+        if n <= ratio(0, 1) {
+            continue;
+        }
+        for (k, c) in [(&ka, na), (&kb, nb)] {
+            let left = kept[k].clone() - n.clone() * ratio(i64::from(c), 1);
+            if left > ratio(0, 1) { kept.insert(k.clone(), left); } else { kept.remove(k); }
+        }
+        *kept.entry(ck).or_insert_with(|| ratio(0, 1)) += n;
+    }
+}
+
 /// The lightest kind a body holds, by hold (`atom::hold`): "held down to Z".
 pub fn lightest(m: &Manifest) -> Option<String> {
     m.iter().filter(|(_, a)| **a > ratio(0, 1)).min_by_key(|(k, _)| (crate::chem::hold(k), crate::chem::charge(k))).map(|(k, _)| k.clone())
@@ -797,7 +914,13 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
         } else {
             w.heat.clone()
         };
-        items.push((w.kept.clone(), r_own * h_s.clone(), ph, heat, w.born > 0));
+        // Its layers meet inside it at their own heat (11.0 (16) inside a
+        // world); a star of the system keeps its matter whole.
+        let mut kept = w.kept.clone();
+        if w.born == 0 {
+            layer_chemistry(&mut kept, &heat);
+        }
+        items.push((kept, r_own * h_s.clone(), ph, heat, w.born > 0));
     }
     let delta = |ell: &Ratio| { let r = ell.clone() / h_s.clone(); h_s.clone() / (r + h_s.clone()) };
     let n = items.len();
@@ -1043,9 +1166,16 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
         let (kept, released) = if ignites {
             (kept, Manifest::new())
         } else {
-            // A planetary core is cool: its atoms are whole (heat 0).
+            // A planetary core is cool: its atoms are whole (heat 0). THE
+            // PLANET KEEPS ITS LAYERS (with xylarium): of what the core
+            // releases, what stands within the edge the star's tide leaves,
+            // `1 − e`, stays bound; only the stripped returns to the medium.
             match heart_cut(&kept, &heat_g, &ratio(0, 1)) {
-                Some((k, r, _)) => (k, r),
+                Some(_) => {
+                    let hw = mass(&kept) / total.clone();
+                    let e = hw.clone() / (hw + h_s.clone());
+                    bind_layers(&kept, &heat_g, &e)
+                }
                 None => (Manifest::new(), kept),
             }
         };
@@ -1257,8 +1387,30 @@ pub fn collide_stars(stars: Vec<crate::pulse::Body>, c_pre: Vec<Ratio>, scale: &
 
 #[cfg(test)]
 mod tests {
+    use super::{layer_bands, layer_chemistry};
+    use num_traits::Zero;
     use crate::flows::contact;
     use cfe::ratio::ratio;
+
+    #[test]
+    fn a_cool_world_keeps_layers_and_makes_water_in_them() {
+        use crate::pulse::Manifest;
+        let three_z = |m: &Manifest| m.iter().fold(ratio(0, 1), |s, (k, a)| s + a.clone() * ratio(3 * i64::from(crate::chem::charge(k)), 1));
+        let mut world: Manifest = [("Z026".to_string(), ratio(40, 1)), ("Z017".to_string(), ratio(7, 1)), ("Z011".to_string(), ratio(11, 1))].into();
+        let before = three_z(&world);
+        // Its layers are read by its own cut: the core at the centre.
+        let (bands, h) = layer_bands(&world, &ratio(0, 1)).expect("a core");
+        assert!(h > ratio(0, 1));
+        assert!(bands.iter().any(|(_, lo, hi)| lo.is_zero() && hi.is_zero()));
+        // Cool, oxygen and hydrogen meet where their bands overlap.
+        layer_chemistry(&mut world, &ratio(0, 1));
+        assert_eq!(three_z(&world), before);
+        assert!(world.keys().any(|k| crate::chem::atom_z(k).is_none()), "some cluster forms where bands overlap, cool");
+        // Hot past every winding, every cluster parts again.
+        let mut hot = world.clone();
+        layer_chemistry(&mut hot, &ratio(1000, 1));
+        assert_eq!(three_z(&hot), before);
+    }
 
     #[test]
     fn contact_is_the_mean_in_step_over_the_echo() {
