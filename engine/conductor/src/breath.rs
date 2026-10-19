@@ -316,7 +316,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 }
                 // Its system still moves: worlds and debris meet, and what
                 // oversteps the rim crosses into the galaxy.
-                let (_, _, escaped) = crate::formation::collide_system(&mut sys, &unit, bell, rang);
+                let (_, _, escaped) = crate::formation::collide_system(&mut sys, &unit, bell, rang, t_u);
                 if !escaped.is_empty() {
                     shed.push((escaped, beyond(&sys), sys.phase.clone()));
                 }
@@ -492,7 +492,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             }
             // COLLISIONS in the system's own medium: worlds grow; what
             // overreaches the system's rim crosses into the galaxy.
-            let (_, _, escaped) = crate::formation::collide_system(&mut sys, &unit, bell, rang);
+            let (_, _, escaped) = crate::formation::collide_system(&mut sys, &unit, bell, rang, t_u);
             if !escaped.is_empty() {
                 shed.push((escaped, beyond(&sys), sys.phase.clone()));
             }

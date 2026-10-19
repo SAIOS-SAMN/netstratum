@@ -697,49 +697,6 @@ fn convergents(x: &Ratio) -> Vec<Ratio> {
     out
 }
 
-/// THE DANCE (with xylarium, 2026-10-16): a system's worlds lock into
-/// resonance with its DOMINANT world (the largest holding), which sets the
-/// ladder. World k reads its period ratio to the dominant, `P_k / P_dom`
-/// (exact: `P = 1 + R/H`), and LOCKS to the convergent `p/q` of that ratio
-/// with the smallest q whose distance from it is within the dominant world's
-/// deficit at k's separation, `δ = H_dom / (|R_k − R_dom| + H_dom)` (a heavy
-/// dominant captures wide, a light one only near-exact ratios; no integer is
-/// chosen and no constant set). The lock moves `R_k` to the convergent's
-/// exact period about the holding inside it; the spin it gives up or takes
-/// is exchanged with the system's belts, so `Σ m·ℓ` is conserved. A world no
-/// convergent reaches stays free. Returns the spin the belts gain.
-pub fn dance(worlds: &mut [crate::pulse::Body], star_hold: &Ratio, unit: &Ratio) -> Ratio {
-    let Some(dom) = (0..worlds.len()).max_by(|&a, &b| mass(&worlds[a].kept).cmp(&mass(&worlds[b].kept))) else { return ratio(0, 1) };
-    let (p_dom, r_dom, h_dom) = (worlds[dom].period.clone(), worlds[dom].radius.clone(), mass(&worlds[dom].kept) / unit.clone());
-    let mut exchanged = ratio(0, 1);
-    let mut inside = star_hold.clone();
-    for k in 0..worlds.len() {
-        let m_k = mass(&worlds[k].kept) / unit.clone();
-        if k != dom && !p_dom.is_zero() && !inside.is_zero() {
-            let x = worlds[k].period.clone() / p_dom.clone();
-            let gap = if worlds[k].radius > r_dom { worlds[k].radius.clone() - r_dom.clone() } else { r_dom.clone() - worlds[k].radius.clone() };
-            let width = h_dom.clone() / (gap + h_dom.clone());
-            let lock = convergents(&x).into_iter().find(|c| {
-                let d = if *c > x { c.clone() - x.clone() } else { x.clone() - c.clone() };
-                d <= width
-            });
-            if let Some(c) = lock {
-                let period = p_dom.clone() * c;
-                if period > ratio(1, 1) {
-                    let reach = inside.clone() * (period.clone() - ratio(1, 1));
-                    let ell = crate::ring::spin(&reach, &inside);
-                    exchanged += m_k.clone() * (worlds[k].ell.clone() - ell.clone());
-                    worlds[k].radius = reach;
-                    worlds[k].period = period;
-                    worlds[k].ell = ell;
-                }
-            }
-        }
-        inside += m_k;
-    }
-    exchanged
-}
-
 /// The interface clock of a centre and the matter it feeds on (one law at
 /// every tier: a star's heartbeat, a galactic core's jets): rings a halving,
 /// `⌈Q̄ / (e · s)⌉`, s the centre's share (a core: 1, its own holding, under
@@ -859,7 +816,7 @@ fn exchange(ell: &[Ratio], dl: &mut [Ratio], i: usize, j: usize, mi: &Ratio, mj:
 /// mⱼ)/(g + mᵢ + mⱼ)`, `T = |δᵢ − δⱼ|/(δᵢ + δⱼ)`); stuck groups (read all at
 /// once, no order) become one body, spins added exactly, the unkept motion
 /// heat; otherwise they BOUNCE, both heated. Returns (sticks, bounces).
-pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, rang: bool) -> (usize, usize, Manifest) {
+pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, rang: bool, t_u: u64) -> (usize, usize, Manifest) {
 
     let total = mass(&sys.total());
     if total.is_zero() || (sys.flows.is_empty() && sys.satellites.is_empty()) {
@@ -1215,8 +1172,87 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
     }
     sys.medium = medium;
     sys.flows = motes;
+    // THE CONGRUENT CONSTRUCTION (operator 2026-10-19; with xylarium).
+    sys.medium_spin += lock_step(&mut worlds, &(mass(&sys.kept) / unit.clone()), unit, t_u);
     sys.satellites = worlds;
     (sticks, bounces, escaped)
+}
+
+/// THE CONGRUENT CONSTRUCTION (operator 2026-10-19: "outer-shell pull is
+/// manifold twist in relation to the orthogonal orbit of the planetary mass
+/// with orbital constructions in congruence that forms a gravitation pull
+/// around the stars+core orbit (regardless of universe, or galaxy) - so SOL
+/// analogy would be earth is in the middle, but moving in lock-step from
+/// mercury->pluto with the jovian gravity well (this is not a gate, but an
+/// example)"; with xylarium). A system's bodies are ONE construction, read
+/// inner to outer as a chain. Each neighbour pair's period ratio
+/// `x = P_out/P_in` locks to the convergent `p/q` of x with the smallest q
+/// within the TWIST'S WIDTH there: the dominant body's well (its deficit at
+/// the pair's separation, `H_dom/(|R_out − R_in| + H_dom)`; the heaviest
+/// simply is it, none is named) times the twist of the orthogonal plane,
+/// `1 − δ` of the outer body about everything inside it. A 1:1 pair is a
+/// COLLISION, the encounter law's (stick or bounce), never the lock's.
+/// Otherwise the lock is an ATTRACTOR, never a placement: the outer
+/// body's displacement from its convergent period returns by
+/// `d/(d + turned)` each echo (d the width, `turned` its own orbits this
+/// echo), as the stars return to their flows. The spin given up or taken is
+/// the belts' (returned), so `Σ m·ℓ` is exact. Supersedes the 2026-10-16
+/// dance, which was never called.
+pub fn lock_step(bodies: &mut Vec<crate::pulse::Body>, star_hold: &Ratio, unit: &Ratio, t_u: u64) -> Ratio {
+    let mut exchanged = ratio(0, 1);
+    if bodies.len() < 2 || star_hold.is_zero() {
+        return exchanged;
+    }
+    bodies.sort_by(|a, b| a.radius.cmp(&b.radius));
+    let Some(dom) = (0..bodies.len()).max_by(|&a, &b| mass(&bodies[a].total()).cmp(&mass(&bodies[b].total()))) else { return exchanged };
+    let h_dom = mass(&bodies[dom].total()) / unit.clone();
+    let mut inside = star_hold.clone() + mass(&bodies[0].total()) / unit.clone();
+    let mut k = 1;
+    while k < bodies.len() {
+        let (p_in, r_in) = (bodies[k - 1].period.clone(), bodies[k - 1].radius.clone());
+        let (p_out, r_out) = (bodies[k].period.clone(), bodies[k].radius.clone());
+        let m_out = mass(&bodies[k].total()) / unit.clone();
+        if p_in <= ratio(0, 1) || p_out <= ratio(0, 1) {
+            inside += m_out;
+            k += 1;
+            continue;
+        }
+        let x = p_out.clone() / p_in.clone();
+        let sep = if r_out > r_in { r_out.clone() - r_in.clone() } else { r_in.clone() - r_out.clone() };
+        let well = h_dom.clone() / (sep + h_dom.clone());
+        let twist = r_out.clone() / (r_out.clone() + inside.clone());
+        let width = well * twist;
+        let lock = convergents(&x).into_iter().find(|c| {
+            let d = if *c > x { c.clone() - x.clone() } else { x.clone() - c.clone() };
+            d <= width
+        });
+        match lock {
+            // CO-ORBITALS ARE COLLISIONS (operator 2026-10-19: "co-orbitals
+            // are collisions: in the early universe ... order is made out of
+            // the chaos over time"): a 1:1 pair is never merged by the lock
+            // nor held apart; it is the encounter law's (they meet as
+            // neighbours in reach, stick or bounce), so the lock leaves it.
+            Some(c) if c == ratio(1, 1) => {}
+            Some(c) => {
+                let target = p_in.clone() * c;
+                if target > ratio(1, 1) {
+                    let r_target = inside.clone() * (target - ratio(1, 1));
+                    let turned = ratio(t_u as i64, 1) / p_out.clone();
+                    let back = if (width.clone() + turned.clone()).is_zero() { ratio(0, 1) } else { width.clone() / (width.clone() + turned) };
+                    let r = crate::ring::grain(&(r_out.clone() + (r_target - r_out.clone()) * back));
+                    let ell = crate::ring::spin(&r, &inside);
+                    exchanged += m_out.clone() * (bodies[k].ell.clone() - ell.clone());
+                    bodies[k].radius = r.clone();
+                    bodies[k].period = crate::ring::period(&r, &inside);
+                    bodies[k].ell = ell;
+                }
+            }
+            None => {}
+        }
+        inside += m_out;
+        k += 1;
+    }
+    exchanged
 }
 
 /// COLLISIONS AMONG A GALAXY'S STARS (operator 2026-10-18: "this is how you

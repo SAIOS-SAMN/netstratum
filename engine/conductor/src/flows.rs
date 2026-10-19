@@ -385,7 +385,20 @@ pub fn kick(motes: &mut [Mote], enc: &Enclosed, p: &Ratio, rho: &Ratio, delta_u:
         // Over its whole passage this bell, never at one instant; a vacuum
         // mote at its inverted reach (`1 − δ`), forward.
         let d_o = if x.vacuum { ratio(1, 1) - d_o } else { d_o };
-        let dl_o = p.clone() * d_o.clone() * mean_response(&from, &(ratio(2, 1) * d_o));
+        let k = mean_response(&from, &(ratio(2, 1) * d_o.clone()));
+        let dl_o = p.clone() * d_o.clone() * k.clone();
+        // DISSIPATION (operator 2026-10-19: "what do our current physics tell
+        // about heat dissipation to the void? probably mimic nature"; with
+        // xylarium): what the kick does not deliver in step becomes HEAT,
+        // `p·δ·(1 − |k|)` (k its signed mean over the passage, the coherent
+        // share), and heat leaves by the built cooling law's two channels
+        // over the passage's two rings: the light through its open frames
+        // (`e`, open over held, a ring) and the vacuum's pull back (`δ` at its
+        // reach, a ring): `a ← (a + heat)·((1 − e)(1 − δ))²`.
+        let coherent = if k < ratio(0, 1) { -k } else { k };
+        let heat = p.clone() * d_o.clone() * (ratio(1, 1) - coherent.min(ratio(1, 1)));
+        let keep = (ratio(1, 1) - open(&x.key).min(ratio(1, 1))) * (ratio(1, 1) - d_o.clone());
+        x.agitation = crate::ring::grain(&((x.agitation.clone() + heat) * keep.clone() * keep));
         // Spin cannot carry a mote through zero reach: a turning is a
         // magnitude in its plane; a kick past zero stops at the core.
         let new_o = crate::ring::grain(&(x.ell_o.clone() + dl_o)).max(ratio(0, 1));

@@ -775,6 +775,24 @@ pub fn orbit_galaxies(u: &mut Universe) {
         let held = |x: &crate::flows::Mote| x.amount.clone() * crate::flows::weight(&x.key) / whole.clone();
         let enc = crate::flows::Enclosed::new(ratio(1, 1), u.firmament.iter().map(|x| (x.ell_o.clone(), held(x))).collect());
         let _ = crate::flows::kick(&mut u.firmament, &enc, &ratio(1, 2), &ratio(1, 1), &ratio(1, 1), &whole);
+        // THE MISSING ANTIPOLE (operator 2026-10-19: "so we having missing
+        // physics at the antipoles?"; with xylarium, the star's hold-return
+        // one tier up): the singularity's HOLD draws each mote back by
+        // `½·δ(R)·ℓ` against the bounce's push on its inertia, `push/w` (the
+        // push ½ × the firmament's own open share, w the mote's hold), so
+        // each kind settles at `ℓ* = 2·push/(w·δ)`, parted by its inertia,
+        // never placed. δ about the enclosed hold.
+        let fm = u.firmament.iter().fold(ratio(0, 1), |s, x| s + x.amount.clone() * crate::flows::weight(&x.key));
+        let fo = u.firmament.iter().fold(ratio(0, 1), |s, x| s + x.amount.clone() * ratio(i64::from(crate::chem::unpaired(&x.key)), 1));
+        if !fm.is_zero() {
+            let push = ratio(1, 2) * fo / fm;
+            let enc = crate::flows::Enclosed::new(ratio(1, 1), u.firmament.iter().map(|x| (x.ell_o.clone(), x.amount.clone() * crate::flows::weight(&x.key) / whole.clone())).collect());
+            for x in u.firmament.iter_mut() {
+                let (_, d) = enc.reach(&x.ell_o);
+                let back = ratio(1, 2) * d * x.ell_o.clone();
+                x.ell_o = crate::ring::grain(&(x.ell_o.clone() + push.clone() / crate::flows::weight(&x.key) - back)).max(ratio(0, 1));
+            }
+        }
         // Its order: matter pushing matter apart by its open frames
         // (`flows::repel`), at the bounce's push.
         crate::flows::repel(&mut u.firmament, &ratio(1, 2));
