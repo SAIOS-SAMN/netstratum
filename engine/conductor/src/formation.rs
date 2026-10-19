@@ -461,19 +461,35 @@ pub fn heart_cut(clump: &Manifest, turning: &Ratio, heat: &Ratio) -> Option<(Man
     // NO THROAT, NO STATE (operators 2026-10-17, with xylarium): a heart
     // (torsion) and a planetary core (magnetism) have no bounce, so they
     // hold only by what they have gathered, `H = held`; the state holds only
-    // at a throat (the universal and galactic cores). Read kind by kind in
-    // order of the spin carried: a kind is held where it stands within the
-    // hold it would join, `ℓ/H ≤ H` with H the held so far and its own
-    // share; the condition is not monotone, so every kind is read.
-    let mut held = ratio(0, 1);
+    // at a throat (the universal and galactic cores). THE HELD SET IS
+    // ORDER-FREE (with xylarium, 2026-10-20; design law: no fill orders): a
+    // kind is held where it stands within the hold of the WHOLE held set,
+    // `ℓ/H* ≤ H*`, `H* = Σ` the held kinds' shares, the greatest such set,
+    // read from all held down (each kind released lowers H*, so the set only
+    // shrinks to its fixed point). A running sum in reading order released
+    // the lightest-carried kind (stripped hydrogen) before the heavy kinds'
+    // hold was counted.
+    let mut held_set: Vec<bool> = vec![true; kinds.len()];
+    let mut held = kinds.iter().fold(ratio(0, 1), |s, k| s + k.2.clone());
+    loop {
+        let mut changed = false;
+        for (i, (_, ell, share)) in kinds.iter().enumerate() {
+            if held_set[i] && (held.is_zero() || ell.clone() / held.clone() > held) {
+                held_set[i] = false;
+                held -= share.clone();
+                changed = true;
+            }
+        }
+        if !changed {
+            break;
+        }
+    }
     let (mut kept, mut released) = (Manifest::new(), Manifest::new());
-    for (k, ell, share) in kinds {
-        let h = held.clone() + share.clone();
-        if !h.is_zero() && ell.clone() / h.clone() <= h {
-            held = h;
-            kept.insert(k.clone(), clump[&k].clone());
+    for (i, (k, _, _)) in kinds.iter().enumerate() {
+        if held_set[i] {
+            kept.insert(k.clone(), clump[k].clone());
         } else {
-            released.insert(k.clone(), clump[&k].clone());
+            released.insert(k.clone(), clump[k].clone());
         }
     }
     if kept.is_empty() {
