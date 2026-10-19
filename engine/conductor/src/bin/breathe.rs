@@ -59,6 +59,26 @@ fn main() {
     let share = |m: &pulse::Manifest, k: &str| { use num_traits::ToPrimitive; let w = whole(m); if w == cfe::ratio::ratio(0, 1) { 0.0 } else { (count(m, k) / w).to_f64().unwrap_or(0.0) } };
     let commonest = all.iter().max_by(|a, b| a.1.cmp(b.1)).map(|(k, _)| k.clone()).unwrap_or_default();
     println!("AGE — by nuclei, H {:.3} -> {:.3}, He {:.3} -> {:.3} (founding -> now); commonest now {commonest}", share(&before, "Z001"), share(&all, "Z001"), share(&before, "Z002"), share(&all, "Z002"));
+    // THE PARITY (with xylarium): the odd share of the Z >= 3 atoms by
+    // nuclei, clusters counted by their parts (equal-halves recycling sorts
+    // the heavy matter by parity).
+    let odd = |m: &pulse::Manifest| {
+        use num_traits::ToPrimitive;
+        let (mut o, mut t) = (cfe::ratio::ratio(0, 1), cfe::ratio::ratio(0, 1));
+        for (k, a) in m {
+            for (n, z) in conductor::chem::components(k).unwrap_or_default() {
+                if z >= 3 {
+                    let x = a.clone() * cfe::ratio::ratio(i64::from(n), 1);
+                    t += x.clone();
+                    if z % 2 == 1 {
+                        o += x;
+                    }
+                }
+            }
+        }
+        if t == cfe::ratio::ratio(0, 1) { 0.0 } else { (o / t).to_f64().unwrap_or(0.0) }
+    };
+    println!("PARITY — odd share of Z >= 3 by nuclei: {:.3} -> {:.3} (founding -> now)", odd(&before), odd(&all));
     // RECYCLING at the galaxies' throats (`conductor::recycle`): what the
     // cores' pulse opened, what releasing splits gave back, the nuclei split.
     let spent = events.iter().fold(cfe::ratio::ratio(0, 1), |s, e| s + e.recycled.spent.clone());
