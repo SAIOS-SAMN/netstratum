@@ -106,6 +106,50 @@ pub fn tightness(key: &str) -> cfe::ratio::Ratio {
     components(key).and_then(|ps| ps.iter().map(|(_, z)| t(*z)).min()).unwrap_or_else(|| cfe::ratio::ratio(0, 1))
 }
 
+/// A cluster's PERMANENT DIPOLE (with xylarium, atoms::hold's form; 11.0
+/// (19) DISSOLUTION): what its symmetry leaves uncancelled, as a share. Its
+/// centre is the first atom named (the heaviest), every other atom an arm.
+/// The centre keeps LONE PAIRS, `(outer − Σ arms' open)/2`, and they bend
+/// it: `bent = lone/(lone + arms)`. Unlike arms leave their mixture
+/// (twice the share not of the commonest kind, at most 1). The dipole is the
+/// cluster's asymmetry `1 − τ_min/τ_max` times the larger of the two. A
+/// pair of unlike atoms is straight and keeps its asymmetry; an atom, or a
+/// centre with no lone pairs and like arms, has none. Water on S^11, O·4H:
+/// oxygen's outer six, four bonded, one lone pair: `(2/3)·(1/5) = 2/15`.
+pub fn dipole(key: &str) -> cfe::ratio::Ratio {
+    use cfe::ratio::ratio;
+    let zero = ratio(0, 1);
+    let atoms: Vec<cfe::almanac::atom::Atom> = components(key)
+        .unwrap_or_default()
+        .into_iter()
+        .flat_map(|(n, z)| std::iter::repeat(z).take(n as usize))
+        .filter_map(cfe::almanac::atom::atom)
+        .collect();
+    let (Some(lo), Some(hi)) = (atoms.iter().map(|a| a.tightness.clone()).min(), atoms.iter().map(|a| a.tightness.clone()).max()) else {
+        return zero;
+    };
+    if hi == zero {
+        return zero;
+    }
+    let asymmetry = ratio(1, 1) - lo / hi;
+    let mixture = |of: &[cfe::almanac::atom::Atom]| {
+        let most = of.iter().map(|a| of.iter().filter(|b| b.z == a.z).count()).max().unwrap_or(0);
+        let n = of.len().max(1) as i64;
+        ratio(2 * (of.len() - most) as i64, n).min(ratio(1, 1))
+    };
+    match atoms.as_slice() {
+        [] | [_] => zero,
+        [_, _] => asymmetry,
+        [centre, arms @ ..] => {
+            let bonded: u32 = arms.iter().map(|a| a.unpaired).sum();
+            let lone = i64::from(centre.outer.saturating_sub(bonded) / 2);
+            let bent = ratio(lone, lone + arms.len() as i64);
+            let unlike = mixture(arms);
+            asymmetry * if bent > unlike { bent } else { unlike }
+        }
+    }
+}
+
 /// THE SMALLEST WHOLE CLUSTER two kinds close in (with xylarium, 969536c):
 /// atoms with `u_A`, `u_B` open frames pair as `(u_B/g)·A + (u_A/g)·B`,
 /// `g = gcd(u_A, u_B)`, every frame paired. None where either has none.
@@ -140,5 +184,10 @@ mod tests {
         assert_eq!(closing(26, 6, 8, 4).map(|c| (c.0, c.1)), Some((2, 3)));
         assert_eq!(charge("2Z026·3Z008"), 2 * 26 + 3 * 8);
         assert!(closed("2Z026·3Z008"));
+        // Water is bent by oxygen's one lone pair: its dipole 2/15. Salt on
+        // S^11 is 7Cl·11Na; an atom has no dipole.
+        assert_eq!(dipole("Z008·4Z001"), cfe::ratio::ratio(2, 15));
+        assert_eq!(closing(11, 7, 17, 11).map(|c| c.2), Some("7Z017·11Z011".into()));
+        assert_eq!(dipole("Z008"), cfe::ratio::ratio(0, 1));
     }
 }
