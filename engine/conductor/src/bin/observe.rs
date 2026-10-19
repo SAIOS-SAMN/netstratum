@@ -208,6 +208,37 @@ fn main() {
             let h_of = |m: &pulse::Manifest| m.get("Z001").map(|a| f(a)).unwrap_or(0.0);
             let stars: Vec<&pulse::Body> = u.cores.iter().flat_map(|c| &c.satellites).collect();
             let remnants = stars.iter().filter(|s| s.remnant).count();
+            // THE GALAXIES' ORBITS (`pulse::orbit_galaxies`): each core's
+            // live reach and period in bells, its orbit's phase, its share.
+            let gal: Vec<String> = u.cores.iter().map(|c| format!("[{}] R {:.3} P {:.3} phase {:.3} share {:.3e}", c.path[0], f(&c.radius), f(&c.period), c.phase.first().map(f).unwrap_or(0.0), share(&c.total()))).collect();
+            println!("GALAXIES: {}", gal.join("; "));
+            // THE FIRMAMENT (`pulse::Universe::firmament`): its kinds, its
+            // share, and where its orbit phases GATHER (a reading: phases
+            // sorted round the turn, a new group wherever the gap between
+            // neighbours exceeds the mean gap; each group's holding-weighted
+            // centre and its kinds).
+            if !u.firmament.is_empty() {
+                let mut ph: Vec<(f64, f64, u32)> = u.firmament.iter().map(|x| (f(&x.phase[0]), f(&(x.amount.clone() * conductor::flows::weight(&x.key))), conductor::chem::charge(&x.key))).collect();
+                ph.sort_by(|a, b| a.0.total_cmp(&b.0));
+                let n = ph.len();
+                let gaps: Vec<f64> = (0..n).map(|i| if i + 1 < n { ph[i + 1].0 - ph[i].0 } else { ph[0].0 + 1.0 - ph[i].0 }).collect();
+                let mean = 1.0 / n as f64;
+                let mut groups: Vec<Vec<usize>> = vec![Vec::new()];
+                for i in 0..n {
+                    groups.last_mut().unwrap().push(i);
+                    if gaps[i] > mean && i + 1 < n {
+                        groups.push(Vec::new());
+                    }
+                }
+                let fh = u.firmament.iter().fold(ratio(0, 1), |s, x| s + x.amount.clone() * conductor::flows::weight(&x.key));
+                let desc: Vec<String> = groups.iter().filter(|g| !g.is_empty()).map(|g| {
+                    let w: f64 = g.iter().map(|&i| ph[i].1).sum();
+                    let c = if w > 0.0 { g.iter().map(|&i| ph[i].0 * ph[i].1).sum::<f64>() / w } else { ph[g[0]].0 };
+                    let (lo, hi) = (g.iter().map(|&i| ph[i].2).min().unwrap_or(0), g.iter().map(|&i| ph[i].2).max().unwrap_or(0));
+                    format!("{c:.3}:{}k(Z{lo}-{hi})", g.len())
+                }).collect();
+                println!("FIRMAMENT: {} motes, share {:.3e}; phases gather in {} groups: {}", n, f(&(fh / whole.clone())), desc.len(), desc.join(" "));
+            }
             let worlds_of = |s: &pulse::Body| s.satellites.iter().filter(|w| w.born == 0).count();
             let mut by: std::collections::BTreeMap<usize, usize> = std::collections::BTreeMap::new();
             for s in &stars {

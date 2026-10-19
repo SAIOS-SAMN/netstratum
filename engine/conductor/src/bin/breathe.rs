@@ -16,7 +16,12 @@ fn main() {
     // (`Universe::t_u`); a T_u argument is no longer read.
     let t_u: u64 = u.t_u;
     let before = u.total();
-    let events = breath::breathe(&mut u, &seed, t_u, 0, until);
+    // Bell by bell, as the conductor beats (the galaxies re-read their
+    // orbits on each universal echo).
+    let mut events = Vec::new();
+    for b in 0..until {
+        events.extend(breath::breathe(&mut u, &seed, t_u, b, b + 1));
+    }
     let unit = breath::unit_mass(&u);
     let births: usize = events.iter().map(|e| e.stars).sum();
     let dissolved: usize = events.iter().map(|e| e.dissolved).sum();

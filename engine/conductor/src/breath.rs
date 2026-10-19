@@ -120,6 +120,11 @@ pub struct Event {
 pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u64) -> Vec<Event> {
     let unit = unit_mass(u);
     use num_traits::Zero as _;
+    // THE GALAXIES ORBIT (`pulse::orbit_galaxies`): on each universal echo,
+    // before its arrivals are read, every core re-reads its reach.
+    if t_u > 0 && until / t_u > from / t_u {
+        crate::pulse::orbit_galaxies(u);
+    }
     // Every echo's arrival, in time order.
     let mut arrivals: Vec<(u64, usize, u64)> = Vec::new();
     for (i, c) in u.cores.iter().enumerate() {
