@@ -79,13 +79,12 @@ fn main() {
         if t == cfe::ratio::ratio(0, 1) { 0.0 } else { (o / t).to_f64().unwrap_or(0.0) }
     };
     println!("PARITY — odd share of Z >= 3 by nuclei: {:.3} -> {:.3} (founding -> now)", odd(&before), odd(&all));
-    // RECYCLING at the galaxies' throats (`conductor::recycle`): what the
-    // cores' pulse opened, what releasing splits gave back, the nuclei split.
-    let spent = events.iter().fold(cfe::ratio::ratio(0, 1), |s, e| s + e.recycled.spent.clone());
-    let released = events.iter().fold(cfe::ratio::ratio(0, 1), |s, e| s + e.recycled.released.clone());
-    let nuclei = events.iter().fold(cfe::ratio::ratio(0, 1), |s, e| s + e.recycled.nuclei.clone());
+    // RECYCLING at the galaxies' throats (`conductor::recycle`, 11.0 (18)):
+    // pressed (constructed) and peeled (deconstructed), the light and the
+    // opened holding, and what was trapped at the throats.
+    let sum = |f: &dyn Fn(&breath::Event) -> cfe::ratio::Ratio| events.iter().fold(cfe::ratio::ratio(0, 1), |s, e| s + f(e));
     let f = |x: &cfe::ratio::Ratio| { use num_traits::ToPrimitive; x.to_f64().unwrap_or(0.0) };
-    println!("RECYCLING — the throats split {:.3e} (grains of nuclei) over {} echoes with splits; pulse spent {:.3e}, released back {:.3e} (holding, units)", f(&nuclei), events.iter().filter(|e| e.recycled.nuclei > cfe::ratio::ratio(0, 1)).count(), f(&spent), f(&released));
+    println!("RECYCLING — the throats pressed {:.3e} and peeled {:.3e} (grains of nuclei); light given {:.3e}, holding opened {:.3e}, trapped {:.3e} (units); {} echoes recycled", f(&sum(&|e| e.recycled.pressed.clone())), f(&sum(&|e| e.recycled.peeled.clone())), f(&sum(&|e| e.recycled.light.clone())), f(&sum(&|e| e.recycled.spent.clone())), f(&sum(&|e| e.recycled.trapped.clone())), events.iter().filter(|e| e.recycled != Default::default()).count());
     if args.get(4).map(String::as_str) == Some("write") {
         let _ = pulse::write(Path::new(era1), &seed, &u);
         let _ = std::fs::write(Path::new(era1).join("conductor.beat"), until.to_string());

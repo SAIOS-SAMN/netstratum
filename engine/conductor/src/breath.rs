@@ -106,9 +106,9 @@ pub struct Event {
     /// Star encounters at this echo: mergers (sticks) and bounces.
     pub merged: usize,
     pub encounters: usize,
-    /// RECYCLING at the galaxy's throat this echo (`crate::recycle`): the
-    /// holding opened (pulse spent), the holding closed by releasing splits,
-    /// and the nuclei split, in holding units of the deepest hole.
+    /// RECYCLING at the galaxy's throat this echo (`crate::recycle`): nuclei
+    /// pressed and peeled, the light given and the holding opened, and the
+    /// holding trapped, in holding units of the deepest hole.
     pub recycled: crate::recycle::Recycled,
 }
 
@@ -639,11 +639,9 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             let loop_was: Vec<(usize, Ratio)> = core.flows.iter().enumerate().filter(|(_, x)| x.vacuum && x.phase.len() > 1).map(|(j, x)| (j, x.phase[1].clone())).collect();
             let (given, absorbed) = crate::flows::kick(&mut core.flows, enc.as_ref().unwrap_or(&throat), &p, &g_rate, &delta_u, &ledger_unit);
             core.reservoir -= given;
-            // RECYCLING (`crate::recycle`; xylarium 11.0 (17)): AFTER the
-            // kicks (kicks are motion, splits the residue), the regenerated
-            // push's remainder, `B = p − Σ m·|Δℓ|`, in holding units by the
-            // core's state, decoheres the matter standing in the throat,
-            // cheapest split first, never overspent.
+            // RECYCLING (`crate::recycle`; xylarium 11.0 (18)): AFTER the
+            // kicks (kicks are motion, recycling the residue), the bounce the
+            // container holds presses and peels the matter in the throat.
             let frac = |x: Ratio| x.clone() - x.floor();
             for (j, was) in loop_was {
                 let to_half = frac(ratio(1, 2) - was.clone());
@@ -654,15 +652,19 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // Clusters part in the throat's heat (1, as the newborn heart's
             // cut) before they split (with xylarium).
             in_throat = crate::recycle::part(&mut core.flows, &in_throat);
-            let budget = crate::ring::grain(&((p.clone() - absorbed) * ledger_unit.clone()));
-            let r = crate::recycle::recycle(&mut core.flows, &in_throat, &budget);
+            // THE CONTAINER (11.0 (18)): the core's state and the kinds held
+            // at or above its cut, the heaviest that moved least; the bounce
+            // it contains, B = p − Σ m·|Δℓ|.
+            let container = ledger_unit.clone() + (h.clone() - ratio(1, 1)) * g_mass.clone();
+            let bounce = crate::ring::grain(&(p.clone() - absorbed));
+            let r = crate::recycle::recycle(&mut core.flows, &in_throat, &bounce, &container, &(g_mass.clone() - (h.clone() - ratio(1, 1)) * g_mass.clone()), bell);
             // Whatever passed the throat, split or not, leaves on the
             // continuum (operator 2026-10-19: "redistributed back via the
             // continuum"); the vacuum refills only from the ocean.
             for &j in &in_throat {
                 core.flows[j].vacuum = false;
             }
-            recycled = crate::recycle::Recycled { spent: r.spent / unit.clone(), released: r.released / unit.clone(), nuclei: r.nuclei };
+            recycled = crate::recycle::Recycled { pressed: r.pressed, light: r.light / unit.clone(), peeled: r.peeled, spent: r.spent / unit.clone(), trapped: r.trapped / unit.clone() };
             // THE SHEAR: neighbouring rings pass turning outward; the inner
             // falls in (the loop becomes an orbit). Σ m·ℓ unchanged.
             let _ = crate::flows::shear(&mut core.flows, enc.as_ref().unwrap_or(&throat), &ledger_unit);
