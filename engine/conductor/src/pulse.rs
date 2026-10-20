@@ -249,12 +249,43 @@ impl Body {
 /// holds, on the universal clock, its galaxy's share of the manifest's
 /// holding, the same as all its galaxy's grains together. Its holding is
 /// that state plus the grains it keeps, so it dominates its galaxy's holding
-/// (quantum mass) whatever its 3-D grains. In the grains' holds.
+/// (quantum mass) whatever its 3-D grains. In the grains' holds. The HOME's
+/// core is the universal core itself, whose state is the universe's
+/// (`universal_state`), counted once there, so the home adds none of its own.
 pub fn core_state(core: &Body) -> Ratio {
+    if is_home(core) {
+        return ratio(0, 1);
+    }
     if !core.state.is_zero() {
         return core.state.clone();
     }
     mass(&core.total())
+}
+
+/// THE HOME (operator 2026-10-20: "build the home galaxy of the elements
+/// authorized around the 'first' core or 'universal core' as the uplink to
+/// hypha - where the ancients live"; with xylarium, 11.0 (25)): the galaxy
+/// whose core is the universal core, path `[0]`, at reach 0. It is never
+/// placed: it is the founding's matter the core's own gravity holds (the
+/// beads that cannot hold their spread against it, `deploy`). It shares one
+/// enclosure with the firmament: the singularity's state, the firmament, then
+/// the home's matter beyond the throat.
+pub fn is_home(body: &Body) -> bool {
+    body.path.first() == Some(&0)
+}
+
+/// The home's push, throat and mean weight, in the universe's own units (its
+/// grains' holding 1, the singularity's state 1): the universal bounce's
+/// push ½ (the universe tier's, as the firmament's kick), the throat holding
+/// the singularity's state and the firmament, and the home's mean weight.
+pub fn home_push(u: &Universe, grains: &Manifest) -> Option<(Ratio, Ratio, Ratio)> {
+    let whole = mass(&u.total());
+    let count = grains.values().fold(ratio(0, 1), |s, a| s + a.clone());
+    if whole.is_zero() || count.is_zero() {
+        return None;
+    }
+    let firm = u.firmament.iter().fold(ratio(0, 1), |s, x| s + x.amount.clone() * crate::flows::weight(&x.key)) / whole;
+    Some((ratio(1, 2), ratio(1, 1) + firm, mass(grains) / count))
 }
 
 /// The universal core's state hold: all the universe's grains together hold
@@ -591,28 +622,34 @@ pub fn deploy(_seed: &[u8; 32], manifest: &Manifest) -> Option<Universe> {
         shares.push((i as u32 + 1, m, d));
     }
     let weight_of = |m: &Manifest| if whole.is_zero() { ratio(0, 1) } else { mass(m) / whole.clone() };
+    // The singularity's state (1) and the firmament it holds (its holding
+    // share, as matter).
+    let firm = if whole.is_zero() { ratio(0, 1) } else { firmament.iter().fold(ratio(0, 1), |s, x| s + x.amount.clone() * crate::flows::weight(&x.key)) / whole.clone() };
     // A BEAD STANDS AS A GALAXY ONLY WHERE IT HOLDS ITS OWN (with xylarium,
-    // 2026-10-20; gravity's reach, one law at every tier, operator
-    // 2026-10-18): its own region about its reach R is `d = R·H_g/(H_g +
-    // H_inside)` (H_g its hold as a throat, 2w; H_inside the singularity's
-    // state 1 and every galaxy standing inside), and its spread `R·s_final`
-    // (s_final = ½·1/(1 + 2) = 1/6, the cascade's last face with all of it
-    // held) must lie within it. A bead that cannot hold its spread is the
-    // medium the stronger pull holds: it joins the universe's medium.
+    // 11.0 (25); gravity's reach, one grammar at every tier, operator
+    // 2026-10-18): the pinch between the universal core and a bead at reach R
+    // is `d = R·H_b/(H_b + H_inside)`. H_b is the bead's OWN matter, w (a
+    // bead not yet standing has no throat, as a clump binds by its own λw);
+    // H_inside is the enclosed hold, the singularity's state 1, the
+    // firmament, and every galaxy standing inside at its standing hold 2w.
+    // Its spread `R·s_final` (s_final = ½·1/(1 + 2) = 1/6, the cascade's last
+    // face with all of it held) must lie within d. A bead that cannot hold its
+    // spread is the universal core's own: its matter is the HOME.
+    let mut home = Manifest::new();
     {
         let s_final = ratio(1, 6);
         shares.sort_by(|a, b| a.2.cmp(&b.2));
-        let mut inside = ratio(1, 1);
+        let mut inside = ratio(1, 1) + firm.clone();
         let mut kept: Vec<(u32, Manifest, Ratio)> = Vec::new();
         for (i, m, d) in std::mem::take(&mut shares) {
-            let h_g = ratio(2, 1) * weight_of(&m);
-            let region = d.clone() * h_g.clone() / (h_g.clone() + inside.clone());
+            let w = weight_of(&m);
+            let region = d.clone() * w.clone() / (w.clone() + inside.clone());
             if d.clone() * s_final.clone() <= region {
-                inside += h_g;
+                inside += ratio(2, 1) * w;
                 kept.push((i, m, d));
             } else {
                 for (k, a) in m {
-                    *medium.entry(k).or_insert_with(|| ratio(0, 1)) += a;
+                    *home.entry(k).or_insert_with(|| ratio(0, 1)) += a;
                 }
             }
         }
@@ -625,7 +662,9 @@ pub fn deploy(_seed: &[u8; 32], manifest: &Manifest) -> Option<Universe> {
     // one tier up holds it (above); its echoes arrive that many bells later.
     // Each core keeps what its bounce holds (`disperse`), in its own units.
     let discs: Vec<Manifest> = shares.iter().map(|(_, m, _)| disperse(m)).collect();
-    let unit = discs.iter().map(mass).max().filter(|m| !m.is_zero())?;
+    // The unit is the deepest galactic hole; with no galaxy standing, the
+    // home's.
+    let unit = discs.iter().map(mass).max().filter(|m| !m.is_zero()).or_else(|| Some(mass(&disperse(&home))).filter(|m| !m.is_zero()))?;
     // FORMATION (docs/83): no system is placed. Each core keeps its disc;
     // the rest is its galaxy's GAS, laid down as motes where the push left
     // each element; stars collapse from it as it cools (`breath`).
@@ -637,7 +676,9 @@ pub fn deploy(_seed: &[u8; 32], manifest: &Manifest) -> Option<Universe> {
     let mut order: Vec<usize> = (0..shares.len()).collect();
     order.sort_by(|&a, &b| shares[a].2.cmp(&shares[b].2));
     let mut orbits: Vec<(Ratio, Ratio, Ratio)> = vec![(ratio(0, 1), ratio(0, 1), ratio(0, 1)); shares.len()];
-    let mut inside = ratio(1, 1);
+    // Inside every galaxy: the singularity's state, the firmament, and the
+    // home's matter (its state is the singularity's, counted once).
+    let mut inside = ratio(1, 1) + firm + weight_of(&home);
     let bells = ratio(t_u as i64, 4);
     let mut k = 0;
     while k < order.len() {
@@ -652,7 +693,7 @@ pub fn deploy(_seed: &[u8; 32], manifest: &Manifest) -> Option<Universe> {
         }
         k += ring.len();
     }
-    let cores = shares
+    let mut cores = shares
         .into_iter()
         .zip(discs)
         .zip(orbits)
@@ -669,6 +710,12 @@ pub fn deploy(_seed: &[u8; 32], manifest: &Manifest) -> Option<Universe> {
             Some(Body { path: vec![u64::from(i)], radius, period, kept, satellites: Vec::new(), medium, ell, medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: mass(&m), flows, reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1) })
         })
         .collect::<Option<Vec<Body>>>()?;
+    // THE HOME at the universal core: its matter as motes, all of it gas
+    // beyond the throat (the throat's held part is the firmament).
+    if !home.is_empty() {
+        let flows = crate::flows::founding(&home)?;
+        cores.insert(0, Body { path: vec![0], radius: ratio(0, 1), period: ratio(0, 1), kept: Manifest::new(), satellites: Vec::new(), medium: home, ell: ratio(0, 1), medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: ratio(0, 1), flows, reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1) });
+    }
     Some(Universe { cores, medium, firmament, unit, t_u })
 }
 
@@ -731,6 +778,13 @@ pub fn orbit_galaxies(u: &mut Universe) {
     for i in order {
         let share = mass(&u.cores[i].total()) / whole.clone();
         let c = &mut u.cores[i];
+        // The home stands at the universal core: it adds its matter to the
+        // hold inside every galaxy (its state is the singularity's) and never
+        // orbits.
+        if is_home(c) {
+            inside += share;
+            continue;
+        }
         if c.ell > ratio(0, 1) {
             let d = c.ell.clone() / inside.clone();
             c.radius = crate::ring::grain(&(d.clone() * bells.clone()));

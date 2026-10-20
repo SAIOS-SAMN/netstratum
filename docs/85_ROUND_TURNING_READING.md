@@ -778,3 +778,94 @@ spin ledger stay exact.
 - **The spin change in the built code**: `breath.rs` and `flows::merge` pool
   spin residues into the galaxy's `medium_spin`. By E2 they go into the body's
   own turning instead.
+
+### Rulings and corrections to §8 (2026-10-20)
+
+**Operator's rulings for netstratum**:
+
+- **O1, places**: a tier's place at a body is the body's OWN CAP from
+  gravity's reach, `α = 180°·d/rim`, `d = R·H_b/(H_b + H_p)`, because
+  anything finer already lies inside the body's own enclosure. Places are
+  read per body, never fixed at 360 or 60. A body without an enclosure
+  (a mote, a moonless world) reads its cap by the same law from its own
+  holding: one grammar.
+- **O3, below the atom**: below the atom is the QUANTUM tier. Its
+  residue is acknowledged and never simulated (the first ring,
+  2026-10-08). The atom's own residue is not stored.
+- **Corners** are where two spheres overlap: the lens tips of a
+  non-Euclidean Venn. They are the geometry, not a defect.
+
+**Taken from xylarium**:
+
+- **E2′**: a residue that lies inside the body's own round (`r ≤ a/2` of
+  a turn) never located the body more finely than its heat does. It
+  DRAINS as that heat and is not carried. Only a body colder than its
+  places descends.
+- **E3′**: the residue of a rigid turn is stored ONCE, on the enclosure's
+  frame, never copied into each child. A cold leaf's residue goes to the
+  quantum tier, acknowledged.
+- **E8, condense**: when two bodies meet into one (a merge, a bond),
+  their phases join as the holding-weighted mean of their full phases on
+  the circle, then pass through E1–E3 again, so no body's residue is
+  dropped in a merge.
+
+xylarium holds its places as one sexagesimal rung per tier (60⁻⁶ of the
+tier's turn). This is an A7 divergence.
+
+### E2″. No rigid turn: each member answers by its own gravity (operator 2026-10-20: "we dont really do shortcuts in orbital mechanics")
+
+E2 and E3′ sent a residue as a RIGID turn of the enclosure's frame (from
+xylarium 11.3b). That treats a system as one solid body, a rigid-frame
+shortcut. Each member is held by its own gravity: a world deep in its
+star's well follows the star, and one near the system's edge is half held
+by the galaxy. The rigid turn is retired.
+
+**The law, already built one tier up** (`breath.rs`, THE RETURN, with
+xylarium): a star's displacement from its galaxy's flows is given back by
+`d/(d + turned)` in each plane. Here `d = 1 − δ` is the drag of the face the
+core does not lock, and `turned` is the body's own spin's turns this echo:
+a fast spinner is a gyroscope.
+
+**Read one tier down** (the star's residue r in plane j, against each member
+m of its system at reach R_m):
+
+- **Drag:** the star's drag on the member there is `d_m = 1 − δ_s(R_m)`,
+  with `δ_s(R) = H_s/(R + H_s)`. It is the star's own hold, falling with
+  distance: gravity.
+- **Inertia:** the member keeps its own axis by `keep_m = turned_m/(d_m +
+  turned_m)`, with turned_m its own spin's turns this echo, set by its
+  holding about its own reach: density.
+- **Its share:** the member's phase in plane j moves by `r·(1 − keep_m)`.
+  The part it keeps, `r·keep_m`, is its offset against the star.
+
+So each world's orbital axis answers the star's residue by its own density
+and its own binding. Nothing is rigid, nothing is dropped, and no new state
+is stored.
+
+**Owed with it** (the same shortcut elsewhere): the code carries a system's
+phases across the tier as galaxy-relative turns, unmagnified (captures,
+sheds, sprays). That is an identity map between tiers, where the derived map
+is §7‴'s. Each crossing (capture, shed, spray, the wind) moves to the
+derived map in the cut-over.
+
+### E2‴. As built (corrects E2″ and O1's place; operator: "proceed with the fixes")
+
+- **The place is the sexagesimal rung within the cap.** Holding a phase to
+  the exact cap carried the holds' own primes (hundreds of bits) into every
+  phase and slowed the breath more than fiftyfold. A body's place is now the
+  largest `60⁻ᵏ` of a turn within its own gravity cap: never coarser than
+  the cap, so nothing the body resolves is lost, and the denominator is a
+  power of sixty (`enfold::place`).
+- **A residue is not a motion.** E2″'s follow-share treated the residue as
+  a displacement the members answer by drag and inertia, and it read the
+  drag backwards: `1 − δ_s` rises with distance. Both are retracted. A star's
+  phase residue is the part of its position finer than its place, which by
+  the ruling (O1) is the detail of its own enclosure. So the star is held to
+  its place, and each member's place AGAINST the star takes the residue:
+  every member stays exactly where it is. Nothing turns, rigidly or
+  otherwise, and nothing is dropped (`breath.rs`, the ride). How each
+  world's axis answers the star by its density and gravity belongs to the
+  dynamics and the plane fill (§5), not to the bookkeeping.
+- **One frame for a system.** A system's members stand against their star:
+  from birth (the disc's spray from 0), at capture (`x − s`), and now in the
+  outburst, which placed its spray at the star's galaxy phases.

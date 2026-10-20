@@ -1377,7 +1377,30 @@ pub fn collide_stars(stars: Vec<crate::pulse::Body>, c_pre: Vec<Ratio>, scale: &
             let reservoir = by(&|b| b.reservoir.clone());
             let phase: Vec<Ratio> = (0..planes).map(|k| crate::ring::grain(&crate::flows::circle_mean(&all.iter().zip(&w).map(|(b, x)| (x.clone(), b.phase.get(k).cloned().unwrap_or_else(|| ratio(0, 1)))).collect::<Vec<_>>()))).collect();
             let bell: Vec<Ratio> = (0..planes).map(|k| crate::ring::grain(&crate::flows::circle_mean(&all.iter().zip(&w).map(|(b, x)| (x.clone(), b.bell.get(k).cloned().unwrap_or_else(|| ratio(0, 1)))).collect::<Vec<_>>()))).collect();
-            for b in members {
+            // A system stands against its star: each merging star's worlds and
+            // motes are re-read against the merged star by the difference of
+            // the two stars' phases, so every body stays where it is.
+            let frac_of = |x: Ratio| x.clone() - x.floor();
+            let rebase = |sats: &mut Vec<crate::pulse::Body>, flows: &mut Vec<crate::flows::Mote>, was: &[Ratio]| {
+                for k in 0..planes.min(was.len()).min(phase.len()) {
+                    let shift = was[k].clone() - phase[k].clone();
+                    for w in sats.iter_mut() {
+                        if let Some(ph) = w.phase.get_mut(k) {
+                            *ph = frac_of(ph.clone() + shift.clone());
+                        }
+                    }
+                    for x in flows.iter_mut() {
+                        if let Some(ph) = x.phase.get_mut(k) {
+                            *ph = frac_of(ph.clone() + shift.clone());
+                        }
+                    }
+                }
+            };
+            let head_was = head.phase.clone();
+            rebase(&mut head.satellites, &mut head.flows, &head_was);
+            for mut b in members {
+                let was = b.phase.clone();
+                rebase(&mut b.satellites, &mut b.flows, &was);
                 for (k, a) in b.kept {
                     *head.kept.entry(k).or_insert_with(|| ratio(0, 1)) += a;
                 }

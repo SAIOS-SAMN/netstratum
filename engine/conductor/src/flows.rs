@@ -335,7 +335,7 @@ impl Enclosed {
 /// the disc"): the route round the loop, not the inversion. A vacuum mote's
 /// loop (the circulation's plane) runs the other way, its advance read over
 /// that passage; its orbit plane turns forward.
-pub fn turn(phase: &mut [Ratio], r_o: &Ratio, h: &Ratio, p: &Ratio, rho: &Ratio, delta_u: &Ratio, inverted: bool) {
+pub fn turn(phase: &mut [Ratio], r_o: &Ratio, h: &Ratio, p: &Ratio, rho: &Ratio, delta_u: &Ratio, inverted: bool, place: Option<&Ratio>) {
     let pull = h.clone() / (r_o.clone() + h.clone());
     let d_o = if inverted { ratio(1, 1) - pull } else { pull };
     // THE LOOP'S RATE (with xylarium): the jetstream turns by the motion law
@@ -343,10 +343,11 @@ pub fn turn(phase: &mut [Ratio], r_o: &Ratio, h: &Ratio, p: &Ratio, rho: &Ratio,
     // inner matter circulates faster than outer. (At R = H it is one turn a
     // bell, a 1:1 lock with the bell: the rim.)
     let d_c = d_o.clone();
-    // On the coordinate's grain (`60⁻⁶`, the carrier's resolution, as every
-    // spin and place): exact sums of exact rationals otherwise compound
-    // their denominators each bell without bound.
-    phase[0] = crate::ring::grain(&frac(&(phase[0].clone() + ratio(2, 1) * d_o)));
+    // Held to the body's own place (`enfold`, docs/85 §8): exact sums of exact
+    // rationals otherwise compound their denominators each bell without bound;
+    // the residue finer than the place drains as heat or passes to the quantum
+    // tier, acknowledged.
+    phase[0] = crate::enfold::hold(&(phase[0].clone() + ratio(2, 1) * d_o), place).0;
     let loop_from = phase[1].clone();
     let route = if inverted { ratio(-1, 1) } else { ratio(1, 1) };
     let loop_phase = frac(&(loop_from.clone() + route.clone() * ratio(2, 1) * d_c.clone()));
@@ -357,7 +358,7 @@ pub fn turn(phase: &mut [Ratio], r_o: &Ratio, h: &Ratio, p: &Ratio, rho: &Ratio,
     // loop's plane.
     let start = if inverted { loop_from - ratio(2, 1) * d_c.clone() } else { loop_from };
     let advance = p.clone() * rho.clone() * delta_u.clone() * mean_response(&start, &(ratio(2, 1) * d_c));
-    phase[1] = crate::ring::grain(&frac(&(loop_phase + route * advance)));
+    phase[1] = crate::enfold::hold(&(loop_phase + route * advance), place).0;
 }
 
 /// One bell's kicks on every mote: the own family in the orbit's plane
@@ -377,7 +378,10 @@ pub fn kick(motes: &mut [Mote], enc: &Enclosed, p: &Ratio, rho: &Ratio, delta_u:
         let h = enc.hold(&x.ell_o);
         let (r_o, d_o) = enc.reach(&x.ell_o);
         let from = x.phase[0].clone();
-        turn(&mut x.phase, &r_o, &h, p, rho, delta_u, x.vacuum);
+        // A mote's place: the cap its own gravity holds (`enfold::place`).
+        let m = if total.is_zero() { ratio(0, 1) } else { x.amount.clone() * weight(&x.key) / total.clone() };
+        let place = crate::enfold::place(&r_o, &m, &h);
+        turn(&mut x.phase, &r_o, &h, p, rho, delta_u, x.vacuum, place.as_ref());
         // Over its whole passage this bell, never at one instant; a vacuum
         // mote at its inverted reach (`1 − δ`), forward.
         let d_o = if x.vacuum { ratio(1, 1) - d_o } else { d_o };
@@ -398,7 +402,6 @@ pub fn kick(motes: &mut [Mote], enc: &Enclosed, p: &Ratio, rho: &Ratio, delta_u:
         // Spin cannot carry a mote through zero reach: a turning is a
         // magnitude in its plane; a kick past zero stops at the core.
         let new_o = crate::ring::grain(&(x.ell_o.clone() + dl_o)).max(ratio(0, 1));
-        let m = if total.is_zero() { ratio(0, 1) } else { x.amount.clone() * weight(&x.key) / total.clone() };
         let dl = new_o.clone() - x.ell_o.clone();
         absorbed += m.clone() * if dl < ratio(0, 1) { -dl.clone() } else { dl.clone() };
         given += m * dl;
