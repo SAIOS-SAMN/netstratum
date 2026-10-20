@@ -335,7 +335,8 @@ impl Enclosed {
 /// the disc"): the route round the loop, not the inversion. A vacuum mote's
 /// loop (the circulation's plane) runs the other way, its advance read over
 /// that passage; its orbit plane turns forward.
-pub fn turn(phase: &mut [Ratio], r_o: &Ratio, h: &Ratio, p: &Ratio, tide: Option<(&Ratio, &Ratio)>, inverted: bool, place: Option<&Ratio>) {
+#[allow(clippy::too_many_arguments)]
+pub fn turn(phase: &mut [Ratio], r_o: &Ratio, h: &Ratio, p: &Ratio, tide: Option<(&Ratio, &Ratio)>, inverted: bool, place: Option<&Ratio>, agitation: &Ratio, cross: &mut crate::enfold::Cross) {
     let pull = h.clone() / (r_o.clone() + h.clone());
     let d_o = if inverted { ratio(1, 1) - pull.clone() } else { pull.clone() };
     // THE LOOP'S RATE (with xylarium): the jetstream turns by the motion law
@@ -343,11 +344,12 @@ pub fn turn(phase: &mut [Ratio], r_o: &Ratio, h: &Ratio, p: &Ratio, tide: Option
     // inner matter circulates faster than outer. (At R = H it is one turn a
     // bell, a 1:1 lock with the bell: the rim.)
     let d_c = d_o.clone();
-    // Held to the body's own place (`enfold`, docs/85 §8): exact sums of exact
-    // rationals otherwise compound their denominators each bell without bound;
-    // the residue finer than the place drains as heat or passes to the quantum
-    // tier, acknowledged.
-    phase[0] = crate::enfold::hold(&(phase[0].clone() + ratio(2, 1) * d_o), place).0;
+    // Through the cross (`enfold`, docs/85 §8): held to the body's own place,
+    // since exact sums of exact rationals otherwise compound their
+    // denominators each bell without bound; the residue drains within its
+    // round, passes to the quantum tier acknowledged, or, with no place of its
+    // own, is cauterized with its scar recorded.
+    phase[0] = crate::enfold::leaf(&(phase[0].clone() + ratio(2, 1) * d_o), place, agitation, 0, cross);
     let loop_from = phase[1].clone();
     let route = if inverted { ratio(-1, 1) } else { ratio(1, 1) };
     let loop_phase = frac(&(loop_from.clone() + route.clone() * ratio(2, 1) * d_c.clone()));
@@ -366,7 +368,7 @@ pub fn turn(phase: &mut [Ratio], r_o: &Ratio, h: &Ratio, p: &Ratio, tide: Option
         None => pull.clone(),
     };
     let advance = p.clone() * felt * mean_response(&start, &(ratio(2, 1) * d_c));
-    phase[1] = crate::enfold::hold(&(loop_phase + route * advance), place).0;
+    phase[1] = crate::enfold::leaf(&(loop_phase + route * advance), place, agitation, 1, cross);
 }
 
 /// One bell's kicks on every mote: the own family in the orbit's plane
@@ -378,7 +380,7 @@ pub fn turn(phase: &mut [Ratio], r_o: &Ratio, h: &Ratio, p: &Ratio, tide: Option
 /// the core's reservoir gives (Σ m·Δℓ, to be taken from it), and the pulse
 /// the matter ABSORBED (Σ m·|Δℓ|, unsigned: each hemisphere's kick alike;
 /// with xylarium), what the recycling budget is read against.
-pub fn kick(motes: &mut [Mote], enc: &Enclosed, p: &Ratio, tide: Option<(&Ratio, &Ratio)>, total: &Ratio) -> (Ratio, Ratio) {
+pub fn kick(motes: &mut [Mote], enc: &Enclosed, p: &Ratio, tide: Option<(&Ratio, &Ratio)>, total: &Ratio, cross: &mut crate::enfold::Cross) -> (Ratio, Ratio) {
     let mut given = ratio(0, 1);
     let mut absorbed = ratio(0, 1);
     for x in motes.iter_mut() {
@@ -389,7 +391,8 @@ pub fn kick(motes: &mut [Mote], enc: &Enclosed, p: &Ratio, tide: Option<(&Ratio,
         // A mote's place: the cap its own gravity holds (`enfold::place`).
         let m = if total.is_zero() { ratio(0, 1) } else { x.amount.clone() * weight(&x.key) / total.clone() };
         let place = crate::enfold::place(&r_o, &m, &h);
-        turn(&mut x.phase, &r_o, &h, p, tide, x.vacuum, place.as_ref());
+        let heat_was = x.agitation.clone();
+        turn(&mut x.phase, &r_o, &h, p, tide, x.vacuum, place.as_ref(), &heat_was, cross);
         // Over its whole passage this bell, never at one instant; a vacuum
         // mote at its inverted reach (`1 − δ`), forward.
         let d_o = if x.vacuum { ratio(1, 1) - d_o } else { d_o };
@@ -915,7 +918,7 @@ pub const REACH_WIDTH: i64 = 360;
 /// Merge motes whose states coincide on the coordinate's grain (`60⁻⁶`
 /// a plane, the carrier's resolution, never law): same kind, same spins and
 /// phases on the grain, their amounts added.
-pub fn merge(motes: &mut Vec<Mote>, total: &Ratio) -> Ratio {
+pub fn merge(motes: &mut Vec<Mote>, total: &Ratio, place_of: &dyn Fn(&Mote) -> Option<Ratio>, cross: &mut crate::enfold::Cross) -> Ratio {
     // The merge rule (with xylarium; the carrier's resolution, never law):
     // same kind, same stream, the same mark in every phase (60 to the turn)
     // and in the reach's share `ℓ/(ℓ + 1)` (360 marks). At the 60⁻⁶ grain
@@ -947,10 +950,23 @@ pub fn merge(motes: &mut Vec<Mote>, total: &Ratio) -> Ratio {
             if !total.is_zero() {
                 remainder += both.clone() * weight(&x.key) / total.clone() * ((exact_o - go.clone()) + (exact_c - gc.clone()));
             }
-            y.agitation = g(&((my * y.agitation.clone() + mx * x.agitation.clone()) / both.clone()));
+            // CONDENSE (the cross): both full phases are read (ascent), meaned
+            // by holding on the circle, and the mean passes through the
+            // cross at the merged mote's place, so neither residue is lost.
+            let w = weight(&x.key);
+            let heat = (my.clone() * y.agitation.clone() + mx.clone() * x.agitation.clone()) / both.clone();
+            y.agitation = g(&heat);
             y.ell_o = go;
             y.ell_c = gc;
             y.amount = both;
+            let place = place_of(y);
+            for k in 0..y.phase.len().min(x.phase.len()) {
+                cross.note(k, crate::enfold::Fate::Ascended, &ratio(0, 1));
+                let mean = circle_mean(&[(my.clone() * w.clone(), y.phase[k].clone()), (mx.clone() * w.clone(), x.phase[k].clone())]);
+                let shift = mean.clone() - y.phase[k].clone();
+                cross.note(k, crate::enfold::Fate::Condensed, &shift);
+                y.phase[k] = crate::enfold::leaf(&mean, place.as_ref(), &heat, k, cross);
+            }
         } else {
             at.insert(kx, out.len());
             out.push(x);

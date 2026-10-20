@@ -732,10 +732,11 @@ pub fn deploy(_seed: &[u8; 32], manifest: &Manifest) -> Option<Universe> {
 /// kept, so a galaxy moves only as the holding inside it changes: what one
 /// gains or loses moves every galaxy outside it. Echo delays follow the
 /// live reach.
-pub fn orbit_galaxies(u: &mut Universe) {
+pub fn orbit_galaxies(u: &mut Universe) -> crate::enfold::Cross {
+    let mut cross = crate::enfold::Cross::default();
     let whole = mass(&u.total());
     if whole.is_zero() {
-        return;
+        return cross;
     }
     let bells = ratio(u.t_u as i64, 4);
     let planes = crate::flows::PLANES;
@@ -750,7 +751,7 @@ pub fn orbit_galaxies(u: &mut Universe) {
         let enc = crate::flows::Enclosed::new(ratio(1, 1), u.firmament.iter().map(|x| (x.ell_o.clone(), held(x))).collect());
         // The firmament stands in the source's own enclosure: it feels the
         // pulse at its own reach (`flows::turn`, no tide).
-        let _ = crate::flows::kick(&mut u.firmament, &enc, &ratio(1, 2), None, &whole);
+        let _ = crate::flows::kick(&mut u.firmament, &enc, &ratio(1, 2), None, &whole, &mut cross);
         // THE MISSING ANTIPOLE (operator 2026-10-19: "so we having missing
         // physics at the antipoles?"; with xylarium, the star's hold-return
         // one tier up): the singularity's HOLD draws each mote back by
@@ -800,6 +801,7 @@ pub fn orbit_galaxies(u: &mut Universe) {
         }
         inside += ratio(2, 1) * share;
     }
+    cross
 }
 
 /// MAGNETISM (operator 2026-10-15, "transduction via magnetism"): an

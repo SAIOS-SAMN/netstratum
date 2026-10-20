@@ -147,6 +147,8 @@ pub struct Event {
     /// (`crate::compound`): each star's path, the rung's fuel Z, the share a
     /// ring and the rings its own clock received.
     pub burns: Vec<(Vec<u64>, u32, Ratio, u64)>,
+    /// THE CROSS this echo (`enfold::Cross`): every residue's fate by plane.
+    pub cross: crate::enfold::Cross,
 }
 
 /// Breathe the universe over bells `from` (exclusive) to `until`, echoes
@@ -159,8 +161,10 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
     use num_traits::Zero as _;
     // THE GALAXIES ORBIT (`pulse::orbit_galaxies`): on each universal echo,
     // before its arrivals are read, every core re-reads its reach.
+    // The firmament's cross is carried into the first arrival's record.
+    let mut pending = crate::enfold::Cross::default();
     if t_u > 0 && until / t_u > from / t_u {
-        crate::pulse::orbit_galaxies(u);
+        pending = crate::pulse::orbit_galaxies(u);
     }
     // Every echo's arrival, in time order.
     let mut arrivals: Vec<(u64, usize, u64)> = Vec::new();
@@ -232,6 +236,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         let mut recycled = crate::recycle::Recycled::default();
         let mut burned = crate::pulse::Manifest::new();
         let mut burns: Vec<(Vec<u64>, u32, Ratio, u64)> = Vec::new();
+        let mut cross = std::mem::take(&mut pending);
         // The galaxy's push and throat in its own units, for the wind's
         // meeting with the medium.
         let g_before = if home { whole_u.clone() } else { mass(&core.total()) };
@@ -250,7 +255,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         let planes = crate::flows::PLANES;
         let c_pre: Vec<Ratio> = core.satellites.iter().map(|b| if b.phase.len() < planes || b.bell.len() < planes { ratio(1, 1) } else { (0..planes).fold(ratio(1, 1), |c, k| c * crate::flows::in_step(&b.phase[k], &b.bell[k])) }).collect();
         let (met, star_sticks, star_bounces) = match &pre {
-            Some((p_g, h_g, _)) if enc.is_some() => crate::formation::collide_stars(std::mem::take(&mut core.satellites), c_pre, &scale_pre, h_g, p_g, &g_before, enc.as_ref().expect("checked")),
+            Some((p_g, h_g, _)) if enc.is_some() => crate::formation::collide_stars(std::mem::take(&mut core.satellites), c_pre, &scale_pre, h_g, p_g, &g_before, enc.as_ref().expect("checked"), &mut cross),
             _ => (std::mem::take(&mut core.satellites).into_iter().zip(c_pre).collect(), 0, 0),
         };
         // WHERE LEAVING MATTER IS SET DOWN (with xylarium; the wind law: the
@@ -317,7 +322,8 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     let was = sys.bell.clone();
                     // The star's place: the cap its own gravity holds about it.
                     let place = crate::enfold::place(&r, &(mass(&sys.total()) / g_before.clone()), &h_in);
-                    crate::flows::turn(&mut sys.bell, &r, &h_in, p_g, tide, false, place.as_ref());
+                    let heat_was = sys.heat.clone();
+                    crate::flows::turn(&mut sys.bell, &r, &h_in, p_g, tide, false, place.as_ref(), &heat_was, &mut cross);
                     // THE RETURN (with xylarium): its galaxy's torque gives
                     // back `d/(d + turned)` of its displacement in each plane,
                     // `d = 1 − δ_gal` its drag, `turned` its own spin's turns
@@ -337,7 +343,17 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         // Nothing moves and nothing is dropped.
                         let (held, residue) = crate::enfold::hold(&g, place.as_ref());
                         sys.phase[k] = held;
-                        if !residue.is_zero() {
+                        if !residue.is_zero() && sys.flows.is_empty() && sys.satellites.is_empty() {
+                            // A star with no members holds its residue as a
+                            // leaf: in its round it drains, past it the
+                            // quantum tier acknowledges it.
+                            let fate = match crate::enfold::residue(&residue, &sys.heat, None) {
+                                crate::enfold::Residue::Drained => crate::enfold::Fate::Drained,
+                                _ => crate::enfold::Fate::Acknowledged,
+                            };
+                            cross.note(k, fate, &residue);
+                        } else if !residue.is_zero() {
+                            cross.note(k, crate::enfold::Fate::Descended, &residue);
                             let shift = |ph: &mut Ratio| {
                                 let x = ph.clone() + residue.clone();
                                 *ph = x.clone() - x.floor();
@@ -406,7 +422,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 }
                 // Its system still moves: worlds and debris meet, and what
                 // oversteps the rim crosses into the galaxy.
-                let (_, _, escaped) = crate::formation::collide_system(&mut sys, &unit, bell, rang, t_u);
+                let (_, _, escaped) = crate::formation::collide_system(&mut sys, &unit, bell, rang, t_u, &mut cross);
                 if !escaped.is_empty() {
                     shed.push((escaped, beyond(&sys), sys.phase.clone()));
                 }
@@ -580,7 +596,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             }
             // COLLISIONS in the system's own medium: worlds grow; what
             // overreaches the system's rim crosses into the galaxy.
-            let (_, _, escaped) = crate::formation::collide_system(&mut sys, &unit, bell, rang, t_u);
+            let (_, _, escaped) = crate::formation::collide_system(&mut sys, &unit, bell, rang, t_u, &mut cross);
             if !escaped.is_empty() {
                 shed.push((escaped, beyond(&sys), sys.phase.clone()));
             }
@@ -750,7 +766,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // at loop phase ½): the inbound leg (the axis, for the vacuum)
             // delivers it to the throat.
             let loop_was: Vec<(usize, Ratio)> = core.flows.iter().enumerate().filter(|(_, x)| x.vacuum && x.phase.len() > 1).map(|(j, x)| (j, x.phase[1].clone())).collect();
-            let (given, absorbed) = crate::flows::kick(&mut core.flows, enc.as_ref().unwrap_or(&throat), &p, tide, &ledger_unit);
+            let (given, absorbed) = crate::flows::kick(&mut core.flows, enc.as_ref().unwrap_or(&throat), &p, tide, &ledger_unit, &mut cross);
             core.reservoir -= given;
             // RECYCLING (`crate::recycle`; xylarium 11.0 (18)): AFTER the
             // kicks (kicks are motion, recycling the residue), the bounce the
@@ -767,6 +783,10 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // Clusters part in the throat's heat (1, as the newborn heart's
             // cut) before they split (with xylarium).
             in_throat = crate::recycle::part(&mut core.flows, &in_throat);
+            // PUNCTURE: each body entering the throat's other face.
+            for _ in &in_throat {
+                cross.note(0, crate::enfold::Fate::Punctured, &ratio(0, 1));
+            }
             // THE CONTAINER (11.0 (18)): the core's state and the kinds held
             // at or above its cut, the heaviest that moved least; the bounce
             // it contains, B = p − Σ m·|Δℓ|.
@@ -778,6 +798,8 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // continuum"); the vacuum refills only from the ocean.
             for &j in &in_throat {
                 core.flows[j].vacuum = false;
+                // SEAL: it leaves on the continuum.
+                cross.note(0, crate::enfold::Fate::Sealed, &ratio(0, 1));
             }
             recycled = crate::recycle::Recycled { pressed: r.pressed, light: r.light / unit.clone(), peeled: r.peeled, spent: r.spent / unit.clone(), trapped: r.trapped / unit.clone(), hydrogen: r.hydrogen };
             // THE SHEAR: neighbouring rings pass turning outward; the inner
@@ -887,7 +909,14 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 stars += 1;
             }
             core.flows.retain(|x| x.amount > ratio(0, 1));
-            let remainder = crate::flows::merge(&mut core.flows, &ledger_unit);
+            // Each mote's place for the condensation: the cap its own gravity
+            // holds in the galaxy's enclosure.
+            let enc_m = crate::flows::Enclosed::new(ratio(1, 1), core.flows.iter().map(|x| (x.ell_o.clone(), x.amount.clone() * crate::flows::weight(&x.key) / g_mass.clone())).collect());
+            let place_of = |x: &crate::flows::Mote| {
+                let (r, _) = enc_m.reach(&x.ell_o);
+                crate::enfold::place(&r, &(x.amount.clone() * crate::flows::weight(&x.key) / ledger_unit.clone()), &enc_m.hold(&x.ell_o))
+            };
+            let remainder = crate::flows::merge(&mut core.flows, &ledger_unit, &place_of, &mut cross);
             core.reservoir += remainder;
             let (kept, free) = crate::flows::read_cut(&core.flows, &h, &p);
             core.kept = kept;
@@ -921,7 +950,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         for (k, a) in to_ocean {
             *u.medium.entry(k).or_insert_with(|| ratio(0, 1)) += a;
         }
-        events.push(Event { bell, galaxy: galaxy_id, rung, write: Write::Perpendicular, stars, jets, returned, dissolved, merged, encounters, recycled, burned, burns });
+        events.push(Event { bell, galaxy: galaxy_id, rung, write: Write::Perpendicular, stars, jets, returned, dissolved, merged, encounters, recycled, burned, burns, cross });
     }
     events
 }

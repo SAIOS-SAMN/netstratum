@@ -286,7 +286,7 @@ fn main() {
             read(&w, 0);
             let step = (echoes / 10).max(1);
             for e in 1..=echoes {
-                pulse::orbit_galaxies(&mut w);
+                let _ = pulse::orbit_galaxies(&mut w);
                 if e % step == 0 {
                     read(&w, e);
                 }

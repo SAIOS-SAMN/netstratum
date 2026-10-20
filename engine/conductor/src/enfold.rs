@@ -73,9 +73,115 @@ pub fn residue(r: &Ratio, agitation: &Ratio, k: Option<&Ratio>) -> Residue {
     }
 }
 
+/// THE CROSS (operator 2026-10-20: "descent can not be done without all of
+/// the other pivotry components: ascent, trajectory, drag, velocity,
+/// condense, drain, puncture, cauterize"; ruled for netstratum 2026-10-21).
+/// Every residue's fate is recorded by its plane (its TRAJECTORY: the plane,
+/// and its sense in the signed sum) for each echo (its VELOCITY: the record is
+/// per echo). DRAG is the dynamics' own hold (δ at the body's reach), never a
+/// fate here.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub enum Fate {
+    /// Handed into the body's own enclosure (its members' places).
+    Descended,
+    /// Read back up: a decision read the full value (a condensation's
+    /// members, a held value with its residue).
+    Ascended,
+    /// Within the body's own round: its heat already holds it.
+    Drained,
+    /// Past a body with no enclosure, to the quantum tier: acknowledged,
+    /// never simulated.
+    Acknowledged,
+    /// Joined in a meeting: bodies meeting into one, their full phases
+    /// meaned by holding on the circle.
+    Condensed,
+    /// Through a throat (a body entering the other face).
+    Punctured,
+    /// Leaving a throat on the continuum, sealed.
+    Sealed,
+    /// A body with no place of its own (no reach or no holding): sealed by
+    /// heat at the coordinate's mark, its residue kept as a SCAR.
+    Cauterized,
+}
+
+/// One plane's record for one fate: how many residues, and their exact
+/// signed sum (the sense of the trajectory).
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct Tally {
+    pub count: u64,
+    pub sum: Ratio,
+}
+
+/// The cross's record over an echo: by plane, by fate.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct Cross {
+    pub by: std::collections::BTreeMap<(usize, Fate), Tally>,
+}
+
+impl Cross {
+    /// Record residue `r` in `plane` with its fate.
+    pub fn note(&mut self, plane: usize, fate: Fate, r: &Ratio) {
+        let t = self.by.entry((plane, fate)).or_default();
+        t.count += 1;
+        t.sum += r.clone();
+    }
+
+    /// Fold another record into this one.
+    pub fn join(&mut self, other: &Cross) {
+        for (k, t) in &other.by {
+            let mine = self.by.entry(*k).or_default();
+            mine.count += t.count;
+            mine.sum += t.sum.clone();
+        }
+    }
+
+    /// How many residues met each fate, every plane together.
+    pub fn counts(&self) -> std::collections::BTreeMap<Fate, u64> {
+        let mut out = std::collections::BTreeMap::new();
+        for ((_, f), t) in &self.by {
+            *out.entry(*f).or_insert(0) += t.count;
+        }
+        out
+    }
+}
+
+/// The coordinate's mark, `60⁻⁶` of a turn (the TUniversal coordinate's six
+/// sexagesimal places): where a body with no place of its own is sealed.
+pub fn mark() -> Ratio {
+    Ratio::new(1.into(), num_bigint::BigInt::from(60).pow(6))
+}
+
+/// A LEAF's phase through the cross: held to its place; its residue drains
+/// within its round or is acknowledged past it; with no place of its own it
+/// is cauterized at the coordinate's mark, the residue a scar.
+pub fn leaf(v: &Ratio, place: Option<&Ratio>, agitation: &Ratio, plane: usize, cross: &mut Cross) -> Ratio {
+    let (held, r, cauterized) = match place.filter(|p| !p.is_zero()) {
+        Some(p) => {
+            let (h, r) = hold(v, Some(p));
+            (h, r, false)
+        }
+        None => {
+            let (h, r) = hold(v, Some(&mark()));
+            (h, r, true)
+        }
+    };
+    if !r.is_zero() {
+        let fate = if cauterized {
+            Fate::Cauterized
+        } else {
+            match residue(&r, agitation, None) {
+                Residue::Drained => Fate::Drained,
+                _ => Fate::Acknowledged,
+            }
+        };
+        cross.note(plane, fate, &r);
+    }
+    held
+}
+
 #[cfg(test)]
 mod tests {
-    use super::{hold, place, residue, Residue};
+    use super::{hold, leaf, place, residue, Cross, Fate, Residue};
     use cfe::ratio::ratio;
 
     #[test]
@@ -108,5 +214,20 @@ mod tests {
         assert_eq!(residue(&ratio(1, 10), &ratio(1, 100), Some(&ratio(1, 4))), Residue::Frame(ratio(2, 5)));
         assert_eq!(residue(&ratio(-1, 10), &ratio(0, 1), None), Residue::Acknowledged);
         assert_eq!(residue(&ratio(0, 1), &ratio(0, 1), None), Residue::Drained);
+    }
+
+    #[test]
+    fn every_residue_meets_a_recorded_fate() {
+        let mut cross = Cross::default();
+        // Held to a place of 1/60: 31/1800 lies 1/1800 past a mark.
+        let held = leaf(&ratio(31, 1800), Some(&ratio(1, 60)), &ratio(0, 1), 0, &mut cross);
+        assert_eq!(held, ratio(1, 60));
+        assert_eq!(cross.by.get(&(0, Fate::Acknowledged)).map(|t| (t.count, t.sum.clone())), Some((1, ratio(1, 1800))));
+        // Within its round it drains.
+        let _ = leaf(&ratio(31, 1800), Some(&ratio(1, 60)), &ratio(1, 100), 1, &mut cross);
+        assert_eq!(cross.by.get(&(1, Fate::Drained)).map(|t| t.count), Some(1));
+        // With no place of its own it is cauterized at the coordinate's mark.
+        let _ = leaf(&ratio(1, 7), None, &ratio(0, 1), 0, &mut cross);
+        assert_eq!(cross.counts().get(&Fate::Cauterized), Some(&1));
     }
 }

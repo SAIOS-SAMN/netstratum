@@ -175,6 +175,16 @@ fn main() {
         }
         println!("CARRIER — widest exact value held, in bits: amounts {amounts}, spins and reaches {spins}, phases {phases}, agitation {agitation}; {} motes", motes.len());
     }
+    // THE CROSS (the eight pivots): every residue's fate over the run, by
+    // fate, every plane together.
+    {
+        let mut all = conductor::enfold::Cross::default();
+        for e in &events {
+            all.join(&e.cross);
+        }
+        let row: Vec<String> = all.counts().iter().map(|(f, n)| format!("{f:?} {n}")).collect();
+        println!("CROSS — residues by fate over the run: {}", if row.is_empty() { "none".into() } else { row.join(", ") });
+    }
     // THE JOINT READ (CONCORDANCE 2.10, the landing rule): each star's burn
     // as the form holds it, its runs `(1 − x_i, n_i)` on its own clock in the
     // order lived, and the reading of what remains on the 60⁻⁶ grain; written

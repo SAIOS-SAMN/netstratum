@@ -804,7 +804,7 @@ fn exchange(ell: &[Ratio], dl: &mut [Ratio], i: usize, j: usize, mi: &Ratio, mj:
 /// mⱼ)/(g + mᵢ + mⱼ)`, `T = |δᵢ − δⱼ|/(δᵢ + δⱼ)`); stuck groups (read all at
 /// once, no order) become one body, spins added exactly, the unkept motion
 /// heat; otherwise they BOUNCE, both heated. Returns (sticks, bounces).
-pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, rang: bool, t_u: u64) -> (usize, usize, Manifest) {
+pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, rang: bool, t_u: u64, cross: &mut crate::enfold::Cross) -> (usize, usize, Manifest) {
 
     let total = mass(&sys.total());
     if total.is_zero() || (sys.flows.is_empty() && sys.satellites.is_empty()) {
@@ -837,7 +837,14 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
     }
     // The system's motes merge by the shared rule (same kind, stream and
     // sectors; the carrier's resolution), so returns don't multiply.
-    let _ = crate::flows::merge(&mut sys.flows, &total);
+    // Each mote's place in the system: the cap its own gravity holds about the
+    // star (the system's own units: its holding 1, the star's h_s).
+    let enc_s = crate::flows::Enclosed::new(h_s.clone(), sys.flows.iter().map(|x| (x.ell_o.clone(), x.amount.clone() * crate::flows::weight(&x.key) / total.clone())).collect());
+    let place_of = |x: &crate::flows::Mote| {
+        let (r, _) = enc_s.reach(&x.ell_o);
+        crate::enfold::place(&r, &(x.amount.clone() * crate::flows::weight(&x.key) / total.clone()), &enc_s.hold(&x.ell_o))
+    };
+    let _ = crate::flows::merge(&mut sys.flows, &total, &place_of, cross);
     let scale = total.clone() / unit.clone();
     let planes = crate::flows::PLANES;
     let frac = |x: &Ratio| x.clone() - x.floor();
@@ -1255,7 +1262,8 @@ pub fn lock_step(bodies: &mut Vec<crate::pulse::Body>, star_hold: &Ratio, unit: 
 /// `c_pre` is each star's coherence before; a merger's is its members' by
 /// holding. Returns the stars, aligned with their coherences, and
 /// (sticks, bounces).
-pub fn collide_stars(stars: Vec<crate::pulse::Body>, c_pre: Vec<Ratio>, scale: &Ratio, h_g: &Ratio, p_g: &Ratio, g_total: &Ratio, enc: &crate::flows::Enclosed) -> (Vec<(crate::pulse::Body, Ratio)>, usize, usize) {
+#[allow(clippy::too_many_arguments)]
+pub fn collide_stars(stars: Vec<crate::pulse::Body>, c_pre: Vec<Ratio>, scale: &Ratio, h_g: &Ratio, p_g: &Ratio, g_total: &Ratio, enc: &crate::flows::Enclosed, cross: &mut crate::enfold::Cross) -> (Vec<(crate::pulse::Body, Ratio)>, usize, usize) {
     let planes = crate::flows::PLANES;
     let n = stars.len();
     if n < 2 || scale.is_zero() || g_total.is_zero() {
@@ -1375,8 +1383,25 @@ pub fn collide_stars(stars: Vec<crate::pulse::Body>, c_pre: Vec<Ratio>, scale: &
             let radius = by(&|b| b.radius.clone());
             let ell = by(&|b| b.ell.clone());
             let reservoir = by(&|b| b.reservoir.clone());
-            let phase: Vec<Ratio> = (0..planes).map(|k| crate::ring::grain(&crate::flows::circle_mean(&all.iter().zip(&w).map(|(b, x)| (x.clone(), b.phase.get(k).cloned().unwrap_or_else(|| ratio(0, 1)))).collect::<Vec<_>>()))).collect();
-            let bell: Vec<Ratio> = (0..planes).map(|k| crate::ring::grain(&crate::flows::circle_mean(&all.iter().zip(&w).map(|(b, x)| (x.clone(), b.bell.get(k).cloned().unwrap_or_else(|| ratio(0, 1)))).collect::<Vec<_>>()))).collect();
+            // CONDENSE (the cross): every merging star's full phase is read
+            // (ascent), meaned by holding on the circle, and held to the merged
+            // star's own place; its residue is the detail of the merged
+            // system, which the members' re-reading against it keeps.
+            let at_ell = radius.clone() / scale.clone() * h_g.clone();
+            let merged_hold = all.iter().fold(ratio(0, 1), |s, b| s + mass(&b.total())) / g_total.clone();
+            let place = crate::enfold::place(&enc.reach(&at_ell).0, &merged_hold, &enc.hold(&at_ell));
+            let phase: Vec<Ratio> = (0..planes)
+                .map(|k| {
+                    let mean = crate::flows::circle_mean(&all.iter().zip(&w).map(|(b, x)| (x.clone(), b.phase.get(k).cloned().unwrap_or_else(|| ratio(0, 1)))).collect::<Vec<_>>());
+                    for _ in &all {
+                        cross.note(k, crate::enfold::Fate::Ascended, &ratio(0, 1));
+                    }
+                    let (held, residue) = crate::enfold::hold(&mean, place.as_ref());
+                    cross.note(k, crate::enfold::Fate::Condensed, &residue);
+                    held
+                })
+                .collect();
+            let bell: Vec<Ratio> = (0..planes).map(|k| crate::enfold::hold(&crate::flows::circle_mean(&all.iter().zip(&w).map(|(b, x)| (x.clone(), b.bell.get(k).cloned().unwrap_or_else(|| ratio(0, 1)))).collect::<Vec<_>>()), place.as_ref()).0).collect();
             // A system stands against its star: each merging star's worlds and
             // motes are re-read against the merged star by the difference of
             // the two stars' phases, so every body stays where it is.
