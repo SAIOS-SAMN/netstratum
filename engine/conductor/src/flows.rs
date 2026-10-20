@@ -335,9 +335,9 @@ impl Enclosed {
 /// the disc"): the route round the loop, not the inversion. A vacuum mote's
 /// loop (the circulation's plane) runs the other way, its advance read over
 /// that passage; its orbit plane turns forward.
-pub fn turn(phase: &mut [Ratio], r_o: &Ratio, h: &Ratio, p: &Ratio, rho: &Ratio, delta_u: &Ratio, inverted: bool, place: Option<&Ratio>) {
+pub fn turn(phase: &mut [Ratio], r_o: &Ratio, h: &Ratio, p: &Ratio, tide: Option<(&Ratio, &Ratio)>, inverted: bool, place: Option<&Ratio>) {
     let pull = h.clone() / (r_o.clone() + h.clone());
-    let d_o = if inverted { ratio(1, 1) - pull } else { pull };
+    let d_o = if inverted { ratio(1, 1) - pull.clone() } else { pull.clone() };
     // THE LOOP'S RATE (with xylarium): the jetstream turns by the motion law
     // AT THE MOTE'S REACH, δ(R) a ring, two rings a bell, continuously;
     // inner matter circulates faster than outer. (At R = H it is one turn a
@@ -357,7 +357,15 @@ pub fn turn(phase: &mut [Ratio], r_o: &Ratio, h: &Ratio, p: &Ratio, rho: &Ratio,
     // on top of the loop's own rate; nothing accumulates as a spin in the
     // loop's plane.
     let start = if inverted { loop_from - ratio(2, 1) * d_c.clone() } else { loop_from };
-    let advance = p.clone() * rho.clone() * delta_u.clone() * mean_response(&start, &(ratio(2, 1) * d_c));
+    // The pulse it feels: a galaxy's received share of the source's rings and
+    // the universal tide at the galaxy (`tide`), or, standing in the source's
+    // own enclosure (the home, the firmament), the source's pull at its own
+    // reach, with no receiver between.
+    let felt = match tide {
+        Some((rho, delta_u)) => rho.clone() * delta_u.clone(),
+        None => pull.clone(),
+    };
+    let advance = p.clone() * felt * mean_response(&start, &(ratio(2, 1) * d_c));
     phase[1] = crate::enfold::hold(&(loop_phase + route * advance), place).0;
 }
 
@@ -370,7 +378,7 @@ pub fn turn(phase: &mut [Ratio], r_o: &Ratio, h: &Ratio, p: &Ratio, rho: &Ratio,
 /// the core's reservoir gives (Σ m·Δℓ, to be taken from it), and the pulse
 /// the matter ABSORBED (Σ m·|Δℓ|, unsigned: each hemisphere's kick alike;
 /// with xylarium), what the recycling budget is read against.
-pub fn kick(motes: &mut [Mote], enc: &Enclosed, p: &Ratio, rho: &Ratio, delta_u: &Ratio, total: &Ratio) -> (Ratio, Ratio) {
+pub fn kick(motes: &mut [Mote], enc: &Enclosed, p: &Ratio, tide: Option<(&Ratio, &Ratio)>, total: &Ratio) -> (Ratio, Ratio) {
     let mut given = ratio(0, 1);
     let mut absorbed = ratio(0, 1);
     for x in motes.iter_mut() {
@@ -381,7 +389,7 @@ pub fn kick(motes: &mut [Mote], enc: &Enclosed, p: &Ratio, rho: &Ratio, delta_u:
         // A mote's place: the cap its own gravity holds (`enfold::place`).
         let m = if total.is_zero() { ratio(0, 1) } else { x.amount.clone() * weight(&x.key) / total.clone() };
         let place = crate::enfold::place(&r_o, &m, &h);
-        turn(&mut x.phase, &r_o, &h, p, rho, delta_u, x.vacuum, place.as_ref());
+        turn(&mut x.phase, &r_o, &h, p, tide, x.vacuum, place.as_ref());
         // Over its whole passage this bell, never at one instant; a vacuum
         // mote at its inverted reach (`1 − δ`), forward.
         let d_o = if x.vacuum { ratio(1, 1) - d_o } else { d_o };
@@ -860,7 +868,7 @@ pub fn clumps(motes: &[Mote], h: &Ratio, p: &Ratio, total: &Ratio) -> Vec<(Ratio
 /// push, the jet cannot fill the channel and it drifts in the VACUUM, the
 /// thin counter-moving flank. A mote in no filament (in transit on the
 /// axial leg) is carried. Returns how many stand in the vacuum.
-pub fn stream(motes: &mut [Mote], chains: &[Chain], push: &Ratio) -> usize {
+pub fn stream(motes: &mut [Mote], chains: &[Chain], push: &dyn Fn(&Mote) -> Ratio) -> usize {
     let mut hold: Vec<Option<Ratio>> = vec![None; motes.len()];
     for c in chains {
         for &j in &c.members {
@@ -869,7 +877,8 @@ pub fn stream(motes: &mut [Mote], chains: &[Chain], push: &Ratio) -> usize {
     }
     let mut vacuum = 0;
     for (x, h) in motes.iter_mut().zip(hold) {
-        x.vacuum = h.is_some_and(|h| h >= *push);
+        let at = push(x);
+        x.vacuum = h.is_some_and(|h| h >= at);
         vacuum += usize::from(x.vacuum);
     }
     vacuum

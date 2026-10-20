@@ -43,13 +43,26 @@ fn main() {
         let echoes = events.iter().filter(|e| u64::from(e.galaxy) == c.path[0]).count();
         let born = c.satellites.len();
         let orbs: usize = c.satellites.iter().map(|s| s.satellites.len()).sum();
-        let g_rate = breath::galaxy_rate(&u, i, &unit);
-        let aeon = g_rate.clone() * cfe::ratio::ratio(until as i64, 1);
-        let rungs = breath::rungs(&breath::slip(&g_rate, until, t_u)).map(|r| r.to_string()).unwrap_or_else(|| "unread".into());
-        let coh = breath::coherence(&breath::slip(&g_rate, until, t_u));
         let year = motion::galactic_year(c).map(|(k, t)| format!("half-mass system {}, year {} bells", k + 1, t.period.round())).unwrap_or_else(|| "no year yet".into());
         let medium = pulse::mass(&c.medium) / unit.clone();
-        println!("  galaxy {:?} at {} bells out: {echoes} echoes, {rungs} rungs (recoherences), coherence now {}%, aeon {} bells (rate {}); {born} systems, {orbs} orbs; medium left {}; {year}", c.path, c.radius, (coh * cfe::ratio::ratio(100, 1)).round(), aeon.round(), g_rate, medium.round());
+        match breath::galaxy_rate(&u, i, &unit) {
+            Some(g_rate) => {
+                let aeon = g_rate.clone() * cfe::ratio::ratio(until as i64, 1);
+                let rungs = breath::rungs(&breath::slip(&g_rate, until, t_u)).map(|r| r.to_string()).unwrap_or_else(|| "unread".into());
+                let coh = breath::coherence(&breath::slip(&g_rate, until, t_u));
+                println!("  galaxy {:?} at {} bells out: {echoes} echoes, {rungs} rungs (recoherences), coherence now {}%, aeon {} bells (rate {}); {born} systems, {orbs} orbs; medium left {}; {year}", c.path, c.radius, (coh * cfe::ratio::ratio(100, 1)).round(), aeon.round(), conductor::reading::sector(&g_rate), medium.round());
+            }
+            None => {
+                // The home's bodies read their own clocks: the spread of its
+                // systems' rates against the source.
+                let rates: Vec<cfe::ratio::Ratio> = (0..c.satellites.len()).map(|s| breath::system_clock(&u, i, s, &unit)).collect();
+                let span = match (rates.iter().min(), rates.iter().max()) {
+                    (Some(a), Some(b)) => format!("{}..{}", conductor::reading::sector(a), conductor::reading::sector(b)),
+                    _ => "none".into(),
+                };
+                println!("  the HOME {:?} at the source: {echoes} echoes; no clock of its own, its {born} systems' clocks {span}; {orbs} orbs; medium left {}; {year}", c.path, medium.round());
+            }
+        }
     }
     // THE CLOCKS (docs/78): which duty comes due how often, by layer.
     let terms: Vec<Option<u64>> = (0..u.cores.len()).map(|i| conductor::clocks::galaxy_terms(&u, i, t_u, 0, until)).collect();

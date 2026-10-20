@@ -85,16 +85,17 @@ pub fn keepers(u: &Universe) -> Vec<(Keeper, Option<usize>)> {
     let light = home.and_then(|c| c.satellites.last()).map(|s| ratio(2, 1) * s.radius.clone()).filter(|l| !l.is_zero()).unwrap_or_else(|| ratio(1, 1));
     for (i, core) in u.cores.iter().enumerate() {
         let g_rate = galaxy_rate(u, i, &unit);
+        let centre = crate::breath::centre_state(u, i);
         let half = galactic_year(core).map(|(k, _)| k).unwrap_or(0);
         let shells = [(Shell::Core, 0usize), (Shell::Mantle, half), (Shell::Rim, core.satellites.len().saturating_sub(1))];
         let mut inner = 0usize;
         for (shell, k) in shells {
             let Some(sys) = core.satellites.get(k) else { continue };
-            let inside = core.satellites[..k].iter().fold(mass(&core.kept) + crate::pulse::core_state(core), |s, o| s + mass(&o.total())) / unit.clone();
+            let inside = core.satellites[..k].iter().fold(mass(&core.kept) + centre.clone(), |s, o| s + mass(&o.total())) / unit.clone();
             let keeper = Keeper {
                 galaxy: core.path.first().map(|g| *g as u32),
                 shell,
-                rate: g_rate.clone() * rate(&sys.radius, &inside),
+                rate: crate::breath::nested(g_rate.as_ref(), rate(&sys.radius, &inside)),
                 delay: core.radius.clone() + sys.radius.clone() / light.clone(),
             };
             out.push((keeper, Some(inner)));

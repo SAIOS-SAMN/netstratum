@@ -65,9 +65,7 @@ fn journal(lines: usize) -> Vec<String> {
 
 /// A system's nested clock: its galaxy's rate times its orbit's.
 fn system_rate(u: &pulse::Universe, g: usize, s: usize, unit: &Ratio) -> Ratio {
-    let core = &u.cores[g];
-    let inside = core.satellites[..s].iter().fold(pulse::mass(&core.kept) + pulse::core_state(core), |a, sys| a + pulse::mass(&sys.total()));
-    breath::galaxy_rate(u, g, unit) * conductor::ring::rate(&core.satellites[s].radius, &(inside / unit.clone()))
+    breath::system_clock(u, g, s, unit)
 }
 
 fn main() {
@@ -105,7 +103,7 @@ fn main() {
                 println!(
                     "  galaxy {:>2}: share {}, disc {}, gas {} ({} motes), {} stars; distance {} (first echo at bell {}); clock {}",
                     c.path[0], f(&(total.clone() / universe_hold.clone())), of(&pulse::mass(&c.kept), &total), of(&pulse::mass(&c.medium), &total),
-                    c.gas.len(), c.satellites.len(), c.radius, (ratio(60, 1) + c.radius.clone()).floor(), f(&breath::galaxy_rate(&u, i, &unit))
+                    c.gas.len(), c.satellites.len(), c.radius, (ratio(60, 1) + c.radius.clone()).floor(), breath::galaxy_rate(&u, i, &unit).map(|g| f(&g).to_string()).unwrap_or_else(|| "the source's own (home)".into())
                 );
             }
         }
@@ -116,7 +114,10 @@ fn main() {
             println!("GALAXY {:?} at beat {now}: share {} of the universe; distance {} light-rings, first echo at bell {}", c.path, f(&(total.clone() / universe_hold.clone())), c.radius, (ratio(60, 1) + c.radius.clone()).floor());
             println!("  core state hold {} (units of the deepest hole), disc {}: {}", f(&(pulse::core_state(c) / unit.clone())), f(&(pulse::mass(&c.kept) / unit.clone())), composition(&c.kept, 6));
             println!("  gas {} of the galaxy in {} motes: {}; gas spin {}", of(&pulse::mass(&c.medium), &total), c.gas.len(), composition(&c.medium, 6), f(&c.medium_spin));
-            println!("  clock against the universal core {}", f(&breath::galaxy_rate(&u, i, &unit)));
+            match breath::galaxy_rate(&u, i, &unit) {
+                Some(g) => println!("  clock against the universal core {}", f(&g)),
+                None => println!("  the home: its core is the source itself, so it has no clock of its own; each body reads its own share"),
+            }
             for (s, sys) in c.satellites.iter().enumerate() {
                 println!("  star {:?}: holding {}, born bell {}, reach {}, {} worlds, clock {}; {}", sys.path, f(&(pulse::mass(&sys.kept) / unit.clone())), sys.born, f(&sys.radius), sys.satellites.len(), f(&system_rate(&u, i, s, &unit)), composition(&sys.kept, 3));
             }

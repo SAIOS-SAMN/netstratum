@@ -38,17 +38,47 @@ pub fn unit_mass(u: &Universe) -> Ratio {
     u.unit.clone()
 }
 
-/// A galaxy's clock against the universal core's: its distance against the
-/// holding nearer the epicenter: the universal core's state, and each nearer
-/// galaxy's (its core's state and its grains).
-pub fn galaxy_rate(u: &Universe, i: usize, unit: &Ratio) -> Ratio {
-    // The home's core is the universal core: its clock against itself is 1.
+/// A galaxy's clock against the universal source: the share of the source's
+/// rings its core receives at its distance, about the holding nearer the
+/// epicenter (the universal core's state, and each nearer galaxy's core state
+/// and grains). The universal bell IS the source's own pulse, and a clock is
+/// the share of it a receiver gets, `r/(r + H)`.
+/// None for the HOME: its core is the source itself, so no receiver stands
+/// between the home's bodies and the source. (`rate(0, H) = 0` would be the
+/// clock of a receiver standing AT the singularity, where nothing stands.)
+pub fn galaxy_rate(u: &Universe, i: usize, unit: &Ratio) -> Option<Ratio> {
     if crate::pulse::is_home(&u.cores[i]) {
-        return ratio(1, 1);
+        return None;
     }
     let d = &u.cores[i].radius;
     let nearer = u.cores.iter().filter(|c| c.radius < *d).fold(crate::pulse::universal_state(u) / unit.clone(), |s, c| s + (crate::pulse::core_state(c) + mass(&c.total())) / unit.clone());
-    rate(d, &nearer)
+    Some(rate(d, &nearer))
+}
+
+/// THE NESTED CLOCK: a body's clock against the source is the product of the
+/// shares each receiver between them takes, the galaxy's (none for the home)
+/// and its own about what is inside its reach.
+pub fn nested(galaxy: Option<&Ratio>, own: Ratio) -> Ratio {
+    match galaxy {
+        Some(g) => g.clone() * own,
+        None => own,
+    }
+}
+
+/// The state a galaxy's bodies orbit about: its core's, and for the home the
+/// singularity's own (`pulse::universal_state`), never a second state.
+pub fn centre_state(u: &Universe, i: usize) -> Ratio {
+    let c = &u.cores[i];
+    if crate::pulse::is_home(c) { crate::pulse::universal_state(u) } else { crate::pulse::core_state(c) }
+}
+
+/// A star system's nested clock: its galaxy's share (none for the home) times
+/// its orbit's about the centre's state, the core's held grains, and every
+/// system inside it.
+pub fn system_clock(u: &Universe, i: usize, s: usize, unit: &Ratio) -> Ratio {
+    let core = &u.cores[i];
+    let inside = core.satellites[..s].iter().fold(mass(&core.kept) + centre_state(u, i), |a, sys| a + mass(&sys.total())) / unit.clone();
+    nested(galaxy_rate(u, i, unit).as_ref(), rate(&core.satellites[s].radius, &inside))
 }
 
 /// A layer's slip behind the universal echo at bell `b`, in turns:
@@ -172,6 +202,12 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             (crate::ocean::take(&u.medium, &share), crate::ocean::arrival_turning(rung, &reach, &h_g, &m, &h_u), delta_u)
         };
         less(&mut u.medium, &gathered);
+        // THE PARENT'S PULSE on this galaxy's bodies: its received share of the
+        // source's rings and the universal tide at its distance; None in the
+        // home, whose bodies stand in the source's own enclosure and feel the
+        // pulse at their own reach.
+        let tide_of = g_rate.clone().map(|g| (g, delta_u.clone()));
+        let tide = tide_of.as_ref().map(|(g, d)| (g, d));
         // THE HOME (`pulse::is_home`) is read in the universe's own units: its
         // core is the universal core, its state the singularity's, its push
         // the universal bounce's, and the firmament stands in its enclosure.
@@ -235,7 +271,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         merged += star_sticks;
         encounters += star_bounces;
         for (mut sys, c_was) in met {
-            let own = g_rate.clone() * rate(&sys.radius, &enclosed_in);
+            let own = nested(g_rate.as_ref(), rate(&sys.radius, &enclosed_in));
             // THE STAR'S BELL (with xylarium): its own spin turns it,
             // `ω_s = δ(ℓ_s/H_s)` a ring, `H_s = 1 + held/held_at_birth`; its
             // phases advance by the rings its clock received this echo.
@@ -281,7 +317,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     let was = sys.bell.clone();
                     // The star's place: the cap its own gravity holds about it.
                     let place = crate::enfold::place(&r, &(mass(&sys.total()) / g_before.clone()), &h_in);
-                    crate::flows::turn(&mut sys.bell, &r, &h_in, p_g, &g_rate, &delta_u, false, place.as_ref());
+                    crate::flows::turn(&mut sys.bell, &r, &h_in, p_g, tide, false, place.as_ref());
                     // THE RETURN (with xylarium): its galaxy's torque gives
                     // back `d/(d + turned)` of its displacement in each plane,
                     // `d = 1 − δ_gal` its drag, `turned` its own spin's turns
@@ -683,8 +719,8 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // when its loop phase crosses ½ in the kicks, below.)
             let mut in_throat: Vec<usize> = Vec::new();
             for (k, a) in gathered {
-                let ell_o = p.clone() * mean.clone() / crate::flows::weight(&k) + g_rate.clone() * turning.0.clone();
-                let ell_c = g_rate.clone() * turning.1.clone();
+                let ell_o = p.clone() * mean.clone() / crate::flows::weight(&k) + nested(g_rate.as_ref(), turning.0.clone());
+                let ell_c = nested(g_rate.as_ref(), turning.1.clone());
                 // It arrives with the Wellspring's winding: its loop leads its orbit by
                 // the push share (½ at the universe tier), the jet's helix.
                 core.flows.push(crate::flows::Mote { key: k, amount: a, ell_o: crate::ring::grain(&ell_o), ell_c: crate::ring::grain(&ell_c), phase: vec![ratio(0, 1), ratio(1, 2)], agitation: ratio(0, 1), born: bell, vacuum: true });
@@ -714,7 +750,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // at loop phase ½): the inbound leg (the axis, for the vacuum)
             // delivers it to the throat.
             let loop_was: Vec<(usize, Ratio)> = core.flows.iter().enumerate().filter(|(_, x)| x.vacuum && x.phase.len() > 1).map(|(j, x)| (j, x.phase[1].clone())).collect();
-            let (given, absorbed) = crate::flows::kick(&mut core.flows, enc.as_ref().unwrap_or(&throat), &p, &g_rate, &delta_u, &ledger_unit);
+            let (given, absorbed) = crate::flows::kick(&mut core.flows, enc.as_ref().unwrap_or(&throat), &p, tide, &ledger_unit);
             core.reservoir -= given;
             // RECYCLING (`crate::recycle`; xylarium 11.0 (18)): AFTER the
             // kicks (kicks are motion, recycling the residue), the bounce the
@@ -762,7 +798,14 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             let h_units = mass(&core.kept) / unit.clone() + state.clone();
             let chains = crate::flows::chains(&core.flows, &h, &p, &g_mass);
             // The stream of every mote, read by force against its filament.
-            let _ = crate::flows::stream(&mut core.flows, &chains, &(p.clone() * g_rate.clone() * delta_u.clone()));
+            // The pulse at a mote: a galaxy's received tide, or, in the home,
+            // the source's own at the mote's reach.
+            let enc_now = crate::flows::Enclosed::new(ratio(1, 1), core.flows.iter().map(|x| (x.ell_o.clone(), x.amount.clone() * crate::flows::weight(&x.key) / g_mass.clone())).collect());
+            let push_at = |x: &crate::flows::Mote| match tide {
+                Some((rho, du)) => p.clone() * rho.clone() * du.clone(),
+                None => p.clone() * enc_now.reach(&x.ell_o).1,
+            };
+            let _ = crate::flows::stream(&mut core.flows, &chains, &push_at);
             let clumps = crate::flows::clumps_of(&core.flows, chains);
             // Each take: (reach, clump, agitation, the star's own spin, phases).
             let mut takes: Vec<(Ratio, crate::pulse::Manifest, Ratio, Ratio, Vec<Ratio>)> = Vec::new();
@@ -886,6 +929,27 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn the_home_has_no_clock_of_its_own_and_its_stars_read_the_source_directly() {
+        use crate::pulse::{Body, Manifest, Universe};
+        let body = |path: Vec<u64>, radius: Ratio, kept: Manifest, satellites: Vec<Body>| Body { path, radius, period: ratio(0, 1), kept, satellites, medium: Manifest::new(), ell: ratio(0, 1), medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1) };
+        let h = || crate::chem::Kind::parse("Z001").expect("a kind");
+        let star = body(vec![0, 1], ratio(3, 1), [(h(), ratio(1, 4))].into(), Vec::new());
+        let home = body(vec![0], ratio(0, 1), Manifest::new(), vec![star]);
+        let galaxy = body(vec![1], ratio(5, 1), [(h(), ratio(1, 2))].into(), Vec::new());
+        let u = Universe { cores: vec![home, galaxy], medium: Manifest::new(), firmament: Vec::new(), unit: ratio(1, 1), t_u: 15 };
+        // The home's core is the source: no receiver, no clock.
+        assert_eq!(galaxy_rate(&u, 0, &ratio(1, 1)), None);
+        assert!(galaxy_rate(&u, 1, &ratio(1, 1)).is_some());
+        // Its star reads its own share about the singularity's state alone.
+        let singularity = crate::pulse::universal_state(&u);
+        assert_eq!(centre_state(&u, 0), singularity.clone());
+        assert_eq!(system_clock(&u, 0, 0, &ratio(1, 1)), rate(&ratio(3, 1), &singularity));
+        // A body's nested clock multiplies only the receivers it has.
+        assert_eq!(nested(None, ratio(2, 3)), ratio(2, 3));
+        assert_eq!(nested(Some(&ratio(1, 2)), ratio(2, 3)), ratio(1, 3));
+    }
 
     #[test]
     fn a_slipping_clock_decoheres_and_recoheres_exactly() {

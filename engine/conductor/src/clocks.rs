@@ -17,20 +17,17 @@
 //! layers (rungs). An undilated galaxy has no epochs: its ancients cannot
 //! arise by deed there. Counts are closed forms between events (`⌊Δ⌋`
 //! differences, `⌊n / P⌋`), never stepped.
-use crate::breath::{galaxy_rate, rungs, slip};
-use crate::ring::rate;
+use crate::breath::{rungs, slip};
 use crate::motion::galactic_year;
-use crate::pulse::{mass, Universe};
+use crate::pulse::Universe;
 use cfe::ratio::{ratio, Ratio};
 use num_traits::Zero;
 
 /// The nested clock rate of galaxy `i`'s half-mass system: the galaxy's
 /// about the universal core, times the system's about the mass it orbits.
 pub fn half_mass_rate(u: &Universe, i: usize, unit: &Ratio) -> Option<Ratio> {
-    let core = &u.cores[i];
-    let (k, _) = galactic_year(core)?;
-    let enclosed = core.satellites[..k].iter().fold(mass(&core.kept) + crate::pulse::core_state(core), |s, sys| s + mass(&sys.total())) / unit.clone();
-    Some(galaxy_rate(u, i, unit) * rate(&core.satellites[k].radius, &enclosed))
+    let (k, _) = galactic_year(&u.cores[i])?;
+    Some(crate::breath::system_clock(u, i, k, unit))
 }
 
 /// A galaxy's EPOCHS (rungs of its half-mass layer) between two bells.
