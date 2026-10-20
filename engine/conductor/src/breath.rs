@@ -527,9 +527,8 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         if let (Some((_, h_g, _)), false) = (&pre, scale_pre.is_zero() || g_before.is_zero()) {
             let reach_m = |x: &crate::flows::Mote| x.ell_o.clone() / h_g.clone();
             let mut claims: Vec<Vec<(usize, Ratio)>> = vec![Vec::new(); core.flows.len()];
-            // PEELED BY REACH, NEVER SWEPT (standing ruling: walk the planes
-            // the law partitions): the motes ordered by reach once, so each
-            // star reads only those within its gravity's reach, `|r − R_s| < d`.
+            // The motes ordered by reach once; each star reads those within its
+            // gravity's reach (`flows::within_reach`).
             let mut by_reach: Vec<(Ratio, usize)> = core.flows.iter().enumerate().map(|(mi, x)| (reach_m(x), mi)).collect();
             by_reach.sort();
             for (si, s) in keep.iter().enumerate() {
@@ -543,9 +542,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     continue;
                 }
                 let d_s = h_g.clone() / (r_s.clone() + h_g.clone());
-                let lo = by_reach.partition_point(|(r, _)| *r <= r_s.clone() - d.clone());
-                let hi = by_reach.partition_point(|(r, _)| *r < r_s.clone() + d.clone());
-                for &(ref r_m, mi) in &by_reach[lo..hi] {
+                for &(ref r_m, mi) in crate::flows::within_reach(&by_reach, &r_s, &d, &mut crate::flows::Work::default()) {
                     let x = &core.flows[mi];
                     let r_m = r_m.clone();
                     let gap = if r_m > r_s { r_m.clone() - r_s.clone() } else { r_s.clone() - r_m.clone() };

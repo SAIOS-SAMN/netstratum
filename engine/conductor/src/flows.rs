@@ -67,10 +67,6 @@ pub struct Mote {
     pub vacuum: bool,
 }
 
-fn z_of(k: &str) -> Option<u32> {
-    k.strip_prefix('Z').and_then(|z| z.parse::<u32>().ok())
-}
-
 /// A kind's weight (its hold).
 pub fn weight(k: &str) -> Ratio {
     ratio(i64::from(crate::chem::hold(k)), 1)
@@ -626,6 +622,72 @@ impl Chain {
 /// `λ = x/apart` with x its holding and magnetism in the galaxy's unit. A
 /// long thin chain spreads faster than it gathers and fails; a dense one
 /// binds.
+/// The work a read spends, counted in its own steps (a comparison, an
+/// addition): cost is read at N and 4N, never timed (MU-RECURSION rule 13).
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
+pub struct Work(pub u64);
+
+/// THE HOLD ALONG A FIBRE: at each member's reach, the sum of the densities
+/// of the bands that cover it, `lo ≤ r ≤ hi`. Read as one sweep along the
+/// reach, band starts added and band ends taken away, never member against
+/// member. `reach[n]` and `bands[n] = (lo, hi, density)` describe member n.
+pub fn hold_along(reach: &[Ratio], bands: &[(Ratio, Ratio, Ratio)], work: &mut Work) -> Vec<Ratio> {
+    let n = reach.len().min(bands.len());
+    let mut by = |v: &mut Vec<(Ratio, usize)>| {
+        v.sort_by(|a, b| {
+            work.0 += 1;
+            a.cmp(b)
+        })
+    };
+    let mut starts: Vec<(Ratio, usize)> = (0..n).map(|i| (bands[i].0.clone(), i)).collect();
+    let mut ends: Vec<(Ratio, usize)> = (0..n).map(|i| (bands[i].1.clone(), i)).collect();
+    let mut at: Vec<(Ratio, usize)> = (0..n).map(|i| (reach[i].clone(), i)).collect();
+    by(&mut starts);
+    by(&mut ends);
+    by(&mut at);
+    let (mut si, mut ei) = (0, 0);
+    let mut sum = ratio(0, 1);
+    let mut out = vec![ratio(0, 1); n];
+    for (r, q) in at {
+        while si < n && starts[si].0 <= r {
+            sum += bands[starts[si].1].2.clone();
+            si += 1;
+            work.0 += 1;
+        }
+        while ei < n && ends[ei].0 < r {
+            sum -= bands[ends[ei].1].2.clone();
+            ei += 1;
+            work.0 += 1;
+        }
+        out[q] = sum.clone();
+        work.0 += 1;
+    }
+    out
+}
+
+/// THE MOTES WITHIN A REACH: of motes ordered by reach, the run standing
+/// strictly within `d` of `r`, `|r_m − r| < d`, read by two bisections of
+/// the order, never mote by mote.
+pub fn within_reach<'a>(by_reach: &'a [(Ratio, usize)], r: &Ratio, d: &Ratio, work: &mut Work) -> &'a [(Ratio, usize)] {
+    let mut bisect = |inside: &dyn Fn(&Ratio) -> bool| {
+        let (mut lo, mut hi) = (0, by_reach.len());
+        while lo < hi {
+            let mid = lo + (hi - lo) / 2;
+            work.0 += 1;
+            if inside(&by_reach[mid].0) {
+                lo = mid + 1;
+            } else {
+                hi = mid;
+            }
+        }
+        lo
+    };
+    let (below, above) = (r.clone() - d.clone(), r.clone() + d.clone());
+    let lo = bisect(&|x: &Ratio| *x <= below);
+    let hi = bisect(&|x: &Ratio| *x < above);
+    &by_reach[lo..hi.max(lo)]
+}
+
 pub fn chains(motes: &[Mote], h: &Ratio, p: &Ratio, total: &Ratio) -> Vec<Chain> {
     if total.is_zero() {
         return Vec::new();
@@ -668,40 +730,17 @@ pub fn chains(motes: &[Mote], h: &Ratio, p: &Ratio, total: &Ratio) -> Vec<Chain>
     // The hold along a group by reach: each member spread over its own band,
     // the hold at a place the sum of every member whose band covers it.
     let profile = |along: &[usize]| -> Vec<Ratio> {
-        let density: Vec<Ratio> = along
+        let bands: Vec<(Ratio, Ratio, Ratio)> = along
             .iter()
             .map(|&j| {
                 let (d0, d1) = (delta(&lov[j]), delta(&hiv[j]));
                 let band = (d0.clone() - d1.clone()) / (d0 + d1);
                 let m = motes[j].amount.clone() * weight(&motes[j].key) / total.clone();
-                if band.is_zero() { m } else { m / band }
+                (lov[j].clone(), hiv[j].clone(), if band.is_zero() { m } else { m / band })
             })
             .collect();
-        // A SWEEP along the reach (never all pairs): the hold at each member's
-        // reach is the sum of the bands covering it, `lo ≤ at ≤ hi`, read as
-        // band starts added and band ends taken away in reach order.
-        let mut starts: Vec<(Ratio, usize)> = along.iter().enumerate().map(|(n, &j)| (lov[j].clone(), n)).collect();
-        let mut ends: Vec<(Ratio, usize)> = along.iter().enumerate().map(|(n, &j)| (hiv[j].clone(), n)).collect();
-        starts.sort();
-        ends.sort();
-        let mut order: Vec<usize> = (0..along.len()).collect();
-        order.sort_by(|&a, &b| rr[along[a]].cmp(&rr[along[b]]).then(a.cmp(&b)));
-        let (mut si, mut ei) = (0, 0);
-        let mut sum = ratio(0, 1);
-        let mut out = vec![ratio(0, 1); along.len()];
-        for q in order {
-            let at = &rr[along[q]];
-            while si < starts.len() && starts[si].0 <= *at {
-                sum += density[starts[si].1].clone();
-                si += 1;
-            }
-            while ei < ends.len() && ends[ei].0 < *at {
-                sum -= density[ends[ei].1].clone();
-                ei += 1;
-            }
-            out[q] = sum.clone();
-        }
-        out
+        let reach: Vec<Ratio> = along.iter().map(|&j| rr[j].clone()).collect();
+        hold_along(&reach, &bands, &mut Work::default())
     };
     // THE FIBRES (operator 2026-10-18: "you bead the individual fibers and
     // then braid the fibers together"): a fibre is one kind's run on one
@@ -940,6 +979,78 @@ pub fn manifest(motes: &[Mote]) -> Manifest {
         *m.entry(x.key.clone()).or_insert_with(|| ratio(0, 1)) += x.amount.clone();
     }
     m
+}
+
+#[cfg(test)]
+mod reading_tests {
+    use super::{founding, hold_along, weight, within_reach, Mote, Work};
+    use cfe::ratio::{ratio, Ratio};
+
+    /// The founding's motes of the first `k` kinds, one grain each: the
+    /// engine's own construction, each mote at its own carried reach.
+    fn motes(k: u32) -> Vec<Mote> {
+        founding(&(1..=k).map(|z| (format!("Z{z:03}"), ratio(1, 1))).collect())
+    }
+
+    /// A fibre's reach and bands as the chain law reads them: `R = ℓ/H`, the
+    /// band `R(1 ± p)`, the density the member's holding share.
+    fn fibre(ms: &[Mote]) -> (Vec<Ratio>, Vec<(Ratio, Ratio, Ratio)>) {
+        let (h, p) = (ratio(2, 1), ratio(1, 2));
+        let total = ms.iter().fold(ratio(0, 1), |s, x| s + x.amount.clone() * weight(&x.key));
+        let reach: Vec<Ratio> = ms.iter().map(|x| x.ell_o.clone() / h.clone()).collect();
+        let bands = ms.iter().zip(&reach).map(|(x, r)| (r.clone() * (ratio(1, 1) - p.clone()), r.clone() * (ratio(1, 1) + p.clone()), x.amount.clone() * weight(&x.key) / total.clone())).collect();
+        (reach, bands)
+    }
+
+    #[test]
+    fn the_hold_along_a_fibre_is_the_sum_of_the_bands_covering_each_reach() {
+        let (reach, bands) = fibre(&motes(40));
+        let swept = hold_along(&reach, &bands, &mut Work::default());
+        for (i, r) in reach.iter().enumerate() {
+            let covering = bands.iter().filter(|(lo, hi, _)| lo <= r && r <= hi).fold(ratio(0, 1), |s, b| s + b.2.clone());
+            assert_eq!(swept[i], covering, "member {i}");
+        }
+    }
+
+    #[test]
+    fn the_hold_along_a_fibre_costs_its_three_orders_and_one_pass_never_its_pairs() {
+        // Three orderings (n·⌈log₂ n⌉ comparisons each at most) and one pass
+        // of 3n steps; member against member would be n² and exceed it.
+        for k in [40u32, 160] {
+            let (reach, bands) = fibre(&motes(k));
+            let n = u64::try_from(reach.len()).unwrap_or(0);
+            let mut work = Work::default();
+            let _ = hold_along(&reach, &bands, &mut work);
+            let bound = 3 * n * u64::from(64 - n.leading_zeros()) + 3 * n;
+            assert!(work.0 <= bound && bound < n * n, "n {n}: work {}, bound {bound}", work.0);
+        }
+    }
+
+    #[test]
+    fn the_motes_within_a_reach_are_exactly_those_strictly_within_it() {
+        let ms = motes(60);
+        let mut by: Vec<(Ratio, usize)> = ms.iter().enumerate().map(|(i, x)| (x.ell_o.clone(), i)).collect();
+        by.sort();
+        let (r, d) = (by[30].0.clone(), (by[40].0.clone() - by[20].0.clone()) / ratio(2, 1));
+        let window: Vec<usize> = within_reach(&by, &r, &d, &mut Work::default()).iter().map(|x| x.1).collect();
+        let defined: Vec<usize> = by.iter().filter(|(x, _)| (if *x > r { x.clone() - r.clone() } else { r.clone() - x.clone() }) < d).map(|x| x.1).collect();
+        assert_eq!(window, defined);
+    }
+
+    #[test]
+    fn the_motes_within_a_reach_cost_two_bisections_not_a_walk() {
+        let cost = |k: u32| {
+            let ms = motes(k);
+            let mut by: Vec<(Ratio, usize)> = ms.iter().enumerate().map(|(i, x)| (x.ell_o.clone(), i)).collect();
+            by.sort();
+            let mut work = Work::default();
+            let _ = within_reach(&by, &by[k as usize / 2].0, &ratio(1, 1000), &mut work);
+            work.0
+        };
+        let (n, n4) = (cost(40), cost(160));
+        // Two bisections grow by two steps each when N quadruples.
+        assert!(n4 <= n + 4, "N {n}, 4N {n4}");
+    }
 }
 
 #[cfg(test)]
