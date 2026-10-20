@@ -109,6 +109,10 @@ pub struct Event {
     /// as rates from a checkpoint): the fuel the galaxy's stars fused this
     /// echo, by kind, in grains.
     pub burned: crate::pulse::Manifest,
+    /// THE BURN'S RUNS this echo, as the composition feeds the form
+    /// (`crate::compound`): each star's path, the rung's fuel Z, the share a
+    /// ring and the rings its own clock received.
+    pub burns: Vec<(Vec<u64>, u32, Ratio, u64)>,
 }
 
 /// Breathe the universe over bells `from` (exclusive) to `until`, echoes
@@ -149,15 +153,15 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         let (gathered, turning, delta_u) = {
             let c = &u.cores[i];
             // Read on the grain where they feed the law (the carrier).
-            let whole = u.cores.iter().fold(crate::pulse::held(&u.medium), |s, c| s + crate::pulse::held(&c.total()));
-            let h_g = crate::ring::grain(&((crate::pulse::core_state(c) + crate::pulse::held(&c.total())) / whole.clone()));
+            let whole = u.cores.iter().fold(crate::pulse::mass(&u.medium), |s, c| s + crate::pulse::mass(&c.total()));
+            let h_g = crate::ring::grain(&((crate::pulse::core_state(c) + crate::pulse::mass(&c.total())) / whole.clone()));
             let ring_bells = ratio((t_u / 4) as i64, 1);
             let reach = c.radius.clone() / ring_bells;
             // Half swings completed by a bell (none before the founding).
             let halves = |b: u64| if c.period.is_zero() { Some(0) } else { crate::ring::whole(&(ratio(i64::try_from(b).ok()?, 1) * ratio(2, 1) / c.period.clone())) };
             let before = if bell > t_u { halves(bell - t_u) } else { Some(0) };
             let Some(half_swings) = halves(bell).zip(before).and_then(|(now, then)| now.checked_sub(then)) else { continue };
-            let m = crate::ring::grain(&(crate::pulse::held(&u.medium) / whole));
+            let m = crate::ring::grain(&(crate::pulse::mass(&u.medium) / whole));
             let h_u = crate::ocean::universe_hold(u);
             let share = crate::ocean::gathered(rung, &reach, &h_g, &m, half_swings, &h_u);
             let delta_u = crate::ring::grain(&(h_u.clone() / (reach.clone() + h_u.clone())));
@@ -180,6 +184,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         let mut infall: Vec<(crate::pulse::Manifest, Ratio, Vec<Ratio>)> = Vec::new();
         let mut recycled = crate::recycle::Recycled::default();
         let mut burned = crate::pulse::Manifest::new();
+        let mut burns: Vec<(Vec<u64>, u32, Ratio, u64)> = Vec::new();
         // The galaxy's push and throat in its own units, for the wind's
         // meeting with the medium.
         let g_before = mass(&core.total());
@@ -447,11 +452,11 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             }
             // BURNING (the burn rate, `formation::burn`; mycelium:
             // transmutation is the universe's own physics): for each rung,
-            // the halvings of its fuel due since the last echo, on the rings
-            // its nested clock received, at its coherence with the echo,
-            // fuse Z + Z → 2Z (H + H → He, He + He → Be). Holding +
-            // magnetism (3Z) is conserved; the system's spin is kept exact as
-            // its holding transduces.
+            // each ring its nested clock received this echo fuses the rung's
+            // share of the fuel that remains, at its coherence with the echo,
+            // compounding (`crate::compound`), Z + Z → 2Z (H + H → He,
+            // He + He → Be). Holding + magnetism (3Z) is conserved; the
+            // system's spin is kept exact as its holding transduces.
             let in_phase = coherence(&slip(&own, bell, t_u));
             // EVERY KIND A RUNG (the law names no rungs: Z + Z → 2Z wherever
             // the fusion changes the open count, `formation::burn`).
@@ -461,25 +466,22 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 if !sys.kept.contains_key(&key) {
                     continue;
                 }
-                let (now_rings, then_rings) = (r_now, r_then);
-                if let (Some((every, _)), Some(fuel)) = (crate::formation::burn(&sys.kept, &(mass(&sys.kept) / mass(&sys.total())), z, &in_phase), sys.kept.get(&key).cloned()) {
-                    let Some(due) = (now_rings / every).checked_sub(then_rings / every).and_then(|d| u32::try_from(d).ok()) else { continue };
-                    if due > 0 {
-                        let left = fuel.clone() / Ratio::from_integer(num_bigint::BigInt::from(2).pow(due));
-                        // Whole grains of the product: two fuel grains each.
-                        let made = crate::pulse::nucleus(&((fuel.clone() - left) / ratio(2, 1)));
-                        if made > ratio(0, 1) {
-                            *burned.entry(key.clone()).or_insert_with(|| ratio(0, 1)) += made.clone() * ratio(2, 1);
-                            let spin = mass(&sys.total()) * sys.ell.clone();
-                            less(&mut sys.kept, &[(key.clone(), made.clone() * ratio(2, 1))].into());
-                            *sys.kept.entry(made_kind.clone()).or_insert_with(|| ratio(0, 1)) += made;
-                            let after = mass(&sys.total());
-                            if !after.is_zero() {
-                                // The spin grain: the floored remainder goes
-                                // to the galaxy's gas (`ring::grain`).
-                                sys.ell = crate::ring::grain(&(spin.clone() / after.clone()));
-                                core.medium_spin += (spin - after * sys.ell.clone()) / unit.clone();
-                            }
+                if let (Some((feed, _)), Some(fuel)) = (crate::formation::burn(&sys.kept, &(mass(&sys.kept) / mass(&sys.total())), z, &in_phase), sys.kept.get(&key).cloned()) {
+                    // The product in whole nuclei, two fuel nuclei each: half
+                    // of what the echo's rings fused, `fuel − fuel·(1 − feed)^r`.
+                    burns.push((sys.path.clone(), z, feed.clone(), r_echo));
+                    let Some(made) = crate::compound::after(&feed, r_echo).and_then(|remaining| crate::compound::read(&fuel, &remaining, |left| crate::pulse::nucleus(&((fuel.clone() - left.clone()) / ratio(2, 1))))) else { continue };
+                    if made > ratio(0, 1) {
+                        *burned.entry(key.clone()).or_insert_with(|| ratio(0, 1)) += made.clone() * ratio(2, 1);
+                        let spin = mass(&sys.total()) * sys.ell.clone();
+                        less(&mut sys.kept, &[(key.clone(), made.clone() * ratio(2, 1))].into());
+                        *sys.kept.entry(made_kind.clone()).or_insert_with(|| ratio(0, 1)) += made;
+                        let after = mass(&sys.total());
+                        if !after.is_zero() {
+                            // The spin grain: the floored remainder goes
+                            // to the galaxy's gas (`ring::grain`).
+                            sys.ell = crate::ring::grain(&(spin.clone() / after.clone()));
+                            core.medium_spin += (spin - after * sys.ell.clone()) / unit.clone();
                         }
                     }
                 }
@@ -495,11 +497,10 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             let rings_echo = r_echo.max(1);
             let pair = Ratio::new(2.into(), crate::pulse::nuclei_per_grain() * num_bigint::BigInt::from(1024));
             // It fuses at least one pair in an echo when the fuel the echo's
-            // rings take (a share `rings/every` of it, the halving's lower
-            // bound) reaches a pair; a slow halving of a large stock still
-            // fuses a great many nuclei.
+            // rings take, `a − a·(1 − feed)^r`, reaches a pair; a slow burn
+            // of a large stock still fuses a great many nuclei.
             let can_burn = sys.kept.iter().any(|(k, a)| {
-                *a >= pair && crate::chem::atom_z(k).is_some_and(|z| crate::formation::burn(&sys.kept, &share_now, z, &ratio(1, 1)).is_some_and(|(every, _)| a.clone() * ratio(rings_echo as i64, 1) >= pair.clone() * ratio(every.min(i64::MAX as u64) as i64, 1)))
+                *a >= pair && crate::chem::atom_z(k).is_some_and(|z| crate::formation::burn(&sys.kept, &share_now, z, &ratio(1, 1)).and_then(|(feed, _)| crate::compound::read(a, &crate::compound::after(&feed, rings_echo)?, |left| a.clone() - left.clone() >= pair)).unwrap_or(false))
             });
             if !can_burn && !sys.kept.is_empty() {
                 sys.remnant = true;
@@ -829,7 +830,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         for (k, a) in to_ocean {
             *u.medium.entry(k).or_insert_with(|| ratio(0, 1)) += a;
         }
-        events.push(Event { bell, galaxy: galaxy_id, rung, write: Write::Perpendicular, stars, jets, returned, dissolved, merged, encounters, recycled, burned });
+        events.push(Event { bell, galaxy: galaxy_id, rung, write: Write::Perpendicular, stars, jets, returned, dissolved, merged, encounters, recycled, burned, burns });
     }
     events
 }

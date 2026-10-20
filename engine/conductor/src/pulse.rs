@@ -43,17 +43,9 @@ pub fn nucleus(x: &Ratio) -> Ratio {
     Ratio::new(x.numer() * &grid / x.denom(), grid)
 }
 
-/// A manifest's holding read ON THE GRAIN, term by term (the carrier,
-/// never law; with xylarium): wherever a holding feeds a law (a hold, a
-/// swing, a share), the exact sum's denominators would otherwise grow with
-/// every kind's own primes. The ledger keeps `mass`, exact.
-pub fn held(m: &Manifest) -> Ratio {
-    m.iter().fold(ratio(0, 1), |s, (k, a)| {
-        let weight = crate::chem::hold(k);
-        s + crate::ring::grain(&(a.clone() * ratio(i64::from(weight), 1)))
-    })
-}
-
+/// A manifest's holding, exact: every amount is a whole count of nuclei on
+/// the one nucleon denominator and every weight whole, so the sum stays on
+/// that denominator however many kinds it adds.
 pub fn mass(m: &Manifest) -> Ratio {
     m.iter().fold(ratio(0, 1), |s, (k, a)| {
         let weight = crate::chem::hold(k);
@@ -821,12 +813,10 @@ fn put_body(b: &Body, out: &mut Vec<u8>) {
         let key = p.key.to_string();
         g.extend_from_slice(&(key.len() as u16).to_le_bytes());
         g.extend_from_slice(key.as_bytes());
-        for r in [&p.held, &p.inner, &p.outer, &p.agitation] {
+        for r in [&p.held, &p.inner, &p.outer, &p.agitation, &p.radiates, &p.vacuum] {
             cfe::ratio::encode(r, &mut g);
         }
-        g.extend_from_slice(&p.halving.unwrap_or(0).to_le_bytes());
         g.extend_from_slice(&p.born.to_le_bytes());
-        g.extend_from_slice(&p.vacuum.to_le_bytes());
         cfe::tlv::put(6, &g, out);
     }
     if b.born > 0 {
@@ -1003,16 +993,14 @@ fn get_mote(v: &[u8]) -> Option<crate::formation::Shell> {
     let key = crate::chem::Kind::parse(std::str::from_utf8(v.get(2..2 + len)?).ok()?)?;
     let mut at = 2 + len;
     let mut r = Vec::new();
-    for _ in 0..4 {
+    for _ in 0..6 {
         let (x, used) = cfe::ratio::decode(v.get(at..)?)?;
         at += used;
         r.push(x);
     }
-    let halving = u64::from_le_bytes(v.get(at..at + 8)?.try_into().ok()?);
-    let born = u64::from_le_bytes(v.get(at + 8..at + 16)?.try_into().ok()?);
-    let vacuum = u64::from_le_bytes(v.get(at + 16..at + 24)?.try_into().ok()?);
+    let born = u64::from_le_bytes(v.get(at..at + 8)?.try_into().ok()?);
     let mut r = r.into_iter();
-    Some(crate::formation::Shell { key, held: r.next()?, inner: r.next()?, outer: r.next()?, agitation: r.next()?, halving: (halving > 0).then_some(halving), born, vacuum })
+    Some(crate::formation::Shell { key, held: r.next()?, inner: r.next()?, outer: r.next()?, agitation: r.next()?, radiates: r.next()?, vacuum: r.next()?, born })
 }
 
 /// Read `<var>/pulse.bin` back: the seed and the universe (bodies are
@@ -1114,7 +1102,7 @@ mod tests {
 
     #[test]
     fn the_pulse_file_reads_back_exactly() {
-        let mote = crate::formation::Shell { key: crate::chem::Kind::parse("Z001").expect("a kind"), held: ratio(1, 5), inner: ratio(1, 3), outer: ratio(2, 3), agitation: ratio(1, 2), halving: Some(2), born: 7, vacuum: 3 };
+        let mote = crate::formation::Shell { key: crate::chem::Kind::parse("Z001").expect("a kind"), held: ratio(1, 5), inner: ratio(1, 3), outer: ratio(2, 3), agitation: ratio(1, 2), radiates: ratio(1, 2), born: 7, vacuum: ratio(3, 7) };
         let orb = Body { path: vec![1, 1, 1], radius: ratio(3, 2), period: ratio(5, 2), kept: [(crate::chem::Kind::parse("Z008").expect("a kind"), ratio(1, 64))].into(), satellites: Vec::new(), medium: Manifest::new(), ell: ratio(7, 3), medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1) };
         let sys = Body { path: vec![1, 1], radius: ratio(9, 2), period: ratio(11, 2), kept: [(crate::chem::Kind::parse("Z001").expect("a kind"), ratio(3, 1024))].into(), satellites: vec![orb], medium: Manifest::new(), ell: ratio(1, 9), medium_spin: ratio(1, 7), gas: Vec::new(), born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1) };
         let core = Body { path: vec![1], radius: ratio(60, 1), period: ratio(0, 1), kept: [(crate::chem::Kind::parse("Z026").expect("a kind"), ratio(1, 2))].into(), satellites: vec![sys], medium: [(crate::chem::Kind::parse("Z001").expect("a kind"), ratio(5, 4))].into(), ell: ratio(0, 1), medium_spin: ratio(13, 11), gas: vec![mote], born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1) };

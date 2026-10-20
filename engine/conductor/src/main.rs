@@ -373,13 +373,15 @@ fn main() {
                 for sys in &core.satellites {
                     let rate = g_rate.clone() * conductor::ring::rate(&sys.radius, &(inside.clone() / unit.clone()));
                     let received = (rate.clone() * cfe::ratio::ratio(beat.saturating_sub(sys.born) as i64, 1)).floor().to_integer().try_into().unwrap_or(0u64);
-                    if let Some((every, left, _)) = conductor::formation::heartbeat(&sys.kept, &(conductor::pulse::mass(&sys.kept) / conductor::pulse::mass(&sys.total())), received) {
-                        // A life: the halvings until less than a grain of fuel
-                        // in 2^30 is left, read in bells on its clock.
-                        if !num_traits::Zero::is_zero(&rate) {
-                            lives.push(cfe::ratio::ratio(30 * i64::try_from(every).unwrap_or(i64::MAX), 1) / rate.clone());
+                    if let Some((feed, _)) = conductor::formation::burn(&sys.kept, &(conductor::pulse::mass(&sys.kept) / conductor::pulse::mass(&sys.total())), 1, &cfe::ratio::ratio(1, 1)) {
+                        // A life: the rings until less than a grain of fuel
+                        // in 2^30 is left, compounding, read in bells on its
+                        // clock.
+                        let below = cfe::ratio::ratio(1, 1 << 30);
+                        if let (false, Some(n)) = (num_traits::Zero::is_zero(&rate), conductor::compound::rings_until(&feed, &below)) {
+                            lives.push(cfe::ratio::Ratio::from_integer(num_bigint::BigInt::from(n)) / rate.clone());
                         }
-                        if left < cfe::ratio::ratio(1, 1 << 30) { spent += 1 } else { burning += 1 }
+                        if conductor::compound::after(&feed, received).and_then(|remaining| conductor::compound::read(&cfe::ratio::ratio(1, 1), &remaining, |left| *left < below)) == Some(true) { spent += 1 } else { burning += 1 }
                     }
                     inside += conductor::pulse::mass(&sys.total());
                 }

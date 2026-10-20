@@ -2,8 +2,9 @@
 
 Operator 2026-10-09, an agreement between netstratum and the operator, built
 with xylarium-kernel as coordinator but in netstratum's own way (instinct and
-physics decide, behaviour emerges, settle at touch, the L1 torus, its cores
-and orbits, exact rationals):
+physics decide, behaviour emerges, settle at touch, its cores and orbits,
+exact rationals). The geometry is era 1's spheres (S^360 galaxies, S^60
+systems, docs/85); the "flat L1 torus" named below is era 0's and retired.
 
 1. Trade hubs and stardocks: resource-point collections with trading markets
    that keep economies stable.

@@ -130,8 +130,11 @@ fn main() {
             println!("STAR {:?} at beat {now}: born bell {}, holding {} (units of the deepest hole), magnetism {}", sys.path, sys.born, f(&(pulse::mass(&sys.kept) / unit.clone())), f(&(pulse::magnetism(&sys.kept) / unit.clone())));
             println!("  matter: {}", composition(&sys.kept, 8));
             println!("  orbit: reach {}, period {} rings, spin ℓ {}; clock {}, {received} rings received since birth", f(&sys.radius), f(&sys.period), f(&sys.ell), f(&rate));
-            match formation::heartbeat(&sys.kept, &(pulse::mass(&sys.kept) / pulse::mass(&sys.total())), received) {
-                Some((every, left, light)) => println!("  HEARTBEAT: fuel halves every {every} received rings; fuel left {}; light {} per received ring", f(&left), f(&light)),
+            match formation::burn(&sys.kept, &(pulse::mass(&sys.kept) / pulse::mass(&sys.total())), 1, &ratio(1, 1)) {
+                Some((feed, light)) => match conductor::compound::after(&feed, received).and_then(|left| conductor::compound::read(&ratio(1, 1), &left, f)) {
+                    Some(left) => println!("  HEARTBEAT: each received ring fuses {} of the fuel that remains; fuel left {left}; light {} per received ring", f(&feed), f(&light)),
+                    None => println!("  HEARTBEAT: refused: the burn's share lies outside the whole"),
+                },
                 None => println!("  HEARTBEAT: no hydrogen fuel"),
             }
             println!("  coupling κ {}", formation::coupling(&sys.kept, &universe_hold).map(|k| f(&k).to_string()).unwrap_or_else(|| "none".into()));
@@ -165,7 +168,7 @@ fn main() {
             let all = c.total();
             let (rings, _, h) = formation::shells(&all, &c.kept);
             let gas: Vec<formation::Shell> = c.gas.iter().cloned().chain(rings).collect();
-            let stretches = formation::stretches(&gas, bell);
+            let Some(stretches) = formation::stretches(&gas, bell) else { return println!("refused: a gas mote's cooling share lies outside the whole") };
             println!("GAS {:?} at bell {bell}: H {}, push share {}, {} motes, {} stretches", c.path, f(&h), f(&((h.clone() - ratio(1, 1)) / h.clone())), c.gas.len(), stretches.len());
             for st in &stretches {
                 let ignite = formation::ignition_share(&st.agitation).map(|s| f(&s).to_string()).unwrap_or_else(|| "too hot".into());
@@ -563,8 +566,9 @@ fn main() {
                 for (k, sys) in c.satellites.iter().enumerate() {
                     let rate = system_rate(&u, i, k, &unit);
                     let received: u64 = (rate.clone() * ratio(now.saturating_sub(sys.born) as i64, 1)).floor().to_integer().try_into().unwrap_or(0);
-                    if let Some((every, left, light)) = formation::heartbeat(&sys.kept, &(pulse::mass(&sys.kept) / pulse::mass(&sys.total())), received) {
-                        println!("  star {:?}: born {}, {received} rings, halves every {every}, fuel left {}, light {}, He {}", sys.path, sys.born, f(&left), f(&light), f(&(conductor::chem::Kind::atom(2).and_then(|he| sys.kept.get(&he).cloned()).unwrap_or_else(|| ratio(0, 1)) * ratio(6, 1) / pulse::mass(&sys.kept))));
+                    let burn = formation::burn(&sys.kept, &(pulse::mass(&sys.kept) / pulse::mass(&sys.total())), 1, &ratio(1, 1));
+                    if let Some((feed, light, left)) = burn.and_then(|(feed, light)| conductor::compound::after(&feed, received).and_then(|left| conductor::compound::read(&ratio(1, 1), &left, f)).map(|left| (feed, light, left))) {
+                        println!("  star {:?}: born {}, {received} rings, fuses {} a ring, fuel left {left}, light {}, He {}", sys.path, sys.born, f(&feed), f(&light), f(&(conductor::chem::Kind::atom(2).and_then(|he| sys.kept.get(&he).cloned()).unwrap_or_else(|| ratio(0, 1)) * ratio(6, 1) / pulse::mass(&sys.kept))));
                     }
                 }
             }

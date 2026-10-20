@@ -88,6 +88,7 @@ pub mod chem;
 pub mod motion;
 pub mod breath;
 pub mod ring;
+pub mod compound;
 pub mod enclosure;
 pub mod formation;
 pub mod ocean;

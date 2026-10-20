@@ -17,10 +17,11 @@
 //!   `R_z (1 − a_z) … R_z (1 + a_z)` (a box: the first build; the sphere's
 //!   measure is the refinement).
 //! - **Cooling.** What a grain cannot hold it radiates: its open frames over
-//!   its held frames, `e_z = unpaired / hold` a ring; held as HALVINGS, its
-//!   agitation halves every `h_z = ⌈1 / e_z⌉` rings; and the VACUUM takes
-//!   back the deficit's share each ring, a halving every `⌈1/δ⌉` rings at its
+//!   its held frames, `e_z = unpaired / hold` of its agitation a ring; and
+//!   the VACUUM takes back the deficit's share `δ = H/(R + H)` a ring at its
 //!   reach (closed-shell gas cools this way alone; close-in gas fastest).
+//!   Both shares compound ring by ring (`crate::compound`): n rings keep
+//!   `((1 − e_z)(1 − δ))^n`.
 //! - **Collapse.** Overlapping shells sum to a stretch of linear holding λ.
 //!   A clump of width w in it collapses where
 //!   `λ (K)(K + w) ≥ (1 + λ)[a (K)(K + w) + H w]`, `K = R + H` at its near
@@ -43,25 +44,27 @@ pub struct Shell {
     pub outer: Ratio,
     /// Its agitation at the cut.
     pub agitation: Ratio,
-    /// Rings a halving of its agitation; None: it never cools by itself.
-    pub halving: Option<u64>,
+    /// The share of its agitation its open frames radiate a ring, `e =
+    /// unpaired / hold` (0: it never cools by itself).
+    pub radiates: Ratio,
     /// The ring it was laid down (the cut: 0; a jet's landing: later); it
     /// cools from then.
     pub born: u64,
-    /// Rings a halving of its agitation through the VACUUM (operator
-    /// 2026-10-16, with xylarium): each ring the vacuum takes back the
-    /// deficit's share δ = H/(R + H) at its reach, so it halves at least
-    /// every ⌈1/δ⌉ rings ((1 − δ)^⌈1/δ⌉ ≤ 1/e < ½; exact, no power). Every
-    /// mote cools this way, closed-shell ones included. 0: no vacuum.
-    pub vacuum: u64,
+    /// The share of its agitation the VACUUM takes back a ring (operator
+    /// 2026-10-16, with xylarium): the deficit `δ = H/(R + H)` at its reach.
+    /// Every mote cools this way, closed-shell ones included. 0: no vacuum.
+    pub vacuum: Ratio,
 }
 
-/// The vacuum's halving at reach `r` about holding `h`: `⌈(r + h)/h⌉`.
-pub fn vacuum_halving(r: &Ratio, h: &Ratio) -> u64 {
-    if h.is_zero() {
-        return 0;
+/// The share of a kind's agitation its open frames radiate a ring: its open
+/// frames over its held frames, `unpaired / hold` (at most ½, since a kind
+/// opens no more frames than its charge and holds at least twice it).
+pub fn radiates(k: &crate::chem::Kind) -> Ratio {
+    let held = crate::chem::hold(k);
+    if held == 0 {
+        return ratio(0, 1);
     }
-    ((r.clone() + h.clone()) / h.clone()).ceil().to_integer().try_into().unwrap_or(0)
+    ratio(i64::from(crate::chem::unpaired(k)), i64::from(held))
 }
 
 /// The disc's cold bands and the gas's shells: the galaxy's grains `all`,
@@ -77,7 +80,7 @@ pub fn shells(all: &Manifest, disc: &Manifest) -> (Vec<Shell>, Vec<Shell>, Ratio
         let ell = push.clone() * mean.clone() / w.clone();
         let r = ell / h.clone();
         let delta = h.clone() / (r.clone() + h.clone());
-        let halving = crate::chem::parts(k).and_then(|(z, _)| atom(z)).and_then(|a| (a.unpaired > 0).then(|| u64::from((hold(a.z) + a.unpaired - 1) / a.unpaired)));
+        let radiates = radiates(k);
         // THE DISPERSAL (`pulse::disperse`; operator: "disc and gas both
         // mixed"): the held part of the kind is the part of its spread
         // within the throat, a COLD BAND `[R(1 − p), min(R(1 + p), H)]` (the
@@ -87,28 +90,27 @@ pub fn shells(all: &Manifest, disc: &Manifest) -> (Vec<Shell>, Vec<Shell>, Ratio
         if held_part > ratio(0, 1) {
             let lo = r.clone() * (ratio(1, 1) - push.clone());
             let hi = (r.clone() * (ratio(1, 1) + push.clone())).min(h.clone()).max(lo.clone());
-            held_out.push(Shell { key: k.clone(), held: held_part.clone() * w.clone() / total.clone(), inner: lo, outer: hi.clone(), agitation: ratio(0, 1), halving, born: 0, vacuum: vacuum_halving(&hi, &h) });
+            held_out.push(Shell { key: k.clone(), held: held_part.clone() * w.clone() / total.clone(), inner: lo, outer: hi.clone(), agitation: ratio(0, 1), radiates: radiates.clone(), born: 0, vacuum: crate::ring::deficit(&hi, &h) });
         }
         let free = amount.clone() - held_part;
         let inner = (r.clone() * (ratio(1, 1) - push.clone())).max(h.clone());
         let outer = r.clone() * (ratio(1, 1) + push.clone());
         if free > ratio(0, 1) && outer > inner {
             let agitation = if delta < push { (push.clone() - delta) / push.clone() } else { ratio(0, 1) };
-            out.push(Shell { key: k.clone(), held: free * w / total.clone(), inner, outer: outer.clone(), agitation, halving, born: 0, vacuum: vacuum_halving(&outer, &h) });
+            out.push(Shell { key: k.clone(), held: free * w / total.clone(), inner, outer: outer.clone(), agitation, radiates, born: 0, vacuum: crate::ring::deficit(&outer, &h) });
         }
     }
     (held_out, out, h)
 }
 
-/// A shell's agitation at ring `n`: halved through both channels, its open
-/// frames' light (`h_e`) and the vacuum's pull back (`h_v`),
-/// `a₀ / 2^(⌊age/h_e⌋ + ⌊age/h_v⌋)`; nothing before it is laid down.
-fn cooled(s: &Shell, n: u64) -> Ratio {
+/// A shell's agitation at ring `n`: both channels, its open frames' light
+/// (`e`) and the vacuum's pull back (`δ`), compounding over its age,
+/// `a₀·((1 − e)(1 − δ))^age`, read on the grain; nothing before it is laid
+/// down. None where a share lies outside the whole.
+fn cooled(s: &Shell, n: u64) -> Option<Ratio> {
     let age = n.saturating_sub(s.born);
-    let by_light = s.halving.map(|h| age / h).unwrap_or(0);
-    let by_vacuum = if s.vacuum > 0 { age / s.vacuum } else { 0 };
-    let halvings = (by_light + by_vacuum).min(4096) as u32;
-    s.agitation.clone() / Ratio::from_integer(num_bigint::BigInt::from(2).pow(halvings))
+    let remaining = crate::compound::after(&s.radiates, age)?.after(&s.vacuum, age).ok()?;
+    crate::compound::read(&s.agitation, &remaining, crate::ring::grain)
 }
 
 /// A stretch of gas between two shell edges, its linear holding and the
@@ -128,8 +130,9 @@ pub struct Stretch {
     pub members: Vec<(usize, Ratio)>,
 }
 
-/// The gas profile at ring `n`: piecewise between every shell edge.
-pub fn stretches(shells: &[Shell], n: u64) -> Vec<Stretch> {
+/// The gas profile at ring `n`: piecewise between every shell edge; None
+/// where a shell's cooling is refused.
+pub fn stretches(shells: &[Shell], n: u64) -> Option<Vec<Stretch>> {
     // The disc's cold rings lie at single reaches; they join whichever
     // stretch of gas passes over them (the disc's outer edge mixing with the
     // gas), and add no edge of their own.
@@ -161,7 +164,7 @@ pub fn stretches(shells: &[Shell], n: u64) -> Vec<Stretch> {
             }
             let density = s.held.clone() / span;
             members.push((i, density.clone() * width.clone()));
-            weighted += density.clone() * cooled(s, n);
+            weighted += density.clone() * cooled(s, n)?;
             mu += density.clone() * open(&s.key);
             lambda += density;
         }
@@ -171,7 +174,7 @@ pub fn stretches(shells: &[Shell], n: u64) -> Vec<Stretch> {
         let agitation = weighted / lambda.clone();
         out.push(Stretch { inner: lo.clone(), outer: hi.clone(), lambda, mu, agitation, members });
     }
-    out
+    Some(out)
 }
 
 /// Does a clump of width `w` at the stretch's near side collapse? (with
@@ -292,23 +295,6 @@ pub fn coupling(star: &Manifest, universe_hold: &Ratio) -> Option<Ratio> {
     Some(mass(star) / universe_hold.clone() / charge)
 }
 
-/// THE HEARTBEAT (with xylarium, 2026-10-16): a star burns at its
-/// INTERFACE, where its heart's gravity matches its atoms' charge: the share
-/// `κ · n_star = s_star / Q̄` of its fuel (s_star its share of the universe's
-/// holding, Q̄ its nuclei's mean outer charge). Each received ring feeds the
-/// fuel's open share e of that interface: held as HALVINGS, the fuel halves
-/// every `⌈Q̄ / (e · s_star)⌉` received rings. Each fusion closes Δu open
-/// frames, transducing magnetism into holding, its light the transduction's
-/// flux. The first rung here: hydrogen to helium (Δu = 2, e = ½).
-/// Returns the rings per halving, the fuel's share left after `rings`
-/// received rings, and the light per received ring (`feed × fuel × Δu`).
-pub fn heartbeat(star: &Manifest, share: &Ratio, rings: u64) -> Option<(u64, Ratio, Ratio)> {
-    let (every, light) = burn(star, share, 1, &ratio(1, 1))?;
-    let halvings = u32::try_from(rings / every).ok()?;
-    let left = ratio(1, 1) / Ratio::from_integer(num_bigint::BigInt::from(2).pow(halvings));
-    Some((every, left.clone(), light * left))
-}
-
 /// The kind a burn rung makes from fuel `z`: two nuclei meet, `z + z → 2z`.
 pub fn product(z: u32) -> Option<crate::chem::Kind> {
     crate::chem::Kind::atom(z.checked_mul(2)?)
@@ -328,10 +314,12 @@ pub fn product(z: u32) -> Option<crate::chem::Kind> {
 ///   star is a tiny part of the universe, a large part of its galaxy, the
 ///   greater part of its system), never of the universe's;
 /// - its RHYTHM the heart's coherence c with the echo (a reading of phase).
-/// The fuel halves every `⌈1/feed⌉` received rings, `feed =
-/// (|Δm|/3Z_p)·τ·s/Q̄·c`; the light per received ring is the transduced
-/// flux, `feed × fuel share × |Δm|`. Returns (rings a halving, light a ring).
-pub fn burn(star: &Manifest, share: &Ratio, z: u32, coherence: &Ratio) -> Option<(u64, Ratio)> {
+/// Each received ring fuses the share `feed = (|Δm|/3Z_p)·τ·s/Q̄·c` of the
+/// fuel that remains, compounding (`crate::compound`): n rings leave
+/// `(1 − feed)^n` of it. The light per received ring is the transduced flux,
+/// `feed × fuel share × |Δm|`. Returns (the share a ring, light a ring);
+/// None where the rung does not run, or its share lies past the whole.
+pub fn burn(star: &Manifest, share: &Ratio, z: u32, coherence: &Ratio) -> Option<(Ratio, Ratio)> {
     let fuel = star.get(&crate::chem::Kind::atom(z)?)?.clone();
     let total = mass(star);
     if total.is_zero() || coherence.is_zero() {
@@ -356,14 +344,11 @@ pub fn burn(star: &Manifest, share: &Ratio, z: u32, coherence: &Ratio) -> Option
         return None;
     }
     let feed = driver * tau * share.clone() / q_mean * coherence.clone();
-    if feed.is_zero() {
+    if feed.is_zero() || feed > ratio(1, 1) {
         return None;
     }
-    // ⌈1/feed⌉ is at least one for any feed; past the carrier the rung is
-    // refused (it never fires on any clock the carrier holds).
-    let every = crate::ring::whole(&(ratio(1, 1) / feed.clone()).ceil())?;
     let fuel_share = fuel * ratio(i64::from(hold(z)), 1) / total;
-    Some((every, feed * fuel_share * ratio(dm, 1)))
+    Some((feed.clone(), feed * fuel_share * ratio(dm, 1)))
 }
 
 /// A STAR'S SYSTEM AT IGNITION (docs/83; planets from the star's own disc):
@@ -664,7 +649,7 @@ pub fn system(clump: &Manifest, agitation: &Ratio, circulation: &Ratio, path: &[
     let scale = total.clone() / unit.clone();
     let star_hold = mass(&star) / unit.clone();
     // At ignition the system is the clump: the star's share of it.
-    let light = heartbeat(&star, &(mass(&star) / total.clone()), 0).map(|(_, _, l)| l).unwrap_or_else(|| ratio(0, 1));
+    let light = burn(&star, &(mass(&star) / total.clone()), 1, &ratio(1, 1)).map(|(_, l)| l).unwrap_or_else(|| ratio(0, 1));
     let mid = (x.clone() + rim.clone()) / ratio(2, 1);
     let unlocked = mid.clone() / (mid + x.clone());
     let heat = light * unlocked.clone();
@@ -743,9 +728,9 @@ pub fn jet_batch(rings: &[Shell], h: &Ratio, rim: &Ratio, born: u64, share: &Rat
             inner: rim.clone() * (ratio(1, 1) - agitation.clone()),
             outer: rim.clone() * (ratio(1, 1) + agitation.clone()),
             agitation: agitation.clone(),
-            halving: ring.halving,
+            radiates: ring.radiates.clone(),
             born,
-            vacuum: vacuum_halving(rim, h),
+            vacuum: crate::ring::deficit(rim, h),
         });
     }
     out

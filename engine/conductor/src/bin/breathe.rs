@@ -27,6 +27,11 @@ fn main() {
     let mut events = Vec::new();
     for b in start..until {
         events.extend(breath::breathe(&mut u, &seed, t_u, b, b + 1));
+        // Progress by the universe's own count, never a clock: each tenth
+        // universal echo.
+        if t_u > 0 && (b + 1) % (10 * t_u) == 0 {
+            eprintln!("bell {}: {} echoes read", b + 1, events.len());
+        }
     }
     let unit = breath::unit_mass(&u);
     let births: usize = events.iter().map(|e| e.stars).sum();
@@ -119,6 +124,75 @@ fn main() {
             w += 1;
         }
         println!("RATES — hydrogen per universal echo, as a share of the hydrogen now: {}", rows.join("; "));
+    }
+    // THE CARRIER'S SIZE (design law 8; the cut-over's measure): the widest
+    // exact rational held, by what it carries, in bits.
+    {
+        let bits = |r: &cfe::ratio::Ratio| r.numer().bits().max(r.denom().bits());
+        let mut amounts = 0u64;
+        let mut spins = 0u64;
+        let mut phases = 0u64;
+        let mut agitation = 0u64;
+        let seen = |m: &pulse::Manifest, w: &mut u64| {
+            for a in m.values() {
+                *w = (*w).max(bits(a));
+            }
+        };
+        seen(&u.medium, &mut amounts);
+        let mut motes: Vec<&conductor::flows::Mote> = u.firmament.iter().collect();
+        for c in &u.cores {
+            seen(&c.total(), &mut amounts);
+            motes.extend(c.flows.iter());
+            for s in &c.satellites {
+                seen(&s.total(), &mut amounts);
+                motes.extend(s.flows.iter());
+                spins = spins.max(bits(&s.ell)).max(bits(&s.radius));
+                for p in s.phase.iter().chain(&s.bell) {
+                    phases = phases.max(bits(p));
+                }
+            }
+        }
+        for x in &motes {
+            amounts = amounts.max(bits(&x.amount));
+            spins = spins.max(bits(&x.ell_o)).max(bits(&x.ell_c));
+            agitation = agitation.max(bits(&x.agitation));
+            for p in &x.phase {
+                phases = phases.max(bits(p));
+            }
+        }
+        println!("CARRIER — widest exact value held, in bits: amounts {amounts}, spins and reaches {spins}, phases {phases}, agitation {agitation}; {} motes", motes.len());
+    }
+    // THE JOINT READ (CONCORDANCE 2.10, the landing rule): each star's burn
+    // as the form holds it, its runs `(1 − x_i, n_i)` on its own clock in the
+    // order lived, and the reading of what remains on the 60⁻⁶ grain; written
+    // whole to `<var>/runs.txt`.
+    {
+        let mut bodies: std::collections::BTreeMap<(Vec<u64>, u32), conductor::compound::Remaining> = std::collections::BTreeMap::new();
+        let mut refused = 0usize;
+        for e in &events {
+            for (path, z, x, n) in &e.burns {
+                let was = bodies.remove(&(path.clone(), *z)).unwrap_or_else(conductor::compound::Remaining::whole);
+                match was.clone().after(x, *n) {
+                    Ok(r) => {
+                        bodies.insert((path.clone(), *z), r);
+                    }
+                    Err(_) => {
+                        refused += 1;
+                        bodies.insert((path.clone(), *z), was);
+                    }
+                }
+            }
+        }
+        let mut text = String::new();
+        let mut runs = 0usize;
+        for ((path, z), r) in &bodies {
+            runs += r.factors().len();
+            let left = conductor::compound::read(&cfe::ratio::ratio(1, 1), r, conductor::ring::grain);
+            let factors: Vec<String> = r.factors().iter().map(|(b, n)| format!("({b}, {n})")).collect();
+            text.push_str(&format!("star {path:?} Z{z}: runs [{}]; left on the grain {}\n", factors.join(", "), left.map(|l| l.to_string()).unwrap_or_else(|| "refused".into())));
+        }
+        let _ = std::fs::write(Path::new(era1).join("runs.txt"), text);
+        println!("JOINT READ — {} burning bodies (star, rung), {runs} runs on their own clocks, {refused} refused; written {era1}/runs.txt", bodies.len());
     }
     if args.get(4).map(String::as_str) == Some("write") {
         let _ = pulse::write(Path::new(era1), &seed, &u);

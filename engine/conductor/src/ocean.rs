@@ -49,7 +49,7 @@ pub fn universe_hold(u: &crate::pulse::Universe) -> Ratio {
     }
     u.cores.iter().fold(ratio(1, 1), |s, c| {
         let all = c.total();
-        s + crate::ring::grain(&((crate::pulse::core_state(c) + crate::pulse::held(&all) + crate::ring::grain(&crate::pulse::magnetism(&all))) / whole.clone()))
+        s + crate::ring::grain(&((crate::pulse::core_state(c) + crate::pulse::mass(&all) + crate::pulse::magnetism(&all)) / whole.clone()))
     })
 }
 
@@ -201,9 +201,8 @@ pub fn land(galaxy: &Manifest, arriving: &Manifest, rho: &Ratio, turning: &(Rati
             let outer = r.clone() * (ratio(1, 1) + p.clone());
             let delta = h.clone() / (r.clone() + h.clone());
             let agitation = if delta < p { (p.clone() - delta) / p.clone() } else { ratio(0, 1) };
-            let halving = crate::chem::atom_z(k).and_then(cfe::almanac::atom::atom).and_then(|a| (a.unpaired > 0).then(|| u64::from((cfe::almanac::atom::hold(a.z) + a.unpaired - 1) / a.unpaired)));
             if outer > inner && !total.is_zero() {
-                motes.push(crate::formation::Shell { key: k.clone(), held: loose.clone() * w / total.clone(), inner, outer: outer.clone(), agitation, halving, born, vacuum: crate::formation::vacuum_halving(&outer, &h) });
+                motes.push(crate::formation::Shell { key: k.clone(), held: loose.clone() * w / total.clone(), inner, outer: outer.clone(), agitation, radiates: crate::formation::radiates(k), born, vacuum: crate::ring::deficit(&outer, &h) });
             }
             free.insert(k.clone(), loose);
         }
