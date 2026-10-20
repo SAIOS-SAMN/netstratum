@@ -36,7 +36,7 @@ use num_traits::Zero;
 /// A shell of one escaped element, in the galaxy's own units.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Shell {
-    pub key: String,
+    pub key: crate::chem::Kind,
     /// Its holding, a share of the galaxy's grains.
     pub held: Ratio,
     pub inner: Ratio,
@@ -68,7 +68,7 @@ pub fn vacuum_halving(r: &Ratio, h: &Ratio) -> u64 {
 /// its core's disc `disc`, in its own units (regeneration). Returns (held,
 /// free, H).
 pub fn shells(all: &Manifest, disc: &Manifest) -> (Vec<Shell>, Vec<Shell>, Ratio) {
-    let weight = |k: &str| crate::chem::hold(k);
+    let weight = |k: &crate::chem::Kind| crate::chem::hold(k);
     let total = mass(all);
     let Some((push, h, mean)) = crate::pulse::galaxy_push(all) else { return (Vec::new(), Vec::new(), ratio(1, 1)) };
     let (mut held_out, mut out) = (Vec::new(), Vec::new());
@@ -145,7 +145,7 @@ pub fn stretches(shells: &[Shell], n: u64) -> Vec<Stretch> {
         }
         let mut members = Vec::new();
         let (mut lambda, mut weighted, mut mu) = (ratio(0, 1), ratio(0, 1), ratio(0, 1));
-        let open = |k: &str| ratio(i64::from(crate::chem::unpaired(k)), i64::from(crate::chem::hold(k).max(1)));
+        let open = |k: &crate::chem::Kind| ratio(i64::from(crate::chem::unpaired(k)), i64::from(crate::chem::hold(k).max(1)));
         for (i, s) in shells.iter().enumerate() {
             let span = s.outer.clone() - s.inner.clone();
             if span.is_zero() {
@@ -310,8 +310,8 @@ pub fn heartbeat(star: &Manifest, share: &Ratio, rings: u64) -> Option<(u64, Rat
 }
 
 /// The kind a burn rung makes from fuel `z`: two nuclei meet, `z + z → 2z`.
-pub fn product(z: u32) -> String {
-    format!("Z{:03}", 2 * z)
+pub fn product(z: u32) -> Option<crate::chem::Kind> {
+    crate::chem::Kind::atom(z.checked_mul(2)?)
 }
 
 /// THE BURN RATE (W31(a) steps 1–2, with xylarium; derived 2026-10-16), the
@@ -332,7 +332,7 @@ pub fn product(z: u32) -> String {
 /// (|Δm|/3Z_p)·τ·s/Q̄·c`; the light per received ring is the transduced
 /// flux, `feed × fuel share × |Δm|`. Returns (rings a halving, light a ring).
 pub fn burn(star: &Manifest, share: &Ratio, z: u32, coherence: &Ratio) -> Option<(u64, Ratio)> {
-    let fuel = star.get(&format!("Z{z:03}"))?.clone();
+    let fuel = star.get(&crate::chem::Kind::atom(z)?)?.clone();
     let total = mass(star);
     if total.is_zero() || coherence.is_zero() {
         return None;
@@ -397,12 +397,14 @@ pub fn dissociate(m: &Manifest) -> Manifest {
     let mut out = Manifest::new();
     for (k, a) in m {
         match crate::chem::components(k) {
-            Some(ps) if ps.len() > 1 => {
-                for (n, z) in ps {
-                    *out.entry(crate::chem::hydride(z, 0)).or_insert_with(|| ratio(0, 1)) += a.clone() * ratio(i64::from(n), 1);
+            [(1, _)] => *out.entry(k.clone()).or_insert_with(|| ratio(0, 1)) += a.clone(),
+            ps => {
+                for &(n, z) in ps {
+                    if let Some(atom) = crate::chem::Kind::atom(z) {
+                        *out.entry(atom).or_insert_with(|| ratio(0, 1)) += a.clone() * ratio(i64::from(n), 1);
+                    }
                 }
             }
-            _ => *out.entry(k.clone()).or_insert_with(|| ratio(0, 1)) += a.clone(),
         }
     }
     out
@@ -416,7 +418,7 @@ pub fn agitation_of(ignition: &Ratio) -> Ratio {
 
 /// Each kind's CARRIED SPIN in a heart's clump (own units), the push on its
 /// open frames plus the place's turning: `ℓ_z = p·(e_z/ē)·(w̄/w_z) + turning`.
-pub fn carried(clump: &Manifest, turning: &Ratio, heat: &Ratio) -> Vec<(String, Ratio)> {
+pub fn carried(clump: &Manifest, turning: &Ratio, heat: &Ratio) -> Vec<(crate::chem::Kind, Ratio)> {
     let total = mass(clump);
     let count = clump.values().fold(ratio(0, 1), |s, a| s + a.clone());
     if total.is_zero() || count.is_zero() {
@@ -447,7 +449,7 @@ pub fn heart_cut(clump: &Manifest, turning: &Ratio, heat: &Ratio) -> Option<(Man
     // AGITATION, never as a weaker push, or it would be counted twice.
     let push = ratio(1, 2);
     let mean_weight = total.clone() / count;
-    let mut kinds: Vec<(String, Ratio, Ratio)> = clump
+    let mut kinds: Vec<(crate::chem::Kind, Ratio, Ratio)> = clump
         .iter()
         .map(|(k, a)| {
             let w = ratio(i64::from(crate::chem::hold(k)), 1);
@@ -509,7 +511,7 @@ pub fn heart_cut(clump: &Manifest, turning: &Ratio, heat: &Ratio) -> Option<(Man
 /// gases its atmosphere, in order of reach); the star's tide strips beyond
 /// `1 − e`, `e = m/(m + M_star)`. Returns each kind's band `(lo, hi)` (the
 /// core's at the centre, `(0, 0)`) and the held share H.
-pub fn layer_bands(kept: &Manifest, heat: &Ratio) -> Option<(Vec<(String, Ratio, Ratio)>, Ratio)> {
+pub fn layer_bands(kept: &Manifest, heat: &Ratio) -> Option<(Vec<(crate::chem::Kind, Ratio, Ratio)>, Ratio)> {
     let (core, _, h) = heart_cut(kept, heat, &ratio(0, 1))?;
     if h.is_zero() {
         return None;
@@ -581,8 +583,8 @@ pub fn layer_chemistry(kept: &mut Manifest, heat: &Ratio) {
         *kept.entry(k).or_insert_with(|| ratio(0, 1)) += a;
     }
     // Atoms meet where their bands overlap.
-    let atoms: Vec<(String, u32, Ratio, Ratio)> = bands.iter().filter_map(|(k, lo, hi)| crate::chem::atom_z(k).filter(|_| kept.contains_key(k)).map(|z| (k.clone(), z, lo.clone(), hi.clone()))).collect();
-    let mut formed: Vec<(String, String, u32, u32, String, Ratio)> = Vec::new();
+    let atoms: Vec<(crate::chem::Kind, u32, Ratio, Ratio)> = bands.iter().filter_map(|(k, lo, hi)| crate::chem::atom_z(k).filter(|_| kept.contains_key(k)).map(|z| (k.clone(), z, lo.clone(), hi.clone()))).collect();
+    let mut formed: Vec<(crate::chem::Kind, crate::chem::Kind, u32, u32, crate::chem::Kind, Ratio)> = Vec::new();
     for (i, (ka, za, la, ha)) in atoms.iter().enumerate() {
         for (kb, zb, lb, hb) in atoms.iter().skip(i + 1) {
             if za == zb {
@@ -618,7 +620,7 @@ pub fn layer_chemistry(kept: &mut Manifest, heat: &Ratio) {
 }
 
 /// The lightest kind a body holds, by hold (`atom::hold`): "held down to Z".
-pub fn lightest(m: &Manifest) -> Option<String> {
+pub fn lightest(m: &Manifest) -> Option<crate::chem::Kind> {
     m.iter().filter(|(_, a)| **a > ratio(0, 1)).min_by_key(|(k, _)| (crate::chem::hold(k), crate::chem::charge(k))).map(|(k, _)| k.clone())
 }
 
@@ -925,7 +927,7 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
     let rate = |l: &Ratio| ratio(2, 1) * delta(l);
     // The hydride bonds formed at this echo's meetings: (centre, hydrogen,
     // their keys, the centre's open frames, the hydrides formed).
-    let mut bonds: Vec<(usize, usize, String, String, u32, u32, String, Ratio)> = Vec::new();
+    let mut bonds: Vec<(usize, usize, crate::chem::Kind, crate::chem::Kind, u32, u32, crate::chem::Kind, Ratio)> = Vec::new();
     let (advance, dl) = {
         let items = &items;
         let parent = &mut parent;
@@ -1076,7 +1078,7 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
                 }
                 continue;
             }
-            let (k, a) = it.0.iter().next().map(|(k, a)| (k.clone(), a.clone())).unwrap_or_default();
+            let Some((k, a)) = it.0.iter().next().map(|(k, a)| (k.clone(), a.clone())) else { continue };
             motes.push(crate::flows::Mote { key: k, amount: a, ell_o: it.1.clone(), ell_c: ratio(0, 1), phase: it.2.clone(), agitation: crate::ring::grain(&(it.3.clone() + heat[g[0]].clone())), born: 0, vacuum: false });
             continue;
         }
@@ -1433,7 +1435,7 @@ mod tests {
     fn a_cool_world_keeps_layers_and_makes_water_in_them() {
         use crate::pulse::Manifest;
         let three_z = |m: &Manifest| m.iter().fold(ratio(0, 1), |s, (k, a)| s + a.clone() * ratio(3 * i64::from(crate::chem::charge(k)), 1));
-        let mut world: Manifest = [("Z026".to_string(), ratio(40, 1)), ("Z017".to_string(), ratio(7, 1)), ("Z011".to_string(), ratio(11, 1))].into();
+        let mut world: Manifest = [(crate::chem::Kind::parse("Z026").expect("a kind"), ratio(40, 1)), (crate::chem::Kind::parse("Z017").expect("a kind"), ratio(7, 1)), (crate::chem::Kind::parse("Z011").expect("a kind"), ratio(11, 1))].into();
         let before = three_z(&world);
         // Its layers are read by its own cut: the core at the centre.
         let (bands, h) = layer_bands(&world, &ratio(0, 1)).expect("a core");

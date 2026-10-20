@@ -75,10 +75,6 @@ pub struct Recycled {
     pub hydrogen: Ratio,
 }
 
-fn atom_key(z: u32) -> String {
-    format!("Z{z:03}")
-}
-
 /// The clusters at `at` PART in the throat's heat (1: every cluster's
 /// loosest winding is within it), each into its atoms, keeping the mote's
 /// state. Returns the throat's motes after parting (new ones appended).
@@ -88,12 +84,15 @@ pub fn part(motes: &mut Vec<Mote>, at: &[usize]) -> Vec<usize> {
         if i >= motes.len() {
             continue;
         }
-        match crate::chem::components(&motes[i].key) {
-            Some(ps) if ps.len() > 1 || ps.first().is_some_and(|(n, _)| *n > 1) => {
+        let ps: Vec<(u32, u32)> = crate::chem::components(&motes[i].key).to_vec();
+        match ps.as_slice() {
+            [(1, _)] => out.push(i),
+            _ => {
                 let whole = motes[i].clone();
                 for (j, (n, z)) in ps.into_iter().enumerate() {
+                    let Some(kind) = crate::chem::Kind::atom(z) else { continue };
                     let mut atom = whole.clone();
-                    atom.key = atom_key(z);
+                    atom.key = kind;
                     atom.amount = whole.amount.clone() * ratio(i64::from(n), 1);
                     if j == 0 {
                         motes[i] = atom;
@@ -104,7 +103,6 @@ pub fn part(motes: &mut Vec<Mote>, at: &[usize]) -> Vec<usize> {
                     }
                 }
             }
-            _ => out.push(i),
         }
     }
     out
@@ -120,7 +118,7 @@ pub fn recycle(motes: &mut Vec<Mote>, at: &[usize], b: &Ratio, s: &Ratio, g: &Ra
     if *b <= ratio(0, 1) || *s <= ratio(0, 1) {
         return out;
     }
-    let h_in = at.iter().filter(|&&i| i < motes.len() && motes[i].key == "Z001").fold(ratio(0, 1), |acc, &i| acc + motes[i].amount.clone());
+    let h_in = at.iter().filter(|&&i| i < motes.len() && motes[i].key == crate::chem::hydrogen()).fold(ratio(0, 1), |acc, &i| acc + motes[i].amount.clone());
     let e = b.clone() * s.clone();
     let built = s.clone() / (s.clone() + e.clone());
     let mut stack: Vec<usize> = at.iter().copied().filter(|&i| i < motes.len()).collect();
@@ -136,7 +134,8 @@ pub fn recycle(motes: &mut Vec<Mote>, at: &[usize], b: &Ratio, s: &Ratio, g: &Ra
             if pairs > ratio(0, 1) {
                 motes[i].amount -= pairs.clone() * ratio(2, 1);
                 let mut fused = motes[i].clone();
-                fused.key = atom_key(2 * z);
+                let Some(product) = crate::chem::Kind::atom(2 * z) else { continue };
+                fused.key = product;
                 fused.amount = pairs.clone();
                 motes.push(fused);
                 stack.push(motes.len() - 1);
@@ -178,8 +177,8 @@ pub fn recycle(motes: &mut Vec<Mote>, at: &[usize], b: &Ratio, s: &Ratio, g: &Ra
             out.spent += n.clone() * ratio(peel_cost(z, k), 1) + deeper.clone() * ratio(next, 1);
             out.peeled += n.clone();
             motes[i].amount -= n.clone();
-            let emit = |key: String, amount: Ratio, motes: &mut Vec<Mote>, stack: &mut Vec<usize>| {
-                if amount > ratio(0, 1) {
+            let emit = |key: Option<crate::chem::Kind>, amount: Ratio, motes: &mut Vec<Mote>, stack: &mut Vec<usize>| {
+                if let (Some(key), true) = (key, amount > ratio(0, 1)) {
                     let mut m = motes[i].clone();
                     m.key = key;
                     m.amount = amount;
@@ -191,11 +190,11 @@ pub fn recycle(motes: &mut Vec<Mote>, at: &[usize], b: &Ratio, s: &Ratio, g: &Ra
             let hydrogen = shallow.clone() * ratio(i64::from(k), 1) + deeper.clone() * ratio(i64::from(k + 1), 1);
             let (rest, rest_deep) = (z - k, z - k - 1);
             let mut h_total = hydrogen;
-            if rest == 1 { h_total += shallow.clone() } else { emit(atom_key(rest), shallow, motes, &mut stack) }
+            if rest == 1 { h_total += shallow.clone() } else { emit(crate::chem::Kind::atom(rest), shallow, motes, &mut stack) }
             if deeper > ratio(0, 1) {
-                if rest_deep == 1 { h_total += deeper.clone() } else { emit(atom_key(rest_deep), deeper, motes, &mut stack) }
+                if rest_deep == 1 { h_total += deeper.clone() } else { emit(crate::chem::Kind::atom(rest_deep), deeper, motes, &mut stack) }
             }
-            emit(atom_key(1), h_total, motes, &mut stack);
+            emit(Some(crate::chem::hydrogen()), h_total, motes, &mut stack);
         }
     }
     // THE GALAXY'S PUSH SORTS THE PRODUCTS (operator 2026-10-19: "build it
@@ -227,7 +226,7 @@ pub fn recycle(motes: &mut Vec<Mote>, at: &[usize], b: &Ratio, s: &Ratio, g: &Ra
     let mut room = ((g.clone() - s.clone()) / ratio(2, 1)).max(ratio(0, 1));
     let mut order: Vec<usize> = stack.iter().copied().filter(|&i| motes[i].amount > ratio(0, 1)).collect();
     order.sort_by_key(|&i| std::cmp::Reverse(crate::chem::hold(&motes[i].key)));
-    let mut held: Vec<(String, Ratio)> = Vec::new();
+    let mut held: Vec<(crate::chem::Kind, Ratio)> = Vec::new();
     for i in order {
         if room <= ratio(0, 1) {
             break;
@@ -269,7 +268,7 @@ pub fn recycle(motes: &mut Vec<Mote>, at: &[usize], b: &Ratio, s: &Ratio, g: &Ra
             motes.push(m);
         }
     }
-    out.hydrogen = stack.iter().filter(|&&i| motes[i].key == "Z001").fold(ratio(0, 1), |acc, &i| acc + motes[i].amount.clone()) - h_in;
+    out.hydrogen = stack.iter().filter(|&&i| motes[i].key == crate::chem::hydrogen()).fold(ratio(0, 1), |acc, &i| acc + motes[i].amount.clone()) - h_in;
     // Everything that passed leaves on the continuum (operator 2026-10-19:
     // "redistributed back via the continuum"); the trapped stand at the
     // throat, continuum matter too.
@@ -284,7 +283,7 @@ mod tests {
     use super::*;
 
     fn mote(key: &str, amount: Ratio) -> Mote {
-        Mote { key: key.into(), amount, ell_o: ratio(1, 2), ell_c: ratio(0, 1), phase: vec![ratio(0, 1), ratio(1, 2)], agitation: ratio(0, 1), born: 0, vacuum: true }
+        Mote { key: crate::chem::Kind::parse(key).expect("a kind"), amount, ell_o: ratio(1, 2), ell_c: ratio(0, 1), phase: vec![ratio(0, 1), ratio(1, 2)], agitation: ratio(0, 1), born: 0, vacuum: true }
     }
 
     fn three_z(ms: &[Mote]) -> Ratio {
@@ -321,6 +320,6 @@ mod tests {
         // No bounce, nothing recycled.
         let mut ms = vec![mote("Z008", ratio(1, 1))];
         assert_eq!(recycle(&mut ms, &[0], &ratio(0, 1), &ratio(4, 1), &ratio(4, 1), 1), Recycled::default());
-        assert_eq!(ms[0].key, "Z008");
+        assert_eq!(ms[0].key, crate::chem::Kind::parse("Z008").expect("a kind"));
     }
 }

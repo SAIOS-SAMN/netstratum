@@ -83,8 +83,8 @@ pub struct World {
     pub window: u64,
 }
 
-fn z_of(key: &str) -> Option<u32> {
-    key.strip_prefix('Z').and_then(|z| z.parse().ok())
+fn z_of(key: &crate::chem::Kind) -> Option<u32> {
+    crate::chem::atom_z(key)
 }
 
 /// A grip in kelvin: `τ · 157,800`.
@@ -539,7 +539,7 @@ mod tests {
     fn a_world_reads_its_heat_and_media() {
         // Hydrogen (single bond) and a two-bond kind at 60 bells: Z = 6 on the
         // harmonic atom (Z = 4 pairs its round shape and bonds nothing).
-        let matter: Manifest = [("Z001".to_string(), ratio(10, 1)), ("Z006".to_string(), ratio(5, 1))].into();
+        let matter: Manifest = [(crate::chem::Kind::parse("Z001").expect("a kind"), ratio(10, 1)), (crate::chem::Kind::parse("Z006").expect("a kind"), ratio(5, 1))].into();
         let w = read(vec![1, 1, 1], &matter, &ratio(60, 1), &ratio(59, 60), &ratio(1, 1), &ratio(1_000_000, 1), 240).unwrap();
         assert_eq!(w.heat, ratio(1000, 1));
         let heavy = read(vec![1, 1, 1], &matter, &ratio(60, 1), &ratio(59, 60), &ratio(3, 1), &ratio(1, 1), 240).unwrap();

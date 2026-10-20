@@ -455,9 +455,9 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             let in_phase = coherence(&slip(&own, bell, t_u));
             // EVERY KIND A RUNG (the law names no rungs: Z + Z → 2Z wherever
             // the fusion changes the open count, `formation::burn`).
-            let rungs: Vec<u32> = sys.kept.keys().filter_map(|k| k.strip_prefix('Z').and_then(|z| z.parse::<u32>().ok())).collect();
+            let rungs: Vec<u32> = sys.kept.keys().filter_map(crate::chem::atom_z).collect();
             for z in rungs {
-                let key = format!("Z{z:03}");
+                let (Some(key), Some(made_kind)) = (crate::chem::Kind::atom(z), crate::formation::product(z)) else { continue };
                 if !sys.kept.contains_key(&key) {
                     continue;
                 }
@@ -472,7 +472,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                             *burned.entry(key.clone()).or_insert_with(|| ratio(0, 1)) += made.clone() * ratio(2, 1);
                             let spin = mass(&sys.total()) * sys.ell.clone();
                             less(&mut sys.kept, &[(key.clone(), made.clone() * ratio(2, 1))].into());
-                            *sys.kept.entry(crate::formation::product(z)).or_insert_with(|| ratio(0, 1)) += made;
+                            *sys.kept.entry(made_kind.clone()).or_insert_with(|| ratio(0, 1)) += made;
                             let after = mass(&sys.total());
                             if !after.is_zero() {
                                 // The spin grain: the floored remainder goes
@@ -499,7 +499,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // bound) reaches a pair; a slow halving of a large stock still
             // fuses a great many nuclei.
             let can_burn = sys.kept.iter().any(|(k, a)| {
-                *a >= pair && k.strip_prefix('Z').and_then(|z| z.parse::<u32>().ok()).is_some_and(|z| crate::formation::burn(&sys.kept, &share_now, z, &ratio(1, 1)).is_some_and(|(every, _)| a.clone() * ratio(rings_echo as i64, 1) >= pair.clone() * ratio(every.min(i64::MAX as u64) as i64, 1)))
+                *a >= pair && crate::chem::atom_z(k).is_some_and(|z| crate::formation::burn(&sys.kept, &share_now, z, &ratio(1, 1)).is_some_and(|(every, _)| a.clone() * ratio(rings_echo as i64, 1) >= pair.clone() * ratio(every.min(i64::MAX as u64) as i64, 1)))
             });
             if !can_burn && !sys.kept.is_empty() {
                 sys.remnant = true;

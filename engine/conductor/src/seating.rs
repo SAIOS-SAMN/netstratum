@@ -55,7 +55,7 @@ pub fn composition_of(u: &Universe, path: &[u64]) -> Option<Vec<(u16, cfe::ratio
     let core = u.cores.iter().find(|c| c.path.first() == path.first())?;
     let sys = core.satellites.iter().find(|s| s.path.get(1) == path.get(1))?;
     let orb = sys.satellites.iter().find(|o| o.path.get(2) == path.get(2))?;
-    Some(orb.kept.iter().filter_map(|(k, a)| k.strip_prefix('Z').and_then(|z| z.parse::<u16>().ok()).map(|z| (z, a.clone()))).collect())
+    Some(orb.kept.iter().filter_map(|(k, a)| crate::chem::atom_z(k).and_then(|z| u16::try_from(z).ok()).map(|z| (z, a.clone()))).collect())
 }
 
 /// Each system's stand-in place and its galactic period (bells a turn about

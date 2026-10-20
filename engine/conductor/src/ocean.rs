@@ -175,7 +175,7 @@ pub fn arrival_turning(n: u64, r: &Ratio, h_g: &Ratio, m: &Ratio, h_u: &Ratio) -
 /// free, the free part's motes); `galaxy` is the galaxy's grains with the
 /// arrivals already counted.
 pub fn land(galaxy: &Manifest, arriving: &Manifest, rho: &Ratio, turning: &(Ratio, Ratio), born: u64) -> (Manifest, Manifest, Vec<crate::formation::Shell>) {
-    let weight = |k: &str| crate::chem::hold(k);
+    let weight = |k: &crate::chem::Kind| crate::chem::hold(k);
     let (mut held, mut free, mut motes) = (Manifest::new(), Manifest::new(), Vec::new());
     let total = mass(galaxy);
     let Some((p, h, mean)) = crate::pulse::galaxy_push(galaxy) else { return (held, arriving.clone(), motes) };
@@ -201,7 +201,7 @@ pub fn land(galaxy: &Manifest, arriving: &Manifest, rho: &Ratio, turning: &(Rati
             let outer = r.clone() * (ratio(1, 1) + p.clone());
             let delta = h.clone() / (r.clone() + h.clone());
             let agitation = if delta < p { (p.clone() - delta) / p.clone() } else { ratio(0, 1) };
-            let halving = k.strip_prefix('Z').and_then(|z| z.parse::<u32>().ok()).and_then(cfe::almanac::atom::atom).and_then(|a| (a.unpaired > 0).then(|| u64::from((cfe::almanac::atom::hold(a.z) + a.unpaired - 1) / a.unpaired)));
+            let halving = crate::chem::atom_z(k).and_then(cfe::almanac::atom::atom).and_then(|a| (a.unpaired > 0).then(|| u64::from((cfe::almanac::atom::hold(a.z) + a.unpaired - 1) / a.unpaired)));
             if outer > inner && !total.is_zero() {
                 motes.push(crate::formation::Shell { key: k.clone(), held: loose.clone() * w / total.clone(), inner, outer: outer.clone(), agitation, halving, born, vacuum: crate::formation::vacuum_halving(&outer, &h) });
             }

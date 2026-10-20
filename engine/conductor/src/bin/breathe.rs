@@ -65,18 +65,18 @@ fn main() {
     // physics of recycling): hydrogen's and helium's shares by nuclei at the
     // founding and now, a reading of age, never a flag.
     let all = u.total();
-    let count = |m: &pulse::Manifest, k: &str| m.get(k).cloned().unwrap_or_else(|| cfe::ratio::ratio(0, 1));
+    let count = |m: &pulse::Manifest, k: Option<conductor::chem::Kind>| k.and_then(|k| m.get(&k).cloned()).unwrap_or_else(|| cfe::ratio::ratio(0, 1));
     let whole = |m: &pulse::Manifest| m.values().fold(cfe::ratio::ratio(0, 1), |s, a| s + a.clone());
-    let share = |m: &pulse::Manifest, k: &str| conductor::reading::share(&count(m, k), &whole(m));
-    let commonest = all.iter().max_by(|a, b| a.1.cmp(b.1)).map(|(k, _)| k.clone()).unwrap_or_default();
-    println!("AGE — by nuclei, H {} -> {}, He {} -> {} (founding -> now); commonest now {commonest}", share(&before, "Z001"), share(&all, "Z001"), share(&before, "Z002"), share(&all, "Z002"));
+    let share = |m: &pulse::Manifest, z: u32| conductor::reading::share(&count(m, conductor::chem::Kind::atom(z)), &whole(m));
+    let commonest = all.iter().max_by(|a, b| a.1.cmp(b.1)).map(|(k, _)| k.to_string()).unwrap_or_else(|| "none".into());
+    println!("AGE — by nuclei, H {} -> {}, He {} -> {} (founding -> now); commonest now {commonest}", share(&before, 1), share(&all, 1), share(&before, 2), share(&all, 2));
     // THE PARITY (with xylarium): the odd share of the Z >= 3 atoms by
     // nuclei, clusters counted by their parts (equal-halves recycling sorts
     // the heavy matter by parity).
     let odd = |m: &pulse::Manifest| {
         let (mut o, mut t) = (cfe::ratio::ratio(0, 1), cfe::ratio::ratio(0, 1));
         for (k, a) in m {
-            for (n, z) in conductor::chem::components(k).unwrap_or_default() {
+            for &(n, z) in conductor::chem::components(k) {
                 if z >= 3 {
                     let x = a.clone() * cfe::ratio::ratio(i64::from(n), 1);
                     t += x.clone();
@@ -101,7 +101,7 @@ fn main() {
     // Where the two meet is the hydrogen's steady state, a fixed point; a
     // read this early is the first instant, never a judgement.
     {
-        let h_now = all.get("Z001").cloned().unwrap_or_else(|| cfe::ratio::ratio(0, 1));
+        let h_now = all.get(&conductor::chem::hydrogen()).cloned().unwrap_or_else(|| cfe::ratio::ratio(0, 1));
         let echoes = ((until - start) / t_u.max(1)).max(1);
         let window = (echoes / 10).max(1);
         let mut rows: Vec<String> = Vec::new();
@@ -111,7 +111,7 @@ fn main() {
             let sel = events.iter().filter(|e| e.bell > lo && e.bell <= hi);
             let (mut b, mut r) = (cfe::ratio::ratio(0, 1), cfe::ratio::ratio(0, 1));
             for e in sel {
-                b += e.burned.get("Z001").cloned().unwrap_or_else(|| cfe::ratio::ratio(0, 1));
+                b += e.burned.get(&conductor::chem::hydrogen()).cloned().unwrap_or_else(|| cfe::ratio::ratio(0, 1));
                 r += e.recycled.hydrogen.clone();
             }
             let per = |x: cfe::ratio::Ratio| conductor::reading::share(&x, &(h_now.clone() * cfe::ratio::ratio(window as i64, 1)));

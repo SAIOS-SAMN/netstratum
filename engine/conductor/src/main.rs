@@ -353,7 +353,7 @@ fn main() {
             let gas_share = universe.cores.iter().map(|c| conductor::pulse::mass(&c.medium)).fold(cfe::ratio::ratio(0, 1), |a, b| a + b) / conductor::pulse::mass(&universe.total());
             let discs = universe.cores.iter().map(|c| conductor::pulse::mass(&c.kept)).fold(cfe::ratio::ratio(0, 1), |a, b| a + b) / conductor::pulse::mass(&universe.total());
             let motes: usize = universe.cores.iter().map(|c| c.gas.len()).sum();
-            let metal_stars = universe.cores.iter().flat_map(|c| &c.satellites).filter(|s| s.kept.keys().any(|k| k != "Z001" && k != "Z002")).count();
+            let metal_stars = universe.cores.iter().flat_map(|c| &c.satellites).filter(|s| s.kept.keys().any(|k| conductor::chem::charge(k) > 2)).count();
             // THE COUPLING at each star's interface (`formation::coupling`).
             let universe_hold = conductor::pulse::mass(&universe.total());
             let kappas: Vec<cfe::ratio::Ratio> = universe.cores.iter().flat_map(|c| &c.satellites).filter_map(|s| conductor::formation::coupling(&s.kept, &universe_hold)).collect();

@@ -25,7 +25,7 @@ use std::collections::BTreeMap;
 use std::path::Path;
 
 /// One kind's amount, by its key (`chem`: an atom `Zddd` or a cluster).
-pub type Manifest = BTreeMap<String, Ratio>;
+pub type Manifest = BTreeMap<crate::chem::Kind, Ratio>;
 
 /// The deployment's grain: ONE NUCLEUS (operator 2026-10-18, the package
 /// as an element recipe: "every kind in the recipe is carried, never
@@ -76,7 +76,7 @@ pub fn from_nuclei(nuclei: &Nuclei) -> Manifest {
     nuclei
         .iter()
         .filter(|(_, count)| **count > num_bigint::BigInt::from(0))
-        .map(|(z, count)| (format!("Z{z:03}"), Ratio::new(count.clone(), grid.clone())))
+        .filter_map(|(z, count)| Some((crate::chem::Kind::atom(u32::from(*z))?, Ratio::new(count.clone(), grid.clone()))))
         .collect()
 }
 
@@ -294,15 +294,15 @@ pub fn galaxy_push(grains: &Manifest) -> Option<(Ratio, Ratio, Ratio)> {
 
 /// The push and its CUT: as `galaxy_push`, with the lightest kind the
 /// throat still holds (None: it holds every kind).
-pub fn push_cut(grains: &Manifest) -> Option<(Ratio, Ratio, Ratio, Option<String>)> {
-    let weight = |k: &str| crate::chem::hold(k);
+pub fn push_cut(grains: &Manifest) -> Option<(Ratio, Ratio, Ratio, Option<crate::chem::Kind>)> {
+    let weight = |k: &crate::chem::Kind| crate::chem::hold(k);
     let total = mass(grains);
     let count = grains.values().fold(ratio(0, 1), |s, a| s + a.clone());
     if total.is_zero() || count.is_zero() {
         return None;
     }
     let mean = total.clone() / count;
-    let mut order: Vec<(&String, &Ratio)> = grains.iter().collect();
+    let mut order: Vec<(&crate::chem::Kind, &Ratio)> = grains.iter().collect();
     order.sort_by(|a, b| weight(b.0).cmp(&weight(a.0)).then(a.0.cmp(b.0)));
     // The cumulative hold of everything heavier than each element.
     let above: Vec<Ratio> = order
@@ -343,7 +343,7 @@ pub fn push_cut(grains: &Manifest) -> Option<(Ratio, Ratio, Ratio, Option<String
 /// The distribution keeps moving after (the waves, the breath): this is
 /// only where the founding pulse leaves it.
 pub fn disperse(grains: &Manifest) -> Manifest {
-    let weight = |k: &str| crate::chem::hold(k);
+    let weight = |k: &crate::chem::Kind| crate::chem::hold(k);
     let Some((p, h, mean)) = galaxy_push(grains) else { return Manifest::new() };
     grains
         .iter()
@@ -406,15 +406,15 @@ pub struct Universe {
 /// No draws: the galaxies are the shells' own beads.
 pub fn cascade(manifest: &Manifest) -> (Manifest, Vec<(Ratio, Manifest)>, Ratio) {
     let g = |x: &Ratio| crate::ring::grain(x);
-    let w = |k: &str| ratio(i64::from(crate::chem::hold(k)), 1);
+    let w = |k: &crate::chem::Kind| ratio(i64::from(crate::chem::hold(k)), 1);
     let total = mass(manifest);
     let count = manifest.values().fold(ratio(0, 1), |s, a| s + a.clone());
     if total.is_zero() || count.is_zero() {
         return (Manifest::new(), Vec::new(), ratio(2, 1));
     }
     let _ = count;
-    let mut kinds: Vec<(String, Ratio)> = manifest.iter().filter(|(_, a)| **a > ratio(0, 1)).map(|(k, a)| (k.clone(), a.clone())).collect();
-    kinds.sort_by_key(|(k, _)| k.strip_prefix('Z').and_then(|z| z.parse::<u32>().ok()).unwrap_or(0));
+    let mut kinds: Vec<(crate::chem::Kind, Ratio)> = manifest.iter().filter(|(_, a)| **a > ratio(0, 1)).map(|(k, a)| (k.clone(), a.clone())).collect();
+    kinds.sort_by_key(|(k, _)| crate::chem::charge(k));
     let face = |held: &Ratio| g(&(ratio(1, 2) * held.clone() / (held.clone() + ratio(1, 1) + held.clone())));
     let mut held = ratio(0, 1);
     let mut share = Vec::with_capacity(kinds.len());
@@ -510,7 +510,7 @@ pub fn cascade(manifest: &Manifest) -> (Manifest, Vec<(Ratio, Manifest)>, Ratio)
         // goes out with the expelled matter, in its shell.
         if reach.clone() * (ratio(1, 1) + s_final.clone()) <= ratio(1, 1) {
             let (kept, rest): (Manifest, Manifest) = m.into_iter().partition(|(k, _)| {
-                k.strip_prefix('Z').and_then(|z| z.parse::<u32>().ok()).is_some_and(|z| vessel.is_some_and(|(lo, hi)| z >= lo && z <= hi))
+                crate::chem::atom_z(k).is_some_and(|z| vessel.is_some_and(|(lo, hi)| z >= lo && z <= hi))
             });
             for (k, a) in kept {
                 *wellspring.entry(k).or_insert_with(|| ratio(0, 1)) += a;
@@ -796,6 +796,7 @@ impl Universe {
 fn put_manifest(m: &Manifest, out: &mut Vec<u8>) {
     out.extend_from_slice(&(m.len() as u32).to_le_bytes());
     for (k, a) in m {
+        let k = k.to_string();
         out.extend_from_slice(&(k.len() as u16).to_le_bytes());
         out.extend_from_slice(k.as_bytes());
         cfe::ratio::encode(a, out);
@@ -817,8 +818,9 @@ fn put_body(b: &Body, out: &mut Vec<u8>) {
     cfe::tlv::put(1, &v, out);
     for p in &b.gas {
         let mut g = Vec::new();
-        g.extend_from_slice(&(p.key.len() as u16).to_le_bytes());
-        g.extend_from_slice(p.key.as_bytes());
+        let key = p.key.to_string();
+        g.extend_from_slice(&(key.len() as u16).to_le_bytes());
+        g.extend_from_slice(key.as_bytes());
         for r in [&p.held, &p.inner, &p.outer, &p.agitation] {
             cfe::ratio::encode(r, &mut g);
         }
@@ -837,8 +839,9 @@ fn put_body(b: &Body, out: &mut Vec<u8>) {
     }
     for x in &b.flows {
         let mut w = Vec::new();
-        w.extend_from_slice(&(x.key.len() as u16).to_le_bytes());
-        w.extend_from_slice(x.key.as_bytes());
+        let key = x.key.to_string();
+        w.extend_from_slice(&(key.len() as u16).to_le_bytes());
+        w.extend_from_slice(key.as_bytes());
         for r in [&x.amount, &x.ell_o, &x.ell_c, &x.agitation] {
             cfe::ratio::encode(r, &mut w);
         }
@@ -911,8 +914,9 @@ pub fn write(var_root: &Path, seed: &[u8; 32], u: &Universe) -> std::io::Result<
     cfe::tlv::put(17, &u.t_u.to_le_bytes(), &mut out);
     for x in &u.firmament {
         let mut w = Vec::new();
-        w.extend_from_slice(&(x.key.len() as u16).to_le_bytes());
-        w.extend_from_slice(x.key.as_bytes());
+        let key = x.key.to_string();
+        w.extend_from_slice(&(key.len() as u16).to_le_bytes());
+        w.extend_from_slice(key.as_bytes());
         for r in [&x.amount, &x.ell_o, &x.ell_c, &x.agitation] {
             cfe::ratio::encode(r, &mut w);
         }
@@ -937,7 +941,7 @@ fn get_manifest(v: &[u8], at: &mut usize) -> Option<Manifest> {
     let mut m = Manifest::new();
     for _ in 0..n {
         let len = u16::from_le_bytes(v.get(*at..*at + 2)?.try_into().ok()?) as usize;
-        let key = String::from_utf8(v.get(*at + 2..*at + 2 + len)?.to_vec()).ok()?;
+        let key = crate::chem::Kind::parse(std::str::from_utf8(v.get(*at + 2..*at + 2 + len)?).ok()?)?;
         *at += 2 + len;
         let (a, used) = cfe::ratio::decode(v.get(*at..)?)?;
         *at += used;
@@ -971,7 +975,7 @@ fn get_body(v: &[u8]) -> Option<Body> {
 /// A flow mote (tag 10), attached to the body read before it.
 fn get_flow(v: &[u8]) -> Option<crate::flows::Mote> {
     let len = u16::from_le_bytes(v.get(0..2)?.try_into().ok()?) as usize;
-    let key = String::from_utf8(v.get(2..2 + len)?.to_vec()).ok()?;
+    let key = crate::chem::Kind::parse(std::str::from_utf8(v.get(2..2 + len)?).ok()?)?;
     let mut at = 2 + len;
     let mut r = Vec::new();
     for _ in 0..4 {
@@ -996,7 +1000,7 @@ fn get_flow(v: &[u8]) -> Option<crate::flows::Mote> {
 /// A gas mote (tag 6), attached to the body read before it.
 fn get_mote(v: &[u8]) -> Option<crate::formation::Shell> {
     let len = u16::from_le_bytes(v.get(0..2)?.try_into().ok()?) as usize;
-    let key = String::from_utf8(v.get(2..2 + len)?.to_vec()).ok()?;
+    let key = crate::chem::Kind::parse(std::str::from_utf8(v.get(2..2 + len)?).ok()?)?;
     let mut at = 2 + len;
     let mut r = Vec::new();
     for _ in 0..4 {
@@ -1078,7 +1082,7 @@ mod tests {
     #[test]
     fn a_universe_file_without_its_unit_is_refused() {
         let dir = std::env::temp_dir().join(format!("ns-refuse-unit-{}", std::process::id()));
-        let u = Universe { cores: Vec::new(), medium: [("Z001".to_string(), ratio(1, 1))].into(), firmament: Vec::new(), unit: ratio(1, 2), t_u: 15 };
+        let u = Universe { cores: Vec::new(), medium: [(crate::chem::Kind::parse("Z001").expect("a kind"), ratio(1, 1))].into(), firmament: Vec::new(), unit: ratio(1, 2), t_u: 15 };
         write(&dir, &[7u8; 32], &u).expect("written");
         assert!(read(&dir).is_some());
         let bytes = std::fs::read(dir.join("pulse.bin")).expect("read");
@@ -1102,19 +1106,19 @@ mod tests {
     fn a_cluster_weighs_its_parts_in_the_galaxy_cut() {
         // Water on S^11 holds 3·12 − 0 = 36, as Z016 does (3·16 − 12): one
         // galaxy of each reads one push, one hold, one mean weight.
-        assert_eq!(crate::chem::hold("Z008·4Z001"), crate::chem::hold("Z016"));
-        let water: Manifest = [("Z008·4Z001".to_string(), ratio(1, 1)), ("Z001".to_string(), ratio(3, 1))].into();
-        let sulphur: Manifest = [("Z016".to_string(), ratio(1, 1)), ("Z001".to_string(), ratio(3, 1))].into();
+        assert_eq!(crate::chem::hold(&crate::chem::Kind::parse("Z008·4Z001").expect("a kind")), crate::chem::hold(&crate::chem::Kind::parse("Z016").expect("a kind")));
+        let water: Manifest = [(crate::chem::Kind::parse("Z008·4Z001").expect("a kind"), ratio(1, 1)), (crate::chem::Kind::parse("Z001").expect("a kind"), ratio(3, 1))].into();
+        let sulphur: Manifest = [(crate::chem::Kind::parse("Z016").expect("a kind"), ratio(1, 1)), (crate::chem::Kind::parse("Z001").expect("a kind"), ratio(3, 1))].into();
         assert_eq!(push_cut(&water).map(|(p, h, m, _)| (p, h, m)), push_cut(&sulphur).map(|(p, h, m, _)| (p, h, m)));
     }
 
     #[test]
     fn the_pulse_file_reads_back_exactly() {
-        let mote = crate::formation::Shell { key: "Z001".into(), held: ratio(1, 5), inner: ratio(1, 3), outer: ratio(2, 3), agitation: ratio(1, 2), halving: Some(2), born: 7, vacuum: 3 };
-        let orb = Body { path: vec![1, 1, 1], radius: ratio(3, 2), period: ratio(5, 2), kept: [("Z008".to_string(), ratio(1, 64))].into(), satellites: Vec::new(), medium: Manifest::new(), ell: ratio(7, 3), medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1) };
-        let sys = Body { path: vec![1, 1], radius: ratio(9, 2), period: ratio(11, 2), kept: [("Z001".to_string(), ratio(3, 1024))].into(), satellites: vec![orb], medium: Manifest::new(), ell: ratio(1, 9), medium_spin: ratio(1, 7), gas: Vec::new(), born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1) };
-        let core = Body { path: vec![1], radius: ratio(60, 1), period: ratio(0, 1), kept: [("Z026".to_string(), ratio(1, 2))].into(), satellites: vec![sys], medium: [("Z001".to_string(), ratio(5, 4))].into(), ell: ratio(0, 1), medium_spin: ratio(13, 11), gas: vec![mote], born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1) };
-        let u = Universe { cores: vec![core], medium: [("Z002".to_string(), ratio(1, 1024))].into(), firmament: Vec::new(), unit: ratio(1, 2), t_u: 15 };
+        let mote = crate::formation::Shell { key: crate::chem::Kind::parse("Z001").expect("a kind"), held: ratio(1, 5), inner: ratio(1, 3), outer: ratio(2, 3), agitation: ratio(1, 2), halving: Some(2), born: 7, vacuum: 3 };
+        let orb = Body { path: vec![1, 1, 1], radius: ratio(3, 2), period: ratio(5, 2), kept: [(crate::chem::Kind::parse("Z008").expect("a kind"), ratio(1, 64))].into(), satellites: Vec::new(), medium: Manifest::new(), ell: ratio(7, 3), medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1) };
+        let sys = Body { path: vec![1, 1], radius: ratio(9, 2), period: ratio(11, 2), kept: [(crate::chem::Kind::parse("Z001").expect("a kind"), ratio(3, 1024))].into(), satellites: vec![orb], medium: Manifest::new(), ell: ratio(1, 9), medium_spin: ratio(1, 7), gas: Vec::new(), born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1) };
+        let core = Body { path: vec![1], radius: ratio(60, 1), period: ratio(0, 1), kept: [(crate::chem::Kind::parse("Z026").expect("a kind"), ratio(1, 2))].into(), satellites: vec![sys], medium: [(crate::chem::Kind::parse("Z001").expect("a kind"), ratio(5, 4))].into(), ell: ratio(0, 1), medium_spin: ratio(13, 11), gas: vec![mote], born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1) };
+        let u = Universe { cores: vec![core], medium: [(crate::chem::Kind::parse("Z002").expect("a kind"), ratio(1, 1024))].into(), firmament: Vec::new(), unit: ratio(1, 2), t_u: 15 };
         let dir = std::env::temp_dir().join(format!("pulse-{}", std::process::id()));
         write(&dir, &[7; 32], &u).unwrap();
         assert_eq!(read(&dir), Some(([7; 32], u)), "the file gives the universe back");

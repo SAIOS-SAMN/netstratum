@@ -49,7 +49,7 @@ fn composition(m: &pulse::Manifest, top: usize) -> String {
     if total == ratio(0, 1) {
         return "—".into();
     }
-    let mut parts: Vec<(String, Ratio)> = m.iter().map(|(k, a)| (k.clone(), pulse::mass(&[(k.clone(), a.clone())].into()) / total.clone())).collect();
+    let mut parts: Vec<(conductor::chem::Kind, Ratio)> = m.iter().map(|(k, a)| (k.clone(), pulse::mass(&[(k.clone(), a.clone())].into()) / total.clone())).collect();
     parts.sort_by(|a, b| b.1.cmp(&a.1));
     parts.iter().take(top).map(|(k, s)| format!("{k}:{}", f(s))).collect::<Vec<_>>().join(" ")
 }
@@ -139,7 +139,7 @@ fn main() {
             let dom = sys.satellites.iter().max_by(|a, b| pulse::mass(&a.kept).cmp(&pulse::mass(&b.kept))).map(|o| o.period.clone());
             for o in &sys.satellites {
                 let lock = dom.as_ref().filter(|p| **p > ratio(0, 1)).map(|p| o.period.clone() / p.clone()).map(|x| if x.denom() < &num_bigint::BigInt::from(1000) { format!("{x}") } else { format!("{} (free)", f(&x)) }).unwrap_or_default();
-                println!("  world {:?}: reach {}, period {}, against the dominant {lock}; held down to {}; {}", o.path, f(&o.radius), f(&o.period), formation::lightest(&o.kept).unwrap_or_default(), composition(&o.kept, 4));
+                println!("  world {:?}: reach {}, period {}, against the dominant {lock}; held down to {}; {}", o.path, f(&o.radius), f(&o.period), formation::lightest(&o.kept).map(|k| k.to_string()).unwrap_or_else(|| "none".into()), composition(&o.kept, 4));
             }
         }
         "world" => {
@@ -235,7 +235,7 @@ fn main() {
                     }
                 }
                 let bm = pulse::mass(&band);
-                let mut top: Vec<(String, Ratio)> = band.iter().map(|(k, a)| (k.clone(), a.clone() * conductor::flows::weight(k))).collect();
+                let mut top: Vec<(conductor::chem::Kind, Ratio)> = band.iter().map(|(k, a)| (k.clone(), a.clone() * conductor::flows::weight(k))).collect();
                 top.sort_by(|a, b| b.1.cmp(&a.1));
                 let (blo, bhi, bn) = zs(&band);
                 let list: Vec<String> = top.iter().take(12).map(|(k, w)| format!("{k}:{}", of(w, &bm))).collect();
@@ -295,7 +295,7 @@ fn main() {
             // worlds' resources.
             let whole = pulse::mass(&u.total());
             let share = |m: &pulse::Manifest| of(&pulse::mass(m), &whole);
-            let h_of = |m: &pulse::Manifest| m.get("Z001").cloned().unwrap_or_else(|| ratio(0, 1));
+            let h_of = |m: &pulse::Manifest| m.get(&conductor::chem::hydrogen()).cloned().unwrap_or_else(|| ratio(0, 1));
             let stars: Vec<&pulse::Body> = u.cores.iter().flat_map(|c| &c.satellites).collect();
             let remnants = stars.iter().filter(|s| s.remnant).count();
             // THE GALAXIES' ORBITS (`pulse::orbit_galaxies`): each core's
@@ -395,7 +395,7 @@ fn main() {
                 if s.satellites.iter().any(|w| w.born == 0) {
                     println!("  HOST star {:?}: {}, heart {:?}", s.path, if s.remnant { "a REMNANT" } else { "burning" }, s.kept.keys().take(4).collect::<Vec<_>>());
                 }
-                let flux = s.kept.keys().filter_map(|k| k.strip_prefix('Z').and_then(|z| z.parse::<u32>().ok())).filter_map(|z| formation::burn(&s.kept, &share, z, &ratio(1, 1)).map(|(_, l)| l)).fold(ratio(0, 1), |a, b| a + b);
+                let flux = s.kept.keys().filter_map(conductor::chem::atom_z).filter_map(|z| formation::burn(&s.kept, &share, z, &ratio(1, 1)).map(|(_, l)| l)).fold(ratio(0, 1), |a, b| a + b);
                 let scale = tot / u.unit.clone();
                 for w in s.satellites.iter().filter(|w| w.born == 0) {
                     let r = if scale == ratio(0, 1) { ratio(0, 1) } else { w.radius.clone() / scale.clone() };
@@ -409,16 +409,16 @@ fn main() {
             }
             // CHEMISTRY: molecules in the worlds and in the systems' media,
             // with water (O + 4H on S^11) named.
-            let in_worlds: Vec<(&String, &Ratio)> = stars.iter().flat_map(|s| &s.satellites).flat_map(|w| w.kept.iter()).filter(|(k, _)| k.contains('·')).collect();
-            let in_media: Vec<(&String, &Ratio)> = stars.iter().flat_map(|s| s.flows.iter().map(|x| (&x.key, &x.amount))).filter(|(k, _)| k.contains('·')).collect();
-            let sum = |v: &[(&String, &Ratio)], k: Option<&str>| f(&v.iter().filter(|(kk, _)| k.map_or(true, |k| kk.as_str() == k)).fold(ratio(0, 1), |a, (_, x)| a + Ratio::clone(x)));
-            let kinds_m: std::collections::BTreeSet<&String> = in_worlds.iter().chain(in_media.iter()).map(|(k, _)| *k).collect();
+            let in_worlds: Vec<(&conductor::chem::Kind, &Ratio)> = stars.iter().flat_map(|s| &s.satellites).flat_map(|w| w.kept.iter()).filter(|(k, _)| conductor::chem::atom_z(k).is_none()).collect();
+            let in_media: Vec<(&conductor::chem::Kind, &Ratio)> = stars.iter().flat_map(|s| s.flows.iter().map(|x| (&x.key, &x.amount))).filter(|(k, _)| conductor::chem::atom_z(k).is_none()).collect();
+            let sum = |v: &[(&conductor::chem::Kind, &Ratio)], k: Option<&str>| f(&v.iter().filter(|(kk, _)| k.map_or(true, |k| kk.to_string() == k)).fold(ratio(0, 1), |a, (_, x)| a + Ratio::clone(x)));
+            let kinds_m: std::collections::BTreeSet<&conductor::chem::Kind> = in_worlds.iter().chain(in_media.iter()).map(|(k, _)| *k).collect();
             println!("  CHEMISTRY: {} molecule kinds; water in worlds {}, in system media {}; all molecules in worlds {}, in media {}",
                 kinds_m.len(), sum(&in_worlds, Some("Z008·4Z001")), sum(&in_media, Some("Z008·4Z001")), sum(&in_worlds, None), sum(&in_media, None));
             // Resources: the worlds' mixes.
             let worlds: Vec<&pulse::Body> = stars.iter().flat_map(|s| &s.satellites).filter(|w| w.born == 0).collect();
-            let mut kinds: std::collections::BTreeSet<String> = std::collections::BTreeSet::new();
-            let mut lightest: std::collections::BTreeMap<String, usize> = std::collections::BTreeMap::new();
+            let mut kinds: std::collections::BTreeSet<conductor::chem::Kind> = std::collections::BTreeSet::new();
+            let mut lightest: std::collections::BTreeMap<conductor::chem::Kind, usize> = std::collections::BTreeMap::new();
             for w in &worlds {
                 kinds.extend(w.kept.keys().cloned());
                 if let Some(k) = formation::lightest(&w.kept) {
@@ -429,16 +429,18 @@ fn main() {
             // Layers: how many kinds each world holds, and its top kind's share.
             let layers: Vec<String> = worlds.iter().take(12).map(|w| {
                 let m = pulse::mass(&w.kept);
-                let top = w.kept.iter().map(|(k, a)| (k.clone(), pulse::mass(&[(k.clone(), a.clone())].into()))).fold((String::new(), ratio(0, 1)), |b, x| if x.1 > b.1 { x } else { b });
-                format!("{}k/{}:{}", w.kept.len(), top.0, of(&top.1, &m))
+                let top = w.kept.iter().map(|(k, a)| (k.clone(), pulse::mass(&[(k.clone(), a.clone())].into()))).max_by(|a, b| a.1.cmp(&b.1));
+                match top {
+                    Some((k, t)) => format!("{}k/{k}:{}", w.kept.len(), of(&t, &m)),
+                    None => format!("{}k", w.kept.len()),
+                }
             }).collect();
             println!("  LAYERS (kinds per world / top kind:share): {}", layers.join(" "));
         }
         "manifest" => {
             // The universe's whole manifest, one kind a line: Z, amount, hold.
             for (k, a) in u.total() {
-                let z = k.strip_prefix('Z').and_then(|z| z.parse::<u32>().ok()).unwrap_or(0);
-                println!("{z} {} {}", f(&a), cfe::almanac::atom::hold(z));
+                println!("{k} {} {}", f(&a), conductor::chem::hold(&k));
             }
         }
         "cascade" => {
@@ -450,8 +452,8 @@ fn main() {
             // each kind carried ℓ = b_k·w̄/w; the beat is the round trip to the
             // top of what REMAINS, 1 + R_top/H, settling at the throat's own.
             let all = u.total();
-            let w = |k: &str| conductor::chem::hold(k);
-            let mut kinds: Vec<(String, Ratio)> = all.iter().filter(|(_, a)| **a > ratio(0, 1)).map(|(k, a)| (k.clone(), a.clone())).collect();
+            let w = |k: &conductor::chem::Kind| conductor::chem::hold(k);
+            let mut kinds: Vec<(conductor::chem::Kind, Ratio)> = all.iter().filter(|(_, a)| **a > ratio(0, 1)).map(|(k, a)| (k.clone(), a.clone())).collect();
             kinds.sort_by(|a, b| w(&b.0).cmp(&w(&a.0)).then(a.0.cmp(&b.0)));
             let total = pulse::mass(&all);
             let count = all.values().fold(ratio(0, 1), |s, a| s + a.clone());
@@ -492,10 +494,10 @@ fn main() {
             let all = u.total();
             let total = pulse::mass(&all);
             let Some((p, h, mean, lightest)) = pulse::push_cut(&all) else { return println!("no matter") };
-            let kinds: Vec<u32> = all.keys().filter_map(|k| k.strip_prefix('Z').and_then(|z| z.parse().ok())).collect();
+            let kinds: Vec<u32> = all.keys().filter_map(conductor::chem::atom_z).collect();
             println!(
                 "FOUNDING CUT over the whole manifest ({} kinds, Z{}..Z{}): p {}, H {}, mean weight {}, lightest held {}",
-                kinds.len(), kinds.iter().min().unwrap_or(&0), kinds.iter().max().unwrap_or(&0), f(&p), f(&h), f(&mean), lightest.unwrap_or_else(|| "— (every kind held)".into())
+                kinds.len(), kinds.iter().min().unwrap_or(&0), kinds.iter().max().unwrap_or(&0), f(&p), f(&h), f(&mean), lightest.map(|k| k.to_string()).unwrap_or_else(|| "— (every kind held)".into())
             );
             let _ = total;
         }
@@ -504,7 +506,7 @@ fn main() {
             let Some(i) = num(1).and_then(galaxy) else { return println!("hearts G") };
             for s in u.cores[i].satellites.iter().take(8) {
                 let m = pulse::mass(&s.kept);
-                let mut ks: Vec<(&String, &Ratio)> = s.kept.iter().collect();
+                let mut ks: Vec<(&conductor::chem::Kind, &Ratio)> = s.kept.iter().collect();
                 ks.sort_by(|a, b| b.1.cmp(a.1));
                 let top: Vec<String> = ks.iter().take(6).map(|(k, a)| format!("{k}:{}", f(&(Ratio::clone(a) * cfe::ratio::ratio(i64::from(conductor::chem::hold(k)), 1) / m.clone())))).collect();
                 println!("  star born {} remnant {} heart {}: {}", s.born, s.remnant, f(&m), top.join(" "));
@@ -513,9 +515,9 @@ fn main() {
         "formation" => {
             for c in &u.cores {
                 let total = pulse::mass(&c.total());
-                let metal = c.satellites.iter().filter(|s| s.kept.keys().any(|k| k != "Z001" && k != "Z002")).count();
+                let metal = c.satellites.iter().filter(|s| s.kept.keys().any(|k| conductor::chem::charge(k) > 2)).count();
                 let remnants = c.satellites.iter().filter(|s| s.remnant).count();
-                let with_h = c.satellites.iter().filter(|s| s.kept.get("Z001").is_some_and(|a| *a > ratio(0, 1))).count();
+                let with_h = c.satellites.iter().filter(|s| s.kept.get(&conductor::chem::hydrogen()).is_some_and(|a| *a > ratio(0, 1))).count();
                 println!(
                     "  galaxy {:>2}: disc {} gas {} ({} motes, {} jet batches); first echo bell {}; {} stars ({metal} with metals, {remnants} remnants, {with_h} holding hydrogen), {} worlds",
                     c.path[0], of(&pulse::mass(&c.kept), &total), of(&pulse::mass(&c.medium), &total), c.gas.len(), c.gas.iter().filter(|g| g.born > 0).count(),
@@ -526,12 +528,12 @@ fn main() {
         "worlds" => {
             // THE PLANETARY CORES (xylarium W1–W4): each world read by the
             // lightest kind its cut kept; rocky and giant are readings of it.
-            let mut by: std::collections::BTreeMap<(u32, String), (usize, Ratio)> = std::collections::BTreeMap::new();
+            let mut by: std::collections::BTreeMap<(u32, conductor::chem::Kind), (usize, Ratio)> = std::collections::BTreeMap::new();
             let mut n = 0;
             let companions = u.cores.iter().flat_map(|c| &c.satellites).flat_map(|s| &s.satellites).filter(|o| o.born > 0).count();
             for o in u.cores.iter().flat_map(|c| &c.satellites).flat_map(|s| &s.satellites).filter(|o| o.born == 0) {
                 n += 1;
-                let k = formation::lightest(&o.kept).unwrap_or_default();
+                let Some(k) = formation::lightest(&o.kept) else { continue };
                 let w = conductor::chem::hold(&k);
                 let e = by.entry((w, k)).or_insert((0, ratio(0, 1)));
                 e.0 += 1;
@@ -562,7 +564,7 @@ fn main() {
                     let rate = system_rate(&u, i, k, &unit);
                     let received: u64 = (rate.clone() * ratio(now.saturating_sub(sys.born) as i64, 1)).floor().to_integer().try_into().unwrap_or(0);
                     if let Some((every, left, light)) = formation::heartbeat(&sys.kept, &(pulse::mass(&sys.kept) / pulse::mass(&sys.total())), received) {
-                        println!("  star {:?}: born {}, {received} rings, halves every {every}, fuel left {}, light {}, He {}", sys.path, sys.born, f(&left), f(&light), f(&(sys.kept.get("Z002").cloned().unwrap_or_else(|| ratio(0, 1)) * ratio(6, 1) / pulse::mass(&sys.kept))));
+                        println!("  star {:?}: born {}, {received} rings, halves every {every}, fuel left {}, light {}, He {}", sys.path, sys.born, f(&left), f(&light), f(&(conductor::chem::Kind::atom(2).and_then(|he| sys.kept.get(&he).cloned()).unwrap_or_else(|| ratio(0, 1)) * ratio(6, 1) / pulse::mass(&sys.kept))));
                     }
                 }
             }

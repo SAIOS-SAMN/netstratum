@@ -49,7 +49,7 @@ pub const PLANES: usize = 2;
 /// A MOTE: matter as held turning, its state carried forward.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Mote {
-    pub key: String,
+    pub key: crate::chem::Kind,
     /// Its amount on the ledger (grains of its kind).
     pub amount: Ratio,
     /// Spin in the orbit's plane, own units: reach `ℓ_o/H`.
@@ -68,12 +68,12 @@ pub struct Mote {
 }
 
 /// A kind's weight (its hold).
-pub fn weight(k: &str) -> Ratio {
+pub fn weight(k: &crate::chem::Kind) -> Ratio {
     ratio(i64::from(crate::chem::hold(k)), 1)
 }
 
 /// A kind's open share, unpaired over hold.
-pub fn open(k: &str) -> Ratio {
+pub fn open(k: &crate::chem::Kind) -> Ratio {
     ratio(i64::from(crate::chem::unpaired(k)), i64::from(crate::chem::hold(k).max(1)))
 }
 
@@ -504,7 +504,7 @@ pub fn shear(motes: &mut [Mote], enc: &Enclosed, total: &Ratio) -> Ratio {
 /// star's own push share (the founding's ½ one tier up), `½ + Z·p` on the loop. It
 /// sorts only as it spreads, by each kind's own inertia under the star's
 /// kick, so early meetings catch mixed matter.
-pub fn spray(released: &Manifest, spins: &[(String, Ratio)], base: &[Ratio], agitation: &Ratio, born: u64, push: &Ratio) -> Vec<Mote> {
+pub fn spray(released: &Manifest, spins: &[(crate::chem::Kind, Ratio)], base: &[Ratio], agitation: &Ratio, born: u64, push: &Ratio) -> Vec<Mote> {
     let held = released.iter().fold(ratio(0, 1), |s, (k, a)| s + a.clone() * weight(k));
     let reach = if held.is_zero() {
         ratio(0, 1)
@@ -745,7 +745,7 @@ pub fn chains(motes: &[Mote], h: &Ratio, p: &Ratio, total: &Ratio) -> Vec<Chain>
     // THE FIBRES (operator 2026-10-18: "you bead the individual fibers and
     // then braid the fibers together"): a fibre is one kind's run on one
     // face, motes whose dispersal bands overlap, linked transitively.
-    let mut fibres: std::collections::BTreeMap<(Vec<bool>, String), Vec<usize>> = std::collections::BTreeMap::new();
+    let mut fibres: std::collections::BTreeMap<(Vec<bool>, crate::chem::Kind), Vec<usize>> = std::collections::BTreeMap::new();
     for (i, x) in motes.iter().enumerate() {
         if on_disc_leg(x) && !rr[i].is_zero() {
             fibres.entry(((0..PLANES).map(|k| frac(&x.phase[k]) < half).collect(), x.key.clone())).or_default().push(i);
@@ -919,7 +919,7 @@ pub fn merge(motes: &mut Vec<Mote>, total: &Ratio) -> Ratio {
     let mut out: Vec<Mote> = Vec::new();
     // Each mote's sector key read once, and found by key, never by a scan
     // of everything kept (each group keyed where its first mote stood).
-    let mut at: std::collections::BTreeMap<(String, bool, Ratio, Vec<Ratio>), usize> = std::collections::BTreeMap::new();
+    let mut at: std::collections::BTreeMap<(crate::chem::Kind, bool, Ratio, Vec<Ratio>), usize> = std::collections::BTreeMap::new();
     let mut remainder = ratio(0, 1);
     for x in std::mem::take(motes) {
         let kx = key(&x);
@@ -994,7 +994,7 @@ mod reading_tests {
     /// The founding's motes of the first `k` kinds, one grain each: the
     /// engine's own construction, each mote at its own carried reach.
     fn motes(k: u32) -> Vec<Mote> {
-        founding(&(1..=k).map(|z| (format!("Z{z:03}"), ratio(1, 1))).collect()).expect("the founding's phases are read exactly")
+        founding(&(1..=k).filter_map(|z| Some((crate::chem::Kind::atom(z)?, ratio(1, 1)))).collect()).expect("the founding's phases are read exactly")
     }
 
     /// A fibre's reach and bands as the chain law reads them: `R = ℓ/H`, the
@@ -1066,7 +1066,7 @@ mod passage_tests {
     #[test]
     fn the_shear_moves_turning_outward_and_keeps_the_books() {
         use super::{shear, weight, Enclosed, Mote};
-        let mote = |ell: (i64, i64), ph: (i64, i64)| Mote { key: "Z001".into(), amount: ratio(1, 8), ell_o: ratio(ell.0, ell.1), ell_c: ratio(0, 1), phase: vec![ratio(ph.0, ph.1), ratio(0, 1)], agitation: ratio(0, 1), born: 0, vacuum: false };
+        let mote = |ell: (i64, i64), ph: (i64, i64)| Mote { key: crate::chem::Kind::parse("Z001").expect("a kind"), amount: ratio(1, 8), ell_o: ratio(ell.0, ell.1), ell_c: ratio(0, 1), phase: vec![ratio(ph.0, ph.1), ratio(0, 1)], agitation: ratio(0, 1), born: 0, vacuum: false };
         let mut motes = vec![mote((1, 4), (0, 1)), mote((1, 2), (1, 60)), mote((3, 4), (1, 30))];
         let total = ratio(1, 1);
         let book = |ms: &[Mote]| ms.iter().fold(ratio(0, 1), |s, x| s + x.amount.clone() * weight(&x.key) * x.ell_o.clone());
