@@ -219,7 +219,8 @@ pub fn collapse(st: &Stretch, h: &Ratio) -> Option<(Ratio, u64)> {
             lo = mid;
         }
     }
-    let count = (width / hi.clone()).floor().to_integer().try_into().unwrap_or(u64::MAX).max(1);
+    // w_J ≤ width, so at least one fits; a count past the carrier is refused.
+    let count = crate::ring::whole(&(width / hi.clone()))?;
     Some((hi, count))
 }
 
@@ -259,7 +260,7 @@ pub fn crest_collapse(m: &Ratio, mu: &Ratio, a: &Ratio, r: &Ratio, h: &Ratio) ->
             lo = mid;
         }
     }
-    let count = (r.clone() / hi.clone()).floor().to_integer().try_into().unwrap_or(u64::MAX).max(1);
+    let count = crate::ring::whole(&(r.clone() / hi.clone()))?;
     Some((hi, count))
 }
 
@@ -307,7 +308,7 @@ pub fn coupling(star: &Manifest, universe_hold: &Ratio) -> Option<Ratio> {
 /// received rings, and the light per received ring (`feed × fuel × Δu`).
 pub fn heartbeat(star: &Manifest, share: &Ratio, rings: u64) -> Option<(u64, Ratio, Ratio)> {
     let (every, light) = burn(star, share, 1, &ratio(1, 1))?;
-    let halvings = (rings / every).min(4096) as u32;
+    let halvings = u32::try_from(rings / every).ok()?;
     let left = ratio(1, 1) / Ratio::from_integer(num_bigint::BigInt::from(2).pow(halvings));
     Some((every, left.clone(), light * left))
 }
@@ -359,7 +360,12 @@ pub fn burn(star: &Manifest, share: &Ratio, z: u32, coherence: &Ratio) -> Option
         return None;
     }
     let feed = driver * tau * share.clone() / q_mean * coherence.clone();
-    let every: u64 = (ratio(1, 1) / feed.clone()).ceil().to_integer().try_into().unwrap_or(u64::MAX).max(1);
+    if feed.is_zero() {
+        return None;
+    }
+    // ⌈1/feed⌉ is at least one for any feed; past the carrier the rung is
+    // refused (it never fires on any clock the carrier holds).
+    let every = crate::ring::whole(&(ratio(1, 1) / feed.clone()).ceil())?;
     let fuel_share = fuel * ratio(i64::from(hold(z)), 1) / total;
     Some((every, feed * fuel_share * ratio(dm, 1)))
 }
@@ -711,23 +717,6 @@ fn convergents(x: &Ratio) -> Vec<Ratio> {
         rest = ratio(1, 1) / frac;
     }
     out
-}
-
-/// The interface clock of a centre and the matter it feeds on (one law at
-/// every tier: a star's heartbeat, a galactic core's jets): rings a halving,
-/// `⌈Q̄ / (e · s)⌉`, s the centre's share (a core: 1, its own holding, under
-/// regeneration; a star: still its share of the universe's, open), Q̄ the
-/// matter's mean outer charge, e its open share (open frames over held).
-pub fn interface_every(matter: &Manifest, share: &Ratio) -> u64 {
-    let count = matter.values().fold(ratio(0, 1), |s, a| s + a.clone());
-    let charge = matter.iter().fold(ratio(0, 1), |s, (k, a)| s + a.clone() * ratio(i64::from(crate::chem::parts(k).and_then(|(z, _)| atom(z)).map(|x| x.enclosed).unwrap_or(0)), 1));
-    let open = crate::pulse::magnetism(matter);
-    let held = mass(matter);
-    if count.is_zero() || charge.is_zero() || open.is_zero() || held.is_zero() || share.is_zero() {
-        return u64::MAX;
-    }
-    let feed = open / held * share.clone() / (charge / count);
-    (ratio(1, 1) / feed).ceil().to_integer().try_into().unwrap_or(u64::MAX).max(1)
 }
 
 /// ONE JET BATCH, at ring `born`: the share `share` of the disc's holding,

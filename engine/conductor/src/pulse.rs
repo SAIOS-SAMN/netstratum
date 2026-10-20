@@ -1090,7 +1090,7 @@ fn get_flow(v: &[u8]) -> Option<crate::flows::Mote> {
         phase.push(x);
     }
     let born = u64::from_le_bytes(v.get(at..at + 8)?.try_into().ok()?);
-    let vacuum = v.get(at + 8).copied().unwrap_or(0) == 1;
+    let vacuum = *v.get(at + 8)? == 1;
     let mut r = r.into_iter();
     Some(crate::flows::Mote { key, amount: r.next()?, ell_o: r.next()?, ell_c: r.next()?, agitation: r.next()?, phase, born, vacuum })
 }
@@ -1108,8 +1108,7 @@ fn get_mote(v: &[u8]) -> Option<crate::formation::Shell> {
     }
     let halving = u64::from_le_bytes(v.get(at..at + 8)?.try_into().ok()?);
     let born = u64::from_le_bytes(v.get(at + 8..at + 16)?.try_into().ok()?);
-    // The vacuum's halving (absent in motes written before it: none).
-    let vacuum = v.get(at + 16..at + 24).and_then(|b| b.try_into().ok()).map(u64::from_le_bytes).unwrap_or(0);
+    let vacuum = u64::from_le_bytes(v.get(at + 16..at + 24)?.try_into().ok()?);
     let mut r = r.into_iter();
     Some(crate::formation::Shell { key, held: r.next()?, inner: r.next()?, outer: r.next()?, agitation: r.next()?, halving: (halving > 0).then_some(halving), born, vacuum })
 }

@@ -29,15 +29,16 @@ impl Turning {
         self.phase0.clone() + ratio(n as i64, 1) / self.period.clone()
     }
 
-    /// Turns completed by bell n.
-    pub fn turns(&self, n: u64) -> u64 {
-        self.phase(n).floor().to_integer().try_into().unwrap_or(0)
+    /// Turns completed by bell n (refused past the carrier).
+    pub fn turns(&self, n: u64) -> Option<u64> {
+        crate::ring::whole(&self.phase(n))
     }
 
-    /// The first bell at which turn `k` is complete.
-    pub fn bell_of_turn(&self, k: u64) -> u64 {
-        let need = (ratio(k as i64, 1) - self.phase0.clone()) * self.period.clone();
-        need.ceil().to_integer().try_into().unwrap_or(0)
+    /// The first bell at which turn `k` is complete (refused past the
+    /// carrier).
+    pub fn bell_of_turn(&self, k: u64) -> Option<u64> {
+        let need = (ratio(i64::try_from(k).ok()?, 1) - self.phase0.clone()) * self.period.clone();
+        crate::ring::whole(&need.ceil())
     }
 }
 
@@ -65,7 +66,7 @@ pub fn years_closing(u: &Universe, n: u64) -> Vec<u32> {
     u.cores
         .iter()
         .filter_map(|c| galactic_year(c).map(|(_, t)| (c.path[0] as u32, t)))
-        .filter(|(_, t)| n > 0 && t.turns(n) > t.turns(n - 1))
+        .filter(|(_, t)| n > 0 && matches!((t.turns(n), t.turns(n - 1)), (Some(a), Some(b)) if a > b))
         .map(|(p, _)| p)
         .collect()
 }
@@ -77,9 +78,9 @@ mod tests {
     #[test]
     fn a_turning_counts_its_turns_exactly() {
         let t = Turning { period: ratio(7, 2), phase0: ratio(0, 1) };
-        assert_eq!(t.turns(3), 0);
-        assert_eq!(t.turns(4), 1);
-        assert_eq!(t.bell_of_turn(2), 7);
+        assert_eq!(t.turns(3), Some(0));
+        assert_eq!(t.turns(4), Some(1));
+        assert_eq!(t.bell_of_turn(2), Some(7));
         assert_eq!(t.phase(1_000_000_000).denom(), &num_bigint::BigInt::from(7), "the denominator never grows");
     }
 }
