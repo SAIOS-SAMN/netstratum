@@ -324,21 +324,27 @@ fn main() {
                 m
             });
             let (_, balance) = cfe::ratio::poles(&conductor::pulse::mass(&held), &conductor::pulse::magnetism(&held));
-            let fl = |r: &cfe::ratio::Ratio| r.numer().to_string().parse::<f64>().unwrap_or(0.0) / r.denom().to_string().parse::<f64>().unwrap_or(1.0);
-            println!("beat {beat}: POLES — universal core strength H_u {:.6e}, balance {:.6} (the share at the ℤ pole)", fl(&conductor::ocean::universe_hold(&universe)), fl(&balance));
+            let f = conductor::reading::sector;
+            println!("beat {beat}: POLES — universal core strength H_u {}, balance {} (the share at the ℤ pole)", f(&conductor::ocean::universe_hold(&universe)), f(&balance));
             // THE ENCLOSURES (docs/78): each galaxy its own S^360, each star
             // system its own S^60, joined at its core's throat; each counts
             // its turns on its own ring (the pulse's round trip to its rim).
             let encl = conductor::enclosure::enclosures(&universe);
-            let f = |r: &cfe::ratio::Ratio| r.numer().to_string().parse::<f64>().unwrap_or(0.0) / r.denom().to_string().parse::<f64>().unwrap_or(1.0);
             let (gal, sys): (Vec<_>, Vec<_>) = encl.iter().partition(|e| e.dim == 360);
-            let span = |v: &[&conductor::enclosure::Enclosure]| (v.iter().map(|e| f(&e.ring())).fold(f64::INFINITY, f64::min), v.iter().map(|e| f(&e.ring())).fold(0.0, f64::max));
-            let ((g0, g1), (s0, s1)) = (span(&gal), span(&sys));
+            // The span of a reading: its least and greatest, exactly.
+            let span = |v: &[&conductor::enclosure::Enclosure]| {
+                let rings: Vec<cfe::ratio::Ratio> = v.iter().map(|e| e.ring()).collect();
+                match (rings.iter().min(), rings.iter().max()) {
+                    (Some(a), Some(b)) => format!("{} to {}", f(a), f(b)),
+                    _ => "none".to_string(),
+                }
+            };
+            let (gs, ss) = (span(&gal), span(&sys));
             let sample = universe.cores.iter().find_map(|c| c.satellites.iter().find(|s| !s.satellites.is_empty()).map(|s| (c, s, &s.satellites[0])));
             let inversion = sample.and_then(|(c, s, w)| {
                 let ge = gal.iter().find(|e| e.path == c.path)?;
                 let se = sys.iter().find(|e| e.path == s.path)?;
-                Some(format!("world {:?}: a year is {:.3e} bells, {:.3e} of its system's own rings, {:.3e} of its galaxy's", w.path, f(&w.period), f(&(w.period.clone() / se.ring())), f(&(w.period.clone() / ge.ring()))))
+                Some(format!("world {:?}: a year is {} bells, {} of its system's own rings, {} of its galaxy's", w.path, f(&w.period), f(&(w.period.clone() / se.ring())), f(&(w.period.clone() / ge.ring()))))
             }).unwrap_or_default();
             // THE FORMATION OBSERVER (docs/83): what the gas has become.
             let stars: usize = universe.cores.iter().map(|c| c.satellites.len()).sum();
@@ -350,13 +356,16 @@ fn main() {
             let metal_stars = universe.cores.iter().flat_map(|c| &c.satellites).filter(|s| s.kept.keys().any(|k| k != "Z001" && k != "Z002")).count();
             // THE COUPLING at each star's interface (`formation::coupling`).
             let universe_hold = conductor::pulse::mass(&universe.total());
-            let kappas: Vec<f64> = universe.cores.iter().flat_map(|c| &c.satellites).filter_map(|s| conductor::formation::coupling(&s.kept, &universe_hold)).map(|k| f(&k)).collect();
-            let (k0, k1) = (kappas.iter().cloned().fold(f64::INFINITY, f64::min), kappas.iter().cloned().fold(0.0, f64::max));
-            println!("beat {beat}: FORMATION — {stars} stars ({metal_stars} with metals) and {worlds} worlds in {lit} of {} galaxies; discs {:.3}, gas {:.3} of the universe in {motes} motes; coupling κ {k0:.3e}..{k1:.3e}", universe.cores.len(), f(&discs), f(&gas_share));
+            let kappas: Vec<cfe::ratio::Ratio> = universe.cores.iter().flat_map(|c| &c.satellites).filter_map(|s| conductor::formation::coupling(&s.kept, &universe_hold)).collect();
+            let kappa = match (kappas.iter().min(), kappas.iter().max()) {
+                (Some(a), Some(b)) => format!("{}..{}", f(a), f(b)),
+                _ => "none".to_string(),
+            };
+            println!("beat {beat}: FORMATION — {stars} stars ({metal_stars} with metals) and {worlds} worlds in {lit} of {} galaxies; discs {}, gas {} of the universe in {motes} motes; coupling κ {kappa}", universe.cores.len(), f(&discs), f(&gas_share));
             // THE HEARTBEAT OBSERVER (docs/83): each star's interface burn
             // on the rings it has received since its heart formed (its
             // nested clock: the galaxy's rate times its orbit's).
-            let mut lives: Vec<f64> = Vec::new();
+            let mut lives: Vec<cfe::ratio::Ratio> = Vec::new();
             let (mut burning, mut spent) = (0usize, 0usize);
             for (i, core) in universe.cores.iter().enumerate() {
                 let g_rate = conductor::breath::galaxy_rate(&universe, i, &unit);
@@ -367,23 +376,25 @@ fn main() {
                     if let Some((every, left, _)) = conductor::formation::heartbeat(&sys.kept, &(conductor::pulse::mass(&sys.kept) / conductor::pulse::mass(&sys.total())), received) {
                         // A life: the halvings until less than a grain of fuel
                         // in 2^30 is left, read in bells on its clock.
-                        lives.push(30.0 * every as f64 / f(&rate).max(1e-300));
+                        if !num_traits::Zero::is_zero(&rate) {
+                            lives.push(cfe::ratio::ratio(30 * i64::try_from(every).unwrap_or(i64::MAX), 1) / rate.clone());
+                        }
                         if left < cfe::ratio::ratio(1, 1 << 30) { spent += 1 } else { burning += 1 }
                     }
                     inside += conductor::pulse::mass(&sys.total());
                 }
             }
-            lives.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
-            if !lives.is_empty() {
-                println!("beat {beat}: HEARTBEAT — {burning} stars burning, {spent} spent; lifetimes {:.3e}..{:.3e} bells (median {:.3e})", lives[0], lives[lives.len() - 1], lives[lives.len() / 2]);
+            lives.sort();
+            if let (Some(a), Some(b)) = (lives.first(), lives.last()) {
+                println!("beat {beat}: HEARTBEAT — {burning} stars burning, {spent} spent; lifetimes {}..{} bells (median {})", f(a), f(b), f(&lives[lives.len() / 2]));
             }
-            println!("beat {beat}: ENCLOSURES — {} galaxies on S^360 (own rings {g0:.3e} to {g1:.3e}), {} systems on S^60 (own rings {s0:.3e} to {s1:.3e}); {inversion}", gal.len(), sys.len());
+            println!("beat {beat}: ENCLOSURES — {} galaxies on S^360 (own rings {gs}), {} systems on S^60 (own rings {ss}); {inversion}", gal.len(), sys.len());
         }
         if !events.is_empty() {
             let _ = conductor::pulse::write(std::path::Path::new(&var_root), &pulse_seed, &universe);
             println!(
-                "beat {beat}: BREATH — {} echoes, {} systems born, {:.6e} returned to the media (units of the deepest hole), {} stars dissolved",
-                breath_reading.echoes, breath_reading.births, breath_reading.returned.numer().to_string().parse::<f64>().unwrap_or(0.0) / breath_reading.returned.denom().to_string().parse::<f64>().unwrap_or(1.0), breath_reading.dissolved
+                "beat {beat}: BREATH — {} echoes, {} systems born, {} returned to the media (units of the deepest hole), {} stars dissolved",
+                breath_reading.echoes, breath_reading.births, conductor::reading::sector(&breath_reading.returned), breath_reading.dissolved
             );
         }
         // The readings follow the universe: refreshed when the breath changed

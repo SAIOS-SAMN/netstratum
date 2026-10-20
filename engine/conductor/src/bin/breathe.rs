@@ -67,14 +67,13 @@ fn main() {
     let all = u.total();
     let count = |m: &pulse::Manifest, k: &str| m.get(k).cloned().unwrap_or_else(|| cfe::ratio::ratio(0, 1));
     let whole = |m: &pulse::Manifest| m.values().fold(cfe::ratio::ratio(0, 1), |s, a| s + a.clone());
-    let share = |m: &pulse::Manifest, k: &str| { use num_traits::ToPrimitive; let w = whole(m); if w == cfe::ratio::ratio(0, 1) { 0.0 } else { (count(m, k) / w).to_f64().unwrap_or(0.0) } };
+    let share = |m: &pulse::Manifest, k: &str| conductor::reading::share(&count(m, k), &whole(m));
     let commonest = all.iter().max_by(|a, b| a.1.cmp(b.1)).map(|(k, _)| k.clone()).unwrap_or_default();
-    println!("AGE — by nuclei, H {:.3} -> {:.3}, He {:.3} -> {:.3} (founding -> now); commonest now {commonest}", share(&before, "Z001"), share(&all, "Z001"), share(&before, "Z002"), share(&all, "Z002"));
+    println!("AGE — by nuclei, H {} -> {}, He {} -> {} (founding -> now); commonest now {commonest}", share(&before, "Z001"), share(&all, "Z001"), share(&before, "Z002"), share(&all, "Z002"));
     // THE PARITY (with xylarium): the odd share of the Z >= 3 atoms by
     // nuclei, clusters counted by their parts (equal-halves recycling sorts
     // the heavy matter by parity).
     let odd = |m: &pulse::Manifest| {
-        use num_traits::ToPrimitive;
         let (mut o, mut t) = (cfe::ratio::ratio(0, 1), cfe::ratio::ratio(0, 1));
         for (k, a) in m {
             for (n, z) in conductor::chem::components(k).unwrap_or_default() {
@@ -87,22 +86,21 @@ fn main() {
                 }
             }
         }
-        if t == cfe::ratio::ratio(0, 1) { 0.0 } else { (o / t).to_f64().unwrap_or(0.0) }
+        conductor::reading::share(&o, &t)
     };
-    println!("PARITY — odd share of Z >= 3 by nuclei: {:.3} -> {:.3} (founding -> now)", odd(&before), odd(&all));
+    println!("PARITY — odd share of Z >= 3 by nuclei: {} -> {} (founding -> now)", odd(&before), odd(&all));
     // RECYCLING at the galaxies' throats (`conductor::recycle`, 11.0 (18)):
     // pressed (constructed) and peeled (deconstructed), the light and the
     // opened holding, and what was trapped at the throats.
     let sum = |f: &dyn Fn(&breath::Event) -> cfe::ratio::Ratio| events.iter().fold(cfe::ratio::ratio(0, 1), |s, e| s + f(e));
-    let f = |x: &cfe::ratio::Ratio| { use num_traits::ToPrimitive; x.to_f64().unwrap_or(0.0) };
-    println!("RECYCLING — the throats pressed {:.3e} and peeled {:.3e} (grains of nuclei); light given {:.3e}, holding opened {:.3e}, trapped {:.3e} (units); {} echoes recycled", f(&sum(&|e| e.recycled.pressed.clone())), f(&sum(&|e| e.recycled.peeled.clone())), f(&sum(&|e| e.recycled.light.clone())), f(&sum(&|e| e.recycled.spent.clone())), f(&sum(&|e| e.recycled.trapped.clone())), events.iter().filter(|e| e.recycled != Default::default()).count());
+    let f = conductor::reading::sector;
+    println!("RECYCLING — the throats pressed {} and peeled {} (grains of nuclei); light given {}, holding opened {}, trapped {} (units); {} echoes recycled", f(&sum(&|e| e.recycled.pressed.clone())), f(&sum(&|e| e.recycled.peeled.clone())), f(&sum(&|e| e.recycled.light.clone())), f(&sum(&|e| e.recycled.spent.clone())), f(&sum(&|e| e.recycled.trapped.clone())), events.iter().filter(|e| e.recycled != Default::default()).count());
     // THE BURN AND THE RETURN AS RATES (TUniversal 11.0 (23)): hydrogen fused
     // by the stars and returned net by the throats, per universal echo, as
     // shares of the hydrogen standing now, over the run's windows (tenths).
     // Where the two meet is the hydrogen's steady state, a fixed point; a
     // read this early is the first instant, never a judgement.
     {
-        use num_traits::ToPrimitive;
         let h_now = all.get("Z001").cloned().unwrap_or_else(|| cfe::ratio::ratio(0, 1));
         let echoes = ((until - start) / t_u.max(1)).max(1);
         let window = (echoes / 10).max(1);
@@ -116,8 +114,8 @@ fn main() {
                 b += e.burned.get("Z001").cloned().unwrap_or_else(|| cfe::ratio::ratio(0, 1));
                 r += e.recycled.hydrogen.clone();
             }
-            let per = |x: cfe::ratio::Ratio| if h_now == cfe::ratio::ratio(0, 1) { 0.0 } else { (x / h_now.clone() / cfe::ratio::ratio(window as i64, 1)).to_f64().unwrap_or(0.0) };
-            rows.push(format!("u {}-{}: burned {:.3e} returned {:+.3e}", start / t_u.max(1) + w * window, start / t_u.max(1) + (w + 1) * window, per(b), per(r)));
+            let per = |x: cfe::ratio::Ratio| conductor::reading::share(&x, &(h_now.clone() * cfe::ratio::ratio(window as i64, 1)));
+            rows.push(format!("u {}-{}: burned {} returned {}", start / t_u.max(1) + w * window, start / t_u.max(1) + (w + 1) * window, per(b), per(r)));
             w += 1;
         }
         println!("RATES — hydrogen per universal echo, as a share of the hydrogen now: {}", rows.join("; "));

@@ -20,20 +20,27 @@
 //!                            echo-beats shed, and each galaxy's return
 //! - `civs`                   the civilizations: live and collapsed
 //! - `events [N]`             the last N creation/collapse events (journal)
-//! - `pace [N]`               beat pace and the top costs over the last N
-//!                            beats; who holds the build lock (contention)
 use cfe::ratio::{ratio, Ratio};
 use conductor::{breath, chronometry, enclosure, formation, life, pulse};
 use std::path::Path;
 use std::process::Command;
 
-fn f(r: &Ratio) -> f64 {
-    r.numer().to_string().parse::<f64>().unwrap_or(0.0) / r.denom().to_string().parse::<f64>().unwrap_or(1.0)
+/// A reading served on the sexagesimal protractor (law 4).
+fn f(r: &Ratio) -> conductor::reading::Sector {
+    conductor::reading::sector(r)
 }
 
-/// `a / b`, 0 where `b` holds nothing (a galaxy whose matter all left).
-fn of(a: &Ratio, b: &Ratio) -> f64 {
-    if *b == ratio(0, 1) { 0.0 } else { f(&(a.clone() / b.clone())) }
+/// `a / b`, zero where `b` holds nothing (a galaxy whose matter all left).
+fn of(a: &Ratio, b: &Ratio) -> conductor::reading::Sector {
+    conductor::reading::share(a, b)
+}
+
+/// The least and greatest of exact readings, served as one span.
+fn span(v: &[Ratio]) -> String {
+    match (v.iter().min(), v.iter().max()) {
+        (Some(a), Some(b)) => format!("{}..{}", f(a), f(b)),
+        _ => "none".into(),
+    }
 }
 
 /// The heaviest elements of a manifest by holding, as `Z:share`.
@@ -42,9 +49,9 @@ fn composition(m: &pulse::Manifest, top: usize) -> String {
     if total == ratio(0, 1) {
         return "—".into();
     }
-    let mut parts: Vec<(String, f64)> = m.iter().map(|(k, a)| (k.clone(), f(&(pulse::mass(&[(k.clone(), a.clone())].into()) / total.clone())))).collect();
-    parts.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
-    parts.iter().take(top).map(|(k, s)| format!("{k}:{s:.3}")).collect::<Vec<_>>().join(" ")
+    let mut parts: Vec<(String, Ratio)> = m.iter().map(|(k, a)| (k.clone(), pulse::mass(&[(k.clone(), a.clone())].into()) / total.clone())).collect();
+    parts.sort_by(|a, b| b.1.cmp(&a.1));
+    parts.iter().take(top).map(|(k, s)| format!("{k}:{}", f(s))).collect::<Vec<_>>().join(" ")
 }
 
 fn beat(var: &str) -> u64 {
@@ -77,7 +84,6 @@ fn main() {
     // Views read from the journal need no universe.
     match view.as_str() {
         "events" => return events(num(1).unwrap_or(40) as usize),
-        "pace" => return pace(num(1).unwrap_or(30) as u64),
         "civs" => return civs(&var),
         _ => {}
     }
@@ -93,13 +99,13 @@ fn main() {
         "universe" => {
             let stars: usize = u.cores.iter().map(|c| c.satellites.len()).sum();
             let worlds: usize = u.cores.iter().flat_map(|c| &c.satellites).map(|s| s.satellites.len()).sum();
-            println!("UNIVERSE at beat {now}: {} galaxies, {stars} stars, {worlds} worlds; intergalactic medium {:.3} of the whole", u.cores.len(), f(&(pulse::mass(&u.medium) / universe_hold.clone())));
+            println!("UNIVERSE at beat {now}: {} galaxies, {stars} stars, {worlds} worlds; intergalactic medium {} of the whole", u.cores.len(), f(&(pulse::mass(&u.medium) / universe_hold.clone())));
             for (i, c) in u.cores.iter().enumerate() {
                 let total = pulse::mass(&c.total());
                 println!(
-                    "  galaxy {:>2}: share {:.3}, disc {:.3}, gas {:.3} ({} motes), {} stars; distance {} (first echo at bell {}); clock {:.6}",
+                    "  galaxy {:>2}: share {}, disc {}, gas {} ({} motes), {} stars; distance {} (first echo at bell {}); clock {}",
                     c.path[0], f(&(total.clone() / universe_hold.clone())), of(&pulse::mass(&c.kept), &total), of(&pulse::mass(&c.medium), &total),
-                    c.gas.len(), c.satellites.len(), c.radius, 60 + f(&c.radius) as u64, f(&breath::galaxy_rate(&u, i, &unit))
+                    c.gas.len(), c.satellites.len(), c.radius, (ratio(60, 1) + c.radius.clone()).floor(), f(&breath::galaxy_rate(&u, i, &unit))
                 );
             }
         }
@@ -107,12 +113,12 @@ fn main() {
             let Some(i) = num(1).and_then(galaxy) else { return println!("galaxy G: no such galaxy") };
             let c = &u.cores[i];
             let total = pulse::mass(&c.total());
-            println!("GALAXY {:?} at beat {now}: share {:.4} of the universe; distance {} light-rings, first echo at bell {}", c.path, f(&(total.clone() / universe_hold.clone())), c.radius, 60 + f(&c.radius) as u64);
-            println!("  core state hold {:.3e} (units of the deepest hole), disc {:.3e}: {}", f(&(pulse::core_state(c) / unit.clone())), f(&(pulse::mass(&c.kept) / unit.clone())), composition(&c.kept, 6));
-            println!("  gas {:.3} of the galaxy in {} motes: {}; gas spin {:.3e}", of(&pulse::mass(&c.medium), &total), c.gas.len(), composition(&c.medium, 6), f(&c.medium_spin));
-            println!("  clock against the universal core {:.6}", f(&breath::galaxy_rate(&u, i, &unit)));
+            println!("GALAXY {:?} at beat {now}: share {} of the universe; distance {} light-rings, first echo at bell {}", c.path, f(&(total.clone() / universe_hold.clone())), c.radius, (ratio(60, 1) + c.radius.clone()).floor());
+            println!("  core state hold {} (units of the deepest hole), disc {}: {}", f(&(pulse::core_state(c) / unit.clone())), f(&(pulse::mass(&c.kept) / unit.clone())), composition(&c.kept, 6));
+            println!("  gas {} of the galaxy in {} motes: {}; gas spin {}", of(&pulse::mass(&c.medium), &total), c.gas.len(), composition(&c.medium, 6), f(&c.medium_spin));
+            println!("  clock against the universal core {}", f(&breath::galaxy_rate(&u, i, &unit)));
             for (s, sys) in c.satellites.iter().enumerate() {
-                println!("  star {:?}: holding {:.3e}, born bell {}, reach {:.3e}, {} worlds, clock {:.6}; {}", sys.path, f(&(pulse::mass(&sys.kept) / unit.clone())), sys.born, f(&sys.radius), sys.satellites.len(), f(&system_rate(&u, i, s, &unit)), composition(&sys.kept, 3));
+                println!("  star {:?}: holding {}, born bell {}, reach {}, {} worlds, clock {}; {}", sys.path, f(&(pulse::mass(&sys.kept) / unit.clone())), sys.born, f(&sys.radius), sys.satellites.len(), f(&system_rate(&u, i, s, &unit)), composition(&sys.kept, 3));
             }
         }
         "star" => {
@@ -121,19 +127,19 @@ fn main() {
             let sys = &u.cores[i].satellites[k];
             let rate = system_rate(&u, i, k, &unit);
             let received: u64 = (rate.clone() * ratio(now.saturating_sub(sys.born) as i64, 1)).floor().to_integer().try_into().unwrap_or(0);
-            println!("STAR {:?} at beat {now}: born bell {}, holding {:.4e} (units of the deepest hole), magnetism {:.3e}", sys.path, sys.born, f(&(pulse::mass(&sys.kept) / unit.clone())), f(&(pulse::magnetism(&sys.kept) / unit.clone())));
+            println!("STAR {:?} at beat {now}: born bell {}, holding {} (units of the deepest hole), magnetism {}", sys.path, sys.born, f(&(pulse::mass(&sys.kept) / unit.clone())), f(&(pulse::magnetism(&sys.kept) / unit.clone())));
             println!("  matter: {}", composition(&sys.kept, 8));
-            println!("  orbit: reach {:.4e}, period {:.4e} rings, spin ℓ {:.4e}; clock {:.6}, {received} rings received since birth", f(&sys.radius), f(&sys.period), f(&sys.ell), f(&rate));
+            println!("  orbit: reach {}, period {} rings, spin ℓ {}; clock {}, {received} rings received since birth", f(&sys.radius), f(&sys.period), f(&sys.ell), f(&rate));
             match formation::heartbeat(&sys.kept, &(pulse::mass(&sys.kept) / pulse::mass(&sys.total())), received) {
-                Some((every, left, light)) => println!("  HEARTBEAT: fuel halves every {every} received rings; fuel left {:.4}; light {:.3e} per received ring", f(&left), f(&light)),
+                Some((every, left, light)) => println!("  HEARTBEAT: fuel halves every {every} received rings; fuel left {}; light {} per received ring", f(&left), f(&light)),
                 None => println!("  HEARTBEAT: no hydrogen fuel"),
             }
-            println!("  coupling κ {:.4e}", formation::coupling(&sys.kept, &universe_hold).map(|k| f(&k)).unwrap_or(0.0));
+            println!("  coupling κ {}", formation::coupling(&sys.kept, &universe_hold).map(|k| f(&k).to_string()).unwrap_or_else(|| "none".into()));
             // The dance: each world's period against the dominant world's.
             let dom = sys.satellites.iter().max_by(|a, b| pulse::mass(&a.kept).cmp(&pulse::mass(&b.kept))).map(|o| o.period.clone());
             for o in &sys.satellites {
-                let lock = dom.as_ref().filter(|p| **p > ratio(0, 1)).map(|p| o.period.clone() / p.clone()).map(|x| if x.denom() < &num_bigint::BigInt::from(1000) { format!("{x}") } else { format!("{:.4} (free)", f(&x)) }).unwrap_or_default();
-                println!("  world {:?}: reach {:.3e}, period {:.3e}, against the dominant {lock}; held down to {}; {}", o.path, f(&o.radius), f(&o.period), formation::lightest(&o.kept).unwrap_or_default(), composition(&o.kept, 4));
+                let lock = dom.as_ref().filter(|p| **p > ratio(0, 1)).map(|p| o.period.clone() / p.clone()).map(|x| if x.denom() < &num_bigint::BigInt::from(1000) { format!("{x}") } else { format!("{} (free)", f(&x)) }).unwrap_or_default();
+                println!("  world {:?}: reach {}, period {}, against the dominant {lock}; held down to {}; {}", o.path, f(&o.radius), f(&o.period), formation::lightest(&o.kept).unwrap_or_default(), composition(&o.kept, 4));
             }
         }
         "world" => {
@@ -142,12 +148,12 @@ fn main() {
                 return println!("world G S W");
             }
             let Some(o) = u.cores.iter().flat_map(|c| &c.satellites).flat_map(|s| &s.satellites).find(|o| o.path == path) else { return println!("no such world") };
-            println!("WORLD {:?} at beat {now}: reach {:.4e}, period {:.4e} rings, holding {:.3e}; {}", o.path, f(&o.radius), f(&o.period), f(&(pulse::mass(&o.kept) / unit.clone())), composition(&o.kept, 8));
+            println!("WORLD {:?} at beat {now}: reach {}, period {} rings, holding {}; {}", o.path, f(&o.radius), f(&o.period), f(&(pulse::mass(&o.kept) / unit.clone())), composition(&o.kept, 8));
             match life::readings(&u, &seed).get(&path) {
                 Some(r) => {
                     let w = &r.world;
-                    println!("  heat {:.1} K, burn {:.3}, gravity {:.3e}, core κ {:.3}, atmosphere {:.3e}, pressure {:.3e}, coupling {:.6}, window {} echoes", f(&w.heat), f(&w.burn), f(&w.gravity), f(&w.core), f(&w.atmosphere), f(&w.pressure), f(&w.coupling), w.window);
-                    println!("  media: chemical {:?} geologic {:?} plasmic {:?} informational {:?}; climb {:?}", w.chemical.as_ref().map(f), w.geologic.as_ref().map(f), w.plasmic.as_ref().map(f), w.informational.as_ref().map(f), r.climb.as_ref().map(|(c, m)| (f(c), *m)));
+                    println!("  heat {}, burn {}, gravity {}, core κ {}, atmosphere {}, pressure {}, coupling {}, window {} echoes", f(&w.heat), f(&w.burn), f(&w.gravity), f(&w.core), f(&w.atmosphere), f(&w.pressure), f(&w.coupling), w.window);
+                    println!("  media: chemical {:?} geologic {:?} plasmic {:?} informational {:?}; climb {:?}", w.chemical.as_ref().map(|x| f(x).to_string()), w.geologic.as_ref().map(|x| f(x).to_string()), w.plasmic.as_ref().map(|x| f(x).to_string()), w.informational.as_ref().map(|x| f(x).to_string()), r.climb.as_ref().map(|(c, m)| (f(c).to_string(), *m)));
                 }
                 None => println!("  no life reading (no star burn or no matter)"),
             }
@@ -160,13 +166,13 @@ fn main() {
             let (rings, _, h) = formation::shells(&all, &c.kept);
             let gas: Vec<formation::Shell> = c.gas.iter().cloned().chain(rings).collect();
             let stretches = formation::stretches(&gas, bell);
-            println!("GAS {:?} at bell {bell}: H {:.3}, push share {:.3}, {} motes, {} stretches", c.path, f(&h), f(&((h.clone() - ratio(1, 1)) / h.clone())), c.gas.len(), stretches.len());
+            println!("GAS {:?} at bell {bell}: H {}, push share {}, {} motes, {} stretches", c.path, f(&h), f(&((h.clone() - ratio(1, 1)) / h.clone())), c.gas.len(), stretches.len());
             for st in &stretches {
-                let ignite = formation::ignition_share(&st.agitation).map(|s| format!("{:.3}", f(&s))).unwrap_or_else(|| "too hot".into());
+                let ignite = formation::ignition_share(&st.agitation).map(|s| f(&s).to_string()).unwrap_or_else(|| "too hot".into());
                 println!(
-                    "  [{:.3e}..{:.3e}] λ {:.3e} a {:.3e} self-deficit {:.3e} → collapse {:?}, ignition share {ignite}",
-                    f(&st.inner), f(&st.outer), f(&st.lambda), f(&st.agitation), f(&st.lambda) / (1.0 + f(&st.lambda)),
-                    formation::collapse(st, &h).map(|(w, n)| (format!("{:.3e}", f(&w)), n))
+                    "  [{}..{}] λ {} a {} self-deficit {} → collapse {:?}, ignition share {ignite}",
+                    f(&st.inner), f(&st.outer), f(&st.lambda), f(&st.agitation), f(&(st.lambda.clone() / (ratio(1, 1) + st.lambda.clone()))),
+                    formation::collapse(st, &h).map(|(w, n)| (f(&w).to_string(), n))
                 );
             }
         }
@@ -180,21 +186,17 @@ fn main() {
             let total = pulse::mass(&c.total());
             let held = c.flows.iter().filter(|x| conductor::flows::held(x, &h, &p) == ratio(1, 1)).count();
             let gas = c.flows.iter().filter(|x| conductor::flows::held(x, &h, &p) == ratio(0, 1)).count();
-            let reaches: Vec<f64> = c.flows.iter().map(|x| f(&(x.ell_o.clone() / h.clone()))).collect();
-            let (r0, r1) = (reaches.iter().cloned().fold(f64::INFINITY, f64::min), reaches.iter().cloned().fold(0.0, f64::max));
-            let phases: Vec<String> = (0..conductor::flows::PLANES).map(|k| {
-                let ph: Vec<f64> = c.flows.iter().map(|x| f(&x.phase[k])).collect();
-                format!("{:.3}..{:.3}", ph.iter().cloned().fold(f64::INFINITY, f64::min), ph.iter().cloned().fold(0.0, f64::max))
-            }).collect();
-            let circ: f64 = c.flows.iter().map(|x| f(&x.ell_c)).fold(0.0, f64::max);
-            println!("FLOWS {:?} at beat {now}: H {:.3}, {} motes ({held} wholly held, {gas} wholly gas), reach {r0:.3}..{r1:.3}, phases {phases:?}, max ℓ_c {circ:.3e}, reservoir {:.3e}", c.path, f(&h), c.flows.len(), f(&c.reservoir));
+            let reaches: Vec<Ratio> = c.flows.iter().map(|x| x.ell_o.clone() / h.clone()).collect();
+            let phases: Vec<String> = (0..conductor::flows::PLANES).map(|k| span(&c.flows.iter().map(|x| x.phase[k].clone()).collect::<Vec<_>>())).collect();
+            let circ = span(&c.flows.iter().map(|x| x.ell_c.clone()).collect::<Vec<_>>());
+            println!("FLOWS {:?} at beat {now}: H {}, {} motes ({held} wholly held, {gas} wholly gas), reach {}, phases {phases:?}, ℓ_c {circ}, reservoir {}", c.path, f(&h), c.flows.len(), span(&reaches), f(&c.reservoir));
             // THE CHAINS (docs/83): each read whole; the best margin shown.
             let chains = conductor::flows::chains(&c.flows, &h, &p, &total);
             let holding = chains.iter().filter(|x| x.holds()).count();
             if let Some(best) = chains.iter().max_by(|a, b| (a.bind.clone() - a.agitation.clone() - a.face.clone()).cmp(&(b.bind.clone() - b.agitation.clone() - b.face.clone()))) {
                 println!(
-                    "  CHAINS {} ({holding} hold); best at R {:.3}: {} members, apart {:.4}, λ/(1+λ) {:.4} vs agitation {:.4} + face {:.4}, margin {:.4}",
-                    chains.len(), f(&best.reach), best.members.len(), f(&best.apart), f(&best.bind), f(&best.agitation), f(&best.face), f(&best.bind) - f(&best.agitation) - f(&best.face)
+                    "  CHAINS {} ({holding} hold); best at R {}: {} members, apart {}, λ/(1+λ) {} vs agitation {} + face {}, margin {}",
+                    chains.len(), f(&best.reach), best.members.len(), f(&best.apart), f(&best.bind), f(&best.agitation), f(&best.face), f(&(best.bind.clone() - best.agitation.clone() - best.face.clone()))
                 );
             }
         }
@@ -223,7 +225,7 @@ fn main() {
                 let (klo, khi, kn) = zs(&c.kept);
                 let (_, ghi, gn) = zs(&all);
                 println!("GALAXY {:?} receives {gn} kinds, the heaviest Z{ghi}", c.path);
-                println!("GALAXY {:?}: core state {:.3e} + held {:.3e} of the galaxy's {:.3e} (core {:.1}% of it); held {kn} kinds, Z{klo}..Z{khi}; push p {:.3}, H {:.3}", c.path, f(&state), f(&pulse::mass(&c.kept)), f(&g), 100.0 * f(&((state.clone() + pulse::mass(&c.kept)) / (state + g.clone()))), f(&p), f(&h));
+                println!("GALAXY {:?}: core state {} + held {} of the galaxy's {} (core {} of it); held {kn} kinds, Z{klo}..Z{khi}; push p {}, H {}", c.path, f(&state), f(&pulse::mass(&c.kept)), f(&g), f(&((state.clone() + pulse::mass(&c.kept)) / (state + g.clone()))), f(&p), f(&h));
                 let (lo, hi) = (fr.clone() * h.clone() * (ratio(1, 1) - p.clone()), fr.clone() * h.clone() * (ratio(1, 1) + p.clone()));
                 let mut band = pulse::Manifest::new();
                 for x in &c.flows {
@@ -236,8 +238,8 @@ fn main() {
                 let mut top: Vec<(String, Ratio)> = band.iter().map(|(k, a)| (k.clone(), a.clone() * conductor::flows::weight(k))).collect();
                 top.sort_by(|a, b| b.1.cmp(&a.1));
                 let (blo, bhi, bn) = zs(&band);
-                let list: Vec<String> = top.iter().take(12).map(|(k, w)| format!("{k}:{:.3}", if bm == ratio(0, 1) { 0.0 } else { f(&(w.clone() / bm.clone())) })).collect();
-                println!("  AT {f_pct}% OF THE WAY TO THE RIM (R {:.3}..{:.3}): {bn} kinds, Z{blo}..Z{bhi}, {:.3e} of the galaxy; by holding: {}", f(&lo), f(&hi), if g == ratio(0, 1) { 0.0 } else { f(&(bm / g.clone())) }, list.join(" "));
+                let list: Vec<String> = top.iter().take(12).map(|(k, w)| format!("{k}:{}", of(w, &bm))).collect();
+                println!("  AT {f_pct}% OF THE WAY TO THE RIM (R {}..{}): {bn} kinds, Z{blo}..Z{bhi}, {} of the galaxy; by holding: {}", f(&lo), f(&hi), of(&bm, &g), list.join(" "));
             }
         }
         "firmament" => {
@@ -260,14 +262,17 @@ fn main() {
                 if n < 2 {
                     return println!("echo {at} {label}: {n} motes");
                 }
-                let nn: Vec<f64> = (0..n).map(|i| (0..n).filter(|&j| j != i).map(|j| {
+                let nn: Vec<Ratio> = (0..n).filter_map(|i| (0..n).filter(|&j| j != i).map(|j| {
                     let c = (0..ms[i].phase.len().min(ms[j].phase.len())).fold(ratio(1, 1), |c, k| c * conductor::flows::in_step(&ms[i].phase[k], &ms[j].phase[k]));
-                    1.0 - f(&c)
-                }).fold(f64::INFINITY, f64::min)).collect();
-                let mean = nn.iter().sum::<f64>() / n as f64;
-                let var = nn.iter().map(|d| (d - mean) * (d - mean)).sum::<f64>() / n as f64;
-                let coincide = nn.iter().filter(|d| **d == 0.0).count();
-                println!("echo {at:5} {label} ({n}): nearest-neighbour distance mean {mean:.4} cv {:.3} min {:.4} max {:.4}; {coincide} motes sitting on another", var.sqrt() / mean.max(1e-12), nn.iter().cloned().fold(f64::INFINITY, f64::min), nn.iter().cloned().fold(0.0, f64::max));
+                    ratio(1, 1) - c
+                }).min()).collect();
+                let count = Ratio::from_integer(n.into());
+                let mean = nn.iter().fold(ratio(0, 1), |s, d| s + d.clone()) / count.clone();
+                // The spread: the mean absolute deviation over the mean (0 for
+                // an arrangement whose every neighbour stands equally far).
+                let dev = nn.iter().fold(ratio(0, 1), |s, d| s + if *d > mean { d.clone() - mean.clone() } else { mean.clone() - d.clone() }) / count;
+                let coincide = nn.iter().filter(|d| **d == ratio(0, 1)).count();
+                println!("echo {at:5} {label} ({n}): nearest-neighbour distance mean {} spread {} range {}; {coincide} motes sitting on another", f(&mean), of(&dev, &mean), span(&nn));
             };
             let read = |w: &pulse::Universe, at: u64| {
                 read_of(&w.firmament, at, "all");
@@ -289,13 +294,13 @@ fn main() {
             // systems by their worlds, their orbits, belts as debris, and the
             // worlds' resources.
             let whole = pulse::mass(&u.total());
-            let share = |m: &pulse::Manifest| if whole == ratio(0, 1) { 0.0 } else { f(&(pulse::mass(m) / whole.clone())) };
-            let h_of = |m: &pulse::Manifest| m.get("Z001").map(|a| f(a)).unwrap_or(0.0);
+            let share = |m: &pulse::Manifest| of(&pulse::mass(m), &whole);
+            let h_of = |m: &pulse::Manifest| m.get("Z001").cloned().unwrap_or_else(|| ratio(0, 1));
             let stars: Vec<&pulse::Body> = u.cores.iter().flat_map(|c| &c.satellites).collect();
             let remnants = stars.iter().filter(|s| s.remnant).count();
             // THE GALAXIES' ORBITS (`pulse::orbit_galaxies`): each core's
             // live reach and period in bells, its orbit's phase, its share.
-            let gal: Vec<String> = u.cores.iter().map(|c| format!("[{}] R {:.3} P {:.3} phase {:.3} share {:.3e}", c.path[0], f(&c.radius), f(&c.period), c.phase.first().map(f).unwrap_or(0.0), share(&c.total()))).collect();
+            let gal: Vec<String> = u.cores.iter().map(|c| format!("[{}] R {} P {} phase {} share {}", c.path[0], f(&c.radius), f(&c.period), c.phase.first().map(|x| f(x).to_string()).unwrap_or_else(|| "none".into()), share(&c.total()))).collect();
             println!("GALAXIES: {}", gal.join("; "));
             // THE FIRMAMENT (`pulse::Universe::firmament`): its kinds, its
             // share, and where its orbit phases GATHER (a reading: phases
@@ -303,47 +308,49 @@ fn main() {
             // neighbours exceeds the mean gap; each group's holding-weighted
             // centre and its kinds).
             if !u.firmament.is_empty() {
-                let mut ph: Vec<(f64, f64, u32)> = u.firmament.iter().map(|x| (f(&x.phase[0]), f(&(x.amount.clone() * conductor::flows::weight(&x.key))), conductor::chem::charge(&x.key))).collect();
-                ph.sort_by(|a, b| a.0.total_cmp(&b.0));
+                let mut ph: Vec<(Ratio, Ratio, u32)> = u.firmament.iter().map(|x| (x.phase[0].clone(), x.amount.clone() * conductor::flows::weight(&x.key), conductor::chem::charge(&x.key))).collect();
+                ph.sort_by(|a, b| a.0.cmp(&b.0));
                 let n = ph.len();
-                let gaps: Vec<f64> = (0..n).map(|i| if i + 1 < n { ph[i + 1].0 - ph[i].0 } else { ph[0].0 + 1.0 - ph[i].0 }).collect();
-                let mean = 1.0 / n as f64;
+                let gaps: Vec<Ratio> = (0..n).map(|i| if i + 1 < n { ph[i + 1].0.clone() - ph[i].0.clone() } else { ph[0].0.clone() + ratio(1, 1) - ph[i].0.clone() }).collect();
+                let mean = Ratio::new(1.into(), n.max(1).into());
                 let mut groups: Vec<Vec<usize>> = vec![Vec::new()];
                 for i in 0..n {
-                    groups.last_mut().unwrap().push(i);
+                    if let Some(g) = groups.last_mut() {
+                        g.push(i);
+                    }
                     if gaps[i] > mean && i + 1 < n {
                         groups.push(Vec::new());
                     }
                 }
                 let fh = u.firmament.iter().fold(ratio(0, 1), |s, x| s + x.amount.clone() * conductor::flows::weight(&x.key));
                 let desc: Vec<String> = groups.iter().filter(|g| !g.is_empty()).map(|g| {
-                    let w: f64 = g.iter().map(|&i| ph[i].1).sum();
-                    let c = if w > 0.0 { g.iter().map(|&i| ph[i].0 * ph[i].1).sum::<f64>() / w } else { ph[g[0]].0 };
-                    let (lo, hi) = (g.iter().map(|&i| ph[i].2).min().unwrap_or(0), g.iter().map(|&i| ph[i].2).max().unwrap_or(0));
-                    format!("{c:.3}:{}k(Z{lo}-{hi})", g.len())
+                    let w = g.iter().fold(ratio(0, 1), |s, &i| s + ph[i].1.clone());
+                    let centre = if w > ratio(0, 1) { g.iter().fold(ratio(0, 1), |s, &i| s + ph[i].0.clone() * ph[i].1.clone()) / w } else { ph[g[0]].0.clone() };
+                    let zs: Vec<u32> = g.iter().map(|&i| ph[i].2).collect();
+                    format!("{}:{}k(Z{}-{})", f(&centre), g.len(), zs.iter().min().copied().unwrap_or(0), zs.iter().max().copied().unwrap_or(0))
                 }).collect();
-                println!("FIRMAMENT: {} motes, share {:.3e}; phases gather in {} groups: {}", n, f(&(fh / whole.clone())), desc.len(), desc.join(" "));
+                println!("FIRMAMENT: {} motes, share {}; phases gather in {} groups: {}", n, of(&fh, &whole), desc.len(), desc.join(" "));
             }
             let worlds_of = |s: &pulse::Body| s.satellites.iter().filter(|w| w.born == 0).count();
             let mut by: std::collections::BTreeMap<usize, usize> = std::collections::BTreeMap::new();
             for s in &stars {
                 *by.entry(worlds_of(s)).or_insert(0) += 1;
             }
-            let gas_h: f64 = u.cores.iter().map(|c| h_of(&c.medium)).sum::<f64>() + stars.iter().map(|s| h_of(&s.medium)).sum::<f64>();
+            let gas_h = u.cores.iter().map(|c| h_of(&c.medium)).chain(stars.iter().map(|s| h_of(&s.medium))).fold(ratio(0, 1), |a, b| a + b);
             let all_h = h_of(&u.total());
-            println!("CENSUS at beat {now}: medium {:.3e} of the universe, {} galaxies, {} stars ({} burning, {} remnants), {} companions",
+            println!("CENSUS at beat {now}: medium {} of the universe, {} galaxies, {} stars ({} burning, {} remnants), {} companions",
                 share(&u.medium), u.cores.len(), stars.len(), stars.len() - remnants, remnants,
                 stars.iter().map(|s| s.satellites.iter().filter(|w| w.born > 0).count()).sum::<usize>());
-            let sys_h: f64 = stars.iter().map(|s| h_of(&s.medium)).sum();
-            println!("  CLOUDS: hydrogen in the galaxies' and systems' gas {:.3} of all hydrogen; in the SYSTEMS' media alone {:.3e} ({:.3} of all)", if all_h > 0.0 { gas_h / all_h } else { 0.0 }, sys_h, if all_h > 0.0 { sys_h / all_h } else { 0.0 });
+            let sys_h = stars.iter().map(|s| h_of(&s.medium)).fold(ratio(0, 1), |a, b| a + b);
+            println!("  CLOUDS: hydrogen in the galaxies' and systems' gas {} of all hydrogen; in the SYSTEMS' media alone {} ({} of all)", of(&gas_h, &all_h), f(&sys_h), of(&sys_h, &all_h));
             println!("  SYSTEMS by worlds: {}", by.iter().map(|(k, v)| format!("{k}:{v}")).collect::<Vec<_>>().join(" "));
             // Orbits of the multi-world systems: reaches and period ratios.
             let mut shown = 0;
             for s in stars.iter().filter(|s| worlds_of(s) >= 2) {
                 let mut ws: Vec<&pulse::Body> = s.satellites.iter().filter(|w| w.born == 0).collect();
                 ws.sort_by(|a, b| a.radius.cmp(&b.radius));
-                let reaches: Vec<String> = ws.iter().map(|w| format!("{:.3e}", f(&w.radius))).collect();
-                let ratios: Vec<String> = ws.windows(2).map(|p| if p[0].period == ratio(0, 1) { "-".into() } else { format!("{:.3}", f(&(p[1].period.clone() / p[0].period.clone()))) }).collect();
+                let reaches: Vec<String> = ws.iter().map(|w| f(&w.radius).to_string()).collect();
+                let ratios: Vec<String> = ws.windows(2).map(|p| if p[0].period == ratio(0, 1) { "-".into() } else { f(&(p[1].period.clone() / p[0].period.clone())).to_string() }).collect();
                 println!("  ORBITS star {:?}: {} worlds at {} (period ratios {})", s.path, ws.len(), reaches.join(" "), ratios.join(" "));
                 shown += 1;
                 if shown >= 6 {
@@ -351,12 +358,12 @@ fn main() {
                 }
             }
             // Belts: the debris standing in a system's own medium as motes.
-            let debris: Vec<f64> = stars.iter().map(|s| s.flows.iter().fold(0.0, |a, x| a + f(&x.amount))).collect();
-            let with_belts = debris.iter().filter(|d| **d > 0.0).count();
-            println!("  BELTS: {} systems carry debris motes, total {:.3e} (units); remnants' released systems re-anchored count in SYSTEMS",
-                with_belts, debris.iter().sum::<f64>());
+            let debris: Vec<Ratio> = stars.iter().map(|s| s.flows.iter().fold(ratio(0, 1), |a, x| a + x.amount.clone())).collect();
+            let with_belts = debris.iter().filter(|d| **d > ratio(0, 1)).count();
+            println!("  BELTS: {} systems carry debris motes, total {} (units); remnants' released systems re-anchored count in SYSTEMS",
+                with_belts, f(&debris.iter().fold(ratio(0, 1), |a, b| a + b.clone())));
             // Where the debris stands against its system's rim (R = ℓ/H_s, rim 1).
-            let mut rs: Vec<f64> = Vec::new();
+            let mut rs: Vec<Ratio> = Vec::new();
             for s in &stars {
                 let tot = pulse::mass(&s.total());
                 if tot == ratio(0, 1) {
@@ -366,19 +373,18 @@ fn main() {
                 if h_s == ratio(0, 1) {
                     continue;
                 }
-                rs.extend(s.flows.iter().map(|x| f(&(x.ell_o.clone() / h_s.clone()))));
+                rs.extend(s.flows.iter().map(|x| x.ell_o.clone() / h_s.clone()));
             }
-            rs.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
-            if !rs.is_empty() {
-                let q = |p: f64| rs[((rs.len() - 1) as f64 * p) as usize];
-                println!("  DEBRIS reach against the rim (1): {} motes, min {:.3e} median {:.3e} max {:.3e}", rs.len(), q(0.0), q(0.5), q(1.0));
+            rs.sort();
+            if let (Some(lo), Some(hi)) = (rs.first(), rs.last()) {
+                println!("  DEBRIS reach against the rim (1): {} motes, min {} median {} max {}", rs.len(), f(lo), f(&rs[(rs.len() - 1) / 2]), f(hi));
             }
             // LIGHT AT THE ORBIT (operator 2026-10-18: "let there be light"; with
             // xylarium): each burning star's light a ring, the transduced flux of
             // its rungs (formation::burn, in full step), and each world's
             // INSOLATION, that flux times the share of directions the star
             // covers from the world's reach, δ_s(r) = H_s/(r + H_s), never 1/r².
-            let mut lit: Vec<(f64, f64, usize)> = Vec::new();
+            let mut lit: Vec<(Ratio, Ratio, usize)> = Vec::new();
             for s in &stars {
                 let tot = pulse::mass(&s.total());
                 if tot == ratio(0, 1) {
@@ -394,20 +400,20 @@ fn main() {
                 for w in s.satellites.iter().filter(|w| w.born == 0) {
                     let r = if scale == ratio(0, 1) { ratio(0, 1) } else { w.radius.clone() / scale.clone() };
                     let cover = h_s.clone() / (r + h_s.clone());
-                    lit.push((f(&flux), f(&(flux.clone() * cover)), w.kept.len()));
+                    lit.push((flux.clone(), flux.clone() * cover, w.kept.len()));
                 }
             }
             if !lit.is_empty() {
-                let ins: Vec<String> = lit.iter().take(12).map(|(fl, i, k)| format!("{:.2e}/{:.2e}({}k)", fl, i, k)).collect();
+                let ins: Vec<String> = lit.iter().take(12).map(|(fl, i, k)| format!("{}/{}({}k)", f(fl), f(i), k)).collect();
                 println!("  LIGHT (star flux / world insolation (kinds)): {}", ins.join(" "));
             }
             // CHEMISTRY: molecules in the worlds and in the systems' media,
             // with water (O + 4H on S^11) named.
             let in_worlds: Vec<(&String, &Ratio)> = stars.iter().flat_map(|s| &s.satellites).flat_map(|w| w.kept.iter()).filter(|(k, _)| k.contains('·')).collect();
             let in_media: Vec<(&String, &Ratio)> = stars.iter().flat_map(|s| s.flows.iter().map(|x| (&x.key, &x.amount))).filter(|(k, _)| k.contains('·')).collect();
-            let sum = |v: &[(&String, &Ratio)], k: Option<&str>| v.iter().filter(|(kk, _)| k.map_or(true, |k| kk.as_str() == k)).fold(0.0, |a, (_, x)| a + f(x));
+            let sum = |v: &[(&String, &Ratio)], k: Option<&str>| f(&v.iter().filter(|(kk, _)| k.map_or(true, |k| kk.as_str() == k)).fold(ratio(0, 1), |a, (_, x)| a + Ratio::clone(x)));
             let kinds_m: std::collections::BTreeSet<&String> = in_worlds.iter().chain(in_media.iter()).map(|(k, _)| *k).collect();
-            println!("  CHEMISTRY: {} molecule kinds; water in worlds {:.3e}, in system media {:.3e}; all molecules in worlds {:.3e}, in media {:.3e}",
+            println!("  CHEMISTRY: {} molecule kinds; water in worlds {}, in system media {}; all molecules in worlds {}, in media {}",
                 kinds_m.len(), sum(&in_worlds, Some("Z008·4Z001")), sum(&in_media, Some("Z008·4Z001")), sum(&in_worlds, None), sum(&in_media, None));
             // Resources: the worlds' mixes.
             let worlds: Vec<&pulse::Body> = stars.iter().flat_map(|s| &s.satellites).filter(|w| w.born == 0).collect();
@@ -423,8 +429,8 @@ fn main() {
             // Layers: how many kinds each world holds, and its top kind's share.
             let layers: Vec<String> = worlds.iter().take(12).map(|w| {
                 let m = pulse::mass(&w.kept);
-                let top = w.kept.iter().map(|(k, a)| (k.clone(), if m == ratio(0, 1) { 0.0 } else { f(&(pulse::mass(&[(k.clone(), a.clone())].into()) / m.clone())) })).fold((String::new(), 0.0), |b, x| if x.1 > b.1 { x } else { b });
-                format!("{}k/{}:{:.2}", w.kept.len(), top.0, top.1)
+                let top = w.kept.iter().map(|(k, a)| (k.clone(), pulse::mass(&[(k.clone(), a.clone())].into()))).fold((String::new(), ratio(0, 1)), |b, x| if x.1 > b.1 { x } else { b });
+                format!("{}k/{}:{}", w.kept.len(), top.0, of(&top.1, &m))
             }).collect();
             println!("  LAYERS (kinds per world / top kind:share): {}", layers.join(" "));
         }
@@ -432,7 +438,7 @@ fn main() {
             // The universe's whole manifest, one kind a line: Z, amount, hold.
             for (k, a) in u.total() {
                 let z = k.strip_prefix('Z').and_then(|z| z.parse::<u32>().ok()).unwrap_or(0);
-                println!("{z} {:e} {}", f(&a), cfe::almanac::atom::hold(z));
+                println!("{z} {} {}", f(&a), cfe::almanac::atom::hold(z));
             }
         }
         "cascade" => {
@@ -463,7 +469,7 @@ fn main() {
             let h_u = ratio(2, 1);
             let p = ratio(1, 2);
             let mut left = total.clone();
-            println!("CASCADE over {} kinds: {} stacks (heaviest first), H {:.1}", kinds.len(), stacks.len(), f(&h_u));
+            println!("CASCADE over {} kinds: {} stacks (heaviest first), H {}", kinds.len(), stacks.len(), f(&h_u));
             for (k, st) in stacks.iter().enumerate() {
                 let m: Ratio = st.iter().map(|&i| prof[i].clone()).fold(ratio(0, 1), |a, b| a + b);
                 let b = p.clone() * total.clone() / left.clone();
@@ -474,9 +480,9 @@ fn main() {
                 let top = stacks.get(k + 1).and_then(|s| s.first()).map(|&i| reach(i));
                 let beat = top.map(|r| ratio(1, 1) + r / h_u.clone());
                 println!(
-                    "  stack {:>2}: {}..{} ({} kinds), share {:.3e}, push {:.4}, reach {:.4}..{:.4}; next beat {}",
+                    "  stack {:>2}: {}..{} ({} kinds), share {}, push {}, reach {}..{}; next beat {}",
                     k + 1, kinds[st[0]].0, kinds[*st.last().expect("a kind")].0, st.len(), f(&(m / total.clone())), f(&b), f(&r_in), f(&r_out),
-                    beat.map(|x| format!("{:.4}", f(&x))).unwrap_or_else(|| "— (settled: the throat's own, 1)".into())
+                    beat.map(|x| f(&x).to_string()).unwrap_or_else(|| "— (settled: the throat's own, 1)".into())
                 );
             }
         }
@@ -488,7 +494,7 @@ fn main() {
             let Some((p, h, mean, lightest)) = pulse::push_cut(&all) else { return println!("no matter") };
             let kinds: Vec<u32> = all.keys().filter_map(|k| k.strip_prefix('Z').and_then(|z| z.parse().ok())).collect();
             println!(
-                "FOUNDING CUT over the whole manifest ({} kinds, Z{}..Z{}): p {:.4}, H {:.4}, mean weight {:.4}, lightest held {}",
+                "FOUNDING CUT over the whole manifest ({} kinds, Z{}..Z{}): p {}, H {}, mean weight {}, lightest held {}",
                 kinds.len(), kinds.iter().min().unwrap_or(&0), kinds.iter().max().unwrap_or(&0), f(&p), f(&h), f(&mean), lightest.unwrap_or_else(|| "— (every kind held)".into())
             );
             let _ = total;
@@ -500,8 +506,8 @@ fn main() {
                 let m = pulse::mass(&s.kept);
                 let mut ks: Vec<(&String, &Ratio)> = s.kept.iter().collect();
                 ks.sort_by(|a, b| b.1.cmp(a.1));
-                let top: Vec<String> = ks.iter().take(6).map(|(k, a)| format!("{k}:{:.3}", f(&(Ratio::clone(a) * cfe::ratio::ratio(i64::from(k.strip_prefix('Z').and_then(|z| z.parse::<u32>().ok()).map(cfe::almanac::atom::hold).unwrap_or(1)), 1) / m.clone())))).collect();
-                println!("  star born {} remnant {} heart {:.3e}: {}", s.born, s.remnant, f(&m), top.join(" "));
+                let top: Vec<String> = ks.iter().take(6).map(|(k, a)| format!("{k}:{}", f(&(Ratio::clone(a) * cfe::ratio::ratio(i64::from(k.strip_prefix('Z').and_then(|z| z.parse::<u32>().ok()).map(cfe::almanac::atom::hold).unwrap_or(1)), 1) / m.clone())))).collect();
+                println!("  star born {} remnant {} heart {}: {}", s.born, s.remnant, f(&m), top.join(" "));
             }
         }
         "formation" => {
@@ -511,9 +517,9 @@ fn main() {
                 let remnants = c.satellites.iter().filter(|s| s.remnant).count();
                 let with_h = c.satellites.iter().filter(|s| s.kept.get("Z001").is_some_and(|a| *a > ratio(0, 1))).count();
                 println!(
-                    "  galaxy {:>2}: disc {:.3} gas {:.3} ({} motes, {} jet batches); first echo bell {}; {} stars ({metal} with metals, {remnants} remnants, {with_h} holding hydrogen), {} worlds",
+                    "  galaxy {:>2}: disc {} gas {} ({} motes, {} jet batches); first echo bell {}; {} stars ({metal} with metals, {remnants} remnants, {with_h} holding hydrogen), {} worlds",
                     c.path[0], of(&pulse::mass(&c.kept), &total), of(&pulse::mass(&c.medium), &total), c.gas.len(), c.gas.iter().filter(|g| g.born > 0).count(),
-                    60 + f(&c.radius) as u64, c.satellites.len(), c.satellites.iter().map(|s| s.satellites.len()).sum::<usize>()
+                    (ratio(60, 1) + c.radius.clone()).floor(), c.satellites.len(), c.satellites.iter().map(|s| s.satellites.len()).sum::<usize>()
                 );
             }
         }
@@ -534,17 +540,20 @@ fn main() {
             println!("WORLDS at beat {now}: {n} (and {companions} grown bodies ignited as companion stars), by the lightest kind each holds (hold, Z: worlds, their holding)");
             // The hearts' share of their systems (what each star holds of
             // all it and its worlds and belts hold): with worlds vs without.
-            let mut shares: Vec<(f64, bool)> = u.cores.iter().flat_map(|c| &c.satellites).filter_map(|s| {
+            let mut shares: Vec<(Ratio, bool)> = u.cores.iter().flat_map(|c| &c.satellites).filter_map(|s| {
                 let t = pulse::mass(&s.total());
-                (t > ratio(0, 1)).then(|| (f(&(pulse::mass(&s.kept) / t)), !s.satellites.is_empty()))
+                (t > ratio(0, 1)).then(|| (pulse::mass(&s.kept) / t, !s.satellites.is_empty()))
             }).collect();
-            shares.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap_or(std::cmp::Ordering::Equal));
-            let with: Vec<f64> = shares.iter().filter(|x| x.1).map(|x| x.0).collect();
-            let without: Vec<f64> = shares.iter().filter(|x| !x.1).map(|x| x.0).collect();
-            let q = |v: &Vec<f64>| if v.is_empty() { "—".to_string() } else { format!("{:.3}/{:.3}/{:.3} (n {})", v[0], v[v.len() / 2], v[v.len() - 1], v.len()) };
+            shares.sort_by(|a, b| a.0.cmp(&b.0));
+            let with: Vec<Ratio> = shares.iter().filter(|x| x.1).map(|x| x.0.clone()).collect();
+            let without: Vec<Ratio> = shares.iter().filter(|x| !x.1).map(|x| x.0.clone()).collect();
+            let q = |v: &Vec<Ratio>| match (v.first(), v.last()) {
+                (Some(a), Some(b)) => format!("{}/{}/{} (n {})", f(a), f(&v[v.len() / 2]), f(b), v.len()),
+                _ => "—".to_string(),
+            };
             println!("  heart share of its system (min/median/max): with worlds {}, without {}", q(&with), q(&without));
             for ((w, k), (count, m)) in &by {
-                println!("  held down to {k} (hold {w}): {count} worlds, holding {:.3e}", f(m));
+                println!("  held down to {k} (hold {w}): {count} worlds, holding {}", f(m));
             }
         }
         "heartbeat" => {
@@ -553,7 +562,7 @@ fn main() {
                     let rate = system_rate(&u, i, k, &unit);
                     let received: u64 = (rate.clone() * ratio(now.saturating_sub(sys.born) as i64, 1)).floor().to_integer().try_into().unwrap_or(0);
                     if let Some((every, left, light)) = formation::heartbeat(&sys.kept, &(pulse::mass(&sys.kept) / pulse::mass(&sys.total())), received) {
-                        println!("  star {:?}: born {}, {received} rings, halves every {every}, fuel left {:.4}, light {:.3e}, He {:.3}", sys.path, sys.born, f(&left), f(&light), f(&(sys.kept.get("Z002").cloned().unwrap_or_else(|| ratio(0, 1)) * ratio(6, 1) / pulse::mass(&sys.kept))));
+                        println!("  star {:?}: born {}, {received} rings, halves every {every}, fuel left {}, light {}, He {}", sys.path, sys.born, f(&left), f(&light), f(&(sys.kept.get("Z002").cloned().unwrap_or_else(|| ratio(0, 1)) * ratio(6, 1) / pulse::mass(&sys.kept))));
                     }
                 }
             }
@@ -562,10 +571,10 @@ fn main() {
             let n = ratio(now as i64, 1);
             for (keeper, inner) in chronometry::keepers(&u) {
                 let r = keeper.read(&n);
-                println!("  keeper {:?} {:?}: rate {:.6}, delay {:.1}, local {:.2}, rung {}, coherence {:.3}, inside {:?}", keeper.galaxy, keeper.shell, f(&keeper.rate), f(&keeper.delay), f(&r.local), r.rung, f(&r.coherence), inner);
+                println!("  keeper {:?} {:?}: rate {}, delay {}, local {}, rung {}, coherence {}, inside {:?}", keeper.galaxy, keeper.shell, f(&keeper.rate), f(&keeper.delay), f(&r.local), r.rung, f(&r.coherence), inner);
             }
             for e in enclosure::enclosures(&u) {
-                println!("  enclosure {:?} on S^{}: rim {:.3e}, own ring {:.3e}, throat {:.3e}", e.path, e.dim, f(&e.rim), f(&e.ring()), f(&e.throat));
+                println!("  enclosure {:?} on S^{}: rim {}, own ring {}, throat {}", e.path, e.dim, f(&e.rim), f(&e.ring()), f(&e.throat));
             }
         }
         "bits" => {
@@ -584,7 +593,7 @@ fn main() {
         "ledger" => {
             let mass = pulse::mass(&u.total()) / unit.clone();
             let magnetism = pulse::magnetism(&u.total()) / unit.clone();
-            println!("LEDGER at beat {now}: mass {:.6e} spin {:.6e} magnetism {:.6e} mass+magnetism {:.6e}", f(&mass), f(&pulse::spin_total(&u, &unit)), f(&magnetism), f(&(mass + magnetism)));
+            println!("LEDGER at beat {now}: mass {} spin {} magnetism {} mass+magnetism {}", f(&mass), f(&pulse::spin_total(&u, &unit)), f(&magnetism), f(&(mass + magnetism)));
             // THE POLES (docs/78 law 11): each core's strength is the span
             // between its ℤ pole (holding) and its ℚ pole (magnetism); its
             // balance the share at the ℤ pole (1: hardened, closed).
@@ -592,12 +601,12 @@ fn main() {
             let held: Vec<pulse::Manifest> = u.cores.iter().map(|c| c.total()).collect();
             let (hold_all, mag_all) = held.iter().fold((ratio(0, 1), ratio(0, 1)), |(h, m), x| (h + pulse::mass(x), m + pulse::magnetism(x)));
             let (_, bal_u) = cfe::ratio::poles(&hold_all, &mag_all);
-            println!("POLES universal core: strength H_u {:.6e} (1 + Σ state + holding + magnetism, founding units), balance {:.6}", f(&h_u), f(&bal_u));
+            println!("POLES universal core: strength H_u {} (1 + Σ state + holding + magnetism, founding units), balance {}", f(&h_u), f(&bal_u));
             for (c, x) in u.cores.iter().zip(&held) {
                 let (span, bal) = cfe::ratio::poles(&pulse::mass(x), &pulse::magnetism(x));
                 let stars: Vec<Ratio> = c.satellites.iter().map(|sys| cfe::ratio::poles(&pulse::mass(&sys.kept), &pulse::magnetism(&sys.kept)).1).collect();
                 let (s0, s1) = (stars.iter().min().cloned().unwrap_or_else(|| ratio(0, 1)), stars.iter().max().cloned().unwrap_or_else(|| ratio(0, 1)));
-                println!("  galaxy {:>2}: strength {:.6e}, balance {:.6}; its {} stars' balance {:.4}..{:.4}", c.path[0], f(&(span.extent() / unit.clone())), f(&bal), stars.len(), f(&s0), f(&s1));
+                println!("  galaxy {:>2}: strength {}, balance {}; its {} stars' balance {}..{}", c.path[0], f(&(span.extent() / unit.clone())), f(&bal), stars.len(), f(&s0), f(&s1));
             }
         }
         "recycle" => {
@@ -609,7 +618,7 @@ fn main() {
             let mass = pulse::mass(&u.total());
             let magnetism = pulse::magnetism(&u.total());
             println!("RECYCLE at beat {now}");
-            println!("  LEDGER: mass {:.9e}, mass+magnetism {:.9e} (units of the deepest hole; exact sums, compare across beats)", f(&(mass.clone() / unit.clone())), f(&((mass.clone() + magnetism) / unit.clone())));
+            println!("  LEDGER: mass {}, mass+magnetism {} (units of the deepest hole; exact sums, compare across beats)", f(&(mass.clone() / unit.clone())), f(&((mass.clone() + magnetism) / unit.clone())));
             // The media, tier by tier: the ocean (intergalactic), each
             // galaxy's gas, each system's, each world's.
             let systems: Vec<&pulse::Body> = u.cores.iter().flat_map(|c| &c.satellites).collect();
@@ -622,7 +631,7 @@ fn main() {
             });
             let galaxies: Vec<&pulse::Body> = u.cores.iter().collect();
             for (name, m) in [("ocean", u.medium.clone()), ("galaxy gas", sum(&galaxies)), ("system media", sum(&systems)), ("world media", sum(&worlds))] {
-                println!("  MEDIUM {name:<13} {:.6e} of the universe; {}", f(&(pulse::mass(&m) / mass.clone())), composition(&m, 5));
+                println!("  MEDIUM {name:<13} {} of the universe; {}", f(&(pulse::mass(&m) / mass.clone())), composition(&m, 5));
             }
             // SHED: what the stars returned to their galaxy's gas, echo by
             // echo (the conductor's BREATH lines).
@@ -641,7 +650,7 @@ fn main() {
             for c in &u.cores {
                 let total = pulse::mass(&c.total());
                 let worlds: usize = c.satellites.iter().map(|s| s.satellites.len()).sum();
-                println!("  RETURN galaxy {:>2}: disc {:.4}, gas {:.4} ({} motes), {} stars, {worlds} worlds", c.path[0], of(&pulse::mass(&c.kept), &total), of(&pulse::mass(&c.medium), &total), c.gas.len(), c.satellites.len());
+                println!("  RETURN galaxy {:>2}: disc {}, gas {} ({} motes), {} stars, {worlds} worlds", c.path[0], of(&pulse::mass(&c.kept), &total), of(&pulse::mass(&c.medium), &total), c.gas.len(), c.satellites.len());
             }
             println!("  CRESTS: owed (the gain a pass on a crest, (medium in band) × a_q × the kick, with xylarium); read once derived");
         }
@@ -657,63 +666,6 @@ fn events(n: usize) {
     for l in lines.iter().skip(lines.len().saturating_sub(n)) {
         println!("{}", l.chars().take(260).collect::<String>());
     }
-}
-
-/// Beat pace and contention: seconds a beat over the last N beats, the top
-/// PROFILE costs, and who holds the shared build lock.
-fn pace(n: u64) {
-    let lines = journal(60_000);
-    let mut beats: Vec<(String, u64)> = Vec::new();
-    let mut costs: std::collections::BTreeMap<String, f64> = std::collections::BTreeMap::new();
-    for l in &lines {
-        if let Some(rest) = l.split("civilizations live — beat ").nth(1) {
-            if let Ok(b) = rest.trim().parse::<u64>() {
-                beats.push((l.split_whitespace().next().unwrap_or("").to_string(), b));
-            }
-        }
-    }
-    let since = beats.last().map(|(_, b)| b.saturating_sub(n)).unwrap_or(0);
-    for l in &lines {
-        let Some(rest) = l.split("PROFILE ").nth(1) else { continue };
-        let Some(b) = l.split("beat ").nth(1).and_then(|r| r.split(':').next()).and_then(|b| b.parse::<u64>().ok()) else { continue };
-        if b < since {
-            continue;
-        }
-        let mut it = rest.split_whitespace();
-        let (Some(name), Some(t)) = (it.next(), it.next()) else { continue };
-        let secs = if let Some(v) = t.strip_suffix("ms") { v.parse::<f64>().unwrap_or(0.0) / 1e3 } else if let Some(v) = t.strip_suffix("µs") { v.parse::<f64>().unwrap_or(0.0) / 1e6 } else if let Some(v) = t.strip_suffix("ns") { v.parse::<f64>().unwrap_or(0.0) / 1e9 } else { t.trim_end_matches('s').parse::<f64>().unwrap_or(0.0) };
-        *costs.entry(name.to_string()).or_insert(0.0) += secs;
-    }
-    let recent: Vec<&(String, u64)> = beats.iter().filter(|(_, b)| *b >= since).collect();
-    if let (Some(first), Some(last)) = (recent.first(), recent.last()) {
-        let secs = |t: &str| chrono_secs(t);
-        let span = secs(&last.0) - secs(&first.0);
-        let n_beats = last.1.saturating_sub(first.1).max(1);
-        println!("PACE: beats {}..{}, {:.1} s a beat", first.1, last.1, span / n_beats as f64);
-    }
-    let mut top: Vec<(String, f64)> = costs.into_iter().collect();
-    top.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
-    for (name, s) in top.iter().take(10) {
-        println!("  {s:>9.2} s  {name}");
-    }
-    let locks = Command::new("lslocks").args(["-n", "-o", "PID,PATH"]).output().map(|o| String::from_utf8_lossy(&o.stdout).to_string()).unwrap_or_default();
-    let holders: Vec<&str> = locks.lines().filter(|l| l.contains("xyl-heavy.lock")).collect();
-    if holders.is_empty() {
-        println!("BUILD LOCK: free");
-    }
-    for h in holders {
-        let pid = h.split_whitespace().next().unwrap_or("");
-        let cmd = std::fs::read_to_string(format!("/proc/{pid}/cmdline")).unwrap_or_default().replace('\0', " ");
-        println!("BUILD LOCK: held by pid {pid}: {}", cmd.chars().take(160).collect::<String>());
-    }
-}
-
-/// Seconds of an ISO journal timestamp's time of day.
-fn chrono_secs(t: &str) -> f64 {
-    let time = t.split('T').nth(1).unwrap_or("");
-    let hms: Vec<f64> = time.split(['+', '-']).next().unwrap_or("").split(':').filter_map(|x| x.parse().ok()).collect();
-    let day: f64 = t.split('T').next().and_then(|d| d.rsplit('-').next()).and_then(|d| d.parse().ok()).unwrap_or(0.0);
-    day * 86400.0 + hms.first().copied().unwrap_or(0.0) * 3600.0 + hms.get(1).copied().unwrap_or(0.0) * 60.0 + hms.get(2).copied().unwrap_or(0.0)
 }
 
 /// The civilizations: each world directory, live or collapsed.
