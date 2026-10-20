@@ -67,6 +67,20 @@ pub fn shell_room(n: u32) -> u64 {
     (0..n).map(|l| 2 * orientations(l)).sum()
 }
 
+/// THE VESSEL (operator 2026-10-19/20: the heaviest elements "form an orderly
+/// container around the bouncing antipoles"; "proceed with your
+/// recommendations"; with xylarium, atoms::vessel): the band of kinds no
+/// passing shell can grip, both edges read on the atom. UPPER: the THIRD
+/// SEALED shell, where every shell is full (the cumulative shell rooms 2,
+/// 28, 208 on S^11). LOWER: the heaviest SEAM below it, where the single
+/// peel releases (`u(z−1) + 1 − u(z) < 0`; Z106). Returns (lower, upper).
+pub fn vessel() -> Option<(u32, u32)> {
+    let upper = u32::try_from(shell_room(1) + shell_room(2) + shell_room(3)).ok()?;
+    let u = |z: u32| i64::from(atom(z).map(|a| a.unpaired).unwrap_or(0));
+    let lower = (2..upper).rev().find(|&z| u(z - 1) + 1 - u(z) < 0)?;
+    Some((lower, upper))
+}
+
 /// The atom of `z` charges, neutral (z electrons). `None` for z = 0.
 pub fn atom(z: u32) -> Option<Atom> {
     if z == 0 {

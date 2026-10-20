@@ -603,14 +603,26 @@ pub fn cascade(manifest: &Manifest) -> (Manifest, Vec<(Ratio, Manifest)>, Ratio)
         }
     }
     let mut wellspring = Manifest::new();
+    let vessel = cfe::almanac::atom::vessel();
     let mut out: Vec<(Manifest, Ratio)> = Vec::new();
     for (m, reach) in shells {
         if m.is_empty() {
             continue;
         }
+        // THE VESSEL SET BY THE GRIP (operator 2026-10-20, with xylarium):
+        // the Wellspring keeps, of what its throat holds by reach, only the
+        // kinds no passing shell can grip (`atom::vessel`, the heaviest seam
+        // to the third sealed shell); whatever else it holds is grippable and
+        // goes out with the expelled matter, in its shell.
         if reach.clone() * (ratio(1, 1) + s_final.clone()) <= ratio(1, 1) {
-            for (k, a) in m {
+            let (kept, rest): (Manifest, Manifest) = m.into_iter().partition(|(k, _)| {
+                k.strip_prefix('Z').and_then(|z| z.parse::<u32>().ok()).is_some_and(|z| vessel.is_some_and(|(lo, hi)| z >= lo && z <= hi))
+            });
+            for (k, a) in kept {
                 *wellspring.entry(k).or_insert_with(|| ratio(0, 1)) += a;
+            }
+            if !rest.is_empty() {
+                out.push((rest, reach));
             }
         } else {
             out.push((m, reach));
@@ -691,6 +703,33 @@ pub fn deploy(_seed: &[u8; 32], manifest: &Manifest) -> Universe {
         shares.push((i as u32 + 1, m, d));
     }
     let weight_of = |m: &Manifest| if whole.is_zero() { ratio(0, 1) } else { mass(m) / whole.clone() };
+    // A BEAD STANDS AS A GALAXY ONLY WHERE IT HOLDS ITS OWN (with xylarium,
+    // 2026-10-20; gravity's reach, one law at every tier, operator
+    // 2026-10-18): its own region about its reach R is `d = R·H_g/(H_g +
+    // H_inside)` (H_g its hold as a throat, 2w; H_inside the singularity's
+    // state 1 and every galaxy standing inside), and its spread `R·s_final`
+    // (s_final = ½·1/(1 + 2) = 1/6, the cascade's last face with all of it
+    // held) must lie within it. A bead that cannot hold its spread is the
+    // medium the stronger pull holds: it joins the universe's medium.
+    {
+        let s_final = ratio(1, 6);
+        shares.sort_by(|a, b| a.2.cmp(&b.2));
+        let mut inside = ratio(1, 1);
+        let mut kept: Vec<(u32, Manifest, Ratio)> = Vec::new();
+        for (i, m, d) in std::mem::take(&mut shares) {
+            let h_g = ratio(2, 1) * weight_of(&m);
+            let region = d.clone() * h_g.clone() / (h_g.clone() + inside.clone());
+            if d.clone() * s_final.clone() <= region {
+                inside += h_g;
+                kept.push((i, m, d));
+            } else {
+                for (k, a) in m {
+                    *medium.entry(k).or_insert_with(|| ratio(0, 1)) += a;
+                }
+            }
+        }
+        shares = kept;
+    }
     // THE BIG BANG POPULATES THE UNIVERSE (docs/78): each core keeps its disc,
     // and its galaxy's first generation of star systems and their planets is
     // laid down by the tidal law; what forms no system is the galaxy's medium,
