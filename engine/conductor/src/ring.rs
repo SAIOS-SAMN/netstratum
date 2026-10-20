@@ -79,6 +79,15 @@ pub fn grain(x: &Ratio) -> Ratio {
     (x.clone() * places.clone()).floor() / places
 }
 
+/// The whole count of a non-negative exact value, `⌊x⌋`, where a `u64`
+/// carries it; refused otherwise (never a default).
+pub fn whole(x: &Ratio) -> Option<u64> {
+    if *x < ratio(0, 1) {
+        return None;
+    }
+    x.floor().to_integer().try_into().ok()
+}
+
 /// A share's SECTOR on the 60⁶-mark protractor (the TUniversal coordinate's
 /// six sexagesimal places, docs/78): which sector holds it, by exact floor.
 pub fn sector(share: &Ratio) -> u64 {
@@ -102,6 +111,15 @@ pub fn birth_key(born: u64, reach: &Ratio, held: &Ratio, siblings: &[u64]) -> u6
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn a_whole_count_is_read_or_refused_never_defaulted() {
+        assert_eq!(whole(&ratio(7, 2)), Some(3));
+        assert_eq!(whole(&ratio(0, 1)), Some(0));
+        assert_eq!(whole(&ratio(-1, 2)), None);
+        let past = Ratio::from_integer(num_bigint::BigInt::from(2).pow(70));
+        assert_eq!(whole(&past), None);
+    }
 
     #[test]
     fn one_law_for_the_clock_the_motion_and_the_balance() {

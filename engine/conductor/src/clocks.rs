@@ -22,6 +22,7 @@ use crate::ring::rate;
 use crate::motion::galactic_year;
 use crate::pulse::{mass, Universe};
 use cfe::ratio::{ratio, Ratio};
+use num_traits::Zero;
 
 /// The nested clock rate of galaxy `i`'s half-mass system: the galaxy's
 /// about the universal core, times the system's about the mass it orbits.
@@ -33,23 +34,30 @@ pub fn half_mass_rate(u: &Universe, i: usize, unit: &Ratio) -> Option<Ratio> {
 }
 
 /// A galaxy's EPOCHS (rungs of its half-mass layer) between two bells.
-pub fn galaxy_epochs(u: &Universe, i: usize, unit: &Ratio, t_u: u64, from: u64, to: u64) -> u64 {
-    half_mass_rate(u, i, unit).map(|r| rungs(&slip(&r, to, t_u)) - rungs(&slip(&r, from, t_u))).unwrap_or(0)
+/// None where the galaxy has no half-mass layer or the count passes the
+/// carrier.
+pub fn galaxy_epochs(u: &Universe, i: usize, unit: &Ratio, t_u: u64, from: u64, to: u64) -> Option<u64> {
+    let r = half_mass_rate(u, i, unit)?;
+    rungs(&slip(&r, to, t_u))?.checked_sub(rungs(&slip(&r, from, t_u))?)
 }
 
 /// A galaxy's operational TERMS between two bells: the echoes it received,
 /// each `t_u` after its distance.
-pub fn galaxy_terms(u: &Universe, i: usize, t_u: u64, from: u64, to: u64) -> u64 {
-    let delay: u64 = u.cores[i].radius.floor().to_integer().try_into().unwrap_or(0);
-    let echoes = |n: u64| if n < delay + t_u { 0 } else { (n - delay) / t_u };
-    echoes(to) - echoes(from)
+pub fn galaxy_terms(u: &Universe, i: usize, t_u: u64, from: u64, to: u64) -> Option<u64> {
+    let delay = crate::ring::whole(&u.cores.get(i)?.radius)?;
+    let first = delay.checked_add(t_u)?;
+    let echoes = |n: u64| if n < first || t_u == 0 { 0 } else { (n - delay) / t_u };
+    echoes(to).checked_sub(echoes(from))
 }
 
 /// A world's local years completed between two bells: one turn of its orbit
 /// about its star (`period` bells a turn), `⌊n / P⌋`.
-pub fn local_years(period: &Ratio, from: u64, to: u64) -> u64 {
-    let turns = |n: u64| -> u64 { (ratio(n as i64, 1) / period.clone()).floor().to_integer().try_into().unwrap_or(0) };
-    turns(to) - turns(from)
+pub fn local_years(period: &Ratio, from: u64, to: u64) -> Option<u64> {
+    if period.is_zero() {
+        return None;
+    }
+    let turns = |n: u64| crate::ring::whole(&(ratio(i64::try_from(n).ok()?, 1) / period.clone()));
+    turns(to)?.checked_sub(turns(from)?)
 }
 
 #[cfg(test)]
@@ -58,8 +66,9 @@ mod tests {
 
     #[test]
     fn local_years_count_turns_between_bells() {
-        assert_eq!(local_years(&ratio(60, 1), 0, 180), 3);
-        assert_eq!(local_years(&ratio(60, 1), 59, 61), 1);
-        assert_eq!(local_years(&ratio(90, 1), 100, 170), 0);
+        assert_eq!(local_years(&ratio(60, 1), 0, 180), Some(3));
+        assert_eq!(local_years(&ratio(60, 1), 59, 61), Some(1));
+        assert_eq!(local_years(&ratio(90, 1), 100, 170), Some(0));
+        assert_eq!(local_years(&ratio(0, 1), 0, 10), None, "a world with no period keeps no years");
     }
 }

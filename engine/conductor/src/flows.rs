@@ -893,6 +893,13 @@ pub fn clumps_of(motes: &[Mote], chains: Vec<Chain>) -> Vec<(Ratio, Vec<(usize, 
         .collect()
 }
 
+/// The phase protractor's marks to a turn: the system tier's S^60 (a
+/// carrier size).
+pub const PHASE_WIDTH: i64 = 60;
+
+/// The reach share's marks: the galaxy tier's S^360 (a carrier size).
+pub const REACH_WIDTH: i64 = 360;
+
 /// Merge motes whose states coincide on the coordinate's grain (`60⁻⁶`
 /// a plane, the carrier's resolution, never law): same kind, same spins and
 /// phases on the grain, their amounts added.
@@ -906,7 +913,7 @@ pub fn merge(motes: &mut Vec<Mote>, total: &Ratio) -> Ratio {
     // floored spin's remainder returned for the core's reservoir so the spin
     // ledger stays exact.
     let g = |x: &Ratio| crate::ring::grain(x);
-    let (phase_marks, reach_marks) = std::env::var("NS_MERGE_MARKS").ok().and_then(|v| v.split_once('/').and_then(|(a, b)| Some((a.parse::<i64>().ok()?, b.parse::<i64>().ok()?)))).unwrap_or((60, 360));
+    let (phase_marks, reach_marks) = (PHASE_WIDTH, REACH_WIDTH);
     let mark = |x: &Ratio, n: i64| (x.clone() * ratio(n, 1)).floor();
     let key = |y: &Mote| (y.key.clone(), y.vacuum, mark(&(y.ell_o.clone() / (y.ell_o.clone() + ratio(1, 1))), reach_marks), y.phase.iter().map(|ph| mark(&frac(ph), phase_marks)).collect::<Vec<_>>());
     let mut out: Vec<Mote> = Vec::new();
@@ -944,19 +951,17 @@ pub fn merge(motes: &mut Vec<Mote>, total: &Ratio) -> Ratio {
 /// The founding's motes for a galaxy: each kind of its grains carried by
 /// the bounce's push, `ℓ_o = p·w̄/w_z` (dispersal's form, own units), no
 /// circulation yet, the founding's phases, cold.
-pub fn founding(grains: &Manifest) -> Vec<Mote> {
-    let Some((p, _, mean)) = crate::pulse::galaxy_push(grains) else { return Vec::new() };
-    // The source's phases (refused only off the axes, where the founding
-    // carries no offset until the sector reading lands; stated, never a
-    // draw). THE CAPTURES TURN THEM (with xylarium): each pass of the
+pub fn founding(grains: &Manifest) -> Option<Vec<Mote>> {
+    let Some((p, _, mean)) = crate::pulse::galaxy_push(grains) else { return Some(Vec::new()) };
+    // The source's phases, read exactly or the founding is refused. THE CAPTURES TURN THEM (with xylarium): each pass of the
     // outbound stream through the throat is one capture and turns the
     // crossing point by a = ½, so kind Z leaves at the source's phase plus
     // `Z·½`, and on the loop it starts on the AXIAL leg, outbound (`½ +
     // Z·½`). Two groups at the founding, parted by each kind's own loop rate
     // `δ(R_z)` at its own reach thereafter. (The per-universe offset, the
     // hypha-assigned TUniversal position, is owed with mycelium.)
-    let source = founding_phases().unwrap_or_else(|| vec![ratio(0, 1); PLANES]);
-    grains
+    let source = founding_phases()?;
+    Some(grains
         .iter()
         .filter(|(_, a)| **a > ratio(0, 1))
         .map(|(k, a)| {
@@ -964,7 +969,7 @@ pub fn founding(grains: &Manifest) -> Vec<Mote> {
             let phase = vec![frac(&(source[0].clone() + turn.clone())), frac(&(ratio(1, 2) + turn))];
             Mote { key: k.clone(), amount: a.clone(), ell_o: crate::ring::grain(&(p.clone() * mean.clone() / weight(k))), ell_c: ratio(0, 1), phase, agitation: ratio(0, 1), born: 0, vacuum: false }
         })
-        .collect()
+        .collect())
 }
 
 /// The motes' total holding (by weight).
@@ -989,7 +994,7 @@ mod reading_tests {
     /// The founding's motes of the first `k` kinds, one grain each: the
     /// engine's own construction, each mote at its own carried reach.
     fn motes(k: u32) -> Vec<Mote> {
-        founding(&(1..=k).map(|z| (format!("Z{z:03}"), ratio(1, 1))).collect())
+        founding(&(1..=k).map(|z| (format!("Z{z:03}"), ratio(1, 1))).collect()).expect("the founding's phases are read exactly")
     }
 
     /// A fibre's reach and bands as the chain law reads them: `R = ℓ/H`, the

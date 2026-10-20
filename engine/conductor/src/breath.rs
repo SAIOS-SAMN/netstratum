@@ -61,9 +61,9 @@ pub fn coherence(delta: &Ratio) -> Ratio {
     ratio(1, 1) - ratio(2, 1) * off
 }
 
-/// Rungs climbed: completed slips, `⌊Δ⌋`.
-pub fn rungs(delta: &Ratio) -> u64 {
-    delta.floor().to_integer().try_into().unwrap_or(0)
+/// Rungs climbed: completed slips, `⌊Δ⌋` (refused past the carrier).
+pub fn rungs(delta: &Ratio) -> Option<u64> {
+    crate::ring::whole(delta)
 }
 
 /// The spin a body carries with everything inside it: its orbit's (its mass
@@ -128,7 +128,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
     // Every echo's arrival, in time order.
     let mut arrivals: Vec<(u64, usize, u64)> = Vec::new();
     for (i, c) in u.cores.iter().enumerate() {
-        let delay: u64 = c.radius.floor().to_integer().try_into().unwrap_or(0);
+        let Some(delay) = crate::ring::whole(&c.radius) else { continue };
         let mut k = 1u64;
         while k * t_u + delay <= until {
             if k * t_u + delay > from {
@@ -154,8 +154,10 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             let h_g = crate::ring::grain(&((crate::pulse::core_state(c) + crate::pulse::held(&c.total())) / whole.clone()));
             let ring_bells = ratio((t_u / 4) as i64, 1);
             let reach = c.radius.clone() / ring_bells;
-            let halves = |b: u64| if c.period.is_zero() { 0 } else { (ratio(2 * b as i64, 1) / c.period.clone()).floor().to_integer().try_into().unwrap_or(0u64) };
-            let half_swings = halves(bell).saturating_sub(halves(bell.saturating_sub(t_u)));
+            // Half swings completed by a bell (none before the founding).
+            let halves = |b: u64| if c.period.is_zero() { Some(0) } else { crate::ring::whole(&(ratio(i64::try_from(b).ok()?, 1) * ratio(2, 1) / c.period.clone())) };
+            let before = if bell > t_u { halves(bell - t_u) } else { Some(0) };
+            let Some(half_swings) = halves(bell).zip(before).and_then(|(now, then)| now.checked_sub(then)) else { continue };
             let m = crate::ring::grain(&(crate::pulse::held(&u.medium) / whole));
             let h_u = crate::ocean::universe_hold(u);
             let share = crate::ocean::gathered(rung, &reach, &h_g, &m, half_swings, &h_u);
@@ -227,10 +229,21 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             }
             let h_s = if sys.state.is_zero() { ratio(1, 1) } else { ratio(1, 1) + mass(&sys.kept) / sys.state.clone() };
             let omega = h_s.clone() / (sys.turning.clone() / h_s.clone() + h_s.clone());
-            let rings_at = |at: u64| -> u64 { (own.clone() * ratio(at.saturating_sub(sys.born) as i64, 1)).floor().to_integer().try_into().unwrap_or(0) };
+            // Rings its clock received from its birth to a bell (none before).
+            let rings_at = |at: u64| -> Option<u64> { if at > sys.born { crate::ring::whole(&(own.clone() * ratio(i64::try_from(at - sys.born).ok()?, 1))) } else { Some(0) } };
+            let echo_start = if bell > t_u { bell - t_u } else { 0 };
+            let (Some(r_now), Some(r_then)) = (rings_at(bell), rings_at(echo_start)) else {
+                keep.push(sys);
+                continue;
+            };
+            let Some(r_echo) = r_now.checked_sub(r_then) else {
+                keep.push(sys);
+                continue;
+            };
             // Its own bell rings on its whole turns (its spin, ω_s): it times
             // its outbursts and its system, never a phase against its galaxy.
-            let rang = (omega.clone() * ratio(rings_at(bell) as i64, 1)).floor() > (omega.clone() * ratio(rings_at(bell.saturating_sub(t_u)) as i64, 1)).floor();
+            let as_ratio = |n: u64| Ratio::from_integer(num_bigint::BigInt::from(n));
+            let rang = (omega.clone() * as_ratio(r_now)).floor() > (omega.clone() * as_ratio(r_then)).floor();
             // ITS REFERENCE (operator 2026-10-18: "this is how you get stars
             // colliding, or random strange star events"): its galaxy's own
             // phase at its place, born at the star's own phases.
@@ -257,7 +270,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     // `d = 1 − δ_gal` its drag, `turned` its own spin's turns
                     // this echo: a fast spinner is a gyroscope.
                     let d = ratio(1, 1) - d_enc;
-                    let turned = omega.clone() * ratio(rings_at(bell).saturating_sub(rings_at(bell.saturating_sub(t_u))) as i64, 1);
+                    let turned = omega.clone() * as_ratio(r_echo);
                     let keep_share = if (d.clone() + turned.clone()).is_zero() { ratio(1, 1) } else { turned.clone() / (d + turned) };
                     for k in 0..planes {
                         let off = sys.phase[k].clone() - was[k].clone();
@@ -278,12 +291,14 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // phase ½). It burns, bursts and sheds nothing else. Emptied, it is
             // gone, and its worlds re-anchor on the nearest star still burning.
             if sys.remnant {
+                // It drains where its galaxy is read (the deficit at its reach)
+                // and its orbit's phase is carried; otherwise nothing moves.
                 let d = match (&pre, &enc) {
-                    (Some((_, h_g, _)), Some(enc)) if !scale_pre.is_zero() => enc.reach(&(sys.radius.clone() / scale_pre.clone() * h_g.clone())).1,
-                    _ => ratio(1, 2),
+                    (Some((_, h_g, _)), Some(enc)) if !scale_pre.is_zero() => Some(enc.reach(&(sys.radius.clone() / scale_pre.clone() * h_g.clone())).1),
+                    _ => None,
                 };
                 let now = mass(&sys.kept);
-                if !now.is_zero() {
+                if let (Some(d), Some(orbit), false) = (d, sys.phase.first().cloned(), now.is_zero()) {
                     let share = (d / ratio(2, 1) * sys.state.clone() / now).min(ratio(1, 1));
                     let mut out = crate::pulse::Manifest::new();
                     for (k, a) in &sys.kept {
@@ -294,7 +309,6 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     }
                     less(&mut sys.kept, &out);
                     returned += mass(&out) / unit.clone();
-                    let orbit = sys.phase.first().cloned().unwrap_or_else(|| ratio(0, 1));
                     // It passes through the galactic core's throat (its
                     // other face): matter standing there to be recycled.
                     infall.push((out, beyond(&sys), vec![orbit, ratio(1, 2)]));
@@ -448,10 +462,9 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 if !sys.kept.contains_key(&key) {
                     continue;
                 }
-                let since = |at: u64| (own.clone() * ratio(at.saturating_sub(sys.born) as i64, 1)).floor().to_integer().try_into().unwrap_or(0u64);
-                let (now_rings, then_rings) = (since(bell), since(bell.saturating_sub(t_u)));
+                let (now_rings, then_rings) = (r_now, r_then);
                 if let (Some((every, _)), Some(fuel)) = (crate::formation::burn(&sys.kept, &(mass(&sys.kept) / mass(&sys.total())), z, &in_phase), sys.kept.get(&key).cloned()) {
-                    let due = (now_rings / every).saturating_sub(then_rings / every).min(64) as u32;
+                    let Some(due) = (now_rings / every).checked_sub(then_rings / every).and_then(|d| u32::try_from(d).ok()) else { continue };
                     if due > 0 {
                         let left = fuel.clone() / Ratio::from_integer(num_bigint::BigInt::from(2).pow(due));
                         // Whole grains of the product: two fuel grains each.
@@ -479,7 +492,8 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // Spent means it cannot fuse one pair of nuclei within an echo even
             // in full step: matter is counted in nuclei, so a burn slower
             // than that makes nothing, ever, at its rate.
-            let rings_echo = rings_at(bell).saturating_sub(rings_at(bell.saturating_sub(t_u))).max(1);
+            // An echo that brought no ring is read as one, its passage itself.
+            let rings_echo = r_echo.max(1);
             let pair = Ratio::new(2.into(), crate::pulse::nuclei_per_grain() * num_bigint::BigInt::from(1024));
             // It fuses at least one pair in an echo when the fuel the echo's
             // rings take (a share `rings/every` of it, the halving's lower
@@ -556,8 +570,10 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     let crossed = (psi.clone() + turn).floor() - psi.floor();
                     let crossings = if crossed < ratio(0, 1) { -crossed } else { crossed };
                     // Each passage holds half of what still stands: k passages
-                    // hold 1 − 2^−k (with xylarium).
-                    let k: u32 = crossings.to_integer().try_into().unwrap_or(64u32).min(64);
+                    // hold 1 − 2^−k. Both deficits lie in (0, 1], so the turn
+                    // is under two and k is 0, 1 or 2; a count past the carrier
+                    // is refused, never capped.
+                    let Ok(k) = u32::try_from(crossings.to_integer()) else { continue };
                     let c = ratio(1, 1) - Ratio::new(1.into(), num_bigint::BigInt::from(2).pow(k));
                     if c > ratio(0, 1) {
                         claims[mi].push((si, c));
@@ -770,7 +786,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 // A star keeps its IGNITION SHARE (the heart's share at its
                 // throat condition) in `reservoir`: decoherence sheds only
                 // what it holds above it.
-                let ignition = crate::formation::ignition_share(&a_clump).unwrap_or_else(|| ratio(0, 1));
+                let Some(ignition) = crate::formation::ignition_share(&a_clump) else { continue };
                 let mut sys = Body { path, radius: r_guess, period: ratio(0, 1), kept, satellites: orbs, medium, ell: ratio(0, 1), medium_spin, gas: Vec::new(), born: bell, state: held_at_birth, flows: disc_motes, reservoir: ignition, turning: spin_own, bell: phases_own.clone(), phase: phases_own, load: world_load, remnant: false, heat: ratio(0, 1) };
                 let internal = subtree_spin(&sys, &unit);
                 let own = taken - internal;
@@ -829,6 +845,6 @@ mod tests {
         // echoes, recohered (one rung) at four.
         let r = ratio(3, 4);
         assert_eq!(coherence(&slip(&r, 120, 60)), ratio(0, 1));
-        assert_eq!((coherence(&slip(&r, 240, 60)), rungs(&slip(&r, 240, 60))), (ratio(1, 1), 1));
+        assert_eq!((coherence(&slip(&r, 240, 60)), rungs(&slip(&r, 240, 60))), (ratio(1, 1), Some(1)));
     }
 }

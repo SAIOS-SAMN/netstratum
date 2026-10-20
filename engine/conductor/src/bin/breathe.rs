@@ -40,16 +40,16 @@ fn main() {
         let orbs: usize = c.satellites.iter().map(|s| s.satellites.len()).sum();
         let g_rate = breath::galaxy_rate(&u, i, &unit);
         let aeon = g_rate.clone() * cfe::ratio::ratio(until as i64, 1);
-        let rungs = breath::rungs(&breath::slip(&g_rate, until, t_u));
+        let rungs = breath::rungs(&breath::slip(&g_rate, until, t_u)).map(|r| r.to_string()).unwrap_or_else(|| "unread".into());
         let coh = breath::coherence(&breath::slip(&g_rate, until, t_u));
         let year = motion::galactic_year(c).map(|(k, t)| format!("half-mass system {}, year {} bells", k + 1, t.period.round())).unwrap_or_else(|| "no year yet".into());
         let medium = pulse::mass(&c.medium) / unit.clone();
         println!("  galaxy {:?} at {} bells out: {echoes} echoes, {rungs} rungs (recoherences), coherence now {}%, aeon {} bells (rate {}); {born} systems, {orbs} orbs; medium left {}; {year}", c.path, c.radius, (coh * cfe::ratio::ratio(100, 1)).round(), aeon.round(), g_rate, medium.round());
     }
     // THE CLOCKS (docs/78): which duty comes due how often, by layer.
-    let terms: Vec<u64> = (0..u.cores.len()).map(|i| conductor::clocks::galaxy_terms(&u, i, t_u, 0, until)).collect();
-    let epochs: Vec<u64> = (0..u.cores.len()).map(|i| conductor::clocks::galaxy_epochs(&u, i, &unit, t_u, 0, until)).collect();
-    let worlds: Vec<u64> = u.cores.iter().flat_map(|c| &c.satellites).flat_map(|s| &s.satellites).map(|o| conductor::clocks::local_years(&o.period, 0, until)).collect();
+    let terms: Vec<Option<u64>> = (0..u.cores.len()).map(|i| conductor::clocks::galaxy_terms(&u, i, t_u, 0, until)).collect();
+    let epochs: Vec<Option<u64>> = (0..u.cores.len()).map(|i| conductor::clocks::galaxy_epochs(&u, i, &unit, t_u, 0, until)).collect();
+    let worlds: Vec<u64> = u.cores.iter().flat_map(|c| &c.satellites).flat_map(|s| &s.satellites).filter_map(|o| conductor::clocks::local_years(&o.period, 0, until)).collect();
     let journaled = worlds.iter().filter(|&&y| y > 0).count();
     let mut w = worlds.clone();
     w.sort();

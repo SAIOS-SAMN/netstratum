@@ -687,7 +687,7 @@ pub fn deploy(_seed: &[u8; 32], manifest: &Manifest) -> Option<Universe> {
     // THE FIRMAMENT: the Wellspring's held kinds stay at the singularity as
     // motes at their capture phases (`flows::founding`), never poured into
     // the ocean.
-    let firmament = if wellspring.is_empty() { Vec::new() } else { crate::flows::founding(&wellspring) };
+    let firmament = if wellspring.is_empty() { Vec::new() } else { crate::flows::founding(&wellspring)? };
     let mut medium = Manifest::new();
     let whole = mass(manifest);
     let mut shares: Vec<(u32, Manifest, Ratio)> = Vec::new();
@@ -771,14 +771,14 @@ pub fn deploy(_seed: &[u8; 32], manifest: &Manifest) -> Option<Universe> {
             // each kind carried by the bounce's push with the founding's
             // phases; what is held and what is gas is READ from their state
             // (the cut as a reading), never placed.
-            let flows = crate::flows::founding(&m);
+            let flows = crate::flows::founding(&m)?;
             let (kept, medium) = match galaxy_push(&m) {
                 Some((p, h, _)) => crate::flows::read_cut(&flows, &h, &p),
                 None => (m.clone(), Manifest::new()),
             };
-            Body { path: vec![u64::from(i)], radius, period, kept, satellites: Vec::new(), medium, ell, medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: mass(&m), flows, reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1) }
+            Some(Body { path: vec![u64::from(i)], radius, period, kept, satellites: Vec::new(), medium, ell, medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: mass(&m), flows, reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1) })
         })
-        .collect();
+        .collect::<Option<Vec<Body>>>()?;
     Some(Universe { cores, medium, firmament, unit, t_u })
 }
 

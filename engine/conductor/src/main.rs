@@ -428,15 +428,17 @@ fn main() {
         }
         conductor::profile::timed("clocks", || {
             for i in 0..universe.cores.len() {
-                breath_reading.terms += conductor::clocks::galaxy_terms(&universe, i, t_u_bells, beat - 1, beat);
-                breath_reading.epochs += conductor::clocks::galaxy_epochs(&universe, i, &unit, t_u_bells, beat - 1, beat);
+                // Counted where read; a galaxy whose clock is not read adds
+                // nothing.
+                breath_reading.terms += conductor::clocks::galaxy_terms(&universe, i, t_u_bells, beat - 1, beat).into_iter().sum::<u64>();
+                breath_reading.epochs += conductor::clocks::galaxy_epochs(&universe, i, &unit, t_u_bells, beat - 1, beat).into_iter().sum::<u64>();
             }
             breath_reading.local_years = universe
                 .cores
                 .iter()
                 .flat_map(|c| &c.satellites)
                 .flat_map(|s| &s.satellites)
-                .map(|o| conductor::clocks::local_years(&o.period, beat - 1, beat))
+                .filter_map(|o| conductor::clocks::local_years(&o.period, beat - 1, beat))
                 .sum();
         });
         // docs/63 — every 10 beats, the observed set: an unobserved line is
