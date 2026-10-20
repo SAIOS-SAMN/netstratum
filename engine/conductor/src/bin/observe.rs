@@ -450,7 +450,7 @@ fn main() {
             // each kind carried ℓ = b_k·w̄/w; the beat is the round trip to the
             // top of what REMAINS, 1 + R_top/H, settling at the throat's own.
             let all = u.total();
-            let w = |k: &str| k.strip_prefix('Z').and_then(|z| z.parse::<u32>().ok()).map(cfe::almanac::atom::hold).unwrap_or(1);
+            let w = |k: &str| conductor::chem::hold(k);
             let mut kinds: Vec<(String, Ratio)> = all.iter().filter(|(_, a)| **a > ratio(0, 1)).map(|(k, a)| (k.clone(), a.clone())).collect();
             kinds.sort_by(|a, b| w(&b.0).cmp(&w(&a.0)).then(a.0.cmp(&b.0)));
             let total = pulse::mass(&all);
@@ -506,7 +506,7 @@ fn main() {
                 let m = pulse::mass(&s.kept);
                 let mut ks: Vec<(&String, &Ratio)> = s.kept.iter().collect();
                 ks.sort_by(|a, b| b.1.cmp(a.1));
-                let top: Vec<String> = ks.iter().take(6).map(|(k, a)| format!("{k}:{}", f(&(Ratio::clone(a) * cfe::ratio::ratio(i64::from(k.strip_prefix('Z').and_then(|z| z.parse::<u32>().ok()).map(cfe::almanac::atom::hold).unwrap_or(1)), 1) / m.clone())))).collect();
+                let top: Vec<String> = ks.iter().take(6).map(|(k, a)| format!("{k}:{}", f(&(Ratio::clone(a) * cfe::ratio::ratio(i64::from(conductor::chem::hold(k)), 1) / m.clone())))).collect();
                 println!("  star born {} remnant {} heart {}: {}", s.born, s.remnant, f(&m), top.join(" "));
             }
         }
@@ -532,7 +532,7 @@ fn main() {
             for o in u.cores.iter().flat_map(|c| &c.satellites).flat_map(|s| &s.satellites).filter(|o| o.born == 0) {
                 n += 1;
                 let k = formation::lightest(&o.kept).unwrap_or_default();
-                let w = k.strip_prefix('Z').and_then(|z| z.parse::<u32>().ok()).map(cfe::almanac::atom::hold).unwrap_or(0);
+                let w = conductor::chem::hold(&k);
                 let e = by.entry((w, k)).or_insert((0, ratio(0, 1)));
                 e.0 += 1;
                 e.1 += pulse::mass(&o.kept) / unit.clone();

@@ -175,7 +175,7 @@ pub fn arrival_turning(n: u64, r: &Ratio, h_g: &Ratio, m: &Ratio, h_u: &Ratio) -
 /// free, the free part's motes); `galaxy` is the galaxy's grains with the
 /// arrivals already counted.
 pub fn land(galaxy: &Manifest, arriving: &Manifest, rho: &Ratio, turning: &(Ratio, Ratio), born: u64) -> (Manifest, Manifest, Vec<crate::formation::Shell>) {
-    let weight = |k: &str| k.strip_prefix('Z').and_then(|z| z.parse::<u32>().ok()).map(cfe::almanac::atom::hold).unwrap_or(1);
+    let weight = |k: &str| crate::chem::hold(k);
     let (mut held, mut free, mut motes) = (Manifest::new(), Manifest::new(), Vec::new());
     let total = mass(galaxy);
     let Some((p, h, mean)) = crate::pulse::galaxy_push(galaxy) else { return (held, arriving.clone(), motes) };

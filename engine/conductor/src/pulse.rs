@@ -397,7 +397,7 @@ pub fn galaxy_push(grains: &Manifest) -> Option<(Ratio, Ratio, Ratio)> {
 /// The push and its CUT: as `galaxy_push`, with the lightest kind the
 /// throat still holds (None: it holds every kind).
 pub fn push_cut(grains: &Manifest) -> Option<(Ratio, Ratio, Ratio, Option<String>)> {
-    let weight = |k: &str| k.strip_prefix('Z').and_then(|z| z.parse::<u32>().ok()).map(cfe::almanac::atom::hold).unwrap_or(1);
+    let weight = |k: &str| crate::chem::hold(k);
     let total = mass(grains);
     let count = grains.values().fold(ratio(0, 1), |s, a| s + a.clone());
     if total.is_zero() || count.is_zero() {
@@ -445,7 +445,7 @@ pub fn push_cut(grains: &Manifest) -> Option<(Ratio, Ratio, Ratio, Option<String
 /// The distribution keeps moving after (the waves, the breath): this is
 /// only where the founding pulse leaves it.
 pub fn disperse(grains: &Manifest) -> Manifest {
-    let weight = |k: &str| k.strip_prefix('Z').and_then(|z| z.parse::<u32>().ok()).map(cfe::almanac::atom::hold).unwrap_or(1);
+    let weight = |k: &str| crate::chem::hold(k);
     let Some((p, h, mean)) = galaxy_push(grains) else { return Manifest::new() };
     grains
         .iter()
@@ -512,7 +512,7 @@ pub const T_U: u64 = 60;
 /// No draws: the galaxies are the shells' own beads.
 pub fn cascade(manifest: &Manifest) -> (Manifest, Vec<(Ratio, Manifest)>, Ratio) {
     let g = |x: &Ratio| crate::ring::grain(x);
-    let w = |k: &str| ratio(i64::from(k.strip_prefix('Z').and_then(|z| z.parse::<u32>().ok()).map(cfe::almanac::atom::hold).unwrap_or(1)), 1);
+    let w = |k: &str| ratio(i64::from(crate::chem::hold(k)), 1);
     let total = mass(manifest);
     let count = manifest.values().fold(ratio(0, 1), |s, a| s + a.clone());
     if total.is_zero() || count.is_zero() {
@@ -1181,6 +1181,16 @@ pub fn read(var_root: &Path) -> Option<([u8; 32], Universe)> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn a_cluster_weighs_its_parts_in_the_galaxy_cut() {
+        // Water on S^11 holds 3·12 − 0 = 36, as Z016 does (3·16 − 12): one
+        // galaxy of each reads one push, one hold, one mean weight.
+        assert_eq!(crate::chem::hold("Z008·4Z001"), crate::chem::hold("Z016"));
+        let water: Manifest = [("Z008·4Z001".to_string(), ratio(1, 1)), ("Z001".to_string(), ratio(3, 1))].into();
+        let sulphur: Manifest = [("Z016".to_string(), ratio(1, 1)), ("Z001".to_string(), ratio(3, 1))].into();
+        assert_eq!(push_cut(&water).map(|(p, h, m, _)| (p, h, m)), push_cut(&sulphur).map(|(p, h, m, _)| (p, h, m)));
+    }
 
     #[test]
     fn the_pulse_file_reads_back_exactly() {
