@@ -64,10 +64,6 @@ pub fn vacuum_halving(r: &Ratio, h: &Ratio) -> u64 {
     ((r.clone() + h.clone()) / h.clone()).ceil().to_integer().try_into().unwrap_or(0)
 }
 
-fn z_of(key: &str) -> Option<u32> {
-    key.strip_prefix('Z').and_then(|z| z.parse::<u32>().ok())
-}
-
 /// The disc's cold bands and the gas's shells: the galaxy's grains `all`,
 /// its core's disc `disc`, in its own units (regeneration). Returns (held,
 /// free, H).
@@ -655,7 +651,7 @@ pub fn system(clump: &Manifest, agitation: &Ratio, circulation: &Ratio, path: &[
     // back to its parts (hydrogen's winding, tightness 1, is stripped), so a
     // star never holds molecules and its hydrogen is fuel.
     let clump = &dissociate(clump);
-    let (star, mut disc, held) = heart_cut(clump, circulation, &ionizing)?;
+    let (star, disc, held) = heart_cut(clump, circulation, &ionizing)?;
     // The star's hold, gathered (no throat): `H_s = held`, a share of the
     // clump; the disc is the rest, `1 − H_s`, over the annulus from the
     // star's hold to the system's rim (its grains' holding, 1), so its line

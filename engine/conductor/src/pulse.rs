@@ -24,8 +24,7 @@ use num_traits::Zero;
 use std::collections::BTreeMap;
 use std::path::Path;
 
-/// One element's amount, by name: an almanac element by its id in hex, or a
-/// matter resource as `resource:<name>`.
+/// One kind's amount, by its key (`chem`: an atom `Zddd` or a cluster).
 pub type Manifest = BTreeMap<String, Ratio>;
 
 /// The deployment's grain: ONE NUCLEUS (operator 2026-10-18, the package
@@ -44,9 +43,6 @@ pub fn nucleus(x: &Ratio) -> Ratio {
     Ratio::new(x.numer() * &grid / x.denom(), grid)
 }
 
-/// Mass for the turning law: each grain of Z holds its atom's rings
-/// (`cfe::almanac::atom::hold`, mass is holding); a key that is no Z (era
-/// 0's kinds, before they cross) holds one.
 /// A manifest's holding read ON THE GRAIN, term by term (the carrier,
 /// never law; with xylarium): wherever a holding feeds a law (a hold, a
 /// swing, a share), the exact sum's denominators would otherwise grow with
@@ -65,121 +61,23 @@ pub fn mass(m: &Manifest) -> Ratio {
     })
 }
 
-fn hex(id: &[u8; 32]) -> String {
-    id.iter().map(|b| format!("{b:02x}")).collect()
-}
-
-/// THE STAND-IN FOUNDING MANIFEST (docs/78, Open): era 0's matter as its
-/// worlds' snapshots hold it, every orb's element stocks and matter
-/// resources (iron, biomass, alloy, diamond, crystal, scrap). Energy and
-/// capacity (joule, sink) and money (STAMP) are not matter. Returns the
-/// manifest and the worlds read.
-pub fn stand_in(era0: &Path) -> (Manifest, usize) {
-    let mut manifest = Manifest::new();
-    let mut read = 0;
-    let Ok(dirs) = std::fs::read_dir(era0.join("worlds")) else { return (manifest, 0) };
-    let mut dirs: Vec<_> = dirs.filter_map(|d| d.ok()).map(|d| d.path()).collect();
-    dirs.sort();
-    for dir in dirs {
-        let Some((_, _, state)) = crate::snapshot::read_state(&dir) else { continue };
-        read += 1;
-        for orb in &state.orbs {
-            for (id, amount) in &orb.elements {
-                *manifest.entry(hex(id)).or_insert_with(|| ratio(0, 1)) += amount.clone();
-            }
-            for (resource, amount) in &orb.banked {
-                if matches!(resource, cfe::dop::Resource::Joule | cfe::dop::Resource::Sink) {
-                    continue;
-                }
-                *manifest.entry(format!("resource:{resource:?}")).or_insert_with(|| ratio(0, 1)) += amount.clone();
-            }
-            *manifest.entry("resource:Scrap".into()).or_insert_with(|| ratio(0, 1)) += orb.scrap.clone();
-        }
-    }
-    manifest.retain(|_, a| *a > ratio(0, 1));
-    for a in manifest.values_mut() {
-        *a = grain(a);
-    }
-    manifest.retain(|_, a| *a > ratio(0, 1));
-    (manifest, read)
-}
-
 /// The nuclei in one grain of any Z (docs/78, "The atom"): 60^30.
 pub fn nuclei_per_grain() -> num_bigint::BigInt {
     num_bigint::BigInt::from(60u32).pow(30)
 }
 
-/// A manifest as mycelium rules it (MANIFEST, ACT_DOMAIN 17): nuclei per Z.
+/// Nuclei per Z, as mycelium's MANIFEST carries them (ACT_DOMAIN 17).
 pub type Nuclei = BTreeMap<u16, num_bigint::BigInt>;
 
-/// The Z whose atom (`cfe::almanac::atom`) reads an era-0 kind's line and
-/// binding: the lowest Z at that depth with that unpaired count, else the
-/// nearest unpaired count at that depth (lowest Z on a tie). The stand-in's
-/// map only; era 1's own elements are one per Z.
-fn z_of_kind(id: &[u8; 32]) -> u16 {
-    let place = cfe::almanac::periodic::periodic_of(id);
-    let (line, binds) = (u32::from(place.line), u32::from(place.binds));
-    (1u32..=118)
-        .filter_map(cfe::almanac::atom::atom)
-        .filter(|a| a.depth == line)
-        .min_by_key(|a| (a.unpaired.abs_diff(binds), a.z))
-        .map(|a| a.z as u16)
-        .unwrap_or(1)
-}
-
-/// An era-0 manifest key's id: an almanac element's own, or a bulk
-/// resource's derived from its name (so it too reads its line by the same
-/// law, with no formula of ours).
-fn kind_id(key: &str) -> [u8; 32] {
-    if let Some(name) = key.strip_prefix("resource:") {
-        return *blake3::Hasher::new_derive_key("netstratum era 0 resource").update(name.as_bytes()).finalize().as_bytes();
-    }
-    let mut id = [0u8; 32];
-    for (i, b) in id.iter_mut().enumerate() {
-        *b = key.get(2 * i..2 * i + 2).and_then(|h| u8::from_str_radix(h, 16).ok()).unwrap_or(0);
-    }
-    id
-}
-
-/// The stand-in as nuclei per Z: each era-0 kind's grains, at its Z, times
-/// the nuclei in a grain. Exact (the amounts lie on the 1/1024 grain).
-pub fn to_nuclei(kinds: &Manifest) -> Nuclei {
-    let mut out = Nuclei::new();
-    for (key, amount) in kinds {
-        let grains = amount.clone() * ratio(1024, 1);
-        let count = grains.to_integer() * nuclei_per_grain();
-        *out.entry(z_of_kind(&kind_id(key))).or_default() += count;
-    }
-    out.retain(|_, c| *c > num_bigint::BigInt::from(0));
-    out
-}
-
-/// A manifest of nuclei entering: per Z, whole grains (`Z<n>` keys) and the
-/// remainder, under a grain's nuclei, kept in the unformed ledger.
-pub fn from_nuclei(nuclei: &Nuclei) -> (Manifest, Nuclei) {
-    let per = nuclei_per_grain();
-    let mut grains = Manifest::new();
-    let mut unformed = Nuclei::new();
-    // Every kind carried in whole nuclei, however few (the package's
-    // recipe; never dropped below a grain). The unformed ledger stays empty.
-    let _ = &mut unformed;
-    for (z, count) in nuclei {
-        if *count > num_bigint::BigInt::from(0) {
-            grains.insert(format!("Z{z:03}"), Ratio::new(count.clone(), per.clone() * num_bigint::BigInt::from(1024)));
-        }
-    }
-    (grains, unformed)
-}
-
-/// Grains back out as nuclei per Z (the unformed added), for the
-/// conservation reading.
-pub fn out_nuclei(grains: &Manifest, unformed: &Nuclei) -> Nuclei {
-    let mut out = unformed.clone();
-    for (key, amount) in grains {
-        let Some(z) = key.strip_prefix('Z').and_then(|z| z.parse::<u16>().ok()) else { continue };
-        *out.entry(z).or_default() += (amount.clone() * ratio(1024, 1)).to_integer() * nuclei_per_grain();
-    }
-    out
+/// A manifest of nuclei entering: per Z, its count in grains (`Z<n>` keys),
+/// every kind carried in whole nuclei however few.
+pub fn from_nuclei(nuclei: &Nuclei) -> Manifest {
+    let grid = nuclei_per_grain() * num_bigint::BigInt::from(1024);
+    nuclei
+        .iter()
+        .filter(|(_, count)| **count > num_bigint::BigInt::from(0))
+        .map(|(z, count)| (format!("Z{z:03}"), Ratio::new(count.clone(), grid.clone())))
+        .collect()
 }
 
 /// THE FOUNDING DISTRIBUTION (docs/78; the capture law, operator 2026-10-16

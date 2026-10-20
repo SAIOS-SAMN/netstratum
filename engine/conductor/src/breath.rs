@@ -32,7 +32,6 @@
 use crate::pulse::{less, mass, Body, Universe};
 use crate::ring::rate;
 use cfe::ratio::{ratio, Ratio};
-use num_traits::Zero;
 
 /// The unit of mass: the deepest core's hole, as founded (`Universe::unit`).
 pub fn unit_mass(u: &Universe) -> Ratio {

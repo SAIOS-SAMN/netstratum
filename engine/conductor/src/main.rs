@@ -249,7 +249,7 @@ fn main() {
     let mut universe_closed: std::collections::HashSet<[u8; 32]> = std::collections::HashSet::new();
     // docs/67 N8 / 78.156: the last final point read, and where the dilation
     // reading starts (beat, h).
-    let mut hubs_cleared_at: Option<String> = None;
+    let mut hubs_cleared_at: Option<String>;
     // docs/75: the term's completed exchanges between lines, for the realms.
     let mut contacts = conductor::realms::Contacts::default();
     let mut passages = conductor::realms::Passages::default();
