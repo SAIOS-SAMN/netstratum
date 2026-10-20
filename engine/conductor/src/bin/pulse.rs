@@ -47,7 +47,10 @@ fn main() {
             println!("FOUNDING — {} Zs as grains, {} with an unformed remainder", grains.len(), unformed.len());
             manifest = grains;
         }
-        let u = pulse::deploy(&seed, &manifest);
+        let Some(u) = pulse::deploy(&seed, &manifest) else {
+            println!("refused: the founding holds no disc, or its echo carries no ring");
+            return;
+        };
         let unit = conductor::breath::unit_mass(&u);
         println!("REDEPLOYED — {} cores, {} systems from the universe's own matter; conservation {}; spin {}", u.cores.len(), u.cores.iter().map(|c| c.satellites.len()).sum::<usize>(), u.total() == manifest, pulse::spin_total(&u, &unit));
         match pulse::write(Path::new(era1), &seed, &u) {
@@ -67,7 +70,10 @@ fn main() {
     println!("BOUNDARY — nuclei in equal nuclei held (grains and unformed): {}", pulse::out_nuclei(&manifest, &unformed) == nuclei);
     // The stand-in seed until era 1's version-2 origin is founded.
     let seed = *blake3::hash(b"netstratum era 1, unfounded stand-in").as_bytes();
-    let u = pulse::deploy(&seed, &manifest);
+    let Some(u) = pulse::deploy(&seed, &manifest) else {
+        println!("refused: the founding holds no disc, or its echo carries no ring");
+        return;
+    };
     let held = |m: &pulse::Manifest| m.values().fold(cfe::ratio::ratio(0, 1), |s, a| s + a.clone());
     let systems: usize = u.cores.iter().map(|c| c.satellites.len()).sum();
     let orbs: usize = u.cores.iter().flat_map(|c| &c.satellites).map(|s| s.satellites.len()).sum();

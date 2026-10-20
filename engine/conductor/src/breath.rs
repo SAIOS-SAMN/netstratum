@@ -34,13 +34,9 @@ use crate::ring::rate;
 use cfe::ratio::{ratio, Ratio};
 use num_traits::Zero;
 
-/// The unit of mass: the deepest core's hole, as founded (`Universe::unit`);
-/// a universe saved before it was kept reads its deepest disc.
+/// The unit of mass: the deepest core's hole, as founded (`Universe::unit`).
 pub fn unit_mass(u: &Universe) -> Ratio {
-    if !u.unit.is_zero() {
-        return u.unit.clone();
-    }
-    u.cores.iter().map(|c| mass(&c.kept)).max().filter(|m| !m.is_zero()).unwrap_or_else(|| ratio(1, 1))
+    u.unit.clone()
 }
 
 /// A galaxy's clock against the universal core's: its distance against the

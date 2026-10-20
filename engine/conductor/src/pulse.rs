@@ -488,10 +488,6 @@ pub struct Universe {
     pub t_u: u64,
 }
 
-/// The universal echo's STAND-IN, in bells, for universes founded before the
-/// bell's period was derived (`Universe::t_u`).
-pub const T_U: u64 = 60;
-
 /// THE PULSE: the manifest deployed from `seed`. The unit of mass is the
 /// deepest core's hole.
 /// THE FOUNDING CASCADE (operators 2026-10-18, xylarium 11.0 (15), the
@@ -678,14 +674,16 @@ pub fn cascade(manifest: &Manifest) -> (Manifest, Vec<(Ratio, Manifest)>, Ratio)
     (wellspring, galaxies, ratio(2, 1) * (outermost + h))
 }
 
-pub fn deploy(_seed: &[u8; 32], manifest: &Manifest) -> Universe {
+pub fn deploy(_seed: &[u8; 32], manifest: &Manifest) -> Option<Universe> {
     // THE FOUNDING CASCADE (above): the Wellspring holds what stays within its
     // throat; its held kinds are the universe's medium about it (the central
     // galaxy's cut is read from them once the ocean is motes: owed); every
     // galaxy is a bead of the expanding shells, at its pinch's reach. No
     // draws. A bead too slight to hold a hole of a nucleus stays medium.
     let (wellspring, beads, echo) = cascade(manifest);
-    let t_u: u64 = echo.ceil().to_integer().try_into().unwrap_or(T_U).max(4);
+    // The bell's period in whole bells; a core ring is a quarter of it, so a
+    // founding whose echo cannot carry one ring a quarter is refused.
+    let t_u: u64 = echo.ceil().to_integer().try_into().ok().filter(|t: &u64| *t >= 4)?;
     // THE FIRMAMENT: the Wellspring's held kinds stay at the singularity as
     // motes at their capture phases (`flows::founding`), never poured into
     // the ocean.
@@ -737,14 +735,14 @@ pub fn deploy(_seed: &[u8; 32], manifest: &Manifest) -> Universe {
     // one tier up holds it (above); its echoes arrive that many bells later.
     // Each core keeps what its bounce holds (`disperse`), in its own units.
     let discs: Vec<Manifest> = shares.iter().map(|(_, m, _)| disperse(m)).collect();
-    let unit = discs.iter().map(mass).max().filter(|m| !m.is_zero()).unwrap_or_else(|| ratio(1, 1));
+    let unit = discs.iter().map(mass).max().filter(|m| !m.is_zero())?;
     // FORMATION (docs/83): no system is placed. Each core keeps its disc;
     // the rest is its galaxy's GAS, laid down as motes where the push left
     // each element; stars collapse from it as it cools (`breath`).
     // THE GALAXIES ORBIT THE UNIVERSAL SINGULARITY (operator): inside out,
     // each about the universal state plus every core inside it (each core
     // its galaxy's state and grains, 2·w_j), by the motion law, in core
-    // rings; a core ring is `T_U / 4` bells (the universe's own echo is the
+    // rings; a core ring is a quarter of the bell's period in bells (the universe's own echo is the
     // round trip to its rim 2). The first ring is the deepest well.
     let mut order: Vec<usize> = (0..shares.len()).collect();
     order.sort_by(|&a, &b| shares[a].2.cmp(&shares[b].2));
@@ -781,7 +779,7 @@ pub fn deploy(_seed: &[u8; 32], manifest: &Manifest) -> Universe {
             Body { path: vec![u64::from(i)], radius, period, kept, satellites: Vec::new(), medium, ell, medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: mass(&m), flows, reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1) }
         })
         .collect();
-    Universe { cores, medium, firmament, unit, t_u }
+    Some(Universe { cores, medium, firmament, unit, t_u })
 }
 
 /// THE GALAXIES ORBIT, DERIVED (operator 2026-10-19: "fixed reach and
@@ -792,7 +790,7 @@ pub fn deploy(_seed: &[u8; 32], manifest: &Manifest) -> Universe {
 /// inside it, `R = ℓ/H` in core rings (the motion law, as at the founding):
 /// `H` the singularity's state (1) plus every core inside (`2·w`, w its
 /// share of the universe's holding, LIVE). Its period follows, `P = 1 + R/H`
-/// (in bells, `T_U/4` a ring), and its orbit's phase advances by the echo's
+/// (in bells, a quarter of the bell's period a ring), and its orbit's phase advances by the echo's
 /// four rings at its deficit, `4·δ`, `δ = H/(R + H)`. Its specific spin is
 /// kept, so a galaxy moves only as the holding inside it changes: what one
 /// gains or loses moves every galaxy outside it. Echo delays follow the
@@ -1050,7 +1048,7 @@ fn get_manifest(v: &[u8], at: &mut usize) -> Option<Manifest> {
     Some(m)
 }
 
-fn get_body(v: &[u8], spun: bool) -> Option<Body> {
+fn get_body(v: &[u8]) -> Option<Body> {
     let mut at = 0;
     let depth = *v.first()? as usize;
     at += 1;
@@ -1063,15 +1061,10 @@ fn get_body(v: &[u8], spun: bool) -> Option<Body> {
     at += used;
     let (period, used) = cfe::ratio::decode(v.get(at..)?)?;
     at += used;
-    let (ell, medium_spin) = if spun {
-        let (ell, used) = cfe::ratio::decode(v.get(at..)?)?;
-        at += used;
-        let (medium_spin, used) = cfe::ratio::decode(v.get(at..)?)?;
-        at += used;
-        (ell, medium_spin)
-    } else {
-        (ratio(0, 1), ratio(0, 1))
-    };
+    let (ell, used) = cfe::ratio::decode(v.get(at..)?)?;
+    at += used;
+    let (medium_spin, used) = cfe::ratio::decode(v.get(at..)?)?;
+    at += used;
     let kept = get_manifest(v, &mut at)?;
     let medium = get_manifest(v, &mut at)?;
     Some(Body { path, radius, period, kept, satellites: Vec::new(), medium, ell, medium_spin, gas: Vec::new(), born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1) })
@@ -1127,22 +1120,24 @@ pub fn read(var_root: &Path) -> Option<([u8; 32], Universe)> {
     let bytes = std::fs::read(var_root.join("pulse.bin")).ok()?;
     let mut seed = None;
     let mut medium = Manifest::new();
-    let mut unit = ratio(0, 1);
-    let mut t_u = T_U;
+    let mut unit: Option<Ratio> = None;
+    let mut t_u: Option<u64> = None;
     let mut firmament: Vec<crate::flows::Mote> = Vec::new();
     let mut flat: Vec<Body> = Vec::new();
-    // Tag 5 marks the spin ledger's format (docs/83 Phase 0); a file without
-    // it reads with no spin (a redeploy gives it its spin).
-    let spun = cfe::tlv::records(&bytes).any(|(t, _)| t == 5);
+    // A universe is read whole or refused: the spin ledger's format (tag 5),
+    // its unit (8) and its bell's period (17) are required.
+    if !cfe::tlv::records(&bytes).any(|(t, _)| t == 5) {
+        return None;
+    }
     for (t, v) in cfe::tlv::records(&bytes) {
         match t {
             3 => seed = v.try_into().ok(),
             2 => medium = get_manifest(v, &mut 0)?,
-            1 => flat.push(get_body(v, spun)?),
+            1 => flat.push(get_body(v)?),
             6 => flat.last_mut()?.gas.push(get_mote(v)?),
             7 => flat.last_mut()?.born = u64::from_le_bytes(v.try_into().ok()?),
-            8 => unit = cfe::ratio::decode(v)?.0,
-            17 => t_u = u64::from_le_bytes(v.try_into().ok()?),
+            8 => unit = Some(cfe::ratio::decode(v)?.0),
+            17 => t_u = Some(u64::from_le_bytes(v.try_into().ok()?)),
             19 => firmament.push(get_flow(v)?),
             9 => flat.last_mut()?.state = cfe::ratio::decode(v)?.0,
             10 => flat.last_mut()?.flows.push(get_flow(v)?),
@@ -1175,12 +1170,36 @@ pub fn read(var_root: &Path) -> Option<([u8; 32], Universe)> {
             _ => return None,
         }
     }
+    let (unit, t_u) = (unit.filter(|u| !u.is_zero())?, t_u?);
     Some((seed?, Universe { cores, medium, firmament, unit, t_u }))
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn a_universe_file_without_its_unit_is_refused() {
+        let dir = std::env::temp_dir().join(format!("ns-refuse-unit-{}", std::process::id()));
+        let u = Universe { cores: Vec::new(), medium: [("Z001".to_string(), ratio(1, 1))].into(), firmament: Vec::new(), unit: ratio(1, 2), t_u: 15 };
+        write(&dir, &[7u8; 32], &u).expect("written");
+        assert!(read(&dir).is_some());
+        let bytes = std::fs::read(dir.join("pulse.bin")).expect("read");
+        let mut out = Vec::new();
+        for (t, v) in cfe::tlv::records(&bytes) {
+            if t != 8 {
+                cfe::tlv::put(t, v, &mut out);
+            }
+        }
+        std::fs::write(dir.join("pulse.bin"), out).expect("rewritten");
+        assert!(read(&dir).is_none());
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn a_founding_that_holds_no_disc_is_refused() {
+        assert!(deploy(&[7u8; 32], &Manifest::new()).is_none());
+    }
 
     #[test]
     fn a_cluster_weighs_its_parts_in_the_galaxy_cut() {
@@ -1198,7 +1217,7 @@ mod tests {
         let orb = Body { path: vec![1, 1, 1], radius: ratio(3, 2), period: ratio(5, 2), kept: [("Z008".to_string(), ratio(1, 64))].into(), satellites: Vec::new(), medium: Manifest::new(), ell: ratio(7, 3), medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1) };
         let sys = Body { path: vec![1, 1], radius: ratio(9, 2), period: ratio(11, 2), kept: [("Z001".to_string(), ratio(3, 1024))].into(), satellites: vec![orb], medium: Manifest::new(), ell: ratio(1, 9), medium_spin: ratio(1, 7), gas: Vec::new(), born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1) };
         let core = Body { path: vec![1], radius: ratio(60, 1), period: ratio(0, 1), kept: [("Z026".to_string(), ratio(1, 2))].into(), satellites: vec![sys], medium: [("Z001".to_string(), ratio(5, 4))].into(), ell: ratio(0, 1), medium_spin: ratio(13, 11), gas: vec![mote], born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1) };
-        let u = Universe { cores: vec![core], medium: [("Z002".to_string(), ratio(1, 1024))].into(), firmament: Vec::new(), unit: ratio(1, 2), t_u: T_U };
+        let u = Universe { cores: vec![core], medium: [("Z002".to_string(), ratio(1, 1024))].into(), firmament: Vec::new(), unit: ratio(1, 2), t_u: 15 };
         let dir = std::env::temp_dir().join(format!("pulse-{}", std::process::id()));
         write(&dir, &[7; 32], &u).unwrap();
         assert_eq!(read(&dir), Some(([7; 32], u)), "the file gives the universe back");
