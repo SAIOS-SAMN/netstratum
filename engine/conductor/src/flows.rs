@@ -631,9 +631,12 @@ pub fn chains(motes: &[Mote], h: &Ratio, p: &Ratio, total: &Ratio) -> Vec<Chain>
         return Vec::new();
     }
     let half = ratio(1, 2);
-    let reach = |x: &Mote| x.ell_o.clone() / h.clone();
-    let lo = |x: &Mote| reach(x) * (ratio(1, 1) - p.clone().min(ratio(1, 1)));
-    let hi = |x: &Mote| reach(x) * (ratio(1, 1) + p.clone());
+    // Each mote's reach and band, read once (exact; recomputing them at every
+    // use was most of the cost).
+    let (down, up) = (ratio(1, 1) - p.clone().min(ratio(1, 1)), ratio(1, 1) + p.clone());
+    let rr: Vec<Ratio> = motes.iter().map(|x| x.ell_o.clone() / h.clone()).collect();
+    let lov: Vec<Ratio> = rr.iter().map(|r| r.clone() * down.clone()).collect();
+    let hiv: Vec<Ratio> = rr.iter().map(|r| r.clone() * up.clone()).collect();
     let delta = |r: &Ratio| h.clone() / (r.clone() + h.clone());
     // A group judged whole by the filament law, edge to edge.
     let judge = |members: Vec<usize>| -> Option<Chain> {
@@ -642,14 +645,14 @@ pub fn chains(motes: &[Mote], h: &Ratio, p: &Ratio, total: &Ratio) -> Vec<Chain>
             let m = motes[j].amount.clone() * weight(&motes[j].key) / total.clone();
             x += m.clone() * (ratio(1, 1) + open(&motes[j].key));
             a_w += m.clone() * motes[j].agitation.clone();
-            r_w += m.clone() * reach(&motes[j]);
+            r_w += m.clone() * rr[j].clone();
             held += m;
         }
         if held.is_zero() {
             return None;
         }
-        let inner = members.iter().map(|&j| lo(&motes[j])).min().expect("a member");
-        let outer = members.iter().map(|&j| hi(&motes[j])).max().expect("a member");
+        let inner = members.iter().map(|&j| lov[j].clone()).min().expect("a member");
+        let outer = members.iter().map(|&j| hiv[j].clone()).max().expect("a member");
         let (d_in, d_out) = (delta(&inner), delta(&outer));
         let t_edges = (d_in.clone() - d_out.clone()) / (d_in + d_out);
         let orbit: Vec<Ratio> = members.iter().map(|&j| frac(&motes[j].phase[0])).collect();
@@ -668,48 +671,66 @@ pub fn chains(motes: &[Mote], h: &Ratio, p: &Ratio, total: &Ratio) -> Vec<Chain>
         let density: Vec<Ratio> = along
             .iter()
             .map(|&j| {
-                let (d0, d1) = (delta(&lo(&motes[j])), delta(&hi(&motes[j])));
+                let (d0, d1) = (delta(&lov[j]), delta(&hiv[j]));
                 let band = (d0.clone() - d1.clone()) / (d0 + d1);
                 let m = motes[j].amount.clone() * weight(&motes[j].key) / total.clone();
                 if band.is_zero() { m } else { m / band }
             })
             .collect();
-        along
-            .iter()
-            .map(|&i| {
-                let at = reach(&motes[i]);
-                along.iter().zip(&density).filter(|(&j, _)| lo(&motes[j]) <= at && at <= hi(&motes[j])).fold(ratio(0, 1), |s, (_, d)| s + d.clone())
-            })
-            .collect()
+        // A SWEEP along the reach (never all pairs): the hold at each member's
+        // reach is the sum of the bands covering it, `lo ≤ at ≤ hi`, read as
+        // band starts added and band ends taken away in reach order.
+        let mut starts: Vec<(Ratio, usize)> = along.iter().enumerate().map(|(n, &j)| (lov[j].clone(), n)).collect();
+        let mut ends: Vec<(Ratio, usize)> = along.iter().enumerate().map(|(n, &j)| (hiv[j].clone(), n)).collect();
+        starts.sort();
+        ends.sort();
+        let mut order: Vec<usize> = (0..along.len()).collect();
+        order.sort_by(|&a, &b| rr[along[a]].cmp(&rr[along[b]]).then(a.cmp(&b)));
+        let (mut si, mut ei) = (0, 0);
+        let mut sum = ratio(0, 1);
+        let mut out = vec![ratio(0, 1); along.len()];
+        for q in order {
+            let at = &rr[along[q]];
+            while si < starts.len() && starts[si].0 <= *at {
+                sum += density[starts[si].1].clone();
+                si += 1;
+            }
+            while ei < ends.len() && ends[ei].0 < *at {
+                sum -= density[ends[ei].1].clone();
+                ei += 1;
+            }
+            out[q] = sum.clone();
+        }
+        out
     };
     // THE FIBRES (operator 2026-10-18: "you bead the individual fibers and
     // then braid the fibers together"): a fibre is one kind's run on one
     // face, motes whose dispersal bands overlap, linked transitively.
     let mut fibres: std::collections::BTreeMap<(Vec<bool>, String), Vec<usize>> = std::collections::BTreeMap::new();
     for (i, x) in motes.iter().enumerate() {
-        if on_disc_leg(x) && !reach(x).is_zero() {
+        if on_disc_leg(x) && !rr[i].is_zero() {
             fibres.entry(((0..PLANES).map(|k| frac(&x.phase[k]) < half).collect(), x.key.clone())).or_default().push(i);
         }
     }
     // Each fibre's beads, per face: (members, the pinch's reach).
     let mut beads_by_face: std::collections::BTreeMap<Vec<bool>, Vec<(Vec<usize>, Ratio)>> = std::collections::BTreeMap::new();
     for ((face, _), mut idx) in fibres {
-        idx.sort_by(|a, b| lo(&motes[*a]).cmp(&lo(&motes[*b])).then(a.cmp(b)));
+        idx.sort_by(|a, b| lov[*a].clone().cmp(&lov[*b].clone()).then(a.cmp(b)));
         let mut runs: Vec<Vec<usize>> = Vec::new();
         let mut edge = ratio(0, 1);
         for i in idx {
-            if runs.is_empty() || lo(&motes[i]) > edge {
+            if runs.is_empty() || lov[i].clone() > edge {
                 runs.push(Vec::new());
-                edge = hi(&motes[i]);
-            } else if hi(&motes[i]) > edge {
-                edge = hi(&motes[i]);
+                edge = hiv[i].clone();
+            } else if hiv[i].clone() > edge {
+                edge = hiv[i].clone();
             }
             runs.last_mut().expect("pushed").push(i);
         }
         let out = beads_by_face.entry(face).or_default();
         for run in runs {
             let mut along = run;
-            along.sort_by(|a, b| reach(&motes[*a]).cmp(&reach(&motes[*b])).then(a.cmp(b)));
+            along.sort_by(|a, b| rr[*a].clone().cmp(&rr[*b].clone()).then(a.cmp(b)));
             let local = profile(&along);
             // THE BEADS (operator: "halving is a human derived measure,
             // whereas anything in nature is measured itself"): a fibre
@@ -725,7 +746,7 @@ pub fn chains(motes: &[Mote], h: &Ratio, p: &Ratio, total: &Ratio) -> Vec<Chain>
             let mut from = 0;
             let mut push = |a: usize, b: usize| {
                 let (k, _) = (a..b).map(|i| (i, local[i].clone())).max_by(|x, y| x.1.cmp(&y.1).then(y.0.cmp(&x.0))).expect("a member");
-                out.push((along[a..b].to_vec(), reach(&motes[along[k]])));
+                out.push((along[a..b].to_vec(), rr[along[k]].clone()));
             };
             for at in cuts {
                 if at > from && at < along.len() {
@@ -742,7 +763,7 @@ pub fn chains(motes: &[Mote], h: &Ratio, p: &Ratio, total: &Ratio) -> Vec<Chain>
     let mut out = Vec::new();
     for (_, beads) in beads_by_face {
         let n = beads.len();
-        let span: Vec<(Ratio, Ratio)> = beads.iter().map(|(m, _)| (m.iter().map(|&j| lo(&motes[j])).min().expect("a member"), m.iter().map(|&j| hi(&motes[j])).max().expect("a member"))).collect();
+        let span: Vec<(Ratio, Ratio)> = beads.iter().map(|(m, _)| (m.iter().map(|&j| lov[j].clone()).min().expect("a member"), m.iter().map(|&j| hiv[j].clone()).max().expect("a member"))).collect();
         let mut parent: Vec<usize> = (0..n).collect();
         fn root(p: &mut [usize], i: usize) -> usize {
             let mut i = i;
