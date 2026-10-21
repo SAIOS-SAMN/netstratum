@@ -5,10 +5,10 @@
 //!   plasmic. Its disposition and perception, and its NAME, are spoken from
 //!   the seed (flavour only; docs/82: no types).
 //! - Its place is its system's stand-in place (until the sphere).
-//! - THE HIERARCHY IS READ FROM THE WAKINGS: the first mind of each galaxy
-//!   takes a PROGENITOR seat (beside the first minds, docs/82); every other
-//!   people is a sovereign of its own system (no station). Ancients by
-//!   birth, stewards and captains follow by the existing laws.
+//! - A WAKING TAKES NO SEAT (operator 2026-10-21, "realms EMERGE, not
+//!   drawn"): every tier is reached by what the line's lineage does
+//!   (ancients by birth near the core, progenitors by folding a gate,
+//!   sovereigns by holding their own system).
 use crate::life::Waking;
 use crate::pulse::{draw, Universe};
 use crate::{Policy, PolitySpec};
@@ -29,7 +29,7 @@ fn spoken(seed: &[u8; 32], path: &[u64], salt: u32) -> String {
 
 /// The line a waking founds, registered and seated, or None if no free name
 /// (or the world already holds a line).
-pub fn found(u: &Universe, seed: &[u8; 32], w: &Waking, registry: &Registry, first_in_galaxy: bool, world: Option<&crate::life::World>) -> Option<PolitySpec> {
+pub fn found(u: &Universe, seed: &[u8; 32], w: &Waking, registry: &Registry, world: Option<&crate::life::World>) -> Option<PolitySpec> {
     let world_name = format!("w{}", w.path.iter().map(|p| p.to_string()).collect::<Vec<_>>().join("-"));
     if crate::polities::world_name_taken(registry, &world_name) {
         return None;
@@ -50,14 +50,9 @@ pub fn found(u: &Universe, seed: &[u8; 32], w: &Waking, registry: &Registry, fir
         perception: ledger::registry::PERCEPTIONS[pick("perception", 4)].to_string(),
         founder: "the ladder".into(),
         lineage: Vec::new(),
-        station: first_in_galaxy.then(|| "progenitor".to_string()),
+        station: None,
     };
-    let created = registry.create(&civilization).or_else(|_| {
-        let mut sovereign = civilization.clone();
-        sovereign.station = None;
-        registry.create(&sovereign)
-    });
-    created.ok()?;
+    registry.create(&civilization).ok()?;
     let civilization = registry.load(&sigil)?;
     let position = crate::seating::place_of(u, &w.path)?;
     let spec = PolitySpec {

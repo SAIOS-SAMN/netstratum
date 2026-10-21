@@ -13,13 +13,20 @@
 //! - **Its distance from the core** is its star's reach, the route's arc to
 //!   the core (`enclosure::route`).
 //!
+//! - **A settler's world** (stage 6): a line cleaved from a line on an era-1
+//!   world settles the free world nearest its parent's (`nearest`): its
+//!   parent's own system first, then its parent's galaxy, the system whose
+//!   reach is nearest its parent's first. A galaxy with no free world leaves
+//!   the settler where its cleave put it.
+//!
 //! The reading is taken whenever the universe or the seating changes
 //! (`set`) and read by the decisions that place a line (`core_of`,
-//! `in_bulge`, `distance`).
+//! `in_bulge`, `distance`, `settle`). The worlds claimed are kept across
+//! readings (`claim`).
 use crate::pulse::{mass, Universe};
 use cfe::ratio::{ratio, Ratio};
 use num_traits::Zero;
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::sync::{Mutex, OnceLock};
 
 /// A reading of where the universe's systems stand.
@@ -30,12 +37,17 @@ pub struct Places {
     /// Each system ([galaxy, star]): its reach in its galaxy's own units and
     /// its distance from its core.
     pub systems: BTreeMap<(u64, u64), (Ratio, Ratio)>,
+    /// Every era-1 world a line can stand on.
+    pub sites: BTreeMap<Vec<u64>, crate::seating::Site>,
+    /// The worlds lines stand on.
+    pub claimed: BTreeSet<Vec<u64>>,
 }
 
 impl Places {
     /// Read the universe against the ledger's charted cores.
     pub fn read(u: &Universe, book: &ledger::Ledger) -> Places {
-        let mut out = Places::default();
+        let worlds: BTreeMap<Vec<u64>, crate::life::World> = crate::life::worlds(u).into_iter().map(|w| (w.path.clone(), w)).collect();
+        let mut out = Places { sites: crate::seating::sites(u, &worlds), ..Places::default() };
         let mut order: Vec<usize> = (0..u.cores.len()).collect();
         order.sort_by(|a, b| u.cores[*a].radius.cmp(&u.cores[*b].radius).then(a.cmp(b)));
         let unit = crate::breath::unit_mass(u);
@@ -65,12 +77,58 @@ fn now() -> &'static Mutex<Option<Places>> {
     NOW.get_or_init(|| Mutex::new(None))
 }
 
-/// Take the reading (after a seating or a breath that moved the universe).
+/// Take the reading (after a seating or a breath that moved the universe),
+/// keeping the worlds claimed.
 pub fn set(u: &Universe, book: &ledger::Ledger) {
-    let p = Places::read(u, book);
+    let mut p = Places::read(u, book);
     if let Ok(mut g) = now().lock() {
+        if let Some(old) = g.take() {
+            p.claimed = old.claimed;
+        }
         *g = Some(p);
     }
+}
+
+/// A line stands on the world at `path`.
+pub fn claim(path: &[u64]) {
+    if let Ok(mut g) = now().lock() {
+        if let Some(p) = g.as_mut() {
+            p.claimed.insert(path.to_vec());
+        }
+    }
+}
+
+/// Whether a line stands on the world at `path`.
+pub fn claimed(path: &[u64]) -> bool {
+    with(|p| Some(p.claimed.contains(path))).unwrap_or(false)
+}
+
+/// THE NEAREST FREE WORLD to a parent's at `parent`: in its own system
+/// first, then in its galaxy by the nearest reach to its own system's, then
+/// by path. None when its galaxy has no free world.
+pub fn nearest<'a>(parent: &[u64], free: impl Iterator<Item = &'a Vec<u64>>, reach: &BTreeMap<(u64, u64), Ratio>) -> Option<Vec<u64>> {
+    let (&g, &s) = (parent.first()?, parent.get(1)?);
+    let home = reach.get(&(g, s))?;
+    free.filter(|p| p.first() == Some(&g) && p.len() > 1)
+        .filter_map(|p| {
+            let r = reach.get(&(g, p[1]))?;
+            let apart = if r > home { r.clone() - home.clone() } else { home.clone() - r.clone() };
+            Some(((p[1] != s, apart, (*p).clone()), (*p).clone()))
+        })
+        .min_by(|a, b| a.0.cmp(&b.0))
+        .map(|(_, p)| p)
+}
+
+/// A settler from the line at `parent` takes the free world nearest it,
+/// claimed.
+pub fn settle(parent: &[u64]) -> Option<crate::seating::Site> {
+    let mut g = now().lock().ok()?;
+    let p = g.as_mut()?;
+    let reach: BTreeMap<(u64, u64), Ratio> = p.systems.iter().map(|(k, (_, d))| (*k, d.clone())).collect();
+    let path = nearest(parent, p.sites.keys().filter(|k| !p.claimed.contains(*k)), &reach)?;
+    let site = p.sites.get(&path)?.clone();
+    p.claimed.insert(path);
+    Some(site)
 }
 
 fn with<T>(f: impl FnOnce(&Places) -> Option<T>) -> Option<T> {
@@ -112,5 +170,18 @@ mod tests {
         assert_eq!(bulge(&[21, 9, 1]), Some(false));
         assert_eq!(p.cores.get(&21).cloned(), Some("core-a".to_string()));
         let _: BTreeMap<u64, String> = p.cores.clone();
+    }
+
+    #[test]
+    fn a_settler_takes_its_parents_system_first_then_the_nearest_reach() {
+        let mut reach = BTreeMap::new();
+        reach.insert((21, 7), ratio(5, 1));
+        reach.insert((21, 8), ratio(6, 1));
+        reach.insert((21, 9), ratio(15, 1));
+        reach.insert((22, 1), ratio(5, 1));
+        let free = [vec![21, 9, 0], vec![21, 8, 0], vec![22, 1, 0], vec![21, 7, 3]];
+        assert_eq!(super::nearest(&[21, 7, 1], free.iter(), &reach), Some(vec![21, 7, 3]));
+        assert_eq!(super::nearest(&[21, 7, 1], free[..3].iter(), &reach), Some(vec![21, 8, 0]));
+        assert_eq!(super::nearest(&[21, 7, 1], free[2..3].iter(), &reach), None);
     }
 }

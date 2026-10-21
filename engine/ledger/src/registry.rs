@@ -32,7 +32,11 @@ pub const PERCEPTIONS: [&str; 4] = ["planar", "volumetric", "harmonic", "umbral"
 /// a universal one (unlocks the progenitor role, per `47_REGISTRY` §4b).
 /// Not a deeper office function like T4-T15 — a receiving seat for the
 /// founding transaction, which is why it sits above them, not among them.
-pub const STATIONS: [&str; 18] = [
+/// **`steward`, `captain` added 2026-10-21** (operator: "stewards as realms
+/// EMERGE ... sovereigns, captains"): a realm's steward and a line's captaincy
+/// of the roads it rides, both seated by what the line does, never at
+/// founding. Registry seats like `elder` and `ancient` (no chain wire).
+pub const STATIONS: [&str; 20] = [
     "progenitor",
     "watcher",
     "observer",
@@ -51,6 +55,8 @@ pub const STATIONS: [&str; 18] = [
     "nexus",
     "elder",
     "ancient",
+    "steward",
+    "captain",
 ];
 
 /// BAND-1 (12_UNION §1): a station's seat width — SPACE AVAILABLE,
@@ -66,6 +72,8 @@ pub fn seat_width(station: &str) -> Option<u64> {
         // Unbounded like sovereign/anchor/nexus: the number of founded
         // planets (elders) and of ancients is not a scarce band to cap.
         "sovereign" | "anchor" | "nexus" | "elder" | "ancient" => None,
+        // As many as there are realms and roads ridden.
+        "steward" | "captain" => None,
         _ => None,
     }
 }
@@ -117,6 +125,10 @@ pub enum Tier {
     /// ANCIENT — the founding-tithe seat for a newly raised world,
     /// universal scope (T17, same law).
     T17,
+    /// STEWARD — the steward of a realm that emerged from passage (T18).
+    T18,
+    /// CAPTAIN — a civilization's master of a realm's roads (T19).
+    T19,
 }
 
 /// The station → tier reading, and THE ENGINE AUTHORITY for it.
@@ -148,6 +160,8 @@ pub fn tier_of(station: Option<&str>) -> Option<Tier> {
         Some("nexus") => Some(Tier::T15),
         Some("elder") => Some(Tier::T16),
         Some("ancient") => Some(Tier::T17),
+        Some("steward") => Some(Tier::T18),
+        Some("captain") => Some(Tier::T19),
         Some(_) => None,
     }
 }
@@ -163,7 +177,7 @@ pub fn office_preconditions(
     evidence: &OfficeEvidence,
 ) -> Result<(), &'static str> {
     match station {
-        "progenitor" | "watcher" | "observer" | "sovereign" => Ok(()),
+        "progenitor" | "watcher" | "observer" | "sovereign" | "steward" | "captain" => Ok(()),
         "caravan" => {
             if evidence.element_kinds > 0 || evidence.routes_chartered > 0 {
                 Ok(())

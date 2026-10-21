@@ -83,8 +83,19 @@ fn main() {
     // Motion (era 1): each system's galactic period, which its lines' orbits
     // read; refreshed when the breath changes the universe.
     let mut system_periods = conductor::seating::periods(&universe);
-    // Where each seated line's world stands: its core and bulge (`places`).
+    // Where each seated line's world stands: its core and bulge (`places`),
+    // and the worlds the lines stand on.
     conductor::places::set(&universe, &book);
+    for spec in &specs {
+        if let Some(path) = &spec.place {
+            conductor::places::claim(path);
+            println!(
+                "conductor: {} stands on world {path:?}{}",
+                spec.civilization.sigil,
+                spec.civilization.lineage.first().map(|p| format!(" (of the line of {p})")).unwrap_or_default()
+            );
+        }
+    }
     // LIFE (docs/82 step 3b): every world's climb is state, advanced by the
     // system's activity at its own coupling's recoherences; its reading is
     // refreshed when the universe changes. A mind wakes when its climb is
@@ -92,8 +103,6 @@ fn main() {
     let mut climbs = conductor::life::read_climbs(std::path::Path::new(&var_root));
     let mut life_readings = conductor::life::readings(&universe, &pulse_seed);
     let mut readings_at: u64 = 0;
-    let mut woken_galaxies: std::collections::BTreeSet<u64> =
-        climbs.iter().filter(|(_, c)| c.woken).filter_map(|(p, _)| p.first().copied()).collect();
     println!(
         "conductor: life — {} worlds read, {} climbing, {} minds woken",
         life_readings.len(),
@@ -415,19 +424,21 @@ fn main() {
             conductor::life::write_climbs(std::path::Path::new(&var_root), &climbs);
         }
         for w in woke {
-            let galaxy = w.path.first().copied().unwrap_or(0);
-            let first = woken_galaxies.insert(galaxy);
+            // A world a line already stands on wakes no second people.
+            if conductor::places::claimed(&w.path) {
+                continue;
+            }
             let world = life_readings.get(&w.path).map(|r| &r.world);
-            if let Some(spec) = conductor::waking::found(&universe, &pulse_seed, &w, &registry, first, world) {
+            if let Some(spec) = conductor::waking::found(&universe, &pulse_seed, &w, &registry, world) {
                 println!(
-                    "beat {beat}: A MIND WAKES — {} ({}, {} medium) on world {:?}{}",
+                    "beat {beat}: A MIND WAKES — {} ({}, {} medium) on world {:?}",
                     spec.civilization.name,
                     spec.civilization.species,
                     w.medium,
-                    w.path,
-                    spec.civilization.station.as_deref().map(|s| format!("; the {s} of its galaxy")).unwrap_or_default()
+                    w.path
                 );
                 breath_reading.wakings += 1;
+                conductor::places::claim(&w.path);
                 worlds.push(Polity::genesis(spec, &registry, &book));
             }
         }
@@ -610,14 +621,23 @@ fn main() {
         }
         ancient = now_ancient;
         total_cleaves += newborns.len() as u64;
-        for spec in newborns {
+        for mut spec in newborns {
+            // THE SETTLING (`places`, operator 2026-10-21), in world order: a
+            // branch of a line on an era-1 world settles the free world
+            // nearest its parent's.
+            let parent = spec.civilization.lineage.first().cloned().unwrap_or_default();
+            let near = worlds.iter().find(|p| p.spec.civilization.sigil == parent).and_then(|p| p.spec.place.clone());
+            if let Some(site) = near.as_deref().and_then(conductor::places::settle) {
+                conductor::seating::apply(&mut spec, &site);
+            }
             println!(
-                "beat {beat}: DIVERGENCE — {} ({}) cleaves from the line of {}, settling {}/{}",
+                "beat {beat}: DIVERGENCE — {} ({}) cleaves from the line of {}, settling {}/{}{}",
                 spec.civilization.name,
                 spec.civilization.species,
                 spec.civilization.lineage.first().map(String::as_str).unwrap_or("?"),
                 spec.world_name,
                 spec.planet,
+                spec.place.as_ref().map(|p| format!(" on world {p:?}")).unwrap_or_default(),
             );
             worlds.push(Polity::genesis(spec, &registry, &book));
         }
@@ -800,8 +820,10 @@ fn main() {
             // THE YEAR'S BOUNCE (cores, ancients, ascension, parliaments,
             // councils): one library function.
             year_lines.extend(conductor::profile::timed("year:bounce", || conductor::year_bounce(&mut worlds, &book, &registry, std::path::Path::new(&var_root), beat, epoch_base)));
+            // The sovereigns: lineages holding their own star systems (`tiers`).
+            year_lines.extend(conductor::tiers::sovereigns(&mut worlds, &registry, std::path::Path::new(&var_root)));
             // docs/75: the term's realms, read from its contacts, then a new term.
-            year_lines.extend(conductor::profile::timed("year:realms", || conductor::realms::bounce(&worlds, &registry, std::path::Path::new(&var_root), &contacts, &passages, beat / scribe::journal::YEAR_TICKS)));
+            year_lines.extend(conductor::profile::timed("year:realms", || conductor::realms::bounce(&mut worlds, &registry, std::path::Path::new(&var_root), &contacts, &passages, beat / scribe::journal::YEAR_TICKS)));
             contacts.clear();
             passages.clear();
             // docs/77: each gate's account, its term's road tolls added.

@@ -149,16 +149,17 @@ fn seat(
 pub fn founding_polities() -> Vec<PolitySpec> {
     let g_half = || Some((StarClass::G, ratio(1, 2), ratio(1, 2)));
     vec![
-        // ── THE PROGENITOR BAND (T0) ──────────────────────────────────
-        // **THE FIFTH SEAT** (`12_UNION` §2, operator ruling 2026-07-30):
-        // *the tardigrade line sits in the progenitor band from this
-        // aeon — Tunborn, the Slagborn line's OWN head.* It is compiled
-        // now, so no boot path can lose it again.
+        // ── THE ELDEST LINES (once the progenitor band) ───────────────
+        // No line is seated a progenitor or a sovereign at founding
+        // (operator 2026-10-21, "realms EMERGE, not drawn"): a progenitor
+        // is the line whose lineage folds a gate (`ascension`), a sovereign
+        // the line whose lineage holds its own star system. Tunborn is the
+        // Slagborn line's own head (`12_UNION` §2, 2026-07-30).
         seat(
             "Tunborn", "tunborn", "hypobiotid-voidsleeper", "hypobiotid",
             "the dark between stars is a bed, not a wall",
             "expansionist", "mineral", "planar",
-            Some("progenitor"), &[],
+            None, &[],
             "tun-reach", "husk", "first-wake", Policy::Steady,
             (ratio(2, 1), ratio(-3, 1), ratio(1, 1)), g_half(),
         ),
@@ -168,7 +169,7 @@ pub fn founding_polities() -> Vec<PolitySpec> {
             "Sylvane", "sylvane", "ailuroform-primus", "ailuroform",
             "we were first, and we remember why that matters less than you think",
             "epicurean", "biotic", "harmonic",
-            Some("progenitor"), &[],
+            None, &[],
             "sylvane-hearth", "sunwell", "first-hearth", Policy::Steady,
             (ratio(1, 1), ratio(1, 1), ratio(1, 1)), None,
         ),
@@ -178,7 +179,7 @@ pub fn founding_polities() -> Vec<PolitySpec> {
             "Forgeborn", "forgeborn", "bimaniform-flatlander", "bimaniform",
             "we plan in stone and fire; we no longer dig",
             "expansionist", "mineral", "planar",
-            Some("progenitor"), &[],
+            None, &[],
             "forge-reach", "anvil-spire", "deepforge", Policy::Industry,
             (ratio(8, 1), ratio(3, 1), ratio(5, 1)), g_half(),
         ),
@@ -187,7 +188,7 @@ pub fn founding_polities() -> Vec<PolitySpec> {
             "Corebound", "corebound", "lithophage-stonewill", "lithophage",
             "the surface is weather; we are the world",
             "epicurean", "mineral", "volumetric",
-            Some("progenitor"), &[],
+            None, &[],
             "core-deep", "coreglow", "stone-hollow", Policy::Steady,
             (ratio(0, 1), ratio(-13, 1), ratio(7, 1)),
             Some((StarClass::M, ratio(1, 2), ratio(2, 1))),
@@ -196,7 +197,7 @@ pub fn founding_polities() -> Vec<PolitySpec> {
             "Coronal Choir", "coronal-choir", "plasmiform-sheet", "plasmiform",
             "we are the weather of the star",
             "expansionist", "plasmic", "harmonic",
-            Some("progenitor"), &[],
+            None, &[],
             "corona-sea", "prominence", "current-sheet", Policy::Steady,
             (ratio(15, 1), ratio(15, 1), ratio(-6, 1)), None,
         ),
@@ -243,23 +244,15 @@ pub fn founding_polities() -> Vec<PolitySpec> {
             (ratio(-11, 1), ratio(16, 1), ratio(4, 1)),
             Some((StarClass::K, ratio(1, 4), ratio(3, 4))),
         ),
-        // ── THE SOVEREIGN BAND (T2) ───────────────────────────────────
-        // The ARCHIVISTS — the sovereign audit tier (12_UNION §2a):
+        // ── THE ARCHIVISTS (12_UNION §2a) ──────────────────────────────
         // Stelahold · Tallykeep · Glyphward, the ledger-integrity and
-        // calendar-keeping lineages descended from the Forgeborn domain.
-        // WHY THIS WAS EMPTY: founding_polities seated T0 (progenitor),
-        // T1 (watcher/observer), and T3 (stationless) — and never T2. The
-        // compiled roster had no `seat(..., Some("sovereign"), ...)`, so the only
-        // path to T2 was the CLI `ascend` deed. Same mechanism as every
-        // other class: compile the office into the roster, lineage to
-        // the domain head, station Some("sovereign"). seat_width is
-        // unbounded for sovereigns (registry.rs), so three founding
-        // seats do not exhaust the band.
+        // calendar-keeping lineages descended from the Forgeborn domain;
+        // sovereign only when their lineage holds its own system.
         seat(
             "Stelahold", "stelahold", "bimaniform-flatlander", "bimaniform",
             "what is written in stone outlives the flood",
             "empiricist", "mineral", "planar",
-            Some("sovereign"), &["forgeborn"],
+            None, &["forgeborn"],
             "stela-reach", "pale-wall", "first-slab", Policy::Steady,
             (ratio(18, 1), ratio(-8, 1), ratio(4, 1)),
             Some((StarClass::G, ratio(1, 3), ratio(1, 1))),
@@ -268,7 +261,7 @@ pub fn founding_polities() -> Vec<PolitySpec> {
             "Tallykeep", "tallykeep", "bimaniform-calendar", "bimaniform",
             "the calendar is the spine of the sky",
             "empiricist", "biotic", "harmonic",
-            Some("sovereign"), &["forgeborn"],
+            None, &["forgeborn"],
             "tally-span", "sun-crown", "first-tally", Policy::Steady,
             (ratio(-14, 1), ratio(9, 1), ratio(22, 1)),
             Some((StarClass::K, ratio(1, 4), ratio(4, 5))),
@@ -277,7 +270,7 @@ pub fn founding_polities() -> Vec<PolitySpec> {
             "Glyphward", "glyphward", "bimaniform-scribe", "bimaniform",
             "the record outlives the recorder",
             "empiricist", "biotic", "harmonic",
-            Some("sovereign"), &["forgeborn"],
+            None, &["forgeborn"],
             "glyph-sky", "star-gate", "first-word", Policy::Steady,
             (ratio(11, 1), ratio(27, 1), ratio(-5, 1)),
             Some((StarClass::A, ratio(1, 5), ratio(1, 1))),

@@ -15,7 +15,10 @@
 //!   networks leaves a civilization CONTESTED.
 //! - A BOUNDARY is a civilization reached by more than one realm's network.
 //! - The STEWARD is the most-contacted member line (contacts: the term's
-//!   completed exchanges, `Contacts`), else the line with the most passage.
+//!   completed exchanges, `Contacts`), else the line with the most passage;
+//!   it takes the steward's seat (`tiers`).
+//! - A CAPTAIN is a member civilization's most-travelled line over the realm's
+//!   network in the term; it takes the captain's seat (`tiers`).
 //!
 //! The term is the core period (one bounce). Placeholders for physics not yet
 //! defined: civilization = lineage root, passage = a gated leg or an envoy,
@@ -82,8 +85,8 @@ fn put_text(text: &str, out: &mut Vec<u8>) {
 
 /// THE REALMS' READING at a term's close: realms by core, their members,
 /// boundaries, contested civilizations and stewards, checkpointed, and what
-/// happened for the log. Behaviour is unchanged.
-pub fn bounce(worlds: &[Polity], registry: &Registry, var_root: &Path, contacts: &Contacts, passages: &Passages, bounce: u64) -> Vec<String> {
+/// happened for the log, and the stewards and captains it seats.
+pub fn bounce(worlds: &mut [Polity], registry: &Registry, var_root: &Path, contacts: &Contacts, passages: &Passages, bounce: u64) -> Vec<String> {
     let parents: BTreeMap<String, Vec<String>> = registry.list().into_iter().map(|c| (c.sigil, c.lineage)).collect();
     let living: Vec<usize> = (0..worlds.len()).filter(|&i| !worlds[i].penned).collect();
     let civ_of_world: BTreeMap<String, String> = living
@@ -140,10 +143,14 @@ pub fn bounce(worlds: &[Polity], registry: &Registry, var_root: &Path, contacts:
     }
     let mut said = Vec::new();
     let mut out = Vec::new();
+    let mut stewards: Vec<(String, String)> = Vec::new();
     for (core, set) in &members {
         let in_realm = |w: &String| civ_of_world.get(w).is_some_and(|c| set.contains(c));
         let pick = |scores: &BTreeMap<String, u64>| scores.iter().filter(|(w, n)| **n > 0 && in_realm(*w)).max_by(|(wa, na), (wb, nb)| na.cmp(nb).then(wb.cmp(wa))).map(|(w, _)| w.clone());
         let steward = pick(&line_contacts).or_else(|| pick(&line_passage));
+        if let Some(w) = &steward {
+            stewards.push((core.clone(), w.clone()));
+        }
         let passed: u64 = by_line.iter().filter(|((_, c), _)| c == core).map(|(_, n)| n).sum();
         let mut v = Vec::new();
         put_text(core, &mut v);
@@ -177,6 +184,34 @@ pub fn bounce(worlds: &[Polity], registry: &Registry, var_root: &Path, contacts:
             contested.len()
         ),
     );
+    // THE TIERS EMERGE FROM THE REALMS (`tiers`): each realm's steward takes
+    // the steward's seat, and each member civilization's most-travelled line
+    // over the realm's network this term (ties by world name) its captain's.
+    let ancients = crate::tiers::ancients(var_root);
+    let index_of: BTreeMap<String, usize> = living.iter().map(|&i| (worlds[i].spec.world_name.clone(), i)).collect();
+    for (core, w) in &stewards {
+        let Some(&i) = index_of.get(w) else { continue };
+        if crate::tiers::raise(&mut worlds[i], registry, "steward", &ancients) {
+            said.push(format!("A STEWARD EMERGES — {} stewards the realm {core}", worlds[i].spec.civilization.sigil));
+        }
+    }
+    let mut captains: BTreeMap<(String, String), (u64, String)> = BTreeMap::new();
+    for ((world, core), n) in &by_line {
+        let Some(civ) = civ_of_world.get(world) else { continue };
+        if *n == 0 || !members.get(core).is_some_and(|set| set.contains(civ)) {
+            continue;
+        }
+        let best = captains.entry((core.clone(), civ.clone())).or_insert((0, String::new()));
+        if *n > best.0 {
+            *best = (*n, world.clone());
+        }
+    }
+    for ((core, civ), (n, w)) in &captains {
+        let Some(&i) = index_of.get(w) else { continue };
+        if crate::tiers::raise(&mut worlds[i], registry, "captain", &ancients) {
+            said.push(format!("A CAPTAIN EMERGES — {} of {civ}, {n} passages over the realm {core}'s roads", worlds[i].spec.civilization.sigil));
+        }
+    }
     let path = var_root.join("realms.bin");
     let staged = path.with_extension("staged");
     if std::fs::write(&staged, out).is_ok() {

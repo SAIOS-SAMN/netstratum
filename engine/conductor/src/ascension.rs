@@ -10,7 +10,9 @@
 //!   throat) folds one, its span measured across the torus, paying the gate's
 //!   cost in STAMP shared equally among ALL the core's ancients (born and
 //!   ascended; the remainder to the first): the progenitors build the doorways
-//!   to the ancients' cores.
+//!   to the ancients' cores. A progenitor is not seated at founding: the
+//!   builders' line that takes a folded gate's tolls (`builder_payee`) becomes
+//!   one at the fold.
 //! - **A2, the envoy.** A master's envoy crosses a MAPPED gate to its core. An
 //!   envoy makes its lineage a bearer of that core's wave and enters the
 //!   throat's contest (`ancients::keepers`). Each bounce it stays it pays the
@@ -663,7 +665,17 @@ pub fn step(worlds: &mut [Polity], book: &Ledger, registry: &Registry, var_root:
             f.builder, f.master, f.trips
         ));
         credit(var_root, &f.from, &f.core, &total, &ratio(0, 1));
-        gates.push(Gate { from: f.from, core: f.core, builder: f.builder, span: cells, mapped: false, built: bounce, place, freshness: FRESHNESS_CELLS });
+        let gate = Gate { from: f.from, core: f.core, builder: f.builder, span: cells, mapped: false, built: bounce, place, freshness: FRESHNESS_CELLS };
+        // THE PROGENITORS EMERGE (operator 2026-10-21): the doorway's builders'
+        // line, the one who takes its tolls, is a progenitor from the fold; an
+        // ancient is already above the doorways.
+        if let Some(b) = builder_payee(worlds, &cores, &parents, keepers, &gate) {
+            let ancients: Vec<String> = arisen.iter().map(|(_, s)| s.clone()).collect();
+            if crate::tiers::raise(&mut worlds[b], registry, "progenitor", &ancients) {
+                said.push(format!("A PROGENITOR EMERGES — {}, whose lineage {} folded the gate {}", worlds[b].spec.civilization.sigil, gate.builder, gate.id()));
+            }
+        }
+        gates.push(gate);
     }
     foldings = paying;
     // A2: the masters' envoys cross MAPPED gates to their chosen cores (5.9).

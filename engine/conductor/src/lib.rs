@@ -91,6 +91,7 @@ pub mod ring;
 pub mod compound;
 pub mod enfold;
 pub mod places;
+pub mod tiers;
 pub mod enclosure;
 pub mod formation;
 pub mod ocean;
@@ -2205,23 +2206,31 @@ impl Polity {
         if office_preconditions(want, &evidence).is_err() {
             return;
         }
-        let Some(station) = Station::from_word(want) else {
-            return;
-        };
-        let Some(line) = cfe::dop::Name::new(&self.spec.civilization.sigil) else {
-            return;
-        };
-        if self
-            .world
-            .seat_station_as(self.automaton, line, station)
-            .is_err()
-        {
-            return;
+        self.take_station(registry, want);
+    }
+
+    /// A line takes `want`: the chain seat, then the registry's card, then the
+    /// line's own spec. False when the chain or the registry refuses (the
+    /// seat's width is full, the station unknown).
+    pub fn take_station(&mut self, registry: &Registry, want: &str) -> bool {
+        // A station with a chain wire is seated on the chain first; a
+        // registry seat (elder, ancient, steward, captain) has none.
+        if let Some(station) = Station::from_word(want) {
+            let Some(line) = cfe::dop::Name::new(&self.spec.civilization.sigil) else {
+                return false;
+            };
+            if self
+                .world
+                .seat_station_as(self.automaton, line, station)
+                .is_err()
+            {
+                return false;
+            }
         }
         // BEAT-PARALLEL — `registry.seat` reads the WHOLE roster (`self.list()`)
         // and enforces a global seat-width constraint, so it is the one op in the
-        // per-civ cycle that is not per-world isolated. It fires at most once per
-        // line's lifetime (guarded above by `held.is_some()`), so serialising it
+        // per-civ cycle that is not per-world isolated. It fires rarely (an office
+        // once per line, a seat when a tier emerges), so serialising it
         // under a global lock keeps the width invariant exact without touching the
         // parallel cognition. Everything else in `cycle` is per-world (`book` is
         // filesystem-keyed by world) or Mutex-guarded (membrane/worth/profile).
@@ -2232,6 +2241,7 @@ impl Polity {
         if seated.is_ok() {
             self.spec.civilization.station = Some(want.into());
         }
+        seated.is_ok()
     }
 
     /// **REFINE STEP (REFINE-1)** — pure NPC conversion of banked raw

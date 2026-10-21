@@ -7,10 +7,10 @@
 //!   stands at a STAND-IN box position (a 3 × 3 × 3 lattice on the 64-cell
 //!   box, 21 cells apart, beyond the 16-cell reach), nearest the universal
 //!   core first: docs/78's flat-site table replaces it with the sphere (A1).
-//! - **Each line is seated on its own star system:** the roster's order
-//!   (the progenitor band first) takes the first systems of every galaxy in
-//!   turn (the innermost, the oldest), then the second, so every galaxy
-//!   receives peoples. A system's stand-in position sits within its
+//! - **Each lineage's head is seated in its own star system** while one is
+//!   free, on the world it is most viable on, the galaxies taken in turn so
+//!   every galaxy receives peoples; **its
+//!   descendants settle the free worlds nearest it** (`seat`). A system's stand-in position sits within its
 //!   galaxy's reach. A line keeps its own star class and orbit until the
 //!   ladder's temperature law (docs/82) reads them from its world.
 use crate::pulse::Universe;
@@ -114,41 +114,112 @@ pub fn site_of(heat: &cfe::ratio::Ratio, burn: &cfe::ratio::Ratio) -> Option<(cf
 /// system per line, and then heat alone, left 67 then 78 of 157 collapsed at
 /// founding). The spec takes that world's era-1 siting and its
 /// system's place. A line with no world left keeps its place.
+/// A world a line can stand on: its stand-in place, its star's class, its
+/// albedo and orbit (`site_of`), and its composition.
+#[derive(Debug, Clone)]
+pub struct Site {
+    pub path: Vec<u64>,
+    pub position: Place,
+    pub star: cfe::thermal::StarClass,
+    pub albedo: Ratio,
+    pub orbit: Ratio,
+    pub composition: Option<Vec<(u16, Ratio)>>,
+}
+
+/// Every era-1 world a line can stand on, by path.
+pub fn sites(u: &Universe, worlds: &std::collections::BTreeMap<Vec<u64>, crate::life::World>) -> std::collections::BTreeMap<Vec<u64>, Site> {
+    worlds
+        .values()
+        .filter_map(|w| {
+            let (star, albedo, orbit) = site_of(&w.heat, &w.burn)?;
+            let position = place_of(u, &w.path)?;
+            Some((w.path.clone(), Site { path: w.path.clone(), position, star, albedo, orbit, composition: composition_of(u, &w.path) }))
+        })
+        .collect()
+}
+
+/// Each system's reach from its core ([galaxy, star]).
+pub fn reaches(u: &Universe) -> std::collections::BTreeMap<(u64, u64), Ratio> {
+    u.cores
+        .iter()
+        .flat_map(|c| c.satellites.iter().filter_map(|s| Some(((*s.path.first()?, *s.path.get(1)?), s.radius.clone()))))
+        .collect()
+}
+
+/// Stand a line on a site.
+pub fn apply(spec: &mut PolitySpec, site: &Site) {
+    spec.position = site.position.clone();
+    spec.star = Some(site.star);
+    spec.albedo = Some(site.albedo.clone());
+    spec.orbit = Some(site.orbit.clone());
+    spec.composition = site.composition.clone();
+    spec.place = Some(site.path.clone());
+}
+
+/// THE SEATING: a lineage's head takes a world in the system the fewest heads
+/// hold, the one it is most viable on there, the galaxies taken in turn; a line descended from a seated line SETTLES the
+/// free world nearest its parent's (`places::nearest`: its parent's own
+/// system first, then its parent's galaxy by reach), so a lineage spreads
+/// through its own system before beyond it. A line whose parent is unseated
+/// is seated as a head.
 pub fn seat(u: &Universe, worlds: &std::collections::BTreeMap<Vec<u64>, crate::life::World>, specs: &mut [PolitySpec]) {
-    let order = by_distance(u);
-    let rank: std::collections::BTreeMap<u64, usize> = order.iter().enumerate().filter_map(|(k, &i)| u.cores[i].path.first().map(|g| (*g, k))).collect();
+    let sites = sites(u, worlds);
+    let reach = reaches(u);
     let mut claimed: std::collections::BTreeSet<Vec<u64>> = std::collections::BTreeSet::new();
     let mut per_galaxy: std::collections::BTreeMap<u64, usize> = std::collections::BTreeMap::new();
-    let sited: Vec<(&crate::life::World, (cfe::thermal::StarClass, cfe::ratio::Ratio, cfe::ratio::Ratio))> =
-        worlds.values().filter_map(|w| site_of(&w.heat, &w.burn).map(|s| (w, s))).collect();
+    let mut per_system: std::collections::BTreeMap<(u64, u64), usize> = std::collections::BTreeMap::new();
+    let sited: Vec<&Site> = sites.values().collect();
     let mut viability: std::collections::BTreeMap<(String, String), Vec<cfe::ratio::Ratio>> = std::collections::BTreeMap::new();
+    let parent_of = |spec: &PolitySpec| spec.civilization.lineage.first().cloned();
+    let sigils: std::collections::BTreeSet<String> = specs.iter().map(|s| s.civilization.sigil.clone()).collect();
+    let mut placed: std::collections::BTreeMap<String, Vec<u64>> = std::collections::BTreeMap::new();
+    // The heads (no seated parent among the specs), by viability.
     for spec in specs.iter_mut() {
+        if parent_of(spec).is_some_and(|p| sigils.contains(&p)) {
+            continue;
+        }
         let key = (spec.civilization.clade.clone(), spec.civilization.metabolism.clone());
         let civ = spec.civilization.clone();
-        let v = viability.entry(key).or_insert_with(|| sited.iter().map(|(_, (c, a, o))| crate::siting::viability_at(&civ, *c, a, o)).collect());
+        let v = viability.entry(key).or_insert_with(|| sited.iter().map(|s| crate::siting::viability_at(&civ, s.star, &s.albedo, &s.orbit)).collect());
         let best = sited
             .iter()
             .enumerate()
-            .filter(|(_, (w, _))| !claimed.contains(&w.path))
-            .max_by(|(ia, (a, _)), (ib, (b, _))| {
+            .filter(|(_, s)| !claimed.contains(&s.path))
+            .max_by(|(ia, a), (ib, b)| {
+                let sa = per_system.get(&(a.path[0], a.path[1])).copied().unwrap_or(0);
+                let sb = per_system.get(&(b.path[0], b.path[1])).copied().unwrap_or(0);
                 let ga = per_galaxy.get(&a.path[0]).copied().unwrap_or(0);
                 let gb = per_galaxy.get(&b.path[0]).copied().unwrap_or(0);
-                v[*ia].cmp(&v[*ib]).then(gb.cmp(&ga)).then(b.path.cmp(&a.path))
+                sb.cmp(&sa).then(v[*ia].cmp(&v[*ib])).then(gb.cmp(&ga)).then(b.path.cmp(&a.path))
             })
-            .map(|(_, (w, _))| *w);
-        let Some(w) = best else { continue };
-        let Some((class, albedo, orbit)) = site_of(&w.heat, &w.burn) else { continue };
-        let Some(k) = rank.get(&w.path[0]).copied() else { continue };
-        let Some(i) = order.get(k).copied() else { continue };
-        let Some(j) = u.cores[i].satellites.iter().position(|s| s.path.get(1) == w.path.get(1)) else { continue };
-        spec.position = system_place(&galaxy_place(k), j);
-        spec.star = Some(class);
-        spec.albedo = Some(albedo);
-        spec.orbit = Some(orbit);
-        spec.composition = composition_of(u, &w.path);
-        spec.place = Some(w.path.clone());
-        claimed.insert(w.path.clone());
-        *per_galaxy.entry(w.path[0]).or_insert(0) += 1;
+            .map(|(_, s)| *s);
+        let Some(site) = best else { continue };
+        apply(spec, site);
+        claimed.insert(site.path.clone());
+        placed.insert(spec.civilization.sigil.clone(), site.path.clone());
+        *per_galaxy.entry(site.path[0]).or_insert(0) += 1;
+        *per_system.entry((site.path[0], site.path[1])).or_insert(0) += 1;
+    }
+    // The descendants, generation by generation: each settles nearest its
+    // parent's world.
+    loop {
+        let mut moved = false;
+        for spec in specs.iter_mut() {
+            if placed.contains_key(&spec.civilization.sigil) {
+                continue;
+            }
+            let Some(parent) = parent_of(spec).and_then(|p| placed.get(&p).cloned()) else { continue };
+            let free = sites.keys().filter(|p| !claimed.contains(*p));
+            let Some(path) = crate::places::nearest(&parent, free, &reach) else { continue };
+            let Some(site) = sites.get(&path) else { continue };
+            apply(spec, site);
+            claimed.insert(path.clone());
+            placed.insert(spec.civilization.sigil.clone(), path);
+            moved = true;
+        }
+        if !moved {
+            break;
+        }
     }
 }
 
