@@ -468,11 +468,15 @@ pub fn kick(motes: &mut [Mote], enc: &Enclosed, p: &Ratio, tide: Option<(&Ratio,
         // Spin cannot carry a mote through zero reach: a turning is a
         // magnitude in its plane; a kick past zero stops at the core.
         // THE BAND (the galaxy tier of the firmament's and `star_kick`'s
-        // grammar): the core pushes each kind out by its open share over its
-        // own weight, `q = push/w`, and its hold returns `½·δ(R)·ℓ`, so the
-        // continuum rests in a band about `R*`; the vacuum feels the same law
-        // on the throat's far face (`through`), the inversion carrying the push
-        // inward. Beyond the rim the vacuum stands outside this sphere.
+        // grammar): the core's bounce pushes each kind out, `q = push/w`
+        // (`push = p·w̄`, the dispersal law's, as at the founding and each
+        // arrival), and its hold returns `½·δ(R)·ℓ` (δ against what is enclosed
+        // at its reach), so the continuum rests in a band. The vacuum feels the
+        // same law reflected through the THROAT, which stands at the core's
+        // state, R = 1 (the enclosed law's base: throat 1, rim 2 in the
+        // enclosure's own units): `R → 2 − R` (`through`). Past the rim the
+        // vacuum stands outside this sphere.
+        let throat = ratio(1, 1);
         let band = match heart_push {
             Some(push) if !h.is_zero() => {
                 let q = push.clone() / weight(&x.key);
@@ -480,7 +484,7 @@ pub fn kick(motes: &mut [Mote], enc: &Enclosed, p: &Ratio, tide: Option<(&Ratio,
                 if !x.vacuum {
                     at(&r_o)
                 } else {
-                    let mirrored = through(&r_o, &h);
+                    let mirrored = through(&r_o, &throat);
                     if mirrored > ratio(0, 1) { -at(&mirrored) } else { ratio(0, 1) }
                 }
             }
@@ -888,7 +892,10 @@ pub fn chains(motes: &[Mote], h: &Ratio, p: &Ratio, total: &Ratio) -> Vec<Chain>
     // face, motes whose dispersal bands overlap, linked transitively.
     let mut fibres: std::collections::BTreeMap<(Vec<bool>, crate::chem::Kind), Vec<usize>> = std::collections::BTreeMap::new();
     for (i, x) in motes.iter().enumerate() {
-        if on_disc_leg(x) && !rr[i].is_zero() {
+        // Only the GAS gathers: a mote inside the throat (its spin within the
+        // core state's, ℓ ≤ 1: the throat at R = 1 about the state 1) is the
+        // core's own held matter, never a star's.
+        if on_disc_leg(x) && x.ell_o > ratio(1, 1) {
             fibres.entry(((0..PLANES).map(|k| frac(&x.phase[k]) < half).collect(), x.key.clone())).or_default().push(i);
         }
     }
