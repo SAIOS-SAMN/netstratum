@@ -37,6 +37,7 @@ impl World {
             warded: None,
             veiled: false,
             taxon: None,
+            land: None,
             region_seed: None,
             evolution_stage: 0,
             collapsed: None,
@@ -125,6 +126,7 @@ impl World {
             warded: committed.warded,
             veiled: committed.veiled,
             taxon: committed.taxon,
+            land: None,
             region_seed: committed.region_seed,
             evolution_stage: committed.evolution_stage,
             collapsed: committed.collapsed,
@@ -444,6 +446,15 @@ impl World {
     /// KERNEL-TAXON: the sealed taxon, if the deed has been done.
     pub fn taxon(&self) -> Option<(u8, u16)> {
         self.taxon
+    }
+    /// ERA 1'S LAND (docs/86): the heads this world's medium feeds wild, read
+    /// from the universe by the caller (each boot; never committed).
+    pub fn set_land(&mut self, wild: Ratio) {
+        self.land = Some(wild);
+    }
+    /// The land set by the caller, if this world stands on an era-1 world.
+    pub fn land(&self) -> Option<&Ratio> {
+        self.land.as_ref()
     }
     /// GALACTIC-1 — seal the world's regional resource-weighting seed
     /// (`dop::region_seed_of`, derived from the charted position outside

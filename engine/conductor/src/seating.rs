@@ -103,7 +103,13 @@ pub fn site_of(heat: &cfe::ratio::Ratio, burn: &cfe::ratio::Ratio) -> Option<(cf
     }
     let distance = |c: &C| { let d = c.luminosity() - burn.clone(); if d < ratio(0, 1) { -d } else { d } };
     let class = [C::O, C::B, C::A, C::F, C::G, C::K, C::M].into_iter().min_by(|a, b| distance(a).cmp(&distance(b)))?;
-    let orbit = cfe::thermal::thermal_k() * class.luminosity() / heat.clone();
+    // On the spin grain (design law 8): the era-0 thermal machinery reads
+    // this orbit every tick, and the exact quotient carried the heat's
+    // eighty-digit terms into every product.
+    let orbit = crate::ring::grain(&(cfe::thermal::thermal_k() * class.luminosity() / heat.clone()));
+    if orbit <= ratio(0, 1) {
+        return None;
+    }
     Some((class, ratio(0, 1), orbit))
 }
 
@@ -124,16 +130,31 @@ pub struct Site {
     pub albedo: Ratio,
     pub orbit: Ratio,
     pub composition: Option<Vec<(u16, Ratio)>>,
+    /// Its land: the heads each medium it carries feeds wild (`life::wild`).
+    pub wild: std::collections::BTreeMap<&'static str, Ratio>,
 }
 
-/// Every era-1 world a line can stand on, by path.
+impl Site {
+    /// The heads its land feeds wild for a people of `metabolism`: its
+    /// medium's (none where the world does not carry it).
+    pub fn wild_for(&self, metabolism: &str) -> Ratio {
+        crate::life::medium_of(metabolism).and_then(|m| self.wild.get(m)).cloned().unwrap_or_else(|| ratio(0, 1))
+    }
+}
+
+/// Every era-1 world a line can stand on, by path, with its land.
 pub fn sites(u: &Universe, worlds: &std::collections::BTreeMap<Vec<u64>, crate::life::World>) -> std::collections::BTreeMap<Vec<u64>, Site> {
+    let all: Vec<crate::life::World> = worlds.values().cloned().collect();
+    let reference = crate::life::reference_pressure(&all);
+    let home = crate::life::home_heat(u).unwrap_or_else(|| ratio(0, 1));
     worlds
         .values()
         .filter_map(|w| {
             let (star, albedo, orbit) = site_of(&w.heat, &w.burn)?;
             let position = place_of(u, &w.path)?;
-            Some((w.path.clone(), Site { path: w.path.clone(), position, star, albedo, orbit, composition: composition_of(u, &w.path) }))
+            let compression = w.pressure.clone() / reference.clone();
+            let wild = ["chemical", "geologic", "plasmic"].into_iter().map(|m| (m, crate::life::wild(w, &compression, m, &home))).collect();
+            Some((w.path.clone(), Site { path: w.path.clone(), position, star, albedo, orbit, composition: composition_of(u, &w.path), wild }))
         })
         .collect()
 }
@@ -154,12 +175,14 @@ pub fn apply(spec: &mut PolitySpec, site: &Site) {
     spec.orbit = Some(site.orbit.clone());
     spec.composition = site.composition.clone();
     spec.place = Some(site.path.clone());
+    spec.wild = Some(site.wild_for(&spec.civilization.metabolism));
 }
 
-/// THE SEATING: a lineage's head takes a world in the system the fewest heads
-/// hold, the one it is most viable on there, the galaxies taken in turn; a line descended from a seated line SETTLES the
-/// free world nearest its parent's (`places::nearest`: its parent's own
-/// system first, then its parent's galaxy by reach), so a lineage spreads
+/// THE SEATING: a lineage's head takes a world its land feeds (docs/86), in
+/// the system the fewest heads hold, the one feeding most of its people there, the galaxies taken in turn; a line descended from a seated line SETTLES the
+/// free world nearest its parent's that its land feeds, else the nearest
+/// free world (`places::nearest`: its parent's own system first, then its
+/// parent's galaxy by reach), so a lineage spreads
 /// through its own system before beyond it. A line whose parent is unseated
 /// is seated as a head.
 pub fn seat(u: &Universe, worlds: &std::collections::BTreeMap<Vec<u64>, crate::life::World>, specs: &mut [PolitySpec]) {
@@ -169,7 +192,9 @@ pub fn seat(u: &Universe, worlds: &std::collections::BTreeMap<Vec<u64>, crate::l
     let mut per_galaxy: std::collections::BTreeMap<u64, usize> = std::collections::BTreeMap::new();
     let mut per_system: std::collections::BTreeMap<(u64, u64), usize> = std::collections::BTreeMap::new();
     let sited: Vec<&Site> = sites.values().collect();
-    let mut viability: std::collections::BTreeMap<(String, String), Vec<cfe::ratio::Ratio>> = std::collections::BTreeMap::new();
+    // A head's viability on a world is its land: the heads its own medium
+    // feeds wild there (docs/86).
+    let mut viability: std::collections::BTreeMap<String, Vec<cfe::ratio::Ratio>> = std::collections::BTreeMap::new();
     let parent_of = |spec: &PolitySpec| spec.civilization.lineage.first().cloned();
     let sigils: std::collections::BTreeSet<String> = specs.iter().map(|s| s.civilization.sigil.clone()).collect();
     let mut placed: std::collections::BTreeMap<String, Vec<u64>> = std::collections::BTreeMap::new();
@@ -178,19 +203,19 @@ pub fn seat(u: &Universe, worlds: &std::collections::BTreeMap<Vec<u64>, crate::l
         if parent_of(spec).is_some_and(|p| sigils.contains(&p)) {
             continue;
         }
-        let key = (spec.civilization.clade.clone(), spec.civilization.metabolism.clone());
-        let civ = spec.civilization.clone();
-        let v = viability.entry(key).or_insert_with(|| sited.iter().map(|s| crate::siting::viability_at(&civ, s.star, &s.albedo, &s.orbit)).collect());
+        let metabolism = spec.civilization.metabolism.clone();
+        let v = viability.entry(metabolism.clone()).or_insert_with(|| sited.iter().map(|s| s.wild_for(&metabolism)).collect());
         let best = sited
             .iter()
             .enumerate()
             .filter(|(_, s)| !claimed.contains(&s.path))
             .max_by(|(ia, a), (ib, b)| {
+                let zero = ratio(0, 1);
                 let sa = per_system.get(&(a.path[0], a.path[1])).copied().unwrap_or(0);
                 let sb = per_system.get(&(b.path[0], b.path[1])).copied().unwrap_or(0);
                 let ga = per_galaxy.get(&a.path[0]).copied().unwrap_or(0);
                 let gb = per_galaxy.get(&b.path[0]).copied().unwrap_or(0);
-                sb.cmp(&sa).then(v[*ia].cmp(&v[*ib])).then(gb.cmp(&ga)).then(b.path.cmp(&a.path))
+                (v[*ia] > zero).cmp(&(v[*ib] > zero)).then(sb.cmp(&sa)).then(v[*ia].cmp(&v[*ib])).then(gb.cmp(&ga)).then(b.path.cmp(&a.path))
             })
             .map(|(_, s)| *s);
         let Some(site) = best else { continue };
@@ -209,8 +234,15 @@ pub fn seat(u: &Universe, worlds: &std::collections::BTreeMap<Vec<u64>, crate::l
                 continue;
             }
             let Some(parent) = parent_of(spec).and_then(|p| placed.get(&p).cloned()) else { continue };
-            let free = sites.keys().filter(|p| !claimed.contains(*p));
-            let Some(path) = crate::places::nearest(&parent, free, &reach) else { continue };
+            // A settler takes the nearest free world its land feeds, else the
+            // nearest free world.
+            let metabolism = spec.civilization.metabolism.clone();
+            let found = {
+                let (taken, metabolism) = (&claimed, &metabolism);
+                let free = |livable: bool| sites.iter().filter(move |(p, s)| !taken.contains(*p) && (!livable || s.wild_for(metabolism) > ratio(0, 1))).map(|(p, _)| p);
+                crate::places::nearest(&parent, free(true), &reach).or_else(|| crate::places::nearest(&parent, free(false), &reach))
+            };
+            let Some(path) = found else { continue };
             let Some(site) = sites.get(&path) else { continue };
             apply(spec, site);
             claimed.insert(path.clone());

@@ -68,15 +68,19 @@ pub fn found(u: &Universe, seed: &[u8; 32], w: &Waking, registry: &Registry, wor
         gauge: None,
         composition: None,
         place: Some(w.path.clone()),
+        wild: None,
     };
-    // Its own world's era-1 siting (the refactor onto era 1's physics).
+    // Its own world's era-1 siting (the refactor onto era 1's physics),
+    // its land among it (`seating::apply`).
     let mut spec = spec;
-    if let Some((class, albedo, orbit)) = world.and_then(|x| crate::seating::site_of(&x.heat, &x.burn)) {
+    if let Some(site) = crate::places::site(&w.path) {
+        crate::seating::apply(&mut spec, &site);
+    } else if let Some((class, albedo, orbit)) = world.and_then(|x| crate::seating::site_of(&x.heat, &x.burn)) {
         spec.star = Some(class);
         spec.albedo = Some(albedo);
         spec.orbit = Some(orbit);
+        spec.composition = crate::seating::composition_of(u, &w.path);
     }
-    spec.composition = crate::seating::composition_of(u, &w.path);
     let seat = ledger::registry::Seat { world: world_name, planet: spec.planet.clone(), colony: spec.colony.clone(), position, policy: spec.policy.describe().to_string() };
     let _ = registry.write_founded_at(&sigil, &seat);
     Some(spec)

@@ -324,6 +324,12 @@ impl World {
     /// flow. A genesis band subsists on exactly this — gatherers on the wild
     /// baseline — and it is the floor the ambient ration stock recovers to.
     pub fn syntropic_flow(&self, orb: u64) -> Ratio {
+        // ERA 1'S LAND (docs/86): on a world standing on an era-1 world, the
+        // wild flow is the heads its own medium feeds untended, each drawing
+        // its ration; the founding orb is that world.
+        if let (Some(wild), true) = (self.land.as_ref(), orb == super::FIRST_ORB) {
+            return wild.clone() * self.per_capita_ration();
+        }
         // A quarter of the potential is the untended wild yield; the other
         // three-quarters is unlocked only by cultivation (operator ruling
         // 2026-08-15). The marginal habitable band already reads a quarter

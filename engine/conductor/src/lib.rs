@@ -931,6 +931,9 @@ pub struct PolitySpec {
     /// its core, its bulge and its distance are read (`places`); None: a line
     /// on no era-1 world, read on the era-0 box.
     pub place: Option<Vec<u64>>,
+    /// ERA 1'S LAND (docs/86): the heads its world's medium feeds wild
+    /// (`life::wild`), set on its world each boot; None on no era-1 world.
+    pub wild: Option<Ratio>,
 }
 
 /// One live polity world: the sim, its contained actor, its research rung.
@@ -1741,6 +1744,9 @@ impl Polity {
                     // first seal); a violating arbor waits penned —
                     // writes never land on a refused chain.
                     let mut world = world;
+                    if let Some(wild) = &spec.wild {
+                        world.set_land(wild.clone());
+                    }
                     // N-I10 — the SIBLING is the second cognitive vessel; a world
                     // founded before N-I10 lacks it, so register it on resume.
                     let sibling = sibling0
@@ -2003,9 +2009,16 @@ impl Polity {
         // is built (`population_ceiling`, the syntropic flow over the ration),
         // never more than FOUNDING_BAND and never less than one: a band does
         // arrive, and what follows is the physics'.
+        if let Some(wild) = &spec.wild {
+            world.set_land(wild.clone());
+        }
         let band = founding_band(&world);
         world.settle_population(cfe::world::FIRST_ORB, band);
-        eprintln!("genesis {}: a founding band of {band} settles", spec.civilization.sigil);
+        eprintln!(
+            "genesis {}: a founding band of {band} settles{}",
+            spec.civilization.sigil,
+            spec.wild.as_ref().map(|w| format!(" (its land feeds {} wild)", w.floor())).unwrap_or_default()
+        );
         let world_name_for_level = spec.world_name.clone();
         Polity {
             chained: 0,
@@ -4979,6 +4992,7 @@ impl Polity {
             gauge: Some(cfe::world::wrap_gauge(origin_key - delta)),
             composition: None,
             place: None,
+            wild: None,
         };
         // THE SEAT, recorded once beside the card: the boot roster reads it,
         // so a restart resumes this branch in the world it was founded in,
@@ -6912,6 +6926,7 @@ pub fn incursion(
         gauge: None,
         composition: None,
         place: None,
+        wild: None,
     };
     let polity = Polity::genesis(spec, registry, book);
     // The door receipts on the universe ledger (ledger-side, the

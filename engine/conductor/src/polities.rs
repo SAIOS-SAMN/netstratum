@@ -115,6 +115,7 @@ fn seat(
         gauge: None,
         composition: None,
         place: None,
+        wild: None,
     }
 }
 
@@ -438,6 +439,7 @@ pub fn registered_polities(registry: &ledger::registry::Registry) -> Vec<PolityS
                 gauge: None,
                 composition: None,
                 place: None,
+                wild: None,
             });
             continue;
         }
@@ -463,6 +465,7 @@ pub fn registered_polities(registry: &ledger::registry::Registry) -> Vec<PolityS
             gauge: None,
             composition: None,
             place: None,
+            wild: None,
         });
     }
     grown

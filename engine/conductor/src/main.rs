@@ -625,7 +625,7 @@ fn main() {
             // nearest its parent's.
             let parent = spec.civilization.lineage.first().cloned().unwrap_or_default();
             let near = worlds.iter().find(|p| p.spec.civilization.sigil == parent).and_then(|p| p.spec.place.clone());
-            if let Some(site) = near.as_deref().and_then(conductor::places::settle) {
+            if let Some(site) = near.as_deref().and_then(|p| conductor::places::settle(p, &spec.civilization.metabolism)) {
                 conductor::seating::apply(&mut spec, &site);
             }
             println!(

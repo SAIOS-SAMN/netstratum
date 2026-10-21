@@ -16,7 +16,8 @@
 //! - **A settler's world** (stage 6): a line cleaved from a line on an era-1
 //!   world settles the free world nearest its parent's (`nearest`): its
 //!   parent's own system first, then its parent's galaxy, the system whose
-//!   reach is nearest its parent's first. A galaxy with no free world leaves
+//!   reach is nearest its parent's first; a world its land feeds before one
+//!   it does not (docs/86). A galaxy with no free world leaves
 //!   the settler where its cleave put it.
 //!
 //! The reading is taken whenever the universe or the seating changes
@@ -89,6 +90,11 @@ pub fn set(u: &Universe, book: &ledger::Ledger) {
     }
 }
 
+/// The site of the world at `path`, if a line can stand on it.
+pub fn site(path: &[u64]) -> Option<crate::seating::Site> {
+    with(|p| p.sites.get(path).cloned())
+}
+
 /// A line stands on the world at `path`.
 pub fn claim(path: &[u64]) {
     if let Ok(mut g) = now().lock() {
@@ -104,11 +110,15 @@ pub fn claimed(path: &[u64]) -> bool {
 }
 
 /// THE NEAREST FREE WORLD to a parent's at `parent`: in its own system
-/// first, then in its galaxy by the nearest reach to its own system's, then
-/// by path. None when its galaxy has no free world.
+/// first, then in its galaxy by the nearest reach to its own system's (to
+/// the core's, where the breath re-anchored its system), then by path. None
+/// when its galaxy has no free world.
 pub fn nearest<'a>(parent: &[u64], free: impl Iterator<Item = &'a Vec<u64>>, reach: &BTreeMap<(u64, u64), Ratio>) -> Option<Vec<u64>> {
     let (&g, &s) = (parent.first()?, parent.get(1)?);
-    let home = reach.get(&(g, s))?;
+    // A parent whose system the breath has since re-anchored stands, for
+    // the reading, at its galaxy's core: the systems nearest the core first.
+    let zero = ratio(0, 1);
+    let home = reach.get(&(g, s)).unwrap_or(&zero);
     free.filter(|p| p.first() == Some(&g) && p.len() > 1)
         .filter_map(|p| {
             let r = reach.get(&(g, p[1]))?;
@@ -119,13 +129,17 @@ pub fn nearest<'a>(parent: &[u64], free: impl Iterator<Item = &'a Vec<u64>>, rea
         .map(|(_, p)| p)
 }
 
-/// A settler from the line at `parent` takes the free world nearest it,
-/// claimed.
-pub fn settle(parent: &[u64]) -> Option<crate::seating::Site> {
+/// A settler of `metabolism` from the line at `parent` takes the free world
+/// nearest it that its land feeds, else the nearest free world, claimed.
+pub fn settle(parent: &[u64], metabolism: &str) -> Option<crate::seating::Site> {
     let mut g = now().lock().ok()?;
     let p = g.as_mut()?;
     let reach: BTreeMap<(u64, u64), Ratio> = p.systems.iter().map(|(k, (_, d))| (*k, d.clone())).collect();
-    let path = nearest(parent, p.sites.keys().filter(|k| !p.claimed.contains(*k)), &reach)?;
+    let path = {
+        let (sites, claimed) = (&p.sites, &p.claimed);
+        let free = |livable: bool| sites.iter().filter(move |(k, s)| !claimed.contains(*k) && (!livable || s.wild_for(metabolism) > ratio(0, 1))).map(|(k, _)| k);
+        nearest(parent, free(true), &reach).or_else(|| nearest(parent, free(false), &reach))?
+    };
     let site = p.sites.get(&path)?.clone();
     p.claimed.insert(path);
     Some(site)
@@ -183,5 +197,7 @@ mod tests {
         assert_eq!(super::nearest(&[21, 7, 1], free.iter(), &reach), Some(vec![21, 7, 3]));
         assert_eq!(super::nearest(&[21, 7, 1], free[..3].iter(), &reach), Some(vec![21, 8, 0]));
         assert_eq!(super::nearest(&[21, 7, 1], free[2..3].iter(), &reach), None);
+        // A parent whose system is gone reads from its galaxy's core.
+        assert_eq!(super::nearest(&[21, 4, 1], free[..3].iter(), &reach), Some(vec![21, 8, 0]));
     }
 }

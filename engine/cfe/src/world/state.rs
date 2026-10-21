@@ -378,6 +378,10 @@ pub struct World {
     pub(super) veiled: bool,
     /// KERNEL-TAXON: the sealed taxon (replay of the receipt).
     pub(super) taxon: Option<(u8, u16)>,
+    /// ERA 1'S LAND (docs/86): the heads the world's own medium feeds wild,
+    /// read from the universe by the caller each boot (`set_land`); never
+    /// committed. None on a world with no era-1 world under it.
+    pub(super) land: Option<Ratio>,
     /// GALACTIC-1 (tag 187): the regional resource-weighting seed, sealed
     /// once at genesis from the world's charted position (replay of the
     /// receipt). `None` for a world that never charted a region — every
