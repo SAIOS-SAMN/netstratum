@@ -114,6 +114,7 @@ fn seat(
         orbit: siting.map(|(_, _, orbit)| orbit),
         gauge: None,
         composition: None,
+        place: None,
     }
 }
 
@@ -443,6 +444,7 @@ pub fn registered_polities(registry: &ledger::registry::Registry) -> Vec<PolityS
                 orbit: None,
                 gauge: None,
                 composition: None,
+                place: None,
             });
             continue;
         }
@@ -467,6 +469,7 @@ pub fn registered_polities(registry: &ledger::registry::Registry) -> Vec<PolityS
             orbit: None,
             gauge: None,
             composition: None,
+            place: None,
         });
     }
     grown

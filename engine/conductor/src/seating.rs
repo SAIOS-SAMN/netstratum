@@ -72,6 +72,12 @@ pub fn periods(u: &Universe) -> std::collections::BTreeMap<Place, cfe::ratio::Ra
     out
 }
 
+/// The ledger core charted for the k-th galaxy by distance (`chart`).
+pub fn charted_core(book: &Ledger, k: usize) -> Option<String> {
+    let p = galaxy_place(k);
+    book.core_of(&(p.0, p.1, p.2))
+}
+
 /// Chart the pulse's cores as galaxies on the universe ledger, once (the
 /// first charters the founding galaxy at the origin; each next stands past
 /// every reach, so each is created).
@@ -140,6 +146,7 @@ pub fn seat(u: &Universe, worlds: &std::collections::BTreeMap<Vec<u64>, crate::l
         spec.albedo = Some(albedo);
         spec.orbit = Some(orbit);
         spec.composition = composition_of(u, &w.path);
+        spec.place = Some(w.path.clone());
         claimed.insert(w.path.clone());
         *per_galaxy.entry(w.path[0]).or_insert(0) += 1;
     }

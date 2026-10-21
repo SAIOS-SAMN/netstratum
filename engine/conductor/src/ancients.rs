@@ -46,6 +46,21 @@ pub fn in_bulge(position: &(Ratio, Ratio, Ratio), centre: &(Ratio, Ratio, Ratio)
     ledger::torus_distance(position, centre, span) < ratio(1, 1)
 }
 
+/// A line's core: its galaxy's for a line on an era-1 world (`places`), the
+/// box's nearest otherwise.
+pub(crate) fn line_core(p: &Polity, book: &Ledger) -> Option<String> {
+    p.spec.place.as_deref().and_then(crate::places::core_of).or_else(|| book.core_of(&p.spec.position))
+}
+
+/// Whether a line stands in its core's bulge: read from the universe for a
+/// line on an era-1 world (`places`), from the box otherwise.
+pub(crate) fn line_in_bulge(p: &Polity, centre: &(Ratio, Ratio, Ratio), span: &Ratio) -> bool {
+    match p.spec.place.as_deref().and_then(crate::places::in_bulge) {
+        Some(b) => b,
+        None => in_bulge(&p.spec.position, centre, span),
+    }
+}
+
 /// The root of a line's lineage: its first parent followed to the end.
 pub(crate) fn root_of(sigil: &str, parents: &BTreeMap<String, Vec<String>>) -> String {
     let mut at = sigil.to_string();
@@ -101,7 +116,9 @@ pub fn keepers_with(worlds: &[Polity], book: &Ledger, registry: &Registry, envoy
 /// change within a step, and each reading measures exact-rational distances to
 /// every core, so the contest reads this list instead of measuring again.
 pub(crate) fn cores_of(worlds: &[Polity], book: &Ledger) -> Vec<Option<String>> {
-    worlds.iter().map(|p| if p.penned { None } else { book.core_of(&p.spec.position) }).collect()
+    // A line on an era-1 world is its galaxy's (`places`); one on none keeps
+    // the box's nearest core.
+    worlds.iter().map(|p| if p.penned { None } else { line_core(p, book) }).collect()
 }
 
 /// G3 at one core, with the envoys `(line sigil, core)` given; `cores` is
@@ -126,8 +143,17 @@ pub(crate) fn keeper_at(
         let entry = groups.entry(root_of(sigil, parents)).or_insert_with(|| (0, 0, Vec::new()));
         entry.0 += polity.world.orbs().len() as u64;
         entry.1 += polity.world.population_of(cfe::world::FIRST_ORB);
-        if in_bulge(&polity.spec.position, centre, &span) {
-            entry.2.push((ledger::torus_distance(&polity.spec.position, centre, &span), sigil.clone()));
+        // In the bulge, and how near: from the universe for a line on an
+        // era-1 world (`places`), from the box otherwise.
+        let era1 = polity.spec.place.as_deref().and_then(|p| crate::places::in_bulge(p).zip(crate::places::distance(p)));
+        match era1 {
+            Some((true, d)) => entry.2.push((d, sigil.clone())),
+            Some((false, _)) => {}
+            None => {
+                if in_bulge(&polity.spec.position, centre, &span) {
+                    entry.2.push((ledger::torus_distance(&polity.spec.position, centre, &span), sigil.clone()));
+                }
+            }
         }
     }
     let mut counted: Vec<&str> = Vec::new();
@@ -302,11 +328,11 @@ pub fn step(
         }
         let living: Vec<&Polity> = worlds
             .iter()
-            .filter(|p| !p.penned && book.core_of(&p.spec.position).as_deref() == Some(core.as_str()))
+            .filter(|p| !p.penned && line_core(p, book).as_deref() == Some(core.as_str()))
             .collect();
         // BY BIRTH: the bulge's first mind and every line that woke within one
         // assembly time of it (a line's clock is its age).
-        let bulge: Vec<&&Polity> = living.iter().filter(|p| in_bulge(&p.spec.position, &galaxy.center, &span)).collect();
+        let bulge: Vec<&&Polity> = living.iter().filter(|p| line_in_bulge(p, &galaxy.center, &span)).collect();
         let first = bulge.iter().map(|p| p.world.now()).max();
         let mut born: Vec<&&Polity> = bulge
             .iter()

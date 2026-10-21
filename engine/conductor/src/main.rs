@@ -83,6 +83,8 @@ fn main() {
     // Motion (era 1): each system's galactic period, which its lines' orbits
     // read; refreshed when the breath changes the universe.
     let mut system_periods = conductor::seating::periods(&universe);
+    // Where each seated line's world stands: its core and bulge (`places`).
+    conductor::places::set(&universe, &book);
     // LIFE (docs/82 step 3b): every world's climb is state, advanced by the
     // system's activity at its own coupling's recoherences; its reading is
     // refreshed when the universe changes. A mind wakes when its climb is
@@ -404,6 +406,7 @@ fn main() {
         if !events.is_empty() && beat >= readings_at + t_u_bells {
             life_readings = conductor::profile::timed("life:read", || conductor::life::readings(&universe, &pulse_seed));
             system_periods = conductor::seating::periods(&universe);
+            conductor::places::set(&universe, &book);
             readings_at = beat;
         }
         let (woke, measured) = conductor::profile::timed("life:climb", || conductor::life::advance(&life_readings, &mut climbs, t_u_bells, beat));

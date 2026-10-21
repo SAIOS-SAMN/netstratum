@@ -90,6 +90,7 @@ pub mod breath;
 pub mod ring;
 pub mod compound;
 pub mod enfold;
+pub mod places;
 pub mod enclosure;
 pub mod formation;
 pub mod ocean;
@@ -925,6 +926,10 @@ pub struct PolitySpec {
     /// ERA 1: the planet composition, grains by Z, sealed into the world at
     /// founding (tag 198); its veins are drawn from it. None: era 0's draws.
     pub composition: Option<Vec<(u16, Ratio)>>,
+    /// ERA 1: the world it stands on (`[galaxy, star, world]`), from which
+    /// its core, its bulge and its distance are read (`places`); None: a line
+    /// on no era-1 world, read on the era-0 box.
+    pub place: Option<Vec<u64>>,
 }
 
 /// One live polity world: the sim, its contained actor, its research rung.
@@ -4963,6 +4968,7 @@ impl Polity {
             // The opposite phase of the cleave (11 §3), wrapped.
             gauge: Some(cfe::world::wrap_gauge(origin_key - delta)),
             composition: None,
+            place: None,
         };
         // THE SEAT, recorded once beside the card: the boot roster reads it,
         // so a restart resumes this branch in the world it was founded in,
@@ -6895,6 +6901,7 @@ pub fn incursion(
         orbit: None,
         gauge: None,
         composition: None,
+        place: None,
     };
     let polity = Polity::genesis(spec, registry, book);
     // The door receipts on the universe ledger (ledger-side, the
