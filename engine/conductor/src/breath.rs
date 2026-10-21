@@ -881,7 +881,11 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // at loop phase ½): the inbound leg (the axis, for the vacuum)
             // delivers it to the throat.
             let loop_was: Vec<(usize, Ratio)> = core.flows.iter().enumerate().filter(|(_, x)| x.vacuum && x.phase.len() > 1).map(|(j, x)| (j, x.phase[1].clone())).collect();
-            let (given, absorbed) = crate::flows::kick(&mut core.flows, enc.as_ref().unwrap_or(&throat), &p, tide, &ledger_unit, &mut cross);
+            // (The galaxy tier's band, a push and return like the firmament's
+            // and the star's, is owed: in the flows' units the deficit-½
+            // surface R = H is the rim where `exits` acts, the throat stands at
+            // the core's state, and the band must be read against that.)
+            let (given, absorbed) = crate::flows::kick(&mut core.flows, enc.as_ref().unwrap_or(&throat), &p, tide, &ledger_unit, None, &mut cross);
             core.reservoir -= given;
             // RECYCLING (`crate::recycle`; xylarium 11.0 (18)): AFTER the
             // kicks (kicks are motion, recycling the residue), the bounce the

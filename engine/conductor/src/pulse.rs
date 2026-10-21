@@ -751,7 +751,8 @@ pub fn orbit_galaxies(u: &mut Universe) -> crate::enfold::Cross {
         let enc = crate::flows::Enclosed::new(ratio(1, 1), u.firmament.iter().map(|x| (x.ell_o.clone(), held(x))).collect());
         // The firmament stands in the source's own enclosure: it feels the
         // pulse at its own reach (`flows::turn`, no tide).
-        let _ = crate::flows::kick(&mut u.firmament, &enc, &ratio(1, 2), None, &whole, &mut cross);
+        // Its hold-return is read below, at the universe tier.
+        let _ = crate::flows::kick(&mut u.firmament, &enc, &ratio(1, 2), None, &whole, None, &mut cross);
         // THE MISSING ANTIPOLE (operator 2026-10-19: "so we having missing
         // physics at the antipoles?"; with xylarium, the star's hold-return
         // one tier up): the singularity's HOLD draws each mote back by

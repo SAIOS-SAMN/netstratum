@@ -429,7 +429,8 @@ pub fn turn(phase: &mut [Ratio], r_o: &Ratio, h: &Ratio, p: &Ratio, tide: Option
 /// the core's reservoir gives (Σ m·Δℓ, to be taken from it), and the pulse
 /// the matter ABSORBED (Σ m·|Δℓ|, unsigned: each hemisphere's kick alike;
 /// with xylarium), what the recycling budget is read against.
-pub fn kick(motes: &mut [Mote], enc: &Enclosed, p: &Ratio, tide: Option<(&Ratio, &Ratio)>, total: &Ratio, cross: &mut crate::enfold::Cross) -> (Ratio, Ratio) {
+#[allow(clippy::too_many_arguments)]
+pub fn kick(motes: &mut [Mote], enc: &Enclosed, p: &Ratio, tide: Option<(&Ratio, &Ratio)>, total: &Ratio, heart_push: Option<&Ratio>, cross: &mut crate::enfold::Cross) -> (Ratio, Ratio) {
     let mut given = ratio(0, 1);
     let mut absorbed = ratio(0, 1);
     for x in motes.iter_mut() {
@@ -466,7 +467,37 @@ pub fn kick(motes: &mut [Mote], enc: &Enclosed, p: &Ratio, tide: Option<(&Ratio,
         x.agitation = crate::ring::grain(&((x.agitation.clone() + heat) * keep.clone() * keep + scar));
         // Spin cannot carry a mote through zero reach: a turning is a
         // magnitude in its plane; a kick past zero stops at the core.
-        let new_o = crate::ring::grain(&(x.ell_o.clone() + dl_o)).max(ratio(0, 1));
+        // THE BAND (the galaxy tier of the firmament's and `star_kick`'s
+        // grammar): the core pushes each kind out by its open share over its
+        // own weight, `q = push/w`, and its hold returns `½·δ(R)·ℓ`, so the
+        // continuum rests in a band about `R*`; the vacuum feels the same law
+        // on the throat's far face (`through`), the inversion carrying the push
+        // inward. Beyond the rim the vacuum stands outside this sphere.
+        let band = match heart_push {
+            Some(push) if !h.is_zero() => {
+                let q = push.clone() / weight(&x.key);
+                let at = |reach: &Ratio| q.clone() - ratio(1, 2) * (h.clone() / (reach.clone() + h.clone())) * reach.clone() * h.clone();
+                if !x.vacuum {
+                    at(&r_o)
+                } else {
+                    let mirrored = through(&r_o, &h);
+                    if mirrored > ratio(0, 1) { -at(&mirrored) } else { ratio(0, 1) }
+                }
+            }
+            _ => ratio(0, 1),
+        };
+        // A kick past the centre carries the mote THROUGH it to the antipode
+        // (its orbit's phase on half a turn), never piled at zero.
+        let raw = x.ell_o.clone() + dl_o + band;
+        let new_o = if raw < ratio(0, 1) {
+            if let Some(ph) = x.phase.get_mut(0) {
+                let t = ph.clone() + ratio(1, 2);
+                *ph = t.clone() - t.floor();
+            }
+            crate::ring::grain(&(-raw))
+        } else {
+            crate::ring::grain(&raw)
+        };
         let dl = new_o.clone() - x.ell_o.clone();
         absorbed += m.clone() * if dl < ratio(0, 1) { -dl.clone() } else { dl.clone() };
         given += m * dl;
@@ -567,14 +598,11 @@ pub fn shear(motes: &mut [Mote], enc: &Enclosed, total: &Ratio) -> Ratio {
     moved
 }
 
-/// WHERE A RELEASED KIND COMES TO REST under its system's own law (the
-/// star's kick, `star_kick`): pushed out by `q = push/w` each echo, returned
-/// by the star's hold `½·δ(R)·ℓ`, `δ = H/(R + H)`, `ℓ = R·H` (system units, H
-/// the star's hold). They balance where `R·H² = 2q·(R + H)`, so
-/// `R* = 2qH/(H² − 2q)` and `ℓ* = R*·H`. Where `2q ≥ H²` the push beats the
-/// hold at every reach: the kind has no rest and stands at the rim
-/// (`ℓ = H²`, `R = H`), where it crosses out by the exit law. None where the
-/// star holds nothing.
+/// WHERE A KIND COMES TO REST under its enclosure's push and return (the
+/// grammar of `star_kick` and the firmament's hold-return): pushed out by
+/// `q = push/w`, returned by `½·δ(R)·ℓ`, `δ = H/(R + H)`, `ℓ = R·H`. They
+/// balance where `R·H² = 2q·(R + H)`: `R* = 2qH/(H² − 2q)`. None where the
+/// push beats the hold at every reach (`2q ≥ H²`: no rest) or nothing holds.
 pub fn rest(w: &Ratio, push: &Ratio, h: &Ratio) -> Option<Ratio> {
     if h.is_zero() || w.is_zero() {
         return None;
@@ -582,19 +610,46 @@ pub fn rest(w: &Ratio, push: &Ratio, h: &Ratio) -> Option<Ratio> {
     let q2 = ratio(2, 1) * push.clone() / w.clone();
     let hh = h.clone() * h.clone();
     if q2 >= hh {
-        return Some(hh);
+        return None;
     }
-    Some(q2.clone() * h.clone() / (hh - q2) * h.clone())
+    Some(q2.clone() * h.clone() / (hh - q2))
+}
+
+/// THE THROAT'S INVERSION on the sphere (operator 2026-10-21: "you are
+/// flattening the second double inversion"): with the polar angle `θ =
+/// 90°·R/H` (the throat at 90°, where δ = ½; the rim at 180°), inverting
+/// through the throat reflects `θ → 180° − θ`, so `R → 2H − R`: the core and
+/// the rim change places, the throat stands. Linear, exact, no square.
+pub fn through(r: &Ratio, h: &Ratio) -> Ratio {
+    ratio(2, 1) * h.clone() - r.clone()
+}
+
+/// A RELEASED kind's place (the double inversion, docs/85 §10): the heart's
+/// cut released it through the heart's throat, which is its star's throat in
+/// the system, so it stands on that throat's FAR face. Its rest under the
+/// system's push and return is read there: at `R*` where that lies outside
+/// (`R* ≥ H`), at the reflection `2H − R*` where the rest falls inside. A
+/// kind the push carries past every hold stands at the rim (`R = 2H`) and
+/// leaves. Returns its spin `ℓ = R·H`.
+pub fn released(w: &Ratio, push: &Ratio, h: &Ratio) -> Option<Ratio> {
+    if h.is_zero() {
+        return None;
+    }
+    let r = match rest(w, push, h) {
+        Some(r) if r >= *h => r,
+        Some(r) => through(&r, h),
+        None => ratio(2, 1) * h.clone(),
+    };
+    Some(r * h.clone())
 }
 
 /// THE SPRAY (with xylarium; the founding epoch one tier down): matter a
 /// heart throws out (an outburst, or the kinds a new star's heart releases)
 /// leaves over directions, each kind at its own capture phase, `Z·p` with p
 /// the star's own push share (the founding's ½ one tier up), `½ + Z·p` on the
-/// loop; and each kind stands where its system's own law brings it to rest
-/// (`rest`), by its own weight, never one shared reach: a heavy kind deep, a
-/// light one far out, and only a kind the push carries past every hold
-/// leaves at the rim.
+/// loop; and each kind stands where its system's own law brings it to rest,
+/// read on the far face of the throat it was released through (`released`),
+/// by its own weight, never one shared reach.
 pub fn spray(released: &Manifest, h: &Ratio, base: &[Ratio], agitation: &Ratio, born: u64, push: &Ratio) -> Vec<Mote> {
     let at = |k: usize| base.get(k).cloned().unwrap_or_else(|| ratio(0, 1));
     released
@@ -605,7 +660,7 @@ pub fn spray(released: &Manifest, h: &Ratio, base: &[Ratio], agitation: &Ratio, 
             // so the kinds leave over the whole turn, never two antipodes.
             let z = ratio(i64::from(crate::chem::charge(k)), 1) * push.clone();
             let phase = vec![crate::ring::grain(&frac(&(at(0) + z.clone()))), crate::ring::grain(&frac(&(at(1) + ratio(1, 2) + z)))];
-            let ell_o = rest(&weight(k), push, h).map(|l| crate::ring::grain(&l)).unwrap_or_else(|| ratio(0, 1));
+            let ell_o = crate::flows::released(&weight(k), push, h).map(|l| crate::ring::grain(&l)).unwrap_or_else(|| ratio(0, 1));
             Mote { key: k.clone(), amount: a.clone(), ell_o, ell_c: ratio(0, 1), phase, agitation: crate::ring::grain(agitation), born, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1) }
         })
         .collect()
@@ -1174,20 +1229,23 @@ mod passage_tests {
 
     #[test]
     fn a_released_kind_rests_where_the_stars_push_meets_its_hold() {
-        use super::rest;
+        use super::{released, rest, through};
         // H = 1, push ½: a kind of weight 4 has q = 1/8, 2q = 1/4 < 1, so
-        // R* = 2qH/(H² − 2q) = (1/4)/(3/4) = 1/3, and ℓ* = R*·H = 1/3.
-        let l = rest(&ratio(4, 1), &ratio(1, 2), &ratio(1, 1)).expect("a rest");
-        assert_eq!(l, ratio(1, 3));
-        // There the push balances the return: push/w = ½·δ(R)·ℓ.
-        let r = l.clone();
-        let d = ratio(1, 1) / (r + ratio(1, 1));
-        assert_eq!(ratio(1, 2) / ratio(4, 1), ratio(1, 2) * d * l);
-        // Heavier rests deeper; a kind the push carries past every hold
-        // stands at the rim (ℓ = H²).
-        assert!(rest(&ratio(16, 1), &ratio(1, 2), &ratio(1, 1)) < rest(&ratio(4, 1), &ratio(1, 2), &ratio(1, 1)));
-        assert_eq!(rest(&ratio(1, 1), &ratio(1, 2), &ratio(1, 1)), Some(ratio(1, 1)));
-        assert_eq!(rest(&ratio(1, 1), &ratio(1, 2), &ratio(0, 1)), None);
+        // R* = 2qH/(H² − 2q) = (1/4)/(3/4) = 1/3.
+        let r = rest(&ratio(4, 1), &ratio(1, 2), &ratio(1, 1)).expect("a rest");
+        assert_eq!(r, ratio(1, 3));
+        // There the push balances the return: push/w = ½·δ(R)·ℓ, ℓ = R·H.
+        let d = ratio(1, 1) / (r.clone() + ratio(1, 1));
+        assert_eq!(ratio(1, 2) / ratio(4, 1), ratio(1, 2) * d * r.clone());
+        // The throat's reflection: the core and the rim change places.
+        assert_eq!(through(&ratio(0, 1), &ratio(1, 1)), ratio(2, 1));
+        assert_eq!(through(&ratio(1, 1), &ratio(1, 1)), ratio(1, 1));
+        // Released through the throat, its rest inside reads on the far face:
+        // R = 2 − 1/3 = 5/3, ℓ = R·H.
+        assert_eq!(released(&ratio(4, 1), &ratio(1, 2), &ratio(1, 1)), Some(ratio(5, 3)));
+        // A kind the push carries past every hold stands at the rim, R = 2H.
+        assert_eq!(rest(&ratio(1, 1), &ratio(1, 2), &ratio(1, 1)), None);
+        assert_eq!(released(&ratio(1, 1), &ratio(1, 2), &ratio(1, 1)), Some(ratio(2, 1)));
     }
 
     #[test]
