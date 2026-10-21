@@ -667,13 +667,12 @@ pub fn system(clump: &Manifest, agitation: &Ratio, circulation: &Ratio, path: &[
     // the clump's own agitation the floor.
     let flux = (ratio(1, 1) - tide.clone()) * unlocked;
     let disc_agitation = (heat + flux).max(agitation.clone());
-    // WORLDS ARE GROWN, NEVER PLACED (operators 2026-10-17; with xylarium):
-    // the disc the heart releases becomes the system's OWN MEDIUM, motes
-    // carrying their state (each kind's carried spin, the star's phases, the
-    // disc's agitation), which collide over time (`collide_system`) and grow
-    // bodies; the depth-manifold chain is the ORDER that emerges, never a
-    // placement at birth.
-    let worlds: Vec<crate::pulse::Body> = Vec::new();
+    // THE PLANETS (operator 2026-10-21: "a random number of planets attached
+    // to each star, for diversity ... breathing ... a space grand strategy"):
+    // at ignition the disc condenses into planets, their matter the disc's
+    // own (nothing made), the rest staying the system's medium to grow by
+    // meetings (`collide_system`); each star's draw is its own.
+    let (worlds, disc) = planets(&disc, path, &h_s, &scale, unit, &star_hold, &disc_agitation);
     let inside = star_hold.clone();
     let load = ratio(0, 1);
     let _ = (&h_s, &rim, &disc_agitation, &x);
@@ -686,6 +685,102 @@ pub fn system(clump: &Manifest, agitation: &Ratio, circulation: &Ratio, path: &[
     let motes: Vec<crate::flows::Mote> = crate::flows::spray(&disc, &h_s, &vec![ratio(0, 1); crate::flows::PLANES], &disc_agitation, path.len() as u64, &star_push);
     let _ = &worlds;
     Some((star, worlds, disc, belts_spin, crate::ring::grain(&load), motes))
+}
+
+/// A star's own draws: a seeded stream from its path (reproducible, its own).
+fn draws(path: &[u64]) -> impl FnMut() -> u64 {
+    let mut seed = Vec::with_capacity(8 * path.len() + 24);
+    seed.extend_from_slice(b"netstratum planets v1");
+    for p in path {
+        seed.extend_from_slice(&p.to_le_bytes());
+    }
+    let mut n: u64 = 0;
+    move || {
+        let mut h = blake3::Hasher::new();
+        h.update(&seed);
+        h.update(&n.to_le_bytes());
+        n += 1;
+        let b = h.finalize();
+        u64::from_le_bytes(b.as_bytes()[..8].try_into().expect("eight bytes"))
+    }
+}
+
+/// THE PLANETS A STAR IS BORN WITH (operator 2026-10-21; gameplay's world
+/// supply): its own draw sets how many (1 to 12), what share of its disc
+/// they take (60–99 %), how that share divides among them, where each stands
+/// between the star's throat (`h_s`) and the system's rim (1) in the system's
+/// own units (in order, each in its own slot), and its phase in each plane. Each planet takes its share of every
+/// kind, the heavier kinds favoured inward and the lighter outward, in whole
+/// nuclei (nothing made: what it does not take stays the disc), and the
+/// planetary core cuts it into layers (`bind_layers`), its stripped part
+/// returned to the disc. Returns the planets and the disc left.
+fn planets(disc: &Manifest, path: &[u64], h_s: &Ratio, scale: &Ratio, unit: &Ratio, star_hold: &Ratio, heat: &Ratio) -> (Vec<crate::pulse::Body>, Manifest) {
+    let mut left = disc.clone();
+    let mut worlds: Vec<crate::pulse::Body> = Vec::new();
+    if disc.is_empty() || h_s.is_zero() || unit.is_zero() {
+        return (worlds, left);
+    }
+    let mut draw = draws(path);
+    let n = 1 + (draw() % 12) as usize;
+    let take = ratio(60 + (draw() % 40) as i64, 100);
+    let sizes: Vec<Ratio> = (0..n).map(|_| ratio(1 + (draw() % 9) as i64, 1)).collect();
+    // Kinds by weight, heaviest first: the heavier half leans inward.
+    let mut kinds: Vec<(crate::chem::Kind, Ratio)> = disc.iter().map(|(k, a)| (k.clone(), a.clone())).collect();
+    kinds.sort_by(|a, b| crate::chem::hold(&b.0).cmp(&crate::chem::hold(&a.0)).then(a.0.cmp(&b.0)));
+    let heavy = kinds.len().div_ceil(2);
+    let lean = |k: usize, idx: usize| -> Ratio { if idx < heavy { ratio((n - k) as i64, 1) } else { ratio(k as i64 + 1, 1) } };
+    let mut mixes: Vec<Manifest> = vec![Manifest::new(); n];
+    for (idx, (kind, amount)) in kinds.iter().enumerate() {
+        let weights: Vec<Ratio> = (0..n).map(|k| sizes[k].clone() * lean(k, idx)).collect();
+        let all = weights.iter().fold(ratio(0, 1), |s, w| s + w.clone());
+        if all.is_zero() {
+            continue;
+        }
+        for k in 0..n {
+            let a = crate::pulse::nucleus(&(amount.clone() * take.clone() * weights[k].clone() / all.clone()));
+            if a > ratio(0, 1) {
+                *mixes[k].entry(kind.clone()).or_insert_with(|| ratio(0, 1)) += a;
+            }
+        }
+    }
+    let total = mass(disc);
+    let mut inside = star_hold.clone();
+    for (k, mix) in mixes.into_iter().enumerate() {
+        if mix.is_empty() {
+            continue;
+        }
+        // The planetary core keeps its layers; what it strips stays the disc.
+        let hw = if total.is_zero() { ratio(0, 1) } else { mass(&mix) / total.clone() };
+        let e = hw.clone() / (hw + h_s.clone());
+        let (kept, released) = match heart_cut(&mix, heat, &ratio(0, 1)) {
+            Some(_) => bind_layers(&mix, heat, &e),
+            None => (Manifest::new(), mix.clone()),
+        };
+        crate::pulse::less(&mut left, &mix);
+        for (kind, a) in released {
+            *left.entry(kind).or_insert_with(|| ratio(0, 1)) += a;
+        }
+        if kept.is_empty() {
+            continue;
+        }
+        // Its slot between the star's throat (`h_s`, where its deficit is ½)
+        // and the system's rim (1, its grains' holding: the rim law), in the
+        // system's own units, its place within the slot drawn.
+        let jitter = ratio((draw() % 60) as i64, 60);
+        let r_own = h_s.clone() + (ratio(1, 1) - h_s.clone()) * (ratio(k as i64, 1) + ratio(1, 4) + jitter / ratio(2, 1)) / ratio(n as i64, 1);
+        let radius = crate::ring::grain(&(r_own * scale.clone()));
+        let m = mass(&kept);
+        let period = crate::ring::period(&radius, &inside);
+        let spin = crate::ring::spin(&radius, &inside);
+        inside += m.clone() / unit.clone();
+        let siblings: Vec<u64> = worlds.iter().map(|w| w.path[path.len()]).collect();
+        let mut wpath = path.to_vec();
+        wpath.push(crate::ring::birth_key(0, &radius, &inside, &siblings));
+        let phase: Vec<Ratio> = (0..crate::flows::PLANES).map(|_| ratio((draw() % 3600) as i64, 3600)).collect();
+        worlds.push(crate::pulse::Body { path: wpath, radius, period, kept, satellites: Vec::new(), medium: Manifest::new(), ell: spin, medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: m, flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase, load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: crate::ring::grain(heat).min(ratio(1, 1)) });
+    }
+    left.retain(|_, a| *a > ratio(0, 1));
+    (worlds, left)
 }
 
 /// The convergents `p/q` of a positive rational, in order.
@@ -1070,7 +1165,18 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
         }
         // A mote that met nothing stays a mote; a world stays a world. THE RIM
         // LAW for every body (a mote too, never only a grown group): a mote
-        // past the system's rim crosses whole into the galaxy.
+        // past the system's rim crosses whole into the galaxy. A star's planets
+        // are drawn at its birth (`planets`), so motes meeting only motes found
+        // no world: they stay the medium, each as it was.
+        if g.iter().all(|&i| i < n_motes) && g.len() > 1 {
+            for &i in &g {
+                let it = &items[i];
+                for (k, a) in &it.0 {
+                    motes.push(crate::flows::Mote { key: k.clone(), amount: a.clone(), ell_o: it.1.clone(), ell_c: ratio(0, 1), phase: it.2.clone(), agitation: crate::ring::grain(&(it.3.clone() + heat[i].clone())), born: 0, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1) });
+                }
+            }
+            continue;
+        }
         if g.len() == 1 && g[0] < n_motes {
             let it = &items[g[0]];
             if reach(it) > rim {
@@ -1472,6 +1578,26 @@ mod tests {
     use num_traits::Zero;
     use crate::flows::contact;
     use cfe::ratio::ratio;
+
+    #[test]
+    fn a_star_is_born_with_its_own_planets_from_its_own_disc() {
+        use crate::pulse::{mass, Manifest};
+        let disc: Manifest = [("Z001", (1, 2)), ("Z008", (1, 8)), ("Z026", (1, 16)), ("Z014", (1, 32))].iter().map(|(k, (n, d))| (crate::chem::Kind::parse(k).expect("a kind"), ratio(*n, *d))).collect();
+        let scale = ratio(3, 1);
+        for star in [vec![21u64, 5], vec![21, 6], vec![0, 9]] {
+            let (worlds, left) = super::planets(&disc, &star, &ratio(1, 2), &scale, &ratio(1, 1), &ratio(1, 4), &ratio(1, 10));
+            // Nothing made: the planets and the disc left hold the disc.
+            let held = worlds.iter().fold(mass(&left), |s, w| s + mass(&w.kept));
+            assert_eq!(held, mass(&disc), "{star:?}");
+            assert!((1..=12).contains(&worlds.len()), "{star:?}: {} planets", worlds.len());
+            // Each between the star's throat (h_s = ½) and the system's rim (1).
+            for w in &worlds {
+                assert!(w.radius > scale.clone() * ratio(1, 2) && w.radius < scale, "{star:?}");
+            }
+            // The same star draws the same planets.
+            assert_eq!(super::planets(&disc, &star, &ratio(1, 2), &scale, &ratio(1, 1), &ratio(1, 4), &ratio(1, 10)).0.len(), worlds.len());
+        }
+    }
 
     #[test]
     fn a_cool_world_keeps_layers_and_makes_water_in_them() {
