@@ -899,6 +899,11 @@ fn put_body(b: &Body, out: &mut Vec<u8>) {
         }
         w.extend_from_slice(&x.born.to_le_bytes());
         w.push(u8::from(x.vacuum));
+        cfe::ratio::encode(&x.lever_place, &mut w);
+        w.push(x.lever.len() as u8);
+        for l in &x.lever {
+            cfe::ratio::encode(l, &mut w);
+        }
         cfe::tlv::put(10, &w, out);
     }
     if !b.reservoir.is_zero() {
@@ -974,6 +979,11 @@ pub fn write(var_root: &Path, seed: &[u8; 32], u: &Universe) -> std::io::Result<
         }
         w.extend_from_slice(&x.born.to_le_bytes());
         w.push(u8::from(x.vacuum));
+        cfe::ratio::encode(&x.lever_place, &mut w);
+        w.push(x.lever.len() as u8);
+        for l in &x.lever {
+            cfe::ratio::encode(l, &mut w);
+        }
         cfe::tlv::put(19, &w, &mut out);
     }
     std::fs::create_dir_all(var_root)?;
@@ -1041,8 +1051,20 @@ fn get_flow(v: &[u8]) -> Option<crate::flows::Mote> {
     }
     let born = u64::from_le_bytes(v.get(at..at + 8)?.try_into().ok()?);
     let vacuum = *v.get(at + 8)? == 1;
+    at += 9;
+    // Its lever: the place it is counted in, then each plane's.
+    let (lever_place, used) = cfe::ratio::decode(v.get(at..)?)?;
+    at += used;
+    let m = *v.get(at)? as usize;
+    at += 1;
+    let mut lever = Vec::with_capacity(m.min(16));
+    for _ in 0..m {
+        let (x, used) = cfe::ratio::decode(v.get(at..)?)?;
+        at += used;
+        lever.push(x);
+    }
     let mut r = r.into_iter();
-    Some(crate::flows::Mote { key, amount: r.next()?, ell_o: r.next()?, ell_c: r.next()?, agitation: r.next()?, phase, born, vacuum })
+    Some(crate::flows::Mote { key, amount: r.next()?, ell_o: r.next()?, ell_c: r.next()?, agitation: r.next()?, phase, born, vacuum, lever, lever_place })
 }
 
 /// A gas mote (tag 6), attached to the body read before it.

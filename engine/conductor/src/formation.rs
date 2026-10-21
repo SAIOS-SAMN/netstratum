@@ -463,7 +463,14 @@ pub fn heart_cut(clump: &Manifest, turning: &Ratio, heat: &Ratio) -> Option<(Man
     loop {
         let mut changed = false;
         for (i, (_, ell, share)) in kinds.iter().enumerate() {
-            if held_set[i] && (held.is_zero() || ell.clone() / held.clone() > held) {
+            // Held where the heart's deficit at the kind's reach meets its
+            // push: `H/(R + H) ≥ p`, `R = ℓ/H` (the deficit law; never a
+            // reach against the hold's own square).
+            let lost = held.is_zero() || {
+                let r = ell.clone() / held.clone();
+                held.clone() / (r + held.clone()) < push
+            };
+            if held_set[i] && lost {
                 held_set[i] = false;
                 held -= share.clone();
                 changed = true;
@@ -669,7 +676,6 @@ pub fn system(clump: &Manifest, agitation: &Ratio, circulation: &Ratio, path: &[
     let worlds: Vec<crate::pulse::Body> = Vec::new();
     let inside = star_hold.clone();
     let load = ratio(0, 1);
-    let spins = carried(clump, circulation, &ionizing);
     let _ = (&h_s, &rim, &disc_agitation, &x);
     let belts_spin = mass(&disc) / unit.clone() * crate::ring::spin(&scale, &inside);
     // The heart's released kinds leave as a spray over directions.
@@ -677,7 +683,7 @@ pub fn system(clump: &Manifest, agitation: &Ratio, circulation: &Ratio, path: &[
     // The spray leaves from the star's cool outer layers: their push (whole
     // atoms), never the hot heart's stripped share.
     let star_push = if mass(&star).is_zero() { ratio(0, 1) } else { crate::ring::grain(&(ratio(1, 2) * crate::pulse::magnetism(&star) / mass(&star))) };
-    let motes: Vec<crate::flows::Mote> = crate::flows::spray(&disc, &spins, &vec![ratio(0, 1); crate::flows::PLANES], &disc_agitation, path.len() as u64, &star_push);
+    let motes: Vec<crate::flows::Mote> = crate::flows::spray(&disc, &h_s, &vec![ratio(0, 1); crate::flows::PLANES], &disc_agitation, path.len() as u64, &star_push);
     let _ = &worlds;
     Some((star, worlds, disc, belts_spin, crate::ring::grain(&load), motes))
 }
@@ -821,7 +827,10 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
     for x in sys.flows.iter_mut() {
         if crate::chem::atom_z(&x.key).is_none() && !x.agitation.is_zero() && x.agitation >= crate::chem::tightness(&x.key) {
             for (k, a) in dissociate(&[(x.key.clone(), x.amount.clone())].into()) {
-                parted.push(crate::flows::Mote { key: k, amount: a, ..x.clone() });
+                // Each part carries its own share of the parent's lever.
+                let share = if x.amount.is_zero() { ratio(0, 1) } else { a.clone() / x.amount.clone() };
+                let lever = x.lever.iter().map(|l| crate::pulse::nucleus(&(l.clone() * share.clone()))).collect();
+                parted.push(crate::flows::Mote { key: k, amount: a, lever, ..x.clone() });
             }
             x.amount = ratio(0, 1);
         }
@@ -1028,7 +1037,7 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
         *items[ib].0.get_mut(&kb).expect("held") -= formed.clone() * ratio(i64::from(nb), 1);
         // The cluster stands where its heavier part stood.
         let at = if crate::chem::charge(&ka) >= crate::chem::charge(&kb) { ia } else { ib };
-        bonded.push(crate::flows::Mote { key: ck, amount: formed, ell_o: items[at].1.clone(), ell_c: ratio(0, 1), phase: items[at].2.clone(), agitation: items[at].3.clone(), born: bell, vacuum: false });
+        bonded.push(crate::flows::Mote { key: ck, amount: formed, ell_o: items[at].1.clone(), ell_c: ratio(0, 1), phase: items[at].2.clone(), agitation: items[at].3.clone(), born: bell, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1) });
     }
     for it in items.iter_mut() {
         it.0.retain(|_, a| *a > ratio(0, 1));
@@ -1071,7 +1080,7 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
                 continue;
             }
             let Some((k, a)) = it.0.iter().next().map(|(k, a)| (k.clone(), a.clone())) else { continue };
-            motes.push(crate::flows::Mote { key: k, amount: a, ell_o: it.1.clone(), ell_c: ratio(0, 1), phase: it.2.clone(), agitation: crate::ring::grain(&(it.3.clone() + heat[g[0]].clone())), born: 0, vacuum: false });
+            motes.push(crate::flows::Mote { key: k, amount: a, ell_o: it.1.clone(), ell_c: ratio(0, 1), phase: it.2.clone(), agitation: crate::ring::grain(&(it.3.clone() + heat[g[0]].clone())), born: 0, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1) });
             continue;
         }
         let mut kept = Manifest::new();
@@ -1133,7 +1142,7 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
         };
         for (k, a) in released {
             if a > ratio(0, 1) {
-                motes.push(crate::flows::Mote { key: k, amount: a, ell_o: ell.clone(), ell_c: ratio(0, 1), phase: phase.clone(), agitation: crate::ring::grain(&heat_g), born: 0, vacuum: false });
+                motes.push(crate::flows::Mote { key: k, amount: a, ell_o: ell.clone(), ell_c: ratio(0, 1), phase: phase.clone(), agitation: crate::ring::grain(&heat_g), born: 0, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1) });
             }
         }
         if kept.is_empty() {

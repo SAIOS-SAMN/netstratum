@@ -65,6 +65,50 @@ pub struct Mote {
     /// outflow, a star's outbursts and wind), true the vacuum (ocean
     /// arrivals).
     pub vacuum: bool,
+    /// THE LEVER (docs/85 §9): per plane, the whole nuclei of its holding
+    /// (signed, in grains) standing one PLACE past its mark, so its holding's
+    /// centre is its true position: `phase + lever/amount · place`. Never
+    /// more than half its amount. Empty where nothing stands past.
+    pub lever: Vec<Ratio>,
+    /// The place its lever is counted in (a share of a turn).
+    pub lever_place: Ratio,
+}
+
+/// A mote's TRUE phase in plane k (ascent): its mark and the share of its
+/// holding standing one place past it.
+pub fn true_phase(x: &Mote, k: usize) -> Ratio {
+    let at = x.phase.get(k).cloned().unwrap_or_else(|| ratio(0, 1));
+    match x.lever.get(k) {
+        Some(l) if !l.is_zero() && !x.amount.is_zero() => at + l.clone() / x.amount.clone() * x.lever_place.clone(),
+        _ => at,
+    }
+}
+
+/// SETTLE a mote's levers from this bell's (descent): each plane's lever
+/// `(next mark, share f)` stands `f` of its holding one place past its mark,
+/// in whole nuclei (the rest below one nucleus acknowledged, the quantum
+/// tier); a plane with none stands whole on its mark.
+pub fn settle(x: &mut Mote, levers: &[(usize, Ratio, Ratio)], place: Option<&Ratio>, cross: &mut crate::enfold::Cross) {
+    let planes = x.phase.len();
+    x.lever = vec![ratio(0, 1); planes];
+    x.lever_place = place.cloned().unwrap_or_else(|| ratio(0, 1));
+    for (k, next, f) in levers {
+        let Some(at) = x.phase.get(*k) else { continue };
+        // The sense: forward where the next mark lies ahead of this one.
+        let ahead = next.clone() - at.clone();
+        let ahead = ahead.clone() - ahead.floor();
+        let forward = ahead < ratio(1, 2);
+        let exact = x.amount.clone() * f.clone();
+        let whole = crate::pulse::nucleus(&exact).min(x.amount.clone());
+        let below = exact - whole.clone();
+        if !below.is_zero() {
+            cross.note(*k, crate::enfold::Fate::Acknowledged, &below);
+        }
+        x.lever[*k] = if forward { whole } else { -whole };
+    }
+    if x.lever.iter().all(|l| l.is_zero()) {
+        x.lever = Vec::new();
+    }
 }
 
 /// A kind's weight (its hold).
@@ -336,7 +380,7 @@ impl Enclosed {
 /// loop (the circulation's plane) runs the other way, its advance read over
 /// that passage; its orbit plane turns forward.
 #[allow(clippy::too_many_arguments)]
-pub fn turn(phase: &mut [Ratio], r_o: &Ratio, h: &Ratio, p: &Ratio, tide: Option<(&Ratio, &Ratio)>, inverted: bool, place: Option<&Ratio>, agitation: &Ratio, cross: &mut crate::enfold::Cross) -> Ratio {
+pub fn turn(phase: &mut [Ratio], r_o: &Ratio, h: &Ratio, p: &Ratio, tide: Option<(&Ratio, &Ratio)>, inverted: bool, place: Option<&Ratio>, agitation: &Ratio, cross: &mut crate::enfold::Cross) -> (Ratio, Vec<(usize, Ratio, Ratio)>) {
     let pull = h.clone() / (r_o.clone() + h.clone());
     let d_o = if inverted { ratio(1, 1) - pull.clone() } else { pull.clone() };
     // THE LOOP'S RATE (with xylarium): the jetstream turns by the motion law
@@ -349,7 +393,7 @@ pub fn turn(phase: &mut [Ratio], r_o: &Ratio, h: &Ratio, p: &Ratio, tide: Option
     // denominators each bell without bound; the residue drains within its
     // round, passes to the quantum tier acknowledged, or, with no place of its
     // own, is cauterized with its scar recorded.
-    let (held, scar_o) = crate::enfold::leaf(&(phase[0].clone() + ratio(2, 1) * d_o), place, agitation, 0, cross);
+    let (held, scar_o, lever_o) = crate::enfold::leaf(&(phase[0].clone() + ratio(2, 1) * d_o), place, agitation, 0, cross);
     phase[0] = held;
     let loop_from = phase[1].clone();
     let route = if inverted { ratio(-1, 1) } else { ratio(1, 1) };
@@ -369,10 +413,11 @@ pub fn turn(phase: &mut [Ratio], r_o: &Ratio, h: &Ratio, p: &Ratio, tide: Option
         None => pull.clone(),
     };
     let advance = p.clone() * felt * mean_response(&start, &(ratio(2, 1) * d_c));
-    let (held, scar_c) = crate::enfold::leaf(&(loop_phase + route * advance), place, agitation, 1, cross);
+    let (held, scar_c, lever_c) = crate::enfold::leaf(&(loop_phase + route * advance), place, agitation, 1, cross);
     phase[1] = held;
-    // A cauterized residue's scar, the heat it enters.
-    scar_o + scar_c
+    // A cauterized residue's scar (the heat it enters) and each plane's lever.
+    let levers = [(0usize, lever_o), (1usize, lever_c)].into_iter().filter_map(|(k, l)| l.map(|(n, f)| (k, n, f))).collect();
+    (scar_o + scar_c, levers)
 }
 
 /// One bell's kicks on every mote: the own family in the orbit's plane
@@ -391,12 +436,17 @@ pub fn kick(motes: &mut [Mote], enc: &Enclosed, p: &Ratio, tide: Option<(&Ratio,
         // Each turns by what is enclosed inside it (the core and all inside).
         let h = enc.hold(&x.ell_o);
         let (r_o, d_o) = enc.reach(&x.ell_o);
+        // ASCENT: the bell turns the mote from where it truly stands, its
+        // lever read back onto its marks.
+        for k in 0..x.phase.len() {
+            x.phase[k] = true_phase(x, k);
+        }
         let from = x.phase[0].clone();
         // A mote's place: the cap its own gravity holds (`enfold::place`).
         let m = if total.is_zero() { ratio(0, 1) } else { x.amount.clone() * weight(&x.key) / total.clone() };
         let place = crate::enfold::place(&r_o, &m, &h);
         let heat_was = x.agitation.clone();
-        let scar = turn(&mut x.phase, &r_o, &h, p, tide, x.vacuum, place.as_ref(), &heat_was, cross);
+        let (scar, levers) = turn(&mut x.phase, &r_o, &h, p, tide, x.vacuum, place.as_ref(), &heat_was, cross);
         // Over its whole passage this bell, never at one instant; a vacuum
         // mote at its inverted reach (`1 − δ`), forward.
         let d_o = if x.vacuum { ratio(1, 1) - d_o } else { d_o };
@@ -421,6 +471,8 @@ pub fn kick(motes: &mut [Mote], enc: &Enclosed, p: &Ratio, tide: Option<(&Ratio,
         absorbed += m.clone() * if dl < ratio(0, 1) { -dl.clone() } else { dl.clone() };
         given += m * dl;
         x.ell_o = new_o;
+        // DESCENT: its weight past its round stands one place past its mark.
+        settle(x, &levers, place.as_ref(), cross);
     }
     (given, absorbed)
 }
@@ -515,20 +567,35 @@ pub fn shear(motes: &mut [Mote], enc: &Enclosed, total: &Ratio) -> Ratio {
     moved
 }
 
+/// WHERE A RELEASED KIND COMES TO REST under its system's own law (the
+/// star's kick, `star_kick`): pushed out by `q = push/w` each echo, returned
+/// by the star's hold `½·δ(R)·ℓ`, `δ = H/(R + H)`, `ℓ = R·H` (system units, H
+/// the star's hold). They balance where `R·H² = 2q·(R + H)`, so
+/// `R* = 2qH/(H² − 2q)` and `ℓ* = R*·H`. Where `2q ≥ H²` the push beats the
+/// hold at every reach: the kind has no rest and stands at the rim
+/// (`ℓ = H²`, `R = H`), where it crosses out by the exit law. None where the
+/// star holds nothing.
+pub fn rest(w: &Ratio, push: &Ratio, h: &Ratio) -> Option<Ratio> {
+    if h.is_zero() || w.is_zero() {
+        return None;
+    }
+    let q2 = ratio(2, 1) * push.clone() / w.clone();
+    let hh = h.clone() * h.clone();
+    if q2 >= hh {
+        return Some(hh);
+    }
+    Some(q2.clone() * h.clone() / (hh - q2) * h.clone())
+}
+
 /// THE SPRAY (with xylarium; the founding epoch one tier down): matter a
 /// heart throws out (an outburst, or the kinds a new star's heart releases)
-/// leaves TOGETHER, every kind at the mean carried reach (holding-weighted),
-/// and over directions: each kind at its own capture phase, `Z·p` with p the
-/// star's own push share (the founding's ½ one tier up), `½ + Z·p` on the loop. It
-/// sorts only as it spreads, by each kind's own inertia under the star's
-/// kick, so early meetings catch mixed matter.
-pub fn spray(released: &Manifest, spins: &[(crate::chem::Kind, Ratio)], base: &[Ratio], agitation: &Ratio, born: u64, push: &Ratio) -> Vec<Mote> {
-    let held = released.iter().fold(ratio(0, 1), |s, (k, a)| s + a.clone() * weight(k));
-    let reach = if held.is_zero() {
-        ratio(0, 1)
-    } else {
-        crate::ring::grain(&(released.iter().fold(ratio(0, 1), |s, (k, a)| s + a.clone() * weight(k) * spins.iter().find(|(kk, _)| kk == k).map(|(_, l)| l.clone()).unwrap_or_else(|| ratio(0, 1))) / held))
-    };
+/// leaves over directions, each kind at its own capture phase, `Z·p` with p
+/// the star's own push share (the founding's ½ one tier up), `½ + Z·p` on the
+/// loop; and each kind stands where its system's own law brings it to rest
+/// (`rest`), by its own weight, never one shared reach: a heavy kind deep, a
+/// light one far out, and only a kind the push carries past every hold
+/// leaves at the rim.
+pub fn spray(released: &Manifest, h: &Ratio, base: &[Ratio], agitation: &Ratio, born: u64, push: &Ratio) -> Vec<Mote> {
     let at = |k: usize| base.get(k).cloned().unwrap_or_else(|| ratio(0, 1));
     released
         .iter()
@@ -538,7 +605,8 @@ pub fn spray(released: &Manifest, spins: &[(crate::chem::Kind, Ratio)], base: &[
             // so the kinds leave over the whole turn, never two antipodes.
             let z = ratio(i64::from(crate::chem::charge(k)), 1) * push.clone();
             let phase = vec![crate::ring::grain(&frac(&(at(0) + z.clone()))), crate::ring::grain(&frac(&(at(1) + ratio(1, 2) + z)))];
-            Mote { key: k.clone(), amount: a.clone(), ell_o: reach.clone(), ell_c: ratio(0, 1), phase, agitation: crate::ring::grain(agitation), born, vacuum: false }
+            let ell_o = rest(&weight(k), push, h).map(|l| crate::ring::grain(&l)).unwrap_or_else(|| ratio(0, 1));
+            Mote { key: k.clone(), amount: a.clone(), ell_o, ell_c: ratio(0, 1), phase, agitation: crate::ring::grain(agitation), born, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1) }
         })
         .collect()
 }
@@ -962,17 +1030,24 @@ pub fn merge(motes: &mut Vec<Mote>, total: &Ratio, place_of: &dyn Fn(&Mote) -> O
             y.agitation = g(&heat);
             y.ell_o = go;
             y.ell_c = gc;
-            y.amount = both;
             let place = place_of(y);
-            for k in 0..y.phase.len().min(x.phase.len()) {
+            // Both true phases (ascent), before the amounts join.
+            let (ty, tx): (Vec<Ratio>, Vec<Ratio>) = ((0..y.phase.len()).map(|k| true_phase(y, k)).collect(), (0..x.phase.len()).map(|k| true_phase(&x, k)).collect());
+            y.amount = both.clone();
+            let mut levers: Vec<(usize, Ratio, Ratio)> = Vec::new();
+            for k in 0..ty.len().min(tx.len()) {
                 cross.note(k, crate::enfold::Fate::Ascended, &ratio(0, 1));
-                let mean = circle_mean(&[(my.clone() * w.clone(), y.phase[k].clone()), (mx.clone() * w.clone(), x.phase[k].clone())]);
-                let shift = mean.clone() - y.phase[k].clone();
+                let mean = circle_mean(&[(my.clone() * w.clone(), ty[k].clone()), (mx.clone() * w.clone(), tx[k].clone())]);
+                let shift = mean.clone() - ty[k].clone();
                 cross.note(k, crate::enfold::Fate::Condensed, &shift);
-                let (held, scar) = crate::enfold::leaf(&mean, place.as_ref(), &heat, k, cross);
+                let (held, scar, lever) = crate::enfold::leaf(&mean, place.as_ref(), &heat, k, cross);
                 y.phase[k] = held;
                 y.agitation = g(&(y.agitation.clone() + scar));
+                if let Some((next, f)) = lever {
+                    levers.push((k, next, f));
+                }
             }
+            settle(y, &levers, place.as_ref(), cross);
         } else {
             at.insert(kx, out.len());
             out.push(x);
@@ -1001,7 +1076,7 @@ pub fn founding(grains: &Manifest) -> Option<Vec<Mote>> {
         .map(|(k, a)| {
             let turn = ratio(i64::from(crate::chem::charge(k)), 2);
             let phase = vec![frac(&(source[0].clone() + turn.clone())), frac(&(ratio(1, 2) + turn))];
-            Mote { key: k.clone(), amount: a.clone(), ell_o: crate::ring::grain(&(p.clone() * mean.clone() / weight(k))), ell_c: ratio(0, 1), phase, agitation: ratio(0, 1), born: 0, vacuum: false }
+            Mote { key: k.clone(), amount: a.clone(), ell_o: crate::ring::grain(&(p.clone() * mean.clone() / weight(k))), ell_c: ratio(0, 1), phase, agitation: ratio(0, 1), born: 0, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1) }
         })
         .collect())
 }
@@ -1098,9 +1173,43 @@ mod passage_tests {
     use cfe::ratio::ratio;
 
     #[test]
+    fn a_released_kind_rests_where_the_stars_push_meets_its_hold() {
+        use super::rest;
+        // H = 1, push ½: a kind of weight 4 has q = 1/8, 2q = 1/4 < 1, so
+        // R* = 2qH/(H² − 2q) = (1/4)/(3/4) = 1/3, and ℓ* = R*·H = 1/3.
+        let l = rest(&ratio(4, 1), &ratio(1, 2), &ratio(1, 1)).expect("a rest");
+        assert_eq!(l, ratio(1, 3));
+        // There the push balances the return: push/w = ½·δ(R)·ℓ.
+        let r = l.clone();
+        let d = ratio(1, 1) / (r + ratio(1, 1));
+        assert_eq!(ratio(1, 2) / ratio(4, 1), ratio(1, 2) * d * l);
+        // Heavier rests deeper; a kind the push carries past every hold
+        // stands at the rim (ℓ = H²).
+        assert!(rest(&ratio(16, 1), &ratio(1, 2), &ratio(1, 1)) < rest(&ratio(4, 1), &ratio(1, 2), &ratio(1, 1)));
+        assert_eq!(rest(&ratio(1, 1), &ratio(1, 2), &ratio(1, 1)), Some(ratio(1, 1)));
+        assert_eq!(rest(&ratio(1, 1), &ratio(1, 2), &ratio(0, 1)), None);
+    }
+
+    #[test]
+    fn a_motes_lever_keeps_its_true_place() {
+        use super::{settle, true_phase, Mote};
+        let mut x = Mote { key: crate::chem::Kind::parse("Z001").expect("a kind"), amount: ratio(1, 1), ell_o: ratio(1, 1), ell_c: ratio(0, 1), phase: vec![ratio(1, 60), ratio(0, 1)], agitation: ratio(0, 1), born: 0, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1) };
+        let p = ratio(1, 60);
+        let mut cross = crate::enfold::Cross::default();
+        // Its true place lies 1/240 past its mark: a quarter of a place, so a
+        // quarter of its holding stands one place on.
+        settle(&mut x, &[(0, ratio(2, 60), ratio(1, 4))], Some(&p), &mut cross);
+        assert_eq!(true_phase(&x, 0), ratio(1, 60) + ratio(1, 240));
+        assert_eq!(true_phase(&x, 1), ratio(0, 1), "a plane with nothing past stands on its mark");
+        // Backward: the next mark behind.
+        settle(&mut x, &[(0, ratio(0, 1), ratio(1, 4))], Some(&p), &mut cross);
+        assert_eq!(true_phase(&x, 0), ratio(1, 60) - ratio(1, 240));
+    }
+
+    #[test]
     fn the_shear_moves_turning_outward_and_keeps_the_books() {
         use super::{shear, weight, Enclosed, Mote};
-        let mote = |ell: (i64, i64), ph: (i64, i64)| Mote { key: crate::chem::Kind::parse("Z001").expect("a kind"), amount: ratio(1, 8), ell_o: ratio(ell.0, ell.1), ell_c: ratio(0, 1), phase: vec![ratio(ph.0, ph.1), ratio(0, 1)], agitation: ratio(0, 1), born: 0, vacuum: false };
+        let mote = |ell: (i64, i64), ph: (i64, i64)| Mote { key: crate::chem::Kind::parse("Z001").expect("a kind"), amount: ratio(1, 8), ell_o: ratio(ell.0, ell.1), ell_c: ratio(0, 1), phase: vec![ratio(ph.0, ph.1), ratio(0, 1)], agitation: ratio(0, 1), born: 0, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1) };
         let mut motes = vec![mote((1, 4), (0, 1)), mote((1, 2), (1, 60)), mote((3, 4), (1, 30))];
         let total = ratio(1, 1);
         let book = |ms: &[Mote]| ms.iter().fold(ratio(0, 1), |s, x| s + x.amount.clone() * weight(&x.key) * x.ell_o.clone());

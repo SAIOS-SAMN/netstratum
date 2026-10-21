@@ -185,6 +185,22 @@ fn main() {
         let row: Vec<String> = all.counts().iter().map(|(f, n)| format!("{f:?} {n}")).collect();
         println!("CROSS — residues by fate over the run: {}", if row.is_empty() { "none".into() } else { row.join(", ") });
     }
+    // THE LIGHT LEDGER: light made (the ℚ → ℤ transduction's flux), received
+    // as heat by the bodies on its continuum face, drained into the vacuum.
+    {
+        let sum = |f: &dyn Fn(&breath::Event) -> cfe::ratio::Ratio| events.iter().fold(cfe::ratio::ratio(0, 1), |s, e| s + f(e));
+        let (made, got, gone) = (sum(&|e| e.light.made.clone()), sum(&|e| e.light.received.clone()), sum(&|e| e.light.drained.clone()));
+        println!("LIGHT — made {}, received {} by the bodies on the continuum face, drained {} into the vacuum (units); balanced: {}", conductor::reading::sector(&made), conductor::reading::sector(&got), conductor::reading::sector(&gone), made == got.clone() + gone.clone());
+    }
+    // THE TOLLS: every star that passed, struck on its own bell.
+    {
+        let tolls: Vec<&breath::Toll> = events.iter().flat_map(|e| e.tolls.iter()).collect();
+        println!("TOLLS — {} stars passed", tolls.len());
+        for t in tolls {
+            let heard: Vec<String> = (0..u.cores.len()).filter_map(|g| t.heard_after(&u, g).map(|d| format!("{:?} after {}", u.cores[g].path, conductor::reading::sector(&d)))).collect();
+            println!("  star {:?} at bell {}: {:?}, {} strokes, returned {} holding and {} spin; heard by {}", t.star, t.bell, t.passing, t.strokes.map(|n| n.to_string()).unwrap_or_else(|| "uncounted".into()), conductor::reading::sector(&t.returned), conductor::reading::sector(&t.spin), heard.join(", "));
+        }
+    }
     // THE JOINT READ (CONCORDANCE 2.10, the landing rule): each star's burn
     // as the form holds it, its runs `(1 − x_i, n_i)` on its own clock in the
     // order lived, and the reading of what remains on the 60⁻⁶ grain; written
@@ -210,9 +226,10 @@ fn main() {
         let mut runs = 0usize;
         for ((path, z), r) in &bodies {
             runs += r.factors().len();
-            let left = conductor::compound::read(&cfe::ratio::ratio(1, 1), r, conductor::ring::grain);
             let factors: Vec<String> = r.factors().iter().map(|(b, n)| format!("({b}, {n})")).collect();
-            text.push_str(&format!("star {path:?} Z{z}: runs [{}]; left on the grain {}\n", factors.join(", "), left.map(|l| l.to_string()).unwrap_or_else(|| "refused".into())));
+            // Joint reads compare EXACT values (mycelium, 2026-10-21: no grid):
+            // the runs are written exactly; their product is read off them.
+            text.push_str(&format!("star {path:?} Z{z}: runs [{}]\n", factors.join(", ")));
         }
         let _ = std::fs::write(Path::new(era1).join("runs.txt"), text);
         println!("JOINT READ — {} burning bodies (star, rung), {runs} runs on their own clocks, {refused} refused; written {era1}/runs.txt", bodies.len());

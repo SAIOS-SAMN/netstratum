@@ -89,8 +89,12 @@ pub enum Fate {
     Ascended,
     /// Within the body's own round: its heat already holds it.
     Drained,
-    /// Past a body with no enclosure, to the quantum tier: acknowledged,
-    /// never simulated.
+    /// Past a body's round, its WEIGHT taken by the lever rule: the share
+    /// `|r|/p` of its holding stands on the neighbouring mark, so the
+    /// holding's centre is the body's true place (its moment `m·r` kept).
+    Weighted,
+    /// Below one nucleus of weight, to the quantum tier: acknowledged, never
+    /// simulated.
     Acknowledged,
     /// Joined in a meeting: bodies meeting into one, their full phases
     /// meaned by holding on the circle.
@@ -151,13 +155,28 @@ pub fn mark() -> Ratio {
     Ratio::new(1.into(), num_bigint::BigInt::from(60).pow(6))
 }
 
+/// THE LEVER (docs/85 §9): a body held to place p whose true position lies r
+/// past its mark keeps its holding on marks without loss only by standing
+/// on the two marks that bracket it: `1 − |r|/p` on its mark and `|r|/p` on
+/// the next mark in r's sense. Then the holding's centre is the true place,
+/// `(1 − f)·held + f·(held ± p) = held + r`, its moment `m·r = W·p` kept, so
+/// the residue's WEIGHT is `W = m·|r|/p`. Returns (the neighbouring mark, the
+/// share f).
+pub fn lever(held: &Ratio, r: &Ratio, place: &Ratio) -> (Ratio, Ratio) {
+    let sense = if *r < ratio(0, 1) { -place.clone() } else { place.clone() };
+    let n = held.clone() + sense;
+    let mag = if *r < ratio(0, 1) { -r.clone() } else { r.clone() };
+    (n.clone() - n.floor(), mag / place.clone())
+}
+
 /// A LEAF's phase through the cross: held to its place; its residue drains
-/// within its round or is acknowledged past it; with no place of its own it
-/// is cauterized at the coordinate's mark, the residue a scar that enters
-/// the body's own heat: the round that would hold it, `2·|r|` (§2: a round of
-/// agitation a holds half a turn's share a/2 about the body). Returns the
-/// held phase and the scar's heat.
-pub fn leaf(v: &Ratio, place: Option<&Ratio>, agitation: &Ratio, plane: usize, cross: &mut Cross) -> (Ratio, Ratio) {
+/// within its round; past it, its weight is taken by the lever (`lever`,
+/// returned for the body to split its holding on the two marks); with no
+/// place of its own it is cauterized at the coordinate's mark, the residue a
+/// scar that enters the body's own heat: the round that would hold it,
+/// `2·|r|` (§2: a round of agitation a holds half a turn's share a/2 about
+/// the body). Returns the held phase, the scar's heat, and the lever.
+pub fn leaf(v: &Ratio, place: Option<&Ratio>, agitation: &Ratio, plane: usize, cross: &mut Cross) -> (Ratio, Ratio, Option<(Ratio, Ratio)>) {
     let (held, r, cauterized) = match place.filter(|p| !p.is_zero()) {
         Some(p) => {
             let (h, r) = hold(v, Some(p));
@@ -168,27 +187,30 @@ pub fn leaf(v: &Ratio, place: Option<&Ratio>, agitation: &Ratio, plane: usize, c
             (h, r, true)
         }
     };
-    if !r.is_zero() {
-        let fate = if cauterized {
-            Fate::Cauterized
-        } else {
-            match residue(&r, agitation, None) {
-                Residue::Drained => Fate::Drained,
-                _ => Fate::Acknowledged,
-            }
-        };
-        cross.note(plane, fate, &r);
-        if cauterized {
-            let mag = if r < ratio(0, 1) { -r.clone() } else { r.clone() };
-            return (held, ratio(2, 1) * mag);
+    if r.is_zero() {
+        return (held, ratio(0, 1), None);
+    }
+    if cauterized {
+        cross.note(plane, Fate::Cauterized, &r);
+        let mag = if r < ratio(0, 1) { -r.clone() } else { r.clone() };
+        return (held, ratio(2, 1) * mag, None);
+    }
+    match (residue(&r, agitation, None), place) {
+        (Residue::Drained, _) | (_, None) => {
+            cross.note(plane, Fate::Drained, &r);
+            (held, ratio(0, 1), None)
+        }
+        (_, Some(p)) => {
+            cross.note(plane, Fate::Weighted, &r);
+            let l = lever(&held, &r, p);
+            (held, ratio(0, 1), Some(l))
         }
     }
-    (held, ratio(0, 1))
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{hold, leaf, place, residue, Cross, Fate, Residue};
+    use super::{hold, lever, leaf, place, residue, Cross, Fate, Residue};
     use cfe::ratio::ratio;
 
     #[test]
@@ -224,18 +246,32 @@ mod tests {
     }
 
     #[test]
+    fn the_lever_keeps_the_holdings_centre_on_the_true_place() {
+        let p = ratio(1, 60);
+        for v in [ratio(31, 1800), ratio(59, 3600), ratio(1, 7)] {
+            let (held, r) = hold(&v, Some(&p));
+            let (n, f) = lever(&held, &r, &p);
+            // The centre of (1 − f) on its mark and f on the next, against the mark.
+            let off = |x: &cfe::ratio::Ratio| { let d = x.clone() - held.clone(); let d = d.clone() - d.round(); d };
+            assert_eq!((ratio(1, 1) - f.clone()) * ratio(0, 1) + f * off(&n), r, "{v}: the moment m·r is kept");
+        }
+    }
+
+    #[test]
     fn every_residue_meets_a_recorded_fate() {
         let mut cross = Cross::default();
         // Held to a place of 1/60: 31/1800 lies 1/1800 past a mark.
-        let (held, heat) = leaf(&ratio(31, 1800), Some(&ratio(1, 60)), &ratio(0, 1), 0, &mut cross);
+        let (held, heat, lever) = leaf(&ratio(31, 1800), Some(&ratio(1, 60)), &ratio(0, 1), 0, &mut cross);
         assert_eq!(heat, ratio(0, 1));
         assert_eq!(held, ratio(1, 60));
-        assert_eq!(cross.by.get(&(0, Fate::Acknowledged)).map(|t| (t.count, t.sum.clone())), Some((1, ratio(1, 1800))));
+        assert_eq!(cross.by.get(&(0, Fate::Weighted)).map(|t| (t.count, t.sum.clone())), Some((1, ratio(1, 1800))));
+        // Past its round its weight stands on the next mark: f = (1/1800)/(1/60) = 1/30.
+        assert_eq!(lever, Some((ratio(2, 60), ratio(1, 30))));
         // Within its round it drains.
         let _ = leaf(&ratio(31, 1800), Some(&ratio(1, 60)), &ratio(1, 100), 1, &mut cross);
         assert_eq!(cross.by.get(&(1, Fate::Drained)).map(|t| t.count), Some(1));
         // With no place of its own it is cauterized at the coordinate's mark.
-        let (_, scar) = leaf(&ratio(1, 7), None, &ratio(0, 1), 0, &mut cross);
+        let (_, scar, _) = leaf(&ratio(1, 7), None, &ratio(0, 1), 0, &mut cross);
         assert_eq!(cross.counts().get(&Fate::Cauterized), Some(&1));
         assert!(scar > ratio(0, 1), "a cauterized residue enters the body's heat");
     }

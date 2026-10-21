@@ -283,7 +283,7 @@ mod tests {
     use super::*;
 
     fn mote(key: &str, amount: Ratio) -> Mote {
-        Mote { key: crate::chem::Kind::parse(key).expect("a kind"), amount, ell_o: ratio(1, 2), ell_c: ratio(0, 1), phase: vec![ratio(0, 1), ratio(1, 2)], agitation: ratio(0, 1), born: 0, vacuum: true }
+        Mote { key: crate::chem::Kind::parse(key).expect("a kind"), amount, ell_o: ratio(1, 2), ell_c: ratio(0, 1), phase: vec![ratio(0, 1), ratio(1, 2)], agitation: ratio(0, 1), born: 0, vacuum: true, lever: Vec::new(), lever_place: ratio(0, 1) }
     }
 
     fn three_z(ms: &[Mote]) -> Ratio {
