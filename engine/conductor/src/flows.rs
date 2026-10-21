@@ -892,10 +892,7 @@ pub fn chains(motes: &[Mote], h: &Ratio, p: &Ratio, total: &Ratio) -> Vec<Chain>
     // face, motes whose dispersal bands overlap, linked transitively.
     let mut fibres: std::collections::BTreeMap<(Vec<bool>, crate::chem::Kind), Vec<usize>> = std::collections::BTreeMap::new();
     for (i, x) in motes.iter().enumerate() {
-        // Only the GAS gathers: a mote inside the throat (its spin within the
-        // core state's, ℓ ≤ 1: the throat at R = 1 about the state 1) is the
-        // core's own held matter, never a star's.
-        if on_disc_leg(x) && x.ell_o > ratio(1, 1) {
+        if on_disc_leg(x) && !rr[i].is_zero() {
             fibres.entry(((0..PLANES).map(|k| frac(&x.phase[k]) < half).collect(), x.key.clone())).or_default().push(i);
         }
     }

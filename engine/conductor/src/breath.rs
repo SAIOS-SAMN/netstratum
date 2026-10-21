@@ -881,10 +881,9 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // at loop phase ½): the inbound leg (the axis, for the vacuum)
             // delivers it to the throat.
             let loop_was: Vec<(usize, Ratio)> = core.flows.iter().enumerate().filter(|(_, x)| x.vacuum && x.phase.len() > 1).map(|(j, x)| (j, x.phase[1].clone())).collect();
-            // The push the core's BOUNCE gives its flows, the dispersal law's
-            // `p·w̄` (a galactic core is a throat, never a heart).
-            let bounce_push = p.clone() * mean.clone();
-            let (given, absorbed) = crate::flows::kick(&mut core.flows, enc.as_ref().unwrap_or(&throat), &p, tide, &ledger_unit, Some(&bounce_push), &mut cross);
+            // The galaxy's band (push and return, `flows::kick`) stands held
+            // back (operator 2026-10-21: "pull it back and make it static").
+            let (given, absorbed) = crate::flows::kick(&mut core.flows, enc.as_ref().unwrap_or(&throat), &p, tide, &ledger_unit, None, &mut cross);
             core.reservoir -= given;
             // RECYCLING (`crate::recycle`; xylarium 11.0 (18)): AFTER the
             // kicks (kicks are motion, recycling the residue), the bounce the
