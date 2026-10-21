@@ -153,8 +153,11 @@ pub fn mark() -> Ratio {
 
 /// A LEAF's phase through the cross: held to its place; its residue drains
 /// within its round or is acknowledged past it; with no place of its own it
-/// is cauterized at the coordinate's mark, the residue a scar.
-pub fn leaf(v: &Ratio, place: Option<&Ratio>, agitation: &Ratio, plane: usize, cross: &mut Cross) -> Ratio {
+/// is cauterized at the coordinate's mark, the residue a scar that enters
+/// the body's own heat: the round that would hold it, `2·|r|` (§2: a round of
+/// agitation a holds half a turn's share a/2 about the body). Returns the
+/// held phase and the scar's heat.
+pub fn leaf(v: &Ratio, place: Option<&Ratio>, agitation: &Ratio, plane: usize, cross: &mut Cross) -> (Ratio, Ratio) {
     let (held, r, cauterized) = match place.filter(|p| !p.is_zero()) {
         Some(p) => {
             let (h, r) = hold(v, Some(p));
@@ -175,8 +178,12 @@ pub fn leaf(v: &Ratio, place: Option<&Ratio>, agitation: &Ratio, plane: usize, c
             }
         };
         cross.note(plane, fate, &r);
+        if cauterized {
+            let mag = if r < ratio(0, 1) { -r.clone() } else { r.clone() };
+            return (held, ratio(2, 1) * mag);
+        }
     }
-    held
+    (held, ratio(0, 1))
 }
 
 #[cfg(test)]
@@ -220,14 +227,16 @@ mod tests {
     fn every_residue_meets_a_recorded_fate() {
         let mut cross = Cross::default();
         // Held to a place of 1/60: 31/1800 lies 1/1800 past a mark.
-        let held = leaf(&ratio(31, 1800), Some(&ratio(1, 60)), &ratio(0, 1), 0, &mut cross);
+        let (held, heat) = leaf(&ratio(31, 1800), Some(&ratio(1, 60)), &ratio(0, 1), 0, &mut cross);
+        assert_eq!(heat, ratio(0, 1));
         assert_eq!(held, ratio(1, 60));
         assert_eq!(cross.by.get(&(0, Fate::Acknowledged)).map(|t| (t.count, t.sum.clone())), Some((1, ratio(1, 1800))));
         // Within its round it drains.
         let _ = leaf(&ratio(31, 1800), Some(&ratio(1, 60)), &ratio(1, 100), 1, &mut cross);
         assert_eq!(cross.by.get(&(1, Fate::Drained)).map(|t| t.count), Some(1));
         // With no place of its own it is cauterized at the coordinate's mark.
-        let _ = leaf(&ratio(1, 7), None, &ratio(0, 1), 0, &mut cross);
+        let (_, scar) = leaf(&ratio(1, 7), None, &ratio(0, 1), 0, &mut cross);
         assert_eq!(cross.counts().get(&Fate::Cauterized), Some(&1));
+        assert!(scar > ratio(0, 1), "a cauterized residue enters the body's heat");
     }
 }

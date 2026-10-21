@@ -336,7 +336,7 @@ impl Enclosed {
 /// loop (the circulation's plane) runs the other way, its advance read over
 /// that passage; its orbit plane turns forward.
 #[allow(clippy::too_many_arguments)]
-pub fn turn(phase: &mut [Ratio], r_o: &Ratio, h: &Ratio, p: &Ratio, tide: Option<(&Ratio, &Ratio)>, inverted: bool, place: Option<&Ratio>, agitation: &Ratio, cross: &mut crate::enfold::Cross) {
+pub fn turn(phase: &mut [Ratio], r_o: &Ratio, h: &Ratio, p: &Ratio, tide: Option<(&Ratio, &Ratio)>, inverted: bool, place: Option<&Ratio>, agitation: &Ratio, cross: &mut crate::enfold::Cross) -> Ratio {
     let pull = h.clone() / (r_o.clone() + h.clone());
     let d_o = if inverted { ratio(1, 1) - pull.clone() } else { pull.clone() };
     // THE LOOP'S RATE (with xylarium): the jetstream turns by the motion law
@@ -349,7 +349,8 @@ pub fn turn(phase: &mut [Ratio], r_o: &Ratio, h: &Ratio, p: &Ratio, tide: Option
     // denominators each bell without bound; the residue drains within its
     // round, passes to the quantum tier acknowledged, or, with no place of its
     // own, is cauterized with its scar recorded.
-    phase[0] = crate::enfold::leaf(&(phase[0].clone() + ratio(2, 1) * d_o), place, agitation, 0, cross);
+    let (held, scar_o) = crate::enfold::leaf(&(phase[0].clone() + ratio(2, 1) * d_o), place, agitation, 0, cross);
+    phase[0] = held;
     let loop_from = phase[1].clone();
     let route = if inverted { ratio(-1, 1) } else { ratio(1, 1) };
     let loop_phase = frac(&(loop_from.clone() + route.clone() * ratio(2, 1) * d_c.clone()));
@@ -368,7 +369,10 @@ pub fn turn(phase: &mut [Ratio], r_o: &Ratio, h: &Ratio, p: &Ratio, tide: Option
         None => pull.clone(),
     };
     let advance = p.clone() * felt * mean_response(&start, &(ratio(2, 1) * d_c));
-    phase[1] = crate::enfold::leaf(&(loop_phase + route * advance), place, agitation, 1, cross);
+    let (held, scar_c) = crate::enfold::leaf(&(loop_phase + route * advance), place, agitation, 1, cross);
+    phase[1] = held;
+    // A cauterized residue's scar, the heat it enters.
+    scar_o + scar_c
 }
 
 /// One bell's kicks on every mote: the own family in the orbit's plane
@@ -392,7 +396,7 @@ pub fn kick(motes: &mut [Mote], enc: &Enclosed, p: &Ratio, tide: Option<(&Ratio,
         let m = if total.is_zero() { ratio(0, 1) } else { x.amount.clone() * weight(&x.key) / total.clone() };
         let place = crate::enfold::place(&r_o, &m, &h);
         let heat_was = x.agitation.clone();
-        turn(&mut x.phase, &r_o, &h, p, tide, x.vacuum, place.as_ref(), &heat_was, cross);
+        let scar = turn(&mut x.phase, &r_o, &h, p, tide, x.vacuum, place.as_ref(), &heat_was, cross);
         // Over its whole passage this bell, never at one instant; a vacuum
         // mote at its inverted reach (`1 − δ`), forward.
         let d_o = if x.vacuum { ratio(1, 1) - d_o } else { d_o };
@@ -409,7 +413,7 @@ pub fn kick(motes: &mut [Mote], enc: &Enclosed, p: &Ratio, tide: Option<(&Ratio,
         let coherent = if k < ratio(0, 1) { -k } else { k };
         let heat = p.clone() * d_o.clone() * (ratio(1, 1) - coherent.min(ratio(1, 1)));
         let keep = (ratio(1, 1) - open(&x.key).min(ratio(1, 1))) * (ratio(1, 1) - d_o.clone());
-        x.agitation = crate::ring::grain(&((x.agitation.clone() + heat) * keep.clone() * keep));
+        x.agitation = crate::ring::grain(&((x.agitation.clone() + heat) * keep.clone() * keep + scar));
         // Spin cannot carry a mote through zero reach: a turning is a
         // magnitude in its plane; a kick past zero stops at the core.
         let new_o = crate::ring::grain(&(x.ell_o.clone() + dl_o)).max(ratio(0, 1));
@@ -965,7 +969,9 @@ pub fn merge(motes: &mut Vec<Mote>, total: &Ratio, place_of: &dyn Fn(&Mote) -> O
                 let mean = circle_mean(&[(my.clone() * w.clone(), y.phase[k].clone()), (mx.clone() * w.clone(), x.phase[k].clone())]);
                 let shift = mean.clone() - y.phase[k].clone();
                 cross.note(k, crate::enfold::Fate::Condensed, &shift);
-                y.phase[k] = crate::enfold::leaf(&mean, place.as_ref(), &heat, k, cross);
+                let (held, scar) = crate::enfold::leaf(&mean, place.as_ref(), &heat, k, cross);
+                y.phase[k] = held;
+                y.agitation = g(&(y.agitation.clone() + scar));
             }
         } else {
             at.insert(kx, out.len());

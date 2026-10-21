@@ -323,7 +323,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     // The star's place: the cap its own gravity holds about it.
                     let place = crate::enfold::place(&r, &(mass(&sys.total()) / g_before.clone()), &h_in);
                     let heat_was = sys.heat.clone();
-                    crate::flows::turn(&mut sys.bell, &r, &h_in, p_g, tide, false, place.as_ref(), &heat_was, &mut cross);
+                    sys.heat += crate::flows::turn(&mut sys.bell, &r, &h_in, p_g, tide, false, place.as_ref(), &heat_was, &mut cross);
                     // THE RETURN (with xylarium): its galaxy's torque gives
                     // back `d/(d + turned)` of its displacement in each plane,
                     // `d = 1 − δ_gal` its drag, `turned` its own spin's turns
@@ -792,14 +792,32 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // it contains, B = p − Σ m·|Δℓ|.
             let container = ledger_unit.clone() + (h.clone() - ratio(1, 1)) * g_mass.clone();
             let bounce = crate::ring::grain(&(p.clone() - absorbed));
+            // What stood in the throat as it entered, to tell how each leaves.
+            let entered: Vec<(usize, crate::chem::Kind, Ratio)> = in_throat.iter().filter(|&&j| j < core.flows.len()).map(|&j| (j, core.flows[j].key.clone(), core.flows[j].amount.clone())).collect();
+            let before = core.flows.len();
             let r = crate::recycle::recycle(&mut core.flows, &in_throat, &bounce, &container, &(g_mass.clone() - (h.clone() - ratio(1, 1)) * g_mass.clone()), bell);
             // Whatever passed the throat, split or not, leaves on the
             // continuum (operator 2026-10-19: "redistributed back via the
-            // continuum"); the vacuum refills only from the ocean.
-            for &j in &in_throat {
+            // continuum"); the vacuum refills only from the ocean. Each exit
+            // closes its puncture: SEALED where it leaves as it entered (its
+            // state read back), CAUTERIZED where the bounce pressed or peeled
+            // it (its state cannot be read back), the change its scar. What
+            // the throat made (the pressed and peeled products) was born there
+            // and leaves on the continuum, cauterized.
+            let holding = |k: &crate::chem::Kind, a: &Ratio| a.clone() * crate::flows::weight(k);
+            for (j, key, amount) in entered {
                 core.flows[j].vacuum = false;
-                // SEAL: it leaves on the continuum.
-                cross.note(0, crate::enfold::Fate::Sealed, &ratio(0, 1));
+                if core.flows[j].key == key && core.flows[j].amount == amount {
+                    cross.note(0, crate::enfold::Fate::Sealed, &ratio(0, 1));
+                } else {
+                    let scar = holding(&key, &amount) - holding(&core.flows[j].key, &core.flows[j].amount);
+                    cross.note(0, crate::enfold::Fate::Cauterized, &scar);
+                }
+            }
+            for x in core.flows.iter_mut().skip(before) {
+                x.vacuum = false;
+                let scar = -holding(&x.key, &x.amount);
+                cross.note(0, crate::enfold::Fate::Cauterized, &scar);
             }
             recycled = crate::recycle::Recycled { pressed: r.pressed, light: r.light / unit.clone(), peeled: r.peeled, spent: r.spent / unit.clone(), trapped: r.trapped / unit.clone(), hydrogen: r.hydrogen };
             // THE SHEAR: neighbouring rings pass turning outward; the inner
