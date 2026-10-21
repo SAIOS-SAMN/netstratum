@@ -95,6 +95,19 @@ pub fn site(path: &[u64]) -> Option<crate::seating::Site> {
     with(|p| p.sites.get(path).cloned())
 }
 
+/// Why a settler from `parent` found no world: the reading's free worlds in
+/// its galaxy, and whether its parent's system still stands.
+pub fn unsettled(parent: &[u64]) -> String {
+    with(|p| {
+        let g = *parent.first()?;
+        let free = p.sites.keys().filter(|k| k.first() == Some(&g) && !p.claimed.contains(*k)).count();
+        let sites = p.sites.keys().filter(|k| k.first() == Some(&g)).count();
+        let stands = parent.get(1).is_some_and(|s| p.systems.contains_key(&(g, *s)));
+        Some(format!("{free} of {sites} worlds free in galaxy {g}; the parent's system {}", if stands { "stands" } else { "is gone" }))
+    })
+    .unwrap_or_else(|| "no reading".into())
+}
+
 /// A line stands on the world at `path`.
 pub fn claim(path: &[u64]) {
     if let Ok(mut g) = now().lock() {

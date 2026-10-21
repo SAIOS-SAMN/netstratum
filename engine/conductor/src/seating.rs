@@ -103,13 +103,17 @@ pub fn site_of(heat: &cfe::ratio::Ratio, burn: &cfe::ratio::Ratio) -> Option<(cf
     }
     let distance = |c: &C| { let d = c.luminosity() - burn.clone(); if d < ratio(0, 1) { -d } else { d } };
     let class = [C::O, C::B, C::A, C::F, C::G, C::K, C::M].into_iter().min_by(|a, b| distance(a).cmp(&distance(b)))?;
-    // On the spin grain (design law 8): the era-0 thermal machinery reads
-    // this orbit every tick, and the exact quotient carried the heat's
-    // eighty-digit terms into every product.
-    let orbit = crate::ring::grain(&(cfe::thermal::thermal_k() * class.luminosity() / heat.clone()));
-    if orbit <= ratio(0, 1) {
-        return None;
+    // Six sexagesimal places of its own size (design law 8): the era-0
+    // thermal machinery reads this orbit every tick, and the exact quotient
+    // carried the heat's eighty-digit terms into every product; a fixed grain
+    // floored the smallest orbits to nothing.
+    let exact = cfe::thermal::thermal_k() * class.luminosity() / heat.clone();
+    let floor = ratio(60, 1).pow(6);
+    let mut scale = ratio(1, 1);
+    while exact.clone() * scale.clone() < floor {
+        scale *= ratio(60, 1);
     }
+    let orbit = (exact * scale.clone()).floor() / scale;
     Some((class, ratio(0, 1), orbit))
 }
 

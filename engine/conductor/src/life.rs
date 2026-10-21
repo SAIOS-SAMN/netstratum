@@ -214,12 +214,13 @@ pub struct Home {
 
 /// The home galaxy is the deepest core (the largest hole, the unit of mass)
 /// AMONG THOSE THAT HAVE FORMED A WORLD (formation, docs/83: a galaxy holds
-/// no system until its gas collapses); its innermost star and that star's
-/// innermost world are the rulers.
+/// no system until its gas collapses); its innermost star that holds a world
+/// and that star's innermost world are the rulers (the breath moves and
+/// empties systems, so the first in order need not hold one).
 pub fn home(u: &Universe) -> Option<Home> {
-    let core = u.cores.iter().filter(|c| c.satellites.first().is_some_and(|s| !s.satellites.is_empty())).max_by(|a, b| mass(&a.kept).cmp(&mass(&b.kept)))?;
-    let sys = core.satellites.first()?;
-    let orb = sys.satellites.first()?;
+    let core = u.cores.iter().filter(|c| c.satellites.iter().any(|s| !s.satellites.is_empty())).max_by(|a, b| mass(&a.kept).cmp(&mass(&b.kept)))?;
+    let sys = core.satellites.iter().filter(|s| !s.satellites.is_empty()).min_by(|a, b| a.radius.cmp(&b.radius))?;
+    let orb = sys.satellites.iter().min_by(|a, b| a.radius.cmp(&b.radius))?;
     Some(Home { star: mass(&sys.kept), world: mass(&orb.kept), year_bells: orb.period.clone() })
 }
 

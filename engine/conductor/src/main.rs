@@ -625,8 +625,10 @@ fn main() {
             // nearest its parent's.
             let parent = spec.civilization.lineage.first().cloned().unwrap_or_default();
             let near = worlds.iter().find(|p| p.spec.civilization.sigil == parent).and_then(|p| p.spec.place.clone());
-            if let Some(site) = near.as_deref().and_then(|p| conductor::places::settle(p, &spec.civilization.metabolism)) {
-                conductor::seating::apply(&mut spec, &site);
+            match near.as_deref().map(|p| (p, conductor::places::settle(p, &spec.civilization.metabolism))) {
+                Some((_, Some(site))) => conductor::seating::apply(&mut spec, &site),
+                Some((p, None)) => println!("beat {beat}: UNSETTLED — {} finds no world near {p:?}: {}", spec.civilization.sigil, conductor::places::unsettled(p)),
+                None => println!("beat {beat}: UNSETTLED — {}: its parent {parent} stands on no era-1 world", spec.civilization.sigil),
             }
             println!(
                 "beat {beat}: DIVERGENCE — {} ({}) cleaves from the line of {}, settling {}/{}{}",
