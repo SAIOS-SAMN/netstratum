@@ -380,7 +380,7 @@ impl Enclosed {
 /// loop (the circulation's plane) runs the other way, its advance read over
 /// that passage; its orbit plane turns forward.
 #[allow(clippy::too_many_arguments)]
-pub fn turn(phase: &mut [Ratio], r_o: &Ratio, h: &Ratio, p: &Ratio, tide: Option<(&Ratio, &Ratio)>, inverted: bool, place: Option<&Ratio>, agitation: &Ratio, cross: &mut crate::enfold::Cross) -> (Ratio, Vec<(usize, Ratio, Ratio)>) {
+pub fn turn(phase: &mut [Ratio], r_o: &Ratio, h: &Ratio, p: &Ratio, tide: Option<(&Ratio, &Ratio)>, inverted: bool, place: Option<&Ratio>, agitation: &Ratio, cross: &mut crate::enfold::Cross) -> (Ratio, Vec<(usize, Ratio, Ratio)>, Ratio) {
     let pull = h.clone() / (r_o.clone() + h.clone());
     let d_o = if inverted { ratio(1, 1) - pull.clone() } else { pull.clone() };
     // THE LOOP'S RATE (with xylarium): the jetstream turns by the motion law
@@ -401,8 +401,10 @@ pub fn turn(phase: &mut [Ratio], r_o: &Ratio, h: &Ratio, p: &Ratio, tide: Option
     // THE PARENT'S PULSE MOVES MATTER ALONG THE LOOP (operator: "the pulse
     // moves matter along the loop"; with xylarium): absorbed in step it
     // ADVANCES the loop's phase, `p·ρ·δ_u` × the hemisphere's signed share,
-    // on top of the loop's own rate; nothing accumulates as a spin in the
-    // loop's plane.
+    // on top of the loop's own rate. AND IT IS A SPIN (docs/90 D1, operator
+    // 2026-10-22; xylarium 11.0: "the loop is an orbit", one kick law per
+    // plane): the same push, read by the one kick law in the loop's plane,
+    // is the loop spin's kick, returned to the caller (`κ_c`).
     let start = if inverted { loop_from - ratio(2, 1) * d_c.clone() } else { loop_from };
     // The pulse it feels: a galaxy's received share of the source's rings and
     // the universal tide at the galaxy (`tide`), or, standing in the source's
@@ -413,11 +415,29 @@ pub fn turn(phase: &mut [Ratio], r_o: &Ratio, h: &Ratio, p: &Ratio, tide: Option
         None => pull.clone(),
     };
     let advance = p.clone() * felt * mean_response(&start, &(ratio(2, 1) * d_c));
+    let kick_c = route.clone() * advance.clone();
     let (held, scar_c, lever_c) = crate::enfold::leaf(&(loop_phase + route * advance), place, agitation, 1, cross);
     phase[1] = held;
     // A cauterized residue's scar (the heat it enters) and each plane's lever.
     let levers = [(0usize, lever_o), (1usize, lever_c)].into_iter().filter_map(|(k, l)| l.map(|(n, f)| (k, n, f))).collect();
-    (scar_o + scar_c, levers)
+    (scar_o + scar_c, levers, kick_c)
+}
+
+/// THE SWING (docs/90 D2): a body's loop spin projects onto its orbit by
+/// where it stands on its loop, the plane's linear measure (`response`): its
+/// spin seen in the orbit plane is `ℓ + ℓ_c·response(ψ_c)`, so its reach swings
+/// each loop between `(ℓ − |ℓ_c|)/H` and `(ℓ + |ℓ_c|)/H`, an elongation
+/// `e = |ℓ_c|/ℓ` read from two planes, no ellipse and no square. Where the
+/// swing passes zero the body passes THROUGH the centre to the antipode (the
+/// orbit-plane kick's law, docs/83): returns the magnitude and whether it is
+/// through (its orbit phase then stands half a turn on).
+pub fn swung(ell: &Ratio, ell_c: &Ratio, psi_c: &Ratio) -> (Ratio, bool) {
+    let s = ell.clone() + ell_c.clone() * response(psi_c);
+    if s < ratio(0, 1) {
+        (-s, true)
+    } else {
+        (s, false)
+    }
 }
 
 /// One bell's kicks on every mote: the own family in the orbit's plane
@@ -434,20 +454,24 @@ pub fn kick(motes: &mut [Mote], enc: &Enclosed, p: &Ratio, tide: Option<(&Ratio,
     let mut given = ratio(0, 1);
     let mut absorbed = ratio(0, 1);
     for x in motes.iter_mut() {
-        // Each turns by what is enclosed inside it (the core and all inside).
-        let h = enc.hold(&x.ell_o);
-        let (r_o, d_o) = enc.reach(&x.ell_o);
+        // Each turns by what is enclosed inside it (the core and all inside),
+        // at the reach its loop swings it to this bell (docs/90 D2): the
+        // motion law at its present reach, so it turns faster inward and
+        // slower outward; through the centre where the swing passes zero.
+        let (now, through_c) = swung(&x.ell_o, &x.ell_c, x.phase.get(1).unwrap_or(&ratio(0, 1)));
+        let h = enc.hold(&now);
+        let (r_o, d_o) = enc.reach(&now);
         // ASCENT: the bell turns the mote from where it truly stands, its
         // lever read back onto its marks.
         for k in 0..x.phase.len() {
             x.phase[k] = true_phase(x, k);
         }
-        let from = x.phase[0].clone();
+        let from = if through_c { frac(&(x.phase[0].clone() + ratio(1, 2))) } else { x.phase[0].clone() };
         // A mote's place: the cap its own gravity holds (`enfold::place`).
         let m = if total.is_zero() { ratio(0, 1) } else { x.amount.clone() * weight(&x.key) / total.clone() };
         let place = crate::enfold::place(&r_o, &m, &h);
         let heat_was = x.agitation.clone();
-        let (scar, levers) = turn(&mut x.phase, &r_o, &h, p, tide, x.vacuum, place.as_ref(), &heat_was, cross);
+        let (scar, levers, kick_c) = turn(&mut x.phase, &r_o, &h, p, tide, x.vacuum, place.as_ref(), &heat_was, cross);
         // Over its whole passage this bell, never at one instant; a vacuum
         // mote at its inverted reach (`1 − δ`), forward.
         let d_o = if x.vacuum { ratio(1, 1) - d_o } else { d_o };
@@ -504,8 +528,17 @@ pub fn kick(motes: &mut [Mote], enc: &Enclosed, p: &Ratio, tide: Option<(&Ratio,
         };
         let dl = new_o.clone() - x.ell_o.clone();
         absorbed += m.clone() * if dl < ratio(0, 1) { -dl.clone() } else { dl.clone() };
-        given += m * dl;
+        given += m.clone() * dl;
         x.ell_o = new_o;
+        // THE LOOP SPIN (docs/90 D1): the release's kick in the loop's plane,
+        // less the hold's return of the held half, `½·δ(R)·ℓ_c`, both from and
+        // to the same reservoir as the orbit plane's (Σ m·(ℓ_o + ℓ_c) and the
+        // reservoir exact).
+        let new_c = crate::ring::grain(&(x.ell_c.clone() + kick_c - ratio(1, 2) * d_o.clone() * x.ell_c.clone()));
+        let dl_c = new_c.clone() - x.ell_c.clone();
+        absorbed += m.clone() * if dl_c < ratio(0, 1) { -dl_c.clone() } else { dl_c.clone() };
+        given += m * dl_c;
+        x.ell_c = new_c;
         // DESCENT: its weight past its round stands one place past its mark.
         settle(x, &levers, place.as_ref(), cross);
     }

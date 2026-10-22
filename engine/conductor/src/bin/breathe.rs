@@ -201,6 +201,33 @@ fn main() {
             println!("  star {:?} at bell {}: {:?}, {} strokes, returned {} holding and {} spin; heard by {}", t.star, t.bell, t.passing, t.strokes.map(|n| n.to_string()).unwrap_or_else(|| "uncounted".into()), conductor::reading::sector(&t.returned), conductor::reading::sector(&t.spin), heard.join(", "));
         }
     }
+    use num_traits::Zero as _;
+    // THE SWING (docs/90): each galaxy's stars' and worlds' elongations, their
+    // loop spin over their orbit spin, `e = |ℓ_c|/ℓ` (the reach swings over
+    // `R(1 ± e)` each loop): how many carry one, their greatest and their
+    // holding-weighted mean; and the loop spin the ledger holds (Σ m·ℓ_c).
+    {
+        let unit = breath::unit_mass(&u);
+        let abs = |x: &cfe::ratio::Ratio| if *x < cfe::ratio::ratio(0, 1) { -x.clone() } else { x.clone() };
+        let e_of = |b: &pulse::Body| if b.ell.is_zero() { cfe::ratio::ratio(0, 1) } else { abs(&b.ell_c) / abs(&b.ell) };
+        let read = |bodies: &[&pulse::Body]| -> String {
+            let swung: Vec<&&pulse::Body> = bodies.iter().filter(|b| !b.ell_c.is_zero()).collect();
+            let most = bodies.iter().map(|b| e_of(b)).max().unwrap_or_else(|| cfe::ratio::ratio(0, 1));
+            let held = bodies.iter().fold(cfe::ratio::ratio(0, 1), |s, b| s + pulse::mass(&b.total()));
+            let mean = if held.is_zero() { cfe::ratio::ratio(0, 1) } else { bodies.iter().fold(cfe::ratio::ratio(0, 1), |s, b| s + pulse::mass(&b.total()) * e_of(b)) / held };
+            format!("{} of {} swinging, greatest e {}, mean e {}", swung.len(), bodies.len(), conductor::reading::sector(&most), conductor::reading::sector(&mean))
+        };
+        let mut loop_spin = cfe::ratio::ratio(0, 1);
+        for core in &u.cores {
+            let stars: Vec<&pulse::Body> = core.satellites.iter().collect();
+            let worlds: Vec<&pulse::Body> = core.satellites.iter().flat_map(|s| s.satellites.iter()).collect();
+            for b in stars.iter().chain(worlds.iter()) {
+                loop_spin += pulse::mass(&b.total()) / unit.clone() * b.ell_c.clone();
+            }
+            println!("SWING {:?} — stars: {}; worlds: {}", core.path, read(&stars), read(&worlds));
+        }
+        println!("SWING — the bodies' loop spin on the ledger, Σ m·ℓ_c = {}", conductor::reading::sector(&loop_spin));
+    }
     // THE JOINT READ (CONCORDANCE 2.10, the landing rule): each star's burn
     // as the form holds it, its runs `(1 − x_i, n_i)` on its own clock in the
     // order lived, and the reading of what remains on the 60⁻⁶ grain; written
