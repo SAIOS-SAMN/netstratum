@@ -53,6 +53,22 @@ pub mod lane {
 /// encoded limit with room for the frame around it.
 pub const PART_BYTES: usize = 700_000;
 
+/// THE UNIVERSE'S RADIUS for its origin (era 1, operator 2026-10-22: "proceed"):
+/// the reach its bell crosses, half the bell's period `T_u/2` light-rings
+/// (`pulse::Universe::t_u`, `<var>/pulse.bin` tag 17). The ring law is already
+/// geometrized (mass is holding, in the units of reach; no G, no c), so the
+/// court's `2m/R` reads true in netstratum's own unit; the court names that
+/// unit a megaparsec, a label only.
+pub fn universe_radius(var_root: &Path) -> io::Result<(u64, u64)> {
+    let bytes = std::fs::read(var_root.join("pulse.bin"))?;
+    let t_u = cfe::tlv::records(&bytes)
+        .find(|(t, _)| *t == 17)
+        .and_then(|(_, v)| v.try_into().ok().map(u64::from_le_bytes))
+        .filter(|t| *t > 0)
+        .ok_or_else(|| io::Error::other("the universe has no bell (pulse.bin tag 17)"))?;
+    Ok((t_u, 2))
+}
+
 /// The tier's signing key, from `home/tier-<name>.key` (minted on first use).
 pub fn tier_key(home: &Path, name: &str) -> io::Result<ed25519_dalek::SigningKey> {
     std::fs::create_dir_all(home)?;
@@ -189,20 +205,20 @@ impl Uplink {
 
     /// **THE ORIGIN** (78.132/78.139/78.140): netstratum's universe stated
     /// ONCE on this court, signed by the domain key — version 2, a ROOT
-    /// (parent face unwitnessed), its space a TORUS in geometrized Mpc with
-    /// the L1 metric (docs/58 §8: 1 cell = 1/32 Mpc, 64 cells per axis =
-    /// periods (2, 2, 2) Mpc). The commitment is the universe's Big Bang: the
+    /// (parent face unwitnessed), its space CURVED and closed (era 1, docs/78:
+    /// the sphere universe; the era-0 L1 torus is retired) of radius `radius`
+    /// (`universe_radius`). The commitment is the universe's Big Bang: the
     /// own-hash of its `UniverseFounded` receipt (its seed). Never edited.
-    pub fn originate(&self, home: &Path, seed: [u8; 32], periods: Vec<(u64, u64)>) -> io::Result<Founded> {
+    pub fn originate(&self, home: &Path, seed: [u8; 32], radius: (u64, u64)) -> io::Result<Founded> {
         use mycelium::anastome::dialogue::domain::Origin;
-        use mycelium::anastome::dialogue::universe::{Genesis, Geometry, Metric, Parent};
+        use mycelium::anastome::dialogue::universe::{Genesis, Geometry, Parent};
         let domain = tier_key(home, "domain")?;
         let origin = Origin {
             domain: domain.verifying_key().to_bytes(),
             kind: ORIGIN_KIND,
             version: 2,
             commitment: seed,
-            universe: Some(Genesis { geometry: Geometry::Torus { periods, metric: Metric::L1 }, parent: Parent::Unwitnessed }),
+            universe: Some(Genesis { geometry: Geometry::Curved(radius), parent: Parent::Unwitnessed }),
         };
         self.session.originate(&origin.sign(&domain))
     }

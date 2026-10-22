@@ -29,7 +29,7 @@
 use mycelium::anastome::dialogue::atlas::{decode_map_reply, encode_map, MapAct, MapRecord, MapRefusal, Mapped};
 use mycelium::anastome::dialogue::domain::{DomainGenesis, Founded, Origin, Reservation};
 use mycelium::anastome::dialogue::seat::Arg;
-use mycelium::anastome::dialogue::universe::{Genesis, Geometry, Metric, Parent};
+use mycelium::anastome::dialogue::universe::{Genesis, Geometry, Parent};
 use mycelium::chronometry::tuniversal::TPoint;
 use mycelium::sdk::Session;
 use std::io;
@@ -147,8 +147,8 @@ pub fn refound(session: &Session, home: &Path, var_root: &Path) -> io::Result<(b
     if !matches!(founded, Founded::Sealed { .. } | Founded::AlreadyFounded) {
         return Ok((false, said));
     }
-    // 2. The origin: the Big Bang's seed, the torus (docs/58 §8: 64 cells of
-    // 1/32 Mpc a side).
+    // 2. The origin: the Big Bang's seed and era 1's closed sphere, its radius
+    // the bell's reach (`fold::universe_radius`).
     let ledger = cfe::persist::load(&var_root.join("worlds/convergence.tlv")).map_err(|e| io::Error::other(format!("the universe ledger did not read: {e:?}")))?;
     let seed = ledger
         .receipts()
@@ -161,7 +161,7 @@ pub fn refound(session: &Session, home: &Path, var_root: &Path) -> io::Result<(b
         kind: crate::fold::ORIGIN_KIND,
         version: 2,
         commitment: seed,
-        universe: Some(Genesis { geometry: Geometry::Torus { periods: vec![(2, 1), (2, 1), (2, 1)], metric: Metric::L1 }, parent: Parent::Unwitnessed }),
+        universe: Some(Genesis { geometry: Geometry::Curved(crate::fold::universe_radius(var_root)?), parent: Parent::Unwitnessed }),
     };
     let originated = session.originate(&origin.sign(&domain))?;
     said.push(format!("2 origin: {originated:?}"));

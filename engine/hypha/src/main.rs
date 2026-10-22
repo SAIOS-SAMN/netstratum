@@ -165,9 +165,15 @@ fn main() -> ExitCode {
                 eprintln!("ns-hypha: {root} has no Big Bang on its universe ledger");
                 return ExitCode::from(1);
             };
-            // docs/58 §8: 1 cell = 1/32 Mpc; 64 cells per axis = 2 Mpc.
-            let periods = vec![(2, 1), (2, 1), (2, 1)];
-            match up.originate(&home, seed, periods) {
+            // Era 1: the closed sphere, its radius the bell's reach.
+            let radius = match ns_hypha::fold::universe_radius(Path::new(&root)) {
+                Ok(r) => r,
+                Err(e) => {
+                    eprintln!("ns-hypha: {root}'s radius did not read: {e}");
+                    return ExitCode::from(1);
+                }
+            };
+            match up.originate(&home, seed, radius) {
                 Ok(f) => {
                     println!("origin: {f:?}");
                     ExitCode::SUCCESS
