@@ -1,40 +1,59 @@
-# 88 — The geoid: a body's own sphere and its figure
+# 88 — The geoid: a body's own sphere, its own spin, its day and its figure
 
-docs/87 step 1. Operator 2026-10-22: "planetary movement is across a
-sphere, space traversal is also in a sphere (where sphere is a geoid)".
+docs/87 step 1, and step 2b. Operator 2026-10-22: "planetary movement is
+across a sphere, space traversal is also in a sphere (where sphere is a
+geoid)"; "DAYS_A_YEAR cannot be a constant, it is derived in the same way
+earth is: the degrees of the rotation in the spin of the planetary mass
+coupled with the orbit of the planet around its star"; "derive own spin".
 
 ## The law (`conductor::geoid`)
 
-A body's own sphere is the shell of its own enclosure, its reach
-`d = R·H_b/(H_b + H_p)` (the enfold law's gravity reach): R its reach about
-the holding H_p inside its orbit (its star and the worlds within), H_b its
-own holding. Its figure is that shell's equipotential under its own turning,
-in the ring law's grammar (`ring`: a place turns by its deficit,
-`δ = H/(r + H)`).
+In the ring law's grammar (`ring`: mass is holding; a place turns by its
+deficit `δ = H/(r + H)`, two rings a bell on the system's meeting step).
 
-1. **Its own spin rises from below** (law 7). The matter it gathered across
-   its reach turned about its parent at `δ_p(R − d)` inside and
-   `δ_p(R + d)` outside. Gathered, the difference is its own turning,
-   `ω_s = δ_p(R + d) − δ_p(R − d)`. The inner matter leads, so shear spins
-   it AGAINST its orbit's sense (negative).
-2. **Its push against its hold.** A satellite skimming its reach turns at
-   `δ_b(d) = H_b/(d + H_b)`; its own turning's share of that is
-   `s = |ω_s|/δ_b(d)`. Only the mantle feels the push, the core holds:
-   `s_κ = s·(1 − κ)`, κ its core share (`life::World.core`).
-3. **The figure.** At θ degrees from the spin axis the push acts by the
-   circle's share there, the ruled sine `S(θ) = 1 − |90° − θ|/90°`
-   (docs/85). The surface stands where the hold less the push is the
-   pole's, `δ_b(r_θ) = δ_b(d)·(1 − s_κ·S(θ))`:
+1. **The surface is the throat**, `r = H_b`, where the body's own hold is the
+   ruled half, `δ_b(H_b) = ½`; a satellite skimming it turns at `2·½ = 1`.
+2. **Own spin** (`Body.own`, tag 20) is the turning against the orbit's
+   frame, signed (positive with the orbit). The orbit's own turning is met
+   by the star's pull (that is what an orbit is), so only own spin pushes
+   the body's matter or turns its star across its sky.
+   - **At birth** (`formation::system`'s planets): the SHEAR across its slot,
+     `2·(δ_p(R + d) − δ_p(R − d))`, `d = R·H_b/(H_b + H_p)`; the inner matter
+     leads, so it turns against its orbit.
+   - **At every meeting that builds it** (`formation::collide_system`): what
+     its members carried, by holding, plus what their meeting brings about
+     its centre,
+
+     ```text
+     ω_impact = Σ w·[(r − r̄)(ω − ω̄) − (φ − φ̄)·Δr] / Σ w·|r − r̄|
+     ```
+
+     the members' offset in reach times their turning's lag (the shear,
+     against the orbit) less their lead in phase times their reach's motion
+     over the step (the breathing: a leader moving in spins it with its
+     orbit, one moving out against it). Exact, holding-weighted, no reading
+     squared; a group meeting at one reach brings nothing.
+3. **Its day** is Earth's reading: over one orbit its own spin turns it
+   `360°·|ω_own|/ω_orbit` against its star, so its days a year are
+   `|ω_own|/ω_orbit`, `ω_orbit = 2·δ_p(R)`. `life::DAYS_A_YEAR` (360, an
+   anchor) is retired: a cell generation is the world's own day, and a
+   world locked to its star (no day) climbs nothing.
+4. **The figure.** The push is own spin's share of the skimming turn,
+   `s = |ω_own|`, felt by the mantle, `s_κ = s·(1 − κ)`. At θ degrees from
+   the spin axis it acts by the ruled sine `S(θ) = 1 − |90° − θ|/90°`
+   (docs/85); the surface stands where hold less push is the pole's:
 
    ```text
-   r_θ = (d + H_b) / (1 − s_κ·S(θ)) − H_b
+   r_θ = 2H_b / (1 − s_κ·S(θ)) − H_b
    ```
 
-   Round where it does not turn, widest at the equator, shed where
-   `s_κ·S(θ)` reaches one.
+## Read (play3, founded fresh at 2^55, 340 bells: 7 worlds)
 
-Exact rationals; differences of deficits and one share; no square, no sine
-of an angle, no norm.
+No worlds met in its 340 bells, so every world carries its birth shear only:
+days a year 0.002 to 0.03 (nearly locked: its star crosses its sky once in
+30 to 500 years), every world against its orbit, bulges 0.04 % to 0.8 %.
+The impacts (both senses, larger spins) are owed to a reading where worlds
+meet.
 
 ## A people's latitude, and its land (docs/87 step 2)
 
@@ -60,20 +79,12 @@ land read at the latitude (and the seating reading it), all 22 lines found
 with bands of 4 and land 68 to 8,046 heads (five had none at the world's
 mean).
 
-## Read (play1 at boot, 22 seated worlds)
-
-Equatorial bulges from 0 to about 1.8 % of the pole's reach; a world whose
-matter is all core (κ = 1) stands round. Every world turns against its
-orbit.
-
 ## Open
 
-- **One sense only.** Shear alone gives every world a retrograde spin.
-  Law 6 asks for both senses; the other (prograde) needs the gathering
-  itself (what falls in from inside its reach versus outside, the
-  encounter law's) and is owed.
-- Spins do not yet evolve (tides, collisions); the figure is read from the
-  present orbit.
+- Spins do not yet ebb by their star's tide (a locking law is owed).
+- The tilt of the spin axis (docs/85: read from the spin's split across
+  planes) and the standing frame (a people's place in closed form in every
+  frame) are next.
 - A people's longitude is the reading's origin (a turning world has no
   preferred meridian) until a second people shares its world.
 - The cap's extent (how far from its latitude a people's land reaches) is

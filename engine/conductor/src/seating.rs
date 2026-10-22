@@ -156,7 +156,7 @@ pub fn figure_of(u: &Universe, path: &[u64], kappa: &Ratio) -> Option<crate::geo
     }
     let held = |b: &crate::pulse::Body| crate::pulse::mass(&b.total()) / unit.clone();
     let inside = sys.satellites.iter().filter(|o| o.radius < orb.radius).fold(crate::pulse::mass(&sys.kept) / unit.clone(), |s, o| s + held(o));
-    crate::geoid::figure(&orb.radius, &held(orb), &inside, kappa)
+    crate::geoid::figure(&orb.radius, &held(orb), &inside, kappa, &orb.own)
 }
 
 impl Site {

@@ -89,7 +89,11 @@ fn main() {
             conductor::places::claim(path);
             let figure = conductor::places::site(path).and_then(|s| s.figure).map(|f| {
                 let bulge = f.bulge().map(|b| conductor::reading::sector(&(b - cfe::ratio::ratio(1, 1))).to_string()).unwrap_or_else(|| "shed".into());
-                format!("; its geoid bulges {bulge} at the equator, turning {}", if f.spin < cfe::ratio::ratio(0, 1) { "against its orbit" } else { "with its orbit" })
+                format!(
+                    "; its geoid bulges {bulge} at the equator, spinning {} its orbit, {} days a year",
+                    if f.spin < cfe::ratio::ratio(0, 1) { "against" } else { "with" },
+                    conductor::reading::sector(&f.days_a_year())
+                )
             });
             let figure = Some(format!(
                 "{}{}",

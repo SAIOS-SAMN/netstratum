@@ -1,40 +1,63 @@
 //! THE GEOID (docs/88; operator 2026-10-22: "planetary movement is across a
-//! sphere, space traversal is also in a sphere (where sphere is a geoid)").
-//! A body's own sphere is the shell of its own enclosure, its reach `d`
-//! (`enfold`: `d = R·H_b/(H_b + H_p)`), and its figure is that shell's
-//! equipotential under its own turning. Each body answers by its own gravity
-//! and density; nothing is squared and no angle passes through a sine.
+//! sphere, space traversal is also in a sphere (where sphere is a geoid)";
+//! "DAYS_A_YEAR cannot be a constant, it is derived in the same way earth
+//! is: the degrees of the rotation in the spin of the planetary mass coupled
+//! with the orbit of the planet around its star"; "derive own spin"). Each
+//! body answers by its own gravity and density; nothing is squared and no
+//! angle passes through a sine.
 //!
-//! - **Its own spin rises from below** (law 7): the matter a body gathered
-//!   across its reach turned about its parent at the parent's deficits
-//!   there, `δ_p(R − d)` inside and `δ_p(R + d)` outside (`ring::deficit`:
-//!   a place's turning is its deficit). Gathered, the difference is its own
-//!   turning, `ω_s = δ_p(R + d) − δ_p(R − d)`: the inner matter leads, so the
-//!   SHEAR spins it against its orbit's sense (negative, retrograde; law 6:
-//!   both senses).
-//! - **Its push against its hold:** a satellite skimming its own reach turns
-//!   at `δ_b(d) = H_b/(d + H_b)`; its own turning's share of that is
-//!   `s = |ω_s| / δ_b(d)`. Only its mantle feels the push, its core holds:
+//! - **Its surface is its throat**, `r = H_b` (the ring law: mass is holding),
+//!   where its own hold is the ruled half, `δ_b(H_b) = ½`, so a satellite
+//!   skimming it turns at `2·½ = 1` (two rings a bell).
+//! - **Its own spin** (`pulse::Body.own`, docs/88) is its turning against its
+//!   orbit's frame, on the system's meeting step: born from the SHEAR across
+//!   its slot (`shear`: `2·(δ_p(R + d) − δ_p(R − d))`, against its orbit) and
+//!   grown by the IMPACTS that build it (`formation::collide_system`), which
+//!   bring either sense. The orbit's own turning is met by its star's pull
+//!   (that is what an orbit is); only the turning against that frame pushes
+//!   the body's matter or turns its star across its sky.
+//! - **Its day** is Earth's reading: over one orbit (360° of its star's
+//!   direction) its own spin turns it `360°·|ω_own|/ω_orbit` against its
+//!   star, so its days a year are `|ω_own|/ω_orbit`, `ω_orbit = 2·δ_p(R)`.
+//! - **Its push against its hold:** its own spin's share of the skimming
+//!   turn, `s = |ω_own|/1`; only its mantle feels it, the core holds:
 //!   `s_κ = s·(1 − κ)`.
 //! - **The figure:** at θ degrees from its spin axis the push acts by the
 //!   circle's share there, the ruled sine `S(θ) = L(90° − θ) = 1 − |90° −
 //!   θ|/90°` (docs/85). The surface stands where the hold less the push is
-//!   the pole's: `δ_b(r_θ) = δ_b(d)·(1 − s_κ·S(θ))`, so
-//!   `r_θ = (d + H_b)/(1 − s_κ·S(θ)) − H_b`. Round where it does not turn,
-//!   widest at the equator, shed where `s_κ·S(θ)` reaches one.
+//!   the pole's: `δ_b(r_θ) = ½·(1 − s_κ·S(θ))`, so
+//!   `r_θ = 2H_b/(1 − s_κ·S(θ)) − H_b`. Round where it does not turn, widest
+//!   at the equator, shed where `s_κ·S(θ)` reaches one.
 use crate::ring::deficit;
 use cfe::ratio::{ratio, Ratio};
 use num_traits::Zero;
 
-/// A body's figure: its pole reach (its own enclosure), its holding, its
-/// own turning (signed: negative against its orbit) and the push share its
-/// mantle feels.
+/// A body's figure: its pole (its throat, `H_b`), its orbit's turning about
+/// its parent (`2·δ_p(R)`), its own spin (signed: negative against its
+/// orbit), and the push share its mantle feels.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Figure {
     pub pole: Ratio,
-    pub hold: Ratio,
+    pub orbit: Ratio,
     pub spin: Ratio,
     pub push: Ratio,
+}
+
+/// THE SHEAR a body is born with (docs/88): the matter it gathered from
+/// across its reach `d = R·H_b/(H_b + H_p)` (`enfold`) turned about its
+/// parent at the parent's deficits there, two rings a bell; in the orbit's
+/// frame the inner leads and the outer lags, `2·(δ_p(R + d) − δ_p(R − d))`,
+/// against its orbit. None where it holds nothing or stands inside its
+/// parent's reach of it.
+pub fn shear(r: &Ratio, h_body: &Ratio, h_parent: &Ratio) -> Option<Ratio> {
+    if h_body.is_zero() || h_parent.is_zero() || r.is_zero() {
+        return None;
+    }
+    let d = r.clone() * h_body.clone() / (h_body.clone() + h_parent.clone());
+    if d.is_zero() || d >= *r {
+        return None;
+    }
+    Some(ratio(2, 1) * (deficit(&(r.clone() + d.clone()), h_parent) - deficit(&(r.clone() - d), h_parent)))
 }
 
 /// The ruled sine of θ degrees, `S(θ) = 1 − |90° − θ|/90°`, θ reduced to a
@@ -50,23 +73,17 @@ pub fn sine(theta: &Ratio) -> Ratio {
     ratio(1, 1) - off / ratio(90, 1)
 }
 
-/// The figure of a body of holding `h_body` and core share `kappa`, at reach
-/// `r` about the holding `h_parent` inside its orbit. None where it holds
-/// nothing, has no reach of its own, or stands inside its parent's reach of
-/// it (`d ≥ R`).
-pub fn figure(r: &Ratio, h_body: &Ratio, h_parent: &Ratio, kappa: &Ratio) -> Option<Figure> {
-    if h_body.is_zero() || r.is_zero() {
+/// The figure of a body of holding `h_body`, core share `kappa` and own spin
+/// `own`, at reach `r` about the holding `h_parent` inside its orbit. None
+/// where it or its parent holds nothing.
+pub fn figure(r: &Ratio, h_body: &Ratio, h_parent: &Ratio, kappa: &Ratio, own: &Ratio) -> Option<Figure> {
+    if h_body.is_zero() || h_parent.is_zero() || r.is_zero() {
         return None;
     }
-    let d = r.clone() * h_body.clone() / (h_body.clone() + h_parent.clone());
-    if d.is_zero() || d >= *r {
-        return None;
-    }
-    let spin = deficit(&(r.clone() + d.clone()), h_parent) - deficit(&(r.clone() - d.clone()), h_parent);
-    let own = deficit(&d, h_body);
-    let s = if spin < ratio(0, 1) { -spin.clone() } else { spin.clone() } / own;
-    let push = s * (ratio(1, 1) - kappa.clone());
-    Some(Figure { pole: d, hold: h_body.clone(), spin, push })
+    let orbit = ratio(2, 1) * deficit(r, h_parent);
+    let magnitude = if *own < ratio(0, 1) { -own.clone() } else { own.clone() };
+    let push = magnitude * (ratio(1, 1) - kappa.clone());
+    Some(Figure { pole: h_body.clone(), orbit, spin: own.clone(), push })
 }
 
 impl Figure {
@@ -77,12 +94,20 @@ impl Figure {
         if left <= ratio(0, 1) {
             return None;
         }
-        Some((self.pole.clone() + self.hold.clone()) / left - self.hold.clone())
+        Some(ratio(2, 1) * self.pole.clone() / left - self.pole.clone())
     }
 
     /// The equator's reach over the pole's (one where it does not turn).
     pub fn bulge(&self) -> Option<Ratio> {
         self.radius_at(&ratio(90, 1)).map(|eq| eq / self.pole.clone())
+    }
+
+    /// ITS DAYS A YEAR, Earth's reading: the turns its own spin makes
+    /// against its star's direction in one orbit, `|ω_own|/ω_orbit`. Zero for
+    /// a body locked to its star (one face to it, no day).
+    pub fn days_a_year(&self) -> Ratio {
+        let own = if self.spin < ratio(0, 1) { -self.spin.clone() } else { self.spin.clone() };
+        own / self.orbit.clone()
     }
 }
 
@@ -149,21 +174,24 @@ mod tests {
     }
 
     #[test]
-    fn a_body_bulges_by_its_own_shear_and_its_core_holds_it_round() {
-        // A body of holding 1 at reach 100 about 99: its reach d = 1.
-        let f = figure(&ratio(100, 1), &ratio(1, 1), &ratio(99, 1), &ratio(0, 1)).expect("a figure");
+    fn a_body_is_born_with_its_shear_and_its_day_is_its_own_spin_over_its_orbit() {
+        // A body of holding 1 at reach 100 about 99: its reach d = 1; the
+        // shear 2·(δ_p(101) − δ_p(99)) = 2·(99/200 − 1/2) = −1/100, against it.
+        assert_eq!(shear(&ratio(100, 1), &ratio(1, 1), &ratio(99, 1)), Some(ratio(-1, 100)));
+        let f = figure(&ratio(100, 1), &ratio(1, 1), &ratio(99, 1), &ratio(0, 1), &ratio(-1, 100)).expect("a figure");
         assert_eq!(f.pole, ratio(1, 1));
-        // The shear: δ_p(101) − δ_p(99) = 99/200 − 99/198 < 0, against its orbit.
-        assert_eq!(f.spin, ratio(99, 200) - ratio(1, 2));
-        assert!(f.spin < ratio(0, 1));
-        // Its push over its own hold δ_b(1) = 1/2: (1/200)/(1/2) = 1/100.
+        // Its orbit turns at 2·δ_p(100) = 198/199; its days a year
+        // (1/100)/(198/199) = 199/19800.
+        assert_eq!(f.orbit, ratio(198, 199));
+        assert_eq!(f.days_a_year(), ratio(199, 19800));
+        // Its push is its own spin's share of the skimming turn (1).
         assert_eq!(f.push, ratio(1, 100));
-        // Widest at the equator, round at the poles, exact.
         assert_eq!(f.radius_at(&ratio(0, 1)), Some(ratio(1, 1)));
-        assert_eq!(f.radius_at(&ratio(90, 1)), Some(ratio(2, 1) / ratio(99, 100) - ratio(1, 1)));
         assert!(f.bulge().expect("bulge") > ratio(1, 1));
-        // A body all core holds round.
-        let core = figure(&ratio(100, 1), &ratio(1, 1), &ratio(99, 1), &ratio(1, 1)).expect("a figure");
+        // A body all core holds round; a body that does not turn has no day.
+        let core = figure(&ratio(100, 1), &ratio(1, 1), &ratio(99, 1), &ratio(1, 1), &ratio(-1, 100)).expect("a figure");
         assert_eq!(core.bulge(), Some(ratio(1, 1)));
+        let locked = figure(&ratio(100, 1), &ratio(1, 1), &ratio(99, 1), &ratio(0, 1), &ratio(0, 1)).expect("a figure");
+        assert_eq!(locked.days_a_year(), ratio(0, 1));
     }
 }

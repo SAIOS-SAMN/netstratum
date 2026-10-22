@@ -81,6 +81,9 @@ pub struct World {
     /// The echoes before the star no longer dominates its system (the
     /// climb's window).
     pub window: u64,
+    /// Its days a year, Earth's reading of its spin against its orbit
+    /// (`geoid::Figure::days_a_year`); None where it has no figure.
+    pub days: Option<Ratio>,
 }
 
 fn z_of(key: &crate::chem::Kind) -> Option<u32> {
@@ -147,7 +150,7 @@ pub fn read(path: Vec<u64>, matter: &Manifest, period: &Ratio, coupling: &Ratio,
         if all.is_zero() { ratio(0, 1) } else { mass(&ionised) / all }
     };
     let plasmic = informational.clone().filter(|_| plasma_share > ratio(0, 1)).map(|x| x * plasma_share);
-    Some(World { path, heat, burn: star_burn.clone(), size, gravity, core, hold, atmosphere: ratio(0, 1), pressure: ratio(0, 1), gases, chemical: chemical.map(|(_, x)| x), geologic, plasmic, informational, coupling: coupling.clone(), delay, belts: ratio(0, 1), window: u64::MAX })
+    Some(World { path, heat, burn: star_burn.clone(), size, gravity, core, hold, atmosphere: ratio(0, 1), pressure: ratio(0, 1), gases, chemical: chemical.map(|(_, x)| x), geologic, plasmic, informational, coupling: coupling.clone(), delay, belts: ratio(0, 1), window: u64::MAX, days: None })
 }
 
 /// `e^(−λ)` bounded above by whole halvings, `2^(−⌊λ · 1442/1000⌋)` (so the
@@ -234,9 +237,6 @@ pub const BELL_YEARS: i64 = 97_850;
 /// year): of order a cell's genome and an animal's (anchors).
 pub const CELL_BITS: i64 = 10_000_000;
 pub const GENOME_BITS: i64 = 6_000_000_000;
-/// A world's day as a share of its year, until S^60 bodies spin (an anchor:
-/// the base-60 circle).
-pub const DAYS_A_YEAR: i64 = 360;
 /// A VIABLE PEOPLE (Franklin's ~500), counted in nuclei (operator
 /// 2026-10-14): a mind's carrier needs about a nucleus of its medium a bit of
 /// its blueprint, so 500 minds need `500 · GENOME_BITS` nuclei of it. A grain
@@ -255,11 +255,17 @@ pub fn viable(matter: &Manifest) -> bool {
 /// ruler): selection writes at most a bit a generation, cells a local day a
 /// generation up to a copier's capacity, bodies a local year for the rest;
 /// decay stretches it by `1 / (1 − 1/x)`. Its local year in standard years
-/// is its turn over the home world's; a bell is BELL_YEARS of them.
-pub fn climb_bells(period_bells: &Ratio, home_year_bells: &Ratio, x: &Ratio, compression: &Ratio) -> Option<Ratio> {
+/// is its turn over the home world's; a bell is BELL_YEARS of them. Its day
+/// is its own (`days` a year, the geoid's reading of its spin against its
+/// orbit): a world with no day (locked to its star) gives cells no
+/// generations, and climbs nothing.
+pub fn climb_bells(period_bells: &Ratio, home_year_bells: &Ratio, days: &Ratio, x: &Ratio, compression: &Ratio) -> Option<Ratio> {
     let _rungs = recoherences_needed(x, compression)?;
+    if *days <= ratio(0, 1) {
+        return None;
+    }
     let year = period_bells.clone() / home_year_bells.clone();
-    let cells = ratio(CELL_BITS, 1) * year.clone() / ratio(DAYS_A_YEAR, 1);
+    let cells = ratio(CELL_BITS, 1) * year.clone() / days.clone();
     let bodies = ratio(GENOME_BITS - CELL_BITS, 1) * year;
     let effective = x.clone() * (ratio(1, 1) + compression.clone());
     let keep = ratio(1, 1) - ratio(1, 1) / effective;
@@ -291,7 +297,7 @@ pub fn window_echoes(star: &Ratio, worlds: &Ratio) -> u64 {
 /// is written, if within the star's window; else never.
 #[allow(clippy::too_many_arguments)]
 pub fn climb(w: &World, x: &Ratio, compression: &Ratio, seed: &[u8; 32], medium: &str, t_u: u64, period_bells: &Ratio, home_year_bells: &Ratio) -> Option<u64> {
-    let bells = climb_bells(period_bells, home_year_bells, x, compression)?;
+    let bells = climb_bells(period_bells, home_year_bells, w.days.as_ref()?, x, compression)?;
     let slip = ratio(1, 1) - w.coupling.clone();
     if slip <= ratio(0, 1) {
         return None;
@@ -443,7 +449,7 @@ pub fn readings(u: &Universe, seed: &[u8; 32]) -> std::collections::BTreeMap<Vec
         let climb = period.filter(|_| matter.as_ref().is_some_and(viable)).and_then(|p| {
             [("chemical", &w.chemical), ("geologic", &w.geologic), ("plasmic", &w.plasmic)]
                 .into_iter()
-                .filter_map(|(m, x)| x.as_ref().and_then(|x| climb_bells(&p, &home.year_bells, x, &compression)).map(|b| (b, m)))
+                .filter_map(|(m, x)| x.as_ref().and_then(|x| climb_bells(&p, &home.year_bells, w.days.as_ref()?, x, &compression)).map(|b| (b, m)))
                 .min_by(|a, b| a.0.cmp(&b.0))
         });
         out.insert(w.path.clone(), Reading { world: w, compression, climb, period: turn, torsion });
@@ -587,6 +593,7 @@ pub fn worlds(u: &Universe) -> Vec<World> {
     for w in out.iter_mut() {
         w.atmosphere = atmosphere(w, &hold_ref);
         w.pressure = w.atmosphere.clone() * w.gravity.clone();
+        w.days = crate::seating::figure_of(u, &w.path, &w.core).map(|f| f.days_a_year());
     }
     out
 }
@@ -597,7 +604,7 @@ mod tests {
 
     #[test]
     fn the_land_takes_up_the_flux_its_medium_carries() {
-        let mut w = World { path: vec![], heat: ratio(2, 1), burn: ratio(1, 1), size: ratio(1, 1), gravity: ratio(1, 1), core: ratio(0, 1), hold: ratio(1, 1), atmosphere: ratio(0, 1), pressure: ratio(0, 1), gases: vec![], chemical: Some(ratio(2, 1)), geologic: Some(ratio(1, 2)), plasmic: None, informational: None, coupling: ratio(0, 1), delay: 0, belts: ratio(0, 1), window: 0 };
+        let mut w = World { path: vec![], heat: ratio(2, 1), burn: ratio(1, 1), size: ratio(1, 1), gravity: ratio(1, 1), core: ratio(0, 1), hold: ratio(1, 1), atmosphere: ratio(0, 1), pressure: ratio(0, 1), gases: vec![], chemical: Some(ratio(2, 1)), geologic: Some(ratio(1, 2)), plasmic: None, informational: None, coupling: ratio(0, 1), delay: 0, belts: ratio(0, 1), window: 0, days: None };
         // x = 2 at no compression: h = 2·1442/1000 = 2884/1000, a = 1442/1000:
         // the equator keeps one halving, 2·(1/2) = 1 of T; the edge of the
         // second (S = 721/1000) takes 2·(721/1000)·(3/4) = 2163/2000 > 1.
