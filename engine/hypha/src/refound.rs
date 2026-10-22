@@ -135,7 +135,6 @@ pub fn refound(session: &Session, home: &Path, var_root: &Path) -> io::Result<(b
     let domain = load_key(home, "tier-domain.key")?;
     let union = load_key(home, "tier-union.key")?;
     let colonies = load_key(home, "tier-colonies.key")?;
-    let Some(point) = session.tuniversal() else { return Ok((false, vec!["the re-founding waits: no final point read yet".into()])) };
     let id = domain.verifying_key().to_bytes();
     let mut said = Vec::new();
     // 1. The domain, its tiers named at genesis (ascending, each once).
@@ -147,6 +146,12 @@ pub fn refound(session: &Session, home: &Path, var_root: &Path) -> io::Result<(b
     if !matches!(founded, Founded::Sealed { .. } | Founded::AlreadyFounded) {
         return Ok((false, said));
     }
+    // Every door reply carries the door's final point: the domain's answer
+    // has brought one, read now (a fresh session has heard none before it).
+    let Some(point) = session.tuniversal() else {
+        said.push("the re-founding waits: no final point read yet".into());
+        return Ok((false, said));
+    };
     // 2. The origin: the Big Bang's seed and era 1's closed sphere, its radius
     // the bell's reach (`fold::universe_radius`).
     let ledger = cfe::persist::load(&var_root.join("worlds/convergence.tlv")).map_err(|e| io::Error::other(format!("the universe ledger did not read: {e:?}")))?;
