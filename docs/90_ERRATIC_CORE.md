@@ -98,6 +98,29 @@ every echo:
 If the inner reaches do not swing more than the ordered layer's, the theory
 fails for this physics.
 
+## 3a. Xylarium's review (2026-10-22, read from its echo.rs)
+
+- **D1 consistent:** 11.0's shear ruling, "THE LOOP IS AN ORBIT: its legs the
+  two halves of one closed path about the attractor", with one kick law per
+  plane (`pulse_face`). Xylarium has the same gap: a galaxy's kicks advance
+  `phase_c`, `l_c` is never kicked (`d_c` computed and discarded), and it is
+  set only by ocean gathering. D1 closes it in both kernels.
+- **D2 the right coupling, as a REPLACEMENT:** xylarium holds eccentricity
+  three ways, none from `l_c`: a galaxy's swing about the universal core
+  (`e = τ/(τ + h_g)`, `shares::swing`), a star's displacement drawn back by
+  its galaxy's drag, and the system tug's bands `r(1 ± e)`, `e = m/(m + M)`
+  (the pinch form, due to give way to the tether, xylarium 11.0 (39), C3).
+  D2 must replace the pinch e in the tug, not sit beside it, and the swing
+  should read the tether's width. In netstratum the same holds: D2 replaces
+  the meeting bands' pinch width (`formation::collide_system`'s world width
+  `hw/(hw + h_s)`), not a second eccentricity beside it.
+- **D3 consistent** if each plane carries its own return (`lock_step` acts on
+  the orbit spin only today, the spin it gives up going to the belts).
+- **The core's infall (xylarium 11.0 (41), 108c445):** each galaxy's core
+  takes in `1/(r + 1)` of each body whose loop crosses it inbound, draining
+  the inner region hardest. It acts with D3: the inner bodies are both
+  kicked hardest and eaten hardest.
+
 ## 4. What it touches
 
 - **The galaxy-band ruling (2026-10-21, "pull it back and make it static")**
