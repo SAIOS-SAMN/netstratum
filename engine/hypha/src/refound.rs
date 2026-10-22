@@ -166,7 +166,7 @@ pub fn refound(session: &Session, home: &Path, var_root: &Path) -> io::Result<(b
         kind: crate::fold::ORIGIN_KIND,
         version: 2,
         commitment: seed,
-        universe: Some(Genesis { geometry: Geometry::Curved(crate::fold::universe_radius(var_root)?), parent: Parent::Unwitnessed }),
+        universe: Some(Genesis { geometry: Geometry::Sphere(crate::fold::universe_radius(var_root)?), parent: Parent::Unwitnessed }),
     };
     let originated = session.originate(&origin.sign(&domain))?;
     said.push(format!("2 origin: {originated:?}"));

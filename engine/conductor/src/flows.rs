@@ -279,7 +279,7 @@ pub fn founding_phases() -> Option<Vec<Ratio>> {
         let half = big(1, 2);
         let v = p.geo(&kept).sub(&kept.geo(&p)).grade(1).scale(&half);
         let c = |m: usize| v.coeff(m).clone();
-        let e3 = cga::base_axis(3);
+        let e3 = cga::base_axis(3)?;
         let turn = |x: num_rational::BigRational, y: num_rational::BigRational| -> Option<Ratio> {
             use num_traits::Signed;
             match (x.is_zero(), y.is_zero(), x.is_positive(), y.is_positive()) {

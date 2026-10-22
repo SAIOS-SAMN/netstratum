@@ -205,8 +205,9 @@ impl Uplink {
 
     /// **THE ORIGIN** (78.132/78.139/78.140): netstratum's universe stated
     /// ONCE on this court, signed by the domain key — version 2, a ROOT
-    /// (parent face unwitnessed), its space CURVED and closed (era 1, docs/78:
-    /// the sphere universe; the era-0 L1 torus is retired) of radius `radius`
+    /// (parent face unwitnessed), its space a closed SPHERE (era 1, docs/78;
+    /// `Geometry::Sphere`, mycelium 8718fede: `Curved` is hyperbolic ℍ³, which
+    /// misstated the universe; the era-0 L1 torus is retired) of radius `radius`
     /// (`universe_radius`). The commitment is the universe's Big Bang: the
     /// own-hash of its `UniverseFounded` receipt (its seed). Never edited.
     pub fn originate(&self, home: &Path, seed: [u8; 32], radius: (u64, u64)) -> io::Result<Founded> {
@@ -218,7 +219,7 @@ impl Uplink {
             kind: ORIGIN_KIND,
             version: 2,
             commitment: seed,
-            universe: Some(Genesis { geometry: Geometry::Curved(radius), parent: Parent::Unwitnessed }),
+            universe: Some(Genesis { geometry: Geometry::Sphere(radius), parent: Parent::Unwitnessed }),
         };
         self.session.originate(&origin.sign(&domain))
     }
