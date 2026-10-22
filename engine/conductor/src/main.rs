@@ -87,10 +87,15 @@ fn main() {
     for spec in &specs {
         if let Some(path) = &spec.place {
             conductor::places::claim(path);
+            let figure = conductor::places::site(path).and_then(|s| s.figure).map(|f| {
+                let bulge = f.bulge().map(|b| conductor::reading::sector(&(b - cfe::ratio::ratio(1, 1))).to_string()).unwrap_or_else(|| "shed".into());
+                format!("; its geoid bulges {bulge} at the equator, turning {}", if f.spin < cfe::ratio::ratio(0, 1) { "against its orbit" } else { "with its orbit" })
+            });
             println!(
-                "conductor: {} stands on world {path:?}{}",
+                "conductor: {} stands on world {path:?}{}{}",
                 spec.civilization.sigil,
-                spec.civilization.lineage.first().map(|p| format!(" (of the line of {p})")).unwrap_or_default()
+                spec.civilization.lineage.first().map(|p| format!(" (of the line of {p})")).unwrap_or_default(),
+                figure.unwrap_or_default()
             );
         }
     }

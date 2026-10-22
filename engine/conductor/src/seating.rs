@@ -136,6 +136,24 @@ pub struct Site {
     pub composition: Option<Vec<(u16, Ratio)>>,
     /// Its land: the heads each medium it carries feeds wild (`life::wild`).
     pub wild: std::collections::BTreeMap<&'static str, Ratio>,
+    /// Its figure, the geoid its peoples stand and move on (docs/88).
+    pub figure: Option<crate::geoid::Figure>,
+}
+
+/// The figure of the world at `path`: its reach about the holding inside
+/// its orbit (its star and the worlds within it), its own holding and core
+/// share (`geoid::figure`).
+pub fn figure_of(u: &Universe, path: &[u64], kappa: &Ratio) -> Option<crate::geoid::Figure> {
+    let core = u.cores.iter().find(|c| c.path.first() == path.first())?;
+    let sys = core.satellites.iter().find(|s| s.path.get(1) == path.get(1))?;
+    let orb = sys.satellites.iter().find(|o| o.path.get(2) == path.get(2))?;
+    let unit = crate::breath::unit_mass(u);
+    if unit <= ratio(0, 1) {
+        return None;
+    }
+    let held = |b: &crate::pulse::Body| crate::pulse::mass(&b.total()) / unit.clone();
+    let inside = sys.satellites.iter().filter(|o| o.radius < orb.radius).fold(crate::pulse::mass(&sys.kept) / unit.clone(), |s, o| s + held(o));
+    crate::geoid::figure(&orb.radius, &held(orb), &inside, kappa)
 }
 
 impl Site {
@@ -158,7 +176,8 @@ pub fn sites(u: &Universe, worlds: &std::collections::BTreeMap<Vec<u64>, crate::
             let position = place_of(u, &w.path)?;
             let compression = w.pressure.clone() / reference.clone();
             let wild = ["chemical", "geologic", "plasmic"].into_iter().map(|m| (m, crate::life::wild(w, &compression, m, &home))).collect();
-            Some((w.path.clone(), Site { path: w.path.clone(), position, star, albedo, orbit, composition: composition_of(u, &w.path), wild }))
+            let figure = figure_of(u, &w.path, &w.core);
+            Some((w.path.clone(), Site { path: w.path.clone(), position, star, albedo, orbit, composition: composition_of(u, &w.path), wild, figure }))
         })
         .collect()
 }
