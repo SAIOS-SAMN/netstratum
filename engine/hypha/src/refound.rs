@@ -147,8 +147,11 @@ pub fn refound(session: &Session, home: &Path, var_root: &Path) -> io::Result<(b
     if !matches!(founded, Founded::Sealed { .. } | Founded::AlreadyFounded) {
         return Ok((false, said));
     }
-    // Every door reply carries the door's final point: the domain's answer
-    // has brought one, read now (a fresh session has heard none before it).
+    // A pointed door reply carries the door's final point: if the domain's
+    // answer brought none, read the court's clock, whose reply does.
+    if session.tuniversal().is_none() {
+        let _ = session.speak(mycelium::physics::laws::codec::encode_clock_request());
+    }
     let Some(point) = session.tuniversal() else {
         said.push("the re-founding waits: no final point read yet".into());
         return Ok((false, said));

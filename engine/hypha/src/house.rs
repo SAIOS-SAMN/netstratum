@@ -275,7 +275,10 @@ impl House {
         // new origin (a sealed `refounded` under it stands), with the keys
         // already held; a try the court stopped is tried again only after a
         // task's patience. The gates map from the next tend.
-        if std::mem::take(&mut self.unknown_domain) {
+        // And a home that has never re-founded (a new domain, founded but not
+        // yet originated) completes its founding on the house's own session,
+        // which hears the court's final point.
+        if std::mem::take(&mut self.unknown_domain) || crate::refound::refounded_under(&self.home).is_none() {
             said.extend(self.refound(seat, &var_root));
         }
         Ok(said)
