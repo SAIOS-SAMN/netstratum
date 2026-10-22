@@ -48,6 +48,11 @@ impl Contacts {
         *self.pairs.entry(key).or_insert(0) += 1;
     }
 
+    /// The worlds the line on world `world` exchanged with this term.
+    pub fn partners(&self, world: &str) -> Vec<String> {
+        self.pairs.keys().filter_map(|(a, b)| if a == world { Some(b.clone()) } else if b == world { Some(a.clone()) } else { None }).collect()
+    }
+
     /// The exchanges counted this term.
     pub fn total(&self) -> u64 {
         self.pairs.values().sum()

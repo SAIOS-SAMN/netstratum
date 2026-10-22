@@ -90,6 +90,7 @@ pub mod breath;
 pub mod ring;
 pub mod compound;
 pub mod enfold;
+pub mod gauges;
 pub mod places;
 pub mod tiers;
 pub mod enclosure;

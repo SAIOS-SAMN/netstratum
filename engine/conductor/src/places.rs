@@ -42,6 +42,9 @@ pub struct Places {
     pub sites: BTreeMap<Vec<u64>, crate::seating::Site>,
     /// The worlds lines stand on.
     pub claimed: BTreeSet<Vec<u64>>,
+    /// Each system's worlds ([galaxy, star]), and each galaxy's stars.
+    pub worlds_in: BTreeMap<(u64, u64), usize>,
+    pub stars_in: BTreeMap<u64, usize>,
 }
 
 impl Places {
@@ -66,6 +69,8 @@ impl Places {
             let scale = held / unit.clone();
             for sys in &core.satellites {
                 let Some(&s) = sys.path.get(1) else { continue };
+                out.worlds_in.insert((g, s), sys.satellites.len());
+                *out.stars_in.entry(g).or_insert(0) += 1;
                 out.systems.insert((g, s), (sys.radius.clone() / scale.clone(), sys.radius.clone()));
             }
         }
@@ -88,6 +93,16 @@ pub fn set(u: &Universe, book: &ledger::Ledger) {
         }
         *g = Some(p);
     }
+}
+
+/// THE SKY of the world at `path` (`gauges`): its own world, its star's
+/// other worlds and its galaxy's stars, counted; zero with no reading.
+pub fn sky(path: &[u64]) -> usize {
+    with(|p| {
+        let (g, s) = (*path.first()?, *path.get(1)?);
+        Some(p.worlds_in.get(&(g, s)).copied().unwrap_or(1).max(1) + p.stars_in.get(&g).copied().unwrap_or(0))
+    })
+    .unwrap_or(0)
 }
 
 /// The site of the world at `path`, if a line can stand on it.

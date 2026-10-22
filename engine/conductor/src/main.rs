@@ -817,6 +817,25 @@ fn main() {
             // The sovereigns: lineages holding their own star systems (`tiers`).
             year_lines.extend(conductor::tiers::sovereigns(&mut worlds, &registry, std::path::Path::new(&var_root)));
             // docs/75: the term's realms, read from its contacts, then a new term.
+            // THE FOUR GAUGES (xylarium 11.0 (37), read from this universe):
+            // each living line's, re-read from its present state.
+            {
+                let place_of: std::collections::BTreeMap<String, Vec<u64>> = worlds.iter().filter_map(|p| p.spec.place.clone().map(|pl| (p.spec.world_name.clone(), pl))).collect();
+                for p in worlds.iter().filter(|p| !p.penned) {
+                    let partners: Vec<Vec<u64>> = contacts.partners(&p.spec.world_name).iter().filter_map(|w| place_of.get(w).cloned()).collect();
+                    let g = conductor::gauges::read(p, &partners);
+                    let pct = |x: &cfe::ratio::Ratio| (x * cfe::ratio::ratio(100, 1)).floor();
+                    year_lines.push(format!(
+                        "GAUGES {} — instinct {}%, intelligence {}%, sentience {}%, consciousness {}%; Γ {}%",
+                        p.spec.civilization.sigil,
+                        pct(&g.instinct),
+                        pct(&g.intelligence),
+                        pct(&g.sentience),
+                        pct(&g.consciousness),
+                        pct(&g.gamma)
+                    ));
+                }
+            }
             year_lines.extend(conductor::profile::timed("year:realms", || conductor::realms::bounce(&mut worlds, &registry, std::path::Path::new(&var_root), &contacts, &passages, beat / scribe::journal::YEAR_TICKS)));
             contacts.clear();
             passages.clear();
