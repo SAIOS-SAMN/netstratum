@@ -19,6 +19,7 @@
 //! A tier's key lives in the uplink home as `tier-<name>.key`, a 32-byte
 //! seed minted on first use; the domain's own key is `tier-domain.key`.
 
+use crate::wire::HouseActs;
 use crate::Uplink;
 use mycelium::anastome::dialogue::domain::{DomainGenesis, Founded, Reservation};
 use mycelium::anastome::dialogue::uplink::{FoldAt, Net, SignedFold, TierFold, Uplinked};

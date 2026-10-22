@@ -26,6 +26,7 @@
 //! missing key stops the re-founding (a new key is a new identity). The house
 //! maps only after the re-founding has run for the present origin (`refounded`
 //! in the uplink home): the coordinator ruled the map waits for the recut.
+use crate::wire::HouseActs;
 use mycelium::anastome::dialogue::atlas::{decode_map_reply, encode_map, MapAct, MapRecord, MapRefusal, Mapped};
 use mycelium::anastome::dialogue::domain::{DomainGenesis, Founded, Origin, Reservation};
 use mycelium::anastome::dialogue::seat::Arg;

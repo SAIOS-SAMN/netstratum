@@ -30,7 +30,7 @@ pub mod house;
 pub mod line;
 pub mod probe;
 pub mod seat;
-pub mod propose;
+pub mod wire;
 pub mod refound;
 
 /// No default court: the standalone :7520 court is retired (coordinator
@@ -126,14 +126,16 @@ impl Uplink {
     }
 
     pub fn laws(&self) -> io::Result<Vec<mycelium::physics::laws::codec::Served>> {
-        self.session.laws()
+        use mycelium::physics::laws::codec::{decode_register_reply, encode_register_request};
+        decode_register_reply(&self.session.speak(encode_register_request())?).ok_or_else(|| io::Error::new(io::ErrorKind::InvalidData, "the register's reply did not decode"))
     }
 
     /// The server's lexicon version, and every term in [`TERMS`] it does not
     /// serve in the vocabulary netstratum means it in.
     pub fn lexicon_check(&self) -> io::Result<(u8, Vec<String>)> {
         use mycelium::physics::laws::lexicon::Vocabulary;
-        let (version, served) = self.session.lexicon()?;
+        use mycelium::physics::laws::codec::{decode_lexicon_reply, encode_lexicon_request};
+        let (version, served) = decode_lexicon_reply(&self.session.speak(encode_lexicon_request())?).ok_or_else(|| io::Error::new(io::ErrorKind::InvalidData, "the lexicon's reply did not decode"))?;
         let theirs = |v: Vocab| match v {
             Vocab::Physical => Vocabulary::Physical,
             Vocab::Civic => Vocabulary::Civic,
@@ -149,7 +151,12 @@ impl Uplink {
 
     /// `t` read by this kernel and by the court, side by side.
     pub fn verify_both(&self, t: &Transition) -> io::Result<Reading> {
-        let court = self.session.verify(t)?;
+        let reply = self.session.speak(mycelium::physics::laws::codec::encode_verify_request(t))?;
+        let mut p = 0;
+        let court = match mycelium::physics::laws::codec::take_verdict(&reply, &mut p) {
+            Some(v) if p == reply.len() => v,
+            _ => return Err(io::Error::new(io::ErrorKind::InvalidData, "the verdict did not decode")),
+        };
         Ok(Reading { local: verify_local(t), court })
     }
 }

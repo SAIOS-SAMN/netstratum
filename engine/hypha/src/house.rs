@@ -22,6 +22,7 @@
 //! time; one left unanswered past its patience goes back for another mind.
 //! Every take is kept (`home/house/takes`).
 
+use crate::wire::HouseActs;
 use ed25519_dalek::SigningKey;
 use mycelium::anastome::dialogue::seat::{Arg, Outcome, Percept, Post, Record, Refusal, Role, Seat, SeatFn, Seats, Taken};
 use mycelium::client::sdk::seat_mind::task::{FN_SOLVE, KIND_TASK};
@@ -128,7 +129,7 @@ pub struct House {
     /// (a restarted relay draws a new one; the cursor is then no progress).
     relay_epoch: Option<u64>,
     /// Seat -> an answer filed and not judged yet, re-filed each tend (78.153).
-    refile: BTreeMap<u32, (mycelium::transducer::element::Element, Vec<Vec<Vec<u8>>>)>,
+    refile: BTreeMap<u32, (Vec<u8>, Vec<Vec<Vec<u8>>>)>,
     /// The court refused an act of this tend as an unknown domain (the recut).
     unknown_domain: bool,
     /// The origin the re-founding was last tried under, and the tend.
@@ -363,14 +364,15 @@ impl House {
         let mut at = 0;
         let rule = mycelium::transducer::element::Element::from_bytes(tape, &mut at).filter(|_| at == tape.len());
         let outputs = mycelium::anastome::dialogue::decode_grids(outs);
-        let (Some(rule), Some(outputs)) = (rule, outputs) else { return (UNREAD, id, "the tape or the grids do not read whole".into()) };
-        self.judge(seat, s, id, rule, outputs)
+        // The tape must read whole as a rule; it is filed as the mind sent it.
+        let (Some(_), Some(outputs)) = (rule, outputs) else { return (UNREAD, id, "the tape or the grids do not read whole".into()) };
+        self.judge(seat, s, id, tape.clone(), outputs)
     }
 
     /// File an answer and read the court's verdict. Not judged yet (78.153):
     /// the task stays before its seat and the same answer waits to be re-filed;
     /// every other verdict lets the task go.
-    fn judge(&mut self, seat: &mut crate::seat::Seat, s: u32, id: [u8; 32], rule: mycelium::transducer::element::Element, outputs: Vec<Vec<Vec<u8>>>) -> (u16, [u8; 32], String) {
+    fn judge(&mut self, seat: &mut crate::seat::Seat, s: u32, id: [u8; 32], rule: Vec<u8>, outputs: Vec<Vec<Vec<u8>>>) -> (u16, [u8; 32], String) {
         let verdict = seat.file_answer(&id, &rule, &outputs);
         if verdict.is_some_and(|(code, _)| code == SOLVE_UNREAD) {
             self.task.insert(s, (id, self.tends));
