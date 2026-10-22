@@ -1,3 +1,11 @@
+> **SUPERSEDED 2026-10-22 (docs/89, B3):** this geoid, its own spin
+> (`Body.own`), its days and its latitude were parallel machinery: a
+> free-standing ball with a radial-line shear and a meridian spread of a
+> stand-in heat, beside the established laws. Removed. A world's day is its
+> clock's slip against its star (`life::World.days`); its feed is its star's
+> light through its unlocked face (`breath::shine`). Its shape, spin planes
+> and place on its star's sphere await the ruled geometry (docs/89 step 6).
+
 # 88 — The geoid: a body's own sphere, its own spin, its day and its figure
 
 docs/87 step 1, and step 2b. Operator 2026-10-22: "planetary movement is

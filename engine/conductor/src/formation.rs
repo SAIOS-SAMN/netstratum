@@ -751,7 +751,7 @@ fn planets(disc: &Manifest, path: &[u64], h_s: &Ratio, scale: &Ratio, unit: &Rat
         }
         // The planetary core keeps its layers; what it strips stays the disc.
         let hw = if total.is_zero() { ratio(0, 1) } else { mass(&mix) / total.clone() };
-        let e = hw.clone() / (hw + h_s.clone());
+        let e = crate::ring::pinch_share(&hw, &h_s);
         let (kept, released) = match heart_cut(&mix, heat, &ratio(0, 1)) {
             Some(_) => bind_layers(&mix, heat, &e),
             None => (Manifest::new(), mix.clone()),
@@ -772,14 +772,12 @@ fn planets(disc: &Manifest, path: &[u64], h_s: &Ratio, scale: &Ratio, unit: &Rat
         let m = mass(&kept);
         let period = crate::ring::period(&radius, &inside);
         let spin = crate::ring::spin(&radius, &inside);
-        // ITS OWN SPIN at birth: the shear across its slot (docs/88).
-        let own = crate::geoid::shear(&radius, &(m.clone() / unit.clone()), &inside).map(|x| crate::ring::grain(&x)).unwrap_or_else(|| ratio(0, 1));
         inside += m.clone() / unit.clone();
         let siblings: Vec<u64> = worlds.iter().map(|w| w.path[path.len()]).collect();
         let mut wpath = path.to_vec();
         wpath.push(crate::ring::birth_key(0, &radius, &inside, &siblings));
         let phase: Vec<Ratio> = (0..crate::flows::PLANES).map(|_| ratio((draw() % 3600) as i64, 3600)).collect();
-        worlds.push(crate::pulse::Body { own, path: wpath, radius, period, kept, satellites: Vec::new(), medium: Manifest::new(), ell: spin, medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: m, flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase, load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: crate::ring::grain(heat).min(ratio(1, 1)) });
+        worlds.push(crate::pulse::Body { path: wpath, radius, period, kept, satellites: Vec::new(), medium: Manifest::new(), ell: spin, medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: m, flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase, load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: crate::ring::grain(heat).min(ratio(1, 1)) });
     }
     left.retain(|_, a| *a > ratio(0, 1));
     (worlds, left)
@@ -957,15 +955,11 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
     // Items: every mote and every world, (manifest, ℓ, phases, agitation).
     // Items: (matter, ℓ, phases, agitation, whether it is a star).
     let mut items: Vec<(Manifest, Ratio, Vec<Ratio>, Ratio, bool)> = Vec::new();
-    // Each item's own spin (docs/88): a mote carries none; a world its own.
-    let mut own_of: Vec<Ratio> = Vec::new();
     let n_motes = sys.flows.len();
     for x in std::mem::take(&mut sys.flows) {
         items.push(([(x.key.clone(), x.amount.clone())].into(), x.ell_o.clone(), x.phase.clone(), x.agitation.clone(), false));
-        own_of.push(ratio(0, 1));
     }
     for w in std::mem::take(&mut sys.satellites) {
-        own_of.push(w.own.clone());
         let r_own = if scale.is_zero() { ratio(0, 1) } else { w.radius.clone() / scale.clone() };
         let ph = if w.phase.len() == planes { w.phase.clone() } else { vec![ratio(0, 1); planes] };
         // A world carries its heat; on its star's bell it cools to the void
@@ -1007,7 +1001,7 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
     let width = |i: usize| -> Ratio {
         if i >= n_motes {
             let hw = mass(&items[i].0) / total.clone();
-            crate::ring::grain(&(hw.clone() / (hw + h_s.clone())))
+            crate::ring::grain(&crate::ring::pinch_share(&hw, &h_s))
         } else {
             items[i].3.clone()
         }
@@ -1117,8 +1111,6 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
             }
         })
     };
-    // Each item's reach before the echo's exchanges, for the impacts' spin.
-    let reach_pre: Vec<Ratio> = ell.iter().map(|l| l.clone() / h_s.clone()).collect();
     let ell: Vec<Ratio> = ell.iter().zip(&dl).map(|(l, d)| l.clone() + d.clone()).collect();
     for i in 0..n {
         items[i].1 = crate::ring::grain(&ell[i]).max(ratio(0, 1));
@@ -1248,7 +1240,7 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
             match heart_cut(&kept, &heat_g, &ratio(0, 1)) {
                 Some(_) => {
                     let hw = mass(&kept) / total.clone();
-                    let e = hw.clone() / (hw + h_s.clone());
+                    let e = crate::ring::pinch_share(&hw, &h_s);
                     bind_layers(&kept, &heat_g, &e)
                 }
                 None => (Manifest::new(), kept),
@@ -1262,36 +1254,6 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
         if kept.is_empty() {
             continue;
         }
-        // ITS OWN SPIN (docs/88): what its members carried, by holding, and
-        // what their meeting brings about its centre: each member's offset in
-        // reach times its turning's lag (the shear: against the orbit), less
-        // its lead in phase times its reach's motion over the step (the
-        // breathing: either sense), by holding, over their spread in reach.
-        // Exact; no member's reading is squared; a group that meets at one
-        // reach brings nothing.
-        let own = {
-            let w: Vec<(usize, Ratio)> = g.iter().map(|&i| (i, mass(&items[i].0))).filter(|(_, m)| *m > ratio(0, 1)).collect();
-            let sum = w.iter().fold(ratio(0, 1), |a, (_, m)| a + m.clone());
-            if sum.is_zero() {
-                ratio(0, 1)
-            } else {
-                let mean = |f: &dyn Fn(usize) -> Ratio| w.iter().fold(ratio(0, 1), |a, (i, m)| a + m.clone() * f(*i)) / sum.clone();
-                let carried = mean(&|i| own_of[i].clone());
-                let r_bar = mean(&|i| reach_pre[i].clone());
-                let w_bar = mean(&|i| advance[i].clone());
-                let p_bar = crate::flows::circle_mean(&w.iter().map(|(i, m)| (m.clone(), phase0[*i].clone())).collect::<Vec<_>>());
-                let lead = |i: usize| { let d = phase0[i].clone() - p_bar.clone() + ratio(1, 2); d.clone() - d.floor() - ratio(1, 2) };
-                let lever = w.iter().fold(ratio(0, 1), |a, (i, m)| { let d = reach_pre[*i].clone() - r_bar.clone(); a + m.clone() * if d < ratio(0, 1) { -d } else { d } });
-                let impact = if lever.is_zero() {
-                    ratio(0, 1)
-                } else {
-                    w.iter().fold(ratio(0, 1), |a, (i, m)| {
-                        a + m.clone() * ((reach_pre[*i].clone() - r_bar.clone()) * (advance[*i].clone() - w_bar.clone()) - lead(*i) * dl[*i].clone() / h_s.clone())
-                    }) / lever
-                };
-                crate::ring::grain(&(carried + impact))
-            }
-        };
         let m = mass(&kept);
         let r_own = ell.clone() / h_s.clone();
         let radius = crate::ring::grain(&(r_own * scale.clone()));
@@ -1303,7 +1265,7 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
         path.push(crate::ring::birth_key(0, &radius, &inside, &siblings));
         // It keeps the heat of its making (its members' and the bonds'),
         // which sets its thermal band for meeting its neighbours.
-        worlds.push(crate::pulse::Body { own, path, radius, period, kept, satellites: Vec::new(), medium: Manifest::new(), ell: spin, medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: m, flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase, load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: crate::ring::grain(&heat_g).min(ratio(1, 1)) });
+        worlds.push(crate::pulse::Body { path, radius, period, kept, satellites: Vec::new(), medium: Manifest::new(), ell: spin, medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: m, flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase, load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: crate::ring::grain(&heat_g).min(ratio(1, 1)) });
         if ignites {
             // A star of its system: born marks it (worlds are born 0).
             if let Some(w) = worlds.last_mut() {

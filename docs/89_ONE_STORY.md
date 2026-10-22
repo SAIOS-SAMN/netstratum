@@ -195,6 +195,34 @@ already speaks.
    day, a people's place on it).
 7. Then docs/87's knowledge steps on top of a story that holds.
 
+## Convergence, pass 1 (2026-10-22, operator: "proceed with your convergence")
+
+Done, read on play3 (the same universe before and after):
+
+- **B3 retired:** `geoid` (figure, shear, meridian flux, latitude),
+  `Body.own` (tag 20), `Site.figure/latitude`, `PolitySpec.latitude`; docs/88
+  marked superseded.
+- **B1 converged:** life reads each world's own `Body.heat` (in kelvin on the
+  hydrogen grip, the scale `open_at` and `layer_chemistry` read), sizes it by
+  every kind's atoms (`chem::components`: a world of compounds is not
+  empty), counts its closed clusters (water among them) as volatiles and as
+  its chemical medium, and closes pairs by `chem::closing` at `open_at`;
+  life's K and `atom::closes` retired. A world's day is its clock's slip
+  against its star, `(1 − coupling)·P/T_u` (`DAYS_A_YEAR` stays retired).
+  Read: 75 of 75 worlds read and 32 climbing (were 7 and 3).
+- **B2 converged:** `shine` lights the worlds of a system as it lights its
+  motes (the unlocked face at each world's reach, its heat rising, the
+  ledger exact). Read: over 150 beats world heats held 0.01 to 0.16 (no world
+  cooled through) as the universe grew 75 → 121 worlds, 108 holding clusters.
+- **The land** reads the world's own heat: 18 of 22 lines found with bands of
+  4 (land 205 to 536 heads); four lines' media take up nothing on their
+  worlds.
+- **B5, the pinch** is one law (`ring::pinch`, `ring::pinch_share`), its six
+  copies rewired.
+
+Not yet converged: B4 (the economy on the box), the rest of B5 (one phase
+law, one home), B6–B8 (the tier map, planes, the tiers' readings).
+
 ## Rulings asked
 
 - R1. Steps 1–5 converge existing laws only; may they proceed in that order?

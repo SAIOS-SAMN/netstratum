@@ -24,11 +24,10 @@ use num_traits::Zero;
 /// sixty, never the holds' own primes. None where the body holds nothing or
 /// stands at no reach.
 pub fn place(reach: &Ratio, h_body: &Ratio, h_parent: &Ratio) -> Option<Ratio> {
-    let both = h_body.clone() + h_parent.clone();
-    if reach.is_zero() || h_body.is_zero() || both.is_zero() {
+    if reach.is_zero() || h_body.is_zero() {
         return None;
     }
-    let cap = reach.clone() * h_body.clone() / both / ratio(4, 1);
+    let cap = crate::ring::pinch(reach, h_body, h_parent) / ratio(4, 1);
     let mut rung = ratio(1, 1);
     while rung > cap {
         rung /= ratio(60, 1);

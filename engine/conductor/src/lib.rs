@@ -90,7 +90,6 @@ pub mod breath;
 pub mod ring;
 pub mod compound;
 pub mod enfold;
-pub mod geoid;
 pub mod places;
 pub mod tiers;
 pub mod enclosure;
@@ -935,9 +934,6 @@ pub struct PolitySpec {
     /// ERA 1'S LAND (docs/86): the heads its world's medium feeds wild
     /// (`life::wild`), set on its world each boot; None on no era-1 world.
     pub wild: Option<Ratio>,
-    /// ERA 1: its colatitude on its world's geoid in degrees, where its
-    /// medium takes up the most flux (docs/88); None on no era-1 world.
-    pub latitude: Option<Ratio>,
 }
 
 /// One live polity world: the sim, its contained actor, its research rung.
@@ -4997,7 +4993,6 @@ impl Polity {
             composition: None,
             place: None,
             wild: None,
-            latitude: None,
         };
         // THE SEAT, recorded once beside the card: the boot roster reads it,
         // so a restart resumes this branch in the world it was founded in,
@@ -6932,7 +6927,6 @@ pub fn incursion(
         composition: None,
         place: None,
         wild: None,
-        latitude: None,
     };
     let polity = Polity::genesis(spec, registry, book);
     // The door receipts on the universe ledger (ledger-side, the

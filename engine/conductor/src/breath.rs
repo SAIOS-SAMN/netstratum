@@ -222,13 +222,26 @@ pub struct Light {
 /// H)` (the ignition heat's law, `formation::system`, read at every echo and
 /// at each body's own reach): its agitation rises by `l·(1 − δ)/M`, M the
 /// enclosure's holding. What no body takes drains into the vacuum ("heat
-/// dissipates into the void"). Returns (received, drained).
-pub fn shine(motes: &mut [crate::flows::Mote], l: &Ratio, h: &Ratio, whole: &Ratio) -> (Ratio, Ratio) {
+/// dissipates into the void"). Every body: the motes, and the WORLDS standing
+/// in it (docs/89 B2), each at its own reach `radius/scale` in the
+/// enclosure's own units, its heat rising the same way. Returns (received,
+/// drained).
+pub fn shine(motes: &mut [crate::flows::Mote], worlds: &mut [Body], scale: &Ratio, l: &Ratio, h: &Ratio, whole: &Ratio) -> (Ratio, Ratio) {
     use num_traits::Zero as _;
     if l.is_zero() || whole.is_zero() || h.is_zero() {
         return (ratio(0, 1), l.clone());
     }
     let mut received = ratio(0, 1);
+    if !scale.is_zero() {
+        for w in worlds.iter_mut() {
+            let r = w.radius.clone() / scale.clone();
+            let unlocked = ratio(1, 1) - h.clone() / (r + h.clone());
+            let warm = l.clone() * unlocked / whole.clone();
+            let now = crate::ring::grain(&(w.heat.clone() + warm));
+            received += (now.clone() - w.heat.clone()) * mass(&w.kept);
+            w.heat = now;
+        }
+    }
     for x in motes.iter_mut() {
         let r = x.ell_o.clone() / h.clone();
         let unlocked = ratio(1, 1) - h.clone() / (r + h.clone());
@@ -684,7 +697,8 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             if !shone.is_zero() {
                 let whole = mass(&sys.total());
                 let h_s = if whole.is_zero() { ratio(0, 1) } else { mass(&sys.kept) / whole.clone() };
-                let (got, gone) = shine(&mut sys.flows, &shone, &h_s, &whole);
+                let scale = whole.clone() / unit.clone();
+                let (got, gone) = shine(&mut sys.flows, &mut sys.satellites, &scale, &shone, &h_s, &whole);
                 light.made += shone / unit.clone();
                 light.received += got / unit.clone();
                 light.drained += gone / unit.clone();
@@ -761,7 +775,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 }
                 let r_s = s.radius.clone() / scale_pre.clone();
                 let h_s = mass(&s.total()) / g_before.clone();
-                let d = r_s.clone() * h_s.clone() / (h_s + h_g.clone());
+                let d = crate::ring::pinch(&r_s, &h_s, &h_g);
                 if d.is_zero() {
                     continue;
                 }
@@ -809,7 +823,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     let s = &mut keep[si];
                     let r_s = s.radius.clone() / scale_pre.clone();
                     let h_s_g = mass(&s.total()) / g_before.clone();
-                    let d = r_s.clone() * h_s_g.clone() / (h_s_g + h_g.clone());
+                    let d = crate::ring::pinch(&r_s, &h_s_g, &h_g);
                     let gap = if r_m > r_s { r_m.clone() - r_s } else { r_s - r_m.clone() };
                     let tot = mass(&s.total());
                     let h_sys = if tot.is_zero() { ratio(1, 1) } else { mass(&s.kept) / tot };
@@ -938,7 +952,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             }
             // The throat's light crosses the galaxy on the continuum face.
             if !r.light.is_zero() {
-                let (got, gone) = shine(&mut core.flows, &r.light, &h, &g_mass);
+                let (got, gone) = shine(&mut core.flows, &mut [], &ratio(0, 1), &r.light, &h, &g_mass);
                 light.made += r.light.clone() / unit.clone();
                 light.received += got / unit.clone();
                 light.drained += gone / unit.clone();
@@ -1042,7 +1056,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 // throat condition) in `reservoir`: decoherence sheds only
                 // what it holds above it.
                 let Some(ignition) = crate::formation::ignition_share(&a_clump) else { continue };
-                let mut sys = Body { own: ratio(0, 1), path, radius: r_guess, period: ratio(0, 1), kept, satellites: orbs, medium, ell: ratio(0, 1), medium_spin, gas: Vec::new(), born: bell, state: held_at_birth, flows: disc_motes, reservoir: ignition, turning: spin_own, bell: phases_own.clone(), phase: phases_own, load: world_load, remnant: false, heat: ratio(0, 1) };
+                let mut sys = Body { path, radius: r_guess, period: ratio(0, 1), kept, satellites: orbs, medium, ell: ratio(0, 1), medium_spin, gas: Vec::new(), born: bell, state: held_at_birth, flows: disc_motes, reservoir: ignition, turning: spin_own, bell: phases_own.clone(), phase: phases_own, load: world_load, remnant: false, heat: ratio(0, 1) };
                 let internal = subtree_spin(&sys, &unit);
                 let own = taken - internal;
                 sys.ell = crate::ring::grain(&(own.clone() / m_u.clone()));
@@ -1104,7 +1118,7 @@ mod tests {
     #[test]
     fn the_home_has_no_clock_of_its_own_and_its_stars_read_the_source_directly() {
         use crate::pulse::{Body, Manifest, Universe};
-        let body = |path: Vec<u64>, radius: Ratio, kept: Manifest, satellites: Vec<Body>| Body { own: ratio(0, 1), path, radius, period: ratio(0, 1), kept, satellites, medium: Manifest::new(), ell: ratio(0, 1), medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1) };
+        let body = |path: Vec<u64>, radius: Ratio, kept: Manifest, satellites: Vec<Body>| Body { path, radius, period: ratio(0, 1), kept, satellites, medium: Manifest::new(), ell: ratio(0, 1), medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1) };
         let h = || crate::chem::Kind::parse("Z001").expect("a kind");
         let star = body(vec![0, 1], ratio(3, 1), [(h(), ratio(1, 4))].into(), Vec::new());
         let home = body(vec![0], ratio(0, 1), Manifest::new(), vec![star]);
@@ -1127,7 +1141,7 @@ mod tests {
         let mote = |ell: (i64, i64), amount: (i64, i64)| crate::flows::Mote { key: crate::chem::Kind::parse("Z001").expect("a kind"), amount: ratio(amount.0, amount.1), ell_o: ratio(ell.0, ell.1), ell_c: ratio(0, 1), phase: vec![ratio(0, 1), ratio(0, 1)], agitation: ratio(0, 1), born: 0, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1) };
         let mut motes = vec![mote((1, 2), (1, 4)), mote((3, 1), (1, 8))];
         let l = ratio(1, 1000);
-        let (got, gone) = shine(&mut motes, &l, &ratio(1, 2), &ratio(1, 1));
+        let (got, gone) = shine(&mut motes, &mut [], &ratio(0, 1), &l, &ratio(1, 2), &ratio(1, 1));
         assert_eq!(got.clone() + gone, l, "made = received + drained");
         assert!(got > ratio(0, 1));
         // The farther body stands more on the unlocked face and warms more.
@@ -1137,7 +1151,7 @@ mod tests {
     #[test]
     fn a_toll_is_heard_after_its_route_through_the_throats() {
         use crate::pulse::{Body, Manifest, Universe};
-        let core = |path: Vec<u64>, radius: Ratio| Body { own: ratio(0, 1), path, radius, period: ratio(0, 1), kept: Manifest::new(), satellites: Vec::new(), medium: Manifest::new(), ell: ratio(0, 1), medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1) };
+        let core = |path: Vec<u64>, radius: Ratio| Body { path, radius, period: ratio(0, 1), kept: Manifest::new(), satellites: Vec::new(), medium: Manifest::new(), ell: ratio(0, 1), medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1) };
         let u = Universe { cores: vec![core(vec![1], ratio(5, 1)), core(vec![2], ratio(9, 1))], medium: Manifest::new(), firmament: Vec::new(), unit: ratio(1, 1), t_u: 15 };
         let t = Toll { star: vec![1, 7], bell: 40, passing: Passing::Spent, strokes: Some(3), returned: ratio(1, 1), spin: ratio(0, 1), star_reach: ratio(2, 1), galaxy_reach: ratio(5, 1) };
         // Its own galaxy hears it after its reach to the core; another after

@@ -60,6 +60,24 @@ pub fn spin(r: &Ratio, held: &Ratio) -> Ratio {
     r.clone() * held.clone()
 }
 
+/// THE PINCH'S SHARE (operator 2026-10-18; the enfold law's gravity reach):
+/// where a body's pull on its own outweighs its parent's, `H_b/(d + H_b) =
+/// H_p/((R − d) + H_p)`, so its reach is this share of its own reach about
+/// the parent, `H_b/(H_b + H_p)`; zero where neither holds.
+pub fn pinch_share(h_body: &Ratio, h_parent: &Ratio) -> Ratio {
+    let both = h_body.clone() + h_parent.clone();
+    if both.is_zero() {
+        return ratio(0, 1);
+    }
+    h_body.clone() / both
+}
+
+/// THE PINCH: a body's own reach at reach `r` about its parent,
+/// `d = r·H_b/(H_b + H_p)`.
+pub fn pinch(r: &Ratio, h_body: &Ratio, h_parent: &Ratio) -> Ratio {
+    r.clone() * pinch_share(h_body, h_parent)
+}
+
 /// THE BALANCE: the reach where spin ℓ stands about H, `ℓ / H`; None where
 /// nothing holds it or it carries no spin.
 pub fn radius(ell: &Ratio, held: &Ratio) -> Option<Ratio> {

@@ -69,7 +69,6 @@ pub fn found(u: &Universe, seed: &[u8; 32], w: &Waking, registry: &Registry, wor
         composition: None,
         place: Some(w.path.clone()),
         wild: None,
-        latitude: None,
     };
     // Its own world's era-1 siting (the refactor onto era 1's physics),
     // its land among it (`seating::apply`).

@@ -11,8 +11,13 @@
 //!   of the tier, a placeholder). Linear homology made every body a scaled
 //!   copy (gravity fixed by composition, every star's innermost world at
 //!   one heat); compression breaks it.
-//! - Heat: `T = (K / P) · (1 + M_star / M_a)`, P the world's turn in bells
-//!   (K = 60,000 K·bells): a compressed star burns harder, so no cap.
+//! - Heat: the world's own heat in the universe (`Body.heat`: born from its
+//!   disc's light, fed by its star's light through its unlocked face
+//!   (`breath::shine`), cooling to the void each bell), read in kelvin on the
+//!   hydrogen grip (`T = heat · HYDROGEN_K`): the heat `open_at` and
+//!   `layer_chemistry` read, one scale (docs/89, B1).
+//! - Its matter is its layers as they stand: the clusters its chemistry made
+//!   (water among them) as well as its atoms.
 //! - Gravity `g = M / R` (mass by `A = 2Z`), growing with the world's mass.
 //! - Core: its network formers (two or more bonds) sink and shield; their
 //!   share of its mass is `κ`.
@@ -30,12 +35,10 @@
 //!   read by the lower bound `1/ln 2 ≥ 1442/1000` (toward fewer minds). A
 //!   medium CARRIES when its error is below one half (a halving or more).
 use crate::pulse::{mass, Manifest, Universe};
-use cfe::almanac::atom::{atom, closes, Atom};
+use cfe::almanac::atom::{atom, Atom};
 use cfe::ratio::{ratio, Ratio};
 use num_traits::Zero;
 
-/// The heat anchor: K·bells.
-pub const K: i64 = 60_000;
 /// The hydrogen anchor: an atom of tightness 1 holds to 157,800 K (its
 /// grip: what a bond holds against heat, for phase and plasma).
 pub const HYDROGEN_K: i64 = 157_800;
@@ -53,7 +56,8 @@ pub const BLUEPRINT_DOUBLINGS: i64 = 26;
 pub struct World {
     pub path: Vec<u64>,
     pub heat: Ratio,
-    /// Its star's burn against the home star (a luminosity, home = 1).
+    /// Its star's burn against the home star (a luminosity, home = 1): read
+    /// only by the era-0 thermal stand-in (`seating::site_of`, docs/89 B4).
     pub burn: Ratio,
     pub size: Ratio,
     pub gravity: Ratio,
@@ -81,8 +85,9 @@ pub struct World {
     /// The echoes before the star no longer dominates its system (the
     /// climb's window).
     pub window: u64,
-    /// Its days a year, Earth's reading of its spin against its orbit
-    /// (`geoid::Figure::days_a_year`); None where it has no figure.
+    /// Its days a year: the turns its clock slips against its star's in one
+    /// orbit, `(1 − coupling)·P/T_u` (its recoherences a year); None where
+    /// the universe has no echo.
     pub days: Option<Ratio>,
 }
 
@@ -95,16 +100,22 @@ fn grip(a: &Atom) -> Ratio {
     a.tightness.clone() * ratio(HYDROGEN_K, 1)
 }
 
-/// Read one world: its matter, its turn (bells), and its clock against its
-/// star (the coupling's rate).
+/// Read one world: its matter, its own heat in kelvin (`Body.heat ·
+/// HYDROGEN_K`), and its clock against its star (the coupling's rate). None
+/// where it is cold through (nothing agitates it) or holds nothing.
 #[allow(clippy::too_many_arguments)]
-pub fn read(path: Vec<u64>, matter: &Manifest, period: &Ratio, coupling: &Ratio, star_burn: &Ratio, world_scale: &Ratio, delay: u64) -> Option<World> {
-    if period.is_zero() || matter.is_empty() {
+pub fn read(path: Vec<u64>, matter: &Manifest, heat: &Ratio, coupling: &Ratio, star_burn: &Ratio, world_scale: &Ratio, delay: u64) -> Option<World> {
+    if heat.is_zero() || matter.is_empty() {
         return None;
     }
-    let heat = ratio(K, 1) / period.clone() * star_burn.clone();
+    let heat = heat.clone();
     let atoms: Vec<(Atom, Ratio)> = matter.iter().filter_map(|(k, g)| z_of(k).and_then(atom).map(|a| (a, g.clone()))).collect();
-    let loose = atoms.iter().fold(ratio(0, 1), |s, (a, g)| s + g.clone() * ratio(i64::from(a.enclosed * a.depth), 1));
+    // Every kind's atoms are its size, a cluster's by its parts
+    // (`chem::components`): a world of compounds is not empty.
+    let loose = matter.iter().fold(ratio(0, 1), |s, (k, g)| {
+        let sized = crate::chem::components(k).iter().filter_map(|&(n, z)| atom(z).map(|a| i64::from(n) * i64::from(a.enclosed * a.depth))).sum::<i64>();
+        s + g.clone() * ratio(sized, 1)
+    });
     if loose.is_zero() {
         return None;
     }
@@ -114,27 +125,42 @@ pub fn read(path: Vec<u64>, matter: &Manifest, period: &Ratio, coupling: &Ratio,
     let gravity = mass(matter) / size.clone();
     let plasma = |a: &Atom| grip(a) < heat;
     let volatile = |a: &Atom| !plasma(a) && a.unpaired <= 1;
-    let gases: Vec<(u32, Ratio)> = atoms.iter().filter(|(a, _)| volatile(a) || plasma(a)).map(|(a, g)| (cfe::almanac::atom::hold(a.z), g.clone())).collect();
+    // The volatiles: closed atoms or those bonding once, plasma, and the
+    // closed clusters its chemistry made (they bond no further), by their
+    // holding (`chem::hold`).
+    let mut gases: Vec<(u32, Ratio)> = atoms.iter().filter(|(a, _)| volatile(a) || plasma(a)).map(|(a, g)| (cfe::almanac::atom::hold(a.z), g.clone())).collect();
+    gases.extend(matter.iter().filter(|(k, _)| z_of(k).is_none() && crate::chem::unpaired(k) == 0).map(|(k, g)| (crate::chem::hold(k), g.clone())));
     let core_matter: Manifest = matter.iter().filter(|(k, _)| z_of(k).and_then(atom).is_some_and(|a| !plasma(&a) && a.unpaired >= 2)).map(|(k, g)| (k.clone(), g.clone())).collect();
     let core = mass(&core_matter) / mass(matter);
     let hold = gravity.clone() * (ratio(1, 1) + core.clone()) / heat.clone();
-    // CHEMICAL: the most abundant closing pair whose weaker grip holds.
-    let bonders: Vec<&(Atom, Ratio)> = atoms.iter().filter(|(a, _)| !plasma(a) && a.unpaired > 0).collect();
+    // CHEMICAL: the compound it lives in. First the closed clusters its
+    // layers already hold (`formation::layer_chemistry` made them, water
+    // among them) whose grip the heat does not beat; then the pairs that
+    // `chem::closing` closes at this heat (`open_at`). The most abundant.
+    let tight_k = |k: &crate::chem::Kind| crate::chem::tightness(k) * ratio(HYDROGEN_K, 1);
     let mut chemical: Option<(Ratio, Ratio)> = None;
+    let mut consider = |share: Ratio, contact_tightness: Ratio| {
+        if chemical.as_ref().is_none_or(|(s, _)| share > *s) {
+            chemical = Some((share, contact_tightness * ratio(CONTACT_K, 1) / heat.clone()));
+        }
+    };
+    for (k, g) in matter.iter() {
+        if crate::chem::atom_z(k).is_none() && tight_k(k) > heat {
+            consider(g.clone(), crate::chem::tightness(k));
+        }
+    }
+    let grip_units = heat.clone() / ratio(HYDROGEN_K, 1);
+    let bonders: Vec<&(Atom, Ratio)> = atoms.iter().filter(|(a, _)| !plasma(a) && a.unpaired > 0).collect();
     for (i, (a, ga)) in bonders.iter().enumerate() {
         for (b, gb) in bonders.iter().skip(i) {
-            if !closes(&[a.z, b.z]) {
+            let (ua, ub) = (cfe::almanac::atom::open_at(a.z, &grip_units), cfe::almanac::atom::open_at(b.z, &grip_units));
+            if crate::chem::closing(a.z, ua, b.z, ub).is_none() {
                 continue;
             }
-            let hold = grip(a).min(grip(b));
-            if hold <= heat {
+            if grip(a).min(grip(b)) <= heat {
                 continue;
             }
-            let share = ga.clone().min(gb.clone());
-            if chemical.as_ref().is_none_or(|(s, _)| share > *s) {
-                let contact = a.tightness.clone().min(b.tightness.clone()) * ratio(CONTACT_K, 1);
-                chemical = Some((share, contact / heat.clone()));
-            }
+            consider(ga.clone().min(gb.clone()), a.tightness.clone().min(b.tightness.clone()));
         }
     }
     // GEOLOGIC: the most abundant network former (two or more bonds) the
@@ -213,6 +239,8 @@ pub struct Home {
     pub star: Ratio,
     pub world: Ratio,
     pub year_bells: Ratio,
+    /// The home world's own heat in kelvin (`Body.heat · HYDROGEN_K`).
+    pub heat: Ratio,
 }
 
 /// The home galaxy is the deepest core (the largest hole, the unit of mass)
@@ -224,7 +252,7 @@ pub fn home(u: &Universe) -> Option<Home> {
     let core = u.cores.iter().filter(|c| c.satellites.iter().any(|s| !s.satellites.is_empty())).max_by(|a, b| mass(&a.kept).cmp(&mass(&b.kept)))?;
     let sys = core.satellites.iter().filter(|s| !s.satellites.is_empty()).min_by(|a, b| a.radius.cmp(&b.radius))?;
     let orb = sys.satellites.iter().min_by(|a, b| a.radius.cmp(&b.radius))?;
-    Some(Home { star: mass(&sys.kept), world: mass(&orb.kept), year_bells: orb.period.clone() })
+    Some(Home { star: mass(&sys.kept), world: mass(&orb.kept), year_bells: orb.period.clone(), heat: orb.heat.clone() * ratio(HYDROGEN_K, 1) })
 }
 
 /// THE BELL (xylarium's ladder, shared): the home core's ring, the pulse's
@@ -256,7 +284,7 @@ pub fn viable(matter: &Manifest) -> bool {
 /// generation up to a copier's capacity, bodies a local year for the rest;
 /// decay stretches it by `1 / (1 − 1/x)`. Its local year in standard years
 /// is its turn over the home world's; a bell is BELL_YEARS of them. Its day
-/// is its own (`days` a year, the geoid's reading of its spin against its
+/// is its own (`days` a year, its clock's slips against its star in one
 /// orbit): a world with no day (locked to its star) gives cells no
 /// generations, and climbs nothing.
 pub fn climb_bells(period_bells: &Ratio, home_year_bells: &Ratio, days: &Ratio, x: &Ratio, compression: &Ratio) -> Option<Ratio> {
@@ -386,15 +414,13 @@ pub fn medium_of(metabolism: &str) -> Option<&'static str> {
     }
 }
 
-/// The home world's heat, the land's ruler: `K / P_home` (its star's burn is
-/// the unit).
+/// The home world's heat, the land's ruler: its own `Body.heat` in kelvin.
 pub fn home_heat(u: &Universe) -> Option<Ratio> {
-    let home = home(u)?;
-    (!home.year_bells.is_zero()).then(|| ratio(K, 1) / home.year_bells)
+    home(u).map(|h| h.heat).filter(|h| !h.is_zero())
 }
 
-/// A medium's halvings on a world at its mean heat and compression; None
-/// where the world does not hold the medium.
+/// A medium's halvings on a world at its heat and compression; None where
+/// the world does not hold the medium.
 pub fn medium_halvings(w: &World, compression: &Ratio, medium: &str) -> Option<Ratio> {
     let x = match medium {
         "chemical" => w.chemical.as_ref(),
@@ -405,25 +431,22 @@ pub fn medium_halvings(w: &World, compression: &Ratio, medium: &str) -> Option<R
     Some(halvings(x, compression))
 }
 
-/// THE LAND (docs/86, refined by docs/88): the heads a world feeds wild in
-/// one medium. What limits a people is energy, its star's flux on its world
-/// (docs/82), and the world's heat IS that flux (`T = K/P · burn`, step 1). A
-/// turning world receives it by latitude, and its medium carries most where
-/// the local heat leaves it the most whole halvings: the people stands
-/// there, and its land is that latitude's uptake, `u` of T
-/// (`geoid::latitude`: `2S·(1 − 2^(−⌊h/(2S)⌋))` at its best S). The ruler is
-/// the home world, whose mean flux feeds one viable people (`VIABLE_PEOPLE`,
-/// a declared placeholder anchor): `wild = ⌊VIABLE_PEOPLE · T · u / T_home⌋`,
-/// heads counted whole. A hot world's equator may carry nothing while its
-/// cold latitudes feed a people; no band is drawn (design law 10); nothing
-/// is squared.
+/// THE LAND (docs/86, re-pointed by docs/89): the heads a world feeds wild
+/// in one medium. What limits a people is energy, its star's flux on its
+/// world (docs/82): the world's own heat, kept from the light it receives
+/// through its unlocked face (`breath::shine`). Its medium takes up the share
+/// it carries as pattern, `1 − 2^(−⌊h⌋)` (whole halvings, none under one).
+/// The ruler is the home world, whose heat feeds one viable people
+/// (`VIABLE_PEOPLE`, a declared placeholder anchor):
+/// `wild = ⌊VIABLE_PEOPLE · T · (1 − 2^(−⌊h⌋)) / T_home⌋`, heads whole.
 pub fn wild(w: &World, compression: &Ratio, medium: &str, home_heat: &Ratio) -> Ratio {
     let Some(h) = medium_halvings(w, compression, medium) else { return ratio(0, 1) };
     if home_heat.is_zero() {
         return ratio(0, 1);
     }
-    let Some((_, uptake)) = crate::geoid::latitude(&h) else { return ratio(0, 1) };
-    (ratio(VIABLE_PEOPLE, 1) * w.heat.clone() * uptake / home_heat.clone()).floor()
+    let whole: u32 = h.floor().to_integer().try_into().unwrap_or(u32::MAX).min(64);
+    let carried = ratio(1, 1) - Ratio::new(num_bigint::BigInt::from(1), num_bigint::BigInt::from(2u8).pow(whole));
+    (ratio(VIABLE_PEOPLE, 1) * w.heat.clone() * carried / home_heat.clone()).floor()
 }
 
 /// Every world's current reading (refreshed when the universe changes).
@@ -562,6 +585,7 @@ pub fn worlds(u: &Universe) -> Vec<World> {
     let _ = median;
     let home = home(u);
     let star_scale = home.as_ref().map(|h| h.star.clone()).unwrap_or_else(|| ratio(1, 1));
+    let t_u = ratio(i64::try_from(u.t_u).unwrap_or(i64::MAX), 1);
     let world_scale = home.as_ref().map(|h| h.world.clone()).unwrap_or_else(|| ratio(1, 1));
     let mut out = Vec::new();
     for core in &u.cores {
@@ -576,9 +600,10 @@ pub fn worlds(u: &Universe) -> Vec<World> {
             let window = window_echoes(&star, &worlds_mass);
             for orb in &sys.satellites {
                 let coupling = crate::ring::rate(&orb.radius, &(inside.clone() / crate::breath::unit_mass(u)));
-                if let Some(mut w) = read(orb.path.clone(), &orb.kept, &orb.period, &coupling, &star_burn, &world_scale, delay) {
+                if let Some(mut w) = read(orb.path.clone(), &orb.kept, &(orb.heat.clone() * ratio(HYDROGEN_K, 1)), &coupling, &star_burn, &world_scale, delay) {
                     w.belts = belts.clone();
                     w.window = window;
+                    w.days = (!t_u.is_zero()).then(|| (ratio(1, 1) - coupling.clone()) * orb.period.clone() / t_u.clone());
                     out.push(w);
                 }
                 inside += mass(&orb.total());
@@ -593,7 +618,6 @@ pub fn worlds(u: &Universe) -> Vec<World> {
     for w in out.iter_mut() {
         w.atmosphere = atmosphere(w, &hold_ref);
         w.pressure = w.atmosphere.clone() * w.gravity.clone();
-        w.days = crate::seating::figure_of(u, &w.path, &w.core).map(|f| f.days_a_year());
     }
     out
 }
@@ -605,34 +629,30 @@ mod tests {
     #[test]
     fn the_land_takes_up_the_flux_its_medium_carries() {
         let mut w = World { path: vec![], heat: ratio(2, 1), burn: ratio(1, 1), size: ratio(1, 1), gravity: ratio(1, 1), core: ratio(0, 1), hold: ratio(1, 1), atmosphere: ratio(0, 1), pressure: ratio(0, 1), gases: vec![], chemical: Some(ratio(2, 1)), geologic: Some(ratio(1, 2)), plasmic: None, informational: None, coupling: ratio(0, 1), delay: 0, belts: ratio(0, 1), window: 0, days: None };
-        // x = 2 at no compression: h = 2·1442/1000 = 2884/1000, a = 1442/1000:
-        // the equator keeps one halving, 2·(1/2) = 1 of T; the edge of the
-        // second (S = 721/1000) takes 2·(721/1000)·(3/4) = 2163/2000 > 1.
-        // Twice the home heat: ⌊500·2·2163/2000⌋ = 1081.
-        assert_eq!(wild(&w, &ratio(0, 1), "chemical", &ratio(1, 1)), ratio(1081, 1));
-        // A medium under a halving at the mean still carries toward the
-        // poles: x = 1/2, h = 721/1000, a = 721/2000, S = a, one halving:
-        // 2·(721/2000)·(1/2) = 721/2000; ⌊500·2·721/2000⌋ = 360.
-        assert_eq!(wild(&w, &ratio(0, 1), "geologic", &ratio(1, 1)), ratio(360, 1));
-        // An absent medium feeds nothing.
+        // x = 2 at no compression: h = 2·1442/1000 = 2.884, two whole
+        // halvings, 3/4 carried; twice the home heat: 500·2·3/4 = 750.
+        assert_eq!(wild(&w, &ratio(0, 1), "chemical", &ratio(1, 1)), ratio(750, 1));
+        // Under a halving the medium carries nothing; an absent medium too.
+        assert_eq!(wild(&w, &ratio(0, 1), "geologic", &ratio(1, 1)), ratio(0, 1));
         assert_eq!(wild(&w, &ratio(0, 1), "plasmic", &ratio(1, 1)), ratio(0, 1));
-        // Hotter flux, a weaker medium: x = 1, h = 1442/1000, a = 721/1000:
-        // only toward the poles, S = a: 2·a·(1/2) = 721/1000; ⌊500·4·721/1000⌋ = 1442.
+        // Hotter flux, a weaker medium: the uptake is the product, no band.
         w.heat = ratio(4, 1);
         w.chemical = Some(ratio(1, 1));
-        assert_eq!(wild(&w, &ratio(0, 1), "chemical", &ratio(1, 1)), ratio(1442, 1));
+        assert_eq!(wild(&w, &ratio(0, 1), "chemical", &ratio(1, 1)), ratio(1000, 1));
     }
 
     #[test]
     fn a_world_reads_its_heat_and_media() {
-        // Hydrogen (single bond) and a two-bond kind at 60 bells: Z = 6 on the
-        // harmonic atom (Z = 4 pairs its round shape and bonds nothing).
+        // Hydrogen (single bond) and a two-bond kind at its own heat of
+        // 1,000 K: Z = 6 on the harmonic atom (Z = 4 pairs its round shape
+        // and bonds nothing).
         let matter: Manifest = [(crate::chem::Kind::parse("Z001").expect("a kind"), ratio(10, 1)), (crate::chem::Kind::parse("Z006").expect("a kind"), ratio(5, 1))].into();
-        let w = read(vec![1, 1, 1], &matter, &ratio(60, 1), &ratio(59, 60), &ratio(1, 1), &ratio(1_000_000, 1), 240).unwrap();
-        assert_eq!(w.heat, ratio(1000, 1));
-        let heavy = read(vec![1, 1, 1], &matter, &ratio(60, 1), &ratio(59, 60), &ratio(3, 1), &ratio(1, 1), 240).unwrap();
-        assert_eq!(heavy.heat, ratio(3000, 1), "a burning star, no cap");
+        let w = read(vec![1, 1, 1], &matter, &ratio(1000, 1), &ratio(59, 60), &ratio(1, 1), &ratio(1_000_000, 1), 240).unwrap();
+        assert_eq!(w.heat, ratio(1000, 1), "a world's heat is its own");
+        let heavy = read(vec![1, 1, 1], &matter, &ratio(1000, 1), &ratio(59, 60), &ratio(1, 1), &ratio(1, 1), 240).unwrap();
         assert!(heavy.gravity > w.gravity, "a compressed world pulls harder");
+        // A world cold through offers nothing.
+        assert!(read(vec![1, 1, 1], &matter, &ratio(0, 1), &ratio(59, 60), &ratio(1, 1), &ratio(1, 1), 240).is_none());
         // A coupling at 59/60 slips 1/60 a echo: its first recoherence at
         // echo 60, after the galaxy's 240-bell delay.
         assert_eq!(wake_bell(&w, 1, 60), Some(240 + 60 * 60));

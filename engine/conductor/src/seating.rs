@@ -136,27 +136,6 @@ pub struct Site {
     pub composition: Option<Vec<(u16, Ratio)>>,
     /// Its land: the heads each medium it carries feeds wild (`life::wild`).
     pub wild: std::collections::BTreeMap<&'static str, Ratio>,
-    /// Its figure, the geoid its peoples stand and move on (docs/88).
-    pub figure: Option<crate::geoid::Figure>,
-    /// Where on it each medium takes up the most flux: its colatitude in
-    /// degrees (`geoid::latitude`).
-    pub latitude: std::collections::BTreeMap<&'static str, Ratio>,
-}
-
-/// The figure of the world at `path`: its reach about the holding inside
-/// its orbit (its star and the worlds within it), its own holding and core
-/// share (`geoid::figure`).
-pub fn figure_of(u: &Universe, path: &[u64], kappa: &Ratio) -> Option<crate::geoid::Figure> {
-    let core = u.cores.iter().find(|c| c.path.first() == path.first())?;
-    let sys = core.satellites.iter().find(|s| s.path.get(1) == path.get(1))?;
-    let orb = sys.satellites.iter().find(|o| o.path.get(2) == path.get(2))?;
-    let unit = crate::breath::unit_mass(u);
-    if unit <= ratio(0, 1) {
-        return None;
-    }
-    let held = |b: &crate::pulse::Body| crate::pulse::mass(&b.total()) / unit.clone();
-    let inside = sys.satellites.iter().filter(|o| o.radius < orb.radius).fold(crate::pulse::mass(&sys.kept) / unit.clone(), |s, o| s + held(o));
-    crate::geoid::figure(&orb.radius, &held(orb), &inside, kappa, &orb.own)
 }
 
 impl Site {
@@ -179,12 +158,7 @@ pub fn sites(u: &Universe, worlds: &std::collections::BTreeMap<Vec<u64>, crate::
             let position = place_of(u, &w.path)?;
             let compression = w.pressure.clone() / reference.clone();
             let wild = ["chemical", "geologic", "plasmic"].into_iter().map(|m| (m, crate::life::wild(w, &compression, m, &home))).collect();
-            let figure = figure_of(u, &w.path, &w.core);
-            let latitude = ["chemical", "geologic", "plasmic"]
-                .into_iter()
-                .filter_map(|m| crate::life::medium_halvings(w, &compression, m).and_then(|h| crate::geoid::latitude(&h)).map(|(theta, _)| (m, theta)))
-                .collect();
-            Some((w.path.clone(), Site { path: w.path.clone(), position, star, albedo, orbit, composition: composition_of(u, &w.path), wild, figure, latitude }))
+            Some((w.path.clone(), Site { path: w.path.clone(), position, star, albedo, orbit, composition: composition_of(u, &w.path), wild }))
         })
         .collect()
 }
@@ -206,7 +180,6 @@ pub fn apply(spec: &mut PolitySpec, site: &Site) {
     spec.composition = site.composition.clone();
     spec.place = Some(site.path.clone());
     spec.wild = Some(site.wild_for(&spec.civilization.metabolism));
-    spec.latitude = crate::life::medium_of(&spec.civilization.metabolism).and_then(|m| site.latitude.get(m)).cloned();
 }
 
 /// THE SEATING: a lineage's head takes a world its land feeds (docs/86), in

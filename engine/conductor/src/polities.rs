@@ -116,7 +116,6 @@ fn seat(
         composition: None,
         place: None,
         wild: None,
-        latitude: None,
     }
 }
 
@@ -441,7 +440,6 @@ pub fn registered_polities(registry: &ledger::registry::Registry) -> Vec<PolityS
                 composition: None,
                 place: None,
                 wild: None,
-                latitude: None,
             });
             continue;
         }
@@ -468,7 +466,6 @@ pub fn registered_polities(registry: &ledger::registry::Registry) -> Vec<PolityS
             composition: None,
             place: None,
             wild: None,
-            latitude: None,
         });
     }
     grown
