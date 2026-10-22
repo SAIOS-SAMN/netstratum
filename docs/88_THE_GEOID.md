@@ -36,6 +36,30 @@ in the ring law's grammar (`ring`: a place turns by its deficit,
 Exact rationals; differences of deficits and one share; no square, no sine
 of an angle, no norm.
 
+## A people's latitude, and its land (docs/87 step 2)
+
+A turning world receives its star's flux by latitude. Read along a meridian,
+the share at θ degrees from the axis is `2·S(θ)` of the world's flux T (the
+meridian's mean of S is ½): nothing at the poles, twice the mean at the
+equator. A medium's halvings at θ follow the local heat's agitation,
+`h_θ = h/(2·S(θ))`, so its uptake there is `2S·(1 − 2^(−⌊h/(2S)⌋))` of T.
+
+**Where a people stands** (`geoid::latitude`): within each whole halving the
+uptake rises with S, so the best stands at a halving's edge or at the
+equator. With `a = h/2`, the larger of `S = 1` (⌊a⌋ halvings) and
+`S = a/⌈a⌉` (⌈a⌉ halvings) is the people's latitude, colatitude `90°·S`: a
+construction (law 9). A strong medium stands at the equator; a weak one
+toward the poles, where the cold leaves it its halvings.
+
+**Its land** (refining docs/86): the uptake at its latitude,
+`wild = ⌊500 · T · u / T_home⌋`. A hot world's equator may carry nothing
+while its cold latitudes feed a people.
+
+Read (play1 at boot): latitudes from 19° to 90° from the pole (one line's
+medium carries nowhere on its world); with the land read at the latitude,
+all 22 lines found with bands of 4 and land 68 to 8,046 heads (five had
+none at the world's mean).
+
 ## Read (play1 at boot, 22 seated worlds)
 
 Equatorial bulges from 0 to about 1.8 % of the pole's reach; a world whose
@@ -50,4 +74,7 @@ orbit.
   encounter law's) and is owed.
 - Spins do not yet evolve (tides, collisions); the figure is read from the
   present orbit.
-- Next (docs/87 step 2): a people's place as a cap on this figure.
+- A people's longitude is the reading's origin (a turning world has no
+  preferred meridian) until a second people shares its world.
+- The cap's extent (how far from its latitude a people's land reaches) is
+  owed; the land is read at the latitude.

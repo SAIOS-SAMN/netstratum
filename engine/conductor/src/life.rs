@@ -387,30 +387,37 @@ pub fn home_heat(u: &Universe) -> Option<Ratio> {
     (!home.year_bells.is_zero()).then(|| ratio(K, 1) / home.year_bells)
 }
 
-/// THE LAND (docs/86, operator 2026-10-21): the heads a world feeds wild in
-/// one medium. What limits a people is energy, its star's flux on its world
-/// (docs/82), and the world's heat IS that flux (`T = K/P · burn`, step 1);
-/// a medium takes up the share it carries as pattern, `1 − 2^(−⌊h⌋)` (h its
-/// halvings at the world's compression, whole halvings, erring toward fewer:
-/// a medium of less than a halving takes up nothing). The ruler is the home
-/// world, whose full flux feeds one viable people (`VIABLE_PEOPLE`, a
-/// declared placeholder anchor): `wild = ⌊VIABLE_PEOPLE · T · (1 − 2^(−⌊h⌋)) /
-/// T_home⌋`, heads counted whole. A hotter world brings more flux and its medium carries less of
-/// it, so no band is drawn (design law 10); nothing is squared.
-pub fn wild(w: &World, compression: &Ratio, medium: &str, home_heat: &Ratio) -> Ratio {
+/// A medium's halvings on a world at its mean heat and compression; None
+/// where the world does not hold the medium.
+pub fn medium_halvings(w: &World, compression: &Ratio, medium: &str) -> Option<Ratio> {
     let x = match medium {
         "chemical" => w.chemical.as_ref(),
         "geologic" => w.geologic.as_ref(),
         "plasmic" => w.plasmic.as_ref(),
         _ => None,
-    };
-    let Some(x) = x else { return ratio(0, 1) };
+    }?;
+    Some(halvings(x, compression))
+}
+
+/// THE LAND (docs/86, refined by docs/88): the heads a world feeds wild in
+/// one medium. What limits a people is energy, its star's flux on its world
+/// (docs/82), and the world's heat IS that flux (`T = K/P · burn`, step 1). A
+/// turning world receives it by latitude, and its medium carries most where
+/// the local heat leaves it the most whole halvings: the people stands
+/// there, and its land is that latitude's uptake, `u` of T
+/// (`geoid::latitude`: `2S·(1 − 2^(−⌊h/(2S)⌋))` at its best S). The ruler is
+/// the home world, whose mean flux feeds one viable people (`VIABLE_PEOPLE`,
+/// a declared placeholder anchor): `wild = ⌊VIABLE_PEOPLE · T · u / T_home⌋`,
+/// heads counted whole. A hot world's equator may carry nothing while its
+/// cold latitudes feed a people; no band is drawn (design law 10); nothing
+/// is squared.
+pub fn wild(w: &World, compression: &Ratio, medium: &str, home_heat: &Ratio) -> Ratio {
+    let Some(h) = medium_halvings(w, compression, medium) else { return ratio(0, 1) };
     if home_heat.is_zero() {
         return ratio(0, 1);
     }
-    let whole: u32 = halvings(x, compression).floor().to_integer().try_into().unwrap_or(u32::MAX).min(64);
-    let carried = ratio(1, 1) - Ratio::new(num_bigint::BigInt::from(1), num_bigint::BigInt::from(2u8).pow(whole));
-    (ratio(VIABLE_PEOPLE, 1) * w.heat.clone() * carried / home_heat.clone()).floor()
+    let Some((_, uptake)) = crate::geoid::latitude(&h) else { return ratio(0, 1) };
+    (ratio(VIABLE_PEOPLE, 1) * w.heat.clone() * uptake / home_heat.clone()).floor()
 }
 
 /// Every world's current reading (refreshed when the universe changes).
@@ -591,16 +598,22 @@ mod tests {
     #[test]
     fn the_land_takes_up_the_flux_its_medium_carries() {
         let mut w = World { path: vec![], heat: ratio(2, 1), burn: ratio(1, 1), size: ratio(1, 1), gravity: ratio(1, 1), core: ratio(0, 1), hold: ratio(1, 1), atmosphere: ratio(0, 1), pressure: ratio(0, 1), gases: vec![], chemical: Some(ratio(2, 1)), geologic: Some(ratio(1, 2)), plasmic: None, informational: None, coupling: ratio(0, 1), delay: 0, belts: ratio(0, 1), window: 0 };
-        // x = 2 at no compression: h = 2·1442/1000 = 2.884, two whole
-        // halvings, 3/4 carried; twice the home heat: 500·2·3/4 = 750.
-        assert_eq!(wild(&w, &ratio(0, 1), "chemical", &ratio(1, 1)), ratio(750, 1));
-        // Under a halving the medium carries nothing; an absent medium too.
-        assert_eq!(wild(&w, &ratio(0, 1), "geologic", &ratio(1, 1)), ratio(0, 1));
+        // x = 2 at no compression: h = 2·1442/1000 = 2884/1000, a = 1442/1000:
+        // the equator keeps one halving, 2·(1/2) = 1 of T; the edge of the
+        // second (S = 721/1000) takes 2·(721/1000)·(3/4) = 2163/2000 > 1.
+        // Twice the home heat: ⌊500·2·2163/2000⌋ = 1081.
+        assert_eq!(wild(&w, &ratio(0, 1), "chemical", &ratio(1, 1)), ratio(1081, 1));
+        // A medium under a halving at the mean still carries toward the
+        // poles: x = 1/2, h = 721/1000, a = 721/2000, S = a, one halving:
+        // 2·(721/2000)·(1/2) = 721/2000; ⌊500·2·721/2000⌋ = 360.
+        assert_eq!(wild(&w, &ratio(0, 1), "geologic", &ratio(1, 1)), ratio(360, 1));
+        // An absent medium feeds nothing.
         assert_eq!(wild(&w, &ratio(0, 1), "plasmic", &ratio(1, 1)), ratio(0, 1));
-        // Hotter flux, a weaker medium: the uptake is the product, no band.
+        // Hotter flux, a weaker medium: x = 1, h = 1442/1000, a = 721/1000:
+        // only toward the poles, S = a: 2·a·(1/2) = 721/1000; ⌊500·4·721/1000⌋ = 1442.
         w.heat = ratio(4, 1);
         w.chemical = Some(ratio(1, 1));
-        assert_eq!(wild(&w, &ratio(0, 1), "chemical", &ratio(1, 1)), ratio(1000, 1));
+        assert_eq!(wild(&w, &ratio(0, 1), "chemical", &ratio(1, 1)), ratio(1442, 1));
     }
 
     #[test]

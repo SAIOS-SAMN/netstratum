@@ -86,9 +86,57 @@ impl Figure {
     }
 }
 
+/// The share of a world's flux T a turning world receives at θ degrees from
+/// its axis, read along a meridian: `2·S(θ)` (the meridian's mean of S is ½,
+/// so the meridian holds T): nothing at the poles, twice the mean at the
+/// equator.
+pub fn flux_share(theta: &Ratio) -> Ratio {
+    ratio(2, 1) * sine(theta)
+}
+
+/// THE PEOPLE'S LATITUDE (docs/88): where on its world a people's medium
+/// takes up the most of its star's flux. A medium of `h` halvings at the
+/// world's mean heat carries, at θ, the local heat's agitation: `h_θ =
+/// h/(2·S(θ))`, so its uptake there is `2S·(1 − 2^(−⌊h/(2S)⌋))` of T. Within
+/// each whole halving the uptake rises with S, so the best stands at a
+/// halving's edge or at the equator: of `S = 1` (`⌊a⌋` halvings) and
+/// `S = a/⌈a⌉` (`⌈a⌉` halvings), `a = h/2`, the larger, a construction (law
+/// 9). Returns its colatitude in degrees (the northern half; the southern is
+/// its mirror) and the uptake as a share of T; None where the medium carries
+/// nothing anywhere.
+pub fn latitude(h: &Ratio) -> Option<(Ratio, Ratio)> {
+    let a = h.clone() / ratio(2, 1);
+    if a <= ratio(0, 1) {
+        return None;
+    }
+    let taken = |s: &Ratio, n: &num_bigint::BigInt| -> Ratio {
+        let n: u32 = n.try_into().unwrap_or(u32::MAX).min(64);
+        ratio(2, 1) * s.clone() * (ratio(1, 1) - Ratio::new(num_bigint::BigInt::from(1), num_bigint::BigInt::from(2u8).pow(n)))
+    };
+    let at_equator = (ratio(1, 1), taken(&ratio(1, 1), &a.floor().to_integer()));
+    let ceil = a.ceil().to_integer();
+    let edge_s = a.clone() / Ratio::from_integer(ceil.clone());
+    let at_edge = (edge_s.clone(), taken(&edge_s, &ceil));
+    let (s, up) = if at_edge.1 > at_equator.1 { at_edge } else { at_equator };
+    (up > ratio(0, 1)).then(|| (ratio(90, 1) * s, up))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn a_people_stands_where_its_medium_takes_up_the_most() {
+        // h = 6 (a = 3): the equator keeps 3 halvings, 2·(7/8) = 7/4 of T.
+        assert_eq!(latitude(&ratio(6, 1)), Some((ratio(90, 1), ratio(7, 4))));
+        // h = 5 (a = 5/2): the equator keeps 2 halvings, 2·(3/4) = 3/2; the
+        // edge of the third, S = 5/6, 2·(5/6)·(7/8) = 35/24 < 3/2.
+        assert_eq!(latitude(&ratio(5, 1)), Some((ratio(90, 1), ratio(3, 2))));
+        // h = 1 (a = 1/2): the hot equator carries nothing; the medium stands
+        // at S = 1/2, 45°, with one halving: 2·(1/2)·(1/2) = 1/2.
+        assert_eq!(latitude(&ratio(1, 1)), Some((ratio(45, 1), ratio(1, 2))));
+        assert_eq!(latitude(&ratio(0, 1)), None);
+    }
 
     #[test]
     fn the_ruled_sine_closes_at_the_poles_and_peaks_at_the_equator() {

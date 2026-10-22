@@ -1,5 +1,8 @@
 # 86 — The land: what a world feeds wild
 
+**Refined by docs/88:** the land is read at the people's latitude on its
+turning world, `u` of T in place of `1 − 2^(−⌊h⌋)` at the mean.
+
 Operator 2026-10-21: "proceed - you may do the derivations" (after the
 600-beat read: every line founded with a band of one, no shipyard, no trade,
 no gate in 600 beats).

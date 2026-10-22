@@ -91,6 +91,11 @@ fn main() {
                 let bulge = f.bulge().map(|b| conductor::reading::sector(&(b - cfe::ratio::ratio(1, 1))).to_string()).unwrap_or_else(|| "shed".into());
                 format!("; its geoid bulges {bulge} at the equator, turning {}", if f.spin < cfe::ratio::ratio(0, 1) { "against its orbit" } else { "with its orbit" })
             });
+            let figure = Some(format!(
+                "{}{}",
+                figure.unwrap_or_default(),
+                spec.latitude.as_ref().map(|t| format!("; it stands {}° from the pole", t.floor())).unwrap_or_else(|| "; its medium takes up nothing there".into())
+            ));
             println!(
                 "conductor: {} stands on world {path:?}{}{}",
                 spec.civilization.sigil,

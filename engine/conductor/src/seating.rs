@@ -138,6 +138,9 @@ pub struct Site {
     pub wild: std::collections::BTreeMap<&'static str, Ratio>,
     /// Its figure, the geoid its peoples stand and move on (docs/88).
     pub figure: Option<crate::geoid::Figure>,
+    /// Where on it each medium takes up the most flux: its colatitude in
+    /// degrees (`geoid::latitude`).
+    pub latitude: std::collections::BTreeMap<&'static str, Ratio>,
 }
 
 /// The figure of the world at `path`: its reach about the holding inside
@@ -177,7 +180,11 @@ pub fn sites(u: &Universe, worlds: &std::collections::BTreeMap<Vec<u64>, crate::
             let compression = w.pressure.clone() / reference.clone();
             let wild = ["chemical", "geologic", "plasmic"].into_iter().map(|m| (m, crate::life::wild(w, &compression, m, &home))).collect();
             let figure = figure_of(u, &w.path, &w.core);
-            Some((w.path.clone(), Site { path: w.path.clone(), position, star, albedo, orbit, composition: composition_of(u, &w.path), wild, figure }))
+            let latitude = ["chemical", "geologic", "plasmic"]
+                .into_iter()
+                .filter_map(|m| crate::life::medium_halvings(w, &compression, m).and_then(|h| crate::geoid::latitude(&h)).map(|(theta, _)| (m, theta)))
+                .collect();
+            Some((w.path.clone(), Site { path: w.path.clone(), position, star, albedo, orbit, composition: composition_of(u, &w.path), wild, figure, latitude }))
         })
         .collect()
 }
@@ -199,6 +206,7 @@ pub fn apply(spec: &mut PolitySpec, site: &Site) {
     spec.composition = site.composition.clone();
     spec.place = Some(site.path.clone());
     spec.wild = Some(site.wild_for(&spec.civilization.metabolism));
+    spec.latitude = crate::life::medium_of(&spec.civilization.metabolism).and_then(|m| site.latitude.get(m)).cloned();
 }
 
 /// THE SEATING: a lineage's head takes a world its land feeds (docs/86), in
