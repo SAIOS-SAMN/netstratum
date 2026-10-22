@@ -826,11 +826,14 @@ pub fn magnetism(m: &Manifest) -> Ratio {
 }
 
 /// THE SPIN LEDGER's total (docs/83 Phase 0): every orbiting body's mass
-/// times its specific spin, and every medium's spin, in units of the unit
-/// mass. Conserved exactly across the breath.
+/// times its specific spin in both orbits (docs/90), and every medium's
+/// spin, in units of the unit mass. The motes' spins and the cores'
+/// reservoirs are kept in each galaxy's own units and are not in it, so it
+/// moves wherever matter crosses between motes and bodies (`breathe` reads
+/// how far).
 pub fn spin_total(u: &Universe, unit: &Ratio) -> Ratio {
     fn of(b: &Body, unit: &Ratio) -> Ratio {
-        let own = mass(&b.total()) / unit.clone() * b.ell.clone();
+        let own = mass(&b.total()) / unit.clone() * (b.ell.clone() + b.ell_orth.clone());
         b.satellites.iter().fold(own + b.medium_spin.clone(), |s, x| s + of(x, unit))
     }
     u.cores.iter().fold(ratio(0, 1), |s, c| s + of(c, unit))

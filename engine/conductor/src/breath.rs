@@ -157,6 +157,12 @@ pub struct Event {
     pub light: Light,
     /// THE TOLLS this echo: every star that passed.
     pub tolls: Vec<Toll>,
+    /// THE SPIN IDENTITIES this echo (docs/90): for each ledger the spin
+    /// moves through, the residual of each check, `after − before` of its
+    /// whole sum (0 where exact). `kick`: a galaxy's motes, both orbits, and
+    /// its reservoir across the kicks; `ride`: each star's orthogonal spin and
+    /// its galaxy's reservoir across its ride.
+    pub identity: Vec<(&'static str, Ratio)>,
 }
 
 /// How a star passed.
@@ -346,6 +352,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         let mut cross = std::mem::take(&mut pending);
         let mut light = Light::default();
         let mut tolls: Vec<Toll> = Vec::new();
+        let mut identity: Vec<(&'static str, Ratio)> = Vec::new();
         // The galaxy's push and throat in its own units, for the wind's
         // meeting with the medium.
         let g_before = if home { whole_u.clone() } else { mass(&core.total()) };
@@ -460,9 +467,14 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         let ledger_unit = if home { whole_u.clone() } else { crate::pulse::core_state(core) };
                         let share = if ledger_unit.is_zero() { ratio(0, 1) } else { mass(&sys.total()) / ledger_unit };
                         let kicked = orth_flows.clone() + kick_orth - ratio(1, 2) * d_enc.clone() * orth_flows.clone();
-                        let kept_c = crate::ring::grain(&(kicked * keep_share.clone()));
-                        core.reservoir -= share * (kept_c.clone() - orth_flows.clone());
-                        sys.ell_orth = crate::ring::grain(&(kept_c / to_flows.clone()));
+                        let kept_c = kicked * keep_share.clone();
+                        // Stored on the grain in the units of `ell`; the
+                        // reservoir pays exactly the change stored.
+                        let before = core.reservoir.clone() + share.clone() * sys.ell_orth.clone() * to_flows.clone();
+                        let stored = crate::ring::grain(&(kept_c / to_flows.clone()));
+                        core.reservoir -= share.clone() * (stored.clone() - sys.ell_orth.clone()) * to_flows.clone();
+                        sys.ell_orth = stored;
+                        identity.push(("ride", core.reservoir.clone() + share * sys.ell_orth.clone() * to_flows.clone() - before));
                     }
                     for k in 0..planes {
                         let off = sys.phase[k].clone() - was[k].clone();
@@ -920,8 +932,11 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             let orth_was: Vec<(usize, Ratio)> = core.flows.iter().enumerate().filter(|(_, x)| x.vacuum && x.phase.len() > 1).map(|(j, x)| (j, x.phase[1].clone())).collect();
             // The galaxy's band (push and return, `flows::kick`) stands held
             // back (operator 2026-10-21: "pull it back and make it static").
+            let ledger_sum = |core: &Body| core.flows.iter().fold(core.reservoir.clone(), |s, x| s + x.amount.clone() * crate::flows::weight(&x.key) / ledger_unit.clone() * (x.ell_o.clone() + x.ell_orth.clone()));
+            let before = ledger_sum(core);
             let (given, absorbed) = crate::flows::kick(&mut core.flows, enc.as_ref().unwrap_or(&throat), &p, tide, &ledger_unit, None, &mut cross);
             core.reservoir -= given;
+            identity.push(("kick", ledger_sum(core) - before));
             // RECYCLING (`crate::recycle`; xylarium 11.0 (18)): AFTER the
             // kicks (kicks are motion, recycling the residue), the bounce the
             // container holds presses and peels the matter in the throat.
@@ -1139,7 +1154,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         for (k, a) in to_ocean {
             *u.medium.entry(k).or_insert_with(|| ratio(0, 1)) += a;
         }
-        events.push(Event { bell, galaxy: galaxy_id, rung, write: Write::Perpendicular, stars, jets, returned, dissolved, merged, encounters, recycled, burned, burns, cross, light, tolls });
+        events.push(Event { bell, galaxy: galaxy_id, rung, write: Write::Perpendicular, stars, jets, returned, dissolved, merged, encounters, recycled, burned, burns, cross, light, tolls, identity });
     }
     events
 }

@@ -129,6 +129,29 @@ fails for this physics.
   the inner region hardest. It acts with D3: the inner bodies are both
   kicked hardest and eaten hardest.
 
+## 3b. Built and read (2026-10-22; 2^55, 340 bells, the same founding as before)
+
+- **The identities** (`breath::Event.identity`, read by `breathe`), each the
+  whole sum of its ledger before and after:
+  - `kick`, each galaxy's motes in both orbits and its core's reservoir across
+    the kicks: **39 of 39 exact**;
+  - `ride`, each star's orthogonal spin and its galaxy's reservoir across its
+    ride: **165 of 165 exact** (a leak found and fixed: the reservoir had been
+    paid the change before the grain while the star stored it after).
+  - The bodies' ledger (`spin_total`, now with both orbits) moved −0.113 of
+    3.55 over the run. It excludes the motes and the reservoirs, which are kept
+    in each galaxy's own units, so it moves whenever matter crosses between
+    motes and bodies (births, ignitions, escapes). A single universe-wide
+    spin identity is not yet defined across those units: owed with the tier
+    map (docs/89, B6).
+- **The prediction:** the home galaxy's stars swing with mean elongation
+  e ≈ 0.20 (greatest ≈ 0.51) against galaxy 21's ≈ 0.03: the inner core is
+  erratic, the outer near-round, as derived. For worlds it does not hold
+  clearly: galaxy 21's worlds swing more (mean ≈ 0.11, greatest ≈ 0.70) than
+  the home's (≈ 0.05); the lock's damping is owed a look.
+- Light balanced; formation shifted (94 systems born, was 123; 65 merged, was
+  80; the home now holds 6 worlds, was none).
+
 ## 4. What it touches
 
 - **The galaxy-band ruling (2026-10-21, "pull it back and make it static")**

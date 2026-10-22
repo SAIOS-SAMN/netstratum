@@ -24,6 +24,7 @@ fn main() {
     if start > 0 {
         println!("RESUMED at bell {start} (the checkpoint)");
     }
+    let spin_before = pulse::spin_total(&u, &breath::unit_mass(&u));
     let mut events = Vec::new();
     for b in start..until {
         events.extend(breath::breathe(&mut u, &seed, t_u, b, b + 1));
@@ -200,6 +201,27 @@ fn main() {
             let heard: Vec<String> = (0..u.cores.len()).filter_map(|g| t.heard_after(&u, g).map(|d| format!("{:?} after {}", u.cores[g].path, conductor::reading::sector(&d)))).collect();
             println!("  star {:?} at bell {}: {:?}, {} strokes, returned {} holding and {} spin; heard by {}", t.star, t.bell, t.passing, t.strokes.map(|n| n.to_string()).unwrap_or_else(|| "uncounted".into()), conductor::reading::sector(&t.returned), conductor::reading::sector(&t.spin), heard.join(", "));
         }
+    }
+    // THE SPIN IDENTITIES (docs/90): each check's residual, `after − before`
+    // of its ledger's whole sum, exact where 0.
+    {
+        let mut kinds: std::collections::BTreeMap<&str, (u64, u64, cfe::ratio::Ratio)> = std::collections::BTreeMap::new();
+        for (kind, r) in events.iter().flat_map(|e| e.identity.iter()) {
+            let abs = if *r < cfe::ratio::ratio(0, 1) { -r.clone() } else { r.clone() };
+            let e = kinds.entry(kind).or_insert((0, 0, cfe::ratio::ratio(0, 1)));
+            e.0 += 1;
+            if abs == cfe::ratio::ratio(0, 1) {
+                e.1 += 1;
+            }
+            if abs > e.2 {
+                e.2 = abs;
+            }
+        }
+        for (kind, (n, exact, worst)) in &kinds {
+            println!("IDENTITY {kind} — {exact} of {n} exact; greatest residual {}", conductor::reading::sector(worst));
+        }
+        let spin_after = pulse::spin_total(&u, &breath::unit_mass(&u));
+        println!("IDENTITY ledger — the bodies' spin (both orbits) and media, before {} after {}: moved {} (motes and reservoirs are outside it)", conductor::reading::sector(&spin_before), conductor::reading::sector(&spin_after), conductor::reading::sector(&(spin_after.clone() - spin_before.clone())));
     }
     use num_traits::Zero as _;
     // THE SWING (docs/90): each galaxy's stars' and worlds' elongations, their
