@@ -45,6 +45,12 @@ pub struct Places {
     /// Each system's worlds ([galaxy, star]), and each galaxy's stars.
     pub worlds_in: BTreeMap<(u64, u64), usize>,
     pub stars_in: BTreeMap<u64, usize>,
+    /// Each world's clock against its core's echo: its system's share about
+    /// its galaxy's centre (the centre's state, its held grains and every
+    /// system inside it). The galaxy's own share is common to all its bodies,
+    /// and a world's well about its star is its star's, not its core's, so
+    /// neither enters proximity to the core.
+    pub clock: BTreeMap<Vec<u64>, Ratio>,
 }
 
 impl Places {
@@ -67,10 +73,15 @@ impl Places {
                 continue;
             }
             let scale = held / unit.clone();
-            for sys in &core.satellites {
+            for (si, sys) in core.satellites.iter().enumerate() {
                 let Some(&s) = sys.path.get(1) else { continue };
                 out.worlds_in.insert((g, s), sys.satellites.len());
                 *out.stars_in.entry(g).or_insert(0) += 1;
+                let inside_core = core.satellites[..si].iter().fold(mass(&core.kept) + crate::breath::centre_state(u, i), |a, x| a + mass(&x.total())) / unit.clone();
+                let core_clock = crate::ring::rate(&sys.radius, &inside_core);
+                for orb in &sys.satellites {
+                    out.clock.insert(orb.path.clone(), core_clock.clone());
+                }
                 out.systems.insert((g, s), (sys.radius.clone() / scale.clone(), sys.radius.clone()));
             }
         }
@@ -103,6 +114,28 @@ pub fn sky(path: &[u64]) -> usize {
         Some(p.worlds_in.get(&(g, s)).copied().unwrap_or(1).max(1) + p.stars_in.get(&g).copied().unwrap_or(0))
     })
     .unwrap_or(0)
+}
+
+/// THE ECHO TIER of the world at `path` (operator 2026-10-22: ancients are "a
+/// tiered range close to the core based on the proximity to the temporal echo
+/// that makes an ancient"): the whole halvings its clock has lost against the
+/// core's echo, `k` where its system's clock about the core `c ≤ 2^(−k)`. Tier
+/// 1 begins at the core's throat (a clock at half the echo stands where the
+/// deficit is ½), deeper tiers deeper in; re-read whenever the universe moves.
+pub fn echo_tier(path: &[u64]) -> Option<u32> {
+    with(|p| {
+        let c = p.clock.get(path)?.clone();
+        if c <= ratio(0, 1) {
+            return None;
+        }
+        let mut k = 0u32;
+        let mut bound = ratio(1, 2);
+        while c <= bound && k < 64 {
+            k += 1;
+            bound /= ratio(2, 1);
+        }
+        Some(k)
+    })
 }
 
 /// The site of the world at `path`, if a line can stand on it.
