@@ -264,41 +264,6 @@ pub fn shine(motes: &mut [crate::flows::Mote], worlds: &mut [Body], scale: &Rati
     (received, drained)
 }
 
-/// THE CORE'S LIGHT ON ITS SYSTEMS (docs/91; operator 2026-10-22: "derive and
-/// build them - start with the core's release heating worlds"): the same
-/// continuum-face law as `shine`, one tier on, the products across tiers
-/// (docs/82). Each star system standing in the galaxy takes, per unit of its
-/// mass, the share the core's face leaves unlocked at its reach,
-/// `l·(1 − δ(R))/M_g` (R its reach in the galaxy's own units, `radius/scale`);
-/// what the system took crosses into it and is shone over its own bodies, its
-/// worlds and its motes, each at its own reach in the system, by the same law
-/// (`shine`, the system's own hold `h_s`); what no body inside takes drains.
-/// Returns (received by the bodies inside, drained inside); the system's share
-/// not taken there is in `drained`, so `l = received + drained` stays the
-/// caller's exact ledger together with the motes' shine.
-pub fn shine_systems(systems: &mut [Body], l: &Ratio, h: &Ratio, whole: &Ratio, unit: &Ratio) -> (Ratio, Ratio) {
-    use num_traits::Zero as _;
-    let (mut received, mut drained) = (ratio(0, 1), ratio(0, 1));
-    if l.is_zero() || whole.is_zero() || h.is_zero() || unit.is_zero() {
-        return (received, drained);
-    }
-    let scale = whole.clone() / unit.clone();
-    for sys in systems.iter_mut() {
-        let held = mass(&sys.total());
-        if held.is_zero() {
-            continue;
-        }
-        let r = sys.radius.clone() / scale.clone();
-        let unlocked = ratio(1, 1) - h.clone() / (r + h.clone());
-        let taken = l.clone() * unlocked * held.clone() / whole.clone();
-        let h_s = mass(&sys.kept) / held.clone();
-        let (got, gone) = shine(&mut sys.flows, &mut sys.satellites, &(held.clone() / unit.clone()), &taken, &h_s, &held);
-        received += got;
-        drained += gone;
-    }
-    (received, drained)
-}
-
 /// Breathe the universe over bells `from` (exclusive) to `until`, echoes
 /// every `t_u` bells (the conductor calls it once a beat, `(beat − 1, beat]`).
 /// Events in time order. Each echo is a perpendicular write down; each birth
@@ -1025,13 +990,10 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             }
             // The throat's light crosses the galaxy on the continuum face.
             if !r.light.is_zero() {
-                let (got, _) = shine(&mut core.flows, &mut [], &ratio(0, 1), &r.light, &h, &g_mass);
-                // And on every star system standing in the galaxy, crossing
-                // into each to its worlds and motes (`shine_systems`).
-                let (inside, _) = shine_systems(&mut core.satellites, &r.light, &h, &g_mass, &unit);
+                let (got, gone) = shine(&mut core.flows, &mut [], &ratio(0, 1), &r.light, &h, &g_mass);
                 light.made += r.light.clone() / unit.clone();
-                light.received += (got.clone() + inside.clone()) / unit.clone();
-                light.drained += (r.light.clone() - got - inside) / unit.clone();
+                light.received += got / unit.clone();
+                light.drained += gone / unit.clone();
             }
             recycled = crate::recycle::Recycled { pressed: r.pressed, light: r.light / unit.clone(), peeled: r.peeled, spent: r.spent / unit.clone(), trapped: r.trapped / unit.clone(), hydrogen: r.hydrogen };
             // THE SHEAR: neighbouring rings pass turning outward; the inner
@@ -1232,25 +1194,6 @@ mod tests {
         assert!(got > ratio(0, 1));
         // The farther body stands more on the unlocked face and warms more.
         assert!(motes[1].agitation > motes[0].agitation);
-    }
-
-    #[test]
-    fn the_cores_light_crosses_into_its_systems_and_warms_their_worlds() {
-        use crate::pulse::{Body, Manifest};
-        let kind = |z: &str| crate::chem::Kind::parse(z).expect("a kind");
-        let body = |radius: Ratio, kept: Manifest, satellites: Vec<Body>| Body { ell_orth: ratio(0, 1), path: vec![1, 1], radius, period: ratio(0, 1), kept, satellites, medium: Manifest::new(), ell: ratio(0, 1), medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1) };
-        // A system of a star and one world, at reach 2 in a galaxy of hold 1/2.
-        let world = body(ratio(1, 1), [(kind("Z008"), ratio(1, 16))].into(), Vec::new());
-        let mut systems = vec![body(ratio(2, 1), [(kind("Z002"), ratio(1, 4))].into(), vec![world])];
-        let l = ratio(1, 1000);
-        // The galaxy holds the system and as much again besides.
-        let whole = mass(&systems[0].total()) * ratio(2, 1);
-        let (inside, drained) = shine_systems(&mut systems, &l, &ratio(1, 2), &whole, &ratio(1, 1));
-        // The world warmed, and what the system took is received or drained
-        // inside it, exactly: never more than the core sent.
-        assert!(systems[0].satellites[0].heat > ratio(0, 1));
-        assert!(inside > ratio(0, 1));
-        assert!(inside.clone() + drained <= l);
     }
 
     #[test]

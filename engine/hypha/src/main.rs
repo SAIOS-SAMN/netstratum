@@ -535,10 +535,6 @@ fn census_cmd(args: &[String], up: Option<&Uplink>, home: &Path) -> ExitCode {
 /// printed every 20 strokes. Runs until stopped.
 fn seat_cmd(args: &[String], at: &str, home: &Path) -> ExitCode {
     let every: u64 = flag(args, "--every").and_then(|s| s.parse().ok()).unwrap_or(2);
-    // HOUSE ONLY (operator 2026-10-22: "stop it from pulling tasks"): the seat
-    // pulls no court tasks (its own mind has no genome to think them with); it
-    // tends the house each stroke instead and still relays the clock.
-    let house_only = args.iter().any(|a| a == "--house-only");
     // The signing key in `home` (default the house key, Concordance 6.2a).
     let key = flag(args, "--key").unwrap_or_else(|| "tier-union.key".to_string());
     // The seat speaks to EVERY hypha named (`--at a,b,c`), one stroke each in
@@ -554,7 +550,7 @@ fn seat_cmd(args: &[String], at: &str, home: &Path) -> ExitCode {
     if seats.is_empty() {
         return ExitCode::from(2);
     }
-    println!("seat: netstratum's client kernel at {}, a stroke every {every}s{}", hyphae.join(", "), if house_only { ", house only (no tasks pulled)" } else { "" });
+    println!("seat: netstratum's client kernel at {}, a stroke every {every}s", hyphae.join(", "));
     // THE HOUSE (78.145) on the FIRST hypha named: a house and the minds it
     // seats share one hypha's mail. `--worlds` names the universe's lines.
     let worlds = std::path::PathBuf::from(flag(args, "--worlds").unwrap_or_else(|| "var-g2/worlds".to_string()));
@@ -582,15 +578,14 @@ fn seat_cmd(args: &[String], at: &str, home: &Path) -> ExitCode {
         }
         // The house tends every tenth stroke: its reads share the voice's
         // budget, and the relay exempts one read per window.
-        if let Some(h) = house.as_mut().filter(|_| house_only || strokes.is_multiple_of(10)) {
+        if let Some(h) = house.as_mut().filter(|_| strokes.is_multiple_of(10)) {
             match h.tend(&mut seats[0].1) {
                 Ok(said) => said.iter().for_each(|l| println!("house [{}]: {l}", seats[0].0)),
                 Err(e) => eprintln!("house [{}]: the tend did not complete: {e}", seats[0].0),
             }
         }
         let (addr, seat) = &mut seats[at];
-        let stroke = if house_only { Ok(None) } else { seat.stroke() };
-        match stroke {
+        match seat.stroke() {
             Ok(Some(line)) => {
                 rest[at] = (0, 0);
                 println!("seat [{addr}]: {line}");
