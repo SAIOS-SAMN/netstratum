@@ -55,10 +55,10 @@ toward the poles, where the cold leaves it its halvings.
 `wild = ⌊500 · T · u / T_home⌋`. A hot world's equator may carry nothing
 while its cold latitudes feed a people.
 
-Read (play1 at boot): latitudes from 19° to 90° from the pole (one line's
-medium carries nowhere on its world); with the land read at the latitude,
-all 22 lines found with bands of 4 and land 68 to 8,046 heads (five had
-none at the world's mean).
+Read (play1 at boot): latitudes from 19° to 90° from the pole; with the
+land read at the latitude (and the seating reading it), all 22 lines found
+with bands of 4 and land 68 to 8,046 heads (five had none at the world's
+mean).
 
 ## Read (play1 at boot, 22 seated worlds)
 
