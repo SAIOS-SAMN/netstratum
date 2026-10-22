@@ -209,11 +209,11 @@ pub struct Body {
     /// from its members' spread of orbital spin; its bell `ω_s = δ(ℓ_s/H_s)`
     /// is the system's time. Zero for every other body.
     pub turning: Ratio,
-    /// ITS LOOP SPIN (tag 21; docs/90): its spin in the loop plane, the
+    /// ITS ORTHOGONAL SPIN (tag 21; docs/90): its spin in the orthogonal orbit's plane, the
     /// orthogonal one, in the units of `ell` (its orbit spin): kicked by its
     /// parent's release, returned by its parent's hold, damped by order. Its
-    /// reach swings by it each loop, `R(ψ_c) = (ℓ + ℓ_c·response(ψ_c))/H`.
-    pub ell_c: Ratio,
+    /// reach swings by it each orthogonal turn, `R(ψ_⊥) = (ℓ + ℓ_⊥·response(ψ_⊥))/H`.
+    pub ell_orth: Ratio,
     /// A star's phases on its S^n, one per plane (tag 13): its members'
     /// holding-weighted phases at birth, advancing by its bell.
     pub phase: Vec<Ratio>,
@@ -712,14 +712,14 @@ pub fn deploy(_seed: &[u8; 32], manifest: &Manifest) -> Option<Universe> {
                 Some((p, h, _)) => crate::flows::read_cut(&flows, &h, &p),
                 None => (m.clone(), Manifest::new()),
             };
-            Some(Body { ell_c: ratio(0, 1), path: vec![u64::from(i)], radius, period, kept, satellites: Vec::new(), medium, ell, medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: mass(&m), flows, reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1) })
+            Some(Body { ell_orth: ratio(0, 1), path: vec![u64::from(i)], radius, period, kept, satellites: Vec::new(), medium, ell, medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: mass(&m), flows, reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1) })
         })
         .collect::<Option<Vec<Body>>>()?;
     // THE HOME at the universal core: its matter as motes, all of it gas
     // beyond the throat (the throat's held part is the firmament).
     if !home.is_empty() {
         let flows = crate::flows::founding(&home)?;
-        cores.insert(0, Body { ell_c: ratio(0, 1), path: vec![0], radius: ratio(0, 1), period: ratio(0, 1), kept: Manifest::new(), satellites: Vec::new(), medium: home, ell: ratio(0, 1), medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: ratio(0, 1), flows, reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1) });
+        cores.insert(0, Body { ell_orth: ratio(0, 1), path: vec![0], radius: ratio(0, 1), period: ratio(0, 1), kept: Manifest::new(), satellites: Vec::new(), medium: home, ell: ratio(0, 1), medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: ratio(0, 1), flows, reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1) });
     }
     Some(Universe { cores, medium, firmament, unit, t_u })
 }
@@ -896,7 +896,7 @@ fn put_body(b: &Body, out: &mut Vec<u8>) {
         let key = x.key.to_string();
         w.extend_from_slice(&(key.len() as u16).to_le_bytes());
         w.extend_from_slice(key.as_bytes());
-        for r in [&x.amount, &x.ell_o, &x.ell_c, &x.agitation] {
+        for r in [&x.amount, &x.ell_o, &x.ell_orth, &x.agitation] {
             cfe::ratio::encode(r, &mut w);
         }
         w.push(x.phase.len() as u8);
@@ -927,9 +927,9 @@ fn put_body(b: &Body, out: &mut Vec<u8>) {
         cfe::ratio::encode(&b.load, &mut w);
         cfe::tlv::put(14, &w, out);
     }
-    if !b.ell_c.is_zero() {
+    if !b.ell_orth.is_zero() {
         let mut w = Vec::new();
-        cfe::ratio::encode(&b.ell_c, &mut w);
+        cfe::ratio::encode(&b.ell_orth, &mut w);
         cfe::tlv::put(21, &w, out);
     }
 
@@ -982,7 +982,7 @@ pub fn write(var_root: &Path, seed: &[u8; 32], u: &Universe) -> std::io::Result<
         let key = x.key.to_string();
         w.extend_from_slice(&(key.len() as u16).to_le_bytes());
         w.extend_from_slice(key.as_bytes());
-        for r in [&x.amount, &x.ell_o, &x.ell_c, &x.agitation] {
+        for r in [&x.amount, &x.ell_o, &x.ell_orth, &x.agitation] {
             cfe::ratio::encode(r, &mut w);
         }
         w.push(x.phase.len() as u8);
@@ -1039,7 +1039,7 @@ fn get_body(v: &[u8]) -> Option<Body> {
     at += used;
     let kept = get_manifest(v, &mut at)?;
     let medium = get_manifest(v, &mut at)?;
-    Some(Body { ell_c: ratio(0, 1), path, radius, period, kept, satellites: Vec::new(), medium, ell, medium_spin, gas: Vec::new(), born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1) })
+    Some(Body { ell_orth: ratio(0, 1), path, radius, period, kept, satellites: Vec::new(), medium, ell, medium_spin, gas: Vec::new(), born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1) })
 }
 
 /// A flow mote (tag 10), attached to the body read before it.
@@ -1076,7 +1076,7 @@ fn get_flow(v: &[u8]) -> Option<crate::flows::Mote> {
         lever.push(x);
     }
     let mut r = r.into_iter();
-    Some(crate::flows::Mote { key, amount: r.next()?, ell_o: r.next()?, ell_c: r.next()?, agitation: r.next()?, phase, born, vacuum, lever, lever_place })
+    Some(crate::flows::Mote { key, amount: r.next()?, ell_o: r.next()?, ell_orth: r.next()?, agitation: r.next()?, phase, born, vacuum, lever, lever_place })
 }
 
 /// A gas mote (tag 6), attached to the body read before it.
@@ -1125,7 +1125,7 @@ pub fn read(var_root: &Path) -> Option<([u8; 32], Universe)> {
             11 => flat.last_mut()?.reservoir = cfe::ratio::decode(v)?.0,
             12 => flat.last_mut()?.turning = cfe::ratio::decode(v)?.0,
             14 => flat.last_mut()?.load = cfe::ratio::decode(v)?.0,
-            21 => flat.last_mut()?.ell_c = cfe::ratio::decode(v)?.0,
+            21 => flat.last_mut()?.ell_orth = cfe::ratio::decode(v)?.0,
             16 => flat.last_mut()?.remnant = v.first() == Some(&1),
             18 => flat.last_mut()?.heat = cfe::ratio::decode(v)?.0,
             13 | 15 => {
@@ -1196,9 +1196,9 @@ mod tests {
     #[test]
     fn the_pulse_file_reads_back_exactly() {
         let mote = crate::formation::Shell { key: crate::chem::Kind::parse("Z001").expect("a kind"), held: ratio(1, 5), inner: ratio(1, 3), outer: ratio(2, 3), agitation: ratio(1, 2), radiates: ratio(1, 2), born: 7, vacuum: ratio(3, 7) };
-        let orb = Body { ell_c: ratio(0, 1), path: vec![1, 1, 1], radius: ratio(3, 2), period: ratio(5, 2), kept: [(crate::chem::Kind::parse("Z008").expect("a kind"), ratio(1, 64))].into(), satellites: Vec::new(), medium: Manifest::new(), ell: ratio(7, 3), medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1) };
-        let sys = Body { ell_c: ratio(0, 1), path: vec![1, 1], radius: ratio(9, 2), period: ratio(11, 2), kept: [(crate::chem::Kind::parse("Z001").expect("a kind"), ratio(3, 1024))].into(), satellites: vec![orb], medium: Manifest::new(), ell: ratio(1, 9), medium_spin: ratio(1, 7), gas: Vec::new(), born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1) };
-        let core = Body { ell_c: ratio(0, 1), path: vec![1], radius: ratio(60, 1), period: ratio(0, 1), kept: [(crate::chem::Kind::parse("Z026").expect("a kind"), ratio(1, 2))].into(), satellites: vec![sys], medium: [(crate::chem::Kind::parse("Z001").expect("a kind"), ratio(5, 4))].into(), ell: ratio(0, 1), medium_spin: ratio(13, 11), gas: vec![mote], born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1) };
+        let orb = Body { ell_orth: ratio(0, 1), path: vec![1, 1, 1], radius: ratio(3, 2), period: ratio(5, 2), kept: [(crate::chem::Kind::parse("Z008").expect("a kind"), ratio(1, 64))].into(), satellites: Vec::new(), medium: Manifest::new(), ell: ratio(7, 3), medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1) };
+        let sys = Body { ell_orth: ratio(0, 1), path: vec![1, 1], radius: ratio(9, 2), period: ratio(11, 2), kept: [(crate::chem::Kind::parse("Z001").expect("a kind"), ratio(3, 1024))].into(), satellites: vec![orb], medium: Manifest::new(), ell: ratio(1, 9), medium_spin: ratio(1, 7), gas: Vec::new(), born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1) };
+        let core = Body { ell_orth: ratio(0, 1), path: vec![1], radius: ratio(60, 1), period: ratio(0, 1), kept: [(crate::chem::Kind::parse("Z026").expect("a kind"), ratio(1, 2))].into(), satellites: vec![sys], medium: [(crate::chem::Kind::parse("Z001").expect("a kind"), ratio(5, 4))].into(), ell: ratio(0, 1), medium_spin: ratio(13, 11), gas: vec![mote], born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1) };
         let u = Universe { cores: vec![core], medium: [(crate::chem::Kind::parse("Z002").expect("a kind"), ratio(1, 1024))].into(), firmament: Vec::new(), unit: ratio(1, 2), t_u: 15 };
         let dir = std::env::temp_dir().join(format!("pulse-{}", std::process::id()));
         write(&dir, &[7; 32], &u).unwrap();

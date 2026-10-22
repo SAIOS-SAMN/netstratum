@@ -7,7 +7,7 @@
 //!
 //! - **A mote's state**, carried forward, never rebuilt: its kind and
 //!   amount, its spin in the orbit's plane `ℓ_o` (reach `R = ℓ_o/H`, the
-//!   motion law) and in the circulation's plane `ℓ_c` (radial–axial, along
+//!   motion law) and in the circulation's plane `ℓ_⊥` (radial–axial, along
 //!   the torsion axis), its PHASES on its enclosure's S^n (one per plane,
 //!   turns against the bell), its agitation and birth.
 //! - **The kick**, once per bell of the kicking core (the core's bell is its
@@ -18,7 +18,7 @@
 //!   turns sizes it, `1 − 2·|ψ|` (ψ the phase against the bell, |ψ| its
 //!   distance on the circle); times κ, the push's share gripping the mote
 //!   by its core's hold at its reach: `κ_o = p·δ(R)` for the own family in
-//!   the orbit's plane, `κ_c = p·ρ·δ_u` for the parent's (the universal bell
+//!   the orbit's plane, `κ_⊥ = p·ρ·δ_u` for the parent's (the universal bell
 //!   received at ρ) in the circulation's plane. Off resonance the signs
 //!   alternate and cancel; on resonance they add: the cyclotron.
 //! - **The spin ledger**: every Δℓ given to a mote of holding m is −m·Δℓ to
@@ -26,8 +26,8 @@
 //! - **The cut is a reading**: a mote's held share is the part of its
 //!   dispersal band (`R(1 ± p)`) within the throat, in both planes,
 //!   `f_o · f_c`; the rest is the galaxy's gas.
-//! - **Two exits, by state**: the JET, `ℓ_c` carrying the axial reading past
-//!   the throat (`ℓ_c/H ≥ H`), along the torsion axis; RADIAL ESCAPE, `R ≥ H`
+//! - **Two exits, by state**: the JET, `ℓ_⊥` carrying the axial reading past
+//!   the throat (`ℓ_⊥/H ≥ H`), along the torsion axis; RADIAL ESCAPE, `R ≥ H`
 //!   in the orbit's plane. Either way the mote crosses whole into the
 //!   medium one tier up.
 //! - **Collapse where the motes are**: a mote and those near it in reach
@@ -55,7 +55,7 @@ pub struct Mote {
     /// Spin in the orbit's plane, own units: reach `ℓ_o/H`.
     pub ell_o: Ratio,
     /// Spin in the circulation's plane (radial–axial, the torsion axis).
-    pub ell_c: Ratio,
+    pub ell_orth: Ratio,
     /// Its phase in each plane against the bell, in turns `[0, 1)`.
     pub phase: Vec<Ratio>,
     pub agitation: Ratio,
@@ -311,7 +311,7 @@ fn held_share(ell: &Ratio, h: &Ratio, p: &Ratio) -> Ratio {
 
 /// THE CUT AS A READING: a mote's held share, `f_o·f_c`.
 pub fn held(mote: &Mote, h: &Ratio, p: &Ratio) -> Ratio {
-    held_share(&mote.ell_o, h, p) * held_share(&mote.ell_c, h, p)
+    held_share(&mote.ell_o, h, p) * held_share(&mote.ell_orth, h, p)
 }
 
 /// THE ENCLOSED HOLDING (the ring-density law, xylarium 11.0: a ring is
@@ -376,14 +376,14 @@ impl Enclosed {
 /// ITS ROUTE (operator 2026-10-16, xylarium 11.0 (11): "a continuum jetstream
 /// carries matter out of the singularity along the axis and home through
 /// the disc; a vacuum jetstream draws it in along the axis and out through
-/// the disc"): the route round the loop, not the inversion. A vacuum mote's
-/// loop (the circulation's plane) runs the other way, its advance read over
+/// the disc"): the route round the orthogonal orbit, not the inversion. A vacuum mote's
+/// orthogonal orbit (the circulation's plane) runs the other way, its advance read over
 /// that passage; its orbit plane turns forward.
 #[allow(clippy::too_many_arguments)]
 pub fn turn(phase: &mut [Ratio], r_o: &Ratio, h: &Ratio, p: &Ratio, tide: Option<(&Ratio, &Ratio)>, inverted: bool, place: Option<&Ratio>, agitation: &Ratio, cross: &mut crate::enfold::Cross) -> (Ratio, Vec<(usize, Ratio, Ratio)>, Ratio) {
     let pull = h.clone() / (r_o.clone() + h.clone());
     let d_o = if inverted { ratio(1, 1) - pull.clone() } else { pull.clone() };
-    // THE LOOP'S RATE (with xylarium): the jetstream turns by the motion law
+    // THE ORTHOGONAL ORBIT'S RATE (with xylarium): the jetstream turns by the motion law
     // AT THE MOTE'S REACH, δ(R) a ring, two rings a bell, continuously;
     // inner matter circulates faster than outer. (At R = H it is one turn a
     // bell, a 1:1 lock with the bell: the rim.)
@@ -395,17 +395,17 @@ pub fn turn(phase: &mut [Ratio], r_o: &Ratio, h: &Ratio, p: &Ratio, tide: Option
     // own, is cauterized with its scar recorded.
     let (held, scar_o, lever_o) = crate::enfold::leaf(&(phase[0].clone() + ratio(2, 1) * d_o), place, agitation, 0, cross);
     phase[0] = held;
-    let loop_from = phase[1].clone();
+    let orth_from = phase[1].clone();
     let route = if inverted { ratio(-1, 1) } else { ratio(1, 1) };
-    let loop_phase = frac(&(loop_from.clone() + route.clone() * ratio(2, 1) * d_c.clone()));
-    // THE PARENT'S PULSE MOVES MATTER ALONG THE LOOP (operator: "the pulse
-    // moves matter along the loop"; with xylarium): absorbed in step it
-    // ADVANCES the loop's phase, `p·ρ·δ_u` × the hemisphere's signed share,
-    // on top of the loop's own rate. AND IT IS A SPIN (docs/90 D1, operator
+    let orth_phase = frac(&(orth_from.clone() + route.clone() * ratio(2, 1) * d_c.clone()));
+    // THE PARENT'S PULSE MOVES MATTER ALONG THE ORTHOGONAL ORBIT (operator: "the pulse
+    // moves matter along the orthogonal orbit"; with xylarium): absorbed in step it
+    // ADVANCES the orthogonal orbit's phase, `p·ρ·δ_u` × the hemisphere's signed share,
+    // on top of the orthogonal orbit's own rate. AND IT IS A SPIN (docs/90 D1, operator
     // 2026-10-22; xylarium 11.0: "the loop is an orbit", one kick law per
-    // plane): the same push, read by the one kick law in the loop's plane,
-    // is the loop spin's kick, returned to the caller (`κ_c`).
-    let start = if inverted { loop_from - ratio(2, 1) * d_c.clone() } else { loop_from };
+    // plane): the same push, read by the one kick law in the orthogonal orbit's plane,
+    // is the orthogonal spin's kick, returned to the caller (`κ_⊥`).
+    let start = if inverted { orth_from - ratio(2, 1) * d_c.clone() } else { orth_from };
     // The pulse it feels: a galaxy's received share of the source's rings and
     // the universal tide at the galaxy (`tide`), or, standing in the source's
     // own enclosure (the home, the firmament), the source's pull at its own
@@ -415,24 +415,24 @@ pub fn turn(phase: &mut [Ratio], r_o: &Ratio, h: &Ratio, p: &Ratio, tide: Option
         None => pull.clone(),
     };
     let advance = p.clone() * felt * mean_response(&start, &(ratio(2, 1) * d_c));
-    let kick_c = route.clone() * advance.clone();
-    let (held, scar_c, lever_c) = crate::enfold::leaf(&(loop_phase + route * advance), place, agitation, 1, cross);
+    let kick_orth = route.clone() * advance.clone();
+    let (held, scar_c, lever_c) = crate::enfold::leaf(&(orth_phase + route * advance), place, agitation, 1, cross);
     phase[1] = held;
     // A cauterized residue's scar (the heat it enters) and each plane's lever.
     let levers = [(0usize, lever_o), (1usize, lever_c)].into_iter().filter_map(|(k, l)| l.map(|(n, f)| (k, n, f))).collect();
-    (scar_o + scar_c, levers, kick_c)
+    (scar_o + scar_c, levers, kick_orth)
 }
 
-/// THE SWING (docs/90 D2): a body's loop spin projects onto its orbit by
-/// where it stands on its loop, the plane's linear measure (`response`): its
-/// spin seen in the orbit plane is `ℓ + ℓ_c·response(ψ_c)`, so its reach swings
-/// each loop between `(ℓ − |ℓ_c|)/H` and `(ℓ + |ℓ_c|)/H`, an elongation
-/// `e = |ℓ_c|/ℓ` read from two planes, no ellipse and no square. Where the
+/// THE SWING (docs/90 D2): a body's orthogonal spin projects onto its orbit by
+/// where it stands on its orthogonal orbit, the plane's linear measure (`response`): its
+/// spin seen in the orbit plane is `ℓ + ℓ_⊥·response(ψ_⊥)`, so its reach swings
+/// each orthogonal turn between `(ℓ − |ℓ_⊥|)/H` and `(ℓ + |ℓ_⊥|)/H`, an elongation
+/// `e = |ℓ_⊥|/ℓ` read from two planes, no ellipse and no square. Where the
 /// swing passes zero the body passes THROUGH the centre to the antipode (the
 /// orbit-plane kick's law, docs/83): returns the magnitude and whether it is
 /// through (its orbit phase then stands half a turn on).
-pub fn swung(ell: &Ratio, ell_c: &Ratio, psi_c: &Ratio) -> (Ratio, bool) {
-    let s = ell.clone() + ell_c.clone() * response(psi_c);
+pub fn swung(ell: &Ratio, ell_orth: &Ratio, psi_c: &Ratio) -> (Ratio, bool) {
+    let s = ell.clone() + ell_orth.clone() * response(psi_c);
     if s < ratio(0, 1) {
         (-s, true)
     } else {
@@ -441,7 +441,7 @@ pub fn swung(ell: &Ratio, ell_c: &Ratio, psi_c: &Ratio) -> (Ratio, bool) {
 }
 
 /// One bell's kicks on every mote: the own family in the orbit's plane
-/// (`κ_o = p·δ(R)`, a spin); the parent's moves the mote along the loop
+/// (`κ_o = p·δ(R)`, a spin); the parent's moves the mote along the orthogonal orbit
 /// (`p·ρ·δ_u`, a phase).
 /// Each plane's phase first advances by its own turning over the bell's two
 /// rings (`2·δ` turns, the motion law's `ω = δ`; the bell's own turn is
@@ -455,10 +455,10 @@ pub fn kick(motes: &mut [Mote], enc: &Enclosed, p: &Ratio, tide: Option<(&Ratio,
     let mut absorbed = ratio(0, 1);
     for x in motes.iter_mut() {
         // Each turns by what is enclosed inside it (the core and all inside),
-        // at the reach its loop swings it to this bell (docs/90 D2): the
+        // at the reach its orthogonal orbit swings it to this bell (docs/90 D2): the
         // motion law at its present reach, so it turns faster inward and
         // slower outward; through the centre where the swing passes zero.
-        let (now, through_c) = swung(&x.ell_o, &x.ell_c, x.phase.get(1).unwrap_or(&ratio(0, 1)));
+        let (now, through_c) = swung(&x.ell_o, &x.ell_orth, x.phase.get(1).unwrap_or(&ratio(0, 1)));
         let h = enc.hold(&now);
         let (r_o, d_o) = enc.reach(&now);
         // ASCENT: the bell turns the mote from where it truly stands, its
@@ -471,7 +471,7 @@ pub fn kick(motes: &mut [Mote], enc: &Enclosed, p: &Ratio, tide: Option<(&Ratio,
         let m = if total.is_zero() { ratio(0, 1) } else { x.amount.clone() * weight(&x.key) / total.clone() };
         let place = crate::enfold::place(&r_o, &m, &h);
         let heat_was = x.agitation.clone();
-        let (scar, levers, kick_c) = turn(&mut x.phase, &r_o, &h, p, tide, x.vacuum, place.as_ref(), &heat_was, cross);
+        let (scar, levers, kick_orth) = turn(&mut x.phase, &r_o, &h, p, tide, x.vacuum, place.as_ref(), &heat_was, cross);
         // Over its whole passage this bell, never at one instant; a vacuum
         // mote at its inverted reach (`1 − δ`), forward.
         let d_o = if x.vacuum { ratio(1, 1) - d_o } else { d_o };
@@ -530,15 +530,15 @@ pub fn kick(motes: &mut [Mote], enc: &Enclosed, p: &Ratio, tide: Option<(&Ratio,
         absorbed += m.clone() * if dl < ratio(0, 1) { -dl.clone() } else { dl.clone() };
         given += m.clone() * dl;
         x.ell_o = new_o;
-        // THE LOOP SPIN (docs/90 D1): the release's kick in the loop's plane,
-        // less the hold's return of the held half, `½·δ(R)·ℓ_c`, both from and
-        // to the same reservoir as the orbit plane's (Σ m·(ℓ_o + ℓ_c) and the
+        // THE ORTHOGONAL SPIN (docs/90 D1): the release's kick in the orthogonal orbit's plane,
+        // less the hold's return of the held half, `½·δ(R)·ℓ_⊥`, both from and
+        // to the same reservoir as the orbit plane's (Σ m·(ℓ_o + ℓ_⊥) and the
         // reservoir exact).
-        let new_c = crate::ring::grain(&(x.ell_c.clone() + kick_c - ratio(1, 2) * d_o.clone() * x.ell_c.clone()));
-        let dl_c = new_c.clone() - x.ell_c.clone();
+        let new_c = crate::ring::grain(&(x.ell_orth.clone() + kick_orth - ratio(1, 2) * d_o.clone() * x.ell_orth.clone()));
+        let dl_c = new_c.clone() - x.ell_orth.clone();
         absorbed += m.clone() * if dl_c < ratio(0, 1) { -dl_c.clone() } else { dl_c.clone() };
         given += m * dl_c;
-        x.ell_c = new_c;
+        x.ell_orth = new_c;
         // DESCENT: its weight past its round stands one place past its mark.
         settle(x, &levers, place.as_ref(), cross);
     }
@@ -574,7 +574,7 @@ pub fn contact(psi0: &Ratio, d: &Ratio) -> Ratio {
 
 /// THE SHEAR (operator 2026-10-18: "shear the kinematic pressure as an
 /// attractor on opposing hemispheres to provide the shear on the orbit …
-/// this turns your 'loop' into an 'orbit'"; with xylarium): neighbouring
+/// this turns your 'orthogonal orbit' into an 'orbit'"; with xylarium): neighbouring
 /// rings of the flow turn at different rates, and where they stand in
 /// contact the pressure between them moves turning OUTWARD. The inner falls
 /// in, the outer moves out, and the disc accretes, so inbound and outbound are
@@ -684,7 +684,7 @@ pub fn released(w: &Ratio, push: &Ratio, h: &Ratio) -> Option<Ratio> {
 /// heart throws out (an outburst, or the kinds a new star's heart releases)
 /// leaves over directions, each kind at its own capture phase, `Z·p` with p
 /// the star's own push share (the founding's ½ one tier up), `½ + Z·p` on the
-/// loop; and each kind stands where its system's own law brings it to rest,
+/// orthogonal orbit; and each kind stands where its system's own law brings it to rest,
 /// read on the far face of the throat it was released through (`released`),
 /// by its own weight, never one shared reach.
 pub fn spray(released: &Manifest, h: &Ratio, base: &[Ratio], agitation: &Ratio, born: u64, push: &Ratio) -> Vec<Mote> {
@@ -698,7 +698,7 @@ pub fn spray(released: &Manifest, h: &Ratio, base: &[Ratio], agitation: &Ratio, 
             let z = ratio(i64::from(crate::chem::charge(k)), 1) * push.clone();
             let phase = vec![crate::ring::grain(&frac(&(at(0) + z.clone()))), crate::ring::grain(&frac(&(at(1) + ratio(1, 2) + z)))];
             let ell_o = crate::flows::released(&weight(k), push, h).map(|l| crate::ring::grain(&l)).unwrap_or_else(|| ratio(0, 1));
-            Mote { key: k.clone(), amount: a.clone(), ell_o, ell_c: ratio(0, 1), phase, agitation: crate::ring::grain(agitation), born, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1) }
+            Mote { key: k.clone(), amount: a.clone(), ell_o, ell_orth: ratio(0, 1), phase, agitation: crate::ring::grain(agitation), born, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1) }
         })
         .collect()
 }
@@ -721,9 +721,9 @@ pub fn star_kick(motes: &mut [Mote], heart: &Manifest, h_s: &Ratio) {
     }
 }
 
-/// THE JETSTREAM IS A CONTINUOUS LOOP (operators 2026-10-16/17: "a
+/// THE JETSTREAM IS A CONTINUOUS ORBIT, the orthogonal orbit (operators 2026-10-16/17: "a
 /// continuous flow, inbound and outbound"): the circulation's plane IS the
-/// loop, a mote's phase in it its place on the loop. The AXIAL leg (out
+/// orthogonal orbit, a mote's phase in it its place on the orthogonal orbit. The AXIAL leg (out
 /// along the torsion axis and over: phase in `[½, 1)`) carries matter in
 /// transit; the DISC leg (down at the rim and home through the disc: phase
 /// in `[0, ½)`) is where the cut and collapse are read. No jet batch, no jet
@@ -732,9 +732,9 @@ pub fn on_disc_leg(x: &Mote) -> bool {
     frac(&x.phase[1]) < ratio(1, 2)
 }
 
-/// The one exit, by state: a mote whose loop OVERREACHES THE RIM (its
+/// The one exit, by state: a mote whose orthogonal orbit OVERREACHES THE RIM (its
 /// reach at or past the throat, `R ≥ H`) crosses whole into the medium one
-/// tier up, where the enclosing core's loops carry it round the same way.
+/// tier up, where the enclosing core's orthogonal orbits carry it round the same way.
 /// Returns the motes that left; the rest stay.
 pub fn exits(motes: &mut Vec<Mote>, h: &Ratio) -> Vec<Mote> {
     let (gone, stay): (Vec<Mote>, Vec<Mote>) = std::mem::take(motes).into_iter().partition(|x| x.ell_o.clone() / h.clone() >= *h);
@@ -1109,7 +1109,7 @@ pub fn merge(motes: &mut Vec<Mote>, total: &Ratio, place_of: &dyn Fn(&Mote) -> O
                 continue;
             }
             let exact_o = (my.clone() * y.ell_o.clone() + mx.clone() * x.ell_o.clone()) / both.clone();
-            let exact_c = (my.clone() * y.ell_c.clone() + mx.clone() * x.ell_c.clone()) / both.clone();
+            let exact_c = (my.clone() * y.ell_orth.clone() + mx.clone() * x.ell_orth.clone()) / both.clone();
             let (go, gc) = (g(&exact_o), g(&exact_c));
             if !total.is_zero() {
                 remainder += both.clone() * weight(&x.key) / total.clone() * ((exact_o - go.clone()) + (exact_c - gc.clone()));
@@ -1121,7 +1121,7 @@ pub fn merge(motes: &mut Vec<Mote>, total: &Ratio, place_of: &dyn Fn(&Mote) -> O
             let heat = (my.clone() * y.agitation.clone() + mx.clone() * x.agitation.clone()) / both.clone();
             y.agitation = g(&heat);
             y.ell_o = go;
-            y.ell_c = gc;
+            y.ell_orth = gc;
             let place = place_of(y);
             // Both true phases (ascent), before the amounts join.
             let (ty, tx): (Vec<Ratio>, Vec<Ratio>) = ((0..y.phase.len()).map(|k| true_phase(y, k)).collect(), (0..x.phase.len()).map(|k| true_phase(&x, k)).collect());
@@ -1157,8 +1157,8 @@ pub fn founding(grains: &Manifest) -> Option<Vec<Mote>> {
     // The source's phases, read exactly or the founding is refused. THE CAPTURES TURN THEM (with xylarium): each pass of the
     // outbound stream through the throat is one capture and turns the
     // crossing point by a = ½, so kind Z leaves at the source's phase plus
-    // `Z·½`, and on the loop it starts on the AXIAL leg, outbound (`½ +
-    // Z·½`). Two groups at the founding, parted by each kind's own loop rate
+    // `Z·½`, and on the orthogonal orbit it starts on the AXIAL leg, outbound (`½ +
+    // Z·½`). Two groups at the founding, parted by each kind's own orthogonal orbit rate
     // `δ(R_z)` at its own reach thereafter. (The per-universe offset, the
     // hypha-assigned TUniversal position, is owed with mycelium.)
     let source = founding_phases()?;
@@ -1168,7 +1168,7 @@ pub fn founding(grains: &Manifest) -> Option<Vec<Mote>> {
         .map(|(k, a)| {
             let turn = ratio(i64::from(crate::chem::charge(k)), 2);
             let phase = vec![frac(&(source[0].clone() + turn.clone())), frac(&(ratio(1, 2) + turn))];
-            Mote { key: k.clone(), amount: a.clone(), ell_o: crate::ring::grain(&(p.clone() * mean.clone() / weight(k))), ell_c: ratio(0, 1), phase, agitation: ratio(0, 1), born: 0, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1) }
+            Mote { key: k.clone(), amount: a.clone(), ell_o: crate::ring::grain(&(p.clone() * mean.clone() / weight(k))), ell_orth: ratio(0, 1), phase, agitation: ratio(0, 1), born: 0, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1) }
         })
         .collect())
 }
@@ -1288,7 +1288,7 @@ mod passage_tests {
     #[test]
     fn a_motes_lever_keeps_its_true_place() {
         use super::{settle, true_phase, Mote};
-        let mut x = Mote { key: crate::chem::Kind::parse("Z001").expect("a kind"), amount: ratio(1, 1), ell_o: ratio(1, 1), ell_c: ratio(0, 1), phase: vec![ratio(1, 60), ratio(0, 1)], agitation: ratio(0, 1), born: 0, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1) };
+        let mut x = Mote { key: crate::chem::Kind::parse("Z001").expect("a kind"), amount: ratio(1, 1), ell_o: ratio(1, 1), ell_orth: ratio(0, 1), phase: vec![ratio(1, 60), ratio(0, 1)], agitation: ratio(0, 1), born: 0, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1) };
         let p = ratio(1, 60);
         let mut cross = crate::enfold::Cross::default();
         // Its true place lies 1/240 past its mark: a quarter of a place, so a
@@ -1304,7 +1304,7 @@ mod passage_tests {
     #[test]
     fn the_shear_moves_turning_outward_and_keeps_the_books() {
         use super::{shear, weight, Enclosed, Mote};
-        let mote = |ell: (i64, i64), ph: (i64, i64)| Mote { key: crate::chem::Kind::parse("Z001").expect("a kind"), amount: ratio(1, 8), ell_o: ratio(ell.0, ell.1), ell_c: ratio(0, 1), phase: vec![ratio(ph.0, ph.1), ratio(0, 1)], agitation: ratio(0, 1), born: 0, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1) };
+        let mote = |ell: (i64, i64), ph: (i64, i64)| Mote { key: crate::chem::Kind::parse("Z001").expect("a kind"), amount: ratio(1, 8), ell_o: ratio(ell.0, ell.1), ell_orth: ratio(0, 1), phase: vec![ratio(ph.0, ph.1), ratio(0, 1)], agitation: ratio(0, 1), born: 0, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1) };
         let mut motes = vec![mote((1, 4), (0, 1)), mote((1, 2), (1, 60)), mote((3, 4), (1, 30))];
         let total = ratio(1, 1);
         let book = |ms: &[Mote]| ms.iter().fold(ratio(0, 1), |s, x| s + x.amount.clone() * weight(&x.key) * x.ell_o.clone());

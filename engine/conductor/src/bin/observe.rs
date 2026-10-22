@@ -192,8 +192,8 @@ fn main() {
             let gas = c.flows.iter().filter(|x| conductor::flows::held(x, &h, &p) == ratio(0, 1)).count();
             let reaches: Vec<Ratio> = c.flows.iter().map(|x| x.ell_o.clone() / h.clone()).collect();
             let phases: Vec<String> = (0..conductor::flows::PLANES).map(|k| span(&c.flows.iter().map(|x| x.phase[k].clone()).collect::<Vec<_>>())).collect();
-            let circ = span(&c.flows.iter().map(|x| x.ell_c.clone()).collect::<Vec<_>>());
-            println!("FLOWS {:?} at beat {now}: H {}, {} motes ({held} wholly held, {gas} wholly gas), reach {}, phases {phases:?}, ℓ_c {circ}, reservoir {}", c.path, f(&h), c.flows.len(), span(&reaches), f(&c.reservoir));
+            let circ = span(&c.flows.iter().map(|x| x.ell_orth.clone()).collect::<Vec<_>>());
+            println!("FLOWS {:?} at beat {now}: H {}, {} motes ({held} wholly held, {gas} wholly gas), reach {}, phases {phases:?}, ℓ_⊥ {circ}, reservoir {}", c.path, f(&h), c.flows.len(), span(&reaches), f(&c.reservoir));
             // THE CHAINS (docs/83): each read whole; the best margin shown.
             let chains = conductor::flows::chains(&c.flows, &h, &p, &total);
             let holding = chains.iter().filter(|x| x.holds()).count();
