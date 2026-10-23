@@ -46,6 +46,10 @@ fn main() {
         let last: std::collections::BTreeMap<u32, (usize, usize)> = events.iter().map(|e| (e.galaxy, (e.grown.2, e.grown.3))).collect();
         let born = events.iter().fold(cfe::ratio::ratio(0, 1), |s, e| s + e.discs.0.clone());
         let out = events.iter().fold(cfe::ratio::ratio(0, 1), |s, e| s + e.discs.1.clone());
+        let (cl, fell) = events.iter().fold((cfe::ratio::ratio(0, 1), cfe::ratio::ratio(0, 1)), |s, e| (s.0 + e.collapse.0.clone(), s.1 + e.collapse.1.clone()));
+        println!("INFALL — clumps {} (holding); fell into the hearts {}, the rest their discs", conductor::reading::sector(&cl), conductor::reading::sector(&fell));
+        let f = events.iter().fold((0usize, 0usize, 0usize, 0usize), |s, e| (s.0 + e.fates.0, s.1 + e.fates.1, s.2 + e.fates.2, s.3 + e.fates.3));
+        println!("GROWN — bodies grown by meetings: {} worlds, {} ignited as stars, {} whose core held nothing, {} that left past the rim", f.0, f.1, f.2, f.3);
         println!("DISCS — released at the stars' births {} (holding), at or past the rim when released {}", conductor::reading::sector(&born), conductor::reading::sector(&out));
         println!("SYSTEMS MET — {sticks} stuck, {bounces} bounced; overstepped the rims {} (holding); after the last echo, motes and bodies by galaxy {last:?}", conductor::reading::sector(&escaped));
     }

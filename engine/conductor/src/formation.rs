@@ -401,6 +401,36 @@ pub fn agitation_of(ignition: &Ratio) -> Ratio {
     (ratio(1, 1) - x.clone()) / (ratio(2, 1) * (ratio(1, 1) + x))
 }
 
+/// THE INFALL (docs/91, the disc from the collapse): of a clump's members,
+/// each `(holding, distance from the clump's centre in the clump's own
+/// units)`, which fall into the forming heart. A member falls where it stands
+/// within the throat of what has fallen, `r ≤ H*` (`δ = H*/(r + H*) ≥ ½`, the
+/// heart cut's own test read by place), `H*` the share the fallen hold, read
+/// from all fallen down to the fixed point (order-free, as the heart cut's
+/// held set). The rest stays out: the disc.
+pub fn infall(members: &[(Ratio, Ratio)]) -> Vec<bool> {
+    let m = members.iter().fold(ratio(0, 1), |s, (w, _)| s + w.clone());
+    if m.is_zero() {
+        return vec![false; members.len()];
+    }
+    let mut fallen = vec![true; members.len()];
+    let mut held = ratio(1, 1);
+    loop {
+        let mut changed = false;
+        for i in 0..members.len() {
+            if fallen[i] && members[i].1 > held {
+                fallen[i] = false;
+                held -= members[i].0.clone() / m.clone();
+                changed = true;
+            }
+        }
+        if !changed {
+            break;
+        }
+    }
+    fallen
+}
+
 /// Each kind's CARRIED SPIN in a heart's clump (own units), the push on its
 /// open frames plus the place's turning: `ℓ_z = p·(e_z/ē)·(w̄/w_z) + turning`.
 pub fn carried(clump: &Manifest, turning: &Ratio, heat: &Ratio) -> Vec<(crate::chem::Kind, Ratio)> {
@@ -616,7 +646,16 @@ pub fn lightest(m: &Manifest) -> Option<crate::chem::Kind> {
     m.iter().filter(|(_, a)| **a > ratio(0, 1)).min_by_key(|(k, _)| (crate::chem::hold(k), crate::chem::charge(k))).map(|(k, _)| k.clone())
 }
 
-pub fn system(clump: &Manifest, agitation: &Ratio, circulation: &Ratio, path: &[u64], unit: &Ratio, tide: &Ratio) -> Option<(Manifest, Vec<crate::pulse::Body>, Manifest, Ratio, Ratio, Vec<crate::flows::Mote>)> {
+/// A STAR'S SYSTEM AT IGNITION (docs/91: the disc from the collapse, the wind
+/// from the heart): `clump` is what FELL into the heart (`collapse`), `outside`
+/// the members that did not, each with its distance in its orbit's plane and
+/// its offset on its orthogonal orbit in the system's units, `whole` the
+/// whole clump's holding (the system at
+/// ignition). The heart is cut in the fallen matter's own units and carried
+/// into the system's by λ, the fallen share (spin by λ², reach and hold
+/// alike); `circulation` is the star's own spin in the system's units.
+#[allow(clippy::too_many_arguments)]
+pub fn system(clump: &Manifest, outside: Vec<(crate::flows::Mote, Ratio, Ratio)>, whole: &Ratio, agitation: &Ratio, circulation: &Ratio, path: &[u64], unit: &Ratio, tide: &Ratio) -> Option<(Manifest, Vec<crate::pulse::Body>, Manifest, Ratio, Ratio, Vec<crate::flows::Mote>)> {
     // Ignition: a clump at a ≥ ½ never forms a heart.
     ignition_share(agitation)?;
     // THE HEART'S TORSION, THE CUT ONE TIER DOWN (operator, with xylarium,
@@ -632,7 +671,16 @@ pub fn system(clump: &Manifest, agitation: &Ratio, circulation: &Ratio, path: &[
     // `R_z = ℓ_z/H ≤ H`; past it, it is the DISC, spun to orbit. One
     // crossing on the cumulative hold. A clump with no open frames (ē = 0)
     // is all star, no disc: a reading.
-    let total = mass(clump);
+    let fell = mass(clump);
+    if fell.is_zero() || whole.is_zero() {
+        return None;
+    }
+    let total = whole.clone();
+    let lambda = fell.clone() / total.clone();
+    let lambda2 = lambda.clone() * lambda.clone();
+    // The star's own spin read in the fallen matter's units (a smaller unit
+    // dilates spin by 1/λ²).
+    let circulation_f = circulation.clone() / lambda2.clone();
     // The new heart is hot: its heat strips the loosest windings (hydrogen
     // first), so it keeps its fuel.
     // THE NEWBORN HEART IS HOT (operator 2026-10-18, "proceed with your
@@ -645,7 +693,8 @@ pub fn system(clump: &Manifest, agitation: &Ratio, circulation: &Ratio, path: &[
     // back to its parts (hydrogen's winding, tightness 1, is stripped), so a
     // star never holds molecules and its hydrogen is fuel.
     let clump = &dissociate(clump);
-    let (star, disc, held) = heart_cut(clump, circulation, &ionizing)?;
+    let (star, disc, _) = heart_cut(clump, &circulation_f, &ionizing)?;
+    let held = mass(&star) / total.clone();
     // The star's hold, gathered (no throat): `H_s = held`, a share of the
     // clump; the disc is the rest, `1 − H_s`, over the annulus from the
     // star's hold to the system's rim (its grains' holding, 1), so its line
@@ -679,18 +728,47 @@ pub fn system(clump: &Manifest, agitation: &Ratio, circulation: &Ratio, path: &[
     let inside = star_hold.clone();
     let load = ratio(0, 1);
     let _ = (&h_s, &rim, &disc_agitation, &x);
-    let belts_spin = mass(&disc) / unit.clone() * crate::ring::spin(&scale, &inside);
+    let _ = &inside;
     // The heart's released kinds leave as a spray over directions.
     // The newborn star's push: ½ × its hot heart's open share.
     // The spray leaves from the star's cool outer layers: their push (whole
     // atoms), never the hot heart's stripped share.
     let star_push = if mass(&star).is_zero() { ratio(0, 1) } else { crate::ring::grain(&(ratio(1, 2) * crate::pulse::magnetism(&star) / mass(&star))) };
-    // At ignition the system is the clump: its carried spins are in the
-    // system's own units.
-    let thrown = carried(clump, circulation, &ionizing);
-    let motes: Vec<crate::flows::Mote> = crate::flows::spray(&disc, &thrown, &vec![ratio(0, 1); crate::flows::PLANES], &disc_agitation, path.len() as u64, &star_push);
+    // THE WIND: what the heart releases leaves at the spin its cut carried it
+    // with, carried from the fallen matter's units into the system's.
+    let thrown: Vec<(crate::chem::Kind, Ratio)> = carried(clump, &circulation_f, &ionizing).into_iter().map(|(k, l)| (k, l * lambda2.clone())).collect();
+    let mut motes: Vec<crate::flows::Mote> = crate::flows::spray(&disc, &thrown, &vec![ratio(0, 1); crate::flows::PLANES], &disc_agitation, path.len() as u64, &star_push);
+    // THE DISC: what never fell, where it stands, turning at the balance of
+    // its place in each plane, `ℓ = r·H(<r)` (the ring law: reach × the hold
+    // inside it), the hold the system's own enclosure: the star as it stands
+    // after its cut and every disc member nearer it (members at one distance
+    // hold each other alike); its phases its own; warmed by the newborn star's
+    // light and the galaxy's unlocked face. Read, never placed.
+    let mut outside = outside;
+    outside.sort_by(|a, b| a.1.cmp(&b.1));
+    let mut inside = h_s.clone();
+    let mut i = 0;
+    while i < outside.len() {
+        let mut j = i;
+        while j < outside.len() && outside[j].1 == outside[i].1 {
+            j += 1;
+        }
+        let at = inside.clone();
+        for (x, r, c) in &outside[i..j] {
+            motes.push(crate::flows::Mote { ell_o: crate::ring::grain(&(r.clone() * at.clone())), ell_orth: crate::ring::grain(&(c.clone() * at.clone())), agitation: crate::ring::grain(&x.agitation.clone().max(disc_agitation.clone())), ..x.clone() });
+            inside += x.amount.clone() * crate::flows::weight(&x.key) / total.clone();
+        }
+        i = j;
+    }
+    let mut medium = Manifest::new();
+    for x in &motes {
+        *medium.entry(x.key.clone()).or_insert_with(|| ratio(0, 1)) += x.amount.clone();
+    }
+    // The medium's spin on the ledger: each mote's own, carried into the
+    // ledger's units by the system's dilation (`ℓ_ledger = ℓ_sys·scale²`).
+    let medium_spin = motes.iter().fold(ratio(0, 1), |s, x| s + x.amount.clone() * crate::flows::weight(&x.key) / unit.clone() * (x.ell_o.clone() + x.ell_orth.clone()) * scale.clone() * scale.clone());
     let _ = &worlds;
-    Some((star, worlds, disc, belts_spin, crate::ring::grain(&load), motes))
+    Some((star, worlds, medium, medium_spin, crate::ring::grain(&load), motes))
 }
 
 /// The convergents `p/q` of a positive rational, in order.
@@ -818,15 +896,15 @@ fn exchange(ell: &[Ratio], dl: &mut [Ratio], i: usize, j: usize, mi: &Ratio, mj:
 /// matter that overstepped the rim, and, on the star's bell, the residual of
 /// its torque's identity (`h_s·Δℓ_s + Σ m·Δℓ`, the star's spin and its system's
 /// across the torques: zero where the star paid exactly what it gave).
-pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, rang: bool, t_u: u64, cross: &mut crate::enfold::Cross) -> (usize, usize, Manifest, Option<Ratio>) {
+pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, rang: bool, t_u: u64, cross: &mut crate::enfold::Cross) -> (usize, usize, Manifest, Option<Ratio>, (usize, usize, usize, usize)) {
 
     let total = mass(&sys.total());
     if total.is_zero() || (sys.flows.is_empty() && sys.satellites.is_empty()) {
-        return (0, 0, Manifest::new(), None);
+        return (0, 0, Manifest::new(), None, (0, 0, 0, 0));
     }
     let h_s = mass(&sys.kept) / total.clone();
     if h_s.is_zero() {
-        return (0, 0, Manifest::new(), None);
+        return (0, 0, Manifest::new(), None, (0, 0, 0, 0));
     }
     // The star's torque on its system: one force, each kind by its inertia.
     // DISSOCIATION AT THE PLACE'S OWN HEAT (with xylarium): a cluster mote
@@ -1152,6 +1230,9 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
     // What overreaches the system's rim (reach past 1, its grains' holding;
     // the rim law) crosses whole into the galaxy.
     let mut escaped = Manifest::new();
+    // The fates of the bodies grown this echo: worlds, stars ignited, and
+    // bodies whose core held nothing (their matter back to the medium).
+    let mut fates = (0usize, 0usize, 0usize, 0usize);
     let rim = ratio(1, 1);
     for (_, g) in groups {
         let r_group = {
@@ -1162,6 +1243,9 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
             if m.is_zero() { ratio(0, 1) } else { enc.reach(&(g.iter().fold(ratio(0, 1), |a, &i| a + mass(&items[i].0) * out(i)) / m)).0 }
         };
         if r_group > rim {
+            if g.len() > 1 {
+                fates.3 += 1;
+            }
             for &i in &g {
                 for (k, a) in &items[i].0 {
                     *escaped.entry(k.clone()).or_insert_with(|| ratio(0, 1)) += a.clone();
@@ -1187,6 +1271,7 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
             continue;
         }
         let mut kept = Manifest::new();
+        let grown = g.len() > 1;
         let (mut m, mut ml, mut ml_c) = (ratio(0, 1), ratio(0, 1), ratio(0, 1));
         let mut ph: Vec<Vec<(Ratio, Ratio)>> = vec![Vec::new(); planes];
         for &i in &g {
@@ -1252,6 +1337,15 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
                 motes.push(crate::flows::Mote { key: k, amount: a, ell_o: ell.clone(), ell_orth: own_c.clone(), phase: phase.clone(), agitation: crate::ring::grain(&heat_g), born: 0, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1) });
             }
         }
+        if grown {
+            if ignites {
+                fates.1 += 1;
+            } else if kept.is_empty() {
+                fates.2 += 1;
+            } else {
+                fates.0 += 1;
+            }
+        }
         if kept.is_empty() {
             continue;
         }
@@ -1304,7 +1398,7 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
     } else {
         None
     };
-    (sticks, bounces, escaped, identity)
+    (sticks, bounces, escaped, identity, fates)
 }
 
 /// THE CONGRUENT CONSTRUCTION (operator 2026-10-19: "outer-shell pull is
