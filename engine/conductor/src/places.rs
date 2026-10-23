@@ -81,7 +81,7 @@ impl Places {
                 out.worlds_in.insert((g, s), sys.satellites.len());
                 *out.stars_in.entry(g).or_insert(0) += 1;
                 let core_clock = match &frame {
-                    Some((enc, dil)) => ratio(1, 1) - enc.reach(&(sys.ell.clone() / dil.clone())).1,
+                    Some(enc) => ratio(1, 1) - enc.reach(&sys.ell).1,
                     None => ratio(0, 1),
                 };
                 for orb in &sys.satellites {

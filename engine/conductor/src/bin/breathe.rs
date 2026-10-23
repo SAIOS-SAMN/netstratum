@@ -63,7 +63,8 @@ fn main() {
         // universal echo.
         if t_u > 0 && (b + 1) % (10 * t_u) == 0 {
             let (motes, widest, in_systems) = carrier(&u);
-            eprintln!("bell {}: {} echoes read; {motes} motes ({in_systems} in the systems), widest {widest} bits", b + 1, events.len());
+            let (rung, read) = events.iter().fold((0usize, 0usize), |a, e| (a.0 + e.rang.0, a.1 + e.rang.1));
+            eprintln!("bell {}: {} echoes read; {motes} motes ({in_systems} in the systems), widest {widest} bits; star bells rang {rung} of {read} star-echoes", b + 1, events.len());
             if last_motes > 0 && motes > 2 * last_motes {
                 grown_past = Some(b + 1);
                 break;
