@@ -69,7 +69,8 @@ never pushed by the heart, because it never entered it.
 leaves at its carried spin (`spray`): the WIND, as read in §1.
 
 **C6. Accretion, the process.** A disc member whose spin later falls within
-the star's throat (meetings exchange spin between neighbours; the star's
+the heart's hold (a heart has no throat: a throat is the tube joining two
+enclosures, a galactic core's or a remnant's) (meetings exchange spin between neighbours; the star's
 torque pays its own spin out, magnetic braking) joins the heart, its spin
 paid into the star's (`h_s·Δℓ_s = m·ℓ`, exact). A star therefore grows by
 accretion over echoes, and its worlds grow in the same disc.
@@ -105,7 +106,7 @@ holding-weighted phase in each plane): its offset radially and along each
 plane's turn at the centre's reach (S¹'s linear measure), lengths dilated
 ONCE into the clump's units (`g/m_c`).
 
-**P2. What falls.** A member falls where it stands within the throat of what
+**P2. What falls.** A member falls where it stands within the hold of what
 has fallen in EVERY plane (the meeting law's "coincide in every plane"):
 its greatest offset `r ≤ H*`, `δ = H*/(r + H*) ≥ ½`, the heart cut's test
 read by place, `H*` the fallen share at the order-free fixed point

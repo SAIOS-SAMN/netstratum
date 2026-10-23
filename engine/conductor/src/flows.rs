@@ -351,6 +351,20 @@ impl Enclosed {
         self.held[self.spins.partition_point(|l| l < ell)].clone()
     }
 
+    /// `H(<r)` by PLACE: the base and every body whose own reach stands
+    /// within `r`, the hold a body standing at reach r turns about (the ring
+    /// law's containment read by place, for a body known by where it stands).
+    pub fn hold_within(&self, r: &Ratio) -> Ratio {
+        let mut h = self.held[0].clone();
+        for (i, l) in self.spins.iter().enumerate() {
+            let at = l.clone() / self.held[i].clone();
+            if at < *r {
+                h += self.held[i + 1].clone() - self.held[i].clone();
+            }
+        }
+        h
+    }
+
     /// A body's reach and deficit at spin ℓ: `R = ℓ/H(<ℓ)`, `δ = H/(R + H)`.
     pub fn reach(&self, ell: &Ratio) -> (Ratio, Ratio) {
         let h = self.hold(ell);
@@ -430,6 +444,21 @@ pub fn turn(phase: &mut [Ratio], r_o: &Ratio, h: &Ratio, p: &Ratio, tide: Option
 pub fn orth_push(orth_from: &Ratio, d_c: &Ratio, p: &Ratio, felt: &Ratio, inverted: bool) -> Ratio {
     let start = if inverted { orth_from.clone() - ratio(2, 1) * d_c.clone() } else { orth_from.clone() };
     p.clone() * felt.clone() * mean_response(&start, &(ratio(2, 1) * d_c.clone()))
+}
+
+/// THROUGH THE CENTRE (the torque's law, docs/83; with xylarium): a spin
+/// carried past zero is a turning in the other sense, so the body passes
+/// through the centre to the antipode, its orbit phase half a turn on, its
+/// spin the magnitude, never piled at zero.
+pub fn through_centre(ell: Ratio, phase: &mut [Ratio]) -> Ratio {
+    if ell < ratio(0, 1) {
+        if let Some(ph) = phase.get_mut(0) {
+            *ph = frac(&(ph.clone() + ratio(1, 2)));
+        }
+        -ell
+    } else {
+        ell
+    }
 }
 
 /// THE SWING (docs/90 D2): a body's orthogonal spin projects onto its orbit by
@@ -653,7 +682,9 @@ pub fn shear(motes: &mut [Mote], enc: &Enclosed, total: &Ratio) -> Ratio {
     }
     for i in 0..n {
         if !dl[i].is_zero() {
-            motes[i].ell_o = crate::ring::grain(&(motes[i].ell_o.clone() + dl[i].clone())).max(ratio(0, 1));
+            let x = &mut motes[i];
+            let now = crate::ring::grain(&(x.ell_o.clone() + dl[i].clone()));
+            x.ell_o = through_centre(now, &mut x.phase);
         }
     }
     moved
@@ -707,11 +738,12 @@ pub fn on_disc_leg(x: &Mote) -> bool {
 }
 
 /// The one exit, by state: a mote whose orthogonal orbit OVERREACHES THE RIM (its
-/// reach at or past the throat, `R ≥ H`) crosses whole into the medium one
-/// tier up, where the enclosing core's orthogonal orbits carry it round the same way.
-/// Returns the motes that left; the rest stay.
-pub fn exits(motes: &mut Vec<Mote>, h: &Ratio) -> Vec<Mote> {
-    let (gone, stay): (Vec<Mote>, Vec<Mote>) = std::mem::take(motes).into_iter().partition(|x| x.ell_o.clone() / h.clone() >= *h);
+/// reach at or past the throat, `R ≥ H`, read by the one enclosure: `ℓ ≥
+/// H(<ℓ)²`, δ at most ½) crosses whole into the medium one tier up, where the
+/// enclosing core's orthogonal orbits carry it round the same way. Returns
+/// the motes that left; the rest stay.
+pub fn exits(motes: &mut Vec<Mote>, enc: &Enclosed) -> Vec<Mote> {
+    let (gone, stay): (Vec<Mote>, Vec<Mote>) = std::mem::take(motes).into_iter().partition(|x| { let h = enc.hold(&x.ell_o); x.ell_o >= h.clone() * h });
     *motes = stay;
     gone
 }
@@ -840,52 +872,36 @@ pub fn within_reach<'a>(by_reach: &'a [(Ratio, usize)], r: &Ratio, d: &Ratio, wo
     &by_reach[lo..hi.max(lo)]
 }
 
-pub fn chains(motes: &[Mote], h: &Ratio, p: &Ratio, total: &Ratio) -> Vec<Chain> {
+/// THE BEADS (operator 2026-10-18: "you bead the individual fibers and then
+/// braid the fibers together"): the matter's own gatherings, read every
+/// echo. A FIBRE is one kind's run on one face (the same hemisphere in every
+/// plane), motes whose dispersal bands `r(1 ± p)` overlap, linked
+/// transitively; it pinches where its hold gathers (each local maximum) and
+/// parts at the minima between. Each bead is one body of gas. Returned by
+/// face: (its members, the reach where it pinches). Read by the one
+/// enclosure: each mote's reach `ℓ/H(<ℓ)` about the hold it turns in. The
+/// collapse reads the disc leg alone (`disc_leg`); a body of gas is a body on
+/// either leg (the face's orthogonal hemisphere is the leg), so the merge
+/// reads both.
+pub fn beads(motes: &[Mote], enc: &Enclosed, p: &Ratio, total: &Ratio, disc_leg: bool) -> std::collections::BTreeMap<Vec<bool>, Vec<(Vec<usize>, Ratio)>> {
+    let mut beads_by_face: std::collections::BTreeMap<Vec<bool>, Vec<(Vec<usize>, Ratio)>> = std::collections::BTreeMap::new();
     if total.is_zero() {
-        return Vec::new();
+        return beads_by_face;
     }
     let half = ratio(1, 2);
-    // Each mote's reach and band, read once (exact; recomputing them at every
-    // use was most of the cost).
     let (down, up) = (ratio(1, 1) - p.clone().min(ratio(1, 1)), ratio(1, 1) + p.clone());
-    let rr: Vec<Ratio> = motes.iter().map(|x| x.ell_o.clone() / h.clone()).collect();
+    let hh: Vec<Ratio> = motes.iter().map(|x| enc.hold(&x.ell_o)).collect();
+    let rr: Vec<Ratio> = motes.iter().zip(&hh).map(|(x, h)| x.ell_o.clone() / h.clone()).collect();
     let lov: Vec<Ratio> = rr.iter().map(|r| r.clone() * down.clone()).collect();
     let hiv: Vec<Ratio> = rr.iter().map(|r| r.clone() * up.clone()).collect();
-    let delta = |r: &Ratio| h.clone() / (r.clone() + h.clone());
-    // A group judged whole by the filament law, edge to edge.
-    let judge = |members: Vec<usize>| -> Option<Chain> {
-        let (mut x, mut held, mut a_w, mut r_w) = (ratio(0, 1), ratio(0, 1), ratio(0, 1), ratio(0, 1));
-        for &j in &members {
-            let m = motes[j].amount.clone() * weight(&motes[j].key) / total.clone();
-            x += m.clone() * (ratio(1, 1) + open(&motes[j].key));
-            a_w += m.clone() * motes[j].agitation.clone();
-            r_w += m.clone() * rr[j].clone();
-            held += m;
-        }
-        if held.is_zero() {
-            return None;
-        }
-        let inner = members.iter().map(|&j| lov[j].clone()).min().expect("a member");
-        let outer = members.iter().map(|&j| hiv[j].clone()).max().expect("a member");
-        let (d_in, d_out) = (delta(&inner), delta(&outer));
-        let t_edges = (d_in.clone() - d_out.clone()) / (d_in + d_out);
-        let orbit: Vec<Ratio> = members.iter().map(|&j| frac(&motes[j].phase[0])).collect();
-        let extent = orbit.iter().max().expect("a member").clone() - orbit.iter().min().expect("a member").clone();
-        let apart = ratio(1, 1) - in_step(&extent, &ratio(0, 1)) * (ratio(1, 1) - t_edges);
-        let reach_w = r_w / held.clone();
-        let face = (ratio(1, 1) - delta(&reach_w)) / ratio(2, 1);
-        // A chain with no extent at all (no push to spread it) is not read as
-        // infinitely dense: it does not bind.
-        let bind = if apart.is_zero() { ratio(0, 1) } else { let lambda = x / apart.clone(); lambda.clone() / (ratio(1, 1) + lambda) };
-        Some(Chain { members, reach: reach_w, bind, agitation: a_w / held, face, apart })
-    };
+    let delta_of = |j: usize, r: &Ratio| hh[j].clone() / (r.clone() + hh[j].clone());
     // The hold along a group by reach: each member spread over its own band,
     // the hold at a place the sum of every member whose band covers it.
     let profile = |along: &[usize]| -> Vec<Ratio> {
         let bands: Vec<(Ratio, Ratio, Ratio)> = along
             .iter()
             .map(|&j| {
-                let (d0, d1) = (delta(&lov[j]), delta(&hiv[j]));
+                let (d0, d1) = (delta_of(j, &lov[j]), delta_of(j, &hiv[j]));
                 let band = (d0.clone() - d1.clone()) / (d0 + d1);
                 let m = motes[j].amount.clone() * weight(&motes[j].key) / total.clone();
                 (lov[j].clone(), hiv[j].clone(), if band.is_zero() { m } else { m / band })
@@ -899,12 +915,11 @@ pub fn chains(motes: &[Mote], h: &Ratio, p: &Ratio, total: &Ratio) -> Vec<Chain>
     // face, motes whose dispersal bands overlap, linked transitively.
     let mut fibres: std::collections::BTreeMap<(Vec<bool>, crate::chem::Kind), Vec<usize>> = std::collections::BTreeMap::new();
     for (i, x) in motes.iter().enumerate() {
-        if on_disc_leg(x) && !rr[i].is_zero() {
+        if (!disc_leg || on_disc_leg(x)) && !rr[i].is_zero() {
             fibres.entry(((0..PLANES).map(|k| frac(&x.phase[k]) < half).collect(), x.key.clone())).or_default().push(i);
         }
     }
     // Each fibre's beads, per face: (members, the pinch's reach).
-    let mut beads_by_face: std::collections::BTreeMap<Vec<bool>, Vec<(Vec<usize>, Ratio)>> = std::collections::BTreeMap::new();
     for ((face, _), mut idx) in fibres {
         idx.sort_by(|a, b| lov[*a].clone().cmp(&lov[*b].clone()).then(a.cmp(b)));
         let mut runs: Vec<Vec<usize>> = Vec::new();
@@ -948,6 +963,53 @@ pub fn chains(motes: &[Mote], h: &Ratio, p: &Ratio, total: &Ratio) -> Vec<Chain>
             push(from, along.len());
         }
     }
+    beads_by_face
+}
+
+pub fn chains(motes: &[Mote], enc: &Enclosed, p: &Ratio, total: &Ratio) -> Vec<Chain> {
+    if total.is_zero() {
+        return Vec::new();
+    }
+    // Each mote's reach and band, read once by the one enclosure (exact;
+    // recomputing them at every use was most of the cost): its reach `ℓ/H(<ℓ)`
+    // and the hold it turns about.
+    let (down, up) = (ratio(1, 1) - p.clone().min(ratio(1, 1)), ratio(1, 1) + p.clone());
+    let hh: Vec<Ratio> = motes.iter().map(|x| enc.hold(&x.ell_o)).collect();
+    let rr: Vec<Ratio> = motes.iter().zip(&hh).map(|(x, h)| x.ell_o.clone() / h.clone()).collect();
+    let lov: Vec<Ratio> = rr.iter().map(|r| r.clone() * down.clone()).collect();
+    let hiv: Vec<Ratio> = rr.iter().map(|r| r.clone() * up.clone()).collect();
+    // The deficit at a reach about the hold a member turns about.
+    let delta_of = |j: usize, r: &Ratio| hh[j].clone() / (r.clone() + hh[j].clone());
+    // A group judged whole by the filament law, edge to edge.
+    let judge = |members: Vec<usize>| -> Option<Chain> {
+        let (mut x, mut held, mut a_w, mut r_w) = (ratio(0, 1), ratio(0, 1), ratio(0, 1), ratio(0, 1));
+        for &j in &members {
+            let m = motes[j].amount.clone() * weight(&motes[j].key) / total.clone();
+            x += m.clone() * (ratio(1, 1) + open(&motes[j].key));
+            a_w += m.clone() * motes[j].agitation.clone();
+            r_w += m.clone() * rr[j].clone();
+            held += m;
+        }
+        if held.is_zero() {
+            return None;
+        }
+        let j_in = *members.iter().min_by(|&&a, &&b| lov[a].cmp(&lov[b]).then(a.cmp(&b))).expect("a member");
+        let j_out = *members.iter().max_by(|&&a, &&b| hiv[a].cmp(&hiv[b]).then(b.cmp(&a))).expect("a member");
+        let (d_in, d_out) = (delta_of(j_in, &lov[j_in]), delta_of(j_out, &hiv[j_out]));
+        let t_edges = (d_in.clone() - d_out.clone()) / (d_in + d_out);
+        let orbit: Vec<Ratio> = members.iter().map(|&j| frac(&motes[j].phase[0])).collect();
+        let extent = orbit.iter().max().expect("a member").clone() - orbit.iter().min().expect("a member").clone();
+        let apart = ratio(1, 1) - in_step(&extent, &ratio(0, 1)) * (ratio(1, 1) - t_edges);
+        let reach_w = r_w / held.clone();
+        // The hold the chain turns about, by holding.
+        let h_w = members.iter().fold(ratio(0, 1), |s, &j| s + motes[j].amount.clone() * weight(&motes[j].key) / total.clone() * hh[j].clone()) / held.clone();
+        let face = (ratio(1, 1) - h_w.clone() / (reach_w.clone() + h_w)) / ratio(2, 1);
+        // A chain with no extent at all (no push to spread it) is not read as
+        // infinitely dense: it does not bind.
+        let bind = if apart.is_zero() { ratio(0, 1) } else { let lambda = x / apart.clone(); lambda.clone() / (ratio(1, 1) + lambda) };
+        Some(Chain { members, reach: reach_w, bind, agitation: a_w / held, face, apart })
+    };
+    let beads_by_face = beads(motes, enc, p, total, true);
     // THE BRAID: beads of different fibres twine where each one's pinch
     // stands within the other's extent (mutual, so no order), and the
     // twining carries across; each braid is read whole by the filament law.
@@ -996,8 +1058,8 @@ pub fn chains(motes: &[Mote], h: &Ratio, p: &Ratio, total: &Ratio) -> Vec<Chain>
 /// member taking its filament's coherence share (a chain is a partition, so
 /// nothing is claimed twice). Returns, per holding chain, its reach and the
 /// share of each mote it takes.
-pub fn clumps(motes: &[Mote], h: &Ratio, p: &Ratio, total: &Ratio) -> Vec<(Ratio, Vec<(usize, Ratio)>)> {
-    clumps_of(motes, chains(motes, h, p, total))
+pub fn clumps(motes: &[Mote], enc: &Enclosed, p: &Ratio, total: &Ratio) -> Vec<(Ratio, Vec<(usize, Ratio)>)> {
+    clumps_of(motes, chains(motes, enc, p, total))
 }
 
 /// STREAMING BY FORCE (operator 2026-10-18: "jetstreams depending on their
@@ -1046,36 +1108,41 @@ pub fn clumps_of(motes: &[Mote], chains: Vec<Chain>) -> Vec<(Ratio, Vec<(usize, 
         .collect()
 }
 
-/// The phase protractor's marks to a turn: the system tier's S^60 (a
-/// carrier size).
-pub const PHASE_WIDTH: i64 = 60;
-
-/// The reach share's marks: the galaxy tier's S^360 (a carrier size).
-pub const REACH_WIDTH: i64 = 360;
-
-/// Merge motes whose states coincide on the coordinate's grain (`60⁻⁶`
-/// a plane, the carrier's resolution, never law): same kind, same spins and
-/// phases on the grain, their amounts added.
-pub fn merge(motes: &mut Vec<Mote>, total: &Ratio, place_of: &dyn Fn(&Mote) -> Option<Ratio>, cross: &mut crate::enfold::Cross) -> Ratio {
-    // The merge rule (with xylarium; the carrier's resolution, never law):
-    // same kind, same stream, the same mark in every phase (60 to the turn)
-    // and in the reach's share `ℓ/(ℓ + 1)` (360 marks). At the 60⁻⁶ grain
-    // motes almost never coincide and nothing bounds their number; the
-    // readings must not move with the marks (A/B, with xylarium). Holding
-    // sums exactly; spins and agitation merge by holding onto the grid, the
-    // floored spin's remainder returned for the core's reservoir so the spin
-    // ledger stays exact.
+/// MERGE BY THE MATTER'S OWN GATHERINGS (operator 2026-10-23: "we shouldnt
+/// have any grids - why would we? they only distort and provide rigidity";
+/// design law 3, no cells in a fixed grid): the motes of one bead (`beads`:
+/// one kind on one face, a fibre's run between its hold's minima, one body
+/// of gas) and of one stream are one mote. Holding sums exactly; spins and
+/// heat join by holding onto the grain, the floored spin's remainder
+/// returned for the core's reservoir so the spin ledger stays exact; both
+/// full phases are read (ascent), meaned by holding on the circle, and the
+/// mean passes through the cross at the merged mote's place. A mote in no
+/// bead (on the axial leg, in transit) stands as it is. Returns the spin
+/// remainder.
+pub fn merge(motes: &mut Vec<Mote>, beads: &std::collections::BTreeMap<Vec<bool>, Vec<(Vec<usize>, Ratio)>>, total: &Ratio, place_of: &dyn Fn(&Mote) -> Option<Ratio>, cross: &mut crate::enfold::Cross) -> Ratio {
     let g = |x: &Ratio| crate::ring::grain(x);
-    let (phase_marks, reach_marks) = (PHASE_WIDTH, REACH_WIDTH);
-    let mark = |x: &Ratio, n: i64| (x.clone() * ratio(n, 1)).floor();
-    let key = |y: &Mote| (y.key.clone(), y.vacuum, mark(&(y.ell_o.clone() / (y.ell_o.clone() + ratio(1, 1))), reach_marks), y.phase.iter().map(|ph| mark(&frac(ph), phase_marks)).collect::<Vec<_>>());
+    let n = motes.len();
+    // Each mote's body: (its bead, its stream), or none.
+    let mut body: Vec<Option<(usize, bool)>> = vec![None; n];
+    let mut k = 0usize;
+    for list in beads.values() {
+        for (members, _) in list {
+            for &j in members {
+                if j < n {
+                    body[j] = Some((k, motes[j].vacuum));
+                }
+            }
+            k += 1;
+        }
+    }
     let mut out: Vec<Mote> = Vec::new();
-    // Each mote's sector key read once, and found by key, never by a scan
-    // of everything kept (each group keyed where its first mote stood).
-    let mut at: std::collections::BTreeMap<(crate::chem::Kind, bool, Ratio, Vec<Ratio>), usize> = std::collections::BTreeMap::new();
+    let mut at: std::collections::BTreeMap<(usize, bool), usize> = std::collections::BTreeMap::new();
     let mut remainder = ratio(0, 1);
-    for x in std::mem::take(motes) {
-        let kx = key(&x);
+    for (j, x) in std::mem::take(motes).into_iter().enumerate() {
+        let Some(kx) = body[j] else {
+            out.push(x);
+            continue;
+        };
         if let Some(y) = at.get(&kx).map(|&i| &mut out[i]) {
             let (my, mx) = (y.amount.clone(), x.amount.clone());
             let both = my.clone() + mx.clone();
@@ -1088,9 +1155,6 @@ pub fn merge(motes: &mut Vec<Mote>, total: &Ratio, place_of: &dyn Fn(&Mote) -> O
             if !total.is_zero() {
                 remainder += both.clone() * weight(&x.key) / total.clone() * ((exact_o - go.clone()) + (exact_c - gc.clone()));
             }
-            // CONDENSE (the cross): both full phases are read (ascent), meaned
-            // by holding on the circle, and the mean passes through the
-            // cross at the merged mote's place, so neither residue is lost.
             let w = weight(&x.key);
             let heat = (my.clone() * y.agitation.clone() + mx.clone() * x.agitation.clone()) / both.clone();
             y.agitation = g(&heat);

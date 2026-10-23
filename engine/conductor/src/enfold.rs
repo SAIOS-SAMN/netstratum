@@ -122,11 +122,14 @@ pub struct Cross {
 }
 
 impl Cross {
-    /// Record residue `r` in `plane` with its fate.
+    /// Record residue `r` in `plane` with its fate. The record's sum stands on
+    /// the coordinate's grain (the carrier, never law, as `flows::Enclosed`'s):
+    /// an exact sum of thousands of unrelated residues grows its denominator
+    /// without bound, and with it every echo's cost.
     pub fn note(&mut self, plane: usize, fate: Fate, r: &Ratio) {
         let t = self.by.entry((plane, fate)).or_default();
         t.count += 1;
-        t.sum += r.clone();
+        t.sum += crate::ring::grain(r);
     }
 
     /// Fold another record into this one.

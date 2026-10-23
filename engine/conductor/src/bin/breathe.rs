@@ -26,14 +26,55 @@ fn main() {
     }
     let spin_before = pulse::spin_total(&u, &breath::unit_mass(&u));
     let mut events = Vec::new();
+    // THE CARRIER'S GROWTH, read as the run goes (operator 2026-10-23: "if its
+    // growing uncontrolled and there is no end in sight, what is our course of
+    // action?"): each tenth universal echo, the motes held and the widest spin
+    // and phase in bits, counted, never timed (MU-RECURSION rule 13). A chunk
+    // that more than doubles the motes of the one before stops the run: the
+    // growth is the reading, and what was read so far is reported.
+    let bits = |r: &cfe::ratio::Ratio| r.numer().bits().max(r.denom().bits());
+    let carrier = |u: &pulse::Universe| -> (usize, u64, usize) {
+        let mut n = u.firmament.len();
+        let mut in_systems = 0usize;
+        let mut widest = 0u64;
+        let mut see = |x: &conductor::flows::Mote| {
+            widest = widest.max(bits(&x.ell_o)).max(bits(&x.ell_orth));
+            for p in &x.phase {
+                widest = widest.max(bits(p));
+            }
+        };
+        u.firmament.iter().for_each(&mut see);
+        for c in &u.cores {
+            n += c.flows.len();
+            c.flows.iter().for_each(&mut see);
+            for s in &c.satellites {
+                n += s.flows.len();
+                in_systems += s.flows.len();
+                s.flows.iter().for_each(&mut see);
+            }
+        }
+        (n, widest, in_systems)
+    };
+    let mut grown_past: Option<u64> = None;
+    let mut last_motes = carrier(&u).0;
     for b in start..until {
         events.extend(breath::breathe(&mut u, &seed, t_u, b, b + 1));
         // Progress by the universe's own count, never a clock: each tenth
         // universal echo.
         if t_u > 0 && (b + 1) % (10 * t_u) == 0 {
-            eprintln!("bell {}: {} echoes read", b + 1, events.len());
+            let (motes, widest, in_systems) = carrier(&u);
+            eprintln!("bell {}: {} echoes read; {motes} motes ({in_systems} in the systems), widest {widest} bits", b + 1, events.len());
+            if last_motes > 0 && motes > 2 * last_motes {
+                grown_past = Some(b + 1);
+                break;
+            }
+            last_motes = motes;
         }
     }
+    if let Some(at) = grown_past {
+        println!("GROWTH — the motes more than doubled in the chunk ending at bell {at}: the run stopped there");
+    }
+    let until = grown_past.unwrap_or(until);
     let unit = breath::unit_mass(&u);
     let births: usize = events.iter().map(|e| e.stars).sum();
     let dissolved: usize = events.iter().map(|e| e.dissolved).sum();
@@ -53,8 +94,11 @@ fn main() {
         let w = events.iter().fold([cfe::ratio::ratio(0, 1), cfe::ratio::ratio(0, 1), cfe::ratio::ratio(0, 1), cfe::ratio::ratio(0, 1)], |mut s, e| { for (a, b) in s.iter_mut().zip(e.weights.iter()) { *a += b.clone(); } s });
         let mean = |m: &cfe::ratio::Ratio, n: &cfe::ratio::Ratio| if n.is_zero() { "none".to_string() } else { conductor::reading::sector(&(m.clone() / n.clone())).to_string() };
         println!("WEIGHT — a nucleus's mean hold: grown groups that left past the rim {}, worlds grown {}", mean(&w[0], &w[1]), mean(&w[2], &w[3]));
-        let im = events.iter().fold((0usize, 0usize), |s, e| (s.0 + e.impacts.0, s.1 + e.impacts.1));
-        println!("IMPACTS — bounces that struck as matter {}, tugs between neighbouring worlds {}", im.0, im.1);
+        let im = events.iter().fold((0usize, 0usize, 0usize), |s, e| (s.0 + e.impacts.0, s.1 + e.impacts.1, s.2 + e.impacts.2));
+        println!("IMPACTS — bounces that struck as matter {}, tugs between neighbouring worlds {}; grown groups carried past the rim by their orthogonal orbit's swing alone {}", im.0, im.1, im.2);
+        let ms = events.iter().fold([0usize; 6], |mut a, e| { for i in 0..5 { a[i] += e.motes[i]; } a });
+        let held: usize = { let mut last: std::collections::BTreeMap<u32, usize> = std::collections::BTreeMap::new(); for e in &events { last.insert(e.galaxy, e.motes[5]); } last.values().sum() };
+        println!("MOTES — entered the galaxies' flows: arrivals {}, shed and through the stars' throats {}, recycling {}, clump members returned {}; folded by the merge {}; held at the end {held}", ms[0], ms[1], ms[2], ms[3], ms[4]);
         println!("DISCS — released at the stars' births {} (holding), at or past the rim when released {}", conductor::reading::sector(&born), conductor::reading::sector(&out));
         println!("SYSTEMS MET — {sticks} stuck, {bounces} bounced; overstepped the rims {} (holding); after the last echo, motes and bodies by galaxy {last:?}", conductor::reading::sector(&escaped));
     }
