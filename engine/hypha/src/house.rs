@@ -507,6 +507,17 @@ impl House {
                     };
                     let ok = reason == TAKEN_OK;
                     if ok {
+                        // A seat that changes hands: the task set before the
+                        // mind that left goes back to the queue, as its
+                        // declination would have sent it (the new holder never
+                        // perceived it).
+                        if self.held.get(&t.seat).is_some_and(|m| *m != t.mind) {
+                            if let Some((id, _)) = self.task.remove(&t.seat) {
+                                self.refile.remove(&t.seat);
+                                seat.give_back(id);
+                                said.push(format!("seat {} changed hands: task {} back to the queue", t.seat, hex(&id[..6])));
+                            }
+                        }
                         self.held.insert(t.seat, t.mind);
                         self.heard.insert(t.seat, self.tends);
                         let line = line.unwrap_or_default();

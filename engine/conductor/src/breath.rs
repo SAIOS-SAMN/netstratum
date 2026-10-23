@@ -144,6 +144,9 @@ pub struct Event {
     /// The bodies the systems grew this echo: worlds, stars ignited, and
     /// bodies whose core held nothing.
     pub fates: (usize, usize, usize, usize),
+    /// Their weight: holding and nuclei of the grown groups that left past the
+    /// rim, and of the worlds grown.
+    pub weights: [Ratio; 4],
     /// The discs the stars born this echo released (holding), and the share
     /// of it that stood at or past its system's rim when released.
     pub discs: (Ratio, Ratio),
@@ -390,6 +393,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         let mut grown = (0usize, 0usize, 0usize, 0usize);
         let mut escaped_all = ratio(0, 1);
         let mut fates = (0usize, 0usize, 0usize, 0usize);
+        let mut weights = [ratio(0, 1), ratio(0, 1), ratio(0, 1), ratio(0, 1)];
         let mut discs = (ratio(0, 1), ratio(0, 1));
         let mut collapse = (ratio(0, 1), ratio(0, 1));
         let (mut merged, mut encounters) = (0usize, 0usize);
@@ -631,7 +635,10 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 }
                 // Its system still moves: worlds and debris meet, and what
                 // oversteps the rim crosses into the galaxy.
-                let (st, bo, escaped, star_identity, made) = crate::formation::collide_system(&mut sys, &unit, bell, rang, t_u, &mut cross);
+                let (st, bo, escaped, star_identity, made, weighs) = crate::formation::collide_system(&mut sys, &unit, bell, rang, t_u, &mut cross);
+                for (a, b) in weights.iter_mut().zip(weighs) {
+                    *a += b;
+                }
                 fates = (fates.0 + made.0, fates.1 + made.1, fates.2 + made.2, fates.3 + made.3);
                 if let Some(r) = star_identity {
                     identity.push(("star", r));
@@ -834,7 +841,10 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             }
             // COLLISIONS in the system's own medium: worlds grow; what
             // overreaches the system's rim crosses into the galaxy.
-            let (st, bo, escaped, star_identity, made) = crate::formation::collide_system(&mut sys, &unit, bell, rang, t_u, &mut cross);
+            let (st, bo, escaped, star_identity, made, weighs) = crate::formation::collide_system(&mut sys, &unit, bell, rang, t_u, &mut cross);
+                for (a, b) in weights.iter_mut().zip(weighs) {
+                    *a += b;
+                }
                 fates = (fates.0 + made.0, fates.1 + made.1, fates.2 + made.2, fates.3 + made.3);
                 if let Some(r) = star_identity {
                     identity.push(("star", r));
@@ -1308,7 +1318,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         for (k, a) in to_ocean {
             *u.medium.entry(k).or_insert_with(|| ratio(0, 1)) += a;
         }
-        events.push(Event { bell, galaxy: galaxy_id, rung, write: Write::Perpendicular, stars, jets, returned, dissolved, merged, encounters, grown, escaped: escaped_all, fates, discs, collapse, recycled, burned, burns, cross, light, tolls, identity });
+        events.push(Event { bell, galaxy: galaxy_id, rung, write: Write::Perpendicular, stars, jets, returned, dissolved, merged, encounters, grown, escaped: escaped_all, fates, weights, discs, collapse, recycled, burned, burns, cross, light, tolls, identity });
     }
     events
 }

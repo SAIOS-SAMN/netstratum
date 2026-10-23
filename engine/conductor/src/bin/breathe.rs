@@ -50,6 +50,9 @@ fn main() {
         println!("INFALL — clumps {} (holding); fell into the hearts {}, the rest their discs", conductor::reading::sector(&cl), conductor::reading::sector(&fell));
         let f = events.iter().fold((0usize, 0usize, 0usize, 0usize), |s, e| (s.0 + e.fates.0, s.1 + e.fates.1, s.2 + e.fates.2, s.3 + e.fates.3));
         println!("GROWN — bodies grown by meetings: {} worlds, {} ignited as stars, {} whose core held nothing, {} that left past the rim", f.0, f.1, f.2, f.3);
+        let w = events.iter().fold([cfe::ratio::ratio(0, 1), cfe::ratio::ratio(0, 1), cfe::ratio::ratio(0, 1), cfe::ratio::ratio(0, 1)], |mut s, e| { for (a, b) in s.iter_mut().zip(e.weights.iter()) { *a += b.clone(); } s });
+        let mean = |m: &cfe::ratio::Ratio, n: &cfe::ratio::Ratio| if n.is_zero() { "none".to_string() } else { conductor::reading::sector(&(m.clone() / n.clone())).to_string() };
+        println!("WEIGHT — a nucleus's mean hold: grown groups that left past the rim {}, worlds grown {}", mean(&w[0], &w[1]), mean(&w[2], &w[3]));
         println!("DISCS — released at the stars' births {} (holding), at or past the rim when released {}", conductor::reading::sector(&born), conductor::reading::sector(&out));
         println!("SYSTEMS MET — {sticks} stuck, {bounces} bounced; overstepped the rims {} (holding); after the last echo, motes and bodies by galaxy {last:?}", conductor::reading::sector(&escaped));
     }

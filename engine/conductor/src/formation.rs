@@ -896,15 +896,15 @@ fn exchange(ell: &[Ratio], dl: &mut [Ratio], i: usize, j: usize, mi: &Ratio, mj:
 /// matter that overstepped the rim, and, on the star's bell, the residual of
 /// its torque's identity (`h_s·Δℓ_s + Σ m·Δℓ`, the star's spin and its system's
 /// across the torques: zero where the star paid exactly what it gave).
-pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, rang: bool, t_u: u64, cross: &mut crate::enfold::Cross) -> (usize, usize, Manifest, Option<Ratio>, (usize, usize, usize, usize)) {
+pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, rang: bool, t_u: u64, cross: &mut crate::enfold::Cross) -> (usize, usize, Manifest, Option<Ratio>, (usize, usize, usize, usize), [Ratio; 4]) {
 
     let total = mass(&sys.total());
     if total.is_zero() || (sys.flows.is_empty() && sys.satellites.is_empty()) {
-        return (0, 0, Manifest::new(), None, (0, 0, 0, 0));
+        return (0, 0, Manifest::new(), None, (0, 0, 0, 0), [ratio(0, 1), ratio(0, 1), ratio(0, 1), ratio(0, 1)]);
     }
     let h_s = mass(&sys.kept) / total.clone();
     if h_s.is_zero() {
-        return (0, 0, Manifest::new(), None, (0, 0, 0, 0));
+        return (0, 0, Manifest::new(), None, (0, 0, 0, 0), [ratio(0, 1), ratio(0, 1), ratio(0, 1), ratio(0, 1)]);
     }
     // The star's torque on its system: one force, each kind by its inertia.
     // DISSOCIATION AT THE PLACE'S OWN HEAT (with xylarium): a cluster mote
@@ -1233,6 +1233,11 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
     // The fates of the bodies grown this echo: worlds, stars ignited, and
     // bodies whose core held nothing (their matter back to the medium).
     let mut fates = (0usize, 0usize, 0usize, 0usize);
+    // Their weight: the holding and the nuclei of the grown groups that left
+    // past the rim, and of the worlds grown (a body's mean hold a nucleus is
+    // how heavy its kinds are).
+    let mut weighs = [ratio(0, 1), ratio(0, 1), ratio(0, 1), ratio(0, 1)];
+    let nuclei = |m: &Manifest| m.values().fold(ratio(0, 1), |s, a| s + a.clone());
     let rim = ratio(1, 1);
     for (_, g) in groups {
         let r_group = {
@@ -1245,6 +1250,10 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
         if r_group > rim {
             if g.len() > 1 {
                 fates.3 += 1;
+                for &i in &g {
+                    weighs[0] += mass(&items[i].0);
+                    weighs[1] += nuclei(&items[i].0);
+                }
             }
             for &i in &g {
                 for (k, a) in &items[i].0 {
@@ -1344,6 +1353,8 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
                 fates.2 += 1;
             } else {
                 fates.0 += 1;
+                weighs[2] += mass(&kept);
+                weighs[3] += nuclei(&kept);
             }
         }
         if kept.is_empty() {
@@ -1398,7 +1409,7 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
     } else {
         None
     };
-    (sticks, bounces, escaped, identity, fates)
+    (sticks, bounces, escaped, identity, fates, weighs)
 }
 
 /// THE CONGRUENT CONSTRUCTION (operator 2026-10-19: "outer-shell pull is
