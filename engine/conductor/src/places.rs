@@ -73,12 +73,17 @@ impl Places {
                 continue;
             }
             let scale = held / unit.clone();
-            for (si, sys) in core.satellites.iter().enumerate() {
+            // The system's clock about its core: the rings it receives at its
+            // reach, `1 − δ` by its galaxy's one enclosure at its own spin.
+            let frame = crate::breath::galaxy_frame(u, i, &unit);
+            for sys in core.satellites.iter() {
                 let Some(&s) = sys.path.get(1) else { continue };
                 out.worlds_in.insert((g, s), sys.satellites.len());
                 *out.stars_in.entry(g).or_insert(0) += 1;
-                let inside_core = core.satellites[..si].iter().fold(mass(&core.kept) + crate::breath::centre_state(u, i), |a, x| a + mass(&x.total())) / unit.clone();
-                let core_clock = crate::ring::rate(&sys.radius, &inside_core);
+                let core_clock = match &frame {
+                    Some((enc, dil)) => ratio(1, 1) - enc.reach(&(sys.ell.clone() / dil.clone())).1,
+                    None => ratio(0, 1),
+                };
                 for orb in &sys.satellites {
                     out.clock.insert(orb.path.clone(), core_clock.clone());
                 }

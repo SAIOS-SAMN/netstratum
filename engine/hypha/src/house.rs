@@ -387,7 +387,7 @@ impl House {
                 seat.give_back(id);
                 (DECLINED, id, format!("declined task {} (stop {stop}): the seat is free", hex(&id[..6])))
             }
-            _ => (NO_TASK, *citation, format!("a declination of task {} the seat does not hold", hex(&citation[..6]))),
+            _ => (NO_TASK, *citation, format!("a declination of task {} the seat does not hold (args as received: {args:?})", hex(&citation[..6]))),
         }
     }
 

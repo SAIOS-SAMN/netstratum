@@ -53,6 +53,8 @@ fn main() {
         let w = events.iter().fold([cfe::ratio::ratio(0, 1), cfe::ratio::ratio(0, 1), cfe::ratio::ratio(0, 1), cfe::ratio::ratio(0, 1)], |mut s, e| { for (a, b) in s.iter_mut().zip(e.weights.iter()) { *a += b.clone(); } s });
         let mean = |m: &cfe::ratio::Ratio, n: &cfe::ratio::Ratio| if n.is_zero() { "none".to_string() } else { conductor::reading::sector(&(m.clone() / n.clone())).to_string() };
         println!("WEIGHT — a nucleus's mean hold: grown groups that left past the rim {}, worlds grown {}", mean(&w[0], &w[1]), mean(&w[2], &w[3]));
+        let im = events.iter().fold((0usize, 0usize), |s, e| (s.0 + e.impacts.0, s.1 + e.impacts.1));
+        println!("IMPACTS — bounces that struck as matter {}, tugs between neighbouring worlds {}", im.0, im.1);
         println!("DISCS — released at the stars' births {} (holding), at or past the rim when released {}", conductor::reading::sector(&born), conductor::reading::sector(&out));
         println!("SYSTEMS MET — {sticks} stuck, {bounces} bounced; overstepped the rims {} (holding); after the last echo, motes and bodies by galaxy {last:?}", conductor::reading::sector(&escaped));
     }

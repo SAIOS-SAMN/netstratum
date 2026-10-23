@@ -377,10 +377,8 @@ fn main() {
             let mut lives: Vec<cfe::ratio::Ratio> = Vec::new();
             let (mut burning, mut spent) = (0usize, 0usize);
             for (i, core) in universe.cores.iter().enumerate() {
-                let g_rate = conductor::breath::galaxy_rate(&universe, i, &unit);
-                let mut inside = conductor::pulse::mass(&core.kept) + conductor::breath::centre_state(&universe, i);
-                for sys in &core.satellites {
-                    let rate = conductor::breath::nested(g_rate.as_ref(), conductor::ring::rate(&sys.radius, &(inside.clone() / unit.clone())));
+                for (s, sys) in core.satellites.iter().enumerate() {
+                    let rate = conductor::breath::system_clock(&universe, i, s, &unit);
                     let received = (rate.clone() * cfe::ratio::ratio(beat.saturating_sub(sys.born) as i64, 1)).floor().to_integer().try_into().unwrap_or(0u64);
                     if let Some((feed, _)) = conductor::formation::burn(&sys.kept, &(conductor::pulse::mass(&sys.kept) / conductor::pulse::mass(&sys.total())), 1, &cfe::ratio::ratio(1, 1)) {
                         // A life: the rings until less than a grain of fuel
@@ -392,7 +390,6 @@ fn main() {
                         }
                         if conductor::compound::after(&feed, received).and_then(|remaining| conductor::compound::read(&cfe::ratio::ratio(1, 1), &remaining, |left| *left < below)) == Some(true) { spent += 1 } else { burning += 1 }
                     }
-                    inside += conductor::pulse::mass(&sys.total());
                 }
             }
             lives.sort();

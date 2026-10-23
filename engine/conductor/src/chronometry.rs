@@ -24,8 +24,8 @@
 //!   keeper inside it is the entry's RESIDUAL, kept, never averaged. The
 //!   epicenter's entry carries the last TUniversal final point heard (the
 //!   bridge: rings per final-point advance, measured). `<var>/chrono.jrn`.
-use crate::breath::{galaxy_rate, unit_mass};
-use crate::ring::rate;
+use crate::breath::unit_mass;
+
 use crate::motion::galactic_year;
 use crate::pulse::{mass, Universe};
 use cfe::ratio::{ratio, Ratio};
@@ -84,18 +84,15 @@ pub fn keepers(u: &Universe) -> Vec<(Keeper, Option<usize>)> {
     let home = u.cores.iter().max_by(|a, b| mass(&a.kept).cmp(&mass(&b.kept)));
     let light = home.and_then(|c| c.satellites.last()).map(|s| ratio(2, 1) * s.radius.clone()).filter(|l| !l.is_zero()).unwrap_or_else(|| ratio(1, 1));
     for (i, core) in u.cores.iter().enumerate() {
-        let g_rate = galaxy_rate(u, i, &unit);
-        let centre = crate::breath::centre_state(u, i);
         let half = galactic_year(core).map(|(k, _)| k).unwrap_or(0);
         let shells = [(Shell::Core, 0usize), (Shell::Mantle, half), (Shell::Rim, core.satellites.len().saturating_sub(1))];
         let mut inner = 0usize;
         for (shell, k) in shells {
             let Some(sys) = core.satellites.get(k) else { continue };
-            let inside = core.satellites[..k].iter().fold(mass(&core.kept) + centre.clone(), |s, o| s + mass(&o.total())) / unit.clone();
             let keeper = Keeper {
                 galaxy: core.path.first().map(|g| *g as u32),
                 shell,
-                rate: crate::breath::nested(g_rate.as_ref(), rate(&sys.radius, &inside)),
+                rate: crate::breath::system_clock(u, i, k, &unit),
                 delay: core.radius.clone() + sys.radius.clone() / light.clone(),
             };
             out.push((keeper, Some(inner)));
