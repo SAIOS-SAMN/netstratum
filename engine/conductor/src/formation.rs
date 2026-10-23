@@ -1059,7 +1059,8 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
     // joining two enclosures, the universal and galactic cores' and a
     // remnant's; a burning heart has no bounce): it holds only what it has
     // gathered, `H = held`. A disc mote falls into the heart where its spin
-    // stands within that hold, `ℓ ≤ H*²` (`δ ≥ ½`, the heart cut's own test),
+    // stands within that hold, `R = ℓ/H* ≤ H*` (`δ ≥ ½`, the heart cut's own
+    // test),
     // `H* = h_s` and the shares of the motes that fall, read from all
     // candidates down to the fixed point (order-free, as the heart cut's held
     // set and the collapse's infall). Nothing passes to another face: its
@@ -1074,7 +1075,9 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
         loop {
             let mut changed = false;
             for (i, x) in sys.flows.iter().enumerate() {
-                if falls[i] && x.ell_o > held.clone() * held.clone() {
+                // Its reach against the hold, `R = ℓ/H* ≤ H*` (the heart
+                // cut's form; no square).
+                if falls[i] && (held.is_zero() || x.ell_o.clone() / held.clone() > held) {
                     falls[i] = false;
                     held -= share_of(x);
                     changed = true;
@@ -1288,10 +1291,7 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
             let _ = &s;
             let bind = grip_share * m_ij.clone() / (m_ij.clone() + ratio(1, 1) - near.clone());
             let (di, dj) = (delta(&ell_now[i]), delta(&ell_now[j]));
-            // Their relative turning; two whose deficits read alike (both at
-            // rest on the grain, far out) turn together: none.
-            let sum = di.clone() + dj.clone();
-            let t = if sum.is_zero() { ratio(0, 1) } else { (if di > dj { di.clone() - dj.clone() } else { dj.clone() - di.clone() }) / sum };
+            let t = if di > dj { di.clone() - dj.clone() } else { dj.clone() - di.clone() } / (di + dj);
             // THE BOND (the chemistry layer, with xylarium 969536c): any two
             // atoms meeting, each with frames still open at the place's own
             // heat, close in their SMALLEST WHOLE CLUSTER; of the contact,
@@ -1724,10 +1724,7 @@ pub fn collide_stars(stars: Vec<crate::pulse::Body>, c_pre: Vec<Ratio>, scale: &
             let m_ij = m[i].clone() + m[j].clone();
             let bind = s * m_ij.clone() / (m_ij.clone() + ratio(1, 1) - near);
             let (di, dj) = (delta(&ell_now[i]), delta(&ell_now[j]));
-            // Their relative turning; two whose deficits read alike (both at
-            // rest on the grain, far out) turn together: none.
-            let sum = di.clone() + dj.clone();
-            let t = if sum.is_zero() { ratio(0, 1) } else { (if di > dj { di.clone() - dj.clone() } else { dj.clone() - di.clone() }) / sum };
+            let t = if di > dj { di.clone() - dj.clone() } else { dj.clone() - di.clone() } / (di + dj);
             if bind >= t {
                 let (a, b) = (root(parent, i), root(parent, j));
                 if a != b {

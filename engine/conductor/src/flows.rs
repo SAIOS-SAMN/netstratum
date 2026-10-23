@@ -365,11 +365,15 @@ impl Enclosed {
         h
     }
 
-    /// A body's reach and deficit at spin ℓ: `R = ℓ/H(<ℓ)`, `δ = H/(R + H)`.
+    /// A body's reach and deficit at spin ℓ: `R = ℓ/H(<ℓ)`, `δ = H/(R + H)`,
+    /// EXACT (operator 2026-10-23: "this is approximations leaking into an
+    /// exact system"): readings, never stored, so never floored. ℓ and H
+    /// already stand on the grain, so their quotients' denominators are
+    /// bounded; δ is never 0 while anything holds.
     pub fn reach(&self, ell: &Ratio) -> (Ratio, Ratio) {
         let h = self.hold(ell);
-        let r = crate::ring::grain(&(ell.clone() / h.clone()));
-        (r.clone(), crate::ring::grain(&(h.clone() / (r + h))))
+        let r = ell.clone() / h.clone();
+        (r.clone(), h.clone() / (r + h))
     }
 }
 
@@ -491,32 +495,68 @@ pub fn swung(ell: &Ratio, ell_orth: &Ratio, psi_c: &Ratio) -> (Ratio, bool) {
 pub fn torque(motes: &mut [Mote], enc: &Enclosed, p: &Ratio, tide: Option<(&Ratio, &Ratio)>, total: &Ratio, heart_push: Option<&Ratio>, cross: &mut crate::enfold::Cross) -> (Ratio, Ratio) {
     let mut given = ratio(0, 1);
     let mut absorbed = ratio(0, 1);
+    // THE PUSH, CERTIFIED (design law 11; operator 2026-10-23: "build the
+    // certified intervals"): the push is read from the ledger's totals, its
+    // exact denominator the ledger's, and it multiplies every mote's torque.
+    // It is held by its two bounds on the grain, which contain it; each mote's
+    // update is read at both, and where both store the same state and the
+    // same record that IS what the exact push stores (the update is monotone
+    // in the push and the grain is monotone), so it stands, certified. Only
+    // where the bounds straddle a mark is the update read with the exact push.
+    let lo = crate::ring::grain(p);
+    let hi = if lo == *p { lo.clone() } else { lo.clone() + crate::ring::grain_step() };
     for x in motes.iter_mut() {
-        // Each turns by what is enclosed inside it (the core and all inside),
-        // at the reach its orthogonal orbit swings it to this bell (docs/90 D2): the
-        // motion law at its present reach, so it turns faster inward and
-        // slower outward; through the centre where the swing passes zero.
-        let (now, through_c) = swung(&x.ell_o, &x.ell_orth, x.phase.get(1).unwrap_or(&ratio(0, 1)));
-        let h = enc.hold(&now);
-        let (r_o, d_o) = enc.reach(&now);
-        // ASCENT: the bell turns the mote from where it truly stands, its
-        // lever read back onto its marks.
-        for k in 0..x.phase.len() {
-            x.phase[k] = true_phase(x, k);
+        if lo == hi {
+            let (g, ab) = torque_one(x, enc, &lo, tide, total, heart_push, cross);
+            given += g;
+            absorbed += ab;
+            continue;
         }
-        let from = if through_c { frac(&(x.phase[0].clone() + ratio(1, 2))) } else { x.phase[0].clone() };
-        // A mote's place: the cap its own gravity holds (`enfold::place`).
-        let m = if total.is_zero() { ratio(0, 1) } else { x.amount.clone() * weight(&x.key) / total.clone() };
-        let place = crate::enfold::place(&r_o, &m, &h);
-        let heat_was = x.agitation.clone();
-        let (scar, levers, torque_orth) = turn(&mut x.phase, &r_o, &h, p, tide, x.vacuum, place.as_ref(), &heat_was, cross);
-        let (g, ab) = spin_torque(x, &from, &h, &r_o, &d_o, p, &torque_orth, heart_push, &m, &scar);
-        given += g;
-        absorbed += ab;
-        // DESCENT: its weight past its round stands one place past its mark.
-        settle(x, &levers, place.as_ref(), cross);
+        let (mut xa, mut xb) = (x.clone(), x.clone());
+        let (mut ca, mut cb) = (crate::enfold::Cross::default(), crate::enfold::Cross::default());
+        let (ga, aa) = torque_one(&mut xa, enc, &lo, tide, total, heart_push, &mut ca);
+        let (gb, ab) = torque_one(&mut xb, enc, &hi, tide, total, heart_push, &mut cb);
+        if xa == xb && ca == cb && ga == gb && aa == ab {
+            *x = xa;
+            cross.join(&ca);
+            given += ga;
+            absorbed += aa;
+        } else {
+            let (g, ab) = torque_one(x, enc, p, tide, total, heart_push, cross);
+            given += g;
+            absorbed += ab;
+        }
     }
     (given, absorbed)
+}
+
+/// ONE MOTE'S BELL: its phases turned and its spins torqued (`turn`,
+/// `spin_torque`), its lever settled; returns the spin given and the pulse
+/// absorbed.
+#[allow(clippy::too_many_arguments)]
+fn torque_one(x: &mut Mote, enc: &Enclosed, p: &Ratio, tide: Option<(&Ratio, &Ratio)>, total: &Ratio, heart_push: Option<&Ratio>, cross: &mut crate::enfold::Cross) -> (Ratio, Ratio) {
+    // Each turns by what is enclosed inside it (the core and all inside),
+    // at the reach its orthogonal orbit swings it to this bell (docs/90 D2): the
+    // motion law at its present reach, so it turns faster inward and
+    // slower outward; through the centre where the swing passes zero.
+    let (now, through_c) = swung(&x.ell_o, &x.ell_orth, x.phase.get(1).unwrap_or(&ratio(0, 1)));
+    let h = enc.hold(&now);
+    let (r_o, d_o) = enc.reach(&now);
+    // ASCENT: the bell turns the mote from where it truly stands, its
+    // lever read back onto its marks.
+    for k in 0..x.phase.len() {
+        x.phase[k] = true_phase(x, k);
+    }
+    let from = if through_c { frac(&(x.phase[0].clone() + ratio(1, 2))) } else { x.phase[0].clone() };
+    // A mote's place: the cap its own gravity holds (`enfold::place`).
+    let m = if total.is_zero() { ratio(0, 1) } else { x.amount.clone() * weight(&x.key) / total.clone() };
+    let place = crate::enfold::place(&r_o, &m, &h);
+    let heat_was = x.agitation.clone();
+    let (scar, levers, torque_orth) = turn(&mut x.phase, &r_o, &h, p, tide, x.vacuum, place.as_ref(), &heat_was, cross);
+    let (g, ab) = spin_torque(x, &from, &h, &r_o, &d_o, p, &torque_orth, heart_push, &m, &scar);
+    // DESCENT: its weight past its round stands one place past its mark.
+    settle(x, &levers, place.as_ref(), cross);
+    (g, ab)
 }
 
 /// THE TORQUE ON ONE MOTE'S SPINS over one bell's passage, the one law at
@@ -661,7 +701,7 @@ pub fn shear(motes: &mut [Mote], enc: &Enclosed, total: &Ratio) -> Ratio {
             continue;
         }
         let c = crate::ring::grain(&contact(&(motes[o].phase[0].clone() - motes[n_].phase[0].clone()), &(ratio(2, 1) * (d[o].clone() - d[n_].clone()))));
-        let t = crate::ring::grain(&(if d[o] > d[n_] { d[o].clone() - d[n_].clone() } else { d[n_].clone() - d[o].clone() } / (d[o].clone() + d[n_].clone())));
+        let t = crate::ring::grain(&((if d[o] > d[n_] { d[o].clone() - d[n_].clone() } else { d[n_].clone() - d[o].clone() }) / (d[o].clone() + d[n_].clone())));
         let u = crate::ring::grain(&(c * t * gap / m_ij));
         if u.is_zero() {
             continue;
@@ -738,12 +778,12 @@ pub fn on_disc_leg(x: &Mote) -> bool {
 }
 
 /// The one exit, by state: a mote whose orthogonal orbit OVERREACHES THE RIM (its
-/// reach at or past the throat, `R ≥ H`, read by the one enclosure: `ℓ ≥
-/// H(<ℓ)²`, δ at most ½) crosses whole into the medium one tier up, where the
+/// reach at or past the throat, `R = ℓ/H(<ℓ) ≥ H(<ℓ)`, read by the one
+/// enclosure, δ at most ½) crosses whole into the medium one tier up, where the
 /// enclosing core's orthogonal orbits carry it round the same way. Returns
 /// the motes that left; the rest stay.
 pub fn exits(motes: &mut Vec<Mote>, enc: &Enclosed) -> Vec<Mote> {
-    let (gone, stay): (Vec<Mote>, Vec<Mote>) = std::mem::take(motes).into_iter().partition(|x| { let h = enc.hold(&x.ell_o); x.ell_o >= h.clone() * h });
+    let (gone, stay): (Vec<Mote>, Vec<Mote>) = std::mem::take(motes).into_iter().partition(|x| { let (r, _) = enc.reach(&x.ell_o); r >= enc.hold(&x.ell_o) });
     *motes = stay;
     gone
 }

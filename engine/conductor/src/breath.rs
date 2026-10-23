@@ -402,7 +402,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             let m = crate::ring::grain(&(crate::pulse::mass(&u.medium) / whole));
             let h_u = crate::ocean::universe_hold(u);
             let share = crate::ocean::gathered(rung, &reach, &h_g, &m, half_swings, &h_u);
-            let delta_u = crate::ring::grain(&(h_u.clone() / (reach.clone() + h_u.clone())));
+            let delta_u = h_u.clone() / (reach.clone() + h_u.clone());
             (crate::ocean::take(&u.medium, &share), crate::ocean::arrival_turning(rung, &reach, &h_g, &m, &h_u), delta_u)
         };
         less(&mut u.medium, &gathered);

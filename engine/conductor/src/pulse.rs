@@ -352,12 +352,14 @@ pub fn push_cut(grains: &Manifest) -> Option<(Ratio, Ratio, Ratio, Option<crate:
     // the arriving ocean, docs/83).
     let cut = (0..order.len()).collect::<Vec<_>>().partition_point(|&idx| holds(idx));
     let held = above.get(cut).cloned().unwrap_or_else(|| above.last().cloned().unwrap_or_else(|| ratio(0, 1)) + order.last().map(|(k, a)| (*a).clone() * ratio(i64::from(weight(k)), 1) / total.clone()).unwrap_or_else(|| ratio(0, 1)));
-    // Read on the coordinate's grain where they feed the law (the carrier):
-    // the push and hold multiply every mote's torque and reach each bell.
-    let held = crate::ring::grain(&held);
+    // EXACT (operator 2026-10-23: "this is approximations leaking into an
+    // exact system"; "build the certified intervals"): the readings stand as
+    // they are. Where they multiply every mote's torque each bell, the torque
+    // holds the push by its bounds on the grain and reads it exactly only
+    // where those bounds would store differently (`flows::torque`).
     let h = ratio(1, 1) + held.clone();
     let lightest = if cut >= order.len() { None } else { cut.checked_sub(1).map(|i| order[i].0.clone()) };
-    Some((crate::ring::grain(&(held / h.clone())), h, crate::ring::grain(&mean), lightest))
+    Some((held / h.clone(), h, mean, lightest))
 }
 
 /// THE DISPERSAL (operator 2026-10-16: "we shouldn't be sorting anything,

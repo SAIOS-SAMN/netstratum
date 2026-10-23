@@ -97,6 +97,12 @@ pub fn grain(x: &Ratio) -> Ratio {
     (x.clone() * places.clone()).floor() / places
 }
 
+/// One mark of the spin grain, `60⁻⁶`: the width of a certified interval's
+/// bounds on the grain (`flows::torque`).
+pub fn grain_step() -> Ratio {
+    Ratio::new(num_bigint::BigInt::from(1), num_bigint::BigInt::from(60).pow(6))
+}
+
 /// The whole count of a non-negative exact value, `⌊x⌋`, where a `u64`
 /// carries it; refused otherwise (never a default).
 pub fn whole(x: &Ratio) -> Option<u64> {
