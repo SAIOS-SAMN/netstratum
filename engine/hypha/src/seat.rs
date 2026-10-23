@@ -161,6 +161,11 @@ impl Seat {
         self.session.tuniversal()
     }
 
+    /// The tasks pulled and waiting for a free seated mind.
+    pub fn queued(&self) -> usize {
+        self.before.len()
+    }
+
     pub fn next_before(&mut self) -> Option<[u8; 32]> {
         self.before.pop_front()
     }

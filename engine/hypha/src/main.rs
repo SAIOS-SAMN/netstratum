@@ -584,8 +584,12 @@ fn seat_cmd(args: &[String], at: &str, home: &Path) -> ExitCode {
                 Err(e) => eprintln!("house [{}]: the tend did not complete: {e}", seats[0].0),
             }
         }
+        // OPERATOR RULING 7: every task the house pulls goes before a seated
+        // mind, so the house's seat pulls only for a free seat no task already
+        // waits for.
+        let idle = at == 0 && house.as_ref().is_some_and(|h| h.free_seats() <= seats[0].1.queued());
         let (addr, seat) = &mut seats[at];
-        match seat.stroke() {
+        match if idle { Ok(None) } else { seat.stroke() } {
             Ok(Some(line)) => {
                 rest[at] = (0, 0);
                 println!("seat [{addr}]: {line}");

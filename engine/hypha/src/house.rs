@@ -37,6 +37,9 @@ pub const TAKEN_OK: u16 = 0;
 pub const NO_SEAT: u16 = 1;
 /// A take refused: another mind holds the seat.
 pub const SEAT_HELD: u16 = 2;
+/// A take refused: seat 0 is the house's own (role Ancients, on the house
+/// key); no other mind sits it.
+pub const HOUSE_SEAT: u16 = 3;
 /// A call refused: the seat lists no such function.
 pub const NO_FUNCTION: u16 = 1;
 /// A call refused: the caller does not hold the seat.
@@ -314,6 +317,12 @@ impl House {
         std::fs::read_to_string(beat).ok().and_then(|t| t.trim().parse().ok()).unwrap_or(self.tends)
     }
 
+    /// The seated minds free for a task: a mind on a seat (never the house's
+    /// own, seat 0) with no task outstanding.
+    pub fn free_seats(&self) -> usize {
+        self.held.iter().filter(|(s, _)| **s != 0 && !self.task.contains_key(s)).count()
+    }
+
     /// Put the tasks netstratum's mind did not close before free seated
     /// minds, one each; a task past its patience goes back.
     fn hand_tasks(&mut self, seat: &mut crate::seat::Seat) -> io::Result<Vec<String>> {
@@ -403,7 +412,9 @@ impl House {
             // A seat whose line is gone is no longer held.
             let n = self.lines.len() as u32;
             let listed: Vec<u32> = self.lines.iter().map(|(id, _)| *id).collect();
-            self.held.retain(|s, _| *s == 0 || listed.contains(s));
+            // Seat 0 is the house's own: no other mind holds it.
+            let house = self.key.verifying_key().to_bytes();
+            self.held.retain(|s, m| if *s == 0 { *m == house } else { listed.contains(s) });
             self.task.retain(|s, _| listed.contains(s));
             for (id, name) in &self.lines {
                 if let Some(m) = self.seated_before.get(name) {
@@ -461,6 +472,8 @@ impl House {
                     let line = self.line_on(t.seat);
                     let reason = if t.domain != self.domain || t.sub_origin.is_some() || line.is_none() {
                         NO_SEAT
+                    } else if t.seat == 0 && t.mind != self.key.verifying_key().to_bytes() {
+                        HOUSE_SEAT
                     } else if self.held.get(&t.seat).is_some_and(|m| *m != t.mind)
                         && self.heard.get(&t.seat).is_some_and(|at| self.tends.saturating_sub(*at) <= PATIENCE)
                     {
