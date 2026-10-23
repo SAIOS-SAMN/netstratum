@@ -392,14 +392,14 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             let c = &u.cores[i];
             // Read on the grain where they feed the law (the carrier).
             let whole = u.cores.iter().fold(crate::pulse::mass(&u.medium), |s, c| s + crate::pulse::mass(&c.total()));
-            let h_g = crate::ring::grain(&((crate::pulse::core_state(c) + crate::pulse::mass(&c.total())) / whole.clone()));
+            let h_g = (crate::pulse::core_state(c) + crate::pulse::mass(&c.total())) / whole.clone();
             let ring_bells = ratio(t_u as i64, 4);
             let reach = c.radius.clone() / ring_bells;
             // Half swings completed by a bell (none before the founding).
             let halves = |b: u64| if c.period.is_zero() { Some(0) } else { crate::ring::whole(&(ratio(i64::try_from(b).ok()?, 1) * ratio(2, 1) / c.period.clone())) };
             let before = if bell > t_u { halves(bell - t_u) } else { Some(0) };
             let Some(half_swings) = halves(bell).zip(before).and_then(|(now, then)| now.checked_sub(then)) else { continue };
-            let m = crate::ring::grain(&(crate::pulse::mass(&u.medium) / whole));
+            let m = crate::pulse::mass(&u.medium) / whole;
             let h_u = crate::ocean::universe_hold(u);
             let share = crate::ocean::gathered(rung, &reach, &h_g, &m, half_swings, &h_u);
             let delta_u = h_u.clone() / (reach.clone() + h_u.clone());
@@ -730,7 +730,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 }
                 let push = if mass(&sys.kept).is_zero() { ratio(0, 1) } else { ratio(1, 2) * crate::pulse::magnetism(&sys.kept) / mass(&sys.kept) };
                 // The spray leaves from the star itself.
-                sys.flows.extend(crate::flows::spray(&burst, &thrown, &vec![ratio(0, 1); planes], &ratio(0, 1), bell, &crate::ring::grain(&push)));
+                sys.flows.extend(crate::flows::spray(&burst, &thrown, &vec![ratio(0, 1); planes], &ratio(0, 1), bell, &push));
             }
             let mut back = crate::pulse::Manifest::new();
             // THE WIND (operator: made at the INTERFACE): the star's
@@ -1117,7 +1117,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // at or above its cut, the heaviest that moved least; the bounce
             // it contains, B = p − Σ m·|Δℓ|.
             let container = ledger_unit.clone() + (h.clone() - ratio(1, 1)) * g_mass.clone();
-            let bounce = crate::ring::grain(&(p.clone() - absorbed));
+            let bounce = p.clone() - absorbed;
             // What stood in the throat as it entered, to tell how each leaves.
             let entered: Vec<(usize, crate::chem::Kind, Ratio)> = in_throat.iter().filter(|&&j| j < core.flows.len()).map(|&j| (j, core.flows[j].key.clone(), core.flows[j].amount.clone())).collect();
             let before = core.flows.len();

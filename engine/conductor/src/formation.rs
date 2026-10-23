@@ -800,7 +800,7 @@ pub fn system(clump: &Manifest, outside: Vec<(crate::flows::Mote, Ratio, Ratio)>
     // The newborn star's push: ½ × its hot heart's open share.
     // The spray leaves from the star's cool outer layers: their push (whole
     // atoms), never the hot heart's stripped share.
-    let star_push = if mass(&star).is_zero() { ratio(0, 1) } else { crate::ring::grain(&(ratio(1, 2) * crate::pulse::magnetism(&star) / mass(&star))) };
+    let star_push = if mass(&star).is_zero() { ratio(0, 1) } else { ratio(1, 2) * crate::pulse::magnetism(&star) / mass(&star) };
     // THE WIND: what the heart releases leaves at the spin its cut carried it
     // with, carried from the fallen matter's units into the system's.
     let thrown: Vec<(crate::chem::Kind, Ratio)> = carried(clump, &circulation_f, &ionizing).into_iter().map(|(k, l)| (k, l * lambda2.clone())).collect();
@@ -1195,7 +1195,7 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
     let width = |i: usize| -> Ratio {
         if i >= n_motes {
             let hw = mass(&items[i].0) / total.clone();
-            crate::ring::grain(&crate::ring::pinch_share(&hw, &enc.hold(&items[i].1)))
+            crate::ring::pinch_share(&hw, &enc.hold(&items[i].1))
         } else {
             items[i].3.clone()
         }
