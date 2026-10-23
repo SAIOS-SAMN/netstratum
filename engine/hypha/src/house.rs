@@ -136,6 +136,10 @@ pub struct House {
     relay_epoch: Option<u64>,
     /// Seat -> an answer filed and not judged yet, re-filed each tend (78.153).
     refile: BTreeMap<u32, (Vec<u8>, Vec<Vec<Vec<u8>>>)>,
+    /// Tasks a seated mind declined: the task's citation -> (the mind, the
+    /// tend it declined on). Never set before that mind again until its
+    /// patience has passed (its language may have moved by then).
+    declined: BTreeMap<[u8; 32], ([u8; 32], u64)>,
     /// The court refused an act of this tend as an unknown domain (the recut).
     unknown_domain: bool,
     /// The origin the re-founding was last tried under, and the tend.
@@ -194,6 +198,7 @@ impl House {
             tends: 0,
             percepts: 0,
             refile: BTreeMap::new(),
+            declined: BTreeMap::new(),
             relay_epoch: None,
             unknown_domain: false,
             refound_tried: None,
@@ -341,8 +346,20 @@ impl House {
             }
         }
         let free: Vec<(u32, [u8; 32])> = self.held.iter().filter(|(s, _)| **s != 0 && !self.task.contains_key(s)).map(|(s, m)| (*s, *m)).collect();
+        let tends_now = self.tends;
+        self.declined.retain(|_, (_, at)| tends_now - *at <= PATIENCE);
         for (s, mind) in free {
-            let Some(id) = seat.next_before() else { break };
+            // The next task this mind has not declined; one it declined is
+            // dropped (the court sets it before another seat or later).
+            let mut next = None;
+            while let Some(id) = seat.next_before() {
+                if self.declined.get(&id).is_some_and(|(m, _)| *m == mind) {
+                    continue;
+                }
+                next = Some(id);
+                break;
+            }
+            let Some(id) = next else { break };
             self.percepts += 1;
             let p = Percept {
                 sub_origin: None,
@@ -375,7 +392,7 @@ impl House {
 
     /// A declination received (fn 2): the task outstanding on the seat, named
     /// by its citation, goes back to the queue and the seat is free at once.
-    fn decline(&mut self, seat: &mut crate::seat::Seat, s: u32, args: &[Arg]) -> (u16, [u8; 32], String) {
+    fn decline(&mut self, _seat: &mut crate::seat::Seat, s: u32, args: &[Arg]) -> (u16, [u8; 32], String) {
         let (Some(Arg::Key(citation)), stop) = (args.first(), args.get(1)) else { return (UNREAD, [0u8; 32], "the arguments are not [Key, Count]".into()) };
         let stop = match stop {
             Some(Arg::Count(n)) => n.to_string(),
@@ -384,7 +401,11 @@ impl House {
         match self.task.get(&s) {
             Some(&(id, _)) if id == *citation => {
                 self.task.remove(&s);
-                seat.give_back(id);
+                // The mind that declined it is never handed it again before
+                // its patience: dropped from the queue, remembered by mind.
+                if let Some(&mind) = self.held.get(&s) {
+                    self.declined.insert(id, (mind, self.tends));
+                }
                 (DECLINED, id, format!("declined task {} (stop {stop}): the seat is free", hex(&id[..6])))
             }
             _ => (NO_TASK, *citation, format!("a declination of task {} the seat does not hold (args as received: {args:?})", hex(&citation[..6]))),
