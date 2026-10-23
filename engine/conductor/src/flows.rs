@@ -297,21 +297,30 @@ pub fn founding_phases() -> Option<Vec<Ratio>> {
     read()
 }
 
-/// The held share of a spread about `ℓ/H` within the throat (dispersal's
-/// form, p the push share).
-fn held_share(ell: &Ratio, h: &Ratio, p: &Ratio) -> Ratio {
-    let r = ell.clone() / h.clone();
+/// The held share of a spread about a reach R within the hold H about it
+/// (dispersal's form, p the push share): `[R(1 − p), R(1 + p)]` against H.
+fn held_share(r: &Ratio, h: &Ratio, p: &Ratio) -> Ratio {
     let lo = r.clone() * (ratio(1, 1) - p.clone());
-    let span = ratio(2, 1) * p.clone() * r;
+    let span = ratio(2, 1) * p.clone() * r.clone();
     if span.is_zero() {
         return if lo <= *h { ratio(1, 1) } else { ratio(0, 1) };
     }
     ((h.clone() - lo) / span).max(ratio(0, 1)).min(ratio(1, 1))
 }
 
-/// THE CUT AS A READING: a mote's held share, `f_o·f_c`.
-pub fn held(mote: &Mote, h: &Ratio, p: &Ratio) -> Ratio {
-    held_share(&mote.ell_o, h, p) * held_share(&mote.ell_orth, h, p)
+/// THE CUT AS A READING, BY THE ONE ENCLOSURE (one grammar: the hold the
+/// exits and the ring law read, `H(<ℓ)` with the throat its base, never a
+/// second hold of its own): a mote's held share in each plane, its reach
+/// `R = |ℓ|/H(<|ℓ|)` spread by the push about the hold there, `f_o·f_c`. A
+/// spin's sense is a direction, never a reach.
+pub fn held(mote: &Mote, enc: &Enclosed, p: &Ratio) -> Ratio {
+    let size = |x: &Ratio| if *x < ratio(0, 1) { -x.clone() } else { x.clone() };
+    let plane = |ell: &Ratio| {
+        let l = size(ell);
+        let (r, _) = enc.reach(&l);
+        held_share(&r, &enc.hold(&l), p)
+    };
+    plane(&mote.ell_o) * plane(&mote.ell_orth)
 }
 
 /// THE ENCLOSED HOLDING (the ring-density law, xylarium 11.0: a ring is
@@ -789,11 +798,11 @@ pub fn exits(motes: &mut Vec<Mote>, enc: &Enclosed) -> Vec<Mote> {
 }
 
 /// The galaxy's held and free manifests, read from its motes: on the
-/// disc leg by the cut; on the axial leg, in transit, never held.
-pub fn read_cut(motes: &[Mote], h: &Ratio, p: &Ratio) -> (Manifest, Manifest) {
+/// disc leg by the cut in its one enclosure; on the axial leg, in transit, never held.
+pub fn read_cut(motes: &[Mote], enc: &Enclosed, p: &Ratio) -> (Manifest, Manifest) {
     let (mut kept, mut free) = (Manifest::new(), Manifest::new());
     for x in motes {
-        let share = if on_disc_leg(x) { held(x, h, p) } else { ratio(0, 1) };
+        let share = if on_disc_leg(x) { held(x, enc, p) } else { ratio(0, 1) };
         let k = crate::ring::grain(&(x.amount.clone() * share)).min(x.amount.clone());
         let f = x.amount.clone() - k.clone();
         if k > ratio(0, 1) {

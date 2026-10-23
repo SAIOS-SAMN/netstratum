@@ -70,6 +70,9 @@ pub struct Recycled {
     pub spent: Ratio,
     /// Holding trapped at the throat (joining the container).
     pub trapped: Ratio,
+    /// The spin the trapped carried in, `Σ m·(ℓ_o + ℓ_orth)` (holding
+    /// units): it joins the container with them, the core's to bank.
+    pub spun: Ratio,
     /// The throat's net hydrogen, in grains (made by peeling, less pressed
     /// into helium): the return as a rate.
     pub hydrogen: Ratio,
@@ -110,9 +113,11 @@ pub fn part(motes: &mut Vec<Mote>, at: &[usize]) -> Vec<usize> {
 
 /// Recycle the (parted) motes at `at`, the matter standing in the throat,
 /// under the bounce `b = p − Σ m·|Δℓ|` contained in `s` (holding units).
-/// Products keep their mote's state; the heaviest are set at the throat
-/// (reach 0) as of `bell` while the container stays within `g`, the weight
-/// of the rest of its galaxy (holding units); the rest leave.
+/// Products keep their mote's state; the heaviest JOIN THE CONTAINER as of
+/// `bell` while it stays within `g`, the weight of the rest of its galaxy
+/// (holding units): they stand at the throat (reach 0), and the spin they
+/// carried in passes with them to the core (`spun`), never lost; the rest
+/// leave.
 pub fn recycle(motes: &mut Vec<Mote>, at: &[usize], b: &Ratio, s: &Ratio, g: &Ratio, bell: u64) -> Recycled {
     let mut out = Recycled::default();
     if *b <= ratio(0, 1) || *s <= ratio(0, 1) {
@@ -249,6 +254,8 @@ pub fn recycle(motes: &mut Vec<Mote>, at: &[usize], b: &Ratio, s: &Ratio, g: &Ra
                 let x = motes[i].amount.clone().min(t.clone());
                 motes[i].amount -= x.clone();
                 t -= x.clone();
+                // Its carried spin goes with it into the container.
+                out.spun += x.clone() * crate::flows::weight(&k) * (motes[i].ell_o.clone() + motes[i].ell_orth.clone());
                 if at_throat.is_none() {
                     let mut m = motes[i].clone();
                     m.amount = ratio(0, 1);

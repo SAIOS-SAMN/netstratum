@@ -188,8 +188,9 @@ fn main() {
             let c = &u.cores[i];
             let Some((p, h, _)) = pulse::galaxy_push(&c.total()) else { return println!("no matter") };
             let total = pulse::mass(&c.total());
-            let held = c.flows.iter().filter(|x| conductor::flows::held(x, &h, &p) == ratio(1, 1)).count();
-            let gas = c.flows.iter().filter(|x| conductor::flows::held(x, &h, &p) == ratio(0, 1)).count();
+            let Some(frame) = conductor::breath::galaxy_frame(&u, i, &conductor::breath::unit_mass(&u)) else { return println!("no frame") };
+            let held = c.flows.iter().filter(|x| conductor::flows::held(x, &frame, &p) == ratio(1, 1)).count();
+            let gas = c.flows.iter().filter(|x| conductor::flows::held(x, &frame, &p) == ratio(0, 1)).count();
             let reaches: Vec<Ratio> = c.flows.iter().map(|x| x.ell_o.clone() / h.clone()).collect();
             let phases: Vec<String> = (0..conductor::flows::PLANES).map(|k| span(&c.flows.iter().map(|x| x.phase[k].clone()).collect::<Vec<_>>())).collect();
             let circ = span(&c.flows.iter().map(|x| x.ell_orth.clone()).collect::<Vec<_>>());

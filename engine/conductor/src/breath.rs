@@ -437,10 +437,10 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         let mut enclosed_in = mass(&core.kept) / unit.clone() + state.clone();
         let mut keep: Vec<Body> = Vec::new();
         // What the stars shed crosses whole into the galaxy's flows.
-        let mut shed: Vec<(crate::pulse::Manifest, Ratio, Vec<Ratio>)> = Vec::new();
+        let mut shed: Vec<(crate::pulse::Manifest, Ratio, Ratio, Vec<Ratio>)> = Vec::new();
         // What a remnant passes through its other face, the galactic core's
         // throat (recycled there, then on with the shed).
-        let mut infall: Vec<(crate::pulse::Manifest, Ratio, Vec<Ratio>)> = Vec::new();
+        let mut infall: Vec<(crate::pulse::Manifest, Ratio, Ratio, Vec<Ratio>)> = Vec::new();
         let mut recycled = crate::recycle::Recycled::default();
         let mut burned = crate::pulse::Manifest::new();
         let mut burns: Vec<(Vec<u64>, u32, Ratio, u64)> = Vec::new();
@@ -497,7 +497,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             }
         };
         // Worlds of emptied remnants, re-anchored after the stars are read.
-        let mut orphans: Vec<(Body, Ratio, Vec<Ratio>)> = Vec::new();
+        let mut orphans: Vec<(Body, Ratio, Ratio, Vec<Ratio>)> = Vec::new();
         merged += star_sticks;
         encounters += star_bounces;
         for (mut sys, c_was) in met {
@@ -667,7 +667,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     returned += mass(&out) / unit.clone();
                     // It passes through the galactic core's throat (its
                     // other face): matter standing there to be recycled.
-                    infall.push((out, beyond(&sys), vec![orbit, ratio(1, 2)]));
+                    infall.push((out, beyond(&sys), sys.ell_orth.clone(), vec![orbit, ratio(1, 2)]));
                 }
                 if mass(&sys.kept).is_zero() {
                     // Emptied: its medium crosses whole; its worlds re-anchor.
@@ -680,9 +680,9 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         less(&mut left, &w.total());
                     }
                     if !left.is_empty() {
-                        shed.push((left, beyond(&sys), sys.phase.clone()));
+                        shed.push((left, beyond(&sys), sys.ell_orth.clone(), sys.phase.clone()));
                     }
-                    orphans.extend(worlds.into_iter().map(|w| (w, own_of(&sys), sys.phase.clone())));
+                    orphans.extend(worlds.into_iter().map(|w| (w, own_of(&sys), sys.ell_orth.clone(), sys.phase.clone())));
                     dissolved += 1;
                     continue;
                 }
@@ -698,7 +698,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 grown = (grown.0 + st, grown.1 + bo, grown.2 + sys.flows.len(), grown.3 + sys.satellites.len());
                 escaped_all += mass(&escaped);
                 if !escaped.is_empty() {
-                    shed.push((escaped, beyond(&sys), sys.phase.clone()));
+                    shed.push((escaped, beyond(&sys), sys.ell_orth.clone(), sys.phase.clone()));
                 }
                 enclosed_in += mass(&sys.total()) / unit.clone();
                 keep.push(sys);
@@ -791,7 +791,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 core.medium_spin += subtree_spin(&sys, &unit);
                 let all = sys.total();
                 returned += mass(&all) / unit.clone();
-                shed.push((all, beyond(&sys), sys.phase.clone()));
+                shed.push((all, beyond(&sys), sys.ell_orth.clone(), sys.phase.clone()));
                 dissolved += 1;
                 continue;
             }
@@ -812,7 +812,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // THE SPIN LEDGER (docs/83 Phase 0): shed matter carries its
             // system's specific spin into the medium.
             core.medium_spin += mass(&back) / unit.clone() * sys.ell.clone();
-            shed.push((back, beyond(&sys), sys.phase.clone()));
+            shed.push((back, beyond(&sys), sys.ell_orth.clone(), sys.phase.clone()));
             if mass(&sys.kept).is_zero() {
                 // Spent: all it held returns, with all its spin (its orbit's
                 // and everything turning inside it).
@@ -820,7 +820,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 core.medium_spin += subtree_spin(&sys, &unit);
                 let all = sys.total();
                 returned += mass(&all) / unit.clone();
-                shed.push((all, beyond(&sys), sys.phase.clone()));
+                shed.push((all, beyond(&sys), sys.ell_orth.clone(), sys.phase.clone()));
                 dissolved += 1;
                 continue;
             }
@@ -909,7 +909,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             grown = (grown.0 + st, grown.1 + bo, grown.2 + sys.flows.len(), grown.3 + sys.satellites.len());
             escaped_all += mass(&escaped);
             if !escaped.is_empty() {
-                shed.push((escaped, beyond(&sys), sys.phase.clone()));
+                shed.push((escaped, beyond(&sys), sys.ell_orth.clone(), sys.phase.clone()));
             }
             enclosed_in += mass(&sys.total()) / unit.clone();
             keep.push(sys);
@@ -920,7 +920,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         // re-read against its new one by the two stars' phase difference (and
         // in the galaxy's frame by its old star's phase): it stays where it is.
         let frac_of = |x: Ratio| x.clone() - x.floor();
-        for (mut w, at, was) in orphans {
+        for (mut w, at, orth, was) in orphans {
             // The nearest standing star in the galaxy's frame, by spin.
             let host = keep.iter_mut().filter(|s| !s.remnant).min_by_key(|s| { let o = own_of(s); if o > at { o - at.clone() } else { at.clone() - o } });
             match host {
@@ -932,7 +932,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 }
                 None => {
                     let place: Vec<Ratio> = (0..planes).map(|k| frac_of(w.phase.get(k).cloned().unwrap_or_else(|| ratio(0, 1)) + was.get(k).cloned().unwrap_or_else(|| ratio(0, 1)))).collect();
-                    shed.push((w.total(), at, place))
+                    shed.push((w.total(), at, orth, place))
                 }
             }
         }
@@ -1066,10 +1066,12 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 motes_in[0] += 1;
                 core.flows.push(crate::flows::Mote { key: k, amount: a, ell_o: crate::ring::grain(&ell_o), ell_orth: crate::ring::grain(&ell_orth), phase: vec![ratio(0, 1), ratio(1, 2)], agitation: ratio(0, 1), born: bell, vacuum: true, lever: Vec::new(), lever_place: ratio(0, 1) });
             }
-            // Shed matter crosses whole at the spin it left with, in the
-            // galaxy's frame (its star's own, carried to its region's edge).
+            // Shed matter crosses whole at the spins it left with, in the
+            // galaxy's frame: its star's orbit, carried to its region's edge,
+            // and its star's orthogonal orbit (carried spins add; never
+            // dropped to zero, or `Σ m·ℓ_orth` would leak).
             let falling = infall.len();
-            for (n, (m, at, star_phase)) in infall.into_iter().chain(shed).enumerate() {
+            for (n, (m, at, orth, star_phase)) in infall.into_iter().chain(shed).enumerate() {
                 for (k, a) in m {
                     if n < falling {
                         in_throat.push(core.flows.len());
@@ -1078,7 +1080,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     // star's continuum stream.
                     let phase = if star_phase.len() == crate::flows::PLANES { star_phase.clone() } else { zero_phase.clone() };
                     motes_in[1] += 1;
-                    core.flows.push(crate::flows::Mote { key: k, amount: a, ell_o: crate::ring::grain(&at), ell_orth: ratio(0, 1), phase, agitation: ratio(0, 1), born: bell, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1) });
+                    core.flows.push(crate::flows::Mote { key: k, amount: a, ell_o: crate::ring::grain(&at), ell_orth: orth.clone(), phase, agitation: ratio(0, 1), born: bell, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1) });
                 }
             }
             // THE TORQUE, its spin from the core's reservoir (the antipole).
@@ -1163,7 +1165,11 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 light.received += (got.clone() + inside.clone()) / unit.clone();
                 light.drained += (r.light.clone() - got - inside) / unit.clone();
             }
-            recycled = crate::recycle::Recycled { pressed: r.pressed, light: r.light / unit.clone(), peeled: r.peeled, spent: r.spent / unit.clone(), trapped: r.trapped / unit.clone(), hydrogen: r.hydrogen };
+            // The trapped join the container at the throat, their carried
+            // spin with them: the core banks it in its reservoir (the
+            // antipole), so `Σ m·ℓ` and the reservoir stay one ledger.
+            core.reservoir += r.spun.clone() / ledger_unit.clone();
+            recycled = crate::recycle::Recycled { pressed: r.pressed, light: r.light / unit.clone(), peeled: r.peeled, spent: r.spent / unit.clone(), trapped: r.trapped / unit.clone(), spun: r.spun / ledger_unit.clone(), hydrogen: r.hydrogen };
             // THE SHEAR: neighbouring rings pass turning outward; the inner
             // falls in (the loop becomes an orbit). Σ m·ℓ unchanged.
             let _ = crate::flows::shear(&mut core.flows, enc.as_ref().unwrap_or(&throat), &ledger_unit);
@@ -1175,7 +1181,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 *to_ocean.entry(x.key).or_insert_with(|| ratio(0, 1)) += x.amount;
                 jets += 1;
             }
-            let (kept, free) = crate::flows::read_cut(&core.flows, &h, &p);
+            let (kept, free) = crate::flows::read_cut(&core.flows, &galaxy_enc(core), &p);
             core.kept = kept;
             core.medium = free;
             // THE CLUMPS, where the motes are; the echo compresses only
@@ -1371,7 +1377,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             motes_in[4] += held_before.saturating_sub(core.flows.len());
             motes_in[5] = core.flows.len();
             core.reservoir += remainder;
-            let (kept, free) = crate::flows::read_cut(&core.flows, &h, &p);
+            let (kept, free) = crate::flows::read_cut(&core.flows, &galaxy_enc(core), &p);
             core.kept = kept;
             core.medium = free;
             core.gas.clear();

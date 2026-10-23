@@ -711,7 +711,13 @@ pub fn deploy(_seed: &[u8; 32], manifest: &Manifest) -> Option<Universe> {
             // (the cut as a reading), never placed.
             let flows = crate::flows::founding(&m)?;
             let (kept, medium) = match galaxy_push(&m) {
-                Some((p, h, _)) => crate::flows::read_cut(&flows, &h, &p),
+                // By its one enclosure as founded: the throat 1, each mote
+                // by its share of the galaxy's holding at its own spin.
+                Some((p, _, _)) => {
+                    let g = mass(&m);
+                    let enc = crate::flows::Enclosed::new(ratio(1, 1), flows.iter().map(|x| (x.ell_o.clone(), x.amount.clone() * crate::flows::weight(&x.key) / g.clone())).collect());
+                    crate::flows::read_cut(&flows, &enc, &p)
+                }
                 None => (m.clone(), Manifest::new()),
             };
             Some(Body { ell_orth: ratio(0, 1), path: vec![u64::from(i)], radius, period, kept, satellites: Vec::new(), medium, ell, medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: mass(&m), flows, reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1) })
