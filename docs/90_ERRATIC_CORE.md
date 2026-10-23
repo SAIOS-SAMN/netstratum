@@ -8,6 +8,13 @@ xylarium's code call it the "loop" (`l_c`, `phase_c`); that name described the
 circulation's route and hid that it is an orbit, which is how its spin went
 unkicked. Quotations keep their original words.
 
+**Naming (operator 2026-10-23: "what's a better word than kick"; "yes - do the
+rename"):** the parent's pulse changing a body's spin each bell is a TORQUE
+(code `flows::torque`, `spin_torque`, `torque_orth`; identity `torque`): it
+adds spin on one hemisphere of the bell and takes it on the other, what does
+not land in step is heat, and it is always paired with the hold's return.
+"Kick" named a single blow from outside and hid that.
+
 Operator 2026-10-22, a THEORY to derive: "the inner core stars and planets
 would be erratic because the push/pull of the orthogonal release from the
 core coupled with the first layer of order in stars/planets past the inner
@@ -25,16 +32,16 @@ xylarium where the laws are shared.
   the ORTHOGONAL ORBIT's plane (1, the circulation's: "a continuum jetstream carries matter
   out of the singularity along the axis and home through the disc", 2026-10-16).
   A mote carries a spin in each, `ℓ_o` and `ℓ_⊥`, and a phase in each.
-- **One kick law** (`flows::kick`): the own family pushes in the orbit plane as
+- **One torque law** (`flows::torque`): the own family pushes in the orbit plane as
   a SPIN, `Δℓ_o = κ_o·mean_response(ψ_o, 2δ)`, `κ_o = p·δ(R)`, `p` the push.
   `mean_response` is S¹'s linear measure (`1 − 2|ψ|`) averaged over the
-  passage, so the sign of a kick is which hemisphere of the bell the body
+  passage, so the sign of a torque is which hemisphere of the bell the body
   stands on.
-- **The parent's release on the orthogonal orbit's plane** (`flows::kick`/`turn`): "the
+- **The parent's release on the orthogonal orbit's plane** (`flows::torque`/`turn`): "the
   parent's moves the mote along the orthogonal orbit (`p·ρ·δ_u`, a PHASE)". This is the
   orthogonal release. It is felt as a shift of the orthogonal phase only, never as
-  orthogonal spin: `ℓ_⊥` is set only by ocean arrivals and no kick changes it (B7).
-- **The hold returns** (`flows::star_kick`, the galaxy's band): whatever a
+  orthogonal spin: `ℓ_⊥` is set only by ocean arrivals and no torque changes it (B7).
+- **The hold returns** (the band in `flows::spin_torque`, built as `star_kick` until 2026-10-23): whatever a
   push gives, the hold returns the held hemisphere, `½·δ(R)·ℓ` each echo.
 - **The tilt** (docs/85 §6d): a body's split of its turning across its
   planes is an angle, `χ = 90°·ℓ_⊥/(ℓ_o + ℓ_⊥)`, read, never set.
@@ -45,7 +52,7 @@ xylarium where the laws are shared.
 
 ## 2. The derivation
 
-**D1. The orthogonal release is a spin, by the one kick law.** A push in a
+**D1. The orthogonal release is a spin, by the one torque law.** A push in a
 plane is a spin in that plane; the orbit plane already reads it so. Read the
 parent's release on the orthogonal orbit's plane by the same law:
 
@@ -62,7 +69,7 @@ plane.
 **D2. The orthogonal spin swings the reach (eccentricity from two planes).** A
 body's reach is its balance, `R = ℓ/H` (`ring`). Its orthogonal spin projects onto
 its orbit plane by where it stands on the orthogonal orbit, the same linear measure
-the kick reads, `response(ψ_⊥) = 1 − 2|ψ_⊥|` (+1 on the outbound leg, −1 on
+the torque reads, `response(ψ_⊥) = 1 − 2|ψ_⊥|` (+1 on the outbound leg, −1 on
 the inbound):
 
 ```text
@@ -76,12 +83,12 @@ nothing is squared: eccentricity is the second plane's spin seen in the
 first, frame by frame in closed form (law 5).
 
 **D3. Erratic where the release is strong and the order is absent.** Each
-echo the orthogonal spin takes the release's kick, signed by the hemisphere
+echo the orthogonal spin takes the release's torque, signed by the hemisphere
 (`mean_response`), and gives back the hold's half. So it wanders: a sum of
-signed kicks that the hold leaks away.
+signed torques that the hold leaks away.
 - Near the core the release is strongest: `δ_u` near its largest, and
-  `p·ρ·δ_u` large against the return. The kicks' signs follow each body's
-  own orthogonal phase against the bell, so neighbouring bodies are kicked apart:
+  `p·ρ·δ_u` large against the return. The torques' signs follow each body's
+  own orthogonal phase against the bell, so neighbouring bodies are torqued apart:
   reaches swing by large, uncorrelated amounts. That is the ERRATIC core.
 - Past the innermost construction the bodies LOCK (`lock_step`): an ordered
   body's displacement returns by `d/(d + turned)` each echo, which damps its
@@ -109,9 +116,9 @@ fails for this physics.
 ## 3a. Xylarium's review (2026-10-22, read from its echo.rs)
 
 - **D1 consistent:** 11.0's shear ruling, "THE LOOP IS AN ORBIT: its legs the
-  two halves of one closed path about the attractor", with one kick law per
-  plane (`pulse_face`). Xylarium has the same gap: a galaxy's kicks advance
-  `phase_c`, `l_c` (xylarium's name for ℓ_⊥) is never kicked (`d_c` computed and discarded), and it is
+  two halves of one closed path about the attractor", with one torque law per
+  plane (`pulse_face`). Xylarium has the same gap: a galaxy's torques advance
+  `phase_c`, `l_c` (xylarium's name for ℓ_⊥) is never torqued (`d_c` computed and discarded), and it is
   set only by ocean gathering. D1 closes it in both kernels.
 - **D2 the right coupling, as a REPLACEMENT:** xylarium holds eccentricity
   three ways, none from `l_c` (xylarium's name for ℓ_⊥): a galaxy's swing about the universal core
@@ -127,14 +134,14 @@ fails for this physics.
 - **The core's infall (xylarium 11.0 (41), 108c445):** each galaxy's core
   takes in `1/(r + 1)` of each body whose orthogonal orbit crosses it inbound, draining
   the inner region hardest. It acts with D3: the inner bodies are both
-  kicked hardest and eaten hardest.
+  torqued hardest and eaten hardest.
 
 ## 3b. Built and read (2026-10-22; 2^55, 340 bells, the same founding as before)
 
 - **The identities** (`breath::Event.identity`, read by `breathe`), each the
   whole sum of its ledger before and after:
-  - `kick`, each galaxy's motes in both orbits and its core's reservoir across
-    the kicks: **39 of 39 exact**;
+  - `torque`, each galaxy's motes in both orbits and its core's reservoir across
+    the torques: **39 of 39 exact**;
   - `ride`, each star's orthogonal spin and its galaxy's reservoir across its
     ride: **165 of 165 exact** (a leak found and fixed: the reservoir had been
     paid the change before the grain while the star stored it after).
@@ -159,5 +166,5 @@ fails for this physics.
   D1 drives the ORTHOGONAL ORBIT's plane only and leaves the orbit plane as ruled, but it
   is still the core's push re-entering, so it needs the operator's word.
 - **R2** (docs/89): this is "the planes" driven, in its first form.
-- **Shared with xylarium:** `kick`, `turn` and the band's law were built with
+- **Shared with xylarium:** `torque`, `turn` and the band's law were built with
   it. D1 and D2 change what the orthogonal orbit's plane means (a spin, not only a phase).

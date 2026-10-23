@@ -202,7 +202,7 @@ pub struct Body {
     /// THE FLOWS (`crate::flows`): a galaxy's matter as motes carrying
     /// their state forward (tag 10 each); empty for every other body.
     pub flows: Vec<crate::flows::Mote>,
-    /// The core's turning reservoir, the kicks' antipole (tag 11): what it
+    /// The core's turning reservoir, the torques' antipole (tag 11): what it
     /// gave its motes' spin, taken from it, so `Σ m·ℓ + reservoir` holds.
     pub reservoir: Ratio,
     /// A STAR'S OWN SPIN `ℓ_s` (tag 12; with xylarium): captured at birth
@@ -210,7 +210,7 @@ pub struct Body {
     /// is the system's time. Zero for every other body.
     pub turning: Ratio,
     /// ITS ORTHOGONAL SPIN (tag 21; docs/90): its spin in the orthogonal orbit's plane, the
-    /// orthogonal one, in the units of `ell` (its orbit spin): kicked by its
+    /// orthogonal one, in the units of `ell` (its orbit spin): torqued by its
     /// parent's release, returned by its parent's hold, damped by order. Its
     /// reach swings by it each orthogonal turn, `R(ψ_⊥) = (ℓ + ℓ_⊥·response(ψ_⊥))/H`.
     pub ell_orth: Ratio,
@@ -281,7 +281,7 @@ pub fn is_home(body: &Body) -> bool {
 
 /// The home's push, throat and mean weight, in the universe's own units (its
 /// grains' holding 1, the singularity's state 1): the universal bounce's
-/// push ½ (the universe tier's, as the firmament's kick), the throat holding
+/// push ½ (the universe tier's, as the firmament's torque), the throat holding
 /// the singularity's state and the firmament, and the home's mean weight.
 pub fn home_push(u: &Universe, grains: &Manifest) -> Option<(Ratio, Ratio, Ratio)> {
     let whole = mass(&u.total());
@@ -353,7 +353,7 @@ pub fn push_cut(grains: &Manifest) -> Option<(Ratio, Ratio, Ratio, Option<crate:
     let cut = (0..order.len()).collect::<Vec<_>>().partition_point(|&idx| holds(idx));
     let held = above.get(cut).cloned().unwrap_or_else(|| above.last().cloned().unwrap_or_else(|| ratio(0, 1)) + order.last().map(|(k, a)| (*a).clone() * ratio(i64::from(weight(k)), 1) / total.clone()).unwrap_or_else(|| ratio(0, 1)));
     // Read on the coordinate's grain where they feed the law (the carrier):
-    // the push and hold multiply every mote's kick and reach each bell.
+    // the push and hold multiply every mote's torque and reach each bell.
     let held = crate::ring::grain(&held);
     let h = ratio(1, 1) + held.clone();
     let lightest = if cut >= order.len() { None } else { cut.checked_sub(1).map(|i| order[i].0.clone()) };
@@ -397,7 +397,7 @@ pub struct Universe {
     /// 'bouncing antipoles' ... the pulses over time ... should move the
     /// firmament into order ... derived"; with xylarium, (A)): the kinds
     /// the founding's Wellspring holds stay at the singularity as motes, each
-    /// at its capture phase, kicked by the universal bounce each echo by its
+    /// at its capture phase, torqued by the universal bounce each echo by its
     /// own inertia (the heaviest barely move). What order its phases gather
     /// into is a reading, never set. Tag 19, one mote a record.
     pub firmament: Vec<crate::flows::Mote>,
@@ -736,45 +736,48 @@ pub fn deploy(_seed: &[u8; 32], manifest: &Manifest) -> Option<Universe> {
 /// four rings at its deficit, `4·δ`, `δ = H/(R + H)`. Its specific spin is
 /// kept, so a galaxy moves only as the holding inside it changes: what one
 /// gains or loses moves every galaxy outside it. Echo delays follow the
-/// live reach.
-pub fn orbit_galaxies(u: &mut Universe) -> crate::enfold::Cross {
+/// live reach. Returns the cross and the firmament torque's identity residual
+/// (its spin moved plus the singularity's reservoir moved: zero where paid
+/// exactly).
+pub fn orbit_galaxies(u: &mut Universe) -> (crate::enfold::Cross, Option<Ratio>) {
     let mut cross = crate::enfold::Cross::default();
     let whole = mass(&u.total());
     if whole.is_zero() {
-        return cross;
+        return (cross, None);
     }
     let bells = ratio(u.t_u as i64, 4);
     let planes = crate::flows::PLANES;
     let mut order: Vec<usize> = (0..u.cores.len()).collect();
     order.sort_by(|&a, &b| u.cores[a].ell.cmp(&u.cores[b].ell).then(a.cmp(&b)));
-    // THE FIRMAMENT'S KICK (with xylarium): the universal bounce kicks it
+    // THE FIRMAMENT'S TORQUE (with xylarium): the universal bounce torques it
     // each echo, at full amplitude (½), about the ENCLOSED hold (the
     // singularity's state, 1, plus every firmament mote strictly inside),
-    // each kind by its own inertia.
+    // each kind by its own inertia: the one torque law (`flows::torque`), its band
+    // the bounce's push on the firmament's open frames (`½ ×` its open share)
+    // and the singularity's hold drawing each mote back by `½·δ(R)·ℓ`
+    // (operator 2026-10-19, "the missing antipole"), so each kind settles
+    // parted by its inertia, never placed; through the centre where a torque
+    // passes it. PAID BY THE SINGULARITY: the home stands at the source (its
+    // state is the singularity's) and keeps its reservoir in the universe's
+    // own units, the firmament's, so what the torques give the firmament the
+    // home's reservoir gives up (`Σ m·ℓ + reservoir` exact).
+    let mut identity = None;
     if !u.firmament.is_empty() {
         let held = |x: &crate::flows::Mote| x.amount.clone() * crate::flows::weight(&x.key) / whole.clone();
         let enc = crate::flows::Enclosed::new(ratio(1, 1), u.firmament.iter().map(|x| (x.ell_o.clone(), held(x))).collect());
-        // The firmament stands in the source's own enclosure: it feels the
-        // pulse at its own reach (`flows::turn`, no tide).
-        // Its hold-return is read below, at the universe tier.
-        let _ = crate::flows::kick(&mut u.firmament, &enc, &ratio(1, 2), None, &whole, None, &mut cross);
-        // THE MISSING ANTIPOLE (operator 2026-10-19: "so we having missing
-        // physics at the antipoles?"; with xylarium, the star's hold-return
-        // one tier up): the singularity's HOLD draws each mote back by
-        // `½·δ(R)·ℓ` against the bounce's push on its inertia, `push/w` (the
-        // push ½ × the firmament's own open share, w the mote's hold), so
-        // each kind settles at `ℓ* = 2·push/(w·δ)`, parted by its inertia,
-        // never placed. δ about the enclosed hold.
         let fm = u.firmament.iter().fold(ratio(0, 1), |s, x| s + x.amount.clone() * crate::flows::weight(&x.key));
         let fo = u.firmament.iter().fold(ratio(0, 1), |s, x| s + x.amount.clone() * ratio(i64::from(crate::chem::unpaired(&x.key)), 1));
-        if !fm.is_zero() {
-            let push = ratio(1, 2) * fo / fm;
-            let enc = crate::flows::Enclosed::new(ratio(1, 1), u.firmament.iter().map(|x| (x.ell_o.clone(), x.amount.clone() * crate::flows::weight(&x.key) / whole.clone())).collect());
-            for x in u.firmament.iter_mut() {
-                let (_, d) = enc.reach(&x.ell_o);
-                let back = ratio(1, 2) * d * x.ell_o.clone();
-                x.ell_o = crate::ring::grain(&(x.ell_o.clone() + push.clone() / crate::flows::weight(&x.key) - back)).max(ratio(0, 1));
-            }
+        let push = if fm.is_zero() { None } else { Some(ratio(1, 2) * fo / fm) };
+        let ledger = |firm: &[crate::flows::Mote]| firm.iter().fold(ratio(0, 1), |s, x| s + held(x) * (x.ell_o.clone() + x.ell_orth.clone()));
+        let before = ledger(&u.firmament);
+        // The firmament stands in the source's own enclosure: it feels the
+        // pulse at its own reach (`flows::turn`, no tide).
+        let (given, _) = crate::flows::torque(&mut u.firmament, &enc, &ratio(1, 2), None, &whole, push.as_ref(), &mut cross);
+        let moved = ledger(&u.firmament) - before;
+        if let Some(home) = u.cores.iter_mut().find(|c| is_home(c)) {
+            let was = home.reservoir.clone();
+            home.reservoir -= given;
+            identity = Some(moved + (home.reservoir.clone() - was));
         }
         // Its order: matter pushing matter apart by its open frames
         // (`flows::repel`), at the bounce's push.
@@ -807,7 +810,7 @@ pub fn orbit_galaxies(u: &mut Universe) -> crate::enfold::Cross {
         }
         inside += ratio(2, 1) * share;
     }
-    cross
+    (cross, identity)
 }
 
 /// MAGNETISM (operator 2026-10-15, "transduction via magnetism"): an

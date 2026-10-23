@@ -10,7 +10,7 @@
 //! - TWO ANTIPOLES AT A THROAT. The CONTAINER `S` is the holding of the
 //!   heaviest held kinds, the core's state and the kinds at or above its
 //!   cut: the Z pole, coherence. The REVERBERATION `E = B·S`, with
-//!   `B = p − Σ m·|Δℓ|` what the push leaves after its kicks: the Q pole,
+//!   `B = p − Σ m·|Δℓ|` what the push leaves after its torques: the Q pole,
 //!   decoherence.
 //! - The matter in the throat (the vacuum's inbound leg, the remnants'
 //!   drains) takes the bounce, shared by `H/(R + H)`. `S/(S + E)` is

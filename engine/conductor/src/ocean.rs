@@ -5,12 +5,12 @@
 //!   strength (operator ruling (i)); in universe units `H_u` (`universe_hold`:
 //!   its state 1 and every galactic core with its galaxy) and its bell rings once in `P_b = P(H_u) = 2` own rings, so
 //!   the crests stand at `R_{p/q} = H_u(P_b·p/q − 1) = H_u(2p/q − 1)` core rings
-//!   for `½ < p/q ≤ 1`. A crest couples to the kick by `a_q = 1/q` for odd q,
+//!   for `½ < p/q ≤ 1`. A crest couples to the torque by `a_q = 1/q` for odd q,
 //!   0 for even (xylarium's ruling).
 //! - **Crests form with age** (proposed): a crest of order q is in phase only
-//!   after q passes of the kick, so at echo n the crests with `q ≤ n` stand.
+//!   after q passes of the torque, so at echo n the crests with `q ≤ n` stand.
 //!   No constant bounds them; the structure grows with the universe.
-//! - **The ocean on the crests** (proposed): the kick collects it by coupling,
+//! - **The ocean on the crests** (proposed): the torque collects it by coupling,
 //!   crest p/q holding `a_q / Σ a` of it; stateless, re-read every echo.
 //! - **The swing** (docs/83, "The swing"): a galactic core swings about its
 //!   reach R between `R(1 − e)` and `R(1 + e)`, `e = τ/(τ + h_g)`, the

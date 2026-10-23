@@ -249,7 +249,7 @@ fn main() {
         "firmament" => {
             // THE FIRMAMENT'S ORDER OVER MANY PULSES (a reading on a copy):
             // the singularity's pulses alone (`pulse::orbit_galaxies`, the
-            // kick and the repulsion), N echoes, read every N/10. Evenness:
+            // torque and the repulsion), N echoes, read every N/10. Evenness:
             // each mote's distance on the sphere to its nearest neighbour
             // (1 − closeness, the product over planes of in-step), their
             // mean and spread (coefficient of variation; an ordered
@@ -619,7 +619,7 @@ fn main() {
         "recycle" => {
             // THE RECYCLING CIRCUIT (docs/83, proposed with xylarium): what
             // is shed crosses outward whole into the medium one tier up; the
-            // regenerated pulse kicks it along the crests; the return is gas
+            // regenerated pulse torques it along the crests; the return is gas
             // arriving where a galaxy held everything. Read only, the
             // quantities both nodes read; no outcome assumed.
             let mass = pulse::mass(&u.total());
@@ -659,7 +659,7 @@ fn main() {
                 let worlds: usize = c.satellites.iter().map(|s| s.satellites.len()).sum();
                 println!("  RETURN galaxy {:>2}: disc {}, gas {} ({} motes), {} stars, {worlds} worlds", c.path[0], of(&pulse::mass(&c.kept), &total), of(&pulse::mass(&c.medium), &total), c.gas.len(), c.satellites.len());
             }
-            println!("  CRESTS: owed (the gain a pass on a crest, (medium in band) × a_q × the kick, with xylarium); read once derived");
+            println!("  CRESTS: owed (the gain a pass on a crest, (medium in band) × a_q × the torque, with xylarium); read once derived");
         }
         other => println!("unknown view {other}; see the source's header for the views"),
     }

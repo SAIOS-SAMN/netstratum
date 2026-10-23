@@ -10,7 +10,7 @@
 //!   motion law) and in the circulation's plane `ℓ_⊥` (radial–axial, along
 //!   the torsion axis), its PHASES on its enclosure's S^n (one per plane,
 //!   turns against the bell), its agitation and birth.
-//! - **The kick**, once per bell of the kicking core (the core's bell is its
+//! - **The torque**, once per bell of the torquing core (the core's bell is its
 //!   bounce, once an echo it regenerates), every mote, held or not: per
 //!   plane, the HEMISPHERE the mote's phase stands in against the bell
 //!   signs it (the S⁰ face; operator: coherence is a count over the S^n
@@ -149,7 +149,7 @@ fn off(psi: &Ratio) -> Ratio {
     if f > ratio(1, 2) { ratio(1, 1) - f } else { f }
 }
 
-/// THE KICK'S RESPONSE in one plane: the hemisphere signs it (the first half
+/// THE TORQUE'S RESPONSE in one plane: the hemisphere signs it (the first half
 /// of the circle against the bell gains, the second loses), S¹'s linear
 /// measure sizes it, `1 − 2|ψ|`.
 pub fn response(psi: &Ratio) -> Ratio {
@@ -158,7 +158,7 @@ pub fn response(psi: &Ratio) -> Ratio {
     if f < ratio(1, 2) { share } else { -share }
 }
 
-/// THE KICK'S RESPONSE OVER ITS PASSAGE (with xylarium: a kick sampled at
+/// THE TORQUE'S RESPONSE OVER ITS PASSAGE (with xylarium: a torque sampled at
 /// one instant while the mote sweeps near a whole turn falls on one
 /// hemisphere every time, and the core pays without end): the exact mean of
 /// the sawtooth `1 − 2·frac(ψ)` over the arc `[ψ, ψ + len]`. Within each
@@ -338,7 +338,7 @@ impl Enclosed {
         held.push(run.clone());
         // On the coordinate's grain (the carrier, never law): an exact sum of
         // thousands of holdings otherwise grows its denominators without
-        // bound, and every reach, contact and kick inherits them.
+        // bound, and every reach, contact and torque inherits them.
         for (_, h) in &bodies {
             run += crate::ring::grain(h);
             held.push(run.clone());
@@ -402,25 +402,34 @@ pub fn turn(phase: &mut [Ratio], r_o: &Ratio, h: &Ratio, p: &Ratio, tide: Option
     // moves matter along the orthogonal orbit"; with xylarium): absorbed in step it
     // ADVANCES the orthogonal orbit's phase, `p·ρ·δ_u` × the hemisphere's signed share,
     // on top of the orthogonal orbit's own rate. AND IT IS A SPIN (docs/90 D1, operator
-    // 2026-10-22; xylarium 11.0: "the loop is an orbit", one kick law per
-    // plane): the same push, read by the one kick law in the orthogonal orbit's plane,
-    // is the orthogonal spin's kick, returned to the caller (`κ_⊥`).
-    let start = if inverted { orth_from - ratio(2, 1) * d_c.clone() } else { orth_from };
+    // 2026-10-22; xylarium 11.0: "the loop is an orbit", one torque law per
+    // plane): the same push, read by the one torque law in the orthogonal orbit's plane,
+    // is the orthogonal spin's torque, returned to the caller (`κ_⊥`).
     // The pulse it feels: a galaxy's received share of the source's rings and
     // the universal tide at the galaxy (`tide`), or, standing in the source's
-    // own enclosure (the home, the firmament), the source's pull at its own
-    // reach, with no receiver between.
+    // own enclosure (the home, the firmament, a star's own system), the
+    // source's pull at its own reach, with no receiver between.
     let felt = match tide {
         Some((rho, delta_u)) => rho.clone() * delta_u.clone(),
         None => pull.clone(),
     };
-    let advance = p.clone() * felt * mean_response(&start, &(ratio(2, 1) * d_c));
-    let kick_orth = route.clone() * advance.clone();
+    let advance = orth_push(&orth_from, &d_c, p, &felt, inverted);
+    let torque_orth = route.clone() * advance.clone();
     let (held, scar_c, lever_c) = crate::enfold::leaf(&(orth_phase + route * advance), place, agitation, 1, cross);
     phase[1] = held;
     // A cauterized residue's scar (the heat it enters) and each plane's lever.
     let levers = [(0usize, lever_o), (1usize, lever_c)].into_iter().filter_map(|(k, l)| l.map(|(n, f)| (k, n, f))).collect();
-    (scar_o + scar_c, levers, kick_orth)
+    (scar_o + scar_c, levers, torque_orth)
+}
+
+/// THE PARENT'S PUSH ALONG THE ORTHOGONAL ORBIT over one bell's passage
+/// (docs/90 D1): `p·felt` × the hemisphere's signed mean over the arc the
+/// orthogonal phase sweeps, `2·δ` from where it stood (a vacuum mote's route
+/// runs the other way, its passage read backward). Unsigned by the route:
+/// the caller signs it.
+pub fn orth_push(orth_from: &Ratio, d_c: &Ratio, p: &Ratio, felt: &Ratio, inverted: bool) -> Ratio {
+    let start = if inverted { orth_from.clone() - ratio(2, 1) * d_c.clone() } else { orth_from.clone() };
+    p.clone() * felt.clone() * mean_response(&start, &(ratio(2, 1) * d_c.clone()))
 }
 
 /// THE SWING (docs/90 D2): a body's orthogonal spin projects onto its orbit by
@@ -429,7 +438,7 @@ pub fn turn(phase: &mut [Ratio], r_o: &Ratio, h: &Ratio, p: &Ratio, tide: Option
 /// each orthogonal turn between `(ℓ − |ℓ_⊥|)/H` and `(ℓ + |ℓ_⊥|)/H`, an elongation
 /// `e = |ℓ_⊥|/ℓ` read from two planes, no ellipse and no square. Where the
 /// swing passes zero the body passes THROUGH the centre to the antipode (the
-/// orbit-plane kick's law, docs/83): returns the magnitude and whether it is
+/// orbit-plane torque's law, docs/83): returns the magnitude and whether it is
 /// through (its orbit phase then stands half a turn on).
 pub fn swung(ell: &Ratio, ell_orth: &Ratio, psi_c: &Ratio) -> (Ratio, bool) {
     let s = ell.clone() + ell_orth.clone() * response(psi_c);
@@ -440,17 +449,17 @@ pub fn swung(ell: &Ratio, ell_orth: &Ratio, psi_c: &Ratio) -> (Ratio, bool) {
     }
 }
 
-/// One bell's kicks on every mote: the own family in the orbit's plane
+/// One bell's torques on every mote: the own family in the orbit's plane
 /// (`κ_o = p·δ(R)`, a spin); the parent's moves the mote along the orthogonal orbit
 /// (`p·ρ·δ_u`, a phase).
 /// Each plane's phase first advances by its own turning over the bell's two
 /// rings (`2·δ` turns, the motion law's `ω = δ`; the bell's own turn is
 /// whole, so the phase against it moves by `2δ` mod 1). Returns the spin
 /// the core's reservoir gives (Σ m·Δℓ, to be taken from it), and the pulse
-/// the matter ABSORBED (Σ m·|Δℓ|, unsigned: each hemisphere's kick alike;
+/// the matter ABSORBED (Σ m·|Δℓ|, unsigned: each hemisphere's torque alike;
 /// with xylarium), what the recycling budget is read against.
 #[allow(clippy::too_many_arguments)]
-pub fn kick(motes: &mut [Mote], enc: &Enclosed, p: &Ratio, tide: Option<(&Ratio, &Ratio)>, total: &Ratio, heart_push: Option<&Ratio>, cross: &mut crate::enfold::Cross) -> (Ratio, Ratio) {
+pub fn torque(motes: &mut [Mote], enc: &Enclosed, p: &Ratio, tide: Option<(&Ratio, &Ratio)>, total: &Ratio, heart_push: Option<&Ratio>, cross: &mut crate::enfold::Cross) -> (Ratio, Ratio) {
     let mut given = ratio(0, 1);
     let mut absorbed = ratio(0, 1);
     for x in motes.iter_mut() {
@@ -471,77 +480,92 @@ pub fn kick(motes: &mut [Mote], enc: &Enclosed, p: &Ratio, tide: Option<(&Ratio,
         let m = if total.is_zero() { ratio(0, 1) } else { x.amount.clone() * weight(&x.key) / total.clone() };
         let place = crate::enfold::place(&r_o, &m, &h);
         let heat_was = x.agitation.clone();
-        let (scar, levers, kick_orth) = turn(&mut x.phase, &r_o, &h, p, tide, x.vacuum, place.as_ref(), &heat_was, cross);
-        // Over its whole passage this bell, never at one instant; a vacuum
-        // mote at its inverted reach (`1 − δ`), forward.
-        let d_o = if x.vacuum { ratio(1, 1) - d_o } else { d_o };
-        let k = mean_response(&from, &(ratio(2, 1) * d_o.clone()));
-        let dl_o = p.clone() * d_o.clone() * k.clone();
-        // DISSIPATION (operator 2026-10-19: "what do our current physics tell
-        // about heat dissipation to the void? probably mimic nature"; with
-        // xylarium): what the kick does not deliver in step becomes HEAT,
-        // `p·δ·(1 − |k|)` (k its signed mean over the passage, the coherent
-        // share), and heat leaves by the built cooling law's two channels
-        // over the passage's two rings: the light through its open frames
-        // (`e`, open over held, a ring) and the vacuum's pull back (`δ` at its
-        // reach, a ring): `a ← (a + heat)·((1 − e)(1 − δ))²`.
-        let coherent = if k < ratio(0, 1) { -k } else { k };
-        let heat = p.clone() * d_o.clone() * (ratio(1, 1) - coherent.min(ratio(1, 1)));
-        let keep = (ratio(1, 1) - open(&x.key).min(ratio(1, 1))) * (ratio(1, 1) - d_o.clone());
-        x.agitation = crate::ring::grain(&((x.agitation.clone() + heat) * keep.clone() * keep + scar));
-        // Spin cannot carry a mote through zero reach: a turning is a
-        // magnitude in its plane; a kick past zero stops at the core.
-        // THE BAND (the galaxy tier of the firmament's and `star_kick`'s
-        // grammar): the core's bounce pushes each kind out, `q = push/w`
-        // (`push = p·w̄`, the dispersal law's, as at the founding and each
-        // arrival), and its hold returns `½·δ(R)·ℓ` (δ against what is enclosed
-        // at its reach), so the continuum rests in a band. The vacuum feels the
-        // same law reflected through the THROAT, which stands at the core's
-        // state, R = 1 (the enclosed law's base: throat 1, rim 2 in the
-        // enclosure's own units): `R → 2 − R` (`through`). Past the rim the
-        // vacuum stands outside this sphere.
-        let throat = ratio(1, 1);
-        let band = match heart_push {
-            Some(push) if !h.is_zero() => {
-                let q = push.clone() / weight(&x.key);
-                let at = |reach: &Ratio| q.clone() - ratio(1, 2) * (h.clone() / (reach.clone() + h.clone())) * reach.clone() * h.clone();
-                if !x.vacuum {
-                    at(&r_o)
-                } else {
-                    let mirrored = through(&r_o, &throat);
-                    if mirrored > ratio(0, 1) { -at(&mirrored) } else { ratio(0, 1) }
-                }
-            }
-            _ => ratio(0, 1),
-        };
-        // A kick past the centre carries the mote THROUGH it to the antipode
-        // (its orbit's phase on half a turn), never piled at zero.
-        let raw = x.ell_o.clone() + dl_o + band;
-        let new_o = if raw < ratio(0, 1) {
-            if let Some(ph) = x.phase.get_mut(0) {
-                let t = ph.clone() + ratio(1, 2);
-                *ph = t.clone() - t.floor();
-            }
-            crate::ring::grain(&(-raw))
-        } else {
-            crate::ring::grain(&raw)
-        };
-        let dl = new_o.clone() - x.ell_o.clone();
-        absorbed += m.clone() * if dl < ratio(0, 1) { -dl.clone() } else { dl.clone() };
-        given += m.clone() * dl;
-        x.ell_o = new_o;
-        // THE ORTHOGONAL SPIN (docs/90 D1): the release's kick in the orthogonal orbit's plane,
-        // less the hold's return of the held half, `½·δ(R)·ℓ_⊥`, both from and
-        // to the same reservoir as the orbit plane's (Σ m·(ℓ_o + ℓ_⊥) and the
-        // reservoir exact).
-        let new_c = crate::ring::grain(&(x.ell_orth.clone() + kick_orth - ratio(1, 2) * d_o.clone() * x.ell_orth.clone()));
-        let dl_c = new_c.clone() - x.ell_orth.clone();
-        absorbed += m.clone() * if dl_c < ratio(0, 1) { -dl_c.clone() } else { dl_c.clone() };
-        given += m * dl_c;
-        x.ell_orth = new_c;
+        let (scar, levers, torque_orth) = turn(&mut x.phase, &r_o, &h, p, tide, x.vacuum, place.as_ref(), &heat_was, cross);
+        let (g, ab) = spin_torque(x, &from, &h, &r_o, &d_o, p, &torque_orth, heart_push, &m, &scar);
+        given += g;
+        absorbed += ab;
         // DESCENT: its weight past its round stands one place past its mark.
         settle(x, &levers, place.as_ref(), cross);
     }
+    (given, absorbed)
+}
+
+/// THE TORQUE ON ONE MOTE'S SPINS over one bell's passage, the one law at
+/// every tier (a galaxy's core on its motes, a star on its system's): from
+/// the orbit phase it stood at (`from`) and the reach and deficit it turns
+/// at (`r_o`, `d_o`, inside the hold `h`), the own family's push in the orbit
+/// plane, the band's push and return (`heart_push`), the parent's push along
+/// the orthogonal orbit (`torque_orth`) less the hold's return, and what is
+/// not delivered in step left as heat. Returns the spin given (Σ m·Δℓ, the
+/// antipole's to pay) and the pulse absorbed (Σ m·|Δℓ|).
+#[allow(clippy::too_many_arguments)]
+pub fn spin_torque(x: &mut Mote, from: &Ratio, h: &Ratio, r_o: &Ratio, d_o: &Ratio, p: &Ratio, torque_orth: &Ratio, heart_push: Option<&Ratio>, m: &Ratio, scar: &Ratio) -> (Ratio, Ratio) {
+    let mut given = ratio(0, 1);
+    let mut absorbed = ratio(0, 1);
+    // Over its whole passage this bell, never at one instant; a vacuum
+    // mote at its inverted reach (`1 − δ`), forward.
+    let d_o = if x.vacuum { ratio(1, 1) - d_o.clone() } else { d_o.clone() };
+    let k = mean_response(from, &(ratio(2, 1) * d_o.clone()));
+    let dl_o = p.clone() * d_o.clone() * k.clone();
+    // DISSIPATION (operator 2026-10-19: "what do our current physics tell
+    // about heat dissipation to the void? probably mimic nature"; with
+    // xylarium): what the torque does not deliver in step becomes HEAT,
+    // `p·δ·(1 − |k|)` (k its signed mean over the passage, the coherent
+    // share), and heat leaves by the built cooling law's two channels
+    // over the passage's two rings: the light through its open frames
+    // (`e`, open over held, a ring) and the vacuum's pull back (`δ` at its
+    // reach, a ring): `a ← (a + heat)·((1 − e)(1 − δ))²`.
+    let coherent = if k < ratio(0, 1) { -k } else { k };
+    let heat = p.clone() * d_o.clone() * (ratio(1, 1) - coherent.min(ratio(1, 1)));
+    let keep = (ratio(1, 1) - open(&x.key).min(ratio(1, 1))) * (ratio(1, 1) - d_o.clone());
+    x.agitation = crate::ring::grain(&((x.agitation.clone() + heat) * keep.clone() * keep + scar.clone()));
+    // THE BAND (one grammar: the firmament's, a galaxy's, a star's): the core's bounce pushes each kind out, `q = push/w`
+    // (`push = p·w̄`, the dispersal law's, as at the founding and each
+    // arrival), and its hold returns `½·δ(R)·ℓ` (δ against what is enclosed
+    // at its reach), so the continuum rests in a band. The vacuum feels the
+    // same law reflected through the THROAT, which stands at the core's
+    // state, R = 1 (the enclosed law's base: throat 1, rim 2 in the
+    // enclosure's own units): `R → 2 − R` (`through`). Past the rim the
+    // vacuum stands outside this sphere.
+    let throat = ratio(1, 1);
+    let band = match heart_push {
+        Some(push) if !h.is_zero() => {
+            let q = push.clone() / weight(&x.key);
+            let at = |reach: &Ratio| q.clone() - ratio(1, 2) * (h.clone() / (reach.clone() + h.clone())) * reach.clone() * h.clone();
+            if !x.vacuum {
+                at(r_o)
+            } else {
+                let mirrored = through(r_o, &throat);
+                if mirrored > ratio(0, 1) { -at(&mirrored) } else { ratio(0, 1) }
+            }
+        }
+        _ => ratio(0, 1),
+    };
+    // A torque past the centre carries the mote THROUGH it to the antipode
+    // (its orbit's phase on half a turn), never piled at zero.
+    let raw = x.ell_o.clone() + dl_o + band;
+    let new_o = if raw < ratio(0, 1) {
+        if let Some(ph) = x.phase.get_mut(0) {
+            let t = ph.clone() + ratio(1, 2);
+            *ph = t.clone() - t.floor();
+        }
+        crate::ring::grain(&(-raw))
+    } else {
+        crate::ring::grain(&raw)
+    };
+    let dl = new_o.clone() - x.ell_o.clone();
+    absorbed += m.clone() * if dl < ratio(0, 1) { -dl.clone() } else { dl.clone() };
+    given += m.clone() * dl;
+    x.ell_o = new_o;
+    // THE ORTHOGONAL SPIN (docs/90 D1): the release's torque in the orthogonal orbit's plane,
+    // less the hold's return of the held half, `½·δ(R)·ℓ_⊥`, both from and
+    // to the same reservoir as the orbit plane's (Σ m·(ℓ_o + ℓ_⊥) and the
+    // reservoir exact).
+    let new_c = crate::ring::grain(&(x.ell_orth.clone() + torque_orth.clone() - ratio(1, 2) * d_o.clone() * x.ell_orth.clone()));
+    let dl_c = new_c.clone() - x.ell_orth.clone();
+    absorbed += m.clone() * if dl_c < ratio(0, 1) { -dl_c.clone() } else { dl_c.clone() };
+    given += m.clone() * dl_c;
+    x.ell_orth = new_c;
     (given, absorbed)
 }
 
@@ -580,7 +604,7 @@ pub fn contact(psi0: &Ratio, d: &Ratio) -> Ratio {
 /// in, the outer moves out, and the disc accretes, so inbound and outbound are
 /// one closed orbit. Neighbours by spin across every face (faces decide who
 /// belongs to a filament, never who meets), each pair weighed by its contact
-/// over the bell at the kick's own rates (`2δ`, enclosed). The unkept motion
+/// over the bell at the torque's own rates (`2δ`, enclosed). The unkept motion
 /// is `contact × T`, with `T` the deficits' contrast; gas has no grip, so it is
 /// the tether law without the bond. The conserved spin exchange: the outer
 /// gains, the inner gives, each by the other's mass share. All pairs are read
@@ -635,23 +659,6 @@ pub fn shear(motes: &mut [Mote], enc: &Enclosed, total: &Ratio) -> Ratio {
     moved
 }
 
-/// WHERE A KIND COMES TO REST under its enclosure's push and return (the
-/// grammar of `star_kick` and the firmament's hold-return): pushed out by
-/// `q = push/w`, returned by `½·δ(R)·ℓ`, `δ = H/(R + H)`, `ℓ = R·H`. They
-/// balance where `R·H² = 2q·(R + H)`: `R* = 2qH/(H² − 2q)`. None where the
-/// push beats the hold at every reach (`2q ≥ H²`: no rest) or nothing holds.
-pub fn rest(w: &Ratio, push: &Ratio, h: &Ratio) -> Option<Ratio> {
-    if h.is_zero() || w.is_zero() {
-        return None;
-    }
-    let q2 = ratio(2, 1) * push.clone() / w.clone();
-    let hh = h.clone() * h.clone();
-    if q2 >= hh {
-        return None;
-    }
-    Some(q2.clone() * h.clone() / (hh - q2))
-}
-
 /// THE THROAT'S INVERSION on the sphere (operator 2026-10-21: "you are
 /// flattening the second double inversion"): with the polar angle `θ =
 /// 90°·R/H` (the throat at 90°, where δ = ½; the rim at 180°), inverting
@@ -661,64 +668,31 @@ pub fn through(r: &Ratio, h: &Ratio) -> Ratio {
     ratio(2, 1) * h.clone() - r.clone()
 }
 
-/// A RELEASED kind's place (the double inversion, docs/85 §10): the heart's
-/// cut released it through the heart's throat, which is its star's throat in
-/// the system, so it stands on that throat's FAR face. Its rest under the
-/// system's push and return is read there: at `R*` where that lies outside
-/// (`R* ≥ H`), at the reflection `2H − R*` where the rest falls inside. A
-/// kind the push carries past every hold stands at the rim (`R = 2H`) and
-/// leaves. Returns its spin `ℓ = R·H`.
-pub fn released(w: &Ratio, push: &Ratio, h: &Ratio) -> Option<Ratio> {
-    if h.is_zero() {
-        return None;
-    }
-    let r = match rest(w, push, h) {
-        Some(r) if r >= *h => r,
-        Some(r) => through(&r, h),
-        None => ratio(2, 1) * h.clone(),
-    };
-    Some(r * h.clone())
-}
-
 /// THE SPRAY (with xylarium; the founding epoch one tier down): matter a
 /// heart throws out (an outburst, or the kinds a new star's heart releases)
 /// leaves over directions, each kind at its own capture phase, `Z·p` with p
 /// the star's own push share (the founding's ½ one tier up), `½ + Z·p` on the
-/// orthogonal orbit; and each kind stands where its system's own law brings it to rest,
-/// read on the far face of the throat it was released through (`released`),
-/// by its own weight, never one shared reach.
-pub fn spray(released: &Manifest, h: &Ratio, base: &[Ratio], agitation: &Ratio, born: u64, push: &Ratio) -> Vec<Mote> {
+/// orthogonal orbit. THROWN, NEVER PLACED (operator 2026-10-22: "gravity and
+/// physics should supply the required motion"): each kind leaves at the spin
+/// the heart's cut carried it with (`carried`, in its system's units), which
+/// already stands past the throat (the cut released it where its reach
+/// outran the heart's hold, the double inversion's far face, operator
+/// 2026-10-21); its system's enclosure reads its reach, and the star's torque
+/// and hold settle it bell by bell, by its own weight.
+pub fn spray(released: &Manifest, carried: &[(crate::chem::Kind, Ratio)], base: &[Ratio], agitation: &Ratio, born: u64, push: &Ratio) -> Vec<Mote> {
     let at = |k: usize| base.get(k).cloned().unwrap_or_else(|| ratio(0, 1));
     released
         .iter()
         .filter(|(_, a)| **a > ratio(0, 1))
-        .map(|(k, a)| {
+        .filter_map(|(k, a)| {
             // The capture phase: Z × the PARENT'S push share (the star's own),
             // so the kinds leave over the whole turn, never two antipodes.
             let z = ratio(i64::from(crate::chem::charge(k)), 1) * push.clone();
             let phase = vec![crate::ring::grain(&frac(&(at(0) + z.clone()))), crate::ring::grain(&frac(&(at(1) + ratio(1, 2) + z)))];
-            let ell_o = crate::flows::released(&weight(k), push, h).map(|l| crate::ring::grain(&l)).unwrap_or_else(|| ratio(0, 1));
-            Mote { key: k.clone(), amount: a.clone(), ell_o, ell_orth: ratio(0, 1), phase, agitation: crate::ring::grain(agitation), born, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1) }
+            let ell_o = crate::ring::grain(&carried.iter().find(|(c, _)| c == k)?.1);
+            Some(Mote { key: k.clone(), amount: a.clone(), ell_o, ell_orth: ratio(0, 1), phase, agitation: crate::ring::grain(agitation), born, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1) })
         })
         .collect()
-}
-
-/// THE STAR'S KICK ON ITS SYSTEM (with xylarium; the galaxy's law one tier
-/// down): each echo the star's bell pushes its system's motes with ONE force,
-/// its push on its open frames (`½ ×` the heart's open share), each kind
-/// moving by its own inertia, and the star's hold returns the held
-/// hemisphere, `½·δ(R)·ℓ` (`R = ℓ/H_s`).
-pub fn star_kick(motes: &mut [Mote], heart: &Manifest, h_s: &Ratio) {
-    let held = crate::pulse::mass(heart);
-    if held.is_zero() || h_s.is_zero() {
-        return;
-    }
-    let push = ratio(1, 2) * crate::pulse::magnetism(heart) / held;
-    for x in motes.iter_mut() {
-        let r = x.ell_o.clone() / h_s.clone();
-        let d = h_s.clone() / (r + h_s.clone());
-        x.ell_o = crate::ring::grain(&(x.ell_o.clone() + push.clone() / weight(&x.key) - ratio(1, 2) * d * x.ell_o.clone())).max(ratio(0, 1));
-    }
 }
 
 /// THE JETSTREAM IS A CONTINUOUS ORBIT, the orthogonal orbit (operators 2026-10-16/17: "a
@@ -1029,7 +1003,7 @@ pub fn clumps(motes: &[Mote], h: &Ratio, p: &Ratio, total: &Ratio) -> Vec<(Ratio
 /// STREAMING BY FORCE (operator 2026-10-18: "jetstreams depending on their
 /// force are either continuums or vacuums in the filament … analogous to the
 /// gulf stream"): a mote's stream is READ, never labelled by its origin.
-/// Where the jet's push at it (`p·ρ·δ_u`, the kick's own reading) beats the
+/// Where the jet's push at it (`p·ρ·δ_u`, the torque's own reading) beats the
 /// hold of the filament it stands in (`λ/(1 + λ)`), it is carried in the
 /// CONTINUUM, one moving body with the current; where the hold beats the
 /// push, the jet cannot fill the channel and it drifts in the VACUUM, the
@@ -1265,24 +1239,12 @@ mod passage_tests {
     use cfe::ratio::ratio;
 
     #[test]
-    fn a_released_kind_rests_where_the_stars_push_meets_its_hold() {
-        use super::{released, rest, through};
-        // H = 1, push ½: a kind of weight 4 has q = 1/8, 2q = 1/4 < 1, so
-        // R* = 2qH/(H² − 2q) = (1/4)/(3/4) = 1/3.
-        let r = rest(&ratio(4, 1), &ratio(1, 2), &ratio(1, 1)).expect("a rest");
-        assert_eq!(r, ratio(1, 3));
-        // There the push balances the return: push/w = ½·δ(R)·ℓ, ℓ = R·H.
-        let d = ratio(1, 1) / (r.clone() + ratio(1, 1));
-        assert_eq!(ratio(1, 2) / ratio(4, 1), ratio(1, 2) * d * r.clone());
-        // The throat's reflection: the core and the rim change places.
+    fn the_throats_inversion_exchanges_core_and_rim() {
+        use super::through;
+        // The throat's reflection: the core and the rim change places, the
+        // throat stands.
         assert_eq!(through(&ratio(0, 1), &ratio(1, 1)), ratio(2, 1));
         assert_eq!(through(&ratio(1, 1), &ratio(1, 1)), ratio(1, 1));
-        // Released through the throat, its rest inside reads on the far face:
-        // R = 2 − 1/3 = 5/3, ℓ = R·H.
-        assert_eq!(released(&ratio(4, 1), &ratio(1, 2), &ratio(1, 1)), Some(ratio(5, 3)));
-        // A kind the push carries past every hold stands at the rim, R = 2H.
-        assert_eq!(rest(&ratio(1, 1), &ratio(1, 2), &ratio(1, 1)), None);
-        assert_eq!(released(&ratio(1, 1), &ratio(1, 2), &ratio(1, 1)), Some(ratio(2, 1)));
     }
 
     #[test]

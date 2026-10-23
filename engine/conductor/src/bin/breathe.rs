@@ -39,6 +39,16 @@ fn main() {
     let dissolved: usize = events.iter().map(|e| e.dissolved).sum();
     let returned = events.iter().fold(cfe::ratio::ratio(0, 1), |s, e| s + e.returned.clone());
     println!("STARS MET — {} merged, {} bounced", events.iter().map(|e| e.merged).sum::<usize>(), events.iter().map(|e| e.encounters).sum::<usize>());
+    {
+        let sticks: usize = events.iter().map(|e| e.grown.0).sum();
+        let bounces: usize = events.iter().map(|e| e.grown.1).sum();
+        let escaped = events.iter().fold(cfe::ratio::ratio(0, 1), |s, e| s + e.escaped.clone());
+        let last: std::collections::BTreeMap<u32, (usize, usize)> = events.iter().map(|e| (e.galaxy, (e.grown.2, e.grown.3))).collect();
+        let born = events.iter().fold(cfe::ratio::ratio(0, 1), |s, e| s + e.discs.0.clone());
+        let out = events.iter().fold(cfe::ratio::ratio(0, 1), |s, e| s + e.discs.1.clone());
+        println!("DISCS — released at the stars' births {} (holding), at or past the rim when released {}", conductor::reading::sector(&born), conductor::reading::sector(&out));
+        println!("SYSTEMS MET — {sticks} stuck, {bounces} bounced; overstepped the rims {} (holding); after the last echo, motes and bodies by galaxy {last:?}", conductor::reading::sector(&escaped));
+    }
     println!("BREATH — {} bells, T_u {t_u}: {} echoes (perpendicular writes down); recohered {births} systems born, decohered {} returned and {dissolved} stars dissolved (writes up)", until, events.len(), returned.round());
     for (i, c) in u.cores.iter().enumerate() {
         let echoes = events.iter().filter(|e| u64::from(e.galaxy) == c.path[0]).count();
