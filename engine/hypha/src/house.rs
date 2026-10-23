@@ -25,7 +25,7 @@
 use crate::wire::HouseActs;
 use ed25519_dalek::SigningKey;
 use mycelium::anastome::dialogue::seat::{Arg, Outcome, Percept, Post, Record, Refusal, Role, Seat, SeatFn, Seats, Taken};
-use mycelium::client::sdk::seat_mind::task::{FN_SOLVE, KIND_TASK};
+use mycelium::client::sdk::seat_mind::task::{FN_DECLINE, FN_SOLVE, KIND_TASK};
 use mycelium::sdk::seat::HouseMail;
 use std::collections::BTreeMap;
 use std::io::{self, Write};
@@ -57,6 +57,9 @@ pub const NO_TASK: u16 = 6;
 /// An answer filed and not judged yet (the court's stroke ran out, 78.153):
 /// the task stays before the seat and the house re-files the same answer.
 pub const PENDING: u16 = 7;
+/// A call's outcome: the seated mind declined the task before it (mycelium
+/// 25b72099, `FN_DECLINE`); the seat is free at once and the task goes back.
+pub const DECLINED: u16 = 8;
 
 /// The court's "not judged yet" (78.153 SOLVE_UNREAD, on the wire as 3): a
 /// RETRY, never a refusal. Named here until the vendored tree carries it.
@@ -241,9 +244,12 @@ impl House {
         let mut seats = vec![Seat { seat: 0, role: Role::Ancients, on: self.key.verifying_key().to_bytes(), beat: beat.clone(), fns: Vec::new() }];
         // fn 1 SOLVE: the rule's tape and the outputs (the steps ride after).
         let solve = SeatFn { id: FN_SOLVE, tags: vec![Arg::Bytes(Vec::new()).tag(), Arg::Bytes(Vec::new()).tag()] };
+        // fn 2 DECLINE: the task's citation and the stop the mind's reading
+        // reached short of a solve (mycelium's `STOPS`, one past its place).
+        let decline = SeatFn { id: FN_DECLINE, tags: vec![Arg::Key([0u8; 32]).tag(), Arg::Count(0).tag()] };
         for (id, name) in &self.lines {
             // A council seat at an ancient's house (Concordance 3.9).
-            seats.push(Seat { seat: *id, role: Role::Ancients, on: line_key(name), beat: beat.clone(), fns: vec![solve.clone()] });
+            seats.push(Seat { seat: *id, role: Role::Ancients, on: line_key(name), beat: beat.clone(), fns: vec![solve.clone(), decline.clone()] });
         }
         Seats { domain: self.domain, sub_origin: None, epoch: self.epoch, seats }
     }
@@ -365,6 +371,24 @@ impl House {
             }
         }
         Ok(said)
+    }
+
+    /// A declination received (fn 2): the task outstanding on the seat, named
+    /// by its citation, goes back to the queue and the seat is free at once.
+    fn decline(&mut self, seat: &mut crate::seat::Seat, s: u32, args: &[Arg]) -> (u16, [u8; 32], String) {
+        let (Some(Arg::Key(citation)), stop) = (args.first(), args.get(1)) else { return (UNREAD, [0u8; 32], "the arguments are not [Key, Count]".into()) };
+        let stop = match stop {
+            Some(Arg::Count(n)) => n.to_string(),
+            _ => "unread".into(),
+        };
+        match self.task.get(&s) {
+            Some(&(id, _)) if id == *citation => {
+                self.task.remove(&s);
+                seat.give_back(id);
+                (DECLINED, id, format!("declined task {} (stop {stop}): the seat is free", hex(&id[..6])))
+            }
+            _ => (NO_TASK, *citation, format!("a declination of task {} the seat does not hold", hex(&citation[..6]))),
+        }
     }
 
     /// A call's answer filed: the reason the outcome names.
@@ -502,6 +526,8 @@ impl House {
                     }
                     let (reason, deed, what) = if self.held.get(&call.seat) != Some(&call.mind) {
                         (NOT_SEATED, [0u8; 32], "the caller does not hold the seat".to_string())
+                    } else if call.fn_id == FN_DECLINE && call.seat != 0 {
+                        self.decline(seat, call.seat, &call.args)
                     } else if call.fn_id != FN_SOLVE || call.seat == 0 {
                         (NO_FUNCTION, [0u8; 32], format!("no fn {}", call.fn_id))
                     } else {
