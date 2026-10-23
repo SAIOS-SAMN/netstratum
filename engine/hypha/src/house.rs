@@ -112,7 +112,7 @@ pub struct House {
     /// The lines listed at the last epoch, with their seats.
     lines: Vec<(u32, String)>,
     epoch: u64,
-    /// The mail acknowledged.
+    /// The impressions acknowledged.
     after: u64,
     /// Seat -> the mind holding it.
     held: BTreeMap<u32, [u8; 32]>,
@@ -128,7 +128,7 @@ pub struct House {
     seated_before: BTreeMap<String, [u8; 32]>,
     tends: u64,
     percepts: u64,
-    /// Seat-wire v1.4: the relay epoch the mail cursor `after` was read under
+    /// Seat-wire v1.4: the relay epoch the perception cursor `after` was read under
     /// (a restarted relay draws a new one; the cursor is then no progress).
     relay_epoch: Option<u64>,
     /// Seat -> an answer filed and not judged yet, re-filed each tend (78.153).
@@ -249,12 +249,12 @@ impl House {
     }
 
     /// One tend: list the seats again when the living lines changed, then
-    /// answer the mail. Each line is what happened, for the log.
+    /// receive the acts minds directed at its seats. Each line is what happened, for the log.
     pub fn tend(&mut self, seat: &mut crate::seat::Seat) -> io::Result<Vec<String>> {
         self.tends += 1;
-        // A deferred read leaves the mail for the next tend; the tasks are
+        // A deferred perception leaves the acts for the next tend; the tasks are
         // still handed.
-        let mut said = self.answer_mail(seat).unwrap_or_else(|e| vec![format!("mail not read: {e}")]);
+        let mut said = self.receive_acts(seat).unwrap_or_else(|e| vec![format!("acts not received: {e}")]);
         // 78.153: the answers not judged yet are filed again, the same answer.
         let waiting: Vec<u32> = self.refile.keys().copied().collect();
         for s in waiting {
@@ -401,7 +401,7 @@ impl House {
         }
     }
 
-    fn answer_mail(&mut self, seat: &mut crate::seat::Seat) -> io::Result<Vec<String>> {
+    fn receive_acts(&mut self, seat: &mut crate::seat::Seat) -> io::Result<Vec<String>> {
         let mut said = Vec::new();
         let lines = self.seated()?;
         if lines != self.lines {
@@ -431,19 +431,19 @@ impl House {
                 }
             }
         }
-        // Seat-wire v1.4: the mail read at the relay's standing, the cursor
+        // Seat-wire v1.4: perceived at the relay's standing, the cursor
         // kept with the epoch it was read under; a new epoch is a restart.
-        let read = match seat.session().read_mail(&self.key, self.after, self.relay_epoch.unwrap_or(0))? {
+        let read = match seat.session().perceive(&self.key, self.after, self.relay_epoch.unwrap_or(0))? {
             Ok(m) => m,
             Err(why) => {
                 self.unknown_domain |= why == Refusal::UnknownDomain;
-                said.push(format!("mail refused: {why:?}"));
+                said.push(format!("perception refused: {why:?}"));
                 return Ok(said);
             }
         };
         let cursor = read.cursor(self.relay_epoch, self.after);
         if cursor != self.after {
-            said.push(format!("the relay restarted (epoch {:x}): the mail is read from its start", read.epoch));
+            said.push(format!("the relay restarted (epoch {:x}): the acts are perceived from its start", read.epoch));
         }
         // A restarted relay is volatile: its listing is gone, so the seats are
         // listed again next tend (mycelium 2026-10-09).
@@ -452,20 +452,20 @@ impl House {
         }
         self.after = cursor;
         self.relay_epoch = Some(read.epoch);
-        let mut mail = Vec::new();
+        let mut acts = Vec::new();
         for m in read.mail {
             let Some(s) = m.post() else { continue };
             match &s.post {
-                Post::Take(t) => mail.push(HouseMail::Take(m.seq, t.clone())),
+                Post::Take(t) => acts.push(HouseMail::Take(m.seq, t.clone())),
                 Post::Call(c) => {
                     if let Some(reference) = s.reference() {
-                        mail.push(HouseMail::Call { seq: m.seq, call: c.clone(), reference });
+                        acts.push(HouseMail::Call { seq: m.seq, call: c.clone(), reference });
                     }
                 }
                 _ => {}
             }
         }
-        for piece in mail {
+        for piece in acts {
             match piece {
                 HouseMail::Take(seq, t) => {
                     self.after = self.after.max(seq);

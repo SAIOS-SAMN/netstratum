@@ -120,7 +120,7 @@ impl Seat {
         })
     }
 
-    /// The session this seat speaks through: the house tends its mail on
+    /// The session this seat speaks through: the house perceives on
     /// it (a house and its minds speak to the same hypha, 78.145).
     pub fn session(&self) -> &Session {
         &self.session

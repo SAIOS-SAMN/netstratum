@@ -43,7 +43,8 @@ pub trait HouseActs {
     fn post_taken(&self, house: &SigningKey, t: Taken) -> io::Result<Result<u64, Refusal>>;
     fn post_percept(&self, house: &SigningKey, p: Percept) -> io::Result<Result<u64, Refusal>>;
     fn post_outcome(&self, house: &SigningKey, o: Outcome) -> io::Result<Result<u64, Refusal>>;
-    fn read_mail(&self, key: &SigningKey, after: u64, epoch: u64) -> io::Result<Result<MailRead, Refusal>>;
+    /// The impressions the court holds for `key` past `after`: perceived.
+    fn perceive(&self, key: &SigningKey, after: u64, epoch: u64) -> io::Result<Result<MailRead, Refusal>>;
     /// A court task for `voice` from the registry, or `None` where it holds
     /// nothing for it.
     fn pull_task(&self, voice: &[u8; 32]) -> io::Result<Option<mycelium::anastome::dialogue::TaskEnvelope>>;
@@ -92,9 +93,9 @@ impl HouseActs for Session {
     fn post_outcome(&self, house: &SigningKey, o: Outcome) -> io::Result<Result<u64, Refusal>> {
         self.seat_post(&Post::Outcome(o).sign(house).ok_or_else(unwritten)?)
     }
-    fn read_mail(&self, key: &SigningKey, after: u64, epoch: u64) -> io::Result<Result<MailRead, Refusal>> {
+    fn perceive(&self, key: &SigningKey, after: u64, epoch: u64) -> io::Result<Result<MailRead, Refusal>> {
         let act = seat::encode_read_mail(&ReadMail::sign_standing(key, after, epoch, nonce()?));
-        seat::decode_mail_reply_standing(&self.speak(act)?).ok_or_else(|| undecoded("mail"))
+        seat::decode_mail_reply_standing(&self.speak(act)?).ok_or_else(|| undecoded("perception"))
     }
     fn pull_task(&self, voice: &[u8; 32]) -> io::Result<Option<mycelium::anastome::dialogue::TaskEnvelope>> {
         let reply = self.speak(mycelium::anastome::dialogue::percept::encode_task_request(voice))?;

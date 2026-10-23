@@ -552,7 +552,7 @@ fn seat_cmd(args: &[String], at: &str, home: &Path) -> ExitCode {
     }
     println!("seat: netstratum's client kernel at {}, a stroke every {every}s", hyphae.join(", "));
     // THE HOUSE (78.145) on the FIRST hypha named: a house and the minds it
-    // seats share one hypha's mail. `--worlds` names the universe's lines.
+    // seats share one hypha's impressions. `--worlds` names the universe's lines.
     let worlds = std::path::PathBuf::from(flag(args, "--worlds").unwrap_or_else(|| "var-g2/worlds".to_string()));
     let mut house = match ns_hypha::house::House::open(home, &worlds) {
         Ok(h) => Some(h),
