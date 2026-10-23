@@ -1174,12 +1174,16 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 let mut sys = Body { ell_orth: ratio(0, 1), path, radius: r_guess, period: ratio(0, 1), kept, satellites: orbs, medium, ell: ratio(0, 1), medium_spin, gas: Vec::new(), born: bell, state: held_at_birth, flows: disc_motes, reservoir: ignition, turning: spin_own, bell: phases_own.clone(), phase: phases_own, load: world_load, remnant: false, heat: ratio(0, 1) };
                 {
                     let whole = mass(&sys.total());
-                    let h_s = if whole.is_zero() { ratio(0, 1) } else { mass(&sys.kept) / whole };
-                    for x in &sys.flows {
-                        let held = x.amount.clone() * crate::flows::weight(&x.key);
-                        discs.0 += held.clone();
-                        if !h_s.is_zero() && x.ell_o.clone() / h_s.clone() >= ratio(1, 1) {
-                            discs.1 += held;
+                    if !whole.is_zero() {
+                        // Read by the system's one enclosure (the star and the
+                        // disc inside each mote), as its meetings read it.
+                        let enc = crate::flows::Enclosed::new(mass(&sys.kept) / whole.clone(), sys.flows.iter().map(|x| (x.ell_o.clone(), x.amount.clone() * crate::flows::weight(&x.key) / whole.clone())).collect());
+                        for x in &sys.flows {
+                            let held = x.amount.clone() * crate::flows::weight(&x.key);
+                            discs.0 += held.clone();
+                            if enc.reach(&x.ell_o).0 >= ratio(1, 1) {
+                                discs.1 += held;
+                            }
                         }
                     }
                 }

@@ -853,10 +853,18 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
     // law): read once at the echo's start, the star's hold the base and every
     // mote and world inside adding its own, in the system's own units (its
     // holding 1, a world's spin `R·h_s` from its radius).
-    let r_of = |w: &crate::pulse::Body| if scale.is_zero() { ratio(0, 1) } else { w.radius.clone() / scale.clone() };
+    // ONE FRAME (the ring law read in the system's own units, docs/85 §7: a
+    // tier's unit is its own holding): reach and hold are both shares of the
+    // system's holding, `R = radius/scale`, `H = H_ledger/scale`, so a world's
+    // ledger spin `ℓ = R·H` is its spin here dilated twice, `ℓ_ledger =
+    // ℓ_sys·scale²`, while its deficit, and so its period, read the same in
+    // both. A world's reach is read from its spin by the one enclosure,
+    // never from the star's hold alone.
+    let dil = scale.clone() * scale.clone();
+    let own_spin = |l: &Ratio| if dil.is_zero() { ratio(0, 1) } else { l.clone() / dil.clone() };
     let enc = crate::flows::Enclosed::new(
         h_s.clone(),
-        sys.flows.iter().map(|x| (x.ell_o.clone(), x.amount.clone() * crate::flows::weight(&x.key) / total.clone())).chain(sys.satellites.iter().map(|w| (r_of(w) * h_s.clone(), mass(&w.total()) / total.clone()))).collect(),
+        sys.flows.iter().map(|x| (x.ell_o.clone(), x.amount.clone() * crate::flows::weight(&x.key) / total.clone())).chain(sys.satellites.iter().map(|w| (own_spin(&w.ell), mass(&w.total()) / total.clone()))).collect(),
     );
     // The star's push on its system, `½ ×` its heart's open share.
     let star_push = if mass(&sys.kept).is_zero() { ratio(0, 1) } else { ratio(1, 2) * crate::pulse::magnetism(&sys.kept) / mass(&sys.kept) };
@@ -917,17 +925,19 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
     // spin.
     let mut orth_of: Vec<Ratio> = Vec::new();
     let n_motes = sys.flows.len();
+    // Each world's identity, its birth reading, kept while it stands.
+    let mut paths: Vec<Vec<u64>> = Vec::new();
     for x in std::mem::take(&mut sys.flows) {
         orth_of.push(x.ell_orth.clone());
         items.push(([(x.key.clone(), x.amount.clone())].into(), x.ell_o.clone(), x.phase.clone(), x.agitation.clone(), false));
     }
     for w in std::mem::take(&mut sys.satellites) {
-        let r_own = r_of(&w);
+        let ell_sys = own_spin(&w.ell);
         let ph = if w.phase.len() == planes { w.phase.clone() } else { vec![ratio(0, 1); planes] };
         // A world carries its heat; on its star's bell it cools to the void
         // through its unlocked face, `½(1 − δ)` of it at its reach.
         let heat = if rang {
-            let (_, d) = enc.reach(&(r_own.clone() * h_s.clone()));
+            let (_, d) = enc.reach(&ell_sys);
             crate::ring::grain(&(w.heat.clone() * (ratio(1, 1) - ratio(1, 2) * (ratio(1, 1) - d))))
         } else {
             w.heat.clone()
@@ -942,10 +952,8 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
         // pushes it along its orthogonal orbit by the one law (`flows::orth_push`),
         // and its hold returns the held half, `½·δ·ℓ_⊥`, δ at the reach its
         // orthogonal orbit swings it to; the star's own spin pays it (exact).
-        let ell_sys = r_own.clone() * h_s.clone();
-        let to_sys = if w.ell.is_zero() { ratio(0, 1) } else { ell_sys.clone() / w.ell.clone() };
-        let mut orth_sys = w.ell_orth.clone() * to_sys.clone();
-        if rang && !to_sys.is_zero() {
+        let mut orth_sys = own_spin(&w.ell_orth);
+        if rang && !dil.is_zero() {
             let (now, _) = crate::flows::swung(&ell_sys, &orth_sys, &ph[1]);
             let (_, d) = enc.reach(&now);
             let after = crate::ring::grain(&(orth_sys.clone() + crate::flows::orth_push(&ph[1], &d, &star_push, &d, false) - ratio(1, 2) * d * orth_sys.clone()));
@@ -956,11 +964,12 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
         }
         orth_of.push(orth_sys);
         items.push((kept, ell_sys, ph, heat, w.born > 0));
+        paths.push(w.path.clone());
     }
     // Each turns by what is enclosed inside it (the star and all inside).
     let delta = |ell: &Ratio| enc.reach(ell).1;
     let n = items.len();
-    let reach = |it: &(Manifest, Ratio, Vec<Ratio>, Ratio, bool)| it.1.clone() / h_s.clone();
+    let reach = |it: &(Manifest, Ratio, Vec<Ratio>, Ratio, bool)| enc.reach(&it.1).0;
     let share = |it: &(Manifest, Ratio, Vec<Ratio>, Ratio, bool)| mass(&it.0) / total.clone();
     let mut parent: Vec<usize> = (0..n).collect();
     let (mut sticks, mut bounces) = (0, 0);
@@ -981,7 +990,7 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
     let width = |i: usize| -> Ratio {
         if i >= n_motes {
             let hw = mass(&items[i].0) / total.clone();
-            crate::ring::grain(&crate::ring::pinch_share(&hw, &h_s))
+            crate::ring::grain(&crate::ring::pinch_share(&hw, &enc.hold(&items[i].1)))
         } else {
             items[i].3.clone()
         }
@@ -1140,7 +1149,6 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
     }
     let mut worlds = Vec::new();
     let mut motes = Vec::new();
-    let mut inside = mass(&sys.kept) / unit.clone();
     // What overreaches the system's rim (reach past 1, its grains' holding;
     // the rim law) crosses whole into the galaxy.
     let mut escaped = Manifest::new();
@@ -1151,7 +1159,7 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
             // Its outer swing (docs/90 D2): it escapes when its orthogonal orbit carries
             // it past the rim, not only its mean reach.
             let out = |i: usize| items[i].1.clone() + if orth_of[i] < ratio(0, 1) { -orth_of[i].clone() } else { orth_of[i].clone() };
-            if m.is_zero() { ratio(0, 1) } else { g.iter().fold(ratio(0, 1), |a, &i| a + mass(&items[i].0) * out(i)) / m / h_s.clone() }
+            if m.is_zero() { ratio(0, 1) } else { enc.reach(&(g.iter().fold(ratio(0, 1), |a, &i| a + mass(&items[i].0) * out(i)) / m)).0 }
         };
         if r_group > rim {
             for &i in &g {
@@ -1168,7 +1176,7 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
         if g.len() == 1 && g[0] < n_motes {
             let it = &items[g[0]];
             let swept = if orth_of[g[0]] < ratio(0, 1) { -orth_of[g[0]].clone() } else { orth_of[g[0]].clone() };
-            if (it.1.clone() + swept) / h_s.clone() > rim {
+            if enc.reach(&(it.1.clone() + swept)).0 > rim {
                 for (k, a) in &it.0 {
                     *escaped.entry(k.clone()).or_insert_with(|| ratio(0, 1)) += a.clone();
                 }
@@ -1213,12 +1221,13 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
         // filament, `λ/(1 + λ)` with `λ` its holding and magnetism over its
         // reach, against its agitation and the unlocked face, and passes the
         // ignition test (`2(a + face) < 1`). It keeps its matter whole.
-        let r_body = ell.clone() / h_s.clone();
+        let (r_body, d_body) = enc.reach(&ell);
+        let h_in = enc.hold(&ell);
         let was_star = g.iter().any(|&i| i >= n_motes && items[i].4);
         let ignites = was_star || (kept.len() > 1 && !r_body.is_zero() && {
             let own = (mass(&kept) + crate::pulse::magnetism(&kept)) / total.clone();
             let lambda = own / r_body.clone();
-            let face = (ratio(1, 1) - h_s.clone() / (r_body.clone() + h_s.clone())) / ratio(2, 1);
+            let face = (ratio(1, 1) - d_body.clone()) / ratio(2, 1);
             lambda.clone() / (ratio(1, 1) + lambda) >= heat_g.clone() + face.clone() && ratio(2, 1) * (heat_g.clone() + face) < ratio(1, 1)
         });
         // Otherwise THE PLANETARY CORE cuts it, its heat the added turning.
@@ -1232,7 +1241,7 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
             match heart_cut(&kept, &heat_g, &ratio(0, 1)) {
                 Some(_) => {
                     let hw = mass(&kept) / total.clone();
-                    let e = crate::ring::pinch_share(&hw, &h_s);
+                    let e = crate::ring::pinch_share(&hw, &h_in);
                     bind_layers(&kept, &heat_g, &e)
                 }
                 None => (Manifest::new(), kept),
@@ -1247,17 +1256,26 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
             continue;
         }
         let m = mass(&kept);
-        let r_own = ell.clone() / h_s.clone();
-        let radius = crate::ring::grain(&(r_own * scale.clone()));
-        let period = crate::ring::period(&radius, &inside);
-        let spin = crate::ring::spin(&radius, &inside);
-        inside += m.clone() / unit.clone();
-        let siblings: Vec<u64> = worlds.iter().map(|w: &crate::pulse::Body| w.path[sys.path.len()]).collect();
-        let mut path = sys.path.clone();
-        path.push(crate::ring::birth_key(0, &radius, &inside, &siblings));
+        // Its reach and period by the one enclosure; its spin carried exactly
+        // (Σ m·ℓ of what met), back into the ledger's units.
+        let radius = crate::ring::grain(&(r_body.clone() * scale.clone()));
+        let period = crate::ring::period(&r_body, &h_in);
+        let spin = crate::ring::grain(&(ell.clone() * dil.clone()));
+        // A world that gathered stays that world (its heaviest world's birth
+        // reading); a body grown from motes alone is born here.
+        let heaviest = g.iter().filter(|&&i| i >= n_motes).max_by(|&&a, &&b| mass(&items[a].0).cmp(&mass(&items[b].0)).then(b.cmp(&a)));
+        let path = match heaviest {
+            Some(&i) => paths[i - n_motes].clone(),
+            None => {
+                let siblings: Vec<u64> = worlds.iter().map(|w: &crate::pulse::Body| w.path[sys.path.len()]).chain(paths.iter().filter_map(|p| p.get(sys.path.len()).copied())).collect();
+                let mut path = sys.path.clone();
+                path.push(crate::ring::birth_key(bell, &r_body, &h_in, &siblings));
+                path
+            }
+        };
         // It keeps the heat of its making (its members' and the bonds'),
         // which sets its thermal band for meeting its neighbours.
-        let ell_orth = if ell.is_zero() { ratio(0, 1) } else { crate::ring::grain(&(own_c.clone() * spin.clone() / ell.clone())) };
+        let ell_orth = crate::ring::grain(&(own_c.clone() * dil.clone()));
         worlds.push(crate::pulse::Body { ell_orth, path, radius, period, kept, satellites: Vec::new(), medium: Manifest::new(), ell: spin, medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: m, flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase, load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: crate::ring::grain(&heat_g).min(ratio(1, 1)) });
         if ignites {
             // A star of its system: born marks it (worlds are born 0).
