@@ -1583,39 +1583,32 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
         sys.turning -= paid * to_u.clone();
         identities.push(("star", sys.turning.clone() - was + (motes_moved + worlds_moved) * to_u));
     }
-    // INFALL INTO THE HEART (docs/91 C6; with xylarium 2026-10-23). A heart
-    // has NO THROAT and no state (operators 2026-10-17: a throat is the tube
-    // joining two enclosures, the universal and galactic cores' and a
-    // remnant's; a burning heart has no bounce): it holds only what it has
-    // gathered, `H = held`. A disc mote falls into the heart where its spin
-    // stands within that hold, `R = ℓ/H* ≤ H*` (`δ ≥ ½`, the heart cut's own
-    // test),
-    // `H* = h_s` and the shares of the motes that fall, read from all
-    // candidates down to the fixed point (order-free, as the heart cut's held
-    // set and the collapse's infall). Nothing passes to another face: its
-    // matter joins what the heart keeps, parted to its atoms (a heart holds
-    // no molecules), and its spin joins the star's own, `h'·ℓ'_s = h·ℓ_s +
-    // m·(ℓ_o + ℓ_⊥)` (exact).
+    // INFALL INTO THE HEART (docs/91 C6; with xylarium 2026-10-23, the
+    // extent law 2026-10-24). A heart has NO THROAT and no state (operators
+    // 2026-10-17): it holds only what it has gathered, `H = held`. Held is
+    // not inside: `δ ≥ ½` at a mote's reach says the star's hold dominates
+    // there, which is what BOUND means; read as a length it made a dominant
+    // star swallow its own system. Matter meets matter where EXTENTS overlap
+    // (the collision law): the star's extent is the reach of its outermost
+    // HELD kind in the heart's own units, `R_max = max ℓ_z/H*` over the kinds
+    // its cut holds, dilated once into the system by its share, `E_s =
+    // h_s·R_max`. A disc mote falls only where its own reach stands within
+    // it, `R ≤ E_s`; between the extent and the rim it is bound and orbits.
+    // A hot heart that has shed its light kinds is compact and leaves room;
+    // that is a reading, never a dial. Nothing passes to another face: what
+    // falls joins what the heart keeps, parted to its atoms (a heart holds no
+    // molecules), and its spin joins the star's own (exact).
     {
         let (mut fell, mut fell_m, mut fell_l) = (Manifest::new(), ratio(0, 1), ratio(0, 1));
         let share_of = |x: &crate::flows::Mote| x.amount.clone() * crate::flows::weight(&x.key) / total.clone();
-        let mut falls: Vec<bool> = sys.flows.iter().map(|_| true).collect();
-        let mut held = sys.flows.iter().fold(h_s.clone(), |a, x| a + share_of(x));
-        loop {
-            let mut changed = false;
-            for (i, x) in sys.flows.iter().enumerate() {
-                // Its reach against the hold, `R = ℓ/H* ≤ H*` (the heart
-                // cut's form; no square).
-                if falls[i] && (held.is_zero() || x.ell_o.clone() / held.clone() > held) {
-                    falls[i] = false;
-                    held -= share_of(x);
-                    changed = true;
-                }
+        let extent = match heart_cut(&sys.kept, &ratio(0, 1), &ratio(0, 1)) {
+            Some((held_k, _, h_k)) if !h_k.is_zero() => {
+                let r_max = carried(&sys.kept, &ratio(0, 1), &ratio(0, 1)).into_iter().filter(|(k, _)| held_k.contains_key(k)).map(|(_, l)| l / h_k.clone()).max().unwrap_or_else(|| ratio(0, 1));
+                h_s.clone() * r_max
             }
-            if !changed {
-                break;
-            }
-        }
+            _ => ratio(0, 1),
+        };
+        let falls: Vec<bool> = sys.flows.iter().map(|x| enc.reach(&x.ell_o).0 <= extent).collect();
         for (x, f) in sys.flows.iter_mut().zip(&falls) {
             if *f {
                 let m = share_of(x);
