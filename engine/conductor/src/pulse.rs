@@ -451,8 +451,9 @@ pub struct Universe {
 /// far and `H = 1 + held` (a hemisphere, never a static ½). The epicentre's
 /// spin is their sum, `K = Σ s`. BURSTS empty the stack from the top
 /// (heaviest first) on one hemisphere and the EXPANSION fills from the base
-/// (lightest first) on the other, so every kind is pushed by `K + s_z`, the
-/// whole spin plus its own share once, and carried `ℓ_z = (K + s_z)·w̄/w_z`
+/// (lightest first) on the other, so every kind is pushed by `K + s_i`, the
+/// whole spin plus its STACK's share once (the stacks the weight profile's
+/// beads, heaviest first), and carried `ℓ_z = (K + s_i)·w̄/w_z`
 /// to `R_z = ℓ_z/H` (w̄ the amount-weighted mean weight). A kind whose spread
 /// stays within the throat, `R_z(1 + s_final) ≤ 1`, is HELD by the
 /// Wellspring; the rest stand in expanding shells at their own reaches, by
@@ -486,17 +487,42 @@ pub fn cascade(manifest: &Manifest) -> (Manifest, Vec<(Ratio, Manifest)>, Ratio)
     let spin = share.iter().fold(ratio(0, 1), |a, b| a + b.clone());
     let h = ratio(1, 1) + held.clone();
     let s_final = face(&held);
+    // THE STACKS (11.0 (15), with xylarium 2026-10-24: "the stack's own BEADS
+    // by weight (the beading law at the founding), never sized"): the kinds
+    // heaviest first (ties in capture order), the weight profile `amount·w`
+    // cut at its local minima, each run between cuts a stack. A stack's share
+    // is the sum of its kinds' capture shares, and every kind in it feels the
+    // bursts from the top and the expansion from the base together, `B_i +
+    // E_i = K + s_i`.
+    let mut heavy: Vec<usize> = (0..kinds.len()).collect();
+    heavy.sort_by(|&a, &b| w(&kinds[b].0).cmp(&w(&kinds[a].0)));
+    let prof: Vec<Ratio> = heavy.iter().map(|&i| kinds[i].1.clone() * w(&kinds[i].0)).collect();
+    let mut stack_share = vec![ratio(0, 1); kinds.len()];
+    let mut from = 0usize;
+    let close = |from: usize, to: usize, stack_share: &mut Vec<Ratio>| {
+        let s_i = heavy[from..to].iter().fold(ratio(0, 1), |a, &i| a + share[i].clone());
+        for &i in &heavy[from..to] {
+            stack_share[i] = s_i.clone();
+        }
+    };
+    for k in 1..prof.len().saturating_sub(1) {
+        if prof[k] < prof[k - 1] && prof[k] <= prof[k + 1] {
+            close(from, k, &mut stack_share);
+            from = k;
+        }
+    }
+    close(from, prof.len(), &mut stack_share);
     // Every kind leaves as a SHELL: a mix at one reach (with xylarium: shells
     // as mixes, so a passage adds to a mix, never a new shell).
     let mut shells: Vec<(Manifest, Ratio)> = kinds
         .into_iter()
-        .zip(share)
+        .zip(stack_share)
         .map(|((k, a), s)| {
             // Element-agnostic (operator 2026-10-18: "the push must be agnostic
             // to the element by anything other than the force produced by the
             // bounces of the antipoles ... inertia is fine"): the one force
             // `K + s`, each kind moving by its own inertia, never against the
-            // population's mean weight.
+            // population's mean weight; `s` its stack's share.
             let reach = g(&((spin.clone() + s) / w(&k) / h.clone()));
             ([(k, a)].into_iter().collect::<Manifest>(), reach)
         })
