@@ -88,6 +88,31 @@ pub fn galaxy_frame(u: &Universe, i: usize, unit: &Ratio) -> Option<crate::flows
     Some(crate::flows::Enclosed::new(ratio(1, 1), core.flows.iter().map(held).chain(core.satellites.iter().map(|b| (b.ell.clone(), mass(&b.total()) / g.clone()))).chain(firm).collect()))
 }
 
+/// THE OUTFLOW'S BOOK (with xylarium 2026-10-24; the settling book's
+/// inverse): matter leaving a system at spin `ℓ_at` (its region's edge,
+/// `beyond`) takes `m·ℓ_at` with it, and the system's orbit pays it, `W·ℓ =
+/// (W − m)·ℓ′ + m·ℓ_at`, W its whole holding before the outflow; through the
+/// centre past zero; the grain's remainder to the galaxy's medium spin.
+/// `m` is the holding that left (already taken from the system); a system
+/// left with nothing is no recoil (it dissolved: it leaves at its own orbit).
+#[allow(clippy::too_many_arguments)]
+fn book_outflow(sys: &mut Body, m: &Ratio, at: &Ratio, unit: &Ratio, medium_spin: &mut Ratio, identity: &mut Vec<(&'static str, Ratio)>) {
+    use num_traits::Zero as _;
+    let after = mass(&sys.total());
+    if after.is_zero() || m.is_zero() || unit.is_zero() {
+        return;
+    }
+    let whole = after.clone() + m.clone();
+    let before = whole * sys.ell.clone();
+    let exact = (before.clone() - m.clone() * at.clone()) / after.clone();
+    let stored = crate::flows::through_centre(crate::ring::grain(&exact), &mut sys.phase);
+    let signed = if exact < ratio(0, 1) { -stored.clone() } else { stored.clone() };
+    let rest = before.clone() - m.clone() * at.clone() - after.clone() * signed.clone();
+    *medium_spin += rest.clone() / unit.clone();
+    identity.push(("outflow", after * signed + m.clone() * at.clone() + rest - before));
+    sys.ell = stored;
+}
+
 /// A star system's nested clock: its galaxy's share (none for the home) times
 /// its orbit's, the rings it receives at its reach, `1 − δ`, δ by its
 /// galaxy's one enclosure at its own spin (`galaxy_frame`).
@@ -671,7 +696,9 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     returned += mass(&out) / unit.clone();
                     // It passes through the galactic core's throat (its
                     // other face): matter standing there to be recycled.
-                    infall.push((out, beyond(&sys), sys.ell_orth.clone(), vec![orbit, ratio(1, 2)]));
+                    let at = beyond(&sys);
+                    book_outflow(&mut sys, &mass(&out), &at, &unit, &mut core.medium_spin, &mut identity);
+                    infall.push((out, at, sys.ell_orth.clone(), vec![orbit, ratio(1, 2)]));
                 }
                 if mass(&sys.kept).is_zero() {
                     // Emptied: its medium crosses whole; its worlds re-anchor.
@@ -684,7 +711,8 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         less(&mut left, &w.total());
                     }
                     if !left.is_empty() {
-                        shed.push((left, beyond(&sys), sys.ell_orth.clone(), sys.phase.clone()));
+                        // Dissolved whole: it leaves at its own orbit.
+                        shed.push((left, own_of(&sys), sys.ell_orth.clone(), sys.phase.clone()));
                     }
                     orphans.extend(worlds.into_iter().map(|w| (w, own_of(&sys), sys.ell_orth.clone(), sys.phase.clone())));
                     dissolved += 1;
@@ -702,7 +730,9 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 grown = (grown.0 + st, grown.1 + bo, grown.2 + sys.flows.len(), grown.3 + sys.satellites.len());
                 escaped_all += mass(&escaped);
                 if !escaped.is_empty() {
-                    shed.push((escaped, beyond(&sys), sys.ell_orth.clone(), sys.phase.clone()));
+                    let at = beyond(&sys);
+                    book_outflow(&mut sys, &mass(&escaped), &at, &unit, &mut core.medium_spin, &mut identity);
+                    shed.push((escaped, at, sys.ell_orth.clone(), sys.phase.clone()));
                 }
                 enclosed_in += mass(&sys.total()) / unit.clone();
                 keep.push(sys);
@@ -797,7 +827,8 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 core.medium_spin += subtree_spin(&sys, &unit);
                 let all = sys.total();
                 returned += mass(&all) / unit.clone();
-                shed.push((all, beyond(&sys), sys.ell_orth.clone(), sys.phase.clone()));
+                // Dissolved whole: it leaves at its own orbit.
+                shed.push((all, own_of(&sys), sys.ell_orth.clone(), sys.phase.clone()));
                 dissolved += 1;
                 continue;
             }
@@ -818,7 +849,9 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // THE SPIN LEDGER (docs/83 Phase 0): shed matter carries its
             // system's specific spin into the medium.
             core.medium_spin += mass(&back) / unit.clone() * sys.ell.clone();
-            shed.push((back, beyond(&sys), sys.ell_orth.clone(), sys.phase.clone()));
+            let at = beyond(&sys);
+            book_outflow(&mut sys, &mass(&back), &at, &unit, &mut core.medium_spin, &mut identity);
+            shed.push((back, at, sys.ell_orth.clone(), sys.phase.clone()));
             if mass(&sys.kept).is_zero() {
                 // Spent: all it held returns, with all its spin (its orbit's
                 // and everything turning inside it).
@@ -826,7 +859,8 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 core.medium_spin += subtree_spin(&sys, &unit);
                 let all = sys.total();
                 returned += mass(&all) / unit.clone();
-                shed.push((all, beyond(&sys), sys.ell_orth.clone(), sys.phase.clone()));
+                // Dissolved whole: it leaves at its own orbit.
+                shed.push((all, own_of(&sys), sys.ell_orth.clone(), sys.phase.clone()));
                 dissolved += 1;
                 continue;
             }
@@ -915,7 +949,9 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             grown = (grown.0 + st, grown.1 + bo, grown.2 + sys.flows.len(), grown.3 + sys.satellites.len());
             escaped_all += mass(&escaped);
             if !escaped.is_empty() {
-                shed.push((escaped, beyond(&sys), sys.ell_orth.clone(), sys.phase.clone()));
+                let at = beyond(&sys);
+                book_outflow(&mut sys, &mass(&escaped), &at, &unit, &mut core.medium_spin, &mut identity);
+                shed.push((escaped, at, sys.ell_orth.clone(), sys.phase.clone()));
             }
             enclosed_in += mass(&sys.total()) / unit.clone();
             keep.push(sys);
