@@ -1253,6 +1253,10 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 let lambda = members.iter().zip(&fallen).filter(|(_, f)| **f).fold(ratio(0, 1), |s, (x, _)| s + held_of(x)) / m.clone();
                 let (mut fell, mut fell_held, mut heat, mut amt) = (crate::pulse::Manifest::new(), ratio(0, 1), ratio(0, 1), ratio(0, 1));
                 let mut orth_held = ratio(0, 1);
+                // The clump's own circulation: its members' orthogonal spins by
+                // holding (the frame a member's carried circulation is read
+                // against).
+                let orth_clump = members.iter().fold(ratio(0, 1), |s, x| s + held_of(x) * x.ell_orth.clone()) / m.clone();
                 let mut ph: Vec<Vec<(Ratio, Ratio)>> = vec![Vec::new(); crate::flows::PLANES];
                 let _ = &lambda;
                 // THE STAR'S OWN SPIN (with xylarium 2026-10-23): the spin its
@@ -1288,7 +1292,15 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         // offset on its orthogonal orbit; its spins are read at
                         // the system's birth, once the heart is cut
                         // (`formation::system`).
-                        outside.push((crate::flows::Mote { born: bell, ..x.clone() }, radial.clone().max(o.clone()), c.clone()));
+                        // Its offset along the orthogonal orbit is a PLACE on that
+                        // orbit (its phase), never motion along it (with
+                        // xylarium 2026-10-24); its circulation is what it
+                        // CARRIED, its orthogonal spin against the clump's, as
+                        // a share of its orbit spin (frame-free, read in the
+                        // galaxy where both stand).
+                        let _ = c;
+                        let carried_c = if x.ell_o.is_zero() { ratio(0, 1) } else { (x.ell_orth.clone() - orth_clump.clone()) / x.ell_o.clone() };
+                        outside.push((crate::flows::Mote { born: bell, ..x.clone() }, radial.clone().max(o.clone()), carried_c));
                     }
                 }
                 collapse.0 += m.clone();

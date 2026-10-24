@@ -822,7 +822,11 @@ pub fn system(clump: &Manifest, outside: Vec<(crate::flows::Mote, Ratio, Ratio)>
         }
         let at = inside.clone();
         for (x, r, c) in &outside[i..j] {
-            motes.push(crate::flows::Mote { ell_o: crate::ring::grain(&(r.clone() * at.clone())), ell_orth: crate::ring::grain(&(c.clone() * at.clone())), agitation: crate::ring::grain(&x.agitation.clone().max(disc_agitation.clone())), ..x.clone() });
+            // In-plane, the balance spin of its place (the ring law); about
+            // the orthogonal axis, the circulation it carried, its share `c`
+            // of its orbit spin (never its offset read as a second orbit).
+            let ell_o = crate::ring::grain(&(r.clone() * at.clone()));
+            motes.push(crate::flows::Mote { ell_orth: crate::ring::grain(&(c.clone() * ell_o.clone())), ell_o, agitation: crate::ring::grain(&x.agitation.clone().max(disc_agitation.clone())), ..x.clone() });
             inside += x.amount.clone() * crate::flows::weight(&x.key) / total.clone();
         }
         i = j;
