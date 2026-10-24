@@ -332,7 +332,7 @@ fn main() {
                 }
                 m
             });
-            let (_, balance) = cfe::ratio::poles(&conductor::pulse::mass(&held), &conductor::pulse::magnetism(&held));
+            let (_, balance) = cfe::ratio::poles(&conductor::pulse::held(&held), &conductor::pulse::magnetism(&held));
             let f = conductor::reading::sector;
             println!("beat {beat}: POLES — universal core strength H_u {}, balance {} (the share at the ℤ pole)", f(&conductor::ocean::universe_hold(&universe)), f(&balance));
             // THE ENCLOSURES (docs/78): each galaxy its own S^360, each star

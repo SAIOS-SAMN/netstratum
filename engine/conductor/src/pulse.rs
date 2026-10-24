@@ -43,14 +43,22 @@ pub fn nucleus(x: &Ratio) -> Ratio {
     Ratio::new(x.numer() * &grid / x.denom(), grid)
 }
 
-/// A manifest's holding, exact: every amount is a whole count of nuclei on
-/// the one nucleon denominator and every weight whole, so the sum stays on
-/// that denominator however many kinds it adds.
+/// A manifest's MASS, exact: its weight, holding and magnetism converged
+/// (`chem::weight`, 3Z a nucleus; operator 2026-10-24), what gravity pulls
+/// and inertia answers by. Every amount is a whole count of nuclei on the one
+/// nucleon denominator and every weight whole, so the sum stays on that
+/// denominator however many kinds it adds; conserved exactly by the breath.
 pub fn mass(m: &Manifest) -> Ratio {
     m.iter().fold(ratio(0, 1), |s, (k, a)| {
-        let weight = crate::chem::hold(k);
+        let weight = crate::chem::weight(k);
         s + a.clone() * ratio(i64::from(weight), 1)
     })
+}
+
+/// A manifest's HOLDING, its closed frames alone (the Z pole): what the open
+/// frames (`magnetism`, the Q pole) are read against, as a push's open share.
+pub fn held(m: &Manifest) -> Ratio {
+    m.iter().fold(ratio(0, 1), |s, (k, a)| s + a.clone() * ratio(i64::from(crate::chem::hold(k)), 1))
 }
 
 /// The nuclei in one grain of any Z (docs/78, "The atom"): 60^30.
@@ -321,8 +329,7 @@ pub fn star_spin(b: &Body, unit: &Ratio) -> Ratio {
 /// either), so it is the same exact value on every read, derived, never
 /// stored. The galaxies keep theirs in their founded core state.
 pub fn universal_ledger(u: &Universe) -> Ratio {
-    let t = u.total();
-    mass(&t) + magnetism(&t)
+    mass(&u.total())
 }
 
 /// THE DISC'S CUT (docs/79 and docs/83; the push law with xylarium,
@@ -349,7 +356,7 @@ pub fn galaxy_push(grains: &Manifest) -> Option<(Ratio, Ratio, Ratio)> {
 /// The push and its CUT: as `galaxy_push`, with the lightest kind the
 /// throat still holds (None: it holds every kind).
 pub fn push_cut(grains: &Manifest) -> Option<(Ratio, Ratio, Ratio, Option<crate::chem::Kind>)> {
-    let weight = |k: &crate::chem::Kind| crate::chem::hold(k);
+    let weight = |k: &crate::chem::Kind| crate::chem::weight(k);
     let total = mass(grains);
     let count = grains.values().fold(ratio(0, 1), |s, a| s + a.clone());
     if total.is_zero() || count.is_zero() {
@@ -399,7 +406,7 @@ pub fn push_cut(grains: &Manifest) -> Option<(Ratio, Ratio, Ratio, Option<crate:
 /// The distribution keeps moving after (the waves, the breath): this is
 /// only where the founding pulse leaves it.
 pub fn disperse(grains: &Manifest) -> Manifest {
-    let weight = |k: &crate::chem::Kind| crate::chem::hold(k);
+    let weight = |k: &crate::chem::Kind| crate::chem::weight(k);
     let Some((p, h, mean)) = galaxy_push(grains) else { return Manifest::new() };
     grains
         .iter()
@@ -468,7 +475,7 @@ pub fn cascade(manifest: &Manifest) -> (Manifest, Vec<(Ratio, Manifest)>, Ratio)
     // denominators and every reach carries it, so the passes are owed as
     // certified readings (design law 11) before the grain comes off.
     let g = |x: &Ratio| crate::ring::grain(x);
-    let w = |k: &crate::chem::Kind| ratio(i64::from(crate::chem::hold(k)), 1);
+    let w = |k: &crate::chem::Kind| ratio(i64::from(crate::chem::weight(k)), 1);
     let total = mass(manifest);
     let count = manifest.values().fold(ratio(0, 1), |s, a| s + a.clone());
     if total.is_zero() || count.is_zero() {
@@ -1310,12 +1317,16 @@ mod tests {
 
     #[test]
     fn a_cluster_weighs_its_parts_in_the_galaxy_cut() {
-        // Water on S^11 holds 3·12 − 0 = 36, as Z016 does (3·16 − 12): one
-        // galaxy of each reads one push, one hold, one mean weight.
-        assert_eq!(crate::chem::hold(&crate::chem::Kind::parse("Z008·4Z001").expect("a kind")), crate::chem::hold(&crate::chem::Kind::parse("Z016").expect("a kind")));
-        let water: Manifest = [(crate::chem::Kind::parse("Z008·4Z001").expect("a kind"), ratio(1, 1)), (crate::chem::Kind::parse("Z001").expect("a kind"), ratio(3, 1))].into();
-        let sulphur: Manifest = [(crate::chem::Kind::parse("Z016").expect("a kind"), ratio(1, 1)), (crate::chem::Kind::parse("Z001").expect("a kind"), ratio(3, 1))].into();
-        assert_eq!(push_cut(&water).map(|(p, h, m, _)| (p, h, m)), push_cut(&sulphur).map(|(p, h, m, _)| (p, h, m)));
+        // A cluster's weight as mass is its parts' (3Z each, converged:
+        // operator 2026-10-24): water, Z008·4Z001, weighs 3·8 + 4·3 = 36, as
+        // Z012 does (3·12); one galaxy of each reads one push, one hold, one
+        // mean weight.
+        let k = |s: &str| crate::chem::Kind::parse(s).expect("a kind");
+        assert_eq!(crate::chem::weight(&k("Z008·4Z001")), crate::chem::weight(&k("Z008")) + 4 * crate::chem::weight(&k("Z001")));
+        assert_eq!(crate::chem::weight(&k("Z008·4Z001")), crate::chem::weight(&k("Z012")));
+        let water: Manifest = [(k("Z008·4Z001"), ratio(1, 1)), (k("Z001"), ratio(3, 1))].into();
+        let twelve: Manifest = [(k("Z012"), ratio(1, 1)), (k("Z001"), ratio(3, 1))].into();
+        assert_eq!(push_cut(&water).map(|(p, h, m, _)| (p, h, m)), push_cut(&twelve).map(|(p, h, m, _)| (p, h, m)));
     }
 
     #[test]

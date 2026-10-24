@@ -71,7 +71,7 @@ pub fn radiates(k: &crate::chem::Kind) -> Ratio {
 /// its core's disc `disc`, in its own units (regeneration). Returns (held,
 /// free, H).
 pub fn shells(all: &Manifest, disc: &Manifest) -> (Vec<Shell>, Vec<Shell>, Ratio) {
-    let weight = |k: &crate::chem::Kind| crate::chem::hold(k);
+    let weight = |k: &crate::chem::Kind| crate::chem::weight(k);
     let total = mass(all);
     let Some((push, h, mean)) = crate::pulse::galaxy_push(all) else { return (Vec::new(), Vec::new(), ratio(1, 1)) };
     let (mut held_out, mut out) = (Vec::new(), Vec::new());
@@ -444,7 +444,7 @@ pub fn carried(clump: &Manifest, turning: &Ratio, heat: &Ratio) -> Vec<(crate::c
     clump
         .keys()
         .map(|k| {
-            let w = ratio(i64::from(crate::chem::hold(k)), 1);
+            let w = ratio(i64::from(crate::chem::weight(k)), 1);
             let open = ratio(i64::from(crate::chem::atom_z(k).map(|z| cfe::almanac::atom::open_at(z, heat)).unwrap_or_else(|| crate::chem::unpaired(k))), 1) / w.clone();
             let ell = if open_mean.is_zero() { ratio(0, 1) } else { ratio(1, 2) * open / open_mean.clone() * mean_weight.clone() / w } + turning.clone();
             (k.clone(), ell)
@@ -467,7 +467,7 @@ pub fn heart_cut(clump: &Manifest, turning: &Ratio, heat: &Ratio) -> Option<(Man
     let mut kinds: Vec<(crate::chem::Kind, Ratio, Ratio)> = clump
         .iter()
         .map(|(k, a)| {
-            let w = ratio(i64::from(crate::chem::hold(k)), 1);
+            let w = ratio(i64::from(crate::chem::weight(k)), 1);
             let open = ratio(i64::from(crate::chem::atom_z(k).map(|z| cfe::almanac::atom::open_at(z, heat)).unwrap_or_else(|| crate::chem::unpaired(k))), 1) / w.clone();
             // CARRIED SPINS ADD (with xylarium): the place's turning (in
             // the plane orthogonal to the orbit, the rotoreflection) turns
@@ -572,7 +572,7 @@ pub fn struck_bands(kept: &Manifest, heat: &Ratio, strike: &Ratio) -> Option<(Ve
     let face = |ell: &Ratio| { let r = ell.clone() / h.clone(); (ratio(1, 1) - h.clone() / (r + h.clone())) / ratio(2, 1) };
     // The holding-weighted mean face of what stands outside the core.
     let (fw, ww) = base.iter().filter(|(k, _)| !core.contains_key(k)).fold((ratio(0, 1), ratio(0, 1)), |(f, w), (k, ell)| {
-        let wk = kept[k].clone() * ratio(i64::from(crate::chem::hold(k)), 1) / total.clone();
+        let wk = kept[k].clone() * ratio(i64::from(crate::chem::weight(k)), 1) / total.clone();
         (f + wk.clone() * face(ell), w + wk)
     });
     let mean_face = if ww.is_zero() { ratio(0, 1) } else { fw / ww };
@@ -803,7 +803,7 @@ pub fn system(clump: &Manifest, outside: Vec<(crate::flows::Mote, Ratio, Ratio)>
     // The newborn star's push: ½ × its hot heart's open share.
     // The spray leaves from the star's cool outer layers: their push (whole
     // atoms), never the hot heart's stripped share.
-    let star_push = if mass(&star).is_zero() { ratio(0, 1) } else { ratio(1, 2) * crate::pulse::magnetism(&star) / mass(&star) };
+    let star_push = if crate::pulse::held(&star).is_zero() { ratio(0, 1) } else { ratio(1, 2) * crate::pulse::magnetism(&star) / crate::pulse::held(&star) };
     // THE DISC (read first: the wind's hold counts it): what never fell, where it stands, turning at the balance of
     // its place in each plane, `ℓ = r·H(<r)` (the ring law: reach × the hold
     // inside it), the hold the system's own enclosure: the star as it stands
@@ -894,7 +894,7 @@ pub fn grip(m: &Manifest) -> Ratio {
     }
     m.iter().fold(ratio(0, 1), |s, (k, a)| {
         let t = crate::chem::parts(k).and_then(|(z, _)| atom(z)).map(|x| x.tightness).unwrap_or_else(|| ratio(0, 1));
-        s + a.clone() * ratio(i64::from(crate::chem::hold(k)), 1) * t
+        s + a.clone() * ratio(i64::from(crate::chem::weight(k)), 1) * t
     }) / total
 }
 
@@ -1013,7 +1013,7 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
     // length (`R·scale`).
     let Some(enc) = system_frame(sys, unit) else { return (0, 0, Manifest::new(), Vec::new(), (0, 0, 0, 0), [ratio(0, 1), ratio(0, 1), ratio(0, 1), ratio(0, 1)], (0, 0, 0)) };
     // The star's push on its system, `½ ×` its heart's open share.
-    let star_push = if mass(&sys.kept).is_zero() { ratio(0, 1) } else { ratio(1, 2) * crate::pulse::magnetism(&sys.kept) / mass(&sys.kept) };
+    let star_push = if crate::pulse::held(&sys.kept).is_zero() { ratio(0, 1) } else { ratio(1, 2) * crate::pulse::magnetism(&sys.kept) / crate::pulse::held(&sys.kept) };
     // THE STAR'S TORQUE ON ITS SYSTEM, on the star's own bell only (its clock),
     // never at every arrival: the one torque law (`flows::spin_torque`), the star
     // its system's core. Each mote, at the reach its orthogonal orbit swings
@@ -1485,7 +1485,7 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
         let h_in = enc.hold(&ell);
         let was_star = g.iter().any(|&i| i >= n_motes && items[i].4);
         let ignites = was_star || (kept.len() > 1 && !r_body.is_zero() && {
-            let own = (mass(&kept) + crate::pulse::magnetism(&kept)) / total.clone();
+            let own = mass(&kept) / total.clone();
             let lambda = own / r_body.clone();
             let face = (ratio(1, 1) - d_body.clone()) / ratio(2, 1);
             lambda.clone() / (ratio(1, 1) + lambda) >= heat_g.clone() + face.clone() && ratio(2, 1) * (heat_g.clone() + face) < ratio(1, 1)
@@ -1644,7 +1644,7 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
                 if !released.is_empty() && !h_k.is_zero() {
                     let lambda = mass(&sys.kept) / total.clone();
                     let carried_k = carried(&sys.kept, &ratio(0, 1), &ratio(0, 1));
-                    let star_push_now = if mass(&held).is_zero() { ratio(0, 1) } else { ratio(1, 2) * crate::pulse::magnetism(&held) / mass(&held) };
+                    let star_push_now = if crate::pulse::held(&held).is_zero() { ratio(0, 1) } else { ratio(1, 2) * crate::pulse::magnetism(&held) / crate::pulse::held(&held) };
                     let spins: Vec<(crate::chem::Kind, Ratio)> = carried_k.into_iter().filter(|(k, _)| released.contains_key(k)).map(|(k, l)| { let r = l / h_k.clone() * lambda.clone(); let h = enc.hold_within(&r); (k, r * h) }).collect();
                     let thrown = crate::flows::spray(&released, &spins, &sys.phase, &ratio(0, 1), bell, &star_push_now);
                     for x in &thrown {

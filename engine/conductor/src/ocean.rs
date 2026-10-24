@@ -49,7 +49,7 @@ pub fn universe_hold(u: &crate::pulse::Universe) -> Ratio {
     }
     u.cores.iter().fold(ratio(1, 1), |s, c| {
         let all = c.total();
-        s + crate::ring::grain(&((crate::pulse::core_state(c) + crate::pulse::mass(&all) + crate::pulse::magnetism(&all)) / whole.clone()))
+        s + crate::ring::grain(&((crate::pulse::core_state(c) + crate::pulse::mass(&all)) / whole.clone()))
     })
 }
 
@@ -175,7 +175,7 @@ pub fn arrival_turning(n: u64, r: &Ratio, h_g: &Ratio, m: &Ratio, h_u: &Ratio) -
 /// free, the free part's motes); `galaxy` is the galaxy's grains with the
 /// arrivals already counted.
 pub fn land(galaxy: &Manifest, arriving: &Manifest, rho: &Ratio, turning: &(Ratio, Ratio), born: u64) -> (Manifest, Manifest, Vec<crate::formation::Shell>) {
-    let weight = |k: &crate::chem::Kind| crate::chem::hold(k);
+    let weight = |k: &crate::chem::Kind| crate::chem::weight(k);
     let (mut held, mut free, mut motes) = (Manifest::new(), Manifest::new(), Vec::new());
     let total = mass(galaxy);
     let Some((p, h, mean)) = crate::pulse::galaxy_push(galaxy) else { return (held, arriving.clone(), motes) };

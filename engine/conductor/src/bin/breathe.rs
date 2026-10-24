@@ -200,7 +200,8 @@ fn main() {
     // Fusion transmutes kinds (H + H → He), so the manifest itself changes;
     // what the breath conserves is each nucleus's 3Z, holding plus
     // magnetism (transduction via magnetism).
-    let three_z = |m: &pulse::Manifest| pulse::mass(m) + pulse::magnetism(m);
+    // Mass is already the whole 3Z (holding and magnetism converged).
+    let three_z = |m: &pulse::Manifest| pulse::mass(m);
     println!("CONSERVATION — the breath created nothing (holding + magnetism, 3Z): {}; the manifest unchanged: {}", three_z(&u.total()) == three_z(&before), u.total() == before);
     // THE AGE (operator 2026-10-19: "universes age from their conception on
     // the TUniversal sexagesimal logged at their birth (distribution of

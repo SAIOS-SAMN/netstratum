@@ -608,12 +608,12 @@ fn main() {
             // balance the share at the ℤ pole (1: hardened, closed).
             let h_u = conductor::ocean::universe_hold(&u);
             let held: Vec<pulse::Manifest> = u.cores.iter().map(|c| c.total()).collect();
-            let (hold_all, mag_all) = held.iter().fold((ratio(0, 1), ratio(0, 1)), |(h, m), x| (h + pulse::mass(x), m + pulse::magnetism(x)));
+            let (hold_all, mag_all) = held.iter().fold((ratio(0, 1), ratio(0, 1)), |(h, m), x| (h + pulse::held(x), m + pulse::magnetism(x)));
             let (_, bal_u) = cfe::ratio::poles(&hold_all, &mag_all);
             println!("POLES universal core: strength H_u {} (1 + Σ state + holding + magnetism, founding units), balance {}", f(&h_u), f(&bal_u));
             for (c, x) in u.cores.iter().zip(&held) {
-                let (span, bal) = cfe::ratio::poles(&pulse::mass(x), &pulse::magnetism(x));
-                let stars: Vec<Ratio> = c.satellites.iter().map(|sys| cfe::ratio::poles(&pulse::mass(&sys.kept), &pulse::magnetism(&sys.kept)).1).collect();
+                let (span, bal) = cfe::ratio::poles(&pulse::held(x), &pulse::magnetism(x));
+                let stars: Vec<Ratio> = c.satellites.iter().map(|sys| cfe::ratio::poles(&pulse::held(&sys.kept), &pulse::magnetism(&sys.kept)).1).collect();
                 let (s0, s1) = (stars.iter().min().cloned().unwrap_or_else(|| ratio(0, 1)), stars.iter().max().cloned().unwrap_or_else(|| ratio(0, 1)));
                 println!("  galaxy {:>2}: strength {}, balance {}; its {} stars' balance {}..{}", c.path[0], f(&(span.extent() / unit.clone())), f(&bal), stars.len(), f(&s0), f(&s1));
             }

@@ -113,7 +113,7 @@ pub fn settle(x: &mut Mote, levers: &[(usize, Ratio, Ratio)], place: Option<&Rat
 
 /// A kind's weight (its hold).
 pub fn weight(k: &crate::chem::Kind) -> Ratio {
-    ratio(i64::from(crate::chem::hold(k)), 1)
+    ratio(i64::from(crate::chem::weight(k)), 1)
 }
 
 /// A kind's open share, unpaired over hold.

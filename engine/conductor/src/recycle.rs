@@ -230,13 +230,13 @@ pub fn recycle(motes: &mut Vec<Mote>, at: &[usize], b: &Ratio, s: &Ratio, g: &Ra
     // continuum.
     let mut room = ((g.clone() - s.clone()) / ratio(2, 1)).max(ratio(0, 1));
     let mut order: Vec<usize> = stack.iter().copied().filter(|&i| motes[i].amount > ratio(0, 1)).collect();
-    order.sort_by_key(|&i| std::cmp::Reverse(crate::chem::hold(&motes[i].key)));
+    order.sort_by_key(|&i| std::cmp::Reverse(crate::chem::weight(&motes[i].key)));
     let mut held: Vec<(crate::chem::Kind, Ratio)> = Vec::new();
     for i in order {
         if room <= ratio(0, 1) {
             break;
         }
-        let w = ratio(i64::from(crate::chem::hold(&motes[i].key)), 1);
+        let w = ratio(i64::from(crate::chem::weight(&motes[i].key)), 1);
         let t = crate::pulse::nucleus(&(room.clone() / w.clone())).min(motes[i].amount.clone());
         if t > ratio(0, 1) {
             room -= t.clone() * w;
@@ -244,7 +244,7 @@ pub fn recycle(motes: &mut Vec<Mote>, at: &[usize], b: &Ratio, s: &Ratio, g: &Ra
         }
     }
     for (k, mut t) in held {
-        out.trapped += t.clone() * ratio(i64::from(crate::chem::hold(&k)), 1);
+        out.trapped += t.clone() * ratio(i64::from(crate::chem::weight(&k)), 1);
         let mut at_throat: Option<Mote> = None;
         for &i in &stack {
             if t <= ratio(0, 1) {

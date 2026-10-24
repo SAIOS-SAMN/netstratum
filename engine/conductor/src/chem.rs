@@ -130,9 +130,19 @@ pub fn unpaired(kind: &Kind) -> u32 {
     }
 }
 
-/// Its hold, `3·charge − open`: the holding of its closed pairs.
+/// Its hold, `3·charge − open`: the holding of its closed pairs (the Z
+/// pole; chemistry reads its open frames against it).
 pub fn hold(kind: &Kind) -> u32 {
     3 * charge(kind) - unpaired(kind)
+}
+
+/// ITS WEIGHT AS MASS (operator 2026-10-24: "the 3Q that 3Z lives on top of
+/// and converges to the singular 'weight' as mass"): its closed frames and
+/// its open ones together, `hold + unpaired = 3·charge`, the one weight that
+/// gravity pulls and inertia answers by. Conserved through every fusion and
+/// peel (charge is).
+pub fn weight(kind: &Kind) -> u32 {
+    3 * charge(kind)
 }
 
 /// Whether it is closed (every open frame paired): inert.
