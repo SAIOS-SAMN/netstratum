@@ -942,58 +942,54 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 }
             }
         }
-        // CAPTURE FROM THE GALAXY MEDIUM (with xylarium; the inbound half of a
-        // star's circulation, the wind its outbound): a star holds the
-        // galaxy's motes standing within its gravitational reach, its pinch
-        // `d = R_s·H_s/(H_s + H_g)` (operator: gravity's reach), and in
-        // contact with it by phase, by that contact's share, in whole nuclei;
-        // a mote several stars claim divides among them. What is held joins
-        // the system's own medium at its reach in the system's unit (the
-        // region's edge, d, is the system's rim, 1), its phase relative to
-        // the star's, carrying its own heat. Remnants do not capture.
+        // CAPTURE IS SETTLING (operator 2026-10-24, relayed by xylarium: "the
+        // star is caught in its own gravitational motion with the galactic
+        // core which settles amongst all larger body gravity wells - and earth
+        // settles in the stars in the same formula derived"; the inbound half
+        // of a star's circulation, the wind its outbound). A galaxy mote whose
+        // place stands inside a star's sphere, where the star's pull meets the
+        // core's, `h_s/(d_s + h_s) = H/(d + H)`, so `d_s/d = k = h_s/H` (the
+        // Apollonian sphere of the two holds; its inner crossing is the
+        // pinch, `R_s·k/(1 + k)`), SETTLES into the star's system: no passage
+        // count, a mote moving with the star settles like any other; one
+        // several stars hold divides among them, whole nuclei to each alike.
+        // THE GALAXY TIER'S BOOK: the system's orbit takes the settled turning
+        // by holding in each plane, `ℓ′ = (W·ℓ + m·ℓ_m)/(W + m)` (W the
+        // system's whole holding, as its mergers and the folds join), the
+        // grain's remainder to the galaxy's medium spin, so the books close.
+        // THE SYSTEM TIER: it is set down at its place, radially `gap/(k·r_m)`
+        // (the sphere's edge the system's rim, 1), turning at that place's
+        // balance, `ℓ = r·H(<r)`; its circulation is what it carried against
+        // the star's, as a share of its orbit spin (an offset is a phase,
+        // never a second orbit). Remnants do not capture.
         if let (Some(_), Some(enc), false) = (&pre, &enc, scale_pre.is_zero() || g_before.is_zero()) {
             let reach_m = |x: &crate::flows::Mote| enc.reach(&x.ell_o).0;
-            let mut claims: Vec<Vec<(usize, Ratio)>> = vec![Vec::new(); core.flows.len()];
-            // The motes ordered by reach once; each star reads those within its
-            // gravity's reach (`flows::within_reach`).
+            let mut claims: Vec<Vec<usize>> = vec![Vec::new(); core.flows.len()];
             let mut by_reach: Vec<(Ratio, usize)> = core.flows.iter().enumerate().map(|(mi, x)| (reach_m(x), mi)).collect();
             by_reach.sort();
-            for (si, s) in keep.iter().enumerate() {
+            let farthest = by_reach.last().map(|(r, _)| r.clone()).unwrap_or_else(|| ratio(0, 1));
+            // Each standing star's sphere: (its reach, its k).
+            let spheres: Vec<Option<(Ratio, Ratio)>> = keep.iter().map(|s| {
                 if s.remnant || s.phase.is_empty() {
-                    continue;
+                    return None;
                 }
-                let (r_s, d_s) = enc.reach(&own_of(s));
-                let h_s = mass(&s.total()) / g_before.clone();
-                let d = crate::ring::pinch(&r_s, &h_s, &enc.hold(&own_of(s)));
-                if d.is_zero() {
-                    continue;
+                let r_s = enc.reach(&own_of(s)).0;
+                let h_in = enc.hold(&own_of(s));
+                if h_in.is_zero() || r_s.is_zero() {
+                    return None;
                 }
-                for &(ref r_m, mi) in crate::flows::within_reach(&by_reach, &r_s, &d, &mut crate::flows::Work::default()) {
-                    let x = &core.flows[mi];
-                    let r_m = r_m.clone();
-                    let gap = if r_m > r_s { r_m.clone() - r_s.clone() } else { r_s.clone() - r_m.clone() };
-                    if gap >= d {
-                        continue;
-                    }
-                    // ONCE PER PASSAGE (with xylarium): the mote is taken each
-                    // time their orbit phases' difference crosses a whole turn
-                    // this echo (the dance's conjunctions, in closed form), a
-                    // whole passage's contact (½) each time; a mote moving
-                    // with the star is never swept again.
-                    let d_m = enc.reach(&x.ell_o).1;
-                    let _ = r_m;
-                    let psi = x.phase[0].clone() - s.phase[0].clone();
-                    let turn = ratio(2, 1) * (d_m - d_s.clone());
-                    let crossed = (psi.clone() + turn).floor() - psi.floor();
-                    let crossings = if crossed < ratio(0, 1) { -crossed } else { crossed };
-                    // Each passage holds half of what still stands: k passages
-                    // hold 1 − 2^−k. Both deficits lie in (0, 1], so the turn
-                    // is under two and k is 0, 1 or 2; a count past the carrier
-                    // is refused, never capped.
-                    let Ok(k) = u32::try_from(crossings.to_integer()) else { continue };
-                    let c = ratio(1, 1) - Ratio::new(1.into(), num_bigint::BigInt::from(2).pow(k));
-                    if c > ratio(0, 1) {
-                        claims[mi].push((si, c));
+                Some((r_s, mass(&s.total()) / g_before.clone() / h_in))
+            }).collect();
+            for (si, sp) in spheres.iter().enumerate() {
+                let Some((r_s, k)) = sp else { continue };
+                // The sphere spans `R_s/(1 + k) .. R_s/(1 − k)` about the core;
+                // a star that outholds its place (k ≥ 1) reaches every mote
+                // beyond its inner crossing.
+                let d = if *k < ratio(1, 1) { r_s.clone() * k.clone() / (ratio(1, 1) - k.clone()) } else { farthest.clone() + r_s.clone() };
+                for &(ref r_m, mi) in crate::flows::within_reach(&by_reach, r_s, &d, &mut crate::flows::Work::default()) {
+                    let gap = if *r_m > *r_s { r_m.clone() - r_s.clone() } else { r_s.clone() - r_m.clone() };
+                    if gap < k.clone() * r_m.clone() {
+                        claims[mi].push(si);
                     }
                 }
             }
@@ -1003,33 +999,44 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 }
                 let n = ratio(cl.len() as i64, 1);
                 let r_m = reach_m(&core.flows[mi]);
-                for (si, c) in cl {
-                    let take = crate::pulse::nucleus(&(core.flows[mi].amount.clone() * c / n.clone())).min(core.flows[mi].amount.clone());
+                let whole_amount = core.flows[mi].amount.clone();
+                for si in cl {
+                    let take = if n == ratio(1, 1) { whole_amount.clone() } else { crate::pulse::nucleus(&(whole_amount.clone() / n.clone())) }.min(core.flows[mi].amount.clone());
                     if take <= ratio(0, 1) {
                         continue;
                     }
+                    let Some((r_s, k)) = spheres[si].clone() else { continue };
                     core.flows[mi].amount -= take.clone();
+                    let x = core.flows[mi].clone();
                     let s = &mut keep[si];
-                    let r_s = enc.reach(&own_of(s)).0;
-                    let h_s_g = mass(&s.total()) / g_before.clone();
-                    let d = crate::ring::pinch(&r_s, &h_s_g, &enc.hold(&own_of(s)));
-                    let gap = if r_m > r_s { r_m.clone() - r_s.clone() } else { r_s.clone() - r_m.clone() };
-                    let tot = mass(&s.total());
-                    let h_sys = if tot.is_zero() { ratio(1, 1) } else { mass(&s.kept) / tot.clone() };
-                    let x = &core.flows[mi];
-                    let phase: Vec<Ratio> = x.phase.iter().zip(&s.phase).map(|(a, b)| { let f = a.clone() - b.clone(); crate::ring::grain(&(f.clone() - f.floor())) }).collect();
                     let key = x.key.clone();
-                    // HELD WHERE IT STANDS (the disc's law, docs/91 P3): its
-                    // place in the system (the region's edge, d, the system's
-                    // rim, 1): radially `gap/d`, along its orthogonal orbit its
-                    // phase's offset from the star's at the star's reach; it
-                    // turns at the balance of that place, `ℓ = r·H(<r)`, H the
-                    // system's own enclosure there.
-                    let r_sys = gap / d.clone();
-                    let off_c = { let f = phase.get(1).cloned().unwrap_or_else(|| ratio(0, 1)); if f > ratio(1, 2) { ratio(1, 1) - f } else { f } };
-                    let c_sys = r_s.clone() * off_c / d;
+                    let m = take.clone() * crate::flows::weight(&key);
+                    // Its circulation against the star's, read before the book
+                    // moves the star's.
+                    let carried_c = if x.ell_o.is_zero() { ratio(0, 1) } else { (x.ell_orth.clone() - s.ell_orth.clone()) / x.ell_o.clone() };
+                    // The galaxy tier's book, both planes.
+                    let w_sys = mass(&s.total());
+                    if !(w_sys.clone() + m.clone()).is_zero() {
+                        let exact_o = (w_sys.clone() * s.ell.clone() + m.clone() * x.ell_o.clone()) / (w_sys.clone() + m.clone());
+                        let exact_c = (w_sys.clone() * s.ell_orth.clone() + m.clone() * x.ell_orth.clone()) / (w_sys.clone() + m.clone());
+                        let before = w_sys.clone() * (s.ell.clone() + s.ell_orth.clone()) + m.clone() * (x.ell_o.clone() + x.ell_orth.clone());
+                        let (go, gc) = (crate::ring::grain(&exact_o), crate::ring::grain(&exact_c));
+                        let rest = before.clone() - (w_sys.clone() + m.clone()) * (go.clone() + gc.clone());
+                        core.medium_spin += rest.clone() / unit.clone();
+                        identity.push(("settle", (w_sys.clone() + m.clone()) * (go.clone() + gc.clone()) + rest - before));
+                        s.ell = go;
+                        s.ell_orth = gc;
+                    }
+                    // The system tier: set down at its place.
+                    let gap = if r_m > r_s { r_m.clone() - r_s.clone() } else { r_s.clone() - r_m.clone() };
+                    let edge = k.clone() * r_m.clone();
+                    let r_sys = if edge.is_zero() { ratio(0, 1) } else { gap / edge };
+                    let tot = mass(&s.total());
+                    let h_sys = if tot.is_zero() { ratio(1, 1) } else { mass(&s.kept) / tot };
                     let h_at = crate::formation::system_frame(s, &unit).map(|enc_s| enc_s.hold_within(&r_sys)).unwrap_or(h_sys);
-                    let mote = crate::flows::Mote { key: key.clone(), amount: take.clone(), ell_o: crate::ring::grain(&(r_sys * h_at.clone())), ell_orth: crate::ring::grain(&(c_sys * h_at)), phase, agitation: x.agitation.clone(), born: bell, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1) };
+                    let ell_o = crate::ring::grain(&(r_sys * h_at));
+                    let phase: Vec<Ratio> = x.phase.iter().zip(&s.phase).map(|(a, b)| { let f = a.clone() - b.clone(); crate::ring::grain(&(f.clone() - f.floor())) }).collect();
+                    let mote = crate::flows::Mote { key: key.clone(), amount: take.clone(), ell_orth: crate::ring::grain(&(carried_c * ell_o.clone())), ell_o, phase, agitation: x.agitation.clone(), born: bell, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1) };
                     *s.medium.entry(key).or_insert_with(|| ratio(0, 1)) += take;
                     s.flows.push(mote);
                 }
