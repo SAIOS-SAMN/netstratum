@@ -1403,4 +1403,25 @@ mod passage_tests {
         // Across the bell: from ¾ to 1¼, the loss then the gain cancel.
         assert_eq!(mean_response(&ratio(3, 4), &ratio(1, 2)), ratio(0, 1));
     }
+
+    #[test]
+    fn the_torque_telescopes_its_invariant_holds_whatever_the_advance() {
+        // THE TORQUE'S INVARIANT (with xylarium 2026-10-24): a bell's push
+        // over the arc it sweeps, `p·δ·k` with `k` the passage mean over `2δ`,
+        // is `(p/2)·[F(ψ + 2δ) − F(ψ)]`, `F = f(1 − f)` the sawtooth's
+        // periodic antiderivative; so `I = ℓ − (p/2)·F(ψ)` stands, bell on
+        // bell, for any advances (arcs across the bell and past whole turns).
+        use cfe::ratio::Ratio;
+        let f_of = |x: &Ratio| { let f = x.clone() - x.floor(); f.clone() * (ratio(1, 1) - f) };
+        let p = ratio(1, 2);
+        let (mut ell, mut psi) = (ratio(7, 10), ratio(3, 10));
+        let inv = |ell: &Ratio, psi: &Ratio| ell.clone() - p.clone() / ratio(2, 1) * f_of(psi);
+        let start = inv(&ell, &psi);
+        for d in [ratio(1, 3), ratio(9, 20), ratio(1, 2), ratio(1, 7), ratio(5, 6), ratio(2, 5), ratio(3, 11), ratio(1, 1)] {
+            let len = ratio(2, 1) * d.clone();
+            ell = ell + p.clone() * d * mean_response(&psi, &len);
+            psi = psi + len;
+            assert_eq!(inv(&ell, &psi), start);
+        }
+    }
 }
