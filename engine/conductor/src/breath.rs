@@ -416,6 +416,9 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         // the universal bounce's, and the firmament stands in its enclosure.
         let home = crate::pulse::is_home(&u.cores[i]);
         let whole_u = mass(&u.total());
+        // The home's ledger unit: the universe's conserved 3Z, never its
+        // moving holding (`pulse::universal_ledger`).
+        let ledger_u = crate::pulse::universal_ledger(u);
         let home_push = if home { crate::pulse::home_push(u, &u.cores[i].total()) } else { None };
         let firm_held: Vec<(Ratio, Ratio)> = if home && !whole_u.is_zero() { u.firmament.iter().map(|x| (x.ell_o.clone(), x.amount.clone() * crate::flows::weight(&x.key) / whole_u.clone())).collect() } else { Vec::new() };
         let core = &mut u.cores[i];
@@ -518,7 +521,8 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             let h_s = { let t = mass(&sys.total()); if t.is_zero() { ratio(1, 1) } else { mass(&sys.kept) / t } };
             // Its spin's sense is a direction, never a rate: a star torqued
             // through to the other sense rings by its magnitude.
-            let spin_s = if sys.turning < ratio(0, 1) { -sys.turning.clone() } else { sys.turning.clone() };
+            let l_s = crate::pulse::star_spin(&sys, &unit);
+            let spin_s = if l_s < ratio(0, 1) { -l_s } else { l_s };
             let omega = h_s.clone() / (spin_s / h_s.clone() + h_s.clone());
             // Rings its clock received from its birth to a bell (none before).
             let rings_at = |at: u64| -> Option<u64> { if at > sys.born { crate::ring::whole(&(own.clone() * ratio(i64::try_from(at - sys.born).ok()?, 1))) } else { Some(0) } };
@@ -584,7 +588,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     // fast spinner, an ordered star, holds round). What it
                     // gains or gives back is the core reservoir's.
                     if !to_flows.is_zero() {
-                        let ledger_unit = if home { whole_u.clone() } else { crate::pulse::core_state(core) };
+                        let ledger_unit = if home { ledger_u.clone() } else { crate::pulse::core_state(core) };
                         let share = if ledger_unit.is_zero() { ratio(0, 1) } else { mass(&sys.total()) / ledger_unit };
                         let torqued = orth_flows.clone() + torque_orth - ratio(1, 2) * d_enc.clone() * orth_flows.clone();
                         let kept_c = torqued * keep_share.clone();
@@ -768,9 +772,11 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     }
                 }
             }
-            // SPIN-DOWN: what leaves carries its share of the star's spin.
+            // SPIN-DOWN: what leaves carries its share of the star's spin (its
+            // specific spin unchanged), the share floored at the flow so the
+            // extensive spin stays a bounded sum.
             if !kept_before.is_zero() {
-                sys.turning = crate::ring::grain(&(sys.turning.clone() * (ratio(1, 1) - mass(&back) / kept_before)));
+                sys.turning = sys.turning.clone() - crate::ring::grain(&(sys.turning.clone() * mass(&back) / kept_before));
             }
             // DECOHERENCE (operator: "coherence holds, decoherence splits";
             // with xylarium): the star's coherence with its GALAXY'S BELL,
@@ -1087,7 +1093,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // The reservoir is kept in the galaxy's FOUNDED holding (its
             // core's state, never drained), one fixed unit, so its exact sum
             // never compounds denominators echo on echo.
-            let ledger_unit = if home { whole_u.clone() } else { crate::pulse::core_state(core) };
+            let ledger_unit = if home { ledger_u.clone() } else { crate::pulse::core_state(core) };
             let throat = crate::flows::Enclosed::new(h.clone(), Vec::new());
             // A VACUUM MOTE PASSES THE THROAT (with xylarium) when its orthogonal orbit
             // phase crosses ½ during the torques (both streams pass the core
@@ -1336,7 +1342,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 // throat condition) in `reservoir`: decoherence sheds only
                 // what it holds above it.
                 let Some(ignition) = crate::formation::ignition_share(&a_clump) else { continue };
-                let mut sys = Body { ell_orth: ratio(0, 1), path, radius: r_guess, period: ratio(0, 1), kept, satellites: orbs, medium, ell: ratio(0, 1), medium_spin, gas: Vec::new(), born: bell, state: held_at_birth, flows: disc_motes, reservoir: ignition, turning: spin_own, bell: phases_own.clone(), phase: phases_own, load: world_load, remnant: false, heat: ratio(0, 1) };
+                let mut sys = Body { ell_orth: ratio(0, 1), path, radius: r_guess, period: ratio(0, 1), kept, satellites: orbs, medium, ell: ratio(0, 1), medium_spin, gas: Vec::new(), born: bell, state: held_at_birth.clone(), flows: disc_motes, reservoir: ignition, turning: crate::ring::grain(&(held_at_birth.clone() / unit.clone() * spin_own)), bell: phases_own.clone(), phase: phases_own, load: world_load, remnant: false, heat: ratio(0, 1) };
                 {
                     // Read by the system's one enclosure, as its meetings read it.
                     if let Some(enc) = crate::formation::system_frame(&sys, &unit) {

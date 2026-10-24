@@ -55,6 +55,65 @@ fn main() {
         }
         (n, widest, in_systems)
     };
+    // EVERY STORED FIELD'S WIDTH (the scalar-collapse audit: a value stored
+    // and stepped through a recurrence widens chunk on chunk; a bounded one
+    // levels): the widest exact value held per field, per tier, in bits.
+    let fields = |u: &pulse::Universe| -> std::collections::BTreeMap<String, u64> {
+        let mut w: std::collections::BTreeMap<String, u64> = std::collections::BTreeMap::new();
+        let mut put = |k: String, r: &cfe::ratio::Ratio| {
+            let b = bits(r);
+            let e = w.entry(k).or_insert(0);
+            *e = (*e).max(b);
+        };
+        fn body(tier: &str, b: &pulse::Body, put: &mut dyn FnMut(String, &cfe::ratio::Ratio)) {
+            let f = |n: &str| format!("{tier}.{n}");
+            for (n, r) in [("ell", &b.ell), ("ell_orth", &b.ell_orth), ("radius", &b.radius), ("period", &b.period), ("medium_spin", &b.medium_spin), ("state", &b.state), ("reservoir", &b.reservoir), ("turning", &b.turning), ("load", &b.load), ("heat", &b.heat)] {
+                put(f(n), r);
+            }
+            for p in b.phase.iter() {
+                put(f("phase"), p);
+            }
+            for p in b.bell.iter() {
+                put(f("bell"), p);
+            }
+            for a in b.kept.values() {
+                put(f("kept"), a);
+            }
+            for a in b.medium.values() {
+                put(f("medium"), a);
+            }
+            for x in &b.flows {
+                for (n, r) in [("amount", &x.amount), ("ell_o", &x.ell_o), ("ell_orth", &x.ell_orth), ("agitation", &x.agitation), ("lever_place", &x.lever_place)] {
+                    put(format!("{tier}.mote.{n}"), r);
+                }
+                for p in x.phase.iter() {
+                    put(format!("{tier}.mote.phase"), p);
+                }
+                for l in x.lever.iter() {
+                    put(format!("{tier}.mote.lever"), l);
+                }
+            }
+        }
+        for x in &u.firmament {
+            put("firmament.ell_o".into(), &x.ell_o);
+            put("firmament.amount".into(), &x.amount);
+        }
+        for a in u.medium.values() {
+            put("universe.medium".into(), a);
+        }
+        for c in &u.cores {
+            body("galaxy", c, &mut put);
+            for s in &c.satellites {
+                body("system", s, &mut put);
+                for x in &s.satellites {
+                    body("world", x, &mut put);
+                }
+            }
+        }
+        w
+    };
+    let show = |w: &std::collections::BTreeMap<String, u64>| w.iter().map(|(k, b)| format!("{k} {b}")).collect::<Vec<_>>().join(", ");
+    eprintln!("FIELDS at bell {start}: {}", show(&fields(&u)));
     let mut grown_past: Option<u64> = None;
     let mut last_motes = carrier(&u).0;
     for b in start..until {
@@ -65,6 +124,7 @@ fn main() {
             let (motes, widest, in_systems) = carrier(&u);
             let (rung, read) = events.iter().fold((0usize, 0usize), |a, e| (a.0 + e.rang.0, a.1 + e.rang.1));
             eprintln!("bell {}: {} echoes read; {motes} motes ({in_systems} in the systems), widest {widest} bits; star bells rang {rung} of {read} star-echoes", b + 1, events.len());
+            eprintln!("FIELDS at bell {}: {}", b + 1, show(&fields(&u)));
             if last_motes > 0 && motes > 2 * last_motes {
                 grown_past = Some(b + 1);
                 break;

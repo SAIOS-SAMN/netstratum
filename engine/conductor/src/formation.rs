@@ -1576,9 +1576,12 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
     sys.satellites = worlds;
     // The star gives up what its torques gave its system.
     if rang {
+        // On the universe's fixed unit (`Body::turning`): the system's shares
+        // times its holding over the unit, `Σ amount·w·Δℓ/unit`, bounded.
+        let to_u = total.clone() / unit.clone();
         let was = sys.turning.clone();
-        sys.turning -= paid / h_s.clone();
-        identities.push(("star", h_s.clone() * (sys.turning.clone() - was) + motes_moved + worlds_moved));
+        sys.turning -= paid * to_u.clone();
+        identities.push(("star", sys.turning.clone() - was + (motes_moved + worlds_moved) * to_u));
     }
     // INFALL INTO THE HEART (docs/91 C6; with xylarium 2026-10-23). A heart
     // has NO THROAT and no state (operators 2026-10-17: a throat is the tube
@@ -1624,7 +1627,8 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
         }
         sys.flows.retain(|x| x.amount > ratio(0, 1));
         if !fell.is_empty() {
-            let before = h_s.clone() * sys.turning.clone() + fell_l.clone();
+            let to_u = total.clone() / unit.clone();
+            let before = sys.turning.clone() + fell_l.clone() * to_u.clone();
             for (k, a) in dissociate(&fell) {
                 *sys.kept.entry(k).or_insert_with(|| ratio(0, 1)) += a;
             }
@@ -1654,9 +1658,8 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
                     sys.flows.extend(thrown);
                 }
             }
-            let h_now = mass(&sys.kept) / total.clone();
-            sys.turning = (before.clone() - thrown_l.clone()) / h_now.clone();
-            identities.push(("infall", h_now * sys.turning.clone() + thrown_l - before));
+            sys.turning = before.clone() - thrown_l.clone() * to_u.clone();
+            identities.push(("infall", sys.turning.clone() + thrown_l * to_u - before));
         }
     }
     (sticks, bounces, escaped, identities, fates, weighs, (struck_n, tugs_n, struck_n_swing))
@@ -1857,24 +1860,10 @@ pub fn collide_stars(stars: Vec<crate::pulse::Body>, c_pre: Vec<Ratio>, scale: &
                     }
                 }
             };
-            // THE STARS' OWN SPINS JOIN BY WHAT THEY CARRY (no square; with
-            // xylarium 2026-10-23): each is a product of two readings in its
-            // own system, its reach `ℓ_s/h` and its hold `h = kept/M`; into
-            // the merged system each reading moves once, the reach as a
-            // length by `M_i/M` and the hold as its share `kept_i/M`; the
-            // merged star's spin is their holding-weighted mean.
-            let merged_m = std::iter::once(&head).chain(members.iter()).fold(ratio(0, 1), |a, b| a + mass(&b.total()));
-            let merged_k = std::iter::once(&head).chain(members.iter()).fold(ratio(0, 1), |a, b| a + mass(&b.kept));
-            let read_in = |b: &crate::pulse::Body| -> Ratio {
-                let (m_i, k_i) = (mass(&b.total()), mass(&b.kept));
-                if m_i.is_zero() || k_i.is_zero() || merged_m.is_zero() {
-                    return ratio(0, 1);
-                }
-                let reach = b.turning.clone() / (k_i.clone() / m_i.clone()) * (m_i / merged_m.clone());
-                let hold = k_i / merged_m.clone();
-                reach * hold
-            };
-            let spin_sum = std::iter::once(&head).chain(members.iter()).fold(ratio(0, 1), |a, b| a + mass(&b.kept) * read_in(b));
+            // THE STARS' OWN SPINS ADD (conservation; no frame to cross): each
+            // is kept extensive on the universe's fixed unit (`Body::turning`),
+            // so the merged star's is their sum, exact.
+            let spin_sum = std::iter::once(&head).chain(members.iter()).fold(ratio(0, 1), |a, b| a + b.turning.clone());
             let head_was = head.phase.clone();
             rebase(&mut head.satellites, &mut head.flows, &head_was);
             for mut b in members {
@@ -1896,9 +1885,7 @@ pub fn collide_stars(stars: Vec<crate::pulse::Body>, c_pre: Vec<Ratio>, scale: &
                 // A merger with a remnant is a remnant.
                 head.remnant = head.remnant || b.remnant;
             }
-            if !merged_k.is_zero() {
-                head.turning = crate::ring::grain(&(spin_sum / merged_k));
-            }
+            head.turning = spin_sum;
             head.radius = crate::ring::grain(&radius);
             head.ell = crate::ring::grain(&ell);
             head.ell_orth = crate::ring::grain(&ell_orth);

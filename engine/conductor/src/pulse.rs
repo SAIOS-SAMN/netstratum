@@ -205,9 +205,14 @@ pub struct Body {
     /// The core's turning reservoir, the torques' antipole (tag 11): what it
     /// gave its motes' spin, taken from it, so `Σ m·ℓ + reservoir` holds.
     pub reservoir: Ratio,
-    /// A STAR'S OWN SPIN `ℓ_s` (tag 12; with xylarium): captured at birth
-    /// from its members' spread of orbital spin; its bell `ω_s = δ(ℓ_s/H_s)`
-    /// is the system's time. Zero for every other body.
+    /// A STAR'S OWN SPIN (tag 12; with xylarium): captured at birth from its
+    /// members' spread of orbital spin; its bell `ω_s = δ(ℓ_s/H_s)` is the
+    /// system's time. Kept EXTENSIVE on the universe's fixed unit, `S =
+    /// (kept/unit)·ℓ_s`, a bounded running sum of what it is paid and gives
+    /// (the scalar-collapse law: a specific spin re-divided by a share that
+    /// moves every echo widened without bound); its specific spin in its
+    /// system's units is read from it, `ℓ_s = S·unit/kept` (`star_spin`).
+    /// Zero for every other body.
     pub turning: Ratio,
     /// ITS ORTHOGONAL SPIN (tag 21; docs/90): its spin in the orthogonal orbit's plane, the
     /// orthogonal one, in the units of `ell` (its orbit spin): torqued by its
@@ -297,6 +302,27 @@ pub fn home_push(u: &Universe, grains: &Manifest) -> Option<(Ratio, Ratio, Ratio
 /// exactly one of its rings, so its state equals their total holding.
 pub fn universal_state(u: &Universe) -> Ratio {
     mass(&u.total())
+}
+
+/// A star's own specific spin in its system's units, read from its
+/// extensive spin (`Body::turning`): `ℓ_s = S·unit/kept`.
+pub fn star_spin(b: &Body, unit: &Ratio) -> Ratio {
+    let k = mass(&b.kept);
+    if k.is_zero() {
+        return ratio(0, 1);
+    }
+    b.turning.clone() * unit.clone() / k
+}
+
+/// THE HOME'S LEDGER UNIT (the scalar-collapse law: a ledger summed in a
+/// unit that moves widens without bound, each term on a new denominator):
+/// the universe's 3Z, its holding plus its magnetism, which the breath
+/// conserves exactly (burning trades holding for magnetism, never makes
+/// either), so it is the same exact value on every read, derived, never
+/// stored. The galaxies keep theirs in their founded core state.
+pub fn universal_ledger(u: &Universe) -> Ratio {
+    let t = u.total();
+    mass(&t) + magnetism(&t)
 }
 
 /// THE DISC'S CUT (docs/79 and docs/83; the push law with xylarium,
@@ -770,17 +796,21 @@ pub fn orbit_galaxies(u: &mut Universe) -> (crate::enfold::Cross, Option<Ratio>)
     // own units, the firmament's, so what the torques give the firmament the
     // home's reservoir gives up (`Σ m·ℓ + reservoir` exact).
     let mut identity = None;
+    // The singularity's reservoir and the firmament's spins are booked in the
+    // home's fixed ledger unit; the hold is read in shares of the whole.
+    let ledger_u = universal_ledger(u);
     if !u.firmament.is_empty() {
         let held = |x: &crate::flows::Mote| x.amount.clone() * crate::flows::weight(&x.key) / whole.clone();
+        let booked = |x: &crate::flows::Mote| x.amount.clone() * crate::flows::weight(&x.key) / ledger_u.clone();
         let enc = crate::flows::Enclosed::new(ratio(1, 1), u.firmament.iter().map(|x| (x.ell_o.clone(), held(x))).collect());
         let fm = u.firmament.iter().fold(ratio(0, 1), |s, x| s + x.amount.clone() * crate::flows::weight(&x.key));
         let fo = u.firmament.iter().fold(ratio(0, 1), |s, x| s + x.amount.clone() * ratio(i64::from(crate::chem::unpaired(&x.key)), 1));
         let push = if fm.is_zero() { None } else { Some(ratio(1, 2) * fo / fm) };
-        let ledger = |firm: &[crate::flows::Mote]| firm.iter().fold(ratio(0, 1), |s, x| s + held(x) * (x.ell_o.clone() + x.ell_orth.clone()));
+        let ledger = |firm: &[crate::flows::Mote]| firm.iter().fold(ratio(0, 1), |s, x| s + booked(x) * (x.ell_o.clone() + x.ell_orth.clone()));
         let before = ledger(&u.firmament);
         // The firmament stands in the source's own enclosure: it feels the
         // pulse at its own reach (`flows::turn`, no tide).
-        let (given, _) = crate::flows::torque(&mut u.firmament, &enc, &ratio(1, 2), None, &whole, push.as_ref(), &mut cross);
+        let (given, _) = crate::flows::torque(&mut u.firmament, &enc, &ratio(1, 2), None, &ledger_u, push.as_ref(), &mut cross);
         let moved = ledger(&u.firmament) - before;
         if let Some(home) = u.cores.iter_mut().find(|c| is_home(c)) {
             let was = home.reservoir.clone();
