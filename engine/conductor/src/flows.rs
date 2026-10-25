@@ -360,6 +360,12 @@ impl Enclosed {
         self.held[self.spins.partition_point(|l| l < ell)].clone()
     }
 
+    /// The enclosure's WHOLE hold: its base and every body in it (the rim
+    /// law, docs/78: an enclosure's rim is its own holding, `rim = H`).
+    pub fn whole(&self) -> Ratio {
+        self.held.last().cloned().unwrap_or_else(|| ratio(0, 1))
+    }
+
     /// `H(<r)` by PLACE: the base and every body whose own reach stands
     /// within `r`, the hold a body standing at reach r turns about (the ring
     /// law's containment read by place, for a body known by where it stands).
@@ -792,7 +798,11 @@ pub fn on_disc_leg(x: &Mote) -> bool {
 /// enclosing core's orthogonal orbits carry it round the same way. Returns
 /// the motes that left; the rest stay.
 pub fn exits(motes: &mut Vec<Mote>, enc: &Enclosed) -> Vec<Mote> {
-    let (gone, stay): (Vec<Mote>, Vec<Mote>) = std::mem::take(motes).into_iter().partition(|x| { let (r, _) = enc.reach(&x.ell_o); r >= enc.hold(&x.ell_o) });
+    // THE RIM is the enclosure's own whole holding (the rim law, docs/78:
+    // [throat 1, rim 2]), never the throat's condition `R = H(<ℓ)`, which
+    // is the RING, the disc's inner edge (docs/94 §2).
+    let rim = enc.whole();
+    let (gone, stay): (Vec<Mote>, Vec<Mote>) = std::mem::take(motes).into_iter().partition(|x| enc.reach(&x.ell_o).0 >= rim);
     *motes = stay;
     gone
 }
@@ -1239,7 +1249,7 @@ pub fn merge(motes: &mut Vec<Mote>, beads: &std::collections::BTreeMap<Vec<bool>
 /// The founding's motes for a galaxy: each kind of its grains carried by
 /// the bounce's push, `ℓ_o = p·w̄/w_z` (dispersal's form, own units), no
 /// circulation yet, the founding's phases, cold.
-pub fn founding(grains: &Manifest) -> Option<Vec<Mote>> {
+pub fn founding(grains: &Manifest, span: Option<&Ratio>) -> Option<Vec<Mote>> {
     let Some((p, _, mean)) = crate::pulse::galaxy_push(grains) else { return Some(Vec::new()) };
     // The source's phases, read exactly or the founding is refused. THE CAPTURES TURN THEM (with xylarium): each pass of the
     // outbound stream through the throat is one capture and turns the
@@ -1248,16 +1258,150 @@ pub fn founding(grains: &Manifest) -> Option<Vec<Mote>> {
     // Z·½`). Two groups at the founding, parted by each kind's own orthogonal orbit rate
     // `δ(R_z)` at its own reach thereafter. (The per-universe offset, the
     // hypha-assigned TUniversal position, is owed with mycelium.)
+    // FROM THE RING (operator 2026-10-25: "make worlds appear"; docs/94 §2:
+    // nothing can orbit inside the ring, where `2δ > 1` breaks the luminal
+    // bound): with `span` (the matter's share of the enclosure's hold, the
+    // disc's span from the ring at 1 to the rim at `1 + span`: 1 for a
+    // galaxy, whose state is its grains, the home's share of the universe
+    // for the home), kind z flows out from the ring to `R_z = 1 +
+    // span·p·w̄/w_z`, the heaviest nearest the ring, turning at the balance of
+    // that place `ℓ_z = R_z·H(<R_z)` (the hold by place: the ring's state 1
+    // and every kind nearer, each its share times the span). Without a span
+    // (the firmament, the Wellspring's held kinds at the singularity) it is
+    // carried from the centre, `ℓ_z = p·w̄/w_z`.
     let source = founding_phases()?;
-    Some(grains
+    let total = crate::pulse::mass(grains);
+    if total.is_zero() {
+        return Some(Vec::new());
+    }
+    let kinds: Vec<(&crate::chem::Kind, &Ratio, Ratio, Ratio)> = grains
         .iter()
         .filter(|(_, a)| **a > ratio(0, 1))
         .map(|(k, a)| {
+            let carried = p.clone() * mean.clone() / weight(k);
+            let place = match span { Some(sp) => ratio(1, 1) + sp.clone() * carried, None => carried };
+            (k, a, place, span.cloned().unwrap_or_else(|| ratio(1, 1)) * a.clone() * weight(k) / total.clone())
+        })
+        .collect();
+    let hold_at = |r: &Ratio| kinds.iter().filter(|(_, _, rj, _)| rj < r).fold(ratio(1, 1), |s, (_, _, _, sj)| s + sj.clone());
+    Some(kinds
+        .iter()
+        .map(|(k, a, r, _)| {
             let turn = ratio(i64::from(crate::chem::charge(k)), 2);
             let phase = vec![frac(&(source[0].clone() + turn.clone())), frac(&(ratio(1, 2) + turn))];
-            Mote { key: k.clone(), amount: a.clone(), ell_o: crate::ring::grain(&(p.clone() * mean.clone() / weight(k))), ell_orth: ratio(0, 1), phase, agitation: ratio(0, 1), born: 0, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1) }
+            let ell = if span.is_some() { r.clone() * hold_at(r) } else { r.clone() };
+            Mote { key: (*k).clone(), amount: (*a).clone(), ell_o: crate::ring::grain(&ell), ell_orth: ratio(0, 1), phase, agitation: ratio(0, 1), born: 0, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1) }
         })
         .collect())
+}
+
+/// THE MÖBIUS JETSTREAM'S MAP (docs/94 §2; operator 2026-10-25: "vacuum-
+/// continuum inversion needs to be a mobius inversion through the ocean as a
+/// jetstream current"), first degree in the deficit: `(δ, ψ, s) ↦ (1 − δ,
+/// ψ + ½, −s)`. On a mote it is its leg turned (continuum ↔ vacuum: the
+/// vacuum leg reads its pull at `1 − δ` and runs its circulation the other
+/// way, its sense flipped) and its orbit phase half a turn on. Twice is the
+/// identity.
+pub fn mobius(x: &mut Mote) {
+    x.vacuum = !x.vacuum;
+    if let Some(ph) = x.phase.get_mut(0) {
+        *ph = frac(&(ph.clone() + ratio(1, 2)));
+    }
+}
+
+/// THE LUMINAL BOUND (docs/94 §2; the UMD kinematic law, SUBSTRATE_C = 1):
+/// no particle turns more than one whole orbit in a K-step. A continuum mote
+/// turns `2δ` a bell, so inside the ring (`δ > ½`) it would fracture; it
+/// takes the Möbius jetstream instead, onto the vacuum leg, where its pull
+/// reads `1 − δ < ½`. Returns how many took it.
+pub fn luminal(motes: &mut [Mote], enc: &Enclosed) -> usize {
+    let mut n = 0;
+    for x in motes.iter_mut() {
+        if !x.vacuum && enc.reach(&x.ell_o).1 > ratio(1, 2) {
+            mobius(x);
+            n += 1;
+        }
+    }
+    n
+}
+
+/// THE FLUID BETWEEN RINGS (docs/94 §4, §6, §7; operator 2026-10-25: "derive
+/// the missing components - fluid-MHD and UMD overlay"; "build it"). The
+/// rings are the fluid's own beads (`beads`, one kind on one face). Each
+/// ring reads, never stores: its holding `m`, its spin `ℓ̄` and heat `ā`
+/// (holding-weighted), its reach `R` (its pinch), its width `2pR` (its
+/// band's spread), its DENSITY `ρ = m/(2pR)`, its PRESSURE `P = ρ·ā` plus its
+/// MAGNETIC PRESSURE, and its MAGNETIZATION `M = Σ u·in_step(φ, φ̄)` (each
+/// member's open frames by its field phase's in-step with the ring's mean,
+/// the field phase its circulation phase, frozen into the particle, so the
+/// rings' differential turning winds the field). Between neighbouring rings
+/// on a face (the inner at the lesser reach) two exchanges move turning
+/// OUTWARD by the exchange law (the outer gains `u·m_in`, the inner gives
+/// `u·m_out`, `u = share·(ℓ̄_out − ℓ̄_in)/(m_in + m_out)`, Σ m·ℓ unchanged):
+/// the PRESSURE's, whichever ring presses harder expanding, its share
+/// `|P_in − P_out|/(P_in + P_out)`; and the FIELD's (magnetic shear), its
+/// share `|M_in − M_out|/(M_in + M_out)` times the rings' gear contrast
+/// `|δ_in − δ_out|/(δ_in + δ_out)`. First degree, L1, saturating shares;
+/// every member of a ring moves alike. Returns (the pressure's spin moved,
+/// the field's spin moved), by holding.
+pub fn fluid(motes: &mut [Mote], enc: &Enclosed, p: &Ratio, total: &Ratio) -> (Ratio, Ratio) {
+    if total.is_zero() || motes.len() < 2 {
+        return (ratio(0, 1), ratio(0, 1));
+    }
+    let rings_by_face = beads(motes, enc, p, total, false);
+    let share = |x: &Mote| x.amount.clone() * weight(&x.key) / total.clone();
+    let mut dl = vec![ratio(0, 1); motes.len()];
+    let (mut moved_p, mut moved_b) = (ratio(0, 1), ratio(0, 1));
+    for rings in rings_by_face.values() {
+        // Each ring read once: (members, m, ℓ̄, R, P, M, δ).
+        let mut read: Vec<(Vec<usize>, Ratio, Ratio, Ratio, Ratio, Ratio, Ratio)> = rings.iter().filter_map(|(members, pinch)| {
+            let m = members.iter().fold(ratio(0, 1), |a, &i| a + share(&motes[i]));
+            if m.is_zero() {
+                return None;
+            }
+            let ell = members.iter().fold(ratio(0, 1), |a, &i| a + share(&motes[i]) * motes[i].ell_o.clone()) / m.clone();
+            let heat = members.iter().fold(ratio(0, 1), |a, &i| a + share(&motes[i]) * motes[i].agitation.clone()) / m.clone();
+            let field_mean = circle_mean(&members.iter().map(|&i| (share(&motes[i]), motes[i].phase.get(1).cloned().unwrap_or_else(|| ratio(0, 1)))).collect::<Vec<_>>());
+            let magnet = members.iter().fold(ratio(0, 1), |a, &i| a + motes[i].amount.clone() * ratio(i64::from(crate::chem::unpaired(&motes[i].key)), 1) / total.clone() * in_step(motes[i].phase.get(1).unwrap_or(&ratio(0, 1)), &field_mean));
+            let width = ratio(2, 1) * p.clone() * pinch.clone();
+            let pressure = if width.is_zero() { ratio(0, 1) } else { (m.clone() * heat + magnet.clone()) / width };
+            let delta = enc.reach(&ell).1;
+            Some((members.clone(), m, ell, pinch.clone(), pressure, magnet, delta))
+        }).collect();
+        read.sort_by(|a, b| a.3.cmp(&b.3));
+        for w in read.windows(2) {
+            let (inn, out) = (&w[0], &w[1]);
+            let gap = out.2.clone() - inn.2.clone();
+            let m_ij = inn.1.clone() + out.1.clone();
+            if gap <= ratio(0, 1) || m_ij.is_zero() {
+                continue;
+            }
+            let contrast = |a: &Ratio, b: &Ratio| { let s = a.clone() + b.clone(); if s.is_zero() { ratio(0, 1) } else { (if a > b { a.clone() - b.clone() } else { b.clone() - a.clone() }) / s } };
+            let s_p = contrast(&inn.4, &out.4);
+            let s_b = contrast(&inn.5, &out.5) * contrast(&inn.6, &out.6);
+            for (s, moved) in [(s_p, &mut moved_p), (s_b, &mut moved_b)] {
+                if s.is_zero() {
+                    continue;
+                }
+                let u = s * gap.clone() / m_ij.clone();
+                let (gain, give) = (u.clone() * inn.1.clone(), u * out.1.clone());
+                for &i in &out.0 {
+                    dl[i] += gain.clone();
+                }
+                for &i in &inn.0 {
+                    dl[i] -= give.clone();
+                }
+                *moved += out.1.clone() * gain;
+            }
+        }
+    }
+    for (x, d) in motes.iter_mut().zip(dl) {
+        if !d.is_zero() {
+            let now = crate::ring::grain(&(x.ell_o.clone() + d));
+            x.ell_o = through_centre(now, &mut x.phase);
+        }
+    }
+    (moved_p, moved_b)
 }
 
 /// The motes' total holding (by weight).
@@ -1282,7 +1426,7 @@ mod reading_tests {
     /// The founding's motes of the first `k` kinds, one grain each: the
     /// engine's own construction, each mote at its own carried reach.
     fn motes(k: u32) -> Vec<Mote> {
-        founding(&(1..=k).filter_map(|z| Some((crate::chem::Kind::atom(z)?, ratio(1, 1)))).collect()).expect("the founding's phases are read exactly")
+        founding(&(1..=k).filter_map(|z| Some((crate::chem::Kind::atom(z)?, ratio(1, 1)))).collect(), None).expect("the founding's phases are read exactly")
     }
 
     /// A fibre's reach and bands as the chain law reads them: `R = ℓ/H`, the
@@ -1402,6 +1546,17 @@ mod passage_tests {
         assert_eq!(mean_response(&ratio(1, 2), &ratio(1, 2)), ratio(-1, 2));
         // Across the bell: from ¾ to 1¼, the loss then the gain cancel.
         assert_eq!(mean_response(&ratio(3, 4), &ratio(1, 2)), ratio(0, 1));
+    }
+
+    #[test]
+    fn the_mobius_jetstream_twice_is_the_identity() {
+        use super::{mobius, Mote};
+        let mut x = Mote { key: crate::chem::Kind::parse("Z026").expect("a kind"), amount: ratio(1, 1), ell_o: ratio(1, 3), ell_orth: ratio(0, 1), phase: vec![ratio(3, 10), ratio(1, 7)], agitation: ratio(0, 1), born: 0, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1) };
+        let was = x.clone();
+        mobius(&mut x);
+        assert!(x.vacuum && x.phase[0] == ratio(4, 5), "one pass: the other leg, half a turn on");
+        mobius(&mut x);
+        assert_eq!(x, was, "two passes close");
     }
 
     #[test]

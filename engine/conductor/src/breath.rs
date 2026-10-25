@@ -1190,7 +1190,15 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             let mut in_throat: Vec<usize> = Vec::new();
             for (x, t_o, t_c) in gathered {
                 let (k, a, agitation) = (x.key, x.amount, x.agitation);
-                let ell_o = p.clone() * mean.clone() / crate::flows::weight(&k) + nested(g_rate.as_ref(), t_o);
+                // It lands FROM THE RING (docs/94 §2), within its disc's span
+                // (its matter's share of its hold: 1 for a galaxy, the home's
+                // share of the universe for the home), at the balance of its
+                // place in the galaxy's one enclosure; its own crossing
+                // turning carried.
+                let span = if home && !whole_u.is_zero() { mass(&core.total()) / whole_u.clone() } else { ratio(1, 1) };
+                let r_land = ratio(1, 1) + span * p.clone() * mean.clone() / crate::flows::weight(&k);
+                let h_land = enc.as_ref().map(|e| e.hold_within(&r_land)).unwrap_or_else(|| ratio(1, 1));
+                let ell_o = r_land * h_land + nested(g_rate.as_ref(), t_o);
                 let ell_orth = nested(g_rate.as_ref(), t_c);
                 // It arrives with the Wellspring's winding: its orthogonal orbit leads its orbit by
                 // the push share (½ at the universe tier), the jet's helix.
@@ -1304,6 +1312,13 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // THE SHEAR: neighbouring rings pass turning outward; the inner
             // falls in (the loop becomes an orbit). Σ m·ℓ unchanged.
             let _ = crate::flows::shear(&mut core.flows, enc.as_ref().unwrap_or(&throat), &ledger_unit);
+            // THE FLUID (docs/94): pressure and the field move turning
+            // outward between the galaxy's rings; and THE LUMINAL BOUND: a
+            // continuum mote inside the ring takes the Möbius jetstream onto
+            // the vacuum leg, never orbiting faster than a turn a bell.
+            let enc_f = galaxy_enc(core);
+            let _ = crate::flows::fluid(&mut core.flows, &enc_f, &p, &ledger_unit);
+            let _ = crate::flows::luminal(&mut core.flows, &enc_f);
             // THE EXITS: the jet (along the axis) and radial escape cross
             // whole into the ocean (their state's onward carriage owed: the
             // ocean is not yet motes).

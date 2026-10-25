@@ -1083,6 +1083,9 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
     // they stand in contact, so the inner falls in and the outer moves out,
     // and the disc accretes. `Σ m·ℓ` unchanged.
     let _ = crate::flows::shear(&mut sys.flows, &enc, &total);
+    // THE FLUID one tier down (docs/94): the disc's rings move turning
+    // outward by their pressure and their field.
+    let _ = crate::flows::fluid(&mut sys.flows, &enc, &star_push, &total);
     // The system's motes merge by its own gatherings, the beads of its disc
     // (one kind on one face, a fibre's run between its hold's minima; no
     // grid), its band the star's push.

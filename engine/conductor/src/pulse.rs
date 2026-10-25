@@ -735,7 +735,7 @@ pub fn deploy(_seed: &[u8; 32], manifest: &Manifest) -> Option<Universe> {
     // THE FIRMAMENT: the Wellspring's held kinds stay at the singularity as
     // motes at their capture phases (`flows::founding`), never poured into
     // the ocean.
-    let firmament = if wellspring.is_empty() { Vec::new() } else { crate::flows::founding(&wellspring)? };
+    let firmament = if wellspring.is_empty() { Vec::new() } else { crate::flows::founding(&wellspring, None)? };
     // Beads too slight to hold a hole of a nucleus stay the OCEAN: motes at
     // their beads' reach, on the vacuum leg (set down below, once the
     // galaxies inside them are known).
@@ -844,7 +844,8 @@ pub fn deploy(_seed: &[u8; 32], manifest: &Manifest) -> Option<Universe> {
             // each kind carried by the bounce's push with the founding's
             // phases; what is held and what is gas is READ from their state
             // (the cut as a reading), never placed.
-            let flows = crate::flows::founding(&m)?;
+            // A galaxy's state is its grains: its disc spans the ring to 2.
+            let flows = crate::flows::founding(&m, Some(&ratio(1, 1)))?;
             let (kept, medium) = match galaxy_push(&m) {
                 // By its one enclosure as founded: the throat 1, each mote
                 // by its share of the galaxy's holding at its own spin.
@@ -861,7 +862,9 @@ pub fn deploy(_seed: &[u8; 32], manifest: &Manifest) -> Option<Universe> {
     // THE HOME at the universal core: its matter as motes, all of it gas
     // beyond the throat (the throat's held part is the firmament).
     if !home.is_empty() {
-        let flows = crate::flows::founding(&home)?;
+        // The home's state is the universe's: its disc spans its own share.
+        let home_span = if whole.is_zero() { ratio(0, 1) } else { mass(&home) / whole.clone() };
+        let flows = crate::flows::founding(&home, Some(&home_span))?;
         cores.insert(0, Body { ell_orth: ratio(0, 1), path: vec![0], radius: ratio(0, 1), period: ratio(0, 1), kept: Manifest::new(), satellites: Vec::new(), medium: home, ell: ratio(0, 1), medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: ratio(0, 1), flows, reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1) });
     }
     Some(Universe { cores, ocean, firmament, unit, t_u })
