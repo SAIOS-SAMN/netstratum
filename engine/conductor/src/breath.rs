@@ -608,8 +608,10 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     let to_flows = ratio(1, 1);
                     let orth_flows = sys.ell_orth.clone() * to_flows.clone();
                     // At the reach its orthogonal orbit swings it to (docs/90 D2).
-                    let (now, _) = crate::flows::swung(&ell_s, &orth_flows, sys.phase.get(1).unwrap_or(&ratio(0, 1)));
+                    let (now, through_c) = crate::flows::swung(&ell_s, &orth_flows, sys.phase.get(1).unwrap_or(&ratio(0, 1)));
                     let (r, d_enc) = enc.reach(&now);
+                    // Its orbit phase as the echo starts (the pull reads it).
+                    let psi_o = sys.phase.first().cloned().unwrap_or_else(|| ratio(0, 1));
                     let h_in = enc.hold(&now);
                     let was = sys.bell.clone();
                     // The star's place: the cap its own gravity holds about it.
@@ -683,6 +685,26 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                                 }
                             }
                         }
+                    }
+                    // THE CORE PULLS THE STAR (operator 2026-10-24: "they will
+                    // be pulled by the torque from their higher order galactic
+                    // core"): its orbit spin takes its galaxy's torque by the one
+                    // law, as the galaxy's motes do (the band held back, operator
+                    // 2026-10-21): the core's push over its passage by
+                    // hemisphere, `p·δ·k`, from the orbit phase it stood at.
+                    // Through the centre where it passes it; the core's
+                    // reservoir pays exactly what is stored.
+                    let from = if through_c { psi_o.clone() + ratio(1, 2) - (psi_o.clone() + ratio(1, 2)).floor() } else { psi_o };
+                    let k = crate::flows::mean_response(&from, &(ratio(2, 1) * d_enc.clone()));
+                    let raw = sys.ell.clone() + p_g.clone() * d_enc.clone() * k;
+                    let ledger_unit = if home { ledger_u.clone() } else { crate::pulse::core_state(core) };
+                    if !ledger_unit.is_zero() {
+                        let share = mass(&sys.total()) / ledger_unit;
+                        let before = core.reservoir.clone() + share.clone() * sys.ell.clone();
+                        let pulled = crate::flows::through_centre(crate::ring::grain(&raw), &mut sys.phase);
+                        core.reservoir -= share.clone() * (pulled.clone() - sys.ell.clone());
+                        sys.ell = pulled;
+                        identity.push(("pull", core.reservoir.clone() + share * sys.ell.clone() - before));
                     }
                 }
             }
