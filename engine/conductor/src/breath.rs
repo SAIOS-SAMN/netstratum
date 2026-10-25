@@ -1339,7 +1339,8 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     (radial, along(0), along(1))
                 }).collect();
                 let places: Vec<(Ratio, Ratio)> = members.iter().zip(&offsets).map(|(x, (r, o, c))| (held_of(x), r.clone().max(o.clone()).max(c.clone()))).collect();
-                let fallen = crate::formation::infall(&places);
+                let falling: Vec<(crate::pulse::Manifest, Ratio, Ratio)> = members.iter().zip(&places).map(|(x, (w, d))| ([(x.key.clone(), x.amount.clone())].into_iter().collect(), w.clone(), d.clone())).collect();
+                let fallen = crate::formation::infall(&falling);
                 let lambda = members.iter().zip(&fallen).filter(|(_, f)| **f).fold(ratio(0, 1), |s, (x, _)| s + held_of(x)) / m.clone();
                 let (mut fell, mut fell_held, mut heat, mut amt) = (crate::pulse::Manifest::new(), ratio(0, 1), ratio(0, 1), ratio(0, 1));
                 let mut orth_held = ratio(0, 1);

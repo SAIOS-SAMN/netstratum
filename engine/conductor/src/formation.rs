@@ -401,26 +401,50 @@ pub fn agitation_of(ignition: &Ratio) -> Ratio {
     (ratio(1, 1) - x.clone()) / (ratio(2, 1) * (ratio(1, 1) + x))
 }
 
-/// THE INFALL (docs/91, the disc from the collapse): of a clump's members,
-/// each `(holding, distance from the clump's centre in the clump's own
-/// units)`, which fall into the forming heart. A member falls where it stands
-/// within the hold of what has fallen, `r ≤ H*` (`δ = H*/(r + H*) ≥ ½`, the
-/// heart cut's own test read by place), `H*` the share the fallen hold, read
-/// from all fallen down to the fixed point (order-free, as the heart cut's
-/// held set). The rest stays out: the disc.
-pub fn infall(members: &[(Ratio, Ratio)]) -> Vec<bool> {
-    let m = members.iter().fold(ratio(0, 1), |s, (w, _)| s + w.clone());
+/// THE INFALL (docs/91, the disc from the collapse; operator 2026-10-25,
+/// with xylarium: "the core of stars which should be 'reactors'"): of a
+/// clump's members, each `(its matter, its holding, its distance from the
+/// clump's centre in the clump's own units)`, which fall into the forming
+/// heart. A reactor has NO THROAT, so what falls is never read by the throat
+/// condition (`r ≤ H*`, `δ ≥ ½`): it is read by the REACTOR'S OWN EXTENT. A
+/// member falls where its place stands within `λ·R_max`, `λ` the share of
+/// the clump that has fallen and `R_max` the reach of the outermost kind the
+/// DARK cut of what has fallen holds (`heart_cut` at turning 0 and heat 0,
+/// its push ½), read from all fallen down to the fixed point, order-free (each
+/// release shrinks λ and re-reads the cut). The rest stays out: the disc,
+/// between the extent and the system's breathing rim.
+pub fn infall(members: &[(Manifest, Ratio, Ratio)]) -> Vec<bool> {
+    let m = members.iter().fold(ratio(0, 1), |s, (_, w, _)| s + w.clone());
     if m.is_zero() {
         return vec![false; members.len()];
     }
     let mut fallen = vec![true; members.len()];
-    let mut held = ratio(1, 1);
     loop {
+        let mut fell = Manifest::new();
+        let mut held_w = ratio(0, 1);
+        for ((k, w, _), f) in members.iter().zip(&fallen) {
+            if *f {
+                for (kind, a) in k {
+                    *fell.entry(kind.clone()).or_insert_with(|| ratio(0, 1)) += a.clone();
+                }
+                held_w += w.clone();
+            }
+        }
+        if fell.is_empty() {
+            break;
+        }
+        let fell = dissociate(&fell);
+        let extent = match heart_cut(&fell, &ratio(0, 1), &ratio(0, 1)) {
+            Some((held, _, h_k)) if !h_k.is_zero() => {
+                let r_max = carried(&fell, &ratio(0, 1), &ratio(0, 1)).into_iter().filter(|(k, _)| held.contains_key(k)).map(|(_, l)| l / h_k.clone()).max().unwrap_or_else(|| ratio(0, 1));
+                held_w / m.clone() * r_max
+            }
+            _ => ratio(0, 1),
+        };
         let mut changed = false;
-        for i in 0..members.len() {
-            if fallen[i] && members[i].1 > held {
+        for (i, (_, _, d)) in members.iter().enumerate() {
+            if fallen[i] && *d > extent {
                 fallen[i] = false;
-                held -= members[i].0.clone() / m.clone();
                 changed = true;
             }
         }
