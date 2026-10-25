@@ -98,8 +98,13 @@ fn main() {
             put("firmament.ell_o".into(), &x.ell_o);
             put("firmament.amount".into(), &x.amount);
         }
-        for a in u.medium.values() {
-            put("universe.medium".into(), a);
+        for x in &u.ocean {
+            for (n, r) in [("amount", &x.amount), ("ell_o", &x.ell_o), ("ell_orth", &x.ell_orth), ("agitation", &x.agitation)] {
+                put(format!("ocean.{n}"), r);
+            }
+            for p in x.phase.iter() {
+                put("ocean.phase".into(), p);
+            }
         }
         for c in &u.cores {
             body("galaxy", c, &mut put);
@@ -277,7 +282,7 @@ fn main() {
                 *w = (*w).max(bits(a));
             }
         };
-        seen(&u.medium, &mut amounts);
+        seen(&u.medium(), &mut amounts);
         let mut motes: Vec<&conductor::flows::Mote> = u.firmament.iter().collect();
         for c in &u.cores {
             seen(&c.total(), &mut amounts);

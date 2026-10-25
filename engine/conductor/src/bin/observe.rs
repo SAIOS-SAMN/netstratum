@@ -97,7 +97,7 @@ fn main() {
         "universe" => {
             let stars: usize = u.cores.iter().map(|c| c.satellites.len()).sum();
             let worlds: usize = u.cores.iter().flat_map(|c| &c.satellites).map(|s| s.satellites.len()).sum();
-            println!("UNIVERSE at beat {now}: {} galaxies, {stars} stars, {worlds} worlds; intergalactic medium {} of the whole", u.cores.len(), f(&(pulse::mass(&u.medium) / universe_hold.clone())));
+            println!("UNIVERSE at beat {now}: {} galaxies, {stars} stars, {worlds} worlds; intergalactic medium {} of the whole", u.cores.len(), f(&(pulse::mass(&u.medium()) / universe_hold.clone())));
             for (i, c) in u.cores.iter().enumerate() {
                 let total = pulse::mass(&c.total());
                 println!(
@@ -345,7 +345,7 @@ fn main() {
             let gas_h = u.cores.iter().map(|c| h_of(&c.medium)).chain(stars.iter().map(|s| h_of(&s.medium))).fold(ratio(0, 1), |a, b| a + b);
             let all_h = h_of(&u.total());
             println!("CENSUS at beat {now}: medium {} of the universe, {} galaxies, {} stars ({} burning, {} remnants), {} companions",
-                share(&u.medium), u.cores.len(), stars.len(), stars.len() - remnants, remnants,
+                share(&u.medium()), u.cores.len(), stars.len(), stars.len() - remnants, remnants,
                 stars.iter().map(|s| s.satellites.iter().filter(|w| w.born > 0).count()).sum::<usize>());
             let sys_h = stars.iter().map(|s| h_of(&s.medium)).fold(ratio(0, 1), |a, b| a + b);
             println!("  CLOUDS: hydrogen in the galaxies' and systems' gas {} of all hydrogen; in the SYSTEMS' media alone {} ({} of all)", of(&gas_h, &all_h), f(&sys_h), of(&sys_h, &all_h));
@@ -639,7 +639,7 @@ fn main() {
                 m
             });
             let galaxies: Vec<&pulse::Body> = u.cores.iter().collect();
-            for (name, m) in [("ocean", u.medium.clone()), ("galaxy gas", sum(&galaxies)), ("system media", sum(&systems)), ("world media", sum(&worlds))] {
+            for (name, m) in [("ocean", u.medium()), ("galaxy gas", sum(&galaxies)), ("system media", sum(&systems)), ("world media", sum(&worlds))] {
                 println!("  MEDIUM {name:<13} {} of the universe; {}", f(&(pulse::mass(&m) / mass.clone())), composition(&m, 5));
             }
             // SHED: what the stars returned to their galaxy's gas, echo by

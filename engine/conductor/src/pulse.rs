@@ -426,7 +426,13 @@ pub fn disperse(grains: &Manifest) -> Manifest {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Universe {
     pub cores: Vec<Body>,
-    pub medium: Manifest,
+    /// THE OCEAN OF SPACE (operator 2026-10-25: "this needs to be aligned on
+    /// 'jetstreams' of vacuum/continuum via the ocean of space"; "build the
+    /// ocean as motes"; with xylarium): the medium between galaxies as
+    /// MOTES, each a parcel of matter carrying its state, in transit on the
+    /// vacuum leg home, never at rest. Its manifest is a reading
+    /// (`Universe::medium`). Tag 24, one mote a record.
+    pub ocean: Vec<crate::flows::Mote>,
     /// THE FIRMAMENT (operator 2026-10-19: "the heaviest elements probably
     /// dont move that much, and form an orderly 'container' around the
     /// 'bouncing antipoles' ... the pulses over time ... should move the
@@ -730,14 +736,15 @@ pub fn deploy(_seed: &[u8; 32], manifest: &Manifest) -> Option<Universe> {
     // motes at their capture phases (`flows::founding`), never poured into
     // the ocean.
     let firmament = if wellspring.is_empty() { Vec::new() } else { crate::flows::founding(&wellspring)? };
-    let mut medium = Manifest::new();
+    // Beads too slight to hold a hole of a nucleus stay the OCEAN: motes at
+    // their beads' reach, on the vacuum leg (set down below, once the
+    // galaxies inside them are known).
+    let mut slight: Vec<(Ratio, Manifest)> = Vec::new();
     let whole = mass(manifest);
     let mut shares: Vec<(u32, Manifest, Ratio)> = Vec::new();
     for (i, (d, m)) in beads.into_iter().enumerate() {
         if take(&m, &tier(2).centre).is_empty() {
-            for (k, a) in m {
-                *medium.entry(k).or_insert_with(|| ratio(0, 1)) += a;
-            }
+            slight.push((d, m));
             continue;
         }
         shares.push((i as u32 + 1, m, d));
@@ -799,7 +806,7 @@ pub fn deploy(_seed: &[u8; 32], manifest: &Manifest) -> Option<Universe> {
     let mut orbits: Vec<(Ratio, Ratio, Ratio)> = vec![(ratio(0, 1), ratio(0, 1), ratio(0, 1)); shares.len()];
     // Inside every galaxy: the singularity's state, the firmament, and the
     // home's matter (its state is the singularity's, counted once).
-    let mut inside = ratio(1, 1) + firm + weight_of(&home);
+    let mut inside = ratio(1, 1) + firm.clone() + weight_of(&home);
     let bells = ratio(t_u as i64, 4);
     let mut k = 0;
     while k < order.len() {
@@ -813,6 +820,20 @@ pub fn deploy(_seed: &[u8; 32], manifest: &Manifest) -> Option<Universe> {
             inside += ratio(2, 1) * weight_of(&shares[j].1);
         }
         k += ring.len();
+    }
+    // THE OCEAN at the founding: each slight bead's kinds as motes at its
+    // reach, turning at the balance of that place about the singularity and
+    // every galaxy inside it (the galaxies' own law), on the vacuum leg.
+    let base_in = ratio(1, 1) + firm.clone() + weight_of(&home);
+    let mut ocean: Vec<crate::flows::Mote> = Vec::new();
+    for (d, m) in slight {
+        let inside = shares.iter().filter(|(_, _, dj)| *dj < d).fold(base_in.clone(), |a, (_, mj, _)| a + ratio(2, 1) * weight_of(mj));
+        let ell = crate::ring::spin(&d, &inside);
+        for (k, a) in m {
+            if a > ratio(0, 1) {
+                ocean.push(crate::flows::Mote { key: k, amount: a, ell_o: crate::ring::grain(&ell), ell_orth: ratio(0, 1), phase: vec![ratio(0, 1), ratio(1, 2)], agitation: ratio(0, 1), born: 0, vacuum: true, lever: Vec::new(), lever_place: ratio(0, 1) });
+            }
+        }
     }
     let mut cores = shares
         .into_iter()
@@ -843,7 +864,7 @@ pub fn deploy(_seed: &[u8; 32], manifest: &Manifest) -> Option<Universe> {
         let flows = crate::flows::founding(&home)?;
         cores.insert(0, Body { ell_orth: ratio(0, 1), path: vec![0], radius: ratio(0, 1), period: ratio(0, 1), kept: Manifest::new(), satellites: Vec::new(), medium: home, ell: ratio(0, 1), medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: ratio(0, 1), flows, reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1) });
     }
-    Some(Universe { cores, medium, firmament, unit, t_u })
+    Some(Universe { cores, ocean, firmament, unit, t_u })
 }
 
 /// THE GALAXIES ORBIT, DERIVED (operator 2026-10-19: "fixed reach and
@@ -861,6 +882,26 @@ pub fn deploy(_seed: &[u8; 32], manifest: &Manifest) -> Option<Universe> {
 /// live reach. Returns the cross and the firmament torque's identity residual
 /// (its spin moved plus the singularity's reservoir moved: zero where paid
 /// exactly).
+/// THE OCEAN'S FRAME: the universe's enclosure as the galaxies' orbits read
+/// it (`orbit_galaxies`), in core rings: the singularity's state 1, the
+/// firmament, the home's matter at the centre (its state is the
+/// singularity's, counted once), every other galaxy at its orbit spin by
+/// `2w` (its state and its grains), and the ocean's own motes, each a share
+/// of the universe's mass. An ocean mote's reach is read from it, `R =
+/// ℓ/H(<ℓ)`, in the same rings as a galaxy's.
+pub fn ocean_frame(u: &Universe) -> Option<crate::flows::Enclosed> {
+    let whole = mass(&u.total());
+    if whole.is_zero() {
+        return None;
+    }
+    let firm = u.firmament.iter().fold(ratio(0, 1), |s, x| s + x.amount.clone() * crate::flows::weight(&x.key)) / whole.clone();
+    let home: Ratio = u.cores.iter().filter(|c| is_home(c)).fold(ratio(0, 1), |s, c| s + mass(&c.total()) / whole.clone());
+    let bodies = u.cores.iter().filter(|c| !is_home(c)).map(|c| (c.ell.clone(), ratio(2, 1) * mass(&c.total()) / whole.clone()))
+        .chain(u.ocean.iter().map(|x| (x.ell_o.clone(), x.amount.clone() * crate::flows::weight(&x.key) / whole.clone())))
+        .collect();
+    Some(crate::flows::Enclosed::new(ratio(1, 1) + firm + home, bodies))
+}
+
 pub fn orbit_galaxies(u: &mut Universe) -> (crate::enfold::Cross, Option<Ratio>) {
     let mut cross = crate::enfold::Cross::default();
     let whole = mass(&u.total());
@@ -908,6 +949,27 @@ pub fn orbit_galaxies(u: &mut Universe) -> (crate::enfold::Cross, Option<Ratio>)
         // Its order: matter pushing matter apart by its open frames
         // (`flows::repel`), at the bounce's push.
         crate::flows::repel(&mut u.firmament, &ratio(1, 2));
+    }
+    // THE OCEAN IN TRANSIT (operator 2026-10-25: "jetstreams of
+    // vacuum/continuum via the ocean of space"; never at rest): the
+    // universal bounce torques every ocean mote by the one law about the
+    // ocean's frame (the band held back, as for a galaxy's motes), its
+    // vacuum-leg motes at their inverted reach; the singularity's reservoir,
+    // the home's, pays (identity with the firmament's).
+    if !u.ocean.is_empty() {
+        if let Some(enc_o) = ocean_frame(u) {
+            let booked = |x: &crate::flows::Mote| x.amount.clone() * crate::flows::weight(&x.key) / ledger_u.clone();
+            let ledger = |sea: &[crate::flows::Mote]| sea.iter().fold(ratio(0, 1), |s, x| s + booked(x) * (x.ell_o.clone() + x.ell_orth.clone()));
+            let before = ledger(&u.ocean);
+            let (given, _) = crate::flows::torque(&mut u.ocean, &enc_o, &ratio(1, 2), None, &ledger_u, None, &mut cross);
+            let moved = ledger(&u.ocean) - before;
+            if let Some(home) = u.cores.iter_mut().find(|c| is_home(c)) {
+                let was = home.reservoir.clone();
+                home.reservoir -= given;
+                let r = moved + (home.reservoir.clone() - was);
+                identity = Some(identity.unwrap_or_else(|| ratio(0, 1)) + r);
+            }
+        }
     }
     // The singularity's state (1) and the firmament it holds (its holding
     // share, as matter: only a throat counts twice).
@@ -969,8 +1031,17 @@ pub fn spin_total(u: &Universe, unit: &Ratio) -> Ratio {
 }
 
 impl Universe {
+    /// The ocean's matter, read from its motes.
+    pub fn medium(&self) -> Manifest {
+        let mut m = Manifest::new();
+        for x in &self.ocean {
+            *m.entry(x.key.clone()).or_insert_with(|| ratio(0, 1)) += x.amount.clone();
+        }
+        m
+    }
+
     pub fn total(&self) -> Manifest {
-        let mut all = self.medium.clone();
+        let mut all = self.medium();
         for x in &self.firmament {
             *all.entry(x.key.clone()).or_insert_with(|| ratio(0, 1)) += x.amount.clone();
         }
@@ -1102,14 +1173,11 @@ pub fn write(var_root: &Path, seed: &[u8; 32], u: &Universe) -> std::io::Result<
     for c in &u.cores {
         put_body(c, &mut out);
     }
-    let mut v = Vec::new();
-    put_manifest(&u.medium, &mut v);
-    cfe::tlv::put(2, &v, &mut out);
     let mut w = Vec::new();
     cfe::ratio::encode(&u.unit, &mut w);
     cfe::tlv::put(8, &w, &mut out);
     cfe::tlv::put(17, &u.t_u.to_le_bytes(), &mut out);
-    for x in &u.firmament {
+    for (tag, x) in u.firmament.iter().map(|x| (19u8, x)).chain(u.ocean.iter().map(|x| (24u8, x))) {
         let mut w = Vec::new();
         let key = x.key.to_string();
         w.extend_from_slice(&(key.len() as u16).to_le_bytes());
@@ -1128,7 +1196,7 @@ pub fn write(var_root: &Path, seed: &[u8; 32], u: &Universe) -> std::io::Result<
         for l in &x.lever {
             cfe::ratio::encode(l, &mut w);
         }
-        cfe::tlv::put(19, &w, &mut out);
+        cfe::tlv::put(tag, &w, &mut out);
     }
     std::fs::create_dir_all(var_root)?;
     let path = var_root.join("pulse.bin");
@@ -1232,7 +1300,7 @@ fn get_mote(v: &[u8]) -> Option<crate::formation::Shell> {
 pub fn read(var_root: &Path) -> Option<([u8; 32], Universe)> {
     let bytes = std::fs::read(var_root.join("pulse.bin")).ok()?;
     let mut seed = None;
-    let mut medium = Manifest::new();
+    let mut ocean: Vec<crate::flows::Mote> = Vec::new();
     let mut unit: Option<Ratio> = None;
     let mut t_u: Option<u64> = None;
     let mut firmament: Vec<crate::flows::Mote> = Vec::new();
@@ -1245,7 +1313,14 @@ pub fn read(var_root: &Path) -> Option<([u8; 32], Universe)> {
     for (t, v) in cfe::tlv::records(&bytes) {
         match t {
             3 => seed = v.try_into().ok(),
-            2 => medium = get_manifest(v, &mut 0)?,
+            // A file from before the ocean was motes: its manifest at the
+            // singularity, on the vacuum leg (its amounts kept whole).
+            2 => {
+                for (k, a) in get_manifest(v, &mut 0)? {
+                    ocean.push(crate::flows::Mote { key: k, amount: a, ell_o: ratio(0, 1), ell_orth: ratio(0, 1), phase: vec![ratio(0, 1), ratio(1, 2)], agitation: ratio(0, 1), born: 0, vacuum: true, lever: Vec::new(), lever_place: ratio(0, 1) });
+                }
+            }
+            24 => ocean.push(get_flow(v)?),
             1 => flat.push(get_body(v)?),
             6 => flat.last_mut()?.gas.push(get_mote(v)?),
             7 => flat.last_mut()?.born = u64::from_le_bytes(v.try_into().ok()?),
@@ -1285,7 +1360,7 @@ pub fn read(var_root: &Path) -> Option<([u8; 32], Universe)> {
         }
     }
     let (unit, t_u) = (unit.filter(|u| !u.is_zero())?, t_u?);
-    Some((seed?, Universe { cores, medium, firmament, unit, t_u }))
+    Some((seed?, Universe { cores, ocean, firmament, unit, t_u }))
 }
 
 #[cfg(test)]
@@ -1295,7 +1370,7 @@ mod tests {
     #[test]
     fn a_universe_file_without_its_unit_is_refused() {
         let dir = std::env::temp_dir().join(format!("ns-refuse-unit-{}", std::process::id()));
-        let u = Universe { cores: Vec::new(), medium: [(crate::chem::Kind::parse("Z001").expect("a kind"), ratio(1, 1))].into(), firmament: Vec::new(), unit: ratio(1, 2), t_u: 15 };
+        let u = Universe { cores: Vec::new(), ocean: vec![crate::flows::Mote { key: crate::chem::Kind::parse("Z001").expect("a kind"), amount: ratio(1, 1), ell_o: ratio(1, 3), ell_orth: ratio(0, 1), phase: vec![ratio(0, 1), ratio(1, 2)], agitation: ratio(0, 1), born: 0, vacuum: true, lever: Vec::new(), lever_place: ratio(0, 1) }], firmament: Vec::new(), unit: ratio(1, 2), t_u: 15 };
         write(&dir, &[7u8; 32], &u).expect("written");
         assert!(read(&dir).is_some());
         let bytes = std::fs::read(dir.join("pulse.bin")).expect("read");
@@ -1335,7 +1410,7 @@ mod tests {
         let orb = Body { ell_orth: ratio(0, 1), path: vec![1, 1, 1], radius: ratio(3, 2), period: ratio(5, 2), kept: [(crate::chem::Kind::parse("Z008").expect("a kind"), ratio(1, 64))].into(), satellites: Vec::new(), medium: Manifest::new(), ell: ratio(7, 3), medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1) };
         let sys = Body { ell_orth: ratio(0, 1), path: vec![1, 1], radius: ratio(9, 2), period: ratio(11, 2), kept: [(crate::chem::Kind::parse("Z001").expect("a kind"), ratio(3, 1024))].into(), satellites: vec![orb], medium: Manifest::new(), ell: ratio(1, 9), medium_spin: ratio(1, 7), gas: Vec::new(), born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1) };
         let core = Body { ell_orth: ratio(0, 1), path: vec![1], radius: ratio(60, 1), period: ratio(0, 1), kept: [(crate::chem::Kind::parse("Z026").expect("a kind"), ratio(1, 2))].into(), satellites: vec![sys], medium: [(crate::chem::Kind::parse("Z001").expect("a kind"), ratio(5, 4))].into(), ell: ratio(0, 1), medium_spin: ratio(13, 11), gas: vec![mote], born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1) };
-        let u = Universe { cores: vec![core], medium: [(crate::chem::Kind::parse("Z002").expect("a kind"), ratio(1, 1024))].into(), firmament: Vec::new(), unit: ratio(1, 2), t_u: 15 };
+        let u = Universe { cores: vec![core], ocean: vec![crate::flows::Mote { key: crate::chem::Kind::parse("Z002").expect("a kind"), amount: ratio(1, 1024), ell_o: ratio(1, 3), ell_orth: ratio(0, 1), phase: vec![ratio(0, 1), ratio(1, 2)], agitation: ratio(0, 1), born: 0, vacuum: true, lever: Vec::new(), lever_place: ratio(0, 1) }], firmament: Vec::new(), unit: ratio(1, 2), t_u: 15 };
         let dir = std::env::temp_dir().join(format!("pulse-{}", std::process::id()));
         write(&dir, &[7; 32], &u).unwrap();
         assert_eq!(read(&dir), Some(([7; 32], u)), "the file gives the universe back");

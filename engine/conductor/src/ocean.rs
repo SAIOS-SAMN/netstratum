@@ -1,5 +1,12 @@
 //! THE OCEAN: the return leg of the recycling circuit (docs/83, "Recycling
-//! and recyclotronic propulsion"; with xylarium, proposed, to be tested).
+//! and recyclotronic propulsion"; with xylarium). THE OCEAN IS MOTES
+//! (operator 2026-10-25: "jetstreams of vacuum/continuum via the ocean of
+//! space"; "build the ocean as motes"): `Universe::ocean`, each mote in
+//! transit on the vacuum leg (`pulse::orbit_galaxies` torques it, its reach
+//! read by `pulse::ocean_frame`), landing WHOLE in the one galaxy whose pull
+//! is greatest at its reach among those whose swing holds it (`breath`). The
+//! standing crests and the gathered share below are RETIRED (they divided the
+//! ocean by holdings); the swing, the crossing's turning and the pump stay.
 //!
 //! - **The crests.** The universal core regenerates its pulse at full
 //!   strength (operator ruling (i)); in universe units `H_u` (`universe_hold`:
@@ -53,28 +60,6 @@ pub fn universe_hold(u: &crate::pulse::Universe) -> Ratio {
     })
 }
 
-fn gcd(a: i64, b: i64) -> i64 {
-    if b == 0 { a } else { gcd(b, a % b) }
-}
-
-/// The coupled crests standing at echo `n`: `(reach in core rings, a_q)`.
-pub fn crests(n: u64, h_u: &Ratio) -> Vec<(Ratio, Ratio)> {
-    let h = h_u.clone();
-    let mut out = Vec::new();
-    let mut q: i64 = 1;
-    while q as u64 <= n.max(1) {
-        // p/q in (½, 1].
-        for p in (q / 2 + 1)..=q {
-            if gcd(p, q) != 1 {
-                continue;
-            }
-            out.push((h.clone() * (ratio(2 * p, q) - ratio(1, 1)), ratio(1, q)));
-        }
-        q += 2;
-    }
-    out
-}
-
 /// A galaxy's swing about reach `r` (core rings), its holding `h_g` in
 /// universe units: `(R₋, R₊)`.
 pub fn swing(r: &Ratio, h_g: &Ratio, h_u: &Ratio) -> (Ratio, Ratio) {
@@ -85,33 +70,6 @@ pub fn swing(r: &Ratio, h_g: &Ratio, h_u: &Ratio) -> (Ratio, Ratio) {
     }
     let e = tau.clone() / (tau + h_g.clone());
     (r.clone() * (ratio(1, 1) - e.clone()), r.clone() * (ratio(1, 1) + e))
-}
-
-/// The share of the ocean a galaxy gathers over `half_swings` half-swings at
-/// echo `n`: its reach `r` (core rings), its holding `h_g` and the ocean's
-/// `m` (both in universe units). Each crest within the swing is crossed
-/// once a half-swing; the take from a crest never exceeds what stands there.
-pub fn gathered(n: u64, r: &Ratio, h_g: &Ratio, m: &Ratio, half_swings: u64, h_u: &Ratio) -> Ratio {
-    if half_swings == 0 || m.is_zero() || h_g.is_zero() {
-        return ratio(0, 1);
-    }
-    let all = crests(n, h_u);
-    let sum = all.iter().fold(ratio(0, 1), |s, (_, a)| s + a.clone());
-    let (lo, hi) = swing(r, h_g, h_u);
-    all.iter().filter(|(at, _)| *at >= lo && *at <= hi).fold(ratio(0, 1), |s, (_, a)| {
-        let on = a.clone() / sum.clone();
-        let m_q = m.clone() * on.clone();
-        let each = a.clone() * h_g.clone() / (h_g.clone() + m_q);
-        s + on * (each * ratio(half_swings as i64, 1)).min(ratio(1, 1))
-    })
-}
-
-/// Take the share `share` of the ocean, kind by kind on the grain.
-pub fn take(ocean: &Manifest, share: &Ratio) -> Manifest {
-    if share.is_zero() || mass(ocean).is_zero() {
-        return Manifest::new();
-    }
-    crate::pulse::take(ocean, &share.clone().min(ratio(1, 1)))
 }
 
 /// The relative turning at a crossing (proposed): the galaxy keeps its
@@ -141,24 +99,6 @@ pub fn radial_share(r: &Ratio, h_g: &Ratio, at: &Ratio, h_u: &Ratio) -> Ratio {
     let off = ratio(2, 1) * u - ratio(1, 1);
     let off = if off < ratio(0, 1) { -off } else { off };
     e * (ratio(1, 1) - off).max(ratio(0, 1))
-}
-
-/// The crossings' turning in the two planes (the bivector, never reduced to
-/// a magnitude), each weighted by what its crest gave: (the orbit's plane,
-/// tangential; the swing's plane, radial).
-pub fn arrival_turning(n: u64, r: &Ratio, h_g: &Ratio, m: &Ratio, h_u: &Ratio) -> (Ratio, Ratio) {
-    let all = crests(n, h_u);
-    let sum = all.iter().fold(ratio(0, 1), |s, (_, a)| s + a.clone());
-    let (lo, hi) = swing(r, h_g, h_u);
-    let (mut w, mut t, mut rad) = (ratio(0, 1), ratio(0, 1), ratio(0, 1));
-    for (at, a) in all.iter().filter(|(at, _)| *at >= lo && *at <= hi) {
-        let m_q = m.clone() * a.clone() / sum.clone();
-        let each = a.clone() * h_g.clone() / (h_g.clone() + m_q) * a.clone() / sum.clone();
-        t += each.clone() * relative_turning(r, at, h_u);
-        rad += each.clone() * radial_share(r, h_g, at, h_u);
-        w += each;
-    }
-    if w.is_zero() { (ratio(0, 1), ratio(0, 1)) } else { (t / w.clone(), rad / w) }
 }
 
 /// WHERE ARRIVING MATTER LANDS (xylarium, proposed: CARRIED SPINS ADD,
