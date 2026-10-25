@@ -971,7 +971,7 @@ pub fn system_frame(sys: &crate::pulse::Body, unit: &Ratio) -> Option<crate::flo
 /// matter that overstepped the rim, and, on the star's bell, the residual of
 /// its torque's identity (`h_s·Δℓ_s + Σ m·Δℓ`, the star's spin and its system's
 /// across the torques: zero where the star paid exactly what it gave).
-pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, rang: bool, _t_u: u64, cross: &mut crate::enfold::Cross) -> (usize, usize, Manifest, Vec<(&'static str, Ratio)>, (usize, usize, usize, usize), [Ratio; 4], (usize, usize, usize)) {
+pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, rang: bool, _t_u: u64, rim_sys: &Ratio, cross: &mut crate::enfold::Cross) -> (usize, usize, Manifest, Vec<(&'static str, Ratio)>, (usize, usize, usize, usize), [Ratio; 4], (usize, usize, usize)) {
 
     let total = mass(&sys.total());
     if total.is_zero() || (sys.flows.is_empty() && sys.satellites.is_empty()) {
@@ -1395,7 +1395,11 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
     // how heavy its kinds are).
     let mut weighs = [ratio(0, 1), ratio(0, 1), ratio(0, 1), ratio(0, 1)];
     let nuclei = |m: &Manifest| m.values().fold(ratio(0, 1), |s, a| s + a.clone());
-    let rim = ratio(1, 1);
+    // THE RIM BREATHES (operator 2026-10-25: "this should be derived based on
+    // the system and dynamically breathe"): the system's own reach of
+    // gravity in its own units, read from its galaxy this echo (`rim_sys`,
+    // breath's `rim_of`), never a fixed 1.
+    let rim = rim_sys.clone();
     for (_, g) in groups {
         let r_group = {
             let m: Ratio = g.iter().map(|&i| mass(&items[i].0)).fold(ratio(0, 1), |a, b| a + b);

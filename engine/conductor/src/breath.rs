@@ -524,6 +524,26 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 _ => crate::ring::grain(&own),
             }
         };
+        // THE SYSTEM'S RIM, BREATHING (operator 2026-10-25: "this should be
+        // derived based on the system and dynamically breathe"; ruling O1, a
+        // body's place is its own cap from gravity's reach): its gravity's
+        // reach in its galaxy now, `d = R_s·h_s/(h_s + H)` (H the hold inside
+        // its reach), read in its own units, whose length is its holding share
+        // `λ = h_s`: `ρ = d/λ = R_s/(h_s + H)`. Deep where the core dominates
+        // (R_s < H) the system is smaller than its holding; farther out, larger;
+        // it follows the star every echo as it migrates, gains and sheds.
+        let rim_of = |b: &Body| -> Ratio {
+            match &enc {
+                Some(enc) if !g_before.is_zero() => {
+                    let own = own_of(b);
+                    let (r_s, _) = enc.reach(&own);
+                    let h = enc.hold(&own);
+                    let h_s = mass(&b.total()) / g_before.clone();
+                    if (h_s.clone() + h.clone()).is_zero() { ratio(1, 1) } else { r_s / (h_s + h) }
+                }
+                _ => ratio(1, 1),
+            }
+        };
         // Worlds of emptied remnants, re-anchored after the stars are read.
         let mut orphans: Vec<(Body, Ratio, Ratio, Vec<Ratio>)> = Vec::new();
         merged += star_sticks;
@@ -720,7 +740,8 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 }
                 // Its system still moves: worlds and debris meet, and what
                 // oversteps the rim crosses into the galaxy.
-                let (st, bo, escaped, star_identity, made, weighs, met_by) = crate::formation::collide_system(&mut sys, &unit, bell, rang, t_u, &mut cross);
+                let rim_s = rim_of(&sys);
+                let (st, bo, escaped, star_identity, made, weighs, met_by) = crate::formation::collide_system(&mut sys, &unit, bell, rang, t_u, &rim_s, &mut cross);
                 impacts = (impacts.0 + met_by.0, impacts.1 + met_by.1, impacts.2 + met_by.2);
                 for (a, b) in weights.iter_mut().zip(weighs) {
                     *a += b;
@@ -939,7 +960,8 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             }
             // COLLISIONS in the system's own medium: worlds grow; what
             // overreaches the system's rim crosses into the galaxy.
-            let (st, bo, escaped, star_identity, made, weighs, met_by) = crate::formation::collide_system(&mut sys, &unit, bell, rang, t_u, &mut cross);
+            let rim_s = rim_of(&sys);
+            let (st, bo, escaped, star_identity, made, weighs, met_by) = crate::formation::collide_system(&mut sys, &unit, bell, rang, t_u, &rim_s, &mut cross);
                 impacts = (impacts.0 + met_by.0, impacts.1 + met_by.1, impacts.2 + met_by.2);
                 for (a, b) in weights.iter_mut().zip(weighs) {
                     *a += b;
@@ -1065,8 +1087,11 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     }
                     // The system tier: set down at its place.
                     let gap = if r_m > r_s { r_m.clone() - r_s.clone() } else { r_s.clone() - r_m.clone() };
-                    let edge = k.clone() * r_m.clone();
-                    let r_sys = if edge.is_zero() { ratio(0, 1) } else { gap / edge };
+                    // A galaxy length enters the system divided once by its
+                    // holding share, against its breathing rim.
+                    let lam = mass(&s.total()) / g_before.clone();
+                    let _ = &k;
+                    let r_sys = if lam.is_zero() { ratio(0, 1) } else { gap / lam };
                     let tot = mass(&s.total());
                     let h_sys = if tot.is_zero() { ratio(1, 1) } else { mass(&s.kept) / tot };
                     let h_at = crate::formation::system_frame(s, &unit).map(|enc_s| enc_s.hold_within(&r_sys)).unwrap_or(h_sys);
@@ -1252,7 +1277,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // clump's holding, agitation, the star's own spin, phases, its
             // orthogonal spin, the members as they were).
             #[allow(clippy::type_complexity)]
-            let mut takes: Vec<(Ratio, crate::pulse::Manifest, Vec<(crate::flows::Mote, Ratio, Ratio)>, Ratio, Ratio, Ratio, Vec<Ratio>, Ratio, Vec<crate::flows::Mote>, Vec<(Ratio, Ratio, Ratio)>)> = Vec::new();
+            let mut takes: Vec<(Ratio, crate::pulse::Manifest, Vec<(crate::flows::Mote, Ratio, Ratio)>, Ratio, Ratio, Ratio, Vec<Ratio>, Ratio, Vec<crate::flows::Mote>, Vec<(Ratio, Ratio, Ratio)>, Ratio, Vec<crate::flows::Mote>)> = Vec::new();
             for (reach, shares) in clumps {
                 // Each member as it stood, its share of its mote.
                 let mut members: Vec<crate::flows::Mote> = Vec::new();
@@ -1313,6 +1338,14 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 let hold_c = |r: &Ratio| places.iter().filter(|(_, d)| d < r).fold(ratio(0, 1), |a, (w, _)| a + w.clone() / m.clone());
                 let mut fell_spins: Vec<(Ratio, Ratio, Ratio)> = Vec::new();
                 let mut outside: Vec<(crate::flows::Mote, Ratio, Ratio)> = Vec::new();
+                // THE NEWBORN'S RIM, breathing from birth: its gravity's reach
+                // in its own units, `ρ = R_c/(λ + H(<R_c))` (λ the clump's
+                // share). A member that never fell and stands beyond it is no
+                // part of the newborn: it stays the galaxy's medium.
+                let lam_c = m.clone() / g_mass.clone();
+                let h_c = enc_now.hold_within(&r_c);
+                let rho_birth = if (lam_c.clone() + h_c.clone()).is_zero() { ratio(1, 1) } else { r_c.clone() / (lam_c + h_c) };
+                let (mut beyond_rim, mut beyond_held): (Vec<crate::flows::Mote>, Ratio) = (Vec::new(), ratio(0, 1));
                 for (idx, ((x, f), (radial, o, c))) in members.iter().zip(&fallen).zip(&offsets).enumerate() {
                     let w = held_of(x);
                     if *f {
@@ -1342,8 +1375,14 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         // a share of its orbit spin (frame-free, read in the
                         // galaxy where both stand).
                         let _ = c;
+                        let place = radial.clone().max(o.clone());
+                        if place > rho_birth {
+                            beyond_held += w.clone();
+                            beyond_rim.push(x.clone());
+                            continue;
+                        }
                         let carried_c = if x.ell_o.is_zero() { ratio(0, 1) } else { (x.ell_orth.clone() - orth_clump.clone()) / x.ell_o.clone() };
-                        outside.push((crate::flows::Mote { born: bell, ..x.clone() }, radial.clone().max(o.clone()), carried_c));
+                        outside.push((crate::flows::Mote { born: bell, ..x.clone() }, place, carried_c));
                     }
                 }
                 collapse.0 += m.clone();
@@ -1358,9 +1397,12 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 let spin = crate::ring::grain(&(fell_spins.iter().fold(ratio(0, 1), |a, (w, r, h)| a + w.clone() * r.clone() * h.clone()) / fell_held.clone()));
                 let phases: Vec<Ratio> = ph.iter().map(|x| crate::ring::grain(&crate::flows::circle_mean(x))).collect();
                 let orth_mean = orth_held / fell_held;
-                takes.push((reach, fell, outside, m, a, spin, phases, orth_mean, members, fell_spins));
+                // The newborn's whole: what fell and its disc, never what stands
+                // beyond its rim.
+                let whole_c = m.clone() - beyond_held;
+                takes.push((reach, fell, outside, whole_c, a, spin, phases, orth_mean, members, fell_spins, rho_birth, beyond_rim));
             }
-            for (reach, star, outside, whole_held, a_own, spin_own, phases_own, orth_mean, members, fell_spins) in takes {
+            for (reach, star, outside, whole_held, a_own, spin_own, phases_own, orth_mean, members, fell_spins, rho_birth, beyond_rim) in takes {
                 let whole_mass = whole_held.clone();
                 let m_u = whole_mass.clone() / unit.clone();
                 if m_u.is_zero() {
@@ -1390,6 +1432,9 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     core.flows.extend(members);
                     continue;
                 };
+                // What stood beyond the newborn's rim stays the galaxy's medium.
+                motes_in[3] += beyond_rim.len();
+                core.flows.extend(beyond_rim);
                 // Its STATE is its holding at birth (a heart's state, set at
                 // its forming, never drained); its own spin and phases.
                 let held_at_birth = mass(&kept);
@@ -1404,7 +1449,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         for x in &sys.flows {
                             let held = x.amount.clone() * crate::flows::weight(&x.key);
                             discs.0 += held.clone();
-                            if enc.reach(&x.ell_o).0 >= ratio(1, 1) {
+                            if enc.reach(&x.ell_o).0 >= rho_birth {
                                 discs.1 += held;
                             }
                         }
