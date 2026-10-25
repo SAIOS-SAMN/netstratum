@@ -415,7 +415,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         // reach, `δ_g = h_g/(|r − R_g| + h_g)` (the anchor form), among those
         // whose swing holds it, never divided by holdings; the rest flows on.
         // Each keeps its state; the crossing's turning is read at its reach.
-        let (gathered, turning, delta_u) = {
+        let (gathered, delta_u) = {
             let whole = u.cores.iter().fold(crate::pulse::mass(&u.medium()), |s, c| s + crate::pulse::mass(&c.total()));
             let ring_bells = ratio(t_u as i64, 4);
             let h_u = crate::ocean::universe_hold(u);
@@ -428,10 +428,17 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             }).collect();
             let reach = galaxies[i].1.clone();
             let h_g = galaxies[i].2.clone();
+            // The galaxy's share of the universe: a mote's own spin crosses
+            // between the galaxy's frame and the universe's by it, once (×f
+            // out, /f home), so its turning survives the round trip.
+            let f_g = if whole.is_zero() { ratio(0, 1) } else { crate::pulse::mass(&u.cores[i].total()) / whole.clone() };
+            let ell_g = u.cores[i].ell.clone();
             let frame = crate::pulse::ocean_frame(u);
-            let mut landed: Vec<crate::flows::Mote> = Vec::new();
+            // Each landing mote with ITS OWN crossing turning (with xylarium):
+            // in the orbit plane its spin against the galaxy's orbit there,
+            // `|ℓ_m − ℓ_g|/f`; across it, the swing's radial share at its reach.
+            let mut landed: Vec<(crate::flows::Mote, Ratio, Ratio)> = Vec::new();
             let mut flowing: Vec<crate::flows::Mote> = Vec::new();
-            let (mut w_sum, mut t_o, mut t_c) = (ratio(0, 1), ratio(0, 1), ratio(0, 1));
             for x in std::mem::take(&mut u.ocean) {
                 let r_m = match (&frame, x.vacuum) {
                     (Some(f), true) => f.reach(&x.ell_o).0,
@@ -445,19 +452,17 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     d(a).cmp(&d(b)).then(b.0.cmp(&a.0))
                 }).map(|g| g.0);
                 if best == Some(i) {
-                    let m = x.amount.clone() * crate::flows::weight(&x.key);
-                    t_o += m.clone() * crate::ocean::relative_turning(&reach, &r_m, &h_u);
-                    t_c += m.clone() * crate::ocean::radial_share(&reach, &h_g, &r_m, &h_u);
-                    w_sum += m;
-                    landed.push(x);
+                    let rel = if x.ell_o > ell_g { x.ell_o.clone() - ell_g.clone() } else { ell_g.clone() - x.ell_o.clone() };
+                    let t_o = if f_g.is_zero() { ratio(0, 1) } else { rel / f_g.clone() };
+                    let t_c = crate::ocean::radial_share(&reach, &h_g, &r_m, &h_u);
+                    landed.push((x, t_o, t_c));
                 } else {
                     flowing.push(x);
                 }
             }
             u.ocean = flowing;
-            let turning = if w_sum.is_zero() { (ratio(0, 1), ratio(0, 1)) } else { (t_o / w_sum.clone(), t_c / w_sum) };
             let delta_u = h_u.clone() / (reach.clone() + h_u.clone());
-            (landed, turning, delta_u)
+            (landed, delta_u)
         };
         // THE PARENT'S PULSE on this galaxy's bodies: its received share of the
         // source's rings and the universal tide at its distance; None in the
@@ -1165,7 +1170,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         let mut stars = 0;
         let mut to_ocean: Vec<crate::flows::Mote> = Vec::new();
         let mut with = core.total();
-        for x in &gathered {
+        for (x, _, _) in &gathered {
             *with.entry(x.key.clone()).or_insert_with(|| ratio(0, 1)) += x.amount.clone();
         }
         let g_mass = if home { whole_u.clone() } else { mass(&with) };
@@ -1183,10 +1188,10 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // (The arrivals ride the vacuum's loop; each passes the throat
             // when its orthogonal phase crosses ½ in the torques, below.)
             let mut in_throat: Vec<usize> = Vec::new();
-            for x in gathered {
+            for (x, t_o, t_c) in gathered {
                 let (k, a, agitation) = (x.key, x.amount, x.agitation);
-                let ell_o = p.clone() * mean.clone() / crate::flows::weight(&k) + nested(g_rate.as_ref(), turning.0.clone());
-                let ell_orth = nested(g_rate.as_ref(), turning.1.clone());
+                let ell_o = p.clone() * mean.clone() / crate::flows::weight(&k) + nested(g_rate.as_ref(), t_o);
+                let ell_orth = nested(g_rate.as_ref(), t_c);
                 // It arrives with the Wellspring's winding: its orthogonal orbit leads its orbit by
                 // the push share (½ at the universe tier), the jet's helix.
                 motes_in[0] += 1;
@@ -1308,7 +1313,11 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 // galaxy about the universal core (its galaxy's orbit spins
                 // and phases), on the vacuum leg home.
                 let phase = if core.phase.len() == crate::flows::PLANES { core.phase.clone() } else { x.phase.clone() };
-                to_ocean.push(crate::flows::Mote { ell_o: core.ell.clone(), ell_orth: core.ell_orth.clone(), phase, vacuum: true, born: bell, lever: Vec::new(), lever_place: ratio(0, 1), ..x });
+                // Its own spin carried across by its galaxy's share, once
+                // (with xylarium): `ℓ_u = ℓ_g + ℓ_m·f` in each plane.
+                let f_g = if whole_u.is_zero() { ratio(0, 1) } else { mass(&core.total()) / whole_u.clone() };
+                let (ell_u, orth_u) = (crate::ring::grain(&(core.ell.clone() + x.ell_o.clone() * f_g.clone())), crate::ring::grain(&(core.ell_orth.clone() + x.ell_orth.clone() * f_g)));
+                to_ocean.push(crate::flows::Mote { ell_o: ell_u, ell_orth: orth_u, phase, vacuum: true, born: bell, lever: Vec::new(), lever_place: ratio(0, 1), ..x });
                 jets += 1;
             }
             let (kept, free) = crate::flows::read_cut(&core.flows, &galaxy_enc(core), &p);
