@@ -722,7 +722,7 @@ pub fn cascade(manifest: &Manifest) -> (Manifest, Vec<(Ratio, Manifest)>, Ratio)
     (wellspring, galaxies, ratio(2, 1) * (outermost + h))
 }
 
-pub fn deploy(_seed: &[u8; 32], manifest: &Manifest) -> Option<Universe> {
+pub fn deploy(seed: &[u8; 32], manifest: &Manifest) -> Option<Universe> {
     // THE FOUNDING CASCADE (above): the Wellspring holds what stays within its
     // throat; its held kinds are the universe's medium about it (the central
     // galaxy's cut is read from them once the ocean is motes: owed); every
@@ -867,7 +867,12 @@ pub fn deploy(_seed: &[u8; 32], manifest: &Manifest) -> Option<Universe> {
         let flows = crate::flows::founding(&home, Some(&home_span))?;
         cores.insert(0, Body { ell_orth: ratio(0, 1), path: vec![0], radius: ratio(0, 1), period: ratio(0, 1), kept: Manifest::new(), satellites: Vec::new(), medium: home, ell: ratio(0, 1), medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: ratio(0, 1), flows, reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1) });
     }
-    Some(Universe { cores, ocean, firmament, unit, t_u })
+    // THE BOARD (`crate::board`; operator 2026-10-25: "lets just place this
+    // down"): the founding's first star systems and their worlds, placed from
+    // the galaxies' own grains.
+    let mut u = Universe { cores, ocean, firmament, unit, t_u };
+    crate::board::place(&mut u, seed);
+    Some(u)
 }
 
 /// THE GALAXIES ORBIT, DERIVED (operator 2026-10-19: "fixed reach and

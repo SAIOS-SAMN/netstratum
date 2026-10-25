@@ -119,12 +119,21 @@ fn main() {
     };
     let show = |w: &std::collections::BTreeMap<String, u64>| w.iter().map(|(k, b)| format!("{k} {b}")).collect::<Vec<_>>().join(", ");
     eprintln!("FIELDS at bell {start}: {}", show(&fields(&u)));
+    let started = std::time::Instant::now();
     let mut grown_past: Option<u64> = None;
     let mut last_motes = carrier(&u).0;
     for b in start..until {
         events.extend(breath::breathe(&mut u, &seed, t_u, b, b + 1));
         // Progress by the universe's own count, never a clock: each tenth
         // universal echo.
+        // Each universal echo: the motes, the systems' bodies, the time.
+        if t_u > 0 && (b + 1) % t_u == 0 {
+            let bodies: usize = u.cores.iter().flat_map(|c| &c.satellites).map(|s| s.satellites.len() + s.flows.len()).sum();
+            let systems: usize = u.cores.iter().map(|c| c.satellites.len()).sum();
+            let (merged_n, dissolved_n, born_n, worlds_n): (usize, usize, usize, usize) = events.iter().fold((0, 0, 0, 0), |a, e| (a.0 + e.merged, a.1 + e.dissolved, a.2 + e.stars, a.3 + e.fates.0));
+            let worlds_now: usize = u.cores.iter().flat_map(|c| &c.satellites).map(|s| s.satellites.len()).sum();
+            eprintln!("echo at bell {}: {} systems ({} merged, {} dissolved, {} born so far), {} worlds standing ({} grown), {} bodies and motes in systems, {} galaxy motes, {} ocean motes, {:?} since start", b + 1, systems, merged_n, dissolved_n, born_n, worlds_now, worlds_n, bodies, u.cores.iter().map(|c| c.flows.len()).sum::<usize>(), u.ocean.len(), started.elapsed());
+        }
         if t_u > 0 && (b + 1) % (10 * t_u) == 0 {
             let (motes, widest, in_systems) = carrier(&u);
             let (rung, read) = events.iter().fold((0usize, 0usize), |a, e| (a.0 + e.rang.0, a.1 + e.rang.1));

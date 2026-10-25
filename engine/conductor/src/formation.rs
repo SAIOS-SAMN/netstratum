@@ -1743,10 +1743,19 @@ pub fn collide_stars(stars: Vec<crate::pulse::Body>, c_pre: Vec<Ratio>, scale: &
             if stars[i].phase.len() < planes || r[i].is_zero() || stars[j].phase.len() < planes || r[j].is_zero() {
                 return false;
             }
+            // Two stars meet where their GRAVITY SPHERES overlap (operator
+            // 2026-10-25, the board: the galaxy's dispersal band, ±p_g of a
+            // star's whole reach, made every star a third of its galaxy wide,
+            // so neighbours of one mix stuck as soon as they stood in step):
+            // each its tether sphere, radius `k·r`, `k = h/H(<ℓ)` (the sphere
+            // settling reads), widened by the reach its orthogonal orbit
+            // sweeps.
             let (inner, outer) = if r[i] < r[j] { (i, j) } else { (j, i) };
             let reach_out = r[inner].clone() * (ratio(1, 1) + abs(&e_c[inner]));
             let reach_in = r[outer].clone() * (ratio(1, 1) - abs(&e_c[outer]).min(ratio(1, 1)));
-            reach_out * (ratio(1, 1) + p_g.clone()) >= reach_in * (ratio(1, 1) - p_g.clone().min(ratio(1, 1)))
+            let sphere = |x: usize| { let h = enc.hold(&own[x]); if h.is_zero() { ratio(0, 1) } else { m[x].clone() / h * r[x].clone() } };
+            let _ = p_g;
+            reach_out + sphere(inner) >= reach_in - sphere(outer)
         })
         .collect();
     // THE MEETINGS: each star's orbit turns as its galaxy's flows do at its
