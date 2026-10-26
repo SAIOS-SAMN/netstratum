@@ -164,9 +164,26 @@ Each component is its own, with its own witness (`nuclides.rs`,
   (neutrons per proton, the weight-4 mass share, hydrogen's) and reported at
   the founding, never imposed.
 
-OPEN, to land before the founding runs on them: THE SEAL WINDOW, the pass at
-which deuterium's seal first holds against the bounce's heat and the neutrons
-standing on the vacuum leg are captured. Our founding is cold (the bounce
-carries no heat of its own today), so the window has no heat to close against;
-the bounce's heat must be stated first. Until then the founding keeps its
-static quarter, flagged.
+The seal window and the bounce's heat: §9 (built).
+
+## 9. The bounce's heat and the seal window (operator 2026-10-26: "derive the bounce's heat and build it")
+
+- **The heat.** A body at deficit δ turns `2δ` of its orbit a bell; the
+  luminal bound allows one whole turn, so inside the ring the excess cannot be
+  motion and is agitation: `a = max(0, 2δ − 1) = (H − R)/(H + R)`. Hot at the
+  core (1), cold at the ring (0), cooling as the bounce's bubble expands; the
+  substrate weight's form, first degree (`nuclides::bounce_heat`).
+- **The seal window.** A fibre's two counter-turning ends part where the heat
+  reaches half a turn, the ignition law's bound `a ≥ ½` one tier down; so the
+  seal first holds where `2δ − 1 = ½`, δ = ¾ (`nuclides::seal_window`).
+- **The neutron share** is the unitary exchange's own fixed point there,
+  `p·δ = n·½(1 − δ)`, `n/(p + n) = 2δ/(1 + δ)` = 6/7 (`nuclides::neutron_share`):
+  neutron-rich, the mirror of nature's, as the letters are.
+- **The captures at the window:** each proton binds a neutron (deuterium, the
+  first seal) and deuterons pair to weight 4; an odd deuteron stands. The
+  unpaired neutrons return to the continuum by the unlocked face past the
+  window, protons: hydrogen.
+
+Read on 2^55 grains (the isomorphic reading, beside nature): neutrons per
+proton among the nucleons 1/6 (nature about 1/7); weight 4 by mass 2/7
+(about 1/4); hydrogen 5/7 (about 3/4). The static quarter is retired.

@@ -81,29 +81,33 @@ pub fn from_nuclei(nuclei: &Nuclei) -> Manifest {
         .collect()
 }
 
-/// THE FOUNDING NUCLEOSYNTHESIS (docs/97; operator 2026-10-26: "align on
-/// nature and build it"). As nature's: the bounce's nucleons leave as free
-/// protons and neutrons, and captures run only on the neutrons, stopping
-/// when they are spent, so the founding is mostly hydrogen and the heavy
-/// weight is the stars' to build over generations.
-/// - THE NEUTRON SHARE: the bounce's held pole at its crossing, the unlocked
-///   face of its ring, `½(1 − δ)` at δ = ½: a quarter of the nucleons
-///   (docs/97 §5, for the operator's ruling; nature's freeze-out leaves
-///   about an eighth).
-/// - THE CAPTURES: each neutron binds into a proton where the nucleus first
-///   seals, deuterium (weight 2, κ = 1); deuterons pair into the next seal,
-///   weight 4 (Q 2, Z 2), by the one law the stars burn by, `w + w → 2w`.
-///   An odd deuteron stands.
-/// - What no neutron reaches is hydrogen.
+/// BOUNCE NUCLEOSYNTHESIS (docs/97 §8–§9; operator 2026-10-26: "derive the
+/// bounce's heat and build it"). The bounce's matter cools from the core
+/// (`nuclides::bounce_heat`, the luminal excess `2δ − 1`) and its nucleons
+/// exchange poles every pass (protons to the vacuum leg by the held face,
+/// neutrons back by the unlocked face; the Möbius pass, booked both ways).
+/// - THE SEAL WINDOW: the heat falls to half a turn at δ = ¾, where a fibre
+///   first holds (`nuclides::seal_window`).
+/// - THE NEUTRON SHARE: the exchange's own fixed point there, `2δ/(1 + δ)` =
+///   6/7 (`nuclides::neutron_share`), never set.
+/// - THE CAPTURES at the window: each proton binds a neutron where the nucleus
+///   first seals (deuterium, weight 2) and deuterons pair to the next seal,
+///   weight 4 (Q 2, Z 2), by the one law the stars burn by, `w + w → 2w`; an
+///   odd deuteron stands.
+/// - THE UNPAIRED NEUTRONS return to the continuum by the unlocked face, past
+///   the window, as protons: hydrogen.
 /// Returns the manifest by nuclide, in grains (whole nuclei however few);
 /// nucleons conserved exactly.
 pub fn founding(nuclei: &num_bigint::BigInt) -> Manifest {
     let zero = num_bigint::BigInt::from(0);
     let grid = nuclei_per_grain() * num_bigint::BigInt::from(1024);
-    let neutrons = nuclei / num_bigint::BigInt::from(4);
-    let alphas = &neutrons / num_bigint::BigInt::from(2);
-    let deuterons = &neutrons - &alphas * num_bigint::BigInt::from(2);
-    let hydrogen = nuclei - &neutrons * num_bigint::BigInt::from(2);
+    let share = crate::nuclides::neutron_share(&crate::nuclides::seal_window());
+    let neutrons = (Ratio::from_integer(nuclei.clone()) * share).floor().to_integer();
+    let protons = nuclei - &neutrons;
+    let paired = protons.clone().min(neutrons.clone());
+    let alphas = &paired / num_bigint::BigInt::from(2);
+    let deuterons = &paired - &alphas * num_bigint::BigInt::from(2);
+    let hydrogen = (&protons - &paired) + (&neutrons - &paired);
     let mut out = Manifest::new();
     for (w, count) in [(1u32, hydrogen), (2, deuterons), (4, alphas)] {
         if count > zero {

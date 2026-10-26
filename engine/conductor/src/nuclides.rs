@@ -138,6 +138,34 @@ pub fn exchange(p: &num_bigint::BigInt, n: &num_bigint::BigInt, delta: &cfe::rat
     (p - &to_n + &to_p, n - &to_p + &to_n)
 }
 
+/// THE BOUNCE'S HEAT (docs/97 §9): a body at deficit δ turns `2δ` of its
+/// orbit a bell; the luminal bound allows one whole turn, so inside the ring
+/// the excess `2δ − 1` cannot be motion and is agitation:
+/// `a = max(0, 2δ − 1) = (H − R)/(H + R)`, 1 at the core, 0 at the ring,
+/// cooling as the bubble expands (the substrate weight's form, first degree).
+pub fn bounce_heat(delta: &cfe::ratio::Ratio) -> cfe::ratio::Ratio {
+    use cfe::ratio::ratio;
+    (ratio(2, 1) * delta.clone() - ratio(1, 1)).max(ratio(0, 1))
+}
+
+/// THE SEAL WINDOW (docs/97 §9): a fibre's two counter-turning ends part
+/// where the heat reaches half a turn (the ignition law's bound, `a ≥ ½`,
+/// one tier down), so deuterium's seal first holds as the bounce's heat
+/// falls to ½: `2δ − 1 = ½`, δ = ¾.
+pub fn seal_window() -> cfe::ratio::Ratio {
+    use cfe::ratio::ratio;
+    // Solve bounce_heat(δ) = ½ exactly.
+    (ratio(1, 2) + ratio(1, 1)) / ratio(2, 1)
+}
+
+/// THE EXCHANGE'S FIXED POINT (docs/97 §9): where the pass's two booked
+/// directions balance, `p·δ = n·½(1 − δ)`, the neutron share is
+/// `2δ/(1 + δ)`; read at the seal window, never set.
+pub fn neutron_share(delta: &cfe::ratio::Ratio) -> cfe::ratio::Ratio {
+    use cfe::ratio::ratio;
+    ratio(2, 1) * delta.clone() / (ratio(1, 1) + delta.clone())
+}
+
 /// THE ISOMORPHIC READING (docs/97 §8): a founding's outcome set beside
 /// nature's own, never imposed: (neutrons per proton among the nucleons,
 /// the helium-weight mass share, hydrogen's mass share). Nature reads about
@@ -212,5 +240,23 @@ mod tests {
         assert!(n1 > num_bigint::BigInt::from(0));
         let (p2, n2) = exchange(&p1, &n1, &ratio(1, 3));
         assert_eq!(&p2 + &n2, &p + &n);
+    }
+
+    #[test]
+    fn the_bounce_cools_to_its_seal_window_and_the_exchange_reads_the_neutron_share() {
+        // Hot at the core, cold at the ring.
+        assert_eq!(bounce_heat(&ratio(1, 1)), ratio(1, 1));
+        assert_eq!(bounce_heat(&ratio(1, 2)), ratio(0, 1));
+        // The seal window: the heat at half a turn.
+        assert_eq!(seal_window(), ratio(3, 4));
+        assert_eq!(bounce_heat(&seal_window()), ratio(1, 2));
+        // The exchange's fixed point there: six neutrons in seven.
+        let x = neutron_share(&seal_window());
+        assert_eq!(x, ratio(6, 7));
+        // It is the fixed point: a pass at δ leaves it standing.
+        let n = num_bigint::BigInt::from(6_000_000u64);
+        let p = num_bigint::BigInt::from(1_000_000u64);
+        let (p1, n1) = exchange(&p, &n, &seal_window());
+        assert_eq!((p1, n1), (p, n));
     }
 }
