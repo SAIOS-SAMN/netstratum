@@ -904,7 +904,10 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
             if rang && c_before < heart_share && c_sg < heart_share {
                 tolls.push(Toll { star: sys.path.clone(), bell, passing: Passing::Decohered, strokes: crate::ring::whole(&(omega.clone() * as_ratio(r_now))), returned: mass(&sys.total()) / unit.clone(), spin: subtree_spin(&sys, &unit), star_reach: sys.radius.clone(), galaxy_reach: core.radius.clone() });
                 core.medium_spin += subtree_spin(&sys, &unit);
-                let all = sys.total();
+                let mut all = sys.total();
+                // THE RAPID CAPTURE (docs/97 §10): what a dying star returns
+                // runs the capture chain at once on its own hydrogen.
+                crate::nuclides::capture_rapid(&mut all);
                 returned += mass(&all) / unit.clone();
                 // Dissolved whole: it leaves at its own orbit.
                 shed.push((all, own_of(&sys), sys.ell_orth.clone(), sys.phase.clone()));
@@ -936,7 +939,10 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
                 // and everything turning inside it).
                 tolls.push(Toll { star: sys.path.clone(), bell, passing: Passing::Spent, strokes: crate::ring::whole(&(omega.clone() * as_ratio(r_now))), returned: mass(&sys.total()) / unit.clone(), spin: subtree_spin(&sys, &unit), star_reach: sys.radius.clone(), galaxy_reach: core.radius.clone() });
                 core.medium_spin += subtree_spin(&sys, &unit);
-                let all = sys.total();
+                let mut all = sys.total();
+                // THE RAPID CAPTURE (docs/97 §10): what a dying star returns
+                // runs the capture chain at once on its own hydrogen.
+                crate::nuclides::capture_rapid(&mut all);
                 returned += mass(&all) / unit.clone();
                 // Dissolved whole: it leaves at its own orbit.
                 shed.push((all, own_of(&sys), sys.ell_orth.clone(), sys.phase.clone()));
@@ -985,6 +991,10 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
                     }
                 }
             }
+            // THE SLOW CAPTURE (docs/97 §10): each ring its clock received this
+            // echo, its heart's nuclides capture its hydrogen, one nucleon a
+            // ring, kept by the hemisphere law.
+            crate::nuclides::capture_slow(&mut sys.kept, r_echo, &in_phase);
             // ITS LIGHT crosses its own system on the continuum face.
             if !shone.is_zero() {
                 let whole = mass(&sys.total());

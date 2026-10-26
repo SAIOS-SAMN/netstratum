@@ -187,3 +187,26 @@ The seal window and the bounce's heat: §9 (built).
 Read on 2^55 grains (the isomorphic reading, beside nature): neutrons per
 proton among the nucleons 1/6 (nature about 1/7); weight 4 by mass 2/7
 (about 1/4); hydrogen 5/7 (about 3/4). The static quarter is retired.
+
+## 10. The heavy weight: the stars' captures (operator 2026-10-26: "we need weight up to 1200"; "i thought two turns ago we discussed moving up to 1200")
+
+The founding makes weights 1, 2 and 4 only, as nature's. Everything heavier is
+the stars' to build and return to their galaxies' gas, generation on
+generation. One law, the nucleus's own convergence: a capture adds one
+nucleon, `w → w + 1` (a proton where the end claims a direction alone, a
+neutron where it binds; the pole is the leg, `nuclides::mobius`), and it
+SURVIVES by the hemisphere law, bound or lone on the held hemisphere:
+`σ_{w+1} = ½(1 + κ_{w+1})`. The seals (κ = 1) keep every capture: matter piles
+there (28, 208, 1092), the abundance peaks read off the process. Every capture
+draws one hydrogen nucleus, so nucleons are conserved exactly.
+
+- **The slow capture (in a burning star):** each ring its clock receives, every
+  nuclide w its heart holds passes `f_H·c·σ_{w+1}` of itself to w + 1, f_H
+  hydrogen's share of the heart's nuclei, c the star's coherence with the echo
+  (`nuclides::capture_slow`).
+- **The rapid capture (at a star's death):** the matter a star returns whole
+  (spent or decohered) runs the chain at once, each weight in turn passing
+  `σ_{w+1}` of what stands there upward, until its hydrogen is spent
+  (`nuclides::capture_rapid`).
+- **Recycling** returns both to the galaxy's gas, so every generation is born
+  heavier.

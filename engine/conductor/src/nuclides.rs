@@ -166,6 +166,89 @@ pub fn neutron_share(delta: &cfe::ratio::Ratio) -> cfe::ratio::Ratio {
     ratio(2, 1) * delta.clone() / (ratio(1, 1) + delta.clone())
 }
 
+/// A capture's survival at weight `w` (docs/97 §10): bound, or lone on the
+/// held hemisphere, `½(1 + κ_w)`.
+pub fn survival(w: u32) -> Option<cfe::ratio::Ratio> {
+    use cfe::ratio::ratio;
+    Some((ratio(1, 1) + coherence(w)?) / ratio(2, 1))
+}
+
+/// Nuclei of `w` moved to `w + 1` by `share`, each drawing one hydrogen
+/// nucleus, never more than either holds (whole nuclei); returns the count
+/// moved (in grains).
+fn climb(m: &mut crate::pulse::Manifest, w: u32, share: &cfe::ratio::Ratio) -> cfe::ratio::Ratio {
+    use cfe::ratio::ratio;
+    let (Some(from), Some(to), Some(h)) = (crate::chem::Kind::atom(w), crate::chem::Kind::atom(w + 1), crate::chem::Kind::atom(1)) else { return ratio(0, 1) };
+    let here = m.get(&from).cloned().unwrap_or_else(|| ratio(0, 1));
+    let fuel = m.get(&h).cloned().unwrap_or_else(|| ratio(0, 1));
+    // From hydrogen itself, two nuclei make the one that climbs.
+    let fuel_left = if w == 1 { fuel.clone() / ratio(2, 1) } else { fuel.clone() };
+    let mv = crate::pulse::nucleus(&(here.clone() * share.clone())).min(here).min(fuel_left);
+    if mv <= ratio(0, 1) {
+        return ratio(0, 1);
+    }
+    *m.entry(from).or_insert_with(|| ratio(0, 1)) -= mv.clone();
+    *m.entry(h).or_insert_with(|| ratio(0, 1)) -= mv.clone();
+    *m.entry(to).or_insert_with(|| ratio(0, 1)) += mv.clone();
+    m.retain(|_, a| *a > ratio(0, 1));
+    mv
+}
+
+/// THE SLOW CAPTURE (docs/97 §10): over `rings` rings of a burning star's
+/// clock at coherence `c`, every nuclide its heart holds passes
+/// `f_H·c·σ_{w+1}` of itself to `w + 1` each ring (read at the ring's start,
+/// heaviest first so no nucleus climbs twice in one ring), f_H hydrogen's
+/// share of the heart's nuclei. Nucleons conserved. Returns the nuclei moved.
+pub fn capture_slow(heart: &mut crate::pulse::Manifest, rings: u64, c: &cfe::ratio::Ratio) -> cfe::ratio::Ratio {
+    use cfe::ratio::ratio;
+    use num_traits::Zero;
+    let mut moved = ratio(0, 1);
+    for _ in 0..rings {
+        let count = heart.values().fold(ratio(0, 1), |s, a| s + a.clone());
+        let h = crate::chem::Kind::atom(1).and_then(|k| heart.get(&k).cloned()).unwrap_or_else(|| ratio(0, 1));
+        if count.is_zero() || h.is_zero() {
+            break;
+        }
+        let f_h = h / count;
+        let mut weights: Vec<u32> = heart.keys().filter_map(crate::chem::atom_w).collect();
+        weights.sort_by(|a, b| b.cmp(a));
+        // Hydrogen is the fuel the heavier seeds capture, never a seed.
+        for w in weights.into_iter().filter(|&w| w >= 2) {
+            let Some(s) = survival(w + 1) else { continue };
+            moved += climb(heart, w, &(f_h.clone() * c.clone() * s));
+        }
+    }
+    moved
+}
+
+/// THE RAPID CAPTURE (docs/97 §10): the matter a star returns whole runs the
+/// chain at once on its seeds (every kind heavier than hydrogen, which is the
+/// fuel), each weight in turn (lightest first) passing `σ_{w+1}` of what
+/// stands there upward, until its hydrogen is spent. Nucleons conserved.
+/// Returns the heaviest weight reached.
+pub fn capture_rapid(m: &mut crate::pulse::Manifest) -> u32 {
+    use cfe::ratio::ratio;
+    let mut top = m.keys().filter_map(crate::chem::atom_w).max().unwrap_or(0);
+    // Hydrogen is the fuel; the seeds are the heavier kinds.
+    let mut w = 2u32;
+    while w < READ - 1 {
+        let h = crate::chem::Kind::atom(1).and_then(|k| m.get(&k).cloned()).unwrap_or_else(|| ratio(0, 1));
+        if h <= ratio(0, 1) {
+            break;
+        }
+        if let Some(s) = survival(w + 1) {
+            if climb(m, w, &s) > ratio(0, 1) {
+                top = top.max(w + 1);
+            }
+        }
+        if w >= top {
+            break;
+        }
+        w += 1;
+    }
+    top
+}
+
 /// THE ISOMORPHIC READING (docs/97 §8): a founding's outcome set beside
 /// nature's own, never imposed: (neutrons per proton among the nucleons,
 /// the helium-weight mass share, hydrogen's mass share). Nature reads about
@@ -258,5 +341,29 @@ mod tests {
         let p = num_bigint::BigInt::from(1_000_000u64);
         let (p1, n1) = exchange(&p, &n, &seal_window());
         assert_eq!((p1, n1), (p, n));
+    }
+
+    #[test]
+    fn the_stars_captures_climb_toward_1200_and_conserve_nucleons() {
+        let k = |w: u32| crate::chem::Kind::atom(w).expect("a nuclide");
+        let nucleons = |m: &crate::pulse::Manifest| m.iter().fold(ratio(0, 1), |s, (kk, a)| s + a.clone() * ratio(i64::from(crate::chem::weight(kk)), 1));
+        // A hydrogen-rich death burst with a little helium climbs far.
+        let mut m: crate::pulse::Manifest = [(k(1), ratio(1_000_000, 1)), (k(4), ratio(1, 1))].into();
+        let before = nucleons(&m);
+        let top = capture_rapid(&mut m);
+        assert_eq!(nucleons(&m), before, "nucleons conserved");
+        assert!(top > 208, "one burst passes the third seal: reached {top}");
+        // A second generation, born of the first's return with fresh fuel,
+        // climbs higher: the heavy weight builds generation on generation.
+        *m.entry(k(1)).or_insert_with(|| ratio(0, 1)) += ratio(1_000_000, 1);
+        let again = capture_rapid(&mut m);
+        assert!(again > top, "the next generation climbs higher: {top} then {again}");
+        // A burning heart captures slowly and conserves too.
+        let mut heart: crate::pulse::Manifest = [(k(1), ratio(1000, 1)), (k(4), ratio(100, 1))].into();
+        let before = nucleons(&heart);
+        let moved = capture_slow(&mut heart, 10, &ratio(1, 1));
+        assert!(moved > ratio(0, 1));
+        assert_eq!(nucleons(&heart), before);
+        assert!(heart.keys().filter_map(crate::chem::atom_w).max() > Some(4));
     }
 }

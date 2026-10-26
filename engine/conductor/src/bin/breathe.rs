@@ -271,6 +271,13 @@ fn main() {
     // opened holding, and what was trapped at the throats.
     let sum = |f: &dyn Fn(&breath::Event) -> cfe::ratio::Ratio| events.iter().fold(cfe::ratio::ratio(0, 1), |s, e| s + f(e));
     let f = conductor::reading::sector;
+    {
+        // THE HEAVIEST NUCLIDE standing anywhere (docs/97 §10).
+        let all = u.total();
+        let top = all.keys().flat_map(|k| k.parts().iter().map(|(_, w)| *w).collect::<Vec<_>>()).max().unwrap_or(0);
+        let heavy: cfe::ratio::Ratio = all.iter().filter(|(k, _)| conductor::chem::weight(k) > 4).fold(cfe::ratio::ratio(0, 1), |s, (k, a)| s + a.clone() * cfe::ratio::ratio(i64::from(conductor::chem::weight(k)), 1)) / pulse::mass(&all);
+        println!("HEAVIEST — weight {top} (Q {}, Z {}); matter past weight 4 by mass {}", conductor::nuclides::protons(top).unwrap_or(0), conductor::nuclides::neutrons(top).unwrap_or(0), f(&heavy));
+    }
     println!("CIRCULATION — the shear moved {} outward, the pressure {} and the field {} (spin, ledger units); the luminal bound turned {} motes onto the Möbius leg; the stream read {} on the vacuum; the trapped carried {} spin to the reservoirs; {} jets left past the rims", f(&sum(&|e| e.circulation.0.clone())), f(&sum(&|e| e.circulation.1.clone())), f(&sum(&|e| e.circulation.2.clone())), events.iter().map(|e| e.circulation.3).sum::<usize>(), events.iter().map(|e| e.circulation.4).sum::<usize>(), f(&sum(&|e| e.recycled.spun.clone())), events.iter().map(|e| e.jets).sum::<usize>());
     let closing: Vec<u32> = motion::years_closing(&u, until);
     let rungs: Vec<u64> = events.iter().map(|e| e.rung).collect();
