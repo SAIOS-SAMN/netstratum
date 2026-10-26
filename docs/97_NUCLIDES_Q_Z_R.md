@@ -6,7 +6,7 @@ planets - i want this built as the inverse of xylarium where Q is the proton
 and Z is the neutron and R is the phase state of the electron through p as
 the pulse reverberation of the echo from the core".
 
-Status: DERIVED (§1–§4); §5 the abundance law OPEN for ruling. Not built.
+Status: §1–§2 and §4 BUILT (41b2a6b); §5 BUILT in nature's form (the neutron share for ruling); §3 (R) not yet built.
 
 Read against: xylarium spec 11.0 (53) (Z the proton, Q the neutron, R the
 electron's phase; ruled there) and xyl-cosmos `fibres.rs` (ends on S^11,
@@ -16,7 +16,7 @@ fibres, seals). Netstratum is the inverse: Q the proton, Z the neutron.
 
 The letters are swapped deliberately (operator, relayed by xylarium
 2026-10-26: "i want netstratum to run the opposite of yours - Z/Q letter swap
-for the nucleons"; xylarium spec 11.0 (53), 3a7d3b1): netstratum Q = proton,
+for the nucleons"; xylarium spec 11.0 (53), 5e4db24): netstratum Q = proton,
 Z = neutron; xylarium Z = proton, Q = neutron; both R = the electron's phase.
 Anything crossing between the kernels in Z/Q terms (a shared law, a bench, an
 anastome reading) is translated at the seam, Z ↔ Q, and labelled on each side
@@ -125,3 +125,23 @@ where the free pool is left. Candidates:
    weight reaches 1200.
 4. R as the electron's phase, read at the galaxy's bell.
 5. Re-read every identity and a founding.
+
+## 7. Built: the founding in nature's form (operator 2026-10-26: "align on nature and build it")
+
+As nature's: the bounce leaves free protons and neutrons; captures run only on
+the neutrons and stop when they are spent; the heavy weight is the stars' to
+build over generations.
+
+- **The neutron share:** a quarter of the nucleons, the unlocked face of the
+  bounce's ring, `½(1 − δ)` at δ = ½. FOR RULING: nature's freeze-out leaves
+  about an eighth (helium about a quarter of the mass; ours gives a half).
+- **The captures:** each neutron binds a proton where the nucleus first seals,
+  deuterium (w 2); deuterons pair to the next seal, w 4 (Q 2, Z 2), by the
+  one law the stars burn by, `w + w → 2w`; an odd deuteron stands.
+- **Hydrogen** is what no neutron reaches. Nucleons conserved exactly.
+
+Read on 2^55 grains: hydrogen and weight 4 only. The cascade (`pulse::cascade`)
+then sorts kinds into shells by weight, so the universe stands as two
+galaxies of one element each. That is the next misalignment: nature's
+galaxies share the primordial mix (docs/78: "every share carries the
+manifest's composition in proportion").
