@@ -85,7 +85,9 @@ pub fn galaxy_frame(u: &Universe, i: usize, unit: &Ratio) -> Option<crate::flows
     }
     let held = |x: &crate::flows::Mote| (x.ell_o.clone(), x.amount.clone() * crate::flows::weight(&x.key) / g.clone());
     let firm: Vec<(Ratio, Ratio)> = if home { u.firmament.iter().map(held).collect() } else { Vec::new() };
-    Some(crate::flows::Enclosed::new(ratio(1, 1), core.flows.iter().map(held).chain(core.satellites.iter().map(|b| (b.ell.clone(), mass(&b.total()) / g.clone()))).chain(firm).collect()))
+    // The base: the throat's state 1 and what it still holds, at the centre
+    // inside every orbit (docs/96 step 3).
+    Some(crate::flows::Enclosed::new(ratio(1, 1) + mass(&core.throat) / g.clone(), core.flows.iter().map(held).chain(core.satellites.iter().map(|b| (b.ell.clone(), mass(&b.total()) / g.clone()))).chain(firm).collect()))
 }
 
 /// THE OUTFLOW'S BOOK (with xylarium 2026-10-24; the settling book's
@@ -533,7 +535,7 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
         let enc = pre.as_ref().filter(|_| !g_before.is_zero()).map(|_| {
             let motes = core.flows.iter().map(|x| (x.ell_o.clone(), x.amount.clone() * crate::flows::weight(&x.key) / g_before.clone()));
             let stars = core.satellites.iter().map(|b| (own_of(b), mass(&b.total()) / g_before.clone()));
-            crate::flows::Enclosed::new(ratio(1, 1), motes.chain(stars).chain(firm_held.iter().cloned()).collect())
+            crate::flows::Enclosed::new(ratio(1, 1) + mass(&core.throat) / g_before.clone(), motes.chain(stars).chain(firm_held.iter().cloned()).collect())
         });
         // STARS COLLIDE (operator 2026-10-18; with xylarium): the one
         // collide law among the galaxy's stars, before each reads its echo;
@@ -1185,7 +1187,9 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
             let scale = g_mass.clone() / unit.clone();
             let zero_phase = vec![ratio(0, 1); crate::flows::PLANES];
             // The galaxy's one enclosure as it stands: its motes and its stars.
-            let galaxy_enc = |core: &Body| crate::flows::Enclosed::new(ratio(1, 1), core.flows.iter().map(|x| (x.ell_o.clone(), x.amount.clone() * crate::flows::weight(&x.key) / g_mass.clone())).chain(core.satellites.iter().map(|b| (b.ell.clone(), mass(&b.total()) / g_mass.clone()))).collect());
+            // Its base the throat's state 1 and what the throat still holds
+            // (docs/96 step 3), at the centre inside every orbit.
+            let galaxy_enc = |core: &Body| crate::flows::Enclosed::new(ratio(1, 1) + mass(&core.throat) / g_mass.clone(), core.flows.iter().map(|x| (x.ell_o.clone(), x.amount.clone() * crate::flows::weight(&x.key) / g_mass.clone())).chain(core.satellites.iter().map(|b| (b.ell.clone(), mass(&b.total()) / g_mass.clone()))).collect());
             // THE BOUNCE RELEASES (docs/96 step 3; operator 2026-10-26: "each
             // bounce from the core doesnt 'throw' - it pushes, that push is the
             // incremental 'flow' of tidal forces between the vacuum and the
@@ -1615,7 +1619,7 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
             core.flows.retain(|x| x.amount > ratio(0, 1));
             // Each mote's place for the condensation: the cap its own gravity
             // holds in the galaxy's enclosure.
-            let enc_m = crate::flows::Enclosed::new(ratio(1, 1), core.flows.iter().map(|x| (x.ell_o.clone(), x.amount.clone() * crate::flows::weight(&x.key) / g_mass.clone())).collect());
+            let enc_m = crate::flows::Enclosed::new(ratio(1, 1) + mass(&core.throat) / g_mass.clone(), core.flows.iter().map(|x| (x.ell_o.clone(), x.amount.clone() * crate::flows::weight(&x.key) / g_mass.clone())).collect());
             let place_of = |x: &crate::flows::Mote| {
                 let (r, _) = enc_m.reach(&x.ell_o);
                 crate::enfold::place(&r, &(x.amount.clone() * crate::flows::weight(&x.key) / ledger_unit.clone()), &enc_m.hold(&x.ell_o))
