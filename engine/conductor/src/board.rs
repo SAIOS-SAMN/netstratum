@@ -55,13 +55,14 @@ fn body(path: Vec<u64>, radius: Ratio, period: Ratio, kept: Manifest, ell: Ratio
 }
 
 /// PLACE the founding's first star systems and their worlds (see the module).
-/// For each galaxy: `n` stars across its disc's span, from the ring (1) to
-/// the rim (`1 + span`), each at the balance of its place in the galaxy's
-/// enclosure; each star's matter its equal part of the galaxy's gathered
-/// share, cut by its own heart (the held its star, the released its worlds,
-/// at least `WORLD_SHARE`); its worlds, heaviest inward, spaced across the
-/// room between the star's extent and its breathing rim, each at the balance
-/// of its place in its system's enclosure. Returns (stars, worlds) placed.
+/// For each galaxy: up to `n` stars spaced by reach from the ring (1) within
+/// the disc's span (`1 + span`), each at the balance of its place in the
+/// galaxy's enclosure; each star's matter its equal part of the galaxy's
+/// gathered share, cut by its own heart (the held its star, the released its
+/// worlds, at least `WORLD_SHARE`); its worlds, heaviest inward, spaced by
+/// reach from its extent (or its ring) within its breathing rim, each at the
+/// balance of its place in its system's enclosure, the rest its belts.
+/// Returns (stars, worlds) placed.
 pub fn place(u: &mut Universe, seed: &[u8; 32]) -> (usize, usize) {
     let unit = u.unit.clone();
     let whole = mass(&u.total());
@@ -92,15 +93,30 @@ pub fn place(u: &mut Universe, seed: &[u8; 32]) -> (usize, usize) {
         let enc = Enclosed::new(ratio(1, 1), core.flows.iter().map(|x| (x.ell_o.clone(), x.amount.clone() * crate::flows::weight(&x.key) / g_now.clone())).collect());
         let mut left = pool.clone();
         let mut siblings: Vec<u64> = core.satellites.iter().map(|s| s.path.get(1).copied().unwrap_or(0)).collect();
+        // SPACING BY REACH (docs/78, the mass split): each star stands where
+        // its reach just meets the last one's, `r_k (1 − m_k/H(<r_k)) =
+        // r_(k−1) + r_d,(k−1)`, `r_d = r·m/H` its dominance reach, from the
+        // ring outward (nothing orbits inside it). The spacing is the
+        // enclosure's own, never an even ruler; what does not fit within the
+        // disc's span stays the galaxy's.
+        let mut bound = ratio(1, 1);
         for j in 0..n {
             let mine = if j + 1 == n { left.clone() } else { take(&pool, &ratio(1, i64::from(n))) };
-            less(&mut left, &mine);
             if mine.is_empty() {
                 continue;
             }
-            // Its place in the disc's span and the balance there.
-            let r_s = ratio(1, 1) + span.clone() * ratio(2 * i64::from(j) + 1, 2 * i64::from(n));
+            let m_s = mass(&mine) / g.clone();
+            let h_b = enc.hold_within(&bound);
+            if h_b <= m_s {
+                break;
+            }
+            let r_s = crate::ring::grain(&(bound.clone() / (ratio(1, 1) - m_s.clone() / h_b)));
+            if r_s > ratio(1, 1) + span.clone() {
+                break;
+            }
+            less(&mut left, &mine);
             let h_gal = enc.hold_within(&r_s);
+            bound = r_s.clone() + r_s.clone() * m_s / h_gal.clone();
             let ell = crate::ring::grain(&(r_s.clone() * h_gal.clone()));
             let radius = crate::ring::grain(&(r_s.clone() * g.clone() / unit.clone()));
             let period = crate::ring::period(&r_s, &h_gal);
@@ -139,7 +155,7 @@ pub fn place(u: &mut Universe, seed: &[u8; 32]) -> (usize, usize) {
             };
             let h_sys_gal = total_sys.clone() / g.clone();
             let rim = r_s.clone() / (h_sys_gal + h_gal.clone());
-            let room_hi = if rim > extent { rim } else { extent.clone() * ratio(2, 1) };
+            let room_hi = rim;
             // Its worlds: the disc's kinds heaviest first, parted into k worlds
             // of equal holding, inner to outer.
             let k_lo = WORLDS.0;
@@ -159,11 +175,29 @@ pub fn place(u: &mut Universe, seed: &[u8; 32]) -> (usize, usize) {
             let mut sats: Vec<Body> = Vec::new();
             let mut inner = h_s.clone();
             let mut w_sib: Vec<u64> = Vec::new();
-            for (i, wm) in worlds_m.into_iter().enumerate() {
+            // Spacing by reach, one tier down (as the stars'): from the
+            // reactor's extent or the system's ring (`R = H`, inside which
+            // nothing orbits), whichever stands further out; what does not
+            // fit within the rim joins the system's medium (its belts).
+            let mut bound = if extent > h_s { extent.clone() } else { h_s.clone() };
+            let mut belts = Manifest::new();
+            for wm in worlds_m.into_iter() {
                 if wm.is_empty() {
                     continue;
                 }
-                let r = extent.clone() + (room_hi.clone() - extent.clone()) * ratio(i as i64 + 1, i64::from(k) + 1);
+                let m_w = mass(&wm) / total_sys.clone();
+                let fits = inner > m_w && {
+                    let r = bound.clone() / (ratio(1, 1) - m_w.clone() / inner.clone());
+                    r <= room_hi
+                };
+                if !fits {
+                    for (kind, a) in wm {
+                        *belts.entry(kind).or_insert_with(|| ratio(0, 1)) += a;
+                    }
+                    continue;
+                }
+                let r = crate::ring::grain(&(bound.clone() / (ratio(1, 1) - m_w.clone() / inner.clone())));
+                bound = r.clone() + r.clone() * m_w / inner.clone();
                 let w_ell = crate::ring::grain(&(r.clone() * inner.clone()));
                 let w_radius = crate::ring::grain(&(r.clone() * total_sys.clone() / unit.clone()));
                 let w_period = crate::ring::period(&r, &inner);
@@ -181,6 +215,7 @@ pub fn place(u: &mut Universe, seed: &[u8; 32]) -> (usize, usize) {
             sys.turning = crate::ring::grain(&(mass(&sys.kept) / unit.clone() * h_s.clone()));
             sys.reservoir = crate::formation::ignition_share(&ratio(0, 1)).unwrap_or_else(|| ratio(1, 1));
             sys.satellites = sats;
+            sys.medium = belts;
             core.satellites.push(sys);
             n_stars += 1;
         }
