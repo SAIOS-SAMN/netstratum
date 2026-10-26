@@ -223,44 +223,39 @@ pub fn collapse(st: &Stretch, h: &Ratio) -> Option<(Ratio, u64)> {
     Some((hi, count))
 }
 
-/// COLLAPSE ON A CREST (with xylarium; docs/83, "the ocean view one tier
-/// down"): a galaxy's own bell lays crests as on the universe's, and the
-/// torque collects the galaxy's matter on them; the tidal wave's crest
-/// COMPRESSES what stands there (the tide's other face). A crest ring at
-/// reach R (own units, the core's holding H) carries `m` of the galaxy's
-/// holding and `μ` of its magnetism; its length is R (one turn, no π). A
-/// clump of length w along it binds by its whole 3Z read as its own
-/// enclosure, `x/(k + x)`, `x = (m + μ)·w/R`, `k = R + H`, against its
-/// agitation, half the tide's UNLOCKED face `½·(1 − H/k)` (operator
-/// 2026-10-16: the core HOLDS δ and leaves 1 − δ unlocked; held matter is
-/// heated by the face the core does not lock, never one face for both) and
-/// the shear `H·w/(k(k + w))`. None
-/// where the whole ring does not hold; else the smallest holding length
-/// `w_J` by one crossing and `⌊R/w_J⌋` clumps along the ring.
+/// THE RING FRAGMENTS, READ IN THE CLUMP'S OWN ENCLOSURE (docs/96 §7;
+/// operator 2026-10-26; the ruling of 2026-10-16, "shares read in the body's
+/// own enclosure"). A ring at reach R about the galaxy's hold H carries `m` of
+/// the galaxy's holding and `μ` of its magnetism, its heat `a`. A clump of arc
+/// w on it carries `x = (m + μ)·w/R`; in its OWN enclosure that is its whole
+/// hold (1), and its half-width `w/2` is a length dilated once by its share,
+/// `r_c = (w/2)/x`, so it binds by its own deficit,
+/// `δ_c = 1/(r_c + 1) = λ/(1 + λ)`, `λ = 2(m + μ)/R` (the ring's line
+/// density; the arc cancels). Against it stand its heat, the unlocked face of
+/// the galaxy at the ring, `½(1 − δ(R))`, and the galaxy's TIDE across the
+/// clump, the contrast of the galaxy's deficit at its two edges,
+/// `(δ(R − w/2) − δ(R + w/2))/(δ(R − w/2) + δ(R + w/2)) = w/(2(R + H))`
+/// (exact, first degree). The binding does not depend on w and the tide grows
+/// with it, so the ring parts into the LARGEST clumps that still hold,
+/// `w_max = 2(R + H)·(λ/(1 + λ) − a − face)`, `⌊R/w_max⌋` of them (one where
+/// the whole ring holds). None where even a point of the ring cannot hold.
+/// (It was read against the galaxy's own enclosure, `x/(R + H + x)` with the
+/// galaxy's full shear, which capped any ring's binding near 0.25–0.33 against
+/// a barrier near 0.48: no ring could ever hold.)
 pub fn crest_collapse(m: &Ratio, mu: &Ratio, a: &Ratio, r: &Ratio, h: &Ratio) -> Option<(Ratio, u64)> {
     if r.is_zero() || (m.clone() + mu.clone()).is_zero() {
         return None;
     }
-    let k = r.clone() + h.clone();
-    let floor = a.clone() + (ratio(1, 1) - h.clone() / k.clone()) / ratio(2, 1);
-    let holds = |w: &Ratio| {
-        let x = (m.clone() + mu.clone()) * w.clone() / r.clone();
-        x.clone() / (k.clone() + x) >= floor.clone() + h.clone() * w.clone() / (k.clone() * (k.clone() + w.clone()))
-    };
-    if !holds(r) {
+    let lambda = ratio(2, 1) * (m.clone() + mu.clone()) / r.clone();
+    let bind = lambda.clone() / (ratio(1, 1) + lambda);
+    let face = (ratio(1, 1) - h.clone() / (r.clone() + h.clone())) / ratio(2, 1);
+    let budget = bind - a.clone() - face;
+    if budget <= ratio(0, 1) {
         return None;
     }
-    let (mut lo, mut hi) = (ratio(0, 1), r.clone());
-    for _ in 0..24 {
-        let mid = (lo.clone() + hi.clone()) / ratio(2, 1);
-        if holds(&mid) {
-            hi = mid;
-        } else {
-            lo = mid;
-        }
-    }
-    let count = crate::ring::whole(&(r.clone() / hi.clone()))?;
-    Some((hi, count))
+    let w = (ratio(2, 1) * (r.clone() + h.clone()) * budget).min(r.clone());
+    let count = crate::ring::whole(&(r.clone() / w.clone()))?.max(1);
+    Some((w, count))
 }
 
 /// IGNITION, THE QUANTUM HEART (operator 2026-10-15; with xylarium): a
@@ -1529,6 +1524,28 @@ pub struct Settled {
     pub moved: Ratio,
     /// Its identity residual (zero where booked exactly).
     pub residual: Ratio,
+}
+
+#[cfg(test)]
+mod crest_tests {
+    use super::crest_collapse;
+    use cfe::ratio::ratio;
+
+    #[test]
+    fn a_ring_parts_into_the_largest_clumps_that_hold_in_their_own_enclosure() {
+        // The bell-462 outermost ring: m + μ = 0.57 at R 1.64 about H 1.94,
+        // heat 0.069: λ = 0.695, binding 0.41 beats heat + face 0.30.
+        let got = crest_collapse(&ratio(52, 100), &ratio(5, 100), &ratio(69, 1000), &ratio(164, 100), &ratio(194, 100));
+        let (w, n) = got.expect("a dense ring holds");
+        assert!(w > ratio(0, 1) && n >= 1);
+        // A thin inner ring (m + μ = 0.045) does not: its binding 0.08 falls
+        // short of its face alone.
+        assert!(crest_collapse(&ratio(40, 1000), &ratio(5, 1000), &ratio(75, 1000), &ratio(1015, 1000), &ratio(1089, 1000)).is_none());
+        // Denser rings part into more, smaller clumps? No: binding grows, so
+        // the largest holding arc grows and the clumps are fewer and larger.
+        let (w2, n2) = crest_collapse(&ratio(80, 100), &ratio(5, 100), &ratio(69, 1000), &ratio(164, 100), &ratio(194, 100)).expect("holds");
+        assert!(w2 >= w && n2 <= n);
+    }
 }
 
 #[cfg(test)]

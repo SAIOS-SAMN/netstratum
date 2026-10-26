@@ -166,9 +166,21 @@ Each echo, in order:
 - **Rings.** Band pairs on the strip `ρ = R/ring − 1 ∈ (0, 1]`, images at
   `−ρ`, each stepping by `k(ρ) = (S/G)·(1 + ρ)/(1 − ρ)`, `S = base/whole +`
   the matter within `|ρ'| < ρ`, `G = 1 − S`.
-- **Fragments.** Each ring fragments by the crest law,
-  `crest_collapse(m, μ, a, R_mid, enc.hold_within(R_mid))`, into `⌊R/w_J⌋`
-  clumps by phase in the galaxy's disc plane.
+- **Fragments, read in the clump's own enclosure** (the 2026-10-16 ruling,
+  "shares read in the body's own enclosure"). A clump of arc w on a ring at R
+  (about the galaxy's hold H, carrying m of its holding and μ of its
+  magnetism, at heat a) binds by its own deficit
+  `λ/(1 + λ)`, `λ = 2(m + μ)/R` (its half-width `w/2` dilated once by its
+  share; the arc cancels). Against it: its heat, the galaxy's unlocked face
+  at the ring `½(1 − δ(R))`, and the galaxy's tide across it, the contrast of
+  the galaxy's deficit at its edges, `w/(2(R + H))`. The ring parts into the
+  largest clumps that still hold, `w_max = 2(R + H)·(λ/(1 + λ) − a − face)`,
+  `⌊R/w_max⌋` of them, each by phase in the galaxy's disc plane; none where
+  the binding does not beat the heat and the face.
+  Retired: the crest read against the galaxy's enclosure,
+  `x/(R + H + x)` with the galaxy's full shear, which capped every ring's
+  binding near 0.25–0.33 against a barrier near 0.48 (measured at bell 462,
+  2026-10-26): no ring could hold, and no star formed.
 
 Retired: the throat's unreleased hold in the enclosure's base (built
 2026-10-26, `89dcadd`), and the release read against the push's own hold.
