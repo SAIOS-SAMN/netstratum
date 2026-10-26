@@ -145,3 +145,28 @@ then sorts kinds into shells by weight, so the universe stands as two
 galaxies of one element each. That is the next misalignment: nature's
 galaxies share the primordial mix (docs/78: "every share carries the
 manifest's composition in proportion").
+
+## 8. Bounce nucleosynthesis: three components (operator 2026-10-26: "is this isomorphic nucleosynthesis or unitary?"; "should it be automorphic?"; "land all three so we have the individual components correct")
+
+Each component is its own, with its own witness (`nuclides.rs`,
+`the_three_components_stand_apart_and_each_holds`):
+
+- **AUTOMORPHIC, the structure.** A nucleon's pole IS its leg: on the
+  continuum leg (open, R forward) a proton, on the vacuum leg (held, R
+  backward) a neutron. Conversion is the Möbius pass (`(δ, ψ, s) ↦ (1 − δ,
+  ψ + ½, −s)`), an involution: `M∘M = id`. The swap Q ↔ Z maps the nucleus's
+  convergence onto itself (every fibre one of each; every seal its own
+  image). Nothing is imported from nature.
+- **UNITARY, the books.** One exchange a pass: protons cross to the vacuum leg
+  by the held face, `p·δ`; neutrons to the continuum by the unlocked face,
+  `n·½(1 − δ)`; whole nucleons, both sides booked, `p + n` unchanged.
+- **ISOMORPHIC, a reading only.** The founding's outcome set beside nature's
+  (neutrons per proton, the weight-4 mass share, hydrogen's) and reported at
+  the founding, never imposed.
+
+OPEN, to land before the founding runs on them: THE SEAL WINDOW, the pass at
+which deuterium's seal first holds against the bounce's heat and the neutrons
+standing on the vacuum leg are captured. Our founding is cold (the bounce
+carries no heat of its own today), so the window has no heat to close against;
+the bounce's heat must be stated first. Until then the founding keeps its
+static quarter, flagged.

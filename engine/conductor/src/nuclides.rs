@@ -98,6 +98,75 @@ pub fn of_protons(q: u32) -> Option<u32> {
     (protons(w)? == q).then_some(w)
 }
 
+/// A NUCLEON'S POLE IS ITS LEG (the automorphic component; docs/97 §8): on
+/// the continuum leg (open, R forward) it is a proton, on the vacuum leg
+/// (held, R backward) a neutron.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Pole {
+    Proton,
+    Neutron,
+}
+
+/// THE CONVERSION IS THE MÖBIUS PASS (`flows::mobius`'s map on a nucleon's
+/// pole): through the ring the leg turns, so the pole does; twice is the
+/// identity.
+pub fn mobius(p: Pole) -> Pole {
+    match p {
+        Pole::Proton => Pole::Neutron,
+        Pole::Neutron => Pole::Proton,
+    }
+}
+
+/// THE SWAP Q ↔ Z read on the convergence (the automorphism of the nucleus):
+/// a fibre is one proton and one neutron, so exchanging the poles of every
+/// fibre leaves the fibres, and only the lone ends change pole. Returns the
+/// swapped nuclide's (protons, neutrons): (Z, Q).
+pub fn swapped(w: u32) -> Option<(u32, u32)> {
+    Some((neutrons(w)?, protons(w)?))
+}
+
+/// ONE PASS OF THE FOUNDING'S EXCHANGE (the unitary component; docs/97 §8):
+/// of `p` protons and `n` neutrons at a pass where the bounce's bubble holds
+/// the face δ, protons cross to the vacuum leg by the held face, `p·δ`, and
+/// neutrons to the continuum by the unlocked face, `n·½(1 − δ)`, both in
+/// whole nucleons, both booked: `p + n` is unchanged. Returns (p, n) after.
+pub fn exchange(p: &num_bigint::BigInt, n: &num_bigint::BigInt, delta: &cfe::ratio::Ratio) -> (num_bigint::BigInt, num_bigint::BigInt) {
+    use cfe::ratio::{ratio, Ratio};
+    let whole = |x: Ratio| x.floor().to_integer();
+    let to_n = whole(Ratio::from_integer(p.clone()) * delta.clone());
+    let to_p = whole(Ratio::from_integer(n.clone()) * (ratio(1, 1) - delta.clone()) / ratio(2, 1));
+    (p - &to_n + &to_p, n - &to_p + &to_n)
+}
+
+/// THE ISOMORPHIC READING (docs/97 §8): a founding's outcome set beside
+/// nature's own, never imposed: (neutrons per proton among the nucleons,
+/// the helium-weight mass share, hydrogen's mass share). Nature reads about
+/// 1/7, 1/4 and 3/4.
+pub fn beside_nature(m: &crate::pulse::Manifest) -> Option<(cfe::ratio::Ratio, cfe::ratio::Ratio, cfe::ratio::Ratio)> {
+    use cfe::ratio::ratio;
+    use num_traits::Zero;
+    let (mut q, mut z, mut whole, mut alpha, mut h) = (ratio(0, 1), ratio(0, 1), ratio(0, 1), ratio(0, 1), ratio(0, 1));
+    for (k, a) in m {
+        for &(n, w) in k.parts() {
+            let count = a.clone() * ratio(i64::from(n), 1);
+            q += count.clone() * ratio(i64::from(protons(w)?), 1);
+            z += count.clone() * ratio(i64::from(neutrons(w)?), 1);
+            let mw = count * ratio(i64::from(w), 1);
+            whole += mw.clone();
+            if w == 4 {
+                alpha += mw.clone();
+            }
+            if w == 1 {
+                h += mw;
+            }
+        }
+    }
+    if q.is_zero() || whole.is_zero() {
+        return None;
+    }
+    Some((z / q, alpha / whole.clone(), h / whole))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -124,5 +193,24 @@ mod tests {
         assert_eq!(of_protons(2), Some(3));
         assert_eq!(binds(2), Some(true));
         assert_eq!(binds(3), Some(false));
+    }
+
+    #[test]
+    fn the_three_components_stand_apart_and_each_holds() {
+        // AUTOMORPHIC: the Möbius pass is an involution on a nucleon's pole,
+        // and the swap Q ↔ Z maps every seal onto itself.
+        for p in [Pole::Proton, Pole::Neutron] {
+            assert_eq!(mobius(mobius(p)), p);
+        }
+        for w in [2u32, 4, 28, 208, 1092] {
+            assert_eq!(swapped(w), protons(w).zip(neutrons(w)), "seal {w} is its own image");
+        }
+        // UNITARY: a pass books both directions; nucleons are conserved.
+        let (p, n) = (num_bigint::BigInt::from(1_000_000u64), num_bigint::BigInt::from(0));
+        let (p1, n1) = exchange(&p, &n, &ratio(1, 3));
+        assert_eq!(&p1 + &n1, &p + &n);
+        assert!(n1 > num_bigint::BigInt::from(0));
+        let (p2, n2) = exchange(&p1, &n1, &ratio(1, 3));
+        assert_eq!(&p2 + &n2, &p + &n);
     }
 }

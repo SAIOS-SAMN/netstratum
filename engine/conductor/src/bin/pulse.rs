@@ -26,7 +26,12 @@ fn main() {
     // as nuclei.
     let n = grains * pulse::nuclei_per_grain() * num_bigint::BigInt::from(1024);
     let manifest = pulse::founding(&n);
-    println!("FOUNDING — {} Zs as grains", manifest.len());
+    println!("FOUNDING — {} nuclides as grains", manifest.len());
+    // The isomorphic reading: the founding beside nature's (never imposed).
+    if let Some((np, he, h)) = conductor::nuclides::beside_nature(&manifest) {
+        let f = |x: &cfe::ratio::Ratio| conductor::reading::sector(x).to_string();
+        println!("BESIDE NATURE — neutrons per proton {} (nature about 1/7), weight-4 mass share {} (about 1/4), hydrogen {} (about 3/4)", f(&np), f(&he), f(&h));
+    }
     let seed = *blake3::hash(b"netstratum era 1, unfounded stand-in").as_bytes();
     let Some(u) = pulse::deploy(&manifest) else {
         println!("refused: the founding holds no disc, or its echo carries no ring");
