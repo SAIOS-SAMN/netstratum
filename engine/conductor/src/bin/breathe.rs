@@ -174,6 +174,9 @@ fn main() {
         let ms = events.iter().fold([0usize; 6], |mut a, e| { for i in 0..5 { a[i] += e.motes[i]; } a });
         let held: usize = { let mut last: std::collections::BTreeMap<u32, usize> = std::collections::BTreeMap::new(); for e in &events { last.insert(e.galaxy, e.motes[5]); } last.values().sum() };
         println!("MOTES — entered the galaxies' flows: arrivals {}, shed and through the stars' throats {}, recycling {}, clump members returned {}; folded by the merge {}; held at the end {held}", ms[0], ms[1], ms[2], ms[3], ms[4]);
+        let rel = events.iter().fold((0usize, cfe::ratio::ratio(0, 1)), |s, e| (s.0 + e.released.0, s.1 + e.released.1.clone()));
+        let throat_left: cfe::ratio::Ratio = { let mut last: std::collections::BTreeMap<u32, cfe::ratio::Ratio> = std::collections::BTreeMap::new(); for e in &events { last.insert(e.galaxy, e.released.2.clone()); } last.values().fold(cfe::ratio::ratio(0, 1), |s, x| s + x.clone()) };
+        println!("RELEASE — the bounces released {} motes from the throats, holding {}; the throats still hold {}", rel.0, conductor::reading::sector(&rel.1), conductor::reading::sector(&throat_left));
         println!("DISCS — released at the stars' births {} (holding), at or past the rim when released {}", conductor::reading::sector(&born), conductor::reading::sector(&out));
         println!("SYSTEMS MET — {sticks} stuck, {bounces} bounced; overstepped the rims {} (holding); after the last echo, motes and bodies by galaxy {last:?}", conductor::reading::sector(&escaped));
     }

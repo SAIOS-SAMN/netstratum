@@ -128,12 +128,6 @@ pub fn space_of(phase: &[Ratio]) -> Vec<Ratio> {
     SPACE.iter().map(|&k| phase.get(k).cloned().unwrap_or_else(|| ratio(0, 1))).collect()
 }
 
-/// THE FRAMES' TURN on spatial plane j (docs/95 §1): a proton's three frames
-/// stand a third of a turn apart, one on each axis, so a kind of charge Z
-/// stands `Z·j/3` round on plane j.
-pub fn frame_turn(z: u32, j: usize) -> Ratio {
-    frac(&ratio(i64::from(z) * j as i64, 3))
-}
 
 /// A MOTE: matter as held turning, its state carried forward.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -865,11 +859,11 @@ pub fn spray(released: &Manifest, carried: &[(crate::chem::Kind, Ratio)], base: 
             // The capture phase: Z × the PARENT'S push share (the star's own),
             // so the kinds leave over the whole turn, never two antipodes.
             let z = ratio(i64::from(crate::chem::charge(k)), 1) * push.clone();
-            // On each spatial plane its frames' own turn too (docs/95 §1).
-            let zk = crate::chem::charge(k);
+            // From the star's own phase in each plane (docs/96: the planes
+            // part by the star's own history, never a set offset).
             let mut phase = rest(crate::ring::grain(&frac(&(at(LOOP) + ratio(1, 2) + z.clone()))));
-            for (j, &s) in SPACE.iter().enumerate() {
-                phase[s] = crate::ring::grain(&frac(&(at(s) + z.clone() + frame_turn(zk, j))));
+            for &s in &SPACE {
+                phase[s] = crate::ring::grain(&frac(&(at(s) + z.clone())));
             }
             let ell_o = crate::ring::grain(&carried.iter().find(|(c, _)| c == k)?.1);
             Some(Mote { key: k.clone(), amount: a.clone(), ell_o, ell_orth: ratio(0, 1), phase, agitation: crate::ring::grain(agitation), born, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1), tilt: Vec::new() })
@@ -1387,14 +1381,11 @@ pub fn founding(grains: &Manifest, span: Option<&Ratio>) -> Option<Vec<Mote>> {
     Some(kinds
         .iter()
         .map(|(k, a, r, _)| {
-            // The captures' half turn a pass, and on each spatial plane its
-            // frames' own turn (docs/95 §1): kinds part by their charge in
-            // every plane, never two antipodes.
-            let zk = crate::chem::charge(k);
-            let turn = ratio(i64::from(zk), 2);
+            // The captures' half turn a pass, in every plane alike.
+            let turn = ratio(i64::from(crate::chem::charge(k)), 2);
             let mut phase = rest(frac(&(ratio(1, 2) + turn.clone())));
-            for (j, &s) in SPACE.iter().enumerate() {
-                phase[s] = frac(&(turn.clone() + frame_turn(zk, j)));
+            for &s in &SPACE {
+                phase[s] = frac(&turn);
             }
             let ell = if span.is_some() { r.clone() * hold_at(r) } else { r.clone() };
             Mote { key: (*k).clone(), amount: (*a).clone(), ell_o: crate::ring::grain(&ell), ell_orth: ratio(0, 1), phase, agitation: ratio(0, 1), born: 0, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1), tilt: Vec::new() }

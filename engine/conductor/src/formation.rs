@@ -1621,7 +1621,7 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
         // It keeps the heat of its making (its members' and the bonds'),
         // which sets its thermal band for meeting its neighbours.
         let ell_orth = crate::ring::grain(&own_c);
-        worlds.push(crate::pulse::Body { ell_orth, path, radius, period, kept, satellites: Vec::new(), medium: Manifest::new(), ell: spin, medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: m, flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase, load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: crate::ring::grain(&heat_g).min(ratio(1, 1)), tilt: tilt_g });
+        worlds.push(crate::pulse::Body { ell_orth, path, radius, period, kept, satellites: Vec::new(), medium: Manifest::new(), ell: spin, medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: m, flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase, load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: crate::ring::grain(&heat_g).min(ratio(1, 1)), tilt: tilt_g, throat: Default::default() });
         if ignites {
             // A star of its system: born marks it (worlds are born 0).
             if let Some(w) = worlds.last_mut() {
