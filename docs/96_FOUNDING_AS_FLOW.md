@@ -7,7 +7,8 @@ distributes them - align on our topology"; "'walk' is forward, and linear -
 not multi-axial: where are you losing capacity"; "scope it and derive the
 meanings and align on topology for implementation and show plan".
 
-Status: SCOPED, not built. Builds on docs/95 (three spatial planes and the R
+Status: steps 1–5 BUILT (2026-10-26); §7 the galaxy enclosure's master
+algorithm, the law the code follows. Builds on docs/95 (three spatial planes and the R
 loop). Replaces the founding's one-step throw and the board's placement.
 
 ## 1. The meanings, derived
@@ -131,3 +132,43 @@ below gathers from.
    never byte equality).
 7. **Read.** The founding through D3's end: counts, worlds per star, every
    identity, cost per echo.
+
+## 7. The galaxy enclosure: the master algorithm (operator 2026-10-26)
+
+Every galaxy reading (its frame, the echo's, the flows', the merge's, its
+exits) is one enclosure:
+
+    g      = mass(core.total())                 throat + released + stars
+    base   = 1                                  the core's state, set at the
+                                                bounce, never drained
+    bodies = { (ℓ_x, m_x/g) : each mote x }  ∪  { (ℓ_s, mass(s)/g) : each star s }
+    enc    = Enclosed(base, bodies)
+    ring   = base                               R = H, δ = ½
+    rim    = 2·base                             the loop closes: the image
+                                                2H − R reaches the centre
+
+**The base is the core's state alone.** The state IS the throat's grains (set
+at the bounce, the galaxy's grains then), so the throat's unreleased hold is
+never added to it. Counted twice it inflated the ring (to about 1.4 while the
+throat held most of its grains): released matter stood inside the ring, the
+luminal bound flipped about a thousand motes an echo onto the Möbius leg, and
+the disc's rings were too thin to hold (the regression of 2026-10-26).
+
+Each echo, in order:
+
+- **Release.** For each kind k the throat holds, `c = p·w̄/w_k` (the push's
+  carry) and `s_k = ½·c/(c + base)` (the tide on the unlocked face, read
+  against the core's state); the bounce releases `nucleus(a_k·s_k)`, placed at
+  `R = ring + span·c`, turning at `ℓ = R·enc.hold_within(R)`.
+- **Luminal.** A mote with `R < ring` takes the Möbius jetstream:
+  `(δ, ψ, s) ↦ (1 − δ, ψ + ½, −s)`.
+- **Exits.** A mote with `R ≥ rim` crosses into the ocean.
+- **Rings.** Band pairs on the strip `ρ = R/ring − 1 ∈ (0, 1]`, images at
+  `−ρ`, each stepping by `k(ρ) = (S/G)·(1 + ρ)/(1 − ρ)`, `S = base/whole +`
+  the matter within `|ρ'| < ρ`, `G = 1 − S`.
+- **Fragments.** Each ring fragments by the crest law,
+  `crest_collapse(m, μ, a, R_mid, enc.hold_within(R_mid))`, into `⌊R/w_J⌋`
+  clumps by phase in the galaxy's disc plane.
+
+Retired: the throat's unreleased hold in the enclosure's base (built
+2026-10-26, `89dcadd`), and the release read against the push's own hold.

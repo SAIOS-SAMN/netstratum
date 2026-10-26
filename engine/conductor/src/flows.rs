@@ -898,13 +898,11 @@ pub fn on_disc_leg(x: &Mote) -> bool {
 /// enclosing core's orthogonal orbits carry it round the same way. Returns
 /// the motes that left; the rest stay.
 pub fn exits(motes: &mut Vec<Mote>, enc: &Enclosed) -> Vec<Mote> {
-    // THE RIM is where the loop closes (operator 2026-10-26, the double
-    // pass: a state returns only after `M∘M`): the image `2H − R` of the
-    // return leg reaches the centre at `R = 2H`, H the ring (the throat's
-    // base). It is the rim law's [throat 1, rim 2] in the throat's own units.
-    // (It was the whole holding, which equals 2H only while the throat holds
-    // its grains' state alone; with the throat still holding unreleased
-    // matter it fell short of the loop and sent the return leg to the ocean.)
+    // THE RIM is where the loop closes (docs/96 §7, the double pass: a state
+    // returns only after `M∘M`): the image `2H − R` of the return leg reaches
+    // the centre at `R = 2·base`, base the core's state. It is the rim law's
+    // [throat 1, rim 2]. (It was the whole holding, which falls short of the
+    // loop while the throat still holds unreleased grains.)
     let rim = ratio(2, 1) * enc.base();
     let (gone, stay): (Vec<Mote>, Vec<Mote>) = std::mem::take(motes).into_iter().partition(|x| enc.reach(&x.ell_o).0 >= rim);
     *motes = stay;
