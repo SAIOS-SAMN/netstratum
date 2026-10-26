@@ -586,6 +586,26 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
                 _ => ratio(1, 1),
             }
         };
+        // THE SPACING AT A STAR (xylarium 11.0 (51), the master equation, with
+        // netstratum's base, the throat's state and what it holds): at the
+        // star's reach R in its galaxy, the push of what stands inside against
+        // the pull of what stands outside, `k = P0·R/G(>R)`, `G = H_all − H(<R)`,
+        // and the core's dispersion there `p = (P0·R − G)/(P0·R + G)`. The core
+        // is read dark (P0 = 1): its light is made after the systems are read.
+        let spacing_at = |b: &Body| -> (Ratio, Ratio) {
+            match &enc {
+                Some(enc) => {
+                    let r = enc.reach(&own_of(b)).0;
+                    let h_in = enc.hold_within(&r);
+                    let g = enc.whole() - h_in;
+                    if g <= ratio(0, 1) {
+                        return (ratio(0, 1), ratio(1, 2));
+                    }
+                    (r.clone() / g.clone(), (r.clone() - g.clone()) / (r + g))
+                }
+                None => (ratio(0, 1), ratio(0, 1)),
+            }
+        };
         // Worlds of emptied remnants, re-anchored after the stars are read.
         let mut orphans: Vec<(Body, Ratio, Ratio, Vec<Ratio>)> = Vec::new();
         merged += star_sticks;
@@ -806,7 +826,9 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
                 // Its system still moves: worlds and debris meet, and what
                 // oversteps the rim crosses into the galaxy.
                 let rim_s = rim_of(&sys);
-                let (st, bo, escaped, star_identity, made, weighs, met_by) = crate::formation::collide_system(&mut sys, &unit, bell, rang, t_u, &rim_s, &mut cross);
+                let (k_s, p_s) = spacing_at(&sys);
+                let (escaped, formed, _) = crate::formation::settle_system(&mut sys, &unit, &k_s, &p_s, &rim_s, r_echo, rang, bell);
+                let (st, bo, star_identity, made, weighs, met_by): (usize, usize, Vec<(&'static str, Ratio)>, (usize, usize, usize, usize), [Ratio; 4], (usize, usize, usize)) = (0, 0, Vec::new(), (formed, 0, 0, 0), [ratio(0, 1), ratio(0, 1), ratio(0, 1), ratio(0, 1)], (0, 0, 0));
                 impacts = (impacts.0 + met_by.0, impacts.1 + met_by.1, impacts.2 + met_by.2);
                 for (a, b) in weights.iter_mut().zip(weighs) {
                     *a += b;
@@ -1026,7 +1048,9 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
             // COLLISIONS in the system's own medium: worlds grow; what
             // overreaches the system's rim crosses into the galaxy.
             let rim_s = rim_of(&sys);
-            let (st, bo, escaped, star_identity, made, weighs, met_by) = crate::formation::collide_system(&mut sys, &unit, bell, rang, t_u, &rim_s, &mut cross);
+            let (k_s, p_s) = spacing_at(&sys);
+            let (escaped, formed, _) = crate::formation::settle_system(&mut sys, &unit, &k_s, &p_s, &rim_s, r_echo, rang, bell);
+            let (st, bo, star_identity, made, weighs, met_by): (usize, usize, Vec<(&'static str, Ratio)>, (usize, usize, usize, usize), [Ratio; 4], (usize, usize, usize)) = (0, 0, Vec::new(), (formed, 0, 0, 0), [ratio(0, 1), ratio(0, 1), ratio(0, 1), ratio(0, 1)], (0, 0, 0));
                 impacts = (impacts.0 + met_by.0, impacts.1 + met_by.1, impacts.2 + met_by.2);
                 for (a, b) in weights.iter_mut().zip(weighs) {
                     *a += b;

@@ -1977,6 +1977,212 @@ pub fn collide_stars(stars: Vec<crate::pulse::Body>, c_pre: Vec<Ratio>, scale: &
     (out, sticks, bounces)
 }
 
+/// THE SYSTEM'S FIXED POINT (operator 2026-10-26: "whats the better way to
+/// produce this with stable worlds and stable orbits" → "proceed"): a star
+/// system is read where its matter comes to rest under the laws, never
+/// stepped. Bands open at the system's ring (or its heart's extent, beyond
+/// which the heart holds), `B_0 = max(h_s, extent)`, and step out by the
+/// spacing of xylarium's master equation (11.0 (51)), `k = P0·R/G(>R)` read
+/// at the star's place in its galaxy (`k`, passed in), to the breathing rim.
+/// The system's loose matter (its medium) is spread over each kind's band
+/// `r(1 ± p)`, its reach as the heart's cut carries it and `p` the core's
+/// dispersion at the star (passed in, none where the pull keeps one band),
+/// and each band takes its share. A world STANDING in a band (inner worlds
+/// to inner bands, in order) gathers its band's share; a band with no world
+/// FORMS one where its matter holds against the unlocked face there,
+/// `λ/(1 + λ) ≥ ½(1 − δ)`, `λ` its share over its width; otherwise it stays
+/// the belts. What falls inside the first band returns to the star; what
+/// stands past the rim leaves for the galaxy. Each world stands at its
+/// band's middle, turning at the balance of that place about the star and
+/// every world inside it; between events it turns in closed form by its own
+/// rate (`2δ` a ring over the rings `r_echo`, each plane by its tilt). The
+/// spin the re-reading moves is booked to the system's medium, so the ledger
+/// stays exact. Returns (what left past the rim, worlds formed, the spin
+/// moved).
+#[allow(clippy::too_many_arguments)]
+pub fn settle_system(sys: &mut crate::pulse::Body, unit: &Ratio, k: &Ratio, p_core: &Ratio, rim: &Ratio, r_echo: u64, rang: bool, bell: u64) -> (Manifest, usize, Ratio) {
+    let mut escaped = Manifest::new();
+    let total = mass(&sys.total());
+    if total.is_zero() || sys.kept.is_empty() || unit.is_zero() {
+        return (escaped, 0, ratio(0, 1));
+    }
+    let planes = crate::flows::PLANES;
+    let frac = |x: Ratio| x.clone() - x.floor();
+    // The spin as it stands (the ledger's reading): worlds and the medium's motes.
+    let spin_of = |b: &crate::pulse::Body| b.satellites.iter().fold(ratio(0, 1), |s, w| s + mass(&w.total()) / unit.clone() * w.ell.clone()) + b.flows.iter().fold(ratio(0, 1), |s, x| s + x.amount.clone() * crate::flows::weight(&x.key) / unit.clone() * x.ell_o.clone());
+    let spin_before = spin_of(sys);
+    let h_s = mass(&sys.kept) / total.clone();
+    // The pool: the system's loose matter (its medium holds what its motes do).
+    let pool: Manifest = std::mem::take(&mut sys.medium);
+    sys.flows.clear();
+    // Each kind's reach as the heart's cut carries it, in the system's units.
+    let mut mix = sys.kept.clone();
+    for (kind, a) in &pool {
+        *mix.entry(kind.clone()).or_insert_with(|| ratio(0, 1)) += a.clone();
+    }
+    let (extent, reach_of) = match heart_cut(&mix, &ratio(0, 1), &ratio(0, 1)) {
+        Some((held, _, h_k)) if !h_k.is_zero() => {
+            let reaches: Vec<(crate::chem::Kind, Ratio)> = carried(&mix, &ratio(0, 1), &ratio(0, 1)).into_iter().map(|(kind, l)| (kind, h_s.clone() * l / h_k.clone())).collect();
+            let ext = reaches.iter().filter(|(kind, _)| held.contains_key(kind)).map(|(_, r)| r.clone()).max().unwrap_or_else(|| ratio(0, 1));
+            (ext, reaches)
+        }
+        _ => (ratio(0, 1), Vec::new()),
+    };
+    let b0 = if extent > h_s { extent } else { h_s.clone() };
+    // The bands: from B_0 by k to the rim (one band where k ≤ 1: the pull
+    // keeps the system on one band).
+    let mut edges = vec![b0.clone()];
+    if *rim > b0 {
+        if *k > ratio(1, 1) {
+            let mut b = b0.clone();
+            while b < *rim && edges.len() < 64 {
+                b = crate::ring::grain(&(b * k.clone()));
+                edges.push(if b < *rim { b.clone() } else { rim.clone() });
+            }
+        } else {
+            edges.push(rim.clone());
+        }
+    }
+    let bands: Vec<(Ratio, Ratio)> = edges.windows(2).map(|w| (w[0].clone(), w[1].clone())).collect();
+    // Each kind's share in each band, the rest inside (to the star) or past
+    // the rim (to the galaxy).
+    let p = p_core.clone().max(ratio(0, 1)).min(ratio(1, 2));
+    let share_in = |lo: &Ratio, hi: &Ratio, a: &Ratio, b: &Ratio| -> Ratio {
+        if hi <= lo {
+            return if lo >= a && lo < b { ratio(1, 1) } else { ratio(0, 1) };
+        }
+        let x = if lo > a { lo.clone() } else { a.clone() };
+        let y = if hi < b { hi.clone() } else { b.clone() };
+        if y <= x { ratio(0, 1) } else { (y - x) / (hi.clone() - lo.clone()) }
+    };
+    let mut in_band: Vec<Manifest> = vec![Manifest::new(); bands.len()];
+    let mut to_star = Manifest::new();
+    let mut belts = Manifest::new();
+    for (kind, a) in &pool {
+        let r = reach_of.iter().find(|(c, _)| c == kind).map(|(_, r)| r.clone()).unwrap_or_else(|| b0.clone());
+        let (lo, hi) = (r.clone() * (ratio(1, 1) - p.clone()), r * (ratio(1, 1) + p.clone()));
+        let mut left = a.clone();
+        let put = |into: &mut Manifest, f: Ratio, left: &mut Ratio| {
+            let x = crate::pulse::nucleus(&(a.clone() * f)).min(left.clone());
+            if x > ratio(0, 1) {
+                *left -= x.clone();
+                *into.entry(kind.clone()).or_insert_with(|| ratio(0, 1)) += x;
+            }
+        };
+        let below = share_in(&lo, &hi, &ratio(0, 1), &b0);
+        put(&mut to_star, below, &mut left);
+        for (n, (x, y)) in bands.iter().enumerate() {
+            put(&mut in_band[n], share_in(&lo, &hi, x, y), &mut left);
+        }
+        // What stands past the rim leaves; nucleus remainders stay belts.
+        let beyond = share_in(&lo, &hi, rim, &(hi.clone().max(rim.clone()) + ratio(1, 1)));
+        put(&mut escaped, beyond, &mut left);
+        if left > ratio(0, 1) {
+            *belts.entry(kind.clone()).or_insert_with(|| ratio(0, 1)) += left;
+        }
+    }
+    for (kind, a) in to_star {
+        *sys.kept.entry(kind).or_insert_with(|| ratio(0, 1)) += a;
+    }
+    // The worlds standing, inner to outer, take the bands in order; worlds
+    // past the last band join the outermost (their meeting).
+    let mut worlds = std::mem::take(&mut sys.satellites);
+    worlds.sort_by(|a, b| a.ell.cmp(&b.ell));
+    let mut out: Vec<crate::pulse::Body> = Vec::new();
+    let mut formed = 0usize;
+    let mut inner = mass(&sys.kept) / total.clone();
+    let mut siblings: Vec<u64> = worlds.iter().filter_map(|w| w.path.last().copied()).collect();
+    let mut worlds = worlds.into_iter();
+    for (n, (x, y)) in bands.iter().enumerate() {
+        let r = crate::ring::grain(&((x.clone() + y.clone()) / ratio(2, 1)));
+        let got = std::mem::take(&mut in_band[n]);
+        let m_band = mass(&got) / total.clone();
+        let world = match worlds.next() {
+            Some(mut w) => {
+                for (kind, a) in got {
+                    *w.kept.entry(kind).or_insert_with(|| ratio(0, 1)) += a;
+                }
+                // A last band takes every world left standing past it.
+                if n + 1 == bands.len() {
+                    for rest in worlds.by_ref() {
+                        for (kind, a) in rest.total() {
+                            *w.kept.entry(kind).or_insert_with(|| ratio(0, 1)) += a;
+                        }
+                    }
+                }
+                Some(w)
+            }
+            None => {
+                let width = y.clone() - x.clone();
+                let delta = inner.clone() / (r.clone() + inner.clone());
+                let face = (ratio(1, 1) - delta) / ratio(2, 1);
+                let lambda = if width.is_zero() { ratio(0, 1) } else { m_band.clone() / width };
+                if !got.is_empty() && lambda.clone() / (ratio(1, 1) + lambda) >= face {
+                    // Its phases: the star's in each plane, turned by its
+                    // kinds' captures (`Z/2`, by holding on the circle).
+                    let z_turn = crate::flows::circle_mean(&got.iter().map(|(kind, a)| (a.clone() * crate::flows::weight(kind), ratio(i64::from(crate::chem::charge(kind)), 2))).collect::<Vec<_>>());
+                    let mut phase = crate::flows::rest(ratio(1, 2));
+                    for &s in &crate::flows::SPACE {
+                        phase[s] = crate::ring::grain(&frac(sys.phase.get(s).cloned().unwrap_or_else(|| ratio(0, 1)) + z_turn.clone()));
+                    }
+                    let key = crate::ring::birth_key(bell, &r, &inner, &siblings);
+                    siblings.push(key);
+                    let mut path = sys.path.clone();
+                    path.push(key);
+                    formed += 1;
+                    let state = mass(&got);
+                    Some(crate::pulse::Body { ell_orth: ratio(0, 1), path, radius: ratio(0, 1), period: ratio(0, 1), kept: got, satellites: Vec::new(), medium: Manifest::new(), ell: ratio(0, 1), medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state, flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase, load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1), tilt: sys.tilt.clone(), throat: Default::default() })
+                } else {
+                    for (kind, a) in got {
+                        *belts.entry(kind).or_insert_with(|| ratio(0, 1)) += a;
+                    }
+                    None
+                }
+            }
+        };
+        if let Some(mut w) = world {
+            // Its place: the band's middle, at the balance about the star and
+            // every world inside it; its rate the motion law's there.
+            let delta = inner.clone() / (r.clone() + inner.clone());
+            w.ell = crate::ring::grain(&(r.clone() * inner.clone()));
+            w.radius = crate::ring::grain(&(r.clone() * total.clone() / unit.clone()));
+            w.period = crate::ring::period(&r, &inner);
+            crate::flows::full(&mut w.phase);
+            // CLOSED-FORM TURNING between events: `2δ` a ring over this
+            // echo's rings, each spatial plane by its tilt, the loop whole.
+            let advance = ratio(2, 1) * delta.clone() * Ratio::from_integer(num_bigint::BigInt::from(r_echo));
+            let t = crate::flows::tilt_of(&w.tilt);
+            for kp in 0..planes.min(w.phase.len()) {
+                let share = crate::flows::SPACE.iter().position(|&s| s == kp).map(|j| t[j].clone()).unwrap_or_else(|| ratio(1, 1));
+                w.phase[kp] = crate::ring::grain(&frac(w.phase[kp].clone() + advance.clone() * share));
+            }
+            // It cools to the void on its star's bell through its unlocked
+            // face, `½(1 − δ)` of its heat, and its layers meet at its heat.
+            if rang {
+                w.heat = crate::ring::grain(&(w.heat.clone() * (ratio(1, 1) - ratio(1, 2) * (ratio(1, 1) - delta))));
+            }
+            if w.born == 0 {
+                layer_chemistry(&mut w.kept, &w.heat);
+            }
+            inner += mass(&w.total()) / total.clone();
+            out.push(w);
+        }
+    }
+    // Worlds with no band at all (a system with no room): they join the star's
+    // belts, their matter loose.
+    for rest in worlds {
+        for (kind, a) in rest.total() {
+            *belts.entry(kind).or_insert_with(|| ratio(0, 1)) += a;
+        }
+    }
+    sys.satellites = out;
+    sys.medium = belts;
+    // The spin the re-reading moved, booked to the system's medium.
+    let moved = spin_of(sys) - spin_before;
+    sys.medium_spin -= moved.clone();
+    (escaped, formed, moved)
+}
+
 #[cfg(test)]
 mod tests {
     use super::{layer_bands, layer_chemistry};
