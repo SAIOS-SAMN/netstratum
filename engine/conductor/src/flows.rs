@@ -80,6 +80,44 @@ pub fn antipode(phase: &mut [Ratio]) {
     }
 }
 
+/// A TILT read whole: its three shares, isotropic (a third each) where none
+/// is carried.
+pub fn tilt_of(t: &[Ratio]) -> Vec<Ratio> {
+    if t.len() == SPACE.len() {
+        t.to_vec()
+    } else {
+        vec![ratio(1, 3); SPACE.len()]
+    }
+}
+
+/// A tilt from per-plane spin magnitudes: each plane's share of their sum,
+/// held on the grain with the last plane taking the rest (the shares sum to
+/// one exactly, never re-divided without bound). Isotropic where nothing
+/// turns.
+pub fn tilt_from(spins: &[Ratio]) -> Vec<Ratio> {
+    let sum = spins.iter().fold(ratio(0, 1), |s, l| s + l.clone());
+    if sum.is_zero() {
+        return Vec::new();
+    }
+    let mut t: Vec<Ratio> = spins.iter().map(|l| crate::ring::grain(&(l.clone() / sum.clone()))).collect();
+    let rest = ratio(1, 1) - t[..t.len() - 1].iter().fold(ratio(0, 1), |s, x| s + x.clone());
+    let last = t.len() - 1;
+    t[last] = rest;
+    t
+}
+
+/// TILTS BLENDED where turning bodies join: each plane's spin added,
+/// `Σ w·ℓ·t_k`, re-read as shares (`w` each one's holding, `ℓ` its spin).
+pub fn blend(parts: &[(Ratio, Ratio, Vec<Ratio>)]) -> Vec<Ratio> {
+    let mut sums = vec![ratio(0, 1); SPACE.len()];
+    for (w, l, t) in parts {
+        for (k, s) in tilt_of(t).into_iter().enumerate() {
+            sums[k] += w.clone() * l.clone() * s;
+        }
+    }
+    tilt_from(&sums)
+}
+
 /// A reading's mean over the spatial planes (L1: their sum over three).
 pub fn space_mean(f: impl Fn(usize) -> Ratio) -> Ratio {
     SPACE.iter().fold(ratio(0, 1), |s, &k| s + f(k)) / ratio(3, 1)
@@ -123,6 +161,10 @@ pub struct Mote {
     pub lever: Vec<Ratio>,
     /// The place its lever is counted in (a share of a turn).
     pub lever_place: Ratio,
+    /// ITS TILT (docs/96 step 1): its orbit spin's share in each spatial
+    /// plane, `ℓ_k = ℓ_o·t_k`, the shares summing to one (L1, so its reach
+    /// stays `ℓ_o/H`); empty reads isotropic, a third in each.
+    pub tilt: Vec<Ratio>,
 }
 
 /// A mote's TRUE phase in plane k (ascent): its mark and the share of its
@@ -425,7 +467,7 @@ impl Enclosed {
 /// orthogonal orbit (the circulation's plane) runs the other way, its advance read over
 /// that passage; its orbit plane turns forward.
 #[allow(clippy::too_many_arguments)]
-pub fn turn(phase: &mut [Ratio], r_o: &Ratio, h: &Ratio, p: &Ratio, tide: Option<(&Ratio, &Ratio)>, inverted: bool, place: Option<&Ratio>, agitation: &Ratio, cross: &mut crate::enfold::Cross) -> (Ratio, Vec<(usize, Ratio, Ratio)>, Ratio) {
+pub fn turn(phase: &mut [Ratio], tilt: &[Ratio], r_o: &Ratio, h: &Ratio, p: &Ratio, tide: Option<(&Ratio, &Ratio)>, inverted: bool, place: Option<&Ratio>, agitation: &Ratio, cross: &mut crate::enfold::Cross) -> (Ratio, Vec<(usize, Ratio, Ratio)>, Ratio) {
     let pull = h.clone() / (r_o.clone() + h.clone());
     let d_o = if inverted { ratio(1, 1) - pull.clone() } else { pull.clone() };
     // THE ORTHOGONAL ORBIT'S RATE (with xylarium): the jetstream turns by the motion law
@@ -438,13 +480,15 @@ pub fn turn(phase: &mut [Ratio], r_o: &Ratio, h: &Ratio, p: &Ratio, tide: Option
     // denominators each bell without bound; the residue drains within its
     // round, passes to the quantum tier acknowledged, or, with no place of its
     // own, is cauterized with its scar recorded.
-    // Every spatial plane turns at the one rate (docs/95), each from where
-    // it stands.
+    // Every spatial plane turns by its tilt's share of the body's turning
+    // (docs/96 step 1; L1: the shares sum to the whole `2δ`), each from
+    // where it stands.
+    let t = tilt_of(tilt);
     let mut scar_o = ratio(0, 1);
     let mut levers: Vec<(usize, Ratio, Ratio)> = Vec::new();
-    for &k in &SPACE {
+    for (j, &k) in SPACE.iter().enumerate() {
         let Some(at) = phase.get(k).cloned() else { continue };
-        let (held, scar, lever) = crate::enfold::leaf(&(at + ratio(2, 1) * d_o.clone()), place, agitation, k, cross);
+        let (held, scar, lever) = crate::enfold::leaf(&(at + ratio(2, 1) * d_o.clone() * t[j].clone()), place, agitation, k, cross);
         phase[k] = held;
         scar_o += scar;
         if let Some((n, f)) = lever {
@@ -594,7 +638,8 @@ fn torque_one(x: &mut Mote, enc: &Enclosed, p: &Ratio, tide: Option<(&Ratio, &Ra
     let m = if total.is_zero() { ratio(0, 1) } else { x.amount.clone() * weight(&x.key) / total.clone() };
     let place = crate::enfold::place(&r_o, &m, &h);
     let heat_was = x.agitation.clone();
-    let (scar, levers, torque_orth) = turn(&mut x.phase, &r_o, &h, p, tide, x.vacuum, place.as_ref(), &heat_was, cross);
+    let tilt = x.tilt.clone();
+    let (scar, levers, torque_orth) = turn(&mut x.phase, &tilt, &r_o, &h, p, tide, x.vacuum, place.as_ref(), &heat_was, cross);
     let (g, ab) = spin_torque(x, &from, &h, &r_o, &d_o, p, &torque_orth, heart_push, &m, &scar);
     // DESCENT: its weight past its round stands one place past its mark.
     settle(x, &levers, place.as_ref(), cross);
@@ -616,8 +661,13 @@ pub fn spin_torque(x: &mut Mote, from: &[Ratio], h: &Ratio, r_o: &Ratio, d_o: &R
     // Over its whole passage this bell, never at one instant; a vacuum
     // mote at its inverted reach (`1 − δ`), forward.
     let d_o = if x.vacuum { ratio(1, 1) - d_o.clone() } else { d_o.clone() };
-    // Its response in each spatial plane over the passage, their mean (docs/95).
-    let k = from.iter().fold(ratio(0, 1), |s, f| s + mean_response(f, &(ratio(2, 1) * d_o.clone()))) / ratio(3, 1);
+    // ITS RESPONSE IN EACH SPATIAL PLANE over that plane's passage (its
+    // tilt's share of `2δ`; docs/96 step 1): the push acts in every plane at
+    // once (isoclinic), each plane's spin `ℓ·t_k` torqued by its own
+    // response, weighted by its share.
+    let t = tilt_of(&x.tilt);
+    let resp: Vec<Ratio> = from.iter().zip(&t).map(|(f, tk)| mean_response(f, &(ratio(2, 1) * d_o.clone() * tk.clone()))).collect();
+    let k = resp.iter().zip(&t).fold(ratio(0, 1), |s, (r, tk)| s + r.clone() * tk.clone());
     let dl_o = p.clone() * d_o.clone() * k.clone();
     // DISSIPATION (operator 2026-10-19: "what do our current physics tell
     // about heat dissipation to the void? probably mimic nature"; with
@@ -653,15 +703,27 @@ pub fn spin_torque(x: &mut Mote, from: &[Ratio], h: &Ratio, r_o: &Ratio, d_o: &R
         }
         _ => ratio(0, 1),
     };
-    // A torque past the centre carries the mote THROUGH it to the antipode
-    // (its orbit's phase on half a turn), never piled at zero.
-    let raw = x.ell_o.clone() + dl_o + band;
-    let new_o = if raw < ratio(0, 1) {
-        antipode(&mut x.phase);
-        crate::ring::grain(&(-raw))
-    } else {
-        crate::ring::grain(&raw)
-    };
+    // EACH PLANE'S SPIN: its share of the orbit spin, its own torque and
+    // its share of the band (radial). A plane torqued past zero carries the
+    // mote THROUGH the centre in that plane (its phase there on half a
+    // turn), never piled at zero; the orbit spin is the L1 sum, the tilt
+    // re-read from the planes.
+    let _ = dl_o;
+    let mut planes_l: Vec<Ratio> = Vec::with_capacity(t.len());
+    for (j, tk) in t.iter().enumerate() {
+        let lk = x.ell_o.clone() * tk.clone() + p.clone() * d_o.clone() * resp[j].clone() * tk.clone() + band.clone() * tk.clone();
+        if lk < ratio(0, 1) {
+            if let Some(ph) = x.phase.get_mut(SPACE[j]) {
+                *ph = frac(&(ph.clone() + ratio(1, 2)));
+            }
+            planes_l.push(-lk);
+        } else {
+            planes_l.push(lk);
+        }
+    }
+    let raw = planes_l.iter().fold(ratio(0, 1), |s, l| s + l.clone());
+    let new_o = crate::ring::grain(&raw);
+    x.tilt = tilt_from(&planes_l);
     let dl = new_o.clone() - x.ell_o.clone();
     absorbed += m.clone() * if dl < ratio(0, 1) { -dl.clone() } else { dl.clone() };
     given += m.clone() * dl;
@@ -740,10 +802,11 @@ pub fn shear(motes: &mut [Mote], enc: &Enclosed, total: &Ratio) -> Ratio {
         if gap <= ratio(0, 1) || m_ij.is_zero() {
             continue;
         }
-        let c = space_mean(|k| match (motes[o].phase.get(k), motes[n_].phase.get(k)) {
-            (Some(a), Some(b)) => contact(&(a.clone() - b.clone()), &(ratio(2, 1) * (d[o].clone() - d[n_].clone()))),
+        let (to, tn) = (tilt_of(&motes[o].tilt), tilt_of(&motes[n_].tilt));
+        let c = SPACE.iter().enumerate().fold(ratio(0, 1), |s, (j, &k)| s + match (motes[o].phase.get(k), motes[n_].phase.get(k)) {
+            (Some(a), Some(b)) => contact(&(a.clone() - b.clone()), &(ratio(2, 1) * (d[o].clone() * to[j].clone() - d[n_].clone() * tn[j].clone()))),
             _ => ratio(0, 1),
-        });
+        }) / ratio(3, 1);
         let t = (if d[o] > d[n_] { d[o].clone() - d[n_].clone() } else { d[n_].clone() - d[o].clone() }) / (d[o].clone() + d[n_].clone());
         let u = c * t * gap / m_ij;
         if u.is_zero() {
@@ -809,7 +872,7 @@ pub fn spray(released: &Manifest, carried: &[(crate::chem::Kind, Ratio)], base: 
                 phase[s] = crate::ring::grain(&frac(&(at(s) + z.clone() + frame_turn(zk, j))));
             }
             let ell_o = crate::ring::grain(&carried.iter().find(|(c, _)| c == k)?.1);
-            Some(Mote { key: k.clone(), amount: a.clone(), ell_o, ell_orth: ratio(0, 1), phase, agitation: crate::ring::grain(agitation), born, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1) })
+            Some(Mote { key: k.clone(), amount: a.clone(), ell_o, ell_orth: ratio(0, 1), phase, agitation: crate::ring::grain(agitation), born, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1), tilt: Vec::new() })
         })
         .collect()
 }
@@ -1253,6 +1316,8 @@ pub fn merge(motes: &mut Vec<Mote>, beads: &std::collections::BTreeMap<Vec<bool>
             let w = weight(&x.key);
             let heat = (my.clone() * y.agitation.clone() + mx.clone() * x.agitation.clone()) / both.clone();
             y.agitation = g(&heat);
+            // The tilts join as their plane spins add (docs/96 step 1).
+            y.tilt = blend(&[(my.clone(), y.ell_o.clone(), y.tilt.clone()), (mx.clone(), x.ell_o.clone(), x.tilt.clone())]);
             y.ell_o = go;
             y.ell_orth = gc;
             let place = place_of(y);
@@ -1332,7 +1397,7 @@ pub fn founding(grains: &Manifest, span: Option<&Ratio>) -> Option<Vec<Mote>> {
                 phase[s] = frac(&(turn.clone() + frame_turn(zk, j)));
             }
             let ell = if span.is_some() { r.clone() * hold_at(r) } else { r.clone() };
-            Mote { key: (*k).clone(), amount: (*a).clone(), ell_o: crate::ring::grain(&ell), ell_orth: ratio(0, 1), phase, agitation: ratio(0, 1), born: 0, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1) }
+            Mote { key: (*k).clone(), amount: (*a).clone(), ell_o: crate::ring::grain(&ell), ell_orth: ratio(0, 1), phase, agitation: ratio(0, 1), born: 0, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1), tilt: Vec::new() }
         })
         .collect())
 }
@@ -1532,7 +1597,7 @@ mod reading_tests {
 
 #[cfg(test)]
 mod passage_tests {
-    use super::mean_response;
+    use super::{blend, mean_response, rest, space_of, spin_torque, tilt_from, tilt_of, Mote};
     use cfe::ratio::ratio;
 
     #[test]
@@ -1547,7 +1612,7 @@ mod passage_tests {
     #[test]
     fn a_motes_lever_keeps_its_true_place() {
         use super::{settle, true_phase, Mote};
-        let mut x = Mote { key: crate::chem::Kind::parse("Z001").expect("a kind"), amount: ratio(1, 1), ell_o: ratio(1, 1), ell_orth: ratio(0, 1), phase: vec![ratio(1, 60), ratio(0, 1)], agitation: ratio(0, 1), born: 0, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1) };
+        let mut x = Mote { key: crate::chem::Kind::parse("Z001").expect("a kind"), amount: ratio(1, 1), ell_o: ratio(1, 1), ell_orth: ratio(0, 1), phase: vec![ratio(1, 60), ratio(0, 1)], agitation: ratio(0, 1), born: 0, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1), tilt: Vec::new() };
         let p = ratio(1, 60);
         let mut cross = crate::enfold::Cross::default();
         // Its true place lies 1/240 past its mark: a quarter of a place, so a
@@ -1563,7 +1628,7 @@ mod passage_tests {
     #[test]
     fn the_shear_moves_turning_outward_and_keeps_the_books() {
         use super::{shear, weight, Enclosed, Mote};
-        let mote = |ell: (i64, i64), ph: (i64, i64)| Mote { key: crate::chem::Kind::parse("Z001").expect("a kind"), amount: ratio(1, 8), ell_o: ratio(ell.0, ell.1), ell_orth: ratio(0, 1), phase: vec![ratio(ph.0, ph.1), ratio(0, 1)], agitation: ratio(0, 1), born: 0, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1) };
+        let mote = |ell: (i64, i64), ph: (i64, i64)| Mote { key: crate::chem::Kind::parse("Z001").expect("a kind"), amount: ratio(1, 8), ell_o: ratio(ell.0, ell.1), ell_orth: ratio(0, 1), phase: vec![ratio(ph.0, ph.1), ratio(0, 1)], agitation: ratio(0, 1), born: 0, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1), tilt: Vec::new() };
         let mut motes = vec![mote((1, 4), (0, 1)), mote((1, 2), (1, 60)), mote((3, 4), (1, 30))];
         let total = ratio(1, 1);
         let book = |ms: &[Mote]| ms.iter().fold(ratio(0, 1), |s, x| s + x.amount.clone() * weight(&x.key) * x.ell_o.clone());
@@ -1589,9 +1654,31 @@ mod passage_tests {
     }
 
     #[test]
+    fn a_tilt_parts_the_spin_over_three_planes_and_sums_to_one() {
+        // Shares from plane spins sum to one exactly, the last plane taking the rest.
+        let t = tilt_from(&[ratio(1, 7), ratio(2, 7), ratio(4, 7)]);
+        assert_eq!(t.iter().fold(ratio(0, 1), |s, x| s + x.clone()), ratio(1, 1));
+        // Blending adds plane spins: a body all in plane 0 and one all in
+        // plane 2, equal holding and spin, join half and half.
+        let b = blend(&[(ratio(1, 1), ratio(1, 1), vec![ratio(1, 1), ratio(0, 1), ratio(0, 1)]), (ratio(1, 1), ratio(1, 1), vec![ratio(0, 1), ratio(0, 1), ratio(1, 1)])]);
+        assert_eq!(b, vec![ratio(1, 2), ratio(0, 1), ratio(1, 2)]);
+        // No tilt reads isotropic.
+        assert_eq!(tilt_of(&[]), vec![ratio(1, 3); 3]);
+        // A torqued mote keeps its tilt a partition of one and its orbit spin
+        // the L1 sum of its planes.
+        let mut x = Mote { key: crate::chem::Kind::parse("Z001").expect("a kind"), amount: ratio(1, 1), ell_o: ratio(1, 2), ell_orth: ratio(0, 1), phase: rest(ratio(1, 2)), agitation: ratio(0, 1), born: 0, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1), tilt: vec![ratio(1, 2), ratio(1, 3), ratio(1, 6)] };
+        x.phase[0] = ratio(1, 10);
+        x.phase[2] = ratio(7, 10);
+        let from = space_of(&x.phase);
+        let _ = spin_torque(&mut x, &from, &ratio(1, 1), &ratio(1, 2), &ratio(2, 3), &ratio(1, 4), &ratio(0, 1), None, &ratio(1, 1), &ratio(0, 1));
+        assert_eq!(x.tilt.iter().fold(ratio(0, 1), |s, v| s + v.clone()), ratio(1, 1));
+        assert!(x.tilt[0] != ratio(1, 2) || x.tilt[1] != ratio(1, 3), "the planes torqued apart by their own responses");
+    }
+
+    #[test]
     fn the_mobius_jetstream_twice_is_the_identity() {
         use super::{mobius, Mote};
-        let mut x = Mote { key: crate::chem::Kind::parse("Z026").expect("a kind"), amount: ratio(1, 1), ell_o: ratio(1, 3), ell_orth: ratio(0, 1), phase: vec![ratio(3, 10), ratio(1, 7)], agitation: ratio(0, 1), born: 0, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1) };
+        let mut x = Mote { key: crate::chem::Kind::parse("Z026").expect("a kind"), amount: ratio(1, 1), ell_o: ratio(1, 3), ell_orth: ratio(0, 1), phase: vec![ratio(3, 10), ratio(1, 7)], agitation: ratio(0, 1), born: 0, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1), tilt: Vec::new() };
         let was = x.clone();
         mobius(&mut x);
         assert!(x.vacuum && x.phase[0] == ratio(4, 5), "one pass: the other leg, half a turn on");

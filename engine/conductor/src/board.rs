@@ -60,7 +60,7 @@ fn less(m: &mut Manifest, by: &Manifest) {
 
 fn body(path: Vec<u64>, radius: Ratio, period: Ratio, kept: Manifest, ell: Ratio, phase: Vec<Ratio>) -> Body {
     let state = mass(&kept);
-    Body { ell_orth: ratio(0, 1), path, radius, period, kept, satellites: Vec::new(), medium: Manifest::new(), ell, medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state, flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), bell: phase.clone(), phase, load: ratio(0, 1), remnant: false, heat: ratio(0, 1) }
+    Body { ell_orth: ratio(0, 1), path, radius, period, kept, satellites: Vec::new(), medium: Manifest::new(), ell, medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state, flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), bell: phase.clone(), phase, load: ratio(0, 1), remnant: false, heat: ratio(0, 1), tilt: Vec::new() }
 }
 
 /// PLACE the founding's first star systems and their worlds (see the module).
@@ -234,7 +234,7 @@ pub fn place(u: &mut Universe, seed: &[u8; 32]) -> (usize, usize) {
                 if let Some(x) = core.flows.iter_mut().find(|x| x.key == k) {
                     x.amount += a;
                 } else {
-                    core.flows.push(Mote { key: k, amount: a, ell_o: ratio(1, 1), ell_orth: ratio(0, 1), phase: crate::flows::rest(ratio(1, 2)), agitation: ratio(0, 1), born: 0, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1) });
+                    core.flows.push(Mote { key: k, amount: a, ell_o: ratio(1, 1), ell_orth: ratio(0, 1), phase: crate::flows::rest(ratio(1, 2)), agitation: ratio(0, 1), born: 0, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1), tilt: Vec::new() });
                 }
             }
         }
