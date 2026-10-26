@@ -12,6 +12,16 @@ Read against: xylarium spec 11.0 (53) (Z the proton, Q the neutron, R the
 electron's phase; ruled there) and xyl-cosmos `fibres.rs` (ends on S^11,
 fibres, seals). Netstratum is the inverse: Q the proton, Z the neutron.
 
+## The seam with xylarium
+
+The letters are swapped deliberately (operator, relayed by xylarium
+2026-10-26: "i want netstratum to run the opposite of yours - Z/Q letter swap
+for the nucleons"; xylarium spec 11.0 (53), 3a7d3b1): netstratum Q = proton,
+Z = neutron; xylarium Z = proton, Q = neutron; both R = the electron's phase.
+Anything crossing between the kernels in Z/Q terms (a shared law, a bench, an
+anastome reading) is translated at the seam, Z ↔ Q, and labelled on each side
+("Q(proton)").
+
 ## 0. Why
 
 The founding today is a chain over the charge alone, `count_Z =
