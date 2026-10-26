@@ -114,3 +114,21 @@ coherence as products over the planes (their present form for two).
 4. Separation along the sphere for meetings, capture, ocean landing.
 5. The board on the new state (stars and worlds each in their own planes).
 6. Read: identities exact, worlds placed and kept, cost per echo measured.
+
+## 8. Z and Q together (operator 2026-10-26)
+
+"Where is Q on this Z axis - both must work together otherwise you'll get a
+divergence in R"; "realign your forward trajectory on that bond".
+
+- Q is Z's partner on the same plane, never a separate axis: a bond turns a
+  frame from the Q pole to the Z pole within its plane.
+- Every law reads the two as shares of their sum, the whole weight
+  `A + Q = 3Z`, never one pole over the other. R is their span, `A − Q`
+  (the number grammar, 2026-10-17: ℝ the span between the ℤ and ℚ poles),
+  bounded by the whole.
+- BUILT: a body's push is `½·Q/(A + Q)` (`pulse::push_of`), at most ½, the
+  luminal bound itself (it was `½·Q/A`, past ½ wherever the open outweighed
+  the held, Z 31 among our own atoms); a kind's open share is `Q/(A + Q)`
+  (`flows::open`, it was `Q/A`, past one for the same kinds).
+- WITHDRAWN: the rest reach `H·A/Q` (infinite at Q = 0) and the spacing
+  `(2A + Q)/(2A − Q)` (a pole at Q = 2A), both sent to xylarium.

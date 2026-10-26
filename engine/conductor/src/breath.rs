@@ -853,7 +853,7 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
                 for (k, a) in &burst {
                     *sys.medium.entry(k.clone()).or_insert_with(|| ratio(0, 1)) += a.clone();
                 }
-                let push = if crate::pulse::held(&sys.kept).is_zero() { ratio(0, 1) } else { ratio(1, 2) * crate::pulse::magnetism(&sys.kept) / crate::pulse::held(&sys.kept) };
+                let push = crate::pulse::push_of(&sys.kept);
                 // The spray leaves from the star itself.
                 sys.flows.extend(crate::flows::spray(&burst, &thrown, &vec![ratio(0, 1); planes], &ratio(0, 1), bell, &push));
             }

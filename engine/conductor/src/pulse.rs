@@ -356,6 +356,20 @@ pub fn universal_ledger(u: &Universe) -> Ratio {
 /// 2026-10-16): each core re-pulses at full strength in its own units, so no
 /// share of the universe enters the push; a galaxy's gas comes from outside
 /// (the ocean), not from its own bounce.
+/// A BODY'S PUSH, Z AND Q TOGETHER (operator 2026-10-26: "where is Q on this
+/// Z axis - both must work together otherwise you'll get a divergence in
+/// R"): half its open frames' share of its whole weight, `½·Q/(A + Q)` (Q its
+/// magnetism, A its holding; their sum its 3Z mass). Never one pole over the
+/// other: `½·Q/A` passed ½ wherever the open outweighed the held, breaking
+/// the luminal bound; read on the whole it is at most ½, the bound itself.
+pub fn push_of(m: &Manifest) -> Ratio {
+    let whole = mass(m);
+    if whole.is_zero() {
+        return ratio(0, 1);
+    }
+    ratio(1, 2) * magnetism(m) / whole
+}
+
 pub fn galaxy_push(grains: &Manifest) -> Option<(Ratio, Ratio, Ratio)> {
     push_cut(grains).map(|(p, h, mean, _)| (p, h, mean))
 }

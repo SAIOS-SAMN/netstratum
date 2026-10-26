@@ -148,7 +148,7 @@ pub fn stretches(shells: &[Shell], n: u64) -> Option<Vec<Stretch>> {
         }
         let mut members = Vec::new();
         let (mut lambda, mut weighted, mut mu) = (ratio(0, 1), ratio(0, 1), ratio(0, 1));
-        let open = |k: &crate::chem::Kind| ratio(i64::from(crate::chem::unpaired(k)), i64::from(crate::chem::hold(k).max(1)));
+        let open = crate::flows::open;
         for (i, s) in shells.iter().enumerate() {
             let span = s.outer.clone() - s.inner.clone();
             if span.is_zero() {
@@ -827,7 +827,7 @@ pub fn system(clump: &Manifest, outside: Vec<(crate::flows::Mote, Ratio, Ratio)>
     // The newborn star's push: ½ × its hot heart's open share.
     // The spray leaves from the star's cool outer layers: their push (whole
     // atoms), never the hot heart's stripped share.
-    let star_push = if crate::pulse::held(&star).is_zero() { ratio(0, 1) } else { ratio(1, 2) * crate::pulse::magnetism(&star) / crate::pulse::held(&star) };
+    let star_push = crate::pulse::push_of(&star);
     // THE DISC (read first: the wind's hold counts it): what never fell, where it stands, turning at the balance of
     // its place in each plane, `ℓ = r·H(<r)` (the ring law: reach × the hold
     // inside it), the hold the system's own enclosure: the star as it stands
@@ -1040,7 +1040,7 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
     // length (`R·scale`).
     let Some(enc) = system_frame(sys, unit) else { return (0, 0, Manifest::new(), Vec::new(), (0, 0, 0, 0), [ratio(0, 1), ratio(0, 1), ratio(0, 1), ratio(0, 1)], (0, 0, 0)) };
     // The star's push on its system, `½ ×` its heart's open share.
-    let star_push = if crate::pulse::held(&sys.kept).is_zero() { ratio(0, 1) } else { ratio(1, 2) * crate::pulse::magnetism(&sys.kept) / crate::pulse::held(&sys.kept) };
+    let star_push = crate::pulse::push_of(&sys.kept);
     // THE STAR'S TORQUE ON ITS SYSTEM, on the star's own bell only (its clock),
     // never at every arrival: the one torque law (`flows::spin_torque`), the star
     // its system's core. Each mote, at the reach its orthogonal orbit swings
@@ -1705,7 +1705,7 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
                 if !released.is_empty() && !h_k.is_zero() {
                     let lambda = mass(&sys.kept) / total.clone();
                     let carried_k = carried(&sys.kept, &ratio(0, 1), &ratio(0, 1));
-                    let star_push_now = if crate::pulse::held(&held).is_zero() { ratio(0, 1) } else { ratio(1, 2) * crate::pulse::magnetism(&held) / crate::pulse::held(&held) };
+                    let star_push_now = crate::pulse::push_of(&held);
                     let spins: Vec<(crate::chem::Kind, Ratio)> = carried_k.into_iter().filter(|(k, _)| released.contains_key(k)).map(|(k, l)| { let r = l / h_k.clone() * lambda.clone(); let h = enc.hold_within(&r); (k, r * h) }).collect();
                     let thrown = crate::flows::spray(&released, &spins, &sys.phase, &ratio(0, 1), bell, &star_push_now);
                     for x in &thrown {

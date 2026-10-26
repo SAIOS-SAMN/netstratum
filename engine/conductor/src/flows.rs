@@ -203,9 +203,11 @@ pub fn weight(k: &crate::chem::Kind) -> Ratio {
     ratio(i64::from(crate::chem::weight(k)), 1)
 }
 
-/// A kind's open share, unpaired over hold.
+/// A kind's open share of its whole weight, `Q/(A + Q)` (Z and Q together,
+/// operator 2026-10-26: never one pole over the other, `Q/A` passed one
+/// where the open outweighed the held). At most one.
 pub fn open(k: &crate::chem::Kind) -> Ratio {
-    ratio(i64::from(crate::chem::unpaired(k)), i64::from(crate::chem::hold(k).max(1)))
+    ratio(i64::from(crate::chem::unpaired(k)), i64::from(crate::chem::weight(k).max(1)))
 }
 
 fn frac(x: &Ratio) -> Ratio {
