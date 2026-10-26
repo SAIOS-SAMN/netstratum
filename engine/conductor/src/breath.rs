@@ -542,6 +542,7 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
         // each carries the coherence it had before the encounter.
         let planes = crate::flows::PLANES;
         let c_pre: Vec<Ratio> = core.satellites.iter().map(|b| if b.phase.len() < planes || b.bell.len() < planes { ratio(1, 1) } else { (0..planes).fold(ratio(1, 1), |c, k| c * crate::flows::in_step(&b.phase[k], &b.bell[k])) }).collect();
+        crate::profile::mark("breath:stars-collide");
         let (met, star_sticks, star_bounces) = match &pre {
             Some((p_g, _, _)) if enc.is_some() => crate::formation::collide_stars(std::mem::take(&mut core.satellites), c_pre, &scale_pre, p_g, &g_before, enc.as_ref().expect("checked"), &mut cross),
             _ => (std::mem::take(&mut core.satellites).into_iter().zip(c_pre).collect(), 0, 0),
@@ -589,6 +590,7 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
         let mut orphans: Vec<(Body, Ratio, Ratio, Vec<Ratio>)> = Vec::new();
         merged += star_sticks;
         encounters += star_bounces;
+        crate::profile::mark("breath:systems");
         for (mut sys, c_was) in met {
             // Its clock about the galaxy's centre: the rings it receives at its
             // reach, `1 − δ`, δ by the galaxy's one enclosure at its own spin.
@@ -1169,6 +1171,7 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
             core.flows.retain(|x| x.amount > ratio(0, 1));
         }
         core.satellites = keep;
+        crate::profile::mark("breath:flows-arrivals");
         // THE FLOWS (`crate::flows`; docs/83, xylarium 11.0; STAGED on two
         // planes, the orbit's and the circulation's): the galaxy's matter is
         // motes carrying their state; the core's bell torques every mote
@@ -1190,6 +1193,7 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
             // Its base the throat's state 1 and what the throat still holds
             // (docs/96 step 3), at the centre inside every orbit.
             let galaxy_enc = |core: &Body| crate::flows::Enclosed::new(ratio(1, 1) + mass(&core.throat) / g_mass.clone(), core.flows.iter().map(|x| (x.ell_o.clone(), x.amount.clone() * crate::flows::weight(&x.key) / g_mass.clone())).chain(core.satellites.iter().map(|b| (b.ell.clone(), mass(&b.total()) / g_mass.clone()))).collect());
+            crate::profile::mark("breath:release");
             // THE BOUNCE RELEASES (docs/96 step 3; operator 2026-10-26: "each
             // bounce from the core doesnt 'throw' - it pushes, that push is the
             // incremental 'flow' of tidal forces between the vacuum and the
@@ -1287,6 +1291,7 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
                     core.flows.push(crate::flows::Mote { key: k, amount: a, ell_o: crate::ring::grain(&at), ell_orth: orth.clone(), phase, agitation: ratio(0, 1), born: bell, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1), tilt: Vec::new() });
                 }
             }
+            crate::profile::mark("breath:torque");
             // THE TORQUE, its spin from the core's reservoir (the antipole).
             // The reservoir is kept in the galaxy's FOUNDED holding (its
             // core's state, never drained), one fixed unit, so its exact sum
@@ -1305,6 +1310,7 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
             let (given, absorbed) = crate::flows::torque(&mut core.flows, enc.as_ref().unwrap_or(&throat), &p, tide, &ledger_unit, None, &mut cross);
             core.reservoir -= given;
             identity.push(("torque", ledger_sum(core) - before));
+            crate::profile::mark("breath:recycle");
             // RECYCLING (`crate::recycle`; xylarium 11.0 (18)): AFTER the
             // torques (torques are motion, recycling the residue), the bounce the
             // container holds presses and peels the matter in the throat.
@@ -1376,17 +1382,21 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
             recycled = crate::recycle::Recycled { pressed: r.pressed, light: r.light / unit.clone(), peeled: r.peeled, spent: r.spent / unit.clone(), trapped: r.trapped / unit.clone(), spun: r.spun / ledger_unit.clone(), hydrogen: r.hydrogen };
             // THE SHEAR: neighbouring rings pass turning outward; the inner
             // falls in (the loop becomes an orbit). Σ m·ℓ unchanged.
+            crate::profile::mark("breath:shear");
             let _ = crate::flows::shear(&mut core.flows, enc.as_ref().unwrap_or(&throat), &ledger_unit);
             // THE FLUID (docs/94): pressure and the field move turning
             // outward between the galaxy's rings; and THE LUMINAL BOUND: a
             // continuum mote inside the ring takes the Möbius jetstream onto
             // the vacuum leg, never orbiting faster than a turn a bell.
             let enc_f = galaxy_enc(core);
+            crate::profile::mark("breath:fluid");
             let _ = crate::flows::fluid(&mut core.flows, &enc_f, &p, &ledger_unit);
+            crate::profile::mark("breath:luminal");
             let _ = crate::flows::luminal(&mut core.flows, &enc_f);
             // THE EXITS: the jet (along the axis) and radial escape cross
             // whole into the ocean (their state's onward carriage owed: the
             // ocean is not yet motes).
+            crate::profile::mark("breath:exits");
             let enc_x = galaxy_enc(core);
             for x in crate::flows::exits(&mut core.flows, &enc_x) {
                 // It leaves WHOLE, keeping its state, co-moving with its
@@ -1408,6 +1418,7 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
             let h_units = mass(&core.kept) / unit.clone() + state.clone();
             // The galaxy's one enclosure as its motes now stand.
             let enc_now = galaxy_enc(core);
+            crate::profile::mark("breath:chains");
             let chains = crate::flows::chains(&core.flows, &enc_now, &p, &g_mass);
             // The stream of every mote, read by force against its filament.
             // The pulse at a mote: a galaxy's received tide, or, in the home,
@@ -1417,6 +1428,7 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
                 None => p.clone() * enc_now.reach(&x.ell_o).1,
             };
             let _ = crate::flows::stream(&mut core.flows, &chains, &push_at);
+            crate::profile::mark("breath:clumps");
             let clumps = crate::flows::clumps_of(&core.flows, chains);
             // Each take: (reach, what fell, the disc outside it, the whole
             // clump's holding, agitation, the star's own spin, phases, its
@@ -1624,6 +1636,7 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
                 let (r, _) = enc_m.reach(&x.ell_o);
                 crate::enfold::place(&r, &(x.amount.clone() * crate::flows::weight(&x.key) / ledger_unit.clone()), &enc_m.hold(&x.ell_o))
             };
+            crate::profile::mark("breath:merge");
             let held_before = core.flows.len();
             // Merged by the galaxy's own gatherings, its beads (no grid).
             let gathered_beads = crate::flows::beads(&core.flows, &galaxy_enc(core), &p, &g_mass, false);
@@ -1636,6 +1649,7 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
             core.medium = free;
             core.gas.clear();
         }
+        crate::profile::mark("breath:balance");
         // THE BALANCE (the motion law, `crate::ring`; cold bodies): each
         // system stands where its spin meets the holding inside it,
         // `R = ℓ / H(<ℓ)`, read by the galaxy's one enclosure at the echo's
@@ -1671,6 +1685,7 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
         }
         let galaxy_id = core.path[0] as u32;
         u.ocean.extend(to_ocean);
+        crate::profile::mark("breath:echo-end");
         events.push(Event { bell, galaxy: galaxy_id, rung, write: Write::Perpendicular, stars, jets, returned, dissolved, merged, encounters, grown, escaped: escaped_all, fates, weights, impacts, discs, collapse, motes: motes_in, released, rang: rang_n, recycled, burned, burns, cross, light, tolls, identity });
     }
     events

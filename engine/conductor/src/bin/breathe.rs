@@ -180,6 +180,9 @@ fn main() {
         println!("DISCS — released at the stars' births {} (holding), at or past the rim when released {}", conductor::reading::sector(&born), conductor::reading::sector(&out));
         println!("SYSTEMS MET — {sticks} stuck, {bounces} bounced; overstepped the rims {} (holding); after the last echo, motes and bodies by galaxy {last:?}", conductor::reading::sector(&escaped));
     }
+    for (name, spent) in conductor::profile::drain() {
+        eprintln!("PROFILE {name}: {:.1}s", spent.as_secs_f64());
+    }
     println!("BREATH — {} bells, T_u {t_u}: {} echoes (perpendicular writes down); recohered {births} systems born, decohered {} returned and {dissolved} stars dissolved (writes up)", until, events.len(), returned.round());
     for (i, c) in u.cores.iter().enumerate() {
         let echoes = events.iter().filter(|e| u64::from(e.galaxy) == c.path[0]).count();

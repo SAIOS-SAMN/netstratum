@@ -802,7 +802,12 @@ pub fn shear(motes: &mut [Mote], enc: &Enclosed, total: &Ratio) -> Ratio {
             _ => ratio(0, 1),
         }) / ratio(3, 1);
         let t = (if d[o] > d[n_] { d[o].clone() - d[n_].clone() } else { d[n_].clone() - d[o].clone() }) / (d[o].clone() + d[n_].clone());
-        let u = c * t * gap / m_ij;
+        // The pair's unkept share held on the grain (the carrier, never the
+        // law): the exchange below books both sides by the one factor, so
+        // `Σ m·ℓ` stays exact whatever it is, and its readings' denominators
+        // never compound pair on pair (profiled 2026-10-26: unheld, the
+        // shear and the fluid were 96% of an echo).
+        let u = crate::ring::grain(&(crate::ring::grain(&c) * crate::ring::grain(&t) * gap / m_ij));
         if u.is_zero() {
             continue;
         }
@@ -1462,7 +1467,11 @@ pub fn fluid(motes: &mut [Mote], enc: &Enclosed, p: &Ratio, total: &Ratio) -> (R
             let width = ratio(2, 1) * p.clone() * pinch.clone();
             let pressure = if width.is_zero() { ratio(0, 1) } else { (m.clone() * heat + magnet.clone()) / width };
             let delta = enc.reach(&ell).1;
-            Some((members.clone(), m, ell, pinch.clone(), pressure, magnet, delta))
+            // Each ring's readings held on the grain (the carrier, never the
+            // law; the exchange books both sides by one factor, so `Σ m·ℓ`
+            // stays exact): unheld, their quotients compounded ring on ring.
+            let g = crate::ring::grain;
+            Some((members.clone(), m, g(&ell), pinch.clone(), g(&pressure), g(&magnet), g(&delta)))
         }).collect();
         read.sort_by(|a, b| a.3.cmp(&b.3));
         for w in read.windows(2) {
@@ -1479,7 +1488,7 @@ pub fn fluid(motes: &mut [Mote], enc: &Enclosed, p: &Ratio, total: &Ratio) -> (R
                 if s.is_zero() {
                     continue;
                 }
-                let u = s * gap.clone() / m_ij.clone();
+                let u = crate::ring::grain(&(crate::ring::grain(&s) * gap.clone() / m_ij.clone()));
                 let (gain, give) = (u.clone() * inn.1.clone(), u * out.1.clone());
                 for &i in &out.0 {
                     dl[i] += gain.clone();

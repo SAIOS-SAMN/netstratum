@@ -7368,6 +7368,25 @@ pub mod profile {
         out
     }
 
+    /// A MARK: the time since the last mark is booked to the last mark's
+    /// name, and this mark starts its own (armed by `NETSTRATUM_PROFILE`).
+    pub fn mark(name: &'static str) {
+        if !armed() {
+            return;
+        }
+        static LAST: Mutex<Option<(&'static str, Instant)>> = Mutex::new(None);
+        let now = Instant::now();
+        let mut last = LAST.lock().expect("profile mark");
+        if let Some((held, at)) = last.take() {
+            let mut book = BOOK.lock().expect("profile book");
+            match book.iter_mut().find(|(h, _)| *h == held) {
+                Some((_, total)) => *total += now - at,
+                None => book.push((held, now - at)),
+            }
+        }
+        *last = Some((name, now));
+    }
+
     /// Drain the accumulated per-beat totals, costliest first.
     pub fn drain() -> Vec<(&'static str, Duration)> {
         if !armed() {
