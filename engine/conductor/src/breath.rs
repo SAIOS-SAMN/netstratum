@@ -825,9 +825,9 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
                 }
                 // Its system still moves: worlds and debris meet, and what
                 // oversteps the rim crosses into the galaxy.
-                let rim_s = rim_of(&sys);
+                let _rim_s = rim_of(&sys);
                 let (k_s, p_s) = spacing_at(&sys);
-                let (escaped, formed, _) = crate::formation::settle_system(&mut sys, &unit, &k_s, &p_s, &rim_s, r_echo, rang, bell);
+                let (escaped, formed, _) = crate::formation::settle_system(&mut sys, &unit, &k_s, &p_s, r_echo, rang, bell);
                 let (st, bo, star_identity, made, weighs, met_by): (usize, usize, Vec<(&'static str, Ratio)>, (usize, usize, usize, usize), [Ratio; 4], (usize, usize, usize)) = (0, 0, Vec::new(), (formed, 0, 0, 0), [ratio(0, 1), ratio(0, 1), ratio(0, 1), ratio(0, 1)], (0, 0, 0));
                 impacts = (impacts.0 + met_by.0, impacts.1 + met_by.1, impacts.2 + met_by.2);
                 for (a, b) in weights.iter_mut().zip(weighs) {
@@ -1047,9 +1047,9 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
             }
             // COLLISIONS in the system's own medium: worlds grow; what
             // overreaches the system's rim crosses into the galaxy.
-            let rim_s = rim_of(&sys);
+            let _rim_s = rim_of(&sys);
             let (k_s, p_s) = spacing_at(&sys);
-            let (escaped, formed, _) = crate::formation::settle_system(&mut sys, &unit, &k_s, &p_s, &rim_s, r_echo, rang, bell);
+            let (escaped, formed, _) = crate::formation::settle_system(&mut sys, &unit, &k_s, &p_s, r_echo, rang, bell);
             let (st, bo, star_identity, made, weighs, met_by): (usize, usize, Vec<(&'static str, Ratio)>, (usize, usize, usize, usize), [Ratio; 4], (usize, usize, usize)) = (0, 0, Vec::new(), (formed, 0, 0, 0), [ratio(0, 1), ratio(0, 1), ratio(0, 1), ratio(0, 1)], (0, 0, 0));
                 impacts = (impacts.0 + met_by.0, impacts.1 + met_by.1, impacts.2 + met_by.2);
                 for (a, b) in weights.iter_mut().zip(weighs) {

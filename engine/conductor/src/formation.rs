@@ -2000,7 +2000,7 @@ pub fn collide_stars(stars: Vec<crate::pulse::Body>, c_pre: Vec<Ratio>, scale: &
 /// stays exact. Returns (what left past the rim, worlds formed, the spin
 /// moved).
 #[allow(clippy::too_many_arguments)]
-pub fn settle_system(sys: &mut crate::pulse::Body, unit: &Ratio, k: &Ratio, p_core: &Ratio, rim: &Ratio, r_echo: u64, rang: bool, bell: u64) -> (Manifest, usize, Ratio) {
+pub fn settle_system(sys: &mut crate::pulse::Body, unit: &Ratio, k: &Ratio, p_core: &Ratio, r_echo: u64, rang: bool, bell: u64) -> (Manifest, usize, Ratio) {
     let mut escaped = Manifest::new();
     let total = mass(&sys.total());
     if total.is_zero() || sys.kept.is_empty() || unit.is_zero() {
@@ -2029,6 +2029,20 @@ pub fn settle_system(sys: &mut crate::pulse::Body, unit: &Ratio, k: &Ratio, p_co
         _ => (ratio(0, 1), Vec::new()),
     };
     let b0 = if extent > h_s { extent } else { h_s.clone() };
+    // THE DOUBLE PASS (operator 2026-10-26: "are you pushing for perfect
+    // equilibrium on a mobius strip"): nothing rests on one leg. A state
+    // returns only after two passes of the jetstream (`M∘M = id`): outbound
+    // on the continuum at R, inverted through the ring to `2H − R` on the
+    // vacuum leg (`flows::through`), and back. So every band is a PAIR, its
+    // outbound span and its return image through the system's ring
+    // (`H = h_s`), and the loop closes only where the image stands at or
+    // beyond the centre: the rim is `2·h_s` (the rim law's [throat 1, rim 2],
+    // read from the loop). Matter on the return leg belongs to its pair,
+    // never to a loss; only what stands past the loop leaves.
+    let ring = h_s.clone();
+    let rim_loop = ratio(2, 1) * ring.clone();
+    let rim = &rim_loop;
+    let mirror = |x: &Ratio| crate::flows::through(x, &ring);
     // The bands: from B_0 by k to the rim (one band where k ≤ 1: the pull
     // keeps the system on one band).
     let mut edges = vec![b0.clone()];
@@ -2069,11 +2083,16 @@ pub fn settle_system(sys: &mut crate::pulse::Body, unit: &Ratio, k: &Ratio, p_co
                 *into.entry(kind.clone()).or_insert_with(|| ratio(0, 1)) += x;
             }
         };
-        let below = share_in(&lo, &hi, &ratio(0, 1), &b0);
-        put(&mut to_star, below, &mut left);
+        // Each band takes its outbound span and its return image.
         for (n, (x, y)) in bands.iter().enumerate() {
-            put(&mut in_band[n], share_in(&lo, &hi, x, y), &mut left);
+            let (ix, iy) = (mirror(y).max(ratio(0, 1)), mirror(x).max(ratio(0, 1)));
+            let back = if iy > ix { share_in(&lo, &hi, &ix, &iy) } else { ratio(0, 1) };
+            put(&mut in_band[n], share_in(&lo, &hi, x, y) + back, &mut left);
         }
+        // What no pair carries inside the first band is the heart's: the star.
+        let inner_edge = bands.first().map(|(x, _)| mirror(x).max(ratio(0, 1))).unwrap_or_else(|| b0.clone());
+        let held_span = share_in(&lo, &hi, &ratio(0, 1), &inner_edge) + if b0 > ring { share_in(&lo, &hi, &mirror(&b0).max(ratio(0, 1)), &b0) } else { ratio(0, 1) };
+        put(&mut to_star, held_span, &mut left);
         // What stands past the rim leaves; nucleus remainders stay belts.
         let beyond = share_in(&lo, &hi, rim, &(hi.clone().max(rim.clone()) + ratio(1, 1)));
         put(&mut escaped, beyond, &mut left);
