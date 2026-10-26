@@ -642,7 +642,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     let to_flows = ratio(1, 1);
                     let orth_flows = sys.ell_orth.clone() * to_flows.clone();
                     // At the reach its orthogonal orbit swings it to (docs/90 D2).
-                    let (now, through_c) = crate::flows::swung(&ell_s, &orth_flows, sys.phase.get(1).unwrap_or(&ratio(0, 1)));
+                    let (now, through_c) = crate::flows::swung(&ell_s, &orth_flows, sys.phase.get(crate::flows::LOOP).unwrap_or(&ratio(0, 1)));
                     let (r, d_enc) = enc.reach(&now);
                     // Its orbit phase as the echo starts (the pull reads it).
                     let psi_o = sys.phase.first().cloned().unwrap_or_else(|| ratio(0, 1));
@@ -1203,7 +1203,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 // It arrives with the Wellspring's winding: its orthogonal orbit leads its orbit by
                 // the push share (½ at the universe tier), the jet's helix.
                 motes_in[0] += 1;
-                core.flows.push(crate::flows::Mote { key: k, amount: a, ell_o: crate::ring::grain(&ell_o), ell_orth: crate::ring::grain(&ell_orth), phase: vec![ratio(0, 1), ratio(1, 2)], agitation, born: bell, vacuum: true, lever: Vec::new(), lever_place: ratio(0, 1) });
+                core.flows.push(crate::flows::Mote { key: k, amount: a, ell_o: crate::ring::grain(&ell_o), ell_orth: crate::ring::grain(&ell_orth), phase: crate::flows::rest(ratio(1, 2)), agitation, born: bell, vacuum: true, lever: Vec::new(), lever_place: ratio(0, 1) });
             }
             // Shed matter crosses whole at the spins it left with, in the
             // galaxy's frame: its star's orbit, carried to its region's edge,
@@ -1232,7 +1232,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // phase crosses ½ during the torques (both streams pass the core
             // at orthogonal phase ½): the inbound leg (the axis, for the vacuum)
             // delivers it to the throat.
-            let orth_was: Vec<(usize, Ratio)> = core.flows.iter().enumerate().filter(|(_, x)| x.vacuum && x.phase.len() > 1).map(|(j, x)| (j, x.phase[1].clone())).collect();
+            let orth_was: Vec<(usize, Ratio)> = core.flows.iter().enumerate().filter(|(_, x)| x.vacuum && x.phase.len() > crate::flows::LOOP).map(|(j, x)| (j, x.phase[crate::flows::LOOP].clone())).collect();
             // The galaxy's band (push and return, `flows::torque`) stands held
             // back (operator 2026-10-21: "pull it back and make it static").
             let ledger_sum = |core: &Body| core.flows.iter().fold(core.reservoir.clone(), |s, x| s + x.amount.clone() * crate::flows::weight(&x.key) / ledger_unit.clone() * (x.ell_o.clone() + x.ell_orth.clone()));
@@ -1248,7 +1248,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // through the disc): it reaches the throat crossing ½ from above.
             for (j, was) in orth_was {
                 let to_half = frac(was.clone() - ratio(1, 2));
-                if to_half > ratio(0, 1) && to_half <= frac(was - core.flows[j].phase[1].clone()) {
+                if to_half > ratio(0, 1) && to_half <= frac(was - core.flows[j].phase[crate::flows::LOOP].clone()) {
                     in_throat.push(j);
                 }
             }

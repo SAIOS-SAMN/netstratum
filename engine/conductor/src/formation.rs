@@ -936,11 +936,12 @@ fn root(p: &mut [usize], i: usize) -> usize {
 /// from the echo's start (no order), each with its contact over the echo,
 /// each body turning along its orbit at `rate(ℓ)`; `meet` reads a pair and
 /// may move spins into `dl`. Returns each body's turning over the echo.
-fn meetings(phase0: &[Ratio], ell: &[Ratio], rate: &dyn Fn(&Ratio) -> Ratio, pairs: &[(usize, usize)], meet: &mut dyn FnMut(usize, usize, &Ratio, &mut Vec<Ratio>)) -> (Vec<Ratio>, Vec<Ratio>) {
+fn meetings(phase0: &[Vec<Ratio>], ell: &[Ratio], rate: &dyn Fn(&Ratio) -> Ratio, pairs: &[(usize, usize)], meet: &mut dyn FnMut(usize, usize, &Ratio, &mut Vec<Ratio>)) -> (Vec<Ratio>, Vec<Ratio>) {
     let rt: Vec<Ratio> = ell.iter().map(|l| rate(l)).collect();
     let mut dl = vec![ratio(0, 1); ell.len()];
     for &(i, j) in pairs {
-        let c = crate::flows::contact(&(phase0[j].clone() - phase0[i].clone()), &(rt[j].clone() - rt[i].clone()));
+        // Their contact in each spatial plane over the echo, its mean (docs/95).
+        let c = phase0[i].iter().zip(&phase0[j]).fold(ratio(0, 1), |s, (a, b)| s + crate::flows::contact(&(b.clone() - a.clone()), &(rt[j].clone() - rt[i].clone()))) / ratio(3, 1);
         meet(i, j, &c, &mut dl);
     }
     (rt, dl)
@@ -1058,12 +1059,15 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
     let motes_before = ledger(&sys.flows);
     if rang {
         for x in sys.flows.iter_mut() {
-            let psi_c = x.phase.get(1).cloned().unwrap_or_else(|| ratio(0, 1));
+            crate::flows::full(&mut x.phase);
+            let psi_c = x.phase[crate::flows::LOOP].clone();
             let (now, through_c) = crate::flows::swung(&x.ell_o, &x.ell_orth, &psi_c);
             let h = enc.hold(&now);
             let (r_o, d_o) = enc.reach(&now);
-            let psi_o = x.phase.first().cloned().unwrap_or_else(|| ratio(0, 1));
-            let from = if through_c { frac(&(psi_o + ratio(1, 2))) } else { psi_o };
+            let mut from = crate::flows::space_of(&x.phase);
+            if through_c {
+                crate::flows::antipode(&mut from);
+            }
             let m = x.amount.clone() * crate::flows::weight(&x.key) / total.clone();
             // In its star's own enclosure it feels the star's pull at its own
             // reach (no receiver between); a vacuum mote at its inverted reach,
@@ -1202,9 +1206,15 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
     // Where each stands this echo on its swing (docs/90 D2): turning and
     // relative turning at its present reach, its orbit phase half a turn on
     // where the swing carried it through the centre.
-    let swing: Vec<(Ratio, bool)> = (0..n).map(|i| crate::flows::swung(&ell[i], &orth_of[i], items[i].2.get(1).unwrap_or(&ratio(0, 1)))).collect();
+    let swing: Vec<(Ratio, bool)> = (0..n).map(|i| crate::flows::swung(&ell[i], &orth_of[i], items[i].2.get(crate::flows::LOOP).unwrap_or(&ratio(0, 1)))).collect();
     let ell_now: Vec<Ratio> = swing.iter().map(|(l, _)| l.clone()).collect();
-    let phase0: Vec<Ratio> = items.iter().zip(&swing).map(|(it, (_, through))| if *through { frac(&(it.2[0].clone() + ratio(1, 2))) } else { it.2[0].clone() }).collect();
+    let phase0: Vec<Vec<Ratio>> = items.iter().zip(&swing).map(|(it, (_, through))| {
+        let mut p = crate::flows::space_of(&it.2);
+        if *through {
+            crate::flows::antipode(&mut p);
+        }
+        p
+    }).collect();
     let rate = |l: &Ratio| ratio(2, 1) * delta(l);
     // The hydride bonds formed at this echo's meetings: (centre, hydrogen,
     // their keys, the centre's open frames, the hydrides formed).
@@ -1353,9 +1363,17 @@ pub fn collide_system(sys: &mut crate::pulse::Body, unit: &Ratio, bell: u64, ran
         tugs_n += 1;
         let rel = advance[j].clone() - advance[i].clone();
         for (k, (spins, into)) in [(&ell, &mut dl), (&orth_of, &mut dl_c)].into_iter().enumerate() {
-            let psi = if k == 0 { phase0[j].clone() - phase0[i].clone() } else { items[j].2.get(1).cloned().unwrap_or_else(|| ratio(0, 1)) - items[i].2.get(1).cloned().unwrap_or_else(|| ratio(0, 1)) };
-            let (start, len) = if rel < ratio(0, 1) { (psi.clone() + rel.clone(), -rel.clone()) } else { (psi, rel.clone()) };
-            let kk = crate::flows::mean_response(&start, &len);
+            let lp = crate::flows::LOOP;
+            let psis: Vec<Ratio> = if k == 0 {
+                phase0[j].iter().zip(&phase0[i]).map(|(b, a)| b.clone() - a.clone()).collect()
+            } else {
+                vec![items[j].2.get(lp).cloned().unwrap_or_else(|| ratio(0, 1)) - items[i].2.get(lp).cloned().unwrap_or_else(|| ratio(0, 1))]
+            };
+            // Its response over the passage in each plane it reads, their mean.
+            let kk = psis.iter().fold(ratio(0, 1), |s, psi| {
+                let (start, len) = if rel < ratio(0, 1) { (psi.clone() + rel.clone(), -rel.clone()) } else { (psi.clone(), rel.clone()) };
+                s + crate::flows::mean_response(&start, &len)
+            }) / ratio(psis.len() as i64, 1);
             let spread = spins[i].clone() + spins[j].clone();
             let gap_l = if spins[i] > spins[j] { spins[i].clone() - spins[j].clone() } else { spins[j].clone() - spins[i].clone() };
             if gap_l.is_zero() {
@@ -1715,7 +1733,6 @@ pub fn collide_stars(stars: Vec<crate::pulse::Body>, c_pre: Vec<Ratio>, scale: &
     if n < 2 || scale.is_zero() || g_total.is_zero() {
         return (stars.into_iter().zip(c_pre).collect(), 0, 0);
     }
-    let frac = |x: &Ratio| x.clone() - x.floor();
     // The galaxy's frame: a star's spins are kept there, its reach the one
     // enclosure's.
     let own: Vec<Ratio> = stars.iter().map(|b| b.ell.clone()).collect();
@@ -1766,11 +1783,14 @@ pub fn collide_stars(stars: Vec<crate::pulse::Body>, c_pre: Vec<Ratio>, scale: &
     // Where each stands this echo on its swing (docs/90 D2): its turning and
     // its relative turning read at its present reach, its orbit phase half a
     // turn on where the swing has carried it through the centre.
-    let swing: Vec<(Ratio, bool)> = (0..n).map(|i| crate::flows::swung(&ell[i], &(ell[i].clone() * e_c[i].clone()), stars[i].phase.get(1).unwrap_or(&ratio(0, 1)))).collect();
+    let swing: Vec<(Ratio, bool)> = (0..n).map(|i| crate::flows::swung(&ell[i], &(ell[i].clone() * e_c[i].clone()), stars[i].phase.get(crate::flows::LOOP).unwrap_or(&ratio(0, 1)))).collect();
     let ell_now: Vec<Ratio> = swing.iter().map(|(l, _)| l.clone()).collect();
-    let phase0: Vec<Ratio> = stars.iter().zip(&swing).map(|(b, (_, through))| {
-        let p0 = b.phase.first().cloned().unwrap_or_else(|| ratio(0, 1));
-        if *through { frac(&(p0 + ratio(1, 2))) } else { p0 }
+    let phase0: Vec<Vec<Ratio>> = stars.iter().zip(&swing).map(|(b, (_, through))| {
+        let mut p = crate::flows::space_of(&b.phase);
+        if *through {
+            crate::flows::antipode(&mut p);
+        }
+        p
     }).collect();
     let rate = |l: &Ratio| ratio(2, 1) * delta(l);
     let (_, dl) = {
@@ -1784,9 +1804,10 @@ pub fn collide_stars(stars: Vec<crate::pulse::Body>, c_pre: Vec<Ratio>, scale: &
         let ell_now = &ell_now;
         meetings(&phase0, ell_now, &rate, &pairs, &mut |i, j, c, dl| {
             let s = if g[i].is_zero() || g[j].is_zero() { ratio(0, 1) } else if g[i] < g[j] { g[i].clone() / g[j].clone() } else { g[j].clone() / g[i].clone() };
-            // Closeness a share on the sphere: their orbit contact over the
-            // echo times their in-step in the other planes.
-            let near = (1..planes).fold(c.clone(), |c, k| c * crate::flows::in_step(&stars[i].phase[k], &stars[j].phase[k]));
+            // Closeness a share on the sphere: their contact over the echo in
+            // the spatial planes times their in-step on the R loop.
+            let lp = crate::flows::LOOP;
+            let near = c.clone() * crate::flows::in_step(stars[i].phase.get(lp).unwrap_or(&ratio(0, 1)), stars[j].phase.get(lp).unwrap_or(&ratio(0, 1)));
             let m_ij = m[i].clone() + m[j].clone();
             let bind = s * m_ij.clone() / (m_ij.clone() + ratio(1, 1) - near);
             let (di, dj) = (delta(&ell_now[i]), delta(&ell_now[j]));

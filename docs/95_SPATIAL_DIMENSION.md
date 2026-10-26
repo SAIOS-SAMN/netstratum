@@ -5,7 +5,7 @@ dimensions"; "this is undefined 'sub-physics' flows::PLANES = 2"; "derive this
 as our spatial dimension 3D via 3Z/3Q + R coordinates (positive R denotes
 'forward' in linear time)".
 
-Status: DERIVED, not built. Retires `flows::PLANES = 2` and the hand-built
+Status: step 1 BUILT (three spatial planes and the R loop on every phase; the hand-built source retired). Retires `flows::PLANES = 2` and the hand-built
 source of `flows::founding_phases` (a sphere of radius 4, the point (2,0,0)
 and the generator ½e₁e₂, typed in, read on two planes sharing e₁).
 

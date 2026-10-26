@@ -36,6 +36,15 @@ fn frac_of(seed: &[u8; 32], path: &[u64], field: &str, j: u32) -> Ratio {
     crate::ring::grain(&Ratio::new(num_bigint::BigInt::from(d), num_bigint::BigInt::from(2u8).pow(64)))
 }
 
+/// A placed body's phases: each spatial plane's and its R loop's, drawn.
+fn drawn(seed: &[u8; 32], path: &[u64]) -> Vec<Ratio> {
+    let mut v = crate::flows::rest(frac_of(seed, path, "phase-c", 0));
+    for (j, &k) in crate::flows::SPACE.iter().enumerate() {
+        v[k] = frac_of(seed, path, "phase-o", j as u32);
+    }
+    v
+}
+
 fn take(m: &Manifest, share: &Ratio) -> Manifest {
     m.iter().map(|(k, a)| (k.clone(), crate::pulse::nucleus(&(a.clone() * share.clone())).min(a.clone()))).filter(|(_, a)| *a > ratio(0, 1)).collect()
 }
@@ -123,7 +132,7 @@ pub fn place(u: &mut Universe, seed: &[u8; 32]) -> (usize, usize) {
             let key = crate::ring::birth_key(0, &r_s, &h_gal, &siblings);
             siblings.push(key);
             let path = vec![core.path[0], key];
-            let phases = vec![frac_of(seed, &path, "phase-o", 0), frac_of(seed, &path, "phase-c", 0)];
+            let phases = drawn(seed, &path);
             // Its heart's own cut: the held is the star, the released its worlds.
             let (mut kept, mut disc) = match crate::formation::heart_cut(&mine, &ratio(0, 1), &ratio(0, 1)) {
                 Some((held, released, _)) => (held, released),
@@ -204,7 +213,7 @@ pub fn place(u: &mut Universe, seed: &[u8; 32]) -> (usize, usize) {
                 let w_key = crate::ring::birth_key(0, &r, &inner, &w_sib);
                 w_sib.push(w_key);
                 let w_path = vec![path[0], path[1], w_key];
-                let w_phases = vec![frac_of(seed, &w_path, "phase-o", 0), frac_of(seed, &w_path, "phase-c", 0)];
+                let w_phases = drawn(seed, &w_path);
                 inner += mass(&wm) / total_sys.clone();
                 sats.push(body(w_path, w_radius, w_period, wm, w_ell, w_phases));
                 n_worlds += 1;
@@ -225,7 +234,7 @@ pub fn place(u: &mut Universe, seed: &[u8; 32]) -> (usize, usize) {
                 if let Some(x) = core.flows.iter_mut().find(|x| x.key == k) {
                     x.amount += a;
                 } else {
-                    core.flows.push(Mote { key: k, amount: a, ell_o: ratio(1, 1), ell_orth: ratio(0, 1), phase: vec![ratio(0, 1), ratio(1, 2)], agitation: ratio(0, 1), born: 0, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1) });
+                    core.flows.push(Mote { key: k, amount: a, ell_o: ratio(1, 1), ell_orth: ratio(0, 1), phase: crate::flows::rest(ratio(1, 2)), agitation: ratio(0, 1), born: 0, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1) });
                 }
             }
         }

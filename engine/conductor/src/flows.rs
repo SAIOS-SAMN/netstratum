@@ -36,15 +36,66 @@
 //!   enclosure, against their agitation, the unlocked face `½(1 − δ)` and the
 //!   shear.
 //!
-//! STAGED (labelled, never the law's answer): two planes, the orbit's and the
-//! circulation's, read from mycelium's 3-D `physics::source` (one plane of
-//! the S^n reading per plane); S^60/S^360 wait on the n-dimensional source.
+//! THE PLANES (docs/95; operator 2026-10-26: "our spatial dimension 3D via
+//! 3Z/3Q + R coordinates (positive R denotes 'forward' in linear time)"):
+//! three spatial planes, each axis's closed (Z) and open (Q) frames, and the
+//! R loop, the circulation (outbound along the axis, R forward; home through
+//! the disc).
 use crate::pulse::Manifest;
 use cfe::ratio::{ratio, Ratio};
 use num_traits::Zero;
 
-/// The planes read today: the orbit's (0) and the circulation's (1).
-pub const PLANES: usize = 2;
+/// THE SPATIAL PLANES (docs/95): a nucleus weighs `3Z`, one frame of each
+/// proton on each of three axes, and each axis is a PLANE of its closed (Z)
+/// and open (Q) frames. A body orbits in all three at its one rate `2δ` a
+/// bell; their phases are where it stands in each.
+pub const SPACE: [usize; 3] = [0, 2, 3];
+/// THE R LOOP (docs/95 §2): R is reach, the axis paired with none; its loop
+/// is the circulation (the orthogonal orbit), its outbound leg R forward.
+pub const LOOP: usize = 1;
+/// A phase vector's length: the three spatial planes and the R loop.
+pub const PLANES: usize = 4;
+
+/// Phases at rest: every spatial plane at the bell, the R loop at `loop_at`.
+pub fn rest(loop_at: Ratio) -> Vec<Ratio> {
+    let mut v = vec![ratio(0, 1); PLANES];
+    v[LOOP] = loop_at;
+    v
+}
+
+/// A phase vector carried to its full length (the planes it lacks at the
+/// bell; the R loop keeps its index).
+pub fn full(phase: &mut Vec<Ratio>) {
+    if phase.len() < PLANES {
+        phase.resize(PLANES, ratio(0, 1));
+    }
+}
+
+/// THE ANTIPODE: through the centre, half a turn on in every spatial plane.
+pub fn antipode(phase: &mut [Ratio]) {
+    for &k in &SPACE {
+        if let Some(ph) = phase.get_mut(k) {
+            *ph = frac(&(ph.clone() + ratio(1, 2)));
+        }
+    }
+}
+
+/// A reading's mean over the spatial planes (L1: their sum over three).
+pub fn space_mean(f: impl Fn(usize) -> Ratio) -> Ratio {
+    SPACE.iter().fold(ratio(0, 1), |s, &k| s + f(k)) / ratio(3, 1)
+}
+
+/// The spatial phases of a vector (each plane's, the bell where it lacks one).
+pub fn space_of(phase: &[Ratio]) -> Vec<Ratio> {
+    SPACE.iter().map(|&k| phase.get(k).cloned().unwrap_or_else(|| ratio(0, 1))).collect()
+}
+
+/// THE FRAMES' TURN on spatial plane j (docs/95 §1): a proton's three frames
+/// stand a third of a turn apart, one on each axis, so a kind of charge Z
+/// stands `Z·j/3` round on plane j.
+pub fn frame_turn(z: u32, j: usize) -> Ratio {
+    frac(&ratio(i64::from(z) * j as i64, 3))
+}
 
 /// A MOTE: matter as held turning, its state carried forward.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -258,45 +309,6 @@ pub fn repel(motes: &mut [Mote], push: &Ratio) {
     }
 }
 
-/// THE FOUNDING'S PHASES, from the bounce's white-face outflow (mycelium
-/// `physics::source`): `N = P ∧ (P·K)` at the crossing point P on the
-/// horizon, the spin K turning at the regenerated push's share ½; each
-/// plane's phase is the direction of `v = P·K` in that plane. Read today on
-/// the 3-D source: the orbit's plane (e₁e₂) and the circulation's (e₁e₃).
-/// A plane in which the outflow has no component carries no phase offset
-/// (0). Directions are read exactly on the axes; any other direction waits
-/// on xylarium's sector reading (refused, never rounded).
-pub fn founding_phases() -> Option<Vec<Ratio>> {
-    use mycelium::transducer::cga::{self, Mv, E1, E2};
-    let big = |n: i64, d: i64| num_rational::BigRational::new(n.into(), d.into());
-    let sigma = cga::sphere_at(&[big(0, 1), big(0, 1), big(0, 1)], &big(4, 1));
-    let p = cga::point_at(&[big(2, 1), big(0, 1), big(0, 1)]);
-    let k = Mv::blade(E1, big(1, 1)).geo(&Mv::blade(E2, big(1, 2)));
-    let read = || -> Option<Vec<Ratio>> {
-        let kept = mycelium::physics::source::keeping(&sigma, &k)?;
-        let src = mycelium::physics::source::Source::of(&sigma, &p, &kept)?;
-        let _ = &src;
-        let half = big(1, 2);
-        let v = p.geo(&kept).sub(&kept.geo(&p)).grade(1).scale(&half);
-        let c = |m: usize| v.coeff(m).clone();
-        let e3 = cga::base_axis(3)?;
-        let turn = |x: num_rational::BigRational, y: num_rational::BigRational| -> Option<Ratio> {
-            use num_traits::Signed;
-            match (x.is_zero(), y.is_zero(), x.is_positive(), y.is_positive()) {
-                (true, true, _, _) => Some(ratio(0, 1)),
-                (false, true, true, _) => Some(ratio(0, 1)),
-                (true, false, _, true) => Some(ratio(1, 4)),
-                (false, true, false, _) => Some(ratio(1, 2)),
-                (true, false, _, false) => Some(ratio(3, 4)),
-                // Off the axes: xylarium's sector reading (owed); refused.
-                _ => None,
-            }
-        };
-        Some(vec![turn(c(E1), c(E2))?, turn(c(E1), c(e3))?])
-    };
-    read()
-}
-
 /// The held share of a spread about a reach R within the hold H about it
 /// (dispersal's form, p the push share): `[R(1 − p), R(1 + p)]` against H.
 fn held_share(r: &Ratio, h: &Ratio, p: &Ratio) -> Ratio {
@@ -426,9 +438,20 @@ pub fn turn(phase: &mut [Ratio], r_o: &Ratio, h: &Ratio, p: &Ratio, tide: Option
     // denominators each bell without bound; the residue drains within its
     // round, passes to the quantum tier acknowledged, or, with no place of its
     // own, is cauterized with its scar recorded.
-    let (held, scar_o, lever_o) = crate::enfold::leaf(&(phase[0].clone() + ratio(2, 1) * d_o), place, agitation, 0, cross);
-    phase[0] = held;
-    let orth_from = phase[1].clone();
+    // Every spatial plane turns at the one rate (docs/95), each from where
+    // it stands.
+    let mut scar_o = ratio(0, 1);
+    let mut levers: Vec<(usize, Ratio, Ratio)> = Vec::new();
+    for &k in &SPACE {
+        let Some(at) = phase.get(k).cloned() else { continue };
+        let (held, scar, lever) = crate::enfold::leaf(&(at + ratio(2, 1) * d_o.clone()), place, agitation, k, cross);
+        phase[k] = held;
+        scar_o += scar;
+        if let Some((n, f)) = lever {
+            levers.push((k, n, f));
+        }
+    }
+    let orth_from = phase[LOOP].clone();
     let route = if inverted { ratio(-1, 1) } else { ratio(1, 1) };
     let orth_phase = frac(&(orth_from.clone() + route.clone() * ratio(2, 1) * d_c.clone()));
     // THE PARENT'S PULSE MOVES MATTER ALONG THE ORTHOGONAL ORBIT (operator: "the pulse
@@ -448,10 +471,12 @@ pub fn turn(phase: &mut [Ratio], r_o: &Ratio, h: &Ratio, p: &Ratio, tide: Option
     };
     let advance = orth_push(&orth_from, &d_c, p, &felt, inverted);
     let torque_orth = route.clone() * advance.clone();
-    let (held, scar_c, lever_c) = crate::enfold::leaf(&(orth_phase + route * advance), place, agitation, 1, cross);
-    phase[1] = held;
+    let (held, scar_c, lever_c) = crate::enfold::leaf(&(orth_phase + route * advance), place, agitation, LOOP, cross);
+    phase[LOOP] = held;
     // A cauterized residue's scar (the heat it enters) and each plane's lever.
-    let levers = [(0usize, lever_o), (1usize, lever_c)].into_iter().filter_map(|(k, l)| l.map(|(n, f)| (k, n, f))).collect();
+    if let Some((n, f)) = lever_c {
+        levers.push((LOOP, n, f));
+    }
     (scar_o + scar_c, levers, torque_orth)
 }
 
@@ -471,9 +496,7 @@ pub fn orth_push(orth_from: &Ratio, d_c: &Ratio, p: &Ratio, felt: &Ratio, invert
 /// spin the magnitude, never piled at zero.
 pub fn through_centre(ell: Ratio, phase: &mut [Ratio]) -> Ratio {
     if ell < ratio(0, 1) {
-        if let Some(ph) = phase.get_mut(0) {
-            *ph = frac(&(ph.clone() + ratio(1, 2)));
-        }
+        antipode(phase);
         -ell
     } else {
         ell
@@ -554,7 +577,8 @@ fn torque_one(x: &mut Mote, enc: &Enclosed, p: &Ratio, tide: Option<(&Ratio, &Ra
     // at the reach its orthogonal orbit swings it to this bell (docs/90 D2): the
     // motion law at its present reach, so it turns faster inward and
     // slower outward; through the centre where the swing passes zero.
-    let (now, through_c) = swung(&x.ell_o, &x.ell_orth, x.phase.get(1).unwrap_or(&ratio(0, 1)));
+    full(&mut x.phase);
+    let (now, through_c) = swung(&x.ell_o, &x.ell_orth, &x.phase[LOOP]);
     let h = enc.hold(&now);
     let (r_o, d_o) = enc.reach(&now);
     // ASCENT: the bell turns the mote from where it truly stands, its
@@ -562,7 +586,10 @@ fn torque_one(x: &mut Mote, enc: &Enclosed, p: &Ratio, tide: Option<(&Ratio, &Ra
     for k in 0..x.phase.len() {
         x.phase[k] = true_phase(x, k);
     }
-    let from = if through_c { frac(&(x.phase[0].clone() + ratio(1, 2))) } else { x.phase[0].clone() };
+    let mut from = space_of(&x.phase);
+    if through_c {
+        antipode(&mut from);
+    }
     // A mote's place: the cap its own gravity holds (`enfold::place`).
     let m = if total.is_zero() { ratio(0, 1) } else { x.amount.clone() * weight(&x.key) / total.clone() };
     let place = crate::enfold::place(&r_o, &m, &h);
@@ -583,13 +610,14 @@ fn torque_one(x: &mut Mote, enc: &Enclosed, p: &Ratio, tide: Option<(&Ratio, &Ra
 /// not delivered in step left as heat. Returns the spin given (Σ m·Δℓ, the
 /// antipole's to pay) and the pulse absorbed (Σ m·|Δℓ|).
 #[allow(clippy::too_many_arguments)]
-pub fn spin_torque(x: &mut Mote, from: &Ratio, h: &Ratio, r_o: &Ratio, d_o: &Ratio, p: &Ratio, torque_orth: &Ratio, heart_push: Option<&Ratio>, m: &Ratio, scar: &Ratio) -> (Ratio, Ratio) {
+pub fn spin_torque(x: &mut Mote, from: &[Ratio], h: &Ratio, r_o: &Ratio, d_o: &Ratio, p: &Ratio, torque_orth: &Ratio, heart_push: Option<&Ratio>, m: &Ratio, scar: &Ratio) -> (Ratio, Ratio) {
     let mut given = ratio(0, 1);
     let mut absorbed = ratio(0, 1);
     // Over its whole passage this bell, never at one instant; a vacuum
     // mote at its inverted reach (`1 − δ`), forward.
     let d_o = if x.vacuum { ratio(1, 1) - d_o.clone() } else { d_o.clone() };
-    let k = mean_response(from, &(ratio(2, 1) * d_o.clone()));
+    // Its response in each spatial plane over the passage, their mean (docs/95).
+    let k = from.iter().fold(ratio(0, 1), |s, f| s + mean_response(f, &(ratio(2, 1) * d_o.clone()))) / ratio(3, 1);
     let dl_o = p.clone() * d_o.clone() * k.clone();
     // DISSIPATION (operator 2026-10-19: "what do our current physics tell
     // about heat dissipation to the void? probably mimic nature"; with
@@ -629,10 +657,7 @@ pub fn spin_torque(x: &mut Mote, from: &Ratio, h: &Ratio, r_o: &Ratio, d_o: &Rat
     // (its orbit's phase on half a turn), never piled at zero.
     let raw = x.ell_o.clone() + dl_o + band;
     let new_o = if raw < ratio(0, 1) {
-        if let Some(ph) = x.phase.get_mut(0) {
-            let t = ph.clone() + ratio(1, 2);
-            *ph = t.clone() - t.floor();
-        }
+        antipode(&mut x.phase);
         crate::ring::grain(&(-raw))
     } else {
         crate::ring::grain(&raw)
@@ -715,7 +740,10 @@ pub fn shear(motes: &mut [Mote], enc: &Enclosed, total: &Ratio) -> Ratio {
         if gap <= ratio(0, 1) || m_ij.is_zero() {
             continue;
         }
-        let c = contact(&(motes[o].phase[0].clone() - motes[n_].phase[0].clone()), &(ratio(2, 1) * (d[o].clone() - d[n_].clone())));
+        let c = space_mean(|k| match (motes[o].phase.get(k), motes[n_].phase.get(k)) {
+            (Some(a), Some(b)) => contact(&(a.clone() - b.clone()), &(ratio(2, 1) * (d[o].clone() - d[n_].clone()))),
+            _ => ratio(0, 1),
+        });
         let t = (if d[o] > d[n_] { d[o].clone() - d[n_].clone() } else { d[n_].clone() - d[o].clone() }) / (d[o].clone() + d[n_].clone());
         let u = c * t * gap / m_ij;
         if u.is_zero() {
@@ -774,7 +802,12 @@ pub fn spray(released: &Manifest, carried: &[(crate::chem::Kind, Ratio)], base: 
             // The capture phase: Z × the PARENT'S push share (the star's own),
             // so the kinds leave over the whole turn, never two antipodes.
             let z = ratio(i64::from(crate::chem::charge(k)), 1) * push.clone();
-            let phase = vec![crate::ring::grain(&frac(&(at(0) + z.clone()))), crate::ring::grain(&frac(&(at(1) + ratio(1, 2) + z)))];
+            // On each spatial plane its frames' own turn too (docs/95 §1).
+            let zk = crate::chem::charge(k);
+            let mut phase = rest(crate::ring::grain(&frac(&(at(LOOP) + ratio(1, 2) + z.clone()))));
+            for (j, &s) in SPACE.iter().enumerate() {
+                phase[s] = crate::ring::grain(&frac(&(at(s) + z.clone() + frame_turn(zk, j))));
+            }
             let ell_o = crate::ring::grain(&carried.iter().find(|(c, _)| c == k)?.1);
             Some(Mote { key: k.clone(), amount: a.clone(), ell_o, ell_orth: ratio(0, 1), phase, agitation: crate::ring::grain(agitation), born, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1) })
         })
@@ -789,7 +822,7 @@ pub fn spray(released: &Manifest, carried: &[(crate::chem::Kind, Ratio)], base: 
 /// in `[0, ½)`) is where the cut and collapse are read. No jet batch, no jet
 /// exit: matter goes round, out and back at once.
 pub fn on_disc_leg(x: &Mote) -> bool {
-    frac(&x.phase[1]) < ratio(1, 2)
+    frac(x.phase.get(LOOP).unwrap_or(&ratio(0, 1))) < ratio(1, 2)
 }
 
 /// The one exit, by state: a mote whose orthogonal orbit OVERREACHES THE RIM (its
@@ -975,7 +1008,7 @@ pub fn beads(motes: &[Mote], enc: &Enclosed, p: &Ratio, total: &Ratio, disc_leg:
     let mut fibres: std::collections::BTreeMap<(Vec<bool>, crate::chem::Kind), Vec<usize>> = std::collections::BTreeMap::new();
     for (i, x) in motes.iter().enumerate() {
         if (!disc_leg || on_disc_leg(x)) && !rr[i].is_zero() {
-            fibres.entry(((0..PLANES).map(|k| frac(&x.phase[k]) < half).collect(), x.key.clone())).or_default().push(i);
+            fibres.entry(((0..PLANES).map(|k| frac(x.phase.get(k).unwrap_or(&ratio(0, 1))) < half).collect(), x.key.clone())).or_default().push(i);
         }
     }
     // Each fibre's beads, per face: (members, the pinch's reach).
@@ -1056,8 +1089,11 @@ pub fn chains(motes: &[Mote], enc: &Enclosed, p: &Ratio, total: &Ratio) -> Vec<C
         let j_out = *members.iter().max_by(|&&a, &&b| hiv[a].cmp(&hiv[b]).then(b.cmp(&a))).expect("a member");
         let (d_in, d_out) = (delta_of(j_in, &lov[j_in]), delta_of(j_out, &hiv[j_out]));
         let t_edges = (d_in.clone() - d_out.clone()) / (d_in + d_out);
-        let orbit: Vec<Ratio> = members.iter().map(|&j| frac(&motes[j].phase[0])).collect();
-        let extent = orbit.iter().max().expect("a member").clone() - orbit.iter().min().expect("a member").clone();
+        // Its extent round the orbit: in each spatial plane, their mean.
+        let extent = space_mean(|k| {
+            let orbit: Vec<Ratio> = members.iter().map(|&j| frac(motes[j].phase.get(k).unwrap_or(&ratio(0, 1)))).collect();
+            orbit.iter().max().expect("a member").clone() - orbit.iter().min().expect("a member").clone()
+        });
         let apart = ratio(1, 1) - in_step(&extent, &ratio(0, 1)) * (ratio(1, 1) - t_edges);
         let reach_w = r_w / held.clone();
         // The hold the chain turns about, by holding.
@@ -1159,7 +1195,7 @@ pub fn clumps_of(motes: &[Mote], chains: Vec<Chain>) -> Vec<(Ratio, Vec<(usize, 
             // ONE share, taken from every member alike, so a star's mix is
             // its filament's mix.
             let coherence = (0..PLANES).fold(ratio(1, 1), |acc, k| {
-                let phase = circle_mean(&c.members.iter().map(|&j| (motes[j].amount.clone() * weight(&motes[j].key), motes[j].phase[k].clone())).collect::<Vec<_>>());
+                let phase = circle_mean(&c.members.iter().map(|&j| (motes[j].amount.clone() * weight(&motes[j].key), motes[j].phase.get(k).cloned().unwrap_or_else(|| ratio(0, 1)))).collect::<Vec<_>>());
                 acc * in_step(&phase, &ratio(0, 1))
             });
             (c.reach, c.members.into_iter().map(|j| (j, coherence.clone())).collect())
@@ -1251,7 +1287,7 @@ pub fn merge(motes: &mut Vec<Mote>, beads: &std::collections::BTreeMap<Vec<bool>
 /// circulation yet, the founding's phases, cold.
 pub fn founding(grains: &Manifest, span: Option<&Ratio>) -> Option<Vec<Mote>> {
     let Some((p, _, mean)) = crate::pulse::galaxy_push(grains) else { return Some(Vec::new()) };
-    // The source's phases, read exactly or the founding is refused. THE CAPTURES TURN THEM (with xylarium): each pass of the
+    // The phases stand against the source's own bell (docs/95). THE CAPTURES TURN THEM (with xylarium): each pass of the
     // outbound stream through the throat is one capture and turns the
     // crossing point by a = ½, so kind Z leaves at the source's phase plus
     // `Z·½`, and on the orthogonal orbit it starts on the AXIAL leg, outbound (`½ +
@@ -1269,7 +1305,6 @@ pub fn founding(grains: &Manifest, span: Option<&Ratio>) -> Option<Vec<Mote>> {
     // and every kind nearer, each its share times the span). Without a span
     // (the firmament, the Wellspring's held kinds at the singularity) it is
     // carried from the centre, `ℓ_z = p·w̄/w_z`.
-    let source = founding_phases()?;
     let total = crate::pulse::mass(grains);
     if total.is_zero() {
         return Some(Vec::new());
@@ -1287,8 +1322,15 @@ pub fn founding(grains: &Manifest, span: Option<&Ratio>) -> Option<Vec<Mote>> {
     Some(kinds
         .iter()
         .map(|(k, a, r, _)| {
-            let turn = ratio(i64::from(crate::chem::charge(k)), 2);
-            let phase = vec![frac(&(source[0].clone() + turn.clone())), frac(&(ratio(1, 2) + turn))];
+            // The captures' half turn a pass, and on each spatial plane its
+            // frames' own turn (docs/95 §1): kinds part by their charge in
+            // every plane, never two antipodes.
+            let zk = crate::chem::charge(k);
+            let turn = ratio(i64::from(zk), 2);
+            let mut phase = rest(frac(&(ratio(1, 2) + turn.clone())));
+            for (j, &s) in SPACE.iter().enumerate() {
+                phase[s] = frac(&(turn.clone() + frame_turn(zk, j)));
+            }
             let ell = if span.is_some() { r.clone() * hold_at(r) } else { r.clone() };
             Mote { key: (*k).clone(), amount: (*a).clone(), ell_o: crate::ring::grain(&ell), ell_orth: ratio(0, 1), phase, agitation: ratio(0, 1), born: 0, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1) }
         })
@@ -1304,9 +1346,7 @@ pub fn founding(grains: &Manifest, span: Option<&Ratio>) -> Option<Vec<Mote>> {
 /// identity.
 pub fn mobius(x: &mut Mote) {
     x.vacuum = !x.vacuum;
-    if let Some(ph) = x.phase.get_mut(0) {
-        *ph = frac(&(ph.clone() + ratio(1, 2)));
-    }
+    antipode(&mut x.phase);
 }
 
 /// THE LUMINAL BOUND (docs/94 §2; the UMD kinematic law, SUBSTRATE_C = 1):
@@ -1361,7 +1401,7 @@ pub fn fluid(motes: &mut [Mote], enc: &Enclosed, p: &Ratio, total: &Ratio) -> (R
             }
             let ell = members.iter().fold(ratio(0, 1), |a, &i| a + share(&motes[i]) * motes[i].ell_o.clone()) / m.clone();
             let heat = members.iter().fold(ratio(0, 1), |a, &i| a + share(&motes[i]) * motes[i].agitation.clone()) / m.clone();
-            let field_mean = circle_mean(&members.iter().map(|&i| (share(&motes[i]), motes[i].phase.get(1).cloned().unwrap_or_else(|| ratio(0, 1)))).collect::<Vec<_>>());
+            let field_mean = circle_mean(&members.iter().map(|&i| (share(&motes[i]), motes[i].phase.get(LOOP).cloned().unwrap_or_else(|| ratio(0, 1)))).collect::<Vec<_>>());
             let magnet = members.iter().fold(ratio(0, 1), |a, &i| a + motes[i].amount.clone() * ratio(i64::from(crate::chem::unpaired(&motes[i].key)), 1) / total.clone() * in_step(motes[i].phase.get(1).unwrap_or(&ratio(0, 1)), &field_mean));
             let width = ratio(2, 1) * p.clone() * pinch.clone();
             let pressure = if width.is_zero() { ratio(0, 1) } else { (m.clone() * heat + magnet.clone()) / width };
