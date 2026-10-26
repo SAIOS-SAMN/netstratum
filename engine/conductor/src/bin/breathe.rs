@@ -244,7 +244,7 @@ fn main() {
     let all = u.total();
     let count = |m: &pulse::Manifest, k: Option<conductor::chem::Kind>| k.and_then(|k| m.get(&k).cloned()).unwrap_or_else(|| cfe::ratio::ratio(0, 1));
     let whole = |m: &pulse::Manifest| m.values().fold(cfe::ratio::ratio(0, 1), |s, a| s + a.clone());
-    let share = |m: &pulse::Manifest, z: u32| conductor::reading::share(&count(m, conductor::chem::Kind::atom(z)), &whole(m));
+    let share = |m: &pulse::Manifest, z: u32| conductor::reading::share(&count(m, conductor::chem::Kind::element(z)), &whole(m));
     let commonest = all.iter().max_by(|a, b| a.1.cmp(b.1)).map(|(k, _)| k.to_string()).unwrap_or_else(|| "none".into());
     println!("AGE — by nuclei, H {} -> {}, He {} -> {} (founding -> now); commonest now {commonest}", share(&before, 1), share(&all, 1), share(&before, 2), share(&all, 2));
     // THE PARITY (with xylarium): the odd share of the Z >= 3 atoms by

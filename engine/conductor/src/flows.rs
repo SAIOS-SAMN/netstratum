@@ -1739,7 +1739,7 @@ mod passage_tests {
     #[test]
     fn a_motes_lever_keeps_its_true_place() {
         use super::{settle, true_phase, Mote};
-        let mut x = Mote { key: crate::chem::Kind::parse("Z001").expect("a kind"), amount: ratio(1, 1), ell_o: ratio(1, 1), ell_orth: ratio(0, 1), phase: vec![ratio(1, 60), ratio(0, 1)], agitation: ratio(0, 1), born: 0, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1), tilt: Vec::new() };
+        let mut x = Mote { key: crate::chem::Kind::parse("W0001").expect("a kind"), amount: ratio(1, 1), ell_o: ratio(1, 1), ell_orth: ratio(0, 1), phase: vec![ratio(1, 60), ratio(0, 1)], agitation: ratio(0, 1), born: 0, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1), tilt: Vec::new() };
         let p = ratio(1, 60);
         let mut cross = crate::enfold::Cross::default();
         // Its true place lies 1/240 past its mark: a quarter of a place, so a
@@ -1755,7 +1755,7 @@ mod passage_tests {
     #[test]
     fn the_shear_moves_turning_outward_and_keeps_the_books() {
         use super::{shear, weight, Enclosed, Mote};
-        let mote = |ell: (i64, i64), ph: (i64, i64)| Mote { key: crate::chem::Kind::parse("Z001").expect("a kind"), amount: ratio(1, 8), ell_o: ratio(ell.0, ell.1), ell_orth: ratio(0, 1), phase: vec![ratio(ph.0, ph.1), ratio(0, 1)], agitation: ratio(0, 1), born: 0, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1), tilt: Vec::new() };
+        let mote = |ell: (i64, i64), ph: (i64, i64)| Mote { key: crate::chem::Kind::parse("W0001").expect("a kind"), amount: ratio(1, 8), ell_o: ratio(ell.0, ell.1), ell_orth: ratio(0, 1), phase: vec![ratio(ph.0, ph.1), ratio(0, 1)], agitation: ratio(0, 1), born: 0, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1), tilt: Vec::new() };
         let mut motes = vec![mote((1, 4), (0, 1)), mote((1, 2), (1, 60)), mote((3, 4), (1, 30))];
         let total = ratio(1, 1);
         let book = |ms: &[Mote]| ms.iter().fold(ratio(0, 1), |s, x| s + x.amount.clone() * weight(&x.key) * x.ell_o.clone());
@@ -1793,7 +1793,7 @@ mod passage_tests {
         assert_eq!(tilt_of(&[]), vec![ratio(1, 3); 3]);
         // A torqued mote keeps its tilt a partition of one and its orbit spin
         // the L1 sum of its planes.
-        let mut x = Mote { key: crate::chem::Kind::parse("Z001").expect("a kind"), amount: ratio(1, 1), ell_o: ratio(1, 2), ell_orth: ratio(0, 1), phase: rest(ratio(1, 2)), agitation: ratio(0, 1), born: 0, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1), tilt: vec![ratio(1, 2), ratio(1, 3), ratio(1, 6)] };
+        let mut x = Mote { key: crate::chem::Kind::parse("W0001").expect("a kind"), amount: ratio(1, 1), ell_o: ratio(1, 2), ell_orth: ratio(0, 1), phase: rest(ratio(1, 2)), agitation: ratio(0, 1), born: 0, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1), tilt: vec![ratio(1, 2), ratio(1, 3), ratio(1, 6)] };
         x.phase[0] = ratio(1, 10);
         x.phase[2] = ratio(7, 10);
         let from = space_of(&x.phase);
@@ -1805,7 +1805,7 @@ mod passage_tests {
     #[test]
     fn the_mobius_jetstream_twice_is_the_identity() {
         use super::{mobius, Mote};
-        let mut x = Mote { key: crate::chem::Kind::parse("Z026").expect("a kind"), amount: ratio(1, 1), ell_o: ratio(1, 3), ell_orth: ratio(0, 1), phase: vec![ratio(3, 10), ratio(1, 7)], agitation: ratio(0, 1), born: 0, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1), tilt: Vec::new() };
+        let mut x = Mote { key: crate::chem::Kind::parse("W0041").expect("a kind"), amount: ratio(1, 1), ell_o: ratio(1, 3), ell_orth: ratio(0, 1), phase: vec![ratio(3, 10), ratio(1, 7)], agitation: ratio(0, 1), born: 0, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1), tilt: Vec::new() };
         let was = x.clone();
         mobius(&mut x);
         assert!(x.vacuum && x.phase[0] == ratio(4, 5), "one pass: the other leg, half a turn on");

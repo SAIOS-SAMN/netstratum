@@ -25,7 +25,7 @@ fn main() {
     // THE FOUNDING DISTRIBUTION from the bounce's nucleons: the grains given,
     // as nuclei.
     let n = grains * pulse::nuclei_per_grain() * num_bigint::BigInt::from(1024);
-    let manifest = pulse::from_nuclei(&pulse::founding_shape(&n));
+    let manifest = pulse::founding(&n);
     println!("FOUNDING — {} Zs as grains", manifest.len());
     let seed = *blake3::hash(b"netstratum era 1, unfounded stand-in").as_bytes();
     let Some(u) = pulse::deploy(&manifest) else {

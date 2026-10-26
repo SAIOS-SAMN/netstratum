@@ -953,7 +953,7 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
             let in_phase = coherence(&slip(&own, bell, t_u));
             // EVERY KIND A RUNG (the law names no rungs: Z + Z → 2Z wherever
             // the fusion changes the open count, `formation::burn`).
-            let rungs: Vec<u32> = sys.kept.keys().filter_map(crate::chem::atom_z).collect();
+            let rungs: Vec<u32> = sys.kept.keys().filter_map(crate::chem::atom_w).collect();
             // The light this star's rungs make this echo: each product pair
             // transduces `2u(z) − u(2z)` of magnetism into holding.
             let mut shone = ratio(0, 1);
@@ -1010,7 +1010,7 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
             // rings take, `a − a·(1 − feed)^r`, reaches a pair; a slow burn
             // of a large stock still fuses a great many nuclei.
             let can_burn = sys.kept.iter().any(|(k, a)| {
-                *a >= pair && crate::chem::atom_z(k).is_some_and(|z| crate::formation::burn(&sys.kept, &share_now, z, &ratio(1, 1)).and_then(|(feed, _)| crate::compound::read(a, &crate::compound::after(&feed, rings_echo)?, |left| a.clone() - left.clone() >= pair)).unwrap_or(false))
+                *a >= pair && crate::chem::atom_w(k).is_some_and(|z| crate::formation::burn(&sys.kept, &share_now, z, &ratio(1, 1)).and_then(|(feed, _)| crate::compound::read(a, &crate::compound::after(&feed, rings_echo)?, |left| a.clone() - left.clone() >= pair)).unwrap_or(false))
             });
             if !can_burn && !sys.kept.is_empty() {
                 sys.remnant = true;
@@ -1696,7 +1696,7 @@ mod tests {
     fn the_home_has_no_clock_of_its_own_and_its_stars_read_the_source_directly() {
         use crate::pulse::{Body, Manifest, Universe};
         let body = |path: Vec<u64>, radius: Ratio, kept: Manifest, satellites: Vec<Body>| Body { ell_orth: ratio(0, 1), path, radius, period: ratio(0, 1), kept, satellites, medium: Manifest::new(), ell: ratio(0, 1), medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1), tilt: Vec::new(), throat: Default::default() };
-        let h = || crate::chem::Kind::parse("Z001").expect("a kind");
+        let h = || crate::chem::Kind::parse("W0001").expect("a kind");
         let star = body(vec![0, 1], ratio(3, 1), [(h(), ratio(1, 4))].into(), Vec::new());
         let home = body(vec![0], ratio(0, 1), Manifest::new(), vec![star]);
         let galaxy = body(vec![1], ratio(5, 1), [(h(), ratio(1, 2))].into(), Vec::new());
@@ -1719,7 +1719,7 @@ mod tests {
 
     #[test]
     fn light_made_is_received_or_drained_exactly() {
-        let mote = |ell: (i64, i64), amount: (i64, i64)| crate::flows::Mote { key: crate::chem::Kind::parse("Z001").expect("a kind"), amount: ratio(amount.0, amount.1), ell_o: ratio(ell.0, ell.1), ell_orth: ratio(0, 1), phase: vec![ratio(0, 1), ratio(0, 1)], agitation: ratio(0, 1), born: 0, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1), tilt: Vec::new() };
+        let mote = |ell: (i64, i64), amount: (i64, i64)| crate::flows::Mote { key: crate::chem::Kind::parse("W0001").expect("a kind"), amount: ratio(amount.0, amount.1), ell_o: ratio(ell.0, ell.1), ell_orth: ratio(0, 1), phase: vec![ratio(0, 1), ratio(0, 1)], agitation: ratio(0, 1), born: 0, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1), tilt: Vec::new() };
         let mut motes = vec![mote((1, 2), (1, 4)), mote((3, 1), (1, 8))];
         let l = ratio(1, 1000);
         // An enclosure holding ½ and nothing else: the motes stand at reach
@@ -1740,9 +1740,9 @@ mod tests {
         // A system of a star and one world, at reach 2 in a galaxy of hold 1/2
         // (its spin `R·H` = 1, kept in the galaxy's frame); the world turning
         // in its system.
-        let mut world = body(ratio(1, 1), [(kind("Z008"), ratio(1, 16))].into(), Vec::new());
+        let mut world = body(ratio(1, 1), [(kind("W0010"), ratio(1, 16))].into(), Vec::new());
         world.ell = ratio(1, 1);
-        let mut systems = vec![body(ratio(2, 1), [(kind("Z002"), ratio(1, 4))].into(), vec![world])];
+        let mut systems = vec![body(ratio(2, 1), [(kind("W0003"), ratio(1, 4))].into(), vec![world])];
         systems[0].ell = ratio(1, 1);
         let enc = crate::flows::Enclosed::new(ratio(1, 2), Vec::new());
         let l = ratio(1, 1000);

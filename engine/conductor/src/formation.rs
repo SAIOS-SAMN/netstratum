@@ -30,7 +30,6 @@
 //!   clump that holds is ONE crossing w*, and the stretch forms as many stars
 //!   of holding `λ · w*` as fit.
 use crate::pulse::{mass, Manifest};
-use cfe::almanac::atom::{atom, hold};
 use cfe::ratio::{ratio, Ratio};
 use num_traits::Zero;
 
@@ -283,7 +282,7 @@ pub fn ignition_share(agitation: &Ratio) -> Option<Ratio> {
 /// Exact, from the manifest and the atom tier; no constant drawn.
 pub fn coupling(star: &Manifest, universe_hold: &Ratio) -> Option<Ratio> {
     let per_grain = Ratio::from_integer(crate::pulse::nuclei_per_grain() * num_bigint::BigInt::from(1024));
-    let charge = star.iter().fold(ratio(0, 1), |s, (k, a)| s + a.clone() * per_grain.clone() * ratio(i64::from(crate::chem::parts(k).and_then(|(z, _)| atom(z)).map(|x| x.enclosed).unwrap_or(0)), 1));
+    let charge = star.iter().fold(ratio(0, 1), |s, (k, a)| s + a.clone() * per_grain.clone() * ratio(i64::from(crate::chem::parts(k).and_then(|(z, _)| crate::chem::atom_of(z)).map(|x| x.enclosed).unwrap_or(0)), 1));
     if charge.is_zero() || universe_hold.is_zero() {
         return None;
     }
@@ -320,7 +319,7 @@ pub fn burn(star: &Manifest, share: &Ratio, z: u32, coherence: &Ratio) -> Option
     if total.is_zero() || coherence.is_zero() {
         return None;
     }
-    let open = |z: u32| i64::from(atom(z).map(|a| a.unpaired).unwrap_or(0));
+    let open = |z: u32| i64::from(crate::chem::atom_of(z).map(|a| a.unpaired).unwrap_or(0));
     // A rung runs only where PAIRING RISES (with xylarium): fusion turns
     // magnetism into holding and sends light out, `2·u(z) > u(2z)`. Where
     // the product is more open it would take light in, so it does not run,
@@ -330,10 +329,11 @@ pub fn burn(star: &Manifest, share: &Ratio, z: u32, coherence: &Ratio) -> Option
     if dm <= 0 {
         return None;
     }
-    let driver = ratio(dm, 3 * 2 * i64::from(z));
+    // Over the product's weight, its nucleons `2w` (docs/97).
+    let driver = ratio(dm, 2 * i64::from(z));
     let tau = ratio(1, 1 + 2 * i64::from(z));
     let count = star.values().fold(ratio(0, 1), |s, a| s + a.clone());
-    let charge = star.iter().fold(ratio(0, 1), |s, (k, a)| s + a.clone() * ratio(i64::from(crate::chem::parts(k).and_then(|(z, _)| atom(z)).map(|x| x.enclosed).unwrap_or(0)), 1));
+    let charge = star.iter().fold(ratio(0, 1), |s, (k, a)| s + a.clone() * ratio(i64::from(crate::chem::parts(k).and_then(|(z, _)| crate::chem::atom_of(z)).map(|x| x.enclosed).unwrap_or(0)), 1));
     let q_mean = charge / count;
     if q_mean.is_zero() {
         return None;
@@ -342,7 +342,7 @@ pub fn burn(star: &Manifest, share: &Ratio, z: u32, coherence: &Ratio) -> Option
     if feed.is_zero() || feed > ratio(1, 1) {
         return None;
     }
-    let fuel_share = fuel * ratio(i64::from(hold(z)), 1) / total;
+    let fuel_share = fuel * ratio(i64::from(crate::chem::hold(&crate::chem::Kind::atom(z)?)), 1) / total;
     Some((feed.clone(), feed * fuel_share * ratio(dm, 1)))
 }
 
@@ -368,7 +368,7 @@ pub fn burn(star: &Manifest, share: &Ratio, z: u32, coherence: &Ratio) -> Option
 /// A mix's open frames after IONIZATION BY HEAT (`atom::open_at`): what the
 /// heat leaves unpaired, by amount. Heat 0 is the whole atoms (magnetism).
 pub fn open_mass(m: &Manifest, heat: &Ratio) -> Ratio {
-    m.iter().fold(ratio(0, 1), |s, (k, a)| s + a.clone() * ratio(i64::from(crate::chem::atom_z(k).map(|z| cfe::almanac::atom::open_at(z, heat)).unwrap_or_else(|| crate::chem::unpaired(k))), 1))
+    m.iter().fold(ratio(0, 1), |s, (k, a)| s + a.clone() * ratio(i64::from(crate::chem::atom_w(k).map(|z| cfe::almanac::atom::open_at(crate::chem::protons(z), heat)).unwrap_or_else(|| crate::chem::unpaired(k))), 1))
 }
 
 /// A mix with every molecule broken back to its parts (the chemistry layer:
@@ -464,7 +464,7 @@ pub fn carried(clump: &Manifest, turning: &Ratio, heat: &Ratio) -> Vec<(crate::c
         .keys()
         .map(|k| {
             let w = ratio(i64::from(crate::chem::weight(k)), 1);
-            let open = ratio(i64::from(crate::chem::atom_z(k).map(|z| cfe::almanac::atom::open_at(z, heat)).unwrap_or_else(|| crate::chem::unpaired(k))), 1) / w.clone();
+            let open = ratio(i64::from(crate::chem::atom_w(k).map(|z| cfe::almanac::atom::open_at(crate::chem::protons(z), heat)).unwrap_or_else(|| crate::chem::unpaired(k))), 1) / w.clone();
             let ell = if open_mean.is_zero() { ratio(0, 1) } else { ratio(1, 2) * open / open_mean.clone() * mean_weight.clone() / w } + turning.clone();
             (k.clone(), ell)
         })
@@ -487,7 +487,7 @@ pub fn heart_cut(clump: &Manifest, turning: &Ratio, heat: &Ratio) -> Option<(Man
         .iter()
         .map(|(k, a)| {
             let w = ratio(i64::from(crate::chem::weight(k)), 1);
-            let open = ratio(i64::from(crate::chem::atom_z(k).map(|z| cfe::almanac::atom::open_at(z, heat)).unwrap_or_else(|| crate::chem::unpaired(k))), 1) / w.clone();
+            let open = ratio(i64::from(crate::chem::atom_w(k).map(|z| cfe::almanac::atom::open_at(crate::chem::protons(z), heat)).unwrap_or_else(|| crate::chem::unpaired(k))), 1) / w.clone();
             // CARRIED SPINS ADD (with xylarium): the place's turning (in
             // the plane orthogonal to the orbit, the rotoreflection) turns
             // every kind alike, no weight ratio.
@@ -675,7 +675,7 @@ pub fn layer_chemistry(kept: &mut Manifest, heat: &Ratio) {
     // Deep clusters part.
     let mut parted = Manifest::new();
     for (k, lo, hi) in &bands {
-        if crate::chem::atom_z(k).is_none() {
+        if crate::chem::atom_w(k).is_none() {
             let mid = (lo.clone() + hi.clone()) / ratio(2, 1);
             let t = at(&mid);
             if !t.is_zero() && t >= crate::chem::tightness(k) {
@@ -691,7 +691,7 @@ pub fn layer_chemistry(kept: &mut Manifest, heat: &Ratio) {
         *kept.entry(k).or_insert_with(|| ratio(0, 1)) += a;
     }
     // Atoms meet where their bands overlap.
-    let atoms: Vec<(crate::chem::Kind, u32, Ratio, Ratio)> = bands.iter().filter_map(|(k, lo, hi)| crate::chem::atom_z(k).filter(|_| kept.contains_key(k)).map(|z| (k.clone(), z, lo.clone(), hi.clone()))).collect();
+    let atoms: Vec<(crate::chem::Kind, u32, Ratio, Ratio)> = bands.iter().filter_map(|(k, lo, hi)| crate::chem::atom_w(k).filter(|_| kept.contains_key(k)).map(|z| (k.clone(), z, lo.clone(), hi.clone()))).collect();
     let mut formed: Vec<(crate::chem::Kind, crate::chem::Kind, u32, u32, crate::chem::Kind, Ratio)> = Vec::new();
     for (i, (ka, za, la, ha)) in atoms.iter().enumerate() {
         for (kb, zb, lb, hb) in atoms.iter().skip(i + 1) {
@@ -703,7 +703,7 @@ pub fn layer_chemistry(kept: &mut Manifest, heat: &Ratio) {
             // Two at the centre (zero width) meet whole; else by overlap.
             let contact = if narrow.is_zero() { if lo <= hi { ratio(1, 1) } else { continue } } else if hi <= lo { continue } else { ((hi.clone() - lo.clone()) / narrow).min(ratio(1, 1)) };
             let t = at(&((lo + hi) / ratio(2, 1)));
-            let (ua, ub) = (cfe::almanac::atom::open_at(*za, &t), cfe::almanac::atom::open_at(*zb, &t));
+            let (ua, ub) = (cfe::almanac::atom::open_at(crate::chem::protons(*za), &t), cfe::almanac::atom::open_at(crate::chem::protons(*zb), &t));
             let Some((na, nb, ck)) = crate::chem::closing(*za, ua, *zb, ub) else { continue };
             let t_min = crate::chem::tightness(ka).min(crate::chem::tightness(kb));
             let held = if t.is_zero() { ratio(1, 1) } else { (t_min / t).min(ratio(1, 1)) };
@@ -872,7 +872,7 @@ pub fn grip(m: &Manifest) -> Ratio {
         return ratio(0, 1);
     }
     m.iter().fold(ratio(0, 1), |s, (k, a)| {
-        let t = crate::chem::parts(k).and_then(|(z, _)| atom(z)).map(|x| x.tightness).unwrap_or_else(|| ratio(0, 1));
+        let t = crate::chem::parts(k).and_then(|(z, _)| crate::chem::atom_of(z)).map(|x| x.tightness).unwrap_or_else(|| ratio(0, 1));
         s + a.clone() * ratio(i64::from(crate::chem::weight(k)), 1) * t
     }) / total
 }
@@ -1582,8 +1582,9 @@ mod tests {
     #[test]
     fn a_cool_world_keeps_layers_and_makes_water_in_them() {
         use crate::pulse::Manifest;
-        let three_z = |m: &Manifest| m.iter().fold(ratio(0, 1), |s, (k, a)| s + a.clone() * ratio(3 * i64::from(crate::chem::charge(k)), 1));
-        let mut world: Manifest = [(crate::chem::Kind::parse("Z026").expect("a kind"), ratio(40, 1)), (crate::chem::Kind::parse("Z017").expect("a kind"), ratio(7, 1)), (crate::chem::Kind::parse("Z011").expect("a kind"), ratio(11, 1))].into();
+        let three_z = |m: &Manifest| m.iter().fold(ratio(0, 1), |s, (k, a)| s + a.clone() * ratio(i64::from(crate::chem::weight(k)), 1));
+        // Neighbours by weight stand in overlapping bands: nitrogen and oxygen.
+        let mut world: Manifest = [(crate::chem::Kind::element(8).expect("oxygen"), ratio(40, 1)), (crate::chem::Kind::element(7).expect("nitrogen"), ratio(40, 1))].into();
         let before = three_z(&world);
         // Its layers are read by its own cut: the core at the centre.
         let (bands, h) = layer_bands(&world, &ratio(0, 1)).expect("a core");
@@ -1592,7 +1593,7 @@ mod tests {
         // Cool, oxygen and hydrogen meet where their bands overlap.
         layer_chemistry(&mut world, &ratio(0, 1));
         assert_eq!(three_z(&world), before);
-        assert!(world.keys().any(|k| crate::chem::atom_z(k).is_none()), "some cluster forms where bands overlap, cool");
+        assert!(world.keys().any(|k| crate::chem::atom_w(k).is_none()), "some cluster forms where bands overlap, cool");
         // Hot past every winding, every cluster parts again.
         let mut hot = world.clone();
         layer_chemistry(&mut hot, &ratio(1000, 1));

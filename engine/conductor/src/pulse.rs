@@ -69,42 +69,48 @@ pub fn nuclei_per_grain() -> num_bigint::BigInt {
 /// Nuclei per Z, as mycelium's MANIFEST carries them (ACT_DOMAIN 17).
 pub type Nuclei = BTreeMap<u16, num_bigint::BigInt>;
 
-/// A manifest of nuclei entering: per Z, its count in grains (`Z<n>` keys),
-/// every kind carried in whole nuclei however few.
+/// A manifest of nuclei entering from the court (mycelium's MANIFEST carries
+/// nuclei per charge): each charge's count in grains as its element, its
+/// lightest nuclide (`Kind::element`), every kind in whole nuclei.
 pub fn from_nuclei(nuclei: &Nuclei) -> Manifest {
     let grid = nuclei_per_grain() * num_bigint::BigInt::from(1024);
     nuclei
         .iter()
         .filter(|(_, count)| **count > num_bigint::BigInt::from(0))
-        .filter_map(|(z, count)| Some((crate::chem::Kind::atom(u32::from(*z))?, Ratio::new(count.clone(), grid.clone()))))
+        .filter_map(|(z, count)| Some((crate::chem::Kind::element(u32::from(*z))?, Ratio::new(count.clone(), grid.clone()))))
         .collect()
 }
 
-/// THE FOUNDING DISTRIBUTION (docs/78; the capture law, operator 2026-10-16
-/// "derive a", with xylarium): the bounce's white-face outflow leaves along
-/// the outbound continuum jetstream, and each pass through the throat is ONE
-/// CAPTURE, kind Z built from Z − 1 by the share the stream carries on,
-/// `count_Z = count_{Z−1} · a · h_Z`. `a` is DERIVED, never drawn: what the
-/// throat does not hold at the crossing, its unlocked face, `1 − δ(H, H) =
-/// ½` (the same face that heats held matter); `h_Z = (3Z − unpaired)/3Z`,
-/// the atom tier's holding share (paired nuclei hold better). From the
-/// bounce's nucleons (`count_0 = N`) until a Z falls below one nucleus (no
-/// cap). It is the SHAPE the universe requests: the composition of the
-/// signed MANIFEST its reserve sends the court (mycelium 78.155b), which
-/// records and grants it and never reshapes it.
-pub fn founding_shape(nuclei: &num_bigint::BigInt) -> Nuclei {
-    let mut out = Nuclei::new();
-    let mut count = Ratio::from_integer(nuclei.clone());
-    // No cap: the chain runs until a Z falls below one nucleus (the
-    // package's recipe ends where the chain does; no Earth table's 118).
-    for z in 1u16..=u16::MAX {
-        let held = cfe::almanac::atom::atom(u32::from(z)).map(|a| ratio(i64::from(3 * u32::from(z) - a.unpaired), i64::from(3 * u32::from(z)))).unwrap_or_else(|| ratio(1, 1));
-        count = count * ratio(1, 2) * held;
-        let whole = count.floor().to_integer();
-        if whole <= num_bigint::BigInt::from(0) {
-            break;
+/// THE FOUNDING NUCLEOSYNTHESIS (docs/97; operator 2026-10-26: "align on
+/// nature and build it"). As nature's: the bounce's nucleons leave as free
+/// protons and neutrons, and captures run only on the neutrons, stopping
+/// when they are spent, so the founding is mostly hydrogen and the heavy
+/// weight is the stars' to build over generations.
+/// - THE NEUTRON SHARE: the bounce's held pole at its crossing, the unlocked
+///   face of its ring, `½(1 − δ)` at δ = ½: a quarter of the nucleons
+///   (docs/97 §5, for the operator's ruling; nature's freeze-out leaves
+///   about an eighth).
+/// - THE CAPTURES: each neutron binds into a proton where the nucleus first
+///   seals, deuterium (weight 2, κ = 1); deuterons pair into the next seal,
+///   weight 4 (Q 2, Z 2), by the one law the stars burn by, `w + w → 2w`.
+///   An odd deuteron stands.
+/// - What no neutron reaches is hydrogen.
+/// Returns the manifest by nuclide, in grains (whole nuclei however few);
+/// nucleons conserved exactly.
+pub fn founding(nuclei: &num_bigint::BigInt) -> Manifest {
+    let zero = num_bigint::BigInt::from(0);
+    let grid = nuclei_per_grain() * num_bigint::BigInt::from(1024);
+    let neutrons = nuclei / num_bigint::BigInt::from(4);
+    let alphas = &neutrons / num_bigint::BigInt::from(2);
+    let deuterons = &neutrons - &alphas * num_bigint::BigInt::from(2);
+    let hydrogen = nuclei - &neutrons * num_bigint::BigInt::from(2);
+    let mut out = Manifest::new();
+    for (w, count) in [(1u32, hydrogen), (2, deuterons), (4, alphas)] {
+        if count > zero {
+            if let Some(k) = crate::chem::Kind::atom(w) {
+                out.insert(k, Ratio::new(count, grid.clone()));
+            }
         }
-        out.insert(z, whole);
     }
     out
 }
@@ -678,7 +684,7 @@ pub fn cascade(manifest: &Manifest) -> (Manifest, Vec<(Ratio, Manifest)>, Ratio)
         // goes out with the expelled matter, in its shell.
         if reach.clone() * (ratio(1, 1) + s_final.clone()) <= ratio(1, 1) {
             let (kept, rest): (Manifest, Manifest) = m.into_iter().partition(|(k, _)| {
-                crate::chem::atom_z(k).is_some_and(|z| vessel.is_some_and(|(lo, hi)| z >= lo && z <= hi))
+                crate::chem::atom_w(k).is_some_and(|z| vessel.is_some_and(|(lo, hi)| z >= lo && z <= hi))
             });
             for (k, a) in kept {
                 *wellspring.entry(k).or_insert_with(|| ratio(0, 1)) += a;
@@ -1419,7 +1425,7 @@ mod tests {
     #[test]
     fn a_universe_file_without_its_unit_is_refused() {
         let dir = std::env::temp_dir().join(format!("ns-refuse-unit-{}", std::process::id()));
-        let u = Universe { cores: Vec::new(), ocean: vec![crate::flows::Mote { key: crate::chem::Kind::parse("Z001").expect("a kind"), amount: ratio(1, 1), ell_o: ratio(1, 3), ell_orth: ratio(0, 1), phase: crate::flows::rest(ratio(1, 2)), agitation: ratio(0, 1), born: 0, vacuum: true, lever: Vec::new(), lever_place: ratio(0, 1), tilt: Vec::new() }], firmament: Vec::new(), unit: ratio(1, 2), t_u: 15 };
+        let u = Universe { cores: Vec::new(), ocean: vec![crate::flows::Mote { key: crate::chem::Kind::parse("W0001").expect("a kind"), amount: ratio(1, 1), ell_o: ratio(1, 3), ell_orth: ratio(0, 1), phase: crate::flows::rest(ratio(1, 2)), agitation: ratio(0, 1), born: 0, vacuum: true, lever: Vec::new(), lever_place: ratio(0, 1), tilt: Vec::new() }], firmament: Vec::new(), unit: ratio(1, 2), t_u: 15 };
         write(&dir, &[7u8; 32], &u).expect("written");
         assert!(read(&dir).is_some());
         let bytes = std::fs::read(dir.join("pulse.bin")).expect("read");
@@ -1446,20 +1452,20 @@ mod tests {
         // Z012 does (3·12); one galaxy of each reads one push, one hold, one
         // mean weight.
         let k = |s: &str| crate::chem::Kind::parse(s).expect("a kind");
-        assert_eq!(crate::chem::weight(&k("Z008·4Z001")), crate::chem::weight(&k("Z008")) + 4 * crate::chem::weight(&k("Z001")));
-        assert_eq!(crate::chem::weight(&k("Z008·4Z001")), crate::chem::weight(&k("Z012")));
-        let water: Manifest = [(k("Z008·4Z001"), ratio(1, 1)), (k("Z001"), ratio(3, 1))].into();
-        let twelve: Manifest = [(k("Z012"), ratio(1, 1)), (k("Z001"), ratio(3, 1))].into();
+        assert_eq!(crate::chem::weight(&k("W0010·4W0001")), crate::chem::weight(&k("W0010")) + 4 * crate::chem::weight(&k("W0001")));
+        assert_eq!(crate::chem::weight(&k("W0010·4W0001")), crate::chem::weight(&k("W0014")));
+        let water: Manifest = [(k("W0010·4W0001"), ratio(1, 1)), (k("W0001"), ratio(3, 1))].into();
+        let twelve: Manifest = [(k("W0014"), ratio(1, 1)), (k("W0001"), ratio(3, 1))].into();
         assert_eq!(push_cut(&water).map(|(p, h, m, _)| (p, h, m)), push_cut(&twelve).map(|(p, h, m, _)| (p, h, m)));
     }
 
     #[test]
     fn the_pulse_file_reads_back_exactly() {
-        let mote = crate::formation::Shell { key: crate::chem::Kind::parse("Z001").expect("a kind"), held: ratio(1, 5), inner: ratio(1, 3), outer: ratio(2, 3), agitation: ratio(1, 2), radiates: ratio(1, 2), born: 7, vacuum: ratio(3, 7) };
-        let orb = Body { ell_orth: ratio(0, 1), path: vec![1, 1, 1], radius: ratio(3, 2), period: ratio(5, 2), kept: [(crate::chem::Kind::parse("Z008").expect("a kind"), ratio(1, 64))].into(), satellites: Vec::new(), medium: Manifest::new(), ell: ratio(7, 3), medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1), tilt: Vec::new(), throat: Default::default() };
-        let sys = Body { ell_orth: ratio(0, 1), path: vec![1, 1], radius: ratio(9, 2), period: ratio(11, 2), kept: [(crate::chem::Kind::parse("Z001").expect("a kind"), ratio(3, 1024))].into(), satellites: vec![orb], medium: Manifest::new(), ell: ratio(1, 9), medium_spin: ratio(1, 7), gas: Vec::new(), born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1), tilt: Vec::new(), throat: Default::default() };
-        let core = Body { ell_orth: ratio(0, 1), path: vec![1], radius: ratio(60, 1), period: ratio(0, 1), kept: [(crate::chem::Kind::parse("Z026").expect("a kind"), ratio(1, 2))].into(), satellites: vec![sys], medium: [(crate::chem::Kind::parse("Z001").expect("a kind"), ratio(5, 4))].into(), ell: ratio(0, 1), medium_spin: ratio(13, 11), gas: vec![mote], born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1), tilt: Vec::new(), throat: Default::default() };
-        let u = Universe { cores: vec![core], ocean: vec![crate::flows::Mote { key: crate::chem::Kind::parse("Z002").expect("a kind"), amount: ratio(1, 1024), ell_o: ratio(1, 3), ell_orth: ratio(0, 1), phase: crate::flows::rest(ratio(1, 2)), agitation: ratio(0, 1), born: 0, vacuum: true, lever: Vec::new(), lever_place: ratio(0, 1), tilt: Vec::new() }], firmament: Vec::new(), unit: ratio(1, 2), t_u: 15 };
+        let mote = crate::formation::Shell { key: crate::chem::Kind::parse("W0001").expect("a kind"), held: ratio(1, 5), inner: ratio(1, 3), outer: ratio(2, 3), agitation: ratio(1, 2), radiates: ratio(1, 2), born: 7, vacuum: ratio(3, 7) };
+        let orb = Body { ell_orth: ratio(0, 1), path: vec![1, 1, 1], radius: ratio(3, 2), period: ratio(5, 2), kept: [(crate::chem::Kind::parse("W0010").expect("a kind"), ratio(1, 64))].into(), satellites: Vec::new(), medium: Manifest::new(), ell: ratio(7, 3), medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1), tilt: Vec::new(), throat: Default::default() };
+        let sys = Body { ell_orth: ratio(0, 1), path: vec![1, 1], radius: ratio(9, 2), period: ratio(11, 2), kept: [(crate::chem::Kind::parse("W0001").expect("a kind"), ratio(3, 1024))].into(), satellites: vec![orb], medium: Manifest::new(), ell: ratio(1, 9), medium_spin: ratio(1, 7), gas: Vec::new(), born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1), tilt: Vec::new(), throat: Default::default() };
+        let core = Body { ell_orth: ratio(0, 1), path: vec![1], radius: ratio(60, 1), period: ratio(0, 1), kept: [(crate::chem::Kind::parse("W0041").expect("a kind"), ratio(1, 2))].into(), satellites: vec![sys], medium: [(crate::chem::Kind::parse("W0001").expect("a kind"), ratio(5, 4))].into(), ell: ratio(0, 1), medium_spin: ratio(13, 11), gas: vec![mote], born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1), tilt: Vec::new(), throat: Default::default() };
+        let u = Universe { cores: vec![core], ocean: vec![crate::flows::Mote { key: crate::chem::Kind::parse("W0003").expect("a kind"), amount: ratio(1, 1024), ell_o: ratio(1, 3), ell_orth: ratio(0, 1), phase: crate::flows::rest(ratio(1, 2)), agitation: ratio(0, 1), born: 0, vacuum: true, lever: Vec::new(), lever_place: ratio(0, 1), tilt: Vec::new() }], firmament: Vec::new(), unit: ratio(1, 2), t_u: 15 };
         let dir = std::env::temp_dir().join(format!("pulse-{}", std::process::id()));
         write(&dir, &[7; 32], &u).unwrap();
         assert_eq!(read(&dir), Some(([7; 32], u)), "the file gives the universe back");

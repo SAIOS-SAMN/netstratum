@@ -41,7 +41,7 @@ use crate::flows::Mote;
 use cfe::ratio::{ratio, Ratio};
 
 fn u(z: u32) -> i64 {
-    i64::from(cfe::almanac::atom::atom(z).map(|a| a.unpaired).unwrap_or(0))
+    i64::from(crate::chem::atom_of(z).map(|a| a.unpaired).unwrap_or(0))
 }
 
 /// The cost of peeling `k` nucleons from one nucleus of `z`, loosest first,
@@ -131,7 +131,7 @@ pub fn recycle(motes: &mut Vec<Mote>, at: &[usize], b: &Ratio, s: &Ratio, g: &Ra
     let mut load: Vec<(usize, u32, Ratio)> = Vec::new();
     let mut light = ratio(0, 1);
     for &i in &stack.clone() {
-        let Some(z) = crate::chem::atom_z(&motes[i].key) else { continue };
+        let Some(z) = crate::chem::atom_w(&motes[i].key) else { continue };
         let a = motes[i].amount.clone();
         let pressed = crate::pulse::nucleus(&(a.clone() * built.clone())).min(a.clone());
         if let Some(l) = rung_light(z) {
@@ -294,7 +294,7 @@ mod tests {
     }
 
     fn three_z(ms: &[Mote]) -> Ratio {
-        ms.iter().fold(ratio(0, 1), |s, m| s + m.amount.clone() * ratio(3 * i64::from(crate::chem::charge(&m.key)), 1))
+        ms.iter().fold(ratio(0, 1), |s, m| s + m.amount.clone() * ratio(i64::from(crate::chem::weight(&m.key)), 1))
     }
 
     #[test]
@@ -303,19 +303,20 @@ mod tests {
         for z in [2u32, 8, 17, 28, 67, 106] {
             assert_eq!(peel_cost(z, z - 1), i64::from(z) - u(z), "z = {z}");
         }
-        // Every single peel costs 0 or 2, releasing only at z 67 and 106.
-        assert!((2..=240).all(|z| [0, 2].contains(&(peel_cost(z, 1))) || [67, 106].contains(&z)));
+        // A single peel's cost is its own law, `u(w − 1) + u(1) − u(w)`.
+        assert!((2..=240).all(|w| peel_cost(w, 1) == u(w - 1) + u(1) - u(w)));
         // The inversion through the throat swaps the pull and the push:
         // δ(H²/R) = 1 − δ(R), fixed at R = H (both ½).
         let d = |r: Ratio, h: Ratio| h.clone() / (r + h);
         for (r, h) in [(ratio(1, 3), ratio(3, 2)), (ratio(7, 2), ratio(1, 1)), (ratio(2, 1), ratio(2, 1))] {
             assert_eq!(d(h.clone() * h.clone() / r.clone(), h.clone()), ratio(1, 1) - d(r, h));
         }
-        // The rung: H + H gives light, Be + Be does not.
-        assert_eq!(rung_light(1), Some(2));
+        // The rung: H + H (to deuterium, weight 2, still one proton) gives
+        // light; He + He does not.
+        assert_eq!(rung_light(1), Some(1));
         assert_eq!(rung_light(4), None);
         // Water parts in the throat's heat.
-        let mut ms = vec![mote("Z008·4Z001", ratio(1, 1))];
+        let mut ms = vec![mote("W0010·4W0001", ratio(1, 1))];
         let at = part(&mut ms, &[0]);
         assert_eq!(at.len(), 2);
         // A bounce B = ½ on S = 4: a third is peeled, two thirds pressed.
@@ -325,8 +326,8 @@ mod tests {
         assert!(r.pressed > ratio(0, 1) && r.light > ratio(0, 1));
         assert!(r.peeled > ratio(0, 1));
         // No bounce, nothing recycled.
-        let mut ms = vec![mote("Z008", ratio(1, 1))];
+        let mut ms = vec![mote("W0010", ratio(1, 1))];
         assert_eq!(recycle(&mut ms, &[0], &ratio(0, 1), &ratio(4, 1), &ratio(4, 1), 1), Recycled::default());
-        assert_eq!(ms[0].key, crate::chem::Kind::parse("Z008").expect("a kind"));
+        assert_eq!(ms[0].key, crate::chem::Kind::parse("W0010").expect("a kind"));
     }
 }

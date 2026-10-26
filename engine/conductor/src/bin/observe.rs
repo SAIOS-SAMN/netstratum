@@ -155,7 +155,7 @@ fn main() {
             println!("WORLD {:?} at beat {now}: reach {}, period {} rings, holding {}; {}", o.path, f(&o.radius), f(&o.period), f(&(pulse::mass(&o.kept) / unit.clone())), composition(&o.kept, 8));
             // Its compounds and their permanent dipoles (`chem::dipole`): how
             // polar each medium it holds is.
-            let compounds: Vec<String> = o.kept.keys().filter(|k| conductor::chem::atom_z(k).is_none()).map(|k| format!("{k} dipole {}", f(&conductor::chem::dipole(k)))).collect();
+            let compounds: Vec<String> = o.kept.keys().filter(|k| conductor::chem::atom_w(k).is_none()).map(|k| format!("{k} dipole {}", f(&conductor::chem::dipole(k)))).collect();
             if !compounds.is_empty() {
                 println!("  compounds: {}", compounds.join(", "));
             }
@@ -231,7 +231,7 @@ fn main() {
                 let g = pulse::mass(&all);
                 let state = pulse::core_state(c);
                 let zs = |m: &pulse::Manifest| {
-                    let z: Vec<u32> = m.keys().filter_map(|k| conductor::chem::atom_z(k)).collect();
+                    let z: Vec<u32> = m.keys().filter_map(|k| conductor::chem::atom_w(k)).collect();
                     (z.iter().min().copied().unwrap_or(0), z.iter().max().copied().unwrap_or(0), m.len())
                 };
                 let (klo, khi, kn) = zs(&c.kept);
@@ -267,7 +267,7 @@ fn main() {
             // Read for the whole firmament and for its VESSEL, the kinds at
             // or above its heaviest seam (the twin weights where the peel
             // releases: Z106 on S^11, found by the atom, not named).
-            let top = u.firmament.iter().filter_map(|x| conductor::chem::atom_z(&x.key)).max().unwrap_or(0);
+            let top = u.firmament.iter().filter_map(|x| conductor::chem::atom_w(&x.key)).max().unwrap_or(0);
             let seam = (2..=top).rev().find(|&z| cfe::almanac::atom::hold(z) == cfe::almanac::atom::hold(z - 1)).unwrap_or(0);
             let read_of = |ms: &[conductor::flows::Mote], at: u64, label: &str| {
                 let n = ms.len();
@@ -288,7 +288,7 @@ fn main() {
             };
             let read = |w: &pulse::Universe, at: u64| {
                 read_of(&w.firmament, at, "all");
-                let vessel: Vec<conductor::flows::Mote> = w.firmament.iter().filter(|x| conductor::chem::atom_z(&x.key).is_some_and(|z| z >= seam)).cloned().collect();
+                let vessel: Vec<conductor::flows::Mote> = w.firmament.iter().filter(|x| conductor::chem::atom_w(&x.key).is_some_and(|z| z >= seam)).cloned().collect();
                 read_of(&vessel, at, &format!("vessel Z>={seam}"));
             };
             read(&w, 0);
@@ -407,7 +407,7 @@ fn main() {
                 if s.satellites.iter().any(|w| w.born == 0) {
                     println!("  HOST star {:?}: {}, heart {:?}", s.path, if s.remnant { "a REMNANT" } else { "burning" }, s.kept.keys().take(4).collect::<Vec<_>>());
                 }
-                let flux = s.kept.keys().filter_map(conductor::chem::atom_z).filter_map(|z| formation::burn(&s.kept, &share, z, &ratio(1, 1)).map(|(_, l)| l)).fold(ratio(0, 1), |a, b| a + b);
+                let flux = s.kept.keys().filter_map(conductor::chem::atom_w).filter_map(|z| formation::burn(&s.kept, &share, z, &ratio(1, 1)).map(|(_, l)| l)).fold(ratio(0, 1), |a, b| a + b);
                 let scale = tot / u.unit.clone();
                 for w in s.satellites.iter().filter(|w| w.born == 0) {
                     let r = if scale == ratio(0, 1) { ratio(0, 1) } else { w.radius.clone() / scale.clone() };
@@ -421,12 +421,12 @@ fn main() {
             }
             // CHEMISTRY: molecules in the worlds and in the systems' media,
             // with water (O + 4H on S^11) named.
-            let in_worlds: Vec<(&conductor::chem::Kind, &Ratio)> = stars.iter().flat_map(|s| &s.satellites).flat_map(|w| w.kept.iter()).filter(|(k, _)| conductor::chem::atom_z(k).is_none()).collect();
-            let in_media: Vec<(&conductor::chem::Kind, &Ratio)> = stars.iter().flat_map(|s| s.flows.iter().map(|x| (&x.key, &x.amount))).filter(|(k, _)| conductor::chem::atom_z(k).is_none()).collect();
+            let in_worlds: Vec<(&conductor::chem::Kind, &Ratio)> = stars.iter().flat_map(|s| &s.satellites).flat_map(|w| w.kept.iter()).filter(|(k, _)| conductor::chem::atom_w(k).is_none()).collect();
+            let in_media: Vec<(&conductor::chem::Kind, &Ratio)> = stars.iter().flat_map(|s| s.flows.iter().map(|x| (&x.key, &x.amount))).filter(|(k, _)| conductor::chem::atom_w(k).is_none()).collect();
             let sum = |v: &[(&conductor::chem::Kind, &Ratio)], k: Option<&str>| f(&v.iter().filter(|(kk, _)| k.map_or(true, |k| kk.to_string() == k)).fold(ratio(0, 1), |a, (_, x)| a + Ratio::clone(x)));
             let kinds_m: std::collections::BTreeSet<&conductor::chem::Kind> = in_worlds.iter().chain(in_media.iter()).map(|(k, _)| *k).collect();
             println!("  CHEMISTRY: {} molecule kinds; water in worlds {}, in system media {}; all molecules in worlds {}, in media {}",
-                kinds_m.len(), sum(&in_worlds, Some("Z008·4Z001")), sum(&in_media, Some("Z008·4Z001")), sum(&in_worlds, None), sum(&in_media, None));
+                kinds_m.len(), sum(&in_worlds, Some("W0010·4W0001")), sum(&in_media, Some("W0010·4W0001")), sum(&in_worlds, None), sum(&in_media, None));
             // Resources: the worlds' mixes.
             let worlds: Vec<&pulse::Body> = stars.iter().flat_map(|s| &s.satellites).filter(|w| w.born == 0).collect();
             let mut kinds: std::collections::BTreeSet<conductor::chem::Kind> = std::collections::BTreeSet::new();
@@ -506,7 +506,7 @@ fn main() {
             let all = u.total();
             let total = pulse::mass(&all);
             let Some((p, h, mean, lightest)) = pulse::push_cut(&all) else { return println!("no matter") };
-            let kinds: Vec<u32> = all.keys().filter_map(conductor::chem::atom_z).collect();
+            let kinds: Vec<u32> = all.keys().filter_map(conductor::chem::atom_w).collect();
             println!(
                 "FOUNDING CUT over the whole manifest ({} kinds, Z{}..Z{}): p {}, H {}, mean weight {}, lightest held {}",
                 kinds.len(), kinds.iter().min().unwrap_or(&0), kinds.iter().max().unwrap_or(&0), f(&p), f(&h), f(&mean), lightest.map(|k| k.to_string()).unwrap_or_else(|| "— (every kind held)".into())

@@ -85,6 +85,7 @@ pub mod decide;
 pub mod annal;
 pub mod pulse;
 pub mod chem;
+pub mod nuclides;
 pub mod motion;
 pub mod breath;
 pub mod ring;

@@ -35,7 +35,7 @@
 //!   read by the lower bound `1/ln 2 ≥ 1442/1000` (toward fewer minds). A
 //!   medium CARRIES when its error is below one half (a halving or more).
 use crate::pulse::{mass, Manifest, Universe};
-use cfe::almanac::atom::{atom, Atom};
+use cfe::almanac::atom::Atom;
 use cfe::ratio::{ratio, Ratio};
 use num_traits::Zero;
 
@@ -92,7 +92,7 @@ pub struct World {
 }
 
 fn z_of(key: &crate::chem::Kind) -> Option<u32> {
-    crate::chem::atom_z(key)
+    crate::chem::atom_w(key)
 }
 
 /// A grip in kelvin: `τ · 157,800`.
@@ -109,11 +109,11 @@ pub fn read(path: Vec<u64>, matter: &Manifest, heat: &Ratio, coupling: &Ratio, s
         return None;
     }
     let heat = heat.clone();
-    let atoms: Vec<(Atom, Ratio)> = matter.iter().filter_map(|(k, g)| z_of(k).and_then(atom).map(|a| (a, g.clone()))).collect();
+    let atoms: Vec<(Atom, Ratio)> = matter.iter().filter_map(|(k, g)| z_of(k).and_then(crate::chem::atom_of).map(|a| (a, g.clone()))).collect();
     // Every kind's atoms are its size, a cluster's by its parts
     // (`chem::components`): a world of compounds is not empty.
     let loose = matter.iter().fold(ratio(0, 1), |s, (k, g)| {
-        let sized = crate::chem::components(k).iter().filter_map(|&(n, z)| atom(z).map(|a| i64::from(n) * i64::from(a.enclosed * a.depth))).sum::<i64>();
+        let sized = crate::chem::components(k).iter().filter_map(|&(n, z)| crate::chem::atom_of(z).map(|a| i64::from(n) * i64::from(a.enclosed * a.depth))).sum::<i64>();
         s + g.clone() * ratio(sized, 1)
     });
     if loose.is_zero() {
@@ -130,7 +130,7 @@ pub fn read(path: Vec<u64>, matter: &Manifest, heat: &Ratio, coupling: &Ratio, s
     // holding (`chem::hold`).
     let mut gases: Vec<(u32, Ratio)> = atoms.iter().filter(|(a, _)| volatile(a) || plasma(a)).map(|(a, g)| (cfe::almanac::atom::hold(a.z), g.clone())).collect();
     gases.extend(matter.iter().filter(|(k, _)| z_of(k).is_none() && crate::chem::unpaired(k) == 0).map(|(k, g)| (crate::chem::hold(k), g.clone())));
-    let core_matter: Manifest = matter.iter().filter(|(k, _)| z_of(k).and_then(atom).is_some_and(|a| !plasma(&a) && a.unpaired >= 2)).map(|(k, g)| (k.clone(), g.clone())).collect();
+    let core_matter: Manifest = matter.iter().filter(|(k, _)| z_of(k).and_then(crate::chem::atom_of).is_some_and(|a| !plasma(&a) && a.unpaired >= 2)).map(|(k, g)| (k.clone(), g.clone())).collect();
     let core = mass(&core_matter) / mass(matter);
     let hold = gravity.clone() * (ratio(1, 1) + core.clone()) / heat.clone();
     // CHEMICAL: the compound it lives in. First the closed clusters its
@@ -145,7 +145,7 @@ pub fn read(path: Vec<u64>, matter: &Manifest, heat: &Ratio, coupling: &Ratio, s
         }
     };
     for (k, g) in matter.iter() {
-        if crate::chem::atom_z(k).is_none() && tight_k(k) > heat {
+        if crate::chem::atom_w(k).is_none() && tight_k(k) > heat {
             consider(g.clone(), crate::chem::tightness(k));
         }
     }
@@ -172,7 +172,7 @@ pub fn read(path: Vec<u64>, matter: &Manifest, heat: &Ratio, coupling: &Ratio, s
     // PLASMIC: the field the coupling sets holding the ionised share.
     let plasma_share = {
         let all = mass(matter);
-        let ionised: Manifest = matter.iter().filter(|(k, _)| z_of(k).and_then(atom).is_some_and(|a| plasma(&a))).map(|(k, g)| (k.clone(), g.clone())).collect();
+        let ionised: Manifest = matter.iter().filter(|(k, _)| z_of(k).and_then(crate::chem::atom_of).is_some_and(|a| plasma(&a))).map(|(k, g)| (k.clone(), g.clone())).collect();
         if all.is_zero() { ratio(0, 1) } else { mass(&ionised) / all }
     };
     let plasmic = informational.clone().filter(|_| plasma_share > ratio(0, 1)).map(|x| x * plasma_share);
@@ -646,7 +646,7 @@ mod tests {
         // Hydrogen (single bond) and a two-bond kind at its own heat of
         // 1,000 K: Z = 6 on the harmonic atom (Z = 4 pairs its round shape
         // and bonds nothing).
-        let matter: Manifest = [(crate::chem::Kind::parse("Z001").expect("a kind"), ratio(10, 1)), (crate::chem::Kind::parse("Z006").expect("a kind"), ratio(5, 1))].into();
+        let matter: Manifest = [(crate::chem::Kind::parse("W0001").expect("a kind"), ratio(10, 1)), (crate::chem::Kind::parse("W0008").expect("a kind"), ratio(5, 1))].into();
         let w = read(vec![1, 1, 1], &matter, &ratio(1000, 1), &ratio(59, 60), &ratio(1, 1), &ratio(1_000_000, 1), 240).unwrap();
         assert_eq!(w.heat, ratio(1000, 1), "a world's heat is its own");
         let heavy = read(vec![1, 1, 1], &matter, &ratio(1000, 1), &ratio(59, 60), &ratio(1, 1), &ratio(1, 1), 240).unwrap();
