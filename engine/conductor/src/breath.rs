@@ -1332,6 +1332,9 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
             let ledger_sum = |core: &Body| core.flows.iter().fold(core.reservoir.clone(), |s, x| s + x.amount.clone() * crate::flows::weight(&x.key) / ledger_unit.clone() * (x.ell_o.clone() + x.ell_orth.clone()));
             let before = ledger_sum(core);
             let (given, absorbed) = crate::flows::torque(&mut core.flows, enc.as_ref().unwrap_or(&throat), &p, tide, &ledger_unit, None, &mut cross);
+            // THE DISC FORMS: each mote's tilt returns toward its galaxy's spin
+            // plane (`flows::settle_disc`).
+            let _ = crate::flows::settle_disc(&mut core.flows, enc.as_ref().unwrap_or(&throat));
             core.reservoir -= given;
             identity.push(("torque", ledger_sum(core) - before));
             crate::profile::mark("breath:recycle");
@@ -1453,7 +1456,11 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
             };
             let _ = crate::flows::stream(&mut core.flows, &chains, &push_at);
             crate::profile::mark("breath:clumps");
-            let clumps = crate::flows::clumps_of(&core.flows, chains);
+            // THE GALAXY SETTLES ITS STARS (docs/96; operator 2026-10-26): its
+            // band pairs on the strip, never the stepped filaments' clumps.
+            let _ = chains;
+            let star_reaches: Vec<Ratio> = core.satellites.iter().map(|b| enc_now.reach(&b.ell).0).collect();
+            let clumps = crate::flows::band_pairs(&core.flows, &enc_now, &p, &star_reaches, &g_mass);
             // Each take: (reach, what fell, the disc outside it, the whole
             // clump's holding, agitation, the star's own spin, phases, its
             // orthogonal spin, the members as they were).

@@ -410,6 +410,11 @@ impl Enclosed {
         self.held[self.spins.partition_point(|l| l < ell)].clone()
     }
 
+    /// The enclosure's BASE: its throat's own hold (the ring's `H`).
+    pub fn base(&self) -> Ratio {
+        self.held.first().cloned().unwrap_or_else(|| ratio(0, 1))
+    }
+
     /// The enclosure's WHOLE hold: its base and every body in it (the rim
     /// law, docs/78: an enclosure's rim is its own holding, `rim = H`).
     pub fn whole(&self) -> Ratio {
@@ -895,10 +900,14 @@ pub fn on_disc_leg(x: &Mote) -> bool {
 /// enclosing core's orthogonal orbits carry it round the same way. Returns
 /// the motes that left; the rest stay.
 pub fn exits(motes: &mut Vec<Mote>, enc: &Enclosed) -> Vec<Mote> {
-    // THE RIM is the enclosure's own whole holding (the rim law, docs/78:
-    // [throat 1, rim 2]), never the throat's condition `R = H(<ℓ)`, which
-    // is the RING, the disc's inner edge (docs/94 §2).
-    let rim = enc.whole();
+    // THE RIM is where the loop closes (operator 2026-10-26, the double
+    // pass: a state returns only after `M∘M`): the image `2H − R` of the
+    // return leg reaches the centre at `R = 2H`, H the ring (the throat's
+    // base). It is the rim law's [throat 1, rim 2] in the throat's own units.
+    // (It was the whole holding, which equals 2H only while the throat holds
+    // its grains' state alone; with the throat still holding unreleased
+    // matter it fell short of the loop and sent the return leg to the ocean.)
+    let rim = ratio(2, 1) * enc.base();
     let (gone, stay): (Vec<Mote>, Vec<Mote>) = std::mem::take(motes).into_iter().partition(|x| enc.reach(&x.ell_o).0 >= rim);
     *motes = stay;
     gone
@@ -1247,6 +1256,150 @@ pub fn stream(motes: &mut [Mote], chains: &[Chain], push: &dyn Fn(&Mote) -> Rati
 }
 
 /// The clumps of chains already read: those that hold collapse.
+/// THE DISC FORMS (operator 2026-10-26: "i guess this is why galaxies form
+/// discs - align on nature"): angular momentum is kept while the motion off
+/// the plane of the net spin is damped away, so matter settles into its
+/// galaxy's spin plane. The plane is a READING: the galaxy's tilt, its
+/// matter's plane spins added (`blend`, by `m·ℓ`). Each mote's tilt returns
+/// toward it by the attractor law ruled for stars (2026-10-18: "the spin has
+/// an orbit and a tilt as attractors ... return each echo `d/(d +
+/// turned)`"): it keeps `turned/(d + turned)` of its displacement, `d = 1 −
+/// δ` its drag at its reach and `turned = 2δ` its own turning a bell. A
+/// convex share, so every tilt stays a partition of one. Returns the
+/// galaxy's tilt.
+pub fn settle_disc(motes: &mut [Mote], enc: &Enclosed) -> Vec<Ratio> {
+    let plane = blend(&motes.iter().map(|x| (x.amount.clone() * weight(&x.key), x.ell_o.clone(), x.tilt.clone())).collect::<Vec<_>>());
+    if plane.is_empty() {
+        return plane;
+    }
+    for x in motes.iter_mut() {
+        let d = enc.reach(&x.ell_o).1;
+        let drag = ratio(1, 1) - d.clone();
+        let turned = ratio(2, 1) * d;
+        if (drag.clone() + turned.clone()).is_zero() {
+            continue;
+        }
+        let keep = turned.clone() / (drag + turned);
+        let t = tilt_of(&x.tilt);
+        let moved: Vec<Ratio> = t.iter().zip(&plane).map(|(tk, pk)| pk.clone() + (tk.clone() - pk.clone()) * keep.clone()).collect();
+        x.tilt = tilt_from(&moved);
+    }
+    plane
+}
+
+/// THE GALAXY SETTLES ITS STARS (operator 2026-10-26: "let the stars take
+/// care of the planets, planets their moons, and the galaxy their stars -
+/// otherwise you'll be saturated with data"; on the strip, xylarium 11.0
+/// (51)(g)): the one law of `formation::settle_system`, one tier up, in the
+/// galaxy's own enclosure. On the strip `ρ = R/H − 1` about the galaxy's ring
+/// (H its throat's base), every band is a PAIR, its outbound span and its
+/// image through the ring; each band steps by the push of what stands inside
+/// its pair against the pull of what stands outside, `k(ρ) = (S/G)·(1 +
+/// ρ)/(1 − ρ)`, opening at the ring's own dispersal pair `(S − G)/(S + G)`
+/// at ρ = 0. Each mote's matter is spread over its band `r(1 ± p)`. A band's
+/// pair HOLDS where its matter meets the unlocked face at its middle,
+/// `λ/(1 + λ) ≥ ½(1 − δ)`, `λ` its share over its width; a band where a
+/// star already stands is that star's (its capture reads it). Returns the
+/// holding bands as clumps: (the band's middle reach, each member's share).
+pub fn band_pairs(motes: &[Mote], enc: &Enclosed, p: &Ratio, stars: &[Ratio], g_total: &Ratio) -> Vec<(Ratio, Vec<(usize, Ratio)>)> {
+    let ring = enc.base();
+    let whole = enc.whole();
+    if ring.is_zero() || whole.is_zero() || motes.is_empty() {
+        return Vec::new();
+    }
+    let total = holding(motes);
+    let p = p.clone().max(ratio(0, 1)).min(ratio(1, 2));
+    let share_in = |lo: &Ratio, hi: &Ratio, a: &Ratio, b: &Ratio| -> Ratio {
+        if hi <= lo {
+            return if lo >= a && lo < b { ratio(1, 1) } else { ratio(0, 1) };
+        }
+        let x = if lo > a { lo.clone() } else { a.clone() };
+        let y = if hi < b { hi.clone() } else { b.clone() };
+        if y <= x { ratio(0, 1) } else { (y - x) / (hi.clone() - lo.clone()) }
+    };
+    // Shares of the whole: the motes carry the galaxy's loose holding.
+    let loose = whole.clone() - ring.clone();
+    let m_of = |i: usize| if total.is_zero() { ratio(0, 1) } else { motes[i].amount.clone() * weight(&motes[i].key) / total.clone() * loose.clone() / whole.clone() };
+    let pair = |x: &Ratio| (ring.clone() * (ratio(1, 1) - x.clone()), ring.clone() * (ratio(1, 1) + x.clone()));
+    let band = |i: usize| { let r = enc.reach(&motes[i].ell_o).0; (r.clone() * (ratio(1, 1) - p.clone()), r * (ratio(1, 1) + p.clone())) };
+    let bands_all: Vec<(Ratio, Ratio)> = (0..motes.len()).map(band).collect();
+    let inside = |x: &Ratio| -> Ratio {
+        let (a, b) = pair(x);
+        (0..motes.len()).fold(ring.clone() / whole.clone(), |acc, i| acc + m_of(i) * share_in(&bands_all[i].0, &bands_all[i].1, &a, &b))
+    };
+    let s0 = ring.clone() / whole.clone();
+    let rho0 = (ratio(2, 1) * s0 - ratio(1, 1)).max(ratio(0, 1));
+    let mut rhos: Vec<Ratio> = vec![ratio(0, 1)];
+    if rho0 > ratio(0, 1) && rho0 < ratio(1, 1) {
+        rhos.push(crate::ring::grain(&rho0));
+    }
+    while let Some(at) = rhos.last().cloned() {
+        if at >= ratio(1, 1) || at <= ratio(0, 1) || rhos.len() >= 256 {
+            break;
+        }
+        let s_in = inside(&at);
+        let g_out = ratio(1, 1) - s_in.clone();
+        if g_out <= ratio(0, 1) {
+            break;
+        }
+        let k_at = s_in / g_out * (ratio(1, 1) + at.clone()) / (ratio(1, 1) - at.clone());
+        if k_at <= ratio(1, 1) {
+            break;
+        }
+        let next = crate::ring::grain(&(at * k_at));
+        rhos.push(if next < ratio(1, 1) { next } else { ratio(1, 1) });
+    }
+    if *rhos.last().expect("one") < ratio(1, 1) {
+        rhos.push(ratio(1, 1));
+    }
+    let mut out = Vec::new();
+    for w in rhos.windows(2) {
+        let (x, y) = (w[0].clone(), w[1].clone());
+        if y <= x {
+            continue;
+        }
+        let (o_lo, o_hi) = (ring.clone() * (ratio(1, 1) + x.clone()), ring.clone() * (ratio(1, 1) + y.clone()));
+        let (i_lo, i_hi) = (ring.clone() * (ratio(1, 1) - y.clone()), ring.clone() * (ratio(1, 1) - x.clone()));
+        // A star standing in the ring does not close it: a ring holds many
+        // stars around its turn, each where its own matter coincides (the
+        // matter nearest a star is its capture's).
+        let _ = stars;
+        let members: Vec<(usize, Ratio)> = (0..motes.len()).filter_map(|i| {
+            let (lo, hi) = &bands_all[i];
+            let s = share_in(lo, hi, &o_lo, &o_hi) + share_in(lo, hi, &i_lo.clone().max(ratio(0, 1)), &i_hi);
+            (s > ratio(0, 1)).then(|| (i, crate::ring::grain(&s).min(ratio(1, 1))))
+        }).filter(|(_, s)| *s > ratio(0, 1)).collect();
+        if members.is_empty() {
+            continue;
+        }
+        let m = members.iter().fold(ratio(0, 1), |acc, (i, s)| acc + m_of(*i) * s.clone());
+        let mid = (o_lo.clone() + o_hi.clone()) / ratio(2, 1);
+        let width = o_hi - o_lo;
+        let h_mid = enc.hold_within(&mid);
+        let delta = h_mid.clone() / (mid.clone() + h_mid);
+        let face = (ratio(1, 1) - delta) / ratio(2, 1);
+        let lambda = if width.is_zero() { ratio(0, 1) } else { m.clone() / width.clone() };
+        if std::env::var_os("NETSTRATUM_BANDS").is_some() {
+            eprintln!("BAND ring {} whole {} rho [{}, {}] m {} width {} lambda {} face {}", crate::ring::grain(&ring), crate::ring::grain(&whole), crate::ring::grain(&x), crate::ring::grain(&y), crate::ring::grain(&m), crate::ring::grain(&width), crate::ring::grain(&lambda), crate::ring::grain(&face));
+        }
+        let _ = (lambda, face);
+        // AROUND THE RING (the disc fragments locally, nature's way): within
+        // the band's pair, stars form where its matter coincides around the
+        // turn in every plane and holds against its heat and the unlocked
+        // face: the chain law on the band's own share of each mote.
+        let part: Vec<Mote> = members.iter().map(|(i, s)| Mote { amount: crate::pulse::nucleus(&(motes[*i].amount.clone() * s.clone())).min(motes[*i].amount.clone()), ..motes[*i].clone() }).collect();
+        let total_part = holding(&part);
+        if total_part.is_zero() {
+            continue;
+        }
+        for chain in chains(&part, enc, &p, g_total).into_iter().filter(|c| c.holds()) {
+            let shares: Vec<(usize, Ratio)> = chain.members.iter().map(|&j| (members[j].0, members[j].1.clone())).collect();
+            out.push((chain.reach, shares));
+        }
+    }
+    out
+}
+
 pub fn clumps_of(motes: &[Mote], chains: Vec<Chain>) -> Vec<(Ratio, Vec<(usize, Ratio)>)> {
     chains
         .into_iter()
