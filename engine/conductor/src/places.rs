@@ -220,10 +220,13 @@ pub fn core_of(path: &[u64]) -> Option<String> {
     with(|p| p.cores.get(path.first()?).cloned())
 }
 
-/// Whether the world at `path` stands in its core's bulge: its star within
-/// the galaxy's throat (reach ≤ 1 in the galaxy's own units).
+/// Whether the world at `path` stands in its core's bulge: its clock has lost
+/// at least one whole halving against the core's echo (`echo_tier` ≥ 1, the
+/// ancients' "tiered range close to the core based on the proximity to the
+/// temporal echo", operator 2026-10-22).
 pub fn in_bulge(path: &[u64]) -> Option<bool> {
-    with(|p| p.systems.get(&(*path.first()?, *path.get(1)?)).map(|(r, _)| *r <= ratio(1, 1)))
+    let _ = with(|p| p.systems.get(&(*path.first()?, *path.get(1)?)).map(|_| ()))?;
+    Some(echo_tier(path).is_some_and(|k| k >= 1))
 }
 
 /// The world at `path`'s distance from its core: its star's reach.

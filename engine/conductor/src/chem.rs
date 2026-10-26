@@ -101,10 +101,6 @@ pub fn parts(kind: &Kind) -> Option<(u32, u32)> {
     }
 }
 
-/// The hydride of centre `z` with `k` hydrogens (`k = 0`: the atom).
-pub fn hydride(z: u32, k: u32) -> Option<Kind> {
-    if k == 0 { Kind::atom(z) } else { Kind::cluster(&[(1, z), (k, 1)]) }
-}
 
 /// A plain atom's Z (None for a cluster): what may burn, ionize or be cut by
 /// its windings.
@@ -230,7 +226,6 @@ mod tests {
     fn water_is_oxygen_and_four_hydrogens_closed() {
         assert_eq!(parts(&kind("Z008")), Some((8, 0)));
         assert_eq!(parts(&kind("Z008·4Z001")), Some((8, 4)));
-        assert_eq!(hydride(8, 4), Some(kind("Z008·4Z001")));
         assert_eq!(atom_z(&kind("Z008·4Z001")), None);
         // On S^11, oxygen opens four, so O + 4H closes.
         assert_eq!(unpaired(&kind("Z008")), 4);

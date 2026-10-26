@@ -743,7 +743,7 @@ pub fn cascade(manifest: &Manifest) -> (Manifest, Vec<(Ratio, Manifest)>, Ratio)
     (wellspring, galaxies, ratio(2, 1) * (outermost + h))
 }
 
-pub fn deploy(seed: &[u8; 32], manifest: &Manifest) -> Option<Universe> {
+pub fn deploy(manifest: &Manifest) -> Option<Universe> {
     // THE FOUNDING CASCADE (above): the Wellspring holds what stays within its
     // throat; its held kinds are the universe's medium about it (the central
     // galaxy's cut is read from them once the ocean is motes: owed); every
@@ -879,7 +879,6 @@ pub fn deploy(seed: &[u8; 32], manifest: &Manifest) -> Option<Universe> {
     }
     // Nothing is placed (docs/96): stars and worlds gather from what the
     // bounces release and the void distributes.
-    let _ = seed;
     Some(Universe { cores, ocean, firmament, unit, t_u })
 }
 
@@ -1437,7 +1436,7 @@ mod tests {
 
     #[test]
     fn a_founding_that_holds_no_disc_is_refused() {
-        assert!(deploy(&[7u8; 32], &Manifest::new()).is_none());
+        assert!(deploy(&Manifest::new()).is_none());
     }
 
     #[test]

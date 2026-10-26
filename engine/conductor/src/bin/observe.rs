@@ -153,6 +153,12 @@ fn main() {
             }
             let Some(o) = u.cores.iter().flat_map(|c| &c.satellites).flat_map(|s| &s.satellites).find(|o| o.path == path) else { return println!("no such world") };
             println!("WORLD {:?} at beat {now}: reach {}, period {} rings, holding {}; {}", o.path, f(&o.radius), f(&o.period), f(&(pulse::mass(&o.kept) / unit.clone())), composition(&o.kept, 8));
+            // Its compounds and their permanent dipoles (`chem::dipole`): how
+            // polar each medium it holds is.
+            let compounds: Vec<String> = o.kept.keys().filter(|k| conductor::chem::atom_z(k).is_none()).map(|k| format!("{k} dipole {}", f(&conductor::chem::dipole(k)))).collect();
+            if !compounds.is_empty() {
+                println!("  compounds: {}", compounds.join(", "));
+            }
             match life::readings(&u, &seed).get(&path) {
                 Some(r) => {
                     let w = &r.world;

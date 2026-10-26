@@ -669,7 +669,6 @@ pub fn spin_torque(x: &mut Mote, from: &[Ratio], h: &Ratio, r_o: &Ratio, d_o: &R
     let t = tilt_of(&x.tilt);
     let resp: Vec<Ratio> = from.iter().zip(&t).map(|(f, tk)| mean_response(f, &(ratio(2, 1) * d_o.clone() * tk.clone()))).collect();
     let k = resp.iter().zip(&t).fold(ratio(0, 1), |s, (r, tk)| s + r.clone() * tk.clone());
-    let dl_o = p.clone() * d_o.clone() * k.clone();
     // DISSIPATION (operator 2026-10-19: "what do our current physics tell
     // about heat dissipation to the void? probably mimic nature"; with
     // xylarium): what the torque does not deliver in step becomes HEAT,
@@ -709,7 +708,6 @@ pub fn spin_torque(x: &mut Mote, from: &[Ratio], h: &Ratio, r_o: &Ratio, d_o: &R
     // mote THROUGH the centre in that plane (its phase there on half a
     // turn), never piled at zero; the orbit spin is the L1 sum, the tilt
     // re-read from the planes.
-    let _ = dl_o;
     let mut planes_l: Vec<Ratio> = Vec::with_capacity(t.len());
     for (j, tk) in t.iter().enumerate() {
         let lk = x.ell_o.clone() * tk.clone() + p.clone() * d_o.clone() * resp[j].clone() * tk.clone() + band.clone() * tk.clone();
@@ -1222,13 +1220,6 @@ pub fn chains(motes: &[Mote], enc: &Enclosed, p: &Ratio, total: &Ratio) -> Vec<C
     out
 }
 
-/// THE CLUMPS, where the motes are: every chain that holds collapses, each
-/// member taking its filament's coherence share (a chain is a partition, so
-/// nothing is claimed twice). Returns, per holding chain, its reach and the
-/// share of each mote it takes.
-pub fn clumps(motes: &[Mote], enc: &Enclosed, p: &Ratio, total: &Ratio) -> Vec<(Ratio, Vec<(usize, Ratio)>)> {
-    clumps_of(motes, chains(motes, enc, p, total))
-}
 
 /// STREAMING BY FORCE (operator 2026-10-18: "jetstreams depending on their
 /// force are either continuums or vacuums in the filament … analogous to the
@@ -1301,7 +1292,7 @@ pub fn settle_disc(motes: &mut [Mote], enc: &Enclosed) -> Vec<Ratio> {
 /// `λ/(1 + λ) ≥ ½(1 − δ)`, `λ` its share over its width; a band where a
 /// star already stands is that star's (its capture reads it). Returns the
 /// holding bands as clumps: (the band's middle reach, each member's share).
-pub fn band_pairs(motes: &[Mote], enc: &Enclosed, p: &Ratio, stars: &[Ratio], g_total: &Ratio) -> Vec<(Ratio, Vec<(usize, Ratio)>)> {
+pub fn band_pairs(motes: &[Mote], enc: &Enclosed, p: &Ratio, plane: &[Ratio], g_total: &Ratio) -> Vec<(Ratio, Vec<(usize, Ratio)>)> {
     let ring = enc.base();
     let whole = enc.whole();
     if ring.is_zero() || whole.is_zero() || motes.is_empty() {
@@ -1360,10 +1351,6 @@ pub fn band_pairs(motes: &[Mote], enc: &Enclosed, p: &Ratio, stars: &[Ratio], g_
         }
         let (o_lo, o_hi) = (ring.clone() * (ratio(1, 1) + x.clone()), ring.clone() * (ratio(1, 1) + y.clone()));
         let (i_lo, i_hi) = (ring.clone() * (ratio(1, 1) - y.clone()), ring.clone() * (ratio(1, 1) - x.clone()));
-        // A star standing in the ring does not close it: a ring holds many
-        // stars around its turn, each where its own matter coincides (the
-        // matter nearest a star is its capture's).
-        let _ = stars;
         let members: Vec<(usize, Ratio)> = (0..motes.len()).filter_map(|i| {
             let (lo, hi) = &bands_all[i];
             let s = share_in(lo, hi, &o_lo, &o_hi) + share_in(lo, hi, &i_lo.clone().max(ratio(0, 1)), &i_hi);
@@ -1372,53 +1359,40 @@ pub fn band_pairs(motes: &[Mote], enc: &Enclosed, p: &Ratio, stars: &[Ratio], g_
         if members.is_empty() {
             continue;
         }
-        let m = members.iter().fold(ratio(0, 1), |acc, (i, s)| acc + m_of(*i) * s.clone());
+        // THE RING FRAGMENTS (the disc's local collapse, nature's way; the
+        // crest law, `formation::crest_collapse`, with xylarium): the ring's
+        // holding m and magnetism μ, its heat a, at its middle R about the
+        // hold H there, hold along a length w_J against the unlocked face and
+        // the shear, so ⌊R/w_J⌋ clumps stand around the turn. Each member
+        // joins the clump whose arc holds it, by its phase in the galaxy's
+        // disc plane (the plane the disc settled into, `settle_disc`).
         let mid = (o_lo.clone() + o_hi.clone()) / ratio(2, 1);
-        let width = o_hi - o_lo;
         let h_mid = enc.hold_within(&mid);
-        let delta = h_mid.clone() / (mid.clone() + h_mid);
-        let face = (ratio(1, 1) - delta) / ratio(2, 1);
-        let lambda = if width.is_zero() { ratio(0, 1) } else { m.clone() / width.clone() };
-        if std::env::var_os("NETSTRATUM_BANDS").is_some() {
-            eprintln!("BAND ring {} whole {} rho [{}, {}] m {} width {} lambda {} face {}", crate::ring::grain(&ring), crate::ring::grain(&whole), crate::ring::grain(&x), crate::ring::grain(&y), crate::ring::grain(&m), crate::ring::grain(&width), crate::ring::grain(&lambda), crate::ring::grain(&face));
-        }
-        let _ = (lambda, face);
-        // AROUND THE RING (the disc fragments locally, nature's way): within
-        // the band's pair, stars form where its matter coincides around the
-        // turn in every plane and holds against its heat and the unlocked
-        // face: the chain law on the band's own share of each mote.
-        let part: Vec<Mote> = members.iter().map(|(i, s)| Mote { amount: crate::pulse::nucleus(&(motes[*i].amount.clone() * s.clone())).min(motes[*i].amount.clone()), ..motes[*i].clone() }).collect();
-        let total_part = holding(&part);
-        if total_part.is_zero() {
+        let held_of = |i: usize, s: &Ratio| motes[i].amount.clone() * s.clone() * weight(&motes[i].key) / g_total.clone();
+        let m = members.iter().fold(ratio(0, 1), |acc, (i, s)| acc + held_of(*i, s));
+        let mu = members.iter().fold(ratio(0, 1), |acc, (i, s)| acc + motes[*i].amount.clone() * s.clone() * ratio(i64::from(crate::chem::unpaired(&motes[*i].key)), 1) / g_total.clone());
+        if m.is_zero() {
             continue;
         }
-        for chain in chains(&part, enc, &p, g_total).into_iter().filter(|c| c.holds()) {
-            let shares: Vec<(usize, Ratio)> = chain.members.iter().map(|&j| (members[j].0, members[j].1.clone())).collect();
-            out.push((chain.reach, shares));
+        let a = crate::ring::grain(&(members.iter().fold(ratio(0, 1), |acc, (i, s)| acc + held_of(*i, s) * motes[*i].agitation.clone()) / m.clone()));
+        let Some((_, count)) = crate::formation::crest_collapse(&m, &mu, &a, &mid, &h_mid) else { continue };
+        if count == 0 {
+            continue;
+        }
+        let disc = SPACE[tilt_of(plane).iter().enumerate().max_by(|x, y| x.1.cmp(y.1).then(y.0.cmp(&x.0))).map(|(j, _)| j).unwrap_or(0)];
+        let n = Ratio::from_integer(num_bigint::BigInt::from(count));
+        let mut arcs: std::collections::BTreeMap<num_bigint::BigInt, Vec<(usize, Ratio)>> = std::collections::BTreeMap::new();
+        for (i, sh) in members {
+            let at = frac(motes[i].phase.get(disc).unwrap_or(&ratio(0, 1)));
+            arcs.entry((at * n.clone()).floor().to_integer()).or_default().push((i, sh));
+        }
+        for (_, clump) in arcs {
+            out.push((crate::ring::grain(&mid), clump));
         }
     }
     out
 }
 
-pub fn clumps_of(motes: &[Mote], chains: Vec<Chain>) -> Vec<(Ratio, Vec<(usize, Ratio)>)> {
-    chains
-        .into_iter()
-        .filter(|c| c.holds())
-        .map(|c| {
-            // THE FILAMENT'S COHERENCE WITH THE BELL (with xylarium; the
-            // recoherence ruling, "an echo compresses only the coherent
-            // part", now the filament's own): the product over planes of the
-            // in-step share of its holding-weighted phase against the bell;
-            // ONE share, taken from every member alike, so a star's mix is
-            // its filament's mix.
-            let coherence = (0..PLANES).fold(ratio(1, 1), |acc, k| {
-                let phase = circle_mean(&c.members.iter().map(|&j| (motes[j].amount.clone() * weight(&motes[j].key), motes[j].phase.get(k).cloned().unwrap_or_else(|| ratio(0, 1)))).collect::<Vec<_>>());
-                acc * in_step(&phase, &ratio(0, 1))
-            });
-            (c.reach, c.members.into_iter().map(|j| (j, coherence.clone())).collect())
-        })
-        .collect()
-}
 
 /// MERGE BY THE MATTER'S OWN GATHERINGS (operator 2026-10-23: "we shouldnt
 /// have any grids - why would we? they only distort and provide rigidity";

@@ -28,7 +28,7 @@
 //!   the galaxy takes the in-phase share `a_q` of the medium on it, scaled by
 //!   its own pull `h_g/(h_g + m)` (a pair share). Crossings are counted on
 //!   whole half-swings elapsed, exact, never stepped.
-use crate::pulse::{mass, Manifest};
+
 use cfe::ratio::{ratio, Ratio};
 use num_traits::Zero;
 
@@ -72,17 +72,6 @@ pub fn swing(r: &Ratio, h_g: &Ratio, h_u: &Ratio) -> (Ratio, Ratio) {
     (r.clone() * (ratio(1, 1) - e.clone()), r.clone() * (ratio(1, 1) + e))
 }
 
-/// The relative turning at a crossing (proposed): the galaxy keeps its
-/// orbit's turning, `δ` at its guiding reach `r` (its spin `ℓ = r·H` carried
-/// through the swing), while the crest's ring at `at` turns at `δ(at)`; the
-/// share `|δ(r) − δ(at)| / δ(r)`, about the universe's holding.
-pub fn relative_turning(r: &Ratio, at: &Ratio, h_u: &Ratio) -> Ratio {
-    let h = h_u.clone();
-    let d = |x: &Ratio| h.clone() / (x.clone() + h.clone());
-    let (dr, da) = (d(r), d(at));
-    let diff = if dr > da { dr.clone() - da } else { da - dr.clone() };
-    diff / dr
-}
 
 /// The swing's RADIAL share at a crossing of the crest at `at` (proposed; a
 /// reading, never a trajectory): the crossing's place along the swing as a
@@ -101,54 +90,6 @@ pub fn radial_share(r: &Ratio, h_g: &Ratio, at: &Ratio, h_u: &Ratio) -> Ratio {
     e * (ratio(1, 1) - off).max(ratio(0, 1))
 }
 
-/// WHERE ARRIVING MATTER LANDS (xylarium, proposed: CARRIED SPINS ADD,
-/// PLANE BY PLANE). The bounce's push is the isoclinic harmonic pulse
-/// (xylarium's operator), so it acts in every plane at once; arriving
-/// matter also brings the crossing's turning in two planes, so kind z
-/// carries in each plane `ℓ = p·(w̄/w_z) + ρ_g·t_plane` (t the crossing's
-/// share in that plane, read in the galaxy's own units through its received
-/// share ρ_g). Each plane's cut is the founding's: about `R = ℓ/H`, spread
-/// over `R(1 ± p)`, its held share the part within the throat; a kind is
-/// HELD only as held in both planes, `f_orbit · f_swing` (a product of
-/// distinct shares). The rest is GAS at the orbit plane's reach, agitation
-/// `(p − δ)/p`, cooling by both channels from bell `born`. Returns (held,
-/// free, the free part's motes); `galaxy` is the galaxy's grains with the
-/// arrivals already counted.
-pub fn land(galaxy: &Manifest, arriving: &Manifest, rho: &Ratio, turning: &(Ratio, Ratio), born: u64) -> (Manifest, Manifest, Vec<crate::formation::Shell>) {
-    let weight = |k: &crate::chem::Kind| crate::chem::weight(k);
-    let (mut held, mut free, mut motes) = (Manifest::new(), Manifest::new(), Vec::new());
-    let total = mass(galaxy);
-    let Some((p, h, mean)) = crate::pulse::galaxy_push(galaxy) else { return (held, arriving.clone(), motes) };
-    for (k, amount) in arriving {
-        let w = ratio(i64::from(weight(k)), 1);
-        let push = p.clone() * mean.clone() / w.clone();
-        let held_share = |t: &Ratio| {
-            let r = (push.clone() + rho.clone() * t.clone()) / h.clone();
-            let lo = r.clone() * (ratio(1, 1) - p.clone());
-            let span = ratio(2, 1) * p.clone() * r.clone();
-            if span.is_zero() { if lo <= h { ratio(1, 1) } else { ratio(0, 1) } } else { ((h.clone() - lo) / span).max(ratio(0, 1)).min(ratio(1, 1)) }
-        };
-        let f = held_share(&turning.0) * held_share(&turning.1);
-        // The gas stands where the plane carrying it farthest leaves it.
-        let r = (push.clone() + rho.clone() * turning.0.clone().max(turning.1.clone())) / h.clone();
-        let kept = crate::ring::grain(&(amount.clone() * f));
-        let loose = amount.clone() - kept.clone();
-        if kept > ratio(0, 1) {
-            held.insert(k.clone(), kept);
-        }
-        if loose > ratio(0, 1) {
-            let inner = (r.clone() * (ratio(1, 1) - p.clone())).max(h.clone());
-            let outer = r.clone() * (ratio(1, 1) + p.clone());
-            let delta = h.clone() / (r.clone() + h.clone());
-            let agitation = if delta < p { (p.clone() - delta) / p.clone() } else { ratio(0, 1) };
-            if outer > inner && !total.is_zero() {
-                motes.push(crate::formation::Shell { key: k.clone(), held: loose.clone() * w / total.clone(), inner, outer: outer.clone(), agitation, radiates: crate::formation::radiates(k), born, vacuum: crate::ring::deficit(&outer, &h) });
-            }
-            free.insert(k.clone(), loose);
-        }
-    }
-    (held, free, motes)
-}
 
 /// THE PUMP (convection, with xylarium; docs/83): the universal tide a
 /// swinging galaxy feels differs between its turnings,

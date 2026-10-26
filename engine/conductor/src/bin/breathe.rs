@@ -188,7 +188,20 @@ fn main() {
         let echoes = events.iter().filter(|e| u64::from(e.galaxy) == c.path[0]).count();
         let born = c.satellites.len();
         let orbs: usize = c.satellites.iter().map(|s| s.satellites.len()).sum();
-        let year = motion::galactic_year(c).map(|(k, t)| format!("half-mass system {}, year {} bells", k + 1, t.period.round())).unwrap_or_else(|| "no year yet".into());
+        // Its galactic year and the bell its next one closes (`motion`).
+        let year = motion::galactic_year(c).map(|(k, t)| {
+            let next = t.turns(until).and_then(|n| t.bell_of_turn(n + 1)).map(|b| b.to_string()).unwrap_or_else(|| "past the carrier".into());
+            format!("half-mass system {}, year {} bells, next closes at bell {next}", k + 1, t.period.round())
+        }).unwrap_or_else(|| "no year yet".into());
+        // THE PUMP (convection, `ocean::pump`): the universal tide's
+        // difference across the galaxy's swing.
+        let pump = {
+            let whole = pulse::mass(&u.total());
+            let h_g = if num_traits::Zero::is_zero(&whole) { cfe::ratio::ratio(0, 1) } else { (pulse::core_state(c) + pulse::mass(&c.total())) / whole };
+            let ring = cfe::ratio::ratio(t_u as i64, 4);
+            conductor::reading::sector(&conductor::ocean::pump(&(c.radius.clone() / ring), &h_g, &conductor::ocean::universe_hold(&u))).to_string()
+        };
+        let year = format!("{year}; pump {pump}");
         let medium = pulse::mass(&c.medium) / unit.clone();
         match breath::galaxy_rate(&u, i, &unit) {
             Some(g_rate) => {
@@ -258,6 +271,11 @@ fn main() {
     // opened holding, and what was trapped at the throats.
     let sum = |f: &dyn Fn(&breath::Event) -> cfe::ratio::Ratio| events.iter().fold(cfe::ratio::ratio(0, 1), |s, e| s + f(e));
     let f = conductor::reading::sector;
+    println!("CIRCULATION — the shear moved {} outward, the pressure {} and the field {} (spin, ledger units); the luminal bound turned {} motes onto the Möbius leg; the stream read {} on the vacuum; the trapped carried {} spin to the reservoirs; {} jets left past the rims", f(&sum(&|e| e.circulation.0.clone())), f(&sum(&|e| e.circulation.1.clone())), f(&sum(&|e| e.circulation.2.clone())), events.iter().map(|e| e.circulation.3).sum::<usize>(), events.iter().map(|e| e.circulation.4).sum::<usize>(), f(&sum(&|e| e.recycled.spun.clone())), events.iter().map(|e| e.jets).sum::<usize>());
+    let closing: Vec<u32> = motion::years_closing(&u, until);
+    let rungs: Vec<u64> = events.iter().map(|e| e.rung).collect();
+    let parallel = events.iter().filter(|e| matches!(e.write, breath::Write::Parallel)).count();
+    println!("ECHOES — rungs read {}..{}, {} written parallel and {} perpendicular; galactic years closing at bell {until}: {closing:?}", rungs.iter().min().copied().unwrap_or(0), rungs.iter().max().copied().unwrap_or(0), parallel, events.len() - parallel);
     println!("RECYCLING — the throats pressed {} and peeled {} (grains of nuclei); light given {}, holding opened {}, trapped {} (units); {} echoes recycled", f(&sum(&|e| e.recycled.pressed.clone())), f(&sum(&|e| e.recycled.peeled.clone())), f(&sum(&|e| e.recycled.light.clone())), f(&sum(&|e| e.recycled.spent.clone())), f(&sum(&|e| e.recycled.trapped.clone())), events.iter().filter(|e| e.recycled != Default::default()).count());
     // THE BURN AND THE RETURN AS RATES (TUniversal 11.0 (23)): hydrogen fused
     // by the stars and returned net by the throats, per universal echo, as
