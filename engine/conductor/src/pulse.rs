@@ -81,35 +81,56 @@ pub fn from_nuclei(nuclei: &Nuclei) -> Manifest {
         .collect()
 }
 
-/// BOUNCE NUCLEOSYNTHESIS (docs/97 §8–§9; operator 2026-10-26: "derive the
-/// bounce's heat and build it"). The bounce's matter cools from the core
-/// (`nuclides::bounce_heat`, the luminal excess `2δ − 1`) and its nucleons
-/// exchange poles every pass (protons to the vacuum leg by the held face,
-/// neutrons back by the unlocked face; the Möbius pass, booked both ways).
-/// - THE SEAL WINDOW: read on the source's own clock, where deuterium's heat
-///   falls to its grip (`nuclides::seal_window`, docs/97 §11).
-/// - THE NEUTRON SHARE: the exchange's own fixed point there, `2δ/(1 + δ)` =
-///   6/7 (`nuclides::neutron_share`), never set.
-/// - THE CAPTURES at the window: each proton binds a neutron where the nucleus
-///   first seals (deuterium, weight 2) and deuterons pair to the next seal,
-///   weight 4 (Q 2, Z 2), by the one law the stars burn by, `w + w → 2w`; an
+/// The founding's table: every nuclide to this weight (docs/97 §12, the
+/// operator's ruling of 2026-10-27).
+pub const TABLE: u32 = 1200;
+
+/// BOUNCE NUCLEOSYNTHESIS (docs/97 §8–§12). The bounce's matter cools from the
+/// core on the source's own clock and its nucleons exchange poles every pass,
+/// booked both ways.
+/// - THE SEAL WINDOW: where deuterium's heat falls to its grip
+///   (`nuclides::seal_window`); THE NEUTRON SHARE the exchange's own fixed
+///   point there (`nuclides::neutron_share`), never set.
+/// - THE SEEDS: each proton binds a neutron and deuterons pair to weight 4; an
 ///   odd deuteron stands.
-/// - THE UNPAIRED NEUTRONS return to the continuum by the unlocked face, past
-///   the window, as protons: hydrogen.
+/// - THE TABLE: the seeds climb the nucleus's convergence on the free
+///   neutrons, each staying at w with `1 − σ_{w+1}` and climbing on with
+///   `σ_{w+1} = ½(1 + κ_{w+1})`, to `TABLE`; every climb a neutron captured.
+/// - The free neutrons left return to the continuum as hydrogen.
 /// Returns the manifest by nuclide, in grains (whole nuclei however few);
 /// nucleons conserved exactly.
 pub fn founding(nuclei: &num_bigint::BigInt) -> Manifest {
-    let zero = num_bigint::BigInt::from(0);
-    let grid = nuclei_per_grain() * num_bigint::BigInt::from(1024);
+    use num_bigint::BigInt;
+    let zero = BigInt::from(0);
+    let grid = nuclei_per_grain() * BigInt::from(1024);
     let share = crate::nuclides::neutron_share(&crate::nuclides::seal_window(&crate::nuclides::source_clock()));
     let neutrons = (Ratio::from_integer(nuclei.clone()) * share).floor().to_integer();
     let protons = nuclei - &neutrons;
     let paired = protons.clone().min(neutrons.clone());
-    let alphas = &paired / num_bigint::BigInt::from(2);
-    let deuterons = &paired - &alphas * num_bigint::BigInt::from(2);
-    let hydrogen = (&protons - &paired) + (&neutrons - &paired);
+    let seeds = &paired / BigInt::from(2);
+    let deuterons = &paired - &seeds * BigInt::from(2);
+    let mut free = &neutrons - &paired + (&protons - &paired);
+    let mut counts: Vec<(u32, BigInt)> = Vec::new();
+    // The seeds climb, each step a neutron captured, while neutrons remain.
+    let mut arriving = seeds;
+    for w in 4..=TABLE {
+        if arriving <= zero {
+            break;
+        }
+        let climb = if w < TABLE {
+            crate::nuclides::survival(w + 1).map(|s| (Ratio::from_integer(arriving.clone()) * s).floor().to_integer()).unwrap_or_else(|| zero.clone()).min(free.clone())
+        } else {
+            zero.clone()
+        };
+        let stay = &arriving - &climb;
+        if stay > zero {
+            counts.push((w, stay));
+        }
+        free -= &climb;
+        arriving = climb;
+    }
     let mut out = Manifest::new();
-    for (w, count) in [(1u32, hydrogen), (2, deuterons), (4, alphas)] {
+    for (w, count) in [(1u32, free), (2, deuterons)].into_iter().chain(counts) {
         if count > zero {
             if let Some(k) = crate::chem::Kind::atom(w) {
                 out.insert(k, Ratio::new(count, grid.clone()));
@@ -760,6 +781,34 @@ pub fn deploy(manifest: &Manifest) -> Option<Universe> {
     // galaxy is a bead of the expanding shells, at its pinch's reach. No
     // draws. A bead too slight to hold a hole of a nucleus stays medium.
     let (wellspring, beads, echo) = cascade(manifest);
+    // THE GALAXIES CARRY THE WHOLE MIX (docs/97 §12; docs/78: "every share
+    // carries the manifest's composition in proportion"): each bead keeps its
+    // place and its mass and takes the beads' pooled composition in
+    // proportion to its mass, in whole nuclei; what flooring leaves joins the
+    // heaviest bead. Never a slice by weight.
+    let beads = {
+        let mut pool = Manifest::new();
+        for (_, m) in &beads {
+            for (k, a) in m {
+                *pool.entry(k.clone()).or_insert_with(|| ratio(0, 1)) += a.clone();
+            }
+        }
+        let whole_b = mass(&pool);
+        let mut left = pool.clone();
+        let heaviest = beads.iter().enumerate().max_by(|a, b| mass(&a.1 .1).cmp(&mass(&b.1 .1))).map(|(i, _)| i);
+        let mut mixed: Vec<(Ratio, Manifest)> = beads.iter().map(|(d, m)| {
+            let f = if whole_b.is_zero() { ratio(0, 1) } else { mass(m) / whole_b.clone() };
+            let part: Manifest = pool.iter().map(|(k, a)| (k.clone(), nucleus(&(a.clone() * f.clone())))).filter(|(_, a)| *a > ratio(0, 1)).collect();
+            less(&mut left, &part);
+            (d.clone(), part)
+        }).collect();
+        if let Some(i) = heaviest {
+            for (k, a) in left {
+                *mixed[i].1.entry(k).or_insert_with(|| ratio(0, 1)) += a;
+            }
+        }
+        mixed
+    };
     // The bell's period in whole bells; a core ring is a quarter of it, so a
     // founding whose echo cannot carry one ring a quarter is refused.
     let t_u: u64 = echo.ceil().to_integer().try_into().ok().filter(|t: &u64| *t >= 4)?;

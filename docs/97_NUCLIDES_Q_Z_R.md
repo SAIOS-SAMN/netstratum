@@ -229,3 +229,22 @@ draws one hydrogen nucleus, so nucleons are conserved exactly.
   heat exceeds (`a = ν_star·h_s − 1`, ν_star its own clock, h_s its heart's
   share, its deficit at its centre) breaks into its nucleons; they are the
   rapid capture's fuel for the rest. Nucleons conserved.
+
+## 12. A fresh founding with the full table to weight 1200 (operator 2026-10-27: "remove these starter galaxies - and start fresh with a full table of elements up to 1200")
+
+- **The light, as §9:** the neutron share the exchange's fixed point at the
+  seal window, each proton bound into a seed of weight 4 (deuterons paired;
+  an odd one stands).
+- **The table, from the same window:** the free neutrons the pairing leaves
+  are captured by the seeds as they climb the nucleus's convergence. A seed
+  arriving at w stays there with `1 − σ_{w+1}` and climbs on with `σ_{w+1} =
+  ½(1 + κ_{w+1})` (the hemisphere law), so the seeds spread over every weight
+  from 4 to 1200 (the operator's table; seeds reaching 1200 stand there), peaked
+  at the seals. Each climb is a neutron captured; the neutrons the seeds do
+  not take return to the continuum as hydrogen. Nucleons conserved exactly.
+- Read: hydrogen about 0.45, weight 4 about 0.03, the table above 4 about 0.52
+  by mass; every weight to 1200 stands (at 1200, about 10^-63 a nucleon).
+- **The galaxies carry the whole mix** (docs/78: "every share carries the
+  manifest's composition in proportion"): the cascade's beads keep their
+  places and their masses, each taking the founding's composition in
+  proportion to its mass, never a slice by weight.
