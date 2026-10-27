@@ -112,7 +112,7 @@ The driver stays over the product's nucleons `2w`.
 
 ## 4. Build order (one commit each, its witness read before the next)
 
-1. **§2.1 disc-leg membership.** Witness: no member on the axial leg; the
+1. **§2.1 disc-leg membership** (BUILT). Witness: no member on the axial leg; the
    ring's holding conserved.
 2. **§2.2 the infall in phases** (the frame and `g/m` retire). Witness: a
    member displaced only in a plane of tilt 0 is in step; a member a quarter

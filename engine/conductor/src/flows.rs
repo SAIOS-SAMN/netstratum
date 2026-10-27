@@ -1291,7 +1291,8 @@ pub fn settle_disc(motes: &mut [Mote], enc: &Enclosed) -> Vec<Ratio> {
 /// pair HOLDS where its matter's bond meets its heat and the tide across
 /// it (`formation::crest_collapse`, docs/96 §8); a band where a
 /// star already stands is that star's (its capture reads it). Returns the
-/// holding bands as bindings: (the band's middle reach, each member's share).
+/// holding bands as bindings: (the band's middle reach, each member's share),
+/// every member on the disc leg (docs/99 §2.1).
 pub fn band_pairs(motes: &[Mote], enc: &Enclosed, p: &Ratio, plane: &[Ratio], g_total: &Ratio) -> Vec<(Ratio, Vec<(usize, Ratio)>)> {
     let ring = enc.base();
     let whole = enc.whole();
@@ -1351,7 +1352,10 @@ pub fn band_pairs(motes: &[Mote], enc: &Enclosed, p: &Ratio, plane: &[Ratio], g_
         }
         let (o_lo, o_hi) = (ring.clone() * (ratio(1, 1) + x.clone()), ring.clone() * (ratio(1, 1) + y.clone()));
         let (i_lo, i_hi) = (ring.clone() * (ratio(1, 1) - y.clone()), ring.clone() * (ratio(1, 1) - x.clone()));
-        let members: Vec<(usize, Ratio)> = (0..motes.len()).filter_map(|i| {
+        // A BINDING GATHERS ON THE DISC LEG (docs/99 §2.1): the axial leg is
+        // matter in transit, half a loop from the disc; the rings above
+        // step on all the galaxy's matter, the binding's own is the disc's.
+        let members: Vec<(usize, Ratio)> = (0..motes.len()).filter(|&i| on_disc_leg(&motes[i])).filter_map(|i| {
             let (lo, hi) = &bands_all[i];
             let s = share_in(lo, hi, &o_lo, &o_hi) + share_in(lo, hi, &i_lo.clone().max(ratio(0, 1)), &i_hi);
             (s > ratio(0, 1)).then(|| (i, crate::ring::grain(&s).min(ratio(1, 1))))
@@ -1817,6 +1821,28 @@ mod passage_tests {
         assert!(x.vacuum && x.phase[0] == ratio(4, 5), "one pass: the other leg, half a turn on");
         mobius(&mut x);
         assert_eq!(x, was, "two passes close");
+    }
+
+    #[test]
+    fn a_binding_gathers_on_the_disc_leg_alone() {
+        use super::{band_pairs, on_disc_leg, Enclosed, Mote, LOOP};
+        // A heavy cold ring at reach 3/2 about a base of 1, half its motes
+        // on the disc leg (loop phase 1/10), half in transit (7/10).
+        let mote = |j: i64, loop_at: (i64, i64)| {
+            let mut phase = super::rest(ratio(loop_at.0, loop_at.1));
+            phase[0] = ratio(j, 40);
+            Mote { key: crate::chem::Kind::parse("W0016").expect("a kind"), amount: ratio(1, 1), ell_o: ratio(3, 2), ell_orth: ratio(0, 1), phase, agitation: ratio(0, 1), born: 0, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1), tilt: vec![ratio(1, 1), ratio(0, 1), ratio(0, 1)] }
+        };
+        let motes: Vec<Mote> = (0..40).map(|j| mote(j, if j % 2 == 0 { (1, 10) } else { (7, 10) })).collect();
+        let enc = Enclosed::new(ratio(1, 1), vec![(ratio(3, 2), ratio(1, 1))]);
+        let g = super::holding(&motes) * ratio(2, 1);
+        let bindings = band_pairs(&motes, &enc, &ratio(1, 10), &[ratio(1, 1), ratio(0, 1), ratio(0, 1)], &g);
+        assert!(!bindings.is_empty(), "the ring binds");
+        for (_, members) in &bindings {
+            for (i, _) in members {
+                assert!(on_disc_leg(&motes[*i]), "member {i} at loop phase {} is in transit", motes[*i].phase[LOOP]);
+            }
+        }
     }
 
     #[test]
