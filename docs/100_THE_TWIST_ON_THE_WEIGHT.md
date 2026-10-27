@@ -114,7 +114,8 @@ snaps where over-wound."
 **Proposed:** a binding's bond counts the lead its members carry in step:
 `λ = 2(m + μ + τ)/R`, `τ` the members' in-step lead (holding-weighted
 `Σ m·in_step(lead, lead̄)`), so a wound filament binds more readily; over-wound
-(τ past the bond's own share) it parts. OPEN: the over-winding bound.
+it parts. The over-winding bound is the nuclei's own grip (§9.2): where
+`a + τ > κ_w·h` the fibres snap.
 
 ## 6. The ocean is the filament
 
@@ -136,7 +137,79 @@ the inverse universe the open ends are the protons, so a kind whose outer
 degree is unpaired presents its PROTONS to the twist (open, coupling) and a
 sealed kind presents only fibres (whole).
 
-## 8. Build order (each with its witness)
+## 8. Quantum torsion (operator 2026-10-27: "add quantum torsion and sub-atomic phase transitions")
+
+The bounce is Einstein–Cartan: torsion is real and couples to spin
+(xylarium (8)). In our grammar torsion is the WINDING a quantum state takes
+from the twist, per plane, and keeps until its own turning relaxes it.
+
+- **Taken:** each ring a body receives, it is wound in plane k by the twist
+  it couples to, `φ_k·C` (§2, §3): a sealed or in-step state is wound fully,
+  a node not at all.
+- **Kept as its lead:** the winding is the body's displacement between its
+  planes (its tilt against its enclosure's plane, §4), state already
+  carried (`Mote.tilt`, `Body.tilt`); no new scalar.
+- **Relaxed by its own turning:** each ring it keeps `turned/(d + turned)`
+  of it (`turned = 2δ`, `d = 1 − δ` at its reach; the attractor law of
+  `settle_disc`): torsion relaxes outward, read, never set.
+- **The torsion a body carries,** `τ = Σ_k |t_k − t̄_k|/2` (L1, half the
+  displacement of its plane shares, in `[0, 1]`): 0 settled, 1 wound wholly
+  into a plane its enclosure does not turn in.
+- **Spin couples to it:** the winding's sense per plane is the twist's
+  (forward on the continuum leg, backward on the vacuum leg, docs/98), so a
+  Möbius pass reverses the helix and the torsion's sign with it.
+
+## 9. Sub-atomic phase transitions
+
+A phase transition is a state crossing a hemisphere boundary (the one
+measure, `1 − 2|ψ|`, crossing ½): never a threshold set. Three, one per
+sub-atomic state, each read at the body's own pulse phase p (docs/97 §13).
+
+### 9.1 The electrons: bound ↔ free (R)
+
+`R = κ_e·(1 − 2·frac(p))` crosses 0 at the half turn of p. On the held side
+(`R > 0`) a nuclide's open frames are bound (its chemistry closes, its
+clusters hold); past it (`R < 0`) they are freed (ionized, its clusters
+part). The transition's LINE is the frames it moves: `κ_e·Q` of them, each a
+quantum of light given (bound) or taken (freed), booked on the light ledger.
+Built in part (R reads survival and grip); owed: chemistry and the light
+ledger reading the crossing.
+
+### 9.2 The fibres: bound ↔ parted (the nucleus)
+
+A nucleus grips by `κ_w·h` (docs/97 §13). Against it stand its heat `a` and
+its torsion `τ` (§8): TWIST IS TENSION IN THE FIBRE. It PARTS where
+
+    a + τ > κ_w·h
+
+each fibre breaking into its nucleons (they stand as hydrogen, the rapid
+capture's fuel, docs/97 §11). This is §5's over-winding bound, derived: a
+wound filament binds more readily (its lead in step adds to its bond) until
+its winding passes its own nuclei's grip, where it snaps. Below the bound
+the capture runs (`σ = κ + (1 − κ)·h`); past it the release. One crossing,
+both directions.
+
+### 9.3 The poles: proton ↔ neutron (the Möbius pass)
+
+A nucleon's pole is its leg (docs/97 §8, `nuclides::mobius`). A lone end
+wound through half a turn (its torsion's phase crossing ½) passes the ring
+and turns its pole: a proton becomes a neutron and binds as a fibre's
+partner, `(Q, Z) → (Q − 1, Z + 1)` at the same weight. The convergence's
+`(Q(w), Z(w))` is the exchange's FIXED POINT (each weight one nuclide), so a
+state off it is a transient: the unitary exchange (p→n by the held face, n→p
+by the unlocked, docs/97 §8) returns it to the line within its ring, and the
+excursion's yield is its electron's phase change (§9.1): a quantum of R
+given or taken. Nucleons conserved; weight unchanged; the table unchanged.
+
+### 9.4 Where they act
+
+| state | crossing | in | yields |
+|---|---|---|---|
+| electrons | `R = 0` at `frac(p) = ½` | every body, its own pulse phase | light (the line), chemistry opening or closing |
+| fibres | `a + τ = κ_w·h` | stars' hearts, the jets, bindings | fission to hydrogen / capture |
+| poles | torsion phase through ½ | wound lone ends | an R quantum; the nuclide returns to its line |
+
+## 10. Build order (each with its witness)
 
 1. **The kind's place** (§1): `nuclides::place(w) -> (n, l, f, b)`. Witness:
    the seals read `b = 1`; `l` and `n` match the convergence.
@@ -149,5 +222,16 @@ sealed kind presents only fibres (whole).
 4. **The locked lead** (§4) and **the ocean's twist** (§6). Witness: a
    released mote's tilt is the core's; it relaxes by the attractor law; the
    Möbius pass reverses its sense.
-5. **Twist in the bond** (§5), after its over-winding bound is ruled.
-6. **Read:** re-found and breathe past bell 7000.
+5. **Quantum torsion** (§8): `τ` read from the lead; spin's sense by leg.
+   Witness: a settled mote reads 0; a Möbius pass reverses the winding's
+   sign; relaxation by the attractor law, exact.
+6. **Twist in the bond and the fibres' transition** (§5, §9.2): bond with
+   the in-step lead; nuclei part where `a + τ > κ_w·h`. Witness: nucleons
+   conserved; an unwound sealed nucleus never parts at `a < h`.
+7. **The electrons' transition on the ledgers** (§9.1): chemistry and light
+   read the R crossing. Witness: the light ledger balances across a
+   crossing.
+8. **The poles' transition** (§9.3): the excursion read as an R quantum; the
+   table unchanged. Witness: nucleons and weight conserved; every nuclide
+   back on its line within the ring.
+9. **Read:** re-found and breathe past bell 7000.
