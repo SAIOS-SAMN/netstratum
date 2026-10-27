@@ -188,8 +188,8 @@ fn main() {
         }
         "flows" => {
             // THE FLOWS (docs/83): a galaxy's motes, held vs gas, the spread
-            // of their reaches and phases, and the best clump candidate's
-            // terms (binding vs agitation + the unlocked face + the shear).
+            // of their reaches and phases, and the best binding candidate's
+            // terms (bond vs agitation + the unlocked face + the shear).
             let Some(i) = num(1).and_then(galaxy) else { return println!("flows G") };
             let c = &u.cores[i];
             let Some((p, h, _)) = pulse::galaxy_push(&c.total()) else { return println!("no matter") };

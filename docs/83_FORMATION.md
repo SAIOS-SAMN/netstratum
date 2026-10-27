@@ -95,7 +95,7 @@ bell's ring rate, phase and torsion winding) is primitive and mass is a
 reading, the deficit `δ` a state's echo leaves in each well (docs/78, "The
 singularities"). Then `v / c = δ = M / (r + M)` (xylarium's
 `M = r·δ / (1 − δ)` inverted; reached independently here), bounded, with a
-horizon at `δ → 1`, compactness restored (a clump's surface speed rises as
+horizon at `δ → 1`, compactness restored (a binding's surface speed rises as
 it shrinks, so collapse runs away and a Jeans length returns), and one law
 for the clock (rate `1 − δ`) and the motion. c is light per ring; no G, no
 mass unit.
@@ -223,7 +223,7 @@ precession and its propulsion are owed together.
   balance and clocks, the chronometry keepers, the half-mass clock) read
   its holding as state plus kept grains, and a galaxy's clock reads the
   universal state and each nearer galaxy's (state plus grains). 3-D
-  readings (the births' clump size, the galactic year's half-mass) stay on
+  readings (the births' binding size, the galactic year's half-mass) stay on
   grains.
 - **The clock ratio, derived** (closed with xylarium, 2026-10-15; their
   founding draw withdrawn): the universal core's period is the total hold
@@ -265,10 +265,10 @@ precession and its propulsion are owed together.
   court records and grants μ per kind and never reshapes it; our vendored
   mycelium predates it, so the reserve's submission needs a re-pin).
 - **FRAGMENTATION, the crux.** Under `ℓ = R·H` the shear `dℓ/dR = H` is the
-  same at every reach, so a clump read with the orbital spin difference
+  same at every reach, so a binding read with the orbital spin difference
   needs a core-sized mass to collapse (the inverted galaxy from the law;
   the tidal placeholder fails the same way: 20 systems in the universe).
-  Fixed with xylarium's 11.4: a clump's own spin is the SHEAR IN TURNING,
+  Fixed with xylarium's 11.4: a binding's own spin is the SHEAR IN TURNING,
   `σ = δ(R) − δ(R + w) = H·w / ((R + H)(R + w + H))`, falling with reach;
   collapse `m/(w + m) ≥ a + σ`. Open, sent to xylarium: the gas's WIDTH
   (each escaped element otherwise a zero-width shell: draft, agitation
@@ -283,15 +283,15 @@ deploy lays down each core's disc and its galaxy's GAS as motes, no
 placed systems; the core's AXIAL JETS land at the rim; at each echo (the
 universal core's pulse reaching the galaxy after its light-travel delay,
 bells 300 to 3,540) the gas that has cooled enough is PARTITIONED by the
-galaxy's shear into clumps (`⌊W/w*⌋`, by the echo's coherent share), and
-each clump IGNITES:
+galaxy's shear into bindings (`⌊W/w*⌋`, by the echo's coherent share), and
+each binding IGNITES:
 
 - **The quantum heart** (operator; with xylarium): a star is the core's
   pair one tier down, a containment ring at its centre holding its body's
-  grains as one ring of its own. A collapsing clump runs away to the
+  grains as one ring of its own. A collapsing binding runs away to the
   throat condition `w = m` (deficit ½), where the heart forms, and the star
-  holds `(1 − 2a)/(1 + 2a)` of its clump (a the agitation at ignition); at
-  `a ≥ ½` light pushes back first and the clump stays gas.
+  holds `(1 − 2a)/(1 + 2a)` of its binding (a the agitation at ignition); at
+  `a ≥ ½` light pushes back first and the binding stays gas.
 - **The coupling, derived** (operator: derived, never founding): read at
   each star's interface, its heart's hold (the star's share of the
   universe's holding on the core's clock) against its atoms' charge hold
@@ -301,7 +301,7 @@ each clump IGNITES:
   fusion's yield and burn (the heartbeat, with xylarium, next), not the
   star's size.
 - **Atom size** (the opacity question) is set aside: a star's size comes
-  from ignition and its clump (where it stands), not opacity.
+  from ignition and its binding (where it stands), not opacity.
 - **Tests:** universe-building tests removed (operator: the binary run is
   the witness; pure guards only).
 
@@ -342,7 +342,7 @@ mass + magnetism.
   light; closed-shell gas cools; close-in gas fastest.
 - **The disc's own heat** at ignition (with xylarium): the new star's first
   light its disc cannot re-lock, `a_disc(R) = L·R/(R + x*)`, rising outward
-  against the vacuum's pull, strongest inward. (Before it, a cold clump's
+  against the vacuum's pull, strongest inward. (Before it, a cold binding's
   disc held whole: one world per system.)
 - **The spin grain** (design law 8): stars had grown 1,700–3,300-bit reaches
   (the observer read NaN); a body's spin and a world's place are floored to
@@ -390,7 +390,7 @@ and the gas both mixed (`pulse::disperse`, `formation::shells`).
 Witnessed live (re-founded 14:18, beat 112), with the push still divided by
 the galaxy's share of the universe: 97 stars in 13 galaxies, mixed discs
 (0.46–0.57 in the large galaxies), mixed gas, and **0 worlds**: every star
-held its whole clump. The star tier's push carried no share, the galaxy
+held its whole binding. The star tier's push carried no share, the galaxy
 tier's did; the two tiers were not one law. That raised the ruling below.
 
 ### Regeneration (operator ruling (i), 2026-10-16; built, 41c231e)
@@ -464,7 +464,7 @@ crest's width (the collected medium's deficit, the open fixed point).
 - the SHED: what each tier loses an echo, by kind, and where it lands;
 - the CRESTS: medium on resonant orbits gains, medium between them does
   not (read as gain a pass against `p/q`);
-- the RETURN: gas arriving in a galaxy that held everything, then clumps,
+- the RETURN: gas arriving in a galaxy that held everything, then bindings,
   then stars, then worlds: 0 → read, none stated in advance.
 
 Read with `observe recycle [N]` (LEDGER, MEDIUM by tier, SHED from the
@@ -601,7 +601,7 @@ the one capture law. Operator: "think of it like a continuous fountain".
    none sits on it). RULED (operator 2026-10-18): the central galaxy is the
    core's OWN DISC, its cut read on the ocean motes inside its throat
    (as a galaxy's `read_cut`), never a galaxy founded or placed. Its stars
-   form there by the same clump law.
+   form there by the same binding law.
 3. **The return closes the books.** Where an inner galaxy's jetstream
    overlaps a universal east/west jet, they exchange. The galaxy's outbound
    leg feeds the universal loop, and the loop's return delivers into the
@@ -861,13 +861,13 @@ Linear, exact, closed forms between events (docs/78 design laws).
    light elements its gas, and the population of stars that gas
    collapses into. No tidal-law systems, no hole share. The root defect was
    the pulse's distribution of the elements, not the tidal law.
-1. **Collapse:** a clump of medium collapses where its own gravity beats its
+1. **Collapse:** a binding of medium collapses where its own gravity beats its
    pressure and spin (a Jeans criterion, square-free), replacing the
    breath's births by rule.
 2. **The star and its disk:** what falls to the centre is the star
    (compressed and burning by the laws already built, docs/82); conserved
    spin leaves a disk.
-3. **Planets:** the disk fragments where a clump can hold its own reach (the
+3. **Planets:** the disk fragments where a binding can hold its own reach (the
    tidal law, docs/78), and bodies grow by accretion events: their number,
    sizes and spacing emerge.
 4. **The leftovers:** belts and comet clouds are what the disk leaves
@@ -911,7 +911,7 @@ part built. One formation law for both, stated square-free here.
   no square is formed.)
 - **The radial law.** A body of spin L has its circular radius where its
   own speed meets the law's: `L / r = c·δ(<r)`, so `r_c = L / (c·δ(<r))`,
-  linear in L and in `1/δ`. A clump that loses spin falls inward to its new
+  linear in L and in `1/δ`. A binding that loses spin falls inward to its new
   `r_c`; one that gains mass inside its orbit tightens. Radial motion about
   `r_c` is the second pivot (its stretch e); ESCAPE is the crossing at
   e → 1. Infall, orbit and escape are one closed form with events at
@@ -928,13 +928,13 @@ part built. One formation law for both, stated square-free here.
   DISK. Infall, pressure support and orbit are one exact linear balance;
   its crossings are the events.
 - **Collapse (Jeans, square-free, every term a speed;** corrected by
-  xylarium: the first statement mixed rates of different things). A clump
+  xylarium: the first statement mixed rates of different things). A binding
   of mass m and radius R collapses where its own surface speed beats its
   thermal and spin speeds: `c·δ(m) ≥ v_th + L / R`. Its spin speed rises as
   it shrinks, `v = L / R`; what its surface cannot hold (`L/R > c·δ(m)`) is
   SHED to the disk as L on the ledger, so the disk's L is the sum of what
   was shed, conserved exactly. That is how the disk forms.
-- **Fragmentation.** The disk fragments where a clump inside it passes the
+- **Fragmentation.** The disk fragments where a binding inside it passes the
   same test against the disk's shear across its reach; planets grow by
   accretion events, their masses and the stars' (the IMF) read as OUTCOMES,
   never a catalogue.

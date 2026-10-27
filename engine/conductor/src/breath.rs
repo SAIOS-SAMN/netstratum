@@ -5,7 +5,7 @@
 //!   bells, and each echo is a beat of time carried through the quantum
 //!   state. An echo reaches a galaxy after its distance from the universal
 //!   core (one length a bell).
-//! - **The breath.** Each echo compresses a galaxy's medium. Where the clump
+//! - **The breath.** Each echo compresses a galaxy's medium. Where the binding
 //!   at the next reach boundary can hold its own reach (the tidal law,
 //!   `m = μ · M(<r)`), a star system is born there, its orbs by the same
 //!   law one tier down. The medium is consumed, nothing created.
@@ -200,13 +200,13 @@ pub struct Event {
     /// The discs the stars born this echo released (holding), and the share
     /// of it that stood at or past its system's rim when released.
     pub discs: (Ratio, Ratio),
-    /// THE INFALL (docs/91): the clumps' holding this echo, and of it what
+    /// THE INFALL (docs/91): the bindings' holding this echo, and of it what
     /// fell into the hearts (the rest stayed out as their discs).
     pub collapse: (Ratio, Ratio),
     /// THE MOTES' LEDGER this echo (the carrier's growth, read): the motes
     /// that entered the galaxy's flows from the ocean's arrivals, from what
     /// its stars shed and passed through their throats, from its throat's
-    /// recycling, and the clumps' members returned; then how many the merge
+    /// recycling, and the bindings' members returned; then how many the merge
     /// folded away, and how many the galaxy holds at the echo's end.
     pub motes: [usize; 6],
     /// THE BOUNCE'S RELEASE this echo (docs/96 step 3): the motes its tide
@@ -1195,7 +1195,7 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
         // planes, the orbit's and the circulation's): the galaxy's matter is
         // motes carrying their state; the core's bell torques every mote
         // by its hemisphere against the bell; the exits, the cut and the
-        // clumps are READ from where the motes' states have carried them.
+        // bindings are READ from where the motes' states have carried them.
         let mut jets = 0;
         let mut stars = 0;
         let mut to_ocean: Vec<crate::flows::Mote> = Vec::new();
@@ -1439,7 +1439,7 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
             let (kept, free) = crate::flows::read_cut(&core.flows, &galaxy_enc(core), &p);
             core.kept = kept;
             core.medium = free;
-            // THE CLUMPS, where the motes are; the echo compresses only
+            // THE BINDINGS, where the motes are; the echo compresses only
             // its coherent part (recoherence).
             // The galaxy's one enclosure as its motes now stand.
             let enc_now = galaxy_enc(core);
@@ -1453,17 +1453,17 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
                 None => p.clone() * enc_now.reach(&x.ell_o).1,
             };
             circulation.4 = crate::flows::stream(&mut core.flows, &chains, &push_at);
-            crate::profile::mark("breath:clumps");
+            crate::profile::mark("breath:bindings");
             // THE GALAXY SETTLES ITS STARS (docs/96; operator 2026-10-26): its
-            // band pairs on the strip, never the stepped filaments' clumps.
+            // band pairs on the strip, never the stepped filaments' bindings.
             let _ = chains;
-            let clumps = crate::flows::band_pairs(&core.flows, &enc_now, &p, &core.tilt, &g_mass);
+            let bindings = crate::flows::band_pairs(&core.flows, &enc_now, &p, &core.tilt, &g_mass);
             // Each take: (reach, what fell, the disc outside it, the whole
-            // clump's holding, agitation, the star's own spin, phases, its
+            // binding's holding, agitation, the star's own spin, phases, its
             // orthogonal spin, the members as they were).
             #[allow(clippy::type_complexity)]
             let mut takes: Vec<(Ratio, crate::pulse::Manifest, Vec<(crate::flows::Mote, Ratio, Ratio)>, Ratio, Ratio, Ratio, Vec<Ratio>, Ratio, Vec<crate::flows::Mote>, Vec<(Ratio, Ratio, Ratio)>, Ratio, Vec<crate::flows::Mote>)> = Vec::new();
-            for (reach, shares) in clumps {
+            for (reach, shares) in bindings {
                 // Each member as it stood, its share of its mote.
                 let mut members: Vec<crate::flows::Mote> = Vec::new();
                 for (j, s) in shares {
@@ -1481,10 +1481,10 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
                     continue;
                 }
                 // THE INFALL BY PLACE (docs/91): each member stands at a place
-                // about the clump's centre (its holding-weighted reach in the
+                // about the binding's centre (its holding-weighted reach in the
                 // galaxy's enclosure and its holding-weighted phase in each
                 // plane), its offset in each plane a length read in the
-                // clump's own units (dilated once, `g/m_c`): radially, and
+                // binding's own units (dilated once, `g/m_c`): radially, and
                 // along each plane's turn at the centre's reach (S¹'s linear
                 // measure). It falls where it stands within the throat of what
                 // has fallen in every plane; the rest is the disc.
@@ -1508,24 +1508,24 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
                 let fallen = crate::formation::infall(&falling);
                 let (mut fell, mut fell_held, mut heat, mut amt) = (crate::pulse::Manifest::new(), ratio(0, 1), ratio(0, 1), ratio(0, 1));
                 let mut orth_held = ratio(0, 1);
-                // The clump's own circulation: its members' orthogonal spins by
+                // The binding's own circulation: its members' orthogonal spins by
                 // holding (the frame a member's carried circulation is read
                 // against).
-                let orth_clump = members.iter().fold(ratio(0, 1), |s, x| s + held_of(x) * x.ell_orth.clone()) / m.clone();
+                let orth_binding = members.iter().fold(ratio(0, 1), |s, x| s + held_of(x) * x.ell_orth.clone()) / m.clone();
                 let mut ph: Vec<Vec<(Ratio, Ratio)>> = vec![Vec::new(); crate::flows::PLANES];
                 // THE STAR'S OWN SPIN (with xylarium 2026-10-23): the spin its
                 // matter carried before the collapse, conserved through the
-                // infall. Before the cut every member stands in the CLUMP's
+                // infall. Before the cut every member stands in the BINDING's
                 // enclosure, so a member's spin about the centre is the balance
                 // of its place there, `ℓ′ = r′·H_c(<r′)` (two readings: its place's
-                // reach, and the clump's hold within it, every member nearer,
+                // reach, and the binding's hold within it, every member nearer,
                 // fallen or not); the star's is their holding-weighted mean over
                 // what fell.
                 let hold_c = |r: &Ratio| places.iter().filter(|(_, d)| d < r).fold(ratio(0, 1), |a, (w, _)| a + w.clone() / m.clone());
                 let mut fell_spins: Vec<(Ratio, Ratio, Ratio)> = Vec::new();
                 let mut outside: Vec<(crate::flows::Mote, Ratio, Ratio)> = Vec::new();
                 // THE NEWBORN'S RIM, breathing from birth: its gravity's reach
-                // in its own units, `ρ = R_c/(λ + H(<R_c))` (λ the clump's
+                // in its own units, `ρ = R_c/(λ + H(<R_c))` (λ the binding's
                 // share). A member that never fell and stands beyond it is no
                 // part of the newborn: it stays the galaxy's medium.
                 let lam_c = m.clone() / g_mass.clone();
@@ -1539,7 +1539,7 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
                         fell_held += w.clone();
                         heat += x.amount.clone() * x.agitation.clone();
                         amt += x.amount.clone();
-                        // Its place's spin in the clump, and the star's
+                        // Its place's spin in the binding, and the star's
                         // holding-weighted phases; its orthogonal spin by
                         // holding.
                         let r_at = places[idx].1.clone();
@@ -1557,7 +1557,7 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
                         // Its offset along the orthogonal orbit is a PLACE on that
                         // orbit (its phase), never motion along it (with
                         // xylarium 2026-10-24); its circulation is what it
-                        // CARRIED, its orthogonal spin against the clump's, as
+                        // CARRIED, its orthogonal spin against the binding's, as
                         // a share of its orbit spin (frame-free, read in the
                         // galaxy where both stand).
                         let place = radial.clone().max(o.clone());
@@ -1566,7 +1566,7 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
                             beyond_rim.push(x.clone());
                             continue;
                         }
-                        let carried_c = if x.ell_o.is_zero() { ratio(0, 1) } else { (x.ell_orth.clone() - orth_clump.clone()) / x.ell_o.clone() };
+                        let carried_c = if x.ell_o.is_zero() { ratio(0, 1) } else { (x.ell_orth.clone() - orth_binding.clone()) / x.ell_o.clone() };
                         outside.push((crate::flows::Mote { born: bell, ..x.clone() }, place, carried_c));
                     }
                 }
@@ -1596,9 +1596,9 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
                 // IGNITION: its own agitation (the galaxy's unlocked face is in
                 // it as the light's warming, never added again, docs/96 §8).
                 let tide = crate::ring::deficit(&reach, &h);
-                let a_clump = a_own.clone();
+                let a_binding = a_own.clone();
                 // ITS ORBIT, in the galaxy's one frame, where it is kept: the
-                // clump's common spin (its members' holding-weighted mean,
+                // binding's common spin (its members' holding-weighted mean,
                 // `Σ w·(ℓ − ℓ̄) = 0`); its reach the enclosure's.
                 let mw = members.iter().fold(ratio(0, 1), |acc, x| acc + x.amount.clone() * crate::flows::weight(&x.key));
                 let mean_own = if mw.is_zero() { ratio(0, 1) } else { members.iter().fold(ratio(0, 1), |acc, x| acc + x.amount.clone() * crate::flows::weight(&x.key) * x.ell_o.clone()) / mw.clone() };
@@ -1610,7 +1610,7 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
                 // CARRIED SPINS ADD: the star's own spin, captured from the
                 // spread of what fell, is the turning its heart cut adds to
                 // every kind (no weight ratio).
-                let lit = crate::formation::ignition_share(&a_clump).and_then(|_| crate::formation::system(&star, outside, &whole_mass, &a_clump, &fell_spins, &path, &tide));
+                let lit = crate::formation::ignition_share(&a_binding).and_then(|_| crate::formation::system(&star, outside, &whole_mass, &a_binding, &fell_spins, &path, &tide));
                 let Some((kept, medium, medium_spin, disc_motes)) = lit else {
                     // No heart: the members go on as they were.
                     motes_in[3] += members.len();
@@ -1626,7 +1626,7 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
                 // A star keeps its IGNITION SHARE (the heart's share at its
                 // throat condition) in `reservoir`: decoherence sheds only
                 // what it holds above it.
-                let Some(ignition) = crate::formation::ignition_share(&a_clump) else { continue };
+                let Some(ignition) = crate::formation::ignition_share(&a_binding) else { continue };
                 let mut sys = Body { ell_orth: ratio(0, 1), path, radius: r_guess, period: ratio(0, 1), kept, satellites: Vec::new(), medium, ell: ratio(0, 1), medium_spin, gas: Vec::new(), born: bell, state: held_at_birth.clone(), flows: disc_motes, reservoir: ignition, turning: crate::ring::grain(&(held_at_birth.clone() / unit.clone() * spin_own)), bell: phases_own.clone(), phase: phases_own, load: ratio(0, 1), remnant: false, heat: ratio(0, 1), tilt: crate::flows::blend(&members.iter().map(|x| (x.amount.clone() * crate::flows::weight(&x.key), x.ell_o.clone(), x.tilt.clone())).collect::<Vec<_>>()), throat: Default::default() };
                 {
                     // Read by the system's one enclosure, as its meetings read it.
@@ -1640,8 +1640,8 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
                         }
                     }
                 }
-                // Its orbit: the clump's common spin about the galaxy's core
-                // (the members' own spins about the clump sum to nothing there,
+                // Its orbit: the binding's common spin about the galaxy's core
+                // (the members' own spins about the binding sum to nothing there,
                 // `Σ w·(ℓ − ℓ̄) = 0`); the disc's spin about the star is its own,
                 // on the medium's ledger.
                 let own = taken;

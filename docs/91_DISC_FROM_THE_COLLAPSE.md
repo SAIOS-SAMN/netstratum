@@ -25,14 +25,14 @@ all. What is missing is the matter that never reaches the heart.
 
 ## 2. What is established (read from the code)
 
-- **The clump** (`flows::chains`, `clumps_of`): a filament of galaxy motes
+- **The binding** (`flows::chains`, `clumps_of`): a filament of galaxy motes
   that binds by the filament law (`λ/(1 + λ) ≥ a + face`). Each member is a
   share of one mote: its holding `w`, its spin about the galaxy's core
   `ℓ_j`, its phases.
 - **The star's own spin** (ruling with xylarium, `breath`): the members'
   holding-weighted spread of spin about their own mean, `ℓ_s = Σ w|ℓ_j − ℓ̄|/Σ w`.
-  The mean `ℓ̄` is the clump's common orbit about the galaxy's core; the
-  spread is spin about the clump's own centre.
+  The mean `ℓ̄` is the binding's common orbit about the galaxy's core; the
+  spread is spin about the binding's own centre.
 - **The heart cut** (`formation::heart_cut`): a kind is held where the
   heart's deficit at its reach meets the push, `δ = H/(R + H) ≥ ½`, i.e.
   `ℓ ≤ H²`, `H` the held set's share (order-free fixed point). What is not
@@ -45,23 +45,23 @@ all. What is missing is the matter that never reaches the heart.
 ## 3. The derivation
 
 **C1. A member's own spin.** By the ruling that gives a star its spin, the
-part of a member's spin that is not the clump's common orbit is its spin
-about the clump's centre: `Δ_j = ℓ_j − ℓ̄`. Each member carries its own; the
+part of a member's spin that is not the binding's common orbit is its spin
+about the binding's centre: `Δ_j = ℓ_j − ℓ̄`. Each member carries its own; the
 star's spin is their spread.
 
-**C2. Read in the clump's frame.** The heart's test is read in the clump's
+**C2. Read in the binding's frame.** The heart's test is read in the binding's
 own units (its holding 1). By the frame map,
 `Δ'_j = |Δ_j|·(g/m_c)²`, `g` the galaxy's holding in the units its motes'
-spins are kept in, `m_c` the clump's.
+spins are kept in, `m_c` the binding's.
 
 **C3. What falls.** A member falls into the heart where its own spin stands
 within the throat of what has fallen, `Δ'_j ≤ H*²`, `H*` the share of the
-clump the fallen members hold, read from all fallen down to the fixed point
+binding the fallen members hold, read from all fallen down to the fixed point
 (the heart cut's own test and its own order-free fixed point, one tier out).
 Nothing is placed: each member falls or not by its own spin and the hold of
 the others.
 
-**C4. The disc.** A member that does not fall stays in orbit about the clump
+**C4. The disc.** A member that does not fall stays in orbit about the binding
 at the spin it already had, `Δ'_j`, with its own phases: the DISC. It is
 never pushed by the heart, because it never entered it.
 
@@ -78,18 +78,18 @@ accretion over echoes, and its worlds grow in the same disc.
 ## 4. The reading (before any law changes)
 
 `formation::collapse_share` and breathe's COLLAPSE line read, for every
-clump, the holding that would fall by C1–C3, once with the dilation (C2)
+binding, the holding that would fall by C1–C3, once with the dilation (C2)
 and once undilated, the frame the current code effectively uses when it
 adds the galaxy-unit spread `ℓ_s` to the heart's carried spins.
 
-The risk C2 carries: a clump is a small share of its galaxy, so `(g/m_c)²`
+The risk C2 carries: a binding is a small share of its galaxy, so `(g/m_c)²`
 is large, and every member's own spin may exceed any heart's hold. That is
 the angular-momentum problem of real star formation: a cloud holds far more
 spin than a star can. In nature it is resolved by transport (C6). If the
 reading shows almost nothing falls, the star does not ignite at once: the
-clump is a disc, and its heart is gathered by accretion.
+binding is a disc, and its heart is gathered by accretion.
 
-Result (2^55, 340 bells): with the dilation 45 % of the clumps' holding
+Result (2^55, 340 bells): with the dilation 45 % of the bindings' holding
 would fall, undilated 100 % (the current code: everything through the
 heart, so the whole disc is wind). Built that way, the read REFUTED C1–C3:
 every disc member stood past its system's rim, and no world stood. The
@@ -100,11 +100,11 @@ balance of a place.
 
 ## 5. The second form, by place (built)
 
-**P1. A member's place.** Each member stands at a place about the clump's
+**P1. A member's place.** Each member stands at a place about the binding's
 centre (its holding-weighted reach in the galaxy's enclosure and its
 holding-weighted phase in each plane): its offset radially and along each
 plane's turn at the centre's reach (S¹'s linear measure), lengths dilated
-ONCE into the clump's units (`g/m_c`).
+ONCE into the binding's units (`g/m_c`).
 
 **P2. What falls.** A member falls where it stands within the hold of what
 has fallen in EVERY plane (the meeting law's "coincide in every plane"):
@@ -125,10 +125,10 @@ fallen matter's own units, carried into the system's by λ (the fallen
 share; spin by λ²). The star's own spin is the spread of what fell. What
 the heart releases leaves at its carried spin: the wind.
 
-**P5. Nothing placed.** A clump that makes no heart returns its members as
-they were (their spins, phases and heat), never reset to the clump's reach.
+**P5. Nothing placed.** A binding that makes no heart returns its members as
+they were (their spins, phases and heat), never reset to the binding's reach.
 
-**Read (2^55, 340 bells):** 70 % of the clumps' holding fell; the home's
+**Read (2^55, 340 bells):** 70 % of the bindings' holding fell; the home's
 systems hold 186 disc motes at the end (none before); 5 worlds grew, 2
 stand at the end (the home's first world and one in galaxy 21, each with a
 completed local year); identities firmament 20/20, ride 160/160, star

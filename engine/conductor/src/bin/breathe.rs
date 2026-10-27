@@ -163,7 +163,7 @@ fn main() {
         let born = events.iter().fold(cfe::ratio::ratio(0, 1), |s, e| s + e.discs.0.clone());
         let out = events.iter().fold(cfe::ratio::ratio(0, 1), |s, e| s + e.discs.1.clone());
         let (cl, fell) = events.iter().fold((cfe::ratio::ratio(0, 1), cfe::ratio::ratio(0, 1)), |s, e| (s.0 + e.collapse.0.clone(), s.1 + e.collapse.1.clone()));
-        println!("INFALL — clumps {} (holding); fell into the hearts {}, the rest their discs", conductor::reading::sector(&cl), conductor::reading::sector(&fell));
+        println!("INFALL — bindings {} (holding); fell into the hearts {}, the rest their discs", conductor::reading::sector(&cl), conductor::reading::sector(&fell));
         let f = events.iter().fold((0usize, 0usize, 0usize, 0usize), |s, e| (s.0 + e.fates.0, s.1 + e.fates.1, s.2 + e.fates.2, s.3 + e.fates.3));
         println!("GROWN — bodies grown by meetings: {} worlds, {} ignited as stars, {} whose core held nothing, {} that left past the rim", f.0, f.1, f.2, f.3);
         let w = events.iter().fold([cfe::ratio::ratio(0, 1), cfe::ratio::ratio(0, 1), cfe::ratio::ratio(0, 1), cfe::ratio::ratio(0, 1)], |mut s, e| { for (a, b) in s.iter_mut().zip(e.weights.iter()) { *a += b.clone(); } s });
@@ -173,7 +173,7 @@ fn main() {
         println!("IMPACTS — bounces that struck as matter {}, tugs between neighbouring worlds {}; grown groups carried past the rim by their orthogonal orbit's swing alone {}", im.0, im.1, im.2);
         let ms = events.iter().fold([0usize; 6], |mut a, e| { for i in 0..5 { a[i] += e.motes[i]; } a });
         let held: usize = { let mut last: std::collections::BTreeMap<u32, usize> = std::collections::BTreeMap::new(); for e in &events { last.insert(e.galaxy, e.motes[5]); } last.values().sum() };
-        println!("MOTES — entered the galaxies' flows: arrivals {}, shed and through the stars' throats {}, recycling {}, clump members returned {}; folded by the merge {}; held at the end {held}", ms[0], ms[1], ms[2], ms[3], ms[4]);
+        println!("MOTES — entered the galaxies' flows: arrivals {}, shed and through the stars' throats {}, recycling {}, binding members returned {}; folded by the merge {}; held at the end {held}", ms[0], ms[1], ms[2], ms[3], ms[4]);
         let rel = events.iter().fold((0usize, cfe::ratio::ratio(0, 1)), |s, e| (s.0 + e.released.0, s.1 + e.released.1.clone()));
         let throat_left: cfe::ratio::Ratio = { let mut last: std::collections::BTreeMap<u32, cfe::ratio::Ratio> = std::collections::BTreeMap::new(); for e in &events { last.insert(e.galaxy, e.released.2.clone()); } last.values().fold(cfe::ratio::ratio(0, 1), |s, x| s + x.clone()) };
         println!("RELEASE — the bounces released {} motes from the throats, holding {}; the throats still hold {}", rel.0, conductor::reading::sector(&rel.1), conductor::reading::sector(&throat_left));

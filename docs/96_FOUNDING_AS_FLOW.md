@@ -45,9 +45,19 @@ Each term in plain words, then what it is in our laws.
   that bell, in each plane. Successive releases leave at successive phases,
   so the void fills the sphere because the core turns between bounces. No
   draw and no offset: the angular spread is the release's own history.
+- **A binding** (operator 2026-10-27: "clumps needs more description - its
+  the bonding of elements"; "rename clumps to bindings"): elements on one
+  ring of the disc bound into one body by their holding and their open
+  frames together (`λ = 2(m + μ)/R`, m gravity's share, μ the electrons'),
+  where that bond, `λ/(1 + λ)`, meets their heat and the tide across them.
+  It makes a BODY, never matter: nuclides are made at the bounce and in the
+  stars (docs/97), clusters by chemistry inside a body. A binding that
+  ignites is a star; one that does not, its members go on as they were.
+  (Formerly "clump"; its strength `λ/(1 + λ)`, formerly "binding", is the
+  BOND.)
 - **Bodies gather where the void's motes coincide.** Where landed motes
   stand together in reach (their bands overlap) and in every plane (the
-  product of their in-step shares), they hold if their binding meets their
+  product of their in-step shares), they hold if their bond meets their
   agitation and the unlocked face (`flows::chains`, `Chain::holds`): stars in
   a galaxy, worlds in a system. Read for all motes at once, then moved; never
   a walk.
@@ -63,7 +73,7 @@ Each term in plain words, then what it is in our laws.
 | release into the void | the cascade's release to the ocean | exits through the ring | outbursts and wind (`spray`) |
 | the void | the ocean | its gas on the vacuum leg | its belts |
 | distribution | landing in the galaxy pulling hardest | landing from the ring within the disc's span | settling inside the breathing rim |
-| gathering | galaxies (the shells' beads) | stars (clumps of the disc) | worlds (`collide_system`) |
+| gathering | galaxies (the shells' beads) | stars (bindings of the disc) | worlds (`collide_system`) |
 
 One grammar on coupled tiers: what a tier's void distributes is what the tier
 below gathers from.
@@ -76,7 +86,7 @@ below gathers from.
   is one tilted circle (docs/95 built step 1 lean).
 - **Six angles.** The founding's offsets `Z/2 + Z·j/3` put every kind in one
   of six phase groups.
-- **Two-plane leftovers.** The clump's infall offsets read planes 0 and 1
+- **Two-plane leftovers.** The binding's infall offsets read planes 0 and 1
   (`along(0)`, `along(1)`, breath.rs); the landing's crossing turning is a
   pair `(t_o, t_c)`.
 - **The walk** (discarded uncommitted): a forward scan along R.
@@ -112,7 +122,7 @@ below gathers from.
 1. **Spin per plane.** `ℓ_k` on each spatial plane plus the R loop's spin,
    on motes and bodies; reach `R = Σ|ℓ_k|/H` (L1); the tape carries them.
    Witness: the spin ledger exact; a single-plane mote reads its old reach.
-2. **Two-plane leftovers.** The clump's infall offsets over the three planes
+2. **Two-plane leftovers.** The binding's infall offsets over the three planes
    and R; the landing's crossing turning per plane. Witness: the identities
    exact on the current founding.
 3. **The release.** The throat holds its grains; each bounce releases
@@ -124,7 +134,7 @@ below gathers from.
    law at each tier. Witness: every mote lands whole; landed phases cover
    the sphere (read per plane).
 5. **Gathering.** Stars from the galaxy's landed motes by the chains and
-   clumps over three planes; worlds by `collide_system`. `board::place`
+   bindings over three planes; worlds by `collide_system`. `board::place`
    retires. Witness: stars per galaxy, worlds per star, compositions, all
    read, none set.
 6. **Fast forward.** Cohort reads in closed form; the board read at bounce
@@ -166,19 +176,19 @@ Each echo, in order:
 - **Rings.** Band pairs on the strip `ρ = R/ring − 1 ∈ (0, 1]`, images at
   `−ρ`, each stepping by `k(ρ) = (S/G)·(1 + ρ)/(1 − ρ)`, `S = base/whole +`
   the matter within `|ρ'| < ρ`, `G = 1 − S`.
-- **Fragments, read in the clump's own enclosure** (the 2026-10-16 ruling,
-  "shares read in the body's own enclosure"). A clump of arc w on a ring at R
+- **Fragments, read in the binding's own enclosure** (the 2026-10-16 ruling,
+  "shares read in the body's own enclosure"). A binding of arc w on a ring at R
   (about the galaxy's hold H, carrying m of its holding and μ of its
   magnetism, at heat a) binds by its own deficit
   `λ/(1 + λ)`, `λ = 2(m + μ)/R` (its half-width `w/2` dilated once by its
   share; the arc cancels). Against it: its heat and the galaxy's tide across
   it, the contrast of the galaxy's deficit at its edges, `w/(2(R + H))`. The ring parts into the
-  largest clumps that still hold, `w_max = 2(R + H)·(λ/(1 + λ) − a)`,
+  largest bindings that still hold, `w_max = 2(R + H)·(λ/(1 + λ) − a)`,
   `⌊R/w_max⌋` of them, each by phase in the galaxy's disc plane; none where
-  the binding does not beat the heat.
+  the bond does not beat the heat.
   Retired: the crest read against the galaxy's enclosure,
   `x/(R + H + x)` with the galaxy's full shear, which capped every ring's
-  binding near 0.25–0.33 against a barrier near 0.48 (measured at bell 462,
+  bond near 0.25–0.33 against a barrier near 0.48 (measured at bell 462,
   2026-10-26): no ring could hold, and no star formed.
 
 Retired: the throat's unreleased hold in the enclosure's base (built
@@ -191,12 +201,12 @@ the core does not lock heats"). Its heat already reaches the motes and worlds
 as agitation: the light a core sends warms each body by the share its face
 leaves unlocked at its reach (`breath::shine`, `l·(1 − δ)/whole`). Every hold
 test also subtracted it as a barrier, so it was counted twice, and against
-the galaxy's frame in the clump's own enclosure (a cross-tier read). It is
-also scale-free: near ½ at every ring whatever the clump, so measured at the
-home galaxy (2026-10-27) ring bindings 0.03–0.16 stood against about 0.30 of
+the galaxy's frame in the binding's own enclosure (a cross-tier read). It is
+also scale-free: near ½ at every ring whatever the binding, so measured at the
+home galaxy (2026-10-27) ring bonds 0.03–0.16 stood against about 0.30 of
 face and no ring held.
 
-One hold law, every tier: a body holds where its own binding meets its own
+One hold law, every tier: a body holds where its own bond meets its own
 heat and the tide across it,
 
     λ/(1 + λ) ≥ a + tide
@@ -206,9 +216,9 @@ heat and the tide across it,
   apartness, the edges' contrast `t_edges`).
 - **Ignition of a grown body** (`settle_system`): `λ/(1 + λ) ≥ a` and
   `2a < 1` (the ignition share's own bound, `formation::ignition_share`).
-- **Ignition of a galaxy's clump:** its agitation is its own, `a_own`; the
+- **Ignition of a galaxy's binding:** its agitation is its own, `a_own`; the
   face is no longer added.
-- **A stretch's clump** (`formation::holds`): its agitation alone against the
+- **A stretch's binding** (`formation::holds`): its agitation alone against the
   shear.
 
 Retired: the face as a barrier in every hold test.
@@ -266,7 +276,7 @@ ring received). The echo HOLDS its neighbour where it meets that shear:
 
     max(m_i, m_j)/(r + max(m_i, m_j))  ≥  |ω_i − ω_j|
 
-the crest's own law (binding against tide) one tier down: first degree, no
+the crest's own law (bond against tide) one tier down: first degree, no
 age, no kick, no ε. A held pair co-moves and JOINS.
 
 **Only forming orbits meet.** A world whose orbit has closed is SOLID: since

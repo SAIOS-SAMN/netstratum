@@ -23,11 +23,11 @@
 //!   Both shares compound ring by ring (`crate::compound`): n rings keep
 //!   `((1 − e_z)(1 − δ))^n`.
 //! - **Collapse.** Overlapping shells sum to a stretch of linear holding λ.
-//!   A clump of width w in it collapses where
+//!   A binding of width w in it collapses where
 //!   `λ (K)(K + w) ≥ (1 + λ)[a (K)(K + w) + H w]`, `K = R + H` at its near
 //!   side: its own deficit `λ / (1 + λ)` against its agitation and its own
 //!   shear `σ = H w / ((R + H)(R + w + H))`. σ rises with w, so the largest
-//!   clump that holds is ONE crossing w*, and the stretch forms as many stars
+//!   binding that holds is ONE crossing w*, and the stretch forms as many stars
 //!   of holding `λ · w*` as fit.
 use crate::pulse::{mass, Manifest};
 use cfe::ratio::{ratio, Ratio};
@@ -176,14 +176,14 @@ pub fn stretches(shells: &[Shell], n: u64) -> Option<Vec<Stretch>> {
     Some(out)
 }
 
-/// Does a clump of width `w` at the stretch's near side collapse? (with
-/// xylarium, 2026-10-16) The CLUMP IS ITS OWN ENCLOSURE: of width w it holds
+/// Does a binding of width `w` at the stretch's near side collapse? (with
+/// xylarium, 2026-10-16) The BINDING IS ITS OWN ENCLOSURE: of width w it holds
 /// `H_c = λ·w`, and seen from its reach `k = R + H` its hold is the deficit
 /// law's `λw/(k + λw)`, growing with its size (no square); it binds by its
 /// WHOLE 3Z, holding and magnetism, `(λ + μ)w/(k + (λ + μ)w)` (the same rule
 /// as the universal core's hold: the open frames attract). It collapses where
 /// that beats its agitation and the shear across it, `σ = h·w/(k(k + w))`.
-/// Its agitation is ONE for the clump, the same ignition reads: its own,
+/// Its agitation is ONE for the binding, the same ignition reads: its own,
 /// the enclosing centre's unlocked face already in it as the light's warming
 /// (docs/96 §8), never added again as a barrier.
 fn holds(st: &Stretch, h: &Ratio, w: &Ratio) -> bool {
@@ -195,9 +195,9 @@ fn holds(st: &Stretch, h: &Ratio, w: &Ratio) -> bool {
     own.clone() * kw.clone() >= (k + own) * (a * kw + h.clone() * w.clone())
 }
 
-/// THE COLLAPSE: the SMALLEST clump width that holds (the self-binding
+/// THE COLLAPSE: the SMALLEST binding width that holds (the self-bond
 /// grows with size, so thin gas holds only from a larger width: fewer,
-/// larger clumps), found as one crossing by bisection between 0 (no clump
+/// larger bindings), found as one crossing by bisection between 0 (no binding
 /// of no width holds while the agitation is above 0) and the stretch's
 /// width; None where even the whole stretch does not hold. The stars that
 /// fit: `⌊width/w_J⌋`; one, the whole stretch, where `w_J` is the width.
@@ -220,25 +220,25 @@ pub fn collapse(st: &Stretch, h: &Ratio) -> Option<(Ratio, u64)> {
     Some((hi, count))
 }
 
-/// THE RING FRAGMENTS, READ IN THE CLUMP'S OWN ENCLOSURE (docs/96 §7;
+/// THE RING FRAGMENTS, READ IN THE BINDING'S OWN ENCLOSURE (docs/96 §7;
 /// operator 2026-10-26; the ruling of 2026-10-16, "shares read in the body's
 /// own enclosure"). A ring at reach R about the galaxy's hold H carries `m` of
-/// the galaxy's holding and `μ` of its magnetism, its heat `a`. A clump of arc
+/// the galaxy's holding and `μ` of its magnetism, its heat `a`. A binding of arc
 /// w on it carries `x = (m + μ)·w/R`; in its OWN enclosure that is its whole
 /// hold (1), and its half-width `w/2` is a length dilated once by its share,
 /// `r_c = (w/2)/x`, so it binds by its own deficit,
 /// `δ_c = 1/(r_c + 1) = λ/(1 + λ)`, `λ = 2(m + μ)/R` (the ring's line
 /// density; the arc cancels). Against it stand its heat and the galaxy's
-/// TIDE across the clump, the contrast of the galaxy's deficit at its two edges,
+/// TIDE across the binding, the contrast of the galaxy's deficit at its two edges,
 /// `(δ(R − w/2) − δ(R + w/2))/(δ(R − w/2) + δ(R + w/2)) = w/(2(R + H))`
-/// (exact, first degree). The binding does not depend on w and the tide grows
-/// with it, so the ring parts into the LARGEST clumps that still hold,
+/// (exact, first degree). The bond does not depend on w and the tide grows
+/// with it, so the ring parts into the LARGEST bindings that still hold,
 /// `w_max = 2(R + H)·(λ/(1 + λ) − a)`, `⌊R/w_max⌋` of them (one where the
 /// whole ring holds). None where even a point of the ring cannot hold. The
 /// galaxy's unlocked face heats (its light's warming, in `a`); it is never a
 /// barrier here (docs/96 §8).
 /// (It was read against the galaxy's own enclosure, `x/(R + H + x)` with the
-/// galaxy's full shear, which capped any ring's binding near 0.25–0.33 against
+/// galaxy's full shear, which capped any ring's bond near 0.25–0.33 against
 /// a barrier near 0.48: no ring could ever hold.)
 pub fn crest_collapse(m: &Ratio, mu: &Ratio, a: &Ratio, r: &Ratio, h: &Ratio) -> Option<(Ratio, u64)> {
     if r.is_zero() || (m.clone() + mu.clone()).is_zero() {
@@ -258,11 +258,11 @@ pub fn crest_collapse(m: &Ratio, mu: &Ratio, a: &Ratio, r: &Ratio, h: &Ratio) ->
 /// IGNITION, THE QUANTUM HEART (operator 2026-10-15; with xylarium): a
 /// star is the core's pair one tier down, a containment ring at its centre
 /// (its heart) holding its body's grains as one ring of its own, at reach =
-/// hold. A collapsing clump runs away (its deficit `m/(w + m)` rising as its
+/// hold. A collapsing binding runs away (its deficit `m/(w + m)` rising as its
 /// width falls) to the throat condition `w = m`, deficit ½, where the heart
 /// forms. There `λ = 1`, and the largest part that holds about the heart
 /// (`½ ≥ a + x/(x + m)`) is `x* = m (½ − a)/(½ + a)`: the star holds the
-/// share `(1 − 2a)/(1 + 2a)` of its clump, a the agitation at ignition.
+/// share `(1 − 2a)/(1 + 2a)` of its binding, a the agitation at ignition.
 /// None at `a ≥ ½`: light pushes back before the heart forms.
 pub fn ignition_share(agitation: &Ratio) -> Option<Ratio> {
     let half = ratio(1, 2);
@@ -345,14 +345,14 @@ pub fn burn(star: &Manifest, share: &Ratio, z: u32, coherence: &Ratio) -> Option
 }
 
 /// A STAR'S SYSTEM AT IGNITION (docs/83; planets from the star's own disc):
-/// in the clump's own units (holding 1, its ignition extent w = m = 1), the
+/// in the binding's own units (holding 1, its ignition extent w = m = 1), the
 /// heart holds the star, the share `x* = (½ − a)/(½ + a)` within reach x*;
-/// what lies between the heart's reach and the clump's edge, `[x*, 1]`, is
-/// the star's DISC (the clump's own mix, `λ = 1`), anchored on the star
+/// what lies between the heart's reach and the binding's edge, `[x*, 1]`, is
+/// the star's DISC (the binding's own mix, `λ = 1`), anchored on the star
 /// (H = x*). It fragments by the same collapse test (`collapse`): as many
 /// worlds of holding `w*` as fit, standing at their places in the annulus;
 /// what does not fragment stays as the system's medium (its belts). Read in
-/// the transition units by the clump's holding; orbits by the motion law.
+/// the transition units by the binding's holding; orbits by the motion law.
 /// THE HEART'S CUT, one law for a star and a world (with xylarium; W1–W4):
 /// a heart pushes by the electromagnetic repulsion gripping open frames, at
 /// full amplitude in its own units (½, regenerated; its state holds 1), so
@@ -396,12 +396,12 @@ pub fn agitation_of(ignition: &Ratio) -> Ratio {
 
 /// THE INFALL (docs/91, the disc from the collapse; operator 2026-10-25,
 /// with xylarium: "the core of stars which should be 'reactors'"): of a
-/// clump's members, each `(its matter, its holding, its distance from the
-/// clump's centre in the clump's own units)`, which fall into the forming
+/// binding's members, each `(its matter, its holding, its distance from the
+/// binding's centre in the binding's own units)`, which fall into the forming
 /// heart. A reactor has NO THROAT, so what falls is never read by the throat
 /// condition (`r ≤ H*`, `δ ≥ ½`): it is read by the REACTOR'S OWN EXTENT. A
 /// member falls where its place stands within `λ·R_max`, `λ` the share of
-/// the clump that has fallen and `R_max` the reach of the outermost kind the
+/// the binding that has fallen and `R_max` the reach of the outermost kind the
 /// DARK cut of what has fallen holds (`heart_cut` at turning 0 and heat 0,
 /// its push ½), read from all fallen down to the fixed point, order-free (each
 /// release shrinks λ and re-reads the cut). The rest stays out: the disc,
@@ -448,17 +448,17 @@ pub fn infall(members: &[(Manifest, Ratio, Ratio)]) -> Vec<bool> {
     fallen
 }
 
-/// Each kind's CARRIED SPIN in a heart's clump (own units), the push on its
+/// Each kind's CARRIED SPIN in a heart's binding (own units), the push on its
 /// open frames plus the place's turning: `ℓ_z = p·(e_z/ē)·(w̄/w_z) + turning`.
-pub fn carried(clump: &Manifest, turning: &Ratio, heat: &Ratio) -> Vec<(crate::chem::Kind, Ratio)> {
-    let total = mass(clump);
-    let count = clump.values().fold(ratio(0, 1), |s, a| s + a.clone());
+pub fn carried(binding: &Manifest, turning: &Ratio, heat: &Ratio) -> Vec<(crate::chem::Kind, Ratio)> {
+    let total = mass(binding);
+    let count = binding.values().fold(ratio(0, 1), |s, a| s + a.clone());
     if total.is_zero() || count.is_zero() {
         return Vec::new();
     }
-    let open_mean = open_mass(clump, heat) / total.clone();
+    let open_mean = open_mass(binding, heat) / total.clone();
     let mean_weight = total / count;
-    clump
+    binding
         .keys()
         .map(|k| {
             let w = ratio(i64::from(crate::chem::weight(k)), 1);
@@ -469,19 +469,19 @@ pub fn carried(clump: &Manifest, turning: &Ratio, heat: &Ratio) -> Vec<(crate::c
         .collect()
 }
 
-pub fn heart_cut(clump: &Manifest, turning: &Ratio, heat: &Ratio) -> Option<(Manifest, Manifest, Ratio)> {
-    let total = mass(clump);
-    let count = clump.values().fold(ratio(0, 1), |s, a| s + a.clone());
+pub fn heart_cut(binding: &Manifest, turning: &Ratio, heat: &Ratio) -> Option<(Manifest, Manifest, Ratio)> {
+    let total = mass(binding);
+    let count = binding.values().fold(ratio(0, 1), |s, a| s + a.clone());
     if total.is_zero() || count.is_zero() {
         return None;
     }
-    let open_mean = open_mass(clump, heat) / total.clone();
+    let open_mean = open_mass(binding, heat) / total.clone();
     // REGENERATION (operator ruling (i), with xylarium): the heart pushes
     // at full amplitude in its own units, its pair's ½; a tide enters as
     // AGITATION, never as a weaker push, or it would be counted twice.
     let push = ratio(1, 2);
     let mean_weight = total.clone() / count;
-    let mut kinds: Vec<(crate::chem::Kind, Ratio, Ratio)> = clump
+    let mut kinds: Vec<(crate::chem::Kind, Ratio, Ratio)> = binding
         .iter()
         .map(|(k, a)| {
             let w = ratio(i64::from(crate::chem::weight(k)), 1);
@@ -530,9 +530,9 @@ pub fn heart_cut(clump: &Manifest, turning: &Ratio, heat: &Ratio) -> Option<(Man
     let (mut kept, mut released) = (Manifest::new(), Manifest::new());
     for (i, (k, _, _)) in kinds.iter().enumerate() {
         if held_set[i] {
-            kept.insert(k.clone(), clump[k].clone());
+            kept.insert(k.clone(), binding[k].clone());
         } else {
-            released.insert(k.clone(), clump[k].clone());
+            released.insert(k.clone(), binding[k].clone());
         }
     }
     if kept.is_empty() {
@@ -731,34 +731,34 @@ pub fn lightest(m: &Manifest) -> Option<crate::chem::Kind> {
 }
 
 /// A STAR'S SYSTEM AT IGNITION (docs/91: the disc from the collapse, the wind
-/// from the heart): `clump` is what FELL into the heart (`collapse`), `outside`
+/// from the heart): `binding` is what FELL into the heart (`collapse`), `outside`
 /// the members that did not, each with its distance in its orbit's plane and
 /// its offset on its orthogonal orbit in the system's units, `whole` the
-/// whole clump's holding (the system at
+/// whole binding's holding (the system at
 /// ignition). The heart is cut in the fallen matter's own units; every
 /// crossing between those units and the system's is read as a product of
 /// two readings, each moved once (no square, operator 2026-10-23): a reach
 /// as a length by λ, the fallen share, and a hold read in the frame it lands
 /// in. `fell_spins` are what fell, each `(holding, its place's reach r′,
-/// the clump's hold within it H_c(<r′))` in the system's units.
+/// the binding's hold within it H_c(<r′))` in the system's units.
 #[allow(clippy::too_many_arguments)]
-pub fn system(clump: &Manifest, outside: Vec<(crate::flows::Mote, Ratio, Ratio)>, whole: &Ratio, agitation: &Ratio, fell_spins: &[(Ratio, Ratio, Ratio)], path: &[u64], tide: &Ratio) -> Option<(Manifest, Manifest, Ratio, Vec<crate::flows::Mote>)> {
-    // Ignition: a clump at a ≥ ½ never forms a heart.
+pub fn system(binding: &Manifest, outside: Vec<(crate::flows::Mote, Ratio, Ratio)>, whole: &Ratio, agitation: &Ratio, fell_spins: &[(Ratio, Ratio, Ratio)], path: &[u64], tide: &Ratio) -> Option<(Manifest, Manifest, Ratio, Vec<crate::flows::Mote>)> {
+    // Ignition: a binding at a ≥ ½ never forms a heart.
     ignition_share(agitation)?;
     // THE HEART'S TORSION, THE CUT ONE TIER DOWN (operator, with xylarium,
     // 2026-10-16): a heart has no bounce but twists; its push is the
     // electromagnetic repulsion, which grips the OPEN frames (the magnetic
-    // moments). In the clump's own units (its grains hold 1, the heart's
+    // moments). In the binding's own units (its grains hold 1, the heart's
     // state holds 1) the push share is the pair law's ½ restarted at the
     // star's point (`½·ρ_sys`), and each kind is carried
     // `ℓ_z = p·(e_z/ē)·(w̄/w_z)` (e_z its open share, unpaired over
-    // hold; ē the clump's). Read in order of the spin carried (the noble
+    // hold; ē the binding's). Read in order of the spin carried (the noble
     // first: carried none), the heart's hold grows, `H = 1 + held`, and a
     // kind is HELD in the star where it stands within its hold,
     // `R_z = ℓ_z/H ≤ H`; past it, it is the DISC, spun to orbit. One
-    // crossing on the cumulative hold. A clump with no open frames (ē = 0)
+    // crossing on the cumulative hold. A binding with no open frames (ē = 0)
     // is all star, no disc: a reading.
-    let fell = mass(clump);
+    let fell = mass(binding);
     if fell.is_zero() || whole.is_zero() {
         return None;
     }
@@ -780,17 +780,17 @@ pub fn system(clump: &Manifest, outside: Vec<(crate::flows::Mote, Ratio, Ratio)>
     // DISSOCIATION (the chemistry layer): the hot heart breaks every molecule
     // back to its parts (hydrogen's winding, tightness 1, is stripped), so a
     // star never holds molecules and its hydrogen is fuel.
-    let clump = &dissociate(clump);
-    let (star, disc, held_f) = heart_cut(clump, &circulation_f, &ionizing)?;
+    let binding = &dissociate(binding);
+    let (star, disc, held_f) = heart_cut(binding, &circulation_f, &ionizing)?;
     let held = mass(&star) / total.clone();
     // The star's hold, gathered (no throat): `H_s = held`, a share of the
-    // clump; the disc is the rest, `1 − H_s`, over the annulus from the
+    // binding; the disc is the rest, `1 − H_s`, over the annulus from the
     // star's hold to the system's rim (its grains' holding, 1), so its line
     // holding is `λ = 1`.
     let h_s = held.clone();
     let x = h_s.clone();
     let rim = ratio(1, 1);
-    // At ignition the system is the clump: the star's share of it.
+    // At ignition the system is the binding: the star's share of it.
     let light = burn(&star, &(mass(&star) / total.clone()), 1, &ratio(1, 1)).map(|(_, l)| l).unwrap_or_else(|| ratio(0, 1));
     let mid = (x.clone() + rim.clone()) / ratio(2, 1);
     let unlocked = mid.clone() / (mid + x.clone());
@@ -799,7 +799,7 @@ pub fn system(clump: &Manifest, outside: Vec<(crate::flows::Mote, Ratio, Ratio)>
     // the system stands, `1 − δ_gal` (operator: heat comes from the face the
     // core does not lock, never the held face; it had read `δ_gal`), times
     // the share the star leaves unlocked at the annulus; the channels add,
-    // the clump's own agitation the floor.
+    // the binding's own agitation the floor.
     let flux = (ratio(1, 1) - tide.clone()) * unlocked;
     let disc_agitation = (heat + flux).max(agitation.clone());
     // WORLDS ARE GROWN, NEVER PLACED (operators 2026-10-16/17, "never place
@@ -847,7 +847,7 @@ pub fn system(clump: &Manifest, outside: Vec<(crate::flows::Mote, Ratio, Ratio)>
     // (`ℓ_z/H*`) moved once as a length (by λ), and the system's hold at that
     // reach (the star and the disc nearer).
     let hold_at = |r: &Ratio| outside.iter().filter(|(_, d, _)| d < r).fold(h_s.clone(), |a, (x, _, _)| a + x.amount.clone() * crate::flows::weight(&x.key) / total.clone());
-    let thrown: Vec<(crate::chem::Kind, Ratio)> = if held_f.is_zero() { Vec::new() } else { carried(clump, &circulation_f, &ionizing).into_iter().map(|(k, l)| { let r = l / held_f.clone() * lambda.clone(); let h = hold_at(&r); (k, r * h) }).collect() };
+    let thrown: Vec<(crate::chem::Kind, Ratio)> = if held_f.is_zero() { Vec::new() } else { carried(binding, &circulation_f, &ionizing).into_iter().map(|(k, l)| { let r = l / held_f.clone() * lambda.clone(); let h = hold_at(&r); (k, r * h) }).collect() };
     motes.extend(crate::flows::spray(&disc, &thrown, &vec![ratio(0, 1); crate::flows::PLANES], &disc_agitation, path.len() as u64, &star_push));
     let mut medium = Manifest::new();
     for x in &motes {
@@ -1192,7 +1192,7 @@ pub fn collide_stars(stars: Vec<crate::pulse::Body>, c_pre: Vec<Ratio>, scale: &
 /// neighbour answers the echo every ring at its place, by the pulsing body's
 /// deficit read at their gap in its own enclosure, `m/(r + m)`. Their
 /// turnings differ by `|ω_i − ω_j|` a ring. The pair is held, and joins, where
-/// the stronger echo meets that shear: the crest's binding-against-tide one
+/// the stronger echo meets that shear: the crest's bond-against-tide one
 /// tier down, first degree, no age.
 fn echo_holds(w_i: &Ratio, w_j: &Ratio, r: &Ratio, m_i: &Ratio, m_j: &Ratio) -> bool {
     let m = if m_i > m_j { m_i.clone() } else { m_j.clone() };
@@ -1482,19 +1482,19 @@ mod crest_tests {
     use cfe::ratio::ratio;
 
     #[test]
-    fn a_ring_parts_into_the_largest_clumps_that_hold_in_their_own_enclosure() {
+    fn a_ring_parts_into_the_largest_bindings_that_hold_in_their_own_enclosure() {
         // The bell-462 outermost ring: m + μ = 0.57 at R 1.64 about H 1.94,
-        // heat 0.069: λ = 0.695, binding 0.41 beats heat + face 0.30.
+        // heat 0.069: λ = 0.695, bond 0.41 beats heat + face 0.30.
         let got = crest_collapse(&ratio(52, 100), &ratio(5, 100), &ratio(69, 1000), &ratio(164, 100), &ratio(194, 100));
         let (w, n) = got.expect("a dense ring holds");
         assert!(w > ratio(0, 1) && n >= 1);
-        // A thin inner ring (m + μ = 0.045, binding 0.081) holds against its
+        // A thin inner ring (m + μ = 0.045, bond 0.081) holds against its
         // heat 0.075 alone (the face heats, it is no barrier: docs/96 §8),
-        // in one narrow arc; hotter than its binding, it does not.
+        // in one narrow arc; hotter than its bond, it does not.
         assert!(crest_collapse(&ratio(40, 1000), &ratio(5, 1000), &ratio(75, 1000), &ratio(1015, 1000), &ratio(1089, 1000)).is_some());
         assert!(crest_collapse(&ratio(40, 1000), &ratio(5, 1000), &ratio(9, 100), &ratio(1015, 1000), &ratio(1089, 1000)).is_none());
-        // Denser rings part into more, smaller clumps? No: binding grows, so
-        // the largest holding arc grows and the clumps are fewer and larger.
+        // Denser rings part into more, smaller bindings? No: bond grows, so
+        // the largest holding arc grows and the bindings are fewer and larger.
         let (w2, n2) = crest_collapse(&ratio(80, 100), &ratio(5, 100), &ratio(69, 1000), &ratio(164, 100), &ratio(194, 100)).expect("holds");
         assert!(w2 >= w && n2 <= n);
     }

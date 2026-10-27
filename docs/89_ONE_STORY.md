@@ -66,7 +66,7 @@ PEELED by the container's and the bounce's shares; each pressed pair makes
 LIGHT `2u(z) − u(2z)`, which SHINES on the core's motes (`breath::shine`).
 Unchanged matter exits SEALED; changed matter CAUTERIZED with a scar. ✔
 
-**Stars are born from its gas** (`breath`, `formation`): a clump ignites
+**Stars are born from its gas** (`breath`, `formation`): a binding ignites
 where `ignition_share(a + ½(1 − δ))` holds; the heart cut (`heart_cut`, the
 push ½) keeps what binds; the star's own spin is its members' spread of
 orbital spin (`Body.turning`), its phases their holding-weighted mean.

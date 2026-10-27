@@ -934,7 +934,7 @@ pub struct Chain {
     pub members: Vec<usize>,
     /// Its holding-weighted reach.
     pub reach: Ratio,
-    /// Its binding `λ/(1 + λ)`, `λ` its holding and magnetism over its apartness.
+    /// Its bond `λ/(1 + λ)`, `λ` its holding and magnetism over its apartness.
     pub bind: Ratio,
     /// Its holding-weighted agitation.
     pub agitation: Ratio,
@@ -946,7 +946,7 @@ pub struct Chain {
 }
 
 impl Chain {
-    /// It holds where its binding meets its agitation (its tide is in its
+    /// It holds where its bond meets its agitation (its tide is in its
     /// apartness; the face heats and is in its agitation, docs/96 §8).
     pub fn holds(&self) -> bool {
         self.bind >= self.agitation
@@ -1246,7 +1246,7 @@ pub fn stream(motes: &mut [Mote], chains: &[Chain], push: &dyn Fn(&Mote) -> Rati
     vacuum
 }
 
-/// The clumps of chains already read: those that hold collapse.
+/// The bindings of chains already read: those that hold collapse.
 /// THE DISC FORMS (operator 2026-10-26: "i guess this is why galaxies form
 /// discs - align on nature"): angular momentum is kept while the motion off
 /// the plane of the net spin is damped away, so matter settles into its
@@ -1288,10 +1288,10 @@ pub fn settle_disc(motes: &mut [Mote], enc: &Enclosed) -> Vec<Ratio> {
 /// its pair against the pull of what stands outside, `k(ρ) = (S/G)·(1 +
 /// ρ)/(1 − ρ)`, opening at the ring's own dispersal pair `(S − G)/(S + G)`
 /// at ρ = 0. Each mote's matter is spread over its band `r(1 ± p)`. A band's
-/// pair HOLDS where its matter's binding meets its heat and the tide across
+/// pair HOLDS where its matter's bond meets its heat and the tide across
 /// it (`formation::crest_collapse`, docs/96 §8); a band where a
 /// star already stands is that star's (its capture reads it). Returns the
-/// holding bands as clumps: (the band's middle reach, each member's share).
+/// holding bands as bindings: (the band's middle reach, each member's share).
 pub fn band_pairs(motes: &[Mote], enc: &Enclosed, p: &Ratio, plane: &[Ratio], g_total: &Ratio) -> Vec<(Ratio, Vec<(usize, Ratio)>)> {
     let ring = enc.base();
     let whole = enc.whole();
@@ -1363,8 +1363,8 @@ pub fn band_pairs(motes: &[Mote], enc: &Enclosed, p: &Ratio, plane: &[Ratio], g_
         // crest law, `formation::crest_collapse`, with xylarium): the ring's
         // holding m and magnetism μ, its heat a, at its middle R about the
         // hold H there, hold along a length w_J against their heat and the
-        // shear, so ⌊R/w_J⌋ clumps stand around the turn. Each member
-        // joins the clump whose arc holds it, by its phase in the galaxy's
+        // shear, so ⌊R/w_J⌋ bindings stand around the turn. Each member
+        // joins the binding whose arc holds it, by its phase in the galaxy's
         // disc plane (the plane the disc settled into, `settle_disc`).
         let mid = (o_lo.clone() + o_hi.clone()) / ratio(2, 1);
         let h_mid = enc.hold_within(&mid);
@@ -1386,8 +1386,8 @@ pub fn band_pairs(motes: &[Mote], enc: &Enclosed, p: &Ratio, plane: &[Ratio], g_
             let at = frac(motes[i].phase.get(disc).unwrap_or(&ratio(0, 1)));
             arcs.entry((at * n.clone()).floor().to_integer()).or_default().push((i, sh));
         }
-        for (_, clump) in arcs {
-            out.push((crate::ring::grain(&mid), clump));
+        for (_, binding) in arcs {
+            out.push((crate::ring::grain(&mid), binding));
         }
     }
     out
@@ -1539,15 +1539,19 @@ pub fn mobius(x: &mut Mote) {
     antipode(&mut x.phase);
 }
 
-/// THE LUMINAL BOUND (docs/94 §2; the UMD kinematic law, SUBSTRATE_C = 1):
-/// no particle turns more than one whole orbit in a K-step. A continuum mote
-/// turns `2δ` a bell, so inside the ring (`δ > ½`) it would fracture; it
-/// takes the Möbius jetstream instead, onto the vacuum leg, where its pull
-/// reads `1 − δ < ½`. Returns how many took it.
+/// THE LUMINAL BOUND (docs/94 §2, docs/98 §4; the UMD kinematic law,
+/// SUBSTRATE_C = 1): no particle turns more than one whole orbit in a
+/// K-step. A mote turns `2·share` a bell, its share `δ` on the continuum face
+/// and `1 − δ` on the vacuum face; where it exceeds ½ (a continuum mote
+/// inside the ring, a vacuum mote outside it) the mote would fracture, so it
+/// takes the Möbius jetstream onto the other face, where its share is at
+/// most ½. Either face, one law. Returns how many took it.
 pub fn luminal(motes: &mut [Mote], enc: &Enclosed) -> usize {
     let mut n = 0;
     for x in motes.iter_mut() {
-        if !x.vacuum && enc.reach(&x.ell_o).1 > ratio(1, 2) {
+        let d = enc.reach(&x.ell_o).1;
+        let share = if x.vacuum { ratio(1, 1) - d } else { d };
+        if share > ratio(1, 2) {
             mobius(x);
             n += 1;
         }
@@ -1813,6 +1817,29 @@ mod passage_tests {
         assert!(x.vacuum && x.phase[0] == ratio(4, 5), "one pass: the other leg, half a turn on");
         mobius(&mut x);
         assert_eq!(x, was, "two passes close");
+    }
+
+    #[test]
+    fn the_luminal_bound_reads_either_face_and_leaves_every_share_at_most_half() {
+        use super::{luminal, Enclosed, Mote};
+        // About a base of 1: reach 3 reads δ = ¼, reach ⅓ reads δ = ¾.
+        let enc = Enclosed::new(ratio(1, 1), Vec::new());
+        let mote = |ell: (i64, i64), vacuum: bool| Mote { key: crate::chem::Kind::parse("W0001").expect("a kind"), amount: ratio(1, 1), ell_o: ratio(ell.0, ell.1), ell_orth: ratio(0, 1), phase: vec![ratio(1, 10), ratio(1, 7)], agitation: ratio(0, 1), born: 0, vacuum, lever: Vec::new(), lever_place: ratio(0, 1), tilt: Vec::new() };
+        // Outside the ring a vacuum mote reads ¾ and takes the pass; a
+        // continuum mote reads ¼ and stays. Inside, the other way.
+        let mut motes = vec![mote((3, 1), true), mote((3, 1), false), mote((1, 3), false), mote((1, 3), true)];
+        assert_eq!(luminal(&mut motes, &enc), 2);
+        assert_eq!(motes.iter().map(|x| x.vacuum).collect::<Vec<_>>(), vec![false, false, true, true]);
+        for x in &motes {
+            let d = enc.reach(&x.ell_o).1;
+            let share = if x.vacuum { ratio(1, 1) - d } else { d };
+            assert!(share <= ratio(1, 2), "every mote stands on the face it can turn on");
+        }
+        // Read again, nothing moves.
+        assert_eq!(luminal(&mut motes, &enc), 0);
+        // At the ring both faces read ½ and neither passes.
+        let mut ring = vec![mote((1, 1), true), mote((1, 1), false)];
+        assert_eq!(luminal(&mut ring, &enc), 0);
     }
 
     #[test]

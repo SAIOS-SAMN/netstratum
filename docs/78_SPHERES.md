@@ -282,7 +282,7 @@ docs/83, "Corrections").
   - **a galactic bounce's strength** against the universal echo, so a
     galaxy keeps its light gas;
   - **the galaxy count** as an outcome: the universal outflow fragments
-    where a clump holds itself (today: 1 to 60 modes drawn from the seed).
+    where a binding holds itself (today: 1 to 60 modes drawn from the seed).
 - **One law at every tier:** the same sorting wherever matter collapses and
   bounces: a star's heavy core under its light envelope, a disk's heavy
   inner worlds and light outer ones. (Unlike nature's Big Bang, which makes
@@ -549,7 +549,7 @@ Operator, 2026-10-14. Built: `conductor::breath`, the `breathe` binary.
   (Defect corrected, operator: the variation came from spawning galaxies
   and drawing their holes, where it should come from star systems forming;
   the hole draw is removed.)
-- **The breath.** Each echo compresses a galaxy's medium. Where the clump at
+- **The breath.** Each echo compresses a galaxy's medium. Where the binding at
   the next reach boundary can hold its own reach (the tidal law,
   `m = μ · M(<r)`), a star system is born there, its orbs formed by the
   same law one tier down. The medium is consumed; nothing is created.
@@ -590,7 +590,7 @@ Operator, 2026-10-14. Built: `conductor::breath`, the `breathe` binary.
     galaxy's medium, the more the further out of phase (ε the star tier's
     medium share, a placeholder). A star spent below a grain dissolves.
   - **Syntropy:** an echo compresses only the coherent part of a galaxy's
-    medium, `c_g · medium`; a system is born where that part holds a clump
+    medium, `c_g · medium`; a system is born where that part holds a binding
     of its own reach. Periods re-read the law after each echo.
 - **Reading** (`breathe var-e1 36000 60`): 7,437 echoes; 578 systems
   recohered; 12,944 (deepest-hole units) decohered back; conservation
@@ -747,12 +747,12 @@ the lowest tier of the one law (design law 4), a small system that turns.
   - **Workability** (the thermal ruler; its form shared with xylarium, its
     value per universe): temperature is a turning rate of agitation,
     `T = k_T · ω`. `k_T` is fixed by one atom: Z = 1's outer tightness
-    against hydrogen's binding, 13.6 eV ≈ 157,800 K, a cited placeholder
+    against hydrogen's bond, 13.6 eV ≈ 157,800 K, a cited placeholder
     (design law 1), the anchor xylarium will share. A compound is workable
     while its weakest grip `τ_min` holds against `T / k_T`, read as a smooth
     share, not a cutoff.
 - **The stand-in through the boundary** (the `pulse` binary): era 0's 860
-  kinds, each mapped to the Z whose atom reads its line and binding, cross
+  kinds, each mapped to the Z whose atom reads its line and bond, cross
   as nuclei per Z (13 Zs) and enter as grains, nuclei in equal to nuclei
   held. The stand-in's map folds era 0's variety into few Zs; a real grant
   carries its own.

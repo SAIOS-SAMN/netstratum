@@ -841,7 +841,7 @@ pub fn deploy(manifest: &Manifest) -> Option<Universe> {
     // 11.0 (25); gravity's reach, one grammar at every tier, operator
     // 2026-10-18): the pinch between the universal core and a bead at reach R
     // is `d = R·H_b/(H_b + H_inside)`. H_b is the bead's OWN matter, w (a
-    // bead not yet standing has no throat, as a clump binds by its own λw);
+    // bead not yet standing has no throat, as a binding binds by its own λw);
     // H_inside is the enclosed hold, the singularity's state 1, the
     // firmament, and every galaxy standing inside at its standing hold 2w.
     // Its spread `R·s_final` (s_final = ½·1/(1 + 2) = 1/6, the cascade's last

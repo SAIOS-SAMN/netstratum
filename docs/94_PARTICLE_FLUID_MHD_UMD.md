@@ -188,7 +188,7 @@ ratio is read from the particles at the K-step it is needed.
 - Gas stands outward of dust by its pressure; dust drifts inward by drag but
   crowds where the pressure peaks and where it is already dense.
 - Magnetic shear spreads the disc and feeds its centre without emptying it.
-- Crowded dust rings collapse (the clump law) into bodies inside their own
+- Crowded dust rings collapse (the binding law) into bodies inside their own
   rims: worlds.
 
 ## 10. Refused, per the UMD discipline

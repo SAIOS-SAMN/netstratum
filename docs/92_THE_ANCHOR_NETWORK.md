@@ -96,9 +96,9 @@ So the network is a tree: core → disc → first stars → theirs.
 ### 3.3 What falls into a newborn heart (BUILT, 12574d0)
 
 A member falls where its place stands within the reactor's extent,
-`λ·R_max`: `λ` the fallen share of the clump, `R_max` the outermost kind the
+`λ·R_max`: `λ` the fallen share of the binding, `R_max` the outermost kind the
 dark cut of what has fallen holds (`heart_cut` at turning 0, heat 0, push
-½), order-free to the fixed point. Read: 56 % of each clump falls (the
+½), order-free to the fixed point. Read: 56 % of each binding falls (the
 throat test took ~88 %).
 
 ### 3.4 The pull from an anchor, and the grip
@@ -187,7 +187,7 @@ heart).
 | the grip | `flows.rs` (new `grip`) | `δ_p · |k| · in_step · d/(d + turned)` |
 | the torque | `flows::torque` / `torque_one` | an anchored body's hold, reach, deficit, push and passage read from its anchor; payments returned per anchor |
 | payment | `breath.rs` | the disc's to the core reservoir; a star's from its orbit, `W·Δℓ_p = −Σ m·Δℓ`, identity `anchor` |
-| shear, chains, clumps | `flows::shear`, `chains` | beyond `R_d`, neighbours read about their anchor |
+| shear, chains, bindings | `flows::shear`, `chains` | beyond `R_d`, neighbours read about their anchor |
 | capture (settling) | `breath.rs` CAPTURE IS SETTLING | the sphere from each body's anchor, `k = g·h/H_p` |
 | the system's rim | `breath::rim_of` | from the star's anchor, through `g` |
 | exits | `flows::exits` | past the outermost anchor's tether |
@@ -239,7 +239,7 @@ the edge. So before the build (§5) either:
   disc-leg mote keeps some share; the edge may instead be where the held
   share falls below its free share, ½, the throat's own half, read from the
   cut); or
-- where clumps collapse (§1, §6) is the first problem: stars form in the
+- where bindings collapse (§1, §6) is the first problem: stars form in the
   dense inner disc, where the core holds them, whatever the network does
   beyond it.
 
