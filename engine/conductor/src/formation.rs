@@ -292,6 +292,14 @@ pub fn product(z: u32) -> Option<crate::chem::Kind> {
     crate::chem::Kind::atom(z.checked_mul(2)?)
 }
 
+/// TUNNELLING THROUGH THE BARRIER (docs/99 §2.5): the barrier is the charge
+/// the two nuclei bring, their protons `Q + Q` (docs/97: the charge is Q, the
+/// weight w = Q + Z), and the heart's hold (1, regenerated) tunnels it by its
+/// pair share, `τ = 1/(1 + 2Q(w))`: H + H 1/3, He + He 1/5.
+pub fn tunnelling(w: u32) -> Option<Ratio> {
+    Some(ratio(1, 1 + 2 * i64::from(crate::nuclides::protons(w)?)))
+}
+
 /// THE BURN RATE (W31(a) steps 1–2, with xylarium; derived 2026-10-16), the
 /// rung fusing fuel Z into 2Z:
 /// - the BARRIER is the charge the two nuclei bring, `Z + Z` (enclosed
@@ -329,7 +337,7 @@ pub fn burn(star: &Manifest, share: &Ratio, z: u32, coherence: &Ratio) -> Option
     }
     // Over the product's weight, its nucleons `2w` (docs/97).
     let driver = ratio(dm, 2 * i64::from(z));
-    let tau = ratio(1, 1 + 2 * i64::from(z));
+    let tau = tunnelling(z)?;
     let count = star.values().fold(ratio(0, 1), |s, a| s + a.clone());
     let charge = star.iter().fold(ratio(0, 1), |s, (k, a)| s + a.clone() * ratio(i64::from(crate::chem::parts(k).and_then(|(z, _)| crate::chem::atom_of(z)).map(|x| x.enclosed).unwrap_or(0)), 1));
     let q_mean = charge / count;
@@ -1450,6 +1458,15 @@ mod crest_tests {
 mod echo_tests {
     use super::{echo_holds, solid};
     use cfe::ratio::ratio;
+
+    #[test]
+    fn the_barrier_is_the_charge_never_the_weight() {
+        // H + H: one proton each, 1/3; weight 4 (two protons) 1/5, never the
+        // 1/9 its weight would read.
+        assert_eq!(super::tunnelling(1), Some(ratio(1, 3)));
+        assert_eq!(super::tunnelling(4), Some(ratio(1, 5)));
+        assert_eq!(super::tunnelling(1200), Some(ratio(1, 1 + 2 * 636)));
+    }
 
     #[test]
     fn neighbours_join_by_their_echoes_and_solid_orbits_never_meet() {

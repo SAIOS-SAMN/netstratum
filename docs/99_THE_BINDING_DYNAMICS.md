@@ -126,7 +126,7 @@ The driver stays over the product's nucleons `2w`.
    phase place times its hold as a share of what fell, `d·H_c/λ`, the
    place's `/λ` dilation retired). Witness: the system's
    spin booked exactly; every disc member's phase offset from its star kept.
-4. **§2.5 the burn's barrier by charge.** Witness: H + H 1/3, He + He 1/5.
+4. **§2.5 the burn's barrier by charge** (BUILT, `formation::tunnelling`). Witness: H + H 1/3, He + He 1/5.
 5. **Read:** re-found, breathe to bell 1500 (and 3000 for galaxy 163's first
    echoes): bindings formed, hearts formed, stars, worlds per star, every
    identity.
