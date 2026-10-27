@@ -1462,7 +1462,7 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
             // binding's holding, agitation, the star's own spin, phases, its
             // orthogonal spin, the members as they were).
             #[allow(clippy::type_complexity)]
-            let mut takes: Vec<(Ratio, crate::pulse::Manifest, Vec<(crate::flows::Mote, Ratio, Ratio)>, Ratio, Ratio, Ratio, Vec<Ratio>, Ratio, Vec<crate::flows::Mote>, Vec<(Ratio, Ratio, Ratio)>, Ratio, Vec<crate::flows::Mote>)> = Vec::new();
+            let mut takes: Vec<(Ratio, crate::pulse::Manifest, Vec<(crate::flows::Mote, Ratio, Ratio)>, Ratio, Ratio, Ratio, Vec<Ratio>, Ratio, Vec<crate::flows::Mote>, Vec<(Ratio, Ratio, Ratio)>, Ratio)> = Vec::new();
             for (reach, shares) in bindings {
                 // Each member as it stood, its share of its mote.
                 let mut members: Vec<crate::flows::Mote> = Vec::new();
@@ -1480,32 +1480,22 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
                 if m.is_zero() {
                     continue;
                 }
-                // THE INFALL BY PLACE (docs/91): each member stands at a place
-                // about the binding's centre (its holding-weighted reach in the
-                // galaxy's enclosure and its holding-weighted phase in each
-                // plane), its offset in each plane a length read in the
-                // binding's own units (dilated once, `g/m_c`): radially, and
-                // along each plane's turn at the centre's reach (S¹'s linear
-                // measure). It falls where it stands within the throat of what
-                // has fallen in every plane; the rest is the disc.
-                let at: Vec<Ratio> = members.iter().map(|x| enc_now.reach(&x.ell_o).0).collect();
-                let r_c = members.iter().zip(&at).fold(ratio(0, 1), |s, (x, r)| s + held_of(x) * r.clone()) / m.clone();
+                // THE INFALL IN PHASES (docs/99 §2.2; operator 2026-10-27: "we
+                // shouldnt have frames we should have phases"): the binding's
+                // phase is its members' holding-weighted circle mean in each
+                // plane; a member's STEP with it is its in-step share across
+                // the spatial planes by its own orbit's shares (its tilt, L1:
+                // a plane its orbit does not turn in carries no weight),
+                // `C = Σ t_k·in_step(ψ_k, ψ̄_k)`. It FALLS on the held
+                // hemisphere, `C ≥ ½`; on the open hemisphere it is the disc.
+                // Read once, each against the binding's phase: no length, no
+                // frame, no extent that shrinks with what fell. Its PLACE in
+                // the binding is its phase off step, `1 − C`: the heart's
+                // half in `[0, ½]`, the disc's in `(½, 1]` out to the
+                // system's rim, the whole turn.
                 let psi_c: Vec<Ratio> = (0..crate::flows::PLANES).map(|k| crate::flows::circle_mean(&members.iter().map(|x| (held_of(x), x.phase.get(k).cloned().unwrap_or_else(|| ratio(0, 1)))).collect::<Vec<_>>())).collect();
-                let k_len = g_mass.clone() / m.clone();
-                let size = |x: Ratio| if x < ratio(0, 1) { -x } else { x };
-                let off = |a: &Ratio, b: &Ratio| { let d = a.clone() - b.clone(); let f = d.clone() - d.floor(); if f > ratio(1, 2) { ratio(1, 1) - f } else { f } };
-                // Each member's offsets: (radial, along the orbit in the
-                // spatial plane where it stands farthest, along the R loop),
-                // and its distance, the greatest of them (docs/96 step 2).
-                let offsets: Vec<(Ratio, Ratio, Ratio)> = members.iter().zip(&at).map(|(x, r)| {
-                    let radial = size(r.clone() - r_c.clone()) * k_len.clone();
-                    let along = |k: usize| r_c.clone() * off(x.phase.get(k).unwrap_or(&ratio(0, 1)), &psi_c[k]) * k_len.clone();
-                    let spatial = crate::flows::SPACE.iter().map(|&k| along(k)).max().unwrap_or_else(|| ratio(0, 1));
-                    (radial, spatial, along(crate::flows::LOOP))
-                }).collect();
-                let places: Vec<(Ratio, Ratio)> = members.iter().zip(&offsets).map(|(x, (r, o, c))| (held_of(x), r.clone().max(o.clone()).max(c.clone()))).collect();
-                let falling: Vec<(crate::pulse::Manifest, Ratio, Ratio)> = members.iter().zip(&places).map(|(x, (w, d))| ([(x.key.clone(), x.amount.clone())].into_iter().collect(), w.clone(), d.clone())).collect();
-                let fallen = crate::formation::infall(&falling);
+                let places: Vec<(Ratio, Ratio)> = members.iter().map(|x| (held_of(x), ratio(1, 1) - crate::flows::step_with(x, &psi_c))).collect();
+                let fallen: Vec<bool> = places.iter().map(|(_, d)| *d <= ratio(1, 2)).collect();
                 let (mut fell, mut fell_held, mut heat, mut amt) = (crate::pulse::Manifest::new(), ratio(0, 1), ratio(0, 1), ratio(0, 1));
                 let mut orth_held = ratio(0, 1);
                 // The binding's own circulation: its members' orthogonal spins by
@@ -1515,57 +1505,35 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
                 let mut ph: Vec<Vec<(Ratio, Ratio)>> = vec![Vec::new(); crate::flows::PLANES];
                 // THE STAR'S OWN SPIN (with xylarium 2026-10-23): the spin its
                 // matter carried before the collapse, conserved through the
-                // infall. Before the cut every member stands in the BINDING's
-                // enclosure, so a member's spin about the centre is the balance
-                // of its place there, `ℓ′ = r′·H_c(<r′)` (two readings: its place's
-                // reach, and the binding's hold within it, every member nearer,
-                // fallen or not); the star's is their holding-weighted mean over
-                // what fell.
+                // infall: each member's the balance of its place in the
+                // binding, `ℓ′ = d·H_c(<d)` (its phase place d and the hold of
+                // every member more in step, fallen or not); the star's is
+                // their holding-weighted mean over what fell.
                 let hold_c = |r: &Ratio| places.iter().filter(|(_, d)| d < r).fold(ratio(0, 1), |a, (w, _)| a + w.clone() / m.clone());
                 let mut fell_spins: Vec<(Ratio, Ratio, Ratio)> = Vec::new();
                 let mut outside: Vec<(crate::flows::Mote, Ratio, Ratio)> = Vec::new();
-                // THE NEWBORN'S RIM, breathing from birth: its gravity's reach
-                // in its own units, `ρ = R_c/(λ + H(<R_c))` (λ the binding's
-                // share). A member that never fell and stands beyond it is no
-                // part of the newborn: it stays the galaxy's medium.
-                let lam_c = m.clone() / g_mass.clone();
-                let h_c = enc_now.hold_within(&r_c);
-                let rho_birth = if (lam_c.clone() + h_c.clone()).is_zero() { ratio(1, 1) } else { r_c.clone() / (lam_c + h_c) };
-                let (mut beyond_rim, mut beyond_held): (Vec<crate::flows::Mote>, Ratio) = (Vec::new(), ratio(0, 1));
-                for (idx, ((x, f), (radial, o, _))) in members.iter().zip(&fallen).zip(&offsets).enumerate() {
+                // THE SYSTEM'S RIM is the whole turn (`1 − C ≤ 1` always):
+                // every member off the heart's hemisphere is its disc.
+                let rho_birth = ratio(1, 1);
+                for (idx, (x, f)) in members.iter().zip(&fallen).enumerate() {
                     let w = held_of(x);
+                    let place = places[idx].1.clone();
                     if *f {
                         *fell.entry(x.key.clone()).or_insert_with(|| ratio(0, 1)) += x.amount.clone();
                         fell_held += w.clone();
                         heat += x.amount.clone() * x.agitation.clone();
                         amt += x.amount.clone();
-                        // Its place's spin in the binding, and the star's
-                        // holding-weighted phases; its orthogonal spin by
-                        // holding.
-                        let r_at = places[idx].1.clone();
-                        fell_spins.push((w.clone(), r_at.clone(), hold_c(&r_at)));
+                        fell_spins.push((w.clone(), place.clone(), hold_c(&place)));
                         orth_held += w.clone() * x.ell_orth.clone();
                         for k in 0..crate::flows::PLANES {
                             ph[k].push((w.clone(), x.phase.get(k).cloned().unwrap_or_else(|| ratio(0, 1))));
                         }
                     } else {
-                        // THE DISC: it stays where it stands, at its distance in
-                        // its orbit's plane (radial or along the orbit) and its
-                        // offset on its orthogonal orbit; its spins are read at
-                        // the system's birth, once the heart is cut
-                        // (`formation::system`).
-                        // Its offset along the orthogonal orbit is a PLACE on that
-                        // orbit (its phase), never motion along it (with
-                        // xylarium 2026-10-24); its circulation is what it
-                        // CARRIED, its orthogonal spin against the binding's, as
-                        // a share of its orbit spin (frame-free, read in the
-                        // galaxy where both stand).
-                        let place = radial.clone().max(o.clone());
-                        if place > rho_birth {
-                            beyond_held += w.clone();
-                            beyond_rim.push(x.clone());
-                            continue;
-                        }
+                        // THE DISC: it stays at its phase place off step, its
+                        // spins read at the system's birth once the heart is
+                        // cut (`formation::system`); its circulation is what it
+                        // CARRIED, its orthogonal spin against the binding's,
+                        // as a share of its orbit spin.
                         let carried_c = if x.ell_o.is_zero() { ratio(0, 1) } else { (x.ell_orth.clone() - orth_binding.clone()) / x.ell_o.clone() };
                         outside.push((crate::flows::Mote { born: bell, ..x.clone() }, place, carried_c));
                     }
@@ -1582,12 +1550,11 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
                 let spin = crate::ring::grain(&(fell_spins.iter().fold(ratio(0, 1), |a, (w, r, h)| a + w.clone() * r.clone() * h.clone()) / fell_held.clone()));
                 let phases: Vec<Ratio> = ph.iter().map(|x| crate::ring::grain(&crate::flows::circle_mean(x))).collect();
                 let orth_mean = orth_held / fell_held;
-                // The newborn's whole: what fell and its disc, never what stands
-                // beyond its rim.
-                let whole_c = m.clone() - beyond_held;
-                takes.push((reach, fell, outside, whole_c, a, spin, phases, orth_mean, members, fell_spins, rho_birth, beyond_rim));
+                // The newborn's whole: what fell and its disc.
+                let whole_c = m.clone();
+                takes.push((reach, fell, outside, whole_c, a, spin, phases, orth_mean, members, fell_spins, rho_birth));
             }
-            for (reach, star, outside, whole_held, a_own, spin_own, phases_own, orth_mean, members, fell_spins, rho_birth, beyond_rim) in takes {
+            for (reach, star, outside, whole_held, a_own, spin_own, phases_own, orth_mean, members, fell_spins, rho_birth) in takes {
                 let whole_mass = whole_held.clone();
                 let m_u = whole_mass.clone() / unit.clone();
                 if m_u.is_zero() {
@@ -1617,9 +1584,6 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
                     core.flows.extend(members);
                     continue;
                 };
-                // What stood beyond the newborn's rim stays the galaxy's medium.
-                motes_in[3] += beyond_rim.len();
-                core.flows.extend(beyond_rim);
                 // Its STATE is its holding at birth (a heart's state, set at
                 // its forming, never drained); its own spin and phases.
                 let held_at_birth = mass(&kept);

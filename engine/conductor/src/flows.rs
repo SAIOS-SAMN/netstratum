@@ -275,6 +275,17 @@ pub fn in_step(a: &Ratio, b: &Ratio) -> Ratio {
     ratio(1, 1) - ratio(2, 1) * off(&(a.clone() - b.clone()))
 }
 
+/// A MOTE'S STEP WITH A BODY'S PHASE (docs/99 §2.2; operator 2026-10-27:
+/// "we shouldnt have frames we should have phases"): its in-step share
+/// across the spatial planes by its own orbit's shares (its tilt, L1; a plane
+/// its orbit does not turn in carries no weight), `C = Σ t_k·in_step(ψ_k,
+/// ψ̄_k)`. One in step, 0 opposed; it stands on the body's held hemisphere
+/// where `C ≥ ½`.
+pub fn step_with(x: &Mote, psi: &[Ratio]) -> Ratio {
+    let t = tilt_of(&x.tilt);
+    SPACE.iter().zip(&t).fold(ratio(0, 1), |c, (&k, tk)| c + tk.clone() * in_step(x.phase.get(k).unwrap_or(&ratio(0, 1)), psi.get(k).unwrap_or(&ratio(0, 1))))
+}
+
 /// THE FIRMAMENT'S ORDER (operator 2026-10-19: "the pulses over time and the
 /// reverberation/pulsation of the bouncing antipoles should move the
 /// firmament into order (think, dodecahedron - but that needs to be derived
@@ -1821,6 +1832,30 @@ mod passage_tests {
         assert!(x.vacuum && x.phase[0] == ratio(4, 5), "one pass: the other leg, half a turn on");
         mobius(&mut x);
         assert_eq!(x, was, "two passes close");
+    }
+
+    #[test]
+    fn a_member_falls_by_its_step_with_its_binding_never_by_a_length() {
+        use super::{step_with, Mote};
+        use cfe::ratio::Ratio;
+        let mote = |phase: Vec<Ratio>, tilt: Vec<Ratio>| Mote { key: crate::chem::Kind::parse("W0001").expect("a kind"), amount: ratio(1, 1), ell_o: ratio(1, 1), ell_orth: ratio(0, 1), phase, agitation: ratio(0, 1), born: 0, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1), tilt };
+        let centre = vec![ratio(0, 1); super::PLANES];
+        let flat = vec![ratio(1, 1), ratio(0, 1), ratio(0, 1)];
+        // Displaced only in a plane its orbit does not turn in: in step.
+        let mut ph = centre.clone();
+        ph[super::SPACE[1]] = ratio(1, 2);
+        assert_eq!(step_with(&mote(ph, flat.clone()), &centre), ratio(1, 1));
+        // A quarter turn off in its orbit's own plane: on the boundary, ½.
+        let mut ph = centre.clone();
+        ph[super::SPACE[0]] = ratio(1, 4);
+        assert_eq!(step_with(&mote(ph, flat.clone()), &centre), ratio(1, 2));
+        // Half a turn off: opposed, the disc.
+        let mut ph = centre.clone();
+        ph[super::SPACE[0]] = ratio(1, 2);
+        assert_eq!(step_with(&mote(ph, flat), &centre), ratio(0, 1));
+        // Isotropic, off by a tenth in every plane: 4/5, it falls.
+        let ph = vec![ratio(1, 10); super::PLANES];
+        assert_eq!(step_with(&mote(ph, Vec::new()), &centre), ratio(4, 5));
     }
 
     #[test]

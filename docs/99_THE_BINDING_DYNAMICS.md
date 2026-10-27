@@ -114,11 +114,17 @@ The driver stays over the product's nucleons `2w`.
 
 1. **§2.1 disc-leg membership** (BUILT). Witness: no member on the axial leg; the
    ring's holding conserved.
-2. **§2.2 the infall in phases** (the frame and `g/m` retire). Witness: a
+2. **§2.2 the infall in phases** (BUILT with step 3; `flows::step_with`; the
+   frame, `g/m`, `formation::infall` and the newborn's rim by distance
+   retire; the system's rim is the whole turn). Witness: a
    member displaced only in a plane of tilt 0 is in step; a member a quarter
    turn off in its orbit's plane stands at the boundary; a binding whose
    members share its phase falls whole.
-3. **The disc's places in phases** (§2.2 last point). Witness: the system's
+3. **The disc's places in phases** (BUILT with step 2: a disc member's place
+   is its phase off step, `1 − C ∈ (½, 1]`, read by the ring law in
+   `formation::system`; the star's own spin reads each fallen member's
+   phase place times its hold as a share of what fell, `d·H_c/λ`, the
+   place's `/λ` dilation retired). Witness: the system's
    spin booked exactly; every disc member's phase offset from its star kept.
 4. **§2.5 the burn's barrier by charge.** Witness: H + H 1/3, He + He 1/5.
 5. **Read:** re-found, breathe to bell 1500 (and 3000 for galaxy 163's first

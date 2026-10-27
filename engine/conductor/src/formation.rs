@@ -394,60 +394,6 @@ pub fn agitation_of(ignition: &Ratio) -> Ratio {
     (ratio(1, 1) - x.clone()) / (ratio(2, 1) * (ratio(1, 1) + x))
 }
 
-/// THE INFALL (docs/91, the disc from the collapse; operator 2026-10-25,
-/// with xylarium: "the core of stars which should be 'reactors'"): of a
-/// binding's members, each `(its matter, its holding, its distance from the
-/// binding's centre in the binding's own units)`, which fall into the forming
-/// heart. A reactor has NO THROAT, so what falls is never read by the throat
-/// condition (`r ≤ H*`, `δ ≥ ½`): it is read by the REACTOR'S OWN EXTENT. A
-/// member falls where its place stands within `λ·R_max`, `λ` the share of
-/// the binding that has fallen and `R_max` the reach of the outermost kind the
-/// DARK cut of what has fallen holds (`heart_cut` at turning 0 and heat 0,
-/// its push ½), read from all fallen down to the fixed point, order-free (each
-/// release shrinks λ and re-reads the cut). The rest stays out: the disc,
-/// between the extent and the system's breathing rim.
-pub fn infall(members: &[(Manifest, Ratio, Ratio)]) -> Vec<bool> {
-    let m = members.iter().fold(ratio(0, 1), |s, (_, w, _)| s + w.clone());
-    if m.is_zero() {
-        return vec![false; members.len()];
-    }
-    let mut fallen = vec![true; members.len()];
-    loop {
-        let mut fell = Manifest::new();
-        let mut held_w = ratio(0, 1);
-        for ((k, w, _), f) in members.iter().zip(&fallen) {
-            if *f {
-                for (kind, a) in k {
-                    *fell.entry(kind.clone()).or_insert_with(|| ratio(0, 1)) += a.clone();
-                }
-                held_w += w.clone();
-            }
-        }
-        if fell.is_empty() {
-            break;
-        }
-        let fell = dissociate(&fell);
-        let extent = match heart_cut(&fell, &ratio(0, 1), &ratio(0, 1)) {
-            Some((held, _, h_k)) if !h_k.is_zero() => {
-                let r_max = carried(&fell, &ratio(0, 1), &ratio(0, 1)).into_iter().filter(|(k, _)| held.contains_key(k)).map(|(_, l)| l / h_k.clone()).max().unwrap_or_else(|| ratio(0, 1));
-                held_w / m.clone() * r_max
-            }
-            _ => ratio(0, 1),
-        };
-        let mut changed = false;
-        for (i, (_, _, d)) in members.iter().enumerate() {
-            if fallen[i] && *d > extent {
-                fallen[i] = false;
-                changed = true;
-            }
-        }
-        if !changed {
-            break;
-        }
-    }
-    fallen
-}
-
 /// Each kind's CARRIED SPIN in a heart's binding (own units), the push on its
 /// open frames plus the place's turning: `ℓ_z = p·(e_z/ē)·(w̄/w_z) + turning`.
 pub fn carried(binding: &Manifest, turning: &Ratio, heat: &Ratio) -> Vec<(crate::chem::Kind, Ratio)> {
@@ -764,11 +710,11 @@ pub fn system(binding: &Manifest, outside: Vec<(crate::flows::Mote, Ratio, Ratio
     }
     let total = whole.clone();
     let lambda = fell.clone() / total.clone();
-    // The star's own spin in the fallen matter's units: each member's two
-    // readings moved once, its reach `r′/λ` and its hold `H_c/λ`, their
-    // product, by holding.
+    // The star's own spin in what fell: each member's phase place `d` (its
+    // phase off step, never a length, docs/99 §2.2) times its hold re-read
+    // as a share of what fell, `H_c/λ`, by holding.
     let fw = fell_spins.iter().fold(ratio(0, 1), |a, (w, _, _)| a + w.clone());
-    let circulation_f = if fw.is_zero() || lambda.is_zero() { ratio(0, 1) } else { fell_spins.iter().fold(ratio(0, 1), |a, (w, r, h)| a + w.clone() * (r.clone() / lambda.clone()) * (h.clone() / lambda.clone())) / fw };
+    let circulation_f = if fw.is_zero() || lambda.is_zero() { ratio(0, 1) } else { fell_spins.iter().fold(ratio(0, 1), |a, (w, r, h)| a + w.clone() * r.clone() * (h.clone() / lambda.clone())) / fw };
     // The new heart is hot: its heat strips the loosest windings (hydrogen
     // first), so it keeps its fuel.
     // THE NEWBORN HEART IS HOT (operator 2026-10-18, "proceed with your
