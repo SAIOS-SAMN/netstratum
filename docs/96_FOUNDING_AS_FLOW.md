@@ -246,3 +246,36 @@ excursion is the same at 2q meetings and at any later count.
 
 Open (not changed here): within a period the kicks are counted raw (`ρ`,
 `q − 1`), a ceiling; the hemisphere responses also cancel inside the period.
+
+### 8.2 Only forming orbits meet; neighbours exchange echoes, never kicks (operator 2026-10-27: "why are we still using 'kicks' here - and not pulses and echoes"; "right - only orbital masses can 'collide' if they are still forming solid orbits")
+
+Measured (2^55 grains, NETSTRATUM_DIAG, bells 704–880): 746 joins in one
+system, 742 of them at the pair's first meeting, the "kick" `ε·R` exceeding
+the gap by a median 4.5·10^4 (to 10^11). The 77 worlds formed at bell 704
+stood only because no pair had yet met (`N = 0`); at bell 880 they met once
+and 77 joined into one body, which ignited. The kick was the impulse model,
+the pull at the gap held over the whole synodic interval `1/|Δω|`: an
+import, not our grammar. §8.1's libration was sound but never reached.
+
+**Pulses and echoes.** No body strikes another. Each re-pulses at its own
+bell; its neighbour receives the echo at its place every ring, and answers
+by its deficit read at the gap in the pulsing body's own enclosure,
+`m/(r + m)` (m the pulsing body's share, r their gap). Per ring the pair's
+turnings differ by `|ω_i − ω_j|` (`ω = δ = H(<R)/(R + H(<R))`, the turning a
+ring received). The echo HOLDS its neighbour where it meets that shear:
+
+    max(m_i, m_j)/(r + max(m_i, m_j))  ≥  |ω_i − ω_j|
+
+the crest's own law (binding against tide) one tier down: first degree, no
+age, no kick, no ε. A held pair co-moves and JOINS.
+
+**Only forming orbits meet.** A world whose orbit has closed is SOLID: since
+it last stood it has turned `2ω·r_echo` (its closed-form advance over the
+echo's rings), and its orbit is solid where that reaches one whole turn. Two
+solid worlds never join, whatever their echoes: they answer each other's
+pulses in phase (the double pass, §8.1) and keep their orbits. A pair joins
+only where at least one is still forming: the pool's small bodies (each
+kind at its reach) and any world not yet once round.
+
+Retired: `formation::crossed` (the kicks over the age, ε, the encounter
+period q) and `formation::libration`.

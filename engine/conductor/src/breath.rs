@@ -798,7 +798,7 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
                 }
                 // Its system still moves: worlds and debris meet, and what
                 // oversteps the rim crosses into the galaxy.
-                let (escaped, settled) = crate::formation::settle_system(&mut sys, &unit, r_now, r_echo, rang, bell);
+                let (escaped, settled) = crate::formation::settle_system(&mut sys, &unit, r_echo, rang, bell);
                 let (st, bo, star_identity, made, weighs, met_by): (usize, usize, Vec<(&'static str, Ratio)>, (usize, usize, usize, usize), [Ratio; 4], (usize, usize, usize)) = (settled.joins, 0, vec![("system", settled.residual.clone())], (settled.formed, settled.ignited, 0, 0), [ratio(0, 1), ratio(0, 1), settled.worlds_mass.clone(), settled.worlds_nuclei.clone()], (0, 0, 0));
                 impacts = (impacts.0 + met_by.0, impacts.1 + met_by.1, impacts.2 + met_by.2);
                 for (a, b) in weights.iter_mut().zip(weighs) {
@@ -1045,7 +1045,7 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
             }
             // COLLISIONS in the system's own medium: worlds grow; what
             // overreaches the system's rim crosses into the galaxy.
-            let (escaped, settled) = crate::formation::settle_system(&mut sys, &unit, r_now, r_echo, rang, bell);
+            let (escaped, settled) = crate::formation::settle_system(&mut sys, &unit, r_echo, rang, bell);
             let (st, bo, star_identity, made, weighs, met_by): (usize, usize, Vec<(&'static str, Ratio)>, (usize, usize, usize, usize), [Ratio; 4], (usize, usize, usize)) = (settled.joins, 0, vec![("system", settled.residual.clone())], (settled.formed, settled.ignited, 0, 0), [ratio(0, 1), ratio(0, 1), settled.worlds_mass.clone(), settled.worlds_nuclei.clone()], (0, 0, 0));
                 impacts = (impacts.0 + met_by.0, impacts.1 + met_by.1, impacts.2 + met_by.2);
                 for (a, b) in weights.iter_mut().zip(weighs) {

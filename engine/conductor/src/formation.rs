@@ -1187,100 +1187,35 @@ pub fn collide_stars(stars: Vec<crate::pulse::Body>, c_pre: Vec<Ratio>, scale: &
     (out, sticks, bounces)
 }
 
-/// THE KICKS OVER THE AGE (xylarium 11.0 (52), its time; netstratum's
-/// square-free reading, operator 2026-10-26: "wire it"): two neighbours at
-/// rates `ω_i, ω_j` a ring meet once a synodic turn, so over the age `a` (the
-/// rings their star's clock received since its birth, `breath::system_clock`
-/// nested in the galaxy's and the universe's) they meet `N = a·|ω_i − ω_j|`
-/// times. Each meeting turns one by `ε = (m/(r(r + m)))/|Δω|` (the other's
-/// pull a ring over the rings between meetings), an excursion `ε·R` at its
-/// reach. The meetings are never random in an exact universe: the encounter
-/// phase steps by `s = frac(ω_i/Δω)`, rational, so the kicks repeat with
-/// period q, the denominator of the simplest `p/q` that tracks s over the
-/// age (`|s − p/q| ≤ 1/(N·q)`, from s's continued fraction). Over a period
-/// the hemisphere law's responses cancel but for one, its residual `c =
-/// in_step(q·ψ_0)` at their phase offset ψ_0 (the star's own phase common to
-/// both cancels: the offset is read against the star's lock). THE DOUBLE
-/// PASS INVERTS IT (docs/96 §8.1; operator 2026-10-27): a period on the
-/// forward leg is followed by one on the return leg through the ring's
-/// image, where the residual's sign turns (`M∘M = id`), so period k leaves
-/// `(−1)^k·c` and the excursion LIBRATES about the lock, never drifting with
-/// the age (`libration`). They CROSS (and join) where its greatest reaches
-/// their gap. Co-orbital pairs (Δω = 0) never meet and never join.
-fn crossed(w_i: &Ratio, w_j: &Ratio, r: &Ratio, m: &Ratio, reach: &Ratio, psi0: &Ratio, age: u64) -> bool {
-    if r.is_zero() {
-        return true;
-    }
-    let dw = if w_i > w_j { w_i.clone() - w_j.clone() } else { w_j.clone() - w_i.clone() };
-    if dw.is_zero() || age == 0 {
+/// THE ECHO HOLDS ITS NEIGHBOUR (docs/96 §8.2; operator 2026-10-27: "pulses
+/// and echoes", never kicks): a body re-pulses at its own bell and its
+/// neighbour answers the echo every ring at its place, by the pulsing body's
+/// deficit read at their gap in its own enclosure, `m/(r + m)`. Their
+/// turnings differ by `|ω_i − ω_j|` a ring. The pair is held, and joins, where
+/// the stronger echo meets that shear: the crest's binding-against-tide one
+/// tier down, first degree, no age.
+fn echo_holds(w_i: &Ratio, w_j: &Ratio, r: &Ratio, m_i: &Ratio, m_j: &Ratio) -> bool {
+    let m = if m_i > m_j { m_i.clone() } else { m_j.clone() };
+    if m.is_zero() {
         return false;
     }
-    let n_meet = (ratio(i64::try_from(age).unwrap_or(i64::MAX), 1) * dw.clone()).floor();
-    if n_meet.is_zero() {
-        return false;
-    }
-    let eps = m.clone() / (r.clone() * (r.clone() + m.clone())) / dw.clone();
-    // The encounter phase's step and the period it repeats on over the age.
-    let s = {
-        let x = w_i.clone() / dw.clone();
-        x.clone() - x.floor()
-    };
-    let q = {
-        // Continued-fraction convergents of s: the first that tracks it over N.
-        let (mut h0, mut h1) = (num_bigint::BigInt::from(0), num_bigint::BigInt::from(1));
-        let (mut k0, mut k1) = (num_bigint::BigInt::from(1), num_bigint::BigInt::from(0));
-        let mut x = s.clone();
-        let mut q_found: Option<num_bigint::BigInt> = None;
-        for _ in 0..64 {
-            let a = x.floor().to_integer();
-            let (h2, k2) = (a.clone() * h1.clone() + h0.clone(), a * k1.clone() + k0.clone());
-            let approx = Ratio::new(h2.clone(), k2.clone());
-            let gap = if approx > s { approx - s.clone() } else { s.clone() - approx };
-            if gap * n_meet.clone() * Ratio::from_integer(k2.clone()) <= ratio(1, 1) {
-                q_found = Some(k2.clone());
-                break;
-            }
-            h0 = h1;
-            h1 = h2;
-            k0 = k1;
-            k1 = k2;
-            let f = x.clone() - x.floor();
-            if f.is_zero() {
-                break;
-            }
-            x = ratio(1, 1) / f;
-        }
-        Ratio::from_integer(q_found.unwrap_or_else(|| s.denom().clone()))
-    };
-    let c = crate::flows::in_step(&(q.clone() * psi0.clone()), &ratio(0, 1));
-    eps * reach.clone() * libration(&n_meet, &q, &c) >= *r
+    let shear = if w_i > w_j { w_i.clone() - w_j.clone() } else { w_j.clone() - w_i.clone() };
+    m.clone() / (r.clone() + m) >= shear
 }
 
-/// THE GREATEST EXCURSION OVER N MEETINGS, in kicks, the residual `c` of
-/// each period of `q` inverted on every return leg (docs/96 §8.1): with
-/// `P = ⌊N/q⌋`, `ρ = N mod q`, it is ρ at P = 0, `max(q − 1, c + ρ)` at
-/// P = 1, and `c + q − 1` from P = 2 on: bounded, the age past two periods
-/// no longer moving it.
-fn libration(n_meet: &Ratio, q: &Ratio, c: &Ratio) -> Ratio {
-    let periods = (n_meet.clone() / q.clone()).floor();
-    let rest = n_meet.clone() - periods.clone() * q.clone();
-    let last = q.clone() - ratio(1, 1);
-    if periods.is_zero() {
-        rest
-    } else if periods == ratio(1, 1) {
-        last.max(c.clone() + rest)
-    } else {
-        c.clone() + last
-    }
+/// A SOLID ORBIT (docs/96 §8.2): a standing world that has turned at least
+/// once since it last stood, `2ω·r_echo ≥ 1` (its closed-form advance over
+/// the echo's rings). Only orbits still forming meet.
+fn solid(standing: bool, omega: &Ratio, r_echo: u64) -> bool {
+    standing && ratio(2, 1) * omega.clone() * Ratio::from_integer(num_bigint::BigInt::from(r_echo)) >= ratio(1, 1)
 }
 
 /// THE SYSTEM'S WORLDS BY CONVERGENCE (xylarium 11.0 (52), the N-body master
 /// equation, read on our strip; operator 2026-10-26: "build it"). Every other
-/// body turns a body toward itself and never speeds it up, so neighbours
-/// stand apart only while their differential turning outruns the turning
-/// each gives the other: `|ω_i − ω_j| ≥ m/(r·(r + m))` for each of the pair
-/// (`ω = 2δ` a bell, `δ = H(<R)/(R + H(<R))`, r their gap, m the other's
-/// share, c = 1). Where the test fails their paths converge and they JOIN.
+/// body's echo holds its neighbour where it meets their difference in
+/// turning (`echo_holds`, docs/96 §8.2): there their paths converge and they
+/// JOIN, but only where at least one is still forming its orbit; two solid
+/// orbits never meet (`solid`).
 /// The system's loose matter starts as small bodies, each kind at the reach
 /// its heart's cut carries it to, with every world already standing; pairs
 /// that fail the test join (all at once, then read again) until every
@@ -1296,7 +1231,7 @@ fn libration(n_meet: &Ratio, q: &Ratio, c: &Ratio) -> Ratio {
 /// re-reading moves is booked to the system's medium. Returns (what left
 /// past the loop, worlds formed, the spin moved).
 #[allow(clippy::too_many_arguments)]
-pub fn settle_system(sys: &mut crate::pulse::Body, unit: &Ratio, age: u64, r_echo: u64, rang: bool, bell: u64) -> (Manifest, Settled) {
+pub fn settle_system(sys: &mut crate::pulse::Body, unit: &Ratio, r_echo: u64, rang: bool, bell: u64) -> (Manifest, Settled) {
     let mut escaped = Manifest::new();
     let mut read = Settled::default();
     let total = mass(&sys.total());
@@ -1379,11 +1314,10 @@ pub fn settle_system(sys: &mut crate::pulse::Body, unit: &Ratio, age: u64, r_ech
         let mut join = vec![false; n - 1];
         for i in 0..n - 1 {
             let r = bodies[i + 1].0.clone() - bodies[i].0.clone();
-            let psi0 = crate::flows::SPACE.iter().fold(ratio(0, 1), |s, &kp| s + bodies[i].3.get(kp).cloned().unwrap_or_else(|| ratio(0, 1)) - bodies[i + 1].3.get(kp).cloned().unwrap_or_else(|| ratio(0, 1))) / ratio(3, 1);
-            // The excursion each gives the other over the system's age (the
-            // larger reads the pair): its pull a ring at their gap, `m/(r(r + m))`.
-            let reach = bodies[i].0.clone();
-            join[i] = [&bodies[i + 1].1, &bodies[i].1].iter().any(|m| crossed(&omega[i], &omega[i + 1], &r, m, &reach, &psi0, age));
+            // Two solid orbits never meet; a forming one meets where the
+            // stronger echo holds against their shear.
+            let both_solid = solid(bodies[i].5.is_some(), &omega[i], r_echo) && solid(bodies[i + 1].5.is_some(), &omega[i + 1], r_echo);
+            join[i] = !both_solid && echo_holds(&omega[i], &omega[i + 1], &r, &bodies[i].1, &bodies[i + 1].1);
         }
         if !join.iter().any(|j| *j) {
             break;
@@ -1567,37 +1501,26 @@ mod crest_tests {
 }
 
 #[cfg(test)]
-mod crossing_tests {
-    use super::crossed;
+mod echo_tests {
+    use super::{echo_holds, solid};
     use cfe::ratio::ratio;
 
     #[test]
-    fn neighbours_cross_by_their_kicks_over_the_age_never_by_a_ruler() {
-        let (r, m, reach, psi) = (ratio(1, 10), ratio(1, 100), ratio(1, 1), ratio(0, 1));
-        // Co-orbital: they never meet, however old.
-        assert!(!crossed(&ratio(1, 3), &ratio(1, 3), &r, &m, &reach, &psi, 1_000_000));
-        // No age, no meetings.
-        assert!(!crossed(&ratio(1, 3), &ratio(1, 4), &r, &m, &reach, &psi, 0));
-        // THE DOUBLE PASS (docs/96 §8.1): a light pair at a 2:1 (each kick
-        // 4·10^-4 of a gap of 0.1) stands old as it stood young: its
-        // residual inverts on every return leg and librates.
-        let light = ratio(1, 1_000_000);
-        let young = crossed(&ratio(1, 2), &ratio(1, 4), &r, &light, &reach, &psi, 10);
-        let old = crossed(&ratio(1, 2), &ratio(1, 4), &r, &light, &reach, &psi, 10_000_000);
-        assert!(!young && !old, "a resonance librates, it does not drift");
-        // A pair whose own kick reaches its gap joins at its first meeting.
-        assert!(crossed(&ratio(1, 2), &ratio(1, 4), &ratio(1, 100), &ratio(1, 10), &reach, &psi, 4));
-        // The greatest excursion is the same at 2q meetings and any later.
-        let (q, c) = (ratio(7, 1), ratio(3, 5));
-        let at_2q = super::libration(&ratio(14, 1), &q, &c);
-        for n in [15i64, 21, 1_000, 10_000_000] {
-            assert_eq!(super::libration(&ratio(n, 1), &q, &c), at_2q.clone());
-        }
-        assert_eq!(at_2q, ratio(33, 5));
-        // Before its first period, the raw kicks so far.
-        assert_eq!(super::libration(&ratio(5, 1), &q, &c), ratio(5, 1));
-        // Far apart for their masses, they stand even when old.
-        assert!(!crossed(&ratio(1, 2), &ratio(1, 4), &ratio(1, 1), &ratio(1, 1_000_000), &reach, &psi, 1000));
+    fn neighbours_join_by_their_echoes_and_solid_orbits_never_meet() {
+        // Co-orbital: no shear, any echo holds them.
+        assert!(echo_holds(&ratio(1, 3), &ratio(1, 3), &ratio(1, 10), &ratio(1, 100), &ratio(0, 1)));
+        // A light pair at a 2:1 (echo 10^-5 against a shear of ¼) stands,
+        // however long it turns: no age enters.
+        assert!(!echo_holds(&ratio(1, 2), &ratio(1, 4), &ratio(1, 10), &ratio(1, 1_000_000), &ratio(1, 1_000_000)));
+        // A heavy close neighbour holds its partner: echo 10/11 against ¼.
+        assert!(echo_holds(&ratio(1, 2), &ratio(1, 4), &ratio(1, 100), &ratio(1, 10), &ratio(0, 1)));
+        // The stronger echo reads the pair, whichever side it stands on.
+        assert_eq!(echo_holds(&ratio(1, 2), &ratio(1, 4), &ratio(1, 100), &ratio(1, 10), &ratio(0, 1)), echo_holds(&ratio(1, 2), &ratio(1, 4), &ratio(1, 100), &ratio(0, 1), &ratio(1, 10)));
+        // SOLID: a standing world once round since it stood; the pool's
+        // bodies are always forming.
+        assert!(solid(true, &ratio(1, 4), 2));
+        assert!(!solid(true, &ratio(1, 4), 1));
+        assert!(!solid(false, &ratio(1, 4), 1_000));
     }
 }
 
