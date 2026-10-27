@@ -275,6 +275,24 @@ pub fn in_step(a: &Ratio, b: &Ratio) -> Ratio {
     ratio(1, 1) - ratio(2, 1) * off(&(a.clone() - b.clone()))
 }
 
+/// QUANTUM TORSION (docs/100 §8; the bounce is Einstein–Cartan, torsion
+/// couples to spin): the winding a quantum state keeps from the twist, its
+/// lead between planes against its enclosure's plane, `τ = Σ_k |t_k −
+/// t̄_k|/2` (L1, in `[0, 1]`: 0 settled, 1 wound wholly into a plane its
+/// enclosure does not turn in). Kept as the tilt, relaxed by the attractor
+/// law (`settle_disc`), never a scalar of its own.
+pub fn torsion(tilt: &[Ratio], plane: &[Ratio]) -> Ratio {
+    let (t, p) = (tilt_of(tilt), tilt_of(plane));
+    t.iter().zip(&p).fold(ratio(0, 1), |s, (a, b)| s + if a > b { a.clone() - b.clone() } else { b.clone() - a.clone() }) / ratio(2, 1)
+}
+
+/// Its SENSE (docs/100 §8): the winding turns with the route, forward on the
+/// continuum leg, backward on the vacuum leg, so a Möbius pass reverses it.
+pub fn torsion_signed(x: &Mote, plane: &[Ratio]) -> Ratio {
+    let t = torsion(&x.tilt, plane);
+    if x.vacuum { -t } else { t }
+}
+
 /// A MOTE'S STEP WITH A BODY'S PHASE (docs/99 §2.2; operator 2026-10-27:
 /// "we shouldnt have frames we should have phases"): its in-step share
 /// across the spatial planes by its own orbit's shares (its tilt, L1; a plane
@@ -1832,6 +1850,29 @@ mod passage_tests {
         assert!(x.vacuum && x.phase[0] == ratio(4, 5), "one pass: the other leg, half a turn on");
         mobius(&mut x);
         assert_eq!(x, was, "two passes close");
+    }
+
+    #[test]
+    fn torsion_is_the_lead_kept_it_relaxes_by_the_attractor_and_turns_with_the_leg() {
+        use super::{mobius, settle_disc, torsion, torsion_signed, Enclosed, Mote};
+        let flat = vec![ratio(1, 1), ratio(0, 1), ratio(0, 1)];
+        // Settled in its enclosure's plane: none; wound wholly into another: 1.
+        assert_eq!(torsion(&flat, &flat), ratio(0, 1));
+        assert_eq!(torsion(&[ratio(0, 1), ratio(1, 1), ratio(0, 1)], &flat), ratio(1, 1));
+        assert_eq!(torsion(&[ratio(1, 2), ratio(1, 2), ratio(0, 1)], &flat), ratio(1, 2));
+        // The Möbius pass reverses its sense.
+        let mut x = Mote { key: crate::chem::Kind::parse("W0001").expect("a kind"), amount: ratio(1, 1), ell_o: ratio(3, 1), ell_orth: ratio(0, 1), phase: super::rest(ratio(1, 10)), agitation: ratio(0, 1), born: 0, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1), tilt: vec![ratio(1, 2), ratio(1, 2), ratio(0, 1)] };
+        let before = torsion_signed(&x, &flat);
+        mobius(&mut x);
+        assert_eq!(torsion_signed(&x, &flat), -before);
+        mobius(&mut x);
+        // Relaxed by the attractor law: a wound mote among settled ones keeps
+        // the share `turned/(d + turned)` of its lead, exactly.
+        let heavy = Mote { amount: ratio(1000, 1), tilt: flat.clone(), ..x.clone() };
+        let mut motes = vec![heavy, x.clone()];
+        let enc = Enclosed::new(ratio(1, 1), Vec::new());
+        let plane = settle_disc(&mut motes, &enc);
+        assert!(torsion(&motes[1].tilt, &plane) < torsion(&x.tilt, &plane), "the lead loosens");
     }
 
     #[test]

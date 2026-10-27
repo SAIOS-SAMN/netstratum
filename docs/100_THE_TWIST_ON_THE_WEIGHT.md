@@ -232,7 +232,7 @@ given or taken. Nucleons conserved; weight unchanged; the table unchanged.
    owed). Witness: a
    released mote's tilt is the core's; it relaxes by the attractor law; the
    Möbius pass reverses its sense.
-5. **Quantum torsion** (§8): `τ` read from the lead; spin's sense by leg.
+5. **Quantum torsion** (§8, BUILT: `flows::torsion`, `torsion_signed`): `τ` read from the lead; spin's sense by leg.
    Witness: a settled mote reads 0; a Möbius pass reverses the winding's
    sign; relaxation by the attractor law, exact.
 6. **Twist in the bond and the fibres' transition** (§5, §9.2): bond with
