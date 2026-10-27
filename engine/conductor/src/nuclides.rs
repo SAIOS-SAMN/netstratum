@@ -33,6 +33,67 @@ pub fn directions(l: u64) -> u64 {
     choose(l + 11, 11) - if l >= 2 { choose(l + 9, 11) } else { 0 }
 }
 
+/// A NUCLIDE'S PLACE ON S^11 (docs/100 §1; xylarium 11.0 (13): "a kind's
+/// HARMONIC WEIGHT is its place, never its mass alone"), read off the
+/// convergence as its last end arrived: its turning `n` (it holds the
+/// degrees `0..n − 1` closed), its open degree `l` (the harmonic its outer
+/// ends stand on), and of that degree's `dirs` directions the ends claimed
+/// (`lone + bound`) and the fibres paired (`bound`).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Place {
+    pub turning: u64,
+    pub degree: u64,
+    pub dirs: u64,
+    pub lone: u64,
+    pub bound: u64,
+}
+
+impl Place {
+    /// Its outer degree's claimed share, `(lone + bound)/dirs`.
+    pub fn claimed(&self) -> cfe::ratio::Ratio {
+        cfe::ratio::ratio(i64::try_from(self.lone + self.bound).unwrap_or(i64::MAX), i64::try_from(self.dirs.max(1)).unwrap_or(i64::MAX))
+    }
+
+    /// Its outer degree's paired share, `bound/dirs` (1 at every seal).
+    pub fn paired(&self) -> cfe::ratio::Ratio {
+        cfe::ratio::ratio(i64::try_from(self.bound).unwrap_or(i64::MAX), i64::try_from(self.dirs.max(1)).unwrap_or(i64::MAX))
+    }
+}
+
+/// The place of the nuclide of weight `w` (None past the read or at 0).
+pub fn place(w: u32) -> Option<Place> {
+    places().get(usize::try_from(w).ok()?.checked_sub(1)?).copied()
+}
+
+fn places() -> &'static [Place] {
+    static PLACES: std::sync::OnceLock<Vec<Place>> = std::sync::OnceLock::new();
+    PLACES.get_or_init(|| {
+        let mut out = Vec::with_capacity(READ as usize);
+        let (mut turning, mut degree) = (1u64, 0u64);
+        let (mut lone, mut bound) = (0u64, 0u64);
+        for _ in 0..READ {
+            let dirs = directions(degree);
+            if lone + bound < dirs {
+                lone += 1;
+            } else {
+                lone -= 1;
+                bound += 1;
+            }
+            out.push(Place { turning, degree, dirs, lone, bound });
+            if bound == dirs {
+                degree += 1;
+                lone = 0;
+                bound = 0;
+                if degree == turning {
+                    turning += 1;
+                    degree = 0;
+                }
+            }
+        }
+        out
+    })
+}
+
 /// The nucleus of weight `w` (index w − 1): (protons Q, neutrons Z).
 fn table() -> &'static [(u32, u32)] {
     static NUCLEI: std::sync::OnceLock<Vec<(u32, u32)>> = std::sync::OnceLock::new();
@@ -353,6 +414,26 @@ mod tests {
         assert_eq!(of_protons(2), Some(3));
         assert_eq!(binds(2), Some(true));
         assert_eq!(binds(3), Some(false));
+    }
+
+    #[test]
+    fn a_nuclides_place_is_read_off_the_convergence() {
+        // Every seal pairs its outer degree whole; its protons and neutrons
+        // follow the place (Q = Z + lone, Z the fibres closed and open).
+        for w in [2u32, 28, 208, 1092] {
+            let p = place(w).expect("a place");
+            assert_eq!(p.paired(), ratio(1, 1), "seal {w}");
+            assert_eq!(p.claimed(), ratio(1, 1));
+        }
+        // Hydrogen: one lone end on the first degree of the first turning.
+        let h = place(1).expect("hydrogen");
+        assert_eq!((h.turning, h.degree, h.lone, h.bound), (1, 0, 1, 0));
+        // The lone ends of the open degree are the protons past the fibres.
+        for w in [3u32, 100, 1200, 1612] {
+            let p = place(w).expect("a place");
+            assert_eq!(protons(w).zip(neutrons(w)).map(|(q, z)| q - z), Some(u32::try_from(p.lone).expect("small")), "weight {w}");
+            assert!(p.claimed() <= ratio(1, 1));
+        }
     }
 
     #[test]

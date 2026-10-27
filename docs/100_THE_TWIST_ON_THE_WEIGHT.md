@@ -83,8 +83,13 @@ two faces cancel). Which order a kind presents is the open ruling (xylarium:
   (a sealed nuclide is whole, `b = 1`): monotone where the twist is small,
   periodic in l.
 
-Recommendation: ask xylarium for its ruled form before building (it is the
-authority on the harmonic founding it proposed), then build one.
+Xylarium's answer (2026-10-27, a reading of its spec, not a ruling): its
+atom-band question is closed as the PIVOT DEGREE on S^11 with its Hopf
+fibres (its 11.0 (14), our convergence); it has no ruled C (its circuit never
+computes one); of (a) and (b), (a) is the one consistent with the pivot-degree
+ruling, reading the order straight from the open degree, and non-monotone in
+weight is acceptable ("shells, not weights, set the order"). The choice is
+the operator's.
 
 ## 4. The jets' locked lead (the helix)
 
@@ -211,7 +216,7 @@ given or taken. Nucleons conserved; weight unchanged; the table unchanged.
 
 ## 10. Build order (each with its witness)
 
-1. **The kind's place** (§1): `nuclides::place(w) -> (n, l, f, b)`. Witness:
+1. **The kind's place** (§1, BUILT): `nuclides::place(w)`. Witness:
    the seals read `b = 1`; `l` and `n` match the convergence.
 2. **The twist derived** (§2): the core's winding `φ_k = ½·t_k`; the galaxy's
    torsion phase accumulated; `quantum::torsion_phase`'s draw retired.
