@@ -919,7 +919,9 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 // bell, on both legs), breaks what it out-grips at its pulse
                 // phase into nucleons; THE RAPID CAPTURE (§10) then runs on
                 // them at that phase.
-                let heart_heat = crate::nuclides::heat(&h_s, &nu);
+                // Its torsion adds to the heat against the grip (docs/100
+                // §9.2: the fibres part where `a + τ > κ_w·h`).
+                let heart_heat = crate::nuclides::heat(&h_s, &nu) + crate::flows::torsion(&sys.tilt, &core.tilt);
                 crate::nuclides::release(&mut all, &heart_heat, &pulse_p);
                 crate::nuclides::capture_rapid(&mut all, &pulse_p, densest);
                 returned += mass(&all) / unit.clone();
@@ -959,7 +961,9 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 // bell, on both legs), breaks what it out-grips at its pulse
                 // phase into nucleons; THE RAPID CAPTURE (§10) then runs on
                 // them at that phase.
-                let heart_heat = crate::nuclides::heat(&h_s, &nu);
+                // Its torsion adds to the heat against the grip (docs/100
+                // §9.2: the fibres part where `a + τ > κ_w·h`).
+                let heart_heat = crate::nuclides::heat(&h_s, &nu) + crate::flows::torsion(&sys.tilt, &core.tilt);
                 crate::nuclides::release(&mut all, &heart_heat, &pulse_p);
                 crate::nuclides::capture_rapid(&mut all, &pulse_p, densest);
                 returned += mass(&all) / unit.clone();
@@ -1590,6 +1594,15 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 // CARRIED SPINS ADD: the star's own spin, captured from the
                 // spread of what fell, is the turning its heart cut adds to
                 // every kind (no weight ratio).
+                // THE FIBRES' TRANSITION AT IGNITION (docs/100 §9.2): what fell
+                // parts where its heat and its members' torsion pass its
+                // nuclei's grip, read at the binding's own pulse phase (its
+                // R-loop phase); the parted stand as hydrogen, the new
+                // heart's fuel. Nucleons conserved.
+                let mut star = star;
+                let tau_b = crate::flows::torsion(&crate::flows::blend(&members.iter().map(|x| (x.amount.clone() * crate::flows::weight(&x.key), x.ell_o.clone(), x.tilt.clone())).collect::<Vec<_>>()), &core.tilt);
+                let p_b = phases_own.get(crate::flows::LOOP).cloned().unwrap_or_else(|| ratio(0, 1));
+                crate::nuclides::release(&mut star, &(a_binding.clone() + tau_b), &p_b);
                 let lit = crate::formation::ignition_share(&a_binding).and_then(|_| crate::formation::system(&star, outside, &whole_mass, &a_binding, &fell_spins, &path, &tide));
                 let Some((kept, medium, medium_spin, disc_motes)) = lit else {
                     // No heart: the members go on as they were.

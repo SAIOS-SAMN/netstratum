@@ -1408,7 +1408,11 @@ pub fn band_pairs(motes: &[Mote], enc: &Enclosed, p: &Ratio, plane: &[Ratio], g_
             continue;
         }
         let a = crate::ring::grain(&(members.iter().fold(ratio(0, 1), |acc, (i, s)| acc + held_of(*i, s) * motes[*i].agitation.clone()) / m.clone()));
-        let Some((_, count)) = crate::formation::crest_collapse(&m, &mu, &a, &mid, &h_mid) else { continue };
+        // Its members' net lead (their tilts blended by holding: aligned
+        // leads add, opposed cancel) against the disc plane, by holding.
+        let lead = blend(&members.iter().map(|(i, s)| (held_of(*i, s), motes[*i].ell_o.clone(), motes[*i].tilt.clone())).collect::<Vec<_>>());
+        let tau = m.clone() * torsion(&lead, plane);
+        let Some((_, count)) = crate::formation::crest_collapse(&m, &mu, &tau, &a, &mid, &h_mid) else { continue };
         if count == 0 {
             continue;
         }

@@ -235,7 +235,9 @@ given or taken. Nucleons conserved; weight unchanged; the table unchanged.
 5. **Quantum torsion** (§8, BUILT: `flows::torsion`, `torsion_signed`): `τ` read from the lead; spin's sense by leg.
    Witness: a settled mote reads 0; a Möbius pass reverses the winding's
    sign; relaxation by the attractor law, exact.
-6. **Twist in the bond and the fibres' transition** (§5, §9.2): bond with
+6. **Twist in the bond and the fibres' transition** (§5, §9.2, BUILT: the
+   crest's `λ = 2(m + μ + τ)/R`, τ the members' net lead by holding; the
+   fibres part at ignition and in a dying heart where `a + τ > κ_w·h`): bond with
    the in-step lead; nuclei part where `a + τ > κ_w·h`. Witness: nucleons
    conserved; an unwound sealed nucleus never parts at `a < h`.
 7. **The electrons' transition on the ledgers** (§9.1): chemistry and light

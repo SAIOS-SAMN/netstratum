@@ -525,6 +525,23 @@ mod tests {
     }
 
     #[test]
+    fn twist_is_tension_in_the_fibre_a_wound_seal_parts_where_heat_and_torsion_pass_its_grip() {
+        let k = |w: u32| crate::chem::Kind::atom(w).expect("a nuclide");
+        let p0 = ratio(0, 1);
+        let nucleons = |m: &crate::pulse::Manifest| m.iter().fold(ratio(0, 1), |s, (kk, a)| s + a.clone() * ratio(i64::from(crate::chem::weight(kk)), 1));
+        // The seal at 28 grips 9/14 in step with its echo.
+        assert_eq!(grip(28, &p0), Some(ratio(9, 14)));
+        // Unwound at heat ½ it holds.
+        let mut m: crate::pulse::Manifest = [(k(28), ratio(10, 1))].into();
+        assert_eq!(release(&mut m, &ratio(1, 2), &p0), ratio(0, 1));
+        // Wound by τ = ¼ the same heat passes its grip: it parts to hydrogen.
+        let was = nucleons(&m);
+        assert!(release(&mut m, &(ratio(1, 2) + ratio(1, 4)), &p0) > ratio(0, 1));
+        assert_eq!(nucleons(&m), was);
+        assert!(!m.contains_key(&k(28)));
+    }
+
+    #[test]
     fn r_is_read_at_the_pulse_and_its_mean_is_the_old_half() {
         // One electron is lone: R = 0 at every phase, h = ½.
         assert_eq!(electron_phase(2, &ratio(1, 3)), Some(ratio(0, 1)));
