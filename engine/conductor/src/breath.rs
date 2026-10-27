@@ -389,7 +389,7 @@ pub fn shine_systems(systems: &mut [Body], l: &Ratio, enc: &crate::flows::Enclos
 /// Events in time order. Each echo is a perpendicular write down; each birth
 /// answers it with a perpendicular write up (the galaxy's mass within the
 /// new orbit changes), closing a loop.
-pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u64) -> Vec<Event> {
+pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u64) -> Vec<Event> {
     // The universe's densest element: every climb stops there (docs/97 §14).
     let densest = u.densest;
     let unit = unit_mass(u);
@@ -1231,13 +1231,19 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
             // ring to its dispersal reach `1 + span·c`, turning at the balance
             // of that place, at the throat's own phase for it this bell: its
             // kind's turning there over the isotropic planes, `b·2δ/3`, plus
-            // its captures' half turns `Z/2`, and on spatial plane j the
-            // galaxy's torsion carried j times (the quantum layer, docs/79:
-            // the one asymmetry the founding's laws do not make). The core's
-            // reservoir pays the spin it leaves with (the ledger exact).
+            // its captures' half turns `Z/2`, and on each spatial plane the
+            // core's own WINDING there at this bell (docs/100 §2: the twist,
+            // ½ a turn a ring by the plane's tilt share, over the rings the
+            // core has received; derived, never drawn). It leaves with the
+            // core's twist as its LOCKED LEAD between its planes (its tilt,
+            // docs/100 §4: the jet a helix), loosened later by its own
+            // turning (`flows::settle_disc`). The core's reservoir pays the
+            // spin it leaves with (the ledger exact).
             {
                 let span_r = if home && !whole_u.is_zero() { mass(&core.total()) / whole_u.clone() } else { ratio(1, 1) };
-                let torsion = crate::quantum::torsion_phase(seed, core.path[0]);
+                let rings_now = g_rate.clone().unwrap_or_else(|| ratio(1, 1)) * ratio(bell as i64, 1);
+                let twist_t = crate::flows::tilt_of(&core.tilt);
+                let lead = core.tilt.clone();
                 let enc_r = galaxy_enc(core);
                 let ledger_r = if home { ledger_u.clone() } else { crate::pulse::core_state(core) };
                 let frac = |x: Ratio| x.clone() - x.floor();
@@ -1262,7 +1268,7 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
                     let base = frac(ratio(bell as i64, 1) * ratio(2, 3) * d_k + z.clone());
                     let mut phase = crate::flows::rest(crate::ring::grain(&frac(ratio(1, 2) + z)));
                     for (j, &sp) in crate::flows::SPACE.iter().enumerate() {
-                        phase[sp] = crate::ring::grain(&frac(base.clone() + torsion.clone() * ratio(j as i64, 1)));
+                        phase[sp] = crate::ring::grain(&frac(base.clone() + ratio(1, 2) * twist_t[j].clone() * rings_now.clone()));
                     }
                     if let Some(x) = core.throat.get_mut(&k) {
                         *x -= take.clone();
@@ -1272,7 +1278,7 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
                     }
                     released.0 += 1;
                     released.1 += take.clone() * w / unit.clone();
-                    core.flows.push(crate::flows::Mote { key: k, amount: take, ell_o: ell, ell_orth: ratio(0, 1), phase, agitation: ratio(0, 1), born: bell, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1), tilt: Vec::new() });
+                    core.flows.push(crate::flows::Mote { key: k, amount: take, ell_o: ell, ell_orth: ratio(0, 1), phase, agitation: ratio(0, 1), born: bell, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1), tilt: lead.clone() });
                 }
                 core.throat.retain(|_, a| *a > ratio(0, 1));
                 released.2 = mass(&core.throat) / unit.clone();

@@ -218,13 +218,18 @@ given or taken. Nucleons conserved; weight unchanged; the table unchanged.
 
 1. **The kind's place** (§1, BUILT): `nuclides::place(w)`. Witness:
    the seals read `b = 1`; `l` and `n` match the convergence.
-2. **The twist derived** (§2): the core's winding `φ_k = ½·t_k`; the galaxy's
+2. **The twist derived** (§2, BUILT: `quantum::twist`, the hidden phase
+   `frac(b·φ + b/P)`; the release reads the core's winding per plane; the
+   breath now draws nothing): the core's winding `φ_k = ½·t_k`; the galaxy's
    torsion phase accumulated; `quantum::torsion_phase`'s draw retired.
    Witness: the hidden phase reads the same at N and 4N on the closed form.
 3. **Carriage by harmonic** (§3), after xylarium's ruling on C. Witness: the
    heaviest kinds held at the core; the cascade still conserves nucleons and
    spin.
-4. **The locked lead** (§4) and **the ocean's twist** (§6). Witness: a
+4. **The locked lead** (§4) and **the ocean's twist** (§6) (BUILT: a
+   released mote's tilt is its core's twist; motes leaving for the ocean keep
+   their lead and phases; the founding's slight beads still stand at rest,
+   owed). Witness: a
    released mote's tilt is the core's; it relaxes by the attractor law; the
    Möbius pass reverses its sense.
 5. **Quantum torsion** (§8): `τ` read from the lead; spin's sense by leg.

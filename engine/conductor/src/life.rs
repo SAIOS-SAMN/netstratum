@@ -387,8 +387,8 @@ pub struct Reading {
     pub world: World,
     pub compression: Ratio,
     pub climb: Option<(Ratio, &'static str)>,
-    /// Its turn about its star (bells) and its galaxy's torsion phase: the
-    /// hidden phase of its interactions (docs/79).
+    /// Its turn about its star (bells) and its galaxy's twist a bell (docs/100
+    /// §2, derived): the hidden phase of its interactions (docs/79).
     pub period: Ratio,
     pub torsion: Ratio,
 }
@@ -450,7 +450,7 @@ pub fn wild(w: &World, compression: &Ratio, medium: &str, home_heat: &Ratio) -> 
 }
 
 /// Every world's current reading (refreshed when the universe changes).
-pub fn readings(u: &Universe, seed: &[u8; 32]) -> std::collections::BTreeMap<Vec<u64>, Reading> {
+pub fn readings(u: &Universe, _seed: &[u8; 32]) -> std::collections::BTreeMap<Vec<u64>, Reading> {
     let worlds = worlds(u);
     let mut out = std::collections::BTreeMap::new();
     let Some(home) = home(u) else { return out };
@@ -467,7 +467,12 @@ pub fn readings(u: &Universe, seed: &[u8; 32]) -> std::collections::BTreeMap<Vec
             let sys = core.satellites.iter().find(|s| s.path.get(1) == w.path.get(1))?;
             sys.satellites.iter().find(|o| o.path.get(2) == w.path.get(2)).map(|o| o.kept.clone())
         })();
-        let torsion = crate::quantum::torsion_phase(seed, w.path.first().copied().unwrap_or(0));
+        // Its galaxy's twist a bell (docs/100 §2): derived from its core's
+        // clock and disc plane, never drawn; the home turns on the source's.
+        let torsion = u.cores.iter().position(|c| c.path.first() == w.path.first()).map(|i| {
+            let rate = crate::breath::galaxy_rate(u, i, &crate::breath::unit_mass(u)).unwrap_or_else(|| ratio(1, 1));
+            crate::quantum::twist(&rate, &u.cores[i].tilt)
+        }).unwrap_or_else(|| ratio(0, 1));
         let turn = period.clone().unwrap_or_else(|| ratio(0, 1));
         let climb = period.filter(|_| matter.as_ref().is_some_and(viable)).and_then(|p| {
             [("chemical", &w.chemical), ("geologic", &w.geologic), ("plasmic", &w.plasmic)]
