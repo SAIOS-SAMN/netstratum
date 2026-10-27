@@ -113,8 +113,10 @@ pub fn founding(nuclei: &num_bigint::BigInt) -> Manifest {
     let mut counts: Vec<(u32, BigInt)> = Vec::new();
     // The seeds climb, each step a neutron captured, while neutrons remain.
     let mut arriving = seeds;
-    // At the bounce the echo is the source's own: the pulse phase p = 0.
-    let p0 = ratio(0, 1);
+    // THE FOUNDING'S PULSE PHASE (docs/97 §13): the turn its nucleons have
+    // made when the seal window opens, on the source's clock, `ν·δ_window`.
+    let nu = crate::nuclides::source_clock();
+    let p0 = nu.clone() * crate::nuclides::seal_window(&nu);
     for w in 4..=TABLE {
         if arriving <= zero {
             break;

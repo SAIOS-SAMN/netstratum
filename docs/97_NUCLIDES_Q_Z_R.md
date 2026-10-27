@@ -262,7 +262,12 @@ of p. Read at the body's own phase instead:
   `R = κ_e·(1 − 2·frac(p))` (`nuclides::electron_phase`).
 - **p, the pulse at the body's place:** its phase on the R loop
   (`flows::LOOP`) against the echo reaching it, its galaxy's bell there:
-  `p = φ_LOOP − bell_LOOP`. At the bounce the echo is the source's own, p = 0.
+  `p = φ_LOOP − bell_LOOP`. At the bounce, the founding's phase is the turn
+  its nucleons have made when the seal window opens, on the source's clock:
+  `p = ν·δ_window = 1 + grip_2` (3/2 at ν = 2), so frac(p) = ½ and R = 0:
+  the bounce is hot, its electrons free of the bound face. (Read first at
+  p = 0, fully bound, the founding climbed nearly all its seeds and left
+  hydrogen 0.04 by mass: the error the reading corrects.)
 - **The held hemisphere** `h = (1 + R)/2` (`nuclides::held`): the share of a
   lone end standing on the held face. Its mean over p is ½, the old static.
 - **Survival** `σ_{w+1} = κ + (1 − κ)·h` (bound, or lone on the held
