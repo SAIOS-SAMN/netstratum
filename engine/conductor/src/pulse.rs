@@ -81,10 +81,6 @@ pub fn from_nuclei(nuclei: &Nuclei) -> Manifest {
         .collect()
 }
 
-/// The founding's table: every nuclide to this weight (docs/97 §12, the
-/// operator's ruling of 2026-10-27).
-pub const TABLE: u32 = 1200;
-
 /// BOUNCE NUCLEOSYNTHESIS (docs/97 §8–§12). The bounce's matter cools from the
 /// core on the source's own clock and its nucleons exchange poles every pass,
 /// booked both ways.
@@ -95,7 +91,9 @@ pub const TABLE: u32 = 1200;
 ///   odd deuteron stands.
 /// - THE TABLE: the seeds climb the nucleus's convergence on the free
 ///   neutrons, each staying at w with `1 − σ_{w+1}` and climbing on with
-///   `σ_{w+1} = κ + (1 − κ)·h` at the bounce's own phase (docs/97 §13), to `TABLE`; every climb a neutron captured.
+///   `σ_{w+1} = κ + (1 − κ)·h` at the bounce's own phase (docs/97 §13), until
+///   less than one whole nucleus arrives (docs/97 §14: no fixed cap; 1612 at
+///   2^55 grains); every climb a neutron captured.
 /// - The free neutrons left return to the continuum as hydrogen.
 /// Returns the manifest by nuclide, in grains (whole nuclei however few);
 /// nucleons conserved exactly.
@@ -117,15 +115,11 @@ pub fn founding(nuclei: &num_bigint::BigInt) -> Manifest {
     // made when the seal window opens, on the source's clock, `ν·δ_window`.
     let nu = crate::nuclides::source_clock();
     let p0 = nu.clone() * crate::nuclides::seal_window(&nu);
-    for w in 4..=TABLE {
+    for w in 4..crate::nuclides::READ {
         if arriving <= zero {
             break;
         }
-        let climb = if w < TABLE {
-            crate::nuclides::survival(w + 1, &p0).map(|s| (Ratio::from_integer(arriving.clone()) * s).floor().to_integer()).unwrap_or_else(|| zero.clone()).min(free.clone())
-        } else {
-            zero.clone()
-        };
+        let climb = crate::nuclides::survival(w + 1, &p0).map(|s| (Ratio::from_integer(arriving.clone()) * s).floor().to_integer()).unwrap_or_else(|| zero.clone()).min(free.clone());
         let stay = &arriving - &climb;
         if stay > zero {
             counts.push((w, stay));
@@ -509,6 +503,11 @@ pub struct Universe {
     /// whole bells. "The bounce grows, the echo grows ... to the steady
     /// implosion of the echo bubble." Saves from before read the stand-in.
     pub t_u: u64,
+    /// THE DENSEST ELEMENT (tag 25; docs/97 §14, operator 2026-10-27: "no
+    /// fixed cap"): the founding's heaviest nuclide, where its climb ended;
+    /// every later climb (the stars' captures, the burn's product) stops
+    /// there.
+    pub densest: u32,
 }
 
 /// THE PULSE: the manifest deployed from `seed`. The unit of mass is the
@@ -942,7 +941,8 @@ pub fn deploy(manifest: &Manifest) -> Option<Universe> {
     }
     // Nothing is placed (docs/96): stars and worlds gather from what the
     // bounces release and the void distributes.
-    Some(Universe { cores, ocean, firmament, unit, t_u })
+    let densest = manifest.keys().filter_map(crate::chem::atom_w).max().unwrap_or(1);
+    Some(Universe { cores, ocean, firmament, unit, t_u, densest })
 }
 
 /// THE GALAXIES ORBIT, DERIVED (operator 2026-10-19: "fixed reach and
@@ -1274,6 +1274,7 @@ pub fn write(var_root: &Path, seed: &[u8; 32], u: &Universe) -> std::io::Result<
     cfe::ratio::encode(&u.unit, &mut w);
     cfe::tlv::put(8, &w, &mut out);
     cfe::tlv::put(17, &u.t_u.to_le_bytes(), &mut out);
+    cfe::tlv::put(25, &u.densest.to_le_bytes(), &mut out);
     for (tag, x) in u.firmament.iter().map(|x| (19u8, x)).chain(u.ocean.iter().map(|x| (24u8, x))) {
         let mut w = Vec::new();
         let key = x.key.to_string();
@@ -1410,6 +1411,7 @@ pub fn read(var_root: &Path) -> Option<([u8; 32], Universe)> {
     let mut ocean: Vec<crate::flows::Mote> = Vec::new();
     let mut unit: Option<Ratio> = None;
     let mut t_u: Option<u64> = None;
+    let mut densest: Option<u32> = None;
     let mut firmament: Vec<crate::flows::Mote> = Vec::new();
     let mut flat: Vec<Body> = Vec::new();
     // A universe is read whole or refused: the spin ledger's format (tag 5),
@@ -1433,6 +1435,7 @@ pub fn read(var_root: &Path) -> Option<([u8; 32], Universe)> {
             7 => flat.last_mut()?.born = u64::from_le_bytes(v.try_into().ok()?),
             8 => unit = Some(cfe::ratio::decode(v)?.0),
             17 => t_u = Some(u64::from_le_bytes(v.try_into().ok()?)),
+            25 => densest = Some(u32::from_le_bytes(v.try_into().ok()?)),
             19 => firmament.push(get_flow(v)?),
             9 => flat.last_mut()?.state = cfe::ratio::decode(v)?.0,
             10 => flat.last_mut()?.flows.push(get_flow(v)?),
@@ -1472,7 +1475,9 @@ pub fn read(var_root: &Path) -> Option<([u8; 32], Universe)> {
         }
     }
     let (unit, t_u) = (unit.filter(|u| !u.is_zero())?, t_u?);
-    Some((seed?, Universe { cores, ocean, firmament, unit, t_u }))
+    // A save from before the densest was recorded climbs to the read.
+    let densest = densest.unwrap_or(crate::nuclides::READ - 1);
+    Some((seed?, Universe { cores, ocean, firmament, unit, t_u, densest }))
 }
 
 #[cfg(test)]
@@ -1480,9 +1485,22 @@ mod tests {
     use super::*;
 
     #[test]
+    fn the_founding_climbs_to_its_own_densest_element_no_fixed_cap() {
+        // At 2^55 grains the climb ends where less than one whole nucleus
+        // arrives: weight 1612 (docs/97 §14), nucleons conserved.
+        let n = num_bigint::BigInt::from(2u32).pow(55) * super::nuclei_per_grain() * num_bigint::BigInt::from(1024);
+        let m = super::founding(&n);
+        let top = m.keys().filter_map(crate::chem::atom_w).max();
+        assert_eq!(top, Some(1612));
+        let grid = super::nuclei_per_grain() * num_bigint::BigInt::from(1024);
+        let nucleons = m.iter().fold(ratio(0, 1), |s, (k, a)| s + a.clone() * ratio(i64::from(crate::chem::weight(k)), 1));
+        assert_eq!(nucleons * Ratio::from_integer(grid), Ratio::from_integer(n));
+    }
+
+    #[test]
     fn a_universe_file_without_its_unit_is_refused() {
         let dir = std::env::temp_dir().join(format!("ns-refuse-unit-{}", std::process::id()));
-        let u = Universe { cores: Vec::new(), ocean: vec![crate::flows::Mote { key: crate::chem::Kind::parse("W0001").expect("a kind"), amount: ratio(1, 1), ell_o: ratio(1, 3), ell_orth: ratio(0, 1), phase: crate::flows::rest(ratio(1, 2)), agitation: ratio(0, 1), born: 0, vacuum: true, lever: Vec::new(), lever_place: ratio(0, 1), tilt: Vec::new() }], firmament: Vec::new(), unit: ratio(1, 2), t_u: 15 };
+        let u = Universe { cores: Vec::new(), ocean: vec![crate::flows::Mote { key: crate::chem::Kind::parse("W0001").expect("a kind"), amount: ratio(1, 1), ell_o: ratio(1, 3), ell_orth: ratio(0, 1), phase: crate::flows::rest(ratio(1, 2)), agitation: ratio(0, 1), born: 0, vacuum: true, lever: Vec::new(), lever_place: ratio(0, 1), tilt: Vec::new() }], firmament: Vec::new(), unit: ratio(1, 2), t_u: 15, densest: 1200 };
         write(&dir, &[7u8; 32], &u).expect("written");
         assert!(read(&dir).is_some());
         let bytes = std::fs::read(dir.join("pulse.bin")).expect("read");
@@ -1522,7 +1540,7 @@ mod tests {
         let orb = Body { ell_orth: ratio(0, 1), path: vec![1, 1, 1], radius: ratio(3, 2), period: ratio(5, 2), kept: [(crate::chem::Kind::parse("W0010").expect("a kind"), ratio(1, 64))].into(), satellites: Vec::new(), medium: Manifest::new(), ell: ratio(7, 3), medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1), tilt: Vec::new(), throat: Default::default() };
         let sys = Body { ell_orth: ratio(0, 1), path: vec![1, 1], radius: ratio(9, 2), period: ratio(11, 2), kept: [(crate::chem::Kind::parse("W0001").expect("a kind"), ratio(3, 1024))].into(), satellites: vec![orb], medium: Manifest::new(), ell: ratio(1, 9), medium_spin: ratio(1, 7), gas: Vec::new(), born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1), tilt: Vec::new(), throat: Default::default() };
         let core = Body { ell_orth: ratio(0, 1), path: vec![1], radius: ratio(60, 1), period: ratio(0, 1), kept: [(crate::chem::Kind::parse("W0041").expect("a kind"), ratio(1, 2))].into(), satellites: vec![sys], medium: [(crate::chem::Kind::parse("W0001").expect("a kind"), ratio(5, 4))].into(), ell: ratio(0, 1), medium_spin: ratio(13, 11), gas: vec![mote], born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1), tilt: Vec::new(), throat: Default::default() };
-        let u = Universe { cores: vec![core], ocean: vec![crate::flows::Mote { key: crate::chem::Kind::parse("W0003").expect("a kind"), amount: ratio(1, 1024), ell_o: ratio(1, 3), ell_orth: ratio(0, 1), phase: crate::flows::rest(ratio(1, 2)), agitation: ratio(0, 1), born: 0, vacuum: true, lever: Vec::new(), lever_place: ratio(0, 1), tilt: Vec::new() }], firmament: Vec::new(), unit: ratio(1, 2), t_u: 15 };
+        let u = Universe { cores: vec![core], ocean: vec![crate::flows::Mote { key: crate::chem::Kind::parse("W0003").expect("a kind"), amount: ratio(1, 1024), ell_o: ratio(1, 3), ell_orth: ratio(0, 1), phase: crate::flows::rest(ratio(1, 2)), agitation: ratio(0, 1), born: 0, vacuum: true, lever: Vec::new(), lever_place: ratio(0, 1), tilt: Vec::new() }], firmament: Vec::new(), unit: ratio(1, 2), t_u: 15, densest: 1200 };
         let dir = std::env::temp_dir().join(format!("pulse-{}", std::process::id()));
         write(&dir, &[7; 32], &u).unwrap();
         assert_eq!(read(&dir), Some(([7; 32], u)), "the file gives the universe back");

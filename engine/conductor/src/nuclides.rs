@@ -246,7 +246,7 @@ fn climb(m: &mut crate::pulse::Manifest, w: u32, share: &cfe::ratio::Ratio) -> c
 /// `f_H·c·σ_{w+1}` of itself to `w + 1` each ring (read at the ring's start,
 /// heaviest first so no nucleus climbs twice in one ring), f_H hydrogen's
 /// share of the heart's nuclei. Nucleons conserved. Returns the nuclei moved.
-pub fn capture_slow(heart: &mut crate::pulse::Manifest, rings: u64, c: &cfe::ratio::Ratio, p: &cfe::ratio::Ratio) -> cfe::ratio::Ratio {
+pub fn capture_slow(heart: &mut crate::pulse::Manifest, rings: u64, c: &cfe::ratio::Ratio, p: &cfe::ratio::Ratio, densest: u32) -> cfe::ratio::Ratio {
     use cfe::ratio::ratio;
     use num_traits::Zero;
     let mut moved = ratio(0, 1);
@@ -260,7 +260,7 @@ pub fn capture_slow(heart: &mut crate::pulse::Manifest, rings: u64, c: &cfe::rat
         let mut weights: Vec<u32> = heart.keys().filter_map(crate::chem::atom_w).collect();
         weights.sort_by(|a, b| b.cmp(a));
         // Hydrogen is the fuel the heavier seeds capture, never a seed.
-        for w in weights.into_iter().filter(|&w| w >= 2 && w < crate::pulse::TABLE) {
+        for w in weights.into_iter().filter(|&w| w >= 2 && w < densest) {
             let Some(s) = survival(w + 1, p) else { continue };
             moved += climb(heart, w, &(f_h.clone() * c.clone() * s));
         }
@@ -273,13 +273,14 @@ pub fn capture_slow(heart: &mut crate::pulse::Manifest, rings: u64, c: &cfe::rat
 /// fuel), each weight in turn (lightest first) passing `σ_{w+1}` of what
 /// stands there upward, until its hydrogen is spent. Nucleons conserved.
 /// Returns the heaviest weight reached.
-pub fn capture_rapid(m: &mut crate::pulse::Manifest, p: &cfe::ratio::Ratio) -> u32 {
+pub fn capture_rapid(m: &mut crate::pulse::Manifest, p: &cfe::ratio::Ratio, densest: u32) -> u32 {
     use cfe::ratio::ratio;
     let mut top = m.keys().filter_map(crate::chem::atom_w).max().unwrap_or(0);
     // Hydrogen is the fuel; the seeds are the heavier kinds.
     let mut w = 2u32;
-    // The table's top (the operator's 1200) stands; nothing climbs past it.
-    while w < crate::pulse::TABLE {
+    // The universe's densest element (the founding's own, docs/97 §14)
+    // stands; nothing climbs past it.
+    while w < densest {
         let h = crate::chem::Kind::atom(1).and_then(|k| m.get(&k).cloned()).unwrap_or_else(|| ratio(0, 1));
         if h <= ratio(0, 1) {
             break;
@@ -421,22 +422,22 @@ mod tests {
         assert!(freed > ratio(0, 1) && spent.contains_key(&k(28)), "the unsealed break, the seal holds");
         // In step with its echo, one burst climbs to the table's top.
         let mut in_step = m.clone();
-        assert_eq!(capture_rapid(&mut in_step, &p0), crate::pulse::TABLE);
+        assert_eq!(capture_rapid(&mut in_step, &p0, 1200), 1200);
         assert_eq!(nucleons(&in_step), before, "nucleons conserved");
         // At the half turn (R = 0) the climb is the hemisphere's mean.
         let half = ratio(1, 2);
-        let top = capture_rapid(&mut m, &half);
+        let top = capture_rapid(&mut m, &half, 1200);
         assert_eq!(nucleons(&m), before, "nucleons conserved");
         assert!(top > 208, "one burst passes the third seal: reached {top}");
         // A second generation, born of the first's return with fresh fuel,
         // climbs higher: the heavy weight builds generation on generation.
         *m.entry(k(1)).or_insert_with(|| ratio(0, 1)) += ratio(1_000_000, 1);
-        let again = capture_rapid(&mut m, &half);
+        let again = capture_rapid(&mut m, &half, 1200);
         assert!(again > top, "the next generation climbs higher: {top} then {again}");
         // A burning heart captures slowly and conserves too.
         let mut heart: crate::pulse::Manifest = [(k(1), ratio(1000, 1)), (k(4), ratio(100, 1))].into();
         let before = nucleons(&heart);
-        let moved = capture_slow(&mut heart, 10, &ratio(1, 1), &p0);
+        let moved = capture_slow(&mut heart, 10, &ratio(1, 1), &p0, 1200);
         assert!(moved > ratio(0, 1));
         assert_eq!(nucleons(&heart), before);
         assert!(heart.keys().filter_map(crate::chem::atom_w).max() > Some(4));

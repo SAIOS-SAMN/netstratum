@@ -289,3 +289,24 @@ The captures climb to the table's top and stop there, as the founding does
 (`pulse::TABLE`, the operator's 1200): in step with its echo one burst reaches
 it (witness: `r_is_read_at_the_pulse_and_its_mean_is_the_old_half`, and
 `capture_rapid` at p = 0 reading 1200).
+
+## 14. No fixed cap: the densest element is the founding's own (operator 2026-10-27: "use the formulas to calculate the densest element you will need somewhere in the 1200-1700 range"; "run it at 1700 - no fixed cap")
+
+The seeds climb the convergence each passing `σ_{w+1}` of themselves on, in
+whole nuclei; near the top `σ ≈ 0.89`, so the climbing seeds fall by about a
+tenth a weight and the climb ENDS where less than one whole nucleus arrives.
+The free neutrons never run short (about 3.7·10^72 left at 2^55 grains).
+Read at 2^55 grains: the last nucleus stands at **weight 1612** (Q 976, Z
+636): 1600 → 18 arriving, 1606 → 7, 1611 → 2, 1612 → 1 (it stays). A larger
+founding reaches a few weights higher a decade of grains.
+
+- **`pulse::TABLE` retires.** The founding climbs until no whole nucleus
+  arrives (bounded only by the convergence's read).
+- **The universe records its densest element** (`Universe.densest`, tag 25),
+  the founding's heaviest nuclide; every later climb stops there: the
+  stars' slow and rapid captures, and the burn's product `w + w → 2w` (a
+  rung whose product passes it does not run). Nucleons conserved.
+- Beside it (the cascade's own reading at 2^55 grains): the Wellspring holds
+  every kind whose spread stays in its throat, `(K + s_i)(1 + s_final)/(w·H)
+  ≤ 1`, K = 266, H = 2, s_final = 1/6: weight 171 and up, 1434 of 1600
+  kinds; their mass about 6·10^-14 of the whole.

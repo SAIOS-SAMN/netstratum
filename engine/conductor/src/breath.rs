@@ -390,6 +390,8 @@ pub fn shine_systems(systems: &mut [Body], l: &Ratio, enc: &crate::flows::Enclos
 /// answers it with a perpendicular write up (the galaxy's mass within the
 /// new orbit changes), closing a loop.
 pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u64) -> Vec<Event> {
+    // The universe's densest element: every climb stops there (docs/97 §14).
+    let densest = u.densest;
     let unit = unit_mass(u);
     use num_traits::Zero as _;
     // THE GALAXIES ORBIT (`pulse::orbit_galaxies`): on each universal echo,
@@ -919,7 +921,7 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
                 // them at that phase.
                 let heart_heat = crate::nuclides::heat(&h_s, &nu);
                 crate::nuclides::release(&mut all, &heart_heat, &pulse_p);
-                crate::nuclides::capture_rapid(&mut all, &pulse_p);
+                crate::nuclides::capture_rapid(&mut all, &pulse_p, densest);
                 returned += mass(&all) / unit.clone();
                 // Dissolved whole: it leaves at its own orbit.
                 shed.push((all, own_of(&sys), sys.ell_orth.clone(), sys.phase.clone()));
@@ -959,7 +961,7 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
                 // them at that phase.
                 let heart_heat = crate::nuclides::heat(&h_s, &nu);
                 crate::nuclides::release(&mut all, &heart_heat, &pulse_p);
-                crate::nuclides::capture_rapid(&mut all, &pulse_p);
+                crate::nuclides::capture_rapid(&mut all, &pulse_p, densest);
                 returned += mass(&all) / unit.clone();
                 // Dissolved whole: it leaves at its own orbit.
                 shed.push((all, own_of(&sys), sys.ell_orth.clone(), sys.phase.clone()));
@@ -981,6 +983,11 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
             // transduces `2u(z) − u(2z)` of magnetism into holding.
             let mut shone = ratio(0, 1);
             for z in rungs {
+                // A rung whose product passes the universe's densest element
+                // does not run (docs/97 §14).
+                if z.checked_mul(2).map_or(true, |p| p > densest) {
+                    continue;
+                }
                 let (Some(key), Some(made_kind)) = (crate::chem::Kind::atom(z), crate::formation::product(z)) else { continue };
                 if !sys.kept.contains_key(&key) {
                     continue;
@@ -1011,7 +1018,7 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
             // THE SLOW CAPTURE (docs/97 §10): each ring its clock received this
             // echo, its heart's nuclides capture its hydrogen, one nucleon a
             // ring, kept by the hemisphere law at its pulse phase.
-            crate::nuclides::capture_slow(&mut sys.kept, r_echo, &in_phase, &pulse_p);
+            crate::nuclides::capture_slow(&mut sys.kept, r_echo, &in_phase, &pulse_p, densest);
             // ITS LIGHT crosses its own system on the continuum face.
             if !shone.is_zero() {
                 let whole = mass(&sys.total());
@@ -1692,7 +1699,7 @@ mod tests {
         let star = body(vec![0, 1], ratio(3, 1), [(h(), ratio(1, 4))].into(), Vec::new());
         let home = body(vec![0], ratio(0, 1), Manifest::new(), vec![star]);
         let galaxy = body(vec![1], ratio(5, 1), [(h(), ratio(1, 2))].into(), Vec::new());
-        let mut u = Universe { cores: vec![home, galaxy], ocean: Vec::new(), firmament: Vec::new(), unit: ratio(1, 1), t_u: 15 };
+        let mut u = Universe { cores: vec![home, galaxy], ocean: Vec::new(), firmament: Vec::new(), unit: ratio(1, 1), t_u: 15, densest: 1200 };
         // The star's spin, kept in the home's frame: 2.
         u.cores[0].satellites[0].ell = ratio(2, 1);
         // The home's core is the source: no receiver, no clock.
@@ -1752,7 +1759,7 @@ mod tests {
     fn a_toll_is_heard_after_its_route_through_the_throats() {
         use crate::pulse::{Body, Manifest, Universe};
         let core = |path: Vec<u64>, radius: Ratio| Body { ell_orth: ratio(0, 1), path, radius, period: ratio(0, 1), kept: Manifest::new(), satellites: Vec::new(), medium: Manifest::new(), ell: ratio(0, 1), medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1), tilt: Vec::new(), throat: Default::default() };
-        let u = Universe { cores: vec![core(vec![1], ratio(5, 1)), core(vec![2], ratio(9, 1))], ocean: Vec::new(), firmament: Vec::new(), unit: ratio(1, 1), t_u: 15 };
+        let u = Universe { cores: vec![core(vec![1], ratio(5, 1)), core(vec![2], ratio(9, 1))], ocean: Vec::new(), firmament: Vec::new(), unit: ratio(1, 1), t_u: 15, densest: 1200 };
         let t = Toll { star: vec![1, 7], bell: 40, passing: Passing::Spent, strokes: Some(3), returned: ratio(1, 1), spin: ratio(0, 1), star_reach: ratio(2, 1), galaxy_reach: ratio(5, 1) };
         // Its own galaxy hears it after its reach to the core; another after
         // the route through the universal core.
