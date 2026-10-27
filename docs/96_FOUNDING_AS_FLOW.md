@@ -171,12 +171,11 @@ Each echo, in order:
   (about the galaxy's hold H, carrying m of its holding and μ of its
   magnetism, at heat a) binds by its own deficit
   `λ/(1 + λ)`, `λ = 2(m + μ)/R` (its half-width `w/2` dilated once by its
-  share; the arc cancels). Against it: its heat, the galaxy's unlocked face
-  at the ring `½(1 − δ(R))`, and the galaxy's tide across it, the contrast of
-  the galaxy's deficit at its edges, `w/(2(R + H))`. The ring parts into the
-  largest clumps that still hold, `w_max = 2(R + H)·(λ/(1 + λ) − a − face)`,
+  share; the arc cancels). Against it: its heat and the galaxy's tide across
+  it, the contrast of the galaxy's deficit at its edges, `w/(2(R + H))`. The ring parts into the
+  largest clumps that still hold, `w_max = 2(R + H)·(λ/(1 + λ) − a)`,
   `⌊R/w_max⌋` of them, each by phase in the galaxy's disc plane; none where
-  the binding does not beat the heat and the face.
+  the binding does not beat the heat.
   Retired: the crest read against the galaxy's enclosure,
   `x/(R + H + x)` with the galaxy's full shear, which capped every ring's
   binding near 0.25–0.33 against a barrier near 0.48 (measured at bell 462,
@@ -184,3 +183,32 @@ Each echo, in order:
 
 Retired: the throat's unreleased hold in the enclosure's base (built
 2026-10-26, `89dcadd`), and the release read against the push's own hold.
+
+## 8. The unlocked face heats; it is never a barrier (operator 2026-10-27: "think harder about the problem you are trying to solve and what the underlying issue is"; "does that methodology involve constants or static variables")
+
+The unlocked face `½(1 − δ)` was ruled a HEATING law (2026-10-16: "the face
+the core does not lock heats"). Its heat already reaches the motes and worlds
+as agitation: the light a core sends warms each body by the share its face
+leaves unlocked at its reach (`breath::shine`, `l·(1 − δ)/whole`). Every hold
+test also subtracted it as a barrier, so it was counted twice, and against
+the galaxy's frame in the clump's own enclosure (a cross-tier read). It is
+also scale-free: near ½ at every ring whatever the clump, so measured at the
+home galaxy (2026-10-27) ring bindings 0.03–0.16 stood against about 0.30 of
+face and no ring held.
+
+One hold law, every tier: a body holds where its own binding meets its own
+heat and the tide across it,
+
+    λ/(1 + λ) ≥ a + tide
+
+- **The crest** (§7): `w_max = 2(R + H)·(λ/(1 + λ) − a)`.
+- **A chain** holds where `bind ≥ agitation` (its tide is already in its
+  apartness, the edges' contrast `t_edges`).
+- **Ignition of a grown body** (`settle_system`): `λ/(1 + λ) ≥ a` and
+  `2a < 1` (the ignition share's own bound, `formation::ignition_share`).
+- **Ignition of a galaxy's clump:** its agitation is its own, `a_own`; the
+  face is no longer added.
+- **A stretch's clump** (`formation::holds`): its agitation alone against the
+  shear.
+
+Retired: the face as a barrier in every hold test.

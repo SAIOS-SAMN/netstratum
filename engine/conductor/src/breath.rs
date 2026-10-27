@@ -896,6 +896,13 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
             // of its system), the DECOHERENCE FRONT: it comes apart whole and
             // everything returns to the galaxy's flows with its state.
             let c_sg = (0..planes).fold(ratio(1, 1), |c, k| c * crate::flows::in_step(&sys.phase[k], &sys.bell[k]));
+            // ITS PULSE PHASE (docs/97 §13): on the R loop, against the echo
+            // reaching its place (its galaxy's bell there), `p = φ − bell`;
+            // and ITS CLOCK read from the rings it received this echo,
+            // `ν = 2·r_echo/T_u` (each ring read on both legs).
+            let at_loop = |v: &Vec<Ratio>| v.get(crate::flows::LOOP).cloned().unwrap_or_else(|| ratio(0, 1));
+            let pulse_p = at_loop(&sys.phase) - at_loop(&sys.bell);
+            let nu = ratio(2, 1) * as_ratio(r_echo) / as_ratio(t_u.max(1));
             let sys_total = mass(&sys.total());
             let heart_share = if sys_total.is_zero() { ratio(0, 1) } else { mass(&sys.kept) / sys_total };
             // The front needs the slip HELD across a full bell of the star's
@@ -905,13 +912,14 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
                 tolls.push(Toll { star: sys.path.clone(), bell, passing: Passing::Decohered, strokes: crate::ring::whole(&(omega.clone() * as_ratio(r_now))), returned: mass(&sys.total()) / unit.clone(), spin: subtree_spin(&sys, &unit), star_reach: sys.radius.clone(), galaxy_reach: core.radius.clone() });
                 core.medium_spin += subtree_spin(&sys, &unit);
                 let mut all = sys.total();
-                // A DYING HEART'S RELEASE (docs/97 §11): its heat on its own
-                // clock, `ν·h_s − 1` (ν its rings a bell, two by the ring law
-                // at its rate), breaks what it out-grips into nucleons; THE
-                // RAPID CAPTURE (§10) then runs on them.
-                let heart_heat = crate::nuclides::heat(&h_s, &(ratio(2, 1) * own.clone()));
-                crate::nuclides::release(&mut all, &heart_heat);
-                crate::nuclides::capture_rapid(&mut all);
+                // A DYING HEART'S RELEASE (docs/97 §11, §13): its heat on its
+                // own clock, `ν·h_s − 1` (ν the rings it received this echo a
+                // bell, on both legs), breaks what it out-grips at its pulse
+                // phase into nucleons; THE RAPID CAPTURE (§10) then runs on
+                // them at that phase.
+                let heart_heat = crate::nuclides::heat(&h_s, &nu);
+                crate::nuclides::release(&mut all, &heart_heat, &pulse_p);
+                crate::nuclides::capture_rapid(&mut all, &pulse_p);
                 returned += mass(&all) / unit.clone();
                 // Dissolved whole: it leaves at its own orbit.
                 shed.push((all, own_of(&sys), sys.ell_orth.clone(), sys.phase.clone()));
@@ -944,13 +952,14 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
                 tolls.push(Toll { star: sys.path.clone(), bell, passing: Passing::Spent, strokes: crate::ring::whole(&(omega.clone() * as_ratio(r_now))), returned: mass(&sys.total()) / unit.clone(), spin: subtree_spin(&sys, &unit), star_reach: sys.radius.clone(), galaxy_reach: core.radius.clone() });
                 core.medium_spin += subtree_spin(&sys, &unit);
                 let mut all = sys.total();
-                // A DYING HEART'S RELEASE (docs/97 §11): its heat on its own
-                // clock, `ν·h_s − 1` (ν its rings a bell, two by the ring law
-                // at its rate), breaks what it out-grips into nucleons; THE
-                // RAPID CAPTURE (§10) then runs on them.
-                let heart_heat = crate::nuclides::heat(&h_s, &(ratio(2, 1) * own.clone()));
-                crate::nuclides::release(&mut all, &heart_heat);
-                crate::nuclides::capture_rapid(&mut all);
+                // A DYING HEART'S RELEASE (docs/97 §11, §13): its heat on its
+                // own clock, `ν·h_s − 1` (ν the rings it received this echo a
+                // bell, on both legs), breaks what it out-grips at its pulse
+                // phase into nucleons; THE RAPID CAPTURE (§10) then runs on
+                // them at that phase.
+                let heart_heat = crate::nuclides::heat(&h_s, &nu);
+                crate::nuclides::release(&mut all, &heart_heat, &pulse_p);
+                crate::nuclides::capture_rapid(&mut all, &pulse_p);
                 returned += mass(&all) / unit.clone();
                 // Dissolved whole: it leaves at its own orbit.
                 shed.push((all, own_of(&sys), sys.ell_orth.clone(), sys.phase.clone()));
@@ -1001,8 +1010,8 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
             }
             // THE SLOW CAPTURE (docs/97 §10): each ring its clock received this
             // echo, its heart's nuclides capture its hydrogen, one nucleon a
-            // ring, kept by the hemisphere law.
-            crate::nuclides::capture_slow(&mut sys.kept, r_echo, &in_phase);
+            // ring, kept by the hemisphere law at its pulse phase.
+            crate::nuclides::capture_slow(&mut sys.kept, r_echo, &in_phase, &pulse_p);
             // ITS LIGHT crosses its own system on the continuum face.
             if !shone.is_zero() {
                 let whole = mass(&sys.total());
@@ -1584,9 +1593,10 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
                 if m_u.is_zero() {
                     continue;
                 }
-                // IGNITION: its agitation plus half the tide's unlocked face.
+                // IGNITION: its own agitation (the galaxy's unlocked face is in
+                // it as the light's warming, never added again, docs/96 §8).
                 let tide = crate::ring::deficit(&reach, &h);
-                let a_clump = a_own.clone() + (ratio(1, 1) - tide.clone()) / ratio(2, 1);
+                let a_clump = a_own.clone();
                 // ITS ORBIT, in the galaxy's one frame, where it is kept: the
                 // clump's common spin (its members' holding-weighted mean,
                 // `Σ w·(ℓ − ℓ̄) = 0`); its reach the enclosure's.

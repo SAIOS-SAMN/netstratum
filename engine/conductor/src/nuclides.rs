@@ -146,36 +146,54 @@ pub fn heat(delta: &cfe::ratio::Ratio, nu: &cfe::ratio::Ratio) -> cfe::ratio::Ra
     (nu.clone() * delta.clone() - ratio(1, 1)).max(ratio(0, 1))
 }
 
-/// A NUCLEUS'S GRIP (docs/97 §11): a fibre is two counter-turning ends
-/// sharing one whole turn, half each, so a nucleus grips by the share its
-/// fibres bind, `½·κ_w`.
-pub fn grip(w: u32) -> Option<cfe::ratio::Ratio> {
+/// R, THE ELECTRON'S PHASE STATE (docs/97 §3, §13): the nuclide's `Q_w`
+/// electrons converge on S^11 as its nucleons do, fibred share
+/// `κ_e = 2·Z(Q_w)/Q_w`; at pulse phase `p` (turns) the hemisphere law's
+/// response, `R = κ_e·(1 − 2·frac(p))`.
+pub fn electron_phase(w: u32, p: &cfe::ratio::Ratio) -> Option<cfe::ratio::Ratio> {
     use cfe::ratio::ratio;
-    Some(coherence(w)? / ratio(2, 1))
+    let kappa_e = coherence(protons(w)?)?;
+    let f = p.clone() - p.floor();
+    Some(kappa_e * (ratio(1, 1) - ratio(2, 1) * f))
 }
 
-/// The rings a bell at the source: the ring law's two, at rate 1.
+/// THE HELD HEMISPHERE at pulse phase `p` (docs/97 §13): `h = (1 + R)/2`, the
+/// share of a lone end standing on the held face; ½ on a turn's mean.
+pub fn held(w: u32, p: &cfe::ratio::Ratio) -> Option<cfe::ratio::Ratio> {
+    use cfe::ratio::ratio;
+    Some((ratio(1, 1) + electron_phase(w, p)?) / ratio(2, 1))
+}
+
+/// A NUCLEUS'S GRIP (docs/97 §11, §13): a fibre is two counter-turning ends
+/// sharing one whole turn, the held end's share the held hemisphere, so a
+/// nucleus grips by `κ_w·h` at its pulse phase.
+pub fn grip(w: u32, p: &cfe::ratio::Ratio) -> Option<cfe::ratio::Ratio> {
+    Some(coherence(w)? * held(w, p)?)
+}
+
+/// The rings a bell at the source: the double pass (each ring read on both
+/// legs of the loop) at rate 1.
 pub fn source_clock() -> cfe::ratio::Ratio {
     cfe::ratio::ratio(2, 1)
 }
 
-/// THE SEAL WINDOW (docs/97 §11): where deuterium first holds on a clock of
-/// `nu` rings a bell, its heat fallen to its grip, `ν·δ − 1 = ½·κ_2`:
-/// `δ = (1 + grip)/ν`.
+/// THE SEAL WINDOW (docs/97 §11, §13): where deuterium first holds on a
+/// clock of `nu` rings a bell, its heat fallen to its grip at the source's
+/// own echo (p = 0), `ν·δ − 1 = grip_2`: `δ = (1 + grip)/ν`.
 pub fn seal_window(nu: &cfe::ratio::Ratio) -> cfe::ratio::Ratio {
     use cfe::ratio::ratio;
-    (ratio(1, 1) + grip(2).unwrap_or_else(|| ratio(1, 2))) / nu.clone()
+    (ratio(1, 1) + grip(2, &ratio(0, 1)).unwrap_or_else(|| ratio(0, 1))) / nu.clone()
 }
 
-/// A DYING HEART'S RELEASE (docs/97 §11): each nuclide whose grip its heat
-/// exceeds breaks into its nucleons, standing as hydrogen (the exchange
+/// A DYING HEART'S RELEASE (docs/97 §11): each nuclide whose grip at the
+/// heart's pulse phase `p` its heat exceeds breaks into its nucleons, standing as hydrogen (the exchange
 /// returns their neutrons to the continuum): the fuel of the rapid capture.
 /// Nucleons conserved. Returns the nucleons released.
-pub fn release(m: &mut crate::pulse::Manifest, a: &cfe::ratio::Ratio) -> cfe::ratio::Ratio {
+pub fn release(m: &mut crate::pulse::Manifest, a: &cfe::ratio::Ratio, p: &cfe::ratio::Ratio) -> cfe::ratio::Ratio {
     use cfe::ratio::ratio;
     let Some(h) = crate::chem::Kind::atom(1) else { return ratio(0, 1) };
     let mut freed = ratio(0, 1);
-    let broken: Vec<(crate::chem::Kind, cfe::ratio::Ratio)> = m.iter().filter(|(k, _)| crate::chem::atom_w(k).is_some_and(|w| w > 1 && grip(w).is_some_and(|g| *a > g))).map(|(k, x)| (k.clone(), x.clone())).collect();
+    let broken: Vec<(crate::chem::Kind, cfe::ratio::Ratio)> = m.iter().filter(|(k, _)| crate::chem::atom_w(k).is_some_and(|w| w > 1 && grip(w, p).is_some_and(|g| *a > g))).map(|(k, x)| (k.clone(), x.clone())).collect();
     for (k, x) in broken {
         let w = crate::chem::weight(&k);
         m.remove(&k);
@@ -194,11 +212,12 @@ pub fn neutron_share(delta: &cfe::ratio::Ratio) -> cfe::ratio::Ratio {
     ratio(2, 1) * delta.clone() / (ratio(1, 1) + delta.clone())
 }
 
-/// A capture's survival at weight `w` (docs/97 §10): bound, or lone on the
-/// held hemisphere, `½(1 + κ_w)`.
-pub fn survival(w: u32) -> Option<cfe::ratio::Ratio> {
+/// A capture's survival at weight `w` and pulse phase `p` (docs/97 §10,
+/// §13): bound, or lone on the held hemisphere, `κ_w + (1 − κ_w)·h`.
+pub fn survival(w: u32, p: &cfe::ratio::Ratio) -> Option<cfe::ratio::Ratio> {
     use cfe::ratio::ratio;
-    Some((ratio(1, 1) + coherence(w)?) / ratio(2, 1))
+    let k = coherence(w)?;
+    Some(k.clone() + (ratio(1, 1) - k) * held(w, p)?)
 }
 
 /// Nuclei of `w` moved to `w + 1` by `share`, each drawing one hydrogen
@@ -223,11 +242,11 @@ fn climb(m: &mut crate::pulse::Manifest, w: u32, share: &cfe::ratio::Ratio) -> c
 }
 
 /// THE SLOW CAPTURE (docs/97 §10): over `rings` rings of a burning star's
-/// clock at coherence `c`, every nuclide its heart holds passes
+/// clock at coherence `c` and pulse phase `p`, every nuclide its heart holds passes
 /// `f_H·c·σ_{w+1}` of itself to `w + 1` each ring (read at the ring's start,
 /// heaviest first so no nucleus climbs twice in one ring), f_H hydrogen's
 /// share of the heart's nuclei. Nucleons conserved. Returns the nuclei moved.
-pub fn capture_slow(heart: &mut crate::pulse::Manifest, rings: u64, c: &cfe::ratio::Ratio) -> cfe::ratio::Ratio {
+pub fn capture_slow(heart: &mut crate::pulse::Manifest, rings: u64, c: &cfe::ratio::Ratio, p: &cfe::ratio::Ratio) -> cfe::ratio::Ratio {
     use cfe::ratio::ratio;
     use num_traits::Zero;
     let mut moved = ratio(0, 1);
@@ -241,30 +260,31 @@ pub fn capture_slow(heart: &mut crate::pulse::Manifest, rings: u64, c: &cfe::rat
         let mut weights: Vec<u32> = heart.keys().filter_map(crate::chem::atom_w).collect();
         weights.sort_by(|a, b| b.cmp(a));
         // Hydrogen is the fuel the heavier seeds capture, never a seed.
-        for w in weights.into_iter().filter(|&w| w >= 2) {
-            let Some(s) = survival(w + 1) else { continue };
+        for w in weights.into_iter().filter(|&w| w >= 2 && w < crate::pulse::TABLE) {
+            let Some(s) = survival(w + 1, p) else { continue };
             moved += climb(heart, w, &(f_h.clone() * c.clone() * s));
         }
     }
     moved
 }
 
-/// THE RAPID CAPTURE (docs/97 §10): the matter a star returns whole runs the
-/// chain at once on its seeds (every kind heavier than hydrogen, which is the
+/// THE RAPID CAPTURE (docs/97 §10): the matter a star returns whole, at its
+/// pulse phase `p`, runs the chain at once on its seeds (every kind heavier than hydrogen, which is the
 /// fuel), each weight in turn (lightest first) passing `σ_{w+1}` of what
 /// stands there upward, until its hydrogen is spent. Nucleons conserved.
 /// Returns the heaviest weight reached.
-pub fn capture_rapid(m: &mut crate::pulse::Manifest) -> u32 {
+pub fn capture_rapid(m: &mut crate::pulse::Manifest, p: &cfe::ratio::Ratio) -> u32 {
     use cfe::ratio::ratio;
     let mut top = m.keys().filter_map(crate::chem::atom_w).max().unwrap_or(0);
     // Hydrogen is the fuel; the seeds are the heavier kinds.
     let mut w = 2u32;
-    while w < READ - 1 {
+    // The table's top (the operator's 1200) stands; nothing climbs past it.
+    while w < crate::pulse::TABLE {
         let h = crate::chem::Kind::atom(1).and_then(|k| m.get(&k).cloned()).unwrap_or_else(|| ratio(0, 1));
         if h <= ratio(0, 1) {
             break;
         }
-        if let Some(s) = survival(w + 1) {
+        if let Some(s) = survival(w + 1, p) {
             if climb(m, w, &s) > ratio(0, 1) {
                 top = top.max(w + 1);
             }
@@ -361,13 +381,14 @@ mod tests {
         assert_eq!(heat(&ratio(1, 2), &nu), ratio(0, 1));
         // Deuterium's grip is its whole bound share's half; the window is
         // where the heat falls to it.
-        assert_eq!(grip(2), Some(ratio(1, 2)));
+        let p0 = ratio(0, 1);
+        assert_eq!(grip(2, &p0), Some(ratio(1, 2)));
         assert_eq!(seal_window(&nu), ratio(3, 4));
         assert_eq!(heat(&seal_window(&nu), &nu), ratio(1, 2));
         // A slower clock (a nested body) opens its window deeper.
         assert!(seal_window(&ratio(3, 2)) > seal_window(&nu));
         // Unsealed heavy nuclei grip less than the seals.
-        assert!(grip(1200) < grip(1092));
+        assert!(grip(1200, &p0) < grip(1092, &p0));
         // The exchange's fixed point there: six neutrons in seven.
         let x = neutron_share(&seal_window(&nu));
         assert_eq!(x, ratio(6, 7));
@@ -388,23 +409,60 @@ mod tests {
         // A dying heart's heat breaks what it out-grips into nucleons.
         let mut spent: crate::pulse::Manifest = [(k(7), ratio(10, 1)), (k(28), ratio(10, 1))].into();
         let was = nucleons(&spent);
-        let freed = release(&mut spent, &ratio(9, 20));
+        let p0 = ratio(0, 1);
+        // In step with its echo its electrons are bound (R = κ_e): weight 7
+        // grips 18/35, above the heat, and nothing breaks.
+        let mut bound = spent.clone();
+        assert_eq!(release(&mut bound, &ratio(9, 20), &p0), ratio(0, 1));
+        // At the half turn R = 0: weight 7 grips 2/7 and breaks, the seal
+        // grips ½ and holds.
+        let freed = release(&mut spent, &ratio(9, 20), &ratio(1, 2));
         assert_eq!(nucleons(&spent), was);
         assert!(freed > ratio(0, 1) && spent.contains_key(&k(28)), "the unsealed break, the seal holds");
-        let top = capture_rapid(&mut m);
+        // In step with its echo, one burst climbs to the table's top.
+        let mut in_step = m.clone();
+        assert_eq!(capture_rapid(&mut in_step, &p0), crate::pulse::TABLE);
+        assert_eq!(nucleons(&in_step), before, "nucleons conserved");
+        // At the half turn (R = 0) the climb is the hemisphere's mean.
+        let half = ratio(1, 2);
+        let top = capture_rapid(&mut m, &half);
         assert_eq!(nucleons(&m), before, "nucleons conserved");
         assert!(top > 208, "one burst passes the third seal: reached {top}");
         // A second generation, born of the first's return with fresh fuel,
         // climbs higher: the heavy weight builds generation on generation.
         *m.entry(k(1)).or_insert_with(|| ratio(0, 1)) += ratio(1_000_000, 1);
-        let again = capture_rapid(&mut m);
+        let again = capture_rapid(&mut m, &half);
         assert!(again > top, "the next generation climbs higher: {top} then {again}");
         // A burning heart captures slowly and conserves too.
         let mut heart: crate::pulse::Manifest = [(k(1), ratio(1000, 1)), (k(4), ratio(100, 1))].into();
         let before = nucleons(&heart);
-        let moved = capture_slow(&mut heart, 10, &ratio(1, 1));
+        let moved = capture_slow(&mut heart, 10, &ratio(1, 1), &p0);
         assert!(moved > ratio(0, 1));
         assert_eq!(nucleons(&heart), before);
         assert!(heart.keys().filter_map(crate::chem::atom_w).max() > Some(4));
+    }
+
+    #[test]
+    fn r_is_read_at_the_pulse_and_its_mean_is_the_old_half() {
+        // One electron is lone: R = 0 at every phase, h = ½.
+        assert_eq!(electron_phase(2, &ratio(1, 3)), Some(ratio(0, 1)));
+        // In step with the echo the electrons are bound (R = κ_e), at the
+        // half turn neutral, approaching the next echo freed.
+        let w = 1200;
+        let ke = coherence(protons(w).expect("protons")).expect("κ_e");
+        assert_eq!(electron_phase(w, &ratio(0, 1)), Some(ke.clone()));
+        assert_eq!(electron_phase(w, &ratio(1, 2)), Some(ratio(0, 1)));
+        assert_eq!(electron_phase(w, &ratio(3, 4)), Some(-ke / ratio(2, 1)));
+        // Over a turn's phases the held hemisphere averages ½: the static
+        // was the mean, never the reading.
+        let n = 64i64;
+        let mean = (0..n).fold(ratio(0, 1), |s, i| s + held(w, &ratio(2 * i + 1, 2 * n)).expect("h")) / ratio(n, 1);
+        assert_eq!(mean, ratio(1, 2));
+        // Survival: the seals keep every capture whatever p; an unsealed
+        // nuclide survives more in step than out.
+        assert_eq!(survival(1092, &ratio(9, 10)), Some(ratio(1, 1)));
+        assert!(survival(w, &ratio(0, 1)) > survival(w, &ratio(9, 10)));
+        // Its phase is the turn's fraction: a whole turn returns it.
+        assert_eq!(electron_phase(w, &ratio(5, 4)), electron_phase(w, &ratio(1, 4)));
     }
 }

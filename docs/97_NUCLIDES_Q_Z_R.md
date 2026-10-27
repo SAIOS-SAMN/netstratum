@@ -248,3 +248,39 @@ draws one hydrogen nucleus, so nucleons are conserved exactly.
   manifest's composition in proportion"): the cascade's beads keep their
   places and their masses, each taking the founding's composition in
   proportion to its mass, never a slice by weight.
+
+## 13. R read, never averaged (operator 2026-10-27: "does that methodology involve constants or static variables where we should be applying formulas")
+
+The ½ in the survival `½(1 + κ)` and in the grip `½·κ` was the hemisphere law
+averaged over the electron's phase: the mean of `(1 + R)/2` over a whole turn
+of p. Read at the body's own phase instead:
+
+- **R, the electron's phase state (§3, built):** a nuclide of weight w holds
+  `Q_w` electrons; they converge on S^11 as its nucleons do, so their fibred
+  share is `κ_e = 2·Z(Q_w)/Q_w` (the same convergence on Q ends; 0 for one
+  electron). At the pulse phase p,
+  `R = κ_e·(1 − 2·frac(p))` (`nuclides::electron_phase`).
+- **p, the pulse at the body's place:** its phase on the R loop
+  (`flows::LOOP`) against the echo reaching it, its galaxy's bell there:
+  `p = φ_LOOP − bell_LOOP`. At the bounce the echo is the source's own, p = 0.
+- **The held hemisphere** `h = (1 + R)/2` (`nuclides::held`): the share of a
+  lone end standing on the held face. Its mean over p is ½, the old static.
+- **Survival** `σ_{w+1} = κ + (1 − κ)·h` (bound, or lone on the held
+  hemisphere); the seals keep every capture whatever p.
+- **Grip** `κ_w·h`: a fibre's turn shared by its two counter-turning ends, the
+  held end's share the held hemisphere.
+- **The seal window** reads deuterium's grip: one electron, κ_e = 0, R = 0,
+  h = ½, so δ = (1 + ½)/ν stands (¾ on the source's clock), now read.
+- **ν, the rings received:** a star's clock is read from the rings it received
+  this echo, `ν = 2·r_echo/T_u` (the 2 the double pass: each ring is read on
+  both legs of the loop), never `2·rate`.
+
+The founding, the slow and rapid captures, and a dying heart's release all
+read h at their own p. A heart in step with its echo (p near 0) holds its
+electrons bound (R → κ_e) and climbs further; one slipping toward the
+opposite face frees them (R < 0) and its captures part.
+
+The captures climb to the table's top and stop there, as the founding does
+(`pulse::TABLE`, the operator's 1200): in step with its echo one burst reaches
+it (witness: `r_is_read_at_the_pulse_and_its_mean_is_the_old_half`, and
+`capture_rapid` at p = 0 reading 1200).

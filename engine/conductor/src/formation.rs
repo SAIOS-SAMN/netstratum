@@ -183,14 +183,12 @@ pub fn stretches(shells: &[Shell], n: u64) -> Option<Vec<Stretch>> {
 /// WHOLE 3Z, holding and magnetism, `(λ + μ)w/(k + (λ + μ)w)` (the same rule
 /// as the universal core's hold: the open frames attract). It collapses where
 /// that beats its agitation and the shear across it, `σ = h·w/(k(k + w))`.
-/// Its agitation is ONE for the clump, the same ignition reads: its cooled
-/// residue plus half the enclosing centre's UNLOCKED face at its place,
-/// `½·(1 − δ)`, `δ = h/(R + h)` (operator: the face the core does not lock
-/// heats; the galaxy's for a star's clump, the star's for a world's).
+/// Its agitation is ONE for the clump, the same ignition reads: its own,
+/// the enclosing centre's unlocked face already in it as the light's warming
+/// (docs/96 §8), never added again as a barrier.
 fn holds(st: &Stretch, h: &Ratio, w: &Ratio) -> bool {
     let k = st.inner.clone() + h.clone();
-    let unlocked = ratio(1, 1) - h.clone() / k.clone();
-    let a = st.agitation.clone() + unlocked / ratio(2, 1);
+    let a = st.agitation.clone();
     let own = (st.lambda.clone() + st.mu.clone()) * w.clone();
     let kw = k.clone() * (k.clone() + w.clone());
     // λw/(k + λw) ≥ a + h·w/(k(k + w)), cleared of denominators.
@@ -230,14 +228,15 @@ pub fn collapse(st: &Stretch, h: &Ratio) -> Option<(Ratio, u64)> {
 /// hold (1), and its half-width `w/2` is a length dilated once by its share,
 /// `r_c = (w/2)/x`, so it binds by its own deficit,
 /// `δ_c = 1/(r_c + 1) = λ/(1 + λ)`, `λ = 2(m + μ)/R` (the ring's line
-/// density; the arc cancels). Against it stand its heat, the unlocked face of
-/// the galaxy at the ring, `½(1 − δ(R))`, and the galaxy's TIDE across the
-/// clump, the contrast of the galaxy's deficit at its two edges,
+/// density; the arc cancels). Against it stand its heat and the galaxy's
+/// TIDE across the clump, the contrast of the galaxy's deficit at its two edges,
 /// `(δ(R − w/2) − δ(R + w/2))/(δ(R − w/2) + δ(R + w/2)) = w/(2(R + H))`
 /// (exact, first degree). The binding does not depend on w and the tide grows
 /// with it, so the ring parts into the LARGEST clumps that still hold,
-/// `w_max = 2(R + H)·(λ/(1 + λ) − a − face)`, `⌊R/w_max⌋` of them (one where
-/// the whole ring holds). None where even a point of the ring cannot hold.
+/// `w_max = 2(R + H)·(λ/(1 + λ) − a)`, `⌊R/w_max⌋` of them (one where the
+/// whole ring holds). None where even a point of the ring cannot hold. The
+/// galaxy's unlocked face heats (its light's warming, in `a`); it is never a
+/// barrier here (docs/96 §8).
 /// (It was read against the galaxy's own enclosure, `x/(R + H + x)` with the
 /// galaxy's full shear, which capped any ring's binding near 0.25–0.33 against
 /// a barrier near 0.48: no ring could ever hold.)
@@ -247,8 +246,7 @@ pub fn crest_collapse(m: &Ratio, mu: &Ratio, a: &Ratio, r: &Ratio, h: &Ratio) ->
     }
     let lambda = ratio(2, 1) * (m.clone() + mu.clone()) / r.clone();
     let bind = lambda.clone() / (ratio(1, 1) + lambda);
-    let face = (ratio(1, 1) - h.clone() / (r.clone() + h.clone())) / ratio(2, 1);
-    let budget = bind - a.clone() - face;
+    let budget = bind - a.clone();
     if budget <= ratio(0, 1) {
         return None;
     }
@@ -1422,14 +1420,14 @@ pub fn settle_system(sys: &mut crate::pulse::Body, unit: &Ratio, age: u64, r_ech
     let mut siblings: Vec<u64> = bodies.iter().filter_map(|b| b.5.as_ref().and_then(|p| p.last().copied())).collect();
     for (r, m, matter, phase, tilt, path, heat, strike) in bodies {
         let delta_at = inner.clone() / (r.clone() + inner.clone());
-        let face = (ratio(1, 1) - delta_at.clone()) / ratio(2, 1);
         // IGNITION OF A GROWN BODY (one accretion path; with xylarium): it is
         // a STAR of its system where its own matter binds as a filament,
-        // `λ/(1 + λ)`, `λ` its share over its reach, against its heat and the
-        // unlocked face, and passes the ignition test `2(a + face) < 1`.
+        // `λ/(1 + λ)`, `λ` its share over its reach, against its heat (the
+        // star's unlocked face already in it, docs/96 §8), and passes the
+        // ignition share's bound `2a < 1`.
         let ignites = matter.len() > 1 && !r.is_zero() && {
             let lambda = m.clone() / r.clone();
-            lambda.clone() / (ratio(1, 1) + lambda) >= heat.clone() + face.clone() && ratio(2, 1) * (heat.clone() + face.clone()) < ratio(1, 1)
+            lambda.clone() / (ratio(1, 1) + lambda) >= heat.clone() && ratio(2, 1) * heat.clone() < ratio(1, 1)
         };
         // Otherwise THE PLANETARY CORE: a body whose core holds nothing is no
         // world; one that holds keeps what stands within the edge its star's
@@ -1538,9 +1536,11 @@ mod crest_tests {
         let got = crest_collapse(&ratio(52, 100), &ratio(5, 100), &ratio(69, 1000), &ratio(164, 100), &ratio(194, 100));
         let (w, n) = got.expect("a dense ring holds");
         assert!(w > ratio(0, 1) && n >= 1);
-        // A thin inner ring (m + μ = 0.045) does not: its binding 0.08 falls
-        // short of its face alone.
-        assert!(crest_collapse(&ratio(40, 1000), &ratio(5, 1000), &ratio(75, 1000), &ratio(1015, 1000), &ratio(1089, 1000)).is_none());
+        // A thin inner ring (m + μ = 0.045, binding 0.081) holds against its
+        // heat 0.075 alone (the face heats, it is no barrier: docs/96 §8),
+        // in one narrow arc; hotter than its binding, it does not.
+        assert!(crest_collapse(&ratio(40, 1000), &ratio(5, 1000), &ratio(75, 1000), &ratio(1015, 1000), &ratio(1089, 1000)).is_some());
+        assert!(crest_collapse(&ratio(40, 1000), &ratio(5, 1000), &ratio(9, 100), &ratio(1015, 1000), &ratio(1089, 1000)).is_none());
         // Denser rings part into more, smaller clumps? No: binding grows, so
         // the largest holding arc grows and the clumps are fewer and larger.
         let (w2, n2) = crest_collapse(&ratio(80, 100), &ratio(5, 100), &ratio(69, 1000), &ratio(164, 100), &ratio(194, 100)).expect("holds");

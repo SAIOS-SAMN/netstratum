@@ -95,7 +95,7 @@ pub const TABLE: u32 = 1200;
 ///   odd deuteron stands.
 /// - THE TABLE: the seeds climb the nucleus's convergence on the free
 ///   neutrons, each staying at w with `1 − σ_{w+1}` and climbing on with
-///   `σ_{w+1} = ½(1 + κ_{w+1})`, to `TABLE`; every climb a neutron captured.
+///   `σ_{w+1} = κ + (1 − κ)·h` at the bounce's own phase (docs/97 §13), to `TABLE`; every climb a neutron captured.
 /// - The free neutrons left return to the continuum as hydrogen.
 /// Returns the manifest by nuclide, in grains (whole nuclei however few);
 /// nucleons conserved exactly.
@@ -113,12 +113,14 @@ pub fn founding(nuclei: &num_bigint::BigInt) -> Manifest {
     let mut counts: Vec<(u32, BigInt)> = Vec::new();
     // The seeds climb, each step a neutron captured, while neutrons remain.
     let mut arriving = seeds;
+    // At the bounce the echo is the source's own: the pulse phase p = 0.
+    let p0 = ratio(0, 1);
     for w in 4..=TABLE {
         if arriving <= zero {
             break;
         }
         let climb = if w < TABLE {
-            crate::nuclides::survival(w + 1).map(|s| (Ratio::from_integer(arriving.clone()) * s).floor().to_integer()).unwrap_or_else(|| zero.clone()).min(free.clone())
+            crate::nuclides::survival(w + 1, &p0).map(|s| (Ratio::from_integer(arriving.clone()) * s).floor().to_integer()).unwrap_or_else(|| zero.clone()).min(free.clone())
         } else {
             zero.clone()
         };

@@ -33,8 +33,8 @@
 //! - **Collapse where the motes are**: a mote and those near it in reach
 //!   (within its dispersal band) and in phase (the product over planes of
 //!   the in-step shares) bind by their combined 3Z read as their own
-//!   enclosure, against their agitation, the unlocked face `½(1 − δ)` and the
-//!   shear.
+//!   enclosure, against their agitation (the unlocked face heats, in it) and
+//!   the shear.
 //!
 //! THE PLANES (docs/95; operator 2026-10-26: "our spatial dimension 3D via
 //! 3Z/3Q + R coordinates (positive R denotes 'forward' in linear time)"):
@@ -938,16 +938,18 @@ pub struct Chain {
     pub bind: Ratio,
     /// Its holding-weighted agitation.
     pub agitation: Ratio,
-    /// The unlocked face `½(1 − δ)` at its reach.
+    /// The unlocked face `½(1 − δ)` at its reach (a reading: its heat reaches
+    /// the members as the light's warming, docs/96 §8).
     pub face: Ratio,
     /// Its extent as a share on the sphere, edge to edge.
     pub apart: Ratio,
 }
 
 impl Chain {
-    /// It holds where its binding meets its agitation and the unlocked face.
+    /// It holds where its binding meets its agitation (its tide is in its
+    /// apartness; the face heats and is in its agitation, docs/96 §8).
     pub fn holds(&self) -> bool {
-        self.bind >= self.agitation.clone() + self.face.clone()
+        self.bind >= self.agitation
     }
 }
 
@@ -1286,8 +1288,8 @@ pub fn settle_disc(motes: &mut [Mote], enc: &Enclosed) -> Vec<Ratio> {
 /// its pair against the pull of what stands outside, `k(ρ) = (S/G)·(1 +
 /// ρ)/(1 − ρ)`, opening at the ring's own dispersal pair `(S − G)/(S + G)`
 /// at ρ = 0. Each mote's matter is spread over its band `r(1 ± p)`. A band's
-/// pair HOLDS where its matter meets the unlocked face at its middle,
-/// `λ/(1 + λ) ≥ ½(1 − δ)`, `λ` its share over its width; a band where a
+/// pair HOLDS where its matter's binding meets its heat and the tide across
+/// it (`formation::crest_collapse`, docs/96 §8); a band where a
 /// star already stands is that star's (its capture reads it). Returns the
 /// holding bands as clumps: (the band's middle reach, each member's share).
 pub fn band_pairs(motes: &[Mote], enc: &Enclosed, p: &Ratio, plane: &[Ratio], g_total: &Ratio) -> Vec<(Ratio, Vec<(usize, Ratio)>)> {
@@ -1360,8 +1362,8 @@ pub fn band_pairs(motes: &[Mote], enc: &Enclosed, p: &Ratio, plane: &[Ratio], g_
         // THE RING FRAGMENTS (the disc's local collapse, nature's way; the
         // crest law, `formation::crest_collapse`, with xylarium): the ring's
         // holding m and magnetism μ, its heat a, at its middle R about the
-        // hold H there, hold along a length w_J against the unlocked face and
-        // the shear, so ⌊R/w_J⌋ clumps stand around the turn. Each member
+        // hold H there, hold along a length w_J against their heat and the
+        // shear, so ⌊R/w_J⌋ clumps stand around the turn. Each member
         // joins the clump whose arc holds it, by its phase in the galaxy's
         // disc plane (the plane the disc settled into, `settle_disc`).
         let mid = (o_lo.clone() + o_hi.clone()) / ratio(2, 1);
