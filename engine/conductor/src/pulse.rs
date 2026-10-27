@@ -86,8 +86,8 @@ pub fn from_nuclei(nuclei: &Nuclei) -> Manifest {
 /// (`nuclides::bounce_heat`, the luminal excess `2δ − 1`) and its nucleons
 /// exchange poles every pass (protons to the vacuum leg by the held face,
 /// neutrons back by the unlocked face; the Möbius pass, booked both ways).
-/// - THE SEAL WINDOW: the heat falls to half a turn at δ = ¾, where a fibre
-///   first holds (`nuclides::seal_window`).
+/// - THE SEAL WINDOW: read on the source's own clock, where deuterium's heat
+///   falls to its grip (`nuclides::seal_window`, docs/97 §11).
 /// - THE NEUTRON SHARE: the exchange's own fixed point there, `2δ/(1 + δ)` =
 ///   6/7 (`nuclides::neutron_share`), never set.
 /// - THE CAPTURES at the window: each proton binds a neutron where the nucleus
@@ -101,7 +101,7 @@ pub fn from_nuclei(nuclei: &Nuclei) -> Manifest {
 pub fn founding(nuclei: &num_bigint::BigInt) -> Manifest {
     let zero = num_bigint::BigInt::from(0);
     let grid = nuclei_per_grain() * num_bigint::BigInt::from(1024);
-    let share = crate::nuclides::neutron_share(&crate::nuclides::seal_window());
+    let share = crate::nuclides::neutron_share(&crate::nuclides::seal_window(&crate::nuclides::source_clock()));
     let neutrons = (Ratio::from_integer(nuclei.clone()) * share).floor().to_integer();
     let protons = nuclei - &neutrons;
     let paired = protons.clone().min(neutrons.clone());

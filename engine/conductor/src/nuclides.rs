@@ -138,24 +138,52 @@ pub fn exchange(p: &num_bigint::BigInt, n: &num_bigint::BigInt, delta: &cfe::rat
     (p - &to_n + &to_p, n - &to_p + &to_n)
 }
 
-/// THE BOUNCE'S HEAT (docs/97 §9): a body at deficit δ turns `2δ` of its
-/// orbit a bell; the luminal bound allows one whole turn, so inside the ring
-/// the excess `2δ − 1` cannot be motion and is agitation:
-/// `a = max(0, 2δ − 1) = (H − R)/(H + R)`, 1 at the core, 0 at the ring,
-/// cooling as the bubble expands (the substrate weight's form, first degree).
-pub fn bounce_heat(delta: &cfe::ratio::Ratio) -> cfe::ratio::Ratio {
+/// THE HEAT, READ ON A BODY'S OWN CLOCK (docs/97 §11): a body at deficit δ
+/// receiving `nu` rings a bell turns `ν·δ` a bell; the luminal bound (one
+/// whole turn a K-step) leaves the excess as agitation, `max(0, ν·δ − 1)`.
+pub fn heat(delta: &cfe::ratio::Ratio, nu: &cfe::ratio::Ratio) -> cfe::ratio::Ratio {
     use cfe::ratio::ratio;
-    (ratio(2, 1) * delta.clone() - ratio(1, 1)).max(ratio(0, 1))
+    (nu.clone() * delta.clone() - ratio(1, 1)).max(ratio(0, 1))
 }
 
-/// THE SEAL WINDOW (docs/97 §9): a fibre's two counter-turning ends part
-/// where the heat reaches half a turn (the ignition law's bound, `a ≥ ½`,
-/// one tier down), so deuterium's seal first holds as the bounce's heat
-/// falls to ½: `2δ − 1 = ½`, δ = ¾.
-pub fn seal_window() -> cfe::ratio::Ratio {
+/// A NUCLEUS'S GRIP (docs/97 §11): a fibre is two counter-turning ends
+/// sharing one whole turn, half each, so a nucleus grips by the share its
+/// fibres bind, `½·κ_w`.
+pub fn grip(w: u32) -> Option<cfe::ratio::Ratio> {
     use cfe::ratio::ratio;
-    // Solve bounce_heat(δ) = ½ exactly.
-    (ratio(1, 2) + ratio(1, 1)) / ratio(2, 1)
+    Some(coherence(w)? / ratio(2, 1))
+}
+
+/// The rings a bell at the source: the ring law's two, at rate 1.
+pub fn source_clock() -> cfe::ratio::Ratio {
+    cfe::ratio::ratio(2, 1)
+}
+
+/// THE SEAL WINDOW (docs/97 §11): where deuterium first holds on a clock of
+/// `nu` rings a bell, its heat fallen to its grip, `ν·δ − 1 = ½·κ_2`:
+/// `δ = (1 + grip)/ν`.
+pub fn seal_window(nu: &cfe::ratio::Ratio) -> cfe::ratio::Ratio {
+    use cfe::ratio::ratio;
+    (ratio(1, 1) + grip(2).unwrap_or_else(|| ratio(1, 2))) / nu.clone()
+}
+
+/// A DYING HEART'S RELEASE (docs/97 §11): each nuclide whose grip its heat
+/// exceeds breaks into its nucleons, standing as hydrogen (the exchange
+/// returns their neutrons to the continuum): the fuel of the rapid capture.
+/// Nucleons conserved. Returns the nucleons released.
+pub fn release(m: &mut crate::pulse::Manifest, a: &cfe::ratio::Ratio) -> cfe::ratio::Ratio {
+    use cfe::ratio::ratio;
+    let Some(h) = crate::chem::Kind::atom(1) else { return ratio(0, 1) };
+    let mut freed = ratio(0, 1);
+    let broken: Vec<(crate::chem::Kind, cfe::ratio::Ratio)> = m.iter().filter(|(k, _)| crate::chem::atom_w(k).is_some_and(|w| w > 1 && grip(w).is_some_and(|g| *a > g))).map(|(k, x)| (k.clone(), x.clone())).collect();
+    for (k, x) in broken {
+        let w = crate::chem::weight(&k);
+        m.remove(&k);
+        let n = x * ratio(i64::from(w), 1);
+        freed += n.clone();
+        *m.entry(h.clone()).or_insert_with(|| ratio(0, 1)) += n;
+    }
+    freed
 }
 
 /// THE EXCHANGE'S FIXED POINT (docs/97 §9): where the pass's two booked
@@ -327,19 +355,26 @@ mod tests {
 
     #[test]
     fn the_bounce_cools_to_its_seal_window_and_the_exchange_reads_the_neutron_share() {
-        // Hot at the core, cold at the ring.
-        assert_eq!(bounce_heat(&ratio(1, 1)), ratio(1, 1));
-        assert_eq!(bounce_heat(&ratio(1, 2)), ratio(0, 1));
-        // The seal window: the heat at half a turn.
-        assert_eq!(seal_window(), ratio(3, 4));
-        assert_eq!(bounce_heat(&seal_window()), ratio(1, 2));
+        let nu = source_clock();
+        // Hot at the core, cold at the ring, on the source's own clock.
+        assert_eq!(heat(&ratio(1, 1), &nu), ratio(1, 1));
+        assert_eq!(heat(&ratio(1, 2), &nu), ratio(0, 1));
+        // Deuterium's grip is its whole bound share's half; the window is
+        // where the heat falls to it.
+        assert_eq!(grip(2), Some(ratio(1, 2)));
+        assert_eq!(seal_window(&nu), ratio(3, 4));
+        assert_eq!(heat(&seal_window(&nu), &nu), ratio(1, 2));
+        // A slower clock (a nested body) opens its window deeper.
+        assert!(seal_window(&ratio(3, 2)) > seal_window(&nu));
+        // Unsealed heavy nuclei grip less than the seals.
+        assert!(grip(1200) < grip(1092));
         // The exchange's fixed point there: six neutrons in seven.
-        let x = neutron_share(&seal_window());
+        let x = neutron_share(&seal_window(&nu));
         assert_eq!(x, ratio(6, 7));
         // It is the fixed point: a pass at δ leaves it standing.
         let n = num_bigint::BigInt::from(6_000_000u64);
         let p = num_bigint::BigInt::from(1_000_000u64);
-        let (p1, n1) = exchange(&p, &n, &seal_window());
+        let (p1, n1) = exchange(&p, &n, &seal_window(&nu));
         assert_eq!((p1, n1), (p, n));
     }
 
@@ -350,6 +385,12 @@ mod tests {
         // A hydrogen-rich death burst with a little helium climbs far.
         let mut m: crate::pulse::Manifest = [(k(1), ratio(1_000_000, 1)), (k(4), ratio(1, 1))].into();
         let before = nucleons(&m);
+        // A dying heart's heat breaks what it out-grips into nucleons.
+        let mut spent: crate::pulse::Manifest = [(k(7), ratio(10, 1)), (k(28), ratio(10, 1))].into();
+        let was = nucleons(&spent);
+        let freed = release(&mut spent, &ratio(9, 20));
+        assert_eq!(nucleons(&spent), was);
+        assert!(freed > ratio(0, 1) && spent.contains_key(&k(28)), "the unsealed break, the seal holds");
         let top = capture_rapid(&mut m);
         assert_eq!(nucleons(&m), before, "nucleons conserved");
         assert!(top > 208, "one burst passes the third seal: reached {top}");

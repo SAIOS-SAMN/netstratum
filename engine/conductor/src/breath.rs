@@ -905,8 +905,12 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
                 tolls.push(Toll { star: sys.path.clone(), bell, passing: Passing::Decohered, strokes: crate::ring::whole(&(omega.clone() * as_ratio(r_now))), returned: mass(&sys.total()) / unit.clone(), spin: subtree_spin(&sys, &unit), star_reach: sys.radius.clone(), galaxy_reach: core.radius.clone() });
                 core.medium_spin += subtree_spin(&sys, &unit);
                 let mut all = sys.total();
-                // THE RAPID CAPTURE (docs/97 §10): what a dying star returns
-                // runs the capture chain at once on its own hydrogen.
+                // A DYING HEART'S RELEASE (docs/97 §11): its heat on its own
+                // clock, `ν·h_s − 1` (ν its rings a bell, two by the ring law
+                // at its rate), breaks what it out-grips into nucleons; THE
+                // RAPID CAPTURE (§10) then runs on them.
+                let heart_heat = crate::nuclides::heat(&h_s, &(ratio(2, 1) * own.clone()));
+                crate::nuclides::release(&mut all, &heart_heat);
                 crate::nuclides::capture_rapid(&mut all);
                 returned += mass(&all) / unit.clone();
                 // Dissolved whole: it leaves at its own orbit.
@@ -940,8 +944,12 @@ pub fn breathe(u: &mut Universe, seed: &[u8; 32], t_u: u64, from: u64, until: u6
                 tolls.push(Toll { star: sys.path.clone(), bell, passing: Passing::Spent, strokes: crate::ring::whole(&(omega.clone() * as_ratio(r_now))), returned: mass(&sys.total()) / unit.clone(), spin: subtree_spin(&sys, &unit), star_reach: sys.radius.clone(), galaxy_reach: core.radius.clone() });
                 core.medium_spin += subtree_spin(&sys, &unit);
                 let mut all = sys.total();
-                // THE RAPID CAPTURE (docs/97 §10): what a dying star returns
-                // runs the capture chain at once on its own hydrogen.
+                // A DYING HEART'S RELEASE (docs/97 §11): its heat on its own
+                // clock, `ν·h_s − 1` (ν its rings a bell, two by the ring law
+                // at its rate), breaks what it out-grips into nucleons; THE
+                // RAPID CAPTURE (§10) then runs on them.
+                let heart_heat = crate::nuclides::heat(&h_s, &(ratio(2, 1) * own.clone()));
+                crate::nuclides::release(&mut all, &heart_heat);
                 crate::nuclides::capture_rapid(&mut all);
                 returned += mass(&all) / unit.clone();
                 // Dissolved whole: it leaves at its own orbit.

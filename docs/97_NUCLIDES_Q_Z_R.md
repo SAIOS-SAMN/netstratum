@@ -210,3 +210,22 @@ draws one hydrogen nucleus, so nucleons are conserved exactly.
   (`nuclides::capture_rapid`).
 - **Recycling** returns both to the galaxy's gas, so every generation is born
   heavier.
+
+## 11. The heat and the grip as readings (operator 2026-10-26: "this seems really static, like a physics constant: 2δ − 1. Where that passes half a turn")
+
+- **The heat is read on the body's own clock.** A body at deficit δ receiving ν
+  rings a bell (its own nested clock: the universal rate times each well's
+  `r/(r + H)` down its chain, two rings a bell by the ring law) turns `ν·δ` a
+  bell; the luminal bound (SUBSTRATE_C, one whole turn a K-step, the
+  grammar's ruled bound) leaves the excess as agitation, `a = max(0, ν·δ −
+  1)`. At the source ν = 2.
+- **The grip is the nucleus's own.** A fibre is two counter-turning ends
+  sharing one whole turn, half each; a nucleus holds by the share of it its
+  fibres bind, so its grip is `½·κ_w`, κ_w = 2Z/w. Sealed nuclei grip the
+  most; unsealed heavy ones part first. A nuclide holds while `a < ½·κ_w`.
+- **The bounce's seal window** is where deuterium (κ = 1) first holds on the
+  source's clock: `ν·δ − 1 = ½`, δ = 3/(2ν) (¾ at ν = 2), now read, never set.
+- **A dying star's release:** each nuclide of its heart whose grip its heart's
+  heat exceeds (`a = ν_star·h_s − 1`, ν_star its own clock, h_s its heart's
+  share, its deficit at its centre) breaks into its nucleons; they are the
+  rapid capture's fuel for the rest. Nucleons conserved.
