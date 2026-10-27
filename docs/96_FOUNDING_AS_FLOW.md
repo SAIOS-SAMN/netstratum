@@ -212,3 +212,37 @@ heat and the tide across it,
   shear.
 
 Retired: the face as a barrier in every hold test.
+
+### 8.1 The double-pass inversion of the kicks (operator 2026-10-27: "so whats the missing component? the manifold chain inversion on the gravitational lock on the star?"; "proceed - build the double-pass inversion")
+
+`formation::crossed` reads whether two neighbouring worlds, meeting
+`N = a·|Δω|` times over their system's age, are turned across their gap. Their
+encounter phase repeats with period q (the continued fraction of
+`s = frac(ω_i/Δω)`), and over a period the hemisphere law's responses cancel
+but for one residual, `c = in_step(q·ψ₀)` at the pair's phase offset ψ₀ (the
+star's own phase common to both cancels, so the offset is read against the
+star's lock).
+
+The residual was summed with one sign forever, `⌊N/q⌋·c`, growing with the
+age, so every pair eventually joined: 78 worlds standing at bell 704 fell to
+5 at 880 (1363 joins; measured 2026-10-27, 2^55 grains).
+
+**The double pass inverts it.** Nothing rests on one leg (`M∘M = id`): a
+period on the forward leg is followed by one on the return leg through the
+ring's image, where the residual's sign turns. Period k leaves `(−1)^k·c`;
+the excursion LIBRATES about the lock instead of drifting. The greatest
+excursion over the age, in kicks, with `P = ⌊N/q⌋`, `ρ = N mod q`:
+
+    P = 0:  ρ
+    P = 1:  max(q − 1, c + ρ)
+    P ≥ 2:  c + q − 1
+
+bounded, read once, never stepped: past two periods the age no longer
+moves it. A pair joins where `ε·R·kicks ≥ r`, so only neighbours whose own
+period's kicks reach their gap join; a resonance holds its worlds apart.
+
+Witness: an old light pair at a 2:1 stands as it stood young; the greatest
+excursion is the same at 2q meetings and at any later count.
+
+Open (not changed here): within a period the kicks are counted raw (`ρ`,
+`q − 1`), a ceiling; the hemisphere responses also cancel inside the period.

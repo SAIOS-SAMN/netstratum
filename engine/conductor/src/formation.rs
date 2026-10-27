@@ -1199,11 +1199,14 @@ pub fn collide_stars(stars: Vec<crate::pulse::Body>, c_pre: Vec<Ratio>, scale: &
 /// period q, the denominator of the simplest `p/q` that tracks s over the
 /// age (`|s − p/q| ≤ 1/(N·q)`, from s's continued fraction). Over a period
 /// the hemisphere law's responses cancel but for one, its residual `c =
-/// in_step(q·ψ_0)` at their phase offset ψ_0. So the greatest excursion is
-/// `ε·R·(⌊N/q⌋·c + min(N mod q, q))`, linear: no square, no root. They CROSS
-/// (and join) where it reaches their gap. Co-orbital pairs (Δω = 0) never
-/// meet and never join; low-order resonances (small q) add many periods and
-/// cross; high-order pairs nearly cancel and stand.
+/// in_step(q·ψ_0)` at their phase offset ψ_0 (the star's own phase common to
+/// both cancels: the offset is read against the star's lock). THE DOUBLE
+/// PASS INVERTS IT (docs/96 §8.1; operator 2026-10-27): a period on the
+/// forward leg is followed by one on the return leg through the ring's
+/// image, where the residual's sign turns (`M∘M = id`), so period k leaves
+/// `(−1)^k·c` and the excursion LIBRATES about the lock, never drifting with
+/// the age (`libration`). They CROSS (and join) where its greatest reaches
+/// their gap. Co-orbital pairs (Δω = 0) never meet and never join.
 fn crossed(w_i: &Ratio, w_j: &Ratio, r: &Ratio, m: &Ratio, reach: &Ratio, psi0: &Ratio, age: u64) -> bool {
     if r.is_zero() {
         return true;
@@ -1249,11 +1252,26 @@ fn crossed(w_i: &Ratio, w_j: &Ratio, r: &Ratio, m: &Ratio, reach: &Ratio, psi0: 
         }
         Ratio::from_integer(q_found.unwrap_or_else(|| s.denom().clone()))
     };
+    let c = crate::flows::in_step(&(q.clone() * psi0.clone()), &ratio(0, 1));
+    eps * reach.clone() * libration(&n_meet, &q, &c) >= *r
+}
+
+/// THE GREATEST EXCURSION OVER N MEETINGS, in kicks, the residual `c` of
+/// each period of `q` inverted on every return leg (docs/96 §8.1): with
+/// `P = ⌊N/q⌋`, `ρ = N mod q`, it is ρ at P = 0, `max(q − 1, c + ρ)` at
+/// P = 1, and `c + q − 1` from P = 2 on: bounded, the age past two periods
+/// no longer moving it.
+fn libration(n_meet: &Ratio, q: &Ratio, c: &Ratio) -> Ratio {
     let periods = (n_meet.clone() / q.clone()).floor();
     let rest = n_meet.clone() - periods.clone() * q.clone();
-    let c = crate::flows::in_step(&(q.clone() * psi0.clone()), &ratio(0, 1));
-    let kicks = periods * c + rest.min(q);
-    eps * reach.clone() * kicks >= *r
+    let last = q.clone() - ratio(1, 1);
+    if periods.is_zero() {
+        rest
+    } else if periods == ratio(1, 1) {
+        last.max(c.clone() + rest)
+    } else {
+        c.clone() + last
+    }
 }
 
 /// THE SYSTEM'S WORLDS BY CONVERGENCE (xylarium 11.0 (52), the N-body master
@@ -1560,13 +1578,24 @@ mod crossing_tests {
         assert!(!crossed(&ratio(1, 3), &ratio(1, 3), &r, &m, &reach, &psi, 1_000_000));
         // No age, no meetings.
         assert!(!crossed(&ratio(1, 3), &ratio(1, 4), &r, &m, &reach, &psi, 0));
-        // A young pair stands where an old one at a low-order resonance
-        // crosses: a light neighbour's kick is far short of the gap, so it
-        // takes many meetings in step (each kick 4·10^-4 of a gap of 0.1).
+        // THE DOUBLE PASS (docs/96 §8.1): a light pair at a 2:1 (each kick
+        // 4·10^-4 of a gap of 0.1) stands old as it stood young: its
+        // residual inverts on every return leg and librates.
         let light = ratio(1, 1_000_000);
         let young = crossed(&ratio(1, 2), &ratio(1, 4), &r, &light, &reach, &psi, 10);
         let old = crossed(&ratio(1, 2), &ratio(1, 4), &r, &light, &reach, &psi, 10_000_000);
-        assert!(!young && old, "the kicks of a 2:1 accumulate over the age");
+        assert!(!young && !old, "a resonance librates, it does not drift");
+        // A pair whose own kick reaches its gap joins at its first meeting.
+        assert!(crossed(&ratio(1, 2), &ratio(1, 4), &ratio(1, 100), &ratio(1, 10), &reach, &psi, 4));
+        // The greatest excursion is the same at 2q meetings and any later.
+        let (q, c) = (ratio(7, 1), ratio(3, 5));
+        let at_2q = super::libration(&ratio(14, 1), &q, &c);
+        for n in [15i64, 21, 1_000, 10_000_000] {
+            assert_eq!(super::libration(&ratio(n, 1), &q, &c), at_2q.clone());
+        }
+        assert_eq!(at_2q, ratio(33, 5));
+        // Before its first period, the raw kicks so far.
+        assert_eq!(super::libration(&ratio(5, 1), &q, &c), ratio(5, 1));
         // Far apart for their masses, they stand even when old.
         assert!(!crossed(&ratio(1, 2), &ratio(1, 4), &ratio(1, 1), &ratio(1, 1_000_000), &reach, &psi, 1000));
     }
