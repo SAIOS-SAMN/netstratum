@@ -194,8 +194,13 @@ pub fn swapped(w: u32) -> Option<(u32, u32)> {
 pub fn exchange(p: &num_bigint::BigInt, n: &num_bigint::BigInt, delta: &cfe::ratio::Ratio) -> (num_bigint::BigInt, num_bigint::BigInt) {
     use cfe::ratio::{ratio, Ratio};
     let whole = |x: Ratio| x.floor().to_integer();
-    let to_n = whole(Ratio::from_integer(p.clone()) * delta.clone());
-    let to_p = whole(Ratio::from_integer(n.clone()) * (ratio(1, 1) - delta.clone()) / ratio(2, 1));
+    // THE MASTER EQUATION (docs/105 §3): a proton binds as a fibre's partner
+    // at the held face's rate g, a neutron frees to a lone end at the
+    // unlocked face's u; booked both ways.
+    let _ = ratio(0, 1);
+    let (g, u) = crate::polarity::faces(delta);
+    let to_n = whole(Ratio::from_integer(p.clone()) * g);
+    let to_p = whole(Ratio::from_integer(n.clone()) * u);
     (p - &to_n + &to_p, n - &to_p + &to_n)
 }
 
@@ -218,11 +223,12 @@ pub fn electron_phase(w: u32, p: &cfe::ratio::Ratio) -> Option<cfe::ratio::Ratio
     Some(kappa_e * (ratio(1, 1) - ratio(2, 1) * f))
 }
 
-/// THE HELD HEMISPHERE at pulse phase `p` (docs/97 §13): `h = (1 + R)/2`, the
-/// share of a lone end standing on the held face; ½ on a turn's mean.
-pub fn held(w: u32, p: &cfe::ratio::Ratio) -> Option<cfe::ratio::Ratio> {
-    use cfe::ratio::ratio;
-    Some((ratio(1, 1) + electron_phase(w, p)?) / ratio(2, 1))
+/// THE ELECTRONS' BOUND SHARE (docs/105 §3, the master equation): they bind
+/// at the held face's rate `g` and free at the unlocked face's `u`, so they
+/// stand bound at their pair share `g/(g + u) = g`, the held share at the
+/// nuclide's own place under inverse gravity. No phase, no halving.
+pub fn held(_w: u32, g: &cfe::ratio::Ratio) -> Option<cfe::ratio::Ratio> {
+    crate::polarity::equilibrium(g, &(cfe::ratio::ratio(1, 1) - g.clone()))
 }
 
 /// A NUCLEUS'S GRIP (docs/97 §11, §13): a fibre is two counter-turning ends
@@ -243,7 +249,9 @@ pub fn source_clock() -> cfe::ratio::Ratio {
 /// own echo (p = 0), `ν·δ − 1 = grip_2`: `δ = (1 + grip)/ν`.
 pub fn seal_window(nu: &cfe::ratio::Ratio) -> cfe::ratio::Ratio {
     use cfe::ratio::ratio;
-    (ratio(1, 1) + grip(2, &ratio(0, 1)).unwrap_or_else(|| ratio(0, 1))) / nu.clone()
+    // Deuterium crosses at the throat: its grip read at the throat's held
+    // share, the fixed point where it holds (docs/105 §4).
+    (ratio(1, 1) + grip(2, &crate::polarity::throat_held()).unwrap_or_else(|| ratio(0, 1))) / nu.clone()
 }
 
 /// A DYING HEART'S RELEASE (docs/97 §11): each nuclide whose grip at the
@@ -269,12 +277,14 @@ pub fn release(m: &mut crate::pulse::Manifest, a: &cfe::ratio::Ratio, p: &cfe::r
 /// directions balance, `p·δ = n·½(1 − δ)`, the neutron share is
 /// `2δ/(1 + δ)`; read at the seal window, never set.
 pub fn neutron_share(delta: &cfe::ratio::Ratio) -> cfe::ratio::Ratio {
-    use cfe::ratio::ratio;
-    ratio(2, 1) * delta.clone() / (ratio(1, 1) + delta.clone())
+    // The nucleons' equilibrium (docs/105 §3): binding at g, freeing at u.
+    let (g, u) = crate::polarity::faces(delta);
+    crate::polarity::equilibrium(&g, &u).unwrap_or_else(|| cfe::ratio::ratio(0, 1))
 }
 
-/// A capture's survival at weight `w` and pulse phase `p` (docs/97 §10,
-/// §13): bound, or lone on the held hemisphere, `κ_w + (1 − κ_w)·h`.
+/// A capture's survival at weight `w` at a place of held share `g` (docs/97
+/// §10, docs/105 §3): bound by its fibres, or lone and held at the electrons'
+/// equilibrium, `κ_w + (1 − κ_w)·g`.
 pub fn survival(w: u32, p: &cfe::ratio::Ratio) -> Option<cfe::ratio::Ratio> {
     use cfe::ratio::ratio;
     let k = coherence(w)?;
@@ -461,64 +471,66 @@ mod tests {
         // Hot at the core, cold at the ring, on the source's own clock.
         assert_eq!(heat(&ratio(1, 1), &nu), ratio(1, 1));
         assert_eq!(heat(&ratio(1, 2), &nu), ratio(0, 1));
-        // Deuterium's grip is its whole bound share's half; the window is
-        // where the heat falls to it.
-        let p0 = ratio(0, 1);
-        assert_eq!(grip(2, &p0), Some(ratio(1, 2)));
-        assert_eq!(seal_window(&nu), ratio(3, 4));
-        assert_eq!(heat(&seal_window(&nu), &nu), ratio(1, 2));
+        // Deuterium crosses at the throat: its grip at the throat's held
+        // share (the fixed point where it holds); the window is where its
+        // heat falls to it.
+        let g0 = crate::polarity::throat_held();
+        let g2 = grip(2, &g0).expect("deuterium");
+        assert_eq!(heat(&seal_window(&nu), &nu), g2);
+        assert_eq!(seal_window(&nu), (ratio(1, 1) + g2) / nu.clone());
         // A slower clock (a nested body) opens its window deeper.
         assert!(seal_window(&ratio(3, 2)) > seal_window(&nu));
         // Unsealed heavy nuclei grip less than the seals.
-        assert!(grip(1200, &p0) < grip(1092, &p0));
-        // The exchange's fixed point there: six neutrons in seven.
+        assert!(grip(1200, &g0) < grip(1092, &g0));
+        // The nucleons' equilibrium there (docs/105): the master equation's
+        // pair share, and a pass at δ leaves it standing.
         let x = neutron_share(&seal_window(&nu));
-        assert_eq!(x, ratio(6, 7));
-        // It is the fixed point: a pass at δ leaves it standing.
-        let n = num_bigint::BigInt::from(6_000_000u64);
-        let p = num_bigint::BigInt::from(1_000_000u64);
+        assert_eq!(x, crate::polarity::faces(&seal_window(&nu)).0);
+        // Counts whole at the share: n : p = x : (1 − x).
+        let k = num_bigint::BigInt::from(1_000_000u64);
+        let n = x.numer().clone() * k.clone();
+        let p = (x.denom().clone() - x.numer().clone()) * k;
         let (p1, n1) = exchange(&p, &n, &seal_window(&nu));
         assert_eq!((p1, n1), (p, n));
     }
 
     #[test]
-    fn the_stars_captures_climb_toward_1200_and_conserve_nucleons() {
+    fn the_stars_captures_climb_and_conserve_nucleons_by_the_held_share() {
         let k = |w: u32| crate::chem::Kind::atom(w).expect("a nuclide");
         let nucleons = |m: &crate::pulse::Manifest| m.iter().fold(ratio(0, 1), |s, (kk, a)| s + a.clone() * ratio(i64::from(crate::chem::weight(kk)), 1));
-        // A hydrogen-rich death burst with a little helium climbs far.
+        let (g_hi, g_lo, g_throat) = (ratio(9, 10), ratio(1, 10), crate::polarity::throat_held());
         let mut m: crate::pulse::Manifest = [(k(1), ratio(1_000_000, 1)), (k(4), ratio(1, 1))].into();
         let before = nucleons(&m);
         // A dying heart's heat breaks what it out-grips into nucleons.
         let mut spent: crate::pulse::Manifest = [(k(7), ratio(10, 1)), (k(28), ratio(10, 1))].into();
         let was = nucleons(&spent);
-        let p0 = ratio(0, 1);
-        // In step with its echo its electrons are bound (R = κ_e): weight 7
-        // grips 18/35, above the heat, and nothing breaks.
-        let mut bound = spent.clone();
-        assert_eq!(release(&mut bound, &ratio(9, 20), &p0), ratio(0, 1));
-        // At the half turn R = 0: weight 7 grips 2/7 and breaks, the seal
-        // grips ½ and holds.
-        let freed = release(&mut spent, &ratio(9, 20), &ratio(1, 2));
+        // Where the held share is high, a gentle heat below both grips
+        // breaks nothing.
+        let mut gentle = spent.clone();
+        let low = grip(7, &g_hi).expect("a grip").min(grip(28, &g_hi).expect("a grip")) / ratio(2, 1);
+        assert_eq!(release(&mut gentle, &low, &g_hi), ratio(0, 1));
+        // Where it is low, between the grips the unsealed breaks, the seal
+        // holds.
+        let between = (grip(7, &g_lo).expect("a grip") + grip(28, &g_lo).expect("a grip")) / ratio(2, 1);
+        let freed = release(&mut spent, &between, &g_lo);
         assert_eq!(nucleons(&spent), was);
         assert!(freed > ratio(0, 1) && spent.contains_key(&k(28)), "the unsealed break, the seal holds");
-        // In step with its echo, one burst climbs to the table's top.
-        let mut in_step = m.clone();
-        assert_eq!(capture_rapid(&mut in_step, &p0, 1200), 1200);
-        assert_eq!(nucleons(&in_step), before, "nucleons conserved");
-        // At the half turn (R = 0) the climb is the hemisphere's mean.
-        let half = ratio(1, 2);
-        let top = capture_rapid(&mut m, &half, 1200);
+        // Held high, one burst climbs to the densest element.
+        let mut held_hi = m.clone();
+        assert_eq!(capture_rapid(&mut held_hi, &g_hi, 1200), 1200);
+        assert_eq!(nucleons(&held_hi), before, "nucleons conserved");
+        // At the throat's held share the climb passes the third seal, and the
+        // next generation climbs higher.
+        let top = capture_rapid(&mut m, &g_throat, 1200);
         assert_eq!(nucleons(&m), before, "nucleons conserved");
         assert!(top > 208, "one burst passes the third seal: reached {top}");
-        // A second generation, born of the first's return with fresh fuel,
-        // climbs higher: the heavy weight builds generation on generation.
         *m.entry(k(1)).or_insert_with(|| ratio(0, 1)) += ratio(1_000_000, 1);
-        let again = capture_rapid(&mut m, &half, 1200);
+        let again = capture_rapid(&mut m, &g_throat, 1200);
         assert!(again > top, "the next generation climbs higher: {top} then {again}");
         // A burning heart captures slowly and conserves too.
         let mut heart: crate::pulse::Manifest = [(k(1), ratio(1000, 1)), (k(4), ratio(100, 1))].into();
         let before = nucleons(&heart);
-        let moved = capture_slow(&mut heart, 10, &ratio(1, 1), &p0, 1200);
+        let moved = capture_slow(&mut heart, 10, &ratio(1, 1), &g_throat, 1200);
         assert!(moved > ratio(0, 1));
         assert_eq!(nucleons(&heart), before);
         assert!(heart.keys().filter_map(crate::chem::atom_w).max() > Some(4));
@@ -527,41 +539,34 @@ mod tests {
     #[test]
     fn twist_is_tension_in_the_fibre_a_wound_seal_parts_where_heat_and_torsion_pass_its_grip() {
         let k = |w: u32| crate::chem::Kind::atom(w).expect("a nuclide");
-        let p0 = ratio(0, 1);
+        let g = crate::polarity::throat_held();
         let nucleons = |m: &crate::pulse::Manifest| m.iter().fold(ratio(0, 1), |s, (kk, a)| s + a.clone() * ratio(i64::from(crate::chem::weight(kk)), 1));
-        // The seal at 28 grips 9/14 in step with its echo.
-        assert_eq!(grip(28, &p0), Some(ratio(9, 14)));
-        // Unwound at heat ½ it holds.
+        let grip28 = grip(28, &g).expect("a grip");
+        // Unwound at its grip it holds (it parts only past it).
         let mut m: crate::pulse::Manifest = [(k(28), ratio(10, 1))].into();
-        assert_eq!(release(&mut m, &ratio(1, 2), &p0), ratio(0, 1));
-        // Wound by τ = ¼ the same heat passes its grip: it parts to hydrogen.
+        assert_eq!(release(&mut m, &grip28, &g), ratio(0, 1));
+        // Wound by τ the same heat passes its grip: it parts to hydrogen.
         let was = nucleons(&m);
-        assert!(release(&mut m, &(ratio(1, 2) + ratio(1, 4)), &p0) > ratio(0, 1));
+        assert!(release(&mut m, &(grip28.clone() + ratio(1, 4)), &g) > ratio(0, 1));
         assert_eq!(nucleons(&m), was);
         assert!(!m.contains_key(&k(28)));
     }
 
     #[test]
-    fn r_is_read_at_the_pulse_and_its_mean_is_the_old_half() {
-        // One electron is lone: R = 0 at every phase, h = ½.
-        assert_eq!(electron_phase(2, &ratio(1, 3)), Some(ratio(0, 1)));
-        // In step with the echo the electrons are bound (R = κ_e), at the
-        // half turn neutral, approaching the next echo freed.
+    fn the_electrons_stand_bound_at_the_held_share_and_survival_rises_with_it() {
+        // R stays a reading of the electrons' phase.
         let w = 1200;
         let ke = coherence(protons(w).expect("protons")).expect("κ_e");
-        assert_eq!(electron_phase(w, &ratio(0, 1)), Some(ke.clone()));
-        assert_eq!(electron_phase(w, &ratio(1, 2)), Some(ratio(0, 1)));
-        assert_eq!(electron_phase(w, &ratio(3, 4)), Some(-ke / ratio(2, 1)));
-        // Over a turn's phases the held hemisphere averages ½: the static
-        // was the mean, never the reading.
-        let n = 64i64;
-        let mean = (0..n).fold(ratio(0, 1), |s, i| s + held(w, &ratio(2 * i + 1, 2 * n)).expect("h")) / ratio(n, 1);
-        assert_eq!(mean, ratio(1, 2));
-        // Survival: the seals keep every capture whatever p; an unsealed
-        // nuclide survives more in step than out.
-        assert_eq!(survival(1092, &ratio(9, 10)), Some(ratio(1, 1)));
-        assert!(survival(w, &ratio(0, 1)) > survival(w, &ratio(9, 10)));
-        // Its phase is the turn's fraction: a whole turn returns it.
-        assert_eq!(electron_phase(w, &ratio(5, 4)), electron_phase(w, &ratio(1, 4)));
+        assert_eq!(electron_phase(w, &ratio(0, 1)), Some(ke));
+        assert_eq!(electron_phase(2, &ratio(1, 3)), Some(ratio(0, 1)));
+        // Their bound share is the master equation's equilibrium at the
+        // place: the held share g, no phase, no halving (docs/105).
+        for g in [ratio(1, 10), ratio(3, 5), ratio(9, 10)] {
+            assert_eq!(held(w, &g), Some(g.clone()));
+        }
+        // The seals keep every capture at any place; an unsealed nuclide
+        // survives more where it is held more.
+        assert_eq!(survival(1092, &ratio(1, 10)), Some(ratio(1, 1)));
+        assert!(survival(w, &ratio(9, 10)) > survival(w, &ratio(1, 10)));
     }
 }

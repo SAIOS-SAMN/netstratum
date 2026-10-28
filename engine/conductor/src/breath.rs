@@ -900,8 +900,9 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // reaching its place (its galaxy's bell there), `p = φ − bell`;
             // and ITS CLOCK read from the rings it received this echo,
             // `ν = 2·r_echo/T_u` (each ring read on both legs).
-            let at_loop = |v: &Vec<Ratio>| v.get(crate::flows::LOOP).cloned().unwrap_or_else(|| ratio(0, 1));
-            let pulse_p = at_loop(&sys.phase) - at_loop(&sys.bell);
+            // ITS HELD SHARE at its own reach in its galaxy (docs/105 §3,
+            // inverse gravity): what its nuclei's survival and grip read.
+            let g_star = match &enc { Some(e) => crate::polarity::faces(&e.reach(&own_of(&sys)).1).0, None => crate::polarity::throat_held() };
             let nu = ratio(2, 1) * as_ratio(r_echo) / as_ratio(t_u.max(1));
             let sys_total = mass(&sys.total());
             let heart_share = if sys_total.is_zero() { ratio(0, 1) } else { mass(&sys.kept) / sys_total };
@@ -920,8 +921,8 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 // Its torsion adds to the heat against the grip (docs/100
                 // §9.2: the fibres part where `a + τ > κ_w·h`).
                 let heart_heat = crate::nuclides::heat(&h_s, &nu) + crate::flows::torsion(&sys.tilt, &core.tilt);
-                crate::nuclides::release(&mut all, &heart_heat, &pulse_p);
-                crate::nuclides::capture_rapid(&mut all, &pulse_p, densest);
+                crate::nuclides::release(&mut all, &heart_heat, &g_star);
+                crate::nuclides::capture_rapid(&mut all, &g_star, densest);
                 returned += mass(&all) / unit.clone();
                 // Dissolved whole: it leaves at its own orbit.
                 shed.push((all, own_of(&sys), sys.ell_orth.clone(), sys.phase.clone()));
@@ -962,8 +963,8 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 // Its torsion adds to the heat against the grip (docs/100
                 // §9.2: the fibres part where `a + τ > κ_w·h`).
                 let heart_heat = crate::nuclides::heat(&h_s, &nu) + crate::flows::torsion(&sys.tilt, &core.tilt);
-                crate::nuclides::release(&mut all, &heart_heat, &pulse_p);
-                crate::nuclides::capture_rapid(&mut all, &pulse_p, densest);
+                crate::nuclides::release(&mut all, &heart_heat, &g_star);
+                crate::nuclides::capture_rapid(&mut all, &g_star, densest);
                 returned += mass(&all) / unit.clone();
                 // Dissolved whole: it leaves at its own orbit.
                 shed.push((all, own_of(&sys), sys.ell_orth.clone(), sys.phase.clone()));
@@ -1020,7 +1021,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // THE SLOW CAPTURE (docs/97 §10): each ring its clock received this
             // echo, its heart's nuclides capture its hydrogen, one nucleon a
             // ring, kept by the hemisphere law at its pulse phase.
-            crate::nuclides::capture_slow(&mut sys.kept, r_echo, &in_phase, &pulse_p, densest);
+            crate::nuclides::capture_slow(&mut sys.kept, r_echo, &in_phase, &g_star, densest);
             // ITS LIGHT crosses its own system on the continuum face.
             if !shone.is_zero() {
                 let whole = mass(&sys.total());
@@ -1595,13 +1596,13 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 // every kind (no weight ratio).
                 // THE FIBRES' TRANSITION AT IGNITION (docs/100 §9.2): what fell
                 // parts where its heat and its members' torsion pass its
-                // nuclei's grip, read at the binding's own pulse phase (its
-                // R-loop phase); the parted stand as hydrogen, the new
+                // nuclei's grip, read at the binding's held share; the parted stand as hydrogen, the new
                 // heart's fuel. Nucleons conserved.
                 let mut star = star;
                 let tau_b = crate::flows::torsion(&crate::flows::blend(&members.iter().map(|x| (x.amount.clone() * crate::flows::weight(&x.key), x.ell_o.clone(), x.tilt.clone())).collect::<Vec<_>>()), &core.tilt);
-                let p_b = phases_own.get(crate::flows::LOOP).cloned().unwrap_or_else(|| ratio(0, 1));
-                crate::nuclides::release(&mut star, &(a_binding.clone() + tau_b), &p_b);
+                // Its held share at its reach in the galaxy (docs/105 §3).
+                let g_b = crate::polarity::faces(&tide).0;
+                crate::nuclides::release(&mut star, &(a_binding.clone() + tau_b), &g_b);
                 let lit = crate::formation::ignition_share(&a_binding).and_then(|_| crate::formation::system(&star, outside, &whole_mass, &a_binding, &fell_spins, &path, &tide));
                 let Some((kept, medium, medium_spin, disc_motes)) = lit else {
                     // No heart: the members go on as they were.

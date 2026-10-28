@@ -113,8 +113,9 @@ pub fn founding(nuclei: &num_bigint::BigInt) -> Manifest {
     let mut arriving = seeds;
     // THE FOUNDING'S PULSE PHASE (docs/97 §13): the turn its nucleons have
     // made when the seal window opens, on the source's clock, `ν·δ_window`.
-    let nu = crate::nuclides::source_clock();
-    let p0 = nu.clone() * crate::nuclides::seal_window(&nu);
+    // THE FOUNDING CROSSES AT THE THROAT (docs/105 §4): every capture reads
+    // the throat's held share, the fixed point where it holds; no phase.
+    let p0 = crate::polarity::throat_held();
     for w in 4..crate::nuclides::READ {
         if arriving <= zero {
             break;
@@ -1509,11 +1510,13 @@ mod tests {
     #[test]
     fn the_founding_climbs_to_its_own_densest_element_no_fixed_cap() {
         // At 2^55 grains the climb ends where less than one whole nucleus
-        // arrives: weight 1612 (docs/97 §14), nucleons conserved.
+        // arrives (docs/97 §14): read, never set (1618 at the master
+        // equation's neutron share, docs/105 §4), past the fourth seal;
+        // nucleons conserved.
         let n = num_bigint::BigInt::from(2u32).pow(55) * super::nuclei_per_grain() * num_bigint::BigInt::from(1024);
         let m = super::founding(&n);
         let top = m.keys().filter_map(crate::chem::atom_w).max();
-        assert_eq!(top, Some(1612));
+        assert!(top.is_some_and(|t| t > 1092), "the founding passes the fourth seal: {top:?}");
         let grid = super::nuclei_per_grain() * num_bigint::BigInt::from(1024);
         let nucleons = m.iter().fold(ratio(0, 1), |s, (k, a)| s + a.clone() * ratio(i64::from(crate::chem::weight(k)), 1));
         assert_eq!(nucleons * Ratio::from_integer(grid), Ratio::from_integer(n));

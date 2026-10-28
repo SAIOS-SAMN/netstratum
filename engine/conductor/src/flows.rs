@@ -204,10 +204,10 @@ pub fn weight(k: &crate::chem::Kind) -> Ratio {
 }
 
 /// A MOTE'S NUCLEAR GRIP (docs/103 §6, the bond's nuclear layer ν): its
-/// nuclei's fibres' grip, `κ_w·h` at its pulse phase (its R-loop phase; docs/97
-/// §13), a cluster's by its parts' holding. In `[0, 1]`.
-pub fn grip_share(x: &Mote) -> Ratio {
-    let p = x.phase.get(LOOP).cloned().unwrap_or_else(|| ratio(0, 1));
+/// nuclei's fibres' grip, `κ_w·g` at the held share `g` of its place (docs/105
+/// §3), a cluster's by its parts' holding. In `[0, 1]`.
+pub fn grip_share(x: &Mote, g: &Ratio) -> Ratio {
+    let p = g.clone();
     let parts = x.key.parts();
     let whole = parts.iter().fold(0u64, |s, (n, w)| s + u64::from(*n) * u64::from(*w));
     if whole == 0 {
@@ -1196,7 +1196,8 @@ pub fn strands(motes: &[Mote], enc: &Enclosed, p: &Ratio, total: &Ratio) -> Vec<
             let m = motes[j].amount.clone() * weight(&motes[j].key) / total.clone();
             // THE ADDITIVE BOND (docs/103 §6): holding, open frames and the
             // nuclei's grip, each a share of the same reach.
-            x += m.clone() * (ratio(1, 1) + open(&motes[j].key) + grip_share(&motes[j]));
+            let g_j = crate::polarity::faces(&delta_of(j, &rr[j])).0;
+            x += m.clone() * (ratio(1, 1) + open(&motes[j].key) + grip_share(&motes[j], &g_j));
             a_w += m.clone() * motes[j].agitation.clone();
             r_w += m.clone() * rr[j].clone();
             held += m;
@@ -1430,7 +1431,7 @@ pub fn band_pairs(motes: &[Mote], enc: &Enclosed, p: &Ratio, plane: &[Ratio], g_
         let lead = blend(&members.iter().map(|(i, s)| (held_of(*i, s), motes[*i].ell_o.clone(), motes[*i].tilt.clone())).collect::<Vec<_>>());
         let tau = m.clone() * torsion(&lead, plane);
         // The nuclear layer ν: the members' holding by their nuclei's grip.
-        let nu = members.iter().fold(ratio(0, 1), |acc, (i, s)| acc + held_of(*i, s) * grip_share(&motes[*i]));
+        let nu = members.iter().fold(ratio(0, 1), |acc, (i, s)| acc + held_of(*i, s) * grip_share(&motes[*i], &crate::polarity::faces(&enc.reach(&motes[*i].ell_o).1).0));
         let Some((_, count)) = crate::formation::crest_collapse(&m, &mu, &tau, &nu, &a, &mid, &h_mid) else { continue };
         if count == 0 {
             continue;
@@ -1934,13 +1935,14 @@ mod passage_tests {
     }
 
     #[test]
-    fn a_motes_nuclear_grip_is_its_nuclei_at_its_pulse() {
+    fn a_motes_nuclear_grip_is_its_nuclei_at_its_place() {
         use super::{grip_share, Mote};
         let mote = |key: &str, loop_at: (i64, i64)| Mote { key: crate::chem::Kind::parse(key).expect("a kind"), amount: ratio(1, 1), ell_o: ratio(1, 1), ell_orth: ratio(0, 1), phase: super::rest(ratio(loop_at.0, loop_at.1)), agitation: ratio(0, 1), born: 0, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1), tilt: Vec::new() };
         // The seal at 28 grips 9/14 in step with its echo, its own reading.
-        assert_eq!(grip_share(&mote("W0028", (0, 1))), crate::nuclides::grip(28, &ratio(0, 1)).expect("a grip"));
+        let g = ratio(3, 5);
+        assert_eq!(grip_share(&mote("W0028", (0, 1)), &g), crate::nuclides::grip(28, &g).expect("a grip"));
         // Hydrogen, one lone proton, grips nothing.
-        assert_eq!(grip_share(&mote("W0001", (0, 1))), ratio(0, 1));
+        assert_eq!(grip_share(&mote("W0001", (0, 1)), &g), ratio(0, 1));
     }
 
     #[test]

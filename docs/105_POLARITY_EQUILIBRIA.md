@@ -64,7 +64,7 @@ crossing for the lone ends and the fibres' own pairing for the bound ones.
 
 ## 5. Build order (each with its witness)
 
-1. **`polarity`:** `equilibrium(α, β)`, `after(x₀, α, β, n)`, `faces(δ)` →
+1. **`polarity`** (BUILT): `equilibrium(α, β)`, `after(x₀, α, β, n)`, `faces(δ)` →
    `(g, u)`. Witness: conserved; the equilibrium is a fixed point of the
    ring; the closed form at N and 4N agrees with stepping.
 2. **The nucleons' exchange** on it. Witness: nucleons conserved; the

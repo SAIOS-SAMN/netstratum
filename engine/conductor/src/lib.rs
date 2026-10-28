@@ -86,6 +86,7 @@ pub mod annal;
 pub mod pulse;
 pub mod chem;
 pub mod nuclides;
+pub mod polarity;
 pub mod motion;
 pub mod breath;
 pub mod ring;
