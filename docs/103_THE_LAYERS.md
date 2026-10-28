@@ -112,24 +112,30 @@ the face where the matter actually stands (docs/98, the luminal bound).
   stand; this is not a relabel (docs/98 §3 is corrected here: the faces are
   symmetric for motion, not for production).
 - **Scope:** production reads matter on its own face: on the vacuum face the
-  enclosure is read through the throat's inversion, `R → H²/R` (`δ ↦ 1 − δ`),
-  so the vacuum's strip is the image of the continuum's, `H/2 ≤ R < H`, its
-  band pairs, crest and disc read there by the same laws at the inverted reach.
+  enclosure is read through the throat's inversion on the share, `δ ↦ 1 − δ`
+  (first degree; never a radius squared), so the vacuum's strip is the
+  continuum's read on the other face (`½ < δ ≤ ⅔`), its band pairs, crest and
+  disc read there by the same laws at the share's other face.
   **For ruling:** production on each face at its own inverted strip (both
   faces produce), or the universe's whole frame inverted (what we call outside
   is inside, every tier).
 
   **Ruled (operator 2026-10-28): "invert the whole frame".** Derived, its
-  meaning: inverting every reading together (reach `R → H²/R`, deficit
-  `δ → 1 − δ` for turning, the luminal bound, the release's placement, the
-  strip, the rim) leaves the dynamics unchanged, the laws being symmetric
-  under the throat's inversion: a relabel of the coordinate. The one reading
-  not symmetric is the ENCLOSURE'S ORDER: `H(<R)` counts the core's state and
-  the matter standing inside R. In the frame inverted whole, inside is
-  outside: the hold at a place is the core's state and every body standing
-  BEYOND it (in today's coordinate), and the core's throat bounds the frame
-  from outside (matter enclosed by its core as a shell, not orbiting a
-  centre). That is the inversion's physics. **Owed before build:** the
+  meaning, stated on the SHARE (operator 2026-10-28: "so you're using
+  squares inside a sphere": `R → H²/R` is a square and retires; the
+  inversion is `δ ↦ 1 − δ`, first degree): inverting every reading together
+  (turning, the luminal bound, the release's placement, the strip, the rim)
+  leaves the dynamics unchanged, the laws being symmetric under the share's
+  inversion: a relabel. The one reading not symmetric is the ENCLOSURE'S
+  ORDER: the hold at a place counts the core's state and every body whose
+  share is LARGER (deeper, `δ_j > δ`). In the frame inverted whole it counts
+  every body whose share is SMALLER (farther out, `δ_j < δ`), and the core's
+  throat bounds the frame from outside (matter enclosed by its core as a
+  shell). Read: the galaxies' deficits in the universe's frame, about 1/17
+  (242) and 1/117 (245), invert to 16/17 and 116/117, the deepest, inside the
+  universal core's throat; the universal core encloses every galaxy with no
+  sphere enlarged (operator: "do we need to increase the sphere of the
+  enclosing universe?": no). That is the inversion's physics. **Owed before build:** the
   operator's confirmation that the enclosure counts from the outside in.
 
 ## 6. L6 — the bond, composed through the layers

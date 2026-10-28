@@ -26,12 +26,14 @@ From the kernel doc (§ the throat, S^0 faces; the jetstream (11)):
 ## 2. Ours, inverted
 
 Our continuum leg is the vacuum. Each law swaps the face it reads: gravity
-and velocity read `δ(H²/R) = 1 − δ(R)` where the forward read `δ(R)`, the
+and velocity read `1 − δ(R)` (the share's other face) where the forward read `δ(R)`, the
 push, light and cooling read `δ(R)` where the forward read `1 − δ(R)`.
 
 ## 3. The inversion is already in the grammar, and the luminal bound makes it a relabel
 
-- **Inversion through the throat** `R → H²/R` keeps every angle and maps
+- **Inversion through the throat**, read on the share (first degree, never a
+  radius squared, design law 2; operator 2026-10-28: "so you're using squares
+  inside a sphere"), keeps every angle and maps
   `δ ↦ 1 − δ` (witness: `recycle` tests, fixed at R = H, both ½). A mote
   carries its face (`Mote.vacuum`); on the inverted face it reads its pull
   and turning at `1 − δ`, runs its circulation backward, and reflects its
