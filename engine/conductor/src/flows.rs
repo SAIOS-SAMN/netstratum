@@ -719,7 +719,10 @@ pub fn spin_torque(x: &mut Mote, from: &[Ratio], h: &Ratio, r_o: &Ratio, d_o: &R
     // share), and heat leaves by the built cooling law's two channels
     // over the passage's two rings: the light through its open frames
     // (`e`, open over held, a ring) and the vacuum's pull back (`δ` at its
-    // reach, a ring): `a ← (a + heat)·((1 − e)(1 − δ))²`.
+    // reach, a ring). The keep `(1 − e)(1 − δ)` is applied ONCE PER RING of
+    // the double pass (compounding over the two passes, as `(1 − s)ⁿ`
+    // compounds the release; never a square of a quantity):
+    // `a ← (a + heat)·keep·keep`.
     let coherent = if k < ratio(0, 1) { -k } else { k };
     let heat = p.clone() * d_o.clone() * (ratio(1, 1) - coherent.min(ratio(1, 1)));
     let keep = (ratio(1, 1) - open(&x.key).min(ratio(1, 1))) * (ratio(1, 1) - d_o.clone());

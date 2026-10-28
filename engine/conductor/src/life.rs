@@ -317,13 +317,19 @@ pub fn window_echoes(star: &Ratio, worlds: &Ratio) -> u64 {
     (ratio(halvings as i64, 1) * ratio(693, 1000) * ratio(2, 1) / epsilon).floor().to_integer().try_into().unwrap_or(0)
 }
 
-/// A galaxy's TWIST a bell (docs/100 §2): its core's winding from its clock
-/// and its disc plane, the home's on the source's; never drawn. One reading
-/// for every impact law (`climb`, `readings`).
-pub fn twist_of(u: &Universe, galaxy: Option<u64>) -> Ratio {
+/// A world's TWIST a bell (docs/100 §2): its galaxy's core's winding from its
+/// clock, plane by plane, as the world's own planes take it (its tilt), the
+/// home's on the source's clock; never drawn, never flattened to one plane.
+/// One reading for every impact law (`climb`, `readings`).
+pub fn twist_of(u: &Universe, path: &[u64]) -> Ratio {
+    let galaxy = path.first().copied();
+    let body_tilt = u.cores.iter().find(|c| c.path.first().copied() == galaxy)
+        .and_then(|c| c.satellites.iter().find(|s| s.path.get(1) == path.get(1)))
+        .and_then(|s| s.satellites.iter().find(|o| o.path.get(2) == path.get(2)))
+        .map(|o| o.tilt.clone()).unwrap_or_default();
     u.cores.iter().position(|c| c.path.first().copied() == galaxy).map(|i| {
         let rate = crate::breath::galaxy_rate(u, i, &crate::breath::unit_mass(u)).unwrap_or_else(|| ratio(1, 1));
-        crate::quantum::twist(&rate, &u.cores[i].tilt)
+        crate::quantum::twist(&rate, &u.cores[i].tilt, &body_tilt)
     }).unwrap_or_else(|| ratio(0, 1))
 }
 
@@ -477,7 +483,7 @@ pub fn readings(u: &Universe, _seed: &[u8; 32]) -> std::collections::BTreeMap<Ve
             sys.satellites.iter().find(|o| o.path.get(2) == w.path.get(2)).map(|o| o.kept.clone())
         })();
         // Its galaxy's twist a bell (docs/100 §2): derived, never drawn.
-        let torsion = twist_of(u, w.path.first().copied());
+        let torsion = twist_of(u, &w.path);
         let turn = period.clone().unwrap_or_else(|| ratio(0, 1));
         let climb = period.filter(|_| matter.as_ref().is_some_and(viable)).and_then(|p| {
             [("chemical", &w.chemical), ("geologic", &w.geologic), ("plasmic", &w.plasmic)]

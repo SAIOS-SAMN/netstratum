@@ -74,7 +74,7 @@ fn main() {
                 free.push(b);
             }
             let period = period_of(&u_full, &w.path);
-            let twist = life::twist_of(&u_full, w.path.first().copied());
+            let twist = life::twist_of(&u_full, &w.path);
             if let Some(b) = period.and_then(|p| life::climb(w, x, &c, &twist, t_u, &p, &home_year)) {
                 gated.push((b, w.path.clone()));
             }
