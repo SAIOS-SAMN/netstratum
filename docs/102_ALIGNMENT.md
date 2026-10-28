@@ -56,8 +56,8 @@ docs before code; witnesses by re-derivation, never equal bytes.
 | A2 (CLOSED e4b74a9) | tilt dropped on save for firmament and ocean motes | `pulse::write` tags 19/24 | — | — |
 | A3 (CLOSED e4b74a9) | "filament" names a bound chain: rename to **strand** | `flows::chains`, `Chain`, `stream`, docs | — | — |
 | A4 (CLOSED e4b74a9) | two impact laws: `life::climb` draws from the seed (with T_u stood in at 60 by `bin/life`); `life::advance` measures on the hidden phase | `life.rs`, `bin/life.rs` | — | — |
-| A5 | nine readings of the universal state; `is_home` branches; `core_state` 0; the release span branch | pulse, breath, ocean (docs/101 §1.2) | — | — |
-| A6 | three homes: `is_home` (path [0]), `life::home` and `chronometry::keepers` (heaviest kept); `places.rs` | life, chronometry, places | A5 | — |
+| A5 (INTO B1) | nine readings of the universal state; `is_home` branches; `core_state` 0; the release span branch | pulse, breath, ocean (docs/101 §1.2) | B1 | — |
+| A6 (INTO B1, B4) | three homes: `is_home` (path [0]), `life::home` and `chronometry::keepers` (heaviest kept); `places.rs` | life, chronometry, places | B1, B4 | — |
 | A7 (CLOSED e4b74a9) | `formation::echo_holds` duplicates the crest's law | formation | — | — |
 | A8 | `bin/observe`'s "cascade" view recomputes the cascade beside it | observe | B3 | — |
 
@@ -95,7 +95,7 @@ locked lead, torsion, twist in the bond and the fibres (65348e2, 4ffd2e7,
 ## 4. Order
 
 1. **A1–A4, A7** (no physics change; each with its witness).
-2. **A5–A6** (fold the readings and the homes; re-derivation at N and 4N).
+2. **A5–A6 fold into B1** (2026-10-28): folding nine readings over four holders now is rewritten when they become one body; pointing the homes at today's empty home core would break the standard year until B4.
 3. **Rulings in hand:** C (B5), R's scale (B6), `T_u` with mycelium (B2).
 4. **B1 → B2 → B3 → B4 with B5, B7**, then **B8** as the cost demands.
 5. **C1**, then **C2–C4**.
