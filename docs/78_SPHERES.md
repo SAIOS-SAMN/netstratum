@@ -161,6 +161,10 @@ breaks one of them is wrong before it is built.
 
 ## The singularities: the universal core and the galactic cores (operator, 2026-10-15)
 
+> **Carried forward (2026-10-28):** docs/101 builds this ruling: the universal
+> core as one body whose throat holds the founding and whose held cut (the
+> heavy elements) is the firmament; its disc the home.
+
 Supersedes the mass split below for galaxies and their centres (its
 tidal-law systems about a core and its 1/1000 hole share are retired;
 docs/83, "Corrections").

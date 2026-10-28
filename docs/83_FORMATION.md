@@ -800,6 +800,10 @@ going to have a manifold on a little yellow star in the outer rim".
 
 ### The closed limit, the founding and the Wellspring (operator 2026-10-18)
 
+> **Carried forward (2026-10-28):** docs/101 §2 builds the Wellspring's share
+> at the bang as the universal core's throat and held cut, its disc the home
+> (the central galaxy); `cascade` and `deploy` retire.
+
 - **A spent star becomes a REMNANT, ruled (a).** Operator: "keep the stars
   recycling as accurate as possible ... so that we can have this universe be
   self sustaining". A closed star falls to its throat condition and becomes

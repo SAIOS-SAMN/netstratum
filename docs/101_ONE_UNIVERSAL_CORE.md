@@ -8,6 +8,27 @@ and look at all machinery affected". Status: SCOPE. Nothing here is built.
 
 ## 0. TUniversal, the law this aligns on
 
+**Standing rulings this builds (not new law):**
+- docs/78 "The singularities" (operator 2026-10-15): the universal core is the
+  one singularity uplinked to the hypha; "it has mass: the heavy elements
+  caught in its accretion disk, continually pulsed and re-pulsed".
+- docs/83 "The closed limit, the founding and the Wellspring" (ruled
+  2026-10-18): "the Wellspring holds its share at the bang ... heaviest
+  deepest, the galaxies getting what it pushes out; its disc is the central
+  galaxy". The home of §2 is that disc.
+- docs/80 "TUniversal from the singularity": TUniversal's origin is the
+  singularity's bounce; MYCELIUM OWNS TUNIVERSAL; the proposed quantum lane
+  carries "the bounce's torsion phase advance" (`quantum::twist`, docs/100
+  §2). Any change to the universal clock (`T_u`, §6) is coordinated with
+  mycelium before it is built.
+- docs/79 (the bounce as compactified quantum torsion), docs/94 §11 (the
+  jetstream loop), docs/96 §7 (the enclosure), docs/97 (the nuclides),
+  docs/98 (the inverse faces), docs/99 (phases, never frames), docs/100
+  (the twist on the weight).
+- docs/89 §1 describes the universal core as built through `cascade`,
+  `orbit_galaxies` and the crests; this document supersedes that section once
+  built.
+
 - **One universe, one universal core, one clock** (docs/13 §1; docs/78 "The
   breath"): TUniversal sets the quantum clock at the Big Bang at the
   universal core; the singularity's bounce pulses every `T_u` bells; each

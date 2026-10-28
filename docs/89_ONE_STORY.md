@@ -35,6 +35,10 @@ the story breaks. ✔ built and live · ◐ ruled in the docs, not built ·
 
 ### 1. The universal core
 
+> **Superseded once built (2026-10-28):** docs/101 replaces this section's
+> founding (`cascade`, `deploy`), firmament list, home core and
+> `orbit_galaxies` with one universal core.
+
 The pulse founds the universe from its Zs as grains (`pulse::found`,
 `cascade`): kinds within the universal throat stay as the WELLSPRING
 (the firmament, motes about the home), the shells' beads become galaxies.

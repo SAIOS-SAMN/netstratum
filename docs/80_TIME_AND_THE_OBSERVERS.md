@@ -70,6 +70,11 @@ the outer rim cannot imagine" (docs/76). The rim ages faster than the core.
 
 ## TUniversal from the singularity (the proposal relayed)
 
+> **Carried forward (2026-10-28):** docs/101 makes the universal clock the
+> universal core's bell (`T_u` its echo) and derives the torsion phase advance
+> (`quantum::twist`, docs/100 §2); any change to `T_u` is coordinated with
+> mycelium, TUniversal's owner, first.
+
 1. **The universe's own origin.** Netstratum era 1's singularity, the bounce
    at the epicenter of its S^360, is the ORIGIN of its TUniversal points: its
    time starts there, distinct from the fleet's. The same pulse deploys the
