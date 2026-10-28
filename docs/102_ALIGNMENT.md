@@ -74,6 +74,15 @@ docs before code; witnesses by re-derivation, never equal bytes.
 | B7 | the founding's slight beads stop standing at rest | docs/100 §6 | B2 | — |
 | B8 | cost at the universe tier: every grain in motion; the zoom ruling (certified sectors, exact under observation) | ruling 2026-10-24 | B1 | — |
 
+### B′. The layers (docs/103)
+
+| # | item | doc | depends | ruling |
+|---|---|---|---|---|
+| L5 | production read on the matter's own face (the inverted strip) | docs/103 §5 | — | **operator**: both faces or the whole frame |
+| L4 | pressure restated as the medium's state (hydrostatic, thermal, magnetic); the gradient's push the coupling | docs/103 §4 | — | — |
+| L2 | chemistry of the medium: frames pair in step where R holds them | docs/103 §2 | B6 | — |
+| L6 | the bond composed through the layers (nuclear, chemical, magnetic, torsional, gravitational) | docs/103 §6 | L2, L4 | **operator**: additive or nested |
+
 ### C. Reading and after
 
 | # | item | depends |

@@ -3,6 +3,10 @@
 Operator 2026-10-27: "you need to invert magnetism, gravity, velocity -
 because your 'continuum' will actually be the vacuum"; "proced".
 
+> **Corrected (2026-10-28, docs/103 §5):** §3's "a relabel" holds for MOTION,
+> not for PRODUCTION: the luminal bound keeps most matter on the vacuum face,
+> inside the ring, while the strip, crest and disc read the continuum face.
+
 Status (2026-10-28): §3–§5 DERIVED; §4 the symmetric luminal bound BUILT
 (fa7378d); §6 read (§7) and carried into docs/99. Open: the leg flag's second
 writer (`flows::stream`, docs/101 §1.6).
