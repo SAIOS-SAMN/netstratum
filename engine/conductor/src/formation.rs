@@ -240,6 +240,13 @@ pub fn collapse(st: &Stretch, h: &Ratio) -> Option<(Ratio, u64)> {
 /// (It was read against the galaxy's own enclosure, `x/(R + H + x)` with the
 /// galaxy's full shear, which capped any ring's bond near 0.25–0.33 against
 /// a barrier near 0.48: no ring could ever hold.)
+/// THE BOND (docs/102): a body's own deficit at its half-width, `λ/(1 + λ)`,
+/// `λ` its share over its reach. One law at every tier: the crest's rings, a
+/// strand, a grown body's ignition, a pair of forming worlds.
+pub fn bond(lambda: &Ratio) -> Ratio {
+    lambda.clone() / (ratio(1, 1) + lambda.clone())
+}
+
 pub fn crest_collapse(m: &Ratio, mu: &Ratio, tau: &Ratio, a: &Ratio, r: &Ratio, h: &Ratio) -> Option<(Ratio, u64)> {
     if r.is_zero() || (m.clone() + mu.clone()).is_zero() {
         return None;
@@ -247,7 +254,7 @@ pub fn crest_collapse(m: &Ratio, mu: &Ratio, tau: &Ratio, a: &Ratio, r: &Ratio, 
     // TWIST IS TENSION IN THE FIBRE (docs/100 §5): the lead the binding's
     // members carry in step adds to its bond, `λ = 2(m + μ + τ)/R`.
     let lambda = ratio(2, 1) * (m.clone() + mu.clone() + tau.clone()) / r.clone();
-    let bind = lambda.clone() / (ratio(1, 1) + lambda);
+    let bind = bond(&lambda);
     let budget = bind - a.clone();
     if budget <= ratio(0, 1) {
         return None;
@@ -1146,17 +1153,20 @@ pub fn collide_stars(stars: Vec<crate::pulse::Body>, c_pre: Vec<Ratio>, scale: &
 /// THE ECHO HOLDS ITS NEIGHBOUR (docs/96 §8.2; operator 2026-10-27: "pulses
 /// and echoes", never kicks): a body re-pulses at its own bell and its
 /// neighbour answers the echo every ring at its place, by the pulsing body's
-/// deficit read at their gap in its own enclosure, `m/(r + m)`. Their
-/// turnings differ by `|ω_i − ω_j|` a ring. The pair is held, and joins, where
-/// the stronger echo meets that shear: the crest's bond-against-tide one
-/// tier down, first degree, no age.
+/// bond at their gap, `bond(m/r) = m/(r + m)`. Their turnings differ by
+/// `|ω_i − ω_j|` a ring. The pair is held, and joins, where the stronger
+/// bond meets that shear: the crest's law (`bond` against the tide) one tier
+/// down (docs/102 A7), first degree, no age.
 fn echo_holds(w_i: &Ratio, w_j: &Ratio, r: &Ratio, m_i: &Ratio, m_j: &Ratio) -> bool {
     let m = if m_i > m_j { m_i.clone() } else { m_j.clone() };
     if m.is_zero() {
         return false;
     }
     let shear = if w_i > w_j { w_i.clone() - w_j.clone() } else { w_j.clone() - w_i.clone() };
-    m.clone() / (r.clone() + m) >= shear
+    if r.is_zero() {
+        return true;
+    }
+    bond(&(m / r.clone())) >= shear
 }
 
 /// A SOLID ORBIT (docs/96 §8.2): a standing world that has turned at least
@@ -1334,8 +1344,7 @@ pub fn settle_system(sys: &mut crate::pulse::Body, unit: &Ratio, r_echo: u64, ra
         // star's unlocked face already in it, docs/96 §8), and passes the
         // ignition share's bound `2a < 1`.
         let ignites = matter.len() > 1 && !r.is_zero() && {
-            let lambda = m.clone() / r.clone();
-            lambda.clone() / (ratio(1, 1) + lambda) >= heat.clone() && ratio(2, 1) * heat.clone() < ratio(1, 1)
+            bond(&(m.clone() / r.clone())) >= heat.clone() && ratio(2, 1) * heat.clone() < ratio(1, 1)
         };
         // Otherwise THE PLANETARY CORE: a body whose core holds nothing is no
         // world; one that holds keeps what stands within the edge its star's

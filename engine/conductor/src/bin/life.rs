@@ -53,8 +53,10 @@ fn main() {
     // STEP 2: when each medium's mind would wake, by the climb (no erasure)
     // and by the gated climb (impacts and the window); informational is read,
     // not climbed (open).
-    let (seed, u_full) = pulse::read(Path::new(&era1)).unwrap_or(([0; 32], u.clone()));
-    let home_year = life::home(&u_full).map(|h| h.year_bells).unwrap_or_else(|| ratio(60, 1));
+    let (_seed, u_full) = pulse::read(Path::new(&era1)).unwrap_or(([0; 32], u.clone()));
+    // The universe's own bell (TUniversal), never a stand-in.
+    let t_u = u_full.t_u;
+    let home_year = life::home(&u_full).map(|h| h.year_bells).unwrap_or_else(|| ratio(t_u as i64, 1));
     let period_of = |u: &pulse::Universe, path: &[u64]| -> Option<Ratio> {
         let core = u.cores.iter().find(|c| c.path[0] == path[0])?;
         let sys = core.satellites.iter().find(|s| s.path.get(1) == path.get(1))?;
@@ -68,11 +70,12 @@ fn main() {
             let c = w.pressure.clone() / reference.clone();
             let x = match pick { 0 => &w.chemical, 1 => &w.geologic, _ => &w.plasmic };
             let Some(x) = x.as_ref() else { continue };
-            if let Some(b) = life::recoherences_needed(x, &c).and_then(|k| life::wake_bell(w, k, 60)) {
+            if let Some(b) = life::recoherences_needed(x, &c).and_then(|k| life::wake_bell(w, k, t_u)) {
                 free.push(b);
             }
             let period = period_of(&u_full, &w.path);
-            if let Some(b) = period.and_then(|p| life::climb(w, x, &c, &seed, name, 60, &p, &home_year)) {
+            let twist = life::twist_of(&u_full, w.path.first().copied());
+            if let Some(b) = period.and_then(|p| life::climb(w, x, &c, &twist, t_u, &p, &home_year)) {
                 gated.push((b, w.path.clone()));
             }
         }

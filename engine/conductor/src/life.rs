@@ -317,14 +317,26 @@ pub fn window_echoes(star: &Ratio, worlds: &Ratio) -> u64 {
     (ratio(halvings as i64, 1) * ratio(693, 1000) * ratio(2, 1) / epsilon).floor().to_integer().try_into().unwrap_or(0)
 }
 
+/// A galaxy's TWIST a bell (docs/100 §2): its core's winding from its clock
+/// and its disc plane, the home's on the source's; never drawn. One reading
+/// for every impact law (`climb`, `readings`).
+pub fn twist_of(u: &Universe, galaxy: Option<u64>) -> Ratio {
+    u.cores.iter().position(|c| c.path.first().copied() == galaxy).map(|i| {
+        let rate = crate::breath::galaxy_rate(u, i, &crate::breath::unit_mass(u)).unwrap_or_else(|| ratio(1, 1));
+        crate::quantum::twist(&rate, &u.cores[i].tilt)
+    }).unwrap_or_else(|| ratio(0, 1))
+}
+
 /// THE CLIMB WITH ERASURE (docs/82): recoherence by recoherence, each
 /// writing a rung unless an IMPACT strikes there (its chance the system's
-/// belt share, shielded by the atmosphere: `belts / (1 + compression)`,
-/// drawn from the seed) — an impact wastes that recoherence, the rung's need
-/// kept, life never undone. The mind wakes at the recoherence its last rung
-/// is written, if within the star's window; else never.
+/// belt share, shielded by the atmosphere: `belts / (1 + compression)`),
+/// MEASURED on the world's hidden phase, its galaxy's twist and its own turn
+/// (`quantum::hidden_phase`, the one impact law `advance` reads; docs/102 A4:
+/// never drawn) — an impact wastes that recoherence, the rung's need kept,
+/// life never undone. The mind wakes at the recoherence its last rung is
+/// written, if within the star's window; else never.
 #[allow(clippy::too_many_arguments)]
-pub fn climb(w: &World, x: &Ratio, compression: &Ratio, seed: &[u8; 32], medium: &str, t_u: u64, period_bells: &Ratio, home_year_bells: &Ratio) -> Option<u64> {
+pub fn climb(w: &World, x: &Ratio, compression: &Ratio, twist: &Ratio, t_u: u64, period_bells: &Ratio, home_year_bells: &Ratio) -> Option<u64> {
     let bells = climb_bells(period_bells, home_year_bells, w.days.as_ref()?, x, compression)?;
     let slip = ratio(1, 1) - w.coupling.clone();
     if slip <= ratio(0, 1) {
@@ -336,14 +348,11 @@ pub fn climb(w: &World, x: &Ratio, compression: &Ratio, seed: &[u8; 32], medium:
     // window, or never.
     let last: u64 = (ratio(w.window.min(u32::MAX as u64) as i64, 1) * slip.clone()).floor().to_integer().try_into().unwrap_or(0);
     let p = w.belts.clone() / (ratio(1, 1) + compression.clone());
-    let threshold: u64 = (p * ratio(1_000_000, 1)).floor().to_integer().try_into().unwrap_or(0);
-    let mut path = w.path.clone();
-    path.push(medium.len() as u64);
     let mut due = ratio(w.delay as i64, 1) + bells;
     for k in 1..=last {
         let at = wake_bell(w, k, t_u)?;
         if ratio(at as i64, 1) < due {
-            if crate::pulse::draw(seed, &path, "impact", k as u32) % 1_000_000 < threshold {
+            if crate::quantum::measure(&crate::quantum::hidden_phase(twist, at, period_bells), &p) {
                 let next = wake_bell(w, k + 1, t_u)?;
                 due += ratio((next - at) as i64, 1);
             }
@@ -467,12 +476,8 @@ pub fn readings(u: &Universe, _seed: &[u8; 32]) -> std::collections::BTreeMap<Ve
             let sys = core.satellites.iter().find(|s| s.path.get(1) == w.path.get(1))?;
             sys.satellites.iter().find(|o| o.path.get(2) == w.path.get(2)).map(|o| o.kept.clone())
         })();
-        // Its galaxy's twist a bell (docs/100 §2): derived from its core's
-        // clock and disc plane, never drawn; the home turns on the source's.
-        let torsion = u.cores.iter().position(|c| c.path.first() == w.path.first()).map(|i| {
-            let rate = crate::breath::galaxy_rate(u, i, &crate::breath::unit_mass(u)).unwrap_or_else(|| ratio(1, 1));
-            crate::quantum::twist(&rate, &u.cores[i].tilt)
-        }).unwrap_or_else(|| ratio(0, 1));
+        // Its galaxy's twist a bell (docs/100 §2): derived, never drawn.
+        let torsion = twist_of(u, w.path.first().copied());
         let turn = period.clone().unwrap_or_else(|| ratio(0, 1));
         let climb = period.filter(|_| matter.as_ref().is_some_and(viable)).and_then(|p| {
             [("chemical", &w.chemical), ("geologic", &w.geologic), ("plasmic", &w.plasmic)]

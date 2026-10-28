@@ -203,7 +203,7 @@ fn main() {
             println!("FLOWS {:?} at beat {now}: H {}, {} motes ({held} wholly held, {gas} wholly gas), reach {}, phases {phases:?}, ℓ_⊥ {circ}, reservoir {}", c.path, f(&h), c.flows.len(), span(&reaches), f(&c.reservoir));
             // THE CHAINS (docs/83): each read whole; the best margin shown.
             let Some(enc) = conductor::breath::galaxy_frame(&u, i, &conductor::breath::unit_mass(&u)) else { return println!("no frame") };
-            let chains = conductor::flows::chains(&c.flows, &enc, &p, &total);
+            let chains = conductor::flows::strands(&c.flows, &enc, &p, &total);
             let holding = chains.iter().filter(|x| x.holds()).count();
             if let Some(best) = chains.iter().max_by(|a, b| (a.bind.clone() - a.agitation.clone() - a.face.clone()).cmp(&(b.bind.clone() - b.agitation.clone() - b.face.clone()))) {
                 println!(

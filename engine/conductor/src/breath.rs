@@ -1461,19 +1461,20 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // The galaxy's one enclosure as its motes now stand.
             let enc_now = galaxy_enc(core);
             crate::profile::mark("breath:chains");
-            let chains = crate::flows::chains(&core.flows, &enc_now, &p, &g_mass);
-            // The stream of every mote, read by force against its filament.
+            let strands = crate::flows::strands(&core.flows, &enc_now, &p, &g_mass);
+            // The stream of every mote, read by force against its strand (a
+            // reading: the face is the luminal bound's alone).
             // The pulse at a mote: a galaxy's received tide, or, in the home,
             // the source's own at the mote's reach.
             let push_at = |x: &crate::flows::Mote| match tide {
                 Some((rho, du)) => p.clone() * rho.clone() * du.clone(),
                 None => p.clone() * enc_now.reach(&x.ell_o).1,
             };
-            circulation.4 = crate::flows::stream(&mut core.flows, &chains, &push_at);
+            circulation.4 = crate::flows::stream(&core.flows, &strands, &push_at);
             crate::profile::mark("breath:bindings");
             // THE GALAXY SETTLES ITS STARS (docs/96; operator 2026-10-26): its
             // band pairs on the strip, never the stepped filaments' bindings.
-            let _ = chains;
+            let _ = strands;
             let bindings = crate::flows::band_pairs(&core.flows, &enc_now, &p, &core.tilt, &g_mass);
             // Each take: (reach, what fell, the disc outside it, the whole
             // binding's holding, agitation, the star's own spin, phases, its

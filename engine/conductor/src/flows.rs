@@ -956,9 +956,9 @@ pub fn read_cut(motes: &[Mote], enc: &Enclosed, p: &Ratio) -> (Manifest, Manifes
     (kept, free)
 }
 
-/// A FILAMENT read whole (operators 2026-10-18, the cyclotronic chain (7):
+/// A STRAND (docs/102: was "filament"; the filament is a core's flow) read whole (operators 2026-10-18, the cyclotronic chain (7):
 /// "judged whole, with extent read as shares from band edge to band edge").
-pub struct Chain {
+pub struct Strand {
     /// Its members, by index.
     pub members: Vec<usize>,
     /// Its holding-weighted reach.
@@ -974,7 +974,7 @@ pub struct Chain {
     pub apart: Ratio,
 }
 
-impl Chain {
+impl Strand {
     /// It holds where its bond meets its agitation (its tide is in its
     /// apartness; the face heats and is in its agitation, docs/96 §8).
     pub fn holds(&self) -> bool {
@@ -1158,7 +1158,7 @@ pub fn beads(motes: &[Mote], enc: &Enclosed, p: &Ratio, total: &Ratio, disc_leg:
     beads_by_face
 }
 
-pub fn chains(motes: &[Mote], enc: &Enclosed, p: &Ratio, total: &Ratio) -> Vec<Chain> {
+pub fn strands(motes: &[Mote], enc: &Enclosed, p: &Ratio, total: &Ratio) -> Vec<Strand> {
     if total.is_zero() {
         return Vec::new();
     }
@@ -1173,7 +1173,7 @@ pub fn chains(motes: &[Mote], enc: &Enclosed, p: &Ratio, total: &Ratio) -> Vec<C
     // The deficit at a reach about the hold a member turns about.
     let delta_of = |j: usize, r: &Ratio| hh[j].clone() / (r.clone() + hh[j].clone());
     // A group judged whole by the filament law, edge to edge.
-    let judge = |members: Vec<usize>| -> Option<Chain> {
+    let judge = |members: Vec<usize>| -> Option<Strand> {
         let (mut x, mut held, mut a_w, mut r_w) = (ratio(0, 1), ratio(0, 1), ratio(0, 1), ratio(0, 1));
         for &j in &members {
             let m = motes[j].amount.clone() * weight(&motes[j].key) / total.clone();
@@ -1201,8 +1201,8 @@ pub fn chains(motes: &[Mote], enc: &Enclosed, p: &Ratio, total: &Ratio) -> Vec<C
         let face = (ratio(1, 1) - h_w.clone() / (reach_w.clone() + h_w)) / ratio(2, 1);
         // A chain with no extent at all (no push to spread it) is not read as
         // infinitely dense: it does not bind.
-        let bind = if apart.is_zero() { ratio(0, 1) } else { let lambda = x / apart.clone(); lambda.clone() / (ratio(1, 1) + lambda) };
-        Some(Chain { members, reach: reach_w, bind, agitation: a_w / held, face, apart })
+        let bind = if apart.is_zero() { ratio(0, 1) } else { crate::formation::bond(&(x / apart.clone())) };
+        Some(Strand { members, reach: reach_w, bind, agitation: a_w / held, face, apart })
     };
     let beads_by_face = beads(motes, enc, p, total, true);
     // THE BRAID: beads of different fibres twine where each one's pinch
@@ -1259,20 +1259,18 @@ pub fn chains(motes: &[Mote], enc: &Enclosed, p: &Ratio, total: &Ratio) -> Vec<C
 /// push, the jet cannot fill the channel and it drifts in the VACUUM, the
 /// thin counter-moving flank. A mote in no filament (in transit on the
 /// axial leg) is carried. Returns how many stand in the vacuum.
-pub fn stream(motes: &mut [Mote], chains: &[Chain], push: &dyn Fn(&Mote) -> Ratio) -> usize {
+///
+/// A READING, never a write (docs/102 A1: one writer per state): a mote's
+/// face is the luminal bound's alone (`luminal`); this counts the motes whose
+/// strand's hold beats the push, never relabels them.
+pub fn stream(motes: &[Mote], strands: &[Strand], push: &dyn Fn(&Mote) -> Ratio) -> usize {
     let mut hold: Vec<Option<Ratio>> = vec![None; motes.len()];
-    for c in chains {
+    for c in strands {
         for &j in &c.members {
             hold[j] = Some(c.bind.clone());
         }
     }
-    let mut vacuum = 0;
-    for (x, h) in motes.iter_mut().zip(hold) {
-        let at = push(x);
-        x.vacuum = h.is_some_and(|h| h >= at);
-        vacuum += usize::from(x.vacuum);
-    }
-    vacuum
+    motes.iter().zip(hold).filter(|(x, h)| h.as_ref().is_some_and(|h| *h >= push(x))).count()
 }
 
 /// The bindings of chains already read: those that hold collapse.
@@ -1923,6 +1921,21 @@ mod passage_tests {
                 assert!(on_disc_leg(&motes[*i]), "member {i} at loop phase {} is in transit", motes[*i].phase[LOOP]);
             }
         }
+    }
+
+    #[test]
+    fn the_stream_is_a_reading_the_face_is_the_luminal_bounds_alone() {
+        use super::{luminal, stream, Enclosed, Mote, Strand};
+        let enc = Enclosed::new(ratio(1, 1), Vec::new());
+        let mote = |ell: (i64, i64), vacuum: bool| Mote { key: crate::chem::Kind::parse("W0001").expect("a kind"), amount: ratio(1, 1), ell_o: ratio(ell.0, ell.1), ell_orth: ratio(0, 1), phase: vec![ratio(1, 10), ratio(1, 7)], agitation: ratio(0, 1), born: 0, vacuum, lever: Vec::new(), lever_place: ratio(0, 1), tilt: Vec::new() };
+        let mut motes = vec![mote((1, 3), false), mote((3, 1), false)];
+        luminal(&mut motes, &enc);
+        let faces: Vec<bool> = motes.iter().map(|x| x.vacuum).collect();
+        // A strand holding both, its bond beating any push: the stream counts
+        // them as standing against the current, and changes no face.
+        let strand = Strand { members: vec![0, 1], reach: ratio(1, 1), bind: ratio(1, 1), agitation: ratio(0, 1), face: ratio(0, 1), apart: ratio(1, 2) };
+        assert_eq!(stream(&motes, &[strand], &|_| ratio(1, 2)), 2);
+        assert_eq!(motes.iter().map(|x| x.vacuum).collect::<Vec<_>>(), faces);
     }
 
     #[test]

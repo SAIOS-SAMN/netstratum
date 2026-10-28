@@ -1294,6 +1294,11 @@ pub fn write(var_root: &Path, seed: &[u8; 32], u: &Universe) -> std::io::Result<
         for l in &x.lever {
             cfe::ratio::encode(l, &mut w);
         }
+        // Its lead (docs/100 §4), as a flow mote's (tag 10).
+        w.push(x.tilt.len() as u8);
+        for t in &x.tilt {
+            cfe::ratio::encode(t, &mut w);
+        }
         cfe::tlv::put(tag, &w, &mut out);
     }
     std::fs::create_dir_all(var_root)?;
@@ -1540,7 +1545,7 @@ mod tests {
         let orb = Body { ell_orth: ratio(0, 1), path: vec![1, 1, 1], radius: ratio(3, 2), period: ratio(5, 2), kept: [(crate::chem::Kind::parse("W0010").expect("a kind"), ratio(1, 64))].into(), satellites: Vec::new(), medium: Manifest::new(), ell: ratio(7, 3), medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1), tilt: Vec::new(), throat: Default::default() };
         let sys = Body { ell_orth: ratio(0, 1), path: vec![1, 1], radius: ratio(9, 2), period: ratio(11, 2), kept: [(crate::chem::Kind::parse("W0001").expect("a kind"), ratio(3, 1024))].into(), satellites: vec![orb], medium: Manifest::new(), ell: ratio(1, 9), medium_spin: ratio(1, 7), gas: Vec::new(), born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1), tilt: Vec::new(), throat: Default::default() };
         let core = Body { ell_orth: ratio(0, 1), path: vec![1], radius: ratio(60, 1), period: ratio(0, 1), kept: [(crate::chem::Kind::parse("W0041").expect("a kind"), ratio(1, 2))].into(), satellites: vec![sys], medium: [(crate::chem::Kind::parse("W0001").expect("a kind"), ratio(5, 4))].into(), ell: ratio(0, 1), medium_spin: ratio(13, 11), gas: vec![mote], born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1), tilt: Vec::new(), throat: Default::default() };
-        let u = Universe { cores: vec![core], ocean: vec![crate::flows::Mote { key: crate::chem::Kind::parse("W0003").expect("a kind"), amount: ratio(1, 1024), ell_o: ratio(1, 3), ell_orth: ratio(0, 1), phase: crate::flows::rest(ratio(1, 2)), agitation: ratio(0, 1), born: 0, vacuum: true, lever: Vec::new(), lever_place: ratio(0, 1), tilt: Vec::new() }], firmament: Vec::new(), unit: ratio(1, 2), t_u: 15, densest: 1200 };
+        let u = Universe { cores: vec![core], ocean: vec![crate::flows::Mote { key: crate::chem::Kind::parse("W0003").expect("a kind"), amount: ratio(1, 1024), ell_o: ratio(1, 3), ell_orth: ratio(0, 1), phase: crate::flows::rest(ratio(1, 2)), agitation: ratio(0, 1), born: 0, vacuum: true, lever: Vec::new(), lever_place: ratio(0, 1), tilt: vec![ratio(1, 2), ratio(1, 3), ratio(1, 6)] }], firmament: vec![crate::flows::Mote { key: crate::chem::Kind::parse("W0200").expect("a kind"), amount: ratio(1, 4096), ell_o: ratio(1, 5), ell_orth: ratio(0, 1), phase: crate::flows::rest(ratio(1, 2)), agitation: ratio(0, 1), born: 0, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1), tilt: vec![ratio(2, 3), ratio(1, 6), ratio(1, 6)] }], unit: ratio(1, 2), t_u: 15, densest: 1200 };
         let dir = std::env::temp_dir().join(format!("pulse-{}", std::process::id()));
         write(&dir, &[7; 32], &u).unwrap();
         assert_eq!(read(&dir), Some(([7; 32], u)), "the file gives the universe back");
