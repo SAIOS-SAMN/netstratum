@@ -3,6 +3,10 @@
 Operator 2026-10-27: "you need to invert magnetism, gravity, velocity -
 because your 'continuum' will actually be the vacuum"; "proced".
 
+Status (2026-10-28): §3–§5 DERIVED; §4 the symmetric luminal bound BUILT
+(fa7378d); §6 read (§7) and carried into docs/99. Open: the leg flag's second
+writer (`flows::stream`, docs/101 §1.6).
+
 Builds on docs/94 §2 (the Möbius jetstream), docs/96 §7–§8, docs/97 (Q the
 proton, Z the neutron, R the electron's phase; the nucleus as built).
 

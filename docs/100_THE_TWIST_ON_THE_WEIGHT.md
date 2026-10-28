@@ -2,7 +2,7 @@
 
 Operator 2026-10-27: "make sure you have the proper quantum state formulations
 in order to provide the filament (ocean) that the elements are flowing through
-with the proper twists on the weight". Status: SCOPE. Builds on docs/94 (the
+with the proper twists on the weight". Status (2026-10-28): §1, §2, §4, §5, §8, §9.2 BUILT (65348e2, 4ffd2e7, 2db928e, a12af8c); §3 waits on the operator's ruling on C; §9.1 and §9.3 wait on the ruling of R's scale. Builds on docs/94 (the
 Möbius jetstream), docs/96 (founding as flow), docs/97 (Q, Z, R; §14 the
 densest element), docs/99 (phases, never frames); xylarium kernel 11.0 (8)
 twist and torsion on the jets, (13) the harmonic founding, and its built

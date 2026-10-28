@@ -29,6 +29,8 @@ and look at all machinery affected". Status: SCOPE. Nothing here is built.
   `orbit_galaxies` and the crests; this document supersedes that section once
   built.
 
+**The laws:**
+
 - **One universe, one universal core, one clock** (docs/13 §1; docs/78 "The
   breath"): TUniversal sets the quantum clock at the Big Bang at the
   universal core; the singularity's bounce pulses every `T_u` bells; each
@@ -78,7 +80,7 @@ orbits placed in rings). Every remainder of 2026-10-27 lives here.
   definition of home.
 - `places.rs:71` reads the home's held mass as the whole universe.
 
-### 1.5 My own work (2026-10-26/27), against the same test
+### 1.5 The work of 2026-10-26/27, against the same test
 
 - Reuses, no parallel: `quantum::twist` (the nested clock), `flows::step_with`
   (`in_step`), `flows::torsion` (the tilt), `Universe.densest` (a reading), the
@@ -183,9 +185,9 @@ orbits placed in rings). Every remainder of 2026-10-27 lives here.
    every mote's tilt.
 2. **One reading of the universal core's state:** the nine readings fold into
    `core_state` on one universal enclosure, the home's branches removed;
-   numerically the same founding reads the same (re-derivation: the same
-   identities exact, the same counts at bell 1700). Witness: the identities
-   and the bell-1700 reading unchanged.
+   proven by re-derivation, never by equal bytes (operator 2026-10-20): every
+   identity exact, and the one reading derived two ways (the folded and the
+   former form) agreeing, at N and at 4N bells. Witness: those identities.
 3. **One home:** `life::home` and `chronometry::keepers` read the universal
    core's disc, not the heaviest kept. Witness: the keepers' clocks read the
    same nested rates.

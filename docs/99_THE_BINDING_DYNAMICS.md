@@ -1,7 +1,7 @@
 # 99 — The binding's dynamics, end to end, with the inverse faces
 
 Operator 2026-10-27: "scope the full dynamics and include the inverse
-physics". Status: SCOPE (nothing built here). Builds on docs/96 (founding as
+physics". Status (2026-10-28): §2.1–§2.5 BUILT (32a7dfc, 3400588, bc2d32c); §5 open. Builds on docs/96 (founding as
 flow, §7 the galaxy enclosure, §8 the hold law), docs/97 (Q, Z, R), docs/98
 (the inverse faces).
 

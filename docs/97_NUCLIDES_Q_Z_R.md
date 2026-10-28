@@ -6,7 +6,7 @@ planets - i want this built as the inverse of xylarium where Q is the proton
 and Z is the neutron and R is the phase state of the electron through p as
 the pulse reverberation of the echo from the core".
 
-Status: §1–§2 and §4 BUILT (41b2a6b); §5 BUILT in nature's form (the neutron share for ruling); §3 (R) not yet built.
+Status (2026-10-28): §1–§2, §4 BUILT (41b2a6b); §3 R BUILT (785a074, §13); §5 in nature's form; §8–§11 BUILT; §12 BUILT and partly superseded (its table cap 1200 by §14, ff0c985; "the galaxies carry the whole mix" retires with docs/101); §13 BUILT (785a074, cd16484); §14 BUILT (ff0c985).
 
 Read against: xylarium spec 11.0 (53) (Z the proton, Q the neutron, R the
 electron's phase; ruled there) and xyl-cosmos `fibres.rs` (ends on S^11,
@@ -230,7 +230,11 @@ draws one hydrogen nucleus, so nucleons are conserved exactly.
   share, its deficit at its centre) breaks into its nucleons; they are the
   rapid capture's fuel for the rest. Nucleons conserved.
 
-## 12. A fresh founding with the full table to weight 1200 (operator 2026-10-27: "remove these starter galaxies - and start fresh with a full table of elements up to 1200")
+## 12. A fresh founding with the full table to weight 1200
+
+> Superseded in part: the cap at 1200 by §14 (the densest element is the
+> founding's own, 1612 at 2^55 grains); the whole mix by docs/101 (no
+> leftovers; each galaxy's composition its own). (operator 2026-10-27: "remove these starter galaxies - and start fresh with a full table of elements up to 1200")
 
 - **The light, as §9:** the neutron share the exchange's fixed point at the
   seal window, each proton bound into a seed of weight 4 (deuterons paired;
