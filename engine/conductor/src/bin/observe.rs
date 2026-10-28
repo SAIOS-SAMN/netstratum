@@ -267,7 +267,7 @@ fn main() {
             // Read for the whole firmament and for its VESSEL, the kinds at
             // or above its heaviest seam (the twin weights where the peel
             // releases: Z106 on S^11, found by the atom, not named).
-            let top = u.firmament.iter().filter_map(|x| conductor::chem::atom_w(&x.key)).max().unwrap_or(0);
+            let top = u.firmament().iter().filter_map(|x| conductor::chem::atom_w(&x.key)).max().unwrap_or(0);
             let seam = (2..=top).rev().find(|&z| cfe::almanac::atom::hold(z) == cfe::almanac::atom::hold(z - 1)).unwrap_or(0);
             let read_of = |ms: &[conductor::flows::Mote], at: u64, label: &str| {
                 let n = ms.len();
@@ -287,8 +287,9 @@ fn main() {
                 println!("echo {at:5} {label} ({n}): nearest-neighbour distance mean {} spread {} range {}; {coincide} motes sitting on another", f(&mean), of(&dev, &mean), span(&nn));
             };
             let read = |w: &pulse::Universe, at: u64| {
-                read_of(&w.firmament, at, "all");
-                let vessel: Vec<conductor::flows::Mote> = w.firmament.iter().filter(|x| conductor::chem::atom_w(&x.key).is_some_and(|z| z >= seam)).cloned().collect();
+                let firm = w.firmament();
+                read_of(&firm, at, "all");
+                let vessel: Vec<conductor::flows::Mote> = firm.iter().filter(|x| conductor::chem::atom_w(&x.key).is_some_and(|z| z >= seam)).cloned().collect();
                 read_of(&vessel, at, &format!("vessel Z>={seam}"));
             };
             read(&w, 0);
@@ -319,8 +320,9 @@ fn main() {
             // sorted round the turn, a new group wherever the gap between
             // neighbours exceeds the mean gap; each group's holding-weighted
             // centre and its kinds).
-            if !u.firmament.is_empty() {
-                let mut ph: Vec<(Ratio, Ratio, u32)> = u.firmament.iter().map(|x| (x.phase[0].clone(), x.amount.clone() * conductor::flows::weight(&x.key), conductor::chem::charge(&x.key))).collect();
+            let firm = u.firmament();
+            if !firm.is_empty() {
+                let mut ph: Vec<(Ratio, Ratio, u32)> = firm.iter().map(|x| (x.phase[0].clone(), x.amount.clone() * conductor::flows::weight(&x.key), conductor::chem::charge(&x.key))).collect();
                 ph.sort_by(|a, b| a.0.cmp(&b.0));
                 let n = ph.len();
                 let gaps: Vec<Ratio> = (0..n).map(|i| if i + 1 < n { ph[i + 1].0.clone() - ph[i].0.clone() } else { ph[0].0.clone() + ratio(1, 1) - ph[i].0.clone() }).collect();
@@ -334,7 +336,7 @@ fn main() {
                         groups.push(Vec::new());
                     }
                 }
-                let fh = u.firmament.iter().fold(ratio(0, 1), |s, x| s + x.amount.clone() * conductor::flows::weight(&x.key));
+                let fh = firm.iter().fold(ratio(0, 1), |s, x| s + x.amount.clone() * conductor::flows::weight(&x.key));
                 let desc: Vec<String> = groups.iter().filter(|g| !g.is_empty()).map(|g| {
                     let w = g.iter().fold(ratio(0, 1), |s, &i| s + ph[i].1.clone());
                     let centre = if w > ratio(0, 1) { g.iter().fold(ratio(0, 1), |s, &i| s + ph[i].0.clone() * ph[i].1.clone()) / w } else { ph[g[0]].0.clone() };

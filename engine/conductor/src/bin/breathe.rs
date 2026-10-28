@@ -34,7 +34,8 @@ fn main() {
     // growth is the reading, and what was read so far is reported.
     let bits = |r: &cfe::ratio::Ratio| r.numer().bits().max(r.denom().bits());
     let carrier = |u: &pulse::Universe| -> (usize, u64, usize) {
-        let mut n = u.firmament.len();
+        // The firmament stands in the home's flows (B1), counted with them.
+        let mut n = 0;
         let mut in_systems = 0usize;
         let mut widest = 0u64;
         let mut see = |x: &conductor::flows::Mote| {
@@ -43,7 +44,6 @@ fn main() {
                 widest = widest.max(bits(p));
             }
         };
-        u.firmament.iter().for_each(&mut see);
         for c in &u.cores {
             n += c.flows.len();
             c.flows.iter().for_each(&mut see);
@@ -93,10 +93,6 @@ fn main() {
                     put(format!("{tier}.mote.lever"), l);
                 }
             }
-        }
-        for x in &u.firmament {
-            put("firmament.ell_o".into(), &x.ell_o);
-            put("firmament.amount".into(), &x.amount);
         }
         for x in &u.ocean {
             for (n, r) in [("amount", &x.amount), ("ell_o", &x.ell_o), ("ell_orth", &x.ell_orth), ("agitation", &x.agitation)] {
@@ -323,7 +319,7 @@ fn main() {
             }
         };
         seen(&u.medium(), &mut amounts);
-        let mut motes: Vec<&conductor::flows::Mote> = u.firmament.iter().collect();
+        let mut motes: Vec<&conductor::flows::Mote> = Vec::new();
         for c in &u.cores {
             seen(&c.total(), &mut amounts);
             motes.extend(c.flows.iter());

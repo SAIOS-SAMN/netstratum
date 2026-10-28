@@ -40,6 +40,12 @@
 use crate::flows::Mote;
 use cfe::ratio::{ratio, Ratio};
 
+/// A nuclide's own hold, `weight − open` (`chem::hold`): read by its weight,
+/// never by an almanac charge (docs/97, the inverse nucleus).
+fn nuclide_hold(w: u32) -> u32 {
+    crate::chem::Kind::atom(w).map_or(0, |k| crate::chem::hold(&k))
+}
+
 fn u(z: u32) -> i64 {
     i64::from(crate::chem::atom_of(z).map(|a| a.unpaired).unwrap_or(0))
 }
@@ -118,7 +124,7 @@ pub fn part(motes: &mut Vec<Mote>, at: &[usize]) -> Vec<usize> {
 /// (holding units): they stand at the throat (reach 0), and the spin they
 /// carried in passes with them to the core (`spun`), never lost; the rest
 /// leave.
-pub fn recycle(motes: &mut Vec<Mote>, at: &[usize], b: &Ratio, s: &Ratio, g: &Ratio, bell: u64) -> Recycled {
+pub fn recycle(motes: &mut Vec<Mote>, at: &[usize], b: &Ratio, s: &Ratio, g: &Ratio, bell: u64, densest: u32) -> Recycled {
     let mut out = Recycled::default();
     if *b <= ratio(0, 1) || *s <= ratio(0, 1) {
         return out;
@@ -134,12 +140,15 @@ pub fn recycle(motes: &mut Vec<Mote>, at: &[usize], b: &Ratio, s: &Ratio, g: &Ra
         let Some(z) = crate::chem::atom_w(&motes[i].key) else { continue };
         let a = motes[i].amount.clone();
         let pressed = crate::pulse::nucleus(&(a.clone() * built.clone())).min(a.clone());
-        if let Some(l) = rung_light(z) {
+        // Pressed only to the universe's densest element (docs/97 §14), its
+        // product read before anything leaves (nucleons conserved: a pair
+        // with no product is never taken).
+        let product = z.checked_mul(2).filter(|&p| p <= densest).and_then(crate::chem::Kind::atom);
+        if let (Some(l), Some(product)) = (rung_light(z), product) {
             let pairs = crate::pulse::nucleus(&(pressed.clone() / ratio(2, 1)));
             if pairs > ratio(0, 1) {
                 motes[i].amount -= pairs.clone() * ratio(2, 1);
                 let mut fused = motes[i].clone();
-                let Some(product) = crate::chem::Kind::atom(2 * z) else { continue };
                 fused.key = product;
                 fused.amount = pairs.clone();
                 motes.push(fused);
@@ -158,10 +167,10 @@ pub fn recycle(motes: &mut Vec<Mote>, at: &[usize], b: &Ratio, s: &Ratio, g: &Ra
     // DECONSTRUCTED: the reverberation with construction's light, shared by
     // holding over the load, each kind peeled loosest first.
     let pool = e + light;
-    let whole = load.iter().fold(ratio(0, 1), |acc, (_, z, n)| acc + n.clone() * ratio(i64::from(cfe::almanac::atom::hold(*z)), 1));
+    let whole = load.iter().fold(ratio(0, 1), |acc, (_, z, n)| acc + n.clone() * ratio(i64::from(nuclide_hold(*z)), 1));
     if whole > ratio(0, 1) {
         for (i, z, n) in load {
-            let mut share = pool.clone() * n.clone() * ratio(i64::from(cfe::almanac::atom::hold(z)), 1) / whole.clone();
+            let mut share = pool.clone() * n.clone() * ratio(i64::from(nuclide_hold(z)), 1) / whole.clone();
             // As deep as it pays, every nucleus alike; a releasing step is
             // always taken.
             let mut k = 0u32;
@@ -321,13 +330,32 @@ mod tests {
         assert_eq!(at.len(), 2);
         // A bounce B = ½ on S = 4: a third is peeled, two thirds pressed.
         let before = three_z(&ms);
-        let r = recycle(&mut ms, &at, &ratio(1, 2), &ratio(4, 1), &ratio(4, 1), 1);
+        let r = recycle(&mut ms, &at, &ratio(1, 2), &ratio(4, 1), &ratio(4, 1), 1, 1612);
         assert_eq!(three_z(&ms), before);
         assert!(r.pressed > ratio(0, 1) && r.light > ratio(0, 1));
         assert!(r.peeled > ratio(0, 1));
         // No bounce, nothing recycled.
         let mut ms = vec![mote("W0010", ratio(1, 1))];
-        assert_eq!(recycle(&mut ms, &[0], &ratio(0, 1), &ratio(4, 1), &ratio(4, 1), 1), Recycled::default());
+        assert_eq!(recycle(&mut ms, &[0], &ratio(0, 1), &ratio(4, 1), &ratio(4, 1), 1, 1612), Recycled::default());
         assert_eq!(ms[0].key, crate::chem::Kind::parse("W0010").expect("a kind"));
+    }
+
+    #[test]
+    fn pressing_stops_at_the_densest_element_and_never_loses_a_nucleon() {
+        use crate::flows::Mote;
+        let mote = |key: &str| Mote { key: crate::chem::Kind::parse(key).expect("a kind"), amount: ratio(1000, 1), ell_o: ratio(1, 2), ell_orth: ratio(0, 1), phase: crate::flows::rest(ratio(1, 2)), agitation: ratio(0, 1), born: 0, vacuum: true, lever: Vec::new(), lever_place: ratio(0, 1), tilt: Vec::new() };
+        let nucleons = |ms: &[Mote]| ms.iter().fold(ratio(0, 1), |s, x| s + x.amount.clone() * ratio(i64::from(crate::chem::weight(&x.key)), 1));
+        // At the densest weight nothing presses past it; nucleons conserved.
+        let mut ms = vec![mote("W1612")];
+        let before = nucleons(&ms);
+        let r = recycle(&mut ms, &[0], &ratio(1, 2), &ratio(4, 1), &ratio(4, 1), 1, 1612);
+        assert_eq!(nucleons(&ms), before);
+        assert!(ms.iter().all(|x| crate::chem::weight(&x.key) <= 1612));
+        let _ = r;
+        // Below it, pressing runs and still conserves.
+        let mut ms = vec![mote("W0004")];
+        let before = nucleons(&ms);
+        let _ = recycle(&mut ms, &[0], &ratio(1, 2), &ratio(4, 1), &ratio(4, 1), 1, 1612);
+        assert_eq!(nucleons(&ms), before);
     }
 }
