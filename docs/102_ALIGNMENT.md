@@ -83,6 +83,16 @@ docs before code; witnesses by re-derivation, never equal bytes.
 | L2 | chemistry of the medium: frames pair in step where R holds them | docs/103 §2 | B6 | — |
 | L6 | the bond composed through the layers (nuclear, chemical, magnetic, torsional, gravitational) | docs/103 §6 | L2, L4 | **operator**: additive or nested |
 
+### B″. The inverse duals (docs/104)
+
+| # | item | doc | depends | ruling |
+|---|---|---|---|---|
+| D1 | the face map in one place (`held = 1 − δ`, `unlocked = δ`) | docs/104 §4 | — | **operator**: confirm the map (§5) |
+| D2 | heating, cooling and the counterweight on a heat ledger | docs/104 §1–§2 | D1 | — |
+| D3 | push and release on our unlocked face | docs/104 §1 | D1 | — |
+| D4 | twist and its release by our held share | docs/104 §1 | D1 | — |
+| D5 | the quantum state inverted, `h = (1 − R)/2` | docs/104 §1 | D1 | — |
+
 ### C. Reading and after
 
 | # | item | depends |
