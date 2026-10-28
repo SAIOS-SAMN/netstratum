@@ -203,6 +203,19 @@ pub fn weight(k: &crate::chem::Kind) -> Ratio {
     ratio(i64::from(crate::chem::weight(k)), 1)
 }
 
+/// A MOTE'S NUCLEAR GRIP (docs/103 §6, the bond's nuclear layer ν): its
+/// nuclei's fibres' grip, `κ_w·h` at its pulse phase (its R-loop phase; docs/97
+/// §13), a cluster's by its parts' holding. In `[0, 1]`.
+pub fn grip_share(x: &Mote) -> Ratio {
+    let p = x.phase.get(LOOP).cloned().unwrap_or_else(|| ratio(0, 1));
+    let parts = x.key.parts();
+    let whole = parts.iter().fold(0u64, |s, (n, w)| s + u64::from(*n) * u64::from(*w));
+    if whole == 0 {
+        return ratio(0, 1);
+    }
+    parts.iter().fold(ratio(0, 1), |s, (n, w)| s + ratio(i64::from(*n) * i64::from(*w), 1) * crate::nuclides::grip(*w, &p).unwrap_or_else(|| ratio(0, 1))) / ratio(i64::try_from(whole).unwrap_or(i64::MAX), 1)
+}
+
 /// A kind's open share of its whole weight, `Q/(A + Q)` (Z and Q together,
 /// operator 2026-10-26: never one pole over the other, `Q/A` passed one
 /// where the open outweighed the held). At most one.
@@ -483,11 +496,12 @@ impl Enclosed {
 /// THE VACUUM IS THE CONTINUUM INVERTED (operator 2026-10-19: "the vacuum and
 /// the continuum must be mathematically inverted across all dimensional
 /// facets"; "reversal is not an inversion because the inversion happens on
-/// an orthogonal dimension"; with xylarium): inversion through the throat,
-/// `(R, θ) → (H²/R, θ)`, acts on the RADIAL dimension, orthogonal to every
-/// plane the matter turns in, and keeps every angle. So an `inverted`
-/// (vacuum) mote turns FORWARD in every plane, at its inverted reach, where
-/// the pull reads `δ(H²/R) = 1 − δ(R)`, the continuum's push. Its stored spin
+/// an orthogonal dimension"; with xylarium): inversion through the throat
+/// acts on the RADIAL dimension, orthogonal to every plane the matter turns
+/// in, and keeps every angle; it is read on the SHARE, `δ ↦ 1 − δ` (first
+/// degree, never a radius squared: design law 2). So an `inverted` (vacuum)
+/// mote turns FORWARD in every plane at its pull's other face, `1 − δ(R)`,
+/// the continuum's push. Its stored spin
 /// is untouched (`Σ m·ℓ` exact).
 ///
 /// ITS ROUTE (operator 2026-10-16, xylarium 11.0 (11): "a continuum jetstream
@@ -1177,7 +1191,9 @@ pub fn strands(motes: &[Mote], enc: &Enclosed, p: &Ratio, total: &Ratio) -> Vec<
         let (mut x, mut held, mut a_w, mut r_w) = (ratio(0, 1), ratio(0, 1), ratio(0, 1), ratio(0, 1));
         for &j in &members {
             let m = motes[j].amount.clone() * weight(&motes[j].key) / total.clone();
-            x += m.clone() * (ratio(1, 1) + open(&motes[j].key));
+            // THE ADDITIVE BOND (docs/103 §6): holding, open frames and the
+            // nuclei's grip, each a share of the same reach.
+            x += m.clone() * (ratio(1, 1) + open(&motes[j].key) + grip_share(&motes[j]));
             a_w += m.clone() * motes[j].agitation.clone();
             r_w += m.clone() * rr[j].clone();
             held += m;
@@ -1410,7 +1426,9 @@ pub fn band_pairs(motes: &[Mote], enc: &Enclosed, p: &Ratio, plane: &[Ratio], g_
         // leads add, opposed cancel) against the disc plane, by holding.
         let lead = blend(&members.iter().map(|(i, s)| (held_of(*i, s), motes[*i].ell_o.clone(), motes[*i].tilt.clone())).collect::<Vec<_>>());
         let tau = m.clone() * torsion(&lead, plane);
-        let Some((_, count)) = crate::formation::crest_collapse(&m, &mu, &tau, &a, &mid, &h_mid) else { continue };
+        // The nuclear layer ν: the members' holding by their nuclei's grip.
+        let nu = members.iter().fold(ratio(0, 1), |acc, (i, s)| acc + held_of(*i, s) * grip_share(&motes[*i]));
+        let Some((_, count)) = crate::formation::crest_collapse(&m, &mu, &tau, &nu, &a, &mid, &h_mid) else { continue };
         if count == 0 {
             continue;
         }
@@ -1642,6 +1660,17 @@ pub fn fluid(motes: &mut [Mote], enc: &Enclosed, p: &Ratio, total: &Ratio) -> (R
             Some((members.clone(), m, g(&ell), pinch.clone(), g(&pressure), g(&magnet), g(&delta)))
         }).collect();
         read.sort_by(|a, b| a.3.cmp(&b.3));
+        // THE MEDIUM'S STATE (docs/103 §4): each ring bears the hold of every
+        // ring beyond it on its face, `P_h = Σ m_j·δ_j` (the column's weight,
+        // gravity's held share at each), a reading of state beside its
+        // thermal and magnetic pressure; the contrast of the whole moves the
+        // spin (the coupling into motion).
+        let mut column = ratio(0, 1);
+        for r in read.iter_mut().rev() {
+            let own = r.1.clone() * r.6.clone();
+            r.4 = crate::ring::grain(&(r.4.clone() + column.clone()));
+            column += own;
+        }
         for w in read.windows(2) {
             let (inn, out) = (&w[0], &w[1]);
             let gap = out.2.clone() - inn.2.clone();
@@ -1899,6 +1928,16 @@ mod passage_tests {
         // Isotropic, off by a tenth in every plane: 4/5, it falls.
         let ph = vec![ratio(1, 10); super::PLANES];
         assert_eq!(step_with(&mote(ph, Vec::new()), &centre), ratio(4, 5));
+    }
+
+    #[test]
+    fn a_motes_nuclear_grip_is_its_nuclei_at_its_pulse() {
+        use super::{grip_share, Mote};
+        let mote = |key: &str, loop_at: (i64, i64)| Mote { key: crate::chem::Kind::parse(key).expect("a kind"), amount: ratio(1, 1), ell_o: ratio(1, 1), ell_orth: ratio(0, 1), phase: super::rest(ratio(loop_at.0, loop_at.1)), agitation: ratio(0, 1), born: 0, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1), tilt: Vec::new() };
+        // The seal at 28 grips 9/14 in step with its echo, its own reading.
+        assert_eq!(grip_share(&mote("W0028", (0, 1))), crate::nuclides::grip(28, &ratio(0, 1)).expect("a grip"));
+        // Hydrogen, one lone proton, grips nothing.
+        assert_eq!(grip_share(&mote("W0001", (0, 1))), ratio(0, 1));
     }
 
     #[test]

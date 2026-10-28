@@ -247,13 +247,15 @@ pub fn bond(lambda: &Ratio) -> Ratio {
     lambda.clone() / (ratio(1, 1) + lambda.clone())
 }
 
-pub fn crest_collapse(m: &Ratio, mu: &Ratio, tau: &Ratio, a: &Ratio, r: &Ratio, h: &Ratio) -> Option<(Ratio, u64)> {
+pub fn crest_collapse(m: &Ratio, mu: &Ratio, tau: &Ratio, nu: &Ratio, a: &Ratio, r: &Ratio, h: &Ratio) -> Option<(Ratio, u64)> {
     if r.is_zero() || (m.clone() + mu.clone()).is_zero() {
         return None;
     }
     // TWIST IS TENSION IN THE FIBRE (docs/100 §5): the lead the binding's
     // members carry in step adds to its bond, `λ = 2(m + μ + τ)/R`.
-    let lambda = ratio(2, 1) * (m.clone() + mu.clone() + tau.clone()) / r.clone();
+    // THE ADDITIVE BOND (docs/103 §6, operator 2026-10-28): holding,
+    // magnetism, torsion and the nuclei's grip, each a share of the reach.
+    let lambda = ratio(2, 1) * (m.clone() + mu.clone() + tau.clone() + nu.clone()) / r.clone();
     let bind = bond(&lambda);
     let budget = bind - a.clone();
     if budget <= ratio(0, 1) {
@@ -1451,19 +1453,22 @@ mod crest_tests {
         // The bell-462 outermost ring: m + μ = 0.57 at R 1.64 about H 1.94,
         // heat 0.069: λ = 0.695, bond 0.41 beats heat + face 0.30.
         let zero = ratio(0, 1);
-        let got = crest_collapse(&ratio(52, 100), &ratio(5, 100), &zero, &ratio(69, 1000), &ratio(164, 100), &ratio(194, 100));
+        let got = crest_collapse(&ratio(52, 100), &ratio(5, 100), &zero, &zero, &ratio(69, 1000), &ratio(164, 100), &ratio(194, 100));
         let (w, n) = got.expect("a dense ring holds");
         assert!(w > ratio(0, 1) && n >= 1);
         // A thin inner ring (m + μ = 0.045, bond 0.081) holds against its
         // heat 0.075 alone (the face heats, it is no barrier: docs/96 §8),
         // in one narrow arc; hotter than its bond, it does not.
-        assert!(crest_collapse(&ratio(40, 1000), &ratio(5, 1000), &zero, &ratio(75, 1000), &ratio(1015, 1000), &ratio(1089, 1000)).is_some());
-        assert!(crest_collapse(&ratio(40, 1000), &ratio(5, 1000), &zero, &ratio(9, 100), &ratio(1015, 1000), &ratio(1089, 1000)).is_none());
+        assert!(crest_collapse(&ratio(40, 1000), &ratio(5, 1000), &zero, &zero, &ratio(75, 1000), &ratio(1015, 1000), &ratio(1089, 1000)).is_some());
+        assert!(crest_collapse(&ratio(40, 1000), &ratio(5, 1000), &zero, &zero, &ratio(9, 100), &ratio(1015, 1000), &ratio(1089, 1000)).is_none());
+        // Its nuclei's grip, the bond's nuclear layer, binds it too (docs/103
+        // §6, additive): the hot ring of sealed matter holds.
+        assert!(crest_collapse(&ratio(40, 1000), &ratio(5, 1000), &zero, &ratio(4, 100), &ratio(9, 100), &ratio(1015, 1000), &ratio(1089, 1000)).is_some());
         // Wound, the same hot ring binds: its lead's tension adds to its bond.
-        assert!(crest_collapse(&ratio(40, 1000), &ratio(5, 1000), &ratio(2, 100), &ratio(9, 100), &ratio(1015, 1000), &ratio(1089, 1000)).is_some());
+        assert!(crest_collapse(&ratio(40, 1000), &ratio(5, 1000), &ratio(2, 100), &zero, &ratio(9, 100), &ratio(1015, 1000), &ratio(1089, 1000)).is_some());
         // Denser rings part into more, smaller bindings? No: bond grows, so
         // the largest holding arc grows and the bindings are fewer and larger.
-        let (w2, n2) = crest_collapse(&ratio(80, 100), &ratio(5, 100), &zero, &ratio(69, 1000), &ratio(164, 100), &ratio(194, 100)).expect("holds");
+        let (w2, n2) = crest_collapse(&ratio(80, 100), &ratio(5, 100), &zero, &zero, &ratio(69, 1000), &ratio(164, 100), &ratio(194, 100)).expect("holds");
         assert!(w2 >= w && n2 <= n);
     }
 }

@@ -1013,11 +1013,9 @@ pub fn orbit_galaxies(u: &mut Universe) -> (crate::enfold::Cross, Option<Ratio>)
     // with the rest of its flows by the one torque law (`breath`); here only
     // its order, matter pushing matter apart by its open frames
     // (`flows::repel`, at the bounce's push), on the motes within its throat.
-    if let Some(i) = u.cores.iter().position(is_home) {
-        let held: Vec<usize> = match crate::breath::galaxy_frame(u, i, &crate::breath::unit_mass(u)) {
-            Some(enc) => u.cores[i].flows.iter().enumerate().filter(|(_, x)| enc.reach(&x.ell_o).0 <= enc.base()).map(|(j, _)| j).collect(),
-            None => Vec::new(),
-        };
+    let held_at = firmament_of(u);
+    if let Some(&(i, _)) = held_at.first() {
+        let held: Vec<usize> = held_at.iter().map(|&(_, j)| j).collect();
         if held.len() > 1 {
             let mut firm: Vec<crate::flows::Mote> = held.iter().map(|&j| u.cores[i].flows[j].clone()).collect();
             crate::flows::repel(&mut firm, &ratio(1, 2));
@@ -1108,14 +1106,21 @@ pub fn spin_total(u: &Universe, unit: &Ratio) -> Ratio {
     u.cores.iter().fold(ratio(0, 1), |s, c| s + of(c, unit))
 }
 
+/// The firmament's motes as (home, index) pairs (see `Universe::firmament`).
+pub fn firmament_of(u: &Universe) -> Vec<(usize, usize)> {
+    let Some(i) = u.cores.iter().position(is_home) else { return Vec::new() };
+    let Some(enc) = crate::breath::galaxy_frame(u, i, &crate::breath::unit_mass(u)) else { return Vec::new() };
+    let push = ratio(1, 2);
+    u.cores[i].flows.iter().enumerate().filter(|(_, x)| crate::flows::held(x, &enc, &push) == ratio(1, 1)).map(|(j, _)| (i, j)).collect()
+}
+
 impl Universe {
     /// THE FIRMAMENT (docs/101 §2, B1): the universal core's held cut, the
-    /// motes of its own flows standing within its throat (reach at most its
-    /// base) in its one enclosure. A reading, never a second list.
+    /// motes of its own flows the cut holds WHOLLY (`flows::held`: the spread
+    /// `R(1 ± p)` within the throat in both planes, at the universal bounce's
+    /// push ½), in its one enclosure. A reading, never a second list.
     pub fn firmament(&self) -> Vec<crate::flows::Mote> {
-        let Some(i) = self.cores.iter().position(is_home) else { return Vec::new() };
-        let Some(enc) = crate::breath::galaxy_frame(self, i, &crate::breath::unit_mass(self)) else { return Vec::new() };
-        self.cores[i].flows.iter().filter(|x| enc.reach(&x.ell_o).0 <= enc.base()).cloned().collect()
+        firmament_of(self).into_iter().map(|j| self.cores[j.0].flows[j.1].clone()).collect()
     }
 
     /// The ocean's matter, read from its motes.

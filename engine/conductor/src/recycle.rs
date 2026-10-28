@@ -224,8 +224,9 @@ pub fn recycle(motes: &mut Vec<Mote>, at: &[usize], b: &Ratio, s: &Ratio, g: &Ra
     // the continuum.
     // THE INVERSION (operator 2026-10-19: "the vacuum and the continuum must
     // be mathematically inverted across all dimensional facets"): inversion
-    // through the throat, `R → H²/R` (any dimension), turns the vacuum's pull
-    // `H/(R + H)` into `R/(R + H)`, the continuum's push, and back; its one
+    // through the throat, read on the SHARE, `δ ↦ 1 − δ` (first degree; never
+    // a radius squared, design law 2), turns the vacuum's pull `H/(R + H)`
+    // into `R/(R + H)`, the continuum's push, and back; its one
     // fixed point is the throat, `R = H`, both ½. Across the throat the two
     // pressures are the galaxy's weight pressing in and the core's own
     // pushing out, and the core CONSUMES where the vacuum's is equal or
@@ -314,11 +315,16 @@ mod tests {
         }
         // A single peel's cost is its own law, `u(w − 1) + u(1) − u(w)`.
         assert!((2..=240).all(|w| peel_cost(w, 1) == u(w - 1) + u(1) - u(w)));
-        // The inversion through the throat swaps the pull and the push:
-        // δ(H²/R) = 1 − δ(R), fixed at R = H (both ½).
+        // The inversion through the throat swaps the pull and the push on the
+        // share, first degree: the push `R/(R + H)` is the pull's other face,
+        // `1 − H/(R + H)`, fixed at R = H (both ½). No radius is squared.
         let d = |r: Ratio, h: Ratio| h.clone() / (r + h);
+        let push = |r: Ratio, h: Ratio| r.clone() / (r + h);
         for (r, h) in [(ratio(1, 3), ratio(3, 2)), (ratio(7, 2), ratio(1, 1)), (ratio(2, 1), ratio(2, 1))] {
-            assert_eq!(d(h.clone() * h.clone() / r.clone(), h.clone()), ratio(1, 1) - d(r, h));
+            assert_eq!(push(r.clone(), h.clone()), ratio(1, 1) - d(r.clone(), h.clone()));
+            if r == h {
+                assert_eq!(d(r, h), ratio(1, 2));
+            }
         }
         // The rung: H + H (to deuterium, weight 2, still one proton) gives
         // light; He + He does not.
