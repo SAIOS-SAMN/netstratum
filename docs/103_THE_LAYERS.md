@@ -10,6 +10,10 @@ docs/96 (the enclosure, the hold law), docs/97 (Q, Z, R), docs/98 (the faces),
 docs/99 (phases), docs/100 (twist, torsion, transitions), docs/101 (one
 universal core), docs/102 (vocabulary, register).
 
+> **Re-stacked (2026-10-28, docs/106):** these layers stand on a THERMODYNAMIC
+> SUBSTRATE (potential, pressure, energy) that kinematics is propagated from;
+> as written here kinematics was the floor and pressure a residue of motion.
+
 ## 0. The principle
 
 A layer is a mechanism with its own state and its own law. Layers COUPLE:

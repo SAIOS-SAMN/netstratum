@@ -93,6 +93,16 @@ docs before code; witnesses by re-derivation, never equal bytes.
 | D4 | twist and its release by our held share | docs/104 §1 | D1 | — |
 | D5 | the quantum state inverted, `h = (1 − R)/2` | docs/104 §1 | D1 | — |
 
+### B‴. The substrate (docs/106), beneath every layer
+
+| # | item | doc | depends | ruling |
+|---|---|---|---|---|
+| S1 | the energy ledger (heat, motion, potential, both faces), read | docs/106 §6 | — | — |
+| S2 | heat as state with its counterweight | docs/106 §2 | S1 | — |
+| S3 | pressure as state; hydrostatic equilibrium the restoring law | docs/106 §2 | S1 | — |
+| S4 | kinematics propagated from the substrate | docs/106 §3 | S2, S3 | — |
+| S5 | form's coupling: bindings against pressure | docs/106 §3 | S3 | — |
+
 ### C. Reading and after
 
 | # | item | depends |
