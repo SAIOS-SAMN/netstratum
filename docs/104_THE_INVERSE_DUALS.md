@@ -4,8 +4,7 @@ Operator 2026-10-28: "the cooling is probably the inversion heat and needs the
 counterweight to balance the flow"; "because you have an inverted nucleus the
 quantum state will be inverted underneath based on inverse gravity -
 extrapolate formulas out and produce the correct semantic alignment for
-heating/cooling push/pull twist/release". Status: DERIVATION (for the
-operator's confirmation before build). Builds on docs/97 (the inverse
+heating/cooling push/pull twist/release". Status: BUILDING (operator 2026-10-28: "update documentation, scope, and build it substantive"). Builds on docs/97 (the inverse
 nucleus), docs/98 (faces), docs/100 (twist, torsion), docs/103 (the layers;
 §5 the whole frame inverted, its enclosure by share from the outside in).
 
@@ -40,11 +39,11 @@ share (its open frames over its weight).
 | pair | forward (xylarium) | inverse (ours) | in code now | change |
 |---|---|---|---|---|
 | **pull** (gravity's hold) | `δ` | `g = 1 − δ` | `Enclosed::reach`, heart cut `H/(R + H) ≥ p` | the enclosure by share from the outside in (docs/103 §5); the cut held where `g ≥ p` |
-| **push** (the bounce's carriage) | on the unlocked face `1 − δ` | on our unlocked face `u = δ` | release `s = ½·c/(c + base) = ½(1 − δ_c)` (`breath`) | `s = ½·u_c = ½·base/(c + base)` |
-| **heating** (the face not locked heats; ruled 2026-10-16) | `½(1 − δ)` | `½·u = ½·δ` | the light warms bodies by `1 − δ` (`breath::shine`); torque heat `p·δ·(1 − |k|)` | warmth by `u`; torque heat by the face pushed, `p·u·(1 − |k|)` |
+| **push** (the bounce's carriage) | on the unlocked face `1 − δ` | on our unlocked face `u = δ` | release `s = ½·c/(c + base)` (`breath`) | `s = p·c/(c + base)`, `p = S/(S + T)` the core's pair share (§1.2) |
+| **heating** (the face not locked heats; ruled 2026-10-16) | `½(1 − δ)` | `u·e` (§1.2) | the light warms bodies by `1 − δ` (`breath::shine`); torque heat `p·δ·(1 − |k|)` | warmth by `u·e`; torque heat by the face pushed, `p·u·(1 − |k|)` |
 | **cooling** (heat leaves) | light `e` and the vacuum's pull back `δ`, keep `(1 − e)(1 − δ)` a ring | light `e` and OUR pull back `g`, keep `(1 − e)(1 − g) = (1 − e)·δ` | keep `(1 − e)(1 − δ)` (`flows::spin_torque`) | keep `(1 − e)·u`, AND the counterweight (§2) |
-| **twist** (winding per turn) | the deficit, `δ`, by plane `½·t_k` at the ring | our held share, `g`, by plane `g·t_k` at the body's reach | `quantum::twist` `½·t_k` (the ring's δ = ½) | `g(R)·t_k` at the core's own reach (½ at its ring, both faces) |
-| **release** (untwisting; the tide letting go) | by the unlocked face `½(1 − δ)` | by our unlocked face `½·u` | release share as above; torsion relaxes by the attractor | release read on `u`; torsion relaxes by `turned/(d + turned)` with `d = u` |
+| **twist** (winding per turn) | the core's deficit at its ring, `½·t_k` | the same: the fixed point where it holds (§1.2) | `quantum::twist`, a body through its own planes | stands |
+| **release** (untwisting; the tide letting go) | by the unlocked face | by our unlocked face `u` | torsion relaxes by the attractor `turned/(d + turned)`, `d = 1 − δ` | `d = u` |
 | **bound / free** (the electrons) | the held share COUNTED, `h = (F_e + L_e·in_step(p, 0))/Q` | the same count against the face inverse gravity holds, `h = (F_e + L_e·in_step(p, ½))/Q` | `nuclides::held` `(1 + R)/2` (a halving) | the count (§1.1): no halving |
 | **grip / part** (the fibres) | grip `κ·h` | grip `κ·h` with our `h` | `nuclides::grip` | follows `h` |
 | **capture / release** (nucleons) | survival `κ + (1 − κ)·h` | the same with our `h` | `nuclides::survival` | follows `h` |
@@ -76,6 +75,28 @@ and the neutron share, the seeds and the densest element move with it; the
 founding's phase (`frac(p) = ½`) stands on the hemisphere's boundary, where
 `in_step` reads 0 forward and 1 inverted. The founding is re-derived on the
 count, never carried over.
+
+### 1.2 Every share is a pair share of read quantities (operator 2026-10-28: "what is this constant: ½"; "what is the missing formula so that we dont require a hard static variable like ½")
+
+½ is not a constant: it is the inversion's FIXED POINT (δ = 1 − δ only at
+δ = ½: the throat, R = H, both faces equal). Every true ½ is that reading
+taken where it holds. Every share is the PAIR SHARE
+
+    share = a / (a + b)
+
+of the two quantities actually present; ½ is its value only where `a = b`.
+A ½ written as a factor anywhere else carries the throat's value to a place
+that is not the throat: a halving, a static.
+
+| law | the ½ assumed | the pair, read |
+|---|---|---|
+| the electrons' held share | half their ends held | the count, `(F_e + L_e·in_step(p, φ_held))/Q` (§1.1) |
+| a core's push ("regenerated ½") | its state equal to what its throat holds (true at the bounce only) | `p = S/(S + T)`: its state S against what its throat still holds T; ½ at the founding, rising as the throat empties |
+| the release `s = ½·c/(c + base)` | that push | `s = p·c/(c + base)` |
+| a body's push `½·Q/(A + Q)` | half its open share | `Q/(A + Q)`, its open frames over its whole (open in both frames: the inverse nucleus already makes the protons the open ends) |
+| the heating face `½(1 − δ)` | half the unlocked face reaches the body | `u·e`: our unlocked share times the body's own open share (the frames that take heat); heating is the cooling's light channel run backward |
+| the core's twist at its own ring | — | `½·t_k` STANDS: the fixed point read where it holds (a core winds at its ring, δ = ½); a body takes it through its own planes (`quantum::twist`) |
+| the luminal bound (share > ½), the founding's phase | — | STAND: the fixed point read where it holds |
 
 ## 2. The counterweight: every pair conserves across the faces
 
