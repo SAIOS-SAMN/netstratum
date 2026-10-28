@@ -119,6 +119,19 @@ the face where the matter actually stands (docs/98, the luminal bound).
   faces produce), or the universe's whole frame inverted (what we call outside
   is inside, every tier).
 
+  **Ruled (operator 2026-10-28): "invert the whole frame".** Derived, its
+  meaning: inverting every reading together (reach `R → H²/R`, deficit
+  `δ → 1 − δ` for turning, the luminal bound, the release's placement, the
+  strip, the rim) leaves the dynamics unchanged, the laws being symmetric
+  under the throat's inversion: a relabel of the coordinate. The one reading
+  not symmetric is the ENCLOSURE'S ORDER: `H(<R)` counts the core's state and
+  the matter standing inside R. In the frame inverted whole, inside is
+  outside: the hold at a place is the core's state and every body standing
+  BEYOND it (in today's coordinate), and the core's throat bounds the frame
+  from outside (matter enclosed by its core as a shell, not orbiting a
+  centre). That is the inversion's physics. **Owed before build:** the
+  operator's confirmation that the enclosure counts from the outside in.
+
 ## 6. L6 — the bond, composed through the layers
 
 - **Now:** `bond(λ) = λ/(1 + λ)`, `λ = 2(m + μ + τ)/R`: gravity's holding,
@@ -133,7 +146,9 @@ the face where the matter actually stands (docs/98, the luminal bound).
     step (the field, L4);
   - **torsional** `τ`: the members' net lead (L3, built);
   - **gravitational** `m`: the holding (L5).
-- **The rule, for ruling:**
+- **The rule, RULED (operator 2026-10-28): additive.**
+  `λ = 2(m + ν + χ + μ_open + τ)/R`, each layer a share of the same reach.
+- **The rule, as it stood for ruling:**
   - (a) the layers add to the line density, `λ = 2(m + ν + χ + μ_open + τ)/R`,
     each a share of the same reach;
   - (b) the layers nest, each holding what the one beneath leaves free,
@@ -173,7 +188,7 @@ the face where the matter actually stands (docs/98, the luminal bound).
 
 ## 9. For ruling
 
-- **§5:** production on each face's own strip, or the universe's frame
-  inverted whole.
-- **§6:** the bond's composition, additive (a) or nested (b).
+- **§5:** ruled, the whole frame inverted; its meaning (the enclosure counts
+  from the outside in) owed confirmation.
+- **§6:** ruled, additive.
 - Standing: the coupling C (docs/100 §3); R's scale (docs/100 §9).
