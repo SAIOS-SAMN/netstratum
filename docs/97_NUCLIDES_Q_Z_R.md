@@ -230,11 +230,11 @@ draws one hydrogen nucleus, so nucleons are conserved exactly.
   share, its deficit at its centre) breaks into its nucleons; they are the
   rapid capture's fuel for the rest. Nucleons conserved.
 
-## 12. A fresh founding with the full table to weight 1200
+## 12. A fresh founding with the full table to weight 1200 (operator 2026-10-27: "remove these starter galaxies - and start fresh with a full table of elements up to 1200")
 
 > Superseded in part: the cap at 1200 by §14 (the densest element is the
 > founding's own, 1612 at 2^55 grains); the whole mix by docs/101 (no
-> leftovers; each galaxy's composition its own). (operator 2026-10-27: "remove these starter galaxies - and start fresh with a full table of elements up to 1200")
+> leftovers; each galaxy's composition its own).
 
 - **The light, as §9:** the neutron share the exchange's fixed point at the
   seal window, each proton bound into a seed of weight 4 (deuterons paired;
