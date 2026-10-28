@@ -110,7 +110,7 @@ orbits placed in rings). Every remainder of 2026-10-27 lives here.
 - **Its held cut is the firmament:** the same cut every core's throat reads
   (`push_cut`), twisted by its coupling (docs/100 §3): the node-shell and
   heaviest kinds stay; not a second list torqued apart.
-- **Its flows are the ocean:** what each universal bounce releases (the
+- **Its flows are the ocean** (its filament; vocabulary docs/102): what each universal bounce releases (the
   throat release of `breath`, the same law a galactic core uses), on the
   jetstream loop (outbound along the axis, home through the disc, the Möbius
   pass, the luminal bound); the ocean frame IS its enclosure.
