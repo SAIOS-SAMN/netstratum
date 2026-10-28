@@ -62,59 +62,54 @@ Xylarium's (c), inverted: its survival `a·h` reads the crossing's carried
 share (the fixed point) and the held share; ours reads the held face at the
 crossing for the lone ends and the fibres' own pairing for the bound ones.
 
-### 4.1 Freeze-out on the growing S^360 (operator 2026-10-28: "this is still constant: the equilibrium g = ¼"; "add curvature of the S^360 sphere that grows from the core")
+### 4.1 The equilibrium at the core (operator 2026-10-28: "this is still constant: the equilibrium g = ¼"; "do you're adding dimensionality to the originating sphere?"; "yes - strip it and derive the equilibrium at the core")
 
 **Why ¼ was a constant.** The window's g read `1 − (1 + g_throat)/ν`, every
-term a fixed point, and the exchange's rates summed to one (`g + u = 1`), so
-one ring landed on the equilibrium: no history, no scale. Every founding
-read the same share.
+term a fixed point, and the exchange's rates summed to one (`g + u = 1`):
+one ring landed on the equilibrium, with no history and no scale.
 
-**The freeze-out.** A pole changes only while the bounce's heat exceeds the
-grip that would hold it: each ring the exchange runs at the face share times
-the heat's EXCESS over the grip,
+**Retired:** the freeze-out as a front travelling a geodesic over the
+originating S^360 (its angle θ, its circumference C, its growth): it added a
+radial extent and a travel dimension to the sphere docs/78 holds as the frame
+itself, read by angle, never crossed by a process; and it was forward physics
+(hot at the core, cooling outward), never read through the inverse map.
 
-    α = g·x,  β = u·x,  x = (a − grip)/a   (a > grip; else the poles stand)
+**At the core every face is the fixed point,** `g = u`: the faces cancel
+from every pair, and what stands is a pair share of the core's own
+quantities (docs/104 §1.2), read in the inverse universe (heat by our
+unlocked face, holding from the outside in):
 
-so `1 − α − β = 1 − x` and the share APPROACHES its moving equilibrium over
-the rings of the passage, by the master equation's closed form (the product
-of `(1 − x_k)` over the rings, a reading of the passage, never stepped), and
-FREEZES where the heat falls to the grip.
+- **The poles:** a proton binds as a fibre's partner where the grip holds
+  against the heat, `α = g·G/(G + a)`; a neutron frees where the heat beats
+  the grip, `β = u·a/(G + a)`; the faces cancel:
 
-**The curvature (docs/78: "Space: S^360 of radius R, the Big Bang's
-curvature"; distance the geodesic angle; "the core's pulse refocuses on the
-far side; that round trip is the ring").** The bounce's front runs a GEODESIC
-from the core over the sphere: at the core, across its equator, to the
-antipode where it refocuses and returns. Its place is its geodesic angle
-θ, read in half-turns (the antipode at 1), and the sphere's own measure there,
-the front's step with the core, replaces the flat deficit:
+      x* = G / (G + a)
 
-    δ_S(θ) = 1 − θ       (1 at the core; the equator, the throat's fixed
-                          point, at θ = ½ of the way; 0 at the antipode)
+  `G` deuterium's grip at the throat, `κ₂·g_throat` (the fixed point where it
+  holds).
+- **The heat at the core:** its push, the pair share of its STATE S against
+  what its THROAT still holds T (docs/104 §1.2): `a = S/(S + T)`. It reads
+  the core, never the composition it sets: no self-reference, no square.
 
-first degree, intrinsic to the sphere (never a chord, never a radius
-squared). The faces at the front read `g = 1 − δ_S`, `u = δ_S`; the heat
-`a = ν·δ_S − 1`.
+So
 
-**The sphere grows from the core.** The front advances one light-length a
-ring; on a sphere of circumference C (in rings) that is `1/C` of a turn a
-ring, so the rings from the core to the window are
+    x*(T) = G / (G + S/(S + T))
 
-    k_w = θ_w·(C/2),   θ_w = 1 − δ_S,w,   δ_S,w = (1 + grip)/ν
+a reading of the core's state, never one founding number: at the bounce
+`S = T` (`a = ½` there, the fixed point), `x* = ½`, every proton finding its
+partner; as the throat empties the push rises and `x*` falls toward
+`G/(G + 1)`, later releases proton-rich. Each bounce's release carries its
+own share, so galaxies formed from different releases differ (the founding as
+the universal core's throat, docs/101 B2).
 
-(the `/2`: the out leg of the round trip, the double pass's one leg, ruled).
-A larger sphere holds its front in the hot cap for more rings: the exchange
-runs longer and freezes nearer its moving equilibrium. The neutron share is
-then a READING OF THE FOUNDING'S OWN STATE through C, never a fixed share.
+**Read, the present founding (59fc547, the constant ¼):** neutrons per proton
+0.35 (nature about 0.14), hydrogen 0.034 by mass (about 0.75); 126 systems and
+1083 worlds by bell 1194, the cost rising steeply (2228 s).
 
-**Open, the sphere's circumference at the founding.** C is the round trip
-(TUniversal's echo, `T_u` bells × ν rings a bell): today `T_u` is read from the
-founding cascade's outermost shell, which retires (docs/101); its derivation
-from the universal core's own state, and its growth echo by echo as the core
-pulses out its throat, is the same question owed with mycelium (docs/101 §6,
-TUniversal's owner). Until it is ruled the founding reads C from the
-universe's current `T_u`; the founding and `T_u` are then read together to
-their fixed point (the composition sets the cascade's echo, the echo sets the
-freeze-out).
+**Owed with it:** the founding read per bounce at its release (docs/101 B2),
+not once: the single-shot founding at `S = T` reads `x* = ½`, every nucleon
+paired, no free hydrogen to climb on; its meaning is the first release, the
+rest following as the throat empties.
 
 ## 5. Build order (each with its witness)
 
@@ -130,11 +125,9 @@ freeze-out).
 4. **The founding re-read** (§4; BUILT at the throat, its share ¼ a
    constant). Witness: nucleons conserved; the densest element read, never
    set.
-4a. **The freeze-out on the growing S^360** (§4.1): the exchange at the
-   heat's excess over the grip, the front's measure `1 − θ` on the sphere,
-   the rings to the window `θ_w·C/2`, C the round trip. Witness: the share
-   moves with C (a larger sphere freezes nearer its equilibrium); nucleons
-   conserved; at x = 1 every ring the master equation's equilibrium.
+4a. **The equilibrium at the core** (§4.1): `x*(T) = G/(G + S/(S + T))`,
+   read per bounce at release (with docs/101 B2). Witness: ½ at the bounce,
+   falling toward `G/(G + 1)` as the throat empties; nucleons conserved.
 5. **Heat's equilibrium and the counterweight** (docs/104 §2). Witness: the
    heat ledger closes each echo.
 6. **Read:** re-found, breathe to bell 1700.
