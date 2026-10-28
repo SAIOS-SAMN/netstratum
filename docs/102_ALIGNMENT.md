@@ -52,13 +52,13 @@ docs before code; witnesses by re-derivation, never equal bytes.
 
 | # | item | where | depends | ruling |
 |---|---|---|---|---|
-| A1 | the leg flag's two writers: `stream` undoes `luminal` | `flows::stream`, breath | — | — |
-| A2 | tilt dropped on save for firmament and ocean motes | `pulse::write` tags 19/24 | — | — |
-| A3 | "filament" names a bound chain: rename to **strand** | `flows::chains`, `Chain`, `stream`, docs | — | — |
-| A4 | two impact laws: `life::climb` draws from the seed (with T_u stood in at 60 by `bin/life`); `life::advance` measures on the hidden phase | `life.rs`, `bin/life.rs` | — | — |
+| A1 (CLOSED e4b74a9) | the leg flag's two writers: `stream` undoes `luminal` | `flows::stream`, breath | — | — |
+| A2 (CLOSED e4b74a9) | tilt dropped on save for firmament and ocean motes | `pulse::write` tags 19/24 | — | — |
+| A3 (CLOSED e4b74a9) | "filament" names a bound chain: rename to **strand** | `flows::chains`, `Chain`, `stream`, docs | — | — |
+| A4 (CLOSED e4b74a9) | two impact laws: `life::climb` draws from the seed (with T_u stood in at 60 by `bin/life`); `life::advance` measures on the hidden phase | `life.rs`, `bin/life.rs` | — | — |
 | A5 | nine readings of the universal state; `is_home` branches; `core_state` 0; the release span branch | pulse, breath, ocean (docs/101 §1.2) | — | — |
 | A6 | three homes: `is_home` (path [0]), `life::home` and `chronometry::keepers` (heaviest kept); `places.rs` | life, chronometry, places | A5 | — |
-| A7 | `formation::echo_holds` duplicates the crest's law | formation | — | — |
+| A7 (CLOSED e4b74a9) | `formation::echo_holds` duplicates the crest's law | formation | — | — |
 | A8 | `bin/observe`'s "cascade" view recomputes the cascade beside it | observe | B3 | — |
 
 ### B. Forward development (new physics, in order)
