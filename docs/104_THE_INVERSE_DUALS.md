@@ -112,9 +112,9 @@ other), so nothing leaves the books:
   kinds carried far (large c) are released LESS a bounce; heavy kinds (small c)
   released more, then held from outside in.
 - **The electrons are free in step.** A body in step with its echo has its
-  electrons open (R's held hemisphere inverted): its captures survive less and
-  its fibres grip less in step, more off step. The founding (`frac(p) = ½`)
-  is unchanged.
+  lone electrons on the face inverse gravity does not hold (the count, §1.1): its captures survive less and
+  its fibres grip less in step, more off step. The founding is re-derived on
+  the count (§1.1): its phase stands on the hemisphere's boundary.
 - **Twist grows outward.** A core winds its far bodies by `g` (near 1 far out)
   and its near ones less: the outer disc is wound, the inner relaxed.
 
