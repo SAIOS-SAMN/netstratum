@@ -45,13 +45,37 @@ share (its open frames over its weight).
 | **cooling** (heat leaves) | light `e` and the vacuum's pull back `δ`, keep `(1 − e)(1 − δ)` a ring | light `e` and OUR pull back `g`, keep `(1 − e)(1 − g) = (1 − e)·δ` | keep `(1 − e)(1 − δ)` (`flows::spin_torque`) | keep `(1 − e)·u`, AND the counterweight (§2) |
 | **twist** (winding per turn) | the deficit, `δ`, by plane `½·t_k` at the ring | our held share, `g`, by plane `g·t_k` at the body's reach | `quantum::twist` `½·t_k` (the ring's δ = ½) | `g(R)·t_k` at the core's own reach (½ at its ring, both faces) |
 | **release** (untwisting; the tide letting go) | by the unlocked face `½(1 − δ)` | by our unlocked face `½·u` | release share as above; torsion relaxes by the attractor | release read on `u`; torsion relaxes by `turned/(d + turned)` with `d = u` |
-| **bound / free** (the electrons, R) | held hemisphere `h = (1 + R)/2` | held hemisphere on the face inverse gravity holds, `h = (1 − R)/2` | `nuclides::held` `(1 + R)/2` | `(1 − R)/2`: in step with its echo the electrons stand FREE (open), half a turn off they are bound |
+| **bound / free** (the electrons) | the held share COUNTED, `h = (F_e + L_e·in_step(p, 0))/Q` | the same count against the face inverse gravity holds, `h = (F_e + L_e·in_step(p, ½))/Q` | `nuclides::held` `(1 + R)/2` (a halving) | the count (§1.1): no halving |
 | **grip / part** (the fibres) | grip `κ·h` | grip `κ·h` with our `h` | `nuclides::grip` | follows `h` |
 | **capture / release** (nucleons) | survival `κ + (1 − κ)·h` | the same with our `h` | `nuclides::survival` | follows `h` |
 
-Fixed points are unchanged: at the ring `δ = ½`, so `g = u = ½` and every pair
-balances there (both faces equal); at `frac(p) = ½`, `R = 0`, so `h = ½` in
-both frames (the founding's phase, docs/97 §13, stands).
+Fixed points: at the ring `δ = ½`, so `g = u = ½` and every pair balances
+there (both faces equal).
+
+### 1.1 The held share is a COUNT, never a halving (operator 2026-10-28: "(1-R)/2 - that is not a formula: that is a halvening")
+
+`(1 ± R)/2` maps R's range onto a share by halving: a normalisation, not a
+measure. The held share is measured from the state itself. A nuclide's Q
+electrons fill S^11 by the nucleus's own convergence: `F_e = Z(Q)` fibres
+(two counter-turning ends each, so exactly ONE end of each stands on the
+held hemisphere whatever the phase) and `L_e = Q(Q) − Z(Q)` lone ends (each
+on one hemisphere: its share on the held one the S¹ linear measure,
+`in_step`, at the pulse phase p against the held face). Over all
+`Q = 2F_e + L_e` ends:
+
+    h(w, p) = (F_e + L_e·in_step(p, φ_held)) / Q
+
+forward `φ_held = 0` (the face in step with the echo), inverse `φ_held = ½`
+(the face inverse gravity holds). Its mean over a turn is `(F_e + L_e/2)/Q`,
+½ as an AVERAGE, never as a factor. Hydrogen (F = 0, L = 1) runs from 1 to 0
+across a turn where the halving read a flat ½.
+
+**Consequence, read before build:** the founding's seal window reads
+deuterium's grip at the source's phase; with the count it no longer reads ¾,
+and the neutron share, the seeds and the densest element move with it; the
+founding's phase (`frac(p) = ½`) stands on the hemisphere's boundary, where
+`in_step` reads 0 forward and 1 inverted. The founding is re-derived on the
+count, never carried over.
 
 ## 2. The counterweight: every pair conserves across the faces
 
@@ -105,8 +129,10 @@ other), so nothing leaves the books:
    torque's band). Witness: nucleons and spin conserved per bounce.
 4. **Twist and its release** by our held share at the body's reach. Witness:
    the twist at the ring ½ a turn a ring on both faces; the spin ledger exact.
-5. **The quantum state inverted** (`nuclides::held` `(1 − R)/2`). Witness: its
-   mean over a turn ½; the founding's seal window unchanged (`h = ½` at R = 0).
+5. **The quantum state counted and inverted** (`nuclides::held` the count of
+   §1.1 against the held face ½). Witness: the count's mean over a turn
+   `(F_e + L_e/2)/Q`; the founding re-derived on it (its seal window, neutron
+   share and densest element read anew).
 6. **The enclosure from the outside in** (docs/103 §5, L5).
 7. **Read:** re-found, breathe to bell 1700 and past 7000.
 
@@ -114,5 +140,5 @@ other), so nothing leaves the books:
 
 The whole table rests on one statement: under inverse gravity the HELD share
 is `1 − δ` and the UNLOCKED share is `δ`, and the quantum state's held
-hemisphere is the face inverse gravity holds, `(1 − R)/2`. Confirmed, steps
-1–7 follow by the map alone.
+share is the COUNT of §1.1 against the face inverse gravity holds. Confirmed,
+steps 1–7 follow by the map alone.

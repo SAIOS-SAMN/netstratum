@@ -274,6 +274,11 @@ of p. Read at the body's own phase instead:
   hydrogen 0.04 by mass: the error the reading corrects.)
 - **The held hemisphere** `h = (1 + R)/2` (`nuclides::held`): the share of a
   lone end standing on the held face. Its mean over p is ½, the old static.
+  > **Corrected (2026-10-28, docs/104 §1.1; operator: "(1-R)/2 - that is not
+  > a formula: that is a halvening"):** `(1 ± R)/2` is a halving. The held
+  > share is the COUNT of the electrons' ends on the held face,
+  > `h = (F_e + L_e·in_step(p, φ_held))/Q`; the built `(1 + R)/2` (785a074)
+  > stands until the count is built with the founding re-derived on it.
 - **Survival** `σ_{w+1} = κ + (1 − κ)·h` (bound, or lone on the held
   hemisphere); the seals keep every capture whatever p.
 - **Grip** `κ_w·h`: a fibre's turn shared by its two counter-turning ends, the
