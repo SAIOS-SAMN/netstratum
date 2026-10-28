@@ -23,8 +23,8 @@ kept current; each item closes with its commit and witness.
 | **deficit δ** | gravity's held share at reach R, `H/(R + H)`; the push's `1 − δ` | `Enclosed::reach` |
 | **enclosure** | a core's hold read once: base `state/g`, ring = base, rim = `2·base`, the strip between | `flows::Enclosed` |
 | **ring (of flow)** | a band pair on the strip, `k(ρ) = (S/G)(1 + ρ)/(1 − ρ)` | `flows::band_pairs` |
-| **strand** | motes bound in a chain, judged by their bond (was "filament" in `flows::chains`) | `flows::Chain` (rename owed) |
-| **bond** | `λ/(1 + λ)`, `λ = 2(m + μ + τ)/R`: holding, magnetism, torsion | `formation::crest_collapse` |
+| **strand** | motes bound in a chain, judged by their bond (was "filament" in `flows::chains`) | `flows::Strand`, `flows::strands` |
+| **bond** | `λ/(1 + λ)`, `λ = 2(m + μ + τ)/R`: holding, magnetism, torsion | `formation::bond` (read by the crest, strands, ignition, worlds) |
 | **binding** | elements of one ring bound into one body where the bond meets heat and tide | band_pairs' output |
 | **step** | a member's in-step share with its binding's phase, `C = Σ t_k·in_step` | `flows::step_with` |
 | **heart** | what falls (C ≥ ½); its cut keeps what its hold holds | `formation::heart_cut` |
