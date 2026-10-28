@@ -42,7 +42,7 @@ and look at all machinery affected". Status: SCOPE. Nothing here is built.
 - **No leftovers** (operator 2026-10-27): every share by a law; static content
   is a placeholder for missing physics.
 
-## 1. The audit: one core held as four things, read five ways
+## 1. The audit: one core held as four things, read nine ways
 
 ### 1.1 Holders of the universal core's matter
 
