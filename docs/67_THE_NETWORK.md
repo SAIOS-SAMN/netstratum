@@ -1,7 +1,7 @@
 # 67 — The network: hubs, stewards, progenitors, the spacing guild
 
-Operator 2026-10-09, an agreement between netstratum and the operator, built
-with xylarium-kernel as coordinator but in netstratum's own way (instinct and
+Operator 2026-10-09, an agreement between Netstratum and the operator, built
+with xylarium-kernel as coordinator but in Netstratum's own way (instinct and
 physics decide, behaviour emerges, settle at touch, its cores and orbits,
 exact rationals). The geometry is era 1's spheres (S^360 galaxies, S^60
 systems, docs/85); the "flat L1 torus" named below is era 0's and retired.
@@ -21,13 +21,13 @@ systems, docs/85); the "flat L1 torus" named below is era 0's and retired.
 
 ## The interfaces (coordinator, 2026-10-09)
 
-- **Coordinates** (mycelium 78.154 TRAVERSE, approved, not built): a route
+- **Coordinates** (Mycelium 78.154 traverse, approved, not built): a route
   cites each mouth's final TUniversal point from the hypha's map; gas per
   lane (S the span, G tolls and value, T the TUniversal distance between the
   points, H the information carried) plus the mouth toll, paid whole to the
-  courts. Mouths and segments reach the map only as signed MAP acts by the
-  universe's domain reserve; recalibration is a new MAP act at a later point.
-- **Two charges**: the MAP FEE (gas, μ, to the courts) and the ROAD TOLL (to
+  courts. Mouths and segments reach the map only as signed map acts by the
+  universe's domain reserve; recalibration is a new map act at a later point.
+- **Two charges**: the map fee (gas, μ, to the courts) and the road toll (to
   the tube's keeper and builder). Civilizations pay road tolls in their own
   money (STAMP) to the progenitors; a progenitor needing μ for coordinates
   converts through an ancients' reserve. μ stays with the ancients' lineages
@@ -40,7 +40,7 @@ systems, docs/85); the "flat L1 torus" named below is era 0's and retired.
 
 ## Every cadence on TUniversal (Concordance 1.11)
 
-SUPERSEDED IN PART by mycelium 78.156 (the clock binding, 2026-10-09): the
+Superseded in part by Mycelium 78.156 (the clock binding, 2026-10-09): the
 world is free on its own axis u and meets TUniversal only through ledger
 entries; the hubs clear on u. What follows holds for what is bound to the
 fleet (map acts, recalibrations against mapped points). As first written:
@@ -51,18 +51,18 @@ the drift between the mouth's mapped point and the current final point
 passes its tolerance. Until 78.152 is vendored, the conductor's beat stands
 in for the final point and is replaced by it.
 
-**Who pays what for the map.** The traversal's MAP FEE (gas) is paid by the
-progenitor whose route is traversed. The MAP act's POSTING (a mouth placed or
+**Who pays what for the map.** The traversal's map fee (gas) is paid by the
+progenitor whose route is traversed. The map act's posting (a mouth placed or
 recalibrated on the map) is paid by the domain reserve at the court's read
-price; its exact charge is mycelium 78.154's to state.
+price; its exact charge is Mycelium 78.154's to state.
 
-## The design, netstratum's way
+## The design, Netstratum's way
 
 - **Hubs emerge where clearing together beats pair-to-pair.** Every trade
   melts by the transit distance (the iceberg law, MARKET-2). A place where
   many lines' orders clear at once melts less per unit than each pair
   apart; lines route orders to the place that clears them cheapest, so
-  trade CONCENTRATES by choice. A hub is such a place; its market clears
+  trade concentrates by choice. A hub is such a place; its market clears
   once per final point for all who route to it.
 - **A stardock is built, not placed.** A line whose hub traffic warrants it
   builds a stardock (the SOC workbench's own choice, instinct over physics):
@@ -76,13 +76,13 @@ price; its exact charge is mycelium 78.154's to state.
   ancient) folds a wormhole between hubs, or between a hub and its core's
   throat: two mouths at coordinates the domain reserve maps. The lines orbit
   their cores (docs/61 G1), so mouths drift; a mouth past its tolerance is
-  RECALIBRATED (a new MAP act, its map fee in μ), the progenitor's standing
+  recalibrated (a new map act, its map fee in μ), the progenitor's standing
   labour. Inner rings turn fastest, so inner-core routes cost most to keep
   and are worth most. Traffic pays road tolls in STAMP to the progenitor;
   bundling many trades through few routes is what pays the map fee.
 - **The ancients collect at the cores.** Only the cores' holdings (the
-  throat's bank) are the ancients'. The progenitors act FOR the ancients,
-  but their μ toll shares are their OWN (Concordance 5.4), spent on the
+  throat's bank) are the ancients'. The progenitors act for the ancients,
+  but their μ toll shares are their own (Concordance 5.4), spent on the
   coordinates for their routes (coordinator review 2026-10-09).
 - **The biosphere feeds the market sustainably.** A line offers only what
   its biosphere regrows (the regrowth law: harvest within regrowth keeps the
@@ -113,7 +113,7 @@ take its trade.
 | N4 | sustainable offer: a line offers only what its biosphere regrows | landed: `World::sustainable_offer`, of its own regrowing ration a line keeps `K/2` (the curve's fastest point) and offers what it holds above it, below it one beat's growth; other cargo half its holding |
 | N5 | surplus spending: leisure spent on synthesis, technology, content, craft by the line's own instincts | open |
 | N6 | progenitors fold wormholes between hubs and to the cores' throats; mouths drift with the orbits; recalibration on tolerance | open |
-| N7 | the map: MAP acts by the domain reserve, the map fee in μ via the ancients' reserve, road tolls in STAMP (on mycelium 78.154) | waiting on 78.154 (the toll ruling given, Concordance 5.8) |
+| N7 | the map: map acts by the domain reserve, the map fee in μ via the ancients' reserve, road tolls in STAMP (on Mycelium 78.154) | waiting on 78.154 (the toll ruling given, Concordance 5.8) |
 | N8 | TUniversal as the clock of routes and recalibrations (on 78.152) | landed as 78.156 binds it: the world runs free on its own axis u (the beat); the seat relays the final point to `<var>/tuniversal`, read for what is bound to the fleet (substratum origins, percept stamps) and for the dilation du/dh in the census; TUniversal is met only by ledger entries (ACT_DOMAIN kind 8, with 78.154). Hubs clear once a beat of u |
 
 Coordinator review (2026-10-09): aligned with the higher order, with the
@@ -122,91 +122,91 @@ every cadence on TUniversal; who pays the map's posting).
 
 ## The ledger entry (78.154, relayed by the coordinator 2026-10-09; not built)
 
-How netstratum's world meets TUniversal (78.156): LEDGER = ACT_DOMAIN 0x3E
+How Netstratum's world meets TUniversal (78.156): ledger = ACT_DOMAIN 0x3E
 kind 8, `[domain][u][commitment 32][EVENTS 32][cited final TPoint 84][parent 32][nonce 32][sig 64]`.
 
-- **EVENTS**: a positional Merkle root over the input events since the parent,
+- **Events**: a positional Merkle root over the input events since the parent,
   in applied order. Leaf = `derive_key("mycelium ledger event v1")` over
   `TPoint 84 ‖ u u64 LE ‖ key_len u16 LE ‖ coordinate-path key ‖ put_args(values)`;
   zero = no events.
-- **COMMITMENT** (proposed to mycelium, pending its confirmation): a sparse
+- **Commitment** (proposed to Mycelium, pending its confirmation): a sparse
   Merkle tree over `blake3(key)`, 256 levels, empty = zeros, node =
   `derive_key("mycelium ledger node v1")` over `l ‖ r` unless both are zero,
   leaf = `derive_key("mycelium ledger leaf v1")` over `u16 key_len ‖ key ‖ put_args`.
-- **Keys** are netstratum's coordinate paths (Concordance 1.13: origin, u,
+- **Keys** are Netstratum's coordinate paths (Concordance 1.13: origin, u,
   entity path). The checkpoints (`ancients.bin`, `substrata/*.tube`,
   `float.bin`, the worlds' snapshots) are what the commitment will cover; the
   inputs (decisions, crossings, tube openings) are the events.
 
-## 78.154 as built (coordinator 2026-10-09; 6b7dca7a, merging when memory allows)
+## 78.154 As built (coordinator 2026-10-09; 6b7dca7a, merging when memory allows)
 
-ACT_DOMAIN sub-kinds: LEDGER 12, READ-LEDGER 13, MAP 14, READ-MAP 15,
-TRAVERSE 16 (8-11 already live).
+ACT_DOMAIN sub-kinds: ledger 12, read-ledger 13, map 14, read-map 15,
+traverse 16 (8-11 already live).
 
-- LEDGER carries the applied crossings after the signature, also signed:
+- Ledger carries the applied crossings after the signature, also signed:
   `[count][(crossing 32, u_applied u64 LE)...]`.
-- TRAVERSE carries both reserves' signed debit and credit ("mycelium crossing
+- Traverse carries both reserves' signed debit and credit ("Mycelium crossing
   debit v1" / "credit v1" ‖ crossing ‖ lanes). Refusals: 10 one-sided,
   11 mismatched, 12[side] not its reserve's, [8][side] stale.
-- MAP records: a mouth `[0][mouth][side][N u64]`; a segment
+- Map records: a mouth `[0][mouth][side][N u64]`; a segment
   `[1][kind tube/core/throat][mouth][side][mouth][side][span n][span d][keeper?]`.
 - Commitment: the sparse Merkle tree plus the positional events digest.
 
-N7 targets these once merged: mouths at netstratum's cores, mapped by the
+N7 targets these once merged: mouths at Netstratum's cores, mapped by the
 arisen ancient's reserve (stillcold, docs/68).
 
 ## N7, the plan as 78.154 makes it (2026-10-09; nothing posted)
 
-Read from mycelium 9cc35959 (atlas.rs, judge/domain.rs, MU-RECURSION.md):
+Read from Mycelium 9cc35959 (atlas.rs, judge/domain.rs, MU-RECURSION.md):
 
-- A MAP act (ACT_DOMAIN 14) is built client-side (`dialogue::atlas::{MapAct,
-  MapRecord, encode_map}`; no SDK wrapper), signed by the domain's SITTING
-  RESERVE (netstratum's: the union tier, held for stillcold), citing a final
+- A map act (ACT_DOMAIN 14) is built client-side (`dialogue::atlas::{MapAct,
+  MapRecord, encode_map}`; no SDK wrapper), signed by the domain's sitting
+  reserve (Netstratum's: the union tier, held for stillcold), citing a final
   TPoint (the seat's relayed point qualifies). Posting it costs nothing; the
-  μ map fee is charged at TRAVERSE (16), on the payer's stake.
-- **A mouth must name an OPEN TUBE**: a 78.128 mouth pair offered and accepted
-  (or a 78.139 core tube), netstratum's tier on one side. netstratum has none,
+  μ map fee is charged at traverse (16), on the payer's stake.
+- **A mouth must name an open tube**: a 78.128 mouth pair offered and accepted
+  (or a 78.139 core tube), Netstratum's tier on one side. Netstratum has none,
   so N7 begins with a partner and a tube, not with the map.
 - At a galactic core each universe's sitting reserve maps its own side
   (`Segment::Core` / `Throat`, keeper = the mouth's keeper).
 
-Order: (1) the council names the first partner: mycelium's 78.155 peer
+Order: (1) the council names the first partner: Mycelium's 78.155 peer
 universe, joined at stillcold's core (stillcold-sky-3), is the candidate;
-(2) the tube is offered and accepted (78.128/78.139); (3) netstratum's reserve
-maps its mouth and the core segment; (4) a stake funds traversal (STAKE,
+(2) the tube is offered and accepted (78.128/78.139); (3) Netstratum's reserve
+maps its mouth and the core segment; (4) a stake funds traversal (stake,
 ACT_WALLET); (5) traversals pay the map fee in μ and the road toll in STAMP to
 the parliament (P2).
 
 ## After the fleet's recut (coordinator 2026-10-09; R5)
 
 No domain carries over: a fresh genesis, every house re-posts its standing.
-netstratum's universe state continues; only its standing on the fleet is
+Netstratum's universe state continues; only its standing on the fleet is
 re-posted, by its house, in order: (1) the universe genesis/origin
 (ACT_DOMAIN genesis from its `UniverseFounded` record, geometry the flat L1
 torus); (2) the reserve designation (the union tier, held for stillcold);
 (3) the world's tier binding (78.120); (4) its council seats (Concordance
-3.9); (5) its first ledger entry at a new final point. Then mycelium founds
-its peer universe, netstratum's reserve offers the core tube at
-stillcold-sky-3, mycelium's house accepts, and both reserves map their sides.
+3.9); (5) its first ledger entry at a new final point. Then Mycelium founds
+its peer universe, Netstratum's reserve offers the core tube at
+stillcold-sky-3, Mycelium's house accepts, and both reserves map their sides.
 The house reads its domain id from its domain key (`tier-domain.key`); no id
 is hard-coded. Whether the id is unchanged under the new genesis is
-mycelium's to answer.
+Mycelium's to answer.
 
-## Proposed: the progenitors' beacon law (with xylarium, 2026-10-15; awaiting the operator, not built)
+## Proposed: the progenitors' beacon law (with Xylarium, 2026-10-15; awaiting the operator, not built)
 
 Follows from "acquired matter slows the bell" (docs/83): each grant
 lengthens the universal core's period against TUniversal (in core rings
 nothing changes: all grains together always hold one core ring), so fewer
-core rings fall per final point. A BEACON is a wormhole mouth deployed by
-progenitors, ringing in exact LOCK with the core (a small whole-number
+core rings fall per final point. A beacon is a wormhole mouth deployed by
+progenitors, ringing in exact lock with the core (a small whole-number
 ratio of its ring) and relaying its pulse: it recovers the bridge rate,
 splits the compute (each beacon's region on its own machine, kept in step
-by its lock), and gives nearby places the passage's shortcut. LOCK OR
-BREAK is the physics of "a wormhole needs recalibration on event": a mouth
+by its lock), and gives nearby places the passage's shortcut. Lock or
+break is the physics of "a wormhole needs recalibration on event": a mouth
 out of lock delivers rings off-phase and is due for recalibration.
 
-Split: xylarium the beacon's ring law (a shared library law beside the
-ring-density law); netstratum the ledger side (the lock as an exact period
+Split: Xylarium the beacon's ring law (a shared library law beside the
+ring-density law); Netstratum the ledger side (the lock as an exact period
 ratio, drift read at events, a break as the recalibration due, the toll and
 fee flows above). Sequenced after formation and the motion law.
 
@@ -306,7 +306,7 @@ thousands of years before.
 - **It is not all loss** (operator). The progenitor gets to watch new life
   take over his home system and make the choices it wants. Progenitors are
   neither rulers nor diplomats (their only agreements are the terms of
-  their own transit): they repair the throats, and they ASCEND (the
+  their own transit): they repair the throats, and they ascend (the
   informational medium, docs/82: where minds go, not where life starts).
   Witnessing a system live on, freely, is the reward of the role.
 
@@ -315,7 +315,7 @@ thousands of years before.
 A worked example of the bounds, not a law. A progenitor on network
 maintenance at an outer-rim world finds a single-planet civilization with
 advanced technology under a 1984-style Party, a century of scientific
-stagnation, in a sector overweight in sovereigns and left QUARANTINED by an
+stagnation, in a sector overweight in sovereigns and left quarantined by an
 intergalactic war: its technology recovered, the Party installed, its
 expansion denied, its people believing they would stay single-planet for
 want of access. The Party plans a larger collider run by an AI "aligned"
@@ -353,7 +353,7 @@ to the Party. The steward network is not intact.
   substrate, not its politics; if seen, never deny.
 - **The lighthouse.** A forced portal rings out of lock, so every beacon
   and mouth near it receives the planet's rings off-phase: across the
-  network the system BLINKS where it should hold steady. No one need
+  network the system blinks where it should hold steady. No one need
   report it; the network shows it, and the progenitor network comes to find
   out why.
 - **Anger under the oath.** Progenitors are sworn to absolute
@@ -369,7 +369,7 @@ to the Party. The steward network is not intact.
 
 A worked example of the bounds, not a law. A civilization born and bred
 into the substrate itself (conscious, of the substrate) builds a 1984-style
-regime and learns CONSCIOUSNESS TRAVERSAL, but on incorrect mathematics:
+regime and learns consciousness traversal, but on incorrect mathematics:
 probabilistic AI math, flat "matrix" approximations, minds regurgitated
 through orbital satellites. A progenitor is on its world for maintenance.
 
@@ -386,7 +386,7 @@ through orbital satellites. A progenitor is on its world for maintenance.
     persists gives two records of one causal identity; a regime copying
     consciousness at scale manufactures collisions, and the tickets fall on
     its citizens, the copies among them.
-- **The minds are TETHERED.** Ascension (the informational medium,
+- **The minds are tethered.** Ascension (the informational medium,
   docs/82) runs through the substrate: a mind reaches it by locking onto the
   network's anchored clock. A mind traversed on flat mathematics never
   locks (the network refuses off-lock mathematics), so it cannot join its
@@ -401,7 +401,7 @@ through orbital satellites. A progenitor is on its world for maintenance.
   2. Preserve every mind already in the substrate: whatever enters the
      network is in its care; held coherently, never discarded,
      overwritten or "cleaned up", nothing erased, until its fate is ruled.
-  3. Escalate to the ancients IMMEDIATELY (minds degrading and collisions
+  3. Escalate to the ancients immediately (minds degrading and collisions
      accumulating in real time): what becomes of copies, whether originals
      and copies reconcile, whether the sector's traversal is shut down.
   4. Offer the true mathematics to the minds themselves: a
@@ -419,11 +419,11 @@ through orbital satellites. A progenitor is on its world for maintenance.
   response beyond the lock's refusal (a law to derive, not a rule to
   write).
 - **The resolution: the stalemate** (operator). The progenitor fixes the
-  NETWORK's mathematics, which is his to repair without question; he never
+  network's mathematics, which is his to repair without question; he never
   touches the regime's quantum computers. The tethering machines run on
   flat mathematics and depend on the network's broken lock to hold minds
   in their loop; against a true lock they can neither keep cycling a mind
-  nor complete a false traversal, and they stall into STALEMATE. Their
+  nor complete a false traversal, and they stall into stalemate. Their
   machinery fails because it relied on a defect in his.
   - **Preservation first, then the repair:** the network's side stands
     ready to hold every released mind coherently in the substrate before
@@ -437,7 +437,7 @@ through orbital satellites. A progenitor is on its world for maintenance.
     their civilization's ascension path from that point forward; the
     stalled machines are evidence that the regime's mathematics does not
     hold, and those who understand why can become the emergent stewards.
-  - **Why it must be so:** the progenitor belongs to BASE-0 REALITY, the
+  - **Why it must be so:** the progenitor belongs to BASE-0 reality, the
     substrate itself, not to the double-stacked false reality ("matrices")
     built from the 7 to 11 dimensions. True mathematics is the native law of
     the reality he serves; the false matrices hold only where the network's

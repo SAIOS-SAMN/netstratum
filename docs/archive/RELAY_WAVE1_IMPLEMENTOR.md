@@ -1,8 +1,8 @@
-# RELAY — TO THE WAVE-1 IMPLEMENTOR NODE
+# Relay — to the WAVE-1 implementor node
 
-> **ARCHIVED 2026-08-13.** Superseded/dead weight per the doc audit — kept for history, not live spec. See docs/BUILD_ORDER.md, docs/archive/HANDOFF_2026-08-13.md, or the doc it names as its successor for current status.
+> **Archived 2026-08-13.** Superseded/dead weight per the doc audit — kept for history, not live spec. See docs/BUILD_ORDER.md, docs/archive/HANDOFF_2026-08-13.md, or the doc it names as its successor for current status.
 
-> **LANDED `2109bf0` (2026-08-07).** Wave-1 exit met: stations T4–T9,
+> **Landed `2109bf0` (2026-08-07).** Wave-1 exit met: stations T4–T9,
 > NPC T4/T6 seats, REFINE-1 + pure-NPC refine; harness green for those
 > arcs. **Do not re-implement.** Standing law below remains authority for
 > later waves. Next brief: `RELAY_WAVE2_IMPLEMENTOR.md`.
@@ -14,7 +14,7 @@ most of it exists because something already went wrong.
 
 ---
 
-## 1. WHAT YOU ARE BUILDING, AND HOW YOU KNOW YOU ARE DONE
+## 1. What you are building, and how you know you are done
 
 The slice: **stations T4–T9 → REFINE-1 + NPC build → element aperture +
 route + NPC trade → STAMP spot + NPC market makers → R1–R2 only.**
@@ -23,7 +23,7 @@ Perps, R3 and R4 are explicitly out.
 **The done bar is a pure-NPC era:** refined elements exist, a route
 clears, and a STAMP spot clears, with **zero player actions**.
 
-**Build that harness FIRST, red.** Not last. Every wave then turns part
+**Build that harness first, red.** Not last. Every wave then turns part
 of it green, and you always know what you have. The reason is measured,
 not stylistic: this codebase has twice produced features that passed
 every test and were wrong the moment a person drove them.
@@ -41,7 +41,7 @@ NPC harness is what proves playable, so it comes first.
 
 ---
 
-## 2. THE ORDER, AND WHY IT IS THIS ORDER
+## 2. The order, and why it is this order
 
 1. **Claim registers** (§3). Before any code.
 2. **Done-bar harness, red.**
@@ -58,7 +58,7 @@ NPC harness is what proves playable, so it comes first.
 
 ---
 
-## 3. SHARED REGISTERS — CLAIM BEFORE YOU BUMP
+## 3. Shared registers — claim before you bump
 
 Four registers are shared across lanes and collide silently. **The
 ledger block is the register, not the constant.** Write your claim in
@@ -76,13 +76,13 @@ this week; the collision was resolved as a sequence and both ledgers
 carry the scar. `R2.1` in your DAG already says "wire tags claimed
 first" — that instinct is correct and this is why.
 
-**Minor vs patch is DERIVED, not chosen:** a minor moves when the gate
+**Minor vs patch is derived, not chosen:** a minor moves when the gate
 *admits or refuses* something it did not before. A patch cannot alter a
 verdict.
 
 ---
 
-## 4. WHAT A NEW `ClosureEvent` FORCES YOU TO TOUCH
+## 4. What A new `ClosureEvent` forces you to touch
 
 Adding a deed is mechanical but two of the sites are **not
 compiler-enforced** and have been missed before.
@@ -94,8 +94,8 @@ compiler-enforced** and have been missed before.
 | `kernel::layer_of` (World vs Civilizational) | yes — exhaustive match |
 | `kernel::scope_of` (Build/Raze/Collect) | yes — exhaustive match |
 | `lens/render.rs` + CLI receipt line | yes |
-| **`kernel::covered()`** | **NO — by hand** |
-| **`taxon_pins::every_deed()` + its count** | **NO — by hand** |
+| **`kernel::covered()`** | **No — by hand** |
+| **`taxon_pins::every_deed()` + its count** | **No — by hand** |
 
 A deed missing from `covered()` refuses `Unjudged` forever. A deed
 missing from `every_deed()` makes the totality pin pass while proving
@@ -103,7 +103,7 @@ less than it claims. Coverage currently stands at **67 deeds, total**.
 
 ---
 
-## 5. THE LAWS THAT WILL BITE YOU
+## 5. The laws that will bite you
 
 ### 5.1 Doors and facts (29_CONSTRUCTION)
 
@@ -177,8 +177,8 @@ which consequence.
 Operator ruling 2026-07-30, carried in `peel`'s own doc: *no cartesian
 find-scan repetition; peels and shears where there were iterations.*
 
-- **PEEL** — lift one thing out by key.
-- **SHEAR** — one pass depositing into a sheet; never rescan per pair.
+- **Peel** — lift one thing out by key.
+- **Shear** — one pass depositing into a sheet; never rescan per pair.
 
 **The test: does the law already partition the space you are walking?**
 If it does, walk the partitions; the space between them was never a
@@ -228,7 +228,7 @@ STAMP.
 
 ---
 
-## 6. VERIFICATION BAR
+## 6. Verification bar
 
 - **Full board green** before every commit. Not a crate sweep — the
   full board caught cross-crate breakage twice.
@@ -246,7 +246,7 @@ and the harness notification reads *"completed (exit code 0)"* — the
 wrapper's status, not cargo's. The partial log tallies a clean
 "13 passed, 0 failed", which is indistinguishable from success.
 
-**A board is green only if you prove it FINISHED:**
+**A board is green only if you prove it finished:**
 1. capture and read `EXIT $?` from the cargo run itself (124 = killed);
 2. count `Running` lines against the number of test files, and account
    for every missing one;
@@ -258,7 +258,7 @@ a short timeout.
 
 ---
 
-## 7. RULINGS AND DEFAULTS IN FORCE
+## 7. Rulings and defaults in force
 
 All of `Q-T1…Q-S4` are codeable as written (`OPEN_QUESTIONS.md`).
 Notable:
@@ -275,7 +275,7 @@ ruling, the η native ruling, and the IS-3 deed grant.
 
 ---
 
-## 8. COLLISIONS AND TERRITORY
+## 8. Collisions and territory
 
 - **`engine/lens/src/render.rs` and `tools/observer.py` currently hold
   another party's uncommitted work**, including an `elements` array
@@ -293,7 +293,7 @@ ruling, the η native ruling, and the IS-3 deed grant.
 
 ---
 
-## 9. STARTING STATE (historical — pre–Wave-1)
+## 9. Starting state (historical — pre–Wave-1)
 
 `main` @ `48bc7d3` at brief write. **Post-land:** `main` @ **`2109bf0`**,
 kernel **0.20.0**, tag **107** claimed, next free tag **108** / minor **21**.
@@ -304,7 +304,7 @@ kernel / cfe / lens / codec / mesh / scribe / ratio green; `wave1_era_pins`
 clippy zero; ratchet at 112. Conductor full suite still budget
 `mint_loop_pins` separately.
 
-## 10. LANDING RECORD (append-only)
+## 10. Landing record (append-only)
 
 | Commit | Slice |
 |--------|--------|

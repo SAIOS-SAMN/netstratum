@@ -9,7 +9,7 @@ terms. Facts were read from the code on 2026-10-13.
 - **Every star belongs to one line.** The starchart (`worlds/starchart.card`)
   holds one position per world, 101 worlds, and every world is a living or
   dead line's own star.
-- **Expansion stays home.** It charters new orbs around the line's OWN star
+- **Expansion stays home.** It charters new orbs around the line's own star
   (`invest_expansion`, `conductor/src/lib.rs:3007`), capped at 4
   (`SYSTEM_CAP`, a constant).
 - **So mass is partitioned from genesis.** No line can reach, settle or
@@ -24,7 +24,7 @@ needs shared space first.
 
 - **Derivation.** The bounce distributes elements into stars and planets
   (docs/76); civilizations arise only where a planet's physics allows life
-  (genesis). So most stars should hold NO line: systems with planets and veins
+  (genesis). So most stars should hold no line: systems with planets and veins
   and no people.
 - **Proposal.** The starfield holds stars without lines, sited by the same
   distribution that sites the worlds. A line charts orbs around any star
@@ -48,7 +48,7 @@ needs shared space first.
 
 ## 3. Contested mass (needs 1)
 
-A system is CONTESTED when two or more lines hold or work its orbs. Contest is
+A system is contested when two or more lines hold or work its orbs. Contest is
 where disputes start and where a realm's steward has something to rule; war
 (the treaty physics' wall) is one of its outcomes. Read, never declared.
 
@@ -65,7 +65,7 @@ where disputes start and where a realm's steward has something to rule; war
 ## 5. Time varying with depth in a core's well (superseded by docs/80)
 
 **Corrected 2026-10-13.**
-- A clock deep in a well ticks SLOWER than one far from it, not faster.
+- A clock deep in a well ticks slower than one far from it, not faster.
 - The ancients live fewer proper ticks per unit of cosmic time, and receive
   the outer universe's signals blueshifted and compressed: the narrative's
   "temporal waves" (docs/76). The rim ages faster than the core.
@@ -87,7 +87,7 @@ where disputes start and where a realm's steward has something to rule; war
 
 1. **Gate payback (4): a reading.** Per gate: cost, earned, payback, logged
    at each bounce.
-   - Done-when: a GATE ACCOUNT line per gate, no reading → a reading.
+   - Done-when: a gate account line per gate, no reading → a reading.
    - Witness: the builders' STAMP receipts.
 2. **Shared space (1)**, on the operator's ruling.
    - Done-when: stars without lines 0 → > 0; orbs charted around stars not a

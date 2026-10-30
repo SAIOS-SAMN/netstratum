@@ -1,6 +1,6 @@
-# 35 — ORBIT DYNAMO · ESTATE REAL ESTATE · EXPLORATION ECONOMICS
+# 35 — Orbit dynamo · estate real estate · exploration economics
 
-**Status:** LANDING — orbit periods on main (`500be46`); estate ladder
+**Status:** landing — orbit periods on main (`500be46`); estate ladder
 extended for orbital + stratum holdings (this session).  
 **Authority:** `05_THERMAL_BALANCE`, `45_ALMANAC` (orbit grain),
 `24_FORM` §2j (magnets / field, not collision), `29_CONSTRUCTION` C1
@@ -156,7 +156,7 @@ chart receipt per orb.
 | `estate parcels` | derived free/monetary |
 | `appraise estate\|planet\|building\|orbital\|stratum` | AppraisalStruck |
 | `convey` | ParcelConveyed (monetary) |
-| desk TRADE | D_orbit under differential periods |
+| desk trade | D_orbit under differential periods |
 
 ---
 

@@ -1,18 +1,18 @@
-# N6 DIRECTIVES — the mesh working orders (2026-07-30, operator-ruled)
+# N6 Directives — the mesh working orders (2026-07-30, operator-ruled)
 
-> **ARCHIVED 2026-08-13.** Superseded/dead weight per the doc audit — kept for history, not live spec. See docs/BUILD_ORDER.md, docs/archive/HANDOFF_2026-08-13.md, or the doc it names as its successor for current status.
+> **Archived 2026-08-13.** Superseded/dead weight per the doc audit — kept for history, not live spec. See docs/BUILD_ORDER.md, docs/archive/HANDOFF_2026-08-13.md, or the doc it names as its successor for current status.
 
 Plain language. Scope: the N6 landing (NS-5 MESH, first slice MESH-1a).
-Supersedes nothing; folds into NS-5 and PICKUP when N6 lands whole.
+Supersedes nothing; folds into NS-5 and Pickup when N6 lands whole.
 
-**HISTORY — this document's equations are DATED, not law** (annotated
+**History — this document's equations are dated, not law** (annotated
 2026-08-01; text unedited per the quoted-never-rewritten rule). Three
-later rulings overtook it: THE PROPORTIONAL LAW (2026-07-31) struck
+later rulings overtook it: the proportional law (2026-07-31) struck
 `Σ R²` for `Σ |R|`; the zero-point correction (2026-08-01) struck
-reading `C(Δ) = 0` as sameness — zero means the COCYCLE CONDITION
+reading `C(Δ) = 0` as sameness — zero means the cocycle condition
 holds, and an irreducible H¹ core survives it untouched; and MESH-1d
-renamed the equal-spine zero THE REPLICATION WITNESS, reserving
-"consilience" for inputs that COULD disagree. Standing forms:
+renamed the equal-spine zero the replication witness, reserving
+"consilience" for inputs that could disagree. Standing forms:
 `docs/EQUATIONS.md` C2/C3.
 
 ## Review verdict
@@ -33,11 +33,11 @@ The NS-5 stub is verified against the tree 2026-07-30:
   already walks by 3-of-3 unanimity (`vrp.rs`); consilience is
   unanimous or refused, structurally.
 - The predecessor lore correction stands (BUILD_ORDER §1a pin): coherence
-  is SUM-OF-SQUARES in code, not L1; the reference vector measures
-  C = 24, not 8. NS-5's vectors come from OUR code, never the
+  is sum-of-squares in code, not L1; the reference vector measures
+  C = 24, not 8. NS-5's vectors come from our code, never the
   predecessor's prose.
 - Tag registry: the next free tag is **64** (dop.rs header, the one
-  authority — PICKUP §4's "next is 59" note is stale; 60–63 landed as
+  authority — Pickup §4's "next is 59" note is stale; 60–63 landed as
   GaugeShiftedAt, GenesisSealed, WantStruck, WantRelieved). NS-2's
   56–58 set the precedent NS-5 follows: protocol records in the
   protocol's own framing, never world-chronicle events.
@@ -48,7 +48,7 @@ The NS-5 stub is verified against the tree 2026-07-30:
   carries `Delta`, `coherence_functional`, and the residual iterator,
   exact throughout.
 - `rfa-core` depends on `cfe` (the ratio carrier), so the mesh
-  mechanic CANNOT live in `cfe` without a cycle. It is a NEW crate,
+  mechanic cannot live in `cfe` without a cycle. It is a new crate,
   `engine/mesh`, depending on both — one module per protocol seam.
 
 ## Operator rulings (2026-07-30)
@@ -56,19 +56,19 @@ The NS-5 stub is verified against the tree 2026-07-30:
 1. **Identity: blake3/provenance only at N6.** No ed25519, no key-pair
    dependencies enter the wire registry at MESH-1a.
    Consilience-of-independent-computation over exact-rational state
-   reduction IS the claim of N6. Signature wrappers wait for N7, where
+   reduction is the claim of N6. Signature wrappers wait for N7, where
    external cryptographic identity enters the protocol.
 2. **Transport: file exchange first.** A dumb reader exchanging
    `chronicle.tlv` segments between directories satisfies SEAL C whole
    and lets 100% of the consilience logic and vectors witness in pure
    Rust — no sockets, no flakiness. TCP is a later, logic-free adapter.
 3. **Scope: one world.** MESH-1a is two independent engine instances
-   converging on ONE world's chronicle. Universal multi-world
+   converging on one world's chronicle. Universal multi-world
    aggregation belongs to MESH-1c / N7.
 4. **Partition (2026-07-31): the spine stalls; the escape is an open
    fork.** Authority never moves without a seal — an unreachable
-   writer leaves its spine read-only (writes refuse USURPED; reads
-   and consilience continue). A stranded successor continues ONLY on
+   writer leaves its spine read-only (writes refuse usurped; reads
+   and consilience continue). A stranded successor continues only on
    an explicit Diverged branch (tags 43/44, the landed vocabulary);
    healing measures the branches — exact zero confluences, nonzero
    stands preserved as typed divergence for the annex path. No votes,
@@ -93,13 +93,13 @@ with the residual list carried whole (N4 directive 5: C is the summary
 scalar, never the payload). Arity ≥ 2 generalizes: n nodes, one shared
 position claimed pairwise; unanimity is the geometry, not a vote.
 
-**CORRECTED 2026-08-02 (`22_CONTAINMENT` §2n).** The formula above read
-`ΣR²`; the code sums ABSOLUTE VALUES (`delta.rs:193`, `c += r.abs()`)
-and THE PROPORTIONAL LAW bars squares as aggregators of difference.
+**Corrected 2026-08-02 (`22_CONTAINMENT` §2n).** The formula above read
+`ΣR²`; the code sums absolute values (`delta.rs:193`, `c += r.abs()`)
+and the proportional law bars squares as aggregators of difference.
 The multiplier 6 and the zero-iff claim are unaffected — `Σ|R| = 0` iff
 every residual is zero exactly as `ΣR²` would be. The surrounding
 argument therefore stands; only the aggregator was misstated. Note
-also that `C` is LENS-ONLY and gates nothing, which the parenthetical
+also that `C` is lens-only and gates nothing, which the parenthetical
 ("C is the summary scalar, never the payload") already anticipated.
 
 ## Directives
@@ -116,7 +116,7 @@ also that `C` is LENS-ONLY and gates nothing, which the parenthetical
 3. **Tags 64–66 claimed** (dop.rs header, first commit, before code):
    64 mesh head announcement · 65 consilience receipt · 66 mesh
    refusal. All three are NS-5 protocol records in NS-5's own framing —
-   they NEVER enter the world chronicle. The measurement is a read;
+   they never enter the world chronicle. The measurement is a read;
    no world state changes; the lens law in mesh form.
 4. **The mechanic.** `engine/mesh`: `receive(bytes, side)` — the
    ingestion door (frame parse + chain verification; a tampered file
@@ -133,11 +133,11 @@ also that `C` is LENS-ONLY and gates nothing, which the parenthetical
    refuses with its missing range, and the tail exchange cures it;
    (d) divergent histories refuse with the fork sequence and the exact
    residual list. Plus the codec witness backing §2.
-7. **After landing.** Refresh the PICKUP §4 registry note (64–66
-   claimed, next free 67) and one lane line. Nothing else in PICKUP.
+7. **After landing.** Refresh the Pickup §4 registry note (64–66
+   claimed, next free 67) and one lane line. Nothing else in Pickup.
 
 ## Flagged, out of scope
 
 - `engine/rfa-core/Cargo.toml`'s description contains a set-letter
-  glyph ("exact ℚ") — a CHARTER §8 terminology-law violation predating
+  glyph ("exact ℚ") — a Charter §8 terminology-law violation predating
   this landing. One-line cure, its own commit, not MESH-1a's.

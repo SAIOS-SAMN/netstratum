@@ -1,7 +1,7 @@
 # N-I8 — the first shared word
 
-**Lane:** intelligence port · **Status: LANDED `ab01400` — Pin C green**
-**Charter:** [`53_INTELLIGENCE_PORT.md`](53_INTELLIGENCE_PORT.md) D3 Pin C · D1 (`sun / vocabulary::fold`)
+**Lane:** intelligence port · **Status: landed `ab01400` — Pin C green**
+**Charter:** [`53_INTELLIGENCE_PORT.md`](../53_INTELLIGENCE_PORT.md) D3 Pin C · D1 (`sun / vocabulary::fold`)
 **Companions:** N-I-VESSEL (per-vessel basin, seated) · N-I7 (look priced, seated) · `solver::mint::consider` · `vocabulary::fold`
 
 *Markdown is instruction only. The engine reads the deposits and the fold.*
@@ -20,26 +20,26 @@ mints; the second deposit is where culture starts.
 
 | Refused | Why |
 |---|---|
-| `CONFIRMS_TO_MINT = 3` digests as consilience | Three digests from ONE automaton is one vantage agreeing with itself, not two minds converging. This cut RETIRES that as the mint condition. |
-| Individuating the whole population | Seed exactly ONE sibling office (a second cognitive vessel). Wiring every mouth as a thinker stays a later cut. |
-| Copying crystals between basins | Consilience is TWO INDEPENDENT closures of the same orbit — never A's crystal pasted into B. Each vessel reaches the orbit from its own basin, or it does not count. |
-| A chat layer / hearing a word in another frame | N-I10. Never a message score. Culture starts at the second DEPOSIT, not a dialogue. |
-| Un-ignoring the cleave / refine era pins | They wait on SURPLUS and RUNG, not on fold. Leave them ignored. |
-| Re-pricing look or mint | The look still pays `observe_price` (N-I7); the word mint still pays `mint_cost`. Fold changes WHO must close, not the bill. |
-| Touching `pre_reach` | It stays the FREE REDUCE against the sun (the folded vocabulary). Unchanged. |
-| `vocabulary::fold` rewrite | Fold still reads the `SolverWordMinted` receipt and crystallizes to the sun. This cut changes when that receipt is EMITTED, not how it folds. |
+| `CONFIRMS_TO_MINT = 3` digests as consilience | Three digests from one automaton is one vantage agreeing with itself, not two minds converging. This cut retires that as the mint condition. |
+| Individuating the whole population | Seed exactly one sibling office (a second cognitive vessel). Wiring every mouth as a thinker stays a later cut. |
+| Copying crystals between basins | Consilience is two independent closures of the same orbit — never A's crystal pasted into B. Each vessel reaches the orbit from its own basin, or it does not count. |
+| A chat layer / hearing a word in another frame | N-I10. Never a message score. Culture starts at the second deposit, not a dialogue. |
+| Un-ignoring the cleave / refine era pins | They wait on surplus and rung, not on fold. Leave them ignored. |
+| Re-pricing look or mint | The look still pays `observe_price` (N-I7); the word mint still pays `mint_cost`. Fold changes who must close, not the bill. |
+| Touching `pre_reach` | It stays the free reduce against the sun (the folded vocabulary). Unchanged. |
+| `vocabulary::fold` rewrite | Fold still reads the `SolverWordMinted` receipt and crystallizes to the sun. This cut changes when that receipt is emitted, not how it folds. |
 
 ---
 
 ## 2 · Why: one vantage is not consilience
 
 Today a word mints when `word_pending` collects `CONFIRMS_TO_MINT = 3`
-distinct task digests — but all three are the SAME automaton solving three
+distinct task digests — but all three are the same automaton solving three
 forged puzzles. That is one mind confirming itself; a coincidence repeated
 is still a coincidence (`iae::think` already refuses a rule from one pair —
-this is the same law one level up). **Pin C is consilience:** two DISTINCT
-vessels, each from its OWN basin (N-I-VESSEL made the basins separate),
-independently close the SAME orbit. That convergence is the first thing a
+this is the same law one level up). **Pin C is consilience:** two distinct
+vessels, each from its own basin (N-I-VESSEL made the basins separate),
+independently close the same orbit. That convergence is the first thing a
 line holds that no single perspective invented — the seed of a shared
 vocabulary, and therefore of culture. A word two vessels fold is the atom
 of a society; one vessel's private residual is not.
@@ -59,10 +59,10 @@ of a society; one vessel's private residual is not.
   vessel_ids**. `CONFIRMS_TO_MINT = 3` (one-vantage digest count) is retired
   as the mint condition (a per-vessel dedup on digest still prevents one
   vessel double-counting one puzzle).
-- **Seed one sibling office.** Each line registers ONE sibling cognitive
+- **Seed one sibling office.** Each line registers one sibling cognitive
   vessel (`register_agent`, the same door that seats the steward), so every
-  line has two thinkers and consilience is reachable. It thinks on its OWN
-  basin (N-I-VESSEL) and pays its OWN look (N-I7). Not the whole population
+  line has two thinkers and consilience is reachable. It thinks on its own
+  basin (N-I-VESSEL) and pays its own look (N-I7). Not the whole population
   — one sibling.
 - **Same mouth twice does not mint (C−).** One vessel closing the same orbit
   across many beats is still one distinct vessel_id — it never reaches two,
@@ -91,7 +91,7 @@ Glued + verify_work → orbit = consider(program, library, standing)
                           mint_solver_word_as(automaton, orbit, bytes, cited)   // the deed, unchanged
 ```
 
-The mint DEED (`SolverWordMinted`, cited = the digests) is unchanged — only
+The mint deed (`SolverWordMinted`, cited = the digests) is unchanged — only
 its firing condition moved from three digests to two vessels. `mint_cost`
 still bills leisure at the mint; `vocabulary::fold` still reads the receipt
 and crystallizes the word to the sun; `pre_reach` still reads the sun for
@@ -108,7 +108,7 @@ workspace; the receipt it emits is the committed truth.
   no schema bump.
 - **`word_pending` stays non-committed workspace** (a `Vec` on the polity,
   rebuilt each process from the chronicle's own receipts), now carrying
-  vessel_ids. It never enters the digest; the MINT it triggers is the deed
+  vessel_ids. It never enters the digest; the mint it triggers is the deed
   that does.
 - **The mint receipt is unchanged.** `SolverWordMinted { orbit, expansion,
   cited }` — `seal_b_era_pins` / `mint_loop_pins` stay green.
@@ -124,9 +124,9 @@ workspace; the receipt it emits is the committed truth.
 | `engine/conductor/src/lib.rs` | `word_pending` carries `(vessel_id, digest)`; seed one sibling office at genesis (`register_agent`); each cognitive vessel thinks its own basin + pays its own look + deposits; mint at ≥2 distinct vessel_ids |
 | `engine/solver/src/mint.rs` | `consider` unchanged (still reads a program → orbit); `CONFIRMS_TO_MINT` retires as the mint gate (or becomes the per-vessel dedup floor) |
 | `engine/conductor/tests/` | Pin C (two offices, same orbit → `VocabularyMinted`) · C− (one vessel, same orbit twice → no mint) |
-| `engine/cfe/src/vocabulary.rs` | UNCHANGED — `fold` / `solver_words` still read `SolverWordMinted` |
-| `engine/iae` · `engine/solver` (organ) | UNCHANGED — consilience is a conductor tally, not a new reduce |
-| cleave / refine era pins | STAY IGNORED — they wait on surplus and rung, not fold |
+| `engine/cfe/src/vocabulary.rs` | Unchanged — `fold` / `solver_words` still read `SolverWordMinted` |
+| `engine/iae` · `engine/solver` (organ) | Unchanged — consilience is a conductor tally, not a new reduce |
+| cleave / refine era pins | Stay ignored — they wait on surplus and rung, not fold |
 
 ---
 
@@ -135,8 +135,8 @@ workspace; the receipt it emits is the committed truth.
 | Pin | Law |
 |---|---|
 | **C** | two distinct vessels each independently close the same orbit → one `SolverWordMinted` receipt; `vocabulary::fold` reads it into the sun. |
-| **C−** | one vessel closing the same orbit twice (or thrice) mints NOTHING — one distinct vessel_id never reaches two. |
-| **Independent** | the second closure is a vessel draining its OWN basin, not reading the first's crystal. No cross-basin copy. |
+| **C−** | one vessel closing the same orbit twice (or thrice) mints nothing — one distinct vessel_id never reaches two. |
+| **Independent** | the second closure is a vessel draining its own basin, not reading the first's crystal. No cross-basin copy. |
 | **Fold reads the receipt** | `vocabulary::fold` / `solver_words` unchanged; the sun grows only from the minted deed. |
 | **Look + mint still priced** | each vessel's look pays `observe_price` (N-I7); the mint pays `mint_cost`. |
 | **SEAL-B** | the sibling is a chronicled `EntityRegistered`; `seal_b_era_pins` green; `Entity` schema untouched. |

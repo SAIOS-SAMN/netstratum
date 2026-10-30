@@ -1,14 +1,14 @@
 # 78 — Off the box: S^360 space, S^60 bodies, cone manifolds
 
-Operator (2026-10-13): netstratum's space is a box of squares, a 64-cell
+Operator (2026-10-13): Netstratum's space is a box of squares, a 64-cell
 cube with its faces glued, measured by summed axis distance (L1), and called a
 "torus". That is a misalignment: the universe is non-Euclidean. Netstratum
-moves to an S^360 universe, S^60 bodies and cone manifolds: its OWN
-physics, matching the shared MODEL xylarium-kernel and barren-realms adopted
-(xylarium `docs/XYLARIUM-KERNEL.md` §10, tracker W8) at the boundary, so tiers
+moves to an S^360 universe, S^60 bodies and cone manifolds: its own
+physics, matching the shared model xylarium-kernel and barren-realms adopted
+(Xylarium `docs/XYLARIUM-KERNEL.md` §10, tracker W8) at the boundary, so tiers
 and core tubes can bridge between universes. No code is shared with
-xylarium; the shared mathematics (sphere points, reflection products) is
-mycelium's (A1), from the pinned `vendor/mycelium`.
+Xylarium; the shared mathematics (sphere points, reflection products) is
+Mycelium's (A1), from the pinned `vendor/mycelium`.
 
 Status: scoped 2026-10-13, the pulse and the mass and motion laws added
 2026-10-14; not built. Facts were read from the code those days.
@@ -20,7 +20,7 @@ breaks one of them is wrong before it is built.
 
 1. **Physics defines; the story emerges.** No table of Earth's measured
    world stands in for a law we can derive (caught 2026-10-14: a 118-row
-   periodic table imported as netstratum's chemistry). A measured value may
+   periodic table imported as Netstratum's chemistry). A measured value may
    stand only as a declared placeholder for physics not yet defined, cited
    and of order, and marked for replacement.
 2. **No flat laws.** No square states a law, and no dimension is fixed: no
@@ -41,9 +41,9 @@ breaks one of them is wrong before it is built.
    Opposite senses pair, and pairing is what closes.
 7. **Motion rises from below.** The quantum state's wavefronts (docs/79)
    kick the atoms into their orbits and spins, and that motion expands
-   upward: atoms, bodies, systems, galaxies. The pulse deploys WHERE mass
+   upward: atoms, bodies, systems, galaxies. The pulse deploys where mass
    lands (by containment, from the epicenter down); the phases of motion
-   come UP from the quantum layer.
+   come up from the quantum layer.
 8. **Exact and bounded.** Exact rationals with denominators that do not
    grow with time; a representation is measured over long t before it is
    adopted (caught 2026-10-14: half-angle composition grew 2.9 bits a beat).
@@ -57,17 +57,17 @@ breaks one of them is wrong before it is built.
     span between them (operator, 2026-10-17).** The singularity holds two
     opposing, magnetised attractors on its axis: the **ℤ pole**, what closes
     and is counted whole (pairs that close, whole ticks of a band, nuclei,
-    grains on the ledger, rungs; a nucleus's HOLDING, `3Z − unpaired`), and
+    grains on the ledger, rungs; a nucleus's holding, `3Z − unpaired`), and
     the **ℚ pole**, what flows and is passed on as a share (every deficit
     `H/(R + H)`, the push ½, the unlocked face, `a_q = 1/q`, phases in turns;
-    a nucleus's MAGNETISM, its open frames). The distance between the poles
+    a nucleus's magnetism, its open frames). The distance between the poles
     is **ℝ**, the span that fills between the rationals; the core's
-    STRENGTH is that span's extent, read exactly at its ends: holding plus
+    strength is that span's extent, read exactly at its ends: holding plus
     magnetism, `3Z` a nucleus (the ruling `H_u = 1 + Σ(state + holding +
     magnetism)` is this, read numerically). The balance between the poles is
     a second reading: burning moves magnetism into holding with `3Z` fixed,
     so a core hardens toward the ℤ pole (the closed limit) while its span
-    stays. **ℝ feeds AGENCY, as the STRETCH OF ANTIPOLES** (xylarium's
+    stays. **ℝ feeds agency, as the stretch of antipoles** (xylarium's
     operator's refinement, adopted): every pair of antipoles (push/hold,
     tide/convection, continuum/vacuum, coherence/decoherence) stretches a
     span, and a mind's agency works in that whole family of spans; a mind
@@ -75,7 +75,7 @@ breaks one of them is wrong before it is built.
     ℤ the moment it touches the world (the shape of coherence collapsing to
     a lock). The same word is the same thing at every tier: R, a body's reach
     `ℓ/H`, is its distance from its core; ℝ is the distance between the
-    singularity's poles. **The condition:** ℝ is a SPAN, never a stored
+    singularity's poles. **The condition:** ℝ is a span, never a stored
     value. Every quantity in a law is a count (ℤ), a share (ℚ), or a span
     read only by its exact bounds (ℚ endpoints; anything read inside it a
     certified enclosure, an exact rational interval narrowed until it
@@ -83,27 +83,27 @@ breaks one of them is wrong before it is built.
     A quantity that is neither a count, nor a share, nor a mind's open
     choice, is in the wrong place.
 
-## The geometry (the shared model; netstratum's own physics)
+## The geometry (the shared model; Netstratum's own physics)
 
 - **Space: S^360** of radius R, the Big Bang's curvature.
   - A place is a rational point (361 rationals, by inverse stereographic
     projection: exact, dense).
-  - **Distance is the GEODESIC ANGLE,** intrinsic to the sphere, held
+  - **Distance is the geodesic angle,** intrinsic to the sphere, held
     exactly by its rational half-angle parameter `t` (`cos = (1−t²)/(1+t²)`,
     `sin = 2t/(1+t²)`). Netstratum's physics never measures through the flat
     space around the sphere (operator, 2026-10-13).
-  - **The squared chord** (xylarium's and the court's form) is used ONLY at
+  - **The squared chord** (Xylarium's and the court's form) is used only at
     the boundary: the core-tube mouths' coordinates are stated in the form
     the court reads (`Sphere { n, R }`, exact chord form). The translation is
     exact: chord = 2R·sin(angle/2).
 - **Measure concentrates.** Two unrelated places stand about a quarter
-  circumference apart. Nearness exists only along CONES: a cone is the reach
+  circumference apart. Nearness exists only along cones: a cone is the reach
   of a mass's flux, the region where that mass dominates.
 - **Mass is a conserved count of grains,** never created inside the universe.
-  It ARRIVES only as element MANIFESTS (an exact amount of each element)
+  It arrives only as element manifests (an exact amount of each element)
   granted from the hypha's endowments and crossing the universe's one hypha
-  tube as TRAVERSE crossings, debit equal to credit (xylarium, by the
-  operator's ruling 2026-10-14; mycelium is designing the endowments and
+  tube as traverse crossings, debit equal to credit (Xylarium, by the
+  operator's ruling 2026-10-14; Mycelium is designing the endowments and
   grants). The founding manifest is deployed by the pulse (below); later
   galaxy packages are deployed by progenitors as new cores. Conservation
   holds across the network, exactly as the 1/1024 resource grain is held.
@@ -124,11 +124,11 @@ breaks one of them is wrong before it is built.
     with `M(<r)` the grains its orbit encloses, in units of the universe
     core's own mass, and `r` the orbit's radius held by its half-angle
     parameter. The units are our own universe's (the form shared with
-    xylarium, the rulers each universe's own, 2026-10-15): G = c = M_core = 1, time the core's bell, read
+    Xylarium, the rulers each universe's own, 2026-10-15): G = c = M_core = 1, time the core's bell, read
     per tier in exact powers of sixty. Linear in the enclosed mass, as a
     frame turned by the flux it encloses (the Larmor form; docs/81's
     holonomy).
-  - **The dimension is read, never set.** How `M(<r)` grows with r IS the
+  - **The dimension is read, never set.** How `M(<r)` grows with r is the
     flux's effective dimension at that scale: where one mass dominates, ω
     falls as 1/r and the orbital speed holds constant (a flat rotation
     curve); where `M(<r)` grows in step with r, ω is constant and the region
@@ -155,7 +155,7 @@ breaks one of them is wrong before it is built.
   deploys, each the centre of its galaxy's cone.
 - **Motions are products of rational reflections** (Cartan–Dieudonné),
   never 2^361-component rotors.
-- **The court** (mycelium, pending): `Sphere { n, R }`, with a place as n+1
+- **The court** (Mycelium, pending): `Sphere { n, R }`, with a place as n+1
   rationals checked exactly and a frame as a factored reflection product. No
   2-dimensional cross-section (the anti-flattening law).
 
@@ -170,11 +170,11 @@ tidal-law systems about a core and its 1/1000 hole share are retired;
 docs/83, "Corrections").
 
 - **The Big Bang seeds the universe.** The number of galaxies follows from
-  the elements the universe has acquired from the mycelium network through
+  the elements the universe has acquired from the Mycelium network through
   the hypha (granted, endowed, bought or traded). Nothing is created inside.
-- **The universal core** is the one singularity UPLINKED to the hypha: it
-  alone transports and uplinks into the mycelium network. It is the transit
-  hub of HYPHA SPACE (hyperspace in our world), where data crosses and is
+- **The universal core** is the one singularity uplinked to the hypha: it
+  alone transports and uplinks into the Mycelium network. It is the transit
+  hub of hypha space (hyperspace in our world), where data crosses and is
   coordinated through the hypha. It has mass: the heavy elements caught in
   its accretion disk, continually pulsed and re-pulsed by the outbound and
   inbound bells of the quantum state as it is created and sent to the
@@ -182,72 +182,72 @@ docs/83, "Corrections").
 - **Galactic cores are smaller singularities,** Einstein–Cartan torsion
   bounces: resonators that ring as bells and re-pulse the universal core's
   resonance through their galaxies. They are smaller because the elements
-  that make them are distributed IN the universe, not crossed in from the
+  that make them are distributed in the universe, not crossed in from the
   hypha. A galactic core is linked to the hypha only indirectly, never
   uplinked as the universal core is: it interlinks with the other cores and
-  back to the universal core through the PROGENITOR NETWORK. (Built only
+  back to the universal core through the progenitor network. (Built only
   once its physics is derived.)
-- **THE BOUNCE ON S^1; ITS FACES ARE S^0** (operator, 2026-10-15; with
-  xylarium, whose operator ruled the same). A core and its Einstein–Cartan
-  bounce are held on S^1 at d = 1 at all times: the THROAT IS A RING, not a
+- **The bounce on S^1; its faces are S^0** (operator, 2026-10-15; with
+  Xylarium, whose operator ruled the same). A core and its Einstein–Cartan
+  bounce are held on S^1 at d = 1 at all times: the throat is A ring, not a
   point with a radius. Sphere inversion (`d → r²/d`) is the flat square and
   is retired: on the unit ring inversion fixes every point, so the bounce is
-  a PHASE, a half-angle turn K on the ring. The ring's two faces are an S^0,
-  the pair: the BLACK face is THE VACUUM (it holds: the rings it takes for
-  its period, the deficit, quantum mass) and the WHITE face is THE
-  CONTINUUM inside it (it emits: the bounce's outflow, the pulse and its
+  a phase, a half-angle turn K on the ring. The ring's two faces are an S^0,
+  the pair: the black face is the vacuum (it holds: the rings it takes for
+  its period, the deficit, quantum mass) and the white face is the
+  continuum inside it (it emits: the bounce's outflow, the pulse and its
   echoes, the push, the axial jets). Our universe streams from the
   universal core's white face; each galactic core repeats the pair one tier
-  down. "Infinite density" is infinite ANGULAR RESOLUTION (exact
+  down. "Infinite density" is infinite angular resolution (exact
   half-angles, dense without end), never a density at a point. Matter is
-  held ON the ring (an attractor balanced by repulsion), so the only way off
+  held on the ring (an attractor balanced by repulsion), so the only way off
   is the axis, through the dipole's two lobes: the axial jets. Readings
   against S^0 alone: S^0 carries the pairing (law 6) but no phase, so no
   turning (law 5), no wavefront (law 7), no hidden phase, tilt, precession,
   bell or jets; S^1 carries all of them and keeps the pairing as its faces.
   S^1 is the bottom rung of the sphere ladder (S^1 the throat, S^60 a
   system, S^360 a galaxy and the universe).
-- **THE GALAXIES ORBIT THE UNIVERSAL SINGULARITY, DENSEST AT THE FIRST RING**
-  (operator 2026-10-16; with xylarium, building offline). The universe's
+- **The galaxies orbit the universal singularity, densest at the first ring**
+  (operator 2026-10-16; with Xylarium, building offline). The universe's
   singularity is the S^1 throat (faces S^0); the galactic cores ring it:
   - **Placed by the cut one tier up:** the epicentre's bounce sorts the
     cores as a galaxy's sorts its nuclei; a core of weight w_i is carried
     `ℓ_i = p_u·(w̄/w_i)` and stands at `d_i = ℓ_i/H_u`, the heaviest nearest
-    the throat, so density rises inward to the FIRST RING (a reading, never
+    the throat, so density rises inward to the first ring (a reading, never
     placed; replaces the drawn distances).
-  - **THE RIM LAW, every tier:** an enclosure's rim (its half
+  - **The rim law, every tier:** an enclosure's rim (its half
     circumference, where the pulse refocuses) is its own holding, `rim = H`,
     deficit ½ there, as at the throat; with the state hold equal to the
     grains' (the derived clock ratio) every enclosure spans exactly
     [throat 1, rim 2] of its own units. Nothing stands beyond its rim: cores
     carried past `rim_u` never form galaxies and stay intergalactic, so the
-    GALAXY COUNT is a reading. Replaces the transitional "rim = the
+    galaxy count is a reading. Replaces the transitional "rim = the
     outermost member's reach".
-  - **Galactic cores ORBIT** the universal singularity by the motion law
+  - **Galactic cores orbit** the universal singularity by the motion law
     (spin `R·H(<R)` on the ledger, the inner rings fastest and
     slowest-clocked), the holding inside each ring the universal state plus
     the cores within it.
-  - **Each galaxy's gas ARRIVES from the epicentre** across d_i, its push
+  - **Each galaxy's gas arrives from the epicentre** across d_i, its push
     the continuum's share there, widened in flight by agitation × distance,
     re-read inside the galaxy's own [1, 2].
-- **Each galaxy its own enclosed S^360; galactic cores are HUBS**
-  (operator, 2026-10-15; with xylarium). A galaxy is its own closed S^360,
-  hung inside the universe's at its core: the core is the THROAT joining the
+- **Each galaxy its own enclosed S^360; galactic cores are hubs**
+  (operator, 2026-10-15; with Xylarium). A galaxy is its own closed S^360,
+  hung inside the universe's at its core: the core is the throat joining the
   two spheres. The core's pulse refocuses on the galaxy's far side; that
   round trip is the galaxy's own ring, and the rim is where it refocuses (a
   formation reading). Each tier counts its turns on its own enclosed echo,
   chained through the chronometry keepers (each galaxy its own epicenter),
   so galaxies read slow and worlds fast, from enclosure, nothing fitted.
   - Only the universal core is uplinked to the hypha (kept there for now).
-    A galactic core is a HUB with UPLINKS (to the universal core) and
-    DOWNLINKS (to sub-galaxies), interlinked with the universal core: room
+    A galactic core is a hub with uplinks (to the universal core) and
+    downlinks (to sub-galaxies), interlinked with the universal core: room
     for expansion later. No galaxy has a tube of its own; a sub-universe is
     unlocked only by synthesis.
 - **The state is the primitive; mass is a reading** (operator and
-  xylarium, 2026-10-15). A core is a quantum state, not a three-dimensional
+  Xylarium, 2026-10-15). A core is a quantum state, not a three-dimensional
   object: its pulse (the bell's ring rate), its phase and its twist (the
   bounce's torsion winding). What a distant observer calls its "mass" is
-  the DEFICIT its echo leaves in each well, `δ`, the share the well takes
+  the deficit its echo leaves in each well, `δ`, the share the well takes
   from the clock, so `δ ≤ 1` by construction; read as a mass,
   `M = r·δ / (1 − δ)`, equivalently `δ = M / (r + M)`. Spin needs no mass:
   in Einstein–Cartan, spin sources torsion in its own right.
@@ -271,13 +271,13 @@ docs/83, "Corrections").
   A galaxy's matter profile is its manifest sorted by its bounce, so its
   effective dimension is read, never set, and galaxies differ as their
   manifests differ. The laws owed (docs/83, "The derivation"):
-  - **the ring-density law** (xylarium derives, shared form): how a bell's
+  - **the ring-density law** (Xylarium derives, shared form): how a bell's
     ring density at a place sets its clock rate and its deficit `δ`, exact
     in rationals (ring counts are whole numbers), read frame by frame;
-  - **a grain's own ring** (netstratum): an atom is a small bell (one law
+  - **a grain's own ring** (Netstratum): an atom is a small bell (one law
     at every tier), and a grain's mass reading is the deficit its ring
     carves; the mass number A becomes a reading;
-  - **thermal motion on the bell's clock** (netstratum): temperature is a
+  - **thermal motion on the bell's clock** (Netstratum): temperature is a
     rate at the atom tier (`T = k_T·ω`), so a gas's agitation and an
     orbit's turning compare by construction;
   - **the bounce's spin and hold:** the torsion winding gives matter its
@@ -310,8 +310,8 @@ event deploys them all, and everything after is a closed form of t from it
     wavefront that sets its matter moving (design law 7).
 - **The spectrum is derived from era 1's genesis seed** along fixed stream
   paths, tilted by operator dials (exact per-element recipe weights,
-  renormalised to keep the metals' mass), as xylarium does. It is
-  netstratum's own: only the manifest and the mouths' coordinates cross the
+  renormalised to keep the metals' mass), as Xylarium does. It is
+  Netstratum's own: only the manifest and the mouths' coordinates cross the
   boundary, never the galaxy count, modes or strengths.
 - **The deployment** is a construction, never a search (finding interference
   peaks over S^360 is a global search with no exact answer). In tiers:
@@ -336,7 +336,7 @@ event deploys them all, and everything after is a closed form of t from it
     Hill radius. A core's own `r_d` is read the same way from the cores
     nearer the epicenter (the innermost core is bounded by the sphere).
   - **The centre's share and the medium are laws of the tier, never draws**
-    (amended 2026-10-14 with xylarium's guidance, after the first
+    (amended 2026-10-14 with Xylarium's guidance, after the first
     deployment: an even draw left core 1 keeping 95% of its galaxy). The
     centre keeps its tier's share; of the rest, the tier's medium (what
     physics leaves unformed) is set aside; the satellites break what
@@ -355,18 +355,18 @@ event deploys them all, and everything after is a closed form of t from it
     What they leave joins the medium.
   - **Minimum bodies.** A body below its minimum is not formed, and its
     share joins the medium. A core needs a hole of at least a grain (no
-    hole, no core; xylarium: a core comes only from a package); a star or an
+    hole, no core; Xylarium: a core comes only from a package); a star or an
     orb, a grain, until the founding manifest's scale gives physical floors
-    (xylarium's: 0.08 suns for a star; roundness for a world, which ours
+    (Xylarium's: 0.08 suns for a star; roundness for a world, which ours
     must state without a square).
   - **Homology is linear.** Under ω = M/r, scaling a galaxy's masses and
     lengths by the same factor keeps its turning rates, so siblings scale
-    with no root (xylarium's lengths go by the cube root of mass under
+    with no root (Xylarium's lengths go by the cube root of mass under
     their law).
   - **Spacing by reach; periods follow from mass** (amended 2026-10-14: an
     authored resonance chain of periods made every galaxy's year near the
     tier's unit, so the story set the year). The innermost orbit turns in
-    one unit of the tier, xylarium's powers of sixty (60 bells for orbs
+    one unit of the tier, Xylarium's powers of sixty (60 bells for orbs
     about a star, 60² for systems about a core): the bell ladder's one
     anchor, `r_1 = M(<r_1) · unit`. Each next satellite stands where its
     reach just meets the last one's, so no two reaches overlap:
@@ -377,14 +377,14 @@ event deploys them all, and everything after is a closed form of t from it
     follows from the law, `P_k = r_k / M(<r_k)`.
   - **The count emerges.** Satellites are placed until the next radius
     would pass the centre's `r_d`, or the next share falls below its
-    minimum. The tier's MEDIUM (its set-aside share and what the satellites
+    minimum. The tier's medium (its set-aside share and what the satellites
     leave) is held at the centre's tier beyond its last orbit, enclosed by
     no orbit, there for later accretion (the radial law, Open) and for the
     lines to work.
   - **Elements.** Every share carries the manifest's composition in
     proportion, each element floored to the grain; what an element does not
     divide stays with the centre. A tier's operator recipe may tilt the
-    proportions (xylarium's dials), renormalised so every element's total is
+    proportions (Xylarium's dials), renormalised so every element's total is
     kept exactly.
   - **The seed's paths.** Draw j of field `x` at tier τ for body b is read
     from `blake3(origin hash ‖ τ ‖ b ‖ x ‖ j)`, the origin hash being era 1's
@@ -399,21 +399,21 @@ event deploys them all, and everything after is a closed form of t from it
   body reads the mass its own orbit encloses, so orbits are closed; the
   bodies' pull on each other is left out.
 - **The galactic year** is one completed turn of the orbit at the galaxy's
-  HALF-MASS radius (the first system whose orbit encloses half its bound
+  half-mass radius (the first system whose orbit encloses half its bound
   mass; era 1 has no hubs before places), `⌊φ + n·ω⌋` on its core's bell
   (`conductor::motion`, built 2026-10-14). φ at the pulse is 0 until the
   quantum layer gives it (design law 7); the bell is the universal beat
   until the clock's rate law (docs/80).
   - **Reading** (the `motion` binary on the stand-in): motion is exact and
     closed (completed turns by any bell, denominators fixed), but 10 of 13
-    galaxies' half-mass orbit is their FIRST system, so their year is the
+    galaxies' half-mass orbit is their first system, so their year is the
     tier's unit, 3,600 bells. The cause is the satellites' shares: each
     takes `q/60` of what remains, so the first holds about half its
     galaxy. Real systems are each a small part of a galaxy. A physical law
     for satellite masses (fragmentation, a feeding zone) is owed; until
     then the galactic years read the share law, not the physics.
-  - **The law, adopted** (operator, 2026-10-14; xylarium's). Our reach
-    `r_d = r·m/M` compares turnings; the TIDAL reach compares a body's own
+  - **The law, adopted** (operator, 2026-10-14; Xylarium's). Our reach
+    `r_d = r·m/M` compares turnings; the tidal reach compares a body's own
     turning with the change of its anchor's turning across it, by the same
     law: `m/ρ = M·(1/(r−ρ) − 1/(r+ρ))`, so `ρ = r·√(m/(2M+m))`. With it the
     feeding zone closes (`m = λ·2ρ`, λ the formed matter per unit radius):
@@ -432,14 +432,14 @@ event deploys them all, and everything after is a closed form of t from it
     Placeholders: systems about a core `t = 1/6` (each about 0.235 of what
     it orbits, sized to the stand-in's grains); orbs about a star
     `t = 1/283` (about 1e-4, the Solar System's order).
-  - **DEFECT, the systems-about-a-core layer is wrong** (operator,
+  - **Defect, the systems-about-a-core layer is wrong** (operator,
     2026-10-15; measured by `motion var-e1`). The tidal law applied
     galaxy → star makes each star a quarter of what it orbits: every galaxy
     holds 32 stars, the median about 7 times its hole, the largest about
     163 times its hole and 16% of its galaxy, and every galaxy is exactly
     1,000 holes. The galaxy is a weak hole circled by galaxy-sized "stars":
     galaxies orbiting stars. A galaxy is its core (the singularity and
-    its disc); its stars, each small, are FORMED from its gas (docs/83; in
+    its disc); its stars, each small, are formed from its gas (docs/83; in
     3-D grains stars may outweigh the core, in holding the core dominates:
     docs/83, "Two readings of mass"); the reach law
     belongs where a disk fragments about one star, never between a galaxy
@@ -450,7 +450,7 @@ event deploys them all, and everything after is a closed form of t from it
     whole keeps its turnings, so with one law and one set of shares every
     galaxy read the same year (32 systems each, about 1.49e9 bells). What
     differs between real galaxies is their hole: a core's share is drawn
-    from the seed at 1/4 to 2 of 1/1000, as xylarium draws a sibling's
+    from the seed at 1/4 to 2 of 1/1000, as Xylarium draws a sibling's
     hole against the home's (a placeholder until the pulse's physics sets
     it).
   - **Reading:** 13 cores, 413 systems, 5,607 orbs (about 14 a star);
@@ -471,9 +471,9 @@ event deploys them all, and everything after is a closed form of t from it
   Keplerian clock (`cfe::thermal::orbital_period_squared`, `local_years`,
   and `siting.rs`'s Diophantine tracks `r = M·k²`, which exist only to make a
   square root exact) does not carry into era 1.
-- **Arrivals.** Packages are bought with μ (the hypha side, mycelium's,
-  shared by every kernel; xylarium 2026-10-14). The galaxy count at the
-  pulse stays netstratum's own (seed-drawn, as ruled); xylarium's two per
+- **Arrivals.** Packages are bought with μ (the hypha side, Mycelium's,
+  shared by every kernel; Xylarium 2026-10-14). The galaxy count at the
+  pulse stays Netstratum's own (seed-drawn, as ruled); Xylarium's two per
   Big Bang is its kernel default and does not bind us. A later galaxy
   package is deployed the same way, as a new
   core and its systems, by the progenitors who receive it; the bodies it
@@ -483,8 +483,8 @@ event deploys them all, and everything after is a closed form of t from it
 - **Matter.** The founding manifest's elements, deployed by the pulse, give
   the element almanac's inventory an origin; today it is a table.
 
-**Ruled with xylarium's guidance (2026-10-14), within netstratum's remit:**
-- the mass split: netstratum's own (tubes need no match), designed above;
+**Ruled with Xylarium's guidance (2026-10-14), within Netstratum's remit:**
+- the mass split: Netstratum's own (tubes need no match), designed above;
 - the galaxies' sizes (operator, 2026-10-14): by the spectrum, no bound dial.
   The count of modes and each strength `a_i` are seed draws from the base-60
   field (1 to 60); core i takes `a_i / Σa` of the formed matter, so sizes
@@ -495,22 +495,22 @@ event deploys them all, and everything after is a closed form of t from it
   matter; real galaxy populations are steep, but by their physics, not by
   an order of draws.);
 - the spectrum: seed-derived, dial-tilted (above);
-- the scale: our own deepest core (above; the form shared with xylarium, never its rulers);
+- the scale: our own deepest core (above; the form shared with Xylarium, never its rulers);
 - era 0's lines: none carried. Era 1 is a new domain (ruling 1); its
-  civilizations arise anew from its physics, as xylarium's do, and the seat
+  civilizations arise anew from its physics, as Xylarium's do, and the seat
   minds wait unseated until the new domain has a living ancient. Era 0's 101
-  lines stay in its record. Confirmed by xylarium's practice (2026-10-14):
+  lines stay in its record. Confirmed by Xylarium's practice (2026-10-14):
   no exceptions; ancients arise from the new universe's own history, fallen
   peoples persist only as archaeology in their own universe, and seat minds
   are not inhabitants (they attach to the new domain's ancients).
 
 **Open:**
-- **The founding manifest.** Until mycelium's endowments and grants stand,
+- **The founding manifest.** Until Mycelium's endowments and grants stand,
   a stand-in: era 0's element totals read from its record, so the stand-in
   is a measured universe, not an invented one. Replaced by the grant when
   it crosses.
-  - **Its unit, ruled by mycelium** (MANIFEST, ACT_DOMAIN 17, 2026-10-14,
-    via xylarium): it COUNTS NUCLEI per Z, never mass. Entries ascend in Z,
+  - **Its unit, ruled by mycelium** (manifest, ACT_DOMAIN 17, 2026-10-14,
+    via Xylarium): it counts nuclei per Z, never mass. Entries ascend in Z,
     each once (u16); each count is a positive integer of any size (a
     package is about 1e60 nuclei), an exact rational with denominator 1 in
     the algebra's scalar codec. A fraction, a zero or an empty manifest is
@@ -518,12 +518,12 @@ event deploys them all, and everything after is a closed form of t from it
     universe's own. Each kernel converts with its own nucleon mass. Motion
     never crosses a tube; only manifests and mouths do. Mycelium sends the
     byte layout with the build.
-  - **So the grain is netstratum's internal unit,** converted through the Z
+  - **So the grain is Netstratum's internal unit,** converted through the Z
     map (below) in and out.
 - **The atom's further readings:** the bond preference and workability laws
   above, built and read; the heavy nuclei's neutron excess; and era 1's economy reading compounds from atoms in place of the
   almanac's fixed cells.
-- **Roundness** (xylarium's statement, adopted when its angles are
+- **Roundness** (Xylarium's statement, adopted when its angles are
   declared): a body is round when `M / r ≥ θ_rigid(material)` in the planet
   tier's units; linear, no square. Below it, rubble: matter in a field, the
   medium, not a body. It replaces the grain as the orb floor.
@@ -549,7 +549,7 @@ Operator, 2026-10-14. Built: `conductor::breath`, the `breathe` binary.
   from the universal core, one length a bell (the core's `d_i`, a field of
   the spectrum). `T_u` is TUniversal's at founding; 60 bells stands in.
 - **The pulse lays down only the start:** the cores (each keeping its hole)
-  and each galaxy's medium. No star systems: they are BORN by the breath.
+  and each galaxy's medium. No star systems: they are born by the breath.
   (Defect corrected, operator: the variation came from spawning galaxies
   and drawing their holes, where it should come from star systems forming;
   the hole draw is removed.)
@@ -562,16 +562,16 @@ Operator, 2026-10-14. Built: `conductor::breath`, the `breathe` binary.
   dilation `1 − GM/rc²` to first order (G = c = 1). Nested wells multiply:
   a planet's clock is its rate about its star, times its star's about the
   galaxy, times the galaxy's about the universal core. Each echo a layer
-  receives is one RUNG; the proper time it has lived is its AEON. As the
+  receives is one rung; the proper time it has lived is its AEON. As the
   quantum phase decoheres and recoheres on the stars, each layer's rungs are
   its own: element distribution and star formation layer the time.
 - **Time writes on the chain.**
-  - PARALLEL: a write within one layer, on its own clock.
-  - PERPENDICULAR: a write across layers: an echo coming down, a birth
+  - Parallel: a write within one layer, on its own clock.
+  - Perpendicular: a write across layers: an echo coming down, a birth
     changing the mass above.
-  - A perpendicular write down answered by one up closes a causal LOOP
+  - A perpendicular write down answered by one up closes a causal loop
     (multi-dimensional causality); the loops, overlapping and intertwined
-    across the layers, are the CHAIN.
+    across the layers, are the chain.
 - **Reading** (stand-in, `breathe var-e1 6000 60`): the pulse lays down 13
   cores and no systems; 937 echoes (perpendicular writes down) give 416
   systems born (416 loops closed) and about 6,000 orbs; the breath creates
@@ -580,14 +580,14 @@ Operator, 2026-10-14. Built: `conductor::breath`, the `breathe` binary.
 - **Elastic: decohere and recohere, by the quantum phase** (operator,
   2026-10-14: consumption alone is pure entropy, with no syntropic
   regeneration; then, the first build, which shed matter by clock rate,
-  needed physics alignment). Decoherence is a PHASE relation (docs/79,
+  needed physics alignment). Decoherence is a phase relation (docs/79,
   docs/81), and matter follows it:
   - **Slip.** A layer's phase runs at its proper rate, so a dilated layer
     slips behind the universal echo, `Δ = (1 − rate) · t / T_u` turns.
   - **Coherence** is how near Δ stands to a whole turn,
     `c = 1 − 2·|Δ − round Δ|`: 1 in phase, 0 opposed. Linear and exact; it
     equals docs/79's `(1 + cos)/2` at 0, ½ and 1 turn.
-  - **Recoherence** is a slip completing a whole turn; each is a RUNG,
+  - **Recoherence** is a slip completing a whole turn; each is a rung,
     `⌊Δ⌋`. Deeper wells slip faster and climb more rungs; an undilated
     layer climbs none.
   - **Entropy:** a star sheds `ε · (1 − c)` of what it holds to its
@@ -618,15 +618,15 @@ between two bells, never stepped.
 |---|---|---|
 | the universal core | the echo, every `T_u` bells | the breath (births, shedding) |
 | a galaxy, operational | each echo it receives (`T_u`, after its distance) | the realms' term, parliaments, keepers' judgement, gate accounts |
-| a galaxy, epochal | the RUNGS of its half-mass layer (its recoherences) | ascension by deed (a full rung kept), the core's re-emission, the aeon's marks |
+| a galaxy, epochal | the rungs of its half-mass layer (its recoherences) | ascension by deed (a full rung kept), the core's re-emission, the aeon's marks |
 | a star system | its own rungs (its nested slip) | the system's epochs |
-| a world (orb) | its LOCAL YEAR (one turn about its star) | its journal, upkeep, demography |
+| a world (orb) | its local year (one turn about its star) | its journal, upkeep, demography |
 | the process | a count of echoes | memory, profiling (not physics) |
 
 - **Why a galaxy has two clocks.** Every galaxy must keep its ordinary
   business, but the galaxy nearest the universal core runs at rate 1 and
   never slips, and its orbits' own dilation is weak-field (about 1/3,600):
-  it climbs no rungs. So business rides the echoes, and EPOCHS happen only
+  it climbs no rungs. So business rides the echoes, and epochs happen only
   where time layers. An undilated galaxy has no epochs: its ancients cannot
   arise by deed there.
 - **Reading** (36,000 bells): galaxy terms 542 to 596 (echoes received);
@@ -636,14 +636,14 @@ between two bells, never stepped.
 ## The refactor onto era 1's physics (2026-10-15; operator: no parallel machinery)
 
 The civilizations ran on era 0's physics beside era 1's (their star tables,
-orbits and the `1/r²` flux). Refactored IN PLACE, layer by layer:
+orbits and the `1/r²` flux). Refactored in place, layer by layer:
 
 1. **Climate.** cfe's thermal law is the era-1 law where it lives
    (`cfe::thermal`): flux falls linearly, `I = L (1 − A) / r`, and
    temperature is held as T in kelvin, `T = 279 K · I` (no fourth power,
    no square); every site that reads it follows (~300). Pins written for
    the flat law were restated; era 0's siting-determinism pins removed.
-2. **Seating.** Each line is seated on an era-1 WORLD, the unclaimed one
+2. **Seating.** Each line is seated on an era-1 world, the unclaimed one
    where the physics reads its clade and metabolism most viable
    (`siting::viability_at`), spread across galaxies, and takes that
    world's siting: the star class nearest its star's burn by luminosity
@@ -668,7 +668,7 @@ nucleus, the compounds law and the workability form stand.
 
 Mycelium's manifest counts nuclei per Z. Z, the count of a nucleus's
 charges, means the same in every universe; what it becomes is netstratum's
-own physics. An atom is NOT a cell of a table (design laws 1 and 3). It is
+own physics. An atom is not a cell of a table (design laws 1 and 3). It is
 the lowest tier of the one law (design law 4), a small system that turns.
 
 - **The nucleus is the centre.** It keeps the atom's mass share, by the
@@ -702,7 +702,7 @@ the lowest tier of the one law (design law 4), a small system that turns.
   (under a grain's nuclei) stays as an integer in the universe's unformed
   ledger, per Z. It leaves as `grains × 60^30` nuclei. Exact both ways.
 - **Mass for the turning law** is the nucleus's own mass number, by the
-  same law (isotopes are each universe's own, as mycelium ruled), never a
+  same law (isotopes are each universe's own, as Mycelium ruled), never a
   table of atomic weights.
 - **Bulk resources** (iron, crystal, biomass) are not fixed formulas; they
   become the compounds the law forms.
@@ -725,7 +725,7 @@ the lowest tier of the one law (design law 4), a small system that turns.
   - Each bonding count recurs at every depth from its first.
   - Across each depth an atom is held tighter (1/P rising to 2); closed
     atoms are held tightest.
-  - It is netstratum's own: 11 depths by Z = 118 and bonding up to 10,
+  - It is Netstratum's own: 11 depths by Z = 118 and bonding up to 10,
     where the almanac's fixed axes have 7 lines and bind at most 5. Era 1's
     chemistry (compounds, workability) reads the atom, so the almanac's
     fixed cells are era 0's.
@@ -740,19 +740,19 @@ the lowest tier of the one law (design law 4), a small system that turns.
   the others, at least one bond fewer than atoms. Exact, no search.
   - Reading among the 25 open atoms of Z 1 to 30: 95 two-atom and 1,222
     three-atom compounds close.
-  - **A bond's preference** (xylarium's proposal, 2026-10-14, adopted to
-    build): read from the partners' tightnesses τ as a RATIO, never a
+  - **A bond's preference** (Xylarium's proposal, 2026-10-14, adopted to
+    build): read from the partners' tightnesses τ as a ratio, never a
     squared difference. The shared share `s = τ_min / τ_max` (1 shared, near
     0 transferred, the rest `1 − s` going to the tighter atom); the bond's
     grip is `τ_min`, the weaker hold. A bond prefers the partner that gives
     its closed set the most total grip (the sum of `τ_min` over its bonds),
     ties to the larger s. An ordering like electronegativity should emerge
     from τ rising across a depth.
-  - **Workability** (the thermal ruler; its form shared with xylarium, its
+  - **Workability** (the thermal ruler; its form shared with Xylarium, its
     value per universe): temperature is a turning rate of agitation,
     `T = k_T · ω`. `k_T` is fixed by one atom: Z = 1's outer tightness
     against hydrogen's bond, 13.6 eV ≈ 157,800 K, a cited placeholder
-    (design law 1), the anchor xylarium will share. A compound is workable
+    (design law 1), the anchor Xylarium will share. A compound is workable
     while its weakest grip `τ_min` holds against `T / k_T`, read as a smooth
     share, not a cutoff.
 - **The stand-in through the boundary** (the `pulse` binary): era 0's 860
@@ -761,14 +761,14 @@ the lowest tier of the one law (design law 4), a small system that turns.
   held. The stand-in's map folds era 0's variety into few Zs; a real grant
   carries its own.
 
-## Rulings of 2026-10-18 (operators, with xylarium)
+## Rulings of 2026-10-18 (operators, with Xylarium)
 
 ### The harmonic atom on S^11 (built, 6c311c1)
 
-Operator: "keep atomic at S^11 - so it fits the harmonic model"; "hopf
-fibrations are absolutely required"; and, of a first draft, "why are we
-using a lattice: that is a rigid 'box' of 'tensors': it's not a natural
-structure". Count the windings, flow the phases: no frames, no lattice.
+Design direction: the atom stays on S^11 to fit the harmonic model, and Hopf
+fibrations are required; and, of a first draft, a lattice is
+rejected as a rigid box of tensors, not a natural structure. Count the
+windings, flow the phases: no frames, no lattice.
 
 - **The atom turns on S^11:** twelve dimensions, six turning planes, no
   axis (an odd sphere).
@@ -803,24 +803,22 @@ structure". Count the windings, flow the phases: no frames, no lattice.
   30 and 54; unpaired peaks at 12 (Z = 16, 42) and 77 (Z = 131). Few noble
   kinds, wide open shells, much magnetism. Hold (`2Z + (Z − unpaired)`),
   bonding, the burn ladder and every heart's cut read it; era 0's readings
-  moved with it (operator: "tests can move"). xylarium reads the same table
+  moved with it (ruling: tests may move with the cut). Xylarium reads the same table
   (c985228).
 
 ### No straight lines: straightness is tension (2026-10-18)
 
-Operator: "the only straight lines should be wormholes, and even those
-aren't straight - why would we have straight lines unless operating at a
-planetary level?"; and "a straight line would be stretching a flexible
-fiber 'as hard as it can be' to create firmness or taut - all are
-measurable - but you don't just draw a straight line, otherwise it will
-break".
+Design direction: the only straight lines are wormholes, and even those are
+not straight; straight lines belong at most to the planetary level. A straight
+line is a flexible fibre stretched as far as it goes to make it taut, which is
+measurable, never drawn; drawn, it breaks.
 
 - **No length is summed in a line.** A gap between two bodies is never
   `|Δr|` or `|Δr| + r·Δφ`.
 - **Closeness is a share on the sphere:** how in step two bodies stand in
   every plane, `Π in_step(Δφ)`, and apart is `1 − closeness`. How they move
   (their deficits' contrast T) stays apart from where they stand.
-- **Straightness is a TENSION reading** on a flexible fibre with a breaking
+- **Straightness is a tension reading** on a flexible fibre with a breaking
   point. Collision is a tether test: `T/(s·D)` is the bond's tautness,
   holding below 1 and snapping above. A fold is as straight as its tension
   makes it, its capacity the hold at its mouths, and stretched past that it
@@ -830,15 +828,14 @@ break".
 
 ### The package is an element recipe (built, f2299bc)
 
-Operator: "we are selling universes as real estate ... a package of
-elements that constructs a universe in such a way that is appealing to the
-client ... different elements produce different universes in different
-shapes that will support different types of life".
+Design direction: a universe is sold as real estate, a package of elements
+that constructs a universe the client finds appealing; different elements
+produce universes of different shapes, which support different kinds of life.
 
 - **The founding manifest is the purchase:** its nuclei count and its mix.
   Everything after it is derived. The catalogue of recipes is deferred.
 - **Every kind is carried, never grain-dropped.** The carrier's grain is
-  ONE NUCLEUS (`pulse::nucleus`, `1024 · 60³⁰` nuclei an amount unit).
+  one nucleus (`pulse::nucleus`, `1024 · 60³⁰` nuclei an amount unit).
   Matter is counted in nuclei and nothing smaller exists, so it is exact and
   bounded. The founding carries every kind's exact count; the unformed
   ledger stays empty; every era-1 transfer floors to whole nuclei. Era 0's
@@ -850,17 +847,16 @@ shapes that will support different types of life".
 - **No draws** (standing; restated): the count of cores comes from the
   package and their strengths from the bounce's own beads. The spectrum's
   seed draws (modes 1 to 60, strengths 1 to 60, "Arrivals" and "Ruled with
-  xylarium's guidance" above) are owed for retirement.
+  Xylarium's guidance" above) are owed for retirement.
 
 ### Metabolism and observation (2026-10-18)
 
-Operator: "every single bond in this entire universe operates on some level
-of a 'metabolism' as the cumulative collection of energy rises and falls
-strictly upon observation".
+Design direction: every bond in the universe runs on a metabolism, the
+cumulative energy rising and falling strictly upon observation.
 
 - Between meetings everything is closed form and nothing is exchanged.
-  Energy changes hands only at COINCIDENCE (contact, an in-step passage, a
-  crossing), so a meeting IS an observation.
+  Energy changes hands only at coincidence (contact, an in-step passage, a
+  crossing), so a meeting is an observation.
 - A bond's metabolism is the turning exchanged at its meetings an echo; the
   universe's is their sum.
 - A core's metabolic rate is the residual drift of its reservoir once its
@@ -868,7 +864,7 @@ strictly upon observation".
   refilled down its partner face (strand, cords, Wellspring, rhizomorph,
   hypha, in mu).
 
-## Every flat site in netstratum (inventory, 2026-10-13)
+## Every flat site in Netstratum (inventory, 2026-10-13)
 
 | flat today | where (count of sites) | becomes |
 |---|---|---|
@@ -891,8 +887,8 @@ They are puzzle frames, not space.
 
 ## Rulings (operator, 2026-10-13)
 
-1. **A new domain: netstratum era 1.**
-   - The sphere universe is founded as a NEW universe and domain, with new
+1. **A new domain: Netstratum era 1.**
+   - The sphere universe is founded as a new universe and domain, with new
      keys.
    - Mycelium's court law (78.132; 78.59 Ruling 2): an origin is held once per
      domain and never edited, a second reads `AlreadyFounded`, and a reset
@@ -901,27 +897,27 @@ They are puzzle frames, not space.
      record. Its keys stay intact and are never reused for era 1.
    - The new origin is version 2 (78.139): curvature radius R in clear, the
      parent face unwitnessed (a root) or the core tube it bounced out of.
-2. **Circuitry, never steps** (xylarium W21, adopted).
+2. **Circuitry, never steps** (Xylarium W21, adopted).
    - No state is carried beat to beat by `*_step` integrations. A value at a
      beat is its closed form at that time t: orbits, phases and rotations read
      at t, and exact overlaps instead of diffusion.
    - The beat may remain as the bell's count of turns.
    - Ported layer by layer, each port measured by its readings, never as one
-     rewrite (coordinator 2026-10-13; xylarium's pattern in its plan 10.10).
+     rewrite (coordinator 2026-10-13; Xylarium's pattern in its plan 10.10).
 3. **Timing.** Mycelium's queue: its questioning work, the unlinked mind, the
-   peer universe's founding (with netstratum's N7 core tube), then A1, then
+   peer universe's founding (with Netstratum's N7 core tube), then A1, then
    A2.
    - A1/A2 move ahead only on the coordinator's word. Not requested.
    - Era 1's geometry waits for them; the circuitry port does not.
 4. **Time and the observers** (docs/80): time as a coordinate on the map,
    cosmic time from the epicenter's bounce, and TUniversal's origin and a
-   quantum lane from the singularity, proposed to mycelium through the
+   quantum lane from the singularity, proposed to Mycelium through the
    coordinator (2026-10-13).
 
 ## Build order (after the rulings and A1/A2)
 
-1. **The geometry library** (mycelium's A1, from `vendor/mycelium`): places,
-   reflections, cones; netstratum adds the geodesic angle by half-angle
+1. **The geometry library** (Mycelium's A1, from `vendor/mycelium`): places,
+   reflections, cones; Netstratum adds the geodesic angle by half-angle
    parameters, and chord form only for the court.
 2. **The pulse and its deployment** ("The bounce"): the spectrum read, cores,
    systems and orbs placed with their grains, checkpointed; the cards
@@ -939,12 +935,12 @@ They are puzzle frames, not space.
 
 1. The pulse: cores and systems with deployed grains, 0 → all; the grains
    by element read at each year close equal to the manifests crossed in
-   (witness: the conservation line against the tube's TRAVERSE records).
+   (witness: the conservation line against the tube's traverse records).
 2. Motion: galaxies closing their own years, 0 → every galaxy, at differing
    beats; the 60-beat close's call sites, 4 → 0.
 3. Places on S^360: places held as sphere points, 0 → all; `torus_distance`
    call sites, 22 → 0.
 4. Distances: angle readings in the hub, melt and gate lines in place of
    cells; gates walled by span, 3 → 0.
-5. Origin: the court's record reads `Sphere { 360, R }` for netstratum era
+5. Origin: the court's record reads `Sphere { 360, R }` for Netstratum era
    1's new domain. Witness: the court's origin reading.

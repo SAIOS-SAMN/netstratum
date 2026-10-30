@@ -1,53 +1,73 @@
-# netstratum
+# Netstratum
 
-netstratum is a universe and civilization engine written in exact rational
+Netstratum is a universe and civilization engine written in exact rational
 arithmetic. Beneath it runs a cosmology derived from one grammar of shares and
 phases: an S^360 universe whose bounce founds its nuclides, whose galaxies,
 stars and worlds form by flow rather than placement. On top of it runs a
 text-first, multi-planetary city-building game whose civilizations, minds and
 economy live on those worlds. It speaks to the
-[mycelium](https://github.com/SAIOS-SAMN/mycelium) network for its clock, its
+[Mycelium](https://github.com/SAIOS-SAMN/mycelium) network for its clock, its
 atlas and its shared law forms.
 
 **Status:** research software, in active development. Era 1 (the sphere
-universe) is being derived and built in `docs/78`–`docs/106`; the register of
-what is built and what is owed is [`docs/102_ALIGNMENT.md`](docs/102_ALIGNMENT.md).
-See [DISCLAIMER.md](DISCLAIMER.md): the code and documentation are
-AI-generated under human editorial direction.
+universe) is derived and built in [docs/78](docs/78_SPHERES.md) through
+[docs/107](docs/107_MYCELIUM_INTEGRATION.md); the register of what is built
+and what is owed is [docs/102](docs/102_ALIGNMENT.md). See
+[DISCLAIMER.md](DISCLAIMER.md): the code and documentation are AI-generated
+under human editorial direction.
+
+## Key documents
+
+| Document | Purpose |
+|---|---|
+| [docs/README.md](docs/README.md) | The index of every design document |
+| [docs/00_CHARTER.md](docs/00_CHARTER.md) | The founding charter, read whole |
+| [docs/78_SPHERES.md](docs/78_SPHERES.md) | The sphere universe and its design laws, which bind every new law |
+| [docs/102_ALIGNMENT.md](docs/102_ALIGNMENT.md) | One vocabulary for every tier, and the register of what is built and owed |
+| [docs/105_POLARITY_EQUILIBRIA.md](docs/105_POLARITY_EQUILIBRIA.md) | The master equation of a two-pole exchange |
+| [docs/106_THE_THERMODYNAMIC_SUBSTRATE.md](docs/106_THE_THERMODYNAMIC_SUBSTRATE.md) | The substrate (potential, pressure, energy) beneath motion; the next build |
+| [docs/107_MYCELIUM_INTEGRATION.md](docs/107_MYCELIUM_INTEGRATION.md) | How Netstratum keeps time and law with the Mycelium network |
+| [docs/GAME_SPEC.md](docs/GAME_SPEC.md), [docs/SYSTEM_SPEC.md](docs/SYSTEM_SPEC.md) | The game and the system as specified |
+| [docs/EQUATIONS.md](docs/EQUATIONS.md) | The equations in one place |
+| [docs/BUILD_ORDER.md](docs/BUILD_ORDER.md), [docs/OPEN_QUESTIONS.md](docs/OPEN_QUESTIONS.md) | The build sequence and the open questions |
+| [engine/kernel/CHARTER.md](engine/kernel/CHARTER.md) | The kernel's charter: the one validated update function |
+| [protocols/](protocols/) | The NS protocol stack, NS-1 to NS-7 |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Checks, the design record and the commit standard |
 
 ## Layout
 
-```
-engine/      the Rust workspace
-  ratio          exact rationals for the carrier
-  rfa-core       Rational Field Algebra: relational deltas, cocycles, coherence
-  cfe            the Canonical Field Engine: state transitions over RFA
-  codec          the committed state's one canonical encoding
-  kernel         the one validated update function, lawful(prior, next, step)
-  ledger         the pre-chain ledger of record and its lens
-  lens           read-only projections from the chain
-  scribe         the display writers: journals, the Terminal Wall, exports
-  mesh           NS-5: the spine and the lawful chain remainder
-  physics        event-driven exact kinematics on the RFA carrier
-  solver         the ARC solver harness: exact grid transformations as proofs
-  solver-verify  the sealed verifier half of the solver
-  substrate      the exact-ℚ algebra (fields, planes, the CGA multivector)
-  reduct         exact algebraic cognition (the thought engine)
-  tongue         solver programs stated as mycelium rule elements
-  hypha          ns-hypha: the uplink to a mycelium hypha
-  conductor      the heartbeat, and the era-1 universe (pulse, breath, flows,
-                 nuclides, polarity, formation)
-clients/cli  the netstratum game client
-protocols/   the NS protocol stack (NS-1 … NS-7)
-docs/        the charter, the derivations, the register (see docs/README.md)
-tools/       the board observer and the steward inbox (Python), service units
-xtask/       workspace tasks
-```
+| Path | Contents |
+|---|---|
+| [engine/](engine/) ([overview](engine/README.md)) | The Rust workspace |
+| [engine/ratio](engine/ratio) | Exact rationals for the carrier |
+| [engine/rfa-core](engine/rfa-core) | Rational Field Algebra: relational deltas, cocycles, coherence |
+| [engine/cfe](engine/cfe) | The Canonical Field Engine: state transitions over RFA |
+| [engine/codec](engine/codec) | The committed state's one canonical encoding |
+| [engine/kernel](engine/kernel) | The one validated update function, `lawful(prior, next, step)` |
+| [engine/ledger](engine/ledger) | The pre-chain ledger of record |
+| [engine/lens](engine/lens) | Read-only projections from the chain |
+| [engine/scribe](engine/scribe) | The display writers: journals, the Terminal Wall, exports |
+| [engine/mesh](engine/mesh) | NS-5: the spine and the lawful chain remainder |
+| [engine/physics](engine/physics) | Event-driven exact kinematics on the RFA carrier |
+| [engine/solver](engine/solver) | The ARC solver harness: exact grid transformations as proofs |
+| [engine/solver-verify](engine/solver-verify) | The sealed verifier half of the solver |
+| [engine/substrate](engine/substrate) | The exact-ℚ algebra (fields, planes, the CGA multivector) |
+| [engine/reduct](engine/reduct) | Exact algebraic cognition (the thought engine) |
+| [engine/tongue](engine/tongue) | Solver programs stated as Mycelium rule elements |
+| [engine/hypha](engine/hypha) | `ns-hypha`: the uplink to a Mycelium hypha |
+| [engine/conductor](engine/conductor) | The heartbeat, and the era-1 universe (pulse, breath, flows, nuclides, polarity, formation) |
+| [clients/cli](clients/cli) | The Netstratum game client |
+| [protocols/](protocols/) | The NS protocol stack: [NS-1 DOP](protocols/NS-1_DOP.md), [NS-2 RQP](protocols/NS-2_RQP.md), [NS-3 VRP](protocols/NS-3_VRP.md), [NS-4 Aperture](protocols/NS-4_APERTURE.md), [NS-5 Mesh](protocols/NS-5_MESH.md), [NS-6 IPSAL-OS](protocols/NS-6_IPSAL-OS.md), [NS-7 Anchor](protocols/NS-7_ANCHOR.md) |
+| [docs/](docs/) | The charter, the derivations and the register |
+| [tools/](tools/) | The board observer and the steward inbox (Python), example service units |
+| [xtask/](xtask/) | Workspace tasks |
+| [install.sh](install.sh) | Prepares a game universe and the conductor's heartbeat |
 
 ## Building
 
-Rust (stable) and network access to GitHub, for the mycelium crates, which are
-pinned at a tagged release in the root `Cargo.toml`:
+The build needs stable Rust and network access to GitHub for the Mycelium
+crates, which are pinned at a tagged release in the root
+[Cargo.toml](Cargo.toml):
 
 ```
 cargo build --release
@@ -57,7 +77,7 @@ cargo test --workspace
 ## Running the era-1 universe
 
 The conductor's era-1 binaries found and breathe a sphere universe in a
-variable root (`var-*/`, git-ignored, throwaway):
+variable root (`var-*/`, git-ignored and disposable):
 
 ```
 target/release/pulse    <var> found 2^55        # found a universe of 2^55 grains
@@ -65,7 +85,7 @@ target/release/breathe  <var> 1700 _ write      # breathe it to bell 1700
 target/release/observe  --var <var> universe    # read it (galaxy, star, world …)
 ```
 
-`breathe` reports conservation, the identities (spin, light, torque), the
+`breathe` reports conservation, the identities (spin, light, torque), and the
 stars, worlds and clocks of every galaxy.
 
 ## Playing
@@ -74,14 +94,14 @@ stars, worlds and clocks of every galaxy.
 cargo run -p netstratum-cli
 ```
 
-`./install.sh` prepares a game universe and the conductor's heartbeat
-(`./install.sh --help`).
+[install.sh](install.sh) prepares a game universe and the conductor's
+heartbeat (`./install.sh --help`).
 
 ## Documentation
 
-Start with [`docs/README.md`](docs/README.md): the charter, the era-1
+Start with [docs/README.md](docs/README.md): the charter, the era-1
 derivations in order, the vocabulary and the register of what is owed.
-Contribution and commit standards: [CONTRIBUTING.md](CONTRIBUTING.md).
+Contribution and commit standards are in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 

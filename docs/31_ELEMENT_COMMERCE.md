@@ -1,13 +1,13 @@
-# 31 — ELEMENT COMMERCE: routes, refineries, distribution
+# 31 — Element commerce: routes, refineries, distribution
 
-**Status:** PARTIAL LAND — operator directive 2026-08-07; **Wave-1
+**Status:** partial land — operator directive 2026-08-07; **Wave-1
 `2109bf0`** REFINE-1; **Wave-2** E-APT-1 (tags 108–109) +
 `element_trade_step`; **Wave-3** ElementRouteChartered (tag 110) +
-SCHEMA_V6 + rail on charter; **E-MKT-1 LANDED** — MARKET-1 offers carry
+SCHEMA_V6 + rail on charter; **E-MKT-1 landed** — MARKET-1 offers carry
 `Cargo = Resource | Element` (tag 49 wire: Resource 1..=7 or `0‖id[32]`;
 `clear_trade` hauls via `haul`/`haul_element`; conductor `market_step`
 posts element surplus intents).
-Depends on GROUND STEP and composes with ROUTE-1, MARKET-1, MERCHANT-1,
+Depends on Ground step and composes with ROUTE-1, MARKET-1, MERCHANT-1,
 APERTURE-1, TREATY-1.
 
 **Companion:** `30_OFFICES_AND_RAILS.md` (T4 Caravan, T5 Crucible),
@@ -99,14 +99,14 @@ market_step — pin order at landing):
 
 ## 3. Elemental refineries (14 §5 made playable)
 
-### 3.0 LANDED (Wave-1 `2109bf0`) — what the tree actually does
+### 3.0 Landed (Wave-1 `2109bf0`) — what the tree actually does
 
 | Site | Implementation |
 |------|----------------|
 | Zone | `ZoneKind::ElementRefinery = 9`; word `element-refinery`; CLI map glyph `F` |
 | Cost / upkeep | Cost = habitat bill (biomass); upkeep = encasement iron (no bio drain — measured against forge-starved trap) |
 | Heat | Converter-hot (`factory_heat` with smelter class) |
-| Gate | **DEEPENING (condition 3)** on the orb — same technology door as Regenerator. Q-T2: T5 not required |
+| Gate | **Deepening (condition 3)** on the orb — same technology door as Regenerator. Q-T2: T5 not required |
 | Verb | `World::refine_as` → `ClosureEvent::ElementRefined` tag **107** |
 | Recipe | `dop::refine_recipe` / `refined_identity` — spend/yield from `refinement_input`/`refinement_yield` at the raw element's tier; gate re-derives (call-not-copy) |
 | Conductor | After ground banks elements: prefer refinery when surplus and industry not claiming the slot; `refine_step` one convert per beat |
@@ -149,7 +149,7 @@ Still **one zone kind**; fantasy comes from derived rates, not four enums.
 
 **Landed:** `build_step` prefers ElementRefinery when element kinds > 0,
 no refinery stands, industrial is not fundable this beat, not
-forge-starved; DEEPENING gifted when needed. `refine_step` after
+forge-starved; deepening gifted when needed. `refine_step` after
 `office_step` in the cycle quartet.
 
 **Still design:** Crucible (T5) lower reserve factor (O6.2); tune
@@ -184,8 +184,8 @@ Want / market:
   `market_step` bids Resource→Element for hungers.
 - MARKET-1 offers gain `cargo: Resource | ElementId` (**E3.6 landed**).
 - Treaties may enumerate allowed element ids (**E3.9 landed**,
-  2026-08-12): `TreatyElementsAllowed` (tag 165) annexes a STANDING
-  TRADE pact — while any live list stands on a pair, element hauls,
+  2026-08-12): `TreatyElementsAllowed` (tag 165) annexes a standing
+  trade pact — while any live list stands on a pair, element hauls,
   element-cargo clears and element-route charters between them refuse
   ids outside the union of every live list (two-book, the war wall's
   shape). No list ⇒ open matter unfenced. The annex dies with the
@@ -202,7 +202,7 @@ Want / market:
 
 | Surface | Show |
 |---------|------|
-| SOLAR SYSTEMS | ELEMENTS kinds·mass (already) |
+| Solar systems | Elements kinds·mass (already) |
 | New view `routes` | element routes, melt, rail, upkeep (**E3.8 landed**) |
 | New view `refineries` | tuned element, throughput, heat (**E3.8 landed**) |
 | Civ drill-down | top 3 elements by mass; open routes |

@@ -1,6 +1,6 @@
-# FORGE REMEDIATION PLAN — the 94 %
+# Forge remediation plan — the 94 %
 
-> **ARCHIVED 2026-08-13.** Superseded/dead weight per the doc audit — kept for history, not live spec. See docs/BUILD_ORDER.md, docs/archive/HANDOFF_2026-08-13.md, or the doc it names as its successor for current status.
+> **Archived 2026-08-13.** Superseded/dead weight per the doc audit — kept for history, not live spec. See docs/BUILD_ORDER.md, docs/archive/HANDOFF_2026-08-13.md, or the doc it names as its successor for current status.
 
 **Lane:** `remediations-lane`. **Written:** 2026-08-02.
 **Target:** `engine/solver/src/search.rs` — measured at **94.2 % of a
@@ -10,7 +10,7 @@ section's sequencing; §6 below records what changed and why.
 
 ---
 
-## §1 THE SAFETY PROOF — read this before the changes
+## §1 The safety proof — read this before the changes
 
 Everything proposed here is **prover-side only**, and that is not a
 judgement call — it is readable in three places:
@@ -37,7 +37,7 @@ judgement call — it is readable in three places:
 
 And one fact that closes the economic question:
 
-4. **`research_step` runs the search ONCE per world per beat**
+4. **`research_step` runs the search once per world per beat**
    (`conductor/src/lib.rs:1072`) and mints at most once. A faster
    search does not produce more solves per beat — it produces the same
    solve, sooner. **Wall-clock has no path to the mint rate.**
@@ -53,7 +53,7 @@ Those stay exactly as they are.
 
 ---
 
-## §2 WHAT THE SWEEP ACTUALLY COSTS — the arithmetic
+## §2 What the sweep actually costs — the arithmetic
 
 Steady state is level 5+ (`level = (1 + solved/3).min(5)`):
 `Difficulty { tier: 3, word_len: 3, rows: 4, cols: 4, train_pairs: 3 }`.
@@ -96,7 +96,7 @@ before applying its one new op. **That is the shear, unapplied.**
 
 ---
 
-## §3 THE CHANGES
+## §3 The changes
 
 > ## Where the cost is — measured 2026-08-02, and it is not where the plan said
 
@@ -130,7 +130,7 @@ This single reading settles most of §3:
 `forge_task` samples a secret word from the tier's families, but the
 solver can only reach a `Tile` or `Recolor` operator if `derived_tiles` /
 `derived_recolors` reconstruct its exact parameters from the observation
-— and `derived_tiles` reads the ratio off the FIRST pair only, so a word
+— and `derived_tiles` reads the ratio off the first pair only, so a word
 that disturbs the shape (a tile composed with a rotation, say) leaves the
 operator unreachable and the task closed to the search.
 
@@ -147,7 +147,7 @@ surface: should the forge emit only tasks its own vocabulary can close,
 should the derived-operator coverage be widened to match the generative
 families, or is an unsolvable draw a lawful part of the ladder?
 
-## R1b — BUFFER REUSE: LANDED (2026-08-02)
+## R1b — Buffer reuse: landed (2026-08-02)
 >
 > Operator: *"your heap on the Vec is too small."* Correct, and it is
 > what R1 was missing.
@@ -179,7 +179,7 @@ families, or is an unsolvable draw a lawful part of the ladder?
 > one of the two buffers it needed, so it measured as a wash. The
 > hypothesis was right and the implementation was half-done.
 >
-> ## ⛔ R1 (prefix images) + R3 (streamed level) — **STRUCK** (2026-08-02)
+> ## ⛔ R1 (prefix images) + R3 (streamed level) — **struck** (2026-08-02)
 >
 > **The predicted ≈3× did not appear. Measured A/B on one machine state,
 > 40 cycles from one baseline universe:**
@@ -196,8 +196,8 @@ families, or is an unsolvable draw a lawful part of the ladder?
 > cheap re-application on small grids for persistent allocation, and the
 > two cancel.
 >
-> **AND MY OWN 48.24 s FIGURE DOES NOT REPRODUCE.** It was measured
-> BEFORE the 66-commit merge; the same baseline on the same machine now
+> **And my own 48.24 s figure does not reproduce.** It was measured
+> before the 66-commit merge; the same baseline on the same machine now
 > reads ~56.2 s for the *unchanged* code. So the earlier "R1 is a
 > regression" reading was an artefact of comparing across a merge —
 > corrected here rather than left standing. Separately worth noting: the
@@ -208,18 +208,18 @@ families, or is an unsolvable draw a lawful part of the ladder?
 > plan predicting 3× is exactly the kind of claim that has to be measured
 > before it is believed.
 >
-> **KEPT: `solver/tests/search_identity.rs`** — 30 recorded answers
+> **Kept: `solver/tests/search_identity.rs`** — 30 recorded answers
 > spanning every rung, plus determinism and a closes-its-task check. It
 > was written to guard the rewrite and it outlives it: any future change
 > to `solve` now has a pin that catches a substituted program, which is
 > what a property test cannot see.
 >
-> **What this does NOT settle:** where the 94 % actually goes. The
-> op-count model was wrong, so the next move is to PROFILE `solve`
+> **What this does not settle:** where the 94 % actually goes. The
+> op-count model was wrong, so the next move is to profile `solve`
 > (vocabulary construction, `OBJ_OPS` segmentation, allocator) rather
 > than to reason about it again. Recorded as the reopened question.
 
-### R1 — CARRY THE PREFIX OUTPUTS (the shear) · **land first**
+### R1 — Carry the prefix outputs (the shear) · **land first**
 
 **What.** The BFS already holds every prefix in `frontier`. Store with
 each frontier entry the grid it produces **for each training pair**
@@ -249,7 +249,7 @@ it must be written before either lands.
 
 ---
 
-### R3 — STREAM THE FRONTIER, NEVER MATERIALIZE IT (peel) · **land with R1**
+### R3 — Stream the frontier, never materialize it (peel) · **land with R1**
 
 **What.** `search.rs:161-173` builds `next: Vec<Program>` holding up to
 `room` fully-cloned programs — ~50 k heap `Vec<Op>` per world per beat,
@@ -275,8 +275,8 @@ one node's cache. Allocation is not the dominant term — expect
 **Semantics.** Identical, same order, same first match.
 
 **Risk.** The budget accounting (`tested`, `room`, `SEARCH_BUDGET`)
-must count **exactly** as it does today. `SEARCH_BUDGET` is an ENGINE
-LAW (`search.rs:111-119`) and a deterministic bound is what makes the
+must count **exactly** as it does today. `SEARCH_BUDGET` is an engine
+law (`search.rs:111-119`) and a deterministic bound is what makes the
 forge replayable. The rewrite must not drift the count by one.
 
 **Witness.** Extend R1's identity pin to assert the **candidate count**
@@ -284,7 +284,7 @@ is unchanged for a fixed digest, not only the returned program.
 
 ---
 
-### R4 — ORDER THE VOCABULARY BY WHAT THE OBSERVATION SAID · **the largest win**
+### R4 — Order the vocabulary by what the observation said · **the largest win**
 
 **What.** `vocabulary` is built in this order (`search.rs:125-135`):
 
@@ -329,7 +329,7 @@ identity, **then** R4 as a deliberate order change with its own pin
 
 ---
 
-### R5 — MEMOIZE `(digest, difficulty) → outcome` · **measure before building**
+### R5 — memoize `(digest, difficulty) → outcome` · **measure before building**
 
 **What.** `solve` is pure and deterministic. `research_step` seeds it
 from `receipts().last().own`, so a world that appended nothing since
@@ -348,7 +348,7 @@ struck*.
 
 ---
 
-### R2 — CANONICAL FORM ON GEOMETRY RUNS · **deprioritized, with the arithmetic**
+### R2 — Canonical form on geometry runs · **deprioritized, with the arithmetic**
 
 `REMEDIATIONS.md` R2 proposed collapsing the six symmetry generators to
 the ≤8 dihedral elements they generate. Having done the counting, the
@@ -370,7 +370,7 @@ wiring at N6.
 
 ---
 
-## §4 SEQUENCING
+## §4 Sequencing
 
 | # | change | gate | outcome-neutral? | expected |
 |---|---|---|---|---|
@@ -390,11 +390,11 @@ beside the old.
 
 ---
 
-## §5 WHAT IS NOT PROPOSED
+## §5 What is not proposed
 
 - **Touching `SEARCH_BUDGET`.** A candidate count, not a clock, is what
   makes the forge replayable across machines (`search.rs:111-119`, an
-  ENGINE LAW and explicitly never a test knob). It stays.
+  engine law and explicitly never a test knob). It stays.
 - **Skipping depths below `word_len`.** The forge always uses exactly
   `word_len` ops, so depths 0–2 look wasteful — they are 1 407 of
   52 060 candidates (**2.7 %**), and searching them is what lets a
@@ -409,7 +409,7 @@ beside the old.
 
 ---
 
-## §6 CORRECTION TO `REMEDIATIONS.md` §8
+## §6 Correction to `REMEDIATIONS.md` §8
 
 That section sequenced R1–R3 as **blocked on Ruling Box 1**, reasoning
 that the forge is the proof-of-work so making it cheaper re-prices a

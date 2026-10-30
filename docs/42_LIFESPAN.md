@@ -1,10 +1,10 @@
-# 42 — LIFESPAN (the species clock, and what it does to a society)
+# 42 — Lifespan (the species clock, and what it does to a society)
 
-**Status:** DESIGN, proposed 2026-08-13. Entirely **missing law** — no
+**Status:** design, proposed 2026-08-13. Entirely **missing law** — no
 age, mortality, senescence, or turnover exists in code today
 (`world/labor.rs` holds a static headcount). Spec'd here as the
-MORTALITY TERM of the `41_PROVISION` §3 population, with the rulings §5
-names. Not itself LAW — ruled section by section, the `40_REJUVENATION`
+mortality term of the `41_PROVISION` §3 population, with the rulings §5
+names. Not itself law — ruled section by section, the `40_REJUVENATION`
 discipline.
 
 ---
@@ -13,20 +13,20 @@ discipline.
 
 Different entities should not live alike. A crystal-mind or a plasma-
 field is a slow, near-geological being; a biotic-swarm or a void-swarm
-turns over in a breath. Today they turn over IDENTICALLY — not at all:
+turns over in a breath. Today they turn over identically — not at all:
 `labor_force = habitats + clones` is a static count with no birth, no
 death, no generation. This chapter gives each species its own clock,
 and makes that clock the engine of a real trade: **growth versus
 continuity.**
 
 It is the third face of the one tension the game already rules. The
-Locust/Custodian split is EXTRACTION-vs-regrowth on a planet (#28) and
-DEMAND-vs-food on a population (`41_PROVISION` §3); lifespan is
-TURNOVER-vs-continuity on the generations. One law, three surfaces.
+Locust/Custodian split is extraction-vs-regrowth on a planet (#28) and
+demand-vs-food on a population (`41_PROVISION` §3); lifespan is
+turnover-vs-continuity on the generations. One law, three surfaces.
 
-## 1. LIFESPAN IS A SPECIES PROPERTY — read, not chosen
+## 1. Lifespan is A species property — read, not chosen
 
-A line's characteristic lifespan is a fact of WHAT IT IS — its class /
+A line's characteristic lifespan is a fact of what it is — its class /
 clade — the same place `clade_preferred_region` and `economic_mode`
 already read (`almanac::taxon_economy`). The ordering is the law; the
 exact spans are §5:
@@ -42,9 +42,9 @@ from the species roster (`15_TAXON`), not a per-line dial** — a clade's
 lifespan derives from its class band exactly as its preferred region
 does.
 
-## 2. LIFESPAN → THE MORTALITY TERM — turnover in the population curve
+## 2. Lifespan → the mortality term — turnover in the population curve
 
-Lifespan enters as the DEATH RATE in the `41_PROVISION` §3 population
+Lifespan enters as the death rate in the `41_PROVISION` §3 population
 logistic. A population of `labor_force` at lifespan `L` loses a `1/L`
 share of its force per beat to natural turnover — the flat,
 exact-rational shape (`1/L` is a clean ratio; no transcendental,
@@ -54,8 +54,8 @@ a touch is:
     ΔP = food_surplus_growth  −  turnover(1/L · P · Δt)
 
 - A **short-lived** line (small `L`) has a large death term: it must
-  keep breeding hard just to hold, so it grows FAST when fed and
-  collapses FAST when starved — high-variance, adaptive, cheap.
+  keep breeding hard just to hold, so it grows fast when fed and
+  collapses fast when starved — high-variance, adaptive, cheap.
 - A **long-lived** line (large `L`) has a small death term: it holds
   its numbers on little food and barely grows even in surplus — low-
   variance, stable, expensive to expand.
@@ -63,27 +63,27 @@ a touch is:
 Settled lazily at the touch over `Δt`, the same seam as demurrage,
 rejuvenation, and provision — no per-beat deed.
 
-## 3. THE GROWTH-VS-CONTINUITY TRADE — what it means for the society
+## 3. The growth-VS-continuity trade — what it means for the society
 
-Turnover is not only a population number; it is what a society KEEPS.
-The `growth.rs` reading already carries CONTINUITY axes (time, testing,
+Turnover is not only a population number; it is what a society keeps.
+The `growth.rs` reading already carries continuity axes (time, testing,
 scope) derived from the chronicle. Lifespan couples to them:
 
-- **A long-lived society ACCUMULATES.** Its practices, tech, and
+- **A long-lived society accumulates.** Its practices, tech, and
   discovered nodes persist across generations because the generation
-  barely changes — knowledge compounds, the growth-reading's TIME and
-  TESTING axes deepen. The Custodian's body: slow to grow, hard to
+  barely changes — knowledge compounds, the growth-reading's time and
+  testing axes deepen. The Custodian's body: slow to grow, hard to
   displace, rich in retained law.
-- **A short-lived society CHURNS.** Each fast generation must RE-EARN
+- **A short-lived society churns.** Each fast generation must RE-earn
   what the last knew, or it decays — knowledge is discontinuous unless
   actively renewed. The Locust's body: fast, adaptive, forgetful; it
   wins the sprint and loses the archive.
 
 **The mechanic that makes this bite:** a share of a line's standing
 advantages (crystallized boons, adopted practices) that must be
-RE-CONFIRMED within a lifespan or lapse — so a short-lived line pays a
+RE-confirmed within a lifespan or lapse — so a short-lived line pays a
 continuity tax a long-lived one does not. This is the demurrage shape
-applied to KNOWLEDGE rather than stock, and it reuses the same
+applied to knowledge rather than stock, and it reuses the same
 settle-at-touch seam. The exact decay and what lapses is a §5 ruling.
 
 ## 4. What this composes with
@@ -105,7 +105,7 @@ settle-at-touch seam. The exact decay and what lapses is a §5 ruling.
    (crystal/mineral/energy long, biotic collective short), banded so the
    longest is a small multiple of the shortest, not orders apart (a
    10000-beat vs 10-beat split would make short-lived lines unplayable).
-2. **The starvation interaction** (§2) — does turnover ADD to the
+2. **The starvation interaction** (§2) — does turnover add to the
    `41_PROVISION` §3 starvation decay, or is starvation just turnover
    with no births? One combined death term is simpler.
 3. **The continuity tax** (§3) — what a short-lived line must re-confirm

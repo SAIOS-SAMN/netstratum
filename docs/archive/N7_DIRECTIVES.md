@@ -1,6 +1,6 @@
-# N7 DIRECTIVES — the bilateral consensus axes (2026-07-31, coder-04)
+# N7 Directives — the bilateral consensus axes (2026-07-31, coder-04)
 
-Plain language. The design paper BEFORE any code (coder-03 directive
+Plain language. The design paper before any code (coder-03 directive
 2, the mesh precedent: NS-5 went paper-first and it held). Scope: the
 two consensus axes and their coupling. Nothing here is inscribed law
 until the operator rules the two boxes below; the constraint at the
@@ -12,13 +12,13 @@ bottom is already law and carries whole.
 layer is real (forged refuses, drift cures by the tail, one writer
 per clock, the partition law); the measurement instrument widened to
 the totality law at MESH-1d (every committed field measured or
-censused, nothing invisible; the equal-spine zero named THE
-REPLICATION WITNESS). The first non-tautological convergence —
+censused, nothing invisible; the equal-spine zero named the
+replication witness). The first non-tautological convergence —
 confluence of branches that did independent work — waits on the
 opposition readings (coder-03's #33) and consumes the widened
 instrument.
 
-**Axis 2 — proof of useful work (the solver lane, landed BESIDE the
+**Axis 2 — proof of useful work (the solver lane, landed beside the
 board).** `engine/solver` is PoUW in the one lawful form: finding a
 solution is search (hard); every solution emits a blake3
 predecessor-linked certificate chain; `verify_certificate` replays it in
@@ -29,7 +29,7 @@ chronicle, sync never verifies work, work earns nothing receipted.
 Q1's verdict (OPEN_QUESTIONS, 2026-07-26) stands and is carried
 whole: simulation-as-work and GPU float are dead — they broke
 exact-rational replay and made verification unaffordable. The
-salvage IS axis 2: certificate-verified work, cheap to check, hard
+salvage is axis 2: certificate-verified work, cheap to check, hard
 to fake.
 
 ## The coupling (unbuilt — three steps, in order)
@@ -39,8 +39,8 @@ to fake.
    or its digest with the verification path — rides the world
    chronicle. This pays the debt the tree already names
    (BUILD_ORDER §3a-octies: "an honest approximation until solves
-   become receipts"; solver/certificate.rs defers wiring to LAW
-   XVII's first game consumer).
+   become receipts"; solver/certificate.rs defers wiring to law
+   xvii's first game consumer).
 2. **Sync verifies work.** The receive door / the §3.4 session
    replays embedded certificates before adopting a spine that
    carries work claims — the in-house answer to Q1's verification
@@ -49,7 +49,7 @@ to fake.
 3. **Work earns what the operator rules** — never what a landing
    assumes. Ruling box 1.
 
-## RULING BOX 1 — what does certificate-verified work earn?
+## Ruling box 1 — what does certificate-verified work earn?
 
 The candidates visible in the tree, none ruled:
 
@@ -62,14 +62,14 @@ The candidates visible in the tree, none ruled:
   (turns today's honest approximation into receipted truth).
 
 These are not exclusive; the ruling may take one, several with
-weights, or something not listed. UNRULED — no code moves first.
+weights, or something not listed. Unruled — no code moves first.
 
-## RULING BOX 2 — which board does the PoUW wiring land on?
+## Ruling box 2 — which board does the PoUW wiring land on?
 
 The N6 remainder (before the #9 docs fold), or its own board beside
 N7. The wiring touches three lanes (solver, the cfe registry, the
 mesh doors), so it is a real landing either way; the board choice
-sequences it against MESH-1c and the fold. UNRULED.
+sequences it against MESH-1c and the fold. Unruled.
 
 ## The seam law, carried from the mesh cadence
 

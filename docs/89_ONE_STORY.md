@@ -1,13 +1,12 @@
 # 89 — One story: from the universal core to a mind, and where it breaks
 
-Operator 2026-10-22: "why didnt you use the physics we already established to
-create the working universe? you built parallel machinery that is
-misaligned"; "do the inventory: we already water planets, stars, galactic,
-and universe cores - to include chemistry : converge them all into a single
-coherent story".
+Design direction (2026-10-22): the working universe is built on the physics
+already established, not on parallel, misaligned machinery; inventory what
+already waters planets, stars, galactic and universe cores, chemistry
+included, and converge it into one coherent story.
 
 This is an inventory of what the universe already computes, read from the
-code (2026-10-22, HEAD 1459e48), told as one story, followed by every place
+code (2026-10-22, head 1459e48), told as one story, followed by every place
 the story breaks. ✔ built and live · ◐ ruled in the docs, not built ·
 ✘ parallel or stand-in machinery that contradicts the story.
 
@@ -19,7 +18,7 @@ the story breaks. ✔ built and live · ◐ ruled in the docs, not built ·
 - **The nucleus is the unit of matter** (`pulse`, `chem`, cfe `atom`): a
   grain is `1024·60^30` nuclei; a nucleus's span is `3Z` = holding
   (`3Z − unpaired`, the ℤ pole) + magnetism (`unpaired`, the ℚ pole); burning
-  moves magnetism into holding with `3Z` fixed, and LIGHT is that flux. ✔
+  moves magnetism into holding with `3Z` fixed, and light is that flux. ✔
 - **Atoms fill windings on S^11** (cfe `atom`: shells 2, 26, 180; tightness
   `Q_enclosed/n`; `open_at(z, heat)` strips windings the heat beats). ✔
 - **Chemistry closes open frames** (`chem::closing`: the smallest whole
@@ -40,7 +39,7 @@ the story breaks. ✔ built and live · ◐ ruled in the docs, not built ·
 > `orbit_galaxies` with one universal core.
 
 The pulse founds the universe from its Zs as grains (`pulse::found`,
-`cascade`): kinds within the universal throat stay as the WELLSPRING
+`cascade`): kinds within the universal throat stay as the wellspring
 (the firmament, motes about the home), the shells' beads become galaxies.
 The home `[0]` has no clock of its own; its stars read the source directly
 (`galaxy_rate = None`). Each universal echo it kicks the firmament
@@ -48,53 +47,53 @@ The home `[0]` has no clock of its own; its stars read the source directly
 holding `H_u = 1 + Σ(state + holding + magnetism)` counts every nucleus at its
 whole 3Z (`ocean::universe_hold`). ✔
 
-The OCEAN is the universe's recycled medium (`u.medium`): what galaxies jet
-and spill. Galaxies gather it on CRESTS `R_{p/q} = H_u(2p/q − 1)`, coupled
+The ocean is the universe's recycled medium (`u.medium`): what galaxies jet
+and spill. Galaxies gather it on crests `R_{p/q} = H_u(2p/q − 1)`, coupled
 `a_q = 1/q` for odd q (`ocean::gathered`, `take`). ✔ It is not yet motes
-(breath, "STAGED") ◐; `ocean::land`, `pump`, `crest_collapse` are unwired ◐.
+(breath, "staged") ◐; `ocean::land`, `pump`, `crest_collapse` are unwired ◐.
 
 ### 2. A galactic core
 
-A core holds its STATE (the throat, founded, never drained) and its matter
-as MOTES (`Body.flows`, each with `ell_o`, `ell_c`, a phase per plane,
-agitation, a lever). Each echo the core KICKS its motes (`flows::kick`: push
+A core holds its state (the throat, founded, never drained) and its matter
+as motes (`Body.flows`, each with `ell_o`, `ell_c`, a phase per plane,
+agitation, a lever). Each echo the core kicks its motes (`flows::kick`: push
 `p = held/(1 + held)`, `Δℓ = p·δ·mean_response`, heat `p·δ(1 − |k|)`), they
-TURN (`flows::turn`: `2δ` a bell, the vacuum's inversion `δ → 1 − δ`), pass
+turn (`flows::turn`: `2δ` a bell, the vacuum's inversion `δ → 1 − δ`), pass
 through the centre rather than pile (`through: R → 2H − R`), and settle at rest
 `R* = 2qH/(H² − 2q)` (`flows::rest`). ✔ The galaxy's band push is held back
 (operator, "make it static"). ◐
 
-**Its throat is a furnace** (`recycle`): what falls in is PARTED (clusters,
-water included, part at the throat's heat), then PRESSED `z + z → 2z` or
-PEELED by the container's and the bounce's shares; each pressed pair makes
-LIGHT `2u(z) − u(2z)`, which SHINES on the core's motes (`breath::shine`).
-Unchanged matter exits SEALED; changed matter CAUTERIZED with a scar. ✔
+**Its throat is a furnace** (`recycle`): what falls in is parted (clusters,
+water included, part at the throat's heat), then pressed `z + z → 2z` or
+peeled by the container's and the bounce's shares; each pressed pair makes
+light `2u(z) − u(2z)`, which shines on the core's motes (`breath::shine`).
+Unchanged matter exits sealed; changed matter cauterized with a scar. ✔
 
 **Stars are born from its gas** (`breath`, `formation`): a binding ignites
 where `ignition_share(a + ½(1 − δ))` holds; the heart cut (`heart_cut`, the
 push ½) keeps what binds; the star's own spin is its members' spread of
 orbital spin (`Body.turning`), its phases their holding-weighted mean.
-Stars RIDE their galaxy (bell, gyroscope return), MEET (`collide_stars`:
-stick or bounce by `s·D ≥ T`), are CAPTURED at pinches, and DISSOLVE with a
+Stars ride their galaxy (bell, gyroscope return), meet (`collide_stars`:
+stick or bounce by `s·D ≥ T`), are captured at pinches, and dissolve with a
 toll heard down the route (`Toll`). ✔
 
 ### 3. A star and its system
 
-A star BURNS rung by rung (`formation::burn`: a rung runs only where pairing
+A star burns rung by rung (`formation::burn`: a rung runs only where pairing
 rises, `2u(z) > u(2z)`; feed `dm/(6Z)·1/(1+2Z)·s/Q̄·c`, compounding). Its
-LIGHT LEDGER is exact: `made = received + drained` (`breath::Light`); each
-mote of its system takes `l·(1 − δ(R))/M` (`shine`, its UNLOCKED face), the
-rest drains. ✔ At ignition its disc condenses 1–12 PLANETS (`planets`),
+light ledger is exact: `made = received + drained` (`breath::Light`); each
+mote of its system takes `l·(1 − δ(R))/M` (`shine`, its unlocked face), the
+rest drains. ✔ At ignition its disc condenses 1–12 planets (`planets`),
 layered (`bind_layers`), the rest sprayed as motes; its system's motes and
-worlds MEET (`collide_system`: grip × closeness vs relative turning; stick,
-bounce with exchanged spin), CHEMISTRY runs at every meeting (`closing` at the
-place's own heat), and neighbour periods LOCK on convergents (`lock_step`).
+worlds meet (`collide_system`: grip × closeness vs relative turning; stick,
+bounce with exchanged spin), chemistry runs at every meeting (`closing` at the
+place's own heat), and neighbour periods lock on convergents (`lock_step`).
 Outbursts, winds, remnants, decoherence. ✔
 
 ### 4. A world
 
 A world is a layered body (`Body.kept`; core by `heart_cut`, kinds in bands
-`R_z(1 ± ½)`), carrying its HEAT (`Body.heat`, born from its disc's light and
+`R_z(1 ± ½)`), carrying its heat (`Body.heat`, born from its disc's light and
 the unlocked face, cooling `·(1 − ½(1 − δ))` each bell). ✔ **Water is made
 here**: `layer_chemistry` closes overlapping atom bands at the layer's own
 heat, `heat(R) = heat₀·H/(R + H)`; water and every other cluster form in
@@ -111,11 +110,11 @@ that, the quantum tier holds the residues no place can (Acknowledged). ✔
 ### 6. Life, minds and peoples
 
 What the story should say: a world's matter (its layers, with its water),
-at its heat, fed by its star's light through its face, offers MEDIA (chemical,
+at its heat, fed by its star's light through its face, offers media (chemical,
 geologic, plasmic, informational); a medium carries pattern by its halvings;
-the CLIMB is written at the coupling's recoherences (the world's slip
+the climb is written at the coupling's recoherences (the world's slip
 against its star), struck by impacts as quantum measurements, and a mind
-WAKES within its star's window (`life::advance`, `quantum`). ✔ The mind founds
+wakes within its star's window (`life::advance`, `quantum`). ✔ The mind founds
 a line (`waking`); lines grow, cleave, settle, trade, think, and the tiers
 arise from what they do (`tiers`, `ancients`, `ascension`, `realms`). ✔
 
@@ -184,7 +183,7 @@ already speaks.
    by the unlocked face it already reaches its motes by (`shine` over its
    satellites, received `l·(1 − δ(R))/M`, the rest drained); the world's heat
    is kept from it and cools as now. The lock's q refines it later (◐ Ψ_w).
-3. **Retire my parallel pieces (B3)** in place: the land is the light a world
+3. **Retire the parallel pieces (B3)** in place: the land is the light a world
    received taken up by a people's medium; place, spin and day are read on
    the star's sphere when the planes are (step 6).
 4. **One law for each thing (B5)**: one phase (the stepped `Body.phase`), one
@@ -199,7 +198,7 @@ already speaks.
    day, a people's place on it).
 7. Then docs/87's knowledge steps on top of a story that holds.
 
-## Convergence, pass 1 (2026-10-22, operator: "proceed with your convergence")
+## Convergence, pass 1 (2026-10-22, direction to converge)
 
 Done, read on play3 (the same universe before and after):
 

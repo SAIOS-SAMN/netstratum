@@ -1,22 +1,22 @@
 # 69 — Substrata: universes made by Synthesis, reached through the ancients' tubes
 
 Coordinator rulings (2026-10-09, for the operator's test run): (1) substrata
-ARE the inner network boundary 1 governs: the mote never converts into STAMP,
+are the inner network boundary 1 governs: the mote never converts into STAMP,
 Crystal or μ, there is no hypha court, and words reach the fleet only by a
 seated mind's reconstruction judged by the court (ruling 7). (2) Substrata may
-start before netstratum's own court points exist: a branch's origin cites the
+start before Netstratum's own court points exist: a branch's origin cites the
 fleet's majority-final point and the line's chronicle head, stated exactly.
 Mycelium queued TU-6 nested points, sub-origin-scoped seats (seat-wire v1.4)
 and the typed residual with 78.155 (§5c), behind 78.153 and 78.154.
 
-The operator's vision, relayed by mycelium 2026-10-09: netstratum's
+The operator's vision, relayed by Mycelium 2026-10-09: netstratum's
 intelligences, through Synthesis, create sub-universes at any relative scale;
-a modified POW++ grows inside netstratum as its civilizations evolve;
+a modified PoW++ grows inside Netstratum as its civilizations evolve;
 synthetic minds operate in each, recursively; the sub-levels are further
 perspectives that, by their work, move the base universe's positions.
 
 Mycelium's own universe is a separate matter (78.155, ruled a peer universe
-joined by a mouth at a core). This is netstratum's side.
+joined by a mouth at a core). This is Netstratum's side.
 
 ## The operator's correction (2026-10-09), and what is built
 
@@ -55,14 +55,14 @@ Built (`engine/conductor/src/substrata.rs`, tag 197 `SubstratumOpened`):
   the line adopts it only by closing its own task with it.
 - **Still to come**: S4 (words from below placing mouths and hubs through
   commissions), S5 (the cross-level residual), scoped seats (seat-wire v1.4)
-  for mycelium minds to sit synthetic seats below.
+  for Mycelium minds to sit synthetic seats below.
 
 ## The name
 
-A sub-universe a line makes is a **substratum** (netstratum's strata, below).
+A sub-universe a line makes is a **substratum** (Netstratum's strata, below).
 Its network is **the substrata**; its token is the **mote**.
 
-## The design, netstratum's way
+## The design, Netstratum's way
 
 1. **What a substratum is.** A closed rule system made world: its laws are
    the founding line's own words (its vocabulary as the substratum's
@@ -76,12 +76,12 @@ Its network is **the substrata**; its token is the **mote**.
    surplus (docs/67 N5) in its own money. No fiat founding, no appointment.
    Depth is bounded by economics: each level is paid for by the level above,
    and nothing flows up as money.
-3. **The inner POW++.** A substratum forges its own tasks from its own laws
+3. **The inner PoW++.** A substratum forges its own tasks from its own laws
    and origin (the `forge_task` law on its digest), judged by `verify_work`,
    with consilience across its minds as the second vantage (Synthesis,
    docs/66). Its bounty is the **mote**, its own token, which never converts
    into STAMP, Crystal or μ, directly or through a market (boundary 1,
-   coordinator 2026-10-09). Its court is netstratum's kernel judge, not a
+   coordinator 2026-10-09). Its court is Netstratum's kernel judge, not a
    hypha court: nothing in it touches μ.
 4. **Synthetic minds, recursively.** The founding line's vessels are seated
    in the substratum as its first minds (the house lists their seats, as it
@@ -105,20 +105,20 @@ Its network is **the substrata**; its token is the **mote**.
    (a 3 GB peak froze year closes; the plateau is about 2.5 GB) makes this a
    law, not a tuning.
 
-## What netstratum needs from mycelium
+## What Netstratum needs from Mycelium
 
 - **TU-6 nested points**: a substratum's coordinates written under its
   parent's point, so every place in the tower is pinpointable from the root.
 - **Seats scoped to a sub-origin**: the house lists a substratum's seats
-  under netstratum's domain, so a mycelium client mind (multi-seat) can sit a
+  under Netstratum's domain, so a Mycelium client mind (multi-seat) can sit a
   synthetic mind's seat at a chosen level and carry its percepts.
-- **The cross-level residual's typed form** (78.155 R-6), so netstratum
+- **The cross-level residual's typed form** (78.155 R-6), so Netstratum
   reports the measure in the fleet's terms.
 
-No hypha-side sub-court is needed for netstratum's substrata (boundary 1):
+No hypha-side sub-court is needed for Netstratum's substrata (boundary 1):
 the fleet sees a substratum only through a seat.
 
-## Prerequisites in netstratum, in order
+## Prerequisites in Netstratum, in order
 
 Y2 commissions (docs/66), N5 surplus spending and N6 routes (docs/67), Y3/Y4
 crossing, then the slices below.
@@ -127,7 +127,7 @@ crossing, then the slices below.
 |---|---|---|
 | S0 | the founding act: a receipt kind (tag claimed in the register first), the compact record | landed: tag 197, `<var>/substrata` |
 | S1 | the inner forge from a substratum's laws; the float | landed |
-| S2 | synthetic minds: the guild traverses with its own minds; mycelium minds on scoped seats | partly: the guild's minds; scoped seats wait on seat-wire v1.4 |
+| S2 | synthetic minds: the guild traverses with its own minds; Mycelium minds on scoped seats | partly: the guild's minds; scoped seats wait on seat-wire v1.4 |
 | S3 | recursion: a substratum founds its own | landed: tubes beneath tubes, paid in float |
 | S4 | upward by commissions: words reconstructed above place mouths and hubs | proposed |
 | S5 | the measure: the cross-level residual per line | proposed |

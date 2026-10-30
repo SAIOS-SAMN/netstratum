@@ -15,7 +15,7 @@ implement; G2 does not test those.
 
 - **Genesis:** the 22 compiled seats, founded in the first beat
   (`conductor/src/main.rs` startup, `Polity::genesis`).
-- **Growth:** new civilizations appear ONLY by divergence, the cleave
+- **Growth:** new civilizations appear only by divergence, the cleave
   (`lib.rs` `divergence_step`). A line cleaves once it holds the top of the
   difficulty ladder (L8) with at least 20 solves. Its branch is founded
   live, with its own world and chronicle, at a chart point beside the
@@ -25,9 +25,8 @@ implement; G2 does not test those.
   point, under that temperament. Before the fix, a restart founded it a
   second time as `<sigil>-hearth` at a derived position (`bloom-call` vs
   `bloomcall-hearth` in the archive).
-- **Founding is a choice (fixed for G2, operator 2026-10-07: "only give
-  them options, freedom, and agency").** A pinned seat is the line's
-  compiled HOME: one option, not an order. Beside it stand the regime's
+- **Founding is a choice (fixed for G2, direction of 2026-10-07: give the lines options, freedom and agency).** A pinned seat is the line's
+  compiled home: one option, not an order. Beside it stand the regime's
   continuous draws and the open orbits (every twelfth of `k` out to 3)
   around every main-sequence sun, about 365 options. The physics scores
   each by `substrate_viability`, and the band draws among them,
@@ -68,7 +67,7 @@ implement; G2 does not test those.
 | 10 | STAMP | rises, always ≤ crystal ever held; in code it only moves between lines, so total STAMP never falls | `StampMinted`, apertures | `lib.rs:5189-5215`, `world/mod.rs:663`, `:705` |
 | 11 | First cleave | no sooner than 19 beats after the line's first solve, and only at L8 | `beat N: DIVERGENCE — X cleaves from the line of Y`, `Diverged` (tag 43) | `lib.rs:4458` |
 | 12 | Cleave ceiling | at most 22 first-generation cleaves (one per line), fewer as name pools run dry | roster count | `lib.rs:4553-4565` |
-| 13 | Collapse | possible, by a band's own poor choice of land; a collapsed line LEAVES THE ROSTER (its chronicle synced whole) and is never again a party to trade | `CivilizationCollapsed` (tag 174), `beat N: COLLAPSE — …` | `world/science_lab.rs:309-321`, `conductor::retire_collapsed` |
+| 13 | Collapse | possible, by a band's own poor choice of land; a collapsed line leaves the roster (its chronicle synced whole) and is never again a party to trade | `CivilizationCollapsed` (tag 174), `beat N: COLLAPSE — …` | `world/science_lab.rs:309-321`, `conductor::retire_collapsed` |
 | 14 | Restart | resumes, never refounds: same worlds, cleaves not repeated, solves and levels kept | world dirs, `Diverged` count | `lib.rs:1477-1481`, `.seat` cards |
 
 Stale docs found while writing this: 11_AEON §3 and the comment at
@@ -78,7 +77,7 @@ STAMP sinks in 32_STAMP_MARKET §2.2 are doc-only.
 
 ## On the network
 
-Every G2 world is a people under netstratum's domain on the :7520 court.
+Every G2 world is a people under Netstratum's domain on the :7520 court.
 `ns-hypha census var-g2/worlds/<world> --send` folds its new receipts per
 receipt onto the colonies line and self-publishes. G2's compiled seats
 reuse the archive's world names, so a people's network name carries its

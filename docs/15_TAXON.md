@@ -1,8 +1,8 @@
-# THE TAXON VOCABULARIES — class and clade enter the kernel (KERNEL-TAXON, draft for ratification)
+# The taxon vocabularies — class and clade enter the kernel (KERNEL-TAXON, draft for ratification)
 
-**Status:** RATIFIED 2026-07-31 (operator — all three of §6 in one
+**Status:** ratified 2026-07-31 (operator — all three of §6 in one
 ruling: the boundary, the class partition with its seventh class and
-every seating, the clade table). The vocabularies below are LAW at the
+every seating, the clade table). The vocabularies below are law at the
 register tier; they enter the constitution at coder-03's amendment.
 The ratified machine mapping for the migration wave stands at
 `seeds/taxon-map.json` (33 lines, branches inheriting the root class
@@ -21,11 +21,11 @@ couplings land inside `admits()` after the I-invariants seal.
 
 | Category | Disposition | Why |
 |---|---|---|
-| **class** | MOVES into the kernel (closed u8 vocabulary) | identity fact; mechanics may lawfully key on it |
-| **clade** | MOVES into the kernel (closed u8 vocabulary) | identity fact; the taxon tier between species and axes |
-| **creed** | STAYS derived | operator-ruled generative (14 §2.6) — enumerating belief is barred; its kernel hook is the practice deed, already landed |
-| **function** | STAYS derived | a niche reading over state (12 §4), never stored |
-| **names / species / motto** | STAY register-side forever | names are the line's own tongue; the kernel sees only codes |
+| **class** | Moves into the kernel (closed u8 vocabulary) | identity fact; mechanics may lawfully key on it |
+| **clade** | Moves into the kernel (closed u8 vocabulary) | identity fact; the taxon tier between species and axes |
+| **creed** | Stays derived | operator-ruled generative (14 §2.6) — enumerating belief is barred; its kernel hook is the practice deed, already landed |
+| **function** | Stays derived | a niche reading over state (12 §4), never stored |
+| **names / species / motto** | Stay register-side forever | names are the line's own tongue; the kernel sees only codes |
 
 ## 2. The class vocabulary (proposed, code 0 lawful-unclassed)
 
@@ -38,7 +38,7 @@ partition needs:
 | 0 | ∅ | unclassed (lawful — a class arrives by amendment, never by default) | revenants, unratified lines |
 | 1 | ⬡ | biotic-swarm (collective/eusocial/colonial) | Hivelight, Klethaxu, Mycelial Weft, Coralline, Deepmat |
 | 2 | ◈ | geodic-lithovore (mineral metabolisms, stone-eaters) | Slagborn, Tunborn, Cairnborn, Corebound |
-| 3 | ◐ | metashifter (veil-native) | Darlok — the seat is FILLED (2026-08-01) |
+| 3 | ◐ | metashifter (veil-native) | Darlok — the seat is filled (2026-08-01) |
 | 4 | ≋ | telepathic-resonant (alignment/coherence lines) | Syzygy, Stillcold, **Umbrid** (sub-archetype of Stillcold — same class, clade 19) |
 | 5 | ⊚ | pelagic-aerial (volumetric biotic) | Echowright, Eightfold, Hadal, Aerie, Frostwright |
 | 6 | ∿ | plasma-field (plasmic/energy) | Coronal Choir, Borealis |
@@ -52,7 +52,7 @@ partition needs:
 
 **Class ceiling: 13** (`dop::class_ceiling`, raised 2026-08-08 — six balance tiers).
 
-> **THE TABLES ABOVE AND BELOW BECOME A SEED, not the whole**
+> **The tables above and below become A seed, not the whole**
 > (`28_VOCABULARY`, design 2026-08-05). The class and clade vocabularies
 > are closed today and raisable only by a coder. The design folds them
 > from the chain — compiled seed ∪ chain-minted growth — so a T0
@@ -84,9 +84,9 @@ See `almanac::taxon_table::expansion_clade`.
 **Clade ceiling: 345 (`u16`)** — further growth is a constant raise, not a
 type width fight. *(Legacy English aliases still parse.)*
 
-**19 draconic — a SUB-ARCHETYPE, not a peer line** (operator ruling
+**19 draconic — a sub-archetype, not a peer line** (operator ruling
 2026-08-01). The draconic clade seats inside class 4
-(telepathic-resonant), the SAME class the Stillcold line holds. That is
+(telepathic-resonant), the same class the Stillcold line holds. That is
 what "entangled" means here and it is the structural claim, not a
 flavour note: **one archetype, two expressions.** Class is the shared
 identity; clade is how it is expressed. A draconic line and an Stillcold
@@ -94,22 +94,22 @@ line are not two peoples who happen to cooperate — they are the same
 coherence-archetype read at two clades, and any mechanic keyed on class
 sees them as one.
 
-**20 metashifting — the Darlok seat, FILLED.** Class 3 (metashifter,
+**20 metashifting — the Darlok seat, filled.** Class 3 (metashifter,
 veil-native) stood reserved and empty since the partition was drafted.
 The clade that seats there is now named, and the class has an occupant.
 
-## 4. The seal — a NEW deed, deliberately (the amendment-tier argument)
+## 4. The seal — a new deed, deliberately (the amendment-tier argument)
 
 `TaxonSealed { class: u8, clade: u8 }` — once per star, beside the
 G1 seal, never inside it: **extending GenesisSealed's fields would
-change the meaning of an existing record — a BREAKING amendment (major
-bump). A new deed with its own tag is ADDITIVE (minor bump)** — the
+change the meaning of an existing record — a breaking amendment (major
+bump). A new deed with its own tag is additive (minor bump)** — the
 tier the charter built for exactly this cadence. The tag number is
 claimed at the landing amendment, not here (the registry moves too
 fast to pre-claim; four live collisions taught the sequence).
 
 **Invariant coverage (drafted for coder-03's ratification — a tag
-lands only WITH its coverage):**
+lands only with its coverage):**
 - **I2 containment:** the sealing actor holds Build scope or stands
   sovereign; the deed refuses otherwise.
 - **Vocabulary validity (DOP schema law):** `class` and `clade` must
@@ -124,7 +124,7 @@ lands only WITH its coverage):**
 
 ## 5. Sequencing (nothing lands out of order)
 
-1. NOW — this draft; the three ratifications (§6).
+1. Now — this draft; the three ratifications (§6).
 2. Codec freeze window (coder-04) — the committed `(class, clade)`
    fields enter the snapshot schema.
 3. The amendment (coder-03 seals; minor version bump; tag claimed).

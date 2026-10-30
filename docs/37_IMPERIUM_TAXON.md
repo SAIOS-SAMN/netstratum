@@ -1,4 +1,4 @@
-# IMPERIUM TAXON — species · clades · economy · planet · labs
+# Imperium TAXON — species · clades · economy · planet · labs
 
 **Status:** living law (2026-08-08).  
 **Authority:** ports and extends `15_TAXON` (class/clade wire + seal).  
@@ -44,7 +44,7 @@ the board needs more slots — wire already holds 65535.
 | # | Imperium | Alias (parse) | Role |
 |---|----------|---------------|------|
 | 1 | ailuroform | felid | solitary apex |
-| 2 | **bimaniform** | humanoid, **flatlander**, **human**, humans | **FLATLANDER BASELINE** |
+| 2 | **bimaniform** | humanoid, **flatlander**, **human**, humans | **Flatlander baseline** |
 | 3 | cryocoherens | cryo-coherent | superfluid mind |
 | 4 | lithophage | lithic | stone-eater |
 | 5 | hypobiotid | tardigrade | void-sleeper |
@@ -68,7 +68,7 @@ Wire codes **locked**. Display is imperium; aliases parse forever.
 
 ---
 
-## 3. FLATLANDER BASELINE (restored and named)
+## 3. Flatlander baseline (restored and named)
 
 | Field | Value |
 |-------|--------|
@@ -142,7 +142,7 @@ No second physics — only pure scales and gates over existing zones/tech.
 
 ---
 
-## 6. LOCKED line names (court only)
+## 6. Locked line names (court only)
 
 Tunborn · Slagborn · Echowright · Coronal Choir · Corebound · Stillcold · Umbrid ·
 Darlok · Sylvane · Forgeborn — seat structure. Species/clade words move;

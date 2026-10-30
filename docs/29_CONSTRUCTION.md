@@ -1,10 +1,10 @@
-# 29 — THE CONSTRUCTIVE LAW: how the judge and the constants both leave
+# 29 — The constructive law: how the judge and the constants both leave
 
-**Status:** **LAW — RATIFIED BY THE OPERATOR, 2026-08-06.** The ruling,
-verbatim: *"full forward advancement on PROVABLE not POLICED — that is
+**Status:** **law — ratified by the operator, 2026-08-06.** The ruling,
+verbatim: *"full forward advancement on provable not policed — that is
 the absolute truth."* What was drafted as a design is now the organizing
 principle of all forward work: every rule the engine carries is either
-PROVEN at construction — a type, a derivation, a fold of the chain — or
+proven at construction — a type, a derivation, a fold of the chain — or
 it is a debt with a count, and the count only falls. Policing (checking
 after the fact what construction could have made impossible) is the
 defect class this law exists to eliminate.
@@ -16,7 +16,7 @@ Subordinate to `00_CHARTER.md`, `26_ARTICLES.md`, `27_EVIDENCE.md`.
 
 ---
 
-## §1 ONE DEFECT, TWO COSTUMES
+## §1 One defect, two costumes
 
 A judge and a constant are the same thing wearing two costumes: **a
 decision made outside the structure and imposed on it.**
@@ -39,7 +39,7 @@ becomes unrepresentable. What remains is not an authority; it is a door.
 
 ---
 
-## §2 THE JUDGE SURFACE, MEASURED
+## §2 The judge surface, measured
 
 | surface | count |
 |---|---|
@@ -50,20 +50,20 @@ becomes unrepresentable. What remains is not an authority; it is a door.
 Classified, the 81 split into two kinds — and the distinction is the
 whole design:
 
-**SHAPE refusals (~20)** guard states the types can spell but the law
+**Shape refusals (~20)** guard states the types can spell but the law
 forbids: `BadTransfer`, `BadSiting`, `TaxonUnknown`, `OffSlot`,
 `BindingUnlawful`. Every one is a debt. The type let an unlawful value
 exist, so a judge had to catch it. **Each is removable by
 construction** — private fields, one door, the door returns the proof
 (`ShapeReading`, `DivisionProof` — the pattern is already landed).
 
-**FACT refusals (~23)** guard contingent state: `CannotAfford`,
+**Fact refusals (~23)** guard contingent state: `CannotAfford`,
 `NoSuchOrb`, `SeatFull`, `MintNotNovel`. These are not judgments of
 form — they are readings of what the chain currently holds, and they
 belong at the door forever. Refusing to sell what you do not have is not
 an authority; it is arithmetic.
 
-**The end state is therefore not zero refusals. It is zero SHAPE
+**The end state is therefore not zero refusals. It is zero shape
 refusals.** A door that reports facts is a door. A judge that catches
 representable-but-unlawful shapes is a debt, and the debt count is ~20.
 
@@ -81,27 +81,27 @@ Precedents already landed, each one a dead judge arm:
 
 ---
 
-## §3 THE CONSTANT'S THREE LAWFUL DESTINATIONS
+## §3 The constant's three lawful destinations
 
 A constant is a frozen decision. Unfreezing it means finding where the
 decision actually lives. There are exactly three lawful homes, and which
 one applies is a per-cluster ruling, not a refactor:
 
-1. **DERIVATION** — the law was already in the numbers.
+1. **Derivation** — the law was already in the numbers.
    The refinement ladder (`2^(t−1)` / `4^(2−t)`), the ring
    (`lcm` of the live vocabulary arities), the stack (counted from the
    condition namespace). Proof obligation: the derivation must
-   REPRODUCE the landed table exactly, so nothing is repriced.
+   reproduce the landed table exactly, so nothing is repriced.
 
-2. **MEASUREMENT** — the number is a reading of the live board, taken
+2. **Measurement** — the number is a reading of the live board, taken
    fresh instead of frozen. The difficulty ladder's own header already
    promises this: *network-rate adjustment lands with the mesh (N6)*.
    `hunger()` already does it (derived from the line's own rhythm, no
    constants). Prices, pacing and reserves belong here: a reserve target
    should be read off measured volatility, not written as `8`.
 
-3. **THE CHAIN** — the number is operator CONTENT, and content is minted
-   by receipt (`28_VOCABULARY`'s door, THE DEFINITION LAW's shape).
+3. **The chain** — the number is operator content, and content is minted
+   by receipt (`28_VOCABULARY`'s door, the definition law's shape).
    The roster's 76 siting literals are data about 19 lines, not law;
    `placement()` already derives positions for registered lines, and the
    founding lines can walk the same road. Data on the chain is not a
@@ -114,7 +114,7 @@ honest so "placeholder" cannot quietly become "permanent."
 
 ---
 
-## §4 THE ORDER TO DO IT IN
+## §4 The order to do it in
 
 1. **The shape refusals** (~20 arms) — each becomes a constructor;
    highest value per edit, no wire impact, and every kill shrinks the
@@ -134,18 +134,18 @@ literals in `src/`, counted by pin, expected to fall monotonically.
 
 ---
 
-## §5 THE SEMANTICS RULING — machinery speaks machine words
+## §5 The semantics ruling — machinery speaks machine words
 
 **Operator, 2026-08-05:** *why are we judging/lawful — that is not a
 mechanical state of machinery; that's esotericism with bias bleeding
 over into our semantics.*
 
-Correct, and the defect ran deeper than the functions: the VOCABULARY
+Correct, and the defect ran deeper than the functions: the vocabulary
 itself imported an authority frame. A judge has discretion; a verdict is
 pronounced; "lawful" appeals to an order outside the machine. A machine
-has none of those — a transition is DEFINED or UNDEFINED, a shape
-CONSTRUCTS or FAULTS, a gate ADMITS what the relation contains. Naming
-the mechanism after a courtroom is the same bias LAW 9 bars from
+has none of those — a transition is defined or undefined, a shape
+constructs or faults, a gate admits what the relation contains. Naming
+the mechanism after a courtroom is the same bias law 9 bars from
 premises, bleeding in through the identifiers.
 
 **Retired from machinery (renamed 2026-08-05):**
@@ -163,8 +163,8 @@ premises, bleeding in through the identifiers.
 discretion), `Refused` (a lock refuses a key), `Reading`/`Read` (the
 tree's own measurement vocabulary, already everywhere).
 
-**The boundary:** the DOCUMENT layer keeps "law" as a genre word — a
+**The boundary:** the document layer keeps "law" as a genre word — a
 charter is a document, and the operator's own workflow names charter-law
-docs. What is retired is the courtroom as a description of MACHINE
-STATE. The doc layer's own prose sweep ("the judge" as a character in
+docs. What is retired is the courtroom as a description of machine
+state. The doc layer's own prose sweep ("the judge" as a character in
 chapter prose) is the doc lane's follow-on, not this ruling's scope.

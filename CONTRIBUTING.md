@@ -1,14 +1,14 @@
-# Contributing to netstratum
+# Contributing to Netstratum
 
 This document sets the standards a change follows: the environment, the
 checks, how the design record is kept, and how commits are written. It
-matches the standards of the projects netstratum publishes with
-([mycelium](https://github.com/SAIOS-SAMN/mycelium) and xylarium).
+matches the standards of the projects Netstratum publishes with
+([Mycelium](https://github.com/SAIOS-SAMN/mycelium) and Xylarium).
 
 ## Environment
 
 - Rust, stable toolchain, with `rustfmt` and `clippy`.
-- Network access to GitHub at build time: the mycelium crates are fetched
+- Network access to GitHub at build time: the Mycelium crates are fetched
   from their published repository.
 - Linux or macOS. Era-1 readings are exact-rational and memory-hungry; long
   breaths want several GB free and are run one at a time.
@@ -20,7 +20,7 @@ cargo check --workspace --all-targets   # no errors, no warnings
 cargo test  --workspace                 # every test passes
 ```
 
-A physics change also carries its WITNESS: a test that proves the law it
+A physics change also carries its witness: a test that proves the law it
 builds (an identity, a conservation, a fixed point), never a test that pins
 an incidental number.
 
@@ -41,7 +41,7 @@ an incidental number.
 
 ## Mycelium
 
-netstratum depends on `mycelium` and `forms` from
+Netstratum depends on `mycelium` and `forms` from
 https://github.com/SAIOS-SAMN/mycelium at a tagged release, declared once in
 the root `Cargo.toml` (`[workspace.dependencies]`). Bumping the tag is a
 deliberate change of its own: read the release's wire and layout changes,
@@ -53,9 +53,9 @@ re-run every check, and record it.
   identity, `netstratum contributor <two.cats7701@gmail.com>` (the published
   set's ruling, 2026-10-30: one email for every repository, each under its
   own name: `mycelium contributor`, `xylarium contributor`). Personal names
-  appear only in the copyright line (README, NOTICE).
+  appear only in the copyright line (README, notice).
 - **Message:** a subject line of at most 72 characters in the imperative
-  ("Pin mycelium v0.2.0 from GitHub"), a blank line, then a body that says
+  ("Pin Mycelium v0.2.0 from GitHub"), a blank line, then a body that says
   what changed and why, wrapped at 72 columns.
 - **AI assistance:** work produced with an AI model carries a trailer naming
   it, e.g. `Co-Authored-By: Claude <noreply@anthropic.com>`.

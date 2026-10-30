@@ -1,4 +1,4 @@
-# THE BETA RUNBOOK — watching netstratum play itself
+# The beta runbook — watching Netstratum play itself
 
 **Status: operational, verified 2026-08-13.** This documents a
 capability that already exists — `engine/conductor` and
@@ -13,7 +13,7 @@ beat, with **no human input**. `observer.py` watches the result live,
 **strictly read-only** (it parses `chronicle.tlv`/`state.tlv`; it never
 writes).
 
-**This is NOT solver/ARC-AGI-piloted cognition.** `engine/solver/`
+**This is not solver/ARC-AGI-piloted cognition.** `engine/solver/`
 proves useful work by solving ARC-AGI puzzles for the PoW layer — it
 does not choose what a civilization builds, tithes, or researches, and
 has no read/write path into a `Polity`'s decisions. What plays a beta
@@ -95,10 +95,10 @@ for a civilization visibly collapsing (population to 0, chronic
 famine) as a live argument for landing the loss condition that doc
 proposes first.
 
-**Also does not demonstrate:** kernel enforcement being LIVE. Per
+**Also does not demonstrate:** kernel enforcement being live. Per
 `#31` (`docs/39_PHASE3_FLIP.md`, still the top item on
 `docs/GAME_SPEC.md`'s open-work queue), the kernel judges every deed
 but its verdict is still advisory — `replay`, not the kernel, is the
 live transition. A beta run today is not yet proof that an illegal
-deed COULD NOT have applied; it only shows that none happened to be
+deed could not have applied; it only shows that none happened to be
 proposed by conductor's own (lawful-by-construction) policy.

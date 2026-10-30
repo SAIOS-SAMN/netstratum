@@ -2,7 +2,7 @@
 
 **Objective.** No money is issued by the physics. What a civilization
 accepts in trade, at what ratio, and what it holds as money emerge from its
-minds' decisions (docs/73 DECIDE) over its own goods. This holds for a
+minds' decisions (docs/73 decide) over its own goods. This holds for a
 civilization on planetary mass or in latent space. Value is learned, never
 authored.
 
@@ -50,7 +50,7 @@ memory emergent-economy-arc).
 3. **Money is a behaviour, not an issue.** A good is money for a civilization
    to the degree its lines accept it in order to give it on, not to consume
    or build with it. That is measured, never declared.
-4. **Every trade decision is a DECIDE kind** (docs/73): learned from receipts,
+4. **Every trade decision is a decide kind** (docs/73): learned from receipts,
    scored before the outcome, with the current rule as the incumbent.
 
 ## Measures (typed, from the chronicle, no dials)
@@ -65,7 +65,7 @@ memory emergent-economy-arc).
 - **The exchange rate between two moneys** is their cleared ratio at the hubs
   where both trade.
 
-## The new DECIDE kinds (docs/73's step, unchanged)
+## The new decide kinds (docs/73's step, unchanged)
 
 | kind | scope / subject | rows | features (ranked) | loss | incumbent | action while a word acts |
 |---|---|---|---|---|---|---|
@@ -94,7 +94,7 @@ comes from position and holdings, never from a rule.
 
   What the ancients' intelligence decides reaches the markets only through
   them, as participants, under the same laws as every line.
-- **Consequence for today's code.** Payments now made TO an ancient (a gate's
+- **Consequence for today's code.** Payments now made to an ancient (a gate's
   cost, `ascension.rs`) go instead to its lineage's progenitors, who hold them
   for it. An ancient line drops out of the hub's buyers and sellers. Both are
   changes to build, each with a done-when (below).
@@ -104,21 +104,21 @@ comes from position and holdings, never from a rule.
 One shared ladder of tiers for every universe the nodes create, so that a tier
 can bridge between universes, and any two games can be interlinked through
 wormholes or galactic cores. Proposed to the coordinator for the Concordance
-charter; netstratum builds to it.
+charter; Netstratum builds to it.
 
 | tier | who | where | responsible for |
 |---|---|---|---|
-| ANCIENTS | the civilizations that ascend | the planets and systems nearest the galactic core | folding space and time at the galactic cores; designing the inner-galaxy wormholes; assigning progenitors. Pure intelligence: they act on the economy only through their progenitors |
-| PROGENITORS | assigned by the ancients | the passage networks | building, keeping and operating passage. NO HYPERSPACE TRAVERSAL WITHOUT A PROGENITOR ASSIGNED FROM THE ANCIENTS. They collect the tolls, trade on the ancients' behalf, and hear the realms' reports |
-| STEWARDS | govern REALMS | the boundaries between civilizations | diplomacy, trade, and sovereign disputes between civilizations; the realm is the authority over the moneys its peoples' trade produces, settling between them at their cleared ratios; they report up to the progenitors |
-| SOVEREIGNS | the realms' directives and operatives | the planets | acting on their planets as the realm directs |
-| CAPTAINS | the lower level | fleets, states (a planet's), stardocks | the fleets, the planet states and the stardocks |
+| Ancients | the civilizations that ascend | the planets and systems nearest the galactic core | folding space and time at the galactic cores; designing the inner-galaxy wormholes; assigning progenitors. Pure intelligence: they act on the economy only through their progenitors |
+| Progenitors | assigned by the ancients | the passage networks | building, keeping and operating passage. No hyperspace traversal without A progenitor assigned from the ancients. They collect the tolls, trade on the ancients' behalf, and hear the realms' reports |
+| Stewards | govern realms | the boundaries between civilizations | diplomacy, trade, and sovereign disputes between civilizations; the realm is the authority over the moneys its peoples' trade produces, settling between them at their cleared ratios; they report up to the progenitors |
+| Sovereigns | the realms' directives and operatives | the planets | acting on their planets as the realm directs |
+| Captains | the lower level | fleets, states (a planet's), stardocks | the fleets, the planet states and the stardocks |
 
 - **Interaction is tier to adjacent tier.** Captains ↔ sovereigns ↔ stewards ↔
   progenitors ↔ ancients; stewards interact with progenitors, progenitors with
   ancients. Reports and disputes go up; directives come down.
 - **Every tier is a seat for a mind** (Concordance 3.8). A seat decides by
-  DECIDE (docs/73), by learned words, never by authored rules; the physics
+  decide (docs/73), by learned words, never by authored rules; the physics
   bounds every act.
 - **Currencies, tokens and local economies** emerge from the local
   civilizations (above). The realm is the hierarchical authority over them;
@@ -139,7 +139,7 @@ charter; netstratum builds to it.
   states and stardocks.
 - **3.6.** Conflict goes up the chain: unchanged.
 
-### Against netstratum's code
+### Against Netstratum's code
 
 | tier | today | to build |
 |---|---|---|
@@ -151,8 +151,8 @@ charter; netstratum builds to it.
 
 ## The constants, and their way out
 
-Every static constant in the economy is either DERIVED from physics or
-LEARNED by DECIDE (docs/73). Until then it is declared, and visible here and
+Every static constant in the economy is either derived from physics or
+learned by decide (docs/73). Until then it is declared, and visible here and
 in docs/59.
 
 | constant | where | way out |
@@ -164,7 +164,7 @@ in docs/59.
 | gate cost 7 STAMP | `ascension::gate_cost` | learned: the price the progenitors' offer for passage clears at |
 | gate melt and passage toll, span × 1/64 | `ascension::gate_melt` | derived: the melt from distance and technology, as roads already are (`route_melt`); the toll learned |
 | gate freshness 1 cell | `ascension::FRESHNESS_CELLS` | derived: the bulge, one cell |
-| WINDOW 64 | docs/73 | declared; a memory bound |
+| Window 64 | docs/73 | declared; a memory bound |
 | the float's 1 and ¼ | `substrata` | learned, when a population lives below |
 
 ## θ, μ and the free market (operator, 2026-10-13; docs/81)
@@ -175,7 +175,7 @@ in docs/59.
   the universe is paid in μ.
 - **The progenitors hold both μ and θ:** μ from their toll shares at the
   hypha, θ from the passage they carry.
-- **Local economies EARN θ** by converging their timelines and reducing
+- **Local economies earn θ** by converging their timelines and reducing
   their collisions. θ is minted only by convergence and lost by collision.
 - **The free market stands.**
   - θ may be used everywhere, and is required only for traversal.
@@ -193,7 +193,7 @@ in docs/59.
    mass" kept; 5.8 already says "in their own money").
 2. **Denominate in the payee's money.** Gate costs, bounties and passage
    tolls are owed in the payee civilization's money, converted from their
-   current STAMP value at the hub's cleared rate. Until DECIDE learns a price
+   current STAMP value at the hub's cleared rate. Until decide learns a price
    for an obligation, that conversion is its incumbent.
 3. **The memory share** reads wealth as the sum of a line's holdings valued at
    cleared prices in its civilization's money, not STAMP.
@@ -248,7 +248,7 @@ Builds after docs/73 steps 1–3 (capture, learn, act).
   stock ratio.
 - The two action rules.
 - The incumbents until replaced.
-- docs/73's WINDOW.
+- docs/73's window.
 
 ## Dependencies
 

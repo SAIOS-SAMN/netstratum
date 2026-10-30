@@ -1,8 +1,8 @@
-# CIVILIZATIONS — the substrate world-book (design stage)
+# Civilizations — the substrate world-book (design stage)
 
-**Status:** DESIGN / world-book — the founding roster of playable and
+**Status:** design / world-book — the founding roster of playable and
 encounterable peoples. No faction mechanic ships before its protocol sections
-and test vectors exist (CHARTER §1); tolerances, yields, and rates here are
+and test vectors exist (Charter §1); tolerances, yields, and rates here are
 **placeholder parameters**. This is the `docs/00_CHARTER.md` and `README.md`
 "world-book (to come)", opened here.
 
@@ -32,7 +32,7 @@ tardigrade · felid…); substrate lines carry the 12 §5a substrate as
 clade (plasmoid · lithic · syzygial · endolithic · fungal ·
 cryo-coherent). A divergence branch keeps its line's clade — one line,
 one taxon; a confluent hybrid's clade is named at its wave. The tier
-ALIGNS lines the axes cannot: Hivelight and the Klethaxu are both
+aligns lines the axes cannot: Hivelight and the Klethaxu are both
 hymenopteran; the register reads the relation. **Gastropoda stands
 open** — no snail line yet walks the board; the register awaits it.
 
@@ -139,7 +139,7 @@ against mistaking for a baseline, never as the measure of the others.)*
 
 ## 2a. The naming laws (operator rulings, 2026-07-30)
 
-**SIGIL, never slug.** The registry's stable identifier is web jargon
+**Sigil, never slug.** The registry's stable identifier is web jargon
 inherited at G0; the ruling retires it in favor of the house's own
 word, already waiting in NS-2: the **sigil** — a civilization's
 immutable address on the mesh (`sigil:abyssal-vocalis`; NS-2's
@@ -148,7 +148,7 @@ migration (JSON field + struct field, lens-side), queued like
 Crucible→Furnace; surfaces adopt "sigil" immediately.
 
 **Locality-anchored naming.** A civilization's name must carry its
-PLACE, its MEDIUM, and its MANIFESTATION — never a vague vibe.
+place, its medium, and its manifestation — never a vague vibe.
 "Deep Chorus" infers sonar and says nothing about where or how; the
 law replaces the register:
 
@@ -160,9 +160,9 @@ law replaces the register:
 | Eightfold | counts arms only | **Brine Cortex** — sub-ice ocean · saline convection · distributed arm-borne cognition |
 | Mycelial Weft | close, keep | (already locality-anchored: understory · soil · hyphal network) |
 
-The renames are ROSTER data (a wave edit + registry migration), not
+The renames are roster data (a wave edit + registry migration), not
 code; divergence branch naming (the themed heads/tails) must follow
-the same law — the head names the MEDIUM, the tail the MANIFESTATION,
+the same law — the head names the medium, the tail the manifestation,
 and future word-tables grow toward locality. Applied at the next
 roster wave; the old names archive with their chronicles (annex law —
 nothing is renamed retroactively in a sealed record).
@@ -171,7 +171,7 @@ nothing is renamed retroactively in a sealed record).
 
 - **Band-shift is a chronicle mutation, not a free edit.** Marrow
   terraforming that changes a world's `T_eq⁴` emits NS-3 receipts per step and
-  draws any uncertain outcome through the chronicle beacon (CHARTER §9); a band
+  draws any uncertain outcome through the chronicle beacon (Charter §9); a band
   change is a high-value event and a candidate NS-7 anchor trigger (05 §7.2).
 - **A thermal assault on Coherent sectors** couples the physics (05 §1.2
   `Heat_Net`) to the settlement layer's liveness — the rule must keep it a

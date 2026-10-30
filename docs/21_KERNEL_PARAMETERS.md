@@ -1,15 +1,15 @@
-# 21 — THE KERNEL PARAMETERS: the four numbers that price the system
+# 21 — The kernel parameters: the four numbers that price the system
 
-**Status:** SPEC (kernel lane, 2026-08-02). Task #21 named "the four
+**Status:** spec (kernel lane, 2026-08-02). Task #21 named "the four
 kernel-visible literals" without listing them. This measures them,
 states what each refusal calls through, and defines what each must
-become under THE DYNAMIC PARAMETER LAW (#16).
+become under the dynamic parameter law (#16).
 
 Subordinate to `46_KERNEL` and `engine/kernel/CHARTER.md`.
 
 ---
 
-## §1 THE MEASUREMENT — the kernel's entire parameter surface
+## §1 The measurement — the kernel's entire parameter surface
 
 `engine/kernel/src/lib.rs` reaches outside itself exactly three times:
 
@@ -23,13 +23,13 @@ and holds one priced rule of its own:
 
 **That is the whole surface. Four parameters, and every economic
 quantity the kernel can refuse on passes through one of them.** The
-other ~43 placeholders on `PICKUP` §8c price the GAME; these four price
-the KERNEL, which is why they carry an amendment and the rest carry a
+other ~43 placeholders on `PICKUP` §8c price the game; these four price
+the kernel, which is why they carry an amendment and the rest carry a
 ruleset bump.
 
-## §2 THE FOUR, DEFINED
+## §2 The four, defined
 
-### P1 · `mint_bound` — THE PRICE OF COGNITION
+### P1 · `mint_bound` — The price of cognition
 
     kernel/lib.rs:845          drives: Refused::MintExceedsWork (I4)
 
@@ -43,12 +43,12 @@ single most consequential number in the system — it is the issuance
 schedule of the currency.
 
 **Measured properties:**
-- **Three paying rungs.** Levels 0, 1 and 2 earn ZERO. An NPC that
+- **Three paying rungs.** Levels 0, 1 and 2 earn zero. An NPC that
   solves a rung-2 task is paid nothing.
 - Rungs are `1, 4, 7` — arithmetic, common difference 3.
 - Off-ladder earns zero by construction: *"an off-ladder difficulty
   cannot name its own price"* (`discovery_pins.rs:213`).
-- **It is a pure function of the WORK'S SHAPE and nothing else.** It
+- **It is a pure function of the work's shape and nothing else.** It
   reads no prior state at all.
 
 **The defect that makes it #16's first case:** a mint that cannot see
@@ -57,7 +57,7 @@ forever regardless of how much has already been issued, how many nodes
 are working, or what rank stands. That is an issuance schedule with no
 feedback term.
 
-### P2 · `demurrage_per_tick` — THE SINK
+### P2 · `demurrage_per_tick` — The sink
 
     cfe/dop.rs:321             drives: Refused::DecayExceedsBound (I5)
     reached through            cfe::world::demurrage_due
@@ -65,7 +65,7 @@ feedback term.
     1/32 per elapsed tick
 
 **What it is:** the decay rate on un-vaulted banked joules/sink,
-settled by receipt at touch. **FLAT, never proportional** — the sealed
+settled by receipt at touch. **Flat, never proportional** — the sealed
 rule computes `min(rate · ease · elapsed, banked)`, and the flatness is
 deliberate (`world/rules.rs::ease_of`, "the 2^1100 denominator lesson").
 
@@ -73,7 +73,7 @@ deliberate (`world/rules.rs::ease_of`, "the 2^1100 denominator lesson").
 destruction path the kernel bounds, so it is the only counterweight to
 P1 — and the two cannot see each other.
 
-### P3 · `ease_of` — THE MODIFIER ON THE SINK
+### P3 · `ease_of` — The modifier on the sink
 
     cfe/world/replay.rs        scales P2's bound
 
@@ -87,7 +87,7 @@ for an orb holding a condition-5 tech.
 `== 5` test — there is no gradient, so the modifier is a cliff. An orb
 at condition 4 gets nothing; at condition 5 it gets the full halving.
 
-### P4 · `founding_reserves` — THE SEED
+### P4 · `founding_reserves` — The seed
 
     cfe/dop.rs:295             drives: I1 conservation at genesis
 
@@ -100,12 +100,12 @@ the system.**
 **Measured:** two literals, per-founding, constant. Supply therefore
 rises with orb count on a fixed slope that nothing observes.
 
-## §3 WHAT THE FOUR ADD UP TO
+## §3 What the four add up to
 
-    P1 ISSUES        per unit of verified work — fixed
-    P2 DESTROYS      per tick of un-vaulted holding — fixed
-    P3 MODIFIES      the destruction — binary
-    P4 SEEDS         per founding — fixed
+    P1 issues        per unit of verified work — fixed
+    P2 destroys      per tick of un-vaulted holding — fixed
+    P3 modifies      the destruction — binary
+    P4 seeds         per founding — fixed
 
 **None of the four reads prior state.** Total supply therefore follows
 mechanically from how many nodes mine and how many orbs are founded,
@@ -113,9 +113,9 @@ with no feedback anywhere in the loop. That is the finding: **the
 system has a monetary base with no monetary policy**, and #16 exists to
 close it.
 
-## §4 WHAT THEY MUST BECOME — and the constraint that makes it cheap
+## §4 What they must become — and the constraint that makes it cheap
 
-THE DYNAMIC PARAMETER LAW (#16) requires retirement to **bounded
+The dynamic parameter law (#16) requires retirement to **bounded
 functions of prior state**. The binding constraint is what `lawful`
 actually holds when it judges:
 
@@ -124,7 +124,7 @@ actually holds when it judges:
 A dynamic parameter may read `prior` and nothing else — no clock, no
 network, no I/O — or the kernel stops being total and encoding-blind.
 
-**MEASURED, and it is the good news: everything needed is already
+**Measured, and it is the good news: everything needed is already
 reachable from `prior`.**
 
     total supply       Σ banked over prior.orbs           — no new state
@@ -135,12 +135,12 @@ reachable from `prior`.**
 
 So each of the four can become `f(prior)` **without a schema change,
 without a wire change, and without new committed state.** The amendment
-is to the RULE, not to the record — which means each is a VERSION bump
+is to the rule, not to the record — which means each is a version bump
 and a red-first witness, not a migration.
 
 **The shape the law requires**, stated without choosing the policy:
 
-    every parameter becomes  f(prior) with a DECLARED BOUND
+    every parameter becomes  f(prior) with a declared bound
     the bound is checkable from prior alone
     f is monotone in its argument, so the direction of response is
       law rather than an accident of arithmetic
@@ -149,7 +149,7 @@ and a red-first witness, not a migration.
 
 That last clause is what makes this landable on a running game.
 
-## §5 WHAT IS AN OPERATOR RULING, NOT A CODER CHOICE
+## §5 What is an operator ruling, not A CODER choice
 
 **The policy itself.** Whether the mint softens as supply rises,
 whether decay stiffens, whether rank is a multiplier or a gate — these
@@ -170,7 +170,7 @@ Four decisions are owed, in the order they bite:
 4. **P4's slope.** Does the seed shrink as orb count rises, or is a
    fixed per-orb grant intended?
 
-## §6 SEQUENCE
+## §6 Sequence
 
 1. **P1 first.** It is the issuance; every other parameter's correct
    value depends on what it does.
@@ -178,18 +178,18 @@ Four decisions are owed, in the order they bite:
    source is dialed against nothing.
 3. P3 and P4 follow, and are independent of each other.
 
-Each lands as: red-first witness → rule change → VERSION bump →
+Each lands as: red-first witness → rule change → version bump →
 `46_KERNEL` §6 updated. No schema bump on any of the four.
 
 ---
 
-## §7 THE MONETARY RULING — landed, blocked, and what each needs (2026-08-02)
+## §7 The monetary ruling — landed, blocked, and what each needs (2026-08-02)
 
 The operator ruled all four and cleared `P1`+`P2` to land. **Two of the
 four are discharged; two cannot land in the form given.** Measured
 against the tree, not argued.
 
-### 7a. `P4` — DISCHARGED, no amendment needed
+### 7a. `P4` — Discharged, no amendment needed
 
 The ruling asks that the seed *operate strictly at `t = 0` and evaluate
 to `0` for all `t > 0`*. **That is already true by construction:**
@@ -199,23 +199,23 @@ there is no `t > 0` call.
 
 Pinned rather than amended — `kernel/tests/parameter_pins.rs`:
 `p4_the_seed_cannot_fire_twice`, `p4_founding_is_the_only_unminted_arrival`.
-**Zero VERSION cost.**
+**Zero version cost.**
 
-### 7b. `P3` — CANNOT LAND. Three separate blocks.
+### 7b. `P3` — Cannot land. Three separate blocks.
 
     P3(rung) = 1 / (1 + e^{−k(rung − threshold)})
 
-1. **THE SIGMOID IS NOT COMPUTABLE HERE.** `cfe/src/ratio.rs` exposes
+1. **The sigmoid is not computable here.** `cfe/src/ratio.rs` exposes
    `ratio`, `is_canonical`, `encode`, `decode` — and nothing else.
    There is no `e`, no exponential, no root. A logistic curve is
    irrational at essentially every point, and `24_FORM` §2b bars
    roots and floats outright. This is a **type-level impossibility**,
    not a preference.
-2. **WRONG DOMAIN.** `P3` is `ease_of(techs, orb)` — a function of an
-   orb's TECH CONDITION that scales `P2`'s decay bound. It has no
+2. **Wrong domain.** `P3` is `ease_of(techs, orb)` — a function of an
+   orb's tech condition that scales `P2`'s decay bound. It has no
    `rung` argument and never sees the difficulty ladder. The formula
    as written substitutes the mint's domain for the sink modifier's.
-3. **THE RUNG 0–2 FIX IS ATTACHED TO THE WRONG PARAMETER.** *"Rungs
+3. **The rung 0–2 fix is attached to the wrong parameter.** *"Rungs
    0–2 assigned non-zero baseline values"* is a change to `P1`'s
    ladder (`mint_bound`), which is what pays rungs. `P3` cannot pay
    anything — it modifies decay.
@@ -226,7 +226,7 @@ condition — exact, monotone, bounded, and continuous at genesis if
 condition 5 still yields `1/2`. That form needs one word of
 confirmation; the sigmoid does not.
 
-### 7c. `P1` — DIRECTION RULED, FORM BLOCKED
+### 7c. `P1` — Direction ruled, form blocked
 
     P1 = Base(rung) · ( Φ_D / (Σ + ε) )
 
@@ -234,78 +234,78 @@ confirmation; the sigmoid does not.
 without matching rank. `read_entangled(prior).rank` supplies the rank
 term and is landed. **Confirmed safe:** `standing` admits only
 
-`Vacuity::Entangled` (STRUCK 2026-08-04, the vacuity removal) (`boundary.rs:191`), which requires `D > 0`, so a
+`Vacuity::Entangled` (Struck 2026-08-04, the vacuity removal) (`boundary.rs:191`), which requires `D > 0`, so a
 rank-denominated term **can never see a zero denominator** — pinned as
 `p1_capacity_law_refuses_before_any_rank_denominated_term_is_read`.~~
-**THAT GUARANTEE IS WITHDRAWN** (operator ruling 2026-08-04): the
+**That guarantee is withdrawn** (operator ruling 2026-08-04): the
 capacity law is struck, so nothing now refuses a deed for reading
 `rank == 0`, and the pin went with it.
 
-**A NEW BLOCKER, INHERITED FROM THE STRIKE.** `rank` is the circulation
+**A new blocker, inherited from the strike.** `rank` is the circulation
 count and zero is a lawful value for it — a world holding no obligation
 cycle reads zero, and after the strike that world is free to mint. Any
-`P1` denominated on `rank` therefore MUST carry its own guard; it can no
+`P1` denominated on `rank` therefore must carry its own guard; it can no
 longer borrow one from the judge. Note the near-miss in vocabulary: `D`
 (`rfa_core::Degree`) is floored at `GROUND = 1` and is never zero, while
-`rank` is what stands ABOVE that floor and is frequently zero. A form
+`rank` is what stands above that floor and is frequently zero. A form
 written against "D" and implemented against `rank` divides by zero on
 the first quiet world.
 
 **What blocks:**
 
-1. **`Φ_D` IS UNDEFINED.** "Dimensional capacity" names no landed
+1. **`Φ_D` is undefined.** "Dimensional capacity" names no landed
    quantity. `D` is an integer rank; `Φ_D` is a distinct symbol used
    without a definition, and an undefined symbol cannot be compiled.
    The obvious reading is `Φ_D := rank`, but that is a substitution,
    not a translation, so it is flagged rather than assumed.
-2. **GENESIS CONTINUITY FAILS AS STATED.** The ruling requires
+2. **Genesis continuity fails as stated.** The ruling requires
    `P1 → Base(rung)` as `Σ → 0`. **`Σ` is never 0 in a live world** —
    `P4` seeds Iron 20 + Biomass 10 at founding, so supply is 30 before
    any deed is judged. Continuity has to be pinned against the actual
    genesis state, which is what
    `p1_the_landed_rungs_are_1_4_7_and_zero_below` exists to hold.
-3. **`ε` IS A FIFTH LITERAL.** An epsilon guarding a division is an
+3. **`ε` is A fifth literal.** An epsilon guarding a division is an
    undialed number doing load-bearing work in the mint. **A dynamic
    parameter law that introduces more literals than it retires has
    retired nothing** — and with `D > 0` guaranteed, the guard `ε`
    exists to provide is unnecessary.
-4. **UNBOUNDED DENOMINATORS.** Exact-rational division by a running
+4. **Unbounded denominators.** Exact-rational division by a running
    supply total compounds denominators, which is the failure
    `world/rules.rs::ease_of` records as *"the 2^1100 denominator lesson."*
    Whatever form lands must be denominator-bounded by construction.
 
-### 7d. `P2` — DIRECTION RULED, FORM REVERSES A LANDED LESSON
+### 7d. `P2` — Direction ruled, form reverses A landed lesson
 
     P2 = Max( 1/32, 1/32 · (Σ / Φ_D) )
 
-1. **THIS MAKES DEMURRAGE PROPORTIONAL.** The sealed rule is
+1. **This makes demurrage proportional.** The sealed rule is
    deliberately flat: *"`min(rate · ease · elapsed, banked)` per
-   leaking resource, **FLAT, never proportional** (the 2^1100
+   leaking resource, **flat, never proportional** (the 2^1100
    denominator lesson)"* (`world/rules.rs::ease_of`). Scaling the rate by
    `Σ/Φ_D` is the exact move that lesson was learned from. **The most
    serious of the four blocks**, because it reverses a rule the tree
    arrived at by failure.
-2. **UNBOUNDED ABOVE.** `Max` supplies a floor and no ceiling. A rate
+2. **Unbounded above.** `Max` supplies a floor and no ceiling. A rate
    exceeding `1` per tick is total confiscation each tick; `min(…,
    banked)` prevents it going negative but not going punitive. **#16
-   requires a BOUNDED function** — this one is bounded below only.
-3. **`Φ_D = 0` IS REACHABLE HERE.** Unlike `P1`, demurrage is **not**
+   requires a bounded function** — this one is bounded below only.
+3. **`Φ_D = 0` is reachable here.** Unlike `P1`, demurrage is **not**
    gated by `standing` — an orb with no standing obligations decays
    exactly like one with many. So the rank denominator can be zero at
    the moment `P2` is read. Division by zero, in the decay path, on a
    live world.
 
-### 7e. WHAT IS OWED — one ruling, not four
+### 7e. What is owed — one ruling, not four
 
 `P4` is done. `P3`, `P1` and `P2` all reduce to a single question,
 because the same substitution fixes all three:
 
 > **Confirm the constitutional form: rank-denominated feedback carried
-> as a BOUNDED, FLAT ladder — comparison and clamping rather than
+> as a bounded, flat ladder — comparison and clamping rather than
 > running division — with `Φ_D := rank`, a declared floor and ceiling
 > on every parameter, and no `ε`.**
 
-That preserves every ruled DIRECTION — mint softens as supply outruns
+That preserves every ruled direction — mint softens as supply outruns
 rank, decay stiffens, the cliff becomes a ramp, rungs 0–2 may be paid —
 while staying exact, denominator-bounded, defined at `D = 0`, and
 continuous at genesis.
@@ -318,7 +318,7 @@ change once the form is confirmed.
 
 ---
 
-## §8 CROSS-LANE COLLISION — `P2` and capacity-lane §6a rewrite one flow
+## §8 Cross-lane collision — `P2` and capacity-lane §6a rewrite one flow
 
 Capacity-lane is landing a founding economy whose tithe rides the
 demurrage rail. It correctly stopped short of the kernel — *"that's
@@ -326,28 +326,28 @@ kernel surgery on a shared crate, so I haven't done it"* — and the lane
 map puts `engine/kernel/` here. This records the collision surface and
 the one economic consequence neither lane has stated.
 
-### 8a. FOUR SHARED ORGANS
+### 8a. Four shared organs
 
     demurrage_due          P2 needs supply+rank; §6a needs the ward
                            split. One function, one signature change,
                            two reasons.
-    decay() / I5           P2 moves the BOUND; §6a needs I5 to verify
+    decay() / I5           P2 moves the bound; §6a needs I5 to verify
                            a two-sided settlement. Same invariant.
     DemurrageSettled (29)  `{ orb_id, resource, amount }`, encoded via
-                           `amount_layout` — ONE-SIDED, booked as a
+                           `amount_layout` — One-sided, booked as a
                            pure negative. §6a needs a destination, so
-                           it is a WIRE AMENDMENT. P2 needs none.
-    ease_of                CHANGED at `d52f3fd` (P3): the `== 5` cliff
+                           it is a wire amendment. P2 needs none.
+    ease_of                changed at `d52f3fd` (P3): the `== 5` cliff
                            is now a gradient. Any §6a reasoning
                            audited against the cliff should be re-read
                            — the tithe now rides a smooth rate.
 
-### 8b. THE CONSEQUENCE — §6a WEAKENS `P2` EXACTLY AS THE ECONOMY GROWS
+### 8b. The consequence — §6a weakens `P2` exactly as the economy grows
 
 §6a's conservation claim is right and its **stability** claim is not.
 
-    tithe   = decay · capacity(ward)/capacity(world)   → TRANSFERRED
-    burned  = decay − tithe                            → DESTROYED
+    tithe   = decay · capacity(ward)/capacity(world)   → transferred
+    burned  = decay − tithe                            → destroyed
 
 Instantaneously `ΔΣ = −burned ≤ 0`, so the economy is deflationary at
 every step — that much holds. But `burned = decay · (1 − share)`, and
@@ -367,9 +367,9 @@ enough to outrun it (which is what `P2` already does — so the two may
 compose if the rate's response is steeper than `share`'s growth, and
 **that is a measurable question, not a matter of taste**).
 
-### 8c. SEQUENCE — `P2` FIRST, and the reason is mechanical
+### 8c. Sequence — `P2` first, and the reason is mechanical
 
-`P2` changes `demurrage_due`'s RATE; §6a changes its DESTINATION.
+`P2` changes `demurrage_due`'s rate; §6a changes its destination.
 Landing the destination first means the split is verified against a
 rate that is about to move, and the I5 amendment would be written twice.
 Landing `P2` first fixes the rate, after which §6a is a pure
@@ -381,13 +381,13 @@ settles.
 
 ---
 
-## §9 `P2` IS BLOCKED BY THE DEPENDENCY ARROW — found before the 8 sites
+## §9 `P2` is blocked by the dependency arrow — found before the 8 sites
 
 Capacity-lane asked that `P2`'s signature be designed once, knowing the
 split sink follows. Designing it surfaced a blocker that invalidates
 §4's "no schema change" claim for `P2` specifically.
 
-### 9a. THE MEASUREMENT
+### 9a. The measurement
 
     cfe        depends on nothing internal        (the bottom)
     rfa-core   depends on cfe                     (game-blind)
@@ -400,14 +400,14 @@ move below `cfe` either: it needs `Committed` (in `cfe`) and the
 reduction (in `rfa-core`, which already depends on `cfe`), so any home
 below `kernel` is circular.
 
-### 9b. WHY THAT BLOCKS `P2` RATHER THAN MERELY COMPLICATING IT
+### 9b. Why that blocks `P2` rather than merely complicating it
 
-`demurrage_due` is a SEALED RULE — *"the kernel CALLS this for I5's
+`demurrage_due` is a sealed rule — *"the kernel calls this for I5's
 bound (call-not-copy), one rule, one computation, two judges"*
 (`world/rules.rs::ease_of`). `P2` makes the rate depend on rank. So:
 
-- the PROPOSER (`cfe::world`) cannot see rank;
-- the JUDGE (`kernel`) can;
+- the proposer (`cfe::world`) cannot see rank;
+- the judge (`kernel`) can;
 - if they compute different rates, **honest deeds refuse at I5.**
 
 Passing the rate in from above does not help: a rate the kernel accepts
@@ -419,21 +419,21 @@ reach the same value from the same state.
 Rewriting 8 call sites first and discovering it after would have meant
 rewriting them again.
 
-### 9c. THREE WAYS OUT — a choice, not a derivation
+### 9c. Three ways out — a choice, not a derivation
 
-1. **STORE RANK IN `Committed`.** Both sides then read one committed
-   number and cannot disagree. **A SCHEMA CHANGE — which contradicts
+1. **Store rank in `Committed`.** Both sides then read one committed
+   number and cannot disagree. **A schema change — which contradicts
    §4's claim that no parameter needs one; that claim was true for the
    kernel and false for the proposer, and is corrected here.** Its
    virtue is real: rank is the organising quantity of the whole system
    and nothing in the chain currently attests what rank stood when a
    deed was judged. Storing it makes the mint's standing auditable
    instead of recomputed.
-2. **A NEW CRATE BETWEEN `rfa-core` AND `kernel`** holding the
+2. **A new crate between `rfa-core` and `kernel`** holding the
    projection, which `cfe` cannot depend on either — so this only
    helps if `demurrage_due` moves up with it, which un-seals the rule
    from the proposer's side.
-3. **DEMURRAGE STOPS DEPENDING ON RANK.** `P2` responds to SUPPLY
+3. **Demurrage stops depending on rank.** `P2` responds to supply
    alone, which `cfe` can compute from its own state without the
    bridge. Loses the rank term; keeps the sink dynamic and keeps the
    ruled direction (stiffens as supply grows). **Cheapest by a wide
@@ -445,15 +445,15 @@ architectural ruling, and capacity-lane's split sink depends on which
 way it goes**, since §6a also needs rank readable at the touch and
 inherits the same blocker.
 
-### 9d. THE INCENTIVE FINDING — capacity-lane's, and it is load-bearing
+### 9d. The incentive finding — capacity-lane's, and it is load-bearing
 
 Under the split sink, two terms move in opposite directions as a warded
 line advances:
 
     tithe = decay_total · share
-            │             └─ capacity(ward)/capacity(world) — RISES
-            └─ rate · ease · elapsed — FALLS, because `P3` made ease a
-               DESCENDING gradient
+            │             └─ capacity(ward)/capacity(world) — rises
+            └─ rate · ease · elapsed — falls, because `P3` made ease a
+               descending gradient
 
 If the decay term dominates, **an elder's income falls as its ward
 advances — paying the elder to suppress technology inside its own
@@ -464,7 +464,7 @@ arise below the cliff.
 Cheap to measure once both terms are readable at the touch; expensive
 after the tithe is receipted law. **A third argument for `P2` first.**
 
-### 9e. NOTED FROM CAPACITY-LANE
+### 9e. Noted from capacity-lane
 
 `d52f3fd` (P3) is on `kernel-lane` only — **not on `main` and not
 visible downstream.** Their worktree still holds the `== 5` cliff, and
@@ -472,14 +472,14 @@ nothing above should assume the gradient until it lands.
 
 ---
 
-## §10 `P3` REVERTED — it exposed a live/replay divergence (2026-08-02)
+## §10 `P3` reverted — it exposed a live/replay divergence (2026-08-02)
 
 **`P3`'s gradient landed at `d52f3fd` and is reverted at `HEAD`.** It was
 committed after `cargo test -p cfe` and `-p kernel` only, without a
 workspace sweep. The sweep fails:
 
     conductor/tests/survey_pins.rs:207
-    "replay MATCHES the surveyed world"
+    "replay matches the surveyed world"
       live:   Crystal 127/16
       replay: Crystal  15/16
 
@@ -487,12 +487,12 @@ Confirmed by bisection: restoring the `== 5` cliff turns the pin green,
 and the surveyed world holds techs at conditions **0 and 4** — both of
 which the cliff treated identically as `1/1` and the gradient does not.
 
-### 10a. THE FINDING IS WORTH MORE THAN THE FEATURE
+### 10a. The finding is worth more than the feature
 
 This is `46_KERNEL` §3 and task **#30** made concrete. The transition is
 defined twice — `replay`'s 113 arms and the live proposer — and **they
 agree only while the shared rules stay still.** `ease_of` is a sealed
-rule both paths call, and the moment its VALUES changed the two paths
+rule both paths call, and the moment its values changed the two paths
 produced different worlds from the same receipts.
 
 Nothing was wrong with the gradient's arithmetic. The tests that
@@ -502,25 +502,25 @@ differently through two definitions of the same transition** — which is
 precisely the defect #30 exists to close, and it was invisible until a
 sealed rule moved.
 
-### 10b. WHAT THIS COSTS EVERY REMAINING PARAMETER
+### 10b. What this costs every remaining parameter
 
-`P1`, `P2` and `P3` all change sealed-rule VALUES. **Each of them will
+`P1`, `P2` and `P3` all change sealed-rule values. **Each of them will
 hit this same wall**, and the order is now forced:
 
-    #30 FIRST — derive apply from judge where the judge already knows,
+    #30 first — derive apply from judge where the judge already knows,
                 pin the pair where it cannot. Until then, any parameter
                 amendment is a coin-flip on whether the two definitions
                 drift.
 
 The parameter work is not blocked on monetary policy any more. It is
-blocked on the kernel having ONE definition of the transition, and that
+blocked on the kernel having one definition of the transition, and that
 is a kernel-lane task that was already on the board.
 
-### 10c. PROCESS
+### 10c. Process
 
 `-p cfe` and `-p kernel` are not a sweep. `cfe::world` is shared by
 `conductor`, `ledger`, `scribe` and `lens`, so a rule change there is a
-WORKSPACE change and must be tested as one. Recorded because the
+workspace change and must be tested as one. Recorded because the
 failure was mine and the discipline is cheap.
 
 The attempt is kept at `scratchpad/p2-attempt.patch` (474 lines,
@@ -529,23 +529,23 @@ own pins, and is worth re-applying after #30 rather than re-deriving.
 
 ---
 
-## §11 FORWARD: THE UNIFIED TRANSITION + RULESET EPOCHS (operator, 2026-08-02)
+## §11 Forward: the unified transition + ruleset epochs (operator, 2026-08-02)
 
-The revert in §10 was the wrong instinct — it restored a STEP FUNCTION,
+The revert in §10 was the wrong instinct — it restored a step function,
 which is maximally discontinuous, to protect a bifurcated engine. The
 operator's ruling is to forward-engineer the engine instead. Two parts,
 and the second is cheaper than it looks.
 
-### 11a. APPLY WRAPS JUDGE — one transition, zero parallel logic
+### 11a. Apply wraps judge — one transition, zero parallel logic
 
 `replay`'s 113 arms and the live proposer are two implementations of one
 function. **`apply()` becomes a zero-logic wrapper over `judge()`**, so
 a rule evaluated one way live is evaluated the identical way on replay.
 That is #30 cure 1, and §10 is the proof it can no longer be deferred:
-`P1`, `P2` and `P3` all move sealed-rule VALUES, so every one of them
+`P1`, `P2` and `P3` all move sealed-rule values, so every one of them
 hits the same wall until this lands.
 
-### 11b. RULESET EPOCHS — and **NO WIRE AMENDMENT IS NEEDED**
+### 11b. Ruleset epochs — and **no wire amendment is needed**
 
 The ruling asks for a rule-version stamp on the receipt so historical
 worlds replay faithfully while new ticks run new physics. **Measured,
@@ -561,8 +561,8 @@ present, already monotone, and already inside the hash.
 
 So the version is not stored, it is **derived**:
 
-    an ACTIVATION TABLE maps stamp → ruleset epoch
-    every sealed rule takes the stamp it is being evaluated AT
+    an activation table maps stamp → ruleset epoch
+    every sealed rule takes the stamp it is being evaluated at
     a receipt is judged under the ruleset in force when it was written
 
 `ease_of(techs, orb, at)` selects the cliff for `at < T₂` and the
@@ -571,7 +571,7 @@ diverge; new ticks run the continuous physics. This is the standard
 fork mechanism and it costs **zero wire change, zero schema change, and
 zero rehashing.**
 
-### 11c. WHAT THIS RETIRES — my continuity clauses were the wrong fix
+### 11c. What this retires — the continuity clauses were the wrong fix
 
 §4 required every dynamic parameter to equal its old literal at genesis
 *"so the amendment is continuous and no live world jumps."* **Under
@@ -583,11 +583,11 @@ That frees every parameter to take its correct form rather than a form
 bent to meet a legacy value at one point. `P3`'s curve no longer has to
 hit `1/1` and `1/2` exactly; `P1`'s feedback term no longer has to
 collapse to `Base(rung)` at genesis; `P2` no longer needs `1/32` at zero
-supply. **The constraint that shaped three of my translations is gone.**
+supply. **The constraint that shaped three of the translations is gone.**
 
-### 11d. THE ONE COST, STATED PLAINLY
+### 11d. The one cost, stated plainly
 
-Sealed rules become APPEND-ONLY. A rule is never mutated — a new epoch
+Sealed rules become append-only. A rule is never mutated — a new epoch
 is added beside it, and every prior version stays in the tree forever,
 because some receipt still needs it. `ease_of` will hold the cliff and
 the gradient permanently.
@@ -598,7 +598,7 @@ correct trade, but it changes the shape of a parameter amendment from
 the number of rule changes. Worth knowing before the fourth epoch, not
 after.
 
-### 11e. ORDER
+### 11e. Order
 
     1. #30 — apply wraps judge; the activation table; sealed rules
              take `at`. Nothing else can land safely first.
@@ -611,58 +611,58 @@ after.
 
 ---
 
-## §12 LANDED — the epoch mechanism, P3 and P2 (2026-08-02)
+## §12 Landed — the epoch mechanism, P3 and P2 (2026-08-02)
 
-    65963b4  RULESET EPOCHS + P3 re-inscribed
-    39dc3a8  P2 as EPOCH 1
+    65963b4  ruleset epochs + P3 re-inscribed
+    39dc3a8  P2 as epoch 1
 
 **127 test suites, zero failures**, with both continuous rules live —
 including `conductor/tests/survey_pins.rs`, the pin whose live/replay
 divergence forced the §10 revert.
 
-### 12a. WHAT THE MECHANISM IS
+### 12a. What the mechanism is
 
 `cfe::epoch::epoch_at(stamp) -> Genesis | Continuous`, activating at
 `CONTINUOUS_FROM = 100_000`. Every sealed rule takes the stamp it is
-evaluated AT and dispatches on it. A deed written under EPOCH 0 is
-judged by EPOCH 0 forever, so `replay` and the live proposer cannot
+evaluated at and dispatches on it. A deed written under epoch 0 is
+judged by epoch 0 forever, so `replay` and the live proposer cannot
 disagree even while the rules move.
 
 **Zero wire change, zero schema change, zero rehashing** — the stamp
 was already in the receipt and already inside the frame hash.
 
-### 12b. THE TWO EPOCHED RULES
+### 12b. The two epoched rules
 
     ease_of(techs, orb, at)
-      EPOCH 0  ease_cliff       `== 5` → 1/2, else 1/1
-      EPOCH 1  ease_gradient    s = x/(1+|x|), descending, [1/2, 1]
+      epoch 0  ease_cliff       `== 5` → 1/2, else 1/1
+      epoch 1  ease_gradient    s = x/(1+|x|), descending, [1/2, 1]
 
     demurrage_per_tick(supply, at)
-      EPOCH 0  sink_flat        1/32
-      EPOCH 1  sink_by_supply   min(1/4, 1/32·(1 + excess/33))
+      epoch 0  sink_flat        1/32
+      epoch 1  sink_by_supply   min(1/4, 1/32·(1 + excess/33))
 
-Both EPOCH 0 functions are marked **never-edit** in the source: past
+Both epoch 0 functions are marked **never-edit** in the source: past
 receipts depend on them, so changing one would rewrite history's
 meaning. This is the append-only cost of §11d, now concrete.
 
-### 12c. WHY `P2` READS SUPPLY AND NOT RANK — forced, not preferred
+### 12c. Why `P2` reads supply and not rank — forced, not preferred
 
 §9's blocker stands and the epoch mechanism does not dissolve it. Rank
 lives behind `bridge::read_entangled` in `kernel`, above `cfe`, so the
 proposer structurally cannot read it. `standing_supply` is the sealed
 answer: one public function the kernel calls on `prior.orbs` and the
 proposer calls on its own, so both judges reach one value from one
-state (CHARTER §0b).
+state (Charter §0b).
 
-### 12d. WHAT IS NOT YET TRUE — stated plainly
+### 12d. What is not yet true — stated plainly
 
 1. **`apply()` still does not wrap `judge()`.** #30 part 2 is untouched:
    `replay`'s 113 arms and the live proposer remain two implementations
-   of one transition. Epochs remove the DRIFT that value changes cause;
-   they do not remove the DUPLICATION. A structural divergence — an arm
+   of one transition. Epochs remove the drift that value changes cause;
+   they do not remove the duplication. A structural divergence — an arm
    that does something the judge would not admit — is still possible
    and still invisible.
-2. **EPOCH 1 has no end-to-end live-vs-replay witness.** Every EPOCH 1
+2. **Epoch 1 has no end-to-end live-vs-replay witness.** Every epoch 1
    pin is unit-level, because no test world reaches stamp `100_000` and
    driving one there costs 100k ticks. The mechanism is proven at the
    boundary and by construction; it is not yet proven by a surveyed
@@ -672,21 +672,21 @@ state (CHARTER §0b).
 3. **`P1` is not epoched.** `mint_bound` still reads only the work's
    shape. It is the issuance schedule and the last of the four.
 
-### 12e. FOR CAPACITY-LANE
+### 12e. For capacity-lane
 
 The split sink can now land without replay drift: `DemurrageSettled`'s
-two-sided form becomes EPOCH 1 behaviour, EPOCH 0 keeps the one-sided
+two-sided form becomes epoch 1 behaviour, epoch 0 keeps the one-sided
 booking every existing receipt was written under, and no historical
 world is re-judged. The wire amendment for the recipient leg is still
 owed — epochs remove the drift risk, not the tag change.
 
 ---
 
-## §13 WHY THE PROPOSER CANNOT VERIFY — corrected twice (2026-08-02)
+## §13 Why the proposer cannot verify — corrected twice (2026-08-02)
 
 > **§13's first two answers were both wrong.** It first said the arrow
 > forbids it (accidental), then that the arrow is forced (architectural).
-> The real answer is §13c: an explicit, tested LAW forbids it, and the
+> The real answer is §13c: an explicit, tested law forbids it, and the
 > arrow merely encodes that law. Both earlier readings are kept below
 > because the sequence is the point — a compile error is not a reason,
 > and a dependency graph is not a rationale.
@@ -694,7 +694,7 @@ owed — epochs remove the drift risk, not the tag change.
     cfe  ←  physics  ←  solver-verify
     cfe  ←  rfa-core  ←  kernel
 
-`cfe` is the bottom of the workspace arrow. **Every organ that JUDGES
+`cfe` is the bottom of the workspace arrow. **Every organ that judges
 sits above it**, so the proposer can never perform a kernel-grade check
 on itself. Measured three separate times, each while trying to fix a
 different defect:
@@ -708,7 +708,7 @@ The third was attempted and reverted this session: adding
 `physics` depends on `cfe`. An earlier note read only `solver-verify`'s
 direct dependencies and missed it.
 
-### 13a. WHAT THIS SETTLES ABOUT K4
+### 13a. What this settles about K4
 
 K4's note called the fix *"demoting `world.rs` to a proposer across its
 37 `close()` sites"*. That is not a preference — **it is forced.** No
@@ -716,20 +716,20 @@ amount of local checking can be added to the emitter, because every
 check it would need lives on the wrong side of the arrow. The only
 shapes available are:
 
-1. **INVERT THE FLOW.** The emitter returns a PROPOSED deed and applies
+1. **Invert the flow.** The emitter returns a proposed deed and applies
    nothing; something above `cfe` verifies and admits. This is K4 as
    written, and the dependency structure is the reason it is the only
    real option.
-2. **MOVE THE JUDGMENT DOWN.** Relocate `Difficulty`/`verify_work` (and
+2. **Move the judgment down.** Relocate `Difficulty`/`verify_work` (and
    the projection, for standing) beneath `cfe`. That inverts a
-   deliberate design — `rfa-core` is GAME-BLIND by charter and
+   deliberate design — `rfa-core` is game-blind by charter and
    `solver-verify` is the sealed verifier — so it trades one law for
    another and should not be done to dodge a refactor.
 
 **Option 1, and the 37 sites are the work.** There is no one-commit
-version, and the version I scoped as one commit does not compile.
+version, and the version scoped as one commit does not compile.
 
-### 13b. WHAT STAYS OPEN MEANWHILE
+### 13b. What stays open meanwhile
 
 `live_gate_defect.rs` holds the measurement: the emitter admits a
 1,000,000-unit mint against `b"not a proof at all"`, the live projection
@@ -737,7 +737,7 @@ hides it, and `replay` grants it. Nothing in this section closes that —
 it explains why the closure is larger than one call site.
 
 
-### 13c. THE OPAQUE-PAYLOAD LAW — the actual reason
+### 13c. The opaque-payload law — the actual reason
 
 `kernel/tests/recurrence_guard.rs::the_arrow_law_holds` states it:
 
@@ -753,13 +753,13 @@ would know what a proof is made of.
 So the emitter cannot verify — **by charter, not by accident.** The fix
 attempted here (`cfe` → `solver-verify`, `mint_bound` moved down, the
 emitter calling `verify_work`) built and passed its own tests and was
-REVERTED: the guard caught it, which is what the guard is for.
+reverted: the guard caught it, which is what the guard is for.
 
 **K4 stays the inversion.** The emitter proposes; something above `cfe`
 verifies and admits. That was K4's original wording and it is right for
 a reason neither earlier reading of §13 had.
 
-### 13d. WHAT SURVIVED — the `ratio` leaf
+### 13d. What survived — the `ratio` leaf
 
 `cfe::ratio` was 83 self-contained lines, and `physics` imported them
 for `Ratio` alone. That single edge made `physics → cfe`, hence
@@ -767,13 +767,13 @@ for `Ratio` alone. That single edge made `physics → cfe`, hence
 beneath the sealed math tier for no stated reason.
 
 Extracted to `engine/ratio` — a leaf with no internal dependencies.
-`cfe` re-exports it so no caller moved. This removes an ACCIDENTAL
-inversion while leaving the DELIBERATE one (§13c) exactly as charter
+`cfe` re-exports it so no caller moved. This removes an accidental
+inversion while leaving the deliberate one (§13c) exactly as charter
 requires. 142 suites green.
 
 ---
 
-## §14 THE STANDING DEADLOCK — `standing` refuses every mint (verified 2026-08-02)
+## §14 The standing deadlock — `standing` refuses every mint (verified 2026-08-02)
 
 remediations-lane measured `MintWithoutStanding{Void}` 61 then 68 times
 per 10 beats on the live board. **Verified here rather than accepted**
@@ -782,9 +782,9 @@ lane's own invariant:
 
     orbs=1  rank=0  verdict=Void      -> is_admitted() == false
 
-### 14a. IT IS A BOOTSTRAP DEADLOCK, not a tuning problem
+### 14a. It is A bootstrap deadlock, not a tuning problem
 
-`standing` admits only `Vacuity::Entangled` (STRUCK 2026-08-04, the vacuity removal), which needs `D > 0`.
+`standing` admits only `Vacuity::Entangled` (Struck 2026-08-04, the vacuity removal), which needs `D > 0`.
 `D` counts independent cycles in the obligation complex. A cycle needs
 relations; relations are bonds, covenants and debts; those are made by
 spending value. **So a world must mint to relate, and must relate to
@@ -794,7 +794,7 @@ all, so it can never leave rank 0 by its own action.
 Flipping Phase 3 today would halt minting entirely — the relay's
 warning is exactly right, and this is why.
 
-### 14b. THE DISTINCTION THE VERDICT IS MISSING
+### 14b. The distinction the verdict is missing
 
 `Void` is returned both for *a world with no relations yet* and for *a
 world whose relations carry nothing*. Those are not the same state. The
@@ -802,18 +802,18 @@ first is unformed and ought to be able to start; the second is
 genuinely vacuous and is what the law was written to refuse. Collapsing
 them is what turns a forgery gate into a bootstrap lock.
 
-### 14c. WHAT IS OWED — an operator ruling, not a coder choice
+### 14c. What is owed — an operator ruling, not a coder choice
 
 **May a world with no standing obligations mint at all?** Three shapes,
 and this lane will not pick one:
 
-1. **A GENESIS WINDOW.** Early mints are exempt, the way
+1. **A genesis window.** Early mints are exempt, the way
    `founding_reserves` already creates value without work (P4). Bounded
    by receipt count or stamp, so the exemption cannot be farmed.
-2. **SPLIT THE VERDICT.** `Void` for relations-that-carry-nothing,
+2. **Split the verdict.** `Void` for relations-that-carry-nothing,
    something else for no-relations-yet, and admit only the latter.
    Requires no new state — the projection already knows which it is.
-3. **DIFFERENT STANDING FOR THE FIRST RUNG.** Rungs 0–2 pay zero today
+3. **Different standing for the first rung.** Rungs 0–2 pay zero today
    (§2), so an unstanding world could still be allowed to solve them —
    earning nothing but forming the relations that later mints need.
 
@@ -826,37 +826,37 @@ work exactly as designed and stop the economy.
 
 ---
 
-## §15 NEW VERDICT — V IS ALREADY IN THE LAW, AND THE PROJECTION MISREADS IT
+## §15 New verdict — V is already in the law, and the projection misreads it
 
 **§14's diagnosis is withdrawn.** It said the verdict collapses two
 states and needs a new one. Measured, the law already has both.
 
     boundary.rs:180
     dual_pole(rank, form) = match (rank > 0, form.is_non_vacuous()) {
-        (false, false) => Void,        // no structure, NO POTENTIAL
-        (false, true)  => Unframed,    // no structure, POTENTIAL STANDS
+        (false, false) => Void,        // no structure, no potential
+        (false, true)  => Unframed,    // no structure, potential stands
         (true,  false) => Stasis,
         (true,  true)  => Entangled,
     }
 
-**`form.is_non_vacuous()` IS `V`.** The ruling's requirement — *add V to
+**`form.is_non_vacuous()` is `V`.** The ruling's requirement — *add V to
 the equation* — is already satisfied. And `Unframed` is exactly the
-state the ruling proposes under the name Void-Uninitialized (a NAME
-FROM THE RULING, deliberately not a citation — no such variant exists
+state the ruling proposes under the name Void-Uninitialized (a name
+from the ruling, deliberately not a citation — no such variant exists
 and none is needed): structure absent, potential present. **No new variant is needed; the existing one is
 unreachable.**
 
-### 15a. THE ACTUAL DEFECT — measured
+### 15a. The actual defect — measured
 
     orbs=1  rank=0  verdict=Void
     V side: flows = 0
-    banked entries the world ACTUALLY holds: 2   (Iron 20, Biomass 10)
+    banked entries the world actually holds: 2   (Iron 20, Biomass 10)
 
 The world holds real potential and the verdict reads none, so the
 `Unframed` row can never be taken at genesis and every founded world
 falls to `Void`.
 
-**Because `V` is projected from the SAME EDGES as `D`.** `boundary_form`
+**Because `V` is projected from the same edges as `D`.** `boundary_form`
 reads the obligation complex — bonds, covenants, debts — and so does
 the rank. At genesis there are no obligations, so both are zero
 together, by construction, always.
@@ -866,9 +866,9 @@ in every dimension*. Two readings of one source are not two poles: they
 cannot disagree, so the four-row table degenerates to two rows and the
 Unframed and Stasis rows are dead.
 
-### 15b. THE FIX — no new state, no exemption, no bootstrap window
+### 15b. The fix — no new state, no exemption, no bootstrap window
 
-**`V` must read standing POTENTIAL, not standing obligation.** A
+**`V` must read standing potential, not standing obligation.** A
 founded world holding `Iron 20 · Biomass 10` has potential and no
 structure — that is `Unframed` on the table as written. Banked reserves
 are the potential the seed creates (P4), and they are already in
@@ -884,16 +884,16 @@ Then, with no law changed:
 §14's three shapes are all withdrawn. A genesis window, a split verdict
 and a bootstrap rung were three ways to work around a misprojection.
 
-### 15c. THE MERGE IS REFUSED, and why
+### 15c. The merge is refused, and why
 
 The ruling requires verifying **`D > 0` with `rank = 0`** before
-merging. **That is unsatisfiable on this branch**, because here `D` IS
+merging. **That is unsatisfiable on this branch**, because here `D` is
 `rank` — `standing` reads `read.rank` and nothing distinguishes
 them.
 
-It may well be satisfiable on `main`: lens-lane landed *"D IS A
-DIMENSION — the charge field carried whole, never counted"* and *"D IS
-POLYTONIC, and the floor is OCCUPANCY not the ground"*, which is
+It may well be satisfiable on `main`: lens-lane landed *"D is A
+dimension — the charge field carried whole, never counted"* and *"D is
+polytonic, and the floor is occupancy not the ground"*, which is
 precisely the separation the condition assumes. **Refusing the merge
 until that is measured rather than assumed** — merging first and
 checking after is how the last three defects reached the tree.
@@ -910,48 +910,48 @@ section is the explanation rather than the fix. If it is still `Void`,
 
 ---
 
-## §16 WHAT IS ACTUALLY WRONG — `D` IS A REDUCTION AND THE LAW DEFINES AN INDUCTION
+## §16 What is actually wrong — `D` is A reduction and the law defines an induction
 
 Two symptoms, one cause, both measured (`kernel/tests/d_induction.rs`):
 
     rank:  empty board = 0   open path = 0   closed triangle = 1
 
-**SYMPTOM 1 — `D` RETREATS.** Discharge one bond and a closed triangle
-becomes an open path: rank falls `1 → 0`. **ARTICLE IV: *capacity never
+**Symptom 1 — `D` retreats.** Discharge one bond and a closed triangle
+becomes an open path: rank falls `1 → 0`. **Article IV: *capacity never
 retreats, monotone non-decreasing in `D`*.** The implementation
 violates the article on every settled obligation, and nothing tested it
 because nothing tested `D` over time.
 
-**SYMPTOM 2 — `D` HAS NO BASE CASE.** Boards of 1, 2, 3 and 4 orbs
+**Symptom 2 — `D` has no base case.** Boards of 1, 2, 3 and 4 orbs
 holding real reserves all read rank `0`. That is §14–15's deadlock: a
 founded world reads `Void` and every mint refuses.
 
-### 16a. THE CAUSE
+### 16a. The cause
 
-`rank` is computed by REDUCTION — `holonomies` strips a spanning forest
+`rank` is computed by reduction — `holonomies` strips a spanning forest
 from the whole complex and counts what survives. A reduction:
 
-    has NO base case      strip nothing, get nothing → symptom 2
-    has NO monotonicity   it re-reads the whole complex, so it tracks
-                          that complex UP AND DOWN → symptom 1
+    has no base case      strip nothing, get nothing → symptom 2
+    has no monotonicity   it re-reads the whole complex, so it tracks
+                          that complex up and down → symptom 1
 
 **An induction has both by construction.** It begins at a base and
-every step only adds. **ARTICLE IV is an induction law**, and it was
+every step only adds. **Article IV is an induction law**, and it was
 implemented with the one operation that cannot satisfy it.
 
-### 16b. THE FLIP (operator ruling, 2026-08-02) — and it is forced
+### 16b. The flip (operator ruling, 2026-08-02) — and it is forced
 
 > flip `D` to induction and apply reduction to `V`, so they balance
 > while creating between syntropy > entropy
 
-    D  INDUCES   base = what OCCUPIES (a founded world occupies, so D
+    D  induces   base = what occupies (a founded world occupies, so D
                  is never 0 while anything stands); steps only add.
-                 Monotone BY CONSTRUCTION — Article IV becomes
+                 Monotone by construction — Article IV becomes
                  structural instead of aspirational, and the deadlock
                  cannot recur because induction has a base.
 
-    V  REDUCES   potential is what SURVIVES stripping. This already
-                 matches the running mechanism: demurrage IS a
+    V  reduces   potential is what survives stripping. This already
+                 matches the running mechanism: demurrage is a
                  reduction, decay strips potential every tick. V was
                  the reducible quantity all along and was implemented
                  by reading the same edges as D.
@@ -964,21 +964,21 @@ threshold either one crosses alone.
 **And it repairs §15's finding at the root.** `D` and `V` currently
 read one source, so they cannot disagree and the four-row `dual_pole`
 table degenerates. Under the flip they read different things by
-CONSTRUCTION — one built, one stripped — so `Unframed` and `Stasis`
+construction — one built, one stripped — so `Unframed` and `Stasis`
 become reachable states rather than dead rows.
 
-### 16c. WHAT IS OWED, and it is not small
+### 16c. What is owed, and it is not small
 
 `holonomies` stays — cycles are real structure and the fold gate needs
-them. What changes is that `D` is no longer defined AS that count:
+them. What changes is that `D` is no longer defined as that count:
 
 1. **The base.** What occupies? Orbs are the obvious answer and the
    measurement supports it, but occupancy at higher degrees (zones,
    systems) is §3b's `z` question and should be settled with it.
 2. **The step.** What adds to `D`, and is it ever more than one? §2k.1
-   says the residue EMITS a plane — that is the step, and it is already
+   says the residue emits a plane — that is the step, and it is already
    named.
-3. **Where `D` is carried.** An induction accumulates, so it is STATE,
+3. **Where `D` is carried.** An induction accumulates, so it is state,
    not a re-derivation. That is a schema change, and it is the same one
    §9 wanted for the proposer to see rank.
 
@@ -987,17 +987,17 @@ them. What changes is that `D` is no longer defined AS that count:
 enforcement. That is worth one wire amendment rather than three
 workarounds.
 
-### 16d. THE TWO INVERSIONS — §16's own measurement was wrong twice
+### 16d. The two inversions — §16's own measurement was wrong twice
 
     rank:  empty = 0    open path = 0    closed triangle = 1
 
 **Neither number is a reading of `D`.** Both come from computing the
-homology of a bare 1-complex when the object is a WRAPPED 3-SPACE
-carrying a GRADED fiber. Measured: `reduce.rs`, `delta.rs` and
+homology of a bare 1-complex when the object is a wrapped 3-SPACE
+carrying a graded fiber. Measured: `reduce.rs`, `delta.rs` and
 `bridge.rs` contain **no wrapping, no period, no modulus, no torus** —
 the word appears once, in a comment about reach.
 
-**INVERSION 1 · THE SPACE IS NOT COUNTED.** The coordinate wraps:
+**Inversion 1 · the space is not counted.** The coordinate wraps:
 `arbor::Coordinate` carries `s: [Ratio; 3]`, reach is a wrapped-L1
 distance, and the T∞ purge exists *because the torus wraps finitely*.
 **A 3-torus has `b₁ = 3` before anything is drawn on it.** The space
@@ -1006,10 +1006,10 @@ reading of `D` at all — it is a reading of a graph that forgot what it
 was drawn on. **`D` at genesis is the manifold's, and it is not zero.**
 
 That is why *"`D > 0` with `rank = 0`, progenitor standing"* is not a
-contradiction and never was: `D` comes from the SPACE, `rank` from the
-COMPLEX drawn on it. This lane read them as one number.
+contradiction and never was: `D` comes from the space, `rank` from the
+complex drawn on it. This lane read them as one number.
 
-**INVERSION 2 · WITHDRAWN — MEASURED FALSE (2026-08-02).**
+**Inversion 2 · withdrawn — measured false (2026-08-02).**
 
     composing triangle rank = 0     non-composing rank = 1
 
@@ -1022,18 +1022,18 @@ measurement.** A triangle that does not compose carries genuine
 charge — `bridge.rs`'s own header: *a triangle that does not compose is
 an economic fact, not an error*. Zeroing it would erase the residual,
 which `EQUATIONS` D3 makes the source of capacity. Adding a 2-cell does
-not remove that contribution; it RECLASSIFIES it, from an independent
-cycle to CURVATURE on a filled face. Both are non-zero. They are
+not remove that contribution; it reclassifies it, from an independent
+cycle to curvature on a filled face. Both are non-zero. They are
 different objects, and this document conflated them.
 
 The struck claim follows, kept because the error is instructive:
 
-~~**THE TRIANGLE IS AN ARTIFACT.**~~ On a complex with
-2-cells a triangle BOUNDS — it is the boundary of a face and
+~~**the triangle is an artifact.**~~ On a complex with
+2-cells a triangle bounds — it is the boundary of a face and
 contributes nothing to `H₁`. It registered as `1` only because `Delta`
 has no 2-cells to fill it (§2m: *the complex tops out at
-2-simplices*). **The one non-zero reading in §16 measures a MISSING
-CELL, not a present cycle.**
+2-simplices*). **The one non-zero reading in §16 measures a missing
+cell, not a present cycle.**
 
 So `0` should be `3` and `1` should be `0`. Neither error is
 arithmetic. Both are the same projection failure that
@@ -1041,21 +1041,21 @@ arithmetic. Both are the same projection failure that
 geometry: **the projection keeps the drawing and discards the space.**
 Third instance, same cause.
 
-**INVERSION 3 · THE GRADING COLLAPSES.** §2m's path algebra is graded
+**Inversion 3 · the grading collapses.** §2m's path algebra is graded
 and a polynomial does not lose its degree when evaluated. Reading `D`
 as one integer collapses that grading — the same scalar collapse as
 `O(1)` for cost and `C(Δ) = Σ|R|` for residuals. **`D` is a graded
-sequence, not a count**, which is what *"D IS POLYTONIC"* already says
+sequence, not a count**, which is what *"D is polytonic"* already says
 on `main`.
 
-### 16e. WHAT THE FLIP MEANS NOW
+### 16e. What the flip means now
 
-`D` INDUCES, and the base case is **the space itself** — the wrapped
+`D` induces, and the base case is **the space itself** — the wrapped
 manifold's own homology, which stands before any deed. Steps add what
 is built on it. That is why induction is the right operation: **you do
 not reduce your way to a torus, you begin on one.**
 
-`V` REDUCES, stripped by demurrage, exactly as running.
+`V` reduces, stripped by demurrage, exactly as running.
 
 Neither §16c item 1 ("what occupies?") nor §3b's `z` is open in the way
 this document had them: the base is the manifold, and `z` indexes the
@@ -1064,10 +1064,10 @@ projection** — everything else follows from it.
 
 ---
 
-## §17 BASE SIXTY LANDS — and siting the first orb exposes a divergence
+## §17 Base sixty lands — and siting the first orb exposes a divergence
 
-**LANDED:** the ring divides into **sixty** (`dop::TURN_SLOTS`), an
-orbit sits ON a slot or refuses (`OffSlot`), and **two orbs may not
+**Landed:** the ring divides into **sixty** (`dop::TURN_SLOTS`), an
+orbit sits on a slot or refuses (`OffSlot`), and **two orbs may not
 share a place** (`OrbitOccupied`). Nine witnesses in `siting_pins.rs`;
 145 suites green.
 
@@ -1075,24 +1075,24 @@ share a place** (`OrbitOccupied`). Nine witnesses in `siting_pins.rs`;
 repeating it:** every subdivision by 1, 2, 3, 4, 5, 6, 10, 12, 15, 20,
 30 and 60 lands exactly on a slot, and sevenths and eighths do not.
 That is what makes a symmetric layout at many arities exact, and what
-makes collision DECIDABLE rather than a tolerance.
+makes collision decidable rather than a tolerance.
 
-Also landed: `θ` now survives the STATE CONTAINER, not just the event.
+Also landed: `θ` now survives the state container, not just the event.
 The orb's tag-26 thermal frame gained the same additive-trailing angle
 — **caught by `arbor_observed_pins`, which found the committed snapshot
 dropping a place the live world held.**
 
-### 17a. THE CONDUCTOR DOES NOT SITE WITH AN ANGLE — measured, not shy
+### 17a. The conductor does not site with an angle — measured, not shy
 
-Passing ANY slot to the conductor's founding siting makes
+Passing any slot to the conductor's founding siting makes
 `conductor/tests/survey_pins.rs` fail:
 
     Crystal   live 239/16    replay 15/16
-    slots tested: 0, 1, 7, 30 — ALL fail, identically
+    slots tested: 0, 1, 7, 30 — all fail, identically
 
-**It is the PRESENCE of the angle, not its value.** Theta itself
+**It is the presence of the angle, not its value.** Theta itself
 round-trips correctly (both sides read `Some(0)`); what diverges is a
-MINED RESOURCE. The chart is chronicle-seeded, so a longer receipt
+mined resource. The chart is chronicle-seeded, so a longer receipt
 rehashes the chain and redraws the terrain — and a code path that the
 old draw never reached disagrees between live and replay.
 
@@ -1106,42 +1106,42 @@ feature for a known state corruption, and `survey_pins` is the pin that
 caught the P3 revert too — it is the tree's most sensitive live/replay
 detector and it should stay green.
 
-### 17b. WHAT THIS SAYS ABOUT ADDITIVE-TRAILING
+### 17b. What this says about additive-trailing
 
 The event amendment (tag 25) is safe: a receipt without an angle is
 byte-identical to its pre-amendment frame, pinned. **But "additive and
 therefore harmless" is false in general here** — the moment a receipt
-ACTUALLY carries the new field, its hash changes, the chain rehashes,
+actually carries the new field, its hash changes, the chain rehashes,
 and every chronicle-seeded derivation downstream moves.
 
-Additive-trailing preserves DECODING. It does not preserve DERIVATION.
+Additive-trailing preserves decoding. It does not preserve derivation.
 Any amendment that seeds from the chronicle must expect the world to be
 redrawn the first time the field is populated, and that is a ruling
 about worlds, not about the wire.
 
 ---
 
-## §18 THE DEADLOCK DOES NOT EXIST — §14, §15 and §16 RETRACTED (measured 2026-08-03)
+## §18 The deadlock does not exist — §14, §15 and §16 retracted (measured 2026-08-03)
 
 **`D` is already never zero, and the bootstrap path already runs.**
-Both were true before §14 was written. The error was mine and it is
-one substitution: **I read `rank` as `D`.**
+Both were true before §14 was written. The error is one substitution:
+**`rank` was read as `D`.**
 
-    bridge.rs:172   "THIS COUNTS WHAT STANDS ABOVE THE GROUND,
-                     and it is NOT `D`"
+    bridge.rs:172   "this counts what stands above the Ground,
+                     and it is not `D`"
     bridge.rs:283   degree() = Degree::above_ground(rank)
                     "can never return zero"
 
 Measured on a founded world: `degree = Degree(1)`, `rank = 0`. **`D`
-reads ONE at the floor.** The operator's standing requirement that
+reads one at the floor.** The operator's standing requirement that
 `D > 0` was satisfied by the landed design; §14–16 diagnosed a
 zero that was never there.
 
-### 18a. THE MINT GATE READS `rank` DELIBERATELY
+### 18a. The mint gate reads `rank` deliberately
 
 `verdict()` uses `rank`, not `degree()`, and says why in its own doc:
 
-> *Classifies on the ABOVE-GROUND circulation, never on the degree:
+> *Classifies on the above-Ground circulation, never on the degree:
 > every state stands at or above the ground, so a floored reading would
 > make `Void` and `Stasis` unreachable and collapse the four rows to
 > two.*
@@ -1150,39 +1150,39 @@ An attempt to ground the verdict was made this session and reverted: it
 produced exactly that collapse, three `capacity_law_pins` went red, and
 the author of `verdict()` had already foreseen and refused it.
 
-### 18b. THE BOOTSTRAP PATH, MEASURED STEP BY STEP
+### 18b. The bootstrap path, measured step by step
 
     found                orbs=1  degree=1  rank=0  V=0    Void
-    self-bond            REFUSED — BadTransfer. One orb cannot relate;
+    self-bond            refused — BadTransfer. One orb cannot relate;
                          a relation needs two.
-    chart a second orb   Ok(2) — FREE OF THE MINT, paid from the seed
+    chart a second orb   Ok(2) — free of the mint, paid from the seed
     bond a → b           Ok(())
                          orbs=2  degree=1  rank=0  V=2    Unframed
-    chart a third        REFUSED — CannotAfford { Iron, need 20, have 0 }
+    chart a third        refused — CannotAfford { Iron, need 20, have 0 }
 
 **The founding seed pays for exactly one charter.** A cycle needs three
 orbs, so `Entangled` is not reachable from the seed alone — and the way
-past that is PRODUCTION, not minting: zone extractors, tick, collect,
+past that is production, not minting: zone extractors, tick, collect,
 charter again, bond into a ring.
 
 **Nothing in that chain requires a mint.** §14's *"a world must mint to
 relate and relate to mint"* is false. Relations are bought with the
 seed and then with what the zones make; the mint is for cognition, and
-it is the LAST rung of the economy rather than its entry.
+it is the last rung of the economy rather than its entry.
 
-### 18c. WHAT IS WITHDRAWN
+### 18c. What is withdrawn
 
     §14   the bootstrap deadlock            — no deadlock exists
     §14c  three shapes to resolve it        — nothing to resolve
     §15   "V is misread by the projection"  — V reads correctly; the
                                               verdict asks about
-                                              CIRCULATION, and a world
+                                              circulation, and a world
                                               with reserves and no
                                               obligations genuinely has
                                               none
     §16   "D is a reduction, Article IV
-          needs an induction"               — `degree()` IS the
-                                              induction: GROUND plus
+          needs an induction"               — `degree()` is the
+                                              induction: Ground plus
                                               measured circulation, and
                                               it was landed before the
                                               section claiming it was
@@ -1193,7 +1193,7 @@ and `rank` falls — but it is not an Article IV breach, because Article
 IV governs `D`, and `D` is `degree()`, which cannot fall below the
 ground.
 
-### 18d. THE LESSON, WHICH IS NOT ABOUT THIS FEATURE
+### 18d. The lesson, which is not about this feature
 
 Five sections of law were written on one unchecked substitution, and
 the file being reasoned about carried a comment saying, in capitals,

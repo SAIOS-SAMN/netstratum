@@ -1,12 +1,12 @@
 # 106 — The thermodynamic substrate: potential, pressure and energy beneath motion
 
-Operator 2026-10-28: "so whats the main problem you are facing in finding
-stability and equilibrium"; "you're missing a substrate"; "write docs/106 and
-scope it". Status: SCOPE. Read against ipsal-autic
-`docs/implementation/phase_24_5_kinematic_substrate_layer_discipline.md`
-(the operator-named stack, 2026-05-17), as docs/94 was. Builds on docs/94
-(UMD, SUBSTRATE_C), docs/103 (the layers), docs/104 (the inverse duals),
-docs/105 (polarity equilibria).
+Design direction (2026-10-28): the obstacle to stability and equilibrium is a
+missing substrate; this document scopes it. Status: scope. Read against
+ipsal-autic
+`docs/implementation/phase_24_5_kinematic_substrate_layer_discipline.md` (the
+operator-named stack, 2026-05-17), as docs/94 was. Builds on docs/94 (UMD,
+SUBSTRATE_C), docs/103 (the layers), docs/104 (the inverse duals), docs/105
+(polarity equilibria).
 
 ## 0. The stack, and how ours stands inverted
 
@@ -16,11 +16,11 @@ KINEMATICS           motion, transport, SUBSTRATE_C          propagated FROM
 THERMODYNAMICS       pressure, potential, energy             ← the substrate
 ```
 
-Ours runs upside down. MOTION is the floor: torques give spin (`flows::torque`,
+Ours runs upside down. Motion is the floor: torques give spin (`flows::torque`,
 `spin_torque`), and heat and pressure are read off afterwards as its residue
 (agitation the torque's undelivered share; pressure `ρ·ā` of that residue;
 cooling a share that leaves no book). Nothing holds potential or energy as
-STATE, and nothing propagates motion FROM it. That one gap is the main
+state, and nothing propagates motion from it. That one gap is the main
 problem with stability (operator, 2026-10-28):
 
 - **No restoring force:** equilibrium lives in the substrate (pressure
@@ -39,10 +39,10 @@ At each place (a mote's reach in its enclosure, a ring, a body):
   the more energy a body has given up standing there.
 - **Pressure `P`:** what the medium bears there,
   - hydrostatic: the column beyond it, `Σ m_j·δ_j` (built, aa776c9);
-  - thermal: its heat's share of its density, `ρ·a`, `a` heat as STATE (§2);
+  - thermal: its heat's share of its density, `ρ·a`, `a` heat as state (§2);
   - magnetic: its open frames in step over its width (built).
-- **Energy, three forms, one book:** HEAT `a·m` (the substrate's own),
-  MOTION `m·ℓ` (the spin the kinematics carries), POTENTIAL `m·Φ` (where it
+- **Energy, three forms, one book:** heat `a·m` (the substrate's own),
+  motion `m·ℓ` (the spin the kinematics carries), potential `m·Φ` (where it
   stands). In grains of holding, on the one ledger unit (`universal_ledger`).
 
 ## 2. Its laws
@@ -70,7 +70,7 @@ At each place (a mote's reach in its enclosure, a ring, a body):
 - **Motion is the substrate's difference transported:** a body's spin changes
   by the pressure and potential contrast across it, read as pair shares, the
   rotor carrying it (docs/94 §1), bounded by SUBSTRATE_C. The torque stops being
-  a source of its own: the bounce's push enters as the core's POTENTIAL
+  a source of its own: the bounce's push enters as the core's potential
   re-pulsed (its state against its throat, docs/105 §4.1), and what the torque
   gives is what the substrate's potential pays.
 - **Heat is never a residue:** what the transport does not deliver in step is

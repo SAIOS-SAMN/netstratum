@@ -6,7 +6,7 @@ mechanics does in real solar systems. Era 1 deploys its bodies top-down (the
 pulse hands out shares, a star keeps a ruled share, planets are set at reach
 boundaries by construction; docs/78, "The mass split"), and each body then
 only turns about its centre. This document scopes the change to bottom-up
-FORMATION.
+formation.
 
 Status: scoped 2026-10-15; to be designed with xylarium-kernel (the
 formation law shared, as the turning law is). Phase 0's spin ledger built
@@ -24,21 +24,21 @@ exactly 1,000 holes. The galaxy is a weak hole circled by a handful of
 galaxy-sized stars: galaxies orbiting stars. The whole systems-about-a-core
 layer is wrong.
 
-- A galaxy is its CORE: the singularity and the accretion disc of the
+- A galaxy is its core: the singularity and the accretion disc of the
   heaviest elements its bounce held. Its stars form from the light gas the
   bounce sends farthest, each small, turning about the core.
 - **Two readings of mass** (operator, 2026-10-15; correcting "the galaxy's
   mass lies in the population and the gas", Earth's 3-D picture of the
-  Milky Way). 3-D MASS is matter counted (grains, nuclei); most of a
-  galaxy's may lie in its stars and gas. QUANTUM MASS is HOLDING, how long
+  Milky Way). 3-D mass is matter counted (grains, nuclei); most of a
+  galaxy's may lie in its stars and gas. Quantum mass is holding, how long
   states hold the pulse (the ring-density law's H), which sets clocks,
   deficits and turning; a core is a singularity whose bell holds every
   ring that reaches it, so it dominates a galaxy's holding whatever its
   grains. The measurement above compared 3-D grains only. The code's H
-  counts grains alone: the core's own holding as a STATE is the missing
+  counts grains alone: the core's own holding as a state is the missing
   component (below, "The core holds as a state").
 - The reach law (`m = μ·M(<r)`, worlds ten reaches apart) is how a disk
-  fragments about ONE star. It never makes the stars of a galaxy.
+  fragments about one star. It never makes the stars of a galaxy.
 - A population of stars is not a list of explicit bodies: it is the gas's
   collapse read as a distribution, and a star (with its disk and worlds) is
   formed as a body only where something observes it (compact until
@@ -49,7 +49,7 @@ layer is wrong.
 
 ### Our rulers are our own
 
-The first ruling asked xylarium for physical unit rulers (suns, metres,
+The first ruling asked Xylarium for physical unit rulers (suns, metres,
 km/s, one speed constant per tier fixed by the Sun's galactic orbit, Earth's
 year and the Moon's month; a thermal speed from hydrogen's 13.6 eV and the
 proton's mass, growing as the root of temperature). Every part of that was
@@ -73,24 +73,24 @@ misaligned with docs/78's design laws, and none of it is adopted:
    layer (design law 7): a speed is a phase turning per bell, read off the
    law.
 
-xylarium concurs (2026-10-15, their operator's ruling): what the two
-universes share is the laws' FORMS only (the turning law, `v = c·δ`,
+Xylarium concurs (2026-10-15, their operator's ruling): what the two
+universes share is the laws' forms only (the turning law, `v = c·δ`,
 `L = r·v`, the radial balance, the bond law, the chronometry chain). Each
 universe derives its own rulers from its own physics, including the
 home-body compression reference.
 
 What actually blocked Phase 1 is missing physics, not missing units: the
-THERMAL MOTION of matter was never derived from our own atom tier (where
+thermal motion of matter was never derived from our own atom tier (where
 temperature is a rate, `T = k_T·ω`). Derived there, on the same turning
 law and rulers as an orbit, a gas's agitation and an orbit's turning are
 comparable by construction. That derivation is Phase 1's first step.
 
-### The derivation (operator and xylarium, 2026-10-15)
+### The derivation (operator and Xylarium, 2026-10-15)
 
 Constants are missing physics. The speed law `ω = M(<r) / r` makes speed
 `v = M(<r)`, radius-free: unbounded (the 0.1 to 100 c measured), no
 horizon, no runaway collapse, and at odds with the breath's clock law
-`r / (r + M)`. The fix is not a ruler but the primitive: the STATE (a
+`r / (r + M)`. The fix is not a ruler but the primitive: the state (a
 bell's ring rate, phase and torsion winding) is primitive and mass is a
 reading, the deficit `δ` a state's echo leaves in each well (docs/78, "The
 singularities"). Then `v / c = δ = M / (r + M)` (xylarium's
@@ -102,21 +102,21 @@ mass unit.
 
 The split, in order:
 
-1. **xylarium:** the ring-density law (a bell's ring density at a place
+1. **Xylarium:** the ring-density law (a bell's ring density at a place
    sets its clock rate and `δ`), exact, frame by frame. We adopt the form;
    the breath swaps its rate `r / (r + M)` for it.
-   DELIVERED (xylarium 11.0, "THE RING-DENSITY LAW", 2026-10-15): every
-   bell (a core, a star, a grain) HOLDS each ring that reaches it for its
+   Delivered (Xylarium 11.0, "the ring-density law", 2026-10-15): every
+   bell (a core, a star, a grain) holds each ring that reaches it for its
    own period, then passes it on as its echo. A ring crosses empty space to
    r (in light-rings) in r and is held by every bell inside r for their
    periods together, `H(<r)`, so it arrives after `r + H(<r)`:
-   `rate(r) = r / (r + H(<r))`, `δ(<r) = H(<r) / (r + H(<r))`. MASS IS
-   HOLDING, `M = H`. Whole rings, so exact rationals, read ring by ring.
+   `rate(r) = r / (r + H(<r))`, `δ(<r) = H(<r) / (r + H(<r))`. Mass is
+   holding, `M = H`. Whole rings, so exact rationals, read ring by ring.
    Checked against the design laws: no square (linear-fractional), no
    constant (time a ring, length light per ring), construction (a ring is
    a spherical wavefront, so it crosses every bell inside r), frame by
    frame (ring counts), one law at every tier (core, star, grain).
-2. **netstratum:** a grain's own ring (its mass reading from the atom
+2. **Netstratum:** a grain's own ring (its mass reading from the atom
    tier's turning; A a reading) and thermal motion on the bell's clock.
 3. **Then formation:** the bounce's spin (from the torsion winding) and
    hold (sorting core, disk, gas, escape), a galactic bounce's strength,
@@ -127,61 +127,61 @@ The split, in order:
 Built: the grain's own ring (`cfe::almanac::atom::hold`, holding belongs
 to closed pairs: `2Z + (Z − unpaired)` rings; operator's lean, 2026-10-15)
 weighs every grain, and the clock reads `crate::ring::rate`. The ring
-law's MOTION was wired (period `r·(r + H)/H`, the balance
-`r = ℓ·H/(H − ℓ)`, escape at `ℓ ≥ H`) and measured, then HELD:
+law's motion was wired (period `r·(r + H)/H`, the balance
+`r = ℓ·H/(H − ℓ)`, escape at `ℓ ≥ H`) and measured, then held:
 
 - Under `ω = δ/r`, a circular orbit's spin `ℓ = r·δ = r·H/(r + H)`
-  SATURATES at H: far from what it orbits every orbit carries nearly the
+  saturates at H: far from what it orbits every orbit carries nearly the
   same spin, and the radius `ℓ·H/(H − ℓ)` diverges as ℓ nears H. In nature
   `ℓ` grows without bound (as the root of r), so slow mass loss widens an
   orbit; here a loss above `1 − ℓ/H` of the holding inside unbinds it.
 - On the pulse's orbits (`r ≈ 3600·H`) that threshold is 1/3600. A
   6,000-bell breath on the test universe (stars shedding up to 1/100 an
-  echo) ESCAPED 1,894 systems and bore none (each birth takes the edge
+  echo) escaped 1,894 systems and bore none (each birth takes the edge
   gas's spin, ≈ H, and escapes at once). It also cost 754 s against
   23 s under the held law (the balance near `ℓ → H` grows the rationals).
 - The cause is the pairing of `L = r·v` with `v = δ`: our speed reads as
   nature's squared speed (`δ ≈ v²/c²` in the weak field), so `r·δ` is not
   the quantity rotation conserves. Which quantity the ring law conserves
   (its spin, read from the turning without a flat square) is owed before
-  the motion goes live, shared with xylarium (`L = r·v` is a shared form).
+  the motion goes live, shared with Xylarium (`L = r·v` is a shared form).
 
-### The nappe law (rejected) and the dance (with xylarium, 2026-10-15)
+### The nappe law (rejected) and the dance (with Xylarium, 2026-10-15)
 
-- **The nappe law** (xylarium's, remediated by ours): spin is the inversion
+- **The nappe law** (Xylarium's, remediated by ours): spin is the inversion
   between the nappes, `ℓ·ℓ = r·H`. The specific spin ℓ is the primitive,
   held rational; the conserved, additive quantity is `Σ m·ℓ`. Bodies are
   placed by ℓ and read `r = ℓ²/H`, `v = H/ℓ`, `ω = H²/ℓ³`, `P = ℓ³/H²`, all
   exact. Measured on the test breath (6,000 bells), against `ℓ = r·δ`: 0
   escaped (was 1,894), 29 born (was 0), the spin ledger exact, 35 s (was
   754 s; the old motion 23 s); orbits widen smoothly as stars shed.
-  REJECTED by the operator (2026-10-15): "`P² = r³/H` is not a valid
+  Rejected by the operator (2026-10-15): "`P² = r³/H` is not a valid
   formula: squares in spherical computations." Calling `ℓ·ℓ = r·H` an
   inversion does not make it other than a square, and its readings
   (`r = ℓ²/H`, `P = ℓ³/H²`) are Kepler's flat powers. Not adopted. The
   saturation it fixed (`ℓ = r·δ` reaches H) stands open: the spin law must
   be stated in the sphere's own terms (angles and turns, design law 2),
   with no power of a length.
-- **The dance, not Hill spheres** (xylarium's operator; their 11.0): a
-  star and EVERYTHING that orbits it are ONE system turning about one
-  centre of conservation (every holding, every quantum state). STABILITY
-  IS ALIGNMENT, NOT DISTANCE: worlds hold where their turns lock into
+- **The dance, not Hill spheres** (Xylarium's operator; their 11.0): a
+  star and everything that orbits it are one system turning about one
+  centre of conservation (every holding, every quantum state). Stability
+  is alignment, not distance: worlds hold where their turns lock into
   small whole-number ratios (exact, since periods are), with the dominant
   body setting the ladder; spacing is an outcome. The many-body centre and
   the locks are read at events. This retires our reach law's spacing
   ("worlds ten reaches apart", the tidal reach `s`), which is a Hill
   sphere by another name.
 
-### The spin law in angles and turns (open, with xylarium)
+### The spin law in angles and turns (open, with Xylarium)
 
-xylarium's "sphere's spin law" (place as a cap angle, spin as the cap's
+Xylarium's "sphere's spin law" (place as a cap angle, spin as the cap's
 rim over its share) is under joint work. Operator rulings so far:
 
-- ORBITS BREATHE (operator, 2026-10-15; replacing a misread relay that
+- Orbits breathe (operator, 2026-10-15; replacing a misread relay that
   "mass loss must widen orbits"). A law never fixes a direction: orbits
-  expand AND contract as matter is brought in and released and as spin
-  moves, and the answer to "expand or contract?" is both. DEFECTS ARE NOT
-  ERRORS: matter naturally loses components as it orbits. What moves an
+  expand and contract as matter is brought in and released and as spin
+  moves, and the answer to "expand or contract?" is both. Defects are not
+  errors: matter naturally loses components as it orbits. What moves an
   orbit is the ledger: the holding inside it, the spin the matter brings or
   carries away, and spin exchanged between a body's own rotation (its
   planetary core spinning or stagnant; tidal locking) and its orbit, and
@@ -201,12 +201,12 @@ disk"). Formation's bounce-hold law therefore also sets the bell's
 strength and the quantum layer's phase: the disk's mass, its dipole, its
 precession and its propulsion are owed together.
 
-### The core holds as a state (2026-10-15; with xylarium, proposed)
+### The core holds as a state (2026-10-15; with Xylarium, proposed)
 
 - **The core's reach is its ring** (operator, 2026-10-15, superseding "its
   echo, half a light-ring"): the throat is S^1 at d = 1 (docs/78, "The
   bounce on S^1"), so the core's reach is 1 in its own units. Pending with
-  xylarium: whether the core's state spin `R_core·H_core` becomes 1 (from ½),
+  Xylarium: whether the core's state spin `R_core·H_core` becomes 1 (from ½),
   which doubles the push's carried spin in the disc's cut and the gas
   shells (`ℓ_z = p·(w̄/w)/s_g`).
 - **The core's own hold:** a bell holds each ring for its own period, so
@@ -225,13 +225,13 @@ precession and its propulsion are owed together.
   universal state and each nearer galaxy's (state plus grains). 3-D
   readings (the births' binding size, the galactic year's half-mass) stay on
   grains.
-- **The clock ratio, derived** (closed with xylarium, 2026-10-15; their
+- **The clock ratio, derived** (closed with Xylarium, 2026-10-15; their
   founding draw withdrawn): the universal core's period is the total hold
   of everything its ring passes through, the founding manifest's every
   acquired nucleus's own period summed. So `P_core / P_grain` is the
   manifest's total hold: a reading of what the universe acquired through
   the hypha. With no constant:
-  - all the universe's grains together hold exactly ONE core ring, equal
+  - all the universe's grains together hold exactly one core ring, equal
     to the core's own state hold; each grain holds `1/N` of a core ring
     (N the manifest's total hold);
   - a galactic core's state hold, on the universal clock, is its galaxy's
@@ -240,53 +240,53 @@ precession and its propulsion are owed together.
     may carry most of its 3-D mass. The "inversion" was a 3-D reading.
   - The core needs no grains to exist (its state hold 1 exceeds its reach
     ½): the core-first walk starts from the state hold and is all disc.
-  - **ACQUIRED MATTER SLOWS THE BELL:** every growth grant (new nuclei
+  - **Acquired matter slows the bell:** every growth grant (new nuclei
     through the hypha) lengthens the universal core's period, so the rings
     per TUniversal final point shift at each grant; to be read on the
     bridge.
 
-### Formation's derivation, measured on scratch (2026-10-15; operator: derive with xylarium before building)
+### Formation's derivation, measured on scratch (2026-10-15; operator: derive with Xylarium before building)
 
-- **THE DISC'S CUT** (built on scratch, saved in `.testtmp/formation_b.diff`,
-  not live): the push's budget is the UNIVERSAL state re-pulsed down the hub
+- **The disc's cut** (built on scratch, saved in `.testtmp/formation_b.diff`,
+  not live): the push's budget is the universal state re-pulsed down the hub
   and shared over the galaxy's nuclei, `ℓ_z = (p/2)·(w̄/w_z)/s_g`; a nucleus
   is held where `H/(R_z + H) ≥ p`, `p = H_disc/(1 + H_disc)`; one crossing
   on the cumulative hold (bisection), never stepped. Measured: on the era-0
   stand-in (99.9 % heavy by weight) the cores hold ~91 %; re-founded on the
   pairing distribution, ~80 % held and ~20 % released as gas, the light
   elements. Hydrogen escapes only once `p²/(2(1 − p)) ≥ s_g·(w/w̄)`. The cut
-  is the FOUNDING split: stars' returns and the core's jets feed the gas
-  back over time as ledger flows (xylarium).
-- **THE FOUNDING DISTRIBUTION** (option B, operator; built on scratch): from
+  is the founding split: stars' returns and the core's jets feed the gas
+  back over time as ledger flows (Xylarium).
+- **The founding distribution** (option B, operator; built on scratch): from
   pairing (design law 6), each heavier step closes half of what tries,
   `count(Z) = N·2^−Z`, light-dominated by mass, no cap. It is the
-  composition of the universe's signed founding MANIFEST to the court
-  (mycelium 78.155b, built and live: the universe sets the composition, the
+  composition of the universe's signed founding manifest to the court
+  (Mycelium 78.155b, built and live: the universe sets the composition, the
   court records and grants μ per kind and never reshapes it; our vendored
-  mycelium predates it, so the reserve's submission needs a re-pin).
-- **FRAGMENTATION, the crux.** Under `ℓ = R·H` the shear `dℓ/dR = H` is the
+  Mycelium predates it, so the reserve's submission needs a re-pin).
+- **Fragmentation, the crux.** Under `ℓ = R·H` the shear `dℓ/dR = H` is the
   same at every reach, so a binding read with the orbital spin difference
   needs a core-sized mass to collapse (the inverted galaxy from the law;
   the tidal placeholder fails the same way: 20 systems in the universe).
-  Fixed with xylarium's 11.4: a binding's own spin is the SHEAR IN TURNING,
+  Fixed with Xylarium's 11.4: a binding's own spin is the shear in turning,
   `σ = δ(R) − δ(R + w) = H·w / ((R + H)(R + w + H))`, falling with reach;
-  collapse `m/(w + m) ≥ a + σ`. Open, sent to xylarium: the gas's WIDTH
+  collapse `m/(w + m) ≥ a + σ`. Open, sent to Xylarium: the gas's width
   (each escaped element otherwise a zero-width shell: draft, agitation
   `a_z = (p − δ_z)/p` spreading `ℓ_z(1 ± a_z)`); fragmentation as a
-  CROSSING on the cumulative gas, compared as products of distinct sums,
+  crossing on the cumulative gas, compared as products of distinct sums,
   never solving for a squared reading (`(R + H)²`).
 
 ### Formation live: the chain to stars, ignition and the coupling (operator 2026-10-15; built)
 
 Live from 21:41 on a re-founded universe (the pairing distribution): the
-deploy lays down each core's disc and its galaxy's GAS as motes, no
-placed systems; the core's AXIAL JETS land at the rim; at each echo (the
+deploy lays down each core's disc and its galaxy's gas as motes, no
+placed systems; the core's axial jets land at the rim; at each echo (the
 universal core's pulse reaching the galaxy after its light-travel delay,
-bells 300 to 3,540) the gas that has cooled enough is PARTITIONED by the
+bells 300 to 3,540) the gas that has cooled enough is partitioned by the
 galaxy's shear into bindings (`⌊W/w*⌋`, by the echo's coherent share), and
-each binding IGNITES:
+each binding ignites:
 
-- **The quantum heart** (operator; with xylarium): a star is the core's
+- **The quantum heart** (operator; with Xylarium): a star is the core's
   pair one tier down, a containment ring at its centre holding its body's
   grains as one ring of its own. A collapsing binding runs away to the
   throat condition `w = m` (deficit ½), where the heart forms, and the star
@@ -297,8 +297,8 @@ each binding IGNITES:
   universe's holding on the core's clock) against its atoms' charge hold
   (each nucleus's outer band's enclosed charge, over its nuclei):
   `κ = (star_hold / universe_hold) / Σ nuclei·Q_out`. The universe's nucleus
-  count survives in it. Read in the FORMATION observer line; it enters
-  fusion's yield and burn (the heartbeat, with xylarium, next), not the
+  count survives in it. Read in the formation observer line; it enters
+  fusion's yield and burn (the heartbeat, with Xylarium, next), not the
   star's size.
 - **Atom size** (the opacity question) is set aside: a star's size comes
   from ignition and its binding (where it stands), not opacity.
@@ -309,38 +309,38 @@ each binding IGNITES:
 
 Burning met two conflicts: fusion changed the ledger's mass the wrong way
 (H + H → He raises the weight 4 → 6 while releasing light), and it
-transmutes. The operator's answer: TRANSDUCTION VIA MAGNETISM. An atom's
+transmutes. The operator's answer: transduction via magnetism. An atom's
 open frames (unpaired electrons) are its magnetic moments; its holding is
-`3Z − unpaired`; so HOLDING + MAGNETISM = 3Z a nucleus, conserved through
+`3Z − unpaired`; so holding + magnetism = 3Z a nucleus, conserved through
 every fusion (Z is conserved). Pairing frames transduces magnetism into
 holding (H + H → He: holding +2, magnetism −2); unpairing transduces holding
 into magnetism (He + He → Be: holding −2, magnetism +2). The light a fusion
 releases is the transduction's flux through the continuum face, never
-mass. The LEDGER line carries magnetism and the conserved sum
+mass. The ledger line carries magnetism and the conserved sum
 (`pulse::magnetism`). Open: the burning rate (the heartbeat, with
-xylarium); transmutation against mycelium's element account (nuclei per Z
+Xylarium); transmutation against Mycelium's element account (nuclei per Z
 as granted).
 
-**Resolved and built (2026-10-16).** THE HEARTBEAT (with xylarium): a
-star burns at its INTERFACE, the share `κ·n_star = s_star/Q̄` its heart's
+**Resolved and built (2026-10-16).** The heartbeat (with Xylarium): a
+star burns at its interface, the share `κ·n_star = s_star/Q̄` its heart's
 gravity reaches against its atoms' charge; each received ring feeds the
 fuel's open share e of it, held as halvings (`⌈Q̄/(e·s_star)⌉` rings a
 halving); heavier stars burn faster, deeper ones faster still; the share is
 scale-free and the absolute rate comes through the ring flow. Built for the
 first rung, H + H → He, on each echo (`formation::heartbeat`; a star's birth
-bell persisted). TRANSMUTATION (mycelium, 78.155b): the element account
-stays the CROSSING record; fusion is the universe's own physics, never
+bell persisted). Transmutation (Mycelium, 78.155b): the element account
+stays the crossing record; fusion is the universe's own physics, never
 reported; a crossing out is checked by nucleon and Z-weighted totals only.
-Observers: HEARTBEAT (burning, spent, lifetimes) and the LEDGER's
+Observers: heartbeat (burning, spent, lifetimes) and the ledger's
 mass + magnetism.
 
 ### Built offline after the host crash (2026-10-16; services down by the operator's ruling)
 
-- **Vacuum cooling** (with xylarium): every mote halves its agitation
+- **Vacuum cooling** (with Xylarium): every mote halves its agitation
   through the vacuum every `⌈1/δ⌉` rings at its reach (δ = H/(R + H);
   `(1 − δ)^⌈1/δ⌉ ≤ 1/e < ½`, exact, no power), beside its open frames'
   light; closed-shell gas cools; close-in gas fastest.
-- **The disc's own heat** at ignition (with xylarium): the new star's first
+- **The disc's own heat** at ignition (with Xylarium): the new star's first
   light its disc cannot re-lock, `a_disc(R) = L·R/(R + x*)`, rising outward
   against the vacuum's pull, strongest inward. (Before it, a cold binding's
   disc held whole: one world per system.)
@@ -370,7 +370,7 @@ read at events. Measured on the 6,000-bell test breath: 0 escaped, 29 born,
 the spin ledger exact; the first generation moved out (589) and none in,
 because the breath's ledger has only shedding and outermost births so far
 (accretion, the rotation ↔ orbit exchange and galactic pulses are owed).
-Rotation on the same ledger (xylarium's form, `L_rot = Σ_layers m_i·ρ_i·
+Rotation on the same ledger (Xylarium's form, `L_rot = Σ_layers m_i·ρ_i·
 H_rot,i`) lands with the tidal coupling rate, which moves it. Live from
 2026-10-15 14:16 on a redeployed universe (13 cores, 416 systems,
 conservation exact).
@@ -379,11 +379,11 @@ conservation exact).
 
 "We shouldn't be sorting anything, we should be dispersing and letting the
 physics do the distribution." The cut's all-or-nothing verdict per kind
-retires. The bounce pushes every kind out and SPREADS it: kind z is carried
+retires. The bounce pushes every kind out and spreads it: kind z is carried
 `ℓ_z`, stands about `R_z = ℓ_z/H`, and is spread by the push across
-`R_z(1 − p) … R_z(1 + p)`. Its HELD share is the part of that spread within
+`R_z(1 − p) … R_z(1 + p)`. Its held share is the part of that spread within
 the throat, `(H − R_z(1 − p))/(2p·R_z)` taken between 0 and 1: a share,
-never a verdict (xylarium agrees; their ruling "nothing boolean: outcomes
+never a verdict (Xylarium agrees; their ruling "nothing boolean: outcomes
 are shares and rates"). Every kind is partly held and partly free, the disc
 and the gas both mixed (`pulse::disperse`, `formation::shells`).
 
@@ -395,42 +395,42 @@ tier's did; the two tiers were not one law. That raised the ruling below.
 
 ### Regeneration (operator ruling (i), 2026-10-16; built, 41c231e)
 
-Each core re-pulses the echo at FULL STRENGTH in its own units (s = 1). No
+Each core re-pulses the echo at full strength in its own units (s = 1). No
 share of the enclosing body enters the push at any tier: `1/s_g` retires
-from `galaxy_push`, `disperse` and `shells` (xylarium's operator agrees; it
+from `galaxy_push`, `disperse` and `shells` (Xylarium's operator agrees; it
 comes out of theirs too). Rejected: (ii) budget division, a conserved push
 handed down the tiers, under which cores would only redistribute the
 amplitude.
 
-What regeneration renews is the DRIVE (the push, the amplitude), never
+What regeneration renews is the drive (the push, the amplitude), never
 matter. In its own units a body holds all its own matter: read offline and
 live (re-founded 15:25), every galaxy holds its whole manifest as disc
-(push ½, H 2), no gas, no stars, no worlds. A galaxy's gas must ARRIVE from
+(push ½, H 2), no gas, no stars, no worlds. A galaxy's gas must arrive from
 outside. That is the next section's job. Still carrying `s_g`: the jets'
 interface clock `⌈Q̄/(e·s_g)⌉` (not the push; to be re-read with the
 ocean).
 
-### Recycling and recyclotronic propulsion (operator 2026-10-16; PROPOSED, with xylarium, to be tested)
+### Recycling and recyclotronic propulsion (operator 2026-10-16; proposed, with Xylarium, to be tested)
 
 The operator ties regeneration (the drive, physics) and rejuvenation (a
-world's regrowth, docs/40) together through RECYCLING. One closed circuit,
+world's regrowth, docs/40) together through recycling. One closed circuit,
 one law every tier; nothing below is derived yet, and no outcome is stated.
 
 1. **Shedding (outflow).** Every body loses kinds as it orbits and burns:
    defects (never errors), the jets off the disc, a star's burn, the
    vacuum's take-back. This is the circuit's input.
-2. **Recycling.** Shed matter is never lost. It enters the MEDIUM of the
+2. **Recycling.** Shed matter is never lost. It enters the medium of the
    enclosure one tier up: a world's losses the system's gas, a system's the
    galaxy's gas, a galaxy's the ocean. The ledger's total is fixed; matter
    only circulates.
 3. **Recyclotronic propulsion (the kick).** A cyclotron bends charges into
    orbit with a magnetic field and kicks them on each pass. Here:
-   - the BENDING FIELD is the tier's two-charge magnetism (xylarium 11.0,
+   - the bending field is the tier's two-charge magnetism (Xylarium 11.0,
      "two charges, reflected the whole way": the faces c → 1 − c, the
      rotoreflection at every tier);
-   - the KICK is the regenerated pulse, renewed at full strength by each
+   - the kick is the regenerated pulse, renewed at full strength by each
      core on every echo;
-   - medium matter gains only where it orbits IN STEP with the echo: the
+   - medium matter gains only where it orbits in step with the echo: the
      ocean's crests `R_{p/q} = H(P_b·p/q − 1)`, the orbits whose period is a
      whole ratio of the echo. On a crest the kick lands in phase every pass;
      between crests it nets nothing. The crests are the recyclotron's
@@ -444,7 +444,7 @@ one law every tier; nothing below is derived yet, and no outcome is stated.
    stripped recovers only by arrival.
 
 **What it resolves.** Under regeneration a galaxy's gas must come from
-outside: the OCEAN is the recycled medium, kicked out from the universal
+outside: the ocean is the recycled medium, kicked out from the universal
 core along its crests. One mechanism, not a separate build. Rejuvenation's
 ceiling stops being a dial and gains a physical source.
 
@@ -453,27 +453,27 @@ or square; the gain is an in-phase share a pass, never ½mv²; no constant:
 the kick's strength is the core's own amplitude, the field the tier's own
 two charges.
 
-**Owed (with xylarium):** the per-pass gain on a crest (the in-phase share
+**Owed (with Xylarium):** the per-pass gain on a crest (the in-phase share
 times the received pulse); how shed matter divides between tiers; whether
 `a_q = 1/q` (odd q, 0 even) is the crest's coupling to the kick; the
 crest's width (the collected medium's deficit, the open fixed point).
 
 **The test (offline first, then live):**
-- the LEDGER: total mass, and mass + magnetism, unchanged across every
+- the ledger: total mass, and mass + magnetism, unchanged across every
   shed, recycle and kick (exact);
-- the SHED: what each tier loses an echo, by kind, and where it lands;
-- the CRESTS: medium on resonant orbits gains, medium between them does
+- the shed: what each tier loses an echo, by kind, and where it lands;
+- the crests: medium on resonant orbits gains, medium between them does
   not (read as gain a pass against `p/q`);
-- the RETURN: gas arriving in a galaxy that held everything, then bindings,
+- the return: gas arriving in a galaxy that held everything, then bindings,
   then stars, then worlds: 0 → read, none stated in advance.
 
-Read with `observe recycle [N]` (LEDGER, MEDIUM by tier, SHED from the
-breath's lines, RETURN by galaxy; CRESTS once derived). xylarium mirrors the
-same readings. **xylarium's answers (proposed):** (a) the gain on a crest is
-(medium in band) × `a_q` × the kick; the enclosure's OWN core family is
-kicked at full amplitude (1, regenerated), ρ multiplies only the PARENT's
+Read with `observe recycle [N]` (Ledger, medium by tier, shed from the
+breath's lines, return by galaxy; crests once derived). Xylarium mirrors the
+same readings. **Xylarium's answers (proposed):** (a) the gain on a crest is
+(medium in band) × `a_q` × the kick; the enclosure's own core family is
+kicked at full amplitude (1, regenerated), ρ multiplies only the parent's
 family: ρ appears only where a boundary is crossed. (b) Shed matter goes one
-tier up WHOLE, undivided; ρ governs pulses received inward, never matter
+tier up whole, undivided; ρ governs pulses received inward, never matter
 leaving; the enclosing tier's crests then decide where it lands. (c) The
 crest width stays open: the candidate is the fixed point where the in-phase
 gain a pass balances the spread between crests, both shares. (d)
@@ -486,10 +486,10 @@ First live reading (beat 75, regenerated founding): the ledger mass
 universe, all from the cores that never formed, its heaviest kinds
 Z016–Z023; galaxy, system and world media 0; every galaxy disc 1.0.
 
-### The return built and read (2026-10-16, with xylarium; offline)
+### The return built and read (2026-10-16, with Xylarium; offline)
 
 Built (`crate::ocean`, commits ebff83a…3a1e6ad), every form proposed with
-xylarium and checked against the design laws:
+Xylarium and checked against the design laws:
 - **The core's state is set at the bounce** (`Body::state`), never drained;
   holding = state + grains; an emptied galaxy keeps its core.
 - **Jets fire once an echo** (the bounce; the jetstream ruling), releasing
@@ -513,27 +513,27 @@ xylarium and checked against the design laws:
 - **Operator ruling:** ρ_g multiplies the arrival: the matter crossed the
   boundary, so its motion is received like a pulse.
 
-**Read (scratch founding, 1200 bells):** the circuit RUNS and conserves (the
+**Read (scratch founding, 1200 bells):** the circuit runs and conserves (the
 ledger exact); the ocean settles near 0.06 of the universe, its heavy end (O,
-F, N); the galaxies' shares REDISTRIBUTE through it (one 0.116 → 0.046,
-another 0.052 → 0.117). Every arrival is HELD: no gas, no stars. A kind has
+F, N); the galaxies' shares redistribute through it (one 0.116 → 0.046,
+another 0.052 → 0.117). Every arrival is held: no gas, no stars. A kind has
 a free part only where `R(1 + p) > H`, i.e. `ℓ > 8/3` (p ½, H 2); hydrogen's
 push is about 2 and its arrival at most `ρ_g·e ≈ 0.4`: short by about 0.3,
-the heavier far shorter. Under regeneration the circuit runs its SLOW LEG
+the heavier far shorter. Under regeneration the circuit runs its slow leg
 only (ocean → disc → jet → ocean). This is the law's answer as ruled; the
 fast leg, if there is one, waits on missing physics, never on tuning this
 margin.
 
-### The swing (galactic cores, xylarium 11.0 (3); drafted here, accepted by xylarium; to be ruled and built)
+### The swing (galactic cores, Xylarium 11.0 (3); drafted here, accepted by Xylarium; to be ruled and built)
 
 Galactic cores are weaker singularities; the universal core's torsion sets
-them SWINGING about it, never on circles. In the motion law's own terms
+them swinging about it, never on circles. In the motion law's own terms
 (`ℓ = R·H`, `P = 1 + R/H`, `ω = δ` a received ring), shares, sums and
 products of distinct readings only:
 
 1. **The torsion.** Holding and torsion are the two faces of c → 1 − c: the
-   universal core HOLDS `δ_u(R) = H_u/(R + H_u)` at a core's reach and
-   TWISTS the other face, `τ_u = 1 − δ_u(R) = R/(R + H_u)`.
+   universal core holds `δ_u(R) = H_u/(R + H_u)` at a core's reach and
+   twists the other face, `τ_u = 1 − δ_u(R) = R/(R + H_u)`.
 2. **The eccentricity, a share:** `e = τ_u/(τ_u + h_g)`, the torsion
    against the galactic core's own holding `h_g` (its state and grains);
    e < 1 always, no escape by the swing.
@@ -546,9 +546,9 @@ products of distinct readings only:
    R₊; the ellipse's sweep from δ alone, no area law.
 6. **The phase:** a core is born at R₋ (the bounce's own point; the
    white-hole outflow carries it out), so the swing starts at its deepest
-   reach. xylarium carries `frac(i·golden)` into the phase along the swing;
+   reach. Xylarium carries `frac(i·golden)` into the phase along the swing;
    **not adopted here**: the golden ratio is a constant (missing physics)
-   and an index is spreadsheet identity; netstratum's phase is the core's
+   and an index is spreadsheet identity; Netstratum's phase is the core's
    birth reading (its sector at birth, as every body's identity).
 
 Refused: turning points from `δ(R₋) = 1 − δ(R₊)` (gives `R₊·R₋ = H·H`, a
@@ -556,9 +556,9 @@ square in disguise); any energy integral (v²). Owed: the galaxies'
 magnetism setting the universal core's strength (11.0 (1)) feeds `H_u` and
 so e; anticipated to be the recycling circuit seen from the core.
 
-### Motes (operator 2026-10-18: "parcel" renamed)
+### Motes ("parcel" renamed)
 
-A MOTE is a portion of one element that moves with the flow: many atoms of
+A mote is a portion of one element that moves with the flow: many atoms of
 one kind moving together, carrying their kind, amount, reach and spin,
 their phase in each plane, their heat and their stream. A mote is not a
 particle (atoms are the particle tier) and not a grain (the carrier's
@@ -575,31 +575,31 @@ The operator's reasons, and the cautions:
   planet.
 - The moat image (still, guarding water) is semantics only: motes stream
   and connect, and the guarding gate is the Woronin seal.
-- Ships traverse THROUGH the medium motes make up, never on them.
+- Ships traverse through the medium motes make up, never on them.
 - The era-0 economy's postage (`ParcelConveyed`, `dop::Parcel`) keeps its
   word: that one really is a courier's package.
 
-### The fountain: every core's axes, the rings, and the streams (operator 2026-10-18; to be built, with xylarium)
+### The fountain: every core's axes, the rings, and the streams (operator 2026-10-18; to be built, with Xylarium)
 
 The finding that led to it: the universal core pays every galaxy's turning
-and nothing pays it back (xylarium's read: its reservoir falls −1.3 → −9.9
-over 36 echoes). What runs short is TURNING, a spin ledger, not matter, so
+and nothing pays it back (Xylarium's read: its reservoir falls −1.3 → −9.9
+over 36 echoes). What runs short is turning, a spin ledger, not matter, so
 no unique dense matter is asked for. The core's density is the throat
 condition (width = holding, deficit ½), the heaviest kinds held deepest by
-the one capture law. Operator: "think of it like a continuous fountain".
+the one capture law. The image is a continuous fountain.
 
 1. **The universal core's two axes.**
    - **North/south, its partner face:** the uplink and downlink to the
      hypha on opposite antipoles (the paired throat; nothing open).
    - **East/west, its collection:** jets on opposite antipoles that loop
-     out to the FIRST RING of galaxies and back.
+     out to the first ring of galaxies and back.
    That is four jets, two pairs of antipoles, one axis per plane we read.
    Each jet is a continuous loop, inbound and outbound at once (the galaxy
    jetstream's law one tier up).
 2. **A galaxy at the universal core.** The universal core is the core of
    its own central galaxy, which is new (today every galaxy orbits it and
-   none sits on it). RULED (operator 2026-10-18): the central galaxy is the
-   core's OWN DISC, its cut read on the ocean motes inside its throat
+   none sits on it). Ruled (operator 2026-10-18): the central galaxy is the
+   core's own disc, its cut read on the ocean motes inside its throat
    (as a galaxy's `read_cut`), never a galaxy founded or placed. Its stars
    form there by the same binding law.
 3. **The return closes the books.** Where an inner galaxy's jetstream
@@ -612,19 +612,17 @@ the one capture law. Operator: "think of it like a continuous fountain".
    inside the jets' rim.
 4. **Rings outward, one grammar every tier.** A ring galaxy has the same
    axes one tier down.
-   - North/south faces inward, to the core that feeds it (its TRUNK, in
-     xylarium's roads ruling: the trunks become the north/south faces).
+   - North/south faces inward, to the core that feeds it (its trunk, in
+     Xylarium's roads ruling: the trunks become the north/south faces).
    - East/west collects the next ring out.
    Ring by ring the fountain spreads to the rim. The centre is dense and
    the rim is frontier.
 5. **Ring links are jetstreams, never wormholes.** The links between rings
    are the cores' own east/west jets, natural flow that nobody builds. This
-   keeps xylarium's ruling: there are no galaxy-to-galaxy wormholes, and a
-   wormhole is a local, built on-ramp paid in mu that lands INSIDE a ring
+   keeps Xylarium's ruling: there are no galaxy-to-galaxy wormholes, and a
+   wormhole is a local, built on-ramp paid in mu that lands inside a ring
    galaxy ("potentially incoming wormhole connects").
-6. **Continuum or vacuum, by force** (operator: "jetstreams depending on
-   their force are either continuums or vacuums in the filament … analogous
-   to the gulf stream"). The stream is a READING, never a label from a
+6. **Continuum or vacuum, by force** (direction: jetstreams are continuums or vacuums in the filament by their force, analogous to the Gulf Stream). The stream is a reading, never a label from a
    mote's origin.
    - The force is the jet's push at the mote's reach (its pulse share
      times the arrival strength ρ, the kick's own reading).
@@ -644,7 +642,7 @@ the one capture law. Operator: "think of it like a continuous fountain".
    - Today's code sets `vacuum` by origin (arrivals from the ocean vacuum;
      shed and outburst matter continuum). This is retired by this ruling.
 
-**The names (xylarium's operator 2026-10-18, xylarium 10.7, ea0b883).**
+**The names (Xylarium's operator 2026-10-18, Xylarium 10.7, ea0b883).**
 Capacity falls down the ladder:
 1. **Rhizomorph:** the universe core to the hypha, north/south. A universe
    may have one or several, and it is the largest flow.
@@ -674,16 +672,15 @@ tier up, with no new physics: a collection in the universe's medium
 reaching its own throat condition, with galaxies sharing their orbits
 between the two cores.
 
-### Stars in their galaxy: reference, ride, collisions (operators 2026-10-18; built, with xylarium)
+### Stars in their galaxy: reference, ride, collisions (operators 2026-10-18; built, with Xylarium)
 
 1. **The reference and the ride** (363396f). A star's coherence is read
    against its galaxy's own phase at its place, one per plane (Body.bell,
    tag 15), born at the star's own phases and turning as the galaxy's flows
-   do at its reach (flows::turn). The star RIDES it: it orbits with what it
+   do at its reach (flows::turn). The star rides it: it orbits with what it
    was born of. Its own spin `ω_s` only rings its bell and times its
-   outbursts, never moving its phase against its galaxy. Operator: "this is
-   how you get stars colliding, or random strange star events".
-2. **The attractors and the gyroscope return.** Operator (with xylarium):
+   outbursts, never moving its phase against its galaxy. This is how stars collide and how unusual stellar events arise.
+2. **The attractors and the gyroscope return.** Operator (with Xylarium):
    "add an axis to the spin so it has an orbit and a tilt as attractors".
    The orbit and the born tilt are the attractors; the founding's plane gap
    is the tilt, a reading, never incoherence. Each echo the galaxy gives
@@ -700,19 +697,15 @@ between the two cores.
    ignition share. Coincidence is standing together, never a hemisphere
    (hemispheres decide filament membership only); bodies meet only their
    neighbours by reach.
-4. **Meetings by contact** (fa48eda; operator: "it's not a walk, it's a
-   dance"). Snapshot sectors alias, and crossing-only conjunctions miss
-   co-moving matter (worlds fell to 0). Every neighbour pair is in CONTACT
+4. **Meetings by contact** (fa48eda; direction: the motion is a dance, not a walk). Snapshot sectors alias, and crossing-only conjunctions miss
+   co-moving matter (worlds fell to 0). Every neighbour pair is in contact
    over the echo by how much it stands in line: the exact mean of
    `in_step` while their phase difference runs at their rates. `in_step` is
    linear between its kinks, so the mean is duration × the ends' mean, with
    no square. A pair at rest in line has contact 1; a whole passage ½.
    Closeness is contact × the other planes' in-step. Every pair is read at
    once from the echo's start, with no order.
-5. **The enclosed holding** (fa48eda). Operator: "anchor the inner core to
-   the singularity with enough gravitational strength to support the
-   lighter elements on the later rungs coupled with the force of the
-   continuum and vacuum jetstreams". By the ring-density law every bell
+5. **The enclosed holding** (fa48eda). Direction: anchor the inner core to the singularity with enough gravitational strength to support the lighter elements on the later rungs, coupled with the force of the continuum and vacuum jetstreams. By the ring-density law every bell
    inside a reach holds its rings, and every grain is a bell. So
    `H(<ℓ)` = the singularity's own state plus every mote and star turning
    with less spin, strictly inside, read once an echo and on the grain
@@ -725,20 +718,19 @@ held 0.68 (from 0.51), and bounces about 1 in 2.5.
 
 ### Filaments: chains and beads (operators 2026-10-18; built)
 
-1. **Chains, read whole** (b4a813a). Membership is the CHAIN, never a
+1. **Chains, read whole** (b4a813a). Membership is the chain, never a
    centre. Motes on one face whose dispersal bands overlap link
    transitively into a run, with no centre chosen and no order (each face
    class sorted by its bands' inner edges, n·log n). A chain binds by its
-   holding and magnetism over its EXTENT as a share on the sphere, edge to
+   holding and magnetism over its extent as a share on the sphere, edge to
    edge: `apart = 1 − in_step(orbit extent)·(1 − T_edges)`, T read from its
    innermost inner edge to its outermost outer edge. A point has its own
    dispersal, so a lone mote's apartness is its own band's; a chain with no
    extent does not bind. Read: one chain spanned nearly a face, so each
    galaxy made one star an echo.
-2. **Beads** (7367e54). Operator: "halving is a human derived measure,
-   whereas anything in nature is measured itself". A holding filament beads
+2. **Beads** (7367e54). Ruling: halving is a human measure, whereas nature measures itself. A holding filament beads
    like a stream pinching into drops. Each member's local hold is its
-   holding over its own band's share. Every local maximum is a PINCH, where
+   holding over its own band's share. Every local maximum is a pinch, where
    matter gathers (the same pinch as a planetary core's), and beads part at
    the minima between. A bead that does not hold rejoins its neighbour
    across the shallower parting, until every bead holds or the filament is
@@ -752,11 +744,9 @@ held 0.68 (from 0.51), and bounces about 1 in 2.5.
    the exact mean of the signed sawtooth `1 − 2·frac(ψ)` over the arc swept,
    piece by piece within each turn, `1 − (f₀ + f₁)`, with no square. A whole
    turn averages 0.
-2. **The shear** (edb2dd4). Operator: "shear the kinematic pressure as an
-   attractor on opposing hemispheres to provide the shear on the orbit ...
-   this turns your 'loop' into an 'orbit'". Neighbouring rings turn at
+2. **The shear** (edb2dd4). Direction: the kinematic pressure shears as an attractor on opposing hemispheres, giving the orbit its shear; this turns the loop into an orbit. Neighbouring rings turn at
    different rates; where they stand in contact the pressure between them
-   moves turning OUTWARD: the inner falls in, the outer moves out, and the
+   moves turning outward: the inner falls in, the outer moves out, and the
    disc accretes. Inbound and outbound are one closed orbit, with nothing
    absorbed or re-launched. Neighbours by spin across every face, each pair
    weighed by its contact; the unkept motion is contact × T (gas has no
@@ -767,28 +757,26 @@ held 0.68 (from 0.51), and bounces about 1 in 2.5.
    tenth of the drift before the shear (`−4.2e−2 / −3.5e−2`), and swinging
    through zero.
 
-### The cyclotronic chain (operator 2026-10-18; xylarium 11.0; PROPOSED, to be built)
+### The cyclotronic chain (operator 2026-10-18; Xylarium 11.0; proposed, to be built)
 
-Operator: "we need to see this as a cyclotronic functional system - you
-can't distribute elements via singularity and then say the outer rim is
-going to have a manifold on a little yellow star in the outer rim".
+Design direction: the galaxy is a cyclotronic functional system; elements
+cannot be distributed from the singularity while a manifold is assigned to a
+small star on the outer rim.
 
 - A galactic core's manifold is the sheaf of its stars' double cones, the
-  core their shared apex. Each cone's strength is the BOND between core and
+  core their shared apex. Each cone's strength is the bond between core and
   star; the star's orbit is that bond in motion.
 - **Bonds as exact shares:** the core's bond is its held face at the star's
   reach times the star's own hold share; an inner star's bond is its hold
   share times their contact. RSI = core bond / (core bond + the inner
   bonds); a star is the core's own while RSI ≥ ½. A depth-manifold `x` on
   both sides of its own equation is refused (it needs a root).
-- Past that a star is CHAINED out: its anchor is the inner star whose bond
+- Past that a star is chained out: its anchor is the inner star whose bond
   dominates. It rides the anchor (the tether) and is driven by the inner
   stars' wind and the continuum they drive (streaming, a separate push).
   The rate itself is the enclosed holding above, so changing an inner star
   re-reads everything outside it, and chain events cascade without a rule.
-- **Twist and torsion on the jets.** Operator: "don't forget the twist and
-  torsion on the jetstreams as they are expunged from the singularities /
-  cores at the quantum level". A core's winding is its PUSH SHARE p at
+- **Twist and torsion on the jets.** Direction: keep the twist and torsion the jetstreams carry at the quantum level as they are expelled from the singularities and cores. A core's winding is its push share p at
   expulsion: ½ at the founding (the orbit plane at Z·½, the loop at
   ½ + Z·½), rewritten each bell by the kick's extra loop term (torsion
   coupling to spin, Einstein–Cartan). Nothing new is stored. A star's born
@@ -804,24 +792,19 @@ going to have a manifold on a little yellow star in the outer rim".
 > at the bang as the universal core's throat and held cut, its disc the home
 > (the central galaxy); `cascade` and `deploy` retire.
 
-- **A spent star becomes a REMNANT, ruled (a).** Operator: "keep the stars
-  recycling as accurate as possible ... so that we can have this universe be
-  self sustaining". A closed star falls to its throat condition and becomes
+- **A spent star becomes a remnant, ruled (a).** Direction: keep the stars' recycling as accurate as possible, so that the universe is self-sustaining. A closed star falls to its throat condition and becomes
   a small throat whose other face is its own galactic core. What falls in
   comes out in the core's jetstream. It closes when the heart's push no
   longer meets its hold (the ignition test read backwards), never at exact
   zero flux. Its throat is its own pinch, read from its push, never from its
   held share. Released worlds re-anchor to the anchor's system. Built by
-  xylarium; owed here.
+  Xylarium; owed here.
 - **The Wellspring holds its share at the bang, ruled yes.** By the same
   capture law, heaviest deepest, the galaxies getting what it pushes out;
   its disc is the central galaxy. The throat's cut over a whole manifest
   holds every kind (p ½, H 2, read: `observe founding`), so the split is
-  SCALE: dispersal in the universe's own enclosure.
-- **The harmonic founding, ruled; its reading owed.** Operator: "a periodic
-  table of elements is not a 2D piece of paper - each element fits together
-  orthogonally ... as you fold/twist the table of elements the connection
-  will fall by weight on the bond". Each kind is carried by its in-step
+  scale: dispersal in the universe's own enclosure.
+- **The harmonic founding, ruled; its reading owed.** Direction: a periodic table is not a flat sheet; each element fits the others orthogonally, and as the table folds and twists, each connection falls by weight on the bond. Each kind is carried by its in-step
   share with the bounce's twist, as the product over its planes of its
   phases on its own sphere (shell depth on the orbit plane; its winding and
   pairing on the loop), then dispersal decides held and out. A heavier
@@ -857,7 +840,7 @@ Linear, exact, closed forms between events (docs/78 design laws).
 ### Phase 1: formation from the medium
 
 0. **The derivation first** ("The derivation" above): the ring-density
-   law (xylarium), a grain's ring and thermal motion on the bell's clock
+   law (Xylarium), a grain's ring and thermal motion on the bell's clock
    (ours).
    Then the galaxy layer is rebuilt from the bounce (docs/78, "The
    singularities"): each galaxy's manifest sorted by its bounce's hold,
@@ -880,8 +863,8 @@ Linear, exact, closed forms between events (docs/78 design laws).
 ### Phase 2: orbital mechanics as events (circuitry)
 
 - Between events every body moves in closed form, as now.
-- ENCOUNTERS, RESONANCES (period ratios near small whole fractions, exact in
-  rationals), MIGRATION, COLLISIONS, MERGERS and EJECTIONS are annal events;
+- Encounters, resonances (period ratios near small whole fractions, exact in
+  rationals), migration, collisions, mergers and ejections are annal events;
   each re-bases the bodies it touches.
 - A world's impacts come from actual bodies crossing its orbit, not a belt
   share; life's erasure (docs/82) reads them.
@@ -902,22 +885,22 @@ shrinks to what only it should do: deploy the founding gas and the cores.
 
 ## The proposed laws (with xylarium-kernel, 2026-10-15; to be ruled)
 
-xylarium's formation is also mostly placement today (golden-angle stars, a
-catalogue IMF and disc profile, moons stick-broken on a 2:1 chain); its
+Xylarium's formation is also mostly placement today (golden-angle stars, a
+catalogue imf and disc profile, moons stick-broken on a 2:1 chain); its
 package B (isolation-mass fragmentation, ~10 reaches apart) is designed and
 part built. One formation law for both, stated square-free here.
 
-- **The speed law.** Under the turning law a body's orbital SPEED is
+- **The speed law.** Under the turning law a body's orbital speed is
   `v = ω·r = c·δ(<r)`: linear, the enclosed mass alone.
 - **Spin (angular momentum)** is held as `L = r·v`, a product of two
   readings, conserved exactly on a ledger through every collapse, accretion
-  and event. (xylarium writes it `ω·r²`, Kepler's swept area; held as `r·v`
+  and event. (Xylarium writes it `ω·r²`, Kepler's swept area; held as `r·v`
   no square is formed.)
 - **The radial law.** A body of spin L has its circular radius where its
   own speed meets the law's: `L / r = c·δ(<r)`, so `r_c = L / (c·δ(<r))`,
   linear in L and in `1/δ`. A binding that loses spin falls inward to its new
   `r_c`; one that gains mass inside its orbit tightens. Radial motion about
-  `r_c` is the second pivot (its stretch e); ESCAPE is the crossing at
+  `r_c` is the second pivot (its stretch e); escape is the crossing at
   e → 1. Infall, orbit and escape are one closed form with events at
   crossings.
 - **The thermal ruler as a speed.** Temperature reads as a thermal
@@ -928,25 +911,25 @@ part built. One formation law for both, stated square-free here.
 - **The balance (pressure support; closes Open 1).** Every term a speed:
   `c·δ(<r) = L / r + v_th`. A mote's enclosed-mass speed is held by its
   spin speed plus its thermal speed. Gas with no spin falls until its
-  thermal speed holds it: the STAR. Gas with spin settles at `r_c`: the
-  DISK. Infall, pressure support and orbit are one exact linear balance;
+  thermal speed holds it: the star. Gas with spin settles at `r_c`: the
+  disk. Infall, pressure support and orbit are one exact linear balance;
   its crossings are the events.
 - **Collapse (Jeans, square-free, every term a speed;** corrected by
-  xylarium: the first statement mixed rates of different things). A binding
+  Xylarium: the first statement mixed rates of different things). A binding
   of mass m and radius R collapses where its own surface speed beats its
   thermal and spin speeds: `c·δ(m) ≥ v_th + L / R`. Its spin speed rises as
   it shrinks, `v = L / R`; what its surface cannot hold (`L/R > c·δ(m)`) is
-  SHED to the disk as L on the ledger, so the disk's L is the sum of what
+  shed to the disk as L on the ledger, so the disk's L is the sum of what
   was shed, conserved exactly. That is how the disk forms.
 - **Fragmentation.** The disk fragments where a binding inside it passes the
   same test against the disk's shear across its reach; planets grow by
-  accretion events, their masses and the stars' (the IMF) read as OUTCOMES,
+  accretion events, their masses and the stars' (the imf) read as outcomes,
   never a catalogue.
-- **Orbital events** are certified CROSSINGS: two bodies interact when their
+- **Orbital events** are certified crossings: two bodies interact when their
   reach caps cross (share ½), never by pairwise integration; resonances are
   exact small-integer period ratios (rates are exact rationals). Each event
   re-bases what it touches; closed forms between.
-- **Compact until observed** (xylarium 11.4f): a region forms its stars and
+- **Compact until observed** (Xylarium 11.4f): a region forms its stars and
   worlds only when something with sight of it observes it, deterministic
   from its seed and medium, so unobserved regions cost nothing (theirs: a
   cold forecast 3,736 s → 110 s).
@@ -960,9 +943,9 @@ part built. One formation law for both, stated square-free here.
 2. ~~Event granularity~~: bodies interact at reach-cap share ½ and nowhere
    else; a resonance is an event read from exact rate ratios, not a
    proximity.
-3. **Shared with xylarium:** the same place on both sides (placement today,
-   the IMF and disk profile catalogue); one formation law, adopted by
-   xylarium's package B once ruled.
+3. **Shared with Xylarium:** the same place on both sides (placement today,
+   the imf and disk profile catalogue); one formation law, adopted by
+   Xylarium's package B once ruled.
 4. **Cost:** formation is the heaviest physics so far; closed forms between
    events keep it bounded, but it must be measured early.
 

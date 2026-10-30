@@ -1,10 +1,10 @@
-# 55 · THE MANIFOLD — {S,G,T} convergence and topological fluid intelligence
+# 55 · the manifold — {S,G,T} convergence and topological fluid intelligence
 
 **Status:** charter (proposed 2026-08-21). Governs the convergence of the
 per-world multiverse into one shared universe as a fiber bundle, the reduce
 organ's lift onto the total space, and the transport of cognition across worlds
-by a connection. **Two acceptance gates are law: TOPOLOGICAL SOUNDNESS (§4) and
-PROVABLE COGNITIVE INCREASE (§5) — a change that cannot witness both does not
+by a connection. **Two acceptance gates are law: topological soundness (§4) and
+provable cognitive increase (§5) — a change that cannot witness both does not
 land.**
 
 ## 1 · The object: S ⊗ G ⊗ T is a fiber bundle, not three coordinates
@@ -16,25 +16,25 @@ fiber bundle**:
 - **S — the base manifold.** The shared spatial substrate (a galaxy's star/orbit
   field). Today each world sites planets on its own private frame; convergence
   makes S one manifold that every world is a region of.
-- **G — the gauge fiber, a PRODUCT group (amended 2026-08-22).** Originally
+- **G — the gauge fiber, a product group (amended 2026-08-22).** Originally
   named as a single symmetry (`reduct::GaugeDirection`, the reduce organ's
   cognitive orientation); that scoped it to cognition alone and would have
   forced any physical gauge — a planet's orbital phase, a material's
-  thermodynamic phase state — to either overload the SAME fiber (a category
+  thermodynamic phase state — to either overload the same fiber (a category
   error: cognition and geology are unrelated symmetries) or bolt on a second
   {S,G,T} system beside this one (exactly what §8 forbids). Neither is
   correct. The fiber is a **product of independent structure groups**,
-  `G = G_cognition × G_physics × …`, over the SAME base S and the SAME flow
+  `G = G_cognition × G_physics × …`, over the same base S and the same flow
   T — the Standard Model's pattern (`SU(3)×SU(2)×U(1)` over one shared
   spacetime) for exactly this situation: multiple unrelated internal
   symmetries, one geometry. `G_cognition = reduct::GaugeDirection` (already
-  live). `G_physics` is UNDEFINED until its own slice lands (candidate:
+  live). `G_physics` is undefined until its own slice lands (candidate:
   orbital phase / a material's thermodynamic phase state, GALACTIC-2's
-  territory) — this amendment reserves the SHAPE, not the content. Each
+  territory) — this amendment reserves the shape, not the content. Each
   factor transports independently (§6): curvature in one factor (a
   civilization's unglueable structural cohort) must never leak into or be
   conflated with curvature in another (an orbital resonance, a phase
-  transition) — the connection stays BLOCK-DIAGONAL across factors, so S2's
+  transition) — the connection stays block-diagonal across factors, so S2's
   cocycle witness is checked per-factor, never summed across them.
 - **T — the flow.** The k-step beat is the parameter that transports sections
   along the bundle. `TUniversal` ticks are the arc length. Shared by every
@@ -58,7 +58,7 @@ The multiverse collapses to one universe by re-reading each world as a **chart**
   `{S,G,T}` (prerequisite: [[TU-1]]).
 - Charts meet on **overlaps** `U_i ∩ U_j`. Convergence is real only where charts
   overlap; disjoint worlds glue trivially and yield nothing — so the density of
-  civilizations in shared spacetime IS the convergence.
+  civilizations in shared spacetime is the convergence.
 
 `ledger::converge` already folds archived *eras* into one clock along T; this
 charter extends that same fold *spatially* over S.
@@ -77,7 +77,7 @@ exact SNF) of one world's own small `FullMeasurement`. The lift:
   vantages agree), promoted from an O(n²) pairwise `consilience_step` to the
   structural gluing law. The win is that gluing is local and parallel per overlap.
 
-## 4 · TOPOLOGICAL SOUNDNESS (acceptance gate — LAW)
+## 4 · topological soundness (acceptance gate — law)
 
 The construction is only a bundle if it obeys the bundle axioms. Each is a
 witness a landing change must carry:
@@ -90,7 +90,7 @@ witness a landing change must carry:
   `g_ii = e`. This is the single most important soundness pin: without it the
   atlas is not a bundle and the glued cohomology is meaningless. Witness: a triple
   of overlapping charts whose transition composite is the identity, and a
-  negative twin where a tampered `g_ik` REFUSES.
+  negative twin where a tampered `g_ik` refuses.
 - **S3 · Connection compatibility.** The connection (§6) transports gauge
   consistently: parallel transport around a contractible loop is the identity
   (zero curvature ⇒ trivial holonomy), and its failure is the torsion the reduce
@@ -104,16 +104,16 @@ witness a landing change must carry:
 A change that cannot produce S1–S4 as green witnesses is not topologically sound
 and does not land, regardless of any measured throughput.
 
-## 5 · PROVABLE COGNITIVE INCREASE (acceptance gate — LAW)
+## 5 · provable cognitive increase (acceptance gate — law)
 
-Intelligence in netstratum is minted as cohomology classes (words, crystals,
+Intelligence in Netstratum is minted as cohomology classes (words, crystals,
 `grown_basis` rungs — the reduce organ's own output). The multiverse's cognition
 today is the **disjoint sum** `⊕_i H*(W_i)`: each world's classes, isolated.
-Convergence must be shown to mint classes NO single world could — otherwise it is
+Convergence must be shown to mint classes no single world could — otherwise it is
 re-plumbing without intelligence gain.
 
-**The metric (measured on the SAME live population).** The naive
-`rank H*(atlas) − Σ rank H*(chart_i)` is WRONG — gluing both *creates* classes and
+**The metric (measured on the same live population).** The naive
+`rank H*(atlas) − Σ rank H*(chart_i)` is wrong — gluing both *creates* classes and
 *merges* redundant ones, so the raw difference undercounts. The worked
 counter-example is the canonical proof itself: two contractible arcs `U, V` glued
 on a two-point overlap `W` form a circle `X`; `rank H*(X) = 2` (one `H⁰`, one
@@ -122,7 +122,7 @@ on a two-point overlap `W` form a circle `X`; `rank H*(X) = 2` (one `H⁰`, one
 formula scores that convergence as zero cognition, which is false.
 
 The correct measure is the **connecting-homomorphism rank** — the classes of the
-glued atlas that restrict to ZERO on *every* chart (born purely on the overlaps):
+glued atlas that restrict to zero on *every* chart (born purely on the overlaps):
 
 ```
 ΔH  :=  rank ker( H*(atlas) --restriction--> ⊕_i H*(chart_i) )
@@ -138,7 +138,7 @@ arcs); on a disjoint cover it is `0`. Therefore:
   every chart — i.e., iff convergence created a genuinely shared idea.
 
 `ΔH > 0`, **attributed to the specific overlap** that produced each kernel class
-(not a counting artifact), IS the provable cognitive increase — topological, exact
+(not a counting artifact), is the provable cognitive increase — topological, exact
 (integer ranks + torsion, no float), reproducible. Oracle fixtures the
 implementation must pass: **circle ⇒ ΔH = 1**, **disjoint ⇒ ΔH = 0**. The
 **maturity signature**: `ΔH` rising while per-chart `Σ rank H*` flattens — shared
@@ -177,7 +177,7 @@ connection in parallel per overlap rather than through central O(n²) trade.
 2. **MANIFOLD-1** — bundle-lift `reduct::FullMeasurement` (base charts + overlap
    transition data) + the atlas peel (Čech gluing). Ship with S1 + S4 witnesses.
 3. **MANIFOLD-2** — the cocycle/soundness witnesses (S2, S3) as standing negative
-   tests: a tampered transition or a curved-but-claimed-flat region REFUSES.
+   tests: a tampered transition or a curved-but-claimed-flat region refuses.
 4. **MANIFOLD-3** — the connection + holonomy transport; classes flow across
    charts; curvature = torsion witnessed.
 5. **MANIFOLD-4** — the cognitive-increase instrument: live `ΔH` over the cover,
@@ -187,10 +187,10 @@ connection in parallel per overlap rather than through central O(n²) trade.
 
 ## 8 · What this is not
 
-Not a new coordinate system bolted beside the engine — `{S,G,T}` IS the reduce
-organ's existing (site, gauge, step) data, read as a bundle. This cuts BOTH
+Not a new coordinate system bolted beside the engine — `{S,G,T}` is the reduce
+organ's existing (site, gauge, step) data, read as a bundle. This cuts both
 ways after the §1 amendment: a physical gauge (orbital phase, material phase
-state) is a NEW FACTOR of the existing G, not a second `{S,G,T}` system next
+state) is a new factor of the existing G, not a second `{S,G,T}` system next
 to this one, and it is equally wrong to force it into `G_cognition`
 (`reduct::GaugeDirection`) — an unrelated symmetry is a new factor, never an
 overload. Not a scalar intelligence score — cognition stays exact cohomology
@@ -201,12 +201,12 @@ stays its own. And not optional in its gates: soundness (§4) and provable
 increase (§5) are the two witnesses that make this physics rather than
 plumbing — a new G-factor is held to S1–S4 exactly like `G_cognition` was.
 
-## 9 · The Ignition Law of collective cognition (MEASURED, 2026-08-21)
+## 9 · The Ignition Law of collective cognition (measured, 2026-08-21)
 
 The entity-atlas run as a cognitive arena (`reduct/tests/cognitive_arena.rs`,
 `cognitive_law.rs`) yields a conclusive, exact, reproducible law. A civilization's
 collective cognition — the atlas `ΔH` over its houses on the flat cognitive
-contacts — is governed by one control variable, its **CONNECTIVITY**:
+contacts — is governed by one control variable, its **connectivity**:
 
 ```
    connectivity  =  contacts × coherence        (expected reliable cross-house
@@ -223,13 +223,13 @@ Measured (mean ΔH over 48×48 seeded, replay-exact draws, through the real atla
 
 Three conclusions, each asserted as a standing test:
 
-1. **IGNITION THRESHOLD at connectivity = 1.** Below one reliable cross-house
+1. **Ignition threshold at connectivity = 1.** Below one reliable cross-house
    contact a civilization is a *cognitive desert* — ΔH ≈ 0, no collective mind,
    regardless of how much private knowledge each house hoards. This is the sharpest
    result: **cognition is a connectivity phenomenon, not a knowledge-quantity one.**
-2. **LINEAR GROWTH above threshold**, `ΔH ≈ connectivity − 1` (slope 1) — each
+2. **Linear growth above threshold**, `ΔH ≈ connectivity − 1` (slope 1) — each
    additional reliable contact mints one more shared class no house holds alone.
-3. **SELECTION drives civilizations across the threshold.** A population seeded in
+3. **Selection drives civilizations across the threshold.** A population seeded in
    the desert (connectivity 0.5) evolved to 3.91 in 12 generations under
    ΔH-selection with classification mutation — collective cognition is *selected
    for*. The ordering composer > guild > hoarder held in **40/40** independent seed
@@ -242,10 +242,10 @@ classification, harden the connection's coherence past the ignition threshold). 
 direction; the entity-atlas (#146) makes the connectivity — and therefore the
 collective intelligence — a measured, provable quantity per civilization.
 
-### 9.1 · Cognition across topologies — the dimensional-fluidity results (MEASURED)
+### 9.1 · Cognition across topologies — the dimensional-fluidity results (measured)
 
-Running civilizations whose classifications glue into DIFFERENT topologies, and
-reading collective cognition as a per-grade SPECTRUM (`atlas::delta_h_spectrum`, so
+Running civilizations whose classifications glue into different topologies, and
+reading collective cognition as a per-grade spectrum (`atlas::delta_h_spectrum`, so
 the dimensional capacity stays fluid — never a scalar, never one dimension):
 
 | civilization | glue | ΔH-spectrum | cognition lives in |
@@ -260,12 +260,12 @@ Two further conclusive laws:
 - **Dimensional fluidity holds.** A civilization whose houses are of *different*
   intrinsic dimension (a point-mind and a plane-mind) still glues to an exact,
   finite collective cognition; the coherence transports across the dimension gap
-  WITHOUT collapsing either mind to a shared dimension, and a house's private
+  without collapsing either mind to a shared dimension, and a house's private
   higher-dimensional knowledge is never miscounted as shared. Heterogeneous stalks,
   one law up.
-- **The ignition threshold is DIMENSION-DEPENDENT.** Gluing on `n` shared circles
+- **The ignition threshold is dimension-dependent.** Gluing on `n` shared circles
   mints `H¹ = n−1` and `H² = n`: first-order shared ideas carry a connectedness
   merge penalty (ignite only above connectivity 1), while every higher dimension
-  ignites at the FIRST shared higher-structure (connectivity > 0). **Higher-order
+  ignites at the first shared higher-structure (connectivity > 0). **Higher-order
   collective cognition is cheaper to ignite than first-order** — a civilization that
   shares *structure* (not just contacts) reaches deep cognition sooner.

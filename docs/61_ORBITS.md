@@ -9,8 +9,7 @@ points of the circle, never a float angle.
 ## The rulings
 
 1. **Lines orbit their core, in closed form, on sheared ellipses in three
-   dimensions** (operator, 2026-10-08: "orbits should be sheared in order to
-   create ellipses, operating on perpendicular axes in three dimensions").
+   dimensions** (direction of 2026-10-08: orbits are sheared into ellipses, on perpendicular axes, in three dimensions).
    A line's place is `centre + M q(s)`, a function of the beat, never
    stepped:
    - `q(s)` is the universe's own circle, an L1 diamond of radius `r` in a
@@ -21,8 +20,8 @@ points of the circle, never a float angle.
      scalar-collapse class, refused);
    - `M` is a fixed rational 3x2 map: the plane's two axes are the two
      carrying the line's largest founding offsets, the third is the
-     perpendicular; an in-plane SHEAR `h` makes the circle an ellipse and a
-     TILT `k` onto the perpendicular axis inclines it in three dimensions.
+     perpendicular; an in-plane shear `h` makes the circle an ellipse and a
+     tilt `k` onto the perpendicular axis inclines it in three dimensions.
      `h` = the founding height over the founding radius, `k` the height
      carried by the first axis: derived from where the line was founded,
      never tuned. A line founded in the disc plane orbits round; one
@@ -33,7 +32,7 @@ points of the circle, never a float angle.
 2. **The speed is declared, not tuned:** the measured flat rotation speed
    over light, 220 km/s / c ~ 11/15000, in cells a beat (the bell, light,
    is one cell a beat).
-3. **Elements sorted by gravity** (barren SCALES): an element spreads from
+3. **Elements sorted by gravity** (barren scales): an element spreads from
    the core over a length inversely proportional to its mass; heavy
    elements near the core, light everywhere.
 4. **The throat's keeper** — barren-realms' rule as its code has it
@@ -45,7 +44,7 @@ points of the circle, never a float angle.
    Recomputed every season; no tenure. Feeds the ancient's wake (cores
    slice 4).
 5. **Torsion's pitch** follows the coordinator's law above when the field
-   law's pulse reaches netstratum (owed with the field port).
+   law's pulse reaches Netstratum (owed with the field port).
 
 ## Task list
 
@@ -88,6 +87,6 @@ before it enters the algebra; past that, everything is exact.
 5. **Drift.** Per ring the star's drift += V(origin); the system moves
    together, no orbit shears from it.
 
-netstratum's adoption: V acts on the anchor point of a line's orbit map M
+Netstratum's adoption: V acts on the anchor point of a line's orbit map M
 (docs/61 G1) exactly as in 3-4, dx from the native point on M; the stiffness
 radius is the orbit's L1 radius r (stated here as the semi-major measure).

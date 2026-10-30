@@ -1,11 +1,13 @@
 # 100 — The twist on the weight: the quantum state the elements flow by
 
-Operator 2026-10-27: "make sure you have the proper quantum state formulations
-in order to provide the filament (ocean) that the elements are flowing through
-with the proper twists on the weight". Status (2026-10-28): §1, §2, §4, §5, §8, §9.2 BUILT (65348e2, 4ffd2e7, 2db928e, a12af8c); §3 waits on the operator's ruling on C; §9.1 and §9.3 wait on the ruling of R's scale. Builds on docs/94 (the
-Möbius jetstream), docs/96 (founding as flow), docs/97 (Q, Z, R; §14 the
-densest element), docs/99 (phases, never frames); xylarium kernel 11.0 (8)
-twist and torsion on the jets, (13) the harmonic founding, and its built
+Design direction (2026-10-27): formulate the quantum state properly, so that
+the filament (the ocean) the elements flow through carries the proper twists
+on the weight. Status (2026-10-28): §1, §2, §4, §5, §8, §9.2 built (65348e2,
+4ffd2e7, 2db928e, a12af8c); §3 waits on the operator's ruling on C; §9.1 and
+§9.3 wait on the ruling of R's scale. Builds on docs/94 (the Möbius
+jetstream), docs/96 (founding as flow), docs/97 (Q, Z, R; §14 the densest
+element), docs/99 (phases, never frames); Xylarium kernel 11.0 (8) twist and
+torsion on the jets, (13) the harmonic founding, and its built
 `circuit::axes::antinode`.
 
 ## 0. What stands now
@@ -13,7 +15,7 @@ twist and torsion on the jets, (13) the harmonic founding, and its built
 - **The carriage is one number, the weight.** The founding cascade carries
   each kind `ℓ_z = (K + s_i)/w_z` (the bounces' one force over its inertia):
   heavy kinds stay deep, light ride out, by mass alone. Xylarium's reading
-  (13): "the carriage sees each kind as ONE NUMBER, its weight".
+  (13): "the carriage sees each kind as one number, its weight".
 - **The twist is drawn.** `quantum::torsion_phase` reads a galaxy's torsion
   phase from the seed, "a spectrum field until the vacuum's integers define
   it" (docs/79): a draw, against design law "no draws".
@@ -24,7 +26,7 @@ twist and torsion on the jets, (13) the harmonic founding, and its built
 
 ## 1. The quantum state of a kind (its place, its harmonic weight)
 
-Xylarium 11.0 (13): "a kind's HARMONIC WEIGHT is its place, never its mass
+Xylarium 11.0 (13): "a kind's harmonic weight is its place, never its mass
 alone": its phases on its own sphere, where its bands stand, how its frames
 are turned, whether its outer frame is paired.
 
@@ -41,11 +43,11 @@ ends.
 
 ## 2. The bounce's twist, derived (retiring the drawn torsion phase)
 
-- **Twist per turn is the deficit** (xylarium 11.4: "twist per turn is the
+- **Twist per turn is the deficit** (Xylarium 11.4: "twist per turn is the
   deficit"): a core winds each plane, each ring, by its deficit at its own
   ring, `δ = ½`, shared over its planes by its tilt, `φ_k = ½·t_k` (isoclinic:
   one share of a turn in every plane at once).
-- **It relaxes with its history** (xylarium (13): "the torsion has a
+- **It relaxes with its history** (Xylarium (13): "the torsion has a
   history: it relaxes as it carries matter out"): at the founding each
   capture event sees the cascade's own face `s = ½·R/(R + H)` (held so far),
   already the cascade's per-event share; the twist a shell sees is that
@@ -60,23 +62,23 @@ that twist in every plane of its place - the product over its planes - so
 the kinds in step ride the jets out far, the out of step stay deep. The
 superheavy kinds (complex high-l shells) are the most out of step."
 
-**The form:** keep the force and the inertia (operator 2026-10-18: "the push
-must be agnostic to the element by anything other than the force ...
-inertia is fine") and add the coupling:
+**The form:** keep the force and the inertia (direction of 2026-10-18: the
+push is agnostic to the element except through the force; inertia stands) and
+add the coupling:
 
     ℓ_z = (K + s_i) · C_z / w_z
 
 `C_z ∈ [0, 1]` the kind's harmonic coupling with the twist. Heavy kinds stay
-deep by inertia AND by coupling; light, simple kinds ride out; chemical
+deep by inertia and by coupling; light, simple kinds ride out; chemical
 variety from the place, never a draw.
 
-**The coupling (OPEN, for ruling):** xylarium's built antinode law gives a
+**The coupling (open, for ruling):** Xylarium's built antinode law gives a
 harmonic of order q the share `1/q` for odd q and 0 for even q (a node: its
-two faces cancel). Which order a kind presents is the open ruling (xylarium:
+two faces cancel). Which order a kind presents is the open ruling (Xylarium:
 "how many frames a shell holds ... is open and sets every kind's phases"):
 
 - (a) `q = l(w) + 1`, its outer degree's order: s-shells (`l = 0`) couple
-  whole, every even-q shell is a node and is HELD at the core whatever its
+  whole, every even-q shell is a node and is held at the core whatever its
   weight; variety strong, not monotone in weight.
 - (b) the in-step product over its planes of its outer phase `l·φ_k` with the
   twist `φ_k`, `C = Π_k in_step(l·φ_k, φ_k)`, weighted by the paired share
@@ -84,7 +86,7 @@ two faces cancel). Which order a kind presents is the open ruling (xylarium:
   periodic in l.
 
 Xylarium's answer (2026-10-27, a reading of its spec, not a ruling): its
-atom-band question is closed as the PIVOT DEGREE on S^11 with its Hopf
+atom-band question is closed as the pivot degree on S^11 with its Hopf
 fibres (its 11.0 (14), our convergence); it has no ruled C (its circuit never
 computes one); of (a) and (b), (a) is the one consistent with the pivot-degree
 ruling, reading the order straight from the open degree, and non-monotone in
@@ -93,8 +95,8 @@ the operator's.
 
 ## 4. The jets' locked lead (the helix)
 
-Xylarium 11.0 (8): "a mote EXPELLED from a throat carries the core's winding
-as a LOCKED LEAD between its planes - the jet a HELIX, its pitch the core's
+Xylarium 11.0 (8): "a mote expelled from a throat carries the core's winding
+as a locked lead between its planes - the jet a helix, its pitch the core's
 ... along the stream the planes advance together at the core's torsion ratio
 and loosen as the stream's own turning takes over - torsion relaxing
 outward, read, never set."
@@ -112,7 +114,7 @@ Ours, by machinery already built:
 
 ## 5. Twist is tension in the fibre
 
-Xylarium (8): "TWIST IS TENSION IN THE FIBRE: it adds to the tautness of every
+Xylarium (8): "twist is tension in the fibre: it adds to the tautness of every
 filament it threads ... a wound jet binds more readily where it slows and
 snaps where over-wound."
 
@@ -139,13 +141,13 @@ The twist acts on phases, and phases carry no face: the Möbius pass turns a
 mote's route and so the helix's sense (§4). The harmonic coupling reads the
 nucleus as built (Q the open ends, Z the fibres, R the electrons' phase); in
 the inverse universe the open ends are the protons, so a kind whose outer
-degree is unpaired presents its PROTONS to the twist (open, coupling) and a
+degree is unpaired presents its protons to the twist (open, coupling) and a
 sealed kind presents only fibres (whole).
 
-## 8. Quantum torsion (operator 2026-10-27: "add quantum torsion and sub-atomic phase transitions")
+## 8. Quantum torsion (direction of 2026-10-27: add quantum torsion and the sub-atomic phase transitions)
 
 The bounce is Einstein–Cartan: torsion is real and couples to spin
-(xylarium (8)). In our grammar torsion is the WINDING a quantum state takes
+(Xylarium (8)). In our grammar torsion is the winding a quantum state takes
 from the twist, per plane, and keeps until its own turning relaxes it.
 
 - **Taken:** each ring a body receives, it is wound in plane k by the twist
@@ -175,7 +177,7 @@ sub-atomic state, each read at the body's own pulse phase p (docs/97 §13).
 `R = κ_e·(1 − 2·frac(p))` crosses 0 at the half turn of p. On the held side
 (`R > 0`) a nuclide's open frames are bound (its chemistry closes, its
 clusters hold); past it (`R < 0`) they are freed (ionized, its clusters
-part). The transition's LINE is the frames it moves: `κ_e·Q` of them, each a
+part). The transition's line is the frames it moves: `κ_e·Q` of them, each a
 quantum of light given (bound) or taken (freed), booked on the light ledger.
 Built in part (R reads survival and grip); owed: chemistry and the light
 ledger reading the crossing.
@@ -183,7 +185,7 @@ ledger reading the crossing.
 ### 9.2 The fibres: bound ↔ parted (the nucleus)
 
 A nucleus grips by `κ_w·h` (docs/97 §13). Against it stand its heat `a` and
-its torsion `τ` (§8): TWIST IS TENSION IN THE FIBRE. It PARTS where
+its torsion `τ` (§8): twist is tension in the fibre. It parts where
 
     a + τ > κ_w·h
 
@@ -200,7 +202,7 @@ A nucleon's pole is its leg (docs/97 §8, `nuclides::mobius`). A lone end
 wound through half a turn (its torsion's phase crossing ½) passes the ring
 and turns its pole: a proton becomes a neutron and binds as a fibre's
 partner, `(Q, Z) → (Q − 1, Z + 1)` at the same weight. The convergence's
-`(Q(w), Z(w))` is the exchange's FIXED POINT (each weight one nuclide), so a
+`(Q(w), Z(w))` is the exchange's fixed point (each weight one nuclide), so a
 state off it is a transient: the unitary exchange (p→n by the held face, n→p
 by the unlocked, docs/97 §8) returns it to the line within its ring, and the
 excursion's yield is its electron's phase change (§9.1): a quantum of R
@@ -216,26 +218,26 @@ given or taken. Nucleons conserved; weight unchanged; the table unchanged.
 
 ## 10. Build order (each with its witness)
 
-1. **The kind's place** (§1, BUILT): `nuclides::place(w)`. Witness:
+1. **The kind's place** (§1, built): `nuclides::place(w)`. Witness:
    the seals read `b = 1`; `l` and `n` match the convergence.
-2. **The twist derived** (§2, BUILT: `quantum::twist`, the hidden phase
+2. **The twist derived** (§2, built: `quantum::twist`, the hidden phase
    `frac(b·φ + b/P)`; the release reads the core's winding per plane; the
    breath now draws nothing): the core's winding `φ_k = ½·t_k`; the galaxy's
    torsion phase accumulated; `quantum::torsion_phase`'s draw retired.
    Witness: the hidden phase reads the same at N and 4N on the closed form.
-3. **Carriage by harmonic** (§3), after xylarium's ruling on C. Witness: the
+3. **Carriage by harmonic** (§3), after Xylarium's ruling on C. Witness: the
    heaviest kinds held at the core; the cascade still conserves nucleons and
    spin.
-4. **The locked lead** (§4) and **the ocean's twist** (§6) (BUILT: a
+4. **The locked lead** (§4) and **the ocean's twist** (§6) (built: a
    released mote's tilt is its core's twist; motes leaving for the ocean keep
    their lead and phases; the founding's slight beads still stand at rest,
    owed). Witness: a
    released mote's tilt is the core's; it relaxes by the attractor law; the
    Möbius pass reverses its sense.
-5. **Quantum torsion** (§8, BUILT: `flows::torsion`, `torsion_signed`): `τ` read from the lead; spin's sense by leg.
+5. **Quantum torsion** (§8, built: `flows::torsion`, `torsion_signed`): `τ` read from the lead; spin's sense by leg.
    Witness: a settled mote reads 0; a Möbius pass reverses the winding's
    sign; relaxation by the attractor law, exact.
-6. **Twist in the bond and the fibres' transition** (§5, §9.2, BUILT: the
+6. **Twist in the bond and the fibres' transition** (§5, §9.2, built: the
    crest's `λ = 2(m + μ + τ)/R`, τ the members' net lead by holding; the
    fibres part at ignition and in a dying heart where `a + τ > κ_w·h`): bond with
    the in-step lead; nuclei part where `a + τ > κ_w·h`. Witness: nucleons

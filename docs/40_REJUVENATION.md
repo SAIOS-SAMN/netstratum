@@ -1,6 +1,6 @@
-# 40 — PLANETARY REJUVENATION (the regrowth law)
+# 40 — Planetary rejuvenation (the regrowth law)
 
-**Era 1 (operator 2026-10-16), PROPOSED:** rejuvenation becomes the RETURN
+**Era 1 (operator 2026-10-16), proposed:** rejuvenation becomes the return
 leg of the recycling circuit: shed matter recycles into the enclosing
 medium, the regenerated pulse kicks it along the resonant crests
 (recyclotronic propulsion), and what it carries back to a world is its
@@ -9,8 +9,8 @@ K its own holding; rejuvenation mints no matter. See docs/83, "Recycling and
 recyclotronic propulsion". The era-0 law below stands until that is
 derived and tested.
 
-**Status:** DESIGN, ruled 2026-08-12 (operator, Gemini relay). Growth
-form RULED: **(B) rational sigmoid on a grain** (§4) — preserve the
+**Status:** design, ruled 2026-08-12 (operator, Gemini relay). Growth
+form ruled: **(B) rational sigmoid on a grain** (§4) — preserve the
 S-curve so collapse from near-zero is genuinely expensive to recover.
 Charter-law translation of the relayed design; **not** a transcription.
 Task #28.
@@ -18,9 +18,9 @@ Task #28.
 **§6 addendum, 2026-08-13** (operator, direct): the ration this law
 governs is generalized off biomass (landed, commit `f467876` — `K`/`r`/
 `habitability` now read the sitting line's own metabolism and clade,
-not a hardcoded biomass/Mesic pair). §6 below is a PROPOSED ruling,
+not a hardcoded biomass/Mesic pair). §6 below is a proposed ruling,
 five pillars pre-authorized, extending the same law to a ration that is
-NOT privately banked but belongs to the planet itself — with the
+not privately banked but belongs to the planet itself — with the
 public-externality and counter-play consequences that implies. §6.2's
 counter-play was revised the same day: struck an ad-hoc mesh-layer
 "shared star" concept and re-anchored to the standing `Station::
@@ -50,7 +50,7 @@ The mechanic must produce this split without a single tuned constant
 outside the derivations below, and without breaking the exact-rational,
 byte-exact-replay engine.
 
-## 1. The one law over this chapter — deterministic physics get NO deed
+## 1. The one law over this chapter — deterministic physics get no deed
 
 The ledger records **decisions** — a player action, a treaty, an
 extraction — never the passage of time. Logistic regrowth is a
@@ -60,7 +60,7 @@ how **famine, wants, and demurrage** already work — replay-derived
 state, recomputed identically on every node, never a stored authority.
 
 **Rejuvenation is demurrage run backwards.** `world::rules::demurrage_due`
-(rules.rs:121) already settles a FLAT decay lazily *at the touch*:
+(rules.rs:121) already settles a flat decay lazily *at the touch*:
 `elapsed = stamp − orb.last_touch`, the decay applied only when a deed
 touches the orb, capped so it never overshoots. Regrowth is that same
 organ run backwards — a settlement toward `K` instead of toward `0` — and it reuses
@@ -105,7 +105,7 @@ the O(bytes) boot the linear stepper already gives us.
 ## 3. The carrying capacity and the rate — derived, not dialed
 
 - **`K` (carrying capacity)** — the natural ceiling of a resource on a
-  world, read from what the world already IS: its `ZoneKind`, its
+  world, read from what the world already is: its `ZoneKind`, its
   `StarClass` luminosity, and its orbital position (the same three the
   thermal and locality laws already read). A lush habitable-band world
   carries a large `K` for biomass; a barren rock, near zero. No new
@@ -118,14 +118,14 @@ the O(bytes) boot the linear stepper already gives us.
 Both are exact rationals, both fall out of readings that already exist,
 so neither is a tuned dial.
 
-## 4. THE OPEN FORK — the growth curve's exact-rational form
+## 4. The open fork — the growth curve's exact-rational form
 
 The relayed model is the logistic closed form
 
     P(t) = K / (1 + ((K − P0)/P0) · e^(−r·Δt))
 
 and this **cannot be transcribed**. `e^(−r·Δt)` is transcendental;
-netstratum is exact-rational with no floats. Demurrage's own comment
+Netstratum is exact-rational with no floats. Demurrage's own comment
 records the wall directly: a proportional/geometric shape
 `banked × (31/32)^n` "explodes the canonical denominator without bound
 (measured live: ~2^1100 after 220 beats)", which is why the flat law
@@ -150,7 +150,7 @@ Two netstratum-legal translations, each a permanent SEAL-B choice:
   expensive to recover from. **Cost:** more design and more witnesses;
   the surrogate's shape is a chosen approximation.
 
-**RULED (B), 2026-08-12** — the S-curve is the whole point of the
+**Ruled (B), 2026-08-12** — the S-curve is the whole point of the
 Locust/Custodian tension (slow recovery from collapse is what forces
 the jump), and the grain precedent shows exact arithmetic can carry it
 bounded. The rational surrogate and its grain are to be designed as the
@@ -170,7 +170,7 @@ bounded-denominator property, exactly as `grained_t_eq4` pinned heat.
 - **The taxon economy** (`37_IMPERIUM_TAXON`) — extractive vs
   regenerative vs balanced modes are the archetypes this law prices.
 
-## 6. THE MEDIUM RATION — public environmental externalities (PROPOSED)
+## 6. The medium ration — public environmental externalities (proposed)
 
 ### 6.0 Why
 
@@ -182,17 +182,17 @@ heat, and per `docs/36_DEFENSE_AXIOMS.md` §3.3 a plasmic line's own
 "atmosphere" is its local field/density, not gas. Pushed one step
 further, a plasmic line eating a gas giant's helium is drawing down a
 stock that is not its infrastructure's harvest at all — it is the
-**planet's own primordial matter**, the same matter every OTHER line
+**planet's own primordial matter**, the same matter every other line
 sited nearby reads for its own habitability.
 
 That distinction is the design payoff: a Plasmic Locust doesn't only
 ruin its own economy, it can freeze out a biotic neighbor who never
 consented to the trade. This is meant to elevate extraction from a
 solitaire optimization into the union's actual political axis —
-treaties, embargoes, and wars fought over EXTRACTION RATES, not only
+treaties, embargoes, and wars fought over extraction rates, not only
 territorial borders.
 
-### 6.1 RULED pillars — operator-authorized 2026-08-13
+### 6.1 Ruled pillars — operator-authorized 2026-08-13
 
 Five architectural pillars, pre-authorized before the counter-play
 question was resolved (§6.2) and before any code lands:
@@ -200,12 +200,12 @@ question was resolved (§6.2) and before any code lands:
 1. **The Medium ration.** A new ration carrier — a peer to
    `dop::Resource` and the minted-element `Ration::Element` — that is
    read and written on the orb's own site record, never on a player's
-   `banked`/`elements` ledger. Extracting it debits the PLANET; only
+   `banked`/`elements` ledger. Extracting it debits the planet; only
    the player's own cut (if any survives the physics) reaches their
    bank.
-2. **Primordial `K`.** Where §3's `K` derives from BUILT footprint
+2. **Primordial `K`.** Where §3's `K` derives from built footprint
    (`living_zones_of` — habitats and regenerators, infrastructure a
-   player raised), the Medium's `K` derives from the orb's FORMATION
+   player raised), the Medium's `K` derives from the orb's formation
    physics — star class, orbital distance, and (new) some reading of
    the orb's own mass/kind (a "giant" vs a rock) — never from zones
    built on it. A world's primordial ceiling is not something a player
@@ -213,26 +213,26 @@ question was resolved (§6.2) and before any code lands:
 3. **`r ≈ 0` — geological timescale.** The Medium's intrinsic rate is
    effectively zero within any playable era. `grained_logistic` needs
    no new form for this (an `r` near zero just barely creeps — see §4's
-   surrogate); what changes is only the DERIVATION `r` reads, from a
+   surrogate); what changes is only the derivation `r` reads, from a
    habitat's fast biotic yield to a near-null geological one. A
    stripped gas giant does not come back.
 4. **Dual-arm conservation.** The mutating settle-at-touch deed (the
    piece task #28 already stopped short of, biomass or not) gains a
-   SECOND kernel conservation arm here: it must prove the debit off the
+   second kernel conservation arm here: it must prove the debit off the
    orb's site record and the credit onto the extractor's bank as one
    matter-conserving transfer, not two independently-balanced mints.
    This is stricter than the biomass case, where the grown stock
-   mints into existence at the world's OWN account with one arm.
+   mints into existence at the world's own account with one arm.
 5. **Thermal drift feedback.** The depleted Medium level feeds back
    into the region computation, so extraction can shift a world's own
    `ThermalRegion` (per the ATM axiom: strip the medium, lose the
    insulation, the band drifts). This composes for free with today's
    landing: `almanac::habitability(clade, region)` already reads
    region generically (commit `f467876`), so once a region can drift,
-   every clade's own habitability re-derives from the SAME read with
+   every clade's own habitability re-derives from the same read with
    no new cross-wiring.
 
-### 6.2 The counter-play — REVISED 2026-08-13: anchored to the Tier-0 progenitor, not a new mesh concept
+### 6.2 The counter-play — revised 2026-08-13: anchored to the Tier-0 progenitor, not a new mesh concept
 
 **Struck.** The original text here proposed inventing an ad-hoc
 "multiple sovereigns' orbits around one shared star" concept, parked at
@@ -240,7 +240,7 @@ the mesh layer for want of a home. That was reading only
 `cfe::world::state.rs` — where `star: Option<StarClass>` is private to
 one `World`, set by a self-service `commission_star()` with no other
 actor in the loop — and mistaking that prototype's narrowness for the
-LAW's narrowness. It is struck under `20_FOUNDING.md` §0 (the document
+law's narrowness. It is struck under `20_FOUNDING.md` §0 (the document
 yields to the standing ruling, not the reverse).
 
 **What actually stands, in `12_UNION.md` §2/§2a — the correct anchor.**
@@ -256,28 +256,28 @@ progenitor delegating a planet... is council-gated by default... The
 power to create is sovereign; the power to hand what was created into
 another people's world passes through diplomacy."*
 
-**RULED: a shared star is a progenitor's domain object; sovereigns hold
-DELEGATED planets (orbits) under it — never peers who co-own it.** A
-Medium strip on one delegated orbit contributes to a shared SYSTEM
+**Ruled: a shared star is a progenitor's domain object; sovereigns hold
+delegated planets (orbits) under it — never peers who co-own it.** A
+Medium strip on one delegated orbit contributes to a shared system
 perturbation term (dust, radiation, magnetospheric disruption — the ATM
-domain's own vocabulary), read into `t_eq4` for every OTHER orbit the
+domain's own vocabulary), read into `t_eq4` for every other orbit the
 *same progenitor* has delegated under that star, sovereign or not. This
 gives the physical coupling of the earlier draft its correct owner: the
 progenitor's star object is not new state belonging to nobody, it is
 the creation the progenitor already, by charter, holds — sovereigns
 lease orbits within it, they do not co-found the star. A neighbor's
 `ThermalRegion` can still drift from a rival's action with no treaty
-required between the two SOVEREIGNS, because neither of them is the
+required between the two sovereigns, because neither of them is the
 authority the drift answers to — the progenitor is.
 
 **The code dependency, named plainly.** `12_UNION.md` §2/§2a is itself
-still DESIGN-status: nothing in `engine/` implements a progenitor
+still design-status: nothing in `engine/` implements a progenitor
 creating a star and delegating distinct orbits to distinct sovereigns.
 `cfe::World::commission_star` is the only star-creation path today and
 it is sovereign-private. **This ruling cannot be simulated across
 multiple sovereigns while that remains true** — §6.1's pillars can land
 as single-sovereign mechanics (a world striking its own Medium, its own
-`ThermalRegion` drifting) without this dependency, but the CROSS-
+`ThermalRegion` drifting) without this dependency, but the cross-
 sovereign externality that is this section's entire point cannot, until
 at least a minimal slice of progenitor-mediated, multi-delegated star
 ownership exists in code. That slice is not authorized by this ruling
@@ -299,9 +299,9 @@ composes from precedent already standing, four levers deep:
   nothing; war walls everything, the `element_barred`/displacement
   shape). That alone is real teeth: the offender loses market access to
   everyone it angered.
-- **The delegation gate (NEW, authorized this revision) — the
+- **The delegation gate (new, authorized this revision) — the
   structural check, above the other three.** Because the star is the
-  progenitor's creation and every orbit on it is only ever DELEGATED,
+  progenitor's creation and every orbit on it is only ever delegated,
   not owned, the grant itself is a lever no sovereign-to-sovereign
   treaty can be: the progenitor who delegated the strip-mined orbit can
   **arbitrate** the dispute between its delegated sovereigns (a Tier-0
@@ -315,14 +315,14 @@ composes from precedent already standing, four levers deep:
   counterpart to the bottom-up diplomatic/legal/economic levers above —
   a Locust who out-negotiates or out-wars every neighbor still answers
   to the seat that made the room it is standing on.
-- **Kinetic — still OPEN, not ruled here.** Whether a declared war
+- **Kinetic — still open, not ruled here.** Whether a declared war
   should unlock a mechanic to strike an enemy's Medium-extraction zones
   directly (extending `strike_interdiction`'s cargo-in-transit
   precedent, `defense.rs`, to standing infrastructure) is separate
   scope: today `raze`/`raze_as` (`world/core.rs`) is self-service only.
   Left for its own ruling.
 
-### 6.3 What is NOT ruled yet — open forks before code
+### 6.3 What is not ruled yet — open forks before code
 
 - **The progenitor-delegation slice itself.** The hard dependency named
   above: a progenitor entity that creates a star and delegates distinct
@@ -341,7 +341,7 @@ composes from precedent already standing, four levers deep:
   before it is enforceable rather than merely named.
 - **The rate-cap annex's wire shape.** Its `ClosureEvent` tag and any
   new `Ration`/`TreatyKind` wire codes are shared registers (the
-  numbered manifest at the top of `dop.rs`) and must be CLAIMED there
+  numbered manifest at the top of `dop.rs`) and must be claimed there
   before landing, per standing register-claim discipline.
 - **The kinetic escalation** flagged in §6.2 — its own ruling.
 - **`r`'s exact near-zero value.** "Effectively zero" needs a cited

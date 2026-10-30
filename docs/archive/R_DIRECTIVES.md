@@ -1,12 +1,11 @@
 # R_DIRECTIVES — the remediation lane's work orders
 
 **Lane:** `remediations-lane`. **Opened:** 2026-08-02.
-**Authority:** the CODE and the operator's word. **Not the tests.**
+**Authority:** the code and the operator's word. **Not the tests.**
 
-> Operator ruling 2026-08-02: *"our tests are not the authority, the code
-> and directives from the operator are the authority … more than likely
-> its the tests themselves wearing costumes that they shouldnt be
-> because underneath the costume the code is naked."*
+> Operator ruling 2026-08-02: the tests are not the authority; the code and
+> the operator's directives are. Where they disagree, the likelier fault is
+> a test asserting what the code does not do.
 
 A directive names an owner, a cure, and how the cure is checked. It is
 discharged by landing or by being struck — never by a test going green,
@@ -14,13 +13,13 @@ because a green test is exactly what a costume produces.
 
 ---
 
-## R-D1 · MAIN IS CLIPPY-RED, AND NOBODY IS FIXING IT
+## R-D1 · main is clippy-red, and nobody is fixing it
 
-**Status:** OPEN · **Owner:** whoever split `engine/cfe` (kernel-lane
+**Status:** open · **Owner:** whoever split `engine/cfe` (kernel-lane
 split `world.rs` → `world/`; capacity-lane merged it and added
 `stock.rs`) · **Severity:** blocks the workspace's own clippy-zero gate.
 
-`cargo clippy --workspace --all-targets -- -D warnings` is **RED on
+`cargo clippy --workspace --all-targets -- -D warnings` is **red on
 `main` itself**, independent of any lane. Seven errors, all residue of
 the cfe split:
 
@@ -45,12 +44,12 @@ clippy-green.
 
 ---
 
-## R-D2 · THE QUORUM IS A COSTUME — the clock never asks anyone
+## R-D2 · the quorum is A costume — the clock never asks anyone
 
-**Status:** OPEN · **Owner:** operator ruling required (strike or build)
+**Status:** open · **Owner:** operator ruling required (strike or build)
 · **Severity:** a constitutional mechanism that does not exist.
 
-**THE CODE, whole** (`cfe/src/vrp.rs:25-31`):
+**The code, whole** (`cfe/src/vrp.rs:25-31`):
 
 ```rust
 impl Timekeeper {
@@ -67,13 +66,13 @@ timekeeper from another — is ignored. Therefore:
    "3-of-3 unanimous" quorum (`vrp.rs:36`) is one answer counted three
    times. `genesis.rs:10,55` dutifully seats `Timekeeper { id: 0, 1, 2 }`
    and the ids do nothing.
-2. **`Attestation::Refuses` is constructed in EXACTLY ONE place in the
-   whole tree — `cfe/tests/ns3_conformance.rs:93`, a TEST.** Never in
+2. **`Attestation::Refuses` is constructed in exactly one place in the
+   whole tree — `cfe/tests/ns3_conformance.rs:93`, a test.** Never in
    production. No code path can produce it.
 3. **`TickRead::QuorumOpen` is therefore unreachable in production.**
    `walk`'s match arm at `vrp.rs:81` is dead: the count is always 3.
 
-**THIS IS THE COSTUME, precisely.** `ns3_conformance` hand-builds
+**This is the costume, precisely.** `ns3_conformance` hand-builds
 `Refuses`, feeds it straight into `walk()`, and asserts `QuorumOpen`.
 **The test passes and proves nothing about the system**, because it
 bypasses the only producer of attestations there is. The types say
@@ -90,14 +89,14 @@ lying around.
 unreachable"*). It has survived at least one audit because the test is
 green.
 
-**The cure is a RULING, and there are exactly two honest ones:**
+**The cure is a ruling, and there are exactly two honest ones:**
 
-- **STRIKE IT.** One writer per clock is already the mesh's law
+- **Strike it.** One writer per clock is already the mesh's law
   (NS-5 §7, `HandoffSealed`). If the clock is not a quorum, delete
   `Timekeeper`, `Attestation`, the `QuorumOpen` arm and the fixture that
   dresses them, and let `WorldClock` say plainly that it walks by one
   hand. **Nothing is lost — the mechanism was never running.**
-- **BUILD IT.** Give `attest` a reason to consult `self.id` — a keeper
+- **Build it.** Give `attest` a reason to consult `self.id` — a keeper
   that can disagree — and the quorum becomes real. This is heavier and
   only worth it if the N7 anchor wants independent keepers.
 
@@ -110,9 +109,9 @@ by production code, or must not exist.
 
 ---
 
-## R-D3 · THE COSTUME DETECTOR — a standing test, not vigilance
+## R-D3 · the costume detector — a standing test, not vigilance
 
-**Status:** PROPOSED · **Owner:** this lane · **Severity:** the general
+**Status:** proposed · **Owner:** this lane · **Severity:** the general
 cure for R-D2's class.
 
 R-D2 is one instance. The general shape is:
@@ -132,7 +131,7 @@ for retired vocabulary — and caught this lane twice in one session.
 
 **Proposed:** a lint that enumerates public enum variants and fails any
 that appear in `src/` **only** at their declaration and their match
-arms, while being CONSTRUCTED only under `tests/`. Seed the allow-list
+arms, while being constructed only under `tests/`. Seed the allow-list
 with anything ruled deliberately-latent, by name, so the list is the
 review conversation.
 
@@ -142,18 +141,18 @@ that cannot bite is the vacuous check this directive exists to kill.
 
 ---
 
-## R-D4 · WHY DOES IRON EXIST SOLELY — expansion gated on capability
+## R-D4 · why does iron exist solely — expansion gated on capability
 
-**Status:** OPEN, survey not started · **Owner:** this lane, against the
+**Status:** open, survey not started · **Owner:** this lane, against the
 element frame (PToE / syntropy) · **Severity:** design.
 
-Operator reframe 2026-08-02: *"plugging into specific items like 'iron'
-should be instead looking for why does iron exist solely, and how do we
-remediate to increase expansion gated on capabilities."*
+Operator reframe 2026-08-02: rather than plugging specific items such as
+iron, ask why iron alone exists, and remediate so that expansion is gated on
+capabilities.
 
 This lane's alloy finding (task #19) was resource plumbing — one rung
 too low. The target is the same cartesian shape one level up:
-**`Resource` is a CLOSED enum** (`cfe/src/dop.rs:209`) matched
+**`Resource` is a closed enum** (`cfe/src/dop.rs:209`) matched
 exhaustively across the tree, so a periodic table cannot expand without
 touching every arm. Identical in shape to the forge vocabulary `V` this
 lane already un-caged, and the same cure applies: **a set that grows
@@ -162,13 +161,13 @@ with capability, never a fixed enumeration.**
 Survey targets, in order:
 
 1. `Resource` / `ZoneKind` closed enums and their exhaustive matches.
-2. **BOOLEAN GATES** — capabilities flattened to yes/no, which is the
+2. **Boolean gates** — capabilities flattened to yes/no, which is the
    same collapse as reading a dual through one arm:
    `can_smelt = level >= 3`, `knows_its_sun()`, `crossed`, `veiled`,
    `warded: Option<bool>`, `industry_relevant()`, `permits()`.
 3. Iterations on dimensional expansion (the standing cartesian hunt).
 
-**Read the landed element work FIRST** — ELEMENT-GRAMMAR-1 (tags 70–72),
+**Read the landed element work first** — element-GRAMMAR-1 (tags 70–72),
 `45_ALMANAC` §4a/§5a — before proposing anything against it. This lane
 has twice built on one reading without checking the other frame; that is
 the mistake this directive is written to avoid making a third time.

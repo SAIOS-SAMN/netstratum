@@ -7,10 +7,10 @@ moves the cadence.
 
 ## The rulings
 
-1. **No third alphabet.** netstratum's minds do not get a custom fixed
-   alphabet. The shared alphabet is mycelium's seventeen immutable Cayley
-   letters (AUTIC); netstratum's dialects live in WHICH words a line mints,
-   HOW it perceives, and WHAT it can hear, over one alphabet.
+1. **No third alphabet.** Netstratum's minds do not get a custom fixed
+   alphabet. The shared alphabet is Mycelium's seventeen immutable Cayley
+   letters (AUTIC); Netstratum's dialects live in which words a line mints,
+   how it perceives, and what it can hear, over one alphabet.
 2. **Dialects begin in perception.** The register already names four
    perceptions (`PERCEPTIONS`: planar, volumetric, harmonic, umbral); until
    now only volumetric changed anything. Each planar-family perception is
@@ -30,17 +30,17 @@ moves the cadence.
    | umbral   | Sight, Touch, Rhythm | Hue |
    | volumetric | its own seat (unchanged) | — |
 
-   **A sense bounds derivation, not use.** A mind cannot DERIVE a word in a
+   **A sense bounds derivation, not use.** A mind cannot derive a word in a
    channel it does not perceive (its own think withholds), but a word it
    learned (licensed, heard, inherited) is used whole. Knowledge across a
    perception gap is therefore worth something: it can only be bought or
    inherited, never re-derived.
 3. **Speech between lines.** Each line hears its nearest living neighbour
    on the torus (one word per stride). A word wholly inside the hearer's
-   senses is HEARD: it joins the line's heard library and is licensed into
+   senses is heard: it joins the line's heard library and is licensed into
    its own when the line reconstructs it on its own task (the cores'
    inheritance by reconstruction, reused). A word using a channel the hearer
-   lacks is MISHEARD: counted, never adopted. Misheard counts per pair are
+   lacks is misheard: counted, never adopted. Misheard counts per pair are
    the measured dialect distance.
 4. **Translation loss is price.** The knowledge market prices a word at its
    depth plus one per channel the buyer cannot perceive.
@@ -67,7 +67,7 @@ moves the cadence.
 | D1 | sense profiles from perception; think withholds outside the senses | landed |
 | D2 | speech between nearest lines: heard / misheard, heard words reconstructed | landed |
 | D3 | market price = depth + channels the buyer lacks | landed |
-| D4 | COG-DIALECT line: heard, misheard, perceptions present (diversity) | landed |
+| D4 | COG-dialect line: heard, misheard, perceptions present (diversity) | landed |
 | D5 | consilience hardness counts routes = (curiosity order, senses) | landed |
 | D6 | working-library competition: a word unused for a year gives way | landed |
 | D7 | layered peel, slice 1: object op, then the frame through the reduce organ | landed |
@@ -94,8 +94,8 @@ at 1.62-1.66 GB over six minutes.
 ## Measured at D10b (2026-10-08)
 
 One line's 350 words (spore-march), each stated on the ramp probe: 339
-carry a tiling (no form in the court's language until mycelium 78.150, the
+carry a tiling (no form in the court's language until Mycelium 78.150, the
 coordinator's ruling: repetition as the orbit of a translator or screw), 4
-stated, 7 refused at the mint (`MintVertexNotCarried`, sent to mycelium to
+stated, 7 refused at the mint (`MintVertexNotCarried`, sent to Mycelium to
 reproduce). The low `autic=` count is the missing repetition form, not the
 translator.

@@ -1,4 +1,4 @@
-# 43_DISTRIBUTION — THE PROVISIONING LAYER
+# 43_DISTRIBUTION — The provisioning layer
 
 *The bridge between subsistence and a civilization-scale economy. Translated
 from operator directive 2026-08-13 into charter law; grounded in the landed
@@ -6,14 +6,14 @@ population loop (#40–42, `41_PROVISION`) and the settle-at-touch discipline.*
 
 ## 0. Why a layer at all
 
-If food goes straight from harvest to stomach you have a biomass LEDGER,
+If food goes straight from harvest to stomach you have a biomass ledger,
 not a market. The population loop landed in #40–42 is exactly that ledger:
 `population_touch_delta` reads `available = bank + harvest + regrowth` and
 feeds the people directly off it. That is subsistence. It has no place for
 logistics, no place for demand above calories, and no lever for a
 disposition to express itself economically.
 
-The DEPOT is the missing node: an intermediate provisioning stock between
+The depot is the missing node: an intermediate provisioning stock between
 extraction and consumption. Interposing it makes three things load-bearing
 that today are inert — **logistics** (food must move to where the mouths
 are), **stratified demand** (fed people want leisure, which pulls
@@ -21,17 +21,17 @@ specialised labour), and **disposition** (each archetype runs the layer
 differently). It is also the seed of every later trade/merchant system:
 once food buffers and moves, the market machinery has something to price.
 
-## 1. THE DEPOT — a buildable provisioning node (`ZoneKind::Granary`)
+## 1. The depot — a buildable provisioning node (`ZoneKind::Granary`)
 
-*(RULED 2026-08-13: the depot REUSES the raw ration bank — no separate
-stock, no new deed. The granary flips the consumption LAW on; it does not
+*(Ruled 2026-08-13: the depot reuses the raw ration bank — no separate
+stock, no new deed. The granary flips the consumption law on; it does not
 introduce a second quantity. Logistics/transport (§6) therefore stays inert
 for this layer, by the same ruling.)*
 
 A new zone, deployed like any other structure the player builds, per orb (a
 world's provisioning centre), typed to the sitting clade's ration. Its
-STOCK is the orb's existing banked ration (`banked_amount`) — the granary
-is not a second buffer but the INFRASTRUCTURE that changes how the standing
+stock is the orb's existing banked ration (`banked_amount`) — the granary
+is not a second buffer but the infrastructure that changes how the standing
 bank is consumed.
 
 **Presence changes the law, not the numbers.** With no granary a world runs
@@ -43,9 +43,9 @@ disposition factors (§5) come into force. The granary is the technology that
 turns a ledger into an economy — the REGEN-1 precedent (a zone whose
 placement unlocks a law), and it stores nothing new, mints no deed, so the
 whole layer stays SEAL-B-free on the state side. All new quantities
-(stability, coverage, leisure demand) are DERIVED at the touch (§4/§8).
+(stability, coverage, leisure demand) are derived at the touch (§4/§8).
 
-## 2. THE CONSUMPTION CYCLE — draw from the depot, not the harvest
+## 2. The consumption cycle — draw from the depot, not the harvest
 
 Where a depot stands, `population_touch_delta` is rewired: the harvest of
 the span flows **into** the depot (up to its capacity), and the population
@@ -53,44 +53,44 @@ eats **from** the depot's standing fill. The depot decouples production
 from consumption in time — a full granary feeds the people through a lean
 span; an empty one cannot, however much the fields yielded that beat.
 
-Two severities, and the milder fires FIRST (the operator's ordering):
+Two severities, and the milder fires first (the operator's ordering):
 
-- **Depot below caloric baseline → STARVATION.** The existing #40–42 cull:
-  the unfed die. Death is the LAST stage, only when calories run out.
-- **Depot fed but lacking leisure/variety → STALL.** Growth stops and
-  stability falls (§4) BEFORE anyone starves. A provisioned-but-joyless
+- **Depot below caloric baseline → starvation.** The existing #40–42 cull:
+  the unfed die. Death is the last stage, only when calories run out.
+- **Depot fed but lacking leisure/variety → stall.** Growth stops and
+  stability falls (§4) before anyone starves. A provisioned-but-joyless
   population holds or dwindles slowly; it does not die of it.
 
-## 3. STRATIFIED DEMAND — calories, then leisure
+## 3. Stratified demand — calories, then leisure
 
 Two tiers, drawn in order:
 
 1. **Caloric baseline** — the R6 per-capita ration (`harvest/2 · p · Δt`),
    the #40 demand, now drawn from the depot's food slot.
-2. **Leisure / recreation** — a SECOND provision good the depot stocks,
+2. **Leisure / recreation** — a second provision good the depot stocks,
    demanded only once calories are met. It is produced by non-food labour
    (the pull for specialised work) and is clade-typed like the ration
-   (a `Recreation` provision good; **PROPOSED**: a derived leisure invariant
+   (a `Recreation` provision good; **proposed**: a derived leisure invariant
    per clade, minted the way a ration is, not a new hardcoded resource).
 
-Growth requires BOTH tiers. Fed + entertained → the #41 logistic births.
+Growth requires both tiers. Fed + entertained → the #41 logistic births.
 Fed + bored → stall (no births, slow stability bleed). Unfed → cull.
 
-## 4. STABILITY — a derived contentment reading (no new field, no deed)
+## 4. Stability — a derived contentment reading (no new field, no deed)
 
 A reading in `[0,1]`, computed at the touch from the depot's fill against
 the two tiers — high when both calories and leisure are stocked, low when
 leisure is short, zero-adjacent when calories fail. Growth scales by it;
 below a floor, births halt. It is **derived at read**, exactly as the
 regrowth scan is (`regrown_ration`) — it stores nothing and mints no deed,
-so it is SEAL-B-free. (Contrast depot STOCK in §1, which is real state and
+so it is SEAL-B-free. (Contrast depot stock in §1, which is real state and
 must be receipted.)
 
-## 5. DISPOSITION EXPRESSION — R8, realised over the depot
+## 5. Disposition expression — R8, realised over the depot
 
 Distribution is a factor set over a `provision` channel keyed on the
-DISPOSITION axis (`vocabulary::seed(Disposition)`: 1 expansionist ·
-2 empiricist · 3 epicurean) crossed with `economic_mode` — the SAME
+disposition axis (`vocabulary::seed(Disposition)`: 1 expansionist ·
+2 empiricist · 3 epicurean) crossed with `economic_mode` — the same
 bindings the vocabulary already mints, never a bespoke branch (the
 practice-channel precedent, `28_VOCABULARY` / `41_PROVISION §4`). Each
 disposition runs the layer differently:
@@ -99,16 +99,16 @@ disposition runs the layer differently:
   demand, fast headcount growth on thin stability (military rations). Grows
   wide, spends resilience.
 - **Epicurean** — deep and multi-tier. High buffer + high leisure demand,
-  slow growth, deep famine resilience; the leisure pull drives INTERNAL
-  TRADE. Grows rich, spends speed.
+  slow growth, deep famine resilience; the leisure pull drives internal
+  trade. Grows rich, spends speed.
 - **Empiricist** — the depot's surplus margin above subsistence siphons to
-  RESEARCH (feeds the novelty/discovery path, `38_COGNITION`), not mouths
+  research (feeds the novelty/discovery path, `38_COGNITION`), not mouths
   or leisure. Grows knowledge, spends population.
 
 The exact factors are banded by the fourfold law like every chartered
 factor (the §9 ruling), and must not add dial literals (derive-not-dial).
 
-## 6. LOGISTICS FRICTION — food must move (layer 2, deferred)
+## 6. Logistics friction — food must move (layer 2, deferred)
 
 Extraction sites and population centres are different places; food crosses
 from one to the other. Transport capacity, trade routes, and their security
@@ -117,35 +117,35 @@ though the harvest is plentiful. This is the seam that seeds the merchant
 systems (#33). Layer 1 is single-orb (harvest and depot co-located);
 cross-orb transport is layer 2, built on the existing bond/transfer rails.
 
-## 7. THE WORKBENCH — design, deploy, and INSPECT a deployable system
+## 7. The workbench — design, deploy, and inspect a deployable system
 
-*(RULED: build a GENERAL, bench-type-agnostic workbench abstraction up
+*(Ruled: build a general, bench-type-agnostic workbench abstraction up
 front, not a depot-only view.)*
 
 The player builds the distribution engine (and every other deployable
 system) to their civilisation's requirements, and a **workbench** displays
 any bench's components, health, throughput, and unmet requirements — so
 each layer is legible, not a black box. The abstraction is one shape over
-many bench TYPES: a bench reports its component zones, each with a
+many bench types: a bench reports its component zones, each with a
 fill/health/throughput reading and its unmet demands; the console renders
 any bench uniformly. The bench types are the deployable systems already in
 the engine — **depot** (granary zones; food/leisure coverage, stability,
 disposition factors), **refinery** (ElementRefinery), **ship-yard**
 (ShipYard), **lab** (research) — with the depot wired in as the first
-concrete bench that exercises the abstraction. It is READ-ONLY (a `world`
+concrete bench that exercises the abstraction. It is read-only (a `world`
 query + a CLI panel) over deployed state. The workbench is how "grow/design/
 deploy via civilisational requirements" becomes visible and steerable at
 the console.
 
-## 8. SETTLE DISCIPLINE
+## 8. Settle discipline
 
-*(RULED: depot stock = the raw bank, so there is NO new stored quantity and
-NO `DepotSettled` deed. Everything this layer adds is derived at the touch.)*
+*(Ruled: depot stock = the raw bank, so there is no new stored quantity and
+no `DepotSettled` deed. Everything this layer adds is derived at the touch.)*
 
 - **Depot stock** — the orb's existing banked ration; settles through the
   ration deeds already in the collect touch (`YieldCollected`/`UpkeepSettled`),
   no new carrier.
-- **Stability, coverage, leisure demand, factors** — all DERIVED at the
+- **Stability, coverage, leisure demand, factors** — all derived at the
   touch/read; no stored field, no deed (the `regrown_ration` precedent).
 - **The touch order** — harvest banks → population draws its calories, then
   its leisure, from the bank (granary present) → stability gates the births/
@@ -154,29 +154,29 @@ NO `DepotSettled` deed. Everything this layer adds is derived at the touch.)*
 - **No granary → no change** — the #40–42 path is untouched where no granary
   stands, so every existing world and pin replays byte-identical.
 
-## 9. RULINGS (2026-08-13)
+## 9. Rulings (2026-08-13)
 
-1. **The depot's nature — RULED: reuse the raw bank.** No separate stock, no
+1. **The depot's nature — ruled: reuse the raw bank.** No separate stock, no
    `DepotSettled` deed; the granary flips the consumption law on. Logistics
    (§6) stays inert this layer by the same ruling.
-2. **The leisure good — RULED: a derived per-clade recreation invariant**,
+2. **The leisure good — ruled: a derived per-clade recreation invariant**,
    minted like a ration (`metabolic_ration_of` precedent) — species-
    specific (a swarm's leisure ≠ a stone-being's), no new closed resource.
-3. **Stability semantics — RULED: a derived-at-touch reading** in `[0,1]`
+3. **Stability semantics — ruled: a derived-at-touch reading** in `[0,1]`
    gating growth; stores nothing, mints no deed (the `regrown_ration`
    precedent). May be promoted to stored state later if it needs momentum.
-4. **The severity ordering — RULED (confirmed):** leisure-short STALLS (no
-   death), calorie-short STARVES; stability bleeds in the stall band before
+4. **The severity ordering — ruled (confirmed):** leisure-short stalls (no
+   death), calorie-short starves; stability bleeds in the stall band before
    any cull.
-5. **The disposition factors — LANDED (L4)** as a factor set derived from
+5. **The disposition factors — landed (L4)** as a factor set derived from
    `0`/`1`/`2` (no new dial), keyed on `civ_axes().disposition`: expansionist
    leisure ×0 (lean — grows on food alone), epicurean ×2 (deep — the granary
    becomes a luxury engine that stalls without production), empiricist ×1 but
-   HALF its surplus births siphon to research (`research_siphon`, the metric;
+   half its surplus births siphon to research (`research_siphon`, the metric;
    the `DiscoveryMinted` deed is the follow-up). This is the mechanic of R8's
    ¾/5⁄4/¾+research, expressed without importing those literals; the exact
    bands remain a balance ruling if the operator wants R8's numbers.
-6. **The workbench scope — RULED: a GENERAL workbench abstraction up front**
+6. **The workbench scope — ruled: a general workbench abstraction up front**
    — bench-type-agnostic (depot, refinery, ship-yard, lab all as benches),
    the depot wired in as the first concrete bench. See §7.
 

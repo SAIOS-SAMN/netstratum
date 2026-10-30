@@ -1,12 +1,12 @@
-# THE GALACTIC LEVEL — one universe, galaxies by observation (GALAXY-1, design stage)
+# The galactic level — one universe, galaxies by observation (GALAXY-1, design stage)
 
-**Status:** DESIGN, operator ruling 2026-07-30 (recorded by coder-02). No
+**Status:** design, operator ruling 2026-07-30 (recorded by coder-02). No
 mechanic ships before its protocol sections and test vectors exist
-(CHARTER §1); every constant below is a **placeholder parameter**.
+(Charter §1); every constant below is a **placeholder parameter**.
 
 ## 1. One universe — verified, and bound
 
-The universe is TUniversal{S, G, T} and there is exactly ONE: one compact
+The universe is TUniversal{S, G, T} and there is exactly one: one compact
 3-torus base (span 64, the `universe.json` card), one growing polynomial
 fiber, one universal clock, one star-chart. Aeons are G-sheets of the same
 bundle (11 §2.0, §5) — the fold seats a new sheet, never a second universe;
@@ -27,11 +27,11 @@ count starts at one and grows only by deed.**
 
 A galaxy does not pre-exist its observer. When a civilization achieves the
 crossing (THRESHOLD-1 — interstellar flight, receipted) and its traversal
-anchors **past the charted frontier**, the act of observation CREATES the
+anchors **past the charted frontier**, the act of observation creates the
 galaxy. **The frontier is a distance, never an outside** (coder-01
 clarification, 2026-07-30): the torus wraps and the manifold is coned
 (12 §2c — no open ends), so "past every reach" means exactly this — the
-anchor's wrapped-L1 distance to EVERY charted galaxy's center exceeds
+anchor's wrapped-L1 distance to every charted galaxy's center exceeds
 that galaxy's reach (the L1 law: the short way around, no squaring; reach
 a placeholder parameter). A new galaxy is a **far region, never an
 outside**. This is a
@@ -44,7 +44,7 @@ obeys (the universe gains dimensions as discoveries land, contract §9).
 
 ## 4. What a galaxy is, mechanically (candidate bindings)
 
-- **A named region of the ONE torus** — center S (exact rationals), reach
+- **A named region of the one torus** — center S (exact rationals), reach
   (an L1 radius, exact). A new galaxy is a new region, never a new torus
   and never a new universe.
 - **The receipt is the truth.** `GalaxyObserved` (candidate tag 54 —
@@ -52,7 +52,7 @@ obeys (the universe gains dimensions as discoveries land, contract §9).
   beside `EraAnnexed`/`EraFolded` — a universe-scale event carrying the
   observer (the crossing civilization), the creator (the progenitor seat),
   the center, and the reach. A `galaxies.json` card beside the star-chart
-  is the LENS's rendering (SEAL C), rebuilt from receipts. The
+  is the lens's rendering (SEAL C), rebuilt from receipts. The
   EraAnnexed precedent binds whole (coder-01 clarification): the
   world-replay match arm is an **explicit no-op** — a universe event
   never enters a world chronicle, and world replay ignores it if it
@@ -66,7 +66,7 @@ obeys (the universe gains dimensions as discoveries land, contract §9).
   center (0, 0, 0), reach 16); until then it stays implicit, as today.
 - **Room grows before it runs out.** If galactic-scale occupancy presses
   the span (11 §7's bounded-occupancy law read at scale), the span itself
-  GROWS — `universe.json`'s span is already a read parameter, and growth
+  grows — `universe.json`'s span is already a read parameter, and growth
   is a Mint-class irreversible extension (the fiber law applied to S).
   Expansion only; never contraction, never a second universe.
 
@@ -77,7 +77,7 @@ A confluence node (12 §9's manifold law — edges only): needs THRESHOLD-1
 and PLANNER-1 (the progenitor deed gate — landed). Lands whole, one
 landing: the deed + tag inscription, the frontier reading (L1 past every
 reach), the lazy founding charter, the `galaxies.json` rendering, and the
-witnesses — spec + mechanic + vectors together. Registry deltas: NONE — a
+witnesses — spec + mechanic + vectors together. Registry deltas: none — a
 galaxy is geography, not identity (no new axis, no new station). The CLI
 surface (GALAXY-1b) lands as a **`t0 galaxies` verb inside the existing
 t0 console**, never a new top-level command — the progenitor's board

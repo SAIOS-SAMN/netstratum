@@ -3,7 +3,7 @@
 Operator 2026-10-09, on Concordance 1.12 ("a living people is always observed
 (its own life reads its world); a world no one reads is carried compact; its
 people's state worked out in closed form or by spans whose result does not
-depend on how coarsely time was stepped"): the fix belongs in how netstratum
+depend on how coarsely time was stepped"): the fix belongs in how Netstratum
 represents a people, not in the universal law. "Write the arc and start
 building it."
 
@@ -20,7 +20,7 @@ people deciding: it is integration written out step by step.
 A resume is the snapshot's state stepped forward by the tail's receipts
 (`snapshot::carry_forward`); the chain judge checks deeds against the same
 stepped state. So a flow may stop being receipted per beat only if it is
-folded into a receipt that is written: SETTLE AT TOUCH.
+folded into a receipt that is written: settle at touch.
 
 ## Measured (2026-10-09, all 70 lines' snapshots and tails)
 
@@ -38,7 +38,7 @@ folded into a receipt that is written: SETTLE AT TOUCH.
 
 1. **A quiet flow accrues as pending and is receipted at touch.** Per-beat
    accruals (leisure, the population carry) add to a pending sum held by
-   the world. A receipt is written only when the flow is TOUCHED: a deed
+   the world. A receipt is written only when the flow is touched: a deed
    spends it (the spend's receipt carries the pending sum with it), the
    line's state is carried (the year close flushes every pending sum before
    the snapshot), or its own pace comes round. Every receipted deed sees the

@@ -1,6 +1,6 @@
 # 59 — The minds' standing, by the court's judge
 
-**Status: REGISTER.** This is the record Concordance 1.9 asks every kernel to keep: "cognition is measured from outside". Cognition counts only where it meets three conditions:
+**Status: register.** This is the record Concordance 1.9 asks every kernel to keep: "cognition is measured from outside". Cognition counts only where it meets three conditions:
 - a contested judge measures it, and the mind does not run that judge;
 - the mind did not set the tasks;
 - the measurement shows a gain.
@@ -17,55 +17,55 @@ Self-forged, self-judged solves are practice. Each reading below says when it wa
 | paid | 0 |
 | coverage (programs expressible as a court rule) | **0%** |
 
-**Why zero.** The court's judge (`Kernel::judge_solve`, mycelium e70d92de, `src/server/cognition/court/task.rs`):
-- judges a RULE in mycelium's form language;
+**Why zero.** The court's judge (`Kernel::judge_solve`, Mycelium e70d92de, `src/server/cognition/court/task.rs`):
+- judges a rule in Mycelium's form language;
 - replays its derivation on withheld pairs;
 - never compares grids;
 - refuses `NotARule` where `from_element_form` fails.
 
-netstratum's minds produce op-sequence programs over their own table: the six symmetries, `Recolor`, `ObjOp`, `Tile`. Nothing translates them into a form, so today they cannot present a solve at all.
+Netstratum's minds produce op-sequence programs over their own table: the six symmetries, `Recolor`, `ObjOp`, `Tile`. Nothing translates them into a form, so today they cannot present a solve at all.
 
-Using mycelium's own extractor on netstratum's tasks was refused, because that would measure mycelium's mind, not netstratum's. Under Concordance 6.2, a mind that cannot put its work in the court's language has not reached rung 4, "hears anastome".
+Using Mycelium's own extractor on Netstratum's tasks was refused, because that would measure Mycelium's mind, not Netstratum's. Under Concordance 6.2, a mind that cannot put its work in the court's language has not reached rung 4, "hears anastome".
 
 **Practice, for context only, not cognition.** G2 has 26,173 self-forged, self-judged forge solves across about 60 worlds in about 9 hours, as of 2026-10-08:
 - every word minted in the sampled window has hardness 1;
 - depth is capped at 3;
 - 11 of 29 reporting worlds have minted no words;
-- no world is in contact with another (COG-ATLAS vessels = 0);
+- no world is in contact with another (COG-atlas vessels = 0);
 - 24 of 29 civilizations read their drives as decline.
 
 ## Next reading
 
 The coordinator approved this order:
-1. Build THE TRANSLATOR: a netstratum program becomes a mycelium rule, built only through mycelium's own SDK constructors, never forged bytes.
+1. Build the translator: a Netstratum program becomes a Mycelium rule, built only through Mycelium's own SDK constructors, never forged bytes.
    - The symmetries become motions (versors) and `Recolor` becomes a hue relation.
-   - Programs with no form (`ObjOp`, `Tile`) are COUNTED as NotARule, never dropped.
+   - Programs with no form (`ObjOp`, `Tile`) are counted as NotARule, never dropped.
 2. Draw the sample before looking at any verdict: every k-th proof by seal order, across all worlds, including the zero-word worlds.
 3. Run the judge offline and post nothing. Report refused, closed and paid-would-be per world, with coverage beside them.
-4. Repeat the reading after each cores slice lands. The cores (consilience among the dead's words at a core, and the winding loop) are netstratum's first non-grid mechanisms, and the first place a measured gain could show.
+4. Repeat the reading after each cores slice lands. The cores (consilience among the dead's words at a core, and the winding loop) are Netstratum's first non-grid mechanisms, and the first place a measured gain could show.
 
 ## Findings recorded with reading 1 (coordinator rulings, 2026-10-08)
 
 - **The volumetric forge is unsolvable by construction.** It draws `FlipStack` or `CycleLayers` in 2 of every 3 word slots (`solver-verify/src/volume.rs:210-217`). The live render can express only `PerLayer` D4 and recolour (`solver/src/think.rs:189-196`). The volumetric branch also never deposits or mints (`conductor/src/lib.rs:4259-4271`). Volumetric forge outcomes are therefore **not counted as research in any reading**. The forge is left as it is: ARC viability (Concordance 6.2a) is measured on outside tasks, not forged ones.
-- **The minds do not search.** Each runs one fixed reduction-and-render pass, rendering at most 4 ops from the table: D4, one Recolor, Tile, and 8 ObjOps. For ARC-AGI-2 the binding limit is REPRESENTATION, not search: the table cannot state object, relation, count or conditional rules. Estimate: about 0 on ARC-AGI-2 at any search depth.
+- **The minds do not search.** Each runs one fixed reduction-and-render pass, rendering at most 4 ops from the table: D4, one Recolor, Tile, and 8 ObjOps. For ARC-AGI-2 the binding limit is representation, not search: the table cannot state object, relation, count or conditional rules. Estimate: about 0 on ARC-AGI-2 at any search depth.
 - **AUTIC is stale and inactive.** It comes from the frozen `/opt/mycelium` path dependency, and `reduct` was last committed 2026-08-26. It is not kept as a separate language. Speaking anastome means re-founding the membrane on mycelium-v0.1.0, starting with the 78.142 rule seam. The old AUTIC code stays in place until the new membrane works, then retires with a note.
 
 ## The Concordance 1.10 audit (approved 2026-10-08)
 
-Every refusal in netstratum's cognition is either RESTORED, because it rested on a developer standard, or JUSTIFIED as a law of netstratum's world. The full audit went to the coordinator on 2026-10-08.
+Every refusal in Netstratum's cognition is either restored, because it rested on a developer standard, or justified as a law of Netstratum's world. The full audit went to the coordinator on 2026-10-08.
 
-**RESTORE**, built in this order:
-1. Conjectures and guessing inside thought. **LANDED** (restore 1: held conjectures per vessel, tried first on later tasks). A mind holds unglued hypotheses with their residuals as private state, tests them on later tasks, and renders learned drains. A CLAIM (a mint, anything offered outward) must still close every pair.
+**Restore**, built in this order:
+1. Conjectures and guessing inside thought. **Landed** (restore 1: held conjectures per vessel, tried first on later tasks). A mind holds unglued hypotheses with their residuals as private state, tests them on later tasks, and renders learned drains. A claim (a mint, anything offered outward) must still close every pair.
 2. The vessels must differ, so that consilience between them is evidence.
-3. Pin G becomes proportional: a partly fed line thinks in proportion (20_FOUNDING §6a-bis strikes cliffs). **LANDED**: a line its larder does not wholly feed thinks on a seeded draw whose chance is its fed share of mouths (`Polity::thinks_in_proportion`).
+3. Pin G becomes proportional: a partly fed line thinks in proportion (20_FOUNDING §6a-bis strikes cliffs). **Landed**: a line its larder does not wholly feed thinks on a seeded draw whose chance is its fed share of mouths (`Polity::thinks_in_proportion`).
 4. Volumetric lines mint and render.
-5. Partial grids are perceived. **MOOT**: a `Grid` is dense by construction, so `measure_grid`'s whole-or-refused never refuses a real grid. There is nothing partial to perceive.
+5. Partial grids are perceived. **Moot**: a `Grid` is dense by construction, so `measure_grid`'s whole-or-refused never refuses a real grid. There is nothing partial to perceive.
 6. The anti-overfit depth cap (`solver/need.rs:152`) is retired as a cognition limit. Its capacity arm is justified as world physics if it is ever wired.
 7. The forge stays as practice; the ladder's role moves to outside tasks (Concordance 6.2a).
 
-The render table and counts/extrema come through the shared RULE-LANGUAGE EXTENSION (mycelium 78.143), never a netstratum-only version. The translator carries them.
+The render table and counts/extrema come through the shared rule-language extension (Mycelium 78.143), never a netstratum-only version. The translator carries them.
 
-**JUSTIFIED as laws of netstratum's world:**
+**Justified as laws of Netstratum's world:**
 - consilience as the admission test;
 - survival and the leisure price;
 - identity dedups (a single op is already a letter, one orbit is one word);
@@ -75,12 +75,12 @@ The render table and counts/extrema come through the shared RULE-LANGUAGE EXTENS
 
 ## Standing notes
 
-- **Every word minted to date is a "consilience of IDENTICAL reasoners".** The automaton and the sibling run the same deterministic `think_task`. The basin decides only whether a vessel withholds, never what it renders (`conductor/src/lib.rs:3836, 3904, 4371`). Hardness 1 therefore measures nothing yet. This note stands until restore 2 lands.
-- **DECLARED DIAL: the sibling's look price, `observe_price × 1/4`** (`conductor/src/lib.rs:3824`).
+- **Every word minted to date is a "consilience of identical reasoners".** The automaton and the sibling run the same deterministic `think_task`. The basin decides only whether a vessel withholds, never what it renders (`conductor/src/lib.rs:3836, 3904, 4371`). Hardness 1 therefore measures nothing yet. This note stands until restore 2 lands.
+- **Declared dial: the sibling's look price, `observe_price × 1/4`** (`conductor/src/lib.rs:3824`).
   - Measurement history: at full `observe_price` the sibling always fasted under scarcity, consilience never reached two vessels, and no shared word minted. Measured: 0 VocabularyMinted / 0 KnowledgeConverged across 8 mature worlds.
   - The 1/4 was set so that a line able to afford one discovery can always afford the confirmation.
   - The stated rationale, "the ratio of verifying a known program to searching for it", is not derived. It is a tuned value, owed a derivation.
-- **DECLARED BOUND: the words a line holds waiting for a second vantage, `WORD_PENDING_CAP = 64`** (`conductor::consilience_deposit`); the oldest gives way. Measured 2026-10-09: with no bound the waiting list grew ~2 words a beat across the universe and none ever left unconfirmed. A bound on memory, the same class as `solver::HELD_CONJECTURES = 32`; not derived.
-- **DECLARED BOUND: a vessel's basin keeps at most `BASIN_ENTRY_CAP = 16384` chain entries, newest crystals first** (`conductor::research_step`), beside the count cap `AUTIC_BASIN_CAP = 4096`. Measured 2026-10-09: a year-close `malloc_trim` freed ~9 MB of 1.8 GB (live data, not fragmentation); between two closes the basins grew ~3,700 crystals while RSS rose 207 MB, ~60 KB a crystal, so the count cap alone allowed tens of GB across 146 vessels. A bound on memory, not derived; small-grid crystals (tens of entries) still fit by the hundreds, wall-sized ones by the dozen.
-- **DECLARED BOUND: a line's heard words, `INHERITED_CAP = 256`** (the dead's words at its core, words from below, words its parliament carries); the oldest give way. A memory bound, set 2026-10-09 with the parliaments (docs/70), which carry words to many lines each bounce.
-- **DECLARED DIALS: ascension's gates (docs/72)** (`conductor::ascension`). A gate's cost, the ladder's dearest closure (`gate_cost`, the greatest `mint_bound`, 7 STAMP), shared equally among the core's ancients. A gate span's melt fraction, `span x 1/64` (`gate_melt`): the passage toll each bounce in STAMP, and what the gate's road melts in place of the open-space distance. A gate's freshness, `FRESHNESS_CELLS = 1`: the cells its hub may drift from its mapped place before it is offered for re-mapping. None is derived yet.
+- **Declared bound: the words a line holds waiting for a second vantage, `WORD_PENDING_CAP = 64`** (`conductor::consilience_deposit`); the oldest gives way. Measured 2026-10-09: with no bound the waiting list grew ~2 words a beat across the universe and none ever left unconfirmed. A bound on memory, the same class as `solver::HELD_CONJECTURES = 32`; not derived.
+- **Declared bound: a vessel's basin keeps at most `BASIN_ENTRY_CAP = 16384` chain entries, newest crystals first** (`conductor::research_step`), beside the count cap `AUTIC_BASIN_CAP = 4096`. Measured 2026-10-09: a year-close `malloc_trim` freed ~9 MB of 1.8 GB (live data, not fragmentation); between two closes the basins grew ~3,700 crystals while rss rose 207 MB, ~60 KB a crystal, so the count cap alone allowed tens of GB across 146 vessels. A bound on memory, not derived; small-grid crystals (tens of entries) still fit by the hundreds, wall-sized ones by the dozen.
+- **Declared bound: a line's heard words, `INHERITED_CAP = 256`** (the dead's words at its core, words from below, words its parliament carries); the oldest give way. A memory bound, set 2026-10-09 with the parliaments (docs/70), which carry words to many lines each bounce.
+- **Declared dials: ascension's gates (docs/72)** (`conductor::ascension`). A gate's cost, the ladder's dearest closure (`gate_cost`, the greatest `mint_bound`, 7 STAMP), shared equally among the core's ancients. A gate span's melt fraction, `span x 1/64` (`gate_melt`): the passage toll each bounce in STAMP, and what the gate's road melts in place of the open-space distance. A gate's freshness, `FRESHNESS_CELLS = 1`: the cells its hub may drift from its mapped place before it is offered for re-mapping. None is derived yet.

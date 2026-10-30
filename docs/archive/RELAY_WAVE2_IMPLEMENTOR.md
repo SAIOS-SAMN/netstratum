@@ -1,10 +1,10 @@
-# RELAY — TO THE WAVE-2 IMPLEMENTOR NODE
+# Relay — to the WAVE-2 implementor node
 
-> **ARCHIVED 2026-08-13.** Superseded/dead weight per the doc audit — kept for history, not live spec. See docs/BUILD_ORDER.md, docs/archive/HANDOFF_2026-08-13.md, or the doc it names as its successor for current status.
+> **Archived 2026-08-13.** Superseded/dead weight per the doc audit — kept for history, not live spec. See docs/BUILD_ORDER.md, docs/archive/HANDOFF_2026-08-13.md, or the doc it names as its successor for current status.
 
-> **LANDED Wave-2 (2026-08-07):** E-APT-1 tags 108–109, kernel **0.21.0**,
+> **Landed Wave-2 (2026-08-07):** E-APT-1 tags 108–109, kernel **0.21.0**,
 > `element_trade_step`, harness route clear green.
-> **LANDED Wave-3/4 (2026-08-07):** ElementRouteChartered 110, SCHEMA_V6,
+> **Landed Wave-3/4 (2026-08-07):** ElementRouteChartered 110, SCHEMA_V6,
 > STAMP 111–113 + orb tag 73, kernel **0.22.0**, `stamp_market_step`,
 > O6.1/O6.2, harness stamp spot green. Standing law remains authority
 > for instruments / R3–R4 / observer STAMP.
@@ -15,13 +15,13 @@ ratchet, green-board trap). This brief is **only what changed** and
 **what you build next**.
 
 **Working directory:** `/opt/netstratum`.  
-**Lane:** netstratum play surface (not datum/isthmus court).  
+**Lane:** Netstratum play surface (not datum/isthmus court).  
 **Do not** unilaterally edit dirty `tools/observer.py` without
 reconciling; T1.5 / R2.6 / E3.8 touch that surface.
 
 ---
 
-## 1. WHAT WAVE-1 LEFT YOU
+## 1. What WAVE-1 left you
 
 | Item | Value |
 |------|--------|
@@ -39,7 +39,7 @@ STAMP, office *advantages* (O6), observer T-column.
 
 ---
 
-## 2. WHAT YOU ARE BUILDING (Wave-2)
+## 2. What you are building (Wave-2)
 
 **Slice:** **E-APT-1 → E-ROUTE-1 → `element_trade_step` (E3.3)**  
 plus optional **R2.1–R2.2** (rail type + default R1) if it unblocks
@@ -63,7 +63,7 @@ ignored until Wave-4.
 4. **E-ROUTE-1** — charter / upkeep / lapse specialized for ElementId
    (ROUTE-1 topology).
 5. **E3.3** — conductor `element_trade_step` NPC pure clear.
-6. Full board green + clippy + ratchet; **prove EXIT codes** (no
+6. Full board green + clippy + ratchet; **prove exit codes** (no
    timeout-as-green).
 
 **Out of Wave-2:** STAMP, perps, R3/R4 adapters, O6 office advantages
@@ -71,7 +71,7 @@ ignored until Wave-4.
 
 ---
 
-## 3. SHARED REGISTERS (as of Wave-1 land)
+## 3. Shared registers (as of Wave-1 land)
 
 | Register | Ledger site | Next free |
 |----------|-------------|-----------|
@@ -84,7 +84,7 @@ Minor vs patch: minor when the gate *admits or refuses* something new.
 
 ---
 
-## 4. LAWS THAT STILL BITE (short list)
+## 4. Laws that still bite (short list)
 
 - **Call-not-copy** for any rate/recipe (Wave-1: `refine_recipe`).
 - **Receipt authority** for fold-dependent facts.
@@ -97,7 +97,7 @@ Minor vs patch: minor when the gate *admits or refuses* something new.
 
 ---
 
-## 5. CODE MAP (start here)
+## 5. Code map (start here)
 
 | Concern | Path |
 |---------|------|
@@ -110,7 +110,7 @@ Minor vs patch: minor when the gate *admits or refuses* something new.
 
 ---
 
-## 6. VERIFICATION BAR
+## 6. Verification bar
 
 Same as Wave-1 brief §6: full board finished (not timeout), clippy zero,
 ratchet green, `replay == committed` on new arcs, CLI/scripted play.
@@ -120,18 +120,18 @@ and call green.
 
 ---
 
-## 7. TERRITORY
+## 7. Territory
 
 - **`tools/observer.py` / elements uplink:** other lane may hold dirty
   work — reconcile before T1.5 / E3.8.
 - **`#38(b)` conductor corpus:** d3-scope — do not touch unilaterally.
 - **Datum/isthmus court, `Act::Anchor`, Υ estates:** separate lane
-  (`/opt/datum`, `/opt/isthmus`); Wave-2 stays netstratum R1–R2 play
+  (`/opt/datum`, `/opt/isthmus`); Wave-2 stays Netstratum R1–R2 play
   unless you only *claim* feature-gated adapters without path deps.
 
 ---
 
-## 8. STARTING STATE
+## 8. Starting state
 
 `main` @ **`2109bf0`** (Wave-1). Re-measure board yourself before building;
 do not inherit a green figure on trust.

@@ -1,24 +1,24 @@
-> **SUPERSEDED IN PART, 2026-08-05 — THE DEFINITION LAW.** Everything
+> **Superseded in part, 2026-08-05 — the definition law.** Everything
 
-> **ARCHIVED 2026-08-13.** Superseded/dead weight per the doc audit — kept for history, not live spec. See docs/BUILD_ORDER.md, docs/archive/HANDOFF_2026-08-13.md, or the doc it names as its successor for current status.
+> **Archived 2026-08-13.** Superseded/dead weight per the doc audit — kept for history, not live spec. See docs/BUILD_ORDER.md, docs/archive/HANDOFF_2026-08-13.md, or the doc it names as its successor for current status.
 > below concerning `seeds/aeon1-polities.json`, `var/polities.json`,
 > `tools/claim_roster.py`, `load_polities` and `write_default_polities`
-> describes machinery that is STRUCK. The roster compiles
+> describes machinery that is struck. The roster compiles
 > (`conductor::polities`); a registered line reaches the board through
 > its registry card, not through a file. The E1/E4 drift this chapter
 > inventories cannot recur, because there is no second roster to drift
-> from. The measurements and the reasoning are kept as the record of WHY
+> from. The measurements and the reasoning are kept as the record of why
 > the ruling was made.
 
-# ENDOWMENTS — standing we are entitled to and have not claimed
+# Endowments — standing we are entitled to and have not claimed
 
-**Status:** LIVE register (record lane, opened 2026-08-03). Operator
-charge: *"there are probably multiple endowments waiting for us hidden
-… ensure that our civilizations records are in order and we are
-claiming all available resources that we are entitled to."*
+**Status:** live register (record lane, opened 2026-08-03). Operator
+charge: find the endowments still unclaimed, keep the
+civilizations' records in order, and claim every resource they are entitled
+to.
 
 **Definition, derived rather than assumed.** The words "endowment" and
-"entitle" appear ZERO times in the tree (measured: `rg -ni "endow|entitle"`
+"entitle" appear zero times in the tree (measured: `rg -ni "endow|entitle"`
 over the workspace, 2026-08-03). So this is not existing vocabulary being
 looked up — it is a class being named. An **endowment** is:
 
@@ -27,22 +27,22 @@ looked up — it is a class being named. An **endowment** is:
 
 It is not a missing feature and not a bug. The carrier exists; nothing
 calls it. `PICKUP.md` §8 already half-catalogues the shape — *"is this a
-LIVE WIRE, or a CARRIER waiting for one? Most of what follows is built
+live wire, or a carrier waiting for one? Most of what follows is built
 and orphaned, not missing"* — but that sweep self-declares unverified,
 and §8a has since decayed (see §4 below). Every row here carries the
 command that measured it.
 
 **Register discipline.** Plain engineering English. Every claim dated and
-measured. A row leaves this register by being CLAIMED (the entitlement
-taken) or by being STRUCK (ruled not owed) — never by going quiet.
+measured. A row leaves this register by being claimed (the entitlement
+taken) or by being struck (ruled not owed) — never by going quiet.
 
 ---
 
-## §0 THE IDENTITY KEY — settled first, because every other row depends on it
+## §0 The identity key — settled first, because every other row depends on it
 
 **`slug` is the identity. `name` is mutable display.** Measured
 2026-08-03: every seeds entry carries `slug`, every registry file carries
-`slug`, and the registry's `slug` equals its filename in ALL 33 cases.
+`slug`, and the registry's `slug` equals its filename in all 33 cases.
 
 This was not assumed — it was tested, and the first pass of this register
 got it wrong by comparing on `name`. A name-keyed comparison reported
@@ -57,7 +57,7 @@ manufactures deaths and births that never happened.**
 Any claim path keys on `slug` (task #3). Nothing keys on `name` or on
 filename-minus-extension without checking `slug` first.
 
-## §1 E1 — SEVENTEEN CIVILIZATIONS HAVE NO DURABLE RECORD
+## §1 E1 — seventeen civilizations have no durable record
 
 **Severity: highest. This is single-copy data loss exposure, today.**
 
@@ -65,7 +65,7 @@ The durable, git-tracked roster is `seeds/aeon1-polities.json` — 19
 lines. The live record is `var/registry/*.json` — 33 lines. `var*/` is
 git-ignored and single-copy by standing note (`PICKUP.md` §6).
 
-**Seventeen slugs exist ONLY in the git-ignored directory:**
+**Seventeen slugs exist only in the git-ignored directory:**
 
     aerie · basaltvault · bloomdeep · bloomhollow · bloomvault
     borealis · cairnborn · ferndeep · forgechoir · forgedeep
@@ -88,11 +88,11 @@ Measured 2026-08-03 (note the key — `slug`, never `name`):
     print(len(rg-sd), sorted(rg-sd))
     PY
 
-**Owed:** a claim path that MERGES live into durable (§4 E4 explains why
+**Owed:** a claim path that merges live into durable (§4 E4 explains why
 the existing one cannot do it). Not yet built — this register is the
 first half of the debt.
 
-## §2 E2 — THE SEED ROSTER STILL CARRIES THREE PRE-RENAME NAMES
+## §2 E2 — the seed roster still carries three PRE-rename names
 
 **Downgraded from "wrong identity" to "stale display name" by §0's
 measurement.** The identity was never at risk; the slug held on both
@@ -117,7 +117,7 @@ never happened. The defect is now a documented trap rather than a
 corruption. The cure rides the §4 claim path: on a shared slug, the
 registry's `name` is the later authority.
 
-## §3 E3 — THREE SEEDED LINES WERE NEVER SEATED — RESOLVED 2026-08-03
+## §3 E3 — three seeded lines were never seated — resolved 2026-08-03
 
 **Darlok · Draco · Pleiadian** stand in the durable roster with no
 registry entry and no world directory (`shroudmere`, `eclipse-hold`,
@@ -133,12 +133,12 @@ it:
 | Darlok + Draco enter the roster (`66b5f8c`) | **2026-08-01 20:52** |
 | Pleiadian enters the roster (`64739af`) | **2026-08-01 21:03** |
 
-All three were added to the durable roster a day and a half AFTER the
+All three were added to the durable roster a day and a half after the
 live universe was founded and last run. The roster is seated at genesis
 and `write_default_polities` refuses to overwrite (`PICKUP.md` §1), so
 nothing has ever seated them.
 
-**This is the endowment running the OTHER WAY, and it is the one the
+**This is the endowment running the other way, and it is the one the
 charge names most literally.** E1 is value the live universe holds and
 the record has never claimed. E3 is standing the record grants and the
 live universe has never taken: three chartered lines — an `observer`
@@ -151,7 +151,7 @@ document edit. Booked separately from the claim path; it needs the
 operator's word on whether the live universe is re-seated or the three
 wait for the next genesis.
 
-## §4 E4 — THE CLAIM PATH IS INOPERABLE, AND DESTRUCTIVE IF REPAIRED NAIVELY
+## §4 E4 — the claim path is inoperable, and destructive if repaired naively
 
 `PICKUP.md` §8f names `./install.sh export-roster` as the sanctioned
 re-emit of live → seeds, marked `[VERIFIED]`. Measured against the tree
@@ -166,16 +166,16 @@ re-emit of live → seeds, marked `[VERIFIED]`. Measured against the tree
 
 Three independent defects:
 
-1. **It cannot run.** `var/polities.json` DOES NOT EXIST. `var/`'s own
+1. **It cannot run.** `var/polities.json` does not exist. `var/`'s own
    mtime is 2026-07-30 12:24, so no top-level file has been added or
    removed there since. The command dies at line 350 against the live
    universe.
 2. **It reads the wrong file.** The live civilizations are in
    `var/registry/*.json`, not `polities.json`. Even given a roster to
    read, the seventeen lines of §1 would not ride it.
-3. **It is `cp`, not a merge.** A straight overwrite DELETES the three
+3. **It is `cp`, not a merge.** A straight overwrite deletes the three
    §3 lines from the durable record — and those are the three that exist
-   ONLY there, so the deletion is total. It also drops the seeds-side
+   only there, so the deletion is total. It also drops the seeds-side
    siting fields (`world`, `planet`, `star`, `x/y/z`, `colony`, `policy`)
    that the registry does not carry, since the two files are not the
    same schema.
@@ -185,12 +185,12 @@ live `var/polities.json` holds 20" cannot be true as written; that file
 has not existed since at least 2026-07-30. The §8f row is corrected on
 this lane, quoted as history, never silently rewritten.
 
-**THE TWO FILES ARE NOT THE SAME SCHEMA** — measured 2026-08-03, and it
+**The two files are not the same schema** — measured 2026-08-03, and it
 is the constraint that decides the claim path's shape:
 
     seeds only     world · planet · star · albedo · orbit · x/y/z ·
-                   colony · policy · station        (the SITING)
-    registry only  clade · founder                  (the LINEAGE)
+                   colony · policy · station        (the siting)
+    registry only  clade · founder                  (the lineage)
     both           slug · name · species · motto ·
                    disposition · metabolism · perception
                    (flat in seeds, nested under `axes` in the registry)
@@ -199,35 +199,35 @@ So neither file is a superset and neither can be copied over the other
 without loss. The registry cannot express where a civilization sits; the
 roster cannot express what founded it.
 
-**The shape the claim path must have** — BUILT 2026-08-03 as
+**The shape the claim path must have** — built 2026-08-03 as
 `tools/claim_roster.py`, with `install.sh export-roster` rewired to call
-it. A UNION keyed on `slug`: live-only slugs added, durable-only slugs
+it. A union keyed on `slug`: live-only slugs added, durable-only slugs
 preserved, and on a shared slug the registry's `name` taken as the later
 authority while the seeds' siting is kept (a deliberate seat is never
 overwritten by an observed one). Dry run by default; `--write` is the
 only thing that touches the roster; it re-reads its own output and
 refuses to write if any durable slug would vanish.
 
-**A CORRECTION TO THIS SECTION'S FIRST DRAFT.** It said registry-only
-lines should "land with EMPTY siting, which must be visible rather than
+**A correction to this section's first draft.** It said registry-only
+lines should "land with empty siting, which must be visible rather than
 defaulted". **That was wrong, and would have produced a claim the engine
 never sees.** The loader took `world`, `planet`, `colony` and `policy`
-with `?` — an entry missing any of them was SKIPPED at load with only a
+with `?` — an entry missing any of them was skipped at load with only a
 stderr note. An empty-sited entry was therefore not a visible gap; it
 was an invisible one, pinned empirically at the time by
 `an_entry_missing_its_siting_is_silently_dropped_not_refused`.
 
-**Both the loader and that pin are STRUCK** (THE DEFINITION LAW,
+**Both the loader and that pin are struck** (the definition law,
 2026-08-05). The failure mode is gone with them: siting is no longer
-carried by a file that can omit it, it is DERIVED from the sigil, so
+carried by a file that can omit it, it is derived from the sigil, so
 there is no missing-field path left to drop a line silently. The
 paragraph is kept because the reasoning is what justified the ruling —
 a silent drop is worse than a refusal, and the fix was to remove the
 thing that could drop.
 
-The path therefore RECOVERS siting from the live universe —
+The path therefore recovers siting from the live universe —
 `var/worlds/<world>/planets/<planet>/state.json` names its civilization
-slug, and `starchart.json` carries the coordinates — and REFUSES any
+slug, and `starchart.json` carries the coordinates — and refuses any
 line it still cannot complete, reporting it by name. Refuse, never
 guess: a written claim the engine drops is worse than an absent one,
 because it reads as done.
@@ -237,10 +237,10 @@ wearing an export's name.
 
 ### §4a What the path reports today (dry run, 2026-08-03)
 
-    MERGED     16   held by both; 3 renamed (slug held)
-    CLAIMED    14   live lines the roster never recorded
-    PRESERVED   3   roster lines the live universe does not hold
-    REFUSED     3   cannot be completed from real data
+    Merged     16   held by both; 3 renamed (slug held)
+    claimed    14   live lines the roster never recorded
+    preserved   3   roster lines the live universe does not hold
+    refused     3   cannot be completed from real data
 
 **E1 is 17 lines, of which 14 are claimable now and 3 are refused.** The
 three refused — `bloomdeep`, `forgechoir`, `forgedeep` — are a category
@@ -252,13 +252,13 @@ Ferndeep / Slagborn / Bloomhollow"*), and each has coordinates on
 world directory behind them.
 
 Those three charted-but-unfounded worlds are the obvious home for the
-three refused lines, and the tool reports the coincidence WITHOUT acting
+three refused lines, and the tool reports the coincidence without acting
 on it. The slug-to-world name pattern is not reliable in general —
 `cairnborn` sits on `cairn-field`, `aerie` on `windward-spire`, `hadal`
 on `trench-hold` — so adopting it here would be a guess dressed as a
 measurement. Booked for a ruling, not resolved by inference.
 
-## §5 E5 — THE CLEAVE'S POSSIBILITY SPACE IS CONSTANT, AND LANDED LAW SAYS IT SHOULD COMPOUND
+## §5 E5 — the cleave's possibility space is constant, and landed law says it should compound
 
 **Operator, 2026-08-05:** *for every divergent line you should have a
 multiplicative event where the possibilities of possibilities grows as
@@ -267,7 +267,7 @@ the upper line compounds on the lower lines — these are endowments.*
 This is the register's own definition exactly: standing landed law
 already grants, which no code path has ever claimed.
 
-**MEASURED, from the draw in `conductor::divergence_step`.** `mutate`
+**Measured, from the draw in `conductor::divergence_step`.** `mutate`
 excludes the current value, so a flagged axis genuinely moves:
 
 | mask | axes moved | outcomes |
@@ -283,17 +283,17 @@ excludes the current value, so a flagged axis genuinely moves:
 | | × gauge delta, `1/12..=5/12` | 5 |
 | | **= per cleave** | **175** |
 
-**AND 175 IS A CONSTANT.** Nothing in that product reads the line's
+**And 175 is A constant.** Nothing in that product reads the line's
 depth, its open grades, or how many cleaves preceded it. A line at grade
 1 and a line at grade 9 draw from the same 175. The upper line does not
 compound on the lower; there is no multiplicative event.
 
-**WHAT LANDED LAW ALREADY GRANTS, unclaimed in two places.**
+**What landed law already grants, unclaimed in two places.**
 
 1. `11_AEON` §3 makes a cleave a walk on the manifold
    **{disposition × metabolism × perception × G}**. The draw walks the
    first three as a nonempty subset (correct, 2026-08-02) and touches G
-   only as ONE phase moved by a delta from a fixed five-value range. **G
+   only as one phase moved by a delta from a fixed five-value range. **G
    is in the manifold and not in the mask.**
 2. GAUGE-N (`11` §2.1) grows the graded key — one plane per earned mint,
    `shift_gauge_at` refusing `PlaneUnearned` otherwise. That is the
@@ -301,13 +301,13 @@ compound on the lower; there is no multiplicative event.
    it**: `shift_gauge_at` has three callers — the CLI verb (the
    operator's hand), one `cfe` test, and `Polity::unfold`, which `cycle`
    does not call. Every autonomous line sits at genesis `[0]` forever
-   while its earned mints pile up unspent. The era FOLD runs every era;
+   while its earned mints pile up unspent. The era fold runs every era;
    the unfold runs never.
 
 So the compounding term is pinned at k = 1 by (2), and even if it grew,
 (1) would not spend it.
 
-**THE SHAPE OF THE CLAIM, if a cleave walked the open grades too** —
+**The shape of the claim, if a cleave walked the open grades too** —
 a nonempty subset of k grades, each taking one of the five deltas:
 
 | grades k | subsets `2^k−1` | deltas `5^k` | possibility space |
@@ -323,19 +323,19 @@ That is the "possibilities of possibilities": the space a cleave draws
 from is itself a function of what the line has earned, so depth buys
 reach and the upper line compounds on the lower.
 
-**NOT CLAIMED HERE, and the order matters.** (2) before (1): opening the
+**Not claimed here, and the order matters.** (2) before (1): opening the
 grades is worthless if the cleave cannot spend them, and spending them is
-undefined while k = 1. Wiring the unfold into the beat is ALREADY KNOWN
+undefined while k = 1. Wiring the unfold into the beat is already known
 to break a replay pin — `survey_pins` diverged by exactly 7 crystal, and
 that is unexplained (`conductor::Polity::unfold`'s own note). **A
 proposer that breaks SEAL B is worse than one that never expands**, so
 the 7-crystal divergence is the first thing owed, not the last.
 
 Both halves are rulings, not refactors: the mask's domain is a law about
-what a cleave MAY move, and the unfold's wiring changes what every
+what a cleave may move, and the unfold's wiring changes what every
 autonomous line does every beat.
 
-## §6 CANDIDATES — named, NOT yet verified
+## §6 Candidates — named, not yet verified
 
 Sourced from `PICKUP.md` §8b/§8e, which is sweep-reported and explicitly
 not re-verified per row. Listed so they are not lost; each needs its own
@@ -361,7 +361,7 @@ findings.**
 - `cfe/src/world/` (WANT-1 kind 1) — the epistemological want is
   reportedly in the tag-62 vocabulary with no engine rule.
 
-## §8 CLAIMED 2026-08-07 — ORBIT DYNAMO + ESTATE PLACE (35)
+## §8 Claimed 2026-08-07 — orbit dynamo + estate place (35)
 
 **Operator charge (session):** *all orbits should not be the same —
 magnetism of cores, offset by polity of the star and class of the star;
@@ -385,7 +385,7 @@ Q-O3 landlord lease of slots · Q-O4 multi-star period × chart.
 
 ---
 
-## §7 WHAT THIS LANE OWNS, AND WHAT IT RELAYS
+## §7 What this lane owns, and what it relays
 
 Per the lane map (shared memory, read 2026-08-03) this register is the
 record lane's. Territory: `00_CHARTER.md`, `BUILD_ORDER.md`, `PICKUP.md`,
@@ -400,6 +400,6 @@ lane map so the lens node is not walked into. Nothing has been landed in
 Relayed, never landed here: `46_KERNEL` §4/§7 still measures a
 5001-line `engine/cfe/src/world.rs` and orders its split as step 1 —
 the file does not exist on `main`, the organ landed, and the step is
-DONE (kernel lane's doc). `kernel/src/lib.rs` doc comments reportedly
+done (kernel lane's doc). `kernel/src/lib.rs` doc comments reportedly
 still describe coverage as drafted and unenforced while `covered()` is
 total (kernel lane's code).

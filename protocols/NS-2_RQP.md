@@ -1,10 +1,10 @@
 # NS-2 — RQP: Resonance Query Protocol
 
-**Status:** LANDING at N4 (this document supersedes the stub; first
+**Status:** landing at N4 (this document supersedes the stub; first
 consumer: the scanner, `clients/cli` verb `scan`, mechanic
-`engine/cfe/src/query.rs`, witnesses `rqp_scanner.rs`). Written FROM the
+`engine/cfe/src/query.rs`, witnesses `rqp_scanner.rs`). Written from the
 working v0.4 sigil index (`/opt/ipsal-autic-v0.4/iae/src/reduction/mod.rs`,
-the SIGIL1 block — CHARTER §8 ratifies the lineage). Supersedes
+the SIGIL1 block — Charter §8 ratifies the lineage). Supersedes
 PROTOCOL_STACK.md §2. Working orders: `docs/N4_DIRECTIVES.md`.
 
 Search by structural convergence with a measurement, never by keyword. A
@@ -13,13 +13,13 @@ O(bucket), never a scan of the population); a near-miss refuses with its
 delta whole.
 
 **The lens law (operator ruling 2026-07-30, recorded here):** SEAL B
-replay is the REPRODUCTION — byte-identical rebuilding of the committed
-world. RQP is the LENS — a pure structural read of the same receipted
+replay is the reproduction — byte-identical rebuilding of the committed
+world. RQP is the lens — a pure structural read of the same receipted
 truth. A query mutates nothing, orphans nothing, and never enters the
 world chronicle; only its power draw (§1.5) closes and receipts. The
 world's coordinate is TUniversal{S, G, T}; the lens reads along {S, G}
-and leaves T in the ledger: **you query an orb by WHAT it is (S, G),
-never by WHEN it was found (T)** — the ancestor's law, carried whole.
+and leaves T in the ledger: **you query an orb by what it is (S, G),
+never by when it was found (T)** — the ancestor's law, carried whole.
 
 ---
 
@@ -36,9 +36,9 @@ grid symmetries (four rotations × reflection — the plane group of the
 8×8 chart, a structural constant bounded by group order, never a content
 sweep) of the orb's zone list as sorted (row, col, kind) tuples, joined
 with the banked ledger (resource-ascending, zeros absent — the NS-1
-canonical order) and the thermal class. Kind is the LAST tuple
+canonical order) and the thermal class. Kind is the last tuple
 component, so the joint lex-min settles positions first, kinds after —
-the position projection of the joint winner IS the position-only lex-min
+the position projection of the joint winner is the position-only lex-min
 (measured: `the_sigil_is_frame_invariant`).
 
 The **address** is two projections of that one shadow (never two
@@ -59,13 +59,13 @@ orb's touch history — none of it keys the lookup. T rides the hit as a
 ledger-side annotation (§1.3): the stamp of the reading's own power
 draw, the one chronicle trace a query leaves.
 
-*(RULED 2026-07-30 (merge sign-off, ruling 2): this v1 queryable
+*(Ruled 2026-07-30 (merge sign-off, ruling 2): this v1 queryable
 structure — zone geometry as S, banked signature + thermal class as
 G — stands as drafted. Extension law in §4.)*
 
 ### 1.2 Resonance
 
-Two orbs **resonate** iff their joint shadows are EQUAL — zones
+Two orbs **resonate** iff their joint shadows are equal — zones
 congruent under some grid symmetry, banked ledgers equal ratio-for-ratio
 in canonical form, thermal class equal. Equality is exact structural
 identity of canonical forms; there is no threshold, no score, no
@@ -73,24 +73,24 @@ similarity. The lookup is by address bucket (O(bucket)); the verdict is
 by joint comparison inside the bucket.
 
 A scan names a **prober** (the orb that pays the draw, §1.5) and an
-**exemplar** (the orb whose structure IS the query — the CLI's
+**exemplar** (the orb whose structure is the query — the CLI's
 query-by-example form; a structure-literal query is the same wire
 record, §2.2). The exemplar never resonates with itself: the scanner
 reads the population, not the probe. The prober is a candidate like any
-other. The reading happens AFTER the draw closes: the lens reads the
+other. The reading happens after the draw closes: the lens reads the
 committed world as it stands once open — the prober's own debited bank
 included.
 
 ### 1.3 The hit
 
 A hit carries: the resonant orb's id, and the T stamp of the reading
-(the `CrystalDrawn` receipt's stamp, §1.5) — WHEN this lens was paid
-for, never WHEN the orb became what it is. Multiple resonances all
+(the `CrystalDrawn` receipt's stamp, §1.5) — when this lens was paid
+for, never when the orb became what it is. Multiple resonances all
 report (the bucket is small; nothing truncates silently).
 
 ### 1.4 The near-miss refusal
 
-A candidate in the same bucket whose joint shadow does NOT match refuses
+A candidate in the same bucket whose joint shadow does not match refuses
 **with its delta whole** (N4_DIRECTIVES directive 5). The refusal
 carries, per candidate:
 
@@ -105,13 +105,13 @@ carries, per candidate:
   changes when a later ruling widens the bucket);
 - the summary scalar `C(Δ) = Σ |R|` over the banked residuals (the
   coherence-functional shape — exact rational, zero iff the ledgers
-  agree; THE PROPORTIONAL LAW, operator ruling 2026-07-31: each residual
+  agree; the proportional law, operator ruling 2026-07-31: each residual
   counts exactly its size, in its own units — squares are barred as
   aggregators of difference). **The scalar is the summary, never the
   payload**: a consumer that reads only C(Δ) has not read the refusal.
 
 An empty bucket is its own typed verdict — `NoResonance`, carrying the
-probed address and nothing else. It is NOT a delta against the whole
+probed address and nothing else. It is not a delta against the whole
 population: nearest-candidate search would be the O(population) scan
 this protocol exists to refuse.
 
@@ -121,17 +121,17 @@ The scanner draws **resonance crystals** (02 §5.1, deferred to exactly
 this landing — the name earns its meaning here: crystals are the
 scanner's power source). The draw law, the SINK-1 touch shape:
 
-- Affordability is judged PURE on the probing orb's banked crystals
+- Affordability is judged pure on the probing orb's banked crystals
   before anything moves: short of `scan_draw()` (placeholder: 1
   crystal), the scan refuses typed (`CannotAfford`), draws nothing,
   reads nothing, orphans nothing.
 - A funded scan debits `scan_draw()` from the probing orb's bank and
-  closes `CrystalDrawn` (tag 55) — the ONE chronicle event of this
+  closes `CrystalDrawn` (tag 55) — the one chronicle event of this
   protocol. The receipt carries the probing orb and the amount,
   **deliberately blind to what was asked and what was seen**: the lens
   law in wire form. Replay replays the debit; it cannot replay the
   reading, and must not.
-- The draw is spent on the LOOKING, hit or miss: a lens costs power to
+- The draw is spent on the looking, hit or miss: a lens costs power to
   hold open regardless of what stands in front of it.
 
 Crystals are produced by the **Resonator** (zone kind 7), the fourth
@@ -145,7 +145,7 @@ holds: produced by one zone, consumed by the scanner.
 
 ### 1.6 Scope
 
-v1 scans the LOCAL world's orb population. Cross-world resonance
+v1 scans the local world's orb population. Cross-world resonance
 composes at N5/N6 (the mesh carries addresses, never worlds);
 scanner-by-galaxy-region is post-GALAXY-1a and post-N4 (N4_DIRECTIVES
 coordination note). G3 (perception frames, translation loss) reads
@@ -158,7 +158,7 @@ operator ruling (N4_DIRECTIVES ruling 1).
 
 Additive TLV under SEAL A, tags from the permanent registry (dop.rs
 header — the one tag authority). **Records 56–58 are NS-2 protocol
-records in NS-2's own framing: they NEVER enter the world chronicle.**
+records in NS-2's own framing: they never enter the world chronicle.**
 Only tag 55 is a chronicle event.
 
 ### 2.1 Tag 55 — `ClosureEvent::CrystalDrawn` (the chronicle event)
@@ -201,7 +201,7 @@ ns2_vectors`) — any implementation verifies from this document alone.
 The subject is the witness board's planted pair (§3): the probe holds
 extractor@tile 10 (1,2) + habitat@tile 21 (2,5), banked 10 iron + 5
 biomass, unbanded; its rot90 twin (extractor@22, habitat@45, banked
-equal) projects the IDENTICAL sigil:
+equal) projects the identical sigil:
 
     s_canonical: [(1,2), (2,5)]    g_resources: [1, 2]    thermal: 0
     joint zones: [(1,2,1), (2,5,2)]
@@ -242,18 +242,18 @@ exemplar, B the rot90 twin, C the kind swap, D the once-collected.
 1. **The planted match:** A (extractor@10, habitat@21) and B
    (extractor@22, habitat@45) — the same pattern under rot90, banked
    equal (charter reserves minus the same costs, never collected) —
-   project ONE sigil; the scan finds B through the lens (measured:
+   project one sigil; the scan finds B through the lens (measured:
    `the_sigil_is_frame_invariant`, `the_scan_finds_the_match_…`).
 2. **The planted near-misses, delta whole:** C (B's tiles, kinds
    exchanged) refuses with zone deltas [(10, extractor↔habitat),
-   (21, habitat↔extractor)], NO banked residuals, and **C(Δ) = 0 while
+   (21, habitat↔extractor)], no banked residuals, and **C(Δ) = 0 while
    the delta is real** — the scalar is the summary, never the payload.
    D (B's pattern, collected once at +4 ticks: 1E+1H nets iron +5/4,
    biomass +1/2 per tick) refuses with residuals iron −5, biomass −2
    whole and C(Δ) = |−5| + |−2| = 7, exact (the proportional law).
 3. **The lens law:** the chronicle before and after the scan differs
-   by EXACTLY one receipt — the CrystalDrawn debit, blind to the
-   asking; the reading's stamp IS that receipt's stamp.
+   by exactly one receipt — the CrystalDrawn debit, blind to the
+   asking; the reading's stamp is that receipt's stamp.
 4. **The refusal orphans nothing:** a crystal-less scan refuses
    `CannotAfford { Crystal, need 1, have 0 }` typed and pure — no
    receipt, no draw, the chronicle unmoved.
@@ -261,9 +261,9 @@ exemplar, B the rot90 twin, C the kind swap, D the once-collected.
    structure scans to zero hits, zero refusals — never a delta against
    the population.
 6. **The resonator converts on the knife edge:** alloy +4 − 4 = 0 and
-   diamond +1/4 − 1/4 = 0 accrue NOTHING; crystal accrues 1/8 × 8 = 1
+   diamond +1/4 − 1/4 = 0 accrue nothing; crystal accrues 1/8 × 8 = 1
    exactly; collect banks it; famine strikes nothing.
-7. **Replay MATCHES** at the end of every arc —
+7. **Replay matches** at the end of every arc —
    `assert_eq!(replay(world.chronicle()), world.committed())`.
 
 ---
@@ -278,37 +278,37 @@ stands as drafted in §1.1 —
 | facet | projection | joint (the exactness) |
 |---|---|---|
 | S | zone geometry, lex-min over the eight grid symmetries | (row, col, kind) tuples under the one winning transform |
-| G | nonzero banked resource SET + thermal class | the full banked ledger, ratio-for-ratio + the class |
+| G | nonzero banked resource set + thermal class | the full banked ledger, ratio-for-ratio + the class |
 | T | **never in the key** | rides the hit as the draw receipt's stamp |
 
 ### 4.2 The extension law
 
-The structure grows ADDITIVELY, the SEAL A discipline applied to the
-address: a new facet appends to the END of the query record (§2.2) and
+The structure grows additively, the SEAL A discipline applied to the
+address: a new facet appends to the end of the query record (§2.2) and
 to the joint; it never reorders or reinterprets an existing byte. An
 implementation that predates a facet still buckets correctly on the
 prefix it knows — it reports coarser resonance, never wrong resonance.
-Every extension is an operator ruling recorded HERE, one row per facet,
+Every extension is an operator ruling recorded here, one row per facet,
 with its landing named. The dimensional-collapse warning binds every
-facet forever: projections derive from ONE joint shadow, never from
+facet forever: projections derive from one joint shadow, never from
 independent canonicalizations.
 
-### 4.2a The translation law (G3, LANDED 2026-07-30) — a CORRECTION recorded
+### 4.2a The translation law (G3, landed 2026-07-30) — a correction recorded
 
 The §4.3 reservation drafted perception as a G extension. Landing it
-under the axiom check REFUSED that shape: 04 §1.3's law is that the
-H¹ class IS what survives translation — frames are what
-canonicalization quotients OUT, so the observer's basis joins T
-outside the key: **query by WHAT it is, never by WHEN it was found or
-WHO reads it.** The sigil is frame-free (measured:
+under the axiom check refused that shape: 04 §1.3's law is that the
+H¹ class is what survives translation — frames are what
+canonicalization quotients out, so the observer's basis joins T
+outside the key: **query by what it is, never by when it was found or
+who reads it.** The sigil is frame-free (measured:
 `the_sigil_is_frame_free`).
 
-Translation is a READ-time law instead: every hit annotates with the
+Translation is a read-time law instead: every hit annotates with the
 **survival ratio** between the prober's sealed basis and the
 candidate's (`dop::translation_survival` — same basis 1; the 04 §4
 example verbatim, harmonic through a planar eye 3/4; umbral pairs
-1/2; unsealed reads whole; exact rationals, the loss SHOWN never
-silent). The tag-57 hit record extends ADDITIVELY — the survival
+1/2; unsealed reads whole; exact rationals, the loss shown never
+silent). The tag-57 hit record extends additively — the survival
 rides behind the pre-G3 prefix; an old reader parses orb ‖ stamp and
 never needs the tail (measured: `the_hit_record_extends_additively`).
 `translated_read` is the pure cross-frame seam, N5-ready: resonance
@@ -321,6 +321,6 @@ pairing composes at N5/N6 through the same table.
   charted sky region — derived S-side membership (`galaxy_of`,
   wrapped-L1 to charted centers), never a stored tag. Composes with the
   N4_DIRECTIVES coordination note; a separate landing, gated on both.
-- **Cross-world resonance (N5/N6):** the mesh carries ADDRESSES, never
+- **Cross-world resonance (N5/N6):** the mesh carries addresses, never
   worlds; consilience at arity ≥ 2 compares joints across chronicles.
   Nothing in v1's wire changes — the records were framed for this.

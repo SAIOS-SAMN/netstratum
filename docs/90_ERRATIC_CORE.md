@@ -1,44 +1,42 @@
 # 90 — The erratic core: the orthogonal release and the first layer of order
 
-**Naming (operator 2026-10-22: "why are you using the word loop? why isnt
-this an orbit?"):** a body turns about its parent in two orthogonal planes,
-and both are ORBITS. The second is the ORTHOGONAL ORBIT, its spin `ℓ_⊥`
-(code `ell_orth`), its phase `ψ_⊥` (code `phase[1]`). Earlier text and
-xylarium's code call it the "loop" (`l_c`, `phase_c`); that name described the
+**Naming (ruling of 2026-10-22: the body's path about its parent is an orbit,
+not a loop):** a body turns about its parent in two orthogonal planes, and
+both are orbits. The second is the orthogonal orbit, its spin `ℓ_⊥` (code
+`ell_orth`), its phase `ψ_⊥` (code `phase[1]`). Earlier text and Xylarium's
+code call it the "loop" (`l_c`, `phase_c`); that name described the
 circulation's route and hid that it is an orbit, which is how its spin went
 unkicked. Quotations keep their original words.
 
-**Naming (operator 2026-10-23: "what's a better word than kick"; "yes - do the
-rename"):** the parent's pulse changing a body's spin each bell is a TORQUE
+**Naming (ruling of 2026-10-23: "kick" is renamed):** the parent's pulse changing a body's spin each bell is a torque
 (code `flows::torque`, `spin_torque`, `torque_orth`; identity `torque`): it
 adds spin on one hemisphere of the bell and takes it on the other, what does
 not land in step is heat, and it is always paired with the hold's return.
 "Kick" named a single blow from outside and hid that.
 
-Operator 2026-10-22, a THEORY to derive: "the inner core stars and planets
-would be erratic because the push/pull of the orthogonal release from the
-core coupled with the first layer of order in stars/planets past the inner
-most construction of stars - thats a theory, not a proven fact unless
-derived"; "proceed with the derivation".
+Design direction (2026-10-22), a theory to derive: the inner-core stars and
+planets are erratic, through the push and pull of the core's orthogonal
+release coupled with the first layer of order among the stars and planets past
+the innermost construction; a theory, not a fact until derived.
 
-Status: DERIVED from the established laws below, NOT built. Building it
+Status: derived from the established laws below, not built. Building it
 un-holds the galaxy-band ruling of 2026-10-21 in part (§4) and drives the
 orthogonal plane (docs/89 B7), so it waits for the operator, and for
-xylarium where the laws are shared.
+Xylarium where the laws are shared.
 
 ## 1. What is established (read from the code)
 
-- **Two planes in every body** (`flows::PLANES = 2`): the ORBIT plane (0) and
-  the ORTHOGONAL ORBIT's plane (1, the circulation's: "a continuum jetstream carries matter
+- **Two planes in every body** (`flows::PLANES = 2`): the orbit plane (0) and
+  the orthogonal orbit's plane (1, the circulation's: "a continuum jetstream carries matter
   out of the singularity along the axis and home through the disc", 2026-10-16).
   A mote carries a spin in each, `ℓ_o` and `ℓ_⊥`, and a phase in each.
 - **One torque law** (`flows::torque`): the own family pushes in the orbit plane as
-  a SPIN, `Δℓ_o = κ_o·mean_response(ψ_o, 2δ)`, `κ_o = p·δ(R)`, `p` the push.
+  a spin, `Δℓ_o = κ_o·mean_response(ψ_o, 2δ)`, `κ_o = p·δ(R)`, `p` the push.
   `mean_response` is S¹'s linear measure (`1 − 2|ψ|`) averaged over the
   passage, so the sign of a torque is which hemisphere of the bell the body
   stands on.
 - **The parent's release on the orthogonal orbit's plane** (`flows::torque`/`turn`): "the
-  parent's moves the mote along the orthogonal orbit (`p·ρ·δ_u`, a PHASE)". This is the
+  parent's moves the mote along the orthogonal orbit (`p·ρ·δ_u`, a phase)". This is the
   orthogonal release. It is felt as a shift of the orthogonal phase only, never as
   orthogonal spin: `ℓ_⊥` is set only by ocean arrivals and no torque changes it (B7).
 - **The hold returns** (the band in `flows::spin_torque`, built as `star_kick` until 2026-10-23): whatever a
@@ -61,7 +59,7 @@ parent's release on the orthogonal orbit's plane by the same law:
 ```
 
 (the release's push `p`, the body's share `ρ`, the parent's deficit at it
-`δ_u`: the factor the code already applies to the orthogonal phase). Its PULL is
+`δ_u`: the factor the code already applies to the orthogonal phase). Its pull is
 the hold's return on the same plane, `−½·δ(R)·ℓ_⊥` each echo. Nothing new is
 stated: the orbit plane's push and the band's return, read in the second
 plane.
@@ -89,8 +87,8 @@ signed torques that the hold leaks away.
 - Near the core the release is strongest: `δ_u` near its largest, and
   `p·ρ·δ_u` large against the return. The torques' signs follow each body's
   own orthogonal phase against the bell, so neighbouring bodies are torqued apart:
-  reaches swing by large, uncorrelated amounts. That is the ERRATIC core.
-- Past the innermost construction the bodies LOCK (`lock_step`): an ordered
+  reaches swing by large, uncorrelated amounts. That is the erratic core.
+- Past the innermost construction the bodies lock (`lock_step`): an ordered
   body's displacement returns by `d/(d + turned)` each echo, which damps its
   orthogonal spin as it damps its period. Read on the orthogonal spin:
   `ℓ_⊥ ← ℓ_⊥ · turned/(d + turned)` for a locked body. The first ordered layer
@@ -115,23 +113,23 @@ fails for this physics.
 
 ## 3a. Xylarium's review (2026-10-22, read from its echo.rs)
 
-- **D1 consistent:** 11.0's shear ruling, "THE LOOP IS AN ORBIT: its legs the
+- **D1 consistent:** 11.0's shear ruling, "the loop is an orbit: its legs the
   two halves of one closed path about the attractor", with one torque law per
   plane (`pulse_face`). Xylarium has the same gap: a galaxy's torques advance
-  `phase_c`, `l_c` (xylarium's name for ℓ_⊥) is never torqued (`d_c` computed and discarded), and it is
+  `phase_c`, `l_c` (Xylarium's name for ℓ_⊥) is never torqued (`d_c` computed and discarded), and it is
   set only by ocean gathering. D1 closes it in both kernels.
-- **D2 the right coupling, as a REPLACEMENT:** xylarium holds eccentricity
-  three ways, none from `l_c` (xylarium's name for ℓ_⊥): a galaxy's swing about the universal core
+- **D2 the right coupling, as a replacement:** Xylarium holds eccentricity
+  three ways, none from `l_c` (Xylarium's name for ℓ_⊥): a galaxy's swing about the universal core
   (`e = τ/(τ + h_g)`, `shares::swing`), a star's displacement drawn back by
   its galaxy's drag, and the system tug's bands `r(1 ± e)`, `e = m/(m + M)`
-  (the pinch form, due to give way to the tether, xylarium 11.0 (39), C3).
+  (the pinch form, due to give way to the tether, Xylarium 11.0 (39), C3).
   D2 must replace the pinch e in the tug, not sit beside it, and the swing
-  should read the tether's width. In netstratum the same holds: D2 replaces
+  should read the tether's width. In Netstratum the same holds: D2 replaces
   the meeting bands' pinch width (`formation::collide_system`'s world width
   `hw/(hw + h_s)`), not a second eccentricity beside it.
 - **D3 consistent** if each plane carries its own return (`lock_step` acts on
   the orbit spin only today, the spin it gives up going to the belts).
-- **The core's infall (xylarium 11.0 (41), 108c445):** each galaxy's core
+- **The core's infall (Xylarium 11.0 (41), 108c445):** each galaxy's core
   takes in `1/(r + 1)` of each body whose orthogonal orbit crosses it inbound, draining
   the inner region hardest. It acts with D3: the inner bodies are both
   torqued hardest and eaten hardest.
@@ -162,9 +160,9 @@ fails for this physics.
 ## 4. What it touches
 
 - **The galaxy-band ruling (2026-10-21, "pull it back and make it static")**
-  held back the band's ORBIT-plane push, which had suppressed star formation.
-  D1 drives the ORTHOGONAL ORBIT's plane only and leaves the orbit plane as ruled, but it
+  held back the band's orbit-plane push, which had suppressed star formation.
+  D1 drives the orthogonal orbit's plane only and leaves the orbit plane as ruled, but it
   is still the core's push re-entering, so it needs the operator's word.
 - **R2** (docs/89): this is "the planes" driven, in its first form.
-- **Shared with xylarium:** `torque`, `turn` and the band's law were built with
+- **Shared with Xylarium:** `torque`, `turn` and the band's law were built with
   it. D1 and D2 change what the orthogonal orbit's plane means (a spin, not only a phase).

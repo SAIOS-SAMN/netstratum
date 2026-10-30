@@ -1,8 +1,8 @@
 # Disclaimer
 
-netstratum is a universe and civilization engine: an exact-rational
+Netstratum is a universe and civilization engine: an exact-rational
 cosmology (era 1: an S^360 universe, its nuclides, stars and worlds) beneath
-a text-first, multi-planetary city-building game, speaking to the mycelium
+a text-first, multi-planetary city-building game, speaking to the Mycelium
 network. It was developed through sustained human-AI research: the code and
 documentation are AI-generated under human editorial direction.
 

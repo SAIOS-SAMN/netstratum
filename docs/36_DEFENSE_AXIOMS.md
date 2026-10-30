@@ -1,6 +1,6 @@
-# 36 — DEFENSE AXIOMS · SPECIES-RELATIVE SECURITY · COVERT TERRAFORM · ESPIONAGE
+# 36 — Defense axioms · species-relative security · covert terraform · espionage
 
-**Status:** **PARTIAL LAND — Phase 5 core complete** (2026-08-08).  
+**Status:** **partial land — Phase 5 core complete** (2026-08-08).  
 A–F · K2 · M/M2 · dual-use · 19b medium colour · G (R1–R2 + optional R3/R4
 features) · H close-out · **X7** in-tree strand/isthmus/datum adapters.
 Next free tag **152**.  
@@ -183,7 +183,7 @@ voice of residual.
 
 ---
 
-## 2. Technology tree under DEFENSE
+## 2. Technology tree under defense
 
 Technologies are **condition-style nodes** and/or **instrument grades**
 (compose MANU-1, PLANNER-1, TERRA-1). Names are provisional; wire tags
@@ -296,7 +296,7 @@ CYB** used offensively with deniability.
 | **Cognitive ops** | Want storm / practice poison | COG |
 | **Counter-intel** | Detection instruments, ward, veil tax | all |
 
-### 4.2 Compose with MASK / WARDEN
+### 4.2 Compose with mask / warden
 
 - VeilDrawn already clouds readings — **OPSEC**.
 - Ward is **hard lockdown** (no aperture) — rare elder-class defense.
@@ -316,7 +316,7 @@ CYB** used offensively with deniability.
 
 ---
 
-## 5. DEFEND pane & player surface (spec)
+## 5. Defend pane & player surface (spec)
 
 ```
 DEFEND [d]
@@ -354,16 +354,16 @@ Maps onto and **extends** `TASKS_TRADE_FLEET_DESK` P5:
 
 | Wave | Content | Exit |
 |------|---------|------|
-| **P5-A** | KIN vertical: escort active, interdiction residual, DEFEND pane skeleton | **LANDED** |
-| **P5-B** | Species posture + in-game doctrine reorient (anatomy sealed) | **LANDED** tag 144 |
-| **P5-C** | INF compose: veil/ward DEFEND + detection grade | **LANDED** zero tags |
-| **P5-D** | ATM defense + CovertTamper + dual-use TERRA | **LANDED** 141–143 + P5.19 |
-| **P5-E** | COG + CYB instrument/mesh guards + CYBER suite | **LANDED** zero tags |
-| **P5-M / M2** | MKT economic warfare + cascade/haircut/resume audit + suites | **LANDED** 135–140 |
-| **P5-K2** | KIN open-up §12 (species residual · kin_step · perception fog) | **LANDED** zero tags |
-| **P5-F** | Espionage suite (scout/exfil/sabotage) | **LANDED** 145–147 |
-| **P5-G** | Deep rails R1→R2 + optional R3/R4 features + Anchor gate | **PARTIAL** 148 |
-| **P5-H** | Close-out pin + docs PARTIAL LAND core complete | **LANDED** |
+| **P5-A** | KIN vertical: escort active, interdiction residual, defend pane skeleton | **Landed** |
+| **P5-B** | Species posture + in-game doctrine reorient (anatomy sealed) | **Landed** tag 144 |
+| **P5-C** | INF compose: veil/ward defend + detection grade | **Landed** zero tags |
+| **P5-D** | ATM defense + CovertTamper + dual-use terra | **Landed** 141–143 + P5.19 |
+| **P5-E** | COG + CYB instrument/mesh guards + Cyber suite | **Landed** zero tags |
+| **P5-M / M2** | MKT economic warfare + cascade/haircut/resume audit + suites | **Landed** 135–140 |
+| **P5-K2** | KIN open-up §12 (species residual · kin_step · perception fog) | **Landed** zero tags |
+| **P5-F** | Espionage suite (scout/exfil/sabotage) | **Landed** 145–147 |
+| **P5-G** | Deep rails R1→R2 + optional R3/R4 features + Anchor gate | **Partial** 148 |
+| **P5-H** | Close-out pin + docs partial land core complete | **Landed** |
 
 **Order law:** P5-A before combat fantasy; P5-B before species-blind
 armor HP; P5-D before invasion narrative depth; **P5-M after Phase 4**
@@ -447,21 +447,21 @@ Defense (MKT) is **not** “more HP on the Exchange.” It is typed posture:
 | **One chronicle** | SEAL B: suite UI cannot invent residual. |
 | **NPC parity** | Full economic warfare must run in `instrument_step` / future `market_war_step` **without** opening a suite. |
 | **Suite = lens + training + intensity** | Dashboard, alerts, scripted scenarios, optional time-pressure **presentation** — same admits/refuses. |
-| **Optional** | Core loop never requires suite; desk EXCH + DEFEND remain sufficient. |
+| **Optional** | Core loop never requires suite; desk EXCH + defend remain sufficient. |
 | **No free mint** | “Win the mini-game” never grants tech nodes or STAMP outside warrant/receipt law. |
 
 #### Suite catalog (authorized design)
 
 | Suite | Domain | Player fantasy | Engine hooks |
 |-------|--------|----------------|--------------|
-| **CYBER** | CYB-instrument + CYB-mesh | Trace spoof, seal instrument, patch aperture | MANU-1 grade, aperture refuse, scan integrity |
-| **MARKET WAR** | MKT | Defend clears, trip breaker, counter-raid | LastClear, offers, Note/Fut/Share/Perp, circuit breaker |
-| **ESPIONAGE** | INF + COG | Probe / counter-intel board | Veil, ward, detection grade, spy deeds (P5-F) |
-| **MEDIUM** | ATM | Detect tamper pressure, reinforce envelope | CovertTamper, MediumEnvelope (P5-D) |
-| **CONVOY** | KIN | Escort assignment, risk map | EscortOnDuty, convoy_risk (P5-A **landed**) |
+| **Cyber** | CYB-instrument + CYB-mesh | Trace spoof, seal instrument, patch aperture | MANU-1 grade, aperture refuse, scan integrity |
+| **Market war** | MKT | Defend clears, trip breaker, counter-raid | LastClear, offers, Note/Fut/Share/Perp, circuit breaker |
+| **Espionage** | INF + COG | Probe / counter-intel board | Veil, ward, detection grade, spy deeds (P5-F) |
+| **Medium** | ATM | Detect tamper pressure, reinforce envelope | CovertTamper, MediumEnvelope (P5-D) |
+| **Convoy** | KIN | Escort assignment, risk map | EscortOnDuty, convoy_risk (P5-A **landed**) |
 
-UI home: desk panes **DEFEND** + **EXCH** + optional `suite <name>` full-screen
-(ANSI suite or future TUI). Same commands as CLI.
+UI home: desk panes **defend** + **EXCH** + optional `suite <name>` full-screen
+(Ansi suite or future TUI). Same commands as CLI.
 
 ### 10.4 What we refuse
 
@@ -474,11 +474,11 @@ UI home: desk panes **DEFEND** + **EXCH** + optional `suite <name>` full-screen
 
 ### 10.5 Implementation order for MKT + suites
 
-1. **Readings** — MKT rank on `defense_posture`; EXCH shows integrity flags. **LANDED.**  
-2. **Passive defense** — clear seal (N clears), circuit breaker deed. **LANDED** (tags 135–137).  
-3. **Active offense (typed)** — LiquidityRaid / ClearPoison attempts with refuse+residual. **LANDED** (tags 138–139).  
-4. **Suite shells** — dashboards over (1)–(3); CONVOY + MARKET WAR shells **LANDED**; CYBER deferred to P5-E.  
-5. **NPC `market_war_step`** — disposition-routed. **LANDED.**
+1. **Readings** — MKT rank on `defense_posture`; EXCH shows integrity flags. **Landed.**  
+2. **Passive defense** — clear seal (N clears), circuit breaker deed. **Landed** (tags 135–137).  
+3. **Active offense (typed)** — LiquidityRaid / ClearPoison attempts with refuse+residual. **Landed** (tags 138–139).  
+4. **Suite shells** — dashboards over (1)–(3); convoy + market war shells **landed**; Cyber deferred to P5-E.  
+5. **NPC `market_war_step`** — disposition-routed. **Landed.**
 
 **Land commit:** kernel **0.29.0**, SCHEMA_V10, next free tag **140**.
 
@@ -519,12 +519,12 @@ schism. Atmospheric attack hits shared brood medium. Espionage is
 
 | ID | Question | Lean |
 |----|----------|------|
-| Q-D1 | Is CovertTamper a new PlanetSited half-state or pure pressure scalar? | **Ruled:** pressure scalar + TamperDetected at unit threshold; **P5.19:** never rewrites thermal; TERRA dual-use tax 2× crystal; overt terraform clears pressure |
+| Q-D1 | Is CovertTamper a new PlanetSited half-state or pure pressure scalar? | **Ruled:** pressure scalar + TamperDetected at unit threshold; **P5.19:** never rewrites thermal; terra dual-use tax 2× crystal; overt terraform clears pressure |
 | Q-D2 | Multi-actor tamper stack (who is blamed)? | Last unveiled actor + INF witness (later) |
 | Q-D3 | Plasmic ATM = thermal site fields only? | Compose thermal + new field TLV later |
-| Q-D4 | Share of espionage with MASK toll | Compose VeilToll |
+| Q-D4 | Share of espionage with mask toll | Compose VeilToll |
 | Q-D5 | Escort risk formula vs pair_melt | Risk residual separate from melt |
-| Q-D6 | Non-player precursor (elder) as defense puzzle only? | Keep WARDEN combat-free |
+| Q-D6 | Non-player precursor (elder) as defense puzzle only? | Keep warden combat-free |
 
 ---
 
@@ -537,14 +537,14 @@ schism. Atmospheric attack hits shared brood medium. Espionage is
 | `10_TECH_EMERGENCE` | Tech conditions compose |
 | `06_CIVILIZATIONS` | Clade colour source |
 | `05` / `34` | Thermal / medium |
-| `33` DEFEND pane | UI |
+| `33` defend pane | UI |
 | `15_TAXON` | Class/clade ceilings |
 
 ---
 
 ## 11. Expansion matrix (5 attacks × 10 defenses × 7 domains)
 
-**Status:** DESIGN CATALOG (2026-08-08) — structural parity under the
+**Status:** design catalog (2026-08-08) — structural parity under the
 conservation law. **Not** a second combat physics. **Not** 105 free tags.
 
 ### 11.1 Conservation (binding)
@@ -636,9 +636,9 @@ Full 5×10 prose for operator colour lives in session design notes;
 
 ## 12. KIN open-up — civ/species colour without free constants
 
-**Status:** **P5-K2 LANDED** (compose, zero tags). Spine P5-A + colour:
+**Status:** **P5-K2 landed** (compose, zero tags). Spine P5-A + colour:
 `kin_residual_*` · hive cover · place exposure · corridor fog · `kin_step`
-· CONVOY suite residual voice. **No new combat HP. No static KIN trees.**
+· convoy suite residual voice. **No new combat HP. No static KIN trees.**
 
 ### 12.1 Law
 
@@ -653,11 +653,11 @@ dials, no free capability mint, no second physics.
 | # | Opening | Civ/species hook | Derive from (no statics) |
 |---|---------|------------------|---------------------------|
 | **K1** | **Metabolism-keyed residual shape** | Mineral loses iron/scrap; biotic biomass/Habitat cargo; plasmic joule/crystal/STAMP-spark | Sealed genesis **metabolism**; same risk formula, different debit resource |
-| **K2** | **Disposition-routed `kin_step`** | Expansionist escorts/contests; empiricist marks risk / refuses thin cover; epicurean prioritizes SECURE bands | Active **doctrine disposition** (`PostureReoriented` or genesis); NPC parity like `market_war_step` |
+| **K2** | **Disposition-routed `kin_step`** | Expansionist escorts/contests; empiricist marks risk / refuses thin cover; epicurean prioritizes secure bands | Active **doctrine disposition** (`PostureReoriented` or genesis); NPC parity like `market_war_step` |
 | **K3** | **Clade colour on cover/voice** | Tardigrade/lithic hull-as-body; hive many low-grade escorts; plasmoid risk near melt windows | Sealed **taxon clade**; weight ranks / residual *voice*, not new HP |
-| **K4** | **Thermal/orbit as place cost** | Cryo vs hyper corridors feel different | Receipted **orbit period · star magnetism · band** (35 dynamo); fold into risk or haul residual only by CALL |
+| **K4** | **Thermal/orbit as place cost** | Cryo vs hyper corridors feel different | Receipted **orbit period · star magnetism · band** (35 dynamo); fold into risk or haul residual only by call |
 | **K5** | **Perception as corridor fog** | Planar: risk only on charted routes; volumetric: prospect gates “seen” risk; harmonic/umbral: false risk refuses without instrument grade | Active **perception** + MANU-1 grade; refuse paths, not dice |
-| **K6** | **Doctrine reorient + CONVOY suite** | Line can push KIN primary mid-game without rewriting anatomy | Tag **144** already; suite is UI only over escort/risk deeds |
+| **K6** | **Doctrine reorient + convoy suite** | Line can push KIN primary mid-game without rewriting anatomy | Tag **144** already; suite is UI only over escort/risk deeds |
 
 ### 12.3 Land unit rule (P5-K2)
 
@@ -677,18 +677,18 @@ Formula base stays 1/8 from Resonator yield — never a new “base risk” cons
 
 ---
 
-## 13. P5-C INF compose — **LANDED**
+## 13. P5-C INF compose — **landed**
 
 **Landed:** `inf_integrity()` · `detection_grade()` = max MANU-1 instrument
 grade · `DetectionThin { need, have }` · veiled `scan` / `prospect` /
 `assay` require grade ≥ 1 · CLI `veil draw|lift` · `ward elder|lift` ·
-DEFEND INF line. **Zero new tags / schema.**
+defend INF line. **Zero new tags / schema.**
 
 | Task | Exit |
 |------|------|
 | P5.14–P5.15c | **done** — defense_pins `inf_veil_gates_thin_scan…` |
 
-**P5-E LANDED** with INF. **Next:** **P5-F** espionage (uses INF+CYB;
+**P5-E landed** with INF. **Next:** **P5-F** espionage (uses INF+CYB;
 no chronicle rewrite) · P5.19b medium residual colour · P5-H close-out.
 
 ---

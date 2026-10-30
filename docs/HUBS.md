@@ -1,4 +1,4 @@
-# HUBS — bench · intel · trade · diplomatic
+# Hubs — bench · intel · trade · diplomatic
 
 **Status:** living map (update with every hub land).  
 **Law:** hubs are presentation + deed routing over existing world verbs. No second physics.
@@ -103,11 +103,11 @@ Top-level shortcuts: `chem` · `biology` · `physics` · `math` · `science` →
 
 | Root | Role |
 |------|------|
-| `bench` | **BUILD** components (includes dual-law craft twins + science) |
-| `intel` | **KNOWLEDGE activity** |
-| `trade` | **CIRCULATE / run** components |
-| `diplomatic` | **DIPLOMACY activity** (local · stellar · mesh); alias `diplo` |
-| **`polity`** | **LINE IDENTITY** (optional 5th · vent open) — genesis · taxon · mint · AP |
+| `bench` | **Build** components (includes dual-law craft twins + science) |
+| `intel` | **Knowledge activity** |
+| `trade` | **Circulate / run** components |
+| `diplomatic` | **Diplomacy activity** (local · stellar · mesh); alias `diplo` |
+| **`polity`** | **Line identity** (optional 5th · vent open) — genesis · taxon · mint · AP |
 
 ### Domain map
 
@@ -205,24 +205,24 @@ Dual:    polity  ←activity→  bench polity
 | **P8.3** | Labor force from habitats + clones |
 | **P8.4** | Closed-ruins history (`observer ruins`) |
 | **P8.5** | AP capacity ruled table constants |
-| **POL.1–3** | Polity root · `bench polity` dual law · NPC `identity_step` |
+| **Pol.1–3** | Polity root · `bench polity` dual law · NPC `identity_step` |
 | **Deep** | `bench planetary prospect|assay|refine` fire deeds |
 
 ### Landed: H1.3 desk deep-links
 
-Every desk pane carries a **HUB** strip and desk» shortcuts into hub domains:
+Every desk pane carries a **hub** strip and desk» shortcuts into hub domains:
 
 | Pane | Primary (`h`) | Craft twin (`hc`) |
 |------|---------------|-------------------|
-| TRADE | `trade books` | `bench trade` |
-| DIPLOMATIC | `diplomatic local` | `bench diplomatic` |
-| ROUTES | `trade rails` | `bench econ` |
-| ARBITRAGE | `trade books` | `bench trade` |
-| FLEET | `trade fleet` | `bench fleet` |
+| Trade | `trade books` | `bench trade` |
+| Diplomatic | `diplomatic local` | `bench diplomatic` |
+| Routes | `trade rails` | `bench econ` |
+| Arbitrage | `trade books` | `bench trade` |
+| Fleet | `trade fleet` | `bench fleet` |
 | EXCH | `trade books` | `bench offices` |
-| GROW | `bench planetary` | `bench build` |
-| DEFEND | `intel opsec` | `bench doctrine` |
-| EXPLORE | `intel research` | `bench research` |
+| Grow | `bench planetary` | `bench build` |
+| Defend | `intel opsec` | `bench doctrine` |
+| Explore | `intel research` | `bench research` |
 
 `desk» h` / `hub` runs primary; `hc` / `craft` runs the twin. Any hub verb still types through the normal command path.
 

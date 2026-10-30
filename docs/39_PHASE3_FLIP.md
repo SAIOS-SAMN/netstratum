@@ -1,6 +1,6 @@
-# 39 — THE PHASE-3 FLIP (LANDED)
+# 39 — The PHASE-3 flip (landed)
 
-**Status: LANDED 2026-08-13.** The operator ruled §3 option A
+**Status: landed 2026-08-13.** The operator ruled §3 option A
 (sub-coordinate index) and signed off §4. `mesh::arbor::Coordinate`
 gained `sub: u32`, hashed into every commit like every other field —
 several deeds sharing one world tick now address distinctly. §5's
@@ -20,7 +20,7 @@ commitment and blocks further commits that beat until it resolves.
 
 Today the kernel judges **beside** the chain: every deed is run through
 `kernel::admits` every beat, refusals are recorded and read back through
-`Polity::refusals` and announced once — but the deed **STANDS
+`Polity::refusals` and announced once — but the deed **stands
 regardless**, because `cfe::world::replay` is still the live transition.
 The commitment the conductor writes carries `judged = false`
 (`arbor::extend(.., None)`).
@@ -48,7 +48,7 @@ anchor value on a transition each node defines for itself.
 So the preconditions the §0 audit named as blocking are all measured
 met. What remains is purely the wire shape below.
 
-## 3. THE ONE RULING — the addressing law (operator)
+## 3. The one ruling — the addressing law (operator)
 
 The arbor addresses one record per coordinate, and the coordinate's
 `t` is the world clock. **Several deeds share one tick**, so a
@@ -60,8 +60,8 @@ Three ways forward — the ruling picks one:
 
 | Option | Wire cost | What `judged` then means |
 |---|---|---|
-| **A. Sub-coordinate index** | Add a `u32` sub-index to `Coordinate` (hashed into every commit — a breaking wire change, `SCHEMA` of the spine). | One commitment PER DEED, each carrying its own verdict. The true flip; the honest one. |
-| **B. Beat-clean stamp** | `extend` gains a self-verifying multi-step form: it carries the beat's receipts, re-derives each intermediate state, stamps `judged = true` only if EVERY deed admits. Additive wire (the beat's receipts ride the commit). | The beat as a whole was clean. Coarser, but no coordinate change. |
+| **A. Sub-coordinate index** | Add a `u32` sub-index to `Coordinate` (hashed into every commit — a breaking wire change, `SCHEMA` of the spine). | One commitment per deed, each carrying its own verdict. The true flip; the honest one. |
+| **B. Beat-clean stamp** | `extend` gains a self-verifying multi-step form: it carries the beat's receipts, re-derives each intermediate state, stamps `judged = true` only if every deed admits. Additive wire (the beat's receipts ride the commit). | The beat as a whole was clean. Coarser, but no coordinate change. |
 | **C. Tick-per-deed** | Advance the world clock per deed rather than per beat. No wire change, but it re-times the whole economy (demurrage, spans, year voices all read the clock). | One commitment per deed by construction — but the blast radius is the entire tick law. |
 
 **Recommendation: A.** It is the shape the spine was built for (the
@@ -70,10 +70,10 @@ the chronicle already holds; C moves a load-bearing constant nothing
 else asked to move. A is a bounded, reviewed wire amendment — exactly
 the class the tag-claim convention governs.
 
-## 4. THE SIGN-OFF — what a refusal comes to mean (operator)
+## 4. The sign-off — what a refusal comes to mean (operator)
 
 Independently of §3: the day `replay` is demoted, a refused deed stops
-standing on the LIVE board. That changes play — a proposer that
+standing on the live board. That changes play — a proposer that
 emitted an unlawful deed now has it rejected mid-beat rather than
 recorded-and-overruled. The live `var/` re-judges clean today, so the
 immediate blast radius is nil; but the semantic is permanent and is
@@ -92,7 +92,7 @@ yours to authorize.
 4. escrow generalization (`8067f60`) unlocked — an escrowed emitter
    settles only on `admits`, now safe because coverage is total.
 
-## 6. What this document does NOT change
+## 6. What this document does not change
 
 Nothing lands from it without the §3 ruling and §4 sign-off. The
 judge continues to run beside the chain until then, exactly as it

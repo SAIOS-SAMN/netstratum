@@ -1,8 +1,8 @@
-# THE ECONOMY — design stage
+# The economy — design stage
 
-**Status:** DESIGN — no economy mechanic ships before its protocol sections
-and test vectors exist (CHARTER §1), and no settlement mechanic opens before
-landing N7 seals (the ANCHOR bridge is the only lawful money boundary).
+**Status:** design — no economy mechanic ships before its protocol sections
+and test vectors exist (Charter §1), and no settlement mechanic opens before
+landing N7 seals (the anchor bridge is the only lawful money boundary).
 All percentages and prices in this document are **placeholder parameters**,
 not inscribed law — they tune at balance time.
 
@@ -63,7 +63,7 @@ rational arithmetic — a 5% share of 1,000,003 units divides bit-for-bit
 identically on every node. No party can be shorted by rounding, and disputes
 reduce to replaying receipts.
 
-**Bindings:** NS-1 (tile/zone orbs), NS-3 (the split IS receipt routing),
+**Bindings:** NS-1 (tile/zone orbs), NS-3 (the split is receipt routing),
 NS-6 (lease terms live in the entities' permission grants), NS-7 (only if a
 lease settles in external value; in-game-currency leases never touch the
 chain).
@@ -98,13 +98,13 @@ players ──(domain leases, tariffs, rents)──► treasury + node-host pool
              WWW3 settlement rails
 ```
 
-## 5. INSCRIBED GUARDRAILS (these are law, not parameters)
+## 5. Inscribed guardrails (these are law, not parameters)
 
-1. **Fun-first (CHARTER §2):** the core loop — explore, zone, build, trade —
+1. **Fun-first (Charter §2):** the core loop — explore, zone, build, trade —
    is fully playable with zero real-money involvement. Monetization attaches
    to scarce names, land tenure, and infrastructure throughput, never to
    game-rule advantage. No pay-to-win.
-2. **Onboarding stays law (CHARTER §3.5):** a new player never needs a
+2. **Onboarding stays law (Charter §3.5):** a new player never needs a
    wallet. Settlement rails are opt-in for players who choose to hold
    externally-anchored assets.
 3. **No wealth promises.** Netstratum is a game with a real economy attached
@@ -152,7 +152,7 @@ thermodynamic state variable `T_eq⁴`.
   regimes.
 - **Frictionless movement:** in-game energy transfers, market orders, and
   local consumption remain completely CFE-native — zero gas, no external
-  wallet (CHARTER §3.5; guardrail 2 holds).
+  wallet (Charter §3.5; guardrail 2 holds).
 - **The hard line (05 §7.1):** no in-game unit is ever a per-unit crypto
   asset. This extends guardrail 1 — monetization attaches at the settlement
   boundary only.
@@ -177,7 +177,7 @@ same guardrails 3 and 5. Settlement uses an existing chain, never a new one
 
 ### 6.3 Separation of physics and valuation
 
-Per CHARTER §7 and SEAL C, contract bytecode is strictly passive and
+Per Charter §7 and SEAL C, contract bytecode is strictly passive and
 declarative — external tokens mirror immutable facts verified from the
 chronicle root (the exact `T_eq⁴` rationals and band-membership facts),
 provable by simple rational-comparison ZK circuits. Game-loop determinism
@@ -205,7 +205,7 @@ Litho-Chalcogen escrow node rather than a mutable surface store.
 - **Exact-rational validation:** conditions evaluate strictly by exact rational
   comparison over CFE chronicle data (e.g. "Empire A delivered ≥ 1,000,000 J
   to Sector B within N ticks"). No float, no rounding, no subjective dispute
-  window (CHARTER §3.2).
+  window (Charter §3.2).
 - **Dual-key collateral lock:** parties deposit collateral — in-game joules,
   coolant, or entropy rights, or NS-7-bridged ERC-721/1155 assets. While
   locked in the vitrified matrix it cannot be spent, moved, or re-pledged.
@@ -219,7 +219,7 @@ Litho-Chalcogen escrow node rather than a mutable surface store.
 The escrow is powerful enough to break two charter walls if built naively;
 both are closed here:
 
-1. **The CFE is the arbiter, not the chain (CHARTER §7, SEAL C).** All
+1. **The CFE is the arbiter, not the chain (Charter §7, SEAL C).** All
    release/slash logic runs in the CFE state machine. Any ERC-721/1155 asset
    in the pot is a *passive ownership record* only; the external contract
    verifies a proof and moves a token, it never evaluates treaty terms or
@@ -237,7 +237,7 @@ both are closed here:
 For treaties settling on an external chain (inter-empire deeds, tokenized
 macro-routes), the vitrified escrow outcome anchors through NS-7 as a
 succinct proof over the chronicle root — the *real* proof-system version, per
-`05_THERMAL_BALANCE.md` §7.3 (a STARK / multilinear prover over exact-rational
+`05_THERMAL_BALANCE.md` §7.3 (a stark / multilinear prover over exact-rational
 inequalities, not a boundary-stitch or topological invariant). The adapter
 verifies one succinct proof of fulfilment-or-breach and executes the token
 transfer; the chain never sees the treaty history or the physics.

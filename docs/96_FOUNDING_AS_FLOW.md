@@ -1,13 +1,13 @@
 # 96 — The founding as flow: bounce, push, tide, release, the void
 
-Operator 2026-10-26: "each bounce from the core doesnt 'throw' - it pushes,
-that push is the incremental 'flow' of tidal forces between the vacuum and the
-continuum which release the elements into the void and the void then
-distributes them - align on our topology"; "'walk' is forward, and linear -
-not multi-axial: where are you losing capacity"; "scope it and derive the
-meanings and align on topology for implementation and show plan".
+Design direction (2026-10-26): a bounce from the core does not throw, it
+pushes; the push is the incremental flow of tidal forces between the vacuum
+and the continuum, which release the elements into the void, and the void
+distributes them. A walk is forward and linear, not multi-axial, and loses
+capacity. This document scopes the meanings and aligns them on the topology
+for implementation.
 
-Status: steps 1–5 BUILT (2026-10-26); §7 the galaxy enclosure's master
+Status: steps 1–5 built (2026-10-26); §7 the galaxy enclosure's master
 algorithm, the law the code follows. Builds on docs/95 (three spatial planes and the R
 loop). Replaces the founding's one-step throw and the board's placement.
 
@@ -20,7 +20,7 @@ Each term in plain words, then what it is in our laws.
   itself; it sets this bell's push.
 - **The push.** The continuum's share of what the throat holds, `p = ½·u/hold`
   (open frames over closed, `galaxy_push`). It acts in every plane at once
-  (the isoclinic pulse). It is an INCREMENT per bell, never a displacement.
+  (the isoclinic pulse). It is an increment per bell, never a displacement.
 - **The tide.** The flow between vacuum and continuum at a place: the vacuum
   holds `δ = H/(R + H)`, the continuum's face leaves `½(1 − δ)` unlocked
   (ruled 2026-10-16: the tide works on the unlocked face, never the held).
@@ -33,28 +33,26 @@ Each term in plain words, then what it is in our laws.
   (`(δ, ψ, s) ↦ (1 − δ, ψ + ½, −s)`, docs/94 §2): R's sign turns, time's
   sense with it (docs/95 §2).
 - **The void.** The vacuum leg: not empty space but the medium of motes
-  (operator 2026-10-25: "the ocean of space is made up of continuously
-  interlinked motes"). At the universe tier it is the ocean
+  (direction of 2026-10-25: the ocean of space is made of continuously interlinked motes). At the universe tier it is the ocean
   (`Universe.ocean`); at a galaxy's, its gas on the vacuum stream; at a
   system's, its belts.
 - **The void distributes.** Released motes travel about their core, each
   turning at its own rate in all three planes and on the R loop, and each
-  LANDS whole where the pull is strongest within its swing (`ocean::land`;
+  lands whole where the pull is strongest within its swing (`ocean::land`;
   at a galaxy, the ring landing). Distribution is landing, never placement.
 - **The angle comes from time.** Each bounce releases at the core's phase at
   that bell, in each plane. Successive releases leave at successive phases,
   so the void fills the sphere because the core turns between bounces. No
   draw and no offset: the angular spread is the release's own history.
-- **A binding** (operator 2026-10-27: "clumps needs more description - its
-  the bonding of elements"; "rename clumps to bindings"): elements on one
+- **A binding** (direction of 2026-10-27: "clumps" are the bonding of elements, renamed bindings): elements on one
   ring of the disc bound into one body by their holding and their open
   frames together (`λ = 2(m + μ)/R`, m gravity's share, μ the electrons'),
   where that bond, `λ/(1 + λ)`, meets their heat and the tide across them.
-  It makes a BODY, never matter: nuclides are made at the bounce and in the
+  It makes a body, never matter: nuclides are made at the bounce and in the
   stars (docs/97), clusters by chemistry inside a body. A binding that
   ignites is a star; one that does not, its members go on as they were.
   (Formerly "clump"; its strength `λ/(1 + λ)`, formerly "binding", is the
-  BOND.)
+  bond.)
 - **Bodies gather where the void's motes coincide.** Where landed motes
   stand together in reach (their bands overlap) and in every plane (the
   product of their in-step shares), they hold if their bond meets their
@@ -157,7 +155,7 @@ exits) is one enclosure:
     rim    = 2·base                             the loop closes: the image
                                                 2H − R reaches the centre
 
-**The base is the core's state alone.** The state IS the throat's grains (set
+**The base is the core's state alone.** The state is the throat's grains (set
 at the bounce, the galaxy's grains then), so the throat's unreleased hold is
 never added to it. Counted twice it inflated the ring (to about 1.4 while the
 throat held most of its grains): released matter stood inside the ring, the
@@ -194,9 +192,9 @@ Each echo, in order:
 Retired: the throat's unreleased hold in the enclosure's base (built
 2026-10-26, `89dcadd`), and the release read against the push's own hold.
 
-## 8. The unlocked face heats; it is never a barrier (operator 2026-10-27: "think harder about the problem you are trying to solve and what the underlying issue is"; "does that methodology involve constants or static variables")
+## 8. The unlocked face heats; it is never a barrier (direction of 2026-10-27: find the underlying problem, and apply formulas where constants or static variables stood)
 
-The unlocked face `½(1 − δ)` was ruled a HEATING law (2026-10-16: "the face
+The unlocked face `½(1 − δ)` was ruled a heating law (2026-10-16: "the face
 the core does not lock heats"). Its heat already reaches the motes and worlds
 as agitation: the light a core sends warms each body by the share its face
 leaves unlocked at its reach (`breath::shine`, `l·(1 − δ)/whole`). Every hold
@@ -223,7 +221,7 @@ heat and the tide across it,
 
 Retired: the face as a barrier in every hold test.
 
-### 8.1 The double-pass inversion of the kicks (operator 2026-10-27: "so whats the missing component? the manifold chain inversion on the gravitational lock on the star?"; "proceed - build the double-pass inversion")
+### 8.1 The double-pass inversion of the kicks (direction of 2026-10-27: the missing component is the manifold chain's inversion on the star's gravitational lock)
 
 `formation::crossed` reads whether two neighbouring worlds, meeting
 `N = a·|Δω|` times over their system's age, are turned across their gap. Their
@@ -240,7 +238,7 @@ age, so every pair eventually joined: 78 worlds standing at bell 704 fell to
 **The double pass inverts it.** Nothing rests on one leg (`M∘M = id`): a
 period on the forward leg is followed by one on the return leg through the
 ring's image, where the residual's sign turns. Period k leaves `(−1)^k·c`;
-the excursion LIBRATES about the lock instead of drifting. The greatest
+the excursion librates about the lock instead of drifting. The greatest
 excursion over the age, in kicks, with `P = ⌊N/q⌋`, `ρ = N mod q`:
 
     P = 0:  ρ
@@ -257,7 +255,7 @@ excursion is the same at 2q meetings and at any later count.
 Open (not changed here): within a period the kicks are counted raw (`ρ`,
 `q − 1`), a ceiling; the hemisphere responses also cancel inside the period.
 
-### 8.2 Only forming orbits meet; neighbours exchange echoes, never kicks (operator 2026-10-27: "why are we still using 'kicks' here - and not pulses and echoes"; "right - only orbital masses can 'collide' if they are still forming solid orbits")
+### 8.2 Only forming orbits meet; neighbours exchange echoes, never kicks (ruling of 2026-10-27: pulses and echoes, never kicks; only bodies still forming their orbits collide)
 
 Measured (2^55 grains, NETSTRATUM_DIAG, bells 704–880): 746 joins in one
 system, 742 of them at the pair's first meeting, the "kick" `ε·R` exceeding
@@ -272,14 +270,14 @@ bell; its neighbour receives the echo at its place every ring, and answers
 by its deficit read at the gap in the pulsing body's own enclosure,
 `m/(r + m)` (m the pulsing body's share, r their gap). Per ring the pair's
 turnings differ by `|ω_i − ω_j|` (`ω = δ = H(<R)/(R + H(<R))`, the turning a
-ring received). The echo HOLDS its neighbour where it meets that shear:
+ring received). The echo holds its neighbour where it meets that shear:
 
     max(m_i, m_j)/(r + max(m_i, m_j))  ≥  |ω_i − ω_j|
 
 the crest's own law (bond against tide) one tier down: first degree, no
-age, no kick, no ε. A held pair co-moves and JOINS.
+age, no kick, no ε. A held pair co-moves and joins.
 
-**Only forming orbits meet.** A world whose orbit has closed is SOLID: since
+**Only forming orbits meet.** A world whose orbit has closed is solid: since
 it last stood it has turned `2ω·r_echo` (its closed-form advance over the
 echo's rings), and its orbit is solid where that reaches one whole turn. Two
 solid worlds never join, whatever their echoes: they answer each other's

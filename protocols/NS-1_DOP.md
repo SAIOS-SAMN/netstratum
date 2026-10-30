@@ -1,6 +1,6 @@
 # NS-1 — DOP: Dimensional Object Protocol
 
-**Status:** LANDED at N2 (first cut — the colony orb). First consumer: the
+**Status:** landed at N2 (first cut — the colony orb). First consumer: the
 first playable slice (`engine/cfe`, `clients/cli`). Supersedes
 PROTOCOL_STACK.md §1. The spec grows additively as later landings add orb
 kinds (sectors, fleets, profiles); tags are permanent.
@@ -19,7 +19,7 @@ comparison (NS-5) possible.
 
 Every quantity is an exact rational p/q in **canonical form**: coprime
 (gcd(p,q)=1), positive denominator, reduced at construction. Canonical form
-means ONE representation per value — 2/4 and 1/2 are the same bytes on the
+means one representation per value — 2/4 and 1/2 are the same bytes on the
 wire (measured: `the_ratio_carrier_is_canonical`). Yield rates are ratios
 (extractor: 3/2 iron per tick; habitat: 1/4 biomass per tick); accrual over
 n ticks is exact multiplication, never drift (measured: 4 ticks × 3/2 = 6
@@ -29,7 +29,7 @@ exactly; 3 ticks × 3/2 = 9/2 exactly through the wire and back).
 
 An orb carries **committed state only** — what NS-3 receipts ground: the
 header, the zones, the banked ledger. Accrued-but-uncollected yield is
-WORKSPACE: it lives outside the orb, never encodes, and never persists.
+workspace: it lives outside the orb, never encodes, and never persists.
 **What has no receipt does not persist** (the v0.4 workspace invariant,
 carried). Collection is the closure that moves value across the boundary,
 one receipt per resource.
@@ -44,16 +44,16 @@ identical bytes.
 
 ### 2.1 The TLV record
 
-`tag u8 ‖ LE32(length) ‖ value` — additive per CHARTER SEAL A: a reader
+`tag u8 ‖ LE32(length) ‖ value` — additive per Charter SEAL A: a reader
 skips unknown tags, never crashes (measured: `a_reader_skips_unknown_tags`).
 
 ### 2.2 The ratio encoding
 
-`sign u8 (0 non-negative, 1 negative) ‖ LE32(len) ‖ numer magnitude BE ‖
+`sign u8 (0 non-negative, 1 negative) ‖ LE32(len) ‖ numer magnitude be ‖
 LE32(len) ‖ denom magnitude BE` — magnitudes carry no leading zeros; zero's
 magnitude is the empty string; a zero denominator refuses to decode.
 
-### 2.3 THE NETSTRATUM WIRE TAG REGISTRY (permanent)
+### 2.3 The Netstratum wire tag registry (permanent)
 
 One tag, one meaning, forever; retired codes are never reused.
 
@@ -75,37 +75,37 @@ One tag, one meaning, forever; retired codes are never reused.
 | 27 | event: VentSettled (VENT-1) | LE64(orb_id) ‖ ratio (amount) |
 | 28 | orb: vent entry (VENT-1/SINK-1) | ratio (entropy_vented) ‖ LE64(last_touch) |
 | 29 | event: DemurrageSettled (SINK-1) | LE64(orb_id) ‖ resource u8 ‖ ratio |
-| 30 | event: ResourceTransferred (TRADE-1) | LE64(from_orb) ‖ LE64(to_orb) ‖ resource u8 ‖ ratio — banked value MOVES (conservation); both orbs settle demurrage at this touch; cohesion-book postings derive from this receipt + the counterparty's receipted crisis state, never stored |
+| 30 | event: ResourceTransferred (TRADE-1) | LE64(from_orb) ‖ LE64(to_orb) ‖ resource u8 ‖ ratio — banked value moves (conservation); both orbs settle demurrage at this touch; cohesion-book postings derive from this receipt + the counterparty's receipted crisis state, never stored |
 | 31 | event: OverflowAbsorbed (ABSORB-1) | LE64(source_orb) ‖ LE64(absorber_orb) ‖ ratio — un-sealed overflow into the absorber's banked sink: sink_consumed = heat_absorbed = vented_after_shed (05 §1.4, the absorber's ledger carries the shed); opens a reciprocity window owed source → absorber |
 | 32 | event: AbsorptionLapsed (ABSORB-1) | LE64(debtor_orb) ‖ LE64(creditor_orb) ‖ ratio — a window expired unpaid; the remainder posts to the debtor's extraction book (world-driven, the famine-strike shape) |
 | 33 | event: BondSealed (BOND-1) | LE64(source_orb) ‖ LE64(target_orb) ‖ resource u8 ‖ ratio (rate/tick) ‖ LE64(term; 0 = open-ended) — one bond per (source, target, resource) |
-| 34 | event: BondSettled (BOND-1) | LE64(source_orb) ‖ LE64(target_orb) ‖ resource u8 ‖ ratio (amount) ‖ severed u8 ‖ ratio (load) — ONE receipt settles the accumulated span at each touch; its own tag so replay can re-anchor the bond (a manual transfer must stay distinguishable); severed ends the bond, load 0 = orderly |
+| 34 | event: BondSettled (BOND-1) | LE64(source_orb) ‖ LE64(target_orb) ‖ resource u8 ‖ ratio (amount) ‖ severed u8 ‖ ratio (load) — one receipt settles the accumulated span at each touch; its own tag so replay can re-anchor the bond (a manual transfer must stay distinguishable); severed ends the bond, load 0 = orderly |
 | 35 | event: ForwardSealed (FORWARD-1) | LE64(obligor_orb) ‖ LE64(beneficiary_orb) ‖ resource u8 ‖ ratio (quota) ‖ LE64(window) ‖ ratio (collateral) — the collateral rides the receipt so replay never re-derives the fidelity curve; the lock is a bank withdrawal (the vitrified vault, lossless by construction) |
 | 36 | event: ForwardReleased (FORWARD-1) | LE64(obligor_orb) ‖ LE64(beneficiary_orb) ‖ resource u8 ‖ ratio (collateral) — quota met: collateral home, the stake posts fulfilled (world-driven at the tick boundary; fulfilment wins the deadline tie) |
 | 37 | event: ForwardSlashed (FORWARD-1) | LE64(obligor_orb) ‖ LE64(beneficiary_orb) ‖ resource u8 ‖ ratio (collateral) — deadline passed unmet: BREACH_AND_SLASH to the aggrieved, the stake posts breached |
 | 38 | event: FrictionSettled (IDEO-1) | LE64(orb_id) ‖ ratio (amount) — accrued ideological friction (φ × abs divergence × volume, transfers only) sealed into the mover's entropy_vented at its collect; aligned partners generate no receipt at all |
-| 41 | orb: cohesion entry (IDEO-1) | ratio ×8 in fixed order: given_in_crisis ‖ drawn_in_crisis ‖ bond_flow ‖ severance_load ‖ forwards_fulfilled ‖ forwards_breached ‖ returned_across ‖ extracted_across — emitted only when a book is nonzero (a zero-book orb encodes byte-identical to a pre-ideology one); the four axis ratios DERIVE at read, never stored |
-| 39 | event: TechDiscovered (TECH-1a, 10 §2.2) | LE64(orb) ‖ node_id[32] ‖ condition u8 ‖ modifier u8 ‖ ratio (magnitude) ‖ name utf8 — condition 0 is the KERNEL solar leap (12_UNION §5a: a world's first thermal opt-in receipts that its people know their sun — once per world); conditions 1–5 the crystallized emergent nodes (TECH-1b); tag 40 stays RESERVED for TechLicensed (blueprint trade; PLANNER-1's licensed leaps) |
-| 42 | event: GaugeShifted (AEON-1a, 11 §2.1) | ratio (gauge) — the world's key moved on the torus fiber; the receipt carries the WRAPPED value [0,1), replay takes it verbatim (the last stands) |
+| 41 | orb: cohesion entry (IDEO-1) | ratio ×8 in fixed order: given_in_crisis ‖ drawn_in_crisis ‖ bond_flow ‖ severance_load ‖ forwards_fulfilled ‖ forwards_breached ‖ returned_across ‖ extracted_across — emitted only when a book is nonzero (a zero-book orb encodes byte-identical to a pre-ideology one); the four axis ratios derive at read, never stored |
+| 39 | event: TechDiscovered (TECH-1a, 10 §2.2) | LE64(orb) ‖ node_id[32] ‖ condition u8 ‖ modifier u8 ‖ ratio (magnitude) ‖ name utf8 — condition 0 is the kernel solar leap (12_UNION §5a: a world's first thermal opt-in receipts that its people know their sun — once per world); conditions 1–5 the crystallized emergent nodes (TECH-1b); tag 40 stays reserved for TechLicensed (blueprint trade; PLANNER-1's licensed leaps) |
+| 42 | event: GaugeShifted (AEON-1a, 11 §2.1) | ratio (gauge) — the world's key moved on the torus fiber; the receipt carries the wrapped value [0,1), replay takes it verbatim (the last stands) |
 | 43 | event: Diverged (AEON-1a, 11 §3) | ratio (gauge) ‖ branch utf8 — the line cleaved: a peer branch departs (its own chronicle — annex never merge); this world's key moves; no parent, no child |
 | 44 | event: Confluent (AEON-1a, 11 §3) | ratio (gauge) ‖ partner utf8 — two bonded lines combined; the key settles at the interference (the torus midpoint, computed by the caller, receipted wrapped) |
 | 45 | event: StarAged (AEON-1a, 11 §6) | class u8 — the star moved in its mass × composition × age region; luminosity recomputes, every sited orbit's T_eq⁴ shifts at the next tick |
 | 46 | event: EraFolded (AEON-1a, 11 §5) | LE64(era) ‖ ratio (base gauge) — the era sealed into the archive sequence; the new aeon seats on its own G-sheet (base G advances) — archival by construction, nothing destroyed |
-| 49 | event: OfferPosted (MARKET-1, BUILD_ORDER §3a) | LE64(offer) ‖ LE64(orb) ‖ give u8 ‖ ratio (give_amount) ‖ want u8 ‖ ratio (want_amount) — a RESTING intent, never an escrow; the price IS want/give (guardrail 6: no absolute price); affordability judges at the fill |
-| 50 | event: OfferCleared (MARKET-1) | LE64(offer) ‖ LE64(deal) — the crossing filled it at the RESTING offer's price (price-time priority); the fill's amounts live in the aperture legs deal and deal+1; replay removes the intent |
-| 62 | event: WantStruck (WANT-1, 12_UNION §5b) | LE64(orb) ‖ kind u8 (1 epistemological [board-side, reserved] · 2 resonance · 3 novelty) ‖ ratio (reading — the measured drought, ticks) — typed by the SEALED identity; struck at the year voice; a novelty-struck mind mints no nodes |
+| 49 | event: OfferPosted (MARKET-1, BUILD_ORDER §3a) | LE64(offer) ‖ LE64(orb) ‖ give u8 ‖ ratio (give_amount) ‖ want u8 ‖ ratio (want_amount) — a resting intent, never an escrow; the price is want/give (guardrail 6: no absolute price); affordability judges at the fill |
+| 50 | event: OfferCleared (MARKET-1) | LE64(offer) ‖ LE64(deal) — the crossing filled it at the resting offer's price (price-time priority); the fill's amounts live in the aperture legs deal and deal+1; replay removes the intent |
+| 62 | event: WantStruck (WANT-1, 12_UNION §5b) | LE64(orb) ‖ kind u8 (1 epistemological [board-side, reserved] · 2 resonance · 3 novelty) ‖ ratio (reading — the measured drought, ticks) — typed by the sealed identity; struck at the year voice; a novelty-struck mind mints no nodes |
 | 63 | event: WantRelieved (WANT-1) | LE64(orb) ‖ kind u8 — the mind fed (a fresh link, a granted node); world-driven, the famine shape |
-| 60 | event: GaugeShiftedAt (GAUGE-N, 11 §2.1) | LE16(grade) ‖ ratio (gauge, wrapped) — the key at a GRADE: the fiber as a graded vector; a shift at an unopened grade GROWS the key (skipped planes rest at ground); grade 0 is the landed scalar (tag 42 stays its shorthand forever) |
-| 47 | event: ApertureSent (APERTURE-1, NS-4 §2) | LE64(deal) ‖ LE64(from_orb) ‖ resource u8 ‖ ratio (amount) — the SOURCE leg of a cross-world hand-off: banked value LEFT this world, bound to the deal id its far leg carries; replay sees only the debit — pair conservation is an N6 mesh-audit reading, never an orb law |
-| 40 | event: TechLicensed (PLANNER-1, 12_UNION §2) | LE64(deal) ‖ LE64(from_orb) ‖ LE64(council) ‖ condition u8 ‖ node_id[32] ‖ name utf8 — the issuing leg of a cross-world technology hand-off (the aperture shape: the far world receipts TechDiscovered under the same deal, the same node — seeded from deal+condition so both legs derive it); council-gated, shield-bounded, receiver must have crossed; condition 0 (the solar leap) is NEVER licensed |
+| 60 | event: GaugeShiftedAt (GAUGE-N, 11 §2.1) | LE16(grade) ‖ ratio (gauge, wrapped) — the key at a grade: the fiber as a graded vector; a shift at an unopened grade grows the key (skipped planes rest at ground); grade 0 is the landed scalar (tag 42 stays its shorthand forever) |
+| 47 | event: ApertureSent (APERTURE-1, NS-4 §2) | LE64(deal) ‖ LE64(from_orb) ‖ resource u8 ‖ ratio (amount) — the source leg of a cross-world hand-off: banked value left this world, bound to the deal id its far leg carries; replay sees only the debit — pair conservation is an N6 mesh-audit reading, never an orb law |
+| 40 | event: TechLicensed (PLANNER-1, 12_UNION §2) | LE64(deal) ‖ LE64(from_orb) ‖ LE64(council) ‖ condition u8 ‖ node_id[32] ‖ name utf8 — the issuing leg of a cross-world technology hand-off (the aperture shape: the far world receipts TechDiscovered under the same deal, the same node — seeded from deal+condition so both legs derive it); council-gated, shield-bounded, receiver must have crossed; condition 0 (the solar leap) is never licensed |
 | 52 | event: CouncilSealed (COUNCIL-1, 12_UNION §7) | LE64(council) ‖ resource u8 ‖ ratio (quota) ‖ LE64(window) ‖ ratio (collateral) ‖ LE64 × N (members, rest/8) — three or more distinct orbs bound alike; every member's lock withdraws at the seal (refuses whole if any member cannot stake); deliveries to fellow members credit the giver's quota (transfers + bond flow) |
 | 53 | event: CouncilClosed (COUNCIL-1) | LE64(council) ‖ LE64(member) ‖ fulfilled u8 ‖ ratio (banked) — one member's reckoning at the boundary (all judged together, never early); `banked` is exactly what returned to this member (own collateral + forfeit share if faithful; zero if breaching amid faithful; collateral home on total-breach dissolution); the integrity stake reads from the sealed council |
 | 54 | event: GalaxyObserved (GALAXY-1, 13_GALAXY §3–§4 — universe ledger only) | LE16(observer len) ‖ observer utf8 ‖ LE16(creator len) ‖ creator utf8 ‖ LE16(name len) ‖ name utf8 ‖ ratio ×3 (center S, wrapped) ‖ ratio (reach) — the observation deed: appended beside EraAnnexed on `convergence.tlv`, never in a world chronicle (world replay ignores it, the explicit no-op arm); the frontier is a distance, never an outside |
-| 48 | event: ApertureReceived (APERTURE-1, NS-4 §2) | LE64(deal) ‖ LE64(to_orb) ‖ resource u8 ‖ ratio (amount) — the DESTINATION leg: banked value ARRIVED from another world under the same deal; replay sees only the credit; relieves a famine strike at the 02 §2.4 law |
+| 48 | event: ApertureReceived (APERTURE-1, NS-4 §2) | LE64(deal) ‖ LE64(to_orb) ‖ resource u8 ‖ ratio (amount) — the destination leg: banked value arrived from another world under the same deal; replay sees only the credit; relieves a famine strike at the 02 §2.4 law |
 | 10 | event: EntityRegistered (N3) | LE64(entity_id) ‖ LE64(principal) ‖ handle utf8 |
 | 11 | event: ScopeGranted (N3) | LE64(agent) ‖ scope u8 |
 | 12 | event: ScopeRevoked (N3) | LE64(agent) ‖ scope u8 |
-| 13 | event: ColonyCharted (P1) | LE64(orb_id) ‖ LE64(source_orb) ‖ name utf8 — the founding reserves MOVE from source (conservation) |
+| 13 | event: ColonyCharted (P1) | LE64(orb_id) ‖ LE64(source_orb) ‖ name utf8 — the founding reserves move from source (conservation) |
 | 16 | orb header | LE64(orb_id) ‖ name utf8 |
 | 20 | receipt frame (P2, NS-3 §2.4) | the on-disk framing of one whole receipt |
 | 17 | orb zone entry | LE16(tile) ‖ kind u8 |

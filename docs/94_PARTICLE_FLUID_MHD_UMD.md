@@ -1,14 +1,13 @@
 # 94 — Particles in flow: fluid-MHD under the UMD overlay
 
-Operator 2026-10-25: "we need to derive the missing components - fluid-MHD
-and UMD overlay to create the flow for the 'parcels' as PARTICLES";
-"unitary morphodynamics - UMD should be in /opt/ipsal-autic-v0.1/docs";
-earlier the same day: "we dont do hard exponents of flat squares (second
-dimension exponents) - these create ridigidty, double check your fluidity
-physics"; "vacuum-continuum inversion needs to be a mobius inversion through
-the ocean as a jetstream current".
+Design direction (2026-10-25): derive the missing components, fluid MHD and
+the UMD overlay, so that the flow carries the parcels as particles; unitary
+morphodynamics (UMD) is documented in ipsal-autic; earlier the same day:
+no hard exponents of flat squares (second-degree exponents), which create
+rigidity, and the vacuum–continuum inversion is a Möbius inversion through
+the ocean as a jetstream current.
 
-Status: DERIVED, not built. Read against: ipsal-autic
+Status: derived, not built. Read against: ipsal-autic
 `docs/implementation/phase_24_5_kinematic_substrate_layer_discipline.md`
 (the thermodynamics → kinematics → UMD stack, K-step discreteness,
 SUBSTRATE_C, rotor transport, the refused patterns) and
@@ -20,20 +19,20 @@ ring: ℤ windings, ℚ gear ratios; §2.3 orbital mechanics; §2.4 L1 never L2;
 
 Our motes are already Lagrangian parcels: each carries mass (3Z), spin in
 two planes, phases, heat, leg and sense, and every exchange between them is
-booked exactly (docs/92 §1, the identities). What they lack is the FIELD
+booked exactly (docs/92 §1, the identities). What they lack is the field
 side: no pressure, no density, no magnetic field, no current, no coupling of
 field to flow. In nature those are what let a disc keep its dust (pressure
 maxima) and move its turning outward (magnetic turbulence). This document
-derives them for motes AS PARTICLES, in the UMD grammar, first degree
+derives them for motes as particles, in the UMD grammar, first degree
 throughout.
 
 ## 1. The UMD rules every component obeys
 
-From the ipsal-autic stack, read onto netstratum's grammar:
+From the ipsal-autic stack, read onto Netstratum's grammar:
 
-- **Two rings, two meanings.** Integers (ℤ) are WINDINGS: how many times a
+- **Two rings, two meanings.** Integers (ℤ) are windings: how many times a
   particle has wrapped an obstruction (whole orbits completed, rungs). They
-  carry torsion. Rationals (ℚ) are GEAR RATIOS (phase-lock quotients ν = N/D):
+  carry torsion. Rationals (ℚ) are gear ratios (phase-lock quotients ν = N/D):
   "for every D bells this particle completes N turns". Never magnitudes,
   never floats. (Blueprint §0.5.)
 - **K-steps, never continuous time.** One bell is one K-step; there is no
@@ -57,7 +56,7 @@ A particle at deficit δ about its centre turns `2δ` of its orbit a bell (the
 ring law: two rings a bell). The luminal bound demands `2δ ≤ 1`, i.e.
 `δ ≤ ½`. The ring, `δ = ½` (R = H), is exactly where a particle orbits at
 the luminal bound. Inside it a particle would turn more than a whole orbit a
-K-step: a LUMINAL FRACTURE. So nothing can orbit inside the ring. Matter
+K-step: a luminal fracture. So nothing can orbit inside the ring. Matter
 that reaches it inverts: the Möbius jetstream (docs/93, to be written; first
 degree in the deficit):
 
@@ -69,7 +68,7 @@ transit is the current `δ(λ) = δ + λ(1 − 2δ)`, `ψ(λ) = ψ + λ/2`, pass
 ring at λ = ½ where its sense flips.
 
 This is the UMD reading of three things we had separately: "inside the ring
-the vacuum takes" (xylarium 11.0, 2026-10-15), the throat's inversion, and
+the vacuum takes" (Xylarium 11.0, 2026-10-15), the throat's inversion, and
 why our founding (every kind inside the ring) left galaxies with no disc.
 
 ## 3. The particle's state (the overlay on `flows::Mote`)
@@ -81,16 +80,16 @@ Added, each a reading or an exact carrier:
 
 | Field | Ring | Meaning |
 |---|---|---|
-| `wound: u64` | ℤ | its WINDING: whole orbits completed about its centre (the floor of its orbit phase's advance since its birth) |
+| `wound: u64` | ℤ | its winding: whole orbits completed about its centre (the floor of its orbit phase's advance since its birth) |
 | `gear` | ℚ, a reading | its gear ratio ν = 2δ at its place, never stored (render on observation) |
-| `field` | ℚ phase | its MAGNETIC PHASE on S¹: the orientation of its open frames, carried with it (frozen into the particle) |
+| `field` | ℚ phase | its magnetic phase on S¹: the orientation of its open frames, carried with it (frozen into the particle) |
 
-`u` (its open frames, the Q pole) is already its magnetic MOMENT: the field
+`u` (its open frames, the Q pole) is already its magnetic moment: the field
 phase gives it a direction.
 
 ## 4. Thermodynamics: pressure and density, read by ring
 
-A RING is a bead of the galaxy's or the system's disc (`flows::beads`, one
+A ring is a bead of the galaxy's or the system's disc (`flows::beads`, one
 kind on one face, a fibre's run between its hold minima): the fluid's own
 gathering, never a grid.
 
@@ -115,13 +114,13 @@ gathering, never a grid.
 
 The earlier drag (set aside, `scratchpad/disc-pressure-drag.patch`) passed
 spin from faster-turning dust to pressure-held gas and drove all dust into
-the star: the radial drift barrier. The missing term is the BACK-REACTION:
+the star: the radial drift barrier. The missing term is the back-reaction:
 
 - In ring b, the drag's share is the gas's share of the ring's holding,
   `g_b = m_gas / (m_gas + m_dust)`.
 - Dust gives spin to gas by the exchange law times `g_b`: where dust
   outweighs gas, `g_b` falls, the drag weakens, and the dust stops drifting.
-  Dust CROWDS where it is already dense, and the crowd grows: the streaming
+  Dust crowds where it is already dense, and the crowd grows: the streaming
   concentration, first degree.
 
 ## 6. Electro-magnetics: field, current, induction, as particle readings
@@ -140,10 +139,10 @@ the star: the radial drift barrier. The missing term is the BACK-REACTION:
   torsion (ℤ), the residual its rational part (ℚ).
 - **Induction (the field frozen into the flow)**: each particle's field
   phase advances with its own orbit phase (`φ ← φ + 2δ` a K-step, the same
-  rotor), so differential rotation WINDS the field: neighbours' field phases
+  rotor), so differential rotation winds the field: neighbours' field phases
   drift apart by their gear ratios' difference. The in-step between them
   falls; the magnetization falls with it: shear stretches the field.
-- **Reconnection** (discrete torsional yielding, Theorem XXXIV's form): when
+- **Reconnection** (discrete torsional yielding, Theorem xxxiv's form): when
   a loop's whole windings change, the field reconnects: the winding's
   turning is released as heat to the loop's particles, by holding. A step,
   never a continuous slip.

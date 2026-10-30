@@ -1,6 +1,6 @@
-# TASKS — Trade desk · fleets · alignment · local capital (5 phases)
+# Tasks — Trade desk · fleets · alignment · local capital (5 phases)
 
-**Status:** IMPLEMENTATION BOARD — operator directive 2026-08-07.  
+**Status:** implementation board — operator directive 2026-08-07.  
 **Authority doc:** `33_TRADE_FLEET_AND_DESK.md`.  
 **Matter loop:** `34_MATTER_BALANCE.md` (elements · alchemy · fleets ·
 entropy∥syntropy — partial land with Phase 3 fleets).  
@@ -49,21 +49,21 @@ P1 Sightlines & parity  ──►  P2 Alignment (D_eff)
 |----|------|------|
 | D0.1 | [x] `33_TRADE_FLEET_AND_DESK.md` design lock | file exists |
 | D0.2 | [x] This board (`TASKS_TRADE_FLEET_DESK.md`) Phases 1–5 | file exists |
-| D0.3 | [x] Pointers from BUILD_ORDER / PICKUP / 30–32 / OPEN_QUESTIONS | patches |
+| D0.3 | [x] Pointers from BUILD_ORDER / Pickup / 30–32 / OPEN_QUESTIONS | patches |
 | D0.4 | [x] Q-F1…Q-F6 recorded in OPEN_QUESTIONS | rows present |
 
 ---
 
 ## Phase 1 — Sightlines & player parity  `! blocks desk fun`
 
-**Goal:** Interactive ASCII trade surface over **existing** physics;
+**Goal:** Interactive ascii trade surface over **existing** physics;
 player can act on money/cargo paths NPCs already use.
 
 | ID | Task | Depends | Exit |
 |----|------|---------|------|
 | P1.1 | [x] CLI **trade desk mode** (`desk` / `desk enter`, panes t/y/r/a/…) | D0.1 | colony strip; interactive loop |
-| P1.2 | [x] TRADE pane: peer table `D_chart`, melt, treaty, WALL/SHIELD/OPEN | P1.1 | calls `pair_melt` only |
-| P1.3 | [x] ROUTES pane: carrier + element lanes + upkeep hints | P1.1 | `routes` CLI also lists element lanes |
+| P1.2 | [x] trade pane: peer table `D_chart`, melt, treaty, WALL/SHIELD/OPEN | P1.1 | calls `pair_melt` only |
+| P1.3 | [x] routes pane: carrier + element lanes + upkeep hints | P1.1 | `routes` CLI also lists element lanes |
 | P1.4 | [x] DIPLO pane: standing treaties + renounce hint | P1.1 | reads `treaties()` |
 | P1.5 | [x] Arbitrage map (read-only): walled pairs with open M-bridge | P1.2 | merchant geometry |
 | P1.6 | [x] Player **STAMP** verbs: balance, mint, aperture | S4.1 landed | S4.5; SEAL B pin |
@@ -72,7 +72,7 @@ player can act on money/cargo paths NPCs already use.
 | P1.9 | [x] Desk loop dispatches world verbs to `command` (no shadow ledger) | P1.1 | P1.9 |
 | P1.10 | [x] Observer STAMP (tag 73) + world STAMP column; lens JSON `stamp` | P1.6 | S4.6 partial; routes pane in desk/CLI |
 | P1.11 | [x] `clients/cli/tests/desk_pins.rs` melt ≡ pair_melt + stamp mint | P1.2 | green |
-| P1.12 | [x] Docs: Phase 1 land note + 33 PARTIAL | P1.11 | |
+| P1.12 | [x] Docs: Phase 1 land note + 33 partial | P1.11 | |
 
 **Phase 1 done when:** operator can open the desk, see peers/routes/melt,
 post/clear STAMP and element cargo, charter a lane, without inventing
@@ -94,8 +94,8 @@ by law; desk shows windows.
 | P2.3 | [x] `d_orbit` via phased `separation`; 0 if unsited | P2.2 | |
 | P2.4 | [x] `route_melt` + clear_trade / conductor / CLI use D_eff | P2.1, P2.3 | call-not-copy |
 | P2.5 | [x] Alignment CHEAP/FAIR/DEAR/— from D_orbit thresholds | P2.4 | desk colors |
-| P2.6 | [x] ROUTES pane: projected melt next 6 year-steps | P2.5 | |
-| P2.7 | [x] TRADE peers sorted OPEN by rising melt | P2.5 | |
+| P2.6 | [x] routes pane: projected melt next 6 year-steps | P2.5 | |
+| P2.7 | [x] trade peers sorted open by rising melt | P2.5 | |
 | P2.8 | [x] Q-F1 coded: `ORBIT_PHASE_TICKS = 60` year-voice | P2.2 | |
 | P2.9 | [x] `phase_shifts_orbit_and_melt` pin | P2.4 | green |
 | P2.10 | [x] Docs + BUILD_ORDER Phase 2 land | P2.9 | |
@@ -124,7 +124,7 @@ route capacity limited by assigned hulls; shipwright civ interface.
 | P3.7 | [x] hull_voice names per metabolism | P3.6 | |
 | P3.8 | [x] Hull η stacks as product of complements in pair_melt | P3.4 | Q-F2 |
 | P3.9 | [x] conductor `fleet_step` salvage/mint/assign | P3.3 | pure NPC |
-| P3.10 | [x] `fleet` CLI + desk FLEET pane + help fleet | P3.4 | |
+| P3.10 | [x] `fleet` CLI + desk fleet pane + help fleet | P3.4 | |
 | P3.11 | [x] ROUTES/TRADE see capacity via free_capacity / η stack | P3.4 | |
 | P3.12 | [x] Caravan O6.1 still stacks with hull η | P3.8 | |
 | P3.13 | [x] SCHEMA_V7 hull trail + replay SEAL B | P3.3 | |
@@ -183,7 +183,7 @@ optional R3/R4 exits for claims.
 | P5.0 | [x] Design lock `36_DEFENSE_AXIOMS.md` | P4 land | file exists |
 | P5.1 | [x] Escort role **active**: `escort_assign` + cover/risk pure law | P3.3, P5.0 | defense_pins |
 | P5.2 | [x] Interdiction residual on +melt hauls (`InterdictionStruck` 133) | P5.1 | pins + haul path |
-| P5.3 | [x] DEFEND pane + `defend` CLI: posture stubs + escort/risk | P5.1, P1.1 | desk `d` |
+| P5.3 | [x] defend pane + `defend` CLI: posture stubs + escort/risk | P5.1, P1.1 | desk `d` |
 
 ### P5-B — Species-relative posture (readings + in-game reorient)
 
@@ -191,23 +191,23 @@ optional R3/R4 exits for claims.
 |----|------|---------|------|
 | P5.11 | [x] Derive domain weights from metabolism × disposition × perception | P5.0, genesis | pure reading |
 | P5.12 | [x] Clade colour table (voice + primary residual) from taxon/06 | P5.11 | no new dials |
-| P5.13 | [x] DEFEND shows **non-human** posture copy (plasmic/lithic/hive…) | P5.11–P5.12 | CLI/desk |
+| P5.13 | [x] defend shows **non-human** posture copy (plasmic/lithic/hive…) | P5.11–P5.12 | CLI/desk |
 | P5.13b | [x] In-game doctrine reorient (`PostureReoriented` 144); anatomy sealed | P5.11 | pins |
 
-### P5-C — INF compose (veil / ward / counter-intel) · **LANDED**
+### P5-C — INF compose (veil / ward / counter-intel) · **landed**
 
 **Authority:** `36` §13. Compose MASK-1 / WARDEN-1a / MANU-1 — no free
 stealth points, no chronicle rewrite, **zero new tags**.
 
 | ID | Task | Depends | Exit |
 |----|------|---------|------|
-| P5.14 | [x] Surface MASK-1 / WARDEN-1a on DEFEND + `veil`/`ward` CLI | P5.3, veil/ward landed | desk/CLI |
-| P5.14b | [x] INF rank + veil/ward/detection on DEFEND reading | P5.14, P5.13 | reading |
+| P5.14 | [x] Surface MASK-1 / WARDEN-1a on defend + `veil`/`ward` CLI | P5.3, veil/ward landed | desk/CLI |
+| P5.14b | [x] INF rank + veil/ward/detection on defend reading | P5.14, P5.13 | reading |
 | P5.15 | [x] Detection grade from MANU-1 instrument floor (pure) | P5.14, MANU-1 | pin |
 | P5.15b | [x] Thin-scan / veiled prospect/assay refuse (`DetectionThin`) | P5.15 | pin |
 | P5.15c | [x] Docs + pins green; no schema bump | P5.14–P5.15b | ratchet |
 
-### P5-K2 — KIN open-up (species/civ colour, no free constants) · **LANDED**
+### P5-K2 — KIN open-up (species/civ colour, no free constants) · **landed**
 
 **Authority:** `36` §12. Base risk formula stays; residual *kind* and
 NPC routing re-colour from sealed axes / thermal / taxon / doctrine.
@@ -219,18 +219,18 @@ NPC routing re-colour from sealed axes / thermal / taxon / doctrine.
 | P5.51 | [x] K1 metabolism residual kind + voice (`kin_residual_*`) | P5.2, P5.11 | pin |
 | P5.52 | [x] K2 NPC `kin_step` disposition-routed | P5.51, P5.38 pattern | pure NPC |
 | P5.53 | [x] K3 clade colour on escort cover (hive +1 grade) + voice | P5.12, P5.1 | reading |
-| P5.54 | [x] K4 place exposure from `orbit_phase_period` (CALL 35) | P5.1, 35 dynamo | pure |
+| P5.54 | [x] K4 place exposure from `orbit_phase_period` (Call 35) | P5.1, 35 dynamo | pure |
 | P5.55 | [x] K5 perception fog on `mark_convoy_risk` | P5.15, P5.13b | refuse path |
-| P5.56 | [x] K6 CONVOY suite + DEFEND residual kind | P5.35, P5.51 | UI |
+| P5.56 | [x] K6 convoy suite + defend residual kind | P5.35, P5.51 | UI |
 
-### P5-E — COG + CYB · **LANDED**
+### P5-E — COG + CYB · **landed**
 
 | ID | Task | Depends | Exit |
 |----|------|---------|------|
 | P5.20 | [x] Cognitive integrity reading (wants / practices load) | WANT-1, PRACTICE-1 | reading |
 | P5.21 | [x] Instrument-guard anti-spoof reforge refuse | MANU-1 | pin |
 | P5.22 | [x] Mesh-guard veiled positive-melt + stamp hygiene reading | routes, STAMP, INF | pin |
-| P5.37 | [x] CYBER suite shell (COG+CYB dashboard) | P5.20–P5.22 | UI |
+| P5.37 | [x] Cyber suite shell (COG+CYB dashboard) | P5.20–P5.22 | UI |
 
 ### P5-M — Market defense (MKT) + optional suites (`36` §10)
 
@@ -244,9 +244,9 @@ not a second physics. NPC must war without opening a suite.
 | P5.32 | [x] Clear seal: LastClear requires N real clears (Q-S4) | P5.31, P4.2 | pin |
 | P5.33 | [x] Circuit breaker deed `MarketSealed` / resume | P5.31 | pins |
 | P5.34 | [x] Typed offenses: liquidity raid / clear poison (refuse+residual) | P5.32–P5.33 | pins |
-| P5.35 | [x] CONVOY suite shell (dashboard over P5-A risk) | P5.1–P5.3 | optional UI |
-| P5.36 | [x] MARKET WAR suite shell (breaker, clears, open instruments) | P5.33–P5.34 | optional UI |
-| P5.37 | [x] CYBER suite shell (instrument + mesh guards) | P5.21–P5.22 | optional UI |
+| P5.35 | [x] convoy suite shell (dashboard over P5-A risk) | P5.1–P5.3 | optional UI |
+| P5.36 | [x] market war suite shell (breaker, clears, open instruments) | P5.33–P5.34 | optional UI |
+| P5.37 | [x] Cyber suite shell (instrument + mesh guards) | P5.21–P5.22 | optional UI |
 | P5.38 | [x] NPC `market_war_step` (disposition-routed) | P5.34 | pure NPC |
 | P5.39 | [ ] Species-relative MKT residual copy (mineral/biotic/plasmic) | P5.11, P5.31 | |
 
@@ -269,7 +269,7 @@ not a second physics. NPC must war without opening a suite.
 | P5.19 | [x] Dual-use gate: TERRA-1 overt vs CovertTamper covert | TERRA-1, P5.17 | doc+pin |
 | P5.19b | [x] Species-relative medium residual + reinforce resource | P5.11, P5.17 | pin |
 
-### P5-F — Espionage suite · **LANDED**
+### P5-F — Espionage suite · **landed**
 
 | ID | Task | Depends | Exit |
 |----|------|---------|------|
@@ -278,7 +278,7 @@ not a second physics. NPC must war without opening a suite.
 | P5.25 | [x] Sabotage instrument remove (`InstrumentSabotaged` 147) | P5.23 | pins |
 | P5.26 | [x] Disposition-routed NPC `espionage_step` | P5.23–P5.25 | pure NPC |
 
-### P5-G — Deep rails (original capital exits) · **PARTIAL LAND**
+### P5-G — Deep rails (original capital exits) · **partial land**
 
 | ID | Task | Depends | Exit |
 |----|------|---------|------|
@@ -291,12 +291,12 @@ not a second physics. NPC must war without opening a suite.
 External strand/datum adapters remain on tier board (X7); core never
 depends on them for R1–R2 fun.
 
-### P5-H — Close-out · **LANDED**
+### P5-H — Close-out · **landed**
 
 | ID | Task | Depends | Exit |
 |----|------|---------|------|
 | P5.9 | [x] Compose smoke: all P5 integrity surfaces + SEAL B | P5-A…G | pin |
-| P5.10 | [x] Docs Phase 5 → PARTIAL LAND core complete; 33/36/PICKUP | P5.9 | docs |
+| P5.10 | [x] Docs Phase 5 → partial land core complete; 33/36/PICKUP | P5.9 | docs |
 
 **Phase 5 land progress (measured):** **core complete** — A–F · K2 · M/M2 ·
 19b · G partial (R1–R2 + optional R3/R4 gates) · H close-out.

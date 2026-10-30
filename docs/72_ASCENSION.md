@@ -46,7 +46,7 @@ Code: `engine/conductor/src/ascension.rs` (run by `year_bounce` once a
 bounce), the hub clearing (`stamp_market_step`, once a beat), and the house's
 tend (`engine/hypha/src/house.rs`, `refound.rs`).
 
-1. **One keeper everywhere.** The throat's keeper (G3) is read ONCE, with the
+1. **One keeper everywhere.** The throat's keeper (G3) is read once, with the
    envoys counted (`ancients::keepers`, reading `ascension.bin`): once a
    bounce in `year_bounce`, passed to the ancients' step, ascension and the
    parliaments; once a beat in the conductor's loop, passed to the hub
@@ -62,11 +62,11 @@ tend (`engine/hypha/src/house.rs`, `refound.rs`).
    core, the core's parliament (its keeper's lineage) folds one: from the
    master's galaxy hub (the hub clearing's own hub) to the core's centre, its
    span the torus L1 distance in cells. The cost is shared in equal shares on
-   the grain among ALL the core's living ancients, born and ascended, the
-   remainder to the first, and paid by the haul law: ONE TRIP a bounce, from
+   the grain among all the core's living ancients, born and ascended, the
+   remainder to the first, and paid by the haul law: one trip a bounce, from
    the builders' richest line at the core that is not an ancient, each trip
    carrying no more than the payer's free hulls hold, to the first ancient
-   still owed. The log reads "IS PAYING — trip k ... x of 7 STAMP paid"; the
+   still owed. The log reads "is paying — trip k ... x of 7 STAMP paid"; the
    gate folds when the last load lands. A gate is named `galaxy>core`.
 4. **The roads.** A galaxy joined to another galaxy's core by a mapped gate
    clears at that core's hub. Each of its lines takes the cheaper road: open
@@ -81,7 +81,7 @@ tend (`engine/hypha/src/house.rs`, `refound.rs`).
    the builder lineage's richest living line at the core, or, keeping the
    throat through an envoy with no line living there, its rider.
 6. **The envoy (A2).** A master whose chosen gate is mapped sends its envoy
-   through. Each bounce after its crossing the envoy JUDGES: if its lineage
+   through. Each bounce after its crossing the envoy judges: if its lineage
    does not keep the throat in the bounce's reading (with the envoy counted),
    it cannot out-hold the keeper, and it withdraws, logged with both counts,
    paying nothing more. An envoy that stays pays the passage toll, `span x
@@ -94,7 +94,7 @@ tend (`engine/hypha/src/house.rs`, `refound.rs`).
 8. **The map and its recalibration (A4, 5.9).** The conductor offers each
    unmapped gate to the house (`gates-map.bin`: id, core, the builders' line's
    world, the hub's place, the core's centre, freshness). The house maps it as
-   a LOCAL THROAT signed by the reserve, freshness the gate's, and writes back
+   a local throat signed by the reserve, freshness the gate's, and writes back
    the seal with the place it sealed (`gates-mapped.bin`). A gate reads mapped
    when a seal names it at its offered place. Each bounce a gate whose hub has
    drifted from its place by more than its freshness (in cells) goes back to
@@ -110,7 +110,7 @@ tend (`engine/hypha/src/house.rs`, `refound.rs`).
    only after a task's patience. The gates are mapped only under a marker for
    the present origin. `ns-hypha refound` runs the same steps by hand.
 
-**DECLARED (until a law derives them, docs/59):** a gate's cost is the
+**Declared (until a law derives them, docs/59):** a gate's cost is the
 ladder's dearest closure (the greatest `mint_bound`, 7 STAMP); a gate span's
 melt fraction is span x 1/64, the passage toll each bounce in STAMP and the
 roads' melt through it; a gate's freshness is one cell.

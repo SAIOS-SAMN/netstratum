@@ -4,7 +4,7 @@
 **Status:** research directive. Unifies R-D4, R-D5/6 and the salvaged
 nursery design against measurements this lane already took.
 **2026-08-12:** the mint's gate design is now charter law —
-`38_COGNITION_CONVERGENCE.md` §4 (NOVELTY-GATE, task #13): the four
+`38_COGNITION_CONVERGENCE.md` §4 (novelty-gate, task #13): the four
 structural gates (unique orbit · measured productivity · verifier
 conservation · convergent derivation), consuming `rfa-core`'s
 `rcf_hash` and `coherence_functional` as their first production
@@ -19,7 +19,7 @@ lane made moved time and none moved that number — R1, R2, R3, R4, buffer
 reuse, the digest memo, the reverted image dedup.
 
 The reason, read from `search.rs` rather than guessed: `derived_recolors`
-and `derived_tiles` derive an operator only when it is the LAST op of the
+and `derived_tiles` derive an operator only when it is the last op of the
 word with at most one geometric op before it. Anything else leaves that
 operator **outside the vocabulary**, and no search depth reaches an
 operator that is not there.
@@ -46,17 +46,17 @@ operator vocabulary and the closed resource vocabulary are one problem.**
 ## §3 The design already exists, salvaged and unbuilt
 
 From the discarded `parallel-agent` worktree (`engine/solver/src/mint.rs`,
-never committed): **a civilization grows its OWN solver vocabulary.**
+never committed): **a civilization grows its own solver vocabulary.**
 Five laws, and they are already the right ones:
 
-1. **CLOSED ALGEBRA** — a minted operator is a composition of existing
+1. **Closed algebra** — a minted operator is a composition of existing
    total primitives (a macro word, or a geometric prefix with a per-task
    re-derived family). No new semantics, no new code, no I/O. **A mint
-   changes REACHABILITY, never capability class.**
-2. **MEASURED NOVELTY** — the gate.
-3. **BOUNDED** — library, macro and history caps.
-4. **CONTAINED** — per-civilization libraries, never global.
-5. **RECEIPTED AND KILLABLE** — every mint carries a certificate naming
+   changes reachability, never capability class.**
+2. **Measured novelty** — the gate.
+3. **Bounded** — library, macro and history caps.
+4. **Contained** — per-civilization libraries, never global.
+5. **Receipted and killable** — every mint carries a certificate naming
    the triggering task and the base-failure witness; replay re-derives;
    a `--no-mint` flag freezes the door.
 
@@ -68,7 +68,7 @@ it could not do before*.
 ## §4 The reframe this lane owes: the exhaustive sweep is the certificate
 
 Law 2 is the gate: a candidate operator mints only if **the base
-vocabulary provably fails the triggering task at equal search depth AND
+vocabulary provably fails the triggering task at equal search depth and
 the candidate closes it.** Novelty measured, never asserted.
 
 **That proof is exactly what the 35 unsolved tasks already are.** The
@@ -115,18 +115,18 @@ Not every line should grow. The nursery's law 3 (bounded) and law 4
 (contained) need a rule for **who may hold how much vocabulary**, and
 that is the budget work already open:
 
-- `EQUATIONS` §7 rows **B1–B9** derive a search DEPTH from standing.
+- `EQUATIONS` §7 rows **B1–B9** derive a search depth from standing.
   The same reading gives a **library ceiling**: a line holds vocabulary
   in proportion to the structure it sustains.
-- `kernel::bridge::open_axes_of` already names *"the DIRECTION A NEW
-  RELATION WOULD EARN ON"* — the syntropic half, a reading that gives
+- `kernel::bridge::open_axes_of` already names *"the direction A new
+  relation would earn on"* — the syntropic half, a reading that gives
   rather than withholds.
 - `motion::envelope(n, rank) = n^rank` is already the kernel's statement
   that the budget is a function of standing rank rather than a constant.
 
 So the ladder is one ladder: **structure earns depth, and structure earns
 vocabulary.** A line at the ground gets the floor of both. A line
-carrying real relational structure searches deeper AND may hold more
+carrying real relational structure searches deeper and may hold more
 operators — and `frontier(V, d)` grows in both arguments at once, which
 is why it is the right envelope.
 
@@ -164,21 +164,21 @@ The measurement rule stands and now has a reason behind it: **solve rate
 first, time second.** Time is `d`. Solve rate is `V`. Only one of them is
 intelligence.
 
-## §9 The seam with the mesh: JUDGE vs CLAIMANT, not deduction vs generation
+## §9 The seam with the mesh: judge vs claimant, not deduction vs generation
 
-*(Added 2026-08-19, folding a correction relayed from the mycelium lane. It
+*(Added 2026-08-19, folding a correction relayed from the Mycelium lane. It
 governs every kernel↔mesh refactor and corrects a bullet that reads wrong in
 isolation.)*
 
-The tempting shorthand — *"deductive/universal → mycelium; generative/strategic
+The tempting shorthand — *"deductive/universal → Mycelium; generative/strategic
 → kernel"* — misleads, because it is read as *a kernel should not derive.* The
 opposite is true, and consilience is why.
 
-**A word installs only on the byte-exact agreement of two INDEPENDENT
+**A word installs only on the byte-exact agreement of two independent
 derivations.** The claimant kernel derives `pair → word` and proves
 `matches_expected: Some(true)`; the judge (the hypha's `Sentence`, one shared
 implementation in `mycelium::autic::grammar`) re-derives the same pair. Agreement
-IS the proof object. Collapse the two into one implementation and consilience
+is the proof object. Collapse the two into one implementation and consilience
 degrades into self-confirmation — one mind grading its own homework. So the
 claimant's deduction is **constitutive, not duplication**: net's `think_task` /
 tile seat is not a redundant fork of the mesh's tile reading, it is the second
@@ -186,21 +186,21 @@ vantage without which nothing is trustworthy.
 
 The real seam, stated once:
 
-- **JUDGE** — `pair → word`, replay, naming, the coherence laws — is
-  **universal, shared, coded ONCE**, mesh-side (by wire via `six_step`, or as a
+- **Judge** — `pair → word`, replay, naming, the coherence laws — is
+  **universal, shared, coded once**, mesh-side (by wire via `six_step`, or as a
   linked library via `grammar::sentence_on`). The one true waste is a kernel
   re-implementing the judge.
-- **CLAIM + GENERATE** — each kernel's own derivation (so two vantages can
-  agree) AND its curriculum, novelty gate, and game economy (what to attempt,
+- **Claim + generate** — each kernel's own derivation (so two vantages can
+  agree) and its curriculum, novelty gate, and game economy (what to attempt,
   how work is proven and paid) — is **plural, independent, per-kernel**. This is
   the asymmetric niche: net finds D₄/tiles, xyl grinds corpus, sod grows its own
   generator. `sweep_vocabulary`/`standing_orbits` are claim-side machinery and
-  belong in the kernel (netstratum: `solver::mint`), never shared.
+  belong in the kernel (Netstratum: `solver::mint`), never shared.
 
 **PoUW honesty caveat (load-bearing).** A solve that used the mesh's grammar to
-*derive* must NOT mint the kernel's PoUW as forge work — the work claim names the
+*derive* must not mint the kernel's PoUW as forge work — the work claim names the
 mind that actually derived. Concretely for the listening half (walls as
-curriculum): a wall the kernel's OWN seat closes may mint attribution; a wall
+curriculum): a wall the kernel's own seat closes may mint attribution; a wall
 only the hypha's grammar closes may not be claimed by the kernel. Otherwise the
 economy quietly becomes self-dealing.
 

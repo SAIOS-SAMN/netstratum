@@ -1,13 +1,13 @@
 # 98 — The inverse faces: gravity, magnetism and velocity on the other leg
 
-Operator 2026-10-27: "you need to invert magnetism, gravity, velocity -
-because your 'continuum' will actually be the vacuum"; "proced".
+Design direction (2026-10-27): magnetism, gravity and velocity invert, because
+the continuum is in fact the vacuum.
 
-> **Corrected (2026-10-28, docs/103 §5):** §3's "a relabel" holds for MOTION,
-> not for PRODUCTION: the luminal bound keeps most matter on the vacuum face,
+> **Corrected (2026-10-28, docs/103 §5):** §3's "a relabel" holds for motion,
+> not for production: the luminal bound keeps most matter on the vacuum face,
 > inside the ring, while the strip, crest and disc read the continuum face.
 
-Status (2026-10-28): §3–§5 DERIVED; §4 the symmetric luminal bound BUILT
+Status (2026-10-28): §3–§5 derived; §4 the symmetric luminal bound built
 (fa7378d); §6 read (§7) and carried into docs/99. Open: the leg flag's second
 writer (`flows::stream`, docs/101 §1.6).
 
@@ -20,8 +20,8 @@ From the kernel doc (§ the throat, S^0 faces; the jetstream (11)):
 
 | face | role | reads |
 |---|---|---|
-| VACUUM (black) | holds the rings it takes: gravity, containment, quantum mass; matter in transit (axis, arc) | the deficit `δ = H/(R + H)` |
-| CONTINUUM (white) | outflow, pulse and echoes, push, jets, light; the open frames repel (magnetism); the disc is held on it | the unlocked share `1 − δ` |
+| Vacuum (black) | holds the rings it takes: gravity, containment, quantum mass; matter in transit (axis, arc) | the deficit `δ = H/(R + H)` |
+| Continuum (white) | outflow, pulse and echoes, push, jets, light; the open frames repel (magnetism); the disc is held on it | the unlocked share `1 − δ` |
 
 ## 2. Ours, inverted
 
@@ -32,8 +32,7 @@ push, light and cooling read `δ(R)` where the forward read `1 − δ(R)`.
 ## 3. The inversion is already in the grammar, and the luminal bound makes it a relabel
 
 - **Inversion through the throat**, read on the share (first degree, never a
-  radius squared, design law 2; operator 2026-10-28: "so you're using squares
-  inside a sphere"), keeps every angle and maps
+  radius squared, design law 2; ruling of 2026-10-28: no squares inside a sphere), keeps every angle and maps
   `δ ↦ 1 − δ` (witness: `recycle` tests, fixed at R = H, both ½). A mote
   carries its face (`Mote.vacuum`); on the inverted face it reads its pull
   and turning at `1 − δ`, runs its circulation backward, and reflects its
@@ -88,7 +87,7 @@ bell 1500) is measured next: `ignition_share` (heat ≥ ½) or
   nearly where the bound puts them.
 - No binding was refused at ignition (0 by `ignition_share` or
   `formation::system`). The 49683 "returned" members are bindings in which
-  NOTHING FELL (`formation::infall`): by bell 900, 59 bindings and 16876
+  nothing fell (`formation::infall`): by bell 900, 59 bindings and 16876
   members. The heart's extent reads about ½ in the binding's own units; the
   members' distances, the galaxy offsets times `g/m` (the galaxy's holding
   over the binding's), read 10^1–10^5: the nearest member stands a median

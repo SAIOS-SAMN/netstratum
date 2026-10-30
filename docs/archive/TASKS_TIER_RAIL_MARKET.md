@@ -1,6 +1,6 @@
-# TASKS — T4–T9 · R1–R4 · Element commerce · STAMP market
+# Tasks — T4–T9 · R1–R4 · Element commerce · STAMP market
 
-**Status:** IMPLEMENTATION BOARD (operator directive 2026-08-07).  
+**Status:** implementation board (operator directive 2026-08-07).  
 **Authority docs:** `30_OFFICES_AND_RAILS.md`, `31_ELEMENT_COMMERCE.md`,
 `32_STAMP_MARKET.md`.  
 **Related program (desk · fleets · alignment · local capital):**  
@@ -8,7 +8,7 @@
 That board **consumes** S4.5–S4.6, E3.6, Wave 5 I5.*, O6, R2.3/X7 —
 land once, check both boards.  
 **Discipline:** one landing at a time; red-first witnesses; spec + mechanic
-+ vectors together (CHARTER / HANDOFF). Commit only on operator go for
++ vectors together (Charter / Handoff). Commit only on operator go for
 production landings; this file is the backlog DAG.
 
 **Legend:** `[ ]` pending · `[~]` in progress · `[x]` done · `!` blocks fun  
@@ -37,7 +37,7 @@ strand-adapter · isthmus/datum-adapter
 | T1.2 | [x] `ascend` preconditions per office (deed counts) | T1.1 | typed refusals with cures |
 | T1.3 | [x] Seat width + NoSeatOpen for new stations | T1.1 | pins |
 | T1.4 | [x] Founding or mid-era **NPC path** to at least T4/T6 (not only CLI) | T1.2 | conductor pin `wave1_era_pins` |
-| T1.5 | [x] Observer STATION column shows T4–T9 names | T1.1 | `tools/observer.py` ALL_TIERS + tier_of |
+| T1.5 | [x] Observer station column shows T4–T9 names | T1.1 | `tools/observer.py` ALL_TIERS + tier_of |
 | T1.R | [x] **REFINE-1** + E3.5 (pulled into Wave-1 exit) | ground_step | `ElementRefined` tag 107; pure NPC refine |
 
 ---
@@ -51,7 +51,7 @@ strand-adapter · isthmus/datum-adapter
 | R2.3 | [x] Promotion deeds R1→R2 (`RailPromoted` 148) | R2.1, E-APT-1 | pins |
 | R2.4 | [x] Feature-gated R3 strand adapter (no hard path dep) | R2.1 | `deep-rail-strand` / `stamp-rail-strand` |
 | R2.5 | [x] Feature-gated R4 isthmus/datum adapter | R2.1 | `deep-rail-court` / `stamp-rail-court` |
-| R2.6 | [x] Observer RAIL column (max settled rail) | R2.1 | P8.2 arc/worlds · state uplink |
+| R2.6 | [x] Observer rail column (max settled rail) | R2.1 | P8.2 arc/worlds · state uplink |
 
 ---
 
@@ -67,7 +67,7 @@ strand-adapter · isthmus/datum-adapter
 | E3.6 | [x] **E-MKT-1** offers carry ElementId cargo | E3.1, MARKET-1 | `Cargo` union; tag 49 wire; clear_trade; `market_step` element intents; `element_market_pins` |
 | E3.7 | [x] WANT-1 may target element ids | E3.6 | tags 163–164 · element_wants · market demand intents · SCHEMA_V18 |
 | E3.8 | [x] Observer `routes` + `refineries` views | E3.2, E3.4 | `tools/observer.py` routes/refineries; chronicle tag 110−80; state zone kind 9 |
-| E3.9 | [ ] Treaty allow-lists for element ids | E3.1, TREATY | |
+| E3.9 | [ ] Treaty allow-lists for element ids | E3.1, treaty | |
 
 ---
 
@@ -114,11 +114,11 @@ strand-adapter · isthmus/datum-adapter
 
 | ID | Task | Depends | Exit | Repo |
 |----|------|---------|------|------|
-| X7.1 | [x] Strand schema STAMP/Note/Share (`cfe::xrail::strand`) | R2.4, S4.1 | round-trip | netstratum |
-| X7.2 | [x] Isthmus opaque frame (`cfe::xrail::isthmus`) | R2.5 | no path dep | netstratum |
-| X7.3 | [x] Datum multi-axial verify (`cfe::xrail::datum`) | X7.2 | multi-axial close | netstratum |
-| X7.4 | [x] Anchor import refuses bad proofs (tags 149–151) | X7.1–X7.3 | pin | netstratum |
-| X7.5 | [x] E2E pin: export/import stamp + court (feature `xrail-test`) | all | `xrail_pins` | netstratum |
+| X7.1 | [x] Strand schema STAMP/Note/Share (`cfe::xrail::strand`) | R2.4, S4.1 | round-trip | Netstratum |
+| X7.2 | [x] Isthmus opaque frame (`cfe::xrail::isthmus`) | R2.5 | no path dep | Netstratum |
+| X7.3 | [x] Datum multi-axial verify (`cfe::xrail::datum`) | X7.2 | multi-axial close | Netstratum |
+| X7.4 | [x] Anchor import refuses bad proofs (tags 149–151) | X7.1–X7.3 | pin | Netstratum |
+| X7.5 | [x] E2E pin: export/import stamp + court (feature `xrail-test`) | all | `xrail_pins` | Netstratum |
 
 ---
 
@@ -133,14 +133,14 @@ strand-adapter · isthmus/datum-adapter
 | C1.5 | [x] Chem catalog creation (tag 157) | C1.1 | crystal fee · novelty relief |
 | C1.6 | [x] NPC `chemistry_step` disposition-routed | C1.3 | pure NPC · cycle after refine |
 | C1.7 | [x] Stellar capacity game (star lines as project) | locality | `stellar_capacity_board` · `bench star capacity` |
-| H1.1 | [x] BENCH hub (planetary · build · star · chem · econ) | C1.x | CLI `bench` |
-| H1.2 | [x] TRADE hub (books · fleet · rails · vault · aperture) | H1.1 | CLI `trade` |
-| H1.3 | [x] Desk panes deep-link into hub domains | H1.1–H1.2 | desk HUB strip · `h`/`hc` · `docs/HUBS.md` |
+| H1.1 | [x] bench hub (planetary · build · star · chem · econ) | C1.x | CLI `bench` |
+| H1.2 | [x] trade hub (books · fleet · rails · vault · aperture) | H1.1 | CLI `trade` |
+| H1.3 | [x] Desk panes deep-link into hub domains | H1.1–H1.2 | desk hub strip · `h`/`hc` · `docs/HUBS.md` |
 | H1.4 | [x] Back-outs on every nested view (`bench`/`back`/`..`) | H1.1 | never stuck |
 | H1.5 | [x] Bench research · intel · link · doctrine · estate | H1.1 | map missing games |
 | H1.6 | [x] Deep boards: research_board · intel_board · link_board · doctrine | H1.5 | engine pure |
 | H1.7 | [x] Deep deeds from hub: forge · probe · exfil · sabotage · estate | H1.6 | mut bench |
-| H1.8 | [x] Root INTEL peer to BENCH/TRADE (knowledge activity, not craft) | H1.7 | `intel` |
+| H1.8 | [x] Root intel peer to BENCH/TRADE (knowledge activity, not craft) | H1.7 | `intel` |
 | H1.9 | [x] Full domain wire: offices·medium·fleet·assay·culture·books·opsec·stamp·element·diplo local/stellar | H1.8 | `docs/HUBS.md` |
 | H1.10 | [x] Dual law: activity root S ⇒ bench S (diplomatic · intel · trade craft twins) | H1.9 | pin |
 | H1.11 | [x] Preferred name `diplomatic` (diplo alias) + science benches (chem·bio·phys·math·research) | H1.10 | pin |
@@ -159,9 +159,9 @@ strand-adapter · isthmus/datum-adapter
 | P8.3 | [x] Labor/population derived from habitats | 02 | `labor_force` · habitats + clones · polity labor |
 | P8.4 | [x] Closed-ruins history view | observer | `observer ruins` |
 | P8.5 | [x] Balance pass: AP capacity ruled table (slice) | P8.1 | `AP_BASE` · `AP_HABITAT_MULT` · `AP_EXCHANGE_BONUS` |
-| POL.1 | [x] Polity root vent open (CLI scaffold · genesis/taxon/mint/ap) | H1.x | `polity` hub · docs/HUBS.md |
-| POL.2 | [x] Dual-law `bench polity` craft twin | POL.1 | offices · doctrine · labor · practice |
-| POL.3 | [x] Conductor identity_step (habitat labor parity) | POL.1 | pure NPC after chemistry |
+| Pol.1 | [x] Polity root vent open (CLI scaffold · genesis/taxon/mint/ap) | H1.x | `polity` hub · docs/HUBS.md |
+| Pol.2 | [x] Dual-law `bench polity` craft twin | Pol.1 | offices · doctrine · labor · practice |
+| Pol.3 | [x] Conductor identity_step (habitat labor parity) | Pol.1 | pure NPC after chemistry |
 
 ---
 

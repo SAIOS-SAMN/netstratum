@@ -1,10 +1,10 @@
-# 33 — TRADE DESK · FLEETS · ALIGNMENT · LOCAL CAPITAL
+# 33 — Trade desk · fleets · alignment · local capital
 
-**Status:** PARTIAL LAND — **Phases 1–4 complete**; **Phase 5 core complete**
+**Status:** partial land — **Phases 1–4 complete**; **Phase 5 core complete**
 (A–H · K2 · M · dual-use · 19b · R1–R2 rails; optional R3/R4 features).
 Implementation board: **`archive/TASKS_TRADE_FLEET_DESK.md`**.
 
-**Does not overturn:** CHARTER exactness, SEAL B, call-not-copy, tuned-
+**Does not overturn:** Charter exactness, SEAL B, call-not-copy, tuned-
 constant ratchet, ROUTE-1 / MARKET-1 / STAMP-1 as landed. **Does not**
 replace ideology standing bonds (09) with market Notes. **Does not**
 require strand/datum for local fun (R1–R2 first).
@@ -29,7 +29,7 @@ minor **23** — claim before Phase 2+ bumps.
 
 Players running a civilization need to:
 
-1. Open an **interactive ASCII suite** for trade, diplomacy, routes,
+1. Open an **interactive ascii suite** for trade, diplomacy, routes,
    harvesting, and arbitrage — while still exploring, defending, and
    growing the colony.
 2. See **distance** between stars/worlds and **candidate routes** with
@@ -62,7 +62,7 @@ distance in melt, player trade desk, and civ-filtered capital books.
 | L5 | **Markets are books on seats.** Unlisted = absent. Archetype filters listings; it does not fork the clearing math. |
 | L6 | **Ideology Bond ≠ market Note.** Tags 33–34 stay ideology; market debt is Note (32). |
 | L7 | **Exact lattice only.** Orbital phase advances on exact rationals / discrete slots — no float ephemeris. |
-| L8 | **No undervied dials.** Hull grades and costs derive from existing ladders (refinement, instrument grade, sealed parameters) or mint as APPROVED-SEED with ratchet honesty. |
+| L8 | **No undervied dials.** Hull grades and costs derive from existing ladders (refinement, instrument grade, sealed parameters) or mint as approved-seed with ratchet honesty. |
 | L9 | **Solo and interplanetary both.** R1 hearth books and zero-melt same-system hauls are first-class; R2 aperture is the default interstellar door. |
 | L10 | **Combat is Phase 5.** Trade must be fun before interdiction is required. |
 
@@ -100,7 +100,7 @@ distance in melt, player trade desk, and civ-filtered capital books.
 | `D_key` | Wrapped key gap | already inside `pair_melt` |
 | `D_orbit` | Chord / phase gap between sited orbs at current θ, ψ, r | `PlanetSited` + clock (θ advances per-world) |
 | `D_eff` | Effective transit distance | **one function** (new): see §3.2 |
-| `alignment` | Desk reading of relative phase | derived band: CHEAP / FAIR / DEAR |
+| `alignment` | Desk reading of relative phase | derived band: cheap / fair / dear |
 | **orbit period** | ticks per θ-slot step | `ORBIT_PHASE_TICKS × core_magnetism × polity / star.magnetism()` — **not lockstep** |
 
 ### 3.2 Effective distance (sketch — pin at Phase 2 land)
@@ -251,7 +251,7 @@ Note at Phase 4 land (Q-S3).
 
 ---
 
-## 6. ASCII desk — interactive suite
+## 6. Ascii desk — interactive suite
 
 ### 6.1 Persistent frame
 
@@ -269,14 +269,14 @@ Note at Phase 4 land (Q-S3).
 
 | Key | Pane | Contents |
 |-----|------|----------|
-| `t` | TRADE | Peers, D_eff, melt, alignment, post/fill, harvest |
+| `t` | Trade | Peers, D_eff, melt, alignment, post/fill, harvest |
 | `y` | DIPLO | Treaty ladder, war cost, council |
-| `r` | ROUTES | Live lanes, optimize, upkeep, lapse, assign hulls |
-| `f` | FLEET | Hulls, scrap, yard, buy/sell/commission |
+| `r` | Routes | Live lanes, optimize, upkeep, lapse, assign hulls |
+| `f` | Fleet | Hulls, scrap, yard, buy/sell/commission |
 | `x` | EXCH | **Local** books only (archetype-filtered) |
-| `g` | GROW | Existing colony loop surface |
-| `d` | DEFEND | Convoy + domains (CEL…MKT) + veil/ward + espionage + suite entry (`36`) |
-| `e` | EXPLORE | Scan/prospect — feeds cargo identity |
+| `g` | Grow | Existing colony loop surface |
+| `d` | Defend | Convoy + domains (CEL…MKT) + veil/ward + espionage + suite entry (`36`) |
+| `e` | Explore | Scan/prospect — feeds cargo identity |
 
 ### 6.3 Route optimize panel
 
@@ -322,9 +322,9 @@ Authority detail and task IDs: **`archive/TASKS_TRADE_FLEET_DESK.md`**.
 
 | Phase | Name | Player-visible exit |
 |-------|------|---------------------|
-| **1** | **Sightlines & parity** | **LANDED** — desk panes; stamp/element verbs; observer STAMP |
-| **2** | **Alignment economics** | **LANDED** — `D_eff`, year-voice θ phase, alignment bands, melt windows |
-| **3** | **Fleet capital** | **LANDED** — scrap/yard/hulls, capacity-gated hauls, fleet_step, CLI |
+| **1** | **Sightlines & parity** | **Landed** — desk panes; stamp/element verbs; observer STAMP |
+| **2** | **Alignment economics** | **Landed** — `D_eff`, year-voice θ phase, alignment bands, melt windows |
+| **3** | **Fleet capital** | **Landed** — scrap/yard/hulls, capacity-gated hauls, fleet_step, CLI |
 | **3** | **Fleet capital** | Scrap · yard · hull mint/assign/scrap; shipwright NPC spot; route capacity limited by hulls |
 | **4** | **Local capital markets** | Civ-filtered Note/Future/Share/Perp books; instrument_step; freight/alignment seasons tradeable |
 | **5** | **Defense axioms · multi-domain · market war · espionage · deep rails** | Species-relative 7 domains (`36`); **core complete**; R3–R4 feature-optional |
@@ -368,7 +368,7 @@ design from `32`.
 - Global identical ship SKU list and global single stock board  
 - Replacing ROUTE-1 with a parallel melt engine  
 - Full fleet combat before trade desk fun (Phase 5 only)  
-- Real-money billing (CHARTER / 01 split stands)  
+- Real-money billing (Charter / 01 split stands)  
 - Forcing strand/datum for R1–R2 play  
 
 ---
@@ -392,7 +392,7 @@ Carry into `OPEN_QUESTIONS.md` when this doc lands.
 
 ## 12. Success metric (program)
 
-A pure-NPC era **and** a player ASCII session can:
+A pure-NPC era **and** a player ascii session can:
 
 1. Discover peers and **see** melt/alignment/candidate routes  
 2. Post and clear cargo (resource, element, STAMP)  

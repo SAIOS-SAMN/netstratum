@@ -40,7 +40,7 @@ exactly its founder.
    `<var>/trust` names it, its core, the rule, and its reserve basket by mass
    (what its phenotype eats and its working mouths' need a beat). The keys
    stay on disk in `var/uplink`; the house holds them for the ancient and acts
-   as its seat. Nothing is posted to the court by this step: MAP acts at its
+   as its seat. Nothing is posted to the court by this step: map acts at its
    core wait on 78.154.
 5. **The progenitor** (the largest lineage, `largest_lineage`) stays the
    progenitor; the two roles are distinct.
@@ -71,4 +71,4 @@ bloomcall-sky-14.
 | A1 | ancients by birth | landed |
 | A2 | ancients by deed | landed (fires where a core's bulge holds no living line) |
 | A3 | the trust ends; reserve basket stated | landed as a record; key custody unchanged on disk |
-| A4 | MAP acts at the ancient's core; hosting 78.155's mouth | waiting on 78.154 and the 78.155 ruling |
+| A4 | Map acts at the ancient's core; hosting 78.155's mouth | waiting on 78.154 and the 78.155 ruling |

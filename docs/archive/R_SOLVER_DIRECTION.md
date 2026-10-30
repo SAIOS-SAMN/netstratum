@@ -97,9 +97,9 @@ raw images is unbounded in both directions. A search over cohomology
 classes cannot fall below H¹, and the residual is what tells it when to
 expand.
 
-## §3 netstratum already holds both halves
+## §3 Netstratum already holds both halves
 
-| the law needs | netstratum has | where |
+| the law needs | Netstratum has | where |
 |---|---|---|
 | the relational field `Δ(V)` | `rfa_core::Delta` | `rfa-core` |
 | controlled collapse | `coboundary_reduce` | `rfa-core/src/reduce.rs` |

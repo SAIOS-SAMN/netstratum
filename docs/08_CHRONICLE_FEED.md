@@ -1,8 +1,8 @@
-# THE CHRONICLE FEED — the Terminal Wall (JOURNAL-1 directive)
+# The chronicle feed — the Terminal Wall (JOURNAL-1 directive)
 
-**Status:** LANDING SPEC — dispatched to a coder node 2026-07-27. The GUI
+**Status:** landing spec — dispatched to a coder node 2026-07-27. The gui
 course-correction problem is solved by going diegetic: no WebGL, no render
-ambiguity. Civilizations SPEAK — one journal entry per year — and the feed
+ambiguity. Civilizations speak — one journal entry per year — and the feed
 is the observation surface.
 
 **The premise (operator):** "what is *your* civilization doing and how can
@@ -12,8 +12,8 @@ become readable — and therefore economically actionable intelligence.
 
 ## 1. The laws (binding on the implementation)
 
-1. **The journal is a RENDERING, never state.** No new chronicle events, no
-   receipts, no simulation reads. It generates LENS-SIDE from the
+1. **The journal is a rendering, never state.** No new chronicle events, no
+   receipts, no simulation reads. It generates lens-side from the
    chronicle + committed state (the lens law — MIRROR/ANTI-MIRROR
    deprecated, 12 §2c; a lens derives from the one chain and holds no
    copy). Deleting every journal changes nothing; regenerating
@@ -30,15 +30,15 @@ become readable — and therefore economically actionable intelligence.
 5. **A year = 60 ticks** (placeholder) — one field of the TUniversal
    base-60 odometer; the entry header shows the odometer cycle.
 
-## 2. State→text mapping (all from EXISTING state)
+## 2. State→text mapping (all from existing state)
 
 | source | narrative |
 |---|---|
-| banked joules vs heating need | surplus → building/expanding; deficit → RED alert: fuel sought before freeze-lock |
-| famine list / freeze-lock | RED alert per resource, dormant zones named |
+| banked joules vs heating need | surplus → building/expanding; deficit → red alert: fuel sought before freeze-lock |
+| famine list / freeze-lock | Red alert per resource, dormant zones named |
 | overheat / `entropy_vented` delta | thermal stress, radiator exhaustion vs pristine syntropic operations |
 | banked sink + vault band | offering absorption capacity to Furnace traders |
-| zone mix + growth (receipts this year) | what they BUILT; growth rate as exact `p/q` per year |
+| zone mix + growth (receipts this year) | what they built; growth rate as exact `p/q` per year |
 | registry axes (disposition/metabolism/perception) + StarClass/band | leisure & culture flavor (digest-seeded variants) |
 | chartered colonies / entities registered | expansion, population notes, "seeking space" |
 
@@ -56,7 +56,7 @@ Trade requests derive: joule deficit → seeking fuel; high sink → selling
   sweep. Cyber-noir: background `#0a0a10`, neon blue `#00f3ff`
   headers/metadata, neon cyan `#00ffbf` body, neon red `#ff0055` alerts.
   Single-column newest-first card feed; client-side filter bar (sector /
-  faction / alert type). Display animation may be free; CONTENT is static.
+  faction / alert type). Display animation may be free; content is static.
 - Conductor writes journals + wall on year boundaries; CLI gains `journal`
   (print this world's feed, styled).
 

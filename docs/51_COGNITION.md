@@ -1,4 +1,4 @@
-# 51 — COGNITION: THE UNIVERSE AND THE MIND
+# 51 — Cognition: the universe and the mind
 
 **The ruling that separates physics from thought. Downstream of `00_CHARTER`;
 binding on the intelligence arc (`iae`, `substrate`) and everything that mints.**
@@ -9,30 +9,30 @@ with a single exact seam between them. This document is the law of that split.
 
 ---
 
-## 1. THE TWO TIERS (binding)
+## 1. The two tiers (binding)
 
-> **AMENDED by `53_INTELLIGENCE_PORT` (operator ruling 2026-08-17).** The
-> Universe half of this section STANDS, absolute and unchanged. The Mind half —
+> **Amended by `53_INTELLIGENCE_PORT` (operator ruling 2026-08-17).** The
+> Universe half of this section stands, absolute and unchanged. The Mind half —
 > "stochastic, float-tolerant, proposes/guesses candidate generators" — is
-> RETIRED: it was the costume. The Mind does not sample; it OBSERVES. See §1a.
+> retired: it was the costume. The Mind does not sample; it observes. See §1a.
 
 > **The Universe is exact and deterministic; it commits. The Mind is exact and
 > observational; it reduces. Nothing the Mind reduces enters the Universe except
 > through the exact verifier, and the verifier admits only what conserves.**
 
-**THE UNIVERSE (the kernel).** Exact `ℚ/ℤ` (and later `ℚ[x₁…xₘ]`), deterministic,
+**The universe (the kernel).** Exact `ℚ/ℤ` (and later `ℚ[x₁…xₘ]`), deterministic,
 replayable. It holds the state, computes the exact obstruction, runs the exact
 verification (Smith Normal Form today; Gröbner bases / free resolutions when
 multivariate generators appear), and is the **only tier that commits a deed**.
 Conservation is enforced here (`kernel::admits`). No float, no threshold, no
 heuristic score ever enters this tier — that law is unchanged and absolute.
 
-### 1a. THE MIND IS EXACT OBSERVATION (binding, `53`)
+### 1a. The mind is exact observation (binding, `53`)
 
-**THE MIND (the entity-level observer).** Exact, learned, `grown_basis`-seeded —
-**no float, no candidate loop.** It does not guess; it PEELS a pair (a grid at the
+**The mind (the entity-level observer).** Exact, learned, `grown_basis`-seeded —
+**no float, no candidate loop.** It does not guess; it peels a pair (a grid at the
 ARC seat, a book at the survival seat), canonicalizes-and-DIFFERENCES the pair
-against the crystals it has already grown, and **the residual NAMES the deed** —
+against the crystals it has already grown, and **the residual names the deed** —
 the entity becomes the thing that recognized the leftover. Intelligence lives in
 *which book or family is read first* (need orders; observation supplies), never in
 *which candidate is sampled*. A mind whose biomass book is short builds or razes
@@ -43,7 +43,7 @@ is brute force no matter how much cohomology it wears — but a *stochastic
 proposer* that *samples* candidates is the same brute force wearing a noise
 generator, and a *utility-weighted partition-draw* over candidates is the same
 sweep-and-pick wearing a weight. The cognition was never going to live in a
-proposal distribution; it lives in the REDUCTION — peel → difference → drain
+proposal distribution; it lives in the reduction — peel → difference → drain
 against grown crystals → decline through a deduced frame → compose only on the
 remainder. Remove the observation and there is nothing to reduce; remove the exact
 Universe and the render hallucinates unconserved state. Both, jointly — one
@@ -51,7 +51,7 @@ reduction organ at two seats — are bounded cognition. Floats are forbidden in
 *both* tiers now; the thought is as exact as the world it commits to. `53` is the
 carrier; this section is its seam.
 
-## 2. DETERMINISM IS PRESERVED BY SEEDING (binding)
+## 2. Determinism is preserved by seeding (binding)
 
 The Mind's stochasticity must never make the Universe unreplayable. Every
 proposer is seeded strictly from state: `seed = BLAKE3(state_digest)` (the same
@@ -62,7 +62,7 @@ the same chronicle reproduces the same guesses and the same mints. Only exact,
 verified results are committed; the proposal path itself carries no state the
 Universe depends on.
 
-## 3. THE PROPOSE → VERIFY → MINT LOOP (the seam)
+## 3. The propose → verify → mint loop (the seam)
 
 1. **Obstruction.** The Universe measures the task locally (`iae::resolve`) and
    reduces it against the local vocabulary; the exact irreducible harmonic
@@ -79,7 +79,7 @@ Universe depends on.
    could not reach: capability grows in rank, not just reachability, and future
    reductions kill the once-obstructed class in `O(1)`.
 
-## 4. PMC — THE EXACT SKELETON, THE CONTINUUM FRAME
+## 4. PMC — the exact skeleton, the continuum frame
 
 The architecture is **Polymorphic Morphodynamic Coheterology**: a state is a
 morphic section of a polymorphic sheaf complex, not a rigid matrix. Its
@@ -107,7 +107,7 @@ semantic frame, realized *discretely and exactly*: adjoining a generator with
 boundary," done in one algebraic step rather than by integrating a PDE. The frame
 never enters the Universe as float.
 
-## 5. WHAT IS TOO LIMITED, AND WHEN IT IS REPLACED
+## 5. What is too limited, and when it is replaced
 
 SNF exists only over a PID (`ℤ`, single-variable `ℚ[x]`). It is the base verifier
 and it is genuinely too limited for multivariate polynomic generators — there
@@ -118,7 +118,7 @@ the proposer actually emits multivariate generators. A multivariate quotient
 engine built before a system that proposes multivariate generators is untestable
 dead code.
 
-## 6. BIND, DON'T FOLD (binding, not subtractive collapse)
+## 6. Bind, don't fold (binding, not subtractive collapse)
 
 > **A manifold does not disappear when it solves a problem; it binds to it. The
 > engine retains the binding — the overlap and its torsion twist — never

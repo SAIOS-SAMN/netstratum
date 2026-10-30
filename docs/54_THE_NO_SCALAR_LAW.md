@@ -1,4 +1,4 @@
-# 54 - THE NO-SCALAR LAW and the OCULAR re-founding
+# 54 - the no-scalar law and the ocular re-founding
 
 Operator ruling 2026-08-20. Standing law, no exception.
 
@@ -37,7 +37,7 @@ built on the wrong one.
   (pair, coordinate, exact value). Nothing sums, nothing rounds.
 - `divergence(delta)_i = sum_j Delta_ij` is the signed source/sink reading:
   egress (a node produces more than it absorbs), ingress (it sinks), or balanced.
-  The books close (sum of divergences is zero by antisymmetry). This IS an
+  The books close (sum of divergences is zero by antisymmetry). This is an
   economy's net production-minus-consumption, per resource, exact, conserved.
 - `coboundary_reduce` already clears denominators exactly (multiply by the lcm,
   divide by the gcd of numerators) when an integer representative is genuinely
@@ -111,30 +111,30 @@ because they stop being rounded. Each slice commits green with its witness.
 ## 6 The complementary law — every ledger declares its grain at its fill site
 
 Operator ruling 2026-08-20 (the third occurrence of one disease: leisure banks, the
-d_orbit hypothesis, now element stocks). The no-scalar law above governs COGNITION,
+d_orbit hypothesis, now element stocks). The no-scalar law above governs cognition,
 where exactness is unbounded and protected forever. Its complement governs the
-WORLD:
+world:
 
 **Every conserved world-physics ledger declares its grain at its fill site.
 Unbounded exactness is reserved for cognition, where it is law.**
 
 A grain is a quantum of measure on a fluid medium — not a lattice. A lattice is a
-rigid crystal that collapses dimensionality; the SMELT floor does the opposite: it
+rigid crystal that collapses dimensionality; the smelt floor does the opposite: it
 holds a *stock* to a measurable resolution while the medium stays fluid. We do not
 say "lattice" here, and the word must not creep back in: names shape what gets
 built, and a conserved ledger is a measured fluid, not a crystal.
 
 A conserved ledger (element stocks, banked matter, leisure) is quantised to its own
-grain by SMELT-flooring every fill at the site the delta lands. Each ledger declares
-ITS grain: the market/resource ledger speaks 1/64 (`smelt(x) = floor(x·64)/64`, the
-grain the melt law speaks); the ELEMENT ledger speaks the finer 1/1024
+grain by smelt-flooring every fill at the site the delta lands. Each ledger declares
+its grain: the market/resource ledger speaks 1/64 (`smelt(x) = floor(x·64)/64`, the
+grain the melt law speaks); the element ledger speaks the finer 1/1024
 (`smelt_element`, the grain ONT-2 already floors the vein integral to), because
-element MINTS — the food synthesis `joule·richness`, the vein flow — are naturally
+element mints — the food synthesis `joule·richness`, the vein flow — are naturally
 sub-1/64 and flooring them to 1/64 floors small quanta toward zero and starves the
 food economy. 1/1024 preserves 16× finer food while still bounding every element
 denominator to ≤ 1024 (~10 bits): the explosion cannot recur. The dominant haul
 floors to 1/64 (a coarser sub-grid, 64 | 1024, still on the element grain), so the
-whole element ledger stays `denom | 1024`. This is NOT the environment grain-rate
+whole element ledger stays `denom | 1024`. This is not the environment grain-rate
 (`grain_rate`, a best-rational approximation of a *rate* at a call site);
 a floor at a fill and a rate-grain at a call site are different instruments, and
 element math must use neither rate-grain nor unbounded drift. A fill smelted below
@@ -143,12 +143,12 @@ giver, or the audited void records it — matter included).
 
 The disease this prevents is not denominator blowup as such — it is discovering,
 per hot loop, that a ledger never declared its grain. `haul_element` bypassed the
-SMELT and element stocks drifted to 107,756-bit denominators, stalling `mass_of` at
+smelt and element stocks drifted to 107,756-bit denominators, stalling `mass_of` at
 96 s/beat; the trace convicted it (top_build 6 ms, mass_build 96350 ms). One
 standing rule ends the series: when you add a conserved world-ledger, floor its
 fills.
 
-The forward fix stops NEW drift; the existing exploded stocks are floored once by a
+The forward fix stops new drift; the existing exploded stocks are floored once by a
 committed **smelt-sweep event** in the era stream (a receipted deed, so
 `replay == committed` holds across historical eras), carrying conservation-with-dust
 (pre = post + recorded dust, bit-exact — residuals never vanish). A standing

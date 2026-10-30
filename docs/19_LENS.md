@@ -1,6 +1,6 @@
-# 19 — THE LENS LAW: observation, magnification, and motion
+# 19 — The lens law: observation, magnification, and motion
 
-**Status:** LANDED (2026-08-02). Every reading described here is built
+**Status:** landed (2026-08-02). Every reading described here is built
 and pinned; §14 is the inventory. Subordinate to `00_CHARTER.md` and
 `26_ARTICLES.md`.
 
@@ -10,7 +10,7 @@ amends no other lane's law.
 
 ---
 
-## §1 WHAT A LENS IS, AND THE ONE RULE
+## §1 What A lens is, and the one rule
 
 A lens **reads and reports**. It never gates.
 
@@ -22,49 +22,49 @@ total, and no longer replayable step-by-step.* The lens is therefore
 the boundary is what makes this lane structurally unable to break the
 judge. The worst a lens defect does is misreport.
 
-### 1.0 THE OPERATOR DISPLAY BOUND — no privileged seat
+### 1.0 The operator display bound — no privileged seat
 
 **Ruled 2026-08-02: the word "human" is struck from the law and the
-code, and replaced by OPERATOR everywhere it named a SEAT.**
+code, and replaced by operator everywhere it named a seat.**
 
 The corpus carried an exception phrased as *"only where a reading is
 reported to a human lens."* That phrasing was a hazard, not a courtesy:
 it made the strictness of the mathematics depend on **who was
 watching**, and a rule that relaxes for one kind of observer is a
 backdoor through which cosmetic and approximate forms enter and stay.
-There are no humans at the code level. There are only OPERATORS, and an
+There are no humans at the code level. There are only operators, and an
 operator may be organic, synthetic, procedural, or another subsystem.
 **The seat does not care.**
 
 **This enforces a law already landed rather than adding one.**
-`12_UNION` §5a — THE SUBSTRATE LAW, NO ANTHROPIC GATE — already rules
+`12_UNION` §5a — the substrate law, no Anthropic gate — already rules
 that *the union must not overlook anyone through the human perspective
 ingrained in its logic; intelligence is any dynamic that can carry a
-chronicle, in ANY substrate.* The "human lens" exception was that same
+chronicle, in any substrate.* The "human lens" exception was that same
 anthropic gate, surviving in the sealed math and the law documents after
 the law had already refused it.
 
-**THE BOUND, replacing the exception:**
+**The bound, replacing the exception:**
 
-> A display projection generated for an OPERATOR interface is a
+> A display projection generated for an operator interface is a
 > **terminal string representation**. It carries zero accessors, zero
 > ordering traits, and strictly zero write-back capability into any
 > computing or decision path.
 
 So the L1 aggregate is still admitted at this surface — and is now
-admitted on a STRUCTURAL condition rather than a demographic one.
+admitted on a structural condition rather than a demographic one.
 `luminal::Amplitude` is the bound made real: exact rational in,
 `String` out, no accessor, no ordering. Uniform determinism for every
 seat.
 
-**WHAT WAS NOT STRUCK, and the distinction is the same layer discipline
-that reverted the roster sweep.** `humans` as a CIVILIZATION NAME, the
-`humanoid` clade, `human-readable`, `Human Capital` — all CONTENT, all
+**What was not struck, and the distinction is the same layer discipline
+that reverted the roster sweep.** `humans` as a civilization name, the
+`humanoid` clade, `human-readable`, `Human Capital` — all content, all
 untouched. A species in the roster is not a privileged seat, and
 renaming it would be the layer error, not the cure. What was struck is
-every place "human" named a SEAT or licensed an EXCEPTION.
+every place "human" named a seat or licensed an exception.
 
-**THE STANDING TRAP.** A reading used as a target stops being a reading.
+**The standing trap.** A reading used as a target stops being a reading.
 Work reshapes itself into whatever the number counts, and the measure
 stops measuring. `27_EVIDENCE` records that this system's own author made
 that mistake once already. Every reading below is a reading; none is an
@@ -72,9 +72,9 @@ objective; nothing optimizes any of them.
 
 ---
 
-## §1a HOW THIS LANE AVOIDS BECOMING A MIRROR
+## §1a How this lane avoids becoming A mirror
 
-`00_CHARTER` §3a bans the banned instrument as structure AND as word,
+`00_CHARTER` §3a bans the banned instrument as structure and as word,
 and its warning is aimed precisely here. §3a records that the crate it
 excised ***was born a read-only dashboard and was safe while that was
 all it was — it became load-bearing one useful change at a time, and no
@@ -83,17 +83,17 @@ wrong, so this section is the rule that stops it. The excised name is
 not reproduced here: §3a is the one article licensed to say it, because
 the article defining a ban must be able to name what it bans.
 
-**THE TWO SIGNATURES OF A MIRROR**, from §3a:
+**The two signatures of A mirror**, from §3a:
 
-1. **DIRECTION** — it points INWARD at the system rather than OUTWARD at
+1. **Direction** — it points inward at the system rather than outward at
    an object. *"A system that inspects itself and calls the looking work
    is precisely `α ≅ Ω`."*
-2. **THE COPY** — *"because a mirror returns the self, it must hold a
+2. **The copy** — *"because a mirror returns the self, it must hold a
    second image to return — and from that moment there are two things
    that can disagree, and every reconciler after it is a tool built to
    manage a problem that should not exist."*
 
-**THE TEST, applied to every reading in this document.** A reading is a
+**The test, applied to every reading in this document.** A reading is a
 lens only if it passes all three:
 
 ```text
@@ -110,30 +110,30 @@ lens only if it passes all three:
               forbids outright.
 ```
 
-**THE SCOPE-TIGHTENING RULES, binding on this lane:**
+**The scope-tightening rules, binding on this lane:**
 
-- **DERIVE, NEVER RETAIN.** Every reading is a pure function of
+- **Derive, never retain.** Every reading is a pure function of
   committed state, computed at the moment it is asked for and discarded
   after. No lens type holds a field that is a copy of world state.
-- **RENDER-ON-DEMAND MEANS COMPUTE LESS, NEVER STORE MORE** (§4). This
+- **Render-on-demand means compute less, never store more** (§4). This
   is the sharpest edge in the lane. The obvious way to "render only when
-  needed" is a cache — compute once, keep it, serve it — and a cache IS
+  needed" is a cache — compute once, keep it, serve it — and a cache is
   the second image, arriving as an optimization exactly the way the old
-  dashboard did. The optimization here is LAZINESS: not descending a
-  peel nobody is looking through. It is never MEMOISATION.
-- **NO PRIVATE HISTORY.** Readings that span steps (§2a kinematics) read
-  two points FROM THE CHAIN. They never accumulate their own buffer —
+  dashboard did. The optimization here is laziness: not descending a
+  peel nobody is looking through. It is never memoisation.
+- **No private history.** Readings that span steps (§2a kinematics) read
+  two points from the chain. They never accumulate their own buffer —
   the chain is the one record (§11 rule 1), and a lens keeping its own
   timeline is a second one.
-- **NO TALLIES.** A counter that accumulates is a record. Where a
+- **No tallies.** A counter that accumulates is a record. Where a
   frequency is wanted, it derives from receipted deeds, or it is
-  conducted as an EXPERIMENT in a harness (§7a) — never kept as running
+  conducted as an experiment in a harness (§7a) — never kept as running
   state inside the live system.
-- **THE LENS IS DELETABLE.** At any moment, deleting this entire lane
+- **The lens is deletable.** At any moment, deleting this entire lane
   must cost the system nothing but visibility. If removing a lens would
   lose information or break a rule, it had stopped being a lens.
 
-**THE STERILE BOUNDARY, stated formally.** Let `W` be the committed
+**The sterile boundary, stated formally.** Let `W` be the committed
 state and `L` the lens execution:
 
 ```text
@@ -154,9 +154,9 @@ state and `L` the lens execution:
 `W \ L ≡ W` is the whole lane in one line: **remove the lens and the
 world is unchanged.**
 
-**HELD BY A STANDING TEST, NEVER BY MEMORY** (operator ruling
+**Held by A standing test, never by memory** (operator ruling
 2026-08-02, `test_lens_deletability`). Rule 5 as prose is worth nothing
-— prose failed twice in one day in this tree, which is what LAW 8 and
+— prose failed twice in one day in this tree, which is what law 8 and
 `constitution_lint` exist to say. The invariant is mechanical:
 
 > If the kernel, sealed math, cfe, codec, mesh or conductor fail to
@@ -168,29 +168,29 @@ first run:**
 
 | assertion | what it holds |
 |---|---|
-| `no_sealed_crate_depends_on_a_lens` | the judge, the sealed math, cfe, codec, mesh, physics and both solver crates name no lens crate in ANY dependency table — dev included, since a law test that renders cannot run once the lens is gone |
-| `the_ledger_never_depends_on_a_lens_at_runtime` | `#37`'s split holds: the ledger may build fixtures through the display writers in DEV only, never at runtime |
-| `the_conductor_renders_but_never_decides_on_a_reading` | the one lawful edge, pinned by SHAPE rather than absence |
+| `no_sealed_crate_depends_on_a_lens` | the judge, the sealed math, cfe, codec, mesh, physics and both solver crates name no lens crate in any dependency table — dev included, since a law test that renders cannot run once the lens is gone |
+| `the_ledger_never_depends_on_a_lens_at_runtime` | `#37`'s split holds: the ledger may build fixtures through the display writers in dev only, never at runtime |
+| `the_conductor_renders_but_never_decides_on_a_reading` | the one lawful edge, pinned by shape rather than absence |
 
-**THE DIRECTION IS THE LAW, not the dependency.** A CLIENT may render —
+**The direction is the law, not the dependency.** A client may render —
 that is what a client is for, and `16_UNIT` §2 names the conductor a
-client of units. The ban is on a lens standing UPSTREAM OF THE JUDGE,
+client of units. The ban is on a lens standing upstream of the judge,
 because from that moment deleting it breaks a rule rather than dimming a
 light.
 
-**A CONSTANT IS NOT A READING** — the precision the third assertion
+**A constant is not A reading** — the precision the third assertion
 required. The conductor branches on `scribe::journal::YEAR_TICKS` to
-decide WHEN to write a journal. That is a cadence: a fixed number saying
+decide when to write a journal. That is a cadence: a fixed number saying
 how often to render, and a branch on it decides only whether a light
-comes on. A READING is what a lens COMPUTES FROM WORLD STATE, and a
+comes on. A reading is what a lens computes from world state, and a
 branch on one of those puts the world's behaviour downstream of an
-observation. **Only a lens CALL result may never be bound or branched
+observation. **Only a lens call result may never be bound or branched
 on.** The cadence coupling is recorded here rather than refused; if
 `YEAR_TICKS` ever wants a home outside the lens, that is a tidiness
 question and not a mirror.
 
 **Why the outward test passes here.** Every reading below is turned on
-an OBJECT: the peel resolves a relation `Δ`; resonance compares an
+an object: the peel resolves a relation `Δ`; resonance compares an
 entity against a manifold; the `Vacuity` surface reads a world. None
 inspects the lens. The one reading that could point inward — a lens
 reporting on its own rendering — is not built and is barred by this
@@ -198,40 +198,40 @@ section.
 
 ---
 
-## §2 THE THERMODYNAMIC READING IS NOT ENOUGH
+## §2 The thermodynamic reading is not enough
 
 **Operator ruling 2026-08-02:** *thermodynamics is unguided entropy —
 how fast to infinity, how fast to so small its information density
 explodes.* It says a system will run down. It does not say how a system
-MOVES.
+moves.
 
-Article III LAW 4 (the Second Law) is correct and stays: work requires a
+Article III law 4 (the Second Law) is correct and stays: work requires a
 gradient, and a flat field yields none. But it is a statement about
-whether work is POSSIBLE, not about the shape of the motion when it
+whether work is possible, not about the shape of the motion when it
 happens. A lens built only on it can report that a world is `Stasis` and
 nothing further — no direction, no speed, no resonance.
 
 Two layers are available and are not yet read here.
 
-### 2a. KINEMATICS — the pressure of the twist
+### 2a. Kinematics — the pressure of the twist
 
 The ancestor draws the distinction exactly (`/opt/ipsal-autic-v0.1`,
 `docs/mathematics/umd_at_cognition_layer.md` §2):
 
 | layer | content |
 |---|---|
-| **manifold** | **torsion = the TWIST event** — a non-trivial element of `π₁(ℳ)` |
-| **kinematic** | **the PRESSURE of that twist** — the strain it generates |
+| **manifold** | **torsion = the twist event** — a non-trivial element of `π₁(ℳ)` |
+| **kinematic** | **the pressure of that twist** — the strain it generates |
 
 *"Dual witnesses of the same event."*
 
 **Netstratum has the first and not the second.** `orbit_lock`,
-`holonomies` and the fold gate detect that a twist IS. Nothing reads how
+`holonomies` and the fold gate detect that a twist is. Nothing reads how
 hard it pushes. That missing reading is the motion this lane owes.
 
-### 2b. MORPHODYNAMICS — one manifold, K phase angles
+### 2b. Morphodynamics — one manifold, K phase angles
 
-UMD, stated in one line: **ONE manifold observed from K phase angles;
+UMD, stated in one line: **one manifold observed from K phase angles;
 the twist between angles measured as kinematic pressure; coherence is
 the residual at minimum tension.**
 
@@ -239,12 +239,12 @@ The consequence that matters for a lens: two views that disagree are not
 two objects. They are one object seen from two angles, and the
 disagreement is the reading. `SensoryCompound` (K=4) makes the
 dependence explicit — *vision / hearing / touch / refraction phase
-angles **per orbital radius***. Perception varies with DISTANCE, which
+angles **per orbital radius***. Perception varies with distance, which
 is §3.
 
 ---
 
-## §3 MAGNIFICATION IS A DEPTH, NOT A FEATURE
+## §3 Magnification is A depth, not A feature
 
 `perception/nested_peel.rs` settles the telescope/microscope question,
 and its own header carries the decisive claim: *coboundary decomposition
@@ -256,8 +256,8 @@ gives the 3-layer structure — **no new mathematical primitives**.*
     Δ_cell     the raw relation, exact entries     HOW assembled   NEAR  microscopic
 ```
 
-*"Each outer peel constrains the inner. The outer finds WHAT changed;
-the next finds WHERE; the innermost finds HOW."*
+*"Each outer peel constrains the inner. The outer finds what changed;
+the next finds where; the innermost finds how."*
 
 **Netstratum already computes all three.** `coboundary_reduce` yields the
 representative; `holonomies` and the residual field yield the boundary
@@ -270,7 +270,7 @@ it. Zooming out does not lose precision; it removes frame.
 
 ---
 
-## §4 RENDER ON DEMAND — the observable universe
+## §4 Render on demand — the observable universe
 
 An observable universe must render only what is observed, at only the
 depth it is observed at.
@@ -283,18 +283,18 @@ peel is descended only on approach.
 **The bound is the observer's own capacity, not a frame budget**
 (`orbital/kinetic.rs`, LAW-13): *the entity cannot see deeper than its
 capacity allows, regardless of pressure — the effective limit is
-`min(requested, κ)`.* That makes level-of-detail a LAWFUL property of
+`min(requested, κ)`.* That makes level-of-detail a lawful property of
 the observer rather than a performance hack, and it means a lens can
 never be pressured into rendering more than the observer has standing to
 see.
 
 ---
 
-## §5 RESONANCE — PROPAGATION, not a matching threshold
+## §5 Resonance — propagation, not a matching threshold
 
-**THE CORRECTION (operator, 2026-08-02), and it reaches the whole
-section.** Resonance is NOT a static match against a threshold. It is
-the dynamic RATE AND BOUNDARY function governing how an originating
+**The correction (operator, 2026-08-02), and it reaches the whole
+section.** Resonance is not a static match against a threshold. It is
+the dynamic rate and boundary function governing how an originating
 volume expands, contracts, degrades and accelerates over time through
 the medium surrounding it.
 
@@ -305,32 +305,32 @@ the medium surrounding it.
     DECAY       degradation across the separation, over elapsed steps
 ```
 
-**BOTH POLES ARE NAMED** (operator correction 2026-08-02, *invert to
+**Both poles are named** (operator correction 2026-08-02, *invert to
 convergence*). This section first read the motion as `expansion`, a
 signed scalar with the direction taken from its sign — which named a
-TWO-POLE reading after ONE pole and carried the same fact twice.
+two-pole reading after one pole and carried the same fact twice.
 Convergence arrived as *negative expansion*.
 
-It is the SAME fault corrected the same day one file away in
+It is the same fault corrected the same day one file away in
 `rfa_core::capacity`, inverted: there a pole was named for its failure
 mode, here for its opposite. `Egress { sources, TRAPPED, balanced }`
 became `Flux { sources, sinks, balanced }`: **divergence sources,
 convergence sinks, and neither is the other's absence.**
 
-**Convergence is a CAPABILITY.** `05 §1.4` — a dim-star system holds the
-rarest resource in a high-flux universe, radiator headroom, and SELLS
+**Convergence is a capability.** `05 §1.4` — a dim-star system holds the
+rarest resource in a high-flux universe, radiator headroom, and sells
 it. The Frost trades convergence. A reading that renders it as shrinkage
 prices a capability as a loss, and `24_FORM` §2d's own correction
-says why the old framing was wrong: *trapped is convergence MINUS the
+says why the old framing was wrong: *trapped is convergence minus the
 shedding, never convergence itself.*
 
 The ancestor's `|angular_valency − spin| ≤ tolerance` is a threshold
 test, and a threshold test is a photograph of something that is only
 meaningful as a film. **What was landed here first — a depth-indexed
-match — is honest and is NOT resonance**; it is renamed to what it does
+match — is honest and is not resonance**; it is renamed to what it does
 (`Alignment`, §13) and resonance is rebuilt as propagation.
 
-### 5a. THE PROPAGATION PHYSICS, IN DISCRETE EXACT FORM
+### 5a. The propagation physics, in discrete exact form
 
 **The relayed form is continuous and cannot be transcribed:**
 
@@ -341,13 +341,13 @@ match — is honest and is NOT resonance**; it is renamed to what it does
         D(t,d) = decay_consumed(t) · distance_from_origin(d)
 ```
 
-`exp` is TRANSCENDENTAL and `∫` / `d/dt` are continuous. This substrate
+`exp` is transcendental and `∫` / `d/dt` are continuous. This substrate
 admits neither: exactness is a type-level guarantee, and **the chain is
-discrete — one commitment per step, which is `c` itself** (LAW 5).
+discrete — one commitment per step, which is `c` itself** (law 5).
 Transcribing the relayed form would put an approximation into the
 substrate, which is the fault this document has now caught four times.
 
-**The physics survives whole. Steps ARE the clock, so every derivative
+**The physics survives whole. Steps are the clock, so every derivative
 is a difference and every integral is a sum:**
 
 ```text
@@ -364,7 +364,7 @@ Nothing is collapsed to a rate-scalar; the direction survives every
 reading, because *outward* and *inward* are the whole content and a
 magnitude discards exactly that.
 
-### 5b. THE MEDIUM — the accompaniment that speeds or damps
+### 5b. The medium — the accompaniment that speeds or damps
 
 A volume does not propagate through nothing. The surrounding economic
 medium **modulates the velocity**: it either accelerates the motion
@@ -379,9 +379,9 @@ is owed, what capacity stands nearby.
     η < 1   the accompaniment DECELERATES — the medium damps
 ```
 
-**η is DERIVED, never dialed** (LAW 6), for the reason §5c gives.
+**η is derived, never dialed** (law 6), for the reason §5c gives.
 
-**WHAT IT IS DERIVED FROM, settled 2026-08-02.** Until now this clause
+**What it is derived from, settled 2026-08-02.** Until now this clause
 was a promise and the code took `retained` and `shed` as arguments, so η
 was dialed by whoever called it — the exact thing the sentence above
 forbids, sitting one file away from the sentence. The pairing that
@@ -397,19 +397,19 @@ Both are committed state summed across every orb, so the medium is a
 fact about the world rather than an argument about it. A world that
 keeps more than it loses accelerates what propagates through it; one
 bleeding faster than it holds damps. **A world that has vented nothing
-is INERT, not infinitely fast** — the surround has taken nothing away
+is inert, not infinitely fast** — the surround has taken nothing away
 yet, and that is a reading rather than a division by zero.
 
-This is what LAW 6 actually asks for: two observers reading one chain
+This is what law 6 actually asks for: two observers reading one chain
 now derive one η independently, which a passed-in parameter could never
 guarantee no matter how carefully it was documented.
 
-### 5c. WHY NO TOLERANCE CONSTANT SURVIVES
+### 5c. Why no tolerance constant survives
 
 The earlier draft here proposed a fixed ruled tolerance, then a
 depth-derived one. **Both are superseded**: under propagation there is no
-threshold at all to set. A reading of resonance reports a PACE, a
-DIRECTION and a DEGRADATION — three quantities carried whole — and never
+threshold at all to set. A reading of resonance reports a pace, a
+direction and a degradation — three quantities carried whole — and never
 a verdict of *matched / not matched*.
 
 That removes the attack surface entirely rather than shrinking it.
@@ -418,7 +418,7 @@ needs to be tuned"*; a reading with no parameter has nothing to tune,
 and two observers reading the same chain get the same pace because a
 difference of two committed states is not a matter of opinion.
 
-## §6 THE APERTURE — per-observer, without belief
+## §6 The APERTURE — per-observer, without belief
 
 `perception/harmonic_tuning.rs` carries the per-observer bias: an
 11-channel exact-rational weighting under which an entity reads what it
@@ -426,7 +426,7 @@ sees. *"Each entity is the same kernel viewing the same observation
 through its own chromatic spectrum."* The compound is a bounded
 running average, `h[k]' = (h[k]·n + signal)/(n+1)`, exact throughout.
 
-This is how a lens becomes per-observer without violating LAW 9. **No
+This is how a lens becomes per-observer without violating law 9. **No
 belief enters any rule.** The substrate is identical for every observer;
 what differs is the aperture through which it is read, and an aperture
 is a measured weighting rather than a conviction. Two observers may
@@ -436,10 +436,10 @@ observer.
 
 ---
 
-## §7 WHAT MUST BE TRANSLATED, NEVER TRANSCRIBED
+## §7 What must be translated, never transcribed
 
 The ancestor is consulted, never ported (`00_CHARTER` §5). Two of its
-forms are BARRED here and must not arrive intact.
+forms are barred here and must not arrive intact.
 
 **1. The coherence velocity of Theorem β.**
 
@@ -452,8 +452,8 @@ cosmetic meter `Ξ = deeds/(1+ΔD)`; and it collapses a directional
 quantity to a scalar magnitude, which `24_FORM` §2b bars wherever the
 system computes.
 
-**The idea survives and is worth having:** velocity as a DIFFERENCE OF
-READINGS ACROSS CHAIN STEPS, derivable from the chain alone with no
+**The idea survives and is worth having:** velocity as a difference of
+readings across chain steps, derivable from the chain alone with no
 future state. The lawful form carries it **per index and per channel**,
 never as a norm — the same discipline `Extent` already keeps by
 reporting per index rather than one capacity number.
@@ -462,30 +462,30 @@ reporting per index rather than one capacity number.
 and barred for the same reason. The step's outcome may carry its
 per-index difference; it may not carry its length.
 
-**The general rule for this lane:** the ancestor's SHAPES are reference;
+**The general rule for this lane:** the ancestor's shapes are reference;
 every scalar, scored, or capped form is refused. That is the charter's
 standing instruction on provenance, and this document is bound by it.
 
-### 7a. A HARNESS IS NOT A MIRROR — and it is where frequencies live
+### 7a. A harness is not A mirror — and it is where frequencies live
 
 The consultation ledger — proposals offered against proposals withdrawn
 at the sector door — looked like a lens obligation and is not one, and
 the distinction matters beyond this instance.
 
-**A ledger ACCUMULATES. That is a second record**, and §1a forbids it:
+**A ledger accumulates. That is a second record**, and §1a forbids it:
 a running tally inside the live system is a copy that can disagree with
 the chain, and the reconciler that follows is exactly what §11 rule 5
 clause 1 bars. A withdrawal at the door is not a receipted deed — it
 never reaches the chain — so there is nothing for a lens to derive a
-frequency FROM. Counting it privately would be inventing the record.
+frequency from. Counting it privately would be inventing the record.
 
 Two lawful homes, and neither is a lens:
 
-1. **RECEIPT THE WITHDRAWAL.** If the proposal-to-verified ratio is to
+1. **Receipt the withdrawal.** If the proposal-to-verified ratio is to
    be a property of the world, the withdrawal must become a deed and
    ride the chain like any other. That is codec and kernel work, not
    this lane's, and it is the heavier of the two.
-2. **CONDUCT IT AS AN EXPERIMENT.** A harness runs `N` trials and
+2. **Conduct it as an experiment.** A harness runs `N` trials and
    reports what happened in those trials. It reflects no committed
    state, holds no second image of the world, and is deletable without
    loss — so it is neither lens nor mirror. It is an instrument that
@@ -497,34 +497,34 @@ harness already lives — it tracks hit-rates per rung by running trials,
 not by remembering. The ledger belongs beside it.
 
 **The general form:** where a frequency is wanted, either the events are
-receipted and the frequency DERIVES, or it is measured by EXPERIMENT.
+receipted and the frequency derives, or it is measured by experiment.
 There is no third option in which a lens keeps count.
 
 ---
 
-## §8 WHAT THIS LANE DOES NOT TOUCH
+## §8 What this lane does not touch
 
 - `admits()` and everything in `engine/kernel/src` — kernel lane.
-- `engine/rfa-core/` — kernel lane. The lens CONSUMES `coboundary_reduce`,
+- `engine/rfa-core/` — kernel lane. The lens consumes `coboundary_reduce`,
   `holonomies`, `Delta`, `Vacuity`; it does not modify them.
 - `26_ARTICLES`, `17_CAPACITY`, `EQUATIONS`, `kernel/CHARTER.md` — kernel
-  lane's documents. Defects found in them are REPORTED, never edited
+  lane's documents. Defects found in them are reported, never edited
   from here.
 
 ---
 
-## §9 THE OPEN REPORT — a stale debt pointing at struck law
+## §9 The open report — a stale debt pointing at struck law
 
-Two live pointers aim at a STRUCK meter: `25_STANDING` §6 debt 1 reads
+Two live pointers aim at a struck meter: `25_STANDING` §6 debt 1 reads
 *"`Ξ_cosmetic` is not measured … First build"*, and §7b routes an
 *"Art. III window reading"* to `scribe`/`lens`.
 
 **Both point at law that no longer exists.** Article III was struck whole
-and rewritten as THE SCIENCE FOUNDATION; its strike list names
+and rewritten as the science foundation; its strike list names
 `Ξ(w) = deeds(w)/(1+ΔD(w))` and the term "cosmetic non-utility"
 explicitly, and its reasoning is that *physics needs no penalty — a
 closed loop at uniform potential does no work, not because a law forbids
-it but because there is no free energy in it.* LAW 4 now carries that
+it but because there is no free energy in it.* Law 4 now carries that
 ground, via `dual_pole` / `Vacuity::Stasis`, already landed and already
 consulted by `kernel::standing`.
 
@@ -534,36 +534,36 @@ from here (§8).
 
 ---
 
-## §11 KINEMATIC PRESSURE — the strain of a twist
+## §11 Kinematic pressure — the strain of a twist
 
 **The layer this system was missing.** `orbit_lock`, `holonomies` and
-the fold gate all detect that a twist IS. Nothing read how hard it
+the fold gate all detect that a twist is. Nothing read how hard it
 pushes, so an enormous static structure and one straining to move were
 indistinguishable.
 
-    manifold layer   torsion = the TWIST event
-    kinematic layer  the PRESSURE of that twist — the strain it generates
+    manifold layer   torsion = the twist event
+    kinematic layer  the pressure of that twist — the strain it generates
 
 **The pressure is the curvature, and it was already landed.**
-`rfa_core::fiber` (DIRECTIVE 17) states why a flat fiber could never have
+`rfa_core::fiber` (Directive 17) states why a flat fiber could never have
 shown it: with a scalar connection `F = dA` and `[A, A] = 0` identically,
 so a closed loop of scalars is *"a flat, dead circle."* With a matrix
 connection the second term survives — `F = dA + A ∧ A` — and **the
-circulation IS the field**.
+circulation is the field**.
 
 | reading | what it says |
 |---|---|
-| `Pressure` | the curvature of a cell, carried whole. Zero is a FACT — these directions commute — never an absence |
+| `Pressure` | the curvature of a cell, carried whole. Zero is a fact — these directions commute — never an absence |
 | `PhaseLock::holding_pressure` | how far the accumulated transport sits from having closed: the force required to maintain the lock |
 | `Drift` | how a reading moved between two chain points, per component |
 
 **Two corrections to the ancestor, both deliberate.** `Drift` reports
-**STILL**, never *"Converged"* — a structure that did not move may be at
+**Still**, never *"Converged"* — a structure that did not move may be at
 rest or may be stuck, and the reading refuses to presume which. And it
-takes two points FROM THE CHAIN and holds neither, because a lens
+takes two points from the chain and holds neither, because a lens
 keeping its own timeline is a second timeline (§1a).
 
-## §12 THE STANDING SURFACE — REMOVED 2026-08-04
+## §12 The standing surface — removed 2026-08-04
 
 This section specified `lens::standing`, a surface rendering which of
 four rows (`Void` / `Unframed` / `Stasis` / `Entangled`) a structure
@@ -577,33 +577,33 @@ written: *the kernel refuses a work-anchored mint unless the prior state
 reads `Entangled`, and no surface showed an operator which row anything
 stood in — a refusal arrived with a verdict nobody could have
 anticipated.* With no refusal to anticipate, a row nobody acts on is a
-reading that computes nothing, which is the LAW 8 failure this corpus
+reading that computes nothing, which is the law 8 failure this corpus
 has already recorded twice.
 
 **What the section got right, and what any successor must keep.**
-`Stasis` was rendered as a state WANTING re-volumizing, never as a
-fault — LAW 4's refusal is thermodynamic rather than moral, and a
+`Stasis` was rendered as a state wanting re-volumizing, never as a
+fault — law 4's refusal is thermodynamic rather than moral, and a
 surface painting idleness as error would reintroduce the penal frame
 Article III struck. Whatever surface next reports structure must carry
-that discipline forward, and must carry BOTH poles so a reading is
+that discipline forward, and must carry both poles so a reading is
 explicable rather than pronounced.
 
-The `Observation` composition (§15) is untouched: its standing ARM is
+The `Observation` composition (§15) is untouched: its standing arm is
 gone, and the circulation that arm reported is still read through the
 degree arm, where it always came from.
 
-## §13 THE OBSERVER — capacity, and the tolerance that is a position
+## §13 The observer — capacity, and the tolerance that is a position
 
 **Capacity bounds depth**, `min(requested, κ)`. A request beyond
-standing is ANSWERED at the depth the observer can hold, never refused.
-The bound is applied BEFORE any work — a shallow observer asking for the
+standing is answered at the depth the observer can hold, never refused.
+The bound is applied before any work — a shallow observer asking for the
 near view materialises the far view and nothing else. That is the
 laziness of §4, and it caches nothing.
 
-**The peel indexes ALIGNMENT** — *do these two read the same at this
-distance?* That is a real question and it is NOT resonance (§5).
+**The peel indexes alignment** — *do these two read the same at this
+distance?* That is a real question and it is not resonance (§5).
 `observer::Capture` carries it, and `propagation` re-exports it under
-the name ALIGNMENT to say so plainly. Resonance is a propagation across
+the name alignment to say so plainly. Resonance is a propagation across
 a span, not a comparison at an instant.
 
 ```text
@@ -612,16 +612,16 @@ a span, not a comparison at an instant.
     NEAR   compare EXACT ENTRIES   tolerance ZERO — byte-identity
 ```
 
-To loosen the alignment test IS to step back; to tighten it IS to
+To loosen the alignment test is to step back; to tighten it is to
 approach. It is derived rather than dialed, and **two observers standing
-in the same place always agree** — which LAW 6 requires and a
+in the same place always agree** — which law 6 requires and a
 caller-supplied `ε` could never give.
 
 `Capture` has three arms, and the third matters: **`Silent` is not
 `Mismatch`.** Nothing to compare is an absence of subject, and reporting
 it as a disagreement would be inventing a difference.
 
-## §14 THE LANE, AS LANDED
+## §14 The lane, as landed
 
 | module | reading | never |
 |---|---|---|
@@ -629,31 +629,31 @@ it as a disagreement would be inventing a difference.
 | `luminal` | what emerges at a phase through an aperture | returns a magnitude |
 | `kinematic` | the strain of a twist, per component | collapses to a norm |
 | `standing` | which row a state occupies | gates on it |
-| `observer` | how deep one may see; ALIGNMENT at a distance | takes a dialed tolerance |
-| `propagation` | RESONANCE — pace, direction, medium, degradation across a span | collapses a rate to a magnitude |
+| `observer` | how deep one may see; alignment at a distance | takes a dialed tolerance |
+| `propagation` | Resonance — pace, direction, medium, degradation across a span | collapses a rate to a magnitude |
 
 Held by `lens/tests/deletability.rs`: the sealed core names no lens
 crate in any dependency table, the ledger takes no runtime edge, and the
-one lawful client edge is pinned by SHAPE — a client may render, and may
+one lawful client edge is pinned by shape — a client may render, and may
 never decide on a reading.
 
 **The frequency question is answered outside this lane entirely** (§7a):
 `conductor/examples/consultation.rs` measures the door's withdrawal rate
-by EXPERIMENT. It reflects no committed state and is deletable without
+by experiment. It reflects no committed state and is deletable without
 loss, so it is neither lens nor mirror.
 
 ---
 
-## §15 READING IS NOT UNI-DIRECTIONAL — the observation is a POSITION
+## §15 Reading is not UNI-directional — the observation is a position
 
 **Operator correction 2026-08-02.** This lane's first shape was one
 arrow: chain → arm → display, with each arm wired separately toward the
 same linear end. **That is a journal** — digital paper, written once and
 read front to back. A functioning system does not read that way.
 
-> *Readings will come from ANY OF THE ARMS, not a single linear journal.*
+> *Readings will come from any of the arms, not a single linear journal.*
 
-So an observation is not a record produced one way. It is a **POSITION**
+So an observation is not a record produced one way. It is a **position**
 — a depth, a phase, an aperture and a standing, held together — and from
 that one position every arm derives on demand:
 
@@ -672,7 +672,7 @@ that one position every arm derives on demand:
        no arm is the entrance; every arm is reachable from any other
 ```
 
-**Why this is not a record, structurally.** `Observation` holds BORROWED
+**Why this is not a record, structurally.** `Observation` holds borrowed
 references plus four scalars naming where the observer stands. It holds
 no reading. Every arm computes when asked and is discarded — so the type
 cannot become a second image (§1a) and cannot become a cache (§4),
@@ -688,7 +688,7 @@ state to depend on the order.
 **It composes all it likes and still never gates.** An observation
 answers questions and decides nothing.
 
-### 15a. THE JOURNAL IS PAPER — which settles the read-back question
+### 15a. The journal is paper — which settles the read-back question
 
 `engine/scribe` reads its own `journal.jsonl` back in six places, and its
 header claims it never does. Under the uni-directional reading that
@@ -702,49 +702,49 @@ state**; counting lines of paper to know where to append is bookkeeping
 about paper.
 
 **What the header should say** is the narrower true thing: nothing here
-is ever read back AS STATE. The claim as written is stronger than the
+is ever read back as state. The claim as written is stronger than the
 law requires and stronger than the code honours, and a false claim in a
 header is worth fixing even when the code is fine.
 
 ---
 
-## §16 THE BOOKS ARE OPEN — civilizations MINT and ARCHIVE them
+## §16 The books are open — civilizations mint and archive them
 
 *(operator correction 2026-08-02, superseding this section's first cut)*
 
 §6 established the aperture as per-observer sensitivity without belief
-and left the question it could not answer: where does a PARTICULAR
+and left the question it could not answer: where does a particular
 observer's instrument come from? The first answer given here was
 *"from its cohesion books"* — right in spirit, **wrong in two ways that
 both come down to scope.**
 
-### 16a. THE TWO FAULTS OF THE FIRST CUT
+### 16a. The two faults of the first cut
 
-**FAULT ONE — a bounded book set.** The instrument read eight NAMED
+**Fault one — a bounded book set.** The instrument read eight named
 struct fields. That made its width a constant of the source code, so a
 civilization could invent an entirely new kind of account and the lens
 would be structurally blind to it until someone edited this crate.
 **Content growth gated on a compile is the wrong scope for a reading
-layer.** Civilizations do not merely USE books; they MINT them, and they
-ARCHIVE them, and the reading must follow that without being told.
+layer.** Civilizations do not merely use books; they mint them, and they
+archive them, and the reading must follow that without being told.
 
-**FAULT TWO — a layer error, and it produced a false limit.** The books
+**Fault two — a layer error, and it produced a false limit.** The books
 were welded onto the eleven harmonic channels, and the residue was then
 reported as a limit: *"eight books cannot honestly fill eleven
 channels."* That framing was wrong at the root. The eleven are
-SUBSTRATE — spectral, spatial, adjacency, torsion — fixed because the
-physics is fixed. Books are CONTENT — open, because civilizations make
+substrate — spectral, spatial, adjacency, torsion — fixed because the
+physics is fixed. Books are content — open, because civilizations make
 them. **Joining a growing content set to a fixed substrate axis is the
 same layer confusion this tree has caught repeatedly**, and the repair
-is not a better mapping but NO mapping.
+is not a better mapping but no mapping.
 
 There was a plainer defect inside it too. The old channel 0 summed
 `given_in_crisis + returned_across` against `extracted_across` — welding
 the compassion pair to the morality pair and orphaning
-`drawn_in_crisis` entirely. **Each book is a DUAL and its two sides
+`drawn_in_crisis` entirely. **Each book is a dual and its two sides
 belong to each other.**
 
-### 16b. THE SHAPE THAT REPLACES IT
+### 16b. The shape that replaces it
 
 ```text
     APERTURE   11 fixed harmonic channels   SUBSTRATE — physics
@@ -752,21 +752,21 @@ belong to each other.**
 ```
 
 Two instruments, two layers, never joined. `Aperture` knows nothing of
-books; `Regard` knows nothing of harmonics. The regard's WIDTH is a fact
+books; `Regard` knows nothing of harmonics. The regard's width is a fact
 about how many kinds of account an observer has actually kept, and it is
 **bounded by nothing in this crate**.
 
-A book is a DUAL LEDGER: what was KEPT against what was LOST on one
+A book is a dual ledger: what was kept against what was lost on one
 named account. The charter's four (`09 §2.1`–`§2.4`) are all of that
 shape already, which is why opening the set cost no translation — the
-shape was uniform, only the ENUMERATION was frozen.
+shape was uniform, only the enumeration was frozen.
 
-**ONE ENUMERATION POINT.** `books_of` is the single place any book is
+**One enumeration point.** `books_of` is the single place any book is
 named. When committed state grows a registry, it appends there and
 nothing else in the lane changes, because the instrument never names an
 account.
 
-### 16c. ARCHIVING CLOSES A BOOK TO WRITING, NEVER TO READING
+### 16c. Archiving closes A book to writing, never to reading
 
 **This is an anti-laundering rule, not bookkeeping.** If archiving
 dropped a book from the reading, the cheapest way to stop being measured
@@ -778,13 +778,13 @@ took**. Its weight is identical closed or open. What archiving reports
 is that the account will not move again, which is real information and
 not an erasure.
 
-**AND PROVENANCE BOUNDS WHO MAY CLOSE WHAT.** A civilization may archive
-what it MINTED. It may never archive what the CHARTER keeps — otherwise
+**And provenance bounds who may close what.** A civilization may archive
+what it minted. It may never archive what the Charter keeps — otherwise
 the covenant book is closeable by exactly whoever it convicts. That is
 why `BookId` carries `Chartered` against `Minted` rather than being a
 bare identifier.
 
-### 16d. BOOK-1 — THE REGISTRY, BUILT
+### 16d. BOOK-1 — the registry, built
 
 *(operator directive 2026-08-02: take the cfe side)*
 
@@ -799,12 +799,12 @@ the dual account; `cfe::world::books` holds three deeds and no fourth:
 ```
 
 **The specification named tags `0x3E`/`0x3F`. Those are 62 and 63, and
-both are LIVE.** Transcribing them would have corrupted the wire.
+both are live.** Transcribing them would have corrupted the wire.
 Allocated from genuinely free space instead, verified against both the
 encode and decode tables and against capacity-lane's own allocations.
 
 `ColonyOrb::books` presents the charter four and everything minted
-through ONE view, so a reader never learns which storage a book came
+through one view, so a reader never learns which storage a book came
 from. **The charter four are not moved** — they keep their landed fields
 and their landed entry (tag 41, IDEO-1); rewriting sealed state to make
 a uniform container would break every existing chronicle for a tidiness
@@ -813,13 +813,13 @@ that buys nothing.
 An orb that minted nothing emits no book entry at all and stays
 byte-identical to a pre-BOOK-1 orb.
 
-### 16e. THE NOVELTY GATE IS IDENTITY, NOT A THRESHOLD
+### 16e. The novelty gate is identity, not A threshold
 
 The specification asked for `distance(schema_new, schemas) ≥ θ_novelty`.
 **That is refused, and replaced by something exact.**
 
-A kind is content-addressed over its NORMALIZED name, so two
-declarations that normalize alike ARE one kind. A duplicate does not
+A kind is content-addressed over its normalized name, so two
+declarations that normalize alike are one kind. A duplicate does not
 fail a distance test — it is the same book, and the second mint refuses
 naming the one already standing. Case, padding and inner-whitespace
 variants all collapse.
@@ -834,22 +834,22 @@ one:**
 2. **There is no structural schema to measure a distance over.** A book
    declares a name and accrues two sides; nothing machine-checkable
    distinguishes `Valor` from `Valour` except the strings. A "schema
-   distance" could only be string distance — a LINGUISTIC judgment
+   distance" could only be string distance — a linguistic judgment
    wearing a numeric coat — and it would refuse genuinely distinct books
    as readily as duplicates.
 
-**What the exact gate does NOT catch, said plainly:** a deliberate
-near-miss such as `valor-2`. No honest test here can, because that IS a
+**What the exact gate does not catch, said plainly:** a deliberate
+near-miss such as `valor-2`. No honest test here can, because that is a
 different name and may well be a different book.
 
 **So deliberate spam is not answered by a gate, and must not be.** It is
-answered by refusing to reward width. `Regard::width` is a READING, and
+answered by refusing to reward width. `Regard::width` is a reading, and
 §1 rules that nothing optimizes a reading. An orb that mints a thousand
 empty books has a thousand empty books and has bought nothing: an
-unposted book opens no channel at all. A mint COST would bound it
+unposted book opens no channel at all. A mint cost would bound it
 further; that magnitude is a charter decision and was not taken here.
 
-### 16f. WHAT BOOK-1 REFUSES, AND WHY EACH REFUSAL NAMES ITS REASON
+### 16f. What BOOK-1 refuses, and why each refusal names its reason
 
 ```text
     BookAlreadyMinted          the gate — names the book already standing
@@ -864,10 +864,10 @@ further; that magnitude is a charter decision and was not taken here.
 
 `CharterBookNotArchivable` exists because a charter book has no minted
 account to find, so it would otherwise fall out as `NoSuchBook` — a true
-refusal for a MISLEADING reason. Here the reason IS the rule, so it is
+refusal for a misleading reason. Here the reason is the rule, so it is
 named.
 
-**Conservation:** a posting moves BOOK value and touches no banked
+**Conservation:** a posting moves book value and touches no banked
 resource, so it settles nothing and conserves trivially. The kernel's
 `scope_of` is exhaustive by design — adding an event forces a scope
 decision at compile time — and the three arms are drafted there to match
@@ -876,20 +876,20 @@ Collect.
 
 ---
 
-## §17 THE WORD "CONVERGED" IS NOT THIS LANE'S TO SETTLE
+## §17 The word "converged" is not this lane's to settle
 
 *(relay raised 2026-08-02 — `OPEN_QUESTIONS.md` Q5)*
 
-`Motion::Converging` is a DIRECTION — a volume drawing inward, the sink
+`Motion::Converging` is a direction — a volume drawing inward, the sink
 pole against Diverging's source pole, ongoing and carrying its own
-positive magnitude. Elsewhere in the tree `converged` means FINISHED: a
+positive magnitude. Elsewhere in the tree `converged` means finished: a
 world annexed into the universe timeline (CONVERGE-1, `07`). `rfa-core`
 hit the same ambiguity and struck the word from that crate outright,
 because *zero says the relations compose, never that anything was
 finished or emptied.*
 
 **The trap is that the naive reading of "converged" names the wrong
-arm.** A volume that stopped is `Still`. A volume that is CONVERGING is
+arm.** A volume that stopped is `Still`. A volume that is converging is
 in motion. This lane pins its own half — `Motion::Still` is never called
 converged, held by `a_still_volume_is_not_called_converged` and
 `a_still_reading_does_not_claim_convergence` — and those pins reach
@@ -898,7 +898,7 @@ nothing outside `engine/lens`.
 **Nothing is renamed.** CONVERGE-1 is landed law with its own spec and
 is correct in its own domain; the Diverging/Converging pair was ruled
 directly and deliberately mirrors `Flux { sources, sinks }`. Two correct
-uses of one word in two domains is not a defect — a THIRD use that
+uses of one word in two domains is not a defect — a third use that
 conflates them would be, and Q5 exists to keep one from appearing.
 
 The open half belongs to the lanes that own `ledger` and `conductor`:
@@ -909,12 +909,12 @@ values.
 
 ---
 
-## §18 LIT-1 — LITERATURE, and the display rule
+## §18 LIT-1 — literature, and the display rule
 
 *(operator directive 2026-08-02)*
 
 BOOK-1 gave a line accounts of its own making. **Literature is the tier
-above: works a line ASPIRES to, and may claim only with chain receipts
+above: works a line aspires to, and may claim only with chain receipts
 to show for it.**
 
 ```text
@@ -923,20 +923,20 @@ to show for it.**
     LITERATURE   a work it may ASPIRE to            LIT-1
 ```
 
-### 18a. LITERACY IS DERIVED; THE STACK IS BASE-11
+### 18a. Literacy is derived; the stack is BASE-11
 
-**A line is literate when it keeps its own books** — when it has MINTED
-one and POSTED to it. Minting alone is not writing; the page is blank.
+**A line is literate when it keeps its own books** — when it has minted
+one and posted to it. Minting alone is not writing; the page is blank.
 Writing is the act, literacy is the reading of that act, and nothing
 stores it.
 
 Literacy needs no slot in the stack: it is already implied by receipts
-that exist, and a derived reading cannot go stale. It is the DOORWAY to
+that exist, and a derived reading cannot go stale. It is the doorway to
 the upper tier, not a node in it.
 
-**THE STACK IS NOW BASE-11** (operator ruling 2026-08-02, *uplift to
+**The stack is now BASE-11** (operator ruling 2026-08-02, *uplift to
 base-11*). An earlier draft of this section treated base-7 being full as
-a constraint to design around. It was a constraint to LIFT:
+a constraint to design around. It was a constraint to lift:
 
 ```text
     0        the solar leap
@@ -948,12 +948,12 @@ a constraint to design around. It was a constraint to LIFT:
     8..=11   THE UPLIFT TIER — one node per chartered work
 ```
 
-Seven base nodes plus four works is ELEVEN, and `7` is not one of them.
-**The condition FIELD is a shared namespace with two populations** — sky
+Seven base nodes plus four works is eleven, and `7` is not one of them.
+**The condition field is a shared namespace with two populations** — sky
 nodes and separately-riding ones — and `7` was spoken for by landed law
 before the uplift. A first cut put the works at `7..=10` and so gave one
 number two meanings: `deposit_window` reads `techs` for the lesson while
-the sky claimed the same slot for VALOR. Nothing would have broken
+the sky claimed the same slot for valor. Nothing would have broken
 loudly; a held lesson would simply have rendered as an unreached work
 and the real node would have become invisible. Pinned in
 `the_sky_never_claims_the_re_emergence_slot`.
@@ -961,20 +961,20 @@ and the real node would have become invisible. Pinned in
 **The crown's gate does not move, and that is the whole care taken
 here.** It still waits on `0..=5`, still reports a threshold of six, and
 `base_seven_complete` is left exactly as it landed so every law binding
-to it reads what it always did. The four new nodes sit ABOVE the crown
+to it reads what it always did. The four new nodes sit above the crown
 rather than among the nodes it waits for — which is why claiming a deed
 cannot advance the crown by a single step. Pinned in
 `base_eleven_pins.rs`, including that pin specifically.
 
-**A DEED IS THE NODE.** The uplift tier is never granted into `techs`. A
-work is held exactly when it has been CLAIMED on chain receipts, so the
-evidence IS the upgrade: *deeds are accomplishments and civilizational
+**A deed is the node.** The uplift tier is never granted into `techs`. A
+work is held exactly when it has been claimed on chain receipts, so the
+evidence is the upgrade: *deeds are accomplishments and civilizational
 upgrades* (operator, 2026-08-02). Reaching for a work is not holding it.
 
-`base_eleven_complete` reads the full stack — the base tier done AND
+`base_eleven_complete` reads the full stack — the base tier done and
 every deed witnessed. Deeds do not substitute for the base beneath them.
 
-### 18b. ASPIRING IS FREE; CLAIMING COSTS EVIDENCE
+### 18b. Aspiring is free; claiming costs evidence
 
 ```text
     ASPIRE   a literate line declares a work it reaches for. Proves
@@ -983,7 +983,7 @@ every deed witnessed. Deeds do not substitute for the base beneath them.
              RECEIPTS. Every digest is checked against the chronicle.
 ```
 
-**The law verifies the CITATION, never the virtue.** It checks that the
+**The law verifies the citation, never the virtue.** It checks that the
 receipts exist and are this world's. It does not score whether the deeds
 amount to valor — **any formula that did would be the struck C-gate
 wearing a new name**, a number standing in for a judgement, which
@@ -994,29 +994,29 @@ need chain receipts*: a claim without evidence is a boast, and the
 chronicle is what separates the two. Cited evidence is deduplicated and
 ordered, so one state has one encoding however it was typed.
 
-### 18c. THE FOUR CHARTERED WORKS
+### 18c. The four chartered works
 
-VALOR · HONOR · COURAGE · COMMITMENT, reached *through union and
-otherwise towards stewardship*. A line invents ACCOUNTS (BOOK-1); it
+Valor · honor · courage · commitment, reached *through union and
+otherwise towards stewardship*. A line invents accounts (BOOK-1); it
 does not invent the literature it reaches for, so the works are
 chartered and `aspire Glory` refuses.
 
 **`COMMITMENT` collides with a kernel primitive, and that is recorded
-rather than resolved silently.** `26_ARTICLES` ARTICLE IV clause 2 rules
+rather than resolved silently.** `26_ARTICLES` article IV clause 2 rules
 that this manifold is *one commitment per step*, and `Commitment.parent`
-is the chain's backward reference. That is the GOVERNING layer; a work a
-civilization aspires to is CONTENT — the same distinction that kept the
+is the chain's backward reference. That is the governing layer; a work a
+civilization aspires to is content — the same distinction that kept the
 `humans` civilization, the `humanoid` clade and `Human Capital` from
-being renamed when "human" was struck as a SEAT (§1.0), and the same
+being renamed when "human" was struck as a seat (§1.0), and the same
 verdict Q5 reached for `converged`. Two correct uses in two layers is
 not a defect; a third that conflated them would be.
 
-### 18d. EMOJI ARE OUTLAWED; ANSI COLOUR IS NOT
+### 18d. Emoji are outlawed; ansi colour is not
 
 *(operator ruling 2026-08-02)*
 
-Colour is a property of the TERMINAL and carries no glyph — it degrades
-to plain text and costs a reader nothing. An emoji is a GLYPH whose
+Colour is a property of the terminal and carries no glyph — it degrades
+to plain text and costs a reader nothing. An emoji is a glyph whose
 rendering, width and availability vary by font and platform, and it
 breaks column alignment in exactly the surfaces this lane exists to
 keep readable.
@@ -1024,31 +1024,31 @@ keep readable.
 **No character from the Emoji blocks (U+1F000 and above) appears in this
 workspace.** Three had entered — `U+1F4D6` in the BOOK-1 chronicle
 rendering, all three mine — and are struck, replaced with `U+25A4`
-(SQUARE WITH HORIZONTAL FILL), already in the CLI's own register.
+(Square with horizontal fill), already in the CLI's own register.
 
-The BMP dingbats and geometric symbols the CLI has always used are NOT
+The BMP dingbats and geometric symbols the CLI has always used are not
 emoji and are untouched: `✓ ✗ ⚑ ⛏ ☉ ✍ ▤ ◉` and the box-drawing set.
 They are single-width, font-stable, and predate this ruling.
 
-### 18e. THE SPACE IS THE POINT
+### 18e. The space is the point
 
-The works were not RECOVERED from anywhere — `courage`, `stewardship`,
+The works were not recovered from anywhere — `courage`, `stewardship`,
 `literacy`, `literature` and `aspire` appear nowhere in any of the 49
 refs, and `valor` only in fixtures this lane wrote. **That was never the
-ask.** The directive was to CREATE SPACE FOR them, and the space is what
+ask.** The directive was to create space for them, and the space is what
 base-11 opens: four slots above the crown, one per chartered work,
 filled by deeds rather than by timers.
 
-### 18f. WHAT IS NOT BUILT YET
+### 18f. What is not built yet
 
 **Deeds as tradeable, and deeds sparking uplifts.** A claimed work is an
 accomplishment and a civilizational upgrade today — it holds a node in
-the stack. It is not yet a thing that can be TRADED between lines, and
+the stack. It is not yet a thing that can be traded between lines, and
 nothing yet uses a held deed to spark a further uplift. Both are named
 by the directive and neither is built; the node is the foundation they
 would stand on.
 
-### 18g. WHAT WAS NOT BUILT, AND WHY
+### 18g. What was not built, and why
 
 **No new substrate/mesh axis.** The directive raised one as a
 possibility. `04` rules its own constraint: *no genesis axis ships
@@ -1065,11 +1065,10 @@ schema §16e records as absent.
 
 ---
 
-## §19 A GATE MAY READ A WINDOW — the test is VIEWPOINT-DEPENDENCE
+## §19 A gate may read A window — the test is viewpoint-dependence
 
-*(relayed by syntropy-inscription 2026-08-02; operator ruling: "windowed
-might need to get punted to lens-lane because that's a 'perspective' we
-need to account for")*
+*(relayed by syntropy-inscription 2026-08-02; ruling: windowing may belong to
+the lens lane, as a perspective to account for)*
 
 The question put to this lane: **does a gate get to read a windowed
 quantity at all?** `tech.rs` condition 4 is a live tech unlock reading
@@ -1077,9 +1076,9 @@ quantity at all?** `tech.rs` condition 4 is a live tech unlock reading
 a perspective then an unlock depends on a viewpoint.
 
 **The ruling: the axis is not windowed-vs-cumulative. It is
-VIEWPOINT-DEPENDENT vs RECORD-DETERMINED.**
+viewpoint-dependent vs record-determined.**
 
-A perspective in this lane's sense is chosen by the OBSERVER. Two
+A perspective in this lane's sense is chosen by the observer. Two
 observers may legitimately differ and both be right (§2b, §6) — which is
 exactly why a reading may never gate (§1). A window is only a
 perspective if someone gets to pick it.
@@ -1093,13 +1092,13 @@ Condition 4's window is picked by nobody:
 ```
 
 Every node replaying the same chronicle to the same height computes the
-same floor and reaches the same verdict. **That is a RECENCY predicate,
+same floor and reaches the same verdict. **That is a recency predicate,
 and recency is a fact about the record rather than a view of it.** The
 relay's own parenthetical is the right instinct: recent venting should
 mean something different from ancient venting, and saying so in law is
 lawful.
 
-**THE TEST, for the next time this comes up:**
+**The test, for the next time this comes up:**
 
 > Would two nodes replaying the same chronicle to the same height
 > disagree? If they cannot, it is not a perspective, whatever its shape.
@@ -1108,27 +1107,27 @@ So condition 4 stands. It reads the record through a rule that is itself
 part of the law, which is not the category error one level down — it is
 the ordinary business of law.
 
-### 19a. TWO FINDINGS WHILE ANSWERING, both outside this lane
+### 19a. Two findings while answering, both outside this lane
 
 Neither changes the ruling. The first turned out to be the intent; the
 second stands, and is relayed rather than fixed here since
 `world/tech.rs` and `world/survey.rs` are not this lane's territory.
 
-**1. The window LENGTH is world-state-dependent — and that is the
-DIRECTION, not a hazard** (operator ruling 2026-08-03). `deposit_window`
+**1. The window length is world-state-dependent — and that is the
+direction, not a hazard** (operator ruling 2026-08-03). `deposit_window`
 returns 180 instead of 240 when a re-emergence lesson is held and the
 syntropy reading is at or above `1/2`, so condition 4's verdict can move
 because a neighbouring deed landed. This lane first flagged that as a
 coupling to examine. It is the intent:
 
 > Constants, absolutes and statics are being eliminated in favour of
-> deterministic throughput driven by DYNAMISM (morphodynamics).
+> deterministic throughput driven by dynamism (morphodynamics).
 
 A window that changes with the world is not a leak in a static rule — it
 is a rule that has stopped pretending to be static while staying exactly
 as replayable. That is the same reason §5c struck the tolerance constant
 and §16e refused a dialed `θ` on the mint gate: **the objection was never
-to a quantity moving, it was to a quantity being SET.** Derived and
+to a quantity moving, it was to a quantity being set.** Derived and
 moving is lawful; dialed and fixed is not.
 
 The test in §19 is unchanged and is what keeps this honest — a window
@@ -1136,7 +1135,7 @@ may move as much as the record moves, and not one step further.
 
 **2. The floor expression is duplicated.** `survey.rs` prunes at
 `now − deposit_window()` and `tech.rs` filters at `now −
-deposit_window()`. The cache's prune floor must never be TIGHTER than
+deposit_window()`. The cache's prune floor must never be tighter than
 any consumer's, or the consumer silently reads a truncated record and it
 looks like data that was never there. Today the two agree because both
 sites were written the same way — not by construction. The comment
@@ -1145,10 +1144,10 @@ is only true while they agree. One shared function makes it true. This
 is the same shape as the two `ratio_str` copies collapsed in §16's
 neighbourhood: one rule, two homes, nothing holding them equal.
 
-### 19b. WHAT THIS LANE STILL OWES
+### 19b. What this lane still owes
 
-Rendering LIFETIME and WINDOW side by side is a genuine lens job and is
-NOT yet built. It needs `thermal_books_of` / `heat_encased_of`, which
+Rendering lifetime and window side by side is a genuine lens job and is
+not yet built. It needs `thermal_books_of` / `heat_encased_of`, which
 landed on `main` at `2112aa3` and are **not on this branch** — this lane
 sits on `main@e0f8db2` plus the capacity-lane merge. Blocked on the
 reconciliation, not on design.
@@ -1157,16 +1156,16 @@ reconciliation, not on design.
 
 ## §20 GROWTH-1 — the six mechanisms, and the anti-leap test
 
-*(operator ruling 2026-08-03: "practice, wisdom, knowledge, expertise,
-locality, triviality — we need these defined as growth mechanisms")*
+*(ruling of 2026-08-03: practice, wisdom, knowledge, expertise, locality and
+triviality are defined as growth mechanisms)*
 
 The question they answer: *how does a line go from primordialism to
 significant civilization without leaps and bounds and skipping
 everything in between?*
 
-**The rule: a rung must measure something the chain PRODUCES, never
-something a line ASSERTS.** `26_ARTICLES` ARTICLE IV clause 2 rules one
-commitment per step, so a stamp IS elapsed history. A claim can be
+**The rule: a rung must measure something the chain produces, never
+something a line asserts.** `26_ARTICLES` article IV clause 2 rules one
+commitment per step, so a stamp is elapsed history. A claim can be
 typed; a span cannot be forged.
 
 ```text
@@ -1174,9 +1173,9 @@ typed; a span cannot be forged.
               If yes, it is a leap.
 ```
 
-### 20a. THE LEAP THAT WAS MEASURED, and it was this lane's
+### 20a. The leap that was measured, and it was this lane's
 
-Before GROWTH-1, a colony went from founded to a CLAIMED civilizational
+Before GROWTH-1, a colony went from founded to a claimed civilizational
 upgrade in five commands with **every receipt at stamp 0** — and the
 witness cited was receipt #0, the sovereign founder joining, which has
 nothing to do with valor. The base tier beneath it wants 480 ticks of
@@ -1185,7 +1184,7 @@ famine survived and 240 consecutive ticks of overheat.
 The base tier was built from things that cannot be compressed. The
 uplift tier was built from declarations. That was the whole gap.
 
-### 20b. THE SIX AXES, and they are orthogonal
+### 20b. The six axes, and they are orthogonal
 
 ```text
     PRACTICE     TIME       did the doing span real chain time?
@@ -1196,45 +1195,45 @@ uplift tier was built from declarations. That was the whole gap.
     TRIVIALITY   EMPTINESS  how much of it moved nothing?
 ```
 
-**WISDOM is the one worth explaining.** It reads the share of accounts
-carrying BOTH sides — kept AND lost. *A line that has only ever posted
+**Wisdom is the one worth explaining.** It reads the share of accounts
+carrying both sides — kept and lost. *A line that has only ever posted
 wins has recorded a great deal and learned nothing.* The dual ledger is
 what makes that measurable, and it is why BOOK-1 made both sides
 structural rather than conventional. That decision paid here.
 
-**TRIVIALITY is the guard that makes the other five honest.** Without
+**Triviality is the guard that makes the other five honest.** Without
 it every axis is farmable: a thousand empty postings would read as
 practice, breadth and depth alike.
 
-### 20c. NO THRESHOLDS, AND WHY THAT IS POSSIBLE
+### 20c. No thresholds, and why that is possible
 
 Every axis is an exact rational or a count, derived and reported whole.
 Nothing in GROWTH-1 compares against a number, so there is nothing to
 dial (ruling 2026-08-03: constants and statics give way to deterministic
 throughput driven by dynamism).
 
-Where a gate needs one, it compares against ZERO — the difference
+Where a gate needs one, it compares against zero — the difference
 between *happened* and *did not*, which is not a dial. `literate` is the
 first and so far only one: **a line reads and writes when its postings
-SPAN time**, not when one posting exists.
+span time**, not when one posting exists.
 
 **Six readings and no aggregate.** Collapsing them to a single "growth
 score" would be the struck C-gate wearing a sixth name.
 
-### 20d. THE HOLE THE PINS FOUND
+### 20d. The hole the pins found
 
-The first cut measured practice as the span of POSTINGS. A line could
+The first cut measured practice as the span of postings. A line could
 post zeros across a long life and read as practised — padding buying
 literacy, the leap re-entering through the axis built to close it. Its
 own pin caught it.
 
 **Only real writing extends the span now.** An empty posting is counted
-by TRIVIALITY and refused by PRACTICE, which is the correct division of
+by triviality and refused by practice, which is the correct division of
 labour: one reports the padding, the other declines to be fooled by it.
 
-### 20e. WHAT IS STILL A LEAP
+### 20e. What is still A leap
 
-`claim` still accepts a SINGLE witness of any age, so a work can be
+`claim` still accepts a single witness of any age, so a work can be
 claimed the moment a line becomes literate. Practice now gates entry to
 the literature; it does not yet shape what a claim must show. The
-plural-and-spanning witness rule proposed alongside this is NOT built.
+plural-and-spanning witness rule proposed alongside this is not built.

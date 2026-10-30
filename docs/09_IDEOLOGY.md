@@ -1,6 +1,6 @@
-# IDEOLOGY — the dual cohesion ledger (design stage)
+# Ideology — the dual cohesion ledger (design stage)
 
-**Status:** LANDED 2026-07-27, whole — the five-landing board (TRADE-1 →
+**Status:** landed 2026-07-27, whole — the five-landing board (TRADE-1 →
 ABSORB-1 → BOND-1 → FORWARD-1 → IDEO-1, `BUILD_ORDER.md` §3) shipped
 every mechanic here with its protocol sections and witnesses (NS-1 §2.3
 tags 30–38, 41). All rates, windows, weights, and curves remain
@@ -19,8 +19,8 @@ engine judges nothing and measures everything.
 
 **The form ruling (same relay, recorded):** the "unitary morphodynamics"
 formulation — encoding the four as continuous unitary field dynamics — is
-REFUSED (`OPEN_QUESTIONS.md` Q3): continuous field transforms on floating
-hardware diverge across architectures (the no-float law, CHARTER §3.2, and
+refused (`OPEN_QUESTIONS.md` Q3): continuous field transforms on floating
+hardware diverge across architectures (the no-float law, Charter §3.2, and
 SEAL B), and no deterministic transition function for "love" as a field
 exists without inventing subjective physics. The lawful form is this
 document's: four **deterministic behavioural ledgers over receipted
@@ -34,20 +34,20 @@ Ideology is **measured, never declared and never scored**:
 
 1. **Deeds, not dials.** Every axis is a pair of cumulative exact-rational
    counters — a syntropic book and an entropic book, the VENT-1 sheet shape
-   — incremented ONLY by receipted events. A sector cannot set its
+   — incremented only by receipted events. A sector cannot set its
    compassion; it can only act, and be read.
 2. **Derived, never stored.** The four ratios derive at read on the
    observer surface, exactly as the syntropy ratio does (the VENT-1
    uplink precedent). The chronicle carries deeds; arithmetic over deeds
    is free and replayable.
 3. **Each axis is read in its own units, and named.** Every consequence
-   attaches through a specific inscribed mechanic (§3) that CITES THE
-   ONE AXIS IT READS — compassion is consulted as compassion, fidelity
+   attaches through a specific inscribed mechanic (§3) that cites the
+   one axis it reads — compassion is consulted as compassion, fidelity
    as fidelity, each in the units it accrued. Four axes, four readings,
    four names. *(Consequently there is no goodness scalar and no oracle:
    a single figure would have no units to be in, and it is the
-   scalar/scored form the provenance law refuses — CHARTER §5.)*
-4. **A book records what was DONE.** Every entry grounds in a receipted
+   scalar/scored form the provenance law refuses — Charter §5.)*
+4. **A book records what was done.** Every entry grounds in a receipted
    deed, so a book holds exactly the deeds that happened. An orb that
    acted little has a small syntropic book; that is the record standing
    accurately, and a small book is still a book. *(Consequently apathy
@@ -94,11 +94,11 @@ without relief (tag 6), or overheat-struck (tag 22) without clear (tag
 23). The chronicle orders the strike before the deed; classification is a
 replay fact, never a judgment call.
 
-- **`given_in_crisis`** (the giver's syntropic book): value transferred TO
+- **`given_in_crisis`** (the giver's syntropic book): value transferred to
   a struck orb (TRADE-1), or a struck orb's overflow absorbed into one's
   own banked sink (ABSORB-1) — taking on heat so the neighbour's array
   stays coherent.
-- **`drawn_in_crisis`** (the taker's entropic book): value drawn FROM a
+- **`drawn_in_crisis`** (the taker's entropic book): value drawn from a
   struck partner — distress extraction — or heat dumped onto a struck
   absorber.
 
@@ -122,18 +122,18 @@ covenanted).
 
 - **`bond_flow`** (the source's syntropic book): cumulative value streamed
   over live bonds. A symmetric pair of bonds is the marriage form; a
-  single bond is patronage. **BOTH ARE PRIVILEGED in the pair**:
-  `bond_flow` is the SOURCE's syntropic book, so each party sources and
+  single bond is patronage. **Both are privileged in the pair**:
+  `bond_flow` is the source's syntropic book, so each party sources and
   each carries its own book. **Two sources, two books — the privilege
   is held twice.** Patronage holds it once: one party sources, one book
   stands.
 
   **The bond is not the covenant** (recorded 2026-08-02, after the two
-  were conflated in `EQUATIONS` D5). A COVENANT is one obligor owing one
+  were conflated in `EQUATIONS` D5). A covenant is one obligor owing one
   beneficiary, with collateral posted by the obligor alone against a
-  quota inside a window (§2.3, FORWARD-1) — a DIRECTED instrument, and
-  the same asymmetry this clause calls patronage. A BOND is a standing
-  flow, and only a symmetric PAIR of them is the marriage form. **The
+  quota inside a window (§2.3, FORWARD-1) — a directed instrument, and
+  the same asymmetry this clause calls patronage. A bond is a standing
+  flow, and only a symmetric pair of them is the marriage form. **The
   distinction is the direction count, never the collateral.** Both are
   lawful; they are not interchangeable, and the union's office pair
   (`12_UNION` §3b–§3c) takes the pair form, never the directed one.
@@ -150,10 +150,10 @@ cheaper than churn *by the landed decay laws*, not by decree. Severance
 is a real shock: the target's next heating bill (ECON-J) arrives with the
 inflow gone.
 
-### 2.3 Integrity — the fidelity axis · the DECLARATION
+### 2.3 Integrity — the fidelity axis · the declaration
 
 **Read the mechanism, not this line.** The sentence below names a
-CARRIER — where the machinery is seated in the world-book — and a
+carrier — where the machinery is seated in the world-book — and a
 carrier is not a mechanism. The instrument itself is
 `{obligor, beneficiary, resource, quota, delivered, collateral, sealed,
 window}`: a party bound to deliver a quantity by a deadline with
@@ -162,8 +162,8 @@ and what the capacity meter reads is `quota − delivered` and nothing
 else (`CHANNEL_FORWARD`). Reasoning from this carrier line to the
 mechanism produced a false defect on 2026-08-02.
 
-**LAYER: the DECLARATION is CIVILIZATIONAL; the REMAINDER is
-UNIVERSAL** (§2.4's composition rule; `17_CAPACITY` §3d.1a). A line
+**Layer: the declaration is civilizational; the remainder is
+universal** (§2.4's composition rule; `17_CAPACITY` §3d.1a). A line
 that chooses to live by the vitrified word adopts the covenant and is
 gated at T0/T1/T2. A line that merely owes a delivery uses the forward
 and is gated by nothing.
@@ -204,11 +204,11 @@ closes the loop.
 **Declared vs measured (the composition rule):** a sector's *declared*
 policy is a covenant (§2.3's axis); its *measured* policy is this ratio.
 
-**AND THIS DISTINCTION IS THE COVENANT RULING, already latent here**
-(operator ruling 2026-08-02). A DECLARATION is a way of living that a
-line chooses — so the covenant is CIVILIZATIONAL, adopted freely and
-gated at T0/T1/T2. A MEASUREMENT is what a line did — so this ratio,
-and the friction computed from it (§3.2), are UNIVERSAL and bind
+**And this distinction is the covenant ruling, already latent here**
+(operator ruling 2026-08-02). A declaration is a way of living that a
+line chooses — so the covenant is civilizational, adopted freely and
+gated at T0/T1/T2. A measurement is what a line did — so this ratio,
+and the friction computed from it (§3.2), are universal and bind
 everyone. The two layers were written into this composition rule
 before anyone went looking for them.
 A sector that declares reciprocity and measures extraction needs no
@@ -219,7 +219,7 @@ compose without a judge.
 
 `state.json` carries the eight committed counters per orb and derives the
 four ratios at read — derived, never stored, the syntropy-ratio precedent
-exactly. Presentation is fun-first (CHARTER §2): the player reads words
+exactly. Presentation is fun-first (Charter §2): the player reads words
 and exact fractions — "honours 5 of 6 covenants (5/6) · gave 15/4 joules
 in crisis" — never matrix algebra. Fractions render whole (the landed
 CLI discipline: "3/2", never 1.5).
@@ -236,20 +236,20 @@ is never absolute). The empty-book reading is a parameter; the candidate
 default is full collateral until a history exists — trust is earned, and
 the empty book is not a credential.
 
-### 3.2 Friction — the cost of unlike CONDUCT (`ΔS_ideo`) · UNIVERSAL
+### 3.2 Friction — the cost of unlike conduct (`ΔS_ideo`) · universal
 
 **The name is a misnomer and it has cost a reader once.** `ΔS_ideo`
-and "ideological friction" say IDEOLOGY; this section's own body says
+and "ideological friction" say ideology; this section's own body says
 the opposite three sentences later — *friction prices divergence, not
 vice… the engine keeps its promise to judge nothing* — and the
-mechanism reads two MEASURED conduct ratios and nothing else. On
+mechanism reads two measured conduct ratios and nothing else. On
 2026-08-02 the kernel lane read this heading, inferred that a people's
 creed was charging a universal ledger, and filed a defect that did not
 exist. **The body was right the whole time; the title was not.** The
 tag `ΔS_ideo` is kept because receipts and prose elsewhere cite it; the
 word "ideological" is not a description.
 
-**LAYER: UNIVERSAL** (`kernel::layer_of`, `17_CAPACITY` §3d). Any line
+**Layer: universal** (`kernel::layer_of`, `17_CAPACITY` §3d). Any line
 can be reciprocal or not — conduct requires no creed — so this binds
 everyone and no ideology is a precondition for it.
 
@@ -263,9 +263,9 @@ generates additional entropy:
 posted through the landed VENT-1 machinery — accrues as workspace, seals
 by receipt at collect, nothing un-receipted.
 
-**THE SYNTROPIC ARM, and why it was invisible** (2026-08-03). Friction
-receipts only when POSITIVE (`if friction > 0`). When conduct MATCHES,
-divergence is zero, friction is zero, and NOTHING IS RECEIPTED — so the
+**The syntropic arm, and why it was invisible** (2026-08-03). Friction
+receipts only when positive (`if friction > 0`). When conduct matches,
+divergence is zero, friction is zero, and nothing is receipted — so the
 engine computes the agreement on every cross-orb transfer and destroys
 it in the same expression. Not an arm that was never built: one built
 and discarded on each use, with no caller able to ask for it because
@@ -274,20 +274,20 @@ and discarded on each use, with no caller able to ask for it because
     convergence(a, b) = 1 − |reciprocity(a) − reciprocity(b)|
 
 Surfaced as `World::reciprocity_of` and `World::convergence_between` —
-derived, never stored, and paying nothing. Stated as a MAGNITUDE that
+derived, never stored, and paying nothing. Stated as a magnitude that
 is high when conduct agrees, rather than as friction being absent:
 *the reward for alignment is the absence of a penalty* is the
 negentropic shape this ledger exists to refuse.
 
-**AND ABSENCE IS NOT AGREEMENT.** The private reading answers `1/1`
-when an orb has no cross-orb history — correct for PRICING a cost, and
+**And absence is not agreement.** The private reading answers `1/1`
+when an orb has no cross-orb history — correct for pricing a cost, and
 a trap for reading alignment as merit, because **two orbs that have
 never traded would read as perfectly aligned.** The surfaced reading
-answers `None` there instead: they have nothing to agree ABOUT. Any
+answers `None` there instead: they have nothing to agree about. Any
 future rule that pays on convergence inherits that refusal, and must,
 or it pays the inert exactly what it pays the reciprocal.
 
-### 3.2a FRICTION VENTS WHOLE — a landed law it does not obey
+### 3.2a Friction vents whole — a landed law it does not obey
 
 **(operator ruling 2026-08-03: *if friction creates a force for
 divergence, we must capture the energy output in re-convergence or
@@ -301,20 +301,20 @@ consilience*.)**
 ```
 
 **And `EQUATIONS` T3 already rules the opposite** for the very ledger
-it posts into — *THE TWO-ARMED NET-HEAT LEDGER, ENCASEMENT FIRST*:
+it posts into — *the two-armed net-heat ledger, encasement first*:
 
 ```text
     encased = min( Heat_Net, encasement throughput )  ← SYNTROPIC, FIRST
     vented  = the overflow
 ```
 
-Heat is CAPTURED and only the remainder vents. Friction writes into
+Heat is captured and only the remainder vents. Friction writes into
 `entropy_vented` while skipping the capture step that book's own law
 puts first. It is not that friction lacks a syntropic arm by oversight
 — **it declines a landed one.**
 
-**The shape this implies, with no invented constant.** Friction IS
-entropy, entropy is captured by ENCASEMENT, and an orb's encasement
+**The shape this implies, with no invented constant.** Friction is
+entropy, entropy is captured by encasement, and an orb's encasement
 throughput is already computed for heat. The same path serves:
 
 ```text
@@ -326,16 +326,16 @@ throughput is already computed for heat. The same path serves:
 No new resource, no new schema, no new parameter — the existing
 machinery applied to a mechanic that stepped around it.
 
-**ON "CONSILIENCE", precisely.** The word is lawful here in its
-RESERVED sense only. Every reconciliation instrument was EXCISED
+**On "consilience", precisely.** The word is lawful here in its
+reserved sense only. Every reconciliation instrument was excised
 (`AUDIT_2026-07-31`: *consilience, the manifold, the census, the
 triangle — tag 65 retired; nothing in the mesh reads or reconciles a
-second copy*), and MESH-1d reserved the term for **inputs that COULD
+second copy*), and MESH-1d reserved the term for **inputs that could
 disagree**. Two independent conduct records that could have diverged
-and did not are exactly that. So capture may be measured AS
-consilience; it may never be routed THROUGH a reconciler.
+and did not are exactly that. So capture may be measured as
+consilience; it may never be routed through a reconciler.
 
-**LANDED 2026-08-03, on the operator's ruling:** *friction is
+**Landed 2026-08-03, on the operator's ruling:** *friction is
 mechanical and relational work dissipated into thermal micro-states —
 `ΔQ_friction` and `ΔQ_thermal` are the exact same physical currency, so
 any entropic dissipation within an encased system is subject to capture
@@ -350,10 +350,10 @@ whether generated by a sun or by moving parts.
     vented    = friction − captured           → entropy_vented
 ```
 
-**THE RECEIPT NOW NAMES THE VENTED PART, NOT THE TOTAL.** `replay`
+**The receipt now names the vented part, not the total.** `replay`
 does `entropy_vented += amount` verbatim and must never recompute
 physics, so a `FrictionSettled` naming the whole cost would vent the
-captured half a SECOND TIME on every replay — a chain divergence
+captured half a second time on every replay — a chain divergence
 manufactured by bookkeeping. This is the convention `VentSettled`
 already follows: **a receipt records what happened to the ledger it
 names.** The closure holds and both arms are receipted —
@@ -361,21 +361,21 @@ names.** The closure holds and both arms are receipted —
 Chains cut before this landing replay unchanged: their receipts say
 what vented then, and all of it did.
 
-**The capture carries its OWN `YieldCollected` rather than merging into
+**The capture carries its own `YieldCollected` rather than merging into
 the thermal yield.** Merged it would be unattributable, and I6 does not
 let a difference die without account.
 
-**Recorded, not hidden:** the draw is ONE tick's throughput taken at
+**Recorded, not hidden:** the draw is one tick's throughput taken at
 settle, while the friction being settled accrued over the whole span
 since the last collect. That is dimensionally loose and deliberately
-CONSERVATIVE — a span-scaled draw (`throughput × elapsed`) would
+conservative — a span-scaled draw (`throughput × elapsed`) would
 capture far more. Erring toward the void is the safe direction for a
 change that re-prices, and the span question is left open rather than
 silently resolved in the generous direction.
 
-**Whether convergence should additionally EARN remains open** and is a
-separate question: capture RECOVERS what was already spent;
-earning CREATES. The first is conservation, the second is a mint. The physical reading:
+**Whether convergence should additionally earn remains open** and is a
+separate question: capture recovers what was already spent;
+earning creates. The first is conservation, the second is a mint. The physical reading:
 divergent boundary policies genuinely cost handling and verification
 overhead. **Friction prices divergence, not vice:** two extractive
 empires trade with each other frictionless. The engine keeps its promise
@@ -449,16 +449,16 @@ the outside. The world's physics explains its own ethics.
   (candidate tags reserved on the board, inscribed into NS-1 §2.3 only at
   landing); the escrow node is an orb; trade *offers* ride NS-4 at N5;
   cross-empire book composition awaits NS-5 (Q2.3's universe audit).
-- Consumers named per landing (CHARTER §1): `send`, `absorb`,
+- Consumers named per landing (Charter §1): `send`, `absorb`,
   `bond`/`sever`, `covenant`, and the `ideology` panel.
 - Guardrails carried whole: fun-first and no pay-to-win (01 §5 guardrail
   1); no absolute ostracism (01 §5 guardrail 6, §3.1's ceiling); nothing
   here draws chance
-  (CHARTER §9); exact-rational vocabulary throughout (CHARTER §8).
+  (Charter §9); exact-rational vocabulary throughout (Charter §8).
 - Cross-territory: observer columns land in `engine/lens` (coder-01) by
-  operator relay — the VENT-1 uplink precedent (CHARTER §10). (`engine/mirror`
+  operator relay — the VENT-1 uplink precedent (Charter §10). (`engine/mirror`
   is deleted and its name never reused — d606b01, the recurrence guard;
   MIRROR/ANTI-MIRROR deprecated, `12_UNION` §2c.)
 - The Chronicle Feed (08, JOURNAL-1) rightly refused to invent an ideology
-  vector; once IDEO-1 lands the feed MAY read the landed cohesion counters
-  LENS-SIDE under its lens law — rendering, never state.
+  vector; once IDEO-1 lands the feed may read the landed cohesion counters
+  lens-side under its lens law — rendering, never state.

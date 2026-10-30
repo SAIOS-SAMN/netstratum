@@ -1,4 +1,4 @@
-> **SUPERSEDED 2026-10-22 (docs/89, B3):** this geoid, its own spin
+> **Superseded 2026-10-22 (docs/89, B3):** this geoid, its own spin
 > (`Body.own`), its days and its latitude were parallel machinery: a
 > free-standing ball with a radial-line shear and a meridian spread of a
 > stand-in heat, beside the established laws. Removed. A world's day is its
@@ -8,11 +8,11 @@
 
 # 88 — The geoid: a body's own sphere, its own spin, its day and its figure
 
-docs/87 step 1, and step 2b. Operator 2026-10-22: "planetary movement is
-across a sphere, space traversal is also in a sphere (where sphere is a
-geoid)"; "DAYS_A_YEAR cannot be a constant, it is derived in the same way
-earth is: the degrees of the rotation in the spin of the planetary mass
-coupled with the orbit of the planet around its star"; "derive own spin".
+docs/87 step 1, and step 2b. Design direction (2026-10-22): planetary movement
+is across a sphere, and so is space traversal (the sphere being a geoid); the
+days in a year cannot be a constant, but are derived as on Earth, from the
+degrees of the planet's own spin coupled with its orbit about its star; derive
+the body's own spin.
 
 ## The law (`conductor::geoid`)
 
@@ -25,7 +25,7 @@ deficit `δ = H/(r + H)`, two rings a bell on the system's meeting step).
    frame, signed (positive with the orbit). The orbit's own turning is met
    by the star's pull (that is what an orbit is), so only own spin pushes
    the body's matter or turns its star across its sky.
-   - **At birth** (`formation::system`'s planets): the SHEAR across its slot,
+   - **At birth** (`formation::system`'s planets): the shear across its slot,
      `2·(δ_p(R + d) − δ_p(R − d))`, `d = R·H_b/(H_b + H_p)`; the inner matter
      leads, so it turns against its orbit.
    - **At every meeting that builds it** (`formation::collide_system`): what

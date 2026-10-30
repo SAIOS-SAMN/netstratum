@@ -1,23 +1,23 @@
 # 97 — Nuclides: Q the proton, Z the neutron, R the electron's phase
 
-Operator 2026-10-26: "you're still stuck on singular Z numerics : we need
-weight up to 1200 to have well formed galaxies with enough resources to build
-planets - i want this built as the inverse of xylarium where Q is the proton
-and Z is the neutron and R is the phase state of the electron through p as
-the pulse reverberation of the echo from the core".
+Design direction (2026-10-26): the nuclides go beyond a single Z number, to
+weights up to 1200, so that galaxies are well formed with enough resources to
+build planets; this is built as the inverse of Xylarium, Q the proton, Z the
+neutron and R the electron's phase state, carried by p as the pulse's
+reverberation of the core's echo.
 
-Status (2026-10-28): §1–§2, §4 BUILT (41b2a6b); §3 R BUILT (785a074, §13); §5 in nature's form; §8–§11 BUILT; §12 BUILT and partly superseded (its table cap 1200 by §14, ff0c985; "the galaxies carry the whole mix" retires with docs/101); §13 BUILT (785a074, cd16484); §14 BUILT (ff0c985).
+Status (2026-10-28): §1–§2, §4 built (41b2a6b); §3 R built (785a074, §13); §5 in nature's form; §8–§11 built; §12 built and partly superseded (its table cap 1200 by §14, ff0c985; "the galaxies carry the whole mix" retires with docs/101); §13 built (785a074, cd16484); §14 built (ff0c985).
 
-Read against: xylarium spec 11.0 (53) (Z the proton, Q the neutron, R the
+Read against: Xylarium spec 11.0 (53) (Z the proton, Q the neutron, R the
 electron's phase; ruled there) and xyl-cosmos `fibres.rs` (ends on S^11,
 fibres, seals). Netstratum is the inverse: Q the proton, Z the neutron.
 
-## The seam with xylarium
+## The seam with Xylarium
 
-The letters are swapped deliberately (operator, relayed by xylarium
-2026-10-26: "i want netstratum to run the opposite of yours - Z/Q letter swap
-for the nucleons"; xylarium spec 11.0 (53), 5e4db24): netstratum Q = proton,
-Z = neutron; xylarium Z = proton, Q = neutron; both R = the electron's phase.
+The letters are swapped deliberately (operator, relayed by Xylarium
+2026-10-26: Netstratum runs opposite to Xylarium, the Z/Q letters swapped
+for the nucleons; Xylarium spec 11.0 (53), 5e4db24): Netstratum Q = proton,
+Z = neutron; Xylarium Z = proton, Q = neutron; both R = the electron's phase.
 Anything crossing between the kernels in Z/Q terms (a shared law, a bench, an
 anastome reading) is translated at the seam, Z ↔ Q, and labelled on each side
 ("Q(proton)").
@@ -39,16 +39,16 @@ light; there is not enough heavy matter to build worlds.
 - **Conserved:** nucleons, through every fusion, capture and peel. Charge
   moves between Q and Z only with the electron phase (R) carrying the change.
 
-## 2. The nucleus converges on S^11 (xylarium's fibres, inverted)
+## 2. The nucleus converges on S^11 (Xylarium's fibres, inverted)
 
 Nucleon ends arrive one at a time on S^11, whose degree-l harmonics give
 `d(l) = C(l + 11, 11) − C(l + 9, 11)` independent directions (1, 12, 77,
 352, …; the same count as our atom's orientations).
 
-- An end first claims a free direction ALONE. Lone ends are open: in
-  netstratum they are PROTONS (Q).
-- When every direction of the open degree is claimed, the next end BINDS into
-  a lone end: a FIBRE, one proton and one neutron counter-turning.
+- An end first claims a free direction alone. Lone ends are open: in
+  Netstratum they are protons (Q).
+- When every direction of the open degree is claimed, the next end binds into
+  a lone end: a fibre, one proton and one neutron counter-turning.
 - A degree closes when every direction holds a fibre; turning n holds the
   degrees 0..n−1.
 
@@ -94,7 +94,7 @@ electrons, never from the nucleus.
   change of Q carried by R).
 - **Every gravity and ledger site** that reads `3·charge` reads nucleons.
 
-## 5. OPEN — the abundance law (for ruling)
+## 5. Open — the abundance law (for ruling)
 
 The founding must spread the bounce's nucleons over weights to ≥ 1200 while
 conserving them and leaving the hydrogen stars burn. Read on 2^55 grains:
@@ -106,7 +106,7 @@ conserving them and leaving the hydrogen stars burn. Read on 2^55 grains:
 | the same as a capture chain, normalized to the nucleons | w ≫ 1200 | yes | none left (w = 2 seals, so every proton is captured to deuterium) |
 
 The survival share `½(1 + κ)` derives from the hemisphere law and reaches
-weight 1200. What is missing is how a capture CONSUMES a free nucleon:
+weight 1200. What is missing is how a capture consumes a free nucleon:
 the chain must draw each capture from the free protons, so hydrogen stands
 where the free pool is left. Candidates:
 
@@ -126,14 +126,14 @@ where the free pool is left. Candidates:
 4. R as the electron's phase, read at the galaxy's bell.
 5. Re-read every identity and a founding.
 
-## 7. Built: the founding in nature's form (operator 2026-10-26: "align on nature and build it")
+## 7. Built: the founding in nature's form (direction of 2026-10-26: align on nature)
 
 As nature's: the bounce leaves free protons and neutrons; captures run only on
 the neutrons and stop when they are spent; the heavy weight is the stars' to
 build over generations.
 
 - **The neutron share:** a quarter of the nucleons, the unlocked face of the
-  bounce's ring, `½(1 − δ)` at δ = ½. FOR RULING: nature's freeze-out leaves
+  bounce's ring, `½(1 − δ)` at δ = ½. For ruling: nature's freeze-out leaves
   about an eighth (helium about a quarter of the mass; ours gives a half).
 - **The captures:** each neutron binds a proton where the nucleus first seals,
   deuterium (w 2); deuterons pair to the next seal, w 4 (Q 2, Z 2), by the
@@ -146,27 +146,27 @@ galaxies of one element each. That is the next misalignment: nature's
 galaxies share the primordial mix (docs/78: "every share carries the
 manifest's composition in proportion").
 
-## 8. Bounce nucleosynthesis: three components (operator 2026-10-26: "is this isomorphic nucleosynthesis or unitary?"; "should it be automorphic?"; "land all three so we have the individual components correct")
+## 8. Bounce nucleosynthesis: three components (direction of 2026-10-26: the isomorphic, unitary and automorphic components each landed, so that each is correct)
 
 Each component is its own, with its own witness (`nuclides.rs`,
 `the_three_components_stand_apart_and_each_holds`):
 
-- **AUTOMORPHIC, the structure.** A nucleon's pole IS its leg: on the
+- **Automorphic, the structure.** A nucleon's pole is its leg: on the
   continuum leg (open, R forward) a proton, on the vacuum leg (held, R
   backward) a neutron. Conversion is the Möbius pass (`(δ, ψ, s) ↦ (1 − δ,
   ψ + ½, −s)`), an involution: `M∘M = id`. The swap Q ↔ Z maps the nucleus's
   convergence onto itself (every fibre one of each; every seal its own
   image). Nothing is imported from nature.
-- **UNITARY, the books.** One exchange a pass: protons cross to the vacuum leg
+- **Unitary, the books.** One exchange a pass: protons cross to the vacuum leg
   by the held face, `p·δ`; neutrons to the continuum by the unlocked face,
   `n·½(1 − δ)`; whole nucleons, both sides booked, `p + n` unchanged.
-- **ISOMORPHIC, a reading only.** The founding's outcome set beside nature's
+- **Isomorphic, a reading only.** The founding's outcome set beside nature's
   (neutrons per proton, the weight-4 mass share, hydrogen's) and reported at
   the founding, never imposed.
 
 The seal window and the bounce's heat: §9 (built).
 
-## 9. The bounce's heat and the seal window (operator 2026-10-26: "derive the bounce's heat and build it")
+## 9. The bounce's heat and the seal window (direction of 2026-10-26)
 
 - **The heat.** A body at deficit δ turns `2δ` of its orbit a bell; the
   luminal bound allows one whole turn, so inside the ring the excess cannot be
@@ -188,14 +188,14 @@ Read on 2^55 grains (the isomorphic reading, beside nature): neutrons per
 proton among the nucleons 1/6 (nature about 1/7); weight 4 by mass 2/7
 (about 1/4); hydrogen 5/7 (about 3/4). The static quarter is retired.
 
-## 10. The heavy weight: the stars' captures (operator 2026-10-26: "we need weight up to 1200"; "i thought two turns ago we discussed moving up to 1200")
+## 10. The heavy weight: the stars' captures (direction of 2026-10-26: weights up to 1200)
 
 The founding makes weights 1, 2 and 4 only, as nature's. Everything heavier is
 the stars' to build and return to their galaxies' gas, generation on
 generation. One law, the nucleus's own convergence: a capture adds one
 nucleon, `w → w + 1` (a proton where the end claims a direction alone, a
 neutron where it binds; the pole is the leg, `nuclides::mobius`), and it
-SURVIVES by the hemisphere law, bound or lone on the held hemisphere:
+survives by the hemisphere law, bound or lone on the held hemisphere:
 `σ_{w+1} = ½(1 + κ_{w+1})`. The seals (κ = 1) keep every capture: matter piles
 there (28, 208, 1092), the abundance peaks read off the process. Every capture
 draws one hydrogen nucleus, so nucleons are conserved exactly.
@@ -211,7 +211,7 @@ draws one hydrogen nucleus, so nucleons are conserved exactly.
 - **Recycling** returns both to the galaxy's gas, so every generation is born
   heavier.
 
-## 11. The heat and the grip as readings (operator 2026-10-26: "this seems really static, like a physics constant: 2δ − 1. Where that passes half a turn")
+## 11. The heat and the grip as readings (ruling of 2026-10-26: `2δ − 1`, passing half a turn, stood as a physics constant)
 
 - **The heat is read on the body's own clock.** A body at deficit δ receiving ν
   rings a bell (its own nested clock: the universal rate times each well's
@@ -230,7 +230,7 @@ draws one hydrogen nucleus, so nucleons are conserved exactly.
   share, its deficit at its centre) breaks into its nucleons; they are the
   rapid capture's fuel for the rest. Nucleons conserved.
 
-## 12. A fresh founding with the full table to weight 1200 (operator 2026-10-27: "remove these starter galaxies - and start fresh with a full table of elements up to 1200")
+## 12. A fresh founding with the full table to weight 1200 (direction of 2026-10-27: retire the starter galaxies and found afresh with the full table to weight 1200)
 
 > Superseded in part: the cap at 1200 by §14 (the densest element is the
 > founding's own, 1612 at 2^55 grains); the whole mix by docs/101 (no
@@ -253,7 +253,7 @@ draws one hydrogen nucleus, so nucleons are conserved exactly.
   places and their masses, each taking the founding's composition in
   proportion to its mass, never a slice by weight.
 
-## 13. R read, never averaged (operator 2026-10-27: "does that methodology involve constants or static variables where we should be applying formulas")
+## 13. R read, never averaged (ruling of 2026-10-27: formulas, never constants or static variables)
 
 The ½ in the survival `½(1 + κ)` and in the grip `½·κ` was the hemisphere law
 averaged over the electron's phase: the mean of `(1 + R)/2` over a whole turn
@@ -274,9 +274,8 @@ of p. Read at the body's own phase instead:
   hydrogen 0.04 by mass: the error the reading corrects.)
 - **The held hemisphere** `h = (1 + R)/2` (`nuclides::held`): the share of a
   lone end standing on the held face. Its mean over p is ½, the old static.
-  > **Corrected (2026-10-28, docs/104 §1.1; operator: "(1-R)/2 - that is not
-  > a formula: that is a halvening"):** `(1 ± R)/2` is a halving. The held
-  > share is the COUNT of the electrons' ends on the held face,
+  > **Corrected (2026-10-28, docs/104 §1.1):** `(1 ± R)/2` is a halving. The held
+  > share is the count of the electrons' ends on the held face,
   > `h = (F_e + L_e·in_step(p, φ_held))/Q`; the built `(1 + R)/2` (785a074)
   > stands until the count is built with the founding re-derived on it.
 - **Survival** `σ_{w+1} = κ + (1 − κ)·h` (bound, or lone on the held
@@ -299,11 +298,11 @@ The captures climb to the table's top and stop there, as the founding does
 it (witness: `r_is_read_at_the_pulse_and_its_mean_is_the_old_half`, and
 `capture_rapid` at p = 0 reading 1200).
 
-## 14. No fixed cap: the densest element is the founding's own (operator 2026-10-27: "use the formulas to calculate the densest element you will need somewhere in the 1200-1700 range"; "run it at 1700 - no fixed cap")
+## 14. No fixed cap: the densest element is the founding's own (direction of 2026-10-27: compute the densest element by the formulas (in the range 1200–1700); found at 1700 with no fixed cap)
 
 The seeds climb the convergence each passing `σ_{w+1}` of themselves on, in
 whole nuclei; near the top `σ ≈ 0.89`, so the climbing seeds fall by about a
-tenth a weight and the climb ENDS where less than one whole nucleus arrives.
+tenth a weight and the climb ends where less than one whole nucleus arrives.
 The free neutrons never run short (about 3.7·10^72 left at 2^55 grains).
 Read at 2^55 grains: the last nucleus stands at **weight 1612** (Q 976, Z
 636): 1600 → 18 arriving, 1606 → 7, 1611 → 2, 1612 → 1 (it stays). A larger

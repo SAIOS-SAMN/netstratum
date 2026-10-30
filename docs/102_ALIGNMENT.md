@@ -1,9 +1,9 @@
 # 102 — Alignment: one vocabulary, one register of what is owed
 
-Operator 2026-10-28: "whats the coherent picture with aligned semantics for
-implementation"; "lets find our alignment across all the topics we have
-identified that need remediations or forward development". Status: REGISTER,
-kept current; each item closes with its commit and witness.
+Design direction (2026-10-28): state the coherent picture, with aligned
+semantics, for implementation, and align every topic identified as needing
+remediation or forward development. Status: register, kept current; each item
+closes with its commit and witness.
 
 ## 1. The vocabulary (one meaning a word, every tier)
 
@@ -15,7 +15,7 @@ kept current; each item closes with its commit and witness.
 | **bounce / bell** | a core's re-pulse in full in its own units; one a bell | breath's arrivals |
 | **push / unlocked face** | the bounce's carriage on a kind; the face the core does not lock, `1 − δ` | `push_cut`, release |
 | **release** | the tide's share leaving the throat a bounce, `s = ½·c/(c + base)` | breath's release |
-| **flow** (the FILAMENT) | a core's released matter turning on its jetstream loop; the ocean is the universal core's flow | `Body.flows` (`Universe.ocean` folds in, docs/101) |
+| **flow** (the filament) | a core's released matter turning on its jetstream loop; the ocean is the universal core's flow | `Body.flows` (`Universe.ocean` folds in, docs/101) |
 | **mote** | one kind's share of a flow, its state carried forward | `flows::Mote` |
 | **R loop, legs** | the circulation; the continuum leg out along the axis, the vacuum leg home through the disc | `Mote.phase[LOOP]`, `Mote.vacuum` |
 | **Möbius pass** | `(δ, ψ, s) ↦ (1 − δ, ψ + ½, −s)`: a mote's leg turned | `flows::mobius` |
@@ -52,13 +52,13 @@ docs before code; witnesses by re-derivation, never equal bytes.
 
 | # | item | where | depends | ruling |
 |---|---|---|---|---|
-| A1 (CLOSED e4b74a9) | the leg flag's two writers: `stream` undoes `luminal` | `flows::stream`, breath | — | — |
-| A2 (CLOSED e4b74a9) | tilt dropped on save for firmament and ocean motes | `pulse::write` tags 19/24 | — | — |
-| A3 (CLOSED e4b74a9) | "filament" names a bound chain: rename to **strand** | `flows::chains`, `Chain`, `stream`, docs | — | — |
-| A4 (CLOSED e4b74a9) | two impact laws: `life::climb` draws from the seed (with T_u stood in at 60 by `bin/life`); `life::advance` measures on the hidden phase | `life.rs`, `bin/life.rs` | — | — |
-| A5 (INTO B1) | nine readings of the universal state; `is_home` branches; `core_state` 0; the release span branch | pulse, breath, ocean (docs/101 §1.2) | B1 | — |
-| A6 (INTO B1, B4) | three homes: `is_home` (path [0]), `life::home` and `chronometry::keepers` (heaviest kept); `places.rs` | life, chronometry, places | B1, B4 | — |
-| A7 (CLOSED e4b74a9) | `formation::echo_holds` duplicates the crest's law | formation | — | — |
+| A1 (closed e4b74a9) | the leg flag's two writers: `stream` undoes `luminal` | `flows::stream`, breath | — | — |
+| A2 (closed e4b74a9) | tilt dropped on save for firmament and ocean motes | `pulse::write` tags 19/24 | — | — |
+| A3 (closed e4b74a9) | "filament" names a bound chain: rename to **strand** | `flows::chains`, `Chain`, `stream`, docs | — | — |
+| A4 (closed e4b74a9) | two impact laws: `life::climb` draws from the seed (with T_u stood in at 60 by `bin/life`); `life::advance` measures on the hidden phase | `life.rs`, `bin/life.rs` | — | — |
+| A5 (into B1) | nine readings of the universal state; `is_home` branches; `core_state` 0; the release span branch | pulse, breath, ocean (docs/101 §1.2) | B1 | — |
+| A6 (into B1, B4) | three homes: `is_home` (path [0]), `life::home` and `chronometry::keepers` (heaviest kept); `places.rs` | life, chronometry, places | B1, B4 | — |
+| A7 (closed e4b74a9) | `formation::echo_holds` duplicates the crest's law | formation | — | — |
 | A8 | `bin/observe`'s "cascade" view recomputes the cascade beside it | observe | B3 | — |
 
 ### B. Forward development (new physics, in order)
@@ -69,7 +69,7 @@ docs before code; witnesses by re-derivation, never equal bytes.
 | B2 | the founding as its throat; `cascade` and `deploy` retire; `T_u` its echo (hypha reads tag 17) | docs/101 §2, §6 | B1 | **mycelium** (owner of TUniversal), `T_u` |
 | B3 | galaxies formed from its flow (the universe tier's mechanism, the crest's grammar); `orbit_galaxies`' rings retire | docs/101 §2 | B2 | — |
 | B4 | the home as its disc, unique by elements; the firmament the heavy base | docs/78, 83, 101 | B3, B5 | — |
-| B5 | carriage by harmonic, the coupling C | docs/100 §3 | — | **operator**: C ((a) `q = l + 1` per xylarium's reading) |
+| B5 | carriage by harmonic, the coupling C | docs/100 §3 | — | **operator**: C ((a) `q = l + 1` per Xylarium's reading) |
 | B6 | the electrons' transition (R = 0) on the light and chemistry ledgers; the poles' transition | docs/100 §9.1, §9.3 | — | **operator**: R's scale |
 | B7 | the founding's slight beads stop standing at rest | docs/100 §6 | B2 | — |
 | B8 | cost at the universe tier: every grain in motion; the zoom ruling (certified sectors, exact under observation) | ruling 2026-10-24 | B1 | — |
@@ -109,8 +109,8 @@ docs before code; witnesses by re-derivation, never equal bytes.
 |---|---|---|
 | C1 | re-found and breathe past bell 7000: galaxies formed, compositions, the home, stars and worlds per galaxy, identities, cost | B1–B4 |
 | C2 | worlds with life: the gauges and the climb on a stable universe | C1, A4 |
-| C3 | the live G2 universe (var-e2): re-founded only when cleared; services stay down; restarts coordinated with mycelium | C1 |
-| C4 | vendor mycelium past 287cf10c (forms carry geometric elements, tag 16) before any restart | C3 |
+| C3 | the live G2 universe (var-e2): re-founded only when cleared; services stay down; restarts coordinated with Mycelium | C1 |
+| C4 | vendor Mycelium past 287cf10c (forms carry geometric elements, tag 16) before any restart | C3 |
 
 ### D. Closed this cycle (for the record)
 
@@ -125,6 +125,6 @@ locked lead, torsion, twist in the bond and the fibres (65348e2, 4ffd2e7,
 
 1. **A1–A4, A7** (no physics change; each with its witness).
 2. **A5–A6 fold into B1** (2026-10-28): folding nine readings over four holders now is rewritten when they become one body; pointing the homes at today's empty home core would break the standard year until B4.
-3. **Rulings in hand:** C (B5), R's scale (B6), `T_u` with mycelium (B2).
+3. **Rulings in hand:** C (B5), R's scale (B6), `T_u` with Mycelium (B2).
 4. **B1 → B2 → B3 → B4 with B5, B7**, then **B8** as the cost demands.
 5. **C1**, then **C2–C4**.

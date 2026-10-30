@@ -1,23 +1,20 @@
 # 92 — The anchor network: the core held to its accretion disc, stars chained by gravity
 
-Operator 2026-10-25, in order:
+Design directions of 2026-10-25, in order:
 
-- "so your pull strength must be being calculated incorrectly"
-- "pull the galactic cores to the accretion disks"
-- (relayed by xylarium, its operator, the same day) "we are chaining the
-  galactic core too far: we should pull that back for the bounce to only
-  hold to the edge of the accretion disc and then let the accretion disk
-  opportune to the attachment of the first coordination of stars, which
-  then chain down to the order of stars so that there is effectively a
-  'network' of stars via gravity"
-- "something is seriously misaligned here - maybe its our semantics,
-  because we are overlapping on semantics with throats and the core of
-  stars which should be 'reactors' - then you have 'something' that
-  connects core - reactor - planet" (xylarium's operator)
-- "right and anchor weaken by distance"; "and by torque, twist, spin"
-- "scope it and document it"
+- The pull strength was being computed incorrectly.
+- The galactic cores are pulled to their accretion discs.
+- (Relayed by Xylarium the same day.) The galactic core was chained too
+  far: the bounce holds only to the edge of the accretion disc, and the
+  disc in turn offers attachment to the first coordination of stars, which
+  chain down through the order of stars, so that the stars form a network
+  held by gravity.
+- (Xylarium.) The semantics overlapped between throats and the cores of
+  stars, which are reactors; something connects core, reactor and planet.
+- Anchors weaken by distance, and by torque, twist and spin.
+- This document scopes and documents the network.
 
-Status: SCOPED, not built. Derived with xylarium (one form for both
+Status: scoped, not built. Derived with Xylarium (one form for both
 carriers). The reactor's extent fall (§3.3) is built (12574d0).
 
 ## 1. The finding that forces it
@@ -37,7 +34,7 @@ whatever stands inside `ρ` falls.
 
 Read, both carriers, 2026-10-25:
 
-| | netstratum (2^55, 340 bells) | xylarium (seed 7, 8 echoes) |
+| | Netstratum (2^55, 340 bells) | Xylarium (seed 7, 8 echoes) |
 |---|---|---|
 | stars' reaches from the core | 0.0003 – 0.02 (throat at 1) | median 0.31 (min 3e-5, max 2.09) |
 | birth discs at or past the rim | 96 – 100 % | disc born 0 once membership held within the gravity reach |
@@ -49,16 +46,16 @@ core chains everything in its galaxy; nothing beyond it can be a star's.
 
 ## 2. The words (one word was carrying three things)
 
-- **THROAT**: a passage between enclosures, the paired face (the universal
-  and galactic cores', a remnant's). Its STATE belongs to the passage and
+- **Throat**: a passage between enclosures, the paired face (the universal
+  and galactic cores', a remnant's). Its state belongs to the passage and
   holds ("the state holds only where there is a throat"); a galactic core
   is a throat, so its state stays the enclosure's base, 1 (docs/83,
   2026-10-15, stands).
-- **REACTOR**: a star's heart. It holds what it has gathered and pushes;
+- **Reactor**: a star's heart. It holds what it has gathered and pushes;
   it has no throat (2026-10-17) and no state. What falls into it is read by
   its own extent, never by the throat condition.
-- **ANCHOR**: what connects core → reactor → planet: the tether chain
-  (xylarium 11.3a: double-cone manifolds; stretch, torque, twist). Never a
+- **Anchor**: what connects core → reactor → planet: the tether chain
+  (Xylarium 11.3a: double-cone manifolds; stretch, torque, twist). Never a
   pull contest with the core.
 
 ## 3. The forms
@@ -79,13 +76,13 @@ reservoir pays every torque, as now.
 
 ### 3.2 The anchors and the chain
 
-Beyond `R_d` the core holds only through its FIRST COORDINATION:
+Beyond `R_d` the core holds only through its first coordination:
 
-- the DISC is one anchor, standing at `R_d`, its hold `H_d =` the hold
+- the disc is one anchor, standing at `R_d`, its hold `H_d =` the hold
   inside its edge (the state and the disc's matter);
 - each star system standing beyond `R_d` is an anchor, its hold its whole
   system's mass share `h_s`, standing at its reach `R_s`;
-- every body beyond `R_d` (a mote, a star) has ONE PARENT: its nearest
+- every body beyond `R_d` (a mote, a star) has one parent: its nearest
   inner anchor by reach (radial, as every gap is now; the shared plane
   enters when gaps go on the sphere, the same gate as the tide's
   re-derivation). The first stars anchor to the disc; later ones to the
@@ -93,7 +90,7 @@ Beyond `R_d` the core holds only through its FIRST COORDINATION:
 
 So the network is a tree: core → disc → first stars → theirs.
 
-### 3.3 What falls into a newborn heart (BUILT, 12574d0)
+### 3.3 What falls into a newborn heart (built, 12574d0)
 
 A member falls where its place stands within the reactor's extent,
 `λ·R_max`: `λ` the fallen share of the binding, `R_max` the outermost kind the
@@ -108,7 +105,7 @@ A body at reach `r` anchored to an anchor at `R_p` of hold `H_p` feels
     δ_p = H_p / ((r − R_p) + H_p)
 
 measured across its gap from the anchor, never from the core. The anchor's
-GRIP on it weakens by distance, torque, twist and spin (operator,
+grip on it weakens by distance, torque, twist and spin (operator,
 2026-10-25), each a reading the law already has, each entering once:
 
     g = δ_p · |k| · in_step(ψ_c − ψ_c,p) · d/(d + turned)
@@ -136,21 +133,21 @@ A body beyond `R_d` takes its anchor's push, never the core's: the disc
 anchor's push is the core's (`p`, the bounce), a star anchor's its reactor's
 (`½·magnetism/held` of its kept), times the link's grip `g`.
 
-THE PAYMENT, in the frame both share: the anchor's ORBIT pays, `W·Δℓ_p =
+The payment, in the frame both share: the anchor's orbit pays, `W·Δℓ_p =
 −Σ m·Δℓ`, all in galaxy units (the anchor's whole system mass `W`, the
 anchored bodies' `m`), the grain's remainder to the galaxy's medium spin,
 identity `anchor`; the disc anchor's payments are the core reservoir's, as
 now. (Paying from a star's own spin would cross from the galaxy frame into
 the system's by the share twice, a square.)
 
-THE PASSAGE AND THE INVARIANT (4fe71e0: `I = ℓ − (p/2)·f(1 − f)` telescopes
+The passage and the invariant (4fe71e0: `I = ℓ − (p/2)·f(1 − f)` telescopes
 because the push is read over the very arc the phase advances). About an
 anchor the body's phase must advance about the anchor: by its own turning
 about the anchor, `2δ_p`, carried with the anchor's own advance about its
 parent. The push is then read over the relative arc `2δ_p` from the relative
 phase `ψ − ψ_p`, so `I` telescopes about the anchor. (Correction to the
 first statement of this form, 2026-10-25: the relative arc is `2δ_p`, the
-turning ABOUT the anchor, not `2(δ_m − δ_p)`; only the former telescopes.)
+turning about the anchor, not `2(δ_m − δ_p)`; only the former telescopes.)
 Witness first: the invariant read about an anchor over N bells, exact, before
 the live torque uses it.
 
@@ -164,10 +161,10 @@ is past every tether: it exits to the ocean.
 ### 3.7 The planets: the second movement (the lock share)
 
 Operator 2026-10-25: the star's path about its core and the planets' path
-about the star are TWO MOVEMENTS; a planet's orbit is its tug plus the
+about the star are two movements; a planet's orbit is its tug plus the
 star's spin. The pull of the core on the star is built (1133c7c). The lock
 share is derived, not built: `c = δ(r)`, the held face (the unlocked face
-`½(1 − δ)` is what the tide heats, 2026-10-16), as SHARED INERTIA:
+`½(1 − δ)` is what the tide heats, 2026-10-16), as shared inertia:
 
     ℓ_s = S·unit / (kept + Σ m_i·δ_i),   ℓ_p = ℓ_tug + δ(r)·ℓ_s
 
@@ -188,7 +185,7 @@ heart).
 | the torque | `flows::torque` / `torque_one` | an anchored body's hold, reach, deficit, push and passage read from its anchor; payments returned per anchor |
 | payment | `breath.rs` | the disc's to the core reservoir; a star's from its orbit, `W·Δℓ_p = −Σ m·Δℓ`, identity `anchor` |
 | shear, chains, bindings | `flows::shear`, `chains` | beyond `R_d`, neighbours read about their anchor |
-| capture (settling) | `breath.rs` CAPTURE IS SETTLING | the sphere from each body's anchor, `k = g·h/H_p` |
+| capture (settling) | `breath.rs` capture is settling | the sphere from each body's anchor, `k = g·h/H_p` |
 | the system's rim | `breath::rim_of` | from the star's anchor, through `g` |
 | exits | `flows::exits` | past the outermost anchor's tether |
 | the lock share | `formation::collide_system`, `pulse::star_spin` | §3.7, after the rest |
@@ -209,7 +206,7 @@ Each step its own read against the last, on the same founding.
 
 ## 6. Open
 
-- Where our stars stand against `R_d`: READ (§7): most form inside the
+- Where our stars stand against `R_d`: read (§7): most form inside the
   accretion disc as §3.1 reads it. The edge's reading (the held share's
   zero, or its half) decides how much of the galaxy the network governs.
 - The disc anchor's own sphere: read against what stands beyond it (§3.6),

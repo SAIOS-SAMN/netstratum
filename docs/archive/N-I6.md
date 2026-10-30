@@ -1,7 +1,7 @@
 # N-I6 — the residual names the deed
 
-**Lane:** intelligence port · **Status: IMPLEMENT — charter seated `c623f84`**  
-**Charter:** [`53_INTELLIGENCE_PORT.md`](53_INTELLIGENCE_PORT.md) D4.3–D4.6 · D7 · Pins E, F, H  
+**Lane:** intelligence port · **Status: implement — charter seated `c623f84`**  
+**Charter:** [`53_INTELLIGENCE_PORT.md`](../53_INTELLIGENCE_PORT.md) D4.3–D4.6 · D7 · Pins E, F, H  
 **Companions:** N-I5 (`solver/src/survival.rs`) · `cognition.rs` (comes down) · `kernel::admits`
 
 *Markdown is instruction only. The engine reads constructors and the beat.*
@@ -69,7 +69,7 @@ is Short — that is how it names the cure. Pin G still withholds ARC.
 | Seat | Peel | Close means | Residual names |
 |---|---|---|---|
 | Ration first (always) | mouths × species column, same as N-I5 | every mouth fed | nothing on this book — Need may open Matter |
-| Ration Short, accrued covers the shortfall | accrued workspace vs the leftover | DERIVE identity | **Collect** (Pin H). The cycle collect *is* the deed. No zone. |
+| Ration Short, accrued covers the shortfall | accrued workspace vs the leftover | Derive identity | **Collect** (Pin H). The cycle collect *is* the deed. No zone. |
 | Ration Short, accrued does not cover | standing habitat support vs mouths; extractor drain vs habitat | leftover on the **ration** fiber | **Habitat** or **raze Extractor** (Pin E). Never a third Extractor — that is the wrong column. |
 | Ration Fed, Matter opened | alloy vs iron as two sites on the matter fiber | leftover direction | **Synthesizer** (alloy > iron) or **Smelter** (iron > alloy) (Pin F) |
 | Settled orb, zero sites that *yield* the ration | owe one production site on the ration fiber; have none | leftover on the ration column | the unique `industry_relevant` zone whose `zone_yield` is that ration. Founding is this peel, not Policy bootstrap. |
@@ -113,7 +113,7 @@ Delete from the **live path** (and then from the file):
 
 Their *readings* (iron vs alloy, mouths vs habitats, accrued vs owe)
 become the measurements in §3. Disposition / `Policy` caps /
-`industry_relevant` remain **RENDER gates** (cannot express a deed the
+`industry_relevant` remain **render gates** (cannot express a deed the
 books cannot pay, cannot raise a pathway the metabolism cannot touch).
 They are not a second choice among viable zones.
 
@@ -148,7 +148,7 @@ exact numbers / `FullMeasurement`s to the solver.
 |---|---|
 | **E** | one Habitat, two Extractors, ration residual ≠ 0 → think names Habitat or raze-Extractor. A third Extractor is never expressed. No disposition dial. |
 | **F** | ration Fed, alloy > iron → Matter leftover names Synthesizer. iron > alloy → Smelter. Inverse is the draw just priced. |
-| **H** | accrued covers the ration leftover → DERIVE closes as Collect. No zone. No vocabulary. |
+| **H** | accrued covers the ration leftover → derive closes as Collect. No zone. No vocabulary. |
 | **G held** | unclosed book still does not call `think_task`. Rest, not a sweep. |
 | **N-I4 held** | search off the beat. |
 | **SEAL-B** | Entity schema untouched. |

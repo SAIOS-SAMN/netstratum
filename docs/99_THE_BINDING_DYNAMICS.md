@@ -1,22 +1,22 @@
 # 99 — The binding's dynamics, end to end, with the inverse faces
 
-Operator 2026-10-27: "scope the full dynamics and include the inverse
-physics". Status (2026-10-28): §2.1–§2.5 BUILT (32a7dfc, 3400588, bc2d32c); §5 open. Builds on docs/96 (founding as
-flow, §7 the galaxy enclosure, §8 the hold law), docs/97 (Q, Z, R), docs/98
-(the inverse faces).
+Design direction (2026-10-27): scope the full dynamics, inverse physics
+included. Status (2026-10-28): §2.1–§2.5 built (32a7dfc, 3400588, bc2d32c); §5
+open. Builds on docs/96 (founding as flow, §7 the galaxy enclosure, §8 the
+hold law), docs/97 (Q, Z, R), docs/98 (the inverse faces).
 
 ## 0. The measured break (2^55 grains, bells 0–1500)
 
 - 12 systems, 10 companions, 8 worlds by bell 1500; galaxy 163 has heard no
   echo (it stands ~3780 bells out).
 - No binding was refused at ignition (0 by heat, 0 by heart).
-- 49683 members returned from bindings in which NOTHING FELL; by bell 900,
+- 49683 members returned from bindings in which nothing fell; by bell 900,
   59 such bindings, 16876 members; the nearest member a median 118 heart
   extents out (10^1 to 10^5).
 
 ## 1. The chain, stage by stage
 
-Each stage: its law, what it reads by (phases, or a frame still to retire), the FACE it reads (G gravity's
+Each stage: its law, what it reads by (phases, or a frame still to retire), the face it reads (G gravity's
 held share `δ = H/(R + H)`; P the push's unlocked share `1 − δ`), its inverse
 reading, and its state.
 
@@ -27,7 +27,7 @@ reading, and its state.
 | 3 | torque, turning | `2·share` a bell, route by face | mote | G on its face | vacuum face reads `1 − δ`, route backward | built |
 | 4 | disc settles | tilt returns `turned/(d + turned)` | galaxy | G (`turned = 2δ`), P (`d = 1 − δ`) | admitted face only (outside the ring) | built |
 | 5 | rings | band pairs `k(ρ) = (S/G)(1+ρ)/(1−ρ)` on the strip | galaxy | G/P balance | ring fixed (½ both faces) | built |
-| 6 | the crest | bond `λ/(1+λ)`, `λ = 2(m+μ)/R` ≥ heat + tide `w/(2(R+H))`; `⌊R/w_max⌋` bindings by DISC-PLANE phase | the binding's own enclosure | G contrast (tide) | tide symmetric (`|Δδ| = |Δ(1−δ)|`) | built |
+| 6 | the crest | bond `λ/(1+λ)`, `λ = 2(m+μ)/R` ≥ heat + tide `w/(2(R+H))`; `⌊R/w_max⌋` bindings by disc-plane phase | the binding's own enclosure | G contrast (tide) | tide symmetric (`|Δδ| = |Δ(1−δ)|`) | built |
 | 7 | membership | ring band × disc-plane arc | galaxy | — | — | built — **misaligned (§2.1, §2.2)** |
 | 8 | infall | member falls where its distance ≤ `λ_f·R_max` (the heart's extent), fixed point from all fallen down | a dilated frame (`× g/m`) | G (heart cut `δ ≥ ½`) | the held heart is the vacuum face (containment), coherent | built — **broken; to phases (§2.2)** |
 | 9 | ignition | `a < ½`, share `(1−2a)/(1+2a)` | binding | — | — | built |
@@ -42,19 +42,19 @@ reading, and its state.
 
 ### 2.1 Membership takes members from the axial leg
 
-`band_pairs` gathers every mote of a ring band whose DISC-PLANE phase falls
-in the arc, on EITHER leg of the R loop. Members on the axial leg (loop
-phase in `[½, 1)`) are in transit (docs/94 §11: "the AXIAL leg carries
-matter in transit; the DISC leg is where the cut and collapse are read"),
+`band_pairs` gathers every mote of a ring band whose disc-plane phase falls
+in the arc, on either leg of the R loop. Members on the axial leg (loop
+phase in `[½, 1)`) are in transit (docs/94 §11: "the axial leg carries
+matter in transit; the disc leg is where the cut and collapse are read"),
 half a loop from the disc. **Law:** a binding gathers on the disc leg only
 (`on_disc_leg`), as the beads and the cut already do.
 
-### 2.2 No frames: the infall is read in phases (operator 2026-10-27: "we shouldnt have frames we should have phases")
+### 2.2 No frames: the infall is read in phases (ruling of 2026-10-27: phases, never frames)
 
-The infall turns each member's phase offsets into LENGTHS (`r_c·|Δψ_k|`),
+The infall turns each member's phase offsets into lengths (`r_c·|Δψ_k|`),
 dilates them into a frame (`× g/m`, the binding's "own units") and compares
 them with a heart's extent read in that frame. Both the frame and the
-dilation retire: a member's place in its binding is its PHASE, and closeness
+dilation retire: a member's place in its binding is its phase, and closeness
 is the in-step share, the one measure the chains, the coherence and the
 torque already read (S¹'s linear measure, `in_step = 1 − 2|Δψ|`).
 
@@ -97,10 +97,10 @@ The driver stays over the product's nucleons `2w`.
 - **Faces.** The luminal bound admits only the face whose share is at most
   ½ (docs/98): outside the ring the continuum face (δ < ½), inside it the
   vacuum face (1 − δ < ½). Our released matter stands outside the ring, so
-  bodies form on the admitted face and read δ; the hearts hold INSIDE their
+  bodies form on the admitted face and read δ; the hearts hold inside their
   own throats, where the admitted face is the vacuum's: containment is the
-  vacuum's kind (xylarium: "a star is quantum gravity containment, its
-  holding face the vacuum's"). So in our universe the heart IS the vacuum
+  vacuum's kind (Xylarium: "a star is quantum gravity containment, its
+  holding face the vacuum's"). So in our universe the heart is the vacuum
   and the disc the continuum, each read on its admitted face: the inversion
   is carried by where matter stands, never by a second law.
 - **What the inversion changes in a law:** only where a law reads a face
@@ -112,21 +112,21 @@ The driver stays over the product's nucleons `2w`.
 
 ## 4. Build order (one commit each, its witness read before the next)
 
-1. **§2.1 disc-leg membership** (BUILT). Witness: no member on the axial leg; the
+1. **§2.1 disc-leg membership** (built). Witness: no member on the axial leg; the
    ring's holding conserved.
-2. **§2.2 the infall in phases** (BUILT with step 3; `flows::step_with`; the
+2. **§2.2 the infall in phases** (built with step 3; `flows::step_with`; the
    frame, `g/m`, `formation::infall` and the newborn's rim by distance
    retire; the system's rim is the whole turn). Witness: a
    member displaced only in a plane of tilt 0 is in step; a member a quarter
    turn off in its orbit's plane stands at the boundary; a binding whose
    members share its phase falls whole.
-3. **The disc's places in phases** (BUILT with step 2: a disc member's place
+3. **The disc's places in phases** (built with step 2: a disc member's place
    is its phase off step, `1 − C ∈ (½, 1]`, read by the ring law in
    `formation::system`; the star's own spin reads each fallen member's
    phase place times its hold as a share of what fell, `d·H_c/λ`, the
    place's `/λ` dilation retired). Witness: the system's
    spin booked exactly; every disc member's phase offset from its star kept.
-4. **§2.5 the burn's barrier by charge** (BUILT, `formation::tunnelling`). Witness: H + H 1/3, He + He 1/5.
+4. **§2.5 the burn's barrier by charge** (built, `formation::tunnelling`). Witness: H + H 1/3, He + He 1/5.
 5. **Read:** re-found, breathe to bell 1500 (and 3000 for galaxy 163's first
    echoes): bindings formed, hearts formed, stars, worlds per star, every
    identity.

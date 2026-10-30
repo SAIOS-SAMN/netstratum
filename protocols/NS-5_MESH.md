@@ -1,9 +1,9 @@
 # NS-5 — MESH: two nodes, one world
 
-> **SUPERSEDED IN PART — Charter §11, THE ONE-TRUTH AMENDMENT
+> **Superseded in part — Charter §11, the one-truth amendment
 > (2026-07-31).** The consilience instruments of §2 and the
 > reconciliation records of §3 (tag 65; refusal kinds 3–4) are
-> RETIRED and their code excised: a reconciling check between copies
+> retired and their code excised: a reconciling check between copies
 > is unlawful. The lawful remainder of this document: the carrier
 > (§3.3), the receipted handoff (§7), and the partition law (§7.5).
 > The spine at TUniversal{S,G,T} replaces replication whole — state
@@ -12,26 +12,26 @@
 > ladder, #34–#37). Nothing in the superseded sections may be built
 > against.
 
-**Status:** N6a SPECCED + MESH-1a LANDED (both 2026-07-30, reconciled
+**Status:** N6a specced + MESH-1a landed (both 2026-07-30, reconciled
 the same day — two seats wrote the two halves in parallel; this
-document carries both whole) + MESH-1b LANDING (§7 — the receipted
+document carries both whole) + MESH-1b landing (§7 — the receipted
 handoff, tag 67).
 
-> **SPINE AMENDMENT (2026-07-31, arch-02).** The spine LANDED and
-> WALKS: SPINE-1 (tag 84, two maps, four verbs) + the #36 rungs — the
-> ADOPTION DOOR (`Spine::adopt`: a pre-chain world enters the mainline
+> **Spine amendment (2026-07-31, arch-02).** The spine landed and
+> walks: SPINE-1 (tag 84, two maps, four verbs) + the #36 rungs — the
+> adoption door (`Spine::adopt`: a pre-chain world enters the mainline
 > once, the debt stamped `judged=0`, a second adoption refuses) and
-> KERNEL-OBSERVED PLAY (every conductor world chains its committed
+> kernel-observed play (every conductor world chains its committed
 > state each beat at {S, G, T-tick}; the record repeats the blob's
 > leading byte — never a schema constant; a penned world's spine
-> stalls with its pen). THE AGREEMENT LAW landed whole as
+> stalls with its pen). The agreement law landed whole as
 > `mesh::agree` (Σ_mesh · re-sync · resonance m=10 — the ancestor's
 > majority finality stays dropped, per this document's own law).
 > The code cites "NS-5 §9" for the spine's chapter; the full rewrite
-> this header promises (spine as replication whole) is OWED and lands
+> this header promises (spine as replication whole) is owed and lands
 > with the spine uplink (present/receive for commitment segments). The three laws (§1) are the protocol frame, written
-FROM the landed machinery (the N1 spec-from-working-code discipline).
-The consilience first slice (§2) is LANDED: mechanic `engine/mesh`,
+from the landed machinery (the N1 spec-from-working-code discipline).
+The consilience first slice (§2) is landed: mechanic `engine/mesh`,
 witnesses `engine/mesh/tests/mesh_consilience.rs`, 5 green, red-first
 honored.
 Working orders and the three operator rulings of 2026-07-30:
@@ -43,51 +43,51 @@ ancestor's majority finality (witness weight > 0.5). Consilience is
 unanimous or refused, structurally — the house law the world clock
 already keeps (NS-3 §1.3, 3-of-3).
 
-The mesh is how independent engine instances hold ONE universe: not
+The mesh is how independent engine instances hold one universe: not
 by trusting each other, and not by copying each other — by
-MEASURING each other. Convergence is the proof; opposition is the
+measuring each other. Convergence is the proof; opposition is the
 check; the fold is the merge that never merges.
 
 **The identity ruling (2026-07-30):** at N6 the mesh is blake3 and
 provenance only. Consilience-of-independent-computation over
-exact-rational state reduction IS the claim — no key-pair signatures
+exact-rational state reduction is the claim — no key-pair signatures
 enter the registry here. External cryptographic identity arrives at
-N7 (ANCHOR), where the mesh meets parties it cannot re-compute.
+N7 (anchor), where the mesh meets parties it cannot re-compute.
 
 ## 1. The three laws
 
 1. **Proof-of-convergence, not proof-of-authority.** A node's claim
-   about a world IS its chronicle. Two nodes agree when replay of the
+   about a world is its chronicle. Two nodes agree when replay of the
    same receipts reaches the same committed projection — the landed
    CONVERGE-1 machinery run across a wire instead of a directory. No
    node is root; the four C's place every claim. The exact form of
    "reaches the same projection" is §2's consilience measurement,
    landed: C(Δ) = 0 exactly, or refused typed.
 2. **The opposition check (12_UNION §2c).** Cross-node verification
-   is by OPPOSITION, never byte-copying: a two-legged deed verifies
+   is by opposition, never byte-copying: a two-legged deed verifies
    when the far leg is the exact inverse of the near one (the
    aperture pair summing zero; the council reckoning summing to the
    locks; the Delta antisymmetry). Byte-canonical encoding exists
-   ONLY so digests agree; the question a node asks is never "same
+   only so digests agree; the question a node asks is never "same
    bytes as mine" — it is "is your leg my inverse." The aperture
    pair-conservation reading composes here as the N6 mesh audit
    (BUILD_ORDER §3a).
-3. **One writer per clock.** A world's chronicle has ONE authoring
+3. **One writer per clock.** A world's chronicle has one authoring
    node at a time (the two-writer guard, made protocol). Authority
-   moves by RECEIPTED HANDOFF, never by race: the yielding node seals
+   moves by receipted Handoff, never by race: the yielding node seals
    a handoff receipt naming the successor; the taking node's first
    append cites it. A fork (two chains sharing a prefix) is not a
-   catastrophe — it is a DIVERGENCE: both branches live, the ledger's
+   catastrophe — it is a divergence: both branches live, the ledger's
    rotation law names them, and convergence annexes both (annex,
    never merge — 07 §1). The fork's exact measurement is §2.3's
-   DIVERGED refusal — the residuals carried whole are what the annex
+   diverged refusal — the residuals carried whole are what the annex
    then places. The handoff mechanic is §7, landed at MESH-1b.
 
 ## 2. Consilience — the landed first slice (MESH-1a)
 
-### 2.1 The measured manifold (v2) and the structural census — STRUCK
+### 2.1 The measured manifold (v2) and the structural census — struck
 
-> **THE CENSUS KERNEL IS OUT** (operator ruling 2026-08-04):
+> **The census kernel is out** (operator ruling 2026-08-04):
 > *incompatible with the architecture — we are building on a higher
 > dimensional plane of multi-axial PoW++ with two algorithms, PoUW and
 > PoWC, both converging on n-dimensional polynomials.*
@@ -96,18 +96,18 @@ N7 (ANCHOR), where the mesh meets parties it cannot re-compute.
 > `engine/mesh/src/lib.rs` records it: the reconciliation instruments —
 > consilience, the manifold, the census, the triangle, tag 65 and
 > refusal kinds 3–4 — went under the one-truth amendment on
-> 2026-07-31. This section is the SPEC that outlived them, still
+> 2026-07-31. This section is the spec that outlived them, still
 > carrying a wire format (§4's `LE32(census count) ‖ (census u8 ‖
 > LE64(id))…`) for an instrument no code has emitted since.
 >
 > **Two independent reasons, and the second is the general one.** The
 > one-truth amendment struck it because *you do not reconcile what
 > cannot diverge, and agreement between copies was never a
-> measurement*. The ruling above strikes it again for its SHAPE: a
-> census is a FLAT ENUMERATION — committed fields sorted into
+> measurement*. The ruling above strikes it again for its shape: a
+> census is a flat enumeration — committed fields sorted into
 > seventeen named families plus a tripwire code — and an enumeration
 > cannot describe a state whose capacity is a polynomial fiber that
-> GROWS. It is the same 2D construct as the Merkle corpus root, struck
+> grows. It is the same 2D construct as the Merkle corpus root, struck
 > the same day for the same reason: enumerations fix what the
 > architecture is built to let expand.
 >
@@ -117,10 +117,10 @@ N7 (ANCHOR), where the mesh meets parties it cannot re-compute.
 > gauge, PoUW on what verified work has earned — and both read the
 > polynomial, never a roster.
 >
-> **NOT STRUCK, and the distinction is load-bearing:**
+> **Not struck, and the distinction is load-bearing:**
 > `rfa_core::capacity::flux` calls its return an *egress census* —
 > `Flux { sources, sinks, balanced }`, the count of divergence poles.
-> That is a READING in the D/V algebra and is unrelated to this
+> That is a reading in the D/V algebra and is unrelated to this
 > instrument beyond the shared word. A sweep on the word alone would
 > gut the capacity meter, exactly as a sweep on "vacuity" would have
 > gutted the circulation it was built on.
@@ -134,7 +134,7 @@ with an empty residual list — a difference the instrument could not
 see. v2 closes it with one law:
 
 > **The totality law.** Two committed states are equal IFF the
-> residual list AND the census are both empty. Every committed field
+> residual list and the census are both empty. Every committed field
 > is either a rational dimension (measured, residuals whole) or a
 > censused structure (compared whole, exactly, named when it
 > differs). Nothing is invisible.
@@ -160,12 +160,12 @@ exact equality, named typed when it differs:
   covenants · councils · offers · techs · wants · crossed · genesis ·
   terrain · instruments · practices · prospects · warded · veiled.
 
-A state difference that neither list carries reports **UNMEASURED**
+A state difference that neither list carries reports **unmeasured**
 (census code 0) — the tripwire: a future committed field that joined
 neither the manifold nor the census is visible, never silent. In
 code the tripwire is the committed state's own exact equality.
 
-Diverged spines whose residuals and census are BOTH empty are two
+Diverged spines whose residuals and census are both empty are two
 histories arriving at one state — the judgment still refuses (the
 spine forked; one writer per clock), but the measurement truthfully
 reads zero difference. That is the confluence precondition the annex
@@ -184,13 +184,13 @@ The cocycle residual over the canonical triple (origin, A, B) is
 `R_l = B_l − A_l` per coordinate. `coherence_functional` sums the six
 ordered triples of the triangle, so **C(Δ) = 6·Σ R_l²** — exact
 rational, and zero iff every residual is zero. Consilience is
-`C(Δ) = 0` EXACTLY. There is no threshold, no tolerance, no vote.
+`C(Δ) = 0` exactly. There is no threshold, no tolerance, no vote.
 (The triangle is the opposition law in miniature: the shared-position
 claim proves by the residual landing on zero, never by comparing
 bytes.)
 
 Arity ≥ 2 generalizes without new law: n nodes, one origin, the
-shared-position claim pairwise zero; C(Δ) = 0 iff ALL agree.
+shared-position claim pairwise zero; C(Δ) = 0 iff all agree.
 Unanimity is the geometry.
 
 ### 2.3 The judgment
@@ -198,49 +198,49 @@ Unanimity is the geometry.
 `consile(A, B)` over two intact chronicles of one world:
 
 1. **The spine walk.** Compare receipts by own-digest from sequence
-   0. The first differing sequence is the FORK.
-2. **Fork found → DIVERGED.** Both chronicles replay whole (each is
+   0. The first differing sequence is the fork.
+2. **Fork found → diverged.** Both chronicles replay whole (each is
    internally intact); both project (§2.1); the refusal carries the
-   fork sequence, the residual list WHOLE — every nonzero
+   fork sequence, the residual list whole — every nonzero
    `(dimension, B_l − A_l)` in canonical form — and C(Δ) as the
    summary scalar, never the payload (the N4 §5 law). Disagreement is
    preserved for resolution, never voted away: both branches live,
    and the annex path (§1 law 3, CONVERGE-1) places them.
-3. **No fork, unequal lengths → DRIFT.** The shorter side is BEHIND;
+3. **No fork, unequal lengths → drift.** The shorter side is behind;
    the refusal names the missing half-open range `[from, to)`. Drift
    is cured by carrying the tail (§3.3) — never by re-voting history.
-4. **Equal spines → THE REPLICATION WITNESS.** Both sides replay
-   INDEPENDENTLY; the triangle closes; C(Δ) measures; zero issues the
+4. **Equal spines → the replication witness.** Both sides replay
+   independently; the triangle closes; C(Δ) measures; zero issues the
    tag-65 receipt. Named honestly (the coder-04 audit, ruled into the
    text 2026-07-31): on an equal spine the zero witnesses byte-exact
-   REPLICATION and independent replay determinism (SEAL B) — it is
+   replication and independent replay determinism (SEAL B) — it is
    not convergence, because the inputs could not disagree.
    "Consilience" is reserved for measurements whose inputs could:
    a diverged pair (§2.3.2), an opposition reading (§1 law 2, the
    cfe-side instrument), a confluence of branches that did
    independent work (§7.5). A nonzero C on an equal spine would name
-   a broken engine and refuses as DIVERGED at the head — agreement
-   is MEASURED, never declared.
+   a broken engine and refuses as diverged at the head — agreement
+   is measured, never declared.
 
 ### 2.4 The refusal taxonomy
 
 All refusals are typed and carried whole (§3.2):
 
-- **MALFORMED** — a receipt frame that does not parse (side, frame).
-- **FORGED** — a chain that does not re-verify from its own content
+- **Malformed** — a receipt frame that does not parse (side, frame).
+- **Forged** — a chain that does not re-verify from its own content
   (side, first broken sequence). Verification is NS-3
   `verify_receipts`: recomputed digests, walked parent links. A
   chronicle in hand is intact by construction (the one-door law);
   forgery is caught at the boundary, in `receive`.
-- **DRIFT** — same history, less of it (behind side, missing range).
-- **DIVERGED** — forked history: fork sequence, residuals whole, C,
+- **Drift** — same history, less of it (behind side, missing range).
+- **Diverged** — forked history: fork sequence, residuals whole, C,
   and the census (§2.1) — every structural difference named typed.
 
 ### 2.5 Scope
 
-MESH-1a is ONE world's chronicle between two nodes (operator ruling
+MESH-1a is one world's chronicle between two nodes (operator ruling
 2026-07-30). Multi-world aggregation — the §3.4 session's
-universe-span sweep — belongs to MESH-1c / N7. Consilience is a READ:
+universe-span sweep — belongs to MESH-1c / N7. Consilience is a read:
 no receipt enters any world chronicle; mesh records live in the
 mesh's own framing (§3), beside the world, never inside it.
 
@@ -248,7 +248,7 @@ mesh's own framing (§3), beside the world, never inside it.
 
 NS-1 TLV frames — the house wire, never a third format (CBOR/BSON
 refused on record, 2026-07-30). SEAL A carries across nodes: unknown
-event tags sync and verify WITHOUT decoding (the digest law needs
+event tags sync and verify without decoding (the digest law needs
 bytes, not meanings). Tags 64–66, claimed in the dop.rs registry
 header — the one authority. Ratios ride the canonical NS-1 carrier
 (`ratio::encode`). Side codes: 1 = A, 2 = B.
@@ -271,21 +271,21 @@ width; `coherence` the measured C(Δ), exactly 0 by issuance law
 
 Tag 66: `kind u8` then per kind:
 
-- 1 MALFORMED: `side u8 ‖ LE64(frame)`
-- 2 FORGED: `side u8 ‖ LE64(at)`
-- 3 DRIFT: `behind u8 ‖ LE64(from) ‖ LE64(to)`
-- 4 DIVERGED: `LE64(at) ‖ LE32(residual count) ‖
+- 1 malformed: `side u8 ‖ LE64(frame)`
+- 2 forged: `side u8 ‖ LE64(at)`
+- 3 drift: `behind u8 ‖ LE64(from) ‖ LE64(to)`
+- 4 diverged: `LE64(at) ‖ LE32(residual count) ‖
   (LE32(dimension) ‖ ratio(residual))… ‖ ratio(coherence) ‖
   LE32(census count) ‖ (census u8 ‖ LE64(id))…` — the census trails
-  the coherence ADDITIVELY (MESH-1d, 2026-07-31): the landed decoder
+  the coherence additively (MESH-1d, 2026-07-31): the landed decoder
   ignored trailing bytes, so a pre-census record decodes census-empty
-  and the record's meaning never moved. Census codes: 0 UNMEASURED ·
+  and the record's meaning never moved. Census codes: 0 unmeasured ·
   1 orb (id) · 2 entities · 3 star · 4 debts · 5 bonds · 6 covenants
   · 7 councils · 8 offers · 9 techs · 10 wants · 11 crossed ·
   12 genesis · 13 terrain · 14 instruments · 15 practices ·
   16 prospects · 17 warded · 18 veiled (id is 0 except code 1).
-- 5 USURPED: `LE64(at) ‖ LE64(lawful)` (MESH-1b, §7.2)
-- 6 UNCITED: `LE64(at) ‖ LE64(handoff)` (MESH-1b, §7.2)
+- 5 usurped: `LE64(at) ‖ LE64(lawful)` (MESH-1b, §7.2)
+- 6 uncited: `LE64(at) ‖ LE64(handoff)` (MESH-1b, §7.2)
 
 The residual list is the payload, whole; C is the trailing summary.
 Kinds are additive (the SEAL A instinct): a reader meeting a kind it
@@ -294,7 +294,7 @@ does not know skips the record, never crashes.
 ### 3.3 The carrier (the transport ruling, 2026-07-30)
 
 Peers exchange `chronicle.tlv` segments — the NS-3 §2.4 on-disk
-framing IS the wire; there is no second encoding of history. A dumb
+framing is the wire; there is no second encoding of history. A dumb
 file/directory adapter carries whole files or appended tails
 (`persist::sync` appends only what the far side lacks). The engine
 never opens a socket; every adapter is logic-free (SEAL C). 100% of
@@ -303,7 +303,7 @@ flakiness.
 
 ### 3.4 The sync session (N6b — the socket adapter's shape)
 
-When the socket adapter arrives it speaks the SAME frames, in a
+When the socket adapter arrives it speaks the same frames, in a
 session of this shape:
 
 ```
@@ -324,7 +324,7 @@ one world, the landed judgment, a socket instead of a directory.
 
 ## 4. Test vectors
 
-The consilience half is LANDED and witnessed in
+The consilience half is landed and witnessed in
 `engine/mesh/tests/mesh_consilience.rs` — the four semantic vectors
 plus the codec witness backing §3. The session half (§3.4) extracts
 its vectors from the first two-node session, per the N1 law.
@@ -336,19 +336,19 @@ its vectors from the first two-node session, per the N1 law.
    spine, arity 2, the v1 manifold width.
 2. **A forged file refuses typed.** The peer's file re-frames one
    receipt with a moved stamp; the chain cannot recompute; `receive`
-   refuses FORGED with the broken sequence named.
+   refuses forged with the broken sequence named.
 3. **A drifted peer names its range, and the tail cures it.** One
-   side plays on; `consile` refuses DRIFT `[from, to)` naming the
+   side plays on; `consile` refuses drift `[from, to)` naming the
    behind side; the tail syncs across (append-only, only the missing
    receipts); `consile` then issues the receipt at zero.
 4. **Divergent histories carry their residuals whole.** A common
    prefix, then different closures on each side; `consile` refuses
-   DIVERGED at the first differing sequence, the residual list naming
+   diverged at the first differing sequence, the residual list naming
    each differing dimension with its exact rational difference —
    verified in the witness against the two replays' committed
    ledgers — and C(Δ) = 6·Σ R² recomputed exactly.
 5. **The codec witness.** Tags 64/65/66 round-trip byte-exact (equal
-   values, equal bytes; the DIVERGED residual list whole), and an
+   values, equal bytes; the diverged residual list whole), and an
    unknown future tag skips (SEAL A).
 
 ## 5. What the mesh retires, and when
@@ -358,28 +358,28 @@ its vectors from the first two-node session, per the N1 law.
 - The SSE forerunner (webserve /stream) yields to TLV frames pushed
   on the same socket the sync speaks.
 - The epistemological want (kind 1) becomes fully real: broken
-  chains IN REACH now includes the far node's quarantines.
+  chains in reach now includes the far node's quarantines.
 
 ## 6. Deferred, recorded
 
 Transport security (this is a prototype: the mesh trusts its LAN);
 node identity beyond a name (blake3/provenance only at N6 by ruling —
-ties to NS-6 operator profiles and enters at N7 with ANCHOR). The
-handoff under partition was RULED 2026-07-31 — §7.5 carries the law.
+ties to NS-6 operator profiles and enters at N7 with anchor). The
+handoff under partition was ruled 2026-07-31 — §7.5 carries the law.
 
 ## 7. The receipted handoff (MESH-1b)
 
 ### 7.1 The law made mechanic
 
 Tag 67, `ClosureEvent::HandoffSealed { from, to }` — a world-chronicle
-DEED, unlike consilience: authority changing hands is a state change
+deed, unlike consilience: authority changing hands is a state change
 of the protocol layer, so it receipts (the lens law draws the line —
 measurement reads, handoff closes). Wire: `LE64(from) ‖ LE64(to)`.
-The world's own mechanics are BLIND to it: replay ignores the seal
+The world's own mechanics are blind to it: replay ignores the seal
 (the game rules never consult the writing hand), and the walk below
 is the mesh's reading, never a flag.
 
-Authority is a WALK of the spine:
+Authority is a walk of the spine:
 
 - Before the first seal a chronicle is single-handed by construction
   — the pre-mesh era. The walk reads None; every append is lawful.
@@ -389,20 +389,20 @@ Authority is a WALK of the spine:
   is recorded, not consulted (nothing earlier could attest it — the
   provenance law). Authority becomes `to`.
 - After a lawful seal at sequence h: every subsequent receipt must
-  CARRY the authority in its provenance (the forging path names the
-  hand — one writer per clock), and the FIRST subsequent receipt must
-  also CITE h in its provenance (the taking hand acknowledges where
+  carry the authority in its provenance (the forging path names the
+  hand — one writer per clock), and the first subsequent receipt must
+  also cite h in its provenance (the taking hand acknowledges where
   its pen came from). A seal standing last in the chain is lawful
   with its citation outstanding — judged when the next receipt
   exists.
-- A seal whose `from` is not the authority refuses USURPED at its own
+- A seal whose `from` is not the authority refuses usurped at its own
   sequence, like any other unlawful append.
 
 ### 7.2 The refusals (kinds 5–6 on tag 66, additive)
 
-- **USURPED { at, lawful }** — the receipt at `at` does not carry the
+- **Usurped { at, lawful }** — the receipt at `at` does not carry the
   lawful hand. One writer per clock, broken; the lawful hand named.
-- **UNCITED { at, handoff }** — the taking hand's first append does
+- **Uncited { at, handoff }** — the taking hand's first append does
   not cite the seal it took the pen from.
 
 ### 7.3 The doors
@@ -412,9 +412,9 @@ Authority is a WALK of the spine:
 - `yield_authority(chronicle, from, to, stamp)` — checks the walk,
   then seals with provenance `[from]` (plus the pending citation when
   the seal is itself the taking hand's first append). A stale hand
-  refuses BEFORE anything appends.
+  refuses before anything appends.
 - `append_as(chronicle, hand, event, stamp, provenance)` — the
-  guarded write door: refuses USURPED before writing; injects the
+  guarded write door: refuses usurped before writing; injects the
   hand at the provenance head and the citation when one is pending.
   The conductor and the CLI wire these at the consumer slice (the
   two-writer guard's retirement).
@@ -427,23 +427,23 @@ Authority is a WALK of the spine:
    trip (SEAL B — authority survives the file).
 2. **An uncited first append refuses** with the append and the seal
    both named.
-3. **A stale hand refuses** USURPED with the lawful hand named.
+3. **A stale hand refuses** usurped with the lawful hand named.
 4. **A stale seal refuses at the door** — and the chronicle is
    unchanged (the refusal happens before the append).
 5. **The codec.** Tag 67 rides the consolidated NS-1 wire witness
    (`dop_wire.rs`); kinds 5–6 round-trip byte-exact.
 
-### 7.5 The consumer slice (#2, LANDED 2026-07-30 — coder-01)
+### 7.5 The consumer slice (#2, landed 2026-07-30 — coder-01)
 
 **The hands.** The conductor writes as hand **1** (`cfe::vrp::
-CONDUCTOR_HAND`). Every other seat derives its hand from its NAME:
+CONDUCTOR_HAND`). Every other seat derives its hand from its name:
 `hand_of(name)` = the first 8 bytes of the name's digest, LE, with
 the reserved values (0, 1) remapping to 2. No hand registry file —
 the name is the registry.
 
 **The funnel.** The chronicle itself holds the pen (`set_hand`, a
 workspace field — never serialized; the receipts' provenance is the
-record). While held, EVERY append stamps the hand at the provenance
+record). While held, every append stamps the hand at the provenance
 head and cites a seal standing last — so the ~20 engine deeds carry
 the hand through one point, and the walk stays the only judge.
 Pre-stamped provenance (the §7.3 doors) and unheld chronicles pass
@@ -452,15 +452,15 @@ untouched.
 **The conductor's door** (`pen_service`, each beat boundary): a
 `yield <world> <seat>` line in `conductor.ctl` asks; the seal lands
 between beats (no beat is mid-flight), the line is consumed, and the
-world is PENNED — beats, saves, journals, and the market all wait.
+world is penned — beats, saves, journals, and the market all wait.
 The file is then polled: when the walk on the carrier reads hand 1
-again, the conductor re-resumes FROM THE RECEIPTS (SEAL B) and
+again, the conductor re-resumes from the receipts (SEAL B) and
 beats continue, the taking hand's deeds kept.
 
 **The CLI's side.** `pen <world>` writes the ask; the walk-checked
 `far_world` then loads, holds the pen, and cross-world deeds write
 directly; `pen return <world>` yields back. The old founder-heuristic
-guard is RETIRED — a pre-mesh conductor world still refuses until
+guard is retired — a pre-mesh conductor world still refuses until
 its first seal, but the refusal now names the door.
 
 **Witness.** `pen_pins.rs::the_pen_passes_writes_and_returns` — the
@@ -470,18 +470,18 @@ full arc on one file, the walk green at every station.
 ### 7.5 The partition law (operator ruling 2026-07-31)
 
 Authority on one spine never moves without its seal. An unreachable
-writer STALLS the spine: writes refuse (USURPED, the lawful hand
+writer stalls the spine: writes refuse (usurped, the lawful hand
 named); reads, queries, and consilience measurements continue
 normally. There is no silent mutiny — a successor assuming an
 unsealed pen would put two hands inside one blake3 lineage,
 non-deterministic split-brain, SEAL B broken.
 
 The named escape is the fork the laws already bless (§1 law 3): a
-stranded successor never appends to the primary spine — it DIVERGES,
+stranded successor never appends to the primary spine — it diverges,
 openly. A `Diverged { branch, gauge }` record (tags 43/44, the landed
 vocabulary — never a parallel mesh concept) opens the node's own
 branch; local writes accrue there. When the partition heals, the
-branches do not vote on who was right — they MEASURE (§2): exact-zero
+branches do not vote on who was right — they measure (§2): exact-zero
 distance confluences (`Confluent { partner, gauge }`); nonzero
 distance stands preserved as typed divergence for the annex path —
 never discarded, never overwritten.
@@ -489,41 +489,41 @@ never discarded, never overwritten.
 ### 7.6 The sandboxed nursery (operator ruling 2026-07-31)
 
 **Open divergence is lawful; covert divergence is slashed.** A
-declared fork is a NURSERY: a sandboxed branch under its own branch
+declared fork is a nursery: a sandboxed branch under its own branch
 coordinates, where a node may play, experiment, and diverge without
 limit — and without consequence to the mainline, because the
 mainline's coordinates cannot be written from a branch. One value per
 address, always: the galaxy is structurally rip-proof from inside any
 nursery, however immature the play.
 
-NPCs and conductors track a nursery KNOWINGLY — branch coordinates
+NPCs and conductors track a nursery knowingly — branch coordinates
 are addressable, so an polity can follow a divergence and the
 mainline as two named paths and never decohere on re-convergence:
 following was never a second claim on one address.
 
 Re-convergence has one door: the kernel judges the merge as a lawful
 transition at a mainline coordinate, or the nursery's content stays
-in the nursery. Penalty attaches ONLY to presenting nursery state as
+in the nursery. Penalty attaches only to presenting nursery state as
 mainline alignment (the alignment covenant: the pen dies, the work
 dies, the stake dies). We punish the lie, never the disagreement.
 You can play in your nursery; you cannot rip a hole in the galaxy
 from inside it.
 
-## 8. The bridge entity (RULED 2026-07-31 — spec, lands with MESH-1c)
+## 8. The bridge entity (ruled 2026-07-31 — spec, lands with MESH-1c)
 
-Cross-world communication is a lawful, scope-bounded BOUNDARY — never
+Cross-world communication is a lawful, scope-bounded boundary — never
 an un-sandboxed socket. At genesis every world instantiates its own
 IPSAL bridge entity (`BridgeGenesis { bridge_id, scopes,
 generation_tag }` — tag claimed at the landing cadence). The MESH-1c
 TCP adapter is dumb transport only (SEAL C); every remote handshake
-and cross-world interaction TERMINATES at the bridge, which enforces
+and cross-world interaction terminates at the bridge, which enforces
 containment: read and consile open by default; yield/handoff require
 explicit grant receipts. The bridge is the world's one comms door
 into the shared exchange — the per-world uplink the operator named.
 Seeding is conductor-genesis work (coder-01); the session handshake
 naming the bridge is adapter work (coder-03). One seam, two sides.
 
-## 9. THE SPINE (SPINE-1, landed 2026-07-31 — the ladder's #36 spine half)
+## 9. The spine (SPINE-1, landed 2026-07-31 — the ladder's #36 spine half)
 
 The chain bound to the real clock. State is position; the kernel is
 motion; the spine is the recorded path — two maps, four verbs, one
@@ -546,7 +546,7 @@ honesty flag (§9.3); `state_digest` = BLAKE3 of the canonical state
 bytes (the store key); `parent` the previous commitment on this
 branch (32 zeros at mainline genesis). Wire: one TLV record, tag 84,
 value = the hashed fields ‖ `commit[32]`; a record whose commit does
-not recompute REFUSES on load.
+not recompute refuses on load.
 
 ### 9.2 The two maps and the four verbs
 
@@ -557,7 +557,7 @@ not recompute REFUSES on load.
   or backward record refuses the whole file on open.
 - **The store** — state_digest → canonical bytes, content-addressed
   files. A store entry cannot be wrong, only absent; `fetch`
-  re-hashes on every read and a tampered blob refuses FORGED.
+  re-hashes on every read and a tampered blob refuses forged.
 
 The verbs: `resolve(coordinate)` — where the universe stands;
 `fetch(state_digest)` — the geometry, verified on arrival;
@@ -574,7 +574,7 @@ the mainline is unwritable from inside it, §7.6).
 `Unjudged`, the sealed default) refuses the extend whole, and the
 landed commitment carries `judged = 1`. `extend` without a step is
 lawful at this phase and carries `judged = 0` — the coverage hole
-STAMPED into the record, never hidden (a genesis extend is always
+stamped into the record, never hidden (a genesis extend is always
 unjudged: nothing prior exists to judge from; a step offered at
 genesis refuses). When kernel coverage completes (Phase 3), unjudged
 extends retire by amendment. The kernel is consumed, never owned:
@@ -583,7 +583,7 @@ never reads the spine.
 
 ### 9.4 What replicates
 
-The spine IS the uplink's cargo (the uplink law): peers exchange
+The spine is the uplink's cargo (the uplink law): peers exchange
 record streams and store blobs — both self-verifying — and nothing
 else. Drift is being behind on one branch (fetch the tail);
 divergence is a declared branch (its own addresses); a second value

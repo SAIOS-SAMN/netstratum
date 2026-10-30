@@ -1,6 +1,6 @@
 # Binary carriers — JSON is not architecture
 
-**Status:** LAW.  
+**Status:** law.  
 **One sentence:** Colony truth is the verified receipt chain. Disk carriers
 are TLV / binary cards / plain text. **JSON is not a format the system speaks.**
 

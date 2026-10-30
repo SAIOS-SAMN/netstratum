@@ -1,6 +1,6 @@
 # clients/ — the CLI/MUD client
 
-Opened at landing N2. One command launches it (CHARTER §3.5):
+Opened at landing N2. One command launches it (Charter §3.5):
 
     cargo run -p netstratum-cli
 

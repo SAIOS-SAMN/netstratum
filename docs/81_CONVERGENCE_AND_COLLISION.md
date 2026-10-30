@@ -3,7 +3,7 @@
 Operator (2026-10-13): TUniversal is offered as a quantum state; a universe
 chains its own ledger to it, perpendicular (orthogonal), as a local quantum
 state. In a universe of potentials and of time as coordinates, where
-timelines meet there are two outcomes, CONVERGENCE and COLLISION. The
+timelines meet there are two outcomes, convergence and collision. The
 ledger pays locally for convergence and charges for collision. "You can play
 with time, but if you cause a collision you get a ticket, paid dearly in
 your citizens and your local stewards." Stewards keep local time;
@@ -17,15 +17,15 @@ observers), docs/79 (quantum), docs/75 (realms), docs/74 (the hierarchy).
 
 - **TUniversal** is the shared quantum state, one per fleet: the hypha's
   clock.
-- **A universe's ledger** is chained orthogonally to it. By mycelium's ruling
-  78.152d each LEDGER entry already pairs the universe's cosmic time `u` with
+- **A universe's ledger** is chained orthogonally to it. By Mycelium's ruling
+  78.152d each ledger entry already pairs the universe's cosmic time `u` with
   TUniversal's point (docs/80).
 - **Each observer's proper time** is a further local axis inside the
   universe (docs/80).
-- **Where two timelines' records MEET,** there are two outcomes:
-  - **CONVERGENCE:** the records agree. The same event, the same causal
+- **Where two timelines' records meet,** there are two outcomes:
+  - **Convergence:** the records agree. The same event, the same causal
     order, translations to the same cosmic time.
-  - **COLLISION:** the records contradict. For example:
+  - **Collision:** the records contradict. For example:
     - a crossing that arrives before it left;
     - two observers placing causally linked events in opposite order;
     - two claims on the same mass at the same cosmic time.
@@ -48,8 +48,8 @@ Without these, the universe is always convergent:
 
 | outcome | what it does | read from |
 |---|---|---|
-| convergence | pays locally: the realm's ledger is credited, as netstratum's consilience law rewards two vantages agreeing (two-sided receipts are convergence in miniature) | the annals: events recorded by two observers that agree |
-| collision | a TICKET, physical, never a fine: two incompatible records cannot both persist, so the annals keep one, and the other's matter, population or passage is lost at the collision site | the annals: the event kept, and what was lost |
+| convergence | pays locally: the realm's ledger is credited, as Netstratum's consilience law rewards two vantages agreeing (two-sided receipts are convergence in miniature) | the annals: events recorded by two observers that agree |
+| collision | a ticket, physical, never a fine: two incompatible records cannot both persist, so the annals keep one, and the other's matter, population or passage is lost at the collision site | the annals: the event kept, and what was lost |
 
 - **"Paid in citizens" is the physics.** It is the destructive interference
   of incompatible records, not a penalty table.
@@ -64,31 +64,31 @@ Without these, the universe is always convergent:
 
 | tier | duty in time |
 |---|---|
-| ANCIENTS | hold the reference clock (cosmic time at the cores); assign the progenitors |
-| PROGENITORS | keep their wormhole mouths synchronised to the ancients' clock; close their mouths toward a sector that collides too often |
-| STEWARDS | keep the realm's local time-keeping events: place members' events on cosmic time, settle order (causal first, then cosmic time), and answer for the realm's collisions |
-| SOVEREIGNS, CAPTAINS | act on proper time; their acts are the events that converge or collide |
+| Ancients | hold the reference clock (cosmic time at the cores); assign the progenitors |
+| Progenitors | keep their wormhole mouths synchronised to the ancients' clock; close their mouths toward a sector that collides too often |
+| Stewards | keep the realm's local time-keeping events: place members' events on cosmic time, settle order (causal first, then cosmic time), and answer for the realm's collisions |
+| Sovereigns, captains | act on proper time; their acts are the events that converge or collide |
 
 ## Shutdown
 
-- A sector (a realm) is SHUT DOWN when its collisions per span of cosmic time
+- A sector (a realm) is shut down when its collisions per span of cosmic time
   exceed what its network can carry: the progenitors close their mouths
   toward it, and its systems fall back on their own science and hulls, as
   every system without a wormhole lives.
-- **The threshold is a derivation, OPEN.** It is read from the annals and
+- **The threshold is a derivation, open.** It is read from the annals and
   derived from the network's capacity (its mouths, their throughput, the
   realm's span), never a dial.
 
 ## What emerges
 
 Selection: realms with good time-keeping keep their networks and grow, and
-colliding realms are cut off. Advanced civilizations learn, by DECIDE
+colliding realms are cut off. Advanced civilizations learn, by decide
 (docs/73), to produce continuous convergence, or large convergences with
 minor collisions. Nothing in it is scripted.
 
 ## Usurpation: replacing a progenitor lineage with a non-progenitor one
 
-Lineage in netstratum is by the first parent (`ancients::root_of`), not
+Lineage in Netstratum is by the first parent (`ancients::root_of`), not
 gendered. That first-parent rule is itself an authored placeholder.
 
 If locals put a sovereign, non-progenitor lineage in a progenitor lineage's
@@ -121,7 +121,7 @@ gates.
 
 - **Nothing is "supposed to" happen.** The annals record what happened, never
   what should have; a "supposed" timeline would be a script (docs/76).
-- **COLLISION-BORN.** A birth whose causal past runs through an UNRESOLVED
+- **Collision-born.** A birth whose causal past runs through an unresolved
   collision: the parents' meeting, or the conditions of the birth, came
   through a crossing the network never synchronised. It is read from the
   annals, never declared. It is the physical form of "children who were not
@@ -148,7 +148,7 @@ gates.
 ### Branches
 
 - When a collision cannot be resolved by the loss of one record, the
-  timeline may BRANCH: the main timeline continues on the ancients' clock,
+  timeline may branch: the main timeline continues on the ancients' clock,
   and a branch carries the incompatible records.
 - **The split is an event**, at a point on the map, recorded in both annals,
   each append-only.
@@ -156,15 +156,15 @@ gates.
   A branch is a sub-history inside this universe's domain, held by its
   annals, and it can come back (temporal attraction). It never founds a
   parallel universe. All sub-universes (the substrata, docs/69) are
-  unlocked only by SYNTHESIS: a universe below is opened by what is made,
+  unlocked only by synthesis: a universe below is opened by what is made,
   never by a timeline splitting.
 
-### DIVERGENCE
+### Divergence
 
 The separation, on the map, between a branch's records and the main
 timeline's: the interval between corresponding events (the same subject's
 records on each side). Time is a coordinate (docs/80), so divergence is a
-distance, measured exactly as era 1 measures distances: the GEODESIC ANGLE,
+distance, measured exactly as era 1 measures distances: the geodesic angle,
 held by its rational half-angle parameter, here over the time axis and
 place (never a squared chord, which measures through flat space).
 
@@ -177,7 +177,7 @@ place (never a squared chord, which measures through flat space).
 
       ω(D) = W / D   turns
 
-  - `W`: the main timeline's WEIGHT, the records that converge on it (mass,
+  - `W`: the main timeline's weight, the records that converge on it (mass,
     population and passage carried, read from the annals), in docs/78's
     units;
   - `D`: the branch's divergence, held by its half-angle parameter;
@@ -187,8 +187,8 @@ place (never a squared chord, which measures through flat space).
 
 ### Temporal anchors (chronometry)
 
-- **ANCHORS** pin a timeline to the clock:
-  - the LEDGER entries' crossing pairs (cosmic time `u` against the
+- **Anchors** pin a timeline to the clock:
+  - the ledger entries' crossing pairs (cosmic time `u` against the
     TUniversal point, 78.152d), where the universe's timeline is pinned to
     the hypha's;
   - the ancients' clock at the cores (each core's bell);
@@ -201,9 +201,9 @@ place (never a squared chord, which measures through flat space).
   anchored; the stewards keep the realm's time-keeping events (its local
   anchors).
 
-### SUPERFLUIDITY
+### Superfluidity
 
-- Timelines that stay close and converge continuously are COHERENT in phase.
+- Timelines that stay close and converge continuously are coherent in phase.
   Passage among them flows without friction: the melt on the network falls
   toward zero in a coherent realm.
 - **Divergence is friction:** passage and trade cost more as timelines
@@ -216,29 +216,29 @@ place (never a squared chord, which measures through flat space).
   freely; divergent ones bleed melt. This is the economic force behind
   "advanced civilizations seek convergence".
 
-### The point of no return: TERMINAL NODES
+### The point of no return: terminal nodes
 
-- A branch ESCAPES when it diverges faster than the main timeline's pull can
+- A branch escapes when it diverges faster than the main timeline's pull can
   bring it back: the escape condition of the cone law. Its divergence rate
   at `D` exceeds what the pull can still reverse, the work `∫ g dD` from `D`
   outward. It is read as a comparison of the branch's divergence against
   that work, in the geodesic measure, without a flat kinetic square.
   Derived, not a dial; its exact form is fixed with era 1's cone law.
-- An escaped branch is a TERMINAL NODE: it has no path back to the forward
+- An escaped branch is a terminal node: it has no path back to the forward
   positions.
 - **The danger is weight.** A terminal node carrying great weight
   (population, mass, passage) would cause a great collision if it were ever
   forced back. The heavier and farther it is, the worse.
 
-### PRUNING: the progenitors' automated systems
+### Pruning: the progenitors' automated systems
 
-- **The progenitors learn a `prune` decision** (DECIDE, docs/73):
+- **The progenitors learn a `prune` decision** (decide, docs/73):
   - rows: the branches attached to their network;
   - features: divergence `D`, weight, divergence rate, whether escaped;
   - loss: the collision cost when an unpruned branch is reconverged, against
     the convergence lost when a recoverable branch is pruned.
 - **Pruning closes a terminal branch's links to the network.** Its mouths
-  close, it is unanchored, and it no longer attracts or collides. It is NOT
+  close, it is unanchored, and it no longer attracts or collides. It is not
   erased: the branch's annals persist, append-only, and it lives on its own.
 - **The main timeline stays light and coherent:** branches at the edge are
   pruned before they carry too much weight; branches within reach are left
@@ -255,21 +255,21 @@ box back inside a curved universe.
 - **The state is the phase field θ:** the phase at every place of the
   universe's network, counted in turns. θ is its cosmic time: a coherent
   phase advances with time (docs/80).
-- **HOLONOMY.** Around a closed loop, θ returns changed by its holonomy:
+- **Holonomy.** Around a closed loop, θ returns changed by its holonomy:
 
       hol(loop) = W + Φ
 
-  - `W`, the WINDINGS: an integer number of whole turns;
-  - `Φ`, the TORSION ENCLOSED: a rational fraction of a turn, the bounce's
-    torsion threaded through the loop (the cones' twist, xylarium §10.3's
+  - `W`, the windings: an integer number of whole turns;
+  - `Φ`, the torsion enclosed: a rational fraction of a turn, the bounce's
+    torsion threaded through the loop (the cones' twist, Xylarium §10.3's
     torsion as holonomy).
 
   In flat space Φ would vanish and only W would remain; in our curved
   universe both are present, and they are read apart.
-- **COHERENCE is W.** It is counted on the network's loops, exact and an
+- **Coherence is W.** It is counted on the network's loops, exact and an
   integer.
-- **Loops close through the ANCHORS.** Every anchor (a core's clock, a
-  synchronised mouth, a LEDGER crossing pair) reads the common reference
+- **Loops close through the anchors.** Every anchor (a core's clock, a
+  synchronised mouth, a ledger crossing pair) reads the common reference
   phase, so any path between two anchors, completed by the clock, is a loop.
   A realm whose gates form a tree still has coherence, counted on its
   anchor-closed loops.
@@ -286,17 +286,17 @@ box back inside a curved universe.
   `I = I_c sin(Δθ)`: convergence, without dissipation. `sin` is computed
   exactly from the rational half-angle parameter `t`, with
   `sin = 2t/(1+t²)`: no root, and no decimal. A sustained energy difference
-  winds the phase until it SLIPS by one whole turn, dissipating at each
+  winds the phase until it slips by one whole turn, dissipating at each
   slip: a collision, as physics.
-- **A COLLISION is one slip:** W on that loop falls by one turn. k slips are k
+- **A collision is one slip:** W on that loop falls by one turn. k slips are k
   collisions. The ticket is topological (a turn of coherence lost) and
   physical (the loop's weight, below, lost with it).
-- **A CONVERGENCE** keeps a loop's windings intact, or locks a new
+- **A convergence** keeps a loop's windings intact, or locks a new
   anchor-closed loop into phase, adding windings.
 
 ### θ: the currency of the folded space
 
-**θ is paid in TURNS** (exact rationals, never decimals): the same unit as
+**θ is paid in turns** (exact rationals, never decimals): the same unit as
 the bell's count of turns and circuitry's rotations. A payment in θ is a
 transfer of phase between coherent systems, which is what flows through a
 junction. θ aligns with phase transitions: coherence forming (convergence)
@@ -304,7 +304,7 @@ and breaking (collision, the slip) are changes of its order.
 
 **A turn is worth the weight flowing around its loop:** the mass, population
 and passage carried on that loop, read from receipts. A turn on a heavy loop
-is worth more than a turn on a light one: turns times weight, LINEAR, no
+is worth more than a turn on a light one: turns times weight, linear, no
 square. So a large convergence (a heavy loop locked) earns more than a small
 one, and a slip on a heavy loop costs that loop's weight.
 
@@ -324,7 +324,7 @@ one, and a slip on a heavy loop costs that loop's weight.
 - θ is distributed between the ancients and the progenitors as the payout
   for wormhole traversal.
 
-**How a local economy gets θ: by EARNING it.**
+**How a local economy gets θ: by earning it.**
 - **θ is minted only by convergence:** windings gained on anchor-closed
   loops, each turn valued by its loop's weight. θ is lost by collision: one
   turn per slip, at that loop's weight.
@@ -333,7 +333,7 @@ one, and a slip on a heavy loop costs that loop's weight.
   STAMP or any civilization's money by the physics.
 
 **The free market is not overridden.**
-- θ can be used EVERYWHERE, but nothing requires it except traversal over
+- θ can be used everywhere, but nothing requires it except traversal over
   the progenitors' network.
 - Local economies' own currencies remain emergent properties of their
   civilizations' trade (docs/74), and goods trade in whatever money the
@@ -343,7 +343,7 @@ one, and a slip on a heavy loop costs that loop's weight.
   it, at cleared ratios: the progenitors' economy, a market like any other.
 
 **Underneath all of it: matter.**
-- Everything comes down to RESOURCE UTILIZATION: realms' and stewards' trade
+- Everything comes down to resource utilization: realms' and stewards' trade
   networks of element harvesting on local star systems, feeding up the chain.
 - Matter harvested and traded is what the timelines' records are about;
   convergence happens in trade that agrees, and θ is earned where that trade
@@ -373,7 +373,7 @@ torsion enclosed is Φ.
 | shared space for contested mass (docs/77) | missing |
 | divergence measured between records on the map | missing |
 | each timeline's weight, from the annals | missing |
-| branching as a recorded event; its rule ruled with mycelium | missing |
+| branching as a recorded event; its rule ruled with Mycelium | missing |
 | the escape condition from the cone law | missing (era 1's cone law first) |
 | θ: minted by convergence, lost by collision (phase slips), paying for traversal inside the universe; held by progenitors with μ; melt scaled by coherence | missing |
 
@@ -383,7 +383,7 @@ Within era 1, after docs/80's proper time and events on the map.
 
 1. **The reading.** Per realm per term: convergences and collisions, from the
    annals.
-   - Done-when: a TIME line per realm, no reading → convergence and collision
+   - Done-when: a time line per realm, no reading → convergence and collision
      counts.
 2. **Mouths with clocks; assignment as an act.** Passage refused without an
    assignment.

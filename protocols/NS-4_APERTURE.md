@@ -2,11 +2,11 @@
 
 *(Renamed 2026-07-28. First "BEP / Bubble Exchange Protocol" — dropped: "BEP"
 collides with Binance BEP-20/BEP-2 token standards, unacceptable given the
-crypto settlement model at NS-7. Then briefly "MEMBRANE" — dropped as too
-organic. An APERTURE is a controlled opening whose width IS the access
+crypto settlement model at NS-7. Then briefly "membrane" — dropped as too
+organic. An APERTURE is a controlled opening whose width is the access
 granted.)*
 
-**Status:** PARTIAL — the **value carrier** (§1–§3) landed 2026-07-29
+**Status:** partial — the **value carrier** (§1–§3) landed 2026-07-29
 (APERTURE-1, tags 47–48): banked value crosses between worlds as a
 two-legged receipted deed. The **facet machinery** (§4) — sharing bounded
 state at a granted read depth — stays ahead at N5; the market board
@@ -21,8 +21,8 @@ INFORMATION_BUBBLES.md.
 
 ## 1. RFA semantics — the two-legged deed
 
-An aperture transfer moves banked value from an orb in ONE world to an orb
-in ANOTHER, conservation-exact across the pair. Unlike TRADE-1 (one
+An aperture transfer moves banked value from an orb in one world to an orb
+in another, conservation-exact across the pair. Unlike TRADE-1 (one
 chronicle proves conservation), **no single chronicle proves it here**:
 each world receipts only its own leg, and the shared **deal id** links the
 legs — double entry across two books.
@@ -42,7 +42,7 @@ legs — double entry across two books.
   reading, not an orb law — the same boundary as the cohesion books'
   universe composition (OPEN_QUESTIONS Q2.3).
 - **The judgment boundary (09 board law):** the cross-empire cohesion
-  books (compassion/morality) do NOT post on an aperture — cross-world
+  books (compassion/morality) do not post on an aperture — cross-world
   reading composes at N5/N6. **An aperture carries value, never
   judgment.**
 - Amounts are exact-rational and strictly positive; a zero or negative
@@ -51,10 +51,10 @@ legs — double entry across two books.
   exact shortfall).
 - **The shield (THRESHOLD-1, 12_UNION §7):** an aperture touches only
   worlds whose peoples have made the solar leap (TECH-1a) — a pre-solar
-  world is unreachable in EITHER direction (`Shielded`, naming which
+  world is unreachable in either direction (`Shielded`, naming which
   side stands shielded; a refusal moves nothing anywhere). A world is a
   star system, so every aperture deed is interstellar by construction:
-  a world's FIRST lawful aperture is its **crossing** into the union —
+  a world's first lawful aperture is its **crossing** into the union —
   a replay-derived committed reading (`has_crossed`), never a flag.
 
 ## 2. Wire format
@@ -66,8 +66,8 @@ encode equal bytes).
 
 | tag | meaning | value layout |
 |---|---|---|
-| 47 | event: ApertureSent (APERTURE-1) | LE64(deal) ‖ LE64(from_orb) ‖ resource u8 ‖ ratio (amount) — the SOURCE leg: banked value LEFT this world for another; replay sees only the debit |
-| 48 | event: ApertureReceived (APERTURE-1) | LE64(deal) ‖ LE64(to_orb) ‖ resource u8 ‖ ratio (amount) — the DESTINATION leg: banked value ARRIVED from another world, bound to the same deal; replay sees only the credit |
+| 47 | event: ApertureSent (APERTURE-1) | LE64(deal) ‖ LE64(from_orb) ‖ resource u8 ‖ ratio (amount) — the source leg: banked value left this world for another; replay sees only the debit |
+| 48 | event: ApertureReceived (APERTURE-1) | LE64(deal) ‖ LE64(to_orb) ‖ resource u8 ‖ ratio (amount) — the destination leg: banked value arrived from another world, bound to the same deal; replay sees only the credit |
 
 The deal id is caller-assigned and world-external (the conductor or a
 market landing mints it); the engine treats it as an opaque LE64 link.

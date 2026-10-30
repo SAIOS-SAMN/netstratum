@@ -1,22 +1,21 @@
 # 103 — The layers: each its own mechanism, coupled by stated laws
 
-Operator 2026-10-28: "bonding formula sounds too weak, or you are missing
-sub-layers (underneath our known states)"; "pressure is kinematic, should be
-formulaic"; "this entire universe is going to be inverted in order to
-produce"; "we are combining multiple layers of physics here, where kinematic
-and hydrofluids operate through different mechanisms"; "write docs/103 and
-scope each layer". Status: SCOPE. Builds on docs/94 (fluid, MHD, UMD),
-docs/96 (the enclosure, the hold law), docs/97 (Q, Z, R), docs/98 (the faces),
-docs/99 (phases), docs/100 (twist, torsion, transitions), docs/101 (one
-universal core), docs/102 (vocabulary, register).
+Design direction (2026-10-28): the bonding formula is too weak, or sub-layers
+beneath the known states are missing; pressure is treated kinematically and
+should be formulaic; the universe is to be inverted in order to produce;
+kinematics and hydrofluids are distinct layers of physics with distinct
+mechanisms. This document scopes each layer. Status: scope. Builds on docs/94
+(fluid, MHD, UMD), docs/96 (the enclosure, the hold law), docs/97 (Q, Z, R),
+docs/98 (the faces), docs/99 (phases), docs/100 (twist, torsion, transitions),
+docs/101 (one universal core), docs/102 (vocabulary, register).
 
-> **Re-stacked (2026-10-28, docs/106):** these layers stand on a THERMODYNAMIC
-> SUBSTRATE (potential, pressure, energy) that kinematics is propagated from;
+> **Re-stacked (2026-10-28, docs/106):** these layers stand on a thermodynamic
+> substrate (potential, pressure, energy) that kinematics is propagated from;
 > as written here kinematics was the floor and pressure a residue of motion.
 
 ## 0. The principle
 
-A layer is a mechanism with its own state and its own law. Layers COUPLE:
+A layer is a mechanism with its own state and its own law. Layers couple:
 one layer's state enters another's law through a coupling stated as a law of
 its own. A layer never stands in for another (no pressure computed from
 motion, no bond read from one layer alone), and every coupling is read on
@@ -39,8 +38,8 @@ the face where the matter actually stands (docs/98, the luminal bound).
   densest, release where `a + τ > κ_w·h`, the burn's barrier by charge.
 - **Owed:** the electrons' transition (R = 0) and the poles' (docs/100 §9.1,
   §9.3; R's scale for ruling), the coupling C (docs/100 §3, for ruling).
-- **What it gives up:** each nuclide's GRIP (its fibres' bond) and its OPEN
-  FRAMES at its pulse phase (R bound: its electrons hold; R free: open).
+- **What it gives up:** each nuclide's grip (its fibres' bond) and its open
+  frames at its pulse phase (R bound: its electrons hold; R free: open).
 
 ## 2. L2 — chemical (built in worlds only; owed in the medium)
 
@@ -58,8 +57,8 @@ the face where the matter actually stands (docs/98, the luminal bound).
   smallest closing cluster, the contact by the in-step share, the hold by the
   tightness against the heat. Nucleons conserved; light booked (the frames
   paired give their line, docs/100 §9.1).
-- **What it gives up:** PAIRED frames (the chemical bond) and the frames left
-  OPEN (magnetism).
+- **What it gives up:** paired frames (the chemical bond) and the frames left
+  open (magnetism).
 
 ## 3. L3 — kinematic (built)
 
@@ -76,29 +75,29 @@ the face where the matter actually stands (docs/98, the luminal bound).
 ## 4. L4 — hydrofluid (built kinematically; to restate as a state law)
 
 - **Now:** a ring's pressure is `P = (m·ā + M)/w` (holding times its members'
-  mean AGITATION, plus its field M, over its width `2pR`): agitation is the
+  mean agitation, plus its field M, over its width `2pR`): agitation is the
   torque's undelivered residue, so the pressure is a by-product of motion; and
-  the pressure contrast between neighbouring rings moves SPIN outward by an
+  the pressure contrast between neighbouring rings moves spin outward by an
   exchange share each echo. Pressure is computed from motion and acts only
   as motion: no state of the medium stands.
 - **Scope, the medium's state:** each ring of a face (`beads`) is a parcel of
   the continuum with
-  - its DENSITY `ρ = m/w` (holding over width, as now);
-  - its HYDROSTATIC PRESSURE, the hold of every ring outside it on its face
+  - its density `ρ = m/w` (holding over width, as now);
+  - its hydrostatic pressure, the hold of every ring outside it on its face
     borne inward, `P_h(R) = Σ_{rings beyond} m_j·δ_j` (the column's weight,
     gravity's held share at each; a reading of state, no motion);
-  - its THERMAL PRESSURE `ρ·a`, a its heat as a state (the R crossings' line
+  - its thermal pressure `ρ·a`, a its heat as a state (the R crossings' line
     and the fibres' release, docs/100 §9, booked on the light ledger), never
     the torque's residue alone;
-  - its MAGNETIC PRESSURE from its field `M` (open frames in step, as now)
+  - its magnetic pressure from its field `M` (open frames in step, as now)
     over its width.
 - **Scope, the coupling L4 → L3 (a law of its own):** the medium pushes a
-  body moving through it by the pressure GRADIENT across it, the contrast of
+  body moving through it by the pressure gradient across it, the contrast of
   the two sides it spans, `(P_in − P_out)/(P_in + P_out)` (first degree,
   saturating), times the body's own cross share; the spin it moves is booked
   on the ledger. The exchange of spin by contrast retires as the law; it
   stays the coupling's reading.
-- **Scope, the coupling L4 → L6:** pressure SUPPORTS against collapse: a
+- **Scope, the coupling L4 → L6:** pressure supports against collapse: a
   binding's heat in the bond's test is its thermal and magnetic pressure
   against its density, not its members' agitation alone (§6).
 - **Open:** whether hydrostatic support is read per face (the inverse faces'
@@ -110,8 +109,8 @@ the face where the matter actually stands (docs/98, the luminal bound).
 - **Laws (built):** `Enclosed`, the ring law, band pairs on the strip,
   the tide's contrast.
 - **Misaligned (the operator's 3):** the strip (`1 < R ≤ 2`), the band pairs,
-  the crest and the disc read matter on the CONTINUUM face, outside the ring,
-  while the luminal bound now keeps most matter on the VACUUM face, inside the
+  the crest and the disc read matter on the continuum face, outside the ring,
+  while the luminal bound now keeps most matter on the vacuum face, inside the
   ring (47,577 passes by bell 1700). Production is read where matter does not
   stand; this is not a relabel (docs/98 §3 is corrected here: the faces are
   symmetric for motion, not for production).
@@ -124,23 +123,23 @@ the face where the matter actually stands (docs/98, the luminal bound).
   faces produce), or the universe's whole frame inverted (what we call outside
   is inside, every tier).
 
-  **Ruled (operator 2026-10-28): "invert the whole frame".** Derived, its
-  meaning, stated on the SHARE (operator 2026-10-28: "so you're using
-  squares inside a sphere": `R → H²/R` is a square and retires; the
-  inversion is `δ ↦ 1 − δ`, first degree): inverting every reading together
-  (turning, the luminal bound, the release's placement, the strip, the rim)
-  leaves the dynamics unchanged, the laws being symmetric under the share's
-  inversion: a relabel. The one reading not symmetric is the ENCLOSURE'S
-  ORDER: the hold at a place counts the core's state and every body whose
-  share is LARGER (deeper, `δ_j > δ`). In the frame inverted whole it counts
-  every body whose share is SMALLER (farther out, `δ_j < δ`), and the core's
-  throat bounds the frame from outside (matter enclosed by its core as a
-  shell). Read: the galaxies' deficits in the universe's frame, about 1/17
-  (242) and 1/117 (245), invert to 16/17 and 116/117, the deepest, inside the
-  universal core's throat; the universal core encloses every galaxy with no
-  sphere enlarged (operator: "do we need to increase the sphere of the
-  enclosing universe?": no). That is the inversion's physics. **Owed before build:** the
-  operator's confirmation that the enclosure counts from the outside in.
+  **Ruled (2026-10-28): invert the whole frame.** Derived, its meaning, stated
+  on the share (per the ruling of 2026-10-28, no squares inside a sphere: `R →
+  H²/R` is a square and retires; the inversion is `δ ↦ 1 − δ`, first degree):
+  inverting every reading together (turning, the luminal bound, the release's
+  placement, the strip, the rim) leaves the dynamics unchanged, the laws being
+  symmetric under the share's inversion: a relabel. The one reading not
+  symmetric is the enclosure's order: the hold at a place counts the core's
+  state and every body whose share is larger (deeper, `δ_j > δ`). In the frame
+  inverted whole it counts every body whose share is smaller (farther out,
+  `δ_j < δ`), and the core's throat bounds the frame from outside (matter
+  enclosed by its core as a shell). Read: the galaxies' deficits in the
+  universe's frame, about 1/17 (242) and 1/117 (245), invert to 16/17 and
+  116/117, the deepest, inside the universal core's throat; the universal core
+  encloses every galaxy with no sphere enlarged (the question was whether the
+  enclosing universe's sphere must grow: no). That is the inversion's physics.
+  **Owed before build:** the operator's confirmation that the enclosure counts
+  from the outside in.
 
 ## 6. L6 — the bond, composed through the layers
 
@@ -156,7 +155,7 @@ the face where the matter actually stands (docs/98, the luminal bound).
     step (the field, L4);
   - **torsional** `τ`: the members' net lead (L3, built);
   - **gravitational** `m`: the holding (L5).
-- **The rule, RULED (operator 2026-10-28): additive.**
+- **The rule, ruled (operator 2026-10-28): additive.**
   `λ = 2(m + ν + χ + μ_open + τ)/R`, each layer a share of the same reach.
 - **The rule, as it stood for ruling:**
   - (a) the layers add to the line density, `λ = 2(m + ν + χ + μ_open + τ)/R`,

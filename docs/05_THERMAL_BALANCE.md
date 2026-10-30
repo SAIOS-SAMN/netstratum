@@ -1,7 +1,7 @@
-# THERMAL BALANCE — the equilibrium baseline (design stage)
+# Thermal balance — the equilibrium baseline (design stage)
 
-**Status:** DESIGN — no thermal mechanic ships before its protocol sections
-and test vectors exist (CHARTER §1). All thresholds, constants, and yields in
+**Status:** design — no thermal mechanic ships before its protocol sections
+and test vectors exist (Charter §1). All thresholds, constants, and yields in
 this document are **placeholder parameters**, not inscribed law — they tune at
 balance time. Inscribed here so the founding physics ruling is never lost.
 
@@ -46,7 +46,7 @@ radiation balance:
 ### 1.1 The exact-rational ruling (RFA semantics — binding on the CFE)
 
 The fourth root and the physical constants π, σ are irrational; the CFE
-computes in exact rationals and refuses rounding drift (CHARTER §8). The
+computes in exact rationals and refuses rounding drift (Charter §8). The
 lawful formulation therefore never takes the root:
 
 - **Work in flux space.** The canonical engine quantity is
@@ -86,7 +86,7 @@ This is an engine-wide arithmetic law (all circular/spherical geometry), not a
 thermal-only rule; it is stated here because the thermal equation is its first
 consumer.
 
-### 1.2 The net-heat ledger — entropic arm AND syntropic arm
+### 1.2 The net-heat ledger — entropic arm and syntropic arm
 
 Where local industry adds heat on top of stellar flux:
 
@@ -102,14 +102,14 @@ float, no drift).
 discards the residual — against the house law that the residual is
 structured information, measured and kept. The complete loop has two arms:
 
-- **The syntropic arm — ENCASEMENT (first):** excess heat is captured into
+- **The syntropic arm — encasement (first):** excess heat is captured into
   ordered store before anything vents. Each tick,
   `encased = min(Heat_Net, encasement throughput)` accrues as **joules** —
   the commodity money of `01_ECONOMY.md` §6.1, whose supply law ("governed
   strictly by sector thermal balance") this mechanic makes literal.
   Encasement is provided by encasement shells (a zone kind), the harvest
   architecture of §3.1 at colony scale.
-- **The entropic arm — VENT (only the overflow):**
+- **The entropic arm — vent (only the overflow):**
   `overflow = Heat_Net − encased`. Only when `overflow > 0` does the sector
   overheat: every yield that tick degrades by the exact factor
   `1 / (1 + overflow)`, and the transition chronicles (OverheatStruck on
@@ -117,7 +117,7 @@ structured information, measured and kept. The complete loop has two arms:
   The void is the failure mode, never the design.
 
 **The cryo law — the Frost is the bank:** accrued (uncollected) joules
-*leak* `1/8` per tick, floored at zero (the D3 spoilage precedent) — EXCEPT
+*leak* `1/8` per tick, floored at zero (the D3 spoilage precedent) — except
 where `T_eq⁴ ≤ 100⁴ K⁴` (the cryogenic band and colder), where the store
 holds **lossless**: the coherence-vault physics of the Coherent
 (`06` §1.4). Banked (collected, receipted) joules are canonical everywhere.
@@ -200,9 +200,9 @@ passes three gates, symmetric for energy and sink:
    accumulates into the vented ledger and settles as `VentSettled` at
    collect — never un-receipted.
 
-**Symmetric decay (the §1.2 leak law, both sides):** ACCRUED stores leak
+**Symmetric decay (the §1.2 leak law, both sides):** accrued stores leak
 outside their native band — joules leak when warm, sink leaks when
-irradiated without insulation. BANKED stores are canonical and never leak
+irradiated without insulation. Banked stores are canonical and never leak
 (landed law); vaulting either side in a Glasskeeper escrow node (01 §7)
 holds it lossless long-term.
 
@@ -217,7 +217,7 @@ death of the Furnace. Placeholder pricing; tunes at balance.
 ## 2. Terminology ruling: no "Goldilocks"
 
 The term "Goldilocks Zone" is **refused vocabulary** (in the spirit of
-CHARTER §8). It is anthropocentric chauvinism: it assumes carbon-based,
+Charter §8). It is anthropocentric chauvinism: it assumes carbon-based,
 liquid-water life at ≈300 K is the universal baseline, when there is no
 baseline for lifeforms in the universe by population or density. In a world
 where species, computational substrates, and industrial megastructures
@@ -280,26 +280,26 @@ three operational regions. Note these are zones of the *grid*; which zone is
 
 - **Physics:** `T_eq⁴` above the thermal melting threshold — the star
   radiates massive photon energy and the vacuum cannot dissipate it.
-- **PRO:** hyper-cheap solar energy (Dyson arrays at 300% yield —
+- **Pro:** hyper-cheap solar energy (Dyson arrays at 300% yield —
   placeholder).
-- **CON:** heavy thermal maintenance — continuous energy and coolant spend on
+- **Con:** heavy thermal maintenance — continuous energy and coolant spend on
   radiator arrays and heat sinks, governed by the `Heat_Net` ledger (§1.2).
 
 ### 3.2 The Equilibrium Band (per-substrate)
 
 - **Physics:** `T_eq⁴` inside the occupying substrate's band.
-- **PRO:** near-zero heating/cooling overhead for that substrate; for the
+- **Pro:** near-zero heating/cooling overhead for that substrate; for the
   mesic band, populations, bio-domes, and education centers flourish.
-- **CON:** prime real estate — minimal-maintenance zones become the most
+- **Con:** prime real estate — minimal-maintenance zones become the most
   contested territory for trade hubs, civic cities, population centers.
 
 ### 3.3 The Absolute Frost Zone (extreme cold)
 
 - **Physics:** `T_eq⁴ < 100⁴ K⁴` — far orbits, or low-density red-dwarf
   sectors.
-- **PRO:** maximum radiator headroom — foundries, quantum processors, and
+- **Pro:** maximum radiator headroom — foundries, quantum processors, and
   high-energy weapons run at full overdrive without overheating.
-- **CON:** zero ambient solar power; habitats and transit conduits burn
+- **Con:** zero ambient solar power; habitats and transit conduits burn
   thermal heating fuel to prevent embrittlement and atmosphere freeze-out.
 
 ---
@@ -374,7 +374,7 @@ puzzle, and creates organic trade routes between thermal opposites.
   design authority, not a landing.
 - `T_eq⁴`, `Heat_Net`, and band thresholds are exact rationals in the CFE
   (§1.1); any stochastic thermal event (flares, venting) draws through the
-  chronicle beacon under CHARTER §9 with a domain tag (e.g.
+  chronicle beacon under Charter §9 with a domain tag (e.g.
   `"thermal.flare"`).
 - Candidate protocol home: the sector/orb physics belongs with NS-1 DOP orb
   attributes (star `L`, node `A`, `r`) and NS-3 receipts for every thermal
@@ -386,7 +386,7 @@ puzzle, and creates organic trade routes between thermal opposites.
 ## 7. The crypto ruling (thermal value at the settlement boundary)
 
 **The boundary is the charter's, restated:** game logic never touches
-contract bytecode; chains settle, never simulate (CHARTER §7). Crypto cannot
+contract bytecode; chains settle, never simulate (Charter §7). Crypto cannot
 enter the equation — it settles the *value* the equation creates. Three
 layers, world to chain:
 
@@ -395,11 +395,11 @@ layers, world to chain:
 `T_eq⁴` gives every sector an exact, replayable marginal cost of energy:
 near-free in the Furnace, expensive in the Frost. Energy (joules, exact
 rationals in the chronicle) is therefore the commodity money of the world —
-its supply set by physics, not by a mint. The hot/cold price differential IS
+its supply set by physics, not by a mint. The hot/cold price differential is
 the monetary system: coolant flowing hot-ward and energy cold-ward is a
 currency exchange between thermal regimes. This layer lives entirely in the
 CFE — free, high-frequency, chain-free, no wallet at onboarding
-(CHARTER §3.5).
+(Charter §3.5).
 
 **The hard line:** no in-game unit is ever a per-unit crypto asset. Energy
 stays chronicle-native and free to move; anything tighter re-creates Dark
@@ -423,23 +423,23 @@ conditions with physical definitions:
 
 ### 7.3 The adapter maps value, never physics (SEAL C)
 
-On-chain token metadata never carries game rules, but it MAY carry the exact
+On-chain token metadata never carries game rules, but it may carry the exact
 `T_eq⁴` rationals and band-membership facts from the anchored chronicle
 root, so an external buyer verifies what they own (which band, which
 substrate it suits) from the root alone. The chain sees a checkpoint
 containing thermal facts; it never computes them. If settlement ever needs
 ZK proofs of band membership, "`T_eq⁴` ∈ `[250⁴, 320⁴]`" is a cheap
-rational-comparison circuit — the no-float law (CHARTER §3.2) pays off
+rational-comparison circuit — the no-float law (Charter §3.2) pays off
 directly at the crypto boundary.
 
 **Succinct settlement proofs (the buildable core).** The goal at the NS-7
 boundary is to prove a fact about the anchored chronicle root — a band
 membership, a delivered-quota inequality `A/B ≥ C/D`, a closed energy loop —
 *without replaying every tick* that produced it. The lawful tool is a real
-succinct proof system over a finite field: a STARK or a multilinear /
+succinct proof system over a finite field: a stark or a multilinear /
 sum-check prover (Lasso, Jolt, HyperPlonk) whose statements are exact-rational
 inequalities. This is a genuine win precisely because the state is already
-exact rational (CHARTER §3.2) — the arithmetization is clean and the
+exact rational (Charter §3.2) — the arithmetization is clean and the
 verifier stays constant-size.
 
 Two guardrails keep this honest, learned from a rejected "topological /
@@ -461,9 +461,9 @@ derived from the chronicle root and acts on the verdict.
 ### 7.4 The chain ruling: existing chain, never a new one
 
 No new chain is spun up for settlement — inscribed here as a ruling, per
-CHARTER §7's definition of WWW3 as *existing* EVM/UTXO chains:
+Charter §7's definition of WWW3 as *existing* EVM/UTXO chains:
 
-- **The mesh IS the sovereign ledger.** The NS-3 chronicle is append-only
+- **The mesh is the sovereign ledger.** The NS-3 chronicle is append-only
   ground truth (SEAL B); NS-5 proof-of-convergence is the consensus. A
   custom L1 would duplicate that machinery while adding validator
   bootstrapping, security-budget, and liquidity-from-zero problems the

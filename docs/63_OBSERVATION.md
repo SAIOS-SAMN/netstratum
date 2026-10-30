@@ -1,13 +1,12 @@
 # 63 — Observation: compact until watched
 
-Operator 2026-10-09: "we need a way to consolidate this and compact it in a
-way that it's reconstructible and operational without having whole worlds
-that no one is observing waste memory". Ruling on time: "the deterministic
-components of the world are set in compact state (orbits, times) until an
-observer is present, a mind is present, or a people are present — at that
-time we unroll the world and let the stochastic probabilities unwind until
-no observers are present." Observing: a seated mind, contact, the operator's
-watch, the progenitor line.
+Design direction (2026-10-09): consolidate and compact the state so that it
+stays reconstructible and operational, without unobserved worlds holding
+memory. Ruling on time: "the deterministic components of the world are set in
+compact state (orbits, times) until an observer is present, a mind is present,
+or a people are present — at that time we unroll the world and let the
+stochastic probabilities unwind until no observers are present." Observing: a
+seated mind, contact, the operator's watch, the progenitor line.
 
 ## Two compactions
 
@@ -23,8 +22,8 @@ watch, the progenitor line.
    Everything stays reconstructible from the receipts on disk.
 2. **Worlds compact until observed** (Concordance 1.12: "a living people is
    always observed (its own life reads its world); a world no one reads is
-   carried compact"). EVERY LIVING LINE IS OBSERVED and runs; what compacts
-   is a world with no people. Beyond that, a world is OBSERVED when a mind holds
+   carried compact"). Every living line is observed and runs; what compacts
+   is a world with no people. Beyond that, a world is observed when a mind holds
    its seat (the house's takes log), the operator watches it (`<var>/watch`,
    one world name a line), it is the progenitor candidate (the largest
    living lineage), or it is the nearest line to one of those (a people
@@ -49,5 +48,5 @@ bell schedules the dead's words again at the next year close.
 | O4 | the wall rebuilt once per year; the ledger read once per change; lineage only on a birth or death; owned words and office evidence folded incrementally | landed |
 | O5 | observation (1.12): every living people observed; seated, watched, progenitor, contact; compact and unroll every 10 beats | landed; a first build froze 60 living lines (misread 'a people present' as contact), corrected the same hour |
 | O7 | worlds without people (uninhabited planets, the dead's worlds) carried compact and worked out at the coordinate an observer reads, in closed form (1.12) | open |
-| O8 | the beat and year driven from TUniversal (Concordance 1.11, mycelium 78.152) | open, when 78.152 lands |
+| O8 | the beat and year driven from TUniversal (Concordance 1.11, Mycelium 78.152) | open, when 78.152 lands |
 | O6 | the remaining whole-history readers (growth_of, heat_encased_of, the axis folds at boot) as indices | open |

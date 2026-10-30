@@ -1,8 +1,8 @@
-# BALANCE NOTES — the measured survey (A4's executable half, 2026-07-30)
+# Balance notes — the measured survey (A4's executable half, 2026-07-30)
 
-> **ARCHIVED 2026-08-13.** Superseded/dead weight per the doc audit — kept for history, not live spec. See docs/BUILD_ORDER.md, docs/archive/HANDOFF_2026-08-13.md, or the doc it names as its successor for current status.
+> **Archived 2026-08-13.** Superseded/dead weight per the doc audit — kept for history, not live spec. See docs/BUILD_ORDER.md, docs/archive/HANDOFF_2026-08-13.md, or the doc it names as its successor for current status.
 
-**Status:** MEASUREMENT, not tuning. Every retune is a LAW change for
+**Status:** measurement, not tuning. Every retune is a law change for
 replay (version-bumped, never silent — the Q4 discipline); the dials
 turn only on playtest + the 05 §1.4 pricing ruling. This memo is the
 instrument panel the tuning session reads.
@@ -11,7 +11,7 @@ instrument panel the tuning session reads.
 
 | reading | value | the dial it speaks to |
 |---|---|---|
-| famine-struck planets | 13 / 31 (42%) | famine clocks + relief economics — HIGH; the want is the dominant experience of the board |
+| famine-struck planets | 13 / 31 (42%) | famine clocks + relief economics — high; the want is the dominant experience of the board |
 | venting planets | 8 / 31 | radiator_base 2 vs factory heat 1/4 per zone; the doctrine (×5/4) cures heat_net ≤ 1/2 exactly |
 | offers posted / pairs cleared | 28 / 12 | pre-ratio-synthesis baseline; ratios are emergent now (ruled 2026-07-31) — remeasure |
 | cognitive wants struck | 0 | windows 240/480 have not yet elapsed on sealed lines — re-measure after longer eras |
@@ -22,31 +22,31 @@ instrument panel the tuning session reads.
 ## The known hot dials (in likely-first order)
 
 1. **Famine pressure (42%)** — either the relief economics are too
-   thin (trade reaches too few) or the clocks too fast. LANDED
+   thin (trade reaches too few) or the clocks too fast. Landed
    2026-07-30: the famine ask is open-ended — any famished line
    offers half its largest bank for the famined resource, and
    unfamished deep banks (> 8) post surplus wanting the leanest
-   resource their OWN zones burn (demand grounded in upkeep). The
+   resource their own zones burn (demand grounded in upkeep). The
    first cut wanted the scarcest bank outright and every book filled
    with alloy asks nothing answered; a resting offer blocks new
    intents, so upkeep-grounded wants also keep the resting ask
    correct when the famine later strikes that flow. Witness:
-   `any_famine_can_ask_the_market`. MEASURED (60-beat rerun of the
+   `any_famine_can_ask_the_market`. Measured (60-beat rerun of the
    same roster): crossings 12 → 54; famine held at 42% on a board
    that grew 31 → 40 worlds (the bad-targeting variant measured 68%
    on the same run).
 2. **Rung-5 forge cost** — SEARCH_BUDGET 200k is an engine law; the
-   DIFFICULTY TABLE (word_len/grids per rung) is the lawful dial if
+   difficulty table (word_len/grids per rung) is the lawful dial if
    beats must cheapen.
-3. **Ratio synthesis** (RULED 2026-07-31): price is an emergent
+3. **Ratio synthesis** (ruled 2026-07-31): price is an emergent
    ratio, never a system property — there is no base price and none
    will exist. Intents derive their ratio from state: a famished
    line bids steep (want = give/(1+severity)); a surplus line asks
    its reserve-fraction premium (want = give×(2·reserve−target)/
-   reserve, inside 2×). Unmatched ratios REST lawfully — a resting
+   reserve, inside 2×). Unmatched ratios rest lawfully — a resting
    book is a lawful market state, never a bug.
 4. **The iceberg (MARKET-2, ruled + landed 2026-07-31)** — trade's
-   side-fee friction CONVERTED to cargo melt: delivered = sent ×
+   side-fee friction converted to cargo melt: delivered = sent ×
    (1 − φ·D), φ = 1/64 per unit of manifold L1 (spatial + key gap);
    isolation walls at φ·D ≥ 1. φ is the new hot dial: the roster's
    typical inter-world distances (20–40) melt 30–60% — measure
@@ -61,7 +61,7 @@ instrument panel the tuning session reads.
 
 Placeholder prices sitting in dop.rs that nobody chose deliberately —
 MERCHANT-1 must not arbitrage around them before they are tuned on
-purpose. Mechanics stay coder-03's; the VALUES are economics:
+purpose. Mechanics stay coder-03's; the values are economics:
 
 - `scan_draw()` — 1 crystal per scan
 - the resonator's conversion ratios
@@ -76,7 +76,7 @@ the baseline.
 
 ---
 
-## P8.5 ruled table slice (2026-08-09) — AP capacity
+## P8.5 Ruled table slice (2026-08-09) — AP capacity
 
 Placeholder-free **shared AP** capacity (anti click-to-win). Constants live
 in `cfe::world::ap_budget` and are the only lawful knobs:

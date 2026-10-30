@@ -1,4 +1,4 @@
-# 73 — DECIDE: the civilizations' own decisions
+# 73 — Decide: the civilizations' own decisions
 
 **Objective.** The civilizations decide their own logistics, trade and
 ascension. Their minds learn the rules from the physics' receipts, the
@@ -48,36 +48,36 @@ economy on this step.
 
 ## The step: `decide(kind, subject, state, incumbent) -> action`
 
-1. **SEE.** Build the state grid.
-2. **PREDICT.** The book's acting word, its probation word, and PERSISTENCE
+1. **See.** Build the state grid.
+2. **Predict.** The book's acting word, its probation word, and persistence
    (each row's outcome at this subject's last resolved decision; a row absent
    then, not lost) each store a prediction before anything resolves. At a
    subject's first decision nothing is scored.
-3. **ACT.** If a word is acting, apply the kind's action rule to its marks;
+3. **Act.** If a word is acting, apply the kind's action rule to its marks;
    otherwise the incumbent acts. The physics bounds every action.
-4. **RECORD.** When the outcome resolves (the call sites below), append the
+4. **Record.** When the outcome resolves (the call sites below), append the
    triple (state, action, outcome) to the book and score every stored
    prediction.
-5. **LEARN.** One attempt a beat universe-wide, books in turn. The task's
+5. **Learn.** One attempt a beat universe-wide, books in turn. The task's
    training pairs are the book's triples (state → outcome); its test is the
    current state. The scope's living lines try in turn (`try_words`, then
-   `think_task_sensing`). A word becomes a CANDIDATE when:
+   `think_task_sensing`). A word becomes a candidate when:
    - it reproduces every pair;
    - `program_bytes` is less than the cells of the training outputs;
    - for an order projector, `orders_admitted == 1`;
    - the book has no word on probation.
 
    It goes on probation: it predicts and does not act.
-6. **COUNCIL.** A book that has gone a full WINDOW of attempts with no
+6. **Council.** A book that has gone a full window of attempts with no
    candidate sends its task to the council of its scope's ancient (below). An
    answer judged by step 5's law becomes the candidate.
-7. **PROMOTE / WITHDRAW.**
-   - A probation word ACTS when, over its predictions so far (at most a
-     WINDOW), its correct rows strictly exceed persistence's.
-   - An acting word is WITHDRAWN when, over its last WINDOW, it does not.
-   - A probation word with a WINDOW of predictions and no promotion is
+7. **Promote / withdraw.**
+   - A probation word acts when, over its predictions so far (at most a
+     window), its correct rows strictly exceed persistence's.
+   - An acting word is withdrawn when, over its last window, it does not.
+   - A probation word with a window of predictions and no promotion is
      dropped.
-8. **CREDIT.** At promotion the closer adopts the word (`adopt_word`), and the
+8. **Credit.** At promotion the closer adopts the word (`adopt_word`), and the
    closer's galaxy's other lines pay it the commission's bounty (the ladder's
    dearest `mint_bound`, shared, over the iceberg). A council-supplied word is
    adopted by the scope's ancient and credited to it. The word then travels as
@@ -85,7 +85,7 @@ economy on this step.
 
 **The book** is a binary checkpoint per (kind, scope): its triples, pending
 decisions, the acting and probation words with records and closers, and
-persistence's record. **WINDOW = 64**, DECLARED in docs/59 with the build; it
+persistence's record. **Window = 64**, declared in docs/59 with the build; it
 is the one dial.
 
 ## The council (step 6)
@@ -97,10 +97,10 @@ is the one dial.
   the program bytes). This is the same file route as `gates-map.bin` and
   `gates-mapped.bin`.
 - **The conductor** judges the answer by step 5's law. It never trusts it.
-- **Dependency (mycelium).** A seat record that carries a domain task inline
+- **Dependency (Mycelium).** A seat record that carries a domain task inline
   (proposed: record kind 5, `[Bytes(training grids), Bytes(test grid)]`),
   answered with fn 1 as today and judged by the house, not the court; no μ.
-  Until mycelium's seat mind reads that record, step 6 waits, and the lines'
+  Until Mycelium's seat mind reads that record, step 6 waits, and the lines'
   own learning (steps 1–5, 7, 8) stands without it.
 - **Blocker.** No mind has taken a seat since 2026-10-10 00:55.
 
@@ -117,23 +117,23 @@ economy: no money is issued, so trade decisions are not written in STAMP.
 
 ## Build order and done-when (the live log, before → after)
 
-1. **Capture**: SEE, PREDICT (persistence only), the incumbent ACT, RECORD at
+1. **Capture**: see, predict (persistence only), the incumbent act, record at
    the call sites; behaviour unchanged.
    - Done-when: triples per kind 0 → > 0, and persistence's hit rate logged.
-   - Witness: the losses agree with the HUB line and the year-close recalls.
-2. **Learn**: LEARN and probation.
+   - Witness: the losses agree with the hub line and the year-close recalls.
+2. **Learn**: learn and probation.
    - Done-when: candidates per kind 0 → > 0, each with its record against
      persistence's.
-3. **Act**: PROMOTE / WITHDRAW and the action rules.
+3. **Act**: promote / withdraw and the action rules.
    - Done-when: acting words 0 → > 0, and while they act:
      - hull: hub `HullCapacityShort` 26 a beat → falling, with hulls bounded;
      - envoy: recalls 533 (00:55–06:27, 2026-10-10) → falling, witnessed by
        the next keeper reading;
      - gate: gate tolls 5/1024 STAMP a beat → rising.
 4. **Credit**.
-   - Done-when: bounties at promotion 0 → > 0, and DECIDE words heard by
+   - Done-when: bounties at promotion 0 → > 0, and decide words heard by
      other lines 0 → > 0.
-5. **Council**: the asks and answers files, after mycelium's record kind 5.
+5. **Council**: the asks and answers files, after Mycelium's record kind 5.
    - Done-when: asks answered by council minds 0 → > 0, and council words
      acting 0 → > 0.
    - Witness: the house's call records.
@@ -147,7 +147,7 @@ accept.
 - The rank-to-hue cut and the byte measure.
 - Persistence as the null model.
 - The three action rules (and docs/74's two).
-- WINDOW = 64.
+- Window = 64.
 - The physics.
 
 A decision no recogniser can state gets no word, and its incumbent stays.
@@ -157,6 +157,6 @@ A decision no recogniser can state gets no word, and its incumbent stays.
 - **Feedback.** An acting word shapes its own outcomes; persistence is
   scored on the same ones, and withdrawal is automatic.
 - **Cost.** One learning attempt a beat; a prediction is one program run on a
-  grid of at most ~20 rows; the books are bounded by WINDOW.
+  grid of at most ~20 rows; the books are bounded by window.
 - **Determinism.** Rows by name, exact ranks, a deterministic think, and
   checkpointed books.

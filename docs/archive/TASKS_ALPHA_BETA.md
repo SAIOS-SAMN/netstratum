@@ -1,12 +1,12 @@
-# TASKS — ALPHA/BETA READINESS (doc-vs-code audit, 2026-08-13)
+# Tasks — ALPHA/BETA readiness (doc-vs-code audit, 2026-08-13)
 
-**Status:** AUDIT + PROPOSED PHASING. Produced by a full docs/-vs-`engine/`
+**Status:** audit + proposed phasing. Produced by a full docs/-vs-`engine/`
 sweep (5 parallel agents, one per subsystem cluster, each verifying code
 directly rather than trusting doc prose) plus the standing-law findings
-from this session's `40_REJUVENATION.md` §6 work. Not itself LAW — a
+from this session's `40_REJUVENATION.md` §6 work. Not itself law — a
 work-list to be ruled phase by phase, same discipline as `BUILD_ORDER.md`.
 
-**Baseline measured, not asserted:** `cargo test --workspace` is GREEN
+**Baseline measured, not asserted:** `cargo test --workspace` is green
 except one pre-existing debt (`tuned_constant_ratchet`, 165 literals vs a
 ceiling of 112 — red before this session, unrelated to any work here).
 The engine is not broken; the gaps below are missing law, not broken law.
@@ -27,17 +27,17 @@ The engine is not broken; the gaps below are missing law, not broken law.
   "Phase-4 complete," but I5.1–I5.6 (Share/Note/Future/Perp lifecycle,
   `instrument_step`) are still unchecked `[ ]` on the same board — a
   live violation of `00_CHARTER.md`'s one-truth discipline. Every doc
-  claiming LANDED/COMPLETE status this audit found PARTIAL needs its
+  claiming LANDED/COMPLETE status this audit found partial needs its
   status line corrected, not just this list.
-- [x] **The shippable surface for "alpha" — CONFIRMED, not open.**
+- [x] **The shippable surface for "alpha" — confirmed, not open.**
   `clients/cli/src/main.rs` is a real play-through path (found → build
   → trade → diplomacy → judge), not a test harness — the N3 arc
   (agent refused → granted → collected → revoked → refused, 9
-  receipts, replay MATCHES) is measured end to end. **Persistence is
+  receipts, replay matches) is measured end to end. **Persistence is
   complete**: `chronicle.tlv` append-only, `World::resume` replays
   byte-exact across a real process boundary, double-boot and
   era-convergence (128 worlds annexed, torn-tail recovery) both
-  measured. **Multiplayer is NOT ready**: `engine/mesh` carries
+  measured. **Multiplayer is not ready**: `engine/mesh` carries
   two-node chronicle replication (`examples/ns5_two_nodes.rs`, forged
   chains refuse at the break) but **no cross-node consensus** —
   reconciliation, resync, and Sybil-resistant peer weighting are all
@@ -47,18 +47,18 @@ The engine is not broken; the gaps below are missing law, not broken law.
   ready for that scope, nothing here blocks it.
 - [ ] **The kernel Phase-3 flip (`39_PHASE3_FLIP.md`) — a second,
   cheap, high-leverage gate found by this audit, ahead of founding.**
-  The kernel currently runs BESIDE the chain (judges every deed, 70/71
+  The kernel currently runs beside the chain (judges every deed, 70/71
   types covered, zero refusals measured on a 15-world live sample) but
   is not yet the enforcement gate — deeds still apply regardless of
   the judge's verdict. Promoting it needs exactly **one operator
   decision**: the addressing-law question in `39_PHASE3_FLIP.md` §3.
   This is unrelated to founding/tithe and can be ruled in parallel,
-  but it should be ruled EARLY — every phase below plays differently
+  but it should be ruled early — every phase below plays differently
   once refusals are load-bearing instead of advisory.
 
 ## 1. The founding economy — hard blocker, first deed every player hits
 
-`20_FOUNDING.md` is marked **LAW** (2026-08-02). Measured against code,
+`20_FOUNDING.md` is marked **law** (2026-08-02). Measured against code,
 it is close to **zero-implemented**. This is the worst doc/code gap
 found in the whole sweep, because founding is literally step one.
 
@@ -75,14 +75,14 @@ found in the whole sweep, because founding is literally step one.
   `cli/main.rs:1605`) pass `None`, leaving `thermal`/`cryo` domains
   unreachable by founding — marked a defect by the operator on
   2026-08-02 and still open.
-- [ ] **Rule the scope of PURCHASE (§2a) and COMMISSION (§2b) for
+- [ ] **Rule the scope of purchase (§2a) and commission (§2b) for
   alpha.** Today: `post_offer`/`clear_trade` trade `Resource`s between
   orbs, never a planetary ownership stake — no cross-World share
   purchase exists. `commission_star` (`thermal.rs:17`) is a bare stub:
   it sets `StarClass` and fires a receipt with **no price formula**
   (§6b's `work_k · |1/r_current − 1/r_target|` is nowhere in code) and
   **no progenitor gate at all** — any sovereign calls it solo. Decide:
-  ship alpha on FALLBACK (derived siting) + a real tithe only, with
+  ship alpha on fallback (derived siting) + a real tithe only, with
   PURCHASE/COMMISSION explicitly deferred and labeled as such in the
   doc — or scope them in now. Either is fine; leaving the doc silent
   on which is not.
@@ -98,12 +98,12 @@ generic-ration read) is **landed and green** (commits `100b0a7`,
 `06c5ff7`, `e76989d`, `f467876`). One piece was scoped from the start
 and never built:
 
-- [x] **The mutating settle-at-touch — LANDED (`e017ac2`).** At
+- [x] **The mutating settle-at-touch — landed (`e017ac2`).** At
   `collect_as`, before `touch()` seals demurrage (its mirror),
   `rejuvenation_settle` folds the ration's growth-since-`last_touch`
   into the touch's own `YieldCollected` amount. No separate deed (per
   the operator's "physics get no deed" design — the §2 digest rides the
-  collected amount); SEAL-B-safe with NO new machinery, because the
+  collected amount); SEAL-B-safe with no new machinery, because the
   kernel already admits `YieldCollected` as a `+amount` mint and replay
   banks from the receipt. No kernel arm was needed after all. Regression
   green incl. `wave1_era_pins`. **This unblocks #29 and #30** — same
@@ -136,8 +136,8 @@ lanes at once, not just rejuvenation.
 This is new scope this session surfaced, not a pre-existing task-board
 item, so it needs its own ruling before work starts. `12_UNION.md`
 §2/§2a (the progenitor `Station` as Tier-0 star/planet creator, planets
-DELEGATED to sovereigns under council-gated diplomacy) is marked
-DESIGN and is, independently confirmed by two audits this sweep,
+delegated to sovereigns under council-gated diplomacy) is marked
+design and is, independently confirmed by two audits this sweep,
 **almost entirely unimplemented**:
 
 - `commission_star` is the only star-creation path, is entirely
@@ -191,7 +191,7 @@ Phased:
 ## 6. The society layer — new design scope (2026-08-13)
 
 Surfaced by the food-distribution / species / lifespan review this
-session. Food IDENTITY is landed (species→ration, `41_PROVISION` §1);
+session. Food identity is landed (species→ration, `41_PROVISION` §1);
 the society that eats it is missing:
 
 - [ ] **`41_PROVISION` (#36)** — the fed population: per-capita ration
@@ -199,8 +199,8 @@ the society that eats it is missing:
   and distribution by archetype/disposition. Reuses the settle seam.
 - [ ] **`42_LIFESPAN` (#37)** — per-species lifespan as the mortality
   term of the #36 population; the growth-vs-continuity trade (the third
-  face of Locust/Custodian). Ships WITH #36.
-- Both READ the species→planet fit; ENFORCING it at creation (a
+  face of Locust/Custodian). Ships with #36.
+- Both read the species→planet fit; enforcing it at creation (a
   plasmoid founded on a hot world) stays Phase 4 (#34).
 
 These are post-founding depth (beta-facing), independent of Phases 1–3;
@@ -242,7 +242,7 @@ it was already correctly deferred.
    checkbox on its own task board.
 2. `cargo test --workspace` green, `tuned_constant_ratchet` included.
 3. Rejuvenation's settle deed lands, unblocking #29/#30.
-4. Every DESIGN-status doc this audit touched carries an explicit
+4. Every design-status doc this audit touched carries an explicit
    alpha/beta/post-beta triage, not silence.
 5. The kernel Phase-3 flip is ruled (landed or explicitly deferred with
    a reason) rather than left an ambient assumption.

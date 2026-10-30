@@ -28,7 +28,7 @@ knowledge market). Its worth is never declared: it is what it opens below.
   it approaches the full flux T and never passes it. Past it a people
   reaches more flux: more worlds, or a finer lock with its star (Ψ_w,
   docs/82).
-- A people stands on a CAP of its world's geoid, where its medium takes up
+- A people stands on a cap of its world's geoid, where its medium takes up
   most flux; regions are caps, neighbours are caps that overlap (the
   non-Euclidean Venn). Replaces the 64-tile board, the zone table and the
   square surface.
@@ -44,8 +44,8 @@ knowledge market). Its worth is never declared: it is what it opens below.
 - **Between bodies:** a chain of arcs on nested geoids joined at throats
   (`enclosure::route`, the arcs added).
 - **Cost of a carriage:** the pull crossed at each throat `H/(R + H)`; the
-  arc on each sphere; the SENSE (prograde rides the frame's turn, the lever;
-  retrograde pairs with it and pays the paired share, law 6); the WINDOW
+  arc on each sphere; the sense (prograde rides the frame's turn, the lever;
+  retrograde pairs with it and pays the paired share, law 6); the window
   (both ends turn, so a crossing exists where their phases meet, from the
   `p/q` lock of their periods, `convergents`).
 - **Knowledge:** knowing a frame's turning lets a carrier ride prograde and

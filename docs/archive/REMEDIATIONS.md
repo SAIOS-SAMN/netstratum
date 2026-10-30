@@ -1,26 +1,26 @@
-# REMEDIATIONS — the deterministic-cost checklist
+# Remediations — the deterministic-cost checklist
 
 **Lane:** `remediations-lane` (worktree `.claude/worktrees/remediations-lane`).
 **Opened:** 2026-08-02. **Base:** `main` at `540ac96`.
 
-## §0bis SUMMARY — the board in one page
+## §0bis Summary — the board in one page
 
 > A map, never a second authority (`EQUATIONS` §0.1). Restated facts
 > rot; this section holds only **measured numbers** and **pointers**.
 
-**THE MEASUREMENT.** Beat cost at 33 worlds: **1.52 s**, of which
+**The measurement.** Beat cost at 33 worlds: **1.52 s**, of which
 `research_step` is **94.2 %** (1432.9 ms), `merchant_step` 4.0 %,
 `chain_beat` 0.8 %. The forge search grew **≈2000× in 40 beats**;
 everything else grew 3–13×. An 80-cycle run takes 198 s; 120 cycles does
 not finish in ten minutes. Full tables: §1.
 
-**THE FINDING.** The cartesian object is the forge search
+**The finding.** The cartesian object is the forge search
 (`solver/src/search.rs:124`) — breadth-first over the vocabulary
 product, V 14–37, depth ≤3, ~52 060 candidates, each **re-derived from
 the raw input**. `peel` and `shear` are the house cures and both exist;
 this is where they were never applied.
 
-**THE THREE DOCUMENTS.**
+**The three documents.**
 
 | file | what it settles |
 |---|---|
@@ -28,11 +28,11 @@ this is where they were never applied.
 | **`FORGE_REMEDIATION.md`** | the plan for the 94 % — R1+R3 (≈3×, outcome-neutral), R4, R5, R2 |
 | **`FORGE_BUDGET.md`** | `SEARCH_BUDGET` as a capacity reading — rows **B0–B8**, the six **axial capabilities** |
 
-**WHAT LANDS WITHOUT A RULING.** R1+R3 behind one byte-identity pin
+**What lands without A ruling.** R1+R3 behind one byte-identity pin
 (≈3×); then R4; then the find-scans and re-derivations (R7–R13, R17–R18).
 None carry economic content.
 
-**WHAT IS BLOCKED, AND ON WHAT.**
+**What is blocked, and on what.**
 
 - **R6** (stepping replay) rides `kernel-lane` **11a** — the same
   refactor as its #30. Do not design a second.
@@ -40,7 +40,7 @@ None carry economic content.
   replay axis, and operator words for every value (`FORGE_BUDGET` §7).
 - **R2** waits on the `from_key` wiring at N6 (~4 % today).
 
-**THE STANDING LESSON OF THIS LANE.** Three times a conclusion was
+**The standing lesson of this lane.** Three times a conclusion was
 reached from one axis and stated as if it covered the manifold — from
 the *shape* of PoW rather than the code; from consensus-neutrality
 rather than the six axes; from "leave coefficients unnamed" rather than
@@ -49,7 +49,7 @@ not resolve: **`FORGE_BUDGET` §9's axial capabilities** — a landing
 names which capability it exercised, and satisfying one is never
 satisfying the rest.
 
-**TWO COLLAPSES ALREADY RECORDED AS DEFECTS, both inherited by the
+**Two collapses already recorded as defects, both inherited by the
 budget law:** capacity read on the aggregate instead of per channel
 (`bridge.rs:306`), and the four ideology axes collapsed into
 `syntropy_ratio` (`EQUATIONS` §6 **S2**, against `09` §1.3). The
@@ -61,7 +61,7 @@ from outside — it is the law's own shape, twice.
 ## §0 What this file is
 
 The operator's standing question, in the operator's words: find the
-**cartesian CRUD** — *iterative loops around n-dimensional objects that
+**cartesian crud** — *iterative loops around n-dimensional objects that
 operate on every potential of potential* — and every other place the
 system pays a whole-history or whole-product price for an incremental
 answer. `peel` (address one thing directly instead of scanning for it)
@@ -82,7 +82,7 @@ proof-of-work system, and several of the largest wins below *reduce the
 work performed per beat*. That is an economic change, not a free
 optimization, and it is an operator ruling.
 
-## §1 THE MEASUREMENT
+## §1 The measurement
 
 Release build, `--cadence 0`, from the same 19-world founding baseline
 each time (`install.sh --var <scratch>`), single machine, this session.
@@ -128,9 +128,9 @@ Per-beat chain cost is **linear in history** (2.6× the receipts → 2.7×
 the cost). It is small today and it is the term that never stops
 growing, because the roster plateaus and the chronicle does not.
 
-## §2 THE FORGE SWEEP — the 94 %
+## §2 The forge sweep — the 94 %
 
-> **SUPERSEDED IN PART by `docs/FORGE_REMEDIATION.md` (2026-08-02).**
+> **Superseded in part by `docs/FORGE_REMEDIATION.md` (2026-08-02).**
 > That file is the working plan for R1–R5 and corrects three things
 > read wrong here: R1/R3/R4/R5 are **not** blocked on Ruling Box 1
 > (the search is never re-run by a verifier, `mint_bound` keys off
@@ -162,7 +162,7 @@ The space, measured from the source:
   the sweep runs to exhaustion at these sizes rather than being cut
   short `[READ]`
 
-- [ ] **R1 — PREFIX-SHARED EVALUATION (the shear, applied to the search).**
+- [ ] **R1 — prefix-shared evaluation (the shear, applied to the search).**
   `closes()` (`search.rs:105`) re-runs the program **from the raw
   input** for every candidate. BFS already holds every prefix in
   `frontier`; each of a node's V children re-derives that node's
@@ -172,7 +172,7 @@ The space, measured from the source:
   phase, with **zero change to what is found or to the certificate**.
   This is the single best cost-per-risk item on the board. `[READ]`
 
-- [ ] **R2 — CANONICAL FORM ON GEOMETRY WORDS (peel, applied to the
+- [ ] **R2 — canonical form on geometry words (peel, applied to the
   space).** The six symmetry generators generate the dihedral group of
   the square — **at most 8 distinct transforms.** Every word of length
   3 drawn from those six is one of 216 spellings of one of ≤8
@@ -182,7 +182,7 @@ The space, measured from the source:
   uses exactly this idea (its 7 normalization prefixes). Measure the
   collapse before claiming a factor. `[READ]`
 
-- [ ] **R3 — STREAM THE FRONTIER, DO NOT MATERIALIZE IT.**
+- [ ] **R3 — stream the frontier, do not materialize it.**
   `search.rs:161-173` builds `next: Vec<Program>` holding up to `room`
   (≈200k) fully-cloned programs, each a heap `Vec<Op>`. At V=37,
   depth 3 that is ~50k allocations per world per beat, ~1.65M per beat
@@ -190,17 +190,17 @@ The space, measured from the source:
   arithmetically from a mixed-radix counter — **find the k-th
   potential directly, never build the product.** Peel, exactly. `[READ]`
 
-- [ ] **R4 — THE BUDGET STARVES THE INFORMATIVE OPERATORS.**
+- [ ] **R4 — the budget starves the informative operators.**
   `vocabulary` is ordered `[symmetries, object ops, derived_recolors,
   derived_tiles]` (`search.rs:125-135`) and the growth loop breaks at
   `room` (`search.rs:165`). So when the budget bites, the operators
   **derived from the observation itself** — the ones most likely to
   close the task — are the first never enumerated. Ordering the
-  derived ops FIRST is a one-line change that strictly improves the
+  derived ops first is a one-line change that strictly improves the
   solve rate at identical cost. This is closer to a defect than an
   optimisation. `[READ]`
 
-- [ ] **R5 — MEMOIZE `(digest, difficulty) → outcome`.**
+- [ ] **R5 — memoize `(digest, difficulty) → outcome`.**
   `research_step` (`conductor/src/lib.rs:1072`) seeds the forge from
   `receipts().last().own`. A world that appended nothing this beat
   re-forges the identical task and re-runs the identical exhaustive
@@ -208,10 +208,10 @@ The space, measured from the source:
   the repeat is provably wasted. Bound the cache to the live roster.
   `[READ]`
 
-## §3 THE CHAINED BEAT — the term that never stops growing
+## §3 The chained beat — the term that never stops growing
 
-- [ ] **R6 — `replay()` CANNOT STEP, SO EVERY DEED REPLAYS ALL OF
-  HISTORY.** `chain_beat` (`conductor/src/lib.rs:1365-1384`) rebuilds
+- [ ] **R6 — `replay()` cannot step, so every deed replays all of
+  history.** `chain_beat` (`conductor/src/lib.rs:1365-1384`) rebuilds
   the prefix chronicle and replays it **whole, once per new deed**:
   `receipts[..=at].to_vec()` copies the prefix, `Chronicle::from_receipts`
   re-hashes the entire chain (`cfe/src/vrp.rs:201`), and
@@ -222,7 +222,7 @@ The space, measured from the source:
   **This is the same refactor `kernel-lane` needs for task #30 — see
   §9. Do not design a competing one.** `[MEASURED]`
 
-- [ ] **R7 — `persist::sync` READS THE WHOLE FILE TO FIND THE TAIL.**
+- [ ] **R7 — `persist::sync` reads the whole file to find the tail.**
   `cfe/src/persist.rs:56` is an append-only sync that first calls
   `load(path)` (`:63`) — reading the entire file, parsing every
   receipt, and re-verifying the whole hash chain — then compares every
@@ -231,17 +231,17 @@ The space, measured from the source:
   at 180 receipts. A carried append cursor plus a tail-digest check
   gives the same divergence guarantee at O(1). `[MEASURED]`
 
-- [ ] **R8 — `scribe::record` READS `chronicle.jsonl` TWICE PER BEAT.**
+- [ ] **R8 — `scribe::record` reads `chronicle.jsonl` twice per beat.**
   `rotate_divergent` (`scribe/src/lib.rs:124-131`) reads the whole
   export and splits it into lines; then `:101-105` reads the very same
   file **again** just to `.lines().count()` an append cursor. Two full
   reads and parses per world per beat, growing with the export. Same
   cure as R7: carry the cursor. Already named as inventoried debt in
-  PICKUP §8d. `[READ]`
+  Pickup §8d. `[READ]`
 
-## §4 THE FIND-SCANS — peel that does not peel
+## §4 The find-scans — peel that does not peel
 
-- [ ] **R9 — `peel` IS ITSELF A FIND-SCAN.** `cfe/src/world/mod.rs::peel`:
+- [ ] **R9 — `peel` is itself A find-scan.** `cfe/src/world/mod.rs::peel`:
   ```rust
   fn peel(orbs: &mut [ColonyOrb], orb: u64) -> Option<&mut ColonyOrb> {
       orbs.iter_mut().find(|held| held.orb_id == orb)
@@ -255,39 +255,39 @@ The space, measured from the source:
   `orb_id → slot` index (rebuilt on the rare membership change) makes
   every peel O(1) and makes the name true. `[READ]`
 
-- [ ] **R10 — THE WHOLE ENGINE IS Vec-AS-MAP.** Across ~46k lines,
+- [ ] **R10 — the whole engine is Vec-AS-MAP.** Across ~46k lines,
   only **two** files use a keyed map at all (`mesh/src/arbor.rs`,
   `cfe/src/query.rs`); everything else is `Vec` plus linear lookup.
   This is the structural root of R9 and of R11. It does not need a
   wholesale rewrite — it needs an index on the collections that are
   hot and keyed (orbs, offers, techs, debts, covenants). `[READ]`
 
-- [ ] **R11 — `deposit_receipt` IS O(receipts × orbs).** Its inner
+- [ ] **R11 — `deposit_receipt` is O(receipts × orbs).** Its inner
   `deposit` helper (`cfe/src/world/mod.rs`) does
   `sheet.iter().position(...)` per receipt to find the orb's slot in a
   `Vec<(u64, CrystalDeposit)>`. The shear cursor above it is correct;
   the sheet lookup inside it is not. `[READ]`
 
-- [ ] **R12 — `verify_orbit_witness` LINEAR-FINDS THE OPERATOR.**
+- [ ] **R12 — `verify_orbit_witness` linear-finds the operator.**
   `rfa-core/src/fold.rs:249` — `operators.iter().find(|op| op.id == …)`
   inside the judge's half. Small today (operator tables are short) and
   it is the one scan sitting on a constitutional path, so it should be
   a keyed lookup on principle. `[READ]`
 
-## §5 THE FULL RE-DERIVATIONS
+## §5 The full RE-derivations
 
-- [ ] **R13 — THE NON-INCREMENTAL TWIN IS STILL LIVE.**
+- [ ] **R13 — the non-incremental twin is still live.**
   `cfe/src/world/survey.rs` has both `crystal_deposits_at` (the
   correct #41 incremental shear) and `crystal_deposits` (`:1094`,
   a full chronicle rescan that opens `let _ = now;` and never prunes
   the window). `constellation()` (`:1182`) calls **the full-rescan
   twin.** So the one read a player hits most often pays the whole
   history every call, and — separately — diverges from what actually
-  crystallizes. PICKUP §8e already records the divergence as a bug;
+  crystallizes. Pickup §8e already records the divergence as a bug;
   it is also the cost item. One cure closes both: delete the twin and
   route `constellation` through the cursor. `[READ]`
 
-- [ ] **R14 — `committed()` CLONES 22 COLLECTIONS.**
+- [ ] **R14 — `committed()` clones 22 collections.**
   `cfe/src/world/core.rs::committed` deep-clones every committed family to
   produce a snapshot; `chain_beat` calls it again for
   `codec::state_bytes` at `conductor/src/lib.rs:1403`, and
@@ -295,22 +295,22 @@ The space, measured from the source:
   (`:1276`). The orb-id listing needs no snapshot at all — that one
   is free to fix today. `[READ]`
 
-- [ ] **R15 — THE FULL STATE IS SERIALIZED AND WRITTEN EVERY BEAT.**
+- [ ] **R15 — the full state is serialized and written every beat.**
   `codec::state_bytes` is cheap per call (4 µs measured) but the
   arbor writes a **whole-state blob per commitment**
   (`mesh/src/arbor.rs:371`, `:622`). Disk grows with beats × state, not
   with change. A delta-or-blob choice at the commitment is a wire
   question, not a code question — record it, do not act alone. `[MEASURED]`
 
-- [ ] **R16 — `mesh::walk` RE-WALKS THE CHRONICLE FOR PEN AUTHORITY.**
+- [ ] **R16 — `mesh::walk` RE-walks the chronicle for pen authority.**
   `mesh/src/lib.rs:234`, called from `:267`, `:280`, `:308` — each a
   full pass to learn who holds the pen. Cheap now (measured inside a
   3.7 µs `pen_service`), listed for completeness so it is not
   rediscovered later. `[READ]`
 
-## §6 THE CARTESIAN PRODUCTS OVER THE ROSTER
+## §6 The cartesian products over the roster
 
-- [ ] **R17 — `merchant_step` IS A TRIPLE LOOP OVER WORLDS, O(W³).**
+- [ ] **R17 — `merchant_step` is A triple loop over worlds, O(W³).**
   `conductor/src/lib.rs:1445`, loops at `:1453` / `:1457` / `:1461`.
   At 44 worlds that is 85,184 cells per beat. Measured 60.6 ms at 33
   worlds — 4 % today, and it is **cubic**, so it overtakes everything
@@ -325,14 +325,14 @@ The space, measured from the source:
      offer by `(give, want)` once per beat — O(W) — and complementary
      pairs are *found*, never swept. Most beats have none. `[MEASURED]`
 
-- [ ] **R18 — `market_step` IS O(W² × offers²).**
+- [ ] **R18 — `market_step` is O(W² × offers²).**
   `conductor/src/lib.rs:285`; pair loops at `:316-317`, offer loops at
   `:330-331`, and it calls the **mutating** `clear_trade` on every
   combination to discover whether it was viable — operating on every
   potential of every potential, literally. Cheap today (1.5 ms) purely
   because books are short. Same index cure as R17. `[MEASURED]`
 
-## §7 NOT A REMEDIATION — these are already right
+## §7 Not A remediation — these are already right
 
 Recorded so they are not "fixed" by a later reader:
 
@@ -340,7 +340,7 @@ Recorded so they are not "fixed" by a later reader:
   (`rfa-core/src/fold.rs:205`) sweeps operators and is **prover-side
   by construction**; the judge calls `verify_orbit_witness` (`:239`),
   O(step), no search. This is the house pattern (`solver` /
-  `solver-verify`) correctly applied. PICKUP §8a's altitude correction
+  `solver-verify`) correctly applied. Pickup §8a's altitude correction
   is satisfied in the code.
 - **The #41 shear cursor** (`cfe/src/world/survey.rs`) is a correct
   incremental sweep with a pruned window. R13 is about its abandoned
@@ -352,7 +352,7 @@ Recorded so they are not "fixed" by a later reader:
   what makes the forge replayable. R1–R4 change what a candidate
   costs, never what counts as one.
 
-## §8 THE CAVEAT — WITHDRAWN ON EVIDENCE 2026-08-02
+## §8 The caveat — withdrawn on evidence 2026-08-02
 
 **This section originally read: "This is a proof-of-work system. R1–R5
 make the forge cheaper, and the forge is the work" — and concluded that
@@ -372,7 +372,7 @@ law); the correction and its evidence are `docs/FORGE_REMEDIATION.md`
   per world per beat** and mints at most once, so a faster search
   yields the same solve sooner, never more solves.
 
-- [x] **R19 — STRUCK.** There is no forge-cost ruling to wait on.
+- [x] **R19 — struck.** There is no forge-cost ruling to wait on.
   R1, R3, R4 and R5 are **unblocked** and sequenced in
   `FORGE_REMEDIATION.md` §4; R2 is held for the `from_key` wiring at
   N6 on its own (small) merits. Ruling Box 1 still governs the
@@ -383,7 +383,7 @@ law); the correction and its evidence are `docs/FORGE_REMEDIATION.md`
   overhead around the work, and none of them need a ruling. That part
   of the original reading stands.
 
-## §9 CROSS-LANE ALIGNMENT — verified 2026-08-02
+## §9 Cross-lane alignment — verified 2026-08-02
 
 `git worktree list` plus `main..<branch>` this session:
 
@@ -400,7 +400,7 @@ law); the correction and its evidence are `docs/FORGE_REMEDIATION.md`
 integration":** not directly, and that is mostly correct division of
 labour — but three things need saying.
 
-1. **R6 AND `kernel-lane` #30 ARE THE SAME REFACTOR.** `kernel-lane`
+1. **R6 and `kernel-lane` #30 are the same refactor.** `kernel-lane`
    reverted P3 at `df48786` after it exposed a live/replay divergence:
    *"the transition is defined twice, in replay's 113 arms and in the
    live proposer, and they agree only while the shared rules stay
@@ -410,48 +410,48 @@ labour — but three things need saying.
    and a cost debt. This lane must not design a second one — R6 rides
    11a. Relay owed to `kernel-lane`.
 
-2. **FOUR LANES ARE 18–19 COMMITS BEHIND `main`, and `kernel-lane` is
+2. **Four lanes are 18–19 commits behind `main`, and `kernel-lane` is
    19/19 diverged.** That is the largest integration risk on the board
    and it is nobody's assigned task. `capacity-lane` is already gating
    its own §6a on kernel #30, so the coupling is live, not theoretical.
 
-3. **VOCABULARY COLLISION — "peel" now names two different things.**
+3. **Vocabulary collision — "peel" now names two different things.**
    `lens-lane` landed `THE PEEL — magnification is a depth` (`4af07c5`),
    a display/magnification concept. `cfe::world::peel` is the
    data-access idiom in R9. Both are legitimate; the collision should
    be recorded before a third reader merges them by name.
 
-## §10 PICKUP CORRECTIONS — verified against the code this session
+## §10 Pickup corrections — verified against the code this session
 
-PICKUP §8 is dated 2026-08-01 and three of its load-bearing claims have
+Pickup §8 is dated 2026-08-01 and three of its load-bearing claims have
 been overtaken. Corrections are carried into `PICKUP.md` §8a/§8b
 alongside this file.
 
 - **§8a "The judge does not judge. Nothing in production calls
-  `lawful`." — NOW FALSE.** `kernel::well_formed` is called in production at
+  `lawful`." — Now false.** `kernel::well_formed` is called in production at
   `conductor/src/lib.rs:1380`, per deed, every beat, with refusals
   collected into `self.refused`. `[READ]`
-- **§8a "`engine/rfa-core` has ZERO dependents." — NOW FALSE.** Two
+- **§8a "`engine/rfa-core` has zero dependents." — Now false.** Two
   crates depend on it: `kernel` (`engine/kernel/Cargo.toml:18`) and
   `solver` (`engine/solver/Cargo.toml:12`). `[READ]`
-- **§8a's real remainder STANDS, and should be restated narrowly:**
+- **§8a's real remainder stands, and should be restated narrowly:**
   `mesh::arbor::extend` is still passed `None` at
   `conductor/src/lib.rs:1403`, so every commitment is still stamped
   `judged = false`. The judge now runs **beside** the chain, not
   **inside** it. The Phase-3 flip is genuinely open; the sweeping
   version of the claim is not. `[READ]`
-- **§8b's codec entry is STALE.** It reports `SCHEMA_V2` half-sealed
+- **§8b's codec entry is stale.** It reports `SCHEMA_V2` half-sealed
   while `state_bytes` emits v2. `state_bytes` emits `SCHEMA_V3`
   (`codec/src/lib.rs:68`) and v1/v2/v3 all decode (`:320`). The
   lingering item is only the `CODER-04 TO RATIFY` comment still
   attached to V2 at `:37`. `[READ]`
-- **§8e's duplicate `constellation` key is CONFIRMED STILL LIVE** —
+- **§8e's duplicate `constellation` key is confirmed still live** —
   `lens/src/render.rs:121` and `:204` both emit the key into the same
   object. `[READ]`
 
 ---
 
-## R20 — THE DIAL DEBT, MAPPED (2026-08-12, kernel lane) `[MEASURED]`
+## R20 — The dial debt, mapped (2026-08-12, kernel lane) `[MEASURED]`
 
 `tuned_constant_ratchet` is red on `main`: **170** tuned ratio
 literals against the **112** ceiling — 58 dials entered during the
@@ -469,8 +469,8 @@ Measured per file (census parser identical to the ratchet's own):
 | 22 | fifteen files, ≤ 4 each | long tail |
 
 **Sequencing (proposed, not begun):** (1) `parameter.rs` seeds —
-these are ALREADY the chartered-parameter mechanism's seed values;
-they likely convert to APPROVED-SEED or anchor citations by one
+these are already the chartered-parameter mechanism's seed values;
+they likely convert to approved-seed or anchor citations by one
 operator word (the polities.rs precedent). (2) `taxon_economy.rs` +
 `vocabulary.rs` — balance choices; need either measured anchors from
 live-board play or an operator approval marker. (3) `dop.rs` — the
@@ -484,23 +484,23 @@ already named in BALANCE_NOTES.
 is laundering, which the census exists to bar. Each conversion needs
 its justification in the commit that lowers the ceiling.
 
-### R20 UPDATE (2026-08-12) — the parameter seeds sealed (7 retired)
+### R20 Update (2026-08-12) — the parameter seeds sealed (7 retired)
 
 Task #3 advanced: the seven `parameter::seed` values (Encasement
 throughput, radiator base, joule leak, heating/zone, sink throughput,
-friction rate, veil toll) moved from the OPEN-DIAL census to the
-SEALED class. They earned it, provably: each is the epoch-0 value every
+friction rate, veil toll) moved from the open-dial census to the
+sealed class. They earned it, provably: each is the epoch-0 value every
 pre-charter beat read, so editing one recomputes every old chronicle's
 heat — breaking SEAL B. Their lawful movement is a receipted
 `ParameterChartered` deed (P2, tag 103), never an edit. That is the
-SEALED-RATE property, not tuning.
+sealed-rate property, not tuning.
 
 Live dial count **170 → 163**; sealed-class pin **3 → 10**. The ratchet
-stays RED (163 > 112 ceiling): the remaining **51 excess dials** are
-the BALANCE clusters — `dop.rs` (zone economics · yields · refinement ·
+stays red (163 > 112 ceiling): the remaining **51 excess dials** are
+the balance clusters — `dop.rs` (zone economics · yields · refinement ·
 endowments), `vocabulary.rs` (practice bindings), conductor thresholds
 — whose conversion needs measured anchors or operator approval per
 cluster. Deriving them by fiat is the laundering the census bars, so
 they wait on rulings. The next free move is `dop.rs`'s endowment kit
-(a candidate APPROVED-SEED class like the founding roster) — one
+(a candidate approved-seed class like the founding roster) — one
 operator word, the polities.rs precedent.

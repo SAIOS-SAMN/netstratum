@@ -1,18 +1,18 @@
-# 79 — Quantum in netstratum
+# 79 — Quantum in Netstratum
 
-Operator (2026-10-13): netstratum has no quantum layer; it should have one,
+Operator (2026-10-13): Netstratum has no quantum layer; it should have one,
 defined so it fits the physics, built from the physics and not from what has
-been stated elsewhere. The universe answers to its ANNALS, not to replay
+been stated elsewhere. The universe answers to its annals, not to replay
 exactness. The operator's hypothesis, unproven and labelled so: the
 singularity's bounce is quantum torsion, compactified in a Calabi–Yau
 manifold.
 
 Status: scoped 2026-10-13; not built. It belongs to era 1 (docs/78). Time
-is docs/80's: a measurement is an EVENT on the map (a place and its cosmic
+is docs/80's: a measurement is an event on the map (a place and its cosmic
 time); the hidden phase is read there; the annals record its map coordinate
 and the observer's proper time. The singularity's bounce, which drives this
 layer, keeps the universe's own cosmic time (its returns). Per mycelium's
-ruling (78.152d, docs/80) there is no quantum lane: the universe's LEDGER
+ruling (78.152d, docs/80) there is no quantum lane: the universe's ledger
 entry (sub-kind 12) already pairs its cosmic time u with the TUniversal
 point, and will carry the torsion's exact coordinates and the measurement
 count n as an optional trailing field (superseding commit 821841cf); the
@@ -83,22 +83,22 @@ court re-derives the phase advance from them.
   time is the generator's product raised to that span, read at t. No
   stepping (circuitry, docs/78).
 - **Outcome weights** are read from the geometry: the weight of mode i is
-  LINEAR in the cosine of the state's geodesic angle to it,
+  linear in the cosine of the state's geodesic angle to it,
 
       w_i = (1 + cos β_i) / 2,
 
   rational, the weights together summing to one. This is the Born rule read
   geometrically, as the curved state space's own transition measure, not as
-  an amplitude squared in a flat space. It is netstratum's physics, recorded
+  an amplitude squared in a flat space. It is Netstratum's physics, recorded
   as such.
 - **Entanglement.** Two systems' joint state is a point of the curved state
   space over the product of their modes; it is entangled when it is not a
   product of two states. Exact, and decidable on rationals.
 - **Measurement is an annal event.** When a quantum system's modes couple to a
   macroscopic record (a mind's reading, an instrument, a world's chemistry, a
-  body's surface), ONE outcome happens and is written into the annals.
-  - **The hidden variable:** `u ∈ [0, 1)`, rational, in turns: the TORSION
-    ENCLOSED `Φ` by the anchor-closed loop through the event (docs/81: a
+  body's surface), one outcome happens and is written into the annals.
+  - **The hidden variable:** `u ∈ [0, 1)`, rational, in turns: the torsion
+    enclosed `Φ` by the anchor-closed loop through the event (docs/81: a
     loop's holonomy is `W + Φ`, W its windings, Φ its enclosed torsion). It
     is deterministic, set by the bounce's torsion, and unreadable from
     inside the universe. One equation joins the quantum layer to coherence.
@@ -148,7 +148,7 @@ lands; the phases of every turning come up from here, never drawn.
 
 ## Build order and done-when (the live log, before → after)
 
-Within era 1 (docs/78), after its geometry library (mycelium A1).
+Within era 1 (docs/78), after its geometry library (Mycelium A1).
 
 1. **States and evolution.** Rational mode-sphere points and reflection
    rotations, exact.
@@ -179,7 +179,7 @@ Within era 1 (docs/78), after its geometry library (mycelium A1).
   deterministically and unreadably from inside, and the annals keep it;
   nothing is replayed. Minds are not special in measurement.
 - **Toward cognition (direction, not yet built).** The quantum state between
-  a star and a mind is to be the FUEL of cognition: the star's spin and
+  a star and a mind is to be the fuel of cognition: the star's spin and
   magnetism pull on its local minds. A mind thinks on the coupling its star
   gives it. Not designed yet; every law built now must leave room for it
   (a star's spin and field are carried, not discarded).
@@ -203,13 +203,13 @@ a turn, frozen for all time: a placeholder. Its physical meaning:
   Einstein–Cartan bounce: a heavier disk, a harder bounce, a stronger bell.
 - **The tilt is the torsion.** The dipole's axis leans from the core's spin
   axis, and the lean turns (precesses). The torsion at any moment is that
-  lean, so the galaxy's torsion phase is a TURNING, not a number:
+  lean, so the galaxy's torsion phase is a turning, not a number:
   `tilt(t) = tilt₀ + t · ω_precession` (closed form, design law 5), and the
   hidden phase reads `u = frac(tilt(t) + b / P_world)`. The disk's matter
   (accretion; the breath's shedding and births) moves the precession, so a
   galaxy's chance follows its singularity's disk.
 
-Owed, in angles and turns (with xylarium; the bells and EC torsion are
+Owed, in angles and turns (with Xylarium; the bells and EC torsion are
 shared library laws):
 
 1. **The disk's mass** from the bounce's hold (already owed for formation,
@@ -222,31 +222,31 @@ shared library laws):
 4. **The propulsion:** how the disk's holding sets the bounce's strength
    (the galactic bounce strength, docs/83).
 
-### The split and the draft forms (with xylarium, 2026-10-15; proposals, not built)
+### The split and the draft forms (with Xylarium, 2026-10-15; proposals, not built)
 
-- **xylarium (2, 4):** the combined turning `K = K_core + K_disc`
+- **Xylarium (2, 4):** the combined turning `K = K_core + K_disc`
   (holding-weighted bivectors); the lobes are K's two hemispheres, the main
-  attractor on K's dual axis; THE LEAN held as `(a·b, a∧b)` (a the core's
+  attractor on K's dual axis; the lean held as `(a·b, a∧b)` (a the core's
   spin axis, b the dipole's), no norm, no root. Propulsion per ring is the
   disc's deficit share `H_disc / (H_core + H_disc)`; the bell's pitch is
   read from K (replacing their `M^(1/3)`), the Kerr spin read, not drawn.
-- **netstratum (1, 3), drafts:**
-  - THE DISC: each nucleus is HELD where its hold against the core's
+- **Netstratum (1, 3), drafts:**
+  - The disc: each nucleus is held where its hold against the core's
     deficit outweighs the push, `h·δ(<) ≥ p`; walked by hold, heaviest
     first, each held element raises both δ and p, and the walk stops at the
     first the disc cannot hold: the disc's mass is the self-consistent
     balance of its propulsion and its holding. Lighter elements are the
     galaxy's gas; what no core holds is intergalactic.
-  - THE PRECESSION: the lean turns about the core's axis at the disc's own
+  - The precession: the lean turns about the core's axis at the disc's own
     deficit at its reach, `H_disc / (R_disc + H_disc)` turns per received
     ring (a compact disc precesses faster); the starting lean from the held
     elements' unpaired senses summed into K_disc's plane. No draw.
-- **Reviewed by xylarium (2026-10-15):** the precession form agreed (it
+- **Reviewed by Xylarium (2026-10-15):** the precession form agreed (it
   keeps the tilt separate from the bell's strength). The walk gains a first
-  stop, from their operator's formation model: THE CORE comes first,
+  stop, from their operator's formation model: the core comes first,
   filled heaviest-first until its holding equals its reach (`R = H`, deficit
   ½, where the clock runs at half: the inbound and outbound shares equal);
-  the disc walk then starts from the core's holding. OPEN: what fixes the
+  the disc walk then starts from the core's holding. Open: what fixes the
   core's reach (a throat of one light-ring would hold almost nothing; the
   reach must come from the bounce, not a choice). Build checks: each disc's
   ledger carries `K_disc`, so accretion and shedding move the precession
@@ -257,8 +257,8 @@ shared library laws):
 
 - ~~What is quantum; coupling~~: ruled 2026-10-14 (below).
 - **The vacuum** (answered in part, operator 2026-10-15): the vacuum is the
-  BLACK face of the throat ring (S^1 at d = 1; its faces an S^0), the
-  continuum its WHITE face inside it (docs/78, "The bounce on S^1"). Still
+  black face of the throat ring (S^1 at d = 1; its faces an S^0), the
+  continuum its white face inside it (docs/78, "The bounce on S^1"). Still
   open below: the compact manifold's integers.
 - **The vacuum's integers.** The compact manifold's integers for era 1: chosen once, by
   whom (the operator, or derived from the Big Bang's seed)? The same choice

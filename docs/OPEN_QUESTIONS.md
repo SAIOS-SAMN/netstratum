@@ -1,11 +1,11 @@
-# OPEN QUESTIONS — unresolved research vectors
+# Open questions — unresolved research vectors
 
-**Status:** RESEARCH / NOT LAW. Everything here is an *open* direction,
+**Status:** research / not law. Everything here is an *open* direction,
 recorded so a good idea is not lost and a rejected one is not silently
 revived as if settled. Nothing in this file is inscribed law; a vector leaves
 this file only by landing under the BUILD_ORDER process, or by being formally
 closed with its verdict. If a proposal here conflicts with an inscribed law
-(CHARTER, the SEALs, an NS spec), the inscribed law wins until a landing says
+(Charter, the SEALs, an NS spec), the inscribed law wins until a landing says
 otherwise.
 
 ---
@@ -21,11 +21,11 @@ itself the Proof-of-Useful-Work. Settlement proofs would be "holonomy /
 sheaf-cohomology" checks over sector boundaries instead of succinct proofs
 over a trace.
 
-**Verdict: REJECTED as an architecture replacement; kernels salvaged
+**Verdict: rejected as an architecture replacement; kernels salvaged
 elsewhere.** It cannot replace the inscribed stack, for reasons that are
 load-bearing, not tunable:
 
-1. **GPU float breaks exact-rational determinism (CHARTER §3.2) and SEAL B.**
+1. **GPU float breaks exact-rational determinism (Charter §3.2) and SEAL B.**
    IEEE-754 addition is not associative; two GPUs — or two schedules on one
    GPU — diverge in rounding. That is fatal to bit-exact cross-node replay.
    "Spectral rational grids (Chebyshev/Fourier over integer fields)" is
@@ -59,7 +59,7 @@ load-bearing, not tunable:
   standard and already the spirit of NS-5. Kept as engineering, not as
   "holography" or free consensus.
 - Succinct settlement proofs over exact-rational inequalities (`A/B ≥ C/D`) via a
-  real STARK / multilinear prover (Lasso, Jolt, HyperPlonk) — inscribed at
+  real stark / multilinear prover (Lasso, Jolt, HyperPlonk) — inscribed at
   `05_THERMAL_BALANCE.md` §7.3 as the buildable version of the "topological
   proof" idea.
 
@@ -79,11 +79,11 @@ recorded so a flat "no" doesn't bury a good tuning lever.
 
 1. **Passive sink minting — reopened by distinction.** `radiator_base`
    is already a passive, ungated sink (every orb self-cools; landed in
-   THERMAL-1). What stays EARNED is *bankable/exportable* capacity
+   THERMAL-1). What stays earned is *bankable/exportable* capacity
    (`S_cool`). Baseline passive, tradeable earned. Reopen trigger:
    balance shows the cold start too punishing without a baseline.
 2. **Banked-store decay — reopenable as receipted demurrage.** Banked
-   state never mutates silently (SEAL B), but decay MAY accumulate as
+   state never mutates silently (SEAL B), but decay may accumulate as
    workspace and settle in one receipt at collect/transfer (the
    VentSettled shape), or be held off by storage upkeep. Reopen trigger:
    balance wants banked joules not to be a free eternal store outside
@@ -106,7 +106,7 @@ terminology rulings (charter §8); section numbering (mechanical).
 morphodynamics" so that love, compassion, morality, and integrity live as
 continuous unitary field transformations over civilization state.
 
-**Verdict: REJECTED as an engine change; the four concepts landed instead
+**Verdict: rejected as an engine change; the four concepts landed instead
 as the measured dual cohesion ledger** (`09_IDEOLOGY.md`; implementation
 on the ideology board, BUILD_ORDER §3). Two load-bearing walls, the Q1
 verdict's shape:
@@ -114,7 +114,7 @@ verdict's shape:
 1. **The determinism hazard.** Continuous/unitary transforms imply
    floating-point field dynamics; IEEE-754 arithmetic is not associative
    and diverges across CPU/GPU architectures and schedules — fatal to the
-   no-float law (CHARTER §3.2) and to SEAL B byte-exact replay, exactly
+   no-float law (Charter §3.2) and to SEAL B byte-exact replay, exactly
    as Q1's GPU holonomy was.
 2. **The subjectivity hazard.** There is no deterministic CFE transition
    function for "love" as a continuous field that is not invented,
@@ -127,7 +127,7 @@ as real entropy riding the landed VENT-1 machinery (09 §3.2); ideology
 export as ordinary covenant state machines (09 §3.3).
 
 **Addendum — the terminology resolution (operator ruling, 2026-07-29).**
-The reopening path below was taken, and the vector is RESOLVED without
+The reopening path below was taken, and the vector is resolved without
 re-litigating the verdict: "unitary" stays rejected (continuous unitary
 transforms imply float operator arithmetic — wall 1 stands), but
 **morphodynamics is admitted in discrete form** as **Discrete Gauge
@@ -140,7 +140,7 @@ crossing) — the full law is `12_UNION.md` §6. The torsion is structural,
 never a continuous field equation; no float leakage, SEAL B intact.
 
 **What could reopen this vector, honestly:** an exact-rational, replayable
-DISCRETE dynamic — richer covenant state machines, exact-rational policy
+discrete dynamic — richer covenant state machines, exact-rational policy
 evolution rules — at which point it is no longer "morphodynamics", just
 more CFE state machinery under the existing laws. For genuinely continuous
 fields, the same door as Q1: a deterministic exact-arithmetic path plus
@@ -161,11 +161,11 @@ carries its lawful way back in.
    posting weighs all resources at 1 (`commensurate_weight`, the 09 §1
    placeholder). Reopen trigger: balance shows book-gaming by cheap
    resources (a diamond gift and an iron gift posting equal compassion).
-   The table stays exact-rational and lands as a ruleset revision, LAW
+   The table stays exact-rational and lands as a ruleset revision, law
    for replay under a version bump — never a silent retune.
 2. **Recency weighting on the books.** The eight counters are cumulative
    forever; an ancient breach never fades. Reopen path: per-era or
-   windowed READINGS derived at the observer (the derived-never-stored
+   windowed readings derived at the observer (the derived-never-stored
    law holds — the counters stay cumulative; only the reading windows).
    Reopen trigger: balance wants redemption arcs.
 3. **Civilization-scoped composition and the universe audit.** The books
@@ -187,15 +187,15 @@ carries its lawful way back in.
    (10 §5). Nothing to reopen here; the pointer closes the loop opened
    at the VENT-1 landing.
 6. **The journal reads the books.** The Chronicle Feed (08) may now
-   read the landed cohesion counters and friction receipts LENS-SIDE
+   read the landed cohesion counters and friction receipts lens-side
    under its lens law (09 §6; MIRROR/ANTI-MIRROR deprecated, 12 §2c) —
-   a JOURNAL follow-on for the coder node, by relay.
+   a journal follow-on for the coder node, by relay.
 
 ---
 
-## Q5. "CONVERGED" carries two opposite meanings across lanes
+## Q5. "Converged" carries two opposite meanings across lanes
 
-**Raised by the lens lane, 2026-08-02, as a RELAY — not a proposal to
+**Raised by the lens lane, 2026-08-02, as a relay — not a proposal to
 rename anything.** Recorded here so the collision is visible before it
 produces a real defect, and so the lens lane's own handling of it is not
 mistaken for a ruling on anyone else's.
@@ -229,7 +229,7 @@ deletion.
 
 The trap is not the two spellings. It is that the naive reading of
 "converged" — *it has settled, it stopped moving* — names the arm of
-`Motion` that is explicitly **NOT** the converging one:
+`Motion` that is explicitly **not** the converging one:
 
 ```text
     Motion::Diverging { by }    sources — outward
@@ -237,7 +237,7 @@ The trap is not the two spellings. It is that the naive reading of
     Motion::Still               nothing moved
 ```
 
-A volume that stopped is `Still`. A volume that is CONVERGING is in
+A volume that stopped is `Still`. A volume that is converging is in
 motion. Anyone carrying sense 1's intuition into a lens reading will
 read `Still` as "converged" and `Converging` as "finishing", and both
 are wrong.
@@ -257,19 +257,19 @@ lens's own vocabulary and reach nothing in `ledger` or `conductor`.
 
 **Rename nothing.** Specifically:
 
-- **CONVERGE-1 should NOT be renamed.** It is landed law with its own
+- **CONVERGE-1 should not be renamed.** It is landed law with its own
   spec document and ~100 call sites, and the cost of touching it is
   enormously larger than the confusion it causes. The word is also
   correct in its own domain: timelines genuinely do converge onto one
   axis, and that convergence genuinely does complete.
-- **`Motion::Converging` should NOT be renamed.** The Diverging/Converging
+- **`Motion::Converging` should not be renamed.** The Diverging/Converging
   pair was ruled directly by the operator (*"invert to convergence"*,
   2026-08-02) and deliberately mirrors `Flux { sources, sinks }` in
   `rfa-core::capacity`. Renaming it would break the parallel that
   correction was made to create.
 
 Two correct uses of one word in two domains is not a defect. **The
-defect would be a THIRD use that conflates them**, and that is what this
+defect would be a third use that conflates them**, and that is what this
 entry exists to prevent.
 
 ### The open question, addressed to the ledger and conductor lanes
@@ -294,13 +294,13 @@ Not law until ruled and landed — except **coded defaults** below.
 
 | ID | Question | Default / land status |
 |----|----------|------------------------|
-| **Q-T1** | Seat widths for T4–T9 per domain? | **CODED Wave-1:** 16 for T4–T8; T9 unbounded |
-| **Q-T2** | Is T5 Crucible **required** to build ElementRefinery, or only advantaged? | **CODED Wave-1:** advantage only; zone needs DEEPENING |
+| **Q-T1** | Seat widths for T4–T9 per domain? | **Coded Wave-1:** 16 for T4–T8; T9 unbounded |
+| **Q-T2** | Is T5 Crucible **required** to build ElementRefinery, or only advantaged? | **Coded Wave-1:** advantage only; zone needs deepening |
 | **Q-R1** | Must R3 require a live strand process, or sealed strand receipt file offline? | Sealed receipt file OK for offline demo — *open* |
 | **Q-R2** | STAMP mint schedule: crystal-only convert vs multi-collateral? | Crystal convert + Vault Notes against elements — *open* |
 | **Q-S1** | Crystal→STAMP conversion curve? | Placeholder linear at landing; **ratchet forbids undervied dials** — derive/mint at S4.2 |
 | **Q-S2** | Demurrage on unbacked STAMP on/off? | Off in v1 — *open* |
-| **Q-S3** | Migrate FORWARD-1 into Note or keep parallel? | **CODED Phase-4:** parallel (Notes landed; Bond/Forward stay) |
+| **Q-S3** | Migrate FORWARD-1 into Note or keep parallel? | **Coded Phase-4:** parallel (Notes landed; Bond/Forward stay) |
 | **Q-S4** | Minimum clears before a perp index lists? | N=8 clears in window — *open*; Perp opens on last-clear in v1 |
 
 ---
@@ -316,7 +316,7 @@ Recorded from `36_DEFENSE_AXIOMS.md`. Not law until ruled and landed.
 | **Q-D3** | Plasmic ATM medium? | Compose thermal + optional field TLV |
 | **Q-D4** | Espionage vs veiled cost? | Compose VeilToll |
 | **Q-D5** | Escort risk vs pair_melt? | Separate typed residual (not melt rewrite) |
-| **Q-D6** | Elder as combat? | Keep WARDEN puzzle-only (no combat) |
+| **Q-D6** | Elder as combat? | Keep warden puzzle-only (no combat) |
 | **Q-D7** | Digital vs cyber split in wire? | One CYB domain, two sub-channels |
 | **Q-D8** | Clade as mechanic or voice? | Voice + residual priority only (15_TAXON law) |
 | **Q-D9** | MKT as 7th domain vs CYB sub-channel? | **Ruled:** first-class **MKT** domain (`36` §1.3, §10) |
@@ -336,7 +336,7 @@ ship before a full ruling.
 
 | ID | Question | Default if forced early |
 |----|----------|-------------------------|
-| **Q-F1** | θ advance per tick vs year-voice only? | **CODED Phase-2:** year-voice — `ORBIT_PHASE_TICKS = 60` |
+| **Q-F1** | θ advance per tick vs year-voice only? | **Coded Phase-2:** year-voice — `ORBIT_PHASE_TICKS = 60` |
 | **Q-F2** | Hull η stack with route η? | Product of complements (pin Phase 3) |
 | **Q-F3** | Scrap: one pool vs per-resource? | **One scrap pool** from iron/alloy burn v1 |
 | **Q-F4** | Can T3 mint hulls without yard zone? | **Yard required**; office optional advantage |

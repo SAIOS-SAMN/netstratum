@@ -3,9 +3,9 @@
 **Refined by docs/88:** the land is read at the people's latitude on its
 turning world, `u` of T in place of `1 − 2^(−⌊h⌋)` at the mean.
 
-Operator 2026-10-21: "proceed - you may do the derivations" (after the
-600-beat read: every line founded with a band of one, no shipyard, no trade,
-no gate in 600 beats).
+Direction (2026-10-21): proceed with the derivations (after the 600-beat read:
+every line founded with a band of one, no shipyard, no trade, no gate in 600
+beats).
 
 ## What was wrong
 
@@ -23,16 +23,16 @@ band was one and no line could bank a shipyard.
 
 ## The law
 
-docs/82 already states the limit: "what limits a people is ENERGY, its
+docs/82 already states the limit: "what limits a people is energy, its
 star's flux on its world". Step 1 of the ladder already reads that flux:
 a world's heat `T = K/P · burn` is its star's agitation at its radius, a
-flux through a fluid-dimension shell (linear, law 2). A people's MEDIUM
+flux through a fluid-dimension shell (linear, law 2). A people's medium
 (the waking's map: mineral → geologic, biotic → chemical, plasmic →
 plasmic) takes up the share of that flux it carries as pattern. A medium of
 `h` halvings has copy error `2^(−h)`, so it carries `1 − 2^(−⌊h⌋)` (whole
 halvings, erring toward fewer; under one halving it carries nothing, the
 ladder's own threshold). The ruler is the home world, every other reading's
-ruler (heat, size), whose full flux feeds one VIABLE PEOPLE:
+ruler (heat, size), whose full flux feeds one viable people:
 
 ```text
 wild = ⌊ VIABLE_PEOPLE · T · (1 − 2^(−⌊h⌋)) / T_home ⌋      (heads)

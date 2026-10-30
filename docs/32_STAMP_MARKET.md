@@ -1,14 +1,14 @@
 # 32 — STAMP: unit of account, books, and self-sustaining markets
 
-**Status:** PARTIAL LAND — operator directive 2026-08-07. **Wave-4
+**Status:** partial land — operator directive 2026-08-07. **Wave-4
 minimal:** orb STAMP (TLV 73), crystal→STAMP mint (111), apertures
-(112–113), `stamp_market_step` green. **Phase-4 complete:** NOTE · FUT ·
-SHARE · PERP (tags 120–131), SCHEMA_V9, `instrument_step`, desk EXCH,
+(112–113), `stamp_market_step` green. **Phase-4 complete:** note · FUT ·
+share · PERP (tags 120–131), SCHEMA_V9, `instrument_step`, desk EXCH,
 shipwright `HullFinanced`. Establishes an **in-game currency** that is exact-rational,
 receipted, NPC-sustained, and optionally tradeable on **strand / datum /
 isthmus** at R3–R4 (`30_OFFICES_AND_RAILS`). Does not replace crystal
 (PoUW mint medium) or closed carriers (physical law). Does not bill real
-money per tick (`01_ECONOMY` / CHARTER split).
+money per tick (`01_ECONOMY` / Charter split).
 
 **Companion play surface:** interactive desk, fleets, alignment-priced
 routes, and **localized** instrument books — `33_TRADE_FLEET_AND_DESK.md`
@@ -44,7 +44,7 @@ With STAMP:
 
 ## 1. Unit laws
 
-1. **Exact rational only** — numer/denom; no floats (CHARTER).
+1. **Exact rational only** — numer/denom; no floats (Charter).
 2. **Mint is a deed**, never a faucet. Initial sources (§2).
 3. **Conservation in transfer** — STAMP moves by receipt; no silent
    inflation outside ruled mints.
@@ -142,7 +142,7 @@ or per named element family basket).
 | FORWARD-1 covenants | Proto-Note / delivery pact (map carefully) |
 | BOND-1 standing streams | **Not** market Notes — keep separate |
 | MERCHANT-1 caravan | Inventory risk on routes |
-| TREATY war/peace | Gates which books may open |
+| Treaty war/peace | Gates which books may open |
 
 ---
 
@@ -176,7 +176,7 @@ Clearing rules:
 | R1 | World chronicle | Local balances |
 | R2 | Netstratum mesh / aperture | Two-world conserved books |
 | R3 | **strand** | Strand wire instrument / fold-capable claim |
-| R4 | **isthmus** frame + **datum** court | POW++ envelope; multi-axial verify |
+| R4 | **isthmus** frame + **datum** court | PoW++ envelope; multi-axial verify |
 
 ### 5.2 Exit flow (R2 → R3 → R4)
 
@@ -230,7 +230,7 @@ Failure modes that keep the system honest:
 
 - Empty book → no quotes (not infinite spread fantasy).
 - Margin breach → liquidation auction.
-- Route lapse → stranded inventory (MERCHANT risk).
+- Route lapse → stranded inventory (merchant risk).
 - False assay → Note collateral slash.
 
 ---

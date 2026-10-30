@@ -1,10 +1,10 @@
 # 105 — Polarity equilibria: the master equation of a two-pole exchange
 
-Operator 2026-10-28: "you are missing derivable formulas and master equations
-for polarity equilibriums"; "understood - proceed". Builds on docs/104 (the
-inverse duals; §1.1 the count; §1.2 every share a pair share), docs/97 (the
-nucleus), xylarium's founding survival (`elements.rs` `founded`, 11.0 R4: a
-reading relayed 2026-10-28, inverted here through our polarity).
+Design direction (2026-10-28): derive the master equations of the polarity
+equilibria. Builds on docs/104 (the inverse duals; §1.1 the count; §1.2 every
+share a pair share), docs/97 (the nucleus), Xylarium's founding survival
+(`elements.rs` `founded`, 11.0 R4: a reading relayed 2026-10-28, inverted here
+through our polarity).
 
 ## 1. The master equation
 
@@ -24,9 +24,9 @@ passes back:
 
 ## 2. The rates are the faces at the body's own place
 
-Under inverse gravity (docs/104 §0) the HELD share is `g = 1 − δ` and the
-UNLOCKED share `u = δ`, `δ = H/(R + H)` at the body's reach. What BINDS goes at
-the held face's rate, what FREES at the unlocked face's: `α = g`, `β = u`, so
+Under inverse gravity (docs/104 §0) the held share is `g = 1 − δ` and the
+unlocked share `u = δ`, `δ = H/(R + H)` at the body's reach. What binds goes at
+the held face's rate, what frees at the unlocked face's: `α = g`, `β = u`, so
 `x* = g/(g + u) = g`. Never a constant: the rates are where the body stands.
 
 At the throat (`R = H`, the ring) `g = u`: the fixed point, the only place a
@@ -44,11 +44,11 @@ share reads ½, read there and only there (docs/104 §1.2).
 | **push ↔ pull** (where a body settles) | — | — | `u = g`: `δ = ½`, the ring | — |
 
 Phase leaves survival, grip and the electrons' bound share: it stays only
-where xylarium keeps it, heat stripping and decay (its relayed reading).
+where Xylarium keeps it, heat stripping and decay (its relayed reading).
 
 ## 4. The founding, read through it
 
-The bounce's matter crosses at the THROAT, `R = H`, where `g = u` (the fixed
+The bounce's matter crosses at the throat, `R = H`, where `g = u` (the fixed
 point, lawful there). There:
 
 - **The seal window:** deuterium (`κ = 1`) grips `κ·g = g_throat`; its heat
@@ -62,7 +62,7 @@ Xylarium's (c), inverted: its survival `a·h` reads the crossing's carried
 share (the fixed point) and the held share; ours reads the held face at the
 crossing for the lone ends and the fibres' own pairing for the bound ones.
 
-### 4.1 The equilibrium at the core (operator 2026-10-28: "this is still constant: the equilibrium g = ¼"; "do you're adding dimensionality to the originating sphere?"; "yes - strip it and derive the equilibrium at the core")
+### 4.1 The equilibrium at the core (ruling of 2026-10-28: the equilibrium `g = ¼` was still a constant, and the added dimension on the originating sphere is stripped; the equilibrium is derived at the core)
 
 **Why ¼ was a constant.** The window's g read `1 − (1 + g_throat)/ν`, every
 term a fixed point, and the exchange's rates summed to one (`g + u = 1`):
@@ -87,8 +87,8 @@ unlocked face, holding from the outside in):
 
   `G` deuterium's grip at the throat, `κ₂·g_throat` (the fixed point where it
   holds).
-- **The heat at the core:** its push, the pair share of its STATE S against
-  what its THROAT still holds T (docs/104 §1.2): `a = S/(S + T)`. It reads
+- **The heat at the core:** its push, the pair share of its state S against
+  what its throat still holds T (docs/104 §1.2): `a = S/(S + T)`. It reads
   the core, never the composition it sets: no self-reference, no square.
 
 So
@@ -113,7 +113,7 @@ rest following as the throat empties.
 
 ## 5. Build order (each with its witness)
 
-1. **`polarity`** (BUILT): `equilibrium(α, β)`, `after(x₀, α, β, n)`, `faces(δ)` →
+1. **`polarity`** (Built): `equilibrium(α, β)`, `after(x₀, α, β, n)`, `faces(δ)` →
    `(g, u)`. Witness: conserved; the equilibrium is a fixed point of the
    ring; the closed form at N and 4N agrees with stepping.
 2. **The nucleons' exchange** on it. Witness: nucleons conserved; the
@@ -122,7 +122,7 @@ rest following as the throat empties.
    place (`nuclides`); every caller passes its place's `g`. Witness: the
    seals keep every capture; survival rises with `g`; at the throat it reads
    the fixed point.
-4. **The founding re-read** (§4; BUILT at the throat, its share ¼ a
+4. **The founding re-read** (§4; built at the throat, its share ¼ a
    constant). Witness: nucleons conserved; the densest element read, never
    set.
 4a. **The equilibrium at the core** (§4.1): `x*(T) = G/(G + S/(S + T))`,

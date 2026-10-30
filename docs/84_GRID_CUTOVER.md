@@ -1,21 +1,21 @@
 # 84 — The grid cut-over
 
-Operator, 2026-10-20: "we must never lose dimensionality : commit to grid
-cutover and proceed with xylarium". Netstratum leaves every lattice in its
-era-1 state, in parallel with xylarium, under the protocol both shells
-agreed (CONCORDANCE 2.10, nested shells):
+Design direction (2026-10-20): dimensionality is never lost; commit to the
+grid cut-over and proceed with Xylarium. Netstratum leaves every lattice in
+its era-1 state, in parallel with Xylarium, under the protocol both shells
+agreed (concordance 2.10, nested shells):
 
 1. **Freeze.** No new physics on a gridded carrier.
-2. **Forms land in `forms`** (mycelium's innermost shell): `Remaining`
+2. **Forms land in `forms`** (Mycelium's innermost shell): `Remaining`
    (in use), `SPAN` (a certified enclosure of a value, narrowed only where a
    law decides), `TURNING` (a phase as an exact turn toward a Cl(4,1)(ℚ)
    rotor), `READING` (a floor on base b to depth d, for observers only;
-   netstratum's b = 60, d = 6).
+   Netstratum's b = 60, d = 6).
 3. **Each shell cuts over** in dependency order, deleting what it replaces.
 4. **A gate** fails the build on any grid or mark outside the observers and
    `READING`.
 
-No lattice is deleted until SPAN states what a checkpoint stores for
+No lattice is deleted until span states what a checkpoint stores for
 path-dependent state and its size reads bounded at N and 4N echoes. Under
 "never lose dimensionality", detail finer than a tier's places is handed
 down to the tier inside it, never floored away.
@@ -24,20 +24,20 @@ down to the tier inside it, never floored away.
 
 - **Whole nuclei** (`pulse::nucleus`, `pulse::grain`, the burn's pair, the
   coupling's nuclei per amount, recycling's takes): matter is counted in
-  nuclei per Z (CONCORDANCE 1.14), discrete by nature. A count, never a mark.
+  nuclei per Z (concordance 1.14), discrete by nature. A count, never a mark.
 - **Readings**: `reading::sector`, the observers (`observe`, `breathe`,
   the conductor's log), `compound::read` (a reading of the exact
   `Remaining` onto the marks a law lands on).
 - **Identity**: `ring::sector` inside `ring::birth_key` reads a body's birth
   deficit as its key. A key written from a coordinate is a reading
-  (CONCORDANCE A3); it moves to `READING`.
+  (Concordance A3); it moves to `READING`.
 
 ## The inventory, in dependency order
 
 The 60⁻⁶ grain (`ring::grain`) and the merge marks (`flows::PHASE_WIDTH`
 60, `flows::REACH_WIDTH` 360) stand in the state at these places.
 
-### 1. Phases → TURNING
+### 1. Phases → turning
 
 | Where | What is floored |
 |---|---|
@@ -46,7 +46,7 @@ The 60⁻⁶ grain (`ring::grain`) and the merge marks (`flows::PHASE_WIDTH`
 | `pulse.rs` orbit_galaxies | a galaxy's orbit phase (751) |
 | `formation.rs` system, worlds, collisions, merges | world and star phases and bells (1007, 1088, 1343, 1378, 1379) |
 
-### 2. Reach, spin and place → SPAN (path-dependent)
+### 2. Reach, spin and place → span (path-dependent)
 
 | Where | What is floored |
 |---|---|
@@ -60,7 +60,7 @@ The 60⁻⁶ grain (`ring::grain`) and the merge marks (`flows::PHASE_WIDTH`
 The spin ledger's grain remainders (returned to `medium_spin` and the
 core's reservoir) go with them: an exact spin leaves no remainder.
 
-### 3. Agitation, heat and held shares → SPAN
+### 3. Agitation, heat and held shares → span
 
 | Where | What is floored |
 |---|---|
@@ -73,7 +73,7 @@ core's reservoir) go with them: an exact spin leaves no remainder.
 ### 4. Derived shares read on the grain before a law → closed forms
 
 Each is a closed form of state already held; it is read at the width its
-decision needs (a SPAN evaluation), never stored on the grain.
+decision needs (a span evaluation), never stored on the grain.
 
 | Where | What is floored |
 |---|---|
@@ -85,12 +85,12 @@ decision needs (a SPAN evaluation), never stored on the grain.
 | `formation.rs` | a world's hold share (893) |
 
 `pulse.rs` 539 floors a bead's spread at 60⁻⁶ to keep a density finite: an
-invented floor (MU-RECURSION rule 11), to be refused or derived, not carried.
+invented floor (MU-recursion rule 11), to be refused or derived, not carried.
 
 ### 5. Merging → the encounter law at the mote tier
 
 `flows::merge` keys motes by kind, stream and 60/360 marks. It is replaced
-by the encounter law (with xylarium): two motes are one where their own
+by the encounter law (with Xylarium): two motes are one where their own
 spreads overlap in every plane (each reach band `R(1 ± s)` within the
 other's, each turning within the other's spread by `in_step` over their own
 extents) and their contrast falls within their grip. It is read by peeling

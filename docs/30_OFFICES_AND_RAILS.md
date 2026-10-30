@@ -1,8 +1,8 @@
-# 30 — OFFICES AND RAILS: T4–T9 and R1–R4
+# 30 — Offices and rails: T4–T9 and R1–R4
 
-**Status:** PARTIAL LAND — operator directive 2026-08-07; **Wave-1
+**Status:** partial land — operator directive 2026-08-07; **Wave-1
 `2109bf0`** opened the T-line (stations T4–T9, seat widths, ascend
-preconditions, pure-NPC seats to T4/T6). **R-line still DESIGN.** Does
+preconditions, pure-NPC seats to T4/T6). **R-line still design.** Does
 **not** overturn the ruling that **progenitors are the top** (T0 creates
 the board). Higher **numbers** on the T-line are **deeper function
 bands**, not higher rank. The R-line is a **separate ladder** (settlement
@@ -110,9 +110,9 @@ SEAL B.
 | Rail | Voice name | Reach | Settlement truth |
 |------|------------|-------|------------------|
 | **R1** | **Hearth Rail** | Single world chronicle | Replay of that world alone |
-| **R2** | **Aperture Rail** | Cross-world, same netstratum mesh | Two-book aperture / treaty; pair conservation |
+| **R2** | **Aperture Rail** | Cross-world, same Netstratum mesh | Two-book aperture / treaty; pair conservation |
 | **R3** | **Strand Rail** | Xylarium **strand** tollway | Strand wire + lith fold; domain mesh receipts |
-| **R4** | **Court Rail** | **Isthmus** carrier + **datum** authority | POW++ multi-axial close; deed-priced space |
+| **R4** | **Court Rail** | **Isthmus** carrier + **datum** authority | PoW++ multi-axial close; deed-priced space |
 
 ```
   world deeds ──R1──► aperture/treaty ──R2──► strand tollway ──R3──► isthmus/datum ──R4
@@ -128,7 +128,7 @@ SEAL B.
 3. **Demotion is allowed** (R3→R2) with a typed residual; promotion is
    never free.
 4. **R4 is not “more points.”** It is the only altitude at which
-   *foreign* kernels can verify without importing netstratum. That is
+   *foreign* kernels can verify without importing Netstratum. That is
    why isthmus stays path-dependency-free and datum stays the bench.
 5. **NPCs must be able to live entirely on R1–R2** so the game is fun
    offline from strand/datum. R3–R4 are **expansions**, not gates to
@@ -180,7 +180,7 @@ stripped of basic economy.
 ## 6. Explicit non-goals
 
 - T4–T9 as a power ladder above T0.
-- Paying real-world money per tick (CHARTER / 01_ECONOMY split stands).
+- Paying real-world money per tick (Charter / 01_ECONOMY split stands).
 - Forcing strand/datum online for local play.
 - Renaming ideology **standing bonds** (09) — market debt instruments
   are **Notes** (see 32), not those books.
@@ -193,7 +193,7 @@ Recorded for `OPEN_QUESTIONS.md`:
 
 - Q-T1: **coded default** — T4–T8 width 16; T9 unbounded (`2109bf0`).
 - Q-T2: **coded default** — T5 advantage only; T3 may refine with zone
-  (ElementRefinery gate is DEEPENING, not Crucible seat).
+  (ElementRefinery gate is deepening, not Crucible seat).
 - Q-T1 (historical open): seat widths for T4–T9 per domain.
 - Q-T2 (historical open): whether T5 Crucible is required to build refineries or only
   confers advantage.

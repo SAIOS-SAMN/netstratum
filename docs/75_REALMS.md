@@ -1,8 +1,8 @@
 # 75 — Realms: how stewards' boundaries emerge
 
-Operator (2026-10-13): stewards govern REALMS, the boundaries between
+Operator (2026-10-13): stewards govern realms, the boundaries between
 civilizations, and control diplomacy, trade and sovereign disputes (docs/74,
-the tiered hierarchy). The boundaries must be DERIVED, as emergent as
+the tiered hierarchy). The boundaries must be derived, as emergent as
 possible. Any constant is a placeholder for undefined physics.
 
 ## Facts (read from the code)
@@ -53,7 +53,7 @@ crossed it. Space no network reached belongs to no realm.
    - the progenitors operating it (the builders' lineages of its mapped
      gates).
 
-   A civilization whose use is tied between networks is CONTESTED, a member
+   A civilization whose use is tied between networks is contested, a member
    of none.
 5. **A boundary** is a civilization reached by more than one realm's network
    in the term. The realms meet there; disputes and diplomacy live there.
@@ -68,7 +68,7 @@ it stops.
 ## Open, for the operator: passage over inner-galaxy wormholes
 
 Most live gates run from a galaxy's hub to its own core
-(`from == core`). The hub step routes trade only through gates BETWEEN
+(`from == core`). The hub step routes trade only through gates between
 galaxies (`stamp_market_step`, the gates' roads), so over an inner-galaxy gate
 only envoys pass, and those realms stay nearly empty. What rides an
 inner-galaxy wormhole, and why, is physics not yet defined. The ancients
@@ -83,14 +83,14 @@ Roles are positions read from the physics, never checklists or milestones
 - **No containment rule.** A line's range is what the melt, its technology and
   its hulls allow. A wormhole collapses distance; without one, the physics
   bounds how far a line reaches.
-- **A SOVEREIGN** is the line that controls a system's mass: the one whose
+- **A sovereign** is the line that controls a system's mass: the one whose
   holdings and working of that system's orbs and veins are the greatest,
-  measured from the chronicle. Control of a system's mass is UNDEFINED as
+  measured from the chronicle. Control of a system's mass is undefined as
   physics today (docs/76); it is defined first, then sovereignty is read from
-  it. A line that controls no system is a CAPTAIN: it acts from what it holds
+  it. A line that controls no system is a captain: it acts from what it holds
   and carries.
 - **Stewards are promoted by the progenitors from a realm's sovereigns**
-  (operator ruling), as a DECIDE kind (docs/73), `promote`:
+  (operator ruling), as a decide kind (docs/73), `promote`:
   - rows: the realm's sovereigns;
   - loss: the realm's measured outcomes under that steward (unmet trade,
     contested mass);
@@ -106,7 +106,7 @@ Roles are positions read from the physics, never checklists or milestones
   gravity and temporal resonance is physics to define (docs/76), not a rule
   about ancients.
 
-## What the stewards will decide (later steps, by DECIDE, docs/73)
+## What the stewards will decide (later steps, by decide, docs/73)
 
 - **treaty**: Trade, Peace, Defense or War with a civilization across a
   boundary, or renounce one.
@@ -132,22 +132,22 @@ persistence (docs/73).
    - At each bounce: realms (by core), their members, boundaries, contested
      civilizations and stewards, logged and checkpointed (`realms.bin`).
      Behaviour unchanged.
-   - Done-when: a REALMS line each bounce, no reading → realms, boundaries
+   - Done-when: a realms line each bounce, no reading → realms, boundaries
      and stewards per term.
    - Witness: the contacts agree with the trade steps' logged crossings.
 2. **Control of a system's mass,** defined as physics (with docs/76's other
    undefined rows); then sovereigns read from it and logged per bounce.
    - Done-when: sovereigns per system 0 → > 0, each with its measured
      control.
-3. **promote.** The progenitors' DECIDE kind; the steward seat named per
+3. **promote.** The progenitors' decide kind; the steward seat named per
    realm (a seat for a mind, Concordance 3.8; an in-game mind, not a network
    one, 3.9).
    - Done-when: stewards promoted by progenitors 0 → > 0, each realm's steward
      a sovereign of it.
-4. **treaty**, a DECIDE kind.
+4. **treaty**, a decide kind.
    - Done-when: treaties sealed by stewards 0 → > 0; realms merging or
      splitting along them.
-5. **dispute**, a DECIDE kind.
+5. **dispute**, a decide kind.
    - Done-when: disputes ruled 0 → > 0; recurrence falling.
 
 ## Placeholders, stated plainly

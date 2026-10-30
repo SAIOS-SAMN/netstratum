@@ -1,10 +1,10 @@
 # 101 — One universal core: the universe tier under TUniversal
 
-Operator 2026-10-27/28: "there is no 'step' or 'walk' - and 'deploy' is
-misaligned - the core has machinery that produces the flow - it's fluidity,
-not linearality"; "how does align with TUniversal -- audit your work and
-ensure you dont or arent building flat parallel machinery"; "scope it further
-and look at all machinery affected". Status: SCOPE. Nothing here is built.
+Design direction (2026-10-27/28): the core has no step or walk, and "deploy"
+is misaligned; the core is machinery that produces the flow, which is fluid
+rather than linear. Align the core with TUniversal, audit the work so that no
+flat parallel machinery is built, and scope every piece of machinery affected.
+Status: scope. Nothing here is built.
 
 ## 0. TUniversal, the law this aligns on
 
@@ -17,10 +17,10 @@ and look at all machinery affected". Status: SCOPE. Nothing here is built.
   deepest, the galaxies getting what it pushes out; its disc is the central
   galaxy". The home of §2 is that disc.
 - docs/80 "TUniversal from the singularity": TUniversal's origin is the
-  singularity's bounce; MYCELIUM OWNS TUNIVERSAL; the proposed quantum lane
+  singularity's bounce; Mycelium owns TUniversal; the proposed quantum lane
   carries "the bounce's torsion phase advance" (`quantum::twist`, docs/100
   §2). Any change to the universal clock (`T_u`, §6) is coordinated with
-  mycelium before it is built.
+  Mycelium before it is built.
 - docs/79 (the bounce as compactified quantum torsion), docs/94 §11 (the
   jetstream loop), docs/96 §7 (the enclosure), docs/97 (the nuclides),
   docs/98 (the inverse faces), docs/99 (phases, never frames), docs/100
@@ -66,7 +66,7 @@ returning 0 for it. Nine readings of one state.
 
 ### 1.3 The founding pipeline (linear, before the breath)
 
-`pulse::founding` (nuclides; KEEP) → `pulse::cascade` (shells, stacks, the
+`pulse::founding` (nuclides; keep) → `pulse::cascade` (shells, stacks, the
 filter's passes, beads) → `pulse::deploy` (the whole-mix step; the standing
 test `d·s_final ≤ d·w/(w + inside)`; failed beads poured into the home; slight
 beads into the ocean; `disperse` per core; `unit` = the deepest disc;
@@ -76,7 +76,7 @@ orbits placed in rings). Every remainder of 2026-10-27 lives here.
 ### 1.4 Other "homes"
 
 - `life::home` (`life.rs:252`) and `chronometry::keepers` (`chronometry.rs:84`)
-  choose the core with the HEAVIEST `kept`, not `is_home` (path [0]): a third
+  choose the core with the heaviest `kept`, not `is_home` (path [0]): a third
   definition of home.
 - `places.rs:71` reads the home's held mass as the whole universe.
 
@@ -113,7 +113,7 @@ orbits placed in rings). Every remainder of 2026-10-27 lives here.
 - **Its flows are the ocean** (its filament; vocabulary docs/102): what each universal bounce releases (the
   throat release of `breath`, the same law a galactic core uses), on the
   jetstream loop (outbound along the axis, home through the disc, the Möbius
-  pass, the luminal bound); the ocean frame IS its enclosure.
+  pass, the luminal bound); the ocean frame is its enclosure.
 - **Its satellites are the galaxies; they form, never placed:** the universe
   tier's own mechanism, in the crest's grammar: where the flow on its strip
   holds a bond against its heat and the tide (`crest_collapse`, `band_pairs`

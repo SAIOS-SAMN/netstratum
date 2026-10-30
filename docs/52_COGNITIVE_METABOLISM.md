@@ -1,4 +1,4 @@
-# 52 — THE COGNITIVE METABOLISM
+# 52 — The cognitive metabolism
 
 **How intelligence is fueled by the economy and drives it. Downstream of
 `51_COGNITION` (the Universe/Mind split) and the intelligence arc (`iae`,
@@ -13,17 +13,17 @@ never a destiny.**
 
 ---
 
-## 1. THE MATHEMATICS THAT SETS THE BILL (binding)
+## 1. The mathematics that sets the bill (binding)
 
 Cognition here is exact (doc 51, `iae`): a problem is a measured **obstruction**
 — the irreducible harmonic `H¹` class the civilization has not yet resolved
 (`iae::resolve`, `iae::bridge`). Two things can be done with it, and they cost
 differently:
 
-* **RESOLVE against what it knows** — `bind`/`overlay` the obstruction onto the
+* **Resolve against what it knows** — `bind`/`overlay` the obstruction onto the
   learned vocabulary (`reduce_modulo`, O(n) in the mind's rank). This is
   *thriving on what it has*: cheap, drawing only baseline metabolism.
-* **MINT a new generator** — when the obstruction is irreducible, `condense`
+* **Mint a new generator** — when the obstruction is irreducible, `condense`
   it into a new letter (the Sullivan extension, IAE-6). This is *building new
   knowledge*: expensive, drawing the refined perspective good.
 
@@ -35,19 +35,19 @@ metaphor for the metabolism; it *computes* it: `mint_cost = f(betti, torsion,
 degree)`. The problems a civilization faces set, exactly, the metabolic demand of
 solving them.
 
-## 2. THE TWO-TIER METABOLISM (binding)
+## 2. The two-tier metabolism (binding)
 
 The engine already carries the hierarchy the mind runs on (`cfe::dop`):
 
 * **`metabolic_ration`** — the food/calories a species eats (biotic → biomass,
-  mineral → its element, …). **Tier 1: survival, and BASELINE cognition.** A fed
+  mineral → its element, …). **Tier 1: survival, and baseline cognition.** A fed
   line can resolve against what it knows; a starving line cannot afford a single
   proposer guess.
-* **`metabolic_leisure`** — "the recreation good a line SAVOURS once its calories
+* **`metabolic_leisure`** — "the recreation good a line savours once its calories
   are met," drawn from the REFINED/luxury carriers (mineral → Alloy, plasmic →
-  Crystal, biotic → Diamond). **Tier 2: perspective, and DEEP cognition.** The
+  Crystal, biotic → Diamond). **Tier 2: perspective, and deep cognition.** The
   leisure tier fuels thinking beyond survival — the compose depth a line can hold
-  and, above all, the MINTING of new capability. A line resolves on food; it
+  and, above all, the minting of new capability. A line resolves on food; it
   *creates* on leisure.
 
 Rest completes the tier: the **`Habitat`** (the dwelling, `cfe::dop`) is where a
@@ -56,28 +56,28 @@ energy that thinking spends. Evolution is the discount: the evolution/caste deed
 lower the metabolism spent per unit of thought — an evolved line thinks more on
 less.
 
-## 3. THINKING IS A RECEIPTED DRAW (binding)
+## 3. Thinking is A receipted draw (binding)
 
 The cognitive metabolism is real, not accounting fiction. Every act of cognition
 — a proposer search, a condensation mint — draws its ration/leisure as a
 **receipted, conserved debit**, exactly as a zone draws upkeep, so the kernel
-sees it and `kernel::admits` conserves it. It is gated on TRUE wealth (doc `51`
+sees it and `kernel::admits` conserves it. It is gated on true wealth (doc `51`
 / STAB-6, `banked + accrued`): a line cannot leverage its way to a deep mind any
 more than it can leverage its way to a new orb. **No phantom wealth, no phantom
 intelligence, and now: no free thought.**
 
-## 4. THE DRIVE TO BUILD, AND THE STOCHASTIC CHOICE (binding)
+## 4. The drive to build, and the stochastic choice (binding)
 
 Here is where the metabolism becomes behavior. A civilization facing an
 obstruction it cannot afford to mint is at a fork, and the **Mind (the
 stochastic proposer, doc 51) chooses among the options — it is not told which**:
 
-* **MINT NOW** — pay the leisure cost, if the surplus is there.
-* **BUILD CAPACITY** — invest in the metabolism first: raise extractors (more
+* **Mint now** — pay the leisure cost, if the surplus is there.
+* **Build capacity** — invest in the metabolism first: raise extractors (more
   food), the refinement chain (more leisure), habitats (more rest), orbital
   relays and new orbs (more rank → more depth). Cognitive hunger is the build
   drive; the **workbench is the surface where these options are offered.**
-* **ROUTE AROUND** — the side quests, emergent and optional: **war** to seize
+* **Route around** — the side quests, emergent and optional: **war** to seize
   another line's resources rather than grow its own; **infighting** over a
   scarce surplus; **dogma** — adopt a practice/creed that makes a cheaper,
   constrained vocabulary affordable at the cost of flexibility.
@@ -91,12 +91,12 @@ some raid; some ossify into dogma. **These are emergent, not scripted** — the
 side quests happen because the Mind navigates a real cognitive-metabolic
 landscape, not because a table says they should.
 
-**Dogma is a PATH, never the law.** A line may *choose* a creed that trades
+**Dogma is a path, never the law.** A line may *choose* a creed that trades
 reach for cheapness, and that choice is honored; but nothing forces it, and a
 line that keeps its options open keeps its ceiling high. The engine offers dogma;
 it never imposes it.
 
-## 5. MULTI-PLANETARY INTELLIGENCE — THE WORKED PATH
+## 5. Multi-planetary intelligence — the worked path
 
 A concrete instance of the whole loop. A civilization can hold **more knowledge**
 by going multi-planetary — more orbs give more relational rank
@@ -109,7 +109,7 @@ line facing a wall of irreducible obstructions may reach for the stars to think
 past them; another may decide its home world is enough. Both are lawful. The
 engine's job is to make the option *real and priced*, not to pick.
 
-## 6. THE LANDING PAD (binding)
+## 6. The landing pad (binding)
 
 This is the frame the rest of the game hangs on. **Every buildable and every
 action becomes a proposable option in the Mind's stochastic choice**, weighed by

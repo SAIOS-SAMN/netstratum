@@ -1,6 +1,6 @@
-# 34 — MATTER BALANCE: elements · alchemy · fleets · entropy ∥ syntropy
+# 34 — Matter balance: elements · alchemy · fleets · entropy ∥ syntropy
 
-**Status:** PARTIAL LAND — design lock + first coupling (session).  
+**Status:** partial land — design lock + first coupling (session).  
 **Authority for the dual books:** `EQUATIONS` §6, `05_THERMAL_BALANCE`,
 `09_IDEOLOGY` (syntropy ratio), `45_ALMANAC`, `31_ELEMENT_COMMERCE`,
 `33_TRADE_FLEET_AND_DESK`.  
@@ -142,7 +142,7 @@ climbs via vent/collect.
 
 | Verb / pane | Balance role |
 |-------------|--------------|
-| `status` / desk GROW | show thermal_balance + band |
+| `status` / desk grow | show thermal_balance + band |
 | `refine` / alchemy compound | order-work gated |
 | `fleet salvage` / `fleet salvage-element` | recycling path |
 | `fleet mint` | order-work gated |

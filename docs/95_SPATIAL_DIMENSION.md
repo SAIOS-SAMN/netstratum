@@ -1,11 +1,11 @@
 # 95 — The spatial dimension: three planes of 3Z/3Q and R
 
-Operator 2026-10-26: "re-volumize the flattening, nothing should run on two
-dimensions"; "this is undefined 'sub-physics' flows::PLANES = 2"; "derive this
-as our spatial dimension 3D via 3Z/3Q + R coordinates (positive R denotes
-'forward' in linear time)".
+Design direction (2026-10-26): re-volumize what was flattened, since nothing
+runs in two dimensions; `flows::planes = 2` was undefined sub-physics; the
+spatial dimension is derived as 3D through 3Z/3Q and R coordinates, positive R
+denoting forward in linear time.
 
-Status: step 1 BUILT (three spatial planes and the R loop on every phase; the hand-built source retired). Retires `flows::PLANES = 2` and the hand-built
+Status: step 1 built (three spatial planes and the R loop on every phase; the hand-built source retired). Retires `flows::PLANES = 2` and the hand-built
 source of `flows::founding_phases` (a sphere of radius 4, the point (2,0,0)
 and the generator ½e₁e₂, typed in, read on two planes sharing e₁).
 
@@ -15,7 +15,7 @@ A nucleus of charge Z weighs `3Z` (`chem::weight`): its closed frames, the
 hold `3Z − u` (the Z pole), and its open frames, `u` (the Q pole). The three
 of 3Z is the spatial three: each proton carries a frame on each of three
 axes. A frame on axis k is closed or open, so axis k is not a line but a
-PLANE spanned by its closed direction and its open direction:
+plane spanned by its closed direction and its open direction:
 
 | plane | base axes | what turning in it is |
 |---|---|---|
@@ -33,8 +33,8 @@ and one axis that pairs with none.
 
 In the conformal model the odd last base axis pairs with no base axis; its
 flow is carried on the planes it shares with `e₊` and `e₋`, the origin and
-infinity (mycelium `physics::outflow`). An axis joined to origin and
-infinity is scale: R is REACH.
+infinity (Mycelium `physics::outflow`). An axis joined to origin and
+infinity is scale: R is reach.
 
 - **Positive R is forward in linear time.** Outflow from the source (the
   continuum: the founding's throw, a star's release) moves R forward.
@@ -117,8 +117,8 @@ coherence as products over the planes (their present form for two).
 
 ## 8. Z and Q together (operator 2026-10-26)
 
-"Where is Q on this Z axis - both must work together otherwise you'll get a
-divergence in R"; "realign your forward trajectory on that bond".
+Q and Z must work together on the same axis, or R diverges; the forward
+trajectory is realigned on that bond.
 
 - Q is Z's partner on the same plane, never a separate axis: a bond turns a
   frame from the Q pole to the Z pole within its plane.
@@ -126,9 +126,9 @@ divergence in R"; "realign your forward trajectory on that bond".
   `A + Q = 3Z`, never one pole over the other. R is their span, `A − Q`
   (the number grammar, 2026-10-17: ℝ the span between the ℤ and ℚ poles),
   bounded by the whole.
-- BUILT: a body's push is `½·Q/(A + Q)` (`pulse::push_of`), at most ½, the
+- Built: a body's push is `½·Q/(A + Q)` (`pulse::push_of`), at most ½, the
   luminal bound itself (it was `½·Q/A`, past ½ wherever the open outweighed
   the held, Z 31 among our own atoms); a kind's open share is `Q/(A + Q)`
   (`flows::open`, it was `Q/A`, past one for the same kinds).
-- WITHDRAWN: the rest reach `H·A/Q` (infinite at Q = 0) and the spacing
-  `(2A + Q)/(2A − Q)` (a pole at Q = 2A), both sent to xylarium.
+- Withdrawn: the rest reach `H·A/Q` (infinite at Q = 0) and the spacing
+  `(2A + Q)/(2A − Q)` (a pole at Q = 2A), both sent to Xylarium.

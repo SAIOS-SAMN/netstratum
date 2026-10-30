@@ -1,15 +1,15 @@
 # NS-6 — IPSAL-OS: Entity Containment
 
-**Status:** LANDED at N3 (first cut — identity, scoped grants, generation
+**Status:** landed at N3 (first cut — identity, scoped grants, generation
 tagging). First consumer: the sovereign at the terminal + one contained
 agent (`engine/cfe/src/ipsal.rs`, witnesses `ipsal_scope.rs`). Supersedes
-the SAIOS-OS material (AI-SCIENTISTS security research, NEBULA-PRODUCTS
+the SAIOS-OS material (AI-scientists security research, nebula-products
 README) under the ipsal-os name — SAIOS is retired.
 
 Every individual inside this internet — human, NPC, autonomous bot — is an
 **entity**: an identity, a containment scope, and a generation tag on every
 receipt it forges. Agents are citizens, governed by containment, never by
-prohibition (CHARTER §3.4). This is the profile layer the platform vision
+prohibition (Charter §3.4). This is the profile layer the platform vision
 called "a social media profile for each individual inside our internet" —
 at N3 it holds identity and authority; later landings add its presentation
 (the profile orb, NS-1) and its reach (NS-4 aperture sharing, NS-5 presence).
@@ -24,10 +24,10 @@ at N3 it holds identity and authority; later landings add its presentation
 |---|---|
 | `entity_id` | u64, unique in the world, never reused |
 | `handle` | the entity's name, unique among the living |
-| `principal` | ABSENT for a sovereign human; the containing entity's id for an agent |
+| `principal` | Absent for a sovereign human; the containing entity's id for an agent |
 | `grants` | the agent's opened scopes, ascending (meaningless for sovereigns) |
 
-**The containment law:** a sovereign holds every scope BY CONSTRUCTION —
+**The containment law:** a sovereign holds every scope by construction —
 authority is not enumerable data that could be revoked or forged, it is the
 type's shape. An agent holds exactly the scopes its principal granted.
 Scopes at N3: `Build`, `Raze`, `Collect` (wire codes 1–3).
@@ -35,7 +35,7 @@ Scopes at N3: `Build`, `Raze`, `Collect` (wire codes 1–3).
 ### 1.2 The three laws, measured
 
 1. **Containment precedes the world.** Every action checks the actor's
-   authority BEFORE any world state — before founding, the refusal is
+   authority before any world state — before founding, the refusal is
    "no entity," not "no colony" (witness: `actions_refuse_typed`).
 2. **A grant is a scope, not a blanket.** Collect granted opens collect
    and nothing else (witness: `an_agent_acts_only_inside_its_grant`).
@@ -108,7 +108,7 @@ Hierarchy** of the Convergence Coding Language (CCL) —
 `/opt/ipsal-autic-v0.1/repos/convergence-engine/CCL.md`, Part IIb — carried
 here so the ancestry is not lost. CCL's tiers and its governing principle:
 
-| CCL tier | CCL role | netstratum NS-6 |
+| CCL tier | CCL role | Netstratum NS-6 |
 |---|---|---|
 | **Founder** (was "Witness") | the generating element; *"it does not command, it seeds"* | the **sovereign** — authority is structural, not granted |
 | **Derived** (was "Elder") | first-order derivation, composed from the Founder | a **contained agent** (`principal` = the sovereign) |
@@ -117,11 +117,11 @@ here so the ancestry is not lost. CCL's tiers and its governing principle:
 The load-bearing inheritance is CCL's rule **"no entity governs another;
 self-consistency is the design principle."** NS-6 keeps it exactly: a
 sovereign contains, it does not command; an agent acts only inside the scopes
-its principal opened (§1.2). netstratum **collapses** CCL's three creation
+its principal opened (§1.2). Netstratum **collapses** CCL's three creation
 tiers into one recursive relation (sovereign ▷ agent ▷ agent…) — the tier
 *count* is not inscribed, but the seeds-not-commands principle and the
 upward-authority / downward-grant flow are. CCL's naming-discipline half lives
-separately, as the CHARTER §8 Terminology Law.
+separately, as the Charter §8 Terminology Law.
 
 ### 5.1 "Sovereign" — the classifier (kept, defined)
 
@@ -129,8 +129,8 @@ separately, as the CHARTER §8 Terminology Law.
 citizen" movement — exists and is acknowledged, but in this domain the term's
 dominant meaning is **self-sovereign identity** (a mainstream identity concept:
 an entity that controls its own identity under no central authority), and CCL
-originally chose "sovereign" as the NEUTRAL replacement for the genuinely
-loaded `master` / `root` / `admin`. In netstratum it is not a political claim;
+originally chose "sovereign" as the neutral replacement for the genuinely
+loaded `master` / `root` / `admin`. In Netstratum it is not a political claim;
 it is a structural classifier.
 
 **Definition.** A **sovereign** is a self-governing entity that answers to no
@@ -160,14 +160,14 @@ servant of a scripter*, false under the citizenship doctrine ("agents are
 citizens; automation on a leash"). The lawful pair, each importing only true
 invariants:
 
-- **POLITY** — an autonomous collective will that ARISES FROM a group's
+- **Polity** — an autonomous collective will that arises from a group's
   record and acts on its own. The conductor's civilization-players are
   polities literally: temperament from the registry axes, voice from the
   journal fold, character from the cohesion books — constituted by the
   chronicle, scripted by no one. A guild of players acting as one will (N6)
   is an polity forming in the original sense.
-- **AUTOMATON** — Greek `αὐτόματος`, "self-willed" (Homer's self-moving
-  gates; Talos): crafted operative WITH its own motion, bounded by granted
+- **Automaton** — Greek `αὐτόματος`, "self-willed" (Homer's self-moving
+  gates; Talos): crafted operative with its own motion, bounded by granted
   scopes. Exactly an NS-6 contained agent — no entity commands it (§5), it
   acts of its own will inside its grants.
 
@@ -182,18 +182,18 @@ Distinct from the authority hierarchy (§1, §5) is the **place** hierarchy: the
 containment of *locations*, normative here and repeated in
 `03_SUBSTRATE_CONTRACT.md` §8.
 
-- A **STAR** (a star system: one sun and the bodies bound to it) is the
-  simulation container — ONE clock, ONE chronicle, ONE receipt chain (the
+- A **star** (a star system: one sun and the bodies bound to it) is the
+  simulation container — one clock, one chronicle, one receipt chain (the
   replay unit today, the mesh/consensus unit at N6). This tier was formerly
   called "world"; it is renamed **star** because the sun is what the planets
   orbit and what fixes their thermal regime (`05_THERMAL_BALANCE.md` §1). The
   chronicle stays **per-star**, never per-planet.
-- A **PLANET** is a settled body orbiting the star. **A star contains MANY
+- A **planet** is a settled body orbiting the star. **A star contains many
   planets** (cardinality 1★ : N planets).
-- A **COLONY** is one civilization's settlement on a planet. **A planet hosts
-  MANY colonies** (cardinality 1 planet : N colonies), including colonies of
+- A **colony** is one civilization's settlement on a planet. **A planet hosts
+  many colonies** (cardinality 1 planet : N colonies), including colonies of
   different civilizations sharing one body.
-- A **CIVILIZATION** (species-level identity) spans **many stars**.
+- A **civilization** (species-level identity) spans **many stars**.
 
 **Cardinality law (target):** `civilization 1:N star 1:N planet 1:N colony`.
 Today the runtime cardinality is still degenerate (1★ = 1 planet = 1 colony);
@@ -247,7 +247,7 @@ never itself a game rule in bytecode (SEAL C).
 What grew on this protocol without changing it — the first cut held:
 
 - **Scopes stand at the three inscribed** (`Build`/`Raze`/`Collect`),
-  and TEN mutating verbs now pass their gates (chart, zone, raze,
+  and ten mutating verbs now pass their gates (chart, zone, raze,
   collect, transfer, seal_bond, sever_bond, seal_forward, absorb,
   scan — audited 2026-07-30: ten verbs, ten `permitted` checks, zero
   ungated). The scanner rides Collect; a dedicated scan scope awaits
