@@ -73,7 +73,7 @@ closeness; they move to this form.)
 
 **Its extent** is the body's own spread. Agitation `a` is the share of the
 body's turning absorbed and not re-locked (`a = (p − δ)/p` at a cut; the
-kick's heat `p·δ·(1 − |k|)`, its out-of-step share). An out-of-step share
+torque's heat `p·δ·(1 − |k|)`, its out-of-step share). An out-of-step share
 `a` is a closeness `1 − a`, so the body's cap is
 
     { places with C ≥ 1 − a },  half-angle a/2 of a turn (180·a degrees)
@@ -205,7 +205,7 @@ orientation holds one body, where the atom's holds a pair.
   planes.
 - **A body's weights.** A body in one plane has its whole turning there,
   `w = 1` in that plane and 0 elsewhere, so its closeness C (§2) to a body
-  in another plane is 0 until its residue or a kick gives it weight there.
+  in another plane is 0 until its residue or a pulse's torque gives it weight there.
 - **Capacity is never restricted.** Nothing caps the planes at two. A
   system with fewer bodies than planes leaves planes empty: unoccupied,
   never removed.

@@ -1153,7 +1153,7 @@ pub fn collide_stars(stars: Vec<crate::pulse::Body>, c_pre: Vec<Ratio>, scale: &
 }
 
 /// THE ECHO HOLDS ITS NEIGHBOUR (docs/96 §8.2; operator 2026-10-27: "pulses
-/// and echoes", never kicks): a body re-pulses at its own bell and its
+/// and echoes", never impulses): a body re-pulses at its own bell and its
 /// neighbour answers the echo every ring at its place, by the pulsing body's
 /// bond at their gap, `bond(m/r) = m/(r + m)`. Their turnings differ by
 /// `|ω_i − ω_j|` a ring. The pair is held, and joins, where the stronger

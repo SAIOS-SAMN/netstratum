@@ -372,8 +372,8 @@ impl<F: Field> VectorModule<F> {
             dim: self.dim(),
         })?;
         let mut out = self.clone();
-        let kick = magnitude.try_mul(&v_j)?;
-        out.components[i] = v_i.try_add(&kick)?;
+        let shift = magnitude.try_mul(&v_j)?;
+        out.components[i] = v_i.try_add(&shift)?;
         Ok(out)
     }
 

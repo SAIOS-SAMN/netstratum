@@ -42,7 +42,7 @@ The pulse founds the universe from its Zs as grains (`pulse::found`,
 `cascade`): kinds within the universal throat stay as the wellspring
 (the firmament, motes about the home), the shells' beads become galaxies.
 The home `[0]` has no clock of its own; its stars read the source directly
-(`galaxy_rate = None`). Each universal echo it kicks the firmament
+(`galaxy_rate = None`). Each universal echo it pulses the firmament
 (`orbit_galaxies`: push ½, hold-return `½·δ·ℓ`, repel by open charge). Its
 holding `H_u = 1 + Σ(state + holding + magnetism)` counts every nucleus at its
 whole 3Z (`ocean::universe_hold`). ✔
@@ -56,7 +56,7 @@ and spill. Galaxies gather it on crests `R_{p/q} = H_u(2p/q − 1)`, coupled
 
 A core holds its state (the throat, founded, never drained) and its matter
 as motes (`Body.flows`, each with `ell_o`, `ell_c`, a phase per plane,
-agitation, a lever). Each echo the core kicks its motes (`flows::kick`: push
+agitation, a lever). Each echo the core's pulse torques its motes (`flows::torque`: push
 `p = held/(1 + held)`, `Δℓ = p·δ·mean_response`, heat `p·δ(1 − |k|)`), they
 turn (`flows::turn`: `2δ` a bell, the vacuum's inversion `δ → 1 − δ`), pass
 through the centre rather than pile (`through: R → 2H − R`), and settle at rest
@@ -162,7 +162,7 @@ mass; `Toll::heard_after` adds arcs of different tiers; docs/85 §7‴'s map
 `φ = kψ` is not built.
 
 **B7. Planes** ◐: two planes in code (S^360 and S^60 ruled); `ell_c` is
-set only by ocean arrivals and never kicked, so the tilt
+set only by ocean arrivals and never torqued by the pulse, so the tilt
 `χ = 90°·ℓ_c/(ℓ_o + ℓ_c)` reads 0 almost everywhere.
 
 **B8. The peoples' tiers** ✘ in part: ancients "by birth" compare a line's

@@ -40,7 +40,7 @@ breaks one of them is wrong before it is built.
 6. **Both senses.** Turning runs both ways; spin is the sense of a turning.
    Opposite senses pair, and pairing is what closes.
 7. **Motion rises from below.** The quantum state's wavefronts (docs/79)
-   kick the atoms into their orbits and spins, and that motion expands
+   pulse the atoms into their orbits and spins, and that motion expands
    upward: atoms, bodies, systems, galaxies. The pulse deploys where mass
    lands (by containment, from the epicenter down); the phases of motion
    come up from the quantum layer.
@@ -260,7 +260,7 @@ docs/83, "Corrections").
     Both were wrong under Netstratum's own laws: `ω = M(<r) / r` makes speed
     `v = M(<r)`, radius-free (so unbounded, no horizon, no runaway
     collapse, and at odds with the clock law `r / (r + M)`), and an equal
-    kick fixes a nucleus's speed, not where it orbits (that needs spin,
+    impulse fixes a nucleus's speed, not where it orbits (that needs spin,
     `r = L / v`). Under the deficit, speed reads `v / c = δ`, bounded, with
     a horizon at `δ → 1`, and the clock and the motion become one law
     (rate `= 1 − δ`).
@@ -281,7 +281,7 @@ docs/83, "Corrections").
     rate at the atom tier (`T = k_T·ω`), so a gas's agitation and an
     orbit's turning compare by construction;
   - **the bounce's spin and hold:** the torsion winding gives matter its
-    spin, and an element is held where its kick does not exceed the local
+    spin, and an element is held where its pulse's torque does not exceed the local
     turning; built inside out, this sorts core, disk, gas and escape;
   - **a galactic bounce's strength** against the universal echo, so a
     galaxy keeps its light gas;

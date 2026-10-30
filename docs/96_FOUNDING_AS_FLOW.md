@@ -221,7 +221,7 @@ heat and the tide across it,
 
 Retired: the face as a barrier in every hold test.
 
-### 8.1 The double-pass inversion of the kicks (direction of 2026-10-27: the missing component is the manifold chain's inversion on the star's gravitational lock)
+### 8.1 The double-pass inversion of the encounters (direction of 2026-10-27: the missing component is the manifold chain's inversion on the star's gravitational lock)
 
 `formation::crossed` reads whether two neighbouring worlds, meeting
 `N = a·|Δω|` times over their system's age, are turned across their gap. Their
@@ -239,29 +239,29 @@ age, so every pair eventually joined: 78 worlds standing at bell 704 fell to
 period on the forward leg is followed by one on the return leg through the
 ring's image, where the residual's sign turns. Period k leaves `(−1)^k·c`;
 the excursion librates about the lock instead of drifting. The greatest
-excursion over the age, in kicks, with `P = ⌊N/q⌋`, `ρ = N mod q`:
+excursion over the age, in encounters, with `P = ⌊N/q⌋`, `ρ = N mod q`:
 
     P = 0:  ρ
     P = 1:  max(q − 1, c + ρ)
     P ≥ 2:  c + q − 1
 
 bounded, read once, never stepped: past two periods the age no longer
-moves it. A pair joins where `ε·R·kicks ≥ r`, so only neighbours whose own
-period's kicks reach their gap join; a resonance holds its worlds apart.
+moves it. A pair joins where `ε·R·encounters ≥ r`, so only neighbours whose own
+period's encounters reach their gap join; a resonance holds its worlds apart.
 
 Witness: an old light pair at a 2:1 stands as it stood young; the greatest
 excursion is the same at 2q meetings and at any later count.
 
-Open (not changed here): within a period the kicks are counted raw (`ρ`,
+Open (not changed here): within a period the encounters are counted raw (`ρ`,
 `q − 1`), a ceiling; the hemisphere responses also cancel inside the period.
 
-### 8.2 Only forming orbits meet; neighbours exchange echoes, never kicks (ruling of 2026-10-27: pulses and echoes, never kicks; only bodies still forming their orbits collide)
+### 8.2 Only forming orbits meet; neighbours exchange echoes, never impulses (ruling of 2026-10-27: pulses and echoes, never impulses; only bodies still forming their orbits collide)
 
 Measured (2^55 grains, NETSTRATUM_DIAG, bells 704–880): 746 joins in one
-system, 742 of them at the pair's first meeting, the "kick" `ε·R` exceeding
+system, 742 of them at the pair's first meeting, the impulse `ε·R` exceeding
 the gap by a median 4.5·10^4 (to 10^11). The 77 worlds formed at bell 704
 stood only because no pair had yet met (`N = 0`); at bell 880 they met once
-and 77 joined into one body, which ignited. The kick was the impulse model,
+and 77 joined into one body, which ignited. That was the impulse model,
 the pull at the gap held over the whole synodic interval `1/|Δω|`: an
 import, not Netstratum's grammar. §8.1's libration was sound but never reached.
 
@@ -275,7 +275,7 @@ ring received). The echo holds its neighbour where it meets that shear:
     max(m_i, m_j)/(r + max(m_i, m_j))  ≥  |ω_i − ω_j|
 
 the crest's own law (bond against tide) one tier down: first degree, no
-age, no kick, no ε. A held pair co-moves and joins.
+age, no impulse, no ε. A held pair co-moves and joins.
 
 **Only forming orbits meet.** A world whose orbit has closed is solid: since
 it last stood it has turned `2ω·r_echo` (its closed-form advance over the
@@ -285,5 +285,5 @@ pulses in phase (the double pass, §8.1) and keep their orbits. A pair joins
 only where at least one is still forming: the pool's small bodies (each
 kind at its reach) and any world not yet once round.
 
-Retired: `formation::crossed` (the kicks over the age, ε, the encounter
+Retired: `formation::crossed` (the impulses over the age, ε, the encounter
 period q) and `formation::libration`.

@@ -2,7 +2,7 @@
 
 **Era 1 (operator 2026-10-16), proposed:** rejuvenation becomes the return
 leg of the recycling circuit: shed matter recycles into the enclosing
-medium, the regenerated pulse kicks it along the resonant crests
+medium, the regenerated pulse drives it along the resonant crests
 (recyclotronic propulsion), and what it carries back to a world is its
 regrowth. The rate r becomes the world's intake from its crest, the ceiling
 K its own holding; rejuvenation mints no matter. See docs/83, "Recycling and

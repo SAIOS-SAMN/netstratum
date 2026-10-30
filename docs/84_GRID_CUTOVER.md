@@ -41,7 +41,7 @@ The 60⁻⁶ grain (`ring::grain`) and the merge marks (`flows::PHASE_WIDTH`
 
 | Where | What is floored |
 |---|---|
-| `flows.rs` turn, kick, spray | a mote's orbit and loop phases (212, 349, 360, 522) |
+| `flows.rs` turn, torque, spray | a mote's orbit and loop phases (212, 349, 360, 522) |
 | `breath.rs` star ride, capture, birth | a star's phases and bell (284, 603, 752) |
 | `pulse.rs` orbit_galaxies | a galaxy's orbit phase (751) |
 | `formation.rs` system, worlds, collisions, merges | world and star phases and bells (1007, 1088, 1343, 1378, 1379) |
@@ -50,7 +50,7 @@ The 60⁻⁶ grain (`ring::grain`) and the merge marks (`flows::PHASE_WIDTH`
 
 | Where | What is floored |
 |---|---|
-| `flows.rs` kick, repel, hold-return, founding | a mote's ℓ_o, ℓ_c (400, 494, 542, 970) |
+| `flows.rs` torque, repel, hold-return, founding | a mote's ℓ_o, ℓ_c (400, 494, 542, 970) |
 | `pulse.rs` firmament hold-return | a firmament mote's ℓ_o (728) |
 | `breath.rs` capture, arrivals, shed | a mote's ℓ_o, ℓ_c, the shed reach (605, 642, 647, 217) |
 | `breath.rs` burn, birth | a star's specific spin ℓ (483, 793) |

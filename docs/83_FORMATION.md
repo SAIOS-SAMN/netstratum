@@ -423,16 +423,16 @@ one law every tier; nothing below is derived yet, and no outcome is stated.
    enclosure one tier up: a world's losses the system's gas, a system's the
    galaxy's gas, a galaxy's the ocean. The ledger's total is fixed; matter
    only circulates.
-3. **Recyclotronic propulsion (the kick).** A cyclotron bends charges into
-   orbit with a magnetic field and kicks them on each pass. Here:
+3. **Recyclotronic propulsion (the pulse).** A cyclotron bends charges into
+   orbit with a magnetic field and accelerates them on each pass. Here:
    - the bending field is the tier's two-charge magnetism (Xylarium 11.0,
      "two charges, reflected the whole way": the faces c → 1 − c, the
      rotoreflection at every tier);
-   - the kick is the regenerated pulse, renewed at full strength by each
+   - the drive is the regenerated pulse, renewed at full strength by each
      core on every echo;
    - medium matter gains only where it orbits in step with the echo: the
      ocean's crests `R_{p/q} = H(P_b·p/q − 1)`, the orbits whose period is a
-     whole ratio of the echo. On a crest the kick lands in phase every pass;
+     whole ratio of the echo. On a crest the pulse lands in phase every pass;
      between crests it nets nothing. The crests are the recyclotron's
      resonant orbits, the spirals from the echo delay the paths matter climbs
      along them.
@@ -444,23 +444,23 @@ one law every tier; nothing below is derived yet, and no outcome is stated.
    stripped recovers only by arrival.
 
 **What it resolves.** Under regeneration a galaxy's gas must come from
-outside: the ocean is the recycled medium, kicked out from the universal
+outside: the ocean is the recycled medium, pushed out from the universal
 core along its crests. One mechanism, not a separate build. Rejuvenation's
 ceiling stops being a dial and gains a physical source.
 
 **Design-law check.** The resonance is a period ratio p/q, linear, no root
 or square; the gain is an in-phase share a pass, never ½mv²; no constant:
-the kick's strength is the core's own amplitude, the field the tier's own
+the pulse's strength is the core's own amplitude, the field the tier's own
 two charges.
 
 **Owed (with Xylarium):** the per-pass gain on a crest (the in-phase share
 times the received pulse); how shed matter divides between tiers; whether
-`a_q = 1/q` (odd q, 0 even) is the crest's coupling to the kick; the
+`a_q = 1/q` (odd q, 0 even) is the crest's coupling to the pulse; the
 crest's width (the collected medium's deficit, the open fixed point).
 
 **The test (offline first, then live):**
 - the ledger: total mass, and mass + magnetism, unchanged across every
-  shed, recycle and kick (exact);
+  shed, recycle and pulse (exact);
 - the shed: what each tier loses an echo, by kind, and where it lands;
 - the crests: medium on resonant orbits gains, medium between them does
   not (read as gain a pass against `p/q`);
@@ -470,8 +470,8 @@ crest's width (the collected medium's deficit, the open fixed point).
 Read with `observe recycle [N]` (Ledger, medium by tier, shed from the
 breath's lines, return by galaxy; crests once derived). Xylarium mirrors the
 same readings. **Xylarium's answers (proposed):** (a) the gain on a crest is
-(medium in band) × `a_q` × the kick; the enclosure's own core family is
-kicked at full amplitude (1, regenerated), ρ multiplies only the parent's
+(medium in band) × `a_q` × the pulse; the enclosure's own core family is
+pulsed at full amplitude (1, regenerated), ρ multiplies only the parent's
 family: ρ appears only where a boundary is crossed. (b) Shed matter goes one
 tier up whole, undivided; ρ governs pulses received inward, never matter
 leaving; the enclosing tier's crests then decide where it lands. (c) The
@@ -606,7 +606,7 @@ the one capture law. The image is a continuous fountain.
    overlaps a universal east/west jet, they exchange. The galaxy's outbound
    leg feeds the universal loop, and the loop's return delivers into the
    galaxy. Matter crossing carries its turning with it, so what the
-   universal core pays in kicks comes home as the turning of matter
+   universal core pays in torque comes home as the turning of matter
    returning from ring 1. The loop refills the reservoir, not the hypha.
    "Innermost" is read, never counted: the galaxies whose reach falls
    inside the jets' rim.
@@ -625,7 +625,7 @@ the one capture law. The image is a continuous fountain.
 6. **Continuum or vacuum, by force** (direction: jetstreams are continuums or vacuums in the filament by their force, analogous to the Gulf Stream). The stream is a reading, never a label from a
    mote's origin.
    - The force is the jet's push at the mote's reach (its pulse share
-     times the arrival strength ρ, the kick's own reading).
+     times the arrival strength ρ, the pulse's own reading).
    - What the force meets is the filament's hold there, `λ/(1 + λ)`.
    - **Continuum:** where the push beats the hold, the jet carries matter
      along the filament as one moving body (the stream's core current).
@@ -709,7 +709,7 @@ between the two cores.
    inside a reach holds its rings, and every grain is a bell. So
    `H(<ℓ)` = the singularity's own state plus every mote and star turning
    with less spin, strictly inside, read once an echo and on the grain
-   (flows::Enclosed). Motes' kicks, stars' references, their meeting rates
+   (flows::Enclosed). Motes' torques, stars' references, their meeting rates
    and their return read δ from it. The throat still sets the cut.
 
 Read (2 galaxies, 3Z conserved), echo 9: contact alone, 15 + 13 stars and
@@ -738,9 +738,9 @@ held 0.68 (from 0.51), and bounces about 1 in 2.5.
 
 ### The jetstream as an orbit; the metabolic rate (operators 2026-10-18; built)
 
-1. **The kick over its passage** (d9b6c8b). A mote sweeps near a whole turn
-   a bell, so a kick read at one instant lands on one hemisphere every time
-   and the core pays without end. The kick (and the loop's pulse advance) is
+1. **The torque over its passage** (d9b6c8b). A mote sweeps near a whole turn
+   a bell, so a torque read at one instant lands on one hemisphere every time
+   and the core pays without end. The torque (and the loop's pulse advance) is
    the exact mean of the signed sawtooth `1 − 2·frac(ψ)` over the arc swept,
    piece by piece within each turn, `1 − (f₀ + f₁)`, with no square. A whole
    turn averages 0.
@@ -778,7 +778,7 @@ small star on the outer rim.
   re-reads everything outside it, and chain events cascade without a rule.
 - **Twist and torsion on the jets.** Direction: keep the twist and torsion the jetstreams carry at the quantum level as they are expelled from the singularities and cores. A core's winding is its push share p at
   expulsion: ½ at the founding (the orbit plane at Z·½, the loop at
-  ½ + Z·½), rewritten each bell by the kick's extra loop term (torsion
+  ½ + Z·½), rewritten each bell by the torque's extra loop term (torsion
   coupling to spin, Einstein–Cartan). Nothing new is stored. A star's born
   tilt is the twist it inherited from the jets that fed it; expelled matter
   leaves with phase_c = phase_o + p.

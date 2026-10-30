@@ -132,7 +132,7 @@ court re-derives the phase advance from them.
 
 ## Wavefronts set matter moving (operator, 2026-10-14)
 
-The quantum state is where motion starts. Its wavefronts kick the atoms
+The quantum state is where motion starts. Its wavefronts pulse the atoms
 into their orbits and spins, and that motion expands upward: atoms, bodies,
 systems, galaxies (docs/78, design law 7). The pulse deploys where mass
 lands; the phases of every turning come up from here, never drawn.

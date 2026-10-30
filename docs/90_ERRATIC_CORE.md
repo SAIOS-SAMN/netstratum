@@ -5,8 +5,8 @@ not a loop):** a body turns about its parent in two orthogonal planes, and
 both are orbits. The second is the orthogonal orbit, its spin `ℓ_⊥` (code
 `ell_orth`), its phase `ψ_⊥` (code `phase[1]`). Earlier text and Xylarium's
 code call it the "loop" (`l_c`, `phase_c`); that name described the
-circulation's route and hid that it is an orbit, which is how its spin went
-unkicked. Quotations keep their original words.
+circulation's route and hid that it is an orbit, which is how its spin
+received no torque. Quotations keep their original words.
 
 **Naming (ruling of 2026-10-23: "kick" is renamed):** the parent's pulse changing a body's spin each bell is a torque
 (code `flows::torque`, `spin_torque`, `torque_orth`; identity `torque`): it
