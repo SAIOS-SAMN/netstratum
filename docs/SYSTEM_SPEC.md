@@ -414,5 +414,5 @@ whether the verified-work anchor refuses or pays. It composes from pieces
 that mostly do not exist yet (the anchor itself is unbuilt, §7). Recorded
 here as the shape of the future test, but deferred and unboarded (operator
 ruling): an attacker experiment before the kernel is sealed, the spine
-lands, the mesh replicates, and the anchor exists is theater. It revives
+lands, the mesh replicates, and the anchor exists has nothing to test. It revives
 only when those prerequisites stand.

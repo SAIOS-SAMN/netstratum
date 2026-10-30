@@ -56,7 +56,7 @@ Five laws, and they are already the right ones:
 2. **Measured novelty** — the gate.
 3. **Bounded** — library, macro and history caps.
 4. **Contained** — per-civilization libraries, never global.
-5. **Receipted and killable** — every mint carries a certificate naming
+5. **Receipted and revocable** — every mint carries a certificate naming
    the triggering task and the base-failure witness; replay re-derives;
    a `--no-mint` flag freezes the door.
 

@@ -24,7 +24,7 @@ utility deciders leave the live path.
 | A second `think_*` / `BookThought` | `reduce_pair` is the organ. ARC `think` stays the grid seat. |
 | Two books as one `iae::think` train | Ration and matter are sequential seats, not two pairs of one unique. `think` still needs ≥2 same-class observations. Do not lower that gate. |
 | `lookahead::project` on the live path | Clones are not thought (D4.5). |
-| `soc::choose_build` as fallback | Digest draw is the costume Pins E/F exist to kill. |
+| `soc::choose_build` as fallback | Digest draw is the imitation Pins E/F exist to remove. |
 | Fall back to `settlement_choice` when the named deed cannot pay | Withhold. An unaffordable residual is rest, not a score. |
 | `solver` imports `cfe` | Conductor peels the world. Solver thinks measurements. |
 | Entity `grown_basis` / SEAL-B write | Grown stays on Polity. |
@@ -118,7 +118,7 @@ books cannot pay, cannot raise a pathway the metabolism cannot touch).
 They are not a second choice among viable zones.
 
 Regenerator-first / encase-first / forge-starved-hold (D4.6) are not
-this cut's books. They must **not steal a Short ration beat**. Do not
+this cut's books. They must **not take a Short ration beat**. Do not
 re-express the thermal tree. Do not delete it. A Short leftover
 outranks those arms until a thermal book exists.
 

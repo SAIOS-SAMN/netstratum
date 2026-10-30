@@ -246,7 +246,7 @@ Einstein–Cartan half of the pair. A throat held open by accumulated
 weight pinches to a point; one held open by structure no frame explains
 stays traversable. That section also carries the consequence for
 mining: the coboundary trap and the singularity are the same failure,
-so nonce-smashing is already barred by law the bridge landed.
+so nonce grinding is already barred by law the bridge landed.
 
 **Orbs at the overlap have extent — and this one is derivable.**
 `bridge.rs` §head: *"Entities `(i, j, k)` are orbs, indexed by position

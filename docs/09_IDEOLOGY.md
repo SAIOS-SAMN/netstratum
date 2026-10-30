@@ -140,7 +140,7 @@ covenanted).
 - **`severance_load`** (the severer's entropic book): the standing rate ×
   the unserved notice window (placeholder) when a bond is cut without the
   covenanted notice. An orderly severance — notice honoured, or bond run
-  to term — posts **nothing**: leaving is not a sin; dropping a partner
+  to term — posts **nothing**: leaving is not an offence; dropping a partner
   mid-winter is.
 
 **In-game function:** the physics already rewards constancy — bonded flow

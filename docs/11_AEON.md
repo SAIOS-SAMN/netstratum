@@ -179,7 +179,7 @@ convergence engine was already built for, run forward:
    **derelicts**; broken chains **quarantine**. "Some things continue, some
    won't" is convergence's verdict, not an erasure.
 3. **Nothing is destroyed.** The fold is archival by construction — the same
-   annex-never-merge law (07 §1). The graveyard is frontier (07 §3 salvage).
+   annex-never-merge law (07 §1). The archive is frontier (07 §3 salvage).
 
 This subsumes the old "reset": a fresh universe is an aeon that folded an
 empty predecessor.

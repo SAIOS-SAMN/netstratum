@@ -121,11 +121,11 @@ equation already carries this shape as its inner sandwich
 Everything entering the center is stripped on the way in and
 re-dressed on the way out:
 
-1. **B_S kills the angle** — the finite frame group (D4⋉Z², the eight
+1. **B_S removes the angle** — the finite frame group (D4⋉Z², the eight
    grid symmetries and the wrap) canonicalizes both states; the frame
    of approach quotients out (G3's recorded correction: frames join T
    outside the key).
-2. **Π_G kills the gauge** — `coboundary_reduce` strips coordinate
+2. **Π_G removes the gauge** — `coboundary_reduce` strips coordinate
    distortion to the H¹ core; what a relabeling could remove, is
    removed.
 3. **Torsion is the only survivor** — the sole frame-invariant

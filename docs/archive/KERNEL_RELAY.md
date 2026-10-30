@@ -21,7 +21,7 @@ solid it is stated flat; where it is thesis-not-yet-proven it is marked.
 This project is, structurally, a blockchain full-node whose "blocks" are
 governed simulated universes. It was built as a game and grew a
 distributed-ledger spine without naming it. A recent audit found that the
-trust architecture had rotted in a specific place — the `mirror` subsystem
+trust architecture had degraded in a specific place — the `mirror` subsystem
 had become a second, editable copy of authoritative state living outside the
 constitution — and §11 (the One-Truth Amendment) rules that class of thing
 unlawful. The correction is: one authoritative representation (a hash-chained
@@ -63,10 +63,10 @@ operations are exempt from all of it:
   no entity, no scope, no receipt;
 - **one state, one encoding** — the mirror is a second encoding of truth;
 - **exact-rational, receipted, replayable** — the mirror lives in the OS
-  filesystem, where anyone with a shell is a god.
+  filesystem, where anyone with a shell has full authority.
 
-The fossil record of the crime is `rotate_divergent` and the quarantined
-`--closed-*` corpses in `var/worlds`: a second representation of truth can
+The record of the defect is `rotate_divergent` and the quarantined
+`--closed-*` remnants in `var/worlds`: a second representation of truth can
 diverge from the first, and did.
 
 ### 1.4 The deeper finding — the real trust root
@@ -94,7 +94,7 @@ anyone can edit. **The game is constitutional; the universe is not.**
 
 `cfe::opposition` (built in an earlier cycle) reconciles two authoritative copies after
 the fact — aperture legs summed to zero across two books. Useful, but it is a
-patch on a patch: an audit for crimes that only exist because conservation
+patch on a patch: an audit for defects that only exist because conservation
 was enforced per-feature in a mutable interpreter instead of once in a sealed
 kernel. Under §11 it dissolves — its checks become kernel invariants (I1,
 I6). What cannot diverge needs no reconciliation.
@@ -118,7 +118,7 @@ chartered.
 ### 2.2 The five rules (plain), and their vocabulary
 
 §11 rewrote itself to the plain register by ruling (the first draft's "one
-truth" mysticism was rejected). The five normative rules:
+truth" framing was rejected). The five normative rules:
 1. **Single source of truth** — one hash-chained sequence of state snapshots.
 2. **Exports are write-only** — JSON/dashboards are display; nothing parses
    them back in.
@@ -153,7 +153,7 @@ running is deleted by the cure.
 
 Lenses (observer, wall, journals, deriving from the chain) must be built and
 serving before the ledger's display half is deleted. A constitution that
-blinds the sovereign for a week invites the emergency hack that becomes the
+blinds the sovereign for a week invites the emergency workaround that becomes the
 next banned second copy.
 
 ---
@@ -289,7 +289,7 @@ before a technical one, an operator gate, not a coder one.
 Syntropy/entropy held together is Prigogine's dissipative structure: order
 maintained by throughput, not isolation. The game already models it — joules
 minted only by encasement (order costs work, no fiat), demurrage/venting
-always running (order decays without maintenance). Kill either side and it
+always running (order decays without maintenance). Remove either side and it
 collapses (no mint → freeze; no decay → hoard-inflation). This becomes kernel
 law as I4 (bounded creation) + I5 (bounded decay), with I1 (conservation) as
 the closed case.

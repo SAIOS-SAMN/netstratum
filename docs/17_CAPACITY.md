@@ -32,7 +32,7 @@ and is load-bearing history, not dead weight).
 
 **What moved out:**
 
-- **§10bis–§10ter** (the exile of C, the cage, the door, C consulted,
+- **§10bis–§10ter** (the isolation of C, the cage, the door, C consulted,
   the access/authority trade) → `22_CONTAINMENT.md`, which already
   carried "the other side" of the same subject (its own §2n–§2n.3, the
   `C_bound` containment law). The literal duplicate line *"approximation
@@ -836,7 +836,7 @@ line*. **Every body was precise. The titles and carrier lines were read —
 "Ideological friction", "the carrier is the Glasskeeper escrow
 machinery" — and never the paragraph under them.** The defect was a
 reading habit, not a corpus of bad documents, and saying otherwise
-blamed the record for a reading shortcut. The headings that actually mislead
+attributed to the record a fault of the reading. The headings that actually mislead
 have now been fixed at the source (`09` §2.3, §3.2), and each mechanic
 declares its layer where it is described. The `Option` in `layer_of`'s signature stays
 anyway: the next deed whose reach is genuinely undecided needs an

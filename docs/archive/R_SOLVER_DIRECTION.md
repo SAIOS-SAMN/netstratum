@@ -13,7 +13,7 @@ ARC-AGI-2 device this file's geometry reading feeds into.
 
 ## §0 The incident this file opens with
 
-An out-of-memory kill took down the operator's machine. Identified
+An out-of-memory termination stopped the operator's machine. Identified
 cause: `solve` was given a `HashSet<Vec<Grid>>` of every distinct image
 tuple reached, cloned in, unbounded. Reverted at `HEAD`; the tree carries
 none of it.

@@ -6,7 +6,7 @@
 ## §0bis Summary — the board in one page
 
 > A map, never a second authority (`EQUATIONS` §0.1). Restated facts
-> rot; this section holds only **measured numbers** and **pointers**.
+> go stale; this section holds only **measured numbers** and **pointers**.
 
 **The measurement.** Beat cost at 33 worlds: **1.52 s**, of which
 `research_step` is **94.2 %** (1432.9 ms), `merchant_step` 4.0 %,

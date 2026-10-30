@@ -23,9 +23,9 @@ num-traits = "0.2"
 num-integer = "0.1"
 thiserror = "1.0"
 
-# THE TACTICAL BLEED (operator order 2026-08-12): tests were running
+# Optimized tests (operator ruling 2026-08-12): tests were running
 # exact-rational physics at opt-level 0 — the slowest possible
-# rendition of the hottest code, and the era pins wedged on it
+# rendition of the hottest code, and the era pins stalled on it
 # (measured: ~23s/beat debug vs ~1s/beat release at the same board).
 # Tests now compile optimized; debug assertions stay on. The
 # structural cure (the checkpointable Replayer) is the next landing —

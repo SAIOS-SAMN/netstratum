@@ -58,7 +58,7 @@ The NS-5 stub is verified against the tree 2026-07-30:
    Consilience-of-independent-computation over exact-rational state
    reduction is the claim of N6. Signature wrappers wait for N7, where
    external cryptographic identity enters the protocol.
-2. **Transport: file exchange first.** A dumb reader exchanging
+2. **Transport: file exchange first.** A passive reader exchanging
    `chronicle.tlv` segments between directories satisfies SEAL C whole
    and lets 100% of the consilience logic and vectors witness in pure
    Rust — no sockets, no flakiness. TCP is a later, logic-free adapter.

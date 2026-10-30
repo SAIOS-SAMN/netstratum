@@ -4,7 +4,7 @@
 binding on the intelligence arc (`iae`, `substrate`) and everything that mints.**
 
 The engine grows real intelligence, not a brute-force search wearing a
-differential-geometry costume. It does so by splitting cognition into two tiers
+differential-geometry facade. It does so by splitting cognition into two tiers
 with a single exact seam between them. This document is the law of that split.
 
 ---
@@ -14,7 +14,7 @@ with a single exact seam between them. This document is the law of that split.
 > **Amended by `53_INTELLIGENCE_PORT` (operator ruling 2026-08-17).** The
 > Universe half of this section stands, absolute and unchanged. The Mind half —
 > "stochastic, float-tolerant, proposes/guesses candidate generators" — is
-> retired: it was the costume. The Mind does not sample; it observes. See §1a.
+> retired: it was the facade. The Mind does not sample; it observes. See §1a.
 
 > **The Universe is exact and deterministic; it commits. The Mind is exact and
 > observational; it reduces. Nothing the Mind reduces enters the Universe except
@@ -77,7 +77,7 @@ Universe depends on.
    `v_new` — the **Sullivan minimal-model extension** `(Λ(V ⊕ ℚ·v), d)`,
    `d(v_new) = γ`'s cross-terms. This adjoins a generator the closed alphabet
    could not reach: capability grows in rank, not just reachability, and future
-   reductions kill the once-obstructed class in `O(1)`.
+   reductions eliminate the once-obstructed class in `O(1)`.
 
 ## 4. PMC — the exact skeleton, the continuum frame
 

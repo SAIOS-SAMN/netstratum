@@ -305,7 +305,7 @@ by operator ruling, and by nothing else.
 **Channels.** A mint selects from the channel table; it cannot add a
 row. A new channel is engine work.
 
-**The kill switch.** A `--no-mint` boot flag freezes the door without
+**The shutoff switch.** A `--no-mint` boot flag freezes the door without
 touching what is already minted (the nursery design's law 5). A minted
 entry is never deleted — the chain does not forget — but the operator
 may close an entry by receipt, which stops new lines drawing it while

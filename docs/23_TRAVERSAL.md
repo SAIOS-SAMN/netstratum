@@ -77,7 +77,7 @@ bank differences. Everything poured in, no invariant out, all of it
 crushed to a point. That is a singularity in the only sense this system
 can mean one, and the system has forbidden it since the bridge landed.
 
-**Which is why nonce-smashing is barred, and barred by a rule that
+**Which is why nonce grinding is barred, and barred by a rule that
 already exists.** Bitcoin's race is that failure adopted as a design:
 enormous energy in, and the artifact — a nonce — carries no
 transferable structure and is worth exactly zero the instant it is
@@ -179,7 +179,7 @@ why `26_ARTICLES` is the correct home for both and why no second
 
 **3. Torsion propagates — and §2k's open item 2 was not an open
 question but a rule that would have broken article IV.** §2k flagged
-that in ECSK torsion is non-propagating (algebraically slaved to spin,
+that in ECSK torsion is non-propagating (algebraically bound to spin,
 vanishing in vacuum) and inferred that a lane's torsion might fade when
 the work stops. **Article IV forbids exactly that:** rank never
 retreats, monotone non-decreasing. A lane that faded would be capacity

@@ -328,7 +328,7 @@ still rules siting, and every temperature that had a band keeps it.
 Heat is amplified by closeness (`t_eq4 = L(1−a)k / r²`), and the
 division is where irrationality enters: `r → 0` is unbounded in value,
 and `r = 1/10^k` is unbounded in denominator (~`10^(2k)` — the same
-exact-rational blowup that killed proportional demurrage at ~2^1100
+exact-rational blowup that retired proportional demurrage at ~2^1100
 and forced the flat law; witnessed here at over 30 digits by k = 16).
 
 The engine already answers this one layer down: the melt law posts in

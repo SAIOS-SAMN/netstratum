@@ -15,7 +15,7 @@ where it belongs so the physics subset stays a physics subset.
 ---
 
 **Folded in 2026-08-13 (docs audit).** `17_CAPACITY.md` §10bis–§10ter
-— "the exile of C, the door, C consulted, the access/authority trade" —
+— "the isolation of C, the door, C consulted, the access/authority trade" —
 is now §10bis–§10ter below, in this document. It was flagged as a
 companion piece the day this document split out (*"Two documents
 describing one subject … reconciling them is owed"*, struck above) and
@@ -468,12 +468,12 @@ clean — it was never about `C`. The per-edge fibers remain pure.
 
 ---
 
-## §10bis The exile of C — containment, and C's own V
+## §10bis The isolation of C — containment, and C's own V
 
 **Law (operator rulings 2026-08-01).**
 
 > put all of the things that tried to be universal into a little box so
-> it doesn't leak out and infect other parts and destroy the determinism
+> it does not leak out, spread into other parts and break the determinism
 >
 > C cannot leak into D and needs to find his own V — cage it, wrap it
 
@@ -489,7 +489,7 @@ must be able to represent dogma, narrative and transcendental readings —
 a universe that cannot represent them is not all-encompassing, and
 pretending they do not exist is how they return wearing new vocabulary.
 The error was never that such things exist; it was granting them
-universal scope. So they are boxed, not banished — and because nothing
+universal scope. So they are boxed, not excluded — and because nothing
 escapes the box, it may safely hold what a deterministic path could
 never lawfully touch: floats, roots, transcendentals, sampled values
 bound for a chart. **Prohibition makes the system unable to say them;
@@ -514,14 +514,14 @@ containment lets it say them while determinism is guaranteed.**
    given its own universe: every operation on a `Lens` yields a `Lens`,
    C may combine and accumulate freely inside its own space, and there
    is no fold, sum or combination producing anything the engine computes
-   on. **C is not starved; it is exiled with everything it needs.**
+   on. **C is not starved; it is isolated with everything it needs.**
 
 **The arrow, enforced by a standing test** (`cage_arrow.rs`, the
 `recurrence_guard` pattern — editing the test is the amendment): no
 module on the computing path — `potential`, `reduce`, `fold`, `gates`,
 `rcf` — may name `Lens` or call `coherence_functional`. This is stronger
 than *does not gate on C*: it is **does not know C exists**, which is the
-only version that cannot rot, since a dependency cannot be reintroduced
+only version that cannot go stale, since a dependency cannot be reintroduced
 on a name the module never mentions.
 
 Why the seals and not the docstrings: "do not gate on this" failed twice
@@ -648,7 +648,7 @@ them can be answered exactly in the general case. They need search,
 comparison, heuristics, sampling: the whole dirty toolbox.
 
 **So C is not a prisoner in the sector. C is its resident.** It was
-never banished; it was housed where the tools its work requires already
+never excluded; it was housed where the tools its work requires already
 live — the same tools that may never touch the outside. `C(Δ)` is the
 knock on that door: a call, not a score.
 

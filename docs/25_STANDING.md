@@ -33,7 +33,7 @@ computation, hiding one behind vocabulary is cosmetic.
    2026-08-04 — see the correction below), thermodynamically rather than
    morally, through `dual_pole` / `Vacuity::Stasis` — landed, and
    already consulted by `kernel::capacity_law`. Building the window
-   arithmetic would have implemented a corpse. What the lens owed
+   arithmetic would have implemented an inert mechanism. What the lens owed
    instead was a surface for the row a world stands in, which nothing
    displayed; that is `lens::standing` (`19_LENS` §12).
 

@@ -95,7 +95,7 @@ settle-at-touch seam. The exact decay and what lapses is a §5 ruling.
 - **`world/growth.rs`** — the continuity axes lifespan taxes.
 - **`world/labor.rs`** — `labor_force`, the count turnover shrinks.
 - **`42`↔`41`:** neither ships without the other — a mortality term
-  needs a population to kill, and a population needs a mortality floor
+  needs a population to act on, and a population needs a mortality floor
   or it never turns over. Rule and land them together.
 
 ## 5. The rulings owed

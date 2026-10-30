@@ -175,7 +175,7 @@ nothing is renamed retroactively in a sealed record).
   change is a high-value event and a candidate NS-7 anchor trigger (05 §7.2).
 - **A thermal assault on Coherent sectors** couples the physics (05 §1.2
   `Heat_Net`) to the settlement layer's liveness — the rule must keep it a
-  *raid, not an unrecoverable consensus kill*: SEAL B guarantees the chronicle
+  *raid, not an unrecoverable consensus failure*: SEAL B guarantees the chronicle
   survives, the reckoning *service* degrades and self-heals when the sector
   re-cools (matching the Coherent's physiology: dissociate above `T_c`,
   re-condense with no state loss below it).

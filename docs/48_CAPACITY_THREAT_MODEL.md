@@ -67,8 +67,8 @@ damping, `Σ = −∂ dim H¹`, and "reducing cocycle failure." Four were
 caught; the fifth was written by this document's own author one
 paragraph after arguing against it.
 
-That frequency is the finding. Prose corrections rot (the ledger's own
-lesson: restated facts rot, derived facts cannot), so the violations are
+That frequency is the finding. Prose corrections go stale (the ledger's own
+lesson: restated facts go stale, derived facts cannot), so the violations are
 recorded below as attack vectors with standing defenses and the witness
 that would catch each. Every vector below has a real instance from
 2026-08-01 — none is hypothetical.
@@ -299,7 +299,7 @@ one the code already draws.
 Stated in §10's own idiom, because a new law owes its own threat entry.
 
 *Vector:* if non-composition roots instead of refusing, an attacker
-floods a node with cheap non-composing garbage to force unbounded
+floods a node with cheap non-composing filler to force unbounded
 capacity growth — a denial-of-capacity attack replacing the
 denial-of-service the refusal used to provide.
 
@@ -307,7 +307,7 @@ denial-of-service the refusal used to provide.
 `orbit_lock ≠ ∅` — mere inconsistency is not irreducible difference, and
 only irreducible difference opens a plane. Article II denies standing to a
 state resting on the Ground (`D = GROUND` — nothing circulating above
-the point), so garbage-grown extent carries no weight. Article III
+the point), so filler-grown extent carries no weight. Article III
 prices it at zero: deeds without genuine `ΔD` carry no allocation claim,
 and the claim is vacated.
 
@@ -345,7 +345,7 @@ irreducible difference and a unit farmed through AV-11 are the same
 number in the same bank. **No test applied at withdrawal can separate
 them**, because the difference is in the value's origin, not its form.
 
-Therefore: **withdrawal-side controls are theatre; the defense is
+Therefore: **withdrawal-side controls are ineffective; the defense is
 entirely creation-side.** This is what the engine already believes —
 `verify_work` is replay-complete, `mint_bound` is ladder-pinned and pays
 zero on saturated rungs, and `orbit_lock`'s verdict is frame-invariant so
@@ -360,7 +360,7 @@ of §12a earlier. The bifurcation law is correct and it is expensive.
 
 ### 12c. The symmetry that is available **[derived — ratify or strike]**
 
-One withdrawal-side control is not theatre, because it does not test the
+One withdrawal-side control is effective, because it does not test the
 value — it re-tests the value's provenance, which the chain already
 carries:
 
@@ -471,7 +471,7 @@ and any defence reasoned from either.
 
 ### 13b. The honeypot — §12b was wrong, and withdrawn
 
-§12b claimed withdrawal-side controls are theatre because value is
+§12b claimed withdrawal-side controls are ineffective because value is
 fungible at the exit. **That is refuted by the honeypot, and the
 refutation is structural, not a special case.**
 
@@ -579,7 +579,7 @@ because the correction is the more useful record.
 So there was never a conflict between the law and the engine. **The code
 and the law always agreed; two doc comments in one file said the
 opposite.** That is the C(Δ)=0 lesson repeating exactly — the sealed
-implementation held, and only the gloss rotted. It is also why §13e's
+implementation held, and only the gloss went stale. It is also why §13e's
 first framing was itself an instance of the failure it was reporting:
 it compared a comment against a document and called it a defect in the
 engine, without reading the function underneath.

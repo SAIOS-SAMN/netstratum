@@ -225,7 +225,7 @@ N5/N6). Details and sequencing in 04 §6.
   coherence residuals ride the fiber cards, convergence places by the
   terminal-window step); epoch-shift stacks eras end-to-end on one T
   axis. The torn-tail law measured into 07 §1.2 on the real archives: a
-  killed writer's final NUL/half-written line is an append that never
+  interrupted writer's final NUL/half-written line is an append that never
   landed — the world annexes at its verified prefix. Evidence: clippy
   zero; **105/105 workspace witnesses green** (6 converge pins: annex
   onto one axis with exact offsets and TUniversal stamps; placement
@@ -418,7 +418,7 @@ N5/N6). Details and sequencing in 04 §6.
   Phase 2 (trade execution against the wants the wall now shows)
   stays boarded, not landed. bots.json compat: pre-thermal files load
   unchanged (absent fields = derived seats); an unlawful pinned siting
-  leaves the orb thermally dormant instead of killing the board.
+  leaves the orb thermally dormant instead of halting the board.
   Evidence: clippy zero; **134/134 workspace witnesses green** (129
   baseline + 5 new pins, red-first recorded): thermal genesis
   deterministic on both derived and pinned paths; a default era mints
@@ -439,7 +439,7 @@ N5/N6). Details and sequencing in 04 §6.
   love books open: `bond_flow` (source's syntropic book) /
   `severance_load` (the cutter's entropic book = rate ×
   `bond_notice_window()`, placeholder 8). An orderly end — the bond run
-  to its term — posts nothing (leaving is not a sin); a manual sever or
+  to its term — posts nothing (leaving is not an offence); a manual sever or
   an insolvent settle posts the load (the default is the mid-winter
   cut; recorded v1 rulings: the source side cuts; expiry-insolvency
   posts zero — the term was served; settle sites are collect/sever/
@@ -674,7 +674,7 @@ other cone tip (the exact opposite civilization type):
   sheet's leg: claiming derelicts, recycling ruins, absorbing vented
   heat, riding demurrage — every expansion's bounded counter-force,
   wrapping deterministically within exact rational bounds. Design law
-  unchanged: never evil, never destruction-of-record (SEAL B and the
+  unchanged: never malicious, never destruction-of-record (SEAL B and the
   fold's archival law hold) — the game is complete when both legs of
   the manifold are in play on their sheets.
 
@@ -822,7 +822,7 @@ market board's; union tags allocate from 52 at each landing.
 | AEON-1b | B | open | the conductor orchestration: aeon-voice alignment triggers (11 §1), divergence/confluence replacing charted speciation, resonance/clash friction on wrapped ΔG, four-C fold-eligibility, var rotation + G-sheet convergence seating (11 §5.2) |
 | **THRESHOLD-1** | A (after APERTURE-1) | **Landed 2026-07-29** | the shield: no aperture reaches a pre-solar world in either direction (typed `Shielded` naming the shielded side; a refusal moves nothing anywhere); the crossing: a world is a star system, so a world's first lawful aperture deed crosses both parties into the union — replay-derived (`has_crossed`), resume-carried; `is_shielded` the Watchers' reading. Deferred, recorded: the Watcher surface (shielded-worlds board) renders at BOARD-1 (reflection law); crossing-by-second-star-founding awaits the multi-star charter. Evidence: 2 witnesses (bidirectional refusal moves nothing; leap lifts shield → first aperture crosses both → replay+resume carry it) |
 | **BAND-1** | B | **Landed 2026-07-29** | the space-available law in the registry: the `station` office field (progenitor/watcher/observer/sovereign — append-only, an office never a rank; stationless is the common lawful state); seat widths as placeholder parameters (progenitor 8 per lineage domain — the band grows by domains as substrates elevate; watcher/observer 16; sovereign unbounded); the `NoSeatOpen` refusal names the room, its domain, and its width — a room filled, never a rank refused. Deferred, recorded: capacity as a live fiber reading (minted-plane count) awaits AEON-1b's plane surface. Evidence: the ninth-lithic-seat witness refuses exact while the mesic room seats; unknown office refuses typed; round-trip whole |
-| **ELEVATE-1** | confluence (AEON-1a + THRESHOLD-1) | **Landed 2026-07-29** | the three-gate gauge climb (12_UNION §6, discrete gauge morphodynamics): `elevate(delta)` executes as one `GaugeShifted` receipt, gated on three exact chronicle readings — S settlement (no famine/overheat, vent workspace sealed, demurrage current), T coherence (a loop closed within the year voice, 60 ticks — placeholder constant), G the crossing; refusal names every gate (`ElevationBarred` — each false escapable); the fiber never retreats (the delta is a `Positive` proven at the door — 29_CONSTRUCTION killed `BadClimb`). CLI `elevate` wired 2026-07-30 (the wiring audit); four-C trajectory reading (the fuller T gate) still open. Evidence: 3 witnesses green |
+| **ELEVATE-1** | confluence (AEON-1a + THRESHOLD-1) | **Landed 2026-07-29** | the three-gate gauge climb (12_UNION §6, discrete gauge morphodynamics): `elevate(delta)` executes as one `GaugeShifted` receipt, gated on three exact chronicle readings — S settlement (no famine/overheat, vent workspace sealed, demurrage current), T coherence (a loop closed within the year voice, 60 ticks — placeholder constant), G the crossing; refusal names every gate (`ElevationBarred` — each false escapable); the fiber never retreats (the delta is a `Positive` proven at the door — 29_CONSTRUCTION removed `BadClimb`). CLI `elevate` wired 2026-07-30 (the wiring audit); four-C trajectory reading (the fuller T gate) still open. Evidence: 3 witnesses green |
 | **COUNCIL-1** | D | **Landed 2026-07-29** | the multilateral covenant (tags 52–53): three or more orbs bound alike — same collateral, same quota, one boundary reckoning judging all together (the group over the individual; no early release or slash); a breacher's forfeit divides exactly among the faithful; total breach dissolves (collateral home, breaches still post — the books forget nothing); a council that starts unequal never starts (any member unable to stake refuses the whole seal). The two bypasses as derived readings, never flags: `is_imperial` (extraction past double reciprocity + breaches outweighing fulfilments — placeholder thresholds) and `council_breaches` (diplomacy failed = the slash receipts, counted). Single-world (the archipelago is society enough — the 09 precedent); cross-world councils compose at N5/N6. CLI `council` wired 2026-07-30 (the wiring audit); the delegation deed landed at PLANNER-1. Evidence: 4 witnesses green incl. exact forfeit split + pair conservation + replay |
 | **TECH-1a** | D | **Landed 2026-07-29** | the discovery closure (tag 39, byte-exact) + the kernel solar leap: a world's first thermal opt-in receipts that its people know their sun (once per world; the opt-in is the receipt; `knows_its_sun()` the gating read); pre-solar lawful. Evidence: 4 witnesses green (10 §3a) |
 | **TECH-1b** | D | **Landed 2026-07-29** | the crystallized tree (10 §3b): all five conditions weighed exactly at every year boundary from receipts and committed state; seeded-synthesis node ids (BLAKE3 of the chronicle root — replay re-derives at the identical tick); all five modifiers live in the heat law (insulation ×3/4 heating, discipline ×5/4 encasement, deepening ×5/4 sink, doctrine ×5/4 radiator, long-stores ×1/2 demurrage threaded through every touch/affordability read); idempotent per orb per condition. Deferred, recorded: deepening/long-stores end-to-end arc witnesses; throttle-α policy action. Evidence: 3 witnesses green — held pressure crystallizes discipline beside the doctrine while the one-pair world is cured whole (measured survival); survived cold crystallizes insulation at 3/4 exact; replay+resume carry the tree |

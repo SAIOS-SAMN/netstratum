@@ -240,19 +240,19 @@ STAMP.
 ### The environment trap — read this twice
 
 This is a zero-exit-status environment; commands are wrapped so they
-exit 0. **That wrapper also makes a killed board look finished.** A
+exit 0. **That wrapper also makes a terminated run look finished.** A
 backgrounded `timeout N cargo test …` cut off at the limit exits 124,
 and the harness notification reads *"completed (exit code 0)"* — the
 wrapper's status, not cargo's. The partial log tallies a clean
 "13 passed, 0 failed", which is indistinguishable from success.
 
 **A board is green only when it is proven to have finished:**
-1. capture and read `EXIT $?` from the cargo run itself (124 = killed);
+1. capture and read `EXIT $?` from the cargo run itself (124 = timed out);
 2. count `Running` lines against the number of test files, and account
    for every missing one;
 3. confirm the known-slow tests actually reported `ok`.
 
-Identified: a killed board was nearly reported as green, twice. `conductor`'s
+Identified: a terminated run was nearly reported as green, twice. `conductor`'s
 `mint_loop_pins` takes ~26 minutes; budget for it and do not wrap it in
 a short timeout.
 

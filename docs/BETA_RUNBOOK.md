@@ -35,7 +35,7 @@ cargo run -p conductor -- --var var --cycles 200 --cadence 2
 ```
 
 - `--cycles 200` — stop after 200 beats (omit, or pass `0`, to run
-  forever at the cadence until killed).
+  forever at the cadence until stopped).
 - `--cadence 2` — 2 seconds of wall-clock time per beat (tune to taste;
   lower is faster, not "more accurate" — beats are exact-rational, not
   time-sensitive).

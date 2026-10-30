@@ -33,7 +33,7 @@ chronicle.tlv  ──replay──►  World  ──scribe──►  state.tlv + 
 
 **Not carriers:** `*.json`, `*.jsonl`. The engine does not write them, does
 not load them, and does not migrate them. A leftover file on disk is
-garbage — ignored. The scribe may delete known residues when it rewrites
+residue — ignored. The scribe may delete known residues when it rewrites
 a world so the tree stays clean; that is hygiene on the write path, not
 a second truth.
 

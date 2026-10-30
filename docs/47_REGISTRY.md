@@ -36,7 +36,7 @@ it has zero authority by construction (`22_CONTAINMENT` §10ter.c).
 
 
 **Renames already survived, recorded so a reader does not chase a
-ghost.** Each left name is dead and appears here only as history: the
+retired name.** Each such name is retired and appears here only as history: the
 boundary read was formerly `potential_form` (renamed when V took no
 operator); the arbor was formerly the spine; the ledger was formerly a
 name struck whole by Charter §11; and `rank_is_defined` was formerly
@@ -138,7 +138,7 @@ one who wards it. Two ends of one relation, never two names for one job.
 > **Anyone with the ability to unlock the progenitor role is an ancient.**
 
 That is an operational definition and it needs no ceremony, no age, and
-no grant. It also removes the mysticism entirely: an ancient is not
+no grant. It also removes the vagueness entirely: an ancient is not
 someone who *is* something, but someone who *can do* something, and the
 thing is checkable.
 

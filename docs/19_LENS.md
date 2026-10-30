@@ -284,7 +284,7 @@ peel is descended only on approach.
 (`orbital/kinetic.rs`, LAW-13): *the entity cannot see deeper than its
 capacity allows, regardless of pressure — the effective limit is
 `min(requested, κ)`.* That makes level-of-detail a lawful property of
-the observer rather than a performance hack, and it means a lens can
+the observer rather than a performance shortcut, and it means a lens can
 never be pressured into rendering more than the observer has standing to
 see.
 

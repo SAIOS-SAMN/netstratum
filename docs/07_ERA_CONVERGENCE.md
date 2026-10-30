@@ -13,7 +13,7 @@ time; everything marked *law* binds.
 root) whose receipts carry only local stamps — era1's `stamp 65` and era2's
 `stamp 52` are incomparable numbers on unrelated timelines, and no era ever
 persisted the universe card. Boot today is a blind genesis event beside a
-graveyard: nothing reads the archives, every run mints fresh founding
+archive: nothing reads the archives, every run mints fresh founding
 reserves, and any naive merge would interleave same-stamp receipts from
 different timelines — corruption by converging timelines.
 
@@ -39,10 +39,10 @@ world onto one timeline and one chart — by annexation, never by merge.
    excluded from the timeline, left on disk, named in the read. Never
    merged, never deleted.
    **The torn-tail law (measured on the real archives, 2026-07-27):** a
-   killed writer leaves a final line of NUL bytes or a half-written
+   interrupted writer leaves a final line of NUL bytes or a half-written
    record — an append that never completed. By SEAL B (what has no
    receipt does not persist) the world annexes at its **verified
-   prefix** and the tear is recorded in the read. Pure-garbage lines
+   prefix** and the tear is recorded in the read. Unparseable lines
    carry no receipt data and are skipped — if one ever hid a lost
    receipt, the chain law breaks at the next predecessor link and the world
    quarantines anyway. A content-bearing malformed line anywhere but
@@ -139,7 +139,7 @@ chronicle-seeded (axes beacon-drawn from the terminal digest, clade
 era · world · line. One wake per seal. The aeon-voice trigger stays
 the orchestration's (deferred, recorded). The original spec:
 
-The graveyard is frontier read actively: sealed eras are not scenery,
+The archive is frontier read actively: sealed eras are not scenery,
 they are a door that opens both ways. The lawful Antaran shape:
 
 - **What crosses.** Nothing crosses that is not receipted. An incursion

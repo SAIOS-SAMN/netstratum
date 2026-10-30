@@ -9,7 +9,7 @@
 
 A directive names an owner, a cure, and how the cure is checked. It is
 discharged by landing or by being struck — never by a test going green,
-because a green test is exactly what a costume produces.
+because a green test is exactly what a facade produces.
 
 ---
 
@@ -44,7 +44,7 @@ clippy-green.
 
 ---
 
-## R-D2 · the quorum is A costume — the clock never asks anyone
+## R-D2 · the quorum is a facade — the clock never asks anyone
 
 **Status:** open · **Owner:** operator ruling required (strike or build)
 · **Severity:** a constitutional mechanism that does not exist.
@@ -72,7 +72,7 @@ timekeeper from another — is ignored. Therefore:
 3. **`TickRead::QuorumOpen` is therefore unreachable in production.**
    `walk`'s match arm at `vrp.rs:81` is dead: the count is always 3.
 
-**This is the costume, precisely.** `ns3_conformance` hand-builds
+**This is the facade, precisely.** `ns3_conformance` hand-builds
 `Refuses`, feeds it straight into `walk()`, and asserts `QuorumOpen`.
 **The test passes and proves nothing about the system**, because it
 bypasses the only producer of attestations there is. The types say
@@ -109,7 +109,7 @@ by production code, or must not exist.
 
 ---
 
-## R-D3 · the costume detector — a standing test, not vigilance
+## R-D3 · the facade detector — a standing test, not vigilance
 
 **Status:** proposed · **Owner:** this lane · **Severity:** the general
 cure for R-D2's class.
@@ -136,8 +136,8 @@ with anything ruled deliberately-latent, by name, so the list is the
 review conversation.
 
 **And it must have teeth before it is trusted** — `recurrence_guard`'s
-own rule 7: prove the detector on a synthetic costume first. A guard
-that cannot bite is the vacuous check this directive exists to kill.
+own rule 7: prove the detector on a synthetic facade first. A guard
+that cannot bite is the vacuous check this directive exists to eliminate.
 
 ---
 

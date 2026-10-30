@@ -255,7 +255,7 @@ claim ships proven-by-argument.
 **A habit this refresh earned:** three of the five entries above went
 stale by naming a path or a count that the tree later moved. When
 recording a gap, anchor it to a symbol or a law rather than a line
-number where possible — line numbers rot silently and take the finding with
+number where possible — line numbers go stale silently and take the finding with
 them.
 
 ## 10. Session habits that kept this clean

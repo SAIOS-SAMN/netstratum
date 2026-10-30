@@ -49,7 +49,7 @@ first, never by searching the tree.
    conservative law comes to read as a destructive one, because
    "converged" invites minimization and minimization discards exactly
    the residual the economy mints on. The lesson beyond the fix: **a
-   summary word attached to an equation is a restatement, and rots like
+   summary word attached to an equation is a restatement, and goes stale like
    one.** Where this ledger names a zero point it states what the zero
    measures, never what the zero is worth.
    **Chapter five (the missing leg, 2026-08-01):** this ledger carried
@@ -66,7 +66,7 @@ first, never by searching the tree.
    which §0.2 owed. Read as arithmetic, §1–§6 was a dissipation engine
    with bounds on it. The lesson: **a map that inherits one leg of a
    dual has not simplified the law, it has reversed it** — selection
-   rots exactly as a gloss does (chapter four), and it is harder to
+   goes stale exactly as a gloss does (chapter four), and it is harder to
    see, because every row it kept is true.
    **Chapter six (the citation that outlived its referent, operator
    ruling 2026-08-01):** the kernel charter's §5a named `cfe::opposition`
@@ -83,7 +83,7 @@ first, never by searching the tree.
    it asserts a landing that is not there. Every landed row owes a live
    `crate::fn` that resolves; a citation is a claim, and claims are
    checked, never remembered.
-   All drift chapters share the root: restated facts rot; derived
+   All drift chapters share the root: restated facts go stale; derived
    facts cannot.
 4. Documents keep their equations inline where the mechanic lives
    (spec + mechanic + vectors in one landing stands). This ledger adds
@@ -1314,7 +1314,7 @@ outright: *"just as `T_eq⁴` governs the physical thermodynamics of a
 sector, the cohesion ledger governs its social thermodynamics."*
 derived at read, never stored. Value-weighted, never count-weighted (a
 thousand toy promises must not wash one giant breach). Absence is zero,
-not sin: inaction mints no receipt and reads as an empty syntropic
+not an offence: inaction mints no receipt and reads as an empty syntropic
 book, never as a phantom entropic entry.
 
 **S2 · The syntropy ratio (the whole-world read).** Landed

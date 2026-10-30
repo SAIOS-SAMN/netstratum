@@ -187,7 +187,7 @@ by the same name and clause numbers.
 bound and no artificial ceiling may be imposed on the uplift `∂Δ` as it
 approaches luminal capacity.*
 
-**Exact realization — three clauses, and the second kills a
+**Exact realization — three clauses, and the second rules out a
 misreading.**
 
 1. **The floor is occupancy** (operator ruling 2026-08-02). `GROUND`

@@ -154,7 +154,7 @@ walks — exactly the way function and tier read today.
   rides the hit, appended per the §4.2 extension law; one line from
   them inscribes it.
 - **INCURSION-1 — the archived-sheet door.** The Antaran shape:
-  entities out of the fold's sealed eras (the graveyard is frontier —
+  entities out of the fold's sealed eras (the archive is frontier —
   07 §3 salvage read as an active door, not passive ruins), stressing
   the maintainer surface. Composes with NOVEL-1 succession.
 - **WARDEN-1 — the elder world.** A dormant precursor star holding

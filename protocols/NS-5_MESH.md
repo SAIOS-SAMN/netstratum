@@ -78,7 +78,7 @@ N7 (anchor), where the mesh meets parties it cannot re-compute.
    moves by receipted Handoff, never by race: the yielding node seals
    a handoff receipt naming the successor; the taking node's first
    append cites it. A fork (two chains sharing a prefix) is not a
-   catastrophe — it is a divergence: both branches live, the ledger's
+   failure — it is a divergence: both branches live, the ledger's
    rotation law names them, and convergence annexes both (annex,
    never merge — 07 §1). The fork's exact measurement is §2.3's
    diverged refusal — the residuals carried whole are what the annex
@@ -123,8 +123,8 @@ N7 (anchor), where the mesh meets parties it cannot re-compute.
 > `Flux { sources, sinks, balanced }`, the count of divergence poles.
 > That is a reading in the D/V algebra and is unrelated to this
 > instrument beyond the shared word. A sweep on the word alone would
-> gut the capacity meter, exactly as a sweep on "vacuity" would have
-> gutted the circulation it was built on.
+> dismantle the capacity meter, exactly as a sweep on "vacuity" would have
+> dismantled the circulation it was built on.
 
 The text below is kept as the record of what was specified, and is
 **not implementable law**.
@@ -295,7 +295,7 @@ does not know skips the record, never crashes.
 ### 3.3 The carrier (the transport ruling, 2026-07-30)
 
 Peers exchange `chronicle.tlv` segments — the NS-3 §2.4 on-disk
-framing is the wire; there is no second encoding of history. A dumb
+framing is the wire; there is no second encoding of history. A passive
 file/directory adapter carries whole files or appended tails
 (`persist::sync` appends only what the far side lacks). The engine
 never opens a socket; every adapter is logic-free (SEAL C). 100% of
@@ -516,7 +516,7 @@ Cross-world communication is a lawful, scope-bounded boundary — never
 an un-sandboxed socket. At genesis every world instantiates its own
 IPSAL bridge entity (`BridgeGenesis { bridge_id, scopes,
 generation_tag }` — tag claimed at the landing cadence). The MESH-1c
-TCP adapter is dumb transport only (SEAL C); every remote handshake
+TCP adapter is passive transport only (SEAL C); every remote handshake
 and cross-world interaction terminates at the bridge, which enforces
 containment: read and consile open by default; yield/handoff require
 explicit grant receipts. The bridge is the world's one comms door

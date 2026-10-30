@@ -8,8 +8,8 @@ physics deciding for them. Downstream of `00_CHARTER`, `51_COGNITION`,
 
 The port supersedes the half of `51_COGNITION` §1 that calls the Mind a
 *stochastic, float-tolerant proposer that guesses candidate generators*. That
-half is the costume. **Search, utility scores, and Policy `if/else` are the
-costume.** An engine that *enumerates* or *samples* candidates and lets an exact
+half is the facade. **Search, utility scores, and Policy `if/else` are the
+facade.** An engine that *enumerates* or *samples* candidates and lets an exact
 verifier dispose is brute force wearing cohomology; a partition-draw over
 weighted candidates is the same sweep-and-pick with a prettier weight. Both are
 retired here. The Universe half of §1 — exact `ℚ/ℤ`, deterministic, `kernel::admits`

@@ -26,8 +26,8 @@ dimensions open), and band capacity is a **reading of the fiber**, not a
 stored constant. Nothing outranks anything; a band names how much room a
 kind of station has, and the room increases.
 
-**There are no slaves in this universe** (ruling 3). No band and no class
-is servitude; every station is a chosen niche, receipted, and every niche
+**No entity in this universe is owned by another** (ruling 3). No band and
+no class is servitude; every station is a chosen niche, receipted, and every niche
 can elevate (§6). Economic function (mining, harvesting, condensation,
 weaving) is a **property of a civilization's metabolism and world**, not a
 caste: a single-planet grazer that drinks the condensation of methane skies
@@ -331,7 +331,7 @@ difference was chosen — only whether it is irreducible. To become
 permanent it must return genuinely different, **not differently
 described**, and meet someone at a seam willing to converge without
 either of them folding the other away. The engine refuses to confuse
-being reframed with being changed, so the story cannot cheat it either.
+being reframed with being changed, so the story cannot circumvent it either.
 
 **And it cannot be a redistribution.** Moving content between poles at
 fixed `Δ` is the zero-sum shuffle that mints nothing (law 3,

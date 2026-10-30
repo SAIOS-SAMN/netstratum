@@ -428,7 +428,7 @@ Defense (MKT) is **not** “more HP on the Exchange.” It is typed posture:
 
 ### 10.2 Species-relative MKT
 
-| Line | Market attack that “kills” them | Defense emphasis |
+| Line | Market attack that defeats them | Defense emphasis |
 |------|----------------------------------|------------------|
 | Mineral | Alloy/iron spot collapse; scrap-linked Notes | Clear seal on industrial cargo |
 | Biotic | Ration futures panic; Habitat Share drain | Dividend gates; ATM+MKT joint |

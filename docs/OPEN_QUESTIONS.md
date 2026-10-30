@@ -66,7 +66,7 @@ load-bearing, not tunable:
 **What could reopen this vector, honestly:** a deterministic exact-rational GPU
 arithmetic path (finite-field, reproducible across hardware) *plus* a real
 succinct proof of each interior transition (not boundary agreement). At that
-point it is no longer "holographic field magic" — it is GPU-accelerated ZK
+point it is no longer an unexplained "holographic field" — it is GPU-accelerated ZK
 over the existing chronicle, which is a legitimate performance project that
 does not touch the SEALs. That is the form in which it may return.
 

@@ -75,7 +75,7 @@ state-model laws, and earned gotchas live in `HANDOFF.md`.
 > so every "full board" run silently skipped the suites ordered after
 > it (all of conductor's and the CLI's). Boards were reported green
 > that never ran them. Run boards with `--no-fail-fast`. Surfaced by
-> the sweep: `conductor_pins`' two era pins wedged >10 min (pre-existing
+> the sweep: `conductor_pins`' two era pins stalled >10 min (pre-existing
 > at `4a37e53`, removed 2026-08-12 — condition-driven eras via
 > `run_era_until`/`_among` + the optimized test profile; suite now 64s);
 > still red and PRE-existing, owed diagnosis:
@@ -771,8 +771,8 @@ it lands.
 
 ## 6. Known dark spots (all deliberate, none forgotten)
 
-- 3 quarantined `--closed-*` corpses in `var/worlds` — real pre-fix
-  corruption, preserved and named; leave as ruins.
+- 3 quarantined `--closed-*` remnants in `var/worlds` — real pre-fix
+  corruption, preserved and named; leave as preserved records.
 - NS-2 / NS-4 / NS-5 / NS-7 are stubs by build order; N7 settlement gated
   by charter §7 + economy guardrail 5 (regulatory review). Nothing on any
   chain.

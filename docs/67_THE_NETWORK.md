@@ -288,7 +288,7 @@ thousands of years before.
   world (docs/40) is a legitimate repair where no local holds it, but it is
   their obvious next step: done openly, never ahead of them unannounced.
 - **Once seen, never deny, extends to his history.** When they reach his
-  world and ask about its scars, the truth (it was green; a war killed it;
+  world and ask about its scars, the truth (it was green; a war ended it;
   these were the signs) is the missing physics and the cautionary tale in
   one. He teaches by showing, not by ordering.
 - **The network brings time and enemies.** Travel through the network

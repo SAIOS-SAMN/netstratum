@@ -16,9 +16,9 @@ Subordinate to `00_CHARTER.md`, `26_ARTICLES.md`, `27_EVIDENCE.md`.
 
 ---
 
-## §1 One defect, two costumes
+## §1 One defect, two forms
 
-A judge and a constant are the same thing wearing two costumes: **a
+A judge and a constant are the same thing in two forms: **a
 decision made outside the structure and imposed on it.**
 
 - A **judge** is a decision made *after* construction: the state was
@@ -117,7 +117,7 @@ honest so "placeholder" cannot quietly become "permanent."
 ## §4 The order to do it in
 
 1. **The shape refusals** (~20 arms) — each becomes a constructor;
-   highest value per edit, no wire impact, and every kill shrinks the
+   highest value per edit, no wire impact, and every removal shrinks the
    judge.
 2. **The conductor's pacing constants** — flagged in `archive/PICKUP.md` §8c as
    *"no cited law"* already; convert to measurements of the board.
@@ -138,7 +138,7 @@ literals in `src/`, counted by pin, expected to fall monotonically.
 
 **Operator, 2026-08-05** (paraphrased): "judging" and "lawful" are not
 mechanical states of machinery; they are esotericism, with bias
-bleeding over into the semantics.
+leaking into the semantics.
 
 Correct, and the defect ran deeper than the functions: the vocabulary
 itself imported an authority frame. A judge has discretion; a verdict is
@@ -146,7 +146,7 @@ pronounced; "lawful" appeals to an order outside the machine. A machine
 has none of those — a transition is defined or undefined, a shape
 constructs or faults, a gate admits what the relation contains. Naming
 the mechanism after a courtroom is the same bias law 9 bars from
-premises, bleeding in through the identifiers.
+premises, leaking in through the identifiers.
 
 **Retired from machinery (renamed 2026-08-05):**
 

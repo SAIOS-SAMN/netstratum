@@ -88,7 +88,7 @@ codes all refuse typed.
 
 **The replay-complete law (derived this session — do not weaken).**
 `verify_certificate` alone re-derives the hash chain; it does not
-prove the program solves the task. A cheater can seal an intact chain
+prove the program solves the task. A dishonest prover can seal an intact chain
 over a wrong output. The kernel-level verification is therefore the
 full replay, all three or refuse:
 

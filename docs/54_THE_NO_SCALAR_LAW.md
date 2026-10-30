@@ -16,7 +16,7 @@ There is no terminal-projection exception. A draw over options is a draw over th
 graded classes themselves, not over a vector of scalar weights. A price is the
 homological complexity of an obstruction, carried as its class, not a number.
 
-This generalizes the scalar-collapse-derivation-law (ONT-2/3/4, which killed the
+This generalizes the scalar-collapse-derivation-law (ONT-2/3/4, which removed the
 stored-scalar recurrence collapses) to an absolute: not "derive the scalar from
 geometry" but "do not form the scalar at all."
 
