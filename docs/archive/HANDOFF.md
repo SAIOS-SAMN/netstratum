@@ -31,7 +31,7 @@ Do not re-open dual-law hubs or u16 clade unless directed.
    ideology board's).
 4. `docs/03_SUBSTRATE_CONTRACT.md` — mechanic → primitive → witness
    (coder-01 authority).
-5. The design doc for whatever you touch (05 thermal, 09 ideology, 10
+5. The design doc for whatever is touched (05 thermal, 09 ideology, 10
    tech, …) and `protocols/NS-1_DOP.md` §2.3 (the permanent tag
    registry).
 
@@ -181,7 +181,7 @@ tracked, never a source of truth.
 ## 8. Compiler-enforced connectivity (expected breakage)
 
 Adding a `ClosureEvent` variant intentionally breaks three exhaustive
-matches until you add arms. **Paths corrected 2026-08-04** — all three
+matches until arms are added. **Paths corrected 2026-08-04** — all three
 had moved, and the crate the old text named no longer exists:
 
 | match site | was |
@@ -200,7 +200,7 @@ judge judges at all, and it is a `matches!` list — adding a variant
 does not break it, so a new deed silently becomes `Unjudged`. That has
 already happened: `BookPosted` is live and uncovered, and the pin meant
 to prove totality enumerates a hand list of 64 against an enum of 71
-(Pickup §0). **When you add a variant, add it to `covered()` by hand,
+(Pickup §0). **When adding a variant, add it to `covered()` by hand,
 or make the pin exhaustiveness-checked so the compiler starts
 enforcing what this section assumes it does.**
 
@@ -253,9 +253,9 @@ Strike entries here when their witnesses land; add new ones when a
 claim ships proven-by-argument.
 
 **A habit this refresh earned:** three of the five entries above went
-stale by naming a path or a count that the tree later moved. When you
-record a gap, anchor it to a symbol or a law rather than a line number
-where you can — line numbers rot silently and take the finding with
+stale by naming a path or a count that the tree later moved. When
+recording a gap, anchor it to a symbol or a law rather than a line
+number where possible — line numbers rot silently and take the finding with
 them.
 
 ## 10. Session habits that kept this clean

@@ -58,7 +58,7 @@ seed for a universe with nothing yet to buy.
 list because it is interesting, not assigned because a metabolism
 implied a temperature. The axes of `04` §1 (disposition, metabolism,
 perception) are what the list is drawn from; they stop being the thing
-that decides where you land.
+that decides where the player lands.
 
 ## §2 The three acquisition paths
 
@@ -222,8 +222,8 @@ deducted in the reading, and it settles for real at the next genuine
 touch. Vaulted stores keep their exemption unchanged.
 
 **What it makes possible** is everything downstream in this document:
-you cannot tithe, price a commission, or judge a founder's solvency
-until a line's economy adds up to one number.
+no tithe, commission price, or judgment of a founder's solvency is
+possible until a line's economy adds up to one number.
 
 ## §6 The algorithms — nothing here is a constant
 
@@ -274,7 +274,7 @@ at the touch, in this order:
 **A ward's income is a positive act, not a levy.** It is earned by
 having built the capacity to capture, exactly as a colony earns joules
 by raising a shell. A ward that builds nothing captures nothing — not
-because it is punished, but because capture is a thing you construct.
+because it is punished, but because capture is a thing that is constructed.
 
 **This dissolves the divergence rather than counterweighting it.** The
 kernel lane's finding (c0fc819) was that `burned = decay · (1 − share)`
@@ -1128,10 +1128,10 @@ now."
 is negative research, measured on the research axis** — the same term,
 the other direction.
 
-That is how *"how stupid can you be"* becomes a number. A civilization
+That is how the cost of mismanaging a world becomes a number. A civilization
 that degrades its own substrate has failed to model it, and the failure
 is priced in the only currency the engine has: what it can recurrently
-produce. Nothing calls it stupid; its ceiling does.
+produce. Nothing passes judgment on it; its ceiling does.
 
 ### 6j.5 Greed, and the general rule
 
@@ -1158,8 +1158,8 @@ PLANETARY  regeneration(S) ≤ r·S_max/4. STOCK-limited, depletable, and
            degradable on the slow clock.
 ```
 
-**The sun is a flow you can only tap faster; the planet is a stock you
-can destroy.** The engine already carries the correct answer to this —
+**The sun is a flow that can only be tapped faster; the planet is a
+stock that can be destroyed.** The engine already carries the correct answer to this —
 the encasement shell captures stellar heat into joules, and joules mint
 *only* by capture and never by fiat. **"Harvest the star, not the world"
 is not a moral; it is the shape of the bounds.**

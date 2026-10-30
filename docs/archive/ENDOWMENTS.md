@@ -10,7 +10,7 @@
 > from. The measurements and the reasoning are kept as the record of why
 > the ruling was made.
 
-# Endowments — standing we are entitled to and have not claimed
+# Endowments — standing that is due and has not been claimed
 
 **Status:** live register (record lane, opened 2026-08-03). Operator
 charge: find the endowments still unclaimed, keep the
@@ -260,9 +260,9 @@ measurement. Booked for a ruling, not resolved by inference.
 
 ## §5 E5 — the cleave's possibility space is constant, and landed law says it should compound
 
-**Operator, 2026-08-05:** *for every divergent line you should have a
+**Operator, 2026-08-05:** every divergent line should have a
 multiplicative event where the possibilities of possibilities grows as
-the upper line compounds on the lower lines — these are endowments.*
+the upper line compounds on the lower lines — these are endowments.
 
 This is the register's own definition exactly: standing landed law
 already grants, which no code path has ever claimed.

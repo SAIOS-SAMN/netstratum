@@ -92,7 +92,7 @@ their yield multipliers:
 
 A rich-seam extractor yields 9/4 iron/tick; a barren one 3/4. Upkeep does
 not scale with terrain — rich tiles are strictly better, barren tiles are a
-cost you zone over only when the map forces you. Now tile choice matters and
+cost zoned over only when the map forces it. Now tile choice matters and
 the map is worth reading before the first build.
 
 ### 2.6 Adjacency (D3)

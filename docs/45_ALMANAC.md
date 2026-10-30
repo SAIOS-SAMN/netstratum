@@ -24,8 +24,8 @@ tradeable), WANT-1 (elements made wanted), G4 at the mesh (elements
 made confirmable), Ground step (conductor prospect/assay).
 
 **The one law over this whole chapter:** content enters through a
-deed, never through a commit. We author laws, seeds, and small exact
-tables; the chronicle writes the periodic table. Every mechanic below
+deed, never through a commit. Laws, seeds, and small exact tables are
+authored; the chronicle writes the periodic table. Every mechanic below
 is discrete, exact-rational, chronicle-seeded, and replayable — the
 almanac's "intelligence" is a reading of history (Charter §9), never
 an oracle.

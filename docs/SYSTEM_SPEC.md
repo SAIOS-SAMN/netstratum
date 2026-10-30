@@ -263,8 +263,8 @@ not that difference was spent. The genuine difference is the H¹ class:
 `Π_G` strips only the coboundary — the coordinate-frame artifact that
 was never difference — and what survives is the cocycle class, which C
 cannot see. A state may read zero and carry a large irreducible core.
-Reduction removes contradiction and frame; **we never discard
-residuals** (kernel Charter I6, *no difference dies without account*).
+Reduction removes contradiction and frame; **residuals are never
+discarded** (kernel Charter I6, *no difference dies without account*).
 
 **The dimensional-resolution cycle (replaces gradient descent).**
 
@@ -331,7 +331,7 @@ mirror made of permission"; mirror is deprecated as a framing, 12 §2c).
 
     receive(segment):
       for step in segment:
-        lawful(prior, next, step)?      // my kernel re-judges
+        lawful(prior, next, step)?      // this kernel re-judges
         commit[k] == H(...)?            // chain integrity
       accept | refuse-typed(break named)
 

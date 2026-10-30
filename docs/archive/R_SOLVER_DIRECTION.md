@@ -13,8 +13,8 @@ ARC-AGI-2 device this file's geometry reading feeds into.
 
 ## §0 The incident this file opens with
 
-An out-of-memory kill took down the operator's machine. The cause was
-mine: `solve` was given a `HashSet<Vec<Grid>>` of every distinct image
+An out-of-memory kill took down the operator's machine. Identified
+cause: `solve` was given a `HashSet<Vec<Grid>>` of every distinct image
 tuple reached, cloned in, unbounded. Reverted at `HEAD`; the tree carries
 none of it.
 
@@ -22,7 +22,7 @@ The failure is not incidental to the subject. **Raw images have no
 floor**, so a set of them grows without bound. A cohomology class does
 have a floor — §2. Deduplicating by hashed grid was flat indexing, which
 is precisely what `DIMENSIONAL_RESOLUTION.md` names as the thing that
-destroys the geometry. AI implementor identified: it had built brute force
+destroys the geometry. Identified: brute force had been built and
 presented as geometry, and it ran the machine out of memory.
 
 ## §1 The solver imports the relational engine and never calls it
@@ -51,8 +51,8 @@ and witnessed, while the solver enumerates a cartesian product beside it.
   — *"substrate cognition replaces adapter-side rule derivation"*
 
 The retired list is this lane's plan. The search dispatch is netstratum's
-`solve`; the derivation producers are §3c, which the AI implementor proposed the day
-before as the fix. They built both, and moved past both.
+`solve`; the derivation producers are §3c, proposed the day before as
+the fix. Both were built, and both were then superseded.
 
 **The live path:**
 
@@ -86,7 +86,7 @@ opposite of testing 52 060 candidates against it.
 > the irreducible core after every expansion.
 >
 > Expansion bounded by validation gates. Collapse bounded by
-> cohomological projection — **you cannot fold past the irreducible form;
+> cohomological projection — **no fold passes the irreducible form;
 > the H¹ class is the floor.**
 >
 > The cycle: unfold → fold → measure the residual → unfold again if

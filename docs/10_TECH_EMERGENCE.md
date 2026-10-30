@@ -57,7 +57,7 @@ under sustained pressure or surplus. No two worlds need share a tree.
 
 One node per condition kind per orb (idempotent); prerequisites = the
 condition's own history, not a predecessor-pointer web (predecessors emerge naturally:
-you cannot survive 8 famine-years without first being cold).
+no line survives 8 famine-years without first being cold).
 
 ## 3a. TECH-1a landed (2026-07-29) — the discovery closure + the solar leap
 
@@ -115,7 +115,7 @@ condition fixes the concept (insulation · discipline · deepening ·
 doctrine · stores), the node hash draws the voice — so two lines
 crystallizing the same condition speak of it differently ("keening
 doctrine" on one world, "patient doctrine" on another). The hash is the
-identity; the name is the line's own tongue. You cannot stack names on
+identity; the name is the line's own tongue. Names cannot stack on
 rungs, because no two lines share a chronicle root.
 
 **NOVEL-1 landed (2026-07-30, coder-03) — the succession law.** When a

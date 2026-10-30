@@ -16,7 +16,7 @@ first, never by searching the tree.
 2. **The row-claim convention** (the tag-claim convention's counterpart):
    a landing that inscribes a new equation or algorithm claims its row
    here in the same landing, before code uses it. After any merge,
-   verify your row survived.
+   verify the row survived.
 3. **The founding lesson.** Equation drift has already happened once:
    the predecessor's README said the coherence was L1 while the code
    computed sum-of-squares (recorded at BUILD_ORDER §1a). Scattered
@@ -25,7 +25,7 @@ first, never by searching the tree.
    dop.rs tag header. **Chapter two (the proportional law, operator ruling
    2026-07-31):** the ruling reversed which side of that drift was
    law — squares are barred as aggregators of difference everywhere
-   (they are the mathematics of minimization; ours is measurement);
+   (they are the mathematics of minimization; this law's is measurement);
    the L1 forms below are the standing law. Squares and quartics
    survive only as physical law (the T⁴ discipline, T1).
    **Chapter three (the missed sixth, arch-02's coverage audit,
@@ -172,8 +172,8 @@ substance, because substance cannot stand in a plane that was never
 opened (`PlaneUnearned`). See D7 for the crossing itself.
 
 **`D` is A dimension, never an inventory** (operator ruling 2026-08-02:
-*your entire definition is wrong if dimensional capacity is a count of
-rooms*). `D` is the rank of the cycle space — how many independent
+the whole definition is wrong if dimensional capacity is a count of
+rooms). `D` is the rank of the cycle space — how many independent
 structures the manifold sustains — and a rank is a dimension, not a
 tally. **No `planes_opened` counter is ever added to `D`**: a scalar
 accumulator would make the progenitor a ledger clerk handing out keys,
@@ -204,7 +204,7 @@ reads.
 
 **The universe is the D-STORE** (operator ruling 2026-08-02). There is
 no separate store to point at, and asking for one is a category error —
-**you cannot keep the container in something it contains.** `D` is not
+**the container cannot be kept in something it contains.** `D` is not
 recorded in the universe; `D` is the universe's extent, the room within
 which anything is held at all.
 
@@ -239,12 +239,12 @@ definition. The fiber was never a stack of numbers; it is a chord.
   ledger, and *monotonal* — one tone — never appears as a synonym.
 
 **Article IV's non-decrease is derived, not decreed.** *Capacity never
-retreats* was written as an axial law. It follows from what `D` is: you
-cannot un-make room that things are standing in.
+retreats* was written as an axial law. It follows from what `D` is: room
+that things are standing in cannot be un-made.
 
 **The floor is occupancy, not the Ground** (operator ruling 2026-08-02
-— *if the universe shrinks below the capacity for what is already in
-it, then we have a problem*). `GROUND = 1` is the floor of an empty
+— a universe that shrinks below the capacity for what is already in
+it is a problem). `GROUND = 1` is the floor of an empty
 universe. A universe holding structure that needs `k` tones has a floor
 of `k`:
 
@@ -346,7 +346,7 @@ shape in the row meant to exclude it.
                    holding two things, but the join `Node(V) ++ Node(D)`
                    between two nodes that stay two (operator ruling
                    2026-08-02). `++` concatenates; it does not add,
-                   average, or reduce. Read the pair and you are reading
+                   average, or reduce. Reading the pair is reading
                    the bond; there is no third object to read.
 
                    This is why `Ω ≢ V` was owed (`17_CAPACITY` §3,
@@ -1036,7 +1036,7 @@ row's earlier gloss is struck). Zero says the relations compose,
 say the states are identical, and it does not say difference was spent.
 Genuine difference is the H¹ class — C3 preserves it by construction
 (see that row) and C cannot see it, so a state may read `C(Δ) = 0` and
-carry a large irreducible core. **We never discard residuals** (I6:
+carry a large irreducible core. **Residuals are never discarded** (I6:
 *no difference dies without account*).
 
 **C3 · The coboundary reduction.** Landed — `rfa_core::coboundary_reduce`.
@@ -1123,8 +1123,8 @@ only its enforcement home moved, into kernel I1/I6.
 ## §6 Economy and thermal — the manifold dual (syntropy ∥ entropy)
 
 **The two books are now symmetric** (operator ruling 2026-08-03:
-*ensure you have the inverse of divergence in convergence, and
-entropy_vented into syntropy_contained*).
+the inverse of divergence must stand in convergence, and
+entropy_vented in syntropy_contained).
 
 ```text
     ColonyOrb.entropy_vented      what the orb SHED to the void      tag 28

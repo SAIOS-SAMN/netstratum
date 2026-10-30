@@ -44,7 +44,7 @@ infinity is scale: R is reach.
 - **The luminal bound is R's rate bound.** `2δ ≤ 1` (docs/94 §2): nothing
   moves R by more than the ring a K-step.
 
-## 3. The source's three inputs, from our own universe
+## 3. The source's three inputs, from Netstratum's own universe
 
 The law (`mycelium::physics::outflow`, n = 7 read off the coordinates):
 `K = L − σ∧(σ·L)/σ²`, `v = P·K`, `N = P∧v`, and on each base plane its
@@ -128,7 +128,7 @@ trajectory is realigned on that bond.
   bounded by the whole.
 - Built: a body's push is `½·Q/(A + Q)` (`pulse::push_of`), at most ½, the
   luminal bound itself (it was `½·Q/A`, past ½ wherever the open outweighed
-  the held, Z 31 among our own atoms); a kind's open share is `Q/(A + Q)`
+  the held, Z 31 among Netstratum's own atoms); a kind's open share is `Q/(A + Q)`
   (`flows::open`, it was `Q/A`, past one for the same kinds).
 - Withdrawn: the rest reach `H·A/Q` (infinite at Q = 0) and the spacing
   `(2A + Q)/(2A − Q)` (a pole at Q = 2A), both sent to Xylarium.

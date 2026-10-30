@@ -744,7 +744,8 @@ claims a seat and moves no key.
 
 ## 3a-sexies. GAUGE-N (2026-07-30) — from one dial to n planes
 
-The operator's read: "key,value — 2D:2D — we need n-dimensional." The
+The operator's read (paraphrased): key,value is 2D:2D; n dimensions are
+needed. The
 substrate always was (the physics Triple carries graded AxisVectors);
 the world's key was the scalar bottleneck. Landed: the key is a graded
 vector of wrapped exact rationals — `GaugeShiftedAt` (tag 60; moved
@@ -804,7 +805,7 @@ open it.
   observatory.
 - **CLI worlds mirror on save** (#37): a player's saved world reflects
   beside the NPCs (civilization = the sealed line, else the active
-  operator) — testers see their own worlds on every board.
+  operator) — each tester's own worlds appear on every board.
 
 ## 3b. The union board (12_UNION — the world-book of the new aeon)
 
@@ -875,8 +876,8 @@ value stays NS-7 (N7), never here.
 > **A definition compiles. Only a receipt persists.**
 > No file may say what exists; a file may only say what happened.
 
-Issued on the operator's order — *we can't have JSON files hanging
-around our Rust codebase; make a ruling on your lane* — and grounded in
+Issued on the operator's order (paraphrased: no JSON files may linger
+in the Rust codebase; the lane is to rule on it) — and grounded in
 a law the tree already carried: §11 rule 2, *views derive from the
 chain, disposable, never read back*, enforced by
 `engine/kernel/tests/recurrence_guard.rs` against an adopted debt list

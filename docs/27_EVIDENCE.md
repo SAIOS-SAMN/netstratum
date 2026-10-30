@@ -56,7 +56,7 @@ law 8 exists to catch.)
 #### Law 1 — gauge invariance. Only frame-free quantities are physical.
 
 *The physics.* An observable may not depend on the coordinates chosen to
-describe it. A quantity that changes when you relabel is a property of
+describe it. A quantity that changes under relabelling is a property of
 the labelling, not of the world.
 
 *What it forbids.* Every "cosmetic" the old article hunted. Titles,
@@ -147,7 +147,7 @@ global; no effect precedes its cause.
 knowledge. **`c` here is the chain's own step rate — one commitment per
 step** — and a world cannot see a neighbour's obligations except as they
 arrive. That is why unobserved absence may never be counted as absence:
-claiming knowledge outside your light cone is not conservatism, it is a
+claiming knowledge outside one's light cone is not conservatism, it is a
 causality violation, and it mints phantom capacity.
 
 *Landed.* `Observed::Unknown` and the `Resolve` door; the epistemological

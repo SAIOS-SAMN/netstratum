@@ -19,7 +19,7 @@ Each was learned from a misalignment caught by the operator. A new law that
 breaks one of them is wrong before it is built.
 
 1. **Physics defines; the story emerges.** No table of Earth's measured
-   world stands in for a law we can derive (caught 2026-10-14: a 118-row
+   world stands in for a law that can be derived (caught 2026-10-14: a 118-row
    periodic table imported as Netstratum's chemistry). A measured value may
    stand only as a declared placeholder for physics not yet defined, cited
    and of order, and marked for replacement.
@@ -123,7 +123,7 @@ breaks one of them is wrong before it is built.
 
     with `M(<r)` the grains its orbit encloses, in units of the universe
     core's own mass, and `r` the orbit's radius held by its half-angle
-    parameter. The units are our own universe's (the form shared with
+    parameter. The units are the universe's own (the form shared with
     Xylarium, the rulers each universe's own, 2026-10-15): G = c = M_core = 1, time the core's bell, read
     per tier in exact powers of sixty. Linear in the enclosed mass, as a
     frame turned by the flux it encloses (the Larmor form; docs/81's
@@ -174,7 +174,7 @@ docs/83, "Corrections").
   the hypha (granted, endowed, bought or traded). Nothing is created inside.
 - **The universal core** is the one singularity uplinked to the hypha: it
   alone transports and uplinks into the Mycelium network. It is the transit
-  hub of hypha space (hyperspace in our world), where data crosses and is
+  hub of hypha space (hyperspace in the real world), where data crosses and is
   coordinated through the hypha. It has mass: the heavy elements caught in
   its accretion disk, continually pulsed and re-pulsed by the outbound and
   inbound bells of the quantum state as it is created and sent to the
@@ -196,7 +196,7 @@ docs/83, "Corrections").
   the pair: the black face is the vacuum (it holds: the rings it takes for
   its period, the deficit, quantum mass) and the white face is the
   continuum inside it (it emits: the bounce's outflow, the pulse and its
-  echoes, the push, the axial jets). Our universe streams from the
+  echoes, the push, the axial jets). The universe streams from the
   universal core's white face; each galactic core repeats the pair one tier
   down. "Infinite density" is infinite angular resolution (exact
   half-angles, dense without end), never a density at a point. Matter is
@@ -257,7 +257,7 @@ docs/83, "Corrections").
     (G) and no mass unit exist: the borrowed `M_core = 1` retires.
   - **Corrected 2026-10-15:** the first statement here read the core as
     "the heaviest elements inside `M(<r) = r`" with "reach as `1 / A`".
-    Both were wrong under our own laws: `ω = M(<r) / r` makes speed
+    Both were wrong under Netstratum's own laws: `ω = M(<r) / r` makes speed
     `v = M(<r)`, radius-free (so unbounded, no horizon, no runaway
     collapse, and at odds with the clock law `r / (r + M)`), and an equal
     kick fixes a nucleus's speed, not where it orbits (that needs spin,
@@ -290,7 +290,7 @@ docs/83, "Corrections").
 - **One law at every tier:** the same sorting wherever matter collapses and
   bounces: a star's heavy core under its light envelope, a disk's heavy
   inner worlds and light outer ones. (Unlike nature's Big Bang, which makes
-  only the lightest elements, our founding manifest carries every element,
+  only the lightest elements, the founding manifest carries every element,
   so the bounce sorts heavy matter inward from the start.)
 
 ## The bounce: the pulse and the deployment
@@ -357,7 +357,7 @@ event deploys them all, and everything after is a closed form of t from it
     share joins the medium. A core needs a hole of at least a grain (no
     hole, no core; Xylarium: a core comes only from a package); a star or an
     orb, a grain, until the founding manifest's scale gives physical floors
-    (Xylarium's: 0.08 suns for a star; roundness for a world, which ours
+    (Xylarium's: 0.08 suns for a star; roundness for a world, which Netstratum's
     must state without a square).
   - **Homology is linear.** Under ω = M/r, scaling a galaxy's masses and
     lengths by the same factor keeps its turning rates, so siblings scale
@@ -390,7 +390,7 @@ event deploys them all, and everything after is a closed form of t from it
     from `blake3(origin hash ‖ τ ‖ b ‖ x ‖ j)`, the origin hash being era 1's
     version-2 origin. Fixed paths: the same seed deploys the same universe.
   - **The unit.** Masses are in the deepest core's grains (core 1 =
-    `M_core = 1`, our own core), so ω and r are exact rationals.
+    `M_core = 1`, the universe's own core), so ω and r are exact rationals.
 - **Motion.** Every body turns about its centre by the law above, in the
   plane its mode's reflections give. Its phase at t = 0 is not drawn: it
   rises from below (design law 7), the quantum wavefront having set its
@@ -412,7 +412,7 @@ event deploys them all, and everything after is a closed form of t from it
     galaxy. Real systems are each a small part of a galaxy. A physical law
     for satellite masses (fragmentation, a feeding zone) is owed; until
     then the galactic years read the share law, not the physics.
-  - **The law, adopted** (operator, 2026-10-14; Xylarium's). Our reach
+  - **The law, adopted** (operator, 2026-10-14; Xylarium's). The reach
     `r_d = r·m/M` compares turnings; the tidal reach compares a body's own
     turning with the change of its anchor's turning across it, by the same
     law: `m/ρ = M·(1/(r−ρ) − 1/(r+ρ))`, so `ρ = r·√(m/(2M+m))`. With it the
@@ -474,7 +474,7 @@ event deploys them all, and everything after is a closed form of t from it
 - **Arrivals.** Packages are bought with μ (the hypha side, Mycelium's,
   shared by every kernel; Xylarium 2026-10-14). The galaxy count at the
   pulse stays Netstratum's own (seed-drawn, as ruled); Xylarium's two per
-  Big Bang is its kernel default and does not bind us. A later galaxy
+  Big Bang is its kernel default and does not bind Netstratum. A later galaxy
   package is deployed the same way, as a new
   core and its systems, by the progenitors who receive it; the bodies it
   encloses re-read `M(<r)` at that event.
@@ -495,7 +495,7 @@ event deploys them all, and everything after is a closed form of t from it
   matter; real galaxy populations are steep, but by their physics, not by
   an order of draws.);
 - the spectrum: seed-derived, dial-tilted (above);
-- the scale: our own deepest core (above; the form shared with Xylarium, never its rulers);
+- the scale: the universe's own deepest core (above; the form shared with Xylarium, never its rulers);
 - era 0's lines: none carried. Era 1 is a new domain (ruling 1); its
   civilizations arise anew from its physics, as Xylarium's do, and the seat
   minds wait unseated until the new domain has a living ancient. Era 0's 101

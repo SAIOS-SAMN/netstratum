@@ -312,7 +312,7 @@ document does not make it.
 Steps 1–3 are what make the word "kernel" true. Step 4 is what makes it
 load-bearing.
 
-## §3a Why we are judging at all — and why `-> Committed` is still linear (operator, 2026-08-02)
+## §3a Why judging exists at all — and why `-> Committed` is still linear (operator, 2026-08-02)
 
 ### 3a.1 The judge exists because the transition is defined twice
 
@@ -328,9 +328,9 @@ after being demoted to an examiner.
 Locally there is nothing to judge: the proposer and the judge are the
 same authority, so the check catches coder bugs, never an adversary.
 Cross-node, what looks like judging is **re-derivation** — the arbor
-already says it (*"Admission is re-judging, never trust; a judgment you
-cannot re-run is a judgment you do not have"*). You do not grade a
-neighbour's claim; you recompute it and compare.
+already says it: admission is re-judging, never trust, and a judgment
+that cannot be re-run is no judgment at all. A neighbour's claim is not
+graded; it is recomputed and compared.
 
 **So #30's target is not "apply wraps judge". It is: the judge
 disappears.** When the signature no longer accepts `next`, the
@@ -363,7 +363,7 @@ new world.
 2. **Moves compose; states do not.** Two moves compose into a move; two
    endpoints compose into nothing. `arbor::Commitment` stores
    `state: [u8; 32]` — a state hash. **That is why the arbor cannot
-   join** (`K3` wall 1): you cannot merge two branches by merging their
+   join** (`K3` wall 1): two branches cannot be merged by merging their
    endpoints, but composing their moves is defined. The linear framing
    and the missing join are one defect, not two.
 3. **Order becomes expressible.** `a ∘ b ≠ b ∘ a`, and the difference
@@ -471,8 +471,8 @@ change.** One literal added, deliberately, in one place:
 
 **Measured while adding it: `CHANNELS` is 3 on this branch.**
 `CHANNEL_LANE` is present on `remediations-lane` and **not merged
-here** — the relay describes it as landed, and it is landed on their
-branch only. The pin asserts 3 today and becomes 4 when their work
+here** — the relay describes it as landed, and it is landed on that
+branch only. The pin asserts 3 today and becomes 4 when that work
 merges, which is the point of having it.
 
 ### 3c.3 Spatial siting — two corrections before the amendment can be drafted

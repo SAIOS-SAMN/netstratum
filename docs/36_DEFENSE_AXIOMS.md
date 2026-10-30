@@ -92,7 +92,7 @@ refuse and receipt.
 | **Neural / cognitive** | `COG` | Decision integrity, want-maps, solve capacity | Psyops, morale, mind | Umbral occlusion of intent; harmonic jamming of perception frame; empiricist proof-poisoning |
 | **Cyber / digital** | `CYB` | Instrument, ledger interface, licensed tech stack | Hacking, C2, spoofing | Instrument grade corruption; aperture deal forgery attempts (refused typed) |
 | **Market / book** | `MKT` | Capacity to **clear, hold, and price** STAMP & instruments without coercion | Economic warfare, dump attacks, liquidity assassination | Note/Future/Share/Perp integrity; last-clear poison; Exchange listing denial |
-| **Informational / veil** | `INF` | What others may *lawfully read* about you | SIGINT, OPSEC | MASK-1 veil, registry cloud, false assay surface |
+| **Informational / veil** | `INF` | What others may *lawfully read* about an actor | SIGINT, OPSEC | MASK-1 veil, registry cloud, false assay surface |
 | **Kinetic / logistics** | `KIN` | Hulls, escorts, interdiction of cargo in transit | Fleet combat, convoy | Escort hull role (P3 inert → P5 active); route risk |
 
 **Seven domains** after the market-warfare ruling (2026-08-08): MKT is
@@ -463,7 +463,7 @@ Defense (MKT) is **not** “more HP on the Exchange.” It is typed posture:
 UI home: desk panes **defend** + **EXCH** + optional `suite <name>` full-screen
 (Ansi suite or future TUI). Same commands as CLI.
 
-### 10.4 What we refuse
+### 10.4 What is refused
 
 | Anti-pattern | Why |
 |--------------|-----|

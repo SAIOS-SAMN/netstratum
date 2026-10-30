@@ -58,13 +58,14 @@ docs/`) was updated at the citing site to point at the new home. A bare
 
 The formation:
 
-> kick C out entirely as the overall formation and start building
-> around Δ(Ω) = D where D is dimensional capacity overlaid with the
-> maximum potential of ∂Δ — the equations stay the same, but instead of
-> forming around C we are looking at the D capacity and building
-> towards its maximum potential in union with V as a whole — no two
-> parts cut out, and the "descent" is only a uni-directional axial on
-> the maximum dimensions of the polynomial union.
+> Paraphrased: C is removed entirely as the overall formation, and
+> building proceeds around Δ(Ω) = D, where D is dimensional capacity
+> overlaid with the maximum potential of ∂Δ. The equations stay the
+> same, but instead of forming around C, the formation reads the D
+> capacity and builds towards its maximum potential in union with V as
+> a whole — no two parts cut out, and the "descent" is only a
+> uni-directional axial on the maximum dimensions of the polynomial
+> union.
 
 The clarification, same day:
 
@@ -529,8 +530,8 @@ carries the bond requirement.
 
 ### §3c.2 The triangle and the polynomial — measured
 
-**(operator directive 2026-08-02: *upgrade triangle to polynomial so
-that you increase the syntropic state*.)**
+**(operator directive 2026-08-02: upgrade the triangle to a polynomial
+so that the syntropic state increases.)**
 
 The cocycle residual is degree 3 — `R_ijk,l = Δ_ik,l − Δ_ij,l − Δ_jk,l`
 over filled triangles only. The question is what a higher degree would
@@ -578,8 +579,8 @@ The generator question is the one worth ruling on.
 
 ## §3d The layer law — universal, world, civilizational
 
-**(operator question 2026-08-02: *at what layer are you operating, and
-which is a universal law vs world law vs civilizational law?*)**
+**(operator question 2026-08-02: at what layer does each law operate,
+and which is a universal law vs world law vs civilizational law?)**
 
 **The answer today is that nothing says.** Searched the whole corpus:
 there is no universal/world/civilizational taxonomy anywhere. Every law
@@ -1047,11 +1048,11 @@ an agent; `C` has no agency of any kind.
 3. **The unpartitioned extent read.** `ext_x` measures before and after
    reduction. A measurement, never a metric to optimize or descend.
 
-None of the three computes `C`, and no engine path does. My §5 argument
+None of the three computes `C`, and no engine path does. The §5 argument
 — that `H¹ = Z¹/B¹` needs cocycles, so something must check — was about
 textbook cohomology as a quotient. **The engine never forms that
 quotient.** It reduces to a canonical representative and reads its
-extent, and `coboundary_reduce` is total on any `Delta`. The gate I
+extent, and `coboundary_reduce` is total on any `Delta`. The gate §5
 insisted on is required by no operation, and §11 had already said the
 right thing: non-composition roots, it is not refused. §5 then
 re-introduced the refusal one section later — the contradiction was
@@ -1354,9 +1355,9 @@ elevation by the `ground-floor` landing.**
 | `18` §7a kernel-eligible table | *"**Art. II non-vacuous** — `D = 0` holds no standing"* |
 | `rfa-core` | `Extent::is_vacuous()`, testing `coordinates == 0` |
 
-**The ruling:** *"D can never equal 0 in this system — that is an
-absolute which we never should have — otherwise you have no
-dimensions."*
+**The ruling** (paraphrased): D can never equal 0 in this system —
+that is an absolute the system should never have held — otherwise
+there are no dimensions.
 
 Zero capacity is an absolute and this constitution carries none: the
 T∞ purge already barred the reciprocal pole. It also made Article II a

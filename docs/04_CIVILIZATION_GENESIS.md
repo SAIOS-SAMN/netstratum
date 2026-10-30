@@ -12,8 +12,8 @@ authority where this chapter and the code could disagree).
 **The founding insight (the "Project Hail Mary" law):** in this universe,
 *two identical minds cannot verify anything*. A discovery becomes real only
 when two measurably different civilizations confirm it independently.
-Diversity is not flavor — it is the fuel of proof. You need the stranger
-who speaks in 3D.
+Diversity is not flavor — it is the fuel of proof. Proof needs the
+stranger who speaks in 3D.
 
 ---
 
@@ -40,9 +40,9 @@ what differs is which history counts as winning:
 The mineral/biotic split the colony loop already implies, made literal:
 a mineral civilization metabolizes what a biotic one excretes and vice
 versa. **Substrate:** one antisymmetric Delta entry per resource flow —
-`Δ_ij = −Δ_ji` (`rfa_core::Delta`, contract §4). My waste and your food
-are one tensor entry read from two ends; the two ledgers cannot desync
-because they are not two numbers. Comparative advantage arises from biology, making trade
+`Δ_ij = −Δ_ji` (`rfa_core::Delta`, contract §4). One side's waste and the
+other's food are one tensor entry read from two ends; the two ledgers
+cannot desync because they are not two numbers. Comparative advantage arises from biology, making trade
 (N5) natural rather than bolted on.
 
 **SUBSTRATE-1 (12_UNION §5a):** the vocabulary grows append-only —
@@ -79,8 +79,8 @@ not a witness). Same class + different frames = the mint fires.
   `Violated` — that is its teeth, not a defect). A discovery cannot be
   un-known.
 - **Gameplay:** the Empiricist's whole arc is building the instruments and
-  the relationships to get a second, different-frame measurement. Your
-  rival's confirmation is worth more than your ally's echo.
+  the relationships to get a second, different-frame measurement. A
+  rival's confirmation is worth more than an ally's echo.
 
 ## 3. Stress, shock, and recovery
 
@@ -114,8 +114,8 @@ probabilities, exact draws, bit-for-bit replayable.
 - **Scoring:** the status panel gains the disposition-weighted progress
   read — three civs on identical maps see three different "winning"
   numbers, exactly as intended.
-- **Translation UI:** foreign content renders through your basis, with the
-  measured loss visible ("harmonic bubble, 3/4 of structure survives your
+- **Translation UI:** foreign content renders through the player's basis, with
+  the measured loss visible ("harmonic bubble, 3/4 of structure survives a
   planar read — build a resonance array to close the gap").
 
 ## 5. The topology (ruled 2026-07-25, all three nodes aligned)

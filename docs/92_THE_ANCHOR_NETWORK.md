@@ -206,7 +206,7 @@ Each step its own read against the last, on the same founding.
 
 ## 6. Open
 
-- Where our stars stand against `R_d`: read (§7): most form inside the
+- Where Netstratum's stars stand against `R_d`: read (§7): most form inside the
   accretion disc as §3.1 reads it. The edge's reading (the held share's
   zero, or its half) decides how much of the galaxy the network governs.
 - The disc anchor's own sphere: read against what stands beyond it (§3.6),

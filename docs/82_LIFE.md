@@ -162,7 +162,8 @@ carry life, and a world may carry several forms at once.
    500 individuals). It is an event, written to the annals at the bell it
    happens: a perpendicular write up, from the world to its galaxy. The run
    is the draw: each world climbs once, by its own seed (Xylarium estimates
-   by independent replays; we need no estimate, we live the one history).
+   by independent replays; here no estimate is needed, the one history is
+   lived).
 
 ## Step 2, built (2026-10-14): the climb and the wakings
 
@@ -192,8 +193,8 @@ carry life, and a world may carry several forms at once.
 
 Amended 2026-10-15 (both operators): only the forms are shared; each
 universe derives its rulers from its own physics. The home reference body
-below is ours to choose, and the bell's "97,850 standard years" is
-Xylarium's ladder, not a ruler of ours. The home star and world are read
+below is Netstratum's to choose, and the bell's "97,850 standard years"
+is Xylarium's ladder, not a Netstratum ruler. The home star and world are read
 off the inverted galaxy layer (docs/83, "Corrections") until it is rebuilt.
 
 - **One ruler per tier:** compression's `M_a` is the home reference body
@@ -326,8 +327,8 @@ across tiers, no squares, no gates, no habitable zone drawn):**
    deep the mind; without depth (a monkey) it stays small though alive.
 8. **The decision:** instinct (the unconscious survival drive, the deficit
    felt now, `instinct::choose`) runs the `1 − σ` share of a species'
-   choices; deliberation ("I don't want to die, so I will decide": the
-   species' own future deficit represented and reasoned over by the reduce
+   choices; deliberation (the decision to act against
+   a death foreseen: the species' own future deficit represented and reasoned over by the reduce
    engine) runs the σ share.
 
 **Agency (operator 2026-10-17).** Agency is the stretching of the plasma

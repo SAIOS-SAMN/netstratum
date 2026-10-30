@@ -68,8 +68,9 @@ N7 (anchor), where the mesh meets parties it cannot re-compute.
    when the far leg is the exact inverse of the near one (the
    aperture pair summing zero; the council reckoning summing to the
    locks; the Delta antisymmetry). Byte-canonical encoding exists
-   only so digests agree; the question a node asks is never "same
-   bytes as mine" — it is "is your leg my inverse." The aperture
+   only so digests agree; the question a node asks is never whether
+   the bytes match its own — it is whether the far leg is the inverse
+   of its own. The aperture
    pair-conservation reading composes here as the N6 mesh audit
    (BUILD_ORDER §3a).
 3. **One writer per clock.** A world's chronicle has one authoring
@@ -88,9 +89,9 @@ N7 (anchor), where the mesh meets parties it cannot re-compute.
 ### 2.1 The measured manifold (v2) and the structural census — struck
 
 > **The census kernel is out** (operator ruling 2026-08-04):
-> *incompatible with the architecture — we are building on a higher
-> dimensional plane of multi-axial PoW++ with two algorithms, PoUW and
-> PoWC, both converging on n-dimensional polynomials.*
+> incompatible with the architecture (paraphrased: the build stands on a
+> higher dimensional plane of multi-axial PoW++ with two algorithms, PoUW
+> and PoWC, both converging on n-dimensional polynomials).
 >
 > **The code excised it four days before this text was struck.**
 > `engine/mesh/src/lib.rs` records it: the reconciliation instruments —
@@ -101,8 +102,8 @@ N7 (anchor), where the mesh meets parties it cannot re-compute.
 > LE64(id))…`) for an instrument no code has emitted since.
 >
 > **Two independent reasons, and the second is the general one.** The
-> one-truth amendment struck it because *you do not reconcile what
-> cannot diverge, and agreement between copies was never a
+> one-truth amendment struck it because *what cannot diverge needs
+> no reconciliation, and agreement between copies was never a
 > measurement*. The ruling above strikes it again for its shape: a
 > census is a flat enumeration — committed fields sorted into
 > seventeen named families plus a tripwire code — and an enumeration
@@ -505,8 +506,8 @@ Re-convergence has one door: the kernel judges the merge as a lawful
 transition at a mainline coordinate, or the nursery's content stays
 in the nursery. Penalty attaches only to presenting nursery state as
 mainline alignment (the alignment covenant: the pen dies, the work
-dies, the stake dies). We punish the lie, never the disagreement.
-You can play in your nursery; you cannot rip a hole in the galaxy
+dies, the stake dies). The lie is punished, never the disagreement.
+Play in a nursery is free; no nursery can tear a hole in the galaxy
 from inside it.
 
 ## 8. The bridge entity (ruled 2026-07-31 — spec, lands with MESH-1c)

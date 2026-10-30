@@ -79,7 +79,7 @@ that would catch each. Every vector below has a real instance from
 reduced becomes a descent target, however it is justified.
 *Instance:* "syntropy = removing frame and resolving cocycle failure."
 *Defense:* such quantities are refusal predicates only. **The standing
-test — if you can write "minimize X" and it reads as lawful, X is an
+test — if "minimize X" can be written and reads as lawful, X is an
 attack surface.** *Witness:* no law text pairs a system quantity with
 reduce/resolve/minimize/converge.
 
@@ -169,9 +169,10 @@ deliberately held back.
 
 > **Any command that rewrites a file's state without reading it first —
 > `add -A`, `checkout`, `restore`, `stash`, `reset`, `clean` — can
-> destroy work you didn't write.**
+> destroy work the caller did not write.**
 >
-> **Never let a command decide the fate of content you did not author.**
+> **Never let a command decide the fate of content the caller did not
+> author.**
 
 `add -A` decides that on the way in; `checkout` decides it on the way
 out, and a revert on a shared file is exactly as destructive as a sweep.
@@ -320,10 +321,10 @@ deliberate rather than discovered. §12 makes that ordering a ruling.
 
 ## §12 The withdrawal boundary — where monotone value becomes extractable
 
-**Law (operator ruling 2026-08-01).**
+**Law (operator ruling 2026-08-01, restated).**
 
-> on every step we increase economic value until value benefits the
-> withdrawal function based on what you consider attack/defense.
+> Economic value increases on every step until value benefits the
+> withdrawal function, as judged by what is classed as attack/defense.
 
 ### 12a. The mechanism, stated exactly
 
@@ -437,20 +438,20 @@ and withdrawn (§13b).
 
 ## §13 The levels — polytonic value, the honeypot, inversion, and altitude
 
-**Law (operator ruling 2026-08-01), four clauses.**
+**Law (operator ruling 2026-08-01, restated), four clauses.**
 
 > 1 — upgrade value creation to polytonic.
-> 2 — defense can live at an exit; imagine a honeypot scenario: you
-> think you're getting the gold until you try to exit the game.
-> 3 — invert logic and see what answers you get to your own methodology
-> and questions.
-> 4 — why are we even thinking about orbit_lock at this level? orbital
+> 2 — defense can live at an exit; in a honeypot scenario, a player
+> appears to be getting the gold until trying to exit the game.
+> 3 — invert the logic and examine what answers it gives to the
+> methodology and questions themselves.
+> 4 — orbit_lock does not belong at this level: orbital
 > mechanics themselves should be stochastic, but the laws of the land
-> are deterministic. Most people get this wrong thinking that if we live
-> in a deterministic universe everything is deterministic — it operates
+> are deterministic. A common error is to assume that in a
+> deterministic universe everything is deterministic — it operates
 > at different levels.
 
-### 13a. Polytonic, not monotone — and the error was mine
+### 13a. Polytonic, not monotone — and the error was this document's
 
 §12a argued: value accumulates monotonically, therefore a crossing
 exists where withdrawal dominates. **That argument collapsed value to a
@@ -474,11 +475,11 @@ and any defence reasoned from either.
 fungible at the exit. **That is refuted by the honeypot, and the
 refutation is structural, not a special case.**
 
-My argument assumed an exit must classify — separate farmed value from
+The §12b argument assumed an exit must classify — separate farmed value from
 earned value — and correctly concluded it cannot. **An exit does not
 need to classify. It only needs to not pay.** The attacker's strategy is
-disclosed by the attempt to leave: you hold what looks like gold until
-the moment you try to realize it, and realization is where the claim is
+disclosed by the attempt to leave: the holder has what looks like gold
+until the moment of trying to realize it, and realization is where the claim is
 tested against the law rather than against the ledger's arithmetic.
 
 Two properties make this stronger than the creation-side gate, not
@@ -525,7 +526,7 @@ deterministic; the dynamics inside it are not. Conflating the two is how
 a search ends up inside a judge.
 
 That is exactly the error in treating `orbit_lock` as a kernel-level
-gate, and it was mine throughout §§10–12. `orbit_lock` runs a bounded
+gate, and it ran through §§10–12 of this document. `orbit_lock` runs a bounded
 search — every operator, each application checked
 against the antisymmetric surface. A search is exploratory, its method
 is free, and at scale it is stochastic. **The kernel is pure, total,

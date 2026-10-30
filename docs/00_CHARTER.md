@@ -83,7 +83,7 @@ merit and would stand had that project never existed:
 
 1. **Persistence by construction.** The append-only VRP chronicle is the world
    state. There are no resets, no wipes, no ephemeral beta rounds — a reset is
-   not a policy we refuse but an operation that does not exist.
+   not a refused policy but an operation that does not exist.
 2. **Zero floating-point tax.** All state transitions are native RFA (exact
    rational arithmetic). No
    float emulation, no constraint blowup, no thermal throttling. If state is
@@ -103,12 +103,12 @@ merit and would stand had that project never existed:
 **Ruled 2026-08-01. A mirror is banned as a structure and as a word.**
 The difference is what the instrument is for, and which way it points.
 
-- **A lens offers solutions.** You turn a lens on something to resolve
+- **A lens offers solutions.** A lens is turned on something to resolve
   it — it magnifies, focuses, and returns a reading that did not exist
-  before you looked. It points outward, at an object, and its whole
+  before the looking. It points outward, at an object, and its whole
   purpose is to produce what was not previously legible. A lens is
   generative: it answers a question.
-- **A mirror returns the self.** You use a mirror to inspect yourself.
+- **A mirror returns the self.** A mirror is used for self-inspection.
   It points inward and gives back exactly what was already there — no
   new information, by construction, because self-inspection is the one
   operation that cannot resolve anything. It answers nothing; it
@@ -138,13 +138,13 @@ no rule existed to stop it — so §11 was written, the crate was excised
 (d606b01), and `cfe::opposition`, the reconciler it had made necessary,
 went with it (c7cad9e). Anti-mirror followed: verification by opposition
 still needs two records to set against each other, which §11 rule 5
-clause 1 forbids outright. *You do not reconcile what cannot diverge.*
+clause 1 forbids outright. *What cannot diverge needs no reconciling.*
 
 **Held by standing tests, never by memory:**
 `recurrence_guard::the_dead_name_stays_dead` keeps the crate and the
 workspace member dead; `recurrence_guard::the_anti_mirror_stays_excised`
 keeps the reconciler dead; `constitution_lint::no_mirror_in_the_law`
-keeps the name out of the specifications. Vigilance did not save us the
+keeps the name out of the specifications. Vigilance did not catch it the
 first time; a standing test did.
 
 ## 4. The protocol-to-mechanic binding map
@@ -156,7 +156,7 @@ first time; a standing test did.
 | NS-3 | **VRP** — Verification Receipt Protocol | The world chronicle: every action an append-only, predecessor-linked receipt |
 | NS-4 | **APERTURE** — the controlled opening | Sector-map sharing and private trade offers, opened at a granted facet (summary → detail → full) |
 | NS-5 | **MESH** — Proof-of-Convergence Consensus | Multi-node world synchronization ("two laptops, one world") |
-| NS-6 | **IPSAL-OS** — Entity Containment | Player, NPC, and bot identity: the profile of every individual inside our internet |
+| NS-6 | **IPSAL-OS** — Entity Containment | Player, NPC, and bot identity: the profile of every individual inside the network |
 | NS-7 | **Anchor** — WWW3 Settlement Bridge | High-value settlement: minting a rare world, macro-trades, asset ownership anchored to an external chain |
 
 ## 5. Ancestry (consult, never port blindly)
@@ -362,8 +362,8 @@ cure.
 
 **The nursery law.** A world is born and raised on one node — the nursery
 — and because its commitment shape and its judge are already the mesh's
-own, it is born MESH-ready. Joining the mesh is the audience growing: you
-present your chain, peers re-run their identical kernel over every step,
+own, it is born MESH-ready. Joining the mesh is the audience growing: a
+node presents its chain, peers re-run the identical kernel over every step,
 and admission is verification. A **puppet universe is precisely a nursery
 that never earned confirmation** — the same vocabulary names the sandbox
 law and the Sybil analysis.

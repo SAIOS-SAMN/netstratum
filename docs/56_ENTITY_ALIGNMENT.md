@@ -24,8 +24,8 @@ whole cognition beat, and it is one function that:
    (`self.sibling_deposit(&task, digest)`, line 4048) — not to think
    about anything of its own choosing.
 
-Neither vessel has a loop, a task queue, or a "do I want to think about
-this" gate of its own. `research_step` decides "we think about X now" for
+Neither vessel has a loop, a task queue, or a "should this vessel think
+about this" gate of its own. `research_step` decides "think about X now" for
 the whole civilization, then dispatches both vessels at it. This is the
 opposite of "entities think, civ consolidates" — today the civ thinks
 (chooses the one task), and entities merely execute the choice.

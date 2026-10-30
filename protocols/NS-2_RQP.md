@@ -18,7 +18,7 @@ world. RQP is the lens — a pure structural read of the same receipted
 truth. A query mutates nothing, orphans nothing, and never enters the
 world chronicle; only its power draw (§1.5) closes and receipts. The
 world's coordinate is TUniversal{S, G, T}; the lens reads along {S, G}
-and leaves T in the ledger: **you query an orb by what it is (S, G),
+and leaves T in the ledger: **an orb is queried by what it is (S, G),
 never by when it was found (T)** — the ancestor's law, carried whole.
 
 ---

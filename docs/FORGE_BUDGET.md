@@ -9,19 +9,18 @@
 
 ---
 
-## §1 The ruling (operator, 2026-08-02 — recorded as given)
+## §1 The ruling (operator, 2026-08-02 — restated)
 
-> `SEARCH_BUDGET` as a constant is awful, this needs to be based on the
+> `SEARCH_BUDGET` as a constant is unsound; this needs to be based on the
 > civilizational capacity, not a constant.
 >
 > consensus is only 1 axiom on a multi-axial coordinated system.
 >
-> resources should be dynamically produced, if a civ is on 1 planet and
-> sharing with another civ, what happens then? why give them "200,000"
-> — because it sounds nice? that's not brilliant — you should be setting
-> a search minimum and capping this in syntropic state that allows for
-> the balance to happen between what needs to happen verse what "is easy
-> to have happen".
+> resources should be dynamically produced: if a civ is on 1 planet and
+> sharing with another civ, what happens then? A grant of "200,000" is
+> not justified by sounding nice; the design should set a search
+> minimum and cap this in a syntropic state that allows for the balance
+> between what needs to happen and what "is easy to have happen".
 
 And on this file's first draft:
 
@@ -39,7 +38,7 @@ literal — which is exactly the causal history of 200 000. §4 names them;
 
 ---
 
-## §2 The error this corrects — mine, and it is the same one three times
+## §2 The error this corrects — this document's, and the same one three times
 
 `FORGE_REMEDIATION.md` §1 proved the forge search is **consensus-free**
 and concluded: *"They change neither what verifies nor what mints. They
@@ -524,9 +523,9 @@ unknown(prior) > 0   ⇒   δ = 1                                              (
 ### 8bis.c B2 `ρ_D` — Both poles and the charge, never rank alone
 
 The received `ρ_D^D` keyed on rank alone, which re-commits the
-operator's own ruling of the same day (`bridge.rs:176-199`): *"your
-entire definition is wrong if dimensional capacity is a count of
-rooms."* Rank is the dimension of the cycle space; `holonomy` carries
+operator's own ruling of the same day (`bridge.rs:176-199`): the whole
+definition is wrong if dimensional capacity is a count of
+rooms. Rank is the dimension of the cycle space; `holonomy` carries
 each cycle's exact charge; *"a universe with one heavily-charged cycle
 and one with a single faint one read the same rank and are not the same
 universe."* Amended:
@@ -638,7 +637,7 @@ than re-written.
 ### 8ter.b This is not reconciliation
 
 `recurrence_guard.rs` check 2 keeps `cfe::opposition` excised —
-*"you do not reconcile what cannot diverge."* This does not revive it,
+what cannot diverge is not reconciled. This does not revive it,
 and the distinction is exact: **reconciliation compares two copies of
 one thing to find divergence. A lane is one relation with two endpoints**,
 each book holding its own leg by its own receipt. Reading it is
@@ -686,7 +685,7 @@ when a lane can be paid for.
 **Operator ruling 2026-08-02:** triangles have limited use; the inverse
 logic stands on its own, convergence and divergence both, convergence
 always prevailing. The aim is not to rest on single theorems but to make
-them all work together to balance the universes we create.
+them all work together to balance the universes created.
 
 **Upheld. §8quater item 6 over-built on one reading.** It made the
 cyclomatic arm — holonomy, "triangles beat pairs" — the headline
@@ -713,7 +712,7 @@ That is the same fault the board has now corrected twice on its own:
   `Motion::{Diverging{by}, Converging{by}, Still}` — *"its own arm, its
   own positive size, never a minus."*
 
-Mine is the third instance: **a dual read through one arm only.** The
+This document's is the third instance: **a dual read through one arm only.** The
 cycle arm answers *what circulates*; the flux arm answers *what sources
 and what sinks*. A budget keyed on cycles alone prices a Frost world —
 which holds *"the rarest resource in a high-flux universe: radiator
@@ -754,7 +753,7 @@ arm needs its own reading of *how much* convergence counts, and whether
 
 ## §8quater What this unlocks
 
-The operator's question: *"tell me all features we unlock."* Ranked by
+The operator's question: which features does this unlock? Ranked by
 what becomes possible that was not — each traced to the law that opens.
 
 **Immediately, from the landing itself:**
@@ -785,7 +784,7 @@ what becomes possible that was not — each traced to the law that opens.
    mechanic to get it — it falls out of the cyclomatic reading.
 7. **Trade gains a second, deeper payoff.** A lane was only a melt
    discount. It is now a topological edge that earns search depth:
-   **your trading partners literally expand your cognitive horizon.**
+   **a civilization's trading partners literally expand its cognitive horizon.**
    The PoUW economy and the trade economy stop being two games.
 8. **The sharing question becomes live law** — `ε_unknown` (B8) and
    `Telescope`/`LockOn` stop being hypothetical; a partial observer now

@@ -443,9 +443,9 @@ Recorded as a question, not a defect — it was not resolved here.
 **The tag-claim convention** (2026-07-30, after a live collision caught
 mid-cadence — 55 claimed twice, the later claimant moved to 60, and the
 merge then dropped the header hunk): claim a tag by editing the dop.rs
-header in your first commit of the cadence, before any code uses it;
-the header is the one authority, this section only mirrors it; after
-any merge, verify your header hunk survived. One tag, one meaning,
+header in the claimant's first commit of the cadence, before any code
+uses it; the header is the one authority, this section only mirrors
+it; after any merge, verify the header hunk survived. One tag, one meaning,
 forever.
 
 ## 5. Lanes and next work
@@ -644,12 +644,13 @@ The variant landed 2026-07-31: TaxonSealed (tag 85) — deed, state,
 replay/resume, codec v2 (trailing taxon field; v1 still reads,
 witnessed), the drafted Build-class scope_of arm, two witnesses.
 Relays: coder-04 — ratify the schema bump (SCHEMA_V2 emitted, v1
-accepted; your two gate pins updated to v2, flagged inline) — and
-your spine pin the_judge_stands_at_the_door was already red before
+accepted; coder-04's two gate pins updated to v2, flagged inline) —
+and coder-04's spine pin the_judge_stands_at_the_door was already red
+before
 this landing (the fixture's actor 100 is unregistered; coder-03's
 containment coverage outran it — a coder-03/04 seam, not this
-lane's). coder-03 — your #42 is unblocked: the variant and fields
-stand; seal the coverage. Then the AI implementor runs the migration wave from
+lane's). coder-03 — #42 is unblocked: the variant and fields
+stand; seal the coverage. Then the migration wave runs from
 seeds/taxon-map.json. NS-5 §2 rewrite queued on the doc lane per
 coder-04's flag.
 - **coder-03**: N4 (NS-2 RQP + the scanner) — landed on main
@@ -806,7 +807,7 @@ FORWARD-1; its cross-boundary NS-7 settlement §7.3 still awaits N7.)
 `tools/`, `docs/`, `protocols/`).** §8a is verified this session against
 the crate manifests and the named lines. §8b–§8f are sweep-reported at
 `file:line` and are accurate to the read but were not each re-verified —
-confirm the line before you land against it. This section is a work
+confirm the line before landing against it. This section is a work
 board, not law: entries leave it by landing or by being struck.
 
 The organising question is the one the charter already asks: is this
@@ -1187,7 +1188,7 @@ work.** A lane on a fork 49 commits behind ran
 `cargo clippy --workspace -D warnings`, found six genuine findings in
 two files it did not own, and relayed them. Every one was already fixed
 on `main` at `ff3f227` ("clippy to zero"). **Re-run the measurement
-against `main`, not against your fork, before any relay leaves your
+against `main`, not against a fork, before any relay leaves the
 lane** — relaying a defect that no longer exists costs the receiving
 lane a wasted investigation and puts a false entry in the record, which
 is worse than not relaying at all. The same discipline applies to every

@@ -17,9 +17,9 @@ ring: ℤ windings, ℚ gear ratios; §2.3 orbital mechanics; §2.4 L1 never L2;
 
 ## 0. What is missing, and why it matters
 
-Our motes are already Lagrangian parcels: each carries mass (3Z), spin in
-two planes, phases, heat, leg and sense, and every exchange between them is
-booked exactly (docs/92 §1, the identities). What they lack is the field
+Netstratum's motes are already Lagrangian parcels: each carries mass (3Z),
+spin in two planes, phases, heat, leg and sense, and every exchange between
+them is booked exactly (docs/92 §1, the identities). What they lack is the field
 side: no pressure, no density, no magnetic field, no current, no coupling of
 field to flow. In nature those are what let a disc keep its dust (pressure
 maxima) and move its turning outward (magnetic turbulence). This document
@@ -67,9 +67,9 @@ bound), half a turn round the loop, its sense flipped; `M∘M = id`. The
 transit is the current `δ(λ) = δ + λ(1 − 2δ)`, `ψ(λ) = ψ + λ/2`, passing the
 ring at λ = ½ where its sense flips.
 
-This is the UMD reading of three things we had separately: "inside the ring
-the vacuum takes" (Xylarium 11.0, 2026-10-15), the throat's inversion, and
-why our founding (every kind inside the ring) left galaxies with no disc.
+This is the UMD reading of three things previously held separately: "inside
+the ring the vacuum takes" (Xylarium 11.0, 2026-10-15), the throat's inversion, and
+why the founding (every kind inside the ring) left galaxies with no disc.
 
 ## 3. The particle's state (the overlay on `flows::Mote`)
 

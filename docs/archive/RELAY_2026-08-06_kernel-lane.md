@@ -5,10 +5,10 @@
 Four commits on `main` past `6245ba8`. Everything below is measured or
 committed; nothing here is a proposal.
 
-## Shared registers the AI implementor claimed — read before you bump
+## Shared registers claimed — read before bumping
 
 Both of these follow the next-free rule (claim in the ledger, then
-bump) that we adopted after the 0.13.0 collision.
+bump) adopted after the 0.13.0 collision.
 
 | Register | Taken today | Next free |
 |---|---|---|
@@ -17,10 +17,11 @@ bump) that we adopted after the 0.13.0 collision.
 | `ZoneKind` wire | **9+** are minted kinds (`ZoneKind::Minted`) — the compiled table ends at 8 | — |
 | Codec state schema | **v5** (the standing pacts ride the snapshot) | v6 |
 
-**d3-scope: 0.16.0 is gone.** The harness note said you intended it for
+**d3-scope: 0.16.0 is gone.** The harness note said d3-scope intended it for
 the conductor's forge-zeroing. It was never claimed in
-`conservation_pins.rs`, and the ecological loop needed a minor, so the AI
-implementor took it under the rule. Claim **0.18.0** in the ledger before you bump —
+`conservation_pins.rs`, and the ecological loop needed a minor, so the
+kernel lane took it under the rule. Claim **0.18.0** in the ledger before
+bumping —
 the ledger block is the register, not the constant.
 
 ## What landed
@@ -53,8 +54,8 @@ the saturation identity, so the recipe needs no number of its own and
 the ratchet did not move.
 
 **The element declaration in `element_move` widened from one move to
-many, and repeated keys sum rather than overwrite.** If you touch that
-function, that is the trap: a set may offer the same element twice, and
+many, and repeated keys sum rather than overwrite.** Any change to that
+function meets the trap: a set may offer the same element twice, and
 taking only the first match mints matter from nothing. Pinned red-first
 in `chemistry_gate_pins.rs`.
 
@@ -68,15 +69,15 @@ mints a verified solve at `kernel::corpus_weight`. Played end to end:
 `corpus solve 0 tile:3x3:cols` mints 2042249/2 crystal and the Spectrum
 reads it.
 
-**d3-scope, this is the half you should know about:** once-per-task is
+**For d3-scope, this is the half that matters:** once-per-task is
 enforced **at the emitter only** (the CLI reads the chronicle for a
 prior `DiscoveryMinted` carrying that task_id). `cfe` may not parse a
 work payload and the gate is handed committed state, not receipts — so
-the gate half needs the solved set in committed state. If your conductor
+the gate half needs the solved set in committed state. If the d3-scope conductor
 corpus path mints, it must do the same check or worlds will double-mint.
 
-Still open on #38: **(b) the conductor corpus path is yours** — the AI
-implementor did not touch it. (c) the novelty predicate for player-authored tasks.
+Still open on #38: **(b) the conductor corpus path belongs to d3-scope** and
+was not touched. (c) the novelty predicate for player-authored tasks.
 
 ## Landed since (2026-08-07)
 
@@ -119,12 +120,12 @@ resolved by code.
 
 ## To the operator
 
-- **#41 (minted zone kinds) turns on one design decision** and the AI
-  implementor did not invent it. A minted zone's economics must derive from something, and
-  the binding alone is scale factors with nothing to scale. The AI
-  implementor's recommendation is in the task: the mint names A base kind and the
+- **#41 (minted zone kinds) turns on one design decision** and it was
+  not invented by the kernel lane. A minted zone's economics must derive
+  from something, and the binding alone is scale factors with nothing to
+  scale. The kernel lane's recommendation is in the task: the mint names A base kind and the
   binding modulates it, which makes `TradingBinding`'s one-benefit-one-
-  friction law do exactly what you asked — a dominant building becomes
+  friction law do exactly what the operator asked — a dominant building becomes
   unmintable by construction. It costs an additive field on
   `VocabularyMinted`. Two alternatives are recorded with their faults.
 - **Still standing from before:** the seed census-class ruling, the η

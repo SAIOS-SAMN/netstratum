@@ -89,8 +89,8 @@ docs before code; witnesses by re-derivation, never equal bytes.
 |---|---|---|---|---|
 | D1 | the face map in one place (`held = 1 − δ`, `unlocked = δ`) | docs/104 §4 | — | **operator**: confirm the map (§5) |
 | D2 | heating, cooling and the counterweight on a heat ledger | docs/104 §1–§2 | D1 | — |
-| D3 | push and release on our unlocked face | docs/104 §1 | D1 | — |
-| D4 | twist and its release by our held share | docs/104 §1 | D1 | — |
+| D3 | push and release on the unlocked face | docs/104 §1 | D1 | — |
+| D4 | twist and its release by the held share | docs/104 §1 | D1 | — |
 | D5 | the quantum state inverted, `h = (1 − R)/2` | docs/104 §1 | D1 | — |
 
 ### B‴. The substrate (docs/106), beneath every layer

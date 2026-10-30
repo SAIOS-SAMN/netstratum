@@ -44,8 +44,8 @@ drains against different histories and they read the same puzzle
 differently. Compressing think to the vessel is the precondition for
 conversation (a crystal one basin drains that another walls) and for
 culture (a word two vessels fold). It comes before pricing (N-I7) and
-before the fold (N-I8): you cannot price a person's thought, or fold two
-people's word, until the person's basin exists.
+before the fold (N-I8): a person's thought cannot be priced, nor two
+people's word folded, until the person's basin exists.
 
 ---
 
@@ -58,14 +58,14 @@ people's word, until the person's basin exists.
 
 **Law II — maps.** AlignmentConfirmed: *no HashMap in cognition.* A hash
 bucket flattens a structured key and discards the fiber. `Q/ℤ` lives
-**inside** `Crystal` / `Exact`, not in the key. You do **not** need a
-BTree because the rationals demand one.
+**inside** `Crystal` / `Exact`, not in the key. A BTree is **not**
+needed because the rationals demand one.
 
 | Allowed | Role |
 |---|---|
 | `Vec<Crystal>` | the basin — the organ still thinks a list of leftovers |
 | `BTreeMap<u64, Vec<Crystal>>` | **index of mouths**, ordered by `vessel_id` (`Ord`). Deterministic iteration for replay. Not the thought. |
-| `Vec<(u64, Vec<Crystal>)>` + `.find()` | also lawful if you would rather not open a tree this cut |
+| `Vec<(u64, Vec<Crystal>)>` + `.find()` | also lawful if a tree is not to be opened this cut |
 
 | Forbidden | Why |
 |---|---|

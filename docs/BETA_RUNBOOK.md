@@ -3,7 +3,7 @@
 **Status: operational, verified 2026-08-13.** This documents a
 capability that already exists — `engine/conductor` and
 `tools/observer.py` were both landed before this doc was written; this
-is the missing "how do I actually run one" page, not a design.
+is the missing "how to actually run one" page, not a design.
 
 ## 0. What this is, and what it isn't
 

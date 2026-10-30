@@ -2,10 +2,10 @@
 
 Design direction (2026-10-09): consolidate and compact the state so that it
 stays reconstructible and operational, without unobserved worlds holding
-memory. Ruling on time: "the deterministic components of the world are set in
-compact state (orbits, times) until an observer is present, a mind is present,
-or a people are present — at that time we unroll the world and let the
-stochastic probabilities unwind until no observers are present." Observing: a
+memory. Ruling on time: the deterministic components of the world are set in compact
+state (orbits, times) until an observer is present, a mind is present, or a
+people are present; at that time the world is unrolled and the stochastic
+probabilities unwind until no observers are present. Observing: a
 seated mind, contact, the operator's watch, the progenitor line.
 
 ## Two compactions

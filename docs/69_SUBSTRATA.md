@@ -20,10 +20,10 @@ joined by a mouth at a core). This is Netstratum's side.
 
 ## The operator's correction (2026-10-09), and what is built
 
-"You would open internal tubes to sub-universes that would have a subsect of
-the ancients / spacing guild that would traverse those throats, and you would
-use either μ internal to your throats as the ancients' currency or your own
-internal synthetic float." Authorized to proceed: the minds and intelligences
+Ruling (paraphrased): internal tubes open to sub-universes, each with a
+subsect of the ancients / spacing guild that traverses those throats; the
+currency is either μ internal to those throats (the ancients' currency) or
+the universe's own internal synthetic float. Authorized to proceed: the minds and intelligences
 inside may produce any number of universes, at any level of intelligence.
 
 Built (`engine/conductor/src/substrata.rs`, tag 197 `SubstratumOpened`):

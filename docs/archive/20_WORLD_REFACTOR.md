@@ -118,8 +118,8 @@ Three reasons, in order of weight:
 1. **The transition is invisible.** `replay` is the definition of what
    deeds mean, and it is buried in the middle of the game's emitters.
    `KERNEL_RELAY` §1.4: *"their meaning lives in `replay()` — an
-   interpreter three coders rewrite weekly."* You cannot audit what you
-   cannot find.
+   interpreter three coders rewrite weekly."* What cannot be found
+   cannot be audited.
 2. **The kernel's surface is unreadable.** To know what the judge
    depends on, a reader today must scan 5001 lines to discover it is
    three items.
@@ -179,9 +179,9 @@ that file. What must be transplanted by hand:
 **The split makes this easier, not harder** — `rules.rs` is 74 lines
 where the monolith was 5,034.
 
-**Direction: kernel-lane moves onto their structure.** They deleted the
-file; rebasing the AI implementor's edits onto the organ is the only merge that preserves
-both. The reverse re-creates the monolith.
+**Direction: kernel-lane moves onto capacity-lane's structure.**
+capacity-lane deleted the file; rebasing kernel-lane's edits onto the
+organ is the only merge that preserves both. The reverse re-creates the monolith.
 
 ### 7b. A discrepancy to reconcile before merging
 

@@ -77,7 +77,7 @@ standing on the live board. That changes play — a proposer that
 emitted an unlawful deed now has it rejected mid-beat rather than
 recorded-and-overruled. The live `var/` re-judges clean today, so the
 immediate blast radius is nil; but the semantic is permanent and is
-yours to authorize.
+the operator's to authorize.
 
 ## 5. The landing, once ruled (sequence)
 

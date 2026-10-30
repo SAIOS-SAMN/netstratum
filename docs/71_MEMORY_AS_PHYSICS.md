@@ -1,9 +1,9 @@
 # 71 — Memory bounded by physics
 
-Operator (2026-10-09): "you are using the machinery as the guarantor; is our
-system unable to handle that role on its own?" It was: the minds' basins were
-live workspace outside the ledger, so the kernel's invariants never saw their
-growth, and the only bound was a byte cap (the leak of 2026-10-09 was a count
+Operator question (2026-10-09): the machinery was serving as the guarantor;
+was the system unable to handle that role on its own? It was: the minds'
+basins were live workspace outside the ledger, so the kernel's invariants
+never saw their growth, and the only bound was a byte cap (the leak of 2026-10-09 was a count
 cap that physics never priced). This arc makes the universe's own law the
 guarantor and demotes the caps to witnesses.
 

@@ -120,7 +120,7 @@ the face where the matter actually stands (docs/98, the luminal bound).
   continuum's read on the other face (`½ < δ ≤ ⅔`), its band pairs, crest and
   disc read there by the same laws at the share's other face.
   **For ruling:** production on each face at its own inverted strip (both
-  faces produce), or the universe's whole frame inverted (what we call outside
+  faces produce), or the universe's whole frame inverted (what is read as outside
   is inside, every tier).
 
   **Ruled (2026-10-28): invert the whole frame.** Derived, its meaning, stated

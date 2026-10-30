@@ -4,7 +4,7 @@ Design direction (2026-10-28): derive the master equations of the polarity
 equilibria. Builds on docs/104 (the inverse duals; §1.1 the count; §1.2 every
 share a pair share), docs/97 (the nucleus), Xylarium's founding survival
 (`elements.rs` `founded`, 11.0 R4: a reading relayed 2026-10-28, inverted here
-through our polarity).
+through Netstratum's polarity).
 
 ## 1. The master equation
 
@@ -59,7 +59,7 @@ point, lawful there). There:
   table ends where less than one whole nucleus arrives (docs/97 §14).
 
 Xylarium's (c), inverted: its survival `a·h` reads the crossing's carried
-share (the fixed point) and the held share; ours reads the held face at the
+share (the fixed point) and the held share; Netstratum's reads the held face at the
 crossing for the lone ends and the fibres' own pairing for the bound ones.
 
 ### 4.1 The equilibrium at the core (ruling of 2026-10-28: the equilibrium `g = ¼` was still a constant, and the added dimension on the originating sphere is stripped; the equilibrium is derived at the core)
@@ -76,8 +76,8 @@ itself, read by angle, never crossed by a process; and it was forward physics
 
 **At the core every face is the fixed point,** `g = u`: the faces cancel
 from every pair, and what stands is a pair share of the core's own
-quantities (docs/104 §1.2), read in the inverse universe (heat by our
-unlocked face, holding from the outside in):
+quantities (docs/104 §1.2), read in the inverse universe (heat by the
+inverse unlocked face, holding from the outside in):
 
 - **The poles:** a proton binds as a fibre's partner where the grip holds
   against the heat, `α = g·G/(G + a)`; a neutron frees where the heat beats

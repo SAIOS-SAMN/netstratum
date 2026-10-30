@@ -22,7 +22,7 @@ reading, and its state.
 
 | # | stage | law | reads by | face | inverse reading | state |
 |---|---|---|---|---|---|---|
-| 1 | release | `s_k = ½·c/(c + base)`, placed `R = ring + span·c` | galaxy | P (tide on the unlocked face) | released on our continuum leg = the true vacuum; the luminal bound sorts the face | built |
+| 1 | release | `s_k = ½·c/(c + base)`, placed `R = ring + span·c` | galaxy | P (tide on the unlocked face) | released on this universe's continuum leg = the true vacuum; the luminal bound sorts the face | built |
 | 2 | luminal | share > ½ ⇒ Möbius | mote | either | symmetric (docs/98 §4) | built fa7378d |
 | 3 | torque, turning | `2·share` a bell, route by face | mote | G on its face | vacuum face reads `1 − δ`, route backward | built |
 | 4 | disc settles | tilt returns `turned/(d + turned)` | galaxy | G (`turned = 2δ`), P (`d = 1 − δ`) | admitted face only (outside the ring) | built |
@@ -96,11 +96,12 @@ The driver stays over the product's nucleons `2w`.
 
 - **Faces.** The luminal bound admits only the face whose share is at most
   ½ (docs/98): outside the ring the continuum face (δ < ½), inside it the
-  vacuum face (1 − δ < ½). Our released matter stands outside the ring, so
+  vacuum face (1 − δ < ½). This universe's released matter stands outside
+the ring, so
   bodies form on the admitted face and read δ; the hearts hold inside their
   own throats, where the admitted face is the vacuum's: containment is the
   vacuum's kind (Xylarium: "a star is quantum gravity containment, its
-  holding face the vacuum's"). So in our universe the heart is the vacuum
+  holding face the vacuum's"). So in this universe the heart is the vacuum
   and the disc the continuum, each read on its admitted face: the inversion
   is carried by where matter stands, never by a second law.
 - **What the inversion changes in a law:** only where a law reads a face

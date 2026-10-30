@@ -289,9 +289,9 @@ or it pays the inert exactly what it pays the reciprocal.
 
 ### 3.2a Friction vents whole — a landed law it does not obey
 
-**(operator ruling 2026-08-03: *if friction creates a force for
-divergence, we must capture the energy output in re-convergence or
-consilience*.)**
+**(operator ruling 2026-08-03: where friction creates a force for
+divergence, its energy output must be captured in re-convergence or
+consilience.)**
 
 **The gap, verified.** Friction posts its entire amount to the void:
 

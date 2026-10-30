@@ -205,7 +205,7 @@ Scrap (ledger entry: kind + amount)
 |------|---------|
 | Spot | Offer scrap ↔ STAMP / cargo (MARKET-1 / STAMP spot) |
 | Commission | Note or Future: pay / deliver → HullMinted for buyer |
-| Service deed | Pay yard bill on their world; owner = you or lease |
+| Service deed | Pay yard bill on the yard's world; owner = the player or lease |
 
 NPC shipwrights: bid scrap when starved; ask hulls when finished;
 respect war/treaty; catalog from archetype.

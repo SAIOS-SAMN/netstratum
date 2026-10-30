@@ -36,8 +36,8 @@ owned by neither. `D(Ω)` is the room standing in it: not a scalar and
 not a metric density. `D` is the rank of the relational structure — how
 many independent degrees stand — and `D(Ω)` is the space they span.
 
-**`D` is not A capacity** (operator ruling 2026-08-01: *why do we have
-capacity? that should not be the case in an expanding universe*). The
+**`D` is not A capacity** (operator ruling 2026-08-01: capacity has no
+place in an expanding universe). The
 word names a container and implies a ceiling; there is no ceiling
 anywhere in this workspace, and `holonomies().len()` rises without
 bound as structure emerges. `PhiK I^(3)` had the right name all along —
@@ -390,9 +390,9 @@ one at a time. Entanglement is one object:
 **Why this is the stronger force.** It moves the no-free-energy law
 from a reconciliation instrument to an invariant — from *detect and tax* to
 *cannot be constructed*. That is this system's own strongest principle,
-already stated in the kernel's own header: *"an unlawful transition is
-not caught after the fact, it cannot be constructed … you do not
-reconcile what cannot diverge."* Under entanglement a closed loop at
+already stated in the kernel's own header: an unlawful transition is
+not caught after the fact, it cannot be constructed, and what cannot
+diverge is not reconciled. Under entanglement a closed loop at
 uniform potential does not mint and get penalised; **it cannot mint.**
 
 Three consequences, each structural:
@@ -442,7 +442,7 @@ bounds to identities — `amount == mint_bound(d)` — to remove latitude.
 That is the same failure as gradient descent, one level down: it
 collapses a two-sided relation to a point and discards whatever
 distinguished the sides. An equality keeps one value and throws the
-difference away. **We never discard residuals**, and the gap between
+difference away. **Residuals are never discarded**, and the gap between
 what a deed declares and what the state derives is a residual like any
 other. **The law admits no `==` at an entangled seam.**
 

@@ -8,7 +8,7 @@ correction and the kernel/convergence architecture — the full reasoning,
 the rejected approaches, the archaeology, and the open problems — so a node
 joining this work does not re-argue it from scratch. The law is in
 `docs/00_CHARTER.md` §11 and `engine/kernel/CHARTER.md`; this is the journey
-that produced the law. Read this first if you are picking up kernel, spine,
+that produced the law. Read this first when picking up kernel, spine,
 mesh, or economics work; the charters second.
 
 Register note: plain engineering English, no ceremony. Where a claim is
@@ -92,12 +92,12 @@ anyone can edit. **The game is constitutional; the universe is not.**
 
 ### 1.6 The anti-mirror was a symptom, not a fix
 
-`cfe::opposition` (built by the AI implementor) reconciles two authoritative copies after
+`cfe::opposition` (built in an earlier cycle) reconciles two authoritative copies after
 the fact — aperture legs summed to zero across two books. Useful, but it is a
 patch on a patch: an audit for crimes that only exist because conservation
 was enforced per-feature in a mutable interpreter instead of once in a sealed
 kernel. Under §11 it dissolves — its checks become kernel invariants (I1,
-I6). "You do not reconcile what cannot diverge."
+I6). What cannot diverge needs no reconciliation.
 
 ---
 
@@ -138,8 +138,8 @@ trajectory" = hash each snapshot with its predecessor.
 
 The mirror was never *illegal*, only leashed, which is why accretion
 captured it. Rule 5 makes the mirror-shape illegal at review — same tier as
-clippy-zero and replay-MATCHES. Vigilance did not save us; a standing test
-does.
+clippy-zero and replay-MATCHES. Vigilance did not prevent it; a standing
+test does.
 
 ### 2.4 The adoption rule — the live universe survives
 
@@ -183,10 +183,10 @@ no "local mode" and "network mode" — the judge is pure and encoding-blind,
 so it cannot tell whether a step came from local play or a peer's chain. A
 world is born and raised on one node (the **nursery**); because its
 commitment shape and its judge are already the mesh's own, it is
-**born mesh-ready**. Joining the mesh is the audience growing: you present
-your chain, peers re-run their identical kernel over every step, and
-**admission is verification** — a forged history simply fails to enter,
-refused by strangers who never had to trust you.
+**born mesh-ready**. Joining the mesh is the audience growing: a node
+presents its chain, peers re-run their identical kernel over every step,
+and **admission is verification** — a forged history simply fails to
+enter, refused by strangers who never had to trust the presenter.
 
 ---
 
@@ -199,13 +199,14 @@ Local kernel = the node's validator; mesh = the peer network; crypto channel
 numbers" is half right and the half matters:
 
 Proof-of-work does two jobs. **Validity** ("is this state legal?") — Bitcoin
-re-runs scripts; we replay under the sealed kernel; ours is better here,
-genuinely. **Ordering / Sybil resistance** ("when two legal histories
+re-runs scripts; Netstratum replays under the sealed kernel, which is
+better here, genuinely. **Ordering / Sybil resistance** ("when two legal histories
 conflict, which is real, and how is one attacker stopped from spinning up a
 million fake nodes?") — Bitcoin answers "whoever burned the most energy";
 the wasted hashing is that answer. **Replay says nothing about the second
-job.** So we replaced the validity half of PoW with deterministic
-re-execution (better) and still owe the ordering half a real mechanism. Do
+job.** So the validity half of PoW was replaced with deterministic
+re-execution (better), and the ordering half is still owed a real
+mechanism. Do
 not let "intelligence is meaningful" (which makes it worth verifying) be
 confused with "hard to attack" (which it is not yet).
 
@@ -229,7 +230,7 @@ creates value" is G4 across two chains.
   merge — aperture legs sum to zero across two independent books, or the
   merge invented value.
 - **The verified-work anchor (proof-of-useful-work)** is the anti-inflation
-  and anti-Sybil bound: you cannot mint faster than you can produce genuine,
+  and anti-Sybil bound: no node can mint faster than it can produce genuine,
   certified intelligence. This is unbuilt (§7).
 - **The fold cadence (AEON)** bounds how often merges fire — the manifold,
   the four-C fold-eligibility. Prevents merge-farming.
@@ -302,7 +303,7 @@ unaffected and stands**: driving any aggregate of the residuals to zero
 discards them, whichever norm does the aggregating.)*
 
 Driving the coherence functional `C(Δ) = Σ|R|` to zero is gradient descent to
-a minimum: you keep the minimizer and discard the residual. It is
+a minimum: the minimizer is kept and the residual discarded. It is
 uni-directional and lossy — convergence-as-projection manufactures agreement
 by destroying difference. That is entropy wearing a syntropy mask, and it
 violates the whole thesis. **Rejected as the convergence method** (kept only

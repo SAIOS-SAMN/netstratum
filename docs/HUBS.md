@@ -46,7 +46,7 @@ Bench craft is **not** paid in STAMP unit-of-account by default. Three classes:
 | **Off-planet** | Requires *resourcing path*, not a price tag | synth / clone / skin **R2** + their create paths |
 
 Off-planet evidence (any one): `has_crossed` · non-empty element routes · non-empty ROUTE-1 deals.  
-Advanced tech is **gated** until that evidence exists — you cannot buy synth R2 with local STAMP alone.
+Advanced tech is **gated** until that evidence exists — synth R2 cannot be bought with local STAMP alone.
 
 ### Seating law
 
@@ -178,7 +178,7 @@ Dual:  intel       ←activity→  bench intel
 
 Science: bench chem|biology|physics|math|research  →  intel knowledge/research
 
-Polity:  who you are (axes · taxon · mint · AP · labor)
+Polity:  the polity's identity (axes · taxon · mint · AP · labor)
 Dual:    polity  ←activity→  bench polity
 ```
 

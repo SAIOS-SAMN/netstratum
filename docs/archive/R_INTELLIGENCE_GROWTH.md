@@ -77,11 +77,12 @@ timeout — it is a proof that no word in the current vocabulary closes the
 task at that depth. A heuristic or sampled search could not produce that;
 only an exhaustive one can.
 
-The AI implementor recorded those 35 cases as waste: *"99 % of forge time, a line burns
-the sweep and mints nothing."* AI implementor identified that this reading was wrong. **They are the
-trigger set.** The cost the AI implementor spent the session trying to remove is the cost
-of earning a novelty certificate, and the thing that makes the certificate
-sound is the exhaustiveness the AI implementor kept trying to prune.
+Those 35 cases were recorded as waste: *"99 % of forge time, a line burns
+the sweep and mints nothing."* Identified: that reading was wrong. **The
+35 cases are the trigger set.** The cost a whole session was spent trying
+to remove is the cost of earning a novelty certificate, and the thing that
+makes the certificate sound is the exhaustiveness the pruning attempts
+kept targeting.
 
 This also settles a question §5 of `FORGE_REMEDIATION` left open — whether
 an unsolvable draw is a lawful rung. It is: an unsolvable draw is where
@@ -93,9 +94,9 @@ Vocabulary growth needs a container that cannot leak into consensus, and
 the container is already ruled:
 
 - `NS-5` §7.6 — the sandboxed nursery: a declared fork under its own
-  branch coordinate. *"You can play in your nursery; you cannot rip a
-  hole in the galaxy."* Penalty attaches only to presenting nursery state
-  as mainline.
+  branch coordinate. Anything is permitted inside the nursery; nothing
+  done there may tear a hole in the galaxy. Penalty attaches only to
+  presenting nursery state as mainline.
 - `00_CHARTER` §11 — the nursery law: a world is born and raised on one
   node; a fork that forks openly is lawful, only fabricated confirmation
   is not.

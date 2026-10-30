@@ -6,7 +6,7 @@ population loop (#40–42, `41_PROVISION`) and the settle-at-touch discipline.*
 
 ## 0. Why a layer at all
 
-If food goes straight from harvest to stomach you have a biomass ledger,
+If food goes straight from harvest to stomach the result is a biomass ledger,
 not a market. The population loop landed in #40–42 is exactly that ledger:
 `population_touch_delta` reads `available = bank + harvest + regrowth` and
 feeds the people directly off it. That is subsistence. It has no place for

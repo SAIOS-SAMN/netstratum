@@ -30,7 +30,7 @@ Xylarium 11.0 (13): "a kind's harmonic weight is its place, never its mass
 alone": its phases on its own sphere, where its bands stand, how its frames
 are turned, whether its outer frame is paired.
 
-Ours, read off the nucleus's convergence on S^11 (docs/97 §2), exact, per
+Netstratum's, read off the nucleus's convergence on S^11 (docs/97 §2), exact, per
 weight w:
 
 - `n(w)` its turning (it holds the degrees `0..n − 1` closed);
@@ -87,7 +87,7 @@ two faces cancel). Which order a kind presents is the open ruling (Xylarium:
 
 Xylarium's answer (2026-10-27, a reading of its spec, not a ruling): its
 atom-band question is closed as the pivot degree on S^11 with its Hopf
-fibres (its 11.0 (14), our convergence); it has no ruled C (its circuit never
+fibres (its 11.0 (14), Netstratum's convergence); it has no ruled C (its circuit never
 computes one); of (a) and (b), (a) is the one consistent with the pivot-degree
 ruling, reading the order straight from the open degree, and non-monotone in
 weight is acceptable ("shells, not weights, set the order"). The choice is
@@ -101,7 +101,7 @@ as a locked lead between its planes - the jet a helix, its pitch the core's
 and loosen as the stream's own turning takes over - torsion relaxing
 outward, read, never set."
 
-Ours, by machinery already built:
+Netstratum's, by machinery already built:
 
 - **At release** a mote's tilt is the core's twist shares, `t_k = φ_k/Σφ`
   (its lead between planes), not isotropic.
@@ -147,7 +147,7 @@ sealed kind presents only fibres (whole).
 ## 8. Quantum torsion (direction of 2026-10-27: add quantum torsion and the sub-atomic phase transitions)
 
 The bounce is Einstein–Cartan: torsion is real and couples to spin
-(Xylarium (8)). In our grammar torsion is the winding a quantum state takes
+(Xylarium (8)). In Netstratum's grammar torsion is the winding a quantum state takes
 from the twist, per plane, and keeps until its own turning relaxes it.
 
 - **Taken:** each ring a body receives, it is wound in plane k by the twist

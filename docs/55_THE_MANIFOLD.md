@@ -235,8 +235,8 @@ Three conclusions, each asserted as a standing test:
    for*. The ordering composer > guild > hoarder held in **40/40** independent seed
    populations: a law, not a fluke.
 
-The design consequence for the live engine: to raise a civilization's intelligence
-you do not enrich private minds — you raise its **connectivity** (open the
+The design consequence for the live engine: a civilization's intelligence is raised
+not by enriching private minds but by raising its **connectivity** (open the
 classification, harden the connection's coherence past the ignition threshold). The
 `instinct::choose` connection sampler and the 3b selection already push in this
 direction; the entity-atlas (#146) makes the connectivity — and therefore the

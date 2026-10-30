@@ -4,9 +4,9 @@ Operator (2026-10-13): TUniversal is offered as a quantum state; a universe
 chains its own ledger to it, perpendicular (orthogonal), as a local quantum
 state. In a universe of potentials and of time as coordinates, where
 timelines meet there are two outcomes, convergence and collision. The
-ledger pays locally for convergence and charges for collision. "You can play
-with time, but if you cause a collision you get a ticket, paid dearly in
-your citizens and your local stewards." Stewards keep local time;
+ledger pays locally for convergence and charges for collision. Play with
+time is permitted, but causing a collision incurs a ticket, paid dearly in
+the civilization's citizens and local stewards. Stewards keep local time;
 sectors with too many collisions are shut down. Advanced civilizations
 seek continuous convergence, or large convergences with minor collisions.
 
@@ -264,7 +264,7 @@ box back inside a curved universe.
     torsion threaded through the loop (the cones' twist, Xylarium §10.3's
     torsion as holonomy).
 
-  In flat space Φ would vanish and only W would remain; in our curved
+  In flat space Φ would vanish and only W would remain; in this curved
   universe both are present, and they are read apart.
 - **Coherence is W.** It is counted on the network's loops, exact and an
   integer.

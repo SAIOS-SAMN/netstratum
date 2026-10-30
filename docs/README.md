@@ -151,6 +151,5 @@ The universe beneath the game, derived from one grammar of shares and phases
 - [`vectors/`](vectors/): recorded reference readings.
 - [`archive/`](archive/): superseded specifications and the working notes of
   past build cycles (handoffs, directives, task lists), kept for history.
-  The notes were written by AI sessions under the operator's direction; the
-  writer is named "the AI implementor", and its own findings are marked
-  "AI implementor identified".
+  The notes were written by AI sessions under the operator's direction;
+  findings are marked "Identified", "Fixed" or "Remediated".

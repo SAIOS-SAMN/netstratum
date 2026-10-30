@@ -140,7 +140,7 @@ Two costs, and the second is the one that matters:
 2. **Economy.** A line drawing an unsolvable task burns the full sweep
    and mints nothing. At 30 % that is roughly one beat in three spent
    producing no work, and the line cannot tell the difference between
-   "I was not good enough" and "there was nothing there".
+   an insufficient attempt and an empty draw (nothing there to find).
 
 Owed, and it is an operator question because it moves the difficulty
 surface: should the forge emit only tasks its own vocabulary can close,
@@ -149,7 +149,7 @@ families, or is an unsolvable draw a lawful part of the ladder?
 
 ## R1b — Buffer reuse: landed (2026-08-02)
 >
-> Operator: *"your heap on the Vec is too small."* Correct, and it is
+> Operator finding: the heap on the Vec is too small. Correct, and it is
 > what R1 was missing.
 >
 > A grid at live difficulty is 9–16 bytes. `Op::apply` allocated a fresh
@@ -196,7 +196,7 @@ families, or is an unsolvable draw a lawful part of the ladder?
 > cheap re-application on small grids for persistent allocation, and the
 > two cancel.
 >
-> **AI implementor identified: its own 48.24 s figure does not reproduce.** It was measured
+> **Identified: the earlier 48.24 s figure does not reproduce.** It was measured
 > before the 66-commit merge; the same baseline on the same machine now
 > reads ~56.2 s for the *unchanged* code. So the earlier "R1 is a
 > regression" reading was an artefact of comparing across a merge —

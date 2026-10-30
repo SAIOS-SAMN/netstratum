@@ -33,21 +33,21 @@ same map: its held hemisphere is the face inverse gravity holds.
 
 ## 1. The dual pairs
 
-Notation: `δ = H/(R + H)` the forward deficit at a reach; `g = 1 − δ` our
-held share (inverse gravity); `u = δ` our unlocked share; `e` a kind's open
-share (its open frames over its weight).
+Notation: `δ = H/(R + H)` the forward deficit at a reach; `g = 1 − δ` the
+inverse held share (inverse gravity); `u = δ` the inverse unlocked share;
+`e` a kind's open share (its open frames over its weight).
 
-| pair | forward (Xylarium) | inverse (ours) | in code now | change |
+| pair | forward (Xylarium) | inverse (Netstratum) | in code now | change |
 |---|---|---|---|---|
 | **pull** (gravity's hold) | `δ` | `g = 1 − δ` | `Enclosed::reach`, heart cut `H/(R + H) ≥ p` | the enclosure by share from the outside in (docs/103 §5); the cut held where `g ≥ p` |
-| **push** (the bounce's carriage) | on the unlocked face `1 − δ` | on our unlocked face `u = δ` | release `s = ½·c/(c + base)` (`breath`) | `s = p·c/(c + base)`, `p = S/(S + T)` the core's pair share (§1.2) |
+| **push** (the bounce's carriage) | on the unlocked face `1 − δ` | on the inverse unlocked face `u = δ` | release `s = ½·c/(c + base)` (`breath`) | `s = p·c/(c + base)`, `p = S/(S + T)` the core's pair share (§1.2) |
 | **heating** (the face not locked heats; ruled 2026-10-16) | `½(1 − δ)` | `u·e` (§1.2) | the light warms bodies by `1 − δ` (`breath::shine`); torque heat `p·δ·(1 − |k|)` | warmth by `u·e`; torque heat by the face pushed, `p·u·(1 − |k|)` |
-| **cooling** (heat leaves) | light `e` and the vacuum's pull back `δ`, keep `(1 − e)(1 − δ)` a ring | light `e` and our pull back `g`, keep `(1 − e)(1 − g) = (1 − e)·δ` | keep `(1 − e)(1 − δ)` (`flows::spin_torque`) | keep `(1 − e)·u`, and the counterweight (§2) |
+| **cooling** (heat leaves) | light `e` and the vacuum's pull back `δ`, keep `(1 − e)(1 − δ)` a ring | light `e` and the inverse pull back `g`, keep `(1 − e)(1 − g) = (1 − e)·δ` | keep `(1 − e)(1 − δ)` (`flows::spin_torque`) | keep `(1 − e)·u`, and the counterweight (§2) |
 | **twist** (winding per turn) | the core's deficit at its ring, `½·t_k` | the same: the fixed point where it holds (§1.2) | `quantum::twist`, a body through its own planes | stands |
-| **release** (untwisting; the tide letting go) | by the unlocked face | by our unlocked face `u` | torsion relaxes by the attractor `turned/(d + turned)`, `d = 1 − δ` | `d = u` |
+| **release** (untwisting; the tide letting go) | by the unlocked face | by the inverse unlocked face `u` | torsion relaxes by the attractor `turned/(d + turned)`, `d = 1 − δ` | `d = u` |
 | **bound / free** (the electrons) | the held share counted, `h = (F_e + L_e·in_step(p, 0))/Q` | the same count against the face inverse gravity holds, `h = (F_e + L_e·in_step(p, ½))/Q` | `nuclides::held` `(1 + R)/2` (a halving) | the count (§1.1): no halving |
-| **grip / part** (the fibres) | grip `κ·h` | grip `κ·h` with our `h` | `nuclides::grip` | follows `h` |
-| **capture / release** (nucleons) | survival `κ + (1 − κ)·h` | the same with our `h` | `nuclides::survival` | follows `h` |
+| **grip / part** (the fibres) | grip `κ·h` | grip `κ·h` with the inverse `h` | `nuclides::grip` | follows `h` |
+| **capture / release** (nucleons) | survival `κ + (1 − κ)·h` | the same with the inverse `h` | `nuclides::survival` | follows `h` |
 
 Fixed points: at the ring `δ = ½`, so `g = u = ½` and every pair balances
 there (both faces equal).
@@ -95,7 +95,7 @@ that is not the throat: a halving, a static.
 | a core's push ("regenerated ½") | its state equal to what its throat holds (true at the bounce only) | `p = S/(S + T)`: its state S against what its throat still holds T; ½ at the founding, rising as the throat empties |
 | the release `s = ½·c/(c + base)` | that push | `s = p·c/(c + base)` |
 | a body's push `½·Q/(A + Q)` | half its open share | `Q/(A + Q)`, its open frames over its whole (open in both frames: the inverse nucleus already makes the protons the open ends) |
-| the heating face `½(1 − δ)` | half the unlocked face reaches the body | `u·e`: our unlocked share times the body's own open share (the frames that take heat); heating is the cooling's light channel run backward |
+| the heating face `½(1 − δ)` | half the unlocked face reaches the body | `u·e`: the inverse unlocked share times the body's own open share (the frames that take heat); heating is the cooling's light channel run backward |
 | the core's twist at its own ring | — | `½·t_k` stands: the fixed point read where it holds (a core winds at its ring, δ = ½); a body takes it through its own planes (`quantum::twist`) |
 | the luminal bound (share > ½), the founding's phase | — | Stand: the fixed point read where it holds |
 
@@ -111,9 +111,9 @@ other), so nothing leaves the books:
   it by their holding at their own share. Cooling here is heating there.
   Witness: the heat ledger closes each echo (heat before + heat in = heat after
   + light out).
-- **Push and pull:** the bounce's push given on our unlocked face is the hold
-  our gravity takes back on the held face: the spin ledger already books it
-  (the torque's `given` against the core's reservoir); unchanged.
+- **Push and pull:** the bounce's push given on the inverse unlocked face is the
+  hold inverse gravity takes back on the held face: the spin ledger already
+  books it (the torque's `given` against the core's reservoir); unchanged.
 - **Twist and release:** the winding a core gives (`g·t_k` a ring) is what its
   bodies' torsion holds; their release (the attractor's loosening) returns it
   to the core's own turning, booked on the spin ledger (the tilt's change is
@@ -124,7 +124,8 @@ other), so nothing leaves the books:
 
 ## 3. What this changes, read
 
-- **Heat runs the other way.** Matter is heated by our unlocked face, `u = δ`:
+- **Heat runs the other way.** Matter is heated by the inverse unlocked face,
+  `u = δ`:
   deep matter (large δ) is pushed and heated most, far matter cooled; the
   cooling's pull channel deposits heat on the other face. With the luminal
   bound keeping most matter on the vacuum face, the two faces' heats meet at
@@ -147,9 +148,9 @@ other), so nothing leaves the books:
    reads ½.
 2. **Heating, cooling and the counterweight** (§1, §2) on a heat ledger.
    Witness: the ledger closes each echo exactly.
-3. **Push and release** on our unlocked face (the bounce's release, the
+3. **Push and release** on the inverse unlocked face (the bounce's release, the
    torque's band). Witness: nucleons and spin conserved per bounce.
-4. **Twist and its release** by our held share at the body's reach. Witness:
+4. **Twist and its release** by the inverse held share at the body's reach. Witness:
    the twist at the ring ½ a turn a ring on both faces; the spin ledger exact.
 5. **The quantum state counted and inverted** (`nuclides::held` the count of
    §1.1 against the held face ½). Witness: the count's mean over a turn

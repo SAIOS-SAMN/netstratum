@@ -63,9 +63,9 @@ holds this distinction by construction, not by convention.
 
 ## 4. Inverted metabolisms → antisymmetry
 
-"My waste stream is your food supply" is one tensor entry read in two
-directions: `Δ_ij = −Δ_ji`. The mineral/biotic inversion is not two
-ruleset tables kept consistent by hand — it is one antisymmetric
+"One side's waste stream is the other's food supply" is one tensor entry
+read in two directions: `Δ_ij = −Δ_ji`. The mineral/biotic inversion is
+not two ruleset tables kept consistent by hand — it is one antisymmetric
 relation that cannot desync.
 
 - **Primitive:** `rfa_core::Delta::set_antisym` (the only lawful

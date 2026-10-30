@@ -5,9 +5,9 @@ course-correction problem is solved by going diegetic: no WebGL, no render
 ambiguity. Civilizations speak — one journal entry per year — and the feed
 is the observation surface.
 
-**The premise (operator):** "what is *your* civilization doing and how can
-*I* find entertainment in that? Are you building spaceships or harvesting
-honeydew — no one really knows." Growth, stagnation, needs, and leisure
+**The premise (operator):** the player should be able to see what a
+civilization is doing and find entertainment in it — whether it is building
+spaceships or harvesting honeydew, which otherwise no one knows. Growth, stagnation, needs, and leisure
 become readable — and therefore economically actionable intelligence.
 
 ## 1. The laws (binding on the implementation)

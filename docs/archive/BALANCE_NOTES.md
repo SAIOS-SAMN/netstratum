@@ -67,7 +67,7 @@ purpose. Mechanics stay coder-03's; the values are economics:
 - the resonator's conversion ratios
 - the G2 ration magnitudes
 
-Also mine already: φ = 1/64 (the melt), TARGET_RESERVE = 8, route
+Also already in this lane: φ = 1/64 (the melt), TARGET_RESERVE = 8, route
 charter alloy 4 + upkeep 1/4 joule, instrument costs (alloy = grade,
 diamond at 3+), η = (1+grade)/8.
 

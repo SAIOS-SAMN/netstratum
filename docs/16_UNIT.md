@@ -240,7 +240,7 @@ stays true to the landed kernel, not an earlier assumption.
   in `U_DIRECTIVES` §2a). Two corrections the landing forced, recorded
   here because this is the ruling's own text:
   1. **Identity is not admission.** Content-addressing proves which
-     task was solved, never that it was one of ours — a miner may
+     task was solved, never that it was one of this kernel's — a miner may
      author a trivial task, hash it honestly, solve it honestly and
      mint. **The admissible-set answer is struck** (operator ruling
      2026-08-04, same day: the engine must be able to forge new corpus,

@@ -23,10 +23,10 @@ From the kernel doc (§ the throat, S^0 faces; the jetstream (11)):
 | Vacuum (black) | holds the rings it takes: gravity, containment, quantum mass; matter in transit (axis, arc) | the deficit `δ = H/(R + H)` |
 | Continuum (white) | outflow, pulse and echoes, push, jets, light; the open frames repel (magnetism); the disc is held on it | the unlocked share `1 − δ` |
 
-## 2. Ours, inverted
+## 2. This universe, inverted
 
-Our continuum leg is the vacuum. Each law swaps the face it reads: gravity
-and velocity read `1 − δ(R)` (the share's other face) where the forward read `δ(R)`, the
+This universe's continuum leg is the vacuum. Each law swaps the face it
+reads: gravity and velocity read `1 − δ(R)` (the share's other face) where the forward read `δ(R)`, the
 push, light and cooling read `δ(R)` where the forward read `1 − δ(R)`.
 
 ## 3. The inversion is already in the grammar, and the luminal bound makes it a relabel
@@ -41,8 +41,8 @@ push, light and cooling read `δ(R)` where the forward read `1 − δ(R)`.
 - **The luminal bound** (SUBSTRATE_C, one whole turn a K-step): a body turns
   `2·share` a bell, its share δ on one face and `1 − δ` on the other.
   Exactly one face reads at most ½ at any reach; the other would fracture.
-  So matter stands on the face whose share is at most ½, whichever we call
-  the continuum.
+  So matter stands on the face whose share is at most ½, whichever is
+  called the continuum.
 
 Therefore inverting gravity, magnetism and velocity globally only relabels
 the legs: what was read forward on one face is read inverted on the other,

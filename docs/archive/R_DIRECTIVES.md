@@ -125,8 +125,8 @@ explains it — and no live path can reach it.
 
 The house already has the right instrument for exactly this class:
 `kernel/tests/recurrence_guard.rs` mechanizes review lints *"at the same
-tier as clippy-zero"*, on the stated ground that **"vigilance did not
-save us; a standing test does."** `constitution_lint.rs` does the same
+tier as clippy-zero"*, on the stated ground that **vigilance did not
+prevent the defect; a standing test does.** `constitution_lint.rs` does the same
 for retired vocabulary — and caught this lane twice in one session.
 
 **Proposed:** a lint that enumerates public enum variants and fails any

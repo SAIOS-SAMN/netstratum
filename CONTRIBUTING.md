@@ -69,5 +69,5 @@ git-ignored and throwaway: a universe is re-founded, never migrated.
 
 ## License
 
-By contributing you agree that your contributions are licensed under the
-Apache License, Version 2.0 ([LICENSE](LICENSE)).
+By contributing, a contributor agrees that the contributions are licensed
+under the Apache License, Version 2.0 ([LICENSE](LICENSE)).

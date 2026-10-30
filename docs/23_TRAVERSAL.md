@@ -136,8 +136,8 @@ structure that survives reduction, not in energy spent.
 
 §2k wrote the arrow as ECSK usually writes it: **spin sources torsion**,
 torsion appearing as a response where spin-carrying matter sits. The
-operator's correction reverses it: **twist the torsion at the fine
-layer and you have the spin.** Not a source relation — an identity
+operator's correction reverses it: **the torsion twisted at the fine
+layer is the spin.** Not a source relation — an identity
 across scales.
 
 **What is conceded and what is not.** GR is a four-dimensional
@@ -290,8 +290,8 @@ reach is already in the witness type.
 with ordinary arithmetic.**
 
 Backward is a reference: hash the parent, landed as
-`Commitment.parent`. Forward cannot be a reference — **you cannot hash
-what does not exist yet.** But it can be a constraint: an obligation
+`Commitment.parent`. Forward cannot be a reference — **what does not exist
+yet cannot be hashed.** But it can be a constraint: an obligation
 binding the next commitment without naming it.
 
 The organ is landed. `CHANNEL_FORWARD` carries the undelivered

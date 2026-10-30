@@ -20,10 +20,10 @@ still resolves against the same section names.
 
 ---
 
-## §1 The ruling (recorded as given)
+## §1 The ruling (paraphrased)
 
-> we don't limit any of these components to tensors — this is torsion
-> only — we need that regulated in constitutional law … Ω(D) as
+> None of these components is limited to tensors — this is torsion
+> only — and that must be regulated in constitutional law … Ω(D) as
 > dimensional capacity with master equation for symmetric
 > re-categorization of amplitudes on the uplift of ∂Δ — not in a ‖‖
 > cage — but as an expanding component of union between the Ω
@@ -192,8 +192,8 @@ misreading.**
 
 1. **The floor is occupancy** (operator ruling 2026-08-02). `GROUND`
    floors an empty universe at one tone. A universe holding structure
-   that needs `k` tones is floored at `k` — **you cannot have less room
-   than you are using.** Enforced today by absence: no deed closes a
+   that needs `k` tones is floored at `k` — **a universe cannot have
+   less room than it is using.** Enforced today by absence: no deed closes a
    plane (`GaugeShiftedAt` opens grades; nothing removes one), and the
    container law makes structure in an unopened plane unrepresentable.
    **The fold, guarded** (2026-08-02; `kernel::bridge::fold_guard`,

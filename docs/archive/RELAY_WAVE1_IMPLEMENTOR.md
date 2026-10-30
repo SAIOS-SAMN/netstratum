@@ -7,14 +7,14 @@
 > arcs. **Do not re-implement.** Standing law below remains authority for
 > later waves. Next brief: `RELAY_WAVE2_IMPLEMENTOR.md`.
 
-You are building the first vertical slice of the tier/rail/market arc
-(`TASKS_TIER_RAIL_MARKET.md`). This brief is the accumulated law you
-need that the task DAG does not carry. Read it before you write a line;
-most of it exists because something already went wrong.
+This brief covers the first vertical slice of the tier/rail/market arc
+(`TASKS_TIER_RAIL_MARKET.md`). It holds the accumulated law the
+implementor needs that the task DAG does not carry. Read it before
+writing a line; most of it exists because something already went wrong.
 
 ---
 
-## 1. What you are building, and how you know you are done
+## 1. What is being built, and how completion is known
 
 The slice: **stations T4–T9 → REFINE-1 + NPC build → element aperture +
 route + NPC trade → STAMP spot + NPC market makers → R1–R2 only.**
@@ -24,7 +24,7 @@ Perps, R3 and R4 are explicitly out.
 clears, and a STAMP spot clears, with **zero player actions**.
 
 **Build that harness first, red.** Not last. Every wave then turns part
-of it green, and you always know what you have. The reason is measured,
+of it green, and the current state is always known. The reason is measured,
 not stylistic: this codebase has twice produced features that passed
 every test and were wrong the moment a person drove them.
 
@@ -50,18 +50,18 @@ NPC harness is what proves playable, so it comes first.
    not its last row.* The DAG lists it fourth; treat it as the gate. If
    offices are reachable only from the CLI, Waves 3–5 get built on a
    path no automaton walks, and the anti-click-to-win rule ("NPCs must
-   clear markets without a player") is unmeetable by the time you
-   discover it. Wave 1 is done when the conductor seats a T4 and a T6
+   clear markets without a player") is unmeetable by the time it is
+   discovered. Wave 1 is done when the conductor seats a T4 and a T6
    unaided.
 5. **T1.2** — ascend gates with typed refusals.
 6. **REFINE-1.**
 
 ---
 
-## 3. Shared registers — claim before you bump
+## 3. Shared registers — claim before bumping
 
 Four registers are shared across lanes and collide silently. **The
-ledger block is the register, not the constant.** Write your claim in
+ledger block is the register, not the constant.** Write the claim in
 the ledger, then bump.
 
 | Register | Where the ledger lives | Next free |
@@ -73,7 +73,7 @@ the ledger, then bump.
 
 This is not bureaucracy. Two lanes minted kernel `0.13.0` independently
 this week; the collision was resolved as a sequence and both ledgers
-carry the scar. `R2.1` in your DAG already says "wire tags claimed
+carry the scar. `R2.1` in the DAG already says "wire tags claimed
 first" — that instinct is correct and this is why.
 
 **Minor vs patch is derived, not chosen:** a minor moves when the gate
@@ -82,7 +82,7 @@ verdict.
 
 ---
 
-## 4. What A new `ClosureEvent` forces you to touch
+## 4. What a new `ClosureEvent` forces a change to
 
 Adding a deed is mechanical but two of the sites are **not
 compiler-enforced** and have been missed before.
@@ -103,7 +103,7 @@ less than it claims. Coverage currently stands at **67 deeds, total**.
 
 ---
 
-## 5. The laws that will bite you
+## 5. The laws most likely to be broken
 
 ### 5.1 Doors and facts (29_CONSTRUCTION)
 
@@ -112,13 +112,13 @@ constructor and the verb never asks again. If it depends on the
 **chain**, it stays a fact at the verb forever, because what the chain
 holds grows by receipt.
 
-Worked example you can copy: `almanac::Compoundable::new` proves matter
+Worked example to copy: `almanac::Compoundable::new` proves matter
 bonds (shells agree, phases agree, binds saturate — all set-local), so
 past that door `gem()` and `knowledge()` are total, no `Option`
 survives. Locality, pressure and workability read the star, the strata
 and the heat, so they stay at the verb.
 
-For your arc: seat width is a door. *Whether this line has the deeds to
+For this arc: seat width is a door. *Whether this line has the deeds to
 ascend* is a fact.
 
 ### 5.2 One home, and call-not-copy
@@ -141,7 +141,7 @@ Precedents: tag 101 declares the ceilings its draw ran under;
 `ZoneBuilt` declares the compiled base it was priced against;
 `AssayStruck` declares the vein's after-richness.
 
-**This will hit you directly.** T4–T9 offices, STAMP instruments and
+**This applies to this arc directly.** T4–T9 offices, STAMP instruments and
 rail promotions are all fold-or-registry dependent. Decide early, per
 deed: can `admits` re-derive this from committed state? If not, the
 receipt carries it, or the state does.
@@ -151,19 +151,19 @@ receipt carries it, or the state does.
 New wire or snapshot fields append at the **tail**. An older reader
 stops before them and decodes a whole record.
 
-The AI implementor inserted the treaty block mid-stream between the routes and the
+The treaty block was inserted mid-stream between the routes and the
 practices. `world_taxon`'s v1 pin failed instantly because every field
 after it misaligned. Moved to the tail. **Do not insert mid-stream**,
 and note that `world_taxon` hand-truncates a blob to simulate v1 — if
-you add a trailing run, that truncation count moves with it. That pin
+a trailing run is added, that truncation count moves with it. That pin
 bites on purpose.
 
 ### 5.5 SEAL B — replay equals live
 
 Every deed needs a replay arm, and `replay(chronicle) == committed()`
-must hold. Put that assertion in every arc pin you write.
+must hold. Put that assertion in every arc pin.
 
-The split the AI implementor identified this session, and how it happened: breaking a peace
+Identified this session — a split, and how it happened: breaking a peace
 loads the breaker's severance book. Live did it; replay did not. Cause
 — the verb strikes the displaced pact in **its own receipt before**
 sealing the new one, so by the time replay saw the seal, the peace was
@@ -180,16 +180,16 @@ find-scan repetition; peels and shears where there were iterations.*
 - **Peel** — lift one thing out by key.
 - **Shear** — one pass depositing into a sheet; never rescan per pair.
 
-**The test: does the law already partition the space you are walking?**
+**The test: does the law already partition the space being walked?**
 If it does, walk the partitions; the space between them was never a
 candidate. `World::bench` swept every subset of a ledger and filtered —
 55,000 candidates for 24 elements. Sheared onto the `(shell, phase)`
 planes: **7.32s → 0.04s**, same reading.
 
-This applies directly to your market: an order book is not a cartesian
+This applies directly to the market: an order book is not a cartesian
 product of bids and asks. Match on the plane the price law partitions.
 
-**If you optimise, prove the reading did not move.** Keep the naive
+**When optimising, prove the reading did not move.** Keep the naive
 form as a reference oracle in the pin and assert set-for-set agreement
 (`engine/cfe/tests/bench_shear_pins.rs` is the pattern).
 
@@ -223,7 +223,7 @@ way: kernel → sealed math, nothing upward.
 Operator directive 2026-08-07. A mint request carries its **complete
 resolution path**; the gate re-applies it in time linear in the path.
 Nothing searches. Absent path → `WorkBroken::PathAbsent`, refused
-ungranted. Applies to any new mint source you introduce, including
+ungranted. Applies to any new mint source introduced, including
 STAMP.
 
 ---
@@ -246,13 +246,13 @@ and the harness notification reads *"completed (exit code 0)"* — the
 wrapper's status, not cargo's. The partial log tallies a clean
 "13 passed, 0 failed", which is indistinguishable from success.
 
-**A board is green only if you prove it finished:**
+**A board is green only when it is proven to have finished:**
 1. capture and read `EXIT $?` from the cargo run itself (124 = killed);
 2. count `Running` lines against the number of test files, and account
    for every missing one;
 3. confirm the known-slow tests actually reported `ok`.
 
-AI implementor identified: it nearly reported a killed board as green twice. `conductor`'s
+Identified: a killed board was nearly reported as green, twice. `conductor`'s
 `mint_loop_pins` takes ~26 minutes; budget for it and do not wrap it in
 a short timeout.
 
@@ -270,8 +270,8 @@ Notable:
 - **Q-S1** — linear placeholder curve; **see §5.7, it will not pass the
   ratchet as a literal.**
 
-Standing, unresolved, and not yours to decide: the seed census-class
-ruling, the η native ruling, and the IS-3 deed grant.
+Standing, unresolved, and outside this brief's remit: the seed
+census-class ruling, the η native ruling, and the IS-3 deed grant.
 
 ---
 
@@ -282,12 +282,12 @@ ruling, the η native ruling, and the IS-3 deed grant.
   added to the uplink. `31_ELEMENT_COMMERCE` and the observer columns
   (T1.5, R2.6) touch exactly that surface. **Reconcile before editing
   those two files.** Never `git add -A`; never checkout a shared file.
-- **`#38(b)`, the conductor corpus path, is d3-scope's.** They hold the
-  forge-zeroing half. Do not touch it unilaterally.
+- **`#38(b)`, the conductor corpus path, belongs to d3-scope.** That
+  lane holds the forge-zeroing half. Do not touch it unilaterally.
 - **Once-per-task minting is emitter-only.** The CLI bench reads the
   chronicle for a prior `DiscoveryMinted` carrying that task_id. The
   gate cannot: `cfe` may not parse the payload and `admits` gets no
-  receipts. **Any new mint path you build must repeat that check or
+  receipts. **Any new mint path must repeat that check or
   worlds double-mint.** Closing it properly needs the solved set in
   committed state — an unclaimed kernel amendment.
 

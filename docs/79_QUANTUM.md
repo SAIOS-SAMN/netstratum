@@ -243,7 +243,7 @@ shared library laws):
     elements' unpaired senses summed into K_disc's plane. No draw.
 - **Reviewed by Xylarium (2026-10-15):** the precession form agreed (it
   keeps the tilt separate from the bell's strength). The walk gains a first
-  stop, from their operator's formation model: the core comes first,
+  stop, from the Xylarium operator's formation model: the core comes first,
   filled heaviest-first until its holding equals its reach (`R = H`, deficit
   ½, where the clock runs at half: the inbound and outbound shares equal);
   the disc walk then starts from the core's holding. Open: what fixes the

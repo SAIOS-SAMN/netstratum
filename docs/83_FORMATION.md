@@ -47,7 +47,7 @@ layer is wrong.
   half-mass "system"), life's heat and burn (star masses of whole holes),
   the systems' clocks and the 416 bodies the breath carries.
 
-### Our rulers are our own
+### The universe's rulers are its own
 
 The first ruling asked Xylarium for physical unit rulers (suns, metres,
 km/s, one speed constant per tier fixed by the Sun's galactic orbit, Earth's
@@ -63,24 +63,24 @@ misaligned with docs/78's design laws, and none of it is adopted:
    compartment with its own physics; one law reads at every tier with one
    set of rulers (design law 4).
 3. **"No squares" is about geometry, not arithmetic.** A square states a
-   flat, rigid dimension; ours are fluid. A thermal speed taken from
+   flat, rigid dimension; Netstratum's are fluid. A thermal speed taken from
    ½mv² carries that flat geometry however its arithmetic is written
    (design law 2).
 4. **Outcomes are read, never scored against nature.** The masses that
-   collapse are what our physics gives; "a hundredth of a sun" is not a
+   collapse are what this physics gives; "a hundredth of a sun" is not a
    target.
 5. **Speeds are readings, not primitives.** Motion rises from the quantum
    layer (design law 7): a speed is a phase turning per bell, read off the
    law.
 
-Xylarium concurs (2026-10-15, their operator's ruling): what the two
+Xylarium concurs (2026-10-15, by its operator's ruling): what the two
 universes share is the laws' forms only (the turning law, `v = c·δ`,
 `L = r·v`, the radial balance, the bond law, the chronometry chain). Each
 universe derives its own rulers from its own physics, including the
 home-body compression reference.
 
 What actually blocked Phase 1 is missing physics, not missing units: the
-thermal motion of matter was never derived from our own atom tier (where
+thermal motion of matter was never derived from the universe's own atom tier (where
 temperature is a rate, `T = k_T·ω`). Derived there, on the same turning
 law and rulers as an orbit, a gas's agitation and an orbit's turning are
 comparable by construction. That derivation is Phase 1's first step.
@@ -103,7 +103,7 @@ mass unit.
 The split, in order:
 
 1. **Xylarium:** the ring-density law (a bell's ring density at a place
-   sets its clock rate and `δ`), exact, frame by frame. We adopt the form;
+   sets its clock rate and `δ`), exact, frame by frame. The form is adopted;
    the breath swaps its rate `r / (r + M)` for it.
    Delivered (Xylarium 11.0, "the ring-density law", 2026-10-15): every
    bell (a core, a star, a grain) holds each ring that reaches it for its
@@ -140,7 +140,7 @@ law's motion was wired (period `r·(r + H)/H`, the balance
   echo) escaped 1,894 systems and bore none (each birth takes the edge
   gas's spin, ≈ H, and escapes at once). It also cost 754 s against
   23 s under the held law (the balance near `ℓ → H` grows the rationals).
-- The cause is the pairing of `L = r·v` with `v = δ`: our speed reads as
+- The cause is the pairing of `L = r·v` with `v = δ`: the speed here reads as
   nature's squared speed (`δ ≈ v²/c²` in the weak field), so `r·δ` is not
   the quantity rotation conserves. Which quantity the ring law conserves
   (its spin, read from the turning without a flat square) is owed before
@@ -148,7 +148,7 @@ law's motion was wired (period `r·(r + H)/H`, the balance
 
 ### The nappe law (rejected) and the dance (with Xylarium, 2026-10-15)
 
-- **The nappe law** (Xylarium's, remediated by ours): spin is the inversion
+- **The nappe law** (Xylarium's, remediated by Netstratum's): spin is the inversion
   between the nappes, `ℓ·ℓ = r·H`. The specific spin ℓ is the primitive,
   held rational; the conserved, additive quantity is `Σ m·ℓ`. Bodies are
   placed by ℓ and read `r = ℓ²/H`, `v = H/ℓ`, `ω = H²/ℓ³`, `P = ℓ³/H²`, all
@@ -162,13 +162,13 @@ law's motion was wired (period `r·(r + H)/H`, the balance
   saturation it fixed (`ℓ = r·δ` reaches H) stands open: the spin law must
   be stated in the sphere's own terms (angles and turns, design law 2),
   with no power of a length.
-- **The dance, not Hill spheres** (Xylarium's operator; their 11.0): a
+- **The dance, not Hill spheres** (Xylarium's operator; Xylarium 11.0): a
   star and everything that orbits it are one system turning about one
   centre of conservation (every holding, every quantum state). Stability
   is alignment, not distance: worlds hold where their turns lock into
   small whole-number ratios (exact, since periods are), with the dominant
   body setting the ladder; spacing is an outcome. The many-body centre and
-  the locks are read at events. This retires our reach law's spacing
+  the locks are read at events. This retires the reach law's spacing
   ("worlds ten reaches apart", the tidal reach `s`), which is a Hill
   sphere by another name.
 
@@ -225,7 +225,7 @@ precession and its propulsion are owed together.
   universal state and each nearer galaxy's (state plus grains). 3-D
   readings (the births' binding size, the galactic year's half-mass) stay on
   grains.
-- **The clock ratio, derived** (closed with Xylarium, 2026-10-15; their
+- **The clock ratio, derived** (closed with Xylarium, 2026-10-15; Xylarium's
   founding draw withdrawn): the universal core's period is the total hold
   of everything its ring passes through, the founding manifest's every
   acquired nucleus's own period summed. So `P_core / P_grain` is the
@@ -262,7 +262,7 @@ precession and its propulsion are owed together.
   `count(Z) = N·2^−Z`, light-dominated by mass, no cap. It is the
   composition of the universe's signed founding manifest to the court
   (Mycelium 78.155b, built and live: the universe sets the composition, the
-  court records and grants μ per kind and never reshapes it; our vendored
+  court records and grants μ per kind and never reshapes it; the vendored
   Mycelium predates it, so the reserve's submission needs a re-pin).
 - **Fragmentation, the crux.** Under `ℓ = R·H` the shear `dℓ/dR = H` is the
   same at every reach, so a binding read with the orbital spin difference
@@ -377,13 +377,13 @@ conservation exact).
 
 ### Dispersal, not sorting (operator 2026-10-16; built, 5deec46)
 
-"We shouldn't be sorting anything, we should be dispersing and letting the
-physics do the distribution." The cut's all-or-nothing verdict per kind
+Ruling: nothing is sorted; matter is dispersed and the physics does the
+distribution. The cut's all-or-nothing verdict per kind
 retires. The bounce pushes every kind out and spreads it: kind z is carried
 `ℓ_z`, stands about `R_z = ℓ_z/H`, and is spread by the push across
 `R_z(1 − p) … R_z(1 + p)`. Its held share is the part of that spread within
 the throat, `(H − R_z(1 − p))/(2p·R_z)` taken between 0 and 1: a share,
-never a verdict (Xylarium agrees; their ruling "nothing boolean: outcomes
+never a verdict (Xylarium agrees; its ruling "nothing boolean: outcomes
 are shares and rates"). Every kind is partly held and partly free, the disc
 and the gas both mixed (`pulse::disperse`, `formation::shells`).
 
@@ -593,7 +593,7 @@ the one capture law. The image is a continuous fountain.
      hypha on opposite antipoles (the paired throat; nothing open).
    - **East/west, its collection:** jets on opposite antipoles that loop
      out to the first ring of galaxies and back.
-   That is four jets, two pairs of antipoles, one axis per plane we read.
+   That is four jets, two pairs of antipoles, one axis per plane read.
    Each jet is a continuous loop, inbound and outbound at once (the galaxy
    jetstream's law one tier up).
 2. **A galaxy at the universal core.** The universal core is the core of
@@ -812,7 +812,7 @@ small star on the outer rim.
   share at the bang, printed per Z, before anything is wired. No draws:
   cores from the package and the bounce's beads.
 
-## What we have, and what is missing
+## What is built, and what is missing
 
 | nature's ingredient | built | missing |
 |---|---|---|
@@ -841,7 +841,7 @@ Linear, exact, closed forms between events (docs/78 design laws).
 
 0. **The derivation first** ("The derivation" above): the ring-density
    law (Xylarium), a grain's ring and thermal motion on the bell's clock
-   (ours).
+   (Netstratum).
    Then the galaxy layer is rebuilt from the bounce (docs/78, "The
    singularities"): each galaxy's manifest sorted by its bounce's hold,
    the heaviest held nearest its core (its innermost accretion disk), the
@@ -906,8 +906,8 @@ part built. One formation law for both, stated square-free here.
 - **The thermal ruler as a speed.** Temperature reads as a thermal
   agitation `v_th`: `T = k_T·ω` at the atom tier and `v_th` at the gas tier
   are one ruler read at two tiers. (Its anchor on hydrogen's 13.6 eV and
-  the proton's mass, with `v_th ∝ √T`, is withdrawn; see "Our rulers are
-  our own": `v_th` is derived from the atom tier's own turning.)
+  the proton's mass, with `v_th ∝ √T`, is withdrawn; see "The universe's rulers
+  are its own": `v_th` is derived from the atom tier's own turning.)
 - **The balance (pressure support; closes Open 1).** Every term a speed:
   `c·δ(<r) = L / r + v_th`. A mote's enclosed-mass speed is held by its
   spin speed plus its thermal speed. Gas with no spin falls until its

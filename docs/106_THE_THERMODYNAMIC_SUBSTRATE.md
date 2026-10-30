@@ -8,7 +8,7 @@ operator-named stack, 2026-05-17), as docs/94 was. Builds on docs/94 (UMD,
 SUBSTRATE_C), docs/103 (the layers), docs/104 (the inverse duals), docs/105
 (polarity equilibria).
 
-## 0. The stack, and how ours stands inverted
+## 0. The stack, and how Netstratum's stands inverted
 
 ```
 UMD / form           bodies, bindings, hearts, worlds       shaped by
@@ -16,7 +16,7 @@ KINEMATICS           motion, transport, SUBSTRATE_C          propagated FROM
 THERMODYNAMICS       pressure, potential, energy             ← the substrate
 ```
 
-Ours runs upside down. Motion is the floor: torques give spin (`flows::torque`,
+Netstratum's runs upside down. Motion is the floor: torques give spin (`flows::torque`,
 `spin_torque`), and heat and pressure are read off afterwards as its residue
 (agitation the torque's undelivered share; pressure `ρ·ā` of that residue;
 cooling a share that leaves no book). Nothing holds potential or energy as
@@ -52,7 +52,7 @@ At each place (a mote's reach in its enclosure, a ring, a body):
   booked leaving (received or drained, the existing light ledger); nothing
   else leaves. Cooling's pull channel is heat moved to the other face
   (docs/104 §2), never lost.
-- **The heat pair (docs/105 §3):** heating in at our unlocked face on the
+- **The heat pair (docs/105 §3):** heating in at the unlocked face on the
   open frames, `u·e`; cooling out by the pull back and the light,
   `g + e − g·e`; heat stands at the master equation's equilibrium
   `a* = u·e/(u·e + g + e − g·e)`, approached in closed form.
@@ -120,4 +120,4 @@ the substrate's still point.
 - The potential's zero (where `Φ` is read from: the throat's fixed point is
   the natural still point).
 - Its coupling across tiers (a star's substrate inside its galaxy's).
-- The flop's typed outcome in our code (today the luminal pass).
+- The flop's typed outcome in the code (today the luminal pass).

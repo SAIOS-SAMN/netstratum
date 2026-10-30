@@ -770,7 +770,7 @@ account.
 
 **This is an anti-laundering rule, not bookkeeping.** If archiving
 dropped a book from the reading, the cheapest way to stop being measured
-by your breaches would be to close the book — and the worst-behaved
+by one's own breaches would be to close the book — and the worst-behaved
 civilization would present the cleanest instrument.
 
 So an archived book takes no new entries and **keeps every entry it
@@ -1023,7 +1023,7 @@ keep readable.
 
 **No character from the Emoji blocks (U+1F000 and above) appears in this
 workspace.** Three had entered — `U+1F4D6` in the BOOK-1 chronicle
-rendering, all three mine — and are struck, replaced with `U+25A4`
+rendering, all three introduced by this lane — and are struck, replaced with `U+25A4`
 (Square with horizontal fill), already in the CLI's own register.
 
 The BMP dingbats and geometric symbols the CLI has always used are not

@@ -43,7 +43,7 @@ light; there is not enough heavy matter to build worlds.
 
 Nucleon ends arrive one at a time on S^11, whose degree-l harmonics give
 `d(l) = C(l + 11, 11) − C(l + 9, 11)` independent directions (1, 12, 77,
-352, …; the same count as our atom's orientations).
+352, …; the same count as the atom's orientations).
 
 - An end first claims a free direction alone. Lone ends are open: in
   Netstratum they are protons (Q).
@@ -134,7 +134,8 @@ build over generations.
 
 - **The neutron share:** a quarter of the nucleons, the unlocked face of the
   bounce's ring, `½(1 − δ)` at δ = ½. For ruling: nature's freeze-out leaves
-  about an eighth (helium about a quarter of the mass; ours gives a half).
+  about an eighth (helium about a quarter of the mass; Netstratum's gives a
+  half).
 - **The captures:** each neutron binds a proton where the nucleus first seals,
   deuterium (w 2); deuterons pair to the next seal, w 4 (Q 2, Z 2), by the
   one law the stars burn by, `w + w → 2w`; an odd deuteron stands.

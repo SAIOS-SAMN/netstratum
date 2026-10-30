@@ -91,7 +91,7 @@ it drifts silently because nothing forces the copies to agree.
 **Two corrections to this section's name, both recorded rather than
 quietly replaced.**
 
-1. The first draft called it tenure — *how long have you stood*. Wrong
+1. The first draft called it tenure — *how long a holder has stood*. Wrong
    reading; the axis is extent, not duration.
 2. The second called it ward scope. **Also wrong, and wrong in a way
    worth naming: it promoted a menial mechanic into an axis.**
@@ -172,8 +172,9 @@ That single wiring collapses three open things into one landing: the
 placeholder retires, BAND-1's deferral is paid, and the ancient's
 capability becomes measurable rather than declared — because raising D
 requires genuine support expansion under directive 16, and
-`Δ' = Q·Δ` mints nothing. **You cannot talk your way into being an
-ancient; the room only opens for work that actually grew the universe.**
+`Δ' = Q·Δ` mints nothing. **Standing as an
+ancient cannot be argued into existence; the room opens only for work
+that actually grew the universe.**
 
 ### 4d. Why the outside vantage is real and not metaphysics
 
@@ -379,9 +380,9 @@ content must never leak upward into an axis by nothing more than
 sounding grand.
 
 **This section is subordinate to whatever layer taxonomy lands from the
-syntropy lane** (their §3d, in flight). Two lanes writing one law is the
-drift this document exists to prevent; where they disagree, theirs is
-the authority and this reduces to its registry-side application.
+syntropy lane** (that lane's §3d, in flight). Two lanes writing one law
+is the drift this document exists to prevent; where the two disagree, the
+syntropy lane's text is the authority and this reduces to its registry-side application.
 
 ## §5 The expansion law — totality, never locality
 

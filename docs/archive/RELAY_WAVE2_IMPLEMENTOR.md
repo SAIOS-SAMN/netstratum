@@ -9,10 +9,10 @@
 > O6.1/O6.2, harness stamp spot green. Standing law remains authority
 > for instruments / R3–R4 / observer STAMP.
 
-You continue the vertical slice after **Wave-1 `2109bf0`**. Read
+Wave-2 continues the vertical slice after **Wave-1 `2109bf0`**. Read
 `RELAY_WAVE1_IMPLEMENTOR.md` for standing law (registers, SEAL B,
 ratchet, green-board trap). This brief is **only what changed** and
-**what you build next**.
+**what is built next**.
 
 **Working directory:** `/opt/netstratum`.  
 **Lane:** Netstratum play surface (not datum/isthmus court).  
@@ -21,13 +21,13 @@ reconciling; T1.5 / R2.6 / E3.8 touch that surface.
 
 ---
 
-## 1. What WAVE-1 left you
+## 1. What WAVE-1 left
 
 | Item | Value |
 |------|--------|
 | Kernel | `0.20.0` — next free minor **21** |
 | `ClosureEvent` tag | next free **108** |
-| Codec schema | still v5 path unless you append state fields |
+| Codec schema | still v5 path unless state fields are appended |
 | ZoneKind compiled | 1–9 (ElementRefinery = 9); minted > 9 |
 | Stations | 10 words; wire 1–10; `RING_ARITIES` includes 10 |
 | Done-bar harness | `engine/conductor/tests/wave1_era_pins.rs` |
@@ -39,7 +39,7 @@ STAMP, office *advantages* (O6), observer T-column.
 
 ---
 
-## 2. What you are building (Wave-2)
+## 2. What is being built (Wave-2)
 
 **Slice:** **E-APT-1 → E-ROUTE-1 → `element_trade_step` (E3.3)**  
 plus optional **R2.1–R2.2** (rail type + default R1) if it unblocks
@@ -77,7 +77,7 @@ ignored until Wave-4.
 |----------|-------------|-----------|
 | Kernel minor | `engine/kernel/tests/conservation_pins.rs` | **21** |
 | ClosureEvent tag | `engine/cfe/src/dop.rs` header | **108** |
-| Codec schema | `engine/codec` `SCHEMA_V*` | **v6** if you grow state |
+| Codec schema | `engine/codec` `SCHEMA_V*` | **v6** if state grows |
 | ZoneKind wire | compiled 1–9; **minted > 9** | — |
 
 Minor vs patch: minor when the gate *admits or refuses* something new.
@@ -127,11 +127,11 @@ and call green.
 - **`#38(b)` conductor corpus:** d3-scope — do not touch unilaterally.
 - **Datum/isthmus court, `Act::Anchor`, Υ estates:** separate lane
   (`/opt/datum`, `/opt/isthmus`); Wave-2 stays Netstratum R1–R2 play
-  unless you only *claim* feature-gated adapters without path deps.
+  unless it only *claims* feature-gated adapters without path deps.
 
 ---
 
 ## 8. Starting state
 
-`main` @ **`2109bf0`** (Wave-1). Re-measure board yourself before building;
+`main` @ **`2109bf0`** (Wave-1). Re-measure the board before building;
 do not inherit a green figure on trust.

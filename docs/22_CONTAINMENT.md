@@ -154,10 +154,10 @@ letters in the old roles.
 
 ### 2n.1 Where `C` lives — the fiber as workshop, and the one correction (operator, 2026-08-02)
 
-> C needs to be contained in the 2×2 matrix fibre bundle defined where
-> "anything goes" — that's the place where we put approximations,
-> floats, all the things we don't want utilised in a deterministic
-> system
+Ruling (paraphrased): C is to be contained in the 2×2 matrix fibre
+bundle defined as the place where "anything goes" — the place for
+approximations, floats, and everything not to be used in a
+deterministic system.
 
 **The quarantine is right and `C` is the correct resident. One
 distinction has to be drawn or it breaks consensus.**
@@ -237,8 +237,8 @@ anything-goes region into committed state.
 
 ### 2n.2 The sector is one matrix, not every matrix (operator correction, 2026-08-02)
 
-> that means your "matrix" is at the wrong level — and the contained
-> sector has become the entire sector
+Correction (paraphrased): the "matrix" of §2n.1 is at the wrong
+level, and the contained sector has become the entire sector.
 
 **Both claims land. §2n.1 sited the quarantine wrongly, and the
 specific error is a conflation of two different 2×2s.**
@@ -538,9 +538,9 @@ that has already failed twice.
 
 **Law (operator ruling 2026-08-01).**
 
-> the cage is for expansion of variables we don't want impacting the
-> totality of the mathematics of the universe — floats, approximations,
-> dogma, etc
+Ruling (paraphrased): the cage is for the expansion of variables that
+must not affect the totality of the mathematics of the universe —
+floats, approximations, dogma and the like.
 
 **The test is corruption, not shape.** A thing is caged because
 admitting it would break exactness, reproducibility or falsifiability —
@@ -637,7 +637,7 @@ box.**
 > C is the culmination of congruence / coherence / cohesion /
 > conversation / communication / comingling / consilience — he might
 > need the tools inside the containment sector, so he should be
-> consulted, which is why we have C(Δ): it can use any tool in the
+> consulted, which is why C(Δ) exists: it can use any tool in the
 > toolbox to perform those actions without them impacting the external
 > determinism.
 

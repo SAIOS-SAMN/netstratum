@@ -134,7 +134,7 @@ or per named element family basket).
 - NPC perps allowed only on **published indices** with ≥N clears in window
   (anti-illiquidity trap).
 
-### 3.5 What we already have (compose, don’t fork)
+### 3.5 What is already landed (compose, don’t fork)
 
 | Landed | Role in STAMP world |
 |--------|---------------------|

@@ -22,7 +22,7 @@ pays it, and then drains; an unpaid look is rest.
 |---|---|
 | A new rate table | The price derives from the seated `mint_cost × metabolic_exchange`. No dial, no fresh constant. |
 | Free think when the bank is 0 | That is the unpriced speech this cut ends. A broke line fasts — it thinks slowly across beats, not for free. |
-| Desperation burn on the look | The burn (cannibalize people for a Eureka) stays on word mint only. A look you cannot afford is rest, never a burn. |
+| Desperation burn on the look | The burn (cannibalize people for a Eureka) stays on word mint only. An unaffordable look is rest, never a burn. |
 | Per-vessel leisure split | Leisure is the orb's book; the actor is the `automaton`. Splitting leisure per vessel is a later cut (with population individuation), not this one. |
 | Population individuation | Held (same as N-I-VESSEL). |
 | `vocabulary::fold` / a second vessel draining the word | N-I8 — the file after this. |

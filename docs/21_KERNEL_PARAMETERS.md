@@ -153,7 +153,7 @@ That last clause is what makes this landable on a running game.
 
 **The policy itself.** Whether the mint softens as supply rises,
 whether decay stiffens, whether rank is a multiplier or a gate — these
-are monetary decisions and they are not mine to make. This document
+are monetary decisions and are not this document's to make. This document
 defines the parameters, measures their present values, proves the
 readings are available, and stops there.
 
@@ -321,8 +321,8 @@ change once the form is confirmed.
 ## §8 Cross-lane collision — `P2` and capacity-lane §6a rewrite one flow
 
 Capacity-lane is landing a founding economy whose tithe rides the
-demurrage rail. It correctly stopped short of the kernel — *"that's
-kernel surgery on a shared crate, so I haven't done it"* — and the lane
+demurrage rail. It correctly stopped short of the kernel — as kernel
+surgery on a shared crate, it was left undone — and the lane
 map puts `engine/kernel/` here. This records the collision surface and
 the one economic consequence neither lane has stated.
 
@@ -521,7 +521,7 @@ is a kernel-lane task that was already on the board.
 `-p cfe` and `-p kernel` are not a sweep. `cfe::world` is shared by
 `conductor`, `ledger`, `scribe` and `lens`, so a rule change there is a
 workspace change and must be tested as one. Recorded because the
-failure was mine and the discipline is cheap.
+failure occurred here and the discipline is cheap.
 
 The attempt is kept at `scratchpad/p2-attempt.patch` (474 lines,
 `P2`'s supply threading through 12 call sites) — it built and passed its
@@ -1052,8 +1052,8 @@ on `main`.
 
 `D` induces, and the base case is **the space itself** — the wrapped
 manifold's own homology, which stands before any deed. Steps add what
-is built on it. That is why induction is the right operation: **you do
-not reduce your way to a torus, you begin on one.**
+is built on it. That is why induction is the right operation: **a torus
+is not reached by reduction; it is where the count begins.**
 
 `V` reduces, stripped by demurrage, exactly as running.
 

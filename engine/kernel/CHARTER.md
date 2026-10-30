@@ -28,7 +28,7 @@ version-pinned.
 the v0.1 ancestor `/opt/ipsal-autic-v0.1/repos/convergence-engine`
 (`fold.rs`, `mdc.rs`, `consensus.rs`, `DIMENSIONAL_RESOLUTION.md`,
 `DIMENSIONAL_BLOCKCHAIN.md`) — which is AI-generated, sandbox, unwitnessed.
-We take the design and re-witness it red-first in this disciplined tree (the
+The design is taken and re-witnessed red-first in this disciplined tree (the
 NS-3 "spec from the working ancestor" precedent). No sandbox code is
 imported. What the ancestor solves — convergence better than gradient
 descent — it solves; what it does not solve — the ordering/Sybil anchor —
@@ -110,7 +110,7 @@ default-admit. (Landed: the flip + witness `the_sealed_default_refuses_the_unjud
 **No consensus weight before cryptographic identity.** Until identity binds
 (N7), any confirmation-weight computation is advisory only — never
 canonicalizing. Weight summed over self-declared integer hands is the puppet
-web, pre-built by us; this one line forbids a well-meaning seat from
+web, pre-built in this tree; this one line forbids a well-meaning seat from
 implementing it early.
 
 ## 2. The invariant set (the whole of the law)
@@ -202,7 +202,7 @@ Read to know the state; never targets the kernel drives.
   core. Calling zero "converged" contradicts **I6 in §2 of this same
   document** (*no difference dies without account*) and invites the
   minimization §4 rejects. Reduction removes contradiction and frame.
-  **We never discard residuals.**
+  **Residuals are never discarded.**
 
 - **Constitution digest** (the link handshake — same universe?):
 
@@ -210,7 +210,7 @@ Read to know the state; never targets the kernel drives.
 
   Two nodes link only if `D_const` matches. The canonical genesis roster is
   a named deed-set the kernel hashes but does not contain — start canonical
-  (same digest) or fork your own (different digest, still lawful).
+  (same digest) or fork a new one (different digest, still lawful).
 
 - **The commitment** (the spine binds it; the kernel never reads it):
 
@@ -292,7 +292,7 @@ kernel judges one node, one step; anything spanning two nodes is the mesh's.
 - **Proof of Useful Work = I4's mint-bound (kernel) + work-verification
   (mesh).** Local: the anchor on I4 — a deed claiming work carries a
   solver certificate, and the mint may not exceed what `verify_certificate`
-  proves (you cannot mint faster than you produce certified intelligence;
+  proves (no node can mint faster than it produces certified intelligence;
   anti-inflation and anti-Sybil in one bound). Cross-node: the mesh receive
   door replays embedded certificates before adopting a spine.
 - **Seam conservation = I1 (kernel) + replay (mesh).** Local: aperture
@@ -305,7 +305,7 @@ kernel judges one node, one step; anything spanning two nodes is the mesh's.
   books against each other — it re-runs this identical kernel over the
   presented chain, so **admission is verification** (§11's nursery
   law). Any cross-node reading is a lens over the one chain, never a
-  second record: *you do not reconcile what cannot diverge.*
+  second record: *what cannot diverge needs no reconciliation.*
 - **I3 exactness** is the substrate both axes stand on: `C(Δ)=0` must be
   exactly zero and certificates verify exactly — impossible with floats.
 
@@ -340,8 +340,8 @@ to shrink; no gradient term survives (the damped-gradient term struck 2026-08-01
 scale the weight
 `ω` becomes the PoW++ ordering weight, and the confidence `confidence_e`
 is anchored to certificate-verified work (§5a) — that is the seam where
-proof-of-useful-work enters the governance: you cannot buy weight, you
-earn confidence by proving intelligence, and `verify_certificate` is the
+proof-of-useful-work enters the governance: weight cannot be bought,
+confidence is earned by proving intelligence, and `verify_certificate` is the
 proof. Until that anchor lands, `confidence` is advisory only (kernel
 Charter §1: no canonicalizing weight before cryptographic identity).
 
@@ -363,7 +363,7 @@ as three laws a reviewer checks:
    split — this is the hard-won 2^1100 lesson (proportional decay exploded
    a denominator past any fixed width; the fix was flat, bounded, and
    big-integer). A `Rational64` is a correct principle (exact, GCD-reduced,
-   canonical, cross-multiplied comparison — matching ours) but the wrong
+   canonical, cross-multiplied comparison — matching Netstratum's) but the wrong
    width for consensus over accumulating value. Floats are outlawed (I3);
    fixed-width rationals are outlawed for the same reason one layer up.
 
@@ -383,7 +383,7 @@ general ZK. So the useful work such hardware can contribute is
 hash-shaped: state-vector hashing, commitment/merkle verification,
 hash-based proofs (stark-family). Matrix/AI compute needs different
 silicon. The choice of work-shape — hash-based vs proof-based vs
-search-based (our solver certificates today) — determines what hardware
+search-based (Netstratum's solver certificates today) — determines what hardware
 participates, and it is a real economics ruling (Ruling Box 1 territory,
 what work earns) that the kernel does not make: the kernel only requires
 that whatever the work is, `solver_verify::verify_work` checks it by the

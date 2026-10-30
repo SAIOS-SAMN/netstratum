@@ -280,7 +280,7 @@ disposition × metabolism × perception). Point those draws at
 minted archetype automatically enters NPC generation** with no further
 wiring.
 
-This is the answer to *how do we still let the engine populate the
+This is the answer to *how the engine can still populate the
 universe*: it populates it from the same vocabulary the operator edits,
 so a progenitor who mints a class sees NPCs wearing it in the next wave
 — and their bindings are live, because §4 made bindings mandatory.
@@ -330,8 +330,8 @@ Two homes do fit, and they differ in kind:
 
 | reading | home | cost |
 |---|---|---|
-| *You are a covenant people* — an identity | a **clade** (`covenantal`) | one ceiling raise today; free under §8 |
-| *You take up covenant* — a chosen discipline | a **practice** (code 6) | free today: the practice codes are in-value and append-only |
+| *a covenant people* — an identity | a **clade** (`covenantal`) | one ceiling raise today; free under §8 |
+| *taking up covenant* — a chosen discipline | a **practice** (code 6) | free today: the practice codes are in-value and append-only |
 
 The mechanism already exists and is measured: `Covenant { obligor,
 beneficiary, resource, quota, delivered, collateral, sealed, window }` —

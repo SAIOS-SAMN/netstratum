@@ -120,8 +120,8 @@ Unbounded exactness is reserved for cognition, where it is law.**
 
 A grain is a quantum of measure on a fluid medium — not a lattice. A lattice is a
 rigid crystal that collapses dimensionality; the smelt floor does the opposite: it
-holds a *stock* to a measurable resolution while the medium stays fluid. We do not
-say "lattice" here, and the word must not creep back in: names shape what gets
+holds a *stock* to a measurable resolution while the medium stays fluid. The word
+"lattice" is not used here, and the word must not creep back in: names shape what gets
 built, and a conserved ledger is a measured fluid, not a crystal.
 
 A conserved ledger (element stocks, banked matter, leisure) is quantised to its own
@@ -145,7 +145,7 @@ The disease this prevents is not denominator blowup as such — it is discoverin
 per hot loop, that a ledger never declared its grain. `haul_element` bypassed the
 smelt and element stocks drifted to 107,756-bit denominators, stalling `mass_of` at
 96 s/beat; the trace convicted it (top_build 6 ms, mass_build 96350 ms). One
-standing rule ends the series: when you add a conserved world-ledger, floor its
+standing rule ends the series: every conserved world-ledger added floors its
 fills.
 
 The forward fix stops new drift; the existing exploded stocks are floored once by a

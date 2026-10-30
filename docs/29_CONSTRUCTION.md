@@ -9,8 +9,8 @@ it is a debt with a count, and the count only falls. Policing (checking
 after the fact what construction could have made impossible) is the
 defect class this law exists to eliminate.
 
-Originally drafted 2026-08-05 on the operator's question — *how do we
-remove "judge" and constants from our codebase.*
+Originally drafted 2026-08-05 on the operator's question of how to
+remove "judge" and constants from the codebase.
 
 Subordinate to `00_CHARTER.md`, `26_ARTICLES.md`, `27_EVIDENCE.md`.
 
@@ -28,10 +28,10 @@ decision made outside the structure and imposed on it.**
 
 The removal is the same move in both directions: **push the decision
 into the structure.** And the tree's own kernel header already states
-the creed, verbatim:
+the creed, in substance:
 
 > *an unlawful transition is not caught after the fact, it cannot be
-> constructed … you do not reconcile what cannot diverge.*
+> constructed … what cannot diverge is not reconciled.*
 
 The judge is not removed by deleting the function. It is removed by
 making it **vacuous** — every arm dies the day the shape it refuses
@@ -60,7 +60,7 @@ construction** — private fields, one door, the door returns the proof
 **Fact refusals (~23)** guard contingent state: `CannotAfford`,
 `NoSuchOrb`, `SeatFull`, `MintNotNovel`. These are not judgments of
 form — they are readings of what the chain currently holds, and they
-belong at the door forever. Refusing to sell what you do not have is not
+belong at the door forever. Refusing to sell what is not held is not
 an authority; it is arithmetic.
 
 **The end state is therefore not zero refusals. It is zero shape
@@ -136,9 +136,9 @@ literals in `src/`, counted by pin, expected to fall monotonically.
 
 ## §5 The semantics ruling — machinery speaks machine words
 
-**Operator, 2026-08-05:** *why are we judging/lawful — that is not a
-mechanical state of machinery; that's esotericism with bias bleeding
-over into our semantics.*
+**Operator, 2026-08-05** (paraphrased): "judging" and "lawful" are not
+mechanical states of machinery; they are esotericism, with bias
+bleeding over into the semantics.
 
 Correct, and the defect ran deeper than the functions: the vocabulary
 itself imported an authority frame. A judge has discretion; a verdict is

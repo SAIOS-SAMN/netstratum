@@ -34,7 +34,7 @@ The NS-5 stub is verified against the tree 2026-07-30:
   unanimous or refused, structurally.
 - The predecessor lore correction stands (BUILD_ORDER §1a pin): coherence
   is sum-of-squares in code, not L1; the reference vector measures
-  C = 24, not 8. NS-5's vectors come from our code, never the
+  C = 24, not 8. NS-5's vectors come from Netstratum's code, never the
   predecessor's prose.
 - Tag registry: the next free tag is **64** (dop.rs header, the one
   authority — Pickup §4's "next is 59" note is stale; 60–63 landed as

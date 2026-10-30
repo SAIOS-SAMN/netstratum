@@ -13,7 +13,7 @@ loop). Replaces the founding's one-step throw and the board's placement.
 
 ## 1. The meanings, derived
 
-Each term in plain words, then what it is in our laws.
+Each term in plain words, then what it is in Netstratum's laws.
 
 - **The bounce.** The core's bell: once an echo the core re-pulses at full
   strength in its own units (regeneration, 2026-10-16). It moves nothing by
@@ -263,7 +263,7 @@ the gap by a median 4.5·10^4 (to 10^11). The 77 worlds formed at bell 704
 stood only because no pair had yet met (`N = 0`); at bell 880 they met once
 and 77 joined into one body, which ignited. The kick was the impulse model,
 the pull at the gap held over the whole synodic interval `1/|Δω|`: an
-import, not our grammar. §8.1's libration was sound but never reached.
+import, not Netstratum's grammar. §8.1's libration was sound but never reached.
 
 **Pulses and echoes.** No body strikes another. Each re-pulses at its own
 bell; its neighbour receives the echo at its place every ring, and answers

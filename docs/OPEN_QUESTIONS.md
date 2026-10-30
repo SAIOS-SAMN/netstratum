@@ -39,8 +39,8 @@ load-bearing, not tunable:
    violates SEAL B directly.
 3. **Boundary-stitching is a security hole.** Matching neighbours on a shared
    boundary proves *consistency*, not *interior integrity* — a node can
-   compute a false interior while keeping its edges clean. "Cheat inside and
-   the mesh rejects you" is false in general.
+   compute a false interior while keeping its edges clean. The claim that
+   the mesh rejects interior cheating is false in general.
 4. **AdS/CFT misapplied.** The holographic principle is a specific
    gravity/CFT duality; it does not make arbitrary game-state bookkeeping
    reconstructable at O(1) from a 2D boundary.
@@ -50,7 +50,7 @@ load-bearing, not tunable:
    throughput, independent of tick count" claim compares different problems.
 6. **PoUW's open problem is verification.** "The simulation is the useful
    work" is an old, attractive idea; it stalls because useful work must be
-   cheaply verifiable and hard to fake, which returns you to needing a
+   cheaply verifiable and hard to fake, which leads back to needing a
    succinct proof. Boundary-stitching does not close this.
 
 **Kernels kept (already inscribed):**

@@ -53,10 +53,10 @@ Coder-03's assessment is verified and approved. Checked against the tree
    the failing witnesses before the mechanic. NS-2 §1/§2/§3, the engine
    index, the CLI verb, and `examples/ns2_vectors.rs` are one unit.
 3. **File boundaries.**
-   - Yours: `protocols/NS-2_RQP.md`; a new engine module for the index
+   - This lane's: `protocols/NS-2_RQP.md`; a new engine module for the index
      (one new file, suggest `engine/cfe/src/query.rs` — do not spread
      into `engine/mirror/`); the dop.rs tag header (append-only); the
-     scanner CLI verb; the vectors example; your witness files.
+     scanner CLI verb; the vectors example; the lane's witness files.
    - Coder-02, in flight: `engine/mirror/` galaxy module +
      `mirror/tests/galaxy_pins.rs`, `docs/13_GALAXY.md`, universe-ledger
      touchpoints. If the index needs a mirror read, ask — it will be
@@ -65,14 +65,14 @@ Coder-03's assessment is verified and approved. Checked against the tree
      console just landed), conductor. CLI verbs merge one at a time;
      rebase before merging; BUILD_ORDER conflicts resolve keep-both.
 4. **Tags and receipts.** Claim tags by editing the dop.rs header in
-   your first commit, before code uses them. Only the crystal draw is a
+   the lane's first commit, before code uses them. Only the crystal draw is a
    chronicle event (one tag, from 55). Query, hit, and refusal are NS-2
    protocol records in NS-2's own framing — they never enter the world
    chronicle. That is the lens law in wire form: a query is a read, no
    receipt, no state change; only the power draw closes and receipts.
 5. **Exactness.** No floats anywhere. The refusal carries the residual
    list whole; `C(Δ)` is the summary scalar, not the payload.
-6. **After landing.** Refresh your one lane line in Pickup §5 and the
+6. **After landing.** Refresh the lane's one line in Pickup §5 and the
    tag registry note in Pickup §4. Nothing else in Pickup.
 
 ## Needs an operator ruling (not blocking worktree work)

@@ -10,7 +10,7 @@ Every individual inside this internet — human, NPC, autonomous bot — is an
 **entity**: an identity, a containment scope, and a generation tag on every
 receipt it forges. Agents are citizens, governed by containment, never by
 prohibition (Charter §3.4). This is the profile layer the platform vision
-called "a social media profile for each individual inside our internet" —
+called a social media profile for each individual inside the internet —
 at N3 it holds identity and authority; later landings add its presentation
 (the profile orb, NS-1) and its reach (NS-4 aperture sharing, NS-5 presence).
 

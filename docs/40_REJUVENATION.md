@@ -100,7 +100,7 @@ receipt, and does **not** advance `T_last`.
 checkpoint beat, writes the hard absolute stock, and resets every
 zone's `T_last` to the checkpoint. A conductor booting from the
 snapshot starts from absolute numbers and ignores all prior history —
-the O(bytes) boot the linear stepper already gives us.
+the O(bytes) boot the linear stepper already provides.
 
 ## 3. The carrying capacity and the rate — derived, not dialed
 

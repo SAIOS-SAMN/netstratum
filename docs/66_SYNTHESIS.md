@@ -1,12 +1,12 @@
 # 66 — Synthesis: Netstratum's synthetic PoW++
 
 Operator 2026-10-09: the in-game kernel's "puzzle solving" is renamed (the
-name is Netstratum's to choose) and designed as a more robust system: "in
-Netstratum you basically have a synthetic PoW++ network that powers your
-internal systems, and that should be a model of the higher puzzle solving
-PoW++ network that hooks into the hypha mycelium-client minds." Authorized
-to implement, keeping the coordinator in the loop "so that the higher order
-universes can stay aligned".
+name is Netstratum's to choose) and designed as a more robust system.
+Netstratum in effect holds a synthetic PoW++ network that powers its
+internal systems, and that network should be a model of the higher
+puzzle-solving PoW++ network that hooks into the hypha mycelium-client
+minds. Implementation was authorized, with the coordinator kept in the
+loop so that the higher-order universes stay aligned.
 
 ## The name
 

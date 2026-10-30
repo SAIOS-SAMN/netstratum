@@ -268,7 +268,7 @@ and its capital ships are seen. The progenitor's homeworld is the fourth
 world of this same system, once green, destroyed in a galactic war
 thousands of years before.
 
-- **How the homeworld died, in our physics.** Its coupling to its star
+- **How the homeworld died, in Netstratum's physics.** Its coupling to its star
   rode on its rotation and its planetary core's spin; a weapon that
   deflected or stopped that core broke the coupling, and the world went
   quiet (the lever a civilization may learn to move, used as a weapon).
@@ -299,7 +299,7 @@ thousands of years before.
   theirs.
 - **For the simulation:** a progenitor with every reason to intervene who
   still only repairs, tells the truth and lets the locals choose is the
-  strongest form of "freedom to choose your destiny"; one who breaks and
+  strongest form of the freedom to choose one's own destiny; one who breaks and
   rules "for their own good" is its clearest cautionary tale. The physics
   must allow both, and the progenitors, like the civilizations, show which
   way they go.
@@ -413,7 +413,7 @@ through orbital satellites. A progenitor is on its world for maintenance.
   re-synchronised, or the minds gain the true mathematics, they reattach
   to the ascension path from that point forward, the tethered years kept in
   their annals.
-- **Open, for later forensics:** what a copy is in our physics
+- **Open, for later forensics:** what a copy is in Netstratum's physics
   (collision-born, a branch, or a terminal node; it decides whether
   reconciliation is possible), and whether the substrate has an immune
   response beyond the lock's refusal (a law to derive, not a rule to

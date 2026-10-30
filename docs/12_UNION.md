@@ -171,15 +171,15 @@ operates on lenses at this level.** The ruling ratifies an excision the
 tree had already completed: `engine/mirror` was deleted (d606b01) and
 `cfe::opposition` excised (c7cad9e) under `00_CHARTER` §11, and
 `engine/kernel/tests/recurrence_guard.rs` holds both dead as standing
-tests — *"the mirror was never illegal, only leashed, which is why
-accretion captured it; vigilance did not save us, a standing test
-did."* The documents lagged the code by a day; this is the correction.
+tests — the mirror was never illegal, only leashed, which is why
+accretion captured it; vigilance did not prevent it, a standing test
+did. The documents lagged the code by a day; this is the correction.
 
 **Why opposition could not stand — the tough half, stated plainly.**
 Verification by opposition still requires two records to set against
 each other. §11 rule 5 clause 1 rejects *a reconciling check between
-copies*, and the kernel's own header answers it: **you do not reconcile
-what cannot diverge.** Where the judge makes an unlawful transition
+copies*, and the kernel's own header answers it: **what cannot diverge
+is not reconciled.** Where the judge makes an unlawful transition
 unconstructible (24_FORM §2f, §2g), there is no second book left to oppose.
 Opposition was a good answer to a question the One-Truth Amendment
 removed. Losing an elegant mechanism to a stronger law is the ordinary
@@ -195,9 +195,9 @@ carrier is `engine/lens`; the dead name is excised and never reused.
 Each is landed algebra, and each is now carried by kernel I1/I6 rather
 than by any opposition module:
 
-- the Delta antisymmetry (`Δ_ij = −Δ_ji` — my waste and your food are
-  one entry read from two ends): `rfa_core::set_antisym`, and 24_FORM §2a's
-  grounding of `Delta` as an alternating form;
+- the Delta antisymmetry (`Δ_ij = −Δ_ji` — one side's waste and the other's
+  food are one entry read from two ends): `rfa_core::set_antisym`, and
+  24_FORM §2a's grounding of `Delta` as an alternating form;
 - the aperture's two legs — one movement read from two ends, exactly as
   the antisymmetry above: a debit and its far credit are the same
   crossing seen from each book, and the two books agreeing to zero is
@@ -390,8 +390,8 @@ not exist before: a new edge in the obligation complex, so
 `Δ' = Δ + δΔ`, never `Δ' = Q·Δ`. This is why station-union cannot be
 farmed: pairing to climb would have to manufacture a real, receipted,
 irreducibly pairwise obligation, and a merely declared union that
-carries no obligation adds no edge and moves nothing. **You cannot
-marry your way up a ladder that only counts edges.**
+carries no obligation adds no edge and moves nothing. **No station
+can marry its way up a ladder that only counts edges.**
 
 **The elevation.** A sovereign in union with a progenitor is elevated to
 observer — and the mechanism is §3a's witness, which authenticates
@@ -551,7 +551,7 @@ from it.
 
 **The universe is the D-STORE** (ruled 2026-08-02), and it is why the
 two offices dwell in each other rather than owning each other. There is
-no store to point at for `D`, because **you cannot keep the container in
+no store to point at for `D`, because **the container cannot be kept in
 something it contains**. `D` is not held in the universe; `D` is the
 universe's room. The gauge key records which grades stand — the index,
 never the home; a registry holds the deed, not the land.
@@ -561,8 +561,8 @@ never the home; a registry holds the deed, not the land.
 
 Each holds the other's aspect and neither holds the other, which is what
 mutual indwelling means and why no ownership follows from either
-direction. It also earns Article IV without decreeing it: **you cannot
-un-make room that things are standing in.**
+direction. It also earns Article IV without decreeing it: **room that
+things are standing in cannot be un-made.**
 
 Each universe is its own D-store. The λ-node wrap keeps successive
 stores distinct — without it origins collide, *a key of 10 is 0*
@@ -607,7 +607,7 @@ it.** Two powers at opposing poles would need an equilibrium negotiated
 between them. There is none to negotiate, because **neither office
 acts.** A deed acts. `D` does not decide to open a plane — a fold
 refuses, the residue emits, and the plane opens by receipt. `V` does not
-decide to hold — admission commits. The offices are how we name what the
+decide to hold — admission commits. The offices are names for what the
 chain has already done, and two things that do not act cannot compete.
 
 **The equilibrium is structural, bounded from both sides**, and neither
