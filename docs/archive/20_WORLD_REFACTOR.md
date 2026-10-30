@@ -180,7 +180,7 @@ that file. What must be transplanted by hand:
 where the monolith was 5,034.
 
 **Direction: kernel-lane moves onto their structure.** They deleted the
-file; rebasing my edits onto the organ is the only merge that preserves
+file; rebasing the AI implementor's edits onto the organ is the only merge that preserves
 both. The reverse re-creates the monolith.
 
 ### 7b. A discrepancy to reconcile before merging

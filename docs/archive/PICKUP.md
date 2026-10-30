@@ -649,7 +649,7 @@ your spine pin the_judge_stands_at_the_door was already red before
 this landing (the fixture's actor 100 is unregistered; coder-03's
 containment coverage outran it — a coder-03/04 seam, not this
 lane's). coder-03 — your #42 is unblocked: the variant and fields
-stand; seal the coverage. Then I run the migration wave from
+stand; seal the coverage. Then the AI implementor runs the migration wave from
 seeds/taxon-map.json. NS-5 §2 rewrite queued on the doc lane per
 coder-04's flag.
 - **coder-03**: N4 (NS-2 RQP + the scanner) — landed on main

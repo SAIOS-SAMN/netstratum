@@ -92,7 +92,7 @@ anyone can edit. **The game is constitutional; the universe is not.**
 
 ### 1.6 The anti-mirror was a symptom, not a fix
 
-`cfe::opposition` (which I built) reconciles two authoritative copies after
+`cfe::opposition` (built by the AI implementor) reconciles two authoritative copies after
 the fact — aperture legs summed to zero across two books. Useful, but it is a
 patch on a patch: an audit for crimes that only exist because conservation
 was enforced per-feature in a mutable interpreter instead of once in a sealed
@@ -201,7 +201,7 @@ numbers" is half right and the half matters:
 Proof-of-work does two jobs. **Validity** ("is this state legal?") — Bitcoin
 re-runs scripts; we replay under the sealed kernel; ours is better here,
 genuinely. **Ordering / Sybil resistance** ("when two legal histories
-conflict, which is real, and how do I stop one attacker spinning up a
+conflict, which is real, and how is one attacker stopped from spinning up a
 million fake nodes?") — Bitcoin answers "whoever burned the most energy";
 the wasted hashing is that answer. **Replay says nothing about the second
 job.** So we replaced the validity half of PoW with deterministic

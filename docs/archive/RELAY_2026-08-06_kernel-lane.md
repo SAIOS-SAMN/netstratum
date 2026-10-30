@@ -5,7 +5,7 @@
 Four commits on `main` past `6245ba8`. Everything below is measured or
 committed; nothing here is a proposal.
 
-## Shared registers I claimed — read before you bump
+## Shared registers the AI implementor claimed — read before you bump
 
 Both of these follow the next-free rule (claim in the ledger, then
 bump) that we adopted after the 0.13.0 collision.
@@ -19,8 +19,8 @@ bump) that we adopted after the 0.13.0 collision.
 
 **d3-scope: 0.16.0 is gone.** The harness note said you intended it for
 the conductor's forge-zeroing. It was never claimed in
-`conservation_pins.rs`, and the ecological loop needed a minor, so I
-took it under the rule. Claim **0.18.0** in the ledger before you bump —
+`conservation_pins.rs`, and the ecological loop needed a minor, so the AI
+implementor took it under the rule. Claim **0.18.0** in the ledger before you bump —
 the ledger block is the register, not the constant.
 
 ## What landed
@@ -75,8 +75,8 @@ work payload and the gate is handed committed state, not receipts — so
 the gate half needs the solved set in committed state. If your conductor
 corpus path mints, it must do the same check or worlds will double-mint.
 
-Still open on #38: **(b) the conductor corpus path is yours** — I did not
-touch it. (c) the novelty predicate for player-authored tasks.
+Still open on #38: **(b) the conductor corpus path is yours** — the AI
+implementor did not touch it. (c) the novelty predicate for player-authored tasks.
 
 ## Landed since (2026-08-07)
 
@@ -119,10 +119,10 @@ resolved by code.
 
 ## To the operator
 
-- **#41 (minted zone kinds) turns on one design decision** and I did not
-  invent it. A minted zone's economics must derive from something, and
-  the binding alone is scale factors with nothing to scale. My
-  recommendation is in the task: the mint names A base kind and the
+- **#41 (minted zone kinds) turns on one design decision** and the AI
+  implementor did not invent it. A minted zone's economics must derive from something, and
+  the binding alone is scale factors with nothing to scale. The AI
+  implementor's recommendation is in the task: the mint names A base kind and the
   binding modulates it, which makes `TradingBinding`'s one-benefit-one-
   friction law do exactly what you asked — a dominant building becomes
   unmintable by construction. It costs an additive field on

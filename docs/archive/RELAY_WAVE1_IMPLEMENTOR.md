@@ -151,7 +151,7 @@ receipt carries it, or the state does.
 New wire or snapshot fields append at the **tail**. An older reader
 stops before them and decodes a whole record.
 
-I inserted the treaty block mid-stream between the routes and the
+The AI implementor inserted the treaty block mid-stream between the routes and the
 practices. `world_taxon`'s v1 pin failed instantly because every field
 after it misaligned. Moved to the tail. **Do not insert mid-stream**,
 and note that `world_taxon` hand-truncates a blob to simulate v1 — if
@@ -163,7 +163,7 @@ bites on purpose.
 Every deed needs a replay arm, and `replay(chronicle) == committed()`
 must hold. Put that assertion in every arc pin you write.
 
-The split I found this session and how it happened: breaking a peace
+The split the AI implementor identified this session, and how it happened: breaking a peace
 loads the breaker's severance book. Live did it; replay did not. Cause
 — the verb strikes the displaced pact in **its own receipt before**
 sealing the new one, so by the time replay saw the seal, the peace was
@@ -252,7 +252,7 @@ wrapper's status, not cargo's. The partial log tallies a clean
    for every missing one;
 3. confirm the known-slow tests actually reported `ok`.
 
-I nearly reported a killed board as green twice. `conductor`'s
+AI implementor identified: it nearly reported a killed board as green twice. `conductor`'s
 `mint_loop_pins` takes ~26 minutes; budget for it and do not wrap it in
 a short timeout.
 

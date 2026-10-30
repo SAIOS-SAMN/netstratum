@@ -77,11 +77,11 @@ timeout — it is a proof that no word in the current vocabulary closes the
 task at that depth. A heuristic or sampled search could not produce that;
 only an exhaustive one can.
 
-I recorded those 35 cases as waste: *"99 % of forge time, a line burns
-the sweep and mints nothing."* That reading was wrong. **They are the
-trigger set.** The cost I spent the session trying to remove is the cost
+The AI implementor recorded those 35 cases as waste: *"99 % of forge time, a line burns
+the sweep and mints nothing."* AI implementor identified that this reading was wrong. **They are the
+trigger set.** The cost the AI implementor spent the session trying to remove is the cost
 of earning a novelty certificate, and the thing that makes the certificate
-sound is the exhaustiveness I kept trying to prune.
+sound is the exhaustiveness the AI implementor kept trying to prune.
 
 This also settles a question §5 of `FORGE_REMEDIATION` left open — whether
 an unsolvable draw is a lawful rung. It is: an unsolvable draw is where

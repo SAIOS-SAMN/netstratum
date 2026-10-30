@@ -196,7 +196,7 @@ families, or is an unsolvable draw a lawful part of the ladder?
 > cheap re-application on small grids for persistent allocation, and the
 > two cancel.
 >
-> **And my own 48.24 s figure does not reproduce.** It was measured
+> **AI implementor identified: its own 48.24 s figure does not reproduce.** It was measured
 > before the 66-commit merge; the same baseline on the same machine now
 > reads ~56.2 s for the *unchanged* code. So the earlier "R1 is a
 > regression" reading was an artefact of comparing across a merge —

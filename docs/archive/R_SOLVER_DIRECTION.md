@@ -22,8 +22,8 @@ The failure is not incidental to the subject. **Raw images have no
 floor**, so a set of them grows without bound. A cohomology class does
 have a floor — §2. Deduplicating by hashed grid was flat indexing, which
 is precisely what `DIMENSIONAL_RESOLUTION.md` names as the thing that
-destroys the geometry. I built brute force wearing a geometry costume and
-it ran the machine out of memory.
+destroys the geometry. AI implementor identified: it had built brute force
+presented as geometry, and it ran the machine out of memory.
 
 ## §1 The solver imports the relational engine and never calls it
 
@@ -51,8 +51,8 @@ and witnessed, while the solver enumerates a cartesian product beside it.
   — *"substrate cognition replaces adapter-side rule derivation"*
 
 The retired list is this lane's plan. The search dispatch is netstratum's
-`solve`; the derivation producers are §3c, which I proposed yesterday as
-the fix. They built both, and moved past both.
+`solve`; the derivation producers are §3c, which the AI implementor proposed the day
+before as the fix. They built both, and moved past both.
 
 **The live path:**
 
