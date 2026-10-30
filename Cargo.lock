@@ -281,7 +281,7 @@ checksum = "d45db016d36b838f563236e9193d0ee6ce38f3f68b6c94e914b4929c96bbb890"
 [[package]]
 name = "forms"
 version = "0.1.0"
-source = "git+https://github.com/SAIOS-SAMN/mycelium?tag=v0.2.0#1f1a086e2112d29794aec33421527374fc22e2b6"
+source = "git+https://github.com/SAIOS-SAMN/mycelium?tag=v0.2.0#d1bd880da5cf21dae3304c29cad72c77d6542edc"
 dependencies = [
  "num-bigint",
  "num-rational",
@@ -406,7 +406,7 @@ dependencies = [
 [[package]]
 name = "mycelium"
 version = "0.2.0"
-source = "git+https://github.com/SAIOS-SAMN/mycelium?tag=v0.2.0#1f1a086e2112d29794aec33421527374fc22e2b6"
+source = "git+https://github.com/SAIOS-SAMN/mycelium?tag=v0.2.0#d1bd880da5cf21dae3304c29cad72c77d6542edc"
 dependencies = [
  "blake3",
  "ctrlc",

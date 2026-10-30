@@ -50,8 +50,10 @@ re-run every check, and record it.
 ## Commits
 
 - **Author:** commits are authored and committed under the project's
-  neutral identity, `netstratum contributors <contributors@netstratum.invalid>`.
-  Personal names appear only in the copyright line (README, NOTICE).
+  identity, `netstratum contributor <two.cats7701@gmail.com>` (the published
+  set's ruling, 2026-10-30: one email for every repository, each under its
+  own name: `mycelium contributor`, `xylarium contributor`). Personal names
+  appear only in the copyright line (README, NOTICE).
 - **Message:** a subject line of at most 72 characters in the imperative
   ("Pin mycelium v0.2.0 from GitHub"), a blank line, then a body that says
   what changed and why, wrapped at 72 columns.
