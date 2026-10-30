@@ -225,12 +225,12 @@ second brain (lifespan is a clock on the mouth count).
 | N-I3 | `think` four moves + glue; `solver::think_task` consumes it | Pin A green |
 | N-I4 | `research_step` calls only `think_task`; search off the beat | forge still verifies; sweep counter = 0 on the live path |
 | N-I5 | book peel; mouths eat (`41 §2`) | **LANDED** `641470e` · Pin G |
-| N-I6 | survival think names a deed; delete the utility deciders | **LANDED** `fd7bbcc` · Pins E, F, H · [`N-I6.md`](N-I6.md) |
-| N-I-VESSEL | basin per vessel (workspace, not `Entity`) | **LANDED** `4399627` · Pin B at vessel grain · [`N-I-VESSEL.md`](N-I-VESSEL.md) |
-| N-I7 | metabolic debit on the LOOK; leisure gates the observe | **LANDED** `c079dfd` · [`N-I7.md`](N-I7.md) · unfunded line fasts; funded Fed line thinks |
-| N-I8 | sun / `vocabulary::fold` from two vessel deposits | **LANDED** `ab01400` · [`N-I8.md`](N-I8.md) · Pin C (two offices mint), C− (one vantage does not) |
+| N-I6 | survival think names a deed; delete the utility deciders | **LANDED** `fd7bbcc` · Pins E, F, H · [`archive/N-I6.md`](archive/N-I6.md) |
+| N-I-VESSEL | basin per vessel (workspace, not `Entity`) | **LANDED** `4399627` · Pin B at vessel grain · [`archive/N-I-VESSEL.md`](archive/N-I-VESSEL.md) |
+| N-I7 | metabolic debit on the LOOK; leisure gates the observe | **LANDED** `c079dfd` · [`archive/N-I7.md`](archive/N-I7.md) · unfunded line fasts; funded Fed line thinks |
+| N-I8 | sun / `vocabulary::fold` from two vessel deposits | **LANDED** `ab01400` · [`archive/N-I8.md`](archive/N-I8.md) · Pin C (two offices mint), C− (one vantage does not) |
 | N-I9 | same doors: CLI think verb = automaton path; NS-6 grant gates render | **waits** — product parity, not converse |
-| N-I10 | refraction between entities | **LANDED** `3099b80` · [`N-I10.md`](N-I10.md) · peer drains or walls a folded word (primitive + steward swap) |
+| N-I10 | refraction between entities | **LANDED** `3099b80` · [`archive/N-I10.md`](archive/N-I10.md) · peer drains or walls a folded word (primitive + steward swap) |
 
 **Do NOT start N-I10, lifespan, or dogma until N-I6 is green. A social mind on a
 body that cannot count is fiction.**

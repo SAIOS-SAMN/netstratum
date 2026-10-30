@@ -343,5 +343,5 @@ ship before a full ruling.
 | **Q-F5** | R1 bourse without T6 Exchange? | Yes, **Spot-only**; T6 unlocks full stack |
 | **Q-F6** | Lease vs own hull on commission? | **Own** v1; lease Phase 5+ |
 
-Task board: `TASKS_TRADE_FLEET_DESK.md`. Authority: `33_TRADE_FLEET_AND_DESK.md`.
+Task board: `archive/TASKS_TRADE_FLEET_DESK.md`. Authority: `33_TRADE_FLEET_AND_DESK.md`.
 

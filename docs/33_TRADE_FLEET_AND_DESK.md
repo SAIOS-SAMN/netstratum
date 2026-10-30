@@ -2,7 +2,7 @@
 
 **Status:** PARTIAL LAND — **Phases 1–4 complete**; **Phase 5 core complete**
 (A–H · K2 · M · dual-use · 19b · R1–R2 rails; optional R3/R4 features).
-Implementation board: **`TASKS_TRADE_FLEET_DESK.md`**.
+Implementation board: **`archive/TASKS_TRADE_FLEET_DESK.md`**.
 
 **Does not overturn:** CHARTER exactness, SEAL B, call-not-copy, tuned-
 constant ratchet, ROUTE-1 / MARKET-1 / STAMP-1 as landed. **Does not**
@@ -15,8 +15,8 @@ require strand/datum for local fun (R1–R2 first).
 `32_STAMP_MARKET`, **`34_MATTER_BALANCE`** (elements · alchemy · fleets
 · entropy∥syntropy).
 
-**Companion board:** `TASKS_TRADE_FLEET_DESK.md` (Phases 1–5).  
-**Related board:** `TASKS_TIER_RAIL_MARKET.md` (offices, STAMP, instruments
+**Companion board:** `archive/TASKS_TRADE_FLEET_DESK.md` (Phases 1–5).  
+**Related board:** `archive/TASKS_TIER_RAIL_MARKET.md` (offices, STAMP, instruments
 rows that this program **consumes**).
 
 **Baseline at lock:** kernel `0.22.0`, tags through **113**, SCHEMA_V6,
@@ -318,7 +318,7 @@ without T6 full stack.
 
 ## 8. Five implementation phases (summary)
 
-Authority detail and task IDs: **`TASKS_TRADE_FLEET_DESK.md`**.
+Authority detail and task IDs: **`archive/TASKS_TRADE_FLEET_DESK.md`**.
 
 | Phase | Name | Player-visible exit |
 |-------|------|---------------------|

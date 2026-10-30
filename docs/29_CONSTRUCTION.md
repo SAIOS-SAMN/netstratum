@@ -119,7 +119,7 @@ honest so "placeholder" cannot quietly become "permanent."
 1. **The shape refusals** (~20 arms) — each becomes a constructor;
    highest value per edit, no wire impact, and every kill shrinks the
    judge.
-2. **The conductor's pacing constants** — flagged in `PICKUP.md` §8c as
+2. **The conductor's pacing constants** — flagged in `archive/PICKUP.md` §8c as
    *"no cited law"* already; convert to measurements of the board.
 3. **The roster siting** — derive from the sigil unless
    operator-pinned; the pinned seats (Furnace, Frost) are deliberate

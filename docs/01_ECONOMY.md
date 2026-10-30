@@ -14,7 +14,7 @@ refineries: `31_ELEMENT_COMMERCE.md` (**REFINE-1 landed Wave-1**; routes
 Wave-2/3 partial). Offices T4–T9 and R-line: `30_OFFICES_AND_RAILS.md`
 (T-line landed; R1–R2 type partial). Interactive trade desk, fleets,
 alignment-priced routes, civ-local capital books: `33_TRADE_FLEET_AND_DESK.md`
-+ `TASKS_TRADE_FLEET_DESK.md` (5 phases). External trade of STAMP claims
++ `archive/TASKS_TRADE_FLEET_DESK.md` (5 phases). External trade of STAMP claims
 uses the **R-line** (R3 strand, R4 isthmus/datum). NS-7 remains the
 boundary for **real-world** settlement; STAMP is in-game first and only
 optionally exits the court rail.

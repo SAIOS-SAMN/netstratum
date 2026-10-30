@@ -12,7 +12,7 @@ money per tick (`01_ECONOMY` / CHARTER split).
 
 **Companion play surface:** interactive desk, fleets, alignment-priced
 routes, and **localized** instrument books — `33_TRADE_FLEET_AND_DESK.md`
-+ `TASKS_TRADE_FLEET_DESK.md` (Phases 1–5). Wave 5 instruments here are
++ `archive/TASKS_TRADE_FLEET_DESK.md` (Phases 1–5). Wave 5 instruments here are
 **consumed** by Phase 4 of that board (civ-filtered listings).
 
 **Name:** **STAMP** — a unit of account whose truth is a **sealed

@@ -1,6 +1,6 @@
 # N6 DIRECTIVES — the mesh working orders (2026-07-30, operator-ruled)
 
-> **ARCHIVED 2026-08-13.** Superseded/dead weight per the doc audit — kept for history, not live spec. See docs/BUILD_ORDER.md, docs/HANDOFF_2026-08-13.md, or the doc it names as its successor for current status.
+> **ARCHIVED 2026-08-13.** Superseded/dead weight per the doc audit — kept for history, not live spec. See docs/BUILD_ORDER.md, docs/archive/HANDOFF_2026-08-13.md, or the doc it names as its successor for current status.
 
 Plain language. Scope: the N6 landing (NS-5 MESH, first slice MESH-1a).
 Supersedes nothing; folds into NS-5 and PICKUP when N6 lands whole.

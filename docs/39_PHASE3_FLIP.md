@@ -12,7 +12,7 @@ tests), per-deed commitment in `chain_beat` (each deed threads
 the kernel actually admitted; a refused deed gets no arbor
 commitment and blocks further commits that beat until it resolves.
 `world/replay.rs`'s banner records the new role. See
-`docs/U_DIRECTIVES.md` §7's roadmap line for the cross-reference.
+`docs/archive/U_DIRECTIVES.md` §7's roadmap line for the cross-reference.
 
 ---
 

@@ -1,6 +1,6 @@
 # 20 — THE `world.rs` REFACTOR: what the kernel pulls, what stays
 
-> **ARCHIVED 2026-08-13.** Superseded/dead weight per the doc audit — kept for history, not live spec. See docs/BUILD_ORDER.md, docs/HANDOFF_2026-08-13.md, or the doc it names as its successor for current status.
+> **ARCHIVED 2026-08-13.** Superseded/dead weight per the doc audit — kept for history, not live spec. See docs/BUILD_ORDER.md, docs/archive/HANDOFF_2026-08-13.md, or the doc it names as its successor for current status.
 
 **Status:** ~~SPEC~~ **LANDED** (kernel lane, 2026-08-02; confirmed by
 measurement 2026-08-04). The split is DONE: `engine/cfe/src/world.rs`

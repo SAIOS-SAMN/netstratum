@@ -108,7 +108,7 @@ already tracked in §4 below.
 
 ## 4. Ranked open work (HANDOFF's queue, corrected — refreshed same day)
 
-From `docs/HANDOFF_2026-08-13.md`, largest blast radius first — corrected
+From `docs/archive/HANDOFF_2026-08-13.md`, largest blast radius first — corrected
 2026-08-13 where its own citations were wrong (see §5), then refreshed
 again later the same session as `#32` and other items landed:
 
@@ -144,10 +144,10 @@ repeatable failure modes across `docs/`:
   keeps slot 19, the only one cited externally by section number).
   `20_WORLD_REFACTOR` (a closed, past-tense inventory doc) moved to
   `docs/archive/` — `20_FOUNDING` keeps slot 20.
-- **Dated-but-already-stale docs**: `HANDOFF_2026-08-13.md`'s
+- **Dated-but-already-stale docs**: `archive/HANDOFF_2026-08-13.md`'s
   `seat_width()` citation was fabricated (real: 3 call sites, not 7, all
   correct) and its "purse absent" claim was false — corrected in place.
-  `PICKUP.md`'s next-free-tag counter is a live-moving number; re-verify
+  `archive/PICKUP.md`'s next-free-tag counter is a live-moving number; re-verify
   against `dop.rs`'s header before trusting it (was 168 at audit time,
   is 170 as of `#51`'s tag 169 claim — see the merge in this branch).
 - **Accretion docs**: `17_CAPACITY.md` (2248 lines, chronological

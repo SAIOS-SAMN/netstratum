@@ -14,7 +14,7 @@ refreshes at each major handoff.
 
 ### Stand-down marker (2026-08-08)
 
-**Multi-day pause.** State snapshot is **`docs/PICKUP.md` §0** and
+**Multi-day pause.** State snapshot is **`docs/archive/PICKUP.md` §0** and
 `BUILD_ORDER.md` §STAND-DOWN BOARD. Tip **`fce10e0`** on clean `main`.
 Resume: read PICKUP §0 → smoke tests → operator go before new lands.
 Do not re-open dual-law hubs or u16 clade unless directed.
@@ -24,7 +24,7 @@ Do not re-open dual-law hubs or u16 clade unless directed.
 1. `docs/00_CHARTER.md` — every law binds; §8 terminology, §9
    stochastic, §10 the parallel-node protocol.
 2. `docs/BUILD_ORDER.md` — the landed ledger + the boards. What to do
-   next is decided HERE, on operator go. (`docs/PICKUP.md` is the fast
+   next is decided HERE, on operator go. (`docs/archive/PICKUP.md` is the fast
    map of the same state — orientation, never authority.)
 3. `docs/OPEN_QUESTIONS.md` — rejected ideas (never silently revive)
    and recorded deferrals with their reopen triggers (Q4 = the

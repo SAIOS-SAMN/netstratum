@@ -1,3 +1,5 @@
+# EXAMPLE deployment unit: paths assume a checkout at /opt/netstratum; adjust
+# WorkingDirectory and ExecStart to your own clone before installing.
 # THE BOARD'S HEARTBEAT — G2, netstratum's fresh universe (docs/57_GENESIS_G2.md).
 # Civilizations found, think, trade and cleave in var-g2; the archive (var/)
 # is never touched. The network link is netstratum-follow.service, not this.

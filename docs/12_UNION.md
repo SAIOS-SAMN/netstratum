@@ -134,7 +134,7 @@ altitude for claims — **still design**. Full law: `30_OFFICES_AND_RAILS.md`.
 Element commerce (REFINE + E-APT + E-ROUTE partial) and STAMP:
 `31_ELEMENT_COMMERCE.md`, `32_STAMP_MARKET.md`. Trade desk / fleets /
 alignment / local capital: `33_TRADE_FLEET_AND_DESK.md`. Task DAGs:
-`TASKS_TIER_RAIL_MARKET.md`, `TASKS_TRADE_FLEET_DESK.md`.
+`archive/TASKS_TIER_RAIL_MARKET.md`, `archive/TASKS_TRADE_FLEET_DESK.md`.
 
 ## 2b. The torsion law (operator ruling, 2026-07-30)
 

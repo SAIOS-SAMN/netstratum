@@ -1165,7 +1165,7 @@ Building it:
 - gives `rfa_core::rcf_hash` its stated job: the canonical signature of
   the class, so a capacity claim is checkable across nodes.
 - ends `engine/rfa-core`'s orphanhood — zero dependents today
-  (`PICKUP.md` §8a) — turning witnessed unused mathematics into the
+  (`archive/PICKUP.md` §8a) — turning witnessed unused mathematics into the
   capacity engine.
 - retires placeholders BY MEASUREMENT: seat widths
   (`ledger/src/registry.rs:37`), galaxy reach

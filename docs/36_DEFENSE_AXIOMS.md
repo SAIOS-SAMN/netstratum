@@ -39,7 +39,7 @@ The operator charge (session):
    lines without human-normative blind spots.
 
 This document is the design lock. Implementation lands in phased P5
-slices on `TASKS_TRADE_FLEET_DESK.md`.
+slices on `archive/TASKS_TRADE_FLEET_DESK.md`.
 
 ---
 

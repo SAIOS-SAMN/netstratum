@@ -1,6 +1,6 @@
 > **SUPERSEDED IN PART, 2026-08-05 — THE DEFINITION LAW.** Everything
 
-> **ARCHIVED 2026-08-13.** Superseded/dead weight per the doc audit — kept for history, not live spec. See docs/BUILD_ORDER.md, docs/HANDOFF_2026-08-13.md, or the doc it names as its successor for current status.
+> **ARCHIVED 2026-08-13.** Superseded/dead weight per the doc audit — kept for history, not live spec. See docs/BUILD_ORDER.md, docs/archive/HANDOFF_2026-08-13.md, or the doc it names as its successor for current status.
 > below concerning `seeds/aeon1-polities.json`, `var/polities.json`,
 > `tools/claim_roster.py`, `load_polities` and `write_default_polities`
 > describes machinery that is STRUCK. The roster compiles

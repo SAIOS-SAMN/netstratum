@@ -93,7 +93,7 @@ same landing (CHARTER §1); commit on explicit operator go.
   neighbor speaks 29 as HISTORY). 285/285, clippy zero. Design
   authority now also includes `16_UNIT.md` (the unit law + §4a the
   singularity law), `docs/EQUATIONS.md` (THE ONE LEDGER — the
-  row-claim convention is live), `docs/U_DIRECTIVES.md` (the unit
+  row-claim convention is live), `docs/archive/U_DIRECTIVES.md` (the unit
   work orders; U1 next, tag 86 reserved there).
 - **U1a LANDED** (2026-07-31, arch-01): THE PROVER/VERIFIER SPLIT —
   `engine/solver-verify`, the sealed replay half: grid + the ONE apply
@@ -849,7 +849,7 @@ market board's; union tags allocate from 52 at each landing.
 ## 3c. The constitution board (2026-07-31 — the kernel/mesh cadence, two seats)
 
 The unit-lane rungs (U0–U1f, the W-waves) are chronicled in
-`U_DIRECTIVES.md` §1 and `EQUATIONS.md`; this table carries the mesh-second
+`archive/U_DIRECTIVES.md` §1 and `EQUATIONS.md`; this table carries the mesh-second
 lane and the audit rungs beside them. Coverage at the merge: **59 of 64**
 deeds judged; board 342/342, clippy zero at `5f80464`.
 
@@ -939,8 +939,8 @@ roster.
 | `31_ELEMENT_COMMERCE.md` | Element routes, refineries, NPC trade | REFINE + E-APT + E-ROUTE land; E-MKT open |
 | `32_STAMP_MARKET.md` | STAMP unit, instruments, NPC MM | **Spot + MM land**; instruments open |
 | `33_TRADE_FLEET_AND_DESK.md` | Trade desk · fleets · alignment · local capital | **DESIGN LOCK** — not landed |
-| `TASKS_TIER_RAIL_MARKET.md` | Waves 0–8 + vertical slice | Waves 1–4 partial; Wave 5+ open |
-| `TASKS_TRADE_FLEET_DESK.md` | 5-phase desk/fleet/market implementation | Phase 0 docs; Phases 1–5 open |
+| `archive/TASKS_TIER_RAIL_MARKET.md` | Waves 0–8 + vertical slice | Waves 1–4 partial; Wave 5+ open |
+| `archive/TASKS_TRADE_FLEET_DESK.md` | 5-phase desk/fleet/market implementation | Phase 0 docs; Phases 1–5 open |
 | `RELAY_WAVE2_IMPLEMENTOR.md` | Slice brief (historical + Wave-3/4 note) | next: instruments / observer |
 
 ---
@@ -977,7 +977,7 @@ refine spend, harness `pure_npc_stamp_spot_clears` green. Ratchet ≤112.
 Still open: R2.3 promotion, instruments I5, CLI/observer STAMP, R3–R4.
 
 **Trade desk program (2026-08-07):** design in `33_TRADE_FLEET_AND_DESK.md`;
-board `TASKS_TRADE_FLEET_DESK.md`.
+board `archive/TASKS_TRADE_FLEET_DESK.md`.
 
 **Phase 1 LANDED — sightlines & player parity:**
 - CLI `desk` / `desk enter` — TRADE · DIPLO · ROUTES · ARB (+ placeholders)
@@ -1023,7 +1023,7 @@ integrity of the entity (CEL/ATM/COG/CYB/INF/KIN) relative to metabolism,
 disposition, perception, clade; dual of ATM = **covert atmospheric
 tampering** (offensive terraform); espionage stack on veil/ward/instruments;
 KIN escort remains first vertical. Board: P5.0–P5.26 on
-`TASKS_TRADE_FLEET_DESK.md`.
+`archive/TASKS_TRADE_FLEET_DESK.md`.
 
 **P5-A LANDED (KIN escort / interdiction):** tags **132–134** EscortOnDuty,
 InterdictionStruck, ConvoyRiskMarked; `defense_posture` stubs; convoy risk =
@@ -1121,5 +1121,5 @@ cargo build -p netstratum-cli
 python3 tools/observer.py arc --plain | head
 ```
 
-Full orientation: `docs/PICKUP.md` §0.
+Full orientation: `docs/archive/PICKUP.md` §0.
 

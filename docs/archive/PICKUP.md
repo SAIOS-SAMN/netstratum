@@ -91,7 +91,7 @@ state-model laws, and earned gotchas live in `HANDOFF.md`.
 > chartered-parameter seeds moved to the SEALED class; the emergent-
 > rejuvenation taper was kept DERIVED (`1/2^distance`) so it added no
 > dial.)*
-> MAPPED 2026-08-12: `docs/REMEDIATIONS.md` R20 (dop 66 · vocabulary
+> MAPPED 2026-08-12: `docs/archive/REMEDIATIONS.md` R20 (dop 66 · vocabulary
 > 37 · conductor 20 · science 10 · taxon 8 · parameter 7 · tail 22).
 
 Workspace **clean** on `main`. Wave-8 / polity dual-law + **JSON-off
@@ -149,7 +149,7 @@ ruins   — closed archive history (P8.4)
 | Doc | Role |
 |-----|------|
 | `docs/HUBS.md` | Hub map · dual law · science · polity |
-| `docs/TASKS_TIER_RAIL_MARKET.md` | Task board |
+| `docs/archive/TASKS_TIER_RAIL_MARKET.md` | Task board |
 | `docs/31_ELEMENT_COMMERCE.md` | **Next phase authority** (E3.6+) |
 | `docs/32_STAMP_MARKET.md` | Instruments (I5 residual) |
 
@@ -455,7 +455,7 @@ forever.
   and PoWC judged at that level. The law is `16_UNIT.md` (incl. §4a
   the singularity law); the forms are `docs/EQUATIONS.md` (THE ONE
   LEDGER — the row-claim convention is live); the work orders are
-  `docs/U_DIRECTIVES.md`. **LANDED AND COMMITTED (execution order
+  `docs/archive/U_DIRECTIVES.md`. **LANDED AND COMMITTED (execution order
   2026-07-31, seven commits, board at 297/297 green clippy zero):**
   U0 (the spine fixture seats its hand; 240 was a fail-fast
   undercount) · PROPORTION-1 (THE PROPORTIONAL LAW: Σ R² → Σ |R|
@@ -706,7 +706,7 @@ coder-04's flag.
   embodied. G4 sequences behind it by design.
 - **THE REMEDIATIONS LANE** (opened 2026-08-02, worktree
   `.claude/worktrees/remediations-lane`, branch `remediations-lane`):
-  the deterministic-cost board. The law is `docs/REMEDIATIONS.md` —
+  the deterministic-cost board. The law is `docs/archive/REMEDIATIONS.md` —
   nineteen entries (R1–R19) covering the forge sweep, the chained beat,
   the find-scans, the full re-derivations and the roster products, each
   marked `[MEASURED]` / `[READ]` / `[INFERRED]`. **The headline is
@@ -1151,7 +1151,7 @@ The board was checked for ends left hanging. What follows is what the
 sweep found, not a restatement of §8.
 
 **Picked up and now carried:** the whole deterministic-cost surface,
-which no lane owned. It is `docs/REMEDIATIONS.md` (R1–R19) and it is
+which no lane owned. It is `docs/archive/REMEDIATIONS.md` (R1–R19) and it is
 measured, not asserted. Three §8 entries were overtaken by the code and
 are corrected in place above (§8a's two sweeping claims, §8b's codec
 entry); §8e's duplicate `constellation` key is re-verified STILL LIVE at

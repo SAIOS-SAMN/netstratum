@@ -1,41 +1,90 @@
-# NETSTRATUM
+# netstratum
 
-An AI MUD — a text-first, multi-planetary city-building game — that is also the
-playable reference implementation of the dimensional web: the NS protocol stack
-specified in Rational Field Algebra (RFA), executed by the Canonical Field
-Engine (CFE), and settled to existing chains through the WWW3 bridge (NS-7).
+netstratum is a universe and civilization engine written in exact rational
+arithmetic. Beneath it runs a cosmology derived from one grammar of shares and
+phases: an S^360 universe whose bounce founds its nuclides, whose galaxies,
+stars and worlds form by flow rather than placement. On top of it runs a
+text-first, multi-planetary city-building game whose civilizations, minds and
+economy live on those worlds. It speaks to the
+[mycelium](https://github.com/SAIOS-SAMN/mycelium) network for its clock, its
+atlas and its shared law forms.
 
-**Start here:** `docs/00_CHARTER.md` (the founding document, read whole).
-The current landing is always read at `docs/BUILD_ORDER.md`, never inferred.
-Resuming work? `docs/PICKUP.md` is the fast map of the board; `docs/HANDOFF.md` is the working practice around it.
+**Status:** research software, in active development. Era 1 (the sphere
+universe) is being derived and built in `docs/78`–`docs/106`; the register of
+what is built and what is owed is [`docs/102_ALIGNMENT.md`](docs/102_ALIGNMENT.md).
+See [DISCLAIMER.md](DISCLAIMER.md): the code and documentation are
+AI-generated under human editorial direction.
 
-**Wave-1 (2026-08-07, `2109bf0`):** offices T4–T9, pure-NPC seats to T4/T6,
-ElementRefinery + element refine. Next slice: `docs/RELAY_WAVE2_IMPLEMENTOR.md`
-(element aperture · route · NPC trade). Task DAG: `docs/TASKS_TIER_RAIL_MARKET.md`.
+## Layout
 
 ```
-protocols/   NS-1 DOP · NS-2 RQP · NS-3 VRP · NS-4 APERTURE · NS-5 MESH · NS-6 IPSAL-OS · NS-7 ANCHOR
-docs/        00 charter · 01 economy · … · 30 offices/rails · 31 element commerce ·
-             32 STAMP market · BUILD_ORDER (the one carrier) · OPEN_QUESTIONS ·
-             TASKS_TIER_RAIL_MARKET · RELAY_WAVE2_IMPLEMENTOR
-engine/      the Rust workspace: cfe · kernel · codec · rfa-core · physics ·
-             solver · solver-verify · ledger · mesh · conductor
-clients/     the CLI/MUD client
-tools/       observer.py (the board) · steward.py (the inbox)
+engine/      the Rust workspace
+  ratio          exact rationals for the carrier
+  rfa-core       Rational Field Algebra: relational deltas, cocycles, coherence
+  cfe            the Canonical Field Engine: state transitions over RFA
+  codec          the committed state's one canonical encoding
+  kernel         the one validated update function, lawful(prior, next, step)
+  ledger         the pre-chain ledger of record and its lens
+  lens           read-only projections from the chain
+  scribe         the display writers: journals, the Terminal Wall, exports
+  mesh           NS-5: the spine and the lawful chain remainder
+  physics        event-driven exact kinematics on the RFA carrier
+  solver         the ARC solver harness: exact grid transformations as proofs
+  solver-verify  the sealed verifier half of the solver
+  substrate      the exact-ℚ algebra (fields, planes, the CGA multivector)
+  reduct         exact algebraic cognition (the thought engine)
+  tongue         solver programs stated as mycelium rule elements
+  hypha          ns-hypha: the uplink to a mycelium hypha
+  conductor      the heartbeat, and the era-1 universe (pulse, breath, flows,
+                 nuclides, polarity, formation)
+clients/cli  the netstratum game client
+protocols/   the NS protocol stack (NS-1 … NS-7)
+docs/        the charter, the derivations, the register (see docs/README.md)
+tools/       the board observer and the steward inbox (Python), service units
+xtask/       workspace tasks
 ```
 
-Set up: `./install.sh` prepares a universe — builds the binaries, seats the NPC
-roster from `seeds/`, founds the worlds with one bounded beat, and exits with
-nothing left running. `./install.sh run` starts the conductor's heartbeat,
-`fresh` wipes and rebuilds, `status` reports what stands; `--help` lists the
-rest. Var roots are single-copy and git-ignored, so `wipe` guards the live one.
+## Building
 
-Play: `cargo run -p netstratum-cli` (`help` lists everything — found, zone,
-star, site, thermal, journal, save/resume). Autonomous board:
-`cargo run -p conductor` (converges the archived eras, then beats; the
-civilizations journal every 60-tick year onto `var/worlds/wall.html` — the
-Terminal Wall — and `python3 tools/observer.py` prints the ledger board).
+Rust (stable) and network access to GitHub, for the mycelium crates, which are
+pinned at a tagged release in the root `Cargo.toml`:
 
-References live in `/opt/repos/` (the ancestry era — consult, never port
-blindly) and `/opt/ipsal-autic-v0.4/` (the sealed engine build and its organ
-map, `docs/GROUND.md`).
+```
+cargo build --release
+cargo test --workspace
+```
+
+## Running the era-1 universe
+
+The conductor's era-1 binaries found and breathe a sphere universe in a
+variable root (`var-*/`, git-ignored, throwaway):
+
+```
+target/release/pulse    <var> found 2^55        # found a universe of 2^55 grains
+target/release/breathe  <var> 1700 _ write      # breathe it to bell 1700
+target/release/observe  --var <var> universe    # read it (galaxy, star, world …)
+```
+
+`breathe` reports conservation, the identities (spin, light, torque), the
+stars, worlds and clocks of every galaxy.
+
+## Playing
+
+```
+cargo run -p netstratum-cli
+```
+
+`./install.sh` prepares a game universe and the conductor's heartbeat
+(`./install.sh --help`).
+
+## Documentation
+
+Start with [`docs/README.md`](docs/README.md): the charter, the era-1
+derivations in order, the vocabulary and the register of what is owed.
+Contribution and commit standards: [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## License
+
+Copyright 2026 Daniel Edward McFarland. Licensed under the
+[Apache License, Version 2.0](LICENSE); see [NOTICE](NOTICE) and
+[DISCLAIMER.md](DISCLAIMER.md).
