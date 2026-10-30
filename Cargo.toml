@@ -5,6 +5,11 @@ members = [
     "engine/ratio","engine/cfe", "engine/kernel", "engine/codec", "engine/rfa-core", "engine/physics", "engine/solver", "engine/solver-verify", "engine/scribe", "engine/ledger", "engine/lens", "engine/conductor", "engine/mesh", "engine/substrate", "engine/reduct", "clients/cli", "engine/hypha", "engine/tongue", "xtask"]
 
 [workspace.dependencies]
+# Mycelium, the network substrate netstratum's engine speaks through (its
+# clock, atlas and law forms), pinned at a tagged release; bumping it is a
+# deliberate act (docs/STANDARDS.md).
+mycelium = { git = "https://github.com/SAIOS-SAMN/mycelium", tag = "v0.2.0" }
+forms = { git = "https://github.com/SAIOS-SAMN/mycelium", tag = "v0.2.0" }
 blake3 = "1.5"
 num-bigint = "0.4"
 num-rational = "0.4"

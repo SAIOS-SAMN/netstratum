@@ -8224,6 +8224,10 @@ fn chronicle(world: &World, style: &Style) {
             cfe::dop::ClosureEvent::ColonyFounded { name, .. } => {
                 format!("⚑ colony {} founded", style.strong(name))
             }
+            // Era 1: the planet's composition sealed (identity, not ledger).
+            cfe::dop::ClosureEvent::CompositionSealed { nuclei } => {
+                format!("◇ composition sealed: {} nuclides", nuclei.len())
+            }
             cfe::dop::ClosureEvent::ParameterChartered { key, value } => format!(
                 "⚖ parameter {} CHARTERED to {} — the rule follows the chain",
                 style.strong(
@@ -9345,14 +9349,6 @@ fn chronicle(world: &World, style: &Style) {
                     Some(after) => format!(" · the spring now runs at {}", amount(after)),
                     None => String::new(),
                 }
-            ),
-            cfe::dop::ClosureEvent::StapleMined { eaten, .. } => format!(
-                "⛏ {} eaten straight from the staple vein — the population mined its own larder",
-                style.strong(&amount(eaten))
-            ),
-            cfe::dop::ClosureEvent::VeinRejuvenated { injected, .. } => format!(
-                "🌱 {} recovered by the staple vein — orbital forcing grew it back",
-                style.strong(&amount(injected))
             ),
             cfe::dop::ClosureEvent::ElementStocksSwept { dust } => format!(
                 "⊞ element stocks floored to the grain — {} of dust shed (the one-time smelt-sweep, #136)",

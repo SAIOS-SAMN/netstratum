@@ -2,11 +2,11 @@
 name = "tongue"
 version = "0.1.0"
 edition = "2021"
-description = "netstratum's words stated in the fleet's tongue: the translator from solver programs to mycelium v0.1.0 rule elements (docs/60 D10b)"
+description = "netstratum's words stated in the fleet's tongue: the translator from solver programs to mycelium rule elements (docs/60 D10b)"
 
 [dependencies]
-# The same pinned worktree ns-hypha speaks through (vendor/mycelium).
-mycelium = { path = "../../vendor/mycelium" }
+# The same pinned release ns-hypha speaks through (the root Cargo.toml).
+mycelium.workspace = true
 solver = { path = "../solver" }
 blake3.workspace = true
 num-bigint.workspace = true

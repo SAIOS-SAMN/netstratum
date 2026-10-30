@@ -9,12 +9,8 @@ name = "ns-hypha"
 path = "src/main.rs"
 
 [dependencies]
-# Pinned: vendor/mycelium is a git worktree of /opt/mycelium-v0.1.0 at a
-# stated commit (`git -C vendor/mycelium log -1`), the same build the
-# court we speak to runs. Bumping it is a deliberate act, never a side
-# effect of the mycelium tree moving (it lands WIRE- and LAYOUT-CHANGEs
-# several times a day).
-mycelium = { path = "../../vendor/mycelium" }
+# Mycelium at the workspace's pinned release (the root Cargo.toml).
+mycelium.workspace = true
 cfe = { path = "../cfe" }
 codec = { path = "../codec" }
 solver = { path = "../solver" }
