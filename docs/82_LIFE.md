@@ -193,7 +193,7 @@ carry life, and a world may carry several forms at once.
 
 Amended 2026-10-15 (both operators): only the forms are shared; each
 universe derives its rulers from its own physics. The home reference body
-below is Netstratum's to choose, and the bell's "97,850 standard years"
+below is Netstratum's to choose, and the bell's 97,850 years
 is Xylarium's ladder, not a Netstratum ruler. The home star and world are read
 off the inverted galaxy layer (docs/83, "Corrections") until it is rebuilt.
 
@@ -201,10 +201,10 @@ off the inverted galaxy layer (docs/83, "Corrections") until it is rebuilt.
   (the home galaxy, the deepest core; its innermost star; that star's
   innermost world), normalised `R = 2 · R_loose / (1 + r)` and a star's burn
   `(1 + r) / 2`, r the mass over the home body's.
-- **The bell:** the home core's ring, about 97,850 standard years
-  (Xylarium's ladder). The standard year is the home world's local year
-  (the system ruler); a world's local year in standard years is its turn
-  over the home world's.
+- **The bell:** the home core's ring, 97,850 years on Xylarium's ladder
+  (an import, owed its derivation: docs/108). The home year is the home
+  world's local year (the system ruler); a world's local year in home years
+  is its turn over the home world's.
 - **The climb in generations** (selection writes at most a bit a
   generation): cells a local day a generation up to a copier's capacity
   (~1e7 bits), bodies a local year a generation for the rest (to ~6e9
@@ -348,7 +348,7 @@ slow clock, a rim star's slowly on a faster one, and a world's coherence
 recurs on its `p/q` within that rhythm. Equal σ in different rhythms is a
 different consciousness.
 
-**Earth gives the meaning, never a check.** Life on Earth exists in a
+**A state gives the meaning, never a check.** A living world stands in a
 state (a magnetised rocky world locked into a steady relation with a
 coherent star, carrying deep life); that names what high `Ψ_w`, high `e_w`
 and high σ mean. Its numbers are never fitted; the levels are read for

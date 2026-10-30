@@ -256,9 +256,9 @@ pub fn home(u: &Universe) -> Option<Home> {
 }
 
 /// The bell (Xylarium's ladder, shared): the home core's ring, the pulse's
-/// round trip to the disc's edge and back at light speed, about 97,850
-/// standard years. The standard year is the home world's local year (the
-/// system ruler).
+/// round trip to the disc's edge and back at light speed, 97,850 years on
+/// Xylarium's ladder: an import, owed its derivation (docs/108). The home
+/// year is the home world's local year (the system ruler).
 pub const BELL_YEARS: i64 = 97_850;
 /// What one copier carries before a body must (cells: a generation is a
 /// local day), and a mind's blueprint (bodies: a generation is a local
@@ -282,7 +282,7 @@ pub fn viable(matter: &Manifest) -> bool {
 /// The bells a medium's climb takes on a world (docs/82, with xylarium's
 /// ruler): selection writes at most a bit a generation, cells a local day a
 /// generation up to a copier's capacity, bodies a local year for the rest;
-/// decay stretches it by `1 / (1 − 1/x)`. Its local year in standard years
+/// decay stretches it by `1 / (1 − 1/x)`. Its local year in home years
 /// is its turn over the home world's; a bell is BELL_YEARS of them. Its day
 /// is its own (`days` a year, its clock's slips against its star in one
 /// orbit): a world with no day (locked to its star) gives cells no

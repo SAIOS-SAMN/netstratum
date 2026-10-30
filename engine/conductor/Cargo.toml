@@ -3,7 +3,7 @@ name = "conductor"
 version = "0.1.0"
 edition = "2021"
 license.workspace = true
-description = "The heartbeat — autonomous civilizations play their colonies, grind the forge, drain the steward inbox, and keep the ledger; the board lives before the first human arrives"
+description = "The heartbeat — autonomous civilizations play their colonies, grind the forge, drain the steward inbox, and keep the ledger; the board lives before the first player arrives"
 
 [dependencies]
 libc = "0.2"

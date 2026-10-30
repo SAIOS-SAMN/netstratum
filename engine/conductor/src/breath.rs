@@ -1095,10 +1095,10 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 }
             }
         }
-        // Capture is settling (operator 2026-10-24, relayed by Xylarium: "the
+        // Capture is settling (ruling of 2026-10-24, relayed by Xylarium: the
         // star is caught in its own gravitational motion with the galactic
-        // core which settles amongst all larger body gravity wells - and earth
-        // settles in the stars in the same formula derived"; the inbound half
+        // core, which settles amongst all larger gravity wells, and a world
+        // settles in its star by the same formula; the inbound half
         // of a star's circulation, the wind its outbound). A galaxy mote whose
         // place stands inside a star's sphere, where the star's pull meets the
         // core's, `h_s/(d_s + h_s) = H/(d + H)`, so `d_s/d = k = h_s/H` (the

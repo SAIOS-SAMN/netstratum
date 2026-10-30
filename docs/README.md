@@ -60,6 +60,7 @@ The universe beneath the game, derived from one grammar of shares and phases
 | 105 | [Polarity equilibria: the master equation of a two-pole exchange](105_POLARITY_EQUILIBRIA.md) |
 | 106 | [The thermodynamic substrate: potential, pressure and energy beneath motion](106_THE_THERMODYNAMIC_SUBSTRATE.md) |
 | 107 | [Integration with Mycelium: how Netstratum keeps time on the network](107_MYCELIUM_INTEGRATION.md) |
+| 108 | [Own rulers: retiring the imported calibrations](108_OWN_RULERS.md) |
 
 ## Era 0: the game, its civilizations and economy (01–77)
 

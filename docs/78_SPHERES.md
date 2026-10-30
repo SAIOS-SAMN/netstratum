@@ -455,8 +455,7 @@ event deploys them all, and everything after is a closed form of t from it
     it).
   - **Reading:** 13 cores, 413 systems, 5,607 orbs (about 14 a star);
     conservation exact; galactic years at 13 distinct bells, from about
-    3.7e8 to 9.4e9 bells, against orbs' local years from 60 bells. The
-    ratio is the real one's order (a galactic year 225 Myr, a planet's 1).
+    3.7e8 to 9.4e9 bells, against orbs' local years from 60 bells.
   - **So the clocks divide.** A galactic year is far longer than any run:
     the duties the 60-beat close carries (journals, keepers, the realms'
     term, ascension) cannot wait on it. Each belongs on the clock of what it

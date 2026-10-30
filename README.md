@@ -11,7 +11,7 @@ atlas and its shared law forms.
 
 **Status:** research software, in active development. Era 1 (the sphere
 universe) is derived and built in [docs/78](docs/78_SPHERES.md) through
-[docs/107](docs/107_MYCELIUM_INTEGRATION.md); the register of what is built
+[docs/108](docs/108_OWN_RULERS.md); the register of what is built
 and what is owed is [docs/102](docs/102_ALIGNMENT.md). See
 [DISCLAIMER.md](DISCLAIMER.md): the code and documentation are AI-generated
 under human editorial direction.
@@ -27,6 +27,7 @@ under human editorial direction.
 | [docs/105_POLARITY_EQUILIBRIA.md](docs/105_POLARITY_EQUILIBRIA.md) | The master equation of a two-pole exchange |
 | [docs/106_THE_THERMODYNAMIC_SUBSTRATE.md](docs/106_THE_THERMODYNAMIC_SUBSTRATE.md) | The substrate (potential, pressure, energy) beneath motion; the next build |
 | [docs/107_MYCELIUM_INTEGRATION.md](docs/107_MYCELIUM_INTEGRATION.md) | How Netstratum keeps time and law with the Mycelium network |
+| [docs/108_OWN_RULERS.md](docs/108_OWN_RULERS.md) | Every imported Earth, Sun and galaxy calibration, and its derivation on Netstratum's own rulers |
 | [docs/GAME_SPEC.md](docs/GAME_SPEC.md), [docs/SYSTEM_SPEC.md](docs/SYSTEM_SPEC.md) | The game and the system as specified |
 | [docs/EQUATIONS.md](docs/EQUATIONS.md) | The equations in one place |
 | [docs/BUILD_ORDER.md](docs/BUILD_ORDER.md), [docs/OPEN_QUESTIONS.md](docs/OPEN_QUESTIONS.md) | The build sequence and the open questions |

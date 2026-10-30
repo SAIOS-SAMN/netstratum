@@ -4838,7 +4838,7 @@ impl Polity {
         };
         // Multi-axial (operator ruling 2026-08-02: *unpin unary, and
         // make it multi-axis*). `11_AEON` §3 retired "Charted" for
-        // importing terrestrial unary budding — one PARENT, mutate one
+        // importing unary budding — one PARENT, mutate one
         // axis — and this draw was still the second half of that: one
         // of three coordinates moved and the other two were held.
         //

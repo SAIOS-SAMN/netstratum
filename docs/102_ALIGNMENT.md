@@ -103,6 +103,18 @@ docs before code; witnesses by re-derivation, never equal bytes.
 | S4 | kinematics propagated from the substrate | docs/106 §3 | S2, S3 | — |
 | S5 | form's coupling: bindings against pressure | docs/106 §3 | S3 | — |
 
+### B⁗. Own rulers (docs/108): the imported calibrations retired
+
+| # | item | doc | depends | ruling |
+|---|---|---|---|---|
+| O1 | heat read in grips (the lightest kind's τ), `HYDROGEN_K` retires | docs/108 §2 | — | — |
+| O2 | the bell in home years (`1/P_home`), `BELL_YEARS` retires | docs/108 §2 | — | — |
+| O3 | a world sited by its own heat against the home's, the 279 K anchor retires | docs/108 §2 | S2, O2 | — |
+| O4 | a star read by its own burn, the class table leaves era-1 siting | docs/108 §2 | O3 | — |
+| O5 | the tier shares as each tier's equilibrium at its throat; `pulse::tier`'s constants retire | docs/108 §2 | S1, docs/105 §4.1 | — |
+| O6 | docs/82's placeholders (pressure, radiation, a mind's size, a people's floor, spacing) with their laws | docs/108 §2 | S2, S3 | — |
+| O7 | the thermal regimes as bands of heat against the home's, edges at the grips | docs/108 §2 | O1, O3 | — |
+
 ### C. Reading and after
 
 | # | item | depends |
@@ -124,7 +136,8 @@ locked lead, torsion, twist in the bond and the fibres (65348e2, 4ffd2e7,
 ## 4. Order
 
 1. **A1–A4, A7** (no physics change; each with its witness).
-2. **A5–A6 fold into B1** (2026-10-28): folding nine readings over four holders now is rewritten when they become one body; pointing the homes at today's empty home core would break the standard year until B4.
+2. **A5–A6 fold into B1** (2026-10-28): folding nine readings over four holders now is rewritten when they become one body; pointing the homes at today's empty home core would break the home year until B4.
 3. **Rulings in hand:** C (B5), R's scale (B6), `T_u` with Mycelium (B2).
 4. **B1 → B2 → B3 → B4 with B5, B7**, then **B8** as the cost demands.
-5. **C1**, then **C2–C4**.
+5. **O1 → O2**, then **O3, O4, O7** with S2, **O5** with S1, **O6** with S2–S3 (docs/108 §4).
+6. **C1**, then **C2–C4**.

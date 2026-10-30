@@ -1,8 +1,8 @@
 # 83 — Formation: stars and planets form from matter, they are not placed
 
 Operator, 2026-10-15: stars and planets form naturally from the physics of
-matter; forces and gravity, spin and manifolds work together, as orbital
-mechanics does in real solar systems. Era 1 deploys its bodies top-down (the
+matter; forces and gravity, spin and manifolds work together as one orbital
+mechanics. Era 1 deploys its bodies top-down (the
 pulse hands out shares, a star keeps a ruled share, planets are set at reach
 boundaries by construction; docs/78, "The mass split"), and each body then
 only turns about its centre. This document scopes the change to bottom-up
@@ -28,8 +28,7 @@ layer is wrong.
   heaviest elements its bounce held. Its stars form from the light gas the
   bounce sends farthest, each small, turning about the core.
 - **Two readings of mass** (operator, 2026-10-15; correcting "the galaxy's
-  mass lies in the population and the gas", Earth's 3-D picture of the
-  Milky Way). 3-D mass is matter counted (grains, nuclei); most of a
+  mass lies in the population and the gas", an imported 3-D picture). 3-D mass is matter counted (grains, nuclei); most of a
   galaxy's may lie in its stars and gas. Quantum mass is holding, how long
   states hold the pulse (the ring-density law's H), which sets clocks,
   deficits and turning; a core is a singularity whose bell holds every
@@ -622,7 +621,7 @@ the one capture law. The image is a continuous fountain.
    keeps Xylarium's ruling: there are no galaxy-to-galaxy wormholes, and a
    wormhole is a local, built on-ramp paid in mu that lands inside a ring
    galaxy ("potentially incoming wormhole connects").
-6. **Continuum or vacuum, by force** (direction: jetstreams are continuums or vacuums in the filament by their force, analogous to the Gulf Stream). The stream is a reading, never a label from a
+6. **Continuum or vacuum, by force** (direction: jetstreams are continuums or vacuums in the filament by their force). The stream is a reading, never a label from a
    mote's origin.
    - The force is the jet's push at the mote's reach (its pulse share
      times the arrival strength ρ, the pulse's own reading).
@@ -728,7 +727,7 @@ held 0.68 (from 0.51), and bounces about 1 in 2.5.
    dispersal, so a lone mote's apartness is its own band's; a chain with no
    extent does not bind. Read: one chain spanned nearly a face, so each
    galaxy made one star an echo.
-2. **Beads** (7367e54). Ruling: halving is a human measure, whereas nature measures itself. A holding filament beads
+2. **Beads** (7367e54). Ruling: halving is an imposed measure, whereas nature measures itself. A holding filament beads
    like a stream pinching into drops. Each member's local hold is its
    holding over its own band's share. Every local maximum is a pinch, where
    matter gathers (the same pinch as a planetary core's), and beads part at

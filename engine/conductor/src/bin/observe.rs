@@ -216,8 +216,8 @@ fn main() {
             // A galactic core weighed, and the elements AT A POSITION in its
             // disc (ruling of 2026-10-19: the galactic core is weighed as a
             // derivation from Netstratum's own measurements, with a quick
-            // reading of the elemental core composition at a position aligned
-            // with Earth's). Every reading is the galaxy's own: its
+            // reading of the elemental composition at a position in the
+            // disc). Every reading is the galaxy's own: its
             // core's state and what its cut holds (the kinds, heaviest and
             // lightest, their share of the galaxy), and the kinds standing in
             // the band about a share `f` of the way to its rim (R = ℓ/H, the

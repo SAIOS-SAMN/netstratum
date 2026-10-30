@@ -1146,8 +1146,8 @@ pub fn beads(motes: &[Mote], enc: &Enclosed, p: &Ratio, total: &Ratio, disc_leg:
             let mut along = run;
             along.sort_by(|a, b| rr[*a].clone().cmp(&rr[*b].clone()).then(a.cmp(b)));
             let local = profile(&along);
-            // The beads (operator: "halving is a human derived measure,
-            // whereas anything in nature is measured itself"): a fibre
+            // The beads (ruling: halving is an imposed measure, whereas
+            // nature measures itself): a fibre
             // pinches where its hold gathers (each local maximum) and parts
             // at the minima between, the minimum member joining the side
             // whose neighbour holds more.
@@ -1269,9 +1269,8 @@ pub fn strands(motes: &[Mote], enc: &Enclosed, p: &Ratio, total: &Ratio) -> Vec<
 }
 
 
-/// Streaming by force (operator 2026-10-18: "jetstreams depending on their
-/// force are either continuums or vacuums in the filament … analogous to the
-/// gulf stream"): a mote's stream is READ, never labelled by its origin.
+/// Streaming by force (ruling of 2026-10-18: jetstreams are continuums or
+/// vacuums in the filament by their force): a mote's stream is READ, never labelled by its origin.
 /// Where the jet's push at it (`p·ρ·δ_u`, the torque's own reading) beats the
 /// hold of the filament it stands in (`λ/(1 + λ)`), it is carried in the
 /// continuum, one moving body with the current; where the hold beats the
