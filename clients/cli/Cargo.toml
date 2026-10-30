@@ -2,6 +2,7 @@
 name = "netstratum-cli"
 version = "0.1.0"
 edition = "2021"
+license.workspace = true
 description = "The Netstratum MUD client — one command launches it (CHARTER §3.5)"
 
 [[bin]]

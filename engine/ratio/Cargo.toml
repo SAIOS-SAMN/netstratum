@@ -2,6 +2,7 @@
 name = "ratio"
 version = "0.1.0"
 edition = "2021"
+license.workspace = true
 
 # THE LEAF. Exact rational arithmetic and nothing else — no game, no
 # state, no I/O. It sits BELOW every other crate on purpose.

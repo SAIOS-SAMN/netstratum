@@ -2,6 +2,7 @@
 name = "ns-hypha"
 version = "0.1.0"
 edition = "2021"
+license.workspace = true
 description = "Netstratum's uplink to a mycelium hypha: the law register, the domain's founding, and the census folds of every colony's holdings, admitted by continuity on the court"
 
 [[bin]]

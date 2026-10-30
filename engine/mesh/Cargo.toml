@@ -2,6 +2,7 @@
 name = "mesh"
 version = "0.1.0"
 edition = "2021"
+license.workspace = true
 description = "NS-5 MESH — the spine at TUniversal{S,G,T} (two maps, four verbs, one record) and the lawful chain remainder: the integrity door, the head announcement, the authority walk"
 
 [dependencies]

@@ -2,6 +2,7 @@
 name = "reduct"
 version = "0.1.0"
 edition = "2021"
+license.workspace = true
 description = "The thought engine — exact algebraic cognition vendored from ipsal-autic-v0.4. IAE-1: the transport pair Φ/Φ⁻¹ on the substrate multivector."
 
 [dependencies]

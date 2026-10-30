@@ -2,6 +2,7 @@
 name = "ledger"
 version = "0.1.0"
 edition = "2021"
+license.workspace = true
 description = "The pre-chain ledger of record and its lens (Charter §11): the steward seam, the fold, identity, the sky — every file-borne path an inventoried Tier-A debt adopted in-chain at #36 — plus the write-only display exports (deletable, never read back, never uplinked)"
 
 [dependencies]

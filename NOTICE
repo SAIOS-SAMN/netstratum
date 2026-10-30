@@ -1,0 +1,9 @@
+netstratum
+Copyright 2026 Daniel Edward McFarland
+
+This product was developed with AI assistance (Anthropic's Claude); see
+DISCLAIMER.md.
+
+netstratum speaks to the mycelium network through mycelium's published
+crates (https://github.com/SAIOS-SAMN/mycelium, Apache-2.0), fetched at
+build time and not part of this distribution.

@@ -2,6 +2,7 @@
 name = "lens"
 version = "0.1.0"
 edition = "2021"
+license.workspace = true
 description = "Read-only projections from the chain (#37): the display re-served from the spine, deletable exports made re-derivable — never a second truth"
 
 [dependencies]

@@ -2,6 +2,7 @@
 name = "cfe"
 version = "0.1.0"
 edition = "2021"
+license.workspace = true
 description = "Canonical Field Engine — the Netstratum runtime evaluating RFA state transitions"
 
 [dependencies]

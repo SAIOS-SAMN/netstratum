@@ -2,6 +2,7 @@
 name = "rfa-core"
 version = "0.1.0"
 edition = "2021"
+license.workspace = true
 description = "Rational Field Algebra core — the antisymmetric relational Delta, cocycle residuals, coherence, H¹ reduction, and the validation gates (exact rational arithmetic, no floats)"
 
 [dependencies]

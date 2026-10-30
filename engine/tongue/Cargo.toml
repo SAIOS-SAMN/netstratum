@@ -2,6 +2,7 @@
 name = "tongue"
 version = "0.1.0"
 edition = "2021"
+license.workspace = true
 description = "netstratum's words stated in the fleet's tongue: the translator from solver programs to mycelium rule elements (docs/60 D10b)"
 
 [dependencies]

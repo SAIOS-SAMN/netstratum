@@ -2,6 +2,7 @@
 name = "substrate"
 version = "0.1.0"
 edition = "2021"
+license.workspace = true
 description = "The exact-ℚ algebra: fields, polynomials, planes, the {S,G,T} volume, the CGA multivector. No cognition, no modality — vendored from ipsal-autic-v0.4 (IAE-1)."
 
 # THE GEOMETRIC GROUND. Vendored whole (the operator's IAE-1 ruling:

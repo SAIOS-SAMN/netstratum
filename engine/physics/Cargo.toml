@@ -2,6 +2,7 @@
 name = "physics"
 version = "0.1.0"
 edition = "2021"
+license.workspace = true
 description = "Netstratum physics — event-driven exact kinematics on the RFA carrier (no floats, no scheduler, every step carries its inverse)"
 
 [dependencies]

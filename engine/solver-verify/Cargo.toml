@@ -2,6 +2,7 @@
 name = "solver-verify"
 version = "0.1.0"
 edition = "2021"
+license.workspace = true
 description = "The sealed verifier half of the ARC harness — everything a REPLAY needs, nothing a SEARCH needs: grids and the one apply path, the task loader, the deterministic forge, the certificate chain. The prover (solver) is free and non-constitutional; this crate is what the kernel calls."
 
 [dependencies]

@@ -2,6 +2,7 @@
 name = "pen"
 version = "0.1.0"
 edition = "2021"
+license.workspace = true
 description = "RETIRED — JSON pen struck; binary TLV/cards only (docs/JSON_DISPLAY_ONLY.md)"
 
 # Empty placeholder. JsonWriter is gone. Do not reintroduce JSON emission.

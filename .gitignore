@@ -9,3 +9,6 @@ __pycache__/
 
 # Pinned mycelium-v0.1.0 worktree (see engine/hypha/Cargo.toml)
 vendor/
+
+# Local live-binary snapshots (operator deploys), never published
+.live*/
