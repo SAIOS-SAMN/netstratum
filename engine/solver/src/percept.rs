@@ -1,16 +1,16 @@
-//! **RESTORE 10** (Concordance 1.10, the audit approved 2026-10-08): a mind
-//! PERCEIVES objects, counts and extrema — the developer standard that kept
+//! **Restore 10** (Concordance 1.10, the audit approved 2026-10-08): a mind
+//! perceives objects, counts and extrema — the developer standard that kept
 //! quantity out of perception (`reduct/peel.rs`: "never arithmetic content")
 //! binds developers, not minds.
 //!
-//! A grid is perceived as BODIES (4-connected, one hue each, the grid's own
+//! A grid is perceived as bodies (4-connected, one hue each, the grid's own
 //! background left out) with the features the court's rule language selects
-//! on (mycelium 78.143 SELECT, as announced): hue, cell count, shape up to
+//! on (Mycelium 78.143 select, as announced): hue, cell count, shape up to
 //! translation, contact with the frame. Counts are exact; an extremum names
 //! its order and keeps its ties ("the largest" is every body of the largest
 //! count — the rule states it, nothing is broken silently).
 //!
-//! On top of perception, THE SELECTION A TASK SHOWS: across every training
+//! On top of perception, the selection A TASK shows: across every training
 //! pair, which bodies changed and how (recoloured to one hue, or removed),
 //! and the first predicate — in a fixed, stated order — that picks exactly
 //! those bodies in every pair. The rule is then applied to the test input.
@@ -97,7 +97,7 @@ fn candidates(seen: &[(Percept, Vec<Fate>)]) -> Vec<Select> {
     all
 }
 
-/// THE SELECTION A TASK SHOWS: the object rule every training pair agrees
+/// The selection A TASK shows: the object rule every training pair agrees
 /// on, closing every pair exactly, or `None`.
 pub fn learn(train: &[(Grid, Grid)]) -> Option<ObjectRule> {
     if train.is_empty() {
@@ -138,14 +138,14 @@ pub fn learn(train: &[(Grid, Grid)]) -> Option<ObjectRule> {
     None
 }
 
-/// THE FACULTY (docs/66 Y2; coordinator ruling 2026-10-09): where no property
-/// of a body's own separates the treated bodies, the mind reads the ORDER its
+/// The faculty (docs/66 Y2; coordinator ruling 2026-10-09): where no property
+/// of a body's own separates the treated bodies, the mind reads the order its
 /// relations show. Each body's sorted L1 relations to the others (the sense,
 /// `project::relations`) are integrated (partial sums: the coboundary run
 /// backwards), and the integral is read at every cut the relations have:
-/// whole, over the k nearest, over the k farthest. A pair ADMITS a cut and an
+/// whole, over the k nearest, over the k farthest. A pair admits a cut and an
 /// extreme when that end of the order is exactly its treated bodies, ties
-/// kept; the train ADMITS what every informative pair admits (the
+/// kept; the train admits what every informative pair admits (the
 /// intersection, closure on the pairs). The rule is the first admitted: the
 /// whole integral before its cuts, nearest before farthest, least before
 /// most. Nothing is a candidate list: the cuts are the reading's own, and

@@ -1,28 +1,28 @@
-//! **THE CHARTERED PARAMETERS** (P2, tag 103 — the mint path for the
+//! **The chartered parameters** (P2, tag 103 — the mint path for the
 //! balance placeholders, ruled 2026-08-06 alongside the dop.rs minting
 //! design).
 //!
 //! A balance placeholder was a dial in a function: tunable only by a
 //! commit, readable only as a constant. This registry makes each one
-//! CHARTERABLE — a `ParameterChartered` receipt moves the value for
+//! charterable — a `ParameterChartered` receipt moves the value for
 //! the world that receipted it, the fold reads seed ∪ charters in
 //! chronicle order, and the live rule follows the chain instead of
-//! the compiled tree. The seed IS the current dial values, moved here
-//! whole (THE DEFINITION LAW: genesis reads no chain, so the founding
-//! values are compiled — their census class stays DIAL until the
+//! the compiled tree. The seed is the current dial values, moved here
+//! whole (the definition law: genesis reads no chain, so the founding
+//! values are compiled — their census class stays dial until the
 //! operator rules the registry's seed a class of its own; this module
-//! changes what a value CAN do, not what it counts as).
+//! changes what a value can do, not what it counts as).
 //!
-//! **Who may charter is the law**: chartering is a TIER 0 power under
+//! **Who may charter is the law**: chartering is a tier 0 power under
 //! the same standing gate as `mint_vocabulary` (12_UNION ruling 4 —
 //! progenitors create the board everyone else plays on).
 //!
 //! **The band is derived, not chosen**: a chartered value must stand
-//! inside the FOURFOLD BAND of its seed — `[seed/4, 4·seed]` — the
+//! inside the fourfold band of its seed — `[seed/4, 4·seed]` — the
 //! same band `factor_in_bounds` already rules for vocabulary factors,
 //! anchored to the seed so successive charters cannot walk a rate
 //! away one lawful step at a time. The band is decidable from the
-//! value alone, so it lives at a DOOR ([`Chartered`]), not a judge
+//! value alone, so it lives at a door ([`Chartered`]), not a judge
 //! (29_CONSTRUCTION).
 
 use crate::ratio::{ratio, Ratio};
@@ -68,12 +68,12 @@ impl Parameter {
     pub fn code(self) -> u8 {
         self as u8
     }
-    /// The founding value — THE CHARTERED-PARAMETER SEED (P2, tag 103).
+    /// The founding value — the chartered-parameter seed (P2, tag 103).
     ///
-    /// **These are SEALED RATES, not open dials** (task #3, 2026-08-12).
-    /// Each is the epoch-0 value every PRE-CHARTER beat read: the live
+    /// **These are sealed rates, not open dials** (task #3, 2026-08-12).
+    /// Each is the epoch-0 value every PRE-Charter beat read: the live
     /// value folds `seed ∪ charters` (`crate::parameter::of`), so with
-    /// no charter the seed IS the rate, and editing it here would
+    /// no charter the seed is the rate, and editing it here would
     /// recompute every old chronicle's heat — breaking SEAL B on
     /// history. The lawful way to move one is a receipted
     /// `ParameterChartered` deed, never an edit. That is exactly the
@@ -103,9 +103,9 @@ impl Parameter {
     ];
 }
 
-/// **A LAWFUL CHARTER, proven at construction** (29_CONSTRUCTION):
+/// **A lawful Charter, proven at construction** (29_CONSTRUCTION):
 /// the value stands inside the fourfold band of its key's seed. The
-/// band anchors to the SEED, so charters do not compound — the whole
+/// band anchors to the seed, so charters do not compound — the whole
 /// reachable space is `[seed/4, 4·seed]`, forever, by construction.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Chartered {
@@ -138,7 +138,7 @@ pub fn chartered(key: Parameter, value: Ratio) -> Chartered {
         .expect("a chartered literal must stand inside the fourfold band of its seed")
 }
 
-/// The whole table in ONE reverse walk — the tick's read (the
+/// The whole table in one reverse walk — the tick's read (the
 /// practice-channel precedent: one walk per tick, never one per key).
 pub struct Table([Ratio; 7]);
 
@@ -155,7 +155,7 @@ pub fn table_of(chronicle: &crate::vrp::Chronicle) -> Table {
     }))
 }
 
-/// **THE FOLD** — the value as the chain holds it: the LAST charter
+/// **The fold** — the value as the chain holds it: the LAST charter
 /// for the key, or the seed where none stands. Same chain, same
 /// value, on every node, forever.
 pub fn of(chronicle: &crate::vrp::Chronicle, key: Parameter) -> Ratio {

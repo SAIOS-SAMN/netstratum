@@ -84,7 +84,7 @@ impl World {
         Ok(())
     }
 
-    /// STAMP clear witness hygiene: last-clear must meet seal OR Exchange
+    /// STAMP clear witness hygiene: last-clear must meet seal or Exchange
     /// seated before STAMP aperture is "honest" under mesh guard reading.
     /// Pure reading for suite; hard refuse optional on stamp haul path.
     pub fn stamp_mesh_hygiene(&self) -> bool {

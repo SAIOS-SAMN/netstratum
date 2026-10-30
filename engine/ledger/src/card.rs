@@ -100,7 +100,7 @@ pub mod civ {
     pub const STATION: u8 = 11;
 }
 
-/// Seat card (`registry/<sigil>.seat`): where a line that was NOT compiled
+/// Seat card (`registry/<sigil>.seat`): where a line that was not compiled
 /// in was seated at its founding — a cleave's themed world, planet and
 /// colony and its adjacent chart position. Written once by the founding
 /// act; read on every boot, so a restart resumes the line where it was

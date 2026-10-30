@@ -1,5 +1,5 @@
 //! Measure the hardness ladder: forge N tasks per level from distinct
-//! digests, THINK each through the ARC seat (the one reduce organ — search is
+//! digests, think each through the ARC seat (the one reduce organ — search is
 //! gone), report the solve rate. The difficulty knob READ, not asserted.
 //!
 //! Usage: cargo run -p solver --release --example forge_run -- [tasks_per_level]

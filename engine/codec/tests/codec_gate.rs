@@ -34,11 +34,11 @@ fn a_rich_world() -> World {
 fn the_state_round_trips_byte_exact() {
     let committed = a_rich_world().committed();
     let bytes = state_bytes(&committed);
-    // The CURRENT schema leads. Every older schema still READS — a
+    // The current schema leads. Every older schema still reads — a
     // v5 state decodes with no element lanes, which is what a world
-    // predating them held. RATIFIED at v26 (GALACTIC-1 region_seed);
+    // predating them held. Ratified at v26 (GALACTIC-1 region_seed);
     // v25 (ONT-3 vein rejuvenated) and v24 (COG-1 leisure_banks) before
-    // it — v25 and v23 both landed WITHOUT moving this pin (their bumps
+    // it — v25 and v23 both landed without moving this pin (their bumps
     // ran no codec test), so the gate stood red across three landings;
     // the ratification is part of the schema bump, not an afterthought.
     // v22 (50_WIN_CONDITIONS collapsed flag), v21 (49_TAXATION §5

@@ -1,4 +1,4 @@
-//! IAE-4 — THE RESOLVE-SOLVE LOOP, based on locality.
+//! IAE-4 — the resolve-solve LOOP, based on locality.
 //!
 //! "Resolve, don't enumerate." The measured relational field is reduced
 //! against the vocabulary (the known local translations) modulo the
@@ -8,8 +8,8 @@
 //! is computed exactly by the substrate SNF.
 //!
 //! **Locality is the source of the signal.** The measurement carries the
-//! adjacency coordinate (`encode_grid_objects` coord 3): nonzero ONLY for
-//! Manhattan-adjacent cells, and NOT a coboundary — "spatial structure the
+//! adjacency coordinate (`encode_grid_objects` coord 3): nonzero only for
+//! Manhattan-adjacent cells, and not a coboundary — "spatial structure the
 //! difference coordinates cannot represent." The global-difference coordinates
 //! (value/row/col) are coboundaries and resolve to nothing on their own; the
 //! LOCAL adjacency coordinate is what fails to close and drives the solve.
@@ -24,18 +24,18 @@ use substrate::snf::smith_normal_form;
 /// the adjacency boundary.
 pub const RELATIONAL_M: usize = 4;
 
-/// THE BINDING of an obstruction onto a geometry — retained WHOLE, never
+/// The binding of an obstruction onto a geometry — retained whole, never
 /// collapsed to a bare residual (doc 51 §6, "bind, don't fold"). A manifold
 /// does not disappear when it solves a problem; it wraps it, and this records
-/// exactly HOW:
+/// exactly how:
 ///
-/// * `coefficients` — THE OVERLAP: the integer combination of the generators
+/// * `coefficients` — The overlap: the integer combination of the generators
 ///   that binds the obstruction (`generators · coefficients + residual` equals
 ///   the obstruction exactly — nothing is discarded).
-/// * `torsion` — THE TWIST: the invariant factors `> 1`. A ℤ-module carries
+/// * `torsion` — The twist: the invariant factors `> 1`. A ℤ-module carries
 ///   torsion natively (a ℚ-vector space cannot); binding modulo `ℤ/dᵢ` is the
 ///   flex that lets the geometry map onto an imperfect match.
-/// * `residual` — the irreducible remainder that did NOT bind (the surviving
+/// * `residual` — the irreducible remainder that did not bind (the surviving
 ///   obstruction).
 /// * `locked` — `residual == 0`: the geometries overlapped completely.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -46,7 +46,7 @@ pub struct Binding {
     pub locked: bool,
 }
 
-/// OVERLAY — bind `obstruction` onto the geometry spanned by the COLUMNS of
+/// Overlay — bind `obstruction` onto the geometry spanned by the columns of
 /// `generators`, retaining the whole binding (not just the residual). The
 /// exact reconstruction `generators · coefficients + residual = obstruction`
 /// always holds, so nothing collapses: the overlap and its torsion twist are
@@ -101,7 +101,7 @@ pub struct Resolution {
     pub solved: bool,
 }
 
-/// THE RESOLVE. Reduce a measured field in `C¹` modulo the resolvable
+/// The resolve. Reduce a measured field in `C¹` modulo the resolvable
 /// subspace: the coboundaries `Im(δ⁰)` (any global potential is free) together
 /// with the vocabulary's local translations. The residual is the irreducible
 /// obstruction — zero iff the field is fully explained by known structure.

@@ -1,4 +1,4 @@
-//! THE STRATIFIED PEEL — cohomology by exact SNF (IAE-2, step 3).
+//! The stratified peel — cohomology by exact SNF (IAE-2, step 3).
 //!
 //! The reduction the whole architecture exists to get right. `Hᵏ` is the
 //! genuine quotient `Ker(δᵏ) / Im(δᵏ⁻¹)`, read off the substrate's exact
@@ -13,7 +13,7 @@
 //!   `U⁻¹` (where `Im(δᵏ⁻¹) = span{ dᵢ · U⁻¹[:,i] }`), each torsion coordinate
 //!   is taken **modulo its invariant factor** and each free coordinate is
 //!   kept whole. Exact ℤ-module quotient — no coordinate truncation, and the
-//!   surviving harmonic part IS the irreducible obstruction (`H¹`).
+//!   surviving harmonic part is the irreducible obstruction (`H¹`).
 
 use crate::mat::matvec;
 use crate::sheaf::CellSheaf;
@@ -54,7 +54,7 @@ impl CellSheaf {
         Cohomology { grade: k, betti: ker_dim - rank_prev, torsion }
     }
 
-    /// THE PEEL. Reduce `c ∈ Cᵏ` to its canonical representative in
+    /// The peel. Reduce `c ∈ Cᵏ` to its canonical representative in
     /// `Cᵏ / Im(δᵏ⁻¹)` — the exact ℤ-module quotient. A `c` that lies in
     /// `Im(δᵏ⁻¹)` (a coboundary) reduces to zero; a cocycle reduces to its
     /// harmonic `Hᵏ` representative (the irreducible obstruction).

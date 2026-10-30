@@ -1,12 +1,12 @@
 // Wire-format helpers for BigInt + varint serialization.
 //
-// LAW IV exact rational: numerators and denominators encode as variable-length
+// Law IV exact rational: numerators and denominators encode as variable-length
 // `BigInt` little-endian byte sequences with explicit sign + length
 // prefixes. No fixed-width truncation; the encoder preserves the exact
 // algebraic content of every coefficient.
 //
-// LAW X chronometric chain identity: all derivation-path values that
-// reach the receipt-chain hash preimage MUST route through these
+// Law X chronometric chain identity: all derivation-path values that
+// reach the receipt-chain hash preimage must route through these
 // helpers (never via `BigInt::to_le_bytes` direct, never via
 // fixed-width truncation). This is the substrate's BigInt ↔ bytes
 // canonical bridge.
@@ -49,7 +49,7 @@ pub fn decode_u64(bytes: &[u8]) -> Result<(u64, usize), OverflowError> {
         let placed = chunk << shift;
         // Any chunk bit shifted past the 64-bit width is content the
         // decode would silently drop — refused typed, never truncated
-        // (LAW IV; the encoder never emits this shape).
+        // (Law IV; the encoder never emits this shape).
         if placed >> shift != chunk {
             return Err(OverflowError::VarintTooWide { at: consumed });
         }
@@ -82,7 +82,7 @@ pub fn write_bigint_le(buf: &mut Vec<u8>, value: &BigInt) {
 }
 
 /// **`read_bigint_le`** — decode a `BigInt` from the canonical layout.
-/// Returns `(value, bytes_consumed)`. LAW V structured residuals at
+/// Returns `(value, bytes_consumed)`. Law V structured residuals at
 /// every failure mode.
 pub fn read_bigint_le(bytes: &[u8]) -> Result<(BigInt, usize), OverflowError> {
     if bytes.is_empty() {

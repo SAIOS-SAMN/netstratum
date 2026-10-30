@@ -1,14 +1,14 @@
-//! THE ARBOR — the container of spines (operator ruling 2026-08-01).
+//! The arbor — the container of spines (operator ruling 2026-08-01).
 //!
 //! **Why the name moved.** This type was called `Spine`, and a spine is
 //! one line: ordered, load-bearing, one writer per clock. That is
-//! exactly right for a BRANCH and exactly wrong for the object holding
+//! exactly right for a branch and exactly wrong for the object holding
 //! them. `branch()` mints a new line at a fork position and `head(name)`
 //! serves each separately, so one of these has always held several
 //! spines at once — the type was named for its part rather than for
 //! itself.
 //!
-//! An ARBOR holds many spines. It forks and it does not retract: every
+//! An arbor holds many spines. It forks and it does not retract: every
 //! branch persists, which is the bifurcation law in the storage layer —
 //! both sides of a cleave become roots and neither is discarded.
 //!
@@ -23,14 +23,14 @@
 //! linear and ordered and the word is accurate; `Coordinate::branch`
 //! names which spine a commitment sits on.
 //!
-//! **KNOWN GAP: an arbor can fork and cannot JOIN.** There is no merge
+//! **KNOWN gap: an arbor can fork and cannot join.** There is no merge
 //! here. Today it is a semilattice — branches only ever fan outward —
 //! so convergence, the whole value thesis, has no landing site in the
 //! commitment structure. Naming it for branching alone would bless the
 //! half that exists; it is named for the whole it must become.
 //!
 //! **On disk the directory is still `spine/`.** Renaming it would orphan
-//! every live world's committed history, so the path is a MIGRATION to
+//! every live world's committed history, so the path is a migration to
 //! schedule, not a naming decision. Recorded rather than silently split.
 
 use cfe::dop::ClosureEvent;
@@ -43,12 +43,12 @@ use std::path::{Path, PathBuf};
 
 /// Tag 84 — the arbor commitment record (the one authority).
 pub const SPINE_RECORD_TAG: u8 = 84;
-/// Tag 87 — a SEGMENT blob frame (SPINE-UPLINK): `state[32] ‖ bytes`,
+/// Tag 87 — a segment blob frame (SPINE-UPLINK): `state[32] ‖ bytes`,
 /// carried in a replication segment, re-hashed on arrival. Never
 /// stored in `arbor.tlv` — the store already holds blobs by hash.
 pub const SEGMENT_BLOB_TAG: u8 = 87;
-/// Tag 88 — a SEGMENT step frame (SPINE-UPLINK): `commit[32] ‖
-/// actor[8] ‖ stamp[8] ‖ event_bytes`, the proof a JUDGED record's
+/// Tag 88 — a segment step frame (SPINE-UPLINK): `commit[32] ‖
+/// actor[8] ‖ stamp[8] ‖ event_bytes`, the proof a judged record's
 /// transition was lawful, re-gated under the receiver's kernel.
 pub const SEGMENT_STEP_TAG: u8 = 88;
 
@@ -56,12 +56,12 @@ pub const SEGMENT_STEP_TAG: u8 = 88;
 /// is the mainline), the wrapped torus triple, the gauge sheet, the
 /// attested tick, and the sub-tick deed index.
 ///
-/// **`sub` — THE PHASE-3 FLIP** (`39_PHASE3_FLIP` §3, operator ruling
+/// **`sub` — The PHASE-3 flip** (`39_PHASE3_FLIP` §3, operator ruling
 /// 2026-08-13, option A). Several deeds share one world tick, and
 /// judgment is per-deed while the old coordinate addressed per-tick —
 /// a second deed's commitment refused `Occupied` on contact (measured).
 /// `sub` is the deed index within one tick, hashed into every commit
-/// like every other field: one commitment PER DEED, each carrying its
+/// like every other field: one commitment per deed, each carrying its
 /// own kernel verdict. Resets to 0 whenever `t` advances; within one
 /// `t`, `sub` counts 0, 1, 2… in deed order.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -89,11 +89,11 @@ impl Coordinate {
     }
 }
 
-/// THE ARROW, ascending on `(t, sub)` — the Phase-3 addressing law
+/// The arrow, ascending on `(t, sub)` — the Phase-3 addressing law
 /// (`39_PHASE3_FLIP` §3). A later commit on one branch must be later in
 /// (tick, sub-tick) lexicographic order: `t` strictly ahead, or the
 /// same `t` with `sub` strictly ahead — a fresh tick always resets
-/// `sub`'s meaning, since it addresses THAT tick's deeds only.
+/// `sub`'s meaning, since it addresses that tick's deeds only.
 fn ascends(next: &Coordinate, head: &Coordinate) -> bool {
     (next.t, next.sub) > (head.t, head.sub)
 }
@@ -116,7 +116,7 @@ pub struct Commitment {
 pub enum ArborRefused {
     Io { message: String },
     /// A frame that is not a well-formed tag-84 record — gate-side,
-    /// unknown REFUSES.
+    /// unknown refuses.
     Malformed { frame: usize },
     /// A record whose commit does not recompute, a broken parent
     /// link, or a tampered store blob.
@@ -137,8 +137,8 @@ pub enum ArborRefused {
     /// SPINE-UPLINK: a received record claims `gated` but its step
     /// did not ride the segment — the receiver cannot reproduce the
     /// kernel verdict, so it will not admit the claim. Admission is
-    /// re-judging, never trust; a judgment you cannot re-run is a
-    /// judgment you do not have.
+    /// re-judging, never trust; a judgment that cannot be re-run is
+    /// a judgment not held.
     JudgedWithoutProof { frame: usize },
     /// [`Arbor::extend_judged`]: the judge's prior state is not this
     /// branch's head (its digest differs) — the verdict was reached on a
@@ -240,8 +240,8 @@ impl Commitment {
 pub struct Arbor {
     root: PathBuf,
     records: Vec<Commitment>,
-    /// THE MEMORY BOUND (opened with [`Arbor::open_heads`]): `records` holds
-    /// only each branch's HEAD, verified whole at open; appends replace the
+    /// The memory bound (opened with [`Arbor::open_heads`]): `records` holds
+    /// only each branch's head, verified whole at open; appends replace the
     /// head. For the live judge, which reads nothing but heads.
     heads_only: bool,
 }
@@ -264,9 +264,9 @@ impl Arbor {
         if !stream_path.exists() {
             return Ok(Self { root, records: Vec::new(), heads_only: true });
         }
-        // STREAMED, frame by frame: every record recomputes, its parent is
+        // Streamed, frame by frame: every record recomputes, its parent is
         // its branch's head, and the arrow ascends — the same checks as
-        // `open`, holding ONE head per branch and never the file. (Within a
+        // `open`, holding one head per branch and never the file. (Within a
         // branch the strict arrow makes every address distinct; a branch's
         // name is part of its address.) A named branch's birth needs its
         // fork's record, which a stream no longer holds: such an arbor is
@@ -409,7 +409,7 @@ impl Arbor {
         self.records.iter().find(|record| &record.coordinate == coordinate)
     }
 
-    /// The verified records, in stream order — a LENS over the open
+    /// The verified records, in stream order — a lens over the open
     /// arbor (read-only; every record already recomputed at `open`).
     pub fn records(&self) -> &[Commitment] {
         &self.records
@@ -494,8 +494,8 @@ impl Arbor {
         self.append(record)
     }
 
-    /// **THE JUDGED DOOR** (RECONSTRUCT iii, Concordance 4.4 annex): a
-    /// step the caller ALREADY judged with `kernel::admits` on a prior
+    /// **The judged door** (reconstruct iii, Concordance 4.4 annex): a
+    /// step the caller already judged with `kernel::admits` on a prior
     /// state whose digest is `prior` (BLAKE3 of its state bytes). The arbor
     /// carries that verdict instead of re-deriving it: it checks `prior` is
     /// its branch head's own state digest — the one thing it must not take
@@ -529,10 +529,10 @@ impl Arbor {
         self.append(record)
     }
 
-    /// THE ADOPTION DOOR (#36): a pre-chain world enters the mainline
-    /// ONCE — its current state seated as the unjudged genesis, the
+    /// The adoption door (#36): a pre-chain world enters the mainline
+    /// once — its current state seated as the unjudged genesis, the
     /// debt stamped `gated = false` (history before the chain is
-    /// NAMED, never hidden). After adoption every step arrives through
+    /// named, never hidden). After adoption every step arrives through
     /// [`Arbor::extend`], gated where covered. A second adoption
     /// refuses: one truth, one birth — re-entry through this door
     /// would be a mirror made of genesis records.
@@ -576,8 +576,8 @@ impl Arbor {
         self.append(record)
     }
 
-    /// RECEIVE (SPINE-UPLINK): admit a replication segment onto THIS
-    /// arbor. Admission IS verification — the receiver trusts nothing:
+    /// Receive (SPINE-UPLINK): admit a replication segment onto this
+    /// arbor. Admission is verification — the receiver trusts nothing:
     /// every record must reseal (its commit recomputes), extend this
     /// arbor's own head lawfully (parent links, the arrow ascends, the
     /// address is fresh), carry a hash-matched blob that decodes as
@@ -627,7 +627,7 @@ impl Arbor {
                         .ok_or(ArborRefused::Malformed { frame })?;
                     steps.insert(commit, kernel::Step { event, actor, stamp });
                 }
-                // Gate-side: an unknown frame in a segment REFUSES
+                // Gate-side: an unknown frame in a segment refuses
                 // (never skip — a skipped frame is an unadmitted truth).
                 _ => return Err(ArborRefused::Malformed { frame }),
             }
@@ -641,7 +641,7 @@ impl Arbor {
         Ok(admitted)
     }
 
-    /// Admit ONE received record onto this arbor — the trustless core
+    /// Admit one received record onto this arbor — the trustless core
     /// of `receive`, in order (reseal → geometry → chain-extension →
     /// re-gate → append).
     fn admit(
@@ -651,9 +651,9 @@ impl Arbor {
         blobs: &HashMap<[u8; 32], Vec<u8>>,
         steps: &HashMap<[u8; 32], kernel::Step>,
     ) -> Result<bool, ArborRefused> {
-        // Idempotent replication: a record I already hold is a no-op
-        // (a peer may re-present its whole arbor); the SAME commit at
-        // its address skips, a DIFFERENT commit is a fork attempt.
+        // Idempotent replication: a record already held is a no-op
+        // (a peer may re-present its whole arbor); the same commit at
+        // its address skips, a different commit is a fork attempt.
         if let Some(existing) = self.resolve(&record.coordinate) {
             return match existing.commit == record.commit {
                 true => Ok(false),
@@ -673,7 +673,7 @@ impl Arbor {
             return Err(ArborRefused::Forged { frame });
         }
         // 2. Geometry — the blob is held (segment or local store),
-        //    hash-matched, decodes, and its leading byte IS the schema.
+        //    hash-matched, decodes, and its leading byte is the schema.
         let state_bytes = match blobs.get(&record.state) {
             Some(bytes) => bytes.clone(),
             None => self.fetch(&record.state).map_err(|_| ArborRefused::BlobUnheld { frame })?,
@@ -686,7 +686,7 @@ impl Arbor {
         }
         let next = codec::from_state_bytes(&state_bytes)
             .ok_or(ArborRefused::StateUndecodable)?;
-        // 3. Chain-extension — the record extends THIS arbor's own head.
+        // 3. Chain-extension — the record extends this arbor's own head.
         let branch = record.coordinate.branch.clone();
         let prior_state = self.head(&branch).map(|head| head.state);
         match self.head(&branch) {
@@ -725,7 +725,7 @@ impl Arbor {
             }
         }
         // 4. Re-gate — a gated record's transition re-runs `lawful`
-        //    under THIS kernel from the carried step, or it is refused:
+        //    under this kernel from the carried step, or it is refused:
         //    a judgment the receiver cannot reproduce is not admitted.
         if record.judged {
             let step = steps
@@ -737,7 +737,7 @@ impl Arbor {
                 .ok_or(ArborRefused::StateUndecodable)?;
             kernel::admits(&prior, &next, step).map_err(ArborRefused::Refused)?;
         }
-        // 5. Admit — write the blob, append the record VERBATIM (its
+        // 5. Admit — write the blob, append the record verbatim (its
         //    commit verified to reseal: the two spines agree byte-exact).
         let blob = self.blob_path(&record.state);
         if !blob.exists() {

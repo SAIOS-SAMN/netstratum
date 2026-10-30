@@ -1,9 +1,9 @@
-//! Netstratum's ledger tree on the court (mycelium 78.119 / 78.120).
+//! Netstratum's ledger tree on the court (Mycelium 78.119 / 78.120).
 //!
-//! A TIER is a signing key that folds a ledger for the domain; the court
+//! A tier is a signing key that folds a ledger for the domain; the court
 //! admits a tier's fold by continuity — on every lane the identities' nets
 //! sum exactly to the declared emission — and seals it, citing the rows by
-//! hash. The rows stay with netstratum: the chronicle is the record, and
+//! hash. The rows stay with Netstratum: the chronicle is the record, and
 //! anyone holding it can replay the cited prefix.
 //!
 //! Netstratum's tiers, named once at the domain's founding:
@@ -26,11 +26,11 @@ use mycelium::anastome::dialogue::uplink::{FoldAt, Net, SignedFold, TierFold, Up
 use std::io::{self, Read};
 use std::path::Path;
 
-/// The kind of record netstratum's origin commits to: its universe ledger's
+/// The kind of record Netstratum's origin commits to: its universe ledger's
 /// Big Bang (`UniverseFounded`, tag 190), the receipt whose own-hash is the seed.
 pub const ORIGIN_KIND: u8 = 190;
 
-/// The tiers netstratum's domain names at its founding.
+/// The tiers Netstratum's domain names at its founding.
 pub const TIERS: [&str; 2] = ["colonies", "union"];
 
 /// The lanes of a fold row, by MU-LEXICON v2's fold-lane law: S matter,
@@ -41,7 +41,7 @@ pub mod lane {
     /// Banked matter (iron, biomass, alloy, diamond, joule, sink, crystal),
     /// in units of the resource ledger's 1/1024 grain.
     pub const MATTER: usize = 0;
-    /// STAMP, netstratum's unit of account, on the value lane, in the same
+    /// STAMP, Netstratum's unit of account, on the value lane, in the same
     /// grain.
     pub const MONEY: usize = 1;
     /// Words a people mints — each one issued is a declared source on the
@@ -54,11 +54,11 @@ pub mod lane {
 /// encoded limit with room for the frame around it.
 pub const PART_BYTES: usize = 700_000;
 
-/// THE UNIVERSE'S RADIUS for its origin (era 1, operator 2026-10-22: "proceed"):
+/// The universe's radius for its origin (era 1, ruling of 2026-10-22):
 /// the reach its bell crosses, half the bell's period `T_u/2` light-rings
 /// (`pulse::Universe::t_u`, `<var>/pulse.bin` tag 17). The ring law is already
 /// geometrized (mass is holding, in the units of reach; no G, no c), so the
-/// court's `2m/R` reads true in netstratum's own unit; the court names that
+/// court's `2m/R` reads true in Netstratum's own unit; the court names that
 /// unit a megaparsec, a label only.
 pub fn universe_radius(var_root: &Path) -> io::Result<(u64, u64)> {
     let bytes = std::fs::read(var_root.join("pulse.bin"))?;
@@ -119,14 +119,14 @@ impl Uplink {
         self.session.finality(FoldAt::sealed(at)).map(|r| (r.finality, r.bonded))
     }
 
-    /// 78.125 — the tier's LINE HEAD on the court: where its next fold's span
+    /// 78.125 — the tier's LINE head on the court: where its next fold's span
     /// replays from. A client whose own line head disagrees would be
     /// falsified on demand, so it must not fold until they agree.
     pub fn line_head(&self, tier: [u8; 32]) -> io::Result<[u8; 32]> {
         self.session.line_head(tier).map(|h| h.head)
     }
 
-    /// THE STARTUP CHECK (coordinator 2026-10-07): the local line's head must
+    /// The startup check (coordinator 2026-10-07): the local line's head must
     /// equal the court's for this tier before any fold is sent. `Err` names
     /// both heads when they disagree; nothing is sent on a disagreement.
     pub fn check_line_head(&self, key: &ed25519_dalek::SigningKey, local: [u8; 32]) -> io::Result<()> {
@@ -141,7 +141,7 @@ impl Uplink {
         ))
     }
 
-    /// PUBLISH A FOLD'S PREFIX to the court for replay (78.125 evidence):
+    /// Publish A fold's prefix to the court for replay (78.125 evidence):
     /// opened with the fold's own rows and declared, then its entries in
     /// parts of at most [`PART_BYTES`] encoded, so a fold of any span
     /// streams. Signed by `key` (any filer may publish). Returns the court's
@@ -188,7 +188,7 @@ impl Uplink {
         self.session.uplink_fold(f)
     }
 
-    /// Found netstratum's domain on this court: the domain key names every
+    /// Found Netstratum's domain on this court: the domain key names every
     /// tier in [`TIERS`], and from then on the court admits folds only from
     /// those tiers. Once per court: `AlreadyFounded` on a second call is the
     /// court remembering, not a fault.
@@ -204,10 +204,10 @@ impl Uplink {
         self.session.found_domain(&signed)
     }
 
-    /// **THE ORIGIN** (78.132/78.139/78.140): netstratum's universe stated
-    /// ONCE on this court, signed by the domain key — version 2, a ROOT
-    /// (parent face unwitnessed), its space a closed SPHERE (era 1, docs/78;
-    /// `Geometry::Sphere`, mycelium 8718fede: `Curved` is hyperbolic ℍ³, which
+    /// **The origin** (78.132/78.139/78.140): Netstratum's universe stated
+    /// once on this court, signed by the domain key — version 2, a root
+    /// (parent face unwitnessed), its space a closed sphere (era 1, docs/78;
+    /// `Geometry::Sphere`, Mycelium 8718fede: `Curved` is hyperbolic ℍ³, which
     /// misstated the universe; the era-0 L1 torus is retired) of radius `radius`
     /// (`universe_radius`). The commitment is the universe's Big Bang: the
     /// own-hash of its `UniverseFounded` receipt (its seed). Never edited.
@@ -225,7 +225,7 @@ impl Uplink {
         self.session.originate(&origin.sign(&domain))
     }
 
-    /// Designate `tier` (one of [`TIERS`]) as the domain's RESERVE on this
+    /// Designate `tier` (one of [`TIERS`]) as the domain's reserve on this
     /// court, signed by the domain key — held in trust for the ancient not yet
     /// arisen (docs/58 §6 ruling 7). No basket: that is the sitting reserve's
     /// own act, once the ancients take it up.

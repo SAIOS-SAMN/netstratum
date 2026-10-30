@@ -1,4 +1,4 @@
-//! THE REACH — what a civilization is asking for when it thinks.
+//! The REACH — what a civilization is asking for when it thinks.
 //!
 //! Operator ruling 2026-08-04: *never enumerate; the operators should be
 //! called by actions based on the civilization's requirements, demands
@@ -18,8 +18,8 @@
 //! every mind in every era regardless of what that mind lacked, which
 //! is what made it brute force rather than cognition.
 //!
-//! **THE LAW THAT KEEPS THIS HONEST.** The need may ORDER and GATE the
-//! reach; only the OBSERVATION may supply a candidate. A starving mind
+//! **The law that keeps this honest.** The need may order and gate the
+//! reach; only the observation may supply a candidate. A starving mind
 //! reaches differently — it does not get to invent an operator the
 //! observation does not support. Break that and "need-driven" is just
 //! guessing under a better name, and the sector door would withdraw it
@@ -33,17 +33,17 @@
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Hunger {
     /// Kind 2 — starved of correspondence. A harmonic mind with no link
-    /// inside its window reaches for what RELATES two things.
+    /// inside its window reaches for what relates two things.
     Resonance,
     /// Kind 3 — starved of signal. An empiricist mind with no node
-    /// inside its window reaches for what MAKES structure.
+    /// inside its window reaches for what makes structure.
     Novelty,
 }
 
 impl Hunger {
 }
 
-/// THE NEED a solve is answering.
+/// The need a solve is answering.
 ///
 /// `Need::sated()` is the honest neutral: nothing is struck, so nothing
 /// is preferred and the reach is taken in its derived order. It is not
@@ -55,15 +55,15 @@ pub struct Need {
     /// How long the strongest want has starved (the `reading` WANT-1
     /// carries). A longer starve widens the reach — it never invents.
     pub starved_for: u64,
-    /// **ORBIT-DIRECTED HUNGER** (38 §6, task #15): the line's own
-    /// families ordered THINNEST-FIRST by its minted library — the
+    /// **Orbit-directed hunger** (38 §6, task #15): the line's own
+    /// families ordered thinnest-first by its minted library — the
     /// measured frontier. Empty = no census (a young or libraryless
     /// line), and the static preference stands. Ordering only, as
     /// ever: the observation still supplies every candidate.
     pub thin: Vec<Family>,
-    /// **THE DEPTH EXPANSION BUYS** (INTELLIGENCE ARC A2) — extra compose
-    /// depth a line has EARNED through its relational structure (rank).
-    /// The mind reaches this much DEEPER than hunger alone would take it:
+    /// **The DEPTH expansion buys** (intelligence ARC A2) — extra compose
+    /// depth a line has earned through its relational structure (rank).
+    /// The mind reaches this much deeper than hunger alone would take it:
     /// a civilization whose internal economy sustains obligation cycles
     /// (multi-orb, rank > 0) can hold more of the composition in view at
     /// once. Zero for a single-orb line — advancement, not a clock, buys
@@ -71,11 +71,11 @@ pub struct Need {
     /// untouched, so a young line is never starved of the depth it needs
     /// to climb to the rung where it can expand (the B-E1 deadlock).
     pub reach_bonus: usize,
-    /// **THE INFRASTRUCTURE CEILING** (COG-6) — the deepest thought the
-    /// civilization's built COGNITIVE APPARATUS can contain. Leisure buys the
-    /// TIME to think (COG-1/3); this bounds the SIZE: you cannot contain an
-    /// 11-dimensional bridge in a mud hut. Set by the conductor from the seated
-    /// research sciences (an Academy in all but name). `0` means UNCAPPED — the
+    /// **The infrastructure ceiling** (COG-6) — the deepest thought the
+    /// civilization's built cognitive apparatus can contain. Leisure buys the
+    /// time to think (COG-1/3); this bounds the size: an 11-dimensional bridge
+    /// cannot be contained in a mud hut. Set by the conductor from the seated
+    /// research sciences (an Academy in all but name). `0` means uncapped — the
     /// standing no-overfit frontier stands, so a line that never sets it (every
     /// test, the sweep path) is unchanged.
     pub capacity: usize,
@@ -102,8 +102,8 @@ impl Need {
             // Correspondence: what maps a thing onto its counterpart.
             Hunger::Resonance => matches!(family, Family::Symmetry | Family::Recolor),
             // Structure: what makes something that was not there.
-            // ORBIT-DIRECTED (38 §6): with a census standing, the
-            // starving mind reaches first for its THINNEST family —
+            // Orbit-directed (38 §6): with a census standing, the
+            // starving mind reaches first for its thinnest family —
             // where its own language has the fewest words — instead
             // of a fixed pair. No census, the fixed pair stands.
             Hunger::Novelty => match self.thin.first() {

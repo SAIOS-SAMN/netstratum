@@ -1,14 +1,14 @@
-//! **THE AGENT DOOR (#39) — where something that is not the operator
+//! **The agent door (#39) — where something that is not the operator
 //! plays.**
 //!
 //! The conductor's automaton has been the only AI player and it is
-//! COMPILED IN: it calls `World` directly, so "an AI plays netstratum"
-//! has meant "an AI we shipped plays netstratum". This is the inbound
+//! compiled in: it calls `World` directly, so "an AI plays Netstratum"
+//! has meant "an AI shipped with Netstratum plays it". This is the inbound
 //! half of the uplink — outbound is the line wire (no JSON),
 //! which has always been able to tell an outsider what is happening
 //! without any way for one to answer.
 //!
-//! **THE DOOR ADDS NO AUTHORITY.** That is its whole design. Every
+//! **The door adds no authority.** That is its whole design. Every
 //! request runs through the same `*_as` verbs the operator's own
 //! commands do, so an agent is exactly an `Entity` with scoped grants
 //! (`ipsal::Entity::permits`) and the kernel gate judges its deeds
@@ -16,7 +16,7 @@
 //! reader looking for one should find this comment and then find
 //! nothing.
 //!
-//! **TRANSPORT-FREE, deliberately.** The door is a function from a
+//! **Transport-free, deliberately.** The door is a function from a
 //! request LINE to a response, so it can be driven by the CLI, a
 //! socket, a pipe or a test with no law living in the transport. What
 //! ships here is the door and its dispatch; a listener is a thin
@@ -69,9 +69,9 @@ fn one_line(text: &str) -> String {
         .collect()
 }
 
-/// **THE DOOR.** One request line from `actor`, judged and answered.
+/// **The door.** One request line from `actor`, judged and answered.
 ///
-/// The actor is named by HANDLE and resolved against the world's own
+/// The actor is named by handle and resolved against the world's own
 /// entity register: an unregistered name is refused before any deed is
 /// parsed, because identity precedes the world (the kernel's own
 /// ordering). Nothing here grants a scope — `register` and `grant` are
@@ -94,7 +94,7 @@ pub fn handle(world: &mut World, actor_handle: &str, line: &str) -> Response {
     let orb = world.orb().map(|held| held.orb_id).unwrap_or(1);
 
     let outcome: Result<(), ActionRefused> = match deed.as_str() {
-        // BUILD scope.
+        // Build scope.
         "zone" => match (
             words.next().and_then(|w| w.parse::<u16>().ok()),
             words.next().and_then(parse_kind),
@@ -106,12 +106,12 @@ pub fn handle(world: &mut World, actor_handle: &str, line: &str) -> Response {
             Some(stratum) => world.prospect_as(actor, orb, stratum).map(|_| ()),
             None => return Response::refused(&deed, "usage: prospect <stratum>".into()),
         },
-        // RAZE scope.
+        // Raze scope.
         "raze" => match words.next().and_then(|w| w.parse::<u16>().ok()) {
             Some(tile) => world.raze_as(actor, orb, tile),
             None => return Response::refused(&deed, "usage: raze <tile>".into()),
         },
-        // COLLECT scope.
+        // Collect scope.
         "collect" => world.collect_as(actor, orb).map(|_| ()),
         "assay" => match words.next().and_then(|w| resolve_element(world, orb, w)) {
             Some(element) => world.assay_as(actor, orb, element).map(|_| ()),
@@ -133,9 +133,9 @@ pub fn handle(world: &mut World, actor_handle: &str, line: &str) -> Response {
                 }
             }
         }
-        // A READING, not a deed: the door answers what the world looks
+        // A reading, not a deed: the door answers what the world looks
         // like without sealing anything, so an agent can decide before
-        // it acts. Deliberately the ONLY non-sealing verb here.
+        // it acts. Deliberately the only non-sealing verb here.
         "look" => {
             return Response {
                 ok: true,
@@ -162,7 +162,7 @@ pub fn handle(world: &mut World, actor_handle: &str, line: &str) -> Response {
         Ok(()) => {
             // The receipt this deed sealed, if it sealed one. Read from
             // the chronicle rather than reported by the verb, so the
-            // answer is what the CHAIN holds and not what the door
+            // answer is what the chain holds and not what the door
             // believes it did.
             let receipt = match world.chronicle().receipts().len() > before {
                 true => world
@@ -236,7 +236,7 @@ mod tests {
 
     #[test]
     fn the_door_adds_no_authority() {
-        // THE WHOLE DESIGN, as a witness. A registered agent with NO
+        // The whole design, as a witness. A registered agent with no
         // grant is refused by the same containment that refuses it at
         // the operator's own commands — the door is not a way in.
         let mut world = played();
@@ -246,7 +246,7 @@ mod tests {
         assert!(answer.receipt.is_none(), "and a refusal seals no receipt");
         assert!(answer.detail.contains("NotPermitted"), "{}", answer.detail);
 
-        // Granted, the SAME request goes through and seals a receipt.
+        // Granted, the same request goes through and seals a receipt.
         world.grant(agent, Scope::Build).expect("grants");
         let answer = handle(&mut world, "rover", "zone 0 ext");
         assert!(answer.ok, "{}", answer.detail);
@@ -256,7 +256,7 @@ mod tests {
             crate::hex(&world.chronicle().receipts().last().expect("sealed").own().0),
             "the answer names what the CHAIN holds"
         );
-        // And the receipt carries the AGENT's tag, not the sovereign's.
+        // And the receipt carries the agent's tag, not the sovereign's.
         assert!(
             world
                 .chronicle()
@@ -322,7 +322,7 @@ mod tests {
     #[test]
     fn every_scope_gates_its_own_deeds() {
         // The door's deed set spans all three scopes, and each is
-        // gated by ITS own — a Build grant does not buy a Collect.
+        // gated by its own — a Build grant does not buy a Collect.
         let mut world = played();
         let agent = world.register_agent("rover").expect("registers");
         world.grant(agent, Scope::Build).expect("grants build");
@@ -332,8 +332,8 @@ mod tests {
         assert!(!collect.ok, "build does not buy collect");
         assert!(collect.detail.contains("NotPermitted"), "{}", collect.detail);
         world.grant(agent, Scope::Collect).expect("grants collect");
-        // Now permitted — it may still refuse for its OWN law (nothing
-        // accrued), which is a JUDGED answer rather than a barred one.
+        // Now permitted — it may still refuse for its own law (nothing
+        // accrued), which is a judged answer rather than a barred one.
         let collect = handle(&mut world, "rover", "collect");
         assert!(
             !collect.detail.contains("NotPermitted"),

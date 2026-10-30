@@ -1,4 +1,4 @@
-//! LIT-1 DEEDS — literacy, aspiring, and the witnessed claim.
+//! LIT-1 deeds — literacy, aspiring, and the witnessed claim.
 //!
 //! Two deeds and a derived predicate:
 //!
@@ -8,7 +8,7 @@
 //!     claim <work> <digests> assert the deed          WorkClaimed
 //! ```
 //!
-//! **The law verifies the CITATION, never the virtue.** A claim must
+//! **The law verifies the citation, never the virtue.** A claim must
 //! cite chain receipts, and every cited digest is checked against this
 //! world's chronicle. Nothing here scores whether the deeds amount to
 //! valor — a formula that did would be the struck C-gate under a new
@@ -18,20 +18,20 @@ use super::*;
 use crate::literature::{is_work, work_named, work_of, Aspiration, WorkId, WorkView};
 
 impl World {
-    /// **LITERACY — DERIVED, NEVER GRANTED, AND IT COSTS TIME.**
+    /// **Literacy — derived, never granted, and it costs time.**
     ///
-    /// A line reads and writes when it KEEPS books — not when it has
+    /// A line reads and writes when it keeps books — not when it has
     /// written once. The first cut of this predicate read a single
     /// posting, and that was a leap: a colony could go from founded to
     /// literate to a claimed civilizational upgrade in five commands
     /// with every receipt at stamp 0, while the base tier beneath it
     /// wanted 480 ticks of famine survived.
     ///
-    /// So literacy now reads PRACTICE (GROWTH-1): the postings must
-    /// SPAN chain time. One commitment per step (`26_ARTICLES` ARTICLE
+    /// So literacy now reads practice (GROWTH-1): the postings must
+    /// SPAN chain time. One commitment per step (`26_ARTICLES` article
     /// IV cl. 2) means a span cannot be forged the way a keystroke can.
     ///
-    /// **This is not a threshold.** It compares practice against ZERO —
+    /// **This is not a threshold.** It compares practice against zero —
     /// the difference between happened and did not. There is no number
     /// here to dial.
     ///
@@ -62,7 +62,7 @@ impl World {
             .collect()
     }
 
-    /// **ASPIRE** — a literate line declares a work it reaches for.
+    /// **Aspire** — a literate line declares a work it reaches for.
     ///
     /// Proves nothing and is meant to prove nothing. The gate is
     /// literacy alone: a line that cannot keep its own books has no
@@ -82,7 +82,7 @@ impl World {
         if self.orb_by_id(orb).is_none() {
             return Err(ActionRefused::NoSuchOrb { orb });
         }
-        // The works are CHARTERED. A line invents accounts (BOOK-1); it
+        // The works are chartered. A line invents accounts (BOOK-1); it
         // does not invent the literature it reaches for.
         if !is_work(name) {
             return Err(ActionRefused::NoSuchWork { name: name.to_string() });
@@ -109,7 +109,7 @@ impl World {
         Ok(work)
     }
 
-    /// **CLAIM** — the line asserts it has DONE the thing, and cites
+    /// **Claim** — the line asserts it has done the thing, and cites
     /// chain receipts for it.
     ///
     /// Every witness is checked against this world's chronicle. An
@@ -155,9 +155,9 @@ impl World {
             }
             Some(_) => {}
         }
-        // THE CITATION IS WHAT IS VERIFIED. Every digest must be a
+        // The citation is what is verified. Every digest must be a
         // receipt this world actually sealed — the law checks that the
-        // evidence EXISTS, and gates nothing about what it shows.
+        // evidence exists, and gates nothing about what it shows.
         for witness in witnesses {
             if !self.chronicle.sealed(witness) {
                 return Err(ActionRefused::WitnessNotInChronicle { digest: *witness });

@@ -1,51 +1,51 @@
-//! THE REGENERATING STOCK — the economy's capital (20_FOUNDING §6g).
+//! The regenerating stock — the economy's capital (20_FOUNDING §6g).
 //!
 //! Before this module the engine had no underlying asset: `zone_yield`
 //! returned a constant per tick and a vein's `richness` never
 //! decreased. Extraction drew on nothing, so nothing could be owned,
 //! improved, or invested in.
 //!
-//! A stock is a quantity extraction DRAWS DOWN and regeneration
-//! RESTORES:
+//! A stock is a quantity extraction draws down and regeneration
+//! restores:
 //!
 //! ```text
 //! S(t+1) = S(t) + R(S) − E        R(S) = r · S · (1 − S / S_max)
 //! ```
 //!
-//! **RESEARCH RAISES `rate` AND `ceiling`, NEVER THE EXTRACTION
-//! MULTIPLIER.** A multiplier on a flow is a one-time step that lifts
+//! **Research raises `rate` and `ceiling`, never the extraction
+//! multiplier.** A multiplier on a flow is a one-time step that lifts
 //! the line and stops. A rise in the regeneration rate lifts the
-//! CEILING, so the same research pays forever and pays more the larger
+//! ceiling, so the same research pays forever and pays more the larger
 //! the stock it acts on. That is the difference between a tech tree and
 //! a list of upgrades.
 //!
-//! # THE LATTICE — why `step` quantizes, and it is not a rounding
+//! # The LATTICE — why `step` quantizes, and it is not a rounding
 //! convenience
 //!
 //! The logistic term is quadratic in `S`, so in exact rationals its
-//! denominator SQUARES every tick. Measured on this recurrence:
+//! denominator squares every tick. Measured on this recurrence:
 //!
 //! ```text
 //! tick  1 →      4 denominator bits      tick 10 →   6,465
 //! tick  5 →    193                       tick 16 → 414,305
 //! ```
 //!
-//! Sixteen ticks of ONE stock reach a denominator of 414,305 bits, and
+//! Sixteen ticks of one stock reach a denominator of 414,305 bits, and
 //! the arithmetic itself becomes the bottleneck. This engine has
 //! already ruled on a gentler version of exactly this failure: the
-//! demurrage rate is FLAT and never proportional because `banked ×
+//! demurrage rate is flat and never proportional because `banked ×
 //! (31/32)^n` was measured live at ~2^1100 after 220 beats. The
 //! logistic form is far worse — 2^414305 after 16.
 //!
 //! So `S` lives on a fixed rational lattice. Regeneration is computed
-//! EXACTLY and then floored to that lattice, which is a deterministic,
+//! exactly and then floored to that lattice, which is a deterministic,
 //! replayable operation over exact rationals — never a float, never a
 //! silent rounding. Denominators stay bounded by [`LATTICE`] forever,
 //! and the logistic behaviour survives intact: the curve still
 //! saturates, a tended stock still outgrows a neglected one, and
 //! over-extraction still collapses toward the floor.
 //!
-//! # THE SEED FLOOR
+//! # The seed floor
 //!
 //! A stock never reaches zero. It clamps at a strictly positive
 //! `seed_floor` — scorched-earth extraction is punished by a stock too
@@ -66,15 +66,15 @@ pub fn lattice() -> Ratio {
 pub struct ResourceStock {
     /// `S` — what stands now.
     pub current: Ratio,
-    /// `S_max` — the carrying ceiling. RESEARCH expands this.
+    /// `S_max` — the carrying ceiling. Research expands this.
     pub ceiling: Ratio,
-    /// `r` — the intrinsic regeneration rate. RESEARCH raises this.
+    /// `r` — the intrinsic regeneration rate. Research raises this.
     pub rate: Ratio,
     /// `S_min` — the seed core. Strictly positive; extraction is
     /// capped so the stock never breaches it, and it can always climb
     /// back.
     pub seed_floor: Ratio,
-    /// THE LATTICE RESIDUE — what flooring shaved, CARRIED rather than
+    /// The LATTICE residue — what flooring shaved, carried rather than
     /// discarded.
     ///
     /// Flooring without this is a silent mass leak: measured at 0.347
@@ -85,7 +85,7 @@ pub struct ResourceStock {
     /// or leaves the system. It stays bounded (measured 27 bits over
     /// 400 ticks) because it is always smaller than one lattice step.
     ///
-    /// It may read slightly NEGATIVE when the seed floor lifts a stock
+    /// It may read slightly negative when the seed floor lifts a stock
     /// — that is a recorded debt repaid on the next step, never matter
     /// conjured.
     pub residue: Ratio,
@@ -117,12 +117,12 @@ impl ResourceStock {
         }
     }
 
-    /// Advance one tick against a REQUESTED draw, returning what was
+    /// Advance one tick against a requested draw, returning what was
     /// actually drawn.
     ///
     /// Extraction is capped at what stands above the seed core rather
     /// than the stock being clamped up afterwards — clamping up would
-    /// CREATE matter, so the draw is limited instead of the stock being
+    /// create matter, so the draw is limited instead of the stock being
     /// topped back. A civilization asking for more than the land holds
     /// gets what the land holds, and the books still balance.
     pub fn step(&mut self, requested: &Ratio) -> Ratio {
@@ -148,13 +148,13 @@ impl ResourceStock {
         drawn
     }
 
-    /// RESEARCH — raise the intrinsic regeneration rate. The growth
+    /// Research — raise the intrinsic regeneration rate. The growth
     /// mechanism: this pays forever and pays more the larger the stock.
     pub fn research_rate(&mut self, gain: &Ratio) {
         self.rate = Self::onto_lattice(&(self.rate.clone() + gain.clone()));
     }
 
-    /// FLOURISH (§6f.3) — reinvest surplus directly into the stock, so
+    /// Flourish (§6f.3) — reinvest surplus directly into the stock, so
     /// abundance becomes productive base instead of a number that sits.
     pub fn reinvest(&mut self, surplus: &Ratio) {
         let raised = self.current.clone() + surplus.clone();
@@ -165,19 +165,19 @@ impl ResourceStock {
         self.current = Self::onto_lattice(&capped);
     }
 
-    /// THE SLOW CLOCK — an unclean harvest lowers what the land can
-    /// EVER produce, and stopping does not give it back.
+    /// The slow clock — an unclean harvest lowers what the land can
+    /// ever produce, and stopping does not give it back.
     ///
     /// **Two clocks, and only one of them forgives.** Drawing above
     /// regeneration empties a stock, and a stock left fallow climbs
     /// back to its ceiling — measured, full recovery from the seed
-    /// floor. That is the FAST clock and its cost is temporary. A
+    /// floor. That is the fast clock and its cost is temporary. A
     /// method that degrades the substrate instead lowers `rate` and
     /// `ceiling` themselves, and nothing restores them.
     ///
-    /// **THE COST IS QUADRATIC, and this is the whole of the law.**
+    /// **The cost is quadratic, and this is the whole of the law.**
     /// The recurring ceiling is `r·S_max/4`, so a loss that takes both
-    /// terms costs its SQUARE:
+    /// terms costs its square:
     ///
     /// ```text
     /// substrate down 10%  →  81.0% of the recurring ceiling, forever
@@ -188,11 +188,11 @@ impl ResourceStock {
     /// **A civilization does not lose what it took. It loses what it
     /// could ever take again, squared.** No penalty is levied and none
     /// is needed — this is the arithmetic of the logistic, not a
-    /// judgement about greed (CHARTER §2a: physics needs no penalty).
+    /// judgement about greed (Charter §2a: physics needs no penalty).
     ///
     /// **And it is anti-research.** `research_rate` raises `rate`;
     /// this lowers it. An unclean harvest is negative research measured
-    /// on the research axis, which is how "how stupid can you be" gets
+    /// on the research axis, which is how a careless harvest gets
     /// a number instead of a scolding.
     pub fn degrade(&mut self, loss: &Ratio) {
         let one = ratio(1, 1);

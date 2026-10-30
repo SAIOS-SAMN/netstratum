@@ -1,5 +1,5 @@
 //! GALAXY-1a (13_GALAXY §3–§4): the observation deed and its readings.
-//! One universe, structurally — galaxies are lazy REGIONS of the one
+//! One universe, structurally — galaxies are lazy regions of the one
 //! torus, never new tori. The universe ledger (`convergence.tlv`) is
 //! the truth; `galaxies.card` is a TLV rendering; membership derives from
 //! position and is never stored. The frontier is a distance, never an
@@ -15,7 +15,7 @@ use cfe::vrp::Chronicle;
 
 use crate::{card, ratio_str, sanitize, Ledger};
 
-/// A charted galaxy: a named region of the ONE torus — center S in
+/// A charted galaxy: a named region of the one torus — center S in
 /// exact rationals, reach an L1 radius. Reach is a placeholder
 /// parameter (13_GALAXY §4); naming refines under the 10 §2 law
 /// (names are the line's own tongue) at GALAXY-1b.
@@ -147,9 +147,9 @@ impl Ledger {
     }
 
     /// The observation deed (13_GALAXY §3): the anchor wraps onto the
-    /// torus; the FOUNDING galaxy is chartered lazily by the first
-    /// deed ever executed; a new galaxy is CREATED only when the
-    /// anchor stands past the frontier — wrapped-L1 to EVERY charted
+    /// torus; the founding galaxy is chartered lazily by the first
+    /// deed ever executed; a new galaxy is created only when the
+    /// anchor stands past the frontier — wrapped-L1 to every charted
     /// center exceeding its reach (a far region, never an outside).
     /// Both receipts append to the universe ledger; `galaxies.card`
     /// re-renders after (SEAL C). Returns the created galaxy, or None
@@ -225,10 +225,10 @@ impl Ledger {
         Ok(created)
     }
 
-    /// **THE CORE A PLACE'S SINKS REACH** (the cores design, slice 1): its
+    /// **The core A place's sinks REACH** (the cores design, slice 1): its
     /// galaxy's — the charted centre nearest by the torus's own distance
     /// within reach (`galaxy_of`'s law) — and, outside every reach, still the
-    /// NEAREST core: nothing lands nowhere. Ties go to the earlier name.
+    /// nearest core: nothing lands nowhere. Ties go to the earlier name.
     /// `None` only before any galaxy is charted.
     pub fn core_of(&self, position: &(Ratio, Ratio, Ratio)) -> Option<String> {
         let span = self.universe_span();
@@ -298,9 +298,9 @@ impl Ledger {
         held
     }
 
-    /// **THE CORES' LIBRARIES** (the cores design, slice 3): every word the
+    /// **The cores' libraries** (the cores design, slice 3): every word the
     /// dead deposited at each core, by core, in deposit order — each dead
-    /// line's word its OWN claim, citing the line and its proofs (conflicting
+    /// line's word its own claim, citing the line and its proofs (conflicting
     /// words stay distinct). A reading: nothing is written.
     pub fn core_libraries(&self) -> std::collections::BTreeMap<String, Vec<CoreWord>> {
         self.universe_read(|read| read.libraries.clone())
@@ -311,7 +311,7 @@ impl Ledger {
         self.universe_read(|read| read.libraries.values().flatten().map(|word| word.world.clone()).collect())
     }
 
-    /// **THE UNIVERSE'S SEED** (docs/58 §3) — the own-hash of its Big Bang
+    /// **The universe's seed** (docs/58 §3) — the own-hash of its Big Bang
     /// (`UniverseFounded`) on the universe ledger, or `None` before one is
     /// recorded. A reading: nothing is written.
     pub fn universe_seed(&self) -> Option<[u8; 32]> {
@@ -324,10 +324,10 @@ impl Ledger {
             .map(|r| r.own().0)
     }
 
-    /// **THE BIG BANG** (docs/58 §3) — record this universe's origin ONCE on
+    /// **The big bang** (docs/58 §3) — record this universe's origin once on
     /// its universe ledger and return its seed. On an empty ledger it is the
-    /// FIRST receipt; on a ledger that already holds history (a universe
-    /// founded before this law) it is written once, late, as a RE-FOUNDING
+    /// first receipt; on a ledger that already holds history (a universe
+    /// founded before this law) it is written once, late, as a RE-founding
     /// naming the head it was written over. Called again, it returns the seed
     /// already recorded and writes nothing.
     pub fn found_universe(&self, roster: [u8; 32], matter: [u8; 32], stamp: u64) -> std::io::Result<([u8; 32], bool)> {
@@ -401,7 +401,7 @@ impl Ledger {
 }
 
 /// The L1 law on the torus: wrapped |Δ| summed per axis, the short way
-/// around — NO SQUARING.
+/// around — no squaring.
 fn l1_wrapped(
     a: &(Ratio, Ratio, Ratio),
     b: &(Ratio, Ratio, Ratio),

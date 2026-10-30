@@ -1,4 +1,4 @@
-//! **ONT-1a — THE MORPHODYNAMIC FIELD** (operator directive 2026-08-16: *shatter
+//! **ONT-1a — the morphodynamic field** (operator directive 2026-08-16: *shatter
 //! the monolithic iron tree*).
 //!
 //! The economy was anchored at a single origin — iron — so "advancement" was
@@ -17,7 +17,7 @@
 //!   (no axis is a function of another; no dimensional collapse).
 //!
 //! - **The environment is `M ⊕ Φ`.** A planet is not only its matter. Metabolism
-//!   is the extraction of order from a GRADIENT, and a gradient need not be
+//!   is the extraction of order from a gradient, and a gradient need not be
 //!   material — a phototroph reads order straight out of massless luminous flux.
 //!   So the environment tensor joins the (orbit-filtered) material vector with
 //!   the ambient fluxes `Φ = [φ_lum, φ_therm]` (insolation `L/r²`, thermal band).
@@ -26,7 +26,7 @@
 //!   world keeps Volatility and resonance but loses Cohesion (ices/gas/plasma).
 //!
 //! - **A species is a projection.** Its metabolism is an exact-rational matrix
-//!   `T_metab` (5 universal ROLES × the environment axes) that projects the
+//!   `T_metab` (5 universal roles × the environment axes) that projects the
 //!   environment into the roles it can fill: `U_role = T_metab · S_planet`. The
 //!   roles — Food, Structure, Energy, Cognition, Sink — are the universal fungible
 //!   layer the market and crypto mechanics stay locked to; only the *material
@@ -72,14 +72,14 @@ const G: i64 = 64;
 /// One byte → an exact-rational scalar in `[0, 1]`, grained onto `1/G`. Rounded
 /// half-up in pure integer arithmetic (no float, no `Ratio::round`).
 /// `pub(crate)`: reused by the founder-tail law (`almanac::rejuvenation`) to
-/// draw a deterministic scalar from a founding digest — the SAME grain, so no
+/// draw a deterministic scalar from a founding digest — the same grain, so no
 /// second byte-to-ratio convention enters the tree.
 pub(crate) fn grained_unit(byte: u8) -> Ratio {
     let g = ((byte as i64) * G + 127) / 255;
     ratio(g, G)
 }
 
-/// **THE MATERIAL VECTOR `m`** — an element's morphodynamic signature, drawn from
+/// **The material vector `m`** — an element's morphodynamic signature, drawn from
 /// five strictly independent bytes of its 32-byte blake3 id so the axes cannot
 /// be linearly dependent. `[c, v, s, f, h]`. What humans call iron is just a
 /// high-`c`, low-`v`, low-`f` vector; the engine names nothing.
@@ -93,7 +93,7 @@ pub fn material_of(element: &[u8; 32]) -> Vec<Ratio> {
     ]
 }
 
-/// The mesic TENT on the thermal axis — the temperate band, peaking at `1/2` and
+/// The mesic tent on the thermal axis — the temperate band, peaking at `1/2` and
 /// falling to zero at both extremes: `1 − |2·thermal − 1|` (doubled by addition,
 /// so no ratio dial enters). The window organic life is built for.
 fn mesic_tent(thermal: &Ratio) -> Ratio {
@@ -103,16 +103,16 @@ fn mesic_tent(thermal: &Ratio) -> Ratio {
     one - excursion
 }
 
-/// **THE ENVIRONMENTAL GRADIENT** — the planet's condition tensor from INDEPENDENT
+/// **The environmental gradient** — the planet's condition tensor from independent
 /// axes, never a single scalar (the collapse this replaces derived all five
 /// material axes from one `heat`, so a "5-D" vector traced a 1-D curve). Two
 /// orthogonal drivers here, and the shape is built to take more:
 ///
-/// - `thermal ∈ [0, 1]` (cold → hot) sets the PHASE balance: cold condenses
+/// - `thermal ∈ [0, 1]` (cold → hot) sets the phase balance: cold condenses
 ///   cohesion, heat melts to volatility, resonance rides the dense hot phase.
-/// - `aridity ∈ [0, 1]` (0 = arid/dry → 1 = humid/wet) is the ORTHOGONAL moisture
+/// - `aridity ∈ [0, 1]` (0 = arid/dry → 1 = humid/wet) is the orthogonal moisture
 ///   axis — a cold world can be bone-dry and a warm world drenched — so it drives
-///   syntropy (organic life needs a temperate band AND a solvent) and thermal
+///   syntropy (organic life needs a temperate band and a solvent) and thermal
 ///   capacitance (fluids buffer heat) independently of temperature.
 ///
 /// ```text
@@ -152,7 +152,7 @@ fn row(weights: &[(usize, i64)]) -> Vec<Ratio> {
     r
 }
 
-/// **THE ARCHETYPE PROJECTIONS** — each existing metabolism as a `T_metab`,
+/// **The ARCHETYPE projections** — each existing metabolism as a `T_metab`,
 /// derived from its fundamental biology (no authored resource list). The three
 /// are distinct *directions* in role space, and the framework admits any new
 /// archetype as another projection (an autotroph reading Food from `φ_lum` alone,
@@ -166,7 +166,7 @@ fn row(weights: &[(usize, i64)]) -> Vec<Ratio> {
 ///   harmonic resonance and containment (Volatility), the hot dense phase.
 ///
 /// The three structural bases — cohesion (cold), syntropy (mesic), volatility
-/// (hot) — peak at three DIFFERENT thermal niches, so the archetypes diverge
+/// (hot) — peak at three different thermal niches, so the archetypes diverge
 /// across the orbit with no habitability table.
 pub fn archetype(metabolism: u8) -> Metabolism {
     match metabolism {
@@ -194,11 +194,11 @@ pub fn archetype(metabolism: u8) -> Metabolism {
     }
 }
 
-/// **PROJECT A RAW MATERIAL** (RCP: the recipe-discovery hook) — project an
+/// **Project A raw material** (RCP: the recipe-discovery hook) — project an
 /// element's own morphodynamic vector `[c,v,s,f,h]` through a metabolism into the
-/// five roles, with the ambient flux held neutral (a RECIPE works the material
+/// five roles, with the ambient flux held neutral (a recipe works the material
 /// itself, not the planet's light or heat). This is how the discovery engine asks
-/// "how much of role `r` can THIS species wrest from THIS element" — the pairing
+/// "how much of role `r` can this species wrest from this element" — the pairing
 /// that turns an open-almanac element into an emergent recipe, no authored table.
 pub fn project_material(metabolism: &Metabolism, material: &[Ratio]) -> Vec<Ratio> {
     let mut env = vec![ratio(0, 1); ENV_DIM];
@@ -210,7 +210,7 @@ pub fn project_material(metabolism: &Metabolism, material: &[Ratio]) -> Vec<Rati
     project(metabolism, &env)
 }
 
-/// **THE PROJECTION `U_role = T_metab · S_planet`** — the utility a species can
+/// **The projection `U_role = T_metab · S_planet`** — the utility a species can
 /// draw into each role from this planet. Exact-rational; the same inputs always
 /// project the same, so genesis is replay-exact.
 pub fn project(metabolism: &Metabolism, substrate: &[Ratio]) -> Vec<Ratio> {
@@ -225,11 +225,11 @@ pub fn project(metabolism: &Metabolism, substrate: &[Ratio]) -> Vec<Ratio> {
 }
 
 /// The essential roles a body must fill to live — it must eat and it must hold a
-/// form. A metabolism that cannot reach subsistence in EITHER is culled.
+/// form. A metabolism that cannot reach subsistence in either is culled.
 const ESSENTIAL: [usize; 2] = [FOOD, STRUCT];
 
 /// The subsistence fraction: a role is genuinely filled only when its projection
-/// reaches at least half the metabolism's OWN theoretical maximum for that role
+/// reaches at least half the metabolism's own theoretical maximum for that role
 /// (every axis it draws on at unity). Derived from the projection matrix itself —
 /// no external dial — and the same `1/2` the siting viability floor already uses.
 /// This is why the Starvation Cull bites at intermediate orbits, not only the
@@ -247,15 +247,15 @@ pub fn subsistence(metabolism: &Metabolism, role: usize) -> Ratio {
     ceiling(metabolism, role) / ratio(HALVING, 1)
 }
 
-/// **THE SUBSTRATE BOUNDARY CONDITION, GRADED** (ONT-1b, operator refinement: a
+/// **The substrate boundary condition, graded** (ONT-1b, operator refinement: a
 /// marginal world is a proportional penalty, not binary death). The morphodynamic
 /// fitness `η_m`:
 ///
-/// - `η_m = 0` — the CULL. A species that cannot reach subsistence in an
+/// - `η_m = 0` — the cull. A species that cannot reach subsistence in an
 ///   essential role (Food or Structure) has an empty intersection with the
 ///   planet: `⟨C₀, S_planet⟩ = 0`, an infinite deficit, the Starvation Cull on
 ///   beat one. No prohibition table — the geometry rejects the pairing.
-/// - `η_m ∈ [1/2, 1]` — ALIVE, proportionally. The binding essential fill
+/// - `η_m ∈ [1/2, 1]` — Alive, proportionally. The binding essential fill
 ///   fraction: a marginal world (barely above subsistence) reads `≈ 1/2` and
 ///   carries a proportional carrying-capacity penalty; an ideal home reads `1`.
 ///
@@ -263,11 +263,11 @@ pub fn subsistence(metabolism: &Metabolism, role: usize) -> Ratio {
 /// replay-exact.
 pub fn fitness(metabolism: &Metabolism, substrate: &[Ratio], clade_align: &Ratio) -> Ratio {
     let mut u = project(metabolism, substrate);
-    // CLADE THERMAL ALIGNMENT (ONT-1c). A species can only put its structural
-    // material to use where the SEALED CLADE's own thermal band is met — the
+    // CLADE thermal alignment (ONT-1c). A species can only put its structural
+    // material to use where the sealed CLADE's own thermal band is met — the
     // DIO-2 habitability tent, `clade_align ∈ [0, 1]`, supplied by the caller. A
     // cold-preferring clade on a warm orbit reads a low alignment and its
-    // Structure collapses: a thermal MISMATCH, correctly signalled, not a false
+    // Structure collapses: a thermal mismatch, correctly signalled, not a false
     // starvation on an otherwise-habitable orbit.
     u[STRUCT] = u[STRUCT].clone() * clade_align.clone();
     let mut binding = ratio(1, 1);
@@ -289,10 +289,10 @@ pub fn survives(metabolism: &Metabolism, substrate: &[Ratio], clade_align: &Rati
     fitness(metabolism, substrate, clade_align) > ratio(0, 1)
 }
 
-/// **THE STRUCTURAL GRADE** — the metabolism's Structure viability on a substrate,
+/// **The structural grade** — the metabolism's Structure viability on a substrate,
 /// clade-neutral: the Structure fill-fraction, `0` below subsistence, graded in
 /// `[1/2, 1]` when the structural phase is present. (The clade's fine thermal band
-/// is handled separately by `habitability_flux`; this is the ABSOLUTE material
+/// is handled separately by `habitability_flux`; this is the absolute material
 /// phase — can a body of this kind exist here at all.)
 pub fn structural_grade(metabolism: &Metabolism, substrate: &[Ratio]) -> Ratio {
     let u = project(metabolism, substrate);
@@ -303,16 +303,16 @@ pub fn structural_grade(metabolism: &Metabolism, substrate: &[Ratio]) -> Ratio {
     (u[STRUCT].clone() / cap).min(ratio(1, 1))
 }
 
-/// **PHASE FEASIBILITY** (ONT-1d) — does the planet's physical phase, set by the
-/// orbit's `heat`, provide the metabolism's structural basis? Only PLASMA carries
-/// a HARD, clade-independent temperature floor: it needs stellar-level heat to
-/// ionize, and no cold world offers it. The SOLID (mineral) and ORGANIC (biotic)
+/// **Phase feasibility** (ONT-1d) — does the planet's physical phase, set by the
+/// orbit's `heat`, provide the metabolism's structural basis? Only plasma carries
+/// a hard, clade-independent temperature floor: it needs stellar-level heat to
+/// ionize, and no cold world offers it. The solid (mineral) and organic (biotic)
 /// phases are condensed matter that spans the temperate-to-cold range each clade
-/// already ADAPTS to — a lithophage's rock is solid whether its band is torrid or
+/// already adapts to — a lithophage's rock is solid whether its band is torrid or
 /// frozen — so their thermal fit is fully carried by `habitability_flux` (the
 /// clade band) and their phase feasibility is `1` (gating them again would
 /// double-count the clade tent and wrongly cull a warm-clade rock-eater). So the
-/// production factor is `1` for everything but plasmic, whose structural grade IS
+/// production factor is `1` for everything but plasmic, whose structural grade is
 /// its feasibility: a plasmic on anything short of a hot world reads zero — the
 /// Starvation Cull, in the live economy, with no prohibition table. This is the
 /// operator's headline law: a plasmic cannot live on a flatlander earth.
@@ -324,16 +324,16 @@ pub fn phase_feasibility(metabolism: u8, thermal: &Ratio, aridity: &Ratio) -> Ra
     structural_grade(&archetype(3), &substrate)
 }
 
-/// **THE INGESTION KERNEL κ** (ONT metabolic — the diet is the ALMANAC, never an
+/// **The ingestion kernel κ** (ONT metabolic — the diet is the almanac, never an
 /// enum). A species metabolizes an element when the morphodynamic FOOD projection
-/// of that element clears a tolerance `epsilon` — the extraction of ORDER from a
+/// of that element clears a tolerance `epsilon` — the extraction of order from a
 /// gradient, read straight off the species tensor × the element itself, with no
-/// taxonomy branch and no `Resource::{Iron|Joule|Biomass}` bucket. Over the OPEN
-/// blake3 almanac this returns the species' whole diet in DESCENDING affinity, so
+/// taxonomy branch and no `Resource::{Iron|Joule|Biomass}` bucket. Over the open
+/// blake3 almanac this returns the species' whole diet in descending affinity, so
 /// a lithophage finds the dense-cohesion elements, a syntroph the mesic-organic,
-/// each through the SAME projection over the planet's own catalogue. A species
-/// that draws its Food from FLUX rather than matter (a plasmic feeds on the
-/// thermal band) reads zero on every material and so has an EMPTY diet here — it
+/// each through the same projection over the planet's own catalogue. A species
+/// that draws its Food from flux rather than matter (a plasmic feeds on the
+/// thermal band) reads zero on every material and so has an empty diet here — it
 /// does not eat elements. The ordering is deterministic and replay-exact (ties
 /// break to the lexicographically smaller id).
 pub fn ingest(species: &Metabolism, almanac: &[[u8; 32]], epsilon: &Ratio) -> Vec<([u8; 32], Ratio)> {
@@ -352,10 +352,10 @@ pub fn ingest(species: &Metabolism, almanac: &[[u8; 32]], epsilon: &Ratio) -> Ve
     diet
 }
 
-/// **THE STAPLE** — the single element a species metabolizes best on this almanac,
+/// **The staple** — the single element a species metabolizes best on this almanac,
 /// or `None` when its kernel evaluates to ∅ (the universal Starvation Cull: an
 /// empty diet, because no local element aligns with the species — never because a
-/// rule named it). This is what dissolves `metabolic_ration`: a food ELEMENT drawn
+/// rule named it). This is what dissolves `metabolic_ration`: a food element drawn
 /// from the open catalogue by the species tensor × the planet, not a 3-way match.
 pub fn staple(species: &Metabolism, almanac: &[[u8; 32]], epsilon: &Ratio) -> Option<[u8; 32]> {
     ingest(species, almanac, epsilon).into_iter().next().map(|(id, _)| id)
@@ -388,10 +388,10 @@ mod tests {
         ratio(1, 1)
     }
 
-    // Worlds across the thermal axis, WET (aridity 1) so the temperate one can
-    // hold organic life. The three structural bases peak at three niches: a COLD
+    // Worlds across the thermal axis, wet (aridity 1) so the temperate one can
+    // hold organic life. The three structural bases peak at three niches: a cold
     // solid world (thermal → 0) is cohesion — mineral life; a MESIC world
-    // (thermal = 1/2) is syntropy — carbon/organic life; a HOT plasma world
+    // (thermal = 1/2) is syntropy — carbon/organic life; a hot plasma world
     // (thermal → 1) is volatility/resonance — plasma life.
     fn wet() -> Ratio {
         ratio(1, 1)
@@ -406,7 +406,7 @@ mod tests {
         environment(&q(1, 2), &wet(), &ratio(1, 1), &ratio(1, 1))
     }
 
-    // An almanac element whose material vector is set on two INDEPENDENT axes:
+    // An almanac element whose material vector is set on two independent axes:
     // byte 0 = cohesion `c`, byte 8 = syntropy `s` — the axes a lithophage vs a
     // syntroph draws its Food from. Everything else neutral, so the witness reads
     // the ingestion projection alone.
@@ -420,7 +420,7 @@ mod tests {
     #[test]
     fn the_ingestion_kernel_reads_diet_from_the_open_almanac_no_taxonomy() {
         // One almanac, three elements; the diet each species draws is a pure
-        // projection of its tensor over the SAME catalogue — no `Resource` enum,
+        // projection of its tensor over the same catalogue — no `Resource` enum,
         // no `is_plasmoid()` branch.
         let dense = element(255, 0);
         let organic = element(0, 255);
@@ -428,14 +428,14 @@ mod tests {
         let almanac = vec![dense, organic, middling];
         let eps = q(0, 1);
 
-        // A lithophage draws Food from COHESION: it eats the dense element then the
+        // A lithophage draws Food from cohesion: it eats the dense element then the
         // middling one; the purely-syntropic element is not food for it.
         let mineral = archetype(1);
         assert_eq!(staple(&mineral, &almanac, &eps), Some(dense), "the lithophage's staple is the densest element");
         let m_ids: Vec<[u8; 32]> = ingest(&mineral, &almanac, &eps).iter().map(|(id, _)| *id).collect();
         assert_eq!(m_ids, vec![dense, middling], "it eats cohesion, descending; the organic is not its food");
 
-        // A syntroph draws Food from SYNTROPY: the mirror diet, the SAME pipeline.
+        // A syntroph draws Food from syntropy: the mirror diet, the same pipeline.
         let biotic = archetype(2);
         assert_eq!(staple(&biotic, &almanac, &eps), Some(organic), "the syntroph's staple is the most syntropic element");
         let b_ids: Vec<[u8; 32]> = ingest(&biotic, &almanac, &eps).iter().map(|(id, _)| *id).collect();
@@ -448,7 +448,7 @@ mod tests {
 
     #[test]
     fn a_flux_feeder_does_not_eat_elements_the_starvation_cull_emerges() {
-        // A plasmic species draws its Food from the thermal FLUX, not from any
+        // A plasmic species draws its Food from the thermal flux, not from any
         // material axis, so over a material almanac its kernel evaluates to ∅ — the
         // universal Starvation Cull, from the projection alone, no prohibition rule.
         let plasmic = archetype(3);
@@ -473,9 +473,9 @@ mod tests {
 
     #[test]
     fn carbon_life_holds_the_temperate_band_not_the_extremes() {
-        // A biotic builds its body from organic SYNTROPY, which peaks at the
+        // A biotic builds its body from organic syntropy, which peaks at the
         // mesic middle and falls to zero at both thermal extremes. It thrives in
-        // the temperate band and is culled on the cold solid world AND the hot
+        // the temperate band and is culled on the cold solid world and the hot
         // plasma one — carbon life's niche is the middle.
         let biotic = archetype(2);
         assert!(survives(&biotic, &mesic_world(), &any_clade()), "carbon life holds the temperate band");
@@ -505,11 +505,11 @@ mod tests {
 
     #[test]
     fn the_clade_thermal_band_gates_structure() {
-        // ONT-1c, the stillcold fix. TWO biotic lines with the SAME metabolism on
-        // the SAME temperate world differ only by clade thermal alignment. A clade
+        // ONT-1c, the stillcold fix. Two biotic lines with the same metabolism on
+        // the same temperate world differ only by clade thermal alignment. A clade
         // whose sealed band matches (alignment 1) holds its structure and lives; a
         // clade whose band is elsewhere (alignment 0) cannot use the syntropy — a
-        // thermal MISMATCH, culled — never a false starvation on a habitable orbit.
+        // thermal mismatch, culled — never a false starvation on a habitable orbit.
         let biotic = archetype(2);
         assert!(survives(&biotic, &mesic_world(), &ratio(1, 1)), "the aligned clade lives in its band");
         assert!(!survives(&biotic, &mesic_world(), &ratio(0, 1)), "a mismatched clade on the same world is culled");
@@ -533,9 +533,9 @@ mod tests {
 
     #[test]
     fn a_pure_phototroph_reads_massless_flux_and_starves_in_the_dark() {
-        // THE FLUX DECOUPLING, WITNESSED: an autotroph draws Food from the
+        // The flux decoupling, witnessed: an autotroph draws Food from the
         // luminous flux ALONE (no material term) — order from a gradient that is
-        // not matter — and structure from cohesion (so it wants a lit COLD world).
+        // not matter — and structure from cohesion (so it wants a lit cold world).
         let autotroph: Metabolism = vec![
             row(&[(LUM, 1)]), // Food: pure light, no material consumption
             row(&[(C, 1)]),   // Structure: local cohesion (condenses cold)
@@ -554,8 +554,8 @@ mod tests {
 
     #[test]
     fn aridity_is_orthogonal_to_temperature() {
-        // THE COLLAPSE, GONE: temperature and moisture are INDEPENDENT axes. Two
-        // worlds at the SAME temperate thermal differ only in aridity — the wet one
+        // The collapse, gone: temperature and moisture are independent axes. Two
+        // worlds at the same temperate thermal differ only in aridity — the wet one
         // grows organic life, the arid one cannot (syntropy needs a solvent), and a
         // cold world can be wet while a warm world is bone-dry. A single `heat`
         // scalar could never say this.
@@ -574,11 +574,11 @@ mod tests {
 
     #[test]
     fn only_plasma_carries_a_hard_phase_floor_in_production() {
-        // ONT-1d production gate: PLASMA needs stellar heat to exist, so a plasmic
+        // ONT-1d production gate: plasma needs stellar heat to exist, so a plasmic
         // reads zero feasibility on a cold world and positive on a hot one — the
-        // operator's headline law. SOLID (mineral) and ORGANIC (biotic) span the
-        // clade-gated range, so their production feasibility is 1 at ANY heat: a
-        // warm-clade rock-eater is NOT culled (that was the regression this guards).
+        // operator's headline law. Solid (mineral) and organic (biotic) span the
+        // clade-gated range, so their production feasibility is 1 at any heat: a
+        // warm-clade rock-eater is not culled (that was the regression this guards).
         let hot = q(3, 4);
         let cold = q(1, 4);
         assert_eq!(phase_feasibility(3, &cold, &wet()), ratio(0, 1), "no plasma phase on a cold world");

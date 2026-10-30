@@ -1,69 +1,69 @@
-//! **THE SHELL — a spherical carrier** (operator ruling 2026-08-05:
+//! **The SHELL — a spherical carrier** (operator ruling 2026-08-05:
 //! *grid needs to be discarded for spherical references*).
 //!
-//! A grid has PRIVILEGED AXES. `FlipH` and `FlipV` are different
+//! A grid has privileged axes. `FlipH` and `FlipV` are different
 //! operators only because a rectangle has a distinguished horizontal and
 //! vertical; rotate the frame and they exchange. That is a basis, and
-//! `26_ARTICLES` Article I — the PURE GEOMETRY MANDATE — voids readings
+//! `26_ARTICLES` Article I — the pure geometry mandate — voids readings
 //! that require one: *no actor shall reduce state mappings to rigid
 //! coordinate tensor ranks; static metrics are void ab initio.*
-//! `27_EVIDENCE` LAW 1 says the same from the physics side: a quantity
-//! that changes when you relabel is a property of the labelling.
+//! `27_EVIDENCE` law 1 says the same from the physics side: a quantity
+//! that changes under relabelling is a property of the labelling.
 //!
-//! **A SPHERE DOES HAVE A DISTINGUISHED AXIS, and the first draft of
+//! **A sphere does have A distinguished axis, and the first draft of
 //! this header denied it** (operator correction, 2026-08-05). That was
-//! false, and the code below refutes it: `Spin` rotates about the POLAR
-//! axis and `Invert` reflects through the EQUATOR. There is no equator
-//! without a polar axis — the equator IS the axis's fixed circle, which
+//! false, and the code below refutes it: `Spin` rotates about the polar
+//! axis and `Invert` reflects through the equator. There is no equator
+//! without a polar axis — the equator is the axis's fixed circle, which
 //! is where the word comes from.
 //!
-//! The honest count is ONE distinguished axis, not two. A rectangle
-//! privileges a horizontal AND a vertical, and its two mirrors are
+//! The honest count is one distinguished axis, not two. A rectangle
+//! privileges a horizontal and a vertical, and its two mirrors are
 //! independent; a sphere privileges one axis, and around it every
 //! longitude is alike. That difference is what the carrier buys, and it
 //! is pinned as `the_ring_has_no_origin_longitude` — a statement about
 //! longitude alone, which is all it ever proved.
 //!
-//! **AND THE TWO AXES ARE NOT THE SAME KIND.** Longitude closes: it is a
-//! full turn and a circle. Latitude does NOT close: pole to pole is a
-//! HALF turn with endpoints. That 1:2 ratio is the closed sphere's own
+//! **And the two axes are not the same KIND.** Longitude closes: it is a
+//! full turn and a circle. Latitude does not close: pole to pole is a
+//! half turn with endpoints. That 1:2 ratio is the closed sphere's own
 //! shape rather than a convention, and it is why one axis has poles and
 //! the other has none.
 //!
-//! **AND IT IS THE UNIVERSE'S OWN FRAME.** Orbs are sited at `(r, θ, ψ)`
-//! with angles as exact rationals in TURNS on a 60-slot ring
+//! **And it is the universe's own FRAME.** Orbs are sited at `(r, θ, ψ)`
+//! with angles as exact rationals in turns on a 60-slot ring
 //! (`ratio::TURN_SLOTS`). The grid was borrowed from ARC; the shell is
 //! native — a solver task and a star system are now addressed the same
 //! way, and `separation` already measures wrapped angular distance for
 //! both.
 //!
-//! **WHY TURNS AND NOT RADIANS.** A full turn in radians is `2π`, which
+//! **Why turns and not radians.** A full turn in radians is `2π`, which
 //! no rational closes, so a wrapped angle would need a float and the
 //! seam would never meet. In turns the seam is exact. This carrier
 //! contains no floats and no trigonometry, and it never resamples: every
-//! transform is a PERMUTATION OF CELLS.
+//! transform is a permutation of CELLS.
 //!
-//! **NO 3-D DISTORTION, AND IT IS PROVABLE HERE.** A lat-long
-//! tessellation embedded in Euclidean 3-space has cells of unequal AREA
+//! **No 3-D distortion, and it is provable here.** A lat-long
+//! tessellation embedded in Euclidean 3-space has cells of unequal area
 //! — polar cells pinch, equatorial cells spread — and that distortion is
 //! the standard objection to spherical grids. It does not arise here,
 //! for a reason this tree can state exactly: **the carrier has no
 //! metric.** Nothing measures an area, a length or a chord. What is
-//! measured is transport around CLOSED LOOPS, which is what `rfa_core`
+//! measured is transport around CLOSED loops, which is what `rfa_core`
 //! means by a holonomy — *the charge a loop carries that no frame can
 //! explain*, exact and rational, no float and no root.
 //!
-//! Every latitude ring closes in exactly `slots` steps, at EVERY band.
+//! Every latitude ring closes in exactly `slots` steps, at every band.
 //! The loop structure is band-independent, so there is no quantity that
 //! could differ between a polar ring and an equatorial one. The
-//! distortion is a property of an EMBEDDING, and the embedding never
+//! distortion is a property of an embedding, and the embedding never
 //! enters. Pinned as `the_loop_structure_is_band_independent`.
 //!
-//! **WHAT IS REPRESENTABLE, STATED HONESTLY.** The full rotation group
-//! of a sphere is `SO(3)`, and a general rotation does NOT permute the
+//! **What is representable, stated honestly.** The full rotation group
+//! of a sphere is `SO(3)`, and a general rotation does not permute the
 //! cells of a band-and-slot tessellation — it would need interpolation,
 //! which needs floats, which this tree does not have. So the vocabulary
-//! here is the subgroup that IS exact: rotations about the polar axis,
+//! here is the subgroup that is exact: rotations about the polar axis,
 //! reflection through a meridian, reflection through the equator, and
 //! hue permutation. That is a real group, closed and invertible, and
 //! naming its boundary is better than pretending to `SO(3)` and
@@ -72,8 +72,8 @@
 use crate::field::HUES;
 use ratio::TURN_SLOTS;
 
-/// **THE POLAR SPAN IS A HALF TURN.** Longitude closes at a full turn;
-/// latitude runs pole to pole and stops. So the bands divide THIRTY
+/// **The polar SPAN is A half turn.** Longitude closes at a full turn;
+/// latitude runs pole to pole and stops. So the bands divide thirty
 /// where the slots divide sixty — the same ring, halved, which is the
 /// closed sphere's own 1:2 rather than a convention.
 pub const BAND_SLOTS: i64 = TURN_SLOTS / 2;
@@ -81,7 +81,7 @@ pub const BAND_SLOTS: i64 = TURN_SLOTS / 2;
 /// Hues on a spherical shell: `bands` rings of latitude, `slots` cells
 /// around each.
 ///
-/// Row-major by band then slot. `slots` must DIVIDE the 60-slot ring, so
+/// Row-major by band then slot. `slots` must divide the 60-slot ring, so
 /// every cell centre lands on a real orbital slot and a rotation by one
 /// cell is a rotation by a whole number of slots — the discreteness that
 /// makes collision decidable rather than a tolerance.
@@ -92,7 +92,7 @@ pub struct Shell {
     cells: Vec<u8>,
 }
 
-/// **WHY A SHAPE HOLDS OR DOES NOT** — the proof a caller gets back
+/// **Why A shape holds or does not** — the proof a caller gets back
 /// instead of a bare `None` (operator ruling 2026-08-05: *each call
 /// should prove that the shape holds or doesn\'t hold, and what the
 /// derivation is of*).
@@ -109,7 +109,7 @@ pub enum ShapeReading {
     },
     /// The longitude arity does not divide the full ring.
     LongitudeOffSlot(ratio::DivisionProof),
-    /// The latitude arity does not divide the HALVED ring. Note this
+    /// The latitude arity does not divide the halved ring. Note this
     /// refuses arities the longitude admits — 4, 12, 20 and 60 divide
     /// sixty and not thirty — which is the closed sphere\'s own 1:2.
     LatitudeOffSlot(ratio::DivisionProof),
@@ -151,14 +151,14 @@ impl ShapeReading {
 }
 
 impl Shell {
-    /// **EXAMINE A SHAPE, PROVING THE VERDICT.** The law, stated once,
+    /// **Examine A shape, proving the verdict.** The law, stated once,
     /// with its reasons attached — `new` is this plus a constructor.
     pub fn examine(bands: usize, slots: usize, cells: usize) -> ShapeReading {
         let longitude = ratio::divide_ring(TURN_SLOTS, slots as i64);
         if !longitude.holds() {
             return ShapeReading::LongitudeOffSlot(longitude);
         }
-        // The polar span is a HALF turn, so a band boundary lands on a
+        // The polar span is a half turn, so a band boundary lands on a
         // slot of the halved ring. Same discreteness law, same reason:
         // a cell centre between teeth is not a place.
         let latitude = ratio::divide_ring(BAND_SLOTS, bands as i64);
@@ -172,7 +172,7 @@ impl Shell {
         ShapeReading::Holds { longitude, latitude, cells }
     }
 
-    /// THE ONE DOOR. Every admission carries the proof that admitted it.
+    /// The one door. Every admission carries the proof that admitted it.
     pub fn new(bands: usize, slots: usize, cells: Vec<u8>) -> Option<Shell> {
         Shell::examine(bands, slots, cells.len())
             .holds()
@@ -215,7 +215,7 @@ impl Shell {
 
 }
 
-/// A transform of the shell. Every one is a PERMUTATION of cells (or a
+/// A transform of the shell. Every one is a permutation of cells (or a
 /// relabelling of hues), so every one is exact, total and invertible.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Turn {
@@ -276,7 +276,7 @@ pub fn run(word: &Ring, input: &Shell) -> Shell {
     word.iter().fold(input.clone(), |held, turn| turn.apply(&held))
 }
 
-/// **THE CLOSED VOCABULARY OF A SHELL** — every exact transform,
+/// **The CLOSED vocabulary of A SHELL** — every exact transform,
 /// derived from the shell's own tessellation.
 ///
 /// `slots − 1` non-identity spins, one meridian reflection, one
@@ -293,43 +293,43 @@ pub fn vocabulary(shell: &Shell) -> Vec<Turn> {
 }
 
 // ─────────────────────────────────────────────────────────────────────
-// THE ENTITY FRAME — base-60 orbit tied to base-11 stack
+// the entity FRAME — base-60 orbit tied to base-11 stack
 // ─────────────────────────────────────────────────────────────────────
 //
-// Operator ruling 2026-08-05: *tie spin to orbit and you'll get
-// individual frames on base-60; extrapolate down to base-11 per entity
-// in population on partition and hold structure.*
+// Ruling of 2026-08-05: spin is tied to orbit, which yields
+// individual frames on base-60, extrapolated down to base-11 per entity
+// in a population on partition, holding structure.
 //
 // Both bases were already landed law, and neither was invented here:
 //
-//   base-60  THE ORBITAL RING (`ratio::TURN_SLOTS`) — the SHARED frame.
+//   base-60  the orbital ring (`ratio::TURN_SLOTS`) — the shared frame.
 //            Every orb is sited at a slot `k/60`, and the ring is the
 //            one thing the whole population holds in common.
-//   base-11  THE CONDITION STACK (`cfe::world::survey::last_condition()`,
+//   base-11  the condition stack (`cfe::world::survey::last_condition()`,
 //            operator ruling 2026-08-02, *uplift to base-11*) — the
-//            PER-ENTITY frame. Eleven nodes: the solar leap, the five
+//            per-entity frame. Eleven nodes: the solar leap, the five
 //            crystallized conditions, the gifted crown, and four
 //            chartered works.
 //
-// **WHY THE TIE IS EXACT: gcd(11, 60) = 1.** Sixty factors as 2²·3·5 and
+// **Why the tie is exact: gcd(11, 60) = 1.** Sixty factors as 2²·3·5 and
 // eleven is prime, so the two bases share no factor. By the Chinese
 // Remainder Theorem the pair `(orbit mod 60, node mod 11)` maps to a
-// single index mod 660 — and the map is a BIJECTION, so every entity in
+// single index mod 660 — and the map is a bijection, so every entity in
 // the population gets a frame no other entity holds. That is what
 // "individual frames" means, and it is a theorem rather than a policy.
 //
-// **AND IT HOLDS STRUCTURE.** CRT is not merely a relabelling: it is a
+// **And it holds structure.** Crt is not merely a relabelling: it is a
 // ring isomorphism, so the index of a sum is the sum of the indices.
 // Advancing an orbit by one slot and advancing a stack by one node
 // commute, and composing two frames composes their spins. A map that
 // individuated the population without preserving addition would be a
 // scramble; this one is a frame.
 
-/// **THE STACK, DERIVED FROM ITS PARTS** (operator ruling 2026-08-05:
+/// **The stack, derived from its parts** (operator ruling 2026-08-05:
 /// *bring these down to the theorem level*).
 ///
 /// Base-11 was written as `11` in two crates. It is not a number: it is
-/// a SUM, and the sum is the sky's own structure —
+/// a sum, and the sum is the sky's own structure —
 ///
 /// ```text
 ///     1  the solar leap
@@ -338,15 +338,15 @@ pub fn vocabulary(shell: &Shell) -> Vec<Turn> {
 ///     4  the chartered works       → 11, the UPLIFT
 /// ```
 ///
-/// Written as the sum, a reader can see WHERE eleven comes from and a
+/// Written as the sum, a reader can see where eleven comes from and a
 /// change to any part carries through. Written as `11`, the day a sixth
 /// condition lands someone edits one crate and not the other.
-/// **THE STACK'S PARTS, stated here and COUNTED above the arrow.**
+/// **The stack's parts, stated here and counted above the arrow.**
 ///
 /// `cfe::world::survey` derives each of these by asking the condition
 /// vocabularies — `node_kind`, `count_of`, `literature::WORKS` — and
-/// this crate sits BELOW `cfe` and cannot call them. So the parts are
-/// declared here as the requirement and PINNED part-for-part against
+/// this crate sits below `cfe` and cannot call them. So the parts are
+/// declared here as the requirement and pinned part-for-part against
 /// what the sky actually counts (`base_eleven_pins`). A drift in either
 /// direction turns that witness red and names which part moved.
 ///
@@ -356,19 +356,19 @@ pub fn vocabulary(shell: &Shell) -> Vec<Turn> {
 pub const SOLAR_LEAP: i64 = 1;
 pub const CRYSTALLIZED_CONDITIONS: i64 = 5;
 pub const GIFTED_CROWN: i64 = 1;
-/// The BASE tier — what `base_seven_complete` waits for.
+/// The base tier — what `base_seven_complete` waits for.
 pub const BASE_NODES: i64 = SOLAR_LEAP + CRYSTALLIZED_CONDITIONS + GIFTED_CROWN;
-/// The UPLIFT tier — one node per chartered work.
+/// The uplift tier — one node per chartered work.
 pub const CHARTERED_WORKS: i64 = 4;
-/// **DERIVED: `7 + 4 = 11`.** Never typed.
+/// **Derived: `7 + 4 = 11`.** Never typed.
 pub const STACK_NODES: i64 = BASE_NODES + CHARTERED_WORKS;
 
 /// The composite period: every distinct frame, once.
 pub const FRAME_PERIOD: i64 = TURN_SLOTS * STACK_NODES;
 
-/// **THE FRAME OF AN ENTITY** — its orbital slot tied to its stack node.
+/// **The FRAME of an entity** — its orbital slot tied to its stack node.
 ///
-/// The CRT index: the unique `x` in `0..660` with `x ≡ orbit (mod 60)`
+/// The crt index: the unique `x` in `0..660` with `x ≡ orbit (mod 60)`
 /// and `x ≡ node (mod 11)`.
 ///
 /// The coefficients are exact and derived, not tuned: `121 = 11²` is
@@ -379,12 +379,12 @@ pub fn frame_index(orbit_slot: i64, node: i64) -> i64 {
     (121 * orbit_slot + 540 * node).rem_euclid(FRAME_PERIOD)
 }
 
-/// **THE PROOF THE FRAME MAP RESTS ON** — returned by the call rather
+/// **The proof the FRAME map rests on** — returned by the call rather
 /// than asserted in a comment.
 ///
 /// The whole construction is valid iff the two bases are coprime. This
 /// reports the gcd that decides it, the period that follows, and the two
-/// CRT coefficients — each of which is checkable by the reader in one
+/// crt coefficients — each of which is checkable by the reader in one
 /// division.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct FrameProof {
@@ -428,7 +428,7 @@ impl FrameProof {
 }
 
 impl Shell {
-    /// **TIE SPIN TO ORBIT.** The rotation this entity's frame presents.
+    /// **Tie spin to orbit.** The rotation this entity's frame presents.
     ///
     /// The frame index runs on the composite 660-ring; a shell of
     /// `slots` cells reads it at its own arity. An orb at a different

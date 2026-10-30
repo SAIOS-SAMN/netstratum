@@ -1,15 +1,15 @@
-//! THE CHRONICLE FEED (08 — JOURNAL-1): civilizations SPEAK — one
+//! The chronicle feed (08 — JOURNAL-1): civilizations speak — one
 //! journal entry per completed year, generated lens-side from the
-//! chronicle + committed state ONLY.
+//! chronicle + committed state only.
 //!
 //! The laws (08 §1), binding here:
 //!
-//! - **A RENDERING, never state.** No new chronicle events, no
+//! - **A rendering, never state.** No new chronicle events, no
 //!   receipts, no simulation reads. Deleting every journal changes
 //!   nothing; regenerating reproduces it byte-identically.
 //! - **Deterministic narrative.** Same chronicle ⇒ same journal.
 //!   Flavor selection seeds from receipt digests already in the
-//!   chronicle through the beacon (CHARTER §9) — no wall clock, no
+//!   chronicle through the beacon (Charter §9) — no wall clock, no
 //!   ambient randomness.
 //! - **Exact rationals as `p/q` strings** (C2R): growth, joules, sink.
 //!   Never floats, never truncated integers.
@@ -22,7 +22,7 @@
 //!   odometer cycle of the WORLD's own clock (chronicle-derived, so
 //!   regeneration never depends on any epoch outside the chronicle).
 //!
-//! THE YEAR WINDOW: year `y` (1-based) covers stamps in
+//! The YEAR WINDOW: year `y` (1-based) covers stamps in
 //! `[(y−1)·YEAR_TICKS, y·YEAR_TICKS)` and completes when the clock
 //! reaches `y·YEAR_TICKS`. The window is CLOSED under the clock law
 //! (stamps never decrease), so a written year can never change
@@ -44,7 +44,7 @@ use lens::render::universal_clock;
 /// TUniversal base-60 odometer.
 pub const YEAR_TICKS: u64 = 60;
 
-/// The identity facts a journal entry narrates from — a REFLECTION of
+/// The identity facts a journal entry narrates from — a reflection of
 /// the registry entry (never an authority; the registry stays the
 /// directory of receipted truth, 04 §5).
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -86,7 +86,7 @@ impl Alert {
     }
 }
 
-/// The economic summary of one year — every quantity an EXACT string
+/// The economic summary of one year — every quantity an exact string
 /// (integers plain, fractions `p/q`; never a decimal).
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct EconomicSummary {
@@ -138,7 +138,7 @@ pub struct JournalEntry {
 }
 
 /// The joule stance at a year boundary — the surplus/deficit narrative
-/// flips on the EXACT boundary: covered at `banked == need`, deficit
+/// flips on the exact boundary: covered at `banked == need`, deficit
 /// strictly below it (08 §4, witnessed).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum JouleStance {
@@ -279,7 +279,7 @@ fn zone_word(kind: ZoneKind) -> &'static str {
         ZoneKind::Granary => "granary",
         ZoneKind::GovernmentOffice => "government office",
         ZoneKind::WelfareHub => "welfare hub",
-        // #41: a minted building's word lives in the FOLD; the journal
+        // #41: a minted building's word lives in the fold; the journal
         // is prose over receipts and names it generically rather than
         // re-reading the chain here. (This keeps its own long-form
         // spellings deliberately — "encasement shell" against the
@@ -291,7 +291,7 @@ fn zone_word(kind: ZoneKind) -> &'static str {
 
 /// Narrate the year a world has just closed (08 §1.5) from the state it
 /// carries now — the live committed state at the boundary — and that
-/// year's receipts in its history. NO REPLAY (the 2026-10-08 directive and
+/// year's receipts in its history. No replay (the 2026-10-08 directive and
 /// the reconstruct-not-replay recast (vi)): each year is narrated once, live,
 /// as it closes, and kept in `journal.jrn`; nothing re-derives past years.
 /// `zones_before` is the zone count the previous year's entry recorded.
@@ -462,7 +462,7 @@ fn narrate(
         }
     }
 
-    // Famine / freeze-lock, RED per resource with dormant zones named.
+    // Famine / freeze-lock, red per resource with dormant zones named.
     if freeze_locked {
         lines.push(
             "RED — FREEZE-LOCK: the joule stores ran dry on a sub-mesic orbit; every flow stands still until fuel arrives."
@@ -528,7 +528,7 @@ fn narrate(
         );
     }
 
-    // What they BUILT, with exact growth.
+    // What they built, with exact growth.
     if built > 0 {
         let raze_note = match razed {
             0 => String::new(),
@@ -716,7 +716,7 @@ pub fn record_journal(
             appended = 1;
         }
     }
-    // The wall is rebuilt ONCE per year by the caller (`render_wall`), after
+    // The wall is rebuilt once per year by the caller (`render_wall`), after
     // every world has journaled: rebuilt here it re-read every journal and
     // rewrote the whole wall once per world (~70 x 8.5 MB a year).
     let _ = book;

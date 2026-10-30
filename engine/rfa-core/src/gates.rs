@@ -1,5 +1,5 @@
 //! The validation gates — every proposed state step must pass all
-//! three, and a refusal is TYPED (the gate names what failed and by
+//! three, and a refusal is typed (the gate names what failed and by
 //! how much; nothing fails silently).
 
 use crate::delta::{magnitude, Delta};
@@ -24,7 +24,7 @@ pub enum GateReading {
     Accepted,
     /// Conservation refused: antisymmetry / zero-diagonal violated.
     /// Carries the POSITION of the first break `(i, j, l)`, never a
-    /// magnitude — a refusal names WHERE it left the surface, and a
+    /// magnitude — a refusal names where it left the surface, and a
     /// position cannot be thresholded or descended (operator ruling
     /// 2026-08-01: accounting, not identity; no `==` in deterministic
     /// code).
@@ -40,10 +40,10 @@ pub enum GateReading {
 /// 1. **Conservation** — `after` must sit exactly on the invariant
 ///    surface (antisymmetric, zero diagonal).
 /// 2. **Bounded magnitude** — `| ‖after‖₁ − reference |` must not
-///    exceed `epsilon × reference`. A TWO-SIDED bound, never a
+///    exceed `epsilon × reference`. A two-sided bound, never a
 ///    direction: it constrains how far a step may move, never which way.
 ///
-/// **THE PRODUCTIVITY GATE IS STRUCK** (operator ruling 2026-08-01). It
+/// **The productivity gate is struck** (operator ruling 2026-08-01). It
 /// read:
 ///
 /// ```text
@@ -52,8 +52,8 @@ pub enum GateReading {
 /// ```
 ///
 /// It refused any step that did not strictly lower `C`. The fault is
-/// NOT that `C` is a scalar walking one way — a scalar IS linear and
-/// uni-directional, and that is fine FOR `C`. The fault is that this
+/// not that `C` is a scalar walking one way — a scalar is linear and
+/// uni-directional, and that is fine for `C`. The fault is that this
 /// gate **bound the whole LINEAGE to `C`'s single axis**: it admitted
 /// only motion along one coordinate in one direction, and so foreclosed
 /// every other branch an n-dimensional lineage can open. That is the
@@ -62,8 +62,8 @@ pub enum GateReading {
 /// corrected.
 ///
 /// Nothing replaces it. A step that does not lower `C` is not
-/// unproductive — under THE BIFURCATION LAW (`17_CAPACITY` §11) its
-/// non-composition is a ROOT, and capacity opens by receipt. `C` keeps
+/// unproductive — under the bifurcation law (`17_CAPACITY` §11) its
+/// non-composition is a root, and capacity opens by receipt. `C` keeps
 /// its existence as an inert reading and loses every gate it held: no
 /// verdict of this module consults it, and `Accepted` no longer carries
 /// it, because a verdict that ships a scalar invites the next reader to
@@ -71,7 +71,7 @@ pub enum GateReading {
 pub fn validate_step(before: &Delta, after: &Delta, bound: &StepBound) -> GateReading {
     // `before` is retained in the signature: the two-sided magnitude
     // bound is a per-step law and callers hold the pair. Nothing about
-    // the prior state gates the step's DIRECTION any more.
+    // the prior state gates the step's direction any more.
     let _ = before;
     if let Some(at) = after.first_conservation_break() {
         return GateReading::ConservationViolated { at };

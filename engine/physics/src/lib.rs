@@ -6,7 +6,7 @@
 //!
 //! - **No calculus.** All dynamics are finite exact recurrences:
 //!   `Ψ_{k+1} = Ψ_k + 𝒟_T Ψ_k`, read per typed event. No scheduler,
-//!   no frame queue — the accumulated state IS the carrier.
+//!   no frame queue — the accumulated state is the carrier.
 //! - **Every reversible step carries its exact inverse.**
 //!   `apply ∘ apply_negated = identity`, byte-exact.
 //! - **Value creation is irreversible by construction.** A mint appends

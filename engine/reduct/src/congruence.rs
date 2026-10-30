@@ -1,6 +1,6 @@
-//! **THE CONGRUENCE READ** (N-I1, doc `53` D2, seat 1 of the one reduction) —
+//! **The congruence READ** (N-I1, doc `53` D2, seat 1 of the one reduction) —
 //! over a cover pair (two vantages of one structure), the per-direction
-//! relational Δ carried as a WHOLE OBJECT: signed exact coefficients at
+//! relational Δ carried as a whole object: signed exact coefficients at
 //! (site, direction), with the re-forming inverse riding along (the seed law —
 //! nothing is emitted that cannot re-lift). Re-expressed from v0.4
 //! `iae/src/congruence` onto the `CellFrame` carrier (the frame endpoints ride
@@ -15,9 +15,9 @@ use num_bigint::BigInt;
 use std::collections::BTreeMap;
 use thiserror::Error;
 
-/// One direction's asymmetry between two vantages: the sites that DEPARTED (in
-/// A, not B) and those that ARRIVED (in B, not A). Content and support are one —
-/// the sites ARE the where.
+/// One direction's asymmetry between two vantages: the sites that departed (in
+/// A, not B) and those that arrived (in B, not A). Content and support are one —
+/// the sites are the where.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DirectionAsymmetry {
     pub direction: GaugeDirection,
@@ -119,7 +119,7 @@ fn difference(left: &[Site], right: &[Site]) -> Vec<Site> {
 }
 
 /// One exact integer coefficient at a (site, direction) — the entry of the chain
-/// carrier at this grade (WHERE, per axis, never a norm).
+/// carrier at this grade (where, per axis, never a norm).
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ChainEntry {
     pub site: Site,
@@ -128,7 +128,7 @@ pub struct ChainEntry {
 }
 
 /// The grade-0 Δ in chain form: signed exact coefficients at (site, direction),
-/// with both frame endpoints carried. THE ONE chain carrier — its inverse is
+/// with both frame endpoints carried. The one chain carrier — its inverse is
 /// negation, carried trivially by `negated()`.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ChainDelta {
@@ -139,7 +139,7 @@ pub struct ChainDelta {
 }
 
 impl ChainDelta {
-    /// A reading as an integer chain — the READING expands itself into the
+    /// A reading as an integer chain — the reading expands itself into the
     /// ledger's call site (the chain never reaches into the reading's dimensions).
     pub fn from_reading(reading: &CongruenceReading) -> Self {
         let mut ledger = Ledger::new();
@@ -188,11 +188,11 @@ impl ChainDelta {
     }
 }
 
-/// The accumulation carrier — the CALL SITE the chains expand into. Keyed by
+/// The accumulation carrier — the call site the chains expand into. Keyed by
 /// `(row, col, layer, direction)` in a `BTreeMap`, so accumulation is O(log n) per
 /// contribution, not the linear slot-scan it was (a 30×30, 10-hue wall makes
 /// ~9000 possible entries — the scan was O(entries²)). `into_entries` sorts the
-/// output canonically REGARDLESS of insertion order, so this is output-identical
+/// output canonically regardless of insertion order, so this is output-identical
 /// (the map's own key order is normalised away — SEAL-B untouched).
 pub struct Ledger {
     slots: BTreeMap<(i64, i64, i64, u8), BigInt>,
@@ -237,7 +237,7 @@ impl Default for Ledger {
     }
 }
 
-/// The one entry-arithmetic core: each chain EXPANDS ITSELF into the ledger.
+/// The one entry-arithmetic core: each chain expands itself into the ledger.
 pub fn signed_entry_sum(terms: &[(&ChainDelta, i64)]) -> Vec<ChainEntry> {
     let mut ledger = Ledger::new();
     for (chain, sign) in terms {
@@ -246,7 +246,7 @@ pub fn signed_entry_sum(terms: &[(&ChainDelta, i64)]) -> Vec<ChainEntry> {
     ledger.into_entries()
 }
 
-/// **THE PAIR'S SAME-FRAME ASYMMETRY AS A CHAIN** — peel both, read the
+/// **The pair's same-FRAME asymmetry as A chain** — peel both, read the
 /// congruence, cast to the chain carrier. The reduce's difference (stage 3) on
 /// this altitude. Frame-shifting pairs refuse typed (`FramesDisagree`).
 pub fn signed_remainder(

@@ -1,4 +1,4 @@
-//! RECYCLING (xylarium 11.0 (18), 3b95a08; operators 2026-10-19: "why does
+//! Recycling (Xylarium 11.0 (18), 3b95a08; operators 2026-10-19: "why does
 //! it have to be split, instead of a deconstruction?"; "the bounce will be
 //! contained in the heaviest of elements that move least by the force of
 //! the bounce"; "depending on the amount of energy contained, the size of
@@ -7,24 +7,24 @@
 //! matter as it is consumed by the core on the vacuum"). The founding's
 //! bounce run on what a core consumes. No core makes 3Z: holding and
 //! magnetism only trade, and the 3Z ledger stays exact.
-//! - TWO ANTIPOLES AT A THROAT. The CONTAINER `S` is the holding of the
+//! - Two antipoles AT A throat. The container `S` is the holding of the
 //!   heaviest held kinds, the core's state and the kinds at or above its
-//!   cut: the Z pole, coherence. The REVERBERATION `E = B·S`, with
+//!   cut: the Z pole, coherence. The reverberation `E = B·S`, with
 //!   `B = p − Σ m·|Δℓ|` what the push leaves after its torques: the Q pole,
 //!   decoherence.
 //! - The matter in the throat (the vacuum's inbound leg, the remnants'
 //!   drains) takes the bounce, shared by `H/(R + H)`. `S/(S + E)` is
-//!   CONSTRUCTED: pressed like with like by the burn's rung, `z + z → 2z`
+//!   constructed: pressed like with like by the burn's rung, `z + z → 2z`
 //!   where it runs (`2u(z) > u(2z)`), its light adding to E; where the rung
 //!   does not run the pressed share stays whole. `E/(S + E)` is
-//!   DECONSTRUCTED: each kind takes E by its holding share of that load and
-//!   is PEELED loosest nucleon first, `z → (z − k) + kH` at
+//!   deconstructed: each kind takes E by its holding share of that load and
+//!   is peeled loosest nucleon first, `z → (z − k) + kH` at
 //!   `u(z − k) + k − u(z)`, as far as its share pays, in whole nuclei. Odd
 //!   and even alike; nothing is chosen. Peeling to hydrogen costs `z − u(z)`
-//!   whatever the path. On our atom a peel step costs 0 or 2 (it releases
+//!   whatever the path. On Netstratum's atom a peel step costs 0 or 2 (it releases
 //!   only at z 67 and 106): construction gives light, deconstruction takes
 //!   it.
-//! - THE GALAXY'S PUSH SORTS THE PRODUCTS (operator 2026-10-19: the
+//! - The galaxy's push sorts the products (operator 2026-10-19: the
 //!   galaxy's orbit fuels the core as "spinning pressure of torsion", its
 //!   weight the core's pressure; "the vacuum has to have equal or greater
 //!   pressure to consume than the continuum to release and push"; "the
@@ -32,7 +32,7 @@
 //!   dimensional facets"): inversion through the throat swaps the pull and
 //!   the push, fixed at the throat, so the core consumes while the weight of
 //!   the rest of its galaxy is equal or greater than its own. The heaviest
-//!   products are TRAPPED, joining the container, until the two balance;
+//!   products are trapped, joining the container, until the two balance;
 //!   the rest leave on the continuum. (Read per product at the throat, where
 //!   all stand deep in the pull, the balance trapped everything; the
 //!   founding's cascade on the throat's stack alone took its spin from the
@@ -84,7 +84,7 @@ pub struct Recycled {
     pub hydrogen: Ratio,
 }
 
-/// The clusters at `at` PART in the throat's heat (1: every cluster's
+/// The clusters at `at` part in the throat's heat (1: every cluster's
 /// loosest winding is within it), each into its atoms, keeping the mote's
 /// state. Returns the throat's motes after parting (new ones appended).
 pub fn part(motes: &mut Vec<Mote>, at: &[usize]) -> Vec<usize> {
@@ -119,7 +119,7 @@ pub fn part(motes: &mut Vec<Mote>, at: &[usize]) -> Vec<usize> {
 
 /// Recycle the (parted) motes at `at`, the matter standing in the throat,
 /// under the bounce `b = p − Σ m·|Δℓ|` contained in `s` (holding units).
-/// Products keep their mote's state; the heaviest JOIN THE CONTAINER as of
+/// Products keep their mote's state; the heaviest join the container as of
 /// `bell` while it stays within `g`, the weight of the rest of its galaxy
 /// (holding units): they stand at the throat (reach 0), and the spin they
 /// carried in passes with them to the core (`spun`), never lost; the rest
@@ -133,7 +133,7 @@ pub fn recycle(motes: &mut Vec<Mote>, at: &[usize], b: &Ratio, s: &Ratio, g: &Ra
     let e = b.clone() * s.clone();
     let built = s.clone() / (s.clone() + e.clone());
     let mut stack: Vec<usize> = at.iter().copied().filter(|&i| i < motes.len()).collect();
-    // CONSTRUCTED: each kind's share pressed like with like on the rung.
+    // Constructed: each kind's share pressed like with like on the rung.
     let mut load: Vec<(usize, u32, Ratio)> = Vec::new();
     let mut light = ratio(0, 1);
     for &i in &stack.clone() {
@@ -164,7 +164,7 @@ pub fn recycle(motes: &mut Vec<Mote>, at: &[usize], b: &Ratio, s: &Ratio, g: &Ra
         }
     }
     out.light = light.clone();
-    // DECONSTRUCTED: the reverberation with construction's light, shared by
+    // Deconstructed: the reverberation with construction's light, shared by
     // holding over the load, each kind peeled loosest first.
     let pool = e + light;
     let whole = load.iter().fold(ratio(0, 1), |acc, (_, z, n)| acc + n.clone() * ratio(i64::from(nuclide_hold(*z)), 1));
@@ -211,30 +211,30 @@ pub fn recycle(motes: &mut Vec<Mote>, at: &[usize], b: &Ratio, s: &Ratio, g: &Ra
             emit(Some(crate::chem::hydrogen()), h_total, motes, &mut stack);
         }
     }
-    // THE GALAXY'S PUSH SORTS THE PRODUCTS (operator 2026-10-19: "build it
-    // with the galaxy's push ... the orbit of the galaxy is the fuel for the
-    // cores as spinning pressure of torsion - where the weight of the galaxy
-    // is equal to the amount of pressure in the core"; and "the vacuum has to
-    // have equal or greater pressure to consume than the continuum to release
-    // and push - this is how you get the equilibrium on magnetism of the
-    // heavier elements"). Each product stands at its OWN reach, `R = ℓ/H`
-    // (its state, carried), and is TRAPPED where the vacuum's pull there, the
+    // The galaxy's push sorts the products (ruling of 2026-10-19: built with
+    // the galaxy's push; the orbit of the galaxy is the fuel for the cores as
+    // spinning pressure of torsion, the weight of the galaxy equal to the
+    // amount of pressure in the core; and the vacuum must have equal or
+    // greater pressure to consume than the continuum to release and push,
+    // which yields the equilibrium on magnetism of the heavier
+    // elements). Each product stands at its own reach, `R = ℓ/H`
+    // (its state, carried), and is trapped where the vacuum's pull there, the
     // deficit `H/(R + H)`, is equal to or greater than the continuum's push
     // `p`: the core's own hold law (`pulse::push_cut`). The rest leaves on
     // the continuum.
-    // THE INVERSION (operator 2026-10-19: "the vacuum and the continuum must
+    // The inversion (operator 2026-10-19: "the vacuum and the continuum must
     // be mathematically inverted across all dimensional facets"): inversion
-    // through the throat, read on the SHARE, `δ ↦ 1 − δ` (first degree; never
+    // through the throat, read on the share, `δ ↦ 1 − δ` (first degree; never
     // a radius squared, design law 2), turns the vacuum's pull `H/(R + H)`
     // into `R/(R + H)`, the continuum's push, and back; its one
     // fixed point is the throat, `R = H`, both ½. Across the throat the two
     // pressures are the galaxy's weight pressing in and the core's own
-    // pushing out, and the core CONSUMES where the vacuum's is equal or
-    // greater (operator: "the vacuum has to have equal or greater pressure to
-    // consume than the continuum to release and push - this is how you get
-    // the equilibrium on magnetism of the heavier elements"; "the weight of
-    // the galaxy is equal to the amount of pressure in the core"). So the
-    // throat TRAPS, heaviest first, only while the container stays within the
+    // pushing out, and the core consumes where the vacuum's is equal or
+    // greater (ruling of 2026-10-19: the vacuum must have equal or greater
+    // pressure to consume than the continuum to release and push, which
+    // yields the equilibrium on magnetism of the heavier elements; the weight
+    // of the galaxy is equal to the amount of pressure in the core). So the
+    // throat traps, heaviest first, only while the container stays within the
     // weight of the rest of its galaxy: `S + Δ ≤ G − Δ`, room `(G − S)/2`.
     // Past the balance it releases everything; the rest leaves on the
     // continuum.

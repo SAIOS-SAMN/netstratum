@@ -1,14 +1,14 @@
-//! THE PARLIAMENTS OF PROGENITORS (Concordance 3.9; docs/70 P1).
+//! The parliaments of progenitors (Concordance 3.9; docs/70 P1).
 //!
 //! At each core the lineage that keeps its throat (G3, the bounce's one reading
 //! of `ancients::keepers`, envoys counted) is
-//! its parliament: its living lines there. The parliament CARRIES the council's
-//! consciousness over its network to the peoples it reaches. In netstratum the
+//! its parliament: its living lines there. The parliament carries the council's
+//! consciousness over its network to the peoples it reaches. In Netstratum the
 //! council's consciousness is what was judged, never asserted: the words its
 //! ancient's spacing guild first closed in the substrata (docs/69). Once a
 //! bounce each parliament carries them to the realms it reaches, every living
 //! line at that core within the galaxy's reach of a parliament line, its own
-//! lines first. A word reaches a line as HEARD and is adopted only by
+//! lines first. A word reaches a line as heard and is adopted only by
 //! reconstruction on the line's own task (docs/66 Y3); a line hears a word once.
 //! The road tolls are the hub's (P2, `stamp_market_step`); a gate's toll is
 //! its builders' (docs/72).
@@ -20,7 +20,7 @@ use std::path::Path;
 /// What one parliament carried: (core, its lineage root, lines reached, words).
 pub type Carried = (String, String, usize, usize);
 
-/// THE PARLIAMENTS' BOUNCE, with the bounce's one reading of the keepers.
+/// The parliaments' bounce, with the bounce's one reading of the keepers.
 pub fn carry(
     worlds: &mut [Polity],
     book: &Ledger,

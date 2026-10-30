@@ -1,11 +1,11 @@
 //! Object-centric perception: connected components and the operators
-//! that act on OBJECTS rather than the whole grid.
+//! that act on objects rather than the whole grid.
 //!
 //! ARC-AGI-2 evaluation tasks are overwhelmingly object-and-relation
 //! puzzles; grid-global symmetries cannot even express most answers.
 //! This module gives the vocabulary eyes for things: segmentation is
 //! exact (4-connectivity over non-background cells), and every
-//! operator here remains GENERAL — no task knowledge, no fixture
+//! operator here remains general — no task knowledge, no fixture
 //! constant, the no-hardcoding law whole.
 
 use crate::grid::Grid;
@@ -35,7 +35,7 @@ impl Object {
 }
 
 /// The background hue: the most common hue in the grid (ties break
-/// toward the LOWER hue — deterministic, and 0/black wins its ties,
+/// toward the lower hue — deterministic, and 0/black wins its ties,
 /// matching ARC's dominant convention without hardcoding it).
 pub fn background(g: &Grid) -> u8 {
     let mut counts = [0usize; 10];
@@ -131,9 +131,9 @@ pub enum ObjOp {
     CropLargest,
     /// Crop to the bounding box of ALL non-background content.
     CropContent,
-    /// Recolor every object to the hue of the LARGEST object.
+    /// Recolor every object to the hue of the largest object.
     PaintAllLikeLargest,
-    /// Recolor each object by its size RANK into the hue ladder the
+    /// Recolor each object by its size rank into the hue ladder the
     /// observation's largest object wears downward (rank r takes hue
     /// of rank 0 where ambiguous — observation-general, no fixed map).
     /// Kept simple: every object takes the majority hue of the grid's

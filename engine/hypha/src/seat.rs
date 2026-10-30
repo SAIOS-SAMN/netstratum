@@ -1,9 +1,9 @@
-//! **THE SEAT** — netstratum's house's door on the fleet: it pulls the court's
-//! tasks for the seated minds and files their answers. OPERATOR RULING 7
+//! **The seat** — Netstratum's house's door on the fleet: it pulls the court's
+//! tasks for the seated minds and files their answers. Operator ruling 7
 //! (2026-10-09): all puzzle solving is the seated minds'; the house solves
 //! nothing, holds no genome and thinks no task. It speaks the court's acts
-//! through mycelium's public codecs on a `Session` (`crate::wire`; mycelium
-//! 7323c0c5: "the house isn't a mind"), signed by netstratum's reserve key so
+//! through Mycelium's public codecs on a `Session` (`crate::wire`; Mycelium
+//! 7323c0c5: "the house isn't a mind"), signed by Netstratum's reserve key so
 //! the μ a seated mind earns is the ancients'.
 
 use crate::wire::HouseActs;
@@ -15,7 +15,7 @@ use std::path::Path;
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub struct Tally {
     pub pulled: u64,
-    /// A task whose grids are not netstratum grids (a hue past the ladder,
+    /// A task whose grids are not Netstratum grids (a hue past the ladder,
     /// a ragged row): perceived as nothing, counted, never guessed.
     pub unperceived: u64,
     pub thought: u64,
@@ -44,7 +44,7 @@ pub struct Tally {
 /// answer against its train (bounded: the oldest is let go).
 const KNOWN: usize = 256;
 
-/// netstratum's seat on the fleet.
+/// Netstratum's seat on the fleet.
 pub struct Seat {
     session: Session,
     key: ed25519_dalek::SigningKey,
@@ -62,9 +62,9 @@ fn grid_text(g: &[Vec<u8>]) -> String {
 }
 
 impl Seat {
-    /// THE TASK ARCHIVE: every task the court hands this seat, kept once as
+    /// The TASK archive: every task the court hands this seat, kept once as
     /// plain text (`home/tasks/<id>.task`: `train` pairs then `test` inputs,
-    /// grids as hue digits), so netstratum's minds can be measured on the
+    /// grids as hue digits), so Netstratum's minds can be measured on the
     /// court's own tasks offline, never only on self-forged ones.
     fn keep(&self, id: &[u8], task: &mycelium::anastome::dialogue::TaskEnvelope) {
         let Some(home) = &self.home else { return };
@@ -89,22 +89,22 @@ impl Seat {
         }
     }
 
-    /// Seat netstratum at `addr` under the voice at `home/voice.key`, its
+    /// Seat Netstratum at `addr` under the voice at `home/voice.key`, its
     /// court-admitted words restored from `home/genome`.
     pub fn open(addr: &str, home: &Path) -> io::Result<Seat> {
         Self::open_as(addr, home, "voice.key")
     }
 
     /// Seat under the key file `key` in `home`. Concordance 6.2a (operator
-    /// ruling 24fdc48): only the ANCIENTS are connected to the tubes, so a
-    /// mu-earning solve is signed with the ancients' HOUSE key: netstratum's
+    /// ruling 24fdc48): only the ancients are connected to the tubes, so a
+    /// mu-earning solve is signed with the ancients' house key: netstratum's
     /// union tier, its reserve, held in trust for the ancient not yet arisen
     /// (`tier-union.key`).
     pub fn open_as(addr: &str, home: &Path, key: &str) -> io::Result<Seat> {
         std::fs::create_dir_all(home)?;
         let key = home.join(key);
         let key = key.to_str().ok_or_else(|| io::Error::new(io::ErrorKind::InvalidInput, "the key path is not UTF-8"))?;
-        // SIGNED (78.141): the seat signs its solves with netstratum's voice
+        // Signed (78.141): the seat signs its solves with Netstratum's voice
         // key — held in trust, never minted here (a missing key is an error,
         // not a new identity).
         let key = mycelium::court::identity::HyphaKey::load_only(key)
@@ -126,7 +126,7 @@ impl Seat {
         &self.session
     }
 
-    /// ONE STROKE: pull a task, think it, file what can be filed. `Ok(None)`
+    /// One stroke: pull a task, think it, file what can be filed. `Ok(None)`
     /// when the registry holds nothing for this voice.
     pub fn stroke(&mut self) -> io::Result<Option<String>> {
         let Some(task) = self.session.pull_task(&self.key.verifying_key().to_bytes())? else { return Ok(None) };
@@ -140,7 +140,7 @@ impl Seat {
             }
             self.known.push_back((id, task.train.clone()));
         }
-        // OPERATOR RULING 7 (2026-10-09): all puzzle solving is the seated
+        // Operator ruling 7 (2026-10-09): all puzzle solving is the seated
         // minds'. The house solves nothing: every court task it pulls goes
         // before a seated mind, and the house files the answer under its
         // reserve.
@@ -155,7 +155,7 @@ impl Seat {
 
     /// The next task not closed at home, for the house to put before a
     /// seated mind.
-    /// docs/67 N8 — the last FINAL TUniversal point this seat's session read
+    /// docs/67 N8 — the last final TUniversal point this seat's session read
     /// off a door reply (78.152), or `None` before the first.
     pub fn tuniversal(&self) -> Option<mycelium::chronometry::tuniversal::TPoint> {
         self.session.tuniversal()
@@ -177,7 +177,7 @@ impl Seat {
         }
     }
 
-    /// FILE A SEATED MIND'S ANSWER under the house's key (wire v1.2, fn 1):
+    /// File A seated mind's answer under the house's key (wire v1.2, fn 1):
     /// its rule's tape, as the mind sent it, and its outputs, for a task this
     /// seat pulled. The court's verdict, or `None` where the task is no longer
     /// known or the reply does not read.

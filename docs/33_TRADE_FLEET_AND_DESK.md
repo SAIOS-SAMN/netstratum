@@ -62,7 +62,7 @@ distance in melt, player trade desk, and civ-filtered capital books.
 | L5 | **Markets are books on seats.** Unlisted = absent. Archetype filters listings; it does not fork the clearing math. |
 | L6 | **Ideology Bond ≠ market Note.** Tags 33–34 stay ideology; market debt is Note (32). |
 | L7 | **Exact lattice only.** Orbital phase advances on exact rationals / discrete slots — no float ephemeris. |
-| L8 | **No undervied dials.** Hull grades and costs derive from existing ladders (refinement, instrument grade, sealed parameters) or mint as approved-seed with ratchet honesty. |
+| L8 | **No undervied dials.** Hull grades and costs derive from existing ladders (refinement, instrument grade, sealed parameters) or mint as APPROVED-SEED with ratchet honesty. |
 | L9 | **Solo and interplanetary both.** R1 hearth books and zero-melt same-system hauls are first-class; R2 aperture is the default interstellar door. |
 | L10 | **Combat is Phase 5.** Trade must be fun before interdiction is required. |
 

@@ -38,7 +38,7 @@ The friction-gated ascent/descent it proposes is the landed law:
    in the source reads instead as: holds a seat, carries its key.
 2. **No zero-APERTURE transit.** Value moves only by the two-legged
    conserved aperture — the pair sums to zero, and that zero is the
-   verification (kernel I1; the anti-mirror framing that formerly
+   verification (kernel I1; the ANTI-MIRROR framing that formerly
    carried this citation is deprecated — 12 §2c — and the invariant
    moved home to the judge, unchanged). Telepathy is lawful as
    resonance: a small wrapped key gap prices friction low and bridges

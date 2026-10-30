@@ -1,11 +1,11 @@
-//! THE OBSERVATION — a POSITION, from which every arm is reachable
+//! The observation — a POSITION, from which every arm is reachable
 //! (`19_LENS` §15, operator correction 2026-08-02).
 //!
 //! **Reading is not uni-directional.** The lane's first shape was one
 //! arrow — chain, through an arm, to a display — and each arm was wired
 //! separately toward the same linear end. That is a journal: digital
 //! paper, written once, read front to back. A functioning system does
-//! not read that way. **A reading may be entered from ANY ARM**, and the
+//! not read that way. **A reading may be entered from any arm**, and the
 //! arms are related rather than queued.
 //!
 //! So an observation is not a record produced one way. It is a POSITION:
@@ -27,7 +27,7 @@
 //!        no arm is the entrance; every arm is reachable from any other
 //! ```
 //!
-//! # WHY THIS IS NOT A RECORD
+//! # Why this is not A record
 //!
 //! An `Observation` holds **borrowed** references to the relation and
 //! its observation record, plus four scalars naming where the observer
@@ -40,7 +40,7 @@
 //! expensive: asking for one arm computes exactly one arm. The standing reading at a
 //! position costs nothing until a question is asked of it.
 //!
-//! # WHAT IT STILL MAY NOT DO
+//! # What it still may not do
 //!
 //! Compose all it likes — it never gates. An observation answers
 //! questions and decides nothing, and a caller that branches on one has
@@ -55,7 +55,7 @@ use cfe::dop::ColonyOrb;
 use rfa_core::capacity::{flux, Degree, Flux};
 use rfa_core::{holonomies, Delta, Support};
 
-/// WHERE AN OBSERVER STANDS, and everything reachable from there.
+/// Where an observer stands, and everything reachable from there.
 ///
 /// Borrowed, never owning. Constructing one is free; every arm below
 /// derives when asked.
@@ -112,7 +112,7 @@ impl<'a> Observation<'a> {
         self
     }
 
-    /// The instrument this position looks through — the ELEVEN fixed
+    /// The instrument this position looks through — the eleven fixed
     /// harmonic channels of the substrate. A position parameter, read
     /// back plainly like [`Self::granted`]; it is not a reading.
     ///
@@ -127,33 +127,33 @@ impl<'a> Observation<'a> {
         self.capacity.admits(self.depth)
     }
 
-    // ── THE ARMS. Each derives on demand; none is privileged. ─────────
+    // ── the arms. Each derives on demand; none is privileged. ─────────
 
-    /// ARM — the peel. What the relation is made of, at this depth.
+    /// Arm — the peel. What the relation is made of, at this depth.
     pub fn view(&self) -> View {
         crate::observer::observe(self.delta, self.support, self.depth, &self.capacity)
     }
 
-    // THE STANDING ARM IS GONE (operator ruling 2026-08-04): it
+    // The standing arm is gone (operator ruling 2026-08-04): it
     // rendered which of four rows a state occupied, and both the rows
     // and the mint gate they fed are struck. What it uniquely offered —
     // the circulation count — is still reachable through the peel arm
     // below, so no reading was lost with it.
 
-    /// ARM — the flux census. What sources, what sinks, what balances.
+    /// Arm — the flux census. What sources, what sinks, what balances.
     /// **Divergence sources; convergence sinks** — both poles named.
     pub fn flux(&self) -> Flux {
         flux(self.delta)
     }
 
-    /// ARM — the luminal. What emerges at this phase through this
-    /// aperture. Reads THROUGH the peel arm, which is the composition
+    /// Arm — the luminal. What emerges at this phase through this
+    /// aperture. Reads through the peel arm, which is the composition
     /// that was there from the start.
     pub fn luminal(&self) -> Luminal {
         emerge(self.delta, &self.view(), &self.phase, &self.aperture)
     }
 
-    /// ARM — the elevation. How high this state stands.
+    /// Arm — the elevation. How high this state stands.
     ///
     /// Reachable from the peel arm, and also directly: an observer that
     /// wants only the degree does not pay for the entries.
@@ -169,7 +169,7 @@ impl<'a> Observation<'a> {
         }
     }
 
-    /// ARM — the regard. This observer's sensitivity across the OPEN
+    /// Arm — the regard. This observer's sensitivity across the open
     /// set of books it keeps, derived from committed state on demand.
     ///
     /// An observer that has not been named keeps no books, and the

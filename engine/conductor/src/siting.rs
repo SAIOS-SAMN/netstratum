@@ -1,17 +1,17 @@
-//! **THE DIOPHANTINE GENERATOR** (DIO-1, operator-ruled 2026-08-16) —
-//! planetary siting on EXACT RATIONAL orbital tracks, drawn CONTINUOUSLY.
+//! **The diophantine generator** (DIO-1, operator-ruled 2026-08-16) —
+//! planetary siting on exact rational orbital tracks, drawn continuously.
 //!
 //! **The ruling (why).** The engine is exact-rational (ℤ/ℚ) and
 //! replay-exact: no float, no root ever forms in consensus state. The one
 //! remaining irrational threat is the orbital angular step `Δθ = √(M/r³)`.
-//! The fix is to site planets ONLY on tracks whose `r` is chosen so the
+//! The fix is to site planets only on tracks whose `r` is chosen so the
 //! Keplerian relation `r³ = P²·M` holds in exact rationals.
 //!
 //! **The (M, M) base pair.** Kepler is `r³ = P²·M`. Scale a base track by a
 //! rational `k`: `r = r_base·k²`, `P = P_base·k³` preserves `r³ = P²·M`
-//! EXACTLY (`(r_base k²)³ = r_base³ k⁶` and `(P_base k³)² M = P_base² M k⁶`,
-//! equal whenever `r_base³ = P_base² M`). The UNIVERSAL base pair is
-//! `(r_base, P_base) = (M, M)` — because `M³ = M²·M` holds for ANY rational
+//! exactly (`(r_base k²)³ = r_base³ k⁶` and `(P_base k³)² M = P_base² M k⁶`,
+//! equal whenever `r_base³ = P_base² M`). The universal base pair is
+//! `(r_base, P_base) = (M, M)` — because `M³ = M²·M` holds for any rational
 //! `M`. So a lawful track is:
 //!
 //! ```text
@@ -19,27 +19,27 @@
 //! ```
 //!
 //! with `M` the star's mass. Because `P = M·k³` is exact rational, the
-//! angular step `Δθ = 360/P` is EXACT — `√(M/r³)` is never formed. The clock
+//! angular step `Δθ = 360/P` is exact — `√(M/r³)` is never formed. The clock
 //! that reads this track ([`cfe::thermal::local_years`]) is now a pure
 //! rational floor `⌊T/P⌋`, no integer square root.
 //!
-//! **k is CONTINUOUS, not a lattice.** The orbital phase space is a
-//! continuous foliation of S¹ manifolds; `k ∈ ℚ⁺` selects one. We DRAW `k`
+//! **k is continuous, not a lattice.** The orbital phase space is a
+//! continuous foliation of S¹ manifolds; `k ∈ ℚ⁺` selects one. `k` is drawn
 //! continuously from the beacon —
 //! `k = k_center + (draw − 1/2)·spread`, an exact Ratio — so the orbit lands
-//! ANYWHERE in a continuous window, deterministic and replay-exact. We never
-//! invert `r = M·k²` (which would need a root); we draw `k` and forward-form
-//! `r`.
+//! anywhere in a continuous window, deterministic and replay-exact. `r = M·k²`
+//! is never inverted (which would need a root); `k` is drawn and `r`
+//! forward-formed.
 //!
-//! **THE GATE IS PRODUCTION'S OWN VIABILITY (ONT-1d part 3).** A candidate
-//! draw is scored by [`cfe::almanac::substrate_viability`] — the SAME
+//! **The gate is production's own viability (ONT-1d part 3).** A candidate
+//! draw is scored by [`cfe::almanac::substrate_viability`] — the same
 //! `habitability_flux(clade) · phase_feasibility(metabolism)` product that
 //! `carrying_capacity` reads. If a draw lands below the derived floor the draw
 //! advances deterministically (a suffixed beacon domain) until it clears, so a
-//! line self-corrects toward the orbit where it can actually PRODUCE, one
+//! line self-corrects toward the orbit where it can actually produce, one
 //! geometry, no two-viabilities seam. (Earlier DIO-1 scored a shared, species-
 //! blind thermal-coverage η here; that mesic tent could not tell a plasma from
-//! a phototroph, and it is retired.) The k-window per regime only BOUNDS the
+//! a phototroph, and it is retired.) The k-window per regime only bounds the
 //! search; the species-relative gate PLACES the niche within it — re-measured
 //! 2026-10-18 under the linear thermal law to seat the plasma in the furnace
 //! (k ∈ [4/12, 6/12]) where its clade band and plasma phase both hold, and the
@@ -85,21 +85,21 @@ fn track(mass: &Ratio, k: &Ratio) -> (Ratio, Ratio) {
     (mass.clone() * k2, mass.clone() * k3)
 }
 
-/// **THE TRUNCATION BOUNDARY** — quantize `k` onto the orbit sub-lattice
-/// `k_grained = round(k·G)/G` (G = [`cfe::almanac::ORBIT_GRAIN`]) IMMEDIATELY
-/// after the beacon draw and BEFORE any exponentiation. The beacon expands to a
+/// **The truncation boundary** — quantize `k` onto the orbit sub-lattice
+/// `k_grained = round(k·G)/G` (G = [`cfe::almanac::ORBIT_GRAIN`]) immediately
+/// after the beacon draw and before any exponentiation. The beacon expands to a
 /// rational with a 2¹²⁸ denominator; `r = M·k²` squares it and the incident
 /// flux `∝ k⁴` takes it toward 2⁵¹², so every downstream exact-rational
 /// operation drowns in a GCD cascade (the denominator-explosion that stalled
 /// the beat). Graining bounds the denominator — and thus the memory footprint —
-/// to `G`, restoring O(1) arithmetic, while keeping `k` EXACTLY rational so the
+/// to `G`, restoring O(1) arithmetic, while keeping `k` exactly rational so the
 /// Diophantine track (`r³ = P²M`, perfect-square `P²`) stays exact.
 fn grain_k(k: &Ratio) -> Ratio {
     let g = cfe::almanac::ORBIT_GRAIN;
     (k.clone() * ratio(g, 1)).round() / ratio(g, 1)
 }
 
-/// **THE DIOPHANTINE SITING** — the first viable continuous draw of a
+/// **The diophantine siting** — the first viable continuous draw of a
 /// line's regime (05 §3.1), kept as the reference reading. Genesis no longer
 /// imposes it: the band chooses among [`founding_options`] instead.
 ///
@@ -109,13 +109,13 @@ pub(crate) fn diophantine_siting(
     beacon: &Beacon,
 ) -> (StarClass, Ratio, Ratio) {
     // Every derived world sits under a G sun (05 §3.1); the spec overrides
-    // the class when it pins one. M = 1 for G, so r = k² here — but we read
-    // mass() so the generator is star-general the moment the class changes.
+    // the class when it pins one. M = 1 for G, so r = k² here — but mass()
+    // is read so the generator is star-general the moment the class changes.
     let class = StarClass::G;
     let mass = class.mass();
     let (albedo, k_center, _) = regime(civilization, beacon);
 
-    // THE VIABILITY FLOOR, DERIVED (not tuned): at least 1/HALVING of the
+    // The viability floor, derived (not tuned): at least 1/HALVING of the
     // band optimum. A reading, not a dial.
     let floor = ratio(1, HALVING);
 
@@ -141,21 +141,21 @@ pub(crate) fn diophantine_siting(
 /// Albedo + the continuous k-window, per regime: `(albedo, k_center,
 /// k_half)`. A mesic metabolism draws `k` from a temperate window centred
 /// just below `k = 1`; a furnace metabolism (mineral/plasmic, 12_UNION §5a)
-/// from a HOTTER window. Every bound is `twelfths` of a bound integer, so no
+/// from a hotter window. Every bound is `twelfths` of a bound integer, so no
 /// literal dial enters.
 fn regime(civilization: &Civilization, beacon: &Beacon) -> (Ratio, Ratio, Ratio) {
     let plasmic = civilization.metabolism.as_str() == "plasmic";
     let furnace = matches!(civilization.metabolism.as_str(), "mineral" | "plasmic");
     if plasmic {
-        // ONT-1d part 3 — THE PLASMA NICHE, DERIVED FROM THE GATE. Re-measured
-        // 2026-10-18 under era 1's LINEAR thermal law (`T = K·L(1−A)/r`,
+        // ONT-1d part 3 — the plasma niche, derived from the gate. Re-measured
+        // 2026-10-18 under era 1's linear thermal law (`T = K·L(1−A)/r`,
         // bc6471f; the 2026-08-18 window [2/12, 4/12] was measured under the
         // quartic law and now lands in dead orbit, too hot for the clade band
         // tent): a plasmiform line (HyperThermal clade band × plasma phase
         // feasibility) clears its `substrate_viability` floor (1/HALVING) for
-        // k ∈ [8/24, 10/24] at every albedo of its set, and reads ZERO for
+        // k ∈ [8/24, 10/24] at every albedo of its set, and reads zero for
         // k ≤ 6/24 (too hot) and k ≥ 19/24 (too cold for plasma). The
-        // plasma's OWN window: centre k = 5/12 (r ≈ 0.17, clearing at every
+        // plasma's own window: centre k = 5/12 (r ≈ 0.17, clearing at every
         // albedo), half 1/12, so k ∈ [4/12, 6/12].
         let albedos = [ratio(1, 2), ratio(9, 20), ratio(2, 5)];
         let drawn = beacon.uniform_index("genesis.plasmic.albedo", albedos.len() as u64) as usize;
@@ -176,7 +176,7 @@ fn regime(civilization: &Civilization, beacon: &Beacon) -> (Ratio, Ratio, Ratio)
     }
 }
 
-/// THE CONTINUOUS DRAWS — `REROLL_LIMIT` grained `k` across the regime's
+/// The continuous draws — `REROLL_LIMIT` grained `k` across the regime's
 /// window, each from its own beacon domain (`genesis.diophantine.k.{n}`), in
 /// order; `None` where a draw lands non-positive. `k = center + (draw −
 /// 1/2)·(2·half)` sweeps `[center − half, center + half)`.
@@ -187,16 +187,16 @@ fn draws(civilization: &Civilization, beacon: &Beacon) -> Vec<Option<Ratio>> {
     (0..REROLL_LIMIT)
         .map(|attempt| {
             let unit = beacon.draw(&format!("genesis.diophantine.k.{attempt}")); // ∈ [0, 1)
-            // Grain k HERE — before track() exponentiates it (see grain_k).
+            // Grain k here — before track() exponentiates it (see grain_k).
             let k = grain_k(&(k_center.clone() + (unit - half.clone()) * full_width.clone()));
             (k > ratio(0, 1)).then_some(k)
         })
         .collect()
 }
 
-/// ONT-1d part 3 — THE ONE VIABILITY a line reads at an orbit: its clade's
+/// ONT-1d part 3 — the one viability a line reads at an orbit: its clade's
 /// band × its metabolism's phase, at the incident flux of `class` through
-/// `albedo` at `r` (`cfe::almanac::substrate_viability`, the SAME product
+/// `albedo` at `r` (`cfe::almanac::substrate_viability`, the same product
 /// `carrying_capacity` reads). A fresh siting has no world yet, so aridity is
 /// neutral (the solid/organic phases ignore it).
 pub(crate) fn viability_at(civilization: &Civilization, class: StarClass, albedo: &Ratio, r: &Ratio) -> Ratio {
@@ -211,7 +211,7 @@ pub(crate) fn viability_at(civilization: &Civilization, class: StarClass, albedo
     cfe::almanac::substrate_viability(clade, metab, &t_eq4, &ratio(1, 1))
 }
 
-/// ONE PLACE A FOUNDING BAND COULD SETTLE, as the physics reads it.
+/// One place A founding band could settle, as the physics reads it.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct SiteOption {
     pub class: StarClass,
@@ -223,8 +223,8 @@ pub(crate) struct SiteOption {
     pub home: bool,
 }
 
-/// **THE FOUNDING OPTIONS** (G2, operator 2026-10-07: "only give them
-/// options, freedom, and agency"). Where a band COULD settle: its compiled
+/// **The founding options** (G2, ruling of 2026-10-07: bands are given
+/// options, freedom, and agency only). Where a band could settle: its compiled
 /// home when the line has one and the physics admits it (albedo in `[0, 1)`,
 /// orbit `> 0` — the `Unit`/`Positive` doors), and every continuous derived
 /// draw of its regime around every main-sequence sun. Each carries its viability reading.
@@ -253,7 +253,7 @@ pub(crate) fn founding_options(
     // choose. Remnants and the lore exotics are not founding places.
     //
     // Beside the regime's continuous draws (the line's native window), the
-    // OPEN ORBITS: every twelfth of `k` out to `GRAIN/4` whole units
+    // open orbits: every twelfth of `k` out to `GRAIN/4` whole units
     // (`k = n/GRAIN`, `n ∈ 1..=GRAIN·GRAIN/4`), so a line whose clade band
     // lies outside its metabolism's window — a cryogenic biotic, say — can
     // still reach the cold. The window is a bound on the search, not a
@@ -271,11 +271,11 @@ pub(crate) fn founding_options(
     (options, refused)
 }
 
-/// **THE BAND CHOOSES** — a chronicle-seeded proportional draw over the
+/// **The band chooses** — a chronicle-seeded proportional draw over the
 /// options, weighted by viability on the civic lattice
 /// (`⌊viability · LATTICE⌋`, `soc::partition_draw`, salted `founding.site`).
 /// Better land is likelier, never guaranteed; a site the physics reads at
-/// zero carries no weight. When NO option is viable the band still settles
+/// zero carries no weight. When no option is viable the band still settles
 /// somewhere — the draw goes uniform and the physics decides what follows.
 /// `None` only for an empty option list. Exact-integer, replay-exact.
 pub(crate) fn choose_site(options: &[SiteOption], seed: [u8; 32]) -> Option<usize> {
@@ -316,7 +316,7 @@ mod tests {
 
     #[test]
     fn every_track_is_exact_and_keplerian() {
-        // r³ = P²·M holds EXACTLY for a continuous sweep of k — the
+        // r³ = P²·M holds exactly for a continuous sweep of k — the
         // Diophantine invariant, checked without ever forming a root.
         let m = StarClass::G.mass();
         for n in 1..=40i64 {
@@ -351,10 +351,10 @@ mod tests {
 
     #[test]
     fn a_plasmic_line_sites_viable_and_hot() {
-        // ONT-1d part 3 — THE LIVE PLASMIC NICHE. The only roster line that
-        // DERIVES a plasmic orbit (Coronal Choir, clade `plasmiform` = 12) must
-        // site where its NEW gate — `substrate_viability` — actually clears the
-        // floor: a hot world where the HyperThermal clade band AND the plasma
+        // ONT-1d part 3 — the live plasmic niche. The only roster line that
+        // derives a plasmic orbit (Coronal Choir, clade `plasmiform` = 12) must
+        // site where its new gate — `substrate_viability` — actually clears the
+        // floor: a hot world where the HyperThermal clade band and the plasma
         // phase feasibility both read high. This pins the real niche, unlike the
         // furnace test above (empty clade → mesic default), which pins only the
         // window geometry.
@@ -376,7 +376,7 @@ mod tests {
 
     #[test]
     fn distinct_digests_site_distinct_orbits() {
-        // The draw is CONTINUOUS: two different digests land on different
+        // The draw is continuous: two different digests land on different
         // exact orbits (not snapped to a shared seat).
         let a = diophantine_siting(&civ("biotic"), &Beacon::from_digest([1u8; 32]));
         let b = diophantine_siting(&civ("biotic"), &Beacon::from_digest([2u8; 32]));

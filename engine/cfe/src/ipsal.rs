@@ -4,10 +4,10 @@
 //! tag on every receipt it forges.
 //!
 //! The containment law: a SOVEREIGN (no principal) holds every
-//! scope by construction. An AGENT holds exactly the scopes its
+//! scope by construction. An agent holds exactly the scopes its
 //! principal granted, checked at every action, revocable at any time.
 //! Agents are citizens, governed by containment, never by prohibition
-//! (CHARTER §3.4).
+//! (Charter §3.4).
 //!
 //! Generation tagging: an action receipt's provenance is the acting
 //! entity's id. No game rule may branch on provenance — it rides

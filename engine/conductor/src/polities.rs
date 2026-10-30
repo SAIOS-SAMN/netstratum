@@ -1,14 +1,14 @@
-//! **THE DEFINITION LAW** (lens-lane ruling, 2026-08-05, on operator
-//! order: *we can't have JSON files hanging around our Rust codebase —
-//! make a ruling on your lane*).
+//! **The definition law** (lens-lane ruling, 2026-08-05, on an operator
+//! order: JSON files may not stand in the Rust codebase, and the lens
+//! lane rules on its own lane).
 //!
-//! > **A definition COMPILES. Only a receipt PERSISTS.**
-//! > No file may say what EXISTS; a file may only say what HAPPENED.
+//! > **A definition compiles. Only a receipt persists.**
+//! > No file may say what exists; a file may only say what happened.
 //!
 //! This module used to open with the opposite creed — *"lore lives in
 //! data, not source"* — and seeded `<var>/polities.json` for the
 //! operator to hand-edit. That is struck. The roster is source now, and
-//! the roster is the ONLY roster.
+//! the roster is the only roster.
 //!
 //! **Why, in four measured parts.**
 //!
@@ -19,42 +19,42 @@
 //!    refused to overwrite. So the fallback was not a rare path — it was
 //!    the path, and a board on it ran five lines, all `station: None`,
 //!    all T3, with the whole progenitor band structurally absent. The
-//!    previous revision of this file DOCUMENTED that in a comment and
+//!    previous revision of this file documented that in a comment and
 //!    left both copies standing. Two truths do not stay equal; they take
 //!    turns being wrong.
 //!
 //! 2. **§11 rule 2 already forbade it.** *Views derive from the chain,
 //!    disposable, never read back* (`SYSTEM_SPEC` §11, `19_LENS` §15a).
 //!    `recurrence_guard.rs` enforces it with an adopted debt list that
-//!    "never grows" — and `polities.rs` was ON that list. This is not a
-//!    new law; it is an unpaid one. The list SHRINKS by one here, which
+//!    "never grows" — and `polities.rs` was on that list. This is not a
+//!    new law; it is an unpaid one. The list shrinks by one here, which
 //!    is the only direction it is allowed to move.
 //!
 //! 3. **The roster is consensus-relevant, so a file cannot hold it.**
 //!    Which lines exist decides which worlds emit receipts, which decides
 //!    what mints. Two nodes with different `polities.json` derive
-//!    different universes from the same chain. THE UPLINK LAW already
+//!    different universes from the same chain. The uplink law already
 //!    says nothing file-borne rides the mesh; a definition outside the
 //!    chain is that violation waiting for a second node to exist.
 //!
 //! 4. **The parser failed silently, in geometry.** The struck loader
 //!    brace-counted objects ("strings hold no braces" — a motto with a
 //!    `{` broke it), found keys with `text.find("\"name\"")` (which
-//!    matches INSIDE a value), and defaulted a missing `x`/`y`/`z` to
+//!    matches inside a value), and defaulted a missing `x`/`y`/`z` to
 //!    `ratio(0, 1)`. A typo'd coordinate key did not refuse — it sited
-//!    the world at the ORIGIN, on top of whatever else was there. A
+//!    the world at the origin, on top of whatever else was there. A
 //!    mistyped star word did not refuse either; it silently un-pinned a
 //!    thermal seat and let it derive. None of those can be typed wrong
 //!    here, because the compiler reads this file.
 //!
-//! **What is NOT struck.** Chronicles, spines, receipts and `.tlv`
-//! segments stay on disk and stay read at boot — they are what HAPPENED,
+//! **What is not struck.** Chronicles, spines, receipts and `.tlv`
+//! segments stay on disk and stay read at boot — they are what happened,
 //! and a world that forgets is not a world. The law bars definitions in
 //! files, never receipts.
 //!
 //! **How a line is added now.** Through the receipted door: the CLI's
 //! `civ new` verb, which emits a receipt for the birth. Editing a JSON
-//! roster created a civilization with NO receipt — the definition simply
+//! roster created a civilization with no receipt — the definition simply
 //! appeared. That door is now closed, which is the point.
 
 use crate::{Policy, PolitySpec};
@@ -103,8 +103,8 @@ fn seat(
         colony: colony.into(),
         policy,
         position,
-        // BOT-THERM: a seat is PINNED (star, albedo, orbit together) or
-        // DERIVED (all three absent — the orbit falls out at genesis from
+        // BOT-THERM: a seat is pinned (star, albedo, orbit together) or
+        // derived (all three absent — the orbit falls out at genesis from
         // the registry axes through the chronicle beacon). The struck
         // file shape allowed the incoherent middle, where a star was
         // pinned and its albedo silently defaulted. One `Option` of a
@@ -119,27 +119,27 @@ fn seat(
     }
 }
 
-/// **THE AEON 1 ROSTER — the one roster, compiled.**
+/// **The AEON 1 roster — the one roster, compiled.**
 ///
 /// Absorbed from the struck `seeds/aeon1-polities.json` (19 entries),
-/// which was neither read by the engine nor kept in step with it. THE
-/// LOCALITY-ANCHORED NAMES applied as ruled (`06_CIVILIZATIONS` §2a):
+/// which was neither read by the engine nor kept in step with it. The
+/// locality-anchored names applied as ruled (`06_CIVILIZATIONS` §2a):
 /// Deep Chorus → **Echowright** (operator-ruled), Hivelight → **Vitreous
-/// Hex**, Eightfold → **Brine Cortex**, and Slagborn STANDS (its rename
+/// Hex**, Eightfold → **Brine Cortex**, and Slagborn stands (its rename
 /// was declined). The live `var/registry/*.json` cards already carried
 /// those three names while the durable roster did not — the mismatch
 /// `ENDOWMENTS.md` inventories. Compiling the roster resolves it: one
 /// name, one place.
 ///
-/// **THE CLASS PARTITION** (identity re-key #5, 2026-08-14).
+/// **The class partition** (identity re-key #5, 2026-08-14).
 ///
 /// The roster is keyed to the game's own SCI-FI taxonomy — substrate
 /// (biotic · mineral · plasmic · element-eater), clade (the biological
 /// form), thermal band, and tier — never to Earth myth or esoterica.
 /// Names that once carried occult/contactee baggage were retired for
-/// coined netstratum-native ones; the STRUCTURE they anchor is unchanged.
+/// coined netstratum-native ones; the structure they anchor is unchanged.
 ///
-/// Six of the founding lines are not decoration — they ARE the taxon
+/// Six of the founding lines are not decoration — they are the taxon
 /// partition (`15_TAXON` §2): class 7 (apex-solitary) is seated by
 /// Sylvane and Forgeborn and by nobody else, so the class stands or
 /// falls with them; and clade 19 `draconic` (the 2026-08-01 ruling —
@@ -150,9 +150,9 @@ fn seat(
 pub fn founding_polities() -> Vec<PolitySpec> {
     let g_half = || Some((StarClass::G, ratio(1, 2), ratio(1, 2)));
     vec![
-        // ── THE ELDEST LINES (once the progenitor band) ───────────────
+        // ── the eldest LINES (once the progenitor band) ───────────────
         // No line is seated a progenitor or a sovereign at founding
-        // (operator 2026-10-21, "realms EMERGE, not drawn"): a progenitor
+        // (operator 2026-10-21, "realms emerge, not drawn"): a progenitor
         // is the line whose lineage folds a gate (`ascension`), a sovereign
         // the line whose lineage holds its own star system. Tunborn is the
         // Slagborn line's own head (`12_UNION` §2, 2026-07-30).
@@ -164,7 +164,7 @@ pub fn founding_polities() -> Vec<PolitySpec> {
             "tun-reach", "husk", "first-wake", Policy::Steady,
             (ratio(2, 1), ratio(-3, 1), ratio(1, 1)), g_half(),
         ),
-        // CLASS 7 — apex-solitary. Seated by these two and no others,
+        // Class 7 — apex-solitary. Seated by these two and no others,
         // so the class stands or falls with them (`15_TAXON` §2 / 37).
         seat(
             "Sylvane", "sylvane", "ailuroform-primus", "ailuroform",
@@ -175,7 +175,7 @@ pub fn founding_polities() -> Vec<PolitySpec> {
             (ratio(1, 1), ratio(1, 1), ratio(1, 1)), None,
         ),
         seat(
-            // FLATLANDER BASELINE seat (clade bimaniform) — knowledge baseline
+            // Flatlander baseline seat (clade bimaniform) — knowledge baseline
             // for design; extract+regen both natural (EconomicMode::Balanced).
             "Forgeborn", "forgeborn", "bimaniform-flatlander", "bimaniform",
             "we plan in stone and fire; we no longer dig",
@@ -184,7 +184,7 @@ pub fn founding_polities() -> Vec<PolitySpec> {
             "forge-reach", "anvil-spire", "deepforge", Policy::Industry,
             (ratio(8, 1), ratio(3, 1), ratio(5, 1)), g_half(),
         ),
-        // CLASS 2 — geodic-lithovore, beside Slagborn and Tunborn.
+        // Class 2 — geodic-lithovore, beside Slagborn and Tunborn.
         seat(
             "Corebound", "corebound", "lithophage-stonewill", "lithophage",
             "the surface is weather; we are the world",
@@ -202,8 +202,8 @@ pub fn founding_polities() -> Vec<PolitySpec> {
             "corona-sea", "prominence", "current-sheet", Policy::Steady,
             (ratio(15, 1), ratio(15, 1), ratio(-6, 1)), None,
         ),
-        // ── THE WATCHER BAND (T1) ─────────────────────────────────────
-        // CLASS 4 — telepathic-resonant. Stillcold and Umbrid are ONE
+        // ── the watcher band (T1) ─────────────────────────────────────
+        // class 4 — telepathic-resonant. Stillcold and Umbrid are one
         // archetype at two clades (operator ruling 2026-08-01): class is
         // the shared identity, clade is how it is expressed, and any
         // mechanic keyed on class sees them as one line.
@@ -232,7 +232,7 @@ pub fn founding_polities() -> Vec<PolitySpec> {
             "coralline-hearth", "coralline-prime", "first-coralline", Policy::Steady,
             (ratio(12, 1), ratio(0, 1), ratio(0, 1)), None,
         ),
-        // ── THE OBSERVER BAND (T1) ────────────────────────────────────
+        // ── the observer band (T1) ────────────────────────────────────
         // Clade 19 `draconiform` — the saurian sub-archetype the 2026-08-01
         // ruling exists to seat. Same class as Stillcold, a different
         // expression of it.
@@ -245,7 +245,7 @@ pub fn founding_polities() -> Vec<PolitySpec> {
             (ratio(-11, 1), ratio(16, 1), ratio(4, 1)),
             Some((StarClass::K, ratio(1, 4), ratio(3, 4))),
         ),
-        // ── THE ARCHIVISTS (12_UNION §2a) ──────────────────────────────
+        // ── the archivists (12_UNION §2a) ──────────────────────────────
         // Stelahold · Tallykeep · Glyphward, the ledger-integrity and
         // calendar-keeping lineages descended from the Forgeborn domain;
         // sovereign only when their lineage holds its own system.
@@ -276,7 +276,7 @@ pub fn founding_polities() -> Vec<PolitySpec> {
             (ratio(11, 1), ratio(27, 1), ratio(-5, 1)),
             Some((StarClass::A, ratio(1, 5), ratio(1, 1))),
         ),
-        // ── THE UNSEATED LINES (T3 — `tier_of(None)`) ─────────────────
+        // ── the unseated LINES (T3 — `tier_of(None)`) ─────────────────
         // Species strings = imperium tongue (37); never Earth common names.
         // Clade field = imperium word (legacy English still parses).
         seat(
@@ -362,15 +362,15 @@ pub fn founding_polities() -> Vec<PolitySpec> {
     ]
 }
 
-/// **THE PLACEMENT** — a registered line's coordinates, derived exactly
+/// **The placement** — a registered line's coordinates, derived exactly
 /// from its sigil.
 ///
 /// FNV-1a over the sigil bytes, then three coordinates in `-31..=31`.
-/// Deliberately NOT a [`physics::Beacon`] draw: the beacon's law is that
+/// Deliberately not a [`physics::Beacon`] draw: the beacon's law is that
 /// every draw derives from a receipt digest already in the chronicle
-/// (CHARTER §9), and a line being placed has no chronicle yet. Seeding a
+/// (Charter §9), and a line being placed has no chronicle yet. Seeding a
 /// beacon from a name instead would have bought convenience by widening
-/// the one law that makes replay work. This is a PLACEMENT — a pure
+/// the one law that makes replay work. This is a placement — a pure
 /// function of a stable identity, deterministic, exact, integer-only —
 /// and it claims nothing about randomness.
 fn placement(sigil: &str) -> (i64, i64, i64) {
@@ -384,12 +384,12 @@ fn placement(sigil: &str) -> (i64, i64, i64) {
     (axes[0], axes[1], axes[2])
 }
 
-/// **THE REGISTERED LINES** — every civilization in the registry that
+/// **The registered LINES** — every civilization in the registry that
 /// the compiled roster does not already name.
 ///
 /// This is what replaces the struck `polities.json` append. `civ new`
-/// registers a line and stops there; the registry card is a RECEIPT (a
-/// registration HAPPENED), which the definition law admits, and the
+/// registers a line and stops there; the registry card is a receipt (a
+/// registration happened), which the definition law admits, and the
 /// conductor derives the rest rather than reading it back. The card
 /// carries identity — name, axes, station, lineage — and everything
 /// spatial falls out of the sigil, so there is nothing left for a file
@@ -471,7 +471,7 @@ pub fn registered_polities(registry: &ledger::registry::Registry) -> Vec<PolityS
     grown
 }
 
-/// **IS THIS WORLD NAME TAKEN?** A world directory belongs to exactly one
+/// **Is this WORLD NAME taken?** A world directory belongs to exactly one
 /// line. A name is taken when a compiled seat founds there or any line's seat
 /// card records it. Measured 2026-10-08: a cleave named `forge-reach` (head
 /// "forge", tail "reach") was seated in Forgeborn's compiled world; the two
@@ -483,7 +483,7 @@ pub fn world_name_taken(registry: &ledger::registry::Registry, world: &str) -> b
         || registry.list().iter().any(|card| registry.founded_at(&card.sigil).is_some_and(|seat| seat.world == world))
 }
 
-/// **THE COMPILED ROSTER'S DIGEST** (docs/58 §3) — what a universe's Big Bang
+/// **The compiled roster's digest** (docs/58 §3) — what a universe's Big Bang
 /// records of who was seated at its founding: every compiled seat's
 /// identity, world and siting, in roster order. A change to any seat is a
 /// different founding.
@@ -506,12 +506,12 @@ pub fn roster_digest() -> [u8; 32] {
     *h.finalize().as_bytes()
 }
 
-/// **THE ROSTER** — the compiled founding lines, then every registered
+/// **The roster** — the compiled founding lines, then every registered
 /// line the operator has raised since. One call, one truth, no file.
 pub fn roster(registry: &ledger::registry::Registry) -> Vec<PolitySpec> {
     let mut all = founding_polities();
     all.extend(registered_polities(registry));
-    // ONE LINE PER WORLD: a spec whose world another line already holds is
+    // One LINE per WORLD: a spec whose world another line already holds is
     // not seated there (two lines writing one directory is the failure
     // `world_name_taken` now prevents at the cleave); it is reported, loudly.
     let mut held = std::collections::BTreeSet::new();

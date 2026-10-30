@@ -5,27 +5,27 @@
 // cognitive content multi-grade structure (superposition state during
 // K-step accumulation)". The Multivector is the substrate's primary
 // algebraic carrier for cognitive content; each plane's coefficient
-// is a `VectorModule<F>` polynomial (NOT a scalar `Rational<F>`),
+// is a `VectorModule<F>` polynomial (not a scalar `Rational<F>`),
 // admitting the `p^N` denominator growth produced by successive
 // transport compositions during K-step accumulation.
 //
-// THE LOAD-BEARING #62.2 LIFT: plane coefficients lift from
+// The load-bearing #62.2 lift: plane coefficients lift from
 // `Rational<F>` to `VectorModule<F>`. The geometric product on two
-// multivectors composes plane-pair sign × plane-pair POLYNOMIAL
-// CONVOLVE — the substrate's natural `p^N` denominator growth lives
+// multivectors composes plane-pair sign × plane-pair polynomial
+// convolve — the substrate's natural `p^N` denominator growth lives
 // in the convolve operation that fires inside every transport
 // composition.
 //
-// LAW IV exact rational — coefficient field is `Rational<F>` (BigRational).
-// LAW V (a) per-axis preserved — multivectors live in distinct fields
+// Law IV exact rational — coefficient field is `Rational<F>` (BigRational).
+// Law V (a) per-axis preserved — multivectors live in distinct fields
 // (`Multivector<Space>` vs `Multivector<Temporal>`); cross-field
 // arithmetic compile-time impossible.
-// LAW XIV no scalars on derivation path — plane coefficients are
+// Law xiv no scalars on derivation path — plane coefficients are
 // `VectorModule<F>` polynomial, never scalar `Rational<F>`.
 //
 // Storage: sparse `Vec<(PlaneIndex, VectorModule<F>)>` sorted by
 // `PlaneIndex` ascending; empty-polynomial coefficients stripped
-// after every operation. The empty multivector IS the algebraic
+// after every operation. The empty multivector is the algebraic
 // identity (additive zero).
 //
 // Mathematical specification:
@@ -37,7 +37,7 @@
 //   Grade:           grade(plane) = popcount(PlaneIndex)
 //
 // Geometric product on basis planes:
-//   result_bitmask = a XOR b              (shared e_i² = +1 drops out)
+//   result_bitmask = a xor b              (shared e_i² = +1 drops out)
 //   result_sign    = product_sign(a, b)   (count plane-swap inversions)
 //
 // Foundational invariants carried:
@@ -64,7 +64,7 @@ use crate::vector_module::{VectorModule, VectorModuleError};
 pub struct PlaneIndex(pub u64);
 
 /// `PLANE_BIT_WIDTH` — the u64 backing's bit-width. Hard cap on
-/// basis-vector index `i`; bit positions `i ∈ [0, 64)`. NOT a doctrinal
+/// basis-vector index `i`; bit positions `i ∈ [0, 64)`. Not a doctrinal
 /// dimensional ceiling — purely the backing-type width. (Named
 /// `BLADE_BIT_WIDTH` until the rotor/blade decommission, 2026-06-11 —
 /// "blade" imports the flat 2-D slice; the carrier components are
@@ -75,7 +75,7 @@ pub const PLANE_BIT_WIDTH: u8 = 64;
 /// with `i < j`, identifying the plane `e_i ∧ e_j`. (The rotor-era
 /// `BivectorIndex` re-homed and renamed at the decommission,
 /// 2026-06-11 — "bivector" imports the flat 2-D projection; the object
-/// is a PLANE of the carrier, named by its generating pair.)
+/// is a plane of the carrier, named by its generating pair.)
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct PairPlane(PlaneIndex);
 
@@ -106,7 +106,7 @@ impl PairPlane {
 pub const PLUS_SIG_BIT: u8 = 14;
 
 /// **`NEG_SIG_BIT`** — conformal-extension negative-signature basis
-/// vector `e_-`. Bit 15 is the ONLY basis vector in the substrate's
+/// vector `e_-`. Bit 15 is the only basis vector in the substrate's
 /// `Cl(F)_{p+1, 1}` with `(e_-)² = -1`; this is the substrate's CGA
 /// negative-signature axis carrier. When the geometric product
 /// `(a · b)` is computed and bit 15 is set in both operands, the
@@ -154,7 +154,7 @@ impl PlaneIndex {
         }
     }
 
-    /// Construct a grade-2 PAIR plane `e_i ∧ e_j` with canonical
+    /// Construct a grade-2 pair plane `e_i ∧ e_j` with canonical
     /// `i < j`. (Named `bivector` until the rotor/blade decommission —
     /// "bivector" imports the flat 2-D projection; the object is a
     /// grade-2 plane of the carrier, named by its generating pair.)
@@ -168,7 +168,7 @@ impl PlaneIndex {
 
     /// **Inversion-parity sign** of the geometric product `self · other`
     /// on basis planes. Returns +1 or -1. Branch-free arithmetic on
-    /// bit parities; no `if parity == 1` LAW I gate.
+    /// bit parities; no `if parity == 1` law I gate.
     pub const fn product_sign(self, other: PlaneIndex) -> i8 {
         let mut sign: i8 = 1;
         let a = self.0;
@@ -192,12 +192,12 @@ impl PlaneIndex {
     ///
     /// Signature handling:
     ///   * Bits 0..=14 are positive-signature (`e_i² = +1`) —
-    ///     shared bits contribute +1 each, dropping out via XOR.
+    ///     shared bits contribute +1 each, dropping out via xor.
     ///   * Bit 15 (`NEG_SIG_BIT`) is negative-signature
     ///     (`e_-² = -1`) — when shared between operands, contributes
     ///     -1, flipping the overall sign once.
     ///
-    /// The XOR result_index is unchanged (shared bits drop out via
+    /// The xor result_index is unchanged (shared bits drop out via
     /// either +1 or -1 contribution; the wedge orientation parity
     /// is computed separately by `product_sign`).
     pub const fn geometric_product(self, other: PlaneIndex) -> (PlaneIndex, i8) {
@@ -233,7 +233,7 @@ impl PlaneIndex {
 /// * No empty-polynomial coefficients (`VectorModule::is_zero()`
 ///   entries stripped after every operation).
 /// * Unbounded plane count — heap `Vec` grows on push.
-/// * All coefficients are `VectorModule<F>` polynomials, NOT scalar
+/// * All coefficients are `VectorModule<F>` polynomials, not scalar
 ///   `Rational<F>`. This is the #62.2 load-bearing lift.
 pub struct Multivector<F: Field> {
     planes: Vec<(PlaneIndex, VectorModule<F>)>,
@@ -279,11 +279,11 @@ impl<F: Field> PartialOrd for Multivector<F> {
 }
 
 impl<F: Field> Ord for Multivector<F> {
-    /// Total order over the FULL grade structure — the canonical sorted
+    /// Total order over the full grade structure — the canonical sorted
     /// plane list `(PlaneIndex, VectorModule<F>)`, then `active_rank`,
     /// then `horizon` — consistent with the three-field `PartialEq`.
-    /// Per LAW XIV: orders the whole multivector, never a grade-0
-    /// projection. Order is a PINNED GAUGE CHOICE (LAW II) — it picks
+    /// Per law xiv: orders the whole multivector, never a grade-0
+    /// projection. Order is a pinned GAUGE choice (law II) — it picks
     /// representatives; it never stands as identity or verdict.
     fn cmp(&self, other: &Self) -> core::cmp::Ordering {
         self.planes
@@ -347,10 +347,10 @@ impl<F: Field> Multivector<F> {
     }
 
     /// **A grade-0-only multivector** — the single plane `PlaneIndex::SCALAR` carries the polynomial
-    /// `coeff`. A general, LAWFUL building block: grade-0 value-in-degree content is legitimate and
+    /// `coeff`. A general, lawful building block: grade-0 value-in-degree content is legitimate and
     /// pervasive across the substrate (spectral signatures, word cochains, shear classes, soundness
     /// spectra — "honest, no higher grade to lose"). The retired `from_scalar_seed` collapse was the
-    /// SAME shape; it differed only in PROVENANCE (a value fabricated from an integer vs. a real
+    /// same shape; it differed only in provenance (a value fabricated from an integer vs. a real
     /// measurement), which structure cannot see — so the collapse is guarded at the source (the
     /// deleted constructor + the grep-gate), never by a structural ban on grade-0 here.
     /// (Renamed from `scalar`: it builds a grade-0 component, it is not "a scalar".)
@@ -387,7 +387,7 @@ impl<F: Field> Multivector<F> {
         self.active_rank
     }
 
-    /// **LAW-XI INHALE — losslessly re-home every plane into a WIDER `active_rank`.**
+    /// **LAW-XI inhale — losslessly re-home every plane into a wider `active_rank`.**
     ///
     /// The dual of `breath::exhale`: a widen carries ALL planes unchanged (each
     /// already fits the smaller rank, so it a-fortiori fits the wider one), so the
@@ -398,7 +398,7 @@ impl<F: Field> Multivector<F> {
     /// on a common basis width (the e₊/e₋ fiber planes pair with inhaled base
     /// content) instead of being refused as an `ActiveRankMismatch`.
     ///
-    /// Refuses a NARROWING target: shrinking the rank is an `exhale` (it would drop
+    /// Refuses a narrowing target: shrinking the rank is an `exhale` (it would drop
     /// out-of-rank planes), which must route through `breath::exhale` so the
     /// displaced content is preserved in the residual — never silently truncated.
     pub fn widened_to_rank(&self, new_rank: u8) -> Result<Self, MultivectorError> {
@@ -430,15 +430,15 @@ impl<F: Field> Multivector<F> {
 
     /// Maximum polynomial dimension (`degree + 1`) across all present
     /// planes — the multivector's polynomial extent. `0` iff the
-    /// multivector is empty. This is the WITHIN-plane polynomial-degree
-    /// measure (the DIM-LIFT.A degree regime), distinct from geometric
+    /// multivector is empty. This is the within-plane polynomial-degree
+    /// measure (the dim-lift.A degree regime), distinct from geometric
     /// grade; a non-empty multivector always reports `dim ≥ 1`.
     ///
     /// **Scope (auditor inscription):** max-across-planes here is a
-    /// WITHIN-CARRIER, WITHIN-AXIS extent read (LAW XIV §4 method
-    /// read on whole content). It is NOT precedent for a cross-axis
+    /// within-carrier, within-axis extent read (law xiv §4 method
+    /// read on whole content). It is not precedent for a cross-axis
     /// `max()` — aggregating an extent across the per-axis sovereign
-    /// fields remains the convicted D4-band shape (LAW V (a)).
+    /// fields remains the convicted D4-band shape (law V (a)).
     pub fn dim(&self) -> usize {
         self.planes.iter().map(|(_, p)| p.dim()).max().unwrap_or(0)
     }
@@ -469,13 +469,13 @@ impl<F: Field> Multivector<F> {
     /// Checked per-plane polynomial addition. Auto-pads shorter-degree
     /// polynomial coefficients with zero coefficients.
     ///
-    /// **RANK MEET BY INHALE (2a supersession — per-axis fiber ranks are real):**
-    /// same-field operands of different `active_rank` meet at the WIDER rank via
+    /// **Rank meet by inhale (2a supersession — per-axis fiber ranks are real):**
+    /// same-field operands of different `active_rank` meet at the wider rank via
     /// the LAW-XI inhale `widened_to_rank` (the canonical inclusion `Cl_r ⊂ Cl_R`
     /// — every plane carried unchanged, lossless, byte-reversible). Capacity is
     /// never content; the former refusal guarded a one-rank era that the rank-10
     /// gauge palette fiber superseded. The inhale's own guard still refuses any
-    /// NARROWING (that is an exhale and must route through `breath::exhale`).
+    /// narrowing (that is an exhale and must route through `breath::exhale`).
     pub fn try_add(&self, other: &Self) -> Result<Self, MultivectorError> {
         if self.active_rank != other.active_rank {
             let meet = self.active_rank.max(other.active_rank);
@@ -548,13 +548,13 @@ impl<F: Field> Multivector<F> {
     ///   * Sign: `a.product_sign(b)` (inversion parity)
     ///   * **Polynomial coefficient: `convolve(p_a, p_b)` × sign**
     ///
-    /// THIS is where the substrate's `p^N` denominator growth from
+    /// This is where the substrate's `p^N` denominator growth from
     /// successive transport compositions lives. Each product convolves
     /// the input plane polynomials, multiplying their effective
     /// denominators by the smooth-prime profile base.
     pub fn geometric_product(&self, other: &Self) -> Result<Self, MultivectorError> {
         if self.active_rank != other.active_rank {
-            // RANK MEET BY INHALE (see `try_add`) — the doc at `widened_to_rank`
+            // Rank meet by inhale (see `try_add`) — the doc at `widened_to_rank`
             // names exactly this use: meet on a common basis width instead of an
             // `ActiveRankMismatch` refusal.
             let meet = self.active_rank.max(other.active_rank);
@@ -622,10 +622,10 @@ impl<F: Field> Multivector<F> {
     }
 
     /// The algebraic identity `1` — the unit polynomial `[1]` at the grade-0
-    /// COORDINATE (`PlaneIndex::SCALAR`), built through the coordinate-addressed
+    /// coordinate (`PlaneIndex::SCALAR`), built through the coordinate-addressed
     /// constructor. The grade-0 coordinate is a legitimate *address* (the
-    /// identity lives there); this is NOT the `scalar`-confinement collapse — it
-    /// is the unit of the FULL algebra, extensible by any other coordinate.
+    /// identity lives there); this is not the `scalar`-confinement collapse — it
+    /// is the unit of the full algebra, extensible by any other coordinate.
     /// Used wherever `1` is structurally required (`1+N`, the `e₀` split).
     pub fn identity(active_rank: u8, horizon: HorizonContext) -> Self {
         Self::from_planes(
@@ -647,12 +647,12 @@ impl<F: Field> Multivector<F> {
     /// residual (the orb's direction); `N` is its projection onto the nilpotent
     /// face of the `e₀` split. The native closure gate `(1+N)(1−N)=1`
     /// empirically self-checks both the nilpotency and the idempotent.
-    /// **The typed unity read — the ONE structural home of the closure
-    /// comparison (LAW I).** Does `self·other` close on the algebra's 1?
+    /// **The typed unity read — the one structural home of the closure
+    /// comparison (law I).** Does `self·other` close on the algebra's 1?
     /// The comparison lives inside this verdict constructor and nowhere
     /// else; engine code consumes the arms (`Closes` / `Open{residual}`)
     /// and never writes the comparison. The open arm carries the residual
-    /// `self·other − 1` whole (LAW V).
+    /// `self·other − 1` whole (law V).
     pub fn unity_verdict(&self, other: &Self) -> Result<UnityVerdict<F>, MultivectorError> {
         let product = self.geometric_product(other)?;
         let one = Self::identity(product.active_rank(), product.horizon());
@@ -1086,7 +1086,7 @@ mod tests {
     fn scalar_content_lands_in_the_unipotent_kernel() {
         // **Collapse witness (the verified=0 base cause).** Grade-0 (scalar)
         // content commutes with e₀, so N=(1−P)·X·P = X·(P−P²) = 0: a scalar
-        // produces NO morphic motion. This is why content folded onto the
+        // produces no morphic motion. This is why content folded onto the
         // scalar plane left the signature byte-identical.
         let scalar_x = Multivector::<Space>::from_planes(
             &[(

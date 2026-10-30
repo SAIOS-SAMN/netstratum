@@ -200,7 +200,7 @@ operator's principle (a fluid, recycling universe; docs/58 §6.4) asks for
 both.
 
 - **The universe's core** is a black hole at the galactic centre (the
-  "Black hole" of MU-lexicon §1: a sink of mass and value at its place). It
+  "Black hole" of MU-LEXICON §1: a sink of mass and value at its place). It
   is a universe-ledger account, exact and receipted. Every sink above
   deposits there instead of vanishing:
   - the melt in transit;
@@ -209,7 +209,7 @@ both.
   - the ancient's tithe, held for the ancient once one arises.
 - **The core's bounce** is the era fold (11_AEON §5) that Netstratum already
   has. When an era closes, everything the core accrued re-enters the next era
-  through its white hole (MU-lexicon §1: a source returning what the black
+  through its white hole (MU-LEXICON §1: a source returning what the black
   hole took). It goes as the new sheet's founding endowments and its veins'
   richness, so matter is conserved across eras exactly. Within an era it flows
   core-ward, as the principle says ("stars orbit cores").

@@ -1,9 +1,9 @@
-//! THE ESTATE SURVEY, GATED — the theorems' kernel half (E5b).
+//! The ESTATE survey, gated — the theorems' kernel half (E5b).
 //!
 //! The emitter's proofs live in `cfe/tests/estate_survey_pins.rs`; here
-//! the GATE holds them: a well-formed survey admits, a partial covering
+//! the gate holds them: a well-formed survey admits, a partial covering
 //! refuses (unwitnessed observations cannot enter), a misquoted meter
-//! refuses (the kernel calls the SAME sealed rule the emitter drew
+//! refuses (the kernel calls the same sealed rule the emitter drew
 //! from), and the draw conserves.
 
 use cfe::dop::{survey_meter, ClosureEvent};
@@ -37,7 +37,7 @@ fn a_lawful_survey_is_admitted() {
 
 #[test]
 fn a_partial_covering_refuses_the_observation() {
-    // THEOREM (witnessed, whole): drop one orb from the covering — the
+    // Theorem (witnessed, whole): drop one orb from the covering — the
     // observation no longer stands over the estate it claims.
     let (prior, next, mut step) = surveyed_transition();
     let ClosureEvent::EstateSurveyed { covered, .. } = &mut step.event else {
@@ -61,7 +61,7 @@ fn a_partial_covering_refuses_the_observation() {
 
 #[test]
 fn a_misquoted_meter_refuses() {
-    // THEOREM (metered): the gate computes the meter by CALLING the
+    // Theorem (metered): the gate computes the meter by calling the
     // sealed rule — a declared cost above or below it refuses, so the
     // survey cannot be quoted one way and charged another.
     let (prior, next, mut step) = surveyed_transition();

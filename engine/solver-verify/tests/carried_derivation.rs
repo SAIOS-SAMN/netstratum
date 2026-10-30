@@ -1,4 +1,4 @@
-//! THE CARRIED DERIVATION (Concordance 4.4 annex): a schema-v4 forge proof is
+//! The carried derivation (Concordance 4.4 annex): a schema-v4 forge proof is
 //! checked step by step — state 0 against its beacon samples, the forge's
 //! word and the solve's word each walked over it — and every break is named
 //! where it happens.

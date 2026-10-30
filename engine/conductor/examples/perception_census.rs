@@ -1,4 +1,4 @@
-//! PERCEPTION CENSUS — count the registry's civilizations by `perception`
+//! PERCEPTION census — count the registry's civilizations by `perception`
 //! axis. Read-only: lists registry cards, no mutation.
 //!
 //! ```text

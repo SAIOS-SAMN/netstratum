@@ -1,4 +1,4 @@
-//! docs/73 DECIDE, step 1: CAPTURE. Each decision's state is seen as a grid,
+//! docs/73 decide, step 1: capture. Each decision's state is seen as a grid,
 //! persistence (each row's last outcome) predicts before anything resolves,
 //! the incumbent acts, and the resolved triple (state, action, outcome) is
 //! booked. Behaviour is unchanged: no word acts yet.
@@ -13,7 +13,7 @@ use solver_verify::Grid;
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 use std::path::Path;
 
-/// The one dial (docs/73, DECLARED in docs/59): a book keeps at most a
+/// The one dial (docs/73, declared in docs/59): a book keeps at most a
 /// WINDOW of triples and of persistence's scores.
 pub const WINDOW: usize = 64;
 
@@ -54,7 +54,7 @@ fn hues(values: &[Ratio]) -> Vec<u8> {
     values.iter().map(|v| (values.iter().filter(|w| *w < v).count() * 10 / n) as u8).collect()
 }
 
-/// SEE: the state grid of rows (each a feature vector, all of one width).
+/// See: the state grid of rows (each a feature vector, all of one width).
 pub fn see(rows: &[Vec<Ratio>]) -> Option<Grid> {
     let cols = rows.first()?.len();
     let columns: Vec<Vec<u8>> = (0..cols).map(|c| hues(&rows.iter().map(|r| r[c].clone()).collect::<Vec<_>>())).collect();
@@ -63,7 +63,7 @@ pub fn see(rows: &[Vec<Ratio>]) -> Option<Grid> {
 }
 
 impl Book {
-    /// PREDICT (persistence) and RECORD in one: the rows by name, the state
+    /// Predict (persistence) and record in one: the rows by name, the state
     /// seen before the act, the incumbent's act and the rows that lost.
     pub fn resolve(&mut self, names: &[String], state: Grid, action: Vec<u8>, lost: &BTreeSet<String>) -> Resolved {
         let mut done = Resolved { rows: names.len() as u32, lost: names.iter().filter(|n| lost.contains(*n)).count() as u32, ..Resolved::default() };

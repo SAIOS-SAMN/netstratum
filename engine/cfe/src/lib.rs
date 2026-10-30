@@ -1,11 +1,11 @@
-//! CFE — the Canonical Field Engine (CHARTER §8): the runtime that
+//! CFE — the Canonical Field Engine (Charter §8): the runtime that
 //! evaluates RFA state transitions, runs the TLV codecs, and drives the
 //! Netstratum simulation ticks.
 //!
 //! Module map (one module per protocol seam):
 //! - `ratio` — the RFA carrier: exact rationals in canonical coprime
 //!   form, with their wire encoding.
-//! - `tlv`   — the additive wire format (CHARTER SEAL A: readers skip
+//! - `tlv`   — the additive wire format (Charter SEAL A: readers skip
 //!   unknown tags, never crash on them).
 //! - `vrp`   — NS-3: the receipt chain and the attested world clock.
 //! - `dop`   — NS-1: dimensional orbs (the colony orb is the first).
@@ -33,7 +33,7 @@ pub mod morphogen;
 pub mod ipsal;
 pub mod persist;
 pub mod query;
-/// Re-exported from the `ratio` LEAF crate (K4): moving the module
+/// Re-exported from the `ratio` leaf crate (K4): moving the module
 /// out is what let `physics` stop depending on `cfe`, which is what
 /// let `cfe` reach the verifier. Callers keep writing `cfe::ratio::*`.
 pub use ratio;

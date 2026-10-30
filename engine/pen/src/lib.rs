@@ -1,4 +1,4 @@
-//! THE PEN — **retired**.
+//! The pen — **retired**.
 //!
 //! JSON emission is gone from the production write path
 //! (`docs/JSON_DISPLAY_ONLY.md`). Colony carriers are TLV / binary cards;

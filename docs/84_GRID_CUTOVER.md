@@ -85,7 +85,7 @@ decision needs (a span evaluation), never stored on the grain.
 | `formation.rs` | a world's hold share (893) |
 
 `pulse.rs` 539 floors a bead's spread at 60⁻⁶ to keep a density finite: an
-invented floor (MU-recursion rule 11), to be refused or derived, not carried.
+invented floor (MU-RECURSION rule 11), to be refused or derived, not carried.
 
 ### 5. Merging → the encounter law at the mote tier
 

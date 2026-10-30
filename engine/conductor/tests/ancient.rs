@@ -1,5 +1,5 @@
 //! docs/58 §4 (amended 2026-10-08) — the largest living lineage: the living
-//! line whose living descendant tree is STRICTLY the largest (the progenitor
+//! line whose living descendant tree is strictly the largest (the progenitor
 //! candidate; lineage does not crown an ancient); a tie names no one.
 
 use conductor::largest_lineage;

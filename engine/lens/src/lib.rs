@@ -1,7 +1,7 @@
-//! THE LENS (#37) — read-only projections FROM the chain.
+//! The lens (#37) — read-only projections from the chain.
 //!
 //! §11 rule 2: exports are write-only display, deletable at any
-//! moment. #37's law is that they must be RE-SERVABLE from the one
+//! moment. #37's law is that they must be RE-servable from the one
 //! truth before the display half deletes (the observation-continuity
 //! rule). This crate is the physical split's first resident: it reads
 //! the arbor (and nothing else — no ledger file, no export), decodes
@@ -21,14 +21,14 @@ pub mod peel;
 pub mod propagation;
 pub mod render;
 pub mod revocation;
-// THE STANDING SURFACE IS GONE (operator ruling 2026-08-04, the vacuity
+// The standing surface is gone (operator ruling 2026-08-04, the vacuity
 // removal). It rendered which of four rows a structure occupied, and it
-// existed by its own header BECAUSE the kernel gated a mint on that row.
+// existed by its own header because the kernel gated a mint on that row.
 // With the gate struck it would have been a reading nothing acts on,
-// which is the LAW 8 failure the removal was correcting — so it went
+// which is the law 8 failure the removal was correcting — so it went
 // with the law rather than outliving it.
 //
-// `revocation` above is NOT its replacement and does not revive it: it
+// `revocation` above is not its replacement and does not revive it: it
 // reads D4's window (deeds emitted while nothing grew) off `holonomies`
 // alone, never off the struck dual-pole verdict.
 

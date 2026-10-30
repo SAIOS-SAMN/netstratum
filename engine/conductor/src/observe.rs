@@ -1,4 +1,4 @@
-//! **OBSERVATION** (docs/63) — a world is unrolled only while it is observed.
+//! **Observation** (docs/63) — a world is unrolled only while it is observed.
 //!
 //! Operator ruling 2026-10-09: the deterministic components of a world (its
 //! orbit, its clock) are held in compact state until an observer is present
@@ -41,7 +41,7 @@ pub fn watched(watch: &Path) -> BTreeSet<String> {
         .collect()
 }
 
-/// THE OBSERVED SET among `lines` (every living line, awake or compact):
+/// The observed set among `lines` (every living line, awake or compact):
 /// the seated, the watched, the progenitor candidate's, and the nearest
 /// line to each of those.
 pub fn observed(

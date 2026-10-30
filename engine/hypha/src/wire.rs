@@ -1,7 +1,7 @@
-//! THE HOUSE'S ACTS ON THE WIRE (mycelium ac8d425a / 7323c0c5: "the sanctioned
-//! way is: your house opens a `Session` and speaks the court's acts through the
-//! public codecs. No house layer returns to the mind's SDK; the house isn't a
-//! mind."). Each act is encoded by `mycelium::anastome::dialogue`'s public
+//! The house's acts on the wire (Mycelium ac8d425a / 7323c0c5: the sanctioned
+//! way is that the house opens a `Session` and speaks the court's acts through
+//! the public codecs; no house layer returns to the mind's SDK, as the house is
+//! not a mind). Each act is encoded by `mycelium::anastome::dialogue`'s public
 //! codec, spoken through `Session::speak` (the raw act door), and its reply
 //! decoded by the matching public decoder: the same shapes the client SDK's
 //! house wrappers had before Strip 7 removed them. A reply that does not

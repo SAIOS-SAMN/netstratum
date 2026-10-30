@@ -25,7 +25,7 @@ judges 10 of 64 deed types at that landing; 59 of 64 on main after the W-waves):
   amended (kernel Charter §3, SYSTEM_SPEC §0/§4, NS-2, 03 §5). Squares
   survive only as physics (05 T⁴). The name linear is dead.
 - **U1a** — the prover/verifier split (`engine/solver-verify`); the
-  opaque-payload law (cfe carries proof bytes, never parses).
+  OPAQUE-PAYLOAD law (cfe carries proof bytes, never parses).
 - **U1 (I4)** — the PoUW anchor: tag 86 `DiscoveryMinted`,
   `verify_work` the replay-complete judge, `mint_bound` sealed shut.
   Holes A/B (audit §4) closed at landing — witnesses 7/8, the
@@ -60,7 +60,7 @@ exhaustive over all 63 (the compiler forces the scope decision); an
 amendment = move the event into `covered()` + declare its lawful
 conservation delta + red-first witness against `cfe::world`.
 
-## §2 U1 — kernel-verify (the PoUW anchor; I4 completes)
+## §2 U1 — KERNEL-VERIFY (the PoUW anchor; I4 completes)
 
 **The split (prover free, verifier sealed) — landed (U1a).** New
 crate `engine/solver-verify` holding exactly what a replay needs and
@@ -75,7 +75,7 @@ keeps `search` + `volume`, depends on `solver-verify`, re-exports
 whole so no caller breaks. The kernel imports `cfe` + `solver-verify`
 only (one-way; pure, total, no-I/O).
 
-**The opaque-payload law (derived at the split — the arrow forced
+**The OPAQUE-PAYLOAD law (derived at the split — the arrow forced
 it).** `forge` needs `physics::Beacon` and `physics` imports `cfe`,
 so `cfe` can never import `solver-verify` (a cycle). The deed
 therefore carries the proof as an opaque byte payload at the cfe
@@ -86,7 +86,7 @@ encoding-blind; the sealed math owns both form and meaning of work
 proofs). Refuse never guess: truncation, trailing bytes, unknown
 codes all refuse typed.
 
-**The replay-complete law (derived this session — do not weaken).**
+**The REPLAY-COMPLETE law (derived this session — do not weaken).**
 `verify_certificate` alone re-derives the hash chain; it does not
 prove the program solves the task. A dishonest prover can seal an intact chain
 over a wrong output. The kernel-level verification is therefore the
@@ -110,7 +110,7 @@ first commit (the tag-claim convention; 86 verified next-free).**
     }                                      // solver-verify's sealed encoding of
                                            // (forge_digest, difficulty, program,
                                            //  output, certificate); opaque to cfe
-                                           // per the opaque-payload law above
+                                           // per the OPAQUE-PAYLOAD law above
 
 The receipt carries its proof whole — replay under SEAL B re-verifies
 the work forever. No change to `Step` (the deed is the carrier), no
@@ -273,7 +273,7 @@ same canonical one from the task_id — a miner cannot vary it.
    not a ladder rung. `verify_work` is unchanged and refuses a corpus
    payload `UnsupportedShape` rather than mispricing it.
 3. **Root placement.** The ruling puts `CORPUS_ROOT` in the kernel; it
-   is implemented in the sealed tier because the opaque-payload law
+   is implemented in the sealed tier because the OPAQUE-PAYLOAD law
    forbids the kernel parsing a payload, and the inclusion check needs
    the parsed path. `verify_corpus_work_against(bytes, &root)` exists
    as the seam: hoisting the constant into `engine/kernel` and passing
@@ -313,7 +313,7 @@ on a starless world — it now refuses with bound 0 carried, and says
 so). `DemurrageSettled`'s wire form untouched (one tag, one meaning,
 forever).
 
-## §4 U2 — kernel-fold (I6 whole; the singularity witnessed)
+## §4 U2 — KERNEL-FOLD (I6 whole; the singularity witnessed)
 
 **The verifier-only boundary (operator ruling 2026-08-01; amends this
 rung).** The kernel's `rfa-core` dependency is the verifier half only.

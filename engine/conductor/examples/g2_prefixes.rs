@@ -1,4 +1,4 @@
-//! Is every `<world>--closed-*` copy a PREFIX of the live `<world>`
+//! Is every `<world>--closed-*` copy a prefix of the live `<world>`
 //! chronicle (a pure duplicate, no history of its own)? One at a time.
 fn main() {
     let mut a = std::env::args().skip(1);
@@ -8,7 +8,7 @@ fn main() {
     let mut dirs: Vec<_> = std::fs::read_dir(format!("{root}/worlds")).unwrap().flatten().map(|e| e.path())
         .filter(|p| p.file_name().and_then(|n| n.to_str()).is_some_and(|n| n.starts_with(&format!("{world}--closed-")))).collect();
     dirs.sort();
-    // The reference is the live world if it stands, else the LARGEST copy.
+    // The reference is the live world if it stands, else the largest copy.
     let live_dir = std::path::PathBuf::from(format!("{root}/worlds/{world}"));
     let reference = if live_dir.join("chronicle.tlv").exists() { live_dir } else {
         dirs.iter().max_by_key(|d| std::fs::metadata(d.join("chronicle.tlv")).map(|m| m.len()).unwrap_or(0)).cloned().expect("a copy")

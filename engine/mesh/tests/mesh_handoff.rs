@@ -57,7 +57,7 @@ fn the_handoff_walks() {
     assert_eq!(seal, 3, "the seal's sequence");
     assert_eq!(authority(&chronicle), Ok(Some(9)), "the pen moved");
 
-    // The taking hand's first append carries the hand AND cites the seal.
+    // The taking hand's first append carries the hand and cites the seal.
     let at = chronicle.append(ClosureEvent::ZoneRazed { orb_id: 1, tile: 4 }, 4, vec![9, seal]).sequence();
     assert_eq!(at, 4);
     assert_eq!(authority(&chronicle), Ok(Some(9)), "the cited append is lawful");
@@ -95,7 +95,7 @@ fn an_uncited_first_append_refuses() {
 fn a_stale_hand_refuses() {
     let mut chronicle = a_premesh_chronicle();
     yield_authority(&mut chronicle, 7, 9, 3).expect("seals");
-    // The OLD hand keeps writing: it carries itself, not the authority.
+    // The old hand keeps writing: it carries itself, not the authority.
     chronicle.append(ClosureEvent::ZoneRazed { orb_id: 1, tile: 4 }, 4, vec![7]);
     assert_eq!(
         authority(&chronicle),
@@ -111,7 +111,7 @@ fn a_stale_seal_refuses_at_the_door() {
     chronicle.append(ClosureEvent::ZoneRazed { orb_id: 1, tile: 4 }, 4, vec![9, seal]);
     let held = chronicle.receipts().len();
 
-    // The yielded hand tries to seal onward; the door refuses BEFORE
+    // The yielded hand tries to seal onward; the door refuses before
     // anything appends.
     let refused = yield_authority(&mut chronicle, 7, 30, 5).unwrap_err();
     assert_eq!(refused, MeshRefused::Usurped { at: held as u64, lawful: 9 });

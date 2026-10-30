@@ -1,4 +1,4 @@
-//! COMMISSIONS (docs/66 Y2): the universe's real needs as tasks, each with its
+//! Commissions (docs/66 Y2): the universe's real needs as tasks, each with its
 //! own judge, bountied by the lines that need them. A commission declares its
 //! judge's own measure as a generator of the language (operator 2026-10-09,
 //! option 2), so the minds can compose it; it closes when a mind's word
@@ -87,7 +87,7 @@ pub fn plane(worlds: &[Polity], members: &[usize], centre: &(Ratio, Ratio, Ratio
     Some(Plane { grid: Grid::new(rows, cols, cells)?, cells: placed })
 }
 
-/// THE JUDGE: the central bodies marked in hue 2.
+/// The judge: the central bodies marked in hue 2.
 pub fn judged(g: &Grid) -> Grid {
     use solver_verify::project::{apply, Act, ObjectRule, Select};
     apply(&ObjectRule { select: Select::Central, act: Act::Recolor(2) }, g)
@@ -148,7 +148,7 @@ fn galaxies(worlds: &[Polity], book: &Ledger) -> BTreeMap<String, Vec<usize>> {
     out
 }
 
-/// WHERE THE WORD SAYS THE HUB STANDS: the line at a cell the galaxy's
+/// Where the word says the hub stands: the line at a cell the galaxy's
 /// commission word marks, while that word still closes the commission on this
 /// plane and is held by a line of the galaxy. `None` hands the hub back to the
 /// medoid.
@@ -180,7 +180,7 @@ pub struct Commissioned {
     pub ambiguous: Option<(String, usize)>,
 }
 
-/// ONE ATTEMPT A BEAT: the galaxy whose turn it is, if its commission is open,
+/// One attempt A BEAT: the galaxy whose turn it is, if its commission is open,
 /// put to the line whose turn it is.
 pub fn step(worlds: &mut [Polity], ledger: &Ledger, var_root: &Path, beat: u64) -> Commissioned {
     let mut done = Commissioned::default();
@@ -230,7 +230,7 @@ pub fn step(worlds: &mut [Polity], ledger: &Ledger, var_root: &Path, beat: u64) 
     if !holds {
         return done;
     }
-    // DETERMINED, NOT CHOSEN (2026-10-09): an order closes the commission only
+    // Determined, not chosen (2026-10-09): an order closes the commission only
     // when exactly one (cut, extreme) survives the pairs; while several do, the
     // learner's first-admitted rule would be the developer's tie-break, not
     // the minds' deduction, and the commission stays open.

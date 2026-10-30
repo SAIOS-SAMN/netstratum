@@ -1,4 +1,4 @@
-//! **THE FIELD — the n-dimensional carrier** (operator ruling
+//! **The field — the n-dimensional carrier** (operator ruling
 //! 2026-08-04: *remove `Grid` entirely and upgrade to larger
 //! n-dimensional capacity*).
 //!
@@ -9,8 +9,8 @@
 //! its shape as data, so rank 4 costs nothing that rank 2 did not
 //! already pay.
 //!
-//! **THE VOCABULARY COLLAPSES, and that is the point.** Every operator
-//! the two carriers had turns out to be an AXIS operation, and once the
+//! **The vocabulary collapses, and that is the point.** Every operator
+//! the two carriers had turns out to be an axis operation, and once the
 //! axis is a parameter the duplicates disappear:
 //!
 //! ```text
@@ -26,7 +26,7 @@
 //!
 //! `FlipStack` and `FlipV` were the same operation written twice
 //! because one lived in a 2-D type and the other in a 3-D one. That
-//! duplication is what "we aren't building a matrix" names.
+//! duplication is what the ruling "not building a matrix" names.
 //!
 //! **The hue law is the carrier's, as it was for `Grid`.** A hue past
 //! the ladder is not clamped — it is not a field. Two operators index
@@ -47,7 +47,7 @@ pub struct Field {
 }
 
 impl Field {
-    /// THE ONE DOOR. A field has at least one axis, every axis has
+    /// The one door. A field has at least one axis, every axis has
     /// extent, the cell count is the product of the shape, and every
     /// hue sits on the ladder.
     ///
@@ -139,7 +139,7 @@ impl Field {
 /// The axis vocabulary — general operators over any rank.
 ///
 /// Every one of these is total: an operator naming an axis the field
-/// does not have leaves the field UNCHANGED rather than refusing, the
+/// does not have leaves the field unchanged rather than refusing, the
 /// same law the object ops already followed ("an inapplicable read
 /// renders the field unchanged — the verifier rejects useless words by
 /// failing to close, never by crashing").
@@ -208,7 +208,7 @@ impl Axis {
                 let by = by % extent;
                 Field::from_shape(shape.clone(), |at| {
                     let mut from = at.to_vec();
-                    // Roll FORWARD: the cell at `k` comes from `k - by`,
+                    // Roll forward: the cell at `k` comes from `k - by`,
                     // wrapping. `+ extent` keeps the arithmetic in
                     // `usize` without a signed detour.
                     from[axis] = (at[axis] + extent - by) % extent;
@@ -226,7 +226,7 @@ impl Axis {
 /// A word over the axis vocabulary, applied left to right.
 pub type Word = Vec<Axis>;
 
-/// THE ONE APPLY PATH, at any rank.
+/// The one apply path, at any rank.
 pub fn run(word: &Word, input: &Field) -> Field {
     let mut field = input.clone();
     for axis in word {
@@ -235,7 +235,7 @@ pub fn run(word: &Word, input: &Field) -> Field {
     field
 }
 
-/// A quarter turn in the plane of two axes, as a COMPOSITION.
+/// A quarter turn in the plane of two axes, as a composition.
 ///
 /// `Rotate90` was a primitive when the carrier was a matrix. It is not
 /// primitive — it is a swap and a mirror — and saying so is the

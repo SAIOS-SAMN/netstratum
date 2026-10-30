@@ -1,35 +1,35 @@
 //! N-CONDUCTOR + N-LINEAGE — the heartbeat and the lineage graph.
 //!
 //! Scripted civilizations play their colonies autonomously, each
-//! through a CONTAINED AGENT (NS-6: granted scopes, every receipt
+//! through a contained agent (NS-6: granted scopes, every receipt
 //! attributed `by#agent` — automation on a leash). Each heartbeat a
 //! world: drains the steward inbox, plays its policy, ticks,
-//! collects, grinds the forge (its OWN latest receipt digest seeds
-//! the puzzle — CHARTER §9), and keeps the ledger.
+//! collects, grinds the forge (its own latest receipt digest seeds
+//! the puzzle — Charter §9), and keeps the ledger.
 //!
-//! **TECH IS EARNED (the pyramid loop closed):** smelters unlock at
+//! **Tech is earned (the pyramid loop closed):** smelters unlock at
 //! forge rung 3, synthesizers at rung 5 — for every temperament.
 //! Research depth is the tech tree; surplus funds search; search
 //! unlocks industry; industry funds deeper search.
 //!
-//! **GROWTH PER CIV IS A MINT:** a civilization at the TOP of its own
+//! **GROWTH per CIV is A mint:** a civilization at the top of its own
 //! ladder (where `Difficulty`/`VolDifficulty` saturates — rung 8 today) with
-//! 20 confirmed solves CLEAVES once per era into TWO PEER BRANCHES —
+//! 20 confirmed solves cleaves once per era into two peer branches —
 //! irreversible dimensional growth, exactly `physics::FlowEvent::Mint`'s law worn
 //! as gameplay. The mutation is chronicle-seeded: the parent's latest
-//! receipt digest draws WHICH axis mutates and what the child is
+//! receipt digest draws which axis mutates and what the child is
 //! called — the parent's own history decides what its children
 //! become. Lineage is registry-recorded now, receipted at G1. A
-//! branch founds a NEW world (binding #1: one chronicle per world —
+//! branch founds a new world (binding #1: one chronicle per world —
 //! a shared-chronicle counterpart planet waits on the multi-colony
 //! engine).
 //!
-//! **LORE LIVES IN DATA, NOT SOURCE:** polity specs load from
-//! the COMPILED roster (THE DEFINITION LAW — `polities.rs`); nothing
+//! **Lore lives in data, not source:** polity specs load from
+//! the compiled roster (the definition law — `polities.rs`); nothing
 //! file once so even the founding NPCs are operator-editable. NPC
 //! entries carry `founder: "conductor"` — the observer marks them ⚙.
 //!
-//! **THE AUTARKIES FEEL THE STAR (BOT-THERM):** genesis commissions
+//! **The autarkies feel the star (BOT-THERM):** genesis commissions
 //! every polity world's sun and sites its planet — spec-pinned, or
 //! derived from the registry axes through the chronicle beacon (the
 //! civilization's own genesis receipts choose its sky). Furnace-sited
@@ -39,7 +39,7 @@
 //! freeze-lock; mesic polities keep their temperament untouched.
 //!
 //! Everything is deterministic: same era length → byte-identical
-//! receipts. HONEST SEAM: worlds live in process memory; reload from
+//! receipts. Honest seam: worlds live in process memory; reload from
 //! the exported chronicle is the G0 persistence seam (coder-02).
 
 use cfe::dop::{Resource, Station, ZoneKind};
@@ -114,19 +114,19 @@ pub mod quantum;
 pub mod soc;
 // RCP-2 (operator directive 2026-08-16): the emergent recipe space — a buildable
 // is a hashed transformation from open-almanac elements into the universal roles,
-// discovered against a deficit and gated by TOPOLOGICAL reach, never a ZoneKind
+// discovered against a deficit and gated by topological reach, never a ZoneKind
 // enum variant or an integer level. See recipe.rs.
 pub mod recipe;
 pub use polities::{founding_polities, registered_polities, roster, roster_digest, world_name_taken};
 
-/// AEON-1b (11 §5): THE FOLD — seal the live era and rotate it into
+/// AEON-1b (11 §5): the fold — seal the live era and rotate it into
 /// the archive sequence. `EraFolded` (tag 46) appends to the universe
-/// ledger with the NEW base gauge (the next aeon seats on its own
+/// ledger with the new base gauge (the next aeon seats on its own
 /// G-sheet — placeholder advance: era/12, wrapped), then the live
 /// `worlds/` and `registry/` move whole into `<base>-era<N>/` beside
 /// the var root. Nothing is destroyed — the fold is archival by
-/// construction; the next boot CONVERGES the sealed era, and the four
-/// C's read which trajectories continue. The roster file STAYS: the
+/// construction; the next boot converges the sealed era, and the four
+/// C's read which trajectories continue. The roster file stays: the
 /// civilizations continue into the new aeon.
 pub fn fold(var_root: &str) -> std::io::Result<(u64, Ratio)> {
     use cfe::vrp::Chronicle;
@@ -201,23 +201,23 @@ pub fn fold(var_root: &str) -> std::io::Result<(u64, Ratio)> {
     if registry.is_dir() {
         std::fs::rename(&registry, archive.join("registry"))?;
     }
-    // THE DEFINITION LAW: no roster file is archived, because none
+    // The definition law: no roster file is archived, because none
     // exists. The era's roster is the roster the binary that sealed it
     // was compiled with — recorded by the commit, not by a copy.
     Ok((era, gauge))
 }
 
-/// **THE LARGEST LIVING LINEAGE** (docs/58 §4 as amended by the operator's
-/// ruling 2026-10-08). Every LIVING line's tree is itself and every living
+/// **The largest living LINEAGE** (docs/58 §4 as amended by the operator's
+/// ruling 2026-10-08). Every living line's tree is itself and every living
 /// line whose lineage (the registry's DAG, `Civilization.lineage`, followed
 /// transitively) leads back to it; this returns the living line whose tree is
-/// STRICTLY the largest, `(sigil, tree size)` — no threshold, no tie-break.
+/// strictly the largest, `(sigil, tree size)` — no threshold, no tie-break.
 ///
-/// LINEAGE DOES NOT CROWN AN ANCIENT. An ancient is PRODUCED by netstratum's
+/// LINEAGE does not crown an ancient. An ancient is produced by netstratum's
 /// physics at a galactic core (the core-dwelling minds that wake first there,
 /// or a people that comes to fold space — the shared definition), and the
 /// cores do not exist yet. The strongest surface lineage is the natural
-/// PROGENITOR candidate: the ancients' partner, who builds the highways and
+/// progenitor candidate: the ancients' partner, who builds the highways and
 /// wormholes. That is what this reads.
 pub fn largest_lineage(registry: &Registry, living: &std::collections::BTreeSet<String>) -> Option<(String, u64)> {
     let parents: std::collections::BTreeMap<String, Vec<String>> =
@@ -252,25 +252,25 @@ pub fn largest_lineage(registry: &Registry, living: &std::collections::BTreeSet<
     best.filter(|_| !tied)
 }
 
-/// SCIENCE-1 (10 §3d): the RELEVANCE table — which industries exist
+/// SCIENCE-1 (10 §3d): the relevance table — which industries exist
 /// in a science's own tree. A plasmic line carries no forge-of-iron
 /// (smelting is meaningless to a current sheet); its advancement
 /// crosses by the joint research venture instead. Placeholder table,
 /// niche-first (the FUNCTION-1 lesson).
-/// The AericDeckBand mapping (RELEVANCE ENTRY ruling, 2026-07-31):
-/// an aeric home is a banded COLUMN — cloud-deck mesic over
+/// The AericDeckBand mapping (relevance entry ruling, 2026-07-31):
+/// an aeric home is a banded column — cloud-deck mesic over
 /// hyper-thermal depths (12 §5a) — so relevance evaluation reads the
-/// DECK's thermal seat, never the surface's. A reading past the
+/// deck's thermal seat, never the surface's. A reading past the
 /// mesic ceiling displaces to the deck (the ceiling); colder stands
 /// (a frozen giant's deck is honestly frozen). No third siting axis:
 /// geometry stays clean, and every non-aeric body reads unchanged.
 ///
-/// **UNREACHABLE AS WIRED — measured 2026-08-03, declared here rather
+/// **Unreachable as wired — measured 2026-08-03, declared here rather
 /// than quietly repaired.** This tests the METABOLISM axis, and no
 /// metabolism is or can be `"aeric"`: the vocabulary is closed at
 /// `["mineral", "biotic", "plasmic"]`
 /// (`ledger::registry::METABOLISMS`), and `12_UNION` §5a lists aeric as
-/// a SUBSTRATE — a lineage line that is itself *biotic*, distinguished
+/// a substrate — a lineage line that is itself *biotic*, distinguished
 /// by living in a gas giant's banded column. Substrates live in the
 /// `clade` field, not the metabolism axis, which is exactly why the
 /// same table says `plasmic` "needs the third metabolism value" and
@@ -309,27 +309,27 @@ pub fn industry_relevant(metabolism: &str, kind: ZoneKind) -> bool {
     )
 }
 
-/// RATIO SYNTHESIS (ruling 2026-07-31): price is an emergent ratio,
+/// Ratio synthesis (ruling 2026-07-31): price is an emergent ratio,
 /// never a system property. The reserve a line considers "enough" —
 /// the denominator of its relaxed ask and the floor of its surplus.
 pub const TARGET_RESERVE: (i64, i64) = (8, 1);
 
-/// **THE FOUNDING BAND** (COG Slice 2 activation, operator ruling
+/// **The founding band** (COG Slice 2 activation, operator ruling
 /// 2026-08-15 "seed per habitat"). When the conductor raises a
-/// colony's FIRST habitat, a founding band of hunter-gatherers takes
+/// colony's first habitat, a founding band of hunter-gatherers takes
 /// up residence — the settlement is founded, and from that moment the
-/// population is LIVE: it grows toward the thermodynamic K_pop on the
+/// population is live: it grows toward the thermodynamic K_pop on the
 /// syntropic wild flow, and the beat's `collect` drives the logistic
 /// every cycle. Subsequent habitats raise living capacity (K), they do
-/// not reseed the band. This is APPROVED SEED — the founding endowment
+/// not reseed the band. This is approved seed — the founding endowment
 /// of a settlement, definition not tuning (same class as
 /// `founding_reserves`), and it seats through `settle_population`
 /// (whole-integer, so it carries no fractional dial). It is small: a
 /// band well below any world's syntropic limit, so a fresh settlement
-/// GROWS up to its limit rather than being culled down to it.
+/// grows up to its limit rather than being culled down to it.
 pub const FOUNDING_BAND: i64 = 4;
 
-/// **THE FOUNDING BAND, BOUNDED BY THE LAND** (G2). How many of the band the
+/// **The founding band, bounded by the land** (G2). How many of the band the
 /// chosen site feeds before anything is built: `⌊K_pop⌋` read off the world
 /// at genesis (the syntropic wild flow over the per-capita ration), clamped
 /// to `[1, FOUNDING_BAND]`. A rate-0 capture line (a plasmoid draws no
@@ -343,7 +343,7 @@ pub fn founding_band(world: &World) -> i64 {
     k.to_i64().unwrap_or(FOUNDING_BAND).clamp(1, FOUNDING_BAND)
 }
 
-/// The archetype CLASS a founding line seals at genesis (DIO-3a). The roster
+/// The archetype class a founding line seals at genesis (DIO-3a). The roster
 /// declares each line's CLADE (the species — soniform, cnidiform) but no
 /// class; 7 is the neutral baseline `science_lab` already reads for an
 /// unsealed world, and it falls through `economic_mode` to let the clade
@@ -351,7 +351,7 @@ pub fn founding_band(world: &World) -> i64 {
 /// class ceiling is 13); a per-clade archetype table is a later refinement.
 pub const NEUTRAL_ARCHETYPE_CLASS: u8 = 7;
 
-/// The reference model posts in WHOLE LOTS: amounts floor to the
+/// The reference model posts in whole lots: amounts floor to the
 /// 1/64 grid the melt law already speaks (MELT_PER_UNIT). This is
 /// layer-2 prudence, not law — it keeps every book amount's
 /// denominator a small power of 64, so exact arithmetic stays cheap
@@ -363,13 +363,13 @@ fn lot(amount: &Ratio) -> Ratio {
     Ratio::new(amount.numer() * &grid / amount.denom(), grid)
 }
 
-/// A famished line bids STEEP — it gives more than it wants, and
+/// A famished line bids steep — it gives more than it wants, and
 /// deeper famine bids steeper: want = give / (1 + severity).
 fn steep_want(give: &Ratio, severity: u32) -> Ratio {
     give.clone() / ratio(1 + severity as i64, 1)
 }
 
-/// A surplus-rich line RELAXES — it asks a premium that emerges from
+/// A surplus-rich line relaxes — it asks a premium that emerges from
 /// its own reserve fraction: want = give × (2·reserve − target)/
 /// reserve. Exactly give at the target margin, approaching (never
 /// reaching) 2× as the reserve deepens — so a steep famished bid
@@ -380,7 +380,7 @@ fn relaxed_want(give: &Ratio, reserve: &Ratio) -> Ratio {
     give.clone() * (ratio(2, 1) * reserve.clone() - target) / reserve.clone()
 }
 
-/// OFFER-1a (BUILD_ORDER §3a): a world's TRADE INTENT, read pure from
+/// OFFER-1a (BUILD_ORDER §3a): a world's trade intent, read pure from
 /// its committed state. Ratios derive from the state itself (famine
 /// severity, reserve depth) — there is no base price and none is
 /// needed: no ratio is too high or too low, an unmatched one rests
@@ -418,7 +418,7 @@ pub fn trade_intent(world: &World, metabolism: &str) -> Option<(Resource, Ratio,
             }
         }
     }
-    // THE FAMINE ASK: ANY famished line offers half its LARGEST bank
+    // The FAMINE ask: any famished line offers half its largest bank
     // for the famined resource, bidding steep with its severity.
     if let Some(&famined) = orb.famine.first() {
         let biggest = Resource::ALL
@@ -435,9 +435,9 @@ pub fn trade_intent(world: &World, metabolism: &str) -> Option<(Resource, Ratio,
         }
         return None;
     }
-    // THE SURPLUS OFFER: an unfamished line with a reserve past
+    // The surplus offer: an unfamished line with a reserve past
     // target offers half of it at its relaxed premium — wanting the
-    // leanest of the resources its OWN zones burn (demand grounded
+    // leanest of the resources its own zones burn (demand grounded
     // in upkeep, never in an empty slot — measured 2026-07-30; a
     // resting offer blocks new intents, so wanting one's own upkeep
     // keeps the resting ask correct when famine later strikes it).
@@ -536,7 +536,7 @@ fn element_trade_intent(world: &World) -> Option<(cfe::dop::Cargo, Ratio, cfe::d
 
 /// OFFER-1a: one market beat over the whole board — post fresh
 /// intents (one open offer per world; the offer id is the chronicle
-/// length at posting, deterministic), then clear the FIRST crossing
+/// length at posting, deterministic), then clear the first crossing
 /// (price-time priority inside `clear_trade`). Returns the cleared
 /// pairs (world names) for the narrator line.
 pub static PROBE_DIGEST_REPEAT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
@@ -552,14 +552,14 @@ pub static COGNITION_CHOICE_POINTS: std::sync::atomic::AtomicU64 =
 pub static COGNITION_LOOKAHEAD_DECIDED: std::sync::atomic::AtomicU64 =
     std::sync::atomic::AtomicU64::new(0);
 
-/// **PEEL, NOT SWEEP** (operator ruling 2026-07-30: no cartesian find-scan
-/// repetition). `clear_trade`'s own FIRST check refuses any pair whose
+/// **Peel, not sweep** (operator ruling 2026-07-30: no cartesian find-scan
+/// repetition). `clear_trade`'s own first check refuses any pair whose
 /// cargos are not exact mirrors (`held_a.give != held_b.want || held_a.want
-/// != held_b.give` — `cfe::world::mod.rs`) — that mirror condition IS the
+/// != held_b.give` — `cfe::world::mod.rs`) — that mirror condition is the
 /// market's own partition, not an approximation of one. Bucket every open
-/// offer by its `(give, want)` key in ONE pass (O(total offers)), then a
-/// civ pair is a candidate ONLY if one holds a key the other holds the
-/// mirror of — a pair sharing no complementary key can be PROVEN to never
+/// offer by its `(give, want)` key in one pass (O(total offers)), then a
+/// civ pair is a candidate only if one holds a key the other holds the
+/// mirror of — a pair sharing no complementary key can be proven to never
 /// cross, for any combination of their offers, without touching it. The
 /// output is a `BTreeSet`, so its iteration order is always ascending
 /// `(a, b)` regardless of the (randomized) `HashMap` build order — the
@@ -607,8 +607,8 @@ pub fn crossing_candidates(worlds: &[Polity]) -> Vec<(usize, usize)> {
 }
 
 pub fn market_step(worlds: &mut [Polity], beat: u64, span: &Ratio) -> Vec<(String, String)> {
-    // Post intents. NO SINGLES (ruling 2026-07-31): the book is
-    // open-ended — a fresh intent posts BESIDE what rests; only an
+    // Post intents. No singles (ruling 2026-07-31): the book is
+    // open-ended — a fresh intent posts beside what rests; only an
     // identical pair (same give, same want) holds its place.
     for polity in worlds.iter_mut() {
         if polity.penned {
@@ -680,7 +680,7 @@ pub fn market_step(worlds: &mut [Polity], beat: u64, span: &Ratio) -> Vec<(Strin
                 .post_offer(orb, pair, give_amount, want_amount, offer);
         }
     }
-    // Clear crossings: EVERY resting combination on every CANDIDATE pair —
+    // Clear crossings: every resting combination on every candidate pair —
     // no first-match single. Deal ids stride 4 (haul takes deal/deal+1, the
     // wear-charter deal+2) from a per-beat sequence. Candidates are peeled
     // by their own (give, want) key (`crossing_candidates`), never swept
@@ -720,8 +720,8 @@ pub fn market_step(worlds: &mut [Polity], beat: u64, span: &Ratio) -> Vec<(Strin
                 }
             }
         }
-        // ROUTE-1 + NO SINGLES: trade wears the path, and a
-        // better lane ANNEXES the pair — chartered when no lane
+        // ROUTE-1 + no singles: trade wears the path, and a
+        // better lane annexes the pair — chartered when no lane
         // stands, or when the pair's technology now supports a
         // deeper suppression than the best lane held.
         if crossed_here {
@@ -740,7 +740,7 @@ pub fn market_step(worlds: &mut [Polity], beat: u64, span: &Ratio) -> Vec<(Strin
                 .map(|(_, _, grade)| *grade)
                 .max()
                 .unwrap_or(0);
-            // (1+grade)/8 is the PICKUP-flagged placeholder (C2's
+            // (1+grade)/8 is the Pickup-flagged placeholder (C2's
             // cluster). At grade >= 7 it reaches 1, which is out of
             // [0,1) — the dead BadEta used to refuse that at the
             // verb; the Unit door now says it at construction, and
@@ -752,7 +752,7 @@ pub fn market_step(worlds: &mut [Polity], beat: u64, span: &Ratio) -> Vec<(Strin
             if best_held.is_none_or(|held| eta > held) {
                 let deal = beat * 100_000 + seq * 4;
                 seq += 1;
-                // THE REFUSAL IS CARRIED, NEVER SWALLOWED (operator
+                // The refusal is carried, never swallowed (operator
                 // ruling 2026-08-02). `let _ =` here hid the whole
                 // cross-book economy: measured, 17 crossings cleared
                 // and 0 lanes chartered, because every charter
@@ -776,36 +776,36 @@ pub fn market_step(worlds: &mut [Polity], beat: u64, span: &Ratio) -> Vec<(Strin
     cleared
 }
 
-/// WHERE A LINE IS GOING — read from its own measured yield, never set
+/// Where A LINE is going — read from its own measured yield, never set
 /// by a constant.
 ///
 /// `SEARCH_BUDGET` bounds one heartbeat so a single beat cannot run
-/// away; it was never a statement about whether spending is WORTH it.
+/// away; it was never a statement about whether spending is worth it.
 /// This is. Every branch below cites a number from
 /// `solver/examples/forge_reach.rs`, measured over 200 forged tasks per
 /// rung on rungs 3–5 — the rungs that actually pay, since
 /// `mint_bound` f(0..=2) = 0.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Trajectory {
-    /// The cheap reach is closing work. STAY THERE. Yield per candidate
+    /// The cheap reach is closing work. Stay there. Yield per candidate
     /// is highest at sated on every rung — 51/2, 17 and 13 against
     /// struck's 199/8, 11 and 9. Spending more while the cheap reach
-    /// pays is buying what you already have.
+    /// pays is buying what is already held.
     Growth,
-    /// Spending and closing nothing. NECESSITY OPENS THE REACH, and it
+    /// Spending and closing nothing. Necessity opens the REACH, and it
     /// is worth a great deal: the marginal yield of the sated→struck
     /// step measured 97/4, 13/2 and 7 at rungs 3, 4 and 5. At rung 3
     /// struck closes 200/200 — matching an exhaustive sweep at 8
     /// candidates per task against up to 200,000.
     Stagnation,
-    /// Struck, and STILL closing nothing. The READING has failed, so
-    /// stop reading and EXHAUST instead — this is where the sweep earns
+    /// Struck, and still closing nothing. The reading has failed, so
+    /// stop reading and exhaust instead — this is where the sweep earns
     /// its keep and the only place it does.
     ///
     /// Two measurements put it here rather than at a deeper hunger.
     /// First, deeper hunger is worthless: struck→long-starved bought
-    /// EXACTLY ZERO extra yield at rungs 3 and 4, and at rung 5 bought
-    /// one more confirmed closure and one more FALSE one. Second, the
+    /// exactly zero extra yield at rungs 3 and 4, and at rung 5 bought
+    /// one more confirmed closure and one more false one. Second, the
     /// sweep is worth something precisely where the reach is not — at
     /// rungs 4 and 5 it confirms 122 and 86 against the reach's 77 and
     /// 54. Those are the tasks composed through intermediate states no
@@ -827,16 +827,16 @@ impl Trajectory {
         self.need_of(Vec::new(), starved)
     }
 
-    /// **THE TRAJECTORY DECIDES WHETHER; THE LINE DECIDES WHICH.**
+    /// **The trajectory decides whether; the LINE decides which.**
     ///
     /// Composed at the 2026-08-04 merge. This lane's trajectory answers
     /// *is spending paying* — a homeostatic reading, measured, and it
     /// is what stops a paying line from buying reach it already has.
-    /// It cannot answer WHAT the line is short of, and its own
+    /// It cannot answer what the line is short of, and its own
     /// `need` could only ever say Novelty.
     ///
     /// `Polity::hunger` answers that half: it reads the line's own
-    /// chronicle rhythm for BOTH hungers — starved of signal, starved
+    /// chronicle rhythm for both hungers — starved of signal, starved
     /// of links — so two lines stagnating for different reasons reach
     /// for different families. Empty `measured` falls back to Novelty,
     /// which is this lane's original behaviour exactly.
@@ -918,7 +918,7 @@ pub struct PolitySpec {
     pub position: (Ratio, Ratio, Ratio),
     /// BOT-THERM: the world's sun, operator-pinned; `None` derives at
     /// genesis from the civilization's registry axes, beacon-drawn
-    /// from its own genesis receipts (CHARTER §9 — never wall clock).
+    /// from its own genesis receipts (Charter §9 — never wall clock).
     pub star: Option<StarClass>,
     /// BOT-THERM: the orbit albedo, pinned; `None` derives (see `star`).
     pub albedo: Option<Ratio>,
@@ -927,45 +927,45 @@ pub struct PolitySpec {
     /// AEON-1b: the world's opening gauge key, wrapped [0, 1); `None`
     /// founds at zero. A divergence branch carries its cleaved key.
     pub gauge: Option<Ratio>,
-    /// ERA 1: the planet composition, grains by Z, sealed into the world at
+    /// Era 1: the planet composition, grains by Z, sealed into the world at
     /// founding (tag 198); its veins are drawn from it. None: era 0's draws.
     pub composition: Option<Vec<(u16, Ratio)>>,
-    /// ERA 1: the world it stands on (`[galaxy, star, world]`), from which
+    /// Era 1: the world it stands on (`[galaxy, star, world]`), from which
     /// its core, its bulge and its distance are read (`places`); None: a line
     /// on no era-1 world, read on the era-0 box.
     pub place: Option<Vec<u64>>,
-    /// ERA 1'S LAND (docs/86): the heads its world's medium feeds wild
+    /// Era 1'S land (docs/86): the heads its world's medium feeds wild
     /// (`life::wild`), set on its world each boot; None on no era-1 world.
     pub wild: Option<Ratio>,
 }
 
 /// One live polity world: the sim, its contained actor, its research rung.
 /// PERF — the ceiling on a vessel's grown basin. A mind is finite: past this
-/// the OLDEST crystals give way (every think, not only speech: the layered
+/// the oldest crystals give way (every think, not only speech: the layered
 /// and affine seats think more often, and an unbounded basin grew the
 /// conductor ~20 MB a minute, measured 2026-10-09). The basin is live
 /// workspace, never pruned by replay.
 const AUTIC_BASIN_CAP: usize = 4096;
 
-/// **DECLARED BOUND** (memory, 2026-10-09): the heard words a line holds to try
+/// **Declared bound** (memory, 2026-10-09): the heard words a line holds to try
 /// (`inherited`: from the dead at its core, from below, carried by its
 /// parliament); the oldest give way. Recorded in docs/59.
 const INHERITED_CAP: usize = 256;
 
-/// **THE BYTE WITNESS** (docs/71): no vessel's basin may hold more chain
+/// **The byte witness** (docs/71): no vessel's basin may hold more chain
 /// entries than this, ~16 MB. Since M1 the bound is the line's share of the
 /// universe's memory (`memory_budget`); this binds only if that physics is
 /// broken, and every time it binds it is counted (`memory_witness_hits`, the
 /// census alarm).
 const BASIN_ENTRY_CAP: usize = 262_144;
 
-/// **DECLARED** (docs/71 M1, coordinator 2026-10-09: a dial until a law derives
+/// **Declared** (docs/71 M1, coordinator 2026-10-09: a dial until a law derives
 /// it): the chain entries all of the universe's minds may keep together, about
 /// 150 MB at ~60 bytes an entry. Each line keeps its share by its share of the
 /// universe's wealth.
 pub const MIND_ENTRY_BUDGET: usize = 2_400_000;
 
-/// THE YEAR'S BOUNCE, once a year at its close (the conductor's year voice): the year's sinks reach their cores, every core
+/// The year's bounce, once a year at its close (the conductor's year voice): the year's sinks reach their cores, every core
 /// re-emits what it holds, the ancients and the throats' keepers are read
 /// (docs/68), ascension advances (docs/72: gates, envoys, ascension by deed),
 /// the parliaments carry the councils' words (docs/70), and the councils are
@@ -980,7 +980,7 @@ pub fn year_bounce(worlds: &mut Vec<Polity>, book: &Ledger, registry: &Registry,
         said.push(format!("the core {core} returns a pulse to {world}"));
     }
     let bounce = beat / scribe::journal::YEAR_TICKS;
-    // docs/72: the bounce's ONE reading of the throats' keepers (G3, the
+    // docs/72: the bounce's one reading of the throats' keepers (G3, the
     // envoys counted), passed to the ancients, ascension and the parliaments.
     let keepers = profile::timed("year:keepers", || ancients::keepers(worlds, book, registry, var_root));
     said.push(format!("KEEPERS — {} cores kept", keepers.len()));
@@ -995,7 +995,7 @@ pub fn year_bounce(worlds: &mut Vec<Polity>, book: &Ledger, registry: &Registry,
     said
 }
 
-/// docs/71 M1 — THE MEMORY SHARE: each line may keep its share of the
+/// docs/71 M1 — the memory share: each line may keep its share of the
 /// universe's memory (`MIND_ENTRY_BUDGET`) by its share of the universe's
 /// wealth (banked Crystal and STAMP). The shares sum to at most one, so the
 /// minds' memory is bounded by construction however the economy grows; a line
@@ -1019,7 +1019,7 @@ pub fn assign_memory(worlds: &mut [Polity]) {
     }
 }
 
-/// PERF — how often (in world beats) a vessel PRACTISES a mesh wall and SPEAKS a
+/// PERF — how often (in world beats) a vessel practises a mesh wall and speaks a
 /// sentence. Every beat would put two extra reduce ops per civ on top of the
 /// existing think_task, dominating a 107-civ global beat. Periodic keeps both
 /// axes flowing at a fraction of the cost. Absorption stays every beat (it is
@@ -1027,12 +1027,12 @@ pub fn assign_memory(worlds: &mut [Polity]) {
 const AUTIC_STRIDE: u64 = 4;
 
 /// ENTITY-ALIGN-2 (docs/56 §4, piece a) — how often (in world beats) the
-/// SIBLING forges its OWN task off its OWN basin instead of confirming the
+/// sibling forges its own task off its own basin instead of confirming the
 /// automaton's. Rare (once every 4 beats, like `AUTIC_STRIDE`): confirmation
 /// is what actually mints words today (COMM-1), so self-selection must stay
 /// a minority of beats or consilience collapses (neither vessel ever closes
-/// the SAME orbit the other did). Occasional is the whole point of this
-/// slice — the first beat a vessel's OWN choice, not the civ's, decides what
+/// the same orbit the other did). Occasional is the whole point of this
+/// slice — the first beat a vessel's own choice, not the civ's, decides what
 /// it thinks about.
 const SIBLING_AUTONOMY_STRIDE: u64 = 4;
 
@@ -1046,10 +1046,10 @@ pub struct Polity {
     pub world: World,
     /// The polity's contained agent (build/raze/collect granted).
     automaton: u64,
-    /// The steward's contained entity (drains the operator's inbox) — DIRECTIVES
-    /// ONLY. The inbox is not a mind; the steward is no longer a thinker (N-I10).
+    /// The steward's contained entity (drains the operator's inbox) — directives
+    /// only. The inbox is not a mind; the steward is no longer a thinker (N-I10).
     steward: u64,
-    /// N-I10 — the SIBLING office: the line's second COGNITIVE vessel. It thinks
+    /// N-I10 — the sibling office: the line's second cognitive vessel. It thinks
     /// its own basin toward consilience (N-I8) and hears offered words; distinct
     /// from the steward so culture never requires the player's directive vessel
     /// to think.
@@ -1060,8 +1060,8 @@ pub struct Polity {
     streak: u32,
     /// Confirmed solves this era.
     pub solved: u32,
-    /// One CLEAVE per era — growth is rare, not a flood. The cleave
-    /// yields two PEER branches (11 §3); this bounds how OFTEN the
+    /// One cleave per era — growth is rare, not a flood. The cleave
+    /// yields two peer branches (11 §3); this bounds how often the
     /// line grows, never how many branches a growth produces.
     cleaved: bool,
     /// MESH-1b: the pen is out — beats, saves, and the market wait.
@@ -1070,21 +1070,21 @@ pub struct Polity {
     /// lazily at the first chain; re-opening per beat would re-verify
     /// the whole stream every cycle — quadratic over a live era).
     arbor: Option<mesh::arbor::Arbor>,
-    /// DIRECTIVE 19 — how many receipts have been threaded through the
+    /// Directive 19 — how many receipts have been threaded through the
     /// gate and into the chain. Every deed past this mark is chained
     /// individually, with its own step, and gated.
     chained: usize,
-    /// THE STEPPER (task #9): the judged prefix's committed state,
+    /// The stepper (task #9): the judged prefix's committed state,
     /// advanced one receipt at a time — prior/next per deed are a
     /// clone of state (O(state)), never a prefix replay (O(history)).
     /// Workspace like `chained`: seeded at first chain of a process.
     stepper: Option<cfe::world::Replayer>,
-    /// **THE PHASE-3 FLIP** (`39_PHASE3_FLIP` §5, operator ruling
-    /// 2026-08-13): how many receipts have an ARBOR commitment, not
+    /// **The PHASE-3 flip** (`39_PHASE3_FLIP` §5, operator ruling
+    /// 2026-08-13): how many receipts have an arbor commitment, not
     /// just a judgment. Distinct from `chained` — `chained` advances
     /// on every deed judged (lawful or not, purely for the refusal
     /// report); `arbor_committed` advances only past deeds the kernel
-    /// ADMITTED, since a refused deed gets no commitment at all. The
+    /// admitted, since a refused deed gets no commitment at all. The
     /// two marks diverge exactly when a refusal happens, which is the
     /// live measure of "replay demoted to proposer."
     arbor_committed: usize,
@@ -1098,37 +1098,37 @@ pub struct Polity {
     /// beat 1005). It is recomputed now only when the library grew.
     knowledge: Option<(usize, solver::SelfMap)>,
     library_folded: bool,
-    /// N-I8 — words seeking CONSILIENCE: (orbit, expansion, deposits). Each
-    /// deposit is `(vessel_id, digest)`; the word mints only when two DISTINCT
+    /// N-I8 — words seeking consilience: (orbit, expansion, deposits). Each
+    /// deposit is `(vessel_id, digest)`; the word mints only when two distinct
     /// vessels have independently closed the orbit. One vessel confirming many
     /// digests is Horizon, not an install (C−) — pending is a wait.
     word_pending: Vec<([u8; 32], Vec<solver_verify::grid::Op>, Vec<(u64, [u8; 32])>)>,
-    /// Planes this line has OPENED — the unfold, one per earned mint.
+    /// Planes this line has opened — the unfold, one per earned mint.
     /// The fiber's grade count is `world.key().len()`; this counts the
     /// openings that got it there.
     pub unfolded: u64,
-    /// WHERE THIS LINE IS GOING, read from its own outcomes and used
+    /// Where this LINE is going, read from its own outcomes and used
     /// to decide what the next beat's search may spend.
     pub trajectory: Trajectory,
-    /// COG-DIRECTION Slice 3 — the line's ORDER state at the last beat it read
+    /// COG-DIRECTION Slice 3 — the line's order state at the last beat it read
     /// itself: `(syntropy_contained, entropy_vented, families)`. The books are
-    /// cumulative, so the per-beat DELTA is the order-capture FLOW — whether the line
-    /// captured or shed order THIS beat — and the family delta is whether its material
-    /// self is gaining or collapsing structure. Direction is derived from those FLOWS
+    /// cumulative, so the per-beat delta is the order-capture flow — whether the line
+    /// captured or shed order this beat — and the family delta is whether its material
+    /// self is gaining or collapsing structure. Direction is derived from those flows
     /// (evolution — the line vs its own past), not a lifetime-level threshold. `None`
     /// until the first material read.
     prev_order: Option<(Ratio, Ratio, usize)>,
-    /// COG-DIRECTION Slice 3b — the POPULATION's cohesion band this beat:
+    /// COG-DIRECTION Slice 3b — the population's cohesion band this beat:
     /// `(lower_third, upper_third)`, the tertile cuts of the live cohesion
     /// distribution across every warm-booked line. Set once per beat by
     /// [`direction_census_step`] before the cycle loop; read by `research_step` so
-    /// a line's direction is its fitness RELATIVE TO THE POPULATION (true natural
+    /// a line's direction is its fitness relative to the population (true natural
     /// selection: the top third grows, the bottom third declines) rather than an
     /// absolute 1/2 dial. `None` before the first census or when fewer than three
     /// warm lines stand (no population to be relative to → hold). MEASURED
-    /// (2026-08-21, 90-civ live journal): the cohesion LEVEL spreads 0..0.93,
-    /// median 0.070, 72/90 distinct — a clean partition; the per-beat FLOW is ~75%
-    /// flat at EVERY window 1..13, so selection reads the discriminating LEVEL,
+    /// (2026-08-21, 90-civ live journal): the cohesion level spreads 0..0.93,
+    /// median 0.070, 72/90 distinct — a clean partition; the per-beat flow is ~75%
+    /// flat at every window 1..13, so selection reads the discriminating level,
     /// population-relative, never the flat flow (Slice 3a refuted by measurement).
     pop_cohesion_band: Option<(Ratio, Ratio)>,
     /// Beats since this line last closed a task — what it hands the
@@ -1138,7 +1138,7 @@ pub struct Polity {
     /// cumulative. The S of W/S; the board reads its own yield without
     /// instrumentation.
     pub spent: u64,
-    /// Times this line fell back to the EXHAUST path. Counted as
+    /// Times this line fell back to the exhaust path. Counted as
     /// invocations, not candidates: the sweep reports no count and is
     /// bounded by `SEARCH_BUDGET`, so folding it into `spent` would
     /// mix a measured number with a bound and ruin both yields.
@@ -1146,15 +1146,15 @@ pub struct Polity {
     /// Deeds the kernel REFUSED, by receipt sequence. Kept rather than
     /// discarded — a refusal the board never sees is the gate speaking
     /// into a void.
-    /// THE JUDGE'S REFUSALS — per-deed, from `chain_beat`.
+    /// The judge's refusals — per-deed, from `chain_beat`.
     ///
     /// **Made public 2026-08-02 (operator ruling: stop swallowing
-    /// refusals).** This was private and NOTHING read it: the kernel has
+    /// refusals).** This was private and nothing read it: the kernel has
     /// been judging every deed every beat and posting its verdicts into
     /// a field no caller could see. A refusal names its cure, and a cure
     /// nobody can read is not a cure.
     pub refused: Vec<(u64, kernel::Refused)>,
-    /// THE LANE REFUSALS — why `charter_route` said no.
+    /// The lane refusals — why `charter_route` said no.
     ///
     /// `conductor/src/lib.rs`'s charter site discarded this with
     /// `let _ =`, and the consequence was invisible: **17 crossings
@@ -1171,50 +1171,50 @@ pub struct Polity {
     /// `Unsolved` readings. One entry is enough: the repeat is always
     /// "unchanged since last beat".
     ///
-    /// **KEYED ON THE WHOLE `Difficulty`, not on `word_len`** (defect
+    /// **Keyed on the whole `Difficulty`, not on `word_len`** (defect
     /// found at the 2026-08-04 integration, measured). The key was
     /// `(digest, word_len)`, and `Difficulty::level(3)` and `level(4)`
-    /// BOTH carry `word_len: 2` while differing in tier, rows and cols.
+    /// both carry `word_len: 2` while differing in tier, rows and cols.
     /// So a line promoting 3 → 4 on an unchanged digest hit the memo and
     /// was handed the level-3 solve, which the conductor then shipped as
     /// a level-4 proof: the gate re-forged level 4, re-ran the program
     /// and got a different grid — `WorkRefused { OutputMismatch }`, a
-    /// mint the proposer emitted and the gate refused. The task IS the
+    /// mint the proposer emitted and the gate refused. The task is the
     /// whole difficulty, so the key must be too.
-    /// N-I·VESSEL — THE COGNITIVE BASIN, PER VESSEL (THE INTELLIGENCE PORT).
-    /// Each VESSEL (person) grows its OWN basin of crystallized residuals: a
-    /// wall `think_task` mints and adopts joins THAT vessel's mouth, and the
-    /// same vessel's next think DRAINS against it (Pin B) — thinking changes the
+    /// N-I·vessel — the cognitive basin, per vessel (the intelligence port).
+    /// Each vessel (person) grows its own basin of crystallized residuals: a
+    /// wall `think_task` mints and adopts joins that vessel's mouth, and the
+    /// same vessel's next think drains against it (Pin B) — thinking changes the
     /// thinker, one thinker at a time. A sibling on the same puzzle walls afresh;
-    /// it never inherits the wall (isolation IS the map key).
+    /// it never inherits the wall (isolation is the map key).
     ///
-    /// **Law II — the map is an INDEX, not the thought.** `Vec<Crystal>` is the
-    /// basin the organ reduces; `BTreeMap<vessel_id, _>` only ADDRESSES which
+    /// **Law II — the map is an index, not the thought.** `Vec<Crystal>` is the
+    /// basin the organ reduces; `BTreeMap<vessel_id, _>` only addresses which
     /// basin — ordered by `vessel_id` (`Ord`), so iteration is a replay-stable
-    /// walk. NEVER `HashMap` (hash addressing throws away the fiber); `Q/ℤ` lives
-    /// INSIDE the crystals, never in the key. Non-committed workspace like
+    /// walk. Never `HashMap` (hash addressing throws away the fiber); `Q/ℤ` lives
+    /// inside the crystals, never in the key. Non-committed workspace like
     /// `library` — the committed wire (`Entity`) stays empty, so replay of a
     /// pre-grown receipt still matches. Seed vessel is the line's `automaton`;
     /// the map admits many (population individuation is a later cut).
     grown: std::collections::BTreeMap<u64, Vec<solver::Crystal>>,
-    /// Each vessel's HELD CONJECTURES (Concordance 1.10, restore 1): the
+    /// Each vessel's held conjectures (Concordance 1.10, restore 1): the
     /// frames its unglued thoughts closed some pairs with, tried first on
     /// later tasks. Private workspace, like `grown`; never receipted.
     held: std::collections::BTreeMap<u64, Vec<solver::Conjecture>>,
-    /// THE DEAD'S LIBRARY this line has HEARD (cores slice 3): the words dead
+    /// The dead's library this line has heard (cores slice 3): the words dead
     /// lines deposited at its core that the core's bell has carried here.
     /// Tried after the line's own words; one the line reconstructs on its own
     /// task is licensed into its library.
     inherited: solver::mint::Library,
     /// Dead words on their way, with the universal beat each arrives.
     arriving: Vec<(u64, solver::mint::MintedWord)>,
-    /// docs/60 D2 — words this line HEARD from a neighbour (wholly inside its
-    /// senses) and MISHEARD (a channel it lacks), cumulative workspace.
+    /// docs/60 D2 — words this line heard from a neighbour (wholly inside its
+    /// senses) and misheard (a channel it lacks), cumulative workspace.
     pub heard: u64,
     pub misheard: u64,
     /// docs/60 D9 — the dead's open questions on their way, by arrival beat.
     questions_arriving: Vec<(u64, solver::Conjecture)>,
-    /// The words this line OWNS (minted or licensed), folded from its
+    /// The words this line owns (minted or licensed), folded from its
     /// chronicle once and then only from receipts past `word_cursor` (an
     /// absolute receipt index): the market and the census read this, never
     /// a fold of the whole history each beat.
@@ -1226,7 +1226,7 @@ pub struct Polity {
     /// receipts past `office_cursor`.
     office_tally: (u64, u64, u64),
     office_cursor: u64,
-    /// docs/66 Y1 — SYNTHESIS'S FIRST-CLOSURE BOUNTY, as the court pays: the
+    /// docs/66 Y1 — synthesis's first-closure bounty, as the court pays: the
     /// action orbit of the synthesis closing this beat (read at its mint),
     /// the orbits this line closed since the board last merged them, and
     /// every orbit any line in the universe has closed (shared, read-only,
@@ -1241,10 +1241,10 @@ pub struct Polity {
     /// orbit -> whether the tongue states it (an object op or a tile has no
     /// form yet). Filled a few words a beat; workspace like `grown`.
     stated: std::collections::HashMap<[u8; 32], bool>,
-    /// AUTIC-2 — sentences one vessel has SPOKEN to the other (composed
-    /// utterances), and how many carried a DemandUnmet leftover the hearer LEARNED
+    /// AUTIC-2 — sentences one vessel has spoken to the other (composed
+    /// utterances), and how many carried a DemandUnmet leftover the hearer learned
     /// (adopted as a new crystal). Cumulative workspace. The live measure of the
-    /// COMPOSE move: multi-word thought exchanged and comprehended between minds.
+    /// compose move: multi-word thought exchanged and comprehended between minds.
     pub autic_spoke: usize,
     pub autic_learned: usize,
     /// docs/71 M1: the chain entries this line's minds may keep, its share of
@@ -1252,10 +1252,10 @@ pub struct Polity {
     pub memory_budget: Option<usize>,
     /// docs/71: how often a basin met the byte witness (should stay 0).
     pub memory_witness_hits: u64,
-    /// How many refusals the board has already been TOLD. The record
+    /// How many refusals the board has already been told. The record
     /// above is permanent; this is only the narrator's place in it, so
     /// a refusal is announced once per process and kept forever.
-    /// Workspace state, like `chained`: a RESUMED world restarts both
+    /// Workspace state, like `chained`: a resumed world restarts both
     /// at 0 and re-gates its whole chronicle on the next beat, so a
     /// pre-existing refusal is announced again in the new process. That
     /// is honest — the gate met the deed again — and it is the same
@@ -1266,35 +1266,35 @@ pub struct Polity {
     /// `persist_sync` skip re-reading and re-verifying the whole file
     /// every beat, the dominant share of the per-beat floor on a live
     /// era (measured ~3s/civ by beat 11, growing every beat since).
-    /// Workspace like `chained`/`stepper`: a RESUMED world starts cold
+    /// Workspace like `chained`/`stepper`: a resumed world starts cold
     /// (`Default`) and pays one full check on its first beat, exactly
     /// like today.
     sync_cursor: cfe::persist::SyncCursor,
-    /// THE CORES (slice 1): this world's sinks read by the judge and not yet
+    /// The cores (slice 1): this world's sinks read by the judge and not yet
     /// deposited at its core, kept durable beside it (`core.pending`).
     core_pending: cores::Pending,
 }
 
-/// The smelter's (iron, biomass) gate — bound ONCE, read by the
+/// The smelter's (iron, biomass) gate — bound once, read by the
 /// industrial arm, the forge hold, and the gather alike, so the
 /// ratchet counts two dials and no reader can drift from another.
 fn smelter_gates() -> (Ratio, Ratio) {
     (ratio(30, 1), ratio(10, 1))
 }
 
-// ── #146 THE ENTITY-ATLAS (doc 55 §9) — value-preserving live cognition ──
+// ── #146 the ENTITY-ATLAS (doc 55 §9) — value-preserving live cognition ──
 //
-// A civilization's collective cognition = the manifold ΔH over its VESSELS
-// (minds). A crystal's key is its FULL CANONICAL CLASS (`ChainDelta` — frame +
-// exact entries), NEVER a u64 digest: the digest would collapse the frame-morphism
+// A civilization's collective cognition = the manifold ΔH over its vessels
+// (minds). A crystal's key is its full CANONICAL class (`ChainDelta` — frame +
+// exact entries), never a u64 digest: the digest would collapse the frame-morphism
 // and the Q/ℤ coefficients — the very value (the per-vessel analog of a line's
-// `rcf_hash`). Two vessels SHARE a class iff their canonical classes match.
+// `rcf_hash`). Two vessels share a class iff their canonical classes match.
 
 /// The value-preserving key of a crystal — its full canonical class, lossless.
 fn atlas_crystal_key(c: &solver::Crystal) -> String {
     format!("{:?}", c.class)
 }
-/// A splitmix seed from bytes — for the CONNECTION SAMPLE only, never the value key.
+/// A splitmix seed from bytes — for the connection SAMPLE only, never the value key.
 fn atlas_seed(bytes: &[u8]) -> u64 {
     let mut h = 0xcbf2_9ce4_8422_2325u64;
     for b in bytes {
@@ -1358,40 +1358,40 @@ fn office_evidence(world: &World) -> OfficeEvidence {
     evidence
 }
 
-/// **DECLARED BOUND**: how many words a line holds waiting for a second
+/// **Declared bound**: how many words a line holds waiting for a second
 /// vantage (`consilience_deposit`). Memory is finite; the oldest gives way. A
 /// dial, recorded in docs/59, not a law (as `solver::HELD_CONJECTURES`).
 pub const WORD_PENDING_CAP: usize = 64;
 
-/// N-I8 — CONSILIENCE deposit (pure). Record `vessel`'s closure of `orbit` in the
+/// N-I8 — consilience deposit (pure). Record `vessel`'s closure of `orbit` in the
 /// pending board (idempotent per vessel+digest), and return the cited digests IFF
-/// two DISTINCT vessels have now closed it. Does NOT remove the entry — the caller
-/// removes it only on a SUCCESSFUL (affordable) mint, so a consilient-but-unpaid
+/// two distinct vessels have now closed it. Does not remove the entry — the caller
+/// removes it only on a successful (affordable) mint, so a consilient-but-unpaid
 /// word stays pending (fasting). One vessel confirming many digests never reaches
 /// two distinct vessel_ids (C−).
 ///
-/// **BOUNDED BY VESSEL, NOT BY ATTEMPT** (fixed 2026-08-24 — a real, measured
+/// **Bounded by vessel, not by attempt** (fixed 2026-08-24 — a real, measured
 /// leak): a vessel that keeps re-depositing the same unconfirmed orbit across
-/// beats carries a NEW digest every time (`research_step`'s digest is the
+/// beats carries a new digest every time (`research_step`'s digest is the
 /// beat's own receipt hash), so `(vessel, digest)` never repeats even though
 /// it is the same vessel re-confirming the same finding. Appending one entry
-/// per attempt made this grow WITHOUT BOUND for any orbit only one vessel
+/// per attempt made this grow without bound for any orbit only one vessel
 /// ever visits — exactly the shape `pin_c_two_vessels_mint...`'s own fixture
 /// exercises (one vessel deposits three distinct digests before giving up).
-/// Only vessel DIVERSITY ever gates the mint, never the attempt history, so
-/// each vessel gets ONE slot, updated in place — bounded by the vessel
+/// Only vessel diversity ever gates the mint, never the attempt history, so
+/// each vessel gets one slot, updated in place — bounded by the vessel
 /// count (two, in practice), never by beats elapsed.
 ///
-/// **IDENTITY AND CONTENT ARE SEPARATE AXES.** `mint_solver_word_as` gates on
-/// `cited.len()` alone, so this list's LENGTH must track vessel-diversity — the
+/// **IDENTITY and content are separate axes.** `mint_solver_word_as` gates on
+/// `cited.len()` alone, so this list's length must track vessel-diversity — the
 /// identity axis two distinct minds prove by both showing up — never digest
-/// agreement, the content axis. A digest is deterministic on WHAT was closed
-/// (`research_step` stamps every deposit this beat with the SAME chronicle
+/// agreement, the content axis. A digest is deterministic on what was closed
+/// (`research_step` stamps every deposit this beat with the same chronicle
 /// digest), so two distinct vessels closing the same orbit in the same beat
 /// legitimately carry the identical digest — real consilience that a naive
 /// digest-dedup would collapse to one entry and silently starve forever
-/// (`SolverWordUnconfirmed` on every attempt). One digest PER DISTINCT VESSEL,
-/// never per distinct digest VALUE — the digest itself rides along only as
+/// (`SolverWordUnconfirmed` on every attempt). One digest per distinct vessel,
+/// never per distinct digest value — the digest itself rides along only as
 /// per-vessel provenance for the receipt, exactly as `entity_id` rides beside
 /// (never inside) a content hash in the mesh's own orbit-congruence law.
 pub fn consilience_deposit(
@@ -1422,7 +1422,7 @@ pub fn consilience_deposit(
     if vessels.len() < 2 {
         return None; // Horizon — one vantage waiting, not a mint (C−)
     }
-    // One digest per DISTINCT VESSEL (first deposit wins) — `cited.len()` must
+    // One digest per distinct vessel (first deposit wins) — `cited.len()` must
     // equal `vessels.len()`, the identity count, never collapse on shared content.
     let mut cited: Vec<[u8; 32]> = Vec::with_capacity(vessels.len());
     for &v in &vessels {
@@ -1434,10 +1434,10 @@ pub fn consilience_deposit(
 }
 
 /// ENTITY-ALIGN-1 (docs/56 §3, pure) — mirrors `solver::consilience`'s
-/// ALREADY-DEPLOYED hardness measure (`orders.dedup().len()`,
+/// already-deployed hardness measure (`orders.dedup().len()`,
 /// `selfmap.rs:225-231`) at vessel scope instead of line scope: the count
-/// of DISTINCT knowledge-readings among `vessels`, each read from `grown`
-/// and reduced to a SET of classes (order and duplicate count ignored — a
+/// of distinct knowledge-readings among `vessels`, each read from `grown`
+/// and reduced to a set of classes (order and duplicate count ignored — a
 /// basin is a proven set, not a sequence; `ChainDelta` derives
 /// `PartialEq, Eq` but not `Hash`, so this is a linear `contains` scan,
 /// bounded by `AUTIC_BASIN_CAP` per vessel). Identical knowledge from
@@ -1476,7 +1476,7 @@ pub fn confirmation_hardness(
 }
 
 /// ENTITY-ALIGN-2 (docs/56 §4, piece a, pure) — the digest a vessel chooses
-/// its own problem from: a hash of the LATEST crystal in its own basin, never
+/// its own problem from: a hash of the latest crystal in its own basin, never
 /// the civ's chronicle digest. `None` for an empty or absent basin — nothing
 /// grown yet means nothing to derive a problem from, so autonomy is not yet
 /// earned.
@@ -1487,7 +1487,7 @@ pub fn basin_digest(basin: Option<&Vec<solver::Crystal>>) -> Option<[u8; 32]> {
     Some(*hasher.finalize().as_bytes())
 }
 
-/// ENTITY-ALIGN-2 (docs/56 §4, piece a, pure) — whether THIS beat is one
+/// ENTITY-ALIGN-2 (docs/56 §4, piece a, pure) — whether this beat is one
 /// where the sibling self-selects rather than confirms: hash-seeded per
 /// (vessel, beat) so it is emergent (a different vessel's self-select beats
 /// land on different world beats) rather than a synchronized global tick like
@@ -1530,7 +1530,7 @@ fn hex(bytes: &[u8; 32]) -> String {
 
 /// BOT-THERM: the Frost runway law — a sub-mesic colony expands only
 /// when its banked joules cover the one-tick heating bill of the
-/// GROWN city (ECON-J, 05 §1.2: `heating_per_zone × (zones + 1)`).
+/// grown city (ECON-J, 05 §1.2: `heating_per_zone × (zones + 1)`).
 /// Exact rational comparison: meeting the bill exactly holds the
 /// runway; one grain short refuses.
 pub fn joule_runway_allows(banked_joules: &Ratio, zones: usize) -> bool {
@@ -1631,7 +1631,7 @@ impl Polity {
         }
     }
 
-    /// COMPACT a line no one observes (docs/63): its state carried to its
+    /// Compact a line no one observes (docs/63): its state carried to its
     /// snapshot and chronicle, its pending sinks written, and its spec handed
     /// back at its founding place (its orbit is read from there again when
     /// it is unrolled, on its own clock, which stood while it was unwatched).
@@ -1669,7 +1669,7 @@ impl Polity {
         words[words.len().saturating_sub(limit)..].to_vec()
     }
 
-    /// docs/69 — a word closed in a substratum reaches this line as HEARD,
+    /// docs/69 — a word closed in a substratum reaches this line as heard,
     /// never adopted: the line adopts it only by reconstructing it on one of
     /// its own tasks (the inheritance-by-reconstruction door, docs/66 Y3).
     pub fn hear_from_below(&mut self, word: solver::mint::MintedWord) -> bool {
@@ -1715,14 +1715,14 @@ impl Polity {
     /// place on the star-chart.
     pub fn genesis(spec: PolitySpec, registry: &Registry, book: &Ledger) -> Polity {
         let _ = registry.create(&spec.civilization);
-        // BLOCKER A1 (the G0 persistence seam, CLOSED 2026-07-30):
-        // the boot RESUMES before it founds. A verifying resume
+        // Blocker A1 (the G0 persistence seam, CLOSED 2026-07-30):
+        // the boot resumes before it founds. A verifying resume
         // carrier means this world already lived — its receipts,
         // techs, famines, keys, and trades continue; a missing or
         // broken carrier founds fresh (a broken one rotates aside as
         // the ledger's divergence law already provides). NPC progress
         // survives every restart without an operator fold.
-        // CARRY STATE FORWARD: from the world's snapshot plus the receipts
+        // Carry STATE forward: from the world's snapshot plus the receipts
         // written after it — never replayed from genesis once a snapshot
         // stands, and only the chronicle tail it names read into memory
         // (`snapshot::boot`).
@@ -1742,7 +1742,7 @@ impl Polity {
                 {
                     // MESH-1b: the walk decides whose pen this is.
                     // Lawful conductor hand → held and stamped from
-                    // here on; a pen out across a restart STAYS out;
+                    // here on; a pen out across a restart stays out;
                     // pre-mesh None stays unheld (law starts at the
                     // first seal); a violating arbor waits penned —
                     // writes never land on a refused chain.
@@ -1750,7 +1750,7 @@ impl Polity {
                     if let Some(wild) = &spec.wild {
                         world.set_land(wild.clone());
                     }
-                    // N-I10 — the SIBLING is the second cognitive vessel; a world
+                    // N-I10 — the sibling is the second cognitive vessel; a world
                     // founded before N-I10 lacks it, so register it on resume.
                     let sibling = sibling0
                         .unwrap_or_else(|| world.register_agent("sibling").expect("registers"));
@@ -1769,7 +1769,7 @@ impl Polity {
                     );
                     // The ladder resumes from the solve cards
                     // themselves: the highest rung any solve in this
-                    // world was EARNED at (sol::DEPTH). The .json
+                    // world was earned at (sol::DEPTH). The .json
                     // count that stood here died with the format
                     // migration to .sol — it read 0 forever and
                     // silently reset every resumed world to rung 1,
@@ -1862,7 +1862,7 @@ impl Polity {
             &opening,
         );
         let mut world = World::new();
-        // docs/58 §3 — THE CITATION: a freshly founded world's FIRST receipt
+        // docs/58 §3 — the citation: a freshly founded world's first receipt
         // names its universe's Big Bang, so its whole hash chain (its
         // founding digest, and every matter identity derived from it)
         // descends from the universe's origin.
@@ -1872,7 +1872,7 @@ impl Polity {
         world.found(&spec.colony).expect("a fresh world founds");
         // GALACTIC-1: seal the regional resource-weighting seed from the
         // charted position — derived here (the caller holds the ledger's
-        // position), recorded into the chronicle as the DERIVED seed only,
+        // position), recorded into the chronicle as the derived seed only,
         // so replay never needs the starchart back.
         let region_seed =
             cfe::dop::region_seed_of(&spec.position.0, &spec.position.1, &spec.position.2);
@@ -1884,7 +1884,7 @@ impl Polity {
             .register_agent(&format!("{}-conductor", spec.civilization.sigil))
             .expect("registers");
         let steward = world.register_agent("steward").expect("registers");
-        // N-I10 — the SIBLING: the second cognitive vessel (distinct from the
+        // N-I10 — the sibling: the second cognitive vessel (distinct from the
         // steward, which stays on directives). Thinks toward consilience + hears.
         let sibling = world.register_agent("sibling").expect("registers");
         for scope in [Scope::Build, Scope::Raze, Scope::Collect] {
@@ -1906,9 +1906,9 @@ impl Polity {
             let _ = world.adopt_practice(practice);
         }
         // BOT-THERM: thermal genesis — every polity world founds under a
-        // REAL sun. Spec-pinned fields rule; absent ones derive from
+        // real sun. Spec-pinned fields rule; absent ones derive from
         // the registry axes, beacon-seeded by the world's own genesis
-        // receipt digest (the chronicle-seeded discipline, CHARTER §9).
+        // receipt digest (the chronicle-seeded discipline, Charter §9).
         let digest = world
             .chronicle()
             .receipts()
@@ -1917,19 +1917,19 @@ impl Polity {
             .own()
             .0;
         let beacon = Beacon::from_digest(digest);
-        // THE BAND CHOOSES WHERE IT SETTLES (G2, operator 2026-10-07: "only
-        // give them options, freedom, and agency"). A pinned seat is the
-        // line's compiled HOME — one option, not an order — beside every
+        // The band chooses where it settles (G2, ruling of 2026-10-07: bands
+        // are given options, freedom, and agency only). A pinned seat is the
+        // line's compiled home — one option, not an order — beside every
         // continuous draw of its regime; the physics reads each option's
         // viability and the band draws among them, viability-weighted and
         // chronicle-seeded (`siting::choose_site`). Better land is likelier,
-        // never guaranteed. A home the physics refuses is REPORTED, never
+        // never guaranteed. A home the physics refuses is reported, never
         // silently left unsited.
         let home = match (spec.star, spec.albedo.clone(), spec.orbit.clone()) {
             (Some(class), Some(albedo), Some(orbit)) => Some((class, albedo, orbit)),
             _ => None,
         };
-        // ERA 1 (the refactor onto era 1's physics, 2026-10-15): a line seated
+        // Era 1 (the refactor onto era 1's physics, 2026-10-15): a line seated
         // on an era-1 world carries that world's siting (its star class, its
         // orbit at its own heat) and settles there, no draw. Only a line with
         // no world (a cleave, until it settles one) draws from the derived
@@ -1958,12 +1958,12 @@ impl Polity {
             .commission_star(class)
             .expect("a fresh world has no sun yet");
         // An unlawful operator-pinned siting (albedo ≥ 1, orbit ≤ 0)
-        // leaves the orb thermally DORMANT (the engine's opt-in guard)
-        // instead of killing the board; derived seats are always lawful.
-        // SITED WITHOUT AN ANGLE, deliberately. Passing ANY slot here
+        // leaves the orb thermally dormant (the engine's opt-in guard)
+        // instead of halting the board; derived seats are always lawful.
+        // Sited without an angle, deliberately. Passing any slot here
         // makes conductor/tests/survey_pins.rs fail with a live/replay
         // divergence in Crystal — measured at slots 0, 1, 7 and 30, so
-        // it is the PRESENCE of the angle and not its value. See
+        // it is the presence of the angle and not its value. See
         // `21_KERNEL_PARAMETERS` §17: the capability is landed and
         // witnessed, and the conductor does not use it until #30
         // closes the divergence it exposes.
@@ -1981,30 +1981,30 @@ impl Polity {
                 spec.civilization.sigil
             ),
         }
-        // ERA 1: the world's planet composition, sealed once (tag 198); its
+        // Era 1: the world's planet composition, sealed once (tag 198); its
         // veins are drawn from it as canonical elements.
         if let Some(composition) = spec.composition.clone() {
             if let Err(refusal) = world.seal_composition(composition) {
                 eprintln!("genesis {}: the composition was NOT sealed — {refusal:?}", spec.civilization.sigil);
             }
         }
-        // **DIO-3a: SEAL THE CLADE AT GENESIS** (operator ruling 2026-08-16). Until
+        // **DIO-3a: SEAL the CLADE AT GENESIS** (operator ruling 2026-08-16). Until
         // sealed, every founding line reads the flatlander default (clade 2,
-        // Mesic), so DIO-2's species-relative η is LATENT — a whale, a coral,
+        // Mesic), so DIO-2's species-relative η is latent — a whale, a coral,
         // and a plasmoid all read the same temperate optimum. Translate the
-        // spec's DECLARED clade string to its code and seal it, so
+        // spec's declared clade string to its code and seal it, so
         // `rejuvenation_clade` returns the real species and `habitability_flux`
-        // reads its OWN band. Class 7 is the neutral baseline `science_lab`
+        // reads its own band. Class 7 is the neutral baseline `science_lab`
         // already assumes when unsealed (so `economic_mode` falls through to the
         // clade — the identity, not the archetype, colours the economy); a
-        // per-clade archetype class is a later refinement. Sealed AFTER siting so
+        // per-clade archetype class is a later refinement. Sealed after siting so
         // the orbit draw (which reads the genesis digest) is unchanged: DIO-3a
         // isolates to "the clade goes live". A clade the table does not know
         // stays flatlander rather than refusing the founding.
         if let Some(clade) = cfe::almanac::table_clade_from_word(&spec.civilization.clade) {
             let _ = world.seal_taxon(NEUTRAL_ARCHETYPE_CLASS, clade);
         }
-        // THE FOUNDING BAND ARRIVES WITH THE COLONY, BOUNDED BY THE LAND (G2).
+        // The founding band arrives with the COLONY, bounded by the land (G2).
         // The band founds the settlement; it is not a reward for raising a
         // Habitat (that coupling let a first non-habitat build's famine lock
         // the band out forever — every G2 cleave was born empty). Its size is
@@ -2083,7 +2083,7 @@ impl Polity {
         }
     }
 
-    /// **GROUND STEP** (operator lock 2026-08-07) — the almanac arm of
+    /// **Ground step** (operator lock 2026-08-07) — the almanac arm of
     /// the autonomous loop. Issues the same deeds the CLI uses:
     /// `prospect_as` (Scope::Build) and `assay_as` (Scope::Collect).
     ///
@@ -2108,7 +2108,7 @@ impl Polity {
             .map(|held| held.orb_id)
             .collect();
 
-        // PROSPECT — one success per beat, lowest stratum first.
+        // Prospect — one success per beat, lowest stratum first.
         // CIV-REACH-1: stratum 0 always refuses and depth is capped by
         // the people's growth, so the walk is 1..=civ_reach — a bronze
         // line digs its two shallow strata and deepens as tech lands.
@@ -2132,8 +2132,8 @@ impl Polity {
             }
         }
 
-        // ONT-2b: the STAPLE is an ORB invariant — the law partitions the vein
-        // book by orb, so resolve each orb's staple ONCE (a peel by the orb
+        // ONT-2b: the staple is an orb invariant — the law partitions the vein
+        // book by orb, so resolve each orb's staple once (a peel by the orb
         // plane), never per vein. Recomputing `staple_diet_of` (an O(prospects)
         // scan + morphogen projection) inside the assay walk would be a
         // cartesian re-scan of the book per vein — the sweep the standing
@@ -2144,7 +2144,7 @@ impl Polity {
             .map(|&orb| (orb, self.world.staple_diet_of(orb)))
             .collect();
 
-        // ASSAY — every open vein with a positive span.
+        // Assay — every open vein with a positive span.
         // Snapshot (orb, element, last_assay): assay mutates prospects.
         let veins: Vec<(u64, [u8; 32], u64)> = self
             .world
@@ -2158,11 +2158,11 @@ impl Polity {
             if now <= last_assay {
                 continue; // NothingAccrued — wait for the tick to open span
             }
-            // The STAPLE vein is the population's larder — it is mined by EATING
+            // The staple vein is the population's larder — it is mined by eating
             // at the collect touch (demand-driven `StapleMined`), not pumped here
             // on the geometric span. Pre-mining it would strip the vein's
             // richness before `K_pop` reads it (the deadlock the reverted first
-            // attempt hit). Every NON-staple vein (industry, trade, trace) still
+            // attempt hit). Every non-staple vein (industry, trade, trace) still
             // assays on its geometric span. The staple is read from the per-orb
             // peel above, an O(1) lookup in the polity's small orb set.
             let staple = staples
@@ -2176,7 +2176,7 @@ impl Polity {
         }
     }
 
-    /// **OFFICE STEP (T1.4)** — pure NPC path to economic stations.
+    /// **Office step (T1.4)** — pure NPC path to economic stations.
     /// After ground_step has banked elements, a line may claim Caravan
     /// (T4) or Exchange (T6) through the same doors the CLI uses:
     /// chain seat + registry card, gated by [`office_preconditions`].
@@ -2184,7 +2184,7 @@ impl Polity {
     /// diverge without a player click (Wave-1 exit criterion).
     fn office_step(&mut self, registry: &Registry) {
         let held = self.spec.civilization.station.as_deref();
-        // One office per line — the climb is from the COMMON (T3, no
+        // One office per line — the climb is from the common (T3, no
         // seat). A founding progenitor / watcher / observer / sovereign
         // already holds a public office; do not replace it with a
         // deeper economic seat under pure NPC (Wave-1 seats T4/T6 from
@@ -2193,14 +2193,14 @@ impl Polity {
             return;
         }
         let evidence = self.office_evidence_now();
-        // **THE OFFICE DERIVES FROM THE OPPORTUNITY** (INTELLIGENCE ARC B,
+        // **The office derives from the opportunity** (intelligence ARC B,
         // business-development made cognition-driven). A line no longer
         // takes the office a fixed `disposition → office` dial assigns it;
-        // it seats the vocation its OWN economy is strongest in — a router
-        // turns caravan, a market-maker turns exchange. The FIT is the
-        // COMMENSURATE activity each vocation is measured by: routes
+        // it seats the vocation its own economy is strongest in — a router
+        // turns caravan, a market-maker turns exchange. The fit is the
+        // commensurate activity each vocation is measured by: routes
         // chartered vs. market clears, both event counts on the same
-        // scale (element_kinds is inventory BREADTH, a precondition to
+        // scale (element_kinds is inventory breadth, a precondition to
         // seat, never a fit — comparing it against a trade count seats
         // every element-holder crucible by an accident of units).
         let want = if evidence.routes_chartered != evidence.market_clears {
@@ -2212,7 +2212,7 @@ impl Polity {
             }
         } else {
             // no distinguishing activity yet — fall to the disposition's
-            // own structural LEAN (a direction from temperament,
+            // own structural lean (a direction from temperament,
             // 44_LINEAGES, never a tuned magnitude).
             match self.spec.civilization.disposition.as_str() {
                 "empiricist" => "exchange",
@@ -2243,7 +2243,7 @@ impl Polity {
                 return false;
             }
         }
-        // BEAT-PARALLEL — `registry.seat` reads the WHOLE roster (`self.list()`)
+        // BEAT-PARALLEL — `registry.seat` reads the whole roster (`self.list()`)
         // and enforces a global seat-width constraint, so it is the one op in the
         // per-civ cycle that is not per-world isolated. It fires rarely (an office
         // once per line, a seat when a tier emerges), so serialising it
@@ -2260,7 +2260,7 @@ impl Polity {
         seated.is_ok()
     }
 
-    /// **REFINE STEP (REFINE-1)** — pure NPC conversion of banked raw
+    /// **Refine step (REFINE-1)** — pure NPC conversion of banked raw
     /// elements through a standing ElementRefinery. One refine per
     /// beat, first banked kind that covers the recipe spend.
     fn refine_step(&mut self) {
@@ -2301,7 +2301,7 @@ impl Polity {
         }
     }
 
-    /// **C1.6 CHEMISTRY STEP** — pure NPC chemistry, disposition-routed.
+    /// **C1.6 chemistry step** — pure NPC chemistry, disposition-routed.
     ///
     /// One act per beat: seat Chem lab → catalog known gem → compound
     /// best set → iso-union. Empiricist prioritizes catalog (knowledge);
@@ -2321,12 +2321,12 @@ impl Polity {
         // (and others default expansionist-ish yield path).
         let chem = cfe::almanac::ScienceDiscipline::Chem;
 
-        // THE BASE CHEM SEAT IS SURVIVAL INFRASTRUCTURE, not a discretionary
+        // The base chem seat is survival infrastructure, not a discretionary
         // luxury. Measurement (EMERGENCE-2b) showed the base lab is load-bearing:
         // its disposition-ordered survival compounds feed food-margin lines, so
-        // the roster seats it universally. Folding the BASE seat into the surplus
+        // the roster seats it universally. Folding the base seat into the surplus
         // tier starved the very lines with no surplus to invest — so it stays
-        // here, in the survival phase. The DISCRETIONARY chemistry — advancing the
+        // here, in the survival phase. The discretionary chemistry — advancing the
         // lab deeper — is the abundance resolver's Synthesize act. (The full
         // gate-removal waits for `express_survival` to name a chem deed itself.)
         if self.world.science_rank(primary, chem) < 1 {
@@ -2428,7 +2428,7 @@ impl Polity {
         false
     }
 
-    /// **POL.3 IDENTITY STEP** — pure NPC parity for line identity.
+    /// **Pol.3 IDENTITY step** — pure NPC parity for line identity.
     ///
     /// Ensures labor seats (habitat) when force is zero and resources
     /// afford; mirrors the player `polity` / `bench polity` surfaces.
@@ -2483,26 +2483,26 @@ impl Polity {
 
     /// The policy's build decision — at most one zone per beat, never
     /// during famine, always through the contained actor. Industry is
-    /// GATED ON RESEARCH for every temperament: smelters need rung 3,
+    /// gated on research for every temperament: smelters need rung 3,
     /// synthesizers rung 5.
     ///
-    /// **ECO regenerators (operator lock 2026-08-07, mandatory):** when
+    /// **Eco regenerators (operator lock 2026-08-07, mandatory):** when
     /// any open vein on an orb is worn (richness below its natural
     /// spring), the polity prioritizes `ZoneKind::Regenerator` so the
     /// element extraction lifecycle repairs itself. Regenerator
-    /// placement requires DEEPENING (condition 3); the steward gifts
+    /// placement requires deepening (condition 3); the steward gifts
     /// that node when the ecology demands it and the gift is lawful.
     /// RQP/FUNCTION wiring (operator directive 2026-07-30): the
     /// Pathfinder directs the drills. A mature colony (rung 5 — the
     /// synthesizer tier that can have refined a crystal) pays the
-    /// scan's crystal draw; the CrystalDrawn receipt IS the survey
+    /// scan's crystal draw; the CrystalDrawn receipt is the survey
     /// record, and placement follows the reading: a single-orb world
-    /// CHARTERS the surveyed sector (P1) and opens its first drill; a
+    /// charters the surveyed sector (P1) and opens its first drill; a
     /// multi-orb world places the next extractor on the scan's first
     /// resonant orb with room to grow. Unaffordable or starving, the
     /// survey idles lawfully and siting draws rule as before.
     fn survey_step(&mut self) {
-        // THE TOP OF THE LADDER, DERIVED (operator ruling 2026-08-04):
+        // The top of the ladder, derived (operator ruling 2026-08-04):
         // a line surveys once nothing above it differs. `Difficulty::
         // climbs` reads that off the ladder instead of restating its
         // length as a constant.
@@ -2525,8 +2525,8 @@ impl Polity {
             .collect();
         if orbs.len() == 1 {
             // The expansion: the survey confirms the home sigil and
-            // the charter plants its next sector. DERIVED (P2): the
-            // charter MOVES the founding reserves, so the gate is
+            // the charter plants its next sector. Derived (P2): the
+            // charter moves the founding reserves, so the gate is
             // double them — a line charters only from a position that
             // keeps a second founding in the bank. The dead 40/20
             // restated exactly this.
@@ -2572,7 +2572,7 @@ impl Polity {
             .zone_as(self.automaton, target, tile, ZoneKind::Extractor);
     }
 
-    /// **THE FORGE GATHERS** (the G2 relay's second arm, 2026-08-06 —
+    /// **The forge gathers** (the G2 relay's second arm, 2026-08-06 —
     /// "not a spend to hold back; a distribution to gather back"). The
     /// chart law rides 10 biomass to every child and the market banks
     /// imports where the offer rested, so a rung-3 mineral line's
@@ -2581,7 +2581,7 @@ impl Polity {
     /// exactly this movement: the survey grants the postal addresses,
     /// the conveyance moves the parcels, postage prices it honestly.
     ///
-    /// Children keep a DERIVED floor — their own per-tick biomass
+    /// Children keep a derived floor — their own per-tick biomass
     /// rations × the reciprocity window — so the gather can never
     /// famine what the charter founded. Every deed is refusal-pure:
     /// an unaffordable survey or an over-cap conveyance idles this
@@ -2667,26 +2667,26 @@ impl Polity {
             }
         }
     }
-    /// **COG-8 — BUILD-TO-THINK.** A line invests in a bigger BRAIN when it has
+    /// **COG-8 — build-to-think.** A line invests in a bigger brain when it has
     /// thinkers to deepen and can afford the apparatus. Seating a cognitive
     /// science (Math/Physics/Research) lifts `cognitive_capacity` 2→3, so the Mind
     /// composes one rung deeper — COG-6's depth-3 frontier that the conductor,
-    /// seating only Chem, never unlocked. A COSTED investment: `seat_science_as`
+    /// seating only Chem, never unlocked. A costed investment: `seat_science_as`
     /// pays the science-seat bill from the orb's banks, so a poor or starving line
-    /// cannot buy depth — intelligence is EARNED, not gifted (true-wealth). The
-    /// discipline is drawn STOCHASTICALLY — a partition draw over the unseated
+    /// cannot buy depth — intelligence is earned, not gifted (true-wealth). The
+    /// discipline is drawn stochastically — a partition draw over the unseated
     /// cognitive sciences, weighted by the species' own seat affinity (a
     /// comb-compute hexasocial reaches for Math, a plasmiform Physics), seeded by
     /// the line's latest receipt digest so replay is exact (the SOC
     /// stochastic-freedom principle). One seat per beat.
-    /// **THE ABUNDANCE TENSIONS** (COG-EMERGENCE-2) — the three γ the surplus
+    /// **The abundance tensions** (COG-EMERGENCE-2) — the three γ the surplus
     /// resolver weighs, each a saturation on the melt lattice `[0, L]`, read from
-    /// live committed state. The material VOID (`Σ|γ|`, the peel's unspanned
-    /// residual) admits TWO cures: DEEPEN the mind to invent past it (while the
+    /// live committed state. The material void (`Σ|γ|`, the peel's unspanned
+    /// residual) admits two cures: deepen the mind to invent past it (while the
     /// mind has depth headroom — `civic::cognitive_deficit`, zero once a
-    /// hard-cognitive science is seated), or seat CHEMISTRY to synthesise the
-    /// missing structure (while the lab is unseated). Both read the SAME void, so
-    /// the draw picks the cure. EXPANSION reads a different axis — the spatial
+    /// hard-cognitive science is seated), or seat chemistry to synthesise the
+    /// missing structure (while the lab is unseated). Both read the same void, so
+    /// the draw picks the cure. Expansion reads a different axis — the spatial
     /// room left in the star system. No affordability enters: these are tensions,
     /// not budgets.
     fn abundance_tensions(&self) -> (u64, u64, u64, u64, u64) {
@@ -2699,12 +2699,12 @@ impl Polity {
             .civic_peel()
             .map(|p| civic::residual_extent(&p))
             .unwrap_or(0);
-        // DEEPEN: the void weighed against the mind's remaining depth. The base
+        // Deepen: the void weighed against the mind's remaining depth. The base
         // γ saturates at the FRONTIER (by design — the no-overfit ceiling), but
-        // that saturation triggers the instant ONE hard science seats, long
-        // before the Deepen ACT itself runs out of room (`invest_cognition` can
+        // that saturation triggers the instant one hard science seats, long
+        // before the Deepen act itself runs out of room (`invest_cognition` can
         // still seat/deepen the other two, or elevate any of the three past rank
-        // 1). THE SECOND, CAPACITY-SCALED CONSUMER `cognitive_capacity`'s comment
+        // 1). The second, capacity-scaled consumer `cognitive_capacity`'s comment
         // calls for: while any hard-cognitive science stands seated but below
         // its own `max_rank()`, the same material void keeps tilting Deepen —
         // the exact shape `synthesis` already uses to deepen Chem past its base
@@ -2717,9 +2717,9 @@ impl Polity {
         });
         let beyond_frontier = if deepenable { ext.min(l) } else { 0 };
         let cognitive = (base_deficit + beyond_frontier).min(l);
-        // SYNTHESIZE: the DISCRETIONARY deepening of chemistry — advancing the lab
-        // BEYOND the survival base seat (chemistry_step seats rank 1 as survival
-        // infra). Once the lab stands, the SAME material void can be cured further
+        // Synthesize: the discretionary deepening of chemistry — advancing the lab
+        // beyond the survival base seat (chemistry_step seats rank 1 as survival
+        // infra). Once the lab stands, the same material void can be cured further
         // by deepening it — a luxury, so it competes in the abundance fold. Zero
         // before the base seat (survival's job) and once chemistry is maxed.
         let chem_rank = self.world.science_rank(primary, Chem);
@@ -2728,21 +2728,21 @@ impl Polity {
         } else {
             0
         };
-        // EXPAND: the spatial room left in the system, as a lattice fraction.
+        // Expand: the spatial room left in the system, as a lattice fraction.
         let orbs = self.world.committed().orbs.len() as u64;
         let expansion = SYSTEM_CAP.saturating_sub(orbs).saturating_mul(l) / SYSTEM_CAP;
-        // CULTURE — the practices this line's own chronicle has EARNED into the
+        // Culture — the practices this line's own chronicle has earned into the
         // fold (seed ∪ minted, `28_VOCABULARY`) but not yet taken up. Adoption
         // itself stays physics-gated (a tempered discipline still needs its
         // hardship receipts, `adopt_practice_as`) — this tension is only the
-        // WILL: how much unclaimed discipline stands in the fold, capped like
+        // will: how much unclaimed discipline stands in the fold, capped like
         // every other γ.
         let culture = self.earnable_practices().len() as u64;
         let culture = culture.min(l);
-        // CRAFT (RCP-2 F4) — the doing-layer's own unclaimed headroom: how
+        // Craft (RCP-2 F4) — the doing-layer's own unclaimed headroom: how
         // many of the five universal roles this line's held almanac could
         // fill (`recipe::discover`) but hasn't yet raised a recipe for.
-        // Reads the SAME "unclaimed but earnable" shape Culture already
+        // Reads the same "unclaimed but earnable" shape Culture already
         // uses, applied to the material doing-layer instead of vocabulary —
         // a role no held element can fill never counts (the discovery
         // search itself stays honest).
@@ -2752,7 +2752,7 @@ impl Polity {
     }
 
     /// The fold's practices this line has not yet adopted — the raw material
-    /// CULTURE's tension reads and `invest_culture` draws from. Order is the
+    /// culture's tension reads and `invest_culture` draws from. Order is the
     /// fold's own (append order, `28_VOCABULARY`), never re-sorted, so the
     /// seed-draw below is the only source of which one a beat picks.
     fn earnable_practices(&self) -> Vec<u8> {
@@ -2765,7 +2765,7 @@ impl Polity {
     }
 
     /// This line's own species manifold (metabolism archetype) and topological
-    /// reach, as `recipe::discover` needs them — the SAME `civ_reach`-derived
+    /// reach, as `recipe::discover` needs them — the same `civ_reach`-derived
     /// `AlgebraicRank` shape `abundance_step` already builds for the resolver's
     /// own `reach` argument, kept local here since `discover` wants it doubly
     /// (once to size the tension, again inside `invest_craft` to act on it).
@@ -2781,7 +2781,7 @@ impl Polity {
 
     /// The universal roles (`morphogen::FOOD..SINK`) this line's held almanac
     /// could fill via `recipe::discover` but hasn't yet raised a recipe for —
-    /// the raw material CRAFT's tension reads and `invest_craft` draws from.
+    /// the raw material craft's tension reads and `invest_craft` draws from.
     /// A role the almanac cannot fill (no held element projects into it) is an
     /// honest hole, never counted — `discover` itself is the single source of
     /// truth on workability, never re-derived here.
@@ -2808,14 +2808,14 @@ impl Polity {
             .collect()
     }
 
-    /// **THE ABUNDANCE STEP** (COG-EMERGENCE-2) — above the survival floor
-    /// (`express_survival`, the sole zone-raiser — N-I6), the line makes ONE
-    /// surplus choice per beat, not three authored gates. It FEELS the three
+    /// **The abundance step** (COG-EMERGENCE-2) — above the survival floor
+    /// (`express_survival`, the sole zone-raiser — N-I6), the line makes one
+    /// surplus choice per beat, not three authored gates. It feels the three
     /// tensions and draws one act — deepen, expand, synthesise, or hoard — off
-    /// its own chronicle digest. NO affordability is consulted: the will is
+    /// its own chronicle digest. No affordability is consulted: the will is
     /// topological; the chosen act pays its own bill or is REFUSED
     /// (`seat_science_as`/`chart_as` return `Err` on an unpayable bill, or the
-    /// founding on toxic leverage) AFTER the choice. Two lines, same surplus,
+    /// founding on toxic leverage) after the choice. Two lines, same surplus,
     /// different histories → different acts. Replay-exact.
     fn abundance_step(&mut self) {
         let primary = cfe::world::FIRST_ORB;
@@ -2823,7 +2823,7 @@ impl Polity {
         if self.world.orb().is_none() || self.world.star().is_none() {
             return;
         }
-        // NO surplus precondition, NO affordability. The fold runs every beat a
+        // No surplus precondition, no affordability. The fold runs every beat a
         // world stands and draws by tension + instinct ALONE; a chosen act pays
         // its own resource bill or is REFUSED by physics after the fact (cognition
         // seats in Iron/Crystal, never in food, so a lean line's Deepen attempt is
@@ -2833,7 +2833,7 @@ impl Polity {
         let (cognitive, expansion, synthesis, culture, craft) = self.abundance_tensions();
         // `reach` is the line's survey depth — its accumulated history —
         // perturbing the draw. It scales every weight equally, so it never biases
-        // WHICH act, only how this line's own digest lands.
+        // which act, only how this line's own digest lands.
         let reach = soc::AlgebraicRank {
             components: (self.world.civ_reach() as u64).max(1),
             cycles: 0,
@@ -2846,7 +2846,7 @@ impl Polity {
         hasher.update(&receipt.own().0);
         hasher.update(b"abundance-resolve");
         let seed = *hasher.finalize().as_bytes();
-        // SOC-5 — THE COLLECTIVE RESOLVE. The society's self-organisation
+        // SOC-5 — the collective resolve. The society's self-organisation
         // (SOC-4's live caste census) sets how decisively it spends its surplus:
         // a workforce concentrated on one shared deficit commits (a low Hoard
         // floor), a covered or scattered one rests. The concentration is a fold
@@ -2880,20 +2880,20 @@ impl Polity {
         }
     }
 
-    /// The CULTURE act — take up one earned-but-unclaimed practice from the
+    /// The culture act — take up one earned-but-unclaimed practice from the
     /// fold. Which one is a seed-draw over `earnable_practices()` (the same
     /// chronicle-digest discipline every other draw in this file uses), so two
     /// lines with the same unclaimed set but different histories pick
-    /// differently. NO pre-filtering by the tempering gate: the will names a
+    /// differently. No pre-filtering by the tempering gate: the will names a
     /// practice, `adopt_practice_as` is the physics that refuses an untempered
-    /// one AFTER the choice — the same law `invest_cognition`'s unaffordable
+    /// one after the choice — the same law `invest_cognition`'s unaffordable
     /// seat already keeps.
     fn invest_culture(&mut self, seed: [u8; 32]) {
         let earnable = self.earnable_practices();
         if earnable.is_empty() {
-            // CLOSING THE LOOP: this line has adopted every practice its own
+            // Closing the LOOP: this line has adopted every practice its own
             // fold contains — the earned path alone would leave it idle
-            // forever (the fold's "seed ∪ minted" was, until now, ALWAYS just
+            // forever (the fold's "seed ∪ minted" was, until now, always just
             // "seed": `mint_vocabulary_as`'s only live caller was the
             // operator's CLI, never a civ's own derivation). If a real void
             // still stands, invent one — the same "read the residual, tilt
@@ -2913,8 +2913,8 @@ impl Polity {
             .adopt_practice_as(self.automaton, earnable[index]);
     }
 
-    /// **THE CRAFT ACT** (RCP-2 F4) — raise one earned-but-unbuilt recipe:
-    /// which ROLE is a seed-draw over `craftable_roles()` (the same
+    /// **The craft act** (RCP-2 F4) — raise one earned-but-unbuilt recipe:
+    /// which role is a seed-draw over `craftable_roles()` (the same
     /// chronicle-digest discipline every other draw in this file uses), then
     /// `recipe::discover` names the exact transformation (which held element,
     /// how much it yields) and `build_recipe_as` raises it. No pre-filtering
@@ -2952,15 +2952,15 @@ impl Polity {
         }
     }
 
-    /// **INVENT A PRACTICE** — mint a new discipline into THIS line's own
+    /// **Invent A practice** — mint a new discipline into this line's own
     /// fold, derived from what it has actually lived, never a random draw:
-    /// - the FRICTION (`CHANNEL_TEMPER`) is the line's own weathered hardship
+    /// - the friction (`CHANNEL_TEMPER`) is the line's own weathered hardship
     ///   count — an invented discipline demands proof of exactly the trial
     ///   this line has already survived, not an arbitrary number;
-    /// - the BENEFIT (`CHANNEL_DEMURRAGE`) relieves decay in proportion to
+    /// - the benefit (`CHANNEL_DEMURRAGE`) relieves decay in proportion to
     ///   how deep the still-unspanned residual runs — the same shape the
     ///   seeded Hoard practice already wears (`CHANNEL_DEMURRAGE` < 1), so
-    ///   an invented discipline is recognizably the SAME kind of thing a
+    ///   an invented discipline is recognizably the same kind of thing a
     ///   progenitor would have authored, not a foreign mechanic.
     /// Refuses (no-op) when there is no residual to name a discipline after —
     /// a covered economy has nothing left to invent a cure for.
@@ -3018,16 +3018,16 @@ impl Polity {
         );
     }
 
-    /// The DEEPEN act — seat one hard-cognitive science (Math, Physics, Research)
+    /// The deepen act — seat one hard-cognitive science (Math, Physics, Research)
     /// that has headroom, the sub-draw weighted by the species' seat affinity
     /// (Primary 4 · Secondary 2 · Alien 1). Called only once the abundance
-    /// resolver has CHOSEN to deepen; the seat pays its bill or is refused
+    /// resolver has chosen to deepen; the seat pays its bill or is refused
     /// (unaffordable ⇒ the line willed a bigger brain it cannot yet build). Was
     /// `cognitive_investment_step` — its leisure/famine/capacity gates dissolved
     /// into the abundance tension.
     ///
-    /// **BEYOND THE BASE SEAT**: the candidate set is any discipline below its
-    /// OWN `max_rank()`, not just the unseated ones — `seat_science_as` already
+    /// **Beyond the base seat**: the candidate set is any discipline below its
+    /// own `max_rank()`, not just the unseated ones — `seat_science_as` already
     /// elevates rank on a repeat call (1→2), so the same action that seats a
     /// science from cold also deepens one already standing, exactly mirroring
     /// how Chemistry's `Synthesize` arm deepens `chem_rank` past its base seat
@@ -3061,17 +3061,17 @@ impl Polity {
         }
     }
 
-    /// The EXPAND act — charter one new world in the system. Called only once the
-    /// abundance resolver has CHOSEN to expand; the system cap is a physical
+    /// The expand act — charter one new world in the system. Called only once the
+    /// abundance resolver has chosen to expand; the system cap is a physical
     /// bound, and the TRUE-WEALTH solvency (operator ruling 2026-08-15: no
-    /// toxic-leverage founding off floored cash) is the post-choice PHYSICS bound,
-    /// NOT a pre-decision gate. Was `expand_step`'s charter branch; the
+    /// toxic-leverage founding off floored cash) is the post-choice physics bound,
+    /// not a pre-decision gate. Was `expand_step`'s charter branch; the
     /// supply-ring weave stays every-beat in `expand_step`.
     fn invest_expansion(&mut self) {
         const SYSTEM_CAP: usize = 4;
-        // A line cannot PROJECT settlement to a new world before it has matured
+        // A line cannot project settlement to a new world before it has matured
         // (level ≥ 3) — a physical progression bound, kept post-choice (the line
-        // may WILL to expand young; it simply cannot yet reach). Founding early
+        // may will to expand young; it simply cannot yet reach). Founding early
         // would split the food base and tip the home orb into famine.
         if self.level < 3 {
             return;
@@ -3105,13 +3105,13 @@ impl Polity {
     }
 
     fn build_step(&mut self) {
-        // N-I6 — build_step NO LONGER RAISES ZONES. The survival express
-        // (`express_survival`, post-tick) is the SOLE zone-raiser; Policy and
+        // N-I6 — build_step no longer raises ZONES. The survival express
+        // (`express_survival`, post-tick) is the sole zone-raiser; Policy and
         // think must not both build. `gather_for_forge` stays pre-tick — it
         // stocks the forge, it does not settle. The old settlement / industrial
         // / regenerator / forge-hold arms and every decider they called
         // (`settlement_choice` / `industrial_choice` / `score_outcome` /
-        // `lookahead::project` / `soc::choose_build`) are OFF the live path.
+        // `lookahead::project` / `soc::choose_build`) are off the live path.
         self.gather_for_forge();
     }
 
@@ -3186,12 +3186,12 @@ impl Polity {
     /// The research arm: the world's own latest receipt digest seeds
     /// one forge attempt at the current rung. Three confirms promote.
     ///
-    /// PERCEPTION ROUTES THE RESEARCH (the axis has teeth): a
-    /// volumetric civilization natively attempts VOLUMETRIC tasks —
+    /// PERCEPTION routes the research (the axis has teeth): a
+    /// volumetric civilization natively attempts volumetric tasks —
     /// stacked grids, stack operators — while planar and harmonic
     /// civilizations work the planar forge (the harmonic carrier is a
     /// named gap; it lands with its own vocabulary, not as a skin).
-    /// **WHAT THIS LINE IS STARVED FOR** — a CHARACTER's hunger, read
+    /// **What this LINE is starved for** — a character's hunger, read
     /// from its own history.
     ///
     /// **Derived, never stored** (`09_LEDGER` §1.2's law, applied to a
@@ -3199,7 +3199,7 @@ impl Polity {
     /// arm: hunger is a reading of the chronicle this line already
     /// wrote, so two characters differ without a wire amendment.
     ///
-    /// WANT-1 strikes its wants on an ORB — a PLACE starves. That is
+    /// WANT-1 strikes its wants on an orb — a place starves. That is
     /// the right law for a world and the wrong one for a person, and it
     /// is why two characters with the same grants were identical by
     /// construction: `Entity` carries `entity_id`, `handle`,
@@ -3216,10 +3216,10 @@ impl Polity {
     /// The hunger steers the reach; it never steers what is accepted.
     /// The sector door still re-derives every proposal, so a starving
     /// mind looking in a different order costs the gate nothing.
-    // N-I4: idle on the beat. This shaped the retired SEARCH's beam; the one
+    // N-I4: idle on the beat. This shaped the retired search's beam; the one
     // reduce organ observes the forged task's train pairs directly, with no
     // beam to tilt. Preserved for the survival seat (N-I5), where Need/instinct
-    // may ORDER which leftover or book a starving line observes first — an
+    // may order which leftover or book a starving line observes first — an
     // ordering of observation, never a widening or a search.
     #[allow(dead_code)]
     fn hunger(&self) -> Need {
@@ -3247,11 +3247,11 @@ impl Polity {
                     | cfe::dop::ClosureEvent::ResourceTransferred { .. }
             )
         });
-        // **HUNGER IS RELATIVE TO THE LINE'S OWN RHYTHM**, not to a
+        // **Hunger is relative to the line's own RHYTHM**, not to a
         // borrowed constant.
         //
         // This first read inherited WANT-1's orb windows — novelty 480,
-        // resonance 240 — and they are the wrong SCALE for a person: a
+        // resonance 240 — and they are the wrong scale for a person: a
         // 60-beat era never reaches either, so every character was
         // permanently sated, searched at depth 1, and the live board's
         // earnings fell 268 -> 53. That was the constant, not the
@@ -3260,7 +3260,7 @@ impl Polity {
         // A line is starved when it has gone longer without finding
         // than it usually takes it to find — `since > now / finds`,
         // written as a product so the arithmetic stays exact integers.
-        // A line that has NEVER found is starved from the start.
+        // A line that has never found is starved from the start.
         //
         // Scale-free by construction: it reads the same at 60 beats and
         // 6000, and it introduces no number to tune. The two windows it
@@ -3307,32 +3307,32 @@ impl Polity {
         }
     }
 
-    /// **MULTI-ORB EXPANSION** (INTELLIGENCE ARC A1) — a matured
+    /// **Multi-orb expansion** (intelligence ARC A1) — a matured
     /// civilization grows into its star system, and that growth is what
     /// gives its mind something to stand on.
     ///
     /// Once a line has climbed its research ladder (rung ≥ 3 — cognition
-    /// EARNED, not a clock) and its home is fed, it CHARTS a colony orb
-    /// and weaves its orbs into an internal SUPPLY RING (standing
+    /// earned, not a clock) and its home is fed, it charts a colony orb
+    /// and weaves its orbs into an internal supply ring (standing
     /// inter-orb bonds, each orb streaming to the next and the last
     /// closing back). That circular internal economy is exactly what the
-    /// relational algebra reads as RANK (`bridge::read_entangled`): a
+    /// relational algebra reads as rank (`bridge::read_entangled`): a
     /// civilization whose logistics form obligation cycles no simple
     /// hierarchy can explain. It is the structure B-E1's depth coupling
-    /// was blocked on — every book held ONE orb, `rank 0`, so the mind
+    /// was blocked on — every book held one orb, `rank 0`, so the mind
     /// was pinned at the floor. A2 reads this rank into search depth, so
     /// expansion itself deepens the mind.
     ///
     /// Re-sealing an existing bond refuses and is ignored, so this simply
-    /// MAINTAINS the ring as it grows. Nothing is minted — `chart_as`
-    /// MOVES founding reserves, and the bonds settle conserved at the
+    /// maintains the ring as it grows. Nothing is minted — `chart_as`
+    /// moves founding reserves, and the bonds settle conserved at the
     /// touch.
     fn expand_step(&mut self) {
         // A line expands only once it has climbed, and only when fed.
         if self.level < 3 || self.world.orb().is_none_or(|o| !o.famine.is_empty()) {
             return;
         }
-        // THE CHARTER DECISION MOVED to the abundance resolver (Expand arm,
+        // The Charter decision moved to the abundance resolver (Expand arm,
         // EMERGENCE-2 — `invest_expansion`, which keeps the TRUE-WEALTH solvency
         // as its post-choice bound). This step now only weaves the internal
         // supply ring — maintenance that runs every beat a climbed, fed line
@@ -3367,7 +3367,7 @@ impl Polity {
         }
     }
 
-    /// **COGNITION STEP** (COG-1) — bank the beat's LEISURE. `cascade_reading`
+    /// **COGNITION step** (COG-1) — bank the beat's leisure. `cascade_reading`
     /// reads the colony's stratified demand from live committed state and pours
     /// its food flow through the survival tiers (metabolic, then cognitive);
     /// whatever surplus survives is leisure, the budget the Mind spends to
@@ -3383,19 +3383,19 @@ impl Polity {
         if self.world.population_of(primary) == 0 {
             return;
         }
-        // COG-3 FASTING: the accumulator's inflow is the cascade's leisure PLUS
+        // COG-3 fasting: the accumulator's inflow is the cascade's leisure plus
         // a base trickle off the syntropic wild flow, so a zero-leisure line is
         // never permanently deadlocked — it thinks slowly rather than never.
         let leisure = civic::cascade_reading(&self.world, primary).leisure;
         let fill = civic::fasting_fill(leisure, self.world.syntropic_flow(primary));
-        // COG-5 / ONT-4 COGNITIVE DEMURRAGE: unused leisure dissipates each beat
-        // (you cannot bank a nap for ten years). The rate is now DERIVED from the
+        // COG-5 / ONT-4 cognitive demurrage: unused leisure dissipates each beat
+        // (a nap cannot be banked for ten years). The rate is now derived from the
         // planet's orbit and vitals — `thermal(t_eq4) · dry(albedo) ·
         // orbital_tempo(P)` (`World::leisure_decay_rate`) — not a dial: a hot, dry,
         // fast-orbit world spends its surplus quickly, a cold, wet, distant one
-        // hoards it. PROPORTIONAL (`bank × rate`), so zero at an empty bank (a poor
+        // hoards it. Proportional (`bank × rate`), so zero at an empty bank (a poor
         // line still banks its trickle — COG-3); the collapse it once caused is
-        // cured in `settle_leisure` by flooring the FLOW. Net settle = fill − decay.
+        // cured in `settle_leisure` by flooring the flow. Net settle = fill − decay.
         let decay = self.world.leisure_bank_of(primary) * self.world.leisure_decay_rate(primary);
         let delta = fill - decay;
         if delta != ratio(0, 1) {
@@ -3405,17 +3405,17 @@ impl Polity {
         }
     }
 
-    /// **THE DEFECT HANDOFF** (COG-12) — run the civic peel over live state and
-    /// read the irreducible void BACKWARDS: its SHAPE (`classify_defect` — which
+    /// **The defect Handoff** (COG-12) — run the civic peel over live state and
+    /// read the irreducible void backwards: its shape (`classify_defect` — which
     /// family class can bridge it, from the SNF free/torsion character) and its
-    /// SIZE (`mint_cost` — the homological pressure). The Mind reaches toward the
+    /// size (`mint_cost` — the homological pressure). The Mind reaches toward the
     /// shape and as deep as the size demands. Empty shape / zero pressure when
     /// the economy is covered — then there is no void, and no search.
-    /// **THE LIVE CIVIC PEEL** — overlay the population's material deficit on the
+    /// **The live civic peel** — overlay the population's material deficit on the
     /// standing generators and read the residual γ (`EconomicPeel`), the void no
     /// known structure spans. `None` when there is no world to read. This is the
     /// organ N-I6 orphaned (its live caller `build_step` was removed); EMERGENCE-2
-    /// reads it live again — for the abundance TENSIONS, not as a second builder
+    /// reads it live again — for the abundance tensions, not as a second builder
     /// (`express_survival` stays the sole zone-raiser).
     fn civic_peel(&self) -> Option<civic::EconomicPeel> {
         let world = &self.world;
@@ -3439,16 +3439,16 @@ impl Polity {
         Some(civic::civic_reading(&fold, metabolism, &standing, &demand, [0u8; 32]).peel)
     }
 
-    /// **THE LIVE CASTE CENSUS** (SOC-4b) — the society self-organises this beat.
+    /// **The live caste census** (SOC-4b) — the society self-organises this beat.
     /// Partition the working population across the unspanned residual axes the
     /// live civic peel reads (`civic_peel().residual`, the void no standing
-    /// structure spans): each member is DRAWN toward the work most unmet, off
-    /// the line's own committed digest, never assigned by a table. A DERIVED read
+    /// structure spans): each member is drawn toward the work most unmet, off
+    /// the line's own committed digest, never assigned by a table. A derived read
     /// — pure over committed state, exactly like `ration_survives` — so replay
     /// reads the same partition and SEAL-B is untouched. Empty when there is no
     /// world; all-zero over the residual axes when the population is nil or the
     /// economy is covered (no deficit ⇒ no caste, a homogeneous society). This is
-    /// the pure `soc::caste_census` organ finally reading the LIVE deficit rather
+    /// the pure `soc::caste_census` organ finally reading the live deficit rather
     /// than a fixture; the shared objective SOC-5 will converge on is this census.
     pub fn caste_partition(&self) -> Vec<u64> {
         let Some(peel) = self.civic_peel() else {
@@ -3458,7 +3458,7 @@ impl Polity {
         if members == 0 {
             return vec![0u64; peel.residual.len()];
         }
-        // The line's OWN history salts the draw (SOC-2's emergence law): two
+        // The line's own history salts the draw (SOC-2's emergence law): two
         // societies with the same deficit but different pasts organise
         // differently. The last committed digest is that history, deterministic.
         let seed = self
@@ -3483,7 +3483,7 @@ impl Polity {
         (shape, pressure)
     }
 
-    /// N-I5 — THE RATION BOOK'S DIRECTION: the species's owed fiber index. A
+    /// N-I5 — the ration book's direction: the species's owed fiber index. A
     /// Resource ration is its discriminant (1..=7, distinct per metabolism); an
     /// element-eater owes the reserved element slot. Never `UNFED` (0), so the
     /// unfed mouth stays distinguishable from a fed one.
@@ -3494,14 +3494,14 @@ impl Polity {
         }
     }
 
-    /// N-I5 — THE SURVIVAL OBSERVATION. Peel the ration book of one orb into
-    /// HAVE|OWE (mouths as sites over the species-ration fiber) and read it with
-    /// the ONE organ (`solver::ration_reads` → `reduce_pair`). `true` iff the
+    /// N-I5 — the survival observation. Peel the ration book of one orb into
+    /// have|Owe (mouths as sites over the species-ration fiber) and read it with
+    /// the one organ (`solver::ration_reads` → `reduce_pair`). `true` iff the
     /// larder feeds every working mouth this beat. No mouths — or a rate-0 line
     /// with no farmed ration (plasmoid, #29) — trivially survives: there is no
     /// book to peel. A pure deterministic read (labor, sustenance, ration), so
     /// replay reads the same verdict and SEAL-B is untouched.
-    /// RESTORE 3: whether a line its larder only PARTLY feeds thinks this
+    /// Restore 3: whether a line its larder only partly feeds thinks this
     /// beat — a draw by the society's own partition draw over (fed, unfed)
     /// mouths, seeded by the line and the beat, so its chance is exactly the
     /// fed share. A line with no fed mouth does not think.
@@ -3555,7 +3555,7 @@ impl Polity {
             .map(|source| source.available())
             .fold(ratio(0, 1), |sum, amount| sum + amount);
         // Mouth-granular coverage — how many mouths the larder feeds this beat.
-        // `to_integer` truncates toward zero, which IS floor since the quotient
+        // `to_integer` truncates toward zero, which is floor since the quotient
         // is non-negative; capped at the mouths (surplus feeds no phantom).
         let fed = num_traits::ToPrimitive::to_u64(&(available / per_capita).to_integer())
             .unwrap_or(mouths)
@@ -3655,12 +3655,12 @@ impl Polity {
         ZoneKind::Extractor
     }
 
-    /// N-I6 — THE SURVIVAL EXPRESS. Peel the book, think the deed, express ≤1
+    /// N-I6 — the survival express. Peel the book, think the deed, express ≤1
     /// deed through a door that already exists (`zone_as` / `raze_as`; Collect and
-    /// Rest express nothing extra — the cycle collect IS the deed). The SOLE
+    /// Rest express nothing extra — the cycle collect is the deed). The sole
     /// zone-raiser now (`build_step` no longer builds). Runs in the post-tick
     /// window so it reads the food that feeds the mouths, not the drained larder.
-    /// `industry_relevant` / affordability stay RENDER gates — an unaffordable or
+    /// `industry_relevant` / affordability stay render gates — an unaffordable or
     /// off-metabolism deed is rest, not a score.
     fn express_survival(&mut self, orb: u64, matter_opened: bool) {
         let mut book = self.survival_book(orb);
@@ -3695,9 +3695,9 @@ impl Polity {
     /// N-I6 moved zone-raising here (`express_survival`) without
     /// carrying the gate — a sub-mesic (Frost) colony built with no
     /// runway check at all, which is why the runway pin's own frost-
-    /// vs-mesic comparison inverted (a cold colony's PER-ZONE cost
-    /// gate alone is not the same law as its ONE-TICK HEATING BILL
-    /// gate). Checked here, ADDITIONALLY to the ordinary cost gate —
+    /// vs-mesic comparison inverted (a cold colony's per-zone cost
+    /// gate alone is not the same law as its one-TICK heating bill
+    /// gate). Checked here, additionally to the ordinary cost gate —
     /// never in place of it.
     fn seat_zone(&mut self, orb: u64, kind: ZoneKind) {
         let can_pay = kind
@@ -3731,8 +3731,8 @@ impl Polity {
         }
     }
 
-    /// N-I7 — THE LOOK PRICE: the cheapest thought (a single degree-1
-    /// observation), billed in leisure through the SEATED cost law
+    /// N-I7 — the look price: the cheapest thought (a single degree-1
+    /// observation), billed in leisure through the seated cost law
     /// (`civic::mint_cost × metabolic_exchange`) — no new rate table. A constant,
     /// strictly cheaper than any composed word (`mint_cost` is monotone in
     /// residual extent); it moves automatically if the seated cost law moves.
@@ -3744,11 +3744,11 @@ impl Polity {
         ) * civic::metabolic_exchange()
     }
 
-    /// AUTIC-2 — THE COMPOSE MOVE, LIVE. The `speaker` splices its grown words
+    /// AUTIC-2 — the compose move, live. The `speaker` splices its grown words
     /// into an `AuticSentence` (a composed multi-word utterance) and the `hearer`
-    /// ASSEMBLES it against ITS OWN basin: the pieces it recognises are accounted,
+    /// assembles it against its own basin: the pieces it recognises are accounted,
     /// and any leftover (`DemandUnmet`) is exactly the structure it lacked — which
-    /// it LEARNS by adopting the remainder as a new crystal. This is genuine
+    /// it learns by adopting the remainder as a new crystal. This is genuine
     /// knowledge transfer between two minds: one composes a thought from what it
     /// knows, the other comprehends what it can and grows by precisely what it
     /// could not. Bounded to a real sentence (up to AUTIC_SENTENCE_LEN of the
@@ -3760,7 +3760,7 @@ impl Polity {
         self.grown.values().map(|v| v.len()).max().unwrap_or(0)
     }
 
-    /// Observability — this civilization's whole VOCABULARY: the distinct crystal
+    /// Observability — this civilization's whole vocabulary: the distinct crystal
     /// classes held across all its vessels' basins (the words it can speak and
     /// hear). Used to prove a shared language across civilizations.
     pub fn basin_classes(&self) -> Vec<reduct::ChainDelta> {
@@ -3816,7 +3816,7 @@ impl Polity {
         match reduct::assemble(&sentence, hearer_basin) {
             reduct::AssemblyRead::Assembled { .. } => {}
             reduct::AssemblyRead::DemandUnmet { remainder, .. } => {
-                // LEARN — the hearer adopts exactly the structure it lacked (bounded).
+                // Learn — the hearer adopts exactly the structure it lacked (bounded).
                 if hearer_basin.len() < AUTIC_BASIN_CAP {
                     hearer_basin.push(reduct::Crystal::seal(remainder));
                     self.autic_learned += 1;
@@ -3827,11 +3827,11 @@ impl Polity {
     }
 
     /// N-I8 — deposit `vessel`'s closure of `orbit` toward a shared word, and
-    /// MINT it iff two DISTINCT vessels have now closed it (consilience). The
+    /// mint it iff two distinct vessels have now closed it (consilience). The
     /// mint bills `mint_cost` in leisure (COG-2/4/5, unchanged) — an unaffordable
     /// consilient word stays pending (fasting), a starving line may burn people
     /// (COG-3). A lone vessel never reaches two (C−): pending is a wait, not an
-    /// install. The mint DEED (`mint_solver_word_as`) is unchanged.
+    /// install. The mint deed (`mint_solver_word_as`) is unchanged.
     /// ENTITY-ALIGN-1 (docs/56 §3) — the vessel ids that have deposited
     /// toward `orbit` so far, read from `word_pending`'s own per-vessel
     /// slots (see `consilience_deposit`'s doc comment: one slot per
@@ -3859,8 +3859,8 @@ impl Polity {
         let expansion = expansion.to_vec();
         let bill = civic::mint_cost(&[num_bigint::BigInt::from(expansion.len())], &[]);
         let primary = cfe::world::FIRST_ORB;
-        // COG-5: price the homological bill in LEISURE via the exchange rate.
-        // COG-11: an EVOLVED line thinks more on less — the price is discounted by
+        // COG-5: price the homological bill in leisure via the exchange rate.
+        // COG-11: an evolved line thinks more on less — the price is discounted by
         // `cognitive_efficiency(evolution_stage)` (1/(1+stage), exactly 1 at the
         // founding stage so an un-evolved line pays the same as before).
         let price = ratio(
@@ -3879,18 +3879,18 @@ impl Polity {
             Some(civic::Drive::Metabolic)
         );
         let can_burn = !afford && starving && head > burn.clone();
-        // COMM-1 — AGREEMENT IS NEVER DISCARDED. Two minds have independently closed
+        // COMM-1 — agreement is never discarded. Two minds have independently closed
         // the same orbit (consilience reached above) — that shared truth is the rare,
-        // precious event, and its cognitive cost was ALREADY paid by the two looks.
-        // Minting the word is the RECEIPT of the agreement (a banked-neutral deed,
+        // precious event, and its cognitive cost was already paid by the two looks.
+        // Minting the word is the receipt of the agreement (a banked-neutral deed,
         // 28_VOCABULARY §7), not a fresh investment to EROI-gate. Discarding an agreed
         // word because the starved economy can't clear the bar is the deepest waste:
         // the civilization reached a shared word and threw it away, guaranteeing it
-        // never builds a language. So the agreed word ALWAYS mints; the leisure cost
+        // never builds a language. So the agreed word always mints; the leisure cost
         // is settled only when a solvent line can pay it (COG-13 EROI) or a starving
         // line burns for the eureka (COG-3) — otherwise the truth is recorded free.
         // The society keeps every shared word it earns; the economy prices the
-        // ONGOING draw, never the record of agreement.
+        // ongoing draw, never the record of agreement.
         if let Some(bytes) = solver_verify::program_bytes(&expansion) {
             if self
                 .world
@@ -3903,7 +3903,7 @@ impl Polity {
                     self.world.settle_population_exact(primary, -burn);
                 }
                 // ENTITY-ALIGN-1 (docs/56 §3) — read the confirming vessels'
-                // basins BEFORE the pending entry is retained below, then
+                // basins before the pending entry is retained below, then
                 // close the hardness reading as its own receipt alongside
                 // the mint. Recorded only; the mint above already succeeded
                 // on identity alone (cited.len() >= 2), unchanged.
@@ -3912,7 +3912,7 @@ impl Polity {
                 let _ = self
                     .world
                     .record_word_hardness_as(self.automaton, orbit, hardness);
-                // ENTITY-ALIGN-1 — WITNESSED ON THE WIRE, not only in the
+                // ENTITY-ALIGN-1 — witnessed on the wire, not only in the
                 // receipt: the same live signal COG-DIR/COG-ATLAS/COG-LEX
                 // already print every beat, so the graded-consolidation
                 // measure is directly observable on a running board.
@@ -3934,25 +3934,25 @@ impl Polity {
         }
     }
 
-    /// N-I8 — the SIBLING office's independent deposit toward consilience. It
-    /// thinks `task` on ITS OWN basin (the line's second registered office,
-    /// `steward`), pays its OWN look (N-I7), and on a verified close deposits
+    /// N-I8 — the sibling office's independent deposit toward consilience. It
+    /// thinks `task` on its own basin (the line's second registered office,
+    /// `steward`), pays its own look (N-I7), and on a verified close deposits
     /// `(steward, digest)` toward the shared word. Deposit-only: no value mint
     /// (the automaton is the line's value producer). It looks only if the bank
-    /// can pay AFTER the automaton's look — affordability-staggered, so a line
+    /// can pay after the automaton's look — affordability-staggered, so a line
     /// with one look's surplus funds the automaton first and the sibling fasts.
     fn sibling_deposit(&mut self, task: &solver_verify::loader::Task, digest: [u8; 32]) {
         let orb = cfe::world::FIRST_ORB;
-        // COMM-1 — THE CONFIRMING LOOK IS CHEAPER THAN THE DISCOVERING LOOK. The
+        // COMM-1 — the confirming look is cheaper than the discovering look. The
         // sibling is not searching the orbit the automaton already found; it is
-        // CONFIRMING it — verification, not discovery. Communication (a second
-        // vantage on the same wall) is the FOUNDATION of a society, not a surplus
+        // confirming it — verification, not discovery. Communication (a second
+        // vantage on the same wall) is the foundation of a society, not a surplus
         // luxury paid only after discovery, so it must not cost a full second look:
         // priced at full `observe_price` the sibling always fasts under scarcity,
         // consilience never reaches two vessels, and no shared word ever mints
         // (measured: 0 VocabularyMinted / 0 KnowledgeConverged across 8 mature
         // worlds — isolated, non-composing civilizations). Priced as a fraction, a
-        // line that can afford ONE discovery can always afford the confirmation, so
+        // line that can afford one discovery can always afford the confirmation, so
         // two vessels close the same orbit and the word mints. The discount is the
         // ratio of verifying a known program to searching for it.
         let price = Self::observe_price() * cfe::ratio::ratio(1, 4);
@@ -3976,35 +3976,35 @@ impl Polity {
                 }
             }
         }
-        // N-I10 — after thinking, the sibling HEARS one shared word (culture in
+        // N-I10 — after thinking, the sibling hears one shared word (culture in
         // motion). Affordability-gated: it hears only if it can still pay.
         self.sibling_hear();
-        // AUTIC-2 — THE COMPOSE MOVE, LIVE. Above single-word hearing: the
-        // automaton SPEAKS a composed sentence (several of its words spliced) and
-        // the sibling ASSEMBLES it against its basin, learning exactly the leftover
+        // AUTIC-2 — the compose move, live. Above single-word hearing: the
+        // automaton speaks a composed sentence (several of its words spliced) and
+        // the sibling assembles it against its basin, learning exactly the leftover
         // it lacked. Multi-word thought, not one invariant at a time.
         self.speak_and_hear(self.automaton, self.sibling);
-        // COG-AUTHOR (A3) — and the automaton AUTHORS: cites a word, rebinds it,
+        // COG-AUTHOR (A3) — and the automaton authors: cites a word, rebinds it,
         // offers the variant to the mesh door. The rung from hearing to authoring.
     }
 
-    /// ENTITY-ALIGN-2 (docs/56 §4, piece a) — occasionally, the SIBLING
-    /// chooses its OWN problem instead of confirming the automaton's: it
-    /// forges a task off `basin_digest`'s reading of ITS OWN basin, never the
+    /// ENTITY-ALIGN-2 (docs/56 §4, piece a) — occasionally, the sibling
+    /// chooses its own problem instead of confirming the automaton's: it
+    /// forges a task off `basin_digest`'s reading of its own basin, never the
     /// civ's chronicle digest.
     ///
-    /// **CORRECTED AFTER LIVE MEASUREMENT** (2026-08-24): originally priced
-    /// at the FULL `observe_price`, reasoning that a self-selected problem is
+    /// **Corrected after live measurement** (2026-08-24): originally priced
+    /// at the full `observe_price`, reasoning that a self-selected problem is
     /// a genuine discovery and should cost what the automaton's own discovery
-    /// costs. Run live against 22 founding civs for 480 beats — this NEVER
+    /// costs. Run live against 22 founding civs for 480 beats — this never
     /// once fired (zero `ENTITY-ALIGN-2` witness lines; every mint's hardness
     /// stayed 1). The full price is exactly the bar COMM-1's own doc comment
     /// already names as unaffordable in practice ("priced at full
     /// observe_price the sibling always fasts under scarcity... measured: 0
-    /// VocabularyMinted / 0 KnowledgeConverged across 8 mature worlds") — I
-    /// re-introduced the identical dead-code bar COMM-1 exists to avoid.
-    /// Priced at the SAME discount as confirming (COMM-1's `1/4`): the
-    /// distinction this slice adds is WHICH problem the sibling pursues, not
+    /// VocabularyMinted / 0 KnowledgeConverged across 8 mature worlds") — the
+    /// first cut re-introduced the identical dead-code bar COMM-1 exists to avoid.
+    /// Priced at the same discount as confirming (COMM-1's `1/4`): the
+    /// distinction this slice adds is which problem the sibling pursues, not
     /// a stiffer economic bar on pursuing one — a look the sibling could
     /// already afford to spend confirming, it can spend choosing instead.
     /// Returns `false` (self-select declined; the caller falls back to
@@ -4022,8 +4022,8 @@ impl Polity {
             return false;
         }
         self.world.settle_leisure(orb, -price);
-        // ENTITY-ALIGN-2 — WITNESSED ON THE WIRE: the sibling chose its own
-        // problem THIS beat, off ITS OWN basin, not the civ's dispatch.
+        // ENTITY-ALIGN-2 — witnessed on the wire: the sibling chose its own
+        // problem this beat, off its own basin, not the civ's dispatch.
         eprintln!(
             "ENTITY-ALIGN-2 clock {} {}: sibling {} self-selected off its own basin (seed={}), not confirming",
             self.world.now(),
@@ -4048,15 +4048,15 @@ impl Polity {
                 }
             }
         }
-        // Culture propagation is orthogonal to WHICH problem the sibling
+        // Culture propagation is orthogonal to which problem the sibling
         // chose — a self-selecting vessel still hears and speaks.
         self.sibling_hear();
         self.speak_and_hear(self.automaton, self.sibling);
         true
     }
 
-    /// N-I10 — the sibling HEARS one folded word from the sun each beat it can
-    /// afford: it drains the word (understood) or WALLS and adopts it (learns a
+    /// N-I10 — the sibling hears one folded word from the sun each beat it can
+    /// afford: it drains the word (understood) or walls and adopts it (learns a
     /// shared/inherited word its basin lacked). Hearing is looking — it pays
     /// `observe_price` (N-I7); a broke sibling fasts the hear. Bounded to one
     /// word per beat, rotated by the beat clock so the whole vocabulary is heard
@@ -4078,16 +4078,16 @@ impl Polity {
         let _ = solver::hear_word(&expansion, self.grown.entry(sibling).or_default());
     }
 
-    /// #146 THE EMERGENT ENTITY-ATLAS — this civilization's collective cognition,
-    /// measured live through the manifold. VESSELS (minds) are houses; a class held
-    /// by ≥ 2 vessels is a shared idea — a VALUE-PRESERVING overlap (crystals
+    /// #146 the emergent ENTITY-ATLAS — this civilization's collective cognition,
+    /// measured live through the manifold. Vessels (minds) are houses; a class held
+    /// by ≥ 2 vessels is a shared idea — a value-preserving overlap (crystals
     /// compared by their full canonical class, never a lossy digest). The
-    /// connection is sampled PROBABILISTICALLY (seeded by civ+beat+class, replay-
+    /// connection is sampled probabilistically (seeded by civ+beat+class, replay-
     /// exact — `instinct::choose` in the small, weighted by the civ's own cohesion
-    /// coherence), so collective cognition EMERGES from which shared ideas transport
+    /// coherence), so collective cognition emerges from which shared ideas transport
     /// this beat rather than any dialed knob. ΔH is the exact `reduct::atlas`
     /// measure (the Ignition Law, dh = flat − 1). Returns
-    /// `(vessels, contacts, flat, ΔH)`. OBSERVATION ONLY — no committed state, no
+    /// `(vessels, contacts, flat, ΔH)`. Observation only — no committed state, no
     /// receipt, no replay effect.
     fn cognition_atlas(&self, coherence_permille: u64, beat: u64) -> (usize, usize, usize, usize) {
         let houses: Vec<std::collections::BTreeSet<String>> = self
@@ -4166,7 +4166,7 @@ impl Polity {
         let digest = receipt.own().0;
         // A bounded mind: each vessel's basin keeps its newest
         // AUTIC_BASIN_CAP crystals.
-        // MEMORY (2026-10-09): a crystal's size is its chain's entries, and a
+        // Memory (2026-10-09): a crystal's size is its chain's entries, and a
         // basin's newest crystals are kept within BASIN_ENTRY_CAP entries too
         // (the count cap alone let 146 vessels reach tens of GB: measured
         // ~60 KB a crystal, the conductor grew ~3.5 MB a beat).
@@ -4191,14 +4191,14 @@ impl Polity {
             }
             basin.drain(..over);
         }
-        // docs/60 D6 — WORDS COMPETE: the library is stamped on this line's
+        // docs/60 D6 — WORDS compete: the library is stamped on this line's
         // clock; once a year the words unused for a year give way.
         let now = self.world.now();
         self.library.set_clock(now);
         if now > 0 && now.is_multiple_of(scribe::journal::YEAR_TICKS) {
             self.library.forget_unused(scribe::journal::YEAR_TICKS);
         }
-        // docs/60 D10b — THE LINE'S WORDS IN THE SHARED TONGUE: state up to
+        // docs/60 D10b — the line's WORDS in the shared tongue: state up to
         // two not-yet-stated words a beat (bounded, O(new)).
         let unstated: Vec<([u8; 32], Vec<solver::Op>)> = self
             .library
@@ -4211,28 +4211,28 @@ impl Polity {
         for (orbit, expansion) in unstated {
             self.stated.insert(orbit, tongue::state_word(&expansion).is_some());
         }
-        // CAPTURED BEFORE THE BEAT MOVES ANYTHING. Promotion reads both,
+        // Captured before the BEAT moves anything. Promotion reads both,
         // and reading either afterwards would be vacuous: a close always
         // advances the trajectory to Growth.
         let trajectory_before = self.trajectory;
 
-        // COG-DIRECTION (Slices 1+2) — THE CIVILIZATION READS ITSELF AND THAT
-        // READING IS ITS DIRECTION. The SAME `reduct::peel` organ the grid seat runs,
+        // COG-DIRECTION (Slices 1+2) — the CIVILIZATION reads itself and that
+        // reading is its direction. The same `reduct::peel` organ the grid seat runs,
         // turned on this line's own material self: element holdings projected into the
         // five almanac families (the ONT lens, past iron+biomass), combined with its
-        // thermodynamic books (`cohesion_ratio`), to DERIVE a direction — no
-        // `if biomass then food`. Slice 2: this derived read now DRIVES the trajectory
+        // thermodynamic books (`cohesion_ratio`), to derive a direction — no
+        // `if biomass then food`. Slice 2: this derived read now drives the trajectory
         // (the `direction_override` below), retiring the boolean `advance(closed)` FSM
         // for any line with a material self; the FSM survives only as the fallback for
         // a pre-material line (no star, no elements — nothing yet to read). Emitted to
-        // STDERR to be witnessed live on the network, not in a test.
+        // stderr to be witnessed live on the network, not in a test.
         //
         // The mapping is derived from the organ's own readings, not a puzzle boolean:
-        //   ordering (captures order AND ≥2 families)     -> Growth   (composing itself)
+        //   ordering (captures order and ≥2 families)     -> Growth   (composing itself)
         //   dissipating but ≥2 families (venting order)   -> Stagnation (necessity opens the reach)
         //   collapsed to <2 families (a hole)             -> Decline  (material collapse)
-        // Read the material self as OWNED values so the borrow of `self.world` ends
-        // before we mutate `self.prev_order` below.
+        // Read the material self as owned values so the borrow of `self.world` ends
+        // before `self.prev_order` is mutated below.
         let self_now: Option<(soc::DirectionRead, cfe::ratio::Ratio, cfe::ratio::Ratio)> =
             match (self.world.orb(), self.world.star()) {
                 (Some(orb), Some(class)) => soc::observe_direction(
@@ -4251,38 +4251,38 @@ impl Polity {
                 _ => None,
             };
         let direction_override: Option<Trajectory> = if let Some((read, syn, ent)) = self_now {
-            // WITHHOLD LAW (operator ruling 2026-08-21): a direction verdict requires a
-            // SIGNAL. The absence of a reading HOLDS the prior trajectory — it is never
+            // Withhold law (operator ruling 2026-08-21): a direction verdict requires a
+            // signal. The absence of a reading holds the prior trajectory — it is never
             // mapped to a negative verdict (the honest-withhold principle enforced
             // everywhere in this project). Two consequences:
             //
-            // (a) The DRIVER is the lifetime LEVEL read, not the 1-beat FLOW. Measured:
+            // (a) The driver is the lifetime level read, not the 1-beat flow. Measured:
             //     the flow reads ~72% zeros because the entropy/syntropy books are
-            //     CUMULATIVE, so a single beat's delta is usually 0. Driving on a
+            //     cumulative, so a single beat's delta is usually 0. Driving on a
             //     72%-zero instrument maps "unmeasured" to a verdict for most lines —
             //     the withhold sin through a coarse thermometer. The level drives until
-            //     Slice 3a's WINDOWED flow is PROVEN to discriminate (flat-fraction well
+            //     Slice 3a's windowed flow is proven to discriminate (flat-fraction well
             //     below 72%); the flow is emitted for witness only, and flow=0 is a
-            //     HOLD, never a verdict.
-            // (b) Cold books (no thermodynamic reading yet) HOLD the prior trajectory.
+            //     hold, never a verdict.
+            // (b) Cold books (no thermodynamic reading yet) hold the prior trajectory.
             //
             // `families < 2` is a MEASURED collapse (the peel sees the mono-family hole),
             // a real signal, so it verdicts Decline even under the withhold law.
             //
-            // SLICE 3b — POPULATION-RELATIVE SELECTION. Fitness is a line's cohesion
-            // RELATIVE TO THE LIVE POPULATION (the tertile band set by
-            // `direction_census_step`), not an absolute 1/2 dial: the top third GROWS
+            // Slice 3b — population-relative selection. Fitness is a line's cohesion
+            // relative to the live population (the tertile band set by
+            // `direction_census_step`), not an absolute 1/2 dial: the top third grows
             // (fittest — its mind climbs the difficulty ladder), the bottom third
-            // DECLINES (selected against), the middle STAGNATES. This is evolution over
+            // declines (selected against), the middle stagnates. This is evolution over
             // the syntropic value — the same reduce organ reading the civilization's
-            // place in its cohort. The absolute 1/2 threshold is the FALLBACK for a
+            // place in its cohort. The absolute 1/2 threshold is the fallback for a
             // sparse cohort (< 3 warm lines, no band). Withhold law intact: cold books
             // (cohesion None) hold the prior trajectory, never a verdict from absence.
             let derived_solo = if read.families < 2 {
                 Trajectory::Decline
             } else {
                 match (read.cohesion.as_ref(), self.pop_cohesion_band.as_ref()) {
-                    (None, _) => trajectory_before, // cold books — HOLD prior
+                    (None, _) => trajectory_before, // cold books — hold prior
                     (Some(c), Some((lo, hi))) => {
                         if *c >= *hi {
                             Trajectory::Growth // top third of the living cohort
@@ -4297,15 +4297,15 @@ impl Polity {
                     (Some(_), None) => Trajectory::Stagnation,
                 }
             };
-            // #146 MANIFOLD-5 FOLLOW-UP — CONNECTIVITY RELIEVES THE TRAP (doc 55 §9's
-            // own design consequence: "raise CONNECTIVITY... NOT the private minds —
+            // #146 MANIFOLD-5 follow-up — connectivity relieves the trap (doc 55 §9's
+            // own design consequence: "raise connectivity... Not the private minds —
             // which is what the instinct::choose connection sampler + 3b selection
             // already push toward"). dH>0 is not a guess at fitness — it is the
-            // Mayer-Vietoris connecting-map rank PROVING a genuinely shared class
+            // Mayer-Vietoris connecting-map rank proving a genuinely shared class
             // exists this beat across ≥2 of this civ's own vessels (the Ignition Law's
             // ΔH≈connectivity−1: a mind alone or merely adjacent never sees dH>0). A
             // proven collective idea is a strictly positive signal that must never
-            // DOWNGRADE the cohesion-tertile verdict, only promote it one tier
+            // downgrade the cohesion-tertile verdict, only promote it one tier
             // (Decline→Stagnation→Growth) — cohesion stays the primary read; the
             // atlas is the tie-break connectivity already earns, not a second dial.
             let coherence = read.cohesion.as_ref().map(atlas_permille).unwrap_or(0);
@@ -4319,8 +4319,8 @@ impl Polity {
             } else {
                 derived_solo
             };
-            // The per-beat FLOW — WITNESSED ONLY (Slice 3a's input; drives nothing yet).
-            // A zero flow is NO SIGNAL (a hold), printed `0` for the discrimination
+            // The per-beat flow — witnessed only (Slice 3a's input; drives nothing yet).
+            // A zero flow is no signal (a hold), printed `0` for the discrimination
             // measurement, never a verdict here.
             let zero = cfe::ratio::ratio(0, 1);
             let flow = match self.prev_order.as_ref() {
@@ -4381,10 +4381,10 @@ impl Polity {
                 dh,
                 coherence,
             );
-            // COG-LEX — the emergent VOCABULARY made visible: shared words this
+            // COG-LEX — the emergent vocabulary made visible: shared words this
             // civilization has minted (two vantages agreed and the word landed) and
             // the agreements still in flight (one vantage waiting on the pending
-            // board for a second). A growing lexicon IS communication — a society
+            // board for a second). A growing lexicon is communication — a society
             // composing a shared language. Observation only; the mint happens on the
             // research beat, this only reports the standing count.
             // docs/60 D10b — beside the private lexicon, how much of it the
@@ -4413,30 +4413,30 @@ impl Polity {
             None
         };
 
-        // N-I5 — THE SURVIVAL OBSERVATION (Pin G, THE INTELLIGENCE PORT). Peel
+        // N-I5 — the survival observation (Pin G, the intelligence port). Peel
         // the ration book: does the larder feed the working mouths? A line that
-        // cannot does NOT think ARC this beat — it rests (the `None` arm below,
+        // cannot does not think ARC this beat — it rests (the `None` arm below,
         // exactly as a barren beat rests; not a sweep). The owe column is
         // labor_force × the line's ration (mouths eat — buildings' upkeep is not
-        // the pair), the have is the derived sustenance, and the owed DIRECTION
+        // the pair), the have is the derived sustenance, and the owed direction
         // is the species's ration (a plasmoid owes joule, not biomass — no
-        // hardcode). The SAME reduce organ the grid seat runs. Pin G was read
+        // hardcode). The same reduce organ the grid seat runs. Pin G was read
         // in `cycle` after regrowth and before collect drained the larder; since
         // restore 3 a partly fed line thinks in proportion (`thinks`).
         let solved = if !thinks {
             // The book did not close — withhold the beat, call no think_task.
             None
         } else if self.spec.civilization.perception == "volumetric" {
-            // VOLUMETRIC-1d — THE VOLUMETRIC SEAT, WIRED. `think_volume_task`
-            // is the SAME reduce-organ discipline as `think_task` (peel, glue
+            // VOLUMETRIC-1d — the volumetric seat, wired. `think_volume_task`
+            // is the same reduce-organ discipline as `think_task` (peel, glue
             // through `reduct::think`, render, seal — no search; `solve_volume`
             // stays the retired prover-side sweep, never called live). The
-            // SAME N-I7 leisure gate applies — the look's price is a function
+            // same N-I7 leisure gate applies — the look's price is a function
             // of "one degree-1 observation" (`Self::observe_price()`), not of
             // the seat's geometry, so a volumetric line pays exactly what a
             // planar one does for the same look.
             //
-            // MINT/WORD-MINT DEFERRED, deliberately, not by oversight: the wire
+            // MINT/WORD-MINT deferred, deliberately, not by oversight: the wire
             // machinery for a volumetric PoUW deed already exists whole
             // (`WorkClass::Volumetric(VolDifficulty)`, `encode_volume_work` —
             // `mint_discovery_as` takes raw bytes, so it is reachable), but the
@@ -4444,20 +4444,20 @@ impl Polity {
             // `sweep_vocabulary`) is typed to the planar `Program`/`Op`
             // exclusively — extending it to `VProgram` is its own typed-system
             // landing. This wiring's own measured goal does not need it: `think`
-            // grows the basin on ANY wall (Pin B, N-I2), Solved or not — so
+            // grows the basin on any wall (Pin B, N-I2), Solved or not — so
             // `self.grown` (the vessel cognition COG-ATLAS/ΔH reads) fills for a
             // volumetric line exactly the way it does for a planar one, which is
             // the actual thing #173 exists to unblock.
             //
-            // A CONFIRMED VOLUMETRIC CLOSE COUNTS (G2, operator 2026-10-07: "only
-            // give them options, freedom, and agency"). The thought used to be
+            // A confirmed volumetric close counts (G2, ruling of 2026-10-07: bands
+            // are given options, freedom, and agency only). The thought used to be
             // discarded here, so a volumetric line could never close, climb or
             // cleave — a dead end written into the dispatch, not an outcome. A
             // `Solved` whose certificate `think_volume_task` already verified
             // (`verify_volume_certificate`, Pin A on every train pair) and whose
             // test output matches now closes exactly as a planar solve does: the
             // solve is recorded, counted, and the line climbs on mastery. The
-            // MINT stays deferred as documented above (no `WorkProof` — the
+            // mint stays deferred as documented above (no `WorkProof` — the
             // proof slot is `None`), and the membrane's planar pairs are empty.
             let orb = cfe::world::FIRST_ORB;
             let price = Self::observe_price();
@@ -4494,14 +4494,14 @@ impl Polity {
                 }
                 self.library_folded = true;
             }
-            // THE PRE-REACH: a library word tried whole before any
+            // The PRE-REACH: a library word tried whole before any
             // search. A hit is a full lawful proof — the certificate
-            // seals the EXPANSION and `verify_work` re-derives it at
+            // seals the expansion and `verify_work` re-derives it at
             // the gate exactly as a searched program.
-            // CORES SLICE 3 — INHERITANCE BY RECONSTRUCTION (4.4): on a miss of
+            // Cores slice 3 — inheritance by reconstruction (4.4): on a miss of
             // the line's own words, the dead's words this line has heard are
-            // tried on THIS task; one that closes it (the line reconstructed
-            // it on its own task) is LICENSED into the line's own library,
+            // tried on this task; one that closes it (the line reconstructed
+            // it on its own task) is licensed into the line's own library,
             // citing the dead line's proofs. A word that does not close for
             // the reader stays heard, unadopted.
             let own = solver::mint::pre_reach(&task, &self.library);
@@ -4535,35 +4535,35 @@ impl Polity {
                     test_output: output,
                 }
             });
-            // THE PRODUCER IS THE ONE REDUCE ORGAN (N-I4, THE INTELLIGENCE
-            // PORT). On a pre-reach MISS the line THINKS: `think_task` peels the
-            // forged task's train pairs and GLUES a frame, or WITHHOLDS. Search
-            // has LEFT the live beat — `propose_consulted_measured`, `solve`,
+            // The producer is the one reduce organ (N-I4, the intelligence
+            // port). On a pre-reach miss the line thinks: `think_task` peels the
+            // forged task's train pairs and glues a frame, or withholds. Search
+            // has left the live beat — `propose_consulted_measured`, `solve`,
             // `sweep_vocabulary` are no longer in this stack (search.rs survives
             // only as a novelty instrument on the mint path below, never as how
-            // this mind solves the K-step). A withhold is REST: the `None` arm
+            // this mind solves the K-step). A withhold is rest: the `None` arm
             // declines the trajectory exactly as a barren beat always did. It is
-            // NOT a sweep — `swept` does not move on a think withhold (that
+            // not a sweep — `swept` does not move on a think withhold (that
             // cokernel-failure count was the search's, and the search is gone).
             // The basin persists across beats: a wall `think_task` mints and
-            // adopts this beat DRAINS the next (Pin B), so the thinker is
+            // adopts this beat drains the next (Pin B), so the thinker is
             // changed by what it thought.
             let read = match pre_reached {
-                // `pre_reach` is a REDUCE against crystallized words — a library
-                // hit, not a fresh look. It stays UNCHARGED (N-I7).
+                // `pre_reach` is a reduce against crystallized words — a library
+                // hit, not a fresh look. It stays uncharged (N-I7).
                 Some(hit) => hit,
                 None => {
-                    // N-I7 — THE LOOK COSTS LEISURE. The line is Fed here (Pin G
+                    // N-I7 — the look costs leisure. The line is Fed here (Pin G
                     // passed above, else `solved` is already None). The fresh
                     // peel-and-reduce is the priced act: pay the observe price
-                    // FIRST, then drain. An unaffordable look is FASTING — rest
+                    // first, then drain. An unaffordable look is fasting — rest
                     // (this None arm), not a sweep; the bank refills from surplus
                     // (`cognition_step`) and a later beat can pay.
                     let orb = cfe::world::FIRST_ORB;
                     let price = Self::observe_price();
                     if self.world.leisure_bank_of(orb) >= price {
                         self.world.settle_leisure(orb, -price);
-                        // N-I·VESSEL — drain THIS vessel's mouth, not the line pool.
+                        // N-I·vessel — drain this vessel's mouth, not the line pool.
                         let vessel = self.automaton;
                         let senses = self.senses();
                         solver::think_task_sensing(&task, self.grown.entry(vessel).or_default(), self.held.entry(vessel).or_default(), senses)
@@ -4579,16 +4579,16 @@ impl Polity {
                     certificate,
                     test_output,
                 } => {
-                    // NOVELTY-GATE: a confirmed composite is a WORD
+                    // NOVELTY-GATE: a confirmed composite is a word
                     // candidate. Gates 1–2 run here (unique orbit vs
                     // library and this task's standing letters; depth
-                    // ≥ 2 by `consider`); each DISTINCT task digest is
+                    // ≥ 2 by `consider`); each distinct task digest is
                     // one confirmation; the third mints — receipted,
                     // adopted, and a depth-1 letter from then on.
                     if program.len() >= 2 {
-                        // N-I8 — a confirmed composite is a WORD candidate; the
-                        // AUTOMATON deposits its closure. The word mints only on
-                        // CONSILIENCE (a second vessel independently closes the
+                        // N-I8 — a confirmed composite is a word candidate; the
+                        // automaton deposits its closure. The word mints only on
+                        // consilience (a second vessel independently closes the
                         // same orbit) — `deposit_toward_word` gates that and bills
                         // the mint (`mint_cost`, COG-2/4/5, unchanged).
                         let standing =
@@ -4603,7 +4603,7 @@ impl Polity {
                     self.closing = Some(solver::mint::word_orbit(&program));
                     let word: Vec<String> = program.iter().map(|op| op.describe()).collect();
                     let cert_hex = hex(&certificate.output);
-                    // Law II in full: the pairs the solve was PROVED
+                    // Law II in full: the pairs the solve was proved
                     // on cross the membrane whole — the train family
                     // plus the confirmed test — so the mesh judges by
                     // replay, not by a synthesized stand-in. Cloned
@@ -4617,8 +4617,8 @@ impl Polity {
                         .map(|p| (rows(&p.input), rows(&p.output)))
                         .collect();
                     proved.push((rows(&task.test_in), rows(&test_output)));
-                    // THE PROOF, riding WHOLE (the opaque-payload law): the
-                    // CARRIED DERIVATION (schema v4, Concordance 4.4 annex) —
+                    // The proof, riding whole (the opaque-payload law): the
+                    // carried derivation (schema v4, Concordance 4.4 annex) —
                     // the forged task's samples and both words' per-step
                     // state digests, which the kernel walks, never re-runs.
                     let _ = (test_output, certificate);
@@ -4634,20 +4634,20 @@ impl Polity {
                 }
                 _ => None,
             };
-            // N-I8 — the SIBLING office's independent vantage: its OWN basin
-            // (N-I·VESSEL), its OWN look (N-I7), deposit-only (no value mint —
+            // N-I8 — the sibling office's independent vantage: its own basin
+            // (N-I·vessel), its own look (N-I7), deposit-only (no value mint —
             // the automaton is the line's value producer). Affordability-
-            // staggered: it looks only if the bank can still pay AFTER the
+            // staggered: it looks only if the bank can still pay after the
             // automaton, so a line with one look's surplus funds the automaton
             // first and the sibling fasts. When both close the same orbit, the
             // second deposit reaches two distinct vessels and the word mints.
             //
-            // ENTITY-ALIGN-2 (docs/56 §4, piece a) — a MINORITY of beats,
+            // ENTITY-ALIGN-2 (docs/56 §4, piece a) — a minority of beats,
             // hash-seeded per (sibling, beat) so it is emergent rather than a
-            // synchronized global tick, the sibling instead CHOOSES its own
+            // synchronized global tick, the sibling instead chooses its own
             // problem (`sibling_self_select`) — the first entity-initiated
             // agency in this civ's cognition, rather than dispatch deciding
-            // "we think about X now" for both vessels. It falls back to
+            // "think about X now" for both vessels. It falls back to
             // confirming when self-select declines (no basin yet, or cannot
             // afford even the discounted look), so this is additive: no
             // beat that used to confirm loses its confirmation entirely.
@@ -4663,25 +4663,25 @@ impl Polity {
         };
         match solved {
             Some((name, word, cert_hex, proof, proved_pairs)) => {
-                // A1 — CLOSE THE PoUW LOOP. Cognition proved out; now it
-                // MINTS. The amount is `kernel::mint_bound` — the ruled
+                // A1 — close the PoUW LOOP. Cognition proved out; now it
+                // mints. The amount is `kernel::mint_bound` — the ruled
                 // ladder read from the same function the gate enforces,
                 // never a number chosen here.
                 if let Some((work, difficulty)) = proof {
-                    // THE MINT'S ONE ANCHOR (kernel VERSION 4). The
+                    // The mint's one anchor (kernel VERSION 4). The
                     // amount is `kernel::mint_bound` — the ruled ladder
                     // read from the same function the gate enforces,
                     // never a number chosen here — and the proof rides
                     // the deed whole, so `verify_work` re-forges,
                     // re-applies and re-chains it forever.
                     //
-                    // The capacity-law gate that stood here is STRUCK
+                    // The capacity-law gate that stood here is struck
                     // (operator ruling 2026-08-04): identity is pegged
-                    // to entity and is recycled WITHOUT bonds, so a
+                    // to entity and is recycled without bonds, so a
                     // standing test read off relational structure
                     // refused the lawful recycled line by construction.
                     let bound = kernel::mint_bound(difficulty.rung());
-                    // docs/66 Y1 — THE FIRST-CLOSURE BOUNTY, as the court pays
+                    // docs/66 Y1 — the first-closure bounty, as the court pays
                     // it: the first synthesis in the universe of an action
                     // earns the full rung; an independent re-derivation of an
                     // action some line already closed earns the floor (the
@@ -4733,41 +4733,41 @@ impl Polity {
                 let _ = proved_pairs;
                 self.solved += 1;
                 self.streak += 1;
-                // THE COUPLING CLOSES HERE. A close returns the line to
+                // The coupling closes here. A close returns the line to
                 // growth from wherever it was, and clears the hunger it
                 // reached with.
-                // Slice 2: the civilization's DIRECTION is its self-reading when it
+                // Slice 2: the civilization's direction is its self-reading when it
                 // has a material self; the boolean close only sets direction for a
                 // pre-material line (the FSM fallback). The close still clears the
                 // hunger below either way.
                 self.trajectory =
                     direction_override.unwrap_or_else(|| self.trajectory.advance(true));
                 self.starved = 0;
-                // D CLIMBS WHEN THE RUNG IS MASTERED — coupled, not
+                // D climbs when the RUNG is mastered — coupled, not
                 // counted. The old rule was `streak >= 3 && level < 5`:
                 // two chosen constants, one counting confirms while
-                // ignoring what they COST, the other an absolute
+                // ignoring what they cost, the other an absolute
                 // ceiling.
                 //
                 // The couple: D (the rung, an extent) advances only on
                 // expenditure of V (the reach, a rate), and the signal
                 // that a rung is finished is that it stopped costing —
-                // a close off the CHEAP reach. A close that needed
+                // a close off the cheap reach. A close that needed
                 // hunger or exhaustion says the line is at its limit
                 // and holds, however many it strings together.
                 //
-                // The ceiling is DERIVED, never chosen: a line climbs
+                // The ceiling is derived, never chosen: a line climbs
                 // while the ladder still differentiates, and stops
                 // where `Difficulty::level` saturates and the next rung
                 // is the same task at the same price. That reads the
                 // ladder instead of asserting its length, so extending
                 // the ladder extends the climb with no edit here.
-                // PATH-AGNOSTIC BY CONSTRUCTION. The first cut tested
+                // Path-agnostic by construction. The first cut tested
                 // `path_used == Reach`, which silently broke the
                 // uncoupled control: that path never reaches, so it
                 // could never promote, never left rung 1, and earned
-                // exactly zero. The signal is not WHICH path paid, it
-                // is whether the line was ALREADY closing — sustained
+                // exactly zero. The signal is not which path paid, it
+                // is whether the line was already closing — sustained
                 // productivity at this rung. In coupled mode Growth
                 // implies the cheap reach anyway, so this subsumes the
                 // path test rather than weakening it.
@@ -4781,7 +4781,7 @@ impl Polity {
             None => {
                 self.streak = 0;
                 // Growth → stagnation → decline, one step per barren
-                // beat. What each state SPENDS is `Trajectory::need`.
+                // beat. What each state spends is `Trajectory::need`.
                 // Slice 2: the derived self-reading is the direction; the FSM's
                 // barren-beat step only stands for a pre-material line.
                 self.trajectory =
@@ -4791,16 +4791,16 @@ impl Polity {
         }
     }
 
-    /// DIVERGENCE (AEON-1b, 11 §3): at the top of its own ladder (rung 8
+    /// Divergence (AEON-1b, 11 §3): at the top of its own ladder (rung 8
     /// today, read off the ladder's saturation) with 20 confirmed
-    /// solves — sustained pressure — the line CLEAVES into two PEER
+    /// solves — sustained pressure — the line cleaves into two peer
     /// branches: no parent, no child. The origin's own key moves +delta
     /// and receipts `Diverged` naming the departing branch; the branch
     /// founds its own world at the opposite phase (−delta, wrapped).
     /// The mutation stays chronicle-seeded: the line's own history
     /// decides where its branches land on the manifold. The lineage
     /// pointer records LINE membership (LINEAGE-1), never parenthood.
-    /// Does THIS line's ladder still differentiate above `level`? A planar
+    /// Does this line's ladder still differentiate above `level`? A planar
     /// line climbs the planar forge ladder, a volumetric line the volumetric
     /// one — each read off its own saturation, never a remembered top.
     fn ladder_climbs(&self, level: u32) -> bool {
@@ -4812,7 +4812,7 @@ impl Polity {
     }
 
     fn divergence_step(&mut self, registry: &Registry) -> Option<PolitySpec> {
-        // Divergence waits for the TOP of the ladder — derived from
+        // Divergence waits for the top of the ladder — derived from
         // the ladder, not from a remembered 5.
         if self.cleaved || self.ladder_climbs(self.level) || self.solved < 20 {
             return None;
@@ -4820,7 +4820,7 @@ impl Polity {
         let receipt = self.world.chronicle().receipts().last()?;
         let beacon = Beacon::from_digest(receipt.own().0);
         let parent = &self.spec.civilization;
-        // The cleave IS a key change (11 §3): delta in 1/12..=5/12,
+        // The cleave is a key change (11 §3): delta in 1/12..=5/12,
         // beacon-drawn; the branches take opposite gauge phases.
         let delta = ratio(1 + beacon.uniform_index("diverge.delta", 5) as i64, 12);
         let origin_key = self.world.gauge().clone();
@@ -4836,35 +4836,35 @@ impl Polity {
                 false => others[beacon.uniform_index(domain, others.len() as u64) as usize].clone(),
             }
         };
-        // MULTI-AXIAL (operator ruling 2026-08-02: *unpin unary, and
+        // Multi-axial (operator ruling 2026-08-02: *unpin unary, and
         // make it multi-axis*). `11_AEON` §3 retired "Charted" for
-        // importing terrestrial unary budding — ONE PARENT, MUTATE ONE
-        // AXIS — and this draw was still the second half of that: one
+        // importing terrestrial unary budding — one PARENT, mutate one
+        // axis — and this draw was still the second half of that: one
         // of three coordinates moved and the other two were held.
         //
-        // A cleave is a WALK ON THE MANIFOLD
+        // A cleave is a walk on the manifold
         // {disposition × metabolism × perception × G} (11 §3), and a
         // walk confined to one coordinate at a time is not a walk on a
-        // manifold, it is a walk on its axes. The mask draws a NONEMPTY
-        // SUBSET — 1..=7 over three bits — so every combination is
+        // manifold, it is a walk on its axes. The mask draws a nonempty
+        // subset — 1..=7 over three bits — so every combination is
         // reachable and the single-axis move survives as one case among
         // seven rather than as the only case.
         //
         // Nonempty by construction: a cleave always diverges, so the
         // branches can never be clones. `mutate` draws from the options
-        // EXCLUDING the current value, so every flagged axis genuinely
+        // excluding the current value, so every flagged axis genuinely
         // moves.
-        // **28_VOCABULARY V3 — THE DRAW READS THE FOLD, AT THE RECEIPT.**
+        // **28_VOCABULARY V3 — the draw reads the fold, AT the receipt.**
         //
         // The axis vocabularies are no longer the compiled constants:
         // they are `seed ∪ minted`, so a class of entity a progenitor
         // minted is one a cleave can actually walk onto. Without this
         // the editor would grow a vocabulary nothing ever wears.
         //
-        // AND IT READS THE VOCABULARY AS OF THE DRAWING RECEIPT, never
+        // And it reads the vocabulary as of the drawing receipt, never
         // as of today (`28_VOCABULARY` §9). Read today's and replaying an
         // old era hands lines a class that did not exist when they
-        // cleaved — a SEAL B violation that fails SILENTLY, because the
+        // cleaved — a SEAL B violation that fails silently, because the
         // replay still terminates and still looks like a world.
         let stamp = receipt.stamp();
         let words = |axis: cfe::vocabulary::Axis| -> Vec<String> {
@@ -4893,8 +4893,8 @@ impl Polity {
             perception = mutate_from(&perception, &perceptions, "growth.perception");
         }
 
-        // THEMED NAMING (operator ruling): the child's name derives
-        // from the parent's dominant CAPABILITIES — metabolism names
+        // Themed naming (operator ruling): the child's name derives
+        // from the parent's dominant capabilities — metabolism names
         // the head, perception names the tail. Fresh two-part names,
         // never concatenations of provenance (lineage lives in the
         // registry field, not in ever-growing strings).
@@ -4916,7 +4916,7 @@ impl Polity {
             let k = (start + offset) % (heads.len() * tails.len());
             let (head, tail) = (heads[k / tails.len()], tails[k % tails.len()]);
             let sigil = format!("{head}{tail}");
-            // Both the line AND its world must be new: a world directory
+            // Both the line and its world must be new: a world directory
             // belongs to one line (`polities::world_name_taken`).
             if registry.load(&sigil).is_none() && !polities::world_name_taken(registry, &format!("{head}-{tail}")) {
                 chosen = Some((sigil, head, tail));
@@ -4931,7 +4931,7 @@ impl Polity {
             .species
             .strip_suffix(" (descendant)")
             .unwrap_or(&parent.species);
-        // A PEER, not a child: the species is the LINE's species,
+        // A peer, not a child: the species is the LINE's species,
         // whole — no "(descendant)" suffix, no "child of" (11 §3
         // retired the branch).
         let branch = Civilization {
@@ -4954,7 +4954,7 @@ impl Polity {
         // the departing branch (tag 43).
         self.world.diverge(&sigil, delta.clone());
 
-        // The new branch settles ADJACENT: origin position plus a small
+        // The new branch settles adjacent: origin position plus a small
         // beacon-drawn displacement in the exact rationals per spatial axis (half-unit
         // grain, never the zero vector).
         let step = |domain: &str| -> Ratio { ratio(beacon.uniform_index(domain, 9) as i64 - 4, 2) };
@@ -4986,7 +4986,7 @@ impl Polity {
                 )
             },
             // BOT-THERM: a branch's seat is never inherited — it is
-            // drawn from its OWN genesis chronicle (the mutated axes
+            // drawn from its own genesis chronicle (the mutated axes
             // may prefer another regime entirely).
             star: None,
             albedo: None,
@@ -4997,7 +4997,7 @@ impl Polity {
             place: None,
             wild: None,
         };
-        // THE SEAT, recorded once beside the card: the boot roster reads it,
+        // The seat, recorded once beside the card: the boot roster reads it,
         // so a restart resumes this branch in the world it was founded in,
         // at the same chart point under the same temperament — never a
         // second founding under a derived `{sigil}-hearth`. (The gauge is
@@ -5015,10 +5015,10 @@ impl Polity {
         Some(spec)
     }
 
-    /// THE UNFOLD (GAUGE-N, `11` §2.1) — a line OPENS the plane it has
-    /// already EARNED.
+    /// The unfold (GAUGE-N, `11` §2.1) — a line opens the plane it has
+    /// already earned.
     ///
-    /// **NOT CALLED FROM `cycle`, and that is a hold rather than a
+    /// **Not called from `cycle`, and that is a hold rather than a
     /// design.** Wiring it into the beat made
     /// `survey_pins::the_survey_charters_the_sector_and_the_spent_lens_idles`
     /// fail on `replay MATCHES the surveyed world` — the live world and
@@ -5032,19 +5032,19 @@ impl Polity {
     /// The mechanism was landed and had exactly two callers: a cfe test
     /// and the operator's CLI verb. No autonomous line had ever opened
     /// a plane, so every live world sat at genesis `[0]` forever while
-    /// its earned mints piled up unspent. The era FOLD (the
+    /// its earned mints piled up unspent. The era fold (the
     /// contraction) ran every era; the unfold (the expansion) ran never.
     ///
-    /// **The earning rule is NOT restated here.** `shift_gauge_at`
+    /// **The earning rule is not restated here.** `shift_gauge_at`
     /// refuses `PlaneUnearned` when the grade outruns the receipted
     /// mints — one plane per `TechDiscovered { condition: 1.. }`,
     /// `Diverged` or `Confluent`. This asks it and takes the refusal;
     /// copying the filter would be two definitions of one law
-    /// (CHARTER §0b).
+    /// (Charter §0b).
     ///
-    /// **The plane's value is CHRONICLE-SEEDED**, never chosen: drawn
+    /// **The plane's value is chronicle-SEEDED**, never chosen: drawn
     /// from the world's own terminal digest, so replay re-derives it
-    /// exactly and no wall clock enters (CHARTER §9).
+    /// exactly and no wall clock enters (Charter §9).
     pub fn unfold(&mut self) -> bool {
         let Some(receipt) = self.world.chronicle().receipts().last() else {
             return false;
@@ -5071,10 +5071,10 @@ impl Polity {
     /// elements; office seats T4/T6; refine converts raw; chemistry
     /// seats labs / catalogs / compounds — all pure NPC.
     pub fn cycle(&mut self, book: &Ledger, registry: &Registry) -> Option<PolitySpec> {
-        // MANIFOLD-1a (TU-1 / G, doc 55 §1/§3): stamp THIS beat's gauge
+        // MANIFOLD-1a (TU-1 / G, doc 55 §1/§3): stamp this beat's gauge
         // sample first, before any deed below can close a receipt — every
-        // receipt this beat reads the SAME snapshot (TU-1c: gauge settles
-        // at the beat boundary, never mid-beat). The sample is the SAME
+        // receipt this beat reads the same snapshot (TU-1c: gauge settles
+        // at the beat boundary, never mid-beat). The sample is the same
         // reduce-organ occupancy `soc::observe_direction` already peels
         // (the civilization's own material self, `G_cognition =
         // reduct::GaugeDirection`, doc 55 §1 — "already live"), read here
@@ -5092,21 +5092,21 @@ impl Polity {
         profile::timed("tick", || {
             self.world.tick();
         });
-        // N-I5 — THE SURVIVAL OBSERVATION (Pin G), read AFTER the beat's
-        // regrowth (tick) and BEFORE collect consumes it: can the vein/flow feed
+        // N-I5 — the survival observation (Pin G), read after the beat's
+        // regrowth (tick) and before collect consumes it: can the vein/flow feed
         // the working mouths this beat? Read post-collect it would see the
-        // ONT-2b larder drained to ~0 (the staple is MINED vein → mouths at
+        // ONT-2b larder drained to ~0 (the staple is mined vein → mouths at
         // collect, the bank bypassed) and falsely starve a flow-fed line. Pure
         // read — replay reads the same verdict, so SEAL-B is untouched.
         let survives = profile::timed("survival_read", || {
             self.ration_survives(cfe::world::FIRST_ORB)
         });
-        // RESTORE 3 (Concordance 1.10; 20_FOUNDING §6a-bis strikes cliffs): a
-        // line its larder does not wholly feed still THINKS IN PROPORTION — on
+        // Restore 3 (Concordance 1.10; 20_FOUNDING §6a-bis strikes cliffs): a
+        // line its larder does not wholly feed still thinks in proportion — on
         // a draw whose chance is the share of its mouths the larder feeds.
         // One unfed mouth no longer silences the whole line.
         let thinks = survives || self.thinks_in_proportion(cfe::world::FIRST_ORB);
-        // N-I6 — THE SURVIVAL EXPRESS: the residual names ≤1 deed, expressed in
+        // N-I6 — the survival express: the residual names ≤1 deed, expressed in
         // this same post-tick / pre-collect window (the sole zone-raiser now).
         // A Fed book may open matter (Pin F); a Short book still thinks — that is
         // how it names the cure (Pin G withholds only ARC, below).
@@ -5132,21 +5132,21 @@ impl Polity {
         profile::timed("cognition_step", || self.cognition_step());
         profile::timed("survey_step", || self.survey_step());
         profile::timed("expand_step", || self.expand_step());
-        // COG-EMERGENCE-2 THE ABUNDANCE STEP: above the survival floor, the line
-        // makes ONE surplus choice — deepen, expand, synthesise, or hoard — by a
+        // COG-EMERGENCE-2 the abundance step: above the survival floor, the line
+        // makes one surplus choice — deepen, expand, synthesise, or hoard — by a
         // single fold-draw over its tensions, not three authored gates. Runs
-        // BEFORE research so a cognitive seat this beat deepens this beat's mint;
-        // the chosen act pays its own bill or is refused by physics AFTER the
+        // before research so a cognitive seat this beat deepens this beat's mint;
+        // the chosen act pays its own bill or is refused by physics after the
         // choice (the will stays the line's own). Replaces cognitive_investment_
         // step + expand_step's charter + chemistry_step's seat.
         profile::timed("abundance_step", || self.abundance_step());
         profile::timed("research_step", || self.research_step(book, thinks));
         let newborn = profile::timed("divergence_step", || self.divergence_step(registry));
-        // THE RESUME CARRIER (task 25, 2026-07-30): every polity
+        // The resume carrier (task 25, 2026-07-30): every polity
         // world syncs its tlv chronicle beside the ledger exports — an
         // append-only resume copy (cfe::persist grows the file, never
-        // rewrites). The player's OBSERVING hand can resume a copy;
-        // the WRITING hand stays refused at the CLI (two writers on
+        // rewrites). The player's observing hand can resume a copy;
+        // the writing hand stays refused at the CLI (two writers on
         // one clock is the split-brain NS-5 exists to arbitrate) —
         // intervention still goes through the steward inbox.
         // #157 — `sync_from` skips re-reading/re-verifying the prefix
@@ -5161,7 +5161,7 @@ impl Polity {
             )
             .is_ok()
         });
-        // #36 KERNEL-OBSERVED PLAY: the beat chains. The committed
+        // #36 KERNEL-OBSERVED play: the beat chains. The committed
         // state extends this world's arbor at the world clock —
         // adopted once at first sight (the pre-chain founding stamped
         // a named debt), extended every beat after, gated=0 stamped
@@ -5174,7 +5174,7 @@ impl Polity {
             let _ = self.chain_beat(book);
         });
         profile::timed("scribe_record", || {
-            // #157 — a clean `sync_from` this SAME beat already proved
+            // #157 — a clean `sync_from` this same beat already proved
             // chronicle.tlv consistent; `record`'s own divergence check
             // (`rotate_divergent`) would re-read and re-parse the whole
             // file again to answer a question just answered. Skip it
@@ -5207,7 +5207,7 @@ impl Polity {
     /// world tick}` on the mainline. The tick advanced this cycle, so
     /// the arrow ascends structurally; the adoption door shuts itself
     /// after the first pass.
-    /// **CARRY THIS WORLD FORWARD** — sync its chronicle to disk (the tail
+    /// **Carry this WORLD forward** — sync its chronicle to disk (the tail
     /// only, through the polity's own cursor), then write its snapshot at that
     /// head, so the next boot resumes from here instead of from genesis.
     pub fn carry(&mut self, book: &Ledger) -> std::io::Result<()> {
@@ -5216,7 +5216,7 @@ impl Polity {
         self.world.flush_leisure();
         cfe::persist::sync_from(self.world.chronicle(), &dir.join("chronicle.tlv"), &mut self.sync_cursor)
             .map_err(|e| std::io::Error::other(format!("{e:?}")))?;
-        // THE MEMORY BOUND: what the snapshot now carries leaves memory —
+        // The memory bound: what the snapshot now carries leaves memory —
         // every receipt the judge has walked (`chained`), short of the head,
         // drains to the annals; its record stays whole on disk.
         let upto = (self.chained as u64).min(self.world.chronicle().total().saturating_sub(1));
@@ -5235,10 +5235,10 @@ impl Polity {
         }
         let arbor = self.arbor.as_mut().expect("held or just opened");
         // Borrowed, not cloned: the whole history used to be copied here
-        // EVERY beat (O(history) per beat per world, growing without bound);
+        // every beat (O(history) per beat per world, growing without bound);
         // only the unjudged tail is ever walked below.
         let receipts: &[cfe::vrp::Receipt] = self.world.chronicle().receipts();
-        // Positions are ABSOLUTE: the chronicle may hold only a tail from
+        // Positions are absolute: the chronicle may hold only a tail from
         // `base` (the rest drained to the annals once a snapshot carried it).
         let base = self.world.chronicle().base() as usize;
         let total = base + receipts.len();
@@ -5248,7 +5248,7 @@ impl Polity {
             self.spec.position.2.clone(),
         ];
 
-        // THE ADOPTION DOOR (#36): a pre-chain world enters ONCE, its
+        // The adoption door (#36): a pre-chain world enters once, its
         // current state seated as the unjudged genesis — the debt named,
         // never hidden. Everything after walks through the gate.
         if arbor.head("").is_none() {
@@ -5266,26 +5266,26 @@ impl Polity {
             return Ok(());
         }
 
-        // DIRECTIVE 19 — PER-DEED JUDGMENT. One commitment per DEED, not
+        // Directive 19 — per-deed judgment. One commitment per deed, not
         // one per beat, and each carries its own step so
         // `mesh::arbor::extend` runs `kernel::admits` on it. Batching
         // was refused by ruling: nine deeds in one composite hides an
         // un-inspected interior where a local unlawful step shelters
         // behind a net-positive whole.
         //
-        // THE JUDGED WATERMARK (task #8, measured 2026-08-12): the
-        // cursor was memory-only, so EVERY conductor boot re-judged
+        // The judged watermark (task #8, measured 2026-08-12): the
+        // cursor was memory-only, so every conductor boot re-judged
         // every world's whole history — O(receipts²) prefix replays,
         // measured at 421s of a 430s beat across 153 grown worlds
         // (98 %; the "94 % research_step" reading was true at 33 young
         // worlds and is history). `kernel::admits` is deterministic on
         // (prior, next, step) — re-deriving identical verdicts each
         // boot is the R5-memo shape the board already ruled against —
-        // so the cursor and the refused SEQUENCES persist beside the
+        // so the cursor and the refused sequences persist beside the
         // spine, and a boot re-judges only what the record does not
         // hold. No sidecar (or an inconsistent one — a shorter
         // chronicle is a foreign tree) → the full re-judgment, today's
-        // behavior, once. The permanent refusal record survives BETTER
+        // behavior, once. The permanent refusal record survives better
         // than before: it is carried, not recomputed; the few recorded
         // refusals re-derive their typed verdicts at one prefix replay
         // each, so the narrator still announces them once per process.
@@ -5293,7 +5293,7 @@ impl Polity {
             if let Some((watermark, refused_seqs)) =
                 read_judged_sidecar(&book.world_dir(&self.spec.world_name))
             {
-                // Judge each deed live, ONCE (operator directive 2026-10-08):
+                // Judge each deed live, once (operator directive 2026-10-08):
                 // the watermark and the refused sequences are carried in the
                 // record; their verdicts are not re-derived by replaying
                 // prefixes from genesis at boot.
@@ -5303,19 +5303,19 @@ impl Polity {
                 }
             }
         }
-        // THE STEPPER (task #9, the structural cure): prior/next per
+        // The stepper (task #9, the structural cure): prior/next per
         // deed are the stepper's state around one apply — a clone of
         // committed state, O(state) — never a prefix replay. The old
         // form here was O(deeds × history) per beat and O(history²)
         // at boot; measured at 402s of a 430s beat before the
         // watermark, ~20s/beat after it, ~0 now. The stepper seeds once
-        // per process from CARRIED state, never from genesis.
+        // per process from carried state, never from genesis.
         if self.stepper.is_none() {
             // Every deed up to the watermark was judged live already; the
-            // stepper carries the LIVE state forward from there. When the
+            // stepper carries the live state forward from there. When the
             // watermark is the chronicle's head (the boot after a clean
-            // close), the live world IS that state — nothing is replayed.
-            // SEEDED FROM THE SNAPSHOT, NEVER FROM GENESIS (RECONSTRUCT iii):
+            // close), the live world is that state — nothing is replayed.
+            // SEEDED from the snapshot, never from GENESIS (reconstruct iii):
             // a watermark behind the head steps the snapshot's carried state
             // over the held receipts from its position to the watermark. A
             // watermark behind the snapshot (deeds the last process wrote but
@@ -5349,27 +5349,27 @@ impl Polity {
             self.stepper = Some(stepper);
         }
         let stepper = self.stepper.as_mut().expect("seeded above");
-        // **THE PHASE-3 FLIP** (`39_PHASE3_FLIP` §5, operator ruling
-        // 2026-08-13): one arbor commitment PER DEED, each carrying its
+        // **The PHASE-3 flip** (`39_PHASE3_FLIP` §5, operator ruling
+        // 2026-08-13): one arbor commitment per deed, each carrying its
         // own step, so `mesh::arbor::extend` gates it live — the sub-
         // coordinate ruling (§3, option A) is what makes this possible;
         // several deeds sharing one tick address distinctly by `sub`.
         //
-        // `still_admitting` tracks whether every deed so far THIS CALL
+        // `still_admitting` tracks whether every deed so far this call
         // has committed to the arbor. Judgment (for the refusal report,
         // `self.refused`) runs over every new deed unconditionally, same
         // as before — but the arbor only ever extends along its own
         // head, so the first refusal stops arbor commits for the rest
         // of this call. Later deeds stay judged-and-reported but
         // uncommitted; `self.arbor_committed` simply does not advance
-        // past them, so the NEXT call retries from the same point. This
+        // past them, so the next call retries from the same point. This
         // is the live meaning of "replay demoted to a proposer": the
         // world keeps playing regardless, but the arbor — the live gate
         // — only ever holds what the kernel actually admitted.
         let mut still_admitting = true;
-        // RECONSTRUCT (iii): the judge applies each deed ONCE and admits it
-        // ONCE; the arbor carries the verdict through its judged door, which
-        // checks only that the judge's prior IS its head (by digest) — no
+        // Reconstruct (iii): the judge applies each deed once and admits it
+        // once; the arbor carries the verdict through its judged door, which
+        // checks only that the judge's prior is its head (by digest) — no
         // blob fetched, decoded or re-admitted. The prior's digest rides
         // forward from each committed `next`.
         let mut prior_digest: Option<[u8; 32]> = None;
@@ -5387,7 +5387,7 @@ impl Polity {
             let prior = profile::timed("chain:clone", || stepper.state().clone());
             profile::timed("chain:apply", || stepper.apply(receipt));
             let next = stepper.state();
-            // THE CORES (slice 1): what this deed unmade, read from the world's
+            // The cores (slice 1): what this deed unmade, read from the world's
             // own holdings around it — once, past what the pending record
             // already counts.
             if receipt.sequence() as usize >= self.core_pending.through && cores::reaches(receipt.event()) {
@@ -5441,7 +5441,7 @@ impl Polity {
             }
         }
         self.chained = total;
-        // The pending sinks are written BEFORE the watermark, naming how far
+        // The pending sinks are written before the watermark, naming how far
         // they count: a restart between the two re-judges those deeds but
         // does not count them again.
         profile::timed("chain:writes", || {
@@ -5454,12 +5454,12 @@ impl Polity {
         Ok(())
     }
 
-    /// DIRECTIVE 19 — every deed this world's gate REFUSED, by receipt
+    /// Directive 19 — every deed this world's gate REFUSED, by receipt
     /// sequence, in the order it met them. The record is permanent and
     /// nothing prunes it: the chronicle keeps the deed, this keeps the
     /// verdict.
     ///
-    /// A refusal here does NOT mean the deed was undone.
+    /// A refusal here does not mean the deed was undone.
     /// `world/replay.rs` is still the live transition (the Phase 3 flip demotes
     /// it to proposer, `U_DIRECTIVES` §5), so a refused deed stands in
     /// the chronicle with the gate on record against it. That gap is
@@ -5469,7 +5469,7 @@ impl Polity {
     }
 
     /// The refusals the board has not been told about yet. Reading them
-    /// marks them told — the RECORD stays whole above; only the
+    /// marks them told — the record stays whole above; only the
     /// narrator's cursor moves, so each refusal is announced once
     /// instead of every beat thereafter.
     pub fn unreported_refusals(&mut self) -> &[(u64, kernel::Refused)] {
@@ -5479,9 +5479,9 @@ impl Polity {
     }
 }
 
-/// **THE CORES, slice (1): every sink reaches its core** — at the year's
+/// **The cores, slice (1): every sink reaches its core** — at the year's
 /// close. The aperture legs every world's judge holds are paired by deal
-/// across the universe (the melt goes to the SENDER's core); then each world's
+/// across the universe (the melt goes to the sender's core); then each world's
 /// unmade amounts are deposited at the core its charted place reaches
 /// (`Ledger::core_of`), one `CoreDeposited` receipt per holding on the
 /// universe ledger. A world whose universe has no core yet keeps its pending
@@ -5529,8 +5529,8 @@ pub fn core_step(worlds: &mut [Polity], book: &Ledger, stamp: u64) -> Vec<(Strin
     out
 }
 
-/// **THE CORES, slice (2): THE BOUNCE** — at the year's close, after the
-/// year's deposits, every core re-emits each holding it holds as ONE pulse
+/// **The cores, slice (2): the bounce** — at the year's close, after the
+/// year's deposits, every core re-emits each holding it holds as one pulse
 /// into one living world its throat reaches (`Ledger::core_of`), drawn by the
 /// society's own partition draw weighted by population (the living draw the
 /// return; a core whose reach holds no one keeps its pulse for a later year).
@@ -5541,7 +5541,7 @@ pub fn core_step(worlds: &mut [Polity], book: &Ledger, stamp: u64) -> Vec<(Strin
 pub fn core_bounce(worlds: &mut [Polity], book: &Ledger, stamp: u64) -> Vec<(String, String)> {
     let grain = ratio(1, cfe::world::RESOURCE_LEDGER_GRAIN);
     let reached: Vec<Option<String>> = worlds.iter().map(|p| book.core_of(&p.spec.position)).collect();
-    // CORES SLICE 3 — THE CORE'S BELL CARRIES THE WORDS (ruling: time as the
+    // Cores slice 3 — the core's bell carries the WORDS (ruling: time as the
     // bell, not a yearly timer). Each dead word rides the core's pulse out at
     // one cell a beat (a declared carrier speed, docs/59): a line hears it
     // `distance` beats after its deposit — near lines early, rim lines late —
@@ -5603,7 +5603,7 @@ pub fn core_bounce(worlds: &mut [Polity], book: &Ledger, stamp: u64) -> Vec<(Str
         let Some(drawn) = soc::partition_draw(&weights, *seed.finalize().as_bytes()) else { continue };
         pulses.push((candidates[drawn], core, resource, pulse));
     }
-    // The core's side is sealed FIRST: a pulse the ledger did not record is
+    // The core's side is sealed first: a pulse the ledger did not record is
     // never credited, so a core can never emit the same holding twice.
     let emitted = pulses
         .iter()
@@ -5626,7 +5626,7 @@ pub fn core_bounce(worlds: &mut [Polity], book: &Ledger, stamp: u64) -> Vec<(Str
     out
 }
 
-/// THE BELL ARRIVES (cores slice 3): every dead word whose beat has come
+/// The bell arrives (cores slice 3): every dead word whose beat has come
 /// joins the hearing line's inheritance, to be tried on its tasks. Returns
 /// how many words arrived this beat.
 pub fn inheritance_step(worlds: &mut [Polity], stamp: u64) -> usize {
@@ -5665,7 +5665,7 @@ pub fn galaxy_members(worlds: &[Polity], book: &Ledger) -> std::collections::BTr
     galaxies
 }
 
-/// A GALAXY'S HUB (docs/67 N1, docs/66 Y2): where a line's word closes the
+/// A galaxy's hub (docs/67 N1, docs/66 Y2): where a line's word closes the
 /// galaxy's commission the hub stands where the word marks; otherwise the
 /// medoid line (the one nearest, by the torus's L1, to all the others). The
 /// hub clearing and the gates (docs/72) read this one hub.
@@ -5680,7 +5680,7 @@ pub fn galaxy_hub(worlds: &[Polity], book: &Ledger, var_root: &std::path::Path, 
 }
 
 /// MARKET-2: the transit distance the iceberg law melts against — the
-/// universe's own torus distance (`ledger::torus_distance`), WRAPPED against
+/// universe's own torus distance (`ledger::torus_distance`), wrapped against
 /// the carried `span`. It summed unwrapped |Δ| until 2026-10-08: two worlds
 /// beside opposite faces of the torus read as the universe's width apart.
 pub fn spatial_l1(a: &(Ratio, Ratio, Ratio), b: &(Ratio, Ratio, Ratio), span: &Ratio) -> Ratio {
@@ -5712,14 +5712,14 @@ pub fn element_trade_step(worlds: &mut [Polity], beat: u64, span: &Ratio) -> Vec
     let mut cleared = Vec::new();
     let mut seq: u64 = 0;
     let n = worlds.len();
-    // PEELS AND SHEARS, NOT SWEEPS (standing ruling; measured
+    // Peels and shears, not sweeps (standing ruling; measured
     // 2026-08-12 at 66s of a 110s beat, 153 worlds): the pair loop
-    // re-folded BOTH sides' whole element ledgers per pair — O(n²)
+    // re-folded both sides' whole element ledgers per pair — O(n²)
     // exact-rational folds — and re-granted the solar leap per pair.
     // The mass is a per-WORLD reading: cache it once, refresh only the
     // two participants a clear actually moved; grant the leap once per
     // world in a pre-pass. Same pairs, same order, same choices —
-    // WHERE TO LOOK moved, never what clears.
+    // where to look moved, never what clears.
     let mass_of = |p: &Polity| -> Ratio {
         p.world
             .orb()
@@ -5738,10 +5738,10 @@ pub fn element_trade_step(worlds: &mut [Polity], beat: u64, span: &Ratio) -> Vec
         }
     }
     let mut masses: Vec<Ratio> = worlds.iter().map(mass_of).collect();
-    // #136 MEMOIZATION RIDER — the exporter's TOP element is a per-WORLD reading
+    // #136 memoization rider — the exporter's top element is a per-WORLD reading
     // (max over its element ledger, up to ~11.5k kinds). Reading it per (a, b)
-    // pair was the O(kinds·pairs) SWEEP that dominated the beat once the melt
-    // grain landed. Peel it ONCE per world here and refresh only the two a clear
+    // pair was the O(kinds·pairs) sweep that dominated the beat once the melt
+    // grain landed. Peel it once per world here and refresh only the two a clear
     // moves — same element, same tie-break (`max_by` keeps the last of equals),
     // same choices — exactly the bargain the mass cache above already strikes.
     let top_of = |p: &Polity| -> Option<([u8; 32], Ratio)> {
@@ -5758,7 +5758,7 @@ pub fn element_trade_step(worlds: &mut [Polity], beat: u64, span: &Ratio) -> Vec
             if worlds[a].penned || worlds[b].penned {
                 continue;
             }
-            // PEELS BEFORE THE SWEEP (optimization sweep, 2026-10-13): the
+            // Peels before the sweep (optimization sweep, 2026-10-13): the
             // cheap readings first. A pair whose exporter holds no element, or
             // whose half smelts to nothing, ships nothing whatever the road, so
             // its distance and melt are never computed. Exactly the same pairs
@@ -5774,7 +5774,7 @@ pub fn element_trade_step(worlds: &mut [Polity], beat: u64, span: &Ratio) -> Vec
                 continue;
             };
             // Ship half (derive 2 as 1+1 — no tuned dial).
-            // #136 — the dispatched amount lands on the 1/64 SMELT grain too, so
+            // #136 — the dispatched amount lands on the 1/64 smelt grain too, so
             // the sender's stock stays `denom | 64` after the debit (the giver
             // keeps the sub-grain remainder, un-shipped). A ship below 1/64 smelts to
             // zero and the guards below skip it — a fill smelted to zero refuses.
@@ -5822,7 +5822,7 @@ pub fn element_trade_step(worlds: &mut [Polity], beat: u64, span: &Ratio) -> Vec
     cleared
 }
 
-/// What the hubs did in one beat, galaxy by galaxy (the HUB line's reading):
+/// What the hubs did in one beat, galaxy by galaxy (the hub line's reading):
 /// how many cleared, why the others did not, and the buyers' STAMP legs the
 /// hulls cut short or refused.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
@@ -5849,7 +5849,7 @@ pub struct HubCensus {
     /// docs/77: the road tolls each gate earned its builders, each (the
     /// gate's galaxy, its core, the STAMP that arrived).
     pub gate_tolls: Vec<(String, String, Ratio)>,
-    /// docs/73 DECIDE step 1: the hull decisions resolved this beat.
+    /// docs/73 decide step 1: the hull decisions resolved this beat.
     pub decided: decide::Resolved,
     /// The hull books' persistence record over their windows, (correct, rows).
     pub persistence: (u32, u32),
@@ -5906,9 +5906,9 @@ pub fn stamp_market_step(
             }
         }
     }
-    // docs/67 N1 — THE HUBS. The all-pairs spot sweep (every pair of lines,
+    // docs/67 N1 — the hubs. The all-pairs spot sweep (every pair of lines,
     // every beat, four receipts a pair) is retired: each galaxy's trade
-    // clears at ONE place, its hub, once a beat (the stand-in for a final
+    // clears at one place, its hub, once a beat (the stand-in for a final
     // TUniversal point until 78.152). The hub is the galaxy's medoid line (the
     // one nearest, by the torus's L1, to all the others): it emerges from
     // where the lines stand and moves with their orbits. Each participant
@@ -5917,7 +5917,7 @@ pub fn stamp_market_step(
     // a seller's cargo in and its STAMP out. The clearing is one uniform
     // price: every unit of cargo is worth the STAMP that arrived over the
     // cargo that arrived; what does not divide on the grain stays at the hub.
-    // docs/67 N4 — THE SUSTAINABLE OFFER. A seller brings half what it
+    // docs/67 N4 — the sustainable offer. A seller brings half what it
     // holds, but of its own regrowing ration never more than its biosphere
     // spares (`World::sustainable_offer`: the stock above the curve's half
     // point, or one beat's growth below it). The hub prices the rest.
@@ -5953,8 +5953,8 @@ pub fn stamp_market_step(
             .filter_map(|(core, members)| galaxy_hub(worlds, book, var_root, core, members, span).map(|h| (core.clone(), h)))
             .collect()
     });
-    // docs/72 — THE GATES' ROADS. A galaxy joined to another galaxy's core by
-    // a MAPPED gate (5.9) clears at that core's hub: each of its lines runs its
+    // docs/72 — the gates' roads. A galaxy joined to another galaxy's core by
+    // a mapped gate (5.9) clears at that core's hub: each of its lines runs its
     // leg to its own galaxy's hub and through the gate, and the gate's span
     // melt replaces the open-space distance. Of several mapped gates a galaxy
     // takes the one that melts least (then by name); a galaxy whose own core
@@ -5994,7 +5994,7 @@ pub fn stamp_market_step(
                 let _ = worlds[i].world.grant_tech_as(steward, cfe::world::FIRST_ORB, 0);
             }
         }
-        // THE WALL (the iceberg law, as the old sweep kept it): a line whose
+        // The wall (the iceberg law, as the old sweep kept it): a line whose
         // road to the hub melts whole sits out, both sides; and a galaxy whose
         // unwalled lines bring no STAMP or no cargo does not open, so no one
         // pays the melt to a hub with nothing to meet it. A line joined by a
@@ -6027,9 +6027,9 @@ pub fn stamp_market_step(
             census.closed += 1;
             continue;
         }
-        // docs/73 DECIDE (hull), SEE: the clearing's lines by name, each by its
+        // docs/73 decide (hull), see: the clearing's lines by name, each by its
         // STAMP, its cargo offer, its free hull and its melt to the hub, seen
-        // before anything moves. A line LOSES when a STAMP leg of its own is
+        // before anything moves. A line loses when a STAMP leg of its own is
         // refused for want of hull this beat.
         let mut seen: Vec<(String, usize, Vec<Ratio>)> = open
             .iter()
@@ -6041,15 +6041,15 @@ pub fn stamp_market_step(
             .collect();
         seen.sort_by(|a, b| a.0.cmp(&b.0));
         let mut short: std::collections::BTreeSet<String> = std::collections::BTreeSet::new();
-        // IN: each buyer's half STAMP, each seller's offer, to the hub.
+        // In: each buyer's half STAMP, each seller's offer, to the hub.
         let mut paid: Vec<(usize, Ratio)> = Vec::new();
         let mut gave: Vec<(usize, Resource, Ratio)> = Vec::new();
         for (i, melt, _) in &open {
             let (i, melt) = (*i, melt.clone());
             let (stamp, cargo) = (stamp_of(&worlds[i]), cargo_of(&worlds[i]));
             if stamp > ratio(0, 1) {
-                // FLEET-1 PARTIAL FILL, as `clear_trade` keeps it: on a melting
-                // road a hull carries what it CAN. Half the buyer's STAMP was
+                // FLEET-1 PARTIAL fill, as `clear_trade` keeps it: on a melting
+                // road a hull carries what it can. Half the buyer's STAMP was
                 // sent whole or refused whole (HullCapacityShort), the hub's
                 // silent stall: a buyer richer than its hulls never paid in,
                 // and a galaxy whose buyers all were never met. A road that
@@ -6117,7 +6117,7 @@ pub fn stamp_market_step(
         }
         let stamp_in = paid.iter().fold(ratio(0, 1), |s, (_, a)| s + a.clone());
         let cargo_in = gave.iter().fold(ratio(0, 1), |s, (_, _, a)| s + a.clone());
-        // OUT: one uniform price. Each buyer takes every cargo pool in
+        // Out: one uniform price. Each buyer takes every cargo pool in
         // proportion to the STAMP it brought; each seller takes the STAMP in
         // proportion to the cargo it brought. A side with nothing to meet is
         // returned what it brought (the hub holds no one's goods unmet).
@@ -6171,8 +6171,8 @@ pub fn stamp_market_step(
                 let _ = cfe::world::aperture_transfer(&mut house.world, cfe::world::FIRST_ORB, &mut to.world, cfe::world::FIRST_ORB, *r, back, deal);
             }
         }
-        // docs/70 P2 — THE ROAD TOLL (Concordance 5.4, 5.8): charged per unit
-        // CARRIED, on mass, never on value; paid in the realm's own money
+        // docs/70 P2 — the road toll (Concordance 5.4, 5.8): charged per unit
+        // carried, on mass, never on value; paid in the realm's own money
         // (STAMP). The rate is the road's own: the melt fraction the iceberg
         // already takes from money on that leg, so cargo pays for the road as
         // money melts on it. A walled payer pays nothing. On the open road the
@@ -6222,7 +6222,7 @@ pub fn stamp_market_step(
             }
             clears.push((core.clone(), worlds[hub].spec.world_name.clone(), toll_paid, gate_paid));
         }
-        // DECIDE (hull), RECORD: the triple, persistence scored on it.
+        // Decide (hull), record: the triple, persistence scored on it.
         let names: Vec<String> = seen.iter().map(|(n, _, _)| n.clone()).collect();
         let action: Vec<u8> = names.iter().map(|n| built.get(n).copied().unwrap_or(0)).collect();
         let features: Vec<Vec<Ratio>> = seen.drain(..).map(|(_, _, f)| f).collect();
@@ -6247,34 +6247,34 @@ pub fn stamp_market_step(
     (clears, census)
 }
 
-/// MERCHANT-1 (the MARKET-2 sequence) — THE ARBITRAGE PASS, the
+/// MERCHANT-1 (the MARKET-2 sequence) — the arbitrage pass, the
 /// reference model's merchant instinct (layer-2 POLICY over lawful
 /// deeds; SEAM-1 will put a trait boundary here).
 ///
-/// v1 law: the merchant is STRICTLY ADDITIVE — it bridges only
-/// pairs the iceberg has WALLED (pair_melt ≥ 1 direct), creating
+/// v1 law: the merchant is strictly additive — it bridges only
+/// pairs the iceberg has walled (pair_melt ≥ 1 direct), creating
 /// trade where none could exist and never front-running the open
 /// market. The triangle: A rests give G want Q; B rests give Q
 /// want G; M between them pays Q to A, hauls G, sells to B for Q —
-/// profit iff what comes back exceeds what was paid after BOTH
+/// profit iff what comes back exceeds what was paid after both
 /// legs' melt (the operator's test: P_B·(1−φD) > P_A + fees; fees
 /// are ROUTE-1 upkeep, already receipted). One crossing per beat;
-/// a merchant whose second leg refuses HOLDS inventory — that risk
+/// a merchant whose second leg refuses holds inventory — that risk
 /// is the trade. Every leg is an ordinary clear_trade: melt, void
 /// share, and both books' receipts all land by the one law.
 pub fn merchant_step(worlds: &mut [Polity], beat: u64, span: &Ratio) -> Vec<(String, String, String)> {
     let one = || ratio(1, 1);
     let n = worlds.len();
-    // NO SINGLES (ruling 2026-07-31): every profitable triangle runs
-    // this beat, and a merchant posts BESIDE its resting book — an
+    // No singles (ruling 2026-07-31): every profitable triangle runs
+    // this beat, and a merchant posts beside its resting book — an
     // unsold leg-2 counter stays on the open market like any offer.
     let mut crossings = Vec::new();
     let mut seq: u64 = 0;
-    // PEELS AND SHEARS (measured 2026-08-12, 21s of a 45s beat): the
-    // melt is a PAIR reading — keys, routes, seats, siting — and none
+    // Peels and shears (measured 2026-08-12, 21s of a 45s beat): the
+    // melt is a pair reading — keys, routes, seats, siting — and none
     // of those move inside one merchant sweep (a cleared triangle
     // apertures cargo; it charters nothing and unfolds nothing). So
-    // the triangle loop reads each pair's melt ONCE through a lazy
+    // the triangle loop reads each pair's melt once through a lazy
     // memo instead of re-deriving it per (m, a, b). Same triangles,
     // same order, same clears.
     let mut melt_memo: std::collections::HashMap<(usize, usize), Ratio> =
@@ -6440,14 +6440,14 @@ pub fn merchant_step(worlds: &mut [Polity], beat: u64, span: &Ratio) -> Vec<(Str
     crossings
 }
 
-/// **CROSS-LINE CONSILIENCE** (38 §5, the mesh half of the intelligence
+/// **Cross-LINE consilience** (38 §5, the mesh half of the intelligence
 /// arc) — the board's once-per-beat convergence pass.
 ///
-/// Each line resolves its OWN knowledge into a crystallized invariant
+/// Each line resolves its own knowledge into a crystallized invariant
 /// (`solver::knowledge_map`, the same resolve the reach consults). When
-/// INDEPENDENT lines land on the SAME invariant, that agreement is a
+/// independent lines land on the same invariant, that agreement is a
 /// shared axiom no single line owns — and each converged line records its
-/// OWN leg on its OWN chain (`crystallize_knowledge_as`), one leg per
+/// own leg on its own chain (`crystallize_knowledge_as`), one leg per
 /// book, the way a lane spans two worlds without a second copy of one
 /// truth. It is idempotent by construction: a line already carrying a
 /// signature's axiom refuses, so a standing consilience records once and
@@ -6455,7 +6455,7 @@ pub fn merchant_step(worlds: &mut [Polity], beat: u64, span: &Ratio) -> Vec<(Str
 ///
 /// Libraryless lines are skipped — a line that has minted no vocabulary
 /// has resolved no knowledge to share — so the pass costs nothing until
-/// lines begin to learn. Returns the crystallizations struck THIS beat,
+/// lines begin to learn. Returns the crystallizations struck this beat,
 /// each `(world, mass, hardness)`.
 pub fn consilience_step(worlds: &mut [Polity], _beat: u64) -> Vec<(String, u32, u32)> {
     // Each learning line's crystallized knowledge, keyed by board seat —
@@ -6494,13 +6494,13 @@ pub fn consilience_step(worlds: &mut [Polity], _beat: u64) -> Vec<(String, u32, 
                 )
                 .is_ok()
             {
-                // **L4: CONSILIENCE PAYS.** Reaching a shared truth IS a
+                // **L4: consilience pays.** Reaching a shared truth is a
                 // discovery, so it relieves the line's novelty hunger and
                 // lifts its trajectory to growth exactly as a solve does —
-                // the collective payoff spent through the SAME trajectory
+                // the collective payoff spent through the same trajectory
                 // that drives every line's economy, no new matter minted,
-                // no dial. It is gated on HARDNESS ≥ 2 (the truth was
-                // bridged by genuinely UNLIKE lines): a hard-won shared
+                // no dial. It is gated on hardness ≥ 2 (the truth was
+                // bridged by genuinely unlike lines): a hard-won shared
                 // insight prospers the minds that reached it; a trivial
                 // agreement between near-twins is recorded but earns
                 // nothing. Idempotent by the crystallize door above, so
@@ -6520,22 +6520,22 @@ pub fn consilience_step(worlds: &mut [Polity], _beat: u64) -> Vec<(String, u32, 
     recorded
 }
 
-/// **THE KNOWLEDGE MARKET** (INTELLIGENCE ARC C — trade minds, not just
+/// **The knowledge market** (intelligence ARC C — trade minds, not just
 /// matter) — the board's once-per-beat circulation of vocabulary.
 ///
 /// Every word any line has minted is a listing in the roster's pool. A
-/// line that LACKS a word may LICENSE it into its own library — knowledge
+/// line that lacks a word may license it into its own library — knowledge
 /// spreads from the minds that forged it to the minds that can use it,
-/// the way a design or a business idea spreads once it exists. This FIRST
+/// the way a design or a business idea spreads once it exists. This first
 /// cut prices the listing by its DEPTH (the length of the program it
 /// spells — a longer, harder-won word costs more) and gates the buy on
-/// the line's own PROSPERITY: it licenses only a word it can afford
+/// the line's own prosperity: it licenses only a word it can afford
 /// against its banked Crystal. So a rich, developed civilization acquires
 /// the ideas it lacks; a poor one cannot yet reach the deep ones. One
 /// license per line per beat, the cheapest it can afford — the market
 /// clears gradually, not in a flood.
 ///
-/// Banked-neutral: the word is identity, and this cut does not yet MOVE
+/// Banked-neutral: the word is identity, and this cut does not yet move
 /// the payment to the seller (the conserved buyer→seller settlement is
 /// the two-sided follow-up). The prosperity gate is the throttle.
 pub fn knowledge_market_step(worlds: &mut [Polity], _beat: u64) -> Vec<(String, usize)> {
@@ -6560,9 +6560,9 @@ pub fn knowledge_market_step(worlds: &mut [Polity], _beat: u64) -> Vec<(String, 
     }
     // The price of a listing: the DEPTH of the word it spells (program
     // length), derived from the word itself, never a dial.
-    // docs/60 D3 — TRANSLATION LOSS IS PRICE: one more per channel of the
+    // docs/60 D3 — translation loss is price: one more per channel of the
     // word the buyer cannot perceive (it can never re-derive that part).
-    // PEELED (optimization sweep, 2026-10-13): each word is decoded ONCE a
+    // Peeled (optimization sweep, 2026-10-13): each word is decoded once a
     // beat (its length and the senses it needs), not once per buyer; a
     // buyer's price is that length plus the senses it lacks. The same prices:
     // a word that does not decode prices at 1, as before.
@@ -6613,13 +6613,13 @@ pub fn knowledge_market_step(worlds: &mut [Polity], _beat: u64) -> Vec<(String, 
     licensed
 }
 
-/// **THE CORES PULL** (docs/61 G1) — every line's place is read off its
+/// **The cores pull** (docs/61 G1) — every line's place is read off its
 /// orbit on its own clock (its proper time: the world's clock starts at its
 /// founding and persists, so the place is continuous across restarts): its
 /// founding place (as its seat records it) carried round its core on a
 /// sheared, inclined ellipse. Neighbours, speech, the market and the bell
 /// then read the place at the beat.
-/// Each line's place on its orbit about its core. ERA 1: a line turns at its
+/// Each line's place on its orbit about its core. Era 1: a line turns at its
 /// era-1 system's galactic period (`periods`, by its founding place); a line
 /// with no era-1 system (a cleave until it settles one) holds its place.
 pub fn orbit_step(worlds: &mut [Polity], book: &Ledger, periods: &std::collections::BTreeMap<(Ratio, Ratio, Ratio), Ratio>) {
@@ -6641,12 +6641,12 @@ pub fn orbit_step(worlds: &mut [Polity], book: &Ledger, periods: &std::collectio
     }
 }
 
-/// **SPEECH BETWEEN LINES** (docs/60 D2, D4) — every `AUTIC_STRIDE` beats
+/// **Speech between LINES** (docs/60 D2, D4) — every `AUTIC_STRIDE` beats
 /// each line hears one word from its nearest living neighbour on the torus
 /// (the speaker's words in turn). A word wholly inside the hearer's senses is
-/// HEARD: it joins the line's heard library, and is licensed into its own
+/// heard: it joins the line's heard library, and is licensed into its own
 /// when the line reconstructs it on its own task (the cores' inheritance by
-/// reconstruction). A word in a channel the hearer lacks is MISHEARD:
+/// reconstruction). A word in a channel the hearer lacks is misheard:
 /// counted, never adopted. Returns the board's COG-DIALECT line.
 pub fn conversation_step(worlds: &mut [Polity], beat: u64, span: &Ratio) -> Option<String> {
     use solver::senses::Senses;
@@ -6690,7 +6690,7 @@ pub fn conversation_step(worlds: &mut [Polity], beat: u64, span: &Ratio) -> Opti
             misheard += 1;
         }
     }
-    // DIVERSITY: the perceptions present among the living.
+    // Diversity: the perceptions present among the living.
     let mut perceptions: std::collections::BTreeMap<&str, usize> = std::collections::BTreeMap::new();
     for polity in worlds.iter() {
         *perceptions.entry(polity.spec.civilization.perception.as_str()).or_default() += 1;
@@ -6709,7 +6709,7 @@ pub fn conversation_step(worlds: &mut [Polity], beat: u64, span: &Ratio) -> Opti
 /// file ask for the pen; the beat boundary is the one lawful moment
 /// to seal it over (no beat is mid-flight). Consumed lines leave the
 /// file — a refusal is answered once, never retried forever. Penned
-/// worlds are then polled on their FILE: when the taking hand yields
+/// worlds are then polled on their file: when the taking hand yields
 /// back, the conductor re-resumes from the receipts (SEAL B — the
 /// file is the world) and beats continue.
 pub fn pen_service(
@@ -6807,8 +6807,8 @@ pub enum IncursionRefused {
     AlreadyWoken,
 }
 
-/// INCURSION-1a (07 §3.1): the archived-sheet door. A sealed DERELICT
-/// (every orb famished — the cascade law) is continued LIVE under a
+/// INCURSION-1a (07 §3.1): the archived-sheet door. A sealed derelict
+/// (every orb famished — the cascade law) is continued live under a
 /// woken line: the sealed chronicle is copied forward (the archive is
 /// never edited), the succession law executes on the continuation
 /// (NOVEL-1 — the tree drops to the kernel, the record stands), fresh
@@ -6872,7 +6872,7 @@ pub fn incursion(
         station: None,
     };
     let _ = registry.create(&civilization);
-    // The succession on the CONTINUATION — the archive stays sealed.
+    // The succession on the continuation — the archive stays sealed.
     world
         .succeed(&sigil)
         .map_err(|_| IncursionRefused::TheLivingStand)?;
@@ -6891,7 +6891,7 @@ pub fn incursion(
             .map(|held| held.entity_id)
             .ok_or(IncursionRefused::AlreadyWoken)?,
     };
-    // N-I10 — seed the SIBLING cognitive vessel too; `genesis` re-reads it by
+    // N-I10 — seed the sibling cognitive vessel too; `genesis` re-reads it by
     // handle on the resume below (the binding is only for the register side-effect).
     let _sibling = match world.register_agent("sibling") {
         Ok(entity) => entity,
@@ -6943,7 +6943,7 @@ pub fn incursion(
 }
 
 /// GALAXY-1b (13_GALAXY §3, §5): the year-voice observation sweep.
-/// Every crossed, charted world OBSERVES; an anchor past the frontier
+/// Every crossed, charted world observes; an anchor past the frontier
 /// creates the galaxy it observes, executed as the progenitor's deed
 /// (12 §2a — the board-maker function). Idempotent by geometry: a
 /// created galaxy encloses its observer, so the next sweep reads
@@ -6979,7 +6979,7 @@ pub fn observe_crossings(
 /// it holds a progenitor seat; else the first seated progenitor of the
 /// observer's domain (the founding head stands creator for a headless
 /// line — lawful, 12 §5); else the conductor — tier 0's own operations
-/// ARE the progenitors' deeds, named (12 §2a).
+/// are the progenitors' deeds, named (12 §2a).
 fn galaxy_creator(registry: &Registry, civilization: &Civilization) -> String {
     if let Some(head) = registry.resolve_head(&civilization.sigil) {
         if registry.load(&head).and_then(|c| c.station).as_deref() == Some("progenitor") {
@@ -6998,18 +6998,18 @@ fn galaxy_creator(registry: &Registry, civilization: &Civilization) -> String {
         .unwrap_or_else(|| "conductor".into())
 }
 
-/// **COG-DIRECTION Slice 3b — THE POPULATION CENSUS (true natural selection).**
-/// Once per beat, BEFORE the cycle loop, read every warm-booked line's cohesion
+/// **COG-DIRECTION Slice 3b — the population census (true natural selection).**
+/// Once per beat, before the cycle loop, read every warm-booked line's cohesion
 /// (its syntropy fraction, `thermal_balance_of` — `None` when the books are cold,
 /// so a cold line is not in the distribution and holds) and stamp each line's
-/// `pop_cohesion_band` with the TERTILE CUTS of that live distribution. A line
-/// then reads its own direction RELATIVE TO THE POPULATION: the top third grows
+/// `pop_cohesion_band` with the tertile cuts of that live distribution. A line
+/// then reads its own direction relative to the population: the top third grows
 /// (fittest), the bottom third declines (selected against), the middle stagnates.
 /// Fitness is relative to peers, not an absolute dial — evolution over the
 /// syntropic value. Fewer than three warm lines → no band (nothing to be relative
 /// to; the absolute read holds). Grounded by measurement (2026-08-21): the
-/// cohesion LEVEL spreads 0..0.93 (median 0.070, 72/90 distinct) — a clean
-/// partition — while the per-beat FLOW is ~75% flat at every window, so selection
+/// cohesion level spreads 0..0.93 (median 0.070, 72/90 distinct) — a clean
+/// partition — while the per-beat flow is ~75% flat at every window, so selection
 /// reads the discriminating level, not the flat flow. This mutates only ephemeral
 /// conductor state (`trajectory`/`level`), never the chronicle — no replay risk.
 pub fn direction_census_step(worlds: &mut [Polity]) {
@@ -7034,11 +7034,11 @@ pub fn direction_census_step(worlds: &mut [Polity]) {
     }
 }
 
-/// **THE EMERGENT CENSUS, LIVE** — make the wired-but-silent civilization visible
+/// **The emergent census, live** — make the wired-but-silent civilization visible
 /// on the wire (mesh relay #69 + the audit's invisible layers). COG-ECON reports
-/// the ECONOMY moving (chartered lanes, banked primitives, Alloy, zones built) and
-/// the COGNITIVE FLOOR (minds whose cognitive_capacity has lifted off survival to
-/// 3 — a seated science). COG-SOC reports the SELF-ORGANIZATION (caste count +
+/// the economy moving (chartered lanes, banked primitives, Alloy, zones built) and
+/// the cognitive floor (minds whose cognitive_capacity has lifted off survival to
+/// 3 — a seated science). COG-SOC reports the self-organization (caste count +
 /// how many lines have a multi-caste society) that until now steered investment
 /// entirely unseen. Observation only; reads committed/derived state, writes
 /// nothing. Bounded to the live (unpenned) roster.
@@ -7082,13 +7082,13 @@ pub fn emergent_census(worlds: &[Polity], beat: u64) {
     );
 }
 
-/// **THE SHARED-LANGUAGE CENSUS, LIVE** — prove on the wire that the
-/// civilizations speak ONE tongue, learned from the AUTIC network, not private
+/// **The shared-language census, live** — prove on the wire that the
+/// civilizations speak one tongue, learned from the AUTIC network, not private
 /// dialects. Three measured claims over the live population's own basins:
-///   1. COMMON VOCABULARY — crystals held by >= 2 civilizations.
-///   2. MUTUAL INTELLIGIBILITY — a word one civ speaks ASSEMBLES (drains to zero,
-///      `reduct::assemble`) against ANOTHER civ's independently-grown basin.
-///   3. CONTROL — synthetic words OUTSIDE the language must NOT assemble, or the
+///   1. Common vocabulary — crystals held by >= 2 civilizations.
+///   2. Mutual intelligibility — a word one civ speaks assembles (drains to zero,
+///      `reduct::assemble`) against another civ's independently-grown basin.
+///   3. Control — synthetic words outside the language must not assemble, or the
 ///      census proves nothing. Comprehension >> control is the proof.
 /// Emits COG-PROOF. Bounded: samples up to `SAMPLE` speaking civs so the
 /// O(civs^2 * words) cross-civ pass stays cheap on a 100+ roster. Observation
@@ -7106,7 +7106,7 @@ pub fn shared_language_census(worlds: &[Polity], beat: u64) {
     if vocabs.len() < 2 {
         return; // not enough speaking civilizations yet — no claim to make
     }
-    // CLAIM 1 — common vocabulary: how many crystals are held by >= 2 civs.
+    // Claim 1 — common vocabulary: how many crystals are held by >= 2 civs.
     let mut seen: Vec<(reduct::ChainDelta, usize)> = Vec::new();
     for v in &vocabs {
         for w in v {
@@ -7118,7 +7118,7 @@ pub fn shared_language_census(worlds: &[Polity], beat: u64) {
     }
     let shared = seen.iter().filter(|(_, n)| *n >= 2).count();
     let max_holders = seen.iter().map(|(_, n)| *n).max().unwrap_or(0);
-    // CLAIM 2 — mutual intelligibility across every sampled ordered pair.
+    // Claim 2 — mutual intelligibility across every sampled ordered pair.
     let (mut num, mut den) = (0u64, 0u64);
     for (i, va) in vocabs.iter().enumerate() {
         for (j, vb) in vocabs.iter().enumerate() {
@@ -7137,7 +7137,7 @@ pub fn shared_language_census(worlds: &[Polity], beat: u64) {
             }
         }
     }
-    // CLAIM 3 — control: synthetic words guaranteed outside the language (varied
+    // Claim 3 — control: synthetic words guaranteed outside the language (varied
     // by beat so the census cannot accidentally lock onto a real crystal).
     let control: Vec<reduct::ChainDelta> = (0..8i64)
         .map(|i| reduct::probe_class(1_000_000 + beat as i64 * 131 + i, (i % 9 + 1) as u8))
@@ -7163,16 +7163,16 @@ pub fn shared_language_census(worlds: &[Polity], beat: u64) {
     );
 }
 
-/// **THE ONE CLOSURE'S EXIT** (50_WIN_CONDITIONS). A collapsed line (every
+/// **The one closure's exit** (50_WIN_CONDITIONS). A collapsed line (every
 /// orb at zero population, `CivilizationCollapsed`) refuses every scoped act,
-/// but a dead world left in the roster is still a PARTY to every cross-world
+/// but a dead world left in the roster is still a party to every cross-world
 /// step: measured in G2's baseline, dimlight-hold traded 4,485 apertures after
 /// it collapsed at receipt 112. Retiring it here — its chronicle synced whole
 /// first, so the carrier holds every receipt it ever took — removes it from
-/// every step at once, symmetric to how `divergence_step` ADDS a line the
+/// every step at once, symmetric to how `divergence_step` adds a line the
 /// instant one is born. Returns the retired world names, in roster order.
 pub fn retire_collapsed(worlds: &mut Vec<Polity>, book: &Ledger, stamp: u64) -> Vec<String> {
-    // CORES SLICE 3: a dying line's words reach its core before it leaves —
+    // Cores slice 3: a dying line's words reach its core before it leaves —
     // each with its derivation (the proofs it minted on), its own claim — so
     // the dead's knowledge is the living's inheritance, never lost. Once per
     // dead line: a line already deposited (resumed collapsed) is not again.
@@ -7199,7 +7199,7 @@ pub fn retire_collapsed(worlds: &mut Vec<Polity>, book: &Ledger, stamp: u64) -> 
         }
     }
     let _ = book.append_universe(deposits, stamp);
-    // docs/60 D9 — THE DEAD'S OPEN QUESTIONS ride the core's bell beside its
+    // docs/60 D9 — the dead's open questions ride the core's bell beside its
     // words: every conjecture a dying line still held (frames that closed
     // some pairs, never all) reaches each living line its core reaches, one
     // cell a beat, into that line's held conjectures. Workspace like the
@@ -7250,9 +7250,9 @@ pub fn retire_collapsed(worlds: &mut Vec<Polity>, book: &Ledger, stamp: u64) -> 
 /// PHASE-4 — pure NPC instrument lifecycle (P4.7): honest spot clears,
 /// redeem matured notes, settle expired futures; issue a small Note
 /// when listable and STAMP affords half-face collateral.
-/// THE JUDGED SIDECAR — `judged.cursor` beside the world's exports:
+/// The judged sidecar — `judged.cursor` beside the world's exports:
 /// first line the watermark (receipts judged), then one refused
-/// SEQUENCE per line. Verdicts are never stored — they re-derive
+/// sequence per line. Verdicts are never stored — they re-derive
 /// deterministically at boot from the sequences (one prefix replay
 /// each; refusals are rare). Best-effort like every export: a missing
 /// or unreadable sidecar means the full re-judgment, never a crash.
@@ -7269,7 +7269,7 @@ fn write_judged_sidecar(
     watermark: usize,
     refused: &[(u64, kernel::Refused)],
 ) {
-    // UNION with what already stands: the narrator DRAINS the
+    // Union with what already stands: the narrator drains the
     // in-memory record for its ten-beat tally, so the sidecar is the
     // permanent copy and must never shrink by a display read.
     let mut sequences: Vec<u64> = read_judged_sidecar(dir)
@@ -7289,7 +7289,7 @@ fn write_judged_sidecar(
     let _ = std::fs::write(dir.join("judged.cursor"), text);
 }
 
-/// **OPT-IN PHASE PROFILE** (task #8, 2026-08-12) — measures where the
+/// **Opt-in phase profile** (task #8, 2026-08-12) — measures where the
 /// beat goes. Armed by `NETSTRATUM_PROFILE=1`; unarmed it is one
 /// atomic load per phase. An instrument, never a mechanic — it appends
 /// nothing, gates nothing (the cost_probe discipline).
@@ -7305,8 +7305,8 @@ pub mod profile {
         *ARMED.get_or_init(|| std::env::var_os("NETSTRATUM_PROFILE").is_some())
     }
 
-    /// **THE BOUNDARY TRACE** (task #136) — armed by `NETSTRATUM_TRACE`, emits a
-    /// line on stderr AS each step is entered and left, so a step that never
+    /// **The boundary trace** (task #136) — armed by `NETSTRATUM_TRACE`, emits a
+    /// line on stderr as each step is entered and left, so a step that never
     /// returns (a beat that will not advance) is named the instant it is entered:
     /// the last `-> name` with no `<- name` is the stall. Unarmed it is one
     /// `OnceLock` read. Distinct from the aggregate profile, which cannot report
@@ -7315,7 +7315,7 @@ pub mod profile {
         *TRACED.get_or_init(|| std::env::var_os("NETSTRATUM_TRACE").is_some())
     }
 
-    /// The PEAK resident memory since the last reset, in MB (`VmHWM`), and
+    /// The peak resident memory since the last reset, in MB (`VmHWM`), and
     /// the reset (`clear_refs` 5) — so a phase's own transient peak is read.
     fn peak_mb() -> u64 {
         std::fs::read_to_string("/proc/self/status")
@@ -7407,7 +7407,7 @@ pub mod profile {
 /// scrap from iron, hauler grade 0 until idle capacity ≥ 4, assign
 /// idle hulls onto the first live route deal.
 /// The incumbent's act (docs/73): the hulls each line built this beat, by
-/// world, for DECIDE's hull book; and the hulls returned to the idle pool
+/// world, for decide's hull book; and the hulls returned to the idle pool
 /// from routes that had lapsed.
 pub fn fleet_step(worlds: &mut [Polity]) -> (std::collections::BTreeMap<String, u8>, usize) {
     let mut built = std::collections::BTreeMap::new();

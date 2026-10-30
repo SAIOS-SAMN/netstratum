@@ -1,21 +1,21 @@
-//! THE TICK — the world advancing one step.
+//! The TICK — the world advancing one step.
 //!
 //! `tick` alone is 582 lines and is the largest single function in the
-//! organ. It is isolated here rather than split blind: GROUND §3
+//! organ. It is isolated here rather than split blind: Ground §3
 //! invariant 4 says line count is a symptom, and the concern this
 //! function actually mixes has not been measured yet. Named as owed.
 
 use super::*;
 
 impl World {
-    /// One simulation tick for the WHOLE world: every orb's active
+    /// One simulation tick for the whole world: every orb's active
     /// zones net their flows into that orb's workspace — through the
     /// heat law where thermal is live (05 §1.2: encase first, only the
     /// overflow vents, degrade by 1/(1+overflow)); famine strikes per
     /// orb; the one clock walks by quorum.
     pub fn tick(&mut self) -> TickOutcome {
         use crate::parameter::Parameter;
-        // P2 (tag 103): the thermal rates read the CHARTERED table —
+        // P2 (tag 103): the thermal rates read the chartered table —
         // one fold walk per tick, seed where nothing is chartered.
         let rates = crate::parameter::table_of(self.chronicle());
         use crate::thermal;
@@ -49,7 +49,7 @@ impl World {
                     vec![],
                 );
             }
-            // BOND-1: term bonds expire ORDERLY at their exact
+            // BOND-1: term bonds expire orderly at their exact
             // boundary — the final span settles, nothing posts.
             let expired: Vec<(u64, u64, Resource)> = self
                 .bonds
@@ -121,7 +121,7 @@ impl World {
                 self.chronicle.append(event, now, vec![]);
                 self.relieve_recovered(recipient);
             }
-            // COUNCIL-1: councils reckon at the BOUNDARY only — all
+            // COUNCIL-1: councils reckon at the boundary only — all
             // members gated together (the group over the individual;
             // no early release, no early slash). A breacher's
             // collateral divides exactly among the faithful; if every
@@ -187,7 +187,7 @@ impl World {
         let mut struck = Vec::new();
         let mut overheat_struck = Vec::new();
         let mut overheat_cleared = Vec::new();
-        // A zone runs at its VIGOUR — the share of its inputs that
+        // A zone runs at its vigour — the share of its inputs that
         // stand — never all-or-nothing (20_FOUNDING §6a-bis). Zones at
         // zero vigour drop out; the rest carry their reading with them
         // so every downstream sum is weighted rather than counted.
@@ -210,14 +210,14 @@ impl World {
         let stamp_now = self.clock.now();
         // D3: the charted seed, read once — uncharted boosts read 1.
         let terrain = self.terrain_seed;
-        // PRACTICE-1: the bound disciplines, read once — PURE DATA over
+        // PRACTICE-1: the bound disciplines, read once — pure data over
         // the channel table (operator ruling 2026-08-05): a practice
         // acts only through its binding; the bespoke branches are gone.
         use crate::vocabulary::{
             CHANNEL_CONVERTER_YIELD, CHANNEL_EXTRACTOR_UPKEEP, CHANNEL_HABITAT_UPKEEP,
             CHANNEL_HABITAT_YIELD,
         };
-        // ONE fold walk per tick, six channel products from it.
+        // One fold walk per tick, six channel products from it.
         let practice_bindings = self.adopted_practice_bindings();
         let practice_on = |channel: u8| -> Ratio {
             practice_bindings.iter().fold(ratio(1, 1), |acc, binding| {
@@ -232,8 +232,8 @@ impl World {
         let practice_converter_yield = practice_on(CHANNEL_CONVERTER_YIELD);
         // 28_VOCABULARY V0: the sealed class's own mechanism, read once.
         // Before this the class was a term that only resonated — sealed,
-        // replayed, and read by no rule (LAW 8's excision test). An
-        // UNSEALED world reads the empty binding and is unaffected, so
+        // replayed, and read by no rule (law 8's excision test). An
+        // unsealed world reads the empty binding and is unaffected, so
         // this is strictly additive to every world that has not sealed.
         let archetype = self
             .taxon
@@ -242,8 +242,8 @@ impl World {
         let class_yield = crate::vocabulary::factor_on(&archetype, crate::vocabulary::CHANNEL_YIELD);
         let class_upkeep =
             crate::vocabulary::factor_on(&archetype, crate::vocabulary::CHANNEL_UPKEEP);
-        // **#41: THE MINTED BUILDINGS' OWN BINDINGS, SHEARED ONCE.**
-        // The zone fold is read HERE, not per zone: folding the
+        // **#41: the minted buildings' own bindings, sheared once.**
+        // The zone fold is read here, not per zone: folding the
         // chronicle inside the tile loop would rescan the whole chain
         // once per building per tick, which is the find-scan repetition
         // the peel/shear ruling forbids. One pass, then a lookup by
@@ -270,7 +270,7 @@ impl World {
         };
         // TECH-1b: each orb's crystallized boons, read once — [unused,
         // insulation, discipline, deepening, doctrine, stores] — each
-        // carrying the magnitude ITS RECEIPT asserted (receipt
+        // carrying the magnitude its receipt asserted (receipt
         // authority, operator ruling 2026-08-05): the factors below
         // read the chain's own numbers, never a table and never an
         // inline dial.
@@ -287,7 +287,7 @@ impl World {
                 (*orb_id, held)
             })
             .collect();
-        // G2: the element a minted metabolism eats, read ONCE for the
+        // G2: the element a minted metabolism eats, read once for the
         // beat (None for every compiled metabolism, so v1 worlds are
         // untouched). Where it stands, the food-slot flows divert from
         // the resource store to this element's bank.
@@ -299,7 +299,7 @@ impl World {
                 .map(|(_, held)| held.clone())
                 .unwrap_or(NO_BOON);
             // THERMAL-1: the heat law, live only when the sun is
-            // commissioned AND this orb is sited (the opt-in guard).
+            // commissioned and this orb is sited (the opt-in guard).
             let holder = peek(&self.orbs, *orb_id);
             let site = holder.and_then(|held| held.thermal.clone());
             let joule_famined = holder
@@ -364,7 +364,7 @@ impl World {
                     }
                 }
                 if !frozen && heat_net > zero {
-                    // The syntropic arm FIRST (05 §1.2): shells encase
+                    // The syntropic arm first (05 §1.2): shells encase
                     // up to their throughput; joules accrue as yield.
                     let shells: Ratio = active
                         .iter()
@@ -425,11 +425,11 @@ impl World {
                     overheat_cleared.push(*orb_id);
                 }
             }
-            // G2 STASIS (ruled 2026-08-12): an element-eating line that
+            // G2 stasis (ruled 2026-08-12): an element-eating line that
             // cannot meet this beat's food bill in its own element is
-            // FROZEN — all local production suspended, structures held —
+            // frozen — all local production suspended, structures held —
             // exactly the whole-orb freeze a joule-famined sub-mesic orb
-            // takes. It is a per-beat CONDITION, recomputed and never
+            // takes. It is a per-beat condition, recomputed and never
             // stored: the moment trade or minting refills the element
             // bank, the next beat's bill is met and the line runs again.
             if let Some(element) = element_ration {
@@ -448,24 +448,24 @@ impl World {
                 // unsealed read ruleset v1 verbatim.
                 let metabolism = self.genesis.as_ref().map(|held| held.metabolism).unwrap_or(2);
                 let standing: Vec<Zone> = active.iter().map(|(zone, _)| zone.clone()).collect();
-                // G2 TRACE ELEMENTS (2026-08-14): the harvest is modulated
+                // G2 trace elements (2026-08-14): the harvest is modulated
                 // by how well the line meets the trace-element need its own
                 // world offers — full on its veined micronutrients, halved
                 // on a bare larder. One per orb; exactly 1 (no change) for
                 // a world that never opened a vein.
                 let micronutrient = self.micronutrient_factor(*orb_id);
-                // G2 TRACE §3 (2026-08-14): the harvesting CATALYST — the
-                // line's favoured elements flux its EXTRACTION (extractors
+                // G2 trace §3 (2026-08-14): the harvesting catalyst — the
+                // line's favoured elements flux its extraction (extractors
                 // only), a boost-only reagent bonus. Exactly 1 for a world
                 // with no favoured veins.
                 let catalyst = self.catalyst_factor(*orb_id);
                 for (zone, vigour) in active {
-                    // #41: a minted building's numbers are its BASE's —
-                    // the binding modulates what a building DOES, and
+                    // #41: a minted building's numbers are its base's —
+                    // the binding modulates what a building does, and
                     // `priced_as` reads the base fixed at build time.
                     let seat = zone.priced_as();
                     let (resource, mut amount) = crate::dop::zone_yield(seat, metabolism);
-                    // TAXON ECONOMY (37): extractive · regenerative · balanced
+                    // TAXON economy (37): extractive · regenerative · balanced
                     // + planet fit scale yields. Flatlander baseline = balanced × native.
                     let eco = self.taxon_economy_of(*orb_id);
                     let mode_scale = match seat {
@@ -482,13 +482,13 @@ impl World {
                     };
                     amount = amount * mode_scale;
                     let boost = terrain_boost(&terrain, *orb_id, zone, &standing);
-                    // The class's mechanism composes WITH the adopted
+                    // The class's mechanism composes with the adopted
                     // practices, never instead of them: identity and
                     // discipline are different claims on the same world.
-                    // Every factor here is CHANNEL DATA — the global
+                    // Every factor here is channel data — the global
                     // channels apply everywhere, the zone-scoped ones
                     // where the zone kind matches, silence reads 1.
-                    // The MINTED binding composes with the class's and
+                    // The minted binding composes with the class's and
                     // the practices' — three claims on one world, none
                     // of them instead of the others.
                     let mut yield_factor = class_yield.clone()
@@ -497,7 +497,7 @@ impl World {
                     let mut upkeep_factor = class_upkeep.clone()
                         * practice_upkeep.clone()
                         * minted_on(zone.kind, crate::vocabulary::CHANNEL_UPKEEP);
-                    // The family channels follow the BASE: a minted
+                    // The family channels follow the base: a minted
                     // extractor-variant is priced as an extractor.
                     match seat {
                         ZoneKind::Habitat => {
@@ -516,13 +516,13 @@ impl World {
                         }
                         _ => {}
                     }
-                    // G2: an element-eater's FOOD SLOT (the biomass line)
+                    // G2: an element-eater's FOOD slot (the biomass line)
                     // is not a resource flow — it settles against the
                     // element bank below, so it never accrues here.
                     // Every other yield (iron extraction, joule capture)
                     // rides the resource store verbatim.
                     if !(element_ration.is_some() && resource == Resource::Biomass) {
-                        // The catalyst fluxes EXTRACTION alone; food and
+                        // The catalyst fluxes extraction alone; food and
                         // industry read a flat 1.
                         let catalyst_here = match seat {
                             ZoneKind::Extractor => catalyst.clone(),
@@ -598,24 +598,24 @@ impl World {
         }
         // E3.7 — material element wants (per tick, famine-shaped).
         self.sweep_element_wants(stamp);
-        // TECH-1b (10 §2–§3): CRYSTALLIZATION at the year voice — on
+        // TECH-1b (10 §2–§3): crystallization at the year voice — on
         // each year boundary every orb's chronicle is weighed against
         // the condition table; a condition that holds crystallizes its
-        // node ONCE (idempotent per orb per condition). The node id is
+        // node once (idempotent per orb per condition). The node id is
         // the seeded synthesis: BLAKE3(latest receipt digest ‖ orb ‖
         // condition) — the chronicle root at the moment of
         // crystallization, so replay re-derives the identical node at
         // the identical tick. No randomness, no external calls.
         if stamp_now > 0 && stamp_now.is_multiple_of(60) {
-            // The shear: the INCREMENTAL sweep (#41) — only the new
-            // receipts deposit; the crystallizer AND the want check
+            // The shear: the incremental sweep (#41) — only the new
+            // receipts deposit; the crystallizer and the want check
             // read the same carried sheet.
             let deposits = self.crystal_deposits_at(stamp_now);
             let blank = CrystalDeposit::default();
             let candidates: Vec<u64> = self.orbs.iter().map(|held| held.orb_id).collect();
             // WANT-1 (12_UNION §5b): the cognitive wants, star-
-            // INDEPENDENT (a mind needs no sky to starve) and typed by
-            // the SEALED identity — no seal, no entity type, no want
+            // independent (a mind needs no sky to starve) and typed by
+            // the sealed identity — no seal, no entity type, no want
             // (pre-G1 worlds are pre-identity, lawfully neutral).
             if let Some(sealed) = self.genesis.clone() {
                 for orb in &candidates {
@@ -629,7 +629,7 @@ impl World {
                         // resonance: a harmonic mind starved of links.
                         (2, sealed.perception == 3, sheet.last_link, 240),
                         // novelty: a novelty-hungry mind starved of
-                        // signal (a discovery must EXIST to starve for the
+                        // signal (a discovery must exist to starve for the
                         // next) — the empiricist trait, read generically so a
                         // line minted from it hungers too (`44_LINEAGES`).
                         (
@@ -728,7 +728,7 @@ impl World {
                     seed.extend_from_slice(&orb.to_le_bytes());
                     seed.push(condition);
                     let node: [u8; 32] = blake3::hash(&seed).into();
-                    // The name is THIS line's own (10 §2 law 4): drawn
+                    // The name is this line's own (10 §2 law 4): drawn
                     // from the node hash, never a rung label.
                     let name = crate::dop::tech_node_name(condition, &node);
                     self.techs.push((orb, condition, node, magnitude.clone()));
@@ -759,8 +759,8 @@ impl World {
             overheat_cleared,
         }
     }
-    /// Famine relief for ONE orb (02 §2.4). Joule relief on a cold orb
-    /// needs the one-tick HEATING bill covered (ECON-J), not zero.
+    /// Famine relief for one orb (02 §2.4). Joule relief on a cold orb
+    /// needs the one-tick heating bill covered (ECON-J), not zero.
     pub(super) fn relieve_recovered(&mut self, orb: u64) {
         let stamp = self.clock.now();
         let star = self.star;
@@ -810,10 +810,10 @@ impl World {
         }
     }
 
-    /// **G2 — THE ELEMENT THIS LINE EATS** (ruled 2026-08-12). The
-    /// periodic element a MINTED element-metabolism farms and consumes,
+    /// **G2 — the element this LINE eats** (ruled 2026-08-12). The
+    /// periodic element a minted element-metabolism farms and consumes,
     /// or `None` for the three compiled metabolisms and an unsealed
-    /// world. The compiled codes (1..=3) short-circuit BEFORE the fold,
+    /// world. The compiled codes (1..=3) short-circuit before the fold,
     /// so every v1 world reads `None` in O(1) and its flows are
     /// untouched; only an element-eater (code >= 4, a deliberate mint)
     /// pays the vocabulary fold to read its ration.
@@ -828,9 +828,9 @@ impl World {
             .and_then(|entry| entry.ration)
     }
 
-    /// **G2 (#29) — THE FOOD-ELEMENT CYCLE at a collect touch.** An
-    /// element-eater EATS the stored food its zones ran on this span and
-    /// SYNTHESIZES more from ENERGY to refill its larder toward a span's
+    /// **G2 (#29) — the FOOD-element CYCLE at a collect touch.** An
+    /// element-eater eats the stored food its zones ran on this span and
+    /// synthesizes more from ENERGY to refill its larder toward a span's
     /// buffer: it spends Joule to mint the element (a conserved
     /// transmutation, bounded by the element's richness — `minted ≤ joule
     /// × richness`, so a rarer element costs more energy). Returns
@@ -871,11 +871,11 @@ impl World {
         if richness <= ratio(0, 1) {
             return None;
         }
-        let span = bill * ratio(dt as i64, 1); // a span's food: the demand AND the buffer
+        let span = bill * ratio(dt as i64, 1); // a span's food: the demand and the buffer
         let have = held.element_amount(&element);
-        // EAT only what is stored — a frozen span (empty larder) eats nothing.
+        // Eat only what is stored — a frozen span (empty larder) eats nothing.
         let eaten = span.clone().min(have.clone());
-        // REFILL toward the buffer after eating, joule-bounded.
+        // Refill toward the buffer after eating, joule-bounded.
         let joule = held.banked_amount(Resource::Joule);
         let want = (span - (have - eaten.clone())).max(ratio(0, 1));
         let minted = want.min(joule * richness.clone());
@@ -885,10 +885,10 @@ impl World {
         Some((element, minted.clone() / richness, minted, eaten))
     }
 
-    /// G2: the base FOOD BILL an element-eater's active zones levy this
+    /// G2: the base FOOD bill an element-eater's active zones levy this
     /// beat, in element units — the Biomass upkeep components (the food
     /// slot) summed and vigour-weighted, exactly the shape ECON-J's
-    /// heating burn takes. This is both the STASIS threshold (a line
+    /// heating burn takes. This is both the stasis threshold (a line
     /// that cannot meet it freezes) and the amount consumed when it can.
     pub(super) fn element_food_bill(
         active: &[(Zone, Ratio)],

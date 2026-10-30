@@ -1,8 +1,8 @@
-//! THE CHEMISTRY LAYER: a kind of matter is an atom or a cluster, and every
+//! The chemistry layer: a kind of matter is an atom or a cluster, and every
 //! reading of it (its weight, its open frames, its charge, its grip) is a
 //! reading of its parts on the atom, never a table.
 //!
-//! A KIND'S ATOM IS A NUCLIDE (docs/97; operator 2026-10-26: "Q is the proton
+//! A kind's atom is A nuclide (docs/97; operator 2026-10-26: "Q is the proton
 //! and Z is the neutron and R is the phase state of the electron"), named by
 //! its weight `w = Q + Z`, its nucleons: `Wdddd`. Its protons Q and neutrons Z
 //! are read off the nucleus's convergence on S^11 (`crate::nuclides`); its
@@ -92,7 +92,7 @@ impl std::fmt::Display for Kind {
     }
 }
 
-/// THE ATOM OF A NUCLIDE: the electrons its protons hold (`atom(Q)`).
+/// The atom of A nuclide: the electrons its protons hold (`atom(Q)`).
 pub fn atom_of(w: u32) -> Option<Atom> {
     atom(crate::nuclides::protons(w)?)
 }
@@ -153,7 +153,7 @@ pub fn hold(kind: &Kind) -> u32 {
     weight(kind).saturating_sub(unpaired(kind))
 }
 
-/// ITS WEIGHT AS MASS (docs/97): its nucleons, `Σ n·w`, the one weight that
+/// Its weight as mass (docs/97): its nucleons, `Σ n·w`, the one weight that
 /// gravity pulls and inertia answers by. Conserved through every bond,
 /// fusion and peel.
 pub fn weight(kind: &Kind) -> u32 {
@@ -165,15 +165,15 @@ pub fn closed(kind: &Kind) -> bool {
     unpaired(kind) == 0
 }
 
-/// A kind's BOND GRIP, the tightness of its loosest winding in hydrogen's own
+/// A kind's bond grip, the tightness of its loosest winding in hydrogen's own
 /// unit (an atom's outer winding; a cluster's loosest part's).
 pub fn tightness(kind: &Kind) -> Ratio {
     kind.atoms().map(|(_, a)| a.tightness).min().map_or_else(|| ratio(0, 1), |t| t)
 }
 
-/// A cluster's PERMANENT DIPOLE (with xylarium, atoms::hold's form): what its
+/// A cluster's permanent dipole (with Xylarium, atoms::hold's form): what its
 /// symmetry leaves uncancelled, as a share. Its centre is the first atom named
-/// (the heaviest), every other atom an arm. The centre keeps LONE PAIRS,
+/// (the heaviest), every other atom an arm. The centre keeps lone pairs,
 /// `(outer − Σ arms' open)/2`, and they bend it, `bent = lone/(lone + arms)`;
 /// unlike arms leave their mixture (twice the share not of the commonest
 /// kind, at most 1). The dipole is the asymmetry `1 − τ_min/τ_max` times the
@@ -209,7 +209,7 @@ pub fn dipole(kind: &Kind) -> Ratio {
     }
 }
 
-/// THE SMALLEST WHOLE CLUSTER two atoms close in (with xylarium, 969536c):
+/// The smallest whole cluster two atoms close in (with Xylarium, 969536c):
 /// nuclides `a`, `b` (weights) with `u_A`, `u_B` open frames pair as
 /// `(u_B/g)·A + (u_A/g)·B`, `g = gcd(u_A, u_B)`, every frame paired. None
 /// where either has none.

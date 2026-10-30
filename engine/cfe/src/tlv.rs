@@ -1,6 +1,6 @@
-//! The additive TLV wire (CHARTER SEAL A). One record is
+//! The additive TLV wire (Charter SEAL A). One record is
 //! `tag u8 ‖ LE32(length) ‖ value bytes`. A reader iterates records and
-//! SKIPS tags it does not know — unknown content is future content, not
+//! skips tags it does not know — unknown content is future content, not
 //! an error. Tags are permanent: one tag, one meaning, forever.
 
 /// Append one record.

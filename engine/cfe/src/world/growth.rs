@@ -9,10 +9,10 @@ use super::*;
 use crate::growth::{share, Growth};
 
 impl World {
-    /// **THE GROWTH READING** — the six axes of one orb, derived whole.
+    /// **The GROWTH reading** — the six axes of one orb, derived whole.
     ///
     /// Postings carry no stamp on the account (the account holds
-    /// totals), so WHEN comes from the chronicle, which is where when
+    /// totals), so when comes from the chronicle, which is where when
     /// belongs. The books hold how much; the chain holds how long.
     pub fn growth_of(&self, orb: u64) -> Growth {
         let zero = ratio(0, 1);
@@ -33,7 +33,7 @@ impl World {
             postings += 1;
             if *kept == zero && *lost == zero {
                 // A posting that moved nothing. It happened, and it
-                // taught nothing — TRIVIALITY is what says so, and the
+                // taught nothing — triviality is what says so, and the
                 // SPAN below refuses to count it at all.
                 empty += 1;
                 continue;
@@ -46,7 +46,7 @@ impl World {
             last = Some(last.map_or(receipt.stamp(), |held| held.max(receipt.stamp())));
         }
 
-        // PRACTICE — the span the writing covers, against the age of the
+        // Practice — the span the writing covers, against the age of the
         // line. Everything at one stamp spans nothing and reads 0.
         let span = match (first, last) {
             (Some(first), Some(last)) => last.saturating_sub(first),
@@ -63,7 +63,7 @@ impl World {
                     .filter(|view| view.posted())
                     .map(|view| {
                         let weight = view.kept.clone() + view.lost.clone();
-                        // TESTED: both sides posted. Only-ever-winning
+                        // Tested: both sides posted. Only-ever-winning
                         // is a record, not a lesson.
                         let tested = view.kept > zero && view.lost > zero;
                         (weight, tested)

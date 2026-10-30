@@ -1,7 +1,7 @@
-//! LEISURE PROBE — measure the exact-rational gap between per-beat leisure
-//! INCOME and the flat `observe_price` gate (N-I7), across every world on
+//! Leisure probe — measure the exact-rational gap between per-beat leisure
+//! income and the flat `observe_price` gate (N-I7), across every world on
 //! disk. A read-only instrument: loads and resumes each chronicle exactly
-//! as `Polity::genesis` does, computes the SAME quantities `cognition_step`/
+//! as `Polity::genesis` does, computes the same quantities `cognition_step`/
 //! `research_step` read live, and reports — appends nothing, writes nothing.
 //!
 //! ```text

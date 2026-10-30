@@ -2,10 +2,10 @@
 //!
 //! | Root | Role |
 //! |------|------|
-//! | **bench** | BUILD components (every activity root has craft leaves here) |
-//! | **intel** | KNOWLEDGE activity |
-//! | **trade** | CIRCULATE / market activity |
-//! | **diplomatic** | DIPLOMACY activity (local + stellar); short alias: `diplo` |
+//! | **bench** | Build components (every activity root has craft leaves here) |
+//! | **intel** | Knowledge activity |
+//! | **trade** | Circulate / market activity |
+//! | **diplomatic** | Diplomacy activity (local + stellar); short alias: `diplo` |
 //!
 //! Dual law: every standalone activity root **S** has craft surface **`bench S`**.
 //! | Activity | Craft twin |
@@ -156,7 +156,7 @@ fn diplomatic_key() -> &'static str {
 }
 
 // ════════════════════════════════════════════════════════════════════
-// BENCH — BUILD
+// bench — build
 // ════════════════════════════════════════════════════════════════════
 
 pub fn bench(
@@ -227,7 +227,7 @@ pub fn bench(
         Some("trade") | Some("trades") | Some("circulate") | Some("trade-craft") => {
             trade_craft_bench(world, words, style, current)
         }
-        // Dual law: polity identity craft twin (POL.2).
+        // Dual law: polity identity craft twin (pol.2).
         Some("polity")
         | Some("line")
         | Some("identity")
@@ -1692,7 +1692,7 @@ fn trade_craft_bench(
     let _ = w;
 }
 
-/// Craft surface for polity identity components — twin of root `polity` (POL.2).
+/// Craft surface for polity identity components — twin of root `polity` (Pol.2).
 fn polity_craft_bench(
     world: &mut World,
     mut words: impl Iterator<Item = String>,
@@ -1809,7 +1809,7 @@ fn doctrine_bench(
 }
 
 // ════════════════════════════════════════════════════════════════════
-// INTEL — KNOWLEDGE ACTIVITY
+// intel — knowledge activity
 // ════════════════════════════════════════════════════════════════════
 
 pub fn intel(
@@ -2243,7 +2243,7 @@ fn intel_wants(world: &World, style: &Style, current: u64) {
 }
 
 // ════════════════════════════════════════════════════════════════════
-// TRADE — CIRCULATE / RUN
+// trade — circulate / run
 // ════════════════════════════════════════════════════════════════════
 
 pub fn trade(
@@ -2460,7 +2460,7 @@ fn trade_aperture(style: &Style) {
 }
 
 // ════════════════════════════════════════════════════════════════════
-// DIPLOMATIC — DIPLOMACY ACTIVITY (local + stellar)
+// diplomatic — diplomacy activity (local + stellar)
 // Preferred name: `diplomatic`. Short alias: `diplo` (still accepted).
 // ════════════════════════════════════════════════════════════════════
 
@@ -2479,7 +2479,7 @@ pub fn diplo(
     match domain.as_deref() {
         None | Some("help") | Some("?") | Some("menu") | Some("index") => diplo_index(style),
         Some("local") | Some("treaty") | Some("treaties") | Some("pair") => {
-            // DEEP DEEDS: further words fire the treaty grammar itself
+            // Deep deeds: further words fire the treaty grammar itself
             // (call-not-copy — the one home in `treaty_command`);
             // bare `diplomatic local` reads the board.
             let mut rest = words.peekable();
@@ -2615,12 +2615,12 @@ fn diplo_mesh(world: &World, style: &Style, _current: u64) {
 }
 
 // ════════════════════════════════════════════════════════════════════
-// POLITY — optional 5th root (vent open)
+// polity — optional 5th root (vent open)
 // ════════════════════════════════════════════════════════════════════
 //
 // Genesis · taxon · mint · AP as the LINE identity surface. Not dual-law
-// craft (no `bench polity` yet) — activity root for who you are and what
-// you may become. Deeds stay existing verbs; this hub routes + reads.
+// craft (no `bench polity` yet) — activity root for who the player is and
+// what the player may become. Deeds stay existing verbs; this hub routes + reads.
 
 fn foot_polity(style: &Style, parent: Option<&str>) {
     println!();

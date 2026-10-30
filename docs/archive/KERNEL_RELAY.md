@@ -50,7 +50,7 @@ replay grounds worlds." It was lawful **because it was powerless.** A window.
 No single ruling made the mirror authoritative. It collected duties one
 useful landing at a time: a second display-format copy of the chronicle
 (`chronicle.jsonl`), then the registry, journals, the galaxy card, then
-mirror-TLV (committed state as canonical bytes), then the mesh built its
+MIRROR-TLV (committed state as canonical bytes), then the mesh built its
 replication on mirror files, then resume carriers rode "beside its mirror
 each beat." Each step was practical; none was constitutional.
 

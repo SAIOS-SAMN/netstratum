@@ -1,14 +1,14 @@
-//! **THE NOVELTY GATE** (38_COGNITION_CONVERGENCE §4, task #13) — the
+//! **The novelty gate** (38_COGNITION_CONVERGENCE §4, task #13) — the
 //! knocker for the vocabulary's mint door.
 //!
-//! A candidate WORD is a composition of existing total primitives — a
-//! macro letter. Minting one changes REACHABILITY, never capability
+//! A candidate word is a composition of existing total primitives — a
+//! macro letter. Minting one changes reachability, never capability
 //! class (the nursery's closed-algebra law): the word expands to its
 //! constituent ops in every certificate, so the judge never learns a
 //! new symbol and the tag-86 wire never moves.
 //!
-//! **THE ORBIT IS AN ACTION FINGERPRINT**, not an RCF class. The RCF
-//! quotients out frames — and a word IS a frame change, so the RCF
+//! **The orbit is an action fingerprint**, not an RCF class. The RCF
+//! quotients out frames — and a word is a frame change, so the RCF
 //! identifies away exactly what a word is (charter §4 amended at this
 //! landing). Two words are the same letter iff they act identically on
 //! the canonical probe family: `rot90∘rot90` hashes with `rot180`,
@@ -45,7 +45,7 @@ pub struct MintedWord {
 /// receipts. Never persisted here: the chronicle is the register and
 /// the conductor re-folds it (the vocabulary fold's own law).
 ///
-/// WORDS COMPETE (docs/60 D6): each word carries the beat it last closed a
+/// WORDS compete (docs/60 D6): each word carries the beat it last closed a
 /// task (or was adopted); [`Library::forget_unused`] lets a word unused for
 /// a span give way. Only the working library forgets: the chronicle keeps
 /// every word, and a process re-fold restores them all.
@@ -126,11 +126,11 @@ impl Library {
     }
 }
 
-/// **THE CANONICAL PROBE FAMILY** — the fixed basis every word's
+/// **The CANONICAL probe family** — the fixed basis every word's
 /// action is read against. Asymmetric shapes (so every symmetry acts
 /// distinguishably), the whole hue ladder (so every recolor acts), and
 /// separable objects on a background (so every object op acts). These
-/// are canonical basis DATA, the polities.rs class — definition, not
+/// are canonical basis data, the polities.rs class — definition, not
 /// tuning; changing them re-keys every orbit and is a reviewed act.
 fn probes() -> Vec<Grid> {
     let ramp = |rows: usize, cols: usize| -> Grid {
@@ -153,7 +153,7 @@ fn probes() -> Vec<Grid> {
     vec![ramp(2, 3), ramp(3, 3), ramp(3, 4), objects]
 }
 
-/// The word's ACTION ORBIT: blake3 over its outputs on the canonical
+/// The word's action orbit: blake3 over its outputs on the canonical
 /// probe family. Total — an op that cannot act on a probe (dimension
 /// or content mismatch) contributes the untouched probe, so partial
 /// domains still fingerprint deterministically.
@@ -173,7 +173,7 @@ pub fn word_orbit(word: &[Op]) -> [u8; 32] {
 }
 
 /// The standing letters' orbits — the single-op fingerprints of a
-/// task's own sweep vocabulary. A macro whose action equals ANY single
+/// task's own sweep vocabulary. A macro whose action equals any single
 /// letter is a re-spelling, not a word.
 pub fn standing_orbits(vocabulary: &[Op]) -> Vec<[u8; 32]> {
     vocabulary
@@ -182,7 +182,7 @@ pub fn standing_orbits(vocabulary: &[Op]) -> Vec<[u8; 32]> {
         .collect()
 }
 
-/// GATES 1 + 2 on one candidate: a program that closed `cited` at
+/// Gates 1 + 2 on one candidate: a program that closed `cited` at
 /// depth ≥ 2, against this line's library and the standing letters.
 /// Returns the candidate's orbit if it may seek confirmation; `None`
 /// names no fault — most compositions are re-spellings, lawfully.
@@ -201,12 +201,12 @@ pub fn consider(
     Some(orbit)
 }
 
-/// GATE 4's count: the rung ladder's own promote number, derived from
+/// Gate 4's count: the rung ladder's own promote number, derived from
 /// the same law (three confirms promote), never a fresh dial.
 pub const CONFIRMS_TO_MINT: usize = 3;
 
-/// **THE FAMILY CENSUS** (38 §6, task #15) — the line's own families
-/// ordered THINNEST-FIRST by how many minted words touch each: the
+/// **The family census** (38 §6, task #15) — the line's own families
+/// ordered thinnest-first by how many minted words touch each: the
 /// measured frontier a novelty-starved mind reaches toward. A word
 /// counts toward every family its expansion spells (a composite is a
 /// citizen of each). Ties keep the declaration order — deterministic,
@@ -229,8 +229,8 @@ pub fn family_census(library: &Library) -> Vec<crate::need::Family> {
     counts.into_iter().map(|(family, _)| family).collect()
 }
 
-/// **THE PRE-REACH** — the library read before the sweep: each minted
-/// word tried whole, as a depth-1 letter. A hit returns the EXPANSION
+/// **The PRE-REACH** — the library read before the sweep: each minted
+/// word tried whole, as a depth-1 letter. A hit returns the expansion
 /// (the certificate's form); the judge sees only letters it already
 /// knows. The sweep runs unchanged behind it, so nothing previously
 /// reachable is lost and the enumeration order of the old search is
@@ -258,11 +258,11 @@ pub fn pre_reach(
 }
 
 // ─────────────────────────────────────────────────────────────────────
-// THE STANDING VOCABULARY — op-DERIVATION off the observation, the input to
+// the standing vocabulary — op-DERIVATION off the observation, the input to
 // the novelty gate above. Moved here from the deleted `search` module
 // (2026-08-19): these are bounded derivations (peel the task's own ops), never
 // the retired enumerate-and-test search. `sweep_vocabulary` lists the ops a
-// task's observation NAMES; `standing_orbits` fingerprints them so a minted
+// task's observation names; `standing_orbits` fingerprints them so a minted
 // word that is merely a standing op is refused as non-novel.
 // ─────────────────────────────────────────────────────────────────────
 
@@ -314,10 +314,10 @@ fn derived_recolors(task: &Task) -> Vec<Op> {
 }
 
 /// Derive candidate tilings from the shape ratio, under the same seven prefixes.
-/// A ratio must hold on EVERY pair (one pair agreeing is a coincidence). The
-/// 4×4 `TileMirror` grid is enumerated to list the STANDING tile vocabulary
+/// A ratio must hold on every pair (one pair agreeing is a coincidence). The
+/// 4×4 `TileMirror` grid is enumerated to list the standing tile vocabulary
 /// (bounded ≤112 ops, grid-independent — vocabulary construction, not a
-/// recognition sweep; the tile SEAT reads the specific mirror off the carrier).
+/// recognition sweep; the tile seat reads the specific mirror off the carrier).
 fn derived_tiles(task: &Task) -> Vec<Op> {
     let prefixes: [Option<Op>; 7] = [
         None,
@@ -369,7 +369,7 @@ fn derived_tiles(task: &Task) -> Vec<Op> {
     ops
 }
 
-/// **THE STANDING VOCABULARY** — the ops a task's observation names: derived
+/// **The standing vocabulary** — the ops a task's observation names: derived
 /// recolors and tilings first (what the observation itself spells), then the
 /// fixed symmetry alphabet and object ops. Feeds `standing_orbits` (the novelty
 /// gate's "is this merely a standing op?" check). Bounded derivation, no search.

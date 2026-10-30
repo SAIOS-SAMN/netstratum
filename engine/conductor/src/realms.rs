@@ -1,23 +1,23 @@
-//! REALMS (docs/75; operator 2026-10-13): realms form only where an
+//! Realms (docs/75; operator 2026-10-13): realms form only where an
 //! ancient's progenitors have deployed a passage network and passage crossed
 //! it. Space no network reached belongs to no realm; the known universe is
 //! never partitioned (Concordance 3.3: a realm is never laid in advance).
 //!
 //! - A line's CIVILIZATION is its lineage root (`ancients::root_of`).
-//! - A REALM is named by its CORE: the gates leading to one core (built by
+//! - A realm is named by its core: the gates leading to one core (built by
 //!   its parliament for its ancients, docs/72) and the passage over them.
-//! - PASSAGE in a term, per line and core: a hub leg that rode a mapped gate
+//! - Passage in a term, per line and core: a hub leg that rode a mapped gate
 //!   to that core (`Passages`, from the hub step), and an envoy standing at
 //!   that core at the term's close (`ascension.bin`).
-//! - A realm EXISTS when passage to its core was counted. Its members are the
+//! - A realm exists when passage to its core was counted. Its members are the
 //!   civilizations whose lines used its network the most, and the progenitors
 //!   operating it (the builders' lineages of its mapped gates). A tie between
-//!   networks leaves a civilization CONTESTED.
-//! - A BOUNDARY is a civilization reached by more than one realm's network.
-//! - The STEWARD is the most-contacted member line (contacts: the term's
+//!   networks leaves a civilization contested.
+//! - A boundary is a civilization reached by more than one realm's network.
+//! - The steward is the most-contacted member line (contacts: the term's
 //!   completed exchanges, `Contacts`), else the line with the most passage;
 //!   it takes the steward's seat (`tiers`).
-//! - A CAPTAIN is a member civilization's most-travelled line over the realm's
+//! - A captain is a member civilization's most-travelled line over the realm's
 //!   network in the term; it takes the captain's seat (`tiers`).
 //!
 //! The term is the core period (one bounce). Placeholders for physics not yet
@@ -88,7 +88,7 @@ fn put_text(text: &str, out: &mut Vec<u8>) {
     out.extend_from_slice(text.as_bytes());
 }
 
-/// THE REALMS' READING at a term's close: realms by core, their members,
+/// The realms' reading at a term's close: realms by core, their members,
 /// boundaries, contested civilizations and stewards, checkpointed, and what
 /// happened for the log, and the stewards and captains it seats.
 pub fn bounce(worlds: &mut [Polity], registry: &Registry, var_root: &Path, contacts: &Contacts, passages: &Passages, bounce: u64) -> Vec<String> {
@@ -189,7 +189,7 @@ pub fn bounce(worlds: &mut [Polity], registry: &Registry, var_root: &Path, conta
             contested.len()
         ),
     );
-    // THE TIERS EMERGE FROM THE REALMS (`tiers`): each realm's steward takes
+    // The TIERS emerge from the realms (`tiers`): each realm's steward takes
     // the steward's seat, and each member civilization's most-travelled line
     // over the realm's network this term (ties by world name) its captain's.
     let ancients = crate::tiers::ancients(var_root);

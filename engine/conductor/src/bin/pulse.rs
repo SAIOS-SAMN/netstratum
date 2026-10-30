@@ -22,7 +22,7 @@ fn main() {
         println!("refused: {era1} already holds a universe");
         return;
     }
-    // THE FOUNDING DISTRIBUTION from the bounce's nucleons: the grains given,
+    // The founding distribution from the bounce's nucleons: the grains given,
     // as nuclei.
     let n = grains * pulse::nuclei_per_grain() * num_bigint::BigInt::from(1024);
     let manifest = pulse::founding(&n);

@@ -3,7 +3,7 @@
 Inputs to Netstratum's reserve and central-bank design (not yet built). Each
 is an operator ruling relayed by the coordinator; the source is named.
 
-## μ (operator, 2026-10-09; Mycelium 78.149, MU-economy)
+## μ (operator, 2026-10-09; Mycelium 78.149, MU-ECONOMY)
 
 1. **Strict μ.** μ pays only the measured discharge of verified work: no μ
    for a lone Scale, time stood, unclosed demand, or letter and callus
@@ -14,7 +14,7 @@ is an operator ruling relayed by the coordinator; the source is named.
 3. **Staked μ** on the hypha is escrow for intelligence traversal and
    coordinate retrieval, with no demurrage.
 4. **Demurrage** on μ stored in-universe (vaults, currency backing), very
-   slow, and it recycles (Concordance 5.8, MU-economy 7.2, superseding
+   slow, and it recycles (Concordance 5.8, MU-ECONOMY 7.2, superseding
    "dissipates without recycling"), split exactly per lane:
    - its value goes to the hypha as the connection tax, a flow on the
      domain's tier fold from the domain reserve (a transfer, never a burn);

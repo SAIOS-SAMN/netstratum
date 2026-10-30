@@ -5,7 +5,7 @@
 //!   plasmic. Its disposition and perception, and its NAME, are spoken from
 //!   the seed (flavour only; docs/82: no types).
 //! - Its place is its system's stand-in place (until the sphere).
-//! - A WAKING TAKES NO SEAT (operator 2026-10-21, "realms EMERGE, not
+//! - A waking takes no seat (operator 2026-10-21, "realms emerge, not
 //!   drawn"): every tier is reached by what the line's lineage does
 //!   (ancients by birth near the core, progenitors by folding a gate,
 //!   sovereigns by holding their own system).

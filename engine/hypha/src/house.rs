@@ -1,11 +1,11 @@
-//! **THE HOUSE** — netstratum's domain on the seat surface (mycelium 78.145,
+//! **The house** — Netstratum's domain on the seat surface (Mycelium 78.145,
 //! ACT_SEAT 0x53). The house is the domain's sitting reserve (the union tier,
-//! held in trust for the ancient not yet arisen): it LISTS the seats it
-//! offers, answers each TAKE, and answers each CALL with its outcome. The
+//! held in trust for the ancient not yet arisen): it lists the seats it
+//! offers, answers each take, and answers each call with its outcome. The
 //! hypha only holds and forwards.
 //!
 //! The seats: seat 0 is the house's own (role Ancients, on the house key);
-//! seat i >= 1 is a COUNCIL seat at one arisen ancient's line (Concordance
+//! seat i >= 1 is a council seat at one arisen ancient's line (Concordance
 //! 3.9: client minds seat at the ancients and nowhere else; role Ancients, on
 //! the line's name as a key: lines are keyless, Concordance 6.2a). A
 //! steward's line is not listed: no network mind sits in a steward's seat. A line's seat
@@ -13,8 +13,8 @@
 //! dead line's id is retired, never reused), so a death moves no mind. A mind seated
 //! on a line is that line's second vessel (the mind-link, restore 2).
 //!
-//! THE TASK LOOP (wire v1.2, 78.146): a court task netstratum's own mind did
-//! not close at home is put before ONE seated mind (a PERCEPT, record kind 4
+//! The TASK LOOP (wire v1.2, 78.146): a court task Netstratum's own mind did
+//! not close at home is put before one seated mind (a percept, record kind 4
 //! `[Key(citation)]`); the mind fetches it by its citation and answers with
 //! fn 1 `[Bytes(rule tape), Bytes(outputs), Count(step)...]`; the house
 //! files the answer under the reserve's key (so the mu is the ancients') and
@@ -57,12 +57,12 @@ pub const NO_TASK: u16 = 6;
 /// An answer filed and not judged yet (the court's stroke ran out, 78.153):
 /// the task stays before the seat and the house re-files the same answer.
 pub const PENDING: u16 = 7;
-/// A call's outcome: the seated mind declined the task before it (mycelium
+/// A call's outcome: the seated mind declined the task before it (Mycelium
 /// 25b72099, `FN_DECLINE`); the seat is free at once and the task goes back.
 pub const DECLINED: u16 = 8;
 
 /// The court's "not judged yet" (78.153 SOLVE_UNREAD, on the wire as 3): a
-/// RETRY, never a refusal. Named here until the vendored tree carries it.
+/// retry, never a refusal. Named here until the vendored tree carries it.
 pub const SOLVE_UNREAD: u8 = 3;
 
 /// Tends a seat's task may wait for its answer before it goes back.
@@ -101,7 +101,7 @@ fn held_key(home: &Path, file: &str) -> io::Result<SigningKey> {
     Ok(SigningKey::from_bytes(&seed))
 }
 
-/// netstratum's house on one hypha.
+/// Netstratum's house on one hypha.
 pub struct House {
     domain: [u8; 32],
     key: SigningKey,
@@ -122,7 +122,7 @@ pub struct House {
     /// Seat -> the tend its holder was last heard on it (a take or a call).
     /// A hold whose holder has not been heard within a task's patience, or a
     /// hold restored from the takes log and not yet heard in this run, yields
-    /// to a mind that takes the seat now (exclusivity binds a LIVE holder).
+    /// to a mind that takes the seat now (exclusivity binds a live holder).
     heard: BTreeMap<u32, u64>,
     /// Seat -> the task before it and the tend it was put there.
     task: BTreeMap<u32, ([u8; 32], u64)>,
@@ -206,7 +206,7 @@ impl House {
     }
 
     /// The living lines with their seats, a newborn line given the next id.
-    /// THE COUNCILS (Concordance 3.9): the living lines that are arisen
+    /// The councils (Concordance 3.9): the living lines that are arisen
     /// ancients, as the conductor publishes them (`<var>/council.bin`). Client
     /// minds seat at the ancients and nowhere else; a steward's seat holds no
     /// network mind.
@@ -247,10 +247,10 @@ impl House {
     fn listing(&self) -> Seats {
         let beat = Arg::Q { num: 1, den: 1 };
         let mut seats = vec![Seat { seat: 0, role: Role::Ancients, on: self.key.verifying_key().to_bytes(), beat: beat.clone(), fns: Vec::new() }];
-        // fn 1 SOLVE: the rule's tape and the outputs (the steps ride after).
+        // fn 1 solve: the rule's tape and the outputs (the steps ride after).
         let solve = SeatFn { id: FN_SOLVE, tags: vec![Arg::Bytes(Vec::new()).tag(), Arg::Bytes(Vec::new()).tag()] };
-        // fn 2 DECLINE: the task's citation and the stop the mind's reading
-        // reached short of a solve (mycelium's `STOPS`, one past its place).
+        // fn 2 decline: the task's citation and the stop the mind's reading
+        // reached short of a solve (Mycelium's `STOPS`, one past its place).
         let decline = SeatFn { id: FN_DECLINE, tags: vec![Arg::Key([0u8; 32]).tag(), Arg::Count(0).tag()] };
         for (id, name) in &self.lines {
             // A council seat at an ancient's house (Concordance 3.9).
@@ -284,7 +284,7 @@ impl House {
             }
             Err(e) => said.push(format!("gates not mapped: {e}")),
         }
-        // THE RE-FOUNDING, BY THE HOUSE ITSELF (docs/67, docs/72 A4): the court
+        // The RE-founding, by the house itself (docs/67, docs/72 A4): the court
         // refused an act as an unknown domain, so the fleet was recut. Once per
         // new origin (a sealed `refounded` under it stands), with the keys
         // already held; a try the court stopped is tried again only after a
@@ -334,7 +334,7 @@ impl House {
         self.held.iter().filter(|(s, _)| **s != 0 && !self.task.contains_key(s)).count()
     }
 
-    /// Put the tasks netstratum's mind did not close before free seated
+    /// Put the tasks Netstratum's mind did not close before free seated
     /// minds, one each; a task past its patience goes back.
     fn hand_tasks(&mut self, seat: &mut crate::seat::Seat) -> io::Result<Vec<String>> {
         let mut said = Vec::new();
@@ -491,7 +491,7 @@ impl House {
             said.push(format!("the relay restarted (epoch {:x}): the acts are perceived from its start", read.epoch));
         }
         // A restarted relay is volatile: its listing is gone, so the seats are
-        // listed again next tend (mycelium 2026-10-09).
+        // listed again next tend (Mycelium 2026-10-09).
         if self.relay_epoch.is_some_and(|e| e != read.epoch) {
             self.lines.clear();
         }

@@ -1,14 +1,14 @@
-//! TECH AND PRACTICE — conditions, instruments, adopted disciplines.
+//! Tech and practice — conditions, instruments, adopted disciplines.
 //!
-//! THE CLIFF (task #4/#5): `condition == 5` and `hardships < 8` gate
+//! The cliff (task #4/#5): `condition == 5` and `hardships < 8` gate
 //! outcomes here, so everything short of the line reads as nothing.
 //! P3 tried to remove the first and was reverted -- see `super::rules`.
 
 use super::*;
 
 impl World {
-    /// Every adopted discipline's mechanism, in ONE fold walk — the
-    /// FOLD, seed ∪ minted, so a minted discipline computes exactly as
+    /// Every adopted discipline's mechanism, in one fold walk — the
+    /// fold, seed ∪ minted, so a minted discipline computes exactly as
     /// a seeded one (#36 step 3, the mint door). An entry never
     /// mutates once minted, so today's fold carries the binding any
     /// adoption stamp saw — the ordering law holds for free.
@@ -27,10 +27,10 @@ impl World {
             .collect()
     }
 
-    /// The composed factor the ADOPTED disciplines apply on a channel —
+    /// The composed factor the adopted disciplines apply on a channel —
     /// the product across practices, 1 where all are silent. This is
     /// the read that replaced the bespoke `contains(&N)` branches
-    /// (operator ruling 2026-08-05): a practice ACTS only through its
+    /// (operator ruling 2026-08-05): a practice acts only through its
     /// binding data.
     pub(super) fn practice_factor(&self, channel: u8) -> Ratio {
         self.adopted_practice_bindings()
@@ -55,10 +55,10 @@ impl World {
     pub fn techs(&self) -> &[(u64, u8, [u8; 32], Ratio)] {
         &self.techs
     }
-    /// #40 (the petition's executor): GRANT a technology node under
+    /// #40 (the petition's executor): grant a technology node under
     /// steward containment — the inbox form of the licensed arrival
     /// (the two-book licensing pair is recorded debt until NS-5
-    /// arbitrates a true grantor). The crown law holds HERE: condition
+    /// arbitrates a true grantor). The crown law holds here: condition
     /// 6 lands only on a complete base-7 stack; the solar leap is
     /// never granted; one node per condition per orb.
     pub fn grant_tech_as(
@@ -71,7 +71,7 @@ impl World {
         if condition == 0 {
             return Err(ActionRefused::SolarLeapNeverLicensed);
         }
-        // DERIVED, not a magic range: the licensable nodes are exactly
+        // Derived, not a hard-coded range: the licensable nodes are exactly
         // the crystallized tier and the crown — asked of the vocabulary
         // (`node_kind`), so a sixth condition landing moves this gate
         // by itself.
@@ -114,8 +114,8 @@ impl World {
         );
         Ok(())
     }
-    /// MANU-1 (10 §3f): FORGE AN INSTRUMENT — manufacturing overlays
-    /// technology + understanding + industry. Grade IS the
+    /// MANU-1 (10 §3f): forge an instrument — manufacturing overlays
+    /// technology + understanding + industry. Grade is the
     /// crystallized condition; the converter chain must stand (a
     /// smelter for grades 1–2, smelter + synthesizer for 3+); the
     /// frame draws alloy = grade, and grade 3+ optics draw one
@@ -180,7 +180,7 @@ impl World {
     pub fn instruments(&self) -> &[(u64, [u8; 32], u8)] {
         &self.instruments
     }
-    /// TECH-1b (10 §3): does a condition HOLD, read from the deposit
+    /// TECH-1b (10 §3): does a condition hold, read from the deposit
     /// sheet + committed state? Thresholds stay the table's
     /// placeholder parameters.
     pub(super) fn condition_holds(&self, orb: u64, condition: u8, now: u64, sheet: &CrystalDeposit) -> bool {
@@ -249,12 +249,12 @@ impl World {
             _ => false,
         }
     }
-    /// **NOVELTY-GATE (tag 166, 38 §4)** — mint a solver WORD into this
+    /// **NOVELTY-GATE (tag 166, 38 §4)** — mint a solver word into this
     /// line's own library. Build scope (the mint re-rules what this
     /// line can REACH, the founding class). The gates that make the
     /// candidate lawful (unique orbit · productive · verifier-conserved
     /// · three confirms) run prover-side in `solver::mint`; this door
-    /// holds the CHAIN's share: an orbit already receipted refuses (a
+    /// holds the chain's share: an orbit already receipted refuses (a
     /// re-spelling can never re-mint — the fold's own idempotence), an
     /// empty expansion or short confirmation refuses (nothing enters
     /// the library unearned).
@@ -269,11 +269,11 @@ impl World {
         if expansion.is_empty() {
             return Err(ActionRefused::SolverWordEmpty);
         }
-        // COMM-1 — CONGRUENCE THRESHOLD. A shared word is admitted when TWO
+        // COMM-1 — congruence threshold. A shared word is admitted when two
         // independent vantages have converged on the same orbit (the consilience
-        // principle, N-I8: two distinct minds agreeing IS a measurement of truth).
-        // The prior bar of three distinct tasks demanded proof of GENERALITY before
-        // ADMISSION, and it was so strict the vocabulary never formed (0 words across
+        // principle, N-I8: two distinct minds agreeing is a measurement of truth).
+        // The prior bar of three distinct tasks demanded proof of generality before
+        // admission, and it was so strict the vocabulary never formed (0 words across
         // the live population) — communication died at the gate. Two vantages is the
         // trigger; generality hardens the word afterward through reuse (`pre_reach`),
         // not as a precondition to speaking it. (This count is the crude first gauge
@@ -293,10 +293,10 @@ impl World {
         Ok(())
     }
 
-    /// **ENTITY-ALIGN-1 (tag 189, docs/56 §3) — RECORD A WORD'S HARDNESS.**
+    /// **ENTITY-ALIGN-1 (tag 189, docs/56 §3) — record A word's hardness.**
     /// Closed alongside a successful `mint_solver_word_as`, never instead of
     /// it: the mint gate (`cited.len() >= 2`) is untouched, this only
-    /// records HOW diverse the confirming vessels' own knowledge was when
+    /// records how diverse the confirming vessels' own knowledge was when
     /// they agreed. Purely additive bookkeeping — nothing yet reads or
     /// spends this field.
     pub fn record_word_hardness_as(
@@ -310,15 +310,15 @@ impl World {
         Ok(())
     }
 
-    /// **RCP-2 (tag 181) — RAISE AN EMERGENT RECIPE.** A society builds a
+    /// **RCP-2 (tag 181) — raise an emergent recipe.** A society builds a
     /// recipe its discovery engine (`conductor::recipe::discover`) minted: a
-    /// hashed transformation `∏ inputs → role` over the OPEN almanac, priced
+    /// hashed transformation `∏ inputs → role` over the open almanac, priced
     /// by no `ZoneKind` and gated by no integer level — the doing-layer's
-    /// enum and scalar, both dissolved. This door holds the CHAIN's share: a
+    /// enum and scalar, both dissolved. This door holds the chain's share: a
     /// recipe with no inputs, or one that delivers nothing of its role, is
     /// not a recipe (the discovery engine returns an honest `None` for such a
-    /// hole, and the door refuses in kind); and the SAME recipe (inputs ‖
-    /// role) already raised on this orb refuses — the built set is a FOLD
+    /// hole, and the door refuses in kind); and the same recipe (inputs ‖
+    /// role) already raised on this orb refuses — the built set is a fold
     /// (`vocabulary::recipes_built`), minted once, never re-built. The caller
     /// (the conductor's workbench) owns the species affinity and topological
     /// reach gate; this door records the build so the fold reads it.
@@ -354,10 +354,10 @@ impl World {
         Ok(())
     }
 
-    /// **CONSILIENCE (tag 177, 38 §5)** — record this line's participation
+    /// **Consilience (tag 177, 38 §5)** — record this line's participation
     /// in a shared knowledge axiom. The prover side (`solver::consilience`)
-    /// established that INDEPENDENT lines resolved their knowledge to the
-    /// same crystallized `signature`; this door holds the CHAIN's share,
+    /// established that independent lines resolved their knowledge to the
+    /// same crystallized `signature`; this door holds the chain's share,
     /// recording the line's own leg. Idempotent per signature (a line
     /// already recording this convergence refuses — the fold's own
     /// idempotence), and a consilience is agreement between at least two
@@ -384,13 +384,13 @@ impl World {
         Ok(())
     }
 
-    /// **THE KNOWLEDGE MARKET (tag 178, ARC C)** — license a word this
+    /// **The knowledge market (tag 178, ARC C)** — license a word this
     /// line lacks into its own library. The prover side named a word some
-    /// OTHER line minted and this line does not hold; this door holds the
-    /// CHAIN's share: an orbit already in the library refuses (a line
-    /// never licenses what it already knows — minted OR licensed), an
+    /// other line minted and this line does not hold; this door holds the
+    /// chain's share: an orbit already in the library refuses (a line
+    /// never licenses what it already knows — minted or licensed), an
     /// empty expansion refuses (nothing enters the library unearned). The
-    /// word is banked-neutral identity; the buyer's PROSPERITY gate (it
+    /// word is banked-neutral identity; the buyer's prosperity gate (it
     /// can afford the price) is the market's, applied by the caller — this
     /// door only records the acquisition so the fold reads it.
     pub fn license_knowledge_as(
@@ -425,8 +425,8 @@ impl World {
     }
     pub fn adopt_practice_as(&mut self, actor: u64, practice: u8) -> Result<(), ActionRefused> {
         self.permitted(actor, Scope::Build)?;
-        // THE MINT DOOR IS OPEN (#36 step 3): the lawful disciplines
-        // are the FOLD — seed ∪ minted — so this is a FACT of the
+        // The mint door is open (#36 step 3): the lawful disciplines
+        // are the fold — seed ∪ minted — so this is a fact of the
         // chain, never a compiled range. The 1..=5 guard died here;
         // the arm survives because what the fold holds is not
         // decidable from the code alone (the UnknownAxisValue family).
@@ -441,7 +441,7 @@ impl World {
         if self.practices.contains(&practice) {
             return Err(ActionRefused::PracticeAlreadyAdopted { practice });
         }
-        // The tempering gate, read from the discipline's OWN data
+        // The tempering gate, read from the discipline's own data
         // (CHANNEL_TEMPER) — no practice is named here. Only the
         // Overdrive binds it today, so the refusal keeps its name.
         if let Some(threshold) =
@@ -469,9 +469,9 @@ impl World {
         self.practices.push(practice);
         Ok(())
     }
-    /// PRACTICE-1 — release is a REDISCOVERY (operator-ruled): lawful
+    /// PRACTICE-1 — release is a rediscovery (operator-ruled): lawful
     /// only after new doctrine landed since the adoption. A lawful
-    /// release emits the RE-EMERGENCE node (TechDiscovered, condition
+    /// release emits the RE-emergence node (TechDiscovered, condition
     /// 7) seeded from the chronicle root and the practice — divergent
     /// and novel per line per moment; its window-ease boon applies
     /// while alignment holds (the tick reads it).

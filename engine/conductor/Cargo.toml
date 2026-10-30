@@ -8,10 +8,10 @@ description = "The heartbeat — autonomous civilizations play their colonies, g
 [dependencies]
 libc = "0.2"
 cfe = { path = "../cfe" }
-# A1 — CLOSING THE PoUW LOOP (2026-08-01). The conductor is a CLIENT of
+# A1 — closing the PoUW LOOP (2026-08-01). The conductor is a client of
 # units (16_UNIT §2), and clients import the kernel. It reads
-# `mint_bound` so the PROPOSER computes the lawful amount from the SAME
-# ruled ladder the judge enforces (call-not-copy, CHARTER §0b), and
+# `mint_bound` so the proposer computes the lawful amount from the same
+# ruled ladder the judge enforces (call-not-copy, Charter §0b), and
 # `solver-verify` to encode the proof the deed carries whole.
 kernel = { path = "../kernel" }
 solver-verify = { path = "../solver-verify" }
@@ -21,10 +21,10 @@ codec = { path = "../codec" }
 ledger = { path = "../ledger" }
 mesh = { path = "../mesh" }
 physics = { path = "../physics" }
-# THE FLOWS (docs/83): the bounce's white-face outflow is read from
-# mycelium's own `physics::source` (the shared SDK, one copy), never copied.
+# The flows (docs/83): the bounce's white-face outflow is read from
+# Mycelium's own `physics::source` (the shared SDK, one copy), never copied.
 mycelium.workspace = true
-# THE LAW FORMS (CONCORDANCE 2.10): mycelium's innermost shell, called and
+# The law forms (concordance 2.10): Mycelium's innermost shell, called and
 # never restated; at the workspace's pinned release.
 forms.workspace = true
 num-rational.workspace = true
@@ -32,7 +32,7 @@ scribe = { path = "../scribe" }
 # docs/60 D10b: lines' words stated in the fleet's v0.1.0 tongue.
 tongue = { path = "../tongue" }
 solver = { path = "../solver" }
-# COG (doc 52): the thought engine is now a LIVE dependency — the beat peels
+# COG (doc 52): the thought engine is now a live dependency — the beat peels
 # the economy's deficit through the same `overlay` the cognition uses, so
 # production (coefficients) and research (residual) are one operation.
 reduct = { path = "../reduct" }
@@ -46,7 +46,7 @@ num-bigint.workspace = true
 num-traits.workspace = true
 
 [dev-dependencies]
-# The #17 CALIBRATION harness reaches the kernel judge and the sealed
+# The #17 calibration harness reaches the kernel judge and the sealed
 # work-verifier directly to measure mint pressure against the bound.
 # Dev-only (the arrow-law guard's own note: dev-deps are lawful).
 kernel = { path = "../kernel" }

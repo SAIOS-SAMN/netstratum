@@ -186,8 +186,8 @@ copy. Trustless because admission is verification, not reputation.
 | # | landing | what | proven by |
 |---|---|---|---|
 | U0 | The seated hand | the spine judge fixture registers its actor (I2 honored) | 285/285 workspace green, clippy zero |
-| U1 | Kernel-verify | the verifier into sealed math; the discovery-mint deed (tag 86); I4's bound arm, sealed shut | honest certificate admits at its exact bound; tampered chain refuses at its break; over-mint refuses both sides whole; certificate-less mint refuses |
-| U2 | Kernel-fold (I6) | `orbit_lock` re-derived; the fold deed judged; the singularity law (§4a) | gauge difference folds; torsion-locked fold refuses; the refused fold's residue emerges as the one mintable plane; **the angle-free witness** — any frame/gauge presentation of the same pair yields the identical verdict and residue |
+| U1 | KERNEL-VERIFY | the verifier into sealed math; the discovery-mint deed (tag 86); I4's bound arm, sealed shut | honest certificate admits at its exact bound; tampered chain refuses at its break; over-mint refuses both sides whole; certificate-less mint refuses |
+| U2 | KERNEL-FOLD (I6) | `orbit_lock` re-derived; the fold deed judged; the singularity law (§4a) | gauge difference folds; torsion-locked fold refuses; the refused fold's residue emerges as the one mintable plane; **the angle-free witness** — any frame/gauge presentation of the same pair yields the identical verdict and residue |
 | U3 | UNIT-1 | the deployable boundary: one binary builds without conductor/lenses; constitution digest in the handshake | the binary founds, plays, solves, and uplinks against a second copy of itself; cross-version refuses typed |
 | U4 | The ruling boxes come home | mint rate `f`, work-shape, reward split, what work earns (pen weight, mint rights) — operator rulings inscribed as kernel amendments | each ruling lands as an amendment with its witness; the sealed `f` opens |
 

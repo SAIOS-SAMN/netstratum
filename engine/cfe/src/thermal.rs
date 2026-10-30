@@ -3,20 +3,20 @@
 //!
 //! **The law, era 1 (docs/78 design law 2, refactored in place 2026-10-15):**
 //! no square and no fixed dimension states a law. Flux through a
-//! fluid-dimension shell falls LINEARLY, `I = L (1 − A) / r`, and the
+//! fluid-dimension shell falls linearly, `I = L (1 − A) / r`, and the
 //! equilibrium temperature is held as `T` itself, in kelvin, `T = K · I`:
 //! exact for rational inputs, with no root anywhere. (Era 0 held `T⁴` from
 //! a `1/r²` flux, a flat 3-dimensional law; the names `t_eq4`, `bounds4`
 //! and `ceiling4` keep their call sites but now carry `T`.)
 //!
-//! All numbers here are PLACEHOLDER PARAMETERS: `K` is anchored so a
+//! All numbers here are placeholder parameters: `K` is anchored so a
 //! Sol-type body (G star, `L` = 1) at `r` = 1, albedo 0 sits at
 //! `T` = 279 K (mesic), i.e. `K = 279`.
 
 use crate::ratio::{ratio, Ratio};
 use num_traits::ToPrimitive;
 
-/// A CITED kelvin anchor, exact — the ONLY way a band bound or the folded
+/// A cited kelvin anchor, exact — the only way a band bound or the folded
 /// constant enters this module (P2, operator ruling 2026-08-05): the
 /// parameter is a [`crate::anchor::KelvinAnchor`], a typed declaration
 /// carrying its empirical citation. Era 1 holds temperature itself (no
@@ -37,11 +37,11 @@ pub fn t_eq4(luminosity: &Ratio, albedo: &Ratio, orbit_r: &Ratio) -> Ratio {
     insolation(luminosity, albedo, orbit_r) * thermal_k()
 }
 
-/// **THE CONTINUOUS INSOLATION** `I = L·(1−A)/r` (era 1: linear) — the absorbed stellar
-/// flux per unit area, an EXACT rational (COG Slice 2b). This is the
+/// **The continuous insolation** `I = L·(1−A)/r` (era 1: linear) — the absorbed stellar
+/// flux per unit area, an exact rational (COG Slice 2b). This is the
 /// physical vector the 8-way [`ThermalRegion`](crate::almanac::ThermalRegion)
 /// buckets discard: `t_eq4` collapses it into a temperature and bins it, but
-/// primary production reads it NATIVELY, so a bright or close star delivers
+/// primary production reads it natively, so a bright or close star delivers
 /// more food than a dim or distant one — continuously, not in temperature
 /// steps. `L` is the star's own luminosity ([`StarClass::luminosity`]), so
 /// the star class injects its exact energy output straight into the food
@@ -65,7 +65,7 @@ pub enum SubstrateBand {
 }
 
 impl SubstrateBand {
-    /// The inclusive `[lo, hi]` bounds in kelvin, from the CITED anchors.
+    /// The inclusive `[lo, hi]` bounds in kelvin, from the cited anchors.
     pub fn bounds4(self) -> (Ratio, Ratio) {
         use crate::anchor::KelvinAnchor as At;
         match self {
@@ -90,19 +90,19 @@ pub fn coverage_scale4() -> Ratio {
     hi - lo
 }
 
-/// COVERAGE — how well a world at `t_eq4` supports substrate, as an
-/// exact rational in `(0, 1]`, DEFINED EVERYWHERE on the positive line.
+/// Coverage — how well a world at `t_eq4` supports substrate, as an
+/// exact rational in `(0, 1]`, defined everywhere on the positive line.
 ///
 /// **This replaces a wall with a slope.** [`band_of`] answers whether a
 /// world falls inside one of three disjoint windows, so a world one
-/// kelvin outside a bound reads NOTHING while one kelvin inside reads
+/// kelvin outside a bound reads nothing while one kelvin inside reads
 /// everything — and the three windows do not cover the line, leaving
 /// 320–600 K supported by nothing at all. The derived furnace seats
 /// (mineral and plasmic foundings) land in that gap, which made a whole
 /// class of world uninhabitable by construction rather than by design
 /// (`20_FOUNDING` §4, §6c).
 ///
-/// The bands remain, as the regions where coverage is RICH:
+/// The bands remain, as the regions where coverage is rich:
 ///
 /// ```text
 /// inside any band          coverage = 1        a plateau, not a peak
@@ -110,12 +110,12 @@ pub fn coverage_scale4() -> Ratio {
 /// ```
 ///
 /// **Monotone in distance, strictly positive everywhere, and free of
-/// squares** — the difference enters to the first power only, so THE
-/// PROPORTIONAL LAW is untouched (`EQUATIONS` ch.2: squares are barred
+/// squares** — the difference enters to the first power only, so the
+/// proportional law is untouched (`EQUATIONS` ch.2: squares are barred
 /// as aggregators of difference; quartics survive only as physical law,
 /// and `T⁴` is already the carrier here).
 ///
-/// A gap world now reads POOR rather than IMPOSSIBLE, which is a game
+/// A gap world now reads poor rather than impossible, which is a game
 /// where the alternative was a defect.
 pub fn coverage(t_eq4: &Ratio) -> Ratio {
     let zero = ratio(0, 1);
@@ -153,7 +153,7 @@ pub fn cryo_vault_max4() -> Ratio {
     SubstrateBand::Cryogenic.bounds4().1
 }
 
-/// Does an accrued joule store LEAK at this temperature? False in the vault
+/// Does an accrued joule store leak at this temperature? False in the vault
 /// (cryo band and colder), true everywhere warmer (05 §1.2).
 pub fn leaks(t_eq4: &Ratio) -> bool {
     *t_eq4 > cryo_vault_max4()
@@ -177,7 +177,7 @@ pub fn band_of(t_eq4: &Ratio) -> Option<SubstrateBand> {
 
 /// The enumerator of known stars (NS-6 §7): each class fixes its sun's
 /// luminosity `L` (relative to Sol = 1), which drives every bound body's
-/// `T_eq⁴`. Discriminants are the PERMANENT wire codes (NS-6 §7).
+/// `T_eq⁴`. Discriminants are the permanent wire codes (NS-6 §7).
 /// Values are placeholder parameters.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
@@ -219,19 +219,19 @@ impl StarClass {
         }
     }
 
-    /// **MAGNETISM — the field grade of this class** (operator ruling
+    /// **Magnetism — the field grade of this class** (operator ruling
     /// 2026-08-06: *how many planets can orbit a star should be based
     /// on the magnetism of the star associated with the solar system*).
     ///
-    /// Derived from the DYNAMO, the way the abundance spine wears
+    /// Derived from the dynamo, the way the abundance spine wears
     /// metallicity: a star's field comes from its convective dynamo,
     /// and convection deepens down the main sequence — O/B/A are
     /// radiative (weak fossil fields), F begins shallow convection,
-    /// G is the solar dynamo, K runs deeper, M is FULLY convective and
+    /// G is the solar dynamo, K runs deeper, M is fully convective and
     /// carries the strongest main-sequence fields (the packed systems
     /// are the measured case). Remnants: the white dwarf keeps a fossil
-    /// megagauss field; the NEUTRON STAR is the strongest field in
-    /// nature but COMPACT — a tight magnetosphere sweeps clean, so its
+    /// megagauss field; the neutron star is the strongest field in
+    /// nature but compact — a tight magnetosphere sweeps clean, so its
     /// grade is anchored to the measured case (three planets at
     /// PSR B1257+12, the first exoplanets ever found); Wolf–Rayet
     /// strips its own disk with wind. Grades are placeholder dials
@@ -254,21 +254,21 @@ impl StarClass {
         }
     }
 
-    /// **THE RING REACH — how many RINGS this star's field anchors.**
-    /// The law the ruling asked for: planet capacity is BASED ON the
+    /// **The ring REACH — how many rings this star's field anchors.**
+    /// The law the ruling asked for: planet capacity is based on the
     /// magnetism, and at v1 the derivation is identity — one ring per
-    /// field grade. G reaches EIGHT, which lands the home calibration
+    /// field grade. G reaches eight, which lands the home calibration
     /// exactly: Sol's dynamo holds Sol's count. A ring is a distinct
-    /// `orbit_r`; slots WITHIN a ring stay the turn law's business
+    /// `orbit_r`; slots within a ring stay the turn law's business
     /// (60 × 60 per ring, ψ separating) — magnetism bounds how many
     /// rings exist, never how a ring fills.
     pub fn ring_reach(self) -> u8 {
         self.magnetism()
     }
 
-    /// Luminosity relative to Sol — the CITED anchor table
+    /// Luminosity relative to Sol — the cited anchor table
     /// (`crate::anchor::luminosity`, operator ruling 2026-08-05) for
-    /// every astronomical class; the lore class alone keeps a DIAL
+    /// every astronomical class; the lore class alone keeps a dial
     /// here, because fiction has no empirical citation and the census
     /// counts it honestly.
     pub fn luminosity(self) -> Ratio {
@@ -279,7 +279,7 @@ impl StarClass {
             })
     }
 
-    /// The star's MASS in solar masses (`M☉ = 1`) — the anchor Kepler's third
+    /// The star's mass in solar masses (`M☉ = 1`) — the anchor Kepler's third
     /// law reads. The lore White Hole has no citation, so it takes the solar
     /// baseline (trivial, no dial).
     pub fn mass(self) -> Ratio {
@@ -295,10 +295,10 @@ impl StarClass {
 /// Base-60/360 tie-in. Every other period scales off it by Kepler's law.
 const BASE_ORBIT_BEATS: i64 = 360; // the beat↔degree definition (360° circuit)
 
-/// **THE KEPLERIAN PERIOD, SQUARED** (the Keplerian clock) — Kepler's third law
+/// **The keplerian period, squared** (the Keplerian clock) — Kepler's third law
 /// `P² = (360)²·r³/M` in exact rationals (`r` in AU, `M` in `M☉`, `P` in beats).
-/// SQUARED because the period itself, `√(r³/M)`, is irrational and a ℚ-engine
-/// cannot hold it — but the SEMANTIC quantity, the count of completed orbits, is
+/// Squared because the period itself, `√(r³/M)`, is irrational and a ℚ-engine
+/// cannot hold it — but the semantic quantity, the count of completed orbits, is
 /// exact from `P²` alone (see [`local_years`]). A close orbit or a heavy star
 /// gives a small `P²` (a short year); a distant orbit or a light star a large one.
 pub fn orbital_period_squared(orbit_r: &Ratio, mass: &Ratio) -> Ratio {
@@ -307,13 +307,13 @@ pub fn orbital_period_squared(orbit_r: &Ratio, mass: &Ratio) -> Ratio {
     (base.clone() * base) * r3 / mass.clone()
 }
 
-/// The EXACT rational square root of `x`, or `None` when `x` is not a perfect
+/// The exact rational square root of `x`, or `None` when `x` is not a perfect
 /// rational square. `√(p/q) = √p/√q` is exact iff both the numerator and
 /// denominator (of the reduced fraction) are perfect integer squares — the
 /// `BigRational` is always reduced, so this test is total and exact. This is
-/// the DIOPHANTINE window: a track sited by `siting.rs` at `r = M·k²` has
+/// the diophantine window: a track sited by `siting.rs` at `r = M·k²` has
 /// `P² = BASE²·M²·k⁶`, a perfect rational square, so its period `P` is an
-/// EXACT rational and no root is ever approximated.
+/// exact rational and no root is ever approximated.
 fn exact_sqrt(x: &Ratio) -> Option<Ratio> {
     if *x < ratio(0, 1) {
         return None;
@@ -329,15 +329,15 @@ fn exact_sqrt(x: &Ratio) -> Option<Ratio> {
     }
 }
 
-/// **THE LOCAL YEAR** (the Keplerian clock, DIO-1) — how many complete 360°
+/// **The LOCAL YEAR** (the Keplerian clock, DIO-1) — how many complete 360°
 /// orbits a planet has traced in `beats` universal ticks: `⌊beats / P⌋`.
 ///
 /// **The last irrational is gone.** A Diophantine track (`siting.rs`,
-/// `r = M·k²`, `P = M·k³·BASE`) has a PERFECT-SQUARE `P²`, so `P` is an exact
+/// `r = M·k²`, `P = M·k³·BASE`) has a perfect-square `P²`, so `P` is an exact
 /// rational and the year is a pure rational floor `⌊beats / P⌋` — the exact
 /// angular step `Δθ = 360/P` walked `beats` times, no integer square root. For
-/// any OTHER `r` (an operator-pinned off-track world) `P` may be irrational;
-/// there we fall back to the exact integer-sqrt floor `⌊√(beats²/P²)⌋`, which
+/// any other `r` (an operator-pinned off-track world) `P` may be irrational;
+/// there the computation falls back to the exact integer-sqrt floor `⌊√(beats²/P²)⌋`, which
 /// is the same value computed without forming the root. The beat is the
 /// absolute cosmic tick; the year is local geometry — a tight inner world
 /// rolls its calendar often, a distant one seldom, on the very same beat.
@@ -346,13 +346,13 @@ pub fn local_years(orbit_r: &Ratio, mass: &Ratio, beats: u64) -> u64 {
     if p2 <= ratio(0, 1) {
         return 0;
     }
-    // THE DIOPHANTINE PATH: P² is a perfect rational square ⇒ P is exact ⇒
+    // The diophantine path: P² is a perfect rational square ⇒ P is exact ⇒
     // the year is a direct rational floor, no isqrt.
     if let Some(period) = exact_sqrt(&p2) {
         let years = (ratio(beats as i64, 1) / period).floor();
         return years.to_integer().to_u128().unwrap_or(u128::MAX as u128) as u64;
     }
-    // THE FALLBACK (off-track r): the exact integer-sqrt floor of beats²/P².
+    // The fallback (off-track r): the exact integer-sqrt floor of beats²/P².
     let beats2 = ratio(beats as i64, 1) * ratio(beats as i64, 1);
     let x = (beats2 / p2).floor().to_integer().to_u128().unwrap_or(u128::MAX);
     let mut lo = 0u64;
@@ -392,11 +392,11 @@ mod tests {
     fn the_keplerian_clock_ages_planets_by_their_own_geometry() {
         use crate::thermal::{local_years, orbital_period_squared};
         let g = StarClass::G.mass();
-        // Kepler: a distant orbit is a LONGER year than a close one (same star).
+        // Kepler: a distant orbit is a longer year than a close one (same star).
         let close = orbital_period_squared(&r(1, 2), &g);
         let far = orbital_period_squared(&r(4, 1), &g);
         assert!(far > close, "a distant world has a longer period");
-        // A HEAVIER star pulls a SHORTER year at the same orbit.
+        // A heavier star pulls a shorter year at the same orbit.
         let round_heavy = orbital_period_squared(&r(1, 1), &StarClass::O.mass());
         let round_sol = orbital_period_squared(&r(1, 1), &g);
         assert!(round_heavy < round_sol, "a heavier star shortens the year");
@@ -405,7 +405,7 @@ mod tests {
         assert_eq!(local_years(&r(1, 1), &g, 359), 0, "not yet a full orbit");
         assert_eq!(local_years(&r(1, 1), &g, 360), 1, "one 360-beat circuit = one local year");
         assert_eq!(local_years(&r(1, 1), &g, 720), 2, "two circuits, two years");
-        // Two planets, SAME beat, DIFFERENT ages: the close-and-heavy world has
+        // Two planets, same beat, different ages: the close-and-heavy world has
         // lived far more local years than a distant one on the same cosmic tick.
         let beat = 3600;
         let inner = local_years(&r(1, 4), &StarClass::O.mass(), beat);
@@ -417,20 +417,20 @@ mod tests {
     fn the_diophantine_clock_is_an_exact_rational_floor() {
         use crate::thermal::{exact_sqrt, local_years, orbital_period_squared};
         let g = StarClass::G.mass();
-        // A Diophantine track r = M·k² has a PERFECT-SQUARE P², so the period
-        // is an EXACT rational and the year is a pure floor ⌊T/P⌋ — no isqrt.
+        // A Diophantine track r = M·k² has a perfect-square P², so the period
+        // is an exact rational and the year is a pure floor ⌊T/P⌋ — no isqrt.
         let k = r(3, 2); // an off-lattice continuous k
         let rr = g.clone() * k.clone() * k.clone(); // r = M·k²
         let p2 = orbital_period_squared(&rr, &g);
         let period = exact_sqrt(&p2).expect("a Diophantine track has an exact rational period");
-        // P = BASE·M·k³ exactly (BASE = 360, M = 1): 360·(3/2)³ = 360·27/8.
+        // P = base·M·k³ exactly (base = 360, M = 1): 360·(3/2)³ = 360·27/8.
         assert_eq!(period, r(360, 1) * k.clone() * k.clone() * k, "P = BASE·M·k³ exact");
         // The year count is the exact rational floor ⌊beats/P⌋.
         let p_int = period.to_integer().to_u128().unwrap() as u64; // P here is integral
         assert_eq!(local_years(&rr, &g, p_int), 1, "one exact period = one year");
         assert_eq!(local_years(&rr, &g, p_int - 1), 0, "not yet a full period");
         assert_eq!(local_years(&rr, &g, 3 * p_int), 3, "three periods, three years");
-        // A NON-Diophantine r (P² not a perfect square) has no exact period —
+        // A non-Diophantine r (P² not a perfect square) has no exact period —
         // the isqrt fallback still answers, and agrees at the reference world.
         assert_eq!(exact_sqrt(&orbital_period_squared(&r(2, 1), &g)), None, "r=2 is off-track");
         assert_eq!(local_years(&r(1, 1), &g, 720), 2, "the reference world still ages exactly");

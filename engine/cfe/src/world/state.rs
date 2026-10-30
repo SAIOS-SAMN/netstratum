@@ -1,9 +1,9 @@
-//! THE STATE SHAPES — what a world IS, with no logic about what it
+//! The STATE shapes — what a world is, with no logic about what it
 //! does.
 //!
 //! Data only. Split out so a deed module can name a shape without
 //! pulling in the whole proposer, and so two lanes adding fields to
-//! different shapes do not collide (GROUND §4b -- the parallel-lane
+//! different shapes do not collide (Ground §4b -- the parallel-lane
 //! vent).
 
 use crate::dop::{ColonyOrb, Resource};
@@ -37,7 +37,7 @@ pub struct AbsorptionDebt {
 }
 
 /// BOND-1 (09 §2.2): one standing order — source streams `rate` of
-/// `resource` per tick to target, the span settled by ONE BondSettled
+/// `resource` per tick to target, the span settled by one BondSettled
 /// receipt at each touch (collect / sever / term expiry), anchored
 /// like demurrage. Committed state; replays from receipts alone.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -46,7 +46,7 @@ pub struct Bond {
     pub target: u64,
     pub resource: Resource,
     pub rate: Ratio,
-    /// Term in ticks (0 = open-ended); expires ORDERLY at sealed+term.
+    /// Term in ticks (0 = open-ended); expires orderly at sealed+term.
     pub term: u64,
     pub sealed: u64,
     /// The settle anchor — the stamp the span is owed from.
@@ -54,7 +54,7 @@ pub struct Bond {
 }
 
 /// FORWARD-1 (01 §7, 09 §2.3): one vitrified delivery pact — the
-/// obligor's `collateral` sits OUT of its bank (the lock gates every
+/// obligor's `collateral` sits out of its bank (the lock gates every
 /// spend by absence; the matrix is a lossless vault by construction)
 /// until `delivered ≥ quota` releases it home or the passed deadline
 /// slashes it to the beneficiary. Committed state; every mutation
@@ -73,7 +73,7 @@ pub struct Forward {
 }
 
 /// MARKET-1 / E-MKT-1: a resting offer — a receipted intent to trade,
-/// no escrow; the price IS want/give (guardrail 6: no absolute price).
+/// no escrow; the price is want/give (guardrail 6: no absolute price).
 /// Cargo is Resource or ElementId (31 §4) — never a second Resource code.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Offer {
@@ -94,7 +94,7 @@ pub struct Council {
     pub members: Vec<u64>,
     pub resource: Resource,
     pub quota: Ratio,
-    /// Per-member deliveries INTO the council (transfers and bond flow
+    /// Per-member deliveries into the council (transfers and bond flow
     /// to fellow members), member-order matching `members`.
     pub delivered: Vec<Ratio>,
     /// The collateral each member locked (the same for all — bound
@@ -122,21 +122,21 @@ pub struct Committed {
     /// MARKET-1: the resting offers, in posting order.
     pub offers: Vec<Offer>,
     /// TECH-1a: the discovered nodes — (orb, condition, node id,
-    /// RECEIPTED magnitude) in discovery order; condition 0 is the
+    /// receipted magnitude) in discovery order; condition 0 is the
     /// kernel solar leap. The magnitude is what the `TechDiscovered`
     /// receipt asserted (operator ruling 2026-08-05: receipt
-    /// authority) — the tick's boon factors read IT, never a table.
+    /// authority) — the tick's boon factors read it, never a table.
     pub techs: Vec<(u64, u8, [u8; 32], Ratio)>,
     /// WANT-1: the struck cognitive wants — (orb, kind), replay-
     /// derived like famine; kinds per the tag-62 table.
     pub wants: Vec<(u64, u8)>,
     /// E3.7: material wants — (orb, ElementId) for open-matter demand.
     pub element_wants: Vec<(u64, [u8; 32])>,
-    /// THRESHOLD-1: has this world CROSSED — does its chronicle hold
+    /// THRESHOLD-1: has this world crossed — does its chronicle hold
     /// an aperture leg? A world is a star system, so any leg is an
     /// interstellar deed; the first is the crossing (12_UNION §7).
     pub crossed: bool,
-    /// GAUGE-N: the world's gauge KEY — a graded vector of wrapped
+    /// GAUGE-N: the world's gauge key — a graded vector of wrapped
     /// exact rationals on the torus fiber, grown only by receipt.
     /// Grade 0 is the landed scalar; genesis is [0].
     pub gauge: Vec<Ratio>,
@@ -149,14 +149,14 @@ pub struct Committed {
     /// MANU-1: the forged instruments — (orb, tech node, grade) in
     /// forge order; reach law reads the best grade (10 §3f).
     pub instruments: Vec<(u64, [u8; 32], u8)>,
-    /// ROUTE-1: this book's live lanes — (deal, eta); a PAIR exists
+    /// ROUTE-1: this book's live lanes — (deal, eta); a pair exists
     /// where both books hold the deal.
     pub routes: Vec<(u64, crate::dop::Unit)>,
     /// E-ROUTE-1: element-specialized lanes — (deal, η, element, rail).
     pub element_routes: Vec<(u64, crate::dop::Unit, [u8; 32], u8)>,
-    /// #42: this book's standing PACTS, seal order. A treaty is a PAIR
+    /// #42: this book's standing pacts, seal order. A treaty is a pair
     /// object and neither world owns it — each carries its own leg, the
-    /// aperture's deal-id pattern — so this is what THIS world has
+    /// aperture's deal-id pattern — so this is what this world has
     /// agreed to, and the partner's book carries the mirror.
     /// Replay-rebuilt; expiry is read from the clock, never stored.
     pub treaties: Vec<crate::treaty::Treaty>,
@@ -176,23 +176,23 @@ pub struct Committed {
     /// GALACTIC-1 (tag 187): the regional resource-weighting seed, or None
     /// for a world that never charted a region.
     pub region_seed: Option<[u8; 32]>,
-    /// **THE EVOLUTIONARY STAGE** (`44_LINEAGES` §2c, tag 169): how far
+    /// **The evolutionary stage** (`44_LINEAGES` §2c, tag 169): how far
     /// the line has advanced along its arc. 0 at founding; the gated
     /// `EvolutionAdvanced` deed increments it. Lifts provisioning capacity.
     pub evolution_stage: u8,
-    /// **THE FAILURE STATE** (`50_WIN_CONDITIONS`, operator ruling
+    /// **The failure STATE** (`50_WIN_CONDITIONS`, operator ruling
     /// 2026-08-13: "there is no win state — there is a failure
     /// state"). `Some(stamp)` once the genesis orb's population has
     /// settled to zero; `None` while the line stands. The only closure
     /// this game has — there is no win to pair it with.
     pub collapsed: Option<u64>,
-    /// THE VERTICAL AXIS (tag 89, 2026-08-01): the seats held, as
-    /// (line, station) in seating order. A station GATES AUTHORITY, and
+    /// The vertical axis (tag 89, 2026-08-01): the seats held, as
+    /// (line, station) in seating order. A station gates authority, and
     /// until this landing it lived only in an editable registry file —
     /// so who held an office was outside the constitution entirely
-    /// (`KERNEL_RELAY` §1.5). The registry is now a CACHE from the
+    /// (`KERNEL_RELAY` §1.5). The registry is now a cache from the
     /// receipt on, exactly as `GenesisSealed` made it for the axes.
-    /// One seat per line: re-seating REPLACES, and the chain carries
+    /// One seat per line: re-seating replaces, and the chain carries
     /// the whole history of who sat where.
     pub stations: Vec<(String, u8)>,
     /// FLEET-1: receipted hulls (replay of mint/assign/scrap).
@@ -227,34 +227,34 @@ pub struct Committed {
     pub spy_marks: Vec<(u64, u8)>,
     /// O6.5: STAMP held in Vault custody per orb (not free bank).
     pub vault_stamp: Vec<(u64, Ratio)>,
-    /// CHEM science: cataloged gem identities (known chemistry).
+    /// Chem science: cataloged gem identities (known chemistry).
     pub chem_catalog: Vec<[u8; 32]>,
-    /// LAB: science seats (discipline wire, orb, rank).
+    /// Lab: science seats (discipline wire, orb, rank).
     pub science_seats: Vec<(u8, u64, u8)>,
-    /// LAB: bio clone counts per orb.
+    /// Lab: bio clone counts per orb.
     pub clone_counts: Vec<(u64, u64)>,
-    /// PROVISION (41 §3, COG Slice 2): the fractional population remainder
+    /// Provision (41 §3, COG Slice 2): the fractional population remainder
     /// per orb, in `[0, 1)` — the sub-person births the integer
     /// `clone_counts` cannot hold, accrued across touches (replay of
     /// `PopulationAccrued`). Zero for a line at demographic rest.
     pub pop_accrued: Vec<(u64, Ratio)>,
-    /// TAXATION (49 §5): the sovereign treasury balance per orb — an
+    /// Taxation (49 §5): the sovereign treasury balance per orb — an
     /// abstract fiscal reserve levies flow into and welfare spends from
     /// (replay of `TreasurySettled`, floored at zero).
     pub treasury_balances: Vec<(u64, Ratio)>,
-    /// COG-1 (doc 52 §7): the LEISURE BANK per orb — the cascade's surplus
+    /// COG-1 (doc 52 §7): the leisure bank per orb — the cascade's surplus
     /// above every survival drive, accumulated as the budget the Mind spends
     /// to mint (replay of `LeisureSettled`, floored at zero). Zero for a line
     /// with no surplus to spare — a mind that cannot afford to think.
     pub leisure_banks: Vec<(u64, Ratio)>,
-    /// LAB: synthetic mod grade per orb.
+    /// Lab: synthetic mod grade per orb.
     pub synth_mods: Vec<(u64, u8)>,
-    /// LAB: skin/face mod grade per orb.
+    /// Lab: skin/face mod grade per orb.
     pub skin_mods: Vec<(u64, u8)>,
-    /// LAB: rogue faction pressure per orb (synthetic matrix residual).
+    /// Lab: rogue faction pressure per orb (synthetic matrix residual).
     pub rogue_pressure: Vec<(u64, u8)>,
     /// E3.9: element allow-lists annexed to standing trade pacts —
-    /// (deal, partner, enumerated ids), append order. A list LIVES
+    /// (deal, partner, enumerated ids), append order. A list lives
     /// only while a live trade treaty with that partner carries its
     /// deal (liveness is a reading, never stored); it is pruned when
     /// the pact is struck or renounced. While any live list stands on
@@ -282,8 +282,8 @@ pub struct Prospected {
     pub orb: u64,
     pub stratum: u8,
     pub element: [u8; 32],
-    /// **ONT-2 — THE EXTRACTION INTEGRAL, not a richness scalar.** The
-    /// vein carries NO stored richness. Richness is DERIVED on every read
+    /// **ONT-2 — the extraction integral, not a richness scalar.** The
+    /// vein carries no stored richness. Richness is derived on every read
     /// as `element_properties(element, star).2 − extracted` (the immutable
     /// geometry minus this bounded ledger sum) — the collapsing `vein_wear`
     /// recurrence is gone. `extracted` is the cumulative `Σ AssayStruck.amount`
@@ -291,7 +291,7 @@ pub struct Prospected {
     /// terms, so its denominator is bounded forever by `denom(natural)² ≤ 36`
     /// and cannot explode. Starts at zero when the vein opens.
     pub extracted: Ratio,
-    /// **ONT-3 — THE REJUVENATION INTEGRAL, the mirror of `extracted`.** The
+    /// **ONT-3 — the rejuvenation integral, the mirror of `extracted`.** The
     /// bounded monotone sum of inverse receipts (`Σ VeinRejuvenated.injected`)
     /// a worked vein has recovered. Richness derives as
     /// `natural − extracted + rejuvenated` — `Geometry − Σ receipts + Σ inverse
@@ -316,13 +316,13 @@ pub struct World {
     pub(super) chronicle: Chronicle,
     pub(super) orbs: Vec<ColonyOrb>,
     pub(super) entities: Vec<Entity>,
-    /// THERMAL-1: the container's sun (the world IS the star system,
-    /// NS-6 §6); ABSENT until commissioned — thermal stays dormant.
+    /// THERMAL-1: the container's sun (the world is the star system,
+    /// NS-6 §6); absent until commissioned — thermal stays dormant.
     pub(super) star: Option<crate::thermal::StarClass>,
-    /// WORKSPACE, per orb: net flow since that orb's last collection —
+    /// Workspace, per orb: net flow since that orb's last collection —
     /// no receipt, no persistence, not committed.
     pub(super) accrued: Vec<(u64, Resource, Ratio)>,
-    /// VENT-1 WORKSPACE, per orb: vented entropy since last settle —
+    /// VENT-1 workspace, per orb: vented entropy since last settle —
     /// sealed into the cumulative ledger by `VentSettled` at collect,
     /// or carried into a partner's sink by ABSORB-1.
     pub(super) vent_pending: Vec<(u64, Ratio)>,
@@ -337,14 +337,14 @@ pub struct World {
     pub(super) councils: Vec<Council>,
     /// MARKET-1: the resting offers (committed, same law).
     pub(super) offers: Vec<Offer>,
-    /// IDEO-1 WORKSPACE, per orb: accrued ideological friction since
+    /// IDEO-1 workspace, per orb: accrued ideological friction since
     /// the last seal — sealed by `FrictionSettled` at collect.
     pub(super) friction_pending: Vec<(u64, Ratio)>,
-    /// TECH-1a: the discovered nodes with their RECEIPTED magnitudes
+    /// TECH-1a: the discovered nodes with their receipted magnitudes
     /// (committed — replays from receipts alone); condition 0 is the
     /// kernel solar leap.
     pub(super) techs: Vec<(u64, u8, [u8; 32], Ratio)>,
-    /// #41 WORKSPACE: the shear cursor — (receipts processed, carried
+    /// #41 workspace: the shear cursor — (receipts processed, carried
     /// sheet). A pure cache over receipts: never committed, never
     /// persisted; a resumed world rebuilds it at its first boundary.
     pub(super) shear_cursor: (usize, Vec<(u64, CrystalDeposit)>),
@@ -378,7 +378,7 @@ pub struct World {
     pub(super) veiled: bool,
     /// KERNEL-TAXON: the sealed taxon (replay of the receipt).
     pub(super) taxon: Option<(u8, u16)>,
-    /// ERA 1'S LAND (docs/86): the heads the world's own medium feeds wild,
+    /// Era 1'S land (docs/86): the heads the world's own medium feeds wild,
     /// read from the universe by the caller each boot (`set_land`); never
     /// committed. None on a world with no era-1 world under it.
     pub(super) land: Option<Ratio>,
@@ -388,11 +388,11 @@ pub struct World {
     /// prospect it already struck stays byte-identical either way, since
     /// `ProspectStruck` bakes its drawn element into the receipt forever.
     pub(super) region_seed: Option<[u8; 32]>,
-    /// THE EVOLUTIONARY STAGE (tag 169): the arc position (replay).
+    /// The evolutionary stage (tag 169): the arc position (replay).
     pub(super) evolution_stage: u8,
-    /// THE FAILURE STATE (tag 172): `Some(stamp)` once collapsed (replay).
+    /// The failure STATE (tag 172): `Some(stamp)` once collapsed (replay).
     pub(super) collapsed: Option<u64>,
-    /// THE VERTICAL AXIS (tag 89): the seats held, (line, station).
+    /// The vertical axis (tag 89): the seats held, (line, station).
     pub(super) stations: Vec<(String, u8)>,
     /// FLEET-1 hulls.
     pub(super) hulls: Vec<crate::dop::Hull>,
@@ -412,31 +412,31 @@ pub struct World {
     pub(super) spy_marks: Vec<(u64, u8)>,
     /// O6.5: Vault custody STAMP (replay of deposit/withdraw).
     pub(super) vault_stamp: Vec<(u64, Ratio)>,
-    /// CHEM science: cataloged gems (replay of ChemCataloged).
+    /// Chem science: cataloged gems (replay of ChemCataloged).
     pub(super) chem_catalog: Vec<[u8; 32]>,
-    /// LAB: science seats (discipline, orb, rank) — replay of ScienceSeated.
+    /// Lab: science seats (discipline, orb, rank) — replay of ScienceSeated.
     pub(super) science_seats: Vec<(u8, u64, u8)>,
-    /// LAB: clone counts — replay of LabCreated (clone path).
+    /// Lab: clone counts — replay of LabCreated (clone path).
     pub(super) clone_counts: Vec<(u64, u64)>,
-    /// PROVISION (41 §3, COG Slice 2): fractional population remainder per
+    /// Provision (41 §3, COG Slice 2): fractional population remainder per
     /// orb in `[0, 1)` — replay of `PopulationAccrued`.
     pub(super) pop_accrued: Vec<(u64, Ratio)>,
-    /// TAXATION (49 §5): sovereign treasury balances — replay of
+    /// Taxation (49 §5): sovereign treasury balances — replay of
     /// `TreasurySettled` (levies in, welfare out; floored at zero).
     pub(super) treasury_balances: Vec<(u64, Ratio)>,
     /// COG-1 (doc 52 §7): leisure banks — replay of `LeisureSettled`
     /// (cascade surplus in, minting out; floored at zero).
     pub(super) leisure_banks: Vec<(u64, Ratio)>,
-    /// docs/64 P1 — the leisure banks as last RECEIPTED (what replay and the
+    /// docs/64 P1 — the leisure banks as last receipted (what replay and the
     /// judge stand on). The live bank accrues each beat without a receipt;
     /// a spend, or the carry, receipts the difference. Workspace: set from
     /// the banks on every resume, never committed.
     pub(super) leisure_receipted: Vec<(u64, Ratio)>,
-    /// LAB: synth mod grades.
+    /// Lab: synth mod grades.
     pub(super) synth_mods: Vec<(u64, u8)>,
-    /// LAB: skin mod grades.
+    /// Lab: skin mod grades.
     pub(super) skin_mods: Vec<(u64, u8)>,
-    /// LAB: rogue faction pressure.
+    /// Lab: rogue faction pressure.
     pub(super) rogue_pressure: Vec<(u64, u8)>,
     /// E3.9: element allow-lists (replay of TreatyElementsAllowed;
     /// pruned with the pact they ride).
@@ -469,11 +469,11 @@ pub(super) struct CrystalDeposit {
     /// the carried sheet stays bounded (the #41 cursor law).
     pub(super) vented_entries: Vec<(u64, Ratio)>,
     pub(super) encased_entries: Vec<(u64, Ratio)>,
-    /// WANT-1: the last cross-world LINK (aperture leg, bond seal or
+    /// WANT-1: the last cross-world link (aperture leg, bond seal or
     /// settle) and whether one ever stood — the resonance reading.
     pub(super) last_link: Option<u64>,
     /// WANT-1: the last discovery and whether one ever landed — the
-    /// novelty reading (licensed arrivals count: foreign signal FEEDS).
+    /// novelty reading (licensed arrivals count: foreign signal feeds).
     pub(super) last_node: Option<u64>,
 }
 

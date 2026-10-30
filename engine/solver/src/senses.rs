@@ -1,6 +1,6 @@
-//! **THE SENSES** (docs/60 D1) — the channels a word acts in, and the ones a
+//! **The senses** (docs/60 D1) — the channels a word acts in, and the ones a
 //! mind perceives. A word's channels are read off its ops; a line's senses
-//! are read off its register perception. A sense bounds DERIVATION, never
+//! are read off its register perception. A sense bounds derivation, never
 //! use: a mind withholds a program it could not have perceived, but a word
 //! it learned is used whole.
 
@@ -21,7 +21,7 @@ impl Senses {
     /// names no profile for.
     pub const ALL: Senses = Senses(SIGHT | HUE | RHYTHM | TOUCH);
 
-    /// THE PROFILE A REGISTER PERCEPTION NAMES (docs/60 §2). Each of the
+    /// The profile A register PERCEPTION names (docs/60 §2). Each of the
     /// three planar-family perceptions is deaf to one channel; volumetric
     /// keeps its own seat and reads as every channel here.
     pub fn of_perception(perception: &str) -> Senses {

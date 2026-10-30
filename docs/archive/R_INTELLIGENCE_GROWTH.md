@@ -4,7 +4,7 @@
 **Status:** research directive. Unifies R-D4, R-D5/6 and the salvaged
 nursery design against measurements this lane already took.
 **2026-08-12:** the mint's gate design is now charter law —
-`38_COGNITION_CONVERGENCE.md` §4 (novelty-gate, task #13): the four
+`38_COGNITION_CONVERGENCE.md` §4 (NOVELTY-GATE, task #13): the four
 structural gates (unique orbit · measured productivity · verifier
 conservation · convergent derivation), consuming `rfa-core`'s
 `rcf_hash` and `coherence_functional` as their first production

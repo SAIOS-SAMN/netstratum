@@ -31,7 +31,7 @@ Using Mycelium's own extractor on Netstratum's tasks was refused, because that w
 - every word minted in the sampled window has hardness 1;
 - depth is capped at 3;
 - 11 of 29 reporting worlds have minted no words;
-- no world is in contact with another (COG-atlas vessels = 0);
+- no world is in contact with another (COG-ATLAS vessels = 0);
 - 24 of 29 civilizations read their drives as decline.
 
 ## Next reading

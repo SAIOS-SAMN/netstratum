@@ -18,12 +18,12 @@ pub fn ratio(numer: i64, denom: i64) -> Ratio {
     BigRational::new(BigInt::from(numer), BigInt::from(denom))
 }
 
-/// THE SEALED DEFINITION of canonical form (kernel I3 calls this; it never
+/// The sealed definition of canonical form (kernel I3 calls this; it never
 /// defines canonicity itself — the equations are shared, never copied,
-/// KERNEL CHARTER §0b). A value is canonical iff reducing it changes
+/// kernel Charter §0b). A value is canonical iff reducing it changes
 /// nothing: `BigRational::new` normalizes to coprime terms with a positive
 /// denominator, so `is_canonical(r)` holds exactly when `r` already equals
-/// its own normalization. Every value CONSTRUCTED through this type is
+/// its own normalization. Every value constructed through this type is
 /// canonical by construction — so this returns true for any well-formed
 /// `Ratio`, and its role is the sealed law + defense-in-depth at the byte
 /// boundary (a decode that produced a non-canonical value would fail here).
@@ -86,7 +86,7 @@ fn trimmed(bytes: Vec<u8>) -> Vec<u8> {
     bytes[lead..].to_vec()
 }
 
-/// **THE CANONICAL TEXT FORM OF AN EXACT RATIONAL.** Integers plain,
+/// **The CANONICAL text form of an exact rational.** Integers plain,
 /// everything else `p/q` — never a decimal, never a float.
 ///
 /// It lives here, beside the type it governs, because that is what it
@@ -102,11 +102,11 @@ pub fn ratio_str(r: &Ratio) -> String {
 }
 
 // ─────────────────────────────────────────────────────────────────────
-// THE TURN — exact angular geometry
+// the turn — exact angular geometry
 // ─────────────────────────────────────────────────────────────────────
 //
-// **RELOCATED FROM `cfe::dop` (2026-08-05)** so the solver can address a
-// SPHERE in the same frame the universe sites its orbs in (operator
+// **Relocated from `cfe::dop` (2026-08-05)** so the solver can address a
+// sphere in the same frame the universe sites its orbs in (operator
 // ruling: *grid needs to be discarded for spherical references*).
 // `solver-verify` cannot reach `cfe` — the arrow runs the other way —
 // and copying the constant would be the two-truths defect. `ratio` sits
@@ -114,7 +114,7 @@ pub fn ratio_str(r: &Ratio) -> String {
 // `cfe::dop` re-exports every name, so every existing citation resolves
 // unchanged.
 
-/// **THE DERIVATION OF THE RING, computed rather than asserted.**
+/// **The derivation of the ring, computed rather than asserted.**
 ///
 /// `gcd` and `lcm` as `const fn` so the ring's size is not a number
 /// anyone typed — it is the answer to the requirement, evaluated by the
@@ -130,15 +130,15 @@ pub const fn gcd(a: i64, b: i64) -> i64 {
     a
 }
 
-/// **THE REQUIREMENT THE RING ANSWERS, and it is not a number either**
+/// **The requirement the ring answers, and it is not a number either**
 /// (operator ruling 2026-08-05: *all of the constants here need to be
 /// derived dynamically*).
 ///
 /// A first cut wrote `RING_SUBDIVISIONS = 6` — "halves through sixths
 /// must land on a slot" — which derived sixty from a typed six and moved
-/// the magic number one level down rather than removing it. Six was
-/// never the requirement. THE REQUIREMENT IS THE ENGINE'S OWN CLOSED
-/// VOCABULARIES: a population must be layoutable symmetrically by any
+/// the hard-coded constant one level down rather than removing it. Six was
+/// never the requirement. The requirement is the engine's own CLOSED
+/// vocabularies: a population must be layoutable symmetrically by any
 /// partition it actually has, so the ring must admit each of their
 /// arities.
 ///
@@ -151,7 +151,7 @@ pub const fn gcd(a: i64, b: i64) -> i64 {
 ///
 /// The distinct arities are `{3, 4, 5}` and `lcm(3, 4, 5) = 60`.
 ///
-/// **STATIONS IS NOT IN THIS SET (ruling 2026-08-23).** `STATIONS`
+/// **STATIONS is not in this set (ruling 2026-08-23).** `STATIONS`
 /// (`ledger::registry`) is an append-only OFFICE/ROLE taxonomy — T4–T9
 /// (Wave-1, 2026-08-07), then T10–T15 (2026-08-08), then `elder`/
 /// `ancient` (2026-08-13) grew it 4 → 10 → 16 → 18, and it will keep
@@ -163,18 +163,18 @@ pub const fn gcd(a: i64, b: i64) -> i64 {
 /// assert `TURN_SLOTS == 60`), or recognize the coupling was never
 /// load-bearing for stations in the first place. No production code
 /// positions a station on the turn ring (`STATIONS.len()` appeared
-/// ONLY in this test's own arrays, never in `shell.rs`, never in a
+/// only in this test's own arrays, never in `shell.rs`, never in a
 /// ring-placement call) — unlike dispositions/metabolisms/perceptions,
-/// which the incursion generator DOES draw uniformly over
+/// which the incursion generator does draw uniformly over
 /// (`conductor::lib::beacon.uniform_index`), a real (if not yet
-/// ring-positioned) population partition. Sixty already IS the
+/// ring-positioned) population partition. Sixty already is the
 /// requirement's own answer for the four vocabularies that remain in
 /// it — the base-60 orbital ring (below) stands on its own, unmoved
 /// by however many offices the game later names.
 ///
-/// **The vocabularies live ABOVE this crate** — `ledger::registry` and
+/// **The vocabularies live above this crate** — `ledger::registry` and
 /// `cfe` both depend on `ratio`, never the reverse — so the arities are
-/// stated here and PINNED against the live vocabularies from up there
+/// stated here and pinned against the live vocabularies from up there
 /// (`ring_derivation_pins`). Copying them down would be the two-truths
 /// defect; stating the requirement and proving it matches is not.
 pub const RING_ARITIES: [i64; 3] = [3, 4, 5];
@@ -193,12 +193,12 @@ pub const fn lcm_of(arities: &[i64]) -> i64 {
     held
 }
 
-/// THE ORBITAL SLOTS — a turn divides into SIXTY.
+/// The orbital slots — a turn divides into sixty.
 ///
 /// **Base 60, for the reason base 60 has always been used.** It is the
 /// smallest number that divides evenly by 1, 2, 3, 4, 5, 6, 10, 12, 15,
 /// 20, 30 and 60 — twelve exact subdivisions. Halves, thirds, quarters,
-/// fifths and sixths of a ring all land ON a slot, so a system can be
+/// fifths and sixths of a ring all land on a slot, so a system can be
 /// laid out symmetrically at many arities without any angle falling
 /// between the teeth. Sixty is not a rounding: it is the number that
 /// makes the most placements exact.
@@ -206,11 +206,11 @@ pub const fn lcm_of(arities: &[i64]) -> i64 {
 /// A slot is `k/60` for `k ∈ 0..60`, and `k = 60` is `k = 0` — the ring
 /// closes.
 ///
-/// **AND IT IS WHY ANGLES ARE TURNS, NOT RADIANS.** A full turn in
+/// **And it is why angles are turns, not radians.** A full turn in
 /// radians is `2π`, which no rational closes, so a wrapped angle would
 /// need a float and the seam would never meet. In turns the seam is
 /// exact and the circle is representable.
-/// **DERIVED: `lcm(3, 4, 5) = 60`.** Not typed — evaluated from
+/// **Derived: `lcm(3, 4, 5) = 60`.** Not typed — evaluated from
 /// [`RING_ARITIES`], the arities of the engine's own closed
 /// vocabularies. Sixty is not a rounding and not a tradition here: it is
 /// the smallest ring on which every partition the population actually
@@ -218,7 +218,7 @@ pub const fn lcm_of(arities: &[i64]) -> i64 {
 /// follows on its own.
 pub const TURN_SLOTS: i64 = lcm_of(&RING_ARITIES);
 
-/// **DOES A DIVISION OF THE RING HOLD?** The proof a caller gets instead
+/// **Does A division of the ring hold?** The proof a caller gets instead
 /// of a bool: the arity, the ring it was checked against, and the
 /// remainder that decided it.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -250,7 +250,7 @@ impl DivisionProof {
     }
 }
 
-/// Divide a ring of `ring` slots into `arity` cells, PROVING the result.
+/// Divide a ring of `ring` slots into `arity` cells, proving the result.
 pub const fn divide_ring(ring: i64, arity: i64) -> DivisionProof {
     if arity <= 0 {
         return DivisionProof { arity, ring, remainder: -1, cell_span: 0 };
@@ -263,8 +263,8 @@ pub const fn divide_ring(ring: i64, arity: i64) -> DivisionProof {
     }
 }
 
-/// Is this angle ON a slot? Refusing off-slot angles keeps placement
-/// DISCRETE, and discreteness is what makes collision a decidable
+/// Is this angle on a slot? Refusing off-slot angles keeps placement
+/// discrete, and discreteness is what makes collision a decidable
 /// question rather than a tolerance.
 pub fn on_slot(theta: &Ratio) -> bool {
     let scaled = theta.clone() * ratio(TURN_SLOTS, 1);
@@ -284,14 +284,14 @@ pub fn slot_angle(k: i64) -> Ratio {
     ratio(k.rem_euclid(TURN_SLOTS), TURN_SLOTS)
 }
 
-/// The wrapped gap between two turn-fractions — the SHORT WAY ROUND,
+/// The wrapped gap between two turn-fractions — the short way round,
 /// which is what makes each angular axis a circle rather than a segment.
 pub fn turn_gap(a: &Ratio, b: &Ratio) -> Ratio {
     let raw = if a >= b { a.clone() - b.clone() } else { b.clone() - a.clone() };
     raw.clone().min(ratio(1, 1) - raw)
 }
 
-/// **A SLOT — an angle PROVEN on the ring at construction** (29_CONSTRUCTION
+/// **A slot — an angle proven on the ring at construction** (29_CONSTRUCTION
 /// C1: apply from theorems, never judge the outcome).
 ///
 /// `Ratio` can spell any turn-fraction, so every consumer of an angle
@@ -326,7 +326,7 @@ impl Slot {
     }
 }
 
-/// **A UNIT-INTERVAL VALUE — `x ∈ [0, 1)`, proven at construction.**
+/// **A unit-interval value — `x ∈ [0, 1)`, proven at construction.**
 ///
 /// Albedo, route efficiency and every other half-open-unit quantity
 /// carried bare `Ratio`s, so each verb re-checked the range and refused
@@ -346,7 +346,7 @@ impl Unit {
     }
 }
 
-/// **A STRICTLY POSITIVE VALUE — `x > 0`, proven at construction.**
+/// **A strictly positive value — `x > 0`, proven at construction.**
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Positive(Ratio);
 
@@ -359,10 +359,10 @@ impl Positive {
     }
 }
 
-/// **THE LITERAL DOORS** — for literals written in source, where the
+/// **The literal doors** — for literals written in source, where the
 /// author can see the numbers. They panic on an out-of-range literal,
 /// which is the same class as [`ratio`] itself panicking on `d = 0`:
-/// a malformed LITERAL is a build error wearing a run-time coat, not a
+/// a malformed literal is a build error wearing a run-time coat, not a
 /// runtime condition. Values that arrive at runtime go through
 /// [`Unit::new`] / [`Positive::new`], which fault instead.
 pub fn unit(numer: i64, denom: i64) -> Unit {
@@ -372,7 +372,7 @@ pub fn positive(numer: i64, denom: i64) -> Positive {
     Positive::new(ratio(numer, denom)).expect("a positive literal must exceed 0")
 }
 
-/// **A NON-NEGATIVE VALUE — `x ≥ 0`, proven at construction.** The mint
+/// **A non-negative value — `x ≥ 0`, proven at construction.** The mint
 /// amount's shape: zero is lawful (a rung can pay nothing), negative is
 /// not a quantity.
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]

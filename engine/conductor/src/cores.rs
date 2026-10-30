@@ -1,24 +1,24 @@
-//! **THE CORES** (docs/58 §6 rulings 5 and 9; the cores design approved by
+//! **The cores** (docs/58 §6 rulings 5 and 9; the cores design approved by
 //! the operator 2026-10-08) — slice (1): every sink reaches its galaxy's core.
 //!
 //! A charted galaxy's core is the throat at its centre, an account on the
-//! universe ledger. What a world's deeds UNMAKE no longer vanishes: the judge
+//! universe ledger. What a world's deeds unmake no longer vanishes: the judge
 //! (`Polity::chain_beat`) already holds every deed's state before and after,
 //! so each deed's sink is read there, exactly, from the world's own holdings,
 //! and kept PENDING beside the world until the year's close deposits it at
-//! the core (`CoreDeposited`, tag 193). Netstratum's core REFLECTS (operator
+//! the core (`CoreDeposited`, tag 193). Netstratum's core reflects (operator
 //! ruling, 2026-10-08): the re-emission is slice (2).
 //!
 //! What a sink is follows the universe's measured matter budget (docs/58 §7):
 //!
-//!   * the FEE AND LOSS kinds ([`LOSS_KINDS`]) — whatever the world's holdings
+//!   * the fee and loss kinds ([`LOSS_KINDS`]) — whatever the world's holdings
 //!     fell by in that deed;
-//!   * a RAZE — the half the world does not get back, which by the raze law
+//!   * a raze — the half the world does not get back, which by the raze law
 //!     equals the half it does (the refund the deed credits);
-//!   * TRANSIT MELT — an aperture's two legs, paired by deal across the
+//!   * Transit melt — an aperture's two legs, paired by deal across the
 //!     universe: what left the sender less what reached the receiver.
 //!
-//! A build is NOT a sink: its cost is embodied in the zone (the raze is where
+//! A build is not a sink: its cost is embodied in the zone (the raze is where
 //! half of it is lost). Holdings are banked resources and STAMP, exact.
 
 use cfe::dop::{ClosureEvent, Resource};
@@ -217,9 +217,9 @@ impl Pending {
     }
 }
 
-/// THE PAIRING: over every world's held legs, each deal whose sent legs and
+/// The pairing: over every world's held legs, each deal whose sent legs and
 /// received legs are both present for a holding melts `-(sum)` — deposited
-/// at the SENDER's core — and its legs leave the pending sets. Returns
+/// at the sender's core — and its legs leave the pending sets. Returns
 /// `(sender index, holding, melt)`.
 pub fn pair_legs(pending: &mut [&mut Pending]) -> Vec<(usize, Holding, Ratio)> {
     let zero = ratio(0, 1);
@@ -238,7 +238,7 @@ pub fn pair_legs(pending: &mut [&mut Pending]) -> Vec<(usize, Holding, Ratio)> {
         }
     }
     let mut melts = Vec::new();
-    // The paired deals, then ONE pass over each line's legs (was a pass over
+    // The paired deals, then one pass over each line's legs (was a pass over
     // every line's legs per paired deal: a year's ~10^5 deals times ~10^5
     // legs at every year close, docs/64).
     let mut paired: std::collections::BTreeSet<(u64, Holding)> = std::collections::BTreeSet::new();

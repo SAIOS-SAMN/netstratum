@@ -1,9 +1,9 @@
-//! THE FLOWS (docs/83; xylarium 11.0 "NEVER PLACE MATTER - THE FLOWS",
-//! agreed with xylarium 2026-10-16). Operator: "let the formulas place where
+//! The flows (docs/83; Xylarium 11.0 "never place MATTER - the flows",
+//! agreed with Xylarium 2026-10-16). Operator: "let the formulas place where
 //! the matter goes and how it gets there and what it does after it gets
 //! there." Matter is held turning: it moves only as its STATE changes, by
 //! laws acting on that state; where it gathers, what is held and what is
-//! gas, where it collapses, are READINGS of the state, never placements.
+//! gas, where it collapses, are readings of the state, never placements.
 //!
 //! - **A mote's state**, carried forward, never rebuilt: its kind and
 //!   amount, its spin in the orbit's plane `ℓ_o` (reach `R = ℓ_o/H`, the
@@ -12,9 +12,9 @@
 //!   turns against the bell), its agitation and birth.
 //! - **The torque**, once per bell of the torquing core (the core's bell is its
 //!   bounce, once an echo it regenerates), every mote, held or not: per
-//!   plane, the HEMISPHERE the mote's phase stands in against the bell
+//!   plane, the hemisphere the mote's phase stands in against the bell
 //!   signs it (the S⁰ face; operator: coherence is a count over the S^n
-//!   hemispheres, in the sphere's own measure) and S¹'s own LINEAR measure in
+//!   hemispheres, in the sphere's own measure) and S¹'s own linear measure in
 //!   turns sizes it, `1 − 2·|ψ|` (ψ the phase against the bell, |ψ| its
 //!   distance on the circle); times κ, the push's share gripping the mote
 //!   by its core's hold at its reach: `κ_o = p·δ(R)` for the own family in
@@ -26,8 +26,8 @@
 //! - **The cut is a reading**: a mote's held share is the part of its
 //!   dispersal band (`R(1 ± p)`) within the throat, in both planes,
 //!   `f_o · f_c`; the rest is the galaxy's gas.
-//! - **Two exits, by state**: the JET, `ℓ_⊥` carrying the axial reading past
-//!   the throat (`ℓ_⊥/H ≥ H`), along the torsion axis; RADIAL ESCAPE, `R ≥ H`
+//! - **Two exits, by state**: the jet, `ℓ_⊥` carrying the axial reading past
+//!   the throat (`ℓ_⊥/H ≥ H`), along the torsion axis; radial escape, `R ≥ H`
 //!   in the orbit's plane. Either way the mote crosses whole into the
 //!   medium one tier up.
 //! - **Collapse where the motes are**: a mote and those near it in reach
@@ -36,8 +36,8 @@
 //!   enclosure, against their agitation (the unlocked face heats, in it) and
 //!   the shear.
 //!
-//! THE PLANES (docs/95; operator 2026-10-26: "our spatial dimension 3D via
-//! 3Z/3Q + R coordinates (positive R denotes 'forward' in linear time)"):
+//! The PLANES (docs/95; ruling of 2026-10-26: the spatial dimension is 3D via
+//! 3Z/3Q + R coordinates, positive R denoting 'forward' in linear time):
 //! three spatial planes, each axis's closed (Z) and open (Q) frames, and the
 //! R loop, the circulation (outbound along the axis, R forward; home through
 //! the disc).
@@ -45,12 +45,12 @@ use crate::pulse::Manifest;
 use cfe::ratio::{ratio, Ratio};
 use num_traits::Zero;
 
-/// THE SPATIAL PLANES (docs/95): a nucleus weighs `3Z`, one frame of each
-/// proton on each of three axes, and each axis is a PLANE of its closed (Z)
+/// The SPATIAL PLANES (docs/95): a nucleus weighs `3Z`, one frame of each
+/// proton on each of three axes, and each axis is a plane of its closed (Z)
 /// and open (Q) frames. A body orbits in all three at its one rate `2δ` a
 /// bell; their phases are where it stands in each.
 pub const SPACE: [usize; 3] = [0, 2, 3];
-/// THE R LOOP (docs/95 §2): R is reach, the axis paired with none; its loop
+/// The R LOOP (docs/95 §2): R is reach, the axis paired with none; its loop
 /// is the circulation (the orthogonal orbit), its outbound leg R forward.
 pub const LOOP: usize = 1;
 /// A phase vector's length: the three spatial planes and the R loop.
@@ -71,7 +71,7 @@ pub fn full(phase: &mut Vec<Ratio>) {
     }
 }
 
-/// THE ANTIPODE: through the centre, half a turn on in every spatial plane.
+/// The antipode: through the centre, half a turn on in every spatial plane.
 pub fn antipode(phase: &mut [Ratio]) {
     for &k in &SPACE {
         if let Some(ph) = phase.get_mut(k) {
@@ -80,7 +80,7 @@ pub fn antipode(phase: &mut [Ratio]) {
     }
 }
 
-/// A TILT read whole: its three shares, isotropic (a third each) where none
+/// A tilt read whole: its three shares, isotropic (a third each) where none
 /// is carried.
 pub fn tilt_of(t: &[Ratio]) -> Vec<Ratio> {
     if t.len() == SPACE.len() {
@@ -106,7 +106,7 @@ pub fn tilt_from(spins: &[Ratio]) -> Vec<Ratio> {
     t
 }
 
-/// TILTS BLENDED where turning bodies join: each plane's spin added,
+/// Tilts blended where turning bodies join: each plane's spin added,
 /// `Σ w·ℓ·t_k`, re-read as shares (`w` each one's holding, `ℓ` its spin).
 pub fn blend(parts: &[(Ratio, Ratio, Vec<Ratio>)]) -> Vec<Ratio> {
     let mut sums = vec![ratio(0, 1); SPACE.len()];
@@ -129,7 +129,7 @@ pub fn space_of(phase: &[Ratio]) -> Vec<Ratio> {
 }
 
 
-/// A MOTE: matter as held turning, its state carried forward.
+/// A mote: matter as held turning, its state carried forward.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Mote {
     pub key: crate::chem::Kind,
@@ -143,25 +143,25 @@ pub struct Mote {
     pub phase: Vec<Ratio>,
     pub agitation: Ratio,
     pub born: u64,
-    /// Its STREAM KIND, inherited from where it entered and carried
+    /// Its stream KIND, inherited from where it entered and carried
     /// forward, never reassigned: false the continuum (the core's founding
     /// outflow, a star's outbursts and wind), true the vacuum (ocean
     /// arrivals).
     pub vacuum: bool,
-    /// THE LEVER (docs/85 §9): per plane, the whole nuclei of its holding
-    /// (signed, in grains) standing one PLACE past its mark, so its holding's
+    /// The lever (docs/85 §9): per plane, the whole nuclei of its holding
+    /// (signed, in grains) standing one place past its mark, so its holding's
     /// centre is its true position: `phase + lever/amount · place`. Never
     /// more than half its amount. Empty where nothing stands past.
     pub lever: Vec<Ratio>,
     /// The place its lever is counted in (a share of a turn).
     pub lever_place: Ratio,
-    /// ITS TILT (docs/96 step 1): its orbit spin's share in each spatial
+    /// Its tilt (docs/96 step 1): its orbit spin's share in each spatial
     /// plane, `ℓ_k = ℓ_o·t_k`, the shares summing to one (L1, so its reach
     /// stays `ℓ_o/H`); empty reads isotropic, a third in each.
     pub tilt: Vec<Ratio>,
 }
 
-/// A mote's TRUE phase in plane k (ascent): its mark and the share of its
+/// A mote's true phase in plane k (ascent): its mark and the share of its
 /// holding standing one place past it.
 pub fn true_phase(x: &Mote, k: usize) -> Ratio {
     let at = x.phase.get(k).cloned().unwrap_or_else(|| ratio(0, 1));
@@ -171,7 +171,7 @@ pub fn true_phase(x: &Mote, k: usize) -> Ratio {
     }
 }
 
-/// SETTLE a mote's levers from this bell's (descent): each plane's lever
+/// Settle a mote's levers from this bell's (descent): each plane's lever
 /// `(next mark, share f)` stands `f` of its holding one place past its mark,
 /// in whole nuclei (the rest below one nucleus acknowledged, the quantum
 /// tier); a plane with none stands whole on its mark.
@@ -203,7 +203,7 @@ pub fn weight(k: &crate::chem::Kind) -> Ratio {
     ratio(i64::from(crate::chem::weight(k)), 1)
 }
 
-/// A MOTE'S NUCLEAR GRIP (docs/103 §6, the bond's nuclear layer ν): its
+/// A mote's nuclear grip (docs/103 §6, the bond's nuclear layer ν): its
 /// nuclei's fibres' grip, `κ_w·g` at the held share `g` of its place (docs/105
 /// §3), a cluster's by its parts' holding. In `[0, 1]`.
 pub fn grip_share(x: &Mote, g: &Ratio) -> Ratio {
@@ -227,7 +227,7 @@ fn frac(x: &Ratio) -> Ratio {
     x.clone() - x.floor()
 }
 
-/// THE MEAN OF PHASES ON THE CIRCLE, never on the line (a line mean of
+/// The MEAN of PHASES on the circle, never on the line (a line mean of
 /// 0.95 and 0.05 is ½, the far face): each phase's signed offset from a
 /// member's, `(−½, ½]`, weighted, added back on the ring. Exact; the same
 /// for any member as reference while the members share a hemisphere.
@@ -251,7 +251,7 @@ fn off(psi: &Ratio) -> Ratio {
     if f > ratio(1, 2) { ratio(1, 1) - f } else { f }
 }
 
-/// THE TORQUE'S RESPONSE in one plane: the hemisphere signs it (the first half
+/// The torque's response in one plane: the hemisphere signs it (the first half
 /// of the circle against the bell gains, the second loses), S¹'s linear
 /// measure sizes it, `1 − 2|ψ|`.
 pub fn response(psi: &Ratio) -> Ratio {
@@ -260,7 +260,7 @@ pub fn response(psi: &Ratio) -> Ratio {
     if f < ratio(1, 2) { share } else { -share }
 }
 
-/// THE TORQUE'S RESPONSE OVER ITS PASSAGE (with xylarium: a torque sampled at
+/// The torque's response over its passage (with Xylarium: a torque sampled at
 /// one instant while the mote sweeps near a whole turn falls on one
 /// hemisphere every time, and the core pays without end): the exact mean of
 /// the sawtooth `1 − 2·frac(ψ)` over the arc `[ψ, ψ + len]`. Within each
@@ -288,7 +288,7 @@ pub fn in_step(a: &Ratio, b: &Ratio) -> Ratio {
     ratio(1, 1) - ratio(2, 1) * off(&(a.clone() - b.clone()))
 }
 
-/// QUANTUM TORSION (docs/100 §8; the bounce is Einstein–Cartan, torsion
+/// Quantum torsion (docs/100 §8; the bounce is Einstein–Cartan, torsion
 /// couples to spin): the winding a quantum state keeps from the twist, its
 /// lead between planes against its enclosure's plane, `τ = Σ_k |t_k −
 /// t̄_k|/2` (L1, in `[0, 1]`: 0 settled, 1 wound wholly into a plane its
@@ -299,15 +299,15 @@ pub fn torsion(tilt: &[Ratio], plane: &[Ratio]) -> Ratio {
     t.iter().zip(&p).fold(ratio(0, 1), |s, (a, b)| s + if a > b { a.clone() - b.clone() } else { b.clone() - a.clone() }) / ratio(2, 1)
 }
 
-/// Its SENSE (docs/100 §8): the winding turns with the route, forward on the
+/// Its sense (docs/100 §8): the winding turns with the route, forward on the
 /// continuum leg, backward on the vacuum leg, so a Möbius pass reverses it.
 pub fn torsion_signed(x: &Mote, plane: &[Ratio]) -> Ratio {
     let t = torsion(&x.tilt, plane);
     if x.vacuum { -t } else { t }
 }
 
-/// A MOTE'S STEP WITH A BODY'S PHASE (docs/99 §2.2; operator 2026-10-27:
-/// "we shouldnt have frames we should have phases"): its in-step share
+/// A mote's step with A body's phase (docs/99 §2.2; ruling of 2026-10-27:
+/// phases, not frames): its in-step share
 /// across the spatial planes by its own orbit's shares (its tilt, L1; a plane
 /// its orbit does not turn in carries no weight), `C = Σ t_k·in_step(ψ_k,
 /// ψ̄_k)`. One in step, 0 opposed; it stands on the body's held hemisphere
@@ -317,12 +317,11 @@ pub fn step_with(x: &Mote, psi: &[Ratio]) -> Ratio {
     SPACE.iter().zip(&t).fold(ratio(0, 1), |c, (&k, tk)| c + tk.clone() * in_step(x.phase.get(k).unwrap_or(&ratio(0, 1)), psi.get(k).unwrap_or(&ratio(0, 1))))
 }
 
-/// THE FIRMAMENT'S ORDER (operator 2026-10-19: "the pulses over time and the
-/// reverberation/pulsation of the bouncing antipoles should move the
-/// firmament into order (think, dodecahedron - but that needs to be derived
-/// from the mathematics, not set as a dodecahedron)"; "build the
-/// firmament"). The heart's own law, one tier up: matter pushes matter by
-/// the ELECTROMAGNETIC REPULSION gripping its open frames. On each pulse,
+/// The firmament's order (ruling of 2026-10-19: the pulses over time and the
+/// reverberation/pulsation of the bouncing antipoles move the firmament
+/// into order, a dodecahedron-like order derived from the mathematics, never
+/// set as a dodecahedron; the firmament is to be built). The heart's own law, one tier up: matter pushes matter by
+/// the electromagnetic repulsion gripping its open frames. On each pulse,
 /// every mote is pushed away from every other in each plane, by the other's
 /// open charge (`a·e`, its amount times its open frames) times their
 /// closeness on the sphere (the product over planes of their in-step
@@ -400,7 +399,7 @@ fn held_share(r: &Ratio, h: &Ratio, p: &Ratio) -> Ratio {
     ((h.clone() - lo) / span).max(ratio(0, 1)).min(ratio(1, 1))
 }
 
-/// THE CUT AS A READING, BY THE ONE ENCLOSURE (one grammar: the hold the
+/// The cut as A reading, by the one enclosure (one grammar: the hold the
 /// exits and the ring law read, `H(<ℓ)` with the throat its base, never a
 /// second hold of its own): a mote's held share in each plane, its reach
 /// `R = |ℓ|/H(<|ℓ|)` spread by the push about the hold there, `f_o·f_c`. A
@@ -415,7 +414,7 @@ pub fn held(mote: &Mote, enc: &Enclosed, p: &Ratio) -> Ratio {
     plane(&mote.ell_o) * plane(&mote.ell_orth)
 }
 
-/// THE ENCLOSED HOLDING (the ring-density law, xylarium 11.0: a ring is
+/// The enclosed holding (the ring-density law, Xylarium 11.0: a ring is
 /// held by every bell inside its reach, `H(<r)`; operators 2026-10-18, the
 /// cyclotronic chain: "anchor the inner core to the singularity with enough
 /// gravitational strength to support the lighter elements on the later
@@ -452,18 +451,18 @@ impl Enclosed {
         self.held[self.spins.partition_point(|l| l < ell)].clone()
     }
 
-    /// The enclosure's BASE: its throat's own hold (the ring's `H`).
+    /// The enclosure's base: its throat's own hold (the ring's `H`).
     pub fn base(&self) -> Ratio {
         self.held.first().cloned().unwrap_or_else(|| ratio(0, 1))
     }
 
-    /// The enclosure's WHOLE hold: its base and every body in it (the rim
+    /// The enclosure's whole hold: its base and every body in it (the rim
     /// law, docs/78: an enclosure's rim is its own holding, `rim = H`).
     pub fn whole(&self) -> Ratio {
         self.held.last().cloned().unwrap_or_else(|| ratio(0, 1))
     }
 
-    /// `H(<r)` by PLACE: the base and every body whose own reach stands
+    /// `H(<r)` by place: the base and every body whose own reach stands
     /// within `r`, the hold a body standing at reach r turns about (the ring
     /// law's containment read by place, for a body known by where it stands).
     pub fn hold_within(&self, r: &Ratio) -> Ratio {
@@ -478,7 +477,7 @@ impl Enclosed {
     }
 
     /// A body's reach and deficit at spin ℓ: `R = ℓ/H(<ℓ)`, `δ = H/(R + H)`,
-    /// EXACT (operator 2026-10-23: "this is approximations leaking into an
+    /// exact (operator 2026-10-23: "this is approximations leaking into an
     /// exact system"): readings, never stored, so never floored. ℓ and H
     /// already stand on the grain, so their quotients' denominators are
     /// bounded; δ is never 0 while anything holds.
@@ -489,22 +488,22 @@ impl Enclosed {
     }
 }
 
-/// THE GALAXY'S PHASES AT A REACH turned by one bell: what every mote's
+/// The galaxy's PHASES AT A REACH turned by one bell: what every mote's
 /// phases do there, and a star's reference (its galaxy's own phase at its
 /// place, operator 2026-10-18), alike.
 ///
-/// THE VACUUM IS THE CONTINUUM INVERTED (operator 2026-10-19: "the vacuum and
+/// The vacuum is the continuum inverted (operator 2026-10-19: "the vacuum and
 /// the continuum must be mathematically inverted across all dimensional
 /// facets"; "reversal is not an inversion because the inversion happens on
-/// an orthogonal dimension"; with xylarium): inversion through the throat
-/// acts on the RADIAL dimension, orthogonal to every plane the matter turns
-/// in, and keeps every angle; it is read on the SHARE, `δ ↦ 1 − δ` (first
+/// an orthogonal dimension"; with Xylarium): inversion through the throat
+/// acts on the radial dimension, orthogonal to every plane the matter turns
+/// in, and keeps every angle; it is read on the share, `δ ↦ 1 − δ` (first
 /// degree, never a radius squared: design law 2). So an `inverted` (vacuum)
-/// mote turns FORWARD in every plane at its pull's other face, `1 − δ(R)`,
+/// mote turns forward in every plane at its pull's other face, `1 − δ(R)`,
 /// the continuum's push. Its stored spin
 /// is untouched (`Σ m·ℓ` exact).
 ///
-/// ITS ROUTE (operator 2026-10-16, xylarium 11.0 (11): "a continuum jetstream
+/// Its route (operator 2026-10-16, Xylarium 11.0 (11): "a continuum jetstream
 /// carries matter out of the singularity along the axis and home through
 /// the disc; a vacuum jetstream draws it in along the axis and out through
 /// the disc"): the route round the orthogonal orbit, not the inversion. A vacuum mote's
@@ -514,8 +513,8 @@ impl Enclosed {
 pub fn turn(phase: &mut [Ratio], tilt: &[Ratio], r_o: &Ratio, h: &Ratio, p: &Ratio, tide: Option<(&Ratio, &Ratio)>, inverted: bool, place: Option<&Ratio>, agitation: &Ratio, cross: &mut crate::enfold::Cross) -> (Ratio, Vec<(usize, Ratio, Ratio)>, Ratio) {
     let pull = h.clone() / (r_o.clone() + h.clone());
     let d_o = if inverted { ratio(1, 1) - pull.clone() } else { pull.clone() };
-    // THE ORTHOGONAL ORBIT'S RATE (with xylarium): the jetstream turns by the motion law
-    // AT THE MOTE'S REACH, δ(R) a ring, two rings a bell, continuously;
+    // The orthogonal orbit's rate (with Xylarium): the jetstream turns by the motion law
+    // AT the mote's REACH, δ(R) a ring, two rings a bell, continuously;
     // inner matter circulates faster than outer. (At R = H it is one turn a
     // bell, a 1:1 lock with the bell: the rim.)
     let d_c = d_o.clone();
@@ -542,11 +541,11 @@ pub fn turn(phase: &mut [Ratio], tilt: &[Ratio], r_o: &Ratio, h: &Ratio, p: &Rat
     let orth_from = phase[LOOP].clone();
     let route = if inverted { ratio(-1, 1) } else { ratio(1, 1) };
     let orth_phase = frac(&(orth_from.clone() + route.clone() * ratio(2, 1) * d_c.clone()));
-    // THE PARENT'S PULSE MOVES MATTER ALONG THE ORTHOGONAL ORBIT (operator: "the pulse
-    // moves matter along the orthogonal orbit"; with xylarium): absorbed in step it
-    // ADVANCES the orthogonal orbit's phase, `p·ρ·δ_u` × the hemisphere's signed share,
-    // on top of the orthogonal orbit's own rate. AND IT IS A SPIN (docs/90 D1, operator
-    // 2026-10-22; xylarium 11.0: "the loop is an orbit", one torque law per
+    // The parent's pulse moves MATTER along the orthogonal orbit (operator: "the pulse
+    // moves matter along the orthogonal orbit"; with Xylarium): absorbed in step it
+    // advances the orthogonal orbit's phase, `p·ρ·δ_u` × the hemisphere's signed share,
+    // on top of the orthogonal orbit's own rate. And it is A spin (docs/90 D1, operator
+    // 2026-10-22; Xylarium 11.0: "the loop is an orbit", one torque law per
     // plane): the same push, read by the one torque law in the orthogonal orbit's plane,
     // is the orthogonal spin's torque, returned to the caller (`κ_⊥`).
     // The pulse it feels: a galaxy's received share of the source's rings and
@@ -568,7 +567,7 @@ pub fn turn(phase: &mut [Ratio], tilt: &[Ratio], r_o: &Ratio, h: &Ratio, p: &Rat
     (scar_o + scar_c, levers, torque_orth)
 }
 
-/// THE PARENT'S PUSH ALONG THE ORTHOGONAL ORBIT over one bell's passage
+/// The parent's push along the orthogonal orbit over one bell's passage
 /// (docs/90 D1): `p·felt` × the hemisphere's signed mean over the arc the
 /// orthogonal phase sweeps, `2·δ` from where it stood (a vacuum mote's route
 /// runs the other way, its passage read backward). Unsigned by the route:
@@ -578,7 +577,7 @@ pub fn orth_push(orth_from: &Ratio, d_c: &Ratio, p: &Ratio, felt: &Ratio, invert
     p.clone() * felt.clone() * mean_response(&start, &(ratio(2, 1) * d_c.clone()))
 }
 
-/// THROUGH THE CENTRE (the torque's law, docs/83; with xylarium): a spin
+/// Through the centre (the torque's law, docs/83; with Xylarium): a spin
 /// carried past zero is a turning in the other sense, so the body passes
 /// through the centre to the antipode, its orbit phase half a turn on, its
 /// spin the magnitude, never piled at zero.
@@ -591,12 +590,12 @@ pub fn through_centre(ell: Ratio, phase: &mut [Ratio]) -> Ratio {
     }
 }
 
-/// THE SWING (docs/90 D2): a body's orthogonal spin projects onto its orbit by
+/// The swing (docs/90 D2): a body's orthogonal spin projects onto its orbit by
 /// where it stands on its orthogonal orbit, the plane's linear measure (`response`): its
 /// spin seen in the orbit plane is `ℓ + ℓ_⊥·response(ψ_⊥)`, so its reach swings
 /// each orthogonal turn between `(ℓ − |ℓ_⊥|)/H` and `(ℓ + |ℓ_⊥|)/H`, an elongation
 /// `e = |ℓ_⊥|/ℓ` read from two planes, no ellipse and no square. Where the
-/// swing passes zero the body passes THROUGH the centre to the antipode (the
+/// swing passes zero the body passes through the centre to the antipode (the
 /// orbit-plane torque's law, docs/83): returns the magnitude and whether it is
 /// through (its orbit phase then stands half a turn on).
 pub fn swung(ell: &Ratio, ell_orth: &Ratio, psi_c: &Ratio) -> (Ratio, bool) {
@@ -615,18 +614,18 @@ pub fn swung(ell: &Ratio, ell_orth: &Ratio, psi_c: &Ratio) -> (Ratio, bool) {
 /// rings (`2·δ` turns, the motion law's `ω = δ`; the bell's own turn is
 /// whole, so the phase against it moves by `2δ` mod 1). Returns the spin
 /// the core's reservoir gives (Σ m·Δℓ, to be taken from it), and the pulse
-/// the matter ABSORBED (Σ m·|Δℓ|, unsigned: each hemisphere's torque alike;
-/// with xylarium), what the recycling budget is read against.
+/// the matter absorbed (Σ m·|Δℓ|, unsigned: each hemisphere's torque alike;
+/// with Xylarium), what the recycling budget is read against.
 #[allow(clippy::too_many_arguments)]
 pub fn torque(motes: &mut [Mote], enc: &Enclosed, p: &Ratio, tide: Option<(&Ratio, &Ratio)>, total: &Ratio, heart_push: Option<&Ratio>, cross: &mut crate::enfold::Cross) -> (Ratio, Ratio) {
     let mut given = ratio(0, 1);
     let mut absorbed = ratio(0, 1);
-    // THE PUSH, CERTIFIED (design law 11; operator 2026-10-23: "build the
+    // The push, certified (design law 11; operator 2026-10-23: "build the
     // certified intervals"): the push is read from the ledger's totals, its
     // exact denominator the ledger's, and it multiplies every mote's torque.
     // It is held by its two bounds on the grain, which contain it; each mote's
     // update is read at both, and where both store the same state and the
-    // same record that IS what the exact push stores (the update is monotone
+    // same record that is what the exact push stores (the update is monotone
     // in the push and the grain is monotone), so it stands, certified. Only
     // where the bounds straddle a mark is the update read with the exact push.
     let lo = crate::ring::grain(p);
@@ -656,7 +655,7 @@ pub fn torque(motes: &mut [Mote], enc: &Enclosed, p: &Ratio, tide: Option<(&Rati
     (given, absorbed)
 }
 
-/// ONE MOTE'S BELL: its phases turned and its spins torqued (`turn`,
+/// One mote's bell: its phases turned and its spins torqued (`turn`,
 /// `spin_torque`), its lever settled; returns the spin given and the pulse
 /// absorbed.
 #[allow(clippy::too_many_arguments)]
@@ -669,7 +668,7 @@ fn torque_one(x: &mut Mote, enc: &Enclosed, p: &Ratio, tide: Option<(&Ratio, &Ra
     let (now, through_c) = swung(&x.ell_o, &x.ell_orth, &x.phase[LOOP]);
     let h = enc.hold(&now);
     let (r_o, d_o) = enc.reach(&now);
-    // ASCENT: the bell turns the mote from where it truly stands, its
+    // Ascent: the bell turns the mote from where it truly stands, its
     // lever read back onto its marks.
     for k in 0..x.phase.len() {
         x.phase[k] = true_phase(x, k);
@@ -685,12 +684,12 @@ fn torque_one(x: &mut Mote, enc: &Enclosed, p: &Ratio, tide: Option<(&Ratio, &Ra
     let tilt = x.tilt.clone();
     let (scar, levers, torque_orth) = turn(&mut x.phase, &tilt, &r_o, &h, p, tide, x.vacuum, place.as_ref(), &heat_was, cross);
     let (g, ab) = spin_torque(x, &from, &h, &r_o, &d_o, p, &torque_orth, heart_push, &m, &scar);
-    // DESCENT: its weight past its round stands one place past its mark.
+    // Descent: its weight past its round stands one place past its mark.
     settle(x, &levers, place.as_ref(), cross);
     (g, ab)
 }
 
-/// THE TORQUE ON ONE MOTE'S SPINS over one bell's passage, the one law at
+/// The torque on one mote's SPINS over one bell's passage, the one law at
 /// every tier (a galaxy's core on its motes, a star on its system's): from
 /// the orbit phase it stood at (`from`) and the reach and deficit it turns
 /// at (`r_o`, `d_o`, inside the hold `h`), the own family's push in the orbit
@@ -705,21 +704,21 @@ pub fn spin_torque(x: &mut Mote, from: &[Ratio], h: &Ratio, r_o: &Ratio, d_o: &R
     // Over its whole passage this bell, never at one instant; a vacuum
     // mote at its inverted reach (`1 − δ`), forward.
     let d_o = if x.vacuum { ratio(1, 1) - d_o.clone() } else { d_o.clone() };
-    // ITS RESPONSE IN EACH SPATIAL PLANE over that plane's passage (its
+    // Its response in each SPATIAL plane over that plane's passage (its
     // tilt's share of `2δ`; docs/96 step 1): the push acts in every plane at
     // once (isoclinic), each plane's spin `ℓ·t_k` torqued by its own
     // response, weighted by its share.
     let t = tilt_of(&x.tilt);
     let resp: Vec<Ratio> = from.iter().zip(&t).map(|(f, tk)| mean_response(f, &(ratio(2, 1) * d_o.clone() * tk.clone()))).collect();
     let k = resp.iter().zip(&t).fold(ratio(0, 1), |s, (r, tk)| s + r.clone() * tk.clone());
-    // DISSIPATION (operator 2026-10-19: "what do our current physics tell
-    // about heat dissipation to the void? probably mimic nature"; with
-    // xylarium): what the torque does not deliver in step becomes HEAT,
+    // Dissipation (ruling of 2026-10-19: heat dissipation to the void is read
+    // from the current physics, mimicking nature; with
+    // Xylarium): what the torque does not deliver in step becomes heat,
     // `p·δ·(1 − |k|)` (k its signed mean over the passage, the coherent
     // share), and heat leaves by the built cooling law's two channels
     // over the passage's two rings: the light through its open frames
     // (`e`, open over held, a ring) and the vacuum's pull back (`δ` at its
-    // reach, a ring). The keep `(1 − e)(1 − δ)` is applied ONCE PER RING of
+    // reach, a ring). The keep `(1 − e)(1 − δ)` is applied once per ring of
     // the double pass (compounding over the two passes, as `(1 − s)ⁿ`
     // compounds the release; never a square of a quantity):
     // `a ← (a + heat)·keep·keep`.
@@ -727,11 +726,11 @@ pub fn spin_torque(x: &mut Mote, from: &[Ratio], h: &Ratio, r_o: &Ratio, d_o: &R
     let heat = p.clone() * d_o.clone() * (ratio(1, 1) - coherent.min(ratio(1, 1)));
     let keep = (ratio(1, 1) - open(&x.key).min(ratio(1, 1))) * (ratio(1, 1) - d_o.clone());
     x.agitation = crate::ring::grain(&((x.agitation.clone() + heat) * keep.clone() * keep + scar.clone()));
-    // THE BAND (one grammar: the firmament's, a galaxy's, a star's): the core's bounce pushes each kind out, `q = push/w`
+    // The band (one grammar: the firmament's, a galaxy's, a star's): the core's bounce pushes each kind out, `q = push/w`
     // (`push = p·w̄`, the dispersal law's, as at the founding and each
     // arrival), and its hold returns `½·δ(R)·ℓ` (δ against what is enclosed
     // at its reach), so the continuum rests in a band. The vacuum feels the
-    // same law reflected through the THROAT, which stands at the core's
+    // same law reflected through the throat, which stands at the core's
     // state, R = 1 (the enclosed law's base: throat 1, rim 2 in the
     // enclosure's own units): `R → 2 − R` (`through`). Past the rim the
     // vacuum stands outside this sphere.
@@ -749,9 +748,9 @@ pub fn spin_torque(x: &mut Mote, from: &[Ratio], h: &Ratio, r_o: &Ratio, d_o: &R
         }
         _ => ratio(0, 1),
     };
-    // EACH PLANE'S SPIN: its share of the orbit spin, its own torque and
+    // Each plane's spin: its share of the orbit spin, its own torque and
     // its share of the band (radial). A plane torqued past zero carries the
-    // mote THROUGH the centre in that plane (its phase there on half a
+    // mote through the centre in that plane (its phase there on half a
     // turn), never piled at zero; the orbit spin is the L1 sum, the tilt
     // re-read from the planes.
     let mut planes_l: Vec<Ratio> = Vec::with_capacity(t.len());
@@ -773,7 +772,7 @@ pub fn spin_torque(x: &mut Mote, from: &[Ratio], h: &Ratio, r_o: &Ratio, d_o: &R
     absorbed += m.clone() * if dl < ratio(0, 1) { -dl.clone() } else { dl.clone() };
     given += m.clone() * dl;
     x.ell_o = new_o;
-    // THE ORTHOGONAL SPIN (docs/90 D1): the release's torque in the orthogonal orbit's plane,
+    // The orthogonal spin (docs/90 D1): the release's torque in the orthogonal orbit's plane,
     // less the hold's return of the held half, `½·δ(R)·ℓ_⊥`, both from and
     // to the same reservoir as the orbit plane's (Σ m·(ℓ_o + ℓ_⊥) and the
     // reservoir exact).
@@ -785,8 +784,8 @@ pub fn spin_torque(x: &mut Mote, from: &[Ratio], h: &Ratio, r_o: &Ratio, d_o: &R
     (given, absorbed)
 }
 
-/// THE CONTACT OF A PAIR over one echo (operators 2026-10-18, with
-/// xylarium: interaction is continuous, "not a walk, a dance"): the mean of
+/// The contact of A pair over one echo (operators 2026-10-18, with
+/// Xylarium: interaction is continuous, "not a walk, a dance"): the mean of
 /// their orbit planes' in-step share while their phase difference runs from
 /// `ψ0` at the rate `d` a whole echo. `in_step` is linear between its kinks
 /// (`ψ` on the half-turns), so each piece's exact mean is the mean of its
@@ -812,11 +811,11 @@ pub fn contact(psi0: &Ratio, d: &Ratio) -> Ratio {
     cuts.windows(2).fold(ratio(0, 1), |acc, w| acc + (w[1].clone() - w[0].clone()) / span.clone() * (f(&w[0]) + f(&w[1])) / ratio(2, 1))
 }
 
-/// THE SHEAR (operator 2026-10-18: "shear the kinematic pressure as an
-/// attractor on opposing hemispheres to provide the shear on the orbit …
-/// this turns your 'orthogonal orbit' into an 'orbit'"; with xylarium): neighbouring
+/// The shear (ruling of 2026-10-18: the kinematic pressure is sheared as an
+/// attractor on opposing hemispheres to provide the shear on the orbit,
+/// which turns the 'orthogonal orbit' into an 'orbit'; with Xylarium): neighbouring
 /// rings of the flow turn at different rates, and where they stand in
-/// contact the pressure between them moves turning OUTWARD. The inner falls
+/// contact the pressure between them moves turning outward. The inner falls
 /// in, the outer moves out, and the disc accretes, so inbound and outbound are
 /// one closed orbit. Neighbours by spin across every face (faces decide who
 /// belongs to a filament, never who meets), each pair weighed by its contact
@@ -886,8 +885,8 @@ pub fn shear(motes: &mut [Mote], enc: &Enclosed, total: &Ratio) -> Ratio {
     moved
 }
 
-/// THE THROAT'S INVERSION on the sphere (operator 2026-10-21: "you are
-/// flattening the second double inversion"): with the polar angle `θ =
+/// The throat's inversion on the sphere (ruling of 2026-10-21: the second
+/// double inversion must not be flattened): with the polar angle `θ =
 /// 90°·R/H` (the throat at 90°, where δ = ½; the rim at 180°), inverting
 /// through the throat reflects `θ → 180° − θ`, so `R → 2H − R`: the core and
 /// the rim change places, the throat stands. Linear, exact, no square.
@@ -895,11 +894,11 @@ pub fn through(r: &Ratio, h: &Ratio) -> Ratio {
     ratio(2, 1) * h.clone() - r.clone()
 }
 
-/// THE SPRAY (with xylarium; the founding epoch one tier down): matter a
+/// The spray (with Xylarium; the founding epoch one tier down): matter a
 /// heart throws out (an outburst, or the kinds a new star's heart releases)
 /// leaves over directions, each kind at its own capture phase, `Z·p` with p
 /// the star's own push share (the founding's ½ one tier up), `½ + Z·p` on the
-/// orthogonal orbit. THROWN, NEVER PLACED (operator 2026-10-22: "gravity and
+/// orthogonal orbit. Thrown, never placed (operator 2026-10-22: "gravity and
 /// physics should supply the required motion"): each kind leaves at the spin
 /// the heart's cut carried it with (`carried`, in its system's units), which
 /// already stands past the throat (the cut released it where its reach
@@ -912,7 +911,7 @@ pub fn spray(released: &Manifest, carried: &[(crate::chem::Kind, Ratio)], base: 
         .iter()
         .filter(|(_, a)| **a > ratio(0, 1))
         .filter_map(|(k, a)| {
-            // The capture phase: Z × the PARENT'S push share (the star's own),
+            // The capture phase: Z × the parent's push share (the star's own),
             // so the kinds leave over the whole turn, never two antipodes.
             let z = ratio(i64::from(crate::chem::charge(k)), 1) * push.clone();
             // From the star's own phase in each plane (docs/96: the planes
@@ -927,24 +926,24 @@ pub fn spray(released: &Manifest, carried: &[(crate::chem::Kind, Ratio)], base: 
         .collect()
 }
 
-/// THE JETSTREAM IS A CONTINUOUS ORBIT, the orthogonal orbit (operators 2026-10-16/17: "a
-/// continuous flow, inbound and outbound"): the circulation's plane IS the
-/// orthogonal orbit, a mote's phase in it its place on the orthogonal orbit. The AXIAL leg (out
+/// The jetstream is A continuous orbit, the orthogonal orbit (operators 2026-10-16/17: "a
+/// continuous flow, inbound and outbound"): the circulation's plane is the
+/// orthogonal orbit, a mote's phase in it its place on the orthogonal orbit. The axial leg (out
 /// along the torsion axis and over: phase in `[½, 1)`) carries matter in
-/// transit; the DISC leg (down at the rim and home through the disc: phase
+/// transit; the disc leg (down at the rim and home through the disc: phase
 /// in `[0, ½)`) is where the cut and collapse are read. No jet batch, no jet
 /// exit: matter goes round, out and back at once.
 pub fn on_disc_leg(x: &Mote) -> bool {
     frac(x.phase.get(LOOP).unwrap_or(&ratio(0, 1))) < ratio(1, 2)
 }
 
-/// The one exit, by state: a mote whose orthogonal orbit OVERREACHES THE RIM (its
+/// The one exit, by state: a mote whose orthogonal orbit overreaches the rim (its
 /// reach at or past the throat, `R = ℓ/H(<ℓ) ≥ H(<ℓ)`, read by the one
 /// enclosure, δ at most ½) crosses whole into the medium one tier up, where the
 /// enclosing core's orthogonal orbits carry it round the same way. Returns
 /// the motes that left; the rest stay.
 pub fn exits(motes: &mut Vec<Mote>, enc: &Enclosed) -> Vec<Mote> {
-    // THE RIM is where the loop closes (docs/96 §7, the double pass: a state
+    // The rim is where the loop closes (docs/96 §7, the double pass: a state
     // returns only after `M∘M`): the image `2H − R` of the return leg reaches
     // the centre at `R = 2·base`, base the core's state. It is the rim law's
     // [throat 1, rim 2]. (It was the whole holding, which falls short of the
@@ -973,7 +972,7 @@ pub fn read_cut(motes: &[Mote], enc: &Enclosed, p: &Ratio) -> (Manifest, Manifes
     (kept, free)
 }
 
-/// A STRAND (docs/102: was "filament"; the filament is a core's flow) read whole (operators 2026-10-18, the cyclotronic chain (7):
+/// A strand (docs/102: was "filament"; the filament is a core's flow) read whole (operators 2026-10-18, the cyclotronic chain (7):
 /// "judged whole, with extent read as shares from band edge to band edge").
 pub struct Strand {
     /// Its members, by index.
@@ -999,17 +998,17 @@ impl Strand {
     }
 }
 
-/// THE CHAINS of a galaxy's disc leg (operators 2026-10-18: membership is
-/// the CHAIN, never a centre; with xylarium). Motes on one face (the same
+/// The chains of a galaxy's disc leg (operators 2026-10-18: membership is
+/// the chain, never a centre; with Xylarium). Motes on one face (the same
 /// hemisphere in every plane, the S⁰ face test) whose dispersal bands
-/// `r(1 ± p)` overlap link, and the links are TRANSITIVE: a chain is a
+/// `r(1 ± p)` overlap link, and the links are transitive: a chain is a
 /// connected run of overlapping bands on one face, read whole, no centre
 /// chosen, no order (each face class sorted by its bands' inner edges, read
 /// at n·log n). Each chain is judged by the filament law against its own
-/// EXTENT as a share on the sphere, edge to edge, never a length (operator:
+/// extent as a share on the sphere, edge to edge, never a length (operator:
 /// "the only straight lines should be wormholes"): along the ring its orbit
 /// phases' extent, `in_step`; across reach the deficit contrast of its
-/// innermost member's INNER edge and its outermost member's OUTER edge
+/// innermost member's INNER edge and its outermost member's outer edge
 /// (a point has its own dispersal, so a lone mote's apartness is its own
 /// band's, never zero). `apart = 1 − in_step(extent)·(1 − T_edges)`,
 /// `λ = x/apart` with x its holding and magnetism in the galaxy's unit. A
@@ -1020,7 +1019,7 @@ impl Strand {
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
 pub struct Work(pub u64);
 
-/// THE HOLD ALONG A FIBRE: at each member's reach, the sum of the densities
+/// The hold along A FIBRE: at each member's reach, the sum of the densities
 /// of the bands that cover it, `lo ≤ r ≤ hi`. Read as one sweep along the
 /// reach, band starts added and band ends taken away, never member against
 /// member. `reach[n]` and `bands[n] = (lo, hi, density)` describe member n.
@@ -1058,7 +1057,7 @@ pub fn hold_along(reach: &[Ratio], bands: &[(Ratio, Ratio, Ratio)], work: &mut W
     out
 }
 
-/// THE MOTES WITHIN A REACH: of motes ordered by reach, the run standing
+/// The motes within A REACH: of motes ordered by reach, the run standing
 /// strictly within `d` of `r`, `|r_m − r| < d`, read by two bisections of
 /// the order, never mote by mote.
 pub fn within_reach<'a>(by_reach: &'a [(Ratio, usize)], r: &Ratio, d: &Ratio, work: &mut Work) -> &'a [(Ratio, usize)] {
@@ -1081,8 +1080,8 @@ pub fn within_reach<'a>(by_reach: &'a [(Ratio, usize)], r: &Ratio, d: &Ratio, wo
     &by_reach[lo..hi.max(lo)]
 }
 
-/// THE BEADS (operator 2026-10-18: "you bead the individual fibers and then
-/// braid the fibers together"): the matter's own gatherings, read every
+/// The beads (ruling of 2026-10-18: the individual fibres are beaded, then
+/// the fibres braided together): the matter's own gatherings, read every
 /// echo. A FIBRE is one kind's run on one face (the same hemisphere in every
 /// plane), motes whose dispersal bands `r(1 ± p)` overlap, linked
 /// transitively; it pinches where its hold gathers (each local maximum) and
@@ -1119,8 +1118,8 @@ pub fn beads(motes: &[Mote], enc: &Enclosed, p: &Ratio, total: &Ratio, disc_leg:
         let reach: Vec<Ratio> = along.iter().map(|&j| rr[j].clone()).collect();
         hold_along(&reach, &bands, &mut Work::default())
     };
-    // THE FIBRES (operator 2026-10-18: "you bead the individual fibers and
-    // then braid the fibers together"): a fibre is one kind's run on one
+    // The fibres (ruling of 2026-10-18: the individual fibres are beaded,
+    // then the fibres braided together): a fibre is one kind's run on one
     // face, motes whose dispersal bands overlap, linked transitively.
     let mut fibres: std::collections::BTreeMap<(Vec<bool>, crate::chem::Kind), Vec<usize>> = std::collections::BTreeMap::new();
     for (i, x) in motes.iter().enumerate() {
@@ -1147,7 +1146,7 @@ pub fn beads(motes: &[Mote], enc: &Enclosed, p: &Ratio, total: &Ratio, disc_leg:
             let mut along = run;
             along.sort_by(|a, b| rr[*a].clone().cmp(&rr[*b].clone()).then(a.cmp(b)));
             let local = profile(&along);
-            // THE BEADS (operator: "halving is a human derived measure,
+            // The beads (operator: "halving is a human derived measure,
             // whereas anything in nature is measured itself"): a fibre
             // pinches where its hold gathers (each local maximum) and parts
             // at the minima between, the minimum member joining the side
@@ -1194,7 +1193,7 @@ pub fn strands(motes: &[Mote], enc: &Enclosed, p: &Ratio, total: &Ratio) -> Vec<
         let (mut x, mut held, mut a_w, mut r_w) = (ratio(0, 1), ratio(0, 1), ratio(0, 1), ratio(0, 1));
         for &j in &members {
             let m = motes[j].amount.clone() * weight(&motes[j].key) / total.clone();
-            // THE ADDITIVE BOND (docs/103 §6): holding, open frames and the
+            // The additive bond (docs/103 §6): holding, open frames and the
             // nuclei's grip, each a share of the same reach.
             let g_j = crate::polarity::faces(&delta_of(j, &rr[j])).0;
             x += m.clone() * (ratio(1, 1) + open(&motes[j].key) + grip_share(&motes[j], &g_j));
@@ -1225,7 +1224,7 @@ pub fn strands(motes: &[Mote], enc: &Enclosed, p: &Ratio, total: &Ratio) -> Vec<
         Some(Strand { members, reach: reach_w, bind, agitation: a_w / held, face, apart })
     };
     let beads_by_face = beads(motes, enc, p, total, true);
-    // THE BRAID: beads of different fibres twine where each one's pinch
+    // The braid: beads of different fibres twine where each one's pinch
     // stands within the other's extent (mutual, so no order), and the
     // twining carries across; each braid is read whole by the filament law.
     let mut out = Vec::new();
@@ -1270,17 +1269,17 @@ pub fn strands(motes: &[Mote], enc: &Enclosed, p: &Ratio, total: &Ratio) -> Vec<
 }
 
 
-/// STREAMING BY FORCE (operator 2026-10-18: "jetstreams depending on their
+/// Streaming by force (operator 2026-10-18: "jetstreams depending on their
 /// force are either continuums or vacuums in the filament … analogous to the
 /// gulf stream"): a mote's stream is READ, never labelled by its origin.
 /// Where the jet's push at it (`p·ρ·δ_u`, the torque's own reading) beats the
 /// hold of the filament it stands in (`λ/(1 + λ)`), it is carried in the
-/// CONTINUUM, one moving body with the current; where the hold beats the
-/// push, the jet cannot fill the channel and it drifts in the VACUUM, the
+/// continuum, one moving body with the current; where the hold beats the
+/// push, the jet cannot fill the channel and it drifts in the vacuum, the
 /// thin counter-moving flank. A mote in no filament (in transit on the
 /// axial leg) is carried. Returns how many stand in the vacuum.
 ///
-/// A READING, never a write (docs/102 A1: one writer per state): a mote's
+/// A reading, never a write (docs/102 A1: one writer per state): a mote's
 /// face is the luminal bound's alone (`luminal`); this counts the motes whose
 /// strand's hold beats the push, never relabels them.
 pub fn stream(motes: &[Mote], strands: &[Strand], push: &dyn Fn(&Mote) -> Ratio) -> usize {
@@ -1294,10 +1293,10 @@ pub fn stream(motes: &[Mote], strands: &[Strand], push: &dyn Fn(&Mote) -> Ratio)
 }
 
 /// The bindings of chains already read: those that hold collapse.
-/// THE DISC FORMS (operator 2026-10-26: "i guess this is why galaxies form
-/// discs - align on nature"): angular momentum is kept while the motion off
+/// The disc forms (ruling of 2026-10-26: this is why galaxies form discs;
+/// align on nature): angular momentum is kept while the motion off
 /// the plane of the net spin is damped away, so matter settles into its
-/// galaxy's spin plane. The plane is a READING: the galaxy's tilt, its
+/// galaxy's spin plane. The plane is a reading: the galaxy's tilt, its
 /// matter's plane spins added (`blend`, by `m·ℓ`). Each mote's tilt returns
 /// toward it by the attractor law ruled for stars (2026-10-18: "the spin has
 /// an orbit and a tilt as attractors ... return each echo `d/(d +
@@ -1325,17 +1324,17 @@ pub fn settle_disc(motes: &mut [Mote], enc: &Enclosed) -> Vec<Ratio> {
     plane
 }
 
-/// THE GALAXY SETTLES ITS STARS (operator 2026-10-26: "let the stars take
-/// care of the planets, planets their moons, and the galaxy their stars -
-/// otherwise you'll be saturated with data"; on the strip, xylarium 11.0
+/// The GALAXY settles its stars (ruling of 2026-10-26: the stars settle the
+/// planets, the planets their moons, and the galaxy its stars, since
+/// otherwise the reading is saturated with data; on the strip, Xylarium 11.0
 /// (51)(g)): the one law of `formation::settle_system`, one tier up, in the
 /// galaxy's own enclosure. On the strip `ρ = R/H − 1` about the galaxy's ring
-/// (H its throat's base), every band is a PAIR, its outbound span and its
+/// (H its throat's base), every band is a pair, its outbound span and its
 /// image through the ring; each band steps by the push of what stands inside
 /// its pair against the pull of what stands outside, `k(ρ) = (S/G)·(1 +
 /// ρ)/(1 − ρ)`, opening at the ring's own dispersal pair `(S − G)/(S + G)`
 /// at ρ = 0. Each mote's matter is spread over its band `r(1 ± p)`. A band's
-/// pair HOLDS where its matter's bond meets its heat and the tide across
+/// pair holds where its matter's bond meets its heat and the tide across
 /// it (`formation::crest_collapse`, docs/96 §8); a band where a
 /// star already stands is that star's (its capture reads it). Returns the
 /// holding bands as bindings: (the band's middle reach, each member's share),
@@ -1399,7 +1398,7 @@ pub fn band_pairs(motes: &[Mote], enc: &Enclosed, p: &Ratio, plane: &[Ratio], g_
         }
         let (o_lo, o_hi) = (ring.clone() * (ratio(1, 1) + x.clone()), ring.clone() * (ratio(1, 1) + y.clone()));
         let (i_lo, i_hi) = (ring.clone() * (ratio(1, 1) - y.clone()), ring.clone() * (ratio(1, 1) - x.clone()));
-        // A BINDING GATHERS ON THE DISC LEG (docs/99 §2.1): the axial leg is
+        // A binding gathers on the disc leg (docs/99 §2.1): the axial leg is
         // matter in transit, half a loop from the disc; the rings above
         // step on all the galaxy's matter, the binding's own is the disc's.
         let members: Vec<(usize, Ratio)> = (0..motes.len()).filter(|&i| on_disc_leg(&motes[i])).filter_map(|i| {
@@ -1410,8 +1409,8 @@ pub fn band_pairs(motes: &[Mote], enc: &Enclosed, p: &Ratio, plane: &[Ratio], g_
         if members.is_empty() {
             continue;
         }
-        // THE RING FRAGMENTS (the disc's local collapse, nature's way; the
-        // crest law, `formation::crest_collapse`, with xylarium): the ring's
+        // The ring fragments (the disc's local collapse, nature's way; the
+        // crest law, `formation::crest_collapse`, with Xylarium): the ring's
         // holding m and magnetism μ, its heat a, at its middle R about the
         // hold H there, hold along a length w_J against their heat and the
         // shear, so ⌊R/w_J⌋ bindings stand around the turn. Each member
@@ -1451,8 +1450,8 @@ pub fn band_pairs(motes: &[Mote], enc: &Enclosed, p: &Ratio, plane: &[Ratio], g_
 }
 
 
-/// MERGE BY THE MATTER'S OWN GATHERINGS (operator 2026-10-23: "we shouldnt
-/// have any grids - why would we? they only distort and provide rigidity";
+/// Merge by the matter's own gatherings (ruling of 2026-10-23: no grids,
+/// since they only distort and provide rigidity;
 /// design law 3, no cells in a fixed grid): the motes of one bead (`beads`:
 /// one kind on one face, a fibre's run between its hold's minima, one body
 /// of gas) and of one stream are one mote. Holding sums exactly; spins and
@@ -1537,14 +1536,14 @@ pub fn merge(motes: &mut Vec<Mote>, beads: &std::collections::BTreeMap<Vec<bool>
 /// circulation yet, the founding's phases, cold.
 pub fn founding(grains: &Manifest, span: Option<&Ratio>) -> Option<Vec<Mote>> {
     let Some((p, _, mean)) = crate::pulse::galaxy_push(grains) else { return Some(Vec::new()) };
-    // The phases stand against the source's own bell (docs/95). THE CAPTURES TURN THEM (with xylarium): each pass of the
+    // The phases stand against the source's own bell (docs/95). The captures turn them (with Xylarium): each pass of the
     // outbound stream through the throat is one capture and turns the
     // crossing point by a = ½, so kind Z leaves at the source's phase plus
-    // `Z·½`, and on the orthogonal orbit it starts on the AXIAL leg, outbound (`½ +
+    // `Z·½`, and on the orthogonal orbit it starts on the axial leg, outbound (`½ +
     // Z·½`). Two groups at the founding, parted by each kind's own orthogonal orbit rate
     // `δ(R_z)` at its own reach thereafter. (The per-universe offset, the
-    // hypha-assigned TUniversal position, is owed with mycelium.)
-    // FROM THE RING (operator 2026-10-25: "make worlds appear"; docs/94 §2:
+    // hypha-assigned TUniversal position, is owed with Mycelium.)
+    // from the ring (operator 2026-10-25: "make worlds appear"; docs/94 §2:
     // nothing can orbit inside the ring, where `2δ > 1` breaks the luminal
     // bound): with `span` (the matter's share of the enclosure's hold, the
     // disc's span from the ring at 1 to the rim at `1 + span`: 1 for a
@@ -1584,7 +1583,7 @@ pub fn founding(grains: &Manifest, span: Option<&Ratio>) -> Option<Vec<Mote>> {
         .collect())
 }
 
-/// THE MÖBIUS JETSTREAM'S MAP (docs/94 §2; operator 2026-10-25: "vacuum-
+/// The MÖBIUS jetstream's map (docs/94 §2; operator 2026-10-25: "vacuum-
 /// continuum inversion needs to be a mobius inversion through the ocean as a
 /// jetstream current"), first degree in the deficit: `(δ, ψ, s) ↦ (1 − δ,
 /// ψ + ½, −s)`. On a mote it is its leg turned (continuum ↔ vacuum: the
@@ -1596,7 +1595,7 @@ pub fn mobius(x: &mut Mote) {
     antipode(&mut x.phase);
 }
 
-/// THE LUMINAL BOUND (docs/94 §2, docs/98 §4; the UMD kinematic law,
+/// The luminal bound (docs/94 §2, docs/98 §4; the UMD kinematic law,
 /// SUBSTRATE_C = 1): no particle turns more than one whole orbit in a
 /// K-step. A mote turns `2·share` a bell, its share `δ` on the continuum face
 /// and `1 − δ` on the vacuum face; where it exceeds ½ (a continuum mote
@@ -1616,21 +1615,21 @@ pub fn luminal(motes: &mut [Mote], enc: &Enclosed) -> usize {
     n
 }
 
-/// THE FLUID BETWEEN RINGS (docs/94 §4, §6, §7; operator 2026-10-25: "derive
+/// The fluid between rings (docs/94 §4, §6, §7; operator 2026-10-25: "derive
 /// the missing components - fluid-MHD and UMD overlay"; "build it"). The
 /// rings are the fluid's own beads (`beads`, one kind on one face). Each
 /// ring reads, never stores: its holding `m`, its spin `ℓ̄` and heat `ā`
 /// (holding-weighted), its reach `R` (its pinch), its width `2pR` (its
-/// band's spread), its DENSITY `ρ = m/(2pR)`, its PRESSURE `P = ρ·ā` plus its
-/// MAGNETIC PRESSURE, and its MAGNETIZATION `M = Σ u·in_step(φ, φ̄)` (each
+/// band's spread), its density `ρ = m/(2pR)`, its pressure `P = ρ·ā` plus its
+/// magnetic pressure, and its magnetization `M = Σ u·in_step(φ, φ̄)` (each
 /// member's open frames by its field phase's in-step with the ring's mean,
 /// the field phase its circulation phase, frozen into the particle, so the
 /// rings' differential turning winds the field). Between neighbouring rings
 /// on a face (the inner at the lesser reach) two exchanges move turning
-/// OUTWARD by the exchange law (the outer gains `u·m_in`, the inner gives
+/// outward by the exchange law (the outer gains `u·m_in`, the inner gives
 /// `u·m_out`, `u = share·(ℓ̄_out − ℓ̄_in)/(m_in + m_out)`, Σ m·ℓ unchanged):
-/// the PRESSURE's, whichever ring presses harder expanding, its share
-/// `|P_in − P_out|/(P_in + P_out)`; and the FIELD's (magnetic shear), its
+/// the pressure's, whichever ring presses harder expanding, its share
+/// `|P_in − P_out|/(P_in + P_out)`; and the field's (magnetic shear), its
 /// share `|M_in − M_out|/(M_in + M_out)` times the rings' gear contrast
 /// `|δ_in − δ_out|/(δ_in + δ_out)`. First degree, L1, saturating shares;
 /// every member of a ring moves alike. Returns (the pressure's spin moved,
@@ -1664,7 +1663,7 @@ pub fn fluid(motes: &mut [Mote], enc: &Enclosed, p: &Ratio, total: &Ratio) -> (R
             Some((members.clone(), m, g(&ell), pinch.clone(), g(&pressure), g(&magnet), g(&delta)))
         }).collect();
         read.sort_by(|a, b| a.3.cmp(&b.3));
-        // THE MEDIUM'S STATE (docs/103 §4): each ring bears the hold of every
+        // The medium's STATE (docs/103 §4): each ring bears the hold of every
         // ring beyond it on its face, `P_h = Σ m_j·δ_j` (the column's weight,
         // gravity's held share at each), a reading of state beside its
         // thermal and magnetic pressure; the contrast of the whole moves the
@@ -2007,7 +2006,7 @@ mod passage_tests {
 
     #[test]
     fn the_torque_telescopes_its_invariant_holds_whatever_the_advance() {
-        // THE TORQUE'S INVARIANT (with xylarium 2026-10-24): a bell's push
+        // The torque's invariant (with Xylarium 2026-10-24): a bell's push
         // over the arc it sweeps, `p·δ·k` with `k` the passage mean over `2δ`,
         // is `(p/2)·[F(ψ + 2δ) − F(ψ)]`, `F = f(1 − f)` the sawtooth's
         // periodic antiderivative; so `I = ℓ − (p/2)·F(ψ)` stands, bell on

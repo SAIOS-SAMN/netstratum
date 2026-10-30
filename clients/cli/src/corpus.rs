@@ -1,20 +1,20 @@
-//! **THE CORPUS BENCH (#38a) — cognition as gameplay.**
+//! **The corpus bench (#38a) — cognition as gameplay.**
 //!
 //! The economy's second head has been mintable but unreachable: the
 //! carrier law prices a confirmed corpus solve (kernel 0.14.0, the
 //! measured 34-row table), and nothing but the conductor's automaton
-//! could ever submit one. This is the surface where a PLAYER — human
+//! could ever submit one. This is the surface where a player — human
 //! or agent — meets the same benchmark and earns from it.
 //!
-//! **WHAT THE GAME ACTUALLY IS.** A corpus proof is not an answer, it
-//! is an EXPLANATION: a program that reproduces every training pair
+//! **What the game actually is.** A corpus proof is not an answer, it
+//! is an explanation: a program that reproduces every training pair
 //! and then produces the test output. `verify_corpus_work` re-hashes
 //! the task, re-applies the program to all of it, and re-chains the
 //! certificate — so typing the right grid earns nothing and cannot.
 //! That makes the loop hypothesise → test → submit, which is the ARC
 //! task as a puzzle rather than as a quiz.
 //!
-//! **ONLY PRICED TASKS ARE SERVED.** `carrier_bound` refuses an
+//! **Only priced tasks are served.** `carrier_bound` refuses an
 //! unmeasured task `CarrierUnpriced`, so serving the whole 1243 would
 //! be serving mostly dead ends. The bench serves exactly the measured
 //! set — the tasks that pay — by content digest.
@@ -43,7 +43,7 @@ pub struct Served {
     pub blind: bool,
 }
 
-/// **THE PRICED SET, found by CONTENT.** A task's identity is its
+/// **The priced set, found by content.** A task's identity is its
 /// content, never its filename, so the only way to find the measured
 /// tasks in the archive is to read and digest them. 1243 small files;
 /// done once and held for the session.
@@ -69,12 +69,12 @@ pub fn priced(dir: &Path) -> Vec<Served> {
     found.into_iter().map(|(_, served)| served).collect()
 }
 
-/// **THE WORD PARSER** — a player's program, written out.
+/// **The word parser** — a player's program, written out.
 ///
 /// Deliberately covers the operators a person can hold in their head
 /// and type: the eight rigid motions and recolour, plus tiling. The
 /// object-centric family (`Op::Object`) takes a segmentation argument
-/// and is left to the solver until the bench has a way to SHOW what a
+/// and is left to the solver until the bench has a way to show what a
 /// segmentation did — an operator nobody can see the effect of is not
 /// a move a player can reason about.
 pub fn parse_program(words: &[&str]) -> Result<Program, String> {
@@ -157,7 +157,7 @@ pub fn train_verdicts(task: &Task, program: &Program) -> Vec<bool> {
         .collect()
 }
 
-/// **SEAL THE PROVER'S HALF.** Identical in shape to the witness the
+/// **SEAL the prover's half.** Identical in shape to the witness the
 /// sealed math's own pins use: derive the identity from content, run
 /// the program on the test input, and chain the certificate over the
 /// task as the verifier will rebuild it (canonical name, no held-out
@@ -187,13 +187,13 @@ pub fn payload(proof: &CorpusProof) -> Option<Vec<u8>> {
     encode_corpus_work(proof)
 }
 
-/// **HAS THIS WORLD ALREADY EARNED FROM THIS TASK?** (#38d.)
+/// **Has this WORLD already earned from this TASK?** (#38d.)
 ///
-/// The once-per-task law, enforced at the EMITTER — the staleness
+/// The once-per-task law, enforced at the emitter — the staleness
 /// precedent, and for the same reason: the chronicle is what knows,
 /// and the gate is handed committed state rather than receipts. `cfe`
 /// may not parse a work payload (the opaque-payload law), so the
-/// question is asked HERE, above the verifier, where reading it is
+/// question is asked here, above the verifier, where reading it is
 /// lawful.
 ///
 /// **This is a real half-measure and is recorded as one.** A caller
@@ -313,7 +313,7 @@ mod tests {
                 Op::Transpose
             ])
         );
-        // A recolour names only what MOVES; every other hue holds.
+        // A recolour names only what moves; every other hue holds.
         let Ok(program) = parse_program(&["recolor:0>1,7>2"]) else {
             panic!("a lawful recolour");
         };
@@ -354,7 +354,7 @@ mod tests {
 
     #[test]
     fn a_rule_that_explains_the_pairs_seals_a_proof_the_sealed_math_accepts() {
-        // THE WHOLE LOOP, end to end through the REAL verifier: the
+        // The whole LOOP, end to end through the real verifier: the
         // bench seals exactly what `verify_work_class` re-hashes,
         // re-applies and re-chains.
         let served = served_from(turning_task());
@@ -376,7 +376,7 @@ mod tests {
     #[test]
     fn a_rule_that_misses_one_pair_is_refused_by_the_gate() {
         // The bench blocks this before sealing (so the player is told
-        // WHERE it missed), but the law is the gate's: a program that
+        // where it missed), but the law is the gate's: a program that
         // does not reproduce the training pairs is not a proof, and
         // this pins that the two agree.
         let served = served_from(turning_task());
@@ -420,7 +420,7 @@ mod tests {
             vec![cfe::world::SOVEREIGN],
         );
         assert!(already_earned(&chronicle, &served.task_id), "and now it has");
-        // A DIFFERENT task is untouched by that receipt.
+        // A different task is untouched by that receipt.
         let other = served_from(Task { name: "other".into(), ..turning_task() });
         let mut moved = other.task.clone();
         moved.test_in = grid(2, 2, &[8, 8, 8, 8]);

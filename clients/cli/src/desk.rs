@@ -1,4 +1,4 @@
-//! TRADE DESK — Phase 1–2 (`33_TRADE_FLEET_AND_DESK`).
+//! Trade desk — Phase 1–2 (`33_TRADE_FLEET_AND_DESK`).
 //!
 //! Pure readings over landed physics. Melt is always
 //! [`cfe::world::route_melt`] (pair_melt over D_eff = D_chart + D_orbit).
@@ -71,7 +71,7 @@ impl Pane {
             Pane::Diplo => &["diplomatic local", "bench diplomatic"],
             // Lanes are trade rails; craft instruments/routes under econ.
             Pane::Routes => &["trade rails", "bench econ"],
-            // Triangle read sits on books; same craft twin as TRADE.
+            // Triangle read sits on books; same craft twin as trade.
             Pane::Arb => &["trade books", "bench trade"],
             // Run hulls · craft hulls.
             Pane::Fleet => &["trade fleet", "bench fleet"],
@@ -254,7 +254,7 @@ pub fn trade_peers(home: &World) -> Vec<PeerRow> {
             align,
         });
     }
-    // Alignment-sensitive sort: OPEN first by rising melt, then SHIELD, then WALL.
+    // Alignment-sensitive sort: open first by rising melt, then shield, then wall.
     rows.sort_by(|a, b| {
         let rank = |d: PeerDoor| match d {
             PeerDoor::Open => 0,
@@ -352,7 +352,7 @@ fn colony_strip(style: Style, home: &World, orb_id: u64) -> String {
     )
 }
 
-/// Render the outer frame + active pane body (full ANSI).
+/// Render the outer frame + active pane body (full ansi).
 pub fn render_frame(style: Style, home: &World, pane: Pane, orb_id: u64) -> Vec<String> {
     let name = home.name();
     let station = home
@@ -895,7 +895,7 @@ fn render_routes(style: Style, home: &World) -> Vec<String> {
         ));
     }
 
-    // Projected melt windows vs nearest OPEN peer (Phase 2 P2.6).
+    // Projected melt windows vs nearest open peer (Phase 2 P2.6).
     let peers = trade_peers(home);
     if let Some(best) = peers.iter().find(|r| r.door == PeerDoor::Open) {
         if let Ok(peer) = load_peer_read(&best.name) {

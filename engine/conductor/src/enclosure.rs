@@ -1,12 +1,12 @@
-//! docs/78 "The singularities": THE ENCLOSURES (operator, 2026-10-15). Each
+//! docs/78 "The singularities": the enclosures (operator, 2026-10-15). Each
 //! galaxy is its own closed S^360 and each star system its own closed S^60,
-//! hung inside the sphere above at its core: the core is the THROAT joining
-//! the two. Galactic cores are HUBS (uplink to the universal core, downlinks
+//! hung inside the sphere above at its core: the core is the throat joining
+//! the two. Galactic cores are hubs (uplink to the universal core, downlinks
 //! to what they enclose); only the universal core is uplinked to the hypha.
 //!
 //! - **The rim** is where the core's pulse refocuses, on the enclosure's far
-//!   side: held as the sphere's HALF CIRCUMFERENCE, so its radius (rim / π)
-//!   is never formed (a reading, like a sine). THE RIM LAW: it is the
+//!   side: held as the sphere's half circumference, so its radius (rim / π)
+//!   is never formed (a reading, like a sine). The rim law: it is the
 //!   enclosure's own holding (`rim_of`).
 //! - **The enclosure's own ring** is the pulse's round trip, core to rim and
 //!   back: `2 · rim` light-rings. Each tier counts its turns on its own ring,
@@ -47,8 +47,8 @@ impl Enclosure {
     }
 }
 
-/// THE RIM LAW (operator 2026-10-16, with xylarium): an enclosure's rim, its
-/// half circumference where the pulse refocuses, is its own HOLDING, where the
+/// The rim law (operator 2026-10-16, with Xylarium): an enclosure's rim, its
+/// half circumference where the pulse refocuses, is its own holding, where the
 /// vacuum's hold equals the continuum's push (deficit ½, as at the throat):
 /// a galaxy's its core's state plus its grains, a star system's its heart's
 /// state (its grains) plus its grains. With the state equal to the grains,
@@ -107,7 +107,7 @@ fn climb(u: &Universe, path: &[u64]) -> Option<Vec<Ratio>> {
     Some(arcs)
 }
 
-/// THE ROUTE between two bodies through the throats, in light-rings: each
+/// The route between two bodies through the throats, in light-rings: each
 /// climbs to the deepest enclosure they share (the universal core for two
 /// galaxies) and the arcs are summed; within a shared enclosure the arcs to
 /// its core are added (the hub route through the throat). Exact.

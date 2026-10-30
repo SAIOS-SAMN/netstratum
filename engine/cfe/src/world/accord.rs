@@ -1,4 +1,4 @@
-//! ACCORDS — bonds, forwards, councils, severance.
+//! Accords — bonds, forwards, councils, severance.
 //!
 //! The syntropic books (given_in_crisis, returned_across,
 //! forwards_fulfilled) and the entropic ones (extracted_across,
@@ -7,13 +7,13 @@
 use super::*;
 
 impl World {
-    /// COUNCIL-1 (12_UNION §7) — seal a COUNCIL: a multilateral
+    /// COUNCIL-1 (12_UNION §7) — seal a council: a multilateral
     /// forward among three or more distinct orbs, every member bound
-    /// alike. Each locks the SAME collateral (a bank withdrawal, the
+    /// alike. Each locks the same collateral (a bank withdrawal, the
     /// vitrified-vault law) against delivering ≥ quota to fellow
     /// members within the window; the reckoning gates all together at
     /// the boundary — the whole of the group over the needs of the
-    /// individual. Any member unable to lock refuses the WHOLE seal:
+    /// individual. Any member unable to lock refuses the whole seal:
     /// a council that starts unequal never starts.
     pub fn seal_council(
         &mut self,
@@ -27,7 +27,7 @@ impl World {
         // The shape half of the dead `BadCouncil` is unrepresentable
         // now — `Among` proved the membership, `Positive` the quota and
         // collateral, `Window` the deadline (29_CONSTRUCTION). Only the
-        // fresh-id FACT remains, honestly named.
+        // fresh-id fact remains, honestly named.
         let members = members.members().to_vec();
         let quota = quota.value().clone();
         let collateral = collateral.value().clone();
@@ -40,7 +40,7 @@ impl World {
                 return Err(ActionRefused::NoSuchOrb { orb: *member });
             }
         }
-        // Every member must afford its lock BEFORE any lock happens —
+        // Every member must afford its lock before any lock happens —
         // a refusal moves nothing (the aperture discipline).
         for member in &members {
             let held = peek(&self.orbs, *member)
@@ -80,7 +80,7 @@ impl World {
     pub fn councils(&self) -> &[Council] {
         &self.councils
     }
-    /// COUNCIL-1 (12_UNION §7) — the DIPLOMACY-FAILED reading: how
+    /// COUNCIL-1 (12_UNION §7) — the diplomacy-failed reading: how
     /// many council reckonings this orb has breached, straight from
     /// the chronicle. The slash is the receipt that unbinds; until it
     /// exists, the council holds.
@@ -102,9 +102,9 @@ impl World {
     }
     /// BOND-1 (09 §2.2) — seal a standing order: source streams `rate`
     /// of `resource` per tick to target, non-transactional, settled by
-    /// ONE receipt at each touch. One bond per (source, target,
+    /// one receipt at each touch. One bond per (source, target,
     /// resource); `term` 0 is open-ended, otherwise the bond expires
-    /// ORDERLY at sealed+term posting nothing. Collect scope.
+    /// orderly at sealed+term posting nothing. Collect scope.
     pub fn seal_bond_as(
         &mut self,
         actor: u64,
@@ -156,7 +156,7 @@ impl World {
         );
         Ok(())
     }
-    /// BOND-1 — cut a standing bond (v1 ruling: the SOURCE side cuts;
+    /// BOND-1 — cut a standing bond (v1 ruling: the source side cuts;
     /// the load posts to it — the giver stopped giving without the
     /// notice). The final span settles in the same receipt; the
     /// severance load is `rate × bond_notice_window()`. Collect scope.
@@ -179,7 +179,7 @@ impl World {
         Ok(())
     }
     /// BOND-1 — settle one bond's accumulated span up to `stamp`
-    /// (capped at the term boundary) by ONE BondSettled receipt.
+    /// (capped at the term boundary) by one BondSettled receipt.
     /// `ending: Some(load)` ends the bond deliberately (sever: rate ×
     /// notice; term expiry: zero). Insolvency — the span exceeding the
     /// source's post-decay bank — pays what stands and ends the bond
@@ -223,10 +223,10 @@ impl World {
                 .unwrap_or_else(|| ratio(0, 1));
             held.banked_amount(resource) - decay
         };
-        // Floored at zero: a bond DELIVERS, never claws back. When the
+        // Floored at zero: a bond delivers, never claws back. When the
         // source is insolvent (`affordable < 0` — its bank sits below the
         // decay due, e.g. a colony that produces none of this resource
-        // yet), the stream is nothing, not a NEGATIVE transfer that would
+        // yet), the stream is nothing, not a negative transfer that would
         // debit the target and credit the source (the wrong side, which
         // `kernel::admits` rightly refuses as `AmountNotPositive`).
         let pay = owed.clone().min(affordable).max(ratio(0, 1));
@@ -311,11 +311,11 @@ impl World {
         window: crate::dop::Window,
     ) -> Result<(), ActionRefused> {
         self.permitted(actor, Scope::Collect)?;
-        // **THE COVENANT IS A T3 INSTRUMENT** (operator ruling
+        // **The covenant is A T3 instrument** (operator ruling
         // 2026-08-05: *drop covenant to T3 and below*).
         //
         // `tier_of(None) = T3` is the only road to the common band
-        // (`12_UNION` §2a), so the gate reads the world's OWN line and
+        // (`12_UNION` §2a), so the gate reads the world's own line and
         // refuses any that holds a seat. A seated office has chartered
         // authority and does not need to post collateral against a
         // deadline to be believed; the common has nothing else.

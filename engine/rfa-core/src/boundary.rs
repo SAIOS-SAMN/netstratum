@@ -1,11 +1,11 @@
-//! THE BOUNDARY 1-FORM — `∂Δ`, uncaged (DIRECTIVE 10, operator ruling
+//! The boundary 1-FORM — `∂Δ`, uncaged (directive 10, operator ruling
 //! 2026-08-01; `24_FORM` §2b).
 //!
-//! **NO TRAVERSAL. NO BASIS. NO WALK.** (operator correction
-//! 2026-08-01: *we are working in polynomials, not graphs, matrices, or
+//! **No traversal. No basis. No walk.** (operator correction
+//! 2026-08-01: *the work is in polynomials, not graphs, matrices, or
 //! lattices*.) The first cut of this module walked a spanning forest
 //! and read slopes off forest edges. That was a graph algorithm, and it
-//! was not merely non-canonical — it was WRONG: the same state read
+//! was not merely non-canonical — it was wrong: the same state read
 //! flat or sloping depending on which edges the walk happened to take
 //! into the forest, because "the value on a forest edge" is not "the
 //! gradient part of `Δ`".
@@ -13,7 +13,7 @@
 //! The gradient part is an algebraic invariant and needs no walk. A
 //! 1-form splits canonically into a gradient part and a circulation
 //! part, and the gradient part vanishes exactly when the form is
-//! DIVERGENCE-FREE:
+//! divergence-free:
 //!
 //! ```text
 //! div(Δ)_i,l  =  Σ_j Δ_ij,l          over the present edges at i
@@ -27,14 +27,14 @@
 //! at the same answer — which is what a kernel invariant requires and
 //! what the forest version could never provide.
 //!
-//! **It is a FORM, never a magnitude.** The divergence is returned
-//! WHOLE as its components with their positions intact. It is never
+//! **It is a form, never a magnitude.** The divergence is returned
+//! whole as its components with their positions intact. It is never
 //! summed, never normed, never collapsed to `‖∂Δ‖` — the law bars
 //! collapsing a directional quantity to a scalar aggregate wherever the
 //! system computes (`24_FORM` §2b), and a form reduced to one number
 //! is exactly that collapse.
 //!
-//! **THE DUAL-POLE LOCK IS STRUCK** (operator ruling 2026-08-04). This
+//! **The dual-pole lock is struck** (operator ruling 2026-08-04). This
 //! module classified a state on two poles — circulation and net flow —
 //! into four rows (`Void`, `Unframed`, `Stasis`, `Entangled`), and the
 //! kernel refused a work-anchored mint on any row but the last. Both
@@ -42,20 +42,20 @@
 //!
 //! **The ruling, in the operator's terms:** *identity is pegged to
 //! entity, and identity gets recycled without bonds.* The classification
-//! read standing off RELATIONS — bonds, covenants, absorption debts —
+//! read standing off relations — bonds, covenants, absorption debts —
 //! and so demanded of a world precisely what a recycled identity does
 //! not carry. NOVEL-1 succession and INCURSION-1a both produce a line
 //! owing nothing and owed nothing by design; the lock refused it for
 //! being what it lawfully is.
 //!
 //! Measured before the ruling (`harness-lane`, 2026-08-04): the admitted
-//! row needed a three-orb obligation triangle that does NOT compose, a
+//! row needed a three-orb obligation triangle that does not compose, a
 //! shape no world the game produces can form — 60 beats of the live
 //! board gave 374 solves, 0 mints, 124 withheld.
 //!
 //! **What remains here is the reading, which was never the problem.**
 //! [`boundary_form`] is `∂Δ` carried whole, and the divergence is a
-//! first-class reading for THE SIGN LAW (`24_FORM` §2d) and the
+//! first-class reading for the sign law (`24_FORM` §2d) and the
 //! object `capacity.rs` splits against to build the circulation. A
 //! reading is not a gate; removing the gate does not touch it.
 //!
@@ -66,7 +66,7 @@ use crate::reduce::Support;
 use cfe::ratio::Ratio;
 use num_traits::Zero;
 
-/// ONE COMPONENT of the boundary form: the NET FLOW at one vertex on
+/// One component of the boundary form: the net flow at one vertex on
 /// one coordinate. A position and an exact value, never an aggregate.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Flow {
@@ -75,7 +75,7 @@ pub struct Flow {
     pub value: Ratio,
 }
 
-/// `∂Δ` — the boundary form, carried WHOLE as its non-zero components.
+/// `∂Δ` — the boundary form, carried whole as its non-zero components.
 ///
 /// An empty form is pure circulation: every vertex balances, nothing
 /// sources or sinks, and the field does no work.
@@ -96,7 +96,7 @@ impl BoundaryForm {
 }
 
 /// Derive `∂Δ` from a state and its support — the divergence at every
-/// vertex, in ONE pass.
+/// vertex, in one pass.
 ///
 /// Canonical by construction: no spanning structure is chosen and no
 /// order is walked, so two gates always agree. Antisymmetry makes the

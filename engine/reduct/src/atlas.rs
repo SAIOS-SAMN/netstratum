@@ -1,14 +1,14 @@
-//! THE ATLAS — the manifold's total space (doc 55). Charts are `CellSheaf`
+//! The atlas — the manifold's total space (doc 55). Charts are `CellSheaf`
 //! cochain complexes; a cover glues them along overlaps by restriction cochain
 //! maps and gauge transitions. Two laws live here, both exact (integer ranks +
 //! torsion, no float — 54_THE_NO_SCALAR_LAW):
 //!
-//!  - **§4 SOUNDNESS** — [`cocycle_holds`]: the transition functions compose
+//!  - **§4 soundness** — [`cocycle_holds`]: the transition functions compose
 //!    consistently on a triple overlap (`g_ij·g_jk = g_ik`, `g_ii = I`). Without
 //!    it the atlas is not a bundle and the glued cohomology is meaningless.
-//!  - **§5 PROVABLE COGNITIVE INCREASE** — [`delta_h`]: the connecting-homomorphism
+//!  - **§5 provable cognitive increase** — [`delta_h`]: the connecting-homomorphism
 //!    rank of the Mayer–Vietoris sequence — the classes of the glued atlas that
-//!    restrict to ZERO on every chart (born purely on the overlaps). By exactness
+//!    restrict to zero on every chart (born purely on the overlaps). By exactness
 //!    `ΔH = Σ_k [ betti_k(overlap) − rank(j_k) ]`, where `j_k` is the induced
 //!    restriction-difference `H^k(U)⊕H^k(V) → H^k(W)`. The two arcs glued into a
 //!    circle give `ΔH = 1` (the loop no arc carries); a disjoint cover gives `0`.
@@ -75,7 +75,7 @@ fn cohomology_reps(sheaf: &CellSheaf, k: usize) -> Vec<Vec<BigInt>> {
         if r.iter().all(|x| x.is_zero()) {
             continue; // a coboundary — trivial in H^k
         }
-        // Keep it only if it raises the rank (stays independent of what we have).
+        // Keep it only if it raises the rank (stays independent of what is already kept).
         let mut trial = kept.clone();
         trial.push(r.clone());
         if rank_of_columns(&trial) > kept.len() {
@@ -85,7 +85,7 @@ fn cohomology_reps(sheaf: &CellSheaf, k: usize) -> Vec<Vec<BigInt>> {
     kept
 }
 
-/// **§4 SOUNDNESS — the cocycle condition on a triple overlap.** Transition
+/// **§4 soundness — the cocycle condition on a triple overlap.** Transition
 /// functions `g_ij : U_i∩U_j → G` (square integer matrices acting on the fiber)
 /// must satisfy `g_ij · g_jk = g_ik` and each `g_ii = I`. A tampered transition
 /// breaks this and the atlas is not a bundle. Pure exact matrix identity.
@@ -113,7 +113,7 @@ pub fn cocycle_holds(g_ij: &Mat, g_jk: &Mat, g_ik: &Mat) -> bool {
     true
 }
 
-/// **§5 PROVABLE COGNITIVE INCREASE — the connecting-homomorphism rank.** For a
+/// **§5 provable cognitive increase — the connecting-homomorphism rank.** For a
 /// two-chart cover `U, V` with overlap `W` and restriction cochain maps
 /// `r_u_k : C^k(U) → C^k(W)`, `r_v_k : C^k(V) → C^k(W)` (indexed by grade `k`),
 /// the Mayer–Vietoris connecting map's total rank
@@ -122,7 +122,7 @@ pub fn cocycle_holds(g_ij: &Mat, g_jk: &Mat, g_ik: &Mat) -> bool {
 ///   ΔH  =  Σ_k [ betti_k(W)  −  rank( j_k : H^k(U)⊕H^k(V) → H^k(W) ) ]
 /// ```
 ///
-/// counts the classes of the glued atlas that restrict to ZERO on every chart —
+/// counts the classes of the glued atlas that restrict to zero on every chart —
 /// shared ideas no chart carries alone. `ΔH ≥ 0` always; `ΔH > 0` iff convergence
 /// minted a genuinely global class. The restriction maps must be honest cochain
 /// maps (they commute with `δ`); when a grade has no restriction the map is zero.
@@ -148,7 +148,7 @@ fn rank_j(u: &CellSheaf, v: &CellSheaf, w: &CellSheaf, r_u: &[Mat], r_v: &[Mat],
     rank_of_columns(&images)
 }
 
-/// **§5 PROVABLE COGNITIVE INCREASE** — the connecting-homomorphism rank
+/// **§5 provable cognitive increase** — the connecting-homomorphism rank
 /// `ΔH = Σ_k [ betti_k(W) − rank j_k ]` (see module header). `ΔH > 0` iff
 /// convergence minted a class no chart carries.
 pub fn delta_h(u: &CellSheaf, v: &CellSheaf, w: &CellSheaf, r_u: &[Mat], r_v: &[Mat]) -> usize {
@@ -168,12 +168,12 @@ pub fn identity(n: usize) -> Mat {
         .collect()
 }
 
-/// **§6 THE CONNECTION — holonomy around a loop of charts (fluid intelligence).**
+/// **§6 the connection — holonomy around a loop of charts (fluid intelligence).**
 /// Parallel-transport a fiber around a CLOSED loop of overlaps by composing their
-/// transitions `g_{i→j} · g_{j→k} · … · g_{z→i}`. The result is the HOLONOMY. When
-/// it is the identity the connection is FLAT around the loop and a class
+/// transitions `g_{i→j} · g_{j→k} · … · g_{z→i}`. The result is the holonomy. When
+/// it is the identity the connection is flat around the loop and a class
 /// transports intact — knowledge propagates geometrically (not by market copy).
-/// Any deviation is the CURVATURE: the obstruction a class hits, exactly the
+/// Any deviation is the curvature: the obstruction a class hits, exactly the
 /// reduce organ's torsion — the "unglueable structural cohort" made measurable.
 pub fn holonomy(loop_transitions: &[Mat]) -> Mat {
     let mut h: Option<Mat> = None;
@@ -187,7 +187,7 @@ pub fn holonomy(loop_transitions: &[Mat]) -> Mat {
 }
 
 /// The curvature of a loop: `holonomy − I`. Zero iff the connection is flat there
-/// (a class transports); non-zero IS the obstruction (= torsion).
+/// (a class transports); non-zero is the obstruction (= torsion).
 pub fn curvature(loop_transitions: &[Mat], fiber_dim: usize) -> Mat {
     sub(&holonomy(loop_transitions), &identity(fiber_dim))
 }

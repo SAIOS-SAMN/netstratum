@@ -1,5 +1,5 @@
-//! ERA 1'S PLACES FOR THE PEOPLES (operator 2026-10-21: "ancients near the
-//! core ... realms EMERGE"): a line seated on an era-1 world stands where that
+//! Era 1'S PLACES for the peoples (operator 2026-10-21: "ancients near the
+//! core ... realms emerge"): a line seated on an era-1 world stands where that
 //! world stands, so its core, whether it stands in the core's bulge, and how
 //! far it is from the core are read from the universe, never from the era-0
 //! box. A line with no era-1 world keeps the box's readings.
@@ -111,7 +111,7 @@ pub fn set(u: &Universe, book: &ledger::Ledger) {
     }
 }
 
-/// THE SKY of the world at `path` (`gauges`): its own world, its star's
+/// The sky of the world at `path` (`gauges`): its own world, its star's
 /// other worlds and its galaxy's stars, counted; zero with no reading.
 pub fn sky(path: &[u64]) -> usize {
     with(|p| {
@@ -121,7 +121,7 @@ pub fn sky(path: &[u64]) -> usize {
     .unwrap_or(0)
 }
 
-/// THE ECHO TIER of the world at `path` (operator 2026-10-22: ancients are "a
+/// The echo tier of the world at `path` (operator 2026-10-22: ancients are "a
 /// tiered range close to the core based on the proximity to the temporal echo
 /// that makes an ancient"): the whole halvings its clock has lost against the
 /// core's echo, `k` where its system's clock about the core `c ≤ 2^(−k)`. Tier
@@ -175,7 +175,7 @@ pub fn claimed(path: &[u64]) -> bool {
     with(|p| Some(p.claimed.contains(path))).unwrap_or(false)
 }
 
-/// THE NEAREST FREE WORLD to a parent's at `parent`: in its own system
+/// The nearest free WORLD to a parent's at `parent`: in its own system
 /// first, then in its galaxy by the nearest reach to its own system's (to
 /// the core's, where the breath re-anchored its system), then by path. None
 /// when its galaxy has no free world.

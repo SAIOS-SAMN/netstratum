@@ -1,10 +1,10 @@
-//! THE CAPACITY METER — `ext_x` and the D reading.
+//! The capacity meter — `ext_x` and the D reading.
 //!
 //! Closes the first half of `25_STANDING` §6.2 ("`D` is not
 //! measured"). Until this existed, Articles II, III and IV had no
 //! operand and every capacity claim in the tree was unfalsifiable.
 //!
-//! **D is what SURVIVES reduction** (operator ruling 2026-08-01,
+//! **D is what survives reduction** (operator ruling 2026-08-01,
 //! `17_CAPACITY` §4b, `26_ARTICLES` §5):
 //!
 //! ```text
@@ -12,29 +12,29 @@
 //! ```
 //!
 //! The indices `(i, j, k, l)` and the arities `Delta{dim, fiber}` are
-//! the CONTAINER the relation rides on — never the capacity. That
-//! reading is STRUCK. A universe may carry enormous arity and still
-//! stand ON THE GROUND when every difference it holds is pure frame,
+//! the container the relation rides on — never the capacity. That
+//! reading is struck. A universe may carry enormous arity and still
+//! stand on the Ground when every difference it holds is pure frame,
 //! which is exactly the dogmatic loop Article III prices at zero.
 //!
-//! **THE ELEVATION.** Two readings, and they answer different
-//! questions. [`Extent::coordinates`] counts the CIRCULATION — what
+//! **The elevation.** Two readings, and they answer different
+//! questions. [`Extent::coordinates`] counts the circulation — what
 //! stands above the floor — and zero is a lawful answer for it.
 //! [`Extent::degree`] is `D` itself, the elevation, and it is
 //! [`Degree`]: `GROUND + circulation`, never zero, with no
 //! representation for a below-ground value.
 //!
-//! **NEVER ONE SCALAR.** [`Extent`] reports per index. `26_ARTICLES`
+//! **Never one SCALAR.** [`Extent`] reports per index. `26_ARTICLES`
 //! §2b bars collapsing a directional quantity to a scalar aggregate
 //! wherever the system computes; a single "capacity number" would be
 //! the `C = x` substandard character (`17_CAPACITY` §2a.2) returning
-//! under a new name. The extent says WHERE structure stands.
+//! under a new name. The extent says where structure stands.
 //!
-//! **THE PAIRWISE LAW — the meter's one precondition.** The input must
+//! **The pairwise law — the meter's one precondition.** The input must
 //! be irreducibly pairwise (bonds, forwards, absorption debts), so
 //! that non-transitive obligation triangles form genuine `H¹` cocycle
 //! defects. A `Δ` built from node-local scalar differences —
-//! `Δ_ij = p_j − p_i` for any potential `p` — is a PURE COBOUNDARY and
+//! `Δ_ij = p_j − p_i` for any potential `p` — is a pure coboundary and
 //! reduces to exactly zero everywhere:
 //!
 //! ```text
@@ -43,30 +43,30 @@
 //!       = 0
 //! ```
 //!
-//! so such a source carries NO CIRCULATION. It has not vanished: it
-//! sits at the GROUND (see [`Extent::GROUND`]).
+//! so such a source carries no circulation. It has not vanished: it
+//! sits at the Ground (see [`Extent::GROUND`]).
 //!
-//! **D IS NEVER ZERO** (operator ruling 2026-08-01). Zero is an
-//! ABSOLUTE and this system carries none — the T∞ purge already barred
+//! **D is never zero** (operator ruling 2026-08-01). Zero is an
+//! absolute and this system carries none — the T∞ purge already barred
 //! the reciprocal pole, and a capacity of zero says the thing has no
 //! space in which to be. The floor is the POINT: one degree, itself.
 //!
-//! **WHY THE SOURCED POLE IS NOT CAPACITY, measured.** A first attempt
+//! **Why the sourced pole is not capacity, measured.** A first attempt
 //! at this ruling folded the divergence (the egress reading) into `D` so that a
 //! pure coboundary would read non-zero. It fails: divergence is
-//! GAUGE-DEPENDENT — `div(Δ + grad p) = div(Δ) − n·p` — so a node could
+//! GAUGE-dependent — `div(Δ + grad p) = div(Δ) − n·p` — so a node could
 //! inflate its own capacity by adding a pure coboundary, which is the
 //! forgery this meter exists to refuse. Capacity counts the
 //! gauge-INVARIANT content (circulation) above a floor that is never
 //! zero. The divergence stays a first-class reading ([`egress`]) for
-//! THE SIGN LAW; it is simply not `D`.
+//! the sign law; it is simply not `D`.
 //!
 //! The cosmological naming that once wrapped these two readings is
-//! PURGED (`24_FORM` §2d): the organs are `DiscoveryMinted` (tag 86)
+//! purged (`24_FORM` §2d): the organs are `DiscoveryMinted` (tag 86)
 //! and `mesh::spine::seal`, they are not summands of `Δ`, and reading
 //! the mint as raw divergence was the over-reach.
 //!
-//! ALTITUDE: this is a READING, not a gate and not an objective
+//! Altitude: this is a reading, not a gate and not an objective
 //! (`26_ARTICLES`, Ξ/ΔD are readings never objectives). It is `O(dim² ·
 //! fiber)` over the committed relation and calls no search.
 
@@ -75,7 +75,7 @@ use crate::reduce::Support;
 use cfe::ratio::Ratio;
 use num_traits::{Signed, Zero};
 
-/// The EXTENT of a relation, read PER INDEX — never collapsed to one
+/// The extent of a relation, read per index — never collapsed to one
 /// number.
 ///
 /// Every field counts only entries that actually stand: a coordinate
@@ -88,12 +88,12 @@ pub struct Extent {
     pub entities: usize,
     /// Fiber layers carrying at least one surviving coordinate.
     pub layers: usize,
-    /// Independent CIRCULATION coordinates: pairs `(i < j)` × layer
+    /// Independent circulation coordinates: pairs `(i < j)` × layer
     /// carrying holonomy (`∮ ≠ 0`).
     pub coordinates: usize,
 }
 
-/// **`D` — THE DEGREE, STANDING ON THE GROUND BY CONSTRUCTION.**
+/// **`D` — The degree, standing on the Ground by construction.**
 ///
 /// The elevation reading, and the one type any `D` claim must pass
 /// through:
@@ -104,13 +104,13 @@ pub struct Extent {
 ///   D < GROUND   IN THE GROUND — UNREPRESENTABLE, not merely refused
 /// ```
 ///
-/// **WHY A TYPE AND NOT A CHECK** (operator ruling 2026-08-01, maximal
+/// **Why A type and not A check** (operator ruling 2026-08-01, maximal
 /// inscription). `Extent::GROUND` was declared, doc-commented and
 /// asserted, and *no computation ever read it*: `ground()` returned all
 /// zeros, `is_ground()` tested `coordinates == 0`, and the pin that
 /// claimed to prove the floor compared the constant to its own literal.
 /// The ruling said D is never zero; the arithmetic still returned zero.
-/// That is the failure `24_FORM` §2h records and LAW 8 forbids — a
+/// That is the failure `24_FORM` §2h records and law 8 forbids — a
 /// term that resonates but computes nothing.
 ///
 /// The floor is now load-bearing:
@@ -121,7 +121,7 @@ pub struct Extent {
 ///   circulation to `GROUND` — `usize` addition cannot go below its
 ///   own start, so underflow is not a case that exists;
 /// - there is no `From<usize>`, no public tuple construction, and
-///   [`Degree::default`] is the GROUND, never zero.
+///   [`Degree::default`] is the Ground, never zero.
 ///
 /// A below-ground degree is therefore not a state the gate refuses at
 /// runtime — it is a state that cannot be built. That is the house's
@@ -130,16 +130,16 @@ pub struct Extent {
 /// possible*).
 #[derive(Debug, Clone, Copy)]
 pub struct Degree {
-    /// **THE OPENED GROUND** (operator ruling 2026-08-05: *GROUND needs
+    /// **The opened Ground** (operator ruling 2026-08-05: *Ground needs
     /// to be opened up into V = Volume of orbs, weight on D as
-    /// capacity*). The floor a state stands on is the VOLUME of its
+    /// capacity*). The floor a state stands on is the volume of its
     /// estate — the measure of the orbs it holds — never below one.
     /// The 2026-08-01 point survives as the base case: an estate of one
     /// weighs one, and the empty pre-founding state weighs one.
     volume: usize,
     /// The gauge-invariant circulation standing above the floor. This
     /// is what the gate reads (`above()`), and it is deliberately
-    /// UNTOUCHED by the volume — which is the derivation that made the
+    /// untouched by the volume — which is the derivation that made the
     /// opening a patch: nothing the gate admits consults the floor.
     circulation: usize,
 }
@@ -158,7 +158,7 @@ impl Degree {
         Degree { volume: Extent::GROUND, circulation }
     }
 
-    /// **THE OPENED CONSTRUCTOR** — the estate's volume weighting the
+    /// **The opened constructor** — the estate's volume weighting the
     /// degree. `volume` is clamped to one: a state that exists occupies
     /// at least the point, so never-zero survives the opening by
     /// construction rather than by guard.
@@ -167,14 +167,14 @@ impl Degree {
     }
 
     /// The reading as a number, for a lens:
-    /// `volume × (GROUND + circulation)`. Weight means MULTIPLY —
+    /// `volume × (GROUND + circulation)`. Weight means multiply —
     /// founding an orb multiplies the whole degree, which is the
     /// compounding the expansion rulings ask for. Always `≥ GROUND`.
     pub fn get(self) -> usize {
         self.volume * (Extent::GROUND + self.circulation)
     }
 
-    /// How much stands ABOVE the ground — the gauge-invariant
+    /// How much stands above the ground — the gauge-invariant
     /// circulation, which is what grows. **Volume-blind on purpose**:
     /// this is the gate's operand (`revocation_law` reads it and never
     /// `get()`), so the estate's size can never change what admits.
@@ -187,7 +187,7 @@ impl Degree {
         self.volume
     }
 
-    /// ON THE GROUND: at rest on the floor of its own estate, however
+    /// On the Ground: at rest on the floor of its own estate, however
     /// wide that floor is. It holds its place and its structural
     /// existence; it is never deleted and never barred. **Article II's
     /// operand is this predicate, never a zero.**
@@ -195,13 +195,13 @@ impl Degree {
         self.circulation == 0
     }
 
-    /// ABOVE THE GROUND: circulation stands on the floor.
+    /// Above the Ground: circulation stands on the floor.
     pub fn is_above_ground(self) -> bool {
         self.circulation > 0
     }
 }
 
-/// A degree IS its magnitude: two readings of equal capacity are equal,
+/// A degree is its magnitude: two readings of equal capacity are equal,
 /// however that capacity decomposes into floor and circulation. The
 /// decomposition stays separately readable (`volume()`, `above()`) —
 /// the couple remains two individuals — but comparison, ordering and
@@ -229,7 +229,7 @@ impl std::hash::Hash for Degree {
 }
 
 impl Default for Degree {
-    /// The default is the GROUND, never zero — a `Degree` that came from
+    /// The default is the Ground, never zero — a `Degree` that came from
     /// nowhere still stands on the floor.
     fn default() -> Self {
         Degree::GROUND
@@ -243,9 +243,9 @@ impl std::fmt::Display for Degree {
 }
 
 impl Extent {
-    /// **THE GROUND — `D` IS NEVER ZERO** (operator ruling 2026-08-01).
+    /// **The Ground — `D` is never zero** (operator ruling 2026-08-01).
     ///
-    /// Zero capacity is an ABSOLUTE, and this system does not carry
+    /// Zero capacity is an absolute, and this system does not carry
     /// absolutes. The T∞ purge already barred the other pole —
     /// *"infinity is disallowed, the torus wraps finitely"* — and zero
     /// is its reciprocal: a dimensional capacity of zero says the thing
@@ -257,7 +257,7 @@ impl Extent {
     /// traverse is a POINT (`24_FORM` §2e), which is one dimension,
     /// never none.
     ///
-    /// **This constant is now CONSUMED, not merely declared** — see
+    /// **This constant is now consumed, not merely declared** — see
     /// [`Degree`], which is the only way a `D` reading enters the
     /// system.
     pub const GROUND: usize = 1;
@@ -268,9 +268,9 @@ impl Extent {
         Degree::above_ground(self.coordinates)
     }
 
-    /// At the GROUND: the state carries no structure above the point.
-    /// This REPLACES the former `is_vacuous` — the predicate is the
-    /// same set, the MEANING is not. A state here has not vanished; it
+    /// At the Ground: the state carries no structure above the point.
+    /// This replaces the former `is_vacuous` — the predicate is the
+    /// same set, the meaning is not. A state here has not vanished; it
     /// stands at the floor, holding one degree, itself.
     ///
     /// Article II's operand is this predicate, never a zero.
@@ -278,13 +278,13 @@ impl Extent {
         self.degree().is_ground()
     }
 
-    /// ABOVE the ground: circulation stands, and it is what grows.
+    /// Above the ground: circulation stands, and it is what grows.
     pub fn is_above_ground(&self) -> bool {
         self.degree().is_above_ground()
     }
 
     /// Does the relation carry holonomy — `∮ ≠ 0`? This is the
-    /// GAUGE-INVARIANT content, and it is what `D` counts above the
+    /// GAUGE-invariant content, and it is what `D` counts above the
     /// ground.
     pub fn circulates(&self) -> bool {
         self.coordinates > 0
@@ -293,9 +293,9 @@ impl Extent {
 
 /// `ext_x(Δ)` — the extent of each index over the entries that stand.
 ///
-/// This is the RAW extent: it reads whatever `Δ` carries, frame
+/// This is the raw extent: it reads whatever `Δ` carries, frame
 /// included. It is the "before" half of the meter. For capacity use
-/// [`capacity`], which reduces first — frame contributes NOTHING to D.
+/// [`capacity`], which reduces first — frame contributes nothing to D.
 pub fn ext_x(delta: &Delta) -> Extent {
     let dim = delta.dim();
     let fiber = delta.fiber();
@@ -324,25 +324,25 @@ pub fn ext_x(delta: &Delta) -> Extent {
     }
 }
 
-/// **THE DIVERGENCE** — `div(Δ)_i,l = Σ_j Δ_ij,l`, indexed `[i][l]`.
+/// **The divergence** — `div(Δ)_i,l = Σ_j Δ_ij,l`, indexed `[i][l]`.
 ///
 /// One pass, no basepoint, no spanning structure, no chosen basis. It
 /// is the adjoint of the gradient, so it detects the gradient component
 /// exactly: `Δ` has no gradient part iff `div(Δ) = 0` everywhere.
 ///
-/// **THIS IS THE SIGNED READING, and the sign is the law**
-/// (`24_FORM` §2d, THE SIGN LAW):
+/// **This is the signed reading, and the sign is the law**
+/// (`24_FORM` §2d, the sign law):
 ///
-/// - `div_i > 0` — an EGRESS. The vertex sources: it emits more than it
+/// - `div_i > 0` — an egress. The vertex sources: it emits more than it
 ///   absorbs.
-/// - `div_i < 0` — an INGRESS. The vertex sinks: it absorbs more than
+/// - `div_i < 0` — an ingress. The vertex sinks: it absorbs more than
 ///   it emits.
-/// - `div_i = 0` — BALANCED. Whatever the vertex carries circulates —
+/// - `div_i = 0` — Balanced. Whatever the vertex carries circulates —
 ///   it returns what it takes, and the content is holonomic.
 ///
 /// **The books close.** Antisymmetry (`Δ_ji = −Δ_ij`) gives
 /// `Σ_i div_i,l = 0` on every layer, so an egress anywhere implies an
-/// ingress somewhere and NO RELATION IS ALL-SOURCE. That conservation
+/// ingress somewhere and no relation is ALL-source. That conservation
 /// is why the reading is a statement about a boundary rather than about
 /// an isolated vertex.
 pub fn divergence(delta: &Delta) -> Vec<Vec<Ratio>> {
@@ -359,15 +359,15 @@ pub fn divergence(delta: &Delta) -> Vec<Vec<Ratio>> {
     out
 }
 
-/// The egress census of a relation — how many vertices SOURCE, how many
+/// The egress census of a relation — how many vertices source, how many
 /// SINK, how many are balanced. Counted over any fiber layer carrying a
-/// non-zero divergence at that vertex (`24_FORM` §2d, THE SIGN LAW).
+/// non-zero divergence at that vertex (`24_FORM` §2d, the sign law).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Flux {
-    /// DIVERGENCE — `div > 0` on some layer. The vertex SOURCES: it
+    /// Divergence — `div > 0` on some layer. The vertex sources: it
     /// emits more than it takes. Egress.
     pub sources: usize,
-    /// CONVERGENCE — `div < 0` on some layer. The vertex SINKS: it
+    /// Convergence — `div < 0` on some layer. The vertex sinks: it
     /// absorbs more than it emits, and **that is a capability, not a
     /// fault.**
     ///
@@ -377,9 +377,9 @@ pub struct Flux {
     /// measured in joule-commensurable units. The Frost's entire trade
     /// is convergence.
     ///
-    /// **A SINK IS NOT A TRAPPED INTERIOR.** What `18` §2d forbids is
-    /// convergence with NO egress — a closed region that takes and
-    /// never sheds. Absorption is lawful precisely BECAUSE it sheds:
+    /// **A SINK is not A trapped interior.** What `18` §2d forbids is
+    /// convergence with no egress — a closed region that takes and
+    /// never sheds. Absorption is lawful precisely because it sheds:
     /// `sink_consumed = heat_absorbed = vented_after_shed` (`05` §1.4).
     /// That judgment needs the shed ledger and is not visible in `Δ`
     /// alone, so this reading reports the pole and never convicts it.
@@ -392,8 +392,8 @@ pub struct Flux {
 impl Flux {
 }
 
-/// THE FLUX CENSUS — both poles of the divergence, counted and
-/// named: DIVERGENCE sources, CONVERGENCE sinks, and the balanced
+/// The flux census — both poles of the divergence, counted and
+/// named: divergence sources, convergence sinks, and the balanced
 /// circulate. Neither pole is a fault (see [`divergence`]).
 pub fn flux(delta: &Delta) -> Flux {
     let mut census = Flux { sources: 0, sinks: 0, balanced: 0 };
@@ -415,12 +415,12 @@ pub fn flux(delta: &Delta) -> Flux {
     census
 }
 
-/// **THE CIRCULATION — the POSITIVE construction of capacity.**
+/// **The circulation — the positive construction of capacity.**
 ///
 /// `Δ = grad(p) ⊕ circulation`, the discrete Hodge split. This function
 /// returns the circulation summand, and it is built rather than left
 /// over: instead of stripping a frame and counting the residue, it
-/// PROJECTS onto the divergence-free subspace, where the structural
+/// projects onto the divergence-free subspace, where the structural
 /// content actually lives.
 ///
 /// Over the complete relation graph the solve is closed-form and exact.
@@ -432,7 +432,7 @@ pub fn flux(delta: &Delta) -> Flux {
 /// `Δ_ij − Δ_0j + Δ_0i` gauge-FIXES at vertex 0 — a spanning star, a
 /// chosen basis — so its output depends on which vertex is labelled 0,
 /// and Article I voids any reading that requires a chosen basis. The
-/// circulation is UNIQUE: `p` is determined only up to a constant, but
+/// circulation is unique: `p` is determined only up to a constant, but
 /// `grad(p)` is not, so the summand returned here is canonical. Same
 /// class, basis-free representative.
 pub fn circulation(delta: &Delta) -> Delta {
@@ -462,8 +462,8 @@ pub fn circulation(delta: &Delta) -> Delta {
     out
 }
 
-/// **`D` — THE CAPACITY READING**, built positively: the extent of the
-/// CIRCULATION.
+/// **`D` — The capacity reading**, built positively: the extent of the
+/// circulation.
 ///
 /// Frame artifacts contribute nothing; only structural content counts
 /// (`EQUATIONS` D1). The circulation is divergence-free by construction
@@ -475,12 +475,12 @@ pub fn capacity(delta: &Delta) -> Extent {
     ext_x(&circulation(delta))
 }
 
-/// **THE CIRCULATION ON THE SUPPORT** — the Hodge split taken on the
-/// relations that ACTUALLY EXIST, not on the complete graph.
+/// **The circulation on the support** — the Hodge split taken on the
+/// relations that actually exist, not on the complete graph.
 ///
 /// [`circulation`] solves the complete-graph system `p = −div/n`, which
 /// silently treats every absent relation as a real one carrying zero.
-/// For a READING of the whole that is tolerable; for ATTRIBUTION it is
+/// For a reading of the whole that is tolerable; for attribution it is
 /// not, and it fails in two measured ways:
 ///
 /// ```text
@@ -489,14 +489,14 @@ pub fn capacity(delta: &Delta) -> Extent {
 /// ```
 ///
 /// Entities 2 and 3 hold nothing, owe nothing, and are owed nothing,
-/// and each draws a QUARTER of a relation they are not party to —
-/// FARMING BY ABSENCE, which is worse than farming by strain because it
+/// and each draws a quarter of a relation they are not party to —
+/// farming by absence, which is worse than farming by strain because it
 /// costs nothing at all. And the same defect inflates the rest: the
 /// identical relation reads `circ_01 = 0` among two entities and `1/2`
 /// among four, so an orb could enlarge every share in the world by
 /// seating empty orbs beside it.
 ///
-/// Both vanish here. The potential solves the SUPPORT graph's own
+/// Both vanish here. The potential solves the support graph's own
 /// Laplacian system, `L·p = −div`, with `L = deg − adjacency` over
 /// present relations only. Isolated entities form their own components,
 /// carry `p = 0`, and hold no relation to sum — so they bear nothing,
@@ -517,7 +517,7 @@ pub fn circulation_on(delta: &Delta, support: &Support) -> Delta {
     let mut potentials: Vec<Vec<Ratio>> = Vec::with_capacity(fiber);
 
     for l in 0..fiber {
-        // THE COMPONENTS. Each is its own gauge orbit; an isolated
+        // The components. Each is its own gauge orbit; an isolated
         // entity is a component of one and decouples completely.
         let mut comp = vec![usize::MAX; dim];
         let mut count = 0;
@@ -538,7 +538,7 @@ pub fn circulation_on(delta: &Delta, support: &Support) -> Delta {
             count += 1;
         }
 
-        // THE DIVERGENCE, over present relations only.
+        // The divergence, over present relations only.
         let div: Vec<Ratio> = (0..dim)
             .map(|i| {
                 let mut acc = zero.clone();
@@ -557,7 +557,7 @@ pub fn circulation_on(delta: &Delta, support: &Support) -> Delta {
             if members.len() < 2 {
                 continue; // isolated: p = 0, and it holds nothing anyway
             }
-            // GAUGE FIXED at the first member: p = 0 there. The
+            // GAUGE fixed at the first member: p = 0 there. The
             // remaining rows are `(L·p)_v = −div_v`.
             let unknowns = &members[1..];
             let k = unknowns.len();
@@ -637,17 +637,17 @@ pub fn circulation_on(delta: &Delta, support: &Support) -> Delta {
     out
 }
 
-/// **THE BORNE SHARE, AXIS BY AXIS** — how much of the circulation each
-/// entity holds up ON EACH COORDINATE. `D` says how much room stands;
-/// this says WHO IS STANDING IN IT, and IN WHICH DIRECTION.
+/// **The borne share, axis by axis** — how much of the circulation each
+/// entity holds up on each coordinate. `D` says how much room stands;
+/// this says who is standing in it, and in which direction.
 ///
 /// ```text
 /// borne_i,l = ½ · Σ_{j ~ i} |circulation_on(Δ, S)_ij,l|
 /// ```
 ///
-/// **NEVER ONE SCALAR** (`24_FORM` §2b, operator ruling 2026-08-02:
+/// **Never one SCALAR** (`24_FORM` §2b, operator ruling 2026-08-02:
 /// *this needs to be multi-axial on vertices*). The first landing of
-/// this share summed across every coordinate and returned ONE number
+/// this share summed across every coordinate and returned one number
 /// per entity. That is a directional quantity collapsed to a scalar
 /// aggregate, which §2b bars wherever the system computes — and it
 /// erased the only thing an entity can act on. Two entities reading the
@@ -663,8 +663,8 @@ pub fn circulation_on(delta: &Delta, support: &Support) -> Delta {
 /// `verdict_per_dimension` was built to catch: a universe can read
 /// whole on the sum while no single coordinate carries both poles.
 ///
-/// **TOWARD UPLIFT.** A coordinate where an entity stands at the ground
-/// is not a deficiency, it is the OPEN DIRECTION — the axis on which a
+/// **Toward uplift.** A coordinate where an entity stands at the ground
+/// is not a deficiency, it is the open direction — the axis on which a
 /// new relation would earn most. Read per axis, the share stops being a
 /// score and becomes a map of where to grow, which is the whole
 /// difference between a reading that withholds and one that gives
@@ -698,20 +698,20 @@ pub fn borne_axial(delta: &Delta, support: &Support) -> Vec<Vec<Ratio>> {
         .collect()
 }
 
-/// **THE BORNE SHARE** — how much of the circulation each entity holds
-/// up. `D` says how much room stands; this says WHO IS STANDING IN IT.
+/// **The borne share** — how much of the circulation each entity holds
+/// up. `D` says how much room stands; this says who is standing in it.
 ///
 /// Every present relation carries some of the canonical circulation.
-/// Its two ends bear that magnitude EQUALLY — half each — and an
-/// entity's share is the sum over its OWN relations:
+/// Its two ends bear that magnitude equally — half each — and an
+/// entity's share is the sum over its own relations:
 ///
 /// ```text
 /// borne_i = ½ · Σ_{j ~ i} Σ_l |circulation_on(Δ, S)_ij,l|
 /// ```
 ///
-/// **THIS IS THE LENS FORM — the L1 over [`borne_axial`], and the axial
+/// **This is the lens form — the L1 over [`borne_axial`], and the axial
 /// reading is the one that computes.** `24_FORM` §2b permits an L1
-/// aggregate at a HUMAN LENS and bars it wherever the system computes,
+/// aggregate at a human lens and bars it wherever the system computes,
 /// so this is for display and for totals that must reconcile (the
 /// conservation pin sums it against the whole circulation). **A gate
 /// reads [`borne_axial`]**: collapsing first would hide which
@@ -721,22 +721,22 @@ pub fn borne_axial(delta: &Delta, support: &Support) -> Vec<Vec<Ratio>> {
 /// **Why the relation and not the cycle.** The cycle is the intuitive
 /// unit — charge is a property of a closed loop — but a *fundamental
 /// cycle basis* is chosen by a spanning forest, so the node set
-/// `Nodes(C)` and its size `N_C` MOVE WHEN THE ENTITIES ARE RELABELLED.
+/// `Nodes(C)` and its size `N_C` move when the entities are relabelled.
 /// Measured on a theta graph: the same charge yields cycles
 /// `{0,1,2},{0,2,3}` under one labelling and `{0,1,2,3},{0,1,2}` under
 /// another, so `|c|/N_C` pays different entities different amounts for
 /// identical structure. Article I voids it. Only the cycle-space
-/// DIMENSION is invariant, never a chosen basis of it. The circulation
+/// dimension is invariant, never a chosen basis of it. The circulation
 /// is the unique Hodge representative — no forest, no root — so a share
-/// read off IT is basis-free, and this is pinned over every relabelling.
+/// read off it is basis-free, and this is pinned over every relabelling.
 ///
 /// **Why the support and not the complete graph.** See
-/// [`circulation_on`]: on the complete graph an entity holding NO
+/// [`circulation_on`]: on the complete graph an entity holding no
 /// relations draws a quarter of a relation it is not party to. A share
 /// is only ever read across relations that exist.
 ///
 /// **Why circulation and not the residuals.** `symmetry_foundation`
-/// stands exactly where obligations FAIL to compose. Paying on it would
+/// stands exactly where obligations fail to compose. Paying on it would
 /// pay for strain: manufacture an inconsistency, draw a share, do no
 /// work. The circulation is coherent closed content — what actually
 /// composes — so a share can only be earned by structure that holds.
@@ -756,7 +756,7 @@ pub fn borne(delta: &Delta, support: &Support) -> Vec<Ratio> {
         .collect()
 }
 
-/// **THE LAWFUL BASE GROUP** — does this congruence preserve the
+/// **The lawful base group** — does this congruence preserve the
 /// Hodge split, and therefore the capacity reading?
 ///
 /// A base congruence `A·Δ·Aᵀ` preserves `D` **iff `A` maps the
@@ -770,11 +770,11 @@ pub fn borne(delta: &Delta, support: &Support) -> Vec<Ratio> {
 /// A·P·Aᵀ = (A1)(Ap)ᵀ − (Ap)(A1)ᵀ
 /// ```
 ///
-/// which is a gradient again ONLY when `A1 ∈ span(1)`, in which case it
+/// which is a gradient again only when `A1 ∈ span(1)`, in which case it
 /// equals `c · grad(Ap)`. If `A1` leaves that line, the image of a pure
-/// gradient is NOT a gradient: circulation appears out of frame alone,
+/// gradient is not a gradient: circulation appears out of frame alone,
 /// and capacity is forged. Measured — a shear with row sums
-/// `(6/5, 1, 1)` carries a coboundary standing ON THE GROUND to one
+/// `(6/5, 1, 1)` carries a coboundary standing on the Ground to one
 /// circulating in 3 coordinates.
 ///
 /// **This is the residue of the `f05bec8` mint-leak.** The Hodge flip
@@ -783,7 +783,7 @@ pub fn borne(delta: &Delta, support: &Support) -> Vec<Ratio> {
 /// potentials to potentials, and "pure frame" stops being a
 /// well-defined notion under it.
 ///
-/// **Volume SURVIVES the restriction.** The condition is `A1 = c·1`,
+/// **Volume survives the restriction.** The condition is `A1 = c·1`,
 /// not `det(A) = 1` — scaling by `c` has constant row sums and
 /// `det = cⁿ`. So the volumetric scaling the expansion law needs is
 /// admitted; only the constants-breaking directions are refused.
@@ -799,14 +799,14 @@ pub fn preserves_hodge_split(matrix: &[Vec<Ratio>]) -> bool {
     rows.all(|s| s == first)
 }
 
-/// The GROUND extent — what a state carrying nothing above the point
+/// The Ground extent — what a state carrying nothing above the point
 /// reads.
 ///
-/// Its component counts are zero because NOTHING CIRCULATES: no pair
+/// Its component counts are zero because nothing circulates: no pair
 /// carries holonomy, no entity stands in a surviving relation, no layer
 /// is occupied. That is a statement about what is above the floor.
 ///
-/// **Its DEGREE is not zero.** `ground().degree() == Degree::GROUND`,
+/// **Its degree is not zero.** `ground().degree() == Degree::GROUND`,
 /// and that is the reading Article II consults. The state has not
 /// vanished; it stands on the surface holding one degree, itself.
 pub fn ground() -> Extent {

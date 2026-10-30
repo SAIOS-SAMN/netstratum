@@ -1,4 +1,4 @@
-// AUTO-GENERATED — 325 expansion clade words (codes 21..=345)
+// Auto-generated — 325 expansion clade words (codes 21..=345)
 [
     "swarm-alpha", "swarm-beta", "swarm-gamma", "swarm-delta", "swarm-epsilon",
     "swarm-zeta", "swarm-eta", "swarm-theta", "swarm-iota", "swarm-kappa",

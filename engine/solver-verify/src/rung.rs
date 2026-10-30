@@ -1,4 +1,4 @@
-//! **THE RANK-GENERIC RUNG AND FORGE** (operator ruling 2026-08-04:
+//! **The rank-generic RUNG and forge** (operator ruling 2026-08-04:
 //! *remove Grid entirely and upgrade to larger n-dimensional capacity*).
 //!
 //! One ladder, one forge, any rank.
@@ -14,7 +14,7 @@
 //!
 //! `shape: Vec<usize>` spells every rank, and rank falls out of
 //! `shape.len()`. A fourth-rank class needs no new type, no new ladder
-//! and no new gate arm — which is THE MOTION clause 5 (*ARC is a TYPE
+//! and no new gate arm — which is the motion clause 5 (*ARC is a type
 //! of work, not the only type; the machinery must be work-CLASS generic,
 //! never grid-specific*) made structural instead of promised.
 //!
@@ -27,11 +27,11 @@ use physics::Beacon;
 
 /// One rung of the hardness ladder, at any rank.
 ///
-/// **FIELDS PRIVATE, ONE DOOR** (29_CONSTRUCTION C1, operator ruling
+/// **Fields private, one door** (29_CONSTRUCTION C1, operator ruling
 /// 2026-08-05: *apply from theorems — never gate the stochastic
-/// outcome*). A `Rung` that exists IS lawful: the theorem is checked at
+/// outcome*). A `Rung` that exists is lawful: the theorem is checked at
 /// [`Rung::new`], once, with a proof — so the forge that draws from it
-/// is TOTAL and nothing downstream re-gates what construction already
+/// is total and nothing downstream re-gates what construction already
 /// proved. The old `lawful()` gate arm is dead and deleted.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Rung {
@@ -41,7 +41,7 @@ pub struct Rung {
     train_pairs: usize,
 }
 
-/// **WHY A RUNG STANDS OR DOES NOT** — the door's proof, with the
+/// **Why A RUNG stands or does not** — the door's proof, with the
 /// numbers that decided it.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum RungFault {
@@ -57,11 +57,11 @@ pub enum RungFault {
 }
 
 impl Rung {
-    /// **THE ONE DOOR.** Everything the struck `lawful()` gated is
+    /// **The one door.** Everything the struck `lawful()` gated is
     /// checked here, once, and a refusal names its reason. Past this
     /// door there is no unlawful rung to catch.
     ///
-    /// `word_len: 0` is LAWFUL and deliberately admitted: the empty word
+    /// `word_len: 0` is lawful and deliberately admitted: the empty word
     /// is the identity task, and a copy task is a task.
     pub fn new(
         tier: u8,
@@ -102,7 +102,7 @@ impl Rung {
         self.shape.len()
     }
 
-    /// **THE STATIC LADDER, PER RANK.** Network-rate adjustment lands
+    /// **The static ladder, per rank.** Network-rate adjustment lands
     /// with the mesh (N6); until then the levels are explicit.
     ///
     /// Rank 2 reproduces the landed planar table and rank 3 the landed
@@ -152,7 +152,7 @@ impl Rung {
     }
 
     /// The top rung at a rank, derived: the first level nothing rises
-    /// above. Compared against SATURATION, never against the next rung —
+    /// above. Compared against saturation, never against the next rung —
     /// rungs 0 and 1 are deliberately the same opening rung, and a
     /// plateau is not a ceiling.
     pub fn top(rank: usize) -> u32 {
@@ -164,11 +164,11 @@ impl Rung {
         Rung::level(rank, level) != Rung::level(rank, u32::MAX)
     }
 
-    /// **WHERE THIS SHAPE SITS** — the pricing key, as a POSITION rather
+    /// **Where this shape sits** — the pricing key, as a POSITION rather
     /// than a shape.
     ///
     /// Returns `(rank, level)`. A payload cannot name its own price by
-    /// inventing a convenient shape: the shape is matched WHOLE against
+    /// inventing a convenient shape: the shape is matched whole against
     /// the ladder at its own rank, and anything off the ladder has no
     /// position and therefore no price.
     pub fn position(&self) -> Option<(usize, u32)> {
@@ -178,7 +178,7 @@ impl Rung {
             .map(|level| (rank, level))
     }
 
-    // `lawful()` LIVED HERE and is DELETED (29_CONSTRUCTION C1): every
+    // `lawful()` lived here and is deleted (29_CONSTRUCTION C1): every
     // check it performed moved into `Rung::new`, so a rung that exists
     // has nothing left to be gated for. The degeneracy law did not
     // weaken — it moved from a judgment to a precondition of existence.
@@ -196,7 +196,7 @@ pub struct FieldTask {
 /// Sample one transform for position `slot`, drawn from the rung's tier
 /// and the field's own rank.
 ///
-/// **The axis indices are drawn from the RANK**, which is the whole
+/// **The axis indices are drawn from the rank**, which is the whole
 /// reason one sampler serves every class: at rank 2 a `Reverse` is a
 /// flip and a `Swap(0,1)` is a transpose; at rank 3 the same two draws
 /// are what `Volume` had to call `FlipStack` and a layer exchange.
@@ -244,22 +244,22 @@ fn sample_field(beacon: &Beacon, rung: &Rung, pair: usize) -> Field {
     Field::new(rung.shape.clone(), cells).expect("a lawful rung forges a lawful field")
 }
 
-/// **THE N-FORGE.** Beacon-seeded task generation at any rank.
+/// **The N-FORGE.** Beacon-seeded task generation at any rank.
 ///
 /// Same digest and rung, byte-identical task on every machine; a
 /// different chronicle forges a different task. The secret word is
-/// sampled, applied, then DISCARDED — the task carries only
+/// sampled, applied, then discarded — the task carries only
 /// observations, and finding A word that closes them is the solver's
 /// work (it need not be the forged one; the verifier is the authority
 /// either way).
 ///
-/// THE BOUNDARY LAW holds unchanged: the forge allocates rewards and
+/// The boundary law holds unchanged: the forge allocates rewards and
 /// paces difficulty. It is never a security primitive.
 pub fn forge_field(digest: [u8; 32], rung: &Rung) -> FieldTask {
-    // TOTAL, deliberately. A `Rung` is lawful by construction (the one
+    // Total, deliberately. A `Rung` is lawful by construction (the one
     // door), so the stochastic draw ranges over the lawful space and
     // there is no outcome left to gate — the theorem was applied
-    // BEFORE the beacon ever drew.
+    // before the beacon ever drew.
     let beacon = Beacon::from_digest(digest);
     let word: Word = (0..rung.word_len)
         .map(|slot| sample_axis(&beacon, rung, slot))
@@ -288,7 +288,7 @@ pub fn forge_field(digest: [u8; 32], rung: &Rung) -> FieldTask {
     }
 }
 
-/// **THE CLOSED VOCABULARY AT A RANK** — every transform a word may be
+/// **The CLOSED vocabulary AT A rank** — every transform a word may be
 /// built from, derived from the shape rather than listed per class.
 ///
 /// This is what `volume::vocabulary()` was, generalized: that function
@@ -298,7 +298,7 @@ pub fn forge_field(digest: [u8; 32], rung: &Rung) -> FieldTask {
 /// the volumetric set, and rank 4 a set nobody had to write.
 ///
 /// Bounded by construction: `rank` mirrors, `rank·(rank−1)/2` swaps, and
-/// the rolls of each axis. Recolor is EXCLUDED — the hue permutations
+/// the rolls of each axis. Recolor is excluded — the hue permutations
 /// are `10!`, far too many to enumerate, and a search that must guess a
 /// permutation is not a fair-depth search. The forge only draws recolor
 /// at tier 2 and above, which is exactly where the corpus path (not the

@@ -56,8 +56,8 @@ impl Delta {
         &self.entries[i][j][l]
     }
 
-    /// Build a Delta from raw `entries[i][j][l]` — the ONLY writer that
-    /// does NOT enforce antisymmetry. It exists for one lawful use: the
+    /// Build a Delta from raw `entries[i][j][l]` — the only writer that
+    /// does not enforce antisymmetry. It exists for one lawful use: the
     /// image of a general `GL_n(Rat)` conjugation `A·Δ·A⁻¹` (the fold
     /// gate's orbit), which need not be antisymmetric. The result's
     /// lawfulness is never assumed — [`verify_conservation`] is the
@@ -76,20 +76,20 @@ impl Delta {
         Self { dim, fiber, entries }
     }
 
-    /// THE STRUCTURAL BREAK — the first place antisymmetry or the zero
+    /// The structural break — the first place antisymmetry or the zero
     /// diagonal fails, named as a POSITION `(i, j, l)`, never as a
     /// magnitude.
     ///
     /// This is the form the engine uses (operator ruling 2026-08-01:
     /// no `==` in deterministic code — accounting, not identity). It
     /// asks a structural question and answers with a structural fact:
-    /// WHERE the surface is left. It never forms an aggregate, so there
+    /// Where the surface is left. It never forms an aggregate, so there
     /// is no scalar for a later reader to compare, threshold, or
     /// descend, and it short-circuits at the first break rather than
     /// summing the universe to decide a yes/no.
     ///
     /// Contrast [`Self::conservation_measurement`], which collapses the
-    /// same question to one number and is a LENS reading only.
+    /// same question to one number and is a lens reading only.
     pub fn first_conservation_break(&self) -> Option<(usize, usize, usize)> {
         for i in 0..self.dim {
             for l in 0..self.fiber {
@@ -108,11 +108,11 @@ impl Delta {
         None
     }
 
-    /// The conservation measurement — a DISTANCE to the invariant
-    /// surface: `Σ |Δ_ii| + Σ_{i<j} |Δ_ij + Δ_ji|` (THE PROPORTIONAL
-    /// LAW: each violation counts exactly its size, in its own units).
+    /// The conservation measurement — a distance to the invariant
+    /// surface: `Σ |Δ_ii| + Σ_{i<j} |Δ_ij + Δ_ji|` (The proportional
+    /// law: each violation counts exactly its size, in its own units).
     ///
-    /// **LENS READING ONLY.** No engine path decides anything from this
+    /// **Lens reading only.** No engine path decides anything from this
     /// number; it exists so an operator surface can render how far a state
     /// sits from the surface. The engine asks
     /// [`Self::first_conservation_break`] instead, which names a
@@ -140,7 +140,7 @@ impl Delta {
     }
 }
 
-/// The ONE computation of the cocycle condition. For every ordered
+/// The one computation of the cocycle condition. For every ordered
 /// distinct triple `(i, j, k)` and fiber coordinate `l`:
 ///
 /// `R_ijk,l = Δ_ik,l − Δ_ij,l − Δ_jk,l`
@@ -179,14 +179,14 @@ where
 /// distinct triples. `C(Δ) ≥ 0`, exact rational, and `C(Δ) = 0` iff
 /// `Δ_ik = Δ_ij + Δ_jk` for every triple — the cocycle condition.
 ///
-/// THE PROPORTIONAL LAW (operator ruling 2026-07-31): the ancestor's `Σ R²`
-/// is BARRED as an aggregator of difference. Squares are the
+/// The proportional law (operator ruling 2026-07-31): the ancestor's `Σ R²`
+/// is barred as an aggregator of difference. Squares are the
 /// mathematics of minimization — a loss shaped to be differentiated
 /// and descended; this lens exists to be READ. L1 keeps the scalar in
-/// the SAME UNITS as its payload, weights each residual exactly its
+/// the same units as its payload, weights each residual exactly its
 /// size, needs no root ever, and keeps the arithmetic lean (squaring
 /// doubles bit-length — the denominator lesson). The zero point — the
-/// only place the LAW gates — is unchanged.
+/// only place the law gates — is unchanged.
 pub fn coherence_functional(delta: &Delta) -> Lens {
     let mut c = Ratio::zero();
     for_each_residual(delta, |_i, _j, _k, _l, r| {

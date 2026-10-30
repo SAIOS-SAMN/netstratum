@@ -24,7 +24,7 @@ it and the deficit starves it, and the archetype decides how it is
 distributed — the Locust/Custodian tension `40_REJUVENATION` gave the
 planet, now given the people.
 
-## 1. The food-identity law — what a species eats (landed, pinned here)
+## 1. The FOOD-IDENTITY law — what a species eats (landed, pinned here)
 
 **A civilization eats what its species is, never "food" in the
 abstract.** The sealed metabolism is the identity, and the ration

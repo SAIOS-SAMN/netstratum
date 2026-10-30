@@ -5,7 +5,7 @@
 //!
 //! The one question this module answers: are two rational matrices in
 //! the same `GL_n(Rat)` conjugacy class? Two matrices `A` and `PAP⁻¹`
-//! are the SAME state seen through different frames — a gauge
+//! are the same state seen through different frames — a gauge
 //! difference, not a genuine one. The invariant that decides it is the
 //! sequence of invariant factors `d₁ | d₂ | … | dₖ` of the
 //! characteristic matrix `(xI − A)`, computed by its Smith Normal Form
@@ -17,17 +17,17 @@
 //! verdict cannot depend on which frame a state arrived in.
 //!
 //! Two translation laws bind the derivation:
-//! - **THE PROPORTIONAL LAW** touches nothing here — the RCF is a
-//!   CANONICAL FORM, not an aggregator of difference; no square is
+//! - **The proportional law** touches nothing here — the RCF is a
+//!   CANONICAL form, not an aggregator of difference; no square is
 //!   summed as a measure. (The ancestor's `Σ R²` lived only in its
 //!   coherence functional, already landed as `Σ |R|`.)
 //! - **blake3, never Keccak** — the ancestor hashed with Keccak-256;
-//!   the house is blake3-only (N6). The exact hash BYTES are
-//!   netstratum's own, re-witnessed red-first; only the conjugacy
-//!   INVARIANCE property is carried (the NS-3 precedent: the equation
+//!   the house is blake3-only (N6). The exact hash bytes are
+//!   Netstratum's own, re-witnessed red-first; only the conjugacy
+//!   invariance property is carried (the NS-3 precedent: the equation
 //!   is taken, the vectors re-witnessed).
 //!
-//! The judgment is EXACT: `orbit_lock` (the fold gate) compares the
+//! The judgment is exact: `orbit_lock` (the fold gate) compares the
 //! [`RcfSignature`] — the whole exact invariant-factor sequence — not
 //! the hash. [`rcf_hash`] is the compact blake3 fingerprint, for
 //! commitment binding only (a convenience, never a gate — a hash is a
@@ -404,7 +404,7 @@ fn layer_matrix(delta: &Delta, l: usize) -> Vec<Vec<Ratio>> {
     m
 }
 
-/// THE CONJUGACY INVARIANT — the exact RCF signature of a Delta,
+/// The conjugacy invariant — the exact RCF signature of a Delta,
 /// computed layer by layer. `rcf_signature(a) == rcf_signature(b)` iff
 /// `a` and `b` are the same state up to a frame change (a `GL_n(Rat)`
 /// conjugation on every layer). This is what the fold gate compares:
@@ -417,11 +417,11 @@ pub fn rcf_signature(delta: &Delta) -> RcfSignature {
 }
 
 /// The compact blake3 fingerprint of a Delta's RCF signature — the
-/// same 32 bytes for conjugate states, for COMMITMENT BINDING only
+/// same 32 bytes for conjugate states, for commitment binding only
 /// (the arbor may carry it). Never a gate: the fold gate compares the
 /// exact [`RcfSignature`], because a hash is a lossy summary and the
 /// law gates on exact form. blake3, not the ancestor's Keccak (the
-/// house hash; the bytes are netstratum's own, re-witnessed).
+/// house hash; the bytes are Netstratum's own, re-witnessed).
 pub fn rcf_hash(delta: &Delta) -> [u8; 32] {
     let mut buf = Vec::new();
     buf.extend_from_slice(b"netstratum-rcf-v1");
@@ -459,7 +459,7 @@ fn exact_div(p: &RatPoly, q: &RatPoly) -> RatPoly {
     quotient
 }
 
-/// YUN'S SQUAREFREE DECOMPOSITION over `Rat[x]` (characteristic zero):
+/// YUN'S squarefree decomposition over `Rat[x]` (characteristic zero):
 /// monic, pairwise-coprime, squarefree `s_j` with `f = c · ∏ s_jʲ`, listed
 /// as `(j, s_j)` for every non-constant `s_j`. Gcds and exact divisions
 /// only — nothing is factored.
@@ -530,19 +530,19 @@ fn small_det(m: &[Vec<RatPoly>]) -> RatPoly {
     total
 }
 
-/// **THE SKEW-BIPARTITE RCF HASH** — [`rcf_hash`] for the one-layer Delta
-/// whose only relations run between `k` ANCHOR nodes and `w` LEAF nodes,
+/// **The skew-bipartite RCF HASH** — [`rcf_hash`] for the one-layer Delta
+/// whose only relations run between `k` anchor nodes and `w` leaf nodes,
 /// antisymmetrically: `A = [[0, M], [−Mᵀ, 0]]`, `M` the `k×w` block given
-/// as `m` (rows = anchors). The SAME 32 bytes as `rcf_hash` of that Delta,
+/// as `m` (rows = anchors). The same 32 bytes as `rcf_hash` of that Delta,
 /// computed from `k×k` algebra instead of a `(k+w)²` Smith normal form over
 /// `Rat[x]` (measured: 118 s → milliseconds for a 467-word knowledge map).
 ///
 /// Why it is exact, not an approximation:
 ///   * `χ_A(x) = x^{w−k} · det(x²I_k + MMᵀ)` — the Schur complement of the
 ///     `xI_k` block with Sylvester's identity, a `k×k` determinant.
-///   * `A` is real skew-symmetric, hence NORMAL, hence diagonalizable over
+///   * `A` is real skew-symmetric, hence normal, hence diagonalizable over
 ///     ℂ: every elementary divisor is linear, so the invariant factors are
-///     read off the SQUAREFREE decomposition of `χ` — `d_t = ∏_{j ≥ t} s_j`
+///     read off the squarefree decomposition of `χ` — `d_t = ∏_{j ≥ t} s_j`
 ///     (with `x` at its own multiplicity), smallest first, as the Smith form
 ///     lists them. No factoring over ℚ is needed.
 pub fn rcf_hash_skew_bipartite(k: usize, m: &[Vec<Ratio>]) -> [u8; 32] {

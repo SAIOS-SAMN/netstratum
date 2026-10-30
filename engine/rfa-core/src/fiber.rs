@@ -1,5 +1,5 @@
-//! THE NON-ABELIAN FIBER — a `2×2` matrix connection on a relational
-//! edge (DIRECTIVE 17, operator ruling 2026-08-01).
+//! The non-abelian FIBER — a `2×2` matrix connection on a relational
+//! edge (directive 17, operator ruling 2026-08-01).
 //!
 //! **Why the flat fiber could not move.** With a scalar connection the
 //! curvature is `F = dA` and the bracket vanishes identically:
@@ -10,12 +10,12 @@
 //!
 //! With a matrix connection the curvature keeps its second term —
 //! `F = dA + A ∧ A` —
-//! and `[A_i, A_j] ≠ 0` in general. The circulation IS the field. A
+//! and `[A_i, A_j] ≠ 0` in general. The circulation is the field. A
 //! closed loop of non-commuting connections carries flux, so the same
-//! ring is a flywheel rather than a corpse, and it wakes without any
+//! ring is a flywheel rather than a remnant, and it wakes without any
 //! external charge bolted onto a vertex.
 //!
-//! **The holonomy is a PRODUCT, not a sum.** That is the whole
+//! **The holonomy is a product, not a sum.** That is the whole
 //! difference. An abelian loop accumulates `Σ` and cancels; a
 //! non-abelian loop accumulates an ordered product `A₁A₂…Aₙ`, and even
 //! identical factors give `Aⁿ ≠ I`. Order stops being irrelevant, which
@@ -29,7 +29,7 @@ use num_traits::Signed;
 
 /// A `2×2` matrix connection along one relational edge, over exact
 /// rationals. Members of `SL₂` satisfy `det = 1`; the type does not
-/// enforce it, because the gauge law is a READING (see [`Self::is_sl2`])
+/// enforce it, because the gauge law is a reading (see [`Self::is_sl2`])
 /// and a refusal names what it found rather than being unconstructible.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct MatrixFiber2x2 {
@@ -95,7 +95,7 @@ impl MatrixFiber2x2 {
         }
     }
 
-    /// **THE LIE BRACKET** `[A, B] = AB − BA` — the term that does not
+    /// **The lie bracket** `[A, B] = AB − BA` — the term that does not
     /// exist in a scalar fiber. Where this is non-zero the connection is
     /// non-abelian and a closed loop carries field.
     pub fn commutator(&self, other: &Self) -> Self {
@@ -113,7 +113,7 @@ impl MatrixFiber2x2 {
     }
 
     /// L1 magnitude — the taxicab sum of entries. Squares stay barred as
-    /// aggregators (THE PROPORTIONAL LAW); no root is ever taken.
+    /// aggregators (the proportional law); no root is ever taken.
     pub fn l1_norm(&self) -> Ratio {
         self.m[0][0].abs() + self.m[0][1].abs() + self.m[1][0].abs() + self.m[1][1].abs()
     }
@@ -127,12 +127,12 @@ impl MatrixFiber2x2 {
     }
 }
 
-/// **THE LOOP HOLONOMY** — the ordered product of the connections around
+/// **The LOOP holonomy** — the ordered product of the connections around
 /// a closed walk.
 ///
 /// This is where the abelian and non-abelian cases part company. A
-/// scalar loop accumulates a SUM and a balanced ring cancels to zero. A
-/// matrix loop accumulates a PRODUCT, so order matters and even
+/// scalar loop accumulates a sum and a balanced ring cancels to zero. A
+/// matrix loop accumulates a product, so order matters and even
 /// identical factors give `Aⁿ`, which is the identity only in special
 /// cases. A holonomy that is not the identity is flux the loop is
 /// holding.
@@ -143,13 +143,13 @@ pub fn loop_holonomy(walk: &[MatrixFiber2x2]) -> MatrixFiber2x2 {
     walk.iter().fold(MatrixFiber2x2::identity(), |carried, step| carried.matmul(step))
 }
 
-/// **THE CURVATURE OF A PLAQUETTE** — `F = dA + A ∧ A` read on the
+/// **The curvature of A plaquette** — `F = dA + A ∧ A` read on the
 /// smallest closed cell the connection can carry.
 ///
 /// The discrete form of the second term is the bracket: for two
 /// directions `A` and `B`, the field is what fails to commute. The
 /// first term vanishes on a plaquette whose connections are constant
-/// along each direction, so on a uniform cell the curvature IS the
+/// along each direction, so on a uniform cell the curvature is the
 /// bracket — and it is exactly zero for every scalar fiber.
 pub fn plaquette_curvature(a: &MatrixFiber2x2, b: &MatrixFiber2x2) -> MatrixFiber2x2 {
     a.commutator(b)

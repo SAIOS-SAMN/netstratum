@@ -1,5 +1,5 @@
-//! JUDGE PROBE (task #7) — re-judge live chronicles deed by deed and
-//! print each refusal WITH its context, so the three live tallies
+//! Judge probe (task #7) — re-judge live chronicles deed by deed and
+//! print each refusal with its context, so the three live tallies
 //! (NoSuchEntity · ConservationBroken · DecayExceedsBound) resolve to
 //! named receipts instead of counts. Opt-in, appends nothing, judges
 //! nothing into the chain — the cost_probe discipline.

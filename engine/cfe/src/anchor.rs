@@ -1,28 +1,28 @@
-//! **THE PHYSICAL ANCHORS** (P2, operator ruling 2026-08-05).
+//! **The physical anchors** (P2, operator ruling 2026-08-05).
 //!
-//! A constant is a measured anchor ONLY when its provenance is
+//! A constant is a measured anchor only when its provenance is
 //! structurally bound: each value here is reachable through a typed
 //! declaration that names the empirical invariant it stands on, and
 //! through nothing else. There is no bare `measured()` constructor in
 //! this tree — that would be a dial in a lab coat.
 //!
 //! **The census law.** The tuned-constant ratchet walks every source
-//! tree counting DIALS (tunables — target zero, ceiling only falls)
-//! and holds THIS file to the opposite discipline: the anchor set is
-//! FINITE and PINNED EXACTLY (`anchor_pins.rs`) — a value cannot enter,
+//! tree counting dials (tunables — target zero, ceiling only falls)
+//! and holds this file to the opposite discipline: the anchor set is
+//! finite and pinned exactly (`anchor_pins.rs`) — a value cannot enter,
 //! leave, or change without going red against its own citation.
 //!
 //! **Honesty over count.** A value with no empirical citation does not
 //! belong here, whatever that does to the dial ledger: the Luminal
 //! White Hole is lore, so its luminosity stays a counted dial in
 //! `thermal.rs`. Stylized values are declared as stylized — an anchor
-//! cites what it stands NEAR and says so, or it is not an anchor.
+//! cites what it stands near and says so, or it is not an anchor.
 
 use crate::ratio::{ratio, Ratio};
 use crate::thermal::StarClass;
 
-/// **A KELVIN ANCHOR** — a temperature the thermal law stands on, in
-/// whole kelvin. `thermal::kelvin4` accepts THIS TYPE and nothing
+/// **A kelvin anchor** — a temperature the thermal law stands on, in
+/// whole kelvin. `thermal::kelvin4` accepts this type and nothing
 /// else, so a fourth-power bound cannot be built from a bare number.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum KelvinAnchor {
@@ -69,11 +69,11 @@ impl KelvinAnchor {
     }
 }
 
-/// **THE STELLAR LUMINOSITY ANCHORS** — representative luminosities
+/// **The stellar luminosity anchors** — representative luminosities
 /// per class, relative to Sol = 1, each cited against the astronomy it
 /// stands near. `None` for the lore classes: fiction has no empirical
-/// citation, so its value stays a DIAL where it is used.
-/// Main-sequence and remnant MASS in solar masses (`M☉ = 1`) — the second
+/// citation, so its value stays a dial where it is used.
+/// Main-sequence and remnant mass in solar masses (`M☉ = 1`) — the second
 /// stellar anchor, the one Kepler's third law reads (`P² ∝ r³/M`). Cited to the
 /// Morgan–Keenan mass sequence; the lore White Hole has no citation and its
 /// value lives as a dial where it is used.
@@ -103,7 +103,7 @@ pub fn mass(class: StarClass) -> Option<Ratio> {
         StarClass::NeutronStar => Some(ratio(3, 2)),
         // Wolf–Rayet: 10–25 M☉; 20 representative.
         StarClass::WolfRayet => Some(ratio(20, 1)),
-        // LORE — no citation exists; the dial lives in thermal.rs.
+        // Lore — no citation exists; the dial lives in thermal.rs.
         StarClass::LuminalWhiteHole => None,
     }
 }
@@ -131,13 +131,13 @@ pub fn luminosity(class: StarClass) -> Option<Ratio> {
         StarClass::WhiteDwarf => Some(ratio(1, 100)),
         // Red giant: 10²–10³ L☉ up the RGB; 10³ representative.
         StarClass::RedGiant => Some(ratio(1_000, 1)),
-        // Neutron star: young pulsar SPIN-DOWN luminosity reaches
+        // Neutron star: young pulsar spin-down luminosity reaches
         // 10²–10⁴ L☉ (thermal surface emission is far dimmer);
         // 100 takes the spin-down reading, stylized bright.
         StarClass::NeutronStar => Some(ratio(100, 1)),
         // Wolf–Rayet: 10⁵–10⁶ L☉ measured; 2×10⁵ representative.
         StarClass::WolfRayet => Some(ratio(200_000, 1)),
-        // LORE — no citation exists; the dial lives in thermal.rs.
+        // Lore — no citation exists; the dial lives in thermal.rs.
         StarClass::LuminalWhiteHole => None,
     }
 }

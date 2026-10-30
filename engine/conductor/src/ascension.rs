@@ -1,4 +1,4 @@
-//! ASCENSION (docs/72; operator-agreed 2026-10-09): the gates, the climb, the
+//! Ascension (docs/72; operator-agreed 2026-10-09): the gates, the climb, the
 //! higher order.
 //!
 //! - **A1, the core's choice and the gates.** A line that has mastered the top
@@ -13,12 +13,12 @@
 //!   to the ancients' cores. A progenitor is not seated at founding: the
 //!   builders' line that takes a folded gate's tolls (`builder_payee`) becomes
 //!   one at the fold.
-//! - **A2, the envoy.** A master's envoy crosses a MAPPED gate to its core. An
+//! - **A2, the envoy.** A master's envoy crosses a mapped gate to its core. An
 //!   envoy makes its lineage a bearer of that core's wave and enters the
 //!   throat's contest (`ancients::keepers`). Each bounce it stays it pays the
 //!   passage toll to the gate's builders (`builder_payee`), carried through the
 //!   gate; unable to pay, it is recalled. Each bounce after its crossing it
-//!   JUDGES: an envoy whose lineage does not keep the throat (it cannot out-hold
+//!   judges: an envoy whose lineage does not keep the throat (it cannot out-hold
 //!   the keeper) withdraws and pays no more.
 //! - **A3, ascension by deed.** An envoy's lineage that keeps the core's throat
 //!   for a full core period ascends: the envoy's line joins that core's
@@ -31,12 +31,12 @@
 //!
 //! Concordance 5.9 (coordinator ruling (a), 2026-10-09): every crossing takes
 //! its coordinates from the hypha's map, so an envoy crosses, and trade rides,
-//! only a gate MAPPED at its hub's present place. Each bounce a gate whose hub
+//! only a gate mapped at its hub's present place. Each bounce a gate whose hub
 //! has drifted from its mapped place by more than its freshness (in cells) goes
 //! back to unmapped and is offered again; envoys already through stay put, and
 //! owe no toll for a passage they cannot use.
 //!
-//! DECLARED (until a law derives them): a gate's cost is the ladder's dearest
+//! Declared (until a law derives them): a gate's cost is the ladder's dearest
 //! closure; its span's melt fraction is span x 1/64 (the passage toll each
 //! bounce is that fraction of one STAMP; the roads melt by it); its freshness
 //! is one cell. State: `<var>/ascension.bin`, binary records (Concordance 1.13).
@@ -51,7 +51,7 @@ use std::path::Path;
 
 type Place = (Ratio, Ratio, Ratio);
 
-/// DECLARED (docs/59): a gate's freshness, the cells its hub may drift from
+/// Declared (docs/59): a gate's freshness, the cells its hub may drift from
 /// its mapped place before the map no longer holds it.
 pub const FRESHNESS_CELLS: u64 = 1;
 
@@ -276,12 +276,12 @@ fn sealed(var_root: &Path) -> Vec<(String, Place)> {
         .collect()
 }
 
-/// DECLARED: a gate's cost, the ladder's dearest closure.
+/// Declared: a gate's cost, the ladder's dearest closure.
 fn gate_cost() -> Ratio {
     (0..=Difficulty::top()).map(|r| kernel::mint_bound(Some(r))).max().unwrap_or_else(|| ratio(0, 1))
 }
 
-/// DECLARED: a gate span's melt fraction, span x 1/64: what a crossing of the
+/// Declared: a gate span's melt fraction, span x 1/64: what a crossing of the
 /// gate melts (the roads), and the passage toll each bounce in STAMP.
 pub fn gate_melt(span: u64) -> Ratio {
     ratio(i64::try_from(span).unwrap_or(i64::MAX), 64)
@@ -309,7 +309,7 @@ fn through(worlds: &[Polity], i: usize, home_hub: usize, gate: &Gate, span: &Rat
     one.clone() - (one.clone() - leg) * (one - gate_melt(gate.span))
 }
 
-/// ONE TRIP: carry up to `amount` STAMP from line `from` to line `to` on a
+/// One trip: carry up to `amount` STAMP from line `from` to line `to` on a
 /// road melting `melt`, no more than the payer's free hulls hold on a melting
 /// road (the haul law; a road that does not melt asks no hull). Returns what
 /// was carried and what arrived, or why nothing crossed (walled, short, no
@@ -359,7 +359,7 @@ fn hubs(worlds: &[Polity], book: &Ledger, var_root: &Path, span: &Ratio) -> BTre
         .collect()
 }
 
-/// THE GATE'S BUILDERS' LINE, who takes its tolls: the builder lineage's
+/// The gate's builders' LINE, who takes its tolls: the builder lineage's
 /// richest living line at the core, or, keeping the throat through an envoy
 /// with no line living there, its rider.
 pub(crate) fn builder_payee(worlds: &[Polity], cores: &[Option<String>], parents: &BTreeMap<String, Vec<String>>, keepers: &BTreeMap<String, Keeper>, gate: &Gate) -> Option<usize> {
@@ -376,7 +376,7 @@ pub(crate) fn builder_payee(worlds: &[Polity], cores: &[Option<String>], parents
         })
 }
 
-/// THE ROADS for the hub clearing: every mapped gate, its span's melt, and its
+/// The roads for the hub clearing: every mapped gate, its span's melt, and its
 /// builders' line, read with the beat's one reading of the keepers.
 pub fn roads(worlds: &[Polity], book: &Ledger, registry: &Registry, var_root: &Path, keepers: &BTreeMap<String, Keeper>) -> Vec<Road> {
     let mapped: Vec<Gate> = read(var_root).0.into_iter().filter(|g| g.mapped).collect();
@@ -391,7 +391,7 @@ pub fn roads(worlds: &[Polity], book: &Ledger, registry: &Registry, var_root: &P
         .collect()
 }
 
-/// A1 THE CORE'S CHOICE: the core master `i`'s lineage would keep (G3 read
+/// A1 the core's choice: the core master `i`'s lineage would keep (G3 read
 /// with its envoy there and every incumbent as it stands), the most systems
 /// first, then its own galaxy, then by name; and those systems.
 fn choose_core(
@@ -428,7 +428,7 @@ fn lineage_systems(worlds: &[Polity], cores: &[Option<String>], parents: &BTreeM
     living + if away { worlds[envoy].world.orbs().len() as u64 } else { 0 }
 }
 
-/// docs/77 — A GATE'S ACCOUNT: what it cost its parliament and what passage
+/// docs/77 — A gate's account: what it cost its parliament and what passage
 /// over it earned its builders (road tolls on the trade that rode it, and the
 /// envoys' passage tolls), keyed by (galaxy, core). `<var>/gate-accounts.bin`
 /// (Concordance 1.13): tag 1 (galaxy, core, cost ratio, earned ratio).
@@ -473,7 +473,7 @@ fn credit(var_root: &Path, from: &str, core: &str, cost: &Ratio, earned: &Ratio)
     write_accounts(var_root, &accounts);
 }
 
-/// docs/77 — THE GATES' ACCOUNTS at a term's close: the term's road tolls
+/// docs/77 — the gates' accounts at a term's close: the term's road tolls
 /// added to each gate's earnings, and each standing gate's cost, earnings and
 /// payback (earned over cost) for the log. A gate folded before its account
 /// was kept is booked at the cost every gate paid (`gate_cost`).
@@ -501,7 +501,7 @@ pub fn accounts(var_root: &Path, road_tolls: &BTreeMap<(String, String), Ratio>)
     said
 }
 
-/// THE ASCENSION STEP, once a bounce, after the ancients' step, with the
+/// The ascension step, once a bounce, after the ancients' step, with the
 /// bounce's one reading of the keepers. Returns what happened, for the log.
 pub fn step(worlds: &mut [Polity], book: &Ledger, registry: &Registry, var_root: &Path, keepers: &BTreeMap<String, Keeper>, bounce: u64, stamp: u64) -> Vec<String> {
     let mut said = Vec::new();
@@ -513,7 +513,7 @@ pub fn step(worlds: &mut [Polity], book: &Ledger, registry: &Registry, var_root:
     // Each line's core, read once for the step (a line does not change galaxy
     // within it).
     let cores = crate::ancients::cores_of(worlds, book);
-    // 5.9 RECALIBRATION: a gate whose hub drifted from its place by more than
+    // 5.9 recalibration: a gate whose hub drifted from its place by more than
     // its freshness leaves the map and is offered again at the hub's place
     // now; a gate sealed by the house at its offered place reads mapped.
     let sealed = sealed(var_root);
@@ -594,7 +594,7 @@ pub fn step(worlds: &mut [Polity], book: &Ledger, registry: &Registry, var_root:
         ));
         foldings.push(Folding { from: home.clone(), core: target.clone(), builder: keeper.line.clone(), master, owed, trips: 0, started: bounce });
     }
-    // A1: ONE TRIP a bounce for each gate being paid for, from the builders'
+    // A1: one trip a bounce for each gate being paid for, from the builders'
     // richest line at the core that is not an ancient, to the first ancient
     // still owed; the gate folds when the last load lands.
     let mut paying = Vec::new();
@@ -666,7 +666,7 @@ pub fn step(worlds: &mut [Polity], book: &Ledger, registry: &Registry, var_root:
         ));
         credit(var_root, &f.from, &f.core, &total, &ratio(0, 1));
         let gate = Gate { from: f.from, core: f.core, builder: f.builder, span: cells, mapped: false, built: bounce, place, freshness: FRESHNESS_CELLS };
-        // THE PROGENITORS EMERGE (operator 2026-10-21): the doorway's builders'
+        // The progenitors emerge (operator 2026-10-21): the doorway's builders'
         // line, the one who takes its tolls, is a progenitor from the fold; an
         // ancient is already above the doorways.
         if let Some(b) = builder_payee(worlds, &cores, &parents, keepers, &gate) {
@@ -678,7 +678,7 @@ pub fn step(worlds: &mut [Polity], book: &Ledger, registry: &Registry, var_root:
         gates.push(gate);
     }
     foldings = paying;
-    // A2: the masters' envoys cross MAPPED gates to their chosen cores (5.9).
+    // A2: the masters' envoys cross mapped gates to their chosen cores (5.9).
     for (i, home, target, _) in &masters {
         if gates.iter().any(|g| &g.from == home && &g.core == target && g.mapped) {
             let line = worlds[*i].spec.civilization.sigil.clone();
@@ -703,7 +703,7 @@ pub fn step(worlds: &mut [Polity], book: &Ledger, registry: &Registry, var_root:
             said.push(format!("AN ENVOY IS RECALLED — {} from {} (no longer at the ladder's top)", e.line, e.core));
             continue;
         }
-        // THE JUDGEMENT, each bounce after its crossing: with its envoy counted
+        // The judgement, each bounce after its crossing: with its envoy counted
         // (the one reading), does its lineage keep the throat?
         let root = root_of(&e.line, &parents);
         if e.since < bounce && keepers.get(&e.core).is_none_or(|k| k.line != root) {

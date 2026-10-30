@@ -1,6 +1,6 @@
-//! THE KERNEL — the one validated update function (CHARTER §11 rule 3).
+//! The kernel — the one validated update function (Charter §11 rule 3).
 //!
-//! `admits(prior, next, step)` gates whether ONE step lawfully carries
+//! `admits(prior, next, step)` gates whether one step lawfully carries
 //! the universe from `prior` to `next`. It is:
 //!
 //! - **pure** — same inputs, same verdict, forever;
@@ -10,14 +10,14 @@
 //! - **encoding-blind** — it never produces or reads bytes.
 //!   Serialization is the codec's monopoly (the arbor), so the kernel
 //!   and the chain can never disagree about bytes: only one component
-//!   ever produces them. The kernel gates MEANING; the codec fixes
-//!   FORM; the two never overlap.
+//!   ever produces them. The kernel gates meaning; the codec fixes
+//!   form; the two never overlap.
 //!
-//! Conservation, containment, and exactness are INVARIANTS inside this
+//! Conservation, containment, and exactness are invariants inside this
 //! function — an unlawful transition is not caught after the fact, it
-//! cannot be constructed. This is why CHARTER §11 dissolves every
-//! reconciliation instrument: you do not reconcile what cannot
-//! diverge.
+//! cannot be constructed. This is why Charter §11 dissolves every
+//! reconciliation instrument: what cannot diverge needs no
+//! reconciling.
 //!
 //! **Versioned like the charter.** [`VERSION`] is bumped only by
 //! amendment. Every chain commitment binds the version that gated the
@@ -27,7 +27,7 @@
 //!
 //! **Coverage grows by amendment, never silently.** Each event's rules
 //! land as a witnessed addition (one witness per invariant, red-first);
-//! CHARTER §11 clause 2 guards that the growth is amendment-shaped and
+//! Charter §11 clause 2 guards that the growth is amendment-shaped and
 //! that no state semantics ever live outside this function.
 
 pub mod bridge;
@@ -40,20 +40,20 @@ use cfe::ratio::{ratio, Ratio};
 use cfe::world::{Committed, SOVEREIGN};
 use solver_verify::{verify_work_class, WorkBroken, WorkClass};
 
-/// The kernel version — bumped ONLY by charter amendment. The arbor
+/// The kernel version — bumped only by charter amendment. The arbor
 /// binds this into every commitment (`H(schema ‖ bytes ‖ parent ‖
 /// coordinate)` carries the judging version alongside the schema), so
 /// a chain segment is forever verified under the version that cut it.
 ///
-/// VERSION 2 — RULING BOX 1 (operator, 2026-08-01): `mint_bound`
+/// VERSION 2 — ruling box 1 (operator, 2026-08-01): `mint_bound`
 /// unsealed, the emission rate `f` ladder-pinned against the #17
 /// calibration (evidence commit 5898351). Version-1 history gated
 /// every positive discovery mint refused; it verifies forever under
 /// its own law.
 ///
-/// VERSION 3 — THE CAPACITY LAW (operator ruling 2026-08-01), now
-/// STRUCK. It refused a `DiscoveryMinted` unless the prior state read
-/// `Vacuity::Entangled` — structure AND flow, both standing. Kept in
+/// VERSION 3 — the capacity law (operator ruling 2026-08-01), now
+/// struck. It refused a `DiscoveryMinted` unless the prior state read
+/// `Vacuity::Entangled` — structure and flow, both standing. Kept in
 /// this record because version-3 history is gated by version-3 law
 /// forever; the note below says why the law did not survive.
 ///
@@ -63,22 +63,22 @@ use solver_verify::{verify_work_class, WorkBroken, WorkClass};
 /// steps that version 2 would have gated differently — the one thing
 /// this constant exists to prevent. Version-2 history verifies forever
 /// under version 2's law.
-/// VERSION 5 — TWO AMENDMENTS, LANDED TOGETHER AT THE MERGE.
+/// VERSION 5 — two amendments, landed together AT the merge.
 ///
-/// **VERSION 4 — THE CAPACITY LAW IS REMOVED** (operator ruling
-/// 2026-08-04, harness lane). BREAKING in the LOOSENING direction:
+/// **VERSION 4 — the capacity law is removed** (operator ruling
+/// 2026-08-04, harness lane). Breaking in the loosening direction:
 /// every state version 3 refused as `MintWithoutStanding` or
 /// `MintWithoutOwnStanding` is now gated on the mint's real anchor
 /// alone. *Identity is pegged to entity, and identity gets recycled
-/// without bonds* — the capacity law read STANDING off relational
+/// without bonds* — the capacity law read standing off relational
 /// structure, so it demanded of a world exactly what a recycled
 /// identity does not carry. Measured before the ruling: a 60-beat era
 /// produced **374 solves, 0 mints, 124 withheld**. What still anchors
-/// the mint is U1's REPLAY-COMPLETE LAW, untouched.
+/// the mint is U1's REPLAY-COMPLETE law, untouched.
 ///
-/// **VERSION 5 — D4, THE REVOCATION LAW LANDS** (operator ruling
+/// **VERSION 5 — D4, the revocation law lands** (operator ruling
 /// 2026-08-04, cognition lane). A `DiscoveryMinted` deed refuses unless
-/// it carries a strictly positive capacity increment, over a RESOLVED
+/// it carries a strictly positive capacity increment, over a resolved
 /// rank reading. See [`revocation_law`].
 ///
 /// **Both numbers are kept and neither is ambiguous.** They were minted
@@ -86,13 +86,13 @@ use solver_verify::{verify_work_class, WorkBroken, WorkClass};
 /// the two could not collide, and the merge lands both rather than
 /// letting one bump overwrite the other. A chain cut under 3 verifies
 /// forever under the gate that cut it.
-/// **0.5.1 — THE OPENED GROUND** (operator ruling 2026-08-05: *GROUND
+/// **0.5.1 — the opened Ground** (operator ruling 2026-08-05: *Ground
 /// needs to be opened up into V = Volume of orbs, weight on D as
 /// capacity*). `D = volume(orbs) × (GROUND + circulation)` — the floor
 /// a state stands on is the measure of its estate, and founding an orb
 /// multiplies the whole degree.
 ///
-/// **PATCH, and the class is DERIVED rather than chosen by feel.** The
+/// **Patch, and the class is derived rather than chosen by feel.** The
 /// version rule says patch = a change that cannot alter what the gate
 /// admits or refuses. Proven at the type: every gate arm reads
 /// `Degree::above()`, which returns the circulation and is volume-blind
@@ -100,54 +100,54 @@ use solver_verify::{verify_work_class, WorkBroken, WorkClass};
 /// `get()`); the fold gate compares rank against rank — identical to
 /// the old floor-to-floor read on all inputs including adversarial ones
 /// (an orb smuggled into `next` cannot pad an increment, because no
-/// increment reads the floor). What changes is the READING — D on the
+/// increment reads the floor). What changes is the reading — D on the
 /// board grows with the estate — and one refusal's reported number,
 /// which the rule itself lists as patch-class.
 ///
-/// **0.6.0 — THE MAGNETIC REACH** (operator ruling 2026-08-06: planet
-/// capacity is based on the star's magnetism). MINOR, derived: the
-/// gate now REFUSES `RingBeyondReach` where it previously admitted —
+/// **0.6.0 — the magnetic REACH** (operator ruling 2026-08-06: planet
+/// capacity is based on the star's magnetism). Minor, derived: the
+/// gate now refuses `RingBeyondReach` where it previously admitted —
 /// a `PlanetSited` threading a ring beyond what the star's field
 /// anchors. What the gate admits changed, so `minor` moves; the opened
 /// ground (0.5.1) rides beneath it as the patch it was.
 ///
-/// **0.7.0 — THE APPRAISAL** (operator rulings 2026-08-06: appraise
+/// **0.7.0 — the appraisal** (operator rulings 2026-08-06: appraise
 /// before pricing; staleness triggers renegotiation, consent closes
-/// acceptance). MINOR, derived: tag 98 enters `covered()` — the gate
+/// acceptance). Minor, derived: tag 98 enters `covered()` — the gate
 /// now admits (and can refuse `AppraisalOutsideSurvey` /
 /// `AppraisalMisvalued`) a deed that was `Unjudged` before. What the
 /// gate admits changed, so `minor` moves.
 ///
-/// **0.8.0 — THE COUNTER-OFFER** (operator ruling 2026-08-06: the third
-/// outcome). MINOR, derived: tag 99 enters `covered()` — the gate
-/// admits a deed that was `Unjudged`. Staleness gates NOTHING at this
+/// **0.8.0 — the counter-offer** (operator ruling 2026-08-06: the third
+/// outcome). Minor, derived: tag 99 enters `covered()` — the gate
+/// admits a deed that was `Unjudged`. Staleness gates nothing at this
 /// tier by design: it refuses only a counter's citation, at the
 /// emitter, where the chronicle lives.
 ///
-/// **0.9.0 — CONVEY** (operator: complete the estate chain). MINOR,
+/// **0.9.0 — convey** (operator: complete the estate chain). Minor,
 /// derived: tag 100 enters `covered()` with a full I1 arm — the gate
 /// admits what was `Unjudged` and refuses three new ways (address, cap,
 /// postage), each by calling the same sealed rules the emitter drew.
 ///
-/// **0.10.0 — THE MINTED LINE** (the standing ruling: the engine mints
-/// its peoples). MINOR, derived: tag 101 enters `covered()` — the gate
+/// **0.10.0 — the minted LINE** (the standing ruling: the engine mints
+/// its peoples). Minor, derived: tag 101 enters `covered()` — the gate
 /// admits what was `Unjudged`. The receipt is a seed; there is nothing
 /// declarable to misdeclare, so no new refusal arm exists.
 /// (Amendments 0.11.0 through the current minor are recorded in the
 /// version ledger — `tests/conservation_pins.rs` — beside the
-/// NEXT-FREE RULE that assigns minors across lanes.)
+/// next-free RULE that assigns minors across lanes.)
 ///
-/// **0.25.0 — ORBITAL / STRATUM APPRAISAL** (35_ORBIT_DYNAMO_AND_ESTATE).
-/// MINOR, derived: appraisal subjects scale 4–5 (Orbital place under the
+/// **0.25.0 — orbital / stratum appraisal** (35_ORBIT_DYNAMO_AND_ESTATE).
+/// Minor, derived: appraisal subjects scale 4–5 (Orbital place under the
 /// dynamo; prospected Stratum) enter the valuation rule; the gate
 /// re-derives with star magnetism + prospects. Same tag 98; what the
 /// rule can value expanded, so `minor` moves.
 ///
-/// **0.26.0 — PHASE-4 NOTES / FUTURES** (32 + TASKS_TRADE_FLEET_DESK P4).
-/// MINOR: tags 120–124 enter `covered()` (NoteIssued/Redeemed,
+/// **0.26.0 — PHASE-4 notes / futures** (32 + TASKS_TRADE_FLEET_DESK P4).
+/// Minor: tags 120–124 enter `covered()` (NoteIssued/Redeemed,
 /// FutureOpened/Settled, LastClearMarked). SCHEMA_V8 trail.
 ///
-/// **0.27.0 — PHASE-4 SHARE/PERP/HULL FINANCE.** Tags 125–131; SCHEMA_V9.
+/// **0.27.0 — PHASE-4 SHARE/PERP/HULL finance.** Tags 125–131; SCHEMA_V9.
 ///
 /// **0.28.0 — P5-A KIN escort/interdiction.** Tags 132–134.
 ///
@@ -160,7 +160,7 @@ use solver_verify::{verify_work_class, WorkBroken, WorkClass};
 /// cascade_pressure + tamper_pressures trail.
 ///
 /// **0.31.0 — P5-B + P5.19 dual-use.** Tag 144 PostureReoriented;
-/// SCHEMA_V12 posture doctrine overlay; TERRA dual-use tax on CovertTamper.
+/// SCHEMA_V12 posture doctrine overlay; terra dual-use tax on CovertTamper.
 ///
 /// **0.32.0 — P5-F espionage.** Tags 145–147 SpyProbed / TechExfiltrated /
 /// InstrumentSabotaged; SCHEMA_V13 intel_hashes + spy_marks.
@@ -186,9 +186,9 @@ pub const KERNEL_VERSION: Version = Version { major: 0, minor: 37, patch: 0 };
 
 /// The gate's version, as it rides the wire.
 ///
-/// **`x.y.z`, and `major = 0` because this is a prototype** (operator
-/// ruling 2026-08-04: *knock version down to x.x.x — we are still
-/// prototyping*). The five linear amendments become `0.1.0 … 0.5.0`,
+/// **`x.y.z`, and `major = 0` because this is a prototype** (ruling of
+/// 2026-08-04: the version drops to x.x.x while the project is still a
+/// prototype). The five linear amendments become `0.1.0 … 0.5.0`,
 /// so the count is preserved in `minor` and the leading `0` says
 /// plainly that nothing here has promised stability yet.
 ///
@@ -213,14 +213,14 @@ pub struct Version {
 }
 
 impl Version {
-    /// The wire form. Packed so ORDER IS PRESERVED — a later version is
+    /// The wire form. Packed so order is preserved — a later version is
     /// a larger `u64`, which is what a peer comparing two commitments
     /// needs and all it needs.
     ///
     /// The wire field stays `u64` and `Commitment.kernel` is untouched,
     /// so this is not a wire amendment. Chains cut under the linear
-    /// versions 1–5 carry those small integers and still compare BELOW
-    /// every packed version, which is true and is the ordering we want:
+    /// versions 1–5 carry those small integers and still compare below
+    /// every packed version, which is true and is the intended ordering:
     /// they were cut by an earlier gate.
     pub const fn code(self) -> u64 {
         ((self.major as u64) << 32) | ((self.minor as u64) << 16) | self.patch as u64
@@ -236,7 +236,7 @@ impl std::fmt::Display for Version {
 /// The packed gate version bound into every commitment.
 pub const VERSION: u64 = KERNEL_VERSION.code();
 
-/// One proposed transition: the deed that CLAIMS to carry `prior` to
+/// One proposed transition: the deed that claims to carry `prior` to
 /// `next`. `event` is what closed, `actor` is who under NS-6
 /// containment, `stamp` is the world-clock value it is stamped with.
 /// The kernel gates whether the claim is lawful; it never applies it.
@@ -255,16 +255,16 @@ pub struct Step {
 pub enum Refused {
     /// A value-conserving step changed the total of a resource across
     /// the world's banks — value was minted or burned where the deed
-    /// promised only to MOVE it. Both totals carried (boxed — the
+    /// promised only to move it. Both totals carried (boxed — the
     /// carrier is a big-int rational); the residual is theirs to read
     /// (shown, never summarized away).
     ConservationBroken { resource: Resource, before: Box<Ratio>, after: Box<Ratio> },
     /// **D4** — a mint whose capacity increment is zero or negative:
     /// the claim on capacity never entangled with potential, so it is
-    /// VACATED (EQUATIONS D4). Both readings carried whole — the
+    /// vacated (Equations D4). Both readings carried whole — the
     /// circulation standing above the ground before and after.
     ///
-    /// `D` is NOT lowered by this refusal. The claim vacates; the
+    /// `D` is not lowered by this refusal. The claim vacates; the
     /// degree does not (Article IV, and this row's `H¹` floor).
     MintWithoutCapacityIncrement { was: usize, now: usize },
     /// **D4** — the rank reading is not resolved, so no increment over
@@ -280,29 +280,29 @@ pub enum Refused {
     /// Containment: authority is granted, never assumed.
     NotPermitted { actor: u64, scope: Scope },
     /// I4 — a mint carried a negative amount: a deed labelled a creation
-    /// that actually DESTROYS value (a burn wearing a mint's name). Value
+    /// that actually destroys value (a burn wearing a mint's name). Value
     /// enters only by a lawful, non-negative mint.
     MintNotPositive { resource: Resource, amount: Box<Ratio> },
     /// I5 — a decay carried a negative amount: a deed labelled a decay
-    /// that actually CREATES value. Value leaves only by a lawful,
+    /// that actually creates value. Value leaves only by a lawful,
     /// non-negative decay.
     DecayNotPositive { resource: Resource, amount: Box<Ratio> },
     /// I5 — an atomic touch (tag 102) carried the same resource twice:
     /// one window settles one row per resource, and a repeat would
     /// draw the same window's decay twice.
     DecayRowDuplicated { resource: Resource },
-    /// THE ELEMENT LAW (operator ruling 2026-08-01): the element
+    /// The element law (operator ruling 2026-08-01): the element
     /// ledger is gated with strict symmetry to the banked ledger. An
     /// element mint carried a negative amount — value enters the
     /// element ledger only by a lawful, non-negative assay.
     ElementNotPositive { element: [u8; 32], amount: Box<Ratio> },
-    /// THE ELEMENT LAW: an assay drew more than the vein's declared
-    /// yield — `amount ≤ richness · elapsed`, both read from the PRIOR
+    /// The element law: an assay drew more than the vein's declared
+    /// yield — `amount ≤ richness · elapsed`, both read from the prior
     /// vein (`Prospected.richness`, `last_assay`); an assay with no
     /// prior vein yields nothing. Both sides carried whole.
     AssayExceedsVein { bound: Box<Ratio>, claimed: Box<Ratio> },
     /// ECO-1 (#40): the assay declared an after-richness off the
-    /// sealed wear law. The gate re-derives it by CALLING the
+    /// sealed wear law. The gate re-derives it by calling the
     /// emitter's one home (`cfe::dop::vein_wear` — wear from the
     /// draw, recovery from the orb's standing regenerators, capped at
     /// the spring's hash-derived natural flow) and refuses any other
@@ -311,7 +311,7 @@ pub enum Refused {
     /// The sealed 3-field form declares nothing and judges only the
     /// bound. Both sides carried whole.
     VeinWearMisdeclared { expected: Box<Ratio>, declared: Box<Ratio> },
-    /// ELEMENT-CHEMISTRY (#37): the receipt's members do not BOND —
+    /// ELEMENT-CHEMISTRY (#37): the receipt's members do not bond —
     /// the shells disagree, the phases cannot coexist, the count is not
     /// the geometry's arity, or the binds do not saturate. Matter that
     /// does not compound declares no move and may make none.
@@ -322,19 +322,19 @@ pub enum Refused {
     /// identity — a compounding cannot mint a name it did not earn.
     GemMisidentified { expected: Box<[u8; 32]>, declared: Box<[u8; 32]> },
     /// ECO-1 (#40): the vein book moved off its two deeds. Richness
-    /// is JUDGED state now, so the book's motion is the law's:
+    /// is judged state now, so the book's motion is the law's:
     /// a prospect pushes exactly its receipted vein; an assay moves
     /// that vein's span anchor and lands its declared richness;
     /// every other deed holds the book still. `at` names the first
     /// diverging index (the shorter book's length when one is short).
     VeinBookBroken { at: usize },
-    /// THE ELEMENT LAW: an element total changed where the deed
+    /// The element law: an element total changed where the deed
     /// declared no change — the ledger's total for one element must
     /// equal the prior total plus exactly what the deed declares
     /// (only an assay declares a mint; every other deed holds every
     /// element key still). The element named, both totals whole.
     ElementBroken { element: [u8; 32], expected: Box<Ratio>, actual: Box<Ratio> },
-    /// THE GAUGE LAW (U2d, I6's kernel half): the state's key moved
+    /// The GAUGE law (U2d, I6's kernel half): the state's key moved
     /// where the deed declared no move, or landed off its declared
     /// key, or a plane opened or closed undeclared. The first
     /// differing grade named, both sides carried whole (an absent
@@ -342,10 +342,10 @@ pub enum Refused {
     /// exactly its declared structural delta; no state jump is
     /// special-cased (operator ruling).
     GaugeBroken { grade: usize, expected: Box<Ratio>, actual: Box<Ratio> },
-    /// THE SIGN LAW (the value-law wave): a value-carrying deed
-    /// declared a NEGATIVE amount — a credit wearing a debit's name,
+    /// The sign law (the value-law wave): a value-carrying deed
+    /// declared a negative amount — a credit wearing a debit's name,
     /// or the reverse. Every banked movement is non-negative by
-    /// declaration; DIRECTION comes from the deed, never the sign
+    /// declaration; direction comes from the deed, never the sign
     /// (a negative transfer would invert the flow and authorize the
     /// wrong side; a negative settle would credit through a debit).
     /// No un-guarded debit/credit path exists.
@@ -361,78 +361,78 @@ pub enum Refused {
     WorkRefused { broken: WorkBroken },
     /// I4 — the mint exceeds what verified work earns. Both sides
     /// carried whole (the bound the law allows, the amount claimed).
-    /// The bound is the RULED emission rate `f` (Ruling Box 1,
+    /// The bound is the ruled emission rate `f` (Ruling Box 1,
     /// 2026-08-01 — see [`mint_bound`]): ladder-pinned, zero on the
     /// saturated rungs and on every off-ladder shape.
     MintExceedsWork { bound: Box<Ratio>, claimed: Box<Ratio> },
     /// I3 — a value in `next` is not a canonical exact rational (coprime,
-    /// positive denominator). Exactness is a TYPE-LEVEL guarantee
+    /// positive denominator). Exactness is a type-level guarantee
     /// (`BigRational` is canonical by construction, no float ever entered);
     /// I3 is its sealed declaration and defense-in-depth at the byte
-    /// boundary. The kernel CALLS the sealed `ratio::is_canonical`, never
+    /// boundary. The kernel calls the sealed `ratio::is_canonical`, never
     /// defining canonicity itself (the equations are shared, never copied
-    /// — KERNEL CHARTER §0b).
+    /// — Kernel Charter §0b).
     NotCanonical,
-    /// THE SEALED DEFAULT — the gate refuses what no invariant covers.
+    /// The sealed DEFAULT — the gate refuses what no invariant covers.
     /// This event has no landed rule; a deed the kernel cannot gate does
-    /// NOT enter. Coverage grows by amendment: each landing moves an event
+    /// not enter. Coverage grows by amendment: each landing moves an event
     /// from this default-refuse arm to an explicit gated arm, and the
     /// kernel wires as the live gate (Phase 3) only when `Unjudged` is
-    /// unreachable — every event covered. **SEAL A is a READER's law,
-    /// never the gate's:** readers skip unknown TAGS so old software
-    /// survives new content; a gate that skips unknown DEEDS is a hole
+    /// unreachable — every event covered. **SEAL A is a reader's law,
+    /// never the gate's:** readers skip unknown tags so old software
+    /// survives new content; a gate that skips unknown deeds is a hole
     /// exactly the size of every future tag. Two laws, one word "unknown"
     /// — conflating them silently rebuilds default-admit.
     Unjudged,
 
-    /// D5 — THE SOVEREIGN UNION was struck by someone other than the
-    /// ROOT ENTITY. The union is the standing the whole world is
+    /// D5 — the SOVEREIGN union was struck by someone other than the
+    /// root entity. The union is the standing the whole world is
     /// raised on, and no delegate may enter the offices into it: a
-    /// granted scope is authority to act WITHIN the world, never
+    /// granted scope is authority to act within the world, never
     /// authority to constitute it.
     ///
-    /// **Approval is WHO ACTS, never a field.** An earlier design
+    /// **Approval is who acts, never a field.** An earlier design
     /// carried `approved_by_operator: bool` on the deed. A deed is a
-    /// CLAIM, and a claim asserting its own approval is forgeable by
+    /// claim, and a claim asserting its own approval is forgeable by
     /// whoever builds it — the kernel would have had nothing to check
     /// the bool against. I2 containment already binds the actor
-    /// unforgeably, so identity IS the signature.
+    /// unforgeably, so identity is the signature.
     UnionNotStruckByRoot { actor: u64 },
     /// D5 — the union named the wrong offices. It is `Progenitor` with
     /// `Sovereign`, exactly once each: two progenitors or two
     /// sovereigns is not a DYAD, and a dyad is the whole form (`17`
-    /// §3 — two that STAY TWO, neither deriving legitimacy from the
+    /// §3 — two that stay two, neither deriving legitimacy from the
     /// other).
     UnionMalformed { progenitor: Office, sovereign: Office },
     /// D5 — the union declared a review horizon other than the ruled
-    /// one. The term is a REVIEW, not an expiry, and it is fixed at
+    /// one. The term is a review, not an expiry, and it is fixed at
     /// [`cfe::dop::UNION_REVIEW_HORIZON`]: a deed free to name its own
     /// horizon could set it past any reachable stamp and never come up
     /// for approval at all.
     UnionTermNotRuled { declared: u64, ruled: u64 },
-    /// THE RING REACH (2026-08-06) — a siting threads a NEW ring beyond
+    /// The ring REACH (2026-08-06) — a siting threads a new ring beyond
     /// what the star's magnetism anchors. The reach is the field grade
     /// (`StarClass::ring_reach`, the dynamo derivation), computed by
-    /// CALLING the same rule the emitter refused on (call-not-copy).
+    /// calling the same rule the emitter refused on (call-not-copy).
     /// Filling an anchored ring never refuses here — slots within a
     /// ring are the turn rule's business, not the field's.
     RingBeyondReach { held: usize, reach: u8 },
-    /// THE APPRAISAL (2026-08-06) — the subject's orb lies outside the
+    /// The appraisal (2026-08-06) — the subject's orb lies outside the
     /// survey's covering (orb 0 names the estate itself where the
     /// covering cannot value it whole). Nothing appraises unsurveyed.
     AppraisalOutsideSurvey { orb: u64 },
-    /// THE APPRAISAL — the declared value is not what the sealed rule
+    /// The appraisal — the declared value is not what the sealed rule
     /// computes over the prior state and the receipted covering. A
     /// value cannot be quoted one way and receipted another.
     AppraisalMisvalued { declared: Box<Ratio>, computed: Box<Ratio> },
-    /// CONVEY — an endpoint outside the survey's covering: a postal
-    /// address IS a surveyed parcel, at the gate as at the emitter.
+    /// Convey — an endpoint outside the survey's covering: a postal
+    /// address is a surveyed parcel, at the gate as at the emitter.
     ConveyOutsideSurvey { orb: u64 },
-    /// CONVEY — the declared postage is not the postal meter's figure
+    /// Convey — the declared postage is not the postal meter's figure
     /// over the amount. Stamps cannot be quoted one way and burned
     /// another.
     PostageMismatch { declared: Box<Ratio>, metered: Box<Ratio> },
-    /// CONVEY — the ask outruns the sender parcel's monetary portion of
+    /// Convey — the ask outruns the sender parcel's monetary portion of
     /// its prior bank. The free portion stays home, held at the gate
     /// from the receipt's own covering.
     ConveyExceedsMonetary { asked: Box<Ratio>, cap: Box<Ratio> },
@@ -443,14 +443,14 @@ pub enum Refused {
     /// witnessed whole, and charged whole.
     SurveyNotWhole { covered: usize, estate: usize },
     /// E5b — the declared cost does not equal the sealed meter over the
-    /// volume. The kernel computes the meter by calling the SAME rule
+    /// volume. The kernel computes the meter by calling the same rule
     /// the emitter drew from (call-not-copy), so a survey cannot be
     /// quoted one way and charged another.
     SurveyMeterMismatch { declared: Box<Ratio>, metered: Box<Ratio> },
 }
 
-/// THE JUDGE. Does `step` lawfully carry `prior` to `next`? Pure,
-/// total, encoding-blind, AND network-blind (it reads no mesh, no peer,
+/// The judge. Does `step` lawfully carry `prior` to `next`? Pure,
+/// total, encoding-blind, and network-blind (it reads no mesh, no peer,
 /// no uplink — `engine/kernel` imports `cfe` only; all arrows point one
 /// way). `Ok(())` admits; `Err(Refused)` refuses with the break whole.
 pub fn admits(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Refused> {
@@ -466,8 +466,8 @@ pub fn admits(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Re
     union(step)?;
 
     creation(step)?;
-    // D4 AFTER `creation`, deliberately. `creation` gates the DEED —
-    // its proof and its bound; D4 gates the deed's EFFECT on the
+    // D4 after `creation`, deliberately. `creation` gates the deed —
+    // its proof and its bound; D4 gates the deed's effect on the
     // world. Ordering effect after validity means a malformed payload
     // is named `WorkRefused`, not misreported as a capacity failure,
     // and the work law stays reachable by every fixture that tests it.
@@ -532,7 +532,7 @@ fn stamp_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Re
             }
             amount.clone()
         }
-        // THE BOUNCE (tag 195): a core's STAMP pulse arrives — a declared
+        // The bounce (tag 195): a core's STAMP pulse arrives — a declared
         // credit, sign-guarded like the aperture's receive leg.
         ClosureEvent::CoreReturned { resource: None, amount, .. } => {
             if *amount < ratio(0, 1) {
@@ -612,9 +612,9 @@ fn stamp_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Re
                 -collateral.clone()
             }
         }
-        // #138 THE RESOURCE SMELT-SWEEP (tag 186): the migration floors every
-        // orb's STAMP to the 1/64 grain. RE-DERIVE the total floor delta from
-        // PRIOR (call-not-copy): `Σ (smelt(stamp) − stamp)`, a non-positive shave
+        // #138 the resource SMELT-SWEEP (tag 186): the migration floors every
+        // orb's STAMP to the 1/64 grain. RE-derive the total floor delta from
+        // prior (call-not-copy): `Σ (smelt(stamp) − stamp)`, a non-positive shave
         // to the void, exactly what `sweep_resource_grain` applies to `orb.stamp`,
         // so the total-check `after == before + declared` holds. (The banked
         // resource floors are judged in `admitted_deltas`.)
@@ -645,13 +645,13 @@ fn stamp_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Re
     Ok(())
 }
 
-/// **INVARIANT — D4, THE REVOCATION LAW. The eclipse anchor, floored
-/// at `H¹`.** (EQUATIONS D4, INSCRIBED; RULED 2026-08-01; LANDED
+/// **Invariant — D4, the revocation law. The eclipse anchor, floored
+/// at `H¹`.** (Equations D4, inscribed; ruled 2026-08-01; landed
 /// 2026-08-04.)
 ///
 /// D4 is **not** a scalar decay and **not** a contraction of `D`. It is
-/// the FORMAL ENTANGLEMENT COLLAPSE OPERATOR: the site where a claim on
-/// capacity that never entangled with potential is VACATED from the
+/// the formal entanglement collapse operator: the site where a claim on
+/// capacity that never entangled with potential is vacated from the
 /// frame. It executes `18` §3 Article III; it is not a second penalty
 /// beside it.
 ///
@@ -665,49 +665,49 @@ fn stamp_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Re
 ///                                     Π_G was never capacity (D2)
 /// ```
 ///
-/// **THE CLAIM VACATES; THE DEGREE DOES NOT.** That is why D4 is
-/// expressible as a kernel invariant at all: `lawful` REFUSES, it never
-/// mutates. Refusing the deed IS the vacating of its claim, and no code
+/// **The claim vacates; the degree does not.** That is why D4 is
+/// expressible as a kernel invariant at all: `lawful` refuses, it never
+/// mutates. Refusing the deed is the vacating of its claim, and no code
 /// path here can lower a `Degree` — which would violate Article IV and
 /// this row's own floor.
 ///
-/// **THE LAYER SPLIT IS LOAD-BEARING — a WINDOW is not a STEP.** D4
-/// fires in two places and they must never merge. This is the PER-STEP
+/// **The layer split is load-bearing — a WINDOW is not a step.** D4
+/// fires in two places and they must never merge. This is the per-step
 /// half: *a deed that mints carries a non-zero capacity increment, or
 /// refuses* (`18` §2f consequence 2 — no hidden work). The OVER-A-
-/// WINDOW half (`deeds(w) > 0 ∧ ΔD(w) = 0`) is a LENS reading and
+/// WINDOW half (`deeds(w) > 0 ∧ ΔD(w) = 0`) is a lens reading and
 /// gates nothing; it lives in `lens::revocation` and must never be
 /// hoisted into the gate. A rate never attains its bound at any single
 /// step, so a window can never be an invariant.
 ///
-/// **THE PHANTOM-RANK GATE, now due.** `EntangledRead::rank_is_defined`
+/// **The PHANTOM-RANK gate, now due.** `EntangledRead::rank_is_defined`
 /// has existed unused, its own header warning that an unresolved
 /// absence *"would let phantom topology mint phantom rank"*, and
-/// `25_STANDING` §6 recorded it as DEBT rather than enforcement. D4
+/// `25_STANDING` §6 recorded it as debt rather than enforcement. D4
 /// gates a mint on a rank-derived increment, which makes that debt due:
 /// without this check the increment is computed over an incomplete
-/// reading and phantom topology satisfies the test. It is asked FIRST,
+/// reading and phantom topology satisfies the test. It is asked first,
 /// before any increment is compared.
 ///
-/// The increment is read on the CIRCULATION — `Degree::above`, the
+/// The increment is read on the circulation — `Degree::above`, the
 /// gauge-invariant part that grows — never on `Degree::get`, which
 /// includes the ground and would make the comparison vacuous exactly
 /// the way the struck `D > 0` gate was (a floor cannot decide).
-/// **THE MAGNETIC REACH GATE** (operator ruling 2026-08-06: planet
+/// **The magnetic REACH gate** (operator ruling 2026-08-06: planet
 /// capacity is based on the star's magnetism). A `PlanetSited` deed
 /// that threads a ring the prior state does not hold, when the prior
 /// state already holds as many rings as the star's field anchors,
 /// refuses. A ring is a distinct `orbit_r`; the reach is
-/// `StarClass::ring_reach` — the SAME sealed rule the emitter draws,
+/// `StarClass::ring_reach` — the same sealed rule the emitter draws,
 /// so the field cannot be quoted one way at the door and another at
 /// the judge. No star in the prior state is the emitter's refusal
 /// (`NoStarCommissioned`) and is not re-judged here.
-/// **THE APPRAISAL RULE** (2026-08-06): an `AppraisalStruck` declares a
-/// value; the gate RE-DERIVES it from the prior state and the receipt's
+/// **The appraisal RULE** (2026-08-06): an `AppraisalStruck` declares a
+/// value; the gate RE-derives it from the prior state and the receipt's
 /// own seed and covering, calling the same sealed rule the emitter used
 /// (call-not-copy). A subject outside the covering refuses; a declared
 /// value the rule does not compute refuses. Staleness is deliberately
-/// NOT here — it triggers renegotiation and never gates a deed.
+/// not here — it triggers renegotiation and never gates a deed.
 fn appraisal_rule(prior: &Committed, step: &Step) -> Result<(), Refused> {
     let ClosureEvent::AppraisalStruck { subject, seed, covered, value, .. } = &step.event
     else {
@@ -794,7 +794,7 @@ fn revocation_law(
     step: &Step,
 ) -> Result<(), Refused> {
     let ClosureEvent::DiscoveryMinted { .. } = &step.event else {
-        // D4 binds the MINT. Motion of value that already exists makes
+        // D4 binds the mint. Motion of value that already exists makes
         // no capacity claim, so there is no claim to vacate.
         return Ok(());
     };
@@ -808,13 +808,13 @@ fn revocation_law(
     }
 }
 
-/// **D4a — THE RESOLUTION GATE.** An unresolved absence is not a zero.
+/// **D4a — the resolution gate.** An unresolved absence is not a zero.
 ///
 /// `rank_is_defined` stood unused since it was written, its own header
 /// warning that an unresolved absence *"would let phantom topology mint
-/// phantom rank"*, with `25_STANDING` §6 recording it as DEBT rather
-/// than enforcement. D4 computes an increment OVER that rank, so the
-/// debt came due: asked FIRST, before anything is compared.
+/// phantom rank"*, with `25_STANDING` §6 recording it as debt rather
+/// than enforcement. D4 computes an increment over that rank, so the
+/// debt came due: asked first, before anything is compared.
 fn d4a_resolution(before: &bridge::EntangledRead, after: &bridge::EntangledRead) -> Result<(), Refused> {
     match before.rank_is_defined() && after.rank_is_defined() {
         true => Ok(()),
@@ -833,22 +833,22 @@ enum Claim {
     Standing(usize),
 }
 
-/// **D4b — IS THERE A CLAIM TO VACATE AT ALL?**
+/// **D4b — is there A claim to vacate AT ALL?**
 ///
-/// D4 vacates *a claim that did not survive `Π_G`*, and where NOTHING
+/// D4 vacates *a claim that did not survive `Π_G`*, and where nothing
 /// circulates no capacity claim was ever made. A line holding no
 /// relations is not claiming capacity and failing; it is claiming none.
 ///
 /// **This gate was forced by measurement.** D4 first landed binding
 /// every `DiscoveryMinted`, and a 60-beat era refused 48 of 55 mints,
-/// each reading `was: 0, now: 0`. That is the SAME defect the capacity
+/// each reading `was: 0, now: 0`. That is the same defect the capacity
 /// law was struck for the same day — *identity is pegged to entity, and
 /// identity gets recycled without bonds* — reached by another route: a
 /// mint banks value and adds no relation, so `ΔD` is zero by
 /// construction on any world holding nothing.
 ///
-/// **THE GAP THIS EXPOSES, recorded rather than papered over.**
-/// EQUATIONS D3 asserts *capacity growth and the discovery mint are ONE
+/// **The gap this exposes, recorded rather than papered over.**
+/// Equations D3 asserts *capacity growth and the discovery mint are one
 /// event*. In this engine they are two — the mint banks value, a plane
 /// opens separately by `GaugeShiftedAt`. Until a deed claims capacity
 /// as it mints, D4 can only bind where a claim already stands. Owed to
@@ -860,14 +860,14 @@ fn d4b_standing_claim(before: &bridge::EntangledRead) -> Claim {
     }
 }
 
-/// **D4c — THE INCREMENT.** A standing claim grows, or it vacates.
+/// **D4c — the increment.** A standing claim grows, or it vacates.
 ///
-/// Read on the CIRCULATION — what stands above the floor — never on the
+/// Read on the circulation — what stands above the floor — never on the
 /// full `Degree`, which includes the ground and would make the
 /// comparison vacuous exactly the way the struck `D > 0` gate was: a
 /// floor decides nothing.
 ///
-/// The refusal IS the vacating. Nothing here writes, and `Degree` has
+/// The refusal is the vacating. Nothing here writes, and `Degree` has
 /// no below-ground representation to write into even if it did —
 /// Article IV, the `H¹` floor. The claim vacates; the degree does not.
 fn d4c_increment(was: usize, now: usize) -> Result<(), Refused> {
@@ -876,32 +876,32 @@ fn d4c_increment(was: usize, now: usize) -> Result<(), Refused> {
         false => Err(Refused::MintWithoutCapacityIncrement { was, now }),
     }
 }
-/// INVARIANT — D5, THE SOVEREIGN UNION (operator ruling 2026-08-02).
+/// Invariant — D5, the SOVEREIGN union (operator ruling 2026-08-02).
 ///
-/// The union of the offices `D(Ω)` PROGENITOR and `V(Ω)` SOVEREIGN is
-/// a CONSTITUTIONAL deed: it moves no value, opens no plane and shifts
+/// The union of the offices `D(Ω)` progenitor and `V(Ω)` SOVEREIGN is
+/// a constitutional deed: it moves no value, opens no plane and shifts
 /// no key. What it must do is be impossible to strike falsely, and
 /// three things make it so.
 ///
-/// **THE ROOT ENTITY, and only it.** A granted scope is authority to
-/// act WITHIN the world; it is never authority to constitute the world.
+/// **The root entity, and only it.** A granted scope is authority to
+/// act within the world; it is never authority to constitute the world.
 /// `scope_of` puts this deed in Build so the ordinary containment
-/// check applies, and that is NECESSARY BUT NOT SUFFICIENT — this arm
+/// check applies, and that is necessary but not sufficient — this arm
 /// additionally requires `actor == SOVEREIGN`, the root entity id.
-/// Approval is WHO ACTS: a bool on the deed would be set by whoever
+/// Approval is who acts: a bool on the deed would be set by whoever
 /// built it.
 ///
 /// **A DYAD, exactly.** One `Progenitor` and one `Sovereign`. Two of
 /// either is not a union of two offices, and `17` §3 makes the pair
-/// the whole form — two that STAY TWO, neither deriving its legitimacy
+/// the whole form — two that stay two, neither deriving its legitimacy
 /// from the other.
 ///
-/// **THE RULED HORIZON.** A deed free to name its own term could set
+/// **The ruled horizon.** A deed free to name its own term could set
 /// one past any reachable stamp and never come up for approval, which
 /// would make the review a formality. The term is fixed.
 ///
 /// Pure and total like the rest: reads the step only, no clock, no
-/// history — the review FALLS DUE by arithmetic on the receipt's own
+/// history — the review falls due by arithmetic on the receipt's own
 /// stamp, and nothing about it is decided here.
 fn union(step: &Step) -> Result<(), Refused> {
     let ClosureEvent::SovereignUnionSealed { progenitor, sovereign, term_stamps } = &step.event
@@ -926,11 +926,11 @@ fn union(step: &Step) -> Result<(), Refused> {
     Ok(())
 }
 
-/// INVARIANT — element conservation (THE ELEMENT LAW, operator ruling
+/// Invariant — element conservation (the element law, operator ruling
 /// 2026-08-01). The element ledger is gated with strict symmetry to
 /// the banked ledger: an assay mints `richness · elapsed` into a
 /// vein's element — non-negative by declaration, and bounded by the
-/// PRIOR vein's `richness` and `last_assay` (both already committed
+/// prior vein's `richness` and `last_assay` (both already committed
 /// state, so the bound is deterministic from `(prior, step)`). Every
 /// other deed declares no element move, so every element total holds
 /// still (a smuggled element mint under any deed refuses).
@@ -945,8 +945,8 @@ fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
                     amount: Box::new(amount.clone()),
                 });
             }
-            // ONT-2: the vein's yield, RE-DERIVED from the immutable geometry
-            // and the PRIOR extraction integral (call-not-copy, the one home
+            // ONT-2: the vein's yield, RE-derived from the immutable geometry
+            // and the prior extraction integral (call-not-copy, the one home
             // `vein_flow`) — the vein carries no stored richness scalar. Richness
             // is `natural − extracted` (the hash-derived endowment under the
             // prior star, minus what the ledger already took); the flow is that
@@ -972,10 +972,10 @@ fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
             }
             vec![(*element, amount.clone())]
         }
-        // ELEMENT-CHEMISTRY (#37): a bond moves MANY keys at once —
+        // ELEMENT-CHEMISTRY (#37): a bond moves many keys at once —
         // each member spends its lane's valence and the gem carries
         // away the sum. The gate re-derives every one of those numbers
-        // by CALLING the emitter's one home over the members the
+        // by calling the emitter's one home over the members the
         // receipt names (call-not-copy), so a compounding cannot be
         // quoted one way and settled another. A receipt whose members
         // do not bond declares nothing and therefore may move nothing.
@@ -997,7 +997,7 @@ fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
             declared.push((*gem, yielded));
             declared
         }
-        // CHEM science (tag 156): isomorphic gem union — re-derive product.
+        // Chem science (tag 156): isomorphic gem union — re-derive product.
         ClosureEvent::IsoUnionStruck {
             a,
             b,
@@ -1086,24 +1086,24 @@ fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
             vec![(*element, amount.clone())]
         }
         // ING-2b (tag 182): the staple food settle on the element ledger.
-        // The net `delta = regrown − eaten` is DECLARED whole — the element
+        // The net `delta = regrown − eaten` is declared whole — the element
         // mirror of the Resource food fold (`YieldCollected`, the #28
         // admitted free mint the star drives). Signed: net regrowth mints
         // (positive), a lean span where the band ate more than the planet
         // regrew debits (negative). Not re-derived here — symmetric with the
         // Resource food economy, whose regrowth `YieldCollected` the kernel
         // likewise admits free; the emitter clamps the debit to the standing
-        // larder so the total never crosses zero. Every OTHER deed still
+        // larder so the total never crosses zero. Every other deed still
         // declares no element move, so the ledger holds still under them.
         ClosureEvent::RationElementSettled { element, delta, .. } => {
             vec![(*element, delta.clone())]
         }
-        // ONT-2b (tag 183): eating MINES the staple vein. The bound is the
-        // vein's REMAINING RICHNESS (`natural − extracted`), re-derived from
-        // the immutable geometry and the PRIOR extraction integral — a demand
+        // ONT-2b (tag 183): eating mines the staple vein. The bound is the
+        // vein's remaining richness (`natural − extracted`), re-derived from
+        // the immutable geometry and the prior extraction integral — a demand
         // draw may take up to the whole larder in one pull (no per-span
         // geometric throttle; that is the geometric ground-assay's law, not
-        // this one). NO element-ledger move is declared: the mined food went
+        // this one). No element-ledger move is declared: the mined food went
         // vein → mouths, never the bank, so the ledger holds still (delta 0)
         // and only the vein BOOK advances (below). A claim above the remaining
         // richness refuses — no vein feeds more than its geometry holds.
@@ -1132,11 +1132,11 @@ fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
             }
             Vec::new()
         }
-        // ONT-3 (tag 184): a worked vein RECOVERS. The bound is the RECOVERY
-        // HEADROOM — the net drawn so far, `extracted − rejuvenated`, re-derived
+        // ONT-3 (tag 184): a worked vein recovers. The bound is the recovery
+        // headroom — the net drawn so far, `extracted − rejuvenated`, re-derived
         // from the prior integrals — so an injection can only undo real
         // extraction and never lifts richness above the endowment (no matter is
-        // minted from geometry). NO element-ledger move: a delta-0 event, the
+        // minted from geometry). No element-ledger move: a delta-0 event, the
         // vein book alone advancing (below). A claim above the headroom refuses.
         ClosureEvent::VeinRejuvenated { orb_id, element, injected } => {
             if *injected < ratio(0, 1) {
@@ -1159,10 +1159,10 @@ fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
             }
             Vec::new()
         }
-        // G2 (#29): an element-eater's food cycle — it SYNTHESIZES its
-        // element from energy (a conserved TRANSMUTATION; the joule spend
-        // is checked in conservation(), here we bound the element MINT)
-        // and EATS some of the same element running its zones. The net
+        // G2 (#29): an element-eater's food cycle — it synthesizes its
+        // element from energy (a conserved transmutation; the joule spend
+        // is checked in conservation(), here the element mint is bounded)
+        // and eats some of the same element running its zones. The net
         // element change is `minted − eaten`. The mint bound is the
         // element's own natural flow (richness): minted ≤ joule × richness,
         // so a rarer element yields less per joule. No star → zero bound.
@@ -1198,7 +1198,7 @@ fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
             }
             vec![(*element, -amount.clone())]
         }
-        // G2 (#trace): a population BURNS trace elements maintaining its
+        // G2 (#trace): a population burns trace elements maintaining its
         // substrate — the element leaves the ledger (a conserved spend),
         // sign-guarded exactly as salvage is.
         ClosureEvent::TraceConsumed { element, amount, .. } => {
@@ -1210,9 +1210,9 @@ fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
             }
             vec![(*element, -amount.clone())]
         }
-        // #136 THE SMELT-SWEEP (tag 185): the one-time migration floors every element
-        // stock to the 1/1024 grain. RE-DERIVE the per-element floor deltas from the
-        // PRIOR state (call-not-copy — the deed carries only a scalar dust, never
+        // #136 the SMELT-SWEEP (tag 185): the one-time migration floors every element
+        // stock to the 1/1024 grain. RE-derive the per-element floor deltas from the
+        // prior state (call-not-copy — the deed carries only a scalar dust, never
         // per-element amounts a receipt could quote one way and settle another): each
         // stock's declared delta is `smelt_element(prior) − prior`, a non-positive
         // shave to the void, summed per element by the total-check below. This mirrors
@@ -1234,8 +1234,8 @@ fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
     };
     // Total-check every element key present in either state or in the
     // declaration: the total moves by exactly the declared amount.
-    // A key may be declared MORE THAN ONCE (a set holding two of one
-    // lane spends twice), so the deltas SUM rather than overwrite —
+    // A key may be declared more than once (a set holding two of one
+    // lane spends twice), so the deltas sum rather than overwrite —
     // taking only the first match would let the second spend vanish.
     let mut keys: Vec<[u8; 32]> = Vec::new();
     for (element, _) in &declared {
@@ -1266,10 +1266,10 @@ fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
             });
         }
     }
-    // ONT-2: THE VEIN BOOK HOLDS STILL. The vein carries an EXTRACTION
-    // INTEGRAL, not a richness scalar (richness derives as natural −
+    // ONT-2: the vein BOOK holds still. The vein carries an extraction
+    // integral, not a richness scalar (richness derives as natural −
     // extracted), so the book's whole motion is declared: a prospect (or a
-    // supernova scatter) pushes a FRESH vein with extracted = 0; an assay
+    // supernova scatter) pushes a fresh vein with extracted = 0; an assay
     // moves that vein's span anchor and grows its integral by exactly the
     // banked amount; every other deed leaves the book untouched. Declaration
     // == effect, the banked law's shape applied to the vein registry.
@@ -1307,7 +1307,7 @@ fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
                 vein.extracted += amount.clone();
             }
         }
-        // ONT-2b: eating mines the staple vein — the SAME book motion an assay
+        // ONT-2b: eating mines the staple vein — the same book motion an assay
         // makes (the span anchor moves, the integral grows by exactly `eaten`),
         // only the amount is demand-driven, not geometric. Declaration ==
         // effect, the banked law's shape applied to the vein registry.
@@ -1361,16 +1361,16 @@ fn total_element(state: &Committed, element: [u8; 32]) -> Ratio {
         .fold(ratio(0, 1), |sum, held| sum + held)
 }
 
-/// THE GAUGE LAW (U2d — I6's kernel half, the Delta-modeling ruling):
-/// every transition's effect on the gauge vector is EXACTLY what the
+/// The GAUGE law (U2d — I6's kernel half, the Delta-modeling ruling):
+/// every transition's effect on the gauge vector is exactly what the
 /// deed declares — the fold trio moves the key it names, the graded
 /// shift opens exactly its plane, and every other deed holds the
 /// vector still. Declaration == effect, the banked law's shape
-/// applied to the key; no state jump is special-cased. The PAIR half
-/// of I6 — `orbit_lock` between the two MERGING chains — is the merge
+/// applied to the key; no state jump is special-cased. The pair half
+/// of I6 — `orbit_lock` between the two merging chains — is the merge
 /// site's law (converge/mesh admission calling the sealed
 /// `rfa_core::f_fold_star`): the kernel enforces the LOCAL half, the
-/// seam enforces the pair (the aperture-pair pattern, CHARTER §5a).
+/// seam enforces the pair (the aperture-pair pattern, Charter §5a).
 fn gauge_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Refused> {
     use ClosureEvent as E;
     // The declared key effect — ratified against the replay arms.
@@ -1398,7 +1398,7 @@ fn gauge_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Re
             held[at] = gauge.clone();
             held
         }
-        // Every other deed declares NO key move: the vector holds
+        // Every other deed declares no key move: the vector holds
         // still (EraAnnexed among them — a universe-ledger record
         // whose pair-half verification is converge's law at the seam).
         _ => prior.gauge.clone(),
@@ -1420,7 +1420,7 @@ fn gauge_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Re
 }
 
 /// The landed coverage of the invariant set. An event is gated (not
-/// refused `Unjudged`) only when EVERY invariant that should govern it has
+/// refused `Unjudged`) only when every invariant that should govern it has
 /// landed — the completeness rule, so partial coverage never admits. The
 /// universal trio I1/I2/I3 is now landed, so events whose full set is
 /// {containment, exactness} — the pure authority deeds, moving no value —
@@ -1431,7 +1431,7 @@ fn gauge_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Re
 fn covered(event: &ClosureEvent) -> bool {
     use ClosureEvent as E;
     match event {
-        // I1 conservation covers the intra-world move AND the aperture
+        // I1 conservation covers the intra-world move and the aperture
         // legs (the convergence seam): a leg debits/credits exactly its
         // declared amount, the local half of pair conservation.
         E::ResourceTransferred { .. } | E::ApertureSent { .. } | E::ApertureReceived { .. }
@@ -1446,7 +1446,7 @@ fn covered(event: &ClosureEvent) -> bool {
         // the DemurrageSettled shape — I1 (declaration==effect) covers
         // it the same way.
         | E::TitheReceipted { .. }
-        // U1 — the discovery mint's FULL set is landed: I1
+        // U1 — the discovery mint's full set is landed: I1
         // (declaration==effect), I2 (Collect), I3, and I4 whole (sign
         // + the replay-complete verification + the sealed-shut bound).
         | E::DiscoveryMinted { .. }
@@ -1454,107 +1454,107 @@ fn covered(event: &ClosureEvent) -> bool {
         // (no value moves, no ratios): registering an agent and opening
         // or shutting its scopes.
         | E::EntityRegistered { .. } | E::ScopeGranted { .. } | E::ScopeRevoked { .. }
-        // D5 — THE SOVEREIGN UNION. A CONSTITUTIONAL deed: no value
+        // D5 — the SOVEREIGN union. A constitutional deed: no value
         // moves, no ratio is carried, no plane opens. I2 containment
         // covers it and `union` adds the three checks the union
-        // needs — the ROOT entity struck it, the parties are a dyad of
+        // needs — the root entity struck it, the parties are a dyad of
         // two different offices, and the review horizon is the ruled
         // one. Ratified red-first by `sovereign_union_pins`.
         | E::SovereignUnionSealed { .. }
-        // BOOK-1 (19_LENS §16): minting DECLARES a standing account and
-        // archiving ALTERS one — both extend or amend the world's
+        // BOOK-1 (19_LENS §16): minting declares a standing account and
+        // archiving alters one — both extend or amend the world's
         // structure, neither moves banked value. Matches
-        // `world::books`' own scope checks. THE POSTING joins them
+        // `world::books`' own scope checks. The posting joins them
         // (task #17, 2026-08-12 — the §0 audit's one missing row, at
-        // last): a dual entry moves book TALLIES (kept/lost), never
+        // last): a dual entry moves book tallies (kept/lost), never
         // `banked` — banked-neutral, {I2, I3} complete it.
         | E::BookMinted { .. } | E::BookPosted { .. } | E::BookArchived { .. }
         // LIT-1: aspiring and claiming both add standing state and move
         // no banked value. Matches `world::literature`.
         | E::WorkAspired { .. } | E::WorkClaimed { .. }
-        // W-A slice-1 — the BANKED-NEUTRAL authority deeds. Each one's
-        // `world/replay.rs` arm touches NO bank (it sets a flag, a
+        // W-A slice-1 — the banked-neutral authority deeds. Each one's
+        // `world/replay.rs` arm touches no bank (it sets a flag, a
         // seal, a list: terrain seed, star, planet site, practice,
         // ward, veil, genesis, prospect, the succession boundary, a
         // licence record, an instrument, a route, an offer, a bond).
         // So {I2 containment, I3 exactness} complete them, and
-        // conservation's non-constraint is CORRECT — ratified against
+        // conservation's non-constraint is correct — ratified against
         // the replay reading in `authority_pins.rs`. The value-moving
         // "authority" deeds (ColonyFounded/Charted, ZoneBuilt/Razed,
         // Forward/Council seals — all move banks) stay held out for
         // W-A slice-2's I1 arms. TaxonSealed stays coder-03's #42.
         | E::WorldCharted { .. } | E::StarCommissioned { .. } | E::PlanetSited { .. }
-        // E5b THE ESTATE SURVEY (tag 97) — a VALUE-MOVING deed with its
+        // E5b the ESTATE survey (tag 97) — a value-moving deed with its
         // own I1 arm in `lawful_deltas` (the meter's draw, plus the
-        // witnessed and metered theorems judged there). Added BY HAND:
+        // witnessed and metered theorems judged there). Added by hand:
         // the compiler does not force this list, which is exactly how
-        // BookPosted went ungated (PICKUP §0).
+        // BookPosted went ungated (Pickup §0).
         | E::EstateSurveyed { .. }
-        // THE APPRAISAL (tag 98) — banked-neutral: a valuation reading
+        // The appraisal (tag 98) — banked-neutral: a valuation reading
         // moves nothing, and the gate arm re-derives its value from
-        // the receipt's own seed and covering. BY HAND, again: the
+        // the receipt's own seed and covering. By hand, again: the
         // compiler does not force this list.
         | E::AppraisalStruck { .. }
-        // THE MINTED LINE (tag 101) — banked-neutral: identity, never
-        // matter; the receipt is a seed and everything derives. BY HAND.
+        // The minted LINE (tag 101) — banked-neutral: identity, never
+        // matter; the receipt is a seed and everything derives. By hand.
         | E::LineMinted { .. }
-        // TREATIES (tags 105, 106) — banked-neutral: a pact re-rules
-        // what a CROSSING costs and moves nothing by itself; the haul
+        // Treaties (tags 105, 106) — banked-neutral: a pact re-rules
+        // what a crossing costs and moves nothing by itself; the haul
         // that later crosses is the conserved deed. {I2 containment,
-        // I3 exactness} complete them. BY HAND, as ever — the compiler
+        // I3 exactness} complete them. By hand, as ever — the compiler
         // does not force this list.
         | E::TreatySealed { .. } | E::TreatyStruck { .. }
-        // CONVEY (tag 100) — value-moving, with its I1 arm in
+        // Convey (tag 100) — value-moving, with its I1 arm in
         // `admitted_deltas`: the postage burns (net negative), the
         // amount nets zero, and the postal theorems (address, monetary
         // cap, metered postage) are checked there against the receipt's
-        // own seed and covering. BY HAND, as ever.
+        // own seed and covering. By hand, as ever.
         | E::ParcelConveyed { .. }
         // NOVELTY-GATE (tag 166) — banked-neutral: a minted solver
         // word is identity vocabulary, never matter; the mints it
         // later enables are judged at tag 86 by verify_work as ever.
-        // {I2 containment, I3 exactness} complete it. BY HAND.
+        // {I2 containment, I3 exactness} complete it. By hand.
         | E::SolverWordMinted { .. }
         // ENTITY-ALIGN-1 (tag 189) — banked-neutral like the mint it
         // accompanies: a hardness reading is identity vocabulary about
-        // WHICH VESSELS bridged HOW MUCH diversity, never matter. {I2
-        // containment, I3 exactness} complete it. BY HAND.
+        // which vessels bridged how much diversity, never matter. {I2
+        // containment, I3 exactness} complete it. By hand.
         | E::SolverWordHardness { .. }
-        // CROSS-LINE CONSILIENCE (tag 177) — banked-neutral: a shared
+        // Cross-LINE consilience (tag 177) — banked-neutral: a shared
         // knowledge axiom is identity, never matter; it records that
-        // lines converged, moving nothing bankable. BY HAND.
+        // lines converged, moving nothing bankable. By hand.
         | E::KnowledgeConverged { .. }
         | E::KnowledgeLicensed { .. }
-        // RCP-2 (tag 181) — banked-neutral at BUILD: raising an emergent
+        // RCP-2 (tag 181) — banked-neutral at build: raising an emergent
         // recipe moves no value, no element and no key; it opens the
         // society's doing-layer vocabulary, and the per-tick yield it later
         // enables is judged where it banks. {I2 containment, I3 exactness}
-        // complete it — the SolverWordMinted discipline. BY HAND.
+        // complete it — the SolverWordMinted discipline. By hand.
         | E::RecipeBuilt { .. }
         // E3.9 (tag 165) — banked-neutral: the allow-list annex
-        // re-rules WHICH matter may cross the pair and moves nothing
+        // re-rules which matter may cross the pair and moves nothing
         // by itself; the haul it later refuses or admits is the
         // conserved deed. {I2 containment, I3 exactness} complete it,
-        // the treaty pair's own shape. BY HAND, as ever.
+        // the treaty pair's own shape. By hand, as ever.
         | E::TreatyElementsAllowed { .. }
-        // THE COUNTER (tag 99) — banked-neutral: it re-terms a resting
+        // The counter (tag 99) — banked-neutral: it re-terms a resting
         // offer and moves nothing; the fill that later clears is the
-        // conserved deed. BY HAND: the compiler does not force this
-        // list. Staleness deliberately has NO gate arm — it triggers
+        // conserved deed. By hand: the compiler does not force this
+        // list. Staleness deliberately has no gate arm — it triggers
         // renegotiation at the emitter and gates nothing here.
         | E::OfferCountered { .. }
         | E::PracticeAdopted { .. } | E::PracticeReleased { .. } | E::ElderWarded { .. }
         | E::VeilDrawn { .. } | E::WardLifted { .. } | E::VeilLifted { .. }
-        // ELEMENT-CHEMISTRY (tag 104) — value-moving in the ELEMENT
+        // ELEMENT-CHEMISTRY (tag 104) — value-moving in the element
         // ledger, with its arm in `element_move`: the members' spends
         // and the gem's yield are re-derived from the receipt's own
         // members by calling the emitter's recipe, and the gem's
-        // identity is re-derived too. BY HAND, as ever — the compiler
+        // identity is re-derived too. By hand, as ever — the compiler
         // does not force this list.
         | E::GemCompounded { .. }
         // REFINE-1 (tag 107): element-ledger move with arm in
         // `element_move` — rates re-derived from `refine_recipe`.
-        // BY HAND: the compiler does not force this list.
+        // By hand: the compiler does not force this list.
         | E::ElementRefined { .. }
         // E-APT-1 (tags 108–109): element-ledger legs, arm in element_move.
         | E::ElementApertureSent { .. } | E::ElementApertureReceived { .. }
@@ -1577,15 +1577,15 @@ fn covered(event: &ClosureEvent) -> bool {
         | E::GenesisSealed { .. } | E::ProspectStruck { .. } | E::EnrichmentStruck { .. } | E::LineSucceeded { .. }
         | E::TechLicensed { .. } | E::InstrumentForged { .. } | E::RouteChartered { .. }
         | E::OfferPosted { .. } | E::BondSealed { .. }
-        // THE MISSED SIXTH (arch-02's coverage audit): the enum holds
+        // The missed sixth (arch-02's coverage audit): the enum holds
         // 64 deeds, not the documented 63 — GaugeShiftedAt (tag 60,
-        // the graded key shift, LIVE at world/gauge.rs's shift_gauge_at) was
+        // the graded key shift, live at world/gauge.rs's shift_gauge_at) was
         // never counted. Banked-neutral (replay resizes the gauge key,
         // no bank), Build-scoped beside its covered counterpart
         // GaugeShifted. Without it the Phase 3 flip could never
         // complete: a live deed refusing Unjudged forever.
         | E::GaugeShiftedAt { .. }
-        // U2d — THE FOLD TRIO enters under THE GAUGE LAW (I6's kernel
+        // U2d — the fold trio enters under the GAUGE law (I6's kernel
         // half): the fold's only lawful local effect is its declared
         // key move, banks and every undeclared grade held still. The
         // pair half — orbit_lock between the merging chains via the
@@ -1593,15 +1593,15 @@ fn covered(event: &ClosureEvent) -> bool {
         // (converge/mesh admission), the aperture-pair seam pattern.
         // Witnessed in gauge_pins.rs.
         | E::Confluent { .. } | E::EraAnnexed { .. } | E::EraFolded { .. }
-        // W-C / W-D slice — the BANKED-NEUTRAL world-driven and mesh
+        // W-C / W-D slice — the banked-neutral world-driven and mesh
         // deeds. Their `world/replay.rs` arms set a flag, a list, or
         // are no-ops (no bank); `scope_of` is None (a tick's own
         // consequence carries no actor scope). Gated by I3 exactness,
         // conservation and containment vacuous — ratified against the
-        // replay reading in `world_driven_pins.rs`. HELD OUT: the
+        // replay reading in `world_driven_pins.rs`. Held out: the
         // value-movers of these families (FamineStruck −drawn,
         // ForwardSlashed +collateral, CouncilClosed +banked → the I1
-        // value slice) and the FOLD TRIO (Confluent/EraAnnexed/
+        // value slice) and the fold trio (Confluent/EraAnnexed/
         // EraFolded → U2d's I6 gate; a fold is never admitted on
         // exactness alone).
         | E::FamineRelieved { .. } | E::GalaxyObserved { .. } | E::OverheatStruck { .. }
@@ -1621,14 +1621,14 @@ fn covered(event: &ClosureEvent) -> bool {
         | E::GaugeShifted { .. } | E::Diverged { .. } | E::StarAged { .. }
         | E::TechDiscovered { .. } | E::IncursionStruck { .. } | E::VoidShare { .. }
         | E::RouteLapsed { .. }
-        // THE VALUE LAW WAVE (operator directive 2026-07-31): the
-        // value-moving deeds under TOTAL conservation + THE SIGN LAW,
+        // The value law wave (operator directive 2026-07-31): the
+        // value-moving deeds under total conservation + the sign law,
         // deltas declared per-resource in `admitted_deltas` (the sealed
         // rules called, stateful reads from prior). Witnessed in
         // `value_pins.rs`. Tier 1 (single-resource, sign-guarded),
-        // Tier 2 (escrow moves under THE ESCROW LAW — conservation reads
-        // banked + escrow, so a forward lock/return nets ZERO on the
-        // conserved total; council CLOSE held out on Phase 3 threading),
+        // Tier 2 (escrow moves under the escrow law — conservation reads
+        // banked + escrow, so a forward lock/return nets zero on the
+        // conserved total; council close held out on Phase 3 threading),
         // Tier 3 (multi-resource vectors).
         | E::UpkeepSettled { .. } | E::CrystalDrawn { .. } | E::OverflowAbsorbed { .. }
         | E::BondSettled { .. } | E::FamineStruck { .. } | E::ForwardSealed { .. }
@@ -1636,7 +1636,7 @@ fn covered(event: &ClosureEvent) -> bool {
         | E::ForwardReleased { .. } | E::ForwardSlashed { .. } | E::CouncilClosed { .. }
         | E::ColonyFounded { .. } | E::ColonyCharted { .. } | E::ZoneBuilt { .. }
         | E::ZoneRazed { .. }
-        // THE ELEMENT LAW (operator ruling 2026-08-01): the assay mints
+        // The element law (operator ruling 2026-08-01): the assay mints
         // into the element ledger, gated with strict symmetry to the
         // banked ledger — sign-guarded, bounded by the prior vein's
         // richness × elapsed, and zero-invariant for every other deed.
@@ -1646,7 +1646,7 @@ fn covered(event: &ClosureEvent) -> bool {
         // (joule spend + bounded element mint), covered by the value law.
         | E::ElementFarmed { .. }
         // ING-2b (tag 182): the staple food settle on the element ledger —
-        // an element move (net regrown − eaten), covered by THE ELEMENT LAW
+        // an element move (net regrown − eaten), covered by the element law
         // (`element_move` declares its delta) exactly as the assay and farm
         // beside it. Banked-neutral: it moves no Resource. {I2 containment,
         // I3 exactness} complete it.
@@ -1660,27 +1660,27 @@ fn covered(event: &ClosureEvent) -> bool {
         // ONT-3 (tag 184): rejuvenation is the mine's mirror — a delta-0 element
         // move, covered by the same {containment, exactness} completion.
         | E::VeinRejuvenated { .. }
-        // #136 (tag 185): THE SMELT-SWEEP — the one-time grain migration. An
-        // element-ledger move that FLOORS every stock, declaring a per-element
+        // #136 (tag 185): the SMELT-SWEEP — the one-time grain migration. An
+        // element-ledger move that floors every stock, declaring a per-element
         // reduction whose sum is the recorded dust (pre = post + dust); banked-
         // neutral (no Resource moves), a sign-guarded loss like the demurrage decay,
-        // covered by THE ELEMENT LAW beside the assay and farm above.
+        // covered by the element law beside the assay and farm above.
         | E::ElementStocksSwept { .. }
-        // #138 (tag 186): THE RESOURCE SMELT-SWEEP — the banked-resource + STAMP
-        // grain migration. NOT banked-neutral: it declares a per-resource floor
+        // #138 (tag 186): the resource SMELT-SWEEP — the banked-resource + STAMP
+        // grain migration. Not banked-neutral: it declares a per-resource floor
         // reduction (arm in `admitted_deltas`) and a STAMP floor reduction (arm in
         // `stamp_move`), each a sign-guarded loss re-derived from prior (the dust
         // is the recorded shave). Conservation + stamp_move gate it fully.
         | E::ResourceStocksSwept { .. }
-        // THE LAST DEED (operator ruling 2026-08-01, folded to arch-01):
+        // The LAST deed (operator ruling 2026-08-01, folded to arch-01):
         // TaxonSealed — class and clade sealed as identity, once per
         // star (15 §4). {I2 containment (Build), I3 exactness} complete
         // it; it moves no bank, no element, no key (all three
         // conservation laws hold vacuously). With this, `covered()` is
-        // TOTAL — every one of the 64 deeds is gated; `Unjudged` is
+        // total — every one of the 64 deeds is gated; `Unjudged` is
         // unreachable via any current deed (the Phase 3 precondition,
         // witnessed in `taxon_pins.rs`). The sealed default stays as
-        // defense for FUTURE enum additions (refuse-unknown).
+        // defense for future enum additions (refuse-unknown).
         | E::TaxonSealed { .. }
         // GALACTIC-1 (tag 187): the regional seed sealed as identity, once
         // per world — the TaxonSealed shape exactly (moves no bank, no
@@ -1708,33 +1708,33 @@ fn covered(event: &ClosureEvent) -> bool {
         // itself. {I2 containment, I3 exactness} complete it.
         | E::ChronicleCheckpointed { .. }
         | E::EvolutionAdvanced { .. }
-        // THE VERTICAL AXIS (tag 89): the seat is banked-neutral — it
+        // The vertical axis (tag 89): the seat is banked-neutral — it
         // moves no value, no element and no key — so {I2 containment,
         // I3 exactness} complete it. Containment is the whole point:
-        // a station GATES AUTHORITY, so WHO may seat one is the law
+        // a station gates authority, so who may seat one is the law
         // that was missing while it lived in an editable file.
         | E::StationSeated { .. }
-        // THE VOCABULARY MINT (tag 90, 28_VOCABULARY §7): banked-neutral
+        // The vocabulary mint (tag 90, 28_VOCABULARY §7): banked-neutral
         // like the seat above — it moves no value, no element and no
         // key, so {I2 containment, I3 exactness} complete it. Containment
-        // is again the whole point: minting is a TIER 0 power, so WHO may
-        // grow a vocabulary is the law. The FACT gates (standing,
+        // is again the whole point: minting is a tier 0 power, so who may
+        // grow a vocabulary is the law. The fact gates (standing,
         // novelty) live at the world door where the chain is
         // (`mint_vocabulary_as`); the shape gates died at the `Axis`
         // and `TradingBinding` doors (29_CONSTRUCTION).
         | E::VocabularyMinted { .. }
         // P2 (tag 103): a chartered parameter is banked-neutral like
         // the mint above — it moves no value, no element and no key;
-        // {I2 containment, I3 exactness} complete it. WHO may charter
+        // {I2 containment, I3 exactness} complete it. Who may charter
         // is the T0 standing gate at the world door; the band is a
         // door (`cfe::parameter::Chartered`).
         | E::ParameterChartered { .. } => true,
-        // **THE UNJUDGED SET IS EMPTY, AND THE COMPILER HOLDS IT SO**
-        // (task #17, 2026-08-12). This match carries NO wildcard by
+        // **The unjudged set is empty, and the compiler holds it so**
+        // (task #17, 2026-08-12). This match carries no wildcard by
         // law: the hand-listed universe in `taxon_pins` fell behind
         // twice because Rust cannot count an enum at runtime — so the
         // totality now lives where the compiler enforces it. A new
-        // `ClosureEvent` variant BREAKS THIS BUILD until someone
+        // `ClosureEvent` variant breaks this build until someone
         // classifies it: covered above, or given an explicit `=> false`
         // arm here wearing its reason. `BookPosted` — the §0 audit's
         // one missing row — was the last, covered at this landing;
@@ -1742,10 +1742,10 @@ fn covered(event: &ClosureEvent) -> bool {
     }
 }
 
-/// INVARIANT — conservation, TOTAL (the value-law wave, operator
+/// Invariant — conservation, total (the value-law wave, operator
 /// directive 2026-07-31; the escrow strengthening, dispatch C7
-/// 2026-08-01). A deed changes the world's CONSERVED total — banked
-/// PLUS escrowed — by exactly its DECLARED per-resource deltas and
+/// 2026-08-01). A deed changes the world's conserved total — banked
+/// plus escrowed — by exactly its declared per-resource deltas and
 /// nothing else:
 ///
 /// ```text
@@ -1754,17 +1754,17 @@ fn covered(event: &ClosureEvent) -> bool {
 /// ```
 ///
 /// The escrow half (`total_escrow`) closes the lock seam: a forward
-/// seal debits a bank and MUST credit escrow the same collateral (net
-/// declared ZERO) — a debit that escrows nothing no longer passes.
-/// Council CLOSE is held out (its atomic multi-event settle is per-deed
+/// seal debits a bank and must credit escrow the same collateral (net
+/// declared zero) — a debit that escrows nothing no longer passes.
+/// Council close is held out (its atomic multi-event settle is per-deed
 /// threading, gated on Phase 3). Every resource present in either state,
 /// in a lock, or in the declaration is checked — a covered deed with an
-/// EMPTY declaration must leave the conserved total untouched (a
+/// empty declaration must leave the conserved total untouched (a
 /// smuggled change under a neutral deed refuses).
 /// Multi-resource deeds (founding reserves, zone costs and refunds)
-/// declare vectors, never a scalar. The PAIR-level law (a far leg is
-/// the near leg's exact inverse) is the cross-node opposition (KERNEL
-/// CHARTER §5a); the kernel enforces the LOCAL half.
+/// declare vectors, never a scalar. The pair-level law (a far leg is
+/// the near leg's exact inverse) is the cross-node opposition (kernel
+/// Charter §5a); the kernel enforces the LOCAL half.
 fn conservation(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Refused> {
     let deltas = admitted_deltas(prior, &step.event)?;
     let mut resources: Vec<Resource> = Vec::new();
@@ -1781,7 +1781,7 @@ fn conservation(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
         }
     }
     // Escrow-held resources enter the conserved total too: a resource
-    // present ONLY in a lock (no bank holds it) must still be checked —
+    // present only in a lock (no bank holds it) must still be checked —
     // else a forward could seal or return unwitnessed.
     for pact in prior.forwards.iter().chain(next.forwards.iter()) {
         if !resources.contains(&pact.resource) {
@@ -1812,12 +1812,12 @@ fn conservation(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
     Ok(())
 }
 
-/// The declared per-resource banked deltas of a deed — the LAWFUL
-/// movement, sign-guarded at the door (THE SIGN LAW: every amount is
-/// non-negative by declaration; direction comes from the DEED). The
-/// sealed rules are CALLED, never copied (founding reserves, zone
-/// costs/refunds — CHARTER §0b). Stateful declarations (the council's
-/// resource, the razed zone's kind) read PRIOR state, never the event.
+/// The declared per-resource banked deltas of a deed — the lawful
+/// movement, sign-guarded at the door (the sign law: every amount is
+/// non-negative by declaration; direction comes from the deed). The
+/// sealed rules are called, never copied (founding reserves, zone
+/// costs/refunds — Charter §0b). Stateful declarations (the council's
+/// resource, the razed zone's kind) read prior state, never the event.
 /// An event with no arm declares nothing: every bank must hold still.
 fn admitted_deltas(
     prior: &Committed,
@@ -1842,7 +1842,7 @@ fn admitted_deltas(
             non_negative(*resource, amount)?;
             Vec::new()
         }
-        // ColonyCharted: the founding reserves MOVE source → charted —
+        // ColonyCharted: the founding reserves move source → charted —
         // net zero per resource by the sealed rule.
         E::ColonyCharted { .. } => Vec::new(),
         // — the aperture legs, sign-guarded (a negative send is a
@@ -1855,7 +1855,7 @@ fn admitted_deltas(
             non_negative(*resource, amount)?;
             vec![(*resource, amount.clone())]
         }
-        // THE BOUNCE (tag 195): a core's matter pulse arrives — declared,
+        // The bounce (tag 195): a core's matter pulse arrives — declared,
         // sign-guarded; its STAMP twin is judged in stamp_move.
         E::CoreReturned { resource: Some(resource), amount, .. } => {
             non_negative(*resource, amount)?;
@@ -1888,10 +1888,10 @@ fn admitted_deltas(
         // Hull mint/assign/scrap move scrap ledger only (not Resource).
         E::HullMinted { .. } | E::HullAssigned { .. } | E::HullScrapped { .. } | E::OrderWorked { .. } => Vec::new(),
         E::ElementSalvaged { .. } | E::TraceConsumed { .. } => Vec::new(),
-        // ING-2b (tag 182): the staple food settle moves the ELEMENT ledger
+        // ING-2b (tag 182): the staple food settle moves the element ledger
         // only (declared in `element_move`), never a Resource — no banked
         // delta, exactly as TraceConsumed.
-        // ONT-2b (tag 183): the staple mine moves the VEIN book only (a
+        // ONT-2b (tag 183): the staple mine moves the vein book only (a
         // delta-0 element move), never a Resource — no banked delta.
         E::RationElementSettled { .. } | E::StapleMined { .. } | E::VeinRejuvenated { .. } => Vec::new(),
         E::NoteIssued { .. } | E::NoteRedeemed { .. } | E::FutureOpened { .. } | E::FutureSettled { .. } | E::LastClearMarked { .. } | E::ShareIssued { .. } | E::ShareTransferred { .. } | E::ShareDividend { .. } | E::PerpOpened { .. } | E::PerpFunded { .. } | E::PerpClosed { .. } | E::HullFinanced { .. } | E::EscortOnDuty { .. } | E::InterdictionStruck { .. } | E::ConvoyRiskMarked { .. }
@@ -1925,13 +1925,13 @@ fn admitted_deltas(
             non_negative(Resource::Crystal, slash)?;
             vec![(Resource::Crystal, -slash.clone())]
         }
-        // CHEM catalog fee: resonator eighth crystal.
+        // Chem catalog fee: resonator eighth crystal.
         E::ChemCataloged { .. } => {
             let fee = cfe::dop::ZoneKind::Resonator.yield_per_tick().1;
             non_negative(Resource::Crystal, &fee)?;
             vec![(Resource::Crystal, -fee)]
         }
-        // LAB: multi-resource bills (local + resonance) — not STAMP.
+        // Lab: multi-resource bills (local + resonance) — not STAMP.
         // Re-derive from pure tables; metabolism from sealed genesis.
         E::ScienceSeated {
             discipline,
@@ -1945,10 +1945,10 @@ fn admitted_deltas(
                 .map(|g| g.metabolism)
                 .unwrap_or(2);
             if let Some(d) = cfe::almanac::ScienceDiscipline::from_wire(*discipline) {
-                // Re-derive the SEAT AFFINITY exactly as the cfe seat pays it
+                // Re-derive the seat AFFINITY exactly as the cfe seat pays it
                 // (call-not-copy): the bill scales by the species' affinity
                 // (Primary 1 · Secondary 2 · Alien 4), and Research by its economic
-                // mode besides. The old hard-coded `affinity_mult = 1` UNDER-declared
+                // mode besides. The old hard-coded `affinity_mult = 1` under-declared
                 // any non-Primary bill, so the seat consumed more resource than this
                 // conservation check was told — a break only a non-Primary Iron-billed
                 // seat surfaces (Physics off a mineral line, once COG-8 seats it).
@@ -2021,18 +2021,18 @@ fn admitted_deltas(
             non_negative(Resource::Crystal, amount)?;
             vec![(Resource::Crystal, -amount.clone())]
         }
-        // G2 (#29): the JOULE spent to synthesize the food-element leaves
+        // G2 (#29): the joule spent to synthesize the food-element leaves
         // the resource ledger (the element mint is checked in
         // element_move). Sign-guarded — a farm cannot bank energy.
         E::ElementFarmed { joule, .. } => {
             non_negative(Resource::Joule, joule)?;
             vec![(Resource::Joule, -joule.clone())]
         }
-        // CONVEY — the postal theorems, held at the gate. The move nets
+        // Convey — the postal theorems, held at the gate. The move nets
         // zero (amount out, amount in); only the postage leaves the
         // total, burned like upkeep. Address and cap verified from the
         // receipt's own seed and covering against the prior state;
-        // postage verified by CALLING the postal meter.
+        // postage verified by calling the postal meter.
         E::ParcelConveyed { from_orb, to_orb, resource, amount, postage, seed, covered, .. } => {
             non_negative(*resource, amount)?;
             for endpoint in [from_orb, to_orb] {
@@ -2067,18 +2067,18 @@ fn admitted_deltas(
             }
             vec![(stamp, -postage.clone())]
         }
-        // E5b THE ESTATE SURVEY — the three theorems, held at the gate. The meter
-        // and the covering are verified HERE, against the prior state
+        // E5b the ESTATE survey — the three theorems, held at the gate. The meter
+        // and the covering are verified here, against the prior state
         // and the sealed rule, before conservation checks the draw.
         E::EstateSurveyed { covered, cost, .. } => {
-            // WITNESSED AND WHOLE: one witness per orb that stands.
+            // Witnessed and whole: one witness per orb that stands.
             if covered.is_empty() || covered.len() != prior.orbs.len() {
                 return Err(Refused::SurveyNotWhole {
                     covered: covered.len(),
                     estate: prior.orbs.len(),
                 });
             }
-            // METERED: the declared cost IS the sealed meter's figure.
+            // Metered: the declared cost is the sealed meter's figure.
             let (resource, rate) = cfe::dop::survey_meter();
             let metered = rate * ratio(covered.len() as i64, 1);
             if *cost != metered {
@@ -2097,24 +2097,24 @@ fn admitted_deltas(
             non_negative(*resource, drawn)?;
             vec![(*resource, -drawn.clone())]
         }
-        // The council locks collateral × EVERY member OUT of the banks
-        // and INTO escrow (the sealed council enters `next`) — a move
-        // WITHIN the conserved total, so the declared NET is ZERO. The
-        // sign guard stays at the door. (THE ESCROW LAW.)
+        // The council locks collateral × every member out of the banks
+        // and into escrow (the sealed council enters `next`) — a move
+        // within the conserved total, so the declared net is zero. The
+        // sign guard stays at the door. (The escrow law.)
         E::CouncilSealed { resource, collateral, .. } => {
             non_negative(*resource, collateral)?;
             Vec::new()
         }
-        // — Tier 2: escrow moves (THE ESCROW LAW, strengthened
+        // — Tier 2: escrow moves (the escrow law, strengthened
         //   2026-08-01) —
-        // A forward lock/return moves collateral BETWEEN escrow and a
+        // A forward lock/return moves collateral between escrow and a
         // bank: the whole forward enters `next` on seal (escrow rises by
         // the collateral) and leaves on release/slash (escrow falls). Now
         // that conservation reads banked + escrow (`total_conserved`),
-        // the declared NET is ZERO — the bank move is FORCED to equal the
+        // the declared net is zero — the bank move is forced to equal the
         // escrow move, or it refuses. A seal that debits a bank without
         // escrowing the collateral no longer passes. Sign guard at the
-        // door. (Council CLOSE stays declaration==effect on banked — its
+        // door. (Council close stays declaration==effect on banked — its
         // multi-event atomic settle is per-deed threading, gated on the
         // Phase 3 flip; see the CouncilClosed arm.)
         E::ForwardSealed { resource, collateral, .. }
@@ -2123,19 +2123,19 @@ fn admitted_deltas(
             non_negative(*resource, collateral)?;
             Vec::new()
         }
-        // The close is STATEFUL: the resource reads from the PRIOR
+        // The close is stateful: the resource reads from the prior
         // sealed council, never the event. An unknown council declares
         // nothing — a banked change under it refuses.
-        // HELD OUT (the escrow seam): a council reckons at its boundary
-        // as ONE atomic settle — the whole council removed, every member
-        // banked, N `CouncilClosed` events emitted for ONE state
+        // Held out (the escrow seam): a council reckons at its boundary
+        // as one atomic settle — the whole council removed, every member
+        // banked, N `CouncilClosed` events emitted for one state
         // transition. Per-deed escrow discharge (escrow −collateral as
         // each member's seat closes) needs per-deed threading, which the
         // operator gated on the Phase 3 flip (arch-02's conductor lane).
         // Until then the close declares its banked credit and the
         // council is held constant across the deed's prior→next; the
         // escrow discharge is conserved at the settle boundary, not
-        // per-event. Forwards (1 deed ↔ 1 escrow move) ARE strengthened.
+        // per-event. Forwards (1 deed ↔ 1 escrow move) are strengthened.
         E::CouncilClosed { council, banked, .. } => {
             match prior.councils.iter().find(|held| held.council == *council) {
                 Some(held) => {
@@ -2147,10 +2147,10 @@ fn admitted_deltas(
         }
         // — Tier 3: multi-resource, the sealed rules called never
         //   copied —
-        // The chartered genesis mint: EXACTLY the founding reserves.
+        // The chartered genesis mint: exactly the founding reserves.
         E::ColonyFounded { .. } => cfe::dop::founding_reserves(),
         // STAR-ENDOW-1: commissioning tops the genesis orb up to the
-        // class kit — EXACTLY the top-up, re-derived from `prior` by
+        // class kit — exactly the top-up, re-derived from `prior` by
         // the same sealed pair the emitter and replay call
         // (`star_endowment` · `endowment_top_up_deltas`; the kit never
         // strips spent banks, so the delta depends on what stood).
@@ -2183,10 +2183,10 @@ fn admitted_deltas(
             }
             None => Vec::new(),
         },
-        // #41: a build is PRICED on its base. A minted kind's base
-        // lives in the FOLD, which this function cannot read — `prior`
+        // #41: a build is priced on its base. A minted kind's base
+        // lives in the fold, which this function cannot read — `prior`
         // is committed state and carries no chronicle — so the receipt
-        // DECLARES it and the gate reads the declaration, exactly as
+        // declares it and the gate reads the declaration, exactly as
         // tag 101 declares the ceilings its draw ran under. A compiled
         // kind declares none and is its own base.
         E::ZoneBuilt { kind, base, .. } => base
@@ -2195,22 +2195,22 @@ fn admitted_deltas(
             .into_iter()
             .map(|(resource, cost)| (resource, -cost))
             .collect(),
-        // The raze refunds the PRIOR zone's kind at the tile (stateful
+        // The raze refunds the prior zone's kind at the tile (stateful
         // — the event names only the tile). No zone, no refund.
         E::ZoneRazed { orb_id, tile } => prior
             .orbs
             .iter()
             .find(|held| held.orb_id == *orb_id)
             .and_then(|orb| orb.zones.iter().find(|zone| zone.tile == *tile))
-            // #41: the salvage halves what the build SPENT, and for a
+            // #41: the salvage halves what the build spent, and for a
             // minted kind that is its base's cost. The base was fixed
-            // at build time and JUDGED then, so reading it from
+            // at build time and judged then, so reading it from
             // committed state here needs no fold and trusts nothing new.
             .map(|zone| zone.priced_as().raze_refund())
             .unwrap_or_default(),
-        // #138 THE RESOURCE SMELT-SWEEP (tag 186): the migration floors every
-        // banked resource stock to the 1/64 grain. RE-DERIVE the per-resource
-        // floor deltas from PRIOR (call-not-copy — the deed carries only a scalar
+        // #138 the resource SMELT-SWEEP (tag 186): the migration floors every
+        // banked resource stock to the 1/64 grain. RE-derive the per-resource
+        // floor deltas from prior (call-not-copy — the deed carries only a scalar
         // dust, never per-resource amounts a receipt could quote one way and
         // settle another): each stock's declared delta is `smelt(prior) − prior`,
         // a non-positive shave to the void, summed per resource by the total-check
@@ -2229,7 +2229,7 @@ fn admitted_deltas(
             }
             declared
         }
-        // No arm: the deed declares NO banked movement — the total
+        // No arm: the deed declares no banked movement — the total
         // check holds every bank still.
         _ => Vec::new(),
     })
@@ -2246,8 +2246,8 @@ fn total_banked(state: &Committed, resource: Resource) -> Ratio {
         .fold(ratio(0, 1), |sum, held| sum + held)
 }
 
-/// THE ESCROW LAW (operator dispatch C7, 2026-08-01). The world's total
-/// ESCROWED holding of one resource — collateral that sits OUT of every
+/// The escrow law (operator dispatch C7, 2026-08-01). The world's total
+/// escrowed holding of one resource — collateral that sits out of every
 /// bank, locked in open pacts (FORWARD-1 §7): each forward locks its
 /// `collateral`; each council locks `collateral` per member. Pure; the
 /// canonical projection carries only open pacts, so the sum is over what
@@ -2268,7 +2268,7 @@ fn total_escrow(state: &Committed, resource: Resource) -> Ratio {
     forwards + councils
 }
 
-/// The CONSERVED quantity — banked PLUS escrowed. A lock moves value
+/// The conserved quantity — banked plus escrowed. A lock moves value
 /// between the two ledgers, never in or out of the world; conservation
 /// reads this total, so a bank debit under a lock must be matched by an
 /// escrow credit (or the reverse), exactly, or the deed refuses.
@@ -2276,13 +2276,13 @@ fn total_conserved(state: &Committed, resource: Resource) -> Ratio {
     total_banked(state, resource) + total_escrow(state, resource)
 }
 
-/// INVARIANT — bounded creation (I4). Value is created ONLY by a lawful
+/// Invariant — bounded creation (I4). Value is created only by a lawful
 /// mint, and the mint is non-negative (a mint that destroys value is a
 /// burn mislabelled — refused). The declaration==effect half is
 /// conservation (the world total rose by exactly the declared amount);
-/// I4 adds the sign. NAMED SEAM: at convergence scale the mint is bounded
+/// I4 adds the sign. Named seam: at convergence scale the mint is bounded
 /// by verified work — `mint ≤ verify_certificate(work)` — the PoUW anchor
-/// (KERNEL CHARTER §5a), which fills on Ruling Box 1. No fiat (05 §1.2).
+/// (Kernel Charter §5a), which fills on Ruling Box 1. No fiat (05 §1.2).
 fn creation(step: &Step) -> Result<(), Refused> {
     match &step.event {
         ClosureEvent::YieldCollected { resource, amount, .. } if *amount < ratio(0, 1) => {
@@ -2315,12 +2315,12 @@ fn creation(step: &Step) -> Result<(), Refused> {
     }
 }
 
-/// THE MINT BOUND — RULED (Ruling Box 1, operator 2026-08-01; the
+/// The mint bound — ruled (Ruling Box 1, operator 2026-08-01; the
 /// VERSION 1→2 amendment). The emission rate `f` is pinned against
 /// the #17 calibration's measured hit-rates (evidence commit
 /// 5898351: 100% · 100% · 100% · 97.5% · 75% · 42.5%), in exact
-/// integers on the LADDER — L1/ladder terms only, no norms, no roots
-/// (THE PROPORTIONAL LAW):
+/// integers on the ladder — L1/ladder terms only, no norms, no roots
+/// (The proportional law):
 ///
 /// ```text
 /// f(0) = 0 · f(1) = 0 · f(2) = 0   (saturated — free issuance barred)
@@ -2330,17 +2330,17 @@ fn creation(step: &Step) -> Result<(), Refused> {
 ///                                    ~1.75× inverse-hit-rate step)
 /// ```
 ///
-/// `f` is defined ON THE LADDER ONLY: a payload's shape either matches
-/// a ladder rung exactly or it earns ZERO — an off-ladder shape cannot
+/// `f` is defined on the ladder only: a payload's shape either matches
+/// a ladder rung exactly or it earns zero — an off-ladder shape cannot
 /// name its own price (the attacker-shaped hole the #17 audit closed
 /// stays closed at the rate too).
 ///
-/// **PRICED ON THE RUNG, NOT THE SHAPE** (operator ruling 2026-08-04:
-/// *`Grid` should fall out, because we aren't building a matrix*). This
+/// **Priced on the RUNG, not the shape** (ruling of 2026-08-04: `Grid`
+/// falls out, because the engine is not building a matrix). This
 /// took `&Difficulty` and matched the whole struct — so `rows` and
 /// `cols`, the dimensions of an ARC grid, were part of the gate's
-/// price lookup. THE MOTION clause 5 forbids exactly that: *ARC is a
-/// TYPE of work, not the only type.* The exact-match defence is
+/// price lookup. The motion clause 5 forbids exactly that: *ARC is a
+/// type of work, not the only type.* The exact-match defence is
 /// unchanged and now lives in `Difficulty::rung`, which is where the
 /// shape belongs; the gate is handed a POSITION. One pricing path now
 /// serves every work class, planar and volumetric alike, instead of
@@ -2348,12 +2348,12 @@ fn creation(step: &Step) -> Result<(), Refused> {
 /// Work-shapes v1: planar forge tasks only (structural — `verify_work`
 /// accepts no other form). Reward split v1: 100% to the solving world
 /// (the deed banks on its own orb; no mesh counterparty exists yet;
-/// the v2 40/40/20 prover/mesh/reserve split is INSCRIBED in
+/// the v2 40/40/20 prover/mesh/reserve split is inscribed in
 /// U_DIRECTIVES §8 for the mesh era). Saturated rungs are
 /// proof-of-position; the economy lives up the ladder.
-/// **THE CARRIER LAW** (P4, operator ruling 2026-08-06) — what a work
-/// class is worth at the mint, in ONE place for the gate arm and the
-/// sealed warrant alike (CHARTER §0b, call-not-copy):
+/// **The carrier law** (P4, operator ruling 2026-08-06) — what a work
+/// class is worth at the mint, in one place for the gate arm and the
+/// sealed warrant alike (Charter §0b, call-not-copy):
 ///
 /// - **Forge** stays priced by the ladder until the corpus rates are
 ///   MEASURED — the acknowledged sequencing: W(τ) = complexity /
@@ -2363,23 +2363,23 @@ fn creation(step: &Step) -> Result<(), Refused> {
 ///   `verify_work`'s return type); the refusal is now the ruling,
 ///   named `CarrierRetired`. Verification stands forever — history is
 ///   never orphaned.
-/// - **Corpus is STAGED.** Verified whole, refused `CarrierUnpriced`
+/// - **Corpus is staged.** Verified whole, refused `CarrierUnpriced`
 ///   until the measured-rate table fills from the benchmark; the flip
 ///   that prices corpus and zeroes the forge is the carrier switch,
-///   and IT carries the version bump. This landing moves no verdict:
+///   and it carries the version bump. This landing moves no verdict:
 ///   volume and corpus refused before and refuse still, with their
 ///   reasons named instead of accidental.
 fn carrier_bound(work: &[u8]) -> Result<Ratio, WorkBroken> {
     match verify_work_class(work)? {
         WorkClass::Forge(difficulty) => Ok(mint_bound(difficulty.rung())),
         WorkClass::Volumetric(_) => Err(WorkBroken::CarrierRetired),
-        // THE RATIFIED PRICING (2026-08-06): a corpus solve the
+        // The ratified pricing (2026-08-06): a corpus solve the
         // benchmark MEASURED prices at
         //   W(τ) = scarcity(class) × VisitedNodes₃(τ) / word_len(τ)
         // — population scarcity 1243/34 (blind: 283/1), the search
         // frontier the sweep provably expands, over the canonical
         // word. The benchmark is the measurement authority: a task it
-        // never confirmed refuses UNPRICED until a re-measurement
+        // never confirmed refuses unpriced until a re-measurement
         // extends the table (carrier_table.rs, regenerable).
         WorkClass::Corpus { task_id } => {
             corpus_weight(&task_id).ok_or(WorkBroken::CarrierUnpriced)
@@ -2387,7 +2387,7 @@ fn carrier_bound(work: &[u8]) -> Result<Ratio, WorkBroken> {
     }
 }
 
-/// **THE SPECTRUM — the cognition reading of one chronicle** (P3).
+/// **The spectrum — the cognition reading of one chronicle** (P3).
 /// Derived whole from the work the chain actually minted, through the
 /// same sealed verifier the gate runs (call-not-copy). Nothing is
 /// stored and nothing is scored: a reading is a projection of
@@ -2465,17 +2465,17 @@ pub fn mint_bound(rung: Option<u32>) -> Ratio {
         Some(3) => ratio(1, 1),
         Some(4) => ratio(4, 1),
         Some(5) => ratio(7, 1),
-        // Saturated rungs pay zero by ruling, and OFF-LADDER pays zero
+        // Saturated rungs pay zero by ruling, and off-ladder pays zero
         // because a payload never names its own price.
         _ => ratio(0, 1),
     }
 }
 
-/// INVARIANT — bounded decay (I5), COMPLETE (U1f). Value is destroyed
+/// Invariant — bounded decay (I5), complete (U1f). Value is destroyed
 /// non-negative decay (a decay that creates value is refused). The
 /// declaration==effect half is conservation (the world total fell by
-/// exactly the declared amount); I5 adds the sign. NAMED SEAM: the decay
-/// is FLAT and denominator-bounded, `decay ≤ rate · ease · elapsed`
+/// exactly the declared amount); I5 adds the sign. Named seam: the decay
+/// is flat and denominator-bounded, `decay ≤ rate · ease · elapsed`
 /// (never proportional — the 2^1100 lesson), which fills when the sealed
 /// demurrage rule + `last_touch` join the check.
 fn decay(prior: &Committed, step: &Step) -> Result<(), Refused> {
@@ -2487,8 +2487,8 @@ fn decay(prior: &Committed, step: &Step) -> Result<(), Refused> {
                     amount: Box::new(amount.clone()),
                 });
             }
-            // I5's bound (U1f): THE SEALED DEMURRAGE RULE, called
-            // never copied (CHARTER §0b) — one computation, two
+            // I5's bound (U1f): the sealed demurrage RULE, called
+            // never copied (Charter §0b) — one computation, two
             // gates. `elapsed` reads the prior orb's `last_touch`,
             // already committed on the orb wire (tag 28); an orb the
             // rule owes nothing (no leak, no bank, no time) bounds
@@ -2502,17 +2502,17 @@ fn decay(prior: &Committed, step: &Step) -> Result<(), Refused> {
                         orb,
                         prior.star,
                         step.stamp,
-                        // RULESET EPOCHS (`21_KERNEL_PARAMETERS` §11): the gate
-                        // selects the rule by the stamp the DEED carries,
+                        // Ruleset EPOCHS (`21_KERNEL_PARAMETERS` §11): the gate
+                        // selects the rule by the stamp the deed carries,
                         // not by the rule standing today. A receipt
-                        // written under EPOCH 0 is gated by EPOCH 0
+                        // written under epoch 0 is gated by epoch 0
                         // forever, which is what stops `replay` drifting
                         // from the live path when a sealed rule moves.
                         &cfe::world::ease_of(&prior.techs, *orb_id, step.stamp),
                         // P2: the gate reads standing supply from the
-                        // SAME sealed function the proposer used, on
+                        // same sealed function the proposer used, on
                         // `prior`'s own orbs — one computation, two
-                        // gates (CHARTER §0b). A rate the kernel
+                        // gates (Charter §0b). A rate the kernel
                         // accepted without re-deriving would be a number
                         // a node could lie about, with the mint directly
                         // downstream.
@@ -2531,13 +2531,13 @@ fn decay(prior: &Committed, step: &Step) -> Result<(), Refused> {
                 }),
             }
         }
-        // THE ATOMIC TOUCH (tag 102, the demurrage seam closed
+        // The atomic TOUCH (tag 102, the demurrage seam closed
         // 2026-08-06): one receipt carries every resource the touch
         // settled, so the whole settlement is judged against the anchor
-        // that stood BEFORE it — the per-row form judged each row
+        // that stood before it — the per-row form judged each row
         // against a prior the previous row had already anchored, and a
         // dual-resource touch's second row always read elapsed 0. The
-        // sealed rule is still CALLED, never copied; it is called once
+        // sealed rule is still called, never copied; it is called once
         // for the touch, exactly as the emitter called it.
         ClosureEvent::DemurrageTouched { orb_id, decays } => {
             for (at, (resource, amount)) in decays.iter().enumerate() {
@@ -2586,14 +2586,14 @@ fn decay(prior: &Committed, step: &Step) -> Result<(), Refused> {
     }
 }
 
-/// INVARIANT — exactness (I3). Every value in `next` is a canonical exact
-/// rational. Exactness is primarily a TYPE-LEVEL guarantee — `Ratio` is
+/// Invariant — exactness (I3). Every value in `next` is a canonical exact
+/// rational. Exactness is primarily a type-level guarantee — `Ratio` is
 /// `BigRational`, canonical by construction, and no float exists anywhere
 /// in the codebase — so this passes for every well-typed state; I3 is the
-/// sealed DECLARATION of that law plus defense-in-depth over the value
+/// sealed declaration of that law plus defense-in-depth over the value
 /// ledgers (the banked resources and elements most likely to carry a
-/// decoded value). It CALLS the sealed `ratio::is_canonical` (KERNEL
-/// CHARTER §0b: the equation is shared, never reimplemented in the gate).
+/// decoded value). It calls the sealed `ratio::is_canonical` (Kernel
+/// Charter §0b: the equation is shared, never reimplemented in the gate).
 fn exactness(next: &Committed) -> Result<(), Refused> {
     for orb in &next.orbs {
         let banked = orb.banked.iter().map(|(_, amount)| amount);
@@ -2607,7 +2607,7 @@ fn exactness(next: &Committed) -> Result<(), Refused> {
     Ok(())
 }
 
-/// INVARIANT — containment (I2). An actor-deed's actor must be an entity
+/// Invariant — containment (I2). An actor-deed's actor must be an entity
 /// in `prior` that holds the scope the deed requires. Identity precedes
 /// the world: a deed from no one refuses before any state is read. A
 /// sovereign holds every scope by construction; an agent holds exactly
@@ -2617,11 +2617,11 @@ fn containment(prior: &Committed, step: &Step) -> Result<(), Refused> {
     let Some(scope) = scope_of(&step.event) else {
         return Ok(());
     };
-    // THE FOUNDING BOOTSTRAP (found live, 2026-08-12 judge tally —
+    // The founding bootstrap (found live, 2026-08-12 judge tally —
     // one refusal per world ever founded): a chronicle opens with the
-    // sovereign registering ITSELF, and no registrar can precede the
+    // sovereign registering itself, and no registrar can precede the
     // first identity. The one deed whose actor may be unregistered is
-    // the registration of the FIRST entity by its own hand; every
+    // the registration of the first entity by its own hand; every
     // later registration needs a registered registrar with the scope.
     if let ClosureEvent::EntityRegistered { entity_id, .. } = &step.event {
         if prior.entities.is_empty() && *entity_id == step.actor {
@@ -2639,7 +2639,7 @@ fn containment(prior: &Committed, step: &Step) -> Result<(), Refused> {
     }
 }
 
-/// **THE LAYER OF A DEED — how far a rule reaches** (`17_CAPACITY` §3d).
+/// **The layer of A deed — how far a rule reaches** (`17_CAPACITY` §3d).
 ///
 /// Not a documentation convention. In a distributed economy every node
 /// validates independently, so a reach recorded only in prose is a
@@ -2656,37 +2656,37 @@ pub enum Layer {
     /// lawful.
     World,
     /// Binds a LINE: a people's own instrument, in their own substrate.
-    /// Real and lawful, and NEVER a precondition for anyone else's
+    /// Real and lawful, and never a precondition for anyone else's
     /// standing.
     Civilizational,
 }
 
-/// **THE LAYER LAW — EXHAUSTIVE BY DESIGN**, in the shape of
-/// [`scope_of`]: adding a `ClosureEvent` variant forces a LAYER
+/// **The layer law — exhaustive by design**, in the shape of
+/// [`scope_of`]: adding a `ClosureEvent` variant forces a layer
 /// decision here at compile time. There is no wildcard arm and there
 /// must never be one, because a wildcard is exactly the inference this
 /// function exists to abolish.
 ///
-/// **`None` means NOT YET RULED — it does not mean "no layer".** A
+/// **`None` means not yet ruled — it does not mean "no layer".** A
 /// false assignment is worse than an absent one, so a genuinely
-/// contested deed answers `None` and a gate consulting this must REFUSE
+/// contested deed answers `None` and a gate consulting this must refuse
 /// on it rather than assume a reach — the discipline `scope_of` uses
 /// for a deed with no actor scope and `covered()` for an unjudged
 /// event.
 ///
 /// **No deed answers `None` today** (2026-08-02): the three that were
 /// contested were all settled by reading their projections. The
-/// `Option` REMAINS in the signature deliberately — the next deed whose
+/// `Option` remains in the signature deliberately — the next deed whose
 /// reach is genuinely undecided needs an honest home that does not
 /// require changing this signature under pressure, which is exactly
 /// when a default would get invented.
 ///
-/// The rows are keyed on WHAT THE DEED CARRIES, never on the document
+/// The rows are keyed on what the deed carries, never on the document
 /// it is described in — a carrier is not a mechanism (`17` §3d.1).
 pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
     use ClosureEvent as E;
     match event {
-        // ── CIVILIZATIONAL — keyed on a LINE's own identity ──────────
+        // ── civilizational — keyed on a LINE's own identity ──────────
         E::GenesisSealed { .. }        // civilization + the three axes
         | E::LineMinted { .. }         // a people enters — line-keyed by nature
         | E::TaxonSealed { .. }        // class, clade
@@ -2695,8 +2695,8 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         | E::UniverseCited { .. }      // docs/58: the world names its universe's origin
         | E::ChronicleCheckpointed { .. } // CHRONICLE-COMPACT-1: a bookkeeping fact, identity not ledger
         | E::EvolutionAdvanced { .. }  // the arc advances — identity, not ledger
-        // THE VOCABULARY MINT is CIVILIZATIONAL, and the row is keyed on
-        // what the deed CARRIES rather than on what it enables. It is
+        // the vocabulary mint is civilizational, and the row is keyed on
+        // what the deed carries rather than on what it enables. It is
         // authored by a LINE holding a progenitor seat and it names a
         // class of entity — identity vocabulary, not a place and not a
         // quantity. That a minted entry later changes yields does not
@@ -2709,11 +2709,11 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         // ENTITY-ALIGN-1 (tag 189): a hardness reading rides alongside
         // the mint it accompanies, same layer, same reasoning.
         | E::SolverWordHardness { .. }
-        // CONSILIENCE (tag 177): a shared knowledge axiom is keyed on the
+        // Consilience (tag 177): a shared knowledge axiom is keyed on the
         // LINE that reached it — its own knowledge, the same layer.
         | E::KnowledgeConverged { .. }
         | E::KnowledgeLicensed { .. }
-        // P2 (tag 103): a chartered parameter is a DEFINITION the
+        // P2 (tag 103): a chartered parameter is a definition the
         // world's rules read, exactly as a minted vocabulary entry is.
         | E::ParameterChartered { .. }
         // BOOK-1 / LIT-1: a line's own accounts and what it reaches
@@ -2727,7 +2727,7 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         | E::ElderWarded { .. } | E::WardLifted { .. }
         | E::VeilDrawn { .. } | E::VeilLifted { .. } => Some(Layer::Civilizational),
 
-        // ── UNIVERSAL — the universe, the mesh, or any actor ─────────
+        // ── universal — the universe, the mesh, or any actor ─────────
         E::EntityRegistered { .. } | E::ScopeGranted { .. } | E::ScopeRevoked { .. }
         | E::EraAnnexed { .. } | E::EraFolded { .. } | E::GalaxyObserved { .. }
         | E::UniverseFounded { .. }    // docs/58: the universe's origin
@@ -2741,7 +2741,7 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         | E::ResourceTransferred { .. } | E::ApertureSent { .. } | E::ApertureReceived { .. }
         | E::DiscoveryMinted { .. } | E::SovereignUnionSealed { .. }
         // Obligation instruments: ordinary finance, open to any line,
-        // each feeding a D channel. The forward RULING binds the
+        // each feeding a D channel. The forward ruling binds the
         // ceremony, never the remainder (`17` §3d.1a).
         | E::BondSealed { .. } | E::BondSettled { .. }
         | E::ForwardSealed { .. } | E::ForwardReleased { .. } | E::ForwardSlashed { .. }
@@ -2751,7 +2751,7 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         | E::RouteChartered { .. } | E::RouteLapsed { .. }
         | E::VoidShare { .. } => Some(Layer::Universal),
 
-        // ── WORLD — keyed on an ORB inside one committed state ───────
+        // ── WORLD — keyed on an orb inside one committed state ───────
         E::ColonyFounded { .. } | E::ColonyCharted { .. } | E::WorldCharted { .. }
         | E::EstateSurveyed { .. } | E::AppraisalStruck { .. } | E::ParcelConveyed { .. }
         | E::ZoneBuilt { .. } | E::ZoneRazed { .. }
@@ -2769,7 +2769,7 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         // layer beside the farm and assay it migrates, keyed on the place it floors,
         // never a line's identity.
         | E::ElementStocksSwept { .. }
-        // #138 (tag 186): the resource smelt-sweep floors an orb's banked RESOURCE
+        // #138 (tag 186): the resource smelt-sweep floors an orb's banked resource
         // + STAMP — WORLD-layer, same as its element twin, keyed on the place it
         // floors, never a line's identity.
         | E::ResourceStocksSwept { .. }
@@ -2782,18 +2782,18 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         // orb's matter converts, no line is keyed.
         | E::ElementRefined { .. }
         // RCP-2 (tag 181): the emergent doing-layer, the ZoneBuilt
-        // successor — a recipe is raised ON an orb and yields INTO that
-        // orb's economy, so it BINDS the orb, not a line's identity (a
+        // successor — a recipe is raised on an orb and yields into that
+        // orb's economy, so it binds the orb, not a line's identity (a
         // sister orb of the same line raises its own). It carries almanac
         // matter over the universal roles, exactly as GemCompounded and
         // ElementRefined carry an orb's matter — World.
         | E::RecipeBuilt { .. }
-        // ING-2b (tag 182): the staple food settle carries an ORB's grown
+        // ING-2b (tag 182): the staple food settle carries an orb's grown
         // matter (the planet regrew its staple, the population ate) over the
         // element ledger — World, beside ElementFarmed and the assay it
         // draws on; no line is keyed by it.
         | E::RationElementSettled { .. }
-        // ONT-2b (tag 183): the staple mine advances an ORB's vein book (the
+        // ONT-2b (tag 183): the staple mine advances an orb's vein book (the
         // population dug its staple by eating) — World, beside the assay it
         // shares its book motion with; no line is keyed by it.
         | E::StapleMined { .. }
@@ -2826,35 +2826,35 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         | E::InstrumentForged { .. }
         | E::TechDiscovered { .. } | E::TechLicensed { .. } => Some(Layer::World),
 
-        // ── RULED 2026-08-02 by reading the projection ───────────────
+        // ── ruled 2026-08-02 by reading the projection ───────────────
         // FrictionSettled was contested on the guess that it computed
-        // from 09's ideology axes. IT DOES NOT. The chain is:
+        // from 09's ideology axes. It does not. The chain is:
         //   friction   = friction_rate() * divergence * value
         //   divergence = |reciprocity_reading(from) - reciprocity_reading(to)|
         //   reciprocity_reading(orb)
         //              = returned_across / (returned_across + extracted_across)
-        // Two of the orb's OWN measured behavioural books — the same
+        // Two of the orb's own measured behavioural books — the same
         // pair the missing-leg sweep found already two-armed. No creed,
         // no genesis axis, no class or clade appears anywhere in it.
-        // `09` CALLS it "ideological friction"; the projection prices
-        // UNLIKE CONDUCT, and any line can be reciprocal or not.
+        // `09` calls it "ideological friction"; the projection prices
+        // unlike conduct, and any line can be reciprocal or not.
         // Second instance of the §3d.1 trap: a document title is not a
         // scope, exactly as a carrier is not a mechanism.
         E::FrictionSettled { .. } => Some(Layer::Universal),
 
-        // ── RULED 2026-08-02 by reading the projection ───────────────
-        // WantStruck/WantRelieved: the whole block is gated on a SEALED
+        // ── ruled 2026-08-02 by reading the projection ───────────────
+        // WantStruck/WantRelieved: the whole block is gated on a sealed
         // genesis — "no seal, no entity type, no want" — and each kind
         // on a specific axis: resonance needs perception == 3
         // (harmonic), novelty needs disposition == 2 (empiricist). A
-        // line with different axes NEVER EXPERIENCES THE MECHANIC. That
+        // line with different axes never experiences the mechanic. That
         // is civilizational by the exact criterion: a people's own, and
         // never a precondition for anyone else's standing.
         E::WantStruck { .. } | E::WantRelieved { .. }
         | E::ElementWantStruck { .. } | E::ElementWantRelieved { .. }
         | E::PopulationSettled { .. }
         | E::PopulationAccrued { .. }
-        // TAXATION (49 §5): a sovereign treasury is a people's own
+        // Taxation (49 §5): a sovereign treasury is a people's own
         // fiscal store — universal to every founded line, yet never a
         // precondition for anyone else's standing (the Civilizational
         // criterion), exactly like their population.
@@ -2862,7 +2862,7 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         // COG-1 (doc 52 §7): the leisure bank is a line's own cognition
         // budget — universal to a founded line, never another's standing.
         | E::LeisureSettled { .. }
-        // TAXATION (49 §3): a line's practices lapsing at its own
+        // Taxation (49 §3): a line's practices lapsing at its own
         // generation turnover — its own knowledge, no one else's.
         | E::PracticesLapsed { .. }
         // 50_WIN_CONDITIONS: whether a line has collapsed is exactly a
@@ -2872,14 +2872,14 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
             Some(Layer::Civilizational)
         }
 
-        // IncursionStruck LOOKED like it spanned all three layers,
-        // carrying era, world AND line. It does not, and the puzzle
-        // dissolves on a sharper criterion: A LAYER IS WHAT A DEED
-        // BINDS, NOT WHAT IT MENTIONS. Replay does nothing with it
+        // IncursionStruck looked like it spanned all three layers,
+        // carrying era, world and line. It does not, and the puzzle
+        // dissolves on a sharper criterion: A layer is what A deed
+        // binds, not what it mentions. Replay does nothing with it
         // (`world/replay.rs`: `IncursionStruck { .. } => {}`), no live
         // path consumes it, and it is universe-ledger only — "the
         // archive never edited, the living never raided". The world and
-        // line names are the SUBJECT of the record, not keys binding
+        // line names are the subject of the record, not keys binding
         // those entities, exactly as `EraAnnexed` carries a world and
         // binds none.
         E::IncursionStruck { .. } => Some(Layer::Universal),
@@ -2887,12 +2887,12 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
 }
 
 /// The sealed event → scope law (a CFE transition rule extracted into the
-/// kernel). EXHAUSTIVE by design: adding a `ClosureEvent` variant forces a
+/// kernel). Exhaustive by design: adding a `ClosureEvent` variant forces a
 /// scope decision here at compile time — the amendment discipline made
 /// structural. `None` = a world-driven consequence with no actor scope, or
 /// a mesh/universe-ledger deed governed by its own law (never a hole: an
 /// uncovered event refuses `Unjudged` before this is consulted). Each arm
-/// is RATIFIED by a red-first witness as its event enters `covered()`
+/// is ratified by a red-first witness as its event enters `covered()`
 /// against `cfe::world`; today only `ResourceTransferred` (Collect) is
 /// covered and witnessed. The rest are the drafted law, unenforced until
 /// their coverage lands.
@@ -2910,7 +2910,7 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         // #42: sealing or ending a pact re-rules what crossing this
         // pair costs — Build, the founding class of act, beside the
         // chartered parameter it most resembles. E3.9's element annex
-        // re-rules what crossing this pair CARRIES — the same class.
+        // re-rules what crossing this pair carries — the same class.
         | E::TreatySealed { .. } | E::TreatyStruck { .. }
         | E::TreatyElementsAllowed { .. }
         | E::ElderWarded { .. } | E::VeilDrawn { .. } | E::InstrumentForged { .. }
@@ -2936,7 +2936,7 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         // unlike DemurrageSettled's passive decay (None, below).
         | E::TitheReceipted { .. }
         | E::StationSeated { .. }
-        // Build-class: a mint EXTENDS what the world can express. It
+        // Build-class: a mint extends what the world can express. It
         // creates nothing bankable and razes nothing — it opens room in
         // the vocabulary, which is the progenitor's own office
         // (12_UNION ruling 4: *create new spaces*).
@@ -2947,25 +2947,25 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         // ENTITY-ALIGN-1 (tag 189): the hardness reading closed alongside
         // a mint extends the same record — the same founding class.
         | E::SolverWordHardness { .. }
-        // RCP-2 (tag 181): raising an emergent recipe EXTENDS what the
+        // RCP-2 (tag 181): raising an emergent recipe extends what the
         // world can express — it opens the society's doing-layer over the
         // open almanac and banks nothing at the build itself (the yield
         // accrues per tick, judged where it lands). Build, the
         // SolverWordMinted / ZoneBuilt founding class.
         | E::RecipeBuilt { .. }
-        // CONSILIENCE: recording a shared knowledge axiom extends what
+        // Consilience: recording a shared knowledge axiom extends what
         // the LINE holds — the same founding/Build class.
         | E::KnowledgeConverged { .. }
         | E::KnowledgeLicensed { .. }
         // P2 (tag 103): chartering a parameter re-rules the board —
         // Build-class, the progenitor's own office.
         | E::ParameterChartered { .. }
-        // D5 — THE SOVEREIGN UNION. Build-class: it opens the standing
-        // the whole world is raised on. The scope is necessary and NOT
-        // sufficient — `union` additionally requires the ROOT
+        // D5 — the SOVEREIGN union. Build-class: it opens the standing
+        // the whole world is raised on. The scope is necessary and not
+        // sufficient — `union` additionally requires the root
         // entity, because no delegate may strike the union.
-        | E::SovereignUnionSealed { .. }        // BOOK-1 (19_LENS §16): minting DECLARES a standing account and
-        // archiving ALTERS one — both extend or amend the world's
+        | E::SovereignUnionSealed { .. }        // BOOK-1 (19_LENS §16): minting declares a standing account and
+        // archiving alters one — both extend or amend the world's
         // structure, neither moves banked value. Drafted law, matching
         // `world::books`' own scope checks.
         | E::BookMinted { .. } | E::BookArchived { .. }
@@ -2988,7 +2988,7 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         | E::OverflowAbsorbed { .. } | E::BondSettled { .. } | E::ForwardReleased { .. }
         | E::FrictionSettled { .. } | E::ApertureSent { .. } | E::ApertureReceived { .. }
         | E::CrystalDrawn { .. } | E::AssayStruck { .. } | E::ElementFarmed { .. } | E::OfferCleared { .. }
-        // ING-2b (tag 182): the staple food settle SETTLES banked food at a
+        // ING-2b (tag 182): the staple food settle settles banked food at a
         // collect touch — Collect, exactly as the ElementFarmed food cycle
         // and the YieldCollected it mirrors.
         | E::RationElementSettled { .. }
@@ -2998,7 +2998,7 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         // ONT-3 (tag 184): rejuvenation settles at a collect touch — Collect,
         // exactly as the mine and assay that share its book motion.
         | E::VeinRejuvenated { .. }
-        // ELEMENT-CHEMISTRY (#37): compounding SPENDS banked element
+        // ELEMENT-CHEMISTRY (#37): compounding spends banked element
         // value and banks a gem — Collect, exactly as the assay that
         // filled the ledger it draws on. Ratified by the chemistry
         // witnesses as it enters covered().
@@ -3057,27 +3057,27 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
     }
 }
 
-/// **THE SEALED WARRANT (K4).** The kernel's answer to `cfe`'s
+/// **The sealed warrant (K4).** The kernel's answer to `cfe`'s
 /// question: what does this payload earn?
 ///
 /// This is the one organ that may read a work payload, and it does the
 /// same two things the gate does — `verify_work` then `mint_bound` —
 /// so proposer and gate cannot disagree about what a proof is worth
-/// (CHARTER §0b, call-not-copy).
+/// (Charter §0b, call-not-copy).
 ///
-/// It closes the live gate WITHOUT breaking the opaque-payload law:
+/// It closes the live gate without breaking the opaque-payload law:
 /// `cfe` still never imports the verifier. It asks; this answers.
 pub struct SealedWarrant;
 
 impl cfe::world::MintWarrant for SealedWarrant {
     fn earns(&self, work: &[u8]) -> Option<Ratio> {
-        // THE CARRIER LAW, asked of the same function the gate runs.
+        // The carrier law, asked of the same function the gate runs.
         carrier_bound(work).ok()
     }
 
-    /// THE ESCROW CHECK, answered by the gate itself — `admits` is the
+    /// The escrow check, answered by the gate itself — `admits` is the
     /// same function the door runs, not a copy of its reasoning
-    /// (CHARTER §0b, call-not-copy). So a deed the emitter settles is
+    /// (Charter §0b, call-not-copy). So a deed the emitter settles is
     /// one the gate has already accepted on the identical inputs, and
     /// proposer/gate drift on the mint path is not caught late — it is
     /// unreachable.

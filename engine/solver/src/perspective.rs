@@ -1,23 +1,23 @@
-//! **THE PERSPECTIVE ALGEBRA** (38_COGNITION_CONVERGENCE §5, task #14)
-//! — the ARC-AGI-2 device: a compositional task falls to MANY views,
+//! **The perspective algebra** (38_COGNITION_CONVERGENCE §5, task #14)
+//! — the ARC-AGI-2 device: a compositional task falls to many views,
 //! not deeper solitary search.
 //!
 //! One line's attempt on a task is a **Perspective**: the grid it
-//! derived, and — where it fell short of the answer — the STRUCTURED
+//! derived, and — where it fell short of the answer — the structured
 //! RESIDUAL, the cells it got wrong. A structured failure is not
 //! noise; its connected clusters (**silhouettes**) are the sub-rules
 //! the view missed, each a sub-task the forge can draw on its own.
 //!
-//! Perspectives COMPOUND by per-cell congruence (charter §5, the
+//! Perspectives compound by per-cell congruence (charter §5, the
 //! membrane's `compound_perspectives`): the assembled output takes the
-//! majority hue at each cell; the cells where views disagree LOCALIZE
+//! majority hue at each cell; the cells where views disagree localize
 //! the unsolved component; consensus is the exact rational
 //! `agree / total`, never a probability. When every view's residual
-//! agrees on the silhouette count the gap is SYSTEMATIC — the mesh
-//! knows WHAT it is missing, which is a mintable want, not a shrug.
+//! agrees on the silhouette count the gap is systematic — the mesh
+//! knows what it is missing, which is a mintable want, not a shrug.
 //!
-//! **This module is the pure algebra.** It decides nothing about WHICH
-//! lines attempt a task or HOW a compound crystallizes into a shared
+//! **This module is the pure algebra.** It decides nothing about which
+//! lines attempt a task or how a compound crystallizes into a shared
 //! deed — that orchestration is mesh-coupled policy, specced in §5 of
 //! the charter and sequenced with the mesh lane (task #19). Here the
 //! views arrive as grids and leave as a reading; delete any caller and
@@ -37,7 +37,7 @@ pub struct Perspective {
     pub line: u64,
     /// What the line derived for the test.
     pub derived: Grid,
-    /// The cells it got WRONG against the expected answer, as
+    /// The cells it got wrong against the expected answer, as
     /// `(row, col)` — empty when the view was exact. `None` when no
     /// answer is known (the archive withheld it): a perspective can
     /// still compound with others, it just carries no residual.
@@ -49,7 +49,7 @@ pub struct Perspective {
 
 impl Perspective {
     /// Read a perspective from a derived grid and (optionally) the
-    /// expected answer. Mismatched dimensions read as a WHOLE residual
+    /// expected answer. Mismatched dimensions read as a whole residual
     /// — the view got the shape wrong, which is maximal structure, not
     /// an error to hide.
     pub fn read(line: u64, derived: Grid, expected: Option<&Grid>) -> Perspective {
@@ -89,7 +89,7 @@ fn residual_cells(derived: &Grid, want: &Grid) -> Vec<(usize, usize)> {
 /// Connected clusters (4-neighbour) of the residual cells — the k
 /// missed sub-rules. Reuses the sealed segmentation: paint the residual
 /// onto a blank grid and count its objects, so the clustering law is
-/// the ONE the object operators already use (call-not-copy).
+/// the one the object operators already use (call-not-copy).
 fn silhouette_count(shape: &Grid, residual: &[(usize, usize)]) -> usize {
     if residual.is_empty() {
         return 0;
@@ -103,8 +103,8 @@ fn silhouette_count(shape: &Grid, residual: &[(usize, usize)]) -> usize {
         cells[r * cols + c] = 1;
     }
     let grid = Grid::new(rows, cols, cells).expect("residual paints on the ladder");
-    // Background is FIXED at 0, not auto-detected: the residual cells
-    // are the foreground BY CONSTRUCTION, and `background`'s
+    // Background is fixed at 0, not auto-detected: the residual cells
+    // are the foreground by construction, and `background`'s
     // most-common rule would flip when misses outnumber hits (a whole
     // grid of residual would read as one background and zero
     // silhouettes — the exact inversion of the truth).
@@ -128,9 +128,9 @@ pub struct CompoundPerspective {
     pub systematic_gap: Option<usize>,
 }
 
-/// **COMPOUND** — per-cell congruence across views of one task.
+/// **Compound** — per-cell congruence across views of one task.
 ///
-/// All views must share dimensions (they are attempts at ONE grid);
+/// All views must share dimensions (they are attempts at one grid);
 /// a view of a different shape is dropped from the compound and named
 /// in the return's `Err` — a shape disagreement is a coarser signal
 /// than a cell one and belongs to the orchestration, not here. `None`

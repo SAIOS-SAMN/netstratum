@@ -1,7 +1,7 @@
-//! **THE EVOLVED INSTINCT** (COG-7 — the Workbench chooser).
+//! **The evolved instinct** (COG-7 — the Workbench chooser).
 //!
 //! A civilization's history reshapes the probability space of its cognition.
-//! Two layers, and they flow into one another with NO new ledger — the fold is
+//! Two layers, and they flow into one another with no new ledger — the fold is
 //! over data the library already holds:
 //!
 //! - **Basic instinct (the genesis seed).** The species' irreducible prior — a
@@ -13,7 +13,7 @@
 //!   minted was built from generators (operator families) and confirmed against
 //!   obstructions (`cited`). The tally of that cited usage, per family, is the
 //!   rut the line's own timeline has carved: a line that survived by minting one
-//!   kind of geometry reaches first for that kind against the NEXT problem, even
+//!   kind of geometry reaches first for that kind against the next problem, even
 //!   an unrelated one. Its past has rewritten its instinct.
 //!
 //! ```text
@@ -24,7 +24,7 @@
 //! the minted words drowns it out, and behaviour is dominated by the idiosyncratic
 //! structures the line invented to survive its own solar system.
 //!
-//! **THE LAW, UNBROKEN** (`need.rs`): this only ORDERS/WEIGHTS the reach — a bias
+//! **The law, unbroken** (`need.rs`): this only ORDERS/WEIGHTS the reach — a bias
 //! on which family the Workbench tries first. The observation still supplies every
 //! candidate; instinct never invents an operator the observation cannot support.
 
@@ -34,14 +34,14 @@ use crate::need::Family;
 /// weights. (Mirrors `selfmap`'s private census order.)
 const FAMILIES: [Family; 4] = [Family::Symmetry, Family::Recolor, Family::Tile, Family::Object];
 
-/// **THE WORKBENCH CHOOSER** — a chronicle-seeded proportional draw over the
+/// **The workbench chooser** — a chronicle-seeded proportional draw over the
 /// instinct weights: the family the Mind reaches for first this beat, sampled
 /// from the distribution its whole history has shaped. Heavier families are
 /// likelier; the same seed always draws the same family (replayable, divergent
 /// per line). `None` only when every weight is zero (never, once the genesis
 /// seed is present). The seed is the line's latest `chronicle_digest`, so the
-/// draw carries the line's trauma and triumph — two lines with the SAME
-/// vocabulary facing the SAME deficit still guess differently if their
+/// draw carries the line's trauma and triumph — two lines with the same
+/// vocabulary facing the same deficit still guess differently if their
 /// histories differ (the digest is a hash chain of their exact past).
 pub fn choose(weights: &[(Family, u64)], seed: [u8; 32]) -> Option<Family> {
     let total: u64 = weights.iter().fold(0u64, |sum, (_, w)| sum.saturating_add(*w));
@@ -63,10 +63,10 @@ pub fn choose(weights: &[(Family, u64)], seed: [u8; 32]) -> Option<Family> {
     None
 }
 
-/// **THE STRESS BLEND** (COG-7 — the Explore/Exploit tradeoff, thermodynamically
-/// gated). Two opposing biases: the THICK habit (`instinct`, reach for your rut)
-/// and the THIN curiosity (`curiosity`, the `knowledge_order` frontier — reach
-/// for what you lack). Curiosity is a high-entropy, expensive search that only a
+/// **The stress blend** (COG-7 — the Explore/Exploit tradeoff, thermodynamically
+/// gated). Two opposing biases: the thick habit (`instinct`, reach for the rut)
+/// and the thin curiosity (`curiosity`, the `knowledge_order` frontier — reach
+/// for what is lacking). Curiosity is a high-entropy, expensive search that only a
 /// line with surplus can afford; instinct is the low-energy path of least
 /// homological resistance. So the composition is gated by thermodynamic stress:
 ///
@@ -80,7 +80,7 @@ pub fn choose(weights: &[(Family, u64)], seed: [u8; 32]) -> Option<Family> {
 /// leisure): the draw favours curiosity — a prosperous empire has the metabolic
 /// luxury to explore its frontier and diversify.
 ///
-/// EXACT-INTEGER: σ arrives quantised as `sigma_num/sigma_den` (the caller
+/// Exact-integer: σ arrives quantised as `sigma_num/sigma_den` (the caller
 /// clamps `sigma_num ≤ sigma_den`). Each distribution is normalised to its own
 /// total, then the blend is cleared to a common denominator so the returned
 /// weights are exact integers — `choose` only needs their ratios, and the shared
@@ -105,7 +105,7 @@ pub fn blend(
             let c_f = curiosity.iter().position(|g| g == f).map(|p| n - p as u64).unwrap_or(0);
             // W_f × (σ_den · i_total · c_total) = σ_n·i_f·c_total + inv·c_f·i_total.
             // The bracket is a shared constant across families — it cancels in
-            // the proportional draw, so these integers ARE the blended weights.
+            // the proportional draw, so these integers are the blended weights.
             let habit = sn.saturating_mul(i_f).saturating_mul(c_total);
             let frontier = inv.saturating_mul(c_f).saturating_mul(i_total);
             (*f, habit.saturating_add(frontier))
@@ -122,8 +122,8 @@ mod tests {
     #[test]
     fn stress_blends_exploit_against_explore() {
         use Family::*;
-        // A line whose history is all RECOLOR (the rut), but whose thin frontier
-        // (curiosity) points at OBJECT (the family it lacks).
+        // A line whose history is all recolor (the rut), but whose thin frontier
+        // (curiosity) points at object (the family it lacks).
         let instinct = vec![(Symmetry, 1u64), (Recolor, 40), (Tile, 1), (Object, 1)];
         let curiosity = vec![Object, Tile, Symmetry, Recolor]; // thinnest-first
 

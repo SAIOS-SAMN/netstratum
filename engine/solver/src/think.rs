@@ -1,9 +1,9 @@
-//! **THE ARC SEAT** (N-I3, doc `53_INTELLIGENCE_PORT` D1/D2) — the solver reads
-//! its train grids through the ONE reduce organ. It owns NO search: it peels the
+//! **The ARC seat** (N-I3, doc `53_INTELLIGENCE_PORT` D1/D2) — the solver reads
+//! its train grids through the one reduce organ. It owns no search: it peels the
 //! observed pairs into measurements, hands them to `reduct::think`, and — only when
-//! the task GLUES a nameable frame — renders that frame to a program and seals
-//! the proof. Every other verdict WITHHOLDS. `search::solve` / `propose_*` /
-//! `sweep_vocabulary` are the costume this seat replaces; none is called here.
+//! the task glues a nameable frame — renders that frame to a program and seals
+//! the proof. Every other verdict withholds. `search::solve` / `propose_*` /
+//! `sweep_vocabulary` are the facade this seat replaces; none is called here.
 //!
 //! Slice 2 (this landing): the `Grid → FullMeasurement` transducer only.
 //! Slice 3 adds `think_task`, the render table, and the certificate.
@@ -38,18 +38,18 @@ pub enum SolveRead {
 /// Transduce a colored grid into a full measurement: every cell is a site
 /// carrying its hue as a gauge direction.
 ///
-/// **The fiber is the FIXED ten-hue ladder (`HUES`), NOT the grid's own max.**
+/// **The fiber is the fixed ten-hue ladder (`HUES`), not the grid's own max.**
 /// A uniform fiber is load-bearing: a full measurement carries its fiber rank in
 /// its identity, and `canonicalize` preserves it, so `deduce_gauge_move` reads
-/// two forms equal ONLY when their ranks match. Were the fiber the per-grid max,
+/// two forms equal only when their ranks match. Were the fiber the per-grid max,
 /// an all-5s grid (rank 6) and an all-6s grid (rank 7) would never deduce a
 /// gauge move — the 0d3d703e discriminator (a pure hue permutation is
-/// CongruentThroughP) would break at the seat. The ARC gauge fiber IS the wire's
+/// CongruentThroughP) would break at the seat. The ARC gauge fiber is the wire's
 /// ten-hue ladder; every grid lives in it.
 ///
 /// Background 0 is a direction like any other. A grid is dense by construction,
 /// so it measures whole; `try_new` re-verifies wholeness regardless
-/// (whole-or-refused — a grid we cannot measure is never fabricated into one).
+/// (whole-or-refused — a grid that cannot be measured is never fabricated into one).
 pub fn measure_grid(grid: &Grid) -> Result<FullMeasurement, MeasurementRefusal> {
     let occupancy = (0..grid.rows)
         .flat_map(|r| (0..grid.cols).map(move |c| (r, c)))
@@ -67,7 +67,7 @@ pub fn measure_grid(grid: &Grid) -> Result<FullMeasurement, MeasurementRefusal> 
 /// VOLUMETRIC-1b — the `measure_grid` counterpart for a stack of congruent
 /// layers: every cell of every layer is a site carrying its hue, `layer`
 /// riding the stack index. Same fixed ten-hue fiber as `measure_grid` — a
-/// volumetric task lives in the SAME gauge fiber a planar one does (there is
+/// volumetric task lives in the same gauge fiber a planar one does (there is
 /// nothing about stacking layers that widens the hue ladder), so the two
 /// seats' measurements are directly comparable at the fiber. `Volume::new`
 /// already guarantees every layer shares one (rows, cols); this only reads
@@ -99,10 +99,10 @@ pub fn measure_volume(volume: &Volume) -> Result<FullMeasurement, MeasurementRef
 }
 
 // ─────────────────────────────────────────────────────────────────────
-// SLICE 3 — the render table and the seat conductor.
+// slice 3 — the render table and the seat conductor.
 // ─────────────────────────────────────────────────────────────────────
 
-/// **THE WORD A PLANE ELEMENT IS** (docs/62 L3), read off its components:
+/// **The word A plane element is** (docs/62 L3), read off its components:
 /// the exchange is the diagonal reflection (`Transpose`), a row mirror the
 /// horizontal-axis reflection (`FlipV`), a column mirror the vertical one
 /// (`FlipH`), in the element's own order (exchange, then the mirrors on the
@@ -142,7 +142,7 @@ fn render_plane(plane: PlaneElement) -> Option<Program> {
 
 /// Render a relabel (a hue permutation carried as its moved points) to a single
 /// `Recolor` op — identity on unmoved hues. Refuses if any label is off the
-/// ten-hue ladder (never fabricate a hue). An empty relabel renders to NO op.
+/// ten-hue ladder (never fabricate a hue). An empty relabel renders to no op.
 fn render_relabel(relabel: &Relabel) -> Option<Program> {
     if relabel.pairs.is_empty() {
         return Some(Vec::new());
@@ -175,10 +175,10 @@ fn render_frame(frame: &ObserverFrame) -> Option<Program> {
 // VOLUMETRIC-1c — the render table's PerLayer subset.
 // ─────────────────────────────────────────────────────────────────────
 
-/// The eight D₄ words over the PER-LAYER vocabulary — the SAME eight words
+/// The eight D₄ words over the per-layer vocabulary — the same eight words
 /// `d4_words()` already proved distinct, each op wrapped in `VOp::PerLayer`.
 /// No new group theory: `PlaneElement` passes `layer` through unchanged
-/// (VOLUMETRIC-1a), so applying one D₄ word to EVERY layer identically is
+/// (VOLUMETRIC-1a), so applying one D₄ word to every layer identically is
 /// exactly what `PlaneElement` already expresses over a volumetric
 /// measurement — the render target is a re-labeling of the planar one, not a
 /// new one.
@@ -190,12 +190,12 @@ fn d4_vwords() -> [VProgram; 8] {
 /// it — the same match-by-probe technique `render_plane` uses (never a hand
 /// table), proved on a `depth`-layer probe instead of a bare grid.
 ///
-/// **THE SCOPE LIMIT, PROVED not ASSUMED:** `VOp::FlipStack`/`CycleLayers`
-/// genuinely permute sites BETWEEN layers; `PlaneElement` cannot express
+/// **The scope limit, proved not assumed:** `VOp::FlipStack`/`CycleLayers`
+/// genuinely permute sites between layers; `PlaneElement` cannot express
 /// that (its transform never touches `layer`), so a gauge move this render
 /// cannot find among the eight `PerLayer` words is not necessarily
 /// unreal — it may be a stack move outside this render's reach. A task
-/// whose gluing needs one WITHHOLDS honestly (Pin D) rather than being
+/// whose gluing needs one withholds honestly (Pin D) rather than being
 /// invented. Widening past `PerLayer` needs its own layer-acting group
 /// (VOLUMETRIC-2), not this landing.
 fn render_vplane(plane: PlaneElement, depth: usize) -> Option<VProgram> {
@@ -224,12 +224,12 @@ fn render_vframe(frame: &ObserverFrame, depth: usize) -> Option<VProgram> {
 // ─────────────────────────────────────────────────────────────────────
 
 /// The volumetric `recognize_frame`: peel every pair, hand the family to the
-/// SAME reduce organ (`think`) the planar seat uses — `think`/`TaskThought`/
+/// same reduce organ (`think`) the planar seat uses — `think`/`TaskThought`/
 /// `PairClosure` are generic over `FullMeasurement`, never grid-specific —
 /// and render the glued frame. `VOp` has no tile or object operator (only
 /// `PerLayer` + the two stack ops, per `solver_verify::volume`'s own
 /// vocabulary), so unlike `think_task` there is no frame-change/tile/object
-/// path to try: every volumetric task IS the same-frame case.
+/// path to try: every volumetric task is the same-frame case.
 fn recognize_vframe(
     pairs: &[(&Volume, &Volume)],
     grown: &mut Vec<Crystal>,
@@ -251,10 +251,10 @@ fn recognize_vframe(
     }
 }
 
-/// **THINK THE VOLUMETRIC TASK** — the volumetric mirror of `think_task`,
-/// same law: peel, read through the ONE reduce organ, render only when the
+/// **Think the volumetric TASK** — the volumetric mirror of `think_task`,
+/// same law: peel, read through the one reduce organ, render only when the
 /// task glues a nameable frame, seal a re-derivable certificate. Every other
-/// verdict WITHHOLDS (Pin D). This calls neither `solve_volume` (the
+/// verdict withholds (Pin D). This calls neither `solve_volume` (the
 /// RETIRED search prover, kept prover-side and non-constitutional) nor any
 /// enumeration — `research_step`'s volumetric civs reach this exactly the
 /// way its planar civs reach `think_task`.
@@ -267,7 +267,7 @@ pub fn think_volume_task(task: &VolumeTask, grown: &mut Vec<Crystal>) -> VolumeS
     let Some(program) = recognize_vframe(&pairs, grown, depth) else {
         return VolumeSolveRead::Unsolved;
     };
-    // Pin A: the program must reproduce EVERY train output exactly.
+    // Pin A: the program must reproduce every train output exactly.
     if task.train.iter().any(|(input, expected)| &run_volume(&program, input) != expected) {
         return VolumeSolveRead::Unsolved;
     }
@@ -292,8 +292,8 @@ mod volumetric_render_tests {
         Volume::new(vec![layer; depth]).expect("congruent layers")
     }
 
-    /// PROVES the design premise: a `PerLayer` symmetry applied to a real
-    /// volume deduces as a gauge move through `reduce_pair` (the SAME organ
+    /// Proves the design premise: a `PerLayer` symmetry applied to a real
+    /// volume deduces as a gauge move through `reduce_pair` (the same organ
     /// `think_task` uses), and `render_vplane` renders it back to the exact
     /// program that reproduces it — round-tripping through the reduce organ,
     /// not just matching against the probe render_vplane itself uses.
@@ -310,7 +310,7 @@ mod volumetric_render_tests {
                 // `p.plane` and `p.relabel` — a probe where every hue occupies
                 // exactly one site makes geometric movement and hue substitution
                 // indistinguishable (the same ambiguity `render_frame` resolves by
-                // rendering BOTH pieces, never `render_plane` alone), so the full
+                // rendering both pieces, never `render_plane` alone), so the full
                 // frame renders through `render_vframe`, mirroring `render_frame`.
                 let rendered = render_vframe(&p, 3).expect("a per-layer frame renders");
                 assert_eq!(
@@ -323,9 +323,9 @@ mod volumetric_render_tests {
         }
     }
 
-    /// The scope limit, PROVED rather than assumed: `layer` never enters
+    /// The scope limit, proved rather than assumed: `layer` never enters
     /// `PlaneElement`'s transform, so a genuine stack move (data crossing
-    /// between layers) is NOT among the eight `PerLayer` words — the render
+    /// between layers) is not among the eight `PerLayer` words — the render
     /// correctly returns `None` rather than inventing a wrong word.
     #[test]
     fn a_genuine_stack_move_is_outside_the_per_layer_render() {
@@ -334,7 +334,7 @@ mod volumetric_render_tests {
         let ma = measure_volume(&a).expect("whole");
         let mb = measure_volume(&b).expect("whole");
         // FlipStack is genuinely a different measurement (layer 0 and layer 1
-        // swap content), so it either fails to deduce as ANY plane element,
+        // swap content), so it either fails to deduce as any plane element,
         // or — if it coincidentally matches one on this probe — render_vplane
         // must still fail to find a PerLayer word that reproduces it, since
         // no PerLayer word can move a site between layers.
@@ -361,19 +361,19 @@ mod volumetric_render_tests {
     }
 }
 
-/// **THINK THE TASK** — the ARC seat. Peel the train pairs into measurements,
-/// read them through the ONE reduce organ (`reduct::think`), and — only when the
-/// task GLUES a nameable frame — render it to a program, apply it to the
-/// held-out input, and seal the proof. Every other verdict WITHHOLDS: a task
+/// **Think the TASK** — the ARC seat. Peel the train pairs into measurements,
+/// read them through the one reduce organ (`reduct::think`), and — only when the
+/// task glues a nameable frame — render it to a program, apply it to the
+/// held-out input, and seal the proof. Every other verdict withholds: a task
 /// that drained without expressing a frame (ByDrain), disagreed across pairs
 /// (Unglueable), learned a wall (Withheld), or gave too few observations returns
-/// `Unsolved` with NO output (Pin D). The render never invents an Op, never
+/// `Unsolved` with no output (Pin D). The render never invents an Op, never
 /// sweeps; the certificate + train reproduction is the pin (Pin A) — a frame
 /// that does not reproduce every train output is withheld, not emitted. This
 /// path calls neither `search::solve` nor any `propose_*` / `sweep_vocabulary`.
-/// **THE SAME-FRAME SEAT** — the D₄×recolor recognition, factored so the tile
+/// **The same-FRAME seat** — the D₄×recolor recognition, factored so the tile
 /// seat can reuse it on the untiled base. Peel every pair, hand the family to
-/// the ONE reduce organ, render the glued plane+relabel frame. `None` when a
+/// the one reduce organ, render the glued plane+relabel frame. `None` when a
 /// grid will not measure, the family glues no single rule, or the frame is
 /// unnameable. Runs `think` exactly once (the caller ensures one think/task).
 fn recognize_frame(pairs: &[(&Grid, &Grid)], grown: &mut Vec<Crystal>) -> Option<Program> {
@@ -381,7 +381,7 @@ fn recognize_frame(pairs: &[(&Grid, &Grid)], grown: &mut Vec<Crystal>) -> Option
 }
 
 /// [`recognize_frame`], keeping what an unglued thought leaves behind: every
-/// frame that closed SOME pairs, rendered, into `conjectures` (Concordance
+/// frame that closed some pairs, rendered, into `conjectures` (Concordance
 /// 1.10, restore 1). A conjecture is never the answer here.
 fn recognize_frame_conjecturing(
     pairs: &[(&Grid, &Grid)],
@@ -410,11 +410,11 @@ fn recognize_frame_conjecturing(
     }
 }
 
-/// **A HELD CONJECTURE** (Concordance 1.10, the audit's restore 1: a mind
+/// **A held conjecture** (Concordance 1.10, the audit's restore 1: a mind
 /// may hold and test its own hypotheses) — a program an earlier thought
 /// rendered from a frame that closed `closed` of its task's `of` pairs. It is
-/// PRIVATE thought: held by its vessel, tried first on every later task, and
-/// a CLAIM only where it closes every pair of one (Pin A, unchanged).
+/// private thought: held by its vessel, tried first on every later task, and
+/// a claim only where it closes every pair of one (Pin A, unchanged).
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Conjecture {
     pub program: Program,
@@ -422,7 +422,7 @@ pub struct Conjecture {
     pub of: usize,
 }
 
-/// **DECLARED BOUND**: how many conjectures a vessel holds at once. Memory is
+/// **Declared bound**: how many conjectures a vessel holds at once. Memory is
 /// finite; the oldest gives way. A dial, recorded in docs/59, not a law.
 pub const HELD_CONJECTURES: usize = 32;
 
@@ -441,7 +441,7 @@ pub fn hold_conjectures(held: &mut Vec<Conjecture>, fresh: Vec<Conjecture>) {
 }
 
 /// The top-left `br × bc` block of a grid — the tiling's (0,0) cell, which is
-/// unmirrored by construction, so it IS the base the tile repeats.
+/// unmirrored by construction, so it is the base the tile repeats.
 fn top_left_block(g: &Grid, br: usize, bc: usize) -> Option<Grid> {
     if br == 0 || bc == 0 || br > g.rows || bc > g.cols {
         return None;
@@ -484,7 +484,7 @@ fn mirror_word(m: TileMirror) -> Program {
 }
 
 /// **READ the band mirror off the carrier** — a `TileMirror` is one direction of
-/// the tile transport, so an odd band `block` IS `base` under exactly one of the
+/// the tile transport, so an odd band `block` is `base` under exactly one of the
 /// four reflections. A single walk over the 4-element `TileMirror` carrier reads
 /// it directly — no cartesian product, no re-tiling of the whole output.
 fn read_mirror(block: &Grid, base: &Grid) -> Option<TileMirror> {
@@ -493,20 +493,20 @@ fn read_mirror(block: &Grid, base: &Grid) -> Option<TileMirror> {
         .find(|m| run(&mirror_word(*m), base) == *block)
 }
 
-/// **THE TILE SEAT** — the first frame-MORPHISM the ARC seat expresses (the
+/// **The tile seat** — the first frame-MORPHISM the ARC seat expresses (the
 /// render-expressiveness ceiling that saturated the D₄×recolor curriculum). A
-/// frame morphism CHANGES the frame — `output = Tile{d,a,mirrors}(base)`, a
+/// frame morphism changes the frame — `output = Tile{d,a,mirrors}(base)`, a
 /// `br × bc` base repeated `d × a` with the odd bands mirrored — so the
-/// same-frame gauge organ cannot see it. This PEELS the tile-LAST word (no
+/// same-frame gauge organ cannot see it. This peels the tile-LAST word (no
 /// sweep, per the peels-and-shears law):
 ///   1. derive `(d, a)` from the dimension ratio (the base is a D₄ image of the
 ///      input, so its dims are the input's, or transposed);
 ///   2. READ the odd-band mirrors straight off the carrier — `odd_row` from
 ///      block (1,0), `odd_col` from block (0,1) — each a single walk over the
 ///      4-element `TileMirror`, never the 16-way product;
-///   3. verify the tile CHEAPLY (`Tile(base0) == out0`, one apply) BEFORE paying
+///   3. verify the tile cheaply (`Tile(base0) == out0`, one apply) before paying
 ///      the reduce organ, then recognise the base transform `input → base0`
-///      through it exactly ONCE.
+///      through it exactly once.
 /// Pin A (the caller) is the authority: a candidate that does not replay every
 /// pair withholds.
 fn recognize_tile(pairs: &[(&Grid, &Grid)], grown: &mut Vec<Crystal>) -> Option<Program> {
@@ -540,12 +540,12 @@ fn recognize_tile(pairs: &[(&Grid, &Grid)], grown: &mut Vec<Crystal>) -> Option<
             TileMirror::None
         };
         let tile = Op::Tile { down, across, odd_row, odd_col };
-        // CHEAP structural pin (one apply) — the derived tile must reproduce the
+        // Cheap structural pin (one apply) — the derived tile must reproduce the
         // whole output from its own (0,0) block. Only then pay the reduce organ.
         if run(&vec![tile.clone()], &base0) != *out0 {
             continue;
         }
-        // The ONE reduce-organ call: the base transform `input → base0`, family-wide.
+        // The one reduce-organ call: the base transform `input → base0`, family-wide.
         let bases: Option<Vec<(Grid, Grid)>> = pairs
             .iter()
             .map(|(input, output)| top_left_block(output, br, bc).map(|b| ((*input).clone(), b)))
@@ -559,7 +559,7 @@ fn recognize_tile(pairs: &[(&Grid, &Grid)], grown: &mut Vec<Crystal>) -> Option<
     None
 }
 
-/// **A PURE TILING** — the `Tile` op that reproduces `tiled` from `base` (base
+/// **A pure tiling** — the `Tile` op that reproduces `tiled` from `base` (base
 /// repeated `down×across` with the odd bands mirrored), or `None` if `tiled` is
 /// not such a tiling of `base`. Derive `(down,across)` from the dimension ratio
 /// and READ the mirrors off blocks (1,0)/(0,1); the cheap apply is the pin.
@@ -604,10 +604,10 @@ fn d4_inverse_map() -> [usize; 8] {
     inv
 }
 
-/// **THE TILE-FIRST SEAT** — the frame morphism the OTHER way round: `output =
-/// transform(Tile(input))`, the tile applied FIRST then a D₄ word. The tile seat
+/// **The tile-first seat** — the frame morphism the other way round: `output =
+/// transform(Tile(input))`, the tile applied first then a D₄ word. The tile seat
 /// proper reads tile-LAST; here, for each of the 8 D₄ finals, un-apply it (its
-/// inverse) to recover the pre-transform tiled grid, and check THAT is a pure
+/// inverse) to recover the pre-transform tiled grid, and check that is a pure
 /// tiling of the input. A structural enumeration bounded by the plane group,
 /// never a program search; Pin A (the caller) is the authority.
 fn recognize_tile_first(pairs: &[(&Grid, &Grid)]) -> Option<Program> {
@@ -626,10 +626,10 @@ fn recognize_tile_first(pairs: &[(&Grid, &Grid)]) -> Option<Program> {
     None
 }
 
-/// **THE OBJECT SEAT** — the segmentation morphisms (keep/delete/crop over the
-/// 4-connected non-background objects; `CropContent` IS extract-non-background).
+/// **The object seat** — the segmentation morphisms (keep/delete/crop over the
+/// 4-connected non-background objects; `CropContent` is extract-non-background).
 /// These are neither a plane word nor a tiling, so the frame and tile seats
-/// withhold them. Recognise the PURE object op: the single `ObjOp` whose action
+/// withhold them. Recognise the pure object op: the single `ObjOp` whose action
 /// reproduces every train pair. A bounded walk over the fixed object vocabulary
 /// (`OBJ_OPS`), never a program search; Pin A (the caller) is the authority.
 fn recognize_object(pairs: &[(&Grid, &Grid)]) -> Option<Program> {
@@ -657,9 +657,9 @@ fn hue_profile(g: &Grid) -> Vec<usize> {
     profile
 }
 
-/// **THE LAYERED SEAT, OBJECT THEN FRAME** (docs/60 D7, slice 1): the bodies
-/// first, then what is left of the change read through the ONE reduce organ.
-/// For each object op that ACTS on the family, the staged grids (`op(input)`)
+/// **The layered seat, object then FRAME** (docs/60 D7, slice 1): the bodies
+/// first, then what is left of the change read through the one reduce organ.
+/// For each object op that acts on the family, the staged grids (`op(input)`)
 /// are paired with the outputs; where every staged grid could be one plane
 /// motion and hue relabel from its output (same frame up to a transpose, the
 /// same hue profile), the organ is asked once for that frame, and the word is
@@ -690,7 +690,7 @@ fn recognize_object_then_frame(pairs: &[(&Grid, &Grid)], grown: &mut Vec<Crystal
     None
 }
 
-/// **THE LAYERED SEAT, FRAME THEN OBJECT** (docs/60 D7b): a plane motion
+/// **The layered seat, FRAME then object** (docs/60 D7b): a plane motion
 /// first, then an object op on what it made. A bounded walk over the seven
 /// non-identity D4 words and the fixed object vocabulary, each candidate
 /// checked by direct application on every pair (no think, no search beyond
@@ -708,8 +708,8 @@ fn recognize_frame_then_object(pairs: &[(&Grid, &Grid)]) -> Option<Program> {
     None
 }
 
-/// **THE AFFINE SEAT** (docs/62 L2): a translator or a dilator DEDUCED from
-/// the pairs, then what is left read through the ONE reduce organ. The
+/// **The affine seat** (docs/62 L2): a translator or a dilator deduced from
+/// the pairs, then what is left read through the one reduce organ. The
 /// generator's arguments are read off the observation, one derived candidate
 /// each, never swept:
 /// - a dilator where every pair's output frame is the input's times one
@@ -754,23 +754,23 @@ fn recognize_affine_then_frame(pairs: &[(&Grid, &Grid)], grown: &mut Vec<Crystal
     Some(word)
 }
 
-/// **THINK THE TASK** — the ARC seat. Read the train pairs through the ONE
-/// reduce organ and render its verdict to a program, or WITHHOLD. Dispatch on
+/// **Think the TASK** — the ARC seat. Read the train pairs through the one
+/// reduce organ and render its verdict to a program, or withhold. Dispatch on
 /// the frame: when the output shares the input's frame (up to a D₄ transpose)
 /// the same-frame seat names a D₄×recolor word; when the output is a strict
-/// MULTIPLE of it, the tile seat names a frame morphism. Every other verdict
-/// returns `Unsolved` with NO output (Pin D). The render never invents an Op;
+/// multiple of it, the tile seat names a frame morphism. Every other verdict
+/// returns `Unsolved` with no output (Pin D). The render never invents an Op;
 /// the certificate + train reproduction is the pin (Pin A). No `search::solve`,
 /// no `propose_*`, no `sweep_vocabulary`.
 pub fn think_task(task: &Task, grown: &mut Vec<Crystal>) -> SolveRead {
     think_task_held(task, grown, &mut Vec::new())
 }
 
-/// [`think_task`] by a mind that HOLDS CONJECTURES (Concordance 1.10, restore
-/// 1). Its held hypotheses are tried FIRST: one that reproduces every train
+/// [`think_task`] by a mind that holds conjectures (Concordance 1.10, restore
+/// 1). Its held hypotheses are tried first: one that reproduces every train
 /// pair of this task is no longer a conjecture but this task's answer, and
 /// leaves the held set. Otherwise the organ thinks as ever, and the frames an
-/// unglued thought closed SOME pairs with are held for later tasks. Every
+/// unglued thought closed some pairs with are held for later tasks. Every
 /// answer still passes Pin A and its certificate — a claim closes or it is
 /// none.
 pub fn think_task_held(task: &Task, grown: &mut Vec<Crystal>, held: &mut Vec<Conjecture>) -> SolveRead {
@@ -798,7 +798,7 @@ pub fn think_task_sensing(
     let (in0, out0) = (&first.input, &first.output);
     let pairs: Vec<(&Grid, &Grid)> = task.train.iter().map(|p| (&p.input, &p.output)).collect();
     // A D₄ image preserves the frame or transposes it; anything else is a frame
-    // CHANGE — the tile seat's business (one think per task either way).
+    // change — the tile seat's business (one think per task either way).
     let same_frame = (out0.rows, out0.cols) == (in0.rows, in0.cols)
         || (out0.rows, out0.cols) == (in0.cols, in0.rows);
     let mut fresh = Vec::new();
@@ -815,7 +815,7 @@ pub fn think_task_sensing(
     // A pure object op (segmentation morphism) is neither a plane word nor a
     // tiling — try it when the frame/tile seats withhold, in either frame regime.
     .or_else(|| recognize_object(&pairs))
-    // docs/60 D7: a body changed AND moved or recoloured — layered.
+    // docs/60 D7: a body changed and moved or recoloured — layered.
     .or_else(|| recognize_object_then_frame(&pairs, grown))
     .or_else(|| recognize_frame_then_object(&pairs))
     // docs/62 L2: a deduced translator or dilator, then the frame.
@@ -834,7 +834,7 @@ pub fn think_task_sensing(
     seal_answer(task, program)
 }
 
-/// Pin A and the certificate: an answer reproduces EVERY train output
+/// Pin A and the certificate: an answer reproduces every train output
 /// exactly, or it is a withhold — never an emitted guess.
 fn seal_answer(task: &Task, program: Program) -> SolveRead {
     if task.train.iter().any(|pair| run(&program, &pair.input) != pair.output) {
@@ -850,25 +850,25 @@ fn seal_answer(task: &Task, program: Program) -> SolveRead {
 }
 
 // ─────────────────────────────────────────────────────────────────────
-// N-I10 — HEAR: the crystal-exchange primitive (an utterance drained or walled).
+// N-I10 — hear: the crystal-exchange primitive (an utterance drained or walled).
 // ─────────────────────────────────────────────────────────────────────
 
-/// How a hearer received an utterance — the ONLY verdicts hearing renders.
+/// How a hearer received an utterance — the only verdicts hearing renders.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Heard {
-    /// The hearer's basin DRAINED the utterance — already accounted (understood).
+    /// The hearer's basin drained the utterance — already accounted (understood).
     /// Nothing adopted; the hearer knew it (or it is a universal gauge).
     Understood,
-    /// The utterance WALLED — the hearer could not account it; the crystal is
-    /// adopted onto the hearer's OWN basin (learned).
+    /// The utterance walled — the hearer could not account it; the crystal is
+    /// adopted onto the hearer's own basin (learned).
     Learned,
 }
 
-/// **HEAR** (N-I10) — a folded word / crystal offered to a hearer, as a
-/// measurement pair, reduced against the hearer's OWN basin (`reduct::observe` — the
-/// SAME reduce organ as think). `Accounted` → `Understood` (drain, nothing
-/// adopted); a wall → `Learned`, and the crystal is adopted onto `grown` ONLY.
-/// No chat, no score, and NEVER a copy of the speaker's basin — the hearer
+/// **Hear** (N-I10) — a folded word / crystal offered to a hearer, as a
+/// measurement pair, reduced against the hearer's own basin (`reduct::observe` — the
+/// same reduce organ as think). `Accounted` → `Understood` (drain, nothing
+/// adopted); a wall → `Learned`, and the crystal is adopted onto `grown` only.
+/// No chat, no score, and never a copy of the speaker's basin — the hearer
 /// reaches the utterance through its own reduce or walls and mints its own
 /// crystal. The caller prices the look (N-I7); this owns no leisure.
 pub fn hear(a: &FullMeasurement, b: &FullMeasurement, grown: &mut Vec<Crystal>) -> Heard {
@@ -882,7 +882,7 @@ pub fn hear(a: &FullMeasurement, b: &FullMeasurement, grown: &mut Vec<Crystal>) 
     }
 }
 
-/// N-I10 — HEAR a folded word (a `Program`): the word is the utterance, offered
+/// N-I10 — hear a folded word (a `Program`): the word is the utterance, offered
 /// as the pair `(probe, word(probe))` and heard against the hearer's basin. A
 /// pure-geometry word is a universal gauge (drains → `Understood`); a word that
 /// recolors a probe hue to one the probe never carried is a generation gap
@@ -890,7 +890,7 @@ pub fn hear(a: &FullMeasurement, b: &FullMeasurement, grown: &mut Vec<Crystal>) 
 /// twin of `measure_grid` for the survival/ARC seats — no `cfe`, no leisure (the
 /// caller prices the look).
 pub fn hear_word(expansion: &[Op], grown: &mut Vec<Crystal>) -> Heard {
-    // A probe with a small palette so a recolor OUT of it reads as novel.
+    // A probe with a small palette so a recolor out of it reads as novel.
     let probe = match Grid::new(3, 3, vec![1, 0, 2, 0, 1, 0, 2, 0, 1]) {
         Some(g) => g,
         None => return Heard::Understood,

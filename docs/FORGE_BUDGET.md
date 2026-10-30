@@ -868,7 +868,7 @@ satisfying the manifold**; §2 is what that error cost twice.
   inherited open defect — see §4c; do not add a third reader of the
   collapsed ratio.
 
-### A6 · MESH-weight — *is standing earned or assigned?*
+### A6 · MESH-WEIGHT — *is standing earned or assigned?*
 - **reads** verified capacity contributed
 - **decides** peer weight in `Σ_mesh`
 - **refuses** — **nothing today; weight arrives assigned and advisory**

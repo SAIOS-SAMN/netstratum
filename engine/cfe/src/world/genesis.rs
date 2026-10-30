@@ -1,4 +1,4 @@
-//! GENESIS AND IDENTITY — founding, resuming, entities, taxon,
+//! GENESIS and IDENTITY — founding, resuming, entities, taxon,
 //! stations, wards.
 
 use super::*;
@@ -74,16 +74,16 @@ impl World {
     /// P2-PERSIST — resume a world from its chronicle: the committed
     /// projection replays (orbs, entities), the clock reinstates at the
     /// highest stamped value the receipts prove, and the workspace
-    /// starts EMPTY — accrued value and un-stamped ticks from the prior
+    /// starts empty — accrued value and un-stamped ticks from the prior
     /// era had no receipts, so they honestly do not persist.
     pub fn resume(chronicle: Chronicle) -> World {
         let committed = replay(&chronicle);
         Self::resume_from(committed, chronicle)
     }
 
-    /// **CARRY STATE FORWARD** (operator directive 2026-10-08: judge each
+    /// **Carry STATE forward** (operator directive 2026-10-08: judge each
     /// deed live once; carry state forward instead of replaying from
-    /// genesis). The world from a CARRIED committed state — a checkpoint's
+    /// genesis). The world from a carried committed state — a checkpoint's
     /// snapshot brought up to the chronicle's head — and its chronicle, with
     /// no replay. The caller vouches that `committed` is the state at the
     /// chronicle's last receipt; the clock reinstates at the highest stamp
@@ -159,7 +159,7 @@ impl World {
             rogue_pressure: committed.rogue_pressure,
             element_allowlists: committed.element_allowlists,
         };
-        // #136 THE SMELT-SWEEP: floor legacy off-grain element stocks ONCE, as a
+        // #136 the SMELT-SWEEP: floor legacy off-grain element stocks once, as a
         // committed deed in this world's era stream. A no-op (no deed) for a world
         // already on the grain — post-fix worlds and every fresh test build — so
         // SEAL B is untouched; only a pre-ruling-B chronicle is migrated, exactly
@@ -169,16 +169,16 @@ impl World {
         // conservation holds and no world is refused (the seam that ElementBroken'd
         // the whole board is closed; witnessed in `smelt_sweep_judge_pins`).
         world.smelt_sweep();
-        // #138 THE RESOURCE SMELT-SWEEP: the banked-resource + STAMP twin. Floor
+        // #138 the resource SMELT-SWEEP: the banked-resource + STAMP twin. Floor
         // legacy off-grain resource stocks (aperture-compounded Crystal/Iron/
-        // Biomass) and STAMP ONCE, same idempotent + self-terminating shape, so a
+        // Biomass) and STAMP once, same idempotent + self-terminating shape, so a
         // world already on the grain emits no deed and SEAL B is untouched; the
         // kernel admits it (`admitted_deltas` + `stamp_move` re-derive the deltas
         // from prior). Ordered after the element sweep — independent ledgers.
         world.smelt_resource_sweep();
         world
     }
-    /// ELEVATE-1 (12_UNION §6) — THE THREE-GATE GAUGE CLIMB, the
+    /// ELEVATE-1 (12_UNION §6) — the three-gate GAUGE climb, the
     /// discrete-gauge-morphodynamics ascent (Q3 resolved). An earned,
     /// receipted rise in G, executed as `GaugeShifted`, gated on three
     /// exact readings of this world's own chronicle:
@@ -215,8 +215,8 @@ impl World {
             .any(|receipt| matches!(receipt.event(), ClosureEvent::YieldCollected { .. }));
         let crossed = self.crossed;
         // CHANNEL_ALIGN (operator-ruled): an adopted discipline must
-        // stand ALIGNED — the syntropy ratio (09 §2.5, engine read)
-        // holds the floor the disciplines THEMSELVES declare, or the
+        // stand aligned — the syntropy ratio (09 §2.5, engine read)
+        // holds the floor the disciplines themselves declare, or the
         // climb refuses. The alignment loop: resolve the friction to
         // rise. No adopted practice binds the gate → no floor → a line
         // with no practice, or no deeds posted, stands aligned.
@@ -281,7 +281,7 @@ impl World {
             }
         }
     }
-    /// G1 (04 §1/§5) — seal the line's three axes as THE binding
+    /// G1 (04 §1/§5) — seal the line's three axes as the binding
     /// receipt in this world's chronicle. Entry is in the bands
     /// (04 §6a — never a tier-0 seat); one line per world; the
     /// refusals are computed pure. From this receipt on, the registry
@@ -339,15 +339,15 @@ impl World {
             actor,
         );
         // #32, 20_FOUNDING §3: the founding tithe — the economy's
-        // genesis transaction. Denominated in the line's OWN
+        // genesis transaction. Denominated in the line's own
         // metabolic ration (G2), never a flat amount: mineral tithes
         // iron, biotic tithes biomass, plasmic tithes joules (rate 0
         // today — plasmic agriculture is #29, still open, so this is
         // byte-identically a no-op debit for that metabolism until it
-        // lands, not a special case here). FALLBACK siting is the
+        // lands, not a special case here). Fallback siting is the
         // only landed acquisition path (PURCHASE/COMMISSION deferred
         // per HANDOFF_2026-08-13), so every founding today raises a
-        // new world and tithes to the ANCIENT seat.
+        // new world and tithes to the ancient seat.
         let resource = crate::dop::metabolic_ration(metabolism);
         // Capped at what's actually banked — a founding that has
         // already spent its kit down (a colony grown before its type
@@ -428,7 +428,7 @@ impl World {
             return Err(ActionRefused::TaxonAlreadySealed);
         }
         // Class: fold ceiling (minted classes seal) ∪ compiled table.
-        // Clade: open u16 table — NOT the fold (fold seed is legacy 0..=20
+        // Clade: open u16 table — not the fold (fold seed is legacy 0..=20
         // for display only; expansion lives in taxon_table, open-ended).
         use crate::vocabulary::{ceiling, Axis};
         let class_max = ceiling(self.chronicle(), Axis::Class)
@@ -447,7 +447,7 @@ impl World {
     pub fn taxon(&self) -> Option<(u8, u16)> {
         self.taxon
     }
-    /// ERA 1'S LAND (docs/86): the heads this world's medium feeds wild, read
+    /// Era 1'S land (docs/86): the heads this world's medium feeds wild, read
     /// from the universe by the caller (each boot; never committed).
     pub fn set_land(&mut self, wild: Ratio) {
         self.land = Some(wild);
@@ -459,7 +459,7 @@ impl World {
     /// GALACTIC-1 — seal the world's regional resource-weighting seed
     /// (`dop::region_seed_of`, derived from the charted position outside
     /// this chronicle — the caller holds the ledger, this deed only
-    /// records the DERIVED seed, never the position itself, so the
+    /// records the derived seed, never the position itself, so the
     /// chronicle stays self-contained and replay never touches the
     /// starchart). One per world, mirrors `commission_star`/`seal_taxon`:
     /// sealed once, forever.
@@ -483,7 +483,7 @@ impl World {
         self.chronicle.set_region_seed(seed);
         Ok(())
     }
-    /// THE COMPOSITION (tag 198, the refactor onto era 1): seal the world's
+    /// The composition (tag 198, the refactor onto era 1): seal the world's
     /// planet composition, its grains by Z, once. A second seal is a no-op.
     pub fn seal_composition(&mut self, nuclei: Vec<(u16, Ratio)>) -> Result<(), ActionRefused> {
         self.permitted(SOVEREIGN, Scope::Build)?;
@@ -516,7 +516,7 @@ impl World {
         station: crate::dop::Station,
     ) -> Result<(), ActionRefused> {
         self.permitted(actor, Scope::Build)?;
-        // Both shapes are unrepresentable now — a `Station` IS one of
+        // Both shapes are unrepresentable now — a `Station` is one of
         // the four offices, and a `Name` cannot be empty, so the dead
         // `LineUnnamed` arm has no case left to catch (29_CONSTRUCTION).
         let line = line.as_str();
@@ -531,11 +531,11 @@ impl World {
         }
         Ok(())
     }
-    /// **THE VOCABULARY MINT** (tag 90, `28_VOCABULARY` §5–§7).
+    /// **The vocabulary mint** (tag 90, `28_VOCABULARY` §5–§7).
     ///
     /// A T0 progenitor adds an entry to a vocabulary, and the board
     /// grows a class of entity that no coder wrote. Two gates remain,
-    /// both FACTS of the chain — standing and novelty; the shapes died
+    /// both facts of the chain — standing and novelty; the shapes died
     /// at the doors (29_CONSTRUCTION): the axis is a
     /// [`crate::vocabulary::Axis`] (no unknown axis constructs, and no
     /// variant names a STATION — §10), and the binding is a
@@ -543,7 +543,7 @@ impl World {
     /// friction, in bounds, on real channels — §4a — or it does not
     /// construct).
     ///
-    /// **The code is DERIVED here, never accepted.** The caller does not
+    /// **The code is derived here, never accepted.** The caller does not
     /// pass one: the lawful value is `ceiling(axis) + 1` read from the
     /// fold, and the receipt carries it so a reader who has not folded
     /// the chain can still see which entry this is. A caller that could
@@ -570,17 +570,17 @@ impl World {
         self.mint_vocabulary_based_as(actor, line, axis, sigil, word, binding, None)
     }
 
-    /// **THE ZONE MINT'S FULL FORM (#41)** — the same deed carrying a
-    /// declared BASE, the first rung of the operator's resolution
+    /// **The zone mint's full form (#41)** — the same deed carrying a
+    /// declared base, the first rung of the operator's resolution
     /// ladder (`vocabulary::zone_base`).
     ///
     /// `base` is meaningful only on [`crate::vocabulary::Axis::Zone`]:
     /// a minted building's binding is a set of scale factors, and the
-    /// base is what they scale. Left `None`, the base is INFERRED from
+    /// base is what they scale. Left `None`, the base is inferred from
     /// the channels the binding touches; where neither answers, the
     /// entry is lawful vocabulary that simply never builds.
     ///
-    /// A declared base must name a COMPILED kind. Refusing here rather
+    /// A declared base must name a compiled kind. Refusing here rather
     /// than degrading to inference is the P1 discipline: a caller that
     /// names a base at all has said something decidable, and a base
     /// that names nothing is a malformed declaration, not a silence.
@@ -624,7 +624,7 @@ impl World {
                         return Err(ActionRefused::BaseUnknown { code });
                     }
                 }
-                // CHARTER (a), 2026-08-13: a minted DISPOSITION may declare
+                // Charter (a), 2026-08-13: a minted DISPOSITION may declare
                 // the seeded disposition it descends from, inheriting that
                 // base's traits through its lineage charter (`44_LINEAGES`).
                 // The base must be one of the three trait-bearing archetypes.
@@ -637,7 +637,7 @@ impl World {
             }
         }
 
-        // G2: a ration eats an ELEMENT, so it is meaningful only on the
+        // G2: a ration eats an element, so it is meaningful only on the
         // Metabolism axis, and it never rides the same mint as a Zone
         // base — the wire tells the two apart by length, so a mint that
         // carried both would be unreadable. Refuse at the door.
@@ -650,7 +650,7 @@ impl World {
             }
         }
 
-        // GATE 1 — STANDING. Tier 0 only. `station_of` reads the CHAIN,
+        // Gate 1 — standing. Tier 0 only. `station_of` reads the chain,
         // so this cannot be granted by editing anything.
         if self.station_of(line) != Some(1) {
             return Err(ActionRefused::MintWithoutStanding { line: line.to_string() });
@@ -659,7 +659,7 @@ impl World {
         // The trade law (§4a) died at the `TradingBinding` door — a
         // binding that does not trade cannot be constructed.
 
-        // GATE 2 — NOVELTY (§6), measured on the canonical mechanism.
+        // Gate 2 — novelty (§6), measured on the canonical mechanism.
         let standing = vocab::fold(self.chronicle(), axis);
         let shape = vocab::canonical(binding.entries());
         if let Some(twin) = standing
@@ -669,7 +669,7 @@ impl World {
             return Err(ActionRefused::MintNotNovel { like: twin.code });
         }
         // The empty word died at the `Name` door; only the collision
-        // FACT remains — a mark that names two things defines neither.
+        // fact remains — a mark that names two things defines neither.
         let word = word.as_str();
         if standing.iter().any(|entry| {
             entry.word == word || (!sigil.is_empty() && entry.sigil == sigil)
@@ -696,11 +696,11 @@ impl World {
         Ok(code)
     }
 
-    /// **CHARTER A PARAMETER** (tag 103, P2's mint path for the
+    /// **Charter A parameter** (tag 103, P2's mint path for the
     /// balance placeholders). The band died at the door — a
     /// [`crate::parameter::Chartered`] stands inside the fourfold band
-    /// of its seed or it does not construct — so ONE gate remains, a
-    /// fact of the chain: chartering is a TIER 0 power under the same
+    /// of its seed or it does not construct — so one gate remains, a
+    /// fact of the chain: chartering is a tier 0 power under the same
     /// standing law as the vocabulary mint (12_UNION ruling 4).
     pub fn charter_parameter(
         &mut self,
@@ -730,14 +730,14 @@ impl World {
         Ok(())
     }
 
-    /// The chartered value of a parameter — the FOLD's reading (seed ∪
+    /// The chartered value of a parameter — the fold's reading (seed ∪
     /// charters). Public: the conductor's thermal mirror and the CLI
     /// read the same rule the tick runs.
     pub fn parameter(&self, key: crate::parameter::Parameter) -> crate::ratio::Ratio {
         crate::parameter::of(self.chronicle(), key)
     }
 
-    /// THE VERTICAL AXIS: the seat a line holds, from the CHAIN.
+    /// The vertical axis: the seat a line holds, from the chain.
     pub fn station_of(&self, line: &str) -> Option<u8> {
         self.stations.iter().find(|(held, _)| held == line).map(|(_, seat)| *seat)
     }

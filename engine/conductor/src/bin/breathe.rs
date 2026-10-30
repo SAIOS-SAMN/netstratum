@@ -18,7 +18,7 @@ fn main() {
     let before = u.total();
     // Bell by bell, as the conductor beats (the galaxies re-read their
     // orbits on each universal echo).
-    // From a CHECKPOINT (TUniversal 11.0 (23)): a universe written at a beat
+    // From a checkpoint (TUniversal 11.0 (23)): a universe written at a beat
     // resumes there (`conductor.beat`), never from the founding.
     let start: u64 = std::fs::read_to_string(Path::new(era1).join("conductor.beat")).ok().and_then(|t| t.trim().parse().ok()).unwrap_or(0).min(until);
     if start > 0 {
@@ -26,9 +26,9 @@ fn main() {
     }
     let spin_before = pulse::spin_total(&u, &breath::unit_mass(&u));
     let mut events = Vec::new();
-    // THE CARRIER'S GROWTH, read as the run goes (operator 2026-10-23: "if its
-    // growing uncontrolled and there is no end in sight, what is our course of
-    // action?"): each tenth universal echo, the motes held and the widest spin
+    // The carrier's GROWTH, read as the run goes (ruling of 2026-10-23: a
+    // carrier growing uncontrolled with no end in sight needs a course of
+    // action): each tenth universal echo, the motes held and the widest spin
     // and phase in bits, counted, never timed (MU-RECURSION rule 13). A chunk
     // that more than doubles the motes of the one before stops the run: the
     // growth is the reading, and what was read so far is reported.
@@ -55,7 +55,7 @@ fn main() {
         }
         (n, widest, in_systems)
     };
-    // EVERY STORED FIELD'S WIDTH (the scalar-collapse audit: a value stored
+    // Every stored field's width (the scalar-collapse audit: a value stored
     // and stepped through a recurrence widens chunk on chunk; a bounded one
     // levels): the widest exact value held per field, per tier, in bits.
     let fields = |u: &pulse::Universe| -> std::collections::BTreeMap<String, u64> {
@@ -189,7 +189,7 @@ fn main() {
             let next = t.turns(until).and_then(|n| t.bell_of_turn(n + 1)).map(|b| b.to_string()).unwrap_or_else(|| "past the carrier".into());
             format!("half-mass system {}, year {} bells, next closes at bell {next}", k + 1, t.period.round())
         }).unwrap_or_else(|| "no year yet".into());
-        // THE PUMP (convection, `ocean::pump`): the universal tide's
+        // The pump (convection, `ocean::pump`): the universal tide's
         // difference across the galaxy's swing.
         let pump = {
             let whole = pulse::mass(&u.total());
@@ -218,7 +218,7 @@ fn main() {
             }
         }
     }
-    // THE CLOCKS (docs/78): which duty comes due how often, by layer.
+    // The clocks (docs/78): which duty comes due how often, by layer.
     let terms: Vec<Option<u64>> = (0..u.cores.len()).map(|i| conductor::clocks::galaxy_terms(&u, i, t_u, 0, until)).collect();
     let epochs: Vec<Option<u64>> = (0..u.cores.len()).map(|i| conductor::clocks::galaxy_epochs(&u, i, &unit, t_u, 0, until)).collect();
     let worlds: Vec<u64> = u.cores.iter().flat_map(|c| &c.satellites).flat_map(|s| &s.satellites).filter_map(|o| conductor::clocks::local_years(&o.period, 0, until)).collect();
@@ -232,7 +232,7 @@ fn main() {
     // Mass is already the whole 3Z (holding and magnetism converged).
     let three_z = |m: &pulse::Manifest| pulse::mass(m);
     println!("CONSERVATION — the breath created nothing (holding + magnetism, 3Z): {}; the manifest unchanged: {}", three_z(&u.total()) == three_z(&before), u.total() == before);
-    // THE AGE (operator 2026-10-19: "universes age from their conception on
+    // The age (operator 2026-10-19: "universes age from their conception on
     // the TUniversal sexagesimal logged at their birth (distribution of
     // resources)"; hydrogen the commonest at the founding, a reading, then the
     // physics of recycling): hydrogen's and helium's shares by nuclei at the
@@ -243,7 +243,7 @@ fn main() {
     let share = |m: &pulse::Manifest, z: u32| conductor::reading::share(&count(m, conductor::chem::Kind::element(z)), &whole(m));
     let commonest = all.iter().max_by(|a, b| a.1.cmp(b.1)).map(|(k, _)| k.to_string()).unwrap_or_else(|| "none".into());
     println!("AGE — by nuclei, H {} -> {}, He {} -> {} (founding -> now); commonest now {commonest}", share(&before, 1), share(&all, 1), share(&before, 2), share(&all, 2));
-    // THE PARITY (with xylarium): the odd share of the Z >= 3 atoms by
+    // The parity (with Xylarium): the odd share of the Z >= 3 atoms by
     // nuclei, clusters counted by their parts (equal-halves recycling sorts
     // the heavy matter by parity).
     let odd = |m: &pulse::Manifest| {
@@ -262,13 +262,13 @@ fn main() {
         conductor::reading::share(&o, &t)
     };
     println!("PARITY — odd share of Z >= 3 by nuclei: {} -> {} (founding -> now)", odd(&before), odd(&all));
-    // RECYCLING at the galaxies' throats (`conductor::recycle`, 11.0 (18)):
+    // Recycling at the galaxies' throats (`conductor::recycle`, 11.0 (18)):
     // pressed (constructed) and peeled (deconstructed), the light and the
     // opened holding, and what was trapped at the throats.
     let sum = |f: &dyn Fn(&breath::Event) -> cfe::ratio::Ratio| events.iter().fold(cfe::ratio::ratio(0, 1), |s, e| s + f(e));
     let f = conductor::reading::sector;
     {
-        // THE HEAVIEST NUCLIDE standing anywhere (docs/97 §10).
+        // The heaviest nuclide standing anywhere (docs/97 §10).
         let all = u.total();
         let top = all.keys().flat_map(|k| k.parts().iter().map(|(_, w)| *w).collect::<Vec<_>>()).max().unwrap_or(0);
         let heavy: cfe::ratio::Ratio = all.iter().filter(|(k, _)| conductor::chem::weight(k) > 4).fold(cfe::ratio::ratio(0, 1), |s, (k, a)| s + a.clone() * cfe::ratio::ratio(i64::from(conductor::chem::weight(k)), 1)) / pulse::mass(&all);
@@ -280,7 +280,7 @@ fn main() {
     let parallel = events.iter().filter(|e| matches!(e.write, breath::Write::Parallel)).count();
     println!("ECHOES — rungs read {}..{}, {} written parallel and {} perpendicular; galactic years closing at bell {until}: {closing:?}", rungs.iter().min().copied().unwrap_or(0), rungs.iter().max().copied().unwrap_or(0), parallel, events.len() - parallel);
     println!("RECYCLING — the throats pressed {} and peeled {} (grains of nuclei); light given {}, holding opened {}, trapped {} (units); {} echoes recycled", f(&sum(&|e| e.recycled.pressed.clone())), f(&sum(&|e| e.recycled.peeled.clone())), f(&sum(&|e| e.recycled.light.clone())), f(&sum(&|e| e.recycled.spent.clone())), f(&sum(&|e| e.recycled.trapped.clone())), events.iter().filter(|e| e.recycled != Default::default()).count());
-    // THE BURN AND THE RETURN AS RATES (TUniversal 11.0 (23)): hydrogen fused
+    // The burn and the return as rates (TUniversal 11.0 (23)): hydrogen fused
     // by the stars and returned net by the throats, per universal echo, as
     // shares of the hydrogen standing now, over the run's windows (tenths).
     // Where the two meet is the hydrogen's steady state, a fixed point; a
@@ -305,7 +305,7 @@ fn main() {
         }
         println!("RATES — hydrogen per universal echo, as a share of the hydrogen now: {}", rows.join("; "));
     }
-    // THE CARRIER'S SIZE (design law 8; the cut-over's measure): the widest
+    // The carrier's size (design law 8; the cut-over's measure): the widest
     // exact rational held, by what it carries, in bits.
     {
         let bits = |r: &cfe::ratio::Ratio| r.numer().bits().max(r.denom().bits());
@@ -342,7 +342,7 @@ fn main() {
         }
         println!("CARRIER — widest exact value held, in bits: amounts {amounts}, spins and reaches {spins}, phases {phases}, agitation {agitation}; {} motes", motes.len());
     }
-    // THE CROSS (the eight pivots): every residue's fate over the run, by
+    // The cross (the eight pivots): every residue's fate over the run, by
     // fate, every plane together.
     {
         let mut all = conductor::enfold::Cross::default();
@@ -352,14 +352,14 @@ fn main() {
         let row: Vec<String> = all.counts().iter().map(|(f, n)| format!("{f:?} {n}")).collect();
         println!("CROSS — residues by fate over the run: {}", if row.is_empty() { "none".into() } else { row.join(", ") });
     }
-    // THE LIGHT LEDGER: light made (the ℚ → ℤ transduction's flux), received
+    // The light ledger: light made (the ℚ → ℤ transduction's flux), received
     // as heat by the bodies on its continuum face, drained into the vacuum.
     {
         let sum = |f: &dyn Fn(&breath::Event) -> cfe::ratio::Ratio| events.iter().fold(cfe::ratio::ratio(0, 1), |s, e| s + f(e));
         let (made, got, gone) = (sum(&|e| e.light.made.clone()), sum(&|e| e.light.received.clone()), sum(&|e| e.light.drained.clone()));
         println!("LIGHT — made {}, received {} by the bodies on the continuum face, drained {} into the vacuum (units); balanced: {}", conductor::reading::sector(&made), conductor::reading::sector(&got), conductor::reading::sector(&gone), made == got.clone() + gone.clone());
     }
-    // THE TOLLS: every star that passed, struck on its own bell.
+    // The tolls: every star that passed, struck on its own bell.
     {
         let tolls: Vec<&breath::Toll> = events.iter().flat_map(|e| e.tolls.iter()).collect();
         println!("TOLLS — {} stars passed", tolls.len());
@@ -368,7 +368,7 @@ fn main() {
             println!("  star {:?} at bell {}: {:?}, {} strokes, returned {} holding and {} spin; heard by {}", t.star, t.bell, t.passing, t.strokes.map(|n| n.to_string()).unwrap_or_else(|| "uncounted".into()), conductor::reading::sector(&t.returned), conductor::reading::sector(&t.spin), heard.join(", "));
         }
     }
-    // THE SPIN IDENTITIES (docs/90): each check's residual, `after − before`
+    // The spin identities (docs/90): each check's residual, `after − before`
     // of its ledger's whole sum, exact where 0.
     {
         let mut kinds: std::collections::BTreeMap<&str, (u64, u64, cfe::ratio::Ratio)> = std::collections::BTreeMap::new();
@@ -390,7 +390,7 @@ fn main() {
         println!("IDENTITY ledger — the bodies' spin (both orbits) and media, before {} after {}: moved {} (motes and reservoirs are outside it)", conductor::reading::sector(&spin_before), conductor::reading::sector(&spin_after), conductor::reading::sector(&(spin_after.clone() - spin_before.clone())));
     }
     use num_traits::Zero as _;
-    // THE SWING (docs/90): each galaxy's stars' and worlds' elongations, their
+    // The swing (docs/90): each galaxy's stars' and worlds' elongations, their
     // orthogonal spin over their orbit spin, `e = |ℓ_⊥|/ℓ` (the reach swings over
     // `R(1 ± e)` each orthogonal turn): how many carry one, their greatest and their
     // holding-weighted mean; and the orthogonal spin the ledger holds (Σ m·ℓ_⊥).
@@ -416,7 +416,7 @@ fn main() {
         }
         println!("SWING — the bodies' orthogonal spin on the ledger, Σ m·ℓ_⊥ = {}", conductor::reading::sector(&orth_spin));
     }
-    // THE JOINT READ (CONCORDANCE 2.10, the landing rule): each star's burn
+    // The joint READ (concordance 2.10, the landing rule): each star's burn
     // as the form holds it, its runs `(1 − x_i, n_i)` on its own clock in the
     // order lived, and the reading of what remains on the 60⁻⁶ grain; written
     // whole to `<var>/runs.txt`.
@@ -442,7 +442,7 @@ fn main() {
         for ((path, z), r) in &bodies {
             runs += r.factors().len();
             let factors: Vec<String> = r.factors().iter().map(|(b, n)| format!("({b}, {n})")).collect();
-            // Joint reads compare EXACT values (mycelium, 2026-10-21: no grid):
+            // Joint reads compare exact values (Mycelium, 2026-10-21: no grid):
             // the runs are written exactly; their product is read off them.
             text.push_str(&format!("star {path:?} Z{z}: runs [{}]\n", factors.join(", ")));
         }

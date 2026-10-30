@@ -58,7 +58,7 @@ impl FlowEvent {
     }
 }
 
-/// The flow's typed reading — `Still` is a flow that has fired on NO
+/// The flow's typed reading — `Still` is a flow that has fired on no
 /// event, which is not the same fact as a flow whose motion cancelled
 /// to zero content.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -122,7 +122,7 @@ impl FlowState {
 
     /// The exact inverse step: twist by the negated residual.
     /// For the reversible flow events `apply ∘ apply_negated =
-    /// identity`, byte-exact. For a `Mint` it is NOT — twisting the
+    /// identity`, byte-exact. For a `Mint` it is not — twisting the
     /// original degrees cannot remove an appended plane, which is
     /// precisely the non-unitarity the step witness measures.
     pub fn apply_negated(&mut self, event: &FlowEvent) {

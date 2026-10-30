@@ -1,19 +1,19 @@
-//! DIPLOMACY — what one world agrees with another (#42).
+//! Diplomacy — what one world agrees with another (#42).
 //!
-//! Councils, bonds and forwards bind parties to QUANTITIES. A treaty
-//! binds them to a RELATIONSHIP, and the relationship is what every
+//! Councils, bonds and forwards bind parties to quantities. A treaty
+//! binds them to a relationship, and the relationship is what every
 //! quantity between them is then priced through.
 //!
-//! **A pact is a PAIR object and neither world owns it.** Each book
+//! **A pact is a pair object and neither world owns it.** Each book
 //! carries its own leg, the aperture's deal-id pattern, so a treaty
-//! STANDS between two worlds exactly when both have sealed it — and
+//! stands between two worlds exactly when both have sealed it — and
 //! either can renounce its own leg without needing the other's leave.
 //! That is the whole reason it is co-signed rather than decreed.
 //!
 //! Everything shape-decidable died at the [`crate::treaty::TreatyTerms`]
 //! door: a trade pact that raises the melt, a war that eases it, a
 //! peace smuggling terms, a pact binding nothing. What is left here is
-//! the CHAIN's business — who is already at war with whom, and what a
+//! the chain's business — who is already at war with whom, and what a
 //! new pact does to the pacts already standing.
 
 use super::*;
@@ -31,16 +31,16 @@ impl World {
         self.treaty_as(SOVEREIGN, deal, partner, terms, term)
     }
 
-    /// **SEAL THIS WORLD'S LEG OF A PACT.** Build scope: a treaty
+    /// **SEAL this world's leg of A pact.** Build scope: a treaty
     /// re-rules the ground others trade on, which is the founding
     /// class of act.
     ///
-    /// THE DISPLACEMENT LAW is the political core. Peace and war cannot
-    /// both stand on a pair, so sealing one STRIKES the other — and the
+    /// The displacement law is the political core. Peace and war cannot
+    /// both stand on a pair, so sealing one strikes the other — and the
     /// two directions are not the same deed:
     ///
-    ///   PEACE over a war   ends it. Nothing is owed for stopping.
-    ///   WAR over a peace   BREAKS it, and the breach posts to this
+    ///   Peace over a war   ends it. Nothing is owed for stopping.
+    ///   War over a peace   breaks it, and the breach posts to this
     ///                      world's own entropic book, exactly as
     ///                      severing a bond without notice does.
     ///
@@ -64,8 +64,8 @@ impl World {
             return Err(ActionRefused::TreatyWithSelf);
         }
         let kind = terms.kind();
-        // BIO QUARANTINE (task #25): a world whose bio-pressure has
-        // crossed the threshold cannot open a TRADE pact — its Agent
+        // BIO quarantine (task #25): a world whose bio-pressure has
+        // crossed the threshold cannot open a trade pact — its Agent
         // Door is sealed to inbound commerce until the pressure drops.
         // War and peace still stand: quarantine seals the market, never
         // the politics, and never the crossing.
@@ -74,7 +74,7 @@ impl World {
             return Err(ActionRefused::WorldQuarantined { orb });
         }
         let now = self.clock.now();
-        // ONE LIVE PACT OF A KIND PER PARTNER. A second is not a
+        // One live pact of A KIND per partner. A second is not a
         // stronger pact, it is an ambiguous one — and `factor_on`
         // multiplies, so it would silently compound.
         if crate::treaty::stands(&self.treaties, partner, kind, now) {
@@ -84,19 +84,19 @@ impl World {
             });
         }
 
-        // **THE DEFENSE BAR** — what a defense pact COSTS to hold. You
-        // cannot declare war on a world you swore to defend, so the
-        // pact spends an option that a trade pact leaves in your hand.
-        // Renounce the defense first if you mean it; the chronicle will
-        // show you did, which is the point.
+        // **The defense bar** — what a defense pact costs to hold. A
+        // world cannot declare war on a world it swore to defend, so the
+        // pact spends an option that a trade pact leaves in its hand.
+        // The defense must be renounced first if war is meant; the
+        // chronicle will show the renunciation, which is the point.
         if kind == TreatyKind::War
             && crate::treaty::stands(&self.treaties, partner, TreatyKind::Defense, now)
         {
             return Err(ActionRefused::SwornToDefend { partner: partner.to_string() });
         }
 
-        // **AND THE SAME BAR, THE OTHER WAY.** You cannot swear to
-        // defend a world you are at war with. Found by playing it: the
+        // **And the same bar, the other way.** A world cannot swear to
+        // defend a world it is at war with. Found by playing it: the
         // war bar alone let a world hold a defense pact and a war with
         // the same partner at once, which is not a position — it is two
         // contradictory ones. Peace first; the displacement law then
@@ -105,7 +105,7 @@ impl World {
             return Err(ActionRefused::AtWar { partner: partner.to_string() });
         }
 
-        // THE DISPLACEMENT — struck FIRST, and receipted in its own
+        // The displacement — struck first, and receipted in its own
         // right, so the chronicle shows the war ending rather than
         // merely showing a peace appearing.
         if let Some(displaced) = kind.displaces() {
@@ -130,7 +130,7 @@ impl World {
                     },
                     actor,
                 );
-                // BREAKING A PEACE COSTS. The load posts to the
+                // Breaking A peace costs. The load posts to the
                 // breaker's own severance book — the same book a bond
                 // cut without notice posts to, because it is the same
                 // act: an obligation ended by one side's choice.
@@ -165,7 +165,7 @@ impl World {
         Ok(())
     }
 
-    /// **E3.9 — ANNEX AN ELEMENT ALLOW-LIST to a standing trade pact.**
+    /// **E3.9 — annex an element allow-list to a standing trade pact.**
     pub fn treaty_elements(
         &mut self,
         deal: u64,
@@ -179,11 +179,11 @@ impl World {
     /// cross the pair, the same founding class of act as the pact it
     /// rides.
     ///
-    /// The list ANNEXES a live TRADE treaty (same deal, same partner):
+    /// The list annexes a live trade treaty (same deal, same partner):
     /// trade is the only kind that binds goods — defense and peace
     /// bind none, and war walls everything already. It dies with the
     /// pact (strike, renounce, or expiry — liveness is read from the
-    /// treaty, never stored). Lists on one deal COMPOSE BY UNION,
+    /// treaty, never stored). Lists on one deal compose by union,
     /// append-only, like every additive receipt here. An empty list
     /// refuses: barring all matter is war's job, not a trade annex's
     /// (the PeaceBindsNothing shape).
@@ -221,9 +221,9 @@ impl World {
         Ok(())
     }
 
-    /// **E3.9 — IS THIS ELEMENT BARRED toward this partner?** The
-    /// reading every element crossing consults, on BOTH books (the
-    /// war wall's two-book shape). A list is LIVE only while the
+    /// **E3.9 — is this element barred toward this partner?** The
+    /// reading every element crossing consults, on both books (the
+    /// war wall's two-book shape). A list is live only while the
     /// trade treaty it rides stands; while any live list stands on
     /// the pair, only the union of enumerated ids crosses. No live
     /// list ⇒ nothing is barred — the fence exists only where a pair
@@ -250,9 +250,9 @@ impl World {
         !live.iter().any(|elements| elements.contains(element))
     }
 
-    /// **RENOUNCE THIS WORLD'S OWN LEG.** Not a breach: a pact this
+    /// **Renounce this world's own leg.** Not a breach: a pact this
     /// world sealed, this world may end. What it cannot do is end the
-    /// PARTNER's leg — that book is not ours to write, which is what
+    /// partner's leg — that book is not this world's to write, which is what
     /// makes the pair real rather than a convenience.
     pub fn renounce(&mut self, deal: u64, partner: &str) -> Result<(), ActionRefused> {
         self.renounce_as(SOVEREIGN, deal, partner)
@@ -288,7 +288,7 @@ impl World {
         Ok(())
     }
 
-    /// The pacts this book holds that still STAND — expiry is read from
+    /// The pacts this book holds that still stand — expiry is read from
     /// the clock, never stored, so a lapsed pact needs no receipt to
     /// stop binding (the bond's own shape).
     pub fn treaties(&self) -> Vec<&Treaty> {
@@ -296,14 +296,14 @@ impl World {
         self.treaties.iter().filter(|held| !held.expired(now)).collect()
     }
 
-    /// **THE PAIR'S STANDING FACTOR ON ONE CHANNEL** — what this
+    /// **The pair's standing factor on one channel** — what this
     /// world's live pacts with `partner` make of it. One home; the
     /// melt and the reciprocity window both read it.
     pub fn pair_factor(&self, partner: &str, channel: u8) -> Ratio {
         crate::treaty::factor_on(&self.treaties, partner, channel, self.clock.now())
     }
 
-    /// **IS THIS PAIR AT WAR?** The reading every crossing consults —
+    /// **Is this pair AT war?** The reading every crossing consults —
     /// a walled pair exchanges nothing, exactly as the elder's ward
     /// bars an aperture.
     pub fn at_war_with(&self, partner: &str) -> bool {

@@ -67,7 +67,7 @@ moves the cadence.
 | D1 | sense profiles from perception; think withholds outside the senses | landed |
 | D2 | speech between nearest lines: heard / misheard, heard words reconstructed | landed |
 | D3 | market price = depth + channels the buyer lacks | landed |
-| D4 | COG-dialect line: heard, misheard, perceptions present (diversity) | landed |
+| D4 | COG-DIALECT line: heard, misheard, perceptions present (diversity) | landed |
 | D5 | consilience hardness counts routes = (curiosity order, senses) | landed |
 | D6 | working-library competition: a word unused for a year gives way | landed |
 | D7 | layered peel, slice 1: object op, then the frame through the reduce organ | landed |

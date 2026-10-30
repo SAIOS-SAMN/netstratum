@@ -1,22 +1,22 @@
-//! # reduct — netstratum's exact-reduction organ (formerly the local `iae`)
+//! # reduct — Netstratum's exact-reduction organ (formerly the local `iae`)
 //!
-//! **NAMING (2026-08-19, operator ruling).** The IAE/AUTIC thought engine was
-//! ported to mycelium, which is now the AUTHORITY on IAE. This crate — the copy
-//! vendored into netstratum — is renamed `reduct` so the two never collide in
-//! one workspace. It keeps net's LIVE reduce organ (the D₄×recolor ARC seat +
+//! **Naming (2026-08-19, operator ruling).** The IAE/AUTIC thought engine was
+//! ported to Mycelium, which is now the authority on IAE. This crate — the copy
+//! vendored into Netstratum — is renamed `reduct` so the two never collide in
+//! one workspace. It keeps net's live reduce organ (the D₄×recolor ARC seat +
 //! the survival seat); frame-morphism recognition (the asymmetric coboundary /
-//! `FrameMorph` vocabulary) is mycelium's IAE domain and is coordinated with it,
-//! not re-forked here. `mycelium::iae` (used only in `scribe`) is the OTHER,
+//! `FrameMorph` vocabulary) is Mycelium's IAE domain and is coordinated with it,
+//! not re-forked here. `mycelium::iae` (used only in `scribe`) is the other,
 //! authoritative crate — never conflate the two.
 //!
-//! The cognition layer of ipsal-autic-v0.4, brought into netstratum to
+//! The cognition layer of ipsal-autic-v0.4, brought into Netstratum to
 //! replace brute-force enumeration with exact algebraic reduction. It sits
-//! ABOVE `substrate` (the exact-ℚ Clifford ground) and, in later slices,
+//! above `substrate` (the exact-ℚ Clifford ground) and, in later slices,
 //! carries the chain reduction, the Toroid condensation, and the mint.
 //!
 //! **IAE-1 — the transport pair (Φ / Φ⁻¹).** The geometry-first foundation
 //! (operator ruling): every upward/downward movement in the engine is the
-//! ONE transport pair applied at a surface (LAW XV). Φ carries its exact
+//! one transport pair applied at a surface (law XV). Φ carries its exact
 //! inverse Φ⁻¹ from birth (`Φ·Φ⁻¹ = 1` verified exact-rational on entry),
 //! composed by the geometric product — non-abelian, the real geometry, not
 //! the abelianised chain shadow. The chain carrier, its reduction, and the

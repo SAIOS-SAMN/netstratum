@@ -3,10 +3,10 @@
 //! The mathematical ground of IPSAL/AUTIC v0.4: smooth-prime rational
 //! fields, polynomial-per-plane carriers, the {S,G,T} block-diagonal
 //! volume, horizon bounds, and the singularity mirror. Nothing here
-//! cognizes and nothing here names a modality (LAW III — the kernel is
+//! cognizes and nothing here names a modality (law III — the kernel is
 //! general).
 //!
-//! B1 — THE SUBSTRATE LIFT (allowlist record, each module named; 22 B1):
+//! B1 — the substrate lift (allowlist record, each module named; 22 B1):
 //! * `rational` — Field trait, Space/Temporal/Gauge, `Rational<F>`,
 //!   `OverflowError`, `lcm_smooth_primes`
 //! * `vector_module` — `VectorModule<F>` polynomial-per-plane carrier + the
@@ -20,10 +20,10 @@
 //! * `mirror` — `SingularityMirror<F>` bounded inversion
 //! * `wire` — BigInt varint bounded-binary helpers (06 §5)
 //!
-//! LEFT BEHIND by allowlist (named per the landing record): every store
+//! Left behind by allowlist (named per the landing record): every store
 //! (`SortedKeyedVec`, censuses, bases), every digest surface (`sigil_ref`),
 //! the evaluated-transcendental concessions (`color` cyclotomic cosines,
-//! locked Taylor exp — REFUSED by LAW XXII, not carried), `torsion`/
+//! locked Taylor exp — REFUSED by law xxii, not carried), `torsion`/
 //! `inverse_pi` (their consumer organs land later with their own briefs),
 //! `coboundary`/`cochain`/`cocycle`/`cohomology` (reduction is an iae
 //! organ in v0.4, built to 03/18, never ported), `glome`, `conformance`,

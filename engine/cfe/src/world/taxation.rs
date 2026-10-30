@@ -1,14 +1,14 @@
-//! **THE CRAFTABLE TAX SYSTEM** (`49_TAXATION`, task #54/#55). A levy is a
+//! **The craftable tax system** (`49_TAXATION`, task #54/#55). A levy is a
 //! tax as data — what it draws, when, where it flows (`dop::Levy`). This
 //! module holds the readings the levies settle from; the continuity tax
-//! (§3) is the first concrete instance, a demurrage on KNOWLEDGE keyed to
+//! (§3) is the first concrete instance, a demurrage on knowledge keyed to
 //! the lifespan turnover.
 
 use super::*;
 use crate::dop::{Levy, ZoneKind};
 
 impl World {
-    /// Does an ACTIVE civic zone of `kind` stand on this orb?
+    /// Does an active civic zone of `kind` stand on this orb?
     fn has_civic(&self, orb: u64, kind: ZoneKind) -> bool {
         self.orb_by_id(orb)
             .map(|held| {
@@ -19,7 +19,7 @@ impl World {
             .unwrap_or(false)
     }
 
-    /// **DOES A GOVERNMENT OFFICE STAND?** (`49_TAXATION` §2) — the levy
+    /// **Does A government office stand?** (`49_TAXATION` §2) — the levy
     /// collection node. Where one stands, crafted levies collect without
     /// slip; the treasury/collection accounting rides this in the next
     /// fiscal layer.
@@ -27,16 +27,16 @@ impl World {
         self.has_civic(orb, ZoneKind::GovernmentOffice)
     }
 
-    /// **DOES A WELFARE HUB STAND?** (`49_TAXATION` §2) — the public-service
+    /// **Does A welfare hub stand?** (`49_TAXATION` §2) — the public-service
     /// distribution node that feeds the welfare loop.
     pub fn has_welfare_hub(&self, orb: u64) -> bool {
         self.has_civic(orb, ZoneKind::WelfareHub)
     }
 
-    /// **THE WELFARE BUDGET NEEDED** (`49_TAXATION` §5) — the fiscal cost
+    /// **The welfare budget needed** (`49_TAXATION` §5) — the fiscal cost
     /// to fully close the stability stall this cycle: the gap
     /// (`1 − leisure_coverage`) times the population's leisure demand.
-    /// This is what welfare WOULD spend to erase the stall entirely; the
+    /// This is what welfare would spend to erase the stall entirely; the
     /// treasury may or may not hold that much. Zero when there is no hub,
     /// no stall, or no demand.
     fn welfare_budget_needed(&self, orb: u64, stamp: u64) -> Ratio {
@@ -58,19 +58,19 @@ impl World {
         gap * demand
     }
 
-    /// **THE WELFARE SPEND at a touch** (`49_TAXATION` §5) — what the
-    /// WelfareHub actually draws from the sovereign TREASURY this cycle:
+    /// **The welfare spend at a touch** (`49_TAXATION` §5) — what the
+    /// WelfareHub actually draws from the sovereign treasury this cycle:
     /// the budget it needs to close the stall, capped by what the
     /// treasury holds. An empty treasury spends nothing; a flush one
-    /// spends only what the stall costs. This is the fiscal OUTFLOW the
+    /// spends only what the stall costs. This is the fiscal outflow the
     /// collect touch settles (a negative `TreasurySettled`).
     pub fn welfare_spend(&self, orb: u64, stamp: u64) -> Ratio {
         self.treasury_of(orb).min(self.welfare_budget_needed(orb, stamp))
     }
 
-    /// **THE WELFARE SUBSIDY** (`49_TAXATION` §5) — how much a WelfareHub
-    /// lifts stability by spending the sovereign TREASURY into the
-    /// population's pool. It fills the stability GAP in proportion to how
+    /// **The welfare subsidy** (`49_TAXATION` §5) — how much a WelfareHub
+    /// lifts stability by spending the sovereign treasury into the
+    /// population's pool. It fills the stability gap in proportion to how
     /// far the treasury covers the fiscal cost of the stall — a flush
     /// treasury buys the whole gap, an empty one buys nothing. The tax
     /// loop closes here: levies fund the treasury (`levy_collected_at_touch`),
@@ -91,14 +91,14 @@ impl World {
         gap * treasury_coverage
     }
 
-    /// **THE CONTINUITY TAX a line owes at each turnover** (`49_TAXATION`
+    /// **The CONTINUITY tax a line owes at each turnover** (`49_TAXATION`
     /// §3 / `42_LIFESPAN §3`) — the fraction of its unconfirmed knowledge
-    /// (crystallized boons, adopted practices) that LAPSES when a generation
+    /// (crystallized boons, adopted practices) that lapses when a generation
     /// turns over. Derived from lifespan (first-cut rate, flagged for
     /// tuning): a short-lived line (L = one grain) loses ALL of it each
     /// turnover and must re-earn what the last generation knew; a long-lived
     /// line (L = four grains) loses only a quarter — so the Custodian
-    /// ACCUMULATES and the Locust CHURNS. `grain/lifespan`, capped at one;
+    /// accumulates and the Locust churns. `grain/lifespan`, capped at one;
     /// derived (grain and lifespan are structural, not dialed).
     pub fn continuity_tax(&self) -> Ratio {
         let grain = crate::almanac::REGROWTH_GRAIN as i64;
@@ -106,7 +106,7 @@ impl World {
         ratio(grain, lifespan).min(ratio(1, 1))
     }
 
-    /// **THE SOVEREIGN TREASURY BALANCE** (`49_TAXATION` §5) — the
+    /// **The SOVEREIGN treasury balance** (`49_TAXATION` §5) — the
     /// abstract fiscal reserve standing on this orb: everything crafted
     /// levies have collected, net of everything welfare has spent. A
     /// world that never collected a levy reads zero. Folded from the
@@ -120,7 +120,7 @@ impl World {
             .unwrap_or_else(|| ratio(0, 1))
     }
 
-    /// **SETTLE THE TREASURY** (`49_TAXATION` §5, tag 171) — apply a NET
+    /// **Settle the treasury** (`49_TAXATION` §5, tag 171) — apply a net
     /// fiscal change to the sovereign treasury (levies collected in,
     /// welfare spent out), floored at zero, and receipt it so replay
     /// applies the same delta. A zero delta emits nothing, so a world
@@ -143,9 +143,9 @@ impl World {
         );
     }
 
-    /// **GOVERNANCE REACH** (`49_TAXATION` §5) — how far the sovereign's
+    /// **Governance REACH** (`49_TAXATION` §5) — how far the sovereign's
     /// fiscal apparatus extends over its own economy: the share of the
-    /// orb's ACTIVE zones that are GovernmentOffices. A line with no
+    /// orb's active zones that are GovernmentOffices. A line with no
     /// office reaches nothing (0 → byte-identical); one whose civic
     /// build keeps pace with its economy reaches further, up to the
     /// whole of it. Derived from structural state (the office/zone
@@ -167,7 +167,7 @@ impl World {
         ratio(offices, total)
     }
 
-    /// **THE LEVY COLLECTED AT A TOUCH** (`49_TAXATION` §5) — the fiscal
+    /// **The levy collected AT A TOUCH** (`49_TAXATION` §5) — the fiscal
     /// revenue a Touch-triggered levy draws into the treasury: the
     /// governance reach applied to the `taxable` throughput (the net
     /// yield banked this touch, the Trade base). The treasury is an
@@ -183,14 +183,14 @@ impl World {
         self.governance_reach(orb) * taxable.clone()
     }
 
-    /// **THE CONTINUITY LAPSE at a turnover** (`49_TAXATION` §3) — how
+    /// **The CONTINUITY lapse at a turnover** (`49_TAXATION` §3) — how
     /// many of the line's adopted practices lapse to the void for the
     /// `boundaries` generation turnovers crossed this span. Per boundary
     /// `floor(continuity_tax × standing)` lapse, applied in turn: a
     /// short-lived Locust (rate 1) forgets ALL of them at the first
     /// turnover and must re-adopt; a long-lived Custodian (rate 1/4) keeps
     /// most, its law compounding. Zero unless a lifespan class is sealed
-    /// AND practices stand — a line with neither is byte-identical to the
+    /// and practices stand — a line with neither is byte-identical to the
     /// pre-taxation era. The lapse is LIFO (the newest, least-confirmed
     /// knowledge first); the `PracticesLapsed` receipt carries the count.
     pub fn continuity_lapse_at_touch(&self, boundaries: u64) -> u8 {
@@ -221,7 +221,7 @@ impl World {
         (start - remaining) as u8
     }
 
-    /// **LAPSE THE PRACTICES** (`49_TAXATION` §3, tag 172) — drop `count`
+    /// **Lapse the practices** (`49_TAXATION` §3, tag 172) — drop `count`
     /// practices from the tail (LIFO) and receipt it so replay drops the
     /// same. A zero count emits nothing, so a line that keeps all its
     /// knowledge is byte-identical.
@@ -246,9 +246,9 @@ impl World {
         Levy::CONTINUITY
     }
 
-    /// **THE ESTATE TAX RATE** (`49_TAXATION` §4) — the share of a
+    /// **The ESTATE tax rate** (`49_TAXATION` §4) — the share of a
     /// generation's estate taxed to the sovereign at each turnover. It
-    /// shares the lifespan-derived TURNOVER rate with the continuity tax
+    /// shares the lifespan-derived turnover rate with the continuity tax
     /// (`grain/lifespan`): a short-lived line turns over often and is
     /// taxed near its whole per-capita estate each time; a long-lived one
     /// rarely, and only a quarter. One clock, one rate — the two levies
@@ -257,7 +257,7 @@ impl World {
         self.continuity_tax()
     }
 
-    /// **THE ESTATE TAX DUE at a turnover** (`49_TAXATION` §4) — what the
+    /// **The ESTATE tax due at a turnover** (`49_TAXATION` §4) — what the
     /// estate levy collects into the treasury for the generation
     /// boundaries crossed this span. The estate is population-proportional
     /// (ruled 2026-08-13): `population × per_capita_ration`, the

@@ -1,28 +1,28 @@
-//! THE MOVE ALGEBRA (`19_KERNEL` §3a.2, operator ruling 2026-08-02) —
+//! The move algebra (`19_KERNEL` §3a.2, operator ruling 2026-08-02) —
 //! the multi-axial transition, its inversion axiom, and the schedule
 //! that makes non-commutative composition safe across nodes.
 //!
-//! **WHY THIS EXISTS.** `admits(prior, next, step)` accepts `next` and
+//! **Why this exists.** `admits(prior, next, step)` accepts `next` and
 //! returns `Ok(())`: the transition is computed elsewhere and the
 //! kernel grades it. Returning `Committed` instead would fix the
-//! duplication and keep the LINEARITY — a whole world is a POINT, with
+//! duplication and keep the linearity — a whole world is a POINT, with
 //! its axes flattened and no reading of which moved or in what order.
 //!
-//! A transition returns the **MOVE**, and the state is what you get by
-//! composing moves:
+//! A transition returns the **move**, and the state is what composing
+//! moves yields:
 //!
 //! ```text
 //! transition(prior, step) -> Result<Move, Refused>
 //! prior ∘ move = next                 (∘ is NOT commutative)
 //! ```
 //!
-//! **THE MOVE ALREADY EXISTS IN THE JUDGE AND IS DISCARDED.**
+//! **The move already exists in the judge and is discarded.**
 //! `admitted_deltas` (`lib.rs:611`) returns `Vec<(Resource, Ratio)>` —
 //! that is the move — and `conservation` uses it only to compare
 //! against the `next` it was handed, then drops it. This module gives
 //! that value a type and a law.
 //!
-//! **THIS MODULE IS THE ALGEBRA, NOT THE WIRING.** `lawful` still has
+//! **This module is the algebra, not the wiring.** `lawful` still has
 //! its old signature; collapsing the 113 `replay` arms onto this is
 //! #30's remaining half. Landed here so the wiring aims at a certified
 //! shape rather than an invented one.
@@ -30,7 +30,7 @@
 use cfe::dop::Resource;
 use cfe::ratio::{ratio, Ratio};
 
-/// ONE MULTI-AXIAL MOVE — what a deed does, carried per axis rather
+/// One multi-axial move — what a deed does, carried per axis rather
 /// than collapsed into a resulting world.
 ///
 /// Axes are held as sparse position lists, never as a norm: the same
@@ -47,33 +47,33 @@ pub struct Move {
     /// additive** — a later seating replaces an earlier one, which is
     /// one of the two sources of non-commutativity here.
     pub seats: Vec<(String, u8)>,
-    /// THE ACCUMULATOR AXIS — additive, keyed. Covers every per-orb
+    /// The accumulator axis — additive, keyed. Covers every per-orb
     /// running total `replay` maintains (`entropy_vented`, `bond_flow`,
     /// the crisis and morality books, `severance_load`, …). Additive,
-    /// therefore COMMUTING.
+    /// therefore commuting.
     pub books: Vec<(BookKey, Ratio)>,
-    /// THE RECORD AXIS — keyed collections that are INSERTED INTO and
-    /// REMOVED FROM rather than added to (bonds, forwards, councils,
+    /// The record axis — keyed collections that are inserted into and
+    /// removed from rather than added to (bonds, forwards, councils,
     /// offers, debts, prospects, instruments, routes). Ordered, and
-    /// NON-COMMUTING: `remove ∘ insert` is not `insert ∘ remove`.
+    /// non-commuting: `remove ∘ insert` is not `insert ∘ remove`.
     pub records: Vec<RecordOp>,
 }
 
 /// An accumulator's address — `(orb, book)`. The book index is opaque
 /// to the algebra on purpose: which concrete field a number belongs to
-/// is the WIRING's business, and the composition law is the algebra's.
+/// is the wiring's business, and the composition law is the algebra's.
 pub type BookKey = (u64, u16);
 
 /// A keyed collection's address — `(kind, id)`.
 pub type RecordKey = (u16, u64);
 
-/// ONE RECORD OPERATION. Not a delta — a record either stands or does
-/// not, so the axis composes by REPLACEMENT and the order is the whole
+/// One record operation. Not a delta — a record either stands or does
+/// not, so the axis composes by replacement and the order is the whole
 /// content.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum RecordOp {
     /// The record stands, carrying this opaque body. Re-inserting an
-    /// existing key REPLACES it (an amended bond is not a second bond).
+    /// existing key replaces it (an amended bond is not a second bond).
     Insert { key: RecordKey, body: Vec<u8> },
     /// The record no longer stands.
     Remove { key: RecordKey },
@@ -88,12 +88,12 @@ impl RecordOp {
     }
 }
 
-/// HOW AN AXIS COMPOSES — the taxonomy the measurement forced.
+/// How an axis composes — the taxonomy the measurement forced.
 ///
 /// Collapsing `replay`'s arms onto this algebra needs the algebra to
 /// SPAN what the arms do. Measured against `world/replay.rs`'s arms —
 /// **63 of them when this was measured; `replay` carries 71 today, so
-/// the eight added since are NOT covered by the claim below** — every axis they touch composes in exactly one of two ways,
+/// the eight added since are not covered by the claim below** — every axis they touch composes in exactly one of two ways,
 /// and which one decides whether that axis commutes:
 ///
 /// ```text
@@ -116,23 +116,23 @@ pub enum Law {
     Replacement,
 }
 
-/// WHY COMPOSITION DOES NOT COMMUTE — the two sources, both already in
+/// Why composition does not commute — the two sources, both already in
 /// the engine's semantics rather than introduced by this module.
 ///
-/// 1. **THE FLOOR.** A bank cannot go negative, so composition clamps
+/// 1. **The floor.** A bank cannot go negative, so composition clamps
 ///    at zero. `spend(10)` then `earn(5)` is not `earn(5)` then
 ///    `spend(10)` when the bank holds `5` — the first bottoms out and
 ///    loses the remainder, the second does not. Every clamped axis is
 ///    non-commutative by construction.
-/// 2. **REPLACEMENT.** A seat is not a delta; the last seating stands
+/// 2. **Replacement.** A seat is not a delta; the last seating stands
 ///    (`cfe::world` STATION-1). Ordering two seatings of one line gives
 ///    two different offices.
 ///
-/// Additive unclamped axes (the gauge) DO commute. Non-commutativity
+/// Additive unclamped axes (the gauge) do commute. Non-commutativity
 /// is a property of particular axes, not a decoration on all of them —
 /// which is exactly why the move is carried per axis.
 impl Move {
-    /// THE IDENTITY — the move that changes nothing. `e ∘ a = a ∘ e = a`.
+    /// The IDENTITY — the move that changes nothing. `e ∘ a = a ∘ e = a`.
     pub fn identity() -> Self {
         Self::default()
     }
@@ -151,28 +151,28 @@ impl Move {
         Self { banked: vec![((orb, resource), delta)], ..Self::default() }
     }
 
-    /// THE INVERSION AXIOM — every move has a formal inverse: negate
+    /// The inversion axiom — every move has a formal inverse: negate
     /// each additive axis, and drop the seats (a replacement has no
-    /// additive inverse; restoring a prior office is a NEW seating, not
+    /// additive inverse; restoring a prior office is a new seating, not
     /// an undoing).
     ///
-    /// **INVERSES ARE ALGEBRA, NOT PERMISSION.** `a ∘ a⁻¹ = e` holds on
-    /// the additive axes — and applying `a⁻¹` as a DEED is a separate
-    /// question the law answers separately. ARTICLE IV (rank never
+    /// **Inverses are algebra, not permission.** `a ∘ a⁻¹ = e` holds on
+    /// the additive axes — and applying `a⁻¹` as a deed is a separate
+    /// question the law answers separately. Article IV (rank never
     /// retreats) forbids the inverse of a rank-raising move outright,
-    /// and nothing un-mints. **The lawful moves form a MONOID, not a
+    /// and nothing un-mints. **The lawful moves form a monoid, not a
     /// group**; the group exists only so the commutator can be written.
     ///
     /// That is the whole reason inversion is required here: the
     /// commutator needs it, and `23_TRAVERSAL` §2k.1 established that the
-    /// commutator IS the torsion. Without inverses the torsion is not
+    /// commutator is the torsion. Without inverses the torsion is not
     /// expressible at all.
     pub fn inverse(&self) -> Self {
         Self {
             banked: self.banked.iter().map(|(k, d)| (*k, -d.clone())).collect(),
             gauge: self.gauge.iter().map(|d| -d.clone()).collect(),
-            // Replacement axes have NO additive inverse: restoring a
-            // prior office or re-inserting a removed record is a NEW
+            // Replacement axes have no additive inverse: restoring a
+            // prior office or re-inserting a removed record is a new
             // move, never an undoing. Dropped so `a ∘ a⁻¹ = e` holds
             // on exactly the axes where it can.
             seats: Vec::new(),
@@ -181,7 +181,7 @@ impl Move {
         }
     }
 
-    /// UNCLAMPED COMPOSITION — the free group operation. Associative
+    /// Unclamped composition — the free group operation. Associative
     /// and, on the additive axes alone, commutative. This is the
     /// algebra the commutator is taken in.
     pub fn then_free(&self, next: &Self) -> Self {
@@ -223,7 +223,7 @@ impl Move {
         Self { banked, gauge, seats, books, records }
     }
 
-    /// THE COMMUTATOR `[a, b] = a ∘ b ∘ a⁻¹ ∘ b⁻¹`, taken in the free
+    /// The commutator `[a, b] = a ∘ b ∘ a⁻¹ ∘ b⁻¹`, taken in the free
     /// group. The identity iff the two moves commute; anything else is
     /// the torsion the pair carries.
     ///
@@ -235,14 +235,14 @@ impl Move {
 
 }
 
-/// A STANDING POSITION — what a move is applied TO. Sparse and
+/// A standing POSITION — what a move is applied to. Sparse and
 /// non-negative: a bank that cannot go below zero is what makes
 /// application non-commutative.
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct Standing {
     pub banked: Vec<((u64, Resource), Ratio)>,
     pub seats: Vec<(String, u8)>,
-    /// Accumulators. Unlike `banked` these are NOT floored — a book is
+    /// Accumulators. Unlike `banked` these are not floored — a book is
     /// a running total of what happened, and clamping it would erase
     /// history rather than bound a holding.
     pub books: Vec<(BookKey, Ratio)>,
@@ -251,7 +251,7 @@ pub struct Standing {
 }
 
 impl Standing {
-    /// APPLY — `standing ∘ move`. **Clamped at zero on every banked
+    /// Apply — `standing ∘ move`. **Clamped at zero on every banked
     /// axis**, which is the floor that breaks commutativity, and
     /// last-write-wins on seats, which is the replacement that breaks
     /// it again.
@@ -284,7 +284,7 @@ impl Standing {
         }
         books.sort_by_key(|entry| entry.0);
 
-        // RECORDS APPLY IN ORDER, and the order is the content: an
+        // Records apply in order, and the order is the content: an
         // insert after a remove leaves the record standing, the reverse
         // leaves it gone.
         let mut records = self.records.clone();
@@ -328,10 +328,10 @@ impl Standing {
     }
 }
 
-/// THE SCHEDULE — the canonical order moves compose in.
+/// The schedule — the canonical order moves compose in.
 ///
-/// **THIS IS WHAT MAKES NON-COMMUTATIVITY SAFE.** If `a ∘ b ≠ b ∘ a`
-/// and two nodes hold the same set of moves, they reach DIFFERENT
+/// **This is what makes non-commutativity safe.** If `a ∘ b ≠ b ∘ a`
+/// and two nodes hold the same set of moves, they reach different
 /// states unless the order is fixed. Non-commutativity without a
 /// canonical schedule is a consensus break, not a feature.
 ///
@@ -349,17 +349,17 @@ pub struct Slot {
     pub sequence: u64,
 }
 
-/// THE COST ENVELOPE — `O(n^D)`, replacing the flat `O(1)` bound
+/// The cost envelope — `O(n^D)`, replacing the flat `O(1)` bound
 /// (operator ruling 2026-08-02, superseding `22_CONTAINMENT` §2n.3's
-/// per-axis statement for the WORK envelope).
+/// per-axis statement for the work envelope).
 ///
 /// A flat bound was a scalar collapse: it fixed the budget independent
 /// of how much structure stands, which is the same flattening as
-/// `C(Δ) = Σ|R|`. The honest envelope is the VOLUME of the space the
+/// `C(Δ) = Σ|R|`. The honest envelope is the volume of the space the
 /// work ranges over — side `n` along `D` independent axes.
 ///
 /// **It breathes with `D`.** Rank is earned, never granted, and
-/// ARTICLE IV holds it monotone — so the envelope widens as the system
+/// article IV holds it monotone — so the envelope widens as the system
 /// gains dimension and never narrows. That is the re-volumizer: the
 /// budget is a function of standing rank rather than a constant chosen
 /// in advance.
@@ -370,12 +370,12 @@ pub fn envelope(n: u64, rank: u32) -> Option<u128> {
     (n as u128).checked_pow(rank)
 }
 
-// ── THE ONLY THING THAT MAKES THIS ALGEBRA REAL ──────────────────────
+// ── the only thing that makes this algebra real ──────────────────────
 
 use cfe::dop::ClosureEvent;
 use cfe::world::Committed;
 
-/// PROJECT a committed world onto a standing — the banked and seat axes
+/// Project a committed world onto a standing — the banked and seat axes
 /// read straight out of real state.
 ///
 /// **Without this the algebra is fiction.** A `Move` that cannot be
@@ -399,12 +399,12 @@ pub fn project(state: &Committed) -> Standing {
     Standing { banked, seats, books: Vec::new(), records: Vec::new() }
 }
 
-/// THE MOVE ONE DEED MAKES — `event → Move`.
+/// The move one deed makes — `event → Move`.
 ///
-/// **DELIBERATELY PARTIAL.** `None` means *this algebra cannot yet
+/// **Deliberately PARTIAL.** `None` means *this algebra cannot yet
 /// express that deed*, and that is a measurement rather than a hole to
 /// paper over: the honest coverage number is how many events return
-/// `Some` AND reproduce `replay` on a real world, not how many source
+/// `Some` and reproduce `replay` on a real world, not how many source
 /// lines mention an axis.
 ///
 /// Every arm added here must arrive with a witness that applies it to
@@ -413,10 +413,10 @@ pub fn project(state: &Committed) -> Standing {
 /// rule.
 pub fn move_of(event: &ClosureEvent) -> Option<Move> {
     match event {
-        // A transfer is TWO banked legs. When source and target are the
+        // A transfer is two banked legs. When source and target are the
         // same orb they share a key, and a Move carrying one key twice
         // is not canonical — `Standing::then` would apply the legs
-        // SEQUENTIALLY and could floor between them, turning a no-op
+        // sequentially and could floor between them, turning a no-op
         // into a loss. Built through `then_free`, which merges.
         ClosureEvent::ResourceTransferred { from_orb, to_orb, resource, amount } => {
             let out = Move::banked_of(*from_orb, *resource, -amount.clone());
@@ -446,7 +446,7 @@ pub fn move_of(event: &ClosureEvent) -> Option<Move> {
         ClosureEvent::YieldCollected { orb_id, resource, amount } => {
             Some(Move::banked_of(*orb_id, *resource, amount.clone()))
         }
-        // NOT YET EXPRESSIBLE. Not a default arm that guesses — an
+        // Not yet expressible. Not a default arm that guesses — an
         // explicit refusal, so coverage stays measurable.
         _ => None,
     }

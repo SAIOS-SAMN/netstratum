@@ -1,4 +1,4 @@
-//! **SOC — THE SPECIES MANIFOLD & THE OPEN WORKBENCH.**
+//! **SOC — the SPECIES manifold & the open workbench.**
 //!
 //! SOC-1 opened `build_step`'s surplus phase into a stochastic draw over an
 //! option surface (was a fixed `industrial.or(refine).or(settlement)`
@@ -52,19 +52,19 @@ use cfe::ratio::{ratio, Ratio};
 use num_bigint::BigInt;
 use substrate::snf::{smith_normal_form, Smith};
 
-/// **THE CIVILIZATION READS ITSELF (COG-DIRECTION Slice 1).** The same reduce organ
-/// that solves an ARC grid (`reduct::peel`) is turned on the civilization's OWN
+/// **The CIVILIZATION reads itself (COG-DIRECTION Slice 1).** The same reduce organ
+/// that solves an ARC grid (`reduct::peel`) is turned on the civilization's own
 /// material self — not a hardcoded `if biomass then food`. Its element holdings are
-/// projected into the FIVE almanac families (the ONT lens, past iron+biomass:
+/// projected into the five almanac families (the ONT lens, past iron+biomass:
 /// `element_properties(..).0` is the family 1..5) and laid on a 1×n frame; `peel`
 /// covers them into family-bodies. That structural reading is combined with the
 /// thermodynamic books — `cohesion_ratio(syntropy, entropy) ∈ [0,1]`, the fraction
-/// of a line's total activity that is ORDER CAPTURED rather than SHED — to DERIVE a
-/// direction: a line that captures more order than it vents (`cohesion > ½`) AND
+/// of a line's total activity that is order captured rather than shed — to derive a
+/// direction: a line that captures more order than it vents (`cohesion > ½`) and
 /// sustains material diversity (≥2 families present — a mono-family field is a
-/// collapse, a hole the reduce organ sees) is ORDERING; else it is DISSIPATING.
+/// collapse, a hole the reduce organ sees) is ordering; else it is dissipating.
 /// Meaning emerges from the syntropic↔entropic combination, read through the organ,
-/// never a scalar threshold on a legacy resource. Slice 1 EMITS this live to witness
+/// never a scalar threshold on a legacy resource. Slice 1 emits this live to witness
 /// on the wire; Slice 2 lets it drive the trajectory and retires the FSM.
 #[derive(Debug, Clone)]
 pub struct DirectionRead {
@@ -93,10 +93,10 @@ impl DirectionRead {
 /// books its captured order and vented entropy. `None` when the line holds no
 /// elements (nothing material to read yet).
 /// The civilization's own material self, laid on a 1×n frame: each held
-/// element is a site, its gauge direction its almanac FAMILY (1..5 -> 0..4,
+/// element is a site, its gauge direction its almanac family (1..5 -> 0..4,
 /// the ONT projection past the iron coordinate). Shared by `observe_direction`
 /// (the peel reads this occupancy) and the per-beat gauge sample (TU-1 / G:
-/// `MANIFOLD-1a` stamps this SAME occupancy on the beat's receipts, raw — the
+/// `MANIFOLD-1a` stamps this same occupancy on the beat's receipts, raw — the
 /// reduce organ's actual reading, not a re-derived summary).
 pub fn gauge_occupancy(
     holdings: &[([u8; 32], Ratio)],
@@ -153,7 +153,7 @@ const W_BASE: u64 = 1;
 /// (`None` input = drawn from the environment source `⊥`). Assembled from the
 /// standing tables — `ZoneKind::cost` names the input, `yield_per_tick` the
 /// output — so a change to the economy's chemistry flows here with no restatement.
-/// `Habitat`/`Regenerator` restore the metabolism's RATION (species-relative), so
+/// `Habitat`/`Regenerator` restore the metabolism's ration (species-relative), so
 /// they are resolved against `metabolic_harvest`, not listed here.
 fn conversions() -> [(ZoneKind, Option<Resource>, Resource); 6] {
     [
@@ -166,8 +166,8 @@ fn conversions() -> [(ZoneKind, Option<Resource>, Resource); 6] {
     ]
 }
 
-/// **THE METABOLIC TRAIT SEED** — the resources a clade draws from its
-/// environment BEFORE any conversion: its constitutive nature, not a universal
+/// **The metabolic trait seed** — the resources a clade draws from its
+/// environment before any conversion: its constitutive nature, not a universal
 /// baseline. This reads the primary-resource axis the science law already tables
 /// (`science.rs`: mineral is pressure/metal work → Iron, biotic is life →
 /// Biomass, plasmic rides resonance/energy → Joule, never Iron). Biotic is the
@@ -175,7 +175,7 @@ fn conversions() -> [(ZoneKind, Option<Resource>, Resource); 6] {
 /// in its world at all — the operator's law, *why would a plasmic want iron?*
 /// The ration (`metabolic_harvest`) always lies in this set.
 ///
-/// This is the SEED of the reachability, so it decides which pathways can exist:
+/// This is the seed of the reachability, so it decides which pathways can exist:
 /// a trait absent here, and unreachable by any relevant conversion, is a genuine
 /// hole in the species' phase space — the homological exclusion, not a table of
 /// forbidden buildings.
@@ -187,7 +187,7 @@ fn metabolic_traits(metabolism: u8) -> Vec<Resource> {
     }
 }
 
-/// The pathway a buildable REQUIRES: `(input trait, output trait)`. A source
+/// The pathway a buildable requires: `(input trait, output trait)`. A source
 /// building draws its output from the environment (`None` input). Buildings with
 /// no metabolic conversion (civic/refinery infrastructure) return `None` — they
 /// carry no thermodynamic obstruction and are natively bounded by definition.
@@ -205,19 +205,19 @@ fn requirement(kind: ZoneKind, ration: Resource) -> Option<(Option<Resource>, Re
     }
 }
 
-/// **THE ALGEBRAIC RANK** (operator ruling 2026-08-16 — SNF as a presentation,
-/// not a scalar) — the society's intelligence read as the invariant PAIR the
+/// **The algebraic rank** (operator ruling 2026-08-16 — SNF as a presentation,
+/// not a scalar) — the society's intelligence read as the invariant pair the
 /// Smith Normal Form of `∂₁` yields, because a chain complex of free ℤ-modules
-/// IS a free resolution (a generators-and-relations presentation):
+/// is a free resolution (a generators-and-relations presentation):
 ///
-/// - **Free generators** — the algebraic DIMENSION (a Krull-dimension analog):
+/// - **Free generators** — the algebraic dimension (a Krull-dimension analog):
 ///   `components` (`β₀`, independent capabilities reachable from the seed) plus
 ///   `cycles` (`β₁`, independent metabolic loops — regeneration is a CYCLE, a
 ///   syzygy, never a new variable, so dimension alone would miss it).
 /// - **Relations** — the torsion coefficients `dᵢ > 1` (the `ℤ/dᵢ` twists /
 ///   syzygies). Empty while `M_civ` is a graph (graph homology is torsion-free);
 ///   non-empty once higher cells enter. The nonlinear `ℚ[x]/I` / Gröbner frontier
-///   (RCP-2, DIO-3b) is DEFERRED — and, when built, carries modular truncation
+///   (RCP-2, DIO-3b) is deferred — and, when built, carries modular truncation
 ///   from line one; the linear core stays SNF, bounded and cheap.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AlgebraicRank {
@@ -231,7 +231,7 @@ pub struct AlgebraicRank {
 }
 
 impl AlgebraicRank {
-    /// The free rank — the algebraic DIMENSION, `components + cycles`. This is the
+    /// The free rank — the algebraic dimension, `components + cycles`. This is the
     /// scalar the draw summarises as `genus`; the pair loses nothing, it makes the
     /// split (and the relation structure) explicit.
     pub fn dimension(&self) -> u64 {
@@ -239,7 +239,7 @@ impl AlgebraicRank {
     }
 }
 
-/// **`M_civ` — THE SPECIES METABOLIC COMPLEX.** Its vertices (`⊥` + the reachable
+/// **`M_civ` — The SPECIES metabolic complex.** Its vertices (`⊥` + the reachable
 /// resource traits), its exact boundary `∂₁` factored to Smith Normal Form once,
 /// and its genus. Every affinity query pairs against this without refactoring.
 pub struct SpeciesManifold {
@@ -267,8 +267,8 @@ impl SpeciesManifold {
         // that its metabolism cannot run, never contributes its output — that is
         // how a hole (a missing trait) forms, with no exclusion table. A plasmic
         // line never seeds Iron, so the whole iron forge is unreachable from it.
-        // THE FRONTIER PEEL (not a sweep). The relevant conversions form a DAG
-        // rooted at the seed traits; walk it ONCE with a worklist, firing each
+        // The FRONTIER peel (not a sweep). The relevant conversions form a DAG
+        // rooted at the seed traits; walk it once with a worklist, firing each
         // conversion exactly when its input trait arrives. This replaces a
         // fixpoint that re-scanned every conversion each round until nothing grew
         // (O(rounds·E·V), the cartesian find-scan the standing ruling forbids):
@@ -298,7 +298,7 @@ impl SpeciesManifold {
         }
         reachable.sort_by_key(|r| *r as u8);
 
-        // The edges — ONE projection over the same relevant set (each conversion
+        // The edges — one projection over the same relevant set (each conversion
         // whose endpoints are both reachable is an edge), plus the ration source
         // edge (Habitat) and the recycling return edge (ration → ⊥).
         let idx = |r: Resource, traits: &[Resource]| -> usize {
@@ -348,7 +348,7 @@ impl SpeciesManifold {
         }
     }
 
-    /// **THE HOMOLOGICAL PAIRING.** `[ω] = [1_out − 1_in] = 0` in `H₀` iff the
+    /// **The homological pairing.** `[ω] = [1_out − 1_in] = 0` in `H₀` iff the
     /// class lies in `Im(∂₁)` — input and output present and connected. Exact
     /// membership via the SNF witnesses: in the `U` basis, `b ∈ Im(∂₁)` iff each
     /// coordinate below the rank vanishes and each on-rank coordinate is divisible
@@ -387,7 +387,7 @@ impl SpeciesManifold {
         true
     }
 
-    /// **THE MAPPING OPERATOR `𝒯`.** `W_base · genus` for a natively-bounded
+    /// **The mapping operator `𝒯`.** `W_base · genus` for a natively-bounded
     /// building, `0` for an obstructed one. The whole SOC-1 scalar `match
     /// disposition` collapses to this pairing.
     pub fn affinity(&self, kind: ZoneKind) -> u64 {
@@ -411,17 +411,17 @@ fn matvec(a: &[Vec<BigInt>], x: &[BigInt]) -> Vec<BigInt> {
         .collect()
 }
 
-/// **THE WORKBENCH CHOOSER** — the civic partition-function draw. Over the
+/// **The workbench chooser** — the civic partition-function draw. Over the
 /// candidate set `S_valid` (viability resolved upstream by `build_step`'s gates),
 /// weight each by the manifold's `𝒯` affinity and sample `P(s)=w_s/Z` from the
 /// line's `chronicle_digest`. A non-native building weighs `0` — excluded from
 /// `Z` with no boolean override. `None` only when no candidate is natively
 /// bounded (the beat builds nothing, exactly as the old priority returned `None`).
-/// **THE DEFICIT-CLOSER** (SOC-3) — does building `kind` relieve the `binding`
-/// drive's deficit? A society under METABOLIC or COGNITIVE pressure is starved of
-/// SUPPLY — the ration flow that feeds the whole cascade — so the settlement/food
-/// buildings close it; a HOMEOSTATIC deficit (entropy shed faster than contained)
-/// closes with sinks; an EXPANSIVE one with the industry that reaches new niches.
+/// **The deficit-closer** (SOC-3) — does building `kind` relieve the `binding`
+/// drive's deficit? A society under metabolic or cognitive pressure is starved of
+/// supply — the ration flow that feeds the whole cascade — so the settlement/food
+/// buildings close it; a homeostatic deficit (entropy shed faster than contained)
+/// closes with sinks; an expansive one with the industry that reaches new niches.
 /// (The live cascade surfaces Metabolic/Cognitive as binding today; the full map
 /// is future-proof for when the higher tiers are wired.)
 fn serves(kind: ZoneKind, binding: Drive) -> bool {
@@ -435,22 +435,22 @@ fn serves(kind: ZoneKind, binding: Drive) -> bool {
     }
 }
 
-/// **THE WORKBENCH CHOOSER, NEED-TILTED** (SOC-3). Over the native surface, the
-/// homological `affinity` weight is TILTED toward the building that closes the
-/// society's BINDING drive, scaled by how starved that drive is:
+/// **The workbench chooser, need-tilted** (SOC-3). Over the native surface, the
+/// homological `affinity` weight is tilted toward the building that closes the
+/// society's binding drive, scaled by how starved that drive is:
 ///
 /// ```text
 ///   w_s = affinity(s) · ( L + γ_num · [s closes the binding drive] )
 /// ```
 ///
 /// `L` is the melt lattice; `γ_num ∈ [0, L]` is the binding drive's unmet fraction
-/// (`deficit / demand`) quantised onto it. A society that STARVES (`γ_num → L`)
+/// (`deficit / demand`) quantised onto it. A society that starves (`γ_num → L`)
 /// leans hard toward the closer (up to twice as likely); a society at ease
 /// (`binding = None`, `γ_num = 0`) reads `w_s = affinity·L` for every native — the
-/// uniform SOC-2 draw, so the society EXPLORES when comfortable and BUILDS WHAT IT
-/// NEEDS when pressured. The shared `L` and `affinity` (genus) cancel in the draw;
+/// uniform SOC-2 draw, so the society explores when comfortable and builds what it
+/// needs when pressured. The shared `L` and `affinity` (genus) cancel in the draw;
 /// a non-native still weighs `0`. Exact-integer, digest-seeded, replay-exact.
-/// **A ZONE'S WORKBENCH WEIGHT** — the homological `affinity` (genus) of building
+/// **A zone's workbench weight** — the homological `affinity` (genus) of building
 /// `kind` for this species, tilted toward the binding drive when the building
 /// closes it: `affinity · (L + γ·[serves])`. A non-native weighs `0`.
 pub fn zone_weight(
@@ -469,10 +469,10 @@ pub fn zone_weight(
         .saturating_mul(lattice.saturating_add(tilt))
 }
 
-/// **THE PARTITION DRAW** — the shared engine under the workbench: sample an index
+/// **The partition draw** — the shared engine under the workbench: sample an index
 /// `P(i) = w_i/Z` from a weight vector against a caller-salted `draw_seed`. `None`
 /// when every weight is `0` (nothing native — the beat builds nothing). The seed
-/// is the FINAL draw seed; each caller salts its own so independent draws off the
+/// is the final draw seed; each caller salts its own so independent draws off the
 /// same chronicle digest do not correlate. Exact-integer, replay-exact.
 pub fn partition_draw(weights: &[u64], draw_seed: [u8; 32]) -> Option<usize> {
     let total: u64 = weights.iter().fold(0u64, |sum, w| sum.saturating_add(*w));
@@ -501,7 +501,7 @@ pub fn choose_build(
         .iter()
         .map(|kind| zone_weight(*kind, manifold, binding, gamma_num))
         .collect();
-    // The zone draw salts the chronicle digest with "workbench" — the SAME salt
+    // The zone draw salts the chronicle digest with "workbench" — the same salt
     // and cumulative walk as before this factoring, so a zone-only beat is
     // byte-identical.
     let mut hasher = blake3::Hasher::new();
@@ -511,9 +511,9 @@ pub fn choose_build(
     partition_draw(&weights, draw_seed).map(|i| candidates[i])
 }
 
-/// **THE ABUNDANCE MENU** (COG-EMERGENCE-2). Above the survival floor — which
-/// `express_survival` raises as the SOLE zone-builder (N-I6) — a line with
-/// surplus faces ONE choice, not three authored `_step` gates. Each act is a
+/// **The abundance MENU** (COG-EMERGENCE-2). Above the survival floor — which
+/// `express_survival` raises as the sole zone-builder (N-I6) — a line with
+/// surplus faces one choice, not three authored `_step` gates. Each act is a
 /// candidate in the same kind of fold the zone workbench draws from.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Investment {
@@ -525,7 +525,7 @@ pub enum Investment {
     Expand,
     /// Synthesize new matter — seat chemistry. Closed by the chemical residual.
     Synthesize,
-    /// Adopt a discipline the line's chronicle has EARNED but not yet taken up
+    /// Adopt a discipline the line's chronicle has earned but not yet taken up
     /// — a practice already in the fold (seed ∪ minted, `28_VOCABULARY`) this
     /// line doesn't hold. Closed by the culture γ: how many such practices
     /// stand unclaimed. Physics still gates the actual adoption (a tempered
@@ -536,8 +536,8 @@ pub enum Investment {
     /// `build_recipe_as`): a hashed `∏ elements → role` transformation from
     /// the line's own held almanac, gated by topological reach, never a
     /// `ZoneKind`. Closed by the craft γ: how many of the five universal
-    /// roles (`morphogen::ROLE_DIM`) the line's almanac COULD fill but hasn't
-    /// yet raised a recipe for. A FED line grows its doing-layer
+    /// roles (`morphogen::ROLE_DIM`) the line's almanac could fill but hasn't
+    /// yet raised a recipe for. A fed line grows its doing-layer
     /// proactively — the discovery search itself stays honest (a role no
     /// held element can fill draws nothing, an honest hole, not a forced
     /// pick).
@@ -548,7 +548,7 @@ pub enum Investment {
 }
 
 impl Investment {
-    /// The menu, in fold order. `Hoard` is the untilted baseline and MUST stay
+    /// The menu, in fold order. `Hoard` is the untilted baseline and must stay
     /// last — `resolve_investment`'s impossible-zero-weight fallback indexes
     /// `MENU.len() - 1`.
     pub const MENU: [Investment; 6] = [
@@ -561,12 +561,12 @@ impl Investment {
     ];
 }
 
-/// **THE ABUNDANCE WEIGHTS** — the workbench principle carried to the surplus
+/// **The abundance weights** — the workbench principle carried to the surplus
 /// choice: `w = reach · (L + γ)`, the line's topological richness (`reach`, its
 /// algebraic dimension — the same instinct/history the recipe draw reads)
-/// TILTED by the deficit each act would close. `Hoard` carries no tilt
-/// (`w = reach·L`), so a line at ease reads a UNIFORM menu and the draw
-/// EXPLORES; a line under a sharp cognitive γ leans hard toward `Deepen`. NO
+/// tilted by the deficit each act would close. `Hoard` carries no tilt
+/// (`w = reach·L`), so a line at ease reads a uniform menu and the draw
+/// explores; a line under a sharp cognitive γ leans hard toward `Deepen`. No
 /// affordability enters — the weight is topological tension ALONE. The shared
 /// `reach` cancels in the draw, exactly as the shared genus does for zones.
 pub fn investment_weights(
@@ -581,14 +581,14 @@ pub fn investment_weights(
     let lattice = LATTICE as u64;
     let dim = reach.dimension().max(1); // a line always has some reach to spend
     let tilt = |gamma: u64| dim.saturating_mul(lattice.saturating_add(gamma));
-    // **SOC-5 — THE COLLECTIVE RESOLVE.** `Hoard` is the society's default rest —
-    // bank the surplus, raise nothing. A society that has SELF-ORGANISED around a
+    // **SOC-5 — the collective resolve.** `Hoard` is the society's default rest —
+    // bank the surplus, raise nothing. A society that has self-organised around a
     // shared deficit (a concentrated caste census, `caste_convergence` ∈ [0, L])
-    // lowers that floor in proportion: it COMMITS its surplus to the shared
+    // lowers that floor in proportion: it commits its surplus to the shared
     // objective rather than banking it. Convergence 0 — a covered economy, no
     // caste — leaves the floor whole (`dim·L`), so a line at ease rests and
-    // explores EXACTLY as before this slice. The tensions still set the DIRECTION
-    // (which act); the collective's focus sets only the DECISIVENESS (whether to
+    // explores exactly as before this slice. The tensions still set the direction
+    // (which act); the collective's focus sets only the decisiveness (whether to
     // act at all). Emergent: the concentration is a fold of distributed caste
     // draws, no central plan. Bounded — full convergence zeroes the floor, never
     // negative.
@@ -603,14 +603,14 @@ pub fn investment_weights(
     ]
 }
 
-/// **THE ABUNDANCE RESOLVER** (COG-EMERGENCE-2) — the single draw that will
+/// **The abundance resolver** (COG-EMERGENCE-2) — the single draw that will
 /// replace `cognitive_investment_step`, `chemistry_step`'s seat-decision, and
-/// `expand_step`'s gate. The line does not evaluate three `if`s; it FEELS three
+/// `expand_step`'s gate. The line does not evaluate three `if`s; it feels three
 /// tensions and draws one act against its own chronicle digest (salted
 /// `abundance`, independent of the zone draw). Two lines with the same surplus
-/// and the same tensions but DIFFERENT histories (seeds) can choose
+/// and the same tensions but different histories (seeds) can choose
 /// differently — design, not convergence. If the chosen act is unaffordable,
-/// physics rejects it AFTER the fact; its will stays mathematically its own.
+/// physics rejects it after the fact; its will stays mathematically its own.
 /// Replay-exact. (Not yet on the live path — EMERGENCE-2b wires `cycle()`.)
 pub fn resolve_investment(
     reach: &AlgebraicRank,
@@ -641,7 +641,7 @@ pub fn resolve_investment(
     Investment::MENU[i]
 }
 
-/// **THE CASTE WEIGHTS** (SOC-4) — the unspanned deficit γ (`EconomicPeel.residual`,
+/// **The caste weights** (SOC-4) — the unspanned deficit γ (`EconomicPeel.residual`,
 /// what no standing structure spans) read as the society's unmet work, per axis.
 /// `|γ_i|` is how much internal specialisation axis `i` calls for. A covered
 /// economy weighs all-zero — a homogeneous society, no caste.
@@ -652,9 +652,9 @@ pub fn caste_weights(residual: &[BigInt]) -> Vec<u64> {
         .collect()
 }
 
-/// **THE CASTE DRAW** (SOC-4) — which residual-axis caste one unit of the society
+/// **The caste draw** (SOC-4) — which residual-axis caste one unit of the society
 /// joins, weighted by the unspanned deficit on each axis. The society does not
-/// ASSIGN castes by a table; each unit is DRAWN toward the work that is most
+/// assign castes by a table; each unit is drawn toward the work that is most
 /// unmet, off the line's own digest (salted `b"caste"` to decorrelate from the
 /// zone `b"workbench"` and abundance `b"abundance"` draws). `None` when the
 /// economy is covered (every residual zero) — no caste forms. Replay-exact.
@@ -667,12 +667,12 @@ pub fn caste_draw(residual: &[BigInt], seed: [u8; 32]) -> Option<usize> {
     partition_draw(&weights, draw_seed)
 }
 
-/// **THE CASTE CENSUS** (SOC-4) — partition `members` of the society across the
-/// residual axes: each member DRAWS its caste independently (salted by index), so
-/// the census is a stochastic partition that SELF-ORGANISES proportional to the
+/// **The caste census** (SOC-4) — partition `members` of the society across the
+/// residual axes: each member draws its caste independently (salted by index), so
+/// the census is a stochastic partition that self-organises proportional to the
 /// residual, never a centrally-assigned quota. Per-axis head counts (len =
 /// `residual.len()`); all zero when the economy is covered. Two societies with
-/// the same residual but different digests organise DIFFERENTLY — emergence, not
+/// the same residual but different digests organise differently — emergence, not
 /// a caste table. Replay-exact.
 pub fn caste_census(residual: &[BigInt], members: u64, seed: [u8; 32]) -> Vec<u64> {
     let mut census = vec![0u64; residual.len()];
@@ -688,15 +688,15 @@ pub fn caste_census(residual: &[BigInt], members: u64, seed: [u8; 32]) -> Vec<u6
     census
 }
 
-/// **THE COLLECTIVE RESOLVE** (SOC-5) — how sharply the society has CONVERGED on
+/// **The collective resolve** (SOC-5) — how sharply the society has converged on
 /// a shared objective, read off its caste census as a lattice fraction ∈ `[0, L]`.
-/// The measure is the dominant caste's SHARE of the organised workforce: everyone
+/// The measure is the dominant caste's share of the organised workforce: everyone
 /// drawn to one axis → `L` (a society of one mind, fully focused); an even spread
 /// over `k` axes → `L/k` (organised but diffuse); a covered economy that seats no
-/// caste → `0` (nothing to converge on — rest). This is the SHAPE of the deficit
+/// caste → `0` (nothing to converge on — rest). This is the shape of the deficit
 /// the scalar `residual_extent` cannot see: two societies carrying the same total
 /// void differ here iff one faces a single sharp deficit and the other a scatter.
-/// The abundance fold reads it as the surplus's DECISIVENESS (`investment_weights`
+/// The abundance fold reads it as the surplus's decisiveness (`investment_weights`
 /// lowers `Hoard` by it), never its direction. Replay-exact — a pure fold.
 pub fn caste_convergence(census: &[u64]) -> u64 {
     let total: u64 = census.iter().sum();
@@ -724,7 +724,7 @@ mod tests {
 
     #[test]
     fn a_native_pathway_pairs_to_zero_and_scores_positive() {
-        // THE 𝒯 LAW: a balanced line touches Iron and Alloy and the Iron→Alloy
+        // The 𝒯 law: a balanced line touches Iron and Alloy and the Iron→Alloy
         // conversion is relevant, so the forge pathway is bounded — its class
         // vanishes, its affinity is W_base·genus > 0.
         let m = balanced();
@@ -736,9 +736,9 @@ mod tests {
 
     #[test]
     fn a_plasmic_line_is_homologically_excluded_from_the_iron_forge() {
-        // THE HOLE, WITNESSED (the operator's lithophage): a plasmic metabolism
+        // The hole, witnessed (the operator's lithophage): a plasmic metabolism
         // cannot run the Smelter/Synthesizer, so Alloy and Diamond are never
-        // reachable — they are ABSENT from its complex. The forge pathway cannot
+        // reachable — they are absent from its complex. The forge pathway cannot
         // even be expressed; the pairing is a non-trivial obstruction; 𝒯 → 0.
         // No boolean gate, no species table — a topological fact.
         let plasmic = SpeciesManifold::of(3, "plasmic", false);
@@ -753,7 +753,7 @@ mod tests {
 
     #[test]
     fn recycling_raises_the_genus_a_regenerative_society_is_topologically_richer() {
-        // INTELLIGENCE IS GENUS: closing the ration loop (a regenerative economy)
+        // Intelligence is genus: closing the ration loop (a regenerative economy)
         // adds an independent cycle β₁ — the manifold's genus rises. The same
         // clade, recycling, is a topologically more complex society.
         let extractive = SpeciesManifold::of(2, "aqueous", false);
@@ -768,7 +768,7 @@ mod tests {
 
     #[test]
     fn the_metabolic_trait_seed_diverges_the_native_set_across_species() {
-        // THE ENRICHMENT, WITNESSED: viability is now the species' constitutive
+        // The enrichment, witnessed: viability is now the species' constitutive
         // nature, not a universal baseline. A mineral line's world is built of
         // iron (the forge is native); a plasmic line's world has no iron at all
         // (the forge is a hole); a biotic line is the generalist that mines iron
@@ -825,10 +825,10 @@ mod tests {
 
     #[test]
     fn the_binding_drive_tilts_the_workbench_toward_the_closer() {
-        // SOC-3 LAW: a society STARVED on its metabolic tier (binding = Metabolic,
+        // SOC-3 law: a society starved on its metabolic tier (binding = Metabolic,
         // γ maxed) leans toward the food/settlement building that closes it far
-        // more often than a SATED society, whose draw stays uniform. The society
-        // builds what it NEEDS under pressure and EXPLORES at ease.
+        // more often than a sated society, whose draw stays uniform. The society
+        // builds what it needs under pressure and explores at ease.
         let m = balanced();
         let surface = [ZoneKind::Smelter, ZoneKind::Extractor]; // industry vs food
         let full = LATTICE as u64; // maximal deficit fraction
@@ -849,7 +849,7 @@ mod tests {
         // while starving (the workbench stays open).
         assert!(starving < 90, "even a starving line still explores ({starving})");
 
-        // And a SATED society (binding None) reads exactly the SOC-2 uniform draw:
+        // And a sated society (binding None) reads exactly the SOC-2 uniform draw:
         // the tilt vanishes, every native equally weighted regardless of drive.
         for i in 0u8..16 {
             assert_eq!(

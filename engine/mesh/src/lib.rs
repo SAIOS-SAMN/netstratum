@@ -2,31 +2,31 @@
 //!
 //! The reconciliation instruments (consilience, the manifold, the
 //! census, the triangle — tag 65 and refusal kinds 3–4) were excised
-//! under the one-truth amendment: you do not reconcile what cannot
-//! diverge, and agreement between copies was never a measurement.
+//! under the one-truth amendment: what cannot diverge is not
+//! reconciled, and agreement between copies was never a measurement.
 //! What stands is what was always in-chain and single-copy:
 //!
-//! - `receive` — ONE chain's integrity door (frames parse, digests
+//! - `receive` — One chain's integrity door (frames parse, digests
 //!   recompute, the first break named). No second copy is consulted.
 //! - `head` — the 80-byte announcement of where a chain stands.
 //! - the authority walk and its doors (NS-5 §7) — the receipted
-//!   handoff, one writer per clock, deeds ON the chain.
+//!   handoff, one writer per clock, deeds on the chain.
 //!
 //! The arbor at TUniversal{S,G,T} replaces replication whole (the
 //! constitution ladder): state is position, the kernel is motion, the
 //! chain is the path. This crate becomes the arbor's carrier when the
 //! codec gate lands; nothing here reads or writes a second truth.
 //!
-//! THE SANDBOXED NURSERY (NS-5 §7.6, operator ruling 2026-07-31):
+//! The sandboxed nursery (NS-5 §7.6, operator ruling 2026-07-31):
 //! open divergence is lawful; covert divergence is slashed. A
 //! declared fork is a nursery under its own branch coordinates — the
 //! mainline cannot be written from inside it (one value per address,
 //! always), followers never decohere (a branch is addressable, never
 //! a second claim on one address), and re-convergence has one door:
-//! the kernel gates the merge, or the nursery keeps its toys. We
-//! punish the lie, never the disagreement.
+//! the kernel gates the merge, or the nursery keeps its toys. The
+//! lie is penalized, never the disagreement.
 //!
-//! THE UPLINK LAW (operator order 2026-07-31 — mesh authenticity):
+//! The uplink law (operator order 2026-07-31 — mesh authenticity):
 //! nothing file-borne ever rides the mesh. Only chain-verified bytes
 //! ascend — `chronicle.tlv` through the `receive` door today, arbor
 //! commitments at the ladder's #36. Ledger files are pre-chain debts
@@ -81,7 +81,7 @@ pub struct MeshHead {
     pub head: [u8; 32],
 }
 
-/// The typed mesh refusal — every kind gates ONE chain against its
+/// The typed mesh refusal — every kind gates one chain against its
 /// own content or its own law; no copy is reconciled with another.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum MeshRefused {
@@ -209,13 +209,13 @@ struct WalkState {
 }
 
 /// The authority walk (NS-5 §7.1), the one computation of it: gate
-/// each receipt under the authority BEFORE it (carry the hand, cite a
+/// each receipt under the authority before it (carry the hand, cite a
 /// pending seal — authorship before citation), then apply its effect
 /// (a seal moves the pen and opens a citation). Before the first seal
 /// every append is lawful; a seal standing last is lawful with its
 /// citation outstanding.
 fn walk(chronicle: &Chronicle) -> Result<WalkState, MeshRefused> {
-    // THE HAND CARRIED FORWARD: the drained prefix was walked live when it
+    // The hand carried forward: the drained prefix was walked live when it
     // was written, so the walk starts from what it left — the last seal the
     // annals keep names the hand, and a seal that closed the drained prefix
     // still owes its citation to the first held receipt.
@@ -262,7 +262,7 @@ pub fn authority(chronicle: &Chronicle) -> Result<Option<u64>, MeshRefused> {
 }
 
 /// The seal door (NS-5 §7.3): the yielding hand names the successor.
-/// A stale hand refuses BEFORE anything appends; the seal carries its
+/// A stale hand refuses before anything appends; the seal carries its
 /// sealer and, when the seal is itself the taking hand's first
 /// append, the citation it owes.
 pub fn yield_authority(

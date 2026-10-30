@@ -1,5 +1,5 @@
-//! **THE ENVIRONMENT GRAIN** (operator ruling 2026-08-20) — the civilization
-//! WORLD quantizing its OWN physics at a defined joint, and the law that says
+//! **The environment GRAIN** (operator ruling 2026-08-20) — the civilization
+//! WORLD quantizing its own physics at a defined joint, and the law that says
 //! where that quantization may never spread.
 //!
 //! ## The doctrinal boundary — read this before bounding any denominator
@@ -10,26 +10,26 @@
 //! η, Keplerian orbital separation: the civilization world's own physics)
 //! bounding the exact-rational denominator growth that prices its pressure,
 //! exactly as the leisure-bank truncation precedent established. Two hard walls,
-//! ENFORCED, not merely documented:
+//! enforced, not merely documented:
 //!
-//!  1. **GRAIN RATES, NEVER STOCKS.** A conserved ledger — element amounts,
+//!  1. **GRAIN rates, never stocks.** A conserved ledger — element amounts,
 //!     banked matter — must be bit-exact `before == after` a trade. Rounding a
-//!     stock is matter creation and is refused. Only the COEFFICIENTS that price
+//!     stock is matter creation and is refused. Only the coefficients that price
 //!     a trade (melt, η, orbital separation) are grained; the trade amount, once
 //!     priced, moves exactly.
-//!  2. **UNREACHABLE FROM THE JUDGE.** `grain_rate` is `pub(crate)` — the
+//!  2. **Unreachable from the judge.** `grain_rate` is `pub(crate)` — the
 //!     `solver`, `scribe`, and `membrane` crates cannot name it — and a negative
 //!     witness (`cfe/tests/grain_boundary.rs`) fails loudly if any judge-side
 //!     source ever references it.
 //!
-//! If you came here to grain something, the boundary above is the law: is your
+//! Before graining anything, apply the boundary above as the law: is the
 //! value a *rate the world prices with*, or a *thing the judge will weigh*? Only
 //! the first may pass through here.
 
 use crate::ratio::Ratio;
 use num_bigint::BigInt;
 
-/// The largest denominator the environment grain keeps. **DERIVED, not chosen**
+/// The largest denominator the environment grain keeps. **Derived, not chosen**
 /// (Directive 1 — no constant wearing a beard): the bound whose per-pair
 /// `route_melt` cost holds the beat budget, measured live — the landing commit
 /// records the measurement that fixes this number, and it is never hand-edited;
@@ -38,7 +38,7 @@ use num_bigint::BigInt;
 #[allow(dead_code)] // grain organ landed unwired (8ccf6f7); re-wired only when the trace convicts an arithmetic input
 pub(crate) const GRAIN_DENOM_MAX: i64 = 4096;
 
-/// **GRAIN A RATE** — the deterministic best-rational-approximation of `x` to a
+/// **GRAIN A rate** — the deterministic best-rational-approximation of `x` to a
 /// bounded denominator `q <= GRAIN_DENOM_MAX`, by continued-fraction convergents
 /// (the last convergent whose denominator fits the bound).
 ///

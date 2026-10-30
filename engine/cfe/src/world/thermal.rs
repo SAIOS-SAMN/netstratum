@@ -1,7 +1,7 @@
-//! THERMAL DEEDS — the star, the siting, venting and encasement.
+//! Thermal deeds — the star, the siting, venting and encasement.
 //!
-//! THE VENT (20_FOUNDING §4): a mineral or plasmic line founds
-//! BANDLESS -- above the mesic ceiling, an order of magnitude below
+//! The vent (20_FOUNDING §4): a mineral or plasmic line founds
+//! bandless -- above the mesic ceiling, an order of magnitude below
 //! the hyperthermal floor. Coverage is defined by a bucket lookup that
 //! returns nothing in that gap. Task #3 opens it.
 
@@ -43,13 +43,13 @@ impl World {
         if self.star.is_none() {
             return Err(ActionRefused::NoStarCommissioned);
         }
-        // THE PLACEMENT DRAW (2026-08-06), rewritten NATIVE to the slot
-        // type the C1 kill landed: the draw produces `Slot::from_index`
+        // The placement draw (2026-08-06), rewritten native to the slot
+        // type the C1 elimination landed: the draw produces `Slot::from_index`
         // directly — total, wrapping — so an off-lattice draw is not a
-        // case that exists. `None` still means *the world places me*:
+        // case that exists. `None` still means *the world places the orb*:
         // the longitude draws from the chronicle's terminal digest
-        // (CHARTER §9) and walks forward past taken places
-        // deterministically; the RECEIPT CARRIES THE RESOLVED SLOT, so
+        // (Charter §9) and walks forward past taken places
+        // deterministically; the receipt carries the resolved slot, so
         // replay applies and never re-draws.
         let theta = match theta {
             Some(turn) => Some(turn),
@@ -105,10 +105,10 @@ impl World {
                 }
             }
         };
-        // THE PLACEMENT LAW, half retired by construction
-        // (29_CONSTRUCTION C1): an angle IS a `Slot` — off-slot cannot
+        // The placement law, half retired by construction
+        // (29_CONSTRUCTION C1): an angle is a `Slot` — off-slot cannot
         // reach this function, so the `OffSlot` judge arms are deleted
-        // and only the FACT half remains: no two orbs share a place.
+        // and only the fact half remains: no two orbs share a place.
         // Collision stays decidable because the type is discrete.
         if let Some(turn) = &theta {
             let slot = turn.index();
@@ -117,7 +117,7 @@ impl World {
                     && held.thermal.as_ref().is_some_and(|site| {
                         site.orbit_r == orbit_r
                             && site.theta.as_ref() == Some(turn)
-                            // ψ SEPARATES: two orbs may share a ring
+                            // ψ separates: two orbs may share a ring
                             // and a longitude if they are inclined
                             // differently. Without this the collision
                             // law would forbid a volume it should allow.
@@ -127,15 +127,15 @@ impl World {
                 return Err(ActionRefused::OrbitOccupied { orb: taken.orb_id, slot });
             }
         }
-        // BadSiting is DEAD (29_CONSTRUCTION C1): albedo is a `Unit`
+        // BadSiting is dead (29_CONSTRUCTION C1): albedo is a `Unit`
         // and the radius a `Positive` — out-of-range cannot reach this
         // verb, so the range judge is deleted and only facts remain.
         //
-        // THE RING REACH (operator ruling 2026-08-06) is exactly such a
-        // FACT: the star's MAGNETISM bounds how many RINGS it anchors —
+        // The ring REACH (operator ruling 2026-08-06) is exactly such a
+        // fact: the star's magnetism bounds how many rings it anchors —
         // a ring is a distinct orbit radius, and the reach is the field
         // grade (`StarClass::ring_reach`, the dynamo derivation).
-        // Filling an anchored ring stays admitted; THREADING A NEW ONE
+        // Filling an anchored ring stays admitted; threading A new one
         // beyond the field refuses. A count against a derived bound is
         // arithmetic, not a shape — it stays at the door forever.
         let mut rings: Vec<&crate::dop::Positive> = Vec::new();
@@ -161,10 +161,10 @@ impl World {
             albedo: albedo.clone(),
             orbit_r: orbit_r.clone(),
             theta: theta.clone(),
-            // THE LIVE PATH KEEPS THE INCLINATION. Writing None here
-            // while the RECEIPT carried it made live and replay
+            // The live path keeps the inclination. Writing None here
+            // while the receipt carried it made live and replay
             // disagree in the opposite direction to the earlier drops —
-            // and clippy could not see it, because the binding IS used
+            // and clippy could not see it, because the binding is used
             // (by the receipt). Only replay_fidelity catches this.
             psi: psi.clone(),
         });
@@ -177,8 +177,8 @@ impl World {
         );
         let band = crate::thermal::band_of(&teq);
         crate::dop::apply_endowment_add(held, &crate::dop::orbit_endowment(band));
-        // TECH-1a (12_UNION §5a): a world's FIRST thermal opt-in
-        // receipts the kernel SOLAR LEAP — its people now know their
+        // TECH-1a (12_UNION §5a): a world's first thermal opt-in
+        // receipts the kernel solar leap — its people now know their
         // sun. Once per world, never per orb; the node id is seeded
         // from the kernel name + the discovering orb (SEAL B).
         if !self.techs.iter().any(|(_, condition, _, _)| *condition == 0) {
@@ -204,7 +204,7 @@ impl World {
         );
         Ok(())
     }
-    /// AEON-1a (11 §6): the star MOVES in its region — the class
+    /// AEON-1a (11 §6): the star moves in its region — the class
     /// steps, luminosity recomputes, and every sited orbit's T_eq⁴
     /// shifts at the next tick. Movement, never a rung.
     pub fn age_star(
@@ -216,7 +216,7 @@ impl World {
         }
         self.star = Some(class);
         self.close(ClosureEvent::StarAged { class: class as u8 }, SOVEREIGN);
-        // #27 STELLAR NUCLEOSYNTHESIS: a star aging into a REMNANT (the
+        // #27 stellar nucleosynthesis: a star aging into a remnant (the
         // heavy end of the class spine — a white dwarf and beyond) dies
         // and scatters heavy elements; every sited orb gains an enrichment
         // vein. A main-sequence move forges nothing new.

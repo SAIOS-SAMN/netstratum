@@ -1,26 +1,26 @@
-//! CHEMISTRY — what a world's matter makes when it is put together.
+//! Chemistry — what a world's matter makes when it is put together.
 //!
 //! **ELEMENT-CHEMISTRY (#37): the almanac's first consumer.** Until
 //! this deed the periodic table was a complete, pinned derivation that
 //! nothing in the world ever read — five axes deciding nothing, which
-//! is exactly the shape LAW 8 warns about. The compounding deed is
+//! is exactly the shape law 8 warns about. The compounding deed is
 //! what makes the table load-bearing: banked elements bond into gems
-//! by the lane law, so where an element SITS finally decides what a
+//! by the lane law, so where an element sits finally decides what a
 //! civilization can make.
 //!
-//! **SCIENCE PATH** — the bench is not only a list: it scores bonds for
+//! **Science path** — the bench is not only a list: it scores bonds for
 //! *this* sealed civilization (survival utility), names the dark-7
 //! gravity wells that pull toward immediate need, and supports
 //! isomorphic gem union + chemistry catalog (chemical creation as
 //! known recipe, never free matter).
 //!
-//! THE DOOR / FACT SPLIT (29_CONSTRUCTION):
+//! The door / fact split (29_CONSTRUCTION):
 //!
-//!   DOOR   whether the matter bonds at all — the shells agree, the
-//!          phases agree, the binds saturate. A property of the SET,
+//!   Door   whether the matter bonds at all — the shells agree, the
+//!          phases agree, the binds saturate. A property of the set,
 //!          decidable without the chain, so it dies at
 //!          [`crate::almanac::Compoundable`] and cannot be re-asked.
-//!   FACTS  locality, pressure and workability. Every one reads the
+//!   Facts  locality, pressure and workability. Every one reads the
 //!          world — the star's depth, the strata opened here, this
 //!          orb's temperature — so every one stays at the verb
 //!          forever: a set that cannot bond on this rock bonds on the
@@ -51,7 +51,7 @@ pub type ScienceRead = (
 type Plane = (u8, u8);
 
 /// One element as a plane holds it: its identity, and the lane valence
-/// the saturation walk needs — read ONCE at the shear rather than
+/// the saturation walk needs — read once at the shear rather than
 /// re-read for every set the element might appear in.
 type Seated = ([u8; 32], u8);
 
@@ -116,7 +116,7 @@ impl World {
             spend /= ratio(1, 1) + ratio(1, 1);
         }
         // #136 D3 — refine declares its grain (1/1024): the Crucible halving can push
-        // the spend off the grain, and the yield is a recipe rational; both SMELT to
+        // the spend off the grain, and the yield is a recipe rational; both smelt to
         // the element grain before the affordability check, order arms, receipt, and
         // banking read them, so the stock stays on-grain and replay (which decodes
         // these fields) is byte-identical.
@@ -158,7 +158,7 @@ impl World {
     /// The contained form. Collect scope: compounding moves banked
     /// element value, exactly as the assay does.
     ///
-    /// REFUSAL-PURE — every check completes before anything moves, so
+    /// Refusal-pure — every check completes before anything moves, so
     /// a refused compounding leaves no receipt and spends no matter.
     pub fn compound_as(
         &mut self,
@@ -173,21 +173,21 @@ impl World {
         if self.star.is_none() {
             return Err(ActionRefused::NoStarCommissioned);
         }
-        // THE DOOR: does this matter bond? Past here the set is proven,
+        // The door: does this matter bond? Past here the set is proven,
         // and its gem and knowledge are total.
         let set = crate::almanac::Compoundable::new(members)
             .ok_or(ActionRefused::MatterDoesNotBond)?;
 
-        // THE FACTS — the place, then the ledger. One home, so the
-        // BENCH cannot promise what the deed would refuse.
+        // The facts — the place, then the ledger. One home, so the
+        // bench cannot promise what the deed would refuse.
         if let Some(refusal) = self.bond_refusal(orb, set.members()) {
             return Err(refusal);
         }
 
-        // THE RECIPE — one home, the same the gate re-derives from.
+        // The recipe — one home, the same the gate re-derives from.
         let (spends, yielded) = crate::almanac::recipe_of(&set);
         // #136 D3 — gem-compound declares its grain (1/1024): every spend and the
-        // yield SMELT to the element grain before the order arms, receipt, and banking
+        // yield smelt to the element grain before the order arms, receipt, and banking
         // read them, so the element stocks stay on-grain and replay (which decodes
         // these fields) is byte-identical.
         let spends: Vec<([u8; 32], Ratio)> =
@@ -235,10 +235,10 @@ impl World {
         Ok(gem)
     }
 
-    /// **WHETHER THIS BOND STANDS RIGHT NOW** — everything past the
-    /// door, in one home: the PLACE (does the sky carry it, has the
+    /// **Whether this bond stands right NOW** — everything past the
+    /// door, in one home: the place (does the sky carry it, has the
     /// ground the pressure, is the orb at a workable heat) and then
-    /// the LEDGER (is there enough to spend). `None` means the deed
+    /// the ledger (is there enough to spend). `None` means the deed
     /// would go through.
     ///
     /// The bench reads this too, so a set it marks ready is a set the
@@ -264,12 +264,12 @@ impl World {
         None
     }
 
-    /// **WHETHER THIS PLACE CAN WORK THIS MATTER** — the three chain
+    /// **Whether this place can work this MATTER** — the three chain
     /// facts, in one home so the deed and the bench cannot disagree.
     /// `None` means the place stands; otherwise the first refusal, on
     /// the first member that earns it.
     ///
-    /// PRESSURE reads the DEEPEST stratum this orb has opened:
+    /// Pressure reads the deepest stratum this orb has opened:
     /// prospecting is what brings a system's pressure to bear, so a
     /// world that has only scratched the surface cannot release deep
     /// matter however much of it it holds.
@@ -306,7 +306,7 @@ impl World {
     }
 
     /// This orb's equilibrium heat, if it has a place at all. The
-    /// GRAINED reading (`almanac::grained_t_eq4`), because workability
+    /// grained reading (`almanac::grained_t_eq4`), because workability
     /// is an almanac question and the almanac puts orbits on the grain
     /// so exact arithmetic stays cheap.
     pub fn orb_heat(&self, orb: u64) -> Option<Ratio> {
@@ -319,14 +319,14 @@ impl World {
         ))
     }
 
-    /// **THE BENCH, WITH ITS STANDING** — every set this orb's matter
-    /// would bond, each carrying what (if anything) this PLACE has to
+    /// **The bench, with its standing** — every set this orb's matter
+    /// would bond, each carrying what (if anything) this place has to
     /// say about it.
     ///
     /// A bench that listed only what bonds is a trap: measured in live
     /// play, a world's own drawn matter routinely offers recipes its
-    /// orb cannot work, because a compound shares ONE phase and an orb
-    /// sits in ONE thermal region. Reading the refusal here — from the
+    /// orb cannot work, because a compound shares one phase and an orb
+    /// sits in one thermal region. Reading the refusal here — from the
     /// same [`Self::place_refusal`] the deed calls, so the two cannot
     /// drift — turns that from a dead end into a map: it says which
     /// rock to build the next colony on.
@@ -340,36 +340,36 @@ impl World {
             .collect()
     }
 
-    /// **THE BENCH** — every set of this orb's banked elements that
+    /// **The bench** — every set of this orb's banked elements that
     /// would bond, as (members, gem, knowledge). Derived at call and
     /// never stored: it is a reading of the ledger, not state.
     ///
-    /// **SHEARED ONTO THE PLANES, NEVER SWEPT** — the standing ruling
+    /// **Sheared onto the PLANES, never swept** — the standing ruling
     /// that [`peel`] carries (operator, 2026-07-30): *no cartesian
     /// find-scan repetition; peels and shears where there were
     /// iterations.*
     ///
-    /// A first cut of this walked EVERY subset of the ledger up to five
+    /// A first cut of this walked every subset of the ledger up to five
     /// bodies and asked the door about each — some 55,000 candidate
     /// sets for a world holding 24 elements, every one of them
-    /// re-reading each member's seat in the table. It also had to SORT
+    /// re-reading each member's seat in the table. It also had to sort
     /// its output afterwards, which is the tell: a frontier walk has no
     /// order of its own, so determinism had to be bolted on.
     ///
-    /// The bonding law already PARTITIONS the search and the sweep was
+    /// The bonding law already partitions the search and the sweep was
     /// ignoring it. A set bonds only where every member shares the
-    /// SHELL and the PHASE, so `(shell, phase)` are the planes matter
+    /// SHELL and the phase, so `(shell, phase)` are the planes matter
     /// can bond on, and nothing lying between two planes was ever a
     /// candidate. So: one pass deposits the ledger onto its planes (the
-    /// crystal-shear idiom), and each plane is then read on its OWN
-    /// terms — terms which are CONSTANTS there rather than things to
+    /// crystal-shear idiom), and each plane is then read on its own
+    /// terms — terms which are constants there rather than things to
     /// search for, because the shell fixes how many bond at once and
     /// the saturation identity fixes what their binds must sum to.
     ///
     /// Order is deterministic by construction — planes in table order,
     /// members in ledger order — so nothing is sorted afterwards.
     ///
-    /// The reading is UNCHANGED: `compounds` demands one shell, one
+    /// The reading is unchanged: `compounds` demands one shell, one
     /// phase, and a count equal to the arity, so every set the sweep
     /// could find lies inside exactly one plane at exactly that size.
     /// The door remains the one authority on what bonds; the shear only
@@ -378,7 +378,7 @@ impl World {
         let Some(held) = self.orb_by_id(orb) else {
             return Vec::new();
         };
-        // THE SHEAR — ONE pass over the ledger. Each element is
+        // The shear — one pass over the ledger. Each element is
         // deposited on its plane carrying the single number the walk
         // needs (its lane's valence), read once here instead of
         // re-read for every candidate it might appear in.
@@ -391,14 +391,14 @@ impl World {
                 None => sheet.push((plane, vec![(*element, seat.binds)])),
             }
         }
-        // The sheet is bounded by the TABLE, not by the ledger: there
+        // The sheet is bounded by the table, not by the ledger: there
         // are only `SHELLS × PHASES` planes however much matter a world
         // banks.
         sheet.sort_by_key(|(plane, _)| *plane);
 
         let mut found = Vec::new();
         for (plane, members) in &sheet {
-            // THE PLANE'S OWN CONSTANT: its shell fixes the arity, so
+            // The plane's own constant: its shell fixes the arity, so
             // a plane that cannot seat that many holds no set at all
             // and is never walked.
             let arity = usize::from(plane.0) + 1;
@@ -414,7 +414,7 @@ impl World {
         found
     }
 
-    // ── SCIENCE PATH ──────────────────────────────────────────────
+    // ── science path ──────────────────────────────────────────────
 
     /// Sealed civ axes for utility (posture doctrine overlays disposition
     /// / perception when reoriented; metabolism stays anatomy).
@@ -433,7 +433,7 @@ impl World {
         let mut out = Vec::new();
         let one = ratio(1, 1);
         let half = one.clone() / (one.clone() + one.clone());
-        // GREEN — growth greed: crystal famine pressure or cascade.
+        // Green — growth greed: crystal famine pressure or cascade.
         let crystal_thin = self.orb().is_some_and(|o| {
             o.banked_amount(Resource::Crystal) < ratio(1, 1)
         });
@@ -441,7 +441,7 @@ impl World {
         if crystal_thin || cascade {
             out.push((DarkPull::Green, if cascade { one.clone() } else { half.clone() }));
         }
-        // VANITY — surplus display, the epicurean trait read generically
+        // Vanity — surplus display, the epicurean trait read generically
         // (a line minted from an epicurean displays too; `44_LINEAGES`).
         if self.disposition_carries(crate::dop::DispositionTrait::VanityDisplay) {
             let rich = self.orb().is_some_and(|o| o.stamp_amount() > ratio(1, 1));
@@ -449,19 +449,19 @@ impl World {
                 out.push((DarkPull::Vanity, half.clone()));
             }
         }
-        // ENVY — intel stash or spy marks live.
+        // Envy — intel stash or spy marks live.
         if !self.intel_hashes.is_empty() || !self.spy_marks.is_empty() {
             out.push((DarkPull::Envy, one.clone()));
         }
-        // WRATH — any war treaty residual (at_war books).
+        // Wrath — any war treaty residual (at_war books).
         if self.treaties.iter().any(|t| t.kind == crate::treaty::TreatyKind::War) {
             out.push((DarkPull::Wrath, one.clone()));
         }
-        // SLOTH — no instruments forged, no practices.
+        // Sloth — no instruments forged, no practices.
         if self.instruments.is_empty() && self.practices.is_empty() {
             out.push((DarkPull::Sloth, half.clone()));
         }
-        // GLUTTONY — large free banks (iron+biomass+crystal).
+        // Gluttony — large free banks (iron+biomass+crystal).
         if let Some(o) = self.orb() {
             let mass = o.banked_amount(Resource::Iron)
                 + o.banked_amount(Resource::Biomass)
@@ -470,7 +470,7 @@ impl World {
                 out.push((DarkPull::Gluttony, half.clone()));
             }
         }
-        // PRIDE — novelty want struck (starved mind chases depth).
+        // Pride — novelty want struck (starved mind chases depth).
         if self.wants.iter().any(|(_, k)| *k == 3) {
             out.push((DarkPull::Pride, one));
         }
@@ -523,7 +523,7 @@ impl World {
         &self.chem_catalog
     }
 
-    /// **CHEMICAL CREATION (catalog)** — seal a banked gem as known
+    /// **Chemical creation (catalog)** — seal a banked gem as known
     /// chemistry. No free matter; spends resonator-eighth crystal.
     /// Empiricist novelty want may relieve on success (mind fed).
     pub fn chem_catalog_gem(
@@ -544,7 +544,7 @@ impl World {
         if peek(&self.orbs, orb).is_none() {
             return Err(ActionRefused::NoSuchOrb { orb });
         }
-        // LAB seat gate — chemistry catalog is a paid capability.
+        // Lab seat gate — chemistry catalog is a paid capability.
         self.require_science_seat(orb, crate::almanac::ScienceDiscipline::Chem, 1)?;
         if self.chem_catalog.contains(&gem) {
             return Err(ActionRefused::ChemAlreadyCataloged { gem });
@@ -589,7 +589,7 @@ impl World {
         Ok(knowledge)
     }
 
-    /// **ISOMORPHIC UNION** — fuse two banked gems of the same shell/phase
+    /// **Isomorphic union** — fuse two banked gems of the same shell/phase
     /// family into a product (chemical creation of a higher body).
     /// Spends 1 of each, yields 2 of product (mass-exact).
     pub fn iso_union(
@@ -615,7 +615,7 @@ impl World {
         if self.star.is_none() {
             return Err(ActionRefused::NoStarCommissioned);
         }
-        // LAB seat gate — iso-union is chemistry creation.
+        // Lab seat gate — iso-union is chemistry creation.
         self.require_science_seat(orb, crate::almanac::ScienceDiscipline::Chem, 1)?;
         if !crate::almanac::isomorphic(&a, &b) || a == b {
             return Err(ActionRefused::NotIsomorphic);
@@ -623,7 +623,7 @@ impl World {
         let (spend_each, yielded, product) = crate::almanac::iso_union_recipe(&a, &b)
             .ok_or(ActionRefused::NotIsomorphic)?;
         // #136 D3 — iso-union declares its grain (1/1024): the per-side spend and the
-        // yield SMELT to the element grain before the affordability check, order arms,
+        // yield smelt to the element grain before the affordability check, order arms,
         // receipt, and banking read them, so the element stocks stay on-grain and
         // replay (which decodes these fields) is byte-identical.
         let spend_each = smelt_element(&spend_each);
@@ -676,7 +676,7 @@ impl World {
     }
 }
 
-/// **ONE PLANE'S SATURATING SETS** — the deterministic walk INSIDE a
+/// **One plane's saturating sets** — the deterministic walk inside a
 /// plane, where the arity and the binds target are the plane's own
 /// constants rather than things to search for.
 ///
@@ -716,7 +716,7 @@ fn walk_plane(
         // Binds are strictly positive, so an overshoot never recovers;
         // and a partial sum that cannot reach the target even if every
         // remaining member sat at the peak never will. Neither prune
-        // may BREAK the loop — a plane is in ledger order, not binds
+        // may break the loop — a plane is in ledger order, not binds
         // order, so a lighter member can always follow a heavier one.
         if sum * 2 > doubled || (sum + rest * peak) * 2 < doubled {
             continue;

@@ -1,10 +1,10 @@
-//! SURVEY AND TERRAIN — scanning, charting, prospecting,
+//! Survey and terrain — scanning, charting, prospecting,
 //! terraforming, deposits.
 
 use super::*;
 use crate::literature::{work_of, WORKS};
 
-/// **THE SKY IS BASE-11** (operator ruling 2026-08-02, *uplift to
+/// **The sky is BASE-11** (operator ruling 2026-08-02, *uplift to
 /// base-11*). Eleven nodes, in two tiers, and `7` is not one of them:
 ///
 /// ```text
@@ -17,29 +17,29 @@ use crate::literature::{work_of, WORKS};
 ///     8..=11   THE UPLIFT TIER — one node per chartered work
 /// ```
 ///
-/// Seven base nodes plus four works is ELEVEN. The condition FIELD is a
+/// Seven base nodes plus four works is eleven. The condition field is a
 /// shared namespace with two populations — sky nodes and separately
 /// riding ones — and `7` was already spoken for by landed law before
 /// the uplift. A first cut of this ruling put the works at `7..=10` and
 /// so gave one number two meanings: `deposit_window` reads `techs` for
-/// the lesson while the sky claimed the same slot for VALOR, which
+/// the lesson while the sky claimed the same slot for valor, which
 /// would have rendered a held lesson as an unreached work and hidden
 /// the real node entirely.
 ///
 /// **The crown's gate does not move.** It still gates on `0..=5` and
-/// still completes base-7; the uplift sits ABOVE it rather than
+/// still completes base-7; the uplift sits above it rather than
 /// widening what it waits for.
-/// **DERIVED, NOT TYPED** (operator ruling 2026-08-05: *bring these down
-/// to the theorem level*). Eleven is a SUM and the sum is the sky's own
+/// **Derived, not typed** (operator ruling 2026-08-05: *bring these down
+/// to the theorem level*). Eleven is a sum and the sum is the sky's own
 /// structure — the base tier plus one node per chartered work. Written
 /// as `11`, the day a sixth condition lands someone edits one place and
 /// not the others.
-/// **WHAT KIND OF NODE A CONDITION IS** — the classification every
+/// **What KIND of node A condition is** — the classification every
 /// count below is derived from (operator ruling 2026-08-05: *all of
 /// these constants need to be derived dynamically*).
 ///
 /// A first cut typed `1`, `5`, `1` and `4`. Those are not numbers, they
-/// are the SIZES OF POPULATIONS in the condition namespace, and the
+/// are the sizes of populations in the condition namespace, and the
 /// namespace already knows its own members: `dop::tech_node_of` answers
 /// for the crystallized tier, `dop::tech_node_name` names the crown and
 /// the lesson, and `literature::WORKS` lists the chartered works. Count
@@ -53,7 +53,7 @@ pub enum NodeKind {
     /// The gifted crown, granted rather than earned.
     Crown,
     /// PRACTICE-1's re-emergence lesson — rides the condition field but
-    /// is NOT a sky node.
+    /// is not a sky node.
     Lesson,
     /// The uplift tier — one node per chartered work.
     Work,
@@ -70,7 +70,7 @@ pub fn node_kind(condition: u8) -> NodeKind {
     if crate::dop::tech_node_of(condition).is_some() {
         return NodeKind::Crystallized;
     }
-    // Classified by MEANING, asked of the vocabulary — never by parsing
+    // Classified by meaning, asked of the vocabulary — never by parsing
     // a composed name (`tech_node_name` returns "{voice} {concept}", so
     // a `starts_with` reads the voice) and never by a number.
     match crate::dop::condition_concept(condition) {
@@ -92,7 +92,7 @@ pub fn node_kind(condition: u8) -> NodeKind {
     }
 }
 
-/// **A GRADE AN INSTRUMENT CAN BE FORGED AT, proven at construction**
+/// **A grade an instrument can be forged AT, proven at construction**
 /// (P1, 29_CONSTRUCTION). The `InstrumentGradeUnknown` arm died at
 /// this door: forgeability is decidable from the value alone by asking
 /// the vocabulary — [`node_kind`] must say crystallized or crown — so
@@ -108,7 +108,7 @@ impl ForgeableGrade {
         matches!(node_kind(condition), NodeKind::Crystallized | NodeKind::Crown)
             .then_some(ForgeableGrade(condition))
     }
-    /// The condition this grade IS — grade and condition are one
+    /// The condition this grade is — grade and condition are one
     /// number by MANU-1's own law.
     pub fn condition(&self) -> u8 {
         self.0
@@ -133,20 +133,20 @@ pub fn count_of(kind: NodeKind) -> u8 {
         .count() as u8
 }
 
-/// The chartered works — the UPLIFT tier's own size, read from the
+/// The chartered works — the uplift tier's own size, read from the
 /// literature vocabulary rather than restated here.
 pub fn works() -> u8 {
     crate::literature::WORKS.len() as u8
 }
 
-/// The BASE tier — what the crown completes and `base_seven_complete`
+/// The base tier — what the crown completes and `base_seven_complete`
 /// waits for. Its gate does not move.
-/// The BASE tier, COUNTED: the leap, every crystallized condition, and
+/// The base tier, counted: the leap, every crystallized condition, and
 /// the gifted crown.
 pub fn base_nodes() -> u8 {
     count_of(NodeKind::Leap) + count_of(NodeKind::Crystallized) + count_of(NodeKind::Crown)
 }
-/// The whole stack, COUNTED: from the first work through the last one.
+/// The whole stack, counted: from the first work through the last one.
 /// There is no `11` anywhere — ask the vocabularies and they add to it.
 pub fn last_condition() -> u8 {
     first_work() + works() - 1
@@ -157,8 +157,8 @@ pub fn last_condition() -> u8 {
 ///
 /// The base occupies indices `0..=6` — seven nodes — and PRACTICE-1's
 /// lesson rides at `7`, so the works begin at `base + lesson = 8`. The
-/// counts ARE the indices consumed; there is no extra `+1` to add, and a
-/// first cut that added one put VALOR at 9 and left 8 unnamed.
+/// counts are the indices consumed; there is no extra `+1` to add, and a
+/// first cut that added one put valor at 9 and left 8 unnamed.
 pub fn first_work() -> u8 {
     base_nodes() + count_of(NodeKind::Lesson)
 }
@@ -171,9 +171,9 @@ impl World {
     pub fn can_terraform(&self) -> bool {
         self.techs.iter().any(|(_, condition, _, _)| *condition == 6)
     }
-    /// TERRA-1 — TERRAFORM: move a SITED planet between substrate
+    /// TERRA-1 — terraform: move a sited planet between substrate
     /// bands by re-seating its albedo and orbit — the highest
-    /// technology a civilization can hold, and only ever GIFTED
+    /// technology a civilization can hold, and only ever gifted
     /// (licensed down from tier 0 once the base-7 stack stands).
     /// Receipted as a fresh PlanetSited — replay takes the last
     /// seat; the orbit that "does not move" moves only under the
@@ -191,7 +191,7 @@ impl World {
         if self.star.is_none() {
             return Err(ActionRefused::NoStarCommissioned);
         }
-        // BadSiting is DEAD (29_CONSTRUCTION C1): the types prove the
+        // BadSiting is dead (29_CONSTRUCTION C1): the types prove the
         // ranges, so nothing is left to re-check here.
         let held = peel(&mut self.orbs, orb).ok_or(ActionRefused::NoSuchOrb { orb })?;
         if held.thermal.is_none() {
@@ -209,7 +209,7 @@ impl World {
             ClosureEvent::PlanetSited { orb_id: orb, albedo, orbit_r, theta: None , psi: None },
             SOVEREIGN,
         );
-        // P5.19 dual-use: overt TERRA path supersedes covert stress on this orb.
+        // P5.19 dual-use: overt terra path supersedes covert stress on this orb.
         // Public re-site clears pressure; if it was past threshold, unmask residual.
         let prior = self.tamper_pressure_of(orb);
         if prior > ratio(0, 1) {
@@ -237,18 +237,18 @@ impl World {
         }
         Ok(())
     }
-    /// TECH-1b (10 §3) — THE CRYSTAL SHEAR: one pass over the
+    /// TECH-1b (10 §3) — the crystal shear: one pass over the
     /// chronicle deposits every orb's condition readings (famine
     /// spans, overheat spans, the vent-window sums) — the converge
     /// deposit idiom, never a rescan per condition per orb. State
     /// readings (sink, surplus) evaluate directly at the boundary.
-    /// #41 — the INCREMENTAL shear: only receipts past the cursor
+    /// #41 — the incremental shear: only receipts past the cursor
     /// deposit; windowed entries prune at each boundary, so the sweep
     /// stays bounded however old the chronicle grows. The carried
     /// sheet is a pure cache — same receipts, same sheet as the
     /// full scan, by construction (both run deposit_receipt).
     pub(super) fn crystal_deposits_at(&mut self, now: u64) -> Vec<(u64, CrystalDeposit)> {
-        // The cursor counts ABSOLUTE receipts deposited. A cursor behind the
+        // The cursor counts absolute receipts deposited. A cursor behind the
         // drained base (a resumed world: the sheet starts empty) rebuilds
         // from the carried history, with the annals' last aperture stamps.
         let (cursor, mut sheet) = std::mem::take(&mut self.shear_cursor);
@@ -282,9 +282,9 @@ impl World {
         deposit_last_links(&mut sheet, self.chronicle.annals().last_links());
         sheet
     }
-    /// THE CONSTELLATION (operator ruling 2026-07-30): the base-7
+    /// The constellation (operator ruling 2026-07-30): the base-7
     /// stack as a per-orb reading for every surface — each condition's
-    /// held state and its PROGRESS toward crystallizing, derived from
+    /// held state and its progress toward crystallizing, derived from
     /// the same deposit sheet the crystallizer reads (never a second
     /// bookkeeping). Returns (condition, held, progress, threshold):
     /// the timer conditions report ticks (insulation 480, discipline
@@ -300,8 +300,8 @@ impl World {
         }
     }
 
-    /// Has this line CLAIMED the work this node stands for? Derived
-    /// from the aspiration's witnesses — the evidence IS the node.
+    /// Has this line claimed the work this node stands for? Derived
+    /// from the aspiration's witnesses — the evidence is the node.
     pub fn work_claimed(&self, orb: u64, condition: u8) -> bool {
         let Some(name) = World::work_at(condition) else {
             return false;
@@ -326,9 +326,9 @@ impl World {
         (0u8..=last_condition())
             .filter(|condition| *condition != RE_EMERGENCE)
             .map(|condition| {
-                // The BASE tier is earned into `techs`. The UPLIFT tier
+                // The base tier is earned into `techs`. The uplift tier
                 // (7..=10) is not granted at all — a work is held when
-                // the line CLAIMED it, so the node IS the deed.
+                // the line claimed it, so the node is the deed.
                 let held = match condition >= first_work() {
                     true => self.work_claimed(orb, condition),
                     false => self
@@ -361,8 +361,8 @@ impl World {
                             .count() as u64;
                         (earned, 6)
                     }
-                    // THE UPLIFT TIER — one node per chartered work,
-                    // held on a WITNESSED claim. A deed is the upgrade.
+                    // The uplift tier — one node per chartered work,
+                    // held on a witnessed claim. A deed is the upgrade.
                     held_work if held_work >= first_work() => {
                         (u64::from(self.work_claimed(orb, condition)), 1)
                     }
@@ -380,7 +380,7 @@ impl World {
         self.chart_as(SOVEREIGN, name, source)
     }
     /// P1 — chart a charted colony on a new planet: the founding
-    /// reserves MOVE from the source colony's bank to the charted's.
+    /// reserves move from the source colony's bank to the charted's.
     /// Conservation holds — chartering mints nothing. Build scope.
     pub fn chart_as(&mut self, actor: u64, name: &str, source: u64) -> Result<u64, ActionRefused> {
         self.permitted(actor, Scope::Build)?;
@@ -427,8 +427,8 @@ impl World {
     }
     /// N4 (NS-2 RQP) — the scanner: a resonance query over this
     /// world's orb population through the {S, G} lens. The reading is
-    /// PURE and receipts NOTHING; the one mutation is the crystal draw
-    /// (NS-2 §1.5), which closes FIRST — the lens reads the committed
+    /// pure and receipts nothing; the one mutation is the crystal draw
+    /// (NS-2 §1.5), which closes first — the lens reads the committed
     /// world as it stands once open. Sovereign convenience.
     pub fn scan(&mut self, prober: u64, exemplar: u64) -> Result<crate::query::ScanRead, ActionRefused> {
         self.scan_as(SOVEREIGN, prober, exemplar)
@@ -442,8 +442,8 @@ impl World {
         prober: u64,
         exemplar: u64,
     ) -> Result<crate::query::ScanRead, ActionRefused> {
-        // P2: the standing supply the sink's EPOCH 1 rate reads,
-        // snapshotted BEFORE any orb is peeled — an owned Vec, so no
+        // P2: the standing supply the sink's epoch 1 rate reads,
+        // snapshotted before any orb is peeled — an owned Vec, so no
         // borrow of `self.orbs` is held across the mutable touch below.
         let supply = standing_supply(&self.orbs);
         self.permitted(actor, Scope::Collect)?;
@@ -457,7 +457,7 @@ impl World {
         let Some(paying) = self.orb_by_id(prober) else {
             return Err(ActionRefused::NoSuchOrb { orb: prober });
         };
-        // Affordability gated PURE before anything moves (crystals
+        // Affordability gated pure before anything moves (crystals
         // are never demurraged, so the pre-touch read is the
         // post-decay read): a refusal draws nothing, reads nothing,
         // orphans nothing.
@@ -493,7 +493,7 @@ impl World {
         let exemplar_orb = self.orb_by_id(exemplar).expect("judged above");
         let (probed, hits, refusals) = crate::query::resonance_read(exemplar_orb, &self.orbs, star);
         // G3 (NS-2 §4): the translation annotation — every candidate
-        // in ONE world shares the line's basis, so the local read
+        // in one world shares the line's basis, so the local read
         // survives whole; the cross-frame pairing composes at N5/N6
         // through the same table.
         let basis = self.genesis.as_ref().map(|held| held.perception).unwrap_or(0);
@@ -557,7 +557,7 @@ impl World {
                 have: reach,
             });
         }
-        // The genesis root is the FOUNDING receipt's digest — receipt
+        // The genesis root is the founding receipt's digest — receipt
         // 0 is the sovereign's registration and identical across all
         // worlds (measured); the founding carries the name, so every
         // world's seed is its own.
@@ -579,7 +579,7 @@ impl World {
         seed.extend_from_slice(&orb.to_le_bytes());
         seed.push(stratum);
         let mut element: [u8; 32] = blake3::hash(&seed).into();
-        // THE DEPOSIT LAW (`almanac::strata_lines`): the identity's
+        // The deposit law (`almanac::strata_lines`): the identity's
         // LINE axis (byte 3, uncorrelated with the other axes by
         // construction) is quantized to what this stratum's pressure
         // could have deposited under this star — a vein is matter the
@@ -587,9 +587,9 @@ impl World {
         // charted. Still fixed at founding per (root, orb, stratum);
         // a redraw cannot re-roll. civ_reach may still lag the drawn
         // line mid-growth (stratum 3 under G can hold line 4), so the
-        // ASSAY / REFINE ceilings keep their teeth.
+        // assay / refine ceilings keep their teeth.
         element[3] %= crate::almanac::strata_lines(stratum, class);
-        // ERA 1 (2026-10-15): a world with a sealed composition draws its vein
+        // Era 1 (2026-10-15): a world with a sealed composition draws its vein
         // from its own matter, a canonical element weighted by its share and
         // within what this stratum's pressure deposits (the deposit law, by
         // the atom's depth).
@@ -619,7 +619,7 @@ impl World {
             orb,
             stratum,
             element,
-            // ONT-2: a fresh vein has extracted NOTHING; its richness derives
+            // ONT-2: a fresh vein has extracted nothing; its richness derives
             // as `natural − 0 = natural`. The endowment (`richness` above) is
             // the geometry, carried in the receipt for the record, never stored
             // as a mutable scalar.
@@ -643,9 +643,9 @@ impl World {
         Ok(crate::dop::Prospect { element, family, tier, richness, name })
     }
     /// Seal a closure with its actor's generation tag (NS-6).
-    /// D3 (02 §2.5) — chart the star's terrain: the OPT-IN deed. The
-    /// seed is the FOUNDING receipt's digest (chronicle-seeded,
-    /// CHARTER §9), receipted once as `WorldCharted`; the tile classes
+    /// D3 (02 §2.5) — chart the star's terrain: the opt-in deed. The
+    /// seed is the founding receipt's digest (chronicle-seeded,
+    /// Charter §9), receipted once as `WorldCharted`; the tile classes
     /// derive pure from it forever. Build scope — reading the map is
     /// the surveyor's office. Uncharted stars read all Standard.
     pub fn chart_terrain(&mut self) -> Result<[u8; 32], ActionRefused> {
@@ -669,7 +669,7 @@ impl World {
         self.terrain_seed
     }
     /// PRACTICE-1: the condition window — 240, eased ×3/4 to 180
-    /// while a re-emergence lesson (condition 7) is held AND alignment
+    /// while a re-emergence lesson (condition 7) is held and alignment
     /// holds (the operator's speed boost to understanding; placeholder
     /// constants, the syntropy floor at 1/2).
     pub(super) fn deposit_window(&self) -> u64 {
@@ -687,7 +687,7 @@ impl World {
         }
     }
 
-    /// **THE ESTATE SURVEY** (tag 97, E5b — operator rulings 2026-08-05:
+    /// **The ESTATE survey** (tag 97, E5b — operator rulings 2026-08-05:
     /// *survey is a derivation of observation; observations must be
     /// witnessed; surveys must be metered*). Build scope — reading the
     /// map is the surveyor's office, the `chart_terrain` precedent.
@@ -695,17 +695,17 @@ impl World {
     /// The three theorems, enforced here in order, refusal-pure (every
     /// check before any mutation — a refusal orphans nothing):
     ///
-    /// 1. WITNESSED: one witness per orb, the digest of that orb's own
+    /// 1. Witnessed: one witness per orb, the digest of that orb's own
     ///    founding receipt (`ColonyFounded` / `ColonyCharted`), gathered
     ///    from the chronicle. An orb the chronicle cannot witness
     ///    refuses `ClaimWithoutWitness` — the LIT-1 refusal, reused
     ///    because it is the same law: a claim stands on receipts or it
     ///    does not stand.
-    /// 2. METERED: `cost = survey_meter().1 × volume`, drawn from
+    /// 2. Metered: `cost = survey_meter().1 × volume`, drawn from
     ///    `payer` before the receipt closes. Unpayable refuses
     ///    `CannotAfford` with nothing written.
-    /// 3. DERIVED: the receipt seeds from the chronicle's terminal
-    ///    digest (CHARTER §9); parcels derive pure from it forever via
+    /// 3. Derived: the receipt seeds from the chronicle's terminal
+    ///    digest (Charter §9); parcels derive pure from it forever via
     ///    [`crate::dop::parcels_of`] — see [`Self::parcels`].
     pub fn survey_estate(&mut self, payer: u64) -> Result<[u8; 32], ActionRefused> {
         self.survey_estate_as(SOVEREIGN, payer)
@@ -720,7 +720,7 @@ impl World {
         if self.orbs.is_empty() {
             return Err(ActionRefused::NoColony);
         }
-        // THEOREM 1 — the witnesses, gathered before anything moves.
+        // Theorem 1 — the witnesses, gathered before anything moves.
         let mut covered: Vec<(u64, [u8; 32])> = Vec::with_capacity(self.orbs.len());
         for held in &self.orbs {
             let witness = self
@@ -735,7 +735,7 @@ impl World {
                 .ok_or(ActionRefused::ClaimWithoutWitness { name: held.name.clone() })?;
             covered.push((held.orb_id, witness));
         }
-        // THEOREM 2 — the meter, verified post-check and drawn pre-close.
+        // Theorem 2 — the meter, verified post-check and drawn pre-close.
         let (resource, rate) = crate::dop::survey_meter();
         let cost = rate * ratio(covered.len() as i64, 1);
         let seed = self
@@ -754,7 +754,7 @@ impl World {
             });
         }
         held.bank(resource, -cost.clone());
-        // THEOREM 3 — the receipt the parcels derive from.
+        // Theorem 3 — the receipt the parcels derive from.
         self.close(
             ClosureEvent::EstateSurveyed { seed, payer, covered, cost },
             actor,
@@ -762,7 +762,7 @@ impl World {
         Ok(seed)
     }
 
-    /// **THE PARCELS — derived, never stored.** The latest survey's
+    /// **The parcels — derived, never stored.** The latest survey's
     /// receipt is the sole source: its seed and its covering, through
     /// [`crate::dop::parcels_of`]. `None` before any survey — an
     /// unsurveyed estate has no parcels, because deriving one would be
@@ -779,17 +779,17 @@ impl World {
         })
     }
 
-    /// **THE APPRAISAL** (tag 98, 2026-08-06): value derived from the
-    /// survey, at any scale of the ladder — *you have to appraise the
-    /// estate before you can put a price tag on it*. Build scope, the
+    /// **The appraisal** (tag 98, ruling of 2026-08-06): value derived
+    /// from the survey, at any scale of the ladder — the estate is
+    /// appraised before a price tag can be put on it. Build scope, the
     /// surveyor's office. Refusal-pure.
     ///
     /// T1 custody — refuses `ClaimWithoutWitness` where no survey
     /// stands, and where the subject's orb lies outside the survey's
     /// covering: the same law as the survey's own witnesses, one rung
-    /// up. T2 — the value is computed by the sealed rule and RECEIPTED
+    /// up. T2 — the value is computed by the sealed rule and receipted
     /// with the seed and covering, so the gate re-derives it from the
-    /// prior state alone. Staleness (T4) is a separate READING —
+    /// prior state alone. Staleness (T4) is a separate reading —
     /// [`Self::appraisal_stale`] — because it triggers renegotiation
     /// and never gates this deed or acceptance.
     pub fn appraise(&mut self, holding: crate::dop::Holding) -> Result<Ratio, ActionRefused> {
@@ -888,11 +888,11 @@ impl World {
         crate::dop::appraised_value(holding, &self.orbs, &parcels, star_m, &prospects)
     }
 
-    /// **STALENESS — the renegotiation trigger** (operator ruling
+    /// **Staleness — the renegotiation trigger** (operator ruling
     /// 2026-08-06: *staleness triggers renegotiation* — and never
     /// blocks acceptance, because consent closes deals). Decidable and
-    /// deliberately CONSERVATIVE at v1: an appraisal is stale the
-    /// moment ANY receipt follows it — any motion of the world dates a
+    /// deliberately conservative at v1: an appraisal is stale the
+    /// moment any receipt follows it — any motion of the world dates a
     /// valuation. `None` where no such appraisal stands.
     pub fn appraisal_stale(&self, appraisal: &[u8; 32]) -> Option<bool> {
         // An appraisal among the held receipts is stale once any receipt

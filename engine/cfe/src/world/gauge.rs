@@ -1,10 +1,10 @@
-//! THE GAUGE — the frame, its graded shifts, divergence and
+//! The GAUGE — the frame, its graded shifts, divergence and
 //! confluence, veils and shields.
 
 use super::*;
 
 impl World {
-    /// THRESHOLD-1: has this world made the CROSSING — its first
+    /// THRESHOLD-1: has this world made the crossing — its first
     /// receipted aperture deed? Council eligibility reads here.
     pub fn has_crossed(&self) -> bool {
         self.crossed
@@ -19,21 +19,21 @@ impl World {
     pub fn gauge(&self) -> &Ratio {
         &self.gauge[0]
     }
-    /// GAUGE-N: the WHOLE key — the graded vector of wrapped planes.
+    /// GAUGE-N: the whole key — the graded vector of wrapped planes.
     /// Its length is the world's opened dimensionality (derived from
     /// receipts, never stored beyond them).
     pub fn key(&self) -> &[Ratio] {
         &self.gauge
     }
-    /// GAUGE-N (11 §2.1): move — or OPEN — the key at a grade. A
-    /// shift at an unopened grade GROWS the vector (zeros fill the
+    /// GAUGE-N (11 §2.1): move — or open — the key at a grade. A
+    /// shift at an unopened grade grows the vector (zeros fill the
     /// gap: unopened planes rest at ground); the receipt carries the
     /// wrapped value. Grade 0 through this door is lawful and lands
     /// tag 55; the landed grade-0 deeds keep tag 42.
     pub fn shift_gauge_at(&mut self, grade: u16, gauge: Ratio) -> Result<(), ActionRefused> {
         let at = grade as usize;
-        // GAUGE-N refinement (the growth law, 11 §2.1): OPENING a
-        // plane is EARNED — one receipted mint per new dimension. A
+        // GAUGE-N refinement (the growth law, 11 §2.1): opening a
+        // plane is earned — one receipted mint per new dimension. A
         // mint is dimensional growth already receipted: a crystallized
         // or granted node (condition ≥ 1), a divergence, a confluence.
         // Moving an already-open plane stays free.
@@ -67,15 +67,15 @@ impl World {
     }
     /// AEON-1a (11 §2.1): move the key. The value wraps onto [0, 1) —
     /// the fiber is a circle, not a line; the receipted value is the
-    /// WRAPPED one, so replay never re-derives the wrap.
+    /// wrapped one, so replay never re-derives the wrap.
     pub fn shift_gauge(&mut self, gauge: Ratio) {
         let wrapped = wrap_gauge(gauge);
         self.gauge[0] = wrapped.clone();
         self.close(ClosureEvent::GaugeShifted { gauge: wrapped }, SOVEREIGN);
     }
-    /// AEON-1a (11 §3): DIVERGENCE — this line cleaves; a peer branch
+    /// AEON-1a (11 §3): divergence — this line cleaves; a peer branch
     /// departs under `branch`, and this world's own key moves by
-    /// `delta` (the branch takes the opposite phase in ITS chronicle —
+    /// `delta` (the branch takes the opposite phase in its chronicle —
     /// annex, never merge; the caller founds it).
     pub fn diverge(&mut self, branch: &str, delta: Ratio) {
         let gauge = wrap_gauge(self.gauge[0].clone() + delta);
@@ -88,7 +88,7 @@ impl World {
     /// MASK-1a (14 §4) — draw the veil: renders cloud from here on
     /// (the chronicle never lies; the Watchers read through). A
     /// standing joule toll settles at every collect; an unpayable
-    /// toll LIFTS the veil by receipt. Build scope.
+    /// toll lifts the veil by receipt. Build scope.
     pub fn draw_veil(&mut self) -> Result<(), ActionRefused> {
         self.draw_veil_as(SOVEREIGN)
     }

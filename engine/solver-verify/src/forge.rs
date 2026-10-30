@@ -1,16 +1,16 @@
 //! N-FORGE — the puzzle forge (the Infinite ARC).
 //!
 //! Beacon-seeded task generation: the previous receipt digest
-//! (CHARTER §9 — randomness is a reading of history) deterministically
+//! (Charter §9 — randomness is a reading of history) deterministically
 //! forges a fresh transformation task. Same digest, same difficulty →
 //! byte-identical task on every machine; a different chronicle forges
 //! a different task — the stream is endless and non-precomputable.
 //!
-//! THE BOUNDARY LAW (ruled 2026-07-25): the forge allocates REWARDS
-//! and paces difficulty; it is NEVER a security primitive. Security
+//! The boundary law (ruled 2026-07-25): the forge allocates rewards
+//! and paces difficulty; it is never a security primitive. Security
 //! stays on real primitives (BLAKE3 chains, replayable validity,
 //! NS-7 anchoring). No confidentiality claim is made or implied by a
-//! transformation word — our own `coboundary_reduce` strips frame
+//! transformation word — this engine's own `coboundary_reduce` strips frame
 //! distortion in polynomial time, and any "spatial cipher" collapses
 //! the same way.
 
@@ -57,66 +57,66 @@ impl Difficulty {
         (0..).find(|&n| !Difficulty::climbs(n)).unwrap_or(0)
     }
 
-    /// **WHICH LADDER RUNG THIS SHAPE IS** — `None` if it is none of
+    /// **Which ladder RUNG this shape is** — `None` if it is none of
     /// them.
     ///
-    /// This is what a price may be read from. A shape is matched WHOLE
+    /// This is what a price may be read from. A shape is matched whole
     /// against the ladder, so a payload still cannot name its own price
     /// by inventing a convenient difficulty — the anti-self-pricing
     /// defence is unchanged. What changes is what the gate is handed:
     /// a POSITION, not a matrix.
     ///
-    /// **Why (operator ruling 2026-08-04: *`Grid` should fall out,
-    /// because we aren't building a matrix*).** `mint_bound` used to
+    /// **Why (ruling of 2026-08-04: `Grid` falls out, because the
+    /// engine is not building a matrix).** `mint_bound` used to
     /// match the whole `Difficulty` — so `rows` and `cols`, the
     /// dimensions of an ARC grid, were literally part of the gate's
-    /// price lookup. That is THE MOTION clause 5's failure: *ARC is a
-    /// TYPE of work, not the only type; the machinery must be
+    /// price lookup. That is the motion clause 5's failure: *ARC is a
+    /// type of work, not the only type; the machinery must be
     /// work-CLASS generic, never grid-specific.* It was proved the same
     /// day by having to invent a whole parallel `VolDifficulty` with a
     /// `layers` field, because a three-dimensional rung cannot be
     /// spelled in planar fields.
     ///
-    /// A rung is class-independent. The SHAPE stays here, where the
+    /// A rung is class-independent. The shape stays here, where the
     /// forge needs it; only the position crosses to the gate.
     pub fn rung(&self) -> Option<u32> {
         (0..=Difficulty::top()).find(|&n| Difficulty::level(n) == *self)
     }
 
-    /// **DOES THE LADDER STILL RISE ABOVE `level`?**
+    /// **Does the ladder still rise above `level`?**
     ///
     /// Read from the ladder itself: a rung climbs while the next rung
-    /// is a DIFFERENT rung. [`Difficulty::level`]'s catch-all arm makes
+    /// is a different rung. [`Difficulty::level`]'s catch-all arm makes
     /// every level at or above the top structurally identical, so
-    /// equality IS saturation and needs no constant to say so.
+    /// equality is saturation and needs no constant to say so.
     ///
     /// **This replaces `level < 5` at its call sites** (operator ruling
     /// 2026-08-04). That constant was not even the real bound — it
-    /// restated the ladder's own saturation as a magic number, and a
+    /// restated the ladder's own saturation as a hard-coded constant, and a
     /// number restating a structure is a second truth that can drift
     /// from it. Add a rung to `level` and every caller follows; nothing
     /// needs to be told.
-    /// **Compared against SATURATION, not against the next rung.** The
+    /// **Compared against saturation, not against the next rung.** The
     /// first derivation asked `level(n+1) != level(n)` and was wrong at
     /// the bottom: rungs 0 and 1 are deliberately the same opening
-    /// rung, so it read "nothing above me" at the very start of the
+    /// rung, so it read "nothing above this rung" at the very start of the
     /// ladder. A plateau is not a ceiling. The saturated rung is
     /// whatever the catch-all arm returns, so ask for it directly.
     pub fn climbs(level: u32) -> bool {
         Difficulty::level(level) != Difficulty::level(u32::MAX)
     }
 
-    /// THE DEGENERACY LAW, given a name (2026-08-04).
+    /// The degeneracy law, given a name (2026-08-04).
     ///
-    /// [`forge_task`] PANICS on a degenerate rung — `rows`/`cols` of 0
+    /// [`forge_task`] panics on a degenerate rung — `rows`/`cols` of 0
     /// drive `Grid::new(..).expect(..)` — and the fields are `pub`, so
     /// the type cannot refuse them at construction. The guard therefore
     /// lives at every decode door, and it lived as an inline condition
-    /// inside `decode_work` alone: correct, but unnamed, so a SECOND
+    /// inside `decode_work` alone: correct, but unnamed, so a second
     /// decode path (work-shapes v2, the corpus registry) could forget
-    /// it and reopen audit HOLE B. One name, called by every door.
+    /// it and reopen audit hole B. One name, called by every door.
     ///
-    /// `word_len: 0` is LAWFUL and deliberately admitted — the empty
+    /// `word_len: 0` is lawful and deliberately admitted — the empty
     /// secret word is the identity task, and a copy task is a task.
     /// `train_pairs: 0` is not: a replay over no pairs proves nothing
     /// (the vacuity closed in `98ccbbe`).
@@ -126,11 +126,11 @@ impl Difficulty {
 }
 
 impl Difficulty {
-    /// FORGE-2a (14_CREEDS §4): the difficulty VECTOR derived from the
+    /// FORGE-2a (14_CREEDS §4): the difficulty vector derived from the
     /// line's discrete moduli — open gauge planes, crystallized
     /// doctrine, the crossing. Exact integers in, one deterministic
     /// rung out; no floats, no curvature, no stored moduli (the graded
-    /// key IS the moduli, receipted at every shift). A READ only: the
+    /// key is the moduli, receipted at every shift). A READ only: the
     /// static ladder still drives the live forge until the wiring
     /// lands (network-rate adjustment at N6, the ladder's own law).
     /// Every coefficient is a placeholder parameter.
@@ -212,7 +212,7 @@ fn sample_grid(beacon: &Beacon, difficulty: &Difficulty, pair: usize) -> Grid {
 
 /// The forge's secret word for a digest: each op drawn from its own beacon
 /// samples (`forge.family.{slot}`, then the family's own labels). A carried
-/// word is CHECKED against its digest by drawing the same samples, slot by
+/// word is checked against its digest by drawing the same samples, slot by
 /// slot — the samples, never the task, are what is re-read.
 pub fn forge_word(digest: [u8; 32], difficulty: Difficulty) -> Program {
     let beacon = Beacon::from_digest(digest);
@@ -226,7 +226,7 @@ pub fn forge_input(digest: [u8; 32], difficulty: Difficulty, pair: usize) -> Gri
 }
 
 /// Forge one task from a chronicle digest. The secret word is sampled,
-/// applied to freshly sampled inputs, then DISCARDED — the task
+/// applied to freshly sampled inputs, then discarded — the task
 /// carries only observations; finding A word that closes them is the
 /// solver's work (it need not be the forged one; the verifier is the
 /// authority either way).

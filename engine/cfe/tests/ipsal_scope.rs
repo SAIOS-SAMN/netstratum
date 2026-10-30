@@ -53,7 +53,7 @@ fn an_agent_acts_only_inside_its_grant() {
         Err(ActionRefused::NotPermitted { entity: bot, scope: Scope::Build }),
         "a grant is a scope, not a blanket"
     );
-    // The agent's receipts carry ITS tag, not the sovereign's.
+    // The agent's receipts carry its tag, not the sovereign's.
     let last = world.chronicle().receipts().last().expect("collected");
     assert_eq!(last.provenance(), vec![bot], "generation-tagged to the forging agent");
 }

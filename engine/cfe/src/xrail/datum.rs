@@ -1,6 +1,6 @@
 //! X7.3 — Datum-style multi-axial court claim verify (local pure stand-in).
 //!
-//! Full POW++ lives in the datum repo; here we verify a **multi-axial close
+//! Full PoW++ lives in the datum repo; this module verifies a **multi-axial close
 //! envelope**: magic · axes seal · work digest · amount. Reward only when
 //! all axes present and amount positive — no free mint on thin claims.
 

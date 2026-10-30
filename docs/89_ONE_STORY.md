@@ -133,7 +133,7 @@ arise from what they do (`tiers`, `ancients`, `ascension`, `realms`). ✔
 step on: docs/82's `L_s → a_crest → C_ws → C_sg` (◐) is that law refined by
 the lock (`lock_step` finds q but never exports it).
 
-**B3. My recent parallel pieces** ✘ (2026-10-21/22), all stacked on B1:
+**B3. The recent parallel pieces** ✘ (2026-10-21/22), all stacked on B1:
 `life::wild` (land from `T`), `geoid::flux_share`/`latitude` (a meridian
 spread of `T`), `geoid::shear`/`figure` and `Body.own` (a radial-line shear,
 not the sphere), `seating::Site.wild/latitude/figure`, `PolitySpec.wild/

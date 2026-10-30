@@ -5,8 +5,8 @@ edition = "2021"
 license.workspace = true
 description = "The exact-ℚ algebra: fields, polynomials, planes, the {S,G,T} volume, the CGA multivector. No cognition, no modality — vendored from ipsal-autic-v0.4 (IAE-1)."
 
-# THE GEOMETRIC GROUND. Vendored whole (the operator's IAE-1 ruling:
-# geometry first, not the abelian chain shadow). It sits BELOW iae's
+# The geometric Ground. Vendored whole (the operator's IAE-1 ruling:
+# geometry first, not the abelian chain shadow). It sits below iae's
 # cognition exactly as `ratio` sits below `cfe` — pure exact-rational
 # Clifford algebra, no game state, no I/O. The transport pair Φ/Φ⁻¹ is
 # built on the multivector here; the reduction/chain carrier lands later.

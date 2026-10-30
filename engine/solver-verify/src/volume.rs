@@ -1,32 +1,32 @@
-//! THE VOLUMETRIC VERIFIER — work-shapes v3 (operator ruling
+//! The volumetric verifier — work-shapes v3 (operator ruling
 //! 2026-08-04, lifting C8's deferral).
 //!
 //! A `Volume` is a stack of congruent grids. The vocabulary stays
-//! GENERAL — planar symmetries applied per layer, plus two stack
+//! general — planar symmetries applied per layer, plus two stack
 //! operators — so no task knowledge exists on any path here.
 //!
-//! **WHAT CHANGED.** C8 (2026-08-01) ruled the volumetric tier
-//! DECORATIVE: `seal_volume` was a bare digest nobody could re-derive,
+//! **What changed.** C8 (2026-08-01) ruled the volumetric tier
+//! decorative: `seal_volume` was a bare digest nobody could re-derive,
 //! tamper-evidence for no one, and no volumetric deed could mint. That
-//! deferral is now LIFTED — volumetric work is an economic axis, so it
+//! deferral is now lifted — volumetric work is an economic axis, so it
 //! needs a real verifier, and this is it.
 //!
-//! **THE SPLIT, mirroring U1a.** This module holds exactly what a
-//! REPLAY needs: the volume carrier, the one apply path, the
-//! deterministic forge, and a parent-linked certificate. The SEARCH
+//! **The split, mirroring U1a.** This module holds exactly what a
+//! replay needs: the volume carrier, the one apply path, the
+//! deterministic forge, and a parent-linked certificate. The search
 //! (`solver::volume::solve_volume`) stays prover-side, free and
 //! non-constitutional. Finding is expensive; checking is O(word).
 //!
-//! **SIMPLER THAN CORPUS v2, and for a structural reason.** A
-//! volumetric task is FORGE-ONLY: it re-derives from its digest, so the
+//! **Simpler than corpus v2, and for a structural reason.** A
+//! volumetric task is forge-only: it re-derives from its digest, so the
 //! gate needs nothing but the digest to know the task is real. There
 //! is no admissible-set problem, no Merkle root, no inclusion path —
 //! all of which corpus work needs precisely because observed content
 //! cannot be re-derived. Volumetric work is v1's shape in three
 //! dimensions.
 //!
-//! **THE VACUITY IS STRUCTURALLY IMPOSSIBLE HERE, not merely guarded.**
-//! `VolDifficulty::well_formed` refuses a degenerate rung at DECODE, before
+//! **The vacuity is structurally impossible here, not merely guarded.**
+//! `VolDifficulty::well_formed` refuses a degenerate rung at decode, before
 //! any forge or replay runs, so a payload claiming zero training pairs
 //! (whose "maps every pair" would be vacuously true — a free mint) is
 //! not a payload at all. The same law as `Difficulty::well_formed`, and the
@@ -66,7 +66,7 @@ impl Volume {
 /// The volumetric vocabulary — general operators only.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum VOp {
-    /// One planar op applied to EVERY layer identically.
+    /// One planar op applied to every layer identically.
     PerLayer(Op),
     /// Reverse the layer order (top↔bottom mirror).
     FlipStack,
@@ -102,7 +102,7 @@ impl VOp {
 
 pub type VProgram = Vec<VOp>;
 
-/// THE ONE APPLY PATH. A replay must apply every operator a program may
+/// The one apply path. A replay must apply every operator a program may
 /// carry — the same law that kept the object ops verifier-side.
 pub fn run_volume(program: &VProgram, input: &Volume) -> Volume {
     let mut v = input.clone();
@@ -153,11 +153,11 @@ impl VolDifficulty {
             .unwrap_or(0)
     }
 
-    /// **WHICH VOLUMETRIC RUNG THIS SHAPE IS** — the counterpart of
+    /// **Which volumetric RUNG this shape is** — the counterpart of
     /// [`crate::forge::Difficulty::rung`], and the reason a rung is the
     /// right pricing key at all.
     ///
-    /// Volumetric and planar shapes share NO fields — one carries
+    /// Volumetric and planar shapes share no fields — one carries
     /// `layers`, the other does not — but they share the idea of a
     /// POSITION on a ladder. Price the position and one function serves
     /// both classes; price the shape and every new work class needs its
@@ -166,20 +166,20 @@ impl VolDifficulty {
         (0..=VolDifficulty::top()).find(|&n| VolDifficulty::level(n) == *self)
     }
 
-    /// THE DEGENERACY LAW, volumetric — the counterpart of
+    /// The degeneracy law, volumetric — the counterpart of
     /// [`crate::forge::Difficulty::well_formed`], named for the same reason.
     ///
-    /// A rung with no layer, no row, no column, or NO TRAINING PAIR is
+    /// A rung with no layer, no row, no column, or no training pair is
     /// refused at decode, before the forge is ever called. Each field
     /// closes a distinct hole:
     /// - `train_pairs: 0` — the vacuity, and the exploitable one: "maps
-    ///   EVERY training pair" is true over no pairs, so an empty program
+    ///   every training pair" is true over no pairs, so an empty program
     ///   would verify and mint for nothing;
     /// - `rows`/`cols`/`layers` of 0 — the forge's `Grid::new(..)
-    ///   .expect(..)` and `Volume::new(..).expect(..)` PANIC, which is a
-    ///   totality violation inside the gate (audit HOLE B's class).
+    ///   .expect(..)` and `Volume::new(..).expect(..)` panic, which is a
+    ///   totality violation inside the gate (audit hole B's class).
     ///
-    /// `word_len: 0` is LAWFUL and deliberately admitted: the empty word
+    /// `word_len: 0` is lawful and deliberately admitted: the empty word
     /// is the identity task, and a copy task is a task.
     pub fn well_formed(&self) -> bool {
         self.layers > 0 && self.rows > 0 && self.cols > 0 && self.train_pairs > 0
@@ -230,7 +230,7 @@ fn sample_volume(beacon: &Beacon, d: &VolDifficulty, pair: usize) -> Volume {
 /// the planar forge: the secret word renders the observations, then is
 /// discarded; the verifier is the authority.
 ///
-/// PRECONDITION: `difficulty.well_formed()`. Every decode door checks it
+/// Precondition: `difficulty.well_formed()`. Every decode door checks it
 /// first, so the `expect`s above are unreachable from a payload.
 pub fn forge_volume(digest: [u8; 32], difficulty: VolDifficulty) -> VolumeTask {
     let beacon = Beacon::from_digest(digest);
@@ -267,13 +267,13 @@ pub(crate) fn hash_volume(hasher: &mut blake3::Hasher, v: &Volume) {
     }
 }
 
-/// THE VOLUMETRIC CERTIFICATE — a real parent-linked chain, replacing
+/// The volumetric certificate — a real parent-linked chain, replacing
 /// the bare digest C8 correctly called decorative.
 ///
 /// Same shape as [`crate::certificate::SolveCertificate`]: the genesis
 /// binds the whole observation, each step binds one transformation, the
 /// final digest binds the rendered output. Tampering with any link
-/// diverges every digest after it, and the divergence is NAMED.
+/// diverges every digest after it, and the divergence is named.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct VolumeCertificate {
     pub genesis: [u8; 32],

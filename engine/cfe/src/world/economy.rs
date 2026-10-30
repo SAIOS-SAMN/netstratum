@@ -1,4 +1,4 @@
-//! ECONOMY DEEDS — collect, transfer, absorb, offers, the purse.
+//! Economy deeds — collect, transfer, absorb, offers, the purse.
 //!
 //! Every deed here touches banked value, so every one of them settles
 //! demurrage at the touch through `super::rules`. That is the organ's
@@ -12,7 +12,7 @@ impl World {
     pub fn offers(&self) -> &[Offer] {
         &self.offers
     }
-    /// MARKET-1 / E-MKT-1: POST an offer — a receipted intent to give
+    /// MARKET-1 / E-MKT-1: post an offer — a receipted intent to give
     /// one cargo for another at an exact-rational price (want/give —
     /// no absolute price, guardrail 6). Cargo is Resource or Element.
     /// No escrow: the fill gates affordability when a crossing clears.
@@ -26,7 +26,7 @@ impl World {
     ) -> Result<(), ActionRefused> {
         // The reflexive trade and the non-positive amounts died at the
         // `Exchange` and `Positive` doors (29_CONSTRUCTION); the
-        // fresh-id FACT keeps its own name.
+        // fresh-id fact keeps its own name.
         let give = pair.give();
         let want = pair.want();
         let give_amount = give_amount.value().clone();
@@ -62,18 +62,18 @@ impl World {
         );
         Ok(())
     }
-    /// **CONVEY** (tag 100, 2026-08-06): the postal deed — the estate
+    /// **Convey** (tag 100, 2026-08-06): the postal deed — the estate
     /// chain's last link. World-contained (cross-world rides the
     /// aperture pair). Refusal-pure, checks in address → cap → afford
     /// order:
     ///
-    /// 1. ADDRESS: both endpoints must stand in the standing survey's
-    ///    covering — a postal address IS a surveyed parcel
+    /// 1. Address: both endpoints must stand in the standing survey's
+    ///    covering — a postal address is a surveyed parcel
     ///    (`ClaimWithoutWitness`, the custody refusal's fourth use).
-    /// 2. MONETARY CAP: the ask may not exceed the sender parcel's
+    /// 2. Monetary cap: the ask may not exceed the sender parcel's
     ///    monetary portion of its bank — the free portion stays home
     ///    (`ConveyExceedsMonetary`).
-    /// 3. POSTAGE: `postal_meter().1 × amount`, drawn from the sender
+    /// 3. Postage: `postal_meter().1 × amount`, drawn from the sender
     ///    with the amount, burned like upkeep — the amount arrives
     ///    whole (`CannotAfford` when bank < amount + postage).
     pub fn convey(
@@ -85,7 +85,7 @@ impl World {
         self.convey_as(SOVEREIGN, route, resource, amount)
     }
 
-    /// NATIVE TO THE FOURTH KILL: `Between` proves the postal route has
+    /// Native to the fourth elimination: `Between` proves the postal route has
     /// two distinct endpoints and `Positive` proves the amount — a
     /// self-conveyance and a zero conveyance are not deeds that can be
     /// asked for. The old `BadTransfer` arm died with the shapes it
@@ -175,7 +175,7 @@ impl World {
         Ok(())
     }
 
-    /// **RCP-2 F2 — THE BUILT-RECIPE YIELD at a collect touch.** Every
+    /// **RCP-2 F2 — the built-recipe yield at a collect touch.** Every
     /// emergent recipe a society has raised on this orb delivers its
     /// `yield_of_role` of the role's resource per beat; over the `dt` beats
     /// since `last_touch` it yields `yield_of_role · dt`, folded into this
@@ -183,7 +183,7 @@ impl World {
     /// (no new deed, SEAL-B-safe — the rejuvenation/population pattern).
     /// A role with no bankable home yet (`role_resource` → `None`) yields
     /// nothing — the honest hole. Empty for a world that raised no recipe, so
-    /// a v1 world is byte-identical. Read BEFORE the peel, like every other
+    /// a v1 world is byte-identical. Read before the peel, like every other
     /// touch-delta, so no borrow of `self.orbs` is held across it.
     fn recipe_yield_at_touch(&self, orb: u64, stamp: u64) -> Vec<(Resource, Ratio)> {
         let Some(held) = self.orb_by_id(orb) else {
@@ -217,8 +217,8 @@ impl World {
         self.collect_as(SOVEREIGN, FIRST_ORB)
     }
     pub fn collect_as(&mut self, actor: u64, orb: u64) -> Result<usize, ActionRefused> {
-        // P2: the standing supply the sink's EPOCH 1 rate reads,
-        // snapshotted BEFORE any orb is peeled — an owned Vec, so no
+        // P2: the standing supply the sink's epoch 1 rate reads,
+        // snapshotted before any orb is peeled — an owned Vec, so no
         // borrow of `self.orbs` is held across the mutable touch below.
         let supply = standing_supply(&self.orbs);
         self.permitted(actor, Scope::Collect)?;
@@ -226,7 +226,7 @@ impl World {
             return Err(ActionRefused::NoColony);
         }
         // MASK-1a: the veil's standing toll settles at the touch — an
-        // unpayable toll LIFTS the veil by receipt, never silently.
+        // unpayable toll lifts the veil by receipt, never silently.
         if self.veiled {
             let toll = crate::parameter::of(self.chronicle(), crate::parameter::Parameter::VeilToll);
             let held_joules = self
@@ -259,25 +259,25 @@ impl World {
             self.chronicle(),
             crate::parameter::Parameter::EncasementThroughput,
         );
-        // REJUVENATION (task #28) / QUARANTINE DECAY (task #30): the
-        // natural ration's delta since the last touch settles HERE — a
-        // recovery CREDIT for a free world, a starving DEBIT for a
+        // Rejuvenation (task #28) / quarantine decay (task #30): the
+        // natural ration's delta since the last touch settles here — a
+        // recovery credit for a free world, a starving debit for a
         // quarantined one — the exact mirror of the demurrage decay
-        // `touch()` seals just below, computed BEFORE the touch so it
+        // `touch()` seals just below, computed before the touch so it
         // reads the old `last_touch`. It folds into this touch's own
         // yield receipt (no deed of its own — the §2 digest rides the
         // settled amount), so replay banks it straight from the receipt
         // and `last_touch` advances by the same carrier.
         // ING-2b PERF: resolve this line's ration (the almanac-staple scan,
-        // `ration_of`) ONCE for the whole touch and thread it through both the
+        // `ration_of`) once for the whole touch and thread it through both the
         // rejuvenation settle and the population delta (and its `natural`
         // recursion), instead of each reader re-resolving it — the same value,
         // computed once. The staple depends only on the (unchanging this
         // touch) prospects/genesis, so this is a pure memoization.
         let ration = self.ration_of(orb);
         let rejuvenated = self.ration_touch_delta_with(orb, self.clock.now(), ration.clone());
-        // POPULATION (task #40/#41/#42): the elastic population eats its
-        // ration, births from the surplus, and turns over — computed HERE
+        // Population (task #40/#41/#42): the elastic population eats its
+        // ration, births from the surplus, and turns over — computed here
         // from the pre-touch state (the old `last_touch`, the old bank),
         // exactly as the regrowth is. The food eaten folds into this
         // touch's ration as a debit (`pop_consumed`); the net headcount
@@ -289,19 +289,19 @@ impl World {
         // its own ElementFarmed receipt after the touch. `None` for every
         // non-eater, so a v1 world is byte-identical.
         let farm = self.element_farm_at_touch(orb, self.clock.now());
-        // G2 TRACE (2026-08-14): the trace elements the population burns
+        // G2 trace (2026-08-14): the trace elements the population burns
         // maintaining its substrate this span — read pre-touch (over the
         // span just ended), settled as `TraceConsumed` debits after the
         // touch. Empty for a world with no veins or no population, so it is
         // byte-identical.
         let trace = self.trace_consumption_at_touch(orb, self.clock.now());
-        // TAXATION (49 §5): the welfare OUTFLOW is read HERE, before the
+        // Taxation (49 §5): the welfare outflow is read here, before the
         // touch advances `last_touch` — the demand it funds is measured
         // over the span just ended (the same pre-touch reading as the
         // population and the regrowth). Applied to the treasury after the
         // touch, at the same stamp.
         let welfare = self.welfare_spend(orb, self.clock.now());
-        // TAXATION (49 §4): the estate tax at a GENERATION TURNOVER — every
+        // Taxation (49 §4): the estate tax at a generation turnover — every
         // L beats a generation turns and its population-proportional estate
         // is taxed to the treasury. The boundaries crossed this span are
         // read from the pre-touch `last_touch` (like the welfare/population),
@@ -310,7 +310,7 @@ impl World {
         let last_touch = self.orb_by_id(orb).map(|held| held.last_touch).unwrap_or(0);
         let generations = self.clock.now() / lifespan - last_touch / lifespan;
         let estate = self.estate_due_at_touch(orb, generations);
-        // TAXATION (49 §3): the continuity levy — practices the line does
+        // Taxation (49 §3): the continuity levy — practices the line does
         // not keep across the same generation turnover lapse to the void.
         let lapse = self.continuity_lapse_at_touch(generations);
         // RCP-2 F2: the built recipes' yield over the span just ended — read
@@ -330,11 +330,11 @@ impl World {
                 false => *owner != orb,
             }
         });
-        // ONT-2b: the food settle rides whichever CARRIER this line's ration
+        // ONT-2b: the food settle rides whichever carrier this line's ration
         // is. A Resource ration folds into `settleable` (YieldCollected, as
         // ever). An almanac-ELEMENT staple no longer routes through the element
-        // BANK — the vein IS the larder: the band's `bank_draw` this span (the
-        // demand beyond the free wild flow) is captured here and MINED from the
+        // bank — the vein is the larder: the band's `bank_draw` this span (the
+        // demand beyond the free wild flow) is captured here and mined from the
         // staple vein after the touch (`StapleMined`, `extracted += eaten`).
         // `(element, bank_draw)`; resolved to the floored, richness-capped
         // `eaten` below. A Resource line leaves it `None`, byte-identical.
@@ -351,8 +351,8 @@ impl World {
                         None => settleable.push((resource, grown)),
                     }
                 }
-                // ONT-2b: element REGROWTH no longer feeds the food economy —
-                // the vein is a FINITE larder that boom-busts (no regeneration
+                // ONT-2b: element regrowth no longer feeds the food economy —
+                // the vein is a finite larder that boom-busts (no regeneration
                 // until ONT-3 #109, and folding the collapse-prone regrowth
                 // logistic here is the very ONT-3 scalar this arc eradicates).
                 // Food is mined from the vein by eating (below); the grown
@@ -361,22 +361,22 @@ impl World {
             }
         }
         // Fold the food the population ate this span into the same touch as
-        // a DEBIT — the mirror of the regrowth credit. The population's
-        // `consumed` is computed against what it BELIEVED was available
+        // a debit — the mirror of the regrowth credit. The population's
+        // `consumed` is computed against what it believed was available
         // (bank + harvested + natural, rejuvenation.rs), but a colony can
         // hold people while its harvest fails to materialise this touch —
         // so the belief can outrun the coin actually in hand. A mind may
-        // only ever eat what STANDS: the pre-touch bank plus the credits
+        // only ever eat what stands: the pre-touch bank plus the credits
         // this same touch banks (yield + regrown). Clamp the debit to that
         // ceiling so the settled bank can never cross zero — a starving
         // colony eats itself to empty and stops, it does not overdraw and
         // strike a negative-amount famine the kernel must refuse. The
-        // element carrier holds the SAME law against the element larder.
+        // element carrier holds the same law against the element larder.
         // SOURCE-1: the draw dispatches on the primary FoodSource the population
-        // read (not `match ration`) — the source's OWN nature says how eating it
-        // depletes it. A Resource BANK debits (clamped to what stands); a mineral
-        // VEIN is mined (captured here, extracted below). A new source kind (a
-        // FLUX field, #29) adds an arm here, not a fork through the economy.
+        // read (not `match ration`) — the source's own nature says how eating it
+        // depletes it. A Resource bank debits (clamped to what stands); a mineral
+        // vein is mined (captured here, extracted below). A new source kind (a
+        // flux field, #29) adds an arm here, not a fork through the economy.
         if let Some((_, source, consumed)) = &population {
             match source {
                 FoodSource::Bank { resource, .. } => {
@@ -392,9 +392,9 @@ impl World {
                         None => settleable.push((*resource, -eaten)),
                     }
                 }
-                // ONT-2b: eating MINES the staple vein. The band's `bank_draw`
+                // ONT-2b: eating mines the staple vein. The band's `bank_draw`
                 // this span (the demand beyond the free wild flow) is captured
-                // here and extracted from the staple vein after the touch — NOT
+                // here and extracted from the staple vein after the touch — not
                 // debited from the element bank (the bank is bypassed for food;
                 // the vein is the larder). The richness cap and lattice floor
                 // are applied against the live vein below, where `StapleMined`
@@ -425,17 +425,17 @@ impl World {
             .as_ref()
             .map(|(_, draw)| *draw > ratio(0, 1))
             .unwrap_or(false);
-        // #138 THE RESOURCE GRAIN, THE GATE'S OWN GRAIN — `settleable`
-        // being non-empty is not enough: every entry in it (yield OR
+        // #138 the resource GRAIN, the gate's own GRAIN — `settleable`
+        // being non-empty is not enough: every entry in it (yield or
         // upkeep draw) smelts to the 1/1024 grain below, and a sub-grain
         // entry banks nothing and receipts nothing. `touch()` anchors
         // `last_touch` unconditionally the moment it is called — its own
-        // law is "a zero-due touch still anchors silently, the CARRIER
-        // DEED'S OWN REPLAY ARM carries the anchor" — so calling it over
+        // law is "a zero-due touch still anchors silently, the carrier
+        // deed's own replay arm carries the anchor" — so calling it over
         // a `settleable` that smelts to nothing entirely breaks that
         // promise: no receipt follows, live marches on, replay never
         // hears it (the last_touch divergence `lineage_pins` pinned).
-        // Gate on SURVIVES-THE-GRAIN, not merely non-empty.
+        // Gate on survives-the-GRAIN, not merely non-empty.
         let settles_on_grain = settleable.iter().any(|(_, amount)| {
             let magnitude = match *amount >= ratio(0, 1) {
                 true => amount.clone(),
@@ -446,7 +446,7 @@ impl World {
         if !settles_on_grain && farm.is_none() && !staple_mines {
             return Err(ActionRefused::NothingAccrued);
         }
-        // TAXATION (49 §5): the taxable throughput this touch — the net
+        // Taxation (49 §5): the taxable throughput this touch — the net
         // yield banked (positive lines only), the Trade base a
         // Touch-triggered revenue levy draws on. Snapshotted here, before
         // the receipts consume `settleable`; the levy settles into the
@@ -490,17 +490,17 @@ impl World {
             false => true,
         });
         if friction > ratio(0, 1) {
-            // ENCASEMENT FIRST, now obeyed here too (`EQUATIONS` T3,
+            // Encasement first, now obeyed here too (`EQUATIONS` T3,
             // 05 §1.2; operator ruling 2026-08-03: friction entropy is
             // thermodynamically identical to thermal entropy — the same
             // physical currency, so the same capture law).
             //
             // This block used to vent 100% straight to the void while
             // writing into the very ledger whose own law puts capture
-            // FIRST. Heat is encased and only the overflow disperses;
+            // first. Heat is encased and only the overflow disperses;
             // friction declined that arm rather than lacking one.
             //
-            // NO INVENTED CONSTANT: the shells, their throughput and
+            // No invented constant: the shells, their throughput and
             // the TECH-1b discipline boon are read exactly as the
             // per-tick heat path reads them.
             let shells = held
@@ -519,7 +519,7 @@ impl World {
             let captured = friction.clone().min(throughput);
             let overflow = friction - captured.clone();
 
-            // THE SYNTROPIC ARM, FIRST. Captured friction is encased
+            // The syntropic arm, first. Captured friction is encased
             // exactly as captured heat is — it banks joules and rides
             // the existing `YieldCollected` receipt, which is what feeds
             // `encased_entries` and `heat_encased_of`. No new deed.
@@ -536,9 +536,9 @@ impl World {
                     vec![actor],
                 );
             }
-            // THE ENTROPIC ARM: only the overflow vents.
+            // The entropic arm: only the overflow vents.
             //
-            // `FrictionSettled` now carries THE VENTED PART, not the
+            // `FrictionSettled` now carries the vented part, not the
             // total — replay does `entropy_vented += amount` verbatim
             // and must never recompute physics, so a receipt naming the
             // whole cost would vent the captured half a second time on
@@ -561,21 +561,21 @@ impl World {
         for (resource, amount) in settleable {
             match amount >= ratio(0, 1) {
                 true => {
-                    // #138 THE RESOURCE GRAIN — a yield lands on the 1/1024
+                    // #138 the resource GRAIN — a yield lands on the 1/1024
                     // resource grain at its fill site. Yields fold demand splits
                     // and rate·elapsed products that carry non-power-of-2
                     // denominators (a biomass half-harvest banks /15, off any
                     // power-of-2 grid); flooring here keeps every banked resource
                     // `denom | 1024`, the grain the standing witness asserts. The
-                    // recorded YieldCollected carries the SAME floored amount, so
+                    // recorded YieldCollected carries the same floored amount, so
                     // declaration == effect and the kernel admits (call-not-copy).
                     let amount = smelt_resource(&amount);
                     if amount == ratio(0, 1) {
                         continue;
                     }
                     held.bank(resource, amount.clone());
-                    // THE SYNTROPIC BOOK — the inverse of
-                    // entropy_vented. A joule yield IS an encased joule
+                    // The syntropic BOOK — the inverse of
+                    // entropy_vented. A joule yield is an encased joule
                     // (the crystal sheet already reads it that way), so
                     // containing one books it. Mirrored verbatim in
                     // `replay`.
@@ -590,10 +590,10 @@ impl World {
                 }
                 false => {
                     // A negative line is accrued upkeep drawing on the bank.
-                    // It may draw only what STANDS: a bank must never cross
+                    // It may draw only what stands: a bank must never cross
                     // zero, because the per-tick famine check reads the
                     // banked balance and a negative one strikes a nonsensical
-                    // NEGATIVE draw the kernel refuses (AmountNotPositive).
+                    // negative draw the kernel refuses (AmountNotPositive).
                     // Pay what the bank holds; the unpayable remainder returns
                     // to the accrued pool, where the famine check reads it as
                     // `banked(≥0) + accrued(<0) < 0` and strikes lawfully with
@@ -601,11 +601,11 @@ impl World {
                     // the whole owed exactly as before — byte-identical; only a
                     // world that would have overdrawn diverges, and there the
                     // old path was the negative-bank refusal itself.
-                    // #138 THE RESOURCE GRAIN — the upkeep bill lands on the
+                    // #138 the resource GRAIN — the upkeep bill lands on the
                     // 1/1024 grain at its fill site. The accrued-upkeep rate folds
                     // off-grain products (a /15-class demand, compounded across
                     // beats through the accrued pool), so flooring `owed` here keeps
-                    // the DRAW — and, since `unpaid = owed − drawn` and the accrued
+                    // the draw — and, since `unpaid = owed − drawn` and the accrued
                     // pool only ever takes floored deltas, the accrued pool too — on
                     // the grain. The recorded UpkeepSettled carries the same floored
                     // `drawn`, so declaration == effect and the kernel admits.
@@ -648,34 +648,34 @@ impl World {
         if let Some((delta, _, _)) = population {
             self.settle_population_exact(orb, delta);
         }
-        // TAXATION (49 §5): the Touch-triggered revenue levy collects into
+        // Taxation (49 §5): the Touch-triggered revenue levy collects into
         // the sovereign treasury — governance reach × the taxable
         // throughput. Zero reach (no GovernmentOffice standing) collects
         // nothing, so a world without one is byte-identical.
         let revenue = self.levy_collected_at_touch(orb, &taxable);
         self.settle_treasury(orb, revenue);
-        // TAXATION (49 §4): the estate tax INFLOW at each generation
+        // Taxation (49 §4): the estate tax inflow at each generation
         // boundary crossed this span (read pre-touch above). No office /
         // no population / no boundary → zero → no deed.
         self.settle_treasury(orb, estate);
-        // TAXATION (49 §5): the welfare OUTFLOW — spend the treasury (down
+        // Taxation (49 §5): the welfare outflow — spend the treasury (down
         // to what it holds, read pre-touch above) to close the stability
         // stall. No hub / no stall / empty treasury → zero → no deed, so a
         // world without the welfare loop is byte-identical.
         self.settle_treasury(orb, -welfare);
-        // TAXATION (49 §3): the continuity levy lapses the unkept practices
+        // Taxation (49 §3): the continuity levy lapses the unkept practices
         // to the void at the generation turnover (read pre-touch above).
         // Zero → no deed, so a line that keeps its knowledge is byte-identical.
         self.lapse_practices(lapse);
         self.relieve_recovered(orb);
-        // BIO QUARANTINE RELIEF (#30): a quarantined orb recovers a step at
+        // BIO quarantine relief (#30): a quarantined orb recovers a step at
         // the touch — both pressure axes ebb by one. Not quarantined → no
         // ebb → no deed, so an unmodified world is byte-identical.
         self.ebb_pressure(orb);
         // G2 (#29): the food-element cycle settles — joule → element minted,
         // net of what the zones ate; receipted as ElementFarmed. `None` for
         // every non-eater, so a v1 world emits nothing and is byte-identical.
-        // The joule spend is CAPPED at the post-touch bank (the pre-touch
+        // The joule spend is capped at the post-touch bank (the pre-touch
         // reading may exceed it after this touch's demurrage), and the mint
         // re-derived from the capped spend at the element's richness — so
         // the bank never overdraws and the kernel bound still holds tight.
@@ -683,7 +683,7 @@ impl World {
             let stamp = self.clock.now();
             // #136 D3 — the element ledger declares its grain (1/1024) at this fill
             // site: the mint (`joule · richness`) is a product of arbitrary rationals,
-            // so it SMELTS to the element grain before it banks or receipts; the eaten
+            // so it smelts to the element grain before it banks or receipts; the eaten
             // debit is smelted to the same grain so the net `minted − eaten` lands
             // on-grain and the stock's denominator stays bounded (replay banks the
             // recorded, already-smelted, fields — byte-identical). 1/1024 not 1/64:
@@ -709,21 +709,21 @@ impl World {
                 );
             }
         }
-        // ONT-3: every worked vein on the orb RECOVERS at this touch — the
+        // ONT-3: every worked vein on the orb recovers at this touch — the
         // Keplerian orbital-forcing injection over the local years elapsed,
-        // amplified by the orb's recycling (β₁). Settled BEFORE the staple mine
+        // amplified by the orb's recycling (β₁). Settled before the staple mine
         // reads richness, so a vein that recovered this span can feed the mouths.
         self.rejuvenate_orb_veins(orb, self.clock.now(), actor);
-        // ONT-2b: EATING MINES THE STAPLE VEIN — the vein is the larder. The
+        // ONT-2b: eating mines the staple vein — the vein is the larder. The
         // band's `bank_draw` this span (captured pre-touch) is extracted from
         // the orb's staple vein: `extracted += eaten`, capped at the vein's
         // remaining richness (`natural − extracted`, read live), and
-        // LATTICE-FLOORED so the extraction integral's denominator stays
+        // LATTICE-floored so the extraction integral's denominator stays
         // bounded forever (the ONT-2 law — a demand draw is a product of
         // rationals with an unbounded denominator; flooring to `1/1024` keeps
         // `extracted` a `1/1024` multiple, denominator-bounded, replay-exact).
-        // NO bank move: the mined food goes vein → mouths, the element bank
-        // bypassed (the grow-your-own mirror of the syntropic wild gather).
+        // No bank move: the mined food goes vein → mouths, the element bank
+        // bypassed (the home-grown mirror of the syntropic wild gather).
         // Receipts as `StapleMined`; replay folds the same `extracted += eaten`
         // and the kernel re-derives the richness bound. `None`/exhausted for a
         // Resource-ration or worked-out line — no receipt, byte-identical.
@@ -741,7 +741,7 @@ impl World {
                         let eaten =
                             (draw.min(richness) * lattice.clone()).floor() / lattice;
                         if eaten > ratio(0, 1) {
-                            // The SAME book motion an assay makes — the span
+                            // The same book motion an assay makes — the span
                             // anchor moves and the integral grows — so the
                             // live state, replay, and the kernel book agree.
                             vein.extracted += eaten.clone();
@@ -759,7 +759,7 @@ impl World {
                 }
             }
         }
-        // G2 TRACE (2026-08-14): burn the trace elements the population
+        // G2 trace (2026-08-14): burn the trace elements the population
         // consumed this span — one debit per veined element it held, drawn
         // from the larder (read pre-touch). No veins / no population → no
         // draws → no deed → byte-identical.
@@ -777,8 +777,8 @@ impl World {
         Ok(count)
     }
     /// Transfer banked value between two orbs as the sovereign.
-    /// **THE RADIAL TRANSIT SEPARATION** (#50) — the logistics distance
-    /// between two orbs, the NORMALIZED difference of their orbital radii
+    /// **The radial transit separation** (#50) — the logistics distance
+    /// between two orbs, the normalized difference of their orbital radii
     /// `|r_from − r_to| / (r_from + r_to)` ∈ [0, 1). Two orbs at the same
     /// orbit are zero apart; the farther apart their orbits, the closer to
     /// one — bounded, so no transit cost runs away. An orb with no sited
@@ -807,7 +807,7 @@ impl World {
     ) -> Result<(), ActionRefused> {
         self.transfer_as(SOVEREIGN, lane, resource, amount)
     }
-    /// TRADE-1 (09 §2.1) — move BANKED value orb-to-orb within the
+    /// TRADE-1 (09 §2.1) — move banked value orb-to-orb within the
     /// world: the chartering conservation law generalized (nothing
     /// minted, nothing lost). Both sides settle due demurrage at the
     /// touch (the SINK-1 law) before value moves; affordability is
@@ -822,8 +822,8 @@ impl World {
         resource: Resource,
         amount: crate::dop::Positive,
     ) -> Result<(), ActionRefused> {
-        // P2: the standing supply the sink's EPOCH 1 rate reads,
-        // snapshotted BEFORE any orb is peeled — an owned Vec, so no
+        // P2: the standing supply the sink's epoch 1 rate reads,
+        // snapshotted before any orb is peeled — an owned Vec, so no
         // borrow of `self.orbs` is held across the mutable touch below.
         let supply = standing_supply(&self.orbs);
         self.permitted(actor, Scope::Collect)?;
@@ -863,7 +863,7 @@ impl World {
                 });
             }
         }
-        // Crisis reads BEFORE the move — the replay-fact order.
+        // Crisis reads before the move — the replay-fact order.
         let from_crisis = {
             let held = peek(&self.orbs, from).expect("checked");
             in_crisis(held)
@@ -872,9 +872,9 @@ impl World {
             let held = peek(&self.orbs, to).expect("checked");
             in_crisis(held)
         };
-        // IDEO-1 (09 §3.2): friction prices DIVERGENCE, not vice — the
+        // IDEO-1 (09 §3.2): friction prices divergence, not vice — the
         // handling overhead of unlike measured boundary policies, read
-        // BEFORE the move, accrued as workspace against the mover and
+        // before the move, accrued as workspace against the mover and
         // sealed at its collect. Bonds and absorptions are exempt by
         // design: the standing loop is the friction-free channel.
         let divergence = {
@@ -890,9 +890,9 @@ impl World {
                 false => to_reading - from_reading,
             }
         };
-        // #50 LOGISTICS FRICTION: the physical cost of moving matter across
-        // the system — the radial orbital SEPARATION of the two orbs, read
-        // before the touch. It prices into the SAME sanctioned entropy burn
+        // #50 logistics friction: the physical cost of moving matter across
+        // the system — the radial orbital separation of the two orbs, read
+        // before the touch. It prices into the same sanctioned entropy burn
         // as the divergence friction (FrictionSettled at collect), so the
         // moved value stays fully conserved — the mover simply pays a transit
         // overhead. A same-orbit move (or an unsited orb) carries none, so
@@ -974,15 +974,15 @@ impl World {
         pair: crate::dop::Between,
         amount: crate::dop::Positive,
     ) -> Result<(), ActionRefused> {
-        // P2: the standing supply the sink's EPOCH 1 rate reads,
-        // snapshotted BEFORE any orb is peeled — an owned Vec, so no
+        // P2: the standing supply the sink's epoch 1 rate reads,
+        // snapshotted before any orb is peeled — an owned Vec, so no
         // borrow of `self.orbs` is held across the mutable touch below.
         let supply = standing_supply(&self.orbs);
         self.permitted(actor, Scope::Collect)?;
         if self.orbs.is_empty() {
             return Err(ActionRefused::NoColony);
         }
-        // BIO QUARANTINE (task #25): inbound melt reciprocity is barred
+        // BIO quarantine (task #25): inbound melt reciprocity is barred
         // while the world is quarantined — the same seal the Agent Door
         // takes on trade. The crossing is the only aperture left open.
         if self.world_quarantined() {
@@ -1024,7 +1024,7 @@ impl World {
                 });
             }
         }
-        // Crisis reads BEFORE the move — the replay-fact order.
+        // Crisis reads before the move — the replay-fact order.
         let source_crisis = {
             let held = peek(&self.orbs, source).expect("checked");
             in_crisis(held)
@@ -1084,15 +1084,15 @@ impl World {
         }
         Ok(())
     }
-    /// 20_FOUNDING §5 — THE PURSE: a line's economy read whole across
+    /// 20_FOUNDING §5 — the purse: a line's economy read whole across
     /// every orb it holds.
     ///
-    /// **A PROJECTION, NEVER A SETTLING TOUCH.** What each orb OWES in
-    /// demurrage is deducted from the reading and NOTHING IS WRITTEN.
+    /// **A projection, never A settling TOUCH.** What each orb owes in
+    /// demurrage is deducted from the reading and nothing is written.
     /// Looking at a purse is not a chain event, so a status render
     /// costs no receipts; the due settles for real at the next genuine
     /// touch (the SINK-1 law, unchanged). Value is still not hidden
-    /// from decay — the due is already subtracted in what you see.
+    /// from decay — the due is already subtracted in what is read.
     /// Vaulted stores keep their exemption because `demurrage_due`
     /// grants it. Derived at call, never stored (the syntropy-ratio
     /// precedent). Ordered by resource so the read is replayable.
@@ -1125,12 +1125,12 @@ impl World {
         held
     }
 
-    /// **THE SEAT TREASURY — a FOLD over `TitheReceipted`, never a
+    /// **The seat treasury — a fold over `TitheReceipted`, never a
     /// stored balance** (`#32`, `20_FOUNDING` §3, the `purse`/`fold`
     /// precedent). What one seat scope (`SEAT_ELDER`/`SEAT_ANCIENT`)
     /// has been paid across every founding tithe on this chronicle,
     /// summed by resource. There is no seat-holder orb in this engine
-    /// to bank the tithe INTO — this reading is the closest thing to
+    /// to bank the tithe into — this reading is the closest thing to
     /// one until a seat-holder identity exists (`#32` phase 2,
     /// PURCHASE/COMMISSION, still deferred). Replay-inert: reading a
     /// treasury settles nothing and mints nothing.
@@ -1152,18 +1152,18 @@ impl World {
         held
     }
 
-    /// **THE VALUE-LOSS BOOK — derived, never stored** (SYN-1/SYN-2,
+    /// **The value-loss BOOK — derived, never stored** (SYN-1/SYN-2,
     /// operator ruling 2026-08-02).
     ///
-    /// What an orb has LOST to holding costs: demurrage decay plus
+    /// What an orb has lost to holding costs: demurrage decay plus
     /// upkeep draws, summed from the chronicle in joule-commensurable
     /// units (09 §1). Before this, value left the universe with no
     /// record it had ever left — the thermal arm closes its books
     /// (`encased + vented = total excess`) and the value arm closed
     /// nothing.
     ///
-    /// **IT IS NOT `entropy_vented`, and must never be.** That field is
-    /// the SHED-HEAT figure and 05 §1.4's absorption invariant binds it
+    /// **It is not `entropy_vented`, and must never be.** That field is
+    /// the shed-heat figure and 05 §1.4's absorption invariant binds it
     /// exactly: `sink_consumed = heat_absorbed = vented_after_shed`.
     /// Value decay is a monetary velocity cost, not a thermal loss;
     /// summing them would corrupt a landed physical measurement, which
@@ -1171,7 +1171,7 @@ impl World {
     /// proves by failing the moment they are mixed. The two ledgers
     /// stay decoupled: physics on one side, economics on the other.
     ///
-    /// **NO SCHEMA IS SPENT.** `DemurrageSettled { orb_id, .. }` and
+    /// **No schema is spent.** `DemurrageSettled { orb_id, .. }` and
     /// `UpkeepSettled { orb_id, .. }` already carry their orb, so the
     /// whole book is arithmetic over deeds already receipted — the
     /// derived-never-stored law (09 §1.2), and the same shape the
@@ -1191,14 +1191,14 @@ impl World {
             })
     }
 
-    /// **THE UNION REVIEW — derived, never stored** (D5, operator
+    /// **The union review — derived, never stored** (D5, operator
     /// ruling 2026-08-02). When the sovereign union was struck, and
     /// whether its review has fallen due at `stamp`.
     ///
     /// `Some((sealed_at, due))` if the union stands; `None` if it was
-    /// never struck. **`due` is a REVIEW falling due, NEVER a lapse.**
+    /// never struck. **`due` is a review falling due, never a lapse.**
     /// Nothing settles, nothing expires, and no capacity is dropped
-    /// when it turns true: a `BOND-1` term ENDS its bond at
+    /// when it turns true: a `BOND-1` term ends its bond at
     /// `sealed + term`, and if the union did that, D5's breach clause
     /// would fire at stamp 1500 — *D stops and V suffocates; V stops
     /// and D freezes* — and the foundation would lapse on a timer. The
@@ -1208,7 +1208,7 @@ impl World {
     /// Read from the chronicle on demand, so there is no counter to
     /// drift and no field to migrate (`09_LEDGER` §1.2). This is the
     /// consumer that keeps the deed from being a term that only
-    /// resonates (`18` Article III LAW 8).
+    /// resonates (`18` Article III law 8).
     pub fn union_review(&self, stamp: u64) -> Option<(u64, bool)> {
         self.chronicle
             .history()
@@ -1225,24 +1225,24 @@ impl World {
     }
 
 
-    /// **THE HEAT ENCASED — the syntropic arm of the thermal book,
+    /// **The heat encased — the syntropic arm of the thermal book,
     /// derived, never stored** (the missing-leg sweep, 2026-08-02).
     ///
-    /// What an orb has CAPTURED over its whole life: every joule yield
+    /// What an orb has captured over its whole life: every joule yield
     /// it collected, which is the encasement arm by this engine's own
     /// reading — `YieldCollected { resource: Joule }` is exactly what
     /// feeds `encased_entries` on the crystal sheet.
     ///
-    /// **WHY IT WAS OWED.** The thermal dual was two-armed in one place
-    /// and one-armed in another. On the SHEET both arms stand and are
+    /// **Why it was owed.** The thermal dual was two-armed in one place
+    /// and one-armed in another. On the sheet both arms stand and are
     /// symmetric — `vented_entries` from `VentSettled`, `encased_entries`
-    /// from the joule yield — but both are WINDOWED and pruned at each
+    /// from the joule yield — but both are windowed and pruned at each
     /// boundary, and both are `pub(super)`, so they answer one tech
-    /// condition and nothing else. On the ORB, which is committed state,
+    /// condition and nothing else. On the orb, which is committed state,
     /// replayed and public, only `entropy_vented` stands, and it is
-    /// CUMULATIVE FOREVER.
+    /// cumulative forever.
     ///
-    /// So the permanent public book recorded only LOSS. An orb could
+    /// So the permanent public book recorded only loss. An orb could
     /// always be asked what it had shed to the void for its whole life,
     /// and could not be asked what it had ever kept — the gain was
     /// forgotten as soon as the window moved past it. That is the
@@ -1250,11 +1250,11 @@ impl World {
     /// that inherits one leg of a dual has not simplified the law, it
     /// has reversed it.*
     ///
-    /// **NO SCHEMA IS SPENT.** `YieldCollected { orb_id, resource,
+    /// **No schema is spent.** `YieldCollected { orb_id, resource,
     /// amount }` already carries its orb, so the whole arm is
     /// arithmetic over deeds already receipted — the derived-never-stored
     /// law (`09_LEDGER` §1.2), and the same shape [`Self::value_lost_of`]
-    /// took. `entropy_vented` is NOT touched: it is a landed field bound
+    /// took. `entropy_vented` is not touched: it is a landed field bound
     /// by 05 §1.4's absorption invariant, and the cure for a missing arm
     /// is to add the arm, never to disturb the one that stands.
     pub fn heat_encased_of(&self, orb: u64) -> Ratio {
@@ -1271,9 +1271,9 @@ impl World {
             .fold(ratio(0, 1), |a, b| a + b)
     }
 
-    /// **THE THERMAL BOOK, BOTH ARMS AT ONCE** — `(encased, vented)`.
+    /// **The thermal BOOK, both arms AT once** — `(encased, vented)`.
     ///
-    /// Returned as a PAIR and never as a difference or a ratio: a net
+    /// Returned as a pair and never as a difference or a ratio: a net
     /// figure is the one-armed reading wearing two arms' clothes, and
     /// `18` §2b bars collapsing a directional quantity to a scalar
     /// wherever the system computes. An orb that captured 100 and vented

@@ -1,24 +1,24 @@
-//! CHRONOMETRY INSIDE A UNIVERSE: one law with xylarium (its
+//! Chronometry inside A universe: one law with Xylarium (its
 //! docs/XYLARIUM-KERNEL.md 11.4d, crates/xyl-kernel/src/chronometry.rs).
-//! Time is kept by KEEPERS chained from the epicenter outward, never one
+//! Time is kept by keepers chained from the epicenter outward, never one
 //! scalar read everywhere.
 //!
-//! - THE KEEPERS. The epicenter (the universal core, its bounce), then for
-//!   each galactic core three shells: its DEEP CORE (its innermost system's
-//!   radius), INNER MANTLE (its half-mass radius) and OUTER RIM (its outermost
+//! - The keepers. The epicenter (the universal core, its bounce), then for
+//!   each galactic core three shells: its deep core (its innermost system's
+//!   radius), INNER mantle (its half-mass radius) and outer rim (its outermost
 //!   system's radius).
-//! - A KEEPER'S RATE: the law of the wells (breath.rs), a layer at r with
+//! - A keeper's rate: the law of the wells (breath.rs), a layer at r with
 //!   M(<r) inside runs at `r / (r + M(<r))` of the layer above; the galaxy's
 //!   well against the cores nearer the epicenter, the shell's within it;
 //!   nested wells multiply. Exact.
-//! - ITS DELAY: the bells the pulse takes to reach it: its galaxy's distance
+//! - Its delay: the bells the pulse takes to reach it: its galaxy's distance
 //!   plus its shell's radius at the ring's light speed (a ring is the round
 //!   trip to the home galaxy's rim and back: the home rim's radius is half a
 //!   bell).
-//! - ITS READING at the epicenter's count N: local `rate (N − delay)`, slip
+//! - Its reading at the epicenter's count N: local `rate (N − delay)`, slip
 //!   `(1 − rate)(N − delay)` turns, coherence `1 − 2|slip − round slip|`,
 //!   rung `⌊slip⌋`.
-//! - THE CHAIN. At each committed moment (every pulse) every keeper appends an
+//! - The chain. At each committed moment (every pulse) every keeper appends an
 //!   entry citing its own previous entry and the entry of the keeper inside
 //!   it (rim → mantle → core → epicenter), hashed. Its slip against the
 //!   keeper inside it is the entry's RESIDUAL, kept, never averaged. The

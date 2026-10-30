@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 #
-# install.sh — stand up a clean netstratum universe.
+# install.sh — stand up a clean Netstratum universe.
 #
-# A universe is ONE directory (its "var root"):
+# A universe is one directory (its "var root"):
 #
 #   registry/        one card per civilization registered — the compiled
 #                    seats at genesis, every cleave, every registration
@@ -11,7 +11,7 @@
 #   worlds/          one directory per world — chronicle, receipts, lens exports
 #   conductor.ctl    the operator control line (paused / cadence N)
 #
-# The founding roster is COMPILED (engine/conductor/src/polities.rs, 22
+# The founding roster is compiled (engine/conductor/src/polities.rs, 22
 # seats); no roster file is read. New civilizations arise by divergence.
 #
 # Nothing here leaves a process running. `install` prepares the directory
@@ -27,7 +27,7 @@
 #   ./install.sh run   --var demo      start the conductor against ./demo
 #
 # Options:
-#   --var ROOT       universe root, repo-relative unless absolute (default: var)
+#   --var root       universe root, repo-relative unless absolute (default: var)
 #   --no-build       skip cargo build; use whatever already sits in target/
 #   --no-genesis     prepare files only, do not found the worlds
 #   --cadence N      seconds between beats, for `run` (default: 2)
@@ -168,7 +168,7 @@ preflight() {
     || warn "python3 not found — the engine runs fine, but tools/observer.py will not"
 }
 
-# Building is a side effect with its own output; keep it OUT of any
+# Building is a side effect with its own output; keep it out of any
 # command substitution or its progress text lands in the caller's
 # variable instead of on the terminal.
 ensure_build() {

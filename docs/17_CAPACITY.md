@@ -1114,7 +1114,7 @@ already gave and one more from the code itself at the time:
 
 **Correction (this document's own changelog was stale on this point).**
 The deletion did not hold. `rank_is_defined()` is alive today as the
-**Phantom-rank gate** — landed `153a70c`, 2026-08-04 — at
+**PHANTOM-RANK gate** — landed `153a70c`, 2026-08-04 — at
 `engine/kernel/src/bridge.rs:304`, consulted from `engine/kernel/src/
 lib.rs:660,777,783`. The 2026-08-04 landing's own header at `lib.rs:660`
 names it *"now due"* against the debt this section and `25_STANDING` §6

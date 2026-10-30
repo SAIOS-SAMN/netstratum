@@ -1,7 +1,7 @@
-//! **OBSERVE** (N-I2, doc `53` D2) — one pair, cheap. It owns NO algebra but the
+//! **Observe** (N-I2, doc `53` D2) — one pair, cheap. It owns no algebra but the
 //! route match: the drain (`reduce_pair`) already says gauge / wall / carry, and
 //! observe reads that verdict — a GenerationGap wall this vessel could not
-//! account MINTS (and the caller adopts onto THIS vessel); everything else is
+//! account mints (and the caller adopts onto this vessel); everything else is
 //! accounted or carried, never minted. Condensation is a wall named into the
 //! grown basis, not N guesses. There is no proposer here.
 
@@ -19,7 +19,7 @@ pub enum Observed {
     /// minted, for the caller to adopt onto this vessel.
     Minted(Crystal),
     /// A remainder on the letters' own axes (a composition gap) or a frame shift
-    /// — carried whole, NOT minted (generation feedstock is GenerationGap only).
+    /// — carried whole, not minted (generation feedstock is GenerationGap only).
     Carried,
 }
 
@@ -42,8 +42,8 @@ pub fn observe(a: &FullMeasurement, b: &FullMeasurement, grown: &[Crystal]) -> O
     }
 }
 
-/// Adopt a crystal onto a vessel — IDEMPOTENT (the same obstruction twice is one
-/// crystal; a wall already grown is not re-minted). The ONE home for a vessel's
+/// Adopt a crystal onto a vessel — idempotent (the same obstruction twice is one
+/// crystal; a wall already grown is not re-minted). The one home for a vessel's
 /// grow: `cfe::ipsal::Entity::adopt` delegates here, and every vessel (a
 /// `Vec<Crystal>` test double included) grows through it.
 pub fn adopt(grown: &mut Vec<Crystal>, crystal: Crystal) {

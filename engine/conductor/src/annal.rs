@@ -1,9 +1,9 @@
-//! THE UNIVERSE JOURNAL: the conductor's own readings, kept the way every
+//! The universe journal: the conductor's own readings, kept the way every
 //! world keeps its journal (`scribe::record_journal`): framed TLV appended to
 //! `<var>/universe.jrn`, never rewritten.
 //!
 //! The worlds' chronicles, annals and journals outlive any one process; the
-//! conductor's readings (the hubs, DECIDE, the fleet, the year's close) went
+//! conductor's readings (the hubs, decide, the fleet, the year's close) went
 //! only to stdout, and the system journal keeps about five hours of them.
 //! Here they live: one frame a beat, and one at each year's close. The relay
 //! is handed off by the file alone: a conductor resuming at beat b reads the

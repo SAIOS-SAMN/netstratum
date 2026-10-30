@@ -1,17 +1,17 @@
-//! **THE COMPOSE MOVE** (AUTIC-2) — the sentence, the 3rd of the four reduce
-//! moves (doc 53). `think` runs DERIVE + REDUCE; this is COMPOSE: a mind SPLICES
+//! **The compose move** (AUTIC-2) — the sentence, the 3rd of the four reduce
+//! moves (doc 53). `think` runs derive + reduce; this is compose: a mind splices
 //! several of its words into one composed utterance (an `AuticSentence`), and a
-//! hearer ASSEMBLES that utterance against its OWN vocabulary — accounting the
-//! pieces it recognises and NAMING exactly what it does not (the `DemandUnmet`
+//! hearer assembles that utterance against its own vocabulary — accounting the
+//! pieces it recognises and naming exactly what it does not (the `DemandUnmet`
 //! remainder). Built on the same exact accounting the whole engine reduces with
 //! (`drain_exact`); coordinates with the sodalitum/lith shape (shared v0.4
 //! lineage) without importing it.
 //!
-//! A word is a `ChainDelta` (a crystallised class). A SENTENCE is several words
+//! A word is a `ChainDelta` (a crystallised class). A sentence is several words
 //! spliced by exact entry-sum into one class — a composed meaning, not a list.
-//! Hearing is comprehension: subtract the crystals you know; residual to zero is
-//! `Assembled` (understood), a leftover is `DemandUnmet` (precisely what you must
-//! still learn — mint feedstock).
+//! Hearing is comprehension: subtract the known crystals; residual to zero is
+//! `Assembled` (understood), a leftover is `DemandUnmet` (precisely what remains
+//! to be learned — mint feedstock).
 
 use crate::congruence::{signed_entry_sum, ChainDelta};
 use crate::reduction::{drain_exact, BoundingRecord, Crystal};
@@ -36,7 +36,7 @@ impl AuticSentence {
         self.words.is_empty()
     }
 
-    /// SPLICE — the words fused into one composed class by exact signed entry-sum.
+    /// Splice — the words fused into one composed class by exact signed entry-sum.
     /// The frame endpoints ride from the first word (accounting keys on
     /// `(site,direction)`, never the frame, so the endpoints are carried metadata).
     /// An empty sentence composes to an empty class on a degenerate frame.
@@ -79,7 +79,7 @@ impl AssemblyRead {
 }
 
 /// A single-entry probe class at a far-off site — a synthetic "word" for building
-/// CONTROL utterances (guaranteed outside any real learned language) without the
+/// control utterances (guaranteed outside any real learned language) without the
 /// caller reaching for `num_bigint`/`ChainEntry`. `seed` places it; `dir` is its
 /// gauge direction.
 pub fn probe_class(seed: i64, dir: u8) -> ChainDelta {
@@ -96,7 +96,7 @@ pub fn probe_class(seed: i64, dir: u8) -> ChainDelta {
     }
 }
 
-/// **ASSEMBLE** — hear a sentence: splice it, then account it exactly against the
+/// **Assemble** — hear a sentence: splice it, then account it exactly against the
 /// hearer's `basis`. Residual to zero is `Assembled`; a surviving remainder is
 /// `DemandUnmet`, naming precisely the structure the hearer lacked.
 pub fn assemble(sentence: &AuticSentence, basis: &[Crystal]) -> AssemblyRead {
@@ -133,7 +133,7 @@ mod tests {
         let w2 = word((0, 1), 2, 1);
         let sentence = AuticSentence::speak(vec![w1.clone(), w2.clone()]);
         assert_eq!(sentence.len(), 2);
-        // A basis holding BOTH words accounts the whole sentence — Assembled.
+        // A basis holding both words accounts the whole sentence — Assembled.
         let basis = vec![Crystal::seal(w1.clone()), Crystal::seal(w2.clone())];
         assert!(assemble(&sentence, &basis).is_assembled());
     }
@@ -143,7 +143,7 @@ mod tests {
         let w1 = word((0, 0), 1, 1);
         let w2 = word((0, 1), 2, 1);
         let sentence = AuticSentence::speak(vec![w1.clone(), w2.clone()]);
-        // A basis holding only the FIRST word leaves the second as the demand.
+        // A basis holding only the first word leaves the second as the demand.
         let basis = vec![Crystal::seal(w1.clone())];
         match assemble(&sentence, &basis) {
             AssemblyRead::DemandUnmet { remainder, .. } => {

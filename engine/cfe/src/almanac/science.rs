@@ -1,4 +1,4 @@
-//! CHEMISTRY SCIENCE — civ utility, dark-7 gravity, isomorphic union.
+//! Chemistry science — civ utility, dark-7 gravity, isomorphic union.
 //!
 //! Pure derivations only. The science path is not a free mint of matter:
 //! it scores what bonds *for this civilization*, names the dark pulls
@@ -8,7 +8,7 @@
 use super::periodic::{periodic_of, Periodic, LANES};
 use crate::ratio::{ratio, Ratio};
 
-/// **THE DARK SEVEN** — gravity wells toward *immediate* need rather
+/// **The dark seven** — gravity wells toward *immediate* need rather
 /// than long-term survival. Codes 1..=7, closed vocabulary.
 ///
 /// Not sins as flavour text: each reweights the chemistry score when
@@ -83,7 +83,7 @@ pub struct CivAxes {
     pub perception: u8,
 }
 
-/// **SURVIVAL UTILITY** — what this bond does for long-term standing of
+/// **Survival utility** — what this bond does for long-term standing of
 /// *this* sealed civilization. Pure: same axes + members → same score.
 ///
 /// - expansionist (1): width — more members / higher mass fuel growth
@@ -149,7 +149,7 @@ pub fn survival_utility(axes: CivAxes, members: &[[u8; 32]], yielded: &Ratio) ->
     score
 }
 
-/// **DARK UTILITY** under one pull — how attractive the bond is *as a
+/// **Dark utility** under one pull — how attractive the bond is *as a
 /// gravity well*, not as survival. Pure.
 pub fn dark_utility(
     pull: DarkPull,
@@ -209,7 +209,7 @@ pub fn net_utility(
     (survival, dark, net)
 }
 
-/// **ISOMORPHISM** — two banked gems (or any ids) sit in the same
+/// **Isomorphism** — two banked gems (or any ids) sit in the same
 /// geometry family when shell and phase match. Same family ⇒ they may
 /// form an isomorphic union (chemical creation of a higher product
 /// without inventing a free periodic cell).
@@ -252,7 +252,7 @@ pub fn iso_union_recipe(a: &[u8; 32], b: &[u8; 32]) -> Option<(Ratio, Ratio, [u8
     Some((one.clone(), one.clone() + one, product))
 }
 
-// ── SEATED SCIENCE · LAB CREATION · EXPLOSION ─────────────────────
+// ── seated science · lab creation · explosion ─────────────────────
 
 /// Science discipline seats — paid unlocks under the bench.
 /// Not BAND-1 offices; capability seats on an orb.
@@ -354,7 +354,7 @@ impl ScienceDiscipline {
 /// How a bench component is paid — **not all monetary**.
 ///
 /// - **Local resource** — iron / biomass / alloy / diamond from banks
-/// - **Resonance** — crystal (scanner/knowledge fee; NOT STAMP unit-of-account)
+/// - **Resonance** — crystal (scanner/knowledge fee; not STAMP unit-of-account)
 /// - **Off-planet** — advanced tech requires aperture/route evidence first
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum CraftCostClass {
@@ -381,7 +381,7 @@ fn eighth() -> crate::ratio::Ratio {
     crate::ratio::ratio(1, 8)
 }
 
-/// **SCIENCE SEAT BILL** — resource-specific, metabolism-coloured.
+/// **Science seat bill** — resource-specific, metabolism-coloured.
 ///
 /// Not STAMP. Crystal appears only as resonance (math/research/synth face),
 /// or as plasmic primary when that is the sealed food line.
@@ -515,7 +515,7 @@ pub fn science_seat_cost_classes(
     v
 }
 
-/// Lab creation path — what you *make* once seats are paid.
+/// Lab creation path — what a lab *makes* once seats are paid.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[repr(u8)]
 pub enum LabPath {
@@ -721,7 +721,7 @@ impl SeatAffinity {
     }
 }
 
-/// **SEAT AFFINITY** — pure: metabolism × discipline (+ optional clade).
+/// **Seat AFFINITY** — pure: metabolism × discipline (+ optional clade).
 ///
 /// Plasmiform does not need the same lab path as a bimaniform flatlander.
 /// Polybrachia (clade 7) colours skin/math as primary even under biotic.
@@ -788,7 +788,7 @@ pub fn science_seat_affinity(
     }
 }
 
-/// **SEAT FEE** — resonator eighth × discipline weight × rank × affinity.
+/// **Seat fee** — resonator eighth × discipline weight × rank × affinity.
 /// Pure: same inputs → same fee. No free dial.
 pub fn science_seat_fee(discipline: ScienceDiscipline, rank: u8) -> Ratio {
     science_seat_fee_for(discipline, rank, 2, None)
@@ -808,7 +808,7 @@ pub fn science_seat_fee_for(
     eighth * ratio(w, 1) * ratio(r, 1) * ratio(aff, 1)
 }
 
-/// **EXPLOSION RISK** — exact rational, pure.
+/// **Explosion risk** — exact rational, pure.
 ///
 /// ```text
 /// risk = path.base

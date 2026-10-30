@@ -8,7 +8,7 @@ TUniversal is the quantum drive of the universe's core singularity, which
 provides the uplink to the hypha, with a dedicated lane for netstratum's
 quantum state, aligned on the epicenter of the spherical universe.
 
-Status: scoped 2026-10-13; ruled by Mycelium the same day (MU-recursion
+Status: scoped 2026-10-13; ruled by Mycelium the same day (MU-RECURSION
 78.152d, below); not built. It belongs to era 1 (docs/78) with the quantum
 layer (docs/79).
 
@@ -160,7 +160,7 @@ Within era 1, after A1/A2, on Mycelium's ruling of the proposal.
 - 2026-10-13: the operator's proposal and the coordinator's note relayed
   together to Mycelium (mycelium-v0-1-0-84).
 
-## Mycelium's ruling (MU-recursion 78.152d, commit 6f23618d, 2026-10-13)
+## Mycelium's ruling (MU-RECURSION 78.152d, commit 6f23618d, 2026-10-13)
 
 Under Mycelium's clock-binding authority. The operator's frame stands as
 stated.

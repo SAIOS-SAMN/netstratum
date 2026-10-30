@@ -1,4 +1,4 @@
-//! BOOK-1 — THE OPEN BOOK REGISTRY: civilizations mint and archive
+//! BOOK-1 — the open BOOK registry: civilizations mint and archive
 //! (`19_LENS` §16, operator specification 2026-08-02).
 //!
 //! The charter keeps four books (`09 §2.1`–`§2.4`), and until now that
@@ -7,38 +7,38 @@
 //! it, and no reading layer could see it without a recompile. This
 //! module opens the set.
 //!
-//! # WHAT A BOOK IS
+//! # What A BOOK is
 //!
-//! A DUAL ledger: what was KEPT against what was LOST, on one named
+//! A dual ledger: what was kept against what was lost, on one named
 //! account. The charter's four are already exactly that shape, which is
 //! why opening the set needed no translation of what landed — only the
 //! ENUMERATION was closed, never the form.
 //!
-//! **DUAL-ENTRY IS STRUCTURAL, NOT A CONVENTION.** Both sides live in
+//! **Dual-entry is structural, not A convention.** Both sides live in
 //! one [`BookAccount`], so there is no way to hold one side of a book
 //! without the other and no way to post to one side alone. The
 //! cross-welding fault that the lens lane found — one book's kept side
 //! summed against another's lost side — is unrepresentable here rather
 //! than merely forbidden.
 //!
-//! # THE CHARTER FOUR ARE NOT MOVED
+//! # The Charter four are not moved
 //!
 //! They stay where they are: fixed fields on `ColonyOrb`, already
 //! sealed on the wire at orb entry tag 41 (IDEO-1). **Rewriting landed
 //! committed state to make a uniform container would break every
 //! existing chronicle for a tidiness that buys nothing.** Instead
-//! [`ColonyOrb::books`] presents charter and minted books through ONE
+//! [`ColonyOrb::books`] presents charter and minted books through one
 //! read view, so a reader never learns which storage a book came from.
 //!
-//! # IDENTITY IS THE NOVELTY GATE, AND IT IS EXACT
+//! # IDENTITY is the novelty gate, and it is exact
 //!
-//! A book kind is CONTENT-ADDRESSED over its normalized name, the way
+//! A book kind is content-addressed over its normalized name, the way
 //! every other open ledger in this tree is addressed (`14 §2`). Two
-//! declarations that normalize alike ARE the same kind, so a duplicate
+//! declarations that normalize alike are the same kind, so a duplicate
 //! is not caught by a test — it is the same book, and minting it twice
 //! refuses.
 //!
-//! **This deliberately does NOT implement a schema-distance threshold.**
+//! **This deliberately does not implement a schema-distance threshold.**
 //! The specification asked for `distance(schema_new, schemas) ≥ θ`, and
 //! that is refused here for two reasons, the second more important than
 //! the first:
@@ -51,7 +51,7 @@
 //! 2. **There is no structural schema to measure a distance over.** A
 //!    book declares a name and accrues two sides; nothing machine-
 //!    checkable distinguishes "Valor" from "Valour" except the strings.
-//!    A threshold over string distance is a LINGUISTIC judgment wearing
+//!    A threshold over string distance is a linguistic judgment wearing
 //!    a numeric coat, and it would refuse genuinely distinct books as
 //!    readily as duplicates.
 //!
@@ -59,9 +59,9 @@
 //! It catches case, whitespace and padding variants — the whole family
 //! of accidental and lazy duplicates. It does not catch a deliberate
 //! near-miss like `valor-2`, and no honest test in this tree can,
-//! because that IS a different name and might be a different book.
+//! because that is a different name and might be a different book.
 //!
-//! The lawful limiter on deliberate spam is COST and the refusal to
+//! The lawful limiter on deliberate spam is cost and the refusal to
 //! reward width — see `19_LENS` §16 and the note in `world::mint_book`.
 
 use crate::ratio::{ratio, Ratio};
@@ -70,13 +70,13 @@ use crate::ratio::{ratio, Ratio};
 /// no other module has to know them by heart.
 pub const CHARTER_BOOKS: [&str; 4] = ["TRADE-1", "ABSORB-1", "BOND-1", "COVENANT-1"];
 
-/// THE IDENTITY OF A BOOK KIND — content-addressed over the normalized
+/// The IDENTITY of A BOOK KIND — content-addressed over the normalized
 /// name, so a rename cannot mint a duplicate and a re-declaration of the
 /// same account is the same account.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct BookKind(pub [u8; 32]);
 
-/// **THE NORMAL FORM OF A BOOK NAME.** Case-folded, trimmed, and inner
+/// **The normal form of A BOOK NAME.** Case-folded, trimmed, and inner
 /// runs of whitespace collapsed to one space. Everything that differs
 /// only in presentation collapses to one identity here.
 pub fn normalize(name: &str) -> String {
@@ -91,7 +91,7 @@ pub fn kind_of(name: &str) -> BookKind {
     BookKind(blake3::hash(normalize(name).as_bytes()).into())
 }
 
-/// **A MINTABLE BOOK NAME, proven at construction** (P1,
+/// **A mintable BOOK NAME, proven at construction** (P1,
 /// 29_CONSTRUCTION). Two arms died at this door, both decidable from
 /// the text alone: a name whose normal form is empty addresses
 /// nothing, and the charter's four are law, not inventory. The verb
@@ -130,7 +130,7 @@ impl BookName {
     }
 }
 
-/// ONE MINTED ACCOUNT — committed state, rebuilt from receipts on
+/// One minted account — committed state, rebuilt from receipts on
 /// replay. Kind-ascending on the orb (canonical order).
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct BookAccount {
@@ -141,13 +141,13 @@ pub struct BookAccount {
     pub minted_by: u64,
     /// The syntropic side.
     pub kept: Ratio,
-    /// The entropic side of the SAME account, never a separate book.
+    /// The entropic side of the same account, never a separate book.
     pub lost: Ratio,
-    /// CLOSED TO WRITING, never to reading.
+    /// CLOSED to writing, never to reading.
     pub archived: bool,
 }
 
-/// THE UNIFORM READ VIEW over charter and minted books alike.
+/// The uniform READ view over charter and minted books alike.
 ///
 /// A reader never learns which storage a book came from, which is the
 /// whole point: the charter four and a book minted this morning are the

@@ -1,9 +1,9 @@
-//! THE ALMANAC — the periodic law of elements, the locality a star and
+//! The almanac — the periodic law of elements, the locality a star and
 //! a planet give it, the pressure that refines them, and the gems they
 //! compound into.
 //!
 //! `14_ALMANAC.md` rules the grammar; `dop::element_properties` landed
-//! its first half. This is the reading a refinement DEED must be
+//! its first half. This is the reading a refinement deed must be
 //! written against, and it is **broken apart by concern so each axis
 //! can widen without disturbing the others** (operator ruling
 //! 2026-08-04):
@@ -15,7 +15,7 @@
 //!   [`science`]   civ utility · dark-7 gravity · isomorphic union
 //!   [`thermal`]   the temperature line closed, and the orbit grain
 //!
-//! **EVERYTHING HERE IS A DERIVATION.** Pure, total, exact-rational, no
+//! **Everything here is A derivation.** Pure, total, exact-rational, no
 //! I/O and no deed. `element_properties`, `thermal::band_of` and
 //! `site_planet` are all untouched, so nothing that has replayed
 //! replays differently.

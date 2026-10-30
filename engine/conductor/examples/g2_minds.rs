@@ -1,5 +1,5 @@
-//! Concordance 3.8 reading: every living G2 world's MINDS (its registered
-//! entities, by role) against its NON-MINDS (its population of mouths).
+//! Concordance 3.8 reading: every living G2 world's minds (its registered
+//! entities, by role) against its non-minds (its population of mouths).
 use conductor::snapshot;
 use std::collections::BTreeMap;
 use std::path::Path;

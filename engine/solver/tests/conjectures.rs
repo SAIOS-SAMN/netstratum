@@ -1,4 +1,4 @@
-//! Concordance 1.10, the audit's restore 1: a mind HOLDS its own unglued
+//! Concordance 1.10, the audit's restore 1: a mind holds its own unglued
 //! hypotheses and tests them on later tasks — and a conjecture is a claim
 //! only where it closes every pair of one.
 

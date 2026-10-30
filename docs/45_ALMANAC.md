@@ -1,6 +1,6 @@
 # The almanac — the ruled grammar of elements and systems
 
-**Status:** element-GRAMMAR-1 first slice landed (2026-07-31,
+**Status:** ELEMENT-GRAMMAR-1 first slice landed (2026-07-31,
 coder-03; ratified by standing operator order). Landed: the mint deed
 (ProspectStruck, tag 70 — the genesis root is the founding receipt's
 digest, measured: receipt 0 is the sovereign's registration and
@@ -11,7 +11,7 @@ no workspace surgery, no new zone kind), banked element stores (orb
 entry tag 72), the abundance spine, hash-derived properties and
 names, the prospect/assay CLI verbs. Measured: two worlds mint
 different elements from one grammar; the spine binds the draw to the
-sky; replay reads, never rolls. Deferred to element-GRAMMAR-2,
+sky; replay reads, never rolls. Deferred to ELEMENT-GRAMMAR-2,
 recorded: deeper family fantasy rates (§5.2) and G2 element rations (§7.4).
 **Play board 2026-08-07:** `31_ELEMENT_COMMERCE.md`. **REFINE-1 landed
 Wave-1 `2109bf0`:** `ZoneKind::ElementRefinery`, tag 107 `ElementRefined`,
@@ -78,7 +78,7 @@ also refuse when the vein's periodic line exceeds `civ_reach` — a
 people may chart a deep identity and still be unable to mine it until
 sky tech grows. Solar leap (condition 0) does not deepen the mine.
 
-**Star-ENDOW-1 / orbit-ENDOW-1 (landed):** closed-carrier kit scales
+**STAR-ENDOW-1 / ORBIT-ENDOW-1 (landed):** closed-carrier kit scales
 with the sky. `ColonyFounded` banks the bronze packet (20 iron / 10
 biomass). `StarCommissioned` top-ups the genesis orb to a class kit
 (G matches founding; O/B metal-rich + crystal seed; M biomass-rich;
@@ -172,7 +172,7 @@ asserted, at the landing.
 
 Banked element stores are their own ledger and the aperture speaks
 only the seven closed carriers today — **elements are not yet
-tradeable cross-world**. Element-GRAMMAR-2 opens the element leg: the
+tradeable cross-world**. ELEMENT-GRAMMAR-2 opens the element leg: the
 aperture pair keyed by element id (the 47/48 shape with the id in the
 value), conservation exact across the pair, demurrage-free (elements
 are matter, not thermodynamic ledger quantities). With the gradient
@@ -188,7 +188,7 @@ ruled, not rolled); the abundance spine's values and every placeholder
 constant (operator rulings at balance); the beacon-domain tags. The
 grammar generates content; it never generates law.
 
-## 7. The element-GRAMMAR-1 landing checklist (opens on ratification)
+## 7. The ELEMENT-GRAMMAR-1 landing checklist (opens on ratification)
 
 1. Tags claimed in the dop.rs header first commit of the cadence
    (the collision convention): the ProspectStruck deed + the orb

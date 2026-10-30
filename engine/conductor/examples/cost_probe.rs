@@ -1,5 +1,5 @@
-//! COST PROBE (remediations lane) — attribute the per-beat cost of the
-//! chained beat against a REAL chronicle, so the remediation checklist
+//! Cost probe (remediations lane) — attribute the per-beat cost of the
+//! chained beat against a real chronicle, so the remediation checklist
 //! rests on measurement and not on reading.
 //!
 //! This is a measuring instrument, not a mechanic: it appends nothing,
@@ -13,7 +13,7 @@
 //! The shape it exists to expose is `Conductor::chain_beat`
 //! (`conductor/src/lib.rs:1365`), whose own comment concedes it is
 //! "O(deeds × history) per beat". The probe prices one such beat at the
-//! CURRENT history length, so the cost can be re-measured after the
+//! current history length, so the cost can be re-measured after the
 //! stepping replay lands and the curve compared.
 
 use std::time::Instant;
@@ -29,7 +29,7 @@ fn main() {
     };
     let deeds: usize = args.next().and_then(|v| v.parse().ok()).unwrap_or(3);
 
-    // (1) THE LOAD — what `persist::sync` pays on EVERY beat just to
+    // (1) the load — what `persist::sync` pays on every beat just to
     // find the tail it means to append (conductor/src/lib.rs:1289).
     let at = Instant::now();
     let chronicle = match cfe::persist::load(&path) {
@@ -43,7 +43,7 @@ fn main() {
     let receipts = chronicle.receipts().to_vec();
     let n = receipts.len();
 
-    // (2) THE CHAIN VERIFY alone — `from_receipts` re-hashes every link.
+    // (2) the chain verify alone — `from_receipts` re-hashes every link.
     let at = Instant::now();
     let verified = cfe::vrp::Chronicle::from_receipts(receipts.clone());
     let verify = at.elapsed();
@@ -52,18 +52,18 @@ fn main() {
         return;
     }
 
-    // (3) ONE FULL REPLAY — the monolithic loop that cannot advance by a
+    // (3) one full replay — the monolithic loop that cannot advance by a
     // single receipt.
     let at = Instant::now();
     let committed = cfe::world::replay(&chronicle);
     let replay = at.elapsed();
 
-    // (4) ONE STATE ENCODING — paid once per beat at the commitment.
+    // (4) one STATE encoding — paid once per beat at the commitment.
     let at = Instant::now();
     let bytes = codec::state_bytes(&committed);
     let encode = at.elapsed();
 
-    // (5) ONE WHOLE BEAT, as `chain_beat` actually spends it: for each
+    // (5) one whole BEAT, as `chain_beat` actually spends it: for each
     // new deed, rebuild the prefix chronicle (copy + verify) and replay
     // it whole, then gate the step.
     let first = n.saturating_sub(deeds);

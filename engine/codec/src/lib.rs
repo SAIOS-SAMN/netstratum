@@ -1,4 +1,4 @@
-//! CODEC-1 — the committed state's ONE canonical encoding (Charter
+//! CODEC-1 — the committed state's one canonical encoding (Charter
 //! §11 ladder #35; registry tag 83 names the container when these
 //! bytes ride a TLV stream).
 //!
@@ -12,7 +12,7 @@
 //!   encoding because nothing about the encoding is chosen.
 //! - **The schema leads.** Byte 0 is the schema version. Version 1
 //!   is the freeze-window snapshot of the field set (all twenty
-//!   families). A schema this kernel does not know REFUSES — a
+//!   families). A schema this kernel does not know refuses — a
 //!   schema bump is a kernel amendment, never a silent widening.
 //! - **Refuse, never guess.** Truncation, trailing bytes, an unknown
 //!   resource or star or scope code — every malformation decodes to
@@ -33,103 +33,103 @@ use cfe::world::{AbsorptionDebt, Bond, Committed, Council, Forward, Genesis, Off
 /// field set.
 pub const SCHEMA_V1: u8 = 1;
 /// KERNEL-TAXON (15 §4): v2 appends the sealed taxon as a trailing
-/// presence-byte + (class, clade). Emit v2; ACCEPT v1 (taxon absent →
-/// None) so every v1 commitment replays whole. CODER-04 TO RATIFY —
+/// presence-byte + (class, clade). Emit v2; accept v1 (taxon absent →
+/// None) so every v1 commitment replays whole. CODER-04 to ratify —
 /// the schema versions are the codec seat's byte monopoly; this is
 /// the mechanical trailing addition the freeze window exists for.
 pub const SCHEMA_V2: u8 = 2;
-/// THE VERTICAL AXIS (2026-08-01): v3 appends the SEATS held as a
+/// The vertical axis (2026-08-01): v3 appends the seats held as a
 /// trailing count + (station byte, length-prefixed line). Emit v3;
-/// ACCEPT v2 and v1 (seats absent → empty, which is the truthful
+/// accept v2 and v1 (seats absent → empty, which is the truthful
 /// reading of a world that never seated one). The additive-trailing
 /// shape is the KERNEL-TAXON precedent, unchanged.
 pub const SCHEMA_V3: u8 = 3;
-/// RECEIPT AUTHORITY (operator ruling 2026-08-05): v4 appends the
-/// techs' RECEIPTED MAGNITUDES as a trailing run of ratios, one per
-/// tech entry in the techs family's own order. Emit v4; ACCEPT v3 and
-/// below by RECONSTRUCTING each magnitude from the closed writer rule
+/// Receipt authority (operator ruling 2026-08-05): v4 appends the
+/// techs' receipted magnitudes as a trailing run of ratios, one per
+/// tech entry in the techs family's own order. Emit v4; accept v3 and
+/// below by reconstructing each magnitude from the closed writer rule
 /// of those eras (every pre-v4 writer was deterministic: the
 /// crystallized table for conditions it names, 3/4 for the
 /// re-emergence lesson, 1 otherwise). Honest caveat, recorded: a
-/// pre-v4 LICENSED node of a crystallized condition carried 1 in its
+/// pre-v4 licensed node of a crystallized condition carried 1 in its
 /// receipt while the table says otherwise — the reconstruction reads
 /// the table, so such a node decodes with the table's value; the
 /// kernel reads no magnitude today, so no admission changes.
 pub const SCHEMA_V4: u8 = 4;
 
-/// **SCHEMA v5 (#42) — THE PACTS RIDE THE SNAPSHOT.** A world's
+/// **Schema v5 (#42) — the pacts ride the snapshot.** A world's
 /// standing treaties are committed state, so a snapshot that dropped
 /// them would reopen a world at peace with everyone it was at war
 /// with. Appended after the routes, version-gated: a v4 snapshot
-/// decodes with NO pacts, which is exactly what a world that predates
+/// decodes with no pacts, which is exactly what a world that predates
 /// treaties had.
 pub const SCHEMA_V5: u8 = 5;
 
-/// **SCHEMA v6 (Wave-3/4) — ELEMENT ROUTES.** Specialized element
+/// **Schema v6 (Wave-3/4) — element routes.** Specialized element
 /// lanes ride the snapshot trail after treaties. A v5 blob ends before
 /// them and decodes with an empty element-route table (SEAL A).
 pub const SCHEMA_V6: u8 = 6;
 
-/// **SCHEMA v7 (Phase-3 fleet) — hulls trail after element routes.**
+/// **Schema v7 (Phase-3 fleet) — hulls trail after element routes.**
 pub const SCHEMA_V7: u8 = 7;
 
-/// **SCHEMA v8 (Phase-4 instruments) — notes, futures, last clears.**
+/// **Schema v8 (Phase-4 instruments) — notes, futures, last clears.**
 pub const SCHEMA_V8: u8 = 8;
 
-/// **SCHEMA v9 — shares + perps trail.**
+/// **Schema v9 — shares + perps trail.**
 pub const SCHEMA_V9: u8 = 9;
 
-/// **SCHEMA v10 — P5-M clear depths + circuit breaker.**
+/// **Schema v10 — P5-M clear depths + circuit breaker.**
 pub const SCHEMA_V10: u8 = 10;
 
-/// **SCHEMA v11 — P5-M2 cascade + P5-D tamper pressures.**
+/// **Schema v11 — P5-M2 cascade + P5-D tamper pressures.**
 pub const SCHEMA_V11: u8 = 11;
 
-/// **SCHEMA v12 — P5-B posture doctrine overlay.**
+/// **Schema v12 — P5-B posture doctrine overlay.**
 pub const SCHEMA_V12: u8 = 12;
 
-/// **SCHEMA v13 — P5-F intel stash + spy marks.**
+/// **Schema v13 — P5-F intel stash + spy marks.**
 pub const SCHEMA_V13: u8 = 13;
 
-/// **SCHEMA v14 — O6.5 vault custody STAMP per orb.**
+/// **Schema v14 — O6.5 vault custody STAMP per orb.**
 pub const SCHEMA_V14: u8 = 14;
 
-/// **SCHEMA v15 — CHEM science catalog (known gems).**
+/// **Schema v15 — chem science catalog (known gems).**
 pub const SCHEMA_V15: u8 = 15;
 
-/// **SCHEMA v16 — seated science labs (seats · clones · synth · skin · rogue).**
+/// **Schema v16 — seated science labs (seats · clones · synth · skin · rogue).**
 pub const SCHEMA_V16: u8 = 16;
 
-/// **SCHEMA v17 — open clade (u16 LE in taxon field; no u8 tax cap).**
+/// **Schema v17 — open clade (u16 LE in taxon field; no u8 tax cap).**
 pub const SCHEMA_V17: u8 = 17;
 
-/// **SCHEMA v18 — element_wants (E3.7 material WANT-1 targets).**
+/// **Schema v18 — element_wants (E3.7 material WANT-1 targets).**
 pub const SCHEMA_V18: u8 = 18;
 
-/// **SCHEMA v19 — element_allowlists (E3.9 treaty element annexes).**
+/// **Schema v19 — element_allowlists (E3.9 treaty element annexes).**
 pub const SCHEMA_V19: u8 = 19;
 
-/// **SCHEMA v20 — evolution_stage (44_LINEAGES §2c, one trailing byte).**
+/// **Schema v20 — evolution_stage (44_LINEAGES §2c, one trailing byte).**
 pub const SCHEMA_V20: u8 = 20;
 
-/// **SCHEMA v21 — treasury_balances (49_TAXATION §5, trailing run).**
+/// **Schema v21 — treasury_balances (49_TAXATION §5, trailing run).**
 pub const SCHEMA_V21: u8 = 21;
 
-/// **SCHEMA v22 — collapsed (50_WIN_CONDITIONS, the failure state, one
+/// **Schema v22 — collapsed (50_WIN_CONDITIONS, the failure state, one
 /// optional trailing stamp).**
 pub const SCHEMA_V22: u8 = 22;
 
-/// **SCHEMA v23 — pop_accrued (41_PROVISION, COG Slice 2, trailing run).**
+/// **Schema v23 — pop_accrued (41_PROVISION, COG Slice 2, trailing run).**
 /// The fractional population carry per orb — a v22 reader stops before it
 /// and decodes a whole state with every band at a whole headcount.
 pub const SCHEMA_V23: u8 = 23;
 
-/// **SCHEMA v24 — leisure_banks (COG-1, doc 52 §7, trailing run).** The
+/// **Schema v24 — leisure_banks (COG-1, doc 52 §7, trailing run).** The
 /// cognition budget per orb — a v23 reader stops before it and decodes a
 /// whole state with every mind's leisure bank empty.
 pub const SCHEMA_V24: u8 = 24;
 
-/// **SCHEMA v25 — vein `rejuvenated` (ONT-3, resource rejuvenation).** The
+/// **Schema v25 — vein `rejuvenated` (ONT-3, resource rejuvenation).** The
 /// mirror of a vein's `extracted` integral: the inverse-receipt sum a worked
 /// vein has recovered under Keplerian orbital forcing. Appended per prospect
 /// after `last_assay`, version-gated — a v24 reader stops before it and decodes
@@ -137,7 +137,7 @@ pub const SCHEMA_V24: u8 = 24;
 /// the ONT-2 read).
 pub const SCHEMA_V25: u8 = 25;
 
-/// **SCHEMA v26 — region_seed (GALACTIC-1).** The world's regional
+/// **Schema v26 — region_seed (GALACTIC-1).** The world's regional
 /// resource-weighting seed, sealed once at genesis from its charted
 /// position. Appended LAST as a presence byte + 32 bytes, version-gated —
 /// a v25 reader stops before it and decodes `region_seed = None` (byte-
@@ -257,7 +257,7 @@ pub fn state_bytes(committed: &Committed) -> Vec<u8> {
     }
 
     // The in-place family keeps its v1 3-field layout; the receipted
-    // magnitudes ride the v4 TRAILING run below, so every older
+    // magnitudes ride the v4 trailing run below, so every older
     // decoder still reads this family whole.
     put_u32(&mut out, committed.techs.len() as u32);
     for (orb, condition, node, _) in &committed.techs {
@@ -344,7 +344,7 @@ pub fn state_bytes(committed: &Committed) -> Vec<u8> {
         }
         None => out.push(0),
     }
-    // THE VERTICAL AXIS (v3 trailing field): seat count, then each as
+    // The vertical axis (v3 trailing field): seat count, then each as
     // station byte + length-prefixed line.
     out.push(u8::try_from(committed.stations.len()).unwrap_or(u8::MAX));
     for (line, station) in committed.stations.iter().take(usize::from(u8::MAX)) {
@@ -353,13 +353,13 @@ pub fn state_bytes(committed: &Committed) -> Vec<u8> {
         out.push(u8::try_from(name.len()).unwrap_or(u8::MAX));
         out.extend_from_slice(&name[..name.len().min(usize::from(u8::MAX))]);
     }
-    // RECEIPT AUTHORITY (v4 trailing run): each tech entry's receipted
+    // Receipt authority (v4 trailing run): each tech entry's receipted
     // magnitude, in the techs family's own order — no count, because
-    // the count IS the techs count already written above.
+    // the count is the techs count already written above.
     for (_, _, _, magnitude) in &committed.techs {
         ratio::encode(magnitude, &mut out);
     }
-    // #42 (v5 TRAILING RUN): the standing pacts, LAST — the
+    // #42 (v5 trailing run): the standing pacts, LAST — the
     // additive-trailing law this codec has followed since v2. An
     // older reader stops before it and decodes a whole state; a block
     // inserted mid-stream would misalign every field after it, which
@@ -380,7 +380,7 @@ pub fn state_bytes(committed: &Committed) -> Vec<u8> {
             ratio::encode(factor, &mut out);
         }
     }
-    // Wave-3 E-ROUTE (v6 TRAILING RUN): element-specialized lanes.
+    // Wave-3 E-ROUTE (v6 trailing run): element-specialized lanes.
     put_u32(&mut out, committed.element_routes.len() as u32);
     for (deal, eta, element, rail) in &committed.element_routes {
         put_u64(&mut out, *deal);
@@ -449,7 +449,7 @@ pub fn state_bytes(committed: &Committed) -> Vec<u8> {
         ratio::encode(&p.margin, &mut out);
         out.push(u8::from(p.open));
     }
-    // SCHEMA v10 — clear seal depths + circuit breaker clock.
+    // Schema v10 — clear seal depths + circuit breaker clock.
     put_u32(&mut out, committed.clear_depths.len() as u32);
     for (r, d) in &committed.clear_depths {
         out.push(*r as u8);
@@ -462,7 +462,7 @@ pub fn state_bytes(committed: &Committed) -> Vec<u8> {
             put_u64(&mut out, t);
         }
     }
-    // SCHEMA v11 — cascade + tamper pressures.
+    // Schema v11 — cascade + tamper pressures.
     put_u32(&mut out, committed.cascade_pressures.len() as u32);
     for (orb, p) in &committed.cascade_pressures {
         put_u64(&mut out, *orb);
@@ -473,7 +473,7 @@ pub fn state_bytes(committed: &Committed) -> Vec<u8> {
         put_u64(&mut out, *orb);
         ratio::encode(p, &mut out);
     }
-    // SCHEMA v12 — posture doctrine overlay (0 = none).
+    // Schema v12 — posture doctrine overlay (0 = none).
     match committed.posture_disposition {
         None => out.push(0),
         Some(d) => {
@@ -495,7 +495,7 @@ pub fn state_bytes(committed: &Committed) -> Vec<u8> {
             out.push(p);
         }
     }
-    // SCHEMA v13 — intel hashes + spy marks.
+    // Schema v13 — intel hashes + spy marks.
     put_u32(&mut out, committed.intel_hashes.len() as u32);
     for h in &committed.intel_hashes {
         out.extend_from_slice(h);
@@ -505,18 +505,18 @@ pub fn state_bytes(committed: &Committed) -> Vec<u8> {
         put_u64(&mut out, *orb);
         out.push(*d);
     }
-    // SCHEMA v14 — vault custody STAMP.
+    // Schema v14 — vault custody STAMP.
     put_u32(&mut out, committed.vault_stamp.len() as u32);
     for (orb, amt) in &committed.vault_stamp {
         put_u64(&mut out, *orb);
         ratio::encode(amt, &mut out);
     }
-    // SCHEMA v15 — chemistry catalog.
+    // Schema v15 — chemistry catalog.
     put_u32(&mut out, committed.chem_catalog.len() as u32);
     for h in &committed.chem_catalog {
         out.extend_from_slice(h);
     }
-    // SCHEMA v16 — science lab state.
+    // Schema v16 — science lab state.
     put_u32(&mut out, committed.science_seats.len() as u32);
     for (d, orb, rank) in &committed.science_seats {
         out.push(*d);
@@ -543,13 +543,13 @@ pub fn state_bytes(committed: &Committed) -> Vec<u8> {
         put_u64(&mut out, *orb);
         out.push(*p);
     }
-    // SCHEMA v18 trailing: element material wants.
+    // Schema v18 trailing: element material wants.
     put_u32(&mut out, committed.element_wants.len() as u32);
     for (orb, element) in &committed.element_wants {
         put_u64(&mut out, *orb);
         out.extend_from_slice(element);
     }
-    // SCHEMA v19 trailing: treaty element allow-lists (E3.9) —
+    // Schema v19 trailing: treaty element allow-lists (E3.9) —
     // (deal, partner, ids), append order. The additive-trailing law:
     // a v18 reader stops before this run and decodes a whole state.
     put_u32(&mut out, committed.element_allowlists.len() as u32);
@@ -561,11 +561,11 @@ pub fn state_bytes(committed: &Committed) -> Vec<u8> {
             out.extend_from_slice(element);
         }
     }
-    // SCHEMA v20 trailing: the evolutionary stage (44_LINEAGES §2c) — one
+    // Schema v20 trailing: the evolutionary stage (44_LINEAGES §2c) — one
     // byte. A v19 reader stops before it and decodes a whole state at
     // stage 0.
     out.push(committed.evolution_stage);
-    // SCHEMA v21 trailing: sovereign treasury balances (49_TAXATION §5) —
+    // Schema v21 trailing: sovereign treasury balances (49_TAXATION §5) —
     // (orb, balance) run, LAST. A v20 reader stops before it and decodes a
     // whole state with an empty treasury.
     put_u32(&mut out, committed.treasury_balances.len() as u32);
@@ -573,7 +573,7 @@ pub fn state_bytes(committed: &Committed) -> Vec<u8> {
         put_u64(&mut out, *orb);
         ratio::encode(bal, &mut out);
     }
-    // SCHEMA v22 trailing: the failure state (50_WIN_CONDITIONS) — one
+    // Schema v22 trailing: the failure state (50_WIN_CONDITIONS) — one
     // flag byte, then the stamp if set. A v21 reader stops before it and
     // decodes a whole state as not-collapsed.
     match committed.collapsed {
@@ -583,7 +583,7 @@ pub fn state_bytes(committed: &Committed) -> Vec<u8> {
         }
         None => out.push(0),
     }
-    // SCHEMA v23 trailing: the fractional population carry (41_PROVISION,
+    // Schema v23 trailing: the fractional population carry (41_PROVISION,
     // COG Slice 2) — (orb, remainder) run, LAST. A v22 reader stops before
     // it and decodes a whole state with every band at a whole headcount.
     put_u32(&mut out, committed.pop_accrued.len() as u32);
@@ -591,7 +591,7 @@ pub fn state_bytes(committed: &Committed) -> Vec<u8> {
         put_u64(&mut out, *orb);
         ratio::encode(remainder, &mut out);
     }
-    // SCHEMA v24 trailing: the leisure banks (COG-1, doc 52 §7) — (orb,
+    // Schema v24 trailing: the leisure banks (COG-1, doc 52 §7) — (orb,
     // balance) run, LAST. A v23 reader stops before it and decodes a whole
     // state with every mind's cognition budget empty.
     put_u32(&mut out, committed.leisure_banks.len() as u32);
@@ -599,7 +599,7 @@ pub fn state_bytes(committed: &Committed) -> Vec<u8> {
         put_u64(&mut out, *orb);
         ratio::encode(bal, &mut out);
     }
-    // SCHEMA v26 trailing: the regional seed (GALACTIC-1), LAST. A v25
+    // Schema v26 trailing: the regional seed (GALACTIC-1), LAST. A v25
     // reader stops before it and decodes `region_seed = None`.
     match committed.region_seed {
         Some(seed) => {
@@ -864,7 +864,7 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
 
     let mut routes = Vec::new();
     for _ in 0..take.u32()? {
-        // FORM AT THE DOOR: the snapshot's eta re-proves [0,1) at decode,
+        // Form AT the door: the snapshot's eta re-proves [0,1) at decode,
         // same law as the chronicle door — a Unit past here is proven.
         routes.push((take.u64()?, cfe::dop::Unit::new(take.ratio()?)?));
     }
@@ -919,7 +919,7 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         }
     };
 
-    // THE VERTICAL AXIS: v1/v2 carry no seats (empty — a world that
+    // The vertical axis: v1/v2 carry no seats (empty — a world that
     // never seated one); v3 reads the trailing table. Refuse never
     // guess: a short or unlawful entry refuses whole.
     let mut stations: Vec<(String, u8)> = Vec::new();
@@ -940,7 +940,7 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         }
     }
 
-    // RECEIPT AUTHORITY: v4 reads the trailing magnitude run, one per
+    // Receipt authority: v4 reads the trailing magnitude run, one per
     // tech entry in order. Older schemas never carried it —
     // reconstruct by the closed writer rule of those eras (see
     // `SCHEMA_V4`): the crystallized table where it answers, 3/4 for
@@ -966,7 +966,7 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
             .collect()
     };
 
-    // #42 (v5 TRAILING RUN): the pacts after older fields.
+    // #42 (v5 trailing run): the pacts after older fields.
     let mut treaties: Vec<cfe::treaty::Treaty> = Vec::new();
     if schema >= SCHEMA_V5 {
         for _ in 0..take.u32()? {
@@ -985,7 +985,7 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         }
     }
 
-    // Wave-3 (v6 TRAILING RUN): element-specialized lanes.
+    // Wave-3 (v6 trailing run): element-specialized lanes.
     let mut element_routes = Vec::new();
     if schema >= SCHEMA_V6 {
         for _ in 0..take.u32()? {
@@ -1239,11 +1239,11 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         }
     }
 
-    // SCHEMA v20 trailing: the evolutionary stage — one byte, or 0 for a
+    // Schema v20 trailing: the evolutionary stage — one byte, or 0 for a
     // pre-v20 snapshot (a line that had not yet advanced).
     let evolution_stage = if schema >= SCHEMA_V20 { take.u8()? } else { 0 };
 
-    // SCHEMA v21 trailing: sovereign treasury balances, or empty for a
+    // Schema v21 trailing: sovereign treasury balances, or empty for a
     // pre-v21 snapshot (no line had yet collected a levy).
     let mut treasury_balances = Vec::new();
     if schema >= SCHEMA_V21 {
@@ -1254,7 +1254,7 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         }
     }
 
-    // SCHEMA v22 trailing: the failure state, or None for a pre-v22
+    // Schema v22 trailing: the failure state, or None for a pre-v22
     // snapshot (no line had yet collapsed under this schema).
     let collapsed = if schema >= SCHEMA_V22 {
         match take.u8()? {
@@ -1265,7 +1265,7 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         None
     };
 
-    // SCHEMA v23 trailing: the fractional population carry, or empty for a
+    // Schema v23 trailing: the fractional population carry, or empty for a
     // pre-v23 snapshot (every band read at a whole headcount).
     let mut pop_accrued = Vec::new();
     if schema >= SCHEMA_V23 {
@@ -1276,7 +1276,7 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         }
     }
 
-    // SCHEMA v24 trailing: the leisure banks, or empty for a pre-v24 snapshot
+    // Schema v24 trailing: the leisure banks, or empty for a pre-v24 snapshot
     // (every mind's cognition budget read as empty).
     let mut leisure_banks = Vec::new();
     if schema >= SCHEMA_V24 {
@@ -1287,7 +1287,7 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         }
     }
 
-    // SCHEMA v26 trailing: the regional seed (GALACTIC-1), or None for a
+    // Schema v26 trailing: the regional seed (GALACTIC-1), or None for a
     // pre-v26 snapshot (no world had yet charted a region).
     let region_seed = if schema >= SCHEMA_V26 {
         match take.u8()? {

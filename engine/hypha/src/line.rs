@@ -1,21 +1,21 @@
-//! A TIER'S LINE — the canonical, hash-chained run of everything a tier has
-//! folded (mycelium 78.123, ahead of 2(c)'s challenge window).
+//! A tier's LINE — the canonical, hash-chained run of everything a tier has
+//! folded (Mycelium 78.123, ahead of 2(c)'s challenge window).
 //!
 //!   head₀ = 32 zero bytes
-//!   headₙ = payload_hash("mycelium tier line v1" ‖ headₙ₋₁ ‖ entryₙ)
+//!   headₙ = payload_hash("Mycelium tier line v1" ‖ headₙ₋₁ ‖ entryₙ)
 //!
-//! where `entryₙ` is ONE UNDERLYING BATCH — for the `colonies` tier, one
+//! where `entryₙ` is one underlying batch — for the `colonies` tier, one
 //! chronicle receipt's net change per holding and its declared emission —
 //! written canonically (`put_nets(rows) ‖ put_nets(declared)`, children
 //! never included). A fold is the sum of every entry since the tier's last
 //! admitted fold and its prefix is the head after the last of them, so a
-//! challenge re-derives the fold from what it nets: the tier HOLDS its
+//! challenge re-derives the fold from what it nets: the tier holds its
 //! entries, here. A fold nets at most `census::MAX_SPAN` entries, so an
 //! availability demand never asks for more than ~1.1 MB.
 //!
 //! The colonies line's history, as ruled by the coordinator 2026-10-07:
 //!   * entries 0 and 1 (deepmat-veil h 243590, rivergate-hearth h 243591)
-//!     are COARSE, PRE-CORRECTION: whole-window batches, each equal to its
+//!     are coarse, PRE-correction: whole-window batches, each equal to its
 //!     fold. Grandfathered, never re-folded (there is no supersede act); a
 //!     challenge on them is weak, not refused.
 //!   * entries 2..23626 (alignment h 243597, understory h 243599) are
@@ -25,16 +25,16 @@
 //!     glyph-sky h 203174) are not on it at all: grandfathered "unchallenged,
 //!     pre-line".
 //!
-//! THE HOT LINE AND ITS ARCHIVE. The hot file holds only entries some fold
-//! may still be asked to publish. It starts from a BASE (`line-<tier>.base`:
+//! The hot LINE and its archive. The hot file holds only entries some fold
+//! may still be asked to publish. It starts from a base (`line-<tier>.base`:
 //! the head before its first entry, and that entry's index on the whole
 //! line), so pruning never breaks the chain:
-//!   * PRUNE BY FINALITY ([`TierLine::prune_through`]): entries netted only
+//!   * Prune by finality ([`TierLine::prune_through`]): entries netted only
 //!     by folds the court reads `Final` or `PreLine` are appended to
 //!     `line-<tier>.archive` and leave the hot file; the base moves to the
 //!     head after the last of them. Never on Provisional, Blocked,
 //!     Falsified, Unwound or Unrecorded.
-//!   * AN EPOCH ([`TierLine::restart`]): under mycelium 78.125 a tier's first
+//!   * An epoch ([`TierLine::restart`]): under Mycelium 78.125 a tier's first
 //!     fold starts its line at the zero head, and every fold sealed before it
 //!     reads PreLine. The colonies line's first 31732 entries were archived
 //!     whole as `line-colonies.pre-78.125` (coordinator ruling 2026-10-07,
@@ -46,10 +46,10 @@
 //! On disk (`home/line-<tier>`, and the archives alike): one record per
 //! entry, appended only after the court admits the fold —
 //!   `[head 32][cite 32][len u32 LE][entry len]`
-//! — where `cite` is the hash of the netstratum receipt the entry was read
+//! — where `cite` is the hash of the Netstratum receipt the entry was read
 //! from. The cite is not hashed into the line (v1 names only the rows; a
 //! source commitment would come as a law for every domain, never a
-//! netstratum field); it is the tier's pointer back to the receipt.
+//! Netstratum field); it is the tier's pointer back to the receipt.
 
 use mycelium::anastome::dialogue::challenge::Entry as CourtEntry;
 use mycelium::anastome::dialogue::uplink::{Net, TierFold};
@@ -165,18 +165,18 @@ impl TierLine {
         self.offset + self.entries.len() as u64
     }
 
-    /// The head the line WOULD have after `entry` — the prefix a fold of it
+    /// The head the line would have after `entry` — the prefix a fold of it
     /// signs. Nothing is written.
     pub fn peek(&self, entry: &[u8]) -> [u8; 32] {
         next_head(&self.head(), entry)
     }
 
-    /// The head the line WOULD have after every entry in `batch`.
+    /// The head the line would have after every entry in `batch`.
     pub fn peek_all(&self, batch: &[(Vec<u8>, [u8; 32])]) -> [u8; 32] {
         batch.iter().fold(self.head(), |head, (entry, _)| next_head(&head, entry))
     }
 
-    /// Append every entry in `batch`, in order, as ONE write and one sync —
+    /// Append every entry in `batch`, in order, as one write and one sync —
     /// a fold's entries land together or not at all as far as one write can
     /// promise; returns the final head.
     pub fn append_all(&mut self, batch: Vec<(Vec<u8>, [u8; 32])>) -> io::Result<[u8; 32]> {
@@ -238,9 +238,9 @@ impl TierLine {
         Ok(())
     }
 
-    /// ROLL THE HOT LINE BACK to its first `keep` entries — the court is the
+    /// Roll the hot LINE back to its first `keep` entries — the court is the
     /// line's authority, and a court that restarted without its latest
-    /// admissions stands at an EARLIER head of this line; the entries after
+    /// admissions stands at an earlier head of this line; the entries after
     /// it were never sealed there. Returns the entries removed, oldest first
     /// (their cites name the receipts to fold again). The chronicles keep
     /// those receipts; nothing of the record is lost.
@@ -257,7 +257,7 @@ impl TierLine {
         Ok(removed)
     }
 
-    /// START AN EPOCH: the whole hot line set aside as `line-<tier>.<epoch>`
+    /// Start an epoch: the whole hot line set aside as `line-<tier>.<epoch>`
     /// (kept whole, its own chain from its own base) and the hot line
     /// restarted at the zero head, its indices continuing. Refuses to
     /// overwrite an epoch already set aside.
@@ -278,7 +278,7 @@ impl TierLine {
     }
 }
 
-/// ONE ADMITTED FOLD, as its tier keeps it: the court's stamp (its key, the
+/// One admitted fold, as its tier keeps it: the court's stamp (its key, the
 /// coordinates finality is read by) and the span of the line it nets.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct FoldMark {
@@ -418,7 +418,7 @@ pub fn fold_of(entries: &[CourtEntry]) -> (Vec<Net>, Vec<Net>) {
     (sum(&|e| &e.rows), sum(&|e| &e.declared))
 }
 
-/// HOW FAR EACH PEOPLE'S CHRONICLE HAS BEEN FOLDED on a tier — so no
+/// How far each people's chronicle has been folded on a tier — so no
 /// receipt is netted twice. `home/cursor-<tier>`, one line per people:
 /// `people<TAB>receipts folded<TAB>hex hash of the last receipt folded`.
 /// The hash is checked against the chronicle before a census resumes from

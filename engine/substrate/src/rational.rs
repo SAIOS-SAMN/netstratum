@@ -1,10 +1,10 @@
-//! Multi-field exact-rational rational arithmetic over `BigRational` (LAW IV).
+//! Multi-field exact-rational rational arithmetic over `BigRational` (Law IV).
 //!
 //! `Rational<F>` carries an exact-rational value tagged by a phantom field `F`.
 //! The phantom tag enforces the multi-field discipline at the type level:
-//! `Rational<Space>` and `Rational<Temporal>` are DISTINCT TYPES — cross-field
+//! `Rational<Space>` and `Rational<Temporal>` are distinct types — cross-field
 //! arithmetic is a compile-time error. Per-field smooth-prime profile
-//! validation is correctness-driven (naming WHICH algebra a value lives in),
+//! validation is correctness-driven (naming which algebra a value lives in),
 //! not a representation cap: backing is unbounded `BigRational`.
 //!
 //! Lifted whole from the sealed v0.3 line (shared_primitives::rational,
@@ -54,7 +54,7 @@ impl Field for Temporal {
 }
 
 /// Marker for the gauge rational field `exact-rational_Gauge`. The gauge axis owns the
-/// primes 11 and 13; 7 is Temporal-exclusive and NOT in this profile.
+/// primes 11 and 13; 7 is Temporal-exclusive and not in this profile.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Gauge;
 
@@ -115,7 +115,7 @@ impl<F: Field> core::fmt::Debug for Rational<F> {
 impl<F: Field> Rational<F> {
     /// **Canonical constructor** — build a `Rational<F>` from
     /// arbitrary-precision `BigInt` operands. Callers wrap integer literals
-    /// with `BigInt::from(literal)` explicitly; that explicitness IS the
+    /// with `BigInt::from(literal)` explicitly; that explicitness is the
     /// discipline.
     ///
     /// Returns:
@@ -178,7 +178,7 @@ impl<F: Field> Rational<F> {
         self.value.is_negative()
     }
 
-    /// Borrowed numerator as `&BigInt` — the substrate has NO
+    /// Borrowed numerator as `&BigInt` — the substrate has no
     /// lossy-projection boundary.
     #[inline]
     pub fn numerator(&self) -> &BigInt {
@@ -319,7 +319,7 @@ pub fn lcm_smooth_primes<F: Field>() -> BigInt {
 
 /// Structured refusals from `Rational<F>` construction and arithmetic.
 /// Every variant preserves the coordinate residual of the violation
-/// (LAW V) — never a bare bool or message.
+/// (Law V) — never a bare bool or message.
 #[derive(Debug, Clone, PartialEq, Eq, Error)]
 pub enum OverflowError {
     /// Denominator carries a prime outside the field's smooth profile.
@@ -352,13 +352,13 @@ pub enum OverflowError {
     BufferTooShort { needed: usize, actual: usize },
 
     /// Wire-format sign marker outside {0 = zero, 1 = positive,
-    /// 2 = negative} — the observed byte carried as what it is (LAW V:
+    /// 2 = negative} — the observed byte carried as what it is (law V:
     /// the residual names its own coordinate, never another refusal's).
     #[error("wire-format sign marker {observed} invalid (0 = zero, 1 = positive, 2 = negative)")]
     InvalidSignMarker { observed: u8 },
 
     /// Wire-format varint carries content past the 64-bit width at the
-    /// named byte offset — refused whole (LAW IV: no silent truncation
+    /// named byte offset — refused whole (law IV: no silent truncation
     /// of decoded content).
     #[error("wire-format varint exceeds 64 bits at byte offset {at}")]
     VarintTooWide { at: usize },

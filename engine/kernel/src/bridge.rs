@@ -1,40 +1,40 @@
-//! THE BRIDGE — the projection from committed state to the relational
+//! The bridge — the projection from committed state to the relational
 //! tensor (Task #25, operator ruling 2026-08-01).
 //!
-//! Before this module the algebra was an ISLAND: `coboundary_reduce`,
+//! Before this module the algebra was an island: `coboundary_reduce`,
 //! `for_each_residual`, `orbit_lock` and `rcf_signature` were all
 //! landed and witnessed in `rfa-core`, and not one of them had ever run
 //! on a universe. `Δ(V)` — "the relation V expresses" (`26_ARTICLES`
 //! §2a, `EQUATIONS` D0) — was not a computation that existed. This is
 //! that computation.
 //!
-//! **THE COBOUNDARY TRAP, and why the relation is not a bank
+//! **The coboundary trap, and why the relation is not a bank
 //! difference.** If `Δ_ij,l = scalar(i,l) − scalar(j,l)` — the obvious
-//! bridge, per-orb banks differenced — then `Δ` is a PURE COBOUNDARY.
+//! bridge, per-orb banks differenced — then `Δ` is a pure coboundary.
 //! `reduce.rs` phase 1 anchors every relation at vertex 0 and sends
 //! exactly that shape to zero (it is the same construction
-//! `rfa-core/tests/fold_pins.rs` uses to MAKE a gauge shift), so `D`
+//! `rfa-core/tests/fold_pins.rs` uses to make a gauge shift), so `D`
 //! would read zero for every universe forever and Article II would
 //! deny standing to everything. Node-local scalars carry no structural
 //! content by construction.
 //!
-//! **What is projected instead: the irreducibly PAIRWISE obligations.**
+//! **What is projected instead: the irreducibly pairwise obligations.**
 //! A standing obligation between two orbs is not derivable from any
 //! per-orb property, so it survives the reduction as real structure.
-//! The cocycle condition then asks whether obligation COMPOSES: if `i`
+//! The cocycle condition then asks whether obligation composes: if `i`
 //! owes `j` and `j` owes `k`, does that equal what `i` owes `k`? A
 //! triangle that does not compose is an economic fact, not an error.
 //!
-//! Entities `(i, j, k)` are ORBS, indexed by position in
+//! Entities `(i, j, k)` are orbs, indexed by position in
 //! `Committed::orbs`. The fiber coordinate `l` is the obligation
-//! CHANNEL. (Note for readers of the relayed design: `k` is NOT a free
+//! channel. (Note for readers of the relayed design: `k` is not a free
 //! axis to assign — `Delta` is `dim × dim × fiber` and
 //! `for_each_residual` ranges `i`, `j`, `k` all over `dim`. The
 //! relational class therefore rides `l`, the only free coordinate.)
 //!
-//! COUNCILS ARE OMITTED, deliberately: a council binds three or more
+//! Councils are omitted, deliberately: a council binds three or more
 //! members alike (`COUNCIL-1` — one boundary reckoning judging all
-//! together), and projecting it onto pairs would MANUFACTURE pairwise
+//! together), and projecting it onto pairs would manufacture pairwise
 //! structure that the deed never created. A multi-party obligation
 //! needs its own carrier; inventing edges to fit this one is exactly
 //! the cosmetic move `27_EVIDENCE` Article III forbids.
@@ -46,7 +46,7 @@ use rfa_core::{
 
 /// BOND-1: the standing order, `source` → `target` at `rate`/tick.
 pub const CHANNEL_BOND: usize = 0;
-/// FORWARD-1: the UNDELIVERED REMAINDER of a standing delivery
+/// FORWARD-1: the undelivered remainder of a standing delivery
 /// obligation, obligor → beneficiary (`quota − delivered`, floored at
 /// zero — a fully delivered obligation owes nothing and contributes
 /// nothing).
@@ -62,18 +62,18 @@ pub const CHANNEL_FORWARD: usize = 1;
 /// ABSORB-1: the open reciprocity window's remainder, debtor →
 /// creditor.
 pub const CHANNEL_DEBT: usize = 2;
-/// ROUTE-1: the chartered LANE, `eta` — **the one CROSS-BOOK channel**
+/// ROUTE-1: the chartered lane, `eta` — **the one cross-BOOK channel**
 /// (operator ruling 2026-08-02: *"open the cross-book read via
 /// entanglement"*).
 ///
 /// Channels 0–2 are intra-book by construction: `Bond`, `Covenant` and
-/// `AbsorptionDebt` are all keyed on orb ids inside one book. A LANE is
-/// the opposite — `cfe::world::charter_route` writes the SAME `deal`
-/// into BOTH books (`world/mod.rs::charter_route`), so a shared deal id is a
+/// `AbsorptionDebt` are all keyed on orb ids inside one book. A lane is
+/// the opposite — `cfe::world::charter_route` writes the same `deal`
+/// into both books (`world/mod.rs::charter_route`), so a shared deal id is a
 /// committed, replay-derived relation spanning two worlds. It is the
 /// only one there is.
 ///
-/// The two projections are therefore COMPLEMENTARY, never overlapping:
+/// The two projections are therefore complementary, never overlapping:
 /// [`project_complex`] fills 0–2 and leaves this empty;
 /// [`project_complex_across`] fills only this. Nothing is counted twice.
 pub const CHANNEL_LANE: usize = 3;
@@ -82,8 +82,8 @@ pub const CHANNEL_LANE: usize = 3;
 /// channel adds a coordinate and moves no existing reading.
 pub const CHANNELS: usize = 4;
 
-/// WHAT IS KNOWN about a relation (operator ruling 2026-08-01: the
-/// complex is SPARSE — an absent relation is ABSENT, not zero).
+/// What is KNOWN about a relation (operator ruling 2026-08-01: the
+/// complex is sparse — an absent relation is absent, not zero).
 ///
 /// Three values, never two. A dense tensor cannot tell "these two do
 /// not relate" from "these two relate by zero", and that distinction is
@@ -91,7 +91,7 @@ pub const CHANNELS: usize = 4;
 /// cocycle is a coboundary and `D` collapses (measured in
 /// `bridge_pins`). Sparsity is what lets a cycle exist.
 ///
-/// **ABSENCE IS A CLAIM, AND CLAIMS CAN BE WRONG.** This is not
+/// **Absence is A claim, and claims can be wrong.** This is not
 /// epistemic politeness — it is the forgery gate. A mistaken absence
 /// creates a cycle that is not there, and a phantom cycle carries
 /// phantom holonomy, which reads as capacity that was never earned.
@@ -101,12 +101,12 @@ pub const CHANNELS: usize = 4;
 pub enum Observed {
     /// A receipted obligation stands between the pair on this channel.
     Present,
-    /// VERIFIED absent: the observer's record is complete over this
+    /// Verified absent: the observer's record is complete over this
     /// pair, and no obligation stands. Within one book this is the
-    /// ordinary case — a world's chronicle is complete over its OWN
+    /// ordinary case — a world's chronicle is complete over its own
     /// orbs, so silence there is a fact.
     Absent,
-    /// NOT SEEN. The pair may relate beyond the observer's reach. Never
+    /// Not seen. The pair may relate beyond the observer's reach. Never
     /// counted as `Absent`; it must first be resolved (see [`Resolve`]).
     /// Across books this is the ordinary case — *worlds cannot see
     /// neighbours* (WANT-1 kind 1, the epistemological want: a short
@@ -117,16 +117,16 @@ pub enum Observed {
 /// How an `Unknown` is discharged before capacity may be read.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Resolve {
-    /// TELESCOPE FURTHER OUT — widen the reach and look again. The
+    /// Telescope further out — widen the reach and look again. The
     /// relation may stand outside the current horizon (reach is a
     /// wrapped-L1 distance; a short reach hides real structure).
     Telescope,
-    /// LOCK ON — confirm the absence at the present reach, turning
+    /// Lock on — confirm the absence at the present reach, turning
     /// `Unknown` into `Absent` by observation rather than assumption.
     LockOn,
 }
 
-/// ONE RESIDUAL, CARRIED WHOLE — `R_ijk,l = Δ_ik,l − Δ_ij,l − Δ_jk,l`
+/// One RESIDUAL, carried whole — `R_ijk,l = Δ_ik,l − Δ_ij,l − Δ_jk,l`
 /// with the triple and coordinate that produced it.
 ///
 /// **These are the first formations of symmetry** (operator, 2026-08-01;
@@ -138,10 +138,10 @@ pub enum Resolve {
 ///
 /// **Summing them destroys them.** `C(Δ) = Σ|R|` is a scalar aggregate,
 /// and `24_FORM` §2b bars exactly that where the system computes —
-/// L1 survives only at an OPERATOR lens. Worse, the residue composition
+/// L1 survives only at an operator lens. Worse, the residue composition
 /// law (the design owed at `KERNEL_RELAY` §7.4) has nothing to compose
 /// if the residuals were already added together, and `EQUATIONS` D3
-/// makes these the source of capacity: *the residue EMITS, D rises by
+/// makes these the source of capacity: *the residue emits, D rises by
 /// the plane*. A summed residual cannot emit anything.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Residual {
@@ -152,19 +152,19 @@ pub struct Residual {
     pub value: Ratio,
 }
 
-/// THE ENTANGLED READ (`24_FORM` §2f). The rank side and the
-/// potential side, computed in ONE pass over ONE prior state. They are
+/// The entangled READ (`24_FORM` §2f). The rank side and the
+/// potential side, computed in one pass over one prior state. They are
 /// not separately obtainable from this module by construction: a
 /// caller that could take `D` alone and consult the strain separately
 /// would have broken the entanglement and reintroduced the two-object
 /// attack surface the law closes.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct EntangledRead {
-    /// `D` — the RANK of the relational structure: how many independent
+    /// `D` — the rank of the relational structure: how many independent
     /// cycles carry charge no frame explains. Frame contributes nothing.
     ///
-    /// **NOT A CAPACITY** (operator ruling 2026-08-01: *why do we have
-    /// capacity? that should not be the case in an expanding universe*).
+    /// **Not A capacity** (ruling of 2026-08-01: *capacity should not
+    /// exist in an expanding universe*).
     /// "Capacity" names a container and implies a ceiling, and there is
     /// no ceiling here — not in this module, not in `rfa-core`, not
     /// anywhere in the workspace. `holonomies().len()` rises without
@@ -173,50 +173,50 @@ pub struct EntangledRead {
     /// capacity.
     ///
     /// The name also contradicted the law it serves: `EQUATIONS` D2
-    /// already rules that *D is a READING of the universe's own
+    /// already rules that *D is a reading of the universe's own
     /// structure, not a quota anything must fit under* — while the word
     /// said quota. It kept pulling the design back toward the container
     /// D2 struck.
     ///
     /// **Where a real capacity does live:** seat widths and occupancy
-    /// caps (`12_UNION` §3, `11_AEON` §7) ARE bounds, and they are
-    /// DERIVED from this rank. That is how the misnomer arrived — the
+    /// caps (`12_UNION` §3, `11_AEON` §7) are bounds, and they are
+    /// derived from this rank. That is how the misnomer arrived — the
     /// reading that sets a bound was named after the bound it sets.
     /// `PhiK I^(3)` had it right all along: *rank — dim of the
     /// relational structure*.
     ///
-    /// **THIS COUNTS WHAT STANDS ABOVE THE GROUND, and it is NOT `D`**
+    /// **This counts what stands above the Ground, and it is not `D`**
     /// (operator ruling 2026-08-01, maximal inscription). It is the
-    /// circulation count, and at the floor it reads ZERO — correctly,
-    /// because nothing circulates there. `D` is the ELEVATION, which
+    /// circulation count, and at the floor it reads zero — correctly,
+    /// because nothing circulates there. `D` is the elevation, which
     /// includes the point the state occupies by existing, and it is
     /// [`EntangledRead::degree`]. Reading this field as `D` is what put
     /// `D = 0` back into a system whose law says D is never zero.
     ///
     /// It stays a raw count because the question it answers is "does
-    /// anything circulate" — about what is ABOVE the floor, where zero
+    /// anything circulate" — about what is above the floor, where zero
     /// is the right answer and the floor would only blur it. (The
     /// four-row classification that once consumed it is struck —
     /// operator ruling 2026-08-04.)
     pub rank: usize,
-    /// **THE ESTATE'S VOLUME — the opened ground** (operator ruling
+    /// **The estate's volume — the opened ground** (operator ruling
     /// 2026-08-05). The measure of the orbs this reading stood over:
     /// `state.orbs.len()` for a single book, the sum across books for
     /// the cross-book read, never below one. It weights [`Self::degree`]
-    /// and NOTHING the judge consults — every verdict arm reads
+    /// and nothing the judge consults — every verdict arm reads
     /// `degree().above()`, which is volume-blind by construction.
     pub volume: usize,
 
-    /// **THE CHARGE FIELD, CARRIED WHOLE — what each cycle HOLDS**
-    /// (operator ruling 2026-08-02: *your entire definition is wrong if
-    /// dimensional capacity is a count of rooms*).
+    /// **The charge field, carried whole — what each cycle holds**
+    /// (ruling of 2026-08-02: *the definition is wrong if dimensional
+    /// capacity is a count of rooms*).
     ///
-    /// [`Self::rank`] is the DIMENSION of the cycle space — how many
+    /// [`Self::rank`] is the dimension of the cycle space — how many
     /// independent structures the manifold sustains. It is a dimension
     /// and never an inventory, and that part was sound. What was
     /// reductionist is that `holonomies()` returns
-    /// `Holonomy { i, j, l, value }` — every cycle with its EXACT
-    /// CHARGE — and this read took `.len()` and discarded every value.
+    /// `Holonomy { i, j, l, value }` — every cycle with its exact
+    /// charge — and this read took `.len()` and discarded every value.
     ///
     /// Residuals are carried whole. Flows are carried whole. The
     /// holonomies were counted, in the same function whose own comment
@@ -224,72 +224,72 @@ pub struct EntangledRead {
     /// scalar and discards which triple produced each residual."* Two
     /// poles held, the third collapsed.
     ///
-    /// **DIMENSION AND VOLUME ARE DIFFERENT READINGS.** The rank says
+    /// **Dimension and volume are different readings.** The rank says
     /// how many independent cycles stand; these values say what each
     /// one carries. A universe with one heavily-charged cycle and one
-    /// with a single faint one read the SAME rank and are not the same
+    /// with a single faint one read the same rank and are not the same
     /// universe. `18` §2b bars collapsing a directional quantity to a
     /// scalar aggregate wherever the system computes — a count is such
     /// a collapse.
     pub holonomy: Vec<Holonomy>,
-    /// The residual field, WHOLE — every non-composing triple with its
+    /// The residual field, whole — every non-composing triple with its
     /// indices intact. Never pre-summed: these are what emit (D3) and
     /// what the composition law will compose.
-    /// **THE SYMMETRY FOUNDATION — the ground new structure rises
+    /// **The symmetry foundation — the ground new structure rises
     /// from** (operator ruling 2026-08-02, renamed from `residuals`).
     ///
     /// These are the triples that do not compose: `Δ_ik ≠ Δ_ij + Δ_jk`.
     /// Calling the field *residuals* framed it as leftover error
-    /// awaiting containment, when it is the generative input — D3 EMITS
+    /// awaiting containment, when it is the generative input — D3 emits
     /// from exactly here, and the kernel charter says what becomes of
-    /// it: *"the orbit IS the symmetry the residue forms."* This is
+    /// it: *"the orbit is the symmetry the residue forms."* This is
     /// where symmetry comes from, so it is named for that.
     ///
     /// The element type stays [`Residual`]: each entry genuinely is the
     /// per-triple residual of the cocycle condition, which is exact
-    /// mathematics. A field of residuals that CONSTITUTES the
+    /// mathematics. A field of residuals that constitutes the
     /// foundation — the elements keep their name, the field takes its
     /// own.
     pub symmetry_foundation: Vec<Residual>,
-    /// `∂Δ` — the SECOND POLE, carried whole as its non-zero
+    /// `∂Δ` — the second pole, carried whole as its non-zero
     /// components: which vertices carry net flow, and how much. Empty
     /// means pure circulation — every vertex balances, nothing sources
     /// or sinks, and the field does no work however large it is.
     pub flows: Vec<Flow>,
-    /// Pairs whose relation was NOT observed. While any stands, the
+    /// Pairs whose relation was not observed. While any stands, the
     /// complex has holes of unknown shape and no rank may be read
     /// off it.
     pub unknown: usize,
 }
 
 impl EntangledRead {
-    /// **`D` is well-defined only on a fully OBSERVED complex.** One
+    /// **`D` is well-defined only on a fully observed complex.** One
     /// condition, and it is a refusal to read rank out of something
     /// that has none to give: `unknown == 0`. An unresolved absence
     /// would let phantom topology mint phantom rank, so discharge
     /// every `Unknown` by [`Resolve`] first.
     ///
-    /// **THE RESIDUAL CLAUSE IS STRUCK** (operator ruling 2026-08-01).
+    /// **The RESIDUAL clause is struck** (operator ruling 2026-08-01).
     /// It read `&& self.symmetry_foundation.is_empty()`, barring the rank while
     /// any triple failed to compose, on the reasoning that
     /// `H¹ = Z¹/B¹` is defined on cocycles alone. Three faults:
     ///
-    /// 1. That reasoning is about cohomology as a QUOTIENT. This engine
+    /// 1. That reasoning is about cohomology as a quotient. This engine
     ///    never forms the quotient — [`rfa_core::holonomies`] reduces
     ///    against a spanning forest and reads the charge each remaining
-    ///    edge carries. It is TOTAL and needs no cocycle precondition.
+    ///    edge carries. It is total and needs no cocycle precondition.
     /// 2. It gave `C` a gate. Structural phrasing (`is_empty`) rather
     ///    than scalar (`defect == 0`) does not change what it does: a
     ///    non-composing state was barred from being read.
     /// 3. It contradicts this module's own header — *a triangle that
-    ///    does not compose is an economic fact, not an error* — and THE
-    ///    BIFURCATION LAW, under which non-composition ROOTS and opens
-    ///    capacity by receipt. Non-composition is the SIGNAL, and the
+    ///    does not compose is an economic fact, not an error* — and the
+    ///    bifurcation law, under which non-composition roots and opens
+    ///    capacity by receipt. Non-composition is the signal, and the
     ///    old clause silenced exactly the states worth reading.
     ///
-    /// **A RECORDED OBLIGATION, NOT A LANDED MUST** (operator
+    /// **A recorded obligation, not A landed must** (operator
     /// ratification 2026-08-01). This read *"callers that gate on rank
-    /// MUST consult this"* — and no caller does; the only non-test
+    /// must consult this"* — and no caller does; the only non-test
     /// reference is this definition. A `MUST` with no enforcer reads as
     /// landed law and is not one, which is the same shape as a constant
     /// that is declared and never computed.
@@ -304,7 +304,7 @@ impl EntangledRead {
         self.unknown == 0
     }
 
-    /// **`D` — THE DEGREE, ON THE GROUND** (operator ruling 2026-08-01,
+    /// **`D` — The degree, on the Ground** (operator ruling 2026-08-01,
     /// maximal inscription). The elevation this state stands at: the one
     /// degree it occupies by existing, plus every independent
     /// circulation above it.
@@ -329,24 +329,24 @@ impl EntangledRead {
 ///
 /// Pure and total. Orbs are entities in `Committed::orbs` order;
 /// obligations naming an unknown orb are skipped (they relate nothing
-/// in THIS book), and a self-directed obligation is skipped (the
+/// in this book), and a self-directed obligation is skipped (the
 /// diagonal is identically zero — `Delta::set_antisym` would panic,
 /// and the kernel is total).
 ///
-/// Opposed obligations NET: where `i` owes `j` and `j` owes `i` on one
+/// Opposed obligations net: where `i` owes `j` and `j` owes `i` on one
 /// channel, the relation carries the difference. That keeps
 /// antisymmetry meaningful rather than double-counting a settled pair.
 pub fn project(state: &Committed) -> Delta {
     project_complex(state).0
 }
 
-/// Project committed state onto the SPARSE COMPLEX: the relation AND
+/// Project committed state onto the sparse complex: the relation and
 /// its support.
 ///
-/// The support is built from the OBLIGATIONS THEMSELVES, never from
+/// The support is built from the obligations themselves, never from
 /// which entries came out non-zero. That distinction is the whole point
 /// of sparsity: two orbs that owe each other the same amount net to
-/// zero, and they are still RELATED. Reading support off the values
+/// zero, and they are still related. Reading support off the values
 /// would put them back in the same bucket as two orbs that have never
 /// dealt with each other — the exact conflation `Observed` exists to
 /// end.
@@ -402,7 +402,7 @@ pub fn project_complex(state: &Committed) -> (Delta, Support) {
     (delta, support)
 }
 
-/// **THE CROSS-BOOK COMPLEX** — one vertex per BOOK, edged by the lanes
+/// **The cross-BOOK complex** — one vertex per BOOK, edged by the lanes
 /// they share (operator ruling 2026-08-02).
 ///
 /// [`project_complex`] reads inside one book and cannot see a relation
@@ -412,19 +412,19 @@ pub fn project_complex(state: &Committed) -> (Delta, Support) {
 /// signed by book order so the tensor stays antisymmetric, which is the
 /// same discipline [`project_complex`] uses for a directed obligation.
 ///
-/// **THIS IS NOT RECONCILIATION** and does not revive `cfe::opposition`
-/// (CHARTER §11, `recurrence_guard.rs` check 2). Reconciliation compares
-/// two COPIES of one thing to find divergence — *"you do not reconcile
-/// what cannot diverge."* A lane is ONE relation with TWO endpoints,
+/// **This is not reconciliation** and does not revive `cfe::opposition`
+/// (Charter §11, `recurrence_guard.rs` check 2). Reconciliation compares
+/// two copies of one thing to find divergence — *what cannot diverge
+/// is not reconciled.* A lane is one relation with two endpoints,
 /// each book holding its own leg by its own receipt. Reading it is
 /// observation, not comparison, and `read_entangled_observed`'s own doc
 /// already names this as the cross-book door.
 ///
 /// **`unknown` is the caller's honesty.** Pass the count of book-pairs
-/// this observer could NOT see. A conductor holding the whole roster
+/// this observer could not see. A conductor holding the whole roster
 /// passes 0 — that is `Resolve::LockOn`, absence confirmed at the
 /// present reach. An observer holding a subset must carry its blindness
-/// or the rank it reads is a phantom (`bridge.rs` §ABSENCE IS A CLAIM).
+/// or the rank it reads is a phantom (`bridge.rs` §Absence is A claim).
 pub fn project_complex_across(books: &[&Committed]) -> (Delta, Support) {
     let dim = books.len();
     let mut delta = Delta::zero(dim, CHANNELS);
@@ -435,7 +435,7 @@ pub fn project_complex_across(books: &[&Committed]) -> (Delta, Support) {
     }
     for i in 0..dim {
         for j in (i + 1)..dim {
-            // The shared lane: the BEST suppression both books hold, the
+            // The shared lane: the best suppression both books hold, the
             // same reading `cfe::world::pair_melt` takes (call the law's
             // shape, never a second one).
             let shared = books[i]
@@ -455,9 +455,9 @@ pub fn project_complex_across(books: &[&Committed]) -> (Delta, Support) {
     (delta, support)
 }
 
-/// THE REFOLD CERTIFICATE — what the fold took, kept exactly, so the
+/// The refold certificate — what the fold took, kept exactly, so the
 /// fold can be undone (operator ruling 2026-08-01: *fold is too flat —
-/// this is folding a BLANKET, not a piece of paper*).
+/// this is folding a blanket, not a piece of paper*).
 ///
 /// A crease in paper is permanent: the sheet goes flat and the fold
 /// line destroys what was there. A blanket keeps its loft — folding
@@ -469,7 +469,7 @@ pub fn project_complex_across(books: &[&Committed]) -> (Delta, Support) {
 /// mistakes**: if a relation was mis-observed — an `Unknown` wrongly
 /// taken as `Absent`, a reach too short — then some of what the fold
 /// discarded as "frame" was structure, and there is no way back to it.
-/// The certificate closes that door: the fold is EXACTLY INVERTIBLE, so
+/// The certificate closes that door: the fold is exactly invertible, so
 /// a correction to the observation re-runs the fold instead of having
 /// to re-earn the capacity.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -482,23 +482,23 @@ pub struct Refold {
 }
 
 /// What is KNOWN about the relation between two orbs on one channel,
-/// within ONE committed book.
+/// within one committed book.
 ///
 /// A world's chronicle is complete over its own orbs, so silence about
-/// a pair it holds is a VERIFIED absence, not an unobserved one. The
+/// a pair it holds is a verified absence, not an unobserved one. The
 /// `Unknown` case belongs to the cross-book reading, where a book
 /// cannot see a neighbour's obligations and the mesh must present them
 /// — `read_entangled` reports zero unknowns for exactly this reason,
 /// and `read_entangled_observed` is the door for the mesh case.
-/// **Reads the SUPPORT, never a value** (operator ruling 2026-08-01:
+/// **Reads the support, never a value** (operator ruling 2026-08-01:
 /// no `==` in deterministic code). This previously decided presence by
-/// `*delta.entry(i, j, channel) != ratio(0, 1)` — comparing a NETTED
+/// `*delta.entry(i, j, channel) != ratio(0, 1)` — comparing a netted
 /// value against zero. But `project_complex` nets opposed obligations,
-/// so two orbs owing each other equally net to zero and read ABSENT,
+/// so two orbs owing each other equally net to zero and read absent,
 /// which is exactly the conflation this module's own header names as
 /// fatal: *a dense tensor cannot tell "these two do not relate" from
 /// "these two relate by zero", and that distinction is what carries
-/// topology.* A balanced pair RELATES; erasing its edge deletes a real
+/// topology.* A balanced pair relates; erasing its edge deletes a real
 /// cycle and with it real capacity.
 ///
 /// Presence is tracked as the obligations are read and consulted here;
@@ -514,10 +514,10 @@ pub fn observe(state: &Committed, i: usize, j: usize, channel: usize) -> Observe
     }
 }
 
-/// The residual field over FILLED TRIANGLES, enumerated from the
+/// The residual field over filled triangles, enumerated from the
 /// support rather than filtered out of every triple.
 ///
-/// **THROUGHPUT.** `for_each_residual` visits every ordered distinct
+/// **Throughput.** `for_each_residual` visits every ordered distinct
 /// triple — `O(n³·f)` — and on a sparse complex nearly all of them name
 /// a triangle that does not exist. Measured on a ring: 40 orbs 61ms,
 /// 80 orbs 409ms, 160 orbs 3.1s, 320 orbs 22.9s, growing ~7.3x per
@@ -569,29 +569,29 @@ pub fn read_entangled(state: &Committed) -> EntangledRead {
 }
 
 /// The cross-book door: the same one-pass read, carrying the count of
-/// pairs the observer could NOT see. While `unknown > 0` the complex
+/// pairs the observer could not see. While `unknown > 0` the complex
 /// has holes of unknown shape and [`EntangledRead::capacity_is_defined`]
 /// refuses — discharge them by [`Resolve::Telescope`] or
 /// [`Resolve::LockOn`] before reading capacity, never by assuming
 /// absence.
 pub fn read_entangled_observed(state: &Committed, unknown: usize) -> EntangledRead {
     let (delta, support) = project_complex(state);
-    // THE OPENED GROUND (2026-08-05): the floor this reading stands on
+    // The opened Ground (2026-08-05): the floor this reading stands on
     // is the estate's measure. Never below one — the empty pre-founding
     // state still weighs the point.
     let volume = state.orbs.len().max(1);
-    // THE RESIDUAL FIELD, WHOLE, over FILLED TRIANGLES ONLY. Never
+    // The RESIDUAL field, whole, over filled triangles only. Never
     // `coherence_functional` here — that sums the field into one scalar
     // and discards which triple produced each residual, the exact place
     // the first formations of symmetry were being lost (§2b bars the
     // collapse; D3 needs these to emit; the composition law needs them
-    // to compose). And a triple with any absent edge is NOT a triangle:
+    // to compose). And a triple with any absent edge is not a triangle:
     // checking it invents strain from a relation that does not exist,
     // which is the false gauge collapse.
     let symmetry_foundation = symmetry_foundation(&delta, &support);
     let flows = boundary_form(&delta, &support).flows;
     // D — the independent cycles carrying charge no frame explains.
-    // THE CHARGE FIELD, WHOLE — never `.len()` alone. The rank is its
+    // The charge field, whole — never `.len()` alone. The rank is its
     // dimension; the values are what the cycles hold, and both are
     // readings the caller may need (operator ruling 2026-08-02).
     let holonomy = holonomies(&delta, &support);
@@ -599,21 +599,21 @@ pub fn read_entangled_observed(state: &Committed, unknown: usize) -> EntangledRe
     EntangledRead { rank, holonomy, symmetry_foundation, flows, unknown, volume }
 }
 
-/// THE FOLD GUARD — the occupancy floor, on both offices at once
+/// The fold guard — the occupancy floor, on both offices at once
 /// (operator ruling 2026-08-02).
 ///
-/// `18` Article IV clause 1 states the floor: **you cannot have less
-/// room than you are using.** `D ≥ occupancy` binds whenever anything
+/// `18` Article IV clause 1 states the floor: **the room held cannot be
+/// less than the room in use.** `D ≥ occupancy` binds whenever anything
 /// is in the universe, and within a universe it holds by absence — no
 /// deed closes a plane, so `D` cannot shrink at all.
 ///
-/// **THE FOLD IS THE ONE OPERATION THAT COULD ROUTE AROUND THAT**, and
+/// **The fold is the one operation that could route around that**, and
 /// it is why this guard exists. A fold does not shrink `D`; it seats a
-/// NEW universe. So a fold that carried content forward selectively
+/// new universe. So a fold that carried content forward selectively
 /// could land that content in a store with fewer tones than it needs —
 /// no plane was ever closed, and the floor would still be breached.
 ///
-/// **The fold as built is TOTAL** and therefore already safe: the era
+/// **The fold as built is total** and therefore already safe: the era
 /// is archived whole (`conductor::fold` rotates the entire var root)
 /// and the successor seats fresh at `GROUND`. *Nothing is destroyed;
 /// the fold is archival by construction.* This guard exists so that
@@ -621,10 +621,10 @@ pub fn read_entangled_observed(state: &Committed, unknown: usize) -> EntangledRe
 /// `EraFolded { era, gauge }` carries no manifest, so nothing else
 /// could check it.
 ///
-/// **BOTH OFFICES ARE GUARDED, because neither alone is sufficient**
+/// **Both offices are guarded, because neither alone is sufficient**
 /// (`12_UNION` §3b, the office dyad):
 ///
-/// - **D, the PROGENITOR — room.** Structure that crosses must keep its
+/// - **D, the progenitor — room.** Structure that crosses must keep its
 ///   tones. A carried pair may not land where fewer grades stand.
 /// - **V, the SOVEREIGN — standing.** Nothing admitted may simply cease.
 ///   An orb leaves the live universe only into the archive, never into
@@ -635,16 +635,16 @@ pub fn read_entangled_observed(state: &Committed, unknown: usize) -> EntangledRe
 /// be under-roomed, and everything is archived, so nothing is dropped.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum FoldGuard {
-    /// TOTAL — nothing carried forward. The era sealed whole and the
+    /// Total — nothing carried forward. The era sealed whole and the
     /// successor seats fresh. Lawful by construction.
     Total,
-    /// CARRIED, and both floors hold: the carried structure keeps its
+    /// Carried, and both floors hold: the carried structure keeps its
     /// tones, and every departure is accounted.
     CarriedWithinFloor,
     /// REFUSED — carried structure would land in fewer tones than it
     /// occupies. The D floor is breached.
     RoomBelowOccupancy { carried_rank: usize, successor_degree: usize },
-    /// REFUSED — an orb present before is absent after AND absent from
+    /// REFUSED — an orb present before is absent after and absent from
     /// the archive. Something admitted ceased without account.
     StandingDroppedWithoutAccount { orbs: usize },
 }

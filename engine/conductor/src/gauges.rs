@@ -1,27 +1,27 @@
-//! THE FOUR GAUGES OF A PEOPLE (xylarium 11.0 (37); operator 2026-10-21/22:
-//! "never boolean"; "its a gauge, not a boolean or a straight ladder - can be
-//! reversed be actions of the species"; "adopt and read from your own
-//! universe"). The law is xylarium's (xyl-cosmos `peoples.rs`); netstratum
+//! The four gauges of A people (Xylarium 11.0 (37); ruling of 2026-10-21/22:
+//! never boolean; a gauge, not a boolean or a straight ladder, reversible by
+//! the actions of the species; adopted and read from Netstratum's own
+//! universe). The law is Xylarium's (xyl-cosmos `peoples.rs`); Netstratum
 //! reads each term from what its own universe and its own lines already
 //! hold. Every gauge is a share in [0, 1], re-read from the line's present
 //! state whenever it is read (each year's close), never latched, gating
 //! nothing.
 //!
-//! - **Instinct** ("i must eat to survive, and reproduce to have kin"):
+//! - **Instinct** (eating to survive, reproducing to have kin):
 //!   intake over intake and need, `E_in/(E_in + E_need)`. Intake is what its
 //!   world renews for it (the land's wild flow, its star's light taken up by
 //!   its medium, `syntropic_flow`) plus what its works add
 //!   (`cultivated_yield`); need is its people times the ration each eats.
-//! - **Intelligence** ("i barely understand what i am"): its record over
+//! - **Intelligence** (barely understanding what it is): its record over
 //!   what is knowable, the distinct kinds of matter it holds against those on
 //!   its world and on the worlds within its horizon (their compositions).
-//! - **Sentience** ("i am aware but do not possess the capability to act"):
+//! - **Sentience** (aware, without the capability to act):
 //!   its horizon over its sky. Its sky is its own world, its star's other
 //!   worlds and its galaxy's stars; its horizon the targets it reaches by what
 //!   it does this term (its world, and the worlds and stars of the peoples it
 //!   trades with), so a lapse of trade narrows it.
-//! - **Consciousness** ("i am conscious of my planet, resources, and act
-//!   accordingly"): `A·k`, A the share of its world's flow its works direct,
+//! - **Consciousness** (conscious of its planet and resources, acting
+//!   accordingly): `A·k`, A the share of its world's flow its works direct,
 //!   `works/(works + renewal)`, and k its draw in step with its world's
 //!   renewal, `1 − |d − ρ|/(d + ρ)`.
 //! - **The singular gauge**: `Γ = [(1 + g_I)(1 + g_N)(1 + g_S)(1 + g_C) − 1]/15`.

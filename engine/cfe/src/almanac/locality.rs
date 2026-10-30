@@ -1,15 +1,15 @@
-//! LOCALITY AND PRESSURE — what a star and a planet make reachable.
+//! Locality and pressure — what a star and a planet make reachable.
 //!
-//! Two INDEPENDENT readings, and an element needs both:
+//! Two independent readings, and an element needs both:
 //!
-//!   the STAR  says how DEEP a system's strata run  -> [`local_to`]
-//!   the ORBIT says how HOT the orb is              -> the thermal
+//!   the star  says how deep a system's strata run  -> [`local_to`]
+//!   the orbit says how hot the orb is              -> the thermal
 //!                                                     region, in
 //!                                                     [`super::thermal`]
 //!
 //! Neither implies the other. A shallow element under a heavy star can
 //! still be unworkable in the wrong band, and that is what makes a
-//! resource a PLACE rather than a number.
+//! resource a place rather than a number.
 
 use super::periodic::{periodic_of, LINES};
 use crate::ratio::{ratio, Ratio};
@@ -18,7 +18,7 @@ use crate::thermal::StarClass;
 /// Which lines a WORLD can reach at all.
 ///
 /// A heavy, bright class forges and disperses down to the deep lines; a
-/// dim one never reaches them. So the same element id is REACHABLE in
+/// dim one never reaches them. So the same element id is reachable in
 /// one system and absent from another.
 pub fn lines_of(class: StarClass) -> u8 {
     match class {
@@ -36,7 +36,7 @@ pub fn lines_of(class: StarClass) -> u8 {
     }
 }
 
-/// Is this element PRESENT in a system of this class? Locality as a
+/// Is this element present in a system of this class? Locality as a
 /// predicate: deep lines simply do not occur under a shallow star.
 pub fn local_to(element: &[u8; 32], class: StarClass) -> bool {
     periodic_of(element).line <= lines_of(class)
@@ -85,13 +85,13 @@ pub fn civ_may_work(line: u8, held_conditions: impl IntoIterator<Item = u8>, sta
     line > 0 && line <= civ_reach(held_conditions, star)
 }
 
-/// **THE DEPOSIT LAW** — which LINES a stratum of this system can hold.
+/// **The deposit law** — which LINES a stratum of this system can hold.
 ///
 /// The forge that deposited a vein is the same pressure that releases
 /// it, so a stratum carries exactly the lines its own pressure refines:
 /// the deepest `l` with `pressure(stratum) >= l/LINES`, at least 1,
 /// never past the star's forge depth. This is what makes "bronze digs
-/// shallow" yield SHALLOW MATTER rather than unworkable curios — and it
+/// shallow" yield shallow MATTER rather than unworkable curios — and it
 /// is locality made total: a line the system does not carry is never
 /// charted in it.
 pub fn strata_lines(stratum: u8, class: StarClass) -> u8 {
@@ -103,7 +103,7 @@ pub fn strata_lines(stratum: u8, class: StarClass) -> u8 {
     releasable.clamp(1, forge)
 }
 
-/// **THE PRESSURE OF A SYSTEM** — the stratum an orb has opened,
+/// **The pressure of A system** — the stratum an orb has opened,
 /// against the deepest line its star offers.
 pub fn pressure(stratum: u8, class: StarClass) -> Ratio {
     let reach = lines_of(class);
@@ -113,17 +113,17 @@ pub fn pressure(stratum: u8, class: StarClass) -> Ratio {
     }
 }
 
-/// **REFINEMENT** — does this pressure release this element?
+/// **Refinement** — does this pressure release this element?
 ///
 /// It refines when the system brings at least the pressure its line
-/// demands. Exact comparison; no tolerance. Locality DOMINATES
+/// demands. Exact comparison; no tolerance. Locality dominates
 /// pressure: no stratum releases what the system does not carry.
 pub fn refines(element: &[u8; 32], stratum: u8, class: StarClass) -> bool {
     local_to(element, class) && pressure(stratum, class) >= periodic_of(element).refines_at
 }
 
 /// The band form of the workability read, kept for callers that already
-/// hold a `SubstrateBand`. The TOTAL form is
+/// hold a `SubstrateBand`. The total form is
 /// [`super::thermal::workable_at`], which answers for every orb rather
 /// than only those landing inside a band.
 pub fn workable_in(element: &[u8; 32], band: crate::thermal::SubstrateBand) -> bool {

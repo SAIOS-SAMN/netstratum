@@ -298,7 +298,7 @@ kernel judges one node, one step; anything spanning two nodes is the mesh's.
 - **Seam conservation = I1 (kernel) + replay (mesh).** Local: aperture
   legs sum zero within one book — one unconditional line (why the
   void-share ruling mattered). Cross-node: **`cfe::opposition` is
-  excised** (c7cad9e), and the anti-mirror framing that named it is
+  excised** (c7cad9e), and the ANTI-MIRROR framing that named it is
   deprecated (operator ruling 2026-08-01; `12_UNION` §2c). Its checks
   are kernel I1/I6 now, and `tests/recurrence_guard.rs` refuses the
   module's return as a standing test. A merging node does not set two

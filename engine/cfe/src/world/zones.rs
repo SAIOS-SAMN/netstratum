@@ -7,7 +7,7 @@ impl World {
     pub fn zone(&mut self, tile: u16, kind: ZoneKind) -> Result<(), ActionRefused> {
         self.zone_as(SOVEREIGN, FIRST_ORB, tile, kind)
     }
-    /// Zone a tile of one orb — the build SPENDS from that orb's bank
+    /// Zone a tile of one orb — the build spends from that orb's bank
     /// (02 §2.2); Build scope; the receipt carries the actor's tag.
     pub fn zone_as(
         &mut self,
@@ -23,10 +23,10 @@ impl World {
             return Err(ActionRefused::NoColony);
         }
         // REGEN-1 / REFINE-1: regeneration and elemental refining are
-        // TECHNOLOGIES. Extractive · regenerative · balanced modes
+        // technologies. Extractive · regenerative · balanced modes
         // (37 / almanac::taxon_economy) colour the tech door:
         // regenerative lines may seat regenerators at condition 2;
-        // balanced/extractive stay at DEEPENING (3). Refinery always 3.
+        // balanced/extractive stay at deepening (3). Refinery always 3.
         if matches!(kind, ZoneKind::Regenerator | ZoneKind::ElementRefinery) {
             let need = if matches!(kind, ZoneKind::Regenerator) {
                 self.regenerator_tech_need()
@@ -68,11 +68,11 @@ impl World {
                 }
             }
         }
-        // **#41 — THE LADDER'S THIRD RUNG, ENFORCED.** A minted kind
+        // **#41 — the ladder's third RUNG, enforced.** A minted kind
         // builds on the base its mint declared, or on the one its
         // channels infer. Where neither answers, the entry is lawful
         // vocabulary that names a building nobody can raise — so the
-        // refusal lands HERE, at the verb, and the mint stays lawful.
+        // refusal lands here, at the verb, and the mint stays lawful.
         //
         // A fact of the chain, not a shape: what the fold holds decides
         // it, so it can never move to a door.
@@ -90,7 +90,7 @@ impl World {
             // A compiled kind is its own base and declares none.
             _ => None,
         };
-        // The build is PRICED on the base — the binding modulates what
+        // The build is priced on the base — the binding modulates what
         // a building does, never what it costs to raise.
         let priced = base.unwrap_or(kind);
         // The zone_upkeep/zone_yield substitution, applied to cost: the

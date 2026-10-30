@@ -1,22 +1,22 @@
-//! **THE KNOWN-RED LEDGER** — every suite the board currently fails,
-//! each wearing its owning task and its DIAGNOSIS. The ratchet's
-//! discipline applied to test coverage: a red is a COUNTED debt
+//! **The KNOWN-red ledger** — every suite the board currently fails,
+//! each wearing its owning task and its diagnosis. The ratchet's
+//! discipline applied to test coverage: a red is a counted debt
 //! entering by reviewed edit, never an accident, and `cargo board`
-//! fails only on reds NOT in this list. Remove an entry in the same
+//! fails only on reds not in this list. Remove an entry in the same
 //! change that cures it.
 //!
 //! Baseline measured 2026-08-12 at `3cdba22` (211 ok / 14 red).
-//! Task #10 diagnostic sweep closed EIGHT: world_market · world_absorb
+//! Task #10 diagnostic sweep closed eight: world_market · world_absorb
 //! · world_tech_tree (the crossing-law batch) · vertical_axis_pins ·
 //! measured_bounds · roster_claim_pins · polity_therm_pins ·
 //! resume_pins · arbor_pins. A ninth closed 2026-08-12: mint_loop_pins
 //! — the refused deed was NoteIssued (PHASE-4 note collateral peeled
-//! from the free STAMP bank), NOT the chemistry deeds the first
+//! from the free STAMP bank), not the chemistry deeds the first
 //! diagnosis named; a `stamp_move` arm now declares that off-bank move.
 //! Four remain, each root-caused below.
 
 pub const KNOWN_REDS: &[(&str, &str)] = &[
-    // OPERATOR-GATED —
+    // Operator-gated —
     (
         "tuned_constant_ratchet",
         "task #3 — 170 dials vs 112 ceiling; needs per-cluster operator rulings (R20 map)",
@@ -27,7 +27,7 @@ pub const KNOWN_REDS: &[(&str, &str)] = &[
          and 16 does not divide it; the fix is a structural ruling (TURN_SLOTS 60→240, \
          re-keys every angle) OR removing tier-ladder offices from the ring vocabulary",
     ),
-    // FIXTURE DRIFT, deeper than a re-pin (needs FLEET-1/Phase-2 staging + re-derived math) —
+    // Fixture drift, deeper than a re-pin (needs FLEET-1/Phase-2 staging + re-derived math) —
     (
         "merchant_pins",
         "task #10 FIXTURE — the caravan triangle needs FLEET-1 hull staging AND a \

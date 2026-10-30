@@ -50,7 +50,7 @@ fn main() {
     for (b, row) in by_band.iter().enumerate() {
         println!("  {:20} {:5} worlds: chemical {:5}, geologic {:5}, plasmic {:5}, informational {:5}", names[b], row[0], row[1], row[2], row[3], row[4]);
     }
-    // STEP 2: when each medium's mind would wake, by the climb (no erasure)
+    // Step 2: when each medium's mind would wake, by the climb (no erasure)
     // and by the gated climb (impacts and the window); informational is read,
     // not climbed (open).
     let (_seed, u_full) = pulse::read(Path::new(&era1)).unwrap_or(([0; 32], u.clone()));

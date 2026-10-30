@@ -1,8 +1,8 @@
-//! THE BOOKS — an OPEN set that civilizations grow
+//! The BOOKS — an open set that civilizations grow
 //! (`19_LENS` §16, operator correction 2026-08-02).
 //!
-//! **A civilization does not merely USE books. It MINTS them and it
-//! ARCHIVES them.** The first cut of this lane read an observer's
+//! **A civilization does not merely use books. It mints them and it
+//! archives them.** The first cut of this lane read an observer's
 //! sensitivity out of eight named struct fields, which made the
 //! instrument's width a constant of the source code. Under that shape a
 //! civilization could invent an entirely new kind of account and the
@@ -10,16 +10,16 @@
 //! this crate. That is content growth gated on a compile, and it is the
 //! wrong scope for a reading layer.
 //!
-//! So the set is open here. The lens iterates whatever books STAND and
+//! So the set is open here. The lens iterates whatever books stand and
 //! names none of them in its instrument.
 //!
-//! # THE LAYER ERROR THAT CAME FIRST, and it was mine
+//! # The layer error that came first
 //!
 //! The first cut also welded books onto the eleven harmonic channels
 //! and then reported, as a limit, that *"eight books cannot honestly
 //! fill eleven channels."* That framing was wrong at the root. The
-//! eleven channels are SUBSTRATE — spectral, spatial, adjacency,
-//! torsion — fixed because the physics is fixed. Books are CONTENT,
+//! eleven channels are substrate — spectral, spatial, adjacency,
+//! torsion — fixed because the physics is fixed. Books are content,
 //! open because civilizations make them. **Joining a growing content
 //! set to a fixed substrate axis was the same layer confusion this tree
 //! has caught repeatedly**, and the honest repair is not a better
@@ -30,13 +30,13 @@
 //! It also carried a plainer defect. The old channel 0 summed
 //! `given_in_crisis + returned_across` against `extracted_across`,
 //! which welded the compassion pair to the morality pair and orphaned
-//! `drawn_in_crisis` entirely. **Each book is a DUAL and its two sides
+//! `drawn_in_crisis` entirely. **Each book is a dual and its two sides
 //! belong to each other**; mixing pairs loses the very structure the
 //! books are keeping.
 //!
-//! # WHAT A BOOK IS
+//! # What A BOOK is
 //!
-//! A dual ledger: what was KEPT against what was LOST, on one named
+//! A dual ledger: what was kept against what was lost, on one named
 //! account. The four the charter keeps today are all of that shape
 //! (`09 §2.1`–`§2.4`), which is why an open set costs no translation —
 //! the shape was already uniform, only the ENUMERATION was frozen.
@@ -45,7 +45,7 @@ use cfe::books::CHARTER_BOOKS;
 use cfe::dop::ColonyOrb;
 use cfe::ratio::{ratio, Ratio};
 
-/// WHO MINTED A BOOK — and therefore who may close it.
+/// Who minted A BOOK — and therefore who may close it.
 ///
 /// The distinction is not bookkeeping. It is the anti-laundering rule
 /// (§16b): a civilization may archive what it minted, and may never
@@ -64,7 +64,7 @@ pub enum BookId {
 impl BookId {
 }
 
-/// ONE BOOK — a dual account: what stood, against what did not.
+/// One BOOK — a dual account: what stood, against what did not.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Book {
     pub id: BookId,
@@ -73,7 +73,7 @@ pub struct Book {
     /// The entropic side of the same pair. Never a separate book: the
     /// two sides belong to each other.
     pub lost: Ratio,
-    /// CLOSED TO WRITING, never to reading (§16b). An archived book
+    /// CLOSED to writing, never to reading (§16b). An archived book
     /// takes no new entries and keeps every entry it took.
     pub archived: bool,
 }
@@ -96,7 +96,7 @@ impl Book {
     }
 }
 
-/// **THE BOOKS AN ORB KEEPS — the single enumeration point.**
+/// **The BOOKS an orb keeps — the single enumeration point.**
 ///
 /// **Now fed by the real registry** (`BOOK-1`, cfe `world::books`).
 /// `ColonyOrb::books` presents the charter's four and everything the
@@ -134,7 +134,7 @@ pub fn books_of(orb: &ColonyOrb) -> Vec<Book> {
         .collect()
 }
 
-/// **THE REGARD — an observer's sensitivity across the books it keeps.**
+/// **The regard — an observer's sensitivity across the books it keeps.**
 ///
 /// Open by construction: one channel per book that posted, however many
 /// that becomes. Nothing here is an array, a constant, or a name.
@@ -158,7 +158,7 @@ impl Regard {
         }
     }
 
-    /// THE METABOLISM, unchanged from the aperture's:
+    /// The METABOLISM, unchanged from the aperture's:
     /// `h' = (h·n + signal) / (n + 1)`, exact throughout. A channel
     /// unseen before opens at the signal itself.
     pub fn observe(&mut self, id: &BookId, signal: Ratio) {
@@ -177,7 +177,7 @@ impl Regard {
         }
     }
 
-    /// **DERIVED from the books, never assigned.** Every book that
+    /// **Derived from the books, never assigned.** Every book that
     /// posted opens a channel; a book that never posted opens none,
     /// because silence is not a signal of zero.
     pub fn of_books(books: &[Book]) -> Self {
@@ -197,7 +197,7 @@ impl Regard {
     }
 
     /// The weight given one book. A book this observer does not keep
-    /// reads FLAT, never zero — no history is not no sensitivity.
+    /// reads flat, never zero — no history is not no sensitivity.
     pub fn weight(&self, id: &BookId) -> Ratio {
         self.channels
             .iter()
@@ -211,7 +211,7 @@ impl Regard {
         self.channels.iter().any(|(book, _, _)| book == id)
     }
 
-    /// **HOW WIDE THE INSTRUMENT IS — and it grows with the
+    /// **How wide the instrument is — and it grows with the
     /// civilization.** This number is a fact about how many kinds of
     /// account an observer has actually kept, and it is bounded by
     /// nothing in this crate.

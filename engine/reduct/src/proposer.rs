@@ -1,7 +1,7 @@
-//! IAE-5 — THE PROPOSER SEAM, where the Mind meets the Universe (doc 51).
+//! IAE-5 — the proposer seam, where the Mind meets the Universe (doc 51).
 //!
-//! An exact homological engine that ENUMERATES candidates is brute force
-//! wearing a differential-geometry costume. Cognition lives in *which*
+//! An exact homological engine that enumerates candidates is brute force
+//! behind a differential-geometry facade. Cognition lives in *which*
 //! candidates are tried. This module is the entity-level **proposer**: given
 //! the exact obstruction `γ`, it stochastically samples candidate generators —
 //! integer-weighted combinations of the base alphabet — and hands each to the
@@ -69,7 +69,7 @@ fn combine(base: &[Vec<BigInt>], weights: &[i64]) -> Vec<BigInt> {
     out
 }
 
-/// THE PROPOSE → VERIFY → MINT LOOP (doc 51 §3).
+/// The propose → verify → mint LOOP (doc 51 §3).
 ///
 /// Seeded by `seed`, sample up to `max_tries` candidate generators — each an
 /// integer-weighted combination of `base` with weights in `[-weight_range,
@@ -77,7 +77,7 @@ fn combine(base: &[Vec<BigInt>], weights: &[i64]) -> Vec<BigInt> {
 /// first that the verifier admits, minted; `None` if the budget is exhausted
 /// without a bridge.
 ///
-/// `verify` is the ONLY contact with the exact Universe: it is the entity's
+/// `verify` is the only contact with the exact Universe: it is the entity's
 /// exact test that the candidate resolves the obstruction. The proposer itself
 /// knows no homology — it only guesses, which is the whole point.
 pub fn propose_and_verify<V>(

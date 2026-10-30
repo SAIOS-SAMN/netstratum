@@ -737,7 +737,7 @@ hides it, and `replay` grants it. Nothing in this section closes that —
 it explains why the closure is larger than one call site.
 
 
-### 13c. The opaque-payload law — the actual reason
+### 13c. The OPAQUE-PAYLOAD law — the actual reason
 
 `kernel/tests/recurrence_guard.rs::the_arrow_law_holds` states it:
 

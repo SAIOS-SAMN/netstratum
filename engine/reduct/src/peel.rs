@@ -1,14 +1,14 @@
-//! **THE PEEL** (N-I1, doc `53_INTELLIGENCE_PORT` D2) — the cover. From a full
+//! **The peel** (N-I1, doc `53_INTELLIGENCE_PORT` D2) — the cover. From a full
 //! measurement, the three local manifolds: **value** (what transforms — the
 //! per-direction occupancy profile over the gauge fiber), **object** (what moves
 //! — the 4-adjacent connected bodies), **cell** (the exact 2-D frame). Outer
 //! constrains inner. Re-expressed from the v0.4 convergence engine
-//! (`iae/src/peel`) onto netstratum carriers — CellFrame-based, exact, no
+//! (`iae/src/peel`) onto Netstratum carriers — CellFrame-based, exact, no
 //! `SpatialGauge`/`Multivector` (the rank-general uncollapsed carrier and the
 //! generic nested-peel law are later landings, not N-I1).
 //!
-//! The peel produces covers; it makes NO judgment — no direction privileged, no
-//! ambient region assumed. A full measurement is WHOLE by construction or
+//! The peel produces covers; it makes no judgment — no direction privileged, no
+//! ambient region assumed. A full measurement is whole by construction or
 //! refused typed: a partial cover cannot exist as a value of this type (the
 //! single-row flatten is structurally impossible). The congruence read
 //! (`crate::congruence`) takes a `Cover`; there is no path from perception to a
@@ -29,7 +29,7 @@ pub struct Site {
     pub layer: i64,
 }
 
-/// A direction of the gauge fiber — WHICH basis direction (a hue at the ARC
+/// A direction of the gauge fiber — which basis direction (a hue at the ARC
 /// seat; a resource index at the survival seat). The index is a label the
 /// fiber permutes, never arithmetic content; the fiber rank rides the
 /// measurement (the kernel fixes no modality rank).
@@ -47,10 +47,10 @@ pub struct CellFrame {
     pub layers: u32,
 }
 
-/// A FULL measurement: every site of the frame carried exactly once with its
+/// A full measurement: every site of the frame carried exactly once with its
 /// gauge direction, every direction inside the fiber rank — whole by
 /// construction or refused typed (a partial cover cannot exist as a value of
-/// this type). The COMMON carrier both seats peel into (grid cells → sites +
+/// this type). The common carrier both seats peel into (grid cells → sites +
 /// hues; books → sites + resource indices) — never a `Vec<BigInt>`, never a
 /// wrapper on a cochain residual.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -103,7 +103,7 @@ impl FullMeasurement {
                 site: site_of(index, frame),
             }),
             (None, None) => {
-                // CANONICAL CARRIAGE ORDER (row-major): a whole measurement is a
+                // CANONICAL carriage order (row-major): a whole measurement is a
                 // site→direction map with total coverage, so equality is
                 // content, never input order. Sorting here makes `PartialEq`
                 // content-based — two vantages that carry the same cells are the
@@ -133,7 +133,7 @@ impl FullMeasurement {
     }
 }
 
-/// A connected body: sites of ONE gauge direction, 4-adjacent — what moves.
+/// A connected body: sites of one gauge direction, 4-adjacent — what moves.
 /// Sites in canonical (row, col) order.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Body {
@@ -155,7 +155,7 @@ pub struct DirectionSupport {
 }
 
 /// The value manifold — the occupancy profile over the gauge fiber: one support
-/// per PRESENT direction (absent directions carry no support — absence is
+/// per present direction (absent directions carry no support — absence is
 /// structural, never a fabricated empty).
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ValueManifold {
@@ -168,7 +168,7 @@ pub struct CellManifold {
     pub frame: CellFrame,
 }
 
-/// THE COVER — the three manifolds together. The congruence read takes this
+/// The cover — the three manifolds together. The congruence read takes this
 /// type; a flat sequence cannot be presented in its place.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Cover {
@@ -227,7 +227,7 @@ fn site_of(index: usize, frame: CellFrame) -> Site {
     }
 }
 
-/// The 4-neighbors of a lattice index, staying IN FRAME AND IN LAYER — a
+/// The 4-neighbors of a lattice index, staying in FRAME and in layer — a
 /// per-layer symmetry (`solver_verify::volume::VOp::PerLayer`) never moves a
 /// site between layers, so the object manifold's connectivity does not
 /// either; layer-crossing connectivity is not part of this peel (VOLUMETRIC-1

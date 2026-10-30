@@ -1,26 +1,26 @@
-// `VectorModule<F>` — the polynomial-per-plane carrier (FOUNDATIONAL).
+// `VectorModule<F>` — the polynomial-per-plane carrier (foundational).
 //
 // Each axis of every per-axis structure carries a polynomial
 // `Σ_{i=0..N-1} c_i x^i` with `c_i ∈ Rational<F>`, stored as a
-// heap-backed `Vec<Rational<F>>` with NO static dimension cap. The
+// heap-backed `Vec<Rational<F>>` with no static dimension cap. The
 // substrate's motion drives `N` upward through transport composition
 // (denominator growth in `p^N` per smooth-prime profile) and through
 // coboundary reduction. The polynomial degree is structural content;
-// truncation at any consumer is a LAW V per-axis preservation violation.
+// truncation at any consumer is a law V per-axis preservation violation.
 //
 // Lifted whole from the sealed v0.3 line (shared_primitives::
 // vector_module; B1 record) minus serde and minus `twist`/
 // `value_multiset_eq` (their carriers/consumers are not on the Phase-1
 // allowlist — they return with the organs that need them).
 //
-// LAW IV exact rational: each coefficient is `Rational<F>` (BigRational-backed,
-// unbounded). LAW XIV no scalars on derivation path: `VectorModule<F>`
+// Law IV exact rational: each coefficient is `Rational<F>` (BigRational-backed,
+// unbounded). Law xiv no scalars on derivation path: `VectorModule<F>`
 // is the substrate's carrier for "a per-axis value at any derivation
 // site"; producers and consumers operate on the full polynomial via
 // element-wise add + convolve.
 //
 // Block-diagonal type discipline: `VectorModule<Space>` and
-// `VectorModule<Temporal>` are DISTINCT TYPES. Cross-field arithmetic
+// `VectorModule<Temporal>` are distinct types. Cross-field arithmetic
 // is a compile-time error. Inter-field crossing routes through
 // `FieldIsomorphism<F1, F2>` at a node vertex (deferred to #62.2).
 //
@@ -40,7 +40,7 @@
 //                              `(Σ aᵢ xⁱ) · (Σ bⱼ xʲ) =
 //                               Σₖ (Σᵢ aᵢ · bₖ₋ᵢ) xᵏ`.
 //                              Result length = m + n − 1 for non-zero
-//                              operands. THE primitive that produces
+//                              operands. The primitive that produces
 //                              `p^N` denominator growth from per-axis
 //                              torsion accumulation.
 //
@@ -131,12 +131,12 @@ impl<F: Field> VectorModule<F> {
         }
     }
 
-    /// **THE LIFT SURFACE** — wrap a single `Rational<F>` value as a
+    /// **The lift surface** — wrap a single `Rational<F>` value as a
     /// degree-0 polynomial (a single-component coefficient vector).
     ///
-    /// Per LAW XIV no-scalars-on-derivation-path, this constructor is
-    /// the SOLE entry point that lifts a scalar into the polynomial
-    /// carrier. Every call site MUST carry a SINGLETON-BOUNDARY
+    /// Per law xiv no-scalars-on-derivation-path, this constructor is
+    /// the sole entry point that lifts a scalar into the polynomial
+    /// carrier. Every call site must carry a SINGLETON-BOUNDARY
     /// comment naming the boundary class and the specific operation
     /// that will produce polynomial growth from this seed:
     ///
@@ -212,7 +212,7 @@ impl<F: Field> VectorModule<F> {
     /// `i ≥ dim` returns `Rational::zero()`. Standard polynomial ring
     /// behavior.
     ///
-    /// **WARNING.** Per LAW XIV, calling `coefficient_at(0)` on a value
+    /// **Warning.** Per law xiv, calling `coefficient_at(0)` on a value
     /// of arbitrary polynomial degree is a derivation-path collapse —
     /// it discards every higher-degree coefficient. Legitimate
     /// boundaries (wire-format encode of degree-0 known values; test
@@ -299,7 +299,7 @@ impl<F: Field> VectorModule<F> {
     /// zero polynomial. Result length is `m + n − 1` for non-trivial
     /// operands; trimmed at emit per minima-enforcement invariant.
     ///
-    /// THIS is the operation that produces `p^N` denominator growth
+    /// This is the operation that produces `p^N` denominator growth
     /// from successive per-axis multiplications — the canonical
     /// witness exercised by the #62.1 polynomial-growth test.
     pub fn convolve(&self, other: &Self) -> Result<Self, VectorModuleError> {
@@ -354,7 +354,7 @@ impl<F: Field> VectorModule<F> {
     /// `components[i] += magnitude · components[j]`.
     ///
     /// Out-of-bounds indices return the structural `AxisOutOfBounds`
-    /// residual (LAW V (a)). The diagonal case `i == j` is valid
+    /// residual (law V (a)). The diagonal case `i == j` is valid
     /// (scaling component `i` by `1 + magnitude`); no boolean gate
     /// rejects it.
     pub fn bend(
@@ -438,15 +438,15 @@ impl<F: Field> VectorModule<F> {
     }
 
     /// Greatest common divisor over `F[x]`, returned in **primitive (content-
-    /// normalized) canonical form** — NOT monic. Monic normalization (divide
-    /// every coefficient by the LEADING one) is a privileged-axis scalar
+    /// normalized) canonical form** — not monic. Monic normalization (divide
+    /// every coefficient by the leading one) is a privileged-axis scalar
     /// collapse: it elects one coefficient, forces it to 1, and rewrites the
-    /// rest as ratios to it — discarding the absolute scale and REQUIRING
+    /// rest as ratios to it — discarding the absolute scale and requiring
     /// field-division (`c / lead`), which the smooth-prime carrier `Rational<F>`
     /// does not support (a non-smooth leading numerator → a non-smooth
     /// denominator → `PrimeProfileViolation`). The lawful canonical form is the
-    /// CONTENT-democratic one: divide every coefficient by the content (the gcd
-    /// of all of them), which divides EXACTLY (stays in-ring, never a non-smooth
+    /// content-democratic one: divide every coefficient by the content (the gcd
+    /// of all of them), which divides exactly (stays in-ring, never a non-smooth
     /// denominator) and privileges no axis. Computed via the in-ring `ring_gcd`
     /// (pseudo-division — no field-division anywhere on the path).
     pub fn gcd(&self, other: &Self) -> Result<Self, RingError> {
@@ -455,11 +455,11 @@ impl<F: Field> VectorModule<F> {
 
     /// **In-ring polynomial gcd via the pseudo-remainder sequence** — no field-
     /// division, so it never produces a non-smooth denominator on the smooth-
-    /// prime carrier (`Rational<F>` is NOT a field; Euclidean-with-division gcd
+    /// prime carrier (`Rational<F>` is not a field; Euclidean-with-division gcd
     /// assumes one and panics on a non-smooth leading coefficient). Each step
-    /// takes the pseudo-remainder (multiply-through, never divide) then CONTENT-
-    /// REDUCES it to primitive form — the content reduction keeps the pseudo-
-    /// remainder coefficients BOUNDED (the subresultant discipline, simplified
+    /// takes the pseudo-remainder (multiply-through, never divide) then content-
+    /// reduces it to primitive form — the content reduction keeps the pseudo-
+    /// remainder coefficients bounded (the subresultant discipline, simplified
     /// to full content removal: no coefficient explosion across the loop).
     /// Terminates: `deg(b)` strictly decreases each iteration. The result is the
     /// primitive (content-normalized, positive-leading) associate of the true
@@ -476,10 +476,10 @@ impl<F: Field> VectorModule<F> {
     }
 
     /// **Pseudo-division remainder** `prem(self, divisor)` — the remainder of
-    /// `lead(divisor)^k · self ÷ divisor`, computed with ONLY multiplications
+    /// `lead(divisor)^k · self ÷ divisor`, computed with only multiplications
     /// (`stretch` by `lead(divisor)`) and subtractions, never a coefficient
     /// division. So it stays inside the smooth-prime ring (denominators only
-    /// MULTIPLY → stay smooth) — no `PrimeProfileViolation`. It is the true
+    /// multiply → stay smooth) — no `PrimeProfileViolation`. It is the true
     /// field-division remainder scaled by the nonzero factor `lead^k`, so
     /// `prem == 0 ⟺ divisor | self` exactly (the divisibility test the
     /// reachability read needs). Errors on the zero divisor.
@@ -513,8 +513,8 @@ impl<F: Field> VectorModule<F> {
     /// every coefficient is an integer, divides by the content (the BigInt gcd
     /// of those integer numerators) so the coefficients are collectively
     /// primitive, then fixes the sign so the leading coefficient is positive
-    /// (Law XII determinism). EVERY step is in-ring: multiply by the smooth lcm,
-    /// divide by the content which divides EXACTLY — no non-smooth denominator
+    /// (Law XII determinism). Every step is in-ring: multiply by the smooth lcm,
+    /// divide by the content which divides exactly — no non-smooth denominator
     /// ever appears, so the panic monic produced is structurally impossible.
     /// Content-democratic: no coefficient is privileged. Zero is its own
     /// primitive form.
@@ -594,7 +594,7 @@ impl<F: Field> VectorModule<F> {
 }
 
 /// Exact-the exact rationals absolute value helper for `cauchy_bound`. Preserves the
-/// `Rational<F>` field tag; per LAW IV exact-rational, no approximation.
+/// `Rational<F>` field tag; per law IV exact-rational, no approximation.
 fn abs_rational<F: Field>(r: &Rational<F>) -> Rational<F> {
     if r.is_negative() {
         r.negate_ref()
@@ -695,7 +695,7 @@ mod tests {
         assert!(a.convolve(&z).unwrap().is_empty());
     }
 
-    /// **#62.1 ACCEPTANCE WITNESS** — five successive `convolve`
+    /// **#62.1 acceptance witness** — five successive `convolve`
     /// operations grow polynomial degree monotonically per axis.
     /// Proves the algebra produces `p^N`-style growth from per-axis
     /// composition, not collapse.
@@ -911,7 +911,7 @@ mod tests {
 
     #[test]
     fn gcd_is_primitive_not_monic() {
-        // gcd(x² − 1, x − 1) = x − 1, in PRIMITIVE form: integer coeffs,
+        // gcd(x² − 1, x − 1) = x − 1, in primitive form: integer coeffs,
         // content 1, positive leading — never a divide-by-leading (no monic).
         let p1 = VectorModule::<Space>::from_vec(vec![r(-1, 1), r(0, 1), r(1, 1)]);
         let p2 = VectorModule::<Space>::from_vec(vec![r(-1, 1), r(1, 1)]);
@@ -921,7 +921,7 @@ mod tests {
 
     #[test]
     fn gcd_with_zero_is_other_primitive() {
-        // gcd(2x, 0) == x (primitive: 2x ÷ content 2 = x), NEVER 2x ÷ lead.
+        // gcd(2x, 0) == x (primitive: 2x ÷ content 2 = x), never 2x ÷ lead.
         let p = VectorModule::<Space>::from_vec(vec![r(0, 1), r(2, 1)]);
         let z = VectorModule::<Space>::zero_polynomial();
         let g = p.gcd(&z).unwrap();
@@ -931,8 +931,8 @@ mod tests {
 
     #[test]
     fn primitive_part_is_content_division_not_leading_division() {
-        // 6x² + 4x → CONTENT-reduce by gcd(6,4)=2 → 3x² + 2x (integer, primitive).
-        // Monic would have divided by the LEADING 6 → x² + (2/3)x (a privileged-axis
+        // 6x² + 4x → content-reduce by gcd(6,4)=2 → 3x² + 2x (integer, primitive).
+        // Monic would have divided by the leading 6 → x² + (2/3)x (a privileged-axis
         // collapse introducing a denominator). Primitive keeps every coefficient whole.
         let p = VectorModule::<Space>::from_vec(vec![r(0, 1), r(4, 1), r(6, 1)]);
         let prim = p.primitive_part();
@@ -970,7 +970,7 @@ mod tests {
             p.pseudo_remainder(&d).unwrap().is_zero(),
             "exact divisor ⇒ prem 0"
         );
-        // x² + 1 is NOT divisible by x − 1 ⇒ non-zero pseudo-remainder.
+        // x² + 1 is not divisible by x − 1 ⇒ non-zero pseudo-remainder.
         let q = VectorModule::<Space>::from_vec(vec![r(1, 1), r(0, 1), r(1, 1)]);
         assert!(
             !q.pseudo_remainder(&d).unwrap().is_zero(),

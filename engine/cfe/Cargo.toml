@@ -23,7 +23,7 @@ stamp-rail-strand = ["deep-rail-strand"]
 stamp-rail-court = ["deep-rail-court"]
 
 [dev-dependencies]
-# THE FRAME TIE (2026-08-05): the solver names base-11 from below this
+# The FRAME tie (2026-08-05): the solver names base-11 from below this
 # crate's arrow and cannot import LAST_CONDITION. Dev-only, so the
 # runtime arrow is untouched (the arrow-law guard's own note: dev-deps
 # are lawful cargo cycles), and the equality is pinned rather than

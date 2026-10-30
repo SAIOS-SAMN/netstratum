@@ -1,11 +1,11 @@
 // `SingularityMirror<F>` — the substrate's bounded-horizon singularity
 // inversion primitive.
 //
-// When a coordinate falls below `Δ_min(d)`, the substrate does NOT
+// When a coordinate falls below `Δ_min(d)`, the substrate does not
 // collapse — it inverts the value into the macro envelope via a discrete
 // bounded singularity mirror. `invert_below_horizon(x) → Λ_max · x⁻¹`
 // per coefficient is an executable function; the operation is structural,
-// not a divide-by-zero workaround. The mint (Phase 3) is the ONLY organ
+// not a divide-by-zero workaround. The mint (Phase 3) is the only organ
 // that fires this crossing on cognitive content (04 §7.4).
 //
 // Lifted whole from the sealed v0.3 line (shared_primitives::singularity
@@ -13,7 +13,7 @@
 // whose `TorsionResidual` carrier is not on the Phase-1 allowlist — the
 // v0.4 residual carrier is defined at 18 §1 and lands with its organ.
 //
-// LAW IV exact rational + LAW V (a) per-axis preserved + LAW XIV
+// Law IV exact rational + law V (a) per-axis preserved + law xiv
 // polynomial-per-plane: the singularity mirror operates per-axis on
 // `VectorModule<F>` polynomial coordinates.
 //
@@ -82,7 +82,7 @@ impl<F: Field> SingularityMirror<F> {
     /// `a₀, a₁, …, a_{n−1}`), output is `y = Σ bᵢ xⁱ` where
     /// `bᵢ = Λ_max(F, d) · 1/aᵢ` for `aᵢ ≠ 0` and `bᵢ = 0` for
     /// `aᵢ = 0`. The structural-zero positions are preserved in
-    /// `InversionRecord::zero_positions` — that list IS the per-
+    /// `InversionRecord::zero_positions` — that list is the per-
     /// coefficient structured residual.
     ///
     /// Polynomial degree is preserved: if the highest-degree input
@@ -101,14 +101,14 @@ impl<F: Field> SingularityMirror<F> {
             return Err(SingularityError::DivisionByZeroValue);
         }
         let trimmed = x.trim_trailing_zeros();
-        // THE HORIZON GATE (the vacuity cure — operator-ordered sweep):
+        // The horizon gate (the vacuity cure — operator-ordered sweep):
         // the mirror's NAME says below-horizon, but no code consulted
         // Δ_min — every value inverted unconditionally, WithinBounds
         // was unconstructible, and the mint's refusal arm downstream
-        // could never fire. A coordinate is BELOW the horizon iff some
+        // could never fire. A coordinate is below the horizon iff some
         // non-zero coefficient's magnitude falls under Δ_min(F, d);
         // a value standing wholly at or above the horizon passes
-        // through UNINVERTED (doctrine: coordinates bounce off Δ_min
+        // through uninverted (doctrine: coordinates bounce off Δ_min
         // via inversion — only the below-horizon cross the mirror).
         let delta_min_value =
             crate::horizon::delta_min::<F>(self.horizon).map_err(SingularityError::Arithmetic)?;
@@ -132,11 +132,11 @@ impl<F: Field> SingularityMirror<F> {
         self.reflect(&trimmed).map(InversionOutcome::Inverted)
     }
 
-    /// **`reflect`** — the crossing ASSERTED: per-coefficient inversion
-    /// with NO horizon gate. For consumers whose feed is below-horizon
-    /// BY CONSTRUCTION, not by magnitude — the mint's obstruction
+    /// **`reflect`** — the crossing asserted: per-coefficient inversion
+    /// with no horizon gate. For consumers whose feed is below-horizon
+    /// by construction, not by magnitude — the mint's obstruction
     /// reached the mirror only after every reduction exhausted (the
-    /// drain's own proof of irreducibility: a TOPOLOGICAL below-Δ_min,
+    /// drain's own proof of irreducibility: a topological below-Δ_min,
     /// carried as exact integer coefficients whose numeric size is a chart
     /// artifact). Coordinate consumers gate through
     /// `invert_below_horizon`; asserting consumers name the crossing
@@ -149,7 +149,7 @@ impl<F: Field> SingularityMirror<F> {
         let lambda_max_value = crate::horizon::lambda_max::<F>(self.horizon);
         let mut inverted = Vec::with_capacity(trimmed.dim());
         let mut zero_positions = Vec::new();
-        // SUPPORT form (LAW XXIII): the walk is over the carrier's OWN
+        // Support form (law xxiii): the walk is over the carrier's own
         // cells — content that exists — never a `0..dim` rank range with
         // per-coefficient demand access written by this consumer.
         for (i, coeff) in trimmed.components().iter().enumerate() {
@@ -189,7 +189,7 @@ pub enum InversionOutcome<F: Field> {
     WithinBounds(VectorModule<F>),
     /// Value was below `Δ_min`; reflected per-coefficient via the
     /// bounded singularity mirror into the macro envelope. The record carries
-    /// the inverted polynomial AND the per-coefficient structured
+    /// the inverted polynomial and the per-coefficient structured
     /// residual (positions of structural zeros).
     Inverted(InversionRecord<F>),
 }
@@ -206,7 +206,7 @@ pub struct InversionRecord<F: Field> {
     /// structural-zero positions.
     pub coordinates: VectorModule<F>,
     /// Indices `i` where the input polynomial had `aᵢ = 0`. This
-    /// IS the per-coefficient structured residual — empty when the
+    /// is the per-coefficient structured residual — empty when the
     /// input had no interior zero coefficients.
     pub zero_positions: Vec<usize>,
 }
@@ -231,9 +231,9 @@ mod tests {
         SpatialRational::try_new(BigInt::from(num), BigInt::from(denom)).unwrap()
     }
 
-    /// A coefficient genuinely BELOW the canonical horizon:
+    /// A coefficient genuinely below the canonical horizon:
     /// Δ_min(Space, depth 10) = 1/30¹⁰, so 1/30¹¹ is under it (the
-    /// old fixtures used 1/30 — far ABOVE the horizon — and only the
+    /// old fixtures used 1/30 — far above the horizon — and only the
     /// unconditionally-inverting vacuous mirror let them pass as
     /// "below"; the horizon gate exposed them).
     fn below_horizon() -> SpatialRational {
@@ -241,7 +241,7 @@ mod tests {
         SpatialRational::try_new(BigInt::from(1), denom).unwrap()
     }
 
-    /// THE PASS-THROUGH WITNESS (the cured arm): a value standing at
+    /// The pass-through witness (the cured arm): a value standing at
     /// or above Δ_min crosses nothing — WithinBounds carries it whole,
     /// uninverted, and the arm is finally constructible.
     #[test]
@@ -348,7 +348,7 @@ mod tests {
     /// degree, inversion preserves it; verify the composition does
     /// not collapse). (Renamed at the rotor-vocabulary sweep
     /// 2026-06-11 — the body always used `convolve`; the old name was
-    /// a ghost.)
+    /// a retired name.)
     #[test]
     fn inversion_composes_with_convolution_at_horizon_boundary_without_collapse() {
         let mirror = SingularityMirror::<Space>::CANONICAL;

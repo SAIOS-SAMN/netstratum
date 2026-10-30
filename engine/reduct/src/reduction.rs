@@ -1,6 +1,6 @@
-//! **THE ASYMMETRIC REDUCE** (N-I1, doc `53` D2, seat of the one reduction) —
+//! **The asymmetric reduce** (N-I1, doc `53` D2, seat of the one reduction) —
 //! four small algebras plus a twenty-line conductor. Re-expressed from v0.4
-//! `iae/src/{reduction,conjugate}` onto netstratum `CellFrame` carriers; the
+//! `iae/src/{reduction,conjugate}` onto Netstratum `CellFrame` carriers; the
 //! orbit-min quotient constructor (`canonicalize`) lives here (charter D2 keeps
 //! the `reduction::canonicalize` call path — `conjugate` is not ported).
 //!
@@ -23,7 +23,7 @@ use std::collections::BTreeMap;
 use thiserror::Error;
 
 // ─────────────────────────────────────────────────────────────────────
-// SLICE 1 — the plane group, the relabel, the observer frame.
+// slice 1 — the plane group, the relabel, the observer frame.
 // ─────────────────────────────────────────────────────────────────────
 
 /// Exchange the two axes, or keep them.
@@ -59,7 +59,7 @@ impl Flip {
 }
 
 /// A plane-group element in signed-permutation form: exchange the axes, then
-/// mirror per axis — the eight combinations ARE the plane group D₄ (the
+/// mirror per axis — the eight combinations are the plane group D₄ (the
 /// observer's spatial gauge). No `rot90` constructor: a quarter turn is one of
 /// these eight, read off its components.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -140,17 +140,17 @@ impl PlaneElement {
     }
 }
 
-/// A relabel of gauge directions — a PERMUTATION of one chart, carried
-/// canonically as its moved points only (a permutation IS its action; fixed
+/// A relabel of gauge directions — a permutation of one chart, carried
+/// canonically as its moved points only (a permutation is its action; fixed
 /// points and listing order are presentation, so identity over two explicit
-/// domains is ONE permutation). Rules speak this carrier.
+/// domains is one permutation). Rules speak this carrier.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Relabel {
     pub pairs: Vec<(u8, u8)>,
 }
 
 impl Relabel {
-    /// The canonical carrier: MOVED POINTS ONLY, sorted by source label.
+    /// The canonical carrier: moved points only, sorted by source label.
     pub fn new(mut pairs: Vec<(u8, u8)>) -> Self {
         pairs.retain(|(from, to)| from != to);
         pairs.sort_unstable();
@@ -244,14 +244,14 @@ pub enum FrameRefusal {
 }
 
 // ─────────────────────────────────────────────────────────────────────
-// SLICE 2 — the orbit-min canonical form and the deduced gauge move.
+// slice 2 — the orbit-min canonical form and the deduced gauge move.
 // ─────────────────────────────────────────────────────────────────────
 
-/// A RENAMING — the FULL chart map of gauge directions (from → to), every
-/// present direction carried explicitly, identity-acting pairs INCLUDED (for a
+/// A renaming — the full chart map of gauge directions (from → to), every
+/// present direction carried explicitly, identity-acting pairs included (for a
 /// chart-to-chart map `0 → 0` is real action, not presentation; dropping it
 /// destroys the domain and fabricates action outside the chart). The achieving
-/// frames of canonicalization are renamings; RULES are `Relabel` permutations —
+/// frames of canonicalization are renamings; rules are `Relabel` permutations —
 /// two carriers, two jobs.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Renaming {
@@ -281,7 +281,7 @@ impl Renaming {
 }
 
 /// The achieving frame of a canonicalization: a plane element and the full chart
-/// RENAMING, applied plane-first.
+/// renaming, applied plane-first.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RenamingFrame {
     pub plane: PlaneElement,
@@ -325,11 +325,11 @@ pub struct Canonicalized {
     pub achieving_frame: RenamingFrame,
 }
 
-/// **ONE CANONICALIZATION PER MEASUREMENT** — orbit-min over the plane group
+/// **One canonicalization per measurement** — orbit-min over the plane group
 /// (eight elements, a structural constant), first-appearance relabel per image,
-/// row-major lex-min over (frame, direction bytes). Orbit-min IS how the
-/// canonical form is built; the sweep is group-order bounded, NEVER a content
-/// search, and NEVER a no-op (a no-op canonicalize reads a pure hue permutation
+/// row-major lex-min over (frame, direction bytes). Orbit-min is how the
+/// canonical form is built; the sweep is group-order bounded, never a content
+/// search, and never a no-op (a no-op canonicalize reads a pure hue permutation
 /// as a generation gap — the sodalitum false wall).
 pub fn canonicalize(measurement: &FullMeasurement) -> Canonicalized {
     let mut candidates: Vec<(Vec<u8>, CellFrame, RenamingFrame, FullMeasurement)> =
@@ -347,8 +347,8 @@ pub fn canonicalize(measurement: &FullMeasurement) -> Canonicalized {
                 (bytes, image.frame(), frame, image)
             })
             .collect();
-    // Pick the orbit-min by (rows, cols, bytes) WITHOUT cloning the byte vector
-    // per comparison (`min_by` borrows), then MOVE the winner out instead of
+    // Pick the orbit-min by (rows, cols, bytes) without cloning the byte vector
+    // per comparison (`min_by` borrows), then move the winner out instead of
     // re-cloning its whole measurement and frame. `min_by` returns the first
     // minimum, exactly as the old `min_by_key` did — output-identical.
     let winner_idx = candidates
@@ -364,10 +364,10 @@ pub fn canonicalize(measurement: &FullMeasurement) -> Canonicalized {
     }
 }
 
-/// The first-appearance RENAMING of a plane image: every present direction
+/// The first-appearance renaming of a plane image: every present direction
 /// renamed in the order the transformed row-major walk first meets it — the
 /// fiber-group quotient's pinned convention. A full chart map: identity-acting
-/// pairs are kept (they ARE the chart).
+/// pairs are kept (they are the chart).
 fn first_appearance_renaming(measurement: &FullMeasurement, element: &PlaneElement) -> Renaming {
     let in_frame = measurement.frame();
     let mut transformed: Vec<(Site, GaugeDirection)> = measurement
@@ -395,7 +395,7 @@ pub enum GaugeDeduction {
 }
 
 /// Equal canonical forms ⟺ a gauge move; the rule is the difference of achieved
-/// frames. Form equality ONLY — no content walk.
+/// frames. Form equality only — no content walk.
 pub fn deduce_gauge_move(a: &Canonicalized, b: &Canonicalized) -> GaugeDeduction {
     if a.form == b.form {
         GaugeDeduction::GaugeMove { rule: rule_between_frames(&a.achieving_frame, &b.achieving_frame) }
@@ -405,7 +405,7 @@ pub fn deduce_gauge_move(a: &Canonicalized, b: &Canonicalized) -> GaugeDeduction
 }
 
 /// The difference of two achieved frames — `g_B⁻¹ ∘ g_A` on the plane; the
-/// relabel walks A's FULL chart through the inverse of B's chart
+/// relabel walks A's full chart through the inverse of B's chart
 /// (raw_A → canonical → raw_B), so the rule is a bijective permutation whose
 /// inverse reconstructs (the componentwise `Relabel.compose` fabricates a
 /// non-bijective rule on shared images — the reconstruction pin catches it).
@@ -426,7 +426,7 @@ fn rule_between_frames(g_a: &RenamingFrame, g_b: &RenamingFrame) -> ObserverFram
 }
 
 // ─────────────────────────────────────────────────────────────────────
-// SLICE 3 — the drain, the route, the conductor.
+// slice 3 — the drain, the route, the conductor.
 // ─────────────────────────────────────────────────────────────────────
 
 /// A basis element — an installed class the drain accounts against. Class-only
@@ -444,7 +444,7 @@ impl Crystal {
     }
 }
 
-/// THE BOUNDING RECORD: the accounted image WITH the address of the crystal that
+/// The bounding record: the accounted image with the address of the crystal that
 /// accounted it, inscribed at the instant of accounting. Re-adding every image
 /// reconstructs the input byte-exact (the image is the proof, untouched).
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -453,7 +453,7 @@ pub struct BoundingRecord {
     pub basis_at: usize,
 }
 
-/// The DIR-13 per-pair routing of a remainder — a decision about THIS pair's
+/// The DIR-13 per-pair routing of a remainder — a decision about this pair's
 /// structure, never a corpus statistic.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Dir13Route {
@@ -487,12 +487,12 @@ impl Remainder {
     }
 }
 
-/// The three verdicts — the ONLY verdict vocabulary of the reduce. No boolean
+/// The three verdicts — the only verdict vocabulary of the reduce. No boolean
 /// form, no None-miss, no census.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ReduceVerdict {
     /// Drained whole. The bounding records carry every drained part in drain
-    /// order WITH its source address — re-adding the images reconstructs the
+    /// order with its source address — re-adding the images reconstructs the
     /// input exactly.
     Congruent { bounding: Vec<BoundingRecord> },
     /// One class through a deduced frame, carried with P⁻¹ (`ObserverFrame::inverse`).
@@ -501,17 +501,17 @@ pub enum ReduceVerdict {
     Remainder { remainder: Remainder, route: Dir13Route },
 }
 
-/// THE DRAIN: account the residual against the basis by EXACT accounting; what
-/// survives is the remainder. A crystal drains iff EVERY entry of its class is
-/// present in the residual with an IDENTICAL coefficient (sub-multiset, never
+/// The drain: account the residual against the basis by exact accounting; what
+/// survives is the remainder. A crystal drains iff every entry of its class is
+/// present in the residual with an identical coefficient (sub-multiset, never
 /// nearness); the subtraction cancels exactly those entries to zero and touches
-/// nothing else. An EMPTY basis drains nothing — the residual is the whole
+/// nothing else. An empty basis drains nothing — the residual is the whole
 /// (the Pin A path).
 ///
-/// **SINGLE FORWARD PASS** (was a `while drained_this_pass` fixpoint over the
-/// whole basis; scaling audit Tier-1). Because a drain only ZEROES the entries
-/// it matched exactly, it can only ever DISABLE another crystal (remove an entry
-/// the crystal needed present), never ENABLE one the scan already passed — so
+/// **Single forward pass** (was a `while drained_this_pass` fixpoint over the
+/// whole basis; scaling audit Tier-1). Because a drain only zeroes the entries
+/// it matched exactly, it can only ever disable another crystal (remove an entry
+/// the crystal needed present), never enable one the scan already passed — so
 /// the old loop's extra passes drained nothing. One indexed pass reproduces the
 /// exact same drain sequence, `bounding`, and remainder. The residual is carried
 /// as a `(site,direction) → coefficient` map for O(log n) exact accounting (was
@@ -519,7 +519,7 @@ pub enum ReduceVerdict {
 /// same canonical order `into_entries` uses. Output-identical; SEAL-B untouched.
 pub(crate) fn drain_exact(residual: ChainDelta, basis: &[Crystal]) -> (ChainDelta, Vec<BoundingRecord>) {
     let (from, to) = (residual.from, residual.to);
-    // VOLUMETRIC-1a: keyed on the WHOLE site (layer included) — a 2-D
+    // VOLUMETRIC-1a: keyed on the whole site (layer included) — a 2-D
     // residual's sites all carry `layer: 0`, so this is output-identical to
     // the prior (row, col, direction) key for every planar caller; a
     // volumetric residual now keys distinct layers distinctly instead of
@@ -558,10 +558,10 @@ pub(crate) fn drain_exact(residual: ChainDelta, basis: &[Crystal]) -> (ChainDelt
     (ChainDelta { from, to, entries }, bounding)
 }
 
-/// DIR-13, per pair: a residual carrying a gauge direction the SOURCE never
+/// DIR-13, per pair: a residual carrying a gauge direction the source never
 /// expressed is generation feedstock; everything else on the letters' own axes
 /// is a composition gap. (The frame-shift arm routes `CategoryError` upstream.)
-/// Route on ABSENCE-FROM-SOURCE, never on a literal hue value.
+/// Route on absence-from-source, never on a literal hue value.
 fn route_per_pair(a: &FullMeasurement, residual: &ChainDelta) -> Dir13Route {
     let mut source_directions: Vec<u8> =
         a.occupancy().iter().map(|(_, direction)| direction.index).collect();
@@ -577,9 +577,9 @@ fn route_per_pair(a: &FullMeasurement, residual: &ChainDelta) -> Dir13Route {
     }
 }
 
-/// **THE REDUCE (the conductor).** Canonical-equal pairs resolve through the
+/// **The reduce (the conductor).** Canonical-equal pairs resolve through the
 /// deduced frame (identity → Congruent, else CongruentThroughP); unequal pairs
-/// take the pair's same-frame difference (`signed_remainder`, NOT a second
+/// take the pair's same-frame difference (`signed_remainder`, not a second
 /// peel), drain it against the basis, and route what survives. Frame-shifting
 /// pairs refuse at the difference and route CategoryError. There is no second
 /// difference and no candidate loop.

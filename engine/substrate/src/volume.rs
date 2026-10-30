@@ -10,8 +10,8 @@
 //!
 //! Cross-field arithmetic is impossible at the type system. There is no
 //! flattening method — the algebra has no homomorphism from `Volume` to a
-//! single the exact rationals (LAW XIV; 05 App. B form 4). Every transformation on the triple
-//! is STRICTLY BLOCK-DIAGONAL: `U_total = diag(U_Space, U_Time, U_Gauge)`,
+//! single the exact rationals (law xiv; 05 App. B form 4). Every transformation on the triple
+//! is strictly block-diagonal: `U_total = diag(U_Space, U_Time, U_Gauge)`,
 //! each block acting only on its own axis — off-diagonal coupling does not
 //! exist as a constructor, so it is topologically forbidden at the type
 //! level.
@@ -171,7 +171,7 @@ fn write_vector_module<F: Field>(buf: &mut Vec<u8>, value: &VectorModule<F>) {
 /// Block-diagonal per-axis transformation witness. Three per-axis
 /// operations, each on its own field's `VectorModule<F>` — cross-axis
 /// coupling is structurally impossible: the generic `Fn` bounds enforce
-/// same-field input/output. The block-diagonal discipline IS the type
+/// same-field input/output. The block-diagonal discipline is the type
 /// signature.
 #[allow(clippy::type_complexity)]
 pub struct BlockDiagonalOperator<S, T, G>

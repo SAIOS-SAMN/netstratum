@@ -101,16 +101,16 @@ same landing (Charter §1); commit on explicit operator go.
   `objects` (discovered at the split: `Op::Object(ObjOp)` makes the
   object ops apply vocabulary — only the search is prover-side).
   `solver` keeps search + volume, re-exports whole; no caller broke.
-  The opaque-payload law derived and inscribed (U_DIRECTIVES §2):
+  The OPAQUE-PAYLOAD law derived and inscribed (U_DIRECTIVES §2):
   physics' cfe arrow forbids cfe importing the verifier, so the deed
   carries proof bytes under solver-verify's encoding monopoly — the
   kernel calls `verify_work(&bytes)`, never parses. 285/285, clippy
   zero.
-- **U1 kernel-verify landed** (2026-07-31, arch-01): the PoUW anchor —
+- **U1 KERNEL-VERIFY landed** (2026-07-31, arch-01): the PoUW anchor —
   I4 completes. Tag 86 `DiscoveryMinted` (header-claimed): orb ‖
   resource ‖ amount ‖ work, the proof riding whole; replay banks it
   like a yield, the proof is judged at the door. `verify_work` — The
-  replay-complete law: re-forge (the task is its digest) ∧ re-apply
+  REPLAY-COMPLETE law: re-forge (the task is its digest) ∧ re-apply
   (every training pair exactly, the honest-withhold law) ∧ re-chain
   (the certificate re-derives or names its link) — an intact chain
   over a non-solution refuses `TrainingMiss`: the fabricated-render
@@ -371,7 +371,7 @@ N5/N6). Details and sequencing in 04 §6.
   shortfall; tags 31/32 byte-exact). The arc played end-to-end:
   freeze-relief by TRADE-1 → capture → absorb cleared the strike with
   the banner → the paid window lapsed nothing → replay matches.
-- **Bot-THERM landed** (2026-07-27, coder-node worktree): NPC thermal
+- **BOT-THERM landed** (2026-07-27, coder-node worktree): NPC thermal
   adoption — the autarkies feel the star. Thermal genesis: every bot
   world founds under a real sun — `BotWorld::genesis` commissions the
   star and sites the planet through the landed THERMAL-1 engine (no
@@ -857,7 +857,7 @@ deeds judged; board 342/342, clippy zero at `5f80464`.
 | Landing | Seat | Status | Contains |
 |---|---|---|---|
 | **Recurrence guard** | arch-02 | **Landed 2026-07-31** (`c088a7b`) | Charter §11 rule 5 as a standing test (`engine/kernel/tests/recurrence_guard.rs`, 7 witnesses): the dead name stays dead, the anti-mirror stays excised, tag 65 never reused, the arrow law (allowed dep sets grow only by editing the test — amendment made structural), no new read-back path ever (the adopted Tier-A files pinned by name), the uplink law (no JSON in mesh src), the detectors prove their own teeth. Red proven live |
-| **#36 spine, whole** | arch-02 | **Landed 2026-07-31** (`0c10782` + `54cba27`) | schema-truth (the record repeats the blob's leading byte — a fresh-landed defect caught and fixed red-first) · the adoption door (`Spine::adopt` — one truth, one birth; the pre-chain debt stamped `judged=0`, named never hidden) · kernel-observed play (every conductor world walks its own spine each beat at {S,G,T}; the handle held across beats — O(1) appends; the pen stalls the spine). Per-deed threading deferred to phase 3 by operator ruling |
+| **#36 spine, whole** | arch-02 | **Landed 2026-07-31** (`0c10782` + `54cba27`) | schema-truth (the record repeats the blob's leading byte — a fresh-landed defect caught and fixed red-first) · the adoption door (`Spine::adopt` — one truth, one birth; the pre-chain debt stamped `judged=0`, named never hidden) · KERNEL-OBSERVED play (every conductor world walks its own spine each beat at {S,G,T}; the handle held across beats — O(1) appends; the pen stalls the spine). Per-deed threading deferred to phase 3 by operator ruling |
 | **The agreement law** | arch-02 | **Landed 2026-07-31** (`5693ccc`) | `mesh::agree`: Σ_mesh (self seat weight 1 — the predecessor's vacuous zero-denominator arm unrepresentable) · re-sync drift strict at the bound · resonance m=10, the cos-symmetric table taken whole. Not carried, by law: the majority anchor (unanimous-or-refused, NS-5 §1), the sluice formula (ω assigned/advisory until the PoUW anchoring), the σ fixed-point encoding |
 | **#37 opening + renderers** | arch-02 | **Landed 2026-07-31** (`a032ca4` + `f2f4fee`) | `engine/lens`: `committed`/`state_tlv`/`world` projections from the chain only; the renderers + `JsonWriter`/`ratio_str` moved whole to `lens::{render,json}` (ledger's display half calls via temporary shims; the extractor half stays ledger-side as Tier-A law); pins prove state.tlv and state.json re-derive byte-for-byte from spine/chronicle — the display half is deletable. Ahead: the dependency inversion (`scribe` extraction, arch-01, operator directive) |
 | **U2a/U2b + the W-waves** | arch-01 | **Merged 2026-07-31** (`5f80464`) | the RCF conjugacy invariant + `orbit_lock`/fold gate in rfa-core (the PoWC mechanism); three coverage waves ending in the value law wave (`de587cf`): per-resource total conservation, sign guards everywhere (the negative-transfer hole closed), escrow declaration==effect, an empty declaration holds every bank still. Ahead: U2d (fold trio + Δ-bridge + the arrow-law amendment), U2e, then TaxonSealed + AssayStruck close the count |
@@ -1111,7 +1111,7 @@ on external strand/isthmus/datum crates.
 3. Court rename of Earth-culture line names (optional)  
 4. More deep hub deeds (incremental)
 
-**Landed this arc:** H1.3 · C1.6 · C1.7 · P8.1–P8.5 · pol.1–3 · planetary deep deeds · R2.6 rail column · E3.6–E3.8 · CIV-reach · star-endow.
+**Landed this arc:** H1.3 · C1.6 · C1.7 · P8.1–P8.5 · pol.1–3 · planetary deep deeds · R2.6 rail column · E3.6–E3.8 · CIV-REACH · STAR-ENDOW.
 
 ### Smoke on cold start
 

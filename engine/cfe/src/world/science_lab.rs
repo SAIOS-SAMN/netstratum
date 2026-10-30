@@ -105,12 +105,12 @@ impl World {
         self.science_rank(orb, discipline) >= 1
     }
 
-    /// **COGNITIVE CAPACITY** (COG-6) — the deepest thought this colony's built
-    /// brain can contain, in compose-depth. Leisure buys the TIME to think; this
-    /// bounds the SIZE — you cannot contain an 11-dimensional bridge in a mud
-    /// hut. The apparatus is the seated HARD-COGNITIVE sciences (Math, Physics,
+    /// **Cognitive capacity** (COG-6) — the deepest thought this colony's built
+    /// brain can contain, in compose-depth. Leisure buys the time to think; this
+    /// bounds the size — an 11-dimensional bridge cannot be contained in a mud
+    /// hut. The apparatus is the seated hard-cognitive sciences (Math, Physics,
     /// Research — the Academy/Observatory in all but name), each a paid, built
-    /// research institution. BASIC invention is universal — every line can
+    /// research institution. Basic invention is universal — every line can
     /// compose a depth-2 tool (knap flint), the minimum a mint requires — but
     /// the depth-3 FRONTIER (the particle accelerator, the 11-dimensional
     /// bridge) is contained only by a built brain: it opens once a hard-
@@ -125,17 +125,17 @@ impl World {
             .map(|d| self.science_rank(orb, d))
             .max()
             .unwrap_or(0) as usize;
-        // **BASIN → CAPACITY** (operator directive 2026-08-20). The seated
-        // sciences are ONE path to a bigger brain; the mind's OWN GROWTH is the
+        // **Basin → capacity** (operator directive 2026-08-20). The seated
+        // sciences are one path to a bigger brain; the mind's own GROWTH is the
         // other. Every proven word — minted here or licensed from the roster —
-        // condenses the basis, a letter earned by THINKING, so a line that has
+        // condenses the basis, a letter earned by thinking, so a line that has
         // thought enough reaches the depth frontier by COGNITION, not only by
         // building an academy. Grained one rung per `WORDS_PER_RUNG` words. At
         // the frontier a mind's Deepen-γ headroom vanishes (`cognitive_deficit`),
-        // so the abundance fold spends its surplus OUTWARD (Expand/Synthesise) —
+        // so the abundance fold spends its surplus outward (Expand/Synthesise) —
         // the deeper mind builds the richer city, emergent from the fold, no
         // authored tilt. (Bounded at the no-overfit frontier: condensation is the
-        // legitimate path PAST it, but the live consumer — the γ — saturates at
+        // legitimate path past it, but the live consumer — the γ — saturates at
         // 3, so a second, capacity-scaled consumer is what a beyond-3 gradient
         // would need; wiring cognition to the frontier is this slice.)
         const WORDS_PER_RUNG: usize = 8;
@@ -169,18 +169,18 @@ impl World {
             .unwrap_or(0)
     }
 
-    /// **THE ELASTIC POPULATION** (41_PROVISION, ruling R5) — the clone
-    /// count IS the population that births and dies; habitats are the
+    /// **The elastic population** (41_PROVISION, ruling R5) — the clone
+    /// count is the population that births and dies; habitats are the
     /// fixed housing floor. Population dynamics grow and cull this.
     pub fn population_of(&self, orb: u64) -> u64 {
         self.clone_count_of(orb)
     }
 
-    /// **THE SPECIES LIFESPAN `L`** (42_LIFESPAN §1, ruling R7) — DERIVED
+    /// **The SPECIES lifespan `L`** (42_LIFESPAN §1, ruling R7) — derived
     /// from the recovery grain, a 4× spread: the mineral / energy /
     /// lattice classes (geodic-lithovore 2, plasma-field 6, crystal-mind
     /// 10, thermal-banker 12 — beings of stone, energy, and crystal)
-    /// live FOUR grains; every other class, biotic and collective, one
+    /// live four grains; every other class, biotic and collective, one
     /// grain. No new dial — `REGROWTH_GRAIN` and a factor of four.
     pub fn lifespan_of(&self) -> u64 {
         let class = self.taxon.map(|(class, _)| class).unwrap_or(0);
@@ -193,8 +193,8 @@ impl World {
         }
     }
 
-    /// **THE POPULATION CEILING `K_pop`** — the living footprint × clade
-    /// habitability that bounds the ration stock (#28), LIFTED by the
+    /// **The population ceiling `K_pop`** — the living footprint × clade
+    /// habitability that bounds the ration stock (#28), lifted by the
     /// provisioning footprint (`43_DISTRIBUTION` §2): each active granary
     /// sustains more people. With no granary this is exactly the
     /// ecological `ration_capacity_of`, so every #40–42 world is
@@ -221,8 +221,8 @@ impl World {
         }
     }
 
-    /// **SETTLE THE POPULATION** (41_PROVISION §3, tag 167) — the whole-head
-    /// entry point: apply an INTEGER net change. A convenience over
+    /// **Settle the population** (41_PROVISION §3, tag 167) — the whole-head
+    /// entry point: apply an integer net change. A convenience over
     /// [`Self::settle_population_exact`] for the seed, the tests, and any
     /// caller with a whole delta; a whole delta leaves the fractional carry
     /// untouched, so this path is byte-identical to the pre-Slice-2 settle.
@@ -230,8 +230,8 @@ impl World {
         self.settle_population_exact(orb, ratio(delta, 1));
     }
 
-    /// **SETTLE THE POPULATION, EXACTLY** (41_PROVISION §3, COG Slice 2) —
-    /// apply a rational NET change (births − deaths) to the EXACT-RATIONAL
+    /// **Settle the population, exactly** (41_PROVISION §3, COG Slice 2) —
+    /// apply a rational net change (births − deaths) to the exact-rational
     /// population. The current mass is the integer headcount plus its
     /// fractional carry; the net delta folds into that mass, whole colonists
     /// promote to the headcount (receipt tag 167), and the surviving `[0, 1)`
@@ -239,7 +239,7 @@ impl World {
     /// ledger — the receipts carry the promotion and the remainder, so replay
     /// reconstructs both. A sub-one delta that does not cross a whole colonist
     /// still moves the carry, so a small founding band grows instead of
-    /// freezing. The tag-179 receipt is emitted ONLY when the carry actually
+    /// freezing. The tag-179 receipt is emitted only when the carry actually
     /// changes, so a whole-integer settle stays byte-identical to the old
     /// path (which had no carry).
     pub fn settle_population_exact(&mut self, orb: u64, delta: Ratio) {
@@ -248,15 +248,15 @@ impl World {
         }
         let count = self.clone_count_of(orb) as i64;
         let prev_carry = self.pop_accrued_of(orb);
-        // THE TRUE MASS as an exact rational, floored at extinction — a cull
+        // The true mass as an exact rational, floored at extinction — a cull
         // can empty a line but never take it negative.
         let total = (ratio(count, 1) + prev_carry.clone() + delta).max(ratio(0, 1));
         let whole: i64 = total.floor().to_integer().try_into().unwrap_or(i64::MAX);
-        // THE #28 LATTICE GUARD, on the population carry. The logistic feeds
+        // The #28 LATTICE guard, on the population carry. The logistic feeds
         // the carry back as the next touch's `p0`, so its denominator
         // compounds every settle (the same recurrence `stock.rs` lattice-
         // floors for the ration — a denominator that squares each tick).
-        // Bound it: quantize the `[0, 1)` carry onto the SAME lattice the
+        // Bound it: quantize the `[0, 1)` carry onto the same lattice the
         // ration stock uses (`stock::lattice`), so there is one lattice in
         // the engine, not a new dial. The shave is sub-one-lattice-step of a
         // colonist and bounded; population is a logistic, not a ledger, so
@@ -278,7 +278,7 @@ impl World {
             );
         }
         // The surviving fractional carry receipts on tag 179 (absolute) —
-        // only when it CHANGED, so a whole-integer settle carries no new deed.
+        // only when it changed, so a whole-integer settle carries no new deed.
         if remainder != prev_carry {
             self.chronicle.append(
                 crate::dop::ClosureEvent::PopulationAccrued { orb_id: orb, remainder },
@@ -286,9 +286,9 @@ impl World {
                 vec![],
             );
         }
-        // 50_WIN_CONDITIONS, operator ruling 2026-08-13: THE FAILURE STATE.
-        // A line has collapsed only when it is TRULY extinct — every orb at
-        // zero headcount AND no fractional carry anywhere (a `0.4`-colonist
+        // 50_WIN_CONDITIONS, operator ruling 2026-08-13: the failure STATE.
+        // A line has collapsed only when it is truly extinct — every orb at
+        // zero headcount and no fractional carry anywhere (a `0.4`-colonist
         // band is still alive and still growing, so it is not a collapse).
         // Checked here, fires exactly once, idempotent (None -> Some only).
         let extinct = self.clone_counts.iter().all(|(_, count)| *count == 0)
@@ -327,15 +327,15 @@ impl World {
             .unwrap_or(0)
     }
 
-    /// **THE QUARANTINE THRESHOLD (task #25, ruled 2026-08-12)** — the
+    /// **The quarantine threshold (task #25, ruled 2026-08-12)** — the
     /// bio-pressure at which a world's modification has run past what it
-    /// can safely hold. It is the SYNTH-GRADE CEILING (grades 1..=7),
+    /// can safely hold. It is the SYNTH-grade ceiling (grades 1..=7),
     /// the same bound `rogue_pressure` and the mod grades already cap at
     /// (`apply_*` clamp with `.min(7)`) — not a chosen dial but the law's
     /// own ceiling read as a threshold.
     pub const QUARANTINE_PRESSURE: u64 = 7;
 
-    /// G2/BIO: has this ORB's bio-pressure crossed into QUARANTINE? Both
+    /// G2/BIO: has this orb's bio-pressure crossed into quarantine? Both
     /// cascade (BioChemCross) and rogue (SynthRogue) pressure count, each
     /// against the shared ceiling — either maxing out seals the world.
     /// Pure over standing state, so replay reads it identically.
@@ -344,7 +344,7 @@ impl World {
             || u64::from(self.rogue_pressure_of(orb)) >= Self::QUARANTINE_PRESSURE
     }
 
-    /// BIO: does ANY orb of this world stand quarantined? A quarantine
+    /// BIO: does any orb of this world stand quarantined? A quarantine
     /// severs the WORLD's external apertures (the Agent Door to inbound
     /// trade, and melt/trade treaties), so the reading is world-wide.
     pub fn world_quarantined(&self) -> bool {
@@ -364,7 +364,7 @@ impl World {
         }
     }
 
-    /// **SEAT A SCIENCE DISCIPLINE** — pay crystal fee, unlock rank 1 or elevate.
+    /// **Seat A science discipline** — pay crystal fee, unlock rank 1 or elevate.
     pub fn seat_science(
         &mut self,
         orb: u64,
@@ -481,7 +481,7 @@ impl World {
             .unwrap_or(true)
     }
 
-    /// **LAB CREATE** — dual ± outcomes; may explode.
+    /// **Lab create** — dual ± outcomes; may explode.
     ///
     /// Always: known positive + known negative (fee).
     /// If not explode: optional hidden positive (when preview reveals it).
@@ -581,8 +581,8 @@ impl World {
     fn apply_known_positive(&mut self, orb: u64, path: LabPath) {
         match path {
             LabPath::ChemWork => {
-                // Catalog already has its own deed; here we mint a thin
-                // research practice signal: bump detection-adjacent via
+                // Catalog already has its own deed; here a thin research
+                // practice signal is minted: bump detection-adjacent via
                 // nothing free — only record path success is the receipt.
             }
             LabPath::BioChem => {
@@ -788,8 +788,8 @@ impl World {
         }
     }
 
-    /// **BIO QUARANTINE RELIEF (task #30, ruling R3, tag 168)** — a
-    /// quarantined orb recovers ONE step at the touch: both bio-pressure
+    /// **BIO quarantine relief (task #30, ruling R3, tag 168)** — a
+    /// quarantined orb recovers one step at the touch: both bio-pressure
     /// axes (cascade and rogue) ebb by one, the mirror of the `+1` each
     /// explosion accrued, and the recovery is receipted. When the maxed
     /// axis falls below `QUARANTINE_PRESSURE` the world's apertures

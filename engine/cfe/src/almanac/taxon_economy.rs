@@ -1,4 +1,4 @@
-//! TAXON ECONOMY — extractive · regenerative · balanced modes.
+//! TAXON economy — extractive · regenerative · balanced modes.
 //!
 //! Pure derivations from sealed class/clade + planet thermal region.
 //! No free dials. Flatlander baseline = bimaniform (clade 2).
@@ -85,7 +85,7 @@ impl PlanetFit {
     }
 }
 
-/// **FLATLANDER BASELINE** — clade 2 `bimaniform`.
+/// **Flatlander baseline** — clade 2 `bimaniform`.
 ///
 /// The knowledge baseline for design and play: planar tool-makers whose
 /// extract+regen suite is what Earth-trained operators already know.
@@ -106,7 +106,7 @@ pub fn flatlander_species() -> &'static str {
 }
 
 /// Preferred thermal region family for a clade (imperium codes).
-/// Used only to colour PlanetFit — not a hard exile.
+/// Used only to colour PlanetFit — not a hard exclusion.
 pub fn clade_preferred_region(clade: u16) -> ThermalRegion {
     // Expansion clades follow owning class preference.
     if let Some(owner) = crate::almanac::taxon_table::expansion_class_of(clade) {
@@ -128,7 +128,7 @@ pub fn clade_preferred_region(clade: u16) -> ThermalRegion {
     }
 }
 
-/// **ECONOMIC MODE** from class + clade (pure, total for lawful codes).
+/// **Economic mode** from class + clade (pure, total for lawful codes).
 ///
 /// | Mode | Typical clades |
 /// |------|----------------|
@@ -216,8 +216,8 @@ pub fn habitat_yield_scale(mode: EconomicMode, fit: PlanetFit) -> Ratio {
     mode_scale * fit.yield_scale()
 }
 
-/// Tech condition required to place a regenerator (normally 3 = DEEPENING).
-/// Regenerative lines may seat at condition 2 (EASE path); extractive stay at 3.
+/// Tech condition required to place a regenerator (normally 3 = deepening).
+/// Regenerative lines may seat at condition 2 (ease path); extractive stay at 3.
 pub fn regenerator_tech_need(mode: EconomicMode) -> u8 {
     match mode {
         EconomicMode::Regenerative => 2,

@@ -1,8 +1,8 @@
-//! SUBSTRATA: universes made by Synthesis, reached through internal tubes
+//! Substrata: universes made by Synthesis, reached through internal tubes
 //! (docs/69; operator 2026-10-09).
 //!
 //! An ancient's core is a throat. The spacing guild (the ancients) opens
-//! internal tubes from it to SUBSTRATA, sub-universes whose laws are the
+//! internal tubes from it to substrata, sub-universes whose laws are the
 //! opener's own words, and traverses them. A substratum is compact until a
 //! traversal observes it (Concordance 1.12): its record on disk is a binary checkpoint
 //! (Concordance 1.13): its laws, its origin and its last coordinate (how many
@@ -17,18 +17,18 @@
 //!   forged from the substratum's own origin and cursor at its level and
 //!   thought with its laws first, then the opener's own minds; judged as every
 //!   synthesis is (the sealed answer must hold on the pairs).
-//! - **The float**, the throats' own synthetic currency (operator: "your own
-//!   internal synthetic float"), counted in discoveries: a closure pays the
-//!   traverser 1 if no one has closed that action in this substratum, the
-//!   quarter otherwise (docs/66 Y1's ratio, one level down). It never converts
-//!   into STAMP, Crystal or μ (boundary 1, coordinator 2026-10-09): it is spent
+//! - **The float**, the throats' own synthetic currency (design direction:
+//!   an internal synthetic float of their own), counted in discoveries: a
+//!   closure pays the traverser 1 if no one has closed that action in this
+//!   substratum, the quarter otherwise (docs/66 Y1's ratio, one level down).
+//!   It never converts into STAMP, Crystal or μ (boundary 1, coordinator 2026-10-09): it is spent
 //!   only on opening further tubes.
 //! - **Opening**: each ancient's core throat opens its first tube at its
 //!   arising. A further tube costs as many discoveries as its depth and opens
 //!   beneath the tube its float was earned in, one level deeper and harder (the
 //!   ladder extended past the forge's top, to a word of 12 on 12x12), so depth and number are bounded by work done below.
 //! - **Upward**: a word first closed below becomes a law of that substratum
-//!   and reaches the opener's line as HEARD; the line adopts it only by
+//!   and reaches the opener's line as heard; the line adopts it only by
 //!   reconstructing it on its own task (docs/66 Y3). Nothing else crosses up.
 use crate::Polity;
 use cfe::ratio::{ratio, Ratio};
@@ -84,7 +84,7 @@ fn get_text(value: &[u8], at: &mut usize) -> Option<String> {
 }
 
 impl Tube {
-    /// THE CHECKPOINT (Concordance 1.13): the path-dependent state at the
+    /// The checkpoint (Concordance 1.13): the path-dependent state at the
     /// tube's coordinate, as binary TLV records. The laws inherited at the
     /// opening, the words closed since and the cursor are path-dependent; the
     /// tasks are derived from (origin, cursor) and never stored.
@@ -207,7 +207,7 @@ fn level_of(level: u32) -> u32 {
     level
 }
 
-/// THE LADDER EXTENDED, for the substrata only (the lines' forge stays as it
+/// The ladder extended, for the substrata only (the lines' forge stays as it
 /// is: carried work replays on it). Past the forge's top each level adds one
 /// to the secret word's length and one row and one column, up to a word of 12
 /// on a 12x12 grid, where the ladder stands; the vocabulary tier stays the
@@ -224,7 +224,7 @@ fn difficulty(level: u32) -> Difficulty {
     }
 }
 
-/// THE FLOAT'S UNIT is one discovery: a first closure below earns 1, a repeat
+/// The float's unit is one discovery: a first closure below earns 1, a repeat
 /// the quarter (docs/66 Y1's ratio). Not the kernel's ladder price, which pays
 /// zero at the saturated rungs by ruling (and the guild works there).
 fn earned(first: bool) -> Ratio {
@@ -269,7 +269,7 @@ pub struct Traversal {
     pub closed: Option<(String, u32, bool)>,
 }
 
-/// THE GUILD'S BEAT: open every arisen ancient's first tube, then one
+/// The guild's BEAT: open every arisen ancient's first tube, then one
 /// traversal (one task) in one tube, and any tube the float now pays for.
 pub fn step(worlds: &mut [Polity], book: &Ledger, var_root: &Path, beat: u64, stamp: u64) -> Traversal {
     let mut done = Traversal::default();

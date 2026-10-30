@@ -1,11 +1,11 @@
-//! **THINK** (N-I3, doc `53` D1/D2) — the seat conductor. It owns NO algebra: it
-//! runs the two moves that exist (DERIVE via `reduce_pair`'s gauge deduction,
-//! REDUCE via `drain_exact`), GLUES the per-pair closures across observations,
-//! and mints the leftover a vessel could not account. There is no DECLINE
-//! (conjugate) and no COMPOSE (sentence) here — the four-move refusal order with
-//! two organs is honest; a fabricated DECLINE would be a rendered lie.
+//! **Think** (N-I3, doc `53` D1/D2) — the seat conductor. It owns no algebra: it
+//! runs the two moves that exist (derive via `reduce_pair`'s gauge deduction,
+//! reduce via `drain_exact`), glues the per-pair closures across observations,
+//! and mints the leftover a vessel could not account. There is no decline
+//! (conjugate) and no compose (sentence) here — the four-move refusal order with
+//! two organs is honest; a fabricated decline would be a rendered lie.
 //!
-//! Gluing is the whole point: a rule read from ONE pair is a coincidence; a rule
+//! Gluing is the whole point: a rule read from one pair is a coincidence; a rule
 //! every observation shares is understood. A single wall (GenerationGap) is
 //! learned (minted + adopted) and the pass is WITHHELD — the next think of the
 //! same class drains (Glued ByDrain, Pin B at task scope). Fewer than two
@@ -18,7 +18,7 @@ use crate::reduction::{
     identity_frame, reduce_pair, Crystal, Dir13Route, ObserverFrame, ReduceVerdict, Remainder,
 };
 
-/// How a single pair closed, when it CLOSES (a gluable outcome).
+/// How a single pair closed, when it closes (a gluable outcome).
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum PairClosure {
     /// The pair reduced through a deduced frame (identity, or a gauge) — the rule
@@ -29,29 +29,29 @@ pub enum PairClosure {
     ByDrain,
 }
 
-/// The task-scope verdict — the ONLY vocabulary a seat renders from.
+/// The task-scope verdict — the only vocabulary a seat renders from.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum TaskThought {
-    /// Every observation closed the SAME way — the task is understood. Carries
+    /// Every observation closed the same way — the task is understood. Carries
     /// the shared closure (a frame all pairs express, or ByDrain).
     Glued(PairClosure),
     /// The observations closed differently, or a composition/frame remainder
     /// survived — no single rule generalizes. Residuals carried whole.
     ///
-    /// CONJECTURES (Concordance 1.10, the audit's restore 1): every frame that
-    /// closed SOME of the pairs, with how many it closed — a mind's own
+    /// Conjectures (Concordance 1.10, the audit's restore 1): every frame that
+    /// closed some of the pairs, with how many it closed — a mind's own
     /// unglued hypotheses, kept rather than discarded, in first-seen order.
     /// A conjecture is private thought: it is never a claim until it closes
     /// every pair of a task.
     UnglueableAcrossObservations { residuals: Vec<Remainder>, conjectures: Vec<(ObserverFrame, usize)> },
-    /// A GenerationGap wall was minted and ADOPTED this pass — the task learned
+    /// A GenerationGap wall was minted and adopted this pass — the task learned
     /// but did not close; the next think of the same class drains.
     Withheld,
     /// Fewer than two observations — a rule cannot be told from a coincidence.
     InsufficientObservations { count: usize },
 }
 
-/// Think a task's observations against a vessel's grown basis. DERIVE + REDUCE +
+/// Think a task's observations against a vessel's grown basis. Derive + reduce +
 /// glue; a wall is minted and adopted (never pushed directly); express-or-withhold.
 pub fn think(
     observations: &[(FullMeasurement, FullMeasurement)],
@@ -60,9 +60,9 @@ pub fn think(
     if observations.len() < 2 {
         return TaskThought::InsufficientObservations { count: observations.len() };
     }
-    // Judge every pair against the SAME pre-think basis, so two same-class walls
+    // Judge every pair against the same pre-think basis, so two same-class walls
     // both wall (and mint one crystal) this pass rather than the second draining
-    // off the first's fresh adopt — the pass either LEARNS (Withheld) or CLOSES.
+    // off the first's fresh adopt — the pass either learns (Withheld) or closes.
     let basis = grown.clone();
     let mut closures: Vec<PairClosure> = Vec::new();
     let mut walls: Vec<Crystal> = Vec::new();
@@ -88,7 +88,7 @@ pub fn think(
             ReduceVerdict::Remainder { remainder, .. } => residuals.push(remainder),
         }
     }
-    // A wall means the task LEARNED — adopt (idempotent) and withhold this pass.
+    // A wall means the task learned — adopt (idempotent) and withhold this pass.
     if !walls.is_empty() {
         for crystal in walls {
             adopt(grown, crystal);
@@ -117,7 +117,7 @@ fn conjectures(closures: &[PairClosure]) -> Vec<(ObserverFrame, usize)> {
     held
 }
 
-/// GLUE across observations: every pair must have closed the SAME way — the same
+/// Glue across observations: every pair must have closed the same way — the same
 /// frame rule, or all ByDrain. Any disagreement is Unglueable (the rule read
 /// from one pair did not generalize).
 fn glue(closures: Vec<PairClosure>) -> TaskThought {

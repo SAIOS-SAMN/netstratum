@@ -232,7 +232,7 @@ half deletes (the observation-continuity rule — the operator's window never
 goes dark).
 
 **The lens is the level (operator ruling 2026-08-01).** Mirror and
-anti-mirror are deprecated as framings whole; `12_UNION` §2c carries the
+ANTI-MIRROR are deprecated as framings whole; `12_UNION` §2c carries the
 ruling and what survives it. `engine/mirror` is already deleted (d606b01)
 and `cfe::opposition` excised (c7cad9e), both held by standing tests in
 `engine/kernel/tests/recurrence_guard.rs`. A lens derives from the one

@@ -2,11 +2,11 @@
 //! a self-contained game object whose committed state round-trips its
 //! wire codec byte-exact.
 //!
-//! RULESET v1 (02_COLONY_LOOP §2 — LAW for replay; constants never
+//! Ruleset v1 (02_COLONY_LOOP §2 — law for replay; constants never
 //! change silently under an existing world): founding reserves, zone
-//! costs, yields, and upkeep live HERE, beside the types they rule.
+//! costs, yields, and upkeep live here, beside the types they rule.
 //!
-//! THE NETSTRATUM WIRE TAG REGISTRY (permanent — one tag, one meaning,
+//! The Netstratum wire tag registry (permanent — one tag, one meaning,
 //! forever; retired codes are never reused):
 //!   1  ClosureEvent::ColonyFounded
 //!   2  ClosureEvent::ZoneBuilt
@@ -15,7 +15,7 @@
 //!   5  ClosureEvent::FamineStruck
 //!   6  ClosureEvent::FamineRelieved
 //!   7  ClosureEvent::ZoneRazed
-//!   8  ClosureEvent::WorldCharted (D3 — the terrain seed, the OPT-IN
+//!   8  ClosureEvent::WorldCharted (D3 — the terrain seed, the opt-in
 //!         deed; 9 stays reserved for D3 milestones)
 //!   10 ClosureEvent::EntityRegistered (N3)
 //!   11 ClosureEvent::ScopeGranted (N3)
@@ -32,7 +32,7 @@
 //!   31 ClosureEvent::OverflowAbsorbed (ABSORB-1)
 //!   32 ClosureEvent::AbsorptionLapsed (ABSORB-1)
 //!   33 ClosureEvent::BondSealed (BOND-1)
-//!   34 ClosureEvent::BondSettled (BOND-1 — settlement AND severance:
+//!   34 ClosureEvent::BondSettled (BOND-1 — settlement and severance:
 //!      the severed flag + load ride the one settle receipt)
 //!   35 ClosureEvent::ForwardSealed (FORWARD-1)
 //!   36 ClosureEvent::ForwardReleased (FORWARD-1)
@@ -45,8 +45,8 @@
 //!   26 Orb thermal entry (albedo ‖ orbit_r ‖ overheat u8 ‖ θ?) —
 //!      THERMAL-1; θ additive-trailing 2026-08-02, absent = unplaced
 
-//!   20 Orb syntropy entry (syntropy_contained ratio) — THE INVERSE OF
-//!         TAG 28. What the orb has CONTAINED across its whole life:
+//!   20 Orb syntropy entry (syntropy_contained ratio) — the inverse of
+//!         tag 28. What the orb has contained across its whole life:
 //!         every joule encased, whether the excess came from a star or
 //!         from friction (both are the same currency, operator ruling
 //!         2026-08-03). Emitted only when nonzero, so an orb that has
@@ -69,12 +69,12 @@
 //!   48 ClosureEvent::ApertureReceived (NS-4 APERTURE — the dest leg)
 //!   49 ClosureEvent::OfferPosted (MARKET-1 — the resting intent)
 //!   50 ClosureEvent::OfferCleared (MARKET-1 — the crossing filled it)
-//!   51 RESERVED for the market board's third (BOARD-1 if it needs one)
+//!   51 reserved for the market board's third (BOARD-1 if it needs one)
 //!   52 ClosureEvent::CouncilSealed (COUNCIL-1 — the multilateral pact)
 //!   53 ClosureEvent::CouncilClosed (COUNCIL-1 — one member's reckoning)
 //!   54 ClosureEvent::GalaxyObserved (GALAXY-1 — universe ledger only)
 //!   55 ClosureEvent::CrystalDrawn (N4 / NS-2 §1.5 — the scanner's
-//!         power draw, the ONE chronicle event of RQP: query, hit, and
+//!         power draw, the one chronicle event of RQP: query, hit, and
 //!         refusal never receipt — the lens law)
 //!   56–58 NS-2 protocol records (query ‖ hit ‖ refusal — NS-2 §2,
 //!         RQP's own framing, never world-chronicle events)
@@ -103,12 +103,12 @@
 //!   67 ClosureEvent::HandoffSealed (MESH-1b, NS-5 §7 — one writer
 //!         per clock: the yielding hand seals, naming the successor;
 //!         the taking hand's first append cites the seal; authority
-//!         is a mesh WALK of the arbor, never a flag)
+//!         is a mesh walk of the arbor, never a flag)
 //!   68 ClosureEvent::PracticeAdopted (PRACTICE-1, 14 §4 — a line
 //!         binds a receipted discipline; the derived creed never
 //!         binds, the practice does)
 //!   69 ClosureEvent::PracticeReleased (PRACTICE-1 — release is a
-//!         REDISCOVERY: barred until new doctrine landed since the
+//!         rediscovery: barred until new doctrine landed since the
 //!         adoption; emits the condition-7 re-emergence node)
 //!   70 ClosureEvent::ProspectStruck (ELEMENT-GRAMMAR-1, 14 §3 — the
 //!         mint deed: identity read from what the genesis seed always
@@ -116,10 +116,10 @@
 //!         replay reads, never re-rolls. Moved 68→70 at the live
 //!         collision with PRACTICE-1: the later claimant moves.)
 //!   71 ClosureEvent::AssayStruck (ELEMENT-GRAMMAR-1, 14 §3 — the
-//!         extraction closure: richness × elapsed banked in ONE
+//!         extraction closure: richness × elapsed banked in one
 //!         receipt, the bond-settle shape; the mint creates identity,
-//!         the assay moves matter. WIDENED 2026-08-06, ECO-1 #40:
-//!         a trailing ratio — the vein's richness AFTER the deed
+//!         the assay moves matter. Widened 2026-08-06, ECO-1 #40:
+//!         a trailing ratio — the vein's richness after the deed
 //!         (wear and regeneration settle in the same receipt, the
 //!         tag-101 additive pattern). The legacy 3-field form decodes
 //!         with the field absent and replays with richness unmoved —
@@ -133,17 +133,17 @@
 //!         the claiming line's recorded solves reached the ceiling)
 //!   76 ClosureEvent::VeilDrawn (MASK-1a, 14 §4 — the lawful veil:
 //!         clouds renders, never the chronicle)
-//!   77 ClosureEvent::VeilLifted (MASK-1a — by deed, or STARVED when
+//!   77 ClosureEvent::VeilLifted (MASK-1a — by deed, or starved when
 //!         the standing joule toll goes unpaid; starved u8)
 //!   78 ClosureEvent::InstrumentForged (MANU-1, 10 §3f — manufacturing:
-//!         tech + understanding + industry into a held INSTRUMENT;
+//!         tech + understanding + industry into a held instrument;
 //!         grade = the crystallized condition; scan reach = base +
 //!         grade, the global constant struck)
 //!   79 ClosureEvent::RouteChartered (ROUTE-1, MARKET-2 sequence — a
 //!         maintained lane suppresses the melt: φ_route = φ·(1−η);
 //!         two-legged, the deal id pairs the books)
 //!   80 ClosureEvent::RouteLapsed (ROUTE-1 — unpaid maintenance; the
-//!         lane dies on THIS book, and a pair needs both sides live)
+//!         lane dies on this book, and a pair needs both sides live)
 //!   81 ClosureEvent::IncursionStruck (INCURSION-1a, 07 §3.1 — the
 //!         archived-sheet door: a sealed derelict wakes as an
 //!         incursion line; universe ledger only, the archive never
@@ -151,15 +151,15 @@
 //!   82 ClosureEvent::VoidShare (MARKET-2 conform, ruled 2026-07-31 —
 //!         the melt as a first-class receipt on the receiving book:
 //!         sent = received + void share; every deal in the universe
-//!         sums to zero under ONE rule; losses are receipted, never
+//!         sums to zero under one rule; losses are receipted, never
 //!         silent; the gate only sums, never recomputes φ·D.
-//!         `orb_id` ADDED 2026-08-02 (SYN-6): the record named the
-//!         DEAL and never the BEARER, so the melt was receipted and
-//!         credited to NO ONE — visible in aggregate, unattributable
+//!         `orb_id` added 2026-08-02 (SYN-6): the record named the
+//!         deal and never the bearer, so the melt was receipted and
+//!         credited to no one — visible in aggregate, unattributable
 //!         to any book. Wire: LE64 orb ‖ LE64 deal ‖ resource ‖ ratio)
 //!   83 The committed-state container (CODEC-1, §11 ladder #35 — the
 //!         artifact digests bind: schema-versioned canonical bytes of
-//!         the WHOLE committed state, engine/codec's monopoly; one
+//!         the whole committed state, engine/codec's monopoly; one
 //!         state, one encoding; a schema bump is a kernel amendment,
 //!         never a silent widening. Not a ClosureEvent — the arbor's
 //!         framing when state rides a TLV stream)
@@ -175,83 +175,83 @@
 //!         seals at coder-03's amendment; the vocabularies are 15 §2
 //!         (class 1–7, 0 lawful-unclassed) and 15 §3 (clade 1–18,
 //!         0 unrecorded), append-only by amendment)
-//!   96 ClosureEvent::VocabularyMinted — VERSION NOTE, recorded at the
+//!   96 ClosureEvent::VocabularyMinted — VERSION note, recorded at the
 //!         d3-scope merge: this tag landed while KERNEL_VERSION read
-//!         0.5.0 and its additive minor bump was MISSED (the lens
+//!         0.5.0 and its additive minor bump was missed (the lens
 //!         lane's error, declared not absorbed). The 0.6.0 and 0.7.0
 //!         bumps that followed on d3-scope (tags 97, 98) carried the
 //!         symmetric version rule; the merge composes at 0.7.0, which
-//!         SEALS all three additive deeds. No receipt was cut in the
+//!         seals all three additive deeds. No receipt was cut in the
 //!         gap on any chronicle that reached main.
 //!      (28_VOCABULARY §7, 2026-08-05 —
 //!         a T0 progenitor adds an entry to a vocabulary: axis ‖ code ‖
 //!         sigil ‖ word ‖ binding, where the binding is the entry's
-//!         MECHANISM as exact rational factors over the closed channel
-//!         set. The code is carried and VERIFIED against the fold, never
+//!         mechanism as exact rational factors over the closed channel
+//!         set. The code is carried and verified against the fold, never
 //!         chosen. Additive: a minor bump, never breaking)
-//!  101 ClosureEvent::LineMinted (THE MINTED LINE, 2026-08-06 — the
+//!  101 ClosureEvent::LineMinted (the minted LINE, 2026-08-06 — the
 //!         engine mints its peoples: seed alone rides the wire, and
-//!         EVERYTHING derives from it through `line_synthesis` — name,
+//!         everything derives from it through `line_synthesis` — name,
 //!         species, motto, taxon, axes — one rule, one truth, nothing
-//!         declarable to misdeclare. A minted line holds NO office:
+//!         declarable to misdeclare. A minted line holds no office:
 //!         seats enter by tag 89's deed, never by a draw)
-//!  100 ClosureEvent::ParcelConveyed (CONVEY, 2026-08-06 — the postal
+//!  100 ClosureEvent::ParcelConveyed (convey, 2026-08-06 — the postal
 //!         deed, the estate chain's last link: from ‖ to ‖ resource ‖
 //!         amount ‖ postage ‖ survey ‖ seed ‖ covered. World-contained;
-//!         both endpoints must be SURVEYED PARCELS; only the MONETARY
+//!         both endpoints must be surveyed parcels; only the monetary
 //!         portion of the sender's bank conveys — the free portion
 //!         stays home; postage = postal_meter rate × amount, drawn from
 //!         the sender and burned like upkeep, verified at the gate by
 //!         the same rule)
-//!   99 ClosureEvent::OfferCountered (THE COUNTER, 2026-08-06 — the
+//!   99 ClosureEvent::OfferCountered (the counter, 2026-08-06 — the
 //!         third outcome of survey/appraise → refuse/accept/renegotiate:
 //!         offer ‖ want_amount ‖ optional appraisal digest. Amends a
-//!         RESTING offer's ask in committed state, so acceptance (the
-//!         clear) honors the countered terms by construction. A STALE
+//!         resting offer's ask in committed state, so acceptance (the
+//!         clear) honors the countered terms by construction. A stale
 //!         appraisal citation refuses at the emitter — staleness
 //!         triggers renegotiation and the evidence must be re-taken;
 //!         consent needs no such gate, so acceptance never re-checks)
-//!   98 ClosureEvent::AppraisalStruck (THE APPRAISAL, 2026-08-06 — value
+//!   98 ClosureEvent::AppraisalStruck (the appraisal, 2026-08-06 — value
 //!         derives from the survey at every scale: subject ‖ survey
 //!         digest ‖ seed ‖ covered ‖ value. One rule dispatches on the
 //!         subject (building = sealed cost, planetary = banks + buildings,
 //!         estate = planets × the parcels' monetary break); the gate
 //!         re-derives by calling the same rule. Staleness is decidable
-//!         from the stamp and TRIGGERS RENEGOTIATION, never blocks
+//!         from the stamp and triggers renegotiation, never blocks
 //!         acceptance — consent closes deals)
-//!   97 ClosureEvent::EstateSurveyed (E5b THE ESTATE CHAIN, 2026-08-05 —
+//!   97 ClosureEvent::EstateSurveyed (E5b the ESTATE chain, 2026-08-05 —
 //!         the metered, witnessed observation of an estate: seed ‖ payer ‖
 //!         covered (orb ‖ witness digest, one per orb surveyed) ‖ cost.
-//!         Survey DERIVES from observation: parcels derive pure from the
+//!         Survey derives from observation: parcels derive pure from the
 //!         receipt's seed forever; the deed pays the meter — cost =
 //!         survey_meter rate × volume — and carries one witness per orb,
 //!         the digest of that orb's own founding receipt. An observation
 //!         without witnesses cannot be built, a survey that cannot pay
 //!         does not happen)
 //!   86 ClosureEvent::DiscoveryMinted (U1 KERNEL-VERIFY,
-//!         U_DIRECTIVES §2 — the PoUW mint: value created ONLY
+//!         U_DIRECTIVES §2 — the PoUW mint: value created only
 //!         against verified work. orb ‖ resource ‖ amount ‖ work,
-//!         where work is the OPAQUE proof payload — solver-verify's
+//!         where work is the opaque proof payload — solver-verify's
 //!         encoding monopoly (forge digest, difficulty, program,
 //!         output, certificate); the receipt carries its proof whole,
 //!         replay re-verifies forever. Gated by I4's bound arm:
 //!         verify_work(work) = Ok(d) ∧ amount ≤ mint_bound(d);
-//!         mint_bound is SEALED SHUT until Ruling Box 1)
-//!   87 The arbor SEGMENT blob frame (SPINE-UPLINK, NS-5 §9 — a
+//!         mint_bound is sealed shut until Ruling Box 1)
+//!   87 The arbor segment blob frame (SPINE-UPLINK, NS-5 §9 — a
 //!         content-addressed geometry carried in a replication
 //!         segment: state[32] ‖ state_bytes; the receiver re-hashes
-//!         on arrival. Segment-only — NEVER stored in arbor.tlv).
-//!   88 The arbor SEGMENT step frame (SPINE-UPLINK — the proof a
-//!         JUDGED record's transition was lawful: commit[32] ‖
+//!         on arrival. Segment-only — never stored in arbor.tlv).
+//!   88 The arbor segment step frame (SPINE-UPLINK — the proof a
+//!         judged record's transition was lawful: commit[32] ‖
 //!         actor[8] ‖ stamp[8] ‖ event_bytes; the receiver re-gates
 //!         under its own kernel. Segment-only, carried only for
 //!         gated records).
-//!   89 ClosureEvent::StationSeated (THE VERTICAL AXIS, 2026-08-01 —
-//!         the seat enters the chain. A station GATES AUTHORITY (the
+//!   89 ClosureEvent::StationSeated (the vertical axis, 2026-08-01 —
+//!         the seat enters the chain. A station gates authority (the
 //!         tier-0 verbs check it), and it lived only in
 //!         `var/registry/<sigil>.json`, a file anyone with a shell can
 //!         edit. Who holds which office is now a receipted deed and
-//!         committed state; the registry becomes a CACHE from the
+//!         committed state; the registry becomes a cache from the
 //!         receipt on — the G1 precedent, where GenesisSealed did
 //!         exactly this for the axes. Station codes are the BAND-1
 //!         vocabulary by index: 1 progenitor · 2 watcher · 3 observer
@@ -261,14 +261,14 @@
 //!    103  ClosureEvent::ParameterChartered (P2, the chartered
 //!         parameters — the balance placeholders' mint path)
 //!    104  ClosureEvent::GemCompounded (ELEMENT-CHEMISTRY, #37 — the
-//!         almanac's first CONSUMER: banked elements bond into a gem
+//!         almanac's first consumer: banked elements bond into a gem
 //!         by the lane law, the members spending their valence and the
 //!         gem carrying away exactly the sum. The receipt names the
 //!         members and the gem; every quantity re-derives from
 //!         `almanac::recipe_of`)
 //!    105  ClosureEvent::TreatySealed (#42 — the political spectrum:
 //!         trade, defense, peace and war as one co-signed pairwise
-//!         charter over the PAIR channels. The kind is the sign of what
+//!         charter over the pair channels. The kind is the sign of what
 //!         the terms do, and peace/war displace each other.)
 //!    106  ClosureEvent::TreatyStruck (#42 — a pact ends: broken by the
 //!         partner's contrary pact, or renounced. Expiry needs no
@@ -280,7 +280,7 @@
 //!         ZoneBuilt; the conversion itself needs this deed so SEAL B
 //!         can replay element mass.)
 //!    108  ClosureEvent::ElementApertureSent (WAVE-2 E-APT-1, 2026-08-07 —
-//!         source leg of a cross-world ELEMENT haul: open matter leaves
+//!         source leg of a cross-world element haul: open matter leaves
 //!         this book. Pair of 108/109; ROUTE-1 lanes suppress melt via
 //!         the same pair_melt law as resource hauls. No demurrage.)
 //!    109  ClosureEvent::ElementApertureReceived (WAVE-2 E-APT-1 —
@@ -347,26 +347,26 @@
 //!    153  ClosureEvent::VaultWithdrawn (O6.5 — STAMP out of Vault custody.)
 //!    154  ClosureEvent::AssayConsilience (O6.4 — Assay office re-proves vein.)
 //!    155  ClosureEvent::AssaySlashed (O6.4 — false richness residual.)
-//!    156  ClosureEvent::IsoUnionStruck (CHEM science — isomorphic gem union.)
-//!    157  ClosureEvent::ChemCataloged (CHEM science — recipe sealed as known.)
-//!    158  ClosureEvent::DarkPullStruck (CHEM science — dark-7 gravity residual.)
-//!    159  ClosureEvent::ScienceSeated (LAB — paid science discipline unlock.)
-//!    160  ClosureEvent::LabCreated (LAB — dual ± creation; may explode.)
-//!    161  ClosureEvent::ScienceExploded (LAB — explosion residual slash.)
-//!    162  ClosureEvent::RogueFactionStruck (LAB — synthetic matrix residual.)
+//!    156  ClosureEvent::IsoUnionStruck (chem science — isomorphic gem union.)
+//!    157  ClosureEvent::ChemCataloged (chem science — recipe sealed as known.)
+//!    158  ClosureEvent::DarkPullStruck (chem science — dark-7 gravity residual.)
+//!    159  ClosureEvent::ScienceSeated (lab — paid science discipline unlock.)
+//!    160  ClosureEvent::LabCreated (lab — dual ± creation; may explode.)
+//!    161  ClosureEvent::ScienceExploded (lab — explosion residual slash.)
+//!    162  ClosureEvent::RogueFactionStruck (lab — synthetic matrix residual.)
 //!    165  ClosureEvent::TreatyElementsAllowed (E3.9 — element allow-list
 //!         annexed to a standing trade pact; crossings refuse ids outside
 //!         the pair's union while any list lives.)
 //!    166  ClosureEvent::SolverWordMinted (NOVELTY-GATE, 38 §4 — a line's
-//!         minted solver word: action orbit ‖ opaque expansion (the ONE
+//!         minted solver word: action orbit ‖ opaque expansion (the one
 //!         program wire form) ‖ three confirming task digests. The
-//!         library is a FOLD of these receipts; certificates carry the
+//!         library is a fold of these receipts; certificates carry the
 //!         expansion, so the judge's wire never moves.)
 //!    170  ClosureEvent::TitheReceipted (`#32`, 20_FOUNDING §3 — the
 //!         founding-tithe: a debit of the line's own metabolic ration,
-//!         paid to the seat whose standing covers the founding. FALLBACK
+//!         paid to the seat whose standing covers the founding. Fallback
 //!         siting is the only landed acquisition path, so every founding
-//!         today raises a new world and tithes to the ANCIENT seat;
+//!         today raises a new world and tithes to the ancient seat;
 //!         PURCHASE/COMMISSION (the elder path, an existing planet) are
 //!         deferred per HANDOFF_2026-08-13.)
 //!    172  ClosureEvent::PracticesLapsed (`49_TAXATION` §3 — the
@@ -376,10 +376,10 @@
 //!    174  ClosureEvent::CivilizationCollapsed (`50_WIN_CONDITIONS`,
 //!         operator ruling 2026-08-13 — the failure state, the only
 //!         closure this game has; no win-state deed exists or ever
-//!         will, by the same ruling. RENUMBERED twice: 172 -> 173
+//!         will, by the same ruling. Renumbered twice: 172 -> 173
 //!         collided with PracticesLapsed, which committed to main
 //!         first; 173 -> 174 then collided with ElementFarmed, which
-//!         ALSO committed to main first. Landed concurrently with two
+//!         also committed to main first. Landed concurrently with two
 //!         separate lanes claiming the same next-free tag in a row.)
 //!    177  ClosureEvent::KnowledgeConverged (38 §5 — cross-line
 //!         consilience: independent lines that resolve their knowledge to
@@ -400,27 +400,27 @@
 //!         against it yet (CHRONICLE-COMPACT-3). folded_hash[32] ‖
 //!         receipt_count u64 le.)
 //!    189  ClosureEvent::SolverWordHardness (ENTITY-ALIGN-1, docs/56 §3 —
-//!         a SEPARATE receipt closed alongside a SolverWordMinted mint,
+//!         a separate receipt closed alongside a SolverWordMinted mint,
 //!         never a field on it (that payload is opaque-to-end on the
 //!         wire, no safe trailing slot). hardness is the count of
-//!         DISTINCT knowledge-readings among the confirming vessels — the
+//!         distinct knowledge-readings among the confirming vessels — the
 //!         same algorithm solver::consilience already uses for cross-line
 //!         agreement, read at vessel scope. Recorded only; nothing reads
 //!         it yet. orbit[32] ‖ hardness u32 le.)
 //!    Phase-5 claim ledger: next free **199** (198 CompositionSealed — the
 //!    refactor onto era 1: a world's planet composition, its shares by Z,
 //!    sealed once at founding; its veins are drawn from it; 197 SubstratumOpened — docs/69; 193 CoreDeposited, 194 CoreEmitted, 195 CoreReturned, 196 CoreWordDeposited — the cores design; 190 UniverseFounded, 191 UniverseCited, 192 AncientArose — docs/58; 186 ResourceStocksSwept, 184 VeinRejuvenated —
-//!    ONT-3 resource rejuvenation as derivation: a worked vein RECOVERS at a
+//!    ONT-3 resource rejuvenation as derivation: a worked vein recovers at a
 //!    collect touch, its inverse-receipt integral `rejuvenated` growing by the
-//!    KEPLERIAN orbital-forcing quantum (one `natural/REGROWTH_GRAIN` per
-//!    completed local year) AMPLIFIED by topological recycling (β₁, the orb's
+//!    keplerian orbital-forcing quantum (one `natural/REGROWTH_GRAIN` per
+//!    completed local year) amplified by topological recycling (β₁, the orb's
 //!    Regenerator return-pathways); a delta-0 element move (no matter minted,
 //!    the vein book alone advances) capped so richness never exceeds the
 //!    endowment; replay folds `rejuvenated += injected`, the mirror of
 //!    StapleMined's `extracted += eaten`, 2026-08-18; 183 StapleMined —
-//!    ONT-2b the demand-driven staple extraction: the population MINES its
+//!    ONT-2b the demand-driven staple extraction: the population mines its
 //!    staple vein by eating (`extracted += eaten`, capped at the vein's
-//!    remaining richness), the vein IS the larder — a delta-0 element move
+//!    remaining richness), the vein is the larder — a delta-0 element move
 //!    (food goes vein → mouths, the bank bypassed) that only advances the
 //!    vein book; replaces the geometric ground-assay + the RationElementSettled
 //!    bank-debit for the staple, 2026-08-17; 182 RationElementSettled —
@@ -428,7 +428,7 @@
 //!    `regrown − eaten` for the line's almanac staple; the element
 //!    mirror of the YieldCollected food mint), 2026-08-17; 181 RecipeBuilt —
 //!    RCP-2 the emergent recipe built (∏ inputs → role over the open
-//!    almanac; the built set is a FOLD, `vocabulary::recipes_built`),
+//!    almanac; the built set is a fold, `vocabulary::recipes_built`),
 //!    2026-08-16; 180 LeisureSettled —
 //!    COG-1 the leisure bank / cognition budget, doc 52 §7;
 //!    179 PopulationAccrued — 41_PROVISION COG Slice 2;
@@ -459,15 +459,15 @@
 //!   In-value codes opened at N4 (they ride existing orb tags, no new
 //!   TLV tag): Resource::Crystal = 7 (banked entry, tag 18);
 //!   ZoneKind::Resonator = 7 (zone entry, tag 17).
-//!   90 ClosureEvent::SovereignUnionSealed (D5 — THE SOVEREIGN
-//!         UNION: the offices D(Ω) PROGENITOR and V(Ω) SOVEREIGN
-//!         entered into union under a 25-year REVIEW HORIZON.
-//!         Parties are OFFICES, never orb ids — seating an office as
+//!   90 ClosureEvent::SovereignUnionSealed (D5 — the SOVEREIGN
+//!         union: the offices D(Ω) progenitor and V(Ω) SOVEREIGN
+//!         entered into union under a 25-year review horizon.
+//!         Parties are offices, never orb ids — seating an office as
 //!         a colony reduces a global field to a local node. A bonded
 //!         DYAD: neither party derives its legitimacy from the other
 //!         (17 §3 — both are readings of Ω, neither defined through
 //!         the other). Ruled 2026-08-02.
-//!         NOT 0x40: tag 64 is the NS-5 mesh head, and a collision
+//!         Not 0x40: tag 64 is the NS-5 mesh head, and a collision
 //!         there would decode a mesh announcement as a union.)
 
 use crate::books::{kind_of, BookAccount, BookKind, BookView};
@@ -512,24 +512,24 @@ impl Rail {
     }
 }
 
-/// THE TWO OFFICES (`EQUATIONS` D5, `18` §2c′) as a TYPE, so the office
-/// can never be confused with the root ENTITY. `world::SOVEREIGN` is
+/// The two offices (`EQUATIONS` D5, `18` §2c′) as a type, so the office
+/// can never be confused with the root entity. `world::SOVEREIGN` is
 /// `entity_id = 1` — the actor holding every grant under NS-6
-/// containment — while `Office::Sovereign` is `V(Ω)`: what STANDS, not
-/// who ACTS. The collision was undocumented until 2026-08-02; this type
+/// containment — while `Office::Sovereign` is `V(Ω)`: what stands, not
+/// who acts. The collision was undocumented until 2026-08-02; this type
 /// is the disambiguation, so no reader has to infer which sovereign a
 /// line means.
 ///
-/// A BONDED DYAD, never a hierarchy: neither office derives its
+/// A bonded DYAD, never a hierarchy: neither office derives its
 /// legitimacy from the other (`17` §3 — both are readings of `Ω`,
-/// neither defined through the other; D5 — both are PRIVILEGED).
+/// neither defined through the other; D5 — both are privileged).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Office {
-    /// `D(Ω)` — the PROGENITOR. Makes the room; owes room that was
-    /// EARNED (`PlaneUnearned` refuses otherwise).
+    /// `D(Ω)` — the progenitor. Makes the room; owes room that was
+    /// earned (`PlaneUnearned` refuses otherwise).
     Progenitor = 0,
     /// `V(Ω)` — the SOVEREIGN. Holds the substance; owes work that was
-    /// RECEIPTED (admission by `admits()`).
+    /// receipted (admission by `admits()`).
     Sovereign = 1,
 }
 
@@ -544,7 +544,7 @@ impl Office {
     }
 }
 
-/// **TWO DISTINCT ENDPOINTS, proven at construction** (29_CONSTRUCTION
+/// **Two distinct endpoints, proven at construction** (29_CONSTRUCTION
 /// C1). Every value-moving verb refused `from == to` separately and
 /// anonymously — five arms of one shape. A `Between` cannot be a
 /// self-loop; the door names the fault once and the arms die.
@@ -572,7 +572,7 @@ pub fn between(from: u64, to: u64) -> Between {
     Between::new(from, to).expect("a between literal must join two distinct endpoints")
 }
 
-/// **THREE OR MORE DISTINCT MEMBERS, proven at construction** (P1,
+/// **Three or more distinct members, proven at construction** (P1,
 /// 29_CONSTRUCTION). A council is multilateral by definition — two
 /// parties are a forward, and a duplicated member would be bound
 /// twice under one lock. Both halves of `BadCouncil`'s membership
@@ -648,7 +648,7 @@ impl Cargo {
     }
 }
 
-/// **TWO DISTINCT CARGOES, proven at construction** (P1). An offer
+/// **Two distinct cargoes, proven at construction** (P1). An offer
 /// that gives what it wants trades nothing — `give == want` was
 /// `BadOffer`'s shape half. An `Exchange` cannot be reflexive.
 /// Closed-carrier form via [`Exchange::new`] / [`exchange`]; open
@@ -687,7 +687,7 @@ pub fn exchange(give: Resource, want: Resource) -> Exchange {
 /// **A NAME, proven non-empty at construction** (P1). The nameless
 /// line and the nameless word were each policed by their own arm
 /// (`LineUnnamed`; the emptiness half of `MintNameTaken`); a `Name`
-/// cannot be empty, so the arms die and only the collision FACTS
+/// cannot be empty, so the arms die and only the collision facts
 /// remain.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Name(String);
@@ -712,7 +712,7 @@ pub fn name(text: &str) -> Name {
     Name::new(text).expect("a name literal must not be empty")
 }
 
-/// **A DELIVERY WINDOW — at least one tick.** `window == 0` was a shape
+/// **A delivery WINDOW — at least one tick.** `window == 0` was a shape
 /// arm; a zero-tick obligation is not an obligation.
 pub type Window = core::num::NonZeroU64;
 
@@ -721,11 +721,11 @@ pub fn window(ticks: u64) -> Window {
     Window::new(ticks).expect("a window literal must be at least one tick")
 }
 
-/// **THE STATION, AS A TYPE** (BAND-1's closed vocabulary; NOT mintable
+/// **The STATION, as A type** (BAND-1's closed vocabulary; not mintable
 /// by 28_VOCABULARY §10 — offices change by amendment alone, which is
 /// exactly why an enum is honest here where the minted vocabularies get
 /// folds). The u8 range check in `seat_station_as` dies: a `Station`
-/// IS in the band by construction.
+/// is in the band by construction.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Station {
     Progenitor = 1,
@@ -828,13 +828,13 @@ impl Station {
     }
 }
 
-/// THE RULED REVIEW HORIZON — 25 years at 60 ticks a year (`11` §1).
+/// The ruled review horizon — 25 years at 60 ticks a year (`11` §1).
 ///
-/// **A REVIEW, NEVER AN EXPIRY** (operator ruling 2026-08-02). A
-/// `BOND-1` term SETTLES and ENDS at `sealed + term`; were the union
+/// **A review, never an expiry** (operator ruling 2026-08-02). A
+/// `BOND-1` term settles and ends at `sealed + term`; were the union
 /// deeded that way, D5's breach clause would fire at stamp 1500 — *D
 /// stops and V suffocates; V stops and D freezes* — and the foundation
-/// would lapse on a timer. The union STANDS past this mark. What falls
+/// would lapse on a timer. The union stands past this mark. What falls
 /// due is the operator's re-approval, and nothing else.
 pub const UNION_REVIEW_HORIZON: u64 = 1500;
 
@@ -848,7 +848,7 @@ pub enum Resource {
     Alloy = 3,
     /// D2 (02 §5): the ultra-refined tier — dense, trade-worthy.
     Diamond = 4,
-    /// THERMAL-1 (05 §1.2): the commodity joule — minted ONLY by
+    /// THERMAL-1 (05 §1.2): the commodity joule — minted only by
     /// syntropic encasement of excess heat, never by fiat (01 §6.1).
     Joule = 5,
     /// SINK-1 (05 §1.4): bankable heat-absorption capacity — captured
@@ -886,10 +886,10 @@ impl Resource {
 }
 
 /// TECH-1b (10 §3): the condition table — the crystallized node's
-/// modifier kind and magnitude per condition. MECHANICS only: the
+/// modifier kind and magnitude per condition. Mechanics only: the
 /// NAME derives from the node hash (`tech_node_name` — the 10 §2
 /// law-4 word tables), so two lines crystallizing the same condition
-/// carry DIFFERENT names. Naming is never stacked on rungs (operator
+/// carry different names. Naming is never stacked on rungs (operator
 /// ruling 2026-07-30): a line's technology is its own, seeded from
 /// its own chronicle root.
 pub fn tech_node_of(condition: u8) -> Option<(u8, Ratio)> {
@@ -905,19 +905,19 @@ pub fn tech_node_of(condition: u8) -> Option<(u8, Ratio)> {
 
 /// TECH-1b (10 §2, law 4): the node's NAME — a deterministic
 /// word-table composition from the node hash. The condition fixes the
-/// CONCEPT (what the technology does); the hash draws the VOICE (how
+/// concept (what the technology does); the hash draws the voice (how
 /// this line speaks of it). Flavor at the surface, hash as the
 /// identity underneath — replay re-derives the identical name because
 /// the receipt carries the identical node.
-/// **THE CONDITION VOCABULARY** — the bare concept a condition names,
+/// **The condition vocabulary** — the bare concept a condition names,
 /// separated from the voice that speaks it (2026-08-05).
 ///
 /// It lived inline inside [`tech_node_name`], which returns
-/// `"{voice} {concept}"`, so the only way to ask what a condition WAS
+/// `"{voice} {concept}"`, so the only way to ask what a condition was
 /// meant parsing a composed string — and a caller that tried
 /// `starts_with` got the voice instead of the concept. The vocabulary is
 /// now askable directly, which is what lets `survey::node_kind` classify
-/// by MEANING rather than by number.
+/// by meaning rather than by number.
 ///
 /// `None` is the honest answer outside the namespace: an unnamed
 /// condition is not a node.
@@ -932,7 +932,7 @@ pub fn condition_concept(condition: u8) -> Option<&'static str> {
         // TERRA-1: the gifted crown of the base stack — never
         // crystallized locally, only licensed down from tier 0.
         6 => Some("terraforming"),
-        // PRACTICE-1's lesson: it rides the condition field and is NOT a
+        // PRACTICE-1's lesson: it rides the condition field and is not a
         // sky node.
         7 => Some("re-emergence"),
         _ => None,
@@ -964,7 +964,7 @@ pub const SEAT_ANCIENT: u8 = 1;
 /// replayed on `StarCommissioned`. G-class targets match this kit so
 /// legacy G fixtures are byte-stable.
 ///
-/// **Left UNCHANGED, 2026-08-13 (`#32` founding tithe): `chart()`'s
+/// **Left unchanged, 2026-08-13 (`#32` founding tithe): `chart()`'s
 /// transfer amount reuses this exact function, and several fixtures
 /// (`rqp_scanner.rs`) hand-derive exact bank amounts against it — a
 /// dial bump here cascades far past founding. The tithe's headroom is
@@ -978,7 +978,7 @@ pub fn founding_reserves() -> Vec<(Resource, Ratio)> {
 
 /// **STAR-ENDOW-1** — absolute kit targets after the sun is known.
 ///
-/// Applied as a TOP-UP (never strips spent banks): for each resource,
+/// Applied as a top-up (never strips spent banks): for each resource,
 /// if held < target, bank `target − held`. Pure of class alone so
 /// `StarCommissioned` replay re-derives without extra receipt fields.
 ///
@@ -1039,11 +1039,11 @@ pub fn star_endowment(class: crate::thermal::StarClass) -> Vec<(Resource, Ratio)
     }
 }
 
-/// **GALACTIC-1 — THE REGIONAL SEED.** Quantize a charted `(X,Y,Z)` onto a
-/// coarse galactic grid cell (width `REGION_CELL`, the SAME units chart
-/// positions carry) and hash the CELL — never the exact position — into a
+/// **GALACTIC-1 — the regional seed.** Quantize a charted `(X,Y,Z)` onto a
+/// coarse galactic grid cell (width `REGION_CELL`, the same units chart
+/// positions carry) and hash the cell — never the exact position — into a
 /// 32-byte regional weighting seed. Two worlds in the same cell always
-/// derive the SAME seed; a world one cell over derives a DIFFERENT one
+/// derive the same seed; a world one cell over derives a different one
 /// entirely (no interpolation, no smoothing — a genuine grid, the
 /// "topological map of resources spread across systems" the design calls
 /// for). `World::prospect_as` folds this alongside the founding digest, so
@@ -1086,10 +1086,10 @@ pub fn orbit_endowment(band: Option<crate::thermal::SubstrateBand>) -> Vec<(Reso
 
 /// Top-up orb banks to each absolute target (never strips). Shared by
 /// live deeds and replay (`StarCommissioned`).
-/// STAR-ENDOW-1 — the top-up DELTAS a kit yields against a standing
+/// STAR-ENDOW-1 — the top-up deltas a kit yields against a standing
 /// bank: exactly what [`apply_endowment_top_up`] will move, computed
 /// pure so the emitter, replay, and the kernel's conservation gate all
-/// read ONE home (call-not-copy; never strips spent banks).
+/// read one home (call-not-copy; never strips spent banks).
 pub fn endowment_top_up_deltas(
     orb: &ColonyOrb,
     kit: &[(Resource, Ratio)],
@@ -1123,10 +1123,10 @@ pub fn heating_per_zone() -> Ratio {
 }
 
 /// P2 (`21_KERNEL_PARAMETERS` §2): the per-elapsed-tick decay rate on
-/// un-vaulted BANKED joules/sink, settled by receipt at touch.
+/// un-vaulted banked joules/sink, settled by receipt at touch.
 ///
-/// EPOCHED (`cfe::epoch`). EPOCH 0 is the flat `1/32` every existing
-/// receipt was written under; EPOCH 1 reads standing supply, so the
+/// Epoched (`cfe::epoch`). Epoch 0 is the flat `1/32` every existing
+/// receipt was written under; epoch 1 reads standing supply, so the
 /// sink stiffens as the economy accumulates instead of holding still
 /// while issuance grows.
 pub fn demurrage_per_tick(supply: &Ratio, at: u64) -> Ratio {
@@ -1136,13 +1136,13 @@ pub fn demurrage_per_tick(supply: &Ratio, at: u64) -> Ratio {
     }
 }
 
-/// EPOCH 0 — the landed flat rate. **Never edit this function.** Every
+/// Epoch 0 — the landed flat rate. **Never edit this function.** Every
 /// receipt stamped before `epoch::CONTINUOUS_FROM` is gated by it.
 fn sink_flat() -> Ratio {
     ratio(1, 32) // SEALED-RATE: epoch-0 law — editing rewrites history
 }
 
-/// EPOCH 1 — the sink reads standing supply.
+/// Epoch 1 — the sink reads standing supply.
 ///
 /// ```text
 /// excess = max(0, supply − SINK_REFERENCE)
@@ -1157,7 +1157,7 @@ fn sink_flat() -> Ratio {
 ///
 /// **Bounded above by `1/4`** (#16 requires a bounded function; an
 /// uncapped rate above `1` would confiscate a whole bank each tick),
-/// and still FLAT in the holding — supply moves the RATE, never the
+/// and still flat in the holding — supply moves the rate, never the
 /// shape of the decay (the 2^1100 denominator lesson).
 fn sink_by_supply(supply: &Ratio) -> Ratio {
     let reference = ratio(SINK_REFERENCE, 1);
@@ -1199,11 +1199,11 @@ pub fn bond_notice_window() -> u64 {
 /// clamped to [1/4, 4]. The empty book is not a credential (full
 /// collateral until history exists); the ceiling is the guardrail-6
 /// law made literal: a zero-fidelity orb pays the maximum and is
-/// NEVER barred.
+/// never barred.
 pub fn collateral_required(fulfilled: &Ratio, breached: &Ratio, quota: &Ratio) -> Ratio {
     let one = ratio(1, 1);
     let multiplier = (breached.clone() + one.clone()) / (fulfilled.clone() + one);
-    // The clamp IS the fourfold band — one home (P2).
+    // The clamp is the fourfold band — one home (P2).
     let (low, high) = crate::vocabulary::fourfold_band();
     let clamped = multiplier.max(low).min(high);
     quota.clone() * clamped
@@ -1211,7 +1211,7 @@ pub fn collateral_required(fulfilled: &Ratio, breached: &Ratio, quota: &Ratio) -
 
 /// IDEO-1 (09 §3.2, placeholder): the ideological friction rate φ —
 /// `ΔS_ideo = φ × abs(reciprocity_A − reciprocity_B) × volume` per
-/// cross-orb transfer. Friction prices DIVERGENCE, not vice: aligned
+/// cross-orb transfer. Friction prices divergence, not vice: aligned
 /// partners (any alignment) pay exactly zero.
 pub fn friction_rate() -> Ratio {
     crate::parameter::Parameter::FrictionRate.seed()
@@ -1228,43 +1228,43 @@ pub fn veil_toll() -> Ratio {
 }
 
 /// KERNEL-TAXON (15 §2 / 37): class-vocabulary ceiling.
-/// **RAISED 7 → 13 (2026-08-08)** — six balance tiers. Codes 1..=13;
+/// **Raised 7 → 13 (2026-08-08)** — six balance tiers. Codes 1..=13;
 /// 0 lawful-unclassed. Raise by amendment (still u8 headroom to 255).
 pub fn class_ceiling() -> u8 {
     crate::almanac::taxon_table::class_ceiling()
 }
 
 /// KERNEL-TAXON (15 §3 / 37): clade-vocabulary ceiling — **u16, open**.
-/// **RAISED to 345 (2026-08-08)** — 25 expansion taxons × 13 class tiers
+/// **Raised to 345 (2026-08-08)** — 25 expansion taxons × 13 class tiers
 /// + 20 legacy. No u8 wire cap; further growth is a constant raise.
 pub fn clade_ceiling() -> u16 {
     crate::almanac::taxon_table::clade_ceiling()
 }
 
-/// **THE ARCHETYPE SIGILS** (operator ruling 2026-08-05: *sigil is
+/// **The ARCHETYPE sigils** (operator ruling 2026-08-05: *sigil is
 /// allowed because it is essentially a rune or symbol with a definition,
 /// and each archetype needs a sigil as well as the vocabulary*).
 ///
 /// One glyph per class of `15_TAXON` §2, each chosen to state the
-/// class's MECHANISM rather than to decorate it. A sigil here is exactly
+/// class's mechanism rather than to decorate it. A sigil here is exactly
 /// what the ruling says it is: a symbol that carries a definition, in
 /// the same sense as `cfe::query::Sigil` (the frame-invariant canonical
 /// form) and the registry's line identifier. Three uses of one honest
 /// word — a mark that stands for a defined thing.
 ///
-/// Compiled, never filed: the class partition is a DEFINITION, and
-/// definitions compile (`conductor::polities`, THE DEFINITION LAW).
+/// Compiled, never filed: the class partition is a definition, and
+/// definitions compile (`conductor::polities`, the definition law).
 pub fn archetype_sigil(class: u8) -> &'static str {
     crate::almanac::taxon_table::archetype_sigil(class)
 }
 
-/// The class WORD for a code — the vocabulary the sigil marks.
+/// The class word for a code — the vocabulary the sigil marks.
 ///
 /// **`etherial-field` is renamed `plasma-field` (2026-08-05).** "Ether"
 /// names the luminiferous aether, a medium nineteenth-century physics
 /// proposed and Michelson–Morley measured out of existence. It is not
 /// mysticism, which is why it survived earlier sweeps — it is worse for
-/// this document's purposes: DISCREDITED PHYSICS carried in the class
+/// this document's purposes: discredited physics carried in the class
 /// vocabulary of an engine whose Article III admits only observables.
 /// The mechanism is a plasma: current sheets, magnetohydrodynamics, the
 /// `plasmic` metabolism the axis vocabulary already carries.
@@ -1272,9 +1272,9 @@ pub fn archetype_word(class: u8) -> &'static str {
     crate::almanac::taxon_table::archetype_word(class)
 }
 
-/// **THE LINE WORD-TABLES** — the compiled base vocabulary a minted
+/// **The LINE word-tables** — the compiled base vocabulary a minted
 /// civilization draws from (the standing ruling: the engine mints its
-/// peoples). Sized against the ratified taxon vocabulary so EVERY
+/// peoples). Sized against the ratified taxon vocabulary so every
 /// class has words and every disposition × perception has a motto —
 /// totality pinned, not assumed. The minted-vocabulary system (tag 96)
 /// extends these by deed; this is the base it extends.
@@ -1305,7 +1305,7 @@ const MOTTO_ENDS: [[&str; 4]; 4] = [
 
 /// One minted line, whole — everything the registry card needs, drawn
 /// from a digest. **No station field, structurally**: a draw mints a
-/// PEOPLE (the common, lawful state); office enters only by the
+/// people (the common, lawful state); office enters only by the
 /// receipted seat deed (tag 89). A draw that manufactured office would
 /// mint authority from a hash.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -1320,26 +1320,26 @@ pub struct LineDraw {
     pub perception: u8,
 }
 
-/// **LINE SYNTHESIS** — a civilization drawn from a digest: pure,
-/// total, deterministic (CHARTER §9 — the caller seeds from the
-/// chronicle, never a clock). Lawful BY CONSTRUCTION: every axis is
+/// **LINE synthesis** — a civilization drawn from a digest: pure,
+/// total, deterministic (Charter §9 — the caller seeds from the
+/// chronicle, never a clock). Lawful by construction: every axis is
 /// drawn modulo its closed vocabulary and every taxon code modulo its
 /// ratified ceiling, so there is nothing left to check after.
 pub fn line_synthesis(digest: &[u8; 32]) -> LineDraw {
     // The sealed pre-amendment derivation: compiled ceilings. Old
-    // LineMinted receipts (ceilings: None) re-derive through THIS,
+    // LineMinted receipts (ceilings: None) re-derive through this,
     // forever.
     line_synthesis_at(digest, class_ceiling(), clade_ceiling())
 }
 
-/// **THE FOLD-AWARE DRAW** (operator ruling 2026-08-06): the same
-/// synthesis, under the vocabulary ceilings the CALLER proves — the
+/// **The fold-aware draw** (operator ruling 2026-08-06): the same
+/// synthesis, under the vocabulary ceilings the caller proves — the
 /// fold's at the mint stamp, so a minted class or clade is drawable
 /// the moment its receipt stands. Pure and total; a zero ceiling is
 /// lifted to one so the modulus is defined (the seed vocabularies are
 /// never empty).
 ///
-/// RECORDED DEBT: a draw wearing a MINTED class carries the right CODE
+/// Recorded debt: a draw wearing a minted class carries the right code
 /// but its species word renders through the compiled table's fallback
 /// ("unknown") — resolving the fold's own word needs the chronicle at
 /// the render, which is the reader's seam, not this pure function's.
@@ -1380,29 +1380,29 @@ pub fn line_synthesis_at(digest: &[u8; 32], class_ceiling: u8, clade_ceiling: u1
     }
 }
 
-/// **THE POSTAL METER** (CONVEY, 2026-08-06): what carrying one unit
+/// **The postal meter** (convey, 2026-08-06): what carrying one unit
 /// through the post costs — postage = rate × amount, exact, linear,
 /// never compounding. Iron, like the survey's stakes: stamps are
 /// struck metal. A placeholder dial ruled at balance, and the gate
-/// verifies a conveyance's declared postage by calling THIS rule.
+/// verifies a conveyance's declared postage by calling this rule.
 pub fn postal_meter() -> (Resource, Ratio) {
     (Resource::Iron, ratio(1, 16))
 }
 
-/// **THE POSTAGE ON A CONVEYANCE** — the meter's rate on the amount, landed
+/// **The postage on A conveyance** — the meter's rate on the amount, landed
 /// on the resource ledger's 1/1024 grain (#138: every fill smelts at its
-/// carrier). The ONE reading both the live convey and the kernel's gate
+/// carrier). The one reading both the live convey and the kernel's gate
 /// call, so the postage cannot be charged one way and verified another.
 /// Measured in G2: `1/16 × 2547/512` banked iron at `/8192`, off the grain.
 pub fn postage(amount: &Ratio) -> Ratio {
     crate::world::smelt_resource(&(postal_meter().1 * amount.clone()))
 }
 
-/// **THE SURVEY METER** (E5b, 2026-08-05: *surveys must be metered*).
-/// The sealed charging rule: what one survey costs, PER ORB COVERED —
+/// **The survey meter** (E5b, 2026-08-05: *surveys must be metered*).
+/// The sealed charging rule: what one survey costs, per orb covered —
 /// `cost = rate × volume`, exact, flat, never compounding (the 2^1100
 /// lesson binds charging exactly as it binds decay). The gate verifies
-/// a survey's declared cost by calling THIS rule (call-not-copy), so
+/// a survey's declared cost by calling this rule (call-not-copy), so
 /// the meter cannot be quoted one way and charged another.
 ///
 /// Iron is the carrier — survey stakes driven into ground — and the
@@ -1415,8 +1415,8 @@ pub fn survey_meter() -> (Resource, Ratio) {
 /// One parcel of a surveyed orb — the deed's unit of distribution
 /// (E5b: *parcel breaks open into free/monetary values*).
 ///
-/// THEOREM (exact break): `free + monetary == 1` of the parcel's whole,
-/// BY CONSTRUCTION — the two are drawn as `k/12` and `(12−k)/12` from
+/// Theorem (exact break): `free + monetary == 1` of the parcel's whole,
+/// by construction — the two are drawn as `k/12` and `(12−k)/12` from
 /// one byte of the derivation digest, so no residue is truncated and
 /// no residue is invented. What a break leaves over is the carry the
 /// interest law accrues on (the residual carry law), and it is exact.
@@ -1430,7 +1430,7 @@ pub struct Parcel {
     pub monetary: Ratio,
 }
 
-/// **PARCELS DERIVE; THEY ARE NEVER STORED** (survey is a derivation of
+/// **Parcels derive; they are never stored** (survey is a derivation of
 /// observation). Pure and total over the survey receipt's seed and the
 /// orbs it covered: the same receipt yields the same parcels forever,
 /// and an orb the survey did not cover has no parcel — deriving one
@@ -1454,10 +1454,10 @@ pub fn parcels_of(seed: &[u8; 32], covered: &[u64]) -> Vec<Parcel> {
         .collect()
 }
 
-/// **THE APPRAISABLE SUBJECT — one law, every scale** (operator ruling
+/// **The appraisable subject — one law, every scale** (operator ruling
 /// 2026-08-06: *planetary → estate → building → dwelling*; extended
 /// 2026-08-07: *orbital place + prospected stratum* — 35_ORBIT_DYNAMO).
-/// A DWELLING is a `Building` whose zone is `Habitat`.
+/// A dwelling is a `Building` whose zone is `Habitat`.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Holding {
     /// The surveyed whole — valued through its parcels.
@@ -1533,19 +1533,19 @@ pub fn orbital_site_premium(orbit_r: &Ratio, star_magnetism: u8) -> Ratio {
 /// Prospect richness row for pure appraisal (orb, stratum, richness).
 pub type ProspectRow = (u64, u8, Ratio);
 
-/// **THE VALUATION RULE — sealed, pure, one dispatch** (T2/T3 of the
+/// **The valuation RULE — sealed, pure, one dispatch** (T2/T3 of the
 /// appraisal). Value derives from surveyed content and nothing else:
 ///
 ///   Building   Σ its kind's sealed build cost × commensurate weight
 ///   Planetary  Σ banked × weight  +  Σ its buildings' values
 ///   Orbital    planetary + site premium (must be sited)
 ///   Stratum    prospect richness × iron weight (must be prospected)
-///   Estate     Σ planetary(orb) × the parcel's MONETARY portion —
-///              the appraisal is what DENOMINATES the parcel break
+///   Estate     Σ planetary(orb) × the parcel's monetary portion —
+///              the appraisal is what denominates the parcel break
 ///
 /// `None` off the estate: a zone that does not stand, an orb that does
 /// not exist, an empty parcel set — absence is never a zero. The gate
-/// re-derives an appraisal by calling THIS rule (call-not-copy), so a
+/// re-derives an appraisal by calling this rule (call-not-copy), so a
 /// value cannot be quoted one way and receipted another.
 pub fn appraised_value(
     holding: &Holding,
@@ -1641,10 +1641,10 @@ pub fn scan_draw() -> Ratio {
 }
 
 /// G2 (04 §1.2): the ration law — the resource filling the FOOD slot
-/// in every flow, keyed by the SEALED metabolism (biotic is the
+/// in every flow, keyed by the sealed metabolism (biotic is the
 /// ruleset-v1 default). Mineral eats iron; plasmic eats joules — and
 /// the fiat law binds (05 §1.2, 01 §6.1): joules enter only by
-/// encasement, so plasmic agriculture IS the thermal loop.
+/// encasement, so plasmic agriculture is the thermal loop.
 pub fn metabolic_ration(metabolism: u8) -> Resource {
     match metabolism {
         1 => Resource::Iron,
@@ -1654,7 +1654,7 @@ pub fn metabolic_ration(metabolism: u8) -> Resource {
 }
 
 
-/// **WHAT A LEVY DRAWS ON** (`49_TAXATION` §1) — the base a tax is levied
+/// **What A levy draws on** (`49_TAXATION` §1) — the base a tax is levied
 /// against.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum LevyBase {
@@ -1668,7 +1668,7 @@ pub enum LevyBase {
     Trade,
 }
 
-/// **WHEN A LEVY FIRES** (`49_TAXATION` §1).
+/// **When A levy fires** (`49_TAXATION` §1).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum LevyTrigger {
     /// At the settle touch, beside demurrage/rejuvenation.
@@ -1679,7 +1679,7 @@ pub enum LevyTrigger {
     Treaty,
 }
 
-/// **WHERE A LEVY FLOWS** (`49_TAXATION` §1).
+/// **Where A levy flows** (`49_TAXATION` §1).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum LevySink {
     /// To the seated authority (a receipted transfer).
@@ -1690,8 +1690,8 @@ pub enum LevySink {
     Counterparty,
 }
 
-/// **A LEVY** (`49_TAXATION` §1) — a crafted tax as data: what it draws,
-/// when, where it flows. The RATE rides the minted binding
+/// **A levy** (`49_TAXATION` §1) — a crafted tax as data: what it draws,
+/// when, where it flows. The rate rides the minted binding
 /// (progenitor-crafted, `Axis::Levy`); base/trigger/sink name the levy. The
 /// two seeded levies are the continuity tax and the estate tax (§3–4).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -1702,13 +1702,13 @@ pub struct Levy {
 }
 
 impl Levy {
-    /// THE CONTINUITY TAX (§3) — unconfirmed knowledge lapses each turnover.
+    /// The CONTINUITY tax (§3) — unconfirmed knowledge lapses each turnover.
     pub const CONTINUITY: Levy = Levy {
         base: LevyBase::Knowledge,
         trigger: LevyTrigger::Turnover,
         sink: LevySink::Void,
     };
-    /// THE ESTATE TAX (§4) — the estate is taxed to the sovereign at each
+    /// The ESTATE tax (§4) — the estate is taxed to the sovereign at each
     /// generational handover.
     pub const ESTATE: Levy = Levy {
         base: LevyBase::Estate,
@@ -1717,11 +1717,11 @@ impl Levy {
     };
 }
 
-/// **THE CASTES** (`44_LINEAGES` §2d) — the specialized roles a population
-/// differentiates into. NOT a fixed set: a caste IS a disposition-role, so
+/// **The castes** (`44_LINEAGES` §2d) — the specialized roles a population
+/// differentiates into. Not a fixed set: a caste is a disposition-role, so
 /// the castes of a line are exactly its disposition axis's values —
 /// three seeded, more the moment a disposition is minted. `caste_split`
-/// keys the partition by disposition CODE (open), and this enum is only the
+/// keys the partition by disposition code (open), and this enum is only the
 /// convenience NAME for the three seeded roles; a minted disposition gets
 /// its own caste bucket with no variant here. Each maps to its disposition
 /// code, so an expansionist line is mostly Labour, an empiricist mostly
@@ -1754,14 +1754,14 @@ impl Caste {
     }
 }
 
-/// **THE LEISURE INVARIANT (`43_DISTRIBUTION` §3, ruled 2026-08-13).**
-/// The recreation good a line SAVOURS once its calories are met — the
+/// **The leisure invariant (`43_DISTRIBUTION` §3, ruled 2026-08-13).**
+/// The recreation good a line savours once its calories are met — the
 /// second demand tier a granary unlocks. Minted like a ration
 /// (species-specific: a stone-being's leisure ≠ a plasmoid's), drawn
 /// from the REFINED/luxury resources (never a new closed carrier): a
 /// mineral line savours worked alloy, a biotic line gems, a plasmic line
-/// resonance. FIRST-CUT map — the exact goods are a §9.2 balance ruling;
-/// the LAW is that leisure follows the clade, as food does.
+/// resonance. First-cut map — the exact goods are a §9.2 balance ruling;
+/// the law is that leisure follows the clade, as food does.
 pub fn metabolic_leisure(metabolism: u8) -> Resource {
     match metabolism {
         1 => Resource::Alloy,   // a mineral line savours worked metal
@@ -1770,14 +1770,14 @@ pub fn metabolic_leisure(metabolism: u8) -> Resource {
     }
 }
 
-/// **RCP-2 F2 — THE ROLE→RESOURCE PROJECTION (transitional).** An emergent
-/// recipe delivers a universal ROLE (`morphogen::FOOD … SINK`). Until the
+/// **RCP-2 F2 — the role→resource projection (transitional).** An emergent
+/// recipe delivers a universal role (`morphogen::FOOD … SINK`). Until the
 /// roles are first-class bankable stocks, the yield lands in the species'
 /// resource for that role, reusing the projections the economy already
 /// speaks — food follows the clade (`metabolic_ration`), energy is joules
 /// (the universal thermal stock), cognition follows the clade's savoured
 /// luxury (`metabolic_leisure`, the leisure-follows-the-clade law COG runs
-/// on). `None` is an HONEST HOLE: a role with no species-neutral bankable
+/// on). `None` is an honest hole: a role with no species-neutral bankable
 /// home yet — STRUCT would reintroduce the iron singularity the ONT arc
 /// dissolved, and SINK absorbs rather than yields — so a recipe in it builds
 /// and yields nothing until the role economy lands first-class.
@@ -1792,7 +1792,7 @@ pub fn role_resource(role: usize, metabolism: u8) -> Option<Resource> {
 
 /// G2: the habitat's harvest under the sealed metabolism — what the
 /// line farms. Biotic farms biomass (v1 verbatim); mineral farms
-/// iron; plasmic farms NOTHING (rate 0 — its food is captured heat,
+/// iron; plasmic farms nothing (rate 0 — its food is captured heat,
 /// never a yield line).
 pub fn metabolic_harvest(metabolism: u8) -> (Resource, Ratio) {
     match metabolism {
@@ -1802,10 +1802,10 @@ pub fn metabolic_harvest(metabolism: u8) -> (Resource, Ratio) {
     }
 }
 
-/// **THE FOOD SLOT'S CARRIER (G2 element hook, ruled 2026-08-12).** A
+/// **The FOOD slot's carrier (G2 element hook, ruled 2026-08-12).** A
 /// ration is what fills the FOOD slot in a flow. For the three compiled
 /// metabolisms it is one of the closed [`Resource`] carriers; for a
-/// MINTED element-eating metabolism it is a periodic-table element id.
+/// minted element-eating metabolism it is a periodic-table element id.
 /// The element rides its own metabolism's minted vocabulary entry
 /// (`vocabulary::Entry::ration`), not a new deed — so who may declare a
 /// stone-eating line is exactly who may mint any vocabulary (the T0
@@ -1819,7 +1819,7 @@ pub enum Ration {
 }
 
 /// G2: the ration a metabolism eats, element-aware. `element` is the
-/// fold-resolved ration of THIS metabolism's vocabulary entry
+/// fold-resolved ration of this metabolism's vocabulary entry
 /// (`Entry::ration`); where it is `Some`, the line is an element-eater
 /// and every other reading (the compiled `metabolic_ration` code map)
 /// is bypassed. Where `None`, the compiled ruleset stands verbatim, so
@@ -1831,7 +1831,7 @@ pub fn metabolic_ration_of(metabolism: u8, element: Option<[u8; 32]>) -> Ration 
     }
 }
 
-/// G2: the habitat's harvest, element-aware. An element-eater FARMS its
+/// G2: the habitat's harvest, element-aware. An element-eater farms its
 /// own element at the biotic rate (1/tick) — a stone-eating line grows
 /// its stone the way a biotic line grows biomass. Where no element is
 /// declared, the compiled harvest stands verbatim.
@@ -1846,12 +1846,12 @@ pub fn metabolic_harvest_of(metabolism: u8, element: Option<[u8; 32]>) -> (Ratio
 }
 
 /// G2: one zone's yield under the sealed metabolism — the habitat's
-/// biomass line is the FARM slot and reads the line's harvest; every
+/// biomass line is the farm slot and reads the line's harvest; every
 /// other yield is extraction or conversion and never substitutes.
 pub fn zone_yield(kind: ZoneKind, metabolism: u8) -> (Resource, Ratio) {
     match (kind, kind.yield_per_tick()) {
         (ZoneKind::Habitat, (Resource::Biomass, _)) => metabolic_harvest(metabolism),
-        // REGEN-1: the regenerator restores the line's OWN ration —
+        // REGEN-1: the regenerator restores the line's own ration —
         // the harvest map's resource at the extractor's rate.
         (ZoneKind::Regenerator, (_, rate)) => {
             let (ration, _) = metabolic_harvest(metabolism);
@@ -1875,7 +1875,7 @@ pub fn zone_upkeep(kind: ZoneKind, metabolism: u8) -> Vec<(Resource, Ratio)> {
         .collect()
 }
 
-/// G2: one zone's BUILD cost under the sealed metabolism — the exact
+/// G2: one zone's build cost under the sealed metabolism — the exact
 /// substitution rule `zone_upkeep`/`zone_yield` already carry, applied
 /// to `kind.cost()`: every `Biomass` line is the FOOD slot (the
 /// founding-ration price every metabolism can meet once, `31 §3`) and
@@ -1886,11 +1886,11 @@ pub fn zone_upkeep(kind: ZoneKind, metabolism: u8) -> Vec<(Resource, Ratio)> {
 /// `Granary`) already resolve to a `Habitat`/`Encasement` bill inside
 /// `cost()` itself, so one substitution pass here covers them too.
 ///
-/// **Gated on the metabolism's own harvest RATE, not just its
+/// **Gated on the metabolism's own harvest rate, not just its
 /// resource.** Plasmic's ration is Joule at rate 0 — "food is
 /// captured heat, never a yield line" — and Joules never enter the
 /// founding kit (the fiat law: joules enter only by encasement). A
-/// plain resource swap would price a plasmic line's FIRST Habitat in
+/// plain resource swap would price a plasmic line's first Habitat in
 /// a resource it structurally cannot hold yet, deadlocking every
 /// plasmic founding before an Encasement could ever be raised to earn
 /// one. Rate 0 is already this codebase's "opt out of this ration
@@ -1909,12 +1909,12 @@ pub fn zone_cost(kind: ZoneKind, metabolism: u8) -> Vec<(Resource, Ratio)> {
 
 /// G3 (04 §1.3, §4; NS-2 §4, placeholder table): the fraction of
 /// structure surviving a cross-frame read — exact rationals, symmetric
-/// in v1 (the loss prices the DISTANCE between frames). Same basis 1;
+/// in v1 (the loss prices the distance between frames). Same basis 1;
 /// the 04 §4 example verbatim (harmonic through a planar eye: 3/4);
 /// umbral reads by occlusion and keeps 1/2 of any other frame; basis
 /// 0 (unsealed) carries no frame claim and reads whole. The loss is
-/// SHOWN, never silent — and never keys a bucket: frames quotient out
-/// of the sigil (the H¹ class IS what survives translation).
+/// shown, never silent — and never keys a bucket: frames quotient out
+/// of the sigil (the H¹ class is what survives translation).
 pub fn translation_survival(ours: u8, theirs: u8) -> Ratio {
     match (ours, theirs) {
         (0, _) | (_, 0) => ratio(1, 1),
@@ -1937,7 +1937,7 @@ pub struct Prospect {
 
 /// ELEMENT-GRAMMAR-1 (14 §4, placeholder weights): the abundance
 /// arbor — integer weights per (StarClass, family); families 1 light ·
-/// 2 heavy · 3 volatile · 4 noble. A zero weight NEVER yields (the
+/// 2 heavy · 3 volatile · 4 noble. A zero weight never yields (the
 /// arbor law, measured). Values are placeholder parameters; the
 /// operator tunes at balance.
 fn spine_bands(class: crate::thermal::StarClass) -> [u32; 4] {
@@ -1953,7 +1953,7 @@ fn spine_bands(class: crate::thermal::StarClass) -> [u32; 4] {
 }
 
 /// ELEMENT-GRAMMAR-1 (14 §2): properties read from the identity hash
-/// by exact modular arithmetic (CHARTER §9 — the draw is a reading of
+/// by exact modular arithmetic (Charter §9 — the draw is a reading of
 /// the seed, never an oracle): family by arbor band, tier 1–3,
 /// richness = the family's base over the tier.
 pub fn element_properties(
@@ -1982,12 +1982,12 @@ pub fn element_properties(
     (family, tier, richness)
 }
 
-/// **ONT-2 — THE DERIVED VEIN RICHNESS, the one home.** The verb reads it,
-/// the kernel re-derives it; both call HERE (the one-function discipline
+/// **ONT-2 — the derived vein richness, the one home.** The verb reads it,
+/// the kernel re-derives it; both call here (the one-function discipline
 /// that replaced the collapsing `vein_wear` recurrence).
 ///
 /// A vein is not a stored number that drains and refills. Its richness is a
-/// PROJECTION of the immutable geometry minus the exact ledger it has
+/// projection of the immutable geometry minus the exact ledger it has
 /// yielded: `richness = natural − extracted`, floored at zero. `natural` is
 /// the hash-derived endowment ([`element_properties`], a reading of where the
 /// element sits in the star's spine) and never moves; `extracted` is the
@@ -1997,17 +1997,17 @@ pub fn element_properties(
 /// structurally impossible, not patched.
 pub fn vein_richness(natural: &Ratio, extracted: &Ratio, rejuvenated: &Ratio) -> Ratio {
     // ONT-3: richness is `natural − (extracted − rejuvenated)` — the endowment
-    // minus NET extraction, two bounded monotone integrals. While `rejuvenated`
+    // minus net extraction, two bounded monotone integrals. While `rejuvenated`
     // is zero (no rejuvenation settle has fired) this is byte-identical to the
     // ONT-2 `natural − extracted`.
     crate::almanac::rejuvenated_richness(natural, extracted, rejuvenated)
 }
 
-/// **ONT-2 — THE EXTRACTION FLOW at an assay.** What a draw over `elapsed`
+/// **ONT-2 — the extraction flow at an assay.** What a draw over `elapsed`
 /// beats takes from a vein at the given (derived) `richness`:
-/// `richness × natural × elapsed`, an exact-rational GEOMETRIC DECAY (the
+/// `richness × natural × elapsed`, an exact-rational geometric decay (the
 /// vein yields logarithmically less as it depletes, an algebraic `e^{−λt}`),
-/// CAPPED at the remaining richness so the extraction integral never crosses
+/// capped at the remaining richness so the extraction integral never crosses
 /// the endowment (`extracted ≤ natural`, richness ≥ 0 — a theorem, not a
 /// clamped afterthought). Because the flow is `richness · natural · int` — a
 /// product, never a division — the sum it feeds carries a denominator bounded
@@ -2017,7 +2017,7 @@ pub fn vein_flow(richness: &Ratio, natural: &Ratio, elapsed: u64) -> Ratio {
 }
 
 /// The element's name — the naming law (10 §2 law 4) applied to
-/// matter: the family fixes the FORM, the hash draws the voice.
+/// matter: the family fixes the form, the hash draws the voice.
 pub fn element_name(family: u8, element: &[u8; 32]) -> String {
     let form = match family {
         1 => "lode",
@@ -2033,7 +2033,7 @@ pub fn element_name(family: u8, element: &[u8; 32]) -> String {
     format!("{voice} {form}")
 }
 
-/// **REFINE-1 — THE REFINED IDENTITY** (31_ELEMENT_COMMERCE §3).
+/// **REFINE-1 — the refined IDENTITY** (31_ELEMENT_COMMERCE §3).
 /// Content-addressed from the raw element; the gate re-derives by
 /// calling the same function (call-not-copy). One home for emitter
 /// and admits.
@@ -2042,7 +2042,7 @@ pub fn refined_identity(raw: &[u8; 32]) -> [u8; 32] {
     hasher.update(b"netstratum.element.refine.v1");
     hasher.update(raw);
     let mut refined: [u8; 32] = *hasher.finalize().as_bytes();
-    // Refinement PURIFIES — it never transmutes depth. The refined
+    // Refinement purifies — it never transmutes depth. The refined
     // identity inherits the raw's LINE axis (byte 3), so a people that
     // can work a vein can always work what it refines into; every
     // other axis re-draws from the content hash.
@@ -2050,7 +2050,7 @@ pub fn refined_identity(raw: &[u8; 32]) -> [u8; 32] {
     refined
 }
 
-/// **REFINE-1 — THE RECIPE** (14 §5 / 31 §3): spend and yield DERIVE
+/// **REFINE-1 — the recipe** (14 §5 / 31 §3): spend and yield derive
 /// from the raw element's tier via the standing refinement law
 /// (`refinement_input` / `refinement_yield`) — no new dial. The
 /// refined identity is content-addressed. Gate re-derives both.
@@ -2065,17 +2065,17 @@ pub fn refine_recipe(
     (spend, refined, yielded)
 }
 
-/// **A DISPOSITION TRAIT** (`44_LINEAGES`) — a named behavioural capability
+/// **A DISPOSITION trait** (`44_LINEAGES`) — a named behavioural capability
 /// a disposition carries. Formerly these were scattered as inline
 /// `disposition == N` checks across the instrument, tick, and dark-pull
-/// subsystems, so a MINTED disposition could inherit none of them. Here they
-/// are DATA in one table, read generically (`World::disposition_carries`),
+/// subsystems, so a minted disposition could inherit none of them. Here they
+/// are data in one table, read generically (`World::disposition_carries`),
 /// and a minted disposition inherits its base's traits.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum DispositionTrait {
     /// Expansionist: an affinity for freight/haulage instruments.
     FreightAffinity,
-    /// Empiricist: a mind that hungers for the NEXT discovery.
+    /// Empiricist: a mind that hungers for the next discovery.
     NoveltyHunger,
     /// Epicurean: the pull to display surplus (a dark-7 vanity).
     VanityDisplay,
@@ -2094,11 +2094,11 @@ pub fn disposition_traits(disposition: u8) -> &'static [DispositionTrait] {
     }
 }
 
-/// **SELF-EMPHASIS OVER AN OPEN SET OF SLOTS** — the shape a disposition
-/// (or any identity axis) takes when it favours its OWN slot: `sitting`
+/// **Self-emphasis over an open set of slots** — the shape a disposition
+/// (or any identity axis) takes when it favours its own slot: `sitting`
 /// holds the majority, the rest split the remainder evenly, summing to 1.
-/// The one balance dial — the 3/5 majority — is written ONCE here instead
-/// of nine times across a fixed table, and the shape opens to ANY number
+/// The one balance dial — the 3/5 majority — is written once here instead
+/// of nine times across a fixed table, and the shape opens to any number
 /// of slots: three seeded dispositions today, four the moment one is
 /// minted, with no code change. Returns `(code, weight)` in `codes` order.
 pub fn self_emphasis(sitting: u8, codes: &[u8]) -> Vec<(u8, Ratio)> {
@@ -2117,7 +2117,7 @@ pub fn self_emphasis(sitting: u8, codes: &[u8]) -> Vec<(u8, Ratio)> {
 
 /// G1 (04 §1.1): the disposition's value weighting over the three v1
 /// counters — territory closures, verified discoveries, consumed yield —
-/// exact rationals summing to 1. Now DERIVED from [`self_emphasis`] over
+/// exact rationals summing to 1. Now derived from [`self_emphasis`] over
 /// the three seeded disposition slots, so the values are unchanged but the
 /// majority lives in one place. The physics never differs; only which
 /// history counts as winning.
@@ -2131,7 +2131,7 @@ pub fn disposition_weights(disposition: u8) -> Option<[Ratio; 3]> {
 
 /// IDEO-1 (09 §2.5): the derived axis reading — syntropic /
 /// (syntropic + entropic), or None when no deed was ever posted. The
-/// ratio DERIVES at read; it is never stored (the syntropy-ratio
+/// ratio derives at read; it is never stored (the syntropy-ratio
 /// precedent).
 pub fn cohesion_ratio(syntropic: &Ratio, entropic: &Ratio) -> Option<Ratio> {
     let denominator = syntropic.clone() + entropic.clone();
@@ -2141,7 +2141,7 @@ pub fn cohesion_ratio(syntropic: &Ratio, entropic: &Ratio) -> Option<Ratio> {
     }
 }
 
-/// **HOW MANY KINDS THE TABLE COMPILES (#41)** — the last compiled
+/// **How many kinds the table compiles (#41)** — the last compiled
 /// wire code, and so the boundary a minted kind begins past. Counted
 /// from the table by [`ZoneKind::from_wire`] rather than restated, so
 /// landing a ninth compiled kind moves this by itself.
@@ -2153,8 +2153,8 @@ pub const ZONE_KINDS: u8 = {
     code
 };
 
-/// **THE ZONE'S OWN WORD** — the naming law applied to buildings, and
-/// the ONE home for it (#41). The zone axis's seed is built from this,
+/// **The zone's own word** — the naming law applied to buildings, and
+/// the one home for it (#41). The zone axis's seed is built from this,
 /// so a kind's word is vocabulary rather than decoration; the lens and
 /// the CLI read it here instead of keeping copies, which is how the
 /// three spellings that used to exist became one.
@@ -2173,7 +2173,7 @@ pub fn zone_word(kind: ZoneKind) -> &'static str {
         ZoneKind::Granary => "granary",
         ZoneKind::GovernmentOffice => "government-office",
         ZoneKind::WelfareHub => "welfare-hub",
-        // #41: a minted kind's WORD lives in the fold, not the table.
+        // #41: a minted kind's word lives in the fold, not the table.
         // The chronicle names it; this answers only that it is one.
         ZoneKind::Minted(_) => "minted",
     }
@@ -2185,12 +2185,12 @@ pub fn zone_word(kind: ZoneKind) -> &'static str {
 pub enum ZoneKind {
     Extractor = 1,
     Habitat = 2,
-    /// D2 converter (02 §5.2): its upkeep is its INPUT, its yield its
-    /// OUTPUT — conversion is a net flow like every other flow.
+    /// D2 converter (02 §5.2): its upkeep is its input, its yield its
+    /// output — conversion is a net flow like every other flow.
     Smelter = 3,
     Synthesizer = 4,
     /// THERMAL-1 (05 §1.2): the syntropic shell — captures excess heat
-    /// into joules BEFORE anything vents. Its "yield" is computed by
+    /// into joules before anything vents. Its "yield" is computed by
     /// the heat law at tick time, never by `yield_per_tick`.
     Encasement = 5,
     /// SINK-1 (05 §1.4): the cryo-lattice array — captures vault-band
@@ -2201,29 +2201,29 @@ pub enum ZoneKind {
     /// into resonance crystals. One synthesizer feeds one resonator on
     /// the knife edge — diamond nets exactly 0.
     Resonator = 7,
-    /// **REGEN-1 — THE REGENERATOR** (operator directive 2026-08-06):
+    /// **REGEN-1 — the regenerator** (operator directive 2026-08-06):
     /// ecological restoration as infrastructure. What extraction
-    /// takes, regeneration returns: it yields the metabolism's RATION
-    /// resource at the extractor's own rate — every number DERIVES
+    /// takes, regeneration returns: it yields the metabolism's ration
+    /// resource at the extractor's own rate — every number derives
     /// from the standing table, no new dial. Placing one requires the
-    /// DEEPENING crystallized on the orb (condition 3 — the lattice
+    /// deepening crystallized on the orb (condition 3 — the lattice
     /// understood): regeneration is a technology, not a birthright.
     Regenerator = 8,
-    /// **REFINE-1 — THE ELEMENT REFINERY** (31_ELEMENT_COMMERCE §3,
+    /// **REFINE-1 — the element refinery** (31_ELEMENT_COMMERCE §3,
     /// Wave-1 2026-08-07): converts banked raw elements into refined
     /// forms via `refine_as` / tag 107. Resource yield is zero — the
-    /// conversion is the element ledger. DEEPENING (condition 3)
+    /// conversion is the element ledger. Deepening (condition 3)
     /// gates placement, same technology door as the regenerator.
     /// Q-T2: T5 Crucible is advantage only; T3 may refine with the zone.
     ElementRefinery = 9,
-    /// **FLEET-1 — THE SHIP YARD** (33 Phase 3): converts scrap into
+    /// **FLEET-1 — the ship yard** (33 Phase 3): converts scrap into
     /// hulls via `mint_hull`. Resource yield zero. Cost mirrors
     /// smelter iron bill (call-not-copy). Q-F4: yard required to mint.
     ShipYard = 10,
-    /// **PROVISION-1 — THE GRANARY** (`43_DISTRIBUTION` §1, ruled
+    /// **PROVISION-1 — the granary** (`43_DISTRIBUTION` §1, ruled
     /// 2026-08-13): the provisioning node that turns the #40–42
     /// subsistence ledger into an economy. It holds no stock of its own
-    /// (ruled: the depot IS the orb's banked ration); its PRESENCE flips
+    /// (ruled: the depot is the orb's banked ration); its presence flips
     /// the provisioned consumption law on — stratified demand (calories
     /// then a per-clade leisure invariant), a derived stability reading,
     /// and the disposition distribution factors. Resource yield zero; it
@@ -2231,18 +2231,18 @@ pub enum ZoneKind {
     /// whose placement unlocks a law. Buildable freely (no deepening
     /// gate): provisioning is foundational, not a late technology.
     Granary = 11,
-    /// **THE GOVERNMENT OFFICE** (`49_TAXATION` §2, ruled 2026-08-13): the
+    /// **The government office** (`49_TAXATION` §2, ruled 2026-08-13): the
     /// civic collection node. Where one stands, crafted levies collect at
-    /// full efficiency; without one, tax collection SLIPS (evasion/leakage).
+    /// full efficiency; without one, tax collection slips (evasion/leakage).
     /// Infrastructure — no yield of its own, the Granary's bill.
     GovernmentOffice = 12,
-    /// **THE WELFARE HUB** (`49_TAXATION` §2): the public-service
+    /// **The welfare hub** (`49_TAXATION` §2): the public-service
     /// distribution node. It siphons the standing ration reserve into the
     /// population's stability during a stall or famine, buffering the crash
     /// (the welfare→stability loop). Infrastructure — no yield of its own.
     WelfareHub = 13,
-    /// **A MINTED BUILDING (#41)** — the fold code of a zone-axis entry
-    /// past the compiled table. Its economics are its BASE's, modulated
+    /// **A minted building (#41)** — the fold code of a zone-axis entry
+    /// past the compiled table. Its economics are its base's, modulated
     /// by its binding (`vocabulary::zone_base`), so they are read
     /// through the World (which holds the chronicle) and never from the
     /// compiled methods below.
@@ -2382,13 +2382,13 @@ pub fn hull_eta(role: u8, grade: u8) -> Ratio {
 pub fn hull_scrap_cost(role: HullRole, grade: u8) -> Ratio {
     hull_capacity(role.as_wire(), grade)
 }
-/// **THE REFINEMENT LAW** (2026-08-05, on the operator's ruling that
-/// this codebase carries *too many constants — you aren't building
-/// algorithms or theorems, you're building static content*).
+/// **The refinement law** (2026-08-05, on the operator's ruling that
+/// this codebase carried *too many constants — static content was being
+/// built in place of algorithms or theorems*).
 ///
 /// The structural economy was a hand-tuned table. It is not: it is a
-/// LADDER, and the ladder has a law. Every structural resource sits at a
-/// REFINEMENT TIER — how many conversion steps it stands from raw — and
+/// ladder, and the ladder has a law. Every structural resource sits at a
+/// refinement tier — how many conversion steps it stands from raw — and
 /// a converter at tier `t` consumes tier `t−1` and emits tier `t`:
 ///
 /// ```text
@@ -2396,21 +2396,21 @@ pub fn hull_scrap_cost(role: HullRole, grade: u8) -> Ratio {
 ///     yield per tick   =  4^(2−t)          quartering with each step
 /// ```
 ///
-/// **This REPRODUCES the landed table exactly** (pinned in
+/// **This reproduces the landed table exactly** (pinned in
 /// `refinement_pins`), so nothing is repriced by stating it — the
 /// numbers were always this law, written out longhand. The Smelter's
 /// `2 Iron → 1 Alloy` and the Synthesizer's `4 Alloy → 1/4 Diamond` are
 /// the same two formulas at `t = 2` and `t = 3`.
 ///
 /// **Why the two rates differ.** Input doubles and yield quarters, so
-/// the cost per unit of refined output rises by EIGHT per step. That is
+/// the cost per unit of refined output rises by eight per step. That is
 /// the whole reason a refined tier is worth more than what it is made
 /// of, and it is now one number rather than six.
 ///
-/// **AND IT NAMES ITS OWN BOUNDARY.** Only the structural chain
-/// `Iron → Alloy → Diamond` obeys it. Joule, Sink and Crystal are OFF
+/// **And it names its own boundary.** Only the structural chain
+/// `Iron → Alloy → Diamond` obeys it. Joule, Sink and Crystal are off
 /// the chain and have their own laws — the heat law (05 §1.2) mints
-/// joules, the sink law banks cold, and Crystal is the SURVEY currency
+/// joules, the sink law banks cold, and Crystal is the survey currency
 /// rather than a refinement of anything. A law that claimed them would
 /// be overreach, so it declines them by returning `None`.
 pub fn refinement_tier(resource: Resource) -> Option<u32> {
@@ -2421,10 +2421,10 @@ pub fn refinement_tier(resource: Resource) -> Option<u32> {
         Resource::Alloy => Some(2),
         // The ultra-refined tier, from alloy.
         Resource::Diamond => Some(3),
-        // OFF THE CHAIN, each with its own law.
+        // Off the chain, each with its own law.
         Resource::Joule | Resource::Sink | Resource::Crystal => None,
-        // NO CATCH-ALL, deliberately. The match is exhaustive, so a new
-        // resource breaks the build until someone RULES whether it
+        // No catch-ALL, deliberately. The match is exhaustive, so a new
+        // resource breaks the build until someone rules whether it
         // stands on the refinement chain — the `layer_of` discipline,
         // where adding a case fails compilation rather than defaulting
         // into the safest-looking answer.
@@ -2446,9 +2446,9 @@ pub fn refinement_yield(tier: u32) -> Ratio {
 
 
 impl ZoneKind {
-    /// The wire reading, WHOLE: a compiled code names its kind, and
-    /// anything past the table is a MINTED kind carrying its own fold
-    /// code (#41). Validity of a minted code is the FOLD's business,
+    /// The wire reading, whole: a compiled code names its kind, and
+    /// anything past the table is a minted kind carrying its own fold
+    /// code (#41). Validity of a minted code is the fold's business,
     /// exactly as a practice's is — the wire only says which entry is
     /// meant.
     pub fn from_wire(code: u8) -> Option<Self> {
@@ -2486,7 +2486,7 @@ impl ZoneKind {
         !matches!(self, Self::Minted(_))
     }
 
-    /// **THE COMPILED TABLE ONLY** — and it must stay that way:
+    /// **The compiled table only** — and it must stay that way:
     /// [`ZONE_KINDS`] counts the table by walking this until it
     /// answers `None`, so a version that admitted minted codes would
     /// never terminate. One match, two callers; the codes are never
@@ -2529,15 +2529,15 @@ impl ZoneKind {
                 (Resource::Alloy, ratio(10, 1)),
                 (Resource::Diamond, ratio(5, 1)),
             ],
-            // #41: THE COMPILED TABLE HAS NO ANSWER FOR A MINTED KIND.
+            // #41: the compiled table has no answer for A minted KIND.
             // Its economics are its base's, modulated by its binding,
-            // and the base lives in the FOLD — so the authority is
+            // and the base lives in the fold — so the authority is
             // `World::zone_economics`, which holds the chronicle. This
             // answers the ground state so the method stays total; a
             // caller reaching a minted kind here has asked the wrong
             // object, and the build gate refuses before that can pay.
             Self::Minted(_) => Vec::new(),
-            // DERIVED: the shell's frame plus a double hearth — the
+            // Derived: the shell's frame plus a double hearth — the
             // restoration engine is built from what the table already
             // prices.
             Self::Regenerator => {
@@ -2554,7 +2554,7 @@ impl ZoneKind {
                 }
                 cost
             }
-            // DERIVED: the habitat's bill. The refinery's feedstock is
+            // Derived: the habitat's bill. The refinery's feedstock is
             // elements (tag 72); pricing it on the smelter's iron line
             // raided the research→industry forge (smelter gate 30 iron)
             // and left mineral pure-NPC lines unable to smelt. Habitat
@@ -2565,10 +2565,10 @@ impl ZoneKind {
             // salvage (measured: smelter cost left founding iron too
             // thin to mint a hauler in the same era).
             Self::ShipYard => Self::Habitat.cost(),
-            // DERIVED: the habitat's bill. A granary is a ration house —
+            // Derived: the habitat's bill. A granary is a ration house —
             // the same founding-ration cost the habitat pays, no new dial.
             Self::Granary => Self::Habitat.cost(),
-            // DERIVED: civic buildings are raised on the founding ration
+            // Derived: civic buildings are raised on the founding ration
             // bill, like the granary — a public work, not a producer.
             Self::GovernmentOffice | Self::WelfareHub => Self::Habitat.cost(),
         }
@@ -2581,7 +2581,7 @@ impl ZoneKind {
         match self {
             Self::Extractor => (Resource::Iron, ratio(3, 2)),
             Self::Habitat => (Resource::Biomass, ratio(1, 1)),
-            // DERIVED (THE REFINEMENT LAW): `4^(2−t)`. These read
+            // Derived (the refinement law): `4^(2−t)`. These read
             // `ratio(1,1)` and `ratio(1,4)` until 2026-08-05, which was
             // the law written out longhand in two places.
             Self::Smelter => (
@@ -2595,8 +2595,8 @@ impl ZoneKind {
             Self::Encasement => (Resource::Joule, ratio(0, 1)),
             Self::CryoArray => (Resource::Sink, ratio(0, 1)),
             Self::Resonator => (Resource::Crystal, ratio(1, 8)),
-            // DERIVED: the ration resource (the habitat's own yield
-            // map) at the EXTRACTOR's rate — what extraction takes,
+            // Derived: the ration resource (the habitat's own yield
+            // map) at the extractor's rate — what extraction takes,
             // regeneration returns.
             Self::Regenerator => {
                 let (ration, _) = Self::Habitat.yield_per_tick();
@@ -2608,7 +2608,7 @@ impl ZoneKind {
             Self::ElementRefinery => (Resource::Iron, ratio(0, 1)),
             Self::ShipYard => (Resource::Iron, ratio(0, 1)),
             // PROVISION-1: the granary produces nothing — it is the
-            // provisioning LAW's unlock, not a yield line. Zero rate.
+            // provisioning law's unlock, not a yield line. Zero rate.
             Self::Granary => (Resource::Biomass, ratio(0, 1)),
             // Civic infrastructure produces no resource — it collects and
             // distributes, it does not farm.
@@ -2625,7 +2625,7 @@ impl ZoneKind {
         match self {
             Self::Extractor => vec![(Resource::Biomass, ratio(1, 2))],
             Self::Habitat => vec![(Resource::Iron, ratio(1, 4))],
-            // DERIVED (THE REFINEMENT LAW): the structural input is
+            // Derived (the refinement law): the structural input is
             // `2^(t−1)` of the tier below. The biomass line is the FOOD
             // slot and rides the ration law, which is a different one.
             Self::Smelter => vec![
@@ -2645,19 +2645,19 @@ impl ZoneKind {
             Self::Encasement => vec![(Resource::Iron, ratio(1, 4))],
             Self::CryoArray => vec![(Resource::Iron, ratio(1, 4))],
             Self::Resonator => vec![(Resource::Diamond, ratio(1, 4))],
-            // DERIVED: the habitat's own life-support line.
+            // Derived: the habitat's own life-support line.
             Self::Regenerator => Self::Habitat.upkeep_per_tick(),
-            // DERIVED: the encasement's iron maintenance — elements are
+            // Derived: the encasement's iron maintenance — elements are
             // the feedstock, so the food slot must not drain biomass.
             // Measured: biomass upkeep kept mineral lines forge-starved
             // forever (smelter needs 10 bio; a bio-upkeep refinery
             // spent the triangle-trade ration before industry could).
             Self::ElementRefinery => Self::Encasement.upkeep_per_tick(),
             Self::ShipYard => Self::Encasement.upkeep_per_tick(),
-            // DERIVED: the habitat's own life-support line — a granary is
+            // Derived: the habitat's own life-support line — a granary is
             // maintained like the ration house it is.
             Self::Granary => Self::Habitat.upkeep_per_tick(),
-            // DERIVED: the habitat's life-support line — a staffed civic office.
+            // Derived: the habitat's life-support line — a staffed civic office.
             Self::GovernmentOffice | Self::WelfareHub => Self::Habitat.upkeep_per_tick(),
             // #41: the ground state — see `cost`.
             Self::Minted(_) => Vec::new(),
@@ -2689,7 +2689,7 @@ impl ZoneKind {
         }
     }
 
-    /// Razing refunds half of EACH cost component (02 §2.4).
+    /// Razing refunds half of each cost component (02 §2.4).
     pub fn raze_refund(&self) -> Vec<(Resource, Ratio)> {
         self.cost()
             .into_iter()
@@ -2706,13 +2706,13 @@ impl ZoneKind {
 pub struct Zone {
     pub tile: u16,
     pub kind: ZoneKind,
-    /// **#41: THE BASE A MINTED BUILDING WAS RAISED ON.** `None` for
+    /// **#41: the base A minted building was raised on.** `None` for
     /// every compiled kind, which is its own base.
     ///
     /// Committed state, and it has to be: the raze refunds half of what
-    /// the build spent, and the gate reads the PRIOR zone to price it.
-    /// A minted kind's base lives in the FOLD, which `admits` cannot
-    /// read — so the base is FIXED at build time, judged then, and read
+    /// the build spent, and the gate reads the prior zone to price it.
+    /// A minted kind's base lives in the fold, which `admits` cannot
+    /// read — so the base is fixed at build time, judged then, and read
     /// from committed state ever after. Wire: a trailing byte on the
     /// zone's own record (SEAL A — old readers stop at the kind).
     pub base: Option<ZoneKind>,
@@ -2723,7 +2723,7 @@ impl Zone {
     pub fn compiled(tile: u16, kind: ZoneKind) -> Zone {
         Zone { tile, kind, base: None }
     }
-    /// **WHAT THIS ZONE COSTS AND REFUNDS** — the base's numbers where
+    /// **What this zone costs and refunds** — the base's numbers where
     /// one was raised, its own where it is compiled. One home for both
     /// the emitter and the gate, so a build and its raze cannot price
     /// the same building differently.
@@ -2740,16 +2740,16 @@ pub enum ClosureEvent {
     /// account. The kind is content-addressed over the normalized name,
     /// so re-declaring an existing book is not a second book.
     BookMinted { orb_id: u64, kind: BookKind, name: String },
-    /// BOOK-1 — a DUAL entry: both sides of one account, together.
+    /// BOOK-1 — a dual entry: both sides of one account, together.
     /// There is no single-sided posting deed, by construction.
     BookPosted { orb_id: u64, kind: BookKind, kept: Ratio, lost: Ratio },
-    /// BOOK-1 — an account closed to WRITING. It keeps every entry it
+    /// BOOK-1 — an account closed to writing. It keeps every entry it
     /// took and stays readable forever (19_LENS §16c).
     BookArchived { orb_id: u64, kind: BookKind },
     /// LIT-1 — a literate line declares a work it reaches for. Proves
     /// nothing; costs nothing but the receipt.
     WorkAspired { orb_id: u64, work: WorkId, name: String },
-    /// LIT-1 — the line CLAIMS the work and cites chain receipts for
+    /// LIT-1 — the line claims the work and cites chain receipts for
     /// it. The witnesses are receipt digests; an unwitnessed claim
     /// cannot be made.
     WorkClaimed { orb_id: u64, work: WorkId, witnesses: Vec<[u8; 32]> },
@@ -2758,7 +2758,7 @@ pub enum ClosureEvent {
         orb_id: u64,
         tile: u16,
         kind: ZoneKind,
-        /// #41: the compiled kind this build was PRICED against — the
+        /// #41: the compiled kind this build was priced against — the
         /// base a minted kind modulates. `None` for a compiled kind,
         /// which is its own base. The gate reads it because `admits`
         /// judges from committed state and cannot resolve the fold.
@@ -2775,10 +2775,10 @@ pub enum ClosureEvent {
     /// A zone demolished for half its cost back.
     ZoneRazed { orb_id: u64, tile: u16 },
     /// D3 (02 §2.5) — the star's terrain charted: the seed its tile
-    /// classes derive from, pure and forever. The OPT-IN deed (the
+    /// classes derive from, pure and forever. The opt-in deed (the
     /// THERMAL-1 precedent): a star without this receipt reads all
-    /// Standard; the seed is the FOUNDING receipt's digest
-    /// (chronicle-seeded, CHARTER §9 — no wall clock, no dice).
+    /// Standard; the seed is the founding receipt's digest
+    /// (chronicle-seeded, Charter §9 — no wall clock, no dice).
     WorldCharted { seed: [u8; 32] },
     /// N3 — an entity joined this internet: principal 0 = a sovereign
     /// operator; nonzero = an agent contained by that principal.
@@ -2788,18 +2788,18 @@ pub enum ClosureEvent {
     /// N3 — a grant revoked; the agent's next such action refuses.
     ScopeRevoked { agent: u64, scope: crate::ipsal::Scope },
     /// P1 — a charted colony charted on a new planet: the founding
-    /// reserves MOVE from the source orb's bank (conservation — a
+    /// reserves move from the source orb's bank (conservation — a
     /// charter mints nothing).
     ColonyCharted { orb_id: u64, source_orb: u64, name: String },
     /// CONVERGE-1 (07 §1) — an archived world adopted onto the one
     /// timeline: its era, name, terminal digest, and epoch offset.
-    /// Lives ONLY in the universe ledger (`convergence.tlv`), never in
+    /// Lives only in the universe ledger (`convergence.tlv`), never in
     /// a world chronicle; world replay ignores it.
     EraAnnexed { era: String, world: String, terminal: [u8; 32], offset: u64 },
     /// GALAXY-1 (13_GALAXY §3–§4) — the observation deed: a crossing
-    /// anchored past the frontier (wrapped-L1 to EVERY charted center
-    /// exceeding its reach — a far region, never an outside) CREATES
-    /// the galaxy it observes. Lives ONLY in the universe ledger
+    /// anchored past the frontier (wrapped-L1 to every charted center
+    /// exceeding its reach — a far region, never an outside) creates
+    /// the galaxy it observes. Lives only in the universe ledger
     /// (`convergence.tlv`), never in a world chronicle; world replay
     /// ignores it.
     GalaxyObserved {
@@ -2822,8 +2822,8 @@ pub enum ClosureEvent {
     /// orbit radius r, the orb's terms in the equilibrium baseline.
     ///
     /// Extended 2026-08-02 with `theta` (longitude) and `psi`
-    /// (inclination), each a fraction of a TURN, `[0, 1) ⊂ ℚ`. Both are
-    /// ADDITIVE-TRAILING on tag 25: the decoder reads three fields and a
+    /// (inclination), each a fraction of a turn, `[0, 1) ⊂ ℚ`. Both are
+    /// additive-trailing on tag 25: the decoder reads three fields and a
     /// receipt without the rest yields `None`, so no rehash and no new
     /// tag. (`0x41` was proposed and is RETIRED under Charter §11 —
     /// `recurrence_guard` fails the build on reuse.)
@@ -2841,30 +2841,30 @@ pub enum ClosureEvent {
     /// SINK-1 (Q2) — receipted demurrage: un-vaulted banked stores
     /// decayed since last touch; settled here, never silently.
     ///
-    /// SEALED (2026-08-06): new touches emit [`Self::DemurrageTouched`]
+    /// Sealed (2026-08-06): new touches emit [`Self::DemurrageTouched`]
     /// — the per-row form judged each row against a prior the previous
     /// row had already anchored, so a dual-resource touch's second row
     /// always read elapsed 0 (the demurrage seam). Old receipts stay
     /// decodable and replayable forever.
     DemurrageSettled { orb_id: u64, resource: Resource, amount: Ratio },
-    /// SINK-1 (tag 102, the demurrage seam closed 2026-08-06) — **ONE
-    /// TOUCH, ONE RECEIPT**: every resource the touch settles rides
+    /// SINK-1 (tag 102, the demurrage seam closed 2026-08-06) — **one
+    /// TOUCH, one receipt**: every resource the touch settles rides
     /// together, because the TOUCH is the deed and the anchor moves
     /// once. The judge reads the whole settlement against the anchor
     /// that stood before it — the per-row order sensitivity that
     /// refused lawful second rows is unrepresentable here.
     DemurrageTouched { orb_id: u64, decays: Vec<(Resource, Ratio)> },
-    /// **P2 (tag 103) — A BALANCE PLACEHOLDER CHARTERED**: the value
+    /// **P2 (tag 103) — A balance placeholder chartered**: the value
     /// the named parameter holds from this receipt on, for this world.
     /// The fold reads seed ∪ charters (`crate::parameter::of`); the
     /// band is proven at the door (`crate::parameter::Chartered` — the
     /// fourfold band of the seed, anchored so charters cannot walk);
-    /// WHO may charter is the T0 standing gate, the mint's own law.
+    /// who may charter is the T0 standing gate, the mint's own law.
     ParameterChartered { key: u8, value: Ratio },
-    /// **TREATIES (tag 105, #42) — THE POLITICAL SPECTRUM.** One
+    /// **Treaties (tag 105, #42) — the political spectrum.** One
     /// world's leg of a co-signed pairwise charter: the kind is the
     /// politics (trade · defense · peace · war), the terms bind the
-    /// PAIR channels, and `term` is how long it stands (0 = until
+    /// pair channels, and `term` is how long it stands (0 = until
     /// broken, the bond's shape). Both books carry their own leg, the
     /// aperture's deal-id pattern — neither world owns the pact.
     TreatySealed {
@@ -2874,14 +2874,14 @@ pub enum ClosureEvent {
         terms: Vec<(u8, Ratio)>,
         term: u64,
     },
-    /// **TREATIES (tag 106, #42)** — a standing pact ENDS. `broken`
+    /// **Treaties (tag 106, #42)** — a standing pact ends. `broken`
     /// separates the two ways: a pact struck down by the partner's
-    /// contrary pact (peace over war, war over peace) is BROKEN and
+    /// contrary pact (peace over war, war over peace) is broken and
     /// posts against whoever did it; one renounced by its own holder
     /// is not.
     TreatyStruck { deal: u64, partner: String, broken: bool },
-    /// **TREATIES (tag 165, E3.9) — THE ELEMENT ALLOW-LIST.** An annex
-    /// to a STANDING TRADE PACT (same deal, same partner): while any
+    /// **Treaties (tag 165, E3.9) — the element allow-list.** An annex
+    /// to a standing trade pact (same deal, same partner): while any
     /// live list stands on a pair, element crossings between them
     /// refuse ids outside the union of every live list — enumerated
     /// matter only. No list ⇒ open matter flows unfenced (today's
@@ -2894,12 +2894,12 @@ pub enum ClosureEvent {
         elements: Vec<[u8; 32]>,
     },
     /// **NOVELTY-GATE (tag 166, 38_COGNITION_CONVERGENCE §4)** — a line
-    /// mints a solver WORD into its own library: `orbit` is the word's
+    /// mints a solver word into its own library: `orbit` is the word's
     /// action fingerprint (a re-spelling can never re-mint), `expansion`
-    /// is the word spelled in the ONE program wire form (opaque here —
+    /// is the word spelled in the one program wire form (opaque here —
     /// the solver owns the encoding, the opaque-payload law), and
     /// `cited` are the three distinct task digests that confirmed it
-    /// (the rung ladder's own promote count). The library is a FOLD of
+    /// (the rung ladder's own promote count). The library is a fold of
     /// these receipts — no committed field, no codec run; certificates
     /// always carry the expansion, so tag 86's wire never moves.
     SolverWordMinted {
@@ -2907,14 +2907,14 @@ pub enum ClosureEvent {
         expansion: Vec<u8>,
         cited: Vec<[u8; 32]>,
     },
-    /// **CROSS-LINE CONSILIENCE (tag 177, 38 §5)** — the shared knowledge
-    /// no single line owns. When INDEPENDENT lines resolve their own
-    /// knowledge-maps to the SAME crystallized invariant (`signature`),
-    /// that agreement is a MEASUREMENT, not a reconciled copy: the
+    /// **Cross-LINE consilience (tag 177, 38 §5)** — the shared knowledge
+    /// no single line owns. When independent lines resolve their own
+    /// knowledge-maps to the same crystallized invariant (`signature`),
+    /// that agreement is a measurement, not a reconciled copy: the
     /// one-truth amendment bars reconciling copies, never observing that
     /// two independent derivations landed on one structure (the same law
     /// the solver mint's three-distinct-tasks runs on). Each converged
-    /// line records its OWN participation on its OWN chain — one leg per
+    /// line records its own participation on its own chain — one leg per
     /// book, as a lane does. `mass` is the effort share (how many lines
     /// reached it); `hardness` the diversity bridged (how differently the
     /// converged lines are built — a truth two unlike lines share is
@@ -2924,14 +2924,14 @@ pub enum ClosureEvent {
         mass: u32,
         hardness: u32,
     },
-    /// **THE KNOWLEDGE MARKET (tag 178, INTELLIGENCE ARC C)** — a line
-    /// LICENSES a word it lacks from the roster's minted pool: its own
+    /// **The knowledge market (tag 178, intelligence ARC C)** — a line
+    /// licenses a word it lacks from the roster's minted pool: its own
     /// library gains the word (the fold reads this receipt beside
-    /// `SolverWordMinted`), so knowledge CIRCULATES, not just matter.
+    /// `SolverWordMinted`), so knowledge circulates, not just matter.
     /// `orbit` is the word's action fingerprint, `expansion` the program
     /// it spells (the certificate's form), `cited` the tasks that
     /// confirmed it at its origin. Banked-neutral: the word is identity
-    /// vocabulary, never matter — this FIRST cut gates acquisition on the
+    /// vocabulary, never matter — this first cut gates acquisition on the
     /// buyer's own prosperity (Crystal standing) rather than moving a
     /// payment; the conserved buyer→seller settlement is the two-sided
     /// follow-up.
@@ -2940,12 +2940,12 @@ pub enum ClosureEvent {
         expansion: Vec<u8>,
         cited: Vec<[u8; 32]>,
     },
-    /// **ELEMENT-CHEMISTRY (tag 104, #37) — MATTER BONDS.** The
+    /// **ELEMENT-CHEMISTRY (tag 104, #37) — MATTER bonds.** The
     /// almanac's first consumer: a set of banked elements whose lanes
-    /// saturate bonds into a GEM, each member spending its lane's
+    /// saturate bonds into a gem, each member spending its lane's
     /// valence and the gem carrying away exactly the sum.
     ///
-    /// The receipt names only the ORB, the MEMBERS and the GEM.
+    /// The receipt names only the orb, the members and the gem.
     /// Everything else — what each member spends, what the gem yields,
     /// the knowledge won — re-derives from
     /// [`crate::almanac::recipe_of`] over the members alone, so the
@@ -2965,7 +2965,7 @@ pub enum ClosureEvent {
         spent: Ratio,
         yielded: Ratio,
     },
-    /// TRADE-1 (09 §2.1) — BANKED value moved orb-to-orb within one
+    /// TRADE-1 (09 §2.1) — banked value moved orb-to-orb within one
     /// world: the chartering conservation law generalized (nothing
     /// minted, nothing lost). The cohesion-book postings derive from
     /// this receipt and the counterparty's receipted crisis state — a
@@ -2985,7 +2985,7 @@ pub enum ClosureEvent {
     /// `rate` of `resource` per tick to target; `term` in ticks, 0 =
     /// open-ended. One bond per (source, target, resource).
     BondSealed { source_orb: u64, target_orb: u64, resource: Resource, rate: Ratio, term: u64 },
-    /// BOND-1 — a bond's accumulated span settled by ONE receipt at
+    /// BOND-1 — a bond's accumulated span settled by one receipt at
     /// the touch (collect / sever / term expiry). `severed` ends the
     /// bond; `load` is the severance posting (zero for an orderly
     /// end). Its own tag — a bond settle must stay distinguishable
@@ -3033,13 +3033,13 @@ pub enum ClosureEvent {
     /// mover's vented ledger at its collect (the VentSettled shape):
     /// real entropy, the handling cost of divergent boundary policies.
     FrictionSettled { orb_id: u64, amount: Ratio },
-    /// WANT-1 (12_UNION §5b) — a COGNITIVE want strikes: a famine of
-    /// the mind, derived from the chronicle and the SEALED identity
+    /// WANT-1 (12_UNION §5b) — a cognitive want strikes: a famine of
+    /// the mind, derived from the chronicle and the sealed identity
     /// (G1 — the entity type is the receipted axes, never the registry
     /// cache). Kinds: 1 epistemological (truth-starvation — reading
     /// reserved to the board/lens side), 2 resonance (isolation — a
     /// harmonic mind starved of links), 3 novelty (stagnation — an
-    /// empiricist mind starved of signal; crystallization HALTS while
+    /// empiricist mind starved of signal; crystallization halts while
     /// struck, so relief arrives by licensed leap — the co-op pressure
     /// by design). `reading` is the measured drought, in ticks.
     WantStruck { orb_id: u64, kind: u8, reading: Ratio },
@@ -3056,86 +3056,86 @@ pub enum ClosureEvent {
     },
     /// E3.7 (tag 164) — material want relieved (assay/bank fed the vein).
     ElementWantRelieved { orb_id: u64, element: [u8; 32] },
-    /// **PROVISION (41_PROVISION §3, tag 167)** — the population settled
-    /// at a touch: the NET change to the elastic population (the clone
+    /// **Provision (41_PROVISION §3, tag 167)** — the population settled
+    /// at a touch: the net change to the elastic population (the clone
     /// count, ruling R5) over the beats since the last touch — births
     /// from a fed surplus net of the species' mortality, or deaths from
     /// starvation and turnover combined (R7b). Population is a logistic,
     /// not a ledger — it is not conserved — so the receipt carries the
     /// net and replay applies it straight (saturating at zero).
     PopulationSettled { orb_id: u64, delta: i64 },
-    /// **THE FRACTIONAL POPULATION REMAINDER (41_PROVISION, COG Slice 2,
+    /// **The fractional population remainder (41_PROVISION, COG Slice 2,
     /// tag 179)** — the exact-rational carry in `[0, 1)` the integer
     /// headcount cannot hold. The logistic (`population_touch_delta`) yields
-    /// an EXACT growth each touch; a small band's births are a fraction of a
+    /// an exact growth each touch; a small band's births are a fraction of a
     /// person, which `PopulationSettled` (integer) would truncate to zero,
     /// freezing every founding band forever. This receipt carries the
     /// remainder that survives the truncation: births accrue here until they
     /// cross a whole person, then promote to the headcount. Absolute (the
     /// new remainder, not a delta), so replay sets it straight.
     PopulationAccrued { orb_id: u64, remainder: Ratio },
-    /// **TAXATION (49_TAXATION §5, tag 171)** — the SOVEREIGN TREASURY
-    /// settled by a net change: crafted levies collected INTO the
-    /// treasury (positive) net of a welfare budget spent OUT of it
+    /// **Taxation (49_TAXATION §5, tag 171)** — the SOVEREIGN treasury
+    /// settled by a net change: crafted levies collected into the
+    /// treasury (positive) net of a welfare budget spent out of it
     /// (negative). The treasury is an abstract fiscal reserve — a
     /// store, not a conserved Resource (like the population, it is not
     /// a ledger line under conservation) — so the receipt carries the
-    /// NET and replay applies it straight, floored at zero: a spend
+    /// net and replay applies it straight, floored at zero: a spend
     /// can empty the treasury but never overdraw it. A world that
     /// never crafts a levy nor stands a WelfareHub emits none, so it
     /// replays byte-identical.
     TreasurySettled { orb_id: u64, delta: Ratio },
-    /// **COG-1 (doc 52 §7, tag 180)** — settle the LEISURE BANK: the net
+    /// **COG-1 (doc 52 §7, tag 180)** — settle the leisure bank: the net
     /// change to an orb's cognition budget (the cascade's surplus above every
     /// survival drive in, the Mind's minting out), floored at zero. A world
     /// with no surplus and no thought emits none, so it replays byte-identical.
     LeisureSettled { orb_id: u64, delta: Ratio },
-    /// **RCP-2 (tag 181, 2026-08-16) — THE EMERGENT RECIPE BUILT.** A
+    /// **RCP-2 (tag 181, 2026-08-16) — the emergent recipe built.** A
     /// society raised a recipe its discovery engine minted: a hashed
-    /// transformation `∏ inputs → role` over the OPEN almanac, NOT a
+    /// transformation `∏ inputs → role` over the open almanac, not a
     /// `ZoneKind` variant (the doing-layer's enum, dissolved). The receipt
     /// carries the recipe whole — the open-almanac `inputs`, the universal
     /// `role` it fills (`morphogen::FOOD … SINK`, the only fixed vocabulary),
     /// and the `yield_of_role` grained onto the melt lattice at synthesis.
-    /// The recipe's `id` is NOT stored: it re-derives as `blake3(inputs ‖
-    /// role ‖ "recipe")` from the fields here, so the built set is a FOLD of
+    /// The recipe's `id` is not stored: it re-derives as `blake3(inputs ‖
+    /// role ‖ "recipe")` from the fields here, so the built set is a fold of
     /// these receipts (`vocabulary::recipes_built`), never a committed field
     /// — the SolverWordMinted discipline. A world that mints no recipe emits
     /// none, so it replays byte-identical.
     RecipeBuilt { orb_id: u64, inputs: Vec<[u8; 32]>, role: usize, yield_of_role: Ratio },
-    /// **ING-2b (tag 182, 2026-08-17) — THE STAPLE FOOD SETTLED ON THE
-    /// ELEMENT LEDGER.** A line whose ration is an almanac ELEMENT — its
+    /// **ING-2b (tag 182, 2026-08-17) — the staple FOOD settled on the
+    /// element ledger.** A line whose ration is an almanac element — its
     /// staple drawn from the planet's own veins ([`crate::world::World::staple_diet_of`],
     /// the 3-`Resource` food enum dissolved) — settles its food at a
     /// collect touch on the element ledger, the exact mirror of the
-    /// Resource food fold (`YieldCollected`): the planet REGROWS the
-    /// staple toward `K` (the rejuvenation logistic — an admitted FREE
-    /// MINT, the star driving primary production, the #28 settle law) and
-    /// the population EATS its span's demand. The receipt carries the NET
+    /// Resource food fold (`YieldCollected`): the planet regrows the
+    /// staple toward `K` (the rejuvenation logistic — an admitted free
+    /// mint, the star driving primary production, the #28 settle law) and
+    /// the population eats its span's demand. The receipt carries the net
     /// `delta = regrown − eaten` for the one `element`; replay banks
     /// `bank_element(element, delta)`. The headcount rides its own
     /// `PopulationSettled`, exactly as on the Resource path. A
     /// Resource-ration (v1, or unprospected) line settles food through
     /// `YieldCollected` as ever and emits none, so it replays byte-identical.
     RationElementSettled { orb_id: u64, element: [u8; 32], delta: Ratio },
-    /// **ONT-2b — THE DEMAND-DRIVEN STAPLE EXTRACTION (tag 183, the vein is
-    /// the larder).** A population MINES its staple vein by EATING: the food
+    /// **ONT-2b — the demand-driven staple extraction (tag 183, the vein is
+    /// the larder).** A population mines its staple vein by eating: the food
     /// beyond the free wild flow (the span's `bank_draw`) is drawn straight
     /// from the orb's staple vein — `extracted += eaten`, capped at the vein's
     /// remaining richness (`natural − extracted`), lattice-floored so the
     /// extraction integral's denominator stays bounded forever (the ONT-2 law).
     /// A DELTA-0 element move: the mined food goes vein → mouths, never the
-    /// bank — the grow-your-own mirror of the syntropic wild gather — so the
-    /// element LEDGER holds still and only the vein BOOK advances. Replaces
-    /// both the geometric ground-assay pre-mine AND the `RationElementSettled`
-    /// bank-debit for the staple: the band grows into the FULL vein
+    /// bank — the self-cultivated mirror of the syntropic wild gather — so the
+    /// element ledger holds still and only the vein BOOK advances. Replaces
+    /// both the geometric ground-assay pre-mine and the `RationElementSettled`
+    /// bank-debit for the staple: the band grows into the full vein
     /// (`cultivated_yield` = Σ vein_richness lifts `K_pop`), eats it down, and
     /// as the vein depletes `K_pop` drops → plateau/starve/invent (boom-bust,
     /// operator ruling III). Replay folds the same `extracted += eaten`; the
     /// kernel re-derives the richness bound from geometry + the prior integral.
     /// A Resource-ration (v1, unprospected) line never emits it, byte-identical.
     StapleMined { orb_id: u64, element: [u8; 32], eaten: Ratio },
-    /// **VEIN REJUVENATION (ONT-3, tag 184)** — a worked vein RECOVERS. At a
+    /// **Vein rejuvenation (ONT-3, tag 184)** — a worked vein recovers. At a
     /// collect touch the vein's inverse-receipt integral `rejuvenated` grows by
     /// the orbital-forcing injection: `natural/REGROWTH_GRAIN` per completed
     /// LOCAL YEAR (Keplerian ⌊Δt/P⌋) times `(1 + β₁)` for the orb's recycling
@@ -3146,15 +3146,15 @@ pub enum ClosureEvent {
     /// `rejuvenated += injected`; the kernel re-derives the cap from geometry +
     /// the prior integrals. A whole or never-worked vein emits none.
     VeinRejuvenated { orb_id: u64, element: [u8; 32], injected: Ratio },
-    /// **THE SMELT-SWEEP (#136, ruling B / Directive 2, tag 185)** — the one-time
-    /// migration that floors every element stock to the 1/64 SMELT grain. Historical
-    /// hauls banked element fills UN-smelted (before ruling B extended the SMELT to
+    /// **The SMELT-SWEEP (#136, ruling B / Directive 2, tag 185)** — the one-time
+    /// migration that floors every element stock to the 1/64 smelt grain. Historical
+    /// hauls banked element fills UN-smelted (before ruling B extended the smelt to
     /// the element aperture), so a resumed chronicle re-explodes stocks to ~700-bit
     /// denominators every boot and stalls `mass_of` (96 s/beat, `mass_denom_bits`
-    /// 107 756). This deed floors the whole board ONCE, in the era stream, so
+    /// 107 756). This deed floors the whole board once, in the era stream, so
     /// `replay == committed` holds across the historical eras — replay reproduces
     /// the explosion, then this event floors it, byte-identical. A WORLD-wide move
-    /// (no orb key): the apply arm floors EVERY element stock on every orb and drops
+    /// (no orb key): the apply arm floors every element stock on every orb and drops
     /// any that smelt to zero. Conservation is dust-exact — the `dust` field is the
     /// summed shaving `Σ (amount − smelt(amount))` across the whole world, the
     /// receipt of matter that left the ledger (pre = post + dust, bit-for-bit); it
@@ -3164,19 +3164,19 @@ pub enum ClosureEvent {
     /// board already on the grain emits nothing and a second boot re-floors during
     /// replay and adds no new deed.
     ElementStocksSwept { dust: Ratio },
-    /// **THE RESOURCE SMELT-SWEEP (#138, tag 186)** — the element sweep's twin
-    /// for the BANKED RESOURCE + STAMP ledgers. Cross-world aperture transfers
+    /// **The resource SMELT-SWEEP (#138, tag 186)** — the element sweep's twin
+    /// for the banked resource + STAMP ledgers. Cross-world aperture transfers
     /// bank `amount·(1−melt)` UN-smelted (the melt carries a /67-class logistics
     /// denominator), and each hop compounds it, so a resumed chronicle re-grows
     /// Crystal/Iron/Biomass and STAMP to ~30 000-bit denominators every boot and
     /// the conservation judge grinds them (the beat-1 freeze's resource twin,
-    /// #138). This deed floors every banked resource stock AND every orb's STAMP
-    /// to the 1/64 grain ONCE, in the era stream, so `replay == committed` holds
+    /// #138). This deed floors every banked resource stock and every orb's STAMP
+    /// to the 1/64 grain once, in the era stream, so `replay == committed` holds
     /// across the historical eras — replay reproduces the explosion, then this
     /// event floors it, byte-identical. A WORLD-wide move (no orb key): the apply
     /// arm floors every banked resource on every orb (dropping zeros) and every
     /// stamp balance. Conservation is dust-exact — `dust` is the summed shaving
-    /// `Σ (amount − smelt(amount))` across banks AND stamps, informational only
+    /// `Σ (amount − smelt(amount))` across banks and stamps, informational only
     /// (the apply arm re-floors; it does not read `dust`), the kernel re-derives
     /// the per-resource deltas (`admitted_deltas`) and the stamp delta
     /// (`stamp_move`) from prior. Idempotent + self-terminating: the live emit
@@ -3184,27 +3184,27 @@ pub enum ClosureEvent {
     /// off-grain, so a board already on the grain emits nothing and a second boot
     /// re-floors during replay and adds no new deed.
     ResourceStocksSwept { dust: Ratio },
-    /// **THE BIG BANG (tag 190, docs/58 §3)** — a universe's ORIGIN, the
+    /// **The big bang (tag 190, docs/58 §3)** — a universe's origin, the
     /// first receipt of its universe ledger (`convergence.tlv`): its
     /// topology and span, the digest of the compiled founding roster, and the
-    /// digest of its matter law. The receipt's own hash IS the universe's
+    /// digest of its matter law. The receipt's own hash is the universe's
     /// seed. `over` is `None` for a true first receipt; a universe founded
-    /// before this law is RE-FOUNDED once, late, naming the ledger head it was
+    /// before this law is RE-founded once, late, naming the ledger head it was
     /// written over — honest about the order. Identity only: nothing moves.
     UniverseFounded { topology: String, span: Ratio, roster: [u8; 32], matter: [u8; 32], over: Option<[u8; 32]> },
-    /// **THE CITATION (tag 191, docs/58 §3)** — a world's FIRST receipt names
+    /// **The citation (tag 191, docs/58 §3)** — a world's first receipt names
     /// its universe's Big Bang, so the world's hash chain — its founding
     /// digest and every matter identity derived from it — descends from the
     /// universe's origin. Identity only: nothing moves.
     UniverseCited { universe: [u8; 32] },
-    /// **THE ANCIENT ARISES (tag 192, docs/58 §4)** — read at an era's close
+    /// **The ancient arises (tag 192, docs/58 §4)** — read at an era's close
     /// and sealed on the universe ledger: the living line whose living
-    /// descendant tree is STRICTLY the largest (`tree` of `living` lines). It
+    /// descendant tree is strictly the largest (`tree` of `living` lines). It
     /// holds the universe's reserve, keys and mouth from here (until then the
     /// conductor holds them in trust). By lineage, never by appointment; it
     /// may change hands at a later close. Identity only: nothing moves.
     AncientArose { sigil: String, tree: u64, living: u64 },
-    /// **A SINK REACHES ITS CORE (tag 193, docs/58 §6 ruling 9; the cores
+    /// **A SINK reaches its core (tag 193, docs/58 §6 ruling 9; the cores
     /// design approved 2026-10-08)** — sealed on the universe ledger: what
     /// `world`'s deeds unmade since its last deposit (upkeep burned, famine
     /// draws, build costs embodied, the raze's unrefunded half, fees and
@@ -3213,26 +3213,26 @@ pub enum ClosureEvent {
     /// STAMP. The core's holding is the sum of its deposits (less what it
     /// re-emits). Nothing moves in any world: the debit already happened there.
     CoreDeposited { core: String, world: String, resource: Option<Resource>, amount: Ratio },
-    /// **THE BOUNCE, THE CORE'S SIDE (tag 194; the cores design, slice 2)** —
+    /// **The bounce, the core's side (tag 194; the cores design, slice 2)** —
     /// sealed on the universe ledger: `core` re-emits `amount` of a holding
-    /// it holds into `world`, one pulse a year per holding (netstratum's core
-    /// REFLECTS, operator ruling 2026-10-08). A core holds its deposits less
+    /// it holds into `world`, one pulse a year per holding (Netstratum's core
+    /// reflects, operator ruling 2026-10-08). A core holds its deposits less
     /// its emissions; it never emits what it does not hold.
     CoreEmitted { core: String, world: String, resource: Option<Resource>, amount: Ratio },
-    /// **THE BOUNCE, THE WORLD'S SIDE (tag 195)** — the pulse arrives: `amount`
+    /// **The bounce, the world's side (tag 195)** — the pulse arrives: `amount`
     /// of a holding (`None` = STAMP) credited to `orb_id`'s bank from `core`,
     /// the twin of the universe ledger's `CoreEmitted`. A declared source, the
     /// core's return of what the universe's sinks gave it.
     CoreReturned { orb_id: u64, core: String, resource: Option<Resource>, amount: Ratio },
-    /// **THE DEAD'S LEXICON REACHES ITS CORE (tag 196; the cores design,
+    /// **The dead's lexicon reaches its core (tag 196; the cores design,
     /// slice 3)** — sealed on the universe ledger when a line dies: one of
     /// its words (`orbit`, its program's wire `expansion`) deposited at
-    /// `core`, its galaxy's throat, WITH ITS DERIVATION: `cited`, the proofs
+    /// `core`, its galaxy's throat, with its derivation: `cited`, the proofs
     /// the line minted it on. Each dead line's word is its own claim (never
     /// merged with another line's). A living line adopts it only by
-    /// RECONSTRUCTING it on one of its own tasks (4.4). Identity only.
+    /// reconstructing it on one of its own tasks (4.4). Identity only.
     CoreWordDeposited { core: String, world: String, orbit: [u8; 32], expansion: Vec<u8>, cited: Vec<[u8; 32]> },
-    /// **A TUBE OPENS TO A SUBSTRATUM (tag 197, docs/69)** — sealed on the
+    /// **A tube opens to A substratum (tag 197, docs/69)** — sealed on the
     /// universe ledger when the spacing guild opens an internal tube from
     /// `core`'s throat to a sub-universe: its `origin` (the fleet's final
     /// TUniversal point, the opener's chronicle head and the parent's origin,
@@ -3241,9 +3241,9 @@ pub enum ClosureEvent {
     /// it forges, and the `opener`, the ancient whose guild opened it.
     /// Identity only: nothing in the base universe moves.
     SubstratumOpened { core: String, origin: [u8; 32], parent: [u8; 32], depth: u32, level: u32, opener: String },
-    /// **THE GALACTIC REGION (GALACTIC-1, tag 187)** — a world's charted
+    /// **The galactic region (GALACTIC-1, tag 187)** — a world's charted
     /// `(X,Y,Z)` quantized onto a coarse galactic grid cell and hashed once
-    /// at genesis into a REGIONAL weighting seed. Purely additive: an old
+    /// at genesis into a regional weighting seed. Purely additive: an old
     /// chronicle that never charts a region has `region_seed = None` and
     /// every prospect it already struck stays byte-identical (the receipt
     /// carries the drawn element, replay copies it, never rerolls — see
@@ -3255,7 +3255,7 @@ pub enum ClosureEvent {
     /// once (the `StarCommissioned`/`TaxonSealed` precedent): the position
     /// a system charts at is fixed at founding, never travels.
     RegionCharted { seed: [u8; 32] },
-    /// **COMPOSITION (tag 198, the refactor onto era 1, 2026-10-15)** — the
+    /// **Composition (tag 198, the refactor onto era 1, 2026-10-15)** — the
     /// world's planet composition, its grains by Z, sealed once at founding.
     /// The world's veins are drawn from it as canonical elements
     /// (`almanac::atom::canonical`). Identity: replay moves nothing; the
@@ -3264,8 +3264,8 @@ pub enum ClosureEvent {
     /// **CHRONICLE-COMPACT-1 (tag 188)** — a world folds its history to this
     /// point and commits `folded_hash`, a content hash of its `Committed`
     /// state at the moment of closing, plus `receipt_count`, how many
-    /// receipts (including this one) stand in the chronicle so far. SCHEMA
-    /// ONLY at this landing: `replay` records it and moves on (a no-op
+    /// receipts (including this one) stand in the chronicle so far. Schema
+    /// only at this landing: `replay` records it and moves on (a no-op
     /// beyond bookkeeping) — nothing prunes, nothing verifies against it
     /// yet. The load-bearing use (a checkpoint-aware `replay` that trusts a
     /// verified `folded_hash` and skips straight to the post-checkpoint
@@ -3273,16 +3273,16 @@ pub enum ClosureEvent {
     /// without breaking SEAL B) is CHRONICLE-COMPACT-3. Landed additively
     /// and non-breaking on purpose: every existing chronicle (none of which
     /// carries this receipt) replays byte-identical to today, and this
-    /// receipt itself only ever ADDS information, never removes any.
+    /// receipt itself only ever adds information, never removes any.
     ChronicleCheckpointed { folded_hash: [u8; 32], receipt_count: u64 },
-    /// **ENTITY-ALIGN-1 (tag 189, docs/56 §3)** — a SEPARATE receipt from
+    /// **ENTITY-ALIGN-1 (tag 189, docs/56 §3)** — a separate receipt from
     /// the `SolverWordMinted` it accompanies, closed right after that mint
     /// succeeds, never a field bolted onto it: `SolverWordMinted.expansion`
     /// is opaque-to-end on the wire (`value.get(at..)?.to_vec()`, no length
     /// prefix), so there is no safe trailing slot, and reshaping tag 166's
     /// payload would break "one tag, one meaning, forever" outright.
-    /// `hardness` is the count of DISTINCT knowledge-readings among the
-    /// vessels that confirmed `orbit` — the SAME algorithm
+    /// `hardness` is the count of distinct knowledge-readings among the
+    /// vessels that confirmed `orbit` — the same algorithm
     /// `solver::consilience` already uses for cross-LINE agreement
     /// (`orders.dedup().len()`), read at vessel scope instead: two vessels
     /// whose grown basins hold exactly the same crystal classes bridge
@@ -3291,9 +3291,9 @@ pub enum ClosureEvent {
     /// only — nothing yet reads or spends this field; the mint gate
     /// (`cited.len() >= 2`) is untouched.
     SolverWordHardness { orbit: [u8; 32], hardness: u32 },
-    /// **TAXATION (49_TAXATION §3, tag 172)** — the CONTINUITY levy at a
+    /// **Taxation (49_TAXATION §3, tag 172)** — the CONTINUITY levy at a
     /// generation turnover: `count` of the line's most-recently adopted
-    /// practices LAPSE to the void (its unconfirmed knowledge, unkept as
+    /// practices lapse to the void (its unconfirmed knowledge, unkept as
     /// the generation turns). A short-lived line loses all of them each
     /// turnover and must re-adopt; a long-lived one keeps most. The
     /// receipt carries the count; replay drops that many from the tail of
@@ -3301,8 +3301,8 @@ pub enum ClosureEvent {
     /// line that adopts no practice, or has sealed no lifespan class,
     /// emits none and is byte-identical.
     PracticesLapsed { count: u8 },
-    /// **BIO QUARANTINE RELIEF (task #30, ruling R3, tag 168)** — a
-    /// quarantined orb RECOVERS a step at the touch: its bio-pressure
+    /// **BIO quarantine relief (task #30, ruling R3, tag 168)** — a
+    /// quarantined orb recovers a step at the touch: its bio-pressure
     /// (both the cascade and the rogue axes) ebbs by one, the mirror of
     /// the `+1` each explosion accrues. When a maxed axis falls below the
     /// quarantine threshold the world's apertures reopen. The receipt
@@ -3310,12 +3310,12 @@ pub enum ClosureEvent {
     /// exactly as the settle did. A world that never quarantines emits
     /// none and is byte-identical.
     PressureEbbed { orb_id: u64 },
-    /// **G2 ELEMENT ECONOMY (task #29, tag 173)** — the element-eater's
-    /// food cycle at the collect touch. It SPENDS `joule` to MINT `minted`
-    /// of its `element` (a conserved TRANSMUTATION, energy in / matter
+    /// **G2 element economy (task #29, tag 173)** — the element-eater's
+    /// food cycle at the collect touch. It spends `joule` to mint `minted`
+    /// of its `element` (a conserved transmutation, energy in / matter
     /// out; the kernel bounds `minted ≤ joule × richness`, the element's
     /// own natural flow — a rarer element yields less per joule and costs
-    /// more energy), and its zones EAT `eaten` of the same element running
+    /// more energy), and its zones eat `eaten` of the same element running
     /// the span. The net change to the larder is `minted − eaten`: in
     /// steady state the line farms exactly what it ate and holds its
     /// buffer; starved of joule it eats into the buffer and freezes. A
@@ -3327,7 +3327,7 @@ pub enum ClosureEvent {
         minted: Ratio,
         eaten: Ratio,
     },
-    /// **THE UNIVERSAL TRACE-CONSUMPTION VENT** (G2 trace elements,
+    /// **The universal trace-consumption vent** (G2 trace elements,
     /// ruled 2026-08-14, tag 175) — the thermodynamic cost of substrate
     /// maintenance every populated line pays, whatever its clade. At the
     /// settle touch a population debits `amount` of `element` (a trace
@@ -3343,10 +3343,10 @@ pub enum ClosureEvent {
         element: [u8; 32],
         amount: Ratio,
     },
-    /// **STELLAR NUCLEOSYNTHESIS ON STAR DEATH** (task #27, ruled
-    /// 2026-08-14, tag 176) — when a star ages into a REMNANT (a
+    /// **Stellar nucleosynthesis on star death** (task #27, ruled
+    /// 2026-08-14, tag 176) — when a star ages into a remnant (a
     /// collapsed/exploded end-state, the heavy end of the class spine),
-    /// its death forges heavy elements and SCATTERS them: every sited orb
+    /// its death forges heavy elements and scatters them: every sited orb
     /// gains an enrichment vein of `element` (family drawn from the
     /// remnant's own periodic spine, so a heavier remnant seeds heavier
     /// matter) at `richness`, at a reserved stellar `stratum` above the
@@ -3360,7 +3360,7 @@ pub enum ClosureEvent {
         element: [u8; 32],
         richness: Ratio,
     },
-    /// **THE FAILURE STATE** (`50_WIN_CONDITIONS`, operator ruling
+    /// **The failure STATE** (`50_WIN_CONDITIONS`, operator ruling
     /// 2026-08-13, tag 174): *"there is no win state — there is a
     /// failure state — otherwise the game should just continue in
     /// perpetuity."* Fires once, when the genesis orb's population
@@ -3378,10 +3378,10 @@ pub enum ClosureEvent {
     /// flag, never consulted by any game rule — the world's own
     /// mechanics are blind to it).
     HandoffSealed { from: u64, to: u64 },
-    /// MARKET-1 / E-MKT-1 — an OFFER posts: this orb stands ready to
-    /// GIVE `give_amount` of `give` cargo for `want_amount` of `want`
-    /// cargo. Cargo is Resource or Element (31 §4). The price IS the
-    /// ratio; the offer RESTS until a crossing clears it. No escrow.
+    /// MARKET-1 / E-MKT-1 — an offer posts: this orb stands ready to
+    /// give `give_amount` of `give` cargo for `want_amount` of `want`
+    /// cargo. Cargo is Resource or Element (31 §4). The price is the
+    /// ratio; the offer rests until a crossing clears it. No escrow.
     OfferPosted {
         offer: u64,
         orb_id: u64,
@@ -3395,46 +3395,46 @@ pub enum ClosureEvent {
     /// deal+1 — the two directions); this receipt closes the resting
     /// intent. Replay removes the offer.
     OfferCleared { offer: u64, deal: u64 },
-    /// GAUGE-N (11 §2.1, wired 2026-07-30) — the key at a GRADE: the
+    /// GAUGE-N (11 §2.1, wired 2026-07-30) — the key at a grade: the
     /// fiber is a graded vector of wrapped keys, not one dial, and
-    /// this deed moves (or OPENS — a shift at an unopened grade grows
+    /// this deed moves (or opens — a shift at an unopened grade grows
     /// the key, the tonal dimension the growth law promises) one
     /// plane. Grade 0 is the landed scalar; tag 42 stays its own
     /// grade-0 shorthand forever (tags permanent).
     GaugeShiftedAt { grade: u16, gauge: Ratio },
-    /// AEON-1a (11 §2.1) — the world's KEY moved: its gauge phase G,
+    /// AEON-1a (11 §2.1) — the world's key moved: its gauge phase G,
     /// an exact rational wrapped on the torus fiber. Progression,
     /// elevation (12_UNION §6), and crystallized tech all move in G;
     /// replay takes the receipted value verbatim (already wrapped).
     GaugeShifted { gauge: Ratio },
-    /// AEON-1a (11 §3) — DIVERGENCE: this line cleaved; a peer branch
-    /// (no parent, no child) departs under `branch`, and THIS world's
-    /// own key moves to `gauge` (the cleave IS a key change). The
+    /// AEON-1a (11 §3) — divergence: this line cleaved; a peer branch
+    /// (no parent, no child) departs under `branch`, and this world's
+    /// own key moves to `gauge` (the cleave is a key change). The
     /// branch founds its own chronicle — annex, never merge.
     Diverged { branch: String, gauge: Ratio },
-    /// AEON-1a (11 §3) — CONFLUENCE: this line combined with a bonded
+    /// AEON-1a (11 §3) — confluence: this line combined with a bonded
     /// partner line; the key moves to `gauge` (the interference of
     /// both — the midpoint on the torus). Earned via a sustained bond,
     /// never free; the hybrid's own chronicle founds separately.
     Confluent { partner: String, gauge: Ratio },
-    /// AEON-1a (11 §6) — the star MOVED in its region (mass ×
+    /// AEON-1a (11 §6) — the star moved in its region (mass ×
     /// composition × age): the class steps, luminosity recomputes,
     /// every bound orbit's T_eq⁴ shifts at the next tick. Movement in
     /// a region, never a rung on a track.
     StarAged { class: u8 },
-    /// AEON-1a (11 §5) — the FOLD: the era sealed and rotated into the
+    /// AEON-1a (11 §5) — the fold: the era sealed and rotated into the
     /// archive sequence; the receipt carries the era ordinal and the
-    /// NEW base gauge — the next aeon seats on its own G-sheet, a
+    /// new base gauge — the next aeon seats on its own G-sheet, a
     /// parallel degree of the torus that cannot recur into this one.
     /// Nothing is destroyed; the fold is archival by construction.
     EraFolded { era: u64, gauge: Ratio },
-    /// PLANNER-1 (12_UNION §2, 10 §2.2) — a technology LICENSED out of
+    /// PLANNER-1 (12_UNION §2, 10 §2.2) — a technology licensed out of
     /// this world into another: the planner's issuing deed, the source
     /// leg of a two-world hand-off (the aperture shape — the far world
     /// receipts `TechDiscovered` under the same deal). Bound to an
-    /// OPEN council in this world (`council` — delegation settles
+    /// open council in this world (`council` — delegation settles
     /// inside diplomacy, 12_UNION §7); the solar leap (condition 0) is
-    /// NEVER licensed — the young meet their sun themselves.
+    /// never licensed — the young meet their sun themselves.
     TechLicensed {
         deal: u64,
         from_orb: u64,
@@ -3443,7 +3443,7 @@ pub enum ClosureEvent {
         node: [u8; 32],
         name: String,
     },
-    /// COUNCIL-1 (12_UNION §7) — a COUNCIL seals: a multilateral
+    /// COUNCIL-1 (12_UNION §7) — a council seals: a multilateral
     /// forward among three or more orbs, every member bound alike —
     /// each locks the same collateral against delivering ≥ quota to
     /// fellow members within the window. The group overtakes the
@@ -3460,16 +3460,16 @@ pub enum ClosureEvent {
     /// COUNCIL-1 — one member's reckoning at the council boundary:
     /// `banked` is exactly what returned to this member's bank (its
     /// own collateral if faithful, plus its share of forfeits; a
-    /// breacher amid faithful members banks zero; if EVERY member
+    /// breacher amid faithful members banks zero; if every member
     /// breached, each banks its collateral home — no aggrieved party,
     /// the pact dissolves, the books still post). Replay banks the
     /// carried amount verbatim; the integrity stake reads from the
     /// sealed council.
     CouncilClosed { council: u64, member: u64, fulfilled: bool, banked: Ratio },
     /// TECH-1a (10 §2.2) — a technology node enters the chronicle.
-    /// `condition` 0 is the KERNEL solar leap (12_UNION §5a): a world's
+    /// `condition` 0 is the kernel solar leap (12_UNION §5a): a world's
     /// first thermal opt-in receipts that its people now know their
-    /// sun — the opt-in IS the leap's receipt. Conditions 1–5 are the
+    /// sun — the opt-in is the leap's receipt. Conditions 1–5 are the
     /// crystallized emergent nodes (10 §3, the TECH-1b slice); the
     /// node id is the seeded-synthesis hash (SEAL B — replay
     /// re-derives it), `modifier`/`magnitude` the applied parameter
@@ -3482,17 +3482,17 @@ pub enum ClosureEvent {
         magnitude: Ratio,
         name: String,
     },
-    /// NS-4 APERTURE (BUILD_ORDER §3a) — the SOURCE leg of a cross-world
-    /// value hand-off: banked value LEFT this world's orb for another,
+    /// NS-4 APERTURE (BUILD_ORDER §3a) — the source leg of a cross-world
+    /// value hand-off: banked value left this world's orb for another,
     /// bound to `deal` (the id the destination's `ApertureReceived`
-    /// carries). Conservation is a property of the PAIR, not of this
+    /// carries). Conservation is a property of the pair, not of this
     /// chronicle alone — replay of this world sees only the debit.
     ApertureSent { deal: u64, from_orb: u64, resource: Resource, amount: Ratio },
-    /// NS-4 APERTURE (BUILD_ORDER §3a) — the DESTINATION leg: banked
-    /// value ARRIVED in this world's orb from another, bound to the same
+    /// NS-4 APERTURE (BUILD_ORDER §3a) — the destination leg: banked
+    /// value arrived in this world's orb from another, bound to the same
     /// `deal`. Replay of this world sees only the credit.
     ApertureReceived { deal: u64, to_orb: u64, resource: Resource, amount: Ratio },
-    /// E-APT-1 (tag 108, WAVE-2) — source leg of a cross-world ELEMENT
+    /// E-APT-1 (tag 108, WAVE-2) — source leg of a cross-world element
     /// haul. Open matter (tag 72 ledger) leaves this orb; the pair's
     /// melt is applied on the receive leg. No resource demurrage.
     ElementApertureSent {
@@ -3812,7 +3812,7 @@ pub enum ClosureEvent {
         slash: Ratio,
         richness_after: Ratio,
     },
-    /// CHEM science (tag 156) — isomorphic union of two banked gems.
+    /// Chem science (tag 156) — isomorphic union of two banked gems.
     IsoUnionStruck {
         orb_id: u64,
         a: [u8; 32],
@@ -3820,28 +3820,28 @@ pub enum ClosureEvent {
         product: [u8; 32],
         knowledge: u16,
     },
-    /// CHEM science (tag 157) — recipe/gem sealed into the chemistry catalog.
+    /// Chem science (tag 157) — recipe/gem sealed into the chemistry catalog.
     ChemCataloged {
         orb_id: u64,
         gem: [u8; 32],
         knowledge: u16,
         survival: Ratio,
     },
-    /// CHEM science (tag 158) — dark-7 gravity residual on a bond/union.
+    /// Chem science (tag 158) — dark-7 gravity residual on a bond/union.
     DarkPullStruck {
         orb_id: u64,
         pull: u8,
         weight: Ratio,
         dark_score: Ratio,
     },
-    /// LAB (tag 159) — science discipline seated / elevated (paid crystal).
+    /// Lab (tag 159) — science discipline seated / elevated (paid crystal).
     ScienceSeated {
         orb_id: u64,
         discipline: u8,
         rank: u8,
         fee: Ratio,
     },
-    /// LAB (tag 160) — lab creation with dual ± outcomes; may explode.
+    /// Lab (tag 160) — lab creation with dual ± outcomes; may explode.
     LabCreated {
         orb_id: u64,
         path: u8,
@@ -3852,7 +3852,7 @@ pub enum ClosureEvent {
         hidden_neg: bool,
         fee: Ratio,
     },
-    /// LAB (tag 161) — explosion residual (slash resource).
+    /// Lab (tag 161) — explosion residual (slash resource).
     ScienceExploded {
         orb_id: u64,
         path: u8,
@@ -3860,12 +3860,12 @@ pub enum ClosureEvent {
         resource: u8,
         slash: Ratio,
     },
-    /// LAB (tag 162) — synthetic rogue faction pressure (matrix residual).
+    /// Lab (tag 162) — synthetic rogue faction pressure (matrix residual).
     RogueFactionStruck {
         orb_id: u64,
         pressure: u8,
     },
-    /// N4 (NS-2 §1.5) — the scanner's power draw, the ONE chronicle
+    /// N4 (NS-2 §1.5) — the scanner's power draw, the one chronicle
     /// event of RQP: crystals left the probing orb's bank to hold the
     /// lens open. Deliberately blind to what was asked and what was
     /// seen — query, hit, and refusal never receipt (the lens law).
@@ -3876,7 +3876,7 @@ pub enum ClosureEvent {
     /// kernel; every discovered node stands in the record forever —
     /// the pre-existing is changed, never replaced.
     LineSucceeded { successor: String },
-    /// G1 (04 §1/§5) — the three axes sealed as THE binding copy: from
+    /// G1 (04 §1/§5) — the three axes sealed as the binding copy: from
     /// this receipt on, the registry entry is a cache of receipted
     /// truth and no mechanic reads it where this receipt exists.
     /// Genesis is entry in the bands (04 §6a) — never a tier-0 seat.
@@ -3890,7 +3890,7 @@ pub enum ClosureEvent {
     PracticeReleased { practice: u8 },
     /// ELEMENT-GRAMMAR-1 (14 §3) — the mint deed: an element's
     /// identity read from what the genesis seed always held. The
-    /// receipt CARRIES the hash-derived properties, so replay reads
+    /// receipt carries the hash-derived properties, so replay reads
     /// and never re-rolls. The mint creates identity, never matter.
     ProspectStruck {
         orb_id: u64,
@@ -3902,8 +3902,8 @@ pub enum ClosureEvent {
         name: String,
     },
     /// ELEMENT-GRAMMAR-1 (14 §3) — the extraction closure: richness ×
-    /// elapsed banked in ONE receipt (the bond-settle shape).
-    /// ECO-1 (#40): `richness` is the vein's flow AFTER this deed —
+    /// elapsed banked in one receipt (the bond-settle shape).
+    /// ECO-1 (#40): `richness` is the vein's flow after this deed —
     /// wear from the draw and recovery from the orb's regenerators
     /// settle in the same receipt ([`vein_wear`], the one home).
     /// `None` is the sealed pre-ecology form: richness holds still.
@@ -3918,11 +3918,11 @@ pub enum ClosureEvent {
     /// chronicle never lies; a standing joule toll settles at every
     /// collect.
     VeilDrawn {},
-    /// MASK-1a — the veil ends: by deed (starved 0) or STARVED by an
+    /// MASK-1a — the veil ends: by deed (starved 0) or starved by an
     /// unpayable toll (starved 1), receipted either way.
     VeilLifted { starved: bool },
     /// INCURSION-1a (07 §3.1) — the door: a sealed derelict continued
-    /// live under a woken line. Universe ledger ONLY; world replay
+    /// live under a woken line. Universe ledger only; world replay
     /// ignores it (the EraAnnexed precedent).
     IncursionStruck { era: String, world: String, line: String },
     /// KERNEL-TAXON (15 §4) — class and clade sealed as identity,
@@ -3932,41 +3932,41 @@ pub enum ClosureEvent {
     /// register-side forever.
     /// KERNEL-TAXON — class u8, clade **u16** (open expansion; tag 85).
     TaxonSealed { class: u8, clade: u16 },
-    /// **THE EVOLUTIONARY ARC** (`44_LINEAGES` §2c, tag 169): a line
-    /// ADVANCES along its arc — a gated, earned transformation, not a
+    /// **The evolutionary ARC** (`44_LINEAGES` §2c, tag 169): a line
+    /// advances along its arc — a gated, earned transformation, not a
     /// founding fact. The deed carries the new stage; replay sets it.
     /// A neutral Civilizational-layer deed like `TaxonSealed`: it moves
     /// the line's identity, not the ledger, so it mints and conserves
     /// nothing. Stage lifts the civilization's provisioning capacity
     /// (`population_ceiling`) — an evolved people sustains more.
     EvolutionAdvanced { stage: u8 },
-    /// **THE FOUNDING TITHE** (`#32`, `20_FOUNDING` §3, tag 170): the
+    /// **The founding tithe** (`#32`, `20_FOUNDING` §3, tag 170): the
     /// economy's genesis transaction — a debit of the line's own
     /// metabolic ration (G2, `metabolic_ration`/`metabolic_harvest`,
     /// never a flat iron/biomass amount — the resource and rate are
-    /// the founder's OWN metabolism's), paid to the seat scope covering
+    /// the founder's own metabolism's), paid to the seat scope covering
     /// the founding (`to_seat`: 0 = Elder, planetary; 1 = Ancient,
     /// universal — `47_REGISTRY` §4a). A one-sided debit like
     /// `DemurrageSettled`: the tithe leaves the conserved system rather
     /// than crediting a bank this engine does not yet model per-seat.
     TitheReceipted { orb_id: u64, to_seat: u8, resource: Resource, amount: Ratio },
-    /// **THE VOCABULARY MINT** (tag 90, `28_VOCABULARY` §7,
+    /// **The vocabulary mint** (tag 90, `28_VOCABULARY` §7,
     /// 2026-08-05): a T0 progenitor adds an entry to a vocabulary.
     ///
     /// This is what makes the class, clade, axis and practice tables
-    /// GROWABLE without a coder. The definition law bars a FILE from
-    /// saying what exists; it never barred the CHAIN, because a minting
-    /// is something that HAPPENED and every node replays it identically.
+    /// growable without a coder. The definition law bars a file from
+    /// saying what exists; it never barred the chain, because a minting
+    /// is something that happened and every node replays it identically.
     ///
-    /// `code` is CARRIED AND VERIFIED, never chosen — the lawful value
+    /// `code` is carried and verified, never chosen — the lawful value
     /// is `ceiling(axis) + 1` read from the fold, so two nodes cannot
     /// mint colliding codes and a reader who has not folded the chain
     /// can still see which entry this is.
     ///
-    /// `binding` is the entry's MECHANISM (§4): exact rational factors
+    /// `binding` is the entry's mechanism (§4): exact rational factors
     /// over the closed channel set. Data, not code — no sandbox, no
     /// interpreter, no new capability class. An entry that computes
-    /// nothing is refused, which is `27_EVIDENCE` LAW 8 enforced at the
+    /// nothing is refused, which is `27_EVIDENCE` law 8 enforced at the
     /// door instead of discovered later.
     VocabularyMinted {
         axis: u8,
@@ -3974,14 +3974,14 @@ pub enum ClosureEvent {
         sigil: String,
         word: String,
         binding: Vec<(u8, Ratio)>,
-        /// **THE DECLARED BASE (#41)** — for a ZONE mint, the compiled
+        /// **The declared base (#41)** — for a zone mint, the compiled
         /// kind this entry's binding modulates. `None` on every other
         /// axis, and on a zone mint that leaves the base to be inferred
         /// from its channels (`vocabulary::zone_base`). Rides as a
         /// trailing byte by the additive pattern, so every sealed
         /// pre-zone mint decodes with it absent.
         base: Option<u8>,
-        /// **THE ELEMENT RATION (G2 hook, ruled 2026-08-12)** — for a
+        /// **The element ration (G2 hook, ruled 2026-08-12)** — for a
         /// METABOLISM mint, the periodic element this line eats and
         /// farms; `None` on every other axis and on a compiled-ration
         /// metabolism. Rides as a trailing 32-byte block by the same
@@ -3992,9 +3992,9 @@ pub enum ClosureEvent {
         /// decodes with both absent, byte-exact.
         ration: Option<[u8; 32]>,
     },
-    /// THE VERTICAL AXIS (tag 89, 2026-08-01): a line takes an office.
+    /// The vertical axis (tag 89, 2026-08-01): a line takes an office.
     ///
-    /// The station GATES AUTHORITY — the tier-0 verbs check it — and it
+    /// The station gates authority — the tier-0 verbs check it — and it
     /// lived only in `var/registry/<sigil>.json`, editable by anyone
     /// with a shell. `KERNEL_RELAY` §1.5 named this exactly: *the game
     /// is constitutional; the universe is not*. Now the seat is a deed.
@@ -4004,9 +4004,9 @@ pub enum ClosureEvent {
     /// not offices and the wire refuses them via [`Station::from_wire`].
     StationSeated { line: String, station: u8 },
     /// U1 KERNEL-VERIFY (U_DIRECTIVES §2): the discovery mint — value
-    /// created ONLY against verified work (the PoUW anchor, I4's
-    /// bound arm). `work` is the OPAQUE proof payload — encoding is
-    /// solver-verify's monopoly (THE OPAQUE-PAYLOAD LAW): cfe carries
+    /// created only against verified work (the PoUW anchor, I4's
+    /// bound arm). `work` is the opaque proof payload — encoding is
+    /// solver-verify's monopoly (the OPAQUE-PAYLOAD law): cfe carries
     /// it, never reads it; the kernel hands it to the sealed verifier
     /// whole. The receipt carries its proof — replay re-verifies.
     DiscoveryMinted { orb_id: u64, resource: Resource, amount: Ratio, work: Vec<u8> },
@@ -4018,61 +4018,61 @@ pub enum ClosureEvent {
     /// that computes the trade. Banks never move on it; it is the
     /// loss made visible.
     ///
-    /// **`orb_id` ADDED 2026-08-02 (SYN-6, operator approved).** The
-    /// record named the DEAL and never the BEARER, so the melt was
+    /// **`orb_id` added 2026-08-02 (SYN-6, operator approved).** The
+    /// record named the deal and never the bearer, so the melt was
     /// receipted and credited to no one: a loss visible in the
     /// aggregate and unattributable to any book. Every other
     /// value-bearing receipt in this codec carries the orb that bore
     /// it — `DemurrageSettled`, `UpkeepSettled`, `AssayStruck` — and
     /// this one alone did not, which is why `World::value_lost_of`
     /// could account decay and upkeep per orb and had to leave the
-    /// melt out entirely. The field is FIRST, matching the
+    /// melt out entirely. The field is first, matching the
     /// `LE64 ‖ …` layout every orb-bearing record already uses.
     VoidShare { orb_id: u64, deal: u64, resource: Resource, amount: Ratio },
-    /// D5 — **THE SOVEREIGN UNION**, struck. The offices `D(Ω)`
-    /// PROGENITOR and `V(Ω)` SOVEREIGN enter their union under a
-    /// REVIEW HORIZON.
+    /// D5 — **the SOVEREIGN union**, struck. The offices `D(Ω)`
+    /// progenitor and `V(Ω)` SOVEREIGN enter their union under a
+    /// review horizon.
     ///
-    /// **PARTIES ARE OFFICES, NEVER ORB IDS.** `BondSealed` carries
+    /// **Parties are offices, never orb IDS.** `BondSealed` carries
     /// `source: u64, target: u64` — colony ids — and seating an office
     /// there would reduce a global field to a local node. Both offices
     /// are named explicitly so the deed is self-describing and so a
-    /// malformed union (two progenitors, two sovereigns) is REFUSABLE
+    /// malformed union (two progenitors, two sovereigns) is refusable
     /// rather than merely unlikely.
     ///
-    /// **NO `approved_by_operator` FLAG.** An earlier design carried
-    /// one. A deed is a CLAIM, and a claim that asserts its own
+    /// **No `approved_by_operator` flag.** An earlier design carried
+    /// one. A deed is a claim, and a claim that asserts its own
     /// approval is forgeable by whoever constructs it — the kernel
     /// would have nothing to check the bool against. Approval is
-    /// established by WHO ACTS: I2 containment already binds the actor
+    /// established by who acts: I2 containment already binds the actor
     /// to the root entity, unforgeably, and that is the signature.
     ///
-    /// `term_stamps` is a REVIEW horizon, never an expiry: nothing
+    /// `term_stamps` is a review horizon, never an expiry: nothing
     /// settles and nothing lapses when it falls due.
     SovereignUnionSealed { progenitor: Office, sovereign: Office, term_stamps: u64 },
     /// ROUTE-1: a lane chartered — this book's leg of the pair.
     RouteChartered { deal: u64, eta: Unit },
     /// ROUTE-1: the lane lapsed on this book (unpaid maintenance).
     RouteLapsed { deal: u64 },
-    /// **THE ESTATE SURVEY** (tag 97, E5b — operator rulings 2026-08-05:
+    /// **The ESTATE survey** (tag 97, E5b — operator rulings 2026-08-05:
     /// *survey is a derivation of observation; observations must be
     /// witnessed; surveys must be metered*).
     ///
-    /// THEOREM (witnessed): `covered` carries one entry per orb the
-    /// survey stood over — the orb's id and the DIGEST OF ITS OWN
-    /// FOUNDING RECEIPT, gathered from the chronicle at the deed. The
+    /// Theorem (witnessed): `covered` carries one entry per orb the
+    /// survey stood over — the orb's id and the digest of its own
+    /// founding receipt, gathered from the chronicle at the deed. The
     /// emitter refuses an orb it cannot witness, and the gate refuses
     /// an empty covering, so an unwitnessed observation is not a state
     /// that can enter the record.
     ///
-    /// THEOREM (metered): `cost` equals the sealed meter over the
+    /// Theorem (metered): `cost` equals the sealed meter over the
     /// volume — `survey_meter().1 × covered.len()` — checked by the
-    /// gate calling the SAME rule (call-not-copy), and drawn from
+    /// gate calling the same rule (call-not-copy), and drawn from
     /// `payer`'s bank before the receipt closes. A survey that cannot
     /// pay refuses pure: no receipt, no debit.
     ///
-    /// THEOREM (derivation): `seed` is the chronicle's terminal digest
-    /// at the survey (CHARTER §9). Parcels are not state — they DERIVE
+    /// Theorem (derivation): `seed` is the chronicle's terminal digest
+    /// at the survey (Charter §9). Parcels are not state — they derive
     /// from this receipt via [`parcels_of`], the same receipt yielding
     /// the same parcels forever. Nothing here is stored that replay
     /// cannot re-check.
@@ -4082,13 +4082,13 @@ pub enum ClosureEvent {
         covered: Vec<(u64, [u8; 32])>,
         cost: Ratio,
     },
-    /// **THE APPRAISAL** (tag 98): value derived from the survey, at
+    /// **The appraisal** (tag 98): value derived from the survey, at
     /// one scale of the ladder, self-contained for the gate — `seed`
     /// and `covered` ride along so the gate re-derives the parcels and
     /// the value from the prior state alone (the covenant-collateral
     /// precedent: what verification needs rides the receipt). Moves no
     /// value; the stamp is what makes staleness decidable, and
-    /// STALENESS TRIGGERS RENEGOTIATION, NEVER BLOCKS ACCEPTANCE.
+    /// staleness triggers renegotiation, never blocks acceptance.
     AppraisalStruck {
         subject: Holding,
         survey: [u8; 32],
@@ -4096,19 +4096,19 @@ pub enum ClosureEvent {
         covered: Vec<u64>,
         value: Ratio,
     },
-    /// **THE COUNTER-OFFER** (tag 99): renegotiation as a receipt. It
-    /// amends the resting offer's ask — the negotiation stays STANDING
+    /// **The counter-offer** (tag 99): renegotiation as a receipt. It
+    /// amends the resting offer's ask — the negotiation stays standing
     /// (resting books are lawful) and every round is a receipt. The
     /// optional `appraisal` digest is the round's evidence; the emitter
-    /// refuses a STALE citation, because staleness is the trigger that
+    /// refuses a stale citation, because staleness is the trigger that
     /// demands fresh evidence — and deliberately gates nothing else.
     OfferCountered {
         offer: u64,
         want_amount: Ratio,
         appraisal: Option<[u8; 32]>,
     },
-    /// **CONVEY** (tag 100): the postal deed. The parcel's monetary
-    /// break finally MEANS something mechanically: only the monetary
+    /// **Convey** (tag 100): the postal deed. The parcel's monetary
+    /// break finally means something mechanically: only the monetary
     /// portion of the sender's bank is postal-addressable, the free
     /// portion stays home, and both endpoints must be surveyed parcels.
     /// `seed` and `covered` ride along so the gate re-derives the
@@ -4125,16 +4125,16 @@ pub enum ClosureEvent {
         seed: [u8; 32],
         covered: Vec<u64>,
     },
-    /// **THE MINTED LINE** (tag 101): a civilization enters by receipt.
+    /// **The minted LINE** (tag 101): a civilization enters by receipt.
     /// The seed is the whole receipt — every field of the line derives
-    /// from it through [`line_synthesis`], so the wire carries ONE
+    /// from it through [`line_synthesis`], so the wire carries one
     /// truth and the registry card is a render of it. Banked-neutral:
     /// a mint creates IDENTITY, never matter (the element grammar's
     /// law, applied to peoples).
     ///
-    /// **FOLD-AWARE (operator ruling 2026-08-06, receipt authority):**
+    /// **Fold-aware (operator ruling 2026-08-06, receipt authority):**
     /// `ceilings` declares the (class, clade) vocabulary ceilings the
-    /// draw was taken under — the FOLD's ceilings at the mint stamp, so
+    /// draw was taken under — the fold's ceilings at the mint stamp, so
     /// minted classes and clades are drawable the moment their receipts
     /// stand. `None` is the sealed pre-amendment form: those receipts
     /// drew under the compiled ceilings, and decode to exactly that,
@@ -4247,7 +4247,7 @@ impl ClosureEvent {
                 let mut value = orb_id.to_le_bytes().to_vec();
                 ratio::encode(albedo.value(), &mut value);
                 ratio::encode(orbit_r.value(), &mut value);
-                // TRAILING and OPTIONAL: an unsited angle writes no
+                // Trailing and optional: an unsited angle writes no
                 // bytes at all, so a receipt that never had one is
                 // byte-identical to what it was before the amendment.
                 if let Some(turn) = theta {
@@ -5391,7 +5391,7 @@ impl ClosureEvent {
                 value.extend_from_slice(element);
                 ratio::encode(amount, &mut value);
                 // ECO-1: the trailing after-richness, additive — its
-                // absence IS the sealed legacy form, byte-exact.
+                // absence is the sealed legacy form, byte-exact.
                 if let Some(after) = richness {
                     ratio::encode(after, &mut value);
                 }
@@ -5481,7 +5481,7 @@ impl ClosureEvent {
                     ratio::encode(factor, &mut value);
                 }
                 // #41: the declared base, trailing and optional — its
-                // ABSENCE is the sealed pre-zone form, byte-exact. G2:
+                // absence is the sealed pre-zone form, byte-exact. G2:
                 // the element ration rides the same trailing slot as a
                 // 32-byte block; base (Zone) and ration (Metabolism)
                 // never co-occur, so the decoder reads them apart by
@@ -5714,12 +5714,12 @@ impl ClosureEvent {
                 let albedo = Unit::new(albedo)?;
                 let (orbit_r, used_r) = ratio::decode(value.get(8 + used..)?)?;
                 let orbit_r = Positive::new(orbit_r)?;
-                // The trailing angle, ABSENT on every receipt written
+                // The trailing angle, absent on every receipt written
                 // before the amendment. `None` is not `0`: zero would
                 // put all of history on one ray.
                 let tail = value.get(8 + used + used_r..).unwrap_or(&[]);
-                // FORM AT THE DOOR (29_CONSTRUCTION C1): an off-slot
-                // angle refuses at DECODE — the codec fixes form — so a
+                // Form AT the door (29_CONSTRUCTION C1): an off-slot
+                // angle refuses at decode — the codec fixes form — so a
                 // `Slot` past this point is proven and nothing
                 // downstream re-checks it. `OffSlot` is dead.
                 let (theta, used_t) = match ratio::decode(tail) {
@@ -7070,7 +7070,7 @@ impl ClosureEvent {
                     at += used;
                     binding.push((channel, factor));
                 }
-                // #41 / G2: what trails the binding, read by LENGTH — a
+                // #41 / G2: what trails the binding, read by length — a
                 // single byte is the Zone `base`, a 32-byte block is the
                 // Metabolism element `ration`, nothing is the sealed
                 // pre-trailer form. The two never co-occur, so length
@@ -7264,7 +7264,7 @@ pub struct ThermalSite {
     pub albedo: Unit,
     /// Orbit radius r > 0, in the star's units.
     pub orbit_r: Positive,
-    /// THE ANGLE — a fraction of a TURN, `θ ∈ [0, 1) ⊂ ℚ`.
+    /// The angle — a fraction of a turn, `θ ∈ [0, 1) ⊂ ℚ`.
     ///
     /// **Turns, never radians.** A full turn in radians is `2π`, which
     /// is irrational, so a rational angle in radians cannot express a
@@ -7275,14 +7275,14 @@ pub struct ThermalSite {
     /// all collinear — which is a spatial claim nobody made. An orb
     /// without an angle has a radius and no place.
     ///
-    /// Adjacency is WRAPPED L1 on `(r, θ, ψ)`, never Euclidean: plane
+    /// Adjacency is wrapped L1 on `(r, θ, ψ)`, never Euclidean: plane
     /// distance needs `cos` and a square root and both are barred
     /// (`24_FORM` §2b). See [`separation`].
     pub theta: Option<Slot>,
-    /// **ψ — THE INCLINATION**, the second turn, also `[0, 1) ⊂ ℚ`.
+    /// **ψ — the inclination**, the second turn, also `[0, 1) ⊂ ℚ`.
     ///
-    /// `θ` alone confines every orb to ONE PLANE: a disc around the
-    /// star. `ψ` lifts it out, and `(r, θ, ψ)` is a place in a VOLUME
+    /// `θ` alone confines every orb to one plane: a disc around the
+    /// star. `ψ` lifts it out, and `(r, θ, ψ)` is a place in a volume
     /// rather than on a sheet. That is what lets `Ω` range over the
     /// galaxy instead of a single orbital plane.
     ///
@@ -7293,11 +7293,11 @@ pub struct ThermalSite {
     /// commitment already addresses.
     ///
     /// `None` on every frame written before this amendment, and `None`
-    /// means UNINCLINED — not the equator, which `Some(0)` means.
+    /// means uninclined — not the equator, which `Some(0)` means.
     pub psi: Option<Slot>,
 }
 
-/// The colony orb — COMMITTED state only. Unreceipted accrual is
+/// The colony orb — committed state only. Unreceipted accrual is
 /// workspace (it lives on the world, not the orb) and never encodes:
 /// what has no receipt does not persist.
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
@@ -7310,26 +7310,26 @@ pub struct ColonyOrb {
     /// entries are dropped (one state, one encoding).
     pub banked: Vec<(Resource, Ratio)>,
     /// Resources under famine, ascending — zones consuming these are
-    /// DORMANT (no yield, no drain).
+    /// dormant (no yield, no drain).
     pub famine: Vec<Resource>,
-    /// THERMAL-1: the orbit siting; ABSENT until `PlanetSited` — an
+    /// THERMAL-1: the orbit siting; absent until `PlanetSited` — an
     /// unsited orb is thermally dormant (the opt-in guard).
     pub thermal: Option<ThermalSite>,
     /// THERMAL-1: currently overheating (overflow > 0)?
     pub overheat: bool,
     /// VENT-1: cumulative vented entropy, settled by receipt.
-    /// **THE ENTROPIC BOOK** — what this orb has SHED to the void
+    /// **The entropic BOOK** — what this orb has shed to the void
     /// across its whole life. Cumulative, never pruned.
     pub entropy_vented: Ratio,
-    /// **THE SYNTROPIC BOOK — the exact inverse of
+    /// **The syntropic BOOK — the exact inverse of
     /// [`Self::entropy_vented`]** (operator ruling 2026-08-03).
     ///
-    /// What this orb has CONTAINED: every joule encased, whether the
+    /// What this orb has contained: every joule encased, whether the
     /// excess arrived from a star or from friction — the same currency
     /// either way. Cumulative and never pruned, so the two books are
     /// finally symmetric.
     ///
-    /// **Why it had to be a FIELD and not only a reading.** The loss
+    /// **Why it had to be a field and not only a reading.** The loss
     /// arm has always been a stored orb field, replayed and public,
     /// while the capture arm lived either in a pruned window on the
     /// crystal sheet or in a derived reader. An orb could always be
@@ -7346,9 +7346,9 @@ pub struct ColonyOrb {
     /// SINK-1: the stamp of the last settle (demurrage anchor).
     pub last_touch: u64,
     /// TRADE-1 (09 §2.1): the compassion books — cumulative
-    /// joule-commensurable value given TO counterparties standing in
-    /// receipted crisis, and drawn FROM them. Committed state rebuilt
-    /// from receipts alone on replay; wire encoding DEFERRED to
+    /// joule-commensurable value given to counterparties standing in
+    /// receipted crisis, and drawn from them. Committed state rebuilt
+    /// from receipts alone on replay; wire encoding deferred to
     /// IDEO-1 (the reserved orb cohesion entry, tag 38 — recorded on
     /// the board).
     pub given_in_crisis: Ratio,
@@ -7368,7 +7368,7 @@ pub struct ColonyOrb {
     pub bond_flow: Ratio,
     /// The entropic book of the pair (see `bond_flow`).
     pub severance_load: Ratio,
-    /// FORWARD-1 (09 §2.3): the integrity books — VALUE-weighted
+    /// FORWARD-1 (09 §2.3): the integrity books — value-weighted
     /// stakes of forwards released and slashed (a thousand toy
     /// promises never wash one giant breach). Same deferral:
     /// committed, replay-rebuilt, wire at IDEO-1.
@@ -7380,19 +7380,19 @@ pub struct ColonyOrb {
     /// Wire: orb entry tag 70 (SEAL A — old readers skip).
     pub elements: Vec<([u8; 32], Ratio)>,
     /// STAMP-1 (32_STAMP_MARKET): unit-of-account balance on this orb.
-    /// Exact rational; zero encodes as ABSENT (one state, one encoding).
+    /// Exact rational; zero encodes as absent (one state, one encoding).
     /// Wire: orb entry tag 73 (SEAL A — old readers skip).
     pub stamp: Ratio,
     /// FLEET-1 scrap pool (tag 74). One kind (Q-F3).
     pub scrap: Ratio,
-    /// BOOK-1 (19_LENS §16): the books this orb MINTED, kind-ascending
-    /// (canonical order). The charter's four are NOT here — they keep
+    /// BOOK-1 (19_LENS §16): the books this orb minted, kind-ascending
+    /// (canonical order). The charter's four are not here — they keep
     /// their landed fields and their landed wire entry; `books()`
     /// presents both through one view. Wire: orb entry tag 90 (SEAL A
     /// — old readers skip an orb's minted books rather than fail).
     pub books: Vec<BookAccount>,
     /// LIT-1: the works this line reaches for, work-ascending. A work
-    /// carrying witnesses has been CLAIMED. Wire: orb entry tag 91
+    /// carrying witnesses has been claimed. Wire: orb entry tag 91
     /// (SEAL A — old readers skip).
     pub aspirations: Vec<Aspiration>,
 }
@@ -7409,7 +7409,7 @@ impl ColonyOrb {
             let mut value = zone.tile.to_le_bytes().to_vec();
             value.push(zone.kind.wire());
             // #41: the base a minted building was raised on, trailing
-            // and optional — its ABSENCE is the sealed pre-zone form.
+            // and optional — its absence is the sealed pre-zone form.
             if let Some(base) = zone.base {
                 value.push(base.wire());
             }
@@ -7428,10 +7428,10 @@ impl ColonyOrb {
             ratio::encode(site.albedo.value(), &mut value);
             ratio::encode(site.orbit_r.value(), &mut value);
             value.push(self.overheat as u8);
-            // THE ANGLE, additive-trailing on tag 26 (2026-08-02). An
+            // The angle, additive-trailing on tag 26 (2026-08-02). An
             // unsited angle writes nothing, so an orb that never had a
             // place is byte-identical to its pre-amendment frame — and
-            // one that HAS a place keeps it across the state container,
+            // one that has a place keeps it across the state container,
             // which is what the committed snapshot lost before this.
             if let Some(turn) = &site.theta {
                 ratio::encode(turn.angle(), &mut value);
@@ -7513,7 +7513,7 @@ impl ColonyOrb {
         out
     }
 
-    /// **EVERY BOOK THIS ORB KEEPS — charter and minted alike.**
+    /// **Every BOOK this orb keeps — charter and minted alike.**
     ///
     /// The charter four first in charter order, then minted books
     /// kind-ascending. A reader never learns which storage a book came
@@ -7567,7 +7567,7 @@ impl ColonyOrb {
         ]
     }
 
-    /// Decode an orb; unknown tags are SKIPPED (SEAL A).
+    /// Decode an orb; unknown tags are skipped (SEAL A).
     pub fn from_wire(bytes: &[u8]) -> Option<Self> {
         let mut orb = ColonyOrb::default();
         let mut seen_header = false;
@@ -7647,17 +7647,17 @@ impl ColonyOrb {
                     let orbit_r = Positive::new(orbit_r)?;
                     orb.overheat = *value.get(used + used_r)? != 0;
                     // The trailing angle: absent on every frame written
-                    // before the amendment, and absent means UNPLACED,
+                    // before the amendment, and absent means unplaced,
                     // never zero.
                     // The two trailing turns, each absent on frames
-                    // written before its amendment. Absent is UNPLACED
-                    // and UNINCLINED, never zero.
+                    // written before its amendment. Absent is unplaced
+                    // and uninclined, never zero.
                     let tail = value.get(used + used_r + 1..).unwrap_or(&[]);
                     let (theta, used_t) = match ratio::decode(tail) {
                         Some((turn, n)) => (Some(Slot::from_angle(turn)?), n),
                         None => (None, 0),
                     };
-                    // FORM AT THE DOOR: same law as tag 25 — a Slot
+                    // Form AT the door: same law as tag 25 — a Slot
                     // past decode is proven, nothing downstream checks.
                     let psi = match tail.get(used_t..).filter(|rest| !rest.is_empty()) {
                         Some(rest) => {
@@ -7784,7 +7784,7 @@ impl ColonyOrb {
 
     /// How much of one input stands, as a share in `[0, 1]`.
     ///
-    /// **Binary TODAY** because `famine` is a membership set: a
+    /// **Binary today** because `famine` is a membership set: a
     /// resource is famined or it is not. When scarcity carries a degree
     /// (20_FOUNDING §6f, task #14/#16) this becomes the fraction held
     /// against the fraction needed, and every reader below turns
@@ -7796,13 +7796,13 @@ impl ColonyOrb {
         }
     }
 
-    /// A zone's VIGOUR — the rate it can run at, in `[0, 1]`.
+    /// A zone's vigour — the rate it can run at, in `[0, 1]`.
     ///
-    /// **THE LAW OF THE MINIMUM.** A process runs at the rate of its
-    /// SCARCEST input, never at the average of them. The obvious
+    /// **The law of the minimum.** A process runs at the rate of its
+    /// scarcest input, never at the average of them. The obvious
     /// alternative — the share of inputs that stand — is wrong and
     /// measurably so: a Synthesizer consumes alloy 4 and biomass 1, so
-    /// an averaged reading would run it at 1/2 with NO ALLOY AT ALL and
+    /// an averaged reading would run it at 1/2 with no alloy AT ALL and
     /// mint diamond out of feedstock it does not hold. **Averaging
     /// inputs creates matter.** The minimum cannot.
     ///
@@ -7810,7 +7810,7 @@ impl ColonyOrb {
     ///
     /// This reads 0 or 1 today because [`Self::availability`] is
     /// binary, so it is exactly the old all-or-nothing behaviour — but
-    /// the LAW is now the right one, and it turns fractional the moment
+    /// the law is now the right one, and it turns fractional the moment
     /// scarcity does.
     pub fn zone_vigour(&self, zone: &Zone) -> Ratio {
         zone.kind
@@ -7831,7 +7831,7 @@ impl ColonyOrb {
 
 /// D3 (02 §2.5): the tile classes and their yield multipliers. Upkeep
 /// never scales with terrain — rich tiles are strictly better, barren
-/// ones a cost you zone over only when the map forces you.
+/// ones a cost the player zones over only when the map forces it.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TileClass {
     Standard,
@@ -7875,27 +7875,27 @@ pub fn tile_class(seed: &[u8; 32], orb_id: u64, tile: u16) -> TileClass {
 
 
 
-/// THE TURN LAW — relocated to `ratio` (2026-08-05) so the solver can
-/// address a SPHERE in the same frame the universe sites its orbs in,
+/// The turn law — relocated to `ratio` (2026-08-05) so the solver can
+/// address a sphere in the same frame the universe sites its orbs in,
 /// and re-exported here so every existing citation resolves unchanged.
 /// One truth, two readers: `cfe::dop::TURN_SLOTS` and
 /// `ratio::TURN_SLOTS` are the same constant, not two copies.
 pub use ratio::{non_negative, on_slot, positive, slot_angle, slot_of, turn_gap, unit, NonNegative, Positive, Slot, Unit, TURN_SLOTS};
 
 
-/// WRAPPED L1 SEPARATION between two sited orbs — the only adjacency
+/// Wrapped L1 separation between two sited orbs — the only adjacency
 /// this system can compute exactly.
 ///
 /// ```text
 /// d = |r₁ − r₂| + min(|θ₁ − θ₂|, 1 − |θ₁ − θ₂|)
 /// ```
 ///
-/// The angular term takes the SHORT WAY ROUND, which is what makes the
+/// The angular term takes the short way round, which is what makes the
 /// space a circle rather than a segment: `θ = 9/10` and `θ = 1/10` are
 /// `1/5` apart, not `4/5`.
 ///
 /// `None` means the orb has a radius and no place, so no separation is
-/// defined — an unsited orb is not "far", it is UNPLACED, and reporting
+/// defined — an unsited orb is not "far", it is unplaced, and reporting
 /// a distance would invent one.
 pub fn separation(a: &ThermalSite, b: &ThermalSite) -> Option<Ratio> {
     let (Some(theta_a), Some(theta_b)) = (&a.theta, &b.theta) else {
@@ -7907,7 +7907,7 @@ pub fn separation(a: &ThermalSite, b: &ThermalSite) -> Option<Ratio> {
         b.orbit_r.value().clone() - a.orbit_r.value().clone()
     };
     let mut total = radial + turn_gap(theta_a.angle(), theta_b.angle());
-    // ψ ADDS ITS OWN WRAPPED TERM. Two orbs at one radius and one
+    // ψ adds its own wrapped term. Two orbs at one radius and one
     // longitude are still apart if they are inclined differently —
     // without this the volume collapses back to a disc.
     if let (Some(psi_a), Some(psi_b)) = (&a.psi, &b.psi) {

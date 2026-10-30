@@ -1,6 +1,6 @@
 # Tech emergence — the crystallized tree (TECH-1 spec, design stage)
 
-**Status:** design — lands as TECH-1 after bot-THERM; the landing that opens
+**Status:** design — lands as TECH-1 after BOT-THERM; the landing that opens
 SINK-1's deferred research gate. Constants are placeholders.
 
 **The ruling (operator, 2026-07-27):** no static external tech tree — a

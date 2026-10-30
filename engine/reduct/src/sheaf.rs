@@ -1,4 +1,4 @@
-//! THE CELLULAR SHEAF — the stratified carrier (IAE-2, step 2).
+//! The cellular sheaf — the stratified carrier (IAE-2, step 2).
 //!
 //! A base cell complex whose cells carry **heterogeneous stalks**: each cell
 //! `σ` holds its own free ℤ-module `F(σ) = ℤ^{dim σ}`, its native grading —

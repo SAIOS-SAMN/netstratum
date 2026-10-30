@@ -1,5 +1,5 @@
 //! The Netstratum CLI — the first slice's face. One command launches
-//! it (CHARTER §3.5); every completed action closes as an NS-3 receipt;
+//! it (Charter §3.5); every completed action closes as an NS-3 receipt;
 //! `verify` and `replay` read the chain the way any peer would.
 //!
 //! Presentation only lives here: the map grid, colors, and friendly
@@ -54,7 +54,7 @@ fn main() {
                 print!("{} ", style.prompt("netstratum»"));
                 io::stdout().flush().ok();
                 let mut line = String::new();
-                // Bind the read's Result BEFORE matching on it — matching
+                // Bind the read's Result before matching on it — matching
                 // directly on `stdin.lock().read_line(...)` extends the
                 // StdinLock temporary's lifetime across the whole match
                 // arm (a standard Rust footgun), which deadlocks any
@@ -93,7 +93,7 @@ fn banner(style: &Style) {
 }
 
 
-/// BLOCKER A3: the active profile's station — the authority the
+/// Blocker A3: the active profile's station — the authority the
 /// Operator seat claim — **session config**, not colony law.
 ///
 /// Plain text `var/operators/<name>` only (`station <word>` lines).
@@ -154,10 +154,10 @@ fn profile_field(text: &str, key: &str) -> Option<String> {
     None
 }
 
-/// THE FAR WORLD (union wiring, 2026-07-30): cross-world deeds load
-/// the partner from its RESUME carrier (var/worlds/<name>/chronicle.tlv
+/// The far WORLD (union wiring, 2026-07-30): cross-world deeds load
+/// the partner from its resume carrier (var/worlds/<name>/chronicle.tlv
 /// — CLI-saved worlds carry one; polity worlds are export-only and
-/// refuse with the cure named). After a two-legged deed BOTH sides
+/// refuse with the cure named). After a two-legged deed both sides
 /// sync immediately — conservation is never left half-saved.
 fn far_world(name: &str) -> Result<World, String> {
     let path = std::path::PathBuf::from("var/worlds").join(name).join("chronicle.tlv");
@@ -168,8 +168,8 @@ fn far_world(name: &str) -> Result<World, String> {
     }
     let chronicle = cfe::persist::load(&path)
         .map_err(|refusal| format!("{name}'s chronicle refused to verify: {refusal:?}"))?;
-    // MESH-1b (#2): THE WALK RETIRED THE GUARD. A sealed arbor names
-    // its one lawful hand; ours writes, any other refuses by name. A
+    // MESH-1b (#2): the walk RETIRED the guard. A sealed arbor names
+    // its one lawful hand; this node's writes, any other refuses by name. A
     // pre-mesh chronicle is lawful for its single writer — so a
     // conductor world still waits for its first seal (`pen <world>`
     // asks; the conductor seals at its next beat boundary).
@@ -249,7 +249,7 @@ fn sync_world(world: &World) -> Result<usize, String> {
     sync_world_at(world, &name)
 }
 
-/// Sync to a NAMED world dir — a far world's dir is its WORLD name,
+/// Sync to a named world dir — a far world's dir is its WORLD name,
 /// not its colony's (the conductor seats them apart; MESH-1b writes
 /// must land where the conductor re-resumes from).
 fn sync_world_at(world: &World, name: &str) -> Result<usize, String> {
@@ -309,7 +309,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 Some("res") | Some("resonator") => Some(ZoneKind::Resonator),
                 Some("regen") | Some("regenerator") => Some(ZoneKind::Regenerator),
                 Some("yard") | Some("shipyard") | Some("ship-yard") => Some(ZoneKind::ShipYard),
-                // #41: a MINTED building, named by the word its mint
+                // #41: a minted building, named by the word its mint
                 // gave it. The fold is the authority on what a world
                 // can build — a compiled name is matched first so a
                 // mint can never shadow a standing kind.
@@ -471,7 +471,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                             // wear settled in that same receipt, so the
                             // player sees what the draw cost the spring
                             // at the moment they take it.
-                            // ONT-2: the standing flow is DERIVED — natural
+                            // ONT-2: the standing flow is derived — natural
                             // endowment minus the extraction integral.
                             let after = world.committed().star.and_then(|star| {
                                 world
@@ -519,7 +519,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 style.strong("assay <element-prefix>")
             ),
         },
-        // Root hubs: BENCH · INTEL · TRADE · DIPLOMATIC · POLITY (optional 5th).
+        // Root hubs: bench · intel · trade · diplomatic · polity (optional 5th).
         Some("bench") => {
             let rest: Vec<String> = words.map(|w| w.to_string()).collect();
             hubs::bench(world, rest.into_iter(), style, *current);
@@ -704,14 +704,14 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 }
             }
         }
-        // THE CORPUS BENCH (#38a): cognition as gameplay. The economy's
+        // The corpus bench (#38a): cognition as gameplay. The economy's
         // second head, finally reachable by a player.
         Some("corpus") => corpus_command(world, words, style, *current),
-        // #42 THE POLITICAL SPECTRUM — trade · defense · peace · war.
+        // #42 the political spectrum — trade · defense · peace · war.
         Some("treaty") | Some("treaties") | Some("pact") => {
             treaty_command(world, words.map(str::to_string), style)
         }
-        // 20_FOUNDING §1 step 3: "offered a LIST OF TYPES; picks the
+        // 20_FOUNDING §1 step 3: "offered a list of types; picks the
         // one most interesting to them" — bare `genesis` (no args at
         // all) launches the guided picker instead of demanding all
         // four typed arguments up front. `genesis <civ> <disp> <met>
@@ -830,12 +830,12 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
             }
             Err(refusal) => refuse(world, &refusal, style),
         },
-        // NPC CONTROLS (2026-07-30 ruling): the player's hand on the
+        // NPC controls (2026-07-30 ruling): the player's hand on the
         // autonomous board — writes var/conductor.ctl, which the
         // conductor polls every beat. Pause holds every polity world
         // (nothing ticks, nothing ages); speed sets the seconds
         // between beats (0 = flat out).
-        // THE UNION VERBS (wiring audit, 2026-07-30): every landed
+        // The union verbs (wiring audit, 2026-07-30): every landed
         // deed reachable from the hand.
         // MARKET-1: post a resting intent; clear a crossing with a
         // far world (both offers named — the resting price rules).
@@ -884,7 +884,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
         }
         Some("trade") | Some("trades") | Some("tmenu") => {
             // Barter form: trade <offer_id> with <world> …
-            // Otherwise: TRADE hub (books · fleet · rails · vault · aperture).
+            // Otherwise: trade hub (books · fleet · rails · vault · aperture).
             let rest: Vec<String> = words.map(|w| w.to_string()).collect();
             let barter = rest
                 .first()
@@ -947,7 +947,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 hubs::trade(world, rest.into_iter(), style, *current);
             }
         }
-        // SCIENCE-1: the JOINT RESEARCH VENTURE — the formal deed for
+        // SCIENCE-1: the joint research venture — the formal deed for
         // incompatible sciences: a council-bound licensed leap named
         // as what it is. venture <cond> to <world> via <council> deal
         // <n> — sugar over license with the venture's meaning.
@@ -961,7 +961,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
             command(world, &relayed, style, current);
         }
         // GAUGE-N: the graded shift — a progenitor's quantum-state
-        // deed: move (or OPEN) the key at any grade; the whole key
+        // deed: move (or open) the key at any grade; the whole key
         // renders after.
         Some("shift") => {
             if !tier0_gate(style) {
@@ -1195,9 +1195,9 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 ),
             }
         }
-        // THE ASCENSION (the second-look audit, 2026-07-30): the deed
+        // The ascension (the second-look audit, 2026-07-30): the deed
         // upward advancement was missing — a line that leapt, crossed,
-        // and climbed can now CLAIM its seat. The world's own receipts
+        // and climbed can now claim its seat. The world's own receipts
         // are the evidence (crossed + at least one receipted climb);
         // the registry checks the room (space, never rank).
         Some("ascend") => {
@@ -1281,7 +1281,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 ),
             }
         }
-        // THE CONSTELLATION — this line's own sky, BASE-11 since the
+        // The constellation — this line's own sky, BASE-11 since the
         // uplift (operator ruling 2026-08-02). Held nodes glow with
         // their voice-names, timers show exact progress, the crown
         // shows its gate, and the uplift tier shows the deeds claimed.
@@ -1300,8 +1300,8 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                     }
                 }
             }
-            // ELEVEN sky nodes: the base tier as it always was, then
-            // one per chartered work. INDEXED BY CONDITION, so slot 7
+            // Eleven sky nodes: the base tier as it always was, then
+            // one per chartered work. Indexed by condition, so slot 7
             // must be held even though the sky never emits it — and the
             // array must stay as long as the highest condition, not as
             // long as the sky.
@@ -1314,7 +1314,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
             println!("{}", style.head("THE CONSTELLATION — this line's own sky"));
             for (condition, held, progress, threshold) in world.constellation(*current) {
                 let concept = concepts[condition as usize];
-                // The uplift tier reads from DEEDS, not from timers, so
+                // The uplift tier reads from deeds, not from timers, so
                 // it renders on its own terms.
                 if condition >= 8 {
                     if condition == 8 {
@@ -1400,7 +1400,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
         // MANU-1 (10 §3f): forge an instrument — manufacturing is
         // technology + understanding + industry; grade = condition,
         // and the scan horizon reads the best grade held.
-        // The grade is proven at THIS door (29_CONSTRUCTION): the
+        // The grade is proven at this door (29_CONSTRUCTION): the
         // vocabulary decides forgeability, so an unknown grade never
         // reaches the verb.
         Some("forge") => match words
@@ -1516,10 +1516,10 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 ),
             }
         }
-        // MESH-1b (#2): THE PEN — the receipted handoff's CLI side.
+        // MESH-1b (#2): the pen — the receipted handoff's CLI side.
         // `pen <world>` puts the ask on the conductor's control file;
         // the seal lands at the next beat boundary and the walk then
-        // names THIS seat the one lawful hand. `pen return <world>`
+        // names this seat the one lawful hand. `pen return <world>`
         // yields it back; the conductor re-resumes from the receipts.
         Some("pen") => match words.next() {
             Some("return") => match words.next() {
@@ -1608,7 +1608,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
             match verb {
                 Some("pause") => paused = true,
                 Some("resume") | Some("start") => paused = false,
-                // PUNCTUATED PLAY (task #11): run N beats flat out,
+                // Punctuated play (task #11): run N beats flat out,
                 // then the board parks itself paused — advance a
                 // year, read the board, act, advance again.
                 Some("advance") => match words.next().and_then(|w| w.parse::<u64>().ok()) {
@@ -1707,16 +1707,16 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 Err(refusal) => println!("{} control write refused: {refusal}", style.bad("✗")),
             }
         }
-        // THE CIV CONSOLE (2026-07-30 ruling): build a custom
+        // The CIV console (2026-07-30 ruling): build a custom
         // civilization — axes, station, seat checks — from inside the
         // client. `civ` / `civ seats` shows the station console; `civ
         // new` registers the line; the conductor derives its world from
-        // the registry card at its next boot (THE DEFINITION LAW).
-        // THE OPERATOR MENU (prototype — no passwords): profiles under
+        // the registry card at its next boot (the definition law).
+        // The operator MENU (prototype — no passwords): profiles under
         // var/operators/<sigil>, many accounts on one machine; login
         // switches, continue resumes the profile's last saved world.
-        // THE PROGENITOR CONSOLE (tier 0 — the board-makers' hand):
-        // inbox and requests flow UP from the lower dimensions; move
+        // The progenitor console (tier 0 — the board-makers' hand):
+        // inbox and requests flow up from the lower dimensions; move
         // re-charts a world on the torus (the separation deed for
         // stressed sectors — warring factions part in S); contract is
         // the fold; clean sweeps the --closed-* ruins.
@@ -1726,12 +1726,12 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
             }
             let verb = words.next();
             match verb {
-                // ── THE ARCHETYPE EDITOR (28_VOCABULARY §5, V4) ────────
+                // ── the ARCHETYPE editor (28_VOCABULARY §5, V4) ────────
                 //
                 // `t0 vocab [axis]`  read the live folded vocabulary
                 // `t0 mint <axis> <sigil> <word> <ch>:<p>/<q> ...`
                 //
-                // The CLI FORMATS AND RELAYS; it never validates. Every
+                // The CLI formats and relays; it never validates. Every
                 // gate lives at the world door where the chain is — a
                 // client-side check that disagreed with the kernel would
                 // be a second truth, which is the defect the definition
@@ -1782,9 +1782,9 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                         }
                     }
                 }
-                // P2 (tag 103): charter a balance parameter — a TIER 0
+                // P2 (tag 103): charter a balance parameter — a tier 0
                 // power under the mint's own standing gate. Both doors
-                // prove at THIS parse: the key names a parameter, the
+                // prove at this parse: the key names a parameter, the
                 // value stands in the fourfold band of its seed.
                 Some("parameter") => {
                     let key = words.next().and_then(|w| {
@@ -1838,7 +1838,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                     let axis_word = words.next();
                     let sigil = words.next().unwrap_or("");
                     let word = words.next().unwrap_or("");
-                    // The axis is proven at THIS door: an unknown code or
+                    // The axis is proven at this door: an unknown code or
                     // word never reaches the verb (29_CONSTRUCTION).
                     let Some(axis) = axis_word.and_then(|w| {
                         w.parse::<u8>()
@@ -1851,7 +1851,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                                 "class" => Some(cfe::vocabulary::Axis::Class),
                                 "clade" => Some(cfe::vocabulary::Axis::Clade),
                                 "practice" => Some(cfe::vocabulary::Axis::Practice),
-                                // #41: what a world may BUILD.
+                                // #41: what a world may build.
                                 "zone" | "building" => Some(cfe::vocabulary::Axis::Zone),
                                 _ => None,
                             })
@@ -1866,7 +1866,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                     let mut binding = Vec::new();
                     let mut malformed = None;
                     // #41: `on <base>` names the standing kind a minted
-                    // BUILDING modulates — the ladder's first rung.
+                    // building modulates — the ladder's first rung.
                     // Omit it and the base is inferred from the channels
                     // the binding touches; where neither answers, the
                     // word stands and nothing can be raised from it.
@@ -1918,7 +1918,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                         usage();
                         return;
                     }
-                    // The trade law is proven at THIS door, fault named
+                    // The trade law is proven at this door, fault named
                     // (29_CONSTRUCTION): an unlawful binding never
                     // reaches the verb.
                     let binding = match cfe::vocabulary::TradingBinding::new(binding) {
@@ -1947,7 +1947,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                             return;
                         }
                     };
-                    // The seat is read from the CHAIN, and the line is the
+                    // The seat is read from the chain, and the line is the
                     // operator's own. The engine refuses if it is not T0.
                     let line = active_line().unwrap_or_else(|| String::from("operator"));
                     let Some(word_name) = cfe::dop::Name::new(word) else {
@@ -1971,7 +1971,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                     }
                 }
                 None | Some("inbox") | Some("requests") => {
-                    // THE PRIORITY INBOX (operator ruling: flagged,
+                    // The priority inbox (operator ruling: flagged,
                     // never spammed): the upward flow aggregates into
                     // three ranked buckets — a progenitor reads three
                     // lines, then drills only where the board burns.
@@ -1984,7 +1984,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                                 continue;
                             }
                             let name = entry.file_name().to_string_lossy().into_owned();
-                            // CRITICAL: stress from chronicle.tlv (SEAL B),
+                            // Critical: stress from chronicle.tlv (SEAL B),
                             // never state.json display.
                             let tlv = entry.path().join("chronicle.tlv");
                             if let Ok(chronicle) = cfe::persist::load(&tlv) {
@@ -2010,7 +2010,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                                     }
                                 }
                             }
-                            // PETITIONS: the steward inbox, per world.
+                            // Petitions: the steward inbox, per world.
                             if let Ok(pending) = book.pending_directives(&name) {
                                 for petition in pending {
                                     petitions.push(format!(
@@ -2023,7 +2023,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                             }
                         }
                     }
-                    // DISPUTES: receipted council breaches, this
+                    // Disputes: receipted council breaches, this
                     // world's chronicle (cross-world reads await the
                     // mesh).
                     let disputes: usize = world
@@ -2147,7 +2147,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                     );
                 }
                 Some("gift") => {
-                    // t0 gift <world> <condition> — a STRUCTURED
+                    // t0 gift <world> <condition> — a structured
                     // petition: the conductor executes it as a
                     // receipted grant at the next beat (crown law
                     // checked there; the two-book licensing form is
@@ -2202,7 +2202,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
         Some("login") => match words.next() {
             Some(name) => {
                 let sigil = name.to_lowercase().replace(' ', "-");
-                // BLOCKER A3: the profile carries a STATION — the
+                // Blocker A3: the profile carries a STATION — the
                 // authority the tier-0 verbs check. Passwordless per
                 // ruling; the role is the gate, not the secret.
                 let station = match (words.next(), words.next()) {
@@ -2347,12 +2347,12 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                     );
                 }
                 Some("seat") => {
-                    // #23 — THE TAG-89 DEED'S FIRST CALLER. The seat
+                    // #23 — the TAG-89 deed's first caller. The seat
                     // was receipted law (`vertical_axis_pins`: "the seat
                     // replays from the receipt, not from a file") with
-                    // ZERO callers, so every live seating was a
+                    // zero callers, so every live seating was a
                     // hand-edit of the cache this deed exists to
-                    // replace. The verb: deed FIRST, cache after.
+                    // replace. The verb: deed first, cache after.
                     let (Some(sigil), Some(station_word)) = (words.next(), words.next())
                     else {
                         println!(
@@ -2362,9 +2362,9 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                         );
                         return;
                     };
-                    // NATIVE TO THE FOURTH KILL: the word parses
+                    // Native to the fourth removal: the word parses
                     // straight to the `Station` enum — the u8 code and
-                    // its range check died together; an off-band office
+                    // its range check were removed together; an off-band office
                     // is unconstructable past this door.
                     let Some(station) = STATIONS
                         .iter()
@@ -2379,7 +2379,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                         );
                         return;
                     };
-                    // ONE OFFICE PER LINE — a seat REPLACES. Said
+                    // One office per LINE — a seat replaces. Said
                     // before it is done, never after.
                     if let Some(held) = world.station_of(sigil) {
                         if held != station.as_wire() {
@@ -2407,7 +2407,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                         }
                     }
                     // The registry render follows the receipt — the
-                    // CACHE half, honest until #24 makes the registry a
+                    // cache half, honest until #24 makes the registry a
                     // projection of the chain outright.
                     match registry.seat(sigil, station_word) {
                         Ok(()) => println!(
@@ -2504,8 +2504,8 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                             return;
                         }
                     }
-                    // THE DEFINITION LAW (conductor::polities): registering
-                    // IS the whole act. This used to splice a JSON entry
+                    // The definition law (conductor::polities): registering
+                    // is the whole act. This used to splice a JSON entry
                     // onto var/polities.json by stripping the trailing
                     // `]` — a second, unreceipted definition of the line,
                     // written by string surgery. The conductor now derives
@@ -2534,8 +2534,8 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
         }
         Some(deed @ ("practice" | "release")) => {
             let releasing = deed == "release";
-            // The seed five by name; ANY code passes through numeric —
-            // the world judges it against the FOLD, so a minted
+            // The seed five by name; any code passes through numeric —
+            // the world judges it against the fold, so a minted
             // discipline adopts by the code its receipt carries.
             let code = match words.next() {
                 Some("austerity") => Some(1u8),
@@ -2582,7 +2582,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
             ),
             Err(refusal) => refuse(world, &refusal, style),
         },
-        // ESTATE CHAIN (35 / E5b): survey → parcels → appraise any holding.
+        // ESTATE chain (35 / E5b): survey → parcels → appraise any holding.
         Some("estate") => match words.next() {
             None | Some("help") => {
                 println!("{}", style.head("ESTATE — survey · parcels · real-estate appraisal"));
@@ -2633,7 +2633,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 other
             ),
         },
-        // P5-A DEFEND / escort · P5-B posture · P5-M MKT integrity
+        // P5-A defend / escort · P5-B posture · P5-M MKT integrity
         Some("defend") | Some("defence") => match words.next() {
             None | Some("status") | Some("help") => {
                 let p = world.defense_posture();
@@ -3952,7 +3952,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 let path = std::path::PathBuf::from("var/worlds")
                     .join(&orb.name)
                     .join("chronicle.tlv");
-                // #37: the saved world becomes VISIBLE — the ledger
+                // #37: the saved world becomes visible — the ledger
                 // exports it beside the NPCs (civilization = the
                 // sealed line, else the active operator).
                 let civ = world
@@ -4483,7 +4483,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                             reading
                         );
                     }
-                    // BOOK-1: the four above are the CHARTER's. A line
+                    // BOOK-1: the four above are the Charter's. A line
                     // may mint its own, and a display that showed only
                     // four would imply the set is closed.
                     let minted: Vec<_> =
@@ -4525,7 +4525,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
         // GROWTH-1 — the six axes, carried whole. No aggregate: six
         // readings and no score, because collapsing them is the struck
         // C-gate under a sixth name.
-        // ── HISTORY AS A PLACE (#43) — the chronicle, walkable ──────
+        // ── history as A place (#43) — the chronicle, walkable ──────
         Some("eras") | Some("history") => {
             let receipts = world.chronicle().receipts();
             println!(
@@ -4592,7 +4592,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
             Some(stamp) => {
                 // The prefix replica: re-append every receipt at or
                 // before the stamp; digests re-derive identically, and
-                // replay stands you in that world (SEAL B is why this
+                // replay stands the reader in that world (SEAL B is why this
                 // is possible at all).
                 let mut replica = cfe::vrp::Chronicle::new();
                 let mut kept = 0usize;
@@ -4652,7 +4652,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 );
             }
         },
-        // ── THE PLAYER'S ATLAS — every wired surface, listable ──────
+        // ── the player's atlas — every wired surface, listable ──────
         Some("settlements") | Some("orbs") => {
             let committed = world.committed();
             println!("{} SETTLEMENTS — {} standing", style.strong("⌂"), committed.orbs.len());
@@ -4744,11 +4744,11 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
             for vein in &committed.prospects {
                 let (family, tier, natural) =
                     cfe::dop::element_properties(&vein.element, star);
-                // ONT-2: the standing flow is DERIVED — natural minus the
+                // ONT-2: the standing flow is derived — natural minus the
                 // extraction integral; never stored, so it cannot drift or
                 // collapse.
                 let richness = cfe::dop::vein_richness(&natural, &vein.extracted, &vein.rejuvenated);
-                // The periodic EXTRAPOLATION: group and period derive
+                // The periodic extrapolation: group and period derive
                 // from the identity hash by the same modular law as
                 // family and tier — display until the chemistry lands
                 // (#37), exactly as names are display.
@@ -4766,9 +4766,9 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                     amount(&richness),
                     vein.last_assay
                 );
-                // ONT-2: THE GROUND'S CONDITION. The standing flow is shown
+                // ONT-2: the ground's condition. The standing flow is shown
                 // against the nature it can never pass. A worked vein stays
-                // worn until rejuvenation DERIVES it back (ONT-3: orbital
+                // worn until rejuvenation derives it back (ONT-3: orbital
                 // forcing / topological cycle injection) — there is no stored
                 // number ticking up between draws.
                 let worn = richness < natural;
@@ -4786,7 +4786,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
             for orb in &committed.orbs {
                 for (element, held) in &orb.elements {
                     // ELEMENT-CHEMISTRY (#37): banked matter is either
-                    // DRAWN (a vein named it) or MADE (a gem this
+                    // drawn (a vein named it) or made (a gem this
                     // world's own bond named). Both are element ids in
                     // one ledger; the chronicle says which is which.
                     let drawn = committed.prospects.iter().any(|vein| &vein.element == element);
@@ -4965,7 +4965,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
             );
             println!("{}", style.strong("╚══════════════════════════════╝"));
         }
-        // P3 — THE SPECTRUM: the cognition reading, derived whole from
+        // P3 — the spectrum: the cognition reading, derived whole from
         // the work this chronicle actually minted; there is no score.
         Some("spectrum") => {
             let payloads: Vec<&[u8]> = world
@@ -5023,7 +5023,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                     ("locality", "SCOPE     the line's record that sits here", amount(&growth.locality)),
                     ("triviality", "EMPTINESS postings that moved nothing", amount(&growth.triviality)),
                 ] {
-                    // Pad the PLAIN word before painting it — colour
+                    // Pad the plain word before painting it — colour
                     // codes count toward a format width and skew the
                     // column (the same trap as the books display).
                     println!(
@@ -5043,7 +5043,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 );
             }
         },
-        // LIT-1 — the literature's doors. Literacy is DERIVED (a line
+        // LIT-1 — the literature's doors. Literacy is derived (a line
         // that keeps its own books has learned to write), so there is
         // no verb that grants it.
         Some("literature") | Some("works") => match world.orb_by_id(*current) {
@@ -5131,7 +5131,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
             }
         }
         // BOOK-1 (19_LENS §16) — the open registry's doors. Amounts
-        // come BEFORE the name on `post` so a name may hold spaces
+        // come before the name on `post` so a name may hold spaces
         // without the parse turning ambiguous.
         Some("book") | Some("books") => {
             let sub = words.next();
@@ -5154,7 +5154,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                                 Some(value) => format!("standing {}", style.strong(&amount(&value))),
                                 None => style.dim("no entries yet").to_string(),
                             };
-                            // Pad the PLAIN word before painting it:
+                            // Pad the plain word before painting it:
                             // the colour codes count toward a format
                             // width and would skew the column.
                             let mark = match (view.chartered, view.archived) {
@@ -5265,9 +5265,9 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
             None => println!("{} usage: {}", style.bad("✗"), style.strong("planet <name>")),
         },
         Some("agent") => match words.next() {
-            // #39 THE AGENT DOOR. `agent <handle>` REGISTERS (the
+            // #39 the agent door. `agent <handle>` registers (the
             // sovereign's deed, unchanged); `agent <handle> <deed> …`
-            // SUBMITS through the door. Folded into the one verb
+            // submits through the door. Folded into the one verb
             // rather than given its own, because a second `agent`
             // command would have shadowed this one — which is exactly
             // what a first cut did, and playing it found in one line.
@@ -5387,7 +5387,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
     }
 }
 
-/// Desk entry: one-shot pane render, or interactive loop (full ANSI).
+/// Desk entry: one-shot pane render, or interactive loop (full ansi).
 fn desk_command(
     world: &mut World,
     mut pane: desk::Pane,
@@ -6030,7 +6030,7 @@ fn entity_id(world: &World, handle: &str) -> Option<u64> {
         .map(|entity| entity.entity_id)
 }
 
-/// Run one action AS an entity — the containment demo: the same verbs,
+/// Run one action as an entity — the containment demo: the same verbs,
 /// the entity's own authority.
 fn act_as(world: &mut World, actor: u64, rest: &[&str], style: &Style, current: &mut u64) {
     match rest {
@@ -6143,7 +6143,7 @@ fn coordinate(tile: u16) -> String {
 }
 
 /// N4 (NS-2 RQP) — the scanner: the lens beside the book. The
-/// CURRENT planet pays the draw; the exemplar's structure is the
+/// current planet pays the draw; the exemplar's structure is the
 /// query; hits and near-misses render with their deltas whole.
 fn scan(world: &mut World, style: &Style, prober: u64, exemplar: u64) {
     match world.scan(prober, exemplar) {
@@ -6240,9 +6240,9 @@ fn hex_prefix(element: &[u8; 32]) -> String {
     element[..4].iter().map(|byte| format!("{byte:02x}")).collect()
 }
 
-/// **#42 THE POLITICAL SPECTRUM** — `treaty <kind> with <world> [deal
+/// **#42 the political spectrum** — `treaty <kind> with <world> [deal
 /// <n>] [for <n>] [melt <p>/<q>]`, and `treaties` to read what stands.
-/// Deep-deed door: the DIPLOMATIC hub fires the same grammar through
+/// Deep-deed door: the diplomatic hub fires the same grammar through
 /// `diplomatic local …` (call-not-copy), so the iterator is generic
 /// over owned words rather than tied to the prompt's SplitWhitespace.
 pub(crate) fn treaty_command(
@@ -6278,7 +6278,7 @@ pub(crate) fn treaty_command(
             }
             // Resolve each prefix against every id this book knows —
             // banked stores and opened veins alike (a fence may name
-            // matter you hold or matter you mean to receive).
+            // matter the world holds or matter it means to receive).
             let known: Vec<[u8; 32]> = {
                 let committed = world.committed();
                 committed
@@ -6447,11 +6447,11 @@ pub(crate) fn treaty_command(
         );
         return;
     };
-    // **THE ENGINE CHOOSES NO TERMS.** A first cut defaulted the melt
+    // **The engine chooses no TERMS.** A first cut defaulted the melt
     // to a halving for a concord and a doubling for a war — two dials,
     // and the ratchet counted them. It was right to: what a pact costs
-    // is the PARTIES' business, and an engine that picks it is writing
-    // policy nobody agreed to. So a concord or a discord must SAY its
+    // is the parties' business, and an engine that picks it is writing
+    // policy nobody agreed to. So a concord or a discord must say its
     // factor; only a peace, which binds nothing, needs no terms.
     let terms = match kind {
         TreatyKind::Peace => Vec::new(),
@@ -6470,7 +6470,7 @@ pub(crate) fn treaty_command(
             }
         },
     };
-    // The trade law is proven at THIS door, fault named: a pact that
+    // The trade law is proven at this door, fault named: a pact that
     // contradicts its own kind never reaches the verb.
     let terms = match TreatyTerms::new(kind, terms) {
         Ok(terms) => terms,
@@ -6520,7 +6520,7 @@ pub(crate) fn treaty_command(
     }
 }
 
-/// **THE CORPUS BENCH (#38a)** — `corpus` serves a priced task,
+/// **The corpus bench (#38a)** — `corpus` serves a priced task,
 /// `corpus try` tests a hypothesis against the training pairs, and
 /// `corpus solve` seals the proof and mints what the carrier law
 /// prices it at.
@@ -6695,7 +6695,7 @@ fn try_program(served: &corpus::Served, program: &solver_verify::Program, style:
             }
         );
         if !ok {
-            // SHOW THE MISS. A rule that fails is information, and a
+            // Show the miss. A rule that fails is information, and a
             // bench that only says "no" teaches nothing.
             for row in corpus::beside(&got, &pair.output, "vs", color) {
                 println!("      {row}");
@@ -6725,7 +6725,7 @@ fn solve_task(
 ) {
     // The bench refuses to seal a rule that does not explain the
     // training pairs — the gate would refuse it anyway (TrainingMiss),
-    // and failing here says WHY rather than "the work did not verify".
+    // and failing here says why rather than "the work did not verify".
     let verdicts = corpus::train_verdicts(&served.task, &program);
     if verdicts.iter().any(|held| !held) {
         let held = verdicts.iter().filter(|h| **h).count();
@@ -6753,7 +6753,7 @@ fn solve_task(
         println!("{} that proof does not encode — nothing was minted", style.bad("✗"));
         return;
     };
-    // THE AMOUNT IS THE KERNEL'S OWN READING, never a number chosen
+    // The amount is the kernel's own reading, never a number chosen
     // here: the same `carrier_bound` the gate enforces at I4.
     let Some(earned) = kernel::corpus_weight(&served.task_id) else {
         println!(
@@ -6793,7 +6793,7 @@ fn solve_task(
     }
 }
 
-/// ELEMENT-CHEMISTRY (#37): did this world MAKE this identity? Read
+/// ELEMENT-CHEMISTRY (#37): did this world make this identity? Read
 /// from the chronicle, which is the only place that knows — a gem and
 /// a drawn element are both element ids in one ledger, and what
 /// separates them is the deed that put them there.
@@ -6842,7 +6842,7 @@ fn parse_perception(word: &str) -> Option<u8> {
     }
 }
 
-/// **THE GUIDED FOUNDING** (`20_FOUNDING` §1 step 3): walks the three
+/// **The guided founding** (`20_FOUNDING` §1 step 3): walks the three
 /// genesis axes one at a time — DISPOSITION, METABOLISM, PERCEPTION —
 /// then the civilization name, and seals. Flavor text is drawn from
 /// `04_CIVILIZATION_GENESIS.md`/`44_LINEAGES.md`; the codes it returns
@@ -7024,7 +7024,7 @@ fn kind_name(kind: ZoneKind) -> &'static str {
     cfe::dop::zone_word(kind)
 }
 
-/// #41: a building's word, MINTED ONES RESOLVED. The compiled table
+/// #41: a building's word, minted ones resolved. The compiled table
 /// answers for its own kinds; a minted kind's word lives in the fold,
 /// so the chronicle is asked for it — the same seam the minted species
 /// word resolves at (#45). Falls back to the generic word where the
@@ -7226,12 +7226,12 @@ fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
     println!("{} {}", style.bad("✗"), refuse_text(world, refusal, style));
 }
 
-/// The refusal's own words, without the mark. Split out so the BENCH
+/// The refusal's own words, without the mark. Split out so the bench
 /// can say what stands in a set's way in exactly the voice the deed
-/// would use if you tried it — one text, two readers.
+/// would use if the player tried it — one text, two readers.
 fn refuse_text(world: &World, refusal: &ActionRefused, style: &Style) -> String {
     let text = match refusal {
-        // K4: the emitter now refuses BEFORE writing, so these are
+        // K4: the emitter now refuses before writing, so these are
         // reachable from every caller rather than only from the judge.
         ActionRefused::WorkRefused => {
             "that payload is not a proof — the work did not verify".to_string()
@@ -7258,21 +7258,21 @@ fn refuse_text(world: &World, refusal: &ActionRefused, style: &Style) -> String 
              reached its magnetism",
             style.strong(&reach.to_string())
         ),
-        // `OffSlot` is DEAD (29_CONSTRUCTION C1): an off-slot angle
+        // `OffSlot` is dead (29_CONSTRUCTION C1): an off-slot angle
         // cannot be constructed, so no verb can be handed one to refuse.
         // The client parses user input through `Slot::from_angle` and
-        // reports the fault at ITS door instead.
+        // reports the fault at its door instead.
         ActionRefused::OrbitOccupied { orb, slot } => format!(
             "slot {slot} on that ring is held by {} — two orbs cannot share a place",
             style.strong(&orb.to_string())
         ),        // BOOK-1 (19_LENS §16) — each refusal names what stands rather
-        // than a code, because the reason IS the rule here.
+        // than a code, because the reason is the rule here.
         ActionRefused::BookAlreadyMinted { name } => format!(
             "{} is already kept — a book is its normalized name, so re-declaring it is not a second book",
             style.strong(name)
         ),
         // The empty and charter names die at the `BookName` door
-        // (29_CONSTRUCTION) — the client reports them at ITS door via
+        // (29_CONSTRUCTION) — the client reports them at its door via
         // `book_name_fault`.
         ActionRefused::CharterBookNotArchivable { name } => format!(
             "{} is a charter book and is closeable by nobody — otherwise it could be closed by whoever it convicts",
@@ -7749,7 +7749,7 @@ fn refuse_text(world: &World, refusal: &ActionRefused, style: &Style) -> String 
             "deal {} already charters a lane on this book — one charter per deal",
             style.strong(&deal.to_string())
         ),
-        // BadEta is DEAD (29_CONSTRUCTION C1): η is a `Unit` and cannot
+        // BadEta is dead (29_CONSTRUCTION C1): η is a `Unit` and cannot
         // leave [0,1), so no verb can be handed one to refuse.
         ActionRefused::EconomicallyWalled { melt } => format!(
             "the void takes {} of every unit at this distance — this pair is economically WALLED; charter a route or trade nearer",
@@ -7792,7 +7792,7 @@ fn refuse_text(world: &World, refusal: &ActionRefused, style: &Style) -> String 
             "the terrain is already charted — one seed per star, forever (02 §2.5); {} reads the map",
             style.strong("terrain")
         ),
-        // THE COVENANT IS A T3 INSTRUMENT (operator ruling 2026-08-05).
+        // The covenant is A T3 instrument (operator ruling 2026-08-05).
         // The refusal names the seat that bars it, so the way down is
         // legible: the instrument opens to the common band.
         ActionRefused::CovenantAboveTheCommon { line, station } => format!(
@@ -7830,10 +7830,10 @@ fn refuse_text(world: &World, refusal: &ActionRefused, style: &Style) -> String 
             "orb {} is already sited — an orbit does not move",
             style.strong(&orb.to_string())
         ),
-        // BadSiting is DEAD (29_CONSTRUCTION C1): albedo is a `Unit`
+        // BadSiting is dead (29_CONSTRUCTION C1): albedo is a `Unit`
         // and the radius a `Positive` — the client's parse doors report
         // an out-of-range argument before any verb sees it.
-        // BadTransfer is DEAD (29_CONSTRUCTION C1): Between, Positive
+        // BadTransfer is dead (29_CONSTRUCTION C1): Between, Positive
         // and Window prove the shapes at the doors; the client reports
         // parse faults before any verb runs.
         ActionRefused::NodeAlreadyHeld { condition } => format!(
@@ -8096,7 +8096,7 @@ fn status(world: &World, style: &Style, current: u64) {
 
 fn zone_lines(orb: &ColonyOrb, style: &Style, metabolism: u8) {
     for zone in &orb.zones {
-        // G2: the panel renders the line's OWN map (04 §4) — the
+        // G2: the panel renders the line's own map (04 §4) — the
         // sealed metabolism's rations, never the v1 table verbatim.
         let (yields, rate) = cfe::dop::zone_yield(zone.kind, metabolism);
         let drains = cfe::dop::zone_upkeep(zone.kind, metabolism)
@@ -8123,7 +8123,7 @@ fn zone_lines(orb: &ColonyOrb, style: &Style, metabolism: u8) {
     }
 }
 
-/// JOURNAL-1 (08 §3): the chronicle feed for THIS world, newest first —
+/// JOURNAL-1 (08 §3): the chronicle feed for this world, newest first —
 /// a rendering of the chronicle, generated on demand, never state. The
 /// sovereign's session speaks in the reference register (the axes a
 /// registry entry would carry; the CLI world has no registry identity
@@ -8194,7 +8194,7 @@ fn journal_feed(world: &World, style: &Style) {
     }
 }
 
-/// THE WORKBENCH (43_DISTRIBUTION §7) — inspect every bench on the current
+/// The workbench (43_DISTRIBUTION §7) — inspect every bench on the current
 /// orb under one uniform render: its components, its gauges, its unmet
 /// requirements. The depot bench surfaces the whole provisioning society.
 fn workbench_panel(world: &World, style: &Style, current: u64) {
@@ -8244,7 +8244,7 @@ fn chronicle(world: &World, style: &Style) {
                     Some((class, clade)) => cfe::dop::line_synthesis_at(seed, *class, *clade),
                     None => cfe::dop::line_synthesis(seed),
                 };
-                // #45: a MINTED class resolves its word from the FOLD
+                // #45: a minted class resolves its word from the fold
                 // at the render seam — the pure draw stays fold-blind.
                 let species = match draw.class > cfe::dop::class_ceiling() {
                     true => cfe::vocabulary::fold(
@@ -9381,7 +9381,7 @@ fn chronicle(world: &World, style: &Style) {
 }
 
 /// Parse the hex an operator typed into raw bytes — a full digest or
-/// any PREFIX of one, since a prefix is what a display shows.
+/// any prefix of one, since a prefix is what a display shows.
 fn unhex_prefix(word: &str) -> Option<Vec<u8>> {
     let word = word.trim_start_matches("0x");
     if word.is_empty() || word.len() > 64 || !word.len().is_multiple_of(2) {
@@ -9393,7 +9393,7 @@ fn unhex_prefix(word: &str) -> Option<Vec<u8>> {
         .collect()
 }
 
-/// Resolve a typed prefix against the chronicle to the ONE receipt it
+/// Resolve a typed prefix against the chronicle to the one receipt it
 /// names. Zero matches or several are both refused here rather than
 /// guessed at — citing evidence is not a place to be approximately
 /// right, and the world would refuse an unknown digest anyway.

@@ -1,4 +1,4 @@
-//! docs/78 era 1, build step 2: THE PULSE AND ITS DEPLOYMENT.
+//! docs/78 era 1, build step 2: the pulse and its deployment.
 //!
 //! The founding manifest (an exact amount of each element) is deployed by one
 //! law at every tier (docs/78, "The mass split"): a centre keeps a share of
@@ -27,7 +27,7 @@ use std::path::Path;
 /// One kind's amount, by its key (`chem`: an atom `Zddd` or a cluster).
 pub type Manifest = BTreeMap<crate::chem::Kind, Ratio>;
 
-/// The deployment's grain: ONE NUCLEUS (operator 2026-10-18, the package
+/// The deployment's grain: one nucleus (operator 2026-10-18, the package
 /// as an element recipe: "every kind in the recipe is carried, never
 /// grain-dropped"). Matter is counted in nuclei; nothing smaller exists, so
 /// an amount floors to whole nuclei, exact and bounded, and a kind of a few
@@ -43,7 +43,7 @@ pub fn nucleus(x: &Ratio) -> Ratio {
     Ratio::new(x.numer() * &grid / x.denom(), grid)
 }
 
-/// A manifest's MASS, exact: its weight, holding and magnetism converged
+/// A manifest's mass, exact: its weight, holding and magnetism converged
 /// (`chem::weight`, 3Z a nucleus; operator 2026-10-24), what gravity pulls
 /// and inertia answers by. Every amount is a whole count of nuclei on the one
 /// nucleon denominator and every weight whole, so the sum stays on that
@@ -55,7 +55,7 @@ pub fn mass(m: &Manifest) -> Ratio {
     })
 }
 
-/// A manifest's HOLDING, its closed frames alone (the Z pole): what the open
+/// A manifest's holding, its closed frames alone (the Z pole): what the open
 /// frames (`magnetism`, the Q pole) are read against, as a push's open share.
 pub fn held(m: &Manifest) -> Ratio {
     m.iter().fold(ratio(0, 1), |s, (k, a)| s + a.clone() * ratio(i64::from(crate::chem::hold(k)), 1))
@@ -66,10 +66,10 @@ pub fn nuclei_per_grain() -> num_bigint::BigInt {
     num_bigint::BigInt::from(60u32).pow(30)
 }
 
-/// Nuclei per Z, as mycelium's MANIFEST carries them (ACT_DOMAIN 17).
+/// Nuclei per Z, as Mycelium's manifest carries them (ACT_DOMAIN 17).
 pub type Nuclei = BTreeMap<u16, num_bigint::BigInt>;
 
-/// A manifest of nuclei entering from the court (mycelium's MANIFEST carries
+/// A manifest of nuclei entering from the court (Mycelium's manifest carries
 /// nuclei per charge): each charge's count in grains as its element, its
 /// lightest nuclide (`Kind::element`), every kind in whole nuclei.
 pub fn from_nuclei(nuclei: &Nuclei) -> Manifest {
@@ -81,15 +81,15 @@ pub fn from_nuclei(nuclei: &Nuclei) -> Manifest {
         .collect()
 }
 
-/// BOUNCE NUCLEOSYNTHESIS (docs/97 §8–§12). The bounce's matter cools from the
+/// Bounce nucleosynthesis (docs/97 §8–§12). The bounce's matter cools from the
 /// core on the source's own clock and its nucleons exchange poles every pass,
 /// booked both ways.
-/// - THE SEAL WINDOW: where deuterium's heat falls to its grip
-///   (`nuclides::seal_window`); THE NEUTRON SHARE the exchange's own fixed
+/// - The SEAL WINDOW: where deuterium's heat falls to its grip
+///   (`nuclides::seal_window`); the neutron share the exchange's own fixed
 ///   point there (`nuclides::neutron_share`), never set.
-/// - THE SEEDS: each proton binds a neutron and deuterons pair to weight 4; an
+/// - The seeds: each proton binds a neutron and deuterons pair to weight 4; an
 ///   odd deuteron stands.
-/// - THE TABLE: the seeds climb the nucleus's convergence on the free
+/// - The table: the seeds climb the nucleus's convergence on the free
 ///   neutrons, each staying at w with `1 − σ_{w+1}` and climbing on with
 ///   `σ_{w+1} = κ + (1 − κ)·h` at the bounce's own phase (docs/97 §13), until
 ///   less than one whole nucleus arrives (docs/97 §14: no fixed cap; 1612 at
@@ -111,9 +111,9 @@ pub fn founding(nuclei: &num_bigint::BigInt) -> Manifest {
     let mut counts: Vec<(u32, BigInt)> = Vec::new();
     // The seeds climb, each step a neutron captured, while neutrons remain.
     let mut arriving = seeds;
-    // THE FOUNDING'S PULSE PHASE (docs/97 §13): the turn its nucleons have
+    // The founding's pulse phase (docs/97 §13): the turn its nucleons have
     // made when the seal window opens, on the source's clock, `ν·δ_window`.
-    // THE FOUNDING CROSSES AT THE THROAT (docs/105 §4): every capture reads
+    // The founding crosses AT the throat (docs/105 §4): every capture reads
     // the throat's held share, the fixed point where it holds; no phase.
     let p0 = crate::polarity::throat_held();
     for w in 4..crate::nuclides::READ {
@@ -217,42 +217,42 @@ pub struct Body {
     pub satellites: Vec<Body>,
     /// The tier's unbound grains, beyond its last orbit.
     pub medium: Manifest,
-    /// docs/83 Phase 0, THE SPIN LEDGER: the body's specific spin about its
+    /// docs/83 Phase 0, the spin ledger: the body's specific spin about its
     /// centre, `ℓ = R · H` (reach times the holding inside it,
     /// `crate::ring`); its angular momentum is its mass times ℓ. Zero for a core (it does not
     /// orbit).
     pub ell: Ratio,
     /// The medium's total angular momentum (gas carries spin too).
     pub medium_spin: Ratio,
-    /// docs/83 FORMATION: a galactic core's gas as MOTES (each element's
+    /// docs/83 formation: a galactic core's gas as motes (each element's
     /// shell where the bounce's push left it, a jet batch where it landed),
     /// in the galaxy's own units; empty for every other body.
     pub gas: Vec<crate::formation::Shell>,
     /// The bell a star was born (its heart formed, docs/83); 0 for bodies
     /// laid down at the founding and for every other body.
     pub born: u64,
-    /// A galactic core's STATE (with xylarium, 2026-10-16): set at the
+    /// A galactic core's STATE (with Xylarium, 2026-10-16): set at the
     /// bounce, the throat itself, never drained: its galaxy's grains at the
     /// founding (the state holds one ring as all its grains together did).
-    /// The core's HOLDING tracks what it holds, state + grains; an emptied
+    /// The core's holding tracks what it holds, state + grains; an emptied
     /// galaxy keeps its core. Zero for every other body. Tag 9.
     pub state: Ratio,
-    /// THE FLOWS (`crate::flows`): a galaxy's matter as motes carrying
+    /// The flows (`crate::flows`): a galaxy's matter as motes carrying
     /// their state forward (tag 10 each); empty for every other body.
     pub flows: Vec<crate::flows::Mote>,
     /// The core's turning reservoir, the torques' antipole (tag 11): what it
     /// gave its motes' spin, taken from it, so `Σ m·ℓ + reservoir` holds.
     pub reservoir: Ratio,
-    /// A STAR'S OWN SPIN (tag 12; with xylarium): captured at birth from its
+    /// A star's own spin (tag 12; with Xylarium): captured at birth from its
     /// members' spread of orbital spin; its bell `ω_s = δ(ℓ_s/H_s)` is the
-    /// system's time. Kept EXTENSIVE on the universe's fixed unit, `S =
+    /// system's time. Kept extensive on the universe's fixed unit, `S =
     /// (kept/unit)·ℓ_s`, a bounded running sum of what it is paid and gives
     /// (the scalar-collapse law: a specific spin re-divided by a share that
     /// moves every echo widened without bound); its specific spin in its
     /// system's units is read from it, `ℓ_s = S·unit/kept` (`star_spin`).
     /// Zero for every other body.
     pub turning: Ratio,
-    /// ITS ORTHOGONAL SPIN (tag 21; docs/90): its spin in the orthogonal orbit's plane, the
+    /// Its orthogonal spin (tag 21; docs/90): its spin in the orthogonal orbit's plane, the
     /// orthogonal one, in the units of `ell` (its orbit spin): torqued by its
     /// parent's release, returned by its parent's hold, damped by order. Its
     /// reach swings by it each orthogonal turn, `R(ψ_⊥) = (ℓ + ℓ_⊥·response(ψ_⊥))/H`.
@@ -260,29 +260,29 @@ pub struct Body {
     /// A star's phases on its S^n, one per plane (tag 13): its members'
     /// holding-weighted phases at birth, advancing by its bell.
     pub phase: Vec<Ratio>,
-    /// A star's LOAD (tag 14; xylarium's operator 2026-10-17): its worlds'
+    /// A star's load (tag 14; Xylarium's operator 2026-10-17): its worlds'
     /// dragged manifolds, `Σ x_k` in its system's own units; it slows the
     /// star's motion through its galaxy, `v = δ_gal·H/(H + d·Σx)`.
     pub load: Ratio,
-    /// A star's REFERENCE (tag 15; operator 2026-10-18): its galaxy's own
+    /// A star's reference (tag 15; operator 2026-10-18): its galaxy's own
     /// phase at its place, one per plane, born at the star's phases and
     /// turning as the galaxy's flows do at its reach; the star's coherence is
     /// read against it, so only its spin's slip moves it.
     pub bell: Vec<Ratio>,
-    /// A REMNANT (tag 16; the closed limit ruled (a), operator 2026-10-18,
-    /// with xylarium): a star whose every rung is spent. It falls to its throat
+    /// A remnant (tag 16; the closed limit ruled (a), operator 2026-10-18,
+    /// with Xylarium): a star whose every rung is spent. It falls to its throat
     /// condition, a small throat whose other face is its galactic core;
-    /// `state` then records its CLOSING mass.
+    /// `state` then records its closing mass.
     pub remnant: bool,
-    /// A world's HEAT (tag 18; operators 2026-10-18, with xylarium): the
+    /// A world's heat (tag 18; operators 2026-10-18, with Xylarium): the
     /// agitation of the bonds that built it, cooling to the void through its
     /// unlocked face; its thermal band `r(1 ± heat)` is where it meets its
     /// neighbours (the clearing). Zero for every other body.
     pub heat: Ratio,
-    /// ITS TILT (tag 22; docs/96 step 1): its orbit spin's share in each
+    /// Its tilt (tag 22; docs/96 step 1): its orbit spin's share in each
     /// spatial plane (`flows::Mote::tilt`); empty reads isotropic.
     pub tilt: Vec<Ratio>,
-    /// ITS THROAT (tag 23; docs/96 step 3): what a core holds that its
+    /// Its throat (tag 23; docs/96 step 3): what a core holds that its
     /// bounces have not yet released. Each bounce's tide releases its share
     /// onto the continuum; empty for every other body.
     pub throat: Manifest,
@@ -299,12 +299,12 @@ impl Body {
     }
 }
 
-/// THE CORE HOLDS AS A STATE (docs/83, "The core holds as a state";
-/// operator and xylarium, 2026-10-15): a galactic core is a bell whose state
+/// The core holds as A STATE (docs/83, "The core holds as a state";
+/// operator and Xylarium, 2026-10-15): a galactic core is a bell whose state
 /// holds, on the universal clock, its galaxy's share of the manifest's
 /// holding, the same as all its galaxy's grains together. Its holding is
 /// that state plus the grains it keeps, so it dominates its galaxy's holding
-/// (quantum mass) whatever its 3-D grains. In the grains' holds. The HOME's
+/// (quantum mass) whatever its 3-D grains. In the grains' holds. The home's
 /// core is the universal core itself, whose state is the universe's
 /// (`universal_state`), counted once there, so the home adds none of its own.
 pub fn core_state(core: &Body) -> Ratio {
@@ -317,9 +317,9 @@ pub fn core_state(core: &Body) -> Ratio {
     mass(&core.total())
 }
 
-/// THE HOME (operator 2026-10-20: "build the home galaxy of the elements
+/// The home (operator 2026-10-20: "build the home galaxy of the elements
 /// authorized around the 'first' core or 'universal core' as the uplink to
-/// hypha - where the ancients live"; with xylarium, 11.0 (25)): the galaxy
+/// hypha - where the ancients live"; with Xylarium, 11.0 (25)): the galaxy
 /// whose core is the universal core, path `[0]`, at reach 0. It is never
 /// placed: it is the founding's matter the core's own gravity holds (the
 /// beads that cannot hold their spread against it, `deploy`). It shares one
@@ -359,7 +359,7 @@ pub fn star_spin(b: &Body, unit: &Ratio) -> Ratio {
     b.turning.clone() * unit.clone() / k
 }
 
-/// THE HOME'S LEDGER UNIT (the scalar-collapse law: a ledger summed in a
+/// The home's ledger unit (the scalar-collapse law: a ledger summed in a
 /// unit that moves widens without bound, each term on a new denominator):
 /// the universe's 3Z, its holding plus its magnetism, which the breath
 /// conserves exactly (burning trades holding for magnetism, never makes
@@ -369,26 +369,25 @@ pub fn universal_ledger(u: &Universe) -> Ratio {
     mass(&u.total())
 }
 
-/// THE DISC'S CUT (docs/79 and docs/83; the push law with xylarium,
-/// 2026-10-15): what a galactic core's bounce HOLDS. In the galaxy's own
+/// The disc's cut (docs/79 and docs/83; the push law with Xylarium,
+/// 2026-10-15): what a galactic core's bounce holds. In the galaxy's own
 /// units its core's state holds 1 and its grains together 1; the core's echo
 /// reach is its ring, d = 1. The bounce gives every nucleus the same impulse, and its
-/// budget is the UNIVERSAL state, re-pulsed down the hub and shared over the
+/// budget is the universal state, re-pulsed down the hub and shared over the
 /// galaxy's nuclei, so a nucleus of weight w (`atom::hold`) is carried the
 /// spin `ℓ = p·(w̄/w)` (the core's state spin is 1: the throat a ring at d = 1) (w̄ the galaxy's mean weight a nucleus, p the push share
 /// `H_disc / (H_core + H_disc)` with `H_disc` the hold of everything heavier),
-/// settles at `R = ℓ / H` (the motion law) and is HELD where the deficit
+/// settles at `R = ℓ / H` (the motion law) and is held where the deficit
 /// there beats the push, `H / (R + H) ≥ p`. Ordered by weight once, the
 /// criterion moves monotonically (each heavier nucleus held raises H and p),
-/// so the held set is everything above ONE weight w*: a single certified
+/// so the held set is everything above one weight w*: a single certified
 /// crossing on the cumulative hold, read again only when accretion or
-/// shedding changes the manifest. Nothing is stepped. REGENERATION (operator
+/// shedding changes the manifest. Nothing is stepped. Regeneration (operator
 /// 2026-10-16): each core re-pulses at full strength in its own units, so no
 /// share of the universe enters the push; a galaxy's gas comes from outside
 /// (the ocean), not from its own bounce.
-/// A BODY'S PUSH, Z AND Q TOGETHER (operator 2026-10-26: "where is Q on this
-/// Z axis - both must work together otherwise you'll get a divergence in
-/// R"): half its open frames' share of its whole weight, `½·Q/(A + Q)` (Q its
+/// A body's push, Z and Q together (ruling of 2026-10-26: Q stands on the Z
+/// axis, and both must work together, otherwise R diverges): half its open frames' share of its whole weight, `½·Q/(A + Q)` (Q its
 /// magnetism, A its holding; their sum its 3Z mass). Never one pole over the
 /// other: `½·Q/A` passed ½ wherever the open outweighed the held, breaking
 /// the luminal bound; read on the whole it is at most ½, the bound itself.
@@ -404,7 +403,7 @@ pub fn galaxy_push(grains: &Manifest) -> Option<(Ratio, Ratio, Ratio)> {
     push_cut(grains).map(|(p, h, mean, _)| (p, h, mean))
 }
 
-/// The push and its CUT: as `galaxy_push`, with the lightest kind the
+/// The push and its cut: as `galaxy_push`, with the lightest kind the
 /// throat still holds (None: it holds every kind).
 pub fn push_cut(grains: &Manifest) -> Option<(Ratio, Ratio, Ratio, Option<crate::chem::Kind>)> {
     let weight = |k: &crate::chem::Kind| crate::chem::weight(k);
@@ -436,7 +435,7 @@ pub fn push_cut(grains: &Manifest) -> Option<(Ratio, Ratio, Ratio, Option<crate:
     // the arriving ocean, docs/83).
     let cut = (0..order.len()).collect::<Vec<_>>().partition_point(|&idx| holds(idx));
     let held = above.get(cut).cloned().unwrap_or_else(|| above.last().cloned().unwrap_or_else(|| ratio(0, 1)) + order.last().map(|(k, a)| (*a).clone() * ratio(i64::from(weight(k)), 1) / total.clone()).unwrap_or_else(|| ratio(0, 1)));
-    // EXACT (operator 2026-10-23: "this is approximations leaking into an
+    // Exact (operator 2026-10-23: "this is approximations leaking into an
     // exact system"; "build the certified intervals"): the readings stand as
     // they are. Where they multiply every mote's torque each bell, the torque
     // holds the push by its bounds on the grain and reads it exactly only
@@ -446,12 +445,12 @@ pub fn push_cut(grains: &Manifest) -> Option<(Ratio, Ratio, Ratio, Option<crate:
     Some((held / h.clone(), h, mean, lightest))
 }
 
-/// THE DISPERSAL (operator 2026-10-16: "we shouldn't be sorting anything,
-/// we should be dispersing and letting the physics do the distribution").
-/// The bounce pushes every kind out and SPREADS it, never sorting it into a
+/// The dispersal (ruling of 2026-10-16: nothing is sorted; matter is
+/// dispersed and the physics does the distribution).
+/// The bounce pushes every kind out and spreads it, never sorting it into a
 /// slot: kind z is carried `ℓ_z = p·(w̄/w_z)` (regeneration: own units) and stands about
 /// `R_z = ℓ_z/H`, spread by the push across `R_z(1 − p) … R_z(1 + p)`. The
-/// part of its spread within the core's throat (`R ≤ H`) is HELD (the disc),
+/// part of its spread within the core's throat (`R ≤ H`) is held (the disc),
 /// the rest disperses as gas: every kind partly held and partly free, the
 /// heavy leaning inward, the light outward, the disc and the gas both mixed.
 /// The distribution keeps moving after (the waves, the breath): this is
@@ -477,63 +476,63 @@ pub fn disperse(grains: &Manifest) -> Manifest {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Universe {
     pub cores: Vec<Body>,
-    /// THE OCEAN OF SPACE (operator 2026-10-25: "this needs to be aligned on
+    /// The ocean of SPACE (operator 2026-10-25: "this needs to be aligned on
     /// 'jetstreams' of vacuum/continuum via the ocean of space"; "build the
-    /// ocean as motes"; with xylarium): the medium between galaxies as
-    /// MOTES, each a parcel of matter carrying its state, in transit on the
+    /// ocean as motes"; with Xylarium): the medium between galaxies as
+    /// motes, each a parcel of matter carrying its state, in transit on the
     /// vacuum leg home, never at rest. Its manifest is a reading
     /// (`Universe::medium`). Tag 24, one mote a record.
     pub ocean: Vec<crate::flows::Mote>,
-    /// THE FIRMAMENT (operator 2026-10-19: "the heaviest elements probably
-    /// dont move that much, and form an orderly 'container' around the
-    /// 'bouncing antipoles' ... the pulses over time ... should move the
-    /// firmament into order ... derived"; with xylarium, (A)): the kinds
+    /// The firmament (ruling of 2026-10-19: the heaviest elements move little
+    /// and form an orderly 'container' around the 'bouncing antipoles'; the
+    /// pulses over time move the firmament into order, derived; with
+    /// Xylarium, (A)): the kinds
     /// the founding's Wellspring holds stay at the singularity as motes, each
     /// at its capture phase, torqued by the universal bounce each echo by its
     /// own inertia (the heaviest barely move). What order its phases gather
     /// into is a reading, never set. Tag 19, one mote a record.
-    // THE FIRMAMENT is the universal core's held cut (docs/101 §2, B1): its
+    // The firmament is the universal core's held cut (docs/101 §2, B1): its
     // motes stand in the home's own flows, read by `Universe::firmament`.
-    /// The unit of mass: the deepest core's hole AT THE FOUNDING. A hole is
+    /// The unit of mass: the deepest core's hole AT the founding. A hole is
     /// set by the bounce and does not drain when its disc jets away
-    /// (regeneration; with xylarium: the unit is the core's state, never its
+    /// (regeneration; with Xylarium: the unit is the core's state, never its
     /// current disc). Tag 8.
     pub unit: Ratio,
-    /// THE UNIVERSAL BELL'S PERIOD, in bells (tag 17; operator 2026-10-18,
+    /// The universal bell's period, in bells (tag 17; operator 2026-10-18,
     /// derived): the echo bubble's round trip at the founding, a ring out to
     /// the outermost shell and back, held by the throat on the way, `2(R + H)`
     /// whole bells. "The bounce grows, the echo grows ... to the steady
     /// implosion of the echo bubble." Saves from before read the stand-in.
     pub t_u: u64,
-    /// THE DENSEST ELEMENT (tag 25; docs/97 §14, operator 2026-10-27: "no
+    /// The densest element (tag 25; docs/97 §14, operator 2026-10-27: "no
     /// fixed cap"): the founding's heaviest nuclide, where its climb ended;
     /// every later climb (the stars' captures, the burn's product) stops
     /// there.
     pub densest: u32,
 }
 
-/// THE PULSE: the manifest deployed from `seed`. The unit of mass is the
+/// The pulse: the manifest deployed from `seed`. The unit of mass is the
 /// deepest core's hole.
-/// THE FOUNDING CASCADE (operators 2026-10-18, xylarium 11.0 (15), the
+/// The founding cascade (operators 2026-10-18, Xylarium 11.0 (15), the
 /// equitable formula; "the unlocked face - it's a hemisphere, keep it"). The
 /// stack builds by the capture chain (Z ascending); each capture's share is
 /// the unlocked face at its own event, `s = ½·R/(R + H)` with `R = held` so
 /// far and `H = 1 + held` (a hemisphere, never a static ½). The epicentre's
-/// spin is their sum, `K = Σ s`. BURSTS empty the stack from the top
-/// (heaviest first) on one hemisphere and the EXPANSION fills from the base
+/// spin is their sum, `K = Σ s`. Bursts empty the stack from the top
+/// (heaviest first) on one hemisphere and the expansion fills from the base
 /// (lightest first) on the other, so every kind is pushed by `K + s_i`, the
-/// whole spin plus its STACK's share once (the stacks the weight profile's
+/// whole spin plus its stack's share once (the stacks the weight profile's
 /// beads, heaviest first), and carried `ℓ_z = (K + s_i)·w̄/w_z`
 /// to `R_z = ℓ_z/H` (w̄ the amount-weighted mean weight). A kind whose spread
-/// stays within the throat, `R_z(1 + s_final) ≤ 1`, is HELD by the
+/// stays within the throat, `R_z(1 + s_final) ≤ 1`, is held by the
 /// Wellspring; the rest stand in expanding shells at their own reaches, by
 /// weight ("distributed by weight orthogonally - think of a sphere
-/// expanding"). Returns (the Wellspring's held kinds, the GALAXIES: each a
+/// expanding"). Returns (the Wellspring's held kinds, the galaxies: each a
 /// bead of the shells, (its pinch's reach in throat radii, its kinds)).
 /// No draws: the galaxies are the shells' own beads.
 pub fn cascade(manifest: &Manifest) -> (Manifest, Vec<(Ratio, Manifest)>, Ratio) {
-    // ON THE GRAIN, OWED EXACT (operators 2026-10-24, with xylarium: "we
-    // cannot have approximations"): the filter no longer nests its means (it
+    // On the GRAIN, owed exact (ruling of 2026-10-24, with Xylarium: no
+    // approximations): the filter no longer nests its means (it
     // reads the release, below), but the exact spin K sums ~200 distinct
     // denominators and every reach carries it, so the passes are owed as
     // certified readings (design law 11) before the grain comes off.
@@ -557,7 +556,7 @@ pub fn cascade(manifest: &Manifest) -> (Manifest, Vec<(Ratio, Manifest)>, Ratio)
     let spin = share.iter().fold(ratio(0, 1), |a, b| a + b.clone());
     let h = ratio(1, 1) + held.clone();
     let s_final = face(&held);
-    // THE STACKS (11.0 (15), with xylarium 2026-10-24: "the stack's own BEADS
+    // The stacks (11.0 (15), with Xylarium 2026-10-24: "the stack's own beads
     // by weight (the beading law at the founding), never sized"): the kinds
     // heaviest first (ties in capture order), the weight profile `amount·w`
     // cut at its local minima, each run between cuts a stack. A stack's share
@@ -582,7 +581,7 @@ pub fn cascade(manifest: &Manifest) -> (Manifest, Vec<(Ratio, Manifest)>, Ratio)
         }
     }
     close(from, prof.len(), &mut stack_share);
-    // Every kind leaves as a SHELL: a mix at one reach (with xylarium: shells
+    // Every kind leaves as a SHELL: a mix at one reach (with Xylarium: shells
     // as mixes, so a passage adds to a mix, never a new shell).
     let mut shells: Vec<(Manifest, Ratio)> = kinds
         .into_iter()
@@ -599,23 +598,23 @@ pub fn cascade(manifest: &Manifest) -> (Manifest, Vec<(Ratio, Manifest)>, Ratio)
         .collect();
     // Released heaviest first (deepest reach first).
     shells.sort_by(|a, b| a.1.cmp(&b.1));
-    // THE FILTER (operators 2026-10-18, (6) "filtered through the heaviest of
-    // heavy"; with xylarium, 11.0 (15): "every later, lighter stack passes OUT
-    // THROUGH the heavy stacks that stay in - each passage a MEETING"): each
+    // The filter (operators 2026-10-18, (6) "filtered through the heaviest of
+    // heavy"; with Xylarium, 11.0 (15): "every later, lighter stack passes out
+    // through the heavy stacks that stay in - each passage a meeting"): each
     // lighter shell passes out through every heavier shell inside its reach,
     // each passage a meeting by the one law. Shells are isotropic, so a whole
     // passage is contact ½ and a passage ending within the other's spread is
     // ½ of the share crossed. The grip split as at every tier (s the
     // tightness ratio, `D = M/(M + 1 − contact)`, T the deficits' contrast):
-    // the gripped fraction `g = min(s·D, T)/T` is CAUGHT, and the heavier
+    // the gripped fraction `g = min(s·D, T)/T` is caught, and the heavier
     // shell gives `contact·g` times the lighter's mass share of its mix, which
     // rides out with the lighter shell.
-    // ALL AT ONCE, AGAINST THE RELEASE (operator 2026-10-24, with xylarium;
+    // ALL AT once, against the release (operator 2026-10-24, with Xylarium;
     // the design law: no fill orders; the scalar-collapse law: a reach re-
     // averaged after each catch nests its means and its exact width explodes):
     // every passage reads both shells as released; where lighter shells take
     // more of a kind than a shell holds, every take of it is scaled by what it
-    // holds over what is asked, so none gives more than it has; each shell's reach is then ONE holding-
+    // holds over what is asked, so none gives more than it has; each shell's reach is then one holding-
     // weighted mean of its parts' release reaches (`Σ m·ℓ` unchanged by the
     // drag). Matter caught is not caught again in the same founding.
     let delta = |r: &Ratio| h.clone() / (r.clone() + h.clone());
@@ -707,7 +706,7 @@ pub fn cascade(manifest: &Manifest) -> (Manifest, Vec<(Ratio, Manifest)>, Ratio)
         if m.is_empty() {
             continue;
         }
-        // THE VESSEL SET BY THE GRIP (operator 2026-10-20, with xylarium):
+        // The vessel set by the grip (operator 2026-10-20, with Xylarium):
         // the Wellspring keeps, of what its throat holds by reach, only the
         // kinds no passing shell can grip (`atom::vessel`, the heaviest seam
         // to the third sealed shell); whatever else it holds is grippable and
@@ -726,10 +725,10 @@ pub fn cascade(manifest: &Manifest) -> (Manifest, Vec<(Ratio, Manifest)>, Ratio)
             out.push((m, reach));
         }
     }
-    // THE SHELLS BEAD INTO GALAXIES: shells whose spreads `R(1 ± s_final)`
+    // The SHELLS bead into galaxies: shells whose spreads `R(1 ± s_final)`
     // overlap link (transitively); along each, the superposed hold pinches at
     // its maxima and parts at its minima; each bead is a galaxy at its pinch,
-    // its mixes SUMMED (a kind arriving twice is added, never overwritten).
+    // its mixes summed (a kind arriving twice is added, never overwritten).
     out.sort_by(|a, b| a.1.cmp(&b.1));
     let mut runs: Vec<Vec<usize>> = Vec::new();
     let mut edge = ratio(0, 1);
@@ -773,20 +772,20 @@ pub fn cascade(manifest: &Manifest) -> (Manifest, Vec<(Ratio, Manifest)>, Ratio)
         }
         bead(from, run.len());
     }
-    // THE BUBBLE'S ECHO: a ring out to the outermost shell and back, held by
+    // The bubble's echo: a ring out to the outermost shell and back, held by
     // the throat on the way, `2(R + H)`.
     let outermost = out.iter().map(|(_, r)| r.clone()).max().unwrap_or_else(|| ratio(0, 1));
     (wellspring, galaxies, ratio(2, 1) * (outermost + h))
 }
 
 pub fn deploy(manifest: &Manifest) -> Option<Universe> {
-    // THE FOUNDING CASCADE (above): the Wellspring holds what stays within its
+    // The founding cascade (above): the Wellspring holds what stays within its
     // throat; its held kinds are the universe's medium about it (the central
     // galaxy's cut is read from them once the ocean is motes: owed); every
     // galaxy is a bead of the expanding shells, at its pinch's reach. No
     // draws. A bead too slight to hold a hole of a nucleus stays medium.
     let (wellspring, beads, echo) = cascade(manifest);
-    // THE GALAXIES CARRY THE WHOLE MIX (docs/97 §12; docs/78: "every share
+    // The galaxies carry the whole mix (docs/97 §12; docs/78: "every share
     // carries the manifest's composition in proportion"): each bead keeps its
     // place and its mass and takes the beads' pooled composition in
     // proportion to its mass, in whole nuclei; what flooring leaves joins the
@@ -817,11 +816,11 @@ pub fn deploy(manifest: &Manifest) -> Option<Universe> {
     // The bell's period in whole bells; a core ring is a quarter of it, so a
     // founding whose echo cannot carry one ring a quarter is refused.
     let t_u: u64 = echo.ceil().to_integer().try_into().ok().filter(|t: &u64| *t >= 4)?;
-    // THE FIRMAMENT: the Wellspring's held kinds stay at the singularity as
+    // The firmament: the Wellspring's held kinds stay at the singularity as
     // motes at their capture phases (`flows::founding`), never poured into
     // the ocean.
     let firmament = if wellspring.is_empty() { Vec::new() } else { crate::flows::founding(&wellspring, None)? };
-    // Beads too slight to hold a hole of a nucleus stay the OCEAN: motes at
+    // Beads too slight to hold a hole of a nucleus stay the ocean: motes at
     // their beads' reach, on the vacuum leg (set down below, once the
     // galaxies inside them are known).
     let mut slight: Vec<(Ratio, Manifest)> = Vec::new();
@@ -838,16 +837,16 @@ pub fn deploy(manifest: &Manifest) -> Option<Universe> {
     // The singularity's state (1) and the firmament it holds (its holding
     // share, as matter).
     let firm = if whole.is_zero() { ratio(0, 1) } else { firmament.iter().fold(ratio(0, 1), |s, x| s + x.amount.clone() * crate::flows::weight(&x.key)) / whole.clone() };
-    // A BEAD STANDS AS A GALAXY ONLY WHERE IT HOLDS ITS OWN (with xylarium,
+    // A bead stands as A GALAXY only where it holds its own (with Xylarium,
     // 11.0 (25); gravity's reach, one grammar at every tier, operator
     // 2026-10-18): the pinch between the universal core and a bead at reach R
-    // is `d = R·H_b/(H_b + H_inside)`. H_b is the bead's OWN matter, w (a
+    // is `d = R·H_b/(H_b + H_inside)`. H_b is the bead's own matter, w (a
     // bead not yet standing has no throat, as a binding binds by its own λw);
     // H_inside is the enclosed hold, the singularity's state 1, the
     // firmament, and every galaxy standing inside at its standing hold 2w.
     // Its spread `R·s_final` (s_final = ½·1/(1 + 2) = 1/6, the cascade's last
     // face with all of it held) must lie within d. A bead that cannot hold its
-    // spread is the universal core's own: its matter is the HOME.
+    // spread is the universal core's own: its matter is the home.
     let mut home = Manifest::new();
     {
         let s_final = ratio(1, 6);
@@ -868,7 +867,7 @@ pub fn deploy(manifest: &Manifest) -> Option<Universe> {
         }
         shares = kept;
     }
-    // THE BIG BANG POPULATES THE UNIVERSE (docs/78): each core keeps its disc,
+    // The big bang populates the universe (docs/78): each core keeps its disc,
     // and its galaxy's first generation of star systems and their planets is
     // laid down by the tidal law; what forms no system is the galaxy's medium,
     // gas the breath later forms into new systems. A core stands where the cut
@@ -878,10 +877,10 @@ pub fn deploy(manifest: &Manifest) -> Option<Universe> {
     // The unit is the deepest galactic hole; with no galaxy standing, the
     // home's.
     let unit = discs.iter().map(mass).max().filter(|m| !m.is_zero()).or_else(|| Some(mass(&disperse(&home))).filter(|m| !m.is_zero()))?;
-    // FORMATION (docs/83): no system is placed. Each core keeps its disc;
-    // the rest is its galaxy's GAS, laid down as motes where the push left
+    // Formation (docs/83): no system is placed. Each core keeps its disc;
+    // the rest is its galaxy's gas, laid down as motes where the push left
     // each element; stars collapse from it as it cools (`breath`).
-    // THE GALAXIES ORBIT THE UNIVERSAL SINGULARITY (operator): inside out,
+    // The galaxies orbit the universal singularity (operator): inside out,
     // each about the universal state plus every core inside it (each core
     // its galaxy's state and grains, 2·w_j), by the motion law, in core
     // rings; a core ring is a quarter of the bell's period in bells (the universe's own echo is the
@@ -906,7 +905,7 @@ pub fn deploy(manifest: &Manifest) -> Option<Universe> {
         }
         k += ring.len();
     }
-    // THE OCEAN at the founding: each slight bead's kinds as motes at its
+    // The ocean at the founding: each slight bead's kinds as motes at its
     // reach, turning at the balance of that place about the singularity and
     // every galaxy inside it (the galaxies' own law), on the vacuum leg.
     let base_in = ratio(1, 1) + firm.clone() + weight_of(&home);
@@ -925,8 +924,8 @@ pub fn deploy(manifest: &Manifest) -> Option<Universe> {
         .zip(discs)
         .zip(orbits)
         .map(|(((i, m, _), _disc), (radius, period, ell))| {
-            // THE THROAT HOLDS (docs/96 step 3; operator 2026-10-26: "each
-            // bounce from the core doesnt 'throw' - it pushes"): a galaxy's
+            // The throat holds (docs/96 step 3; ruling of 2026-10-26: each
+            // bounce from the core does not 'throw', it pushes): a galaxy's
             // grains stand in its core's throat at the founding, its state
             // its grains; every bounce's tide releases its share onto the
             // continuum (`breath`), and the void distributes it.
@@ -934,7 +933,7 @@ pub fn deploy(manifest: &Manifest) -> Option<Universe> {
             Some(Body { ell_orth: ratio(0, 1), path: vec![u64::from(i)], radius, period, kept: Manifest::new(), satellites: Vec::new(), medium: Manifest::new(), ell, medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state, flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1), tilt: Vec::new(), throat: m })
         })
         .collect::<Option<Vec<Body>>>()?;
-    // THE UNIVERSAL CORE'S OWN GALAXY, the home (docs/101 §2, B1): always
+    // The universal core's own GALAXY, the home (docs/101 §2, B1): always
     // standing; its throat the matter its gravity holds, its flows the
     // firmament (its held cut, counted in its `kept`), never a second list.
     let mut firm_kept = Manifest::new();
@@ -948,14 +947,14 @@ pub fn deploy(manifest: &Manifest) -> Option<Universe> {
     Some(Universe { cores, ocean, unit, t_u, densest })
 }
 
-/// THE GALAXIES ORBIT, DERIVED (operator 2026-10-19: "fixed reach and
-/// period - needs to be derived ... if you still have fixed reach - then you
-/// dont have gravitational interconnections between the universes core and
-/// the galactic cores"; with xylarium). Each universal echo, read inside out
+/// The galaxies orbit, derived (ruling of 2026-10-19: reach and period are
+/// derived, never fixed; a fixed reach leaves no gravitational
+/// interconnection between the universe's core and the galactic cores;
+/// with Xylarium). Each universal echo, read inside out
 /// by spin, every galactic core stands where its spin meets the holding
 /// inside it, `R = ℓ/H` in core rings (the motion law, as at the founding):
 /// `H` the singularity's state (1) plus every core inside (`2·w`, w its
-/// share of the universe's holding, LIVE). Its period follows, `P = 1 + R/H`
+/// share of the universe's holding, live). Its period follows, `P = 1 + R/H`
 /// (in bells, a quarter of the bell's period a ring), and its orbit's phase advances by the echo's
 /// four rings at its deficit, `4·δ`, `δ = H/(R + H)`. Its specific spin is
 /// kept, so a galaxy moves only as the holding inside it changes: what one
@@ -963,7 +962,7 @@ pub fn deploy(manifest: &Manifest) -> Option<Universe> {
 /// live reach. Returns the cross and the firmament torque's identity residual
 /// (its spin moved plus the singularity's reservoir moved: zero where paid
 /// exactly).
-/// THE OCEAN'S FRAME: the universe's enclosure as the galaxies' orbits read
+/// The ocean's FRAME: the universe's enclosure as the galaxies' orbits read
 /// it (`orbit_galaxies`), in core rings: the singularity's state 1, the
 /// firmament, the home's matter at the centre (its state is the
 /// singularity's, counted once), every other galaxy at its orbit spin by
@@ -994,15 +993,15 @@ pub fn orbit_galaxies(u: &mut Universe) -> (crate::enfold::Cross, Option<Ratio>)
     let planes = crate::flows::PLANES;
     let mut order: Vec<usize> = (0..u.cores.len()).collect();
     order.sort_by(|&a, &b| u.cores[a].ell.cmp(&u.cores[b].ell).then(a.cmp(&b)));
-    // THE FIRMAMENT'S TORQUE (with xylarium): the universal bounce torques it
-    // each echo, at full amplitude (½), about the ENCLOSED hold (the
+    // The firmament's torque (with Xylarium): the universal bounce torques it
+    // each echo, at full amplitude (½), about the enclosed hold (the
     // singularity's state, 1, plus every firmament mote strictly inside),
     // each kind by its own inertia: the one torque law (`flows::torque`), its band
     // the bounce's push on the firmament's open frames (`½ ×` its open share)
     // and the singularity's hold drawing each mote back by `½·δ(R)·ℓ`
     // (operator 2026-10-19, "the missing antipole"), so each kind settles
     // parted by its inertia, never placed; through the centre where a torque
-    // passes it. PAID BY THE SINGULARITY: the home stands at the source (its
+    // passes it. Paid by the singularity: the home stands at the source (its
     // state is the singularity's) and keeps its reservoir in the universe's
     // own units, the firmament's, so what the torques give the firmament the
     // home's reservoir gives up (`Σ m·ℓ + reservoir` exact).
@@ -1010,7 +1009,7 @@ pub fn orbit_galaxies(u: &mut Universe) -> (crate::enfold::Cross, Option<Ratio>)
     // The singularity's reservoir and the firmament's spins are booked in the
     // home's fixed ledger unit; the hold is read in shares of the whole.
     let ledger_u = universal_ledger(u);
-    // THE FIRMAMENT'S ORDER (B1): the universal core's held cut is torqued
+    // The firmament's order (B1): the universal core's held cut is torqued
     // with the rest of its flows by the one torque law (`breath`); here only
     // its order, matter pushing matter apart by its open frames
     // (`flows::repel`, at the bounce's push), on the motes within its throat.
@@ -1025,7 +1024,7 @@ pub fn orbit_galaxies(u: &mut Universe) -> (crate::enfold::Cross, Option<Ratio>)
             }
         }
     }
-    // THE OCEAN IN TRANSIT (operator 2026-10-25: "jetstreams of
+    // The ocean in transit (operator 2026-10-25: "jetstreams of
     // vacuum/continuum via the ocean of space"; never at rest): the
     // universal bounce torques every ocean mote by the one law about the
     // ocean's frame (the band held back, as for a galaxy's motes), its
@@ -1078,11 +1077,11 @@ pub fn orbit_galaxies(u: &mut Universe) -> (crate::enfold::Cross, Option<Ratio>)
     (cross, identity)
 }
 
-/// MAGNETISM (operator 2026-10-15, "transduction via magnetism"): an
+/// Magnetism (operator 2026-10-15, "transduction via magnetism"): an
 /// atom's open frames (its unpaired electrons) are its magnetic moments, so
 /// a manifest's magnetism is its grains' unpaired counts. Holding is
-/// `3Z − unpaired` a nucleus (`atom::hold`), so HOLDING + MAGNETISM = 3Z,
-/// which fusion conserves (it conserves Z): pairing frames TRANSDUCES
+/// `3Z − unpaired` a nucleus (`atom::hold`), so holding + magnetism = 3Z,
+/// which fusion conserves (it conserves Z): pairing frames transduces
 /// magnetism into holding, unpairing holding into magnetism, and the light
 /// a fusion releases is that transduction's flux through the continuum
 /// face, never mass.
@@ -1093,7 +1092,7 @@ pub fn magnetism(m: &Manifest) -> Ratio {
     })
 }
 
-/// THE SPIN LEDGER's total (docs/83 Phase 0): every orbiting body's mass
+/// The spin ledger's total (docs/83 Phase 0): every orbiting body's mass
 /// times its specific spin in both orbits (docs/90), and every medium's
 /// spin, in units of the unit mass. The motes' spins and the cores'
 /// reservoirs are kept in each galaxy's own units and are not in it, so it
@@ -1116,8 +1115,8 @@ pub fn firmament_of(u: &Universe) -> Vec<(usize, usize)> {
 }
 
 impl Universe {
-    /// THE FIRMAMENT (docs/101 §2, B1): the universal core's held cut, the
-    /// motes of its own flows the cut holds WHOLLY (`flows::held`: the spread
+    /// The firmament (docs/101 §2, B1): the universal core's held cut, the
+    /// motes of its own flows the cut holds wholly (`flows::held`: the spread
     /// `R(1 ± p)` within the throat in both planes, at the universal bounce's
     /// push ½), in its one enclosure. A reading, never a second list.
     pub fn firmament(&self) -> Vec<crate::flows::Mote> {

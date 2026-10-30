@@ -1,14 +1,14 @@
-//! THE NUCLIDES (docs/97; operator 2026-10-26: "built as the inverse of
-//! xylarium where Q is the proton and Z is the neutron and R is the phase
-//! state of the electron"). A kind's atom is a NUCLIDE named by its weight
+//! The nuclides (docs/97; operator 2026-10-26: "built as the inverse of
+//! Xylarium where Q is the proton and Z is the neutron and R is the phase
+//! state of the electron"). A kind's atom is a nuclide named by its weight
 //! `w = Q + Z`, its nucleons. Its protons and neutrons are read off the
-//! nucleus's convergence on S^11 (xylarium's fibres, inverted), never a
+//! nucleus's convergence on S^11 (Xylarium's fibres, inverted), never a
 //! table:
 //!
 //! - nucleon ends arrive one at a time on S^11, whose degree-l harmonics give
 //!   `d(l) = C(l + 11, 11) − C(l + 9, 11)` independent directions;
-//! - an end first claims a free direction ALONE: a lone end is open, a PROTON;
-//! - once every direction of the open degree is claimed, the next end BINDS
+//! - an end first claims a free direction ALONE: a lone end is open, a proton;
+//! - once every direction of the open degree is claimed, the next end binds
 //!   into a lone end: a FIBRE, one proton and one neutron counter-turning;
 //! - a degree closes when every direction holds a fibre; turning n holds the
 //!   degrees 0..n − 1.
@@ -33,8 +33,8 @@ pub fn directions(l: u64) -> u64 {
     choose(l + 11, 11) - if l >= 2 { choose(l + 9, 11) } else { 0 }
 }
 
-/// A NUCLIDE'S PLACE ON S^11 (docs/100 §1; xylarium 11.0 (13): "a kind's
-/// HARMONIC WEIGHT is its place, never its mass alone"), read off the
+/// A nuclide's place on S^11 (docs/100 §1; Xylarium 11.0 (13): "a kind's
+/// harmonic weight is its place, never its mass alone"), read off the
 /// convergence as its last end arrived: its turning `n` (it holds the
 /// degrees `0..n − 1` closed), its open degree `l` (the harmonic its outer
 /// ends stand on), and of that degree's `dirs` directions the ends claimed
@@ -144,7 +144,7 @@ pub fn coherence(w: u32) -> Option<cfe::ratio::Ratio> {
     Some(cfe::ratio::ratio(i64::from(2 * neutrons(w)?), i64::from(w)))
 }
 
-/// Whether the lone end at weight `w` was a capture of a NEUTRON (it bound),
+/// Whether the lone end at weight `w` was a capture of a neutron (it bound),
 /// else of a proton (it claimed a direction alone).
 pub fn binds(w: u32) -> Option<bool> {
     let before = if w <= 1 { 0 } else { neutrons(w - 1)? };
@@ -159,7 +159,7 @@ pub fn of_protons(q: u32) -> Option<u32> {
     (protons(w)? == q).then_some(w)
 }
 
-/// A NUCLEON'S POLE IS ITS LEG (the automorphic component; docs/97 §8): on
+/// A nucleon's pole is its leg (the automorphic component; docs/97 §8): on
 /// the continuum leg (open, R forward) it is a proton, on the vacuum leg
 /// (held, R backward) a neutron.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -168,7 +168,7 @@ pub enum Pole {
     Neutron,
 }
 
-/// THE CONVERSION IS THE MÖBIUS PASS (`flows::mobius`'s map on a nucleon's
+/// The conversion is the MÖBIUS pass (`flows::mobius`'s map on a nucleon's
 /// pole): through the ring the leg turns, so the pole does; twice is the
 /// identity.
 pub fn mobius(p: Pole) -> Pole {
@@ -178,7 +178,7 @@ pub fn mobius(p: Pole) -> Pole {
     }
 }
 
-/// THE SWAP Q ↔ Z read on the convergence (the automorphism of the nucleus):
+/// The swap Q ↔ Z read on the convergence (the automorphism of the nucleus):
 /// a fibre is one proton and one neutron, so exchanging the poles of every
 /// fibre leaves the fibres, and only the lone ends change pole. Returns the
 /// swapped nuclide's (protons, neutrons): (Z, Q).
@@ -186,7 +186,7 @@ pub fn swapped(w: u32) -> Option<(u32, u32)> {
     Some((neutrons(w)?, protons(w)?))
 }
 
-/// ONE PASS OF THE FOUNDING'S EXCHANGE (the unitary component; docs/97 §8):
+/// One pass of the founding's exchange (the unitary component; docs/97 §8):
 /// of `p` protons and `n` neutrons at a pass where the bounce's bubble holds
 /// the face δ, protons cross to the vacuum leg by the held face, `p·δ`, and
 /// neutrons to the continuum by the unlocked face, `n·½(1 − δ)`, both in
@@ -194,7 +194,7 @@ pub fn swapped(w: u32) -> Option<(u32, u32)> {
 pub fn exchange(p: &num_bigint::BigInt, n: &num_bigint::BigInt, delta: &cfe::ratio::Ratio) -> (num_bigint::BigInt, num_bigint::BigInt) {
     use cfe::ratio::{ratio, Ratio};
     let whole = |x: Ratio| x.floor().to_integer();
-    // THE MASTER EQUATION (docs/105 §3): a proton binds as a fibre's partner
+    // The master equation (docs/105 §3): a proton binds as a fibre's partner
     // at the held face's rate g, a neutron frees to a lone end at the
     // unlocked face's u; booked both ways.
     let _ = ratio(0, 1);
@@ -204,7 +204,7 @@ pub fn exchange(p: &num_bigint::BigInt, n: &num_bigint::BigInt, delta: &cfe::rat
     (p - &to_n + &to_p, n - &to_p + &to_n)
 }
 
-/// THE HEAT, READ ON A BODY'S OWN CLOCK (docs/97 §11): a body at deficit δ
+/// The heat, READ on A body's own clock (docs/97 §11): a body at deficit δ
 /// receiving `nu` rings a bell turns `ν·δ` a bell; the luminal bound (one
 /// whole turn a K-step) leaves the excess as agitation, `max(0, ν·δ − 1)`.
 pub fn heat(delta: &cfe::ratio::Ratio, nu: &cfe::ratio::Ratio) -> cfe::ratio::Ratio {
@@ -212,7 +212,7 @@ pub fn heat(delta: &cfe::ratio::Ratio, nu: &cfe::ratio::Ratio) -> cfe::ratio::Ra
     (nu.clone() * delta.clone() - ratio(1, 1)).max(ratio(0, 1))
 }
 
-/// R, THE ELECTRON'S PHASE STATE (docs/97 §3, §13): the nuclide's `Q_w`
+/// R, the electron's phase STATE (docs/97 §3, §13): the nuclide's `Q_w`
 /// electrons converge on S^11 as its nucleons do, fibred share
 /// `κ_e = 2·Z(Q_w)/Q_w`; at pulse phase `p` (turns) the hemisphere law's
 /// response, `R = κ_e·(1 − 2·frac(p))`.
@@ -223,7 +223,7 @@ pub fn electron_phase(w: u32, p: &cfe::ratio::Ratio) -> Option<cfe::ratio::Ratio
     Some(kappa_e * (ratio(1, 1) - ratio(2, 1) * f))
 }
 
-/// THE ELECTRONS' BOUND SHARE (docs/105 §3, the master equation): they bind
+/// The electrons' bound share (docs/105 §3, the master equation): they bind
 /// at the held face's rate `g` and free at the unlocked face's `u`, so they
 /// stand bound at their pair share `g/(g + u) = g`, the held share at the
 /// nuclide's own place under inverse gravity. No phase, no halving.
@@ -231,7 +231,7 @@ pub fn held(_w: u32, g: &cfe::ratio::Ratio) -> Option<cfe::ratio::Ratio> {
     crate::polarity::equilibrium(g, &(cfe::ratio::ratio(1, 1) - g.clone()))
 }
 
-/// A NUCLEUS'S GRIP (docs/97 §11, §13): a fibre is two counter-turning ends
+/// A nucleus's grip (docs/97 §11, §13): a fibre is two counter-turning ends
 /// sharing one whole turn, the held end's share the held hemisphere, so a
 /// nucleus grips by `κ_w·h` at its pulse phase.
 pub fn grip(w: u32, p: &cfe::ratio::Ratio) -> Option<cfe::ratio::Ratio> {
@@ -244,7 +244,7 @@ pub fn source_clock() -> cfe::ratio::Ratio {
     cfe::ratio::ratio(2, 1)
 }
 
-/// THE SEAL WINDOW (docs/97 §11, §13): where deuterium first holds on a
+/// The SEAL WINDOW (docs/97 §11, §13): where deuterium first holds on a
 /// clock of `nu` rings a bell, its heat fallen to its grip at the source's
 /// own echo (p = 0), `ν·δ − 1 = grip_2`: `δ = (1 + grip)/ν`.
 pub fn seal_window(nu: &cfe::ratio::Ratio) -> cfe::ratio::Ratio {
@@ -254,7 +254,7 @@ pub fn seal_window(nu: &cfe::ratio::Ratio) -> cfe::ratio::Ratio {
     (ratio(1, 1) + grip(2, &crate::polarity::throat_held()).unwrap_or_else(|| ratio(0, 1))) / nu.clone()
 }
 
-/// A DYING HEART'S RELEASE (docs/97 §11): each nuclide whose grip at the
+/// A dying heart's release (docs/97 §11): each nuclide whose grip at the
 /// heart's pulse phase `p` its heat exceeds breaks into its nucleons, standing as hydrogen (the exchange
 /// returns their neutrons to the continuum): the fuel of the rapid capture.
 /// Nucleons conserved. Returns the nucleons released.
@@ -273,7 +273,7 @@ pub fn release(m: &mut crate::pulse::Manifest, a: &cfe::ratio::Ratio, p: &cfe::r
     freed
 }
 
-/// THE EXCHANGE'S FIXED POINT (docs/97 §9): where the pass's two booked
+/// The exchange's fixed POINT (docs/97 §9): where the pass's two booked
 /// directions balance, `p·δ = n·½(1 − δ)`, the neutron share is
 /// `2δ/(1 + δ)`; read at the seal window, never set.
 pub fn neutron_share(delta: &cfe::ratio::Ratio) -> cfe::ratio::Ratio {
@@ -312,7 +312,7 @@ fn climb(m: &mut crate::pulse::Manifest, w: u32, share: &cfe::ratio::Ratio) -> c
     mv
 }
 
-/// THE SLOW CAPTURE (docs/97 §10): over `rings` rings of a burning star's
+/// The slow capture (docs/97 §10): over `rings` rings of a burning star's
 /// clock at coherence `c` and pulse phase `p`, every nuclide its heart holds passes
 /// `f_H·c·σ_{w+1}` of itself to `w + 1` each ring (read at the ring's start,
 /// heaviest first so no nucleus climbs twice in one ring), f_H hydrogen's
@@ -339,7 +339,7 @@ pub fn capture_slow(heart: &mut crate::pulse::Manifest, rings: u64, c: &cfe::rat
     moved
 }
 
-/// THE RAPID CAPTURE (docs/97 §10): the matter a star returns whole, at its
+/// The rapid capture (docs/97 §10): the matter a star returns whole, at its
 /// pulse phase `p`, runs the chain at once on its seeds (every kind heavier than hydrogen, which is the
 /// fuel), each weight in turn (lightest first) passing `σ_{w+1}` of what
 /// stands there upward, until its hydrogen is spent. Nucleons conserved.
@@ -369,7 +369,7 @@ pub fn capture_rapid(m: &mut crate::pulse::Manifest, p: &cfe::ratio::Ratio, dens
     top
 }
 
-/// THE ISOMORPHIC READING (docs/97 §8): a founding's outcome set beside
+/// The isomorphic reading (docs/97 §8): a founding's outcome set beside
 /// nature's own, never imposed: (neutrons per proton among the nucleons,
 /// the helium-weight mass share, hydrogen's mass share). Nature reads about
 /// 1/7, 1/4 and 3/4.
@@ -448,7 +448,7 @@ mod tests {
 
     #[test]
     fn the_three_components_stand_apart_and_each_holds() {
-        // AUTOMORPHIC: the Möbius pass is an involution on a nucleon's pole,
+        // Automorphic: the Möbius pass is an involution on a nucleon's pole,
         // and the swap Q ↔ Z maps every seal onto itself.
         for p in [Pole::Proton, Pole::Neutron] {
             assert_eq!(mobius(mobius(p)), p);
@@ -456,7 +456,7 @@ mod tests {
         for w in [2u32, 4, 28, 208, 1092] {
             assert_eq!(swapped(w), protons(w).zip(neutrons(w)), "seal {w} is its own image");
         }
-        // UNITARY: a pass books both directions; nucleons are conserved.
+        // Unitary: a pass books both directions; nucleons are conserved.
         let (p, n) = (num_bigint::BigInt::from(1_000_000u64), num_bigint::BigInt::from(0));
         let (p1, n1) = exchange(&p, &n, &ratio(1, 3));
         assert_eq!(&p1 + &n1, &p + &n);

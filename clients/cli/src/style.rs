@@ -1,9 +1,9 @@
-//! CLI presentation — full ANSI attribute palette (CHARTER client voice).
+//! CLI presentation — full ansi attribute palette (Charter client voice).
 //!
 //! Respects `--plain` / `NO_COLOR`. Every semantic role has a color so
 //! help menus and the trade desk stay readable under full color.
 
-/// Presentation style for the netstratum CLI.
+/// Presentation style for the Netstratum CLI.
 #[derive(Clone, Copy)]
 pub struct Style {
     pub plain: bool,

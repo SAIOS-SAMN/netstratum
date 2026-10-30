@@ -1,20 +1,20 @@
-//! RULESET EPOCHS (`21_KERNEL_PARAMETERS` §11, operator ruling
+//! Ruleset EPOCHS (`21_KERNEL_PARAMETERS` §11, operator ruling
 //! 2026-08-02) — how a sealed rule changes without any past receipt
 //! changing meaning.
 //!
-//! **THE PROBLEM THIS SOLVES, measured rather than argued.** On
+//! **The problem this solves, measured rather than argued.** On
 //! 2026-08-02 `ease_of`'s values moved from a cliff to a gradient. The
 //! arithmetic was correct and every test that exercised it passed —
 //! and `conductor/tests/survey_pins.rs` failed, because `replay` and
-//! the live proposer reconstructed DIFFERENT worlds from the SAME
+//! the live proposer reconstructed different worlds from the same
 //! receipts (live `Crystal 127/16`, replay `15/16`). The transition is
 //! defined twice, so the two agree only while the sealed rules stand
 //! still. Every parameter amendment moves a sealed rule, so every one
 //! of them hits that wall.
 //!
-//! **THE FIX COSTS NOTHING ON THE WIRE.** A receipt already carries
+//! **The fix costs nothing on the wire.** A receipt already carries
 //! `stamp` (`vrp.rs:100`), already monotone and already inside the
-//! frame hash. So the ruleset a receipt is gated under is DERIVED
+//! frame hash. So the ruleset a receipt is gated under is derived
 //! from what it already holds rather than stored beside it:
 //!
 //! ```text
@@ -26,7 +26,7 @@
 //! No new field, no schema bump, no rehashing, and no historical world
 //! changes meaning — which is precisely why replay cannot drift.
 //!
-//! **SEALED RULES ARE APPEND-ONLY.** A rule is never edited; a new
+//! **Sealed rules are append-only.** A rule is never edited; a new
 //! epoch is added beside it and every prior version stays in the tree
 //! forever, because some receipt still needs it. That is the standing
 //! cost of this design and it is the correct trade — but it means a
@@ -40,18 +40,18 @@
 /// exhaustive in the kernel.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Epoch {
-    /// EPOCH 0 — everything written before the first amendment. The
+    /// Epoch 0 — everything written before the first amendment. The
     /// rules as they stood when the chain began: `ease_of` is the
     /// `== 5` cliff, `demurrage_per_tick` the flat `1/32`, `mint_bound`
     /// the fixed `0·0·0·1·4·7` ladder.
     Genesis,
-    /// EPOCH 1 — THE CONTINUOUS RULES (`21_KERNEL_PARAMETERS` §11e).
+    /// Epoch 1 — the continuous rules (`21_KERNEL_PARAMETERS` §11e).
     /// Cliffs become exact rational curves and constants become
     /// functions of standing state. Nothing here reaches backward.
     Continuous,
 }
 
-/// THE ACTIVATION POINT of [`Epoch::Continuous`].
+/// The activation POINT of [`Epoch::Continuous`].
 ///
 /// Chosen above every stamp any landed world has reached, so the
 /// amendment is inert on existing history by construction rather than

@@ -3,7 +3,7 @@
 **Status:** landed at N3 (first cut — identity, scoped grants, generation
 tagging). First consumer: the sovereign at the terminal + one contained
 agent (`engine/cfe/src/ipsal.rs`, witnesses `ipsal_scope.rs`). Supersedes
-the SAIOS-OS material (AI-scientists security research, nebula-products
+the SAIOS-OS material (AI-scientists security research, NEBULA-PRODUCTS
 README) under the ipsal-os name — SAIOS is retired.
 
 Every individual inside this internet — human, NPC, autonomous bot — is an

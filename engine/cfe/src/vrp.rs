@@ -3,9 +3,9 @@
 //! The append-only law is structural: `Chronicle::append` is the one
 //! write, and it computes both the parent link and the receipt's own
 //! digest internally — callers cannot supply either. Time is a separate
-//! organ: the clock walks ONLY by 3-of-3 unanimous attestation of the
+//! organ: the clock walks only by 3-of-3 unanimous attestation of the
 //! exact successor (NS-3 §1.3); `append` has no clock access, so a
-//! receipt is stamped with the value it is GIVEN and can never move time.
+//! receipt is stamped with the value it is given and can never move time.
 
 use crate::dop::ClosureEvent;
 
@@ -18,17 +18,17 @@ pub enum Attestation {
 
 /// A timekeeper reads the clock and attests its exact successor.
 ///
-/// **THE SEATED QUORUM IS UNANIMOUS BY CONSTRUCTION — a placeholder,
+/// **The seated quorum is unanimous by construction — a placeholder,
 /// declared 2026-08-03, not a law being enforced.** A world seats three
 /// keepers and its tick asks all three (`world/tick.rs`, the one
-/// production caller). They share ONE clock in ONE process, `attest`
+/// production caller). They share one clock in one process, `attest`
 /// consults nothing but that clock, and so the three answers are always
 /// identical: `TickRead::QuorumOpen` is unreachable through this
 /// method, and the live clock always walks. `id` is carried and never
 /// read for the same reason — there is nothing yet for keepers to
-/// differ ABOUT.
+/// differ about.
 ///
-/// This is an absent SOURCE, not an absent judgment. The tick law lives
+/// This is an absent source, not an absent judgment. The tick law lives
 /// in [`WorldClock::tick`], which refuses 2-of-3, a skip and a replay on
 /// the attestations it is handed, exactly as NS-3 §3.1 vectors it —
 /// witnessed by `the_clock_refuses_partial_skip_and_replay`
@@ -81,7 +81,7 @@ impl WorldClock {
     }
 
     /// Boot-time reinstatement (P2-PERSIST): the clock resumes at the
-    /// highest STAMPED value the chronicle proves — every tick up to it
+    /// highest stamped value the chronicle proves — every tick up to it
     /// was attested live in the era that stamped it. Ticks after the
     /// last receipt were workspace-time and are honestly lost (what has
     /// no receipt does not persist). This is not a walk: no attestation
@@ -139,7 +139,7 @@ pub struct LegacyReceipt {
 }
 
 /// The {S,G,T} receipt (doc 55, TU-1). `stamp` stays T's local-clock
-/// half (unchanged). `region_seed` is S — the COARSE galactic cell
+/// half (unchanged). `region_seed` is S — the coarse galactic cell
 /// (GALACTIC-1's `dop::region_seed_of`), never exact `(x,y,z)`: Čech
 /// cohomology is about which cover a civilization overlaps, not point
 /// masses (TU-1b ruling). `gauge` is G — a beat-level snapshot (never
@@ -286,11 +286,11 @@ impl Receipt {
                 let own = ReceiptHash(value.get(48..80)?.try_into().ok()?);
                 let count = u32::from_le_bytes(value.get(80..84)?.try_into().ok()?) as usize;
                 let mut at = 84usize;
-                // NEVER pre-allocate on an untrusted count (SEAL A): a
+                // Never pre-allocate on an untrusted count (SEAL A): a
                 // torn or corrupted frame's `count` is unbounded
                 // attacker/corruption-controlled bytes, and
                 // `Vec::with_capacity(count)` tries the allocation
-                // BEFORE the bounds-checked reads below ever get a
+                // before the bounds-checked reads below ever get a
                 // chance to fail safely on `?` — the crash is the
                 // allocation itself, not a read. Growing a `Vec::new()`
                 // costs nothing extra for the tiny counts every real
@@ -397,7 +397,7 @@ pub struct Chronicle {
     /// the caller (mirrors `set_hand`); every `append` within that beat
     /// reads the same snapshot, never recomputing mid-beat (TU-1c).
     gauge_cache: Vec<u8>,
-    /// CARRY STATE FORWARD (operator directive 2026-10-08): how many
+    /// Carry STATE forward (operator directive 2026-10-08): how many
     /// receipts precede the ones held here — drained to the cold annals on
     /// disk after a snapshot carried their state. `0` for a chronicle that
     /// holds its whole history.
@@ -542,7 +542,7 @@ impl Chronicle {
         Self { base_parent: ReceiptHash::GENESIS, ..Self::default() }
     }
 
-    /// A chronicle that holds only a TAIL: `receipts` follow `base` drained
+    /// A chronicle that holds only a tail: `receipts` follow `base` drained
     /// ones, the last of which hashed to `base_parent`. Verified from there,
     /// the same door as [`Chronicle::from_receipts`].
     pub fn from_tail(base: u64, base_parent: ReceiptHash, receipts: Vec<Receipt>) -> Result<Self, ChainRead> {
@@ -571,7 +571,7 @@ impl Chronicle {
         self.base + self.receipts.len() as u64
     }
 
-    /// DRAIN the held receipts below absolute position `upto` (always
+    /// Drain the held receipts below absolute position `upto` (always
     /// keeping the last one, so the head stays readable) and return them,
     /// oldest first. Their record stays on disk as the annals; what the live
     /// world still needs of them is carried elsewhere.
@@ -590,7 +590,7 @@ impl Chronicle {
         drained
     }
 
-    /// THE WORLD'S HISTORY as the live world reads it: the drained receipts
+    /// The world's history as the live world reads it: the drained receipts
     /// the annals keep (every non-bulk kind), then every held receipt — in
     /// order. A history reader iterates this, never `receipts()`.
     pub fn history(&self) -> impl DoubleEndedIterator<Item = std::borrow::Cow<'_, Receipt>> + Clone {
@@ -624,7 +624,7 @@ impl Chronicle {
         self.receipts.iter().any(|r| r.own().0 == *digest) || self.annals.sealed(digest)
     }
 
-    /// Reconstitute a chronicle from stored receipts — ONLY through the
+    /// Reconstitute a chronicle from stored receipts — only through the
     /// verification read: a chain that does not re-verify from its own
     /// content refuses with its first break named. Append-only holds
     /// across the process boundary because this is the one door back in.
@@ -746,7 +746,7 @@ pub fn verify_receipts(receipts: &[Receipt]) -> ChainRead {
     verify_from(ReceiptHash::GENESIS, receipts)
 }
 
-/// The same verification read over a TAIL: `receipts` must chain from
+/// The same verification read over a tail: `receipts` must chain from
 /// `parent` (the own-hash of the receipt before them), each link re-derived
 /// from its content exactly as [`verify_receipts`] does from genesis. A
 /// reader that already proved a prefix verifies only what follows it.
@@ -777,7 +777,7 @@ pub fn verify_from(parent: ReceiptHash, receipts: &[Receipt]) -> ChainRead {
     ChainRead::Intact
 }
 
-/// The normative digest layout (NS-3 §2.1), `V1` — UNCHANGED by TU-1:
+/// The normative digest layout (NS-3 §2.1), `V1` — Unchanged by TU-1:
 /// `BLAKE3( LE64(sequence) ‖ LE64(stamp) ‖ parent[32] ‖ event_bytes ‖ LE64(k)… )`.
 /// Public over raw event bytes so the NS-3 §3 vectors — whose event
 /// bytes come from the v0.4 ancestor — verify against this exact
@@ -801,7 +801,7 @@ pub fn receipt_digest(
 }
 
 /// The `V2` digest layout (TU-1): `receipt_digest`'s exact formula, with
-/// `region_seed` and `gauge` folded in AFTER provenance and BEFORE
+/// `region_seed` and `gauge` folded in after provenance and before
 /// nothing else changes — S and G are attested facts, so a tampered
 /// region or gauge sample breaks the chain exactly like a tampered event
 /// would (the whole point of stamping them: an untrusted claim about a

@@ -1,4 +1,4 @@
-//! **THE MEASURED CARRIER TABLE** (P3 benchmark, 2026-08-06 — the
+//! **The MEASURED carrier table** (P3 benchmark, 2026-08-06 — the
 //! carrier-switch ratification's data). Depth-3 sweep over the full
 //! corpus (1243 tasks, /opt/ipsal-autic-v0.4/tools/arc_full_corpus):
 //! 34 confirmed, of which 1 blind (the 283-task held-out difference).

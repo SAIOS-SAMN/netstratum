@@ -1,4 +1,4 @@
-//! THE SPAN (docs/78, design law 11, the number grammar; operator
+//! The SPAN (docs/78, design law 11, the number grammar; operator
 //! 2026-10-17): ℤ and ℚ are the singularity's two poles, ℝ the span between
 //! them. ℝ is a SPAN, never a stored value: it is held by its two exact
 //! bounds, and anything read inside it is a certified enclosure narrowed
@@ -82,7 +82,7 @@ impl Span {
         (lo <= hi).then_some(Span { lo, hi })
     }
 
-    /// DECIDE a comparison against an exact threshold, narrowing a span that
+    /// Decide a comparison against an exact threshold, narrowing a span that
     /// a reading refines (`refine` returns a narrower span inside the one
     /// given): Some(true) once the whole span stands at or above the
     /// threshold, Some(false) once it stands below, None if `rounds`
@@ -106,10 +106,10 @@ impl Span {
     }
 }
 
-/// THE CORE'S POLES (design law 11): a manifest's HOLDING is its ℤ pole
-/// (closed pairs, counted whole), its MAGNETISM its ℚ pole (the open frames);
-/// the core's STRENGTH is the span between them, holding plus magnetism (3Z
-/// a nucleus); its BALANCE is the share at the ℤ pole, holding over
+/// The core's poles (design law 11): a manifest's holding is its ℤ pole
+/// (closed pairs, counted whole), its magnetism its ℚ pole (the open frames);
+/// the core's strength is the span between them, holding plus magnetism (3Z
+/// a nucleus); its balance is the share at the ℤ pole, holding over
 /// strength (burning moves magnetism into holding with 3Z fixed: a core
 /// hardens toward 1).
 pub fn poles(holding: &Ratio, magnetism: &Ratio) -> (Span, Ratio) {

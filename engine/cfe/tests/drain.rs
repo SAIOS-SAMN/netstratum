@@ -1,4 +1,4 @@
-//! A chronicle that holds only a TAIL (the rest drained to the annals on
+//! A chronicle that holds only a tail (the rest drained to the annals on
 //! disk after a snapshot carried their state) numbers, chains, verifies and
 //! syncs exactly as the whole one would.
 

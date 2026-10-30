@@ -3,7 +3,7 @@
 //! output. Finding a solution is search (hard); verifying one is a
 //! replay of the chain (cheap). The NS-3 shape, at the solver's
 //! altitude; wiring into the world chronicle lands with the first
-//! game consumer (LAW XVII).
+//! game consumer (law xvii).
 
 use crate::grid::{Grid, Program};
 use crate::loader::Task;
@@ -106,14 +106,14 @@ pub fn verify_certificate(
     CertificateRead::Intact
 }
 
-/// **THE CARRIED DERIVATION** (Concordance 4.4 annex, ruled 2026-10-08;
+/// **The carried derivation** (Concordance 4.4 annex, ruled 2026-10-08;
 /// shared by every kernel and the court): a word's proof is a sequence of
 /// steps `(constructor_k, digest of the state after step k)`. Step k is
 /// valid when constructor_k applied to state k-1 yields a state whose digest
 /// is the carried one. A checker walks the steps locally — it never re-seals
 /// a certificate to compare, and a divergence names its step.
 ///
-/// THE STATE, plainly: the ordered grids a word acts on (for a task: every
+/// The STATE, plainly: the ordered grids a word acts on (for a task: every
 /// training input, then the test input). Its digest is
 ///
 /// ```text

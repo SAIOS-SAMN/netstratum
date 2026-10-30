@@ -1,4 +1,4 @@
-//! CONVERGE RUN — perform the same era-convergence pass `main.rs` runs at
+//! Converge run — perform the same era-convergence pass `main.rs` runs at
 //! boot, standalone, without paying the ~9-minute live-roster genesis cost.
 //! Real effect (not a dry run): verifies each archived world's chain,
 //! quarantines broken ones, places valid ones on the shared star chart, and

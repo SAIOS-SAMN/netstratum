@@ -1,29 +1,29 @@
-//! THE AXES — where an element sits.
+//! The axes — where an element sits.
 //!
-//! Five, and each DECIDES something no other can. An axis that changes
+//! Five, and each decides something no other can. An axis that changes
 //! no outcome is decoration.
 //!
-//!   LINE  (period)     DEPTH      -> the PRESSURE it demands to refine
-//!   LANE  (group)      CHARACTER  -> how much it BINDS; recurs at
+//!   LINE  (period)     DEPTH      -> the pressure it demands to refine
+//!   lane  (group)      character  -> how much it binds; recurs at
 //!                                    every line
-//!   SHELL (geometry)   ARITY      -> how MANY bind at once
-//!   PHASE (state)      THERMAL    -> which region it is workable in
-//!   SPIN  (chirality)  HANDEDNESS -> which GEM a composition names
+//!   SHELL (geometry)   ARITY      -> how many bind at once
+//!   phase (state)      thermal    -> which region it is workable in
+//!   spin  (chirality)  handedness -> which gem a composition names
 //!
-//! Recurrence along the LANE is the load-bearing property: a lane's
+//! Recurrence along the lane is the load-bearing property: a lane's
 //! character depends on the lane alone, so a civilization that has
-//! refined one element can PREDICT the next. That is what makes
+//! refined one element can predict the next. That is what makes
 //! discovery cumulative rather than a lottery.
 
 use crate::ratio::{ratio, Ratio};
 
-/// **THE LANES — widened from 8 to 10** (operator ruling 2026-08-04:
-/// *widen the lanes*), and the width is DERIVED rather than preferred.
+/// **The LANES — widened from 8 to 10** (operator ruling 2026-08-04:
+/// *widen the lanes*), and the width is derived rather than preferred.
 ///
 /// Saturation for an n-body compound is `arity · (LANES/2 + 1) / 2`, so
 /// it is a whole number for every arity exactly when `LANES/2 + 1` is
 /// even — that is, when **`LANES ≡ 2 (mod 4)`**. At 8 the figure is
-/// `arity · 5 / 2`, whole only for EVEN arities, which is why the
+/// `arity · 5 / 2`, whole only for even arities, which is why the
 /// previous landing had to record that no ternary compound could
 /// saturate. At 10 it is `arity · 3`, whole for all of them.
 ///
@@ -41,10 +41,10 @@ pub const LANES: u8 = 10;
 /// How many lines stand. The line is depth; the deepest is the most
 /// pressured and the rarest.
 pub const LINES: u8 = 7;
-/// Binding GEOMETRIES. The shell fixes how many elements enter one
+/// Binding geometries. The shell fixes how many elements enter one
 /// compound — arity `1 + shell`, so 2..=5 bodies.
 pub const SHELLS: u8 = 4;
-/// Workable STATES, one per thermal region family plus the refractory
+/// Workable states, one per thermal region family plus the refractory
 /// that works in any of them.
 pub const PHASES: u8 = 4;
 /// Handedness. Two, and it is not a scale.
@@ -53,7 +53,7 @@ pub const SPINS: u8 = 2;
 /// Every cell the table carries — the product of all five axes.
 pub const CELLS: u32 = (LINES as u32) * (LANES as u32) * (SHELLS as u32) * (PHASES as u32) * (SPINS as u32);
 
-/// WHERE AN ELEMENT SITS, and what that implies.
+/// Where an element sits, and what that implies.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Periodic {
     /// The period — depth. `1..=LINES`.
@@ -63,10 +63,10 @@ pub struct Periodic {
     /// The pressure this element needs before it will refine, rising
     /// with the line. Exact, never a float.
     pub refines_at: Ratio,
-    /// How many of its own lane an element BINDS when it compounds —
+    /// How many of its own lane an element binds when it compounds —
     /// the lane's recurring valence, identical for every line.
     pub binds: u8,
-    /// The binding GEOMETRY. `1..=SHELLS`.
+    /// The binding geometry. `1..=SHELLS`.
     pub shell: u8,
     /// How many elements enter a compound of this geometry: `1 + shell`.
     /// A compound above two is irreducibly not a pair.
@@ -80,7 +80,7 @@ pub struct Periodic {
 /// Read an element's position. Pure: the same id always reads the same
 /// cell, so the table is stable across every world that meets it.
 pub fn periodic_of(element: &[u8; 32]) -> Periodic {
-    // ERA 1 (2026-10-15): a canonical element's cell is READ FROM ITS ATOM
+    // Era 1 (2026-10-15): a canonical element's cell is READ from its atom
     // (docs/78, the atom tier), never drawn from its bytes.
     if let Some(z) = super::atom::z_of(element) {
         if let Some(cell) = atom_cell(z) {
@@ -138,7 +138,7 @@ fn atom_cell(z: u32) -> Option<Periodic> {
     })
 }
 
-/// **THE MATTER LAW'S DIGEST** (docs/58 §3) — what a universe's Big Bang
+/// **The MATTER law's digest** (docs/58 §3) — what a universe's Big Bang
 /// records of its matter: the periodic table's five axes, the resource
 /// ledger's grain, the base resources by wire code and the star classes by
 /// wire code. Two universes carry the same digest exactly when their matter

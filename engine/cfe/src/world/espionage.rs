@@ -11,7 +11,7 @@ fn eighth() -> Ratio {
 }
 
 impl World {
-    /// Pure espionage surface for DEFEND / suite.
+    /// Pure espionage surface for defend / suite.
     pub fn espionage_integrity(&self) -> EspionageIntegrity {
         EspionageIntegrity {
             intel_count: self.intel_hashes.len() as u64,

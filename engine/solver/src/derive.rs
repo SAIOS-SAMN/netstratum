@@ -1,9 +1,9 @@
-//! DERIVATION — the observation names the operator.
+//! Derivation — the observation names the operator.
 //!
 //! The struck enumeration asked "which of these 14+ operators, composed
 //! how many deep, happens to fit?" and swept up to 200,000 candidates
 //! to find out. This module asks the opposite question: *what actually
-//! CHANGED between input and output, and which operator is the one that
+//! changed between input and output, and which operator is the one that
 //! makes that change?* The answer is read, not searched.
 //!
 //! Two derivations already existed and were the only non-swept parts of
@@ -21,7 +21,7 @@
 //!     hues map consistently          → Recolor (under any symmetry frame)
 //! ```
 //!
-//! Each is a NECESSARY condition read from the observation. A candidate
+//! Each is a necessary condition read from the observation. A candidate
 //! that survives derivation is not yet a solution — the verifier still
 //! re-derives it against every training pair, and the sector door still
 //! withdraws whatever fails. Derivation narrows the reach; it never
@@ -55,7 +55,7 @@ const SYMMETRIES: [Op; 6] = [
     Op::Transpose,
 ];
 
-/// Symmetries whose SHAPE is compatible with the observation.
+/// Symmetries whose shape is compatible with the observation.
 ///
 /// A quarter turn transposes the dimensions; a mirror preserves them.
 /// Reading the shapes rules most of them out before a single cell is
@@ -82,7 +82,7 @@ fn derive_symmetries(task: &Task) -> Vec<Candidate> {
 ///
 /// Carried over from the old `derived_recolors` unchanged in spirit:
 /// for each frame, if every pair agrees on where each hue goes, that
-/// mapping IS the operator. Unobserved hues map to themselves.
+/// mapping is the operator. Unobserved hues map to themselves.
 fn derive_recolors(task: &Task) -> Vec<Candidate> {
     let prefixes: [Option<Op>; 7] = [
         None,
@@ -126,7 +126,7 @@ fn derive_recolors(task: &Task) -> Vec<Candidate> {
     found
 }
 
-/// The tiling, read off the shape ratio — and its MIRRORS read off the
+/// The tiling, read off the shape ratio — and its mirrors read off the
 /// content, rather than the sixteen combinations being swept.
 ///
 /// The old derivation emitted all 4×4 mirror pairs and let the search
@@ -160,7 +160,7 @@ fn derive_tiles(task: &Task) -> Vec<Candidate> {
     found
 }
 
-/// Object-centric operators, derived from STRUCTURAL deltas.
+/// Object-centric operators, derived from structural deltas.
 ///
 /// Each arm below is a necessary condition read off pair 0 — object
 /// counts, bounding boxes, hue variety, column mass. An operator whose
@@ -182,7 +182,7 @@ fn derive_objects(task: &Task) -> Vec<Candidate> {
     let same_dims = input.rows == output.rows && input.cols == output.cols;
     let smaller = output.rows <= input.rows && output.cols <= input.cols && !same_dims;
 
-    // CROPS — the output is a sub-box. Compare against the boxes the
+    // Crops — the output is a sub-box. Compare against the boxes the
     // observation actually contains.
     if smaller {
         let largest = &objects[0];
@@ -206,7 +206,7 @@ fn derive_objects(task: &Task) -> Vec<Candidate> {
     let in_non_bg = input.cells.iter().filter(|&&h| h != bg).count();
     let out_non_bg = output.cells.iter().filter(|&&h| h != bg).count();
 
-    // KEEP / DELETE — the object count moved.
+    // Keep / delete — the object count moved.
     if out_objects.len() < objects.len() {
         if out_objects.len() == 1 {
             push(ObjOp::KeepLargest, &mut found);
@@ -217,7 +217,7 @@ fn derive_objects(task: &Task) -> Vec<Candidate> {
         }
     }
 
-    // PAINT — the cells stayed, the hue variety collapsed.
+    // Paint — the cells stayed, the hue variety collapsed.
     if in_non_bg == out_non_bg && objects.len() > 1 {
         let in_hues: std::collections::BTreeSet<u8> =
             input.cells.iter().copied().filter(|&h| h != bg).collect();
@@ -229,7 +229,7 @@ fn derive_objects(task: &Task) -> Vec<Candidate> {
         }
     }
 
-    // GRAVITY — every column keeps its mass and the content sank.
+    // Gravity — every column keeps its mass and the content sank.
     if in_non_bg == out_non_bg && in_non_bg > 0 {
         let column_mass_holds = (0..input.cols).all(|c| {
             let before = (0..input.rows).filter(|&r| input.at(r, c) != bg).count();
@@ -251,7 +251,7 @@ fn derive_objects(task: &Task) -> Vec<Candidate> {
     found
 }
 
-/// THE REACH — every candidate the observation supports, and nothing
+/// The REACH — every candidate the observation supports, and nothing
 /// else. Order here is derivation order; a [`crate::need::Need`] may
 /// reorder it, never extend it.
 pub fn derive(task: &Task) -> Vec<Candidate> {

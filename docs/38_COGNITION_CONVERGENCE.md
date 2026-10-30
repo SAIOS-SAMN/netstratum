@@ -58,7 +58,7 @@ solve path (Pickup §8a):
   mesh-lane half; sequenced separately (task #19, after the Phase-3
   flip).
 
-## 4. Landing: novelty-gate (task #13)
+## 4. Landing: NOVELTY-GATE (task #13)
 
 **What.** The knocker for the mint door. A candidate word `w` (a
 composition that closed — or partially closed — a task) mints into the

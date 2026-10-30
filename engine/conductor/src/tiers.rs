@@ -1,6 +1,6 @@
-//! THE TIERS EMERGE (operator 2026-10-21: "ancients near the core,
-//! progenitors, stewards as realms EMERGE (important that realms emerge, not
-//! be drawn) - sovereigns, captains - and the rest"). No line is seated a tier
+//! The TIERS emerge (ruling of 2026-10-21: ancients near the core;
+//! progenitors; stewards as realms emerge, the realms emerging rather than
+//! being drawn; sovereigns and captains; and the rest). No line is seated a tier
 //! at founding; each is reached by what its lineage does:
 //!
 //! - **ancient**: arises at a core (`ancients`), the council above every seat;
@@ -62,7 +62,7 @@ fn depth(sigil: &str, parents: &BTreeMap<String, Vec<String>>) -> usize {
     n
 }
 
-/// THE SOVEREIGNS: every star system whose era-1 worlds are held by lines of
+/// The sovereigns: every star system whose era-1 worlds are held by lines of
 /// one lineage only, two or more of them, seats the lineage's eldest line
 /// there (fewest generations from its root, then the first seated).
 pub fn sovereigns(worlds: &mut [Polity], registry: &Registry, var_root: &Path) -> Vec<String> {

@@ -1,4 +1,4 @@
-//! **RCP-2 — THE EMERGENT RECIPE SPACE** (operator directive 2026-08-16: *the
+//! **RCP-2 — the emergent recipe SPACE** (operator directive 2026-08-16: *the
 //! doing-layer must be emergent, never an enum or a scalar*).
 //!
 //! The map (RCP-1) found the doing-layer was a closed `ZoneKind` enum priced over
@@ -6,26 +6,26 @@
 //! anthropocentric vestiges. RCP-2 dissolves them, honouring three immutable laws:
 //!
 //! 1. **No enum expansion.** A recipe is not a Rust variant. It is a
-//!    dynamically-synthesised transformation from open-almanac ELEMENTS into the
-//!    universal ROLES, identified by a blake3 hash of its own content — emergent,
+//!    dynamically-synthesised transformation from open-almanac elements into the
+//!    universal roles, identified by a blake3 hash of its own content — emergent,
 //!    replayable, and unlimited, with no authored dispatch.
 //! 2. **No scalar level gate.** "Technology" is not a counter. Advancement is
-//!    TOPOLOGICAL: a civilization can work an element only when its manifold's
+//!    topological: a civilization can work an element only when its manifold's
 //!    algebraic rank (`genus`, `Σ βₖ`) spans the element's own intrinsic
 //!    complexity. Reach is the gate, not a number that ticks up.
 //! 3. **Modular truncation from line one.** The recipe yields are grained onto
 //!    the melt lattice at synthesis, so a per-recipe rational can never seed the
 //!    denominator explosions the accumulators are prone to. (The nonlinear
-//!    `ℚ[x]/I` composition of MULTIPLE elements — `xᵢ·xⱼ` — is the Gröbner
+//!    `ℚ[x]/I` composition of multiple elements — `xᵢ·xⱼ` — is the Gröbner
 //!    frontier; when it lands it carries the same lazy-truncation discipline.)
 //!
 //! **Discovery (the conductor's bridge).** When a society hits an irreducible
-//! deficit `γ` in a role its current `C₀` cannot span, the engine does NOT fall
+//! deficit `γ` in a role its current `C₀` cannot span, the engine does not fall
 //! back to a static table. It searches the open blake3 element almanac for the
 //! element whose morphodynamic vector `m` projects the strongest non-zero yield
 //! into the unspanned role (`morphogen::project_material`), gated by topological
 //! reach, and mints that mapping as a `MintedRecipe`. A role no element can fill
-//! for this species yields NOTHING — the honest hole, not a forced fallback.
+//! for this species yields nothing — the honest hole, not a forced fallback.
 
 use cfe::morphogen;
 use cfe::ratio::{ratio, Ratio};
@@ -35,7 +35,7 @@ use cfe::ratio::{ratio, Ratio};
 /// denominator), not a balance dial.
 const RECIPE_GRAIN: i64 = 64;
 
-/// **AN EMERGENT RECIPE** — a hashed transformation `∏ elements → role`, NOT a
+/// **An emergent recipe** — a hashed transformation `∏ elements → role`, not a
 /// `ZoneKind` variant. Its `id` is the blake3 of its content, so the same
 /// discovery always mints the same recipe (replay-exact) and two distinct
 /// transformations never collide, across an unbounded space with no enum.
@@ -53,7 +53,7 @@ pub struct MintedRecipe {
 }
 
 /// An element's intrinsic complexity, read from its own blake3 bytes (the tier the
-/// almanac already speaks) — the TOPOLOGICAL RANK a civilization must reach to
+/// almanac already speaks) — the topological rank a civilization must reach to
 /// work it. This is what replaces `level ≥ 3`: a deep element demands a
 /// higher-genus manifold, and advancement earns reach rather than ticking a
 /// counter.
@@ -67,7 +67,7 @@ fn grain(x: Ratio) -> Ratio {
     (x * grid.clone()).round() / grid
 }
 
-/// **DISCOVER AN EMERGENT RECIPE** closing a deficit in `role`. Searches the open
+/// **Discover an emergent recipe** closing a deficit in `role`. Searches the open
 /// `almanac` for the element whose morphodynamic vector projects the strongest
 /// yield into the role under the species' projection `metabolism`, admitting only
 /// elements whose complexity the manifold's `rank` (algebraic dimension `Σ βₖ`)
@@ -85,7 +85,7 @@ pub fn discover(
     let zero = ratio(0, 1);
     let mut best: Option<([u8; 32], Ratio)> = None;
     for element in almanac {
-        // TOPOLOGICAL GATE: the manifold must reach the element's complexity.
+        // Topological gate: the manifold must reach the element's complexity.
         if reach < element_complexity(element) {
             continue;
         }
@@ -161,8 +161,8 @@ mod tests {
 
     #[test]
     fn a_role_no_element_can_fill_yields_no_recipe() {
-        // Energy for a mineral line is drawn from the thermal FLUX, not from any
-        // material axis — so no ELEMENT projects into it. The search returns an
+        // Energy for a mineral line is drawn from the thermal flux, not from any
+        // material axis — so no element projects into it. The search returns an
         // honest hole, never a forced fallback.
         let mineral = archetype(1);
         let almanac: Vec<[u8; 32]> = (0..8u8).map(element).collect();
@@ -174,7 +174,7 @@ mod tests {
 
     #[test]
     fn advancement_is_topological_not_a_scalar_level() {
-        // THE LEVEL SCALAR, DISSOLVED. A deep (tier-2) element is unworkable until
+        // The level SCALAR, DISSOLVED. A deep (tier-2) element is unworkable until
         // the manifold's algebraic rank spans its complexity — reach is the gate.
         let mineral = archetype(1);
         let mut deep = element(1);
@@ -197,7 +197,7 @@ mod tests {
         let a = discover(morphogen::STRUCT, &almanac, &mineral, &full_reach()).unwrap();
         let b = discover(morphogen::STRUCT, &almanac, &mineral, &full_reach()).unwrap();
         assert_eq!(a.id, b.id, "the same discovery mints the same recipe — replay-exact");
-        // The same element into a DIFFERENT role is a different recipe (no collision).
+        // The same element into a different role is a different recipe (no collision).
         let single = vec![a.inputs[0]];
         let struct_recipe = discover(morphogen::STRUCT, &single, &mineral, &full_reach());
         let food_recipe = discover(morphogen::FOOD, &single, &mineral, &full_reach());

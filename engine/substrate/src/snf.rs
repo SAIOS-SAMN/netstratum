@@ -1,4 +1,4 @@
-//! EXACT INTEGER SMITH NORMAL FORM — the homological reduction ground.
+//! Exact integer smith normal form — the homological reduction ground.
 //!
 //! For an integer matrix `A` (rows × cols) this computes the decomposition
 //!
@@ -77,7 +77,7 @@ fn identity(n: usize) -> Mat {
         .collect()
 }
 
-// ── ELEMENTARY OPERATIONS, each carried into BOTH the accumulating witness
+// ── elementary operations, each carried into both the accumulating witness
 //    and its inverse. A row op is a left-multiply by an elementary `E`:
 //    `A ← E·A`, `U ← E·U`, `U⁻¹ ← U⁻¹·E⁻¹`. A column op is a right-multiply:
 //    `A ← A·F`, `V ← V·F`, `V⁻¹ ← F⁻¹·V⁻¹`. The inverse of a row op on `U`
@@ -146,7 +146,7 @@ fn col_addmul(a: &mut Mat, v: &mut Mat, v_inv: &mut Mat, i: usize, j: usize, q: 
 /// Compute the exact integer Smith Normal Form of `a` with full witnesses.
 ///
 /// `a` is `rows × cols` (a ragged input is padded conceptually by treating a
-/// short row as trailing zeros is NOT done — every row must have `cols`
+/// short row as trailing zeros is not done — every row must have `cols`
 /// entries; an empty matrix is the 0×0 / r×0 / 0×c degenerate, handled).
 pub fn smith_normal_form(a: &[Vec<BigInt>]) -> Smith {
     let rows = a.len();
@@ -297,7 +297,7 @@ mod tests {
     fn a_full_rank_3x3_has_invariant_factors_2_2_156() {
         // det = 624; gcd of all entries = 2 ⇒ d₁ = 2. The Smith form is
         // diag(2, 2, 156): 2·2·156 = 624, and 2 | 2 | 156. `assert_smith`
-        // independently proves this is THE Smith form (U·A·V = D, unimodular
+        // independently proves this is the Smith form (U·A·V = D, unimodular
         // witnesses, divisibility chain — which uniquely pin the SNF).
         let a = m(&[&[2, 4, 4], &[-6, 6, 12], &[10, 4, 16]]);
         let s = assert_smith(&a);

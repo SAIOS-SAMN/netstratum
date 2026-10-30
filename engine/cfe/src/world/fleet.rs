@@ -1,7 +1,7 @@
 //! FLEET-1 — scrap, shipyards, hulls (33 Phase 3 / TASKS_TRADE_FLEET_DESK).
 //!
 //! Scrap is one pool on the orb (Q-F3). A ShipYard zone is required to
-//! mint (Q-F4). Hull capacity/η/upkeep DERIVE from role+grade — no
+//! mint (Q-F4). Hull capacity/η/upkeep derive from role+grade — no
 //! undervied stat block. Hauls with positive melt require free capacity.
 
 use super::*;
@@ -89,7 +89,7 @@ impl World {
         amount: crate::dop::Positive,
     ) -> Result<(), ActionRefused> {
         self.permitted(actor, Scope::Collect)?;
-        // #136 D3 — the element salvage debit declares its grain: the spend SMELTS
+        // #136 D3 — the element salvage debit declares its grain: the spend smelts
         // to the element grain (1/1024) so the stock stays on-grain after the draw (an
         // off-grain spend knocks an on-grain stock off it). Scrap fills with the same
         // smelted spend and the receipt carries it, so replay is byte-identical.

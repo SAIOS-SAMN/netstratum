@@ -4,7 +4,7 @@
 // Each topological region attaches its own `HorizonContext`; `dilate()`
 // (d → d+1) and `compress()` (d → d−1) execute exact rational refinements
 // of the per-region thresholds. `depth` parameterizes the smooth-prime-
-// profile-derived thresholds; the thresholds are TOPOLOGICAL BOUNDARIES
+// profile-derived thresholds; the thresholds are topological boundaries
 // (exact rational functions of `(depth, F)`), never arithmetic-safety caps.
 //
 // Lifted whole from the sealed v0.3 line (shared_primitives::{horizon,
@@ -100,7 +100,7 @@ pub enum HorizonError {
 /// The horizon depth as a `pow` exponent. Depth is a `u64` tag with
 /// unbounded refinement headroom; a materialized bound at an exponent
 /// beyond `u32::MAX` has billions of digits — physically uncomputable,
-/// never reached. The exponent clamps; the depth TAG keeps its range.
+/// never reached. The exponent clamps; the depth tag keeps its range.
 fn depth_exponent(horizon: HorizonContext) -> u32 {
     u32::try_from(horizon.depth().min(u64::from(u32::MAX)))
         .expect("clamped to u32::MAX — try_from is total")

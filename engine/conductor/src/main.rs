@@ -1,9 +1,9 @@
 //! The conductor binary — the board's heartbeat.
 //!
 //! Usage:
-//!   conductor [--var var] [--cycles N] [--cadence SECONDS] [--fold]
+//!   conductor [--var var] [--cycles N] [--cadence seconds] [--fold]
 //!
-//! ERA 1 (docs/78, docs/82): the universe is the pulse's (`<var>/pulse.bin`,
+//! Era 1 (docs/78, docs/82): the universe is the pulse's (`<var>/pulse.bin`,
 //! deployed by the `pulse` binary), breathed a bell a beat; the original
 //! civilizations are brought over as its first peoples, each on its own star
 //! system.
@@ -35,7 +35,7 @@ fn main() {
         }
     }
 
-    // AEON-1b (11 §5): the FOLD — seal the live era into the archive
+    // AEON-1b (11 §5): the fold — seal the live era into the archive
     // sequence and stop; the next boot converges it onto the new
     // aeon's G-sheet. Nothing is destroyed.
     if do_fold {
@@ -54,7 +54,7 @@ fn main() {
     }
     std::fs::create_dir_all(&var_root).expect("var root");
     let registry = Registry::at(format!("{var_root}/registry"));
-    // ERA 1 (docs/82, operator 2026-10-14): the original civilizations and
+    // Era 1 (docs/82, operator 2026-10-14): the original civilizations and
     // polities are brought over as the universe's first peoples (the
     // compiled founding lines and every registered line), each seated on an
     // era-1 star system below; life also arises by the ladder. The universe
@@ -65,7 +65,7 @@ fn main() {
         eprintln!("conductor: no universe at {var_root}/pulse.bin — deploy it first (the pulse binary)");
         std::process::exit(1);
     };
-    // THE UNIVERSAL PULSE: the bell's period derived at the founding (the
+    // The universal pulse: the bell's period derived at the founding (the
     // echo bubble's round trip; `Universe::t_u`). One beat is one bell.
     let t_u_bells: u64 = universe.t_u;
     let unit = conductor::breath::unit_mass(&universe);
@@ -94,7 +94,7 @@ fn main() {
             );
         }
     }
-    // LIFE (docs/82 step 3b): every world's climb is state, advanced by the
+    // Life (docs/82 step 3b): every world's climb is state, advanced by the
     // system's activity at its own coupling's recoherences; its reading is
     // refreshed when the universe changes. A mind wakes when its climb is
     // written, and founds a line.
@@ -109,7 +109,7 @@ fn main() {
     );
     println!("conductor: the pulse universe — {} cores, {} systems; T_u {t_u_bells} bells", universe.cores.len(), universe.cores.iter().map(|c| c.satellites.len()).sum::<usize>());
 
-    // CONVERGE-1 (07 §1.6): converge the archived eras BEFORE genesis —
+    // CONVERGE-1 (07 §1.6): converge the archived eras before genesis —
     // boot adopts the past instead of founding blind beside it.
     let eras = ledger::converge::default_era_roots(&var_root);
     let converged = ledger::converge::converge(&book, &eras).expect("convergence");
@@ -125,13 +125,13 @@ fn main() {
     }
     let epoch_base = converged.epoch_base;
 
-    // 11 §5.2 (wired 2026-07-30): the LIVE aeon seats on its own
+    // 11 §5.2 (wired 2026-07-30): the live aeon seats on its own
     // G-sheet, above every archived one — sheet N/12 with N archived
     // eras (the fold law's placeholder advance). Spec keys ride above
     // the base; without this the live board would stack onto the
     // folded aeons' height and recur.
     let live_base = cfe::world::wrap_gauge(cfe::ratio::ratio(eras.len() as i64, 12));
-    // docs/58 §3 — THE BIG BANG, recorded once on this universe's ledger
+    // docs/58 §3 — the big bang, recorded once on this universe's ledger
     // before any world is founded (or, for a universe that predates the law,
     // once and late as its re-founding).
     match book.found_universe(conductor::roster_digest(), cfe::almanac::matter_law_digest(), epoch_base) {
@@ -145,7 +145,7 @@ fn main() {
         ),
         Err(e) => eprintln!("conductor: the Big Bang was not recorded: {e}"),
     }
-    // docs/63 — OBSERVATION: only the observed lines are unrolled; the rest
+    // docs/63 — observation: only the observed lines are unrolled; the rest
     // stay compact (their snapshots on disk, their specs here) until an
     // observer arrives.
     let takes = PathBuf::from(std::env::var("NETSTRATUM_HOUSE").unwrap_or_else(|_| "var/uplink/house".into())).join("takes");
@@ -187,13 +187,13 @@ fn main() {
     // minutes (measured 8+ minutes live) — see the flush note further down.
     let _ = std::io::Write::flush(&mut std::io::stdout());
 
-    // OPERATOR CONTROLS (2026-07-30 ruling): `<var>/conductor.ctl`,
+    // Operator controls (2026-07-30 ruling): `<var>/conductor.ctl`,
     // polled each beat — the player's hand on the autonomous board.
     //   paused          the beats hold (nothing ticks, nothing ages)
     //   cadence N       seconds between beats (0 = flat out)
-    //   advance N       PUNCTUATED PLAY (task #11): run N beats flat
+    //   advance N       punctuated play (task #11): run N beats flat
     //                   out, then pause — the player owns the clock.
-    //                   The countdown lives in the FILE, so a crash
+    //                   The countdown lives in the file, so a crash
     //                   mid-advance resumes honestly where it stood.
     // The CLI writes it (`npcs pause|resume|speed N|advance N`);
     // hand-editing is equally lawful. Missing/malformed = defaults.
@@ -220,7 +220,7 @@ fn main() {
         }
         (paused, cadence, advance)
     };
-    // Rewrite ONLY the lines this loop owns; every other line (pen
+    // Rewrite only the lines this loop owns; every other line (pen
     // yields etc.) survives verbatim — the CLI's own rewrite law.
     let write_control = |paused: bool, advance: Option<u64>| {
         let mut text = String::new();
@@ -264,18 +264,18 @@ fn main() {
     let mut passages = conductor::realms::Passages::default();
     // docs/77: the road tolls each gate earned this term.
     let mut gate_tolls: std::collections::BTreeMap<(String, String), cfe::ratio::Ratio> = std::collections::BTreeMap::new();
-    // THE UNIVERSE JOURNAL: the readings below kept in `universe.jrn`, the
+    // The universe journal: the readings below kept in `universe.jrn`, the
     // relay handed off by the file (a resumed conductor writes after the
     // last beat kept).
     let mut annal = conductor::annal::Annal::open(std::path::Path::new(&var_root));
-    // CHRONOMETRY (one law with xylarium): the keepers' chain, committed
+    // Chronometry (one law with Xylarium): the keepers' chain, committed
     // every pulse.
     let mut chain = conductor::chronometry::Chain::open(std::path::Path::new(&var_root));
     let mut dilation_from: Option<(u64, u64)> = None;
     let mut announced_pause = false;
     loop {
         let (paused, cadence, advance) = read_control(cadence_secs);
-        // PUNCTUATED PLAY: an advance overrides the pause and runs
+        // Punctuated play: an advance overrides the pause and runs
         // flat out; zero parks the board paused with its summary.
         let (paused, cadence) = match advance {
             Some(0) => {
@@ -305,7 +305,7 @@ fn main() {
         // TUniversal T = epoch base + this era's beat (07 §1.3): live
         // ticks stack on the converged timeline, never restart it.
         let _ = book.set_universal_clock(epoch_base + beat);
-        // THE BREATH (docs/78): the echoes arriving this bell compress the
+        // The breath (docs/78): the echoes arriving this bell compress the
         // media; stars shed by their phase; the clocks say what comes due.
         let events = conductor::profile::timed("breath", || conductor::breath::breathe(&mut universe, &pulse_seed, t_u_bells, beat - 1, beat));
         let mut breath_reading = conductor::annal::BreathReading {
@@ -316,14 +316,14 @@ fn main() {
             ..Default::default()
         };
         if beat.is_multiple_of(t_u_bells) {
-            // THE LEDGER (docs/83 Phase 0): mass and spin, conserved exactly.
+            // The ledger (docs/83 Phase 0): mass and spin, conserved exactly.
             let total_mass = conductor::pulse::mass(&universe.total()) / unit.clone();
             let total_spin = conductor::pulse::spin_total(&universe, &unit);
             // Transduction via magnetism: holding + magnetism (3Z a nucleus)
             // is what fusion conserves; light carries the transduction.
             let total_magnetism = conductor::pulse::magnetism(&universe.total()) / unit.clone();
             println!("beat {beat}: LEDGER — mass {} spin {} magnetism {} mass+magnetism {} (units of the deepest hole)", total_mass, total_spin, total_magnetism, total_mass.clone() + total_magnetism.clone());
-            // THE POLES (docs/78 law 11): the universal core's strength, the
+            // The poles (docs/78 law 11): the universal core's strength, the
             // span between its ℤ pole (holding) and ℚ pole (magnetism), and
             // its balance, the share at the ℤ pole (1: hardened).
             let held = universe.cores.iter().fold(conductor::pulse::Manifest::new(), |mut m, c| {
@@ -335,7 +335,7 @@ fn main() {
             let (_, balance) = cfe::ratio::poles(&conductor::pulse::held(&held), &conductor::pulse::magnetism(&held));
             let f = conductor::reading::sector;
             println!("beat {beat}: POLES — universal core strength H_u {}, balance {} (the share at the ℤ pole)", f(&conductor::ocean::universe_hold(&universe)), f(&balance));
-            // THE ENCLOSURES (docs/78): each galaxy its own S^360, each star
+            // The enclosures (docs/78): each galaxy its own S^360, each star
             // system its own S^60, joined at its core's throat; each counts
             // its turns on its own ring (the pulse's round trip to its rim).
             let encl = conductor::enclosure::enclosures(&universe);
@@ -355,7 +355,7 @@ fn main() {
                 let se = sys.iter().find(|e| e.path == s.path)?;
                 Some(format!("world {:?}: a year is {} bells, {} of its system's own rings, {} of its galaxy's", w.path, f(&w.period), f(&(w.period.clone() / se.ring())), f(&(w.period.clone() / ge.ring()))))
             }).unwrap_or_default();
-            // THE FORMATION OBSERVER (docs/83): what the gas has become.
+            // The formation observer (docs/83): what the gas has become.
             let stars: usize = universe.cores.iter().map(|c| c.satellites.len()).sum();
             let worlds: usize = universe.cores.iter().flat_map(|c| &c.satellites).map(|s| s.satellites.len()).sum();
             let lit = universe.cores.iter().filter(|c| !c.satellites.is_empty()).count();
@@ -363,7 +363,7 @@ fn main() {
             let discs = universe.cores.iter().map(|c| conductor::pulse::mass(&c.kept)).fold(cfe::ratio::ratio(0, 1), |a, b| a + b) / conductor::pulse::mass(&universe.total());
             let motes: usize = universe.cores.iter().map(|c| c.gas.len()).sum();
             let metal_stars = universe.cores.iter().flat_map(|c| &c.satellites).filter(|s| s.kept.keys().any(|k| conductor::chem::charge(k) > 2)).count();
-            // THE COUPLING at each star's interface (`formation::coupling`).
+            // The coupling at each star's interface (`formation::coupling`).
             let universe_hold = conductor::pulse::mass(&universe.total());
             let kappas: Vec<cfe::ratio::Ratio> = universe.cores.iter().flat_map(|c| &c.satellites).filter_map(|s| conductor::formation::coupling(&s.kept, &universe_hold)).collect();
             let kappa = match (kappas.iter().min(), kappas.iter().max()) {
@@ -371,7 +371,7 @@ fn main() {
                 _ => "none".to_string(),
             };
             println!("beat {beat}: FORMATION — {stars} stars ({metal_stars} with metals) and {worlds} worlds in {lit} of {} galaxies; discs {}, gas {} of the universe in {motes} motes; coupling κ {kappa}", universe.cores.len(), f(&discs), f(&gas_share));
-            // THE HEARTBEAT OBSERVER (docs/83): each star's interface burn
+            // The heartbeat observer (docs/83): each star's interface burn
             // on the rings it has received since its heart formed (its
             // nested clock: the galaxy's rate times its orbit's).
             let mut lives: Vec<cfe::ratio::Ratio> = Vec::new();
@@ -486,17 +486,17 @@ fn main() {
         )) {
             println!("beat {beat}: {line}");
         }
-        // COG-DIRECTION Slice 3b: the population cohesion census BEFORE the cycle
+        // COG-DIRECTION Slice 3b: the population cohesion census before the cycle
         // loop, so each line reads its direction relative to the live cohort.
         conductor::profile::timed("direction_census_step", || {
             conductor::direction_census_step(&mut worlds)
         });
-        // BEAT-PARALLEL (#152) — the per-civ cognitive phase is INDEPENDENT: each
+        // BEAT-PARALLEL (#152) — the per-civ cognitive phase is independent: each
         // line reads its own tasks/surplus/caste-census and mutates only its own
         // world. `book` is per-world filesystem (race-free across worlds),
         // `registry.seat` is lock-guarded, and the membrane/worth/profile statics
         // are Mutex-guarded — so it fans out across threads over disjoint slices.
-        // The mesh-level settlement/trade/consilience steps BELOW stay sequential
+        // The mesh-level settlement/trade/consilience steps below stay sequential
         // (they need the whole roster). Order is preserved (chunks joined in spawn
         // order = world order), so newborn cleaves and replay stay deterministic.
         let newborns: Vec<conductor::PolitySpec> = {
@@ -513,7 +513,7 @@ fn main() {
             // sat idle. Greedy LPT bin-packing (heaviest civ first, always
             // into the currently lightest bucket) approximates a balanced
             // partition. Determinism no longer rides on spawn/finish order:
-            // each result carries its ORIGINAL index, and results are
+            // each result carries its original index, and results are
             // sorted back into world order before use — the same guarantee
             // the old chunk-order trick gave, robust to reassignment.
             // docs/71 M1: each line's share of the universe's memory, by wealth.
@@ -576,9 +576,9 @@ fn main() {
                 }
             }
         }
-        // DIRECTIVE 19: the gate speaks on the board — SEQUENTIAL after the parallel
+        // Directive 19: the gate speaks on the board — sequential after the parallel
         // phase, so verdicts are not interleaved and each line drains once. The
-        // deed still STANDS in the chronicle (`replay` is the live transition until
+        // deed still stands in the chronicle (`replay` is the live transition until
         // the Phase 3 flip); this reports a gate overruled by a proposer.
         for polity in &mut worlds {
             if polity.penned {
@@ -591,13 +591,13 @@ fn main() {
                 );
             }
         }
-        // THE ONE CLOSURE'S EXIT: a line that collapsed this cycle leaves the
+        // The one closure's exit: a line that collapsed this cycle leaves the
         // roster now, its chronicle synced whole, before any cross-world step
         // can name it as a party.
         for name in conductor::retire_collapsed(&mut worlds, &book, epoch_base + beat) {
             println!("beat {beat}: COLLAPSE — {name} has no people left; it leaves the roster, its chronicle kept whole");
         }
-        // THE LARGEST LIVING LINEAGE, read live and announced when it
+        // The largest living LINEAGE, read live and announced when it
         // changes: the progenitor candidate (an ancient arises only at a core).
         let living: std::collections::BTreeSet<String> =
             worlds.iter().map(|p| p.spec.civilization.sigil.clone()).collect();
@@ -617,7 +617,7 @@ fn main() {
         ancient = now_ancient;
         total_cleaves += newborns.len() as u64;
         for mut spec in newborns {
-            // THE SETTLING (`places`, operator 2026-10-21), in world order: a
+            // The settling (`places`, operator 2026-10-21), in world order: a
             // branch of a line on an era-1 world settles the free world
             // nearest its parent's.
             let parent = spec.civilization.lineage.first().cloned().unwrap_or_default();
@@ -644,7 +644,7 @@ fn main() {
         if released > 0 {
             println!("beat {beat}: FLEET — {released} hulls return to the idle pool from lapsed routes");
         }
-        // CORES SLICE 3: the core's bell delivers the dead's words that are due.
+        // Cores slice 3: the core's bell delivers the dead's words that are due.
         let heard = conductor::inheritance_step(&mut worlds, epoch_base + beat);
         if heard > 0 {
             println!("beat {beat}: {heard} words of the dead reach the living");
@@ -676,7 +676,7 @@ fn main() {
         }
         // STAMP MM-1: mint + spot clear (Wave-4).
         // One line per beat, not one per clear (it was ~90 lines a second).
-        // docs/67 N8, as 78.156 binds it: the world runs FREE on its own axis
+        // docs/67 N8, as 78.156 binds it: the world runs free on its own axis
         // u (the beat) at its own pace; TUniversal is met only through ledger
         // entries. The hubs clear once a beat of u. The final point the seat
         // relays is read for what is bound to the fleet (substratum origins,
@@ -697,7 +697,7 @@ fn main() {
             dilation_from = Some((beat, h));
         }
         hubs_cleared_at = point;
-        // docs/70 P2, docs/72: the beat's ONE reading of the throats' keepers
+        // docs/70 P2, docs/72: the beat's one reading of the throats' keepers
         // (G3, the envoys counted) and the mapped gates' roads, for the hubs.
         let (spots, hubs) = {
             let keepers_now = conductor::ancients::keepers(&worlds, &book, &registry, std::path::Path::new(&var_root));
@@ -725,7 +725,7 @@ fn main() {
             hubs.partial,
             refused.join(", ")
         );
-        // docs/73 DECIDE step 1: the hull decisions captured this beat.
+        // docs/73 decide step 1: the hull decisions captured this beat.
         let d = &hubs.decided;
         println!(
             "beat {beat}: DECIDE hull — {} lines seen, {} lost for want of hull; persistence {} of {} rows this beat, {} of {} over the books' windows; {} books, {} triples",
@@ -738,7 +738,7 @@ fn main() {
         if beat.is_multiple_of(10) {
             let _ = conductor::ancients::write_council(&worlds, std::path::Path::new(&var_root));
         }
-        // docs/66 Y2 — COMMISSIONS: one attempt a beat at an open need.
+        // docs/66 Y2 — commissions: one attempt a beat at an open need.
         {
             let commission = conductor::profile::timed("commissions_step", || {
                 conductor::commissions::step(&mut worlds, &book, std::path::Path::new(&var_root), beat)
@@ -750,7 +750,7 @@ fn main() {
                 println!("beat {beat}: COMMISSION CLOSED — {world} sites the hub of {core} by its own word ({by}; {admitted} orders admitted); bounty {arrived} STAMP arrived");
             }
         }
-        // docs/69 — THE SPACING GUILD in the substrata: the ancients' tubes
+        // docs/69 — the spacing guild in the substrata: the ancients' tubes
         // open, and one task a beat is traversed below.
         let below = conductor::profile::timed("substrata_step", || {
             conductor::substrata::step(&mut worlds, &book, std::path::Path::new(&var_root), beat, epoch_base + beat)
@@ -761,28 +761,28 @@ fn main() {
         if let Some((origin, depth, first)) = &below.closed {
             println!("beat {beat}: BELOW — substratum {origin} (depth {depth}) closed {}", if *first { "a first action" } else { "an action again" });
         }
-        // CONSILIENCE (38 §5): independent lines that resolved their
+        // Consilience (38 §5): independent lines that resolved their
         // knowledge to the same invariant crystallize a shared axiom.
         for (world, mass, hardness) in conductor::profile::timed("consilience_step", || conductor::consilience_step(&mut worlds, beat)) {
             println!(
                 "beat {beat}: CONSILIENCE — {world} shares a truth {mass} lines reached (hardness {hardness})"
             );
         }
-        // THE KNOWLEDGE MARKET (ARC C): a prosperous line licenses a word
+        // The knowledge market (ARC C): a prosperous line licenses a word
         // it lacks from the roster's pool — ideas circulate, not just matter.
         for (world, price) in conductor::profile::timed("knowledge_market_step", || conductor::knowledge_market_step(&mut worlds, beat)) {
             println!(
                 "beat {beat}: KNOWLEDGE MARKET — {world} licenses an idea (depth {price}); vocabulary spreads"
             );
         }
-        // SPEECH BETWEEN LINES (docs/60 D2): each line hears its nearest
+        // Speech between LINES (docs/60 D2): each line hears its nearest
         // neighbour; a word outside its senses is misheard.
         if let Some(line) = conductor::profile::timed("conversation_step", || conductor::conversation_step(&mut worlds, beat, &span)) {
             println!("beat {beat}: {line}");
         }
         // JOURNAL-1 (08 §3): on year boundaries every civilization
         // speaks — journals + the Terminal Wall regenerate lens-side.
-        // THE CLOCKS (docs/78): the galaxies' business closes on their terms
+        // The clocks (docs/78): the galaxies' business closes on their terms
         // (echoes received), not on a shared 60-beat year.
         if breath_reading.terms > 0 {
             // ROUTE-1: the year voice draws lane maintenance — an
@@ -808,13 +808,13 @@ fn main() {
                 "beat {beat}: year {} journaled — the wall is fresh (var/worlds/wall.html)",
                 beat / scribe::journal::YEAR_TICKS
             );
-            // THE YEAR'S BOUNCE (cores, ancients, ascension, parliaments,
+            // The year's bounce (cores, ancients, ascension, parliaments,
             // councils): one library function.
             year_lines.extend(conductor::profile::timed("year:bounce", || conductor::year_bounce(&mut worlds, &book, &registry, std::path::Path::new(&var_root), beat, epoch_base)));
             // The sovereigns: lineages holding their own star systems (`tiers`).
             year_lines.extend(conductor::tiers::sovereigns(&mut worlds, &registry, std::path::Path::new(&var_root)));
             // docs/75: the term's realms, read from its contacts, then a new term.
-            // THE FOUR GAUGES (xylarium 11.0 (37), read from this universe):
+            // The four gauges (Xylarium 11.0 (37), read from this universe):
             // each living line's, re-read from its present state.
             {
                 let place_of: std::collections::BTreeMap<String, Vec<u64>> = worlds.iter().filter_map(|p| p.spec.place.clone().map(|pl| (p.spec.world_name.clone(), pl))).collect();
@@ -845,8 +845,8 @@ fn main() {
             if let Err(e) = annal.year(beat, &year_lines) {
                 println!("beat {beat}: THE UNIVERSE JOURNAL did not keep the year's close: {e}");
             }
-            // MEMORY (operator 2026-10-09): what the allocator holds freed but
-            // unreturned is given back at the year's close, and the RSS read
+            // Memory (operator 2026-10-09): what the allocator holds freed but
+            // unreturned is given back at the year's close, and the rss read
             // before and after says how much of the process was live data.
             {
                 let rss = || {
@@ -857,13 +857,13 @@ fn main() {
                         .unwrap_or(0)
                 };
                 let before = rss();
-                // SAFETY: malloc_trim only returns free heap pages to the system.
+                // Safety: malloc_trim only returns free heap pages to the system.
                 unsafe {
                     libc::malloc_trim(0);
                 }
                 println!("beat {beat}: MEMORY — rss {} MB before the trim, {} MB after", before / 1024, rss() / 1024);
             }
-            // CARRY STATE FORWARD: every world's snapshot at the year's close,
+            // Carry STATE forward: every world's snapshot at the year's close,
             // so a boot resumes from here, never from genesis.
             for polity in worlds.iter_mut().filter(|e| !e.penned) {
                 if let Err(e) = polity.carry(&book) {
@@ -879,8 +879,8 @@ fn main() {
                 );
             }
         }
-        // THE LIVE CENSUS (operator methodology 2026-08-20): the beat-level
-        // signal to deduce, LIVE, whether cognition and the civilizations
+        // The live census (operator methodology 2026-08-20): the beat-level
+        // signal to deduce, live, whether cognition and the civilizations
         // advanced — tests and pins prove lawfulness, never improvement; that is
         // proven by running the civs and reading the network. Emitted on stderr
         // (line-buffered, reaches the log at once) so the running kernel is
@@ -931,7 +931,7 @@ fn main() {
             }
             let _ = std::io::stderr().flush();
         }
-        // THE REFUSALS SPEAK (operator ruling 2026-08-02: stop
+        // The refusals speak (operator ruling 2026-08-02: stop
         // swallowing them). Both were collected and neither was ever
         // read: the gate's per-deed verdicts, and the lane charters
         // that could not be paid for. A refusal names its cure, and a
@@ -956,7 +956,7 @@ fn main() {
                 println!("beat {beat}: JUDGE REFUSED — {judged_tally:?}");
             }
         }
-        // THE SHARED-LANGUAGE CENSUS — prove on the wire that the civilizations
+        // The shared-language census — prove on the wire that the civilizations
         // speak one AUTIC tongue (common vocabulary + cross-civ comprehension vs a
         // control). Bounded to <=8 civs x 40 words, so it is cheap; a global beat
         // over 107 civs is slow, so run it every few beats, not every 30.
@@ -964,7 +964,7 @@ fn main() {
             // BEAT-PARALLEL (#152): these were invisible to the phase profile
             // even though the comment above already names them the suspected
             // cost (a global pass over 107 civs) — wrapped so the census that
-            // finds the bottleneck can find THIS one too.
+            // finds the bottleneck can find this one too.
             conductor::profile::timed("shared_language_census", || {
                 conductor::shared_language_census(&worlds, epoch_base + beat)
             });
@@ -977,7 +977,7 @@ fn main() {
             // Re-announce the roster count periodically, not just at boot: the
             // per-beat COG-* instrumentation volume rotates a one-time boot
             // line out of journald's ring buffer within minutes, which blanked
-            // this process's own "N civilizations" line the mycelium monitor's
+            // this process's own "N civilizations" line the Mycelium monitor's
             // civs column depends on (`engine_stats()`'s `(\d+) civilizations`
             // regex, tools/observe.py) long before an operator could read it.
             println!("conductor: {} civilizations live — beat {beat}", worlds.len());
@@ -995,7 +995,7 @@ fn main() {
                 })
                 .collect();
             println!("beat {beat}: {}", summary.join("  "));
-            // Rust's stdout is BLOCK buffered once it isn't a TTY (systemd pipes
+            // Rust's stdout is block buffered once it isn't a TTY (systemd pipes
             // it to journald) — unlike every status eprintln! elsewhere in this
             // codebase, which flushes immediately. Confirmed live: the boot
             // line above this block sat unflushed for 8+ minutes under

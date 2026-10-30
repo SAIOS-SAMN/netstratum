@@ -1,19 +1,19 @@
-//! THE FOLD GATE — `F_fold*` and the conjugator witness (U2, I6, PoWC).
+//! The fold gate — `F_fold*` and the conjugator witness (U2, I6, PoWC).
 //! Re-derived from the v0.1 ancestor `fold.rs` (translate-never-
-//! transcribe), then CORRECTED under DIRECTIVE 01 (operator ruling
+//! transcribe), then corrected under directive 01 (operator ruling
 //! 2026-08-01, the second polarity ruling).
 //!
-//! The question: may two states be FOLDED into one? A fold collapses a
-//! difference. It is lawful ONLY when the difference was a frame change
+//! The question: may two states be folded into one? A fold collapses a
+//! difference. It is lawful only when the difference was a frame change
 //! (gauge) — never when it was genuine.
 //!
-//! # THE SEARCH FALLACY, struck
+//! # The search fallacy, struck
 //!
 //! This module previously answered the question by walking a bounded
 //! orbit: conjugate `a` by each operator up to `k_max` times and compare
 //! [`crate::rcf::rcf_signature`] at every step. **That walk was an
 //! identity tautology.** The RCF signature is the invariant-factor
-//! sequence of `xI − A`, which is a SIMILARITY invariant;
+//! sequence of `xI − A`, which is a similarity invariant;
 //! [`Operator::apply`] is a similarity (`A·Δ·A⁻¹`). Conjugation
 //! therefore cannot move the signature, so every step of the walk
 //! compared a quantity that had not changed. `k_max` bounded nothing,
@@ -24,7 +24,7 @@
 //! `k_max` and the walk are gone. What remains is the exact test the
 //! invariant actually supports, at `O(n³ · fiber)`:
 //!
-//! # THE POLARITY (DIRECTIVE 01, and it is the inverse of the old one)
+//! # The polarity (directive 01, and it is the inverse of the old one)
 //!
 //! ```text
 //! sig(a) ≠ sig(b)  →  TorsionVeto(SignaturesDiffer)
@@ -45,26 +45,26 @@
 //!                       no witness       →  TorsionVeto(WitnessAbsent)
 //! ```
 //!
-//! **The default is VETO.** Absent proof that the difference was gauge,
+//! **The default is veto.** Absent proof that the difference was gauge,
 //! the difference is treated as genuine and preserved. That is the safe
 //! direction: an unproved fold destroys structure irreversibly, while an
 //! unnecessary veto only emits a residue.
 //!
-//! # WHY THE WITNESS COMPARES TENSORS, NOT SIGNATURES
+//! # Why the witness compares tensors, not signatures
 //!
 //! [`verify_orbit_witness`] ends on `current == *b` — exact entry-wise
-//! equality — and NOT on a signature comparison. A signature comparison
+//! equality — and not on a signature comparison. A signature comparison
 //! there would be the same tautology the search fallacy was: it would
 //! pass for any applicable operator whenever `sig(a) = sig(b)`, which is
 //! already known by the time the witness is read. Only exact equality
-//! proves that THIS operator, walked THIS many times, actually carries
+//! proves that this operator, walked this many times, actually carries
 //! `a` onto `b`.
 //!
 //! An operator is a `GL_n(Rat)` conjugation `A·Δ·A⁻¹`. General
 //! conjugation need not preserve antisymmetry, so each step is checked
 //! by [`Delta::verify_conservation`]: an operator that leaves the
 //! antisymmetric surface generates no valid walk (it breaks off), never
-//! a panic — the gate is total. Conjugacy is tested by the EXACT RCF
+//! a panic — the gate is total. Conjugacy is tested by the exact RCF
 //! signature ([`crate::rcf::rcf_signature`]), never a hash (the law
 //! gates on exact form).
 
@@ -141,9 +141,9 @@ impl Operator {
 /// The witness of a claimed gauge relation: which operator, and how
 /// many conjugations by it carry `a` exactly onto `b`.
 ///
-/// The witness is the PROVER's output and the JUDGE's input. It proves
-/// the difference was a LAWFUL frame change — the branch that permits
-/// the collapse. Under DIRECTIVE 01 this is the only branch that needs
+/// The witness is the prover's output and the judge's input. It proves
+/// the difference was a lawful frame change — the branch that permits
+/// the collapse. Under directive 01 this is the only branch that needs
 /// a proof: the veto branch is established by the signature comparison
 /// alone.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -156,12 +156,12 @@ pub struct OrbitWitness {
 /// house law: a refusal names what failed, never a bare bool).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TorsionCause {
-    /// EXACT PROOF of genuine difference: the invariant factors differ,
+    /// Exact proof of genuine difference: the invariant factors differ,
     /// so no conjugation of any kind relates the two states. This is
-    /// the branch that EMITS — the residue becomes a new plane.
+    /// the branch that emits — the residue becomes a new plane.
     SignaturesDiffer,
     /// The states are conjugate in `GL_n(Rat)`, but no witness was
-    /// presented, so no LAWFUL frame change has been shown to relate
+    /// presented, so no lawful frame change has been shown to relate
     /// them. Conjugacy unproven; the default is veto.
     WitnessAbsent,
     /// A witness was presented and failed its re-walk: the named
@@ -173,12 +173,12 @@ pub enum TorsionCause {
 /// The verdict of the fold gate for a pair `(a, b)`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum FoldReading {
-    /// The difference was a PROVEN lawful frame change: equal invariant
-    /// factors AND a re-walked conjugator witness. The two states are
-    /// one seen through a symmetry, and the fold is LAWFUL. Carries the
+    /// The difference was a proven lawful frame change: equal invariant
+    /// factors and a re-walked conjugator witness. The two states are
+    /// one seen through a symmetry, and the fold is lawful. Carries the
     /// witness that permitted it.
     GaugeFold(OrbitWitness),
-    /// The fold is FORBIDDEN. Either the difference is provably genuine
+    /// The fold is forbidden. Either the difference is provably genuine
     /// (`SignaturesDiffer` — the residue must emit as a new plane, the
     /// bounce of 16_UNIT §4a), or gauge was not proven and the default
     /// holds. Carries the cause.
@@ -188,18 +188,18 @@ pub enum FoldReading {
 impl FoldReading {
 }
 
-/// THE PROVER'S SEARCH — find an operator that carries `a` exactly onto
-/// `b` in ONE conjugation.
+/// The prover's search — find an operator that carries `a` exactly onto
+/// `b` in one conjugation.
 ///
-/// No `k_max` and no iterated walk (DIRECTIVE 01: the walk was a
-/// signature tautology). The operator set is a GROUP PRESENTATION: a
+/// No `k_max` and no iterated walk (directive 01: the walk was a
+/// signature tautology). The operator set is a group presentation: a
 /// prover wanting a deeper conjugator composes generators itself and
 /// presents the composite as one [`Operator`], which is exactly the
 /// element the gate then re-walks. Multi-step witnesses remain
 /// verifiable — [`verify_orbit_witness`] re-walks any `step` — but the
 /// built-in search is single-step by construction.
 ///
-/// ALTITUDE: this is prover-side work and belongs nowhere inside a
+/// Altitude: this is prover-side work and belongs nowhere inside a
 /// gate. The gate calls [`verify_orbit_witness`] (O(step)) or, for
 /// the veto branch, [`rcf_signature`] directly (O(n³·fiber)); it never
 /// sweeps an operator space. (The `solver`/`solver-verify` split is the
@@ -221,12 +221,12 @@ pub fn orbit_lock(a: &Delta, b: &Delta, operators: &[Operator]) -> Option<OrbitW
     None
 }
 
-/// THE WITNESS VERIFIER — the JUDGE's half of the split (U1a's pattern
-/// applied to the fold gate: the prover SEARCHES, the gate REPLAYS).
+/// The witness verifier — the judge's half of the split (U1a's pattern
+/// applied to the fold gate: the prover searches, the gate replays).
 ///
-/// Given a PRESENTED [`OrbitWitness`], re-walk the one path it claims:
+/// Given a presented [`OrbitWitness`], re-walk the one path it claims:
 /// conjugate `step` times by the named operator and require the result
-/// to EQUAL `b` exactly. **No search, no operator sweep, no `k_max`** —
+/// to equal `b` exactly. **No search, no operator sweep, no `k_max`** —
 /// the cost is O(`step`) conjugations plus one id lookup, and it is the
 /// same exact arithmetic on every node, so two gates always agree.
 ///
@@ -267,10 +267,10 @@ pub fn verify_orbit_witness(
     current == *b
 }
 
-/// `F_fold*` — THE GATE (DIRECTIVE 01 polarity).
+/// `F_fold*` — The gate (directive 01 polarity).
 ///
 /// A fold of `a` into `b` is lawful IFF their invariant factors agree
-/// AND a presented witness re-walks to `b` exactly. Signature
+/// and a presented witness re-walks to `b` exactly. Signature
 /// disagreement is an exact proof of genuine difference and vetoes
 /// outright; signature agreement without a valid witness vetoes by
 /// default.
@@ -297,15 +297,15 @@ pub fn f_fold_star(
     }
 }
 
-/// THE COMPOSED GATE (U2e — the singularity pipeline, 16_UNIT §4a):
+/// The composed gate (U2e — the singularity pipeline, 16_UNIT §4a):
 /// both states pass through `Π_G` ([`crate::reduce::coboundary_reduce`]
-/// — what a relabeling could remove, is removed) BEFORE the gate
-/// gates. This composition is what makes the verdict ANGLE-FREE: a
+/// — what a relabeling could remove, is removed) before the gate
+/// gates. This composition is what makes the verdict angle-free: a
 /// frame change leaves the RCF signature identical, and a gauge shift
 /// is stripped by the reduction — so the verdict cannot depend on the
 /// frame or gauge of approach.
 ///
-/// The witness is re-walked against the REDUCED tensors, so a prover
+/// The witness is re-walked against the reduced tensors, so a prover
 /// searches on `Π_G(a)` and `Π_G(b)`, not on the raw pair.
 pub fn gated_fold(
     a: &Delta,

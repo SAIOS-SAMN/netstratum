@@ -5,7 +5,7 @@
 //! |---|---|---|
 //! | the universal core | the echo, every `T_u` bells | the breath (births, shedding) |
 //! | a galaxy, operational | each echo it receives (`T_u`, after its distance) | the realms' term, parliaments, keepers' judgement, gate accounts |
-//! | a galaxy, epochal | the RUNGS of its half-mass layer (its recoherences) | ascension by deed (a full rung kept), the core's re-emission, the aeon's marks |
+//! | a galaxy, epochal | the rungs of its half-mass layer (its recoherences) | ascension by deed (a full rung kept), the core's re-emission, the aeon's marks |
 //! | a star system | its own rungs (its nested slip) | the system's epochs |
 //! | a world (orb) | its LOCAL YEAR (one turn about its star) | its journal, upkeep, demography |
 //! | the process | a count of echoes | memory, profiling (not physics) |
@@ -13,7 +13,7 @@
 //! Why two clocks for a galaxy: the galaxy nearest the universal core runs at
 //! rate 1 and never slips, and its orbits' own dilation is weak-field (about
 //! 1/3,600), so it climbs almost no rungs. Its ordinary business must still
-//! run, so it rides the echoes; what marks an EPOCH happens only where time
+//! run, so it rides the echoes; what marks an epoch happens only where time
 //! layers (rungs). An undilated galaxy has no epochs: its ancients cannot
 //! arise by deed there. Counts are closed forms between events (`⌊Δ⌋`
 //! differences, `⌊n / P⌋`), never stepped.

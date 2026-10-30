@@ -1,12 +1,12 @@
-//! **PLANETARY REJUVENATION — the lazy READ** (task #28, `40_REJUVENATION`).
+//! **Planetary rejuvenation — the lazy READ** (task #28, `40_REJUVENATION`).
 //!
-//! A world's natural RATION — biomass for a biotic line, iron for a
+//! A world's natural ration — biomass for a biotic line, iron for a
 //! mineral line, a minted element for a stone-eater (the G2 map,
 //! [`crate::dop::metabolic_ration_of`]) — recovers toward a carrying
 //! capacity `K` along the ruled S-curve
 //! ([`crate::almanac::grained_logistic`]). Nothing here is hardcoded to
 //! biomass: what a world regrows, how fast, and toward what ceiling all
-//! FOLLOW the sitting line's own metabolism and clade, the same
+//! follow the sitting line's own metabolism and clade, the same
 //! species⊗planet⊗archetype composition every other flow reads
 //! (`zone_yield`, `taxon_economy_of`). Deterministic physics get no
 //! deed: the curve is recomputed from `(P0, K, r, Δt)` at need, exactly
@@ -14,7 +14,7 @@
 //! and writes nothing, and `Δt` runs from the orb's `last_touch`, the
 //! same clock the demurrage organ already carries.
 //!
-//! This is the read-only half (a planet SCAN). The mutating half — the
+//! This is the read-only half (a planet scan). The mutating half — the
 //! settle at a value-moving touch, with its receipt digest — banks the
 //! grown stock and advances `last_touch`, and lands with the wiring.
 
@@ -23,7 +23,7 @@ use crate::almanac::{carrying_capacity, grained_logistic, intrinsic_rate, region
 use crate::dop::{metabolic_ration_of, Ration, ZoneKind};
 
 impl World {
-    /// The living ECOLOGICAL FOOTPRINT of an orb — its habitats and
+    /// The living ecological footprint of an orb — its habitats and
     /// regenerators, the zones that hold and restore life. The count
     /// that scales carrying capacity.
     pub fn living_zones_of(&self, orb: u64) -> u64 {
@@ -39,7 +39,7 @@ impl World {
             .unwrap_or(0)
     }
 
-    /// The thermal REGION this orb sits in, or `None` where it has no
+    /// The thermal region this orb sits in, or `None` where it has no
     /// place at all (unsited, or no star) — a world with no place bears
     /// no natural stock, so regrowth reads a barren capacity there.
     pub fn orb_region(&self, orb: u64) -> Option<ThermalRegion> {
@@ -54,7 +54,7 @@ impl World {
             .unwrap_or(u16::from(FLATLANDER_CLADE))
     }
 
-    /// The RATION this orb's line farms and eats — a closed [`Resource`]
+    /// The ration this orb's line farms and eats — a closed [`Resource`]
     /// carrier for the three compiled metabolisms, or the line's own
     /// minted element for a G2 element-eater. Reads the same genesis
     /// metabolism and vocabulary fold every other flow does
@@ -62,7 +62,7 @@ impl World {
     ///
     /// [`Resource`]: crate::dop::Resource
     pub fn ration_of(&self, orb: u64) -> Ration {
-        // ING-2b: the almanac STAPLE first — a species eats the food ELEMENT
+        // ING-2b: the almanac staple first — a species eats the food element
         // its own world grows (`staple_diet_of`, the morphodynamic projection
         // over the planet's prospected veins), dissolving the 3-`Resource`
         // food enum at the mechanism. Falls back to the closed carrier only
@@ -76,16 +76,16 @@ impl World {
         metabolic_ration_of(metabolism, self.metabolic_element())
     }
 
-    /// **ING-2 — THE STAPLE DIET FROM THE WORLD'S OWN VEINS.** The food ELEMENT
+    /// **ING-2 — the staple diet from the world's own veins.** The food element
     /// this orb's line metabolises best: the ingestion kernel
-    /// ([`morphogen::staple`]) over the elements the planet's PROSPECTED veins
-    /// bear ("you eat what your world grows"), keyed on the species' morphodynamic
+    /// ([`morphogen::staple`]) over the elements the planet's prospected veins
+    /// bear (a species eats what its world grows), keyed on the species' morphodynamic
     /// signature. `None` when no prospected vein aligns — an unprospected world,
     /// or matter this line cannot metabolise (a plasmic reads no material vein; a
     /// mineral reads no organic one) — the Starvation Cull, from the projection.
     ///
-    /// This is the almanac-derived diet HANDLE that dissolves the 3-`Resource`
-    /// `metabolic_ration` enum: a food ELEMENT drawn from the open blake3 catalogue
+    /// This is the almanac-derived diet handle that dissolves the 3-`Resource`
+    /// `metabolic_ration` enum: a food element drawn from the open blake3 catalogue
     /// by the species tensor × the planet, never a bucket. It reads only; ING-2b
     /// routes `ration_of`/population/famine through it (a breaking migration off
     /// the closed carriers), so this landing is byte-identical.
@@ -103,10 +103,10 @@ impl World {
         crate::morphogen::staple(&species, &veins, &ratio(0, 1))
     }
 
-    /// **THE CARRYING CAPACITY of this orb's ration** — the ruled `K`,
+    /// **The carrying capacity of this orb's ration** — the ruled `K`,
     /// from the living footprint and the place (`ZoneKind` ⊗ star ⊗
-    /// orbit, the last two folded into the thermal region) AS READ BY
-    /// THE SITTING CLADE. An unsited orb, or one on a barren rock (for
+    /// orbit, the last two folded into the thermal region) as READ by
+    /// the sitting CLADE. An unsited orb, or one on a barren rock (for
     /// this clade), carries none.
     pub fn ration_capacity_of(&self, orb: u64) -> Ratio {
         if self.orb_region(orb).is_none() {
@@ -115,9 +115,9 @@ impl World {
         // DIO-2: read the sitting clade's habitability as the continuous flux
         // tent on the exact `t_eq4`, coherent with `primary_production`.
         let t_eq4 = self.insolation_of(orb) * crate::thermal::thermal_k();
-        // ONT-1d: production reads the SAME morphodynamic viability siting will —
-        // thermal habitability AND the metabolism's phase feasibility across the
-        // environmental gradient. Aridity is the ORTHOGONAL moisture axis, read
+        // ONT-1d: production reads the same morphodynamic viability siting will —
+        // thermal habitability and the metabolism's phase feasibility across the
+        // environmental gradient. Aridity is the orthogonal moisture axis, read
         // from the planet's albedo (an icy/cloudy high-albedo world is
         // volatile-rich and wet; a dark low-albedo rock is arid) — never a
         // re-derivation of temperature.
@@ -132,9 +132,9 @@ impl World {
         )
     }
 
-    /// **THE ARIDITY AXIS** (ONT: the orthogonal moisture dimension) — read from
+    /// **The aridity axis** (ONT: the orthogonal moisture dimension) — read from
     /// the planet's albedo: an icy/cloudy world reflects (high albedo) and is
-    /// volatile-rich and WET; a dark rock absorbs (low albedo) and is ARID. A
+    /// volatile-rich and wet; a dark rock absorbs (low albedo) and is arid. A
     /// separate physical parameter from the orbit's temperature, so the
     /// environmental gradient is genuinely multi-axis. Zero (arid) for an
     /// unsited orb.
@@ -145,7 +145,7 @@ impl World {
             .unwrap_or_else(|| ratio(0, 1))
     }
 
-    /// **THE REGROWN STOCK — a SCAN, never a deed.** What this orb's
+    /// **The regrown stock — a scan, never a deed.** What this orb's
     /// banked ration has recovered to as of `stamp`, folding the ruled
     /// S-curve over the beats elapsed since its `last_touch`. Pure and
     /// replay-inert: looking at a planet is not a chain event, so it
@@ -156,11 +156,11 @@ impl World {
         self.regrown_ration_with(orb, stamp, &self.ration_of(orb))
     }
 
-    /// `regrown_ration` given a PRE-RESOLVED ration. ING-2b PERF: `ration_of`
+    /// `regrown_ration` given a PRE-resolved ration. ING-2b PERF: `ration_of`
     /// now resolves the almanac staple by an O(prospects) scan + projection
     /// (`staple_diet_of`), and the collect touch has many readers of it
     /// (regrowth · settle · population · their `natural` recursion). The
-    /// collect path resolves the ration ONCE and threads it through these
+    /// collect path resolves the ration once and threads it through these
     /// `_with` variants, so the scan runs once per touch instead of ~6× — a
     /// pure memoization (the ration is a deterministic function of the
     /// unchanging prospects/genesis, so the value is identical). The public
@@ -174,7 +174,7 @@ impl World {
         let metabolism = self.genesis.as_ref().map(|held| held.metabolism).unwrap_or(2);
         let dt = stamp.saturating_sub(held.last_touch);
         let grown = grained_logistic(&p0, &k, &intrinsic_rate(metabolism, self.metabolic_element()), dt);
-        // FLOOR ONTO THE LATTICE (the `stock.rs` §lattice ruling). The
+        // Floor onto the LATTICE (the `stock.rs` §lattice ruling). The
         // logistic is an exact rational whose denominator compounds every
         // time its output is banked and fed back as the next `p0` — the
         // very 2^414305-after-16-ticks explosion that lattice-flooring
@@ -190,17 +190,17 @@ impl World {
         (grown * lattice.clone()).floor() / lattice
     }
 
-    /// **THE SETTLE — what a real TOUCH banks.** The stock the natural
-    /// ration has GROWN by since the last touch, ready to fold into the
+    /// **The settle — what a real TOUCH banks.** The stock the natural
+    /// ration has grown by since the last touch, ready to fold into the
     /// touch's own `YieldCollected` receipt (the `40_REJUVENATION` §2
     /// digest, carried implicitly in the collected amount rather than a
     /// separate deed — "deterministic physics get no deed of their own").
     /// `None` when nothing grew: a stock already at or above `K` (a
     /// well-farmed world), a barren place, or a still-empty larder (the
-    /// logistic is dead at zero — a stock must be RESEEDED, so an
+    /// logistic is dead at zero — a stock must be reseeded, so an
     /// almanac-staple line regrows only once assay has struck its first
     /// vein). ING-2b: the ration is carrier-agnostic — a Resource stock or
-    /// an almanac ELEMENT both regrow here, read through `ration_amount`;
+    /// an almanac element both regrow here, read through `ration_amount`;
     /// the collect banks a Resource grown as `YieldCollected`, an element
     /// grown as `RationElementSettled`.
     ///
@@ -212,7 +212,7 @@ impl World {
         self.rejuvenation_settle_with(orb, stamp, self.ration_of(orb))
     }
 
-    /// `rejuvenation_settle` on a PRE-RESOLVED ration (ING-2b PERF memo; see
+    /// `rejuvenation_settle` on a PRE-resolved ration (ING-2b PERF memo; see
     /// [`Self::regrown_ration_with`]).
     pub(super) fn rejuvenation_settle_with(
         &self,
@@ -225,7 +225,7 @@ impl World {
         (grown > ratio(0, 1)).then_some((ration, grown))
     }
 
-    /// **docs/67 N4 — THE SUSTAINABLE OFFER, a scan.** How much of
+    /// **docs/67 N4 — the sustainable offer, a scan.** How much of
     /// `resource` this orb may put on a market without fracturing its
     /// biosphere. `None` where `resource` is not the orb's regrowing ration
     /// (mined ore, banked crystal: not the biosphere's to keep). Where it is,
@@ -253,15 +253,15 @@ impl World {
         Some(floor(next - stock).max(ratio(0, 1)))
     }
 
-    /// **ONT-3 — THE VEIN REJUVENATION SETTLE.** At a collect touch every worked
-    /// vein on the orb RECOVERS. The injection is Keplerian: one
+    /// **ONT-3 — the vein rejuvenation settle.** At a collect touch every worked
+    /// vein on the orb recovers. The injection is Keplerian: one
     /// `natural/REGROWTH_GRAIN` quantum per LOCAL YEAR elapsed since the vein's
     /// last book motion (`⌊now/P⌋ − ⌊last/P⌋`, exact off the two-clock model),
     /// amplified by the orb's topological recycling (`β₁` = the count of
     /// Regenerator return-pathways closing a metabolic loop), capped so a vein
     /// never recovers past its endowment. Lattice-floored (the ONT-2 denominator
     /// discipline) and receipted as `VeinRejuvenated` — a delta-0 element move
-    /// that advances the vein book alone. Runs BEFORE the staple mine, so a vein
+    /// that advances the vein book alone. Runs before the staple mine, so a vein
     /// that recovered this touch can feed the mouths the same span. A world with
     /// no star or no orbit rejuvenates nothing (no place, no forcing clock).
     pub(super) fn rejuvenate_orb_veins(&mut self, orb: u64, stamp: u64, actor: u64) {
@@ -310,7 +310,7 @@ impl World {
                 (inject > ratio(0, 1)).then_some((vein.element, inject))
             })
             .collect();
-        // Phase 2 (WRITE): advance the vein book and receipt each recovery — the
+        // Phase 2 (write): advance the vein book and receipt each recovery — the
         // mirror of the staple mine's `extracted += eaten`.
         for (element, inject) in injections {
             if let Some(vein) = self
@@ -329,24 +329,24 @@ impl World {
         }
     }
 
-    /// **THE QUARANTINE DECAY — what a sealed world LOSES at a touch**
+    /// **The quarantine decay — what a sealed world loses at a touch**
     /// (task #30, ruled 2026-08-12). While a world is quarantined
     /// (bio-pressure past the threshold), its ration does not recover —
-    /// it STARVES, decaying at the same intrinsic rate it would else
+    /// it starves, decaying at the same intrinsic rate it would else
     /// grow: a derived flat `r·Δt`, the per-beat decay the ruling names,
     /// settled lazily at the touch exactly as the regrowth it replaces.
     /// Capped at the stock (never below zero). `None` when the world
     /// stands free, holds no ration, or is an element-eater (whose stock
     /// rides the element economy, #29).
     ///
-    /// Folds into the touch as a resource DEBIT (an `UpkeepSettled`) — the
+    /// Folds into the touch as a resource debit (an `UpkeepSettled`) — the
     /// mirror of the regrowth credit — so it too is SEAL-B-safe with no
     /// new deed, wire, or kernel arm.
     pub fn quarantine_decay(&self, orb: u64, stamp: u64) -> Option<(Ration, Ratio)> {
         self.quarantine_decay_with(orb, stamp, self.ration_of(orb))
     }
 
-    /// `quarantine_decay` on a PRE-RESOLVED ration (ING-2b PERF memo).
+    /// `quarantine_decay` on a PRE-resolved ration (ING-2b PERF memo).
     pub(super) fn quarantine_decay_with(
         &self,
         orb: u64,
@@ -364,14 +364,14 @@ impl World {
         (decay > ratio(0, 1)).then_some((ration, decay))
     }
 
-    /// The ration delta a collect TOUCH settles: a starving DEBIT while
-    /// quarantined, else the recovery CREDIT. One or the other, never
+    /// The ration delta a collect TOUCH settles: a starving debit while
+    /// quarantined, else the recovery credit. One or the other, never
     /// both — a sealed world does not recover.
     pub fn ration_touch_delta(&self, orb: u64, stamp: u64) -> Option<(Ration, Ratio)> {
         self.ration_touch_delta_with(orb, stamp, self.ration_of(orb))
     }
 
-    /// `ration_touch_delta` on a PRE-RESOLVED ration (ING-2b PERF memo).
+    /// `ration_touch_delta` on a PRE-resolved ration (ING-2b PERF memo).
     pub(super) fn ration_touch_delta_with(
         &self,
         orb: u64,
@@ -386,7 +386,7 @@ impl World {
         }
     }
 
-    /// **THE POPULATION NET-DELTA at a collect touch** (#40/#41/#42,
+    /// **The population net-delta at a collect touch** (#40/#41/#42,
     /// `41_PROVISION` §2–3 / `42_LIFESPAN` §1–2). The elastic population
     /// eats its ration, births from the surplus toward `K_pop`, and turns
     /// over across its lifespan — all computed lazily at the touch from
@@ -399,18 +399,18 @@ impl World {
     /// the whole thing rides existing receipts and stays SEAL-B-safe.
     ///
     /// `None` when nothing is driven here: a world with no people, a
-    /// zero-span touch, or a rate-0 CAPTURE line (the plasmoid, whose
+    /// zero-span touch, or a rate-0 capture line (the plasmoid, whose
     /// energy population rides the heat economy, not a farmed stock).
     ///
-    /// SOURCE-1: the food AVAILABLE this span is summed over the line's derived
+    /// SOURCE-1: the food available this span is summed over the line's derived
     /// [`FoodSource`]s ([`Self::sustenance_sources_with`]) — the wild flow it
     /// gathers plus the stock its metabolism grows (a Resource bank, or its
     /// mineral vein) — so this reads no `match ration`; the species → source
     /// mapping lives in the derivation alone.
-    /// - **FED** (`available ≥ demand`): the population grows an S-curve
+    /// - **Fed** (`available ≥ demand`): the population grows an S-curve
     ///   toward its ceiling ([`grained_logistic`] on people, the #28
     ///   curve), less the ordinary mortality; it eats its full demand.
-    /// - **STARVED** (`available < demand`): only the people the span's
+    /// - **Starved** (`available < demand`): only the people the span's
     ///   food can feed survive — the unfed die atop the mortality — and
     ///   all of it is eaten.
     pub fn population_touch_delta(
@@ -421,8 +421,8 @@ impl World {
         self.population_touch_delta_with(orb, stamp, self.ration_of(orb))
     }
 
-    /// `population_touch_delta` on a PRE-RESOLVED ration (ING-2b PERF memo).
-    /// The collect touch resolves the almanac staple ONCE and threads it here
+    /// `population_touch_delta` on a PRE-resolved ration (ING-2b PERF memo).
+    /// The collect touch resolves the almanac staple once and threads it here
     /// and into the `natural` recursion, so `staple_diet_of`'s scan does not
     /// re-run per reader — a pure memoization (the ration is deterministic).
     pub(super) fn population_touch_delta_with(
@@ -431,8 +431,8 @@ impl World {
         stamp: u64,
         ration: Ration,
     ) -> Option<(Ratio, FoodSource, Ratio)> {
-        // THE POPULATION IS EXACT-RATIONAL (COG Slice 2): the integer
-        // headcount PLUS the fractional carry the logistic has accrued but
+        // The population is exact-rational (COG Slice 2): the integer
+        // headcount plus the fractional carry the logistic has accrued but
         // not yet promoted to a whole colonist. The logistic is a multiplier
         // on this mass, so a sub-one band (a founding seed part-way to its
         // next birth) still grows — reading only the integer count would
@@ -448,7 +448,7 @@ impl World {
         }
         let metabolism = self.genesis.as_ref().map(|held| held.metabolism).unwrap_or(2);
         let element = self.metabolic_element();
-        // R6 — per-capita demand is the line's own half-harvest, MODULATED
+        // R6 — per-capita demand is the line's own half-harvest, modulated
         // by the sitting class (`per_capita_ration`): a costly archetype
         // eats more per head, a frugal one less, so all 14 classes (and any
         // minted class) provision distinctly, from the fold, no new dial. A
@@ -461,10 +461,10 @@ impl World {
         let dtr = ratio(dt as i64, 1);
         let demand = pr.clone() * per_capita.clone() * dtr.clone();
         // R7b — mortality: the population turns over once per lifespan `L`,
-        // so `⌊head·Δt/L⌋` WHOLE colonists die this span. Kept integer (as
-        // before Slice 2) and read on the whole HEADCOUNT — turnover claims
+        // so `⌊head·Δt/L⌋` whole colonists die this span. Kept integer (as
+        // before Slice 2) and read on the whole headcount — turnover claims
         // whole people, and a long-lived line whose `head·Δt` has not yet
-        // reached one lifespan neither grows nor dies (the leisure STALL
+        // reached one lifespan neither grows nor dies (the leisure stall
         // holds exactly, `43_DISTRIBUTION` §3–4). Only BIRTHS carry a
         // fraction; deaths-by-turnover stay whole.
         let head = self.population_of(orb) as u128;
@@ -472,7 +472,7 @@ impl World {
             ((head * dt as u128) / self.lifespan_of().max(1) as u128) as i64,
             1,
         );
-        // THE FOOD AVAILABLE THIS SPAN — the standing bank PLUS what the
+        // The FOOD available this SPAN — the standing bank plus what the
         // world produced over the same beats (the farmed yield accrued by
         // the ticks, and the natural regrowth/decay settling at this same
         // touch). The people eat from the period's whole harvest, not last
@@ -480,13 +480,13 @@ impl World {
         // however seldom its sovereign collects, the same path-independence
         // the lazy ration settle already gives. All three fold into this
         // touch, so `consumed ≤ available` keeps the settled bank ≥ 0.
-        // SOURCE-1: DERIVE this line's sustenance sources and read the food it
-        // has this span off the vector — the WILD flow it gathers (eaten first,
+        // SOURCE-1: derive this line's sustenance sources and read the food it
+        // has this span off the vector — the wild flow it gathers (eaten first,
         // never banked) plus the stock its metabolism grows (a Resource bank +
         // this span's harvest, or its mineral vein's unextracted richness). The
-        // species → source mapping lives ONLY in `sustenance_sources_with`; here
+        // species → source mapping lives only in `sustenance_sources_with`; here
         // the population just sums availability and nets the wild share — no
-        // `match ration`, so a FLUX source (energy-eaters, #29) or a multi-source
+        // `match ration`, so a flux source (energy-eaters, #29) or a multi-source
         // diet slots in with no change to this loop.
         let sources = self.sustenance_sources_with(orb, stamp, &ration);
         let syntropic: Ratio = sources
@@ -498,32 +498,32 @@ impl World {
             .iter()
             .map(|source| source.available())
             .fold(ratio(0, 1), |sum, amount| sum + amount);
-        // The PRIMARY larder — the first non-wild source, the one the draw
+        // The primary larder — the first non-wild source, the one the draw
         // depletes. `None` only where the derivation found no stock (an unsited
         // line), which the guards above have already turned back.
         let Some(larder) = sources.into_iter().find(|source| !source.is_wild()) else {
             return None;
         };
         if available >= demand {
-            // FED — births ride the #28 logistic on PEOPLE toward K_pop,
+            // Fed — births ride the #28 logistic on people toward K_pop,
             // less the ordinary mortality; the people eat their full demand.
             let k = self.population_capacity(orb);
-            // MOVING FOOTPRINT (`44_LINEAGES` §2b): a mobile line in a medium
+            // Moving footprint (`44_LINEAGES` §2b): a mobile line in a medium
             // spreads faster — its intrinsic rate takes the growth boost. A
             // non-mobile line's factor is 1, so the #40–42 rate is unchanged.
             let r = intrinsic_rate(metabolism, element) * self.footprint_growth_factor(orb);
             let grown = grained_logistic(&pr, &k, &r, dt);
-            // STABILITY GATE (`43_DISTRIBUTION` §3–4): where a granary
+            // Stability gate (`43_DISTRIBUTION` §3–4): where a granary
             // stands, births scale by the leisure coverage — a fed but
-            // un-entertained people STALLS (births→0, only mortality runs)
+            // un-entertained people stalls (births→0, only mortality runs)
             // rather than starving. Without a granary stability reads 1, so
             // this multiplies by one and the #40–42 path is byte-identical.
-            // EXACT births — the logistic's fractional output is PRESERVED,
+            // Exact births — the logistic's fractional output is preserved,
             // not floored (COG Slice 2). Every modulator is a rational factor
             // the settle later promotes into whole colonists as the carry
             // crosses one; nothing is truncated here.
-            // TFR term III: births are gated by the UNIFIED economic contentment
-            // `max(0, 1 − σ)` — leisure exhaustion AND insolvency — not leisure
+            // TFR term III: births are gated by the unified economic contentment
+            // `max(0, 1 − σ)` — leisure exhaustion and insolvency — not leisure
             // alone. It subsumes the old `stability_of` gate (a solvent, rested
             // line reads exactly `stability_of`, so unchanged) and adds the
             // wealth axis, precipitating the Sated Collapse. `43_DISTRIBUTION`.
@@ -531,7 +531,7 @@ impl World {
                 * self.economic_contentment(orb, stamp)
                 * self.flux_output_factor(orb);
             // DISPOSITION (§5): the cognition caste spends its share of
-            // surplus growth on KNOWLEDGE, not mouths — an exact fraction
+            // surplus growth on knowledge, not mouths — an exact fraction
             // (`cognition / people`) of births, so it too carries no floor.
             // Only a positive surplus is siphoned; a cull is never redirected.
             let people = self.population_of(orb);
@@ -542,31 +542,31 @@ impl World {
             } else {
                 births
             };
-            // THE WILD FLOW IS EATEN FIRST (COG Slice 2c, made real at the
-            // ledger). The syntropic food the band GATHERS is free and drawn
-            // before any cultivated/banked stock, so only the demand BEYOND the
+            // The wild flow is eaten first (COG Slice 2c, made real at the
+            // ledger). The syntropic food the band gathers is free and drawn
+            // before any cultivated/banked stock, so only the demand beyond the
             // wild flow debits the bank. A founding band whose whole demand sits
-            // under the syntropic flow draws NOTHING from the granary — it lives
+            // under the syntropic flow draws nothing from the granary — it lives
             // by gathering, and the industrial surplus it never touches is
             // preserved. The bank is pressured only once the population outgrows
-            // the wild flow — which IS the cultivation trigger (the standing
+            // the wild flow — which is the cultivation trigger (the standing
             // deficit that drives the Mind). This is the third element: the
             // amount economy.rs debits from the stored bank, wild food already
             // netted out.
             let bank_draw = (demand - syntropic).max(ratio(0, 1));
             Some((births - mortality, larder, bank_draw))
         } else {
-            // STARVED — only the fraction of the band the span's food can
+            // Starved — only the fraction of the band the span's food can
             // feed survives; the unfed die atop the ordinary mortality, and
             // all of it is eaten. Exact-rational: a transient shortfall shaves
-            // a fraction of a colonist rather than killing a whole one, so a
+            // a fraction of a colonist rather than removing a whole one, so a
             // fed line is not collapsed by one lean touch.
             let fed = available.clone() / (per_capita * dtr);
             let unfed = (pr - fed).max(ratio(0, 1));
             // The bank draw nets out the wild flow here too: a starving band
             // eats everything it can reach, but the syntropic share was
             // gathered free, so only the non-wild remainder (bank + harvested +
-            // natural) debits the granary — which is exactly what STANDS there.
+            // natural) debits the granary — which is exactly what stands there.
             let bank_draw = (available - syntropic).max(ratio(0, 1));
             Some((-(mortality + unfed), larder, bank_draw))
         }

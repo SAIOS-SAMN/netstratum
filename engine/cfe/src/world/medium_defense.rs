@@ -51,7 +51,7 @@ impl World {
         }
     }
 
-    /// Medium envelope reading for DEFEND / suite.
+    /// Medium envelope reading for defend / suite.
     pub fn medium_integrity(&self, orb: u64) -> MediumIntegrity {
         let pressure = self.tamper_pressure_of(orb);
         let thr = tamper_threshold();
@@ -67,7 +67,7 @@ impl World {
         }
     }
 
-    /// Dual-use ATM reading (P5.19): TERRA crown held ⇒ covert path taxed.
+    /// Dual-use ATM reading (P5.19): terra crown held ⇒ covert path taxed.
     pub fn dual_use_atm(&self) -> DualUseAtm {
         DualUseAtm {
             can_overt_terraform: self.can_terraform(),
@@ -92,7 +92,7 @@ impl World {
     pub fn covert_tamper_as(&mut self, actor: u64, orb: u64) -> Result<Ratio, ActionRefused> {
         self.permitted(actor, Scope::Build)?;
         // P5.19 dual-use: never rewrites PlanetSited / thermal seat.
-        // Holding TERRA crown doubles crystal cost (1+1) — overt path is terraform.
+        // Holding terra crown doubles crystal cost (1+1) — overt path is terraform.
         let base = eighth();
         let cost = if self.can_terraform() {
             base.clone() + base.clone()
@@ -189,7 +189,7 @@ pub struct MediumIntegrity {
     pub pressure: Ratio,
     pub threshold: Ratio,
     pub compromised: bool,
-    /// True when TERRA crown is held — covert path is dual-use taxed.
+    /// True when terra crown is held — covert path is dual-use taxed.
     pub dual_use: bool,
     /// P5.19b reinforce debit resource.
     pub reinforce_resource: Resource,

@@ -738,7 +738,7 @@ reach, because guarding a boundary is an act, not a verdict.
 `17_CAPACITY`'s own drift).** The "kernel bridge's `rank_is_defined`"
 named above as a 2026-08-01 instance of a failed docstring-only
 protection was deleted that same day, but the deletion did not hold: it
-is alive today as the phantom-rank gate, landed `153a70c` 2026-08-04, at
+is alive today as the PHANTOM-RANK gate, landed `153a70c` 2026-08-04, at
 `engine/kernel/src/bridge.rs:304` and consulted from `engine/kernel/src/
 lib.rs:660,777,783`. The point this section makes — that a docstring
 alone failed to hold the line twice — is undisturbed by the method's

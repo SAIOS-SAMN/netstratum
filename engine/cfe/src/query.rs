@@ -1,15 +1,15 @@
 //! NS-2 RQP — the resonance query (N4). The lens beside the ledger:
-//! a PURE structural read of the committed orb population, addressed
+//! a pure structural read of the committed orb population, addressed
 //! by sigil (frame-invariant canonical form), O(bucket), never a scan
 //! of the population. Nothing here mutates and nothing here receipts —
 //! the one chronicle event of RQP (the crystal draw, NS-2 §1.5) lives
 //! in `world::scan`, which pays before it calls in.
 //!
-//! Composed FROM the v0.4 sigil index (`reduct::reduction`, the SIGIL1
-//! block — CHARTER §8): the address is projections of ONE joint
+//! Composed from the v0.4 sigil index (`reduct::reduction`, the SIGIL1
+//! block — Charter §8): the address is projections of one joint
 //! canonical shadow, never independent marginals (the
-//! dimensional-collapse warning); T is excluded from the key — you
-//! query an orb by WHAT it is (S, G), never by WHEN it was found.
+//! dimensional-collapse warning); T is excluded from the key — an
+//! orb is queried by what it is (S, G), never by when it was found.
 
 use crate::dop::{ColonyOrb, Resource};
 use crate::ratio::{ratio, Ratio};
@@ -37,13 +37,13 @@ pub struct Address {
 }
 
 /// The joint canonical shadow — the resonance check. Two orbs resonate
-/// iff these are EQUAL: no threshold, no score, no similarity.
+/// iff these are equal: no threshold, no score, no similarity.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Joint {
     /// Lex-min over the eight grid symmetries of the sorted
     /// (row, col, kind) tuples. Kind is the LAST component, so the
     /// position sequence settles first — the S projection of this
-    /// winner IS the position-only lex-min.
+    /// winner is the position-only lex-min.
     pub zones: Vec<(u8, u8, u8)>,
     /// The banked ledger, resource-ascending, zeros absent (the NS-1
     /// canonical order, carried as (code, amount)).
@@ -60,8 +60,8 @@ pub struct Sigil {
     pub joint: Joint,
 }
 
-/// A near-miss: same bucket, joint mismatch — refused WITH ITS DELTA
-/// WHOLE (NS-2 §1.4).
+/// A near-miss: same bucket, joint mismatch — refused with its delta
+/// whole (NS-2 §1.4).
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct NearMiss {
     pub orb: u64,
@@ -75,20 +75,20 @@ pub struct NearMiss {
     /// bucket); carried so the surface holds if a ruling widens it.
     pub thermal: (u8, u8),
     /// C(Δ) = Σ |R| over the banked residuals — the coherence-functional
-    /// shape (exact rational, zero iff the ledgers agree; THE
-    /// PROPORTIONAL LAW: each residual counts exactly its size, in its own units —
+    /// shape (exact rational, zero iff the ledgers agree; the
+    /// proportional law: each residual counts exactly its size, in its own units —
     /// squares are barred as aggregators of difference), computed
-    /// local: cfe carries no rfa-core dependency. THE SUMMARY, never
+    /// local: cfe carries no rfa-core dependency. The summary, never
     /// the payload.
     pub coherence: Ratio,
 }
 
 /// One scan's reading (NS-2 §1.3–§1.4). Both lists empty = the empty
-/// bucket, its own typed verdict: NO delta against the population —
+/// bucket, its own typed verdict: no delta against the population —
 /// nearest-candidate search would be the very scan RQP refuses.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ScanRead {
-    /// The CrystalDrawn receipt's stamp: WHEN this lens was paid for —
+    /// The CrystalDrawn receipt's stamp: when this lens was paid for —
     /// ledger-side annotation, never a key.
     pub stamp: u64,
     pub probed: Address,
@@ -103,7 +103,7 @@ pub struct ScanRead {
 
 /// The eight grid symmetries — the plane group of the square chart,
 /// a structural constant bounded by group order (the v0.4 law: the
-/// only sweep is over the OBSERVER's frame group, never content).
+/// only sweep is over the observer's frame group, never content).
 fn transforms(row: u8, col: u8) -> [(u8, u8); 8] {
     let last = GRID - 1;
     [

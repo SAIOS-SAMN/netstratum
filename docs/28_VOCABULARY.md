@@ -340,7 +340,7 @@ bind a line to obligations with one benefit and one friction (§4a); a
 covenant clade would say the line is constituted by them.
 
 **The tier ruling (operator, 2026-08-05): *drop covenant to T3 and
-below*.** The covenant is a **common-band instrument** and `seal_forward`
+below*.** The covenant is a **COMMON-BAND instrument** and `seal_forward`
 now refuses any line holding a chartered office.
 
 The reason is in the mechanism rather than in the hierarchy. A covenant

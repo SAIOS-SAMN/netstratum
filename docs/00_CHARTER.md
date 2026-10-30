@@ -136,7 +136,7 @@ journals are lenses. Where a reading is needed, it derives.
 was all it was. It became load-bearing one useful change at a time, and
 no rule existed to stop it — so §11 was written, the crate was excised
 (d606b01), and `cfe::opposition`, the reconciler it had made necessary,
-went with it (c7cad9e). Anti-mirror followed: verification by opposition
+went with it (c7cad9e). ANTI-MIRROR followed: verification by opposition
 still needs two records to set against each other, which §11 rule 5
 clause 1 forbids outright. *What cannot diverge needs no reconciling.*
 
@@ -162,8 +162,8 @@ first time; a standing test did.
 ## 5. Ancestry (consult, never port blindly)
 
 - `/opt/repos/` — the reference era: convergence-engine (the math),
-  AI-technology-WWW (the WWW4 protocol drafts the NS specs supersede),
-  governance (the five-layer architecture), nebula-products (the platform
+  AI-TECHNOLOGY-WWW (the WWW4 protocol drafts the NS specs supersede),
+  governance (the five-layer architecture), NEBULA-PRODUCTS (the platform
   vision), AI-scientists (the safety research). Shapes are reference; every
   scalar/scored/capped form is refused.
 - `/opt/ipsal-autic-v0.4/` — the sealed engine build: the chronicle (VRP's
@@ -274,7 +274,7 @@ Neither node edits the other's territory without an operator relay. Cross-layer 
 primitive → witness test) — the layers hold each other by tests, not by
 memory.
 
-## 11. The one-truth amendment (operator ruling 2026-07-31; rewritten
+## 11. The ONE-TRUTH amendment (operator ruling 2026-07-31; rewritten
 to the plain register by the same ruling — the document says what it
 means; pen coder-03, review coder-04, all seats bound)
 

@@ -1,5 +1,5 @@
-//! A SHARE COMPOUNDS FRAME BY FRAME, read on netstratum's carrier. The law
-//! is mycelium's form (`forms::xylarium::share_compounds`, CONCORDANCE 2.10):
+//! A share compounds FRAME by FRAME, read on Netstratum's carrier. The law
+//! is Mycelium's form (`forms::xylarium::share_compounds`, concordance 2.10):
 //! where a share `x` of what remains is taken on each ring of a body's own
 //! clock, `n` rings leave `(1 − x)^n`, held exactly as its runs
 //! `∏(1 − x_i)^n_i` (`Remaining`). This shell adds only the reading of that
@@ -49,7 +49,7 @@ fn enclose(runs: &[(Ratio, u64)], p: u64) -> (BigInt, BigInt) {
     (lo, hi)
 }
 
-/// THE READING of `a · remaining` (`a ≥ 0`) through `at`, a reading that
+/// The reading of `a · remaining` (`a ≥ 0`) through `at`, a reading that
 /// never turns back as its value rises (a floor on a grain, a comparison):
 /// read at both ends of an enclosure of the exact value, which narrows until
 /// the two agree, and so land where the exact value lands. An enclosure that

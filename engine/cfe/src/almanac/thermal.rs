@@ -1,14 +1,14 @@
-//! THE THERMAL CLOSURE — the temperature line, closed, and the orbit
+//! The thermal closure — the temperature line, closed, and the orbit
 //! grain that keeps it holdable.
 //!
 //! `crate::thermal::band_of` returns `Option<SubstrateBand>` and answers
-//! NONE in four places, which the tree's own witnesses already record:
+//! none in four places, which the tree's own witnesses already record:
 //! below the cryogenic floor, between cryogenic and mesic, between
 //! mesic and hyperthermal, and above hyperthermal.
 //!
 //! A `None` is not a temperature. Every orb has one, so a reading that
 //! declines to name it is a hole in the vocabulary rather than a
-//! refusal. This closes the line by NAMING the uncovered stretches, and
+//! refusal. This closes the line by naming the uncovered stretches, and
 //! changes no admission: `SubstrateBand` still rules siting and every
 //! temperature that had a band keeps it.
 
@@ -23,7 +23,7 @@ pub enum ThermalRegion {
     Quenched,
     /// 10 K – 100 K.
     Cryogenic,
-    /// 100 K – 250 K. A stretch `band_of` answered NONE for.
+    /// 100 K – 250 K. A stretch `band_of` answered none for.
     Sublime,
     /// 250 K – 320 K.
     Mesic,
@@ -33,16 +33,16 @@ pub enum ThermalRegion {
     HyperThermal,
     /// Above 1500 K, up to the ceiling.
     Incandescent,
-    /// **ABOVE THE CEILING.** Reachable only by an UNGRAINED orbit; with
+    /// **Above the ceiling.** Reachable only by an ungrained orbit; with
     /// [`orbit_on_grain`] applied it cannot occur. The arm exists to be
     /// unreachable, and naming it is what let that be checked.
     Beyond,
 }
 
 impl ThermalRegion {
-    /// **THE STELLAR FLUX LEVEL** (`44_LINEAGES` §2b) — the band's rank on
+    /// **The stellar flux level** (`44_LINEAGES` §2b) — the band's rank on
     /// the temperature line, coldest 0 to hottest 7. The flux an orb bathes
-    /// in IS its thermal band, so this is a reading, not a new number: a
+    /// in is its thermal band, so this is a reading, not a new number: a
     /// flux-driven line (`44_LINEAGES`) reads its output off it.
     pub fn flux_level(self) -> u8 {
         match self {
@@ -58,12 +58,12 @@ impl ThermalRegion {
     }
 }
 
-/// **THE ORBIT GRAIN** — the lattice a lawful orbit sits on.
+/// **The orbit GRAIN** — the lattice a lawful orbit sits on.
 ///
 /// Heat is amplified by closeness — `t_eq4 = L(1-a)k / r²` — and the
 /// division is where irrationality enters: `r -> 0` is unbounded in
-/// VALUE, and `r = 1/10^k` is unbounded in DENOMINATOR (~`10^(2k)`, the
-/// blowup that killed proportional demurrage at ~2^1100).
+/// value, and `r = 1/10^k` is unbounded in denominator (~`10^(2k)`, the
+/// blowup that ended proportional demurrage at ~2^1100).
 ///
 /// The engine already answers this one layer down: the melt law posts
 /// in whole lots on a `1/64` grid *"so exact arithmetic stays cheap"*.
@@ -73,7 +73,7 @@ pub const ORBIT_GRAIN: i64 = 64;
 
 /// Snap an orbit to the grain, never below one step. An orbit inside
 /// the first step is not a nearer orbit; it is not an orbit. Floors
-/// rather than rounds, so nothing is moved CLOSER than it asked.
+/// rather than rounds, so nothing is moved closer than it asked.
 pub fn orbit_on_grain(orbit_r: &Ratio) -> Ratio {
     use num_bigint::BigInt;
     let grid = BigInt::from(ORBIT_GRAIN);
@@ -82,7 +82,7 @@ pub fn orbit_on_grain(orbit_r: &Ratio) -> Ratio {
     Ratio::new(at_least_one, grid)
 }
 
-/// **THE DERIVED CEILING** — the brightest class, zero albedo, one grain
+/// **The derived ceiling** — the brightest class, zero albedo, one grain
 /// out. No number is chosen: it falls out of the luminosity table and
 /// the grain, both already present.
 pub fn ceiling4() -> Ratio {
@@ -93,7 +93,7 @@ pub fn ceiling4() -> Ratio {
     )
 }
 
-/// Read the region of a temperature. **TOTAL** — every `t_eq4` names a
+/// Read the region of a temperature. **Total** — every `t_eq4` names a
 /// region, and that is the closure.
 pub fn region_of(t_eq4: &Ratio) -> ThermalRegion {
     use crate::thermal::SubstrateBand as B;
@@ -120,9 +120,9 @@ pub fn grained_t_eq4(luminosity: &Ratio, albedo: &Ratio, orbit_r: &Ratio) -> Rat
     crate::thermal::t_eq4(luminosity, albedo, &orbit_on_grain(orbit_r))
 }
 
-/// Is an element workable at this temperature? The TOTAL form of
+/// Is an element workable at this temperature? The total form of
 /// [`super::locality::workable_in`]. The refractory phase works in any
-/// NAMED region; nothing is workable `Beyond`.
+/// named region; nothing is workable `Beyond`.
 pub fn workable_at(element: &[u8; 32], t_eq4: &Ratio) -> bool {
     let region = region_of(t_eq4);
     if region == ThermalRegion::Beyond {

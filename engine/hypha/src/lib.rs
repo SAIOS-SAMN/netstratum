@@ -1,18 +1,18 @@
-//! Netstratum's uplink to a mycelium hypha (MU-RECURSION 78.62).
+//! Netstratum's uplink to a Mycelium hypha (MU-RECURSION 78.62).
 //!
-//! The hypha holds the laws (L0) and adjudicates; netstratum keeps its own
+//! The hypha holds the laws (L0) and adjudicates; Netstratum keeps its own
 //! game — colonies, peoples, the STAMP economy, the chronicle — and puts
 //! what it settles to the court. Two acts carry it:
 //!
-//!   * VERIFY: a transition read by the court and by this kernel with the
+//!   * Verify: a transition read by the court and by this kernel with the
 //!     same verifier (law 12 — one reader), so the two can only disagree if
 //!     the builds differ.
-//!   * FOLD: a tier's net positions per identity per lane over a prefix of
+//!   * Fold: a tier's net positions per identity per lane over a prefix of
 //!     the tier's own line ([`line`]), signed by the tier, admitted by
 //!     continuity (78.119). [`census`] derives those folds from a colony's
 //!     chronicle exactly.
 //!
-//! Every call goes to a real `mycelium-server` (78.59, "NO MOCK").
+//! Every call goes to a real `mycelium-server` (78.59, "no mock").
 
 use mycelium::court::identity::HyphaKey;
 use mycelium::physics::laws::{self, Breach, Law, Transition, Verdict};
@@ -37,7 +37,7 @@ pub mod refound;
 /// 2026-10-09, docs/PORT.md) and the fleet's hyphae are real tiers, so every
 /// command names its hypha (`--at` / `NS_HYPHA`).
 
-/// One session to one hypha, under netstratum's own voice.
+/// One session to one hypha, under Netstratum's own voice.
 pub struct Uplink {
     session: Session,
     pub addr: String,
@@ -63,7 +63,7 @@ pub fn unmeasured(b: &Breach) -> bool {
     matches!(b, Breach::Undecomposed(Undecomposed::Unbounded(_)))
 }
 
-/// The laws a verdict says were BREACHED, not counting unmeasured readings.
+/// The laws a verdict says were breached, not counting unmeasured readings.
 pub fn laws_of(v: &Verdict) -> Vec<Law> {
     let mut l: Vec<Law> = v.breaches.iter().filter(|(_, b)| !unmeasured(b)).map(|(law, _)| *law).collect();
     l.sort_by_key(|law| law.index());
@@ -77,8 +77,8 @@ pub fn verify_local(t: &Transition) -> Verdict {
     laws::verify_sized(t)
 }
 
-/// The terms netstratum speaks on the network, each in the vocabulary it
-/// means it in (MU-LEXICON). "World" is not among them: in netstratum it is
+/// The terms Netstratum speaks on the network, each in the vocabulary it
+/// means it in (MU-LEXICON). "World" is not among them: in Netstratum it is
 /// the informal name of a people's chronicle, never a wire name.
 pub const TERMS: [(&str, Vocab); 13] = [
     ("Universe", Vocab::Physical),
@@ -131,7 +131,7 @@ impl Uplink {
     }
 
     /// The server's lexicon version, and every term in [`TERMS`] it does not
-    /// serve in the vocabulary netstratum means it in.
+    /// serve in the vocabulary Netstratum means it in.
     pub fn lexicon_check(&self) -> io::Result<(u8, Vec<String>)> {
         use mycelium::physics::laws::lexicon::Vocabulary;
         use mycelium::physics::laws::codec::{decode_lexicon_reply, encode_lexicon_request};

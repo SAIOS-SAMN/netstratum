@@ -77,7 +77,7 @@ lawful, none an edit:
 | Power | Engine deed |
 |---|---|
 | create a new species | authoring a genesis entry (registry create + genesis receipts — the conductor's founding path, made diegetic) |
-| create a new star | chartering a world with a seated star (`StarClass` + albedo + orbit — the bot-THERM siting path) |
+| create a new star | chartering a world with a seated star (`StarClass` + albedo + orbit — the BOT-THERM siting path) |
 | create a new planet | the multi-planet charter (P1) — a new orbit under an existing sun |
 | modify quantum states | a gauge operation on G — a `GaugeShifted` deed (11 §2.1, tag 42); never a continuous field, always a discrete receipted shift (§6) |
 | issue a technology leap | `TechDiscovered` / `TechLicensed` (10, reserved tags 39–40) — a leap may be known or unknown to the receiving civilization; unknown leaps land as sealed grants the locals must still unlock |
@@ -165,8 +165,8 @@ itself (expansion sealed whole and a fresh sheet seated — *nothing is
 destroyed; the fold is archival by construction*) are all readings of
 the dual.
 
-**The anti-mirror law — deprecated (operator ruling 2026-08-01).**
-mirror and anti-mirror are both struck as framings. **The system
+**The ANTI-MIRROR law — deprecated (operator ruling 2026-08-01).**
+mirror and ANTI-MIRROR are both struck as framings. **The system
 operates on lenses at this level.** The ruling ratifies an excision the
 tree had already completed: `engine/mirror` was deleted (d606b01) and
 `cfe::opposition` excised (c7cad9e) under `00_CHARTER` §11, and

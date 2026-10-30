@@ -1,6 +1,6 @@
 # NS-5 — MESH: two nodes, one world
 
-> **Superseded in part — Charter §11, the one-truth amendment
+> **Superseded in part — Charter §11, the ONE-TRUTH amendment
 > (2026-07-31).** The consilience instruments of §2 and the
 > reconciliation records of §3 (tag 65; refusal kinds 3–4) are
 > retired and their code excised: a reconciling check between copies
@@ -21,7 +21,7 @@ handoff, tag 67).
 > walks: SPINE-1 (tag 84, two maps, four verbs) + the #36 rungs — the
 > adoption door (`Spine::adopt`: a pre-chain world enters the mainline
 > once, the debt stamped `judged=0`, a second adoption refuses) and
-> kernel-observed play (every conductor world chains its committed
+> KERNEL-OBSERVED play (every conductor world chains its committed
 > state each beat at {S, G, T-tick}; the record repeats the blob's
 > leading byte — never a schema constant; a penned world's spine
 > stalls with its pen). The agreement law landed whole as

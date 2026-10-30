@@ -1,14 +1,14 @@
-//! THE CENSUS FOLD — a people's chronicle, netted for the court.
+//! The census fold — a people's chronicle, netted for the court.
 //!
 //! The chronicle is the record: an append-only, hash-chained run of
 //! receipts, and the colony's state is its replay. A census over the window
 //! `[from, to)` steps the replay one receipt at a time and reads every
 //! colony orb's holdings before and after each receipt:
 //!
-//!   * ROWS are each holding's net change over the window — one identity per
+//!   * Rows are each holding's net change over the window — one identity per
 //!     (people, orb, holding), matter on [`lane::MATTER`], STAMP on
 //!     [`lane::MONEY`], in units of the resource ledger's 1/1024 grain.
-//!   * DECLARED is what the receipts themselves made or unmade: whatever a
+//!   * Declared is what the receipts themselves made or unmade: whatever a
 //!     receipt's net change on a holding is, summed across every orb, is
 //!     emitted by that receipt's KIND — one identity per (people, kind,
 //!     holding). A transfer between two orbs nets to zero and declares
@@ -132,11 +132,11 @@ fn kind_of(event: &cfe::dop::ClosureEvent) -> String {
     debug.split(|c: char| !c.is_ascii_alphanumeric()).next().unwrap_or("").to_string()
 }
 
-/// THE WORD A RECEIPT ISSUES, if it mints one — its label on the information
+/// The word A receipt issues, if it mints one — its label on the information
 /// lane. A solver word is named by its content-addressed orbit (the same word
 /// minted by two lines is one word); a civic vocabulary word by its axis and
 /// spelling. Domain-local names: a word that may ever cross domains is named by
-/// the hash of its mycelium address instead (coordinator ruling 2026-10-07),
+/// the hash of its Mycelium address instead (coordinator ruling 2026-10-07),
 /// and none crosses yet.
 fn word_issued(event: &cfe::dop::ClosureEvent) -> Option<String> {
     use cfe::dop::ClosureEvent as E;
@@ -147,7 +147,7 @@ fn word_issued(event: &cfe::dop::ClosureEvent) -> Option<String> {
     }
 }
 
-/// ONE RECEIPT'S NET CHANGE — a line entry (78.123's tier line: an entry is
+/// One receipt's net change — a line entry (78.123's tier line: an entry is
 /// the underlying batch a fold nets, never the fold itself). Receipts that
 /// move no holding write no entry.
 #[derive(Debug, Clone)]
@@ -183,15 +183,15 @@ fn small(n: &BigInt, orb: u64, holding: Holding) -> Result<i128, CensusRefused> 
     n.to_i128().ok_or(CensusRefused::Overflow { orb, holding })
 }
 
-/// THE INCREMENTAL CENSUS — a people's replay held open across reads, so a
-/// follower that tails a live chronicle steps each NEW receipt once and
+/// The incremental census — a people's replay held open across reads, so a
+/// follower that tails a live chronicle steps each new receipt once and
 /// never replays from genesis again. `skip` catches up over receipts
 /// already folded (no step emitted); `step` emits the receipt's own change.
 pub struct Stepper {
     replay: Replayer,
     before: Positions,
     applied: usize,
-    /// Every off-grain BREACH read so far, newest last — where a holding left
+    /// Every off-grain breach read so far, newest last — where a holding left
     /// the ledger's grain (a fill site broke #138; reported, never folded).
     pub off_grain: Vec<OffGrain>,
     held_off: std::collections::BTreeSet<(u64, Holding)>,
@@ -203,7 +203,7 @@ impl Stepper {
         Stepper { replay: Replayer::new(), before: Positions::new(), applied: 0, off_grain: Vec::new(), held_off: std::collections::BTreeSet::new() }
     }
 
-    /// A stepper resumed from CARRIED state (RECONSTRUCT v): the committed
+    /// A stepper resumed from carried state (reconstruct v): the committed
     /// state after `applied` receipts, read from a position record — never
     /// rebuilt by replaying the receipts before it.
     pub fn from_state(state: cfe::world::state::Committed, applied: usize) -> Stepper {
@@ -264,8 +264,8 @@ impl Stepper {
             .collect::<Result<Vec<_>, _>>()?;
         let mut declared = declared;
         if let Some(word) = word {
-            // ISSUED: the word is a declared source of one unit of information;
-            // DELIVERED: the people's lexicon (orb 0, the line itself) takes it.
+            // Issued: the word is a declared source of one unit of information;
+            // delivered: the people's lexicon (orb 0, the line itself) takes it.
             declared.push((word, Holding::Words, 1));
             rows.push((0, Holding::Words, 1));
         }
@@ -335,7 +335,7 @@ fn nets(people: &str, rows: &[(u64, Holding, i128)], declared: &[(String, Holdin
     (r, d)
 }
 
-/// THE BOUND ON A FOLD'S SPAN (coordinator ruling 2026-10-07): an
+/// The bound on A fold's SPAN (coordinator ruling 2026-10-07): an
 /// availability demand makes the tier publish every entry a fold nets, and
 /// the court replays them in one act, so no fold nets more than this many
 /// (~1.1 MB at ~270 B an entry). History is backfilled as successive folds.

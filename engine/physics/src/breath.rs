@@ -1,6 +1,6 @@
 //! The breath organ: exhale/inhale — lossless rank reduction.
 //!
-//! Exhale NEVER discards: content beyond the exhaled rank moves WHOLE
+//! Exhale never discards: content beyond the exhaled rank moves whole
 //! to the typed residual. The full exhale→inhale cycle restores the
 //! carrier byte-exact. This is the engine's elasticity primitive — a
 //! carrier under pressure breathes down (storage compression, eviction,

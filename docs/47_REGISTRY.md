@@ -54,7 +54,7 @@ name struck whole by Charter §11; and `rank_is_defined` was formerly
 | clade | `15_TAXON.md` §3 → `seeds/taxon-map.json` | codes 0–20 |
 | seat width | `registry.rs::seat_width` | progenitor 8 · watcher/observer 16 · sovereign unbounded |
 
-## §3 The second-truth register — axes re-typed away from their authority
+## §3 The SECOND-TRUTH register — axes re-typed away from their authority
 
 An axis re-typed elsewhere is a second readable truth (§11 rule 2), and
 it drifts silently because nothing forces the copies to agree.

@@ -8,7 +8,7 @@ members = [
 license = "Apache-2.0"
 
 [workspace.dependencies]
-# Mycelium, the network substrate netstratum's engine speaks through (its
+# Mycelium, the network substrate Netstratum's engine speaks through (its
 # clock, atlas and law forms), pinned at a tagged release; bumping it is a
 # deliberate act (CONTRIBUTING.md).
 mycelium = { git = "https://github.com/SAIOS-SAMN/mycelium", tag = "v0.2.0" }

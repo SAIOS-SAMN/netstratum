@@ -2,7 +2,7 @@
 //! arrow and the address hold structurally; the nursery owns its own
 //! addresses; the store verifies on every read; and the gate stands
 //! at the door — lawful passes, unlawful refuses, the sealed default
-//! refuses, and the unjudged hole is STAMPED, never hidden.
+//! refuses, and the unjudged hole is stamped, never hidden.
 
 use std::fs;
 use std::path::PathBuf;
@@ -107,10 +107,10 @@ fn the_spine_walks_and_reloads_whole() {
 
     let genesis = arbor.extend(coord(0), &bytes_a, None).expect("genesis").clone();
     assert_eq!(genesis.parent, [0u8; 32], "genesis is parentless");
-    // The record repeats the BLOB'S OWN leading byte — read against
+    // The record repeats the blob's own leading byte — read against
     // the blob, not a frozen version constant (re-pinned 2026-08-12:
     // the codec is at v19 now, and every schema bump since v5 broke a
-    // hardcoded assertion; the LAW is "the record echoes the blob").
+    // hardcoded assertion; the law is "the record echoes the blob").
     assert_eq!(genesis.schema, bytes_a[0], "the record repeats the blob's form");
     assert_eq!(genesis.kernel, kernel::VERSION);
     assert!(!genesis.judged, "genesis is honestly unjudged");
@@ -146,8 +146,8 @@ fn the_arrow_and_the_address_hold() {
     arbor.extend(coord(0), &bytes, None).expect("genesis");
     arbor.extend(coord(4), &bytes, None).expect("walks");
 
-    // One value per address: the exact head address refuses OCCUPIED;
-    // the clock only walks forward: a backward tick refuses the ARROW.
+    // One value per address: the exact head address refuses occupied;
+    // the clock only walks forward: a backward tick refuses the arrow.
     assert_eq!(arbor.extend(coord(4), &bytes, None).unwrap_err(), ArborRefused::Occupied);
     assert!(matches!(
         arbor.extend(coord(2), &bytes, None).unwrap_err(),
@@ -257,7 +257,7 @@ fn the_judge_stands_at_the_door() {
     let minting_next = two_orb_state((6, 1), (6, 1));
     arbor.extend(coord(0), &prior, None).expect("genesis");
 
-    // A lawful transfer gates and lands STAMPED gated.
+    // A lawful transfer gates and lands stamped gated.
     let judged = arbor
         .extend(coord(1), &lawful_next, Some(&transfer_step(1)))
         .expect("the lawful step enters")
@@ -273,10 +273,10 @@ fn the_judge_stands_at_the_door() {
         ArborRefused::Refused(kernel::Refused::ConservationBroken { resource: Resource::Iron, .. })
     ));
 
-    // A JUDGED refusal reaches the arbor and refuses. WITNESS
-    // TRUTH-UPDATE (recorded): this block rode the last-uncovered deed
+    // A judged refusal reaches the arbor and refuses. Witness
+    // truth-update (recorded): this block rode the last-uncovered deed
     // (ZoneRazed → EraAnnexed → AssayStruck → TaxonSealed) to prove
-    // the sealed default passed through. With coverage now TOTAL (all
+    // the sealed default passed through. With coverage now total (all
     // 64 deeds gated, kernel `taxon_pins.rs`), there is no Unjudged
     // deed to carry — so the pin shows the arbor carrying a
     // containment refusal instead: TaxonSealed needs Build, and the
@@ -301,7 +301,7 @@ fn the_judge_stands_at_the_door() {
     assert!(!hole.judged, "no judgment claimed is visible in the record, never hidden");
 }
 
-/// The commitment's schema field speaks the BLOB's leading byte — the
+/// The commitment's schema field speaks the blob's leading byte — the
 /// record never misdeclares the form it binds (the codec monopoly:
 /// one component owns the form; the arbor repeats it, never asserts
 /// its own).
@@ -323,7 +323,7 @@ fn the_record_speaks_the_blobs_schema() {
     );
 }
 
-/// THE ADOPTION DOOR (#36): a played, pre-chain world enters the
+/// The adoption door (#36): a played, pre-chain world enters the
 /// mainline once — the debt stamped unjudged, never hidden; a second
 /// adoption refuses; and the chained economy continues on top through
 /// the ordinary gated door.
@@ -333,7 +333,7 @@ fn adoption_is_once_and_names_its_debt() {
     let mut arbor = Arbor::open(&root).expect("opens empty");
 
     // A world with pre-chain history: its chronicle is the Tier-A
-    // debt. Adoption seats its CURRENT state, gated=0 stamped.
+    // debt. Adoption seats its current state, gated=0 stamped.
     let debt = two_orb_state((10, 1), (0, 1));
     let adopted = arbor.adopt(coord(1), &debt).expect("the debt is adopted").clone();
     assert_eq!(adopted.parent, [0u8; 32], "adoption is the mainline's birth");
@@ -350,7 +350,7 @@ fn adoption_is_once_and_names_its_debt() {
         ArborRefused::BranchUnknown { .. }
     ));
 
-    // Life after adoption: the ordinary JUDGED door carries the
+    // Life after adoption: the ordinary judged door carries the
     // economy — a lawful transfer chains on top of the adopted state.
     let next = two_orb_state((7, 1), (3, 1));
     let step = transfer_step(2);
@@ -359,9 +359,9 @@ fn adoption_is_once_and_names_its_debt() {
     assert_eq!(chained.parent, adopted.commit, "the path links through the door");
 }
 
-/// **THE PHASE-3 ADDRESSING LAW** (`39_PHASE3_FLIP` §3, operator
+/// **The PHASE-3 addressing law** (`39_PHASE3_FLIP` §3, operator
 /// ruling 2026-08-13, option A): several deeds sharing one world tick
-/// commit as SEPARATE records, addressed by an ascending `sub` — not
+/// commit as separate records, addressed by an ascending `sub` — not
 /// one commitment per beat, one per deed.
 #[test]
 fn several_deeds_share_one_tick_addressed_by_sub() {
@@ -388,7 +388,7 @@ fn several_deeds_share_one_tick_addressed_by_sub() {
 
     // The old law — one record per tick — is gone: a second deed at
     // t=1 sub=0 (repeating the first's exact address) still refuses
-    // OCCUPIED, but sub=1 no longer collides the way a same-t retry
+    // occupied, but sub=1 no longer collides the way a same-t retry
     // used to (measured, pre-flip: "per-deed commitment refuses
     // Occupied on the second deed of any beat").
     assert_eq!(
@@ -396,7 +396,7 @@ fn several_deeds_share_one_tick_addressed_by_sub() {
         ArborRefused::Occupied
     );
 
-    // A THIRD tick, sub back at 0, still ascends cleanly on top of
+    // A third tick, sub back at 0, still ascends cleanly on top of
     // (t=1, sub=1) — the arrow reads (t, sub) lexicographically, not
     // sub alone.
     let third = arbor
@@ -414,7 +414,7 @@ fn several_deeds_share_one_tick_addressed_by_sub() {
     ));
     assert!(matches!(
         // A fresh address (t=1, sub=5 was never committed) that is
-        // still BEHIND the head (t=2, sub=0) — Occupied cannot fire
+        // still behind the head (t=2, sub=0) — Occupied cannot fire
         // (the address is free); the arrow catches it instead.
         reopened.extend(coord_at(1, 5), &after_first, None).unwrap_err(),
         ArborRefused::ArrowBroken { .. }
@@ -423,7 +423,7 @@ fn several_deeds_share_one_tick_addressed_by_sub() {
 
 #[test]
 fn the_judged_door_carries_a_verdict_only_from_the_head_it_was_reached_on() {
-    // RECONSTRUCT (iii): the judge's prior must BE the head (by digest);
+    // Reconstruct (iii): the judge's prior must be the head (by digest);
     // then the arbor appends judged without fetching, decoding or
     // re-admitting. A prior the arbor does not hold refuses.
     let root = scratch("judged-door");
@@ -450,7 +450,7 @@ fn the_judged_door_carries_a_verdict_only_from_the_head_it_was_reached_on() {
 
 #[test]
 fn a_heads_only_arbor_verifies_whole_and_holds_one_record_a_branch() {
-    // THE MEMORY BOUND: the live judge reads heads alone.
+    // The memory bound: the live judge reads heads alone.
     let root = scratch("heads-only");
     let mut full = Arbor::open(&root).unwrap();
     let genesis = two_orb_state((10, 1), (0, 1));

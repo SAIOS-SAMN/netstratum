@@ -1,4 +1,4 @@
-//! **THE PROJECTOR** (docs/62 L7) — a selection is a projector onto the
+//! **The projector** (docs/62 L7) — a selection is a projector onto the
 //! bodies a predicate picks, and an act on what it picked. The verifier
 //! carries it whole (`Op::Project`), so a learned selection is a word like
 //! any other: certified, minted, replayed. Moved here from the solver's
@@ -47,7 +47,7 @@ pub fn perceive(g: &Grid) -> Percept {
     Percept { background: bg, bodies }
 }
 
-/// WHICH BODIES A RULE SELECTS — the predicates, in the order a mind tries
+/// Which bodies A RULE selects — the predicates, in the order a mind tries
 /// them (a stated order; the first that holds on every pair is the rule).
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Select {
@@ -57,16 +57,16 @@ pub enum Select {
     Largest,
     /// Every body of the smallest count (ties included).
     Smallest,
-    /// THE ORDER A RELATION SHOWS (docs/66 Y2, the faculty; coordinator ruling
+    /// The order A relation shows (docs/66 Y2, the faculty; coordinator ruling
     /// 2026-10-09): every body extreme (`Extreme`) in the integral of its
-    /// SORTED L1 relations to the other bodies, read at a `Cut`. Deduced by
+    /// sorted L1 relations to the other bodies, read at a `Cut`. Deduced by
     /// `solver::percept`, never supplied: `Central` is its case
     /// `Ordered { cut: All, extreme: Least }`.
     Ordered { cut: Cut, extreme: Extreme },
-    /// SUPPLIED (coordinator audit 2026-10-09): the hub-siting commission's
+    /// Supplied (coordinator audit 2026-10-09): the hub-siting commission's
     /// measure handed to the language before the minds could deduce it. Kept so
     /// the words minted with it still read; the learner no longer offers it.
-    /// THE CENTRAL BODIES (docs/66 Y2, the first commission's generator): every
+    /// The central bodies (docs/66 Y2, the first commission's generator): every
     /// body whose L1 distance to all the others, summed, is least (ties
     /// included). A body's distance to another is the least L1 distance
     /// between their cells. Declared by the hub-siting commission as its
@@ -74,7 +74,7 @@ pub enum Select {
     Central,
     /// Touching the frame, or not.
     Border(bool),
-    /// Of the same shape (up to translation) as some OTHER body of another
+    /// Of the same shape (up to translation) as some other body of another
     /// hue in the same grid — a template it copies.
     TwinOfOtherHue,
     /// Of this exact shape.
@@ -123,7 +123,7 @@ fn gap(a: &Body, b: &Body) -> usize {
         .unwrap_or(0)
 }
 
-/// WHERE AN ORDERED READING IS CUT: the integral of a body's sorted relations
+/// Where an ordered reading is cut: the integral of a body's sorted relations
 /// taken whole, over its `k` nearest, or over its `k` farthest.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Cut {
@@ -139,7 +139,7 @@ pub enum Extreme {
     Most,
 }
 
-/// THE SENSE (coordinator ruling 2026-10-09): each body's raw L1 relations to
+/// The sense (coordinator ruling 2026-10-09): each body's raw L1 relations to
 /// every other body, as measured, sorted nearest first. Never pre-summed.
 pub fn relations(p: &Percept) -> Vec<Vec<usize>> {
     (0..p.bodies.len())
@@ -166,14 +166,14 @@ pub fn spread(p: &Percept, i: usize) -> usize {
     p.bodies.iter().enumerate().filter(|(j, _)| *j != i).map(|(_, o)| gap(&p.bodies[i], o)).sum()
 }
 
-/// WHAT A RULE DOES to the bodies it selects.
+/// What A RULE does to the bodies it selects.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Act {
     Recolor(u8),
     Remove,
 }
 
-/// An object rule: SELECT, then ACT.
+/// An object rule: select, then act.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct ObjectRule {
     pub select: Select,

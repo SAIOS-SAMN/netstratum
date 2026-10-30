@@ -1,6 +1,6 @@
-# EXAMPLE deployment unit: paths assume a checkout at /opt/netstratum; adjust
-# WorkingDirectory and ExecStart to your own clone before installing.
-# NETSTRATUM ON THE HYPHA — the follower tails G2's chronicles and folds every
+# Example deployment unit: paths assume a checkout at /opt/netstratum; adjust
+# WorkingDirectory and ExecStart to the local clone before installing.
+# Netstratum on the hypha — the follower tails G2's chronicles and folds every
 # people's new receipts onto a court at play rate (the standalone :7520 court is RETIRED 2026-10-09; this unit stays disabled until the coordinator names a court; ns-hypha has no default court) (engine/hypha
 # follow.rs): per-receipt line entries, self-published folds, prune by
 # finality, line-head check before every round. Coordinator: xylarium-kernel.

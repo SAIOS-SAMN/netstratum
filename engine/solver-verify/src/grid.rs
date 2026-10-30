@@ -14,12 +14,12 @@ pub struct Grid {
 /// The lawful hue ladder: 0–9 inclusive. Wire law, not a preference —
 /// two operators in the sealed math index ten-slot tables by hue
 /// (`Op::Recolor`'s `[u8; 10]`, `objects::background`'s `[usize; 10]`),
-/// so a hue past the ladder is an out-of-bounds panic INSIDE the gate.
+/// so a hue past the ladder is an out-of-bounds panic inside the gate.
 pub const HUES: u8 = 10;
 
 impl Grid {
     /// The one door. Dimensions must be non-degenerate, the cell count
-    /// must match, and EVERY hue must sit on the ladder.
+    /// must match, and every hue must sit on the ladder.
     ///
     /// The hue check was added 2026-08-04: the type documented "hues
     /// 0–9" and never enforced it, leaving the invariant to whichever
@@ -43,7 +43,7 @@ impl Grid {
     }
 
 
-    /// Refill this grid in place, REUSING its existing allocation.
+    /// Refill this grid in place, reusing its existing allocation.
     ///
     /// A grid at live difficulty is 3×3 to 4×4 — nine to sixteen bytes.
     /// Allocating a fresh `Vec` for each is almost pure allocator
@@ -90,20 +90,20 @@ pub enum Op {
     Tile {
         down: usize,
         across: usize,
-        /// Mirror applied inside tiles on odd tile ROWS.
+        /// Mirror applied inside tiles on odd tile rows.
         odd_row: TileMirror,
-        /// Mirror applied inside tiles on odd tile COLUMNS.
+        /// Mirror applied inside tiles on odd tile columns.
         odd_col: TileMirror,
     },
-    /// A TRANSLATOR (docs/62 L1): every cell carried by `(dr, dc)`; a cell
+    /// A translator (docs/62 L1): every cell carried by `(dr, dc)`; a cell
     /// the motion vacates takes the grid's background. A generator of the
     /// algebra, not a named transform: its arguments are the motion.
     Shift { dr: i8, dc: i8 },
-    /// A DILATOR (docs/62 L1): each cell becomes an `up x up` block, or each
+    /// A dilator (docs/62 L1): each cell becomes an `up x up` block, or each
     /// `down x down` block is read as its top-left cell. One of `up`, `down`
     /// is 1.
     Dilate { up: u8, down: u8 },
-    /// A PROJECTOR (docs/62 L7): the bodies a predicate picks, recoloured
+    /// A projector (docs/62 L7): the bodies a predicate picks, recoloured
     /// or removed. Learned from the pairs, never a named object op.
     Project(crate::project::ObjectRule),
 }
@@ -192,7 +192,7 @@ impl Op {
     /// Apply, writing into a caller-held buffer that keeps its
     /// allocation between calls.
     ///
-    /// Identical arithmetic to [`Op::apply`] — this IS its body, and
+    /// Identical arithmetic to [`Op::apply`] — this is its body, and
     /// `apply` is the wrapper. At live grid sizes the allocation costs
     /// more than the transformation, so a search testing tens of
     /// thousands of candidates wants this form.

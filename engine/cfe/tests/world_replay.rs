@@ -1,5 +1,5 @@
 //! The colony-loop witnesses under ruleset v1: exact net flows (RFA —
-//! no drift), builds that SPEND, the workspace/committed boundary, and
+//! no drift), builds that spend, the workspace/committed boundary, and
 //! the committed world (the chronicle replays the committed universe).
 
 use cfe::dop::{Resource, ZoneKind};
@@ -24,7 +24,7 @@ fn nets_accrue_exactly_and_collection_settles_them() {
         world.tick();
     }
     // 1E+1H nets per tick: iron +3/2 − 1/4 = +5/4; biomass +1 − 1/2 =
-    // +1/2. Four ticks: +5 iron, +2 biomass — EXACTLY.
+    // +1/2. Four ticks: +5 iron, +2 biomass — exactly.
     assert_eq!(
         world.accrued(),
         &[(Resource::Iron, ratio(5, 1)), (Resource::Biomass, ratio(2, 1))]
@@ -44,7 +44,7 @@ fn nets_accrue_exactly_and_collection_settles_them() {
 fn settlement_lands_exact_on_the_committed_world() {
     // A session with builds, a negative net settle, and an uncollected tail:
     // what the colony banks is exact. (Operator directive 2026-10-08: this
-    // reads the LIVE world — replay-from-genesis identity is not a goal.)
+    // reads the live world — replay-from-genesis identity is not a goal.)
     let mut world = World::new();
     world.found("meridian").expect("founding closes");
     world.zone(4, ZoneKind::Extractor).expect("affordable");

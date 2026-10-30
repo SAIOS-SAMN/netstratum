@@ -370,7 +370,7 @@ impl World {
         }
     }
 
-    /// K1 / K3 residual voice (pure string for DEFEND / CONVOY).
+    /// K1 / K3 residual voice (pure string for defend / convoy).
     pub fn kin_residual_voice(&self) -> &'static str {
         let p = self.defense_posture();
         match (p.metabolism, p.clade) {
@@ -387,7 +387,7 @@ impl World {
         }
     }
 
-    /// K4 — place stretch from receipted orbit period (CALL 35 dynamo).
+    /// K4 — place stretch from receipted orbit period (call 35 dynamo).
     /// Returns period ticks for genesis orb site, or None if unsited.
     pub fn kin_place_period(&self) -> Option<u64> {
         let site = self.orb()?.thermal.as_ref()?;
@@ -470,7 +470,7 @@ impl World {
     }
 
     /// Convoy risk: base eighth × (1 − cover), plus K4 place exposure when
-    /// orbit period exceeds the phase base (CALL orbit_phase_period / 35).
+    /// orbit period exceeds the phase base (call orbit_phase_period / 35).
     pub fn convoy_risk(&self, deal: u64) -> Ratio {
         let eighth = ZoneKind::Resonator.yield_per_tick().1;
         let cover = self.escort_cover(deal);

@@ -1,16 +1,16 @@
-//! N-VOLUME, PROVER SIDE — the volumetric SEARCH and nothing else.
+//! N-VOLUME, prover side — the volumetric search and nothing else.
 //!
-//! **THE SPLIT LANDED 2026-08-04** (operator ruling lifting C8's
-//! deferral, mirroring U1a's planar split). Everything a REPLAY needs
+//! **The split landed 2026-08-04** (operator ruling lifting C8's
+//! deferral, mirroring U1a's planar split). Everything a replay needs
 //! moved into `solver-verify::volume`: the `Volume` carrier, the `VOp`
 //! vocabulary and its one apply path, the deterministic forge, the
-//! degeneracy law, and a REAL parent-linked certificate. What stays
+//! degeneracy law, and a real parent-linked certificate. What stays
 //! here is the search — expensive, free to improve, non-constitutional.
 //!
-//! **`seal_volume` IS GONE, not re-homed.** C8 ruled it decorative and
+//! **`seal_volume` is gone, not re-homed.** C8 ruled it decorative and
 //! it was: a bare digest nobody could re-derive, tamper-evidence for no
 //! one. Its replacement is `VolumeCertificate`, which a third party can
-//! re-derive and whose divergence is NAMED. A decorative digest is not
+//! re-derive and whose divergence is named. A decorative digest is not
 //! a thing to keep alongside a real one — two seals over one solve is
 //! exactly how a verifier gets called with the wrong one.
 //!
@@ -37,7 +37,7 @@ pub enum VolumeSolveRead {
         program: VProgram,
         test_output: Volume,
         matches_expected: Option<bool>,
-        /// The REAL certificate (2026-08-04): parent-linked over
+        /// The real certificate (2026-08-04): parent-linked over
         /// observation -> word -> output, re-derivable by anyone. It
         /// replaces the decorative digest C8 struck.
         certificate: VolumeCertificate,
@@ -46,17 +46,17 @@ pub enum VolumeSolveRead {
 }
 
 /// Enumerative search over volumetric words: a program is a solution
-/// ONLY if it closes every training pair exactly. The honest withhold
+/// only if it closes every training pair exactly. The honest withhold
 /// stands.
 ///
-/// SUPERSEDED IN SPIRIT by the planar proposer's ruling (never
+/// Superseded in spirit by the planar proposer's ruling (never
 /// enumerate); the volumetric reach is not yet derived and this remains
 /// a sweep. Recorded so the debt is visible rather than implied.
 pub fn solve_volume(task: &VolumeTask, max_depth: usize) -> VolumeSolveRead {
-    // THE VACUOUS SOLVE, REFUSED (operator ruling C8, U_DIRECTIVES §10
+    // The vacuous solve, REFUSED (operator ruling C8, U_DIRECTIVES §10
     // S1). `closes` is true over no pairs, so the empty program closed
     // an empty train at depth 0 and read Solved. Nothing was proved.
-    // The verifier now refuses the same shape as FORM at decode, so
+    // The verifier now refuses the same shape as form at decode, so
     // this guard and that one agree.
     if task.train.is_empty() {
         return VolumeSolveRead::Unsolved;
@@ -68,7 +68,7 @@ pub fn solve_volume(task: &VolumeTask, max_depth: usize) -> VolumeSolveRead {
             .iter()
             .all(|(input, expected)| &run_volume(program, input) == expected)
     };
-    // FORGE-BOUND: the same DERIVED frontier as the planar path
+    // Forge-bound: the same derived frontier as the planar path
     // (`search::frontier`) — depth is the bound, the candidate count is
     // its consequence. The flat `SEARCH_BUDGET` is decommissioned.
     let mut frontier: Vec<VProgram> = vec![Vec::new()];

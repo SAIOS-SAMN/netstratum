@@ -16,7 +16,7 @@ cfe = { path = "../cfe" }
 codec = { path = "../codec" }
 solver = { path = "../solver" }
 tongue = { path = "../tongue" }
-# The signature crate mycelium signs folds with (a tier is its key).
+# The signature crate Mycelium signs folds with (a tier is its key).
 ed25519-dalek = "2.1"
 blake3.workspace = true
 num-bigint.workspace = true

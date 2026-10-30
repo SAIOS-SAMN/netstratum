@@ -470,7 +470,7 @@ Measured per file (census parser identical to the ratchet's own):
 
 **Sequencing (proposed, not begun):** (1) `parameter.rs` seeds —
 these are already the chartered-parameter mechanism's seed values;
-they likely convert to approved-seed or anchor citations by one
+they likely convert to APPROVED-SEED or anchor citations by one
 operator word (the polities.rs precedent). (2) `taxon_economy.rs` +
 `vocabulary.rs` — balance choices; need either measured anchors from
 live-board play or an operator approval marker. (3) `dop.rs` — the
@@ -493,7 +493,7 @@ sealed class. They earned it, provably: each is the epoch-0 value every
 pre-charter beat read, so editing one recomputes every old chronicle's
 heat — breaking SEAL B. Their lawful movement is a receipted
 `ParameterChartered` deed (P2, tag 103), never an edit. That is the
-sealed-rate property, not tuning.
+SEALED-RATE property, not tuning.
 
 Live dial count **170 → 163**; sealed-class pin **3 → 10**. The ratchet
 stays red (163 > 112 ceiling): the remaining **51 excess dials** are
@@ -502,5 +502,5 @@ endowments), `vocabulary.rs` (practice bindings), conductor thresholds
 — whose conversion needs measured anchors or operator approval per
 cluster. Deriving them by fiat is the laundering the census bars, so
 they wait on rulings. The next free move is `dop.rs`'s endowment kit
-(a candidate approved-seed class like the founding roster) — one
+(a candidate APPROVED-SEED class like the founding roster) — one
 operator word, the polities.rs precedent.

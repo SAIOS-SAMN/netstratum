@@ -1,6 +1,6 @@
-//! docs/72 A4 — the re-founding's acts as the COURT reads them: netstratum's
+//! docs/72 A4 — the re-founding's acts as the court reads them: netstratum's
 //! ledger entry and gate map act, built by `ns_hypha::refound`, decoded by
-//! mycelium's own court decoder (`decode_domain_request`) and verified against
+//! Mycelium's own court decoder (`decode_domain_request`) and verified against
 //! the reserve's key. Each test also breaks the act and must see it refused.
 
 use ed25519_dalek::{Signature, SigningKey, Verifier};
@@ -68,7 +68,7 @@ fn the_ledger_entry_commits_to_netstratums_checkpoints() {
     let reserve = SigningKey::from_bytes(&[21; 32]);
     let domain = SigningKey::from_bytes(&[22; 32]).verifying_key().to_bytes();
     let var = scratch("ledger");
-    // No checkpoints: mycelium's law, the empty commitment is zero.
+    // No checkpoints: Mycelium's law, the empty commitment is zero.
     let (empty, n) = ledger_frame(&reserve, domain, &var, 100, point(), [0; 32]).unwrap();
     assert_eq!(n, 0);
     let Some(DomainRequest::Ledger(e)) = decode_domain_request(&empty) else { panic!("the court does not read it as a LEDGER entry") };

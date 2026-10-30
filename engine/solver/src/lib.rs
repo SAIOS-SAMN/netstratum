@@ -4,20 +4,20 @@
 //! Three laws carried from the provenance (v0.4 doc 17, the no-hardcoding
 //! law) and the charter:
 //!
-//! - **No hardcoded solutions.** The engine holds a GENERAL vocabulary
+//! - **No hardcoded solutions.** The engine holds a general vocabulary
 //!   of exact transformations; task files are observed content. No
 //!   branch on task identity exists on any solve path, and deleting
 //!   any fixture changes no code path.
 //! - **The honest withhold outranks a fabricated render.** A program
-//!   is a solution ONLY if it maps every training pair exactly; the
+//!   is a solution only if it maps every training pair exactly; the
 //!   solver returns `Unsolved` rather than a guess.
 //! - **Every solution is a proof, not an assertion.** A solve emits a
 //!   BLAKE3 parent-linked certificate chain (task → each applied
 //!   transformation → the output grid). The certificate is
-//!   TAMPER-evidence (it re-derives the chain over the SAME triple);
+//!   tamper-evidence (it re-derives the chain over the same triple);
 //!   the constitutional work-verifier is `solver_verify::verify_work`,
-//!   which additionally RE-FORGES the task and RE-APPLIES the program
-//!   (THE REPLAY-COMPLETE LAW — an intact chain over a non-solution is
+//!   which additionally RE-forges the task and RE-applies the program
+//!   (The REPLAY-COMPLETE law — an intact chain over a non-solution is
 //!   not a solution). Finding is search; checking is O(program length).
 
 pub mod derive;
@@ -26,24 +26,24 @@ pub mod mint;
 pub mod need;
 pub mod perspective;
 pub mod selfmap;
-// N-I3 (THE INTELLIGENCE PORT) — the ARC seat: peel train grids into
-// `reduct::FullMeasurement`, read them through the ONE reduce organ (`reduct::think`),
-// render a glued frame to a program, seal the proof. NOT a search path.
+// N-I3 (the intelligence port) — the ARC seat: peel train grids into
+// `reduct::FullMeasurement`, read them through the one reduce organ (`reduct::think`),
+// render a glued frame to a program, seal the proof. Not a search path.
 pub mod think;
 pub mod percept;
 // docs/60 D1 — the channels a word acts in and a mind perceives.
 pub mod senses;
-// N-I5 (THE INTELLIGENCE PORT) — the survival seat: peel the ration book
-// (HAVE|OWE, mouths as sites) through the SAME reduce organ. The observation
+// N-I5 (the intelligence port) — the survival seat: peel the ration book
+// (Have|Owe, mouths as sites) through the same reduce organ. The observation
 // that gates the beat (Pin G); naming a survival deed is N-I6.
 pub mod survival;
 pub mod volume;
 
 // The verifier half moved to `solver-verify` (the prover/verifier
-// split, U_DIRECTIVES §2): grids + the FULL apply vocabulary (object
+// split, U_DIRECTIVES §2): grids + the full apply vocabulary (object
 // ops included — a replay must apply every op a program may carry),
 // the loader, the deterministic forge, the certificate chain. Only
-// the SEARCH is prover-side. Re-exported whole so no caller breaks —
+// the search is prover-side. Re-exported whole so no caller breaks —
 // `solver::grid::run` and the root names both stand.
 pub use solver_verify::{certificate, forge, grid, loader, objects};
 pub use solver_verify::{

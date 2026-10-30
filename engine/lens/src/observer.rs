@@ -1,10 +1,10 @@
-//! THE OBSERVER — how deep it may see, and what it reads as resonant
+//! The observer — how deep it may see, and what it reads as resonant
 //! (`19_LENS` §4 and §5, tasks 7 and 9).
 //!
 //! Two properties of whoever is in the seat, and they turn out to be one
 //! mechanism seen twice.
 //!
-//! # CAPACITY BOUNDS DEPTH — lawfully, not for performance
+//! # Capacity bounds DEPTH — lawfully, not for performance
 //!
 //! The ancestor's rule (`orbital/kinetic.rs`, LAW-13):
 //!
@@ -16,15 +16,15 @@
 //! than the observer has standing to see. An observable universe renders
 //! only what is observed, at only the depth it is observed at.
 //!
-//! **LAZY, NEVER MEMOISED** (§4). The bound reduces WHAT IS COMPUTED. It
+//! **Lazy, never memoised** (§4). The bound reduces what is computed. It
 //! caches nothing, because a cache is a second image
 //! (`00_CHARTER` §3a) and would arrive dressed as an optimization
 //! exactly the way the excised dashboard did.
 //!
-//! # THE PEEL IS THE TOLERANCE
+//! # The peel is the tolerance
 //!
 //! Resonance asks whether two structures are the same. The answer
-//! depends on how closely you are looking, and that is the whole of it:
+//! depends on how closely the observer looks, and that is the whole of it:
 //!
 //! ```text
 //!     FAR    compare CLASSES          discrete equality; no numeric
@@ -33,16 +33,16 @@
 //!     NEAR   compare EXACT ENTRIES    tolerance ZERO — byte-identity
 //! ```
 //!
-//! **To loosen the tolerance IS to step back; to tighten it IS to
-//! approach.** So the tolerance is DYNAMIC — as ruled — and it is
-//! DERIVED rather than DIALED. A caller-supplied `ε` would make two
+//! **To loosen the tolerance is to step back; to tighten it is to
+//! approach.** So the tolerance is dynamic — as ruled — and it is
+//! derived rather than dialed. A caller-supplied `ε` would make two
 //! observers report different captures from one state, which is not
-//! evidence (`26_ARTICLES` LAW 6). A depth is a position, and every
+//! evidence (`26_ARTICLES` law 6). A depth is a position, and every
 //! observer standing in the same place reads the same thing.
 //!
 //! A fixed absolute tolerance would be worse than a dial: the substrate
 //! is scale-blind, so one `ε` means *everything captures* at one
-//! magnitude and *nothing captures* at another. The relative form at MID
+//! magnitude and *nothing captures* at another. The relative form at mid
 //! is written cross-multiplied so it stays exact, division-free, and
 //! scales with what it compares.
 
@@ -96,10 +96,10 @@ impl Capacity {
     }
 }
 
-/// **RENDER ON DEMAND.** Read at the depth requested, bounded by what
+/// **Render on demand.** Read at the depth requested, bounded by what
 /// the observer can hold.
 ///
-/// The bound is applied BEFORE any work is done, so a request for the
+/// The bound is applied before any work is done, so a request for the
 /// near view from a far-sighted observer computes the far view and
 /// nothing else. That is the laziness: unobserved depths cost zero
 /// operations, and nothing is retained between calls.
@@ -133,9 +133,9 @@ pub enum Capture {
     Silent { at: Depth },
 }
 
-/// **RESONANCE.** Do these two structures read as one, at this depth?
+/// **Resonance.** Do these two structures read as one, at this depth?
 ///
-/// The depth IS the tolerance (see the module header). Nothing is
+/// The depth is the tolerance (see the module header). Nothing is
 /// dialed, nothing is configured, and two observers standing in the same
 /// place always agree.
 pub fn resonance(
@@ -147,7 +147,7 @@ pub fn resonance(
 ) -> Capture {
     let at = capacity.admits(requested);
     match (peel(a, support, at), peel(b, support, at)) {
-        // FAR — compare CLASSES. Two structures either stand at the same
+        // Far — compare classes. Two structures either stand at the same
         // elevation or they do not; there is no "nearly the same class".
         (View::Far(left), View::Far(right)) => match left == right {
             true => Capture::Captured { at },
@@ -160,7 +160,7 @@ pub fn resonance(
             },
         },
 
-        // MID — compare CIRCULATION, relatively. The comparison is
+        // Mid — compare circulation, relatively. The comparison is
         // cross-multiplied so it never divides and scales with what it
         // compares: a separation of 1 between charges of 2 and 3 is a
         // different fact from a separation of 1 between 2000 and 2001.
@@ -185,7 +185,7 @@ pub fn resonance(
             }
         }
 
-        // NEAR — compare EXACT ENTRIES. Tolerance zero: the strictest
+        // Near — compare exact entries. Tolerance zero: the strictest
         // reading there is, and the one an approaching observer earns.
         (View::Near(left), View::Near(right)) => match left == right {
             true => Capture::Captured { at },
@@ -202,11 +202,11 @@ pub fn resonance(
     }
 }
 
-/// The relative width at MID depth, as an exact rational `1/16`.
+/// The relative width at mid depth, as an exact rational `1/16`.
 ///
 /// **This is a property of the DEPTH, not a dial.** It is fixed here
 /// rather than passed in, because a caller-supplied width would make two
-/// observers at the same distance disagree — which LAW 6 refuses. An
+/// observers at the same distance disagree — which law 6 refuses. An
 /// observer who wants a different tolerance changes DEPTH, which is a
 /// position anyone can occupy and anyone can check.
 const MID_NUM: i64 = 1;

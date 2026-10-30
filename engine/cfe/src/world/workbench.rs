@@ -1,12 +1,12 @@
-//! **THE WORKBENCH** (`43_DISTRIBUTION` §7, task #49) — the read-only
-//! inspection surface that makes a deployed system LEGIBLE. Ruled a
-//! GENERAL, bench-type-agnostic abstraction: one shape over many bench
+//! **The workbench** (`43_DISTRIBUTION` §7, task #49) — the read-only
+//! inspection surface that makes a deployed system legible. Ruled a
+//! general, bench-type-agnostic abstraction: one shape over many bench
 //! kinds, so the console renders any of them uniformly and a new bench
 //! slots in without a new view. A workbench mints nothing and stores
 //! nothing — it is a pure reading over committed state, the `stability_of`
 //! precedent, replay-inert.
 //!
-//! The DEPOT bench is the showcase (the whole provisioning/lineage layer
+//! The depot bench is the showcase (the whole provisioning/lineage layer
 //! made visible: people, castes, the leisure good, stability, the arc
 //! stage, the class-modulated ration); the refinery, ship-yard, and lab
 //! report their component zones under the same shape.
@@ -25,7 +25,7 @@ pub enum BenchKind {
     ShipYard,
     /// The science seats.
     Lab,
-    /// TAXATION (49 §5): the civic engine — the fiscal loop under
+    /// Taxation (49 §5): the civic engine — the fiscal loop under
     /// diplomacy (revenue policy, public services, civic infrastructure).
     Civic,
 }
@@ -61,7 +61,7 @@ pub struct WorkbenchView {
 }
 
 impl World {
-    /// **INSPECT A BENCH** on an orb — the uniform read. `None` where the
+    /// **Inspect A bench** on an orb — the uniform read. `None` where the
     /// orb does not exist; an empty component list is a bench not yet
     /// deployed (a legible "nothing stands here", not an error).
     pub fn workbench(&self, orb: u64, kind: BenchKind) -> Option<WorkbenchView> {
@@ -75,11 +75,11 @@ impl World {
         })
     }
 
-    /// **THE CIVIC BENCH** (`49_TAXATION` §5) — the fiscal loop made
+    /// **The civic bench** (`49_TAXATION` §5) — the fiscal loop made
     /// legible under diplomacy, in the three panels the sovereign works:
-    /// REVENUE POLICY (the treasury, governance reach, the standing
-    /// levies), PUBLIC SERVICES (the welfare spend it funds, the
-    /// stability it buys), and CIVIC INFRASTRUCTURE (the offices and hubs
+    /// Revenue POLICY (the treasury, governance reach, the standing
+    /// levies), public services (the welfare spend it funds, the
+    /// stability it buys), and civic infrastructure (the offices and hubs
     /// that stand). A pure reading — deploying a zone or crafting a levy
     /// is the act; this only shows what stands. Empty everywhere for a
     /// line that has raised no civic zone.
@@ -107,13 +107,13 @@ impl World {
         let continuity = self.continuity_levy();
         let estate = self.estate_levy();
         let gauges = vec![
-            // — REVENUE POLICY —
+            // — Revenue POLICY —
             ("treasury".into(), crate::ratio::ratio_str(&self.treasury_of(orb))),
             ("governance reach".into(), crate::ratio::ratio_str(&self.governance_reach(orb))),
             ("continuity tax".into(), crate::ratio::ratio_str(&self.continuity_tax())),
             ("continuity levy".into(), format!("{continuity:?}")),
             ("estate levy".into(), format!("{estate:?}")),
-            // — PUBLIC SERVICES —
+            // — Public services —
             ("welfare spend".into(), crate::ratio::ratio_str(&self.welfare_spend(orb, horizon))),
             ("stability".into(), crate::ratio::ratio_str(&self.stability_of(orb, horizon))),
         ];
@@ -131,7 +131,7 @@ impl World {
         WorkbenchView { kind: BenchKind::Civic, components, gauges, alerts }
     }
 
-    /// The DEPOT bench — the provisioning society, fully read.
+    /// The depot bench — the provisioning society, fully read.
     fn depot_bench(&self, orb: u64) -> WorkbenchView {
         let held = self.orb_by_id(orb);
         let components = held
@@ -266,7 +266,7 @@ impl World {
         WorkbenchView { kind, components, gauges, alerts }
     }
 
-    /// The LAB bench — the seated science disciplines.
+    /// The lab bench — the seated science disciplines.
     fn lab_bench(&self, orb: u64, kind: BenchKind) -> WorkbenchView {
         let components: Vec<BenchComponent> = self
             .science_seats

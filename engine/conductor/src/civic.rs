@@ -1,19 +1,19 @@
-//! THE HOMOLOGICAL ECONOMY (doc 52) — production and research are ONE peel.
+//! The homological economy (doc 52) — production and research are one peel.
 //!
 //! A colony's physical tension is a deficit vector `δ = Demand − Supply` over
 //! the capacity axes (the `Resource` carriers — coordinate labels of a
-//! `ℤ`-module, NOT control-flow enums). Peeled against the buildable structures
-//! through the SAME `overlay` the cognition uses, `δ` splits into two halves of
+//! `ℤ`-module, not control-flow enums). Peeled against the buildable structures
+//! through the same `overlay` the cognition uses, `δ` splits into two halves of
 //! one `Binding`:
 //!
-//!   * **COEFFICIENTS `cᵢ` → PRODUCTION.** How many of each known structure
+//!   * **Coefficients `cᵢ` → production.** How many of each known structure
 //!     cover the deficit. The seeded builder samples the `cᵢ` distribution to
 //!     choose what to raise this cycle — no cartesian enum cascade, no
 //!     per-plane sweep, O(axes), not O(planes).
-//!   * **RESIDUAL `γ` → RESEARCH.** The irreducible deficit no existing
+//!   * **RESIDUAL `γ` → research.** The irreducible deficit no existing
 //!     structure can span. Passed to the Mind's proposer as the topological
-//!     defect to bridge; a verified guess mints a NEW structure-generator.
-//!     Economic failure IS the tech-tree trigger — Production and Research are
+//!     defect to bridge; a verified guess mints a new structure-generator.
+//!     Economic failure is the tech-tree trigger — Production and Research are
 //!     the same coheterological equation, read from two parts of one output.
 
 use cfe::dop::{zone_upkeep, zone_yield, Resource, ZoneKind};
@@ -41,7 +41,7 @@ fn quantize(r: &Ratio) -> BigInt {
     (r * ratio(LATTICE, 1)).round().to_integer()
 }
 
-/// A zone's NET capacity as a `ℤ`-module vector over `axes`: its yield MINUS
+/// A zone's net capacity as a `ℤ`-module vector over `axes`: its yield minus
 /// its upkeep, quantized onto the lattice. This is the `CHANNEL_YIELD −
 /// CHANNEL_UPKEEP` coordinate the fold entry carries — the algebraic boundary
 /// of the structure. Metabolism-aware, so a biotic and a plasmic line read
@@ -60,13 +60,13 @@ pub fn zone_capacity(kind: ZoneKind, metabolism: u8, axes: &[Resource]) -> Vec<B
     v
 }
 
-/// THE GENERATORS ARE THE FOLD (doc 52 / operator ruling). Map a species'
+/// The generators are the fold (doc 52 / operator ruling). Map a species'
 /// `Axis::Zone` fold (`seed ∪ minted`) into the buildable capacity generators
 /// the peel reduces against — one net-capacity vector per structure the
-/// civilization KNOWS, seed or self-invented. A minted entry resolves through
+/// civilization knows, seed or self-invented. A minted entry resolves through
 /// its base kind (the modulation the channels carry rides the same
 /// `zone_yield`/`zone_upkeep` reading); an entry whose code no longer names a
-/// buildable kind is skipped. NOT a hardcoded menu — the array grows as the
+/// buildable kind is skipped. Not a hardcoded menu — the array grows as the
 /// civilization mints.
 pub fn fold_generators(
     fold: &[Entry],
@@ -82,9 +82,9 @@ pub fn fold_generators(
         .collect()
 }
 
-/// THE STANDING SUPPLY — the aggregate net capacity of the zones already
+/// The standing supply — the aggregate net capacity of the zones already
 /// raised, as a `ℤ`-module vector over `axes`: `Σ` of each standing zone's
-/// `zone_capacity` (yield − upkeep). This is what the colony ALREADY
+/// `zone_capacity` (yield − upkeep). This is what the colony already
 /// produces per tick before any new build, netted for the upkeep the
 /// standing infrastructure itself eats. Reading it as one vector is the
 /// peel's `supply` argument — no per-plane sweep, one fold over the zones.
@@ -106,20 +106,20 @@ pub fn standing_supply(kinds: &[ZoneKind], metabolism: u8, axes: &[Resource]) ->
 /// samples to raise this cycle (`build`, `None` when the deficit is covered
 /// or purely irreducible). The `build` index is resolved back to its
 /// `ZoneKind` through the same fold the generators came from, so what
-/// Production names is always a structure this specific civilization KNOWS.
+/// Production names is always a structure this specific civilization knows.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CivicReading {
     pub peel: EconomicPeel,
     pub build: Option<ZoneKind>,
 }
 
-/// RUN THE LIVE PEEL (COG Slice 1). From a species' real committed state —
+/// Run the live peel (COG Slice 1). From a species' real committed state —
 /// its `Axis::Zone` fold (`seed ∪ minted`), its sealed metabolism, the
 /// zones already standing, and the metabolic demand its population places —
 /// compute the one economic peel the beat acts on. Demand is a set of
 /// `(carrier, exact rate)` loads (population food = `pop × per_capita`,
 /// leisure, …); each is quantized onto the lattice and summed onto its
-/// axis. The generators are drawn STRICTLY from the fold, so a civilization
+/// axis. The generators are drawn strictly from the fold, so a civilization
 /// that has minted a new structure peels against it and one that has not
 /// never sees it — the buildable set is the civilization's own vocabulary,
 /// not a compiled menu.
@@ -148,13 +148,13 @@ pub fn civic_reading(
 /// The peel of a colony's deficit against its buildable structures.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct EconomicPeel {
-    /// Per buildable: how many to raise to cover the deficit (PRODUCTION).
+    /// Per buildable: how many to raise to cover the deficit (production).
     pub coefficients: Vec<BigInt>,
-    /// The TWIST — the invariant factors `> 1` the binding carried (`ℤ/dᵢ`).
+    /// The twist — the invariant factors `> 1` the binding carried (`ℤ/dᵢ`).
     /// Retained from the resolve (it was discarded before COG-2) so the Mind
-    /// can PRICE the mint that bridges this deficit: torsion is shear work.
+    /// can price the mint that bridges this deficit: torsion is shear work.
     pub torsion: Vec<BigInt>,
-    /// The irreducible deficit no structure spans — the Mind's feedstock (RESEARCH).
+    /// The irreducible deficit no structure spans — the Mind's feedstock (research).
     pub residual: Vec<BigInt>,
     /// True iff the deficit is fully covered by known structures (`γ = 0`).
     pub covered: bool,
@@ -182,7 +182,7 @@ pub fn peel_economy(
         })
         .collect();
     let dim = deficit.len();
-    // Generators as COLUMNS: `axes` rows × `buildables` cols.
+    // Generators as columns: `axes` rows × `buildables` cols.
     let cols: Vec<Vec<BigInt>> = (0..dim)
         .map(|i| {
             buildables
@@ -200,31 +200,31 @@ pub fn peel_economy(
     }
 }
 
-/// **THE HOMOLOGY SETS THE BILL** (COG-2). The exact metabolic work to mint the
+/// **The homology sets the bill** (COG-2). The exact metabolic work to mint the
 /// generator that bridges a residual obstruction — priced from the homological
 /// complexity of the void, never a flat fee. A simple linear disconnect is
-/// cheap; a wide, deep, or twisted void is dear. Two terms, both EXACT integers
+/// cheap; a wide, deep, or twisted void is dear. Two terms, both exact integers
 /// (a ℚ-module cannot carry the `ln` a continuous Landauer bound would spend, so
 /// the bit-length stands in for it):
 ///
-///   * **THE BETTI EXTENT** — `Σ |residualᵢ|`, the total unspanned deficit the
+///   * **The BETTI extent** — `Σ |residualᵢ|`, the total unspanned deficit the
 ///     new generator must cover. The free rank's magnitude: more independent
 ///     unbound directions, and a larger shortfall along each, cost more to
 ///     bridge (the `Σ βₖ·cₖ` term, read off the surviving obstruction).
-///   * **THE TORSION SHEAR** — `Σ bitlen(dᵢ)` over the invariant factors `> 1`.
+///   * **The torsion shear** — `Σ bitlen(dᵢ)` over the invariant factors `> 1`.
 ///     Twisting a manifold onto an imperfect match `ℤ/dᵢ` takes physical shear;
 ///     the higher the torsion the higher the friction to snap it into a rigid
 ///     crystal (the `Σ penalty(dᵢ)` term).
 ///
 /// A pure resolve output → a pure price. The Mind pays this `W_mint` from its
-/// accumulated LEISURE (COG-1); a starving mind whose leisure cannot cover it
+/// accumulated leisure (COG-1); a starving mind whose leisure cannot cover it
 /// physically cannot afford to think (COG-3).
 pub fn mint_cost(residual: &[BigInt], torsion: &[BigInt]) -> BigInt {
     let betti_extent: BigInt = residual.iter().map(|x| x.abs()).sum();
-    // COVERED IS FREE. A vanished residual means the deficit is spanned by
-    // structures the civilization ALREADY knows — nothing is minted, so nothing
+    // Covered is free. A vanished residual means the deficit is spanned by
+    // structures the civilization already knows — nothing is minted, so nothing
     // is paid, whatever standing twist the generator lattice carries. The
-    // torsion shear is the friction of threading a NEW generator through that
+    // torsion shear is the friction of threading a new generator through that
     // twist, and it applies only when there is a genuine void to bridge.
     if betti_extent.is_zero() {
         return BigInt::zero();
@@ -233,7 +233,7 @@ pub fn mint_cost(residual: &[BigInt], torsion: &[BigInt]) -> BigInt {
     betti_extent + torsion_shear
 }
 
-/// The base cognitive rate — the fraction of a colony's syntropic WILD flow
+/// The base cognitive rate — the fraction of a colony's syntropic wild flow
 /// that always feeds base cognition (the "brain stem"), even at zero leisure.
 /// The thermodynamic escape valve that breaks the reachability deadlock: a
 /// destitute line thinks slowly off its wild-food trickle rather than never.
@@ -243,29 +243,29 @@ fn base_cognitive_rate() -> Ratio {
 
 /// The desperation exchange rate — how many heads a starving line burns per
 /// unit of `mint_cost` when it cannibalizes its own people to force a Eureka.
-/// Deliberately INEFFICIENT: thinking on a full stomach is cheap, thinking by
-/// sacrificing your population is dear.
+/// Deliberately inefficient: thinking on a full stomach is cheap, thinking by
+/// sacrificing its population is dear.
 fn burn_inefficiency() -> Ratio {
     ratio(4, 1) // APPROVED-SEED (operator ruling 2026-08-15, COG-3 desperation burn)
 }
 
-/// **THE METABOLIC EXCHANGE RATE** (COG-5) — the scalar bridging the calorie
+/// **The metabolic exchange rate** (COG-5) — the scalar bridging the calorie
 /// (leisure, in food-surplus units) to the homology (`mint_cost`, in raw
 /// Betti/torsion units). Without it a thought costs single digits against a
 /// bank of thousands and the starvation gate is toothless; with it a thought
-/// costs a MEANINGFUL fraction of the surplus, so a poor line genuinely cannot
+/// costs a meaningful fraction of the surplus, so a poor line genuinely cannot
 /// afford to think while a rich one can.
 pub fn metabolic_exchange() -> Ratio {
     ratio(8, 1) // APPROVED-SEED (operator ruling 2026-08-16, COG-5 exchange rate)
 }
 
-/// **THE EVOLUTION DISCOUNT — think more on less** (COG-11, doc 52 §2: "Evolution
+/// **The evolution discount — think more on less** (COG-11, doc 52 §2: "Evolution
 /// is the discount: the evolution/caste deeds lower the metabolism spent per unit
 /// of thought — an evolved line thinks more on less."). A line advances its
-/// `evolution_stage` along its arc (the EARNED transformation deed, gated on a
-/// crystallized deepening); each stage makes thought CHEAPER. The multiplier is
+/// `evolution_stage` along its arc (the earned transformation deed, gated on a
+/// crystallized deepening); each stage makes thought cheaper. The multiplier is
 /// `1/(1 + stage)` — exact-rational, monotone decreasing, and exactly `1` at
-/// stage 0, so an un-evolved line (every founding line) is BYTE-IDENTICAL: the
+/// stage 0, so an un-evolved line (every founding line) is byte-identical: the
 /// discount touches only what a line has earned. A stage-1 line thinks at half the
 /// cost, stage-2 a third — a strong return on a rare, gated advancement. No dial:
 /// the denominator is the stage itself.
@@ -273,17 +273,17 @@ pub fn cognitive_efficiency(evolution_stage: u8) -> Ratio {
     ratio(1, 1 + evolution_stage as i64)
 }
 
-/// **THE COGNITIVE γ** (COG-EMERGENCE-1, operator mandate 2026-08-19) — "lack of
-/// cognitive depth" as a DEFICIT the workbench weighs, NOT an `if capacity < 3`
+/// **The cognitive γ** (COG-EMERGENCE-1, operator mandate 2026-08-19) — "lack of
+/// cognitive depth" as a deficit the workbench weighs, not an `if capacity < 3`
 /// gate. A civilization feels a cognitive tension when it carries irreducible
-/// problems — the civic residual γ, the physical deficit NO KNOWN STRUCTURE spans
-/// (`EconomicPeel.residual`, the same extent `mint_cost` prices) — AND its thinking
-/// is too shallow to INVENT the structure that would span them: invention depth is
+/// problems — the civic residual γ, the physical deficit no KNOWN structure spans
+/// (`EconomicPeel.residual`, the same extent `mint_cost` prices) — and its thinking
+/// is too shallow to invent the structure that would span them: invention depth is
 /// bounded by `cognitive_capacity`, so a deeper mind mints more complex generators.
-/// The drive to deepen is that unspanned extent scaled by the depth HEADROOM
+/// The drive to deepen is that unspanned extent scaled by the depth headroom
 /// (`frontier − capacity`): zero for a mind already at the frontier (more depth
 /// spans nothing new) and zero for an economy already covered (γ = 0, no problem to
-/// invent past). This is the number the workbench READS to weigh a cognitive-science
+/// invent past). This is the number the workbench reads to weigh a cognitive-science
 /// seat against every other build — it does not decide; the entity does, by drawing
 /// the fold under this tension. Exact integer, no gate, no dial.
 pub fn cognitive_deficit(residual_extent: u64, capacity: usize, frontier: usize) -> u64 {
@@ -291,7 +291,7 @@ pub fn cognitive_deficit(residual_extent: u64, capacity: usize, frontier: usize)
     residual_extent.saturating_mul(headroom)
 }
 
-/// The residual EXTENT of a peel — `Σ|γ_i|`, the Betti-extent of the unspanned
+/// The residual extent of a peel — `Σ|γ_i|`, the Betti-extent of the unspanned
 /// void (the same measure `mint_cost` bills). The cognitive γ's raw driver: how
 /// much of the economy's demand no known structure covers.
 pub fn residual_extent(peel: &EconomicPeel) -> u64 {
@@ -302,17 +302,17 @@ pub fn residual_extent(peel: &EconomicPeel) -> u64 {
         .unwrap_or(u64::MAX)
 }
 
-/// **THE FASTING FILL** (COG-3) — the cognitive accumulator's inflow this beat:
-/// the cascade's LEISURE plus a base trickle off the syntropic wild flow. The
+/// **The fasting fill** (COG-3) — the cognitive accumulator's inflow this beat:
+/// the cascade's leisure plus a base trickle off the syntropic wild flow. The
 /// rich pay `mint_cost` instantly from their large leisure and coin many words
 /// a beat; the poor (leisure 0) fill only from the trickle — agonizingly slow
 /// thought, but never zero, so a line stuck at an irreducible γ is never
-/// PERMANENTLY deadlocked. It saves for tens of beats, then affords one word.
+/// permanently deadlocked. It saves for tens of beats, then affords one word.
 pub fn fasting_fill(leisure: Ratio, syntropic: Ratio) -> Ratio {
     leisure + syntropic * base_cognitive_rate()
 }
 
-/// **THE DESPERATION PRICE** (COG-3) — the population a line must burn to mint a
+/// **The desperation price** (COG-3) — the population a line must burn to mint a
 /// word it cannot afford from leisure, when a metabolic deficit is actively
 /// biting. `mint_cost` heads times the inefficiency: the crisis instinct that
 /// spends the one substrate a starving colony still has — its people — to buy
@@ -322,14 +322,14 @@ pub fn desperation_price(mint_price: &Ratio) -> Ratio {
     mint_price.clone() * burn_inefficiency()
 }
 
-/// **THE STRATIFIED DRIVES** (doc 52 §7 / the operator's drive-ladder ruling
-/// 2026-08-15) — a civilization's needs in STRICT Maslow priority. Supply fills
-/// each tier in turn and only the surplus ABOVE one tier's demand spills to the
+/// **The stratified drives** (doc 52 §7 / the operator's drive-ladder ruling
+/// 2026-08-15) — a civilization's needs in strict Maslow priority. Supply fills
+/// each tier in turn and only the surplus above one tier's demand spills to the
 /// next, so the same waterfall that meets survival also decides what abundance
-/// is FOR. Ordered: the discriminant is the priority.
+/// is for. Ordered: the discriminant is the priority.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Drive {
-    /// Tier 1 — the caloric floor (`pop × per_capita`). Unmet ⇒ STARVATION.
+    /// Tier 1 — the caloric floor (`pop × per_capita`). Unmet ⇒ starvation.
     Metabolic,
     /// Tier 2 — containment against the demurrage the surplus sheds (SINK-1 /
     /// 05 §1.4). Unmet ⇒ entropy wins; the Mind is driven to mint storage.
@@ -356,27 +356,27 @@ pub struct TierReading {
 pub struct Cascade {
     /// Per tier, in priority order: demand / met / surviving deficit.
     pub tiers: Vec<TierReading>,
-    /// The surplus that survives EVERY tier — the LEISURE the Mind banks to
+    /// The surplus that survives every tier — the leisure the Mind banks to
     /// fund minting (COG-1). Zero the moment any tier is left wanting.
     pub leisure: Ratio,
-    /// The FIRST tier left with a deficit — the binding constraint. `Metabolic`
-    /// here is STARVATION (the classic crisis, halt); a higher tier is
-    /// STAGNATION (fed, but an unmet drive whose γ routes to the proposer as a
-    /// NON-food need). `None` ⇒ every drive met, pure surplus to leisure.
+    /// The first tier left with a deficit — the binding constraint. `Metabolic`
+    /// here is starvation (the classic crisis, halt); a higher tier is
+    /// stagnation (fed, but an unmet drive whose γ routes to the proposer as a
+    /// non-food need). `None` ⇒ every drive met, pure surplus to leisure.
     pub binding: Option<Drive>,
 }
 
-/// **THE CASCADE PEEL** (COG-1) — pour `supply` (the metabolic carrier's total
+/// **The cascade peel** (COG-1) — pour `supply` (the metabolic carrier's total
 /// flow this beat: syntropic + cultivated) through the stratified `demands` in
-/// STRICT priority order. Each tier takes what it can (the min of the flow
+/// strict priority order. Each tier takes what it can (the min of the flow
 /// reaching it and its demand); the deficit that survives is that drive's γ; the
 /// surplus spills to the next tier. Whatever survives the lowest tier is
-/// LEISURE — the budget banked to fund thought. Exact-rational throughout; a
+/// leisure — the budget banked to fund thought. Exact-rational throughout; a
 /// negative demand is treated as no demand (a tier the line does not feel).
 ///
 /// This is the separation the whole arc turns on: a metabolic deficit is
-/// STARVATION and halts the waterfall at the floor; a deficit only at a higher
-/// tier is STAGNATION — the line is fed, but its surplus has nowhere productive
+/// starvation and halts the waterfall at the floor; a deficit only at a higher
+/// tier is stagnation — the line is fed, but its surplus has nowhere productive
 /// to go, so the binding γ is a call for storage, amenities, or invention, not
 /// for food.
 pub fn cascade(supply: Ratio, demands: &[(Drive, Ratio)]) -> Cascade {
@@ -397,20 +397,20 @@ pub fn cascade(supply: Ratio, demands: &[(Drive, Ratio)]) -> Cascade {
     Cascade { tiers, leisure: flow, binding }
 }
 
-/// **THE LIVE CASCADE** (COG-1) — read a colony's stratified demand from its
+/// **The live cascade** (COG-1) — read a colony's stratified demand from its
 /// real committed state and pour the beat's food flow through it. Supply is the
-/// total metabolic flow this beat (the syntropic WILD gather plus the CULTIVATED
+/// total metabolic flow this beat (the syntropic wild gather plus the cultivated
 /// yield — the same two the population eats). The tiers, in priority:
 ///   * **Metabolic** = `population × per_capita_ration` — the caloric floor.
 ///   * **Cognitive** = `cognition caste × per_capita_ration` — the leisure the
 ///     thinkers draw to fund thought (the cognition caste is the mouths that
 ///     eat perspective, not bread).
 ///
-/// The Homeostatic tier is DEFERRED until containment state lands — a colony
+/// The Homeostatic tier is deferred until containment state lands — a colony
 /// with no storage structure feels no containment demand yet, so it is omitted
 /// rather than stubbed at a false deficit. The surplus surviving both tiers is
-/// the LEISURE the beat banks (`settle_leisure`); the `binding` tier names the
-/// crisis: Metabolic is STARVATION, Cognitive is STAGNATION (fed, but the Mind
+/// the leisure the beat banks (`settle_leisure`); the `binding` tier names the
+/// crisis: Metabolic is starvation, Cognitive is stagnation (fed, but the Mind
 /// is short of the leisure to think).
 pub fn cascade_reading(world: &cfe::world::World, orb: u64) -> Cascade {
     let per_capita = world.per_capita_ration();
@@ -425,22 +425,22 @@ pub fn cascade_reading(world: &cfe::world::World, orb: u64) -> Cascade {
     cascade(supply, &demands)
 }
 
-// ── ONT-4: THE LEISURE MANIFOLD ────────────────────────────────────────────
+// ── ONT-4: the leisure manifold ────────────────────────────────────────────
 //
-// The leisure bank was ONE scalar per orb, stepped each beat by the geometric
+// The leisure bank was one scalar per orb, stepped each beat by the geometric
 // demurrage `bank × (1 − d)` — a stored scalar through a recurrence with a
 // multiplication, so its exact-rational denominator accreted the whole causal
 // history and detonated (~beat 117, the collapse ONT-2 unmasked once the vein's
 // mask was gone; see [[scalar-collapse-derivation-law]]). ONT-4 eradicates it on
-// BOTH counts the operator ruled (2026-08-18): (1) NO scalar collapse — the
-// geometric recurrence is replaced by FLAT, floored per-beat flows, so every
+// both counts the operator ruled (2026-08-18): (1) no scalar collapse — the
+// geometric recurrence is replaced by flat, floored per-beat flows, so every
 // stratum stays a bounded `1/grain` integral and no denominator can explode;
-// (2) DIMENSIONAL VOLUME PRESERVED — leisure is no longer collapsed to a 1-D
-// shadow but banked PER DRIVE-LADDER STRATUM (a manifold over `Cascade.tiers`),
+// (2) dimensional volume preserved — leisure is no longer collapsed to a 1-D
+// shadow but banked per drive-ladder stratum (a manifold over `Cascade.tiers`),
 // its volume the sum over strata, so a want's surplus is earmarked by the drive
 // level it survived to rather than melted into one fungible number.
 
-/// **THE LEISURE MANIFOLD** (ONT-4) — the cognition budget as a manifold over the
+/// **The leisure manifold** (ONT-4) — the cognition budget as a manifold over the
 /// drive ladder, not a scalar. Each stratum is one drive tier's standing surplus,
 /// a bounded floored-flow integral; the total [`budget`](Self::budget) is their
 /// sum (the volume). Held separate so minting a want draws the stratum that want
@@ -453,7 +453,7 @@ pub struct LeisureManifold {
 }
 
 impl LeisureManifold {
-    /// **THE VOLUME** — the scalar budget, `Σ` over strata. The dimensional
+    /// **The volume** — the scalar budget, `Σ` over strata. The dimensional
     /// structure lives in `strata`; this is its projection for a scalar reader
     /// (the COG-13 gate, the mint), so nothing downstream must change to read it.
     pub fn budget(&self) -> Ratio {
@@ -471,17 +471,17 @@ impl LeisureManifold {
 
 }
 
-/// The EROI friction margin μ (> 1): a thought must return MORE than it costs,
+/// The EROI friction margin μ (> 1): a thought must return more than it costs,
 /// or the surplus is better banked. A bare integer, not a `ratio` dial — the
 /// ratchet does not count it — set by the COG-13 ruling (operator 2026-08-16):
-/// the return must at least DOUBLE the cost to clear the investment threshold.
+/// the return must at least double the cost to clear the investment threshold.
 const FRICTION_MARGIN: i64 = 2;
 
-/// **COG-13 — THE COGNITIVE INVESTMENT GATE (EROI)** (operator ruling
+/// **COG-13 — the cognitive investment gate (EROI)** (operator ruling
 /// 2026-08-16). Reflexive spending (`afford == spend`) violates Energy Return
 /// on Investment: a mind does not burn accumulated surplus just because the
 /// baseline cost is met. It banks, and invests only when the return justifies
-/// the expenditure AND a stress-scaled resilience reserve is intact. This
+/// the expenditure and a stress-scaled resilience reserve is intact. This
 /// replaces the boolean drain with a stratified decision:
 ///
 /// ```text
@@ -499,7 +499,7 @@ const FRICTION_MARGIN: i64 = 2;
 /// - **Dynamic reserve** `R(γ) = R_max·(1 − s)`: the buffer collapses with
 ///   stress `s` (the binding tier's deficit fraction). Sated (`s = 0`) the
 ///   reserve stands at `R_max` — a generation of the thinkers' own upkeep —
-///   so the bank ACCUMULATES; under crisis the floor drops toward zero and the
+///   so the bank accumulates; under crisis the floor drops toward zero and the
 ///   line spends down to fund its escape (below which the desperation burn, in
 ///   the caller, takes over).
 /// - **Curiosity**: a massively overflowing bank (`B ≥ W + R_max`) funds
@@ -516,7 +516,7 @@ pub fn cognitive_investment(world: &cfe::world::World, orb: u64, price: &Ratio) 
     }
     let cascade = cascade_reading(world, orb);
     let t_gen = ratio(world.lifespan_of() as i64, 1);
-    // R_max — the sated reserve: a GENERATION of the cognition caste's own
+    // R_max — the sated reserve: a generation of the cognition caste's own
     // upkeep, so a prosperous line banks deeply before indulging curiosity.
     let cognitive_demand = cascade
         .tiers
@@ -525,7 +525,7 @@ pub fn cognitive_investment(world: &cfe::world::World, orb: u64, price: &Ratio) 
         .map(|tier| tier.demand.clone())
         .unwrap_or_else(|| zero.clone());
     let reserve_max = cognitive_demand * t_gen.clone();
-    // γ and the stress fraction from the BINDING tier (zero when sated).
+    // γ and the stress fraction from the binding tier (zero when sated).
     let (gamma, stress) = match cascade
         .binding
         .and_then(|drive| cascade.tiers.iter().find(|tier| tier.drive == drive))
@@ -540,32 +540,32 @@ pub fn cognitive_investment(world: &cfe::world::World, orb: u64, price: &Ratio) 
     if bank < price.clone() + reserve {
         return false;
     }
-    // Thermodynamic viability (ROI) OR the curiosity overflow.
+    // Thermodynamic viability (ROI) or the curiosity overflow.
     let roi_ok = gamma * t_gen > ratio(FRICTION_MARGIN, 1) * price.clone();
     let curiosity = bank >= price.clone() + reserve_max;
     roi_ok || curiosity
 }
 
-/// **THE DEFECT CLASSIFICATION** (COG-12) — the void's homological SHAPE tells
+/// **The defect classification** (COG-12) — the void's homological shape tells
 /// the Mind what KIND of tool is missing, so the leap into an irreducible void
 /// is not blind. When γ can be inverted against known structure there is no
-/// search — Production builds the answer; a search happens ONLY for an
+/// search — Production builds the answer; a search happens only for an
 /// irreducible residual (a Sullivan extension, a genuinely new dimension), and
 /// even then the exact SNF split the peel already carries dictates the class:
 ///
 ///   * a void dominated by **free residual** (an unspanned new direction) needs
-///     a tool that MAKES structure that was not there — the STRUCTURE families
+///     a tool that makes structure that was not there — the structure families
 ///     (Tile, Object);
 ///   * a void dominated by **torsion** (a twist onto existing structure) needs a
-///     tool that RELATES what is — the CORRESPONDENCE families (Symmetry, Recolor).
+///     tool that relates what is — the correspondence families (Symmetry, Recolor).
 ///
-/// This reuses the engine's OWN family semantics (`need.rs`: Novelty→structure,
+/// This reuses the engine's own family semantics (`need.rs`: Novelty→structure,
 /// Resonance→correspondence), so the economic void and the solver's hungers
-/// speak one language. Returns the indicated families FIRST — ordering only, the
+/// speak one language. Returns the indicated families first — ordering only, the
 /// observation still supplies every candidate; empty when γ = 0 (no defect).
 ///
-/// EXACT is the free-vs-torsion character, read from the SNF. The one bridge is
-/// WHICH families are "structure" vs "correspondence" — the engine's declared
+/// Exact is the free-vs-torsion character, read from the SNF. The one bridge is
+/// which families are "structure" vs "correspondence" — the engine's declared
 /// convention, not a derived identity (the economic ℤ-module and the grid-op
 /// families are distinct spaces).
 pub fn classify_defect(residual: &[BigInt], torsion: &[BigInt]) -> Vec<solver::need::Family> {
@@ -575,8 +575,8 @@ pub fn classify_defect(residual: &[BigInt], torsion: &[BigInt]) -> Vec<solver::n
     if free.is_zero() && twist.is_zero() {
         return Vec::new(); // covered — no void to classify, no search
     }
-    let structure = [Family::Tile, Family::Object]; // MAKE what was not there
-    let correspondence = [Family::Symmetry, Family::Recolor]; // RELATE what is
+    let structure = [Family::Tile, Family::Object]; // Make what was not there
+    let correspondence = [Family::Symmetry, Family::Recolor]; // relate what is
     // The dominant character leads; the other trails (still reachable).
     if free >= twist {
         structure.iter().chain(correspondence.iter()).copied().collect()
@@ -585,11 +585,11 @@ pub fn classify_defect(residual: &[BigInt], torsion: &[BigInt]) -> Vec<solver::n
     }
 }
 
-/// **THE STRESS INDEX σ** (COG-7) — a colony's thermodynamic stress in `[0, 1]`,
+/// **The stress index σ** (COG-7) — a colony's thermodynamic stress in `[0, 1]`,
 /// the blend coefficient between instinct (exploit) and curiosity (explore). It
-/// reads the live cascade: a line whose METABOLIC floor is unmet is starving and
+/// reads the live cascade: a line whose metabolic floor is unmet is starving and
 /// stressed to the maximum (σ = 1 — pure instinct, no energy for research);
-/// otherwise σ is the unmet fraction of its COGNITIVE tier — a line whose
+/// otherwise σ is the unmet fraction of its cognitive tier — a line whose
 /// thinkers are fully fed reads σ = 0 (sated, free to explore), one whose leisure
 /// only partly covers them reads a genuine blend. Exact-rational; no new dial.
 pub fn stress(world: &cfe::world::World, orb: u64) -> Ratio {
@@ -615,7 +615,7 @@ fn seeded_index(seed: [u8; 32], salt: &[u8], bound: u64) -> u64 {
     v % bound.max(1)
 }
 
-/// Seeded-stochastic pick of WHICH buildable to raise this cycle, weighted by
+/// Seeded-stochastic pick of which buildable to raise this cycle, weighted by
 /// the peel's positive coefficients — production is sampled from the
 /// distribution the homology dictates, never chosen greedily. `None` when no
 /// structure is called for (the deficit is covered, or purely irreducible and
@@ -679,7 +679,7 @@ mod tests {
     #[test]
     fn the_residual_drives_research_an_irreducible_deficit_is_innovation_feedstock() {
         // Axes = [food, metal, knowledge]. Buildables produce food/metal but
-        // NOTHING produces knowledge — the colony has hit a vocabulary wall.
+        // nothing produces knowledge — the colony has hit a vocabulary wall.
         let buildables = vec![
             vec![b(2), b(0), b(0)], // extractor
             vec![b(0), b(3), b(0)], // mine
@@ -697,7 +697,7 @@ mod tests {
         // A biotic line's buildable generators = its Axis::Zone fold (here the
         // seed; a minted civilization's fold is larger). Each is a real
         // net-capacity vector read from the channels — yield positive, upkeep
-        // negative — NOT an entry in a compiled menu.
+        // negative — not an entry in a compiled menu.
         let axes = resource_axes();
         let fold = cfe::vocabulary::seed(cfe::vocabulary::Axis::Zone);
         let generators = fold_generators(&fold, 2, &axes); // 2 = biotic
@@ -725,7 +725,7 @@ mod tests {
     #[test]
     fn the_cascade_separates_starvation_from_stagnation() {
         use Drive::*;
-        // STARVATION — supply below the metabolic floor. The waterfall halts at
+        // Starvation — supply below the metabolic floor. The waterfall halts at
         // tier 1: the binding constraint is Metabolic, no surplus survives, and
         // the higher tiers get nothing.
         let starving = cascade(
@@ -738,9 +738,9 @@ mod tests {
         assert_eq!(starving.tiers[2].met, r(0, 1), "nothing reaches cognition");
         assert_eq!(starving.leisure, r(0, 1), "a starving line banks no leisure");
 
-        // STAGNATION — fed past the floor, but the surplus cannot cover the
-        // cognitive demand. The binding constraint is a HIGHER tier (Cognitive),
-        // NOT Metabolic: the line is fed yet its Mind is starved of leisure. This
+        // Stagnation — fed past the floor, but the surplus cannot cover the
+        // cognitive demand. The binding constraint is a higher tier (Cognitive),
+        // not Metabolic: the line is fed yet its Mind is starved of leisure. This
         // is the Sated crisis the flat model could never express.
         let stagnant = cascade(
             r(25, 1),
@@ -770,7 +770,7 @@ mod tests {
     #[test]
     fn priority_is_strict_a_lower_tier_binds_first() {
         use Drive::*;
-        // Both homeostatic and cognitive go unmet, but the FIRST unmet tier is
+        // Both homeostatic and cognitive go unmet, but the first unmet tier is
         // the binding one — priority is strict, not a max over deficits.
         let c = cascade(r(12, 1), &[(Metabolic, r(10, 1)), (Homeostatic, r(9, 1)), (Cognitive, r(9, 1))]);
         assert_eq!(c.binding, Some(Homeostatic), "the lower unmet tier binds, not the larger deficit");
@@ -784,7 +784,7 @@ mod tests {
 
     #[test]
     fn the_homology_sets_the_bill_a_wider_or_twisted_void_costs_more() {
-        // A pure FREE residual (no torsion): the bill is the void's extent —
+        // A pure free residual (no torsion): the bill is the void's extent —
         // Σ|residualᵢ|, what the new generator must span. Nothing to twist.
         assert_eq!(mint_cost(&[b(0), b(0), b(5)], &[]), b(5), "the free void costs its extent");
         // A deeper void along the same axis costs strictly more.
@@ -797,7 +797,7 @@ mod tests {
             mint_cost(&[b(3), b(0), b(5)], &[]) > mint_cost(&[b(0), b(0), b(5)], &[]),
             "a wider void — more free rank — is dearer"
         );
-        // A residual threaded through a TWISTED lattice pays the shear on top:
+        // A residual threaded through a twisted lattice pays the shear on top:
         // binding a new generator onto a ℤ/4 twist takes friction. bitlen(4)=3.
         assert_eq!(
             mint_cost(&[b(0), b(0), b(5)], &[b(4)]),
@@ -809,7 +809,7 @@ mod tests {
             mint_cost(&[b(0), b(0), b(5)], &[b(255)]) > mint_cost(&[b(0), b(0), b(5)], &[b(4)]),
             "a higher invariant factor shears harder"
         );
-        // COVERED IS FREE: a vanished residual mints nothing, whatever twist the
+        // Covered is free: a vanished residual mints nothing, whatever twist the
         // lattice carries — the shear is paid only to bridge a genuine void.
         assert_eq!(mint_cost(&[b(0), b(0), b(0)], &[b(4)]), b(0), "no void, no bill — even through a twist");
     }
@@ -819,7 +819,7 @@ mod tests {
         // The rich: large leisure dwarfs the trickle — they coin instantly.
         let rich = fasting_fill(r(500, 1), r(80, 1));
         assert!(rich > r(500, 1), "leisure plus a trickle exceeds leisure alone");
-        // The destitute: ZERO leisure, but a live syntropic flow still feeds a
+        // The destitute: zero leisure, but a live syntropic flow still feeds a
         // base cognitive trickle — the accumulator inches up, never stuck at 0.
         let poor = fasting_fill(r(0, 1), r(80, 1));
         assert!(poor > r(0, 1), "a zero-leisure line still fills from the wild trickle: {poor}");
@@ -832,7 +832,7 @@ mod tests {
 
     #[test]
     fn the_desperation_burn_is_dear_paid_in_people() {
-        // A word that costs 3 leisure costs 3×inefficiency HEADS to burn — the
+        // A word that costs 3 leisure costs 3×inefficiency heads to burn — the
         // crisis exchange is deliberately worse than thinking on a full stomach.
         let leisure_price = r(3, 1);
         let heads = desperation_price(&leisure_price);
@@ -844,16 +844,16 @@ mod tests {
     #[test]
     fn the_void_shape_classifies_the_missing_tool() {
         use solver::need::Family;
-        // A FREE-dominated void (unspanned direction, no twist) → the Mind must
-        // MAKE structure: the structure families lead.
+        // A free-dominated void (unspanned direction, no twist) → the Mind must
+        // make structure: the structure families lead.
         let structure = classify_defect(&[b(0), b(0), b(9)], &[]);
         assert_eq!(structure.first(), Some(&Family::Tile), "an unspanned void leads with structure");
         assert!(structure.contains(&Family::Symmetry), "correspondence still reachable (ordering only)");
-        // A TORSION-dominated void (tiny free part, heavy twist) → the Mind must
-        // RELATE existing structure: the correspondence families lead.
+        // A torsion-dominated void (tiny free part, heavy twist) → the Mind must
+        // relate existing structure: the correspondence families lead.
         let twist = classify_defect(&[b(1)], &[b(255), b(255)]);
         assert_eq!(twist.first(), Some(&Family::Symmetry), "a twisted void leads with correspondence");
-        // A COVERED deficit is no void — nothing to classify, no search at all.
+        // A covered deficit is no void — nothing to classify, no search at all.
         assert!(classify_defect(&[b(0), b(0)], &[]).is_empty(), "covered → no search");
     }
 
@@ -871,14 +871,14 @@ mod tests {
     fn the_bill_is_priced_from_the_real_peel_of_a_knowledge_wall() {
         // The residual-drives-research peel: nothing produces the knowledge
         // axis, so a deficit of 5 there is irreducible. The Mind's bill to mint
-        // the missing generator is priced from THAT residual — the same homology
+        // the missing generator is priced from that residual — the same homology
         // the research trigger reads, not a synthetic number.
         let buildables = vec![vec![b(2), b(0), b(0)], vec![b(0), b(3), b(0)]];
         let peel = peel_economy(&[b(0), b(0), b(5)], &[b(0), b(0), b(0)], &buildables);
         assert!(!peel.covered, "the knowledge wall stands");
         let bill = mint_cost(&peel.residual, &peel.torsion);
         assert!(bill > b(0), "an irreducible deficit carries a real bill: {bill}");
-        // The bill is the void's extent (5 units of unspanned knowledge) PLUS
+        // The bill is the void's extent (5 units of unspanned knowledge) plus
         // the shear of threading the new generator through the economy's own
         // standing twist: the food/metal generators (yields 2 and 3) span a
         // lattice with invariant factor ℤ/6, and bitlen(6) = 3. A more baroque

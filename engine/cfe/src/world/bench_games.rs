@@ -118,7 +118,7 @@ pub struct StellarVeinRow {
     pub name: String,
 }
 
-/// **C1.7 STELLAR CAPACITY GAME** — `lines_of` as playable board.
+/// **C1.7 stellar capacity game** — `lines_of` as playable board.
 ///
 /// The star caps how deep the system forges. Prospects open strata;
 /// locality + pressure decide which veins refine. Pure reading —
@@ -143,7 +143,7 @@ pub struct StellarCapacityBoard {
 }
 
 impl World {
-    /// **RESEARCH GAME** — constellation + forge readiness + next move.
+    /// **Research game** — constellation + forge readiness + next move.
     pub fn research_board(&self, orb: u64) -> ResearchBoard {
         let constellation = self.constellation(orb);
         let novelty_blocked = self.wants.iter().any(|(o, k)| *o == orb && *k == 3);
@@ -215,7 +215,7 @@ impl World {
         }
     }
 
-    /// **INTEL GAME** — detection ladder + spy pipeline next step.
+    /// **Intel game** — detection ladder + spy pipeline next step.
     pub fn intel_board(&self, orb: u64) -> IntelBoard {
         let e = self.espionage_integrity();
         let detection = self.detection_grade();
@@ -271,7 +271,7 @@ impl World {
         }
     }
 
-    /// **LINK GAME** — cross-pollination readiness score (exact rational).
+    /// **Link game** — cross-pollination readiness score (exact rational).
     pub fn link_board(&self) -> LinkBoard {
         let now = self.clock.now();
         let councils = self.councils.len();
@@ -340,7 +340,7 @@ impl World {
         }
     }
 
-    /// **DOCTRINE GAME** — posture ranks as playable board.
+    /// **Doctrine game** — posture ranks as playable board.
     pub fn doctrine_board(&self) -> DoctrineBoard {
         let p = self.defense_posture();
         let weak = p
@@ -372,7 +372,7 @@ impl World {
         }
     }
 
-    /// **C1.7 STELLAR CAPACITY** — star lines as project (14 §8.4).
+    /// **C1.7 stellar capacity** — star lines as project (14 §8.4).
     ///
     /// Call-not-copy: [`crate::almanac::lines_of`], [`local_to`],
     /// [`pressure`], [`refines`] are the authorities.
@@ -446,7 +446,7 @@ impl World {
 
         let mut lines = Vec::new();
         for line in 1..=LINES {
-            // Reachable to work: sky forge AND civ growth.
+            // Reachable to work: sky forge and civ growth.
             let reachable = work_reach > 0 && line <= work_reach;
             let pressure_at = star
                 .map(|c| pressure(line, c))

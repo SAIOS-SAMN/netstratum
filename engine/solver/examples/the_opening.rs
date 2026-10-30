@@ -1,18 +1,18 @@
-//! **CAN THE OPENING BE MEASURED?** — the experiment behind task #12.
+//! **Can the opening be MEASURED?** — the experiment behind task #12.
 //!
-//! Operator: *the door is the wrong shape — measure `derive()` to see if
-//! you can measure the opening, otherwise you are blind and have no
-//! senses.*
+//! Operator direction: *the door is the wrong shape — measure `derive()`
+//! to see whether the opening can be measured; otherwise the solver is
+//! blind and has no senses.*
 //!
-//! Today `derive()` returns a LIST and `closes()` answers a BOOL. That
+//! Today `derive()` returns a list and `closes()` answers a BOOL. That
 //! is a door with no senses: a candidate either shuts the task or it
 //! does not, and nothing distinguishes one that got within a cell of
-//! the answer from one that made things worse. The proposer then TRIES
+//! the answer from one that made things worse. The proposer then tries
 //! them, which is search — the thing that should not be needed if the
 //! layer is deterministic.
 //!
 //! The predecessor engine already answers this. `convergence-engine`'s thinking
-//! module does not gate, it MEASURES: `AcceptResult::Accepted {
+//! module does not gate, it measures: `AcceptResult::Accepted {
 //! coherence_reduction }`, `NonCongruent { conflict_magnitude }`,
 //! `NoImprovement { delta_coherence }` — a magnitude, never a verdict.
 //! And its nested peel reports `value_cocycle`, `object_cocycle` and
@@ -21,7 +21,7 @@
 //! So the measure taken here is the L1 residual, which is also this
 //! tree's own law (PROPORTION-1: `Σ|R|`, no squares, no roots).
 //!
-//! **What this decides.** If the residual RANKS the reach — if the
+//! **What this decides.** If the residual ranks the reach — if the
 //! candidate that reduces it most is the one that closes — then the
 //! opening is measurable, derivation can pick rather than try, and the
 //! door can report a magnitude. If it does not rank, the reach is
@@ -32,9 +32,9 @@
 use solver::{derive, load_task, Need, Task};
 use solver_verify::grid::{run, Grid};
 
-/// THE RESIDUAL — `Σ|R|` over the training pairs, in cells.
+/// The RESIDUAL — `Σ|R|` over the training pairs, in cells.
 ///
-/// Shape-aware: a program that renders the wrong SHAPE has not got
+/// Shape-aware: a program that renders the wrong shape has not got
 /// close, so it reads maximally far rather than being compared
 /// cell-wise against a grid of another size. Exact integers, no floats.
 fn residual(program: &[solver_verify::grid::Op], task: &Task) -> u64 {
@@ -75,7 +75,7 @@ fn main() {
         let start = residual(&[], &task);
         let reach = derive(&task);
 
-        // What each derived candidate DOES to the residual — the
+        // What each derived candidate does to the residual — the
         // opening, if there is one.
         let mut openings: Vec<(u64, bool)> = reach
             .iter()
@@ -97,7 +97,7 @@ fn main() {
             0 => {
                 blind += 1;
                 if any_closes {
-                    // A candidate shut the task while reducing NOTHING —
+                    // A candidate shut the task while reducing nothing —
                     // the measure would be blind to the answer.
                     reduces_none_but_closes += 1;
                 }
@@ -106,7 +106,7 @@ fn main() {
             _ => ambiguous += 1,
         }
 
-        // DOES THE MEASURE RANK? Take the largest opening; is it a
+        // Does the measure rank? Take the largest opening; is it a
         // closer, when any closer exists?
         if any_closes && !reducing.is_empty() {
             openings.sort_by_key(|(gain, _)| std::cmp::Reverse(*gain));

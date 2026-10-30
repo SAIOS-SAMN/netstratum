@@ -2,7 +2,7 @@
 //! 2026-10-14: quantum in matter; any recorded interaction is a
 //! measurement).
 //!
-//! - **The twist** of a galaxy (docs/100 §2; xylarium 11.4: "twist per turn
+//! - **The twist** of a galaxy (docs/100 §2; Xylarium 11.4: "twist per turn
 //!   is the deficit"): its core winds each plane by its deficit at its own
 //!   ring, ½ a turn a ring, shared by its tilt; in its disc plane, `½·t_disc`
 //!   a ring, `φ = ½·t_disc·rate` a bell (rate its rings a bell). Derived,
@@ -16,10 +16,10 @@
 //!   outcome is the annal's, never replayed.
 use cfe::ratio::{ratio, Ratio};
 
-/// A galaxy's TWIST a bell as a body in it reads it (docs/100 §2): the core
+/// A galaxy's twist a bell as a body in it reads it (docs/100 §2): the core
 /// winds each plane by ½ a turn a ring by that plane's tilt share, `φ_k =
 /// ½·t_k`, over the rings it receives a bell; a body takes the winding of
-/// every plane by its OWN share of that plane, `Σ_k t_body,k·φ_k` (the versor
+/// every plane by its own share of that plane, `Σ_k t_body,k·φ_k` (the versor
 /// projected on the body's planes, never flattened to one plane). Untilted
 /// reads isotropic (a third a plane).
 pub fn twist(rate: &Ratio, core_tilt: &[Ratio], body_tilt: &[Ratio]) -> Ratio {

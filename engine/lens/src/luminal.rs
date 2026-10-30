@@ -1,4 +1,4 @@
-//! THE LUMINAL LAYER — what an observer SEES of a structure
+//! The luminal layer — what an observer sees of a structure
 //! (`19_LENS` §10, operator ruling 2026-08-02). Carried forward from
 //! `/opt/repos/convergence-engine/src/color.rs` — consulted, translated,
 //! never transcribed.
@@ -6,11 +6,11 @@
 //! The ancestor states the whole architecture in four lines, and they
 //! are the lens law written as physics:
 //!
-//! > *An orb inside an orb. The **holonomic** IS the outer orb — the
-//! > full interference structure. The **luminal** IS the inner orb — the
-//! > observation that lives INSIDE the holonomic, not beside it. The
-//! > space between them is the **PHASE** — the observation angle. Luminal
-//! > is a FUNCTION of holonomic at a given phase: **it emerges, it is not
+//! > *An orb inside an orb. The **holonomic** is the outer orb — the
+//! > full interference structure. The **luminal** is the inner orb — the
+//! > observation that lives inside the holonomic, not beside it. The
+//! > space between them is the **phase** — the observation angle. Luminal
+//! > is a function of holonomic at a given phase: **it emerges, it is not
 //! > stored separately.** They cannot drift apart.*
 //!
 //! **That last clause is `19_LENS` §1a in the ancestor's own words.** A
@@ -18,24 +18,24 @@
 //! cannot drift apart cannot disagree — which is precisely why no
 //! reconciler is ever needed here.
 //!
-//! # THE THREE AXES, and they are orthogonal
+//! # The three axes, and they are orthogonal
 //!
 //! This module does not replace [`crate::peel`]. It completes it. A
 //! lens reading is fixed by three independent choices, and collapsing
 //! any of them into another is what loses the geometry:
 //!
 //! ```text
-//!     DEPTH     how close you stand        crate::peel::Depth
-//!     PHASE     from what angle you look   Phase
-//!     APERTURE  with what instrument       Aperture — 11 channels
+//!     DEPTH     the observer's distance  crate::peel::Depth
+//!     PHASE     the observer's angle     Phase
+//!     APERTURE  the instrument used      Aperture — 11 channels
 //! ```
 //!
-//! Same structure, different depth → a coarser or finer view of the SAME
+//! Same structure, different depth → a coarser or finer view of the same
 //! content. Same structure, different phase → a different manifestation
 //! of the same truth. Same structure, different aperture → a different
 //! observer's sensitivity across the eleven harmonic dimensions.
 //!
-//! # WHY THE APERTURE IS ELEVEN AND WHY IT IS NOT A RELATION
+//! # Why the APERTURE is eleven and why it is not A relation
 //!
 //! The ancestor's `harmonic_tuning.rs` is explicit, and it settles a
 //! question that would otherwise look like a contradiction:
@@ -44,7 +44,7 @@
 //!
 //! The aperture is **not a relation**. It has no gauge, no cocycle, no
 //! reduction, and therefore nothing for the peel to strip. It is a
-//! per-observer SENSITIVITY across eleven dimensions:
+//! per-observer sensitivity across eleven dimensions:
 //!
 //! ```text
 //!     h[0]      value / spectral       h[3]      adjacency / boundary
@@ -55,7 +55,7 @@
 //! peel removes FRAME from a relation; the aperture weights CHANNELS of
 //! an observer. Neither flattens the other.
 //!
-//! # WHAT IS TRANSLATED, NOT TRANSCRIBED
+//! # What is translated, not transcribed
 //!
 //! The ancestor derives amplitude as
 //! `1 / (1 + coherence_functional(delta))`. **That is the third
@@ -65,22 +65,22 @@
 //! a scalar aggregate *wherever the system computes*.
 //!
 //! **And this is the one place in the workspace where the law carves an
-//! exception**: L1 survives *"ONLY where a reading is reported to an
-//! OPERATOR lens, never where the system computes."* The lens IS that
+//! exception**: L1 survives *"only where a reading is reported to an
+//! operator lens, never where the system computes."* The lens is that
 //! surface. So an aggregate amplitude is lawful here and nowhere else.
 //!
-//! **THE OPERATOR DISPLAY BOUND** (operator ruling 2026-08-02). The
-//! exception is bound to a SEAT, never to a species. Whoever sits in it
+//! **The operator display bound** (operator ruling 2026-08-02). The
+//! exception is bound to a seat, never to a species. Whoever sits in it
 //! — organic, synthetic, procedural, another subsystem — meets the same
 //! interface, and the bound is identical for all of them:
 //!
-//! > A display projection is a TERMINAL STRING. Zero accessors, zero
+//! > A display projection is a terminal string. Zero accessors, zero
 //! > ordering traits, zero write-back into any computing or decision
 //! > path.
 //!
 //! [`Amplitude`] is that bound made structural. It holds its value in
 //! `rfa_core::Lens`: exact rational in, `String` out, no accessor, no
-//! comparison, no ordering. A caller may DISPLAY it and cannot branch on
+//! comparison, no ordering. A caller may display it and cannot branch on
 //! it, so the exception cannot leak back by anyone's oversight. Stronger
 //! than the ancestor, which left it a bare `Q` and trusted the reader.
 
@@ -95,7 +95,7 @@ use rfa_core::{Delta, Lens};
 /// one adjacency, seven higher torsion.
 pub const HARMONIC_CHANNELS: usize = 11;
 
-/// THE PHASE — the observation angle. *"WHO is looking."*
+/// The phase — the observation angle. *"Who is looking."*
 ///
 /// Different phase, different manifestation, same truth. The phase does
 /// not alter the structure; it selects which expression of it emerges.
@@ -125,14 +125,14 @@ impl Phase {
     }
 }
 
-/// THE APERTURE — an observer's sensitivity across the eleven harmonic
+/// The APERTURE — an observer's sensitivity across the eleven harmonic
 /// channels. *"Each entity is the same kernel viewing the same
 /// observation through its own chromatic spectrum."*
 ///
 /// **Not a relation** (see the module header): eleven exact rationals
 /// with no coboundary, so nothing here is gauge and nothing reduces.
 /// This is how a lens becomes per-observer without any belief entering
-/// a rule (`26_ARTICLES` LAW 9) — the substrate is identical for every
+/// a rule (`26_ARTICLES` law 9) — the substrate is identical for every
 /// observer; only the instrument differs.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Aperture {
@@ -141,7 +141,7 @@ pub struct Aperture {
 }
 
 impl Aperture {
-    /// THE FLAT APERTURE — every channel weighted alike. The observer
+    /// The flat APERTURE — every channel weighted alike. The observer
     /// that privileges no dimension.
     pub fn flat() -> Self {
         Aperture {
@@ -169,7 +169,7 @@ impl Aperture {
         }
     }
 
-    /// THE METABOLISM — the bounded running average the ancestor
+    /// The METABOLISM — the bounded running average the ancestor
     /// carries: `h[k]' = (h[k]·n + signal) / (n + 1)`.
     ///
     /// Exact rational throughout, no float, no root. An aperture tunes
@@ -191,7 +191,7 @@ impl Default for Aperture {
     }
 }
 
-/// THE AMPLITUDE — the strength of a manifestation, CAGED.
+/// The amplitude — the strength of a manifestation, caged.
 ///
 /// *"Zero amplitude = the structure exists holonomically but is not
 /// currently manifesting luminally."*
@@ -211,7 +211,7 @@ impl Amplitude {
     }
 }
 
-/// THE LUMINAL EXPRESSION — what emerges when this structure is
+/// The luminal expression — what emerges when this structure is
 /// observed at this phase through this aperture.
 ///
 /// It is derived at the moment of asking and held by nobody: *"it
@@ -223,19 +223,19 @@ pub struct Luminal {
     pub torsion_order: Ratio,
     /// The observed wavelength: the period as seen from this phase.
     pub wavelength: Ratio,
-    /// How much of the structure this phase does NOT reveal, relative to
+    /// How much of the structure this phase does not reveal, relative to
     /// the period. Zero at the direct phase; larger as the angle turns.
     pub phase_gap: Ratio,
     /// The strength of the manifestation — caged (see [`Amplitude`]).
     pub amplitude: Amplitude,
 }
 
-/// **THE EMERGENCE.** What an observer at `phase`, looking through
+/// **The emergence.** What an observer at `phase`, looking through
 /// `aperture`, sees of the structure `view` reports.
 ///
 /// Pure and total. Builds on [`crate::peel`] rather than replacing it:
-/// the view fixes the DEPTH, the phase fixes the ANGLE, the aperture
-/// fixes the INSTRUMENT. Nothing is retained.
+/// the view fixes the DEPTH, the phase fixes the angle, the aperture
+/// fixes the instrument. Nothing is retained.
 ///
 /// The luminal is a function of the holonomic — so a caller that wants
 /// a different manifestation re-observes at a different phase rather
@@ -243,7 +243,7 @@ pub struct Luminal {
 pub fn emerge(delta: &Delta, view: &View, phase: &Phase, aperture: &Aperture) -> Luminal {
     let torsion_order = torsion_order(delta);
 
-    // The wavelength IS the period seen from this angle. At the direct
+    // The wavelength is the period seen from this angle. At the direct
     // phase they coincide and nothing is hidden.
     let wavelength = torsion_order.clone() * phase.angle().clone();
 
@@ -253,10 +253,10 @@ pub fn emerge(delta: &Delta, view: &View, phase: &Phase, aperture: &Aperture) ->
         false => (torsion_order.clone() - wavelength.clone()).abs() / torsion_order.clone(),
     };
 
-    // AMPLITUDE — the structure that stands, weighted by the observer's
+    // Amplitude — the structure that stands, weighted by the observer's
     // sensitivity on the channels it stands in. This is the translated
     // form: the ancestor divided by a caged coherence scalar; here the
-    // strength derives from what the PEEL actually found, so the reading
+    // strength derives from what the peel actually found, so the reading
     // is grounded in structure rather than in a barred aggregate.
     let strength = match view {
         // The far view carries an elevation: how high, weighted flat
@@ -281,10 +281,10 @@ pub fn emerge(delta: &Delta, view: &View, phase: &Phase, aperture: &Aperture) ->
     }
 }
 
-/// THE TORSION ORDER — the period of the structure: the lcm of every
+/// The torsion order — the period of the structure: the lcm of every
 /// denominator standing in the relation.
 ///
-/// Exact and integer-valued by construction. It says HOW the wave wraps
+/// Exact and integer-valued by construction. It says how the wave wraps
 /// — a relation whose entries all sit on halves wraps at 2, one that
 /// needs twelfths wraps at 12.
 fn torsion_order(delta: &Delta) -> Ratio {

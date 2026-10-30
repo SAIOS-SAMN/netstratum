@@ -1,8 +1,8 @@
-//! **CARRIED STATE** (operator directive 2026-10-08: "byte-exactness replay
-//! is the antithesis of what we are building"; judge each deed live once and
+//! **Carried STATE** (ruling of 2026-10-08: byte-exactness replay is the
+//! antithesis of what is being built; judge each deed live once and
 //! carry state forward instead of replaying from genesis).
 //!
-//! A world's SNAPSHOT is its committed state as the live world held it at a
+//! A world's snapshot is its committed state as the live world held it at a
 //! chronicle boundary — `<world>/state.snap`:
 //!
 //! ```text
@@ -14,11 +14,11 @@
 //! (integers little-endian) where `receipts` is how many receipts the state
 //! stands after and `head` the own-hash of the last of them (the commitment:
 //! a snapshot belongs to the chronicle whose receipt at that position hashes
-//! to it). The MEMORY BOUND rides beside it: the chronicle held in memory
+//! to it). The memory bound rides beside it: the chronicle held in memory
 //! starts at absolute receipt `base`, which begins at byte `base_bytes` of
 //! `chronicle.tlv` and chains from `base_parent`; what the live world still
 //! reads of the receipts before it is the carried annals. The annals' drained
-//! own-hashes are `annals.dig` beside it — 32 bytes each, APPEND-ONLY, never
+//! own-hashes are `annals.dig` beside it — 32 bytes each, append-only, never
 //! rewritten; the snapshot names how many belong to it. A resume reads the
 //! file from `base_bytes` only. v2 (digests inline) and v1 (no tail, no
 //! annals) snapshots still read. A world
@@ -165,7 +165,7 @@ pub fn resume(dir: &Path, chronicle: Chronicle) -> (World, Resumed) {
 /// The snapshot's state stepped forward over the receipts after it, when the
 /// snapshot belongs to this chronicle.
 fn carry_forward(snap: Snapshot, chronicle: &Chronicle) -> Option<(Committed, Resumed)> {
-    // Positions are ABSOLUTE; the chronicle may hold only a tail from `base`.
+    // Positions are absolute; the chronicle may hold only a tail from `base`.
     let receipts = chronicle.receipts();
     let base = chronicle.base() as usize;
     let total = base + receipts.len();
@@ -182,7 +182,7 @@ fn carry_forward(snap: Snapshot, chronicle: &Chronicle) -> Option<(Committed, Re
     Some((stepper.into_committed(), Resumed::Carried { tail: total - snap.receipts }))
 }
 
-/// **THE BOUNDED BOOT** — bring a world back from its directory reading only
+/// **The bounded boot** — bring a world back from its directory reading only
 /// the chronicle tail its snapshot names: the receipts from `base_bytes` on,
 /// verified from `base_parent`, the annals carried for the rest. Returns the
 /// world, how it came back, and the sync cursor standing at the file's end

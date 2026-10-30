@@ -1,4 +1,4 @@
-//! THE G2 AUDIT — a universe's chronicles read against docs/57_GENESIS_G2.md.
+//! The G2 audit — a universe's chronicles read against docs/57_GENESIS_G2.md.
 //!
 //!   cargo run --release -p conductor --example g2_audit -- [var-g2]
 //!

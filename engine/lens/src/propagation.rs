@@ -1,8 +1,8 @@
-//! RESONANCE AS PROPAGATION — how a volume moves through a medium
+//! Resonance as propagation — how a volume moves through a medium
 //! (`19_LENS` §5, operator correction 2026-08-02).
 //!
 //! **Resonance is not a match against a threshold.** It is the dynamic
-//! rate and boundary function governing how a VOLUME diverges,
+//! rate and boundary function governing how a volume diverges,
 //! converges, degrades and accelerates over time through the medium
 //! around it. A threshold test is a photograph of something only
 //! meaningful as a film.
@@ -14,13 +14,13 @@
 //!     DECAY       degradation across the separation, over steps
 //! ```
 //!
-//! **BOTH POLES ARE NAMED** (correction 2026-08-02). Divergence sources;
+//! **Both poles are named** (correction 2026-08-02). Divergence sources;
 //! convergence sinks; neither is the other's absence. Convergence is a
-//! CAPABILITY — `05 §1.4`, the dim-star system sells radiator headroom,
+//! capability — `05 §1.4`, the dim-star system sells radiator headroom,
 //! the rarest resource in a high-flux universe — so a reading that
 //! renders it as negative expansion prices a capability as a loss.
 //!
-//! # THE FORM IS DISCRETE, AND THAT IS NOT A COMPROMISE
+//! # The form is discrete, and that is not A compromise
 //!
 //! The relayed physics is continuous:
 //!
@@ -32,8 +32,8 @@
 //! `exp` is transcendental and `∫` / `d/dt` are continuous. Neither is
 //! admissible: exactness is a type-level guarantee here, and **the chain
 //! is discrete — one commitment per step, which is `c` itself**
-//! (`26_ARTICLES` LAW 5). So every derivative is a DIFFERENCE and every
-//! integral is a SUM, and the physics arrives whole rather than
+//! (`26_ARTICLES` law 5). So every derivative is a difference and every
+//! integral is a sum, and the physics arrives whole rather than
 //! approximated:
 //!
 //! ```text
@@ -43,14 +43,14 @@
 //! ```
 //!
 //! **The pole is the content.** A rate collapsed to a magnitude says how
-//! fast and throws away WHICH WAY, which is the one thing a reader
+//! fast and throws away which way, which is the one thing a reader
 //! needs. Nothing here is collapsed, and the pole lives in the arm
 //! rather than in a sign.
 //!
-//! # WHAT THIS MODULE DOES NOT DO
+//! # What this module does not do
 //!
 //! It holds no history. Every reading takes the committed points it is
-//! GIVEN and keeps none of them — a lens with its own timeline is a
+//! given and keeps none of them — a lens with its own timeline is a
 //! second timeline (`19_LENS` §1a).
 
 use cfe::dop::Resource;
@@ -59,40 +59,40 @@ use cfe::world::Committed;
 use num_traits::Signed;
 use rfa_core::capacity::Degree;
 
-/// **THE MOTION OF A VOLUME — both poles named, neither derived from
+/// **The motion of A volume — both poles named, neither derived from
 /// the other** (operator correction 2026-08-02, *invert to
 /// convergence*).
 ///
 /// This first read `expansion: Ratio` with a `Direction` taken from its
-/// sign, and that was two faults in one field. It named a TWO-POLE
-/// reading after ONE pole — convergence arriving as *negative
+/// sign, and that was two faults in one field. It named a two-pole
+/// reading after one pole — convergence arriving as *negative
 /// expansion* — and it carried the same fact twice, since the direction
 /// was fully determined by the sign.
 ///
-/// It is the SAME fault corrected one file away in
+/// It is the same fault corrected one file away in
 /// `rfa_core::capacity`, inverted — there a pole was named for its
 /// failure mode, here for its opposite. The census read
 /// `Egress { sources, TRAPPED, balanced }` and became
 /// `Flux { sources, sinks, balanced }`:
 ///
-/// > *DIVERGENCE SOURCES; CONVERGENCE SINKS. Both are poles of one
+/// > *Divergence sources; convergence sinks. Both are poles of one
 /// > reading and both are named.*
 ///
 /// **Convergence is a capability, not a deficit.** `05 §1.4`: a dim-star
 /// system holds the rarest resource in a high-flux universe — radiator
-/// headroom — and SELLS it. The Frost trades convergence. A reading that
+/// headroom — and sells it. The Frost trades convergence. A reading that
 /// renders it as shrinkage prices a capability as a loss.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Motion {
-    /// DIVERGING — the volume sources, pushing outward.
+    /// Diverging — the volume sources, pushing outward.
     Diverging { by: Ratio },
-    /// CONVERGING — the volume sinks, drawing inward. Named in its own
+    /// Converging — the volume sinks, drawing inward. Named in its own
     /// right, never as an expansion that went negative.
     Converging { by: Ratio },
     /// Neither. **Not "converged"** — a volume that did not move may be
     /// at rest or may be stuck, and this reading refuses to presume.
     /// (Note the collision the correction exposed: "converged" as a
-    /// synonym for *finished* is the opposite of CONVERGING as a
+    /// synonym for *finished* is the opposite of converging as a
     /// direction. The still arm is not the convergent one.)
     Still,
 }
@@ -120,7 +120,7 @@ impl Motion {
     }
 }
 
-/// HOW FAST, IN WHAT SHAPE OF CYCLE.
+/// How fast, in what shape of CYCLE.
 ///
 /// Pace is read against the span it took, because the same change over
 /// one step and over a hundred are different events entirely: the first
@@ -135,12 +135,12 @@ pub enum Pace {
     Still,
 }
 
-/// THE MEDIUM — the economic accompaniment a volume propagates through.
+/// The medium — the economic accompaniment a volume propagates through.
 ///
 /// It modulates the velocity: `η > 1` accelerates, `η < 1` damps, `η = 1`
 /// is inert. **Derived from the surround, never dialed** — a
 /// caller-supplied `η` would make two observers read different paces
-/// from one chain, which is not evidence (LAW 6).
+/// from one chain, which is not evidence (law 6).
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Medium {
     /// What the surround retains against what it sheds. Exact.
@@ -153,11 +153,11 @@ impl Medium {
         Medium { eta: ratio(1, 1) }
     }
 
-    /// **DERIVED from the surround**: what stands against what is being
+    /// **Derived from the surround**: what stands against what is being
     /// shed. A medium that retains more than it loses accelerates; one
-    /// bleeding faster than it holds damps.
+    /// leaking faster than it holds damps.
     ///
-    /// `η = (retained + shed) / (shed + shed)` is deliberately NOT used
+    /// `η = (retained + shed) / (shed + shed)` is deliberately not used
     /// — that is a normalised score. This is the plain ratio of what
     /// stands to what leaves, with an inert reading when nothing leaves.
     pub fn from_surround(retained: Ratio, shed: Ratio) -> Self {
@@ -168,9 +168,9 @@ impl Medium {
         }
     }
 
-    /// **THE MEDIUM AS IT ACTUALLY STANDS** — derived from committed
+    /// **The medium as it actually stands** — derived from committed
     /// state, with nothing supplied by a caller (`19_LENS` §5b: *η is
-    /// DERIVED, never dialed*).
+    /// derived, never dialed*).
     ///
     /// The pairing is the thermal law's own, and it was already in the
     /// tree waiting to be read (`05 §1.2`, encase-first / vent-overflow):
@@ -180,13 +180,13 @@ impl Medium {
     ///     SHED       entropy_vented — what overflowed to the void
     /// ```
     ///
-    /// A world that keeps more than it loses ACCELERATES what propagates
-    /// through it; one bleeding faster than it holds DAMPS. Both are
+    /// A world that keeps more than it loses accelerates what propagates
+    /// through it; one leaking faster than it holds damps. Both are
     /// facts about the world rather than arguments about it, so two
     /// observers reading the same chain read the same medium — which is
-    /// what LAW 6 requires and what a passed-in `η` could never give.
+    /// what law 6 requires and what a passed-in `η` could never give.
     ///
-    /// A world that has vented nothing is INERT, not infinitely fast:
+    /// A world that has vented nothing is inert, not infinitely fast:
     /// the surround has taken nothing away yet.
     pub fn of(state: &Committed) -> Self {
         let zero = ratio(0, 1);
@@ -214,14 +214,14 @@ impl Medium {
     }
 }
 
-/// A RESONANCE READING — the propagation of one volume across a span.
+/// A resonance reading — the propagation of one volume across a span.
 ///
 /// Four quantities carried whole. No verdict, no threshold, no score:
 /// a reader learns which way, how fast, how hard the medium pushed, and
 /// how much was lost — and draws its own conclusion.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Resonance {
-    /// `V(k) − V(k−1)` — the pole NAMED, carrying its own size. Not a
+    /// `V(k) − V(k−1)` — the pole named, carrying its own size. Not a
     /// signed scalar: convergence is its own arm, never a negative.
     pub motion: Motion,
     /// How fast, against the span it took.
@@ -253,7 +253,7 @@ impl Resonance {
         decay_consumed: Ratio,
         distance: Ratio,
     ) -> Self {
-        // The derivative IS the difference — the step is the unit. The
+        // The derivative is the difference — the step is the unit. The
         // pole is decided once, here, and carried in the arm; nothing
         // downstream re-derives it from a sign.
         let change = ratio(now.get() as i64, 1) - ratio(origin.get() as i64, 1);
@@ -265,7 +265,7 @@ impl Resonance {
             },
         };
 
-        // FAST is a large change over few steps; LONG is a small change
+        // Fast is a large change over few steps; long is a small change
         // over many. Compared cross-multiplied so it stays exact and
         // scales with the span rather than against a fixed cut.
         let span = ratio(steps.max(1) as i64, 1);
@@ -287,7 +287,7 @@ impl Resonance {
 
 }
 
-/// ALIGNMENT — the static depth-indexed match, renamed to what it does.
+/// Alignment — the static depth-indexed match, renamed to what it does.
 ///
 /// **This is not resonance** (`19_LENS` §5). It answers *"do these two
 /// read the same at this distance?"*, which is a useful question and a

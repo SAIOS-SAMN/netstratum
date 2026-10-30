@@ -5,17 +5,17 @@
 //!
 //! - [`Delta`] — an antisymmetric relational tensor over exact rational:
 //!   `Δ_ij = −Δ_ji`, zero diagonal, one exact-rational-vector of fiber coordinates
-//!   per entry. It encodes RELATIONSHIPS between entities, never the
+//!   per entry. It encodes relationships between entities, never the
 //!   entities themselves.
-//! - [`for_each_residual`] — the ONE computation of the cocycle
+//! - [`for_each_residual`] — the one computation of the cocycle
 //!   condition `R_ijk = Δ_ik − Δ_ij − Δ_jk` over all ordered distinct
 //!   triples. Everything downstream (coherence, gates) composes it.
 //! - [`coherence_functional`] — `C(Δ) = Σ |R|` over the exact rationals
-//!   (THE PROPORTIONAL LAW: squares are barred as aggregators of difference).
+//!   (The proportional law: squares are barred as aggregators of difference).
 //!   `C(Δ) = 0` iff the cocycle condition holds — that and nothing more.
-//!   **C HAS NO OPERATIONAL FUNCTION** (operator ruling 2026-08-01): it
+//!   **C has no operational function** (operator ruling 2026-08-01): it
 //!   is not a score, not a gauge, not a gate, and no engine path
-//!   consults it. It is an L1 collapse for an OPERATOR LENS only. The word
+//!   consults it. It is an L1 collapse for an operator lens only. The word
 //!   "converged" is struck from this crate — zero says the relations
 //!   compose, never that anything was finished or emptied.
 //! - [`coboundary_reduce`] — projection onto the canonical H¹
@@ -47,17 +47,17 @@ pub use fold::{
     OrbitWitness, RatMatrix, TorsionCause,
 };
 pub use gates::{validate_step, GateReading, StepBound};
-// THE FOUR-ROW CLASSIFICATION IS STRUCK (operator ruling 2026-08-04):
+// The four-row classification is struck (operator ruling 2026-08-04):
 // `Vacuity` and `dual_pole` are gone with the capacity law that was
-// their only gate. The BOUNDARY FORM stays — the divergence is a
-// first-class reading for THE SIGN LAW and is what `capacity.rs` splits
+// their only gate. The boundary form stays — the divergence is a
+// first-class reading for the sign law and is what `capacity.rs` splits
 // against.
 pub use boundary::{boundary_form, Flow, BoundaryForm};
 pub use rcf::{invariant_factors, rcf_hash, rcf_hash_skew_bipartite, rcf_signature, RatPoly, RcfSignature};
 pub use reduce::{coboundary_reduce, forest_potentials, holonomies, Holonomy, Support};
-// THE CARRIER, re-exported. A crate that builds a Delta through this
+// The carrier, re-exported. A crate that builds a Delta through this
 // algebra must name its exact-rational entries; re-exporting `Ratio`
-// here lets a crate ABOVE rfa-core (and below `cfe` in the arrow law,
+// here lets a crate above rfa-core (and below `cfe` in the arrow law,
 // like `solver`) do so through the algebra it already depends on,
 // without a direct edge to `cfe`.
 pub use cfe::ratio::{ratio, Ratio};

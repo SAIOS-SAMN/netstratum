@@ -1,12 +1,12 @@
 //! GROWTH-1 — the six growth mechanisms (operator ruling 2026-08-03).
 //!
-//! *"How do we go from primordialism to significant civilization without
-//! leaps and bounds and skipping everything in between?"*
+//! *How does a people go from primordialism to significant civilization
+//! without leaps and bounds and skipping everything in between?*
 //!
 //! The answer this module encodes: **a rung must measure something the
-//! chain PRODUCES, never something a line ASSERTS.** `26_ARTICLES`
-//! ARTICLE IV clause 2 rules that this manifold is one commitment per
-//! step, so a stamp IS elapsed history. A claim can be typed; a span
+//! chain produces, never something a line asserts.** `26_ARTICLES`
+//! article IV clause 2 rules that this manifold is one commitment per
+//! step, so a stamp is elapsed history. A claim can be typed; a span
 //! cannot be forged.
 //!
 //! ```text
@@ -14,7 +14,7 @@
 //!               If yes, it is a leap.
 //! ```
 //!
-//! # THE SIX AXES, and they are orthogonal
+//! # The six axes, and they are orthogonal
 //!
 //! ```text
 //!     PRACTICE     TIME       did the doing span real chain time?
@@ -25,33 +25,33 @@
 //!     TRIVIALITY   EMPTINESS  how much of it moved nothing?
 //! ```
 //!
-//! **WISDOM is the one worth explaining.** It reads the share of an
-//! orb's accounts carrying BOTH sides — kept AND lost. A line that has
+//! **Wisdom is the one worth explaining.** It reads the share of an
+//! orb's accounts carrying both sides — kept and lost. A line that has
 //! only ever posted wins has recorded a great deal and learned nothing;
 //! the dual ledger is what makes that measurable, and it is why BOOK-1
 //! made both sides structural rather than conventional.
 //!
-//! **TRIVIALITY is the guard that makes the other five honest.** Without
+//! **Triviality is the guard that makes the other five honest.** Without
 //! it, every axis is farmable: a thousand empty postings would read as
 //! practice, breadth and depth alike. It reports how much of an apparent
 //! record moved nothing at all, and a reader that ignores it is reading
 //! a padded book.
 //!
-//! # NO THRESHOLDS LIVE HERE
+//! # No thresholds live here
 //!
 //! Every field is an exact rational or a count, derived and reported
 //! whole. Nothing in this module compares against a number, so there is
 //! nothing here to dial (operator ruling 2026-08-03: constants and
 //! statics give way to deterministic throughput driven by dynamism).
 //!
-//! Where a gate needs one of these it compares against ZERO — the
+//! Where a gate needs one of these it compares against zero — the
 //! distinction between *happened* and *did not*, which is not a dial.
 //! `World::literate` is the first: a line reads and writes when its
 //! postings SPAN time, not when one posting exists.
 
 use crate::ratio::{ratio, Ratio};
 
-/// **THE GROWTH READING of one orb.** Derived from the chronicle and the
+/// **The GROWTH reading of one orb.** Derived from the chronicle and the
 /// books, held by nobody, recomputed whenever asked.
 ///
 /// Six quantities carried whole. No verdict, no score, no aggregate: a
@@ -60,30 +60,30 @@ use crate::ratio::{ratio, Ratio};
 /// number is the struck C-gate wearing a sixth name.
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct Growth {
-    /// TIME — the span the postings cover, against the age of the line.
+    /// Time — the span the postings cover, against the age of the line.
     /// Zero when everything happened at one stamp, which is exactly the
     /// leap this axis exists to expose.
     pub practice: Ratio,
-    /// BREADTH — how many distinct accounts have been posted to. A
-    /// COUNT, because breadth has no natural ceiling to divide by.
+    /// Breadth — how many distinct accounts have been posted to. A
+    /// count, because breadth has no natural ceiling to divide by.
     pub knowledge: usize,
     /// DEPTH — the deepest account's share of all this orb's book
     /// weight. One account carrying everything reads 1.
     pub expertise: Ratio,
-    /// TESTING — the share of posted accounts carrying BOTH sides. A
+    /// Testing — the share of posted accounts carrying both sides. A
     /// line that only ever posted wins has learned nothing.
     pub wisdom: Ratio,
-    /// SCOPE — the share of the whole LINE's book weight that sits on
+    /// Scope — the share of the whole LINE's book weight that sits on
     /// this orb. A single-orb line reads 1: wholly local.
     pub locality: Ratio,
-    /// EMPTINESS — the share of postings that moved nothing at all.
+    /// Emptiness — the share of postings that moved nothing at all.
     /// The guard that keeps the other five from being farmed.
     pub triviality: Ratio,
 }
 
 impl Growth {
     /// Has this line practised at all — did its writing span any chain
-    /// time? Compared against ZERO, which is the difference between
+    /// time? Compared against zero, which is the difference between
     /// happened and did not, never a dial.
     pub fn practised(&self) -> bool {
         self.practice > ratio(0, 1)

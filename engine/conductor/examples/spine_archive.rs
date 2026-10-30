@@ -1,6 +1,6 @@
-//! THE SPINE ARCHIVE (coordinator ruling: archive cold, verified, then prune
+//! The spine archive (coordinator ruling: archive cold, verified, then prune
 //! to the head). For one world's spine: every blob in `store/` must hash to
-//! its own name AND be the state of a commitment in `arbor.tlv` (opened in
+//! its own name and be the state of a commitment in `arbor.tlv` (opened in
 //! full, so the chain itself re-verifies). Writes `<out>/<world>.manifest`
 //! (`<state hash> <commitment index>` per archivable blob) and
 //! `<out>/<world>.list` (the blob paths to archive: every verified blob but

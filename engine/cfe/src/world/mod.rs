@@ -1,13 +1,13 @@
-//! The world — THE CONTAINER of the topology (04 §5): multiple colony
-//! orbs (planets' settlements) under ONE clock, ONE chronicle, ONE
+//! The world — the container of the topology (04 §5): multiple colony
+//! orbs (planets' settlements) under one clock, one chronicle, one
 //! receipt chain (binding #1 — the world is the replay unit, the mesh
 //! unit at N6, the anchor root at N7). The P1 landing paid the
 //! registered naming debt by making the struct MEAN the container.
 //!
-//! The flow model (02 §2.3) runs PER ORB: each tick, every active zone
+//! The flow model (02 §2.3) runs per orb: each tick, every active zone
 //! nets yield − upkeep into its orb's accrued workspace; famine strikes
 //! per orb; `collect` settles one orb. Chartering (P1) founds a
-//! charted colony by MOVING the founding reserves from a source
+//! charted colony by moving the founding reserves from a source
 //! colony's bank — conservation holds; no colony after the first gets
 //! free matter.
 
@@ -26,9 +26,9 @@ pub const SOVEREIGN: u64 = 1;
 pub const FIRST_ORB: u64 = 1;
 
 
-// GROUND §4c — the world is ONE ORGAN presenting ONE SURFACE. These
+// Ground §4c — the world is one organ presenting one surface. These
 // modules are internal structure; every name is re-exported below so
-// no caller's import changes (GROUND §3 invariant 1).
+// no caller's import changes (Ground §3 invariant 1).
 pub mod refusal;
 pub mod rules;
 
@@ -108,7 +108,7 @@ pub use state::{
     AbsorptionDebt, Bond, Committed, Council, Forward, Genesis, Leap, Offer, Prospected,
     TickOutcome, World,
 };
-// Internal to the organ — never re-exported (GROUND §3 invariant 1:
+// Internal to the organ — never re-exported (Ground §3 invariant 1:
 // the parts are structure, not a new seam for other crates).
 use state::CrystalDeposit;
 
@@ -226,9 +226,9 @@ use state::CrystalDeposit;
 
 
 
-/// NS-4 APERTURE (BUILD_ORDER §3a) — THE CROSS-WORLD VALUE CARRIER.
-/// Banked value crosses from an orb in ONE world to an orb in ANOTHER,
-/// conservation-exact across the pair, receipted in BOTH chronicles as
+/// NS-4 APERTURE (BUILD_ORDER §3a) — the cross-WORLD value carrier.
+/// Banked value crosses from an orb in one world to an orb in another,
+/// conservation-exact across the pair, receipted in both chronicles as
 /// a two-legged deed sharing one `deal` id: `ApertureSent` debits the
 /// source, `ApertureReceived` credits the destination. Unlike TRADE-1
 /// (one chronicle proves conservation), no single chronicle proves it
@@ -236,7 +236,7 @@ use state::CrystalDeposit;
 /// Both orbs settle due demurrage at the touch (the SINK-1 law) before
 /// value moves; affordability is gated on the source's post-decay
 /// bank, computed pure, so a refusal orphans nothing in either world.
-/// The cross-empire cohesion books (compassion/morality) DO NOT post
+/// The cross-empire cohesion books (compassion/morality) do not post
 /// here: cross-world reading composes at N5/N6 (09 board law) — an
 /// aperture carries value, never judgment.
 pub fn aperture_transfer(
@@ -251,7 +251,7 @@ pub fn aperture_transfer(
     haul(src, from, dst, to, resource, amount.value().clone(), deal, &ratio(0, 1))
 }
 
-/// E-APT-1 — cross-world ELEMENT haul with melt. Zero melt is the
+/// E-APT-1 — cross-world element haul with melt. Zero melt is the
 /// local door; positive melt is MARKET-2 iceberg on open matter.
 /// Demurrage does not touch the element ledger (31 §1).
 #[allow(clippy::too_many_arguments)] // mirrors haul / aperture_transfer arity
@@ -284,8 +284,8 @@ pub fn element_aperture_transfer(
 pub const MELT_PER_UNIT: (i64, i64) = (1, 64);
 
 /// The one transport body. `melt` is the transit's iceberg fraction:
-/// the sender debits the DISPATCHED amount, the receiver banks and
-/// receipts the DELIVERED amount — the difference is the void's,
+/// the sender debits the dispatched amount, the receiver banks and
+/// receipts the delivered amount — the difference is the void's,
 /// derivable from the pair (sent − received = melt·sent), so the
 /// cross-book audit stays exact. Zero melt is the local door.
 #[allow(clippy::too_many_arguments)]
@@ -299,16 +299,16 @@ fn haul(
     deal: u64,
     melt: &Ratio,
 ) -> Result<(), ActionRefused> {
-    // #138 THE RESOURCE GRAIN — the haul carries its cargo on the 1/1024 grain.
-    // Both LEGS floor here at the transport's mouth: the SEND draws `amount`
-    // (this floor) and the RECEIVE banks `smelt_resource(amount·(1−melt))`
+    // #138 the resource GRAIN — the haul carries its cargo on the 1/1024 grain.
+    // Both legs floor here at the transport's mouth: the send draws `amount`
+    // (this floor) and the receive banks `smelt_resource(amount·(1−melt))`
     // below, so neither the sender's nor the receiver's bank leaves the grain.
     // A market fill is already 1/64 (a coarser on-grain sub-grid), so this is
     // idempotent there; a non-market haul is re-seated. The transport carries
     // the exactness, so no downstream bank needs to re-smelt.
     let amount = smelt_resource(&amount);
     // P2: each world's standing supply, snapshotted before either side
-    // is peeled. A haul crosses two worlds and each sink reads its OWN
+    // is peeled. A haul crosses two worlds and each sink reads its own
     // supply — a busy world's rate must not be charged to a quiet one.
     let src_supply = standing_supply(&src.orbs);
     let dst_supply = standing_supply(&dst.orbs);
@@ -323,14 +323,14 @@ fn haul(
     src.mesh_guard_haul(melt)?;
     // THRESHOLD-1 (12_UNION §7): the shield — an aperture touches only
     // worlds whose peoples have made the solar leap (TECH-1a). A world
-    // is a star system, so every aperture IS interstellar; the first
-    // lawful one is a world's CROSSING into the union.
+    // is a star system, so every aperture is interstellar; the first
+    // lawful one is a world's crossing into the union.
     // WARDEN-1a: the elder's reverse shield — no aperture reaches a
     // warded star, either direction, until the gate is solved.
     if src.ward_holds() || dst.ward_holds() {
         return Err(ActionRefused::TheWardHolds);
     }
-    // **#42 THE WALL** — a pair at WAR exchanges nothing, in either
+    // **#42 the wall** — a pair at war exchanges nothing, in either
     // direction, exactly as the elder's ward bars a crossing. Either
     // book's war is enough: it takes two to trade and one to refuse.
     // This is what makes war expensive — it costs the trade, not a
@@ -382,7 +382,7 @@ fn haul(
         src_stamp,
         vec![SOVEREIGN],
     );
-    // DELIVERED after melt, then P5-A interdiction residual (typed, not silent).
+    // Delivered after melt, then P5-A interdiction residual (typed, not silent).
     // delivered_raw = amount × (1 − melt); lost to risk = delivered_raw × risk / 2.
     let after_melt = amount.clone() * (ratio(1, 1) - melt.clone());
     let interdicted = if *melt > ratio(0, 1) {
@@ -391,13 +391,13 @@ fn haul(
     } else {
         ratio(0, 1)
     };
-    // #138 THE RESOURCE GRAIN — the delivered stock lands on the 1/64
+    // #138 the resource GRAIN — the delivered stock lands on the 1/64
     // market grain (the same grain `clear_trade` fills at). `after_melt =
     // amount·(1−melt)` un-grains the sent amount (melt carries the /67-class
     // logistics denominator), and each cross-world hop compounds it, which is
     // the Crystal/Iron denominator explosion the trace convicted at
     // `ApertureReceived`. Flooring here re-seats delivered on the grain; the
-    // shaved dust joins `void_share = amount − delivered`, the SAME first-class
+    // shaved dust joins `void_share = amount − delivered`, the same first-class
     // melt-loss receipt (a transit loss and a grain shave are the same kind of
     // physical loss), so conservation holds by construction and no new deed is
     // needed.
@@ -418,7 +418,7 @@ fn haul(
         dst_stamp,
         vec![SOVEREIGN],
     );
-    // The conform ruling (2026-07-31): the melt is a FIRST-CLASS
+    // The conform ruling (2026-07-31): the melt is a first-class
     // receipt on the receiving book — sent = received + void share,
     // so every deal sums to zero under one rule and the gate only
     // sums, never recomputes φ·D. Losses are receipted, never
@@ -431,7 +431,7 @@ fn haul(
         );
     }
     dst.relieve_recovered(to);
-    // THRESHOLD-1: the deed IS the crossing, for both worlds.
+    // THRESHOLD-1: the deed is the crossing, for both worlds.
     src.crossed = true;
     dst.crossed = true;
     Ok(())
@@ -544,10 +544,10 @@ fn haul_element(
         src_stamp,
         vec![SOVEREIGN],
     );
-    // #136 THE SMELT, EXTENDED TO ELEMENT FILLS (operator ruling B, 2026-08-20).
-    // Every FILL lands on the 1/64 SMELT grain — the same law resource fills obey
+    // #136 the smelt, extended to element fills (operator ruling B, 2026-08-20).
+    // Every fill lands on the 1/64 smelt grain — the same law resource fills obey
     // (`smelt`), bypassed here until now, which is why element stocks drifted to
-    // ~700-bit denominators and stalled `mass_of`. The DELIVERED fill is smelted;
+    // ~700-bit denominators and stalled `mass_of`. The delivered fill is smelted;
     // the sender debits `amount` (kept on the grain by the caller), so both
     // stocks stay `denom | 64`. The void audit (sent − received) absorbs the melt
     // iceberg plus the sub-1/64 shave — no matter is un-receipted (the receipts
@@ -665,7 +665,7 @@ pub fn mint_stamp_from_crystal(
     orb: u64,
     amount: crate::dop::Positive,
 ) -> Result<(), ActionRefused> {
-    // #138 THE RESOURCE GRAIN — the crystal spent (and the STAMP minted 1:1
+    // #138 the resource GRAIN — the crystal spent (and the STAMP minted 1:1
     // from it) lands on the 1/64 grain. The live mint draws `half(surplus)`
     // off the banked Crystal, whose /2 re-off-grains the balance every beat;
     // flooring here keeps both the Crystal debit and the identity STAMP credit
@@ -734,8 +734,8 @@ pub fn stamp_aperture_transfer(
             dest_shielded: !dst.knows_its_sun(),
         });
     }
-    // #138 THE RESOURCE GRAIN — the STAMP haul carries on the 1/1024 grain,
-    // both legs floored at the transport's mouth (the SEND here, the RECEIVE
+    // #138 the resource GRAIN — the STAMP haul carries on the 1/1024 grain,
+    // both legs floored at the transport's mouth (the send here, the receive
     // `smelt_resource(amount·(1−melt))` below), so neither stamp balance leaves
     // the grain and the STAMP aperture cannot re-explode the unit of account.
     let amount = smelt_resource(&amount.value().clone());
@@ -771,7 +771,7 @@ pub fn stamp_aperture_transfer(
         src_stamp,
         vec![SOVEREIGN],
     );
-    // #138 THE RESOURCE GRAIN — STAMP lands on the 1/64 grain, same as the
+    // #138 the resource GRAIN — STAMP lands on the 1/64 grain, same as the
     // resource haul: `amount·(1−melt)` un-grains the sent STAMP, so floor the
     // delivered balance. The melt shave is already a silent loss here (STAMP
     // aperture writes no VoidShare), and the grain dust joins it.
@@ -794,14 +794,14 @@ pub fn stamp_aperture_transfer(
     Ok(())
 }
 
-/// ROUTE-1 (the MARKET-2 sequence): CHARTER A LANE — a two-legged
+/// ROUTE-1 (the MARKET-2 sequence): Charter A lane — a two-legged
 /// deed pairing both books on one deal id. The lane suppresses the
 /// iceberg (melt × (1 − η)); η comes from the partners' technology
 /// (the callers derive it from instrument grades — built, never
 /// granted) and must sit inside [0, 1). The charter draws alloy 4
 /// from each side (v1 placeholder — infrastructure is paid for);
 /// maintenance is drawn at `maintain_routes` (the year voice), and
-/// an unpaid lane LAPSES on its own book — a pair needs both legs.
+/// an unpaid lane lapses on its own book — a pair needs both legs.
 pub fn charter_route(
     a: &mut World,
     orb_a: u64,
@@ -810,7 +810,7 @@ pub fn charter_route(
     eta: crate::dop::Unit,
     deal: u64,
 ) -> Result<(), ActionRefused> {
-    // BadEta is DEAD (29_CONSTRUCTION C1): efficiency is a `Unit` —
+    // BadEta is dead (29_CONSTRUCTION C1): efficiency is a `Unit` —
     // [0, 1) by construction — so the range judge has nothing to catch.
     if !a.knows_its_sun() || !b.knows_its_sun() {
         return Err(ActionRefused::Shielded {
@@ -823,12 +823,12 @@ pub fn charter_route(
     {
         return Err(ActionRefused::RouteKnown { deal });
     }
-    // ROUTE-1 (the founding-deadlock fix): the BASIC resource lane is paid in
-    // BIOMASS — the one primitive a nascent line makes in surplus (Habitats) that
-    // does NOT feed the Iron→hull→Alloy chain. A civilization must not need forged
+    // ROUTE-1 (the founding-deadlock fix): the basic resource lane is paid in
+    // biomass — the one primitive a nascent line makes in surplus (Habitats) that
+    // does not feed the Iron→hull→Alloy chain. A civilization must not need forged
     // super-metals to draw its first trade lane, and it must not starve its hull/
     // smelter economy to pay for a map line either (measured: charging Iron here
-    // delayed hulls past the NPC window). Alloy stays the price of the ADVANCED
+    // delayed hulls past the NPC window). Alloy stays the price of the advanced
     // element lane (`charter_element_route`).
     let cost = resource_route_charter_cost();
     for (world, orb) in [(&mut *a, orb_a), (&mut *b, orb_b)] {
@@ -861,7 +861,7 @@ pub fn charter_route(
     Ok(())
 }
 
-/// E-ROUTE-1 alloy charter bill — the ADVANCED element lane
+/// E-ROUTE-1 alloy charter bill — the advanced element lane
 /// (`charter_element_route`) is paid in forged Alloy: a super-metal for a
 /// high-capacity almanac corridor, earned once a line has smelters. Derived
 /// 1+1+1+1 (no dial).
@@ -870,11 +870,11 @@ fn route_charter_cost() -> Ratio {
     two.clone() + two
 }
 
-/// ROUTE-1 resource-charter bill — the BASIC (founding) trade lane, paid in the
-/// PRIMITIVES a nascent civilization already produces: (Biomass, Iron) per leg,
+/// ROUTE-1 resource-charter bill — the basic (founding) trade lane, paid in the
+/// primitives a nascent civilization already produces: (Biomass, Iron) per leg,
 /// not forged Alloy. This breaks the founding deadlock — a line no longer needs
 /// the LAST step's output (Alloy, which needs a smelter, which needs level, which
-/// needs trade) to take the FIRST step (trade). Route -> trade -> level ->
+/// needs trade) to take the first step (trade). Route -> trade -> level ->
 /// smelter -> Alloy -> element route, in order. Modest and affordable within a few
 /// ticks of a Habitat + Extractor, so early lanes open without flooding.
 fn resource_route_charter_cost() -> Ratio {
@@ -882,15 +882,15 @@ fn resource_route_charter_cost() -> Ratio {
 }
 
 impl World {
-    /// #136 THE SMELT-SWEEP (ruling B / Directive 2, 2026-08-20) — the one-time
-    /// migration that floors this world's element stocks to the 1/64 grain, ONCE,
+    /// #136 the SMELT-SWEEP (ruling B / Directive 2, 2026-08-20) — the one-time
+    /// migration that floors this world's element stocks to the 1/64 grain, once,
     /// as a committed deed (`ElementStocksSwept`). Historical hauls banked element
     /// fills un-smelted, so a resumed chronicle re-explodes stocks to ~700-bit
     /// denominators every boot and stalls `mass_of`. This floors the whole board and
     /// records the shaved dust in the receipt (pre = post + dust, bit-for-bit),
     /// leaving `replay == committed` intact — the apply arm re-floors on replay.
     ///
-    /// Idempotent + self-terminating: it appends the deed ONLY when some stock is
+    /// Idempotent + self-terminating: it appends the deed only when some stock is
     /// off-grain, so a board already on the grain emits nothing (a second boot floors
     /// during replay and adds no new deed). Returns the swept dust, or `None` when
     /// there was nothing to sweep. The live floor and the append share
@@ -904,16 +904,16 @@ impl World {
         Some(dust)
     }
 
-    /// #138 THE RESOURCE SMELT-SWEEP (the element sweep's twin) — the one-time
-    /// migration that floors this world's banked resource stocks AND every orb's
-    /// STAMP to the 1/64 grain, ONCE, as a committed deed (`ResourceStocksSwept`).
+    /// #138 the resource SMELT-SWEEP (the element sweep's twin) — the one-time
+    /// migration that floors this world's banked resource stocks and every orb's
+    /// STAMP to the 1/64 grain, once, as a committed deed (`ResourceStocksSwept`).
     /// Historical cross-world aperture transfers banked `amount·(1−melt)`
     /// un-smelted, so a resumed chronicle re-explodes Crystal/Iron/Biomass + STAMP
     /// to ~30 000-bit denominators every boot and the conservation judge grinds
     /// them. This floors the whole board and records the shaved dust in the
     /// receipt (pre = post + dust, bit-for-bit), leaving `replay == committed`
     /// intact — the apply arm re-floors on replay. Idempotent + self-terminating:
-    /// it appends ONLY when some stock is off-grain. Returns the swept dust, or
+    /// it appends only when some stock is off-grain. Returns the swept dust, or
     /// `None` when there was nothing to sweep. The live floor and the append share
     /// [`sweep_resource_grain`] with the replay arm, so both sides are identical.
     pub fn smelt_resource_sweep(&mut self) -> Option<Ratio> {
@@ -926,7 +926,7 @@ impl World {
     }
 
     /// ROUTE-1: the year-voice maintenance draw — 1/4 joule per live
-    /// lane (v1 placeholder). An unaffordable lane LAPSES by receipt
+    /// lane (v1 placeholder). An unaffordable lane lapses by receipt
     /// on this book; the pair dies with either leg. Returns the
     /// lapsed deal ids.
     pub fn maintain_routes(&mut self, orb: u64) -> Vec<u64> {
@@ -1150,12 +1150,12 @@ pub fn route_melt(a: &World, b: &World, d_chart: &Ratio) -> Ratio {
     pair_melt(a, b, &effective_distance(a, b, d_chart))
 }
 
-/// MARKET-2: THE pair's melt fraction — the one producer of the
+/// MARKET-2: the pair's melt fraction — the one producer of the
 /// formula. The transit reads the whole manifold gap (spatial L1 +
 /// orbital phase + the wrapped key gap: 11 §2.1's clash consumes
 /// payload, never a tertiary sink) at φ = 1/64 per unit; the best
-/// lane BOTH books hold (ROUTE-1) suppresses it. At ≥ 1 the pair is
-/// economically WALLED by decay physics.
+/// lane both books hold (ROUTE-1) suppresses it. At ≥ 1 the pair is
+/// economically walled by decay physics.
 ///
 /// **Callers that have a chart distance should prefer [`route_melt`],**
 /// which folds Phase-2 `D_orbit` into the distance argument. Passing
@@ -1194,11 +1194,11 @@ pub fn pair_melt(a: &World, b: &World, distance: &Ratio) -> Ratio {
     if hull_eta > ratio(0, 1) {
         melt *= ratio(1, 1) - hull_eta;
     }
-    // **#42 THE PACTS** — what two worlds have AGREED the crossing
+    // **#42 the pacts** — what two worlds have agreed the crossing
     // costs. A trade or defense pact eases the melt; a war burdens it
     // (for whatever still crosses before the wall refuses it).
     //
-    // BOTH BOOKS MUST HOLD IT. A treaty is a pair object and neither
+    // Both BOOKS must hold it. A treaty is a pair object and neither
     // world owns it, so one side's signature moves nothing — which is
     // exactly why a pact is worth having and a decree is not.
     let ours = a.pair_factor(b.name(), crate::treaty::PAIR_MELT);
@@ -1209,15 +1209,15 @@ pub fn pair_melt(a: &World, b: &World, distance: &Ratio) -> Ratio {
     melt
 }
 
-/// THE SMELT (ruled 2026-07-31): every FILL lands on the 1/64
-/// SMELT grain the melt law speaks — floor(amount × 64)/64. GCD
+/// The smelt (ruled 2026-07-31): every fill lands on the 1/64
+/// smelt grain the melt law speaks — floor(amount × 64)/64. GCD
 /// reduction alone cannot bound growth: lowest terms themselves grow
 /// when arbitrary rationals multiply through fills and premiums
 /// (measured 2026-07-31: the open no-singles book stalled the beat
 /// by ~6 crossings deep on compounding denominators — the demurrage
 /// precedent at `demurrage_due`, now made a market law). A bounded
 /// grain keeps replay and consilience verification affordable
-/// forever — the POW++ requirement. The shaved dust never leaves the
+/// forever — the PoW++ requirement. The shaved dust never leaves the
 /// giver's bank: nothing moves un-receipted, conservation holds by
 /// construction, and a fill smelted to zero refuses whole (dust
 /// never trades).
@@ -1226,13 +1226,13 @@ pub fn smelt(amount: &Ratio) -> Ratio {
     Ratio::new(amount.numer() * &grid / amount.denom(), grid)
 }
 
-/// #136 — THE ELEMENT-LEDGER GRAIN (1/1024). The element ledger declares a FINER
-/// grain than the 1/64 market/resource SMELT: element MINTS (the food synthesis
+/// #136 — the ELEMENT-LEDGER GRAIN (1/1024). The element ledger declares a finer
+/// grain than the 1/64 market/resource smelt: element mints (the food synthesis
 /// `joule·richness`, the vein flow) are naturally sub-1/64, and flooring them to
 /// 1/64 floors small quanta toward zero and starves the food economy. 1/1024 (the
 /// grain ONT-2 already floors the vein integral to) preserves 16× finer food while
 /// still bounding every element denominator to ≤ 1024 (~10 bits) — the #136
-/// explosion (~700 bits) cannot recur. Every conserved ledger declares ITS grain
+/// explosion (~700 bits) cannot recur. Every conserved ledger declares its grain
 /// (doc 54 §6): the market speaks 1/64, the element ledger 1/1024. The dominant
 /// haul floors to 1/64 (a coarser sub-grid, 64 | 1024, still on-grain), so the whole
 /// element ledger stays `denom | 1024`.
@@ -1243,17 +1243,17 @@ pub fn smelt_element(amount: &Ratio) -> Ratio {
     Ratio::new(amount.numer() * &grid / amount.denom(), grid)
 }
 
-/// #138 — THE RESOURCE-LEDGER GRAIN (1/1024). The banked resource ledger
-/// declares the SAME finer grain as the element ledger, and for the same
+/// #138 — the RESOURCE-LEDGER GRAIN (1/1024). The banked resource ledger
+/// declares the same finer grain as the element ledger, and for the same
 /// measured reason: cross-world aperture deliveries (`amount·(1−melt)`) and the
 /// settlement economy they feed carry sub-1/64 quanta, and flooring them to the
 /// coarse 1/64 market grain shaves enough value to starve marginal lines
 /// (`measured_bounds`: 1/64 tips fed<famished). 1/1024 is 16× finer — it
 /// preserves the food/settlement economy while still bounding every resource
 /// denominator to ≤ 1024 (~10 bits), so the aperture-compounded explosion
-/// (~30 000 bits) cannot recur. The MARKET still SMELTs fills to 1/64 (a coarser
+/// (~30 000 bits) cannot recur. The market still SMELTs fills to 1/64 (a coarser
 /// sub-grid, 64 | 1024, strictly on-grain), so every banked resource stays
-/// `denom | 1024`. Every conserved ledger declares ITS grain (doc 54 §6).
+/// `denom | 1024`. Every conserved ledger declares its grain (doc 54 §6).
 pub const RESOURCE_LEDGER_GRAIN: i64 = 1024;
 
 pub fn smelt_resource(amount: &Ratio) -> Ratio {
@@ -1261,10 +1261,10 @@ pub fn smelt_resource(amount: &Ratio) -> Ratio {
     Ratio::new(amount.numer() * &grid / amount.denom(), grid)
 }
 
-/// #136 THE SMELT-SWEEP, shared body (ruling B / Directive 2). Floor every element
+/// #136 the SMELT-SWEEP, shared body (ruling B / Directive 2). Floor every element
 /// stock on these orbs to the 1/64 grain, drop any stock that smelts to zero, and
-/// return the total dust shaved — `Σ (amount − smelt(amount))`. ONE body, called by
-/// BOTH the live emit ([`World::smelt_sweep`]) and the replay apply arm
+/// return the total dust shaved — `Σ (amount − smelt(amount))`. One body, called by
+/// both the live emit ([`World::smelt_sweep`]) and the replay apply arm
 /// (`ElementStocksSwept`), so the migrated state is byte-identical on both sides and
 /// `replay == committed` holds by construction. Conservation is dust-exact: pre =
 /// post + returned dust, the shaving recorded, never vanished (a floor never lifts,
@@ -1295,11 +1295,11 @@ fn any_off_grain(orbs: &[ColonyOrb]) -> bool {
     })
 }
 
-/// #138 THE RESOURCE SMELT-SWEEP, shared body — the banked-resource + STAMP twin
+/// #138 the resource SMELT-SWEEP, shared body — the banked-resource + STAMP twin
 /// of [`sweep_element_grain`]. Floor every banked resource stock (dropping any
-/// that smelt to zero) and every orb's STAMP balance to the 1/64 SMELT grain, and
-/// return the total dust `Σ (amount − smelt(amount))` shaved across BOTH ledgers.
-/// ONE body, called by BOTH the live emit ([`World::smelt_resource_sweep`]) and
+/// that smelt to zero) and every orb's STAMP balance to the 1/64 smelt grain, and
+/// return the total dust `Σ (amount − smelt(amount))` shaved across both ledgers.
+/// One body, called by both the live emit ([`World::smelt_resource_sweep`]) and
 /// the replay apply arm (`ResourceStocksSwept`), so the migrated state is
 /// byte-identical on both sides and `replay == committed` holds by construction.
 /// Conservation is dust-exact: pre = post + returned dust, the shaving recorded,
@@ -1333,13 +1333,13 @@ fn any_resource_off_grain(orbs: &[ColonyOrb]) -> bool {
     })
 }
 
-/// MARKET-1 (BUILD_ORDER §3a) — CLEAR A CROSSING: two resting offers
-/// on two worlds meet; the fill happens at the RESTING offer's exact
+/// MARKET-1 (BUILD_ORDER §3a) — clear A crossing: two resting offers
+/// on two worlds meet; the fill happens at the resting offer's exact
 /// price (price-time priority: the earlier posted rules; ties break
-/// by lower offer id), moves as TWO aperture pairs (deal and deal+1 —
+/// by lower offer id), moves as two aperture pairs (deal and deal+1 —
 /// the two directions, each conservation-exact, shield-checked), and
 /// closes both intents with OfferCleared. Fill = the largest exchange
-/// both intents admit, SMELTED to the grain; remainders are not
+/// both intents admit, smelted to the grain; remainders are not
 /// carried — an unfilled remainder reposts (offers are intents, not
 /// escrows).
 pub fn clear_trade(
@@ -1367,7 +1367,7 @@ pub fn clear_trade(
     if held_a.give != held_b.want || held_a.want != held_b.give {
         return Err(ActionRefused::NoCrossing);
     }
-    // The prices must CROSS: B offers at least what A asks, per unit.
+    // The prices must cross: B offers at least what A asks, per unit.
     // A asks want_a/give_a of Y per X; B gives give_b/want_b of Y per
     // X. Exact rational comparison, no division by zero (amounts are
     // positive by posting law).
@@ -1378,11 +1378,11 @@ pub fn clear_trade(
     }
     // The resting offer's price rules (price-time priority).
     let a_rests = (held_a.posted, held_a.offer) <= (held_b.posted, held_b.offer);
-    // Fill x of A's give (X): bounded by both intents, SMELTED.
+    // Fill x of A's give (X): bounded by both intents, smelted.
     let x = smelt(&held_a.give_amount.clone().min(held_b.want_amount.clone()));
-    // y of B's give (Y) at the resting price, SMELTED after the
+    // y of B's give (Y) at the resting price, smelted after the
     // price multiply (the price is exact; the lattice bounds what
-    // MOVES — the dust stays with the giver).
+    // moves — the dust stays with the giver).
     let y = match a_rests {
         true => x.clone() * held_a.want_amount.clone() / held_a.give_amount.clone(),
         false => x.clone() * held_b.give_amount.clone() / held_b.want_amount.clone(),
@@ -1391,28 +1391,28 @@ pub fn clear_trade(
     if x <= ratio(0, 1) || y <= ratio(0, 1) {
         return Err(ActionRefused::NoCrossing);
     }
-    // MARKET-2 (ruled 2026-07-31) — THE ICEBERG: delivered = sent ×
-    // (1 − φ·D). ONE producer of the melt number (the conform
+    // MARKET-2 (ruled 2026-07-31) — the iceberg: delivered = sent ×
+    // (1 − φ·D). One producer of the melt number (the conform
     // ruling's spirit): clear_trade and every profit test read
     // pair_melt, nothing recomputes the formula.
     // Phase-2: distance arg is D_chart; melt sees D_eff.
     let melt = route_melt(a, b, &distance);
-    // FLEET-1 PARTIAL FILL: a hull carries what it CAN. A positive-melt crossing
+    // FLEET-1 PARTIAL fill: a hull carries what it can. A positive-melt crossing
     // larger than the haulers moves to their capacity and rests the remainder —
-    // it is NOT refused whole. The all-or-nothing `require_hull_capacity` was
+    // it is not refused whole. The all-or-nothing `require_hull_capacity` was
     // the market's silent stall: two complementary famine bids that genuinely
     // cross never cleared because one leg exceeded a hauler, so both starved
-    // beside a standing trade (the KNOWN RED, task #10 — misdiagnosed as a price
-    // cross; it is hull capacity). Gated EXACTLY on the hull door's own
+    // beside a standing trade (the KNOWN red, task #10 — misdiagnosed as a price
+    // cross; it is hull capacity). Gated exactly on the hull door's own
     // condition (`melt > 0`, `haul`/`haul_element`): a melt-free haul needs no
     // hull, so it is byte-identical, and so is any trade that already fits
     // (scale = 1). Both legs scale by the tightest hull so the exact price holds.
     let (x, y) = {
         let have_x = a.free_capacity(deal);
         let have_y = b.free_capacity(deal + 1);
-        // ONLY the haulable, hulled range partial-fills: a melt-free haul needs
+        // Only the haulable, hulled range partial-fills: a melt-free haul needs
         // no hull (byte-identical), a walled haul (melt ≥ 1) still refuses
-        // EconomicallyWalled, and a haul with NO hull still refuses
+        // EconomicallyWalled, and a haul with no hull still refuses
         // HullCapacityShort in `haul` — never silently filled to zero here.
         let haulable = melt > ratio(0, 1)
             && melt < ratio(1, 1)
@@ -1451,15 +1451,15 @@ pub fn clear_trade(
 }
 
 
-/// PLANNER-1 (12_UNION §2) — LICENSE A TECHNOLOGY LEAP into another
-/// world: the planner's issuing power, receipted in BOTH chronicles
+/// PLANNER-1 (12_UNION §2) — license A technology leap into another
+/// world: the planner's issuing power, receipted in both chronicles
 /// under one deal (the aperture shape). The deed is council-gated —
-/// it must reference an OPEN council in the granting world (delegation
+/// it must reference an open council in the granting world (delegation
 /// settles inside diplomacy) — and shield-bounded: the receiving world
-/// must know its sun AND have crossed (a licensed leap lands only on a
+/// must know its sun and have crossed (a licensed leap lands only on a
 /// union member; below the threshold the young are left to their sky).
-/// The solar leap (condition 0) is NEVER licensed. The leap may be
-/// known or UNKNOWN to the receiver — the name and node arrive with
+/// The solar leap (condition 0) is never licensed. The leap may be
+/// known or unknown to the receiver — the name and node arrive with
 /// the deed; a node the receiver already holds refuses idempotent.
 pub fn license_tech(
     src: &mut World,
@@ -1497,12 +1497,12 @@ pub fn license_tech(
     }
     // The node id is seeded from the licensing deed (SEAL B): the
     // granting chronicle's own digest never enters — the deal and
-    // condition suffice, so both legs derive the SAME node.
+    // condition suffice, so both legs derive the same node.
     let mut seed = b"tech.licensed".to_vec();
     seed.extend_from_slice(&deal.to_le_bytes());
     seed.push(condition);
     let node: [u8; 32] = blake3::hash(&seed).into();
-    // A FACT, now honestly named: the destination already holds this
+    // A fact, now honestly named: the destination already holds this
     // node. It wore the transfer refusal's word for want of its own.
     if dst.techs.iter().any(|(_, _, held, _)| *held == node) {
         return Err(ActionRefused::NodeAlreadyHeld { condition });
@@ -1521,7 +1521,7 @@ pub fn license_tech(
         src_stamp,
         vec![SOVEREIGN],
     );
-    // A licensed node carries the SAME mechanism a crystallized one
+    // A licensed node carries the same mechanism a crystallized one
     // does — the receipt asserts the table's magnitude, and the tick
     // obeys the receipt (receipt authority, operator ruling
     // 2026-08-05). Pre-ruling licensed receipts asserted 1, and 1 they
@@ -1551,14 +1551,14 @@ impl Default for World {
 }
 
 /// Replay a chronicle into the committed projection it grounds
-/// (CHARTER SEAL B) — every orb, every entity, from receipts alone.
+/// (Charter SEAL B) — every orb, every entity, from receipts alone.
 /// AEON-1a: wrap a gauge value onto the torus fiber [0, 1) — exact
 /// rational modulo 1, no floats, no drift.
 pub fn wrap_gauge(gauge: Ratio) -> Ratio {
     gauge.clone() - gauge.floor()
 }
 
-/// GAUGE-N: wrapped L1 between two graded keys of ANY length — an
+/// GAUGE-N: wrapped L1 between two graded keys of any length — an
 /// unopened plane reads ground (0); the short way around each circle,
 /// summed whole (the L1 law on the fiber). Resonance and clash read
 /// here (11 §2.1).
@@ -1577,8 +1577,8 @@ pub fn key_distance(a: &[Ratio], b: &[Ratio]) -> Ratio {
 
 /// D3 (02 §2.5–2.6): the terrain-and-adjacency boost on a yield —
 /// tile class first, then the 4-neighborhood: an extractor beside a
-/// rich TILE runs ×5/4 (the seam runs under the fence); a habitat
-/// beside an ACTIVE extractor runs ×3/4 (noise and dust). Upkeep never
+/// rich tile runs ×5/4 (the seam runs under the fence); a habitat
+/// beside an active extractor runs ×3/4 (noise and dust). Upkeep never
 /// scales; converters and heat-law zones are untouched (v1: terrain
 /// speaks to extraction and agriculture — seams and basins). An
 /// uncharted star reads 1 everywhere — the opt-in law.
@@ -1625,7 +1625,7 @@ fn terrain_boost(
     boost
 }
 
-/// The ONE deposit rule — shared verbatim by the incremental cursor
+/// The one deposit rule — shared verbatim by the incremental cursor
 /// and the pure full scan (same receipts, same sheet, by
 /// construction). Window filtering happens at READ (condition 4) and
 /// by pruning; the rule itself deposits everything typed.
@@ -1708,7 +1708,7 @@ fn touch(
     ease: &Ratio,
     supply: &[(Resource, Ratio)],
 ) {
-    // ONE TOUCH, ONE RECEIPT (the demurrage seam, closed 2026-08-06):
+    // One TOUCH, one receipt (the demurrage seam, closed 2026-08-06):
     // every settled resource rides one DemurrageTouched, because the
     // anchor moves once per touch. The per-row form let a judge see a
     // prior the first row had already anchored, so a dual-resource
@@ -1730,7 +1730,7 @@ fn touch(
 }
 
 /// ABSORB-1 (09 §2.4): a payment from debtor to creditor compensates
-/// open reciprocity windows OLDEST FIRST; each paid portion posts the
+/// open reciprocity windows oldest first; each paid portion posts the
 /// debtor's returned book. Shared verbatim by the live path and replay.
 fn settle_debts(
     debts: &mut Vec<AbsorptionDebt>,
@@ -1761,7 +1761,7 @@ fn settle_debts(
 }
 
 /// IDEO-1 (09 §3.2, placeholder ruling): the measured boundary policy
-/// for the friction law — returned/(returned+extracted); EMPTY books
+/// for the friction law — returned/(returned+extracted); empty books
 /// read as 1 (a fresh orb trades frictionless until measured).
 fn reciprocity_reading(orb: &ColonyOrb) -> Ratio {
     let denominator = orb.returned_across.clone() + orb.extracted_across.clone();
@@ -1772,14 +1772,14 @@ fn reciprocity_reading(orb: &ColonyOrb) -> Ratio {
 }
 
 
-/// PEEL — lift ONE orb out of the field by id: the single hand into
+/// Peel — lift one orb out of the field by id: the single hand into
 /// the collection (operator ruling 2026-07-30: no cartesian find-scan
 /// repetition; peels and shears where there were iterations).
 fn peel(orbs: &mut [ColonyOrb], orb: u64) -> Option<&mut ColonyOrb> {
     orbs.iter_mut().find(|held| held.orb_id == orb)
 }
 
-/// PEEK — the read-only peel.
+/// Peek — the read-only peel.
 fn peek(orbs: &[ColonyOrb], orb: u64) -> Option<&ColonyOrb> {
     orbs.iter().find(|held| held.orb_id == orb)
 }
@@ -1798,7 +1798,7 @@ fn credit_forwards(
     }
 }
 
-/// COUNCIL-1: a delivery from one member to a FELLOW member credits
+/// COUNCIL-1: a delivery from one member to a fellow member credits
 /// the giver's council quota (transfers and bond flow alike — the
 /// forward precedent, widened to the group).
 fn credit_councils(

@@ -111,7 +111,7 @@ dilation applied in turn (owed: the conformal map per tier, written out).
 
 With Xylarium and its operator ("'down, not up' needs to be hooked into
 multi-axial pivot machinery"): the cut-over's operations are mycelium's
-pivot moves (MU-client §1; MU-recursion A16), never new ones.
+pivot moves (MU-CLIENT §1; MU-RECURSION A16), never new ones.
 
 - **Descend**: a residue below a tier's places is handed down, plane by
   plane, into the same body's inner shell as that shell's own turning and

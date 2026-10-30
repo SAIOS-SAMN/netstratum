@@ -1,4 +1,4 @@
-//! MIND-LINK, measured before wiring: mycelium's own extractor, OFFLINE (no
+//! Mind-link, measured before wiring: Mycelium's own extractor, offline (no
 //! session, no key), on every court task the seat kept — its time per task
 //! under the budget a voice uses (`extraction_spend`), and whether the rule
 //! it extracts closes every training pair when spoken back (`speak_rule`).

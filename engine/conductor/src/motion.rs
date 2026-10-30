@@ -1,11 +1,11 @@
-//! docs/78 era 1, build step 3: MOTION. Every body turns about its centre by
+//! docs/78 era 1, build step 3: motion. Every body turns about its centre by
 //! the motion law, `ω = δ` turns a received ring with `δ = H / (R + H)`
 //! (`crate::ring`), so its turn takes `P = 1 + R / H` rings (the pulse records P beside r). A body's phase at bell n is
 //! `φ + n / P` turns, its completed turns `⌊φ + n / P⌋`: a closed form whose
 //! denominator never grows (design laws 5 and 8). Nothing is stepped.
 //!
 //! - **The galactic year** is one turn of the orbit at the galaxy's
-//!   HALF-MASS radius: the first system whose orbit encloses half the
+//!   half-mass radius: the first system whose orbit encloses half the
 //!   galaxy's bound mass (the core and its systems; the medium lies beyond
 //!   every orbit). Each galaxy closes its own year at its own pace, and the
 //!   core's echo of the pulse sounds at it.

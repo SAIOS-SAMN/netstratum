@@ -20,7 +20,7 @@ impl World {
         self.instruments.len()
     }
 
-    /// Pure INF integrity for DEFEND / suite.
+    /// Pure INF integrity for defend / suite.
     pub fn inf_integrity(&self) -> InfIntegrity {
         let grade = self.detection_grade();
         InfIntegrity {

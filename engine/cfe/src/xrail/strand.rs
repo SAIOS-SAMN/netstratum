@@ -2,7 +2,7 @@
 
 use crate::ratio::{self, Ratio};
 
-/// Magic prefix — netstratum-local strand wire (compatible shape for xylarium later).
+/// Magic prefix — netstratum-local strand wire (compatible shape for Xylarium later).
 pub const STRAND_MAGIC: &[u8] = b"NS.X7.STRAND.v1";
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

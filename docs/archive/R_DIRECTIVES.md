@@ -167,7 +167,7 @@ Survey targets, in order:
    `warded: Option<bool>`, `industry_relevant()`, `permits()`.
 3. Iterations on dimensional expansion (the standing cartesian hunt).
 
-**Read the landed element work first** — element-GRAMMAR-1 (tags 70–72),
+**Read the landed element work first** — ELEMENT-GRAMMAR-1 (tags 70–72),
 `45_ALMANAC` §4a/§5a — before proposing anything against it. This lane
 has twice built on one reading without checking the other frame; that is
 the mistake this directive is written to avoid making a third time.

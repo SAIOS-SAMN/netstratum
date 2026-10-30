@@ -1,12 +1,12 @@
-//! THE VERIFIER HALF — the prover/verifier split made constitutional
+//! The verifier half — the prover/verifier split made constitutional
 //! (U_DIRECTIVES §2, 16_UNIT §3).
 //!
-//! This crate holds exactly what a REPLAY needs and nothing a SEARCH
+//! This crate holds exactly what a replay needs and nothing a search
 //! needs: the grid vocabulary and the one apply path (`grid::run`),
 //! the task loader, the deterministic forge (a task re-derives from
 //! its digest — no external data ever), and the certificate chain.
 //! Finding a solution is search — expensive, free to improve,
-//! NON-constitutional; it lives in `solver`, which depends on this
+//! non-constitutional; it lives in `solver`, which depends on this
 //! crate. Verifying one is a replay — cheap, pure, total; the kernel
 //! calls it and never solves.
 //!

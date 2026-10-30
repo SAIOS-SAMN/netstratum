@@ -1,11 +1,11 @@
-//! THE ANCIENTS ARISE (Concordance 3.1; docs/58 §6, docs/61 G3, docs/68).
+//! The ancients arise (Concordance 3.1; docs/58 §6, docs/61 G3, docs/68).
 //!
-//! An ancient is PRODUCED at a core by netstratum's own physics, never by
+//! An ancient is produced at a core by Netstratum's own physics, never by
 //! appointment or lineage alone (docs/58 §6.6):
 //!
 //! - **G3, the throat's keeper**, one law across the two kernels (barren's
 //!   `gateways.hub_contest`): lines are grouped by their lineage's root (the
-//!   progenitor line and the peoples it fathered); a group BEARS the hub when one
+//!   progenitor line and the peoples it fathered); a group bears the hub when one
 //!   of its peoples stands inside the core's bulge; of the bearing groups, the
 //!   one whose peoples hold the most systems at that core keeps the throat, ties
 //!   by size (population) and then by name. Depth (the nearest to the core)
@@ -87,7 +87,7 @@ pub struct Keeper {
     pub rider: String,
 }
 
-/// THE ONE READING of every core's keeper (docs/72 A2, one keeper
+/// The one reading of every core's keeper (docs/72 A2, one keeper
 /// everywhere): G3 over where the living lines stand now, with the envoys
 /// that crossed a gate (`<var>/ascension.bin`). Read once a beat (the hub's
 /// road tolls) and once a bounce (the ancients, ascension, the parliaments)
@@ -96,7 +96,7 @@ pub fn keepers(worlds: &[Polity], book: &Ledger, registry: &Registry, var_root: 
     keepers_with(worlds, book, registry, &crate::ascension::envoys(var_root))
 }
 
-/// G3 with ENVOYS (docs/72 A2): an envoy `(line sigil, core)` that crossed a
+/// G3 with envoys (docs/72 A2): an envoy `(line sigil, core)` that crossed a
 /// gate makes its lineage a bearer of that core's wave, its line the rider, and
 /// adds its line's systems to its lineage's count there: an envoy keeps the
 /// throat only by out-holding the incumbents.
@@ -204,7 +204,7 @@ fn get_text(value: &[u8], at: &mut usize) -> Option<String> {
     Some(s)
 }
 
-/// The cores' books, a CHECKPOINT of binary records (Concordance 1.13): tag 1
+/// The cores' books, a checkpoint of binary records (Concordance 1.13): tag 1
 /// an ancient arisen (core, sigil), tag 2 a keeper's tenure (core, root, the
 /// bounce since). A text book written before 1.13 is read once, then rewritten.
 pub(crate) fn read_books(var_root: &Path) -> BTreeMap<String, CoreBook> {
@@ -297,7 +297,7 @@ pub struct Arisen {
     pub by_birth: bool,
 }
 
-/// THE ANCIENTS' STEP, once a bounce (`bounce` counts the core periods): with
+/// The ancients' step, once a bounce (`bounce` counts the core periods): with
 /// the bounce's one reading of the keepers (`keepers`), advance their tenure,
 /// raise every ancient now due, record each on the universe ledger, and end
 /// the trust at the first. Returns what arose.
@@ -330,7 +330,7 @@ pub fn step(
             .iter()
             .filter(|p| !p.penned && line_core(p, book).as_deref() == Some(core.as_str()))
             .collect();
-        // BY BIRTH: the bulge's first mind and every line that woke within one
+        // By birth: the bulge's first mind and every line that woke within one
         // assembly time of it (a line's clock is its age).
         let bulge: Vec<&&Polity> = living.iter().filter(|p| line_in_bulge(p, &galaxy.center, &span)).collect();
         let first = bulge.iter().map(|p| p.world.now()).max();
@@ -342,7 +342,7 @@ pub fn step(
         born.sort_by(|a, b| b.world.now().cmp(&a.world.now()).then(a.spec.civilization.sigil.cmp(&b.spec.civilization.sigil)));
         let (rising, by_birth) = match born.first() {
             Some(p) => (Some(**p), true),
-            // BY DEED: the keeper's rider, once a full core period is kept.
+            // By deed: the keeper's rider, once a full core period is kept.
             None => match (keepers.get(&core), &entry.kept) {
                 (Some(k), Some((_, since))) if bounce >= since + 1 => {
                     (living.iter().copied().find(|p| p.spec.civilization.sigil == k.rider), false)
@@ -366,10 +366,10 @@ pub fn step(
         arisen.push(Arisen { core: core.clone(), sigil, world: polity.spec.world_name.clone(), by_birth });
     }
     let _ = write_books(var_root, &books);
-    // THE TRUST ENDS at the first ancient (docs/58 §6.7-6.8): the oldest of
+    // The trust ends at the first ancient (docs/58 §6.7-6.8): the oldest of
     // those arising now, then by name. Its reserve basket is stated by mass:
     // what its phenotype eats, and how much a beat its working mouths need.
-    // The trust's passing is an INPUT (Concordance 1.13), stored once as binary
+    // The trust's passing is an input (Concordance 1.13), stored once as binary
     // records in `<var>/trust.bin`: tag 1 the ancient, 2 its world, 3 its core,
     // 4 the rule (1 birth, 2 deed), 5 the stamp, 6 the basket (its ration on
     // the receipt codec's carrier: 0 ‖ resource code, or 1 ‖ element id), 7 its
@@ -405,8 +405,8 @@ pub fn step(
     arisen
 }
 
-/// THE COUNCILS (Concordance 3.9): each arisen ancient's house seats a council
-/// of the mycelium client minds, and client minds seat there and nowhere
+/// The councils (Concordance 3.9): each arisen ancient's house seats a council
+/// of the Mycelium client minds, and client minds seat there and nowhere
 /// else. The house (ns-hypha) lists council seats on exactly the worlds named
 /// in `<var>/council.bin`: binary records, tag 1 an ancient's world.
 pub fn write_council(worlds: &[Polity], var_root: &Path) -> std::io::Result<()> {

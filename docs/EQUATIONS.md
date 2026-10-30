@@ -74,7 +74,7 @@ first, never by searching the tree.
    excised the day before (c7cad9e), with a standing test in
    `recurrence_guard.rs` forbidding its return — a law document
    prescribing a mechanism its own test suite refuses to let exist.
-   Mirror and anti-mirror are deprecated whole by the same ruling
+   Mirror and ANTI-MIRROR are deprecated whole by the same ruling
    (`12_UNION` §2c); **the lens is the level**, because a lens derives
    from the one chain and holds no copy, so it has nothing to
    reconcile. The lesson is specific to this ledger's shape: §0.1 makes
@@ -709,7 +709,7 @@ code:
                           never gates; delete it and the judge is
                           unchanged.
 
-**The phantom-rank gate is now due, and D4 is what made it due.**
+**The PHANTOM-RANK gate is now due, and D4 is what made it due.**
 `EntangledRead::rank_is_defined` had stood unused since it was written,
 its own header warning that an unresolved absence *"would let phantom
 topology mint phantom rank"*, and `25_STANDING` §6 recorded it as debt
@@ -947,7 +947,7 @@ every other deed holds every element key still. Refusals
 
 **I4 · Bounded creation (syntropy).** Landed whole (U1, tag 86) —
 `kernel::creation` + `solver_verify::verify_work` (the
-replay-complete law: re-forge ∧ re-apply every pair ∧ re-chain; an
+REPLAY-COMPLETE law: re-forge ∧ re-apply every pair ∧ re-chain; an
 intact hash chain over a non-solution refuses). **The emission law —
 ruled (Ruling Box 1, operator 2026-08-01; the kernel version 1→2
 amendment; evidence: the #17 calibration, 5898351):** `mint_bound`

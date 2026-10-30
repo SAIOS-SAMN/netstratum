@@ -1,6 +1,6 @@
 //! COGNITION-2 (operator ruling 2026-08-14): the tier above utility
-//! SCORING — utility SEARCH. `cognition::settlement_choice` scores the
-//! CURRENT beat with a static formula; this module clones the world,
+//! scoring — utility search. `cognition::settlement_choice` scores the
+//! current beat with a static formula; this module clones the world,
 //! actually builds a candidate on the clone, ticks it forward, and reads
 //! back what that choice really leads to. It is real search-and-evaluate
 //! planning, not another if/else — and it costs nothing the engine

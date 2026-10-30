@@ -1,6 +1,6 @@
-//! **THE TONGUE** (docs/60 D10b) — netstratum's words stated in the fleet's
-//! language: a solver program as a mycelium v0.1.0 rule element, built ONLY
-//! through mycelium's own constructors (`sdk::rule`), never forged bytes.
+//! **The tongue** (docs/60 D10b) — Netstratum's words stated in the fleet's
+//! language: a solver program as a Mycelium v0.1.0 rule element, built only
+//! through Mycelium's own constructors (`sdk::rule`), never forged bytes.
 //! The seat states its answers through it; the conductor states each line's
 //! words through it, so a line's dialect can be read against the shared
 //! tongue.
@@ -12,7 +12,7 @@ use mycelium::transducer::element::Element;
 use mycelium::transducer::family::{Crystal, NoCrystal};
 use solver::Op;
 
-/// A fleet grid read as a netstratum grid, or `None` (ragged, empty, or a hue
+/// A fleet grid read as a Netstratum grid, or `None` (ragged, empty, or a hue
 /// past the ten-hue ladder).
 fn grid(g: &[Vec<u8>]) -> Option<solver::Grid> {
     let rows = g.len();
@@ -27,8 +27,8 @@ fn rows(g: &solver::Grid) -> Vec<Vec<u8>> {
     g.cells.chunks(g.cols.max(1)).map(|r| r.to_vec()).collect()
 }
 
-/// THE TRANSLATOR (Concordance 1.9/1.10; mycelium 78.142 `sdk::rule`): a
-/// netstratum program as the court's rule. Each of the six symmetries is the
+/// The translator (Concordance 1.9/1.10; Mycelium 78.142 `sdk::rule`): a
+/// Netstratum program as the court's rule. Each of the six symmetries is the
 /// centred rigid motion `Step::grid_motion` builds for the shapes it acts
 /// between (traced through the program on the family's first input);
 /// `Recolor` is a hue step naming every hue it moves. A program with an
@@ -66,7 +66,7 @@ pub fn translate(
                 let d = [BigRational::from_integer(num_bigint::BigInt::from(*dr)), BigRational::from_integer(num_bigint::BigInt::from(*dc))];
                 steps.push(Step::Motion(mycelium::transducer::cga::translator_at(&d)));
             }
-            // docs/62 L7: a projector is the court's SELECT and a hue step
+            // docs/62 L7: a projector is the court's select and a hue step
             // on what it selects (a hue sent to 0 under a selection is erased).
             (None, Op::Project(rule)) => {
                 steps.push(Step::Select(court_pred(&rule.select).ok_or(Untranslated::NotARule)?));
@@ -78,7 +78,7 @@ pub fn translate(
             }
             // The court's sensor reads hue 0 as the background, not a body:
             // a map that moves 0, or sends a hue to 0, creates or erases
-            // bodies and is no gauge on them (mycelium, confirmed at
+            // bodies and is no gauge on them (Mycelium, confirmed at
             // family/perceive.rs). Painting the background is a creation;
             // erasing is a selection's complement.
             (None, Op::Recolor(map)) if map[0] != 0 || map[1..].contains(&0) => {
@@ -95,7 +95,7 @@ pub fn translate(
     sentence(&steps, train, crystal).map_err(|why| Untranslated::Refused(format!("{why:?}")))
 }
 
-/// A projector's predicate in the court's SELECT language, where it has one:
+/// A projector's predicate in the court's select language, where it has one:
 /// size is the body's cell count (the court's Shell); the frame-contact,
 /// twin and exact-shape predicates have no court form yet.
 fn court_pred(select: &solver::percept::Select) -> Option<mycelium::sdk::rule::Pred> {
@@ -128,7 +128,7 @@ pub enum Untranslated {
     Refused(String),
 }
 
-/// A LINE'S WORD IN THE SHARED TONGUE: the word stated on its own action (the
+/// A line's word in the shared tongue: the word stated on its own action (the
 /// ramp probe, every hue present, and what the word makes of it), answered
 /// by the blake3 of the element's address, or `None` where the tongue cannot
 /// state it (an object op or a tile, or the mint refused).

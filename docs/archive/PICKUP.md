@@ -26,7 +26,7 @@ state-model laws, and earned gotchas live in `HANDOFF.md`.
 > - `bench_shear_pins` · `stellar_capacity_pins` — CIV-REACH-1 fixture
 >   drift (bronze dig; dual-reach `reachable` = people ∩ sky) — adapted.
 > - `thermal_flow` — two separate stale exacts: taxon-economy yield
->   scales (`75c35ca`, red for five landings) and star-ENDOW-1's cryo
+>   scales (`75c35ca`, red for five landings) and STAR-ENDOW-1's cryo
 >   band gift (`c2242de`) — re-derived exact.
 >
 > **Law amendments landed with the repair (sealed math — every lane's
@@ -55,7 +55,7 @@ state-model laws, and earned gotchas live in `HANDOFF.md`.
 > civilizations** — the R1+R3 remediation (REMEDIATIONS.md) is now the
 > live board's binding constraint. **Kernel-lane relays from the judge
 > tally (runs beside the chain, so observed not enforced):** (1)
-> star-ENDOW-1 kit top-ups + orbit-ENDOW-1 band gifts read as
+> STAR-ENDOW-1 kit top-ups + ORBIT-ENDOW-1 band gifts read as
 > `ConservationBroken`; (2) `NoSuchEntity {{ actor: 1 }}`; (3)
 > `DecayExceedsBound`. **All three resolved 2026-08-12** (judge_probe
 > example re-judged the live chronicles deed-by-deed): (1)+(2) were
@@ -159,7 +159,7 @@ ruins   — closed archive history (P8.4)
 |----|------|-------|
 | **E3.6** | ~~Element market cargo~~ **landed** | `Cargo` · tag 49 · clear_trade · market_step |
 | **CIV-REACH-1** | ~~Bronze dig depth~~ **landed** | `civ_reach` · prospect stratum · assay/refine line gates |
-| **Star-ENDOW-1** | ~~Star-scaled kit~~ **landed** | `star_endowment` on commission · orbit band gift on site |
+| **STAR-ENDOW-1** | ~~Star-scaled kit~~ **landed** | `star_endowment` on commission · orbit band gift on site |
 | **E3.7** | ~~WANT-1 element ids~~ **landed** | tags 163–164 · element_wants · market demand |
 | **E3.8** | ~~Observer routes/refineries~~ **landed** | `observer routes` · `observer refineries` · chronicle/state TLV |
 | **E3.9** | ~~Treaty allow-lists~~ **landed** (2026-08-12) | tag 165 · `element_allowlists` · SCHEMA_V19 · `treaty elements` CLI · 10 pins |
@@ -345,7 +345,7 @@ wall regenerate every 60-tick year.
 | VENT-1 / ECON-J / SINK-1 | entropy dual ledger (`VentSettled`); heating burn + freeze-lock; bankable sink + flat demurrage |
 | JOURNAL-1 | the Chronicle Feed: per-year journals + cyber-noir `wall.html`, pure rendering, deterministic |
 | the ideology board, whole (coder-02) | TRADE-1 transfers/compassion (30) · ABSORB-1 absorption/morality windows (31–32) · BOND-1 standing bonds/love (33–34) · FORWARD-1 vitrified escrow + fidelity curve/integrity (35–37) · IDEO-1 friction (38) + orb cohesion entry (41) + `ideology` panel — eight books, ratios derived never stored; deferrals at Q4 |
-| Bot-THERM | polities thermally alive: Furnace mints, Frost banks sink and honestly freeze-locks |
+| BOT-THERM | polities thermally alive: Furnace mints, Frost banks sink and honestly freeze-locks |
 | renames | Crucible→Furnace · bot→polity/automaton (NS-6 §5.2) · themed colony names |
 | APERTURE-1 (2026-07-29) | the cross-world value carrier (NS-4 §1–§3, tags 47–48): two-legged deal-linked deed, demurrage at the touch both sides, per-world replay, pair conservation an N6 reading; the market board's gate is open |
 
@@ -425,11 +425,11 @@ WantStruck/WantRelieved (WANT-1); 64–66 the NS-5 protocol records
 own framing, never world-chronicle events; refusal kinds 5–6 added at
 MESH-1b, additive); 67 HandoffSealed (MESH-1b, NS-5 §7 — one writer
 per clock; world replay blind to it); 70 ProspectStruck + 71
-AssayStruck + 72 the orb elements entry (element-GRAMMAR-1,
+AssayStruck + 72 the orb elements entry (ELEMENT-GRAMMAR-1,
 coder-03 — the almanac's mint/assay/stores); 74–77 WARDEN-1a/MASK-1a ·
 81 IncursionStruck · 83 the committed-state container (CODEC-1) · 84
 the spine commitment record (SPINE-1) · 85 TaxonSealed (KERNEL-TAXON)
-· 86 DiscoveryMinted (U1 kernel-verify — the PoUW mint, the opaque
+· 86 DiscoveryMinted (U1 KERNEL-VERIFY — the PoUW mint, the opaque
 work payload); ~~**next free 87**~~ **stale — corrected 2026-08-04:**
 `dop.rs` emits tags up to **95** via `tlv::put`. The header is the one
 authority and this section only mirrors it, so the number is not
@@ -463,8 +463,8 @@ forever.
   29→7, the NS-2 tag-58 wire vector re-extracted; squares survive
   only as physics, 05's T⁴; the word linear is dead in the workspace)
   · U1a (the prover/verifier split — `engine/solver-verify`; the
-  opaque-payload law) · U1 kernel-verify (tag 86 `DiscoveryMinted`;
-  the replay-complete law — an intact chain over a non-solution
+  OPAQUE-PAYLOAD law) · U1 KERNEL-VERIFY (tag 86 `DiscoveryMinted`;
+  the REPLAY-COMPLETE law — an intact chain over a non-solution
   refuses; `mint_bound` sealed shut until Ruling Box 1) · U1f (I5's
   flat decay bound calling the sealed demurrage rule; `last_touch`
   already rode tag 28 — no schema spent) · the audit reconciliation
@@ -632,7 +632,7 @@ INCURSION-1a landed 2026-07-31 (tag 81 — the sealed derelict wakes,
 the archive byte-untouched, the living never raided, the revenant
 line chronicle-seeded). All queue mechanics are landed or blocked on
 one named line each: WARDEN-1b, MASK-1b (coder-03 seam), FORGE-2b
-(N6-gated), wave-4 names (operator). Kernel-TAXON drafted 2026-07-31
+(N6-gated), wave-4 names (operator). KERNEL-TAXON drafted 2026-07-31
 (`15_TAXON.md`): class+clade as closed u8 vocabularies entering the
 kernel by additive amendment; TaxonSealed as a new deed (extending
 GenesisSealed would be breaking); invariant coverage drafted for
@@ -683,7 +683,7 @@ coder-04's flag.
   one cadence, then the TECH-1b witness debt (deepening/long-stores
   arcs) and the G1×NOVEL-1 audit fix (the deed releases the seal).
   `45_ALMANAC.md` drafted (the ruled element grammar — awaits
-  ratification for element-GRAMMAR-1). VENTURE-1 composition witness
+  ratification for ELEMENT-GRAMMAR-1). VENTURE-1 composition witness
   landed (`world_venture.rs` — one deal binds the leap and the
   exchange across two books, one node in two skies, conservation
   exact). **Verified, recorded:** the petition→grant arc stands in
@@ -693,7 +693,7 @@ coder-04's flag.
   market_step pattern — a coder-01-lane extension, handed off here.
   Next candidates: G4 (mesh-gated — the mesh is in flight), want
   relief-by-arrival (seam split with coder-01 pending), the umbral
-  seat (one operator word away). **Element-GRAMMAR-1 landed**
+  seat (one operator word away). **ELEMENT-GRAMMAR-1 landed**
   (tags 70-72 after the live 68/69 collision with PRACTICE-1 — the
   later claimant moved, inscribed; 45_ALMANAC §4a/§5a add the
   dispersal law and element apertures, specced). **OPPOSITION-1
@@ -1027,7 +1027,7 @@ symbols, which do not drift. Cite a symbol or a law, never a line.
   `receipt.event.wire_bytes()` (`lens/src/render.rs`, not the scribe as
   the task had it). `yield_amount` now decodes tag 3 with the
   `tlv_records`/`tlv_ratio` helpers the file already ran in production —
-  the mirror-TLV pattern applied to a receipt instead of an orb.
+  the MIRROR-TLV pattern applied to a receipt instead of an orb.
   Measured read-only on the live board: 705 `yield_collected` receipts,
   prose and bytes agreeing on all 705, four views byte-identical. No
   number moved; the silent-zero failure mode did (`frac` swallowed a bad
@@ -1128,7 +1128,7 @@ witness, not a ruling.
 - `protocols/NS-5_MESH.md` — §3.2 still specifies tag 65 and refusal
   kinds 3–4 byte-by-byte in a document whose own header declares them
   retired; the promised §2/§3 spine rewrite is owed; and tags 87/88
-  (Spine-uplink segment blob/step) have no protocol entry at all.
+  (SPINE-UPLINK segment blob/step) have no protocol entry at all.
 - `protocols/NS-7_ANCHOR.md` is a 26-line stub (§1–§3 all `(unwritten)`).
   `NS-4_APERTURE.md` §4 (the facet ladder) is `(unwritten — N5)`.
 - `kernel/src/lib.rs` — `covered()` and `scope_of`'s own doc comments

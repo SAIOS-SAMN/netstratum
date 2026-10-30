@@ -34,7 +34,7 @@ impl World {
             .unwrap_or(0)
     }
 
-    /// **P8.3 LABOR** — force derived from habitats + clones.
+    /// **P8.3 labor** — force derived from habitats + clones.
     pub fn labor_force(&self, orb: u64) -> u64 {
         self.habitat_count(orb)
             .saturating_add(self.clone_count_of(orb))

@@ -1,4 +1,4 @@
-//! PHASE-4 — market Notes · Futures · Shares · Perps (32 / TASKS P4).
+//! PHASE-4 — market Notes · Futures · Shares · Perps (32 / tasks P4).
 //!
 //! Notes ≠ ideology BondSealed. Futures/Perps mark only against receipted
 //! last clears (no float mark-to-model). Shares dividend from yield window.
@@ -18,7 +18,7 @@ impl World {
             .any(|(_, s)| *s == Station::Exchange as u8)
     }
 
-    /// NOTE book listable: STAMP or crystal evidence, or Exchange seat.
+    /// Note book listable: STAMP or crystal evidence, or Exchange seat.
     pub fn notes_listable(&self) -> bool {
         if self.exchange_seated() {
             return true;
@@ -29,13 +29,13 @@ impl World {
         })
     }
 
-    /// FUTURE book listable: Exchange, expansionist freight affinity,
+    /// Future book listable: Exchange, expansionist freight affinity,
     /// or local cargo evidence (iron/crystal/biomass banked).
     pub fn futures_listable(&self) -> bool {
         if self.exchange_seated() {
             return true;
         }
-        // Freight affinity is a disposition TRAIT, read generically — the
+        // Freight affinity is a disposition trait, read generically — the
         // expansionist bears it, and so does any line minted from one.
         if self.disposition_carries(crate::dop::DispositionTrait::FreightAffinity) {
             return true;
@@ -276,7 +276,7 @@ impl World {
             (pay, seize)
         };
         self.notes[at].open = false;
-        // I5.6 — THE DEFAULT IS ENTROPIC. What a redemption leaves
+        // I5.6 — the DEFAULT is entropic. What a redemption leaves
         // unpaid posts to the issuer's own severance book — the same
         // book a bond cut without notice and a broken peace post to,
         // because it is the same act: an obligation ended short by one
@@ -470,7 +470,7 @@ impl World {
         &self.perps
     }
 
-    /// SHARE book: Exchange, or production evidence (zones + banked stream).
+    /// Share book: Exchange, or production evidence (zones + banked stream).
     pub fn shares_listable(&self) -> bool {
         if self.exchange_seated() {
             return true;

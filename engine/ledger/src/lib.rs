@@ -1,14 +1,14 @@
-//! The pre-chain LEDGER of record and its lens (Charter §11 — the
+//! The pre-chain ledger of record and its lens (Charter §11 — the
 //! crate formerly named "mirror"; the name died 2026-07-31 by
 //! operator order, and with it the pretense that this was ever one
 //! thing).
 //!
-//! WHAT LIVES HERE, honestly inventoried:
+//! What lives here, honestly inventoried:
 //!
 //! **The law (pre-chain interim — every file-borne path a Tier-A
-//! debt, adopted in-chain at ladder #36; no NEW read-back path may
+//! debt, adopted in-chain at ladder #36; no new read-back path may
 //! ever be added — the §11 standing test):**
-//! - the steward seam ([`Directive`]/[`PendingDirective`]) — the ONE
+//! - the steward seam ([`Directive`]/[`PendingDirective`]) — the one
 //!   lawful inbound door: outside writers touch only `inbox/`, and a
 //!   request becomes real solely through the game loop as a
 //!   receipted, scope-checked NS-6 action;
@@ -16,12 +16,12 @@
 //! - [`registry`] — identity: civilizations, stations, sigils;
 //! - [`galaxy`] — the sky: the observation deed, lazy founding.
 //!
-//! **The display half MOVED (the #37 inversion): the writers —
+//! **The display half moved (the #37 inversion): the writers —
 //! record, record_solve, the journals, the wall — live in `scribe`,
-//! ABOVE the lens. This crate is ledger-LAW in fact: it imports no
+//! above the lens. This crate is ledger-LAW in fact: it imports no
 //! lens. Law cards use binary TLV ([`card`]), never JSON.**
 //!
-//! **THE UPLINK LAW (mesh authenticity):** nothing in this crate ever
+//! **The uplink law (mesh authenticity):** nothing in this crate ever
 //! rides the mesh. Only chain-verified bytes ascend — `chronicle.tlv`
 //! today, arbor commitments at #15. Exports are for eyes; ledger
 //! files are debts awaiting adoption; the mesh carries neither.
@@ -43,7 +43,7 @@ pub mod galaxy;
 pub mod registry;
 pub(crate) use cfe::ratio::ratio_str;
 
-/// THE UNIVERSAL CLOCK RENDERING — T of TUniversal{S, G, T} as the
+/// The universal clock rendering — T of TUniversal{S, G, T} as the
 /// six-field base-60 odometer string the law cards carry
 /// (`universe.card` tuniversal). The law writes its own cards with
 /// its own pen (the inversion dropped the lens dependency); the
@@ -63,7 +63,7 @@ pub fn universal_clock(ticks: u64) -> String {
 }
 
 /// A steward directive: a requested verb, to be executed by the game
-/// loop AS the steward entity under its granted scopes. The file is a
+/// loop as the steward entity under its granted scopes. The file is a
 /// request, never a state change.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Directive {
@@ -107,7 +107,7 @@ impl Ledger {
         self.root.join(sanitize(world))
     }
 
-    /// The ledger's root directory — pub for the SCRIBE (the display
+    /// The ledger's root directory — pub for the scribe (the display
     /// writers above the lens), which pens its wall and journals under
     /// the same roots the law keeps. Read-only access; the law's own
     /// writes stay in this crate.
@@ -150,21 +150,21 @@ impl Ledger {
         fs::rename(&pending.path, dir.join(name))
     }
 
-    /// THE UNIVERSE MANIFOLD (contract §9): the base is a compact
+    /// The universe manifold (contract §9): the base is a compact
     /// 3-torus — spatial coordinates S = (x, y, z) live in the exact rationals mod
     /// `span` per axis, so the universe has no edge and every
     /// direction comes back around. A world's full coordinate is
     /// TUniversal{S, G, T}: S the spatial triple, G the gauge (fiber
     /// phase), T the universal tick clock. The polynomial FIBER at
     /// every point is the physics carrier's graded dimensions
-    /// (`physics::AxisVector`), and a Mint GROWS them — the universe
+    /// (`physics::AxisVector`), and a Mint grows them — the universe
     /// gains dimensions as discoveries land. ("Calabi-Yau" is the
     /// lore word; the claim made here is compact toroidal base +
     /// polynomial fiber, nothing more.)
     ///
-    /// THE L1 LAW (carried from the convergence doctrine): distance
+    /// The L1 law (carried from the convergence doctrine): distance
     /// is L1 — the wrapped |Δ| summed per axis, the short way around.
-    /// NO SQUARING: we do not square circles in a toroid; L2 would
+    /// No squaring: circles are not squared in a toroid; L2 would
     /// collapse the geometry the residual carries.
     ///
     /// The span (default 64) reads from `<root>/universe.card` (TLV).
@@ -197,9 +197,9 @@ impl Ledger {
         None
     }
 
-    /// THE UNIVERSAL CLOCK — T of TUniversal{S, G, T}: a six-field
-    /// base-60 odometer over the era's tick count. It advances PER
-    /// TICK, never per wall-second (ambient time would kill SEAL B);
+    /// The universal clock — T of TUniversal{S, G, T}: a six-field
+    /// base-60 odometer over the era's tick count. It advances per
+    /// TICK, never per wall-second (ambient time would break SEAL B);
     /// at a 2-second cadence it happens to move every 2 seconds, but
     /// replay re-derives it exactly.
     pub fn set_universal_clock(&self, ticks: u64) -> std::io::Result<()> {
@@ -232,7 +232,7 @@ impl Ledger {
 
     /// Chart a world onto the star-chart: exact-rational coordinates in
     /// `<root>/starchart.card` (TLV merge-on-write). Spatial coordinates
-    /// WRAP onto the 3-torus; `g` is the gauge phase.
+    /// wrap onto the 3-torus; `g` is the gauge phase.
     pub fn chart_world(
         &self,
         world: &str,
@@ -331,10 +331,10 @@ pub(crate) fn wrapped_abs(a: &Ratio, b: &Ratio, span: &Ratio) -> Ratio {
     }
 }
 
-/// **THE TORUS DISTANCE** — the one distance between two points of the
+/// **The torus distance** — the one distance between two points of the
 /// universe: the L1 law on the 3-torus (wrapped |Δ| per axis, the short way
 /// around, summed), against the universe's carried `span`. Every distance in
-/// the game (melt, logistics, routes, the desk) reads THIS; a sum of unwrapped
+/// the game (melt, logistics, routes, the desk) reads this; a sum of unwrapped
 /// |Δ| flattens the torus into a board with edges.
 pub fn torus_distance(a: &(Ratio, Ratio, Ratio), b: &(Ratio, Ratio, Ratio), span: &Ratio) -> Ratio {
     wrapped_abs(&a.0, &b.0, span) + wrapped_abs(&a.1, &b.1, span) + wrapped_abs(&a.2, &b.2, span)

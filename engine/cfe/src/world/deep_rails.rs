@@ -1,4 +1,4 @@
-//! P5-G deep rails — R1→R2 promotion; R3/R4 optional feature gates (30 / TASKS).
+//! P5-G deep rails — R1→R2 promotion; R3/R4 optional feature gates (30 / tasks).
 //!
 //! R1 Hearth and R2 Aperture are always lawful. R3 Strand / R4 Court promote
 //! only when `deep-rail-strand` / `deep-rail-court` features are enabled on

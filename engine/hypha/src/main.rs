@@ -1,16 +1,16 @@
-//! `ns-hypha` — netstratum on a mycelium hypha.
+//! `ns-hypha` — Netstratum on a Mycelium hypha.
 //!
 //!   ns-hypha laws                       the court's law register
-//!   ns-hypha lexicon                    netstratum's terms against the server's
+//!   ns-hypha lexicon                    Netstratum's terms against the server's
 //!   ns-hypha probe                      a lawful and an unlawful transition, read by both
 //!   ns-hypha census <world-dir> [--last N] [--send]
 //!                                       fold a people's chronicle; --send puts it to the court
-//!   ns-hypha found                      found netstratum's domain on the court (once)
+//!   ns-hypha found                      found Netstratum's domain on the court (once)
 //!   ns-hypha reserve <tier>             designate one of the domain's tiers its reserve (in trust)
 //!   ns-hypha originate [<var-root>]     state the universe's origin once: its Big Bang, its torus
 //!   ns-hypha refound [<var-root>]       after the fleet's recut: found, originate, reserve union,
 //!                                       the first ledger entry; then the house maps the gates
-//!   ns-hypha seat [--every S] [--key F] [--worlds D] netstratum's client kernel on the fleet: pull, think, file (signed with the house key)
+//!   ns-hypha seat [--every S] [--key F] [--worlds D] Netstratum's client kernel on the fleet: pull, think, file (signed with the house key)
 //!   ns-hypha mark <world-dir>           record a people as folded through its chronicle's end
 //!   ns-hypha epoch <name>               set the hot colonies line aside, restart it at zero
 //!   ns-hypha prune                      archive hot entries whose folds the court reads settled
@@ -224,7 +224,7 @@ fn load(dir: &Path) -> Result<(String, cfe::vrp::Chronicle), ExitCode> {
     }
 }
 
-/// PUBLISH every hot fold the court still reads Provisional: its entries
+/// Publish every hot fold the court still reads Provisional: its entries
 /// streamed for replay, so it is upheld before anyone can demand it.
 fn publish_cmd(up: &Uplink, home: &Path) -> ExitCode {
     use ns_hypha::mycelium::anastome::dialogue::challenge::Finality;
@@ -275,7 +275,7 @@ fn publish_cmd(up: &Uplink, home: &Path) -> ExitCode {
     }
 }
 
-/// PRUNE BY FINALITY (see `ns_hypha::follow::prune`).
+/// Prune by finality (see `ns_hypha::follow::prune`).
 fn prune_cmd(up: &Uplink, home: &Path) -> ExitCode {
     let opened = TierLine::open(home, "colonies").and_then(|l| Ok((l, FoldLog::open(home, "colonies")?)));
     let (mut line, log) = match opened {
@@ -300,7 +300,7 @@ fn prune_cmd(up: &Uplink, home: &Path) -> ExitCode {
     }
 }
 
-/// FOLLOW a universe: tail every people's chronicle and fold its new
+/// Follow a universe: tail every people's chronicle and fold its new
 /// receipts onto the court at play rate (see `ns_hypha::follow`). A court
 /// that does not answer backs the rounds off, doubling to ten minutes.
 fn follow_cmd(up: &Uplink, args: &[String], home: &Path) -> ExitCode {
@@ -530,14 +530,14 @@ fn census_cmd(args: &[String], up: Option<&Uplink>, home: &Path) -> ExitCode {
     }
 }
 
-/// THE SEAT (`ns_hypha::seat`): netstratum's one client kernel on the fleet,
+/// The seat (`ns_hypha::seat`): Netstratum's one client kernel on the fleet,
 /// one task a stroke, a stroke every `--every` seconds (default 2), its tally
 /// printed every 20 strokes. Runs until stopped.
 fn seat_cmd(args: &[String], at: &str, home: &Path) -> ExitCode {
     let every: u64 = flag(args, "--every").and_then(|s| s.parse().ok()).unwrap_or(2);
     // The signing key in `home` (default the house key, Concordance 6.2a).
     let key = flag(args, "--key").unwrap_or_else(|| "tier-union.key".to_string());
-    // The seat speaks to EVERY hypha named (`--at a,b,c`), one stroke each in
+    // The seat speaks to every hypha named (`--at a,b,c`), one stroke each in
     // turn, so the work is spread across the fleet rather than one server.
     let hyphae: Vec<String> = at.split(',').map(str::trim).filter(|a| !a.is_empty()).map(String::from).collect();
     let mut seats = Vec::new();
@@ -551,7 +551,7 @@ fn seat_cmd(args: &[String], at: &str, home: &Path) -> ExitCode {
         return ExitCode::from(2);
     }
     println!("seat: netstratum's client kernel at {}, a stroke every {every}s", hyphae.join(", "));
-    // THE HOUSE (78.145) on the FIRST hypha named: a house and the minds it
+    // The house (78.145) on the first hypha named: a house and the minds it
     // seats share one hypha's impressions. `--worlds` names the universe's lines.
     let worlds = std::path::PathBuf::from(flag(args, "--worlds").unwrap_or_else(|| "var-g2/worlds".to_string()));
     let mut house = match ns_hypha::house::House::open(home, &worlds) {
@@ -562,7 +562,7 @@ fn seat_cmd(args: &[String], at: &str, home: &Path) -> ExitCode {
         }
     };
     let mut strokes = 0u64;
-    // A hypha that DEFERS a stroke (the judge's deficit: the voice asked
+    // A hypha that defers a stroke (the judge's deficit: the voice asked
     // faster than its budget) is left to rest, doubling each time it defers
     // again (to 64 strokes) and reset when a stroke completes.
     let mut rest: Vec<(u64, u64)> = vec![(0, 0); seats.len()];
@@ -584,7 +584,7 @@ fn seat_cmd(args: &[String], at: &str, home: &Path) -> ExitCode {
                 Err(e) => eprintln!("house [{}]: the tend did not complete: {e}", seats[0].0),
             }
         }
-        // OPERATOR RULING 7: every task the house pulls goes before a seated
+        // Operator ruling 7: every task the house pulls goes before a seated
         // mind, so the house's seat pulls only for a free seat no task already
         // waits for.
         let idle = at == 0 && house.as_ref().is_some_and(|h| h.free_seats() <= seats[0].1.queued());
@@ -601,7 +601,7 @@ fn seat_cmd(args: &[String], at: &str, home: &Path) -> ExitCode {
             }
             Err(e) => eprintln!("seat [{addr}]: the stroke did not complete: {e}"),
         }
-        // docs/67 N8 — THE CLOCK RELAYED: the greatest final TUniversal point
+        // docs/67 N8 — the clock relayed: the greatest final TUniversal point
         // any seat has read, written whole beside the worlds whenever it
         // advances (a temporary file renamed, so a reader sees one point or
         // the last). The conductor reads it per beat; no point, or no advance,
@@ -628,7 +628,7 @@ fn seat_cmd(args: &[String], at: &str, home: &Path) -> ExitCode {
     }
 }
 
-/// THE RE-FOUNDING (docs/67, docs/72 A4) by hand: the same steps the house
+/// The RE-founding (docs/67, docs/72 A4) by hand: the same steps the house
 /// runs itself when the court no longer knows the domain
 /// (`ns_hypha::refound::refound`): the domain, its origin, its reserve, its
 /// first ledger entry, then the marker. Keys are loaded, never minted.

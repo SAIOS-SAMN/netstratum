@@ -1,10 +1,10 @@
 //! docs/82, step 1: what each world offers life. Per world (an orb of the
 //! pulse universe): its heat, size, gravity, atmosphere and pressure, and
-//! for each MEDIUM it holds (chemical, geologic, plasmic, informational)
-//! how well that medium carries a pattern, in HALVINGS of its copy error.
+//! for each medium it holds (chemical, geologic, plasmic, informational)
+//! how well that medium carries a pattern, in halvings of its copy error.
 //! Nothing is assumed about life's form (docs/78, design law 10).
 //!
-//! - COMPRESSION (operator 2026-10-14: no caps, a world's gravity must grow
+//! - Compression (operator 2026-10-14: no caps, a world's gravity must grow
 //!   with it): a body's own weight squeezes it, `R = R_loose / (1 + M/M_a)`,
 //!   R_loose its nuclei's atomic sizes summed (the atom law's outer orbit,
 //!   `Q_out · P_out`), `M_a` its tier's compression scale (the median body
@@ -28,12 +28,12 @@
 //!   cool, shielded worlds hold; light ones on small, hot, bare worlds go.
 //!   `k` is calibrated on the median world: a hydrogen-weight gas (A = 2)
 //!   there has λ = 1 (a placeholder until escape has a unit).
-//! - Pressure `P = m_atm · g`, read as COMPRESSION against the median
+//! - Pressure `P = m_atm · g`, read as compression against the median
 //!   world's (a placeholder until pressure has a unit).
 //! - A medium carries a pattern where `x = cohesion · (1 + compression) /
 //!   agitation`, and its copy error is `e^(−x)`: held as halvings, `x/ln 2`,
 //!   read by the lower bound `1/ln 2 ≥ 1442/1000` (toward fewer minds). A
-//!   medium CARRIES when its error is below one half (a halving or more).
+//!   medium carries when its error is below one half (a halving or more).
 use crate::pulse::{mass, Manifest, Universe};
 use cfe::almanac::atom::Atom;
 use cfe::ratio::{ratio, Ratio};
@@ -42,9 +42,9 @@ use num_traits::Zero;
 /// The hydrogen anchor: an atom of tightness 1 holds to 157,800 K (its
 /// grip: what a bond holds against heat, for phase and plasma).
 pub const HYDROGEN_K: i64 = 157_800;
-/// A CONTACT, what a copy fails on (docs/82 step 2): far weaker than a
+/// A contact, what a copy fails on (docs/82 step 2): far weaker than a
 /// bond's grip. Anchored on water's copy error, about 1e-4 at 300 K
-/// (xylarium's life.rs): a contact of tightness 1 holds about 2,760 K.
+/// (Xylarium's life.rs): a contact of tightness 1 holds about 2,760 K.
 pub const CONTACT_K: i64 = 2_760;
 /// The doublings from a bare lineage to a mind's blueprint, `log2(B / b)`:
 /// B of order a genome (6e9 bits), b of order a first replicator (100
@@ -119,7 +119,7 @@ pub fn read(path: Vec<u64>, matter: &Manifest, heat: &Ratio, coupling: &Ratio, s
     if loose.is_zero() {
         return None;
     }
-    // Normalised to the home world (xylarium's ruler, shared 2026-10-14):
+    // Normalised to the home world (Xylarium's ruler, shared 2026-10-14):
     // `R = 2 · R_loose / (1 + r)`, r its mass over the home world's.
     let size = ratio(2, 1) * loose / (ratio(1, 1) + mass(matter) / world_scale.clone());
     let gravity = mass(matter) / size.clone();
@@ -133,7 +133,7 @@ pub fn read(path: Vec<u64>, matter: &Manifest, heat: &Ratio, coupling: &Ratio, s
     let core_matter: Manifest = matter.iter().filter(|(k, _)| z_of(k).and_then(crate::chem::atom_of).is_some_and(|a| !plasma(&a) && a.unpaired >= 2)).map(|(k, g)| (k.clone(), g.clone())).collect();
     let core = mass(&core_matter) / mass(matter);
     let hold = gravity.clone() * (ratio(1, 1) + core.clone()) / heat.clone();
-    // CHEMICAL: the compound it lives in. First the closed clusters its
+    // Chemical: the compound it lives in. First the closed clusters its
     // layers already hold (`formation::layer_chemistry` made them, water
     // among them) whose grip the heat does not beat; then the pairs that
     // `chem::closing` closes at this heat (`open_at`). The most abundant.
@@ -163,13 +163,13 @@ pub fn read(path: Vec<u64>, matter: &Manifest, heat: &Ratio, coupling: &Ratio, s
             consider(ga.clone().min(gb.clone()), a.tightness.clone().min(b.tightness.clone()));
         }
     }
-    // GEOLOGIC: the most abundant network former (two or more bonds) the
+    // Geologic: the most abundant network former (two or more bonds) the
     // heat does not melt to plasma.
     // A lattice holds a pattern by as many contacts as the former bonds.
     let geologic = atoms.iter().filter(|(a, _)| !plasma(a) && a.unpaired >= 2).max_by(|x, y| x.1.cmp(&y.1)).map(|(a, _)| a.tightness.clone() * ratio(CONTACT_K * i64::from(a.unpaired), 1) / heat.clone());
-    // INFORMATIONAL: the coupling's coherence over its slip, `rate / (1 − rate)`.
+    // Informational: the coupling's coherence over its slip, `rate / (1 − rate)`.
     let informational = (*coupling < ratio(1, 1)).then(|| coupling.clone() / (ratio(1, 1) - coupling.clone()));
-    // PLASMIC: the field the coupling sets holding the ionised share.
+    // Plasmic: the field the coupling sets holding the ionised share.
     let plasma_share = {
         let all = mass(matter);
         let ionised: Manifest = matter.iter().filter(|(k, _)| z_of(k).and_then(crate::chem::atom_of).is_some_and(|a| plasma(&a))).map(|(k, g)| (k.clone(), g.clone())).collect();
@@ -200,11 +200,11 @@ pub fn halvings(x: &Ratio, compression: &Ratio) -> Ratio {
     x.clone() * (ratio(1, 1) + compression.clone()) * ratio(1442, 1000)
 }
 
-/// STEP 2, THE CLIMB (docs/82). The ladder's rungs are written at the
-/// coupling's RECOHERENCES (each time the planet's slip against its star
+/// Step 2, the climb (docs/82). The ladder's rungs are written at the
+/// coupling's recoherences (each time the planet's slip against its star
 /// completes a turn, the coupling locks and a pattern can be written): a
 /// medium of halvings h writes a rung of `h` doublings, so a mind's
-/// blueprint needs `⌈D / h⌉` rungs (D the blueprint's doublings). DECAY: a
+/// blueprint needs `⌈D / h⌉` rungs (D the blueprint's doublings). Decay: a
 /// medium of cohesion x forgets `1/x` of its progress while it waits, so it
 /// needs `⌈rungs / (1 − 1/x)⌉` recoherences. A medium with less than a
 /// halving (x ≤ ln 2) carries nothing. Returns the recoherences needed.
@@ -244,7 +244,7 @@ pub struct Home {
 }
 
 /// The home galaxy is the deepest core (the largest hole, the unit of mass)
-/// AMONG THOSE THAT HAVE FORMED A WORLD (formation, docs/83: a galaxy holds
+/// among those that have formed A WORLD (formation, docs/83: a galaxy holds
 /// no system until its gas collapses); its innermost star that holds a world
 /// and that star's innermost world are the rulers (the breath moves and
 /// empties systems, so the first in order need not hold one).
@@ -255,7 +255,7 @@ pub fn home(u: &Universe) -> Option<Home> {
     Some(Home { star: mass(&sys.kept), world: mass(&orb.kept), year_bells: orb.period.clone(), heat: orb.heat.clone() * ratio(HYDROGEN_K, 1) })
 }
 
-/// THE BELL (xylarium's ladder, shared): the home core's ring, the pulse's
+/// The bell (Xylarium's ladder, shared): the home core's ring, the pulse's
 /// round trip to the disc's edge and back at light speed, about 97,850
 /// standard years. The standard year is the home world's local year (the
 /// system ruler).
@@ -265,7 +265,7 @@ pub const BELL_YEARS: i64 = 97_850;
 /// year): of order a cell's genome and an animal's (anchors).
 pub const CELL_BITS: i64 = 10_000_000;
 pub const GENOME_BITS: i64 = 6_000_000_000;
-/// A VIABLE PEOPLE (Franklin's ~500), counted in nuclei (operator
+/// A viable people (Franklin's ~500), counted in nuclei (operator
 /// 2026-10-14): a mind's carrier needs about a nucleus of its medium a bit of
 /// its blueprint, so 500 minds need `500 · GENOME_BITS` nuclei of it. A grain
 /// is 60^30 nuclei, so matter never limits a people; its energy (its star's
@@ -303,7 +303,7 @@ pub fn climb_bells(period_bells: &Ratio, home_year_bells: &Ratio, days: &Ratio, 
     Some((cells + bodies) / keep / ratio(BELL_YEARS, 1))
 }
 
-/// THE WINDOW: a star sheds about `ε/2` of itself an echo (its coherence
+/// The WINDOW: a star sheds about `ε/2` of itself an echo (its coherence
 /// averaging a half; docs/78, the breath), so it stays above its worlds'
 /// mass for `log2(M_star / M_worlds) · ln 2 · 2/ε` echoes: counted in whole
 /// halvings (`⌊log2⌋`) with `ln 2 ≥ 693/1000`, erring short.
@@ -317,7 +317,7 @@ pub fn window_echoes(star: &Ratio, worlds: &Ratio) -> u64 {
     (ratio(halvings as i64, 1) * ratio(693, 1000) * ratio(2, 1) / epsilon).floor().to_integer().try_into().unwrap_or(0)
 }
 
-/// A world's TWIST a bell (docs/100 §2): its galaxy's core's winding from its
+/// A world's twist a bell (docs/100 §2): its galaxy's core's winding from its
 /// clock, plane by plane, as the world's own planes take it (its tilt), the
 /// home's on the source's clock; never drawn, never flattened to one plane.
 /// One reading for every impact law (`climb`, `readings`).
@@ -333,8 +333,8 @@ pub fn twist_of(u: &Universe, path: &[u64]) -> Ratio {
     }).unwrap_or_else(|| ratio(0, 1))
 }
 
-/// THE CLIMB WITH ERASURE (docs/82): recoherence by recoherence, each
-/// writing a rung unless an IMPACT strikes there (its chance the system's
+/// The climb with erasure (docs/82): recoherence by recoherence, each
+/// writing a rung unless an impact strikes there (its chance the system's
 /// belt share, shielded by the atmosphere: `belts / (1 + compression)`),
 /// MEASURED on the world's hidden phase, its galaxy's twist and its own turn
 /// (`quantum::hidden_phase`, the one impact law `advance` reads; docs/102 A4:
@@ -348,7 +348,7 @@ pub fn climb(w: &World, x: &Ratio, compression: &Ratio, twist: &Ratio, t_u: u64,
     if slip <= ratio(0, 1) {
         return None;
     }
-    // The mind is LOCKED in at a recoherence of the coupling: the first
+    // The mind is locked in at a recoherence of the coupling: the first
     // after its climb completes, each impact at a recoherence before then
     // costing that interval again (the rung's need kept). Within the star's
     // window, or never.
@@ -377,11 +377,11 @@ pub struct Waking {
     pub medium: &'static str,
 }
 
-/// THE CLIMB AS STATE (docs/82 step 3b, operator 2026-10-14: wakings come
+/// The climb as STATE (docs/82 step 3b, operator 2026-10-14: wakings come
 /// from the system's activity, never a boot-time schedule). Each world
 /// keeps its climb: the share of its climb written, its recoherence count,
 /// the bell of its last and next recoherence. At each recoherence of its
-/// coupling the world reads its CURRENT state and writes the bells since
+/// coupling the world reads its current state and writes the bells since
 /// its last over its climb's length now (an impact there writes nothing,
 /// the rung's need kept); it wakes when the share reaches one, within its
 /// star's window.
@@ -446,7 +446,7 @@ pub fn medium_halvings(w: &World, compression: &Ratio, medium: &str) -> Option<R
     Some(halvings(x, compression))
 }
 
-/// THE LAND (docs/86, re-pointed by docs/89): the heads a world feeds wild
+/// The land (docs/86, re-pointed by docs/89): the heads a world feeds wild
 /// in one medium. What limits a people is energy, its star's flux on its
 /// world (docs/82): the world's own heat, kept from the light it receives
 /// through its unlocked face (`breath::shine`). Its medium takes up the share
@@ -511,7 +511,7 @@ pub fn advance(readings: &std::collections::BTreeMap<Vec<u64>, Reading>, climbs:
         while climb.next <= bell && climb.next <= close {
             let at = climb.next;
             if let Some((length, medium)) = &r.climb {
-                // THE IMPACT IS A MEASUREMENT (docs/79): it strikes when the
+                // The impact is A measurement (docs/79): it strikes when the
                 // hidden phase at this recoherence falls below its chance.
                 let p = w.belts.clone() / (ratio(1, 1) + r.compression.clone());
                 let u = crate::quantum::hidden_phase(&r.torsion, at, &r.period);
@@ -595,7 +595,7 @@ pub fn worlds(u: &Universe) -> Vec<World> {
         v.sort();
         v.get(v.len() / 2).cloned().filter(|m| !m.is_zero()).unwrap_or_else(|| ratio(1, 1))
     };
-    // ONE RULER PER TIER (shared with xylarium, 2026-10-14): the HOME
+    // One ruler per tier (shared with Xylarium, 2026-10-14): the home
     // reference body: the home galaxy (the deepest core), its innermost
     // star, and that star's innermost world.
     let _ = median;

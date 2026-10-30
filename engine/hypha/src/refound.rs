@@ -1,20 +1,20 @@
-//! THE RE-FOUNDING AND THE MAP (docs/67 "After the fleet's recut", docs/72 A4).
+//! The RE-founding and the map (docs/67 "After the fleet's recut", docs/72 A4).
 //!
-//! After the fleet's recut no domain carries over (R5): netstratum's house
-//! re-posts its standing, in order, with the SAME keys (a domain's id is its
+//! After the fleet's recut no domain carries over (R5): Netstratum's house
+//! re-posts its standing, in order, with the same keys (a domain's id is its
 //! founding verifying key, so `var/uplink/*.key` kept intact keeps 5deab117):
 //!
 //! 1. the domain (`found`), its tiers named at genesis (78.119/78.120);
 //! 2. its origin (`originate`): the Big Bang's seed and the flat L1 torus, which
 //!    also states the universe's geometry (78.140) a local throat needs;
 //! 3. its reserve (`reserve union`, held for stillcold, docs/68);
-//! 4. its first LEDGER entry (78.154 sub-kind 12) at a final point: the
+//! 4. its first ledger entry (78.154 sub-kind 12) at a final point: the
 //!    commitment over its checkpoints (Concordance 1.13), no events yet;
-//! 5. then, each tend, its gates as LOCAL THROATS (MAP record kind 2), signed
+//! 5. then, each tend, its gates as LOCAL throats (map record kind 2), signed
 //!    by the reserve, citing a final point: a gate is crossed only once mapped
 //!    (Concordance 5.9).
 //!
-//! The house runs it ITSELF (`House::tend`): when the court refuses its acts as
+//! The house runs it itself (`House::tend`): when the court refuses its acts as
 //! an unknown domain (the recut), it re-founds once for the new origin epoch.
 //! `ns-hypha refound` runs the same steps by hand.
 //!
@@ -22,7 +22,7 @@
 //! conductor writes the gates to map at their hubs' places (`gates-map.bin`),
 //! the house writes back each gate it sealed with the place it sealed it at
 //! (`gates-mapped.bin`); a gate whose hub drifts past its freshness is offered
-//! again at its new place and mapped again. Keys are LOADED, never minted: a
+//! again at its new place and mapped again. Keys are loaded, never minted: a
 //! missing key stops the re-founding (a new key is a new identity). The house
 //! maps only after the re-founding has run for the present origin (`refounded`
 //! in the uplink home): the coordinator ruled the map waits for the recut.
@@ -74,7 +74,7 @@ fn checkpoint_records(var_root: &Path) -> Vec<(Vec<u8>, Vec<Arg>)> {
     out
 }
 
-/// 4. THE FIRST LEDGER ENTRY (78.154 sub-kind 12): at the world's axis
+/// 4. The first ledger entry (78.154 sub-kind 12): at the world's axis
 /// coordinate `u`, committing to the checkpoints, no events, parent zero for
 /// the first (the head after it is kept in `home/ledger-head`).
 /// The ledger entry's frame, built and signed by `reserve` (no session): the
@@ -126,7 +126,7 @@ pub fn refounded_under(home: &Path) -> Option<String> {
     std::fs::read_to_string(home.join("refounded")).ok()?.split_whitespace().nth(1).map(str::to_string)
 }
 
-/// THE RE-FOUNDING, steps 1 to 4 and the marker, with the keys already in the
+/// The RE-founding, steps 1 to 4 and the marker, with the keys already in the
 /// uplink home (never minted): found, originate (the flat L1 torus, periods
 /// 2 Mpc), reserve the union tier, the first ledger entry at the world's u
 /// with a zero parent; when the entry seals, `refounded` names the origin it
@@ -261,7 +261,7 @@ fn read_sealed(var_root: &Path) -> Vec<(String, [cfe::ratio::Ratio; 3])> {
         .collect()
 }
 
-/// A gate's LOCAL THROAT map act (MAP record kind 2), built and signed by
+/// A gate's LOCAL throat map act (map record kind 2), built and signed by
 /// `reserve` (no session): the throat named by the gate, kept by the line on
 /// the keeper's world, its two frames the translators to the hub's place and
 /// to the core's centre, fresh for the gate's freshness.
@@ -281,7 +281,7 @@ pub fn map_frame(
     Ok(encode_map(&MapAct { domain, point, record, nonce: nonce()? }.sign(reserve)))
 }
 
-/// 5. THE GATES AS LOCAL THROATS (MAP record kind 2), each signed by the
+/// 5. The gates as LOCAL throats (map record kind 2), each signed by the
 /// reserve and citing a final point: every gate offered at a place it is not
 /// sealed at is mapped there, and the seal written back with that place for
 /// the conductor (`gates-mapped.bin`). Only after the re-founding under the

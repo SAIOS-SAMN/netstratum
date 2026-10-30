@@ -1,7 +1,7 @@
 //! The step witness: three measured verdicts over one evolution step.
 //!
-//! Every check derives PER AXIS through typed arms — `Violated { axis }`
-//! names WHERE. An unaskable check reads `Unmeasured`: "could not ask"
+//! Every check derives per axis through typed arms — `Violated { axis }`
+//! names where. An unaskable check reads `Unmeasured`: "could not ask"
 //! is never "verified".
 
 use crate::axis::{Axis, AxisVector};

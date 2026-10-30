@@ -1,5 +1,5 @@
 //! NS-3 §4 conformance witnesses, vector-first: the digests here are
-//! the REAL v0.4 chronicle outputs inscribed in NS-3 §3 — extracted,
+//! the real v0.4 chronicle outputs inscribed in NS-3 §3 — extracted,
 //! never fabricated. A fresh implementation must reproduce them from
 //! the stated byte layout alone.
 
@@ -112,17 +112,17 @@ fn the_clock_refuses_partial_skip_and_replay() {
 
 #[test]
 fn the_seated_keepers_cannot_disagree_today() {
-    // THE PLACEHOLDER, PINNED (2026-08-03). The test above proves the
-    // tick LAW: handed 2-of-3, a skip or a replay, the clock refuses.
+    // The placeholder, pinned (2026-08-03). The test above proves the
+    // tick law: handed 2-of-3, a skip or a replay, the clock refuses.
     // This one records what the live world actually hands it. Three
     // seated keepers share one clock in one process and `attest` reads
-    // nothing else, so the production quorum is unanimous BY
-    // CONSTRUCTION and the live clock always walks.
+    // nothing else, so the production quorum is unanimous by
+    // construction and the live clock always walks.
     //
     // Pinned so the vacuity reads as a known placeholder and never as
     // an enforced quorum. Keepers become real parties when identity
     // does (NS-5 processes, NS-7 identity); on that day this pin goes
-    // red and is TRUTH-UPDATED, not deleted.
+    // red and is truth-updated, not deleted.
     let clock = WorldClock::new();
     let seated = [
         Timekeeper { id: 0 },
@@ -183,7 +183,7 @@ fn the_chain_links_and_names_its_first_break() {
         "the chain is parent-linked"
     );
 
-    // A receipt list a peer hands us with one altered stamp: the
+    // A receipt list a peer hands over with one altered stamp: the
     // verification read names the first broken sequence.
     let mut forged: Vec<Receipt> = chronicle.receipts().to_vec();
     match &mut forged[1] {

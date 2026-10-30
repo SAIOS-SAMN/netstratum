@@ -1,4 +1,4 @@
-//! NS-1 vector extraction — prints the REAL wire bytes of the first
+//! NS-1 vector extraction — prints the real wire bytes of the first
 //! slice's orb and events, for inscription in the spec. Run:
 //! `cargo run -p cfe --example ns1_vectors`
 

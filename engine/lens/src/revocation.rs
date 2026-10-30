@@ -1,8 +1,8 @@
-//! **D4 OVER A WINDOW — the revocation reading** (EQUATIONS D4, the
+//! **D4 over A WINDOW — the revocation reading** (Equations D4, the
 //! lens half; landed 2026-08-04).
 //!
 //! D4 is the revocation law: the site where a claim on capacity that
-//! never entangled with potential is VACATED from the frame. It fires
+//! never entangled with potential is vacated from the frame. It fires
 //! in two places and **they must never merge**:
 //!
 //! ```text
@@ -21,22 +21,22 @@
 //! kernel is pure over `(prior, next, step)`; a window is a story about
 //! many steps and belongs to whoever reads them.
 //!
-//! **THIS REPORTS; IT NEVER GATES.** Rule 5. Delete this module and the
+//! **This reports; it never gates.** Rule 5. Delete this module and the
 //! gate is unchanged — `kernel::revocation_law` reaches its own verdict
 //! from its own read, per step. What is added here is only that an
-//! operator can SEE a window in which deeds were emitted while nothing
+//! operator can see a window in which deeds were emitted while nothing
 //! grew.
 //!
-//! **THE CLAIM VACATES; THE DEGREE DOES NOT.** Nothing here lowers
+//! **The claim vacates; the degree does not.** Nothing here lowers
 //! anything. `D` never retreats (`18` §3 Article IV) and
 //! [`rfa_core::Degree`] has no below-ground representation to retreat
-//! into. A vacated window is a reading about a CLAIM, not a debit.
+//! into. A vacated window is a reading about a claim, not a debit.
 //!
-//! **NO SCALAR METER.** `Ξ(w) = deeds(w)/(1 + ΔD(w))` was this row's
-//! window arithmetic and is STRUCK — a single number would rank windows
+//! **No SCALAR meter.** `Ξ(w) = deeds(w)/(1 + ΔD(w))` was this row's
+//! window arithmetic and is struck — a single number would rank windows
 //! against each other and re-introduce exactly the scalar authority
 //! `18` §3 struck. The reading is a typed row plus the two counts it
-//! was taken from, so a reader sees WHY and can check it.
+//! was taken from, so a reader sees why and can check it.
 //!
 //! **Deliberately built on `holonomies` alone.** The circulation count
 //! is the whole input; this module does not touch the dual-pole verdict
@@ -45,7 +45,7 @@
 
 use rfa_core::{holonomies, Delta, Support};
 
-/// What happened to the capacity CLAIM over one window.
+/// What happened to the capacity claim over one window.
 ///
 /// Three rows, and none of them is a score. Two of them are not faults:
 /// a quiet window claimed nothing, and a grown window earned what it
@@ -55,10 +55,10 @@ pub enum Claim {
     /// No deeds in the window. Nothing was claimed, so nothing vacates.
     /// A still world is not a delinquent one.
     Quiet,
-    /// Deeds were emitted AND circulation grew. The claim stood: this
+    /// Deeds were emitted and circulation grew. The claim stood: this
     /// is D3's leg, seen from D4's side.
     Stood,
-    /// **THE REVOCATION.** Deeds were emitted while the rank did not
+    /// **The revocation.** Deeds were emitted while the rank did not
     /// grow — `deeds(w) > 0 ∧ ΔD(w) = 0`. The allocation claim is
     /// vacated; the degree itself is untouched, and the entity is
     /// neither barred nor deleted (Article III's guardrail 6: it still
@@ -69,7 +69,7 @@ pub enum Claim {
 impl Claim {
     /// Did the window's claim on capacity survive?
     ///
-    /// A READING, never a gate — no caller may use this to refuse a
+    /// A reading, never a gate — no caller may use this to refuse a
     /// deed. The gate refuses per step, from its own read.
     pub fn stood(&self) -> bool {
         matches!(self, Claim::Stood | Claim::Quiet)
@@ -106,7 +106,7 @@ impl Revocation {
     ///
     /// Pure and total; derives at call and retains nothing.
     ///
-    /// The increment is read on the CIRCULATION — what stands above the
+    /// The increment is read on the circulation — what stands above the
     /// ground — never on the full `Degree`, which includes the floor.
     /// A comparison against the floor would be vacuous in exactly the
     /// way the struck `D > 0` gate was: a floor decides nothing.

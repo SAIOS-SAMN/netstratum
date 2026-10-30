@@ -1,4 +1,4 @@
-//! ERA CONVERGENCE (07 — CONVERGE-1): annex the archived timelines.
+//! Era convergence (07 — CONVERGE-1): annex the archived timelines.
 //!
 //! The laws (07 §1): annex, never merge — archived chronicles are
 //! sealed, convergence appends `EraAnnexed` receipts to the universe
@@ -50,7 +50,7 @@ pub struct Quarantined {
 /// The convergence read: what one boot adopted, skipped, or refused.
 #[derive(Debug, Default)]
 pub struct ConvergeRead {
-    /// Worlds annexed THIS run: (era, world).
+    /// Worlds annexed this run: (era, world).
     pub adopted: Vec<(String, String)>,
     /// Worlds already annexed by a prior run (idempotence, 07 §1.5).
     pub already: usize,
@@ -75,7 +75,7 @@ pub fn default_era_roots(var_root: &str) -> Vec<(String, PathBuf)> {
         .map(|n| n.to_string_lossy().into_owned())
         .unwrap_or_else(|| "var".into());
     let parent = match root.parent() {
-        // A bare relative root ("var") has an EMPTY parent — that is
+        // A bare relative root ("var") has an empty parent — that is
         // the current directory, not nowhere.
         Some(p) if p.as_os_str().is_empty() => PathBuf::from("."),
         Some(p) => p.to_path_buf(),
@@ -91,9 +91,9 @@ pub fn default_era_roots(var_root: &str) -> Vec<(String, PathBuf)> {
         }
     }
     eras.sort();
-    // THE LIVE ROOT NEVER ANNEXES ITSELF (naming ruling, 2026-07-30):
+    // The live root never annexes itself (naming ruling, 2026-07-30):
     // its worlds are already home and already charted by genesis —
-    // self-annexation minted era-qualified ALIASES of living worlds
+    // self-annexation minted era-qualified aliases of living worlds
     // ("var--<world>" beside "<world>", tripling the board). The fold
     // (AEON-1b) is the one lawful door from live to archive; only the
     // archived `<base>-era<N>` roots converge.
@@ -168,7 +168,7 @@ pub fn converge(book: &Ledger, eras: &[(String, PathBuf)]) -> std::io::Result<Co
                 }
             };
             // The verification door (07 §1.2) — the real chain law over
-            // the RAW event bytes; unknown event tags still verify.
+            // the raw event bytes; unknown event tags still verify.
             if let Some(at) = first_break(&receipts) {
                 read.quarantined.push(Quarantined {
                     era: era.clone(),
@@ -197,7 +197,7 @@ pub fn converge(book: &Ledger, eras: &[(String, PathBuf)]) -> std::io::Result<Co
             let window_start = events.len().saturating_sub(TERMINAL_WINDOW);
             let window = deposit(&events[window_start..]);
             let residual = loop_residual(&events);
-            // CONVERGENCE: placed where it was going — fold + one
+            // Convergence: placed where it was going — fold + one
             // window step of the flow (07 §2).
             let placed = Triple {
                 spatial: fold.spatial.add(&window.spatial),
@@ -205,8 +205,8 @@ pub fn converge(book: &Ledger, eras: &[(String, PathBuf)]) -> std::io::Result<Co
                 gauge: fold.gauge.add(&window.gauge),
             };
             let (x, y, z, _) = project(&placed);
-            // THE ONE G (the alignment seam, 2026-07-30): the chart's
-            // G axis carries the world's KEY — the wrapped exact
+            // The one G (the alignment seam, 2026-07-30): the chart's
+            // G axis carries the world's key — the wrapped exact
             // rational the AEON law defines — never the four-C
             // deposit sum (that projection is an event-count reading;
             // it stays with placement and the fiber card, off this
@@ -214,8 +214,8 @@ pub fn converge(book: &Ledger, eras: &[(String, PathBuf)]) -> std::io::Result<Co
             // and the board read "0 or ~10": genesis keys beside
             // grant counts.
             let g = terminal_gauge(&events);
-            // AEON-1b (11 §4): the FOUR-C ELIGIBILITY — a trajectory
-            // settled in the retirement region annexes as a DERELICT
+            // AEON-1b (11 §4): the FOUR-C eligibility — a trajectory
+            // settled in the retirement region annexes as a derelict
             // (in the world, on the chart, out of the living walk —
             // 07 §3's salvage frontier). The placeholder reading:
             // unrelieved famine strikes outweigh closures in the
@@ -223,8 +223,8 @@ pub fn converge(book: &Ledger, eras: &[(String, PathBuf)]) -> std::io::Result<Co
             // convergence). Nothing is destroyed; the fiber card
             // names the state.
             let derelict = is_derelict(&residual);
-            // THE SHEET SEATING (11 §5.2, wired 2026-07-30): each
-            // annexed aeon seats on its OWN G-sheet — the era ordinal
+            // The sheet seating (11 §5.2, wired 2026-07-30): each
+            // annexed aeon seats on its own G-sheet — the era ordinal
             // fixes the base (era N lived on sheet (N−1)/12, the fold
             // law's placeholder advance), and the world's own key
             // rides above it. Without this offset every aeon stacks
@@ -260,7 +260,7 @@ pub fn converge(book: &Ledger, eras: &[(String, PathBuf)]) -> std::io::Result<Co
 /// The terminal window W (07 §2, placeholder — tunes at balance time).
 const TERMINAL_WINDOW: usize = 8;
 
-/// The world's terminal KEY: the last gauge-carrying receipt's value
+/// The world's terminal key: the last gauge-carrying receipt's value
 /// (GaugeShifted · Diverged · Confluent · EraFolded — the receipt
 /// carries the wrapped value, the last stands; the replay law,
 /// ledger-side). A chronicle with no key moves reads 0.
@@ -291,7 +291,7 @@ fn sheet_base(era: &str) -> Ratio {
     wrap_gauge(ratio(ordinal - 1, 12))
 }
 
-/// CONGRUENCE (07 §2): each decoded event deposits an exact-rational
+/// Congruence (07 §2): each decoded event deposits an exact-rational
 /// shear onto the three axes. Unknown events deposited nothing before
 /// this point (they decode to `None` and are filtered — SEAL A).
 fn deposit(events: &[ClosureEvent]) -> Triple {
@@ -333,7 +333,7 @@ fn deposit(events: &[ClosureEvent]) -> Triple {
     }
 }
 
-/// COHERENCE (07 §2): what loops fail to close — measured and KEPT.
+/// COHERENCE (07 §2): what loops fail to close — measured and kept.
 fn loop_residual(events: &[ClosureEvent]) -> Triple {
     let mut strikes = ratio(0, 1);
     let mut builds = ratio(0, 1);
@@ -387,7 +387,7 @@ fn at_grade(grade: usize, amount: Ratio) -> AxisVector {
     AxisVector::from_vec(components)
 }
 
-/// COHESION (07 §2): the residual rides the fiber — a card, a
+/// Cohesion (07 §2): the residual rides the fiber — a card, a
 /// reflection, never an authority.
 /// AEON-1b (11 §4, placeholder reading): the retirement region — the
 /// residual's strike component stands positive (unrelieved want) and

@@ -1,14 +1,14 @@
 //! The chronicle beacon: deterministic, exact, replayable randomness.
 //!
-//! **The law (CHARTER §9; substrate contract §6):**
-//! "stochastic" in netstratum means chronicle-seeded randomness — every
+//! **The law (Charter §9; substrate contract §6):**
+//! "stochastic" in Netstratum means chronicle-seeded randomness — every
 //! draw derives from a receipt digest already in the chronicle by exact
 //! arithmetic. Rational probabilities, no float, no ambient entropy, no
 //! wall clock. The world feels stochastic to players; replay re-derives
 //! every draw bit-exact, so SEAL B, mesh verification, and anchoring
 //! survive untouched.
 //!
-//! Every draw carries a DOMAIN TAG naming the system that consumed it
+//! Every draw carries a DOMAIN tag naming the system that consumed it
 //! (e.g. `"hazard.meteor"`, `"market.demand"`); the tag must appear in
 //! the receipt that consumed the draw. No game system rolls its own
 //! randomness.
@@ -50,7 +50,7 @@ impl Beacon {
     }
 
     /// An exactly-uniform index in `0..n` — rejection-sampled, so there
-    /// is NO modulo bias: expansions falling in the biased tail are
+    /// is no modulo bias: expansions falling in the biased tail are
     /// discarded and the counter advances (deterministically — replay
     /// walks the same rejections).
     ///

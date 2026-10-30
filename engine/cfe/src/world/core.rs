@@ -1,11 +1,11 @@
-//! CORE — accessors and small deeds that name no larger concern.
+//! Core — accessors and small deeds that name no larger concern.
 //!
 //! Anything here that grows a concern of its own should leave.
 
 use super::*;
 
 impl World {
-    /// TECH-1a: has this world's people made the SOLAR LEAP — do they
+    /// TECH-1a: has this world's people made the solar leap — do they
     /// know the powers of their sun? Pre-solar is a lawful state
     /// (12_UNION §5a); the reading gates licensing and the shield,
     /// never the world's own life.
@@ -35,13 +35,13 @@ impl World {
     pub fn chronicle(&self) -> &Chronicle {
         &self.chronicle
     }
-    /// THE MEMORY BOUND: drain the held receipts below absolute position
+    /// The memory bound: drain the held receipts below absolute position
     /// `upto` into the chronicle's annals (the head always stays held).
     /// Only a carrier whose snapshot already holds them calls this.
     pub fn drain_chronicle_to(&mut self, upto: u64) {
         self.chronicle.drain_to(upto);
     }
-    /// THE MEMORY BOUND: file the chronicle's drained own-hashes not yet in
+    /// The memory bound: file the chronicle's drained own-hashes not yet in
     /// the digest file at `path` (append-only), then let memory release them.
     /// A file holding more than the annals have filed (appended, then the
     /// snapshot naming it never landed) is cut back first; nothing already
@@ -78,7 +78,7 @@ impl World {
     pub fn chronicle_mut(&mut self) -> &mut Chronicle {
         &mut self.chronicle
     }
-    /// **THIS WORLD'S OWN NAME** — the genesis colony's, which is what
+    /// **This world's own NAME** — the genesis colony's, which is what
     /// `found` set and what every other world calls it (#42). A treaty
     /// names its partner by this, so the pair is identified by the same
     /// string on both books.
@@ -172,7 +172,7 @@ impl World {
     }
     pub(super) fn permitted(&self, actor: u64, scope: Scope) -> Result<(), ActionRefused> {
         // 50_WIN_CONDITIONS: a collapsed line accepts no further scoped
-        // action — checked FIRST, ahead of entity/grant lookups, so a
+        // action — checked first, ahead of entity/grant lookups, so a
         // collapsed world refuses uniformly regardless of who's asking.
         if self.collapsed.is_some() {
             return Err(ActionRefused::CivilizationCollapsed);
@@ -204,7 +204,7 @@ impl World {
             .position(|zone| zone.tile == tile)
             .ok_or(ActionRefused::NoSuchZone { tile })?;
         let zone = held.zones.remove(at);
-        // #41: the refund halves what the build SPENT, which for a
+        // #41: the refund halves what the build spent, which for a
         // minted kind is its base's cost — `priced_as` is the one home
         // both ends read, so a building cannot be raised at one price
         // and salvaged at another.
@@ -216,21 +216,21 @@ impl World {
         self.relieve_recovered(orb);
         Ok(())
     }
-    /// Collect ONE orb — settle its workspace against its bank;
+    /// Collect one orb — settle its workspace against its bank;
     /// Collect scope; relief re-checked for that orb.
-    /// THE DISCOVERY MINT (U1, tag 86) — value created against VERIFIED
-    /// WORK, banked on the solving orb.
+    /// The discovery mint (U1, tag 86) — value created against verified
+    /// work, banked on the solving orb.
     ///
     /// This is the emitter the PoUW loop was missing. Before it, a
     /// solved task wrote a file and incremented a counter, and the
     /// economy never heard of it: cognition proved out and minted
     /// nothing.
     ///
-    /// The world PROPOSES; it does not gate. `work` rides WHOLE as the
-    /// opaque payload (THE OPAQUE-PAYLOAD LAW — cfe never parses it),
+    /// The world proposes; it does not gate. `work` rides whole as the
+    /// opaque payload (the OPAQUE-PAYLOAD law — cfe never parses it),
     /// and the kernel re-runs `verify_work` at the door plus the ruled
     /// bound `f(difficulty)`. A caller computes its amount from
-    /// `kernel::mint_bound` so proposer and gate read ONE function.
+    /// `kernel::mint_bound` so proposer and gate read one function.
     ///
     /// Collect-scoped, matching `scope_of(DiscoveryMinted)`.
     pub fn mint_discovery_as(
@@ -249,15 +249,15 @@ impl World {
         if !self.orbs.iter().any(|held| held.orb_id == orb) {
             return Err(ActionRefused::NoSuchOrb { orb });
         }
-        // K4 THE LIVE GATE. The emitter cannot VERIFY — the
+        // K4 the live gate. The emitter cannot verify — the
         // opaque-payload law bars `cfe` from importing the verifier, and
         // `recurrence_guard` fails the build on any attempt. So it does
-        // the lawful thing instead: it CALLS BACK to whoever can.
+        // the lawful thing instead: it calls back to whoever can.
         //
         // `cfe` never parses the payload; it hands the bytes to the
         // warrant and asks what they earn. A caller with no verifier
         // cannot mint at all, and a caller with one cannot mint past
-        // what the work bounds — checked BEFORE `close`, so a refused
+        // what the work bounds — checked before `close`, so a refused
         // mint leaves no receipt. Previously the gate caught this
         // afterwards, by which point the chronicle held it and `replay`
         // granted the value.
@@ -268,10 +268,10 @@ impl World {
                 claimed: Box::new(amount),
             });
         }
-        // THE ESCROW. The deed is built, the state it WOULD produce is
+        // The escrow. The deed is built, the state it would produce is
         // built, and the gate is asked — all before anything is
         // closed. `earns` above priced the work; this asks whether the
-        // TRANSITION stands, which is where D4 and conservation live.
+        // transition stands, which is where D4 and conservation live.
         //
         // A mint that fails here leaves no receipt and moves no value:
         // it was never in the record to take back. Previously the gate
@@ -289,9 +289,9 @@ impl World {
         if !warrant.admits(&prior, &candidate, &event, actor, stamp) {
             return Err(ActionRefused::WorkRefused);
         }
-        // THE CREDIT LANDS ON THE LIVE ORB (found 2026-08-06 by the
+        // The credit lands on the live orb (found 2026-08-06 by the
         // seam's digest perturbation): the escrow refactor banked the
-        // mint on the CANDIDATE — a throwaway built for the gate — and
+        // mint on the candidate — a throwaway built for the gate — and
         // closed the receipt without ever crediting the world, so live
         // starved while replay granted (a SEAL B split, dormant until a
         // mint landed inside a replay-pinned arc). The mint banks like
@@ -364,7 +364,7 @@ impl World {
         }
     }
     /// ELEMENT-GRAMMAR-1 (14 §3) — the extraction closure: richness ×
-    /// elapsed banked in ONE receipt (the bond-settle shape). A vein
+    /// elapsed banked in one receipt (the bond-settle shape). A vein
     /// with no new span refuses NothingAccrued; an unopened identity
     /// refuses typed. Sovereign convenience.
     pub fn assay(&mut self, orb: u64, element: [u8; 32]) -> Result<Ratio, ActionRefused> {
@@ -432,7 +432,7 @@ impl World {
             return Err(ActionRefused::NothingAccrued);
         }
         let span = now - vein.last_assay;
-        // ONT-2: richness is DERIVED (natural − extracted), never a stored
+        // ONT-2: richness is derived (natural − extracted), never a stored
         // scalar; the flow is a geometric decay capped at the remaining
         // richness; the extraction integral grows by exactly what banks. No
         // wear recurrence, so nothing can collapse. The kernel re-derives the
@@ -442,7 +442,7 @@ impl World {
         let richness = crate::dop::vein_richness(&natural, &vein.extracted, &vein.rejuvenated);
         // #136 D3 — the element ledger declares its grain (1/1024) at the assay fill:
         // the vein flow is a geometric decay (a product of arbitrary rationals), so it
-        // SMELTS to the element grain before it folds into the extraction integral,
+        // smelts to the element grain before it folds into the extraction integral,
         // receipts, or banks. The receipt carries this smelted Δ; replay reads it
         // (never re-derives), so `extracted` and the stock stay on-grain, byte-exact.
         let amount = smelt_element(&crate::dop::vein_flow(&richness, &natural, span));
@@ -503,13 +503,13 @@ impl World {
         Some(on_territory * territory + on_discovery * discovery + on_consumed * consumed)
     }
     /// NOVEL-1 (10 §3c) — the succession deed: a successor line adopts
-    /// this DERELICT world's chronicle as its own substrate (07 §3).
+    /// this derelict world's chronicle as its own substrate (07 §3).
     /// The refusal is computed pure (a living line refuses, nothing
     /// moves); on the deed the living tree drops to the world's kernel
     /// (condition 0 — the sun is known to the WORLD, not to the line)
     /// and every other node leaves the tree while standing in the
     /// chronicle forever. The successor's conditions then evaluate
-    /// over the WHOLE inherited chronicle, and its node ids seed from
+    /// over the whole inherited chronicle, and its node ids seed from
     /// roots that contain that history — novel by construction, no new
     /// crystallizer code: the deposit sheet and the seeded synthesis
     /// already read this way. Sovereign convenience.
@@ -533,7 +533,7 @@ impl World {
         self.techs.retain(|(_, condition, _, _)| *condition == 0);
         // The audit law (G1 × NOVEL-1): a line's axes never outlive
         // the line — the deed releases the seal; the successor seals
-        // ANEW (entry in the bands). The old seal stands in the
+        // anew (entry in the bands). The old seal stands in the
         // chronicle forever.
         self.genesis = None;
         self.close(
@@ -570,7 +570,7 @@ impl World {
         self.chronicle.append(event, stamp, vec![actor]);
     }
 
-    /// **THE BOUNCE ARRIVES** (the cores design, slice 2): `core`'s yearly
+    /// **The bounce arrives** (the cores design, slice 2): `core`'s yearly
     /// pulse of a holding (`None` = STAMP) credited to this world's first
     /// orb, receipted `CoreReturned`. The universe is the actor (the
     /// sovereign seat), as it is for every world-driven consequence.

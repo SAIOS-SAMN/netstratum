@@ -4,7 +4,7 @@
 //!
 //! - **The galaxies are charted** on the universe ledger from the pulse's
 //!   cores, so the conductor's galaxy and core readings find them. Each
-//!   stands at a STAND-IN box position (a 3 × 3 × 3 lattice on the 64-cell
+//!   stands at a stand-in box position (a 3 × 3 × 3 lattice on the 64-cell
 //!   box, 21 cells apart, beyond the 16-cell reach), nearest the universal
 //!   core first: docs/78's flat-site table replaces it with the sphere (A1).
 //! - **Each lineage's head is seated in its own star system** while one is
@@ -118,7 +118,7 @@ pub fn site_of(heat: &cfe::ratio::Ratio, burn: &cfe::ratio::Ratio) -> Option<(cf
 }
 
 /// Seat each spec on the unclaimed era-1 world, anywhere, where the physics
-/// reads its life most VIABLE (`siting::viability_at`: its clade and
+/// reads its life most viable (`siting::viability_at`: its clade and
 /// metabolism at that world's siting; ties to the galaxy holding the fewest
 /// lines so far): a line lands where its life can live (2026-10-15: one
 /// system per line, and then heat alone, left 67 then 78 of 157 collapsed at
@@ -182,8 +182,8 @@ pub fn apply(spec: &mut PolitySpec, site: &Site) {
     spec.wild = Some(site.wild_for(&spec.civilization.metabolism));
 }
 
-/// THE SEATING: a lineage's head takes a world its land feeds (docs/86), in
-/// the system the fewest heads hold, the one feeding most of its people there, the galaxies taken in turn; a line descended from a seated line SETTLES the
+/// The seating: a lineage's head takes a world its land feeds (docs/86), in
+/// the system the fewest heads hold, the one feeding most of its people there, the galaxies taken in turn; a line descended from a seated line settles the
 /// free world nearest its parent's that its land feeds, else the nearest
 /// free world (`places::nearest`: its parent's own system first, then its
 /// parent's galaxy by reach), so a lineage spreads

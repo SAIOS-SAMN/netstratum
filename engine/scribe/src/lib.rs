@@ -1,4 +1,4 @@
-//! THE SCRIBE (#37's inversion) — the display WRITERS, moved ABOVE
+//! The scribe (#37's inversion) — the display writers, moved above
 //! the lens. The layering, top to bottom:
 //!
 //! ```text
@@ -15,10 +15,10 @@
 //! The cycle the inversion dissolved: the ledger once held both the
 //! law and the display writers, so it leaned on the lens for its
 //! renderers while the lens was meant to stand alone. The writers now
-//! live HERE, the ledger imports no lens, and the lens imports no
+//! live here, the ledger imports no lens, and the lens imports no
 //! ledger — the arrows point one way.
 //!
-//! **THE WRITE-ONLY LAW (§11 rule 2):** exports are deletable and
+//! **The write-only law (§11 rule 2):** exports are deletable and
 //! regenerable. Colony authority is `chronicle.tlv` + `state.tlv`.
 //! No JSON is written for colony or ledger cards (`docs/JSON_DISPLAY_ONLY.md`).
 
@@ -42,12 +42,12 @@ pub fn record(
     record_body(&dir, world_name, planet, civilization, world)
 }
 
-/// `record`, minus the divergence check — for a caller that ALREADY
-/// proved this beat's chronicle consistent against the SAME on-disk
+/// `record`, minus the divergence check — for a caller that already
+/// proved this beat's chronicle consistent against the same on-disk
 /// file this same process (e.g. a `cfe::persist::sync_from` cursor
 /// that just succeeded). `rotate_divergent` re-reads and re-parses
 /// the whole carrier via `persist::load` to answer a question the
-/// caller's own successful sync already answered — the SECOND half of
+/// caller's own successful sync already answered — the second half of
 /// #157's measured per-beat floor (the sync itself was the first).
 /// Only safe when the caller can make that guarantee; `record` stays
 /// the correct, self-contained door for everyone else.
@@ -124,7 +124,7 @@ fn rotate_divergent(dir: &std::path::Path, world: &World) -> std::io::Result<()>
     if res.is_empty() {
         return Ok(());
     }
-    // The live chronicle may hold only a TAIL (receipts from absolute
+    // The live chronicle may hold only a tail (receipts from absolute
     // position `base`; the rest drained to these annals). Compare at the last
     // position both sides hold; a file that ends exactly at the drained base
     // agrees when its last receipt is the base parent.
@@ -183,7 +183,7 @@ pub fn record_solve(
     card::write_atomic(&dir.join(format!("{}.sol", sanitize(task))), &out)
 }
 
-/// Resume the curriculum ladder from the kernel's OWN paper: the
+/// Resume the curriculum ladder from the kernel's own paper: the
 /// highest rung any solve in this world was earned at. The level is
 /// kernel-local state and the book is its lawful memory (Law I —
 /// state lives where it is law: the mesh remembers words, the book

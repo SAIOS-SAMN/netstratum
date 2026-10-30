@@ -160,7 +160,7 @@ impl World {
         r
     }
 
-    // ONT-2: the O6.4 assay-consilience court is DELETED. It existed only to
+    // ONT-2: the O6.4 assay-consilience court is deleted. It existed only to
     // catch `vein_wear`'s stored richness drifting from the geometric truth
     // and slash crystal to snap it back — a patch confessing the scalar was a
     // lossy shadow of the manifold. Richness is now derived as

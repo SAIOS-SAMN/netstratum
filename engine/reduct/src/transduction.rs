@@ -1,4 +1,4 @@
-//! TRANSDUCTION — a structure-preserving map between two cellular sheaves.
+//! Transduction — a structure-preserving map between two cellular sheaves.
 //!
 //! Not a projection onto a shared homogeneous type (that is transmutation,
 //! and it collapses whatever does not conform). A transduction is a **chain
@@ -8,8 +8,8 @@
 //!     δ_Y ∘ f_# = f_# ∘ δ_X
 //! ```
 //!
-//! carrying the transfer operator AND its adjoint `f^#` (the transpose over
-//! ℤ) explicitly. The commutation is a GATE, not an assumption: if
+//! carrying the transfer operator and its adjoint `f^#` (the transpose over
+//! ℤ) explicitly. The commutation is a gate, not an assumption: if
 //! `f_{k+1}·δ_Xᵏ − δ_Yᵏ·f_k ≠ 0` the operation refuses and returns the
 //! non-commuting remainder whole as a typed topological obstruction —
 //! `TransductionDefect` — rather than forcing a lossy projection. This is
@@ -34,7 +34,7 @@ pub enum TransductionError {
     ShapeMismatch { grade: usize, expected: (usize, usize), got: (usize, usize) },
     /// `f_{k+1}·δ_Xᵏ − δ_Yᵏ·f_k ≠ 0` — the map does not commute with the
     /// differential. The remainder is the topological obstruction, carried
-    /// whole. NEVER truncated into a lossy projection.
+    /// whole. Never truncated into a lossy projection.
     Defect { grade: usize, non_commuting_remainder: Mat },
 }
 

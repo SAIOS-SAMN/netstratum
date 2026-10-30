@@ -1,13 +1,13 @@
-//! **THE RESOLVED KNOWLEDGE-MAP** — curiosity read from the STRUCTURE of
+//! **The resolved knowledge-map** — curiosity read from the structure of
 //! what a line knows, not from a clock (38 §6, task #15, the algebraic
 //! form).
 //!
-//! [`crate::mint::family_census`] orders the families by a flat COUNT of
-//! minted words. This orders them by where each family SITS in the line's
+//! [`crate::mint::family_census`] orders the families by a flat count of
+//! minted words. This orders them by where each family sits in the line's
 //! resolved knowledge — the same reach question answered by the recursive
 //! algebra rather than a tally.
 //!
-//! The map is a relational `Delta` over CONCEPTS. The four families are
+//! The map is a relational `Delta` over concepts. The four families are
 //! anchor nodes; every minted word the line holds is a node too, so the
 //! map grows richer exactly as the line learns. A word is joined to each
 //! family its expansion draws on, weighted by how many of its letters
@@ -15,9 +15,9 @@
 //! close a cycle between them — the map's own topology, formed by the
 //! line's vocabulary.
 //!
-//! [`rfa_core::forest_potentials`] resolves this web into ONE coherent
+//! [`rfa_core::forest_potentials`] resolves this web into one coherent
 //! frame — a potential per concept — and the family whose potential sits
-//! FARTHEST from the line's knowledge centroid is the most peripheral:
+//! farthest from the line's knowledge centroid is the most peripheral:
 //! the frontier a curious mind reaches for first. What the frame cannot
 //! explain — [`rfa_core::holonomies`], cycles of affinity that do not
 //! compose — is the line's genuine structural tension, surfaced whole.
@@ -26,7 +26,7 @@
 //! signature (the hook the cross-line consilience reads).
 //!
 //! **Ordering only, as ever** (the reach law): this decides what a
-//! starving mind reaches for FIRST; the observation still supplies every
+//! starving mind reaches for first; the observation still supplies every
 //! candidate, and every family stays reachable.
 
 use crate::mint::Library;
@@ -44,7 +44,7 @@ const AFFINITY: usize = 1;
 /// The full resolved reading of a line's knowledge.
 #[derive(Debug, Clone)]
 pub struct SelfMap {
-    /// The families, MOST-PERIPHERAL FIRST — the curiosity order a
+    /// The families, most-peripheral first — the curiosity order a
     /// novelty-struck mind reaches by.
     pub order: Vec<Family>,
     /// The crystallized invariant of the whole map — the same 32 bytes
@@ -115,12 +115,12 @@ fn word_counts(library: &Library) -> [usize; FAMILIES.len()] {
     counts
 }
 
-/// **THE CURIOSITY ORDER** — the families ordered most-peripheral first,
+/// **The curiosity order** — the families ordered most-peripheral first,
 /// read off the resolved knowledge frame. This is the live-path reading:
 /// it runs the resolve ([`rfa_core::forest_potentials`], `O(dim²)`) and
 /// nothing heavier, so a mind may consult it every beat it reaches.
 ///
-/// A family's PERIPHERALITY is the distance of its resolved potential
+/// A family's peripherality is the distance of its resolved potential
 /// from the line's knowledge centroid (the mean potential over every
 /// concept). A weakly-developed family — few words, loosely joined —
 /// drifts to the edge of the frame; the well-developed cluster pulls the
@@ -155,7 +155,7 @@ pub fn knowledge_order(library: &Library) -> Vec<Family> {
     order.into_iter().map(|i| FAMILIES[i]).collect()
 }
 
-/// THE FOREST POTENTIALS of the family↔word graph, SPARSE: exactly what
+/// The forest potentials of the family↔word graph, sparse: exactly what
 /// `forest_potentials(project(library))` reads (roots in index order, each
 /// node's neighbours scanned ascending, a potential set as its node is
 /// pushed, the frontier a stack), walked on adjacency lists instead of a
@@ -214,12 +214,12 @@ fn sparse_potentials(library: &Library) -> Vec<Ratio> {
     potential.into_iter().map(|p| p.unwrap_or_else(|| ratio(0, 1))).collect()
 }
 
-/// **THE FULL MAP** — the curiosity order and
+/// **The full map** — the curiosity order and
 /// the crystallized invariant, in one reading.
 ///
 /// The signature runs `rcf_hash` (invariant factors, `O(dim³)` in the
 /// number of concepts) and is heavier than [`knowledge_order`]. It is the
-/// INSPECTION and CRYSTALLIZATION reading — for a workbench view, or for
+/// inspection and crystallization reading — for a workbench view, or for
 /// the cross-line consilience that mints when two lines' maps carry the
 /// same signature — not the per-beat reach.
 pub fn knowledge_map(library: &Library) -> SelfMap {
@@ -234,10 +234,10 @@ pub fn knowledge_map(library: &Library) -> SelfMap {
     }
 }
 
-/// **THE IRREDUCIBLE TENSIONS** of a line's knowledge: cycles of affinity
+/// **The irreducible tensions** of a line's knowledge: cycles of affinity
 /// the coherent frame could not explain away (empty means the knowledge
 /// composes). A reading on demand, no longer part of [`knowledge_map`]:
-/// it projects the library onto a DENSE `(4 + words)²` Delta of exact
+/// it projects the library onto a dense `(4 + words)²` Delta of exact
 /// rationals — over 16 million entries at 4,000 words — which every line
 /// rebuilt at every boot while nothing read it (measured 2026-10-08: the
 /// conductor's 3G heap at its first beat, `consilience_step`).
@@ -246,21 +246,21 @@ pub fn knowledge_tension(library: &Library) -> Vec<Holonomy> {
     holonomies(&delta, &support)
 }
 
-/// **CROSS-LINE CONSILIENCE** (38 §5) — the shared knowledge no single
+/// **Cross-LINE consilience** (38 §5) — the shared knowledge no single
 /// line owns.
 ///
-/// A [`SelfMap::signature`] is the crystallized invariant of ONE line's
+/// A [`SelfMap::signature`] is the crystallized invariant of one line's
 /// resolved knowledge: two lines carry the same 32 bytes exactly when
-/// their knowledge is the same shape up to a frame. When INDEPENDENT
+/// their knowledge is the same shape up to a frame. When independent
 /// lines — different vocabularies, different histories — converge on one
-/// signature, that agreement is a MEASUREMENT, not a reconciled copy
+/// signature, that agreement is a measurement, not a reconciled copy
 /// (the one-truth amendment bars reconciling copies; it does not bar
 /// observing that two derivations landed on the same structure — the
 /// same law the ARC mint's three-distinct-tasks already runs on).
 ///
-/// This is the KNOWLEDGE row of `38 §1`, realized: mass is the effort
+/// This is the knowledge row of `38 §1`, realized: mass is the effort
 /// share (how many lines reached it), hardness is the diversity bridged
-/// (how differently they are built — a truth two UNLIKE lines share is
+/// (how differently they are built — a truth two unlike lines share is
 /// harder-won than one two near-twins do).
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Consilience {
@@ -270,7 +270,7 @@ pub struct Consilience {
     pub lines: Vec<u64>,
     /// Effort share — how many independent lines reached this knowledge.
     pub mass: usize,
-    /// Diversity bridged — how many DISTINCT curiosity-orders the
+    /// Diversity bridged — how many distinct curiosity-orders the
     /// converged lines wear. Two lines that reached the same knowledge by
     /// the same route bridge nothing; two that reached it from different
     /// frontiers bridge a gap, and the knowledge is harder for it.
@@ -280,7 +280,7 @@ pub struct Consilience {
 /// Detect the cross-line consilences among a roster of resolved maps.
 ///
 /// Each `(line_id, map)` is one line's own reading. Lines are grouped by
-/// their exact signature; a group of TWO OR MORE independent lines is a
+/// their exact signature; a group of two or more independent lines is a
 /// consilience. A lone line is no agreement and yields nothing. The
 /// zero-map signature (an empty library) is skipped — a line that knows
 /// nothing has reached no shared truth by having nothing in common.
@@ -292,8 +292,8 @@ pub fn consilience(maps: &[(u64, &SelfMap)]) -> Vec<Consilience> {
     consilience_sensed(&sensed)
 }
 
-/// [`consilience`] where each line also carries its SENSES (docs/60 D5): a
-/// route is a curiosity order AND a way of perceiving, so a truth lines of
+/// [`consilience`] where each line also carries its senses (docs/60 D5): a
+/// route is a curiosity order and a way of perceiving, so a truth lines of
 /// different perceptions reach is harder than one alike lines reach.
 pub fn consilience_sensed(maps: &[(u64, &SelfMap, crate::senses::Senses)]) -> Vec<Consilience> {
     let empty = knowledge_map(&Library::new()).signature;
@@ -312,7 +312,7 @@ pub fn consilience_sensed(maps: &[(u64, &SelfMap, crate::senses::Senses)]) -> Ve
         }
         members.sort_by_key(|(line, _, _)| *line);
         let lines: Vec<u64> = members.iter().map(|(line, _, _)| *line).collect();
-        // Diversity bridged: the count of DISTINCT routes among the
+        // Diversity bridged: the count of distinct routes among the
         // converged lines, a route being a curiosity order and the senses
         // that walked it. Same knowledge from the same frontier, seen the
         // same way, bridges nothing; the more distinct the routes, the
@@ -378,7 +378,7 @@ mod tests {
         assert_eq!(order, FAMILIES.to_vec());
     }
 
-    /// The family with NO words is the frontier: a mind whose whole
+    /// The family with no words is the frontier: a mind whose whole
     /// vocabulary draws on Symmetry and Recolor reaches first for the
     /// families it has never worked — Tile and Object sit farthest from
     /// the centroid its known cluster defines.
@@ -416,7 +416,7 @@ mod tests {
     #[test]
     fn a_shared_pair_of_families_forms_a_map_with_a_signature() {
         let mut library = Library::new();
-        // Both words draw on Symmetry AND Tile, but with different
+        // Both words draw on Symmetry and Tile, but with different
         // weights — the two family→word edges disagree on the affinity,
         // so the four-cycle Symmetry→w0→Tile→w1→Symmetry carries charge.
         library.adopt(word(vec![Op::Rotate90, Op::Rotate180, tile()]));
@@ -427,15 +427,15 @@ mod tests {
     }
 
     /// A knowledge shape is frame-invariant: a line whose library spells
-    /// the SAME structure with re-labelled symmetry letters crystallizes
-    /// the SAME signature — the ground the cross-line consilience stands
+    /// the same structure with re-labelled symmetry letters crystallizes
+    /// the same signature — the ground the cross-line consilience stands
     /// on.
     #[test]
     fn the_same_shape_crystallizes_the_same_signature() {
         let mut a = Library::new();
         a.adopt(word(vec![Op::Rotate90, tile()]));
         let mut b = Library::new();
-        // A DIFFERENT symmetry letter, same family draw and structure.
+        // A different symmetry letter, same family draw and structure.
         b.adopt(word(vec![Op::FlipH, tile()]));
         assert_eq!(
             knowledge_map(&a).signature,
@@ -444,7 +444,7 @@ mod tests {
         );
     }
 
-    /// Two INDEPENDENT lines that crystallize the same signature are a
+    /// Two independent lines that crystallize the same signature are a
     /// consilience; a lone line is not; an empty line shares nothing.
     #[test]
     fn independent_lines_that_converge_are_a_consilience() {
@@ -453,7 +453,7 @@ mod tests {
         let mut b = Library::new();
         b.adopt(word(vec![Op::FlipH, tile()])); // same shape, different letter
         let mut lone = Library::new();
-        // A STRUCTURALLY distinct shape: one word drawing on a SINGLE
+        // A structurally distinct shape: one word drawing on a single
         // family (a pendant), not a two-family bridge — a different
         // invariant, so a different crystallized knowledge.
         lone.adopt(word(vec![Op::Rotate90, Op::Rotate180]));

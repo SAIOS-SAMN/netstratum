@@ -1,6 +1,6 @@
-//! TAXON TABLE — open-ended class · clade ceilings (no u8 wire cap).
+//! TAXON table — open-ended class · clade ceilings (no u8 wire cap).
 //!
-//! **OPEN (2026-08-08):** clade is `u16` end-to-end. Expansion =
+//! **Open (2026-08-08):** clade is `u16` end-to-end. Expansion =
 //! **25 taxons × 13 class tiers** + 20 legacy = ceiling **345**.
 //! Class ceiling **13** (u8 still holds; raised freely by amendment).
 //!

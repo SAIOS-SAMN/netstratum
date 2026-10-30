@@ -1,4 +1,4 @@
-//! THE OBSERVER: read the live universe on demand, never write. The binary
+//! The observer: read the live universe on demand, never write. The binary
 //! run is the witness (operator); this is how it is read.
 //!
 //! `observe [--var var-e1] <view> [args]`, views:
@@ -187,7 +187,7 @@ fn main() {
             }
         }
         "flows" => {
-            // THE FLOWS (docs/83): a galaxy's motes, held vs gas, the spread
+            // The flows (docs/83): a galaxy's motes, held vs gas, the spread
             // of their reaches and phases, and the best binding candidate's
             // terms (bond vs agitation + the unlocked face + the shear).
             let Some(i) = num(1).and_then(galaxy) else { return println!("flows G") };
@@ -201,7 +201,7 @@ fn main() {
             let phases: Vec<String> = (0..conductor::flows::PLANES).map(|k| span(&c.flows.iter().map(|x| x.phase[k].clone()).collect::<Vec<_>>())).collect();
             let circ = span(&c.flows.iter().map(|x| x.ell_orth.clone()).collect::<Vec<_>>());
             println!("FLOWS {:?} at beat {now}: H {}, {} motes ({held} wholly held, {gas} wholly gas), reach {}, phases {phases:?}, ℓ_⊥ {circ}, reservoir {}", c.path, f(&h), c.flows.len(), span(&reaches), f(&c.reservoir));
-            // THE CHAINS (docs/83): each read whole; the best margin shown.
+            // The chains (docs/83): each read whole; the best margin shown.
             let Some(enc) = conductor::breath::galaxy_frame(&u, i, &conductor::breath::unit_mass(&u)) else { return println!("no frame") };
             let chains = conductor::flows::strands(&c.flows, &enc, &p, &total);
             let holding = chains.iter().filter(|x| x.holds()).count();
@@ -213,11 +213,11 @@ fn main() {
             }
         }
         "position" => {
-            // A GALACTIC CORE WEIGHED, AND THE ELEMENTS AT A POSITION IN ITS
-            // DISC (operator 2026-10-19: "use our own measurements in order
-            // to weigh the galactic core properly as a derivation ... a quick
-            // idea as to the elemental core composition in alignment with
-            // earths position"). Every reading is the galaxy's own: its
+            // A galactic core weighed, and the elements AT A POSITION in its
+            // disc (ruling of 2026-10-19: the galactic core is weighed as a
+            // derivation from Netstratum's own measurements, with a quick
+            // reading of the elemental core composition at a position aligned
+            // with Earth's). Every reading is the galaxy's own: its
             // core's state and what its cut holds (the kinds, heaviest and
             // lightest, their share of the galaxy), and the kinds standing in
             // the band about a share `f` of the way to its rim (R = ℓ/H, the
@@ -255,7 +255,7 @@ fn main() {
             }
         }
         "firmament" => {
-            // THE FIRMAMENT'S ORDER OVER MANY PULSES (a reading on a copy):
+            // The firmament's order over many pulses (a reading on a copy):
             // the singularity's pulses alone (`pulse::orbit_galaxies`, the
             // torque and the repulsion), N echoes, read every N/10. Evenness:
             // each mote's distance on the sphere to its nearest neighbour
@@ -264,7 +264,7 @@ fn main() {
             // arrangement reads near 0).
             let echoes = num(1).unwrap_or(400);
             let mut w = u.clone();
-            // Read for the whole firmament and for its VESSEL, the kinds at
+            // Read for the whole firmament and for its vessel, the kinds at
             // or above its heaviest seam (the twin weights where the peel
             // releases: Z106 on S^11, found by the atom, not named).
             let top = u.firmament().iter().filter_map(|x| conductor::chem::atom_w(&x.key)).max().unwrap_or(0);
@@ -302,7 +302,7 @@ fn main() {
             }
         }
         "census" => {
-            // THE CENSUS (operator 2026-10-18: everything the universe makes,
+            // The census (operator 2026-10-18: everything the universe makes,
             // read, never built): the medium, galaxies, stars, clouds,
             // systems by their worlds, their orbits, belts as debris, and the
             // worlds' resources.
@@ -311,12 +311,12 @@ fn main() {
             let h_of = |m: &pulse::Manifest| m.get(&conductor::chem::hydrogen()).cloned().unwrap_or_else(|| ratio(0, 1));
             let stars: Vec<&pulse::Body> = u.cores.iter().flat_map(|c| &c.satellites).collect();
             let remnants = stars.iter().filter(|s| s.remnant).count();
-            // THE GALAXIES' ORBITS (`pulse::orbit_galaxies`): each core's
+            // The galaxies' orbits (`pulse::orbit_galaxies`): each core's
             // live reach and period in bells, its orbit's phase, its share.
             let gal: Vec<String> = u.cores.iter().map(|c| format!("[{}] R {} P {} phase {} share {}", c.path[0], f(&c.radius), f(&c.period), c.phase.first().map(|x| f(x).to_string()).unwrap_or_else(|| "none".into()), share(&c.total()))).collect();
             println!("GALAXIES: {}", gal.join("; "));
-            // THE FIRMAMENT (`pulse::Universe::firmament`): its kinds, its
-            // share, and where its orbit phases GATHER (a reading: phases
+            // The firmament (`pulse::Universe::firmament`): its kinds, its
+            // share, and where its orbit phases gather (a reading: phases
             // sorted round the turn, a new group wherever the gap between
             // neighbours exceeds the mean gap; each group's holding-weighted
             // centre and its kinds).
@@ -393,10 +393,10 @@ fn main() {
             if let (Some(lo), Some(hi)) = (rs.first(), rs.last()) {
                 println!("  DEBRIS reach against the rim (1): {} motes, min {} median {} max {}", rs.len(), f(lo), f(&rs[(rs.len() - 1) / 2]), f(hi));
             }
-            // LIGHT AT THE ORBIT (operator 2026-10-18: "let there be light"; with
-            // xylarium): each burning star's light a ring, the transduced flux of
+            // Light AT the orbit (ruling of 2026-10-18: light reaches the orbit; with
+            // Xylarium): each burning star's light a ring, the transduced flux of
             // its rungs (formation::burn, in full step), and each world's
-            // INSOLATION, that flux times the share of directions the star
+            // insolation, that flux times the share of directions the star
             // covers from the world's reach, δ_s(r) = H_s/(r + H_s), never 1/r².
             let mut lit: Vec<(Ratio, Ratio, usize)> = Vec::new();
             for s in &stars {
@@ -421,7 +421,7 @@ fn main() {
                 let ins: Vec<String> = lit.iter().take(12).map(|(fl, i, k)| format!("{}/{}({}k)", f(fl), f(i), k)).collect();
                 println!("  LIGHT (star flux / world insolation (kinds)): {}", ins.join(" "));
             }
-            // CHEMISTRY: molecules in the worlds and in the systems' media,
+            // Chemistry: molecules in the worlds and in the systems' media,
             // with water (O + 4H on S^11) named.
             let in_worlds: Vec<(&conductor::chem::Kind, &Ratio)> = stars.iter().flat_map(|s| &s.satellites).flat_map(|w| w.kept.iter()).filter(|(k, _)| conductor::chem::atom_w(k).is_none()).collect();
             let in_media: Vec<(&conductor::chem::Kind, &Ratio)> = stars.iter().flat_map(|s| s.flows.iter().map(|x| (&x.key, &x.amount))).filter(|(k, _)| conductor::chem::atom_w(k).is_none()).collect();
@@ -458,13 +458,13 @@ fn main() {
             }
         }
         "cascade" => {
-            // THE FOUNDING CASCADE (operators 2026-10-18; a READING only, with
-            // xylarium): the stack, heaviest first, beads by its weight profile
+            // The founding cascade (operators 2026-10-18; a reading only, with
+            // Xylarium): the stack, heaviest first, beads by its weight profile
             // (amount × hold per kind; pinches at maxima, partings at minima)
             // into stacks. Bounce k releases the top stack at the full push
             // over what is still stacked, b_k = p·M₀/M_k (regeneration (i)),
             // each kind carried ℓ = b_k·w̄/w; the beat is the round trip to the
-            // top of what REMAINS, 1 + R_top/H, settling at the throat's own.
+            // top of what remains, 1 + R_top/H, settling at the throat's own.
             let all = u.total();
             let w = |k: &conductor::chem::Kind| conductor::chem::hold(k);
             let mut kinds: Vec<(conductor::chem::Kind, Ratio)> = all.iter().filter(|(_, a)| **a > ratio(0, 1)).map(|(k, a)| (k.clone(), a.clone())).collect();
@@ -503,7 +503,7 @@ fn main() {
             }
         }
         "founding" => {
-            // THE WELLSPRING'S CUT (operator 2026-10-18, (12)): the galaxy
+            // The wellspring's cut (operator 2026-10-18, (12)): the galaxy
             // throat's law over the universe's whole manifest.
             let all = u.total();
             let total = pulse::mass(&all);
@@ -540,7 +540,7 @@ fn main() {
             }
         }
         "worlds" => {
-            // THE PLANETARY CORES (xylarium W1–W4): each world read by the
+            // The planetary cores (Xylarium W1–W4): each world read by the
             // lightest kind its cut kept; rocky and giant are readings of it.
             let mut by: std::collections::BTreeMap<(u32, conductor::chem::Kind), (usize, Ratio)> = std::collections::BTreeMap::new();
             let mut n = 0;
@@ -611,7 +611,7 @@ fn main() {
             let mass = pulse::mass(&u.total()) / unit.clone();
             let magnetism = pulse::magnetism(&u.total()) / unit.clone();
             println!("LEDGER at beat {now}: mass {} spin {} magnetism {} mass+magnetism {}", f(&mass), f(&pulse::spin_total(&u, &unit)), f(&magnetism), f(&(mass + magnetism)));
-            // THE POLES (docs/78 law 11): each core's strength is the span
+            // The poles (docs/78 law 11): each core's strength is the span
             // between its ℤ pole (holding) and its ℚ pole (magnetism); its
             // balance the share at the ℤ pole (1: hardened, closed).
             let h_u = conductor::ocean::universe_hold(&u);
@@ -627,7 +627,7 @@ fn main() {
             }
         }
         "recycle" => {
-            // THE RECYCLING CIRCUIT (docs/83, proposed with xylarium): what
+            // The recycling circuit (docs/83, proposed with Xylarium): what
             // is shed crosses outward whole into the medium one tier up; the
             // regenerated pulse torques it along the crests; the return is gas
             // arriving where a galaxy held everything. Read only, the
@@ -650,8 +650,8 @@ fn main() {
             for (name, m) in [("ocean", u.medium()), ("galaxy gas", sum(&galaxies)), ("system media", sum(&systems)), ("world media", sum(&worlds))] {
                 println!("  MEDIUM {name:<13} {} of the universe; {}", f(&(pulse::mass(&m) / mass.clone())), composition(&m, 5));
             }
-            // SHED: what the stars returned to their galaxy's gas, echo by
-            // echo (the conductor's BREATH lines).
+            // Shed: what the stars returned to their galaxy's gas, echo by
+            // echo (the conductor's breath lines).
             let n = num(1).unwrap_or(12) as usize;
             // This conductor's run only (its process), not an earlier founding's.
             let pid = Command::new("systemctl").args(["--user", "show", "netstratum-conductor", "-p", "MainPID", "--value"]).output().map(|o| String::from_utf8_lossy(&o.stdout).trim().to_string()).unwrap_or_default();
@@ -662,7 +662,7 @@ fn main() {
             for l in shed.iter().skip(shed.len().saturating_sub(n)) {
                 println!("  SHED {}", l.split("conductor").last().unwrap_or(l).chars().take(200).collect::<String>());
             }
-            // RETURN: per galaxy, what it holds as disc, what it has as gas,
+            // Return: per galaxy, what it holds as disc, what it has as gas,
             // and what formed from it.
             for c in &u.cores {
                 let total = pulse::mass(&c.total());

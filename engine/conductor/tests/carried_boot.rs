@@ -1,5 +1,5 @@
 //! The memory bound (slice 2): a world carried at a snapshot drains what the
-//! snapshot holds to its annals, and boots back reading ONLY the chronicle
+//! snapshot holds to its annals, and boots back reading only the chronicle
 //! tail the snapshot names — the same state, the same history, the same
 //! position, and a sync that continues the file without re-reading it.
 

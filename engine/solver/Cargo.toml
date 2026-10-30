@@ -8,11 +8,11 @@ description = "The ARC solver harness — the cognitive apex: exact grid transfo
 [dependencies]
 blake3.workspace = true
 physics = { path = "../physics" }
-# THE SECTOR DOOR (cage::consult). The search is prover-side and may use
+# The sector door (cage::consult). The search is prover-side and may use
 # any means; what it proposes is withdrawn only through an exact rule.
 rfa-core = { path = "../rfa-core" }
 solver-verify = { path = "../solver-verify" }
-# N-I3 (THE INTELLIGENCE PORT): the solver seat peels its train grids into
-# `reduct::FullMeasurement` and reads them through the ONE reduce organ
+# N-I3 (the intelligence port): the solver seat peels its train grids into
+# `reduct::FullMeasurement` and reads them through the one reduce organ
 # (`reduct::think`). A clean new edge — reduct never imports solver/cfe, so no cycle.
 reduct = { path = "../reduct" }

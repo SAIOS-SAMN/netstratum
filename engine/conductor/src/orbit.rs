@@ -1,4 +1,4 @@
-//! **ORBITS** (docs/61 G1) — a line's place about its core, in closed form.
+//! **Orbits** (docs/61 G1) — a line's place about its core, in closed form.
 //!
 //! The place at a beat is `centre + M q(s)`: `q(s)` the universe's own
 //! circle (an L1 diamond of radius `r` in a two-axis parameter plane) at arc
@@ -9,7 +9,7 @@
 //! coordinate is piecewise linear in the beat, so its denominators stay
 //! bounded for ever.
 //!
-//! ERA 1 (the refactor onto era 1's physics, 2026-10-15): the arc's pace is
+//! Era 1 (the refactor onto era 1's physics, 2026-10-15): the arc's pace is
 //! the turning law's, one circuit in its system's galactic period
 //! (`P = 1 + R / H`, `ring`), never a shared flat-curve speed.
 

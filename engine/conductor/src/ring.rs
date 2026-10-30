@@ -1,9 +1,9 @@
-//! docs/83 "The derivation": THE RING-DENSITY LAW (xylarium 11.0, shared
+//! docs/83 "The derivation": the ring-density law (Xylarium 11.0, shared
 //! form). Every bell (a core, a star, a grain) holds each ring that reaches
 //! it for its own period, then passes it on as its echo. A ring crosses
 //! empty space to a place at r (in light-rings) in r and is held by every
 //! bell inside r for their periods together, `H(<r)`: it arrives after
-//! `r + H(<r)`. MASS IS HOLDING (`M = H`); no G, no c, no mass unit.
+//! `r + H(<r)`. Mass is holding (`M = H`); no G, no c, no mass unit.
 //!
 //! - **The clock:** a place's rate is the rings it receives,
 //!   `r / (r + H)`.
@@ -13,11 +13,11 @@
 //! - **The turning** (operator, 2026-10-15): each ring a place receives
 //!   turns it by its deficit, `ω = δ` turns a received ring, so a turn takes
 //!   `P = 1 / δ = 1 + R / H` received rings: linear, no power.
-//! - **The spin** (reach × holding, with xylarium): `ℓ = R · H`, a product
+//! - **The spin** (reach × holding, with Xylarium): `ℓ = R · H`, a product
 //!   of two distinct readings (the rings of reach and the rings held inside
 //!   it), never the square of one. Conserved; a system adds `Σ m·ℓ`.
 //! - **The balance:** a body of spin ℓ stands at `R = ℓ / H`. Orbits
-//!   BREATHE (operator): the law fixes no direction; an orbit draws in when
+//!   breathe (operator): the law fixes no direction; an orbit draws in when
 //!   the holding inside it grows or it loses spin, and moves out when the
 //!   holding falls or it gains spin. The ledger decides which. Escape is
 //!   read at events (the stretch crossing e → 1), never a share of H.
@@ -60,7 +60,7 @@ pub fn spin(r: &Ratio, held: &Ratio) -> Ratio {
     r.clone() * held.clone()
 }
 
-/// THE PINCH'S SHARE (operator 2026-10-18; the enfold law's gravity reach):
+/// The pinch's share (operator 2026-10-18; the enfold law's gravity reach):
 /// where a body's pull on its own outweighs its parent's, `H_b/(d + H_b) =
 /// H_p/((R − d) + H_p)`, so its reach is this share of its own reach about
 /// the parent, `H_b/(H_b + H_p)`; zero where neither holds.
@@ -72,13 +72,13 @@ pub fn pinch_share(h_body: &Ratio, h_parent: &Ratio) -> Ratio {
     h_body.clone() / both
 }
 
-/// THE PINCH: a body's own reach at reach `r` about its parent,
+/// The pinch: a body's own reach at reach `r` about its parent,
 /// `d = r·H_b/(H_b + H_p)`.
 pub fn pinch(r: &Ratio, h_body: &Ratio, h_parent: &Ratio) -> Ratio {
     r.clone() * pinch_share(h_body, h_parent)
 }
 
-/// THE BALANCE: the reach where spin ℓ stands about H, `ℓ / H`; None where
+/// The balance: the reach where spin ℓ stands about H, `ℓ / H`; None where
 /// nothing holds it or it carries no spin.
 pub fn radius(ell: &Ratio, held: &Ratio) -> Option<Ratio> {
     if held.is_zero() || *ell <= ratio(0, 1) {
@@ -87,7 +87,7 @@ pub fn radius(ell: &Ratio, held: &Ratio) -> Option<Ratio> {
     Some(ell.clone() / held.clone())
 }
 
-/// THE SPIN GRAIN (design law 8, exact and bounded): a body's specific spin
+/// The spin GRAIN (design law 8, exact and bounded): a body's specific spin
 /// and its place are held on 60⁻⁶ (six sexagesimal places, the TUniversal
 /// coordinate's), floored; what flooring leaves goes back to the medium the
 /// spin came from, so the ledger stays exact while no body's numbers grow
@@ -112,14 +112,14 @@ pub fn whole(x: &Ratio) -> Option<u64> {
     x.floor().to_integer().try_into().ok()
 }
 
-/// A share's SECTOR on the 60⁶-mark protractor (the TUniversal coordinate's
+/// A share's sector on the 60⁶-mark protractor (the TUniversal coordinate's
 /// six sexagesimal places, docs/78): which sector holds it, by exact floor.
 pub fn sector(share: &Ratio) -> u64 {
     let places = Ratio::from_integer(num_bigint::BigInt::from(60).pow(6));
     (share.clone() * places).floor().to_integer().try_into().unwrap_or(0)
 }
 
-/// A BODY'S IDENTITY is its birth reading, never a row number (operator
+/// A body's IDENTITY is its birth reading, never a row number (operator
 /// 2026-10-16: "that's spreadsheet logic"): the bell it was born and the
 /// sector of its holding share (the deficit `H/(R + H)` at its reach, the
 /// coordinate's G lane) where it was born, `born · 2³⁶ + sector`. Unique

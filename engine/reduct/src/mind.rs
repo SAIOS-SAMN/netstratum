@@ -1,4 +1,4 @@
-//! IAE-6 — THE GRADED MIND: three manifolds, holonomic containment.
+//! IAE-6 — the graded mind: three manifolds, holonomic containment.
 //!
 //! The persistent vocabulary a civilization carries, graded across the three
 //! nested manifolds of thought (doc 51, the sensory strata):
@@ -11,10 +11,10 @@
 //!     holonomic  outermost   "interpretation" + CONTAINMENT
 //! ```
 //!
-//! The mind's **breathing IS the construction of its geometry**: it *unfolds*
+//! The mind's **breathing is the construction of its geometry**: it *unfolds*
 //! (condenses a new generator when an obstruction is irreducible) and *folds*
 //! (resolves a field against everything it has learned). The inner manifolds
-//! grow FREELY — the only constraint anywhere is the holonomic (outer) shell,
+//! grow freely — the only constraint anywhere is the holonomic (outer) shell,
 //! the containment law (`the inner crystal may not outgrow the exterior`).
 //!
 //! Resolution is **O(n) in the mind's rank** — reduction against `n` learned
@@ -33,7 +33,7 @@ pub enum Manifold {
     Harmonic,
     /// Middle — spatial structure, "sight". Unconstrained.
     Luminal,
-    /// Outermost — interpretation AND containment. The only bounded shell.
+    /// Outermost — interpretation and containment. The only bounded shell.
     Holonomic,
 }
 
@@ -41,7 +41,7 @@ pub enum Manifold {
 /// capacity; a dimension mismatch is a construction error.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ContainmentRefusal {
-    /// The outer shell is full — the containment law, the ONLY capacity bound.
+    /// The outer shell is full — the containment law, the only capacity bound.
     HolonomicShellFull { capacity: usize },
     /// The generator does not live in the mind's cochain dimension.
     DimensionMismatch { expected: usize, got: usize },
@@ -83,7 +83,7 @@ impl Mind {
         self.harmonic.len() + self.luminal.len() + self.holonomic.len()
     }
 
-    /// Every learned generator as the COLUMNS of a `dim × rank` matrix — the
+    /// Every learned generator as the columns of a `dim × rank` matrix — the
     /// O(n) reduction basis, ordered inner → outer.
     pub fn generators(&self) -> Vec<Vec<BigInt>> {
         let cochains: Vec<&Vec<BigInt>> =
@@ -93,7 +93,7 @@ impl Mind {
             .collect()
     }
 
-    /// CONDENSE (unfold): mint `obstruction` as a new generator in `manifold`.
+    /// Condense (unfold): mint `obstruction` as a new generator in `manifold`.
     /// The holonomic shell refuses when full — the containment law; the inner
     /// manifolds never refuse on capacity.
     pub fn condense(
@@ -116,8 +116,8 @@ impl Mind {
         Ok(())
     }
 
-    /// BIND (overlay, not fold): wrap `field` onto the mind's geometry,
-    /// retaining the WHOLE binding — which generators overlapped it, the
+    /// Bind (overlay, not fold): wrap `field` onto the mind's geometry,
+    /// retaining the whole binding — which generators overlapped it, the
     /// torsion twist that let them flex onto it, and the unbound residual. The
     /// manifold binds to the problem; it does not vanish (doc 51 §6). O(n) in
     /// the mind's rank.
@@ -135,7 +135,7 @@ impl Mind {
         self.bind(field).locked
     }
 
-    /// LEARN — the seam (IAE-5) tied to condensation (IAE-6). The proposer,
+    /// Learn — the seam (IAE-5) tied to condensation (IAE-6). The proposer,
     /// seeded, guesses a bridge for `obstruction` from `base`; the exact
     /// verifier admits the first that (together with what the mind already
     /// knows) resolves it; that bridge condenses into `manifold`. Returns the

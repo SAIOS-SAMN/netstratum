@@ -1,6 +1,6 @@
-//! THE FOLLOWER — netstratum's peoples folded onto the court at play rate.
+//! The follower — Netstratum's peoples folded onto the court at play rate.
 //!
-//! The conductor writes each people's chronicle; the follower TAILS them
+//! The conductor writes each people's chronicle; the follower tails them
 //! (`cfe::persist::read_tail`, verified from the last proved receipt) and
 //! steps every new receipt once through a held-open replay
 //! ([`crate::census::Stepper`]), so it never replays a chronicle from genesis
@@ -12,13 +12,13 @@
 //! line by the court's finality read.
 //!
 //! The coordinator's conditions, kept here:
-//!   * ONE stream at a time: folds and publications go out sequentially.
+//!   * One stream at a time: folds and publications go out sequentially.
 //!   * No retry storm: a court that does not answer backs the whole round off
-//!     (doubling, bounded); a court that REFUSES a people's fold halts that
+//!     (doubling, bounded); a court that refuses a people's fold halts that
 //!     people, loudly, until an operator looks.
 //!   * Bounded: when the court is away, a people's pending steps stop growing
-//!     at [`PENDING_BOUND`] — the follower stops reading that chronicle (BACK-
-//!     PRESSURE, not drop-oldest: the chronicle is durable, so nothing is lost,
+//!     at [`PENDING_BOUND`] — the follower stops reading that chronicle (back-
+//!     pressure, not drop-oldest: the chronicle is durable, so nothing is lost,
 //!     it is only read later).
 
 use crate::census::{self, Census, Step, Stepper};
@@ -50,7 +50,7 @@ pub fn people_of(dir: &Path) -> String {
     }
 }
 
-/// PUBLISH ONE FOLD's prefix for replay (78.125 evidence), from the line's
+/// Publish one fold's prefix for replay (78.125 evidence), from the line's
 /// own entries. `Refused(Published)` — upheld before — is answered.
 pub fn publish_fold(up: &Uplink, key: &ed25519_dalek::SigningKey, line: &TierLine, mark: &FoldMark) -> io::Result<Challenged> {
     let bad = |why: &str| io::Error::new(io::ErrorKind::InvalidData, why.to_string());
@@ -72,7 +72,7 @@ pub fn answered(c: &Challenged) -> bool {
     matches!(c, Challenged::Upheld { .. } | Challenged::Refused(ChallengeRefusal::Published))
 }
 
-/// PRUNE BY FINALITY: archive the hot entries netted only by folds the court
+/// Prune by finality: archive the hot entries netted only by folds the court
 /// reads `Final` or `PreLine` — never Provisional, Blocked, Falsified,
 /// Unwound or Unrecorded — walking the folds in order and stopping at the
 /// first that is not settled. Returns how many entries were archived, and the
@@ -96,7 +96,7 @@ pub fn prune(up: &Uplink, line: &mut TierLine, log: &FoldLog) -> io::Result<(usi
     Ok((n, unread))
 }
 
-/// **THE CARRIED POSITION** (RECONSTRUCT v): beside the cursors, one record
+/// **The carried POSITION** (reconstruct v): beside the cursors, one record
 /// a people — `positions-<tier>/<people with '/' as '~'>.pos`:
 ///
 /// ```text
@@ -169,7 +169,7 @@ pub struct Round {
     pub notes: Vec<String>,
 }
 
-/// THE FOLLOWER over one universe (`root/worlds/*`), folding as `home`'s
+/// The follower over one universe (`root/worlds/*`), folding as `home`'s
 /// colonies tier.
 pub struct Follower {
     root: PathBuf,
@@ -212,7 +212,7 @@ impl Follower {
         Ok(Followed { dir: dir.to_path_buf(), cursor, stepper, pending, folded, head, halted: None, reported_off: 0, recorded: 0 })
     }
 
-    /// Seat a people from its CARRIED POSITION: the census state the record
+    /// Seat a people from its carried POSITION: the census state the record
     /// holds, and only the chronicle after it (verified from the record's
     /// head). `None` — and the whole read above, once — when there is no
     /// record, or it stands past the cursor (the line rolled back behind it),
@@ -246,7 +246,7 @@ impl Follower {
         Some(Followed { dir: dir.to_path_buf(), cursor, stepper, pending, folded, head: last, halted: None, reported_off: 0, recorded: applied })
     }
 
-    /// ONE ROUND: read every chronicle's new tail, fold what moved, publish
+    /// One round: read every chronicle's new tail, fold what moved, publish
     /// each admitted fold, prune what the court reads settled. An `Err` is
     /// the court not answering: nothing was lost, and the caller backs off.
     pub fn round(&mut self, up: &Uplink) -> io::Result<Round> {
@@ -254,9 +254,9 @@ impl Follower {
         let mut cursors = crate::line::Cursors::open(&self.home, "colonies")?;
         let mut line = TierLine::open(&self.home, "colonies")?;
         let mut log = FoldLog::open(&self.home, "colonies")?;
-        // THE STARTUP CHECK, every round: fold only on a line the court agrees
+        // The startup check, every round: fold only on a line the court agrees
         // on. A court that is away backs the round off (`Err`). A court whose
-        // head stands EARLIER on this line (it restarted without its latest
+        // head stands earlier on this line (it restarted without its latest
         // admissions) is the authority: the line rolls back to it and the
         // receipts behind the lost entries fold again (`resync`). A head that
         // is not on this line at all halts the round, loudly.
@@ -328,7 +328,7 @@ impl Follower {
             }
         }
 
-        // REPORT every new ledger-grain breach (#138): the game broke its own
+        // Report every new ledger-grain breach (#138): the game broke its own
         // law there; the fold carries only what lies on the grain.
         for (people, f) in self.peoples.iter_mut() {
             for (receipt, orb, holding, amount) in &f.stepper.off_grain[f.reported_off..] {
@@ -337,7 +337,7 @@ impl Follower {
             f.reported_off = f.stepper.off_grain.len();
         }
 
-        // FOLD, one stream at a time.
+        // Fold, one stream at a time.
         for (people, f) in self.peoples.iter_mut() {
             if f.halted.is_some() {
                 continue;
@@ -397,7 +397,7 @@ impl Follower {
             }
         }
 
-        // CARRY each fully folded people's position forward (RECONSTRUCT v).
+        // Carry each fully folded people's position forward (reconstruct v).
         for (people, f) in self.peoples.iter_mut() {
             if f.halted.is_none() && f.pending.is_empty() && f.folded == f.stepper.applied() && f.folded > f.recorded {
                 match write_position(&self.home, people, f) {
@@ -407,7 +407,7 @@ impl Follower {
             }
         }
 
-        // PRUNE what the court reads settled.
+        // Prune what the court reads settled.
         let (pruned, unread) = prune(up, &mut line, &log)?;
         round.pruned = pruned;
         if let Some(e) = unread {
@@ -416,7 +416,7 @@ impl Follower {
         Ok(round)
     }
 
-    /// ROLL BACK TO THE COURT'S HEAD when it stands earlier on this line:
+    /// Roll back to the court's head when it stands earlier on this line:
     /// truncate the hot line to it, drop the logged folds after it, and send
     /// every people whose receipts those entries netted back to its first
     /// such receipt (cursor rolled back, held replay dropped, re-seated next

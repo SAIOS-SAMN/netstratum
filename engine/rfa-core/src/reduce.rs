@@ -12,11 +12,11 @@ use num_bigint::BigInt;
 use num_integer::Integer;
 use num_traits::{One, Signed, Zero};
 
-/// WHICH RELATIONS ARE PRESENT — the sparse complex's edge set
+/// Which relations are present — the sparse complex's edge set
 /// (operator ruling 2026-08-01: *an absent relation is absent, not
 /// zero*).
 ///
-/// [`coboundary_reduce`] assumes a COMPLETE relation: every pair is an
+/// [`coboundary_reduce`] assumes a complete relation: every pair is an
 /// edge, and it anchors the whole reduction at vertex 0. On a complete
 /// graph every cocycle is a coboundary, so the reduction annihilates
 /// everything and `D ≡ 0` — measured in `kernel/tests/bridge_pins.rs`.
@@ -42,7 +42,7 @@ impl Support {
         (i * self.dim + j) * self.fiber + l
     }
 
-    /// Mark the relation between `i` and `j` on coordinate `l` PRESENT.
+    /// Mark the relation between `i` and `j` on coordinate `l` present.
     /// The diagonal is never an edge (`Δ_ii = 0` is not a relation).
     pub fn connect(&mut self, i: usize, j: usize, l: usize) {
         if i == j || i >= self.dim || j >= self.dim || l >= self.fiber {
@@ -70,7 +70,7 @@ impl Support {
     }
 }
 
-/// ONE INDEPENDENT CYCLE'S HOLONOMY — the charge a loop carries that no
+/// One independent cycle's holonomy — the charge a loop carries that no
 /// frame can explain. `(i, j)` is the edge that closes the cycle, `l`
 /// its coordinate.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -81,18 +81,18 @@ pub struct Holonomy {
     pub value: Ratio,
 }
 
-/// ONE LAYER'S SPANNING FOREST — grow a forest over the present edges of
+/// One layer's spanning forest — grow a forest over the present edges of
 /// coordinate `l`, assigning each vertex the potential its forest path
 /// accumulates (roots at zero). Returns the per-vertex potentials
 /// (`None` for a vertex the layer never touches — no edge, no potential)
 /// and the forest-edge mask (`in_forest[i*dim + j]`).
 ///
-/// This is THE FRAME: a spanning forest is a coboundary by construction —
+/// This is the FRAME: a spanning forest is a coboundary by construction —
 /// each forest edge is exactly `p_j − p_i` — so the potentials explain
 /// away precisely what a coordinate frame should, and what they cannot
 /// explain is every remaining edge's holonomy. Both [`holonomies`] (the
 /// charge each non-forest edge carries) and [`forest_potentials`] (the
-/// reconciled worldview itself) read this ONE walk, so they can never
+/// reconciled worldview itself) read this one walk, so they can never
 /// disagree about the frame. Deterministic: the DFS pops the highest
 /// index first and the walk is a pure function of `(delta, support, l)`.
 fn spanning_forest(
@@ -125,17 +125,17 @@ fn spanning_forest(
     (potential, in_forest)
 }
 
-/// SUPPORT-AWARE REDUCTION — reduce against a spanning FOREST of the
+/// Support-aware reduction — reduce against a spanning forest of the
 /// present edges rather than against vertex 0.
 ///
 /// This is the same act [`coboundary_reduce`] performs, done honestly on
 /// a sparse complex. A spanning forest is a coboundary by construction:
 /// give each root potential zero and walk, and every forest edge is
-/// exactly `p_j − p_i`. So the forest is THE FRAME, and it explains
+/// exactly `p_j − p_i`. So the forest is the FRAME, and it explains
 /// away precisely what a frame should. What it cannot explain is every
 /// remaining edge — each one closes exactly one independent cycle, and
 /// the amount by which it disagrees with the forest's potentials is
-/// that cycle's HOLONOMY.
+/// that cycle's holonomy.
 ///
 /// A non-zero holonomy is structure no coordinate change can remove:
 /// it is `∮ ≠ 0`, the topological charge of `24_FORM` §2d's sign law and
@@ -151,7 +151,7 @@ pub fn holonomies(delta: &Delta, support: &Support) -> Vec<Holonomy> {
 
     for l in 0..fiber {
         let (potential, in_forest) = spanning_forest(delta, support, l, dim);
-        // Every present edge OUTSIDE the forest closes one independent
+        // Every present edge outside the forest closes one independent
         // cycle. Its holonomy is what the forest's frame cannot explain.
         for i in 0..dim {
             for j in (i + 1)..dim {
@@ -171,7 +171,7 @@ pub fn holonomies(delta: &Delta, support: &Support) -> Vec<Holonomy> {
     found
 }
 
-/// **THE RECONCILED WORLDVIEW** — the spanning-forest potential of every
+/// **The reconciled worldview** — the spanning-forest potential of every
 /// vertex, per coordinate. `[l][i]` is the potential coordinate `l`
 /// assigns vertex `i`: the accumulated relation along the forest path
 /// from its component root (rooted at zero), and zero for any vertex the
@@ -179,10 +179,10 @@ pub fn holonomies(delta: &Delta, support: &Support) -> Vec<Holonomy> {
 ///
 /// This is the coherent frame the sparse reduction fits to the data —
 /// the one globally-consistent reading of a web of pairwise relations
-/// that a resolve produces. Where the pairwise relations DO compose
+/// that a resolve produces. Where the pairwise relations do compose
 /// (`C = 0`), the potential explains them entirely; where they do not,
 /// [`holonomies`] carries exactly the irreducible remainder the
-/// potential could not. The two are the two halves of the ONE resolve,
+/// potential could not. The two are the two halves of the one resolve,
 /// read off the same [`spanning_forest`] walk.
 ///
 /// Exact rational throughout; no float, no root. A `None` potential
@@ -204,7 +204,7 @@ pub fn forest_potentials(delta: &Delta, support: &Support) -> Vec<Vec<Ratio>> {
 
 /// Reduce `delta` to the canonical representative of its H¹ class.
 ///
-/// **Assumes a COMPLETE relation.** Anchoring at vertex 0 is only
+/// **Assumes a complete relation.** Anchoring at vertex 0 is only
 /// lawful when every pair is an edge and the graph is one component;
 /// on a sparse complex use [`holonomies`], which anchors per component
 /// against a spanning forest. Kept as the dense case it always was.

@@ -1,7 +1,7 @@
-//! P2-PERSIST — the chronicle on disk (NS-3 §2.4). The file IS the
+//! P2-PERSIST — the chronicle on disk (NS-3 §2.4). The file is the
 //! save: an append-only stream of framed receipts. Loading goes
 //! through the verification read (a tampered file refuses with its
-//! break named); syncing appends ONLY the tail (the file is literally
+//! break named); syncing appends only the tail (the file is literally
 //! append-only); a divergent file refuses rather than being clobbered.
 //! The workspace (accrued, un-stamped ticks) is honestly lost across
 //! the boundary: what has no receipt does not persist.
@@ -48,10 +48,10 @@ pub fn load(path: &Path) -> Result<Chronicle, PersistRefused> {
     })
 }
 
-/// Sync a chronicle to its file, appending ONLY the receipts the file
+/// Sync a chronicle to its file, appending only the receipts the file
 /// does not yet hold. Returns how many were appended. If the file
 /// holds receipts this chronicle does not (longer, or a different
-/// history at any index), the sync REFUSES — a divergent past is never
+/// history at any index), the sync refuses — a divergent past is never
 /// clobbered silently.
 pub fn sync(chronicle: &Chronicle, path: &Path) -> Result<usize, PersistRefused> {
     if let Some(parent) = path.parent() {
@@ -103,10 +103,10 @@ pub fn sync(chronicle: &Chronicle, path: &Path) -> Result<usize, PersistRefused>
     Ok(tail.len())
 }
 
-/// **THE SYNC CURSOR** — what THIS PROCESS already proved about a
+/// **The sync cursor** — what this process already proved about a
 /// chronicle file, so a later sync never re-reads or re-verifies the
 /// bytes it already walked. `sync` re-parses and re-digest-chains the
-/// WHOLE on-disk file every call — fine once, ruinous called every
+/// whole on-disk file every call — fine once, ruinous called every
 /// beat over a file that only grows (measured: #157, ~3s/civ/beat by
 /// beat 11, the dominant share of the per-beat floor). The carrier is
 /// append-only and single-writer (the two-writer split NS-5 refuses
@@ -138,7 +138,7 @@ impl SyncCursor {
     }
 }
 
-/// A READER'S place in a chronicle file another process writes: the bytes
+/// A reader's place in a chronicle file another process writes: the bytes
 /// and receipts already proved, and the own-hash of the last of them.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct TailCursor {
@@ -147,11 +147,11 @@ pub struct TailCursor {
     pub head: Option<crate::vrp::ReceiptHash>,
 }
 
-/// READ ONLY THE NEW TAIL of a chronicle file, verified against what was
+/// READ only the new tail of a chronicle file, verified against what was
 /// already proved: the receipts appended since `cursor`, each chained from
 /// the cursor's head (`vrp::verify_from`). A frame still being written (a
 /// truncated tail) is left for the next read, never half-taken. A file
-/// shorter than the cursor, or a tail that does not chain, REFUSES — a
+/// shorter than the cursor, or a tail that does not chain, refuses — a
 /// reader never follows a rewritten past. A missing file reads empty.
 pub fn read_tail(path: &Path, cursor: &mut TailCursor) -> Result<Vec<Receipt>, PersistRefused> {
     let mut file = match fs::File::open(path) {
@@ -186,12 +186,12 @@ pub fn read_tail(path: &Path, cursor: &mut TailCursor) -> Result<Vec<Receipt>, P
     Ok(receipts)
 }
 
-/// Sync a chronicle to its file, ADDITIONALLY caching how much of it
+/// Sync a chronicle to its file, additionally caching how much of it
 /// this process has already proved (`cursor`) so a later call in the
-/// SAME process skips straight to the unread tail — never reloads or
+/// same process skips straight to the unread tail — never reloads or
 /// re-verifies the proved prefix. Semantics match `sync` exactly
 /// (same refusals, same append-only law, same divergence safety
-/// against a shortened or tampered TAIL); only the WORK differs. A
+/// against a shortened or tampered tail); only the work differs. A
 /// cold cursor (`Default`, or a file shorter than what was last
 /// proved — rolled back or replaced under this process) falls back to
 /// the full `sync` once and seeds the cursor from its result.
@@ -238,7 +238,7 @@ pub fn sync_from(
             on_disk_tail.push(receipt);
         }
     }
-    // The cursor counts ABSOLUTE receipts proved; a cursor behind the
+    // The cursor counts absolute receipts proved; a cursor behind the
     // drained base (it never proved what was drained) re-derives cold.
     let proved = cursor.receipts.min(total);
     if proved < base {

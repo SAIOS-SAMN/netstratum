@@ -1,18 +1,18 @@
-//! **THE CARRIED ANNALS** (memory bound, slice 2; the coordinator's history
+//! **The carried annals** (memory bound, slice 2; the coordinator's history
 //! rule: in memory, only the receipts after each world's snapshot — the whole
 //! chronicle stays on disk as the annals).
 //!
-//! When a chronicle DRAINS the receipts a snapshot already carried, what the
+//! When a chronicle drains the receipts a snapshot already carried, what the
 //! live world still reads of them is kept here, nothing more:
 //!
-//!   * every receipt NOT of a [`bulk`] kind, verbatim — the vocabulary, the
+//!   * every receipt not of a [`bulk`] kind, verbatim — the vocabulary, the
 //!     solver words and recipes, surveys, parameters, practices, techs,
 //!     unions, foundings, famines, yields, vents, upkeep… the kinds history
 //!     readers fold over (measured in G2: ~15% of all receipts);
 //!   * the own-hash of every drained receipt, in order — a literature claim
-//!     may cite ANY receipt the world sealed (claims are rare; the list is
+//!     may cite any receipt the world sealed (claims are rare; the list is
 //!     scanned, 32 bytes a receipt, no hashed index). On disk they are an
-//!     APPEND-ONLY file beside the chronicle (the snapshot names how many
+//!     append-only file beside the chronicle (the snapshot names how many
 //!     it holds), never rewritten;
 //!   * the latest aperture stamp per orb (the crystal sheet's `last_link`)
 //!     and the count of drained assays (the office evidence) — the only two
@@ -27,7 +27,7 @@ use crate::dop::ClosureEvent;
 use crate::vrp::Receipt;
 use std::collections::BTreeMap;
 
-/// Is this a BULK kind — dropped from memory once drained, its record on disk?
+/// Is this a bulk kind — dropped from memory once drained, its record on disk?
 pub fn bulk(event: &ClosureEvent) -> bool {
     matches!(
         event,
@@ -51,7 +51,7 @@ pub fn bulk(event: &ClosureEvent) -> bool {
     )
 }
 
-/// THE WINDOWED KINDS (docs/64 P2): drained receipts every reader wants only
+/// The windowed kinds (docs/64 P2): drained receipts every reader wants only
 /// within a recent window — the collected yields and the vents, read by the
 /// crystal deposit sheet over its deposit window and by the elevation's year.
 /// The annals keep them only within [`WINDOW`] stamps of the newest drained
@@ -75,7 +75,7 @@ pub struct Annals {
     /// The last handoff seal drained (the hand it named, its sequence): the
     /// mesh's walk starts from it without decoding the kept history.
     last_seal: Option<(u64, u64)>,
-    /// Drained own-hashes NOT YET FILED in the digest file — the only ones
+    /// Drained own-hashes not yet filed in the digest file — the only ones
     /// memory holds (the memory bound: the file is the record).
     digests: Vec<[u8; 32]>,
     last_link: BTreeMap<u64, u64>,
@@ -231,7 +231,7 @@ impl Annals {
         self.assays
     }
 
-    /// Plain bytes for the snapshot, the digests LEFT OUT (they live in their
+    /// Plain bytes for the snapshot, the digests left out (they live in their
     /// append-only file): `kept count u32 ‖ frames ‖ digest count u64 ‖
     /// links u32 ‖ (orb,stamp)·n ‖ assays u64`, little-endian.
     pub fn to_carried_bytes(&self) -> Vec<u8> {
@@ -242,7 +242,7 @@ impl Annals {
         out
     }
 
-    /// Read [`Annals::to_carried_bytes`] back, its digests left IN THE FILE at
+    /// Read [`Annals::to_carried_bytes`] back, its digests left in the file at
     /// `file` (which must hold at least the count the bytes name), or `None`.
     pub fn from_carried_bytes(b: &[u8], file: std::path::PathBuf) -> Option<Annals> {
         let ((kept_wire, kept_at, last_seal), mut p) = Self::read_kept(b)?;

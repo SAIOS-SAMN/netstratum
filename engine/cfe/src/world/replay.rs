@@ -1,30 +1,30 @@
-//! REPLAY — the transition's SECOND definition.
+//! Replay — the transition's second definition.
 //!
 //! **This file is a known defect, isolated so it can be seen.** The
 //! live proposer in `deeds` and this function both define what a step
 //! does; they agree only while every rule they share stays still.
 //! Kernel task #30 exists to collapse them into one. Until it lands,
-//! any change to a value in `rules` must be verified through BOTH.
+//! any change to a value in `rules` must be verified through both.
 //!
-//! THE VENT (GROUND §4b): the measured coupling is narrower than it
-//! looks. This body recomputes exactly ONE shared rule --
+//! The vent (Ground §4b): the measured coupling is narrower than it
+//! looks. This body recomputes exactly one shared rule --
 //! `crate::dop::commensurate_weight`, in the `ResourceTransferred`
-//! arm. Every other arm APPLIES the receipted amount rather than
+//! arm. Every other arm applies the receipted amount rather than
 //! re-deriving it. So #30's surface is one call site, not 113 arms.
 
 use super::*;
 
 
-/// **THE STEPPER** (task #9, operator order 2026-08-12 — the
+/// **The stepper** (task #9, operator order 2026-08-12 — the
 /// structural cure). `replay` was one monolithic loop that could not
 /// advance by a single receipt, so every caller needing per-receipt
 /// states paid a full prefix replay per receipt — O(history) each,
 /// O(history²) per pass; the conductor's per-deed judgment and its
-/// boot both wedged on exactly that (measured: 402s of a 430s beat).
-/// The Replayer holds the committed state and applies ONE receipt at
+/// boot both stalled on exactly that (measured: 402s of a 430s beat).
+/// The Replayer holds the committed state and applies one receipt at
 /// a time; a checkpoint is a clone of state — O(state), never
 /// O(history). `replay` is now the fold over this stepper, so the
-/// transition keeps ONE body and every SEAL B pin in the workspace
+/// transition keeps one body and every SEAL B pin in the workspace
 /// witnesses the equivalence.
 #[derive(Clone)]
 pub struct Replayer {
@@ -100,7 +100,7 @@ impl Replayer {
         }
     }
 
-    /// A stepper that starts from a CARRIED state — a checkpoint's snapshot
+    /// A stepper that starts from a carried state — a checkpoint's snapshot
     /// — rather than the empty book, so the receipts after it are applied
     /// once, forward, and nothing before it is replayed.
     pub fn from_state(state: Committed) -> Replayer {
@@ -116,7 +116,7 @@ impl Replayer {
         self.state
     }
 
-    /// Apply ONE receipt — the transition's single body.
+    /// Apply one receipt — the transition's single body.
     pub fn apply(&mut self, receipt: &crate::vrp::Receipt) {
         let Committed {
             orbs,
@@ -175,19 +175,19 @@ impl Replayer {
             element_allowlists,
         } = &mut self.state;
     match receipt.event() {
-        // NOVELTY-GATE (tag 166): the solver library is a FOLD of
+        // NOVELTY-GATE (tag 166): the solver library is a fold of
         // these receipts (`vocabulary::solver_words`) — no committed
         // field moves, so replay carries nothing for it.
         ClosureEvent::SolverWordMinted { .. } => {}
-        // CONSILIENCE (tag 177): a knowledge axiom is a record of
+        // Consilience (tag 177): a knowledge axiom is a record of
         // convergence — no committed field moves, so replay carries
         // nothing for it (the SolverWordMinted discipline).
         ClosureEvent::KnowledgeConverged { .. } => {}
-        // ARC C: a licensed word is a FOLD of this receipt (vocabulary::
+        // ARC C: a licensed word is a fold of this receipt (vocabulary::
         // solver_words) — no committed field moves, so replay carries
         // nothing for it (the SolverWordMinted discipline).
         ClosureEvent::KnowledgeLicensed { .. } => {}
-        // RCP-2 (tag 181): the built-recipe set is a FOLD of these receipts
+        // RCP-2 (tag 181): the built-recipe set is a fold of these receipts
         // (`vocabulary::recipes_built`) — no committed field moves, so replay
         // carries nothing for it (the SolverWordMinted discipline).
         ClosureEvent::RecipeBuilt { .. } => {}
@@ -242,7 +242,7 @@ impl Replayer {
                 .find(|held| held.orb_id == *orb_id)
                 .and_then(|held| held.books.iter_mut().find(|held| held.kind == *kind))
             {
-                // Closed to WRITING. Every entry it took stays.
+                // Closed to writing. Every entry it took stays.
                 account.archived = true;
             }
         }
@@ -297,7 +297,7 @@ impl Replayer {
         }
         ClosureEvent::ZoneBuilt { orb_id, tile, kind, base } => {
             if let Some(held) = peel(&mut *orbs, *orb_id) {
-                // #41: the build was PRICED on its base — replay
+                // #41: the build was priced on its base — replay
                 // reads the receipt's own declaration rather than
                 // re-resolving the fold, so a minted kind replays
                 // at exactly what it was raised for. The metabolism
@@ -313,12 +313,12 @@ impl Replayer {
         ClosureEvent::YieldCollected { orb_id, resource, amount } => {
             if let Some(held) = peel(&mut *orbs, *orb_id) {
                 held.bank(*resource, amount.clone());
-                // THE SYNTROPIC BOOK — the inverse of entropy_vented.
-                // A joule yield IS an encased joule (the crystal
+                // The syntropic BOOK — the inverse of entropy_vented.
+                // A joule yield is an encased joule (the crystal
                 // sheet already reads it that way), so containing
                 // one books it, whether the excess came from a star
                 // or from friction. Replay must mirror the live path
-                // EXACTLY or the two states diverge on a field.
+                // exactly or the two states diverge on a field.
                 if *resource == Resource::Joule {
                     held.syntropy_contained += amount.clone();
                 }
@@ -343,8 +343,8 @@ impl Replayer {
                 held.last_touch = receipt.stamp();
             }
         }
-        // THE ESTATE SURVEY (tag 97): the meter's draw replays
-        // exactly — the resource comes from the SAME sealed rule the
+        // The ESTATE survey (tag 97): the meter's draw replays
+        // exactly — the resource comes from the same sealed rule the
         // live path drew from (call-not-copy), and every settle is a
         // touch. The parcels are derived, so nothing else moves.
         ClosureEvent::EstateSurveyed { payer, cost, .. } => {
@@ -354,20 +354,20 @@ impl Replayer {
                 held.last_touch = receipt.stamp();
             }
         }
-        // THE APPRAISAL (tag 98): a valuation reading, receipted.
-        // Moves no bank, sites nothing — the receipt IS the state.
+        // The appraisal (tag 98): a valuation reading, receipted.
+        // Moves no bank, sites nothing — the receipt is the state.
         ClosureEvent::AppraisalStruck { .. } => {}
-        // THE COUNTER (tag 99): the resting offer's ask amends —
-        // the SAME mutation the live path made, so fills read one
+        // The counter (tag 99): the resting offer's ask amends —
+        // the same mutation the live path made, so fills read one
         // truth on both sides of a restart.
         ClosureEvent::OfferCountered { offer, want_amount, .. } => {
             if let Some(held) = offers.iter_mut().find(|held| held.offer == *offer) {
                 held.want_amount = want_amount.clone();
             }
         }
-        // CONVEY (tag 100): the postal move replays EXACTLY as the
+        // Convey (tag 100): the postal move replays exactly as the
         // live path made it — sender pays amount + postage (the
-        // stamp from the SAME sealed rule), receiver banks the
+        // stamp from the same sealed rule), receiver banks the
         // amount whole, both touched.
         ClosureEvent::ParcelConveyed { from_orb, to_orb, resource, amount, postage, .. } => {
             let (stamp, _) = crate::dop::postal_meter();
@@ -381,7 +381,7 @@ impl Replayer {
                 dest.last_touch = receipt.stamp();
             }
         }
-        // THE MINTED LINE (tag 101): identity, never matter — the
+        // The minted LINE (tag 101): identity, never matter — the
         // line derives from the receipt's seed wherever it is read;
         // nothing in committed state moves.
         ClosureEvent::LineMinted { .. } => {}
@@ -415,7 +415,7 @@ impl Replayer {
         ClosureEvent::WorldCharted { seed } => *terrain_seed = Some(*seed),
         // PRACTICE-1: the disciplines replay in adoption order.
         ClosureEvent::PracticeAdopted { practice } => practices.push(*practice),
-        // TAXATION (49 §3): the continuity levy lapses the `count`
+        // Taxation (49 §3): the continuity levy lapses the `count`
         // most-recently adopted practices at a generation turnover —
         // dropped from the tail (LIFO, the least-confirmed first).
         ClosureEvent::PracticesLapsed { count } => {
@@ -430,7 +430,7 @@ impl Replayer {
         // INCURSION-1a: a universe-ledger event — world replay
         // ignores it (the EraAnnexed precedent, explicit no-op).
         // #42: a pact enters this book. Sealing a kind that
-        // DISPLACES another strikes that other down first — peace
+        // displaces another strikes that other down first — peace
         // ends a war, war breaks a peace — so the register can
         // never hold both at once and replay needs no second rule
         // to say so.
@@ -451,11 +451,11 @@ impl Replayer {
                 });
             }
         }
-        // #42: the strike carries WHETHER it was a breach, so the
-        // load posts HERE and not at the seal that caused it.
+        // #42: the strike carries whether it was a breach, so the
+        // load posts here and not at the seal that caused it.
         //
         // Found by the replay pin: the verb strikes the displaced
-        // pact in its OWN receipt, BEFORE sealing the new one, so
+        // pact in its own receipt, before sealing the new one, so
         // by the time replay saw the seal the peace was already
         // gone and the breach was invisible. Live charged it,
         // replay did not — a SEAL B split. The receipt already
@@ -464,7 +464,7 @@ impl Replayer {
         ClosureEvent::TreatyStruck { deal, partner, broken } => {
             treaties.retain(|held| !(held.deal == *deal && held.partner == *partner));
             // E3.9: the annex dies with the pact it rides — the
-            // verb prunes at renounce AND at displacement, and
+            // verb prunes at renounce and at displacement, and
             // both paths receipt this strike, so one arm agrees
             // with both.
             element_allowlists
@@ -497,7 +497,7 @@ impl Replayer {
         // they enter the hash chain (so everything after descends from the
         // origin) and move nothing in committed state.
         ClosureEvent::UniverseFounded { .. } | ClosureEvent::UniverseCited { .. } | ClosureEvent::AncientArose { .. } | ClosureEvent::CoreDeposited { .. } | ClosureEvent::CoreEmitted { .. } | ClosureEvent::CoreWordDeposited { .. } | ClosureEvent::SubstratumOpened { .. } => {}
-        // THE BOUNCE (tag 195): the core's pulse arrives, credited whole.
+        // The bounce (tag 195): the core's pulse arrives, credited whole.
         ClosureEvent::CoreReturned { orb_id, resource, amount, .. } => {
             if let Some(held) = peel(&mut *orbs, *orb_id) {
                 match resource {
@@ -510,7 +510,7 @@ impl Replayer {
         // committed-state effect (it is a bookkeeping fact about the
         // chronicle, not a change to the world). The load-bearing use
         // (skip straight to a verified checkpoint instead of replaying from
-        // genesis) is CHRONICLE-COMPACT-3's job, done ABOVE this apply loop,
+        // genesis) is CHRONICLE-COMPACT-3's job, done above this apply loop,
         // not inside it.
         ClosureEvent::ChronicleCheckpointed { .. } => {}
         // ENTITY-ALIGN-1 (docs/56 §3): a bookkeeping fact about which
@@ -533,13 +533,13 @@ impl Replayer {
         // second copy in the committed state would be the two-truths
         // defect the definition law struck, one layer down.
         ClosureEvent::VocabularyMinted { .. } => {}
-        // P2 (tag 103): the chartered value is FOLD-derived
+        // P2 (tag 103): the chartered value is fold-derived
         // (`parameter::of`) — the receipt is the state.
         ClosureEvent::ParameterChartered { .. } => {}
-        // THE VERTICAL AXIS (tag 89): the seat replays from the
+        // The vertical axis (tag 89): the seat replays from the
         // receipt, so the registry file stops being the authority
         // on who holds which office. One seat per line — re-seating
-        // REPLACES, and the chain keeps the whole history of it.
+        // replaces, and the chain keeps the whole history of it.
         ClosureEvent::StationSeated { line, station } => {
             match stations.iter_mut().find(|(held, _)| held == line) {
                 Some(seat) => seat.1 = *station,
@@ -568,9 +568,9 @@ impl Replayer {
                 held.thermal = Some(crate::dop::ThermalSite {
                     albedo: albedo.clone(),
                     orbit_r: orbit_r.clone(),
-                    // BOTH TURNS FROM THE RECEIPT — never None.
+                    // Both turns from the receipt — never None.
                     // Binding one and discarding it loses an orb's
-                    // PLACE on replay while the live path keeps it,
+                    // place on replay while the live path keeps it,
                     // which is the live/replay divergence class.
                     // Clippy caught this twice here, once per turn.
                     theta: theta.clone(),
@@ -616,8 +616,8 @@ impl Replayer {
                 held.last_touch = receipt.stamp();
             }
         }
-        // SINK-1: the ATOMIC touch (tag 102) — every settled
-        // resource applies together and the anchor moves ONCE.
+        // SINK-1: the atomic touch (tag 102) — every settled
+        // resource applies together and the anchor moves once.
         ClosureEvent::DemurrageTouched { orb_id, decays } => {
             if let Some(held) = peel(&mut *orbs, *orb_id) {
                 for (resource, amount) in decays {
@@ -626,7 +626,7 @@ impl Replayer {
                 held.last_touch = receipt.stamp();
             }
         }
-        // TRADE-1: the move replays with the SAME crisis reads the
+        // TRADE-1: the move replays with the same crisis reads the
         // live path made — the compassion books are a replay fact.
         ClosureEvent::ResourceTransferred { from_orb, to_orb, resource, amount } => {
             let from_crisis = peek(&orbs, *from_orb)
@@ -655,7 +655,7 @@ impl Replayer {
             credit_councils(&mut *councils, *from_orb, *to_orb, *resource, amount);
         }
         // NS-4 APERTURE: the source leg replays as a bank draw —
-        // value left THIS world for another; last_touch anchors at
+        // value left this world for another; last_touch anchors at
         // the deal stamp (the touch settled demurrage separately).
         ClosureEvent::ApertureSent { from_orb, resource, amount, .. } => {
             if let Some(held) = peel(&mut *orbs, *from_orb) {
@@ -696,7 +696,7 @@ impl Replayer {
             }
             *crossed = true;
         }
-        // #136 THE SMELT-SWEEP (tag 185) — the migration deed floors EVERY element
+        // #136 the SMELT-SWEEP (tag 185) — the migration deed floors every element
         // stock on every orb to the 1/64 grain. Shares `sweep_element_grain` with
         // the live emit, so replay reproduces the historical explosion then floors
         // it byte-identically (`replay == committed`). The receipt's `dust` is the
@@ -705,7 +705,7 @@ impl Replayer {
         ClosureEvent::ElementStocksSwept { .. } => {
             let _dust = super::sweep_element_grain(&mut *orbs);
         }
-        // #138 THE RESOURCE SMELT-SWEEP (tag 186) — the banked-resource + STAMP
+        // #138 the resource SMELT-SWEEP (tag 186) — the banked-resource + STAMP
         // twin of tag 185. Shares `sweep_resource_grain` with the live emit, so
         // replay reproduces the aperture-compounded explosion then floors it
         // byte-identically. The `dust` is audit-only; the floor is a pure
@@ -714,7 +714,7 @@ impl Replayer {
             let _dust = super::sweep_resource_grain(&mut *orbs);
         }
         // N4 (NS-2 §1.5): the draw replays as a bank debit and a
-        // touch anchor. The reading it paid for CANNOT replay —
+        // touch anchor. The reading it paid for cannot replay —
         // the receipt is deliberately blind to it (the lens law).
         ClosureEvent::CrystalDrawn { orb_id, amount } => {
             if let Some(held) = peel(&mut *orbs, *orb_id) {
@@ -826,9 +826,9 @@ impl Replayer {
                 held.bank_element(*element, delta.clone());
             }
         }
-        // ONT-2b (tag 183): eating MINES the staple vein. Fold the receipt's
+        // ONT-2b (tag 183): eating mines the staple vein. Fold the receipt's
         // `eaten` into the vein's extraction integral — replay reads, never
-        // re-derives (richness is a projection of geometry − this sum). NO
+        // re-derives (richness is a projection of geometry − this sum). No
         // bank move: the mined food went vein → mouths, the bank bypassed, so
         // the element ledger holds still (a delta-0 move) and only the vein
         // book advances.
@@ -841,11 +841,11 @@ impl Replayer {
                 vein.extracted += eaten.clone();
             }
         }
-        // ONT-3 (tag 184): a worked vein RECOVERS. Fold the receipt's `injected`
+        // ONT-3 (tag 184): a worked vein recovers. Fold the receipt's `injected`
         // into the vein's rejuvenation integral — the mirror of StapleMined's
         // `extracted += eaten` — and advance the span anchor, so richness
         // (`natural − extracted + rejuvenated`) reads the same live, on replay,
-        // and in the kernel book. NO bank move: a delta-0 element event, the
+        // and in the kernel book. No bank move: a delta-0 element event, the
         // vein book alone advancing.
         ClosureEvent::VeinRejuvenated { orb_id, element, injected } => {
             if let Some(vein) = prospects
@@ -1036,7 +1036,7 @@ impl Replayer {
             }
         }
         // TECH-1a: a discovered node replays into the tech list —
-        // the solar leap (condition 0) among them. The RECEIPT's
+        // the solar leap (condition 0) among them. The receipt's
         // magnitude rides along: it is the number the tick obeys
         // (receipt authority, operator ruling 2026-08-05).
         ClosureEvent::TechDiscovered { orb_id, node, condition, magnitude, .. } => {
@@ -1122,7 +1122,7 @@ impl Replayer {
         ClosureEvent::ElementWantRelieved { orb_id, element } => {
             element_wants.retain(|(o, e)| !(*o == *orb_id && e == element));
         }
-        // PROVISION (41 §3): the population settles by its net delta.
+        // Provision (41 §3): the population settles by its net delta.
         // The elastic population is the clone count (R5), floored at zero
         // — a settled cull can empty a line but never take it negative.
         ClosureEvent::PopulationSettled { orb_id, delta } => {
@@ -1137,7 +1137,7 @@ impl Replayer {
                 clone_counts.push((*orb_id, next));
             }
         }
-        // PROVISION (41 §3, COG Slice 2): the fractional remainder is
+        // Provision (41 §3, COG Slice 2): the fractional remainder is
         // absolute — the receipt carries the new `[0, 1)` carry, so replay
         // sets it straight (zero drops the entry, one state one encoding).
         ClosureEvent::PopulationAccrued { orb_id, remainder } => {
@@ -1146,7 +1146,7 @@ impl Replayer {
                 pop_accrued.push((*orb_id, remainder.clone()));
             }
         }
-        // TAXATION (49 §5): the treasury settles by its net delta —
+        // Taxation (49 §5): the treasury settles by its net delta —
         // levies collected in (positive), welfare spent out (negative)
         // — floored at zero. An abstract fiscal reserve; the receipt
         // carries the net, so replay applies it straight.
@@ -1219,12 +1219,12 @@ impl Replayer {
             instruments.push((*orb_id, *tech_hash, *grade));
         }
         // MARKET-2 conform: the void's share moves no bank — the
-        // receipt IS the fact; what landed was already credited.
+        // receipt is the fact; what landed was already credited.
         ClosureEvent::VoidShare { .. } => {}
-        // D5 — THE SOVEREIGN UNION. A CONSTITUTIONAL deed: it
+        // D5 — the SOVEREIGN union. A constitutional deed: it
         // records that the offices stand in union and moves no
         // value, no bank, no zone and no key. Replay therefore has
-        // nothing to rebuild from it — the receipt IS the state.
+        // nothing to rebuild from it — the receipt is the state.
         // The review horizon is READ from the chronicle on demand
         // (`World::union_review`), never accumulated here, so
         // there is no counter to drift.
@@ -1864,7 +1864,7 @@ impl Replayer {
                     .as_ref()
                     .map(|g| g.metabolism)
                     .unwrap_or(2);
-                // Re-derive the SAME affinity the LIVE seat billed, replay-exact:
+                // Re-derive the same affinity the live seat billed, replay-exact:
                 // the clade's seat affinity, and for Research the economic-mode
                 // multiplier — both pure over the sealed taxon this replay already
                 // reconstructs (the `TaxonSealed` arm). Hardcoding `1` here
@@ -2061,7 +2061,7 @@ impl Replayer {
                 rogue_pressure.push((*orb_id, *pressure));
             }
         }
-        // BIO QUARANTINE RELIEF (#30): a recovery step — both pressure
+        // BIO quarantine relief (#30): a recovery step — both pressure
         // axes ebb by one (saturating), the mirror of the +1 each
         // explosion accrued.
         ClosureEvent::PressureEbbed { orb_id } => {

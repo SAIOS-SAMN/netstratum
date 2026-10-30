@@ -1,24 +1,24 @@
-//! THE WORK PROOF — the opaque payload's one form and its gate
+//! The work proof — the opaque payload's one form and its gate
 //! (U1 KERNEL-VERIFY, U_DIRECTIVES §2).
 //!
-//! THE OPAQUE-PAYLOAD LAW: the `DiscoveryMinted` deed carries its
+//! The OPAQUE-PAYLOAD law: the `DiscoveryMinted` deed carries its
 //! proof as bytes that cfe never reads and the kernel never parses —
-//! this module is the encoding's MONOPOLY (the codec-seam pattern:
+//! this module is the encoding's monopoly (the codec-seam pattern:
 //! one component owns the form). Refuse never guess: truncation,
 //! trailing bytes, unknown codes, out-of-range dimensions all refuse.
 //!
-//! THE REPLAY-COMPLETE LAW: the certificate chain alone binds
-//! (task, program, output) — it does NOT prove the program SOLVES the
+//! The REPLAY-COMPLETE law: the certificate chain alone binds
+//! (task, program, output) — it does not prove the program solves the
 //! task; an intact chain can be sealed over a wrong output. So
 //! [`verify_work`] is the full replay, every leg or refuse:
 //!   1. re-forge — the task re-derives from its digest (pure);
-//!   2. re-apply — the program maps EVERY training pair exactly and
+//!   2. re-apply — the program maps every training pair exactly and
 //!      the test input to the claimed output (the honest-withhold
 //!      law: one miss = refuse, never a guess); the forge's own
 //!      `test_expected` must agree;
 //!   3. re-chain — the certificate re-derives Intact.
 //!
-//! Schema v4 (THE CARRIED DERIVATION, Concordance 4.4 annex) replaces the
+//! Schema v4 (the carried derivation, Concordance 4.4 annex) replaces the
 //! replay for forge work: the payload carries the forged task's samples and
 //! both words' per-step state digests, and [`verify_carried_work`] walks them
 //! locally — no re-forge, no re-seal. v1-v3 stay readable as records.
@@ -45,25 +45,25 @@ use crate::volume::{
 
 /// The work-proof wire schema. A bump is an amendment.
 ///
-/// Schema bytes are APPEND-ONLY — one code, one meaning forever. v1 is
+/// Schema bytes are append-only — one code, one meaning forever. v1 is
 /// untouched by v2: the same v1 bytes decode to the same v1 proof, and
 /// a v1 payload never grows a field.
 pub const WORK_SCHEMA_V1: u8 = 1;
 
-/// Work-shapes v2 — CORPUS work (operator ruling 2026-08-04). A corpus
+/// Work-shapes v2 — corpus work (operator ruling 2026-08-04). A corpus
 /// task is observed content and cannot be re-derived from a digest, so
-/// it rides WHOLE. It carried an admissibility proof for one morning;
+/// it rides whole. It carried an admissibility proof for one morning;
 /// the Merkle mechanism was struck the same day (see `crate::corpus`)
 /// and the payload no longer carries a path.
 pub const WORK_SCHEMA_V2_CORPUS: u8 = 2;
 
-/// Work-shapes v3 — VOLUMETRIC work (operator ruling 2026-08-04,
+/// Work-shapes v3 — volumetric work (operator ruling 2026-08-04,
 /// lifting C8's deferral). Forge-only and re-derivable like v1, so the
 /// payload carries only the digest, the rung, the word and the proof —
 /// no task content at all.
 pub const WORK_SCHEMA_V3_VOLUME: u8 = 3;
 
-/// Work-shapes v4 — THE CARRIED DERIVATION (Concordance 4.4 annex, ruled
+/// Work-shapes v4 — the carried derivation (Concordance 4.4 annex, ruled
 /// 2026-10-08). Forge work whose proof is checked step by step, never by
 /// re-running the forge or re-sealing a certificate. The payload, in order
 /// (integers little-endian; grids as everywhere on this wire, `rows u16 ‖
@@ -98,7 +98,7 @@ pub struct WorkProof {
     pub certificate: SolveCertificate,
 }
 
-/// A CORPUS proof (schema v2): the task rides whole, because observed
+/// A corpus proof (schema v2): the task rides whole, because observed
 /// content cannot be re-derived from a digest.
 ///
 /// The task's NAME is not carried. It is not content (see
@@ -109,7 +109,7 @@ pub struct WorkProof {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CorpusProof {
     /// The content digest — `corpus::task_digest(train, test_in)`.
-    /// Binds the payload to the task it claims. It does NOT admit the
+    /// Binds the payload to the task it claims. It does not admit the
     /// task: identity is not admission, and the Merkle admission
     /// mechanism was struck 2026-08-04 (see `corpus.rs`).
     pub task_id: [u8; 32],
@@ -121,7 +121,7 @@ pub struct CorpusProof {
     pub certificate: SolveCertificate,
 }
 
-/// A VOLUMETRIC proof (schema v3): forge-only, so the task is named by
+/// A volumetric proof (schema v3): forge-only, so the task is named by
 /// its digest and rung and re-derived rather than carried.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct VolumeProof {
@@ -177,21 +177,21 @@ impl CarriedProof {
     }
 }
 
-/// What a verified payload turned out to BE. v1 returns a ladder rung;
+/// What a verified payload turned out to be. v1 returns a ladder rung;
 /// corpus work has no rung — its identity is its task_id — so the gate
 /// reports the class and the kernel prices it.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum WorkClass {
     /// Forge work: re-derivable, priced on the ladder by `mint_bound`.
     Forge(Difficulty),
-    /// Corpus work: replayed and OFF the ladder entirely.
+    /// Corpus work: replayed and off the ladder entirely.
     ///
     /// Renamed from `AdmissibleCorpus` when the Merkle admission
-    /// mechanism was struck (2026-08-04) — the old name CLAIMED an
+    /// mechanism was struck (2026-08-04) — the old name claimed an
     /// admission this gate no longer performs, and a name that
-    /// overclaims is the vacuity THE MOTION clause 6 forbids.
+    /// overclaims is the vacuity the motion clause 6 forbids.
     Corpus { task_id: [u8; 32] },
-    /// Volumetric work: re-derivable like forge work, but on its OWN
+    /// Volumetric work: re-derivable like forge work, but on its own
     /// ladder — a volumetric rung is not a planar rung and must never
     /// be priced as one (the two `level(n)` tables are different
     /// shapes, and confusing them would pay 3-D work at 2-D rates).
@@ -212,7 +212,7 @@ pub fn canonical_name(task_id: &[u8; 32]) -> String {
 /// A refused proof — typed, the break named whole (the house law).
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum WorkBroken {
-    /// The payload's FORM refuses: truncation, trailing bytes, an
+    /// The payload's form refuses: truncation, trailing bytes, an
     /// unknown schema or op code, an out-of-range dimension.
     Malformed,
     /// The program does not map training pair `pair` exactly — the
@@ -229,30 +229,30 @@ pub enum WorkBroken {
     /// carries another.
     TaskIdMismatch,
     /// The payload is a well-formed shape this gate cannot price. Not
-    /// a malformation — a SHAPE the caller has not been taught. Today:
+    /// a malformation — a shape the caller has not been taught. Today:
     /// corpus work reaching `verify_work`, whose return type can only
     /// express a ladder rung. `verify_work_class` accepts it.
     UnsupportedShape,
-    /// **P4, THE CARRIER LAW (operator ruling 2026-08-06): the
+    /// **P4, the carrier law (operator ruling 2026-08-06): the
     /// volumetric carrier is RETIRED at the mint.** Verified forever
     /// (`verify_volume_work` stands — history is never orphaned),
     /// minting never again. What was an accident of `verify_work`'s
     /// return type is now the ruling, named as itself.
     CarrierRetired,
-    /// **P4: a VERIFIED corpus proof with no measured price yet.** The
+    /// **P4: a verified corpus proof with no measured price yet.** The
     /// carrier law prices corpus work by W(τ) = complexity / measured
     /// solve rate, and the rate table fills from the blind benchmark
-    /// (P3). Until it does, a corpus mint refuses as UNPRICED — never
+    /// (P3). Until it does, a corpus mint refuses as unpriced — never
     /// as broken; the proof itself verified whole.
     CarrierUnpriced,
-    /// **THE RESOLUTION PATH IS ABSENT** (operator directive
-    /// 2026-08-07: *verify-time search is PROHIBITED; require mint
+    /// **The resolution path is absent** (operator directive
+    /// 2026-08-07: *verify-time search is prohibited; require mint
     /// requests to provide the complete resolution path as proof,
     /// validate it in time linear in the path, and reject ungranted
     /// where the path is absent*).
     ///
     /// A claim with no program states no resolution — there is nothing
-    /// to re-apply, and establishing one would mean SEARCHING at the
+    /// to re-apply, and establishing one would mean searching at the
     /// gate, which is exactly what the directive forbids. The claimant
     /// carries the path or the claim does not stand.
     ///
@@ -328,7 +328,7 @@ fn put_grid(g: &Grid, out: &mut Vec<u8>) -> Option<()> {
     Some(())
 }
 
-/// The ONE program encoding, shared by every schema. Extracted when v2
+/// The one program encoding, shared by every schema. Extracted when v2
 /// landed: a second copy of the op table is a second definition of wire
 /// law, and two definitions drift.
 fn put_op(op: &Op, out: &mut Vec<u8>) -> Option<()> {
@@ -443,9 +443,9 @@ fn put_program(program: &Program, out: &mut Vec<u8>) -> Option<()> {
     Some(())
 }
 
-/// **THE ONE PROGRAM ENCODING, exported** (NOVELTY-GATE, task #13) —
+/// **The one PROGRAM encoding, exported** (NOVELTY-GATE, task #13) —
 /// a minted word's expansion rides receipts as opaque bytes, and those
-/// bytes must be THIS wire form, never a second table that drifts.
+/// bytes must be this wire form, never a second table that drifts.
 /// Round-trips with [`program_from_bytes`]; trailing bytes refuse.
 pub fn program_bytes(program: &Program) -> Option<Vec<u8>> {
     let mut out = Vec::new();
@@ -469,7 +469,7 @@ fn put_volume(v: &Volume, out: &mut Vec<u8>) -> Option<()> {
 
 /// The volumetric op table — wire law, append-only, one code one
 /// meaning forever: 1 PerLayer + a planar op · 2 FlipStack ·
-/// 3 CycleLayers. `PerLayer` nests the PLANAR table rather than
+/// 3 CycleLayers. `PerLayer` nests the planar table rather than
 /// restating it, so the two can never drift apart.
 fn put_vprogram(program: &VProgram, out: &mut Vec<u8>) -> Option<()> {
     put_u16(program.len(), out)?;
@@ -513,7 +513,7 @@ pub fn encode_work(proof: &WorkProof) -> Option<Vec<u8>> {
     Some(out)
 }
 
-/// Encode a CORPUS proof (schema v2). The task rides whole — it is the
+/// Encode a corpus proof (schema v2). The task rides whole — it is the
 /// one work shape that cannot be re-derived.
 pub fn encode_corpus_work(proof: &CorpusProof) -> Option<Vec<u8>> {
     let mut out = vec![WORK_SCHEMA_V2_CORPUS];
@@ -560,7 +560,7 @@ impl<'a> Reader<'a> {
         let cells = self.take(rows.checked_mul(cols)?)?.to_vec();
         Grid::new(rows, cols, cells)
     }
-    /// The ONE op decoding, shared by every schema and by the
+    /// The one op decoding, shared by every schema and by the
     /// volumetric `PerLayer`. Unknown codes refuse.
     fn op(&mut self) -> Option<Op> {
         Some(match self.byte()? {
@@ -692,7 +692,7 @@ impl<'a> Reader<'a> {
     }
 }
 
-/// Decode a proof — the FORM only. Truncation, trailing bytes,
+/// Decode a proof — the form only. Truncation, trailing bytes,
 /// unknown codes, malformed grids all `None`.
 pub fn decode_work(bytes: &[u8]) -> Option<WorkProof> {
     let mut r = Reader { bytes, at: 0 };
@@ -707,11 +707,11 @@ pub fn decode_work(bytes: &[u8]) -> Option<WorkProof> {
         cols: r.byte()? as usize,
         train_pairs: r.byte()? as usize,
     };
-    // Refuse DEGENERATE difficulty as form (the refuse-never-guess law
+    // Refuse degenerate difficulty as form (the refuse-never-guess law
     // extended to degenerate fields). Two holes close here:
     //  · train_pairs 0 → the forge yields an empty training set and
-    //    "maps EVERY training pair" is vacuously true (a free mint);
-    //  · rows/cols 0 → the forge's Grid::new(...).expect() PANICS in
+    //    "maps every training pair" is vacuously true (a free mint);
+    //  · rows/cols 0 → the forge's Grid::new(...).expect() panics in
     //    the kernel's call path — the totality law forbids it.
     // The gate never re-forges a degenerate task: it refuses first.
     // The condition now carries a NAME (`Difficulty::well_formed`) so the
@@ -770,7 +770,7 @@ pub fn encode_carried_work(proof: &CarriedProof) -> Option<Vec<u8>> {
     Some(out)
 }
 
-/// Decode a CARRIED-DERIVATION proof (schema v4) — the FORM only.
+/// Decode a CARRIED-DERIVATION proof (schema v4) — the form only.
 pub fn decode_carried_work(bytes: &[u8]) -> Option<CarriedProof> {
     let mut r = Reader { bytes, at: 0 };
     if r.byte()? != WORK_SCHEMA_V4_CARRIED {
@@ -802,16 +802,16 @@ pub fn decode_carried_work(bytes: &[u8]) -> Option<CarriedProof> {
     Some(CarriedProof { forge_digest, difficulty, inputs, forge_word, forge_derivation, outputs, program, derivation })
 }
 
-/// **THE CARRIED-DERIVATION JUDGE** (schema v4, Concordance 4.4 annex). Every
+/// **The CARRIED-DERIVATION judge** (schema v4, Concordance 4.4 annex). Every
 /// leg is LOCAL — nothing re-runs the forge, nothing re-seals:
 ///
 ///   0. the path is carried (a claim states its resolution);
 ///   1. STATE 0 — every carried input is the beacon's own sample under the
 ///      digest, cell by cell, and the forge word is its own samples, slot
 ///      by slot;
-///   2. THE TASK — the forge word's carried derivation walks from state 0,
+///   2. The TASK — the forge word's carried derivation walks from state 0,
 ///      step by step, to the carried outputs;
-///   3. THE SOLVE — the solve's carried derivation walks from the same
+///   3. The solve — the solve's carried derivation walks from the same
 ///      state 0, step by step, to the same outputs: every training pair
 ///      maps exactly and the test input renders the test answer.
 pub fn verify_carried_work(bytes: &[u8]) -> Result<Difficulty, WorkBroken> {
@@ -848,7 +848,7 @@ pub fn verify_carried_work(bytes: &[u8]) -> Result<Difficulty, WorkBroken> {
     Ok(difficulty)
 }
 
-/// Encode a VOLUMETRIC proof (schema v3).
+/// Encode a volumetric proof (schema v3).
 pub fn encode_volume_work(proof: &VolumeProof) -> Option<Vec<u8>> {
     let mut out = vec![WORK_SCHEMA_V3_VOLUME];
     out.extend_from_slice(&proof.forge_digest);
@@ -869,7 +869,7 @@ pub fn encode_volume_work(proof: &VolumeProof) -> Option<Vec<u8>> {
     Some(out)
 }
 
-/// Decode a VOLUMETRIC proof (schema v3) — the FORM only.
+/// Decode a volumetric proof (schema v3) — the form only.
 pub fn decode_volume_work(bytes: &[u8]) -> Option<VolumeProof> {
     let mut r = Reader { bytes, at: 0 };
     if r.byte()? != WORK_SCHEMA_V3_VOLUME {
@@ -883,11 +883,11 @@ pub fn decode_volume_work(bytes: &[u8]) -> Option<VolumeProof> {
         cols: r.byte()? as usize,
         train_pairs: r.byte()? as usize,
     };
-    // THE VACUITY, REFUSED AS FORM — before the forge is ever called,
+    // The vacuity, REFUSED as form — before the forge is ever called,
     // so the degenerate case is not merely guarded but unreachable.
-    // `train_pairs: 0` is the exploitable one: "maps EVERY training
+    // `train_pairs: 0` is the exploitable one: "maps every training
     // pair" is vacuously true over none, which is a free mint. The
-    // zero dimensions are the totality half — they PANIC the forge.
+    // zero dimensions are the totality half — they panic the forge.
     if !difficulty.well_formed() {
         return None;
     }
@@ -912,14 +912,14 @@ pub fn decode_volume_work(bytes: &[u8]) -> Option<VolumeProof> {
     })
 }
 
-/// THE VOLUMETRIC JUDGE (work-shapes v3). The REPLAY-COMPLETE LAW in
+/// The volumetric judge (work-shapes v3). The REPLAY-COMPLETE law in
 /// three dimensions — every leg or refuse:
 ///
-///   1. **re-forge** — the task IS its digest under this rung, pure and
+///   1. **re-forge** — the task is its digest under this rung, pure and
 ///      deterministic, no external data ever. Volumetric work is
 ///      forge-only, so this single leg does what corpus v2 needed a
 ///      Merkle root and an inclusion path to do.
-///   2. **re-apply** — the program maps EVERY training pair exactly and
+///   2. **re-apply** — the program maps every training pair exactly and
 ///      the test input to the claimed output; the forge's own
 ///      `test_expected` must agree. One miss refuses — the honest
 ///      withhold, never a guess.
@@ -958,7 +958,7 @@ pub fn verify_volume_work(bytes: &[u8]) -> Result<WorkClass, WorkBroken> {
     }
 }
 
-/// Decode a CORPUS proof (schema v2) — the FORM only.
+/// Decode a corpus proof (schema v2) — the form only.
 pub fn decode_corpus_work(bytes: &[u8]) -> Option<CorpusProof> {
     let mut r = Reader { bytes, at: 0 };
     if r.byte()? != WORK_SCHEMA_V2_CORPUS {
@@ -966,8 +966,8 @@ pub fn decode_corpus_work(bytes: &[u8]) -> Option<CorpusProof> {
     }
     let task_id = r.digest()?;
     let train_len = r.u16()?;
-    // THE VACUITY, refused for the new shape too (98ccbbe's law): a
-    // replay over no training pair proves nothing, and "maps EVERY
+    // The vacuity, refused for the new shape too (98ccbbe's law): a
+    // replay over no training pair proves nothing, and "maps every
     // pair" is vacuously true over none. v1 refuses this through
     // `Difficulty::well_formed`; v2 has no difficulty, so it refuses here.
     if train_len == 0 {
@@ -996,13 +996,13 @@ pub fn decode_corpus_work(bytes: &[u8]) -> Option<CorpusProof> {
     })
 }
 
-/// THE JUDGE'S CALL, class-aware — verify ANY work payload and report
+/// The judge's call, class-aware — verify any work payload and report
 /// what it turned out to be. Pure, total, no I/O.
 ///
 /// Dispatch is on the leading schema byte, so v1 and v2 can never be
 /// confused for one another and a future v3 costs one arm.
 ///
-/// **The kernel should call THIS**, not [`verify_work`]: only this
+/// **The kernel should call this**, not [`verify_work`]: only this
 /// entry point can express corpus work, whose identity is a task_id and
 /// not a ladder rung. Relayed to the kernel lane along with the
 /// `mint_bound` arm that prices it.
@@ -1016,42 +1016,42 @@ pub fn verify_work_class(bytes: &[u8]) -> Result<WorkClass, WorkBroken> {
     }
 }
 
-/// THE CORPUS JUDGE (work-shapes v2). Three legs, all or refuse:
+/// The corpus judge (work-shapes v2). Three legs, all or refuse:
 ///
 ///   1. **re-hash** — the carried task hashes to the claimed `task_id`;
 ///      a payload that names one task and carries another refuses.
-///   2. **re-apply** — the program maps EVERY training pair exactly and
+///   2. **re-apply** — the program maps every training pair exactly and
 ///      the test input to the claimed output (the honest-withhold law).
 ///   3. **re-chain** — the certificate re-derives Intact.
 ///
-/// **THE ADMIT LEG WAS STRUCK 2026-08-04** (operator ruling: no Merkle
+/// **The admit leg was struck 2026-08-04** (operator ruling: no Merkle
 /// trees). It checked an inclusion path against a pinned root, which is
-/// a static enumeration AND an authority — see `crate::corpus` for the
-/// reasoning kept whole. Its replacement is a PREDICATE, not a list: a
-/// claim is admissible when the BASE vocabulary provably fails the task
+/// a static enumeration and an authority — see `crate::corpus` for the
+/// reasoning kept whole. Its replacement is a predicate, not a list: a
+/// claim is admissible when the base vocabulary provably fails the task
 /// at depth `d` and the candidate closes it, both halves replayable
 /// with the machinery already here.
 ///
-/// **So this gate does NOT admit, and must not be read as if it did.**
+/// **So this gate does not admit, and must not be read as if it did.**
 /// It proves a payload is internally consistent and that the program
 /// closes the carried task. Whether the task is one anybody authorized
 /// is a question it no longer asks — lawfully, because corpus work has
-/// no rate either: THE MOTION clause 4 makes imported content a
-/// BENCHMARK and never a mint source. It carries no seed, it can be
+/// no rate either: the motion clause 4 makes imported content a
+/// benchmark and never a mint source. It carries no seed, it can be
 /// authored, and its held-out answer is not checkable by the gate.
 ///
-/// **What this CANNOT check, stated plainly and unchanged by the
+/// **What this cannot check, stated plainly and unchanged by the
 /// strike.** A corpus task's held-out answer is not carried and not
-/// derivable, so leg 2 proves the program closes the TRAINING pairs and
-/// renders the claimed output — never that the output is CORRECT.
+/// derivable, so leg 2 proves the program closes the training pairs and
+/// renders the claimed output — never that the output is correct.
 /// Measured: of 34 programs that closed training, 33 matched the
 /// held-out answer and one did not, so ~3% of closures are confidently
 /// wrong. That was the fabrication surface a corpus rate would have
 /// bought, and it is now one more reason there is no such rate.
 pub fn verify_corpus_work(bytes: &[u8]) -> Result<WorkClass, WorkBroken> {
     let proof = decode_corpus_work(bytes).ok_or(WorkBroken::Malformed)?;
-    // 0. THE PATH IS CARRIED, OR THERE IS NO CLAIM (operator directive
-    //    2026-08-07). Everything below RE-APPLIES what the claimant
+    // 0. The path is carried, or there is no claim (operator directive
+    //    2026-08-07). Everything below RE-applies what the claimant
     //    supplied and is linear in the path's length; nothing here
     //    searches for a path, because a gate that searches prices
     //    admission at the cost of a search.
@@ -1085,7 +1085,7 @@ pub fn verify_corpus_work(bytes: &[u8]) -> Result<WorkClass, WorkBroken> {
     }
 }
 
-/// THE JUDGE'S CALL — verify a FORGE payload whole. Pure, total,
+/// The judge's call — verify a forge payload whole. Pure, total,
 /// no I/O; the kernel hands the bytes here and never parses them.
 ///
 /// Unchanged by v2 and deliberately so: its return type is a ladder
@@ -1105,7 +1105,7 @@ pub fn verify_work(bytes: &[u8]) -> Result<Difficulty, WorkBroken> {
         return verify_carried_work(bytes);
     }
     let proof = decode_work(bytes).ok_or(WorkBroken::Malformed)?;
-    // 0. THE PATH IS CARRIED, OR THERE IS NO CLAIM (operator directive
+    // 0. The path is carried, or there is no claim (operator directive
     //    2026-08-07). The forge carrier mints too, so the law is the
     //    same law: a claim states its resolution, and the gate
     //    re-applies it in time linear in the path. Nothing here
@@ -1113,7 +1113,7 @@ pub fn verify_work(bytes: &[u8]) -> Result<Difficulty, WorkBroken> {
     if proof.program.is_empty() {
         return Err(WorkBroken::PathAbsent);
     }
-    // 1. Re-forge: the task IS its digest under this difficulty.
+    // 1. Re-forge: the task is its digest under this difficulty.
     let task = forge_task(proof.forge_digest, proof.difficulty);
     // 2. Re-apply: every training pair exactly, or the solve is none.
     for (pair, held) in task.train.iter().enumerate() {

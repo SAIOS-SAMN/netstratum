@@ -4,8 +4,8 @@ version = "0.1.0"
 edition = "2021"
 license.workspace = true
 
-# THE LEAF. Exact rational arithmetic and nothing else — no game, no
-# state, no I/O. It sits BELOW every other crate on purpose.
+# The leaf. Exact rational arithmetic and nothing else — no game, no
+# state, no I/O. It sits below every other crate on purpose.
 #
 # It used to live inside `cfe`, which meant `physics` (needing only
 # `Ratio`) had to depend on `cfe`, which put `cfe` at the bottom of the

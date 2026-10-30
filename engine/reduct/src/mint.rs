@@ -1,10 +1,10 @@
-//! **THE MINT** (N-I2, doc `53` D2) — a measured GenerationGap becomes a word on
-//! the vessel. The word IS the obstruction: `Crystal::seal(chain)`, its inverse
+//! **The mint** (N-I2, doc `53` D2) — a measured GenerationGap becomes a word on
+//! the vessel. The word is the obstruction: `Crystal::seal(chain)`, its inverse
 //! the chain negated (`ChainDelta::negated`). Nothing is invented — the mint
 //! only names what the drain could not account, and only on measured
 //! irreducibility (the caller routes GenerationGap here; a gauge or a full drain
-//! leaves nothing to mint). An empty obstruction refuses typed: a wall you did
-//! not hit is not a word.
+//! leaves nothing to mint). An empty obstruction refuses typed: a wall not
+//! hit is not a word.
 
 use crate::congruence::ChainDelta;
 use crate::reduction::Crystal;

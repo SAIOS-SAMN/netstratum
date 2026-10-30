@@ -22,7 +22,7 @@ item 5 is closed (Netstratum pins Mycelium `v0.2.0` from GitHub, `5c725ed`).
   each at rate `r / (r + M(<r))` with a light delay, journalled in a
   hash-chained `chrono.jrn` every `t_u_bells` beats. Only the epicenter
   entry records the network height (`engine/conductor/src/chronometry.rs`).
-  This is the bridge-keeper pattern of MU-chronometry §2.1.
+  This is the bridge-keeper pattern of MU-CHRONOMETRY §2.1.
 - **Anchors.** One ledger entry (78.154 sub-kind 12) with the domain,
   `u`, a Merkle commitment over its checkpoints, and the final point,
   posted at re-founding (`refound.rs:56-115, 193`).
@@ -30,7 +30,7 @@ item 5 is closed (Netstratum pins Mycelium `v0.2.0` from GitHub, `5c725ed`).
   point, only when the point's origin matches the last re-founding
   (`refound.rs:117-127, 268-334`).
 
-## Open items against MU-chronometry §7
+## Open items against MU-CHRONOMETRY §7
 
 1. **Anchor on every committed save, not only at re-founding.** With one
    ledger entry the court has a position for the universe but no dilation
@@ -55,10 +55,10 @@ item 5 is closed (Netstratum pins Mycelium `v0.2.0` from GitHub, `5c725ed`).
    `https://github.com/SAIOS-SAMN/mycelium`, tag `v0.2.0`.
 6. **Name the in-game odometer apart.** The base-60 counter
    `TUniversal{S,G,T}` (`engine/ledger/src/lib.rs:46-60, 150-224`) shares
-   the network clock's name and lane letters (MU-lexicon §4).
+   the network clock's name and lane letters (MU-LEXICON §4).
 
 ## What Netstratum adds that Mycelium may adopt
 
 - The keeper hierarchy with slip residuals, bridged at one keeper, is the
-  pattern MU-chronometry §2.1 recommends and plans as a named form in
+  pattern MU-CHRONOMETRY §2.1 recommends and plans as a named form in
   `forms` (Roadmap track 20, K3).

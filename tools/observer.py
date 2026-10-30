@@ -51,7 +51,7 @@ import time
 from fractions import Fraction
 from pathlib import Path
 
-# The seven resources, in wire-code order (cfe::dop::Resource). CRYSTAL
+# The seven resources, in wire-code order (cfe::dop::Resource). Crystal
 # is code 7 — the resonance crystal, and the resource the PoUW mint pays
 # into (`DiscoveryMinted`, tag 86, banks Resource::Crystal). It was
 # missing here, so the one economic output of verified work was invisible
@@ -133,8 +133,8 @@ def show_board(fraction):
 
 
 # ── the house wire (state.tlv; landed as "MIRROR-TLV"): the committed orb decoded native ──
-# NS-1 TLV: tag u8 ‖ LE32(len) ‖ value; unknown tags SKIP (SEAL A).
-# Ratio: sign u8 ‖ LE32(len) ‖ numer BE ‖ LE32(len) ‖ denom BE.
+# NS-1 TLV: tag u8 ‖ LE32(len) ‖ value; unknown tags skip (SEAL A).
+# Ratio: sign u8 ‖ LE32(len) ‖ numer be ‖ LE32(len) ‖ denom be.
 
 def tlv_records(data):
     at = 0
@@ -164,7 +164,7 @@ def tlv_ratio(value, at=0):
 
 
 # The in-value codes (dop.rs: Resource = 1..=7). Crystal rides the
-# EXISTING banked entry (tag 18) — no new TLV tag — so a decoder that
+# existing banked entry (tag 18) — no new TLV tag — so a decoder that
 # stops at 6 silently drops crystal banks instead of failing.
 RESOURCE_NAMES = {1: "iron", 2: "biomass", 3: "alloy", 4: "diamond",
                   5: "joule", 6: "sink", 7: "crystal"}
@@ -536,7 +536,7 @@ CREED_VOICES = ["quiet", "burning", "wandering", "deep", "risen", "iron",
                 "grafted", "sleepless", "wintering", "manifold", "first"]
 
 
-# The hardship GRADIENT (operator-ruled 2026-07-30): the endured
+# The hardship gradient (operator-ruled 2026-07-30): the endured
 # weight selects the word — tempering supports the base, anneal aligns
 # the middle, athanor crowns the deep end. Floors are placeholder
 # parameters; "crucible" is retired from the creed vocabulary.
@@ -681,7 +681,7 @@ def world_facts(world_dir):
     planets = []
     planets_dir = world_dir / "planets"
     world_name = world_dir.name
-    # AUTHORITATIVE: the sigil the scribe wrote into world.card. The
+    # Authoritative: the sigil the scribe wrote into world.card. The
     # dir-name split is only a fallback for a torn/absent card — it is
     # wrong for every flavourfully-named world (forge-reach → forgeborn).
     civ_guess = world_card_sigil(world_dir) or (
@@ -730,10 +730,10 @@ def world_facts(world_dir):
         pending = sum(
             1 for p in inbox.iterdir() if p.is_file() and p.suffix == ".dir"
         )
-    # ── THE MIND'S OWN GROWTH (this version): tally the cognition deeds
+    # ── the mind's own GROWTH (this version): tally the cognition deeds
     # from the chronicle. A line's intelligence shows here — the words it
-    # MINTED (166, its own vocabulary), whether it has CLEAVED (43, spawned
-    # a peer branch on reaching mastery), and the shared TRUTHS it reached
+    # minted (166, its own vocabulary), whether it has cleaved (43, spawned
+    # a peer branch on reaching mastery), and the shared truths it reached
     # by converging with other independent lines (177, cross-line
     # consilience). These are what "watch the civs grow" means now.
     words, cleaved, axioms = 0, False, 0
@@ -1227,14 +1227,14 @@ def view_board(var_root, args, paint):
     running, age, _newest = engine_pulse(var_root)
 
     # Index planet state for tech holdings / zone kinds (from the
-    # worlds we already loaded — never re-read the chronicle).
+    # worlds already loaded — never re-read the chronicle).
     planet_state = {}
     for wname, facts in worlds.items():
         for state in facts["planets"]:
             key = (state.get("world", wname), state.get("planet", "?"))
             planet_state[key] = state
 
-    # ── UNIVERSE ────────────────────────────────────────────────────
+    # ── universe ────────────────────────────────────────────────────
     tiers = {}
     for slug, card in registry.items():
         tiers.setdefault(tier_of(card), []).append(slug)
@@ -1330,7 +1330,7 @@ def view_board(var_root, args, paint):
             "  " + paint.warn(
                 "BOARD GAP: zero T1 seats (watcher/observer) — the architect band is empty"))
 
-    # ── GALAXIES ────────────────────────────────────────────────────
+    # ── galaxies ────────────────────────────────────────────────────
     lines += ["", paint.head("GALAXIES")]
     if not galaxies:
         lines.append("  " + paint.dim("no galaxies charted yet — observation founds them"))
@@ -1363,7 +1363,7 @@ def view_board(var_root, args, paint):
                 "  intergalactic (outside every reach): "
                 + ", ".join(display_name(w) for w in intergalactic))
 
-    # ── SOLAR SYSTEMS ───────────────────────────────────────────────
+    # ── solar systems ───────────────────────────────────────────────
     lines += ["", paint.head("SOLAR SYSTEMS — each world is one star system")]
     # Sort: most active first (clock desc), then name.
     system_rows = sorted(rows, key=lambda r: (-r["clock"], r["world"], r["planet"]))
@@ -1433,7 +1433,7 @@ def view_board(var_root, args, paint):
         "  condition: steady = banks feeding · short X = famine on resource X · "
         "venting = excess heat sealed as entropy · large banks floor with '+'"))
 
-    # ── CIVILIZATIONS ───────────────────────────────────────────────
+    # ── civilizations ───────────────────────────────────────────────
     lines += ["", paint.head("CIVILIZATIONS")]
     # Aggregate per civ from rows.
     civ_agg = {}
@@ -1794,7 +1794,7 @@ def view_civ(var_root, args, paint):
     if card.get("motto"):
         lines.append(f"  {paint.dim(chr(0x201C) + card['motto'] + chr(0x201D))}")
     # The lineage walk (LINEAGE-2): the pointer is a space-joined
-    # LIST — walk the PRIMARY chain (first parent per hop), and mark
+    # list — walk the primary chain (first parent per hop), and mark
     # the confluences; headless is lawful.
     walk, seen, confluent = [target], set(), False
     while True:

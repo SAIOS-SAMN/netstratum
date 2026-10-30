@@ -16,9 +16,8 @@
 
 ## §0 The supremacy clause
 
-> **"My word is stronger than any law or word written down. This is the
-> law — if written rules/laws violate this trajectory, then the laws are
-> wrong."**
+> **The operator's ruling stands above any written law: where written
+> rules violate the ruling's trajectory, the written rules are wrong.**
 
 Inscribed law is a record of rulings, never a source of authority
 against one. Where a document contradicts a standing ruling, **the
