@@ -7,7 +7,7 @@ and test vectors exist (Charter §1); tolerances, yields, and rates here are
 "world-book (to come)", opened here.
 
 **The design law (inherited from `05_THERMAL_BALANCE.md` §2):** there is no
-universal home and no universal people, just as there is no "Goldilocks" zone.
+universal home and no universal people, just as there is no habitable zone.
 Each civilization is bound to a *different thermodynamic survival strategy* and
 to one substrate equilibrium band (05 §2). A faction is the niche of state,
 energy, and entropy that would end the others.
@@ -26,20 +26,20 @@ simulated ecology.
 
 Between species and the axes stands the **clade** — the taxon line:
 free text on the register card, register-only, never a mechanic and
-never the station tier. Biological lines carry their clade (cetacean ·
-cephalopod · hymenopteran · amphibian · teleost · avian · cnidarian ·
-tardigrade · felid…); substrate lines carry the 12 §5a substrate as
+never the station tier. Biological lines carry their clade (soniform ·
+polybrachia · hexasocial · amphiform · actinoform · volatiform · cnidiform ·
+hypobiotid · ailuroform…); substrate lines carry the 12 §5a substrate as
 clade (plasmoid · lithic · syzygial · endolithic · fungal ·
 cryo-coherent). A divergence branch keeps its line's clade — one line,
 one taxon; a confluent hybrid's clade is named at its wave. The tier
 aligns lines the axes cannot: Hivelight and the Klethaxu are both
-hymenopteran; the register reads the relation. **Gastropoda stands
+hexasocial; the register reads the relation. **Heliciform stands
 open** — no snail line yet walks the board; the register awaits it.
 
 ## 1. The roster
 
-Bands from `05_THERMAL_BALANCE.md` §2 (cryogenic 10–100 K · mesic 250–320 K ·
-hyper-thermal 600–1500 K) or a cross-band deep regime (mantle, deep rock).
+Bands from `05_THERMAL_BALANCE.md` §2 (cryogenic 10–100° · mesic 250–320° ·
+hyper-thermal 600–1500°) or a cross-band deep regime (mantle, deep rock).
 
 ### 1.1 The Glasskeepers (Litho-Chalcogens) — the stone that remembers
 
@@ -49,7 +49,7 @@ hyper-thermal 600–1500 K) or a cross-band deep regime (mantle, deep rock).
 - **Physiology:** silicon–sulfur crystalline networks bound in tectonic
   faults and mantle rock; under extreme stress they **vitrify**, freezing
   their structure into a glass phase that preserves stored state across
-  geologic time and survives impact or stellar radiation.
+  lithic time and survives impact or stellar radiation.
 - **Band / regime:** mantle / tectonic (cross-band — deep interior state, not
   surface `T_eq⁴`).
 - **Function — long-horizon anchoring & deep storage.** The world's cold
@@ -74,7 +74,7 @@ hyper-thermal 600–1500 K) or a cross-band deep regime (mantle, deep rock).
   greatest gatherers of stellar fire, thriving where ordinary works burn away.
 - **Netstratum tie-in:** the in-fiction source of the Furnace's cheap energy
   (05 §3.1). Harvest-grids around Emberkin holdings render stellar flux into
-  exact-rational joules — the energy that flows cold-ward along the thermal trade
+  exact-rational embers — the energy that flows cold-ward along the thermal trade
   loop (05 §4, 01 §6.1).
 
 ### 1.3 The Marrow (Endolith collective) — the slow shapers of worlds
@@ -88,7 +88,7 @@ hyper-thermal 600–1500 K) or a cross-band deep regime (mantle, deep rock).
   a zero-energy dormancy under cold or drought and cannot be starved out.
 - **Band / regime:** deep rock / moons (cross-band, buffered from surface
   flux).
-- **Function — macro-engineering & terraforming.** Across long-horizon loops
+- **Function — macro-engineering & worldshaping.** Across long-horizon loops
   they rewrite a world from within: density, radiator headroom, thermal
   conductivity.
 - **Netstratum tie-in:** the only lawful in-fiction way to *move a world
@@ -127,8 +127,8 @@ hyper-thermal 600–1500 K) or a cross-band deep regime (mantle, deep rock).
 |---|---|---|---|
 | The Wanderers (reference, not a baseline) | Variable / borderlands | Generalist; dormancy through drought | First colonization; masters of no niche |
 | Glasskeepers (Litho-Chalcogens) | Mantle / tectonic | Silicon–sulfur crystal; vitrification | Chronicle anchoring, deep storage, neutral escrow |
-| Emberkin (Radiotrophs) | High-flux Furnace (hyper-thermal) | Flux-harvesting lattice; dormancy shell | Energy harvesting & primary joules production |
-| Marrow (Endolith collective) | Deep rock / moons | Eon-scale sub-rock collective; dormancy | Sub-surface terraforming & `T_eq⁴` band shifting |
+| Emberkin (Radiotrophs) | High-flux Furnace (hyper-thermal) | Flux-harvesting lattice; dormancy shell | Energy harvesting & primary ember production |
+| Marrow (Endolith collective) | Deep rock / moons | Eon-scale sub-rock collective; dormancy | Sub-surface worldshaping & `T_eq⁴` band shifting |
 | Coherent (Cryo-Superconductors) | Deep Frost (`T_eq⁴ → 0`) | Superfluid / BEC; dissociates above `T_c` | High-speed proving & consensus reckoning-engines |
 
 *(The Wanderers are the world's own generalist myth — "the people who live
@@ -170,7 +170,7 @@ nothing is renamed retroactively in a sealed record).
 ## 3. Open rulings for the landing that implements this
 
 - **Band-shift is a chronicle mutation, not a free edit.** Marrow
-  terraforming that changes a world's `T_eq⁴` emits NS-3 receipts per step and
+  worldshaping that changes a world's `T_eq⁴` emits NS-3 receipts per step and
   draws any uncertain outcome through the chronicle beacon (Charter §9); a band
   change is a high-value event and a candidate NS-7 anchor trigger (05 §7.2).
 - **A thermal assault on Coherent sectors** couples the physics (05 §1.2

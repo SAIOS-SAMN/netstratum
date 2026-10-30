@@ -26,7 +26,7 @@ fn main() {
         let carries = |x: &Option<Ratio>| x.as_ref().is_some_and(|x| life::halvings(x, &c) >= ratio(1, 1));
         let b = band(&w.heat);
         by_band[b][0] += 1;
-        let media = [carries(&w.chemical), carries(&w.geologic), carries(&w.plasmic), carries(&w.informational)];
+        let media = [carries(&w.chemical), carries(&w.lithic), carries(&w.plasmic), carries(&w.informational)];
         for (i, m) in media.iter().enumerate() {
             if *m {
                 by_band[b][i + 1] += 1;
@@ -48,7 +48,7 @@ fn main() {
     println!("WORLDS — {} read; {airless} airless (no gas kept); {any} carry a pattern in at least one medium", worlds.len());
     println!("ATMOSPHERE — gas kept (share of what the world holds as gas): least {}%, median {}%, most {}%; core share median {}%", kept_share.first().map(|k| (k.clone() * ratio(100, 1)).round()).unwrap_or_default(), kept_share.get(kept_share.len() / 2).map(|k| (k.clone() * ratio(100, 1)).round()).unwrap_or_default(), kept_share.last().map(|k| (k.clone() * ratio(100, 1)).round()).unwrap_or_default(), cores.get(cores.len() / 2).map(|c| (c.clone() * ratio(100, 1)).round()).unwrap_or_default());
     for (b, row) in by_band.iter().enumerate() {
-        println!("  {:20} {:5} worlds: chemical {:5}, geologic {:5}, plasmic {:5}, informational {:5}", names[b], row[0], row[1], row[2], row[3], row[4]);
+        println!("  {:20} {:5} worlds: chemical {:5}, lithic {:5}, plasmic {:5}, informational {:5}", names[b], row[0], row[1], row[2], row[3], row[4]);
     }
     // Step 2: when each medium's mind would wake, by the climb (no erasure)
     // and by the gated climb (impacts and the window); informational is read,
@@ -63,12 +63,12 @@ fn main() {
         sys.satellites.iter().find(|o| o.path.get(2) == path.get(2)).map(|o| o.period.clone())
     };
     let marks = [100_000u64, 1_000_000, 10_000_000];
-    for (name, pick) in [("chemical", 0usize), ("geologic", 1), ("plasmic", 2)] {
+    for (name, pick) in [("chemical", 0usize), ("lithic", 1), ("plasmic", 2)] {
         let mut free: Vec<u64> = Vec::new();
         let mut gated: Vec<(u64, Vec<u64>)> = Vec::new();
         for w in &worlds {
             let c = w.pressure.clone() / reference.clone();
-            let x = match pick { 0 => &w.chemical, 1 => &w.geologic, _ => &w.plasmic };
+            let x = match pick { 0 => &w.chemical, 1 => &w.lithic, _ => &w.plasmic };
             let Some(x) = x.as_ref() else { continue };
             if let Some(b) = life::recoherences_needed(x, &c).and_then(|k| life::wake_bell(w, k, t_u)) {
                 free.push(b);

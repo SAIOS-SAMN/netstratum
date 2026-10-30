@@ -275,14 +275,14 @@ pub struct OfficeEvidence {
 pub struct Civilization {
     pub name: String,
     pub sigil: String,
-    /// Free text — the encyclopedia grows itself ("blue whale",
-    /// "monarch butterfly", "human").
+    /// Free text — the encyclopedia grows itself ("soniform-depth",
+    /// "bimaniform").
     pub species: String,
     /// The CLADE tier (06 register law, ruled 2026-07-30): the taxon
     /// line between species and the axes — free text, register-only,
     /// never a mechanic and never the station tier. Biological lines
-    /// carry their clade (cetacean, cephalopod, gastropod,
-    /// hymenopteran…); substrate lines carry the 12 §5a substrate
+    /// carry their clade (soniform, polybrachia, heliciform,
+    /// hexasocial…); substrate lines carry the 12 §5a substrate
     /// (plasmoid, lithic, syzygial…). Empty = unrecorded, lawful.
     pub clade: String,
     pub motto: String,

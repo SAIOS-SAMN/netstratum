@@ -1,7 +1,7 @@
 //! docs/82 step 3: a mind that wakes becomes a line in the conductor.
 //!
 //! - Its METABOLISM is its medium's, in the registry's closed vocabulary:
-//!   geologic minds are mineral, chemical minds biotic, plasmic minds
+//!   lithic minds are mineral, chemical minds biotic, plasmic minds
 //!   plasmic. Its disposition and perception, and its NAME, are spoken from
 //!   the seed (flavour only; docs/82: no types).
 //! - Its place is its system's stand-in place (until the sphere).
@@ -37,7 +37,7 @@ pub fn found(u: &Universe, seed: &[u8; 32], w: &Waking, registry: &Registry, wor
     let sigil = (0..8u32).map(|salt| spoken(seed, &w.path, salt)).find(|s| registry.load(s).is_none())?;
     let mut name = sigil.clone();
     name[..1].make_ascii_uppercase();
-    let metabolism = match w.medium { "geologic" => "mineral", "plasmic" => "plasmic", _ => "biotic" };
+    let metabolism = match w.medium { "lithic" => "mineral", "plasmic" => "plasmic", _ => "biotic" };
     let pick = |field: &str, n: u64| (draw(seed, &w.path, field, 0) % n) as usize;
     let civilization = Civilization {
         name: name.clone(),

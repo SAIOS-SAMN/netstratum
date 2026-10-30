@@ -56,9 +56,10 @@ from pathlib import Path
 # into (`DiscoveryMinted`, tag 86, banks Resource::Crystal). It was
 # missing here, so the one economic output of verified work was invisible
 # on every board this file renders.
-RESOURCES = ["iron", "biomass", "alloy", "diamond", "joule", "sink", "crystal"]
-STAR_NAMES = {1: "O", 2: "B", 3: "A", 4: "F", 5: "G", 6: "K", 7: "M",
-              8: "bd", 9: "wd", 10: "rg", 11: "ns", 12: "wr", 13: "lwh"}
+RESOURCES = ["iron", "biomass", "alloy", "diamond", "ember", "sink", "crystal"]
+STAR_NAMES = {1: "blue", 2: "blue-white", 3: "white", 4: "yellow-white", 5: "yellow",
+              6: "orange", 7: "red", 8: "bd", 9: "wd", 10: "rg", 11: "ns", 12: "ws",
+              13: "lwh"}
 # 12_UNION §2a + 30_OFFICES (Wave-1): T4–T9 are deeper economic offices,
 # not ranks above the progenitors. Keep in lockstep with
 # ledger::registry::tier_of — one reading, two surfaces.
@@ -167,17 +168,17 @@ def tlv_ratio(value, at=0):
 # existing banked entry (tag 18) — no new TLV tag — so a decoder that
 # stops at 6 silently drops crystal banks instead of failing.
 RESOURCE_NAMES = {1: "iron", 2: "biomass", 3: "alloy", 4: "diamond",
-                  5: "joule", 6: "sink", 7: "crystal"}
+                  5: "ember", 6: "sink", 7: "crystal"}
 
 
 def element_name(element_id: bytes) -> str:
     """Port of cfe::dop::element_name — family form + voice from hash.
 
-    Family is read from byte[1] against a default G-star spine when the
+    Family is read from byte[1] against a default yellow-star spine when the
     star is unknown at this layer (the board names matter; the assay
     already bound richness to the real class at mint time).
     """
-    # G/F/K spine bands [2,1,1,1] — the common board default.
+    # yellow/yellow-white/orange spine bands [2,1,1,1] — the common board default.
     bands = (2, 1, 1, 1)
     total = sum(bands) or 1
     pick = element_id[1] % total
@@ -590,8 +591,8 @@ def function_of(card, agg):
 def is_closed_ruin(dir_name: str) -> bool:
     """Chronicle rotation / divergence ruins: `<base>--closed-<digest8>`.
 
-    Archives on disk — never a second live solar system. Listing them
-    on the board floods the SOLAR SYSTEMS table with cinder clones.
+    Archives on disk — never a second live star system. Listing them
+    on the board floods the STAR SYSTEMS table with cinder clones.
     """
     return "--closed-" in dir_name
 
@@ -1310,7 +1311,7 @@ def view_board(var_root, args, paint):
         f"  matter — elements {paint.strong(str(element_kinds))} kinds "
         f"({paint.strong(show_board(element_mass))} total mass) · "
         f"law carriers: biomass {paint.strong(show_board(totals['biomass']))} · "
-        f"joule {paint.strong(show_board(totals['joule']))} · "
+        f"ember {paint.strong(show_board(totals['ember']))} · "
         f"crystal {paint.strong(show_board(totals['crystal']))} · "
         f"alloy {paint.strong(show_board(totals['alloy']))} · "
         f"iron(legacy) {paint.dim(show_board(totals['iron']))}",
@@ -1363,8 +1364,8 @@ def view_board(var_root, args, paint):
                 "  intergalactic (outside every reach): "
                 + ", ".join(display_name(w) for w in intergalactic))
 
-    # ── solar systems ───────────────────────────────────────────────
-    lines += ["", paint.head("SOLAR SYSTEMS — each world is one star system")]
+    # ── star systems ───────────────────────────────────────────────
+    lines += ["", paint.head("STAR SYSTEMS — each world is one star system")]
     # Sort: most active first (clock desc), then name.
     system_rows = sorted(rows, key=lambda r: (-r["clock"], r["world"], r["planet"]))
     s_table = []
@@ -1412,7 +1413,7 @@ def view_board(var_root, args, paint):
             elem_cell,
             show_board(row["biomass"]),
             show_board(row["crystal"]),
-            show_board(row["joule"]),
+            show_board(row["ember"]),
             f"{held}" if held else "—",
             str(worlds.get(row["world"], {}).get("puzzles", 0) or "—")
             if worlds.get(row["world"], {}).get("puzzles", 0) else "—",
@@ -1420,7 +1421,7 @@ def view_board(var_root, args, paint):
         ])
     lines.append(tabulate(
         ["WORLD", "PLANET", "STAR", "CIVILIZATION", "GALAXY", "ZONES",
-         "CLOCK", "ELEMENTS", "BIO", "CRYSTAL", "JOULE", "TECH", "PUZZLES",
+         "CLOCK", "ELEMENTS", "BIO", "CRYSTAL", "EMBER", "TECH", "PUZZLES",
          "CONDITION"],
         s_table))
     lines.append(paint.dim(
@@ -1428,7 +1429,7 @@ def view_board(var_root, args, paint):
         "C encasement · K cryo · R resonator · G regenerator"))
     lines.append(paint.dim(
         "  ELEMENTS = N kinds · total mass (almanac matter, tag 72) · "
-        "BIO/CRYSTAL/JOULE are closed law carriers · iron is legacy ration only"))
+        "BIO/CRYSTAL/EMBER are closed law carriers · iron is legacy ration only"))
     lines.append(paint.dim(
         "  condition: steady = banks feeding · short X = famine on resource X · "
         "venting = excess heat sealed as entropy · large banks floor with '+'"))
@@ -1580,7 +1581,7 @@ def view_civs(var_root, args, paint):
             creed_of(agg.get("events", []), agg.get("digest", "")),
             str(len(agg["worlds"])), str(agg["colonies"]),
             show_board(agg["biomass"]),
-            show_board(agg["joule"]), show_board(agg["sink"]),
+            show_board(agg["ember"]), show_board(agg["sink"]),
             show_board(agg["crystal"]),
             show_board(agg["iron"]),
             str(agg["puzzles"]),
@@ -1594,14 +1595,14 @@ def view_civs(var_root, args, paint):
         lines += [paint.head(TIER_TITLES[tier]), tabulate(
             ["CIVILIZATION", "SPECIES", "STATION", "FUNCTION", "CREED",
              "WORLDS", "COLONIES",
-             "BIOMASS", "JOULE", "SINK", "CRYSTAL", "IRON(leg)", "PUZZLES",
+             "BIOMASS", "EMBER", "SINK", "CRYSTAL", "IRON(leg)", "PUZZLES",
              "INTELLIGENCE"],
             by_tier[tier]), ""]
     if "T?" in by_tier:
         lines += [paint.head(TIER_TITLES["T?"]), tabulate(
             ["CIVILIZATION", "SPECIES", "STATION", "FUNCTION", "CREED",
              "WORLDS", "COLONIES",
-             "BIOMASS", "JOULE", "SINK", "CRYSTAL", "IRON(leg)", "PUZZLES",
+             "BIOMASS", "EMBER", "SINK", "CRYSTAL", "IRON(leg)", "PUZZLES",
              "INTELLIGENCE"],
             by_tier["T?"]), ""]
     return "\n".join(lines).rstrip() or "(no civilizations match)"
@@ -1636,7 +1637,7 @@ def view_worlds(var_root, args, paint):
             show_board(row.get("stamp", Fraction(0))),
             show_board(row["biomass"]),
             show_board(row["alloy"]), show_board(row["diamond"]),
-            show_board(row["joule"]), show_board(row["sink"]),
+            show_board(row["ember"]), show_board(row["sink"]),
             show_board(row["crystal"]),
             show_board(row["iron"]),
             STAR_NAMES.get(row["star"], "—"),
@@ -1650,7 +1651,7 @@ def view_worlds(var_root, args, paint):
         ])
     return "\n".join([paint.head("SETTLED PLANETS"), tabulate(
         ["CIVILIZATION", "WORLD", "PLANET", "ELEMENTS", "STAMP", "BIOMASS", "ALLOY",
-         "DIAMOND", "JOULE", "SINK", "CRYSTAL", "IRON(leg)", "STAR", "ZONES",
+         "DIAMOND", "EMBER", "SINK", "CRYSTAL", "IRON(leg)", "STAR", "ZONES",
          "TICKS", "TRAJ", "HUNGER", "RAIL", "LABOR",
          "CHAIN", "CONDITION"],
         table)])
@@ -2182,7 +2183,7 @@ def view_ruins(var_root, args, paint):
         ])
     return "\n".join([
         paint.head(f"CLOSED RUINS — {len(ruins)} archive(s)"),
-        paint.dim("  rotated on chronicle divergence · not live solar systems"),
+        paint.dim("  rotated on chronicle divergence · not live star systems"),
         tabulate(
             ["LINE", "CLOSED", "RECEIPTS", "PUZZLES", "AGE", "CHAIN", "DIGEST"],
             ruins,

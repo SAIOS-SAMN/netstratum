@@ -78,7 +78,7 @@ fn index(style: Style) {
     println!();
     println!("  {}", style.section("COLONY LOOP"));
     row(style, "found · zone · tick · collect", "found and run a settlement");
-    row(style, "star · site · thermal", "sun + orbit (alignment feeds melt)");
+    row(style, "star · site · thermal", "star + orbit (alignment feeds melt)");
     row(style, "prospect · assay · refine path", "elements and refinery");
     row(style, "map · status · dashboard", "board readings");
     println!();
@@ -127,7 +127,7 @@ fn bench_help(style: Style) {
     );
     println!();
     println!("  {}", style.section("MATTER & PLACE"));
-    row(style, "bench planetary …", "bio · chem · terraform · medium · thermal · balance");
+    row(style, "bench planetary …", "bio · chem · worldshape · medium · thermal · balance");
     row(style, "bench build", "zones · yard · refinery · regen");
     row(style, "bench star", "commission · site · age · rings");
     row(style, "bench estate", "chart · ladder · parcels · appraise");
@@ -409,7 +409,7 @@ fn routes_help(style: Style) {
     println!();
     println!(
         "  {}",
-        style.hint("Upkeep 1/4 joule per lane at year voice — unpaid lanes lapse.")
+        style.hint("Upkeep 1/4 ember per lane at year voice — unpaid lanes lapse.")
     );
     println!(
         "  {}",
@@ -425,7 +425,7 @@ fn colony_help(style: Style) {
     row(style, "found <name>", "genesis colony");
     row(style, "zone <tile> <ext|hab|smelt|yard|regen|…>", "build");
     row(style, "tick <n> · collect", "time + settle workspace");
-    row(style, "star <class> · site <A> <r>", "commission sun + site orbit");
+    row(style, "star <class> · site <A> <r>", "commission star + site orbit");
     row(style, "rings / sky", "star field · core · orbit period/slot");
     row(style, "thermal · map · status", "readings + thermal balance");
     row(style, "estate survey · parcels · appraise …", "real estate ladder (35)");
@@ -440,7 +440,7 @@ fn colony_help(style: Style) {
     row(style, "posture status|set", "P5-B doctrine reorient (anatomy sealed)");
     row(style, "veil status|draw|lift · ward status|elder|lift", "P5-C INF MASK/WARDEN");
     row(style, "market status|seal|resume|clear|raid|cascade", "P5-M/M2 MKT war");
-    row(style, "medium status|reinforce · tamper", "P5-D ATM + dual-use TERRA tax");
+    row(style, "medium status|reinforce · tamper", "P5-D ATM + dual-use WORLDSHAPE tax");
     row(style, "spy status|probe|exfil|sabotage", "P5-F espionage (intel stash, no free tech)");
     row(style, "rail status|promote", "P5-G R1→R2; R3/R4 feature-gated");
     row(style, "anchor export-stamp|import-strand|import-court", "X7 T9 Anchor (feature-gated)");

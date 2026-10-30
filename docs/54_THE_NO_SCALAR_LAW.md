@@ -129,7 +129,7 @@ grain by smelt-flooring every fill at the site the delta lands. Each ledger decl
 its grain: the market/resource ledger speaks 1/64 (`smelt(x) = floor(x·64)/64`, the
 grain the melt law speaks); the element ledger speaks the finer 1/1024
 (`smelt_element`, the grain ONT-2 already floors the vein integral to), because
-element mints — the food synthesis `joule·richness`, the vein flow — are naturally
+element mints — the food synthesis `ember·richness`, the vein flow — are naturally
 sub-1/64 and flooring them to 1/64 floors small quanta toward zero and starves the
 food economy. 1/1024 preserves 16× finer food while still bounding every element
 denominator to ≤ 1024 (~10 bits): the explosion cannot recur. The dominant haul

@@ -16,11 +16,11 @@ changes taken in below); not built.
 
 Life is emergent from the quantum state between A planet and its star,
 shaped by the planet's elements, its atmosphere and the core of its mass.
-Life takes many forms (the tardigrade, the plasmic, consciousness itself),
-and none is privileged: chemical, geologic, plasmic, informational. No law
-here assumes water, a solvent, carbon, a habitable zone or biology. A world
-offers media; any medium that can carry a pattern against its own noise can
-carry life, and a world may carry several forms at once.
+Life takes many forms (the hypobiotid, the plasmic, consciousness
+itself), and none is privileged: chemical, lithic, plasmic, informational.
+No law here assumes water, a solvent, carbon, a habitable zone or biology.
+A world offers media; any medium that can carry a pattern against its own
+noise can carry life, and a world may carry several forms at once.
 
 ## What a world gives (built)
 
@@ -41,7 +41,7 @@ carry life, and a world may carry several forms at once.
    and its turning come from one source. Since a world turns once in
    `P = r / M(<r)` bells, `T = K / P`. `K` is the orb tier's one anchor:
    the innermost world of a star (one tier unit, 60 bells) at 1,000 K, so
-   `K = 60,000 K·bells` (the Earth anchor needs units the orb tier lacks). Before this can spread worlds across climates, the orbs'
+   `K = 60,000 K·bells` (the Earth anchor needs units the orb tier lacks; an import, docs/108 O6). Before this can spread worlds across climates, the orbs'
    spacing must be physical: neighbours stand ten reaches apart, not with
    reaches just touching (Xylarium: Gyr-stable systems sit 7 to 10 mutual
    reaches apart, below about 3.5 they are unstable on short times; touching
@@ -57,7 +57,7 @@ carry life, and a world may carry several forms at once.
    - **chemical:** the compounds its elements close (the atom law) whose grip
      holds at its temperature (`τ_min · 157,800 K > T`, the hydrogen
      anchor), as liquid, gas or ice alike;
-   - **geologic:** the lattices of its core and crust, its own mass and
+   - **lithic:** the lattices of its core and crust, its own mass and
      deepest elements: patterns held in mineral order, slow and long-lived;
    - **plasmic:** where heat beats every bond, its ionised atmosphere and
      the field its star's coupling sets: patterns held in the field, fast;
@@ -120,7 +120,7 @@ carry life, and a world may carry several forms at once.
    cohesion, `ε = e^(−x)`, x the cohesion over the agitation in that
    medium's own terms: a bond's grip over heat (chemical,
    `x = τ_min · 157,800 K / T`), a lattice's over heat and tremor
-   (geologic), a field's confinement over its turbulence (plasmic), the
+   (lithic), a field's confinement over its turbulence (plasmic), the
    coupling's coherence over its slip (informational). The exponential
    is no power and no square: it is a count of halvings, `ε = 2^(−x/ln 2)`.
    It is held exactly as a certified enclosure: the halvings bounded below
@@ -138,7 +138,7 @@ carry life, and a world may carry several forms at once.
    proper clock (Xylarium's review: copying is the medium's, not the
    orbit's): a plasmic pattern copies on the coupling's fastest turn, a
    chemical one on a local day (a turn of its spin) while one copier holds
-   it and a local year once a body does, a geologic one on many years, an
+   it and a local year once a body does, a lithic one on many years, an
    informational one on the coupling's rungs.
    A world's spin is not yet physics (docs/78, S^60 bodies): until it is,
    its day is a declared share of its year (an anchor). A slower, deeper
@@ -178,7 +178,7 @@ carry life, and a world may carry several forms at once.
 - **A mind wakes** at the universal bell of that recoherence (the world's
   slip per echo, after its galaxy's delay).
 - **Reading** (`life var-e1`): minds could wake (chemical) on 37 worlds by
-  bell 10,000, 2,353 by 100,000, 5,291 by 1,000,000; geologic 88, 5,412,
+  bell 10,000, 2,353 by 100,000, 5,291 by 1,000,000; lithic 88, 5,412,
   5,716; plasmic 31, 67, 67; the first at bell 7,560 in the galaxy nearest
   the universal core. Informational is read, not climbed: its coherence is
   whole at every recoherence (open).
@@ -213,13 +213,13 @@ off the inverted galaxy layer (docs/83, "Corrections") until it is rebuilt.
   before then costing that interval again, within the star's window or
   never.
 - **Reading** (`life var-e1`): minds wake on 93 worlds (chemical), 103
-  (geologic) and 193 (plasmic) of 5,716, about 2% to 7%, near xylarium's
+  (lithic) and 193 (plasmic) of 5,716, about 2% to 7%, near xylarium's
   2%; the first at bell 62,460, in the galaxy nearest the universal core.
   The body rungs are the bottleneck, as Xylarium found.
 - **Ruled (operator, 2026-10-14; starts, to be measured and tuned):**
   - **The informational medium is where minds go, not where life starts.**
     No pattern is written into a phase without something to write it from:
-    it takes a mind already woken in a material medium (chemical, geologic,
+    it takes a mind already woken in a material medium (chemical, lithic,
     plasmic) whose records keep coherent with its star across full rungs,
     and carries it on. It is the physical path to ancienthood (docs/74:
     ancients are pure intelligence; docs/78: ascension by deed keeps a
@@ -236,7 +236,7 @@ off the inverted galaxy layer (docs/83, "Corrections") until it is rebuilt.
 - At boot the conductor reads every world's earliest waking (the gated
   climb on the shared ruler, by any material medium); each wakes at its
   bell and founds a line (`conductor::waking`): its metabolism its medium's
-  (geologic mineral, chemical biotic, plasmic plasmic, the registry's
+  (lithic mineral, chemical biotic, plasmic plasmic, the registry's
   vocabulary), its name, disposition and perception spoken from the seed,
   its place its system's. The first mind of each galaxy takes a progenitor
   seat; every other people is a sovereign. Each waking is counted in the
@@ -255,7 +255,7 @@ off the inverted galaxy layer (docs/83, "Corrections") until it is rebuilt.
 
 ## A people is read from its world
 
-- **Its medium** defines it: chemical (the compound it lives in), geologic
+- **Its medium** defines it: chemical (the compound it lives in), lithic
   (the lattice), plasmic (the field), informational (the coupling), and the
   band it works in. Names are spoken from the seed's syllables, flavour only.
 - **No catalogue, no types.** Era 0's 22 named species stay in era 0's
@@ -375,7 +375,7 @@ the star's light per world (Xylarium); the galaxy-tier lock of each star.
 | `1/ln 2` | certified rational bounds | the halvings of Boltzmann |
 | impacts, sterilisations | rates per local year | a dynamics not yet stated |
 | a viable people | of order 500 | Franklin's minimum |
-| the reference pressure | declared (Earth's surface, 1 bar, stands for it) | a unit of pressure not yet stated |
+| the reference pressure | declared (Earth's surface, 1 bar, stands for it; an import, docs/108 O6) | a unit of pressure not yet stated |
 | `M_a`, compression's scale | the median body of its tier (stars, worlds) | how matter resists its own weight, not yet stated |
 | `K`, read as heat per turning | the innermost world of a star (one tier unit, 60 bells) at 1,000 K | a radiation law not yet stated (replaces the Earth anchor, whose units the orb tier lacks) |
 

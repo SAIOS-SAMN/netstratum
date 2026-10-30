@@ -50,7 +50,7 @@ legs — double entry across two books.
   typed refusal (`BadTransfer` / `NoSuchOrb` / `CannotAfford` naming the
   exact shortfall).
 - **The shield (THRESHOLD-1, 12_UNION §7):** an aperture touches only
-  worlds whose peoples have made the solar leap (TECH-1a) — a pre-solar
+  worlds whose peoples have made the stellar leap (TECH-1a) — a pre-stellar
   world is unreachable in either direction (`Shielded`, naming which
   side stands shielded; a refusal moves nothing anywhere). A world is a
   star system, so every aperture deed is interstellar by construction:

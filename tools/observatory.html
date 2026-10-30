@@ -46,7 +46,7 @@ const F = t => { if (typeof t !== "string") return Number(t||0);
   const s = t.split("/"); return s.length===2 ? Number(s[0])/Number(s[1]) : Number(t); };
 const esc = t => String(t).replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
 const TIER = st => ({progenitor:"T0", watcher:"T1", observer:"T1", sovereign:"T2"})[st] || "T3";
-const RESOURCES = {1:"iron",2:"biomass",3:"alloy",4:"diamond",5:"joule",6:"sink",7:"crystal"};
+const RESOURCES = {1:"iron",2:"biomass",3:"alloy",4:"diamond",5:"ember",6:"sink",7:"crystal"};
 
 async function text(path){ const r = await fetch(path); if(!r.ok) throw 0; return r.text(); }
 async function bin(path){

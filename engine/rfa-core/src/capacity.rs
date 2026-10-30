@@ -374,7 +374,7 @@ pub struct Flux {
     /// A sink is the scarce half of the economy. `05` §1.4: a dim-star
     /// system *"holds the rarest resource in a high-flux universe:
     /// radiator headroom"*, and sells it as `S_cool` — absorption
-    /// measured in joule-commensurable units. The Frost's entire trade
+    /// measured in ember-commensurable units. The Frost's entire trade
     /// is convergence.
     ///
     /// **A SINK is not A trapped interior.** What `18` §2d forbids is

@@ -341,7 +341,7 @@ impl World {
         // #32, 20_FOUNDING §3: the founding tithe — the economy's
         // genesis transaction. Denominated in the line's own
         // metabolic ration (G2), never a flat amount: mineral tithes
-        // iron, biotic tithes biomass, plasmic tithes joules (rate 0
+        // iron, biotic tithes biomass, plasmic tithes embers (rate 0
         // today — plasmic agriculture is #29, still open, so this is
         // byte-identically a no-op debit for that metabolism until it
         // lands, not a special case here). Fallback siting is the

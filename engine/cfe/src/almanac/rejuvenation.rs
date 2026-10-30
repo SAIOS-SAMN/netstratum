@@ -169,10 +169,10 @@ pub fn habitability(clade: u16, region: ThermalRegion) -> Ratio {
 }
 
 /// The clade's preferred substrate band as exact `T⁴` bounds
-/// `(floor⁴, ceiling⁴)`, derived from the cited Kelvin anchors
+/// `(floor⁴, ceiling⁴)`, derived from the cited thermal anchors
 /// ([`crate::thermal::SubstrateBand::bounds4`]). The 8-way preference ladder
 /// collapses onto the three anchored bands; the one inter-band preference
-/// (Torrid, the 320–600 K silence) is the gap between the mesic ceiling and
+/// (Torrid, the 320–600° silence) is the gap between the mesic ceiling and
 /// the foundry floor — itself two cited anchors, no invented bound.
 fn preferred_band_bounds4(clade: u16) -> (Ratio, Ratio) {
     use crate::thermal::SubstrateBand;
@@ -201,7 +201,7 @@ fn preferred_band_bounds4(clade: u16) -> (Ratio, Ratio) {
 /// ```
 ///
 /// `U_opt` is the centre of the clade's preferred substrate band and `V` its
-/// full width — both derived from the cited Kelvin anchors, no dial. A clade
+/// full width — both derived from the cited thermal anchors, no dial. A clade
 /// sits at η=1 dead-centre of its band, η=1/2 at either band edge, and η=0 a
 /// full band-width beyond. So a carbon-water line on a hot Diophantine track
 /// (`t_eq4` above its mesic band) denatures to η→0, while a thermophile at the

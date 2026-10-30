@@ -81,7 +81,7 @@ With STAMP:
 Conductor **`stamp_market_step`** each beat (or year-voice):
 
 1. Market makers (T6 or designated NPC policy) post bid/ask on
-   liquid cargoes (joule, crystal, top elements).
+   liquid cargoes (ember, crystal, top elements).
 2. Inventory constraints: cannot bid what they cannot pay.
 3. Clear against resting offers (MARKET-1 shape).
 4. If inventory stuck → widen spread or stop quoting (no infinite MM).

@@ -60,7 +60,7 @@ impl World {
             pressure: pressure.clone(),
             threshold: thr.clone(),
             compromised: pressure >= thr,
-            dual_use: self.can_terraform(),
+            dual_use: self.can_worldshape(),
             reinforce_resource: self.medium_reinforce_resource(),
             residual_voice: self.medium_residual_voice(),
             metabolism: self.defense_posture().metabolism,
@@ -70,9 +70,9 @@ impl World {
     /// Dual-use ATM reading (P5.19): terra crown held ⇒ covert path taxed.
     pub fn dual_use_atm(&self) -> DualUseAtm {
         DualUseAtm {
-            can_overt_terraform: self.can_terraform(),
+            can_overt_worldshape: self.can_worldshape(),
             can_covert_tamper: true,
-            dual_use_tax: self.can_terraform(),
+            dual_use_tax: self.can_worldshape(),
         }
     }
 
@@ -92,9 +92,9 @@ impl World {
     pub fn covert_tamper_as(&mut self, actor: u64, orb: u64) -> Result<Ratio, ActionRefused> {
         self.permitted(actor, Scope::Build)?;
         // P5.19 dual-use: never rewrites PlanetSited / thermal seat.
-        // Holding terra crown doubles crystal cost (1+1) — overt path is terraform.
+        // Holding terra crown doubles crystal cost (1+1) — overt path is worldshape.
         let base = eighth();
-        let cost = if self.can_terraform() {
+        let cost = if self.can_worldshape() {
             base.clone() + base.clone()
         } else {
             base.clone()
@@ -201,7 +201,7 @@ pub struct MediumIntegrity {
 /// P5.19 dual-use ATM gate reading.
 #[derive(Debug, Clone)]
 pub struct DualUseAtm {
-    pub can_overt_terraform: bool,
+    pub can_overt_worldshape: bool,
     pub can_covert_tamper: bool,
     pub dual_use_tax: bool,
 }

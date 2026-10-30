@@ -76,11 +76,11 @@ capital, and it is the reason this whole section does not violate
 Charter §3.5.** The market primitives stand: `cfe::world::post_offer`,
 `cfe::world::offers`, `cfe::world::clear_trade`, `cfe::world::transfer_as`.
 
-### 2b. Commission — pay a progenitor to move stars and suns
+### 2b. Commission — pay a progenitor to move stars and worlds
 
 If no existing world suits the founder, or none is palatable, **the
 founder pays a progenitor class to build them one** — to move the stars
-and suns and raise a new solar system or world to order. **This must be
+and raise a new star system or world to order. **This must be
 possible.**
 
 This is the progenitor seat doing literally what it is defined to do:
@@ -152,7 +152,7 @@ player.
 `engine/cfe/tests/siting_determinism.rs`, both green):
 
 ```text
-band  Cryogenic     1.000e4  .. 1.000e8   K⁴
+band  Cryogenic     1.000e4  .. 1.000e8   °⁴
 band  Mesic         3.906e9  .. 1.049e10
 band  HyperThermal  1.296e11 .. 5.063e12
 
@@ -169,7 +169,7 @@ struck as a founding default.**
 Two things follow, and both are engineering rather than doctrine:
 
 1. **The band set must cover what the game offers.** Three bands leave
-   two uncovered stretches (100–250 K and 320–600 K in temperature).
+   two uncovered stretches (100–250° and 320–600° in temperature).
    Either the bands close over the offered types or the sites move
    inside them. **The operand exists; the coverage does not.**
 2. **`cryo` must be foundable.** No derivation reaches a cold world
@@ -251,8 +251,8 @@ merely bleak, it measured the wrong object.* It did again here.
 **The engine already runs the right pattern.** Nothing needs inventing:
 
 ```text
-Encasement   "captures excess heat into joules BEFORE anything vents"
-Joule        "minted ONLY by syntropic encasement, never by fiat"
+Encasement   "captures excess heat into embers BEFORE anything vents"
+Ember        "minted ONLY by syntropic encasement, never by fiat"
 CryoArray    "captures vault-band headroom as bankable sink, never passive"
 ```
 
@@ -271,7 +271,7 @@ at the touch, in this order:
 ```
 
 **A ward's income is a positive act, not a levy.** It is earned by
-having built the capacity to capture, exactly as a colony earns joules
+having built the capacity to capture, exactly as a colony earns embers
 by raising a shell. A ward that builds nothing captures nothing — not
 because it is punished, but because capture is a thing that is constructed.
 
@@ -395,8 +395,8 @@ disjoint and do not cover the line, and a sum of steps over
 non-covering intervals is zero between them:
 
 ```text
-T ∈ 320..600 K   → every Θ pair is 0 → Coverage(T) = 0
-the derived furnace seats sit at ~332..347 K
+T ∈ 320..600°   → every Θ pair is 0 → Coverage(T) = 0
+the derived furnace seats sit at ~332..347°
 ```
 
 The worlds §4 exists to rescue read zero under it. **The gap was never
@@ -406,7 +406,7 @@ a sum changes its notation, not its support.** It also introduces
 object is removing literals.
 
 **And the step function is the absolute struck by §6a-bis.** A world one
-kelvin outside a bound reads nothing at all; a world one kelvin inside
+degree outside a bound reads nothing at all; a world one degree inside
 reads full. That is `condition == 5` again, wearing thermal clothes.
 
 **The law — coverage is a positive reading, defined everywhere on the
@@ -421,7 +421,7 @@ coverage(T) is defined for every T > 0
 
 **Three things follow at once.** No temperature is unaccounted, so §7 is
 satisfied. A gap world reads poor rather than impossible, so a mineral
-line founding at 332 K is a hard place to live rather than an
+line founding at 332° is a hard place to live rather than an
 uninhabitable one — which is a game, where the alternative was a defect.
 And `band_of` returning `None` stops being an absolute exclusion: the
 named bands become the regions where coverage is rich, never the test
@@ -434,7 +434,7 @@ on the whole positive line:
 
 ```text
 inside any band      coverage = 1          the bands are PLATEAUS now
-outside every band   1 / (1 + d/scale)     d = K⁴ to the nearest edge
+outside every band   1 / (1 + d/scale)     d = °⁴ to the nearest edge
 ```
 
 **The scale is derived, not chosen** — `coverage_scale4()` is the width
@@ -447,7 +447,7 @@ enters to the first power only.
 
 **Its shape is a valley, not a slope, and that is correct.** Between two
 bands coverage descends and then climbs the far side — a world at
-1.2e11 K⁴ is poor because it is far from mesic, and improving because it
+1.2e11 °⁴ is poor because it is far from mesic, and improving because it
 nears hyperthermal. The first pin written for this assumed monotone in
 temperature and failed; the correction is recorded in the test.
 
@@ -466,7 +466,7 @@ whole of why location is an asset**, and it gives §6h.3's GDP its
 per-deposit term.
 
 **The gap is closed at the point it mattered.** The derived furnace
-seats (1.21–1.45e10 K⁴) now read poor and non-zero instead of
+seats (1.21–1.45e10 °⁴) now read poor and non-zero instead of
 uninhabitable, so a mineral or plasmic founding has a real if hard
 economy rather than a defect — §4's viability law satisfied by a reading
 rather than by moving a band edge.
@@ -517,7 +517,7 @@ step. **The same boundary is read three times independently:**
 ```text
 world/rules.rs:51   gates the SEALED demurrage rule
 world/tick.rs:274   gates cryo-array capture of vault headroom
-world/tick.rs:403   gates the accrued-joule leak
+world/tick.rs:403   gates the accrued-ember leak
 ```
 
 **And "vaulted" is not a thing anyone builds — it is a birth
@@ -629,7 +629,7 @@ away for want of a type.**
 
 ### 6f.2 Expansion two — the cold branch does not exist
 
-`frozen` is computed inside `tick` (`sub_mesic && joule_famined`) and
+`frozen` is computed inside `tick` (`sub_mesic && ember_famined`) and
 discarded at the end of the tick. **There is no `UnderflowStruck`, no
 cold degree, no committed field, no wire tag.** The hot side has two
 events, a flag, a vent mechanism and an absorption market; the cold side
@@ -823,10 +823,10 @@ tiers, and their stellar abundance.**
 `spine_bands` is nucleosynthesis in miniature and it already works:
 
 ```text
-O · B · A                    [1, 2, 0, 1]      hot, massive
-F · G · K                    [2, 1, 1, 1]      sun-like
-M · BrownDwarf               [1, 0, 2, 1]      cool, small
-remnants (WD/RG/NS/WR)       [0, 2, 1, 2]      the forges
+Blue · BlueWhite · White          [1, 2, 0, 1]      hot, massive
+YellowWhite · Yellow · Orange     [2, 1, 1, 1]      mid-sequence
+Red · BrownDwarf                  [1, 0, 2, 1]      cool, small
+remnants (WD/RG/NS/WS)            [0, 2, 1, 2]      the forges
 ```
 
 **A world's matter is drawn from its own star's bands**, exactly as the
@@ -1146,7 +1146,7 @@ one of them is forgiven.
 > it is incurred. **Intelligence is the capacity to tell them apart
 > before the slow clock has run.**
 
-### 6j.6 Sun and planet — the asymmetry the engine already encodes
+### 6j.6 Star and planet — the asymmetry the engine already encodes
 
 ```text
 STELLAR    t_eq4 / thermal_k() per tick. Bounded by luminosity and
@@ -1157,9 +1157,9 @@ PLANETARY  regeneration(S) ≤ r·S_max/4. STOCK-limited, depletable, and
            degradable on the slow clock.
 ```
 
-**The sun is a flow that can only be tapped faster; the planet is a
+**The star is a flow that can only be tapped faster; the planet is a
 stock that can be destroyed.** The engine already carries the correct answer to this —
-the encasement shell captures stellar heat into joules, and joules mint
+the encasement shell captures stellar heat into embers, and embers mint
 *only* by capture and never by fiat. **"Harvest the star, not the world"
 is not a moral; it is the shape of the bounds.**
 
@@ -1196,7 +1196,7 @@ backwards is not a degraded world, it is a broken invariant.
    are: coverage derives from `t_eq4`, which derives from albedo and
    orbit, so a climate that relaxes restores coverage — while `degrade`
    touches `rate` and `ceiling` and nothing restores those.
-3. **Terraforming is not the symmetric inverse.** Substrate hysteresis:
+3. **Worldshaping is not the symmetric inverse.** Substrate hysteresis:
    fallow ticks return `S(t)` to `S_max` and never return `S_max`
    itself. **Pinned** — 200 fallow ticks after a 25% degradation leave
    the recurring ceiling at exactly 9/16. Restoring `S_max` needs
@@ -1206,7 +1206,7 @@ backwards is not a degraded world, it is a broken invariant.
 **Owed, and named rather than assumed:** which methods carry a
 degradation term and how large, whether coverage damage is separable
 from ceiling damage, and whether a degraded substrate can be restored by
-deliberate work (terraforming as the inverse of `degrade`) or only ever
+deliberate work (worldshaping as the inverse of `degrade`) or only ever
 declines.
 
 ## §7 The base-level accounting law

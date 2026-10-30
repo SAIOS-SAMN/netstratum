@@ -39,7 +39,7 @@ P1 Sightlines & parity  ──►  P2 Alignment (D_eff)
 | **2** | Alignment economics | P1 readings useful | Orbit windows move melt |
 | **3** | Fleet capital | P2 D_eff; yard design | Hulls limit and optimize routes |
 | **4** | Local capital markets | P1 STAMP player; `32` Wave 5 | Civ-filtered Note/Fut/Share/Perp |
-| **5** | Defense axioms · escort · covert terraform · espionage · deep rails | P3 hulls; `36_DEFENSE_AXIOMS` | Species-relative defense + KIN convoy + R3/R4 |
+| **5** | Defense axioms · escort · covert worldshape · espionage · deep rails | P3 hulls; `36_DEFENSE_AXIOMS` | Species-relative defense + KIN convoy + R3/R4 |
 
 ---
 
@@ -168,7 +168,7 @@ a Future prices freight around an alignment window without float marks.
 
 ---
 
-## Phase 5 — Defense axioms · convoy · covert terraform · espionage · deep rails
+## Phase 5 — Defense axioms · convoy · covert worldshape · espionage · deep rails
 
 **Authority design:** `36_DEFENSE_AXIOMS.md` (species-relative domains
 CEL/ATM/COG/CYB/INF/KIN; covert atmospheric tampering; espionage stack).  
@@ -191,7 +191,7 @@ optional R3/R4 exits for claims.
 |----|------|---------|------|
 | P5.11 | [x] Derive domain weights from metabolism × disposition × perception | P5.0, genesis | pure reading |
 | P5.12 | [x] Clade colour table (voice + primary residual) from taxon/06 | P5.11 | no new dials |
-| P5.13 | [x] defend shows **non-human** posture copy (plasmic/lithic/hive…) | P5.11–P5.12 | CLI/desk |
+| P5.13 | [x] defend shows **non-bimaniform** posture copy (plasmic/lithic/hive…) | P5.11–P5.12 | CLI/desk |
 | P5.13b | [x] In-game doctrine reorient (`PostureReoriented` 144); anatomy sealed | P5.11 | pins |
 
 ### P5-C — INF compose (veil / ward / counter-intel) · **landed**
@@ -259,14 +259,14 @@ not a second physics. NPC must war without opening a suite.
 | P5.42 | [x] Collateral haircut ladder (pure floor on `issue_note`) | P5.41 | pins |
 | P5.43 | [x] Early `resume_market` audit (clear depth gate) | P5.33 | pins |
 
-### P5-D — ATM defense + covert terraform (land slice)
+### P5-D — ATM defense + covert worldshape (land slice)
 
 | ID | Task | Depends | Exit |
 |----|------|---------|------|
 | P5.16 | [x] Medium envelope reinforce deed (tag 142) | P5.0, thermal | pins |
 | P5.17 | [x] CovertTamper deed + pressure scalar (tag 141) | P5.16 | pins |
 | P5.18 | [x] TamperDetected at unit threshold (tag 143) | P5.17 | pins |
-| P5.19 | [x] Dual-use gate: TERRA-1 overt vs CovertTamper covert | TERRA-1, P5.17 | doc+pin |
+| P5.19 | [x] Dual-use gate: WORLDSHAPE-1 overt vs CovertTamper covert | WORLDSHAPE-1, P5.17 | doc+pin |
 | P5.19b | [x] Species-relative medium residual + reinforce resource | P5.11, P5.17 | pin |
 
 ### P5-F — Espionage suite · **landed**

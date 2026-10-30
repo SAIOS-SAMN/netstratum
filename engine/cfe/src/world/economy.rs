@@ -229,19 +229,19 @@ impl World {
         // unpayable toll lifts the veil by receipt, never silently.
         if self.veiled {
             let toll = crate::parameter::of(self.chronicle(), crate::parameter::Parameter::VeilToll);
-            let held_joules = self
+            let held_embers = self
                 .orbs
                 .iter()
                 .find(|held| held.orb_id == orb)
-                .map(|held| held.banked_amount(Resource::Joule))
+                .map(|held| held.banked_amount(Resource::Ember))
                 .unwrap_or_else(|| ratio(0, 1));
-            if held_joules >= toll {
+            if held_embers >= toll {
                 if let Some(held) = peel(&mut self.orbs, orb) {
-                    held.bank(Resource::Joule, -toll.clone());
+                    held.bank(Resource::Ember, -toll.clone());
                 }
                 let stamp = self.clock.now();
                 self.chronicle.append(
-                    ClosureEvent::UpkeepSettled { orb_id: orb, resource: Resource::Joule, amount: toll },
+                    ClosureEvent::UpkeepSettled { orb_id: orb, resource: Resource::Ember, amount: toll },
                     stamp,
                     vec![actor],
                 );
@@ -285,7 +285,7 @@ impl World {
         // after the touch, at the same stamp.
         let population = self.population_touch_delta_with(orb, self.clock.now(), ration);
         // G2 (#29): the food-element an element-eater synthesizes this
-        // touch (joule → element, conserved). Read pre-touch; settled as
+        // touch (ember → element, conserved). Read pre-touch; settled as
         // its own ElementFarmed receipt after the touch. `None` for every
         // non-eater, so a v1 world is byte-identical.
         let farm = self.element_farm_at_touch(orb, self.clock.now());
@@ -459,7 +459,7 @@ impl World {
         let stamp = self.clock.now();
         let count = settleable.len();
         // SINK-1 (Q2): receipted demurrage at touch — un-vaulted banked
-        // joules/sink decay for the elapsed span, settled openly.
+        // embers/sink decay for the elapsed span, settled openly.
         let ease = ease_of(&self.techs, orb_id, stamp);
         touch(held, self.star, &mut self.chronicle, stamp, &ease, &supply);
         // VENT-1: seal the pending vented entropy into the ledger.
@@ -520,16 +520,16 @@ impl World {
             let overflow = friction - captured.clone();
 
             // The syntropic arm, first. Captured friction is encased
-            // exactly as captured heat is — it banks joules and rides
+            // exactly as captured heat is — it banks embers and rides
             // the existing `YieldCollected` receipt, which is what feeds
             // `encased_entries` and `heat_encased_of`. No new deed.
             if captured > ratio(0, 1) {
-                held.bank(Resource::Joule, captured.clone());
+                held.bank(Resource::Ember, captured.clone());
                 held.syntropy_contained += captured.clone();
                 self.chronicle.append(
                     ClosureEvent::YieldCollected {
                         orb_id,
-                        resource: Resource::Joule,
+                        resource: Resource::Ember,
                         amount: captured,
                     },
                     stamp,
@@ -575,11 +575,11 @@ impl World {
                     }
                     held.bank(resource, amount.clone());
                     // The syntropic BOOK — the inverse of
-                    // entropy_vented. A joule yield is an encased joule
+                    // entropy_vented. An ember yield is an encased ember
                     // (the crystal sheet already reads it that way), so
                     // containing one books it. Mirrored verbatim in
                     // `replay`.
-                    if resource == Resource::Joule {
+                    if resource == Resource::Ember {
                         held.syntropy_contained += amount.clone();
                     }
                     self.chronicle.append(
@@ -672,38 +672,38 @@ impl World {
         // the touch — both pressure axes ebb by one. Not quarantined → no
         // ebb → no deed, so an unmodified world is byte-identical.
         self.ebb_pressure(orb);
-        // G2 (#29): the food-element cycle settles — joule → element minted,
+        // G2 (#29): the food-element cycle settles — ember → element minted,
         // net of what the zones ate; receipted as ElementFarmed. `None` for
         // every non-eater, so a v1 world emits nothing and is byte-identical.
-        // The joule spend is capped at the post-touch bank (the pre-touch
+        // The ember spend is capped at the post-touch bank (the pre-touch
         // reading may exceed it after this touch's demurrage), and the mint
         // re-derived from the capped spend at the element's richness — so
         // the bank never overdraws and the kernel bound still holds tight.
-        if let Some((element, _joule, _minted, eaten)) = farm {
+        if let Some((element, _ember, _minted, eaten)) = farm {
             let stamp = self.clock.now();
             // #136 D3 — the element ledger declares its grain (1/1024) at this fill
-            // site: the mint (`joule · richness`) is a product of arbitrary rationals,
+            // site: the mint (`ember · richness`) is a product of arbitrary rationals,
             // so it smelts to the element grain before it banks or receipts; the eaten
             // debit is smelted to the same grain so the net `minted − eaten` lands
             // on-grain and the stock's denominator stays bounded (replay banks the
             // recorded, already-smelted, fields — byte-identical). 1/1024 not 1/64:
             // a food mint is naturally sub-1/64 and would floor toward zero.
             let eaten = smelt_element(&eaten);
-            let mut joule = ratio(0, 1);
+            let mut ember = ratio(0, 1);
             let mut minted = ratio(0, 1);
             if let Some(class) = self.star {
                 let (_, _, richness) = crate::dop::element_properties(&element, class);
                 if let Some(held) = peel(&mut self.orbs, orb) {
-                    let avail = held.banked_amount(Resource::Joule).max(ratio(0, 1));
-                    joule = _joule.min(avail);
-                    minted = smelt_element(&(joule.clone() * richness));
-                    held.bank(Resource::Joule, -joule.clone());
+                    let avail = held.banked_amount(Resource::Ember).max(ratio(0, 1));
+                    ember = _ember.min(avail);
+                    minted = smelt_element(&(ember.clone() * richness));
+                    held.bank(Resource::Ember, -ember.clone());
                     held.bank_element(element, minted.clone() - eaten.clone());
                 }
             }
             if minted > ratio(0, 1) || eaten > ratio(0, 1) {
                 self.chronicle.append(
-                    ClosureEvent::ElementFarmed { orb_id: orb, element, joule, minted, eaten },
+                    ClosureEvent::ElementFarmed { orb_id: orb, element, ember, minted, eaten },
                     stamp,
                     vec![actor],
                 );
@@ -1156,7 +1156,7 @@ impl World {
     /// operator ruling 2026-08-02).
     ///
     /// What an orb has lost to holding costs: demurrage decay plus
-    /// upkeep draws, summed from the chronicle in joule-commensurable
+    /// upkeep draws, summed from the chronicle in ember-commensurable
     /// units (09 §1). Before this, value left the universe with no
     /// record it had ever left — the thermal arm closes its books
     /// (`encased + vented = total excess`) and the value arm closed
@@ -1228,15 +1228,15 @@ impl World {
     /// **The heat encased — the syntropic arm of the thermal book,
     /// derived, never stored** (the missing-leg sweep, 2026-08-02).
     ///
-    /// What an orb has captured over its whole life: every joule yield
+    /// What an orb has captured over its whole life: every ember yield
     /// it collected, which is the encasement arm by this engine's own
-    /// reading — `YieldCollected { resource: Joule }` is exactly what
+    /// reading — `YieldCollected { resource: Ember }` is exactly what
     /// feeds `encased_entries` on the crystal sheet.
     ///
     /// **Why it was owed.** The thermal dual was two-armed in one place
     /// and one-armed in another. On the sheet both arms stand and are
     /// symmetric — `vented_entries` from `VentSettled`, `encased_entries`
-    /// from the joule yield — but both are windowed and pruned at each
+    /// from the ember yield — but both are windowed and pruned at each
     /// boundary, and both are `pub(super)`, so they answer one tech
     /// condition and nothing else. On the orb, which is committed state,
     /// replayed and public, only `entropy_vented` stands, and it is
@@ -1261,7 +1261,7 @@ impl World {
         self.chronicle
             .history()
             .filter_map(|receipt| match receipt.event() {
-                ClosureEvent::YieldCollected { orb_id, resource: Resource::Joule, amount }
+                ClosureEvent::YieldCollected { orb_id, resource: Resource::Ember, amount }
                     if *orb_id == orb =>
                 {
                     Some(amount.clone())

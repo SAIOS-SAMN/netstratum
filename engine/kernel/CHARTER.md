@@ -140,7 +140,7 @@ constructed, only refused.
 
 **I4 — Bounded creation (syntropy).** Value is created only by a lawful
 mint, and only in the amount its rule permits. No fiat (05 §1.2, 01 §6.1:
-joules only by encasement). At convergence scale the mint is the discovery
+embers only by encasement). At convergence scale the mint is the discovery
 mint (G4), amount tied to verified difference (§7).
 
     value(next) - value(prior)  ==  mint(step),   mint >= 0, gated

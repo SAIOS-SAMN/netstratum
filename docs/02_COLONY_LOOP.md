@@ -135,7 +135,7 @@ New permanent wire tags (NS-1 §2.3 registry; layouts land with their increments
 | 6 | FamineRelieved | a dormant resource recovers |
 | 7 | ZoneRazed | a zone is demolished for half cost |
 | 8 | WorldCharted | the terrain seed, the opt-in deed (D3 — landed 2026-07-30; the seed is the founding receipt's digest) |
-| 9 | MilestoneReached | a milestone closes (D4) — **not landed, corrected 2026-08-13 (doc audit): `ClosureEvent` has no such variant, 0 hits in `engine/`; spoilage (§2.7) is likewise unbuilt — `demurrage_due` exists but applies only to Joule/Sink, never biomass** |
+| 9 | MilestoneReached | a milestone closes (D4) — **not landed, corrected 2026-08-13 (doc audit): `ClosureEvent` has no such variant, 0 hits in `engine/`; spoilage (§2.7) is likewise unbuilt — `demurrage_due` exists but applies only to Ember/Sink, never biomass** |
 
 **Replay rule:** costs, upkeep, terrain generation, and multipliers are
 ruleset constants, versioned with the engine — replay applies them to the

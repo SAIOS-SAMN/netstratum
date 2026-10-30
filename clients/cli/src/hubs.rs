@@ -267,7 +267,7 @@ fn bench_index(style: &Style) {
     );
     println!();
     println!("  {}", style.section("MATTER & PLACE"));
-    row(style, "bench planetary", "bio · chem · terraform · medium · thermal · balance");
+    row(style, "bench planetary", "bio · chem · worldshape · medium · thermal · balance");
     row(style, "bench build", "zones · yard · refinery · regen");
     row(style, "bench star", "commission · site · age · rings · capacity (C1.7)");
     row(style, "bench estate", "chart · parcels · appraise · ladder");
@@ -325,7 +325,7 @@ fn planetary(
             banner(style, "BENCH › PLANETARY");
             row(style, "bench planetary biologic", "regen · biomass · balance");
             row(style, "bench planetary chem", "→ chem craft");
-            row(style, "bench planetary terraform", "TERRA crown");
+            row(style, "bench planetary worldshape", "WORLDSHAPE crown");
             row(style, "bench planetary medium", "→ medium domain");
             row(style, "bench planetary thermal", "heat · encase · cryo");
             row(style, "bench planetary balance", "entropy ∥ syntropy");
@@ -429,15 +429,15 @@ fn planetary(
             foot_bench(style, Some("planetary"));
         }
         Some("chem") | Some("chemistry") => chem_bench(world, words, style, current),
-        Some("terra") | Some("terraform") | Some("tf") => {
-            banner(style, "BENCH › PLANETARY › TERRAFORM");
-            println!("  can_terraform={}", world.can_terraform());
+        Some("shape") | Some("worldshape") | Some("ws") => {
+            banner(style, "BENCH › PLANETARY › WORLDSHAPE");
+            println!("  can_worldshape={}", world.can_worldshape());
             let d = world.dual_use_atm();
             println!(
                 "  dual-use tax={} · overt={} · covert={}",
-                d.dual_use_tax, d.can_overt_terraform, d.can_covert_tamper
+                d.dual_use_tax, d.can_overt_worldshape, d.can_covert_tamper
             );
-            leaf(style, "terraform …", "crown deed");
+            leaf(style, "worldshape …", "crown deed");
             leaf(style, "bench medium", "ATM dual-use path");
             foot_bench(style, Some("planetary"));
         }
@@ -446,7 +446,7 @@ fn planetary(
             banner(style, "BENCH › PLANETARY › THERMAL");
             leaf(style, "thermal", "band reading");
             leaf(style, "zone <tile> enc|cryo", "encasement · cryo array");
-            leaf(style, "bench star", "site under sun");
+            leaf(style, "bench star", "site under star");
             foot_bench(style, Some("planetary"));
         }
         Some("balance") | Some("matter") => {
@@ -461,7 +461,7 @@ fn planetary(
             foot_bench(style, Some("planetary"));
         }
         Some(other) => {
-            println!("{} planetary leaf {} — bio|chem|terraform|medium|thermal|balance|back", style.bad("✗"), other);
+            println!("{} planetary leaf {} — bio|chem|worldshape|medium|thermal|balance|back", style.bad("✗"), other);
             foot_bench(style, Some("planetary"));
         }
     }
@@ -518,8 +518,8 @@ fn star_bench(
     }
     banner(style, "BENCH › STAR");
     match world.star() {
-        Some(c) => println!("  sun · class {:?}", c),
-        None => println!("  {}", style.warn("no sun — `star <class>`")),
+        Some(c) => println!("  star · class {:?}", c),
+        None => println!("  {}", style.warn("no star — `star <class>`")),
     }
     if let Some(o) = world.orb_by_id(current).or_else(|| world.orb()) {
         if let Some(t) = o.thermal.as_ref() {
@@ -547,7 +547,7 @@ fn star_bench(
     leaf(style, "bench star capacity", "C1.7 game — lines_of as play");
     leaf(style, "star <class> · site · thermal · rings · sky", "deeds");
     leaf(style, "bench star age", "deep: age_star year voice");
-    leaf(style, "terraform", "earned crown");
+    leaf(style, "worldshape", "earned crown");
     leaf(style, "prospect <stratum> · assay · refine", "open & work veins");
     foot_bench(style, Some("star"));
 }
@@ -558,14 +558,14 @@ fn stellar_capacity_board(world: &World, style: &Style, current: u64) {
     banner(style, "BENCH › STAR › CAPACITY — lines_of as play");
     match b.star {
         Some(c) => println!(
-            "  sun {:?} · star forge {} of {} lines · civ_reach {} · pressure {}",
+            "  star {:?} · star forge {} of {} lines · civ_reach {} · pressure {}",
             c,
             b.reach,
             b.table_lines,
             b.civ_reach,
             amount(&b.pressure_now)
         ),
-        None => println!("  {}", style.warn("no sun — commission before capacity plays")),
+        None => println!("  {}", style.warn("no star — commission before capacity plays")),
     }
     println!(
         "  open strata {} · local veins {} · refinable now {} · deepest open {}",
@@ -574,7 +574,7 @@ fn stellar_capacity_board(world: &World, style: &Style, current: u64) {
     println!(
         "  {}",
         style.dim(
-            "CIV-REACH-1: bronze digs lines 1–2; crystallize base-7 tech to mine deeper (capped by the sun)"
+            "CIV-REACH-1: bronze digs lines 1–2; crystallize base-7 tech to mine deeper (capped by the star)"
         )
     );
     println!();
@@ -666,7 +666,7 @@ fn medium_bench(
         m.residual_voice, d.dual_use_tax, style.dim("metabolism-coloured")
     );
     leaf(style, "bench medium reinforce", "deep: lower pressure");
-    leaf(style, "bench medium tamper", "deep: covert ATM (taxed if TERRA)");
+    leaf(style, "bench medium tamper", "deep: covert ATM (taxed if WORLDSHAPE)");
     leaf(style, "medium · tamper", "same deeds outside hub");
     foot_bench(style, Some("medium"));
 }
@@ -1314,7 +1314,7 @@ fn physics_bench(
             banner(style, "BENCH › PHYSICS › THERMAL");
             leaf(style, "thermal", "band reading");
             leaf(style, "zone <tile> enc|cryo", "encasement · cryo array");
-            leaf(style, "bench star", "site under sun");
+            leaf(style, "bench star", "site under star");
             foot_bench(style, Some("physics"));
             return;
         }
@@ -1325,7 +1325,7 @@ fn physics_bench(
         "  {}",
         style.dim("Star · thermal · medium · site. No second physics — pure world readings.")
     );
-    println!("  star={:?} · can_terraform={}", world.star(), world.can_terraform());
+    println!("  star={:?} · can_worldshape={}", world.star(), world.can_worldshape());
     let (heat, cold) = world.thermal_books_of(current);
     println!("  thermal books heat={} · cold={}", amount(&heat), amount(&cold));
     if let Some(bal) = world.thermal_balance_of(current) {
@@ -1334,7 +1334,7 @@ fn physics_bench(
     let d = world.dual_use_atm();
     println!(
         "  dual-use tax={} · overt={} · covert={}",
-        d.dual_use_tax, d.can_overt_terraform, d.can_covert_tamper
+        d.dual_use_tax, d.can_overt_worldshape, d.can_covert_tamper
     );
     let mi = world.medium_integrity(current);
     println!(

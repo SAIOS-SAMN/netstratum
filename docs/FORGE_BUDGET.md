@@ -666,7 +666,7 @@ cross-book rank: 0 · flows: 0 · verdicts: [Void, Void, Void, Void]
 
 **And the cause is one line.** `charter_route` (`world/mod.rs`) draws
 **4 alloy from each side**. No polity banks alloy at all (measured:
-`banked` holds iron, biomass, joule, sink — never alloy). So every
+`banked` holds iron, biomass, ember, sink — never alloy). So every
 charter refuses `CannotAfford`, **17 crossings cleared and 0 lanes were
 chartered**, and `conductor/src/lib.rs:378` **swallows the refusal with
 `let _ =`**.

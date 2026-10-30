@@ -14,7 +14,7 @@ fn main() {
     let book = Ledger::at(format!("{var}/worlds"));
 
     let _ = registry.create(&Civilization {
-        name: "Humans".into(),
+        name: "Bimaniform".into(),
         sigil: "bimaniform-line".into(),
         species: "bimaniform".into(),
         clade: String::new(),
@@ -40,20 +40,20 @@ fn main() {
         station: None,
     });
 
-    // Humans settle mars, in the sol world: the aggressive opening.
-    let mut mars = World::new();
-    mars.found("first-landing").unwrap();
-    mars.zone(0, ZoneKind::Extractor).unwrap();
-    mars.zone(1, ZoneKind::Extractor).unwrap();
-    mars.zone(8, ZoneKind::Habitat).unwrap();
+    // The Bimaniform settle cinder, in the first-light world: the aggressive opening.
+    let mut cinder = World::new();
+    cinder.found("first-landing").unwrap();
+    cinder.zone(0, ZoneKind::Extractor).unwrap();
+    cinder.zone(1, ZoneKind::Extractor).unwrap();
+    cinder.zone(8, ZoneKind::Habitat).unwrap();
     for _ in 0..6 {
-        mars.tick();
+        cinder.tick();
     }
-    mars.collect().unwrap();
-    scribe::record(&book, "sol", "mars", "bimaniform-line", &mars).unwrap();
-    scribe::record_solve(&book, "sol", "arc_6150a2bd", "rotate180", "deadbeef", 1).unwrap();
+    cinder.collect().unwrap();
+    scribe::record(&book, "first-light", "cinder", "bimaniform-line", &cinder).unwrap();
+    scribe::record_solve(&book, "first-light", "arc_6150a2bd", "rotate180", "deadbeef", 1).unwrap();
 
-    // Deep Chorus settles tidefall, in the kepler-passage world:
+    // Deep Chorus settles tidefall, in the lantern-passage world:
     // safe and slow, an agent on a leash.
     let mut tidefall = World::new();
     tidefall.found("tidefall-reach").unwrap();
@@ -65,7 +65,7 @@ fn main() {
         tidefall.tick();
     }
     tidefall.collect_as(rover, cfe::world::FIRST_ORB).unwrap();
-    scribe::record(&book, "kepler-passage", "tidefall", "deep-chorus", &tidefall).unwrap();
+    scribe::record(&book, "lantern-passage", "tidefall", "deep-chorus", &tidefall).unwrap();
 
     println!("registered 2 civilizations, exported 2 worlds under {var}");
 }

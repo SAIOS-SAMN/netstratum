@@ -287,7 +287,7 @@ before a technical one, an operator gate, not a coder one.
 ### 5.1 The economy is a dissipative structure
 
 Syntropy/entropy held together is Prigogine's dissipative structure: order
-maintained by throughput, not isolation. The game already models it — joules
+maintained by throughput, not isolation. The game already models it — embers
 minted only by encasement (order costs work, no fiat), demurrage/venting
 always running (order decays without maintenance). Remove either side and it
 collapses (no mint → freeze; no decay → hoard-inflation). This becomes kernel

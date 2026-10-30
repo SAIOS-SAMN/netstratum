@@ -111,7 +111,7 @@ that, the quantum tier holds the residues no place can (Acknowledged). ✔
 
 What the story should say: a world's matter (its layers, with its water),
 at its heat, fed by its star's light through its face, offers media (chemical,
-geologic, plasmic, informational); a medium carries pattern by its halvings;
+lithic, plasmic, informational); a medium carries pattern by its halvings;
 the climb is written at the coupling's recoherences (the world's slip
 against its star), struck by impacts as quantum measurements, and a mind
 wakes within its star's window (`life::advance`, `quantum`). ✔ The mind founds

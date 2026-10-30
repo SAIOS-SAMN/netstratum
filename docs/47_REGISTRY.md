@@ -210,7 +210,7 @@ progenitors make rooms in*, and it needs no new law — only the wire.
 
 ```text
 site (luminosity, albedo, orbit_r)          cfe::query — LIVE
-   → t_eq4          exact K⁴, no roots      cfe::thermal — LIVE
+   → t_eq4          exact degrees⁴, no roots cfe::thermal — LIVE
    → band_of(t_eq4) -> Option<SubstrateBand>  LIVE (used by query,
                                                scribe::journal, cli)
    → lineage_domain(metabolism, band)       LIVE
@@ -245,7 +245,7 @@ Both are struck rather than quietly replaced.
    are deterministic.* The drafts read the stochastic half as the law.
 
 **Measured, not quoted** (`cfe/tests/siting_determinism.rs`, both pins
-green). Bands are `[lo,hi]` in K⁴; founding uses a G sun:
+green). Bands are `[lo,hi]` in degrees⁴; founding uses a yellow star:
 
 ```text
 band  Cryogenic     1.000e4  .. 1.000e8
@@ -261,7 +261,7 @@ mesic seats (biotic)                         6.059e9, 5.453e9, 4.208e9
 **A mineral or plasmic line founds bandless** — above the mesic ceiling,
 and a full order of magnitude below the hyperthermal floor. It sits in
 the gap between bands. The encasement shell is the economic answer to
-that heat (it captures excess heat into joules, `dop.rs:604`), and the
+that heat (it captures excess heat into embers, `dop.rs:604`), and the
 conductor classifies such a world by `regime()`, not by `band_of`.
 
 **Which narrows the defect honestly.** At founding, `None` is the

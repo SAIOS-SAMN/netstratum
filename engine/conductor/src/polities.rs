@@ -13,7 +13,7 @@
 //! **Why, in four measured parts.**
 //!
 //! 1. **The two truths already drifted, and it cost a landed ruling.**
-//!    `12_UNION` §2 seated the tardigrade line in the progenitor band.
+//!    `12_UNION` §2 seated the hypobiotid line in the progenitor band.
 //!    The seed file carried it; these built-in defaults did not; and a
 //!    rebuilt `var` boots the defaults, because `write_default_polities`
 //!    refused to overwrite. So the fallback was not a rare path — it was
@@ -148,7 +148,7 @@ fn seat(
 /// identity is its substrate and clade; the myth is gone, the physics
 /// stays.
 pub fn founding_polities() -> Vec<PolitySpec> {
-    let g_half = || Some((StarClass::G, ratio(1, 2), ratio(1, 2)));
+    let g_half = || Some((StarClass::Yellow, ratio(1, 2), ratio(1, 2)));
     vec![
         // ── the eldest LINES (once the progenitor band) ───────────────
         // No line is seated a progenitor or a sovereign at founding
@@ -171,7 +171,7 @@ pub fn founding_polities() -> Vec<PolitySpec> {
             "we were first, and we remember why that matters less than you think",
             "epicurean", "biotic", "harmonic",
             None, &[],
-            "sylvane-hearth", "sunwell", "first-hearth", Policy::Steady,
+            "sylvane-hearth", "starwell", "first-hearth", Policy::Steady,
             (ratio(1, 1), ratio(1, 1), ratio(1, 1)), None,
         ),
         seat(
@@ -192,7 +192,7 @@ pub fn founding_polities() -> Vec<PolitySpec> {
             None, &[],
             "core-deep", "coreglow", "stone-hollow", Policy::Steady,
             (ratio(0, 1), ratio(-13, 1), ratio(7, 1)),
-            Some((StarClass::M, ratio(1, 2), ratio(2, 1))),
+            Some((StarClass::Red, ratio(1, 2), ratio(2, 1))),
         ),
         seat(
             "Coronal Choir", "coronal-choir", "plasmiform-sheet", "plasmiform",
@@ -214,7 +214,7 @@ pub fn founding_polities() -> Vec<PolitySpec> {
             Some("watcher"), &[],
             "cryo-vault", "stillspire", "still-gate", Policy::Steady,
             (ratio(-9, 1), ratio(14, 1), ratio(2, 1)),
-            Some((StarClass::M, ratio(0, 1), ratio(1, 1))),
+            Some((StarClass::Red, ratio(0, 1), ratio(1, 1))),
         ),
         seat(
             "Thresholder", "thresholder", "bimaniform-septem", "bimaniform",
@@ -223,7 +223,7 @@ pub fn founding_polities() -> Vec<PolitySpec> {
             Some("watcher"), &[],
             "sevenwatch", "threshold-spire", "threshold-watch", Policy::Steady,
             (ratio(21, 1), ratio(-6, 1), ratio(13, 1)),
-            Some((StarClass::B, ratio(1, 4), ratio(1, 1))),
+            Some((StarClass::BlueWhite, ratio(1, 4), ratio(1, 1))),
         ),
         seat(
             "Coralline", "coralline", "cnidiform-accrete", "cnidiform", "we accrete, therefore we are",
@@ -237,13 +237,13 @@ pub fn founding_polities() -> Vec<PolitySpec> {
         // ruling exists to seat. Same class as Stillcold, a different
         // expression of it.
         seat(
-            "Umbrid", "umbrid", "draconiform-umbra", "draconic",
+            "Umbrid", "umbrid", "draconiform-umbra", "draconiform",
             "the union is the evidence; the seat above re-checks it",
             "epicurean", "biotic", "umbral",
             Some("observer"), &[],
             "umbra-hold", "shadowspire", "first-umbra", Policy::Steady,
             (ratio(-11, 1), ratio(16, 1), ratio(4, 1)),
-            Some((StarClass::K, ratio(1, 4), ratio(3, 4))),
+            Some((StarClass::Orange, ratio(1, 4), ratio(3, 4))),
         ),
         // ── the archivists (12_UNION §2a) ──────────────────────────────
         // Stelahold · Tallykeep · Glyphward, the ledger-integrity and
@@ -256,16 +256,16 @@ pub fn founding_polities() -> Vec<PolitySpec> {
             None, &["forgeborn"],
             "stela-reach", "pale-wall", "first-slab", Policy::Steady,
             (ratio(18, 1), ratio(-8, 1), ratio(4, 1)),
-            Some((StarClass::G, ratio(1, 3), ratio(1, 1))),
+            Some((StarClass::Yellow, ratio(1, 3), ratio(1, 1))),
         ),
         seat(
             "Tallykeep", "tallykeep", "bimaniform-calendar", "bimaniform",
             "the calendar is the spine of the sky",
             "empiricist", "biotic", "harmonic",
             None, &["forgeborn"],
-            "tally-span", "sun-crown", "first-tally", Policy::Steady,
+            "tally-span", "star-crown", "first-tally", Policy::Steady,
             (ratio(-14, 1), ratio(9, 1), ratio(22, 1)),
-            Some((StarClass::K, ratio(1, 4), ratio(4, 5))),
+            Some((StarClass::Orange, ratio(1, 4), ratio(4, 5))),
         ),
         seat(
             "Glyphward", "glyphward", "bimaniform-scribe", "bimaniform",
@@ -274,7 +274,7 @@ pub fn founding_polities() -> Vec<PolitySpec> {
             None, &["forgeborn"],
             "glyph-sky", "star-gate", "first-word", Policy::Steady,
             (ratio(11, 1), ratio(27, 1), ratio(-5, 1)),
-            Some((StarClass::A, ratio(1, 5), ratio(1, 1))),
+            Some((StarClass::White, ratio(1, 5), ratio(1, 1))),
         ),
         // ── the unseated LINES (T3 — `tier_of(None)`) ─────────────────
         // Species strings = imperium tongue (37); never Earth common names.
@@ -290,7 +290,7 @@ pub fn founding_polities() -> Vec<PolitySpec> {
             "Echowright", "mysticeti-pelagic", "soniform-songline", "soniform", "we heard it before you saw it",
             "epicurean", "biotic", "harmonic",
             None, &[],
-            "kepler-passage", "tidefall", "songline", Policy::Steady,
+            "lantern-passage", "tidefall", "songline", Policy::Steady,
             (ratio(12, 1), ratio(5, 1), ratio(3, 1)), None,
         ),
         seat(
@@ -304,12 +304,12 @@ pub fn founding_polities() -> Vec<PolitySpec> {
             "Brine Cortex", "eightfold", "polybrachia-cortex", "polybrachia", "eight arms, one argument",
             "epicurean", "biotic", "volumetric",
             None, &[],
-            "jovian-reach", "europa", "brine-garden", Policy::Steady,
+            "giant-reach", "rime-moon", "brine-garden", Policy::Steady,
             (ratio(5, 1), ratio(58, 1), ratio(61, 1)), None,
         ),
-        // BOT-THERM: the Frost seat — an M sun at unit orbit under zero
+        // BOT-THERM: the Frost seat — a red star at unit orbit under zero
         // albedo lands in the cryogenic vault (05 §1.2): sink banks,
-        // joules are life, and the freeze-lock is honestly on the table.
+        // embers are life, and the freeze-lock is honestly on the table.
         seat(
             "Frostwright", "frostwright", "amphiform-rime", "amphiform",
             "we bank what the fire cannot hold",
@@ -317,7 +317,7 @@ pub fn founding_polities() -> Vec<PolitySpec> {
             None, &[],
             "dimlight-hold", "rime", "still-yard", Policy::Steady,
             (ratio(-20, 1), ratio(-11, 1), ratio(44, 1)),
-            Some((StarClass::M, ratio(0, 1), ratio(1, 1))),
+            Some((StarClass::Red, ratio(0, 1), ratio(1, 1))),
         ),
         seat(
             "Mycelial Weft", "mycelial-weft", "mycotiform-hypha", "mycotiform",
@@ -333,7 +333,7 @@ pub fn founding_polities() -> Vec<PolitySpec> {
             None, &[],
             "alignment", "penumbra", "conjunction", Policy::Steady,
             (ratio(-30, 1), ratio(22, 1), ratio(-17, 1)),
-            Some((StarClass::G, ratio(1, 1), ratio(1, 1))),
+            Some((StarClass::Yellow, ratio(1, 1), ratio(1, 1))),
         ),
         seat(
             "Deepmat", "deepmat", "endolithid-understone", "endolithid",
@@ -342,7 +342,7 @@ pub fn founding_polities() -> Vec<PolitySpec> {
             None, &[],
             "deepmat-veil", "underdeck", "no-sky", Policy::Steady,
             (ratio(40, 1), ratio(-2, 1), ratio(9, 1)),
-            Some((StarClass::G, ratio(1, 1), ratio(1, 1))),
+            Some((StarClass::Yellow, ratio(1, 1), ratio(1, 1))),
         ),
         seat(
             "Klethaxu", "klethaxu", "hexasocial-trail", "hexasocial", "the trail is the thought",
@@ -357,7 +357,7 @@ pub fn founding_polities() -> Vec<PolitySpec> {
             None, &[],
             "shroudmere", "nowhere-yet", "first-mask", Policy::Steady,
             (ratio(7, 1), ratio(-19, 1), ratio(11, 1)),
-            Some((StarClass::M, ratio(1, 2), ratio(1, 1))),
+            Some((StarClass::Red, ratio(1, 2), ratio(1, 1))),
         ),
     ]
 }

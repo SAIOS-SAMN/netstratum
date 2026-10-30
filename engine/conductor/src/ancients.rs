@@ -17,9 +17,8 @@
 //!   once its group has kept the throat for one full core period (from one
 //!   bounce to the next) without losing it.
 //!
-//! **The bulge** is the core's own cell: torus L1 distance under one cell. It is
-//! derived, not dialled: a cell is 1/32 Mpc (docs/58 §8), so the galactic bulge
-//! lies inside the core's own cell; and the core's bell, one cell a beat, fills that cell in its first beat.
+//! **The bulge** is the core's own cell: torus L1 distance under one cell. The
+//! cell is the torus's own unit (docs/58 §8); the core's bell, one cell a beat, fills that cell in its first beat.
 //! **The core assembly time** is therefore one beat: the bell's crossing of the
 //! bulge. **The core period** is the core's own bounce period: `core_bounce`
 //! re-emits every core's holdings once a year.

@@ -307,7 +307,7 @@ pub fn vocabulary(shell: &Shell) -> Vec<Turn> {
 //            one thing the whole population holds in common.
 //   base-11  the condition stack (`cfe::world::survey::last_condition()`,
 //            operator ruling 2026-08-02, *uplift to base-11*) — the
-//            per-entity frame. Eleven nodes: the solar leap, the five
+//            per-entity frame. Eleven nodes: the stellar leap, the five
 //            crystallized conditions, the gifted crown, and four
 //            chartered works.
 //
@@ -332,7 +332,7 @@ pub fn vocabulary(shell: &Shell) -> Vec<Turn> {
 /// a sum, and the sum is the sky's own structure —
 ///
 /// ```text
-///     1  the solar leap
+///     1  the stellar leap
 ///     5  the crystallized conditions
 ///     1  the gifted crown          → 7, the BASE tier
 ///     4  the chartered works       → 11, the UPLIFT
@@ -353,11 +353,11 @@ pub fn vocabulary(shell: &Shell) -> Vec<Turn> {
 /// This is the same discipline `RING_ARITIES` follows one crate down:
 /// state the requirement where it is needed, prove it against the live
 /// vocabulary where the vocabulary lives.
-pub const SOLAR_LEAP: i64 = 1;
+pub const STELLAR_LEAP: i64 = 1;
 pub const CRYSTALLIZED_CONDITIONS: i64 = 5;
 pub const GIFTED_CROWN: i64 = 1;
 /// The base tier — what `base_seven_complete` waits for.
-pub const BASE_NODES: i64 = SOLAR_LEAP + CRYSTALLIZED_CONDITIONS + GIFTED_CROWN;
+pub const BASE_NODES: i64 = STELLAR_LEAP + CRYSTALLIZED_CONDITIONS + GIFTED_CROWN;
 /// The uplift tier — one node per chartered work.
 pub const CHARTERED_WORKS: i64 = 4;
 /// **Derived: `7 + 4 = 11`.** Never typed.

@@ -68,7 +68,7 @@ purpose. Mechanics stay coder-03's; the values are economics:
 - the G2 ration magnitudes
 
 Also already in this lane: φ = 1/64 (the melt), TARGET_RESERVE = 8, route
-charter alloy 4 + upkeep 1/4 joule, instrument costs (alloy = grade,
+charter alloy 4 + upkeep 1/4 ember, instrument costs (alloy = grade,
 diamond at 3+), η = (1+grade)/8.
 
 Re-run this survey after any tuning session; the numbers above are

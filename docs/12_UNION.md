@@ -53,7 +53,7 @@ visible from here.
 
 | Species | Lineage domain | Overlay (06 world-book) | Register note |
 |---|---|---|---|
-| **Sylvane** | mesic / biotic (250–320 K) | the Wanderers' shepherds | the warm-world progenitor: life as chemistry in liquid water |
+| **Sylvane** | mesic / biotic (250–320°) | the Wanderers' shepherds | the warm-world progenitor: life as chemistry in liquid water |
 | **Forgeborn** | hyper-thermal / mineral (Furnace) | the Emberkin's elders | backed out of the miner role (ruling 3): they keep the *creation* function, not the extraction — they are planners of the fire, not miners from above |
 | **Stillcold** | cryogenic / deep Frost | the Coherent's elders | the cold-world progenitor: order that holds because the cold allows it |
 | **Corebound** | deep rock / mantle (cross-band) | the Marrow's and Glasskeepers' elders | the interior progenitor: the will inside the stone |
@@ -61,10 +61,10 @@ visible from here.
 *(Stillcold and Corebound are the ruled names, #5; the domains are the
 binding part.)*
 
-**The fifth seat (operator ruling, 2026-07-30).** The tardigrade line sits
+**The fifth seat (operator ruling, 2026-07-30).** The hypobiotid line sits
 in the progenitor band from this aeon: **Tunborn**, the Slagborn line's
 own head — seated among the
-mineral-domain seats exactly as §5 reads it ("a tardigrade progenitor among
+mineral-domain seats exactly as §5 reads it ("a hypobiotid progenitor among
 the Forgeborn-domain seats is the design working, not an anomaly").
 Slagborn's lineage pointer resolves to it; no alien physiology progenerated
 it (ruling 6 holds). The founding four remain the domain heads; Tunborn is
@@ -78,7 +78,7 @@ lawful, none an edit:
 |---|---|
 | create a new species | authoring a genesis entry (registry create + genesis receipts — the conductor's founding path, made diegetic) |
 | create a new star | chartering a world with a seated star (`StarClass` + albedo + orbit — the BOT-THERM siting path) |
-| create a new planet | the multi-planet charter (P1) — a new orbit under an existing sun |
+| create a new planet | the multi-planet charter (P1) — a new orbit under an existing star |
 | modify quantum states | a gauge operation on G — a `GaugeShifted` deed (11 §2.1, tag 42); never a continuous field, always a discrete receipted shift (§6) |
 | issue a technology leap | `TechDiscovered` / `TechLicensed` (10, reserved tags 39–40) — a leap may be known or unknown to the receiving civilization; unknown leaps land as sealed grants the locals must still unlock |
 | create new spaces | extending the fiber — minted planes open room, and band capacity reads the fiber (§1) |
@@ -156,7 +156,7 @@ Syntropy and entropy are **opposite ends of the same closed, coned
 manifold** — there are no open ends: every expansion on one leg is
 bounded by the opposing force on the other side of the polytonic
 spectrum. This is already the engine's landed physics, now named as its
-geometry: the syntropic arm encases (joules mint, loops close, G
+geometry: the syntropic arm encases (embers mint, loops close, G
 climbs) and the entropic arm vents (heat disperses, demurrage decays,
 sink absorbs) — two legs of one cone, and neither runs free of the
 other. The market board's Furnace↔Frost axis, the absorb invariant
@@ -591,7 +591,7 @@ together.
 physiology, and only what ties to the engine is mechanically real). The
 world-book writes the two offices as paired progenitors — a Progenitor
 who lays down the ground and a Sovereign who lives upon it, come from
-different suns and bound to each other. Their bond is a contract signed
+different stars and bound to each other. Their bond is a contract signed
 in the stars and witnessed by the cosmos; what they make together
 belongs to neither house alone, and the universe is their issue.
 
@@ -600,7 +600,7 @@ load-bearing part:** the contract has terms (`EQUATIONS` D5), the
 signing is receipted (`bond_flow`, a standing order settling at touch),
 the witness is the chain (*admission is verification* — no party's word
 is taken), and breaking it is priced (`severance_load`). The myth adds
-the suns; the engine already holds the marriage.
+the stars; the engine already holds the marriage.
 
 **The tension was an artifact of personification, and this dissolves
 it.** Two powers at opposing poles would need an equilibrium negotiated
@@ -662,7 +662,7 @@ solves → prover · the mesic grazer default → sky-condenser. Derived at
 render time from state.json and the registry axes — zero schema, zero
 storage; the match order is a placeholder parameter, and new niches
 append as their values land (aeric → sky-condenser proper, §5a). Slagborn's
-tardigrades are miners because Furnace rock is what they eat, not because
+hypobiotids are miners because Furnace rock is what they eat, not because
 anyone assigned them the pit.
 
 Band III and below: pre-interstellar peoples — in the universe, outside the
@@ -671,7 +671,7 @@ union, under the shield (§7).
 ## 5. The lineage law — every line raises its own
 
 **No species is progenerated by an alien physiology** (ruling 6). An
-Forgeborn is not the progenitor of a tardigrade; the tardigrade line raises
+Forgeborn is not the progenitor of a hypobiotid; the hypobiotid line raises
 its own progenitor, or stands headless until it does. Extrapolated upward,
 the whole union is **lineage-typed**:
 
@@ -683,7 +683,7 @@ the whole union is **lineage-typed**:
   domain** (§2): a mineral-line civilization elevates toward the mineral
   seats, never the mesic ones. The four species names in §2 are the
   *founding* heads; as lines elevate, the eight seats of each species fill
-  with ascended members of that domain — a tardigrade progenitor among the
+  with ascended members of that domain — a hypobiotid progenitor among the
   Forgeborn-domain seats is the design working, not an anomaly.
 - Divergence and confluence (11 §3) move a line's members on the manifold;
   the lineage pointer follows the chronicle, so a confluent hybrid points
@@ -713,45 +713,46 @@ band + function, per the 06 law):
 | **lithic / cryo / thermal** | the founding domains (§2) | as landed | — |
 
 **Worlds and their giants.** A **world** is the collection of planets
-sharing one sun (the engine's World: one star, its orbs — P2's charter).
+sharing one star (the engine's World: one star, its orbs — P2's charter).
 The gas giants of a world are its largest holdings and carry their own
 interior band structure; an aeric line's "surface" is a pressure deck, its
 famine is an updraft failure, its overheat is a sink into the crush. The
 substrate contract maps these to the landed mechanics — no new physics,
 different bindings.
 
-**The solar leap (not all shall know the powers of the suns).** Knowing
-one's sun is a **technology leap, not a birthright** — a TECH-1 discovery
-(`TechDiscovered`, reserved tag 39) the union calls the solar leap. The
+**The stellar leap (not all shall know the powers of the stars).** Knowing
+one's star is a **technology leap, not a birthright** — a TECH-1 discovery
+(`TechDiscovered`, reserved tag 39) the union calls the stellar leap. The
 engine already holds the mechanism: thermal participation is **opt-in per
 orb** (THERMAL-1), and the opt-in is the leap's receipt. A deep-rock line,
 a mycelial mat under kilometers of stone, an aeric floater below opaque
 decks — each may build, trade, and cohere for ages never knowing a star
-exists. Pre-solar is lawful, exactly as headless (§5) and pre-interstellar
+exists. Pre-stellar is lawful, exactly as headless (§5) and pre-interstellar
 (§7) are lawful; a progenitor may license the leap into a civilization's
 sky only through the council gate (§2), and the shield (§7) forbids it
 entirely below the threshold.
 
-**Growth follows the sun — and that is lawful difference, not deficit.**
+**Growth follows the star — and that is lawful difference, not deficit.**
 Cadence is physics the engine already runs: stellar luminosities span five
-orders in exact ratios (an O sun burns at 100 000 where a brown dwarf
+orders in exact ratios (a blue star burns at 100 000 where a brown dwarf
 glimmers at 1/10 000), `T_eq⁴` drives the tick, and stars age class-scaled
-(11 §6: O/B fast, K/M nearly still). A line grown under an M dwarf walks
-slow and long; a line under an O sun races and is brief; a syzygial line
-moves only when its voices align. **No growth pattern is the reference
-pattern** — the union measures each line against its own star's clock (the
-four C's are per-trajectory, never cross-normalized), and the elevation
-gates (§6) read a civilization's chronicle, not its speed. Under duress or
-stagnation any line may stall (§6); under a slow sun a line is not
-stalled, it is *pacing its world* — the two must never be confused, and
-the reading that distinguishes them is coherence, not tempo.
+(11 §6: blue and blue-white fast, orange and red nearly still). A line
+grown under a red star walks slow and long; a line under a blue star races
+and is brief; a syzygial line moves only when its voices align. **No
+growth pattern is the reference pattern** — the union measures each line
+against its own star's clock (the four C's are per-trajectory, never
+cross-normalized), and the elevation gates (§6) read a civilization's
+chronicle, not its speed. Under duress or stagnation any line may stall
+(§6); under a slow star a line is not stalled, it is *pacing its world* —
+the two must never be confused, and the reading that distinguishes them is
+coherence, not tempo.
 
 ## 5b. The want — famine speciated by entity (operator ruling, 2026-07-30)
 
 Famine is liberated from the pantry. **The Want is a targeted depletion
 of whatever sustains an entity** — and what sustains an entity is its
 substrate's own affair (§5a). The landed mechanics already carry the
-physical half (`FamineStruck { resource }` strikes on any store: joule
+physical half (`FamineStruck { resource }` strikes on any store: ember
 famine on the Frost, alloy famine at the synthesizer — tag 5 was never
 food-only); this ruling extends the concept to its full spread:
 
@@ -857,7 +858,7 @@ Two bypasses, both **measured states, never flags**:
 
 **The threshold.** A civilization enters the union only after the
 **crossing**: a receipted traversal from its home star to the next star —
-the first founding or aperture deed anchored at a second sun. Below the
+the first founding or aperture deed anchored at a second star. Below the
 threshold a people is **shielded** (the Watchers' office, §3): no
 delegation onto its worlds, no aperture into its banks, no absorption of
 its overflow, no licensed leap into its sky. The shield is not
@@ -872,18 +873,18 @@ make the leap themselves, or not.
   (0 converged — no baggage); the four founding progenitors seated (one
   seat each, 28 open); the roster preserved at `seeds/aeon1-polities.json`
   (the var stays single-copy by the operator's standing ruling). The
-  pre-solar seeds (Deepmat; Syzygy) use the documented dormant-siting form
+  pre-stellar seeds (Deepmat; Syzygy) use the documented dormant-siting form
   (albedo 1 — the sky commissioned, never known): 11 worlds carry their
-  solar-leap receipt, those two carry none and stand shielded.
+  stellar-leap receipt, those two carry none and stand shielded.
 - **The seed roster:** a new `polities.json` — the four founding
   progenitors first (one seated per species, 28 seats open), then the
   founding Sovereign civilizations in operator order (file order is genesis
   order; waves append between runs).
 - **The carried species:** the prior roster's peoples (Slagborn's
-  tardigrades upgraded per §5 with their own line, Echowright, Hivelight,
+  hypobiotids upgraded per §5 with their own line, Echowright, Hivelight,
   Eightfold, Frostwright) may be re-seeded as *new* genesis entries in this
   aeon — same myths, fresh chronicles, no carried debt.
-- **Wave 2 (2026-07-30, operator ruling):** the tardigrade line seated its
+- **Wave 2 (2026-07-30, operator ruling):** the hypobiotid line seated its
   own head — **Tunborn** (§2's fifth seat), station progenitor, rostered
   at `tun-reach` (Furnace-pinned like its line); Slagborn's lineage pointer
   now resolves to it. The seed roster file `seeds/aeon1-polities.json`
@@ -891,8 +892,8 @@ make the leap themselves, or not.
   (`var*/` is git-ignored; the seeds copy is the durable record).
 - **The substrate spread (§5a):** the seed roster should span the
   substrates, not just the flesh — at least one mycelial line, one
-  pre-solar line (thermal opt-in withheld at genesis: a people that has
-  not yet met its sun), and, as their registry values land, the first
+  pre-stellar line (thermal opt-in withheld at genesis: a people that has
+  not yet met its star), and, as their registry values land, the first
   aeric and plasmic lines. A seed file that is all warm-world biotics
   would re-ingrain the very perspective the substrate law exists to
   remove.

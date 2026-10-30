@@ -36,7 +36,7 @@
 //! - **Viability is a topological intersection.** A species lives where its
 //!   projection lands a non-zero scalar in its essential roles. Place a plasmic
 //!   metabolism (Structure from resonance/volatility) on a cohesive silicate
-//!   earth and the Structure projection evaluates to zero: the intersection is
+//!   world and the Structure projection evaluates to zero: the intersection is
 //!   the null set, `C₀` is empty, and it suffers a Starvation Cull on beat one —
 //!   no hardcoded prohibition, the math simply rejects the pairing.
 //!
@@ -81,7 +81,7 @@ pub(crate) fn grained_unit(byte: u8) -> Ratio {
 
 /// **The material vector `m`** — an element's morphodynamic signature, drawn from
 /// five strictly independent bytes of its 32-byte blake3 id so the axes cannot
-/// be linearly dependent. `[c, v, s, f, h]`. What humans call iron is just a
+/// be linearly dependent. `[c, v, s, f, h]`. What a people calls iron is just a
 /// high-`c`, low-`v`, low-`f` vector; the engine names nothing.
 pub fn material_of(element: &[u8; 32]) -> Vec<Ratio> {
     vec![
@@ -315,7 +315,7 @@ pub fn structural_grade(metabolism: &Metabolism, substrate: &[Ratio]) -> Ratio {
 /// production factor is `1` for everything but plasmic, whose structural grade is
 /// its feasibility: a plasmic on anything short of a hot world reads zero — the
 /// Starvation Cull, in the live economy, with no prohibition table. This is the
-/// operator's headline law: a plasmic cannot live on a flatlander earth.
+/// operator's headline law: a plasmic cannot live on a flatlander world.
 pub fn phase_feasibility(metabolism: u8, thermal: &Ratio, aridity: &Ratio) -> Ratio {
     if metabolism != 3 {
         return ratio(1, 1); // solid and organic phases span the clade-gated range
@@ -328,7 +328,7 @@ pub fn phase_feasibility(metabolism: u8, thermal: &Ratio, aridity: &Ratio) -> Ra
 /// enum). A species metabolizes an element when the morphodynamic FOOD projection
 /// of that element clears a tolerance `epsilon` — the extraction of order from a
 /// gradient, read straight off the species tensor × the element itself, with no
-/// taxonomy branch and no `Resource::{Iron|Joule|Biomass}` bucket. Over the open
+/// taxonomy branch and no `Resource::{Iron|Ember|Biomass}` bucket. Over the open
 /// blake3 almanac this returns the species' whole diet in descending affinity, so
 /// a lithophage finds the dense-cohesion elements, a syntroph the mesic-organic,
 /// each through the same projection over the planet's own catalogue. A species
@@ -546,7 +546,7 @@ mod tests {
         // A lit but cold-enough world: cohesion holds and the light feeds it.
         let lit_cold = environment(&q(1, 4), &wet(), &ratio(1, 1), &ratio(1, 1));
         assert!(survives(&autotroph, &lit_cold, &any_clade()), "the phototroph lives on light with cohesion to stand on");
-        // A sunless cold world: matter to stand on, but no light to eat.
+        // A starless cold world: matter to stand on, but no light to eat.
         let dark = environment(&ratio(0, 1), &wet(), &ratio(0, 1), &ratio(1, 1));
         assert_eq!(project(&autotroph, &dark)[FOOD], ratio(0, 1), "no light, no food, however much rock stands");
         assert!(!survives(&autotroph, &dark, &any_clade()), "the phototroph starves in the dark — flux, not matter, feeds it");

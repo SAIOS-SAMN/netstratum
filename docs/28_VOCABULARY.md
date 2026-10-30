@@ -321,7 +321,7 @@ which family it belongs to. Measured against the partition:
 
 **The eight classes are all substrate** — biotic-swarm, geodic-
 lithovore, metashifter, telepathic-resonant, pelagic-aerial,
-plasma-field, apex-terrestrial. A covenant-people is a social contract
+plasma-field, apex-solitary. A covenant-people is a social contract
 structure, which is not a substrate, so it does not fit the class
 partition at all. That is a real finding about the partition rather than
 a problem with the word.

@@ -11,7 +11,7 @@
 //!   Flavor selection seeds from receipt digests already in the
 //!   chronicle through the beacon (Charter §9) — no wall clock, no
 //!   ambient randomness.
-//! - **Exact rationals as `p/q` strings** (C2R): growth, joules, sink.
+//! - **Exact rationals as `p/q` strings** (C2R): growth, embers, sink.
 //!   Never floats, never truncated integers.
 //! - **The terminology law holds:** Furnace (never Crucible); no
 //!   set-letter glyphs; world-book names from `06` (Emberkin,
@@ -90,9 +90,9 @@ impl Alert {
 /// (integers plain, fractions `p/q`; never a decimal).
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct EconomicSummary {
-    /// Banked joules at the year boundary, summed across orbs.
-    pub banked_joules: String,
-    /// The year's heating bill (ECON-J, 05 §1.2): heating-per-zone ×
+    /// Banked embers at the year boundary, summed across orbs.
+    pub banked_embers: String,
+    /// The year's heating bill (ECON-E, 05 §1.2): heating-per-zone ×
     /// zones × [`YEAR_TICKS`] on sited sub-mesic orbs; 0 elsewhere.
     pub heating_need_year: String,
     /// Cumulative vented entropy at the boundary (VENT-1 ledger).
@@ -137,21 +137,21 @@ pub struct JournalEntry {
     pub trade_request: Option<String>,
 }
 
-/// The joule stance at a year boundary — the surplus/deficit narrative
+/// The ember stance at a year boundary — the surplus/deficit narrative
 /// flips on the exact boundary: covered at `banked == need`, deficit
 /// strictly below it (08 §4, witnessed).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum JouleStance {
+pub enum EmberStance {
     Covered,
     Deficit,
 }
 
-/// Classify banked joules against the year's heating need — an exact
+/// Classify banked embers against the year's heating need — an exact
 /// rational comparison, no rounding anywhere.
-pub fn joule_stance(banked: &Ratio, need: &Ratio) -> JouleStance {
+pub fn ember_stance(banked: &Ratio, need: &Ratio) -> EmberStance {
     match banked < need {
-        true => JouleStance::Deficit,
-        false => JouleStance::Covered,
+        true => EmberStance::Deficit,
+        false => EmberStance::Covered,
     }
 }
 
@@ -258,7 +258,7 @@ fn resource_word(resource: Resource) -> &'static str {
         Resource::Biomass => "biomass",
         Resource::Alloy => "alloy",
         Resource::Diamond => "diamond",
-        Resource::Joule => "joule",
+        Resource::Ember => "ember",
         Resource::Sink => "sink",
         Resource::Crystal => "crystal",
     }
@@ -348,10 +348,10 @@ fn narrate(
     let beacon = Beacon::from_digest(seed.own().0);
 
     // ---- the boundary reads (committed state only) ----
-    let banked_joules: Ratio = committed
+    let banked_embers: Ratio = committed
         .orbs
         .iter()
-        .fold(zero.clone(), |sum, orb| sum + orb.banked_amount(Resource::Joule));
+        .fold(zero.clone(), |sum, orb| sum + orb.banked_amount(Resource::Ember));
     let banked_sink: Ratio = committed
         .orbs
         .iter()
@@ -379,7 +379,7 @@ fn narrate(
         .is_some_and(|t4| *t4 < SubstrateBand::Mesic.bounds4().0);
     let in_vault = t4.as_ref().is_some_and(|t4| *t4 <= cryo_vault_max4());
 
-    // ECON-J (05 §1.2): the year's heating bill on sub-mesic orbs.
+    // ECON-E (05 §1.2): the year's heating bill on sub-mesic orbs.
     let heating_need: Ratio = match sub_mesic {
         true => {
             cfe::dop::heating_per_zone()
@@ -388,12 +388,12 @@ fn narrate(
         }
         false => zero.clone(),
     };
-    let stance = joule_stance(&banked_joules, &heating_need);
+    let stance = ember_stance(&banked_embers, &heating_need);
     let freeze_locked = sub_mesic
         && committed
             .orbs
             .iter()
-            .any(|orb| orb.famine.contains(&Resource::Joule));
+            .any(|orb| orb.famine.contains(&Resource::Ember));
 
     // ---- the window reads (this year's receipts) ----
     let mut built: u64 = 0;
@@ -440,23 +440,23 @@ fn narrate(
     // ---- the narrative (08 §2, top to bottom of the mapping) ----
     let mut lines: Vec<String> = Vec::new();
 
-    // Joules vs heating need.
+    // Embers vs heating need.
     match (stance, heating_need > zero) {
-        (JouleStance::Deficit, _) => lines.push(format!(
-            "RED — the joule bank holds {} against a heating bill of {} this year: fuel is sought before freeze-lock.",
-            ratio_str(&banked_joules),
+        (EmberStance::Deficit, _) => lines.push(format!(
+            "RED — the ember bank holds {} against a heating bill of {} this year: fuel is sought before freeze-lock.",
+            ratio_str(&banked_embers),
             ratio_str(&heating_need),
         )),
-        (JouleStance::Covered, true) => lines.push(format!(
-            "The joule bank stands at {} against a heating bill of {} — the surplus goes to building and expanding.",
-            ratio_str(&banked_joules),
+        (EmberStance::Covered, true) => lines.push(format!(
+            "The ember bank stands at {} against a heating bill of {} — the surplus goes to building and expanding.",
+            ratio_str(&banked_embers),
             ratio_str(&heating_need),
         )),
-        (JouleStance::Covered, false) => {
-            if banked_joules > zero {
+        (EmberStance::Covered, false) => {
+            if banked_embers > zero {
                 lines.push(format!(
-                    "The joule bank stands at {} with no heating bill — the surplus goes to building and expanding.",
-                    ratio_str(&banked_joules),
+                    "The ember bank stands at {} with no heating bill — the surplus goes to building and expanding.",
+                    ratio_str(&banked_embers),
                 ));
             }
         }
@@ -465,7 +465,7 @@ fn narrate(
     // Famine / freeze-lock, red per resource with dormant zones named.
     if freeze_locked {
         lines.push(
-            "RED — FREEZE-LOCK: the joule stores ran dry on a sub-mesic orbit; every flow stands still until fuel arrives."
+            "RED — FREEZE-LOCK: the ember stores ran dry on a sub-mesic orbit; every flow stands still until fuel arrives."
                 .to_string(),
         );
     }
@@ -512,7 +512,7 @@ fn narrate(
             ));
         } else {
             lines.push(
-                "Pristine syntropic operations: nothing vented this year; every excess joule was encased."
+                "Pristine syntropic operations: nothing vented this year; every excess ember was encased."
                     .to_string(),
             );
         }
@@ -522,7 +522,7 @@ fn narrate(
     if let Some(offer) = sink_offer(&banked_sink) {
         lines.push(offer);
     }
-    if in_vault && banked_joules > zero {
+    if in_vault && banked_embers > zero {
         lines.push(
             "The vault band holds: banked stores sit lossless in the deep cold.".to_string(),
         );
@@ -584,11 +584,11 @@ fn narrate(
 
     // Trade requests derive from deficits and surpluses (08 §2).
     let mut trade: Vec<String> = Vec::new();
-    if stance == JouleStance::Deficit || freeze_locked {
-        trade.push("seeking joules (fuel before freeze-lock)".to_string());
+    if stance == EmberStance::Deficit || freeze_locked {
+        trade.push("seeking embers (fuel before freeze-lock)".to_string());
     }
     for resource in &famine {
-        if resource != "joule" {
+        if resource != "ember" {
             trade.push(format!("seeking {resource}"));
         }
     }
@@ -604,7 +604,7 @@ fn narrate(
     }
 
     // ---- alert + headline ----
-    let alert = if !famine.is_empty() || freeze_locked || overheat || stance == JouleStance::Deficit
+    let alert = if !famine.is_empty() || freeze_locked || overheat || stance == EmberStance::Deficit
     {
         Alert::Warning
     } else if built > 0 || !chartered.is_empty() || registered > 0 {
@@ -615,11 +615,11 @@ fn narrate(
     let headline = match alert {
         Alert::Warning => {
             if freeze_locked {
-                "RED ALERT — freeze-lock: joule stores dry against the cold".to_string()
+                "RED ALERT — freeze-lock: ember stores dry against the cold".to_string()
             } else if let Some(first) = famine.first() {
                 format!("RED ALERT — famine: the {first} stores ran dry")
-            } else if stance == JouleStance::Deficit {
-                "RED ALERT — joule deficit against the heating bill".to_string()
+            } else if stance == EmberStance::Deficit {
+                "RED ALERT — ember deficit against the heating bill".to_string()
             } else {
                 "RED ALERT — thermal stress: the radiators run past their rating".to_string()
             }
@@ -643,7 +643,7 @@ fn narrate(
         headline,
         body: lines.join("\n"),
         economics: EconomicSummary {
-            banked_joules: ratio_str(&banked_joules),
+            banked_embers: ratio_str(&banked_embers),
             heating_need_year: ratio_str(&heating_need),
             entropy_vented: ratio_str(&entropy_vented),
             vented_this_year: ratio_str(&vented_this_year),
@@ -671,7 +671,7 @@ pub fn render_entry_tlv(entry: &JournalEntry) -> Vec<u8> {
     card::put_str(jrn::ALERT, entry.alert.word(), &mut out);
     card::put_str(jrn::HEADLINE, &entry.headline, &mut out);
     card::put_str(jrn::BODY, &entry.body, &mut out);
-    card::put_str(jrn::BANKED_JOULES, &entry.economics.banked_joules, &mut out);
+    card::put_str(jrn::BANKED_EMBERS, &entry.economics.banked_embers, &mut out);
     card::put_str(jrn::HEATING_NEED, &entry.economics.heating_need_year, &mut out);
     card::put_str(jrn::ENTROPY_VENTED, &entry.economics.entropy_vented, &mut out);
     card::put_str(jrn::VENTED_YEAR, &entry.economics.vented_this_year, &mut out);

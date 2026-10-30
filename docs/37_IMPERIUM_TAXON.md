@@ -43,25 +43,25 @@ the board needs more slots — wire already holds 65535.
 
 | # | Imperium | Alias (parse) | Role |
 |---|----------|---------------|------|
-| 1 | ailuroform | felid | solitary apex |
-| 2 | **bimaniform** | humanoid, **flatlander**, **human**, humans | **Flatlander baseline** |
+| 1 | ailuroform | — | solitary apex |
+| 2 | **bimaniform** | **flatlander**, flatland, bimanus, baseline | **Flatlander baseline** |
 | 3 | cryocoherens | cryo-coherent | superfluid mind |
 | 4 | lithophage | lithic | stone-eater |
-| 5 | hypobiotid | tardigrade | void-sleeper |
-| 6 | soniform | cetacean | pressure-song |
-| 7 | polybrachia | cephalopod | multi-arm cortex |
-| 8 | hexasocial | hymenopteran | eusocial comb |
-| 9 | amphiform | amphibian | dual-medium |
-| 10 | mycotiform | fungal | hyphal network |
-| 11 | cnidiform | cnidarian | accrete-polyp |
+| 5 | hypobiotid | — | void-sleeper |
+| 6 | soniform | — | pressure-song |
+| 7 | polybrachia | — | multi-arm cortex |
+| 8 | hexasocial | — | eusocial comb |
+| 9 | amphiform | — | dual-medium |
+| 10 | mycotiform | — | hyphal network |
+| 11 | cnidiform | — | accrete-polyp |
 | 12 | plasmiform | plasmoid | plasma intelligence |
 | 13 | syzygiform | syzygial | conjunction-form |
 | 14 | endolithid | endolithic | pore-rock |
-| 15 | volatiform | avian | free-body atmosphere |
-| 16 | actinoform | teleost | finned line |
+| 15 | volatiform | — | free-body atmosphere |
+| 16 | actinoform | — | finned line |
 | 17 | revenid | revenant | returners |
-| 18 | heliciform | gastropod | reserved spiral |
-| 19 | draconiform | draconic | class-4 sub-archetype |
+| 18 | heliciform | — | reserved spiral |
+| 19 | draconiform | — | class-4 sub-archetype |
 | 20 | metamorphid | metashifting | veil-native |
 
 Wire codes **locked**. Display is imperium; aliases parse forever.
@@ -74,10 +74,10 @@ Wire codes **locked**. Display is imperium; aliases parse forever.
 |-------|--------|
 | Clade wire | **2** |
 | Imperium word | `bimaniform` |
-| Knowledge aliases | `flatlander` · `human` · `humans` · `baseline` |
+| Knowledge aliases | `flatlander` · `flatland` · `bimanus` · `baseline` |
 | Species string | `bimaniform-flatlander` |
 | Economic mode | **Balanced** (always) |
-| Design role | Earth-trained operator knowledge is **this** suite |
+| Design role | Operator knowledge is **this** suite |
 
 **Lines that seat the baseline:** Forgeborn (progenitor), Stelahold / Tallykeep / Glyphward
 (sovereign Archivists), Thresholder (watcher) — all `bimaniform`.
@@ -134,7 +134,7 @@ That is the planet dependence: generative always, numbers from place.
 |--------|---------------------|
 | **Mining / extraction** | Extractor yield × extract_scale(mode, fit); soft-cap by mode |
 | **Regeneration** | Regenerator yield × regen_scale; tech door softens for regenerative |
-| **Habitat / farm** | habitat_scale(mode, fit); plasmic farm still metabolism-0 joule |
+| **Habitat / farm** | habitat_scale(mode, fit); plasmic farm still metabolism-0 ember |
 | **Research / information** | Science seats + research fee mult; flatlander primary |
 | **Labs (chem/bio/synth…)** | `science_seat_affinity(metabolism, discipline, clade)` (prior land) |
 

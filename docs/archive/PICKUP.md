@@ -342,7 +342,7 @@ wall regenerate every 60-tick year.
 | N0–N3, P1, P2, D1, D2 | scaffold · VRP chain · first slice · entities · multi-planet charter · persistence · costs/famine · industry |
 | CONVERGE-1 | era annexation onto TUniversal{S,G,T}; torn-tail law; quarantine; four-C placement |
 | THERMAL-1 | `T_eq⁴` equilibrium baseline drives the tick; StarClass; encase-first/vent-overflow; opt-in per orb |
-| VENT-1 / ECON-J / SINK-1 | entropy dual ledger (`VentSettled`); heating burn + freeze-lock; bankable sink + flat demurrage |
+| VENT-1 / ECON-E / SINK-1 | entropy dual ledger (`VentSettled`); heating burn + freeze-lock; bankable sink + flat demurrage |
 | JOURNAL-1 | the Chronicle Feed: per-year journals + cyber-noir `wall.html`, pure rendering, deterministic |
 | the ideology board, whole (coder-02) | TRADE-1 transfers/compassion (30) · ABSORB-1 absorption/morality windows (31–32) · BOND-1 standing bonds/love (33–34) · FORWARD-1 vitrified escrow + fidelity curve/integrity (35–37) · IDEO-1 friction (38) + orb cohesion entry (41) + `ideology` panel — eight books, ratios derived never stored; deferrals at Q4 |
 | BOT-THERM | polities thermally alive: Furnace mints, Frost banks sink and honestly freeze-locks |
@@ -354,15 +354,15 @@ eight operator rulings 2026-07-29: bands as space, four progenitor
 species ×8 seats, Watcher/Observer/Sovereign, the lineage law, discrete
 gauge morphodynamics — Q3 resolved, the substrate law, the implementation
 manifold). **The union board landed whole in first slices (2026-07-29,
-BUILD_ORDER §3b):** SUBSTRATE-1 · LINEAGE-1 · TECH-1a (the solar leap) ·
+BUILD_ORDER §3b):** SUBSTRATE-1 · LINEAGE-1 · TECH-1a (the stellar leap) ·
 THRESHOLD-1 (the crossing + shield) · AEON-1a (G, key changes, star
 aging, the fold) · ELEVATE-1 (the three-gate climb) · BAND-1 (seats) ·
 COUNCIL-1 (the multilateral covenant) · PLANNER-1 (the licensed leap;
-the solar leap is never licensed). **Aeon 1 is live at the default `var/`**
+the stellar leap is never licensed). **Aeon 1 is live at the default `var/`**
 (the old test universe deleted by ruling 2026-07-30; 15 civilizations,
-5 progenitors seated — wave 2, 2026-07-30: **Tunborn**, the tardigrade
+5 progenitors seated — wave 2, 2026-07-30: **Tunborn**, the hypobiotid
 line's own head (12_UNION §2's fifth seat; Slagborn's lineage resolves to
-it) — 2 pre-solar shielded worlds; seed roster in
+it) — 2 pre-stellar shielded worlds; seed roster in
 `seeds/aeon1-polities.json`, created 2026-07-30: it had been referenced
 but never written, and `var*/` is git-ignored, so the seeds copy is the
 durable record — superseded 2026-07-30 by coder-01's A1: the board
@@ -569,7 +569,7 @@ forever.
   calibration measurement (U_DIRECTIVES §7 — measured before `f` is
   ruled). The day's table: `BUILD_ORDER.md` §3c.
 - **coder-01**: next = Phase 2 cross-world trade (polities exchanging
-  joules/`S_cool` — needs a cross-world carrier; transfers are intra-world
+  embers/`S_cool` — needs a cross-world carrier; transfers are intra-world
   today) or TECH-1 (`10_TECH_EMERGENCE.md`, opens SINK-1's deferred
   research/throttle gates).
 - **Rulings landed 2026-07-31** (all six answered concrete): price is
@@ -670,7 +670,7 @@ coder-04's flag.
   `genesis` CLI verb + the disposition-weighted `scored_progress`
   read; 04 §6 row for evidence). **G2 landed same day — the vent at
   full capacity** (the ration-substitution law: mineral eats iron,
-  plasmic eats joules and farms by encasement — the fiat law held;
+  plasmic eats embers and farms by encasement — the fiat law held;
   biotic/unsealed byte-identical to v1; 04 §6 row for evidence) with
   **wave 3a**: Coronal Choir seated progenitor — the first plasmic
   board-maker, tier 0 tri-planar on metabolism (seeds + registry in
@@ -951,7 +951,7 @@ playtest — the same discipline Ruling Box 1 used for `f`.
 
 - `cfe/src/dop.rs:330` — `commensurate_weight` returns 1/1 for every
   resource: council stakes, covenant stakes, crisis books and
-  `settle_debts` all weigh a joule like a diamond. The joule-commensurable
+  `settle_debts` all weigh an ember like a diamond. The ember-commensurable
   table is the live wire (09 §1, OPEN_QUESTIONS Q4.1).
 - `cfe/src/dop.rs:321` — `demurrage_per_tick` 1/32, and it is the
   ceiling the kernel's I5 `DecayExceedsBound` calls through.
@@ -959,7 +959,7 @@ playtest — the same discipline Ruling Box 1 used for `f`.
   13-class luminosity table: the module header declares all of it
   placeholder, and it drives band membership → siting admission.
 - `cfe/src/dop.rs:292-316` — the five heat-law parameters (encasement
-  throughput, radiator base, joule leak, heating per zone, sink
+  throughput, radiator base, ember leak, heating per zone, sink
   throughput).
 - `cfe/src/dop.rs:334,341,349,362` — reciprocity window 8, bond notice
   window 8, the collateral fidelity curve, friction rate 1/8.
@@ -971,7 +971,7 @@ playtest — the same discipline Ruling Box 1 used for `f`.
   the TECH-1b condition thresholds (480/240/100), the practice deposit
   window. (Line numbers struck 2026-08-04: see the note closing §8c.)
 - `engine/cfe/src/world/` — instrument forge costs and the ROUTE-1
-  charter/toll rates (`terraform`, `aperture_transfer`, `haul`),
+  charter/toll rates (`worldshape`, `aperture_transfer`, `haul`),
   hard-coded in bodies rather than sited in `dop.rs` beside the other
   constants.
 - `engine/cfe/src/world/genesis.rs` — `lift_ward`'s ceiling 5, with

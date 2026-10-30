@@ -962,7 +962,7 @@ norms, no roots (§0.3 chapter two stands).
 
 The charter's parenthetical is restored (kernel Charter §2, "Bounded
 creation (syntropy)"): I4 is not merely a ceiling on creation, it is
-the syntropic leg of the value law — *no fiat; joules only by
+the syntropic leg of the value law — *no fiat; embers only by
 encasement* (05 §1.2, 01 §6.1). With I5 it forms the dual, and 24_FORM §2f
 entangles this leg with verified work (`Δ(D) ⋈ ∂Δ`): the mint is not
 bounded by work, it is inseparable from it. Read I4 without its
@@ -1138,7 +1138,7 @@ an asymmetry where one arm is a stored field and the other is not** —
 an orb could be asked what it had lost forever and only be computed at
 for what it had kept.
 
-`syntropy_contained` books every contained joule, whether the excess
+`syntropy_contained` books every contained ember, whether the excess
 arrived from a star or from friction: the same currency either way
 (§3.2a). It is emitted only when nonzero, so a world that has contained
 nothing stays byte-identical to a pre-syntropy one and no chain is
@@ -1182,7 +1182,7 @@ life, and could never be asked what it had ever kept: the gain was
 forgotten as soon as the window moved past it.
 
 Closed by `World::heat_encased_of` and `World::thermal_books_of`
-(`world/economy.rs`), derived from the `YieldCollected { Joule }`
+(`world/economy.rs`), derived from the `YieldCollected { Ember }`
 receipts that already feed `encased_entries` — **no schema spent**, the
 `value_lost_of` shape. The pair is returned as a pair and never netted:
 an orb that captured 100 and vented 100 is not the orb that did
@@ -1209,7 +1209,7 @@ how a sweep becomes a redesign.
 
 **The dual is one object** (`12_UNION` §2c, operator ruling
 2026-07-30). Syntropy and entropy are opposite ends of one closed,
-coned manifold: the syntropic arm encases (joules mint, loops close, G
+coned manifold: the syntropic arm encases (embers mint, loops close, G
 climbs), the entropic arm vents (heat disperses, demurrage decays, sink
 absorbs), and **neither leg runs free of the other**. The rows below
 are therefore one section and not two — splitting them into a thermal
@@ -1229,7 +1229,7 @@ physical law (§0.3 chapter two).
 Formerly titled "the thermal master equation" here; the title is
 retired because reading `T_eq⁴` alone is the one-armed reading that
 05 §1.2 refused by operator ruling 2026-07-27 (*"a design in which
-every excess joule vents to the void discards the residual"*). T3 is
+every excess ember vents to the void discards the residual"*). T3 is
 the ledger.
 
 **T2 · The difficulty vector (FORGE-2a).** Landed as a read —
@@ -1237,7 +1237,7 @@ the ledger.
 float/continuous form barred at 14 §2.5). Wiring N6-gated.
 
 **T3 · The two-armed net-heat ledger — encasement first.** Landed
-(VENT-1 / ECON-J / SINK-1, 2026-07-27). Authority: 05 §1.2.
+(VENT-1 / ECON-E / SINK-1, 2026-07-27). Authority: 05 §1.2.
 Implementation: `cfe::world` (*"the syntropic arm first (05 §1.2)"*).
 
     Heat_Net = stellar radiation + factory heat − radiator capacity
@@ -1248,17 +1248,17 @@ Implementation: `cfe::world` (*"the syntropic arm first (05 §1.2)"*).
 
 The order is law, not preference: excess is captured into ordered store
 before anything vents, and only the overflow disperses. *The void is
-the failure mode, never the design.* Encased joules are the commodity
+the failure mode, never the design.* Encased embers are the commodity
 money of 01 §6.1 — **the mint is the syntropic arm**, which is why I4's
 charter name is *Bounded creation (syntropy)* and why "no fiat" and
-"joules only by encasement" are one rule.
+"embers only by encasement" are one rule.
 
 **T4 · The cryo law — the leak and its pole.** Landed. Authority:
 05 §1.2.
 
-    Accrued joules leak 1/8 per tick, floored at zero
-    except where T_eq⁴ ≤ 100⁴ K⁴ — the store holds lossless
-    banked (collected, receipted) joules are canonical everywhere, never leak
+    Accrued embers leak 1/8 per tick, floored at zero
+    except where T_eq⁴ ≤ 100⁴ °⁴ — the store holds lossless
+    banked (collected, receipted) embers are canonical everywhere, never leak
 
 The Furnace **mints**, the Frost **banks**, and the trade loop closes
 into a circuit — mint → encase → ship cold-ward → vault — with
@@ -1290,7 +1290,7 @@ the shedding, never convergence itself.**
     (1−α) accrues to the vented ledger, settles as VentSettled — never un-receipted
 
 A dim-star system does not ship a negative substance; it sells **banked
-sink** — the capacity to absorb, in joule-commensurable units. The
+sink** — the capacity to absorb, in ember-commensurable units. The
 earned-state law: neither leg is an environmental passive. Raw flux and
 raw void are both worthless until three symmetric gates pass —
 research · infrastructure · throttle. An ungated sector loses 100% of

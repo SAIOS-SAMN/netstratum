@@ -14,7 +14,7 @@ The first stars and planets were born of this.
 The innermost ring past the accretion disc filled with a certain kind of
 planet, and the first civilizations were born there: the ancients. They were
 inundated with temporal waves at a rate the outer rim cannot imagine, as a
-new terrestrial civilization on a linear timeline. So the ancients bore the
+new single-world civilization on a linear timeline. So the ancients bore the
 progenitors, to go out among the stars and create wormholes inside the
 galaxy: superhighways for resource transport. The ancients like to stay on
 their home planets, except for visits to very specific kinds of planet that
@@ -22,7 +22,7 @@ mimic their extreme gravity and temporal resonance.
 
 Toward the outer rim, civilizations were born of the distribution of
 elements. Some grew, some fell. Those that grew looked up at the stars with
-wonder, built science, overcame their single-planet dramas and terrestrial
+wonder, built science, overcame their single-planet dramas and
 conflicts, built stardocks and ships, and learned to walk among the stars.
 Some systems already had wormholes from the progenitor network; some did not.
 Those that did not were tied to the science and resources they gained on

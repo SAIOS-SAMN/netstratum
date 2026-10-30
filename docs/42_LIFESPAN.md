@@ -12,7 +12,7 @@ discipline.
 ## 0. Why
 
 Different entities should not live alike. A crystal-mind or a plasma-
-field is a slow, near-geological being; a biotic-swarm or a void-swarm
+field is a slow being, near the pace of stone; a biotic-swarm or a void-swarm
 turns over in a breath. Today they turn over identically — not at all:
 `labor_force = habitats + clones` is a static count with no birth, no
 death, no generation. This chapter gives each species its own clock,

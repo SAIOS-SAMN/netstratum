@@ -47,7 +47,7 @@
 
 //!   20 Orb syntropy entry (syntropy_contained ratio) — the inverse of
 //!         tag 28. What the orb has contained across its whole life:
-//!         every joule encased, whether the excess came from a star or
+//!         every ember encased, whether the excess came from a star or
 //!         from friction (both are the same currency, operator ruling
 //!         2026-08-03). Emitted only when nonzero, so an orb that has
 //!         contained nothing stays byte-identical to a pre-syntropy one.
@@ -56,10 +56,10 @@
 //!      when a book is nonzero; a zero-book orb encodes byte-identical
 //!      to a pre-ideology one.
 //!   39 ClosureEvent::TechDiscovered (TECH-1a — condition 0 the kernel
-//!      solar leap; 1–5 the crystallized nodes, the TECH-1b slice)
+//!      stellar leap; 1–5 the crystallized nodes, the TECH-1b slice)
 //!   40 ClosureEvent::TechLicensed (PLANNER-1 — the issuing deed; the
 //!      far world receipts TechDiscovered under the same deal; the
-//!      solar leap is never licensed).
+//!      stellar leap is never licensed).
 //!   42 ClosureEvent::GaugeShifted (AEON-1a — the key moves)
 //!   43 ClosureEvent::Diverged (AEON-1a — the cleave, a peer branch)
 //!   44 ClosureEvent::Confluent (AEON-1a — the recombination)
@@ -134,7 +134,7 @@
 //!   76 ClosureEvent::VeilDrawn (MASK-1a, 14 §4 — the lawful veil:
 //!         clouds renders, never the chronicle)
 //!   77 ClosureEvent::VeilLifted (MASK-1a — by deed, or starved when
-//!         the standing joule toll goes unpaid; starved u8)
+//!         the standing ember toll goes unpaid; starved u8)
 //!   78 ClosureEvent::InstrumentForged (MANU-1, 10 §3f — manufacturing:
 //!         tech + understanding + industry into a held instrument;
 //!         grade = the crystallized condition; scan reach = base +
@@ -848,9 +848,9 @@ pub enum Resource {
     Alloy = 3,
     /// D2 (02 §5): the ultra-refined tier — dense, trade-worthy.
     Diamond = 4,
-    /// THERMAL-1 (05 §1.2): the commodity joule — minted only by
+    /// THERMAL-1 (05 §1.2): the commodity ember — minted only by
     /// syntropic encasement of excess heat, never by fiat (01 §6.1).
-    Joule = 5,
+    Ember = 5,
     /// SINK-1 (05 §1.4): bankable heat-absorption capacity — captured
     /// from vault-band headroom by cryo-lattice arrays, never passive.
     Sink = 6,
@@ -867,7 +867,7 @@ impl Resource {
             2 => Some(Self::Biomass),
             3 => Some(Self::Alloy),
             4 => Some(Self::Diamond),
-            5 => Some(Self::Joule),
+            5 => Some(Self::Ember),
             6 => Some(Self::Sink),
             7 => Some(Self::Crystal),
             _ => None,
@@ -879,7 +879,7 @@ impl Resource {
         Self::Biomass,
         Self::Alloy,
         Self::Diamond,
-        Self::Joule,
+        Self::Ember,
         Self::Sink,
         Self::Crystal,
     ];
@@ -923,15 +923,15 @@ pub fn tech_node_of(condition: u8) -> Option<(u8, Ratio)> {
 /// condition is not a node.
 pub fn condition_concept(condition: u8) -> Option<&'static str> {
     match condition {
-        0 => Some("solar leap"),
+        0 => Some("stellar leap"),
         1 => Some("insulation"),
         2 => Some("discipline"),
         3 => Some("deepening"),
         4 => Some("doctrine"),
         5 => Some("stores"),
-        // TERRA-1: the gifted crown of the base stack — never
+        // WORLDSHAPE-1: the gifted crown of the base stack — never
         // crystallized locally, only licensed down from tier 0.
-        6 => Some("terraforming"),
+        6 => Some("worldshaping"),
         // PRACTICE-1's lesson: it rides the condition field and is not a
         // sky node.
         7 => Some("re-emergence"),
@@ -959,10 +959,10 @@ pub const SEAT_ANCIENT: u8 = 1;
 /// Founding banks the bootstrap reserves (02 §2.1): 20 iron, 10 biomass.
 ///
 /// This is the **pre-sky bronze kit** and the chart-transfer packet
-/// (conservation on `ColonyCharted`). Once a sun is commissioned the
+/// (conservation on `ColonyCharted`). Once a star is commissioned the
 /// genesis orb is top-upped to [`star_endowment`] — pure from class,
-/// replayed on `StarCommissioned`. G-class targets match this kit so
-/// legacy G fixtures are byte-stable.
+/// replayed on `StarCommissioned`. Yellow-class targets match this kit so
+/// legacy yellow-star fixtures are byte-stable.
 ///
 /// **Left unchanged, 2026-08-13 (`#32` founding tithe): `chart()`'s
 /// transfer amount reuses this exact function, and several fixtures
@@ -976,7 +976,7 @@ pub fn founding_reserves() -> Vec<(Resource, Ratio)> {
     ]
 }
 
-/// **STAR-ENDOW-1** — absolute kit targets after the sun is known.
+/// **STAR-ENDOW-1** — absolute kit targets after the star is known.
 ///
 /// Applied as a top-up (never strips spent banks): for each resource,
 /// if held < target, bank `target − held`. Pure of class alone so
@@ -996,23 +996,23 @@ pub fn star_endowment(class: crate::thermal::StarClass) -> Vec<(Resource, Ratio)
             (Resource::Biomass, ratio(12, 1)),
             (Resource::Sink, ratio(4, 1)),
         ],
-        S::M => vec![
+        S::Red => vec![
             (Resource::Iron, ratio(16, 1)),
             (Resource::Biomass, ratio(16, 1)),
         ],
-        S::K => vec![
+        S::Orange => vec![
             (Resource::Iron, ratio(18, 1)),
             (Resource::Biomass, ratio(12, 1)),
         ],
-        S::G => vec![
+        S::Yellow => vec![
             (Resource::Iron, ratio(20, 1)),
             (Resource::Biomass, ratio(10, 1)),
         ],
-        S::F | S::A => vec![
+        S::YellowWhite | S::White => vec![
             (Resource::Iron, ratio(28, 1)),
             (Resource::Biomass, ratio(10, 1)),
         ],
-        S::O | S::B => vec![
+        S::Blue | S::BlueWhite => vec![
             (Resource::Iron, ratio(36, 1)),
             (Resource::Biomass, ratio(8, 1)),
             (Resource::Crystal, ratio(1, 1)),
@@ -1026,7 +1026,7 @@ pub fn star_endowment(class: crate::thermal::StarClass) -> Vec<(Resource, Ratio)
             (Resource::Biomass, ratio(6, 1)),
             (Resource::Crystal, ratio(2, 1)),
         ],
-        S::NeutronStar | S::WolfRayet => vec![
+        S::NeutronStar | S::WindStripped => vec![
             (Resource::Iron, ratio(30, 1)),
             (Resource::Biomass, ratio(4, 1)),
             (Resource::Crystal, ratio(4, 1)),
@@ -1116,14 +1116,14 @@ pub fn apply_endowment_add(orb: &mut ColonyOrb, kit: &[(Resource, Ratio)]) {
     }
 }
 
-/// ECON-J (05 §1.2, placeholder): joules one active zone burns per
+/// ECON-E (05 §1.2, placeholder): embers one active zone burns per
 /// tick for heating on a sub-mesic sited orb.
 pub fn heating_per_zone() -> Ratio {
     crate::parameter::Parameter::HeatingPerZone.seed()
 }
 
 /// P2 (`21_KERNEL_PARAMETERS` §2): the per-elapsed-tick decay rate on
-/// un-vaulted banked joules/sink, settled by receipt at touch.
+/// un-vaulted banked embers/sink, settled by receipt at touch.
 ///
 /// Epoched (`cfe::epoch`). Epoch 0 is the flat `1/32` every existing
 /// receipt was written under; epoch 1 reads standing supply, so the
@@ -1172,7 +1172,7 @@ fn sink_by_supply(supply: &Ratio) -> Ratio {
 /// `1/32` (#16 — a parameter with a stated reason, not a magic number).
 const SINK_REFERENCE: i64 = 32;
 
-/// TRADE-1 (09 §1, placeholder): the joule-commensurable weight of a
+/// TRADE-1 (09 §1, placeholder): the ember-commensurable weight of a
 /// resource for cohesion-book postings — the commensuration table.
 /// Weight 1 for every resource in v1; tunes at balance time.
 pub fn commensurate_weight(_resource: Resource) -> Ratio {
@@ -1220,7 +1220,7 @@ pub fn friction_rate() -> Ratio {
 /// N4 (NS-2 §1.5, placeholder): crystals one scan draws from the
 /// probing orb's bank — the lens's power, spent on the looking, hit or
 /// miss. Gated pure before anything moves.
-/// MASK-1a (14 §4, placeholder): the veil's standing joule toll,
+/// MASK-1a (14 §4, placeholder): the veil's standing ember toll,
 /// settled at every collect — an unpayable toll lifts the veil by
 /// receipt, never silently.
 pub fn veil_toll() -> Ratio {
@@ -1642,13 +1642,13 @@ pub fn scan_draw() -> Ratio {
 
 /// G2 (04 §1.2): the ration law — the resource filling the FOOD slot
 /// in every flow, keyed by the sealed metabolism (biotic is the
-/// ruleset-v1 default). Mineral eats iron; plasmic eats joules — and
-/// the fiat law binds (05 §1.2, 01 §6.1): joules enter only by
+/// ruleset-v1 default). Mineral eats iron; plasmic eats embers — and
+/// the fiat law binds (05 §1.2, 01 §6.1): embers enter only by
 /// encasement, so plasmic agriculture is the thermal loop.
 pub fn metabolic_ration(metabolism: u8) -> Resource {
     match metabolism {
         1 => Resource::Iron,
-        3 => Resource::Joule,
+        3 => Resource::Ember,
         _ => Resource::Biomass,
     }
 }
@@ -1774,7 +1774,7 @@ pub fn metabolic_leisure(metabolism: u8) -> Resource {
 /// recipe delivers a universal role (`morphogen::FOOD … SINK`). Until the
 /// roles are first-class bankable stocks, the yield lands in the species'
 /// resource for that role, reusing the projections the economy already
-/// speaks — food follows the clade (`metabolic_ration`), energy is joules
+/// speaks — food follows the clade (`metabolic_ration`), energy is embers
 /// (the universal thermal stock), cognition follows the clade's savoured
 /// luxury (`metabolic_leisure`, the leisure-follows-the-clade law COG runs
 /// on). `None` is an honest hole: a role with no species-neutral bankable
@@ -1784,7 +1784,7 @@ pub fn metabolic_leisure(metabolism: u8) -> Resource {
 pub fn role_resource(role: usize, metabolism: u8) -> Option<Resource> {
     match role {
         r if r == crate::morphogen::FOOD => Some(metabolic_ration(metabolism)),
-        r if r == crate::morphogen::ENERGY => Some(Resource::Joule),
+        r if r == crate::morphogen::ENERGY => Some(Resource::Ember),
         r if r == crate::morphogen::COGNITION => Some(metabolic_leisure(metabolism)),
         _ => None, // STRUCT, SINK — honest holes until roles are first-class
     }
@@ -1797,7 +1797,7 @@ pub fn role_resource(role: usize, metabolism: u8) -> Option<Resource> {
 pub fn metabolic_harvest(metabolism: u8) -> (Resource, Ratio) {
     match metabolism {
         1 => (Resource::Iron, ratio(1, 1)),
-        3 => (Resource::Joule, ratio(0, 1)),
+        3 => (Resource::Ember, ratio(0, 1)),
         _ => (Resource::Biomass, ratio(1, 1)),
     }
 }
@@ -1887,9 +1887,9 @@ pub fn zone_upkeep(kind: ZoneKind, metabolism: u8) -> Vec<(Resource, Ratio)> {
 /// `cost()` itself, so one substitution pass here covers them too.
 ///
 /// **Gated on the metabolism's own harvest rate, not just its
-/// resource.** Plasmic's ration is Joule at rate 0 — "food is
-/// captured heat, never a yield line" — and Joules never enter the
-/// founding kit (the fiat law: joules enter only by encasement). A
+/// resource.** Plasmic's ration is Ember at rate 0 — "food is
+/// captured heat, never a yield line" — and Embers never enter the
+/// founding kit (the fiat law: embers enter only by encasement). A
 /// plain resource swap would price a plasmic line's first Habitat in
 /// a resource it structurally cannot hold yet, deadlocking every
 /// plasmic founding before an Encasement could ever be raised to earn
@@ -1943,10 +1943,10 @@ pub struct Prospect {
 fn spine_bands(class: crate::thermal::StarClass) -> [u32; 4] {
     use crate::thermal::StarClass as S;
     match class {
-        S::O | S::B | S::A => [1, 2, 0, 1],
-        S::F | S::G | S::K => [2, 1, 1, 1],
-        S::M | S::BrownDwarf => [1, 0, 2, 1],
-        S::WhiteDwarf | S::RedGiant | S::NeutronStar | S::WolfRayet | S::LuminalWhiteHole => {
+        S::Blue | S::BlueWhite | S::White => [1, 2, 0, 1],
+        S::YellowWhite | S::Yellow | S::Orange => [2, 1, 1, 1],
+        S::Red | S::BrownDwarf => [1, 0, 2, 1],
+        S::WhiteDwarf | S::RedGiant | S::NeutronStar | S::WindStripped | S::LuminalWhiteHole => {
             [0, 2, 1, 2]
         }
     }
@@ -2190,7 +2190,7 @@ pub enum ZoneKind {
     Smelter = 3,
     Synthesizer = 4,
     /// THERMAL-1 (05 §1.2): the syntropic shell — captures excess heat
-    /// into joules before anything vents. Its "yield" is computed by
+    /// into embers before anything vents. Its "yield" is computed by
     /// the heat law at tick time, never by `yield_per_tick`.
     Encasement = 5,
     /// SINK-1 (05 §1.4): the cryo-lattice array — captures vault-band
@@ -2408,9 +2408,9 @@ pub fn hull_scrap_cost(role: HullRole, grade: u8) -> Ratio {
 /// of, and it is now one number rather than six.
 ///
 /// **And it names its own boundary.** Only the structural chain
-/// `Iron → Alloy → Diamond` obeys it. Joule, Sink and Crystal are off
+/// `Iron → Alloy → Diamond` obeys it. Ember, Sink and Crystal are off
 /// the chain and have their own laws — the heat law (05 §1.2) mints
-/// joules, the sink law banks cold, and Crystal is the survey currency
+/// embers, the sink law banks cold, and Crystal is the survey currency
 /// rather than a refinement of anything. A law that claimed them would
 /// be overreach, so it declines them by returning `None`.
 pub fn refinement_tier(resource: Resource) -> Option<u32> {
@@ -2422,7 +2422,7 @@ pub fn refinement_tier(resource: Resource) -> Option<u32> {
         // The ultra-refined tier, from alloy.
         Resource::Diamond => Some(3),
         // Off the chain, each with its own law.
-        Resource::Joule | Resource::Sink | Resource::Crystal => None,
+        Resource::Ember | Resource::Sink | Resource::Crystal => None,
         // No catch-ALL, deliberately. The match is exhaustive, so a new
         // resource breaks the build until someone rules whether it
         // stands on the refinement chain — the `layer_of` discipline,
@@ -2575,7 +2575,7 @@ impl ZoneKind {
     }
 
     /// The exact yield rate — a ratio, never a float (RFA). The
-    /// encasement shell's joules come from the heat law (05 §1.2), not
+    /// encasement shell's embers come from the heat law (05 §1.2), not
     /// from here: its listed rate is zero.
     pub fn yield_per_tick(&self) -> (Resource, Ratio) {
         match self {
@@ -2592,7 +2592,7 @@ impl ZoneKind {
                 Resource::Diamond,
                 refinement_yield(refinement_tier(Resource::Diamond).unwrap_or(1)),
             ),
-            Self::Encasement => (Resource::Joule, ratio(0, 1)),
+            Self::Encasement => (Resource::Ember, ratio(0, 1)),
             Self::CryoArray => (Resource::Sink, ratio(0, 1)),
             Self::Resonator => (Resource::Crystal, ratio(1, 8)),
             // Derived: the ration resource (the habitat's own yield
@@ -2815,7 +2815,7 @@ pub enum ClosureEvent {
     OverheatStruck { orb_id: u64, overflow: Ratio },
     /// THERMAL-1 — the overflow returned to zero; yields recover.
     OverheatCleared { orb_id: u64 },
-    /// THERMAL-1 (NS-6 §7) — the container's sun commissioned with its
+    /// THERMAL-1 (NS-6 §7) — the container's star commissioned with its
     /// StarClass wire code. Once per world; fixes every orbit's L.
     StarCommissioned { class: u8 },
     /// THERMAL-1 (05 §1.1) — a colony sited on its orbit: albedo A and
@@ -3311,19 +3311,19 @@ pub enum ClosureEvent {
     /// none and is byte-identical.
     PressureEbbed { orb_id: u64 },
     /// **G2 element economy (task #29, tag 173)** — the element-eater's
-    /// food cycle at the collect touch. It spends `joule` to mint `minted`
+    /// food cycle at the collect touch. It spends `ember` to mint `minted`
     /// of its `element` (a conserved transmutation, energy in / matter
-    /// out; the kernel bounds `minted ≤ joule × richness`, the element's
-    /// own natural flow — a rarer element yields less per joule and costs
+    /// out; the kernel bounds `minted ≤ ember × richness`, the element's
+    /// own natural flow — a rarer element yields less per ember and costs
     /// more energy), and its zones eat `eaten` of the same element running
     /// the span. The net change to the larder is `minted − eaten`: in
     /// steady state the line farms exactly what it ate and holds its
-    /// buffer; starved of joule it eats into the buffer and freezes. A
+    /// buffer; starved of ember it eats into the buffer and freezes. A
     /// world with no element-eater emits none and is byte-identical.
     ElementFarmed {
         orb_id: u64,
         element: [u8; 32],
-        joule: Ratio,
+        ember: Ratio,
         minted: Ratio,
         eaten: Ratio,
     },
@@ -3433,8 +3433,8 @@ pub enum ClosureEvent {
     /// leg of a two-world hand-off (the aperture shape — the far world
     /// receipts `TechDiscovered` under the same deal). Bound to an
     /// open council in this world (`council` — delegation settles
-    /// inside diplomacy, 12_UNION §7); the solar leap (condition 0) is
-    /// never licensed — the young meet their sun themselves.
+    /// inside diplomacy, 12_UNION §7); the stellar leap (condition 0) is
+    /// never licensed — the young meet their star themselves.
     TechLicensed {
         deal: u64,
         from_orb: u64,
@@ -3467,9 +3467,9 @@ pub enum ClosureEvent {
     /// sealed council.
     CouncilClosed { council: u64, member: u64, fulfilled: bool, banked: Ratio },
     /// TECH-1a (10 §2.2) — a technology node enters the chronicle.
-    /// `condition` 0 is the kernel solar leap (12_UNION §5a): a world's
+    /// `condition` 0 is the kernel stellar leap (12_UNION §5a): a world's
     /// first thermal opt-in receipts that its people now know their
-    /// sun — the opt-in is the leap's receipt. Conditions 1–5 are the
+    /// star — the opt-in is the leap's receipt. Conditions 1–5 are the
     /// crystallized emergent nodes (10 §3, the TECH-1b slice); the
     /// node id is the seeded-synthesis hash (SEAL B — replay
     /// re-derives it), `modifier`/`magnitude` the applied parameter
@@ -3915,7 +3915,7 @@ pub enum ClosureEvent {
     /// trades from here on (the template grant is WARDEN-1b).
     WardLifted { claimer: String },
     /// MASK-1a (14 §4) — the lawful veil: renders cloud, the
-    /// chronicle never lies; a standing joule toll settles at every
+    /// chronicle never lies; a standing ember toll settles at every
     /// collect.
     VeilDrawn {},
     /// MASK-1a — the veil ends: by deed (starved 0) or starved by an
@@ -4685,10 +4685,10 @@ impl ClosureEvent {
             Self::PressureEbbed { orb_id } => {
                 tlv::put(168, &orb_id.to_le_bytes(), &mut out);
             }
-            Self::ElementFarmed { orb_id, element, joule, minted, eaten } => {
+            Self::ElementFarmed { orb_id, element, ember, minted, eaten } => {
                 let mut value = orb_id.to_le_bytes().to_vec();
                 value.extend_from_slice(element);
-                ratio::encode(joule, &mut value);
+                ratio::encode(ember, &mut value);
                 ratio::encode(minted, &mut value);
                 ratio::encode(eaten, &mut value);
                 tlv::put(173, &value, &mut out);
@@ -6213,10 +6213,10 @@ impl ClosureEvent {
             173 => {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let element: [u8; 32] = value.get(8..40)?.try_into().ok()?;
-                let (joule, used_j) = ratio::decode(value.get(40..)?)?;
+                let (ember, used_j) = ratio::decode(value.get(40..)?)?;
                 let (minted, used_m) = ratio::decode(value.get(40 + used_j..)?)?;
                 let (eaten, _) = ratio::decode(value.get(40 + used_j + used_m..)?)?;
-                Some(Self::ElementFarmed { orb_id, element, joule, minted, eaten })
+                Some(Self::ElementFarmed { orb_id, element, ember, minted, eaten })
             }
             174 => {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
@@ -7324,7 +7324,7 @@ pub struct ColonyOrb {
     /// **The syntropic BOOK — the exact inverse of
     /// [`Self::entropy_vented`]** (operator ruling 2026-08-03).
     ///
-    /// What this orb has contained: every joule encased, whether the
+    /// What this orb has contained: every ember encased, whether the
     /// excess arrived from a star or from friction — the same currency
     /// either way. Cumulative and never pruned, so the two books are
     /// finally symmetric.
@@ -7346,7 +7346,7 @@ pub struct ColonyOrb {
     /// SINK-1: the stamp of the last settle (demurrage anchor).
     pub last_touch: u64,
     /// TRADE-1 (09 §2.1): the compassion books — cumulative
-    /// joule-commensurable value given to counterparties standing in
+    /// ember-commensurable value given to counterparties standing in
     /// receipted crisis, and drawn from them. Committed state rebuilt
     /// from receipts alone on replay; wire encoding deferred to
     /// IDEO-1 (the reserved orb cohesion entry, tag 38 — recorded on

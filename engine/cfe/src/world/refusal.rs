@@ -237,7 +237,7 @@ pub enum ActionRefused {
     /// element to spend its lane's valence. The banked `CannotAfford`
     /// applied to the element ledger, both sides carried whole.
     CannotAffordElement { element: [u8; 32], need: Box<Ratio>, have: Box<Ratio> },
-    /// THERMAL-1 — one sun per world; it is already commissioned.
+    /// THERMAL-1 — one star per world; it is already commissioned.
     StarAlreadyCommissioned,
     /// D3 — one terrain charter per star; the seed is forever.
     TerrainAlreadyCharted,
@@ -376,7 +376,7 @@ pub enum ActionRefused {
         have: u64,
         capacity: u64,
     },
-    /// THERMAL-1 — siting an orbit needs a commissioned sun first.
+    /// THERMAL-1 — siting an orbit needs a commissioned star first.
     NoStarCommissioned,
     /// THERMAL-1 — the orb is already sited; an orbit does not move.
     AlreadySited { orb: u64 },
@@ -387,7 +387,7 @@ pub enum ActionRefused {
     /// crown — derived from `node_kind`, never a hard-coded range.
     NodeUnlicensable { condition: u8 },
     /// THRESHOLD-1 (12_UNION §7) — the shield holds: a people that has
-    /// not made the solar leap cannot be reached by aperture, in
+    /// not made the stellar leap cannot be reached by aperture, in
     /// either direction. The flags name which side stands shielded —
     /// the young are left to make the leap themselves, or not.
     Shielded { source_shielded: bool, dest_shielded: bool },
@@ -418,18 +418,18 @@ pub enum ActionRefused {
     /// PLANNER-1 — delegation settles inside diplomacy: the deed must
     /// reference an open council in the granting world.
     NoSuchCouncil { council: u64 },
-    /// PLANNER-1 — the solar leap is never licensed: the young meet
-    /// their sun themselves, or not (the shield's whole meaning).
-    SolarLeapNeverLicensed,
+    /// PLANNER-1 — the stellar leap is never licensed: the young meet
+    /// their star themselves, or not (the shield's whole meaning).
+    StellarLeapNeverLicensed,
     /// PLANNER-1 — a licensed leap lands only on a union member: the
     /// receiving world must have made its crossing (THRESHOLD-1).
     BelowTheThreshold,
-    /// TERRA-1 — terraforming is the gifted crown: it licenses only
-    /// onto a complete base-7 stack (the solar leap + all five
+    /// WORLDSHAPE-1 — worldshaping is the gifted crown: it licenses only
+    /// onto a complete base-7 stack (the stellar leap + all five
     /// crystallized conditions, earned by the line itself).
     BaseSevenUnfinished,
-    /// TERRA-1 — the orbit moves only under the crown technology.
-    TerraformUnearned,
+    /// WORLDSHAPE-1 — the orbit moves only under the crown technology.
+    WorldshapeUnearned,
     /// ABSORB-1 — only un-sealed pending overflow absorbs; the refusal
     /// names exactly what stands.
     CannotAbsorb { pending: Box<Ratio> },

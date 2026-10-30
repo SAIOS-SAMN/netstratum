@@ -355,7 +355,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
         Some("star") => match words.next().map(parse_star) {
             Some(Some(class)) => match world.commission_star(class) {
                 Ok(()) => println!(
-                    "{} sun commissioned: {} (L = {}) — site your planets: {}",
+                    "{} star commissioned: {} (L = {}) — site your planets: {}",
                     style.ok("✓"),
                     style.strong(star_name(class as u8)),
                     amount(&class.luminosity()),
@@ -364,7 +364,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 Err(refusal) => refuse(world, &refusal, style),
             },
             _ => println!(
-                "{} usage: {} — classes: O B A F G K M · bd wd rg ns wr lwh",
+                "{} usage: {} — classes: blue bluewhite white yellowwhite yellow orange red · bd wd rg ns ws lwh",
                 style.bad("✗"),
                 style.strong("star <class>")
             ),
@@ -1017,7 +1017,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
             Some(Some(class)) => match world.age_star(class) {
                 Ok(()) => println!(
                     "{} the star MOVES in its region — every sited orbit's band shifts at the next tick",
-                    style.ok("☀")
+                    style.ok("✶")
                 ),
                 Err(refusal) => refuse(world, &refusal, style),
             },
@@ -1145,8 +1145,8 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
             match (condition, target, council, deal) {
                 (Some(condition), Some(target), Some(council), Some(deal)) => {
                     let concept = [
-                        "the solar leap", "insulation", "discipline", "deepening",
-                        "doctrine", "stores", "terraforming",
+                        "the stellar leap", "insulation", "discipline", "deepening",
+                        "doctrine", "stores", "worldshaping",
                     ]
                     .get(condition as usize)
                     .copied()
@@ -1306,8 +1306,8 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
             // array must stay as long as the highest condition, not as
             // long as the sky.
             let concepts = [
-                "the solar leap", "insulation", "discipline", "deepening",
-                "doctrine", "stores", "the crown (terraforming)",
+                "the stellar leap", "insulation", "discipline", "deepening",
+                "doctrine", "stores", "the crown (worldshaping)",
                 "the re-emergence lesson (rides separately)",
                 "VALOR", "HONOR", "COURAGE", "COMMITMENT",
             ];
@@ -1395,8 +1395,8 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 style.dim("  a missing condition another line holds is a joint-venture prompt — council + aperture + licensed leap")
             );
         }
-        // TERRA-1: the crown in the hand — re-seat a sited planet's
-        // albedo and orbit; only lawful once terraforming is held.
+        // WORLDSHAPE-1: the crown in the hand — re-seat a sited planet's
+        // albedo and orbit; only lawful once worldshaping is held.
         // MANU-1 (10 §3f): forge an instrument — manufacturing is
         // technology + understanding + industry; grade = condition,
         // and the scan horizon reads the best grade held.
@@ -1487,7 +1487,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 ),
             }
         }
-        Some("terraform") => {
+        Some("worldshape") => {
             let albedo = words
                 .next()
                 .and_then(parse_ratio_arg)
@@ -1498,7 +1498,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 .and_then(cfe::dop::Positive::new);
             match (albedo, orbit) {
                 (Some(albedo), Some(orbit)) => {
-                    match world.terraform(*current, albedo, orbit) {
+                    match world.worldshape(*current, albedo, orbit) {
                         Ok(()) => {
                             println!(
                                 "{} the orbit MOVES — the world re-seats under the crown",
@@ -1512,7 +1512,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 _ => println!(
                     "{} usage: {} — exact rationals, 0 ≤ albedo < 1, orbit > 0",
                     style.bad("✗"),
-                    style.strong("terraform <albedo> <orbit>")
+                    style.strong("worldshape <albedo> <orbit>")
                 ),
             }
         }
@@ -2684,7 +2684,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                     );
                 }
                 println!(
-                    "  ATM pressure {} · dual-use TERRA={}",
+                    "  ATM pressure {} · dual-use WORLDSHAPE={}",
                     amount(&atm.pressure),
                     atm.dual_use
                 );
@@ -4127,7 +4127,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                                     {
                                         println!(
                                             "{} famine on {} relieved — the gift covered the one-tick bill; its zones wake",
-                                            style.ok("☀"),
+                                            style.ok("✶"),
                                             style.strong(&planet)
                                         );
                                         let _ = relieved;
@@ -4147,7 +4147,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                     "{} usage: {} (exact fractions) — e.g. {}",
                     style.bad("✗"),
                     style.strong("send <amount> <resource> to <planet> [from <planet>]"),
-                    style.strong("send 5/2 joule to outpost")
+                    style.strong("send 5/2 ember to outpost")
                 ),
             }
         }
@@ -4281,7 +4281,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                     "{} usage: {} — e.g. {}",
                     style.bad("✗"),
                     style.strong("bond <rate> <resource> to <planet> [for <term>] [from <planet>]"),
-                    style.strong("bond 1/4 joule to coldstore for 12")
+                    style.strong("bond 1/4 ember to coldstore for 12")
                 ),
             }
         }
@@ -4326,7 +4326,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                     "{} usage: {} — e.g. {}",
                     style.bad("✗"),
                     style.strong("sever <resource> to <planet> [from <planet>]"),
-                    style.strong("sever joule to coldstore")
+                    style.strong("sever ember to coldstore")
                 ),
             }
         }
@@ -4687,7 +4687,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
         Some("rings") | Some("sky") => {
             let committed = world.committed();
             match committed.star {
-                None => println!("{} no sun commissioned — the sky is dark", style.dim("✦")),
+                None => println!("{} no star commissioned — the sky is dark", style.dim("✦")),
                 Some(class) => {
                     println!(
                         "{} STAR {:?} — luminosity {} · field anchors {} rings",
@@ -4740,7 +4740,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
             if committed.prospects.is_empty() {
                 println!("  {}", style.dim("no veins prospected — `prospect <stratum>` opens the ground"));
             }
-            let star = committed.star.unwrap_or(cfe::thermal::StarClass::G);
+            let star = committed.star.unwrap_or(cfe::thermal::StarClass::Yellow);
             for vein in &committed.prospects {
                 let (family, tier, natural) =
                     cfe::dop::element_properties(&vein.element, star);
@@ -6878,7 +6878,7 @@ fn genesis_picker(world: &mut World, style: &Style) {
         &[
             (1, "mineral", "eats iron, farms iron — a smelter economy"),
             (2, "biotic", "eats biomass, farms biomass — the common ration"),
-            (3, "plasmic", "eats joules — plasmic agriculture IS the thermal loop, encasement-fed"),
+            (3, "plasmic", "eats embers — plasmic agriculture IS the thermal loop, encasement-fed"),
         ],
     ) else {
         println!("{} founding cancelled", style.dim("○"));
@@ -7048,7 +7048,7 @@ fn parse_resource(word: &str) -> Option<Resource> {
         "biomass" | "bio" => Some(Resource::Biomass),
         "alloy" => Some(Resource::Alloy),
         "diamond" => Some(Resource::Diamond),
-        "joule" | "joules" => Some(Resource::Joule),
+        "ember" | "embers" => Some(Resource::Ember),
         "sink" => Some(Resource::Sink),
         "crystal" | "crystals" => Some(Resource::Crystal),
         _ => None,
@@ -7058,18 +7058,18 @@ fn parse_resource(word: &str) -> Option<Resource> {
 fn parse_star(word: &str) -> Option<cfe::thermal::StarClass> {
     use cfe::thermal::StarClass as S;
     match word.to_ascii_lowercase().as_str() {
-        "o" => Some(S::O),
-        "b" => Some(S::B),
-        "a" => Some(S::A),
-        "f" => Some(S::F),
-        "g" => Some(S::G),
-        "k" => Some(S::K),
-        "m" => Some(S::M),
+        "blue" => Some(S::Blue),
+        "bluewhite" => Some(S::BlueWhite),
+        "white" => Some(S::White),
+        "yellowwhite" => Some(S::YellowWhite),
+        "yellow" => Some(S::Yellow),
+        "orange" => Some(S::Orange),
+        "red" => Some(S::Red),
         "bd" => Some(S::BrownDwarf),
         "wd" => Some(S::WhiteDwarf),
         "rg" => Some(S::RedGiant),
         "ns" => Some(S::NeutronStar),
-        "wr" => Some(S::WolfRayet),
+        "ws" => Some(S::WindStripped),
         "lwh" => Some(S::LuminalWhiteHole),
         _ => None,
     }
@@ -7077,18 +7077,18 @@ fn parse_star(word: &str) -> Option<cfe::thermal::StarClass> {
 
 fn star_name(class: u8) -> &'static str {
     match cfe::thermal::StarClass::from_wire(class) {
-        Some(cfe::thermal::StarClass::O) => "class O (blue)",
-        Some(cfe::thermal::StarClass::B) => "class B (blue-white)",
-        Some(cfe::thermal::StarClass::A) => "class A (white)",
-        Some(cfe::thermal::StarClass::F) => "class F (yellow-white)",
-        Some(cfe::thermal::StarClass::G) => "class G (yellow, Sol-type)",
-        Some(cfe::thermal::StarClass::K) => "class K (orange)",
-        Some(cfe::thermal::StarClass::M) => "class M (red dwarf)",
+        Some(cfe::thermal::StarClass::Blue) => "blue star",
+        Some(cfe::thermal::StarClass::BlueWhite) => "blue-white star",
+        Some(cfe::thermal::StarClass::White) => "white star",
+        Some(cfe::thermal::StarClass::YellowWhite) => "yellow-white star",
+        Some(cfe::thermal::StarClass::Yellow) => "yellow star",
+        Some(cfe::thermal::StarClass::Orange) => "orange star",
+        Some(cfe::thermal::StarClass::Red) => "red star",
         Some(cfe::thermal::StarClass::BrownDwarf) => "brown dwarf",
         Some(cfe::thermal::StarClass::WhiteDwarf) => "white dwarf",
         Some(cfe::thermal::StarClass::RedGiant) => "red giant",
         Some(cfe::thermal::StarClass::NeutronStar) => "neutron star",
-        Some(cfe::thermal::StarClass::WolfRayet) => "Wolf-Rayet",
+        Some(cfe::thermal::StarClass::WindStripped) => "wind-stripped star",
         Some(cfe::thermal::StarClass::LuminalWhiteHole) => "Luminal White Hole ✦",
         None => "unknown class",
     }
@@ -7112,7 +7112,7 @@ fn parse_ratio_arg(word: &str) -> Option<Ratio> {
 fn thermal_line(world: &World, style: &Style, current: u64) {
     use cfe::thermal;
     let Some(class) = world.star() else {
-        println!("{}", style.dim("(no sun — 'star <class>' commissions one)"));
+        println!("{}", style.dim("(no star — 'star <class>' commissions one)"));
         return;
     };
     let Some(orb) = world.orb_by_id(current) else {
@@ -7120,7 +7120,7 @@ fn thermal_line(world: &World, style: &Style, current: u64) {
         return;
     };
     println!(
-        "{}  sun {}",
+        "{}  star {}",
         style.head("THERMAL"),
         style.strong(star_name(class as u8))
     );
@@ -7130,7 +7130,7 @@ fn thermal_line(world: &World, style: &Style, current: u64) {
     };
     let t4 = thermal::t_eq4(&class.luminosity(), site.albedo.value(), site.orbit_r.value());
     let band = match thermal::band_of(&t4) {
-        Some(thermal::SubstrateBand::Cryogenic) => "CRYOGENIC (the vault: lossless joule store)",
+        Some(thermal::SubstrateBand::Cryogenic) => "CRYOGENIC (the vault: lossless ember store)",
         Some(thermal::SubstrateBand::Mesic) => "MESIC (near-zero life-support overhead)",
         Some(thermal::SubstrateBand::HyperThermal) => "HYPER-THERMAL (Furnace-grade)",
         None => match t4 <= thermal::cryo_vault_max4() {
@@ -7147,13 +7147,13 @@ fn thermal_line(world: &World, style: &Style, current: u64) {
             false => style.ok("no"),
         }
     );
-    let joules = world
+    let embers = world
         .accrued_of(current)
         .into_iter()
-        .find(|(resource, _)| *resource == Resource::Joule)
+        .find(|(resource, _)| *resource == Resource::Ember)
         .map(|(_, amount)| amount);
-    if let Some(value) = joules {
-        println!("  accrued joules {} (encased, uncollected)", style.strong(&amount(&value)));
+    if let Some(value) = embers {
+        println!("  accrued embers {} (encased, uncollected)", style.strong(&amount(&value)));
     }
     let s = orb.syntropy_contained.clone();
     let e = orb.entropy_vented.clone();
@@ -7183,7 +7183,7 @@ fn resource_name(resource: Resource) -> &'static str {
         Resource::Biomass => "biomass",
         Resource::Alloy => "alloy",
         Resource::Diamond => "diamond",
-        Resource::Joule => "joule",
+        Resource::Ember => "ember",
         Resource::Sink => "sink",
         Resource::Crystal => "crystal",
     }
@@ -7724,7 +7724,7 @@ fn refuse_text(world: &World, refusal: &ActionRefused, style: &Style) -> String 
             style.strong(name)
         ),
         ActionRefused::StarAlreadyCommissioned => format!(
-            "this world's sun is already commissioned — one star per world (NS-6 §6); {} shows it",
+            "this world's star is already commissioned — one star per world (NS-6 §6); {} shows it",
             style.strong("status")
         ),
         ActionRefused::TheWardHolds => format!(
@@ -7823,7 +7823,7 @@ fn refuse_text(world: &World, refusal: &ActionRefused, style: &Style) -> String 
             style.strong(word)
         ),
         ActionRefused::NoStarCommissioned => format!(
-            "no sun yet — commission one first: {} (O B A F G K M · bd wd rg ns wr lwh)",
+            "no star yet — commission one first: {} (blue bluewhite white yellowwhite yellow orange red · bd wd rg ns ws lwh)",
             style.strong("star <class>")
         ),
         ActionRefused::AlreadySited { orb } => format!(
@@ -7848,17 +7848,17 @@ fn refuse_text(world: &World, refusal: &ActionRefused, style: &Style) -> String 
             "no open council {} stands — delegation settles inside diplomacy; seal the council first",
             style.strong(&format!("{council}"))
         ),
-        ActionRefused::SolarLeapNeverLicensed => {
-            "the solar leap is never licensed — the young meet their sun themselves, or not".into()
+        ActionRefused::StellarLeapNeverLicensed => {
+            "the stellar leap is never licensed — the young meet their star themselves, or not".into()
         }
         ActionRefused::BelowTheThreshold => {
             "a licensed leap lands only on a union member — the receiving world has not crossed".into()
         }
         ActionRefused::BaseSevenUnfinished => {
-            "the crown gifts only onto a FINISHED base-7 stack — the solar leap and all five crystallized conditions, earned first".into()
+            "the crown gifts only onto a FINISHED base-7 stack — the stellar leap and all five crystallized conditions, earned first".into()
         }
-        ActionRefused::TerraformUnearned => format!(
-            "the orbit moves only under the crown technology — terraforming is gifted from tier 0, never taken; see {}",
+        ActionRefused::WorldshapeUnearned => format!(
+            "the orbit moves only under the crown technology — worldshaping is gifted from tier 0, never taken; see {}",
             style.strong("civ seats")
         ),
         ActionRefused::PlaneUnearned { grade, mints } => format!(
@@ -7899,7 +7899,7 @@ fn refuse_text(world: &World, refusal: &ActionRefused, style: &Style) -> String 
             )
         }
         ActionRefused::Shielded { source_shielded, dest_shielded } => format!(
-            "the shield holds — {} not met its sun; a people makes the solar leap itself ({} wakes thermal), or it is left to its sky",
+            "the shield holds — {} not met its star; a people makes the stellar leap itself ({} wakes thermal), or it is left to its sky",
             style.strong(match (source_shielded, dest_shielded) {
                 (true, true) => "neither world has",
                 (true, false) => "this world has",
@@ -8179,9 +8179,9 @@ fn journal_feed(world: &World, style: &Style) {
         }
         let economics = &entry.economics;
         println!(
-            "    {} joules {} · heating bill {} · vented {} · sink {} · zones {} · growth {}",
+            "    {} embers {} · heating bill {} · vented {} · sink {} · zones {} · growth {}",
             style.dim("▤"),
-            style.strong(&economics.banked_joules),
+            style.strong(&economics.banked_embers),
             style.strong(&economics.heating_need_year),
             style.strong(&economics.entropy_vented),
             style.strong(&economics.banked_sink),
@@ -8371,7 +8371,7 @@ fn chronicle(world: &World, style: &Style) {
                 amount(drawn)
             ),
             cfe::dop::ClosureEvent::FamineRelieved { resource, .. } => format!(
-                "☀ famine relieved — {} recovered; zones wake",
+                "✶ famine relieved — {} recovered; zones wake",
                 style.strong(resource_name(*resource))
             ),
             cfe::dop::ClosureEvent::ZoneRazed { tile, .. } => format!(
@@ -8540,7 +8540,7 @@ fn chronicle(world: &World, style: &Style) {
                 "❄ overheat cleared — flows recover whole".to_string()
             }
             cfe::dop::ClosureEvent::StarCommissioned { class } => format!(
-                "☀ sun commissioned — {}",
+                "✶ star commissioned — {}",
                 style.strong(star_name(*class))
             ),
             cfe::dop::ClosureEvent::PlanetSited { orb_id, albedo, orbit_r, theta: _, psi: _ } => format!(
@@ -8705,9 +8705,9 @@ fn chronicle(world: &World, style: &Style) {
             cfe::dop::ClosureEvent::PressureEbbed { orb_id } => format!(
                 "🌡 bio-pressure EBBED — orb {orb_id} recovers a step toward lifting quarantine"
             ),
-            cfe::dop::ClosureEvent::ElementFarmed { orb_id, joule, minted, .. } => format!(
-                "⬡ element SYNTHESIZED — orb {orb_id} spent {} joule to mint {} of its food-element",
-                style.strong(&amount(joule)),
+            cfe::dop::ClosureEvent::ElementFarmed { orb_id, ember, minted, .. } => format!(
+                "⬡ element SYNTHESIZED — orb {orb_id} spent {} ember to mint {} of its food-element",
+                style.strong(&amount(ember)),
                 style.strong(&amount(minted))
             ),
             cfe::dop::ClosureEvent::RationElementSettled { orb_id, delta, .. } => format!(
@@ -8764,7 +8764,7 @@ fn chronicle(world: &World, style: &Style) {
                 style.strong(&amount(gauge))
             ),
             cfe::dop::ClosureEvent::StarAged { class } => format!(
-                "☀ the star moves in its region — class {} now lights every orbit",
+                "✶ the star moves in its region — class {} now lights every orbit",
                 style.strong(&format!("{class}"))
             ),
             cfe::dop::ClosureEvent::EraFolded { era, gauge } => format!(

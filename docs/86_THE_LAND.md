@@ -27,7 +27,7 @@ docs/82 already states the limit: "what limits a people is energy, its
 star's flux on its world". Step 1 of the ladder already reads that flux:
 a world's heat `T = K/P · burn` is its star's agitation at its radius, a
 flux through a fluid-dimension shell (linear, law 2). A people's medium
-(the waking's map: mineral → geologic, biotic → chemical, plasmic →
+(the waking's map: mineral → lithic, biotic → chemical, plasmic →
 plasmic) takes up the share of that flux it carries as pattern. A medium of
 `h` halvings has copy error `2^(−h)`, so it carries `1 − 2^(−⌊h⌋)` (whole
 halvings, erring toward fewer; under one halving it carries nothing, the

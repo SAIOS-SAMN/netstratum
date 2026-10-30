@@ -25,7 +25,7 @@ The friction-gated ascent/descent it proposes is the landed law:
   the Silicoid, already written) and Slagborn's Furnace-eaters; fungal
   collectives are the **Mycelial Weft** (seeded); energy beings are the
   **plasmic** metabolism (Coronal Choir, current sheets — seeded);
-  aquatics are **Deep Chorus**; terraforming tiers are **TERRA-1**
+  aquatics are **Deep Chorus**; worldshaping tiers are **WORLDSHAPE-1**
   (landed — the gifted crown); subterranean depth is the **SWARM-1**
   candidate (04 §6a); eusocial swarms are the **Klethaxu** (wave 3).
 
@@ -51,7 +51,7 @@ The friction-gated ascent/descent it proposes is the landed law:
    is itself a receipted, priced deed (MASK-1, §4). The chronicle
    stays true underneath, always.
 4. **No universal Φ threshold.** The four C's are per-trajectory, never
-   cross-normalized (12 §5a: a line under a slow sun is pacing its
+   cross-normalized (12 §5a: a line under a slow star is pacing its
    world). Friction reads a line against its own chronicle; every
    threshold is a per-line placeholder, never one scalar for all.
 5. **No continuous moduli.** The Kähler-moduli proposal as drafted
@@ -131,7 +131,7 @@ walks — exactly the way function and tier read today.
   the sovereign hand adopts by the `practice`/`release` verbs. All
   constants placeholder; names operator-renameable. Five witnesses.
 - **MASK-1a — landed 2026-07-31** (tags 76/77): the veil deed and its
-  standing joule toll (1/4 at every collect, settled as receipted
+  standing ember toll (1/4 at every collect, settled as receipted
   upkeep; an unpayable toll lifts the veil by receipt, starved-flagged
   — never silently); `is_veiled` the reading; typed refusals; replay
   and resume carry it. Open as MASK-1b: the render cloud (the observer
@@ -140,7 +140,7 @@ walks — exactly the way function and tier read today.
 - **MASK-1 — the lawful veil (specced 2026-07-30).** Lens-layer
   identity masking; the substrate never lies. The concrete design:
   the veil is a receipted deed (`VeilDrawn` / `VeilLifted`, tags at
-  cadence) with a standing joule drain settled at every collect (the
+  cadence) with a standing ember drain settled at every collect (the
   demurrage pattern — an unaffordable veil lifts by receipt, never
   silently). What it clouds, exactly: (a) the veiled line's star-chart
   mark renders unnamed; (b) scan hits against its orbs report
@@ -168,7 +168,7 @@ walks — exactly the way function and tier read today.
   discrete moduli, receipted at every shift), minted fiber planes, and
   earned depth. No floats, no curvature scalars, no stored moduli
   block; renders beside the creed when it lands.
-- **Register waves.** Avian, pelagic-deep, etherean, and silicoid
+- **Register waves.** Volatiform, pelagic-deep, etherean, and silicoid
   peoples enter on the closed axes as waves (the Klethaxu precedent);
   new axis values only by substrate-style landings with the first line
   that cannot be read otherwise.

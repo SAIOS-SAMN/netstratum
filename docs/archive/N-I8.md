@@ -1,7 +1,7 @@
 # N-I8 — the first shared word
 
 **Lane:** intelligence port · **Status: landed `ab01400` — Pin C green**
-**Charter:** [`53_INTELLIGENCE_PORT.md`](../53_INTELLIGENCE_PORT.md) D3 Pin C · D1 (`sun / vocabulary::fold`)
+**Charter:** [`53_INTELLIGENCE_PORT.md`](../53_INTELLIGENCE_PORT.md) D3 Pin C · D1 (`vocabulary::fold`)
 **Companions:** N-I-VESSEL (per-vessel basin, seated) · N-I7 (look priced, seated) · `solver::mint::consider` · `vocabulary::fold`
 
 *Markdown is instruction only. The engine reads the deposits and the fold.*
@@ -26,8 +26,8 @@ mints; the second deposit is where culture starts.
 | A chat layer / hearing a word in another frame | N-I10. Never a message score. Culture starts at the second deposit, not a dialogue. |
 | Un-ignoring the cleave / refine era pins | They wait on surplus and rung, not on fold. Leave them ignored. |
 | Re-pricing look or mint | The look still pays `observe_price` (N-I7); the word mint still pays `mint_cost`. Fold changes who must close, not the bill. |
-| Touching `pre_reach` | It stays the free reduce against the sun (the folded vocabulary). Unchanged. |
-| `vocabulary::fold` rewrite | Fold still reads the `SolverWordMinted` receipt and crystallizes to the sun. This cut changes when that receipt is emitted, not how it folds. |
+| Touching `pre_reach` | It stays the free reduce against the fold (the folded vocabulary). Unchanged. |
+| `vocabulary::fold` rewrite | Fold still reads the `SolverWordMinted` receipt and crystallizes to the fold. This cut changes when that receipt is emitted, not how it folds. |
 
 ---
 
@@ -94,7 +94,7 @@ Glued + verify_work → orbit = consider(program, library, standing)
 The mint deed (`SolverWordMinted`, cited = the digests) is unchanged — only
 its firing condition moved from three digests to two vessels. `mint_cost`
 still bills leisure at the mint; `vocabulary::fold` still reads the receipt
-and crystallizes the word to the sun; `pre_reach` still reads the sun for
+and crystallizes the word to the fold; `pre_reach` still reads the fold for
 free next beat. The consilience test reads the non-committed `word_pending`
 workspace; the receipt it emits is the committed truth.
 
@@ -134,10 +134,10 @@ workspace; the receipt it emits is the committed truth.
 
 | Pin | Law |
 |---|---|
-| **C** | two distinct vessels each independently close the same orbit → one `SolverWordMinted` receipt; `vocabulary::fold` reads it into the sun. |
+| **C** | two distinct vessels each independently close the same orbit → one `SolverWordMinted` receipt; `vocabulary::fold` reads it into the fold. |
 | **C−** | one vessel closing the same orbit twice (or thrice) mints nothing — one distinct vessel_id never reaches two. |
 | **Independent** | the second closure is a vessel draining its own basin, not reading the first's crystal. No cross-basin copy. |
-| **Fold reads the receipt** | `vocabulary::fold` / `solver_words` unchanged; the sun grows only from the minted deed. |
+| **Fold reads the receipt** | `vocabulary::fold` / `solver_words` unchanged; the fold grows only from the minted deed. |
 | **Look + mint still priced** | each vessel's look pays `observe_price` (N-I7); the mint pays `mint_cost`. |
 | **SEAL-B** | the sibling is a chronicled `EntityRegistered`; `seal_b_era_pins` green; `Entity` schema untouched. |
 | **mint_loop** | a rich two-office line still mints — the economy loop closes on consilience, not on one-vantage confirms. |

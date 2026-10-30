@@ -21,7 +21,7 @@ use crate::dop::{ColonyOrb, Resource};
 use crate::ratio::{ratio, Ratio};
 
 /// SINK-1 (Q2): the demurrage due on one orb's un-vaulted banked
-/// joules/sink at `stamp` — computed pure; the caller applies and
+/// embers/sink at `stamp` — computed pure; the caller applies and
 /// receipts (so a refused action never orphans a settlement).
 /// TECH-1b (10 §3): the Long Stores ease — 1/2 once condition 5 has
 /// crystallized for this orb, 1 otherwise. Derived from the tech
@@ -95,7 +95,7 @@ const EASE_SCALE: i64 = 5;
 /// computation serves two gates and neither can disagree about what
 /// supply stood.
 pub fn standing_supply(orbs: &[ColonyOrb]) -> Vec<(Resource, Ratio)> {
-    [Resource::Joule, Resource::Sink]
+    [Resource::Ember, Resource::Sink]
         .into_iter()
         .map(|resource| {
             let total = orbs
@@ -130,7 +130,7 @@ pub fn demurrage_due(
         let t4 = crate::thermal::t_eq4(&class.luminosity(), site.albedo.value(), site.orbit_r.value());
         if crate::thermal::leaks(&t4) && stamp > orb.last_touch {
             let elapsed = ratio((stamp - orb.last_touch) as i64, 1);
-            for resource in [Resource::Joule, Resource::Sink] {
+            for resource in [Resource::Ember, Resource::Sink] {
                 let banked = orb.banked_amount(resource);
                 if banked > ratio(0, 1) {
                     // Flat-rate decay (the leak/spoilage shape), never

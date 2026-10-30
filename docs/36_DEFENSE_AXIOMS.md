@@ -1,15 +1,15 @@
-# 36 — Defense axioms · species-relative security · covert terraform · espionage
+# 36 — Defense axioms · species-relative security · covert worldshape · espionage
 
 **Status:** **partial land — Phase 5 core complete** (2026-08-08).  
 A–F · K2 · M/M2 · dual-use · 19b medium colour · G (R1–R2 + optional R3/R4
 features) · H close-out · **X7** in-tree strand/isthmus/datum adapters.
 Next free tag **152**.  
 **Authority:** `00_CHARTER`, `04_CIVILIZATION_GENESIS`, `05_THERMAL_BALANCE`,
-`06_CIVILIZATIONS`, `10_TECH_EMERGENCE` (TERRA-1, WARDEN-1, MASK-1, MANU-1),
+`06_CIVILIZATIONS`, `10_TECH_EMERGENCE` (WORLDSHAPE-1, WARDEN-1, MASK-1, MANU-1),
 `45_ALMANAC`, `15_TAXON`, `33_TRADE_FLEET_AND_DESK` §Phase 5,
 `TASKS_TRADE_FLEET_DESK` P5.*, `24_FORM` §2j (field, not collision).
 
-**Does not** default defense to human kinetic war. **Does not** invent
+**Does not** default defense to bimaniform kinetic war. **Does not** invent
 float combat dice. **Does not** require strand/datum for R1–R2 defense
 fun. **Does not** replace ideology bonds or market Notes with “military
 bonds.”
@@ -24,7 +24,7 @@ only the **kinetic/logistics surface** of a deeper law:
 
 > **Defense is whatever preserves the entity’s capacity to continue as
 > itself under interference.**  
-> For a tardigrade-clade biotic line, “itself” is not the same as for a
+> For a hypobiotid-clade biotic line, “itself” is not the same as for a
 > plasmic current-sheet or a lithic lattice mind.
 
 The operator charge (session):
@@ -32,11 +32,11 @@ The operator charge (session):
 1. Defense from the **entity itself** outward — neural/cognitive, cyber/
    digital, atmospheric, cellular — each extrapolated as an **axiom of
    defense** relative to civilization and species.
-2. **Atmospheric tampering** as offensive terraforming (covert conquest
+2. **Atmospheric tampering** as offensive worldshaping (covert conquest
    prep).
 3. Extrapolate **espionage**.
-4. Document technologies under defense; define defense for **non-human**
-   lines without human-normative blind spots.
+4. Document technologies under defense; define defense for **non-bimaniform**
+   lines without bimaniform-normative blind spots.
 
 This document is the design lock. Implementation lands in phased P5
 slices on `archive/TASKS_TRADE_FLEET_DESK.md`.
@@ -61,7 +61,7 @@ defense_posture(entity) =
 | Residual is never silent | What is lost (mass, signal, heat, memory…) |
 | Posture is receipted | Tech nodes + deeds, not ambient buffs |
 
-**Human kinetic framing is one specialization** of this law (cellular +
+**Bimaniform kinetic framing is one specialization** of this law (cellular +
 atmospheric + cognitive in a mesic bipedal package). It is **not** the
 template other lines are forced into.
 
@@ -85,9 +85,9 @@ Six **domains** — each a channel pair (defend / offend). Domains are
 not “buildings”; they are **typed residual classes** the engine can
 refuse and receipt.
 
-| Domain | Code | What is preserved | Human-visible metaphor | Non-human examples |
+| Domain | Code | What is preserved | Bimaniform metaphor | Other-clade examples |
 |--------|------|-------------------|------------------------|--------------------|
-| **Cellular / somatic** | `CEL` | Body integrity, biomass/mineral lattice coherence | Armor, immune, hull plating | Tardigrade cryptobiosis; lithic fracture toughness; fungal mycelial redundancy |
+| **Cellular / somatic** | `CEL` | Body integrity, biomass/mineral lattice coherence | Armor, immune, hull plating | Hypobiotid cryptobiosis; lithic fracture toughness; fungal mycelial redundancy |
 | **Atmospheric / medium** | `ATM` | Habitable medium around the entity (gas, plasma, ice, rock fluid) | Atmosphere, life support | Plasmic current-sheet “atmosphere” = local B-field + density; cryo sublimation shell; mantle melt pocket |
 | **Neural / cognitive** | `COG` | Decision integrity, want-maps, solve capacity | Psyops, morale, mind | Umbral occlusion of intent; harmonic jamming of perception frame; empiricist proof-poisoning |
 | **Cyber / digital** | `CYB` | Instrument, ledger interface, licensed tech stack | Hacking, C2, spoofing | Instrument grade corruption; aperture deal forgery attempts (refused typed) |
@@ -141,10 +141,10 @@ Defense *priority* and *failure residual* derive first from metabolism
 | CEL | Current-sheet coherence; reconnection resistance | Magnetic shear, quench | Sheet collapse, zero yield |
 | ATM | Local plasma “weather” — density + field as habitat | **Field-stripping**, radiative cooling attack | Forced dormancy, Furnace exile |
 | COG | Field-pattern memory; umbral/harmonic perception | Pattern noise, occlusion flood | Scan blindness, wrong joint venture |
-| CYB | Resonator / instrument as *sense organ* | Grade sabotage, false t_eq readings | Bad terraform, bad melt windows |
+| CYB | Resonator / instrument as *sense organ* | Grade sabotage, false t_eq readings | Bad worldshape, bad melt windows |
 | MKT | Melt-window books, crystal/STAMP clears | Last-clear spoof timed to phase | Futures liquidated into false marks |
 | INF | Opacity of field topology | Topology spoof | Ambush of routes in “empty” space |
-| KIN | Runner/plasma-sled escort | Interdiction of spark cargo | STAMP/joule loss |
+| KIN | Runner/plasma-sled escort | Interdiction of spark cargo | STAMP/ember loss |
 
 ### 1.5 Clade colour (secondary, not a second physics)
 
@@ -153,10 +153,10 @@ voice of residual.
 
 | Clade family (examples from 06) | Domain emphasis | Distinct “death” |
 |---------------------------------|-----------------|------------------|
-| Tardigrade / cryptobiotic | CEL extreme, ATM secondary | Tuned desiccation = *strategy*, not defeat, until time limit |
+| Hypobiotid / cryptobiotic | CEL extreme, ATM secondary | Tuned desiccation = *strategy*, not defeat, until time limit |
 | Lithic / endolithic / Glasskeeper | CEL + COG (lattice memory), ATM = rock fluid | Vitrification = defense *and* stasis |
-| Hymenopteran / hive | COG collective, INF hive-mask | Queen/node loss ≠ human “leader death” — graph cut residual |
-| Cetacean / volumetric | ATM medium, COG song/harmonic | Silence / medium wrong density |
+| Hexasocial / hive | COG collective, INF hive-mask | Queen/node loss ≠ bimaniform “leader death” — graph cut residual |
+| Soniform / volumetric | ATM medium, COG song/harmonic | Silence / medium wrong density |
 | Plasmoid / syzygial | ATM field, CYB sense | Reconnection cascade |
 | Fungal / mycelial | CEL network redundancy | Fragmentation into many small selves (not always lethal) |
 | Cryo-coherent | ATM ice, CEL quantum noise | Thermal leak as attack |
@@ -166,10 +166,10 @@ voice of residual.
 
 ### 1.6 Disposition colour (tertiary — posture, not anatomy)
 
-| Disposition | Defense posture | Espionage flavour | Covert terraform flavour |
+| Disposition | Defense posture | Espionage flavour | Covert worldshape flavour |
 |-------------|-----------------|-------------------|---------------------------|
 | **Expansionist** | Perimeter, escort mass, first-strike atmospheric prep | Route intel, yard sabotage | **Primary user** of offensive ATM |
-| **Empiricist** | Proof integrity, instrument grade, anti-spoof | Science theft, joint-venture poison | Research terraforming “for science” dual-use |
+| **Empiricist** | Proof integrity, instrument grade, anti-spoof | Science theft, joint-venture poison | Research worldshaping “for science” dual-use |
 | **Epicurean** | Surplus buffers, festival continuity, anti-famine | Market rumor, STAMP panic | Soft power climate for guests, rare hard strip |
 
 ### 1.7 Perception colour (how defense *sees*)
@@ -186,7 +186,7 @@ voice of residual.
 ## 2. Technology tree under defense
 
 Technologies are **condition-style nodes** and/or **instrument grades**
-(compose MANU-1, PLANNER-1, TERRA-1). Names are provisional; wire tags
+(compose MANU-1, PLANNER-1, WORLDSHAPE-1). Names are provisional; wire tags
 claimed only at land.
 
 ### 2.1 Domain tech families (document now, land later)
@@ -201,7 +201,7 @@ claimed only at land.
 | **Veil craft** | MASK-1 deepen, false face, census fog | veil toll | INF |
 | **Convoy doctrine** | Escort activation, risk bands, interdiction residual | Hull Escort | KIN |
 | **Ward depth** | WARDEN-1b elder / depth gate compose | ward | INF+CYB |
-| **Terra dual-use** | TERRA-1 crown; **AtmosphereCraft** offense path | base-7 + license | ATM |
+| **Terra dual-use** | WORLDSHAPE-1 crown; **AtmosphereCraft** offense path | base-7 + license | ATM |
 | **Espionage suite** | Probe under veil, steal tech hash, seed false survey | INF + CYB | INF |
 
 ### 2.2 Offense duals (every defense has a typed dual)
@@ -209,7 +209,7 @@ claimed only at land.
 | Defense domain | Offensive dual | Covert? |
 |----------------|----------------|---------|
 | CEL | Pathogen / fracture / quench | Sometimes |
-| ATM | **Atmospheric tampering / covert terraform** | **Primary covert invasion tool** |
+| ATM | **Atmospheric tampering / covert worldshape** | **Primary covert invasion tool** |
 | COG | Doctrine poison, want storm | Often |
 | CYB | Instrument spoof, mesh spoof (refused or residual typed) | Often |
 | INF | Deep veil, false flag treaty | Always |
@@ -227,7 +227,7 @@ breach. No “HP”; only typed losses already meaningful to the economy
 | Treaty Defense kind | Political non-war; not kinetic |
 | MASK-1 veil | INF baseline |
 | WARDEN-1a reverse shield | Extreme INF+mesh lockdown |
-| TERRA-1 terraform | ATM **overt** seat change (PlanetSited) |
+| WORLDSHAPE-1 worldshape | ATM **overt** seat change (PlanetSited) |
 | MANU-1 instruments | CYB-instrument grade |
 | Estate survey witnesses | Anti-spoof for INF on land |
 | Appraisal staleness | Economic mind-integrity adjacent |
@@ -235,13 +235,13 @@ breach. No “HP”; only typed losses already meaningful to the economy
 
 ---
 
-## 3. Atmospheric tampering & covert terraform
+## 3. Atmospheric tampering & covert worldshape
 
-### 3.1 Why this is not “just TERRA-1 again”
+### 3.1 Why this is not “just WORLDSHAPE-1 again”
 
 | Mode | Visibility | Receipt | Intent |
 |------|------------|---------|--------|
-| **Overt terraform** (TERRA-1) | Public crown tech | Fresh `PlanetSited` | Legitimate band shift |
+| **Overt worldshape** (WORLDSHAPE-1) | Public crown tech | Fresh `PlanetSited` | Legitimate band shift |
 | **Covert atmospheric tampering** | Veiled / deniable | New deeds under INF+ATM | Soften target for conquest |
 
 Covert path **must not** free-mint a PlanetSited rewrite without
@@ -263,7 +263,7 @@ tamper_pressure(orb, domain=ATM) ∈ ℚ≥0
 2. **Covert tamper** shifts effective medium (albedo dusting, gas strip,
    field shear for plasmic) without full re-site.
 3. **Detection** → treaty war flag, residual on spy, or INF reveal.
-4. **Overt phase** may then license TERRA-1 or open war (treaty kind).
+4. **Overt phase** may then license WORLDSHAPE-1 or open war (treaty kind).
 5. **Defense** is MediumEnvelope + detection instruments + ward.
 
 ### 3.3 Species-relative “atmosphere”
@@ -388,9 +388,9 @@ without free dials (§12); P5-G never blocks R1–R2 fun.
 ### 6.2 Non-goals
 
 - Real-time tactical combat sim as a **second physics**  
-- Human-only moral framing as engine law  
+- Bimaniform-only moral framing as engine law  
 - Silent HP bars  
-- Free terraform without TERRA-1 or metered tamper  
+- Free worldshape without WORLDSHAPE-1 or metered tamper  
 - Path-dependency on strand/datum for core defense  
 - Mini-games that mint value outside SEAL B / conservation  
 
@@ -469,7 +469,7 @@ UI home: desk panes **defend** + **EXCH** + optional `suite <name>` full-screen
 |--------------|-----|
 | Separate “hacking sim” with its own score currency | Breaks call-not-copy / STAMP monopoly |
 | Real-time twitch that skips receipts | Breaks SEAL B audit |
-| Human “bank run” only | Ignores plasmic/mineral market death |
+| Bimaniform “bank run” only | Ignores plasmic/mineral market death |
 | Suite-only content | NPC lines must fight economic war unaided |
 
 ### 10.5 Implementation order for MKT + suites
@@ -519,7 +519,7 @@ schism. Atmospheric attack hits shared brood medium. Espionage is
 
 | ID | Question | Lean |
 |----|----------|------|
-| Q-D1 | Is CovertTamper a new PlanetSited half-state or pure pressure scalar? | **Ruled:** pressure scalar + TamperDetected at unit threshold; **P5.19:** never rewrites thermal; terra dual-use tax 2× crystal; overt terraform clears pressure |
+| Q-D1 | Is CovertTamper a new PlanetSited half-state or pure pressure scalar? | **Ruled:** pressure scalar + TamperDetected at unit threshold; **P5.19:** never rewrites thermal; terra dual-use tax 2× crystal; overt worldshape clears pressure |
 | Q-D2 | Multi-actor tamper stack (who is blamed)? | Last unveiled actor + INF witness (later) |
 | Q-D3 | Plasmic ATM = thermal site fields only? | Compose thermal + new field TLV later |
 | Q-D4 | Share of espionage with mask toll | Compose VeilToll |
@@ -652,9 +652,9 @@ dials, no free capability mint, no second physics.
 
 | # | Opening | Civ/species hook | Derive from (no statics) |
 |---|---------|------------------|---------------------------|
-| **K1** | **Metabolism-keyed residual shape** | Mineral loses iron/scrap; biotic biomass/Habitat cargo; plasmic joule/crystal/STAMP-spark | Sealed genesis **metabolism**; same risk formula, different debit resource |
+| **K1** | **Metabolism-keyed residual shape** | Mineral loses iron/scrap; biotic biomass/Habitat cargo; plasmic ember/crystal/STAMP-spark | Sealed genesis **metabolism**; same risk formula, different debit resource |
 | **K2** | **Disposition-routed `kin_step`** | Expansionist escorts/contests; empiricist marks risk / refuses thin cover; epicurean prioritizes secure bands | Active **doctrine disposition** (`PostureReoriented` or genesis); NPC parity like `market_war_step` |
-| **K3** | **Clade colour on cover/voice** | Tardigrade/lithic hull-as-body; hive many low-grade escorts; plasmoid risk near melt windows | Sealed **taxon clade**; weight ranks / residual *voice*, not new HP |
+| **K3** | **Clade colour on cover/voice** | Hypobiotid/lithic hull-as-body; hive many low-grade escorts; plasmoid risk near melt windows | Sealed **taxon clade**; weight ranks / residual *voice*, not new HP |
 | **K4** | **Thermal/orbit as place cost** | Cryo vs hyper corridors feel different | Receipted **orbit period · star magnetism · band** (35 dynamo); fold into risk or haul residual only by call |
 | **K5** | **Perception as corridor fog** | Planar: risk only on charted routes; volumetric: prospect gates “seen” risk; harmonic/umbral: false risk refuses without instrument grade | Active **perception** + MANU-1 grade; refuse paths, not dice |
 | **K6** | **Doctrine reorient + convoy suite** | Line can push KIN primary mid-game without rewriting anatomy | Tag **144** already; suite is UI only over escort/risk deeds |
@@ -694,4 +694,4 @@ no chronicle rewrite) · P5.19b medium residual colour · P5-H close-out.
 ---
 
 *Phase 5 began with KIN vertical (escort). Defense means are defined
-here first so no land hard-codes human war as the only coherence.*
+here first so no land hard-codes bimaniform war as the only coherence.*

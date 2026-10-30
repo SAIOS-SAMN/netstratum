@@ -34,14 +34,14 @@ follows it (`dop::metabolic_ration_of`):
 |---|---|---|---|
 | **biotic** | Biomass | at rate 1 | grows a field |
 | **mineral** (lithovore) | Iron | at rate 1 | works ore bodies |
-| **plasmic** (plasmoid) | Joule | rate **0** | captures heat — never a field |
+| **plasmic** (plasmoid) | Ember | rate **0** | captures heat — never a field |
 | **minted element-eater** (#24) | its periodic element | at rate 1 | farms its own stone |
 
 The plasmoid is the load-bearing case and it is law, not flavor: a
 plasmic line's food is captured energy (`plasmic agriculture is
 encasement of real heat`, 04 §1.2 / 05 §1.2), pinned by
 `world_metabolism::the_mesic_band_starves_a_current_sheet` (a plasmoid
-in a temperate band starves on joule) and
+in a temperate band starves on ember) and
 `plasmic_agriculture_is_encasement_of_real_heat`. Everything downstream
 already reads the ration, not biomass: upkeep, regrowth (#28
 `ration_touch_delta`), quarantine decay (#30), the element-eater stasis

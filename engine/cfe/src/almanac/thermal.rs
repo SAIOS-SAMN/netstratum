@@ -21,17 +21,17 @@ pub enum ThermalRegion {
     /// Below the cryogenic floor. The deepest cold, and a place — not
     /// an absence.
     Quenched,
-    /// 10 K – 100 K.
+    /// 10° – 100°.
     Cryogenic,
-    /// 100 K – 250 K. A stretch `band_of` answered none for.
+    /// 100° – 250°. A stretch `band_of` answered none for.
     Sublime,
-    /// 250 K – 320 K.
+    /// 250° – 320°.
     Mesic,
-    /// 320 K – 600 K. The second silence.
+    /// 320° – 600°. The second silence.
     Torrid,
-    /// 600 K – 1500 K.
+    /// 600° – 1500°.
     HyperThermal,
-    /// Above 1500 K, up to the ceiling.
+    /// Above 1500°, up to the ceiling.
     Incandescent,
     /// **Above the ceiling.** Reachable only by an ungrained orbit; with
     /// [`orbit_on_grain`] applied it cannot occur. The arm exists to be
@@ -87,7 +87,7 @@ pub fn orbit_on_grain(orbit_r: &Ratio) -> Ratio {
 /// the grain, both already present.
 pub fn ceiling4() -> Ratio {
     crate::thermal::t_eq4(
-        &crate::thermal::StarClass::O.luminosity(),
+        &crate::thermal::StarClass::Blue.luminosity(),
         &ratio(0, 1),
         &orbit_on_grain(&ratio(0, 1)),
     )

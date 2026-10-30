@@ -95,14 +95,15 @@ pub fn chart(u: &Universe, book: &Ledger, stamp: u64) -> std::io::Result<usize> 
 /// A world's era-1 siting in cfe's terms (the refactor onto era 1's physics,
 /// 2026-10-15): the star class nearest its star's burn by luminosity, albedo
 /// 0, and the orbit at which cfe's linear law gives the world's own heat,
-/// `r = K · L / T` (K the Sol anchor, 279 K): exact, no root.
+/// `r = K · L / T` (K the home-equilibrium anchor, 279°: an import, owed its
+/// derivation, docs/108 O3): exact, no root.
 pub fn site_of(heat: &cfe::ratio::Ratio, burn: &cfe::ratio::Ratio) -> Option<(cfe::thermal::StarClass, cfe::ratio::Ratio, cfe::ratio::Ratio)> {
     use cfe::thermal::StarClass as C;
     if *heat <= ratio(0, 1) {
         return None;
     }
     let distance = |c: &C| { let d = c.luminosity() - burn.clone(); if d < ratio(0, 1) { -d } else { d } };
-    let class = [C::O, C::B, C::A, C::F, C::G, C::K, C::M].into_iter().min_by(|a, b| distance(a).cmp(&distance(b)))?;
+    let class = [C::Blue, C::BlueWhite, C::White, C::YellowWhite, C::Yellow, C::Orange, C::Red].into_iter().min_by(|a, b| distance(a).cmp(&distance(b)))?;
     // Six sexagesimal places of its own size (design law 8): the era-0
     // thermal machinery reads this orbit every tick, and the exact quotient
     // carried the heat's eighty-digit terms into every product; a fixed grain
@@ -157,7 +158,7 @@ pub fn sites(u: &Universe, worlds: &std::collections::BTreeMap<Vec<u64>, crate::
             let (star, albedo, orbit) = site_of(&w.heat, &w.burn)?;
             let position = place_of(u, &w.path)?;
             let compression = w.pressure.clone() / reference.clone();
-            let wild = ["chemical", "geologic", "plasmic"].into_iter().map(|m| (m, crate::life::wild(w, &compression, m, &home))).collect();
+            let wild = ["chemical", "lithic", "plasmic"].into_iter().map(|m| (m, crate::life::wild(w, &compression, m, &home))).collect();
             Some((w.path.clone(), Site { path: w.path.clone(), position, star, albedo, orbit, composition: composition_of(u, &w.path), wild }))
         })
         .collect()

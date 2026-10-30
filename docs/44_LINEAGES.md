@@ -42,8 +42,8 @@ world's fitness for it is `planet_fit(clade, region) → Prime · Marginal ·
 Hostile`, with `habitability(clade, region)` the life-bearing factor that
 tapers with distance from the home band. A lithovore on cold rock, a
 plasmoid on a scorching close-orbit world, an abyssal line in a deep
-pressured band — each reads its own fit. **This is the "high-gravity super-
-earth / ice-crusted ocean / gas giant / volcanic world" matching the
+pressured band — each reads its own fit. **This is the "high-gravity rocky
+world / ice-crusted ocean / gas giant / volcanic world" matching the
 operator names, already in code.** What is not yet built: the player
 creating a fitted world for a founding — that is the progenitor-gated
 star/planet creation, `TASKS_ALPHA_BETA` Phase 4 (#34).

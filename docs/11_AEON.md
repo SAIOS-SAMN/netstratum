@@ -1,7 +1,7 @@
 # AEON — the polytonic clockwork and the fold (AEON-1 spec, design stage)
 
 **Status:** design — replaces the retracted linear "LIFECYCLE/LIFE-1" draft
-(operator critique, 2026-07-28: terrestrial-linear, destroy-not-fold,
+(operator critique, 2026-07-28: single-world linear, destroy-not-fold,
 shell-script slop, unqualified naming). Re-founded on the engine's own
 n-dimensional machinery — the three sovereign axes, the edgeless torus, the
 **growing** polynomial fiber, and the four C's — as a **polytonic** design.
@@ -23,9 +23,9 @@ on a lone rollover:
   **Base-1 — the daily voice** on the TUniversal scale (operator
   calibration, 2026-07-30).
 - **week** = 7t — **Base-7, the weekly voice**: the technology-stack
-  rhythm (the base-7 stack — solar leap + five crystallized conditions
+  rhythm (the base-7 stack — stellar leap + five crystallized conditions
   + the gifted crown — reads against this voice; trigger surface
-  reserved, TERRA-1).
+  reserved, WORLDSHAPE-1).
 - **year** = 60t (voice 4) — the planet speaks (journal), growth is
   read. **Base-60 — the yearly voice**: crystallization, star
   movement, board-scale shifts.
@@ -103,7 +103,7 @@ plays it.
 
 ## 3. Lineage as a manifold walk — divergence + confluence
 
-"Charted" is retired: it imported terrestrial unary budding (one predecessor,
+"Charted" is retired: it imported unary budding (one predecessor,
 mutate one axis) — half a model with no second half. Two named events, both
 *positions on the {disposition × metabolism × perception × G} manifold*,
 never a family-tree line:
@@ -135,7 +135,7 @@ both legs of the manifold dual (12 §2c) in one deed:
   most, resonance nearly nothing — §2.1's reading made thermodynamic.
   Receipted through the landed vent machinery, never silent.
 - **Containment — the syntropic leg.** The resonant remainder encases:
-  the hybrid's opening bank (encased joules / banked sink) — the
+  the hybrid's opening bank (encased embers / banked sink) — the
   container the crossing built.
 
 Constants are placeholder parameters. Lands with the confluence
@@ -187,11 +187,12 @@ empty predecessor.
 ## 6. Stars as regions, not rails
 
 A star is a point in **mass × composition × age**, not a rung on a track.
-Each age it moves in that region (class-scaled: O/B fast, K/M nearly still),
-`StarAged` (tag 45) recomputing `L` → every bound planet's `T_eq⁴` and band
-shift. The dynamic lever stands — a G-star's mesic halls cook as it reddens,
-a frozen K world thaws when a neighbour goes giant — but framed as movement
-in a region, so two same-class stars can age differently by composition.
+Each age it moves in that region (class-scaled: blue and blue-white fast,
+orange and red nearly still), `StarAged` (tag 45) recomputing `L` → every
+bound planet's `T_eq⁴` and band shift. The dynamic lever stands — a yellow
+star's mesic halls cook as it reddens, a frozen orange-star world thaws when
+a neighbour goes giant — but framed as movement in a region, so two
+same-class stars can age differently by composition.
 
 ## 7. Bounded occupancy — a cap without a monotone line
 

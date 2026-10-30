@@ -201,7 +201,7 @@ pub fn peer_door(home: &World, peer: &World, peer_name: &str) -> (PeerDoor, Stri
     if home.at_war_with(peer_name) || peer.at_war_with(home.name()) {
         return (PeerDoor::Wall, "war".into());
     }
-    if !home.knows_its_sun() || !peer.knows_its_sun() {
+    if !home.knows_its_star() || !peer.knows_its_star() {
         return (PeerDoor::Shield, "shield".into());
     }
     let now = home.now();
@@ -855,7 +855,7 @@ fn render_routes(style: Style, home: &World) -> Vec<String> {
             style.value(&deal.to_string()),
             style.dim("η"),
             style.strong(&ratio_str(eta.value())),
-            style.hint("upkeep 1/4 joule / year-voice")
+            style.hint("upkeep 1/4 ember / year-voice")
         ));
     }
     if committed.routes.is_empty() {
@@ -1129,7 +1129,7 @@ fn resource_word(resource: cfe::dop::Resource) -> &'static str {
         cfe::dop::Resource::Biomass => "biomass",
         cfe::dop::Resource::Alloy => "alloy",
         cfe::dop::Resource::Diamond => "diamond",
-        cfe::dop::Resource::Joule => "joule",
+        cfe::dop::Resource::Ember => "ember",
         cfe::dop::Resource::Sink => "sink",
         cfe::dop::Resource::Crystal => "crystal",
     }

@@ -113,7 +113,7 @@ Top-level shortcuts: `chem` · `biology` · `physics` · `math` · `science` →
 
 ```text
 bench          BUILD COMPONENTS
-  planetary    bio · chem · terraform · medium · thermal · balance
+  planetary    bio · chem · worldshape · medium · thermal · balance
   build        zones · yard · refinery · regen
   star         commission · site · age · rings
   estate       chart · parcels · appraise · ladder

@@ -119,7 +119,7 @@ climbs via vent/collect.
 | Extractor | raw carrier income (iron/bio) |
 | Assay / prospect | open element veins |
 | Regenerator | restores ration; **unlocks order-work under strain** |
-| Encasement | posts syntropy via joule capture (landed collect path) |
+| Encasement | posts syntropy via ember capture (landed collect path) |
 | Demurrage / vent | posts entropy (landed) |
 | Melt void share | cargo lost to void (entropic transit — already receipted) |
 

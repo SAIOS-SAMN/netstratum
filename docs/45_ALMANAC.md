@@ -35,7 +35,7 @@ an oracle.
 ## 1. What stands today (the closed carriers)
 
 Seven resources, wire codes 1–7, a closed vocabulary: iron · biomass ·
-alloy · diamond · joule · sink · crystal. They stay closed — they are
+alloy · diamond · ember · sink · crystal. They stay closed — they are
 the laws' own carriers (rations, fuel, the lens's power, the thermal
 dual ledger). The periodic table does not extend this enum.
 
@@ -76,15 +76,16 @@ only strata 1..=2. Each crystallized base condition **1..=5** raises
 the ceiling by one; never above `lines_of(star)`. **Assay and refine**
 also refuse when the vein's periodic line exceeds `civ_reach` — a
 people may chart a deep identity and still be unable to mine it until
-sky tech grows. Solar leap (condition 0) does not deepen the mine.
+sky tech grows. Stellar leap (condition 0) does not deepen the mine.
 
 **STAR-ENDOW-1 / ORBIT-ENDOW-1 (landed):** closed-carrier kit scales
 with the sky. `ColonyFounded` banks the bronze packet (20 iron / 10
 biomass). `StarCommissioned` top-ups the genesis orb to a class kit
-(G matches founding; O/B metal-rich + crystal seed; M biomass-rich;
-brown dwarf seeds sink). Never strips spent banks. `PlanetSited`
-adds a small band gift (cryo→sink, hyperthermal→iron; mesic home
-none). Chart transfers still move the founding packet (conservation).
+(yellow matches founding; blue and blue-white metal-rich + crystal
+seed; red biomass-rich; brown dwarf seeds sink). Never strips spent
+banks. `PlanetSited` adds a small band gift (cryo→sink,
+hyperthermal→iron; mesic home none). Chart transfers still move the
+founding packet (conservation).
 
 Conservation: an element enters banked stores only by extraction
 against `richness` per tick (the extractor pattern, terrain-multiplied
@@ -100,7 +101,7 @@ The draw's priors are the **abundance spine** — one small ruled table,
 operator-owned, keyed by `StarClass` (the thirteen classes are the
 almanac's spine; metallicity is real astrophysics and the table wears
 it): hot young classes weight heavy families up; dwarfs weight noble
-and volatile; the exotic classes (NeutronStar, WolfRayet,
+and volatile; the exotic classes (NeutronStar, WindStripped,
 LuminalWhiteHole) carry the rare tails. All weights exact rationals;
 placeholder values at the landing, tuned by ruling at balance time.
 
@@ -115,7 +116,7 @@ denominator bounded by the table's own).
 **What is already emergent (landed, zero new code):** the mint reads
 the star's class at mint time, and `StarAged` (tag 45) moves stars
 through their regions — so a star's death already rewrites its own
-system's periodic table: every prospect struck after a G-star falls
+system's periodic table: every prospect struck after a yellow star falls
 to WhiteDwarf draws the exotic spine (heavy and noble open, light
 closes). Home-system enrichment is a property of composition, not a
 feature.
@@ -282,7 +283,7 @@ what makes the lane periodic rather than a ramp.
 A resource is a place, not a number, and it takes both readings:
 
 - **The star says how deep.** `lines_of(class)` — a heavy, bright
-  class forges down to line 7; an M dwarf reaches 3; a brown dwarf 2.
+  class forges down to line 7; a red star reaches 3; a brown dwarf 2.
   The same element id is present in one system and absent from
   another. Locality dominates pressure: no stratum releases what the
   system does not carry.

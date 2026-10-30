@@ -38,7 +38,7 @@ pub const TIERS: [&str; 2] = ["colonies", "union"];
 /// information. μ is never summed across lanes, and neither is anything
 /// here. Netstratum fills S (matter), G (STAMP) and H (words); T stays zero.
 pub mod lane {
-    /// Banked matter (iron, biomass, alloy, diamond, joule, sink, crystal),
+    /// Banked matter (iron, biomass, alloy, diamond, ember, sink, crystal),
     /// in units of the resource ledger's 1/1024 grain.
     pub const MATTER: usize = 0;
     /// STAMP, Netstratum's unit of account, on the value lane, in the same
@@ -58,8 +58,8 @@ pub const PART_BYTES: usize = 700_000;
 /// the reach its bell crosses, half the bell's period `T_u/2` light-rings
 /// (`pulse::Universe::t_u`, `<var>/pulse.bin` tag 17). The ring law is already
 /// geometrized (mass is holding, in the units of reach; no G, no c), so the
-/// court's `2m/R` reads true in Netstratum's own unit; the court names that
-/// unit a megaparsec, a label only.
+/// court's `2m/R` reads true in Netstratum's own unit; the court's name for
+/// that unit is a label only.
 pub fn universe_radius(var_root: &Path) -> io::Result<(u64, u64)> {
     let bytes = std::fs::read(var_root.join("pulse.bin"))?;
     let t_u = cfe::tlv::records(&bytes)

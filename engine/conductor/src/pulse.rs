@@ -169,6 +169,7 @@ fn reach_of(t: Ratio) -> Ratio {
     ratio(2, 1) * t.clone() / (ratio(1, 1) + t.clone() * t)
 }
 
+/// The shares below are imports, owed their derivation (docs/108 O5).
 /// By depth: 3 the epicenter (no mass; the intergalactic medium; its cores
 /// by the spectrum's strengths, `deploy`), 2 a core
 /// (its hole, of order 1/1000 of its galaxy, the hole-to-bulge relation; the

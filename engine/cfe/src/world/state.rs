@@ -109,7 +109,7 @@ pub struct Council {
 pub struct Committed {
     pub orbs: Vec<ColonyOrb>,
     pub entities: Vec<Entity>,
-    /// THERMAL-1: the commissioned sun, if any.
+    /// THERMAL-1: the commissioned star, if any.
     pub star: Option<crate::thermal::StarClass>,
     /// ABSORB-1: the open reciprocity windows, in opening order.
     pub debts: Vec<AbsorptionDebt>,
@@ -123,7 +123,7 @@ pub struct Committed {
     pub offers: Vec<Offer>,
     /// TECH-1a: the discovered nodes — (orb, condition, node id,
     /// receipted magnitude) in discovery order; condition 0 is the
-    /// kernel solar leap. The magnitude is what the `TechDiscovered`
+    /// kernel stellar leap. The magnitude is what the `TechDiscovered`
     /// receipt asserted (operator ruling 2026-08-05: receipt
     /// authority) — the tick's boon factors read it, never a table.
     pub techs: Vec<(u64, u8, [u8; 32], Ratio)>,
@@ -316,7 +316,7 @@ pub struct World {
     pub(super) chronicle: Chronicle,
     pub(super) orbs: Vec<ColonyOrb>,
     pub(super) entities: Vec<Entity>,
-    /// THERMAL-1: the container's sun (the world is the star system,
+    /// THERMAL-1: the container's star (the world is the star system,
     /// NS-6 §6); absent until commissioned — thermal stays dormant.
     pub(super) star: Option<crate::thermal::StarClass>,
     /// Workspace, per orb: net flow since that orb's last collection —
@@ -342,7 +342,7 @@ pub struct World {
     pub(super) friction_pending: Vec<(u64, Ratio)>,
     /// TECH-1a: the discovered nodes with their receipted magnitudes
     /// (committed — replays from receipts alone); condition 0 is the
-    /// kernel solar leap.
+    /// kernel stellar leap.
     pub(super) techs: Vec<(u64, u8, [u8; 32], Ratio)>,
     /// #41 workspace: the shear cursor — (receipts processed, carried
     /// sheet). A pure cache over receipts: never committed, never

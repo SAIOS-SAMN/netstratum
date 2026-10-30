@@ -50,9 +50,9 @@ The law (`mycelium::physics::outflow`, n = 7 read off the coordinates):
 `K = L − σ∧(σ·L)/σ²`, `v = P·K`, `N = P∧v`, and on each base plane its
 outflow `N` and its direction `v` in the plane.
 
-- **σ, the geoid: the ring.** The sphere at the centre of radius the ring,
-  `R = H` (δ = ½, 1 in the enclosure's own units), where the luminal bound
-  stands and through which the throat inverts.
+- **σ, the equipotential figure: the ring.** The sphere at the centre of
+  radius the ring, `R = H` (δ = ½, 1 in the enclosure's own units), where
+  the luminal bound stands and through which the throat inverts.
 - **P, the pivot: the body's point on the ring.** Its plane components are
   its own frames: on plane k, `(z_k, q_k)` its closed and open frames on
   axis k, its R the ring. Held exactly as a rational point by inverse

@@ -108,10 +108,10 @@ pub(crate) fn diophantine_siting(
     civilization: &Civilization,
     beacon: &Beacon,
 ) -> (StarClass, Ratio, Ratio) {
-    // Every derived world sits under a G sun (05 §3.1); the spec overrides
+    // Every derived world sits under a yellow star (05 §3.1); the spec overrides
     // the class when it pins one. M = 1 for G, so r = k² here — but mass()
     // is read so the generator is star-general the moment the class changes.
-    let class = StarClass::G;
+    let class = StarClass::Yellow;
     let mass = class.mass();
     let (albedo, k_center, _) = regime(civilization, beacon);
 
@@ -227,7 +227,7 @@ pub(crate) struct SiteOption {
 /// options, freedom, and agency only). Where a band could settle: its compiled
 /// home when the line has one and the physics admits it (albedo in `[0, 1)`,
 /// orbit `> 0` — the `Unit`/`Positive` doors), and every continuous derived
-/// draw of its regime around every main-sequence sun. Each carries its viability reading.
+/// draw of its regime around every main-sequence star. Each carries its viability reading.
 /// Returns the options and, when a compiled home exists but the physics
 /// refuses it, why — reported, never silently left unsited.
 pub(crate) fn founding_options(
@@ -246,10 +246,10 @@ pub(crate) fn founding_options(
             refused = Some(format!("{class:?} albedo {albedo} orbit {orbit}"));
         }
     }
-    // Every main-sequence sun (O..M, the codes the wire reads 1..=7) offers
+    // Every main-sequence star (blue..red, the codes the wire reads 1..=7) offers
     // the regime's continuous draws on its own Keplerian track `r = M·k²` —
     // the galaxy holds more than one kind of star, so a line whose clade band
-    // sits far from a G sun's temperate window still has living land to
+    // sits far from a yellow star's temperate window still has living land to
     // choose. Remnants and the lore exotics are not founding places.
     //
     // Beside the regime's continuous draws (the line's native window), the
@@ -318,7 +318,7 @@ mod tests {
     fn every_track_is_exact_and_keplerian() {
         // r³ = P²·M holds exactly for a continuous sweep of k — the
         // Diophantine invariant, checked without ever forming a root.
-        let m = StarClass::G.mass();
+        let m = StarClass::Yellow.mass();
         for n in 1..=40i64 {
             let k = ratio(n, 17); // an off-lattice continuous k
             let (r, p) = track(&m, &k);
@@ -334,7 +334,7 @@ mod tests {
         // hugging the mesic band, never in a dead orbit.
         let beacon = Beacon::from_digest([7u8; 32]);
         let (class, albedo, r) = diophantine_siting(&civ("biotic"), &beacon);
-        assert_eq!(class, StarClass::G);
+        assert_eq!(class, StarClass::Yellow);
         let eta = thermal::coverage(&thermal::t_eq4(&class.luminosity(), &albedo, &r));
         assert!(eta >= ratio(1, HALVING), "a mesic world sites viable: η = {eta}");
     }
@@ -386,13 +386,13 @@ mod tests {
     #[test]
     fn a_lawful_home_is_one_option_and_an_unlawful_home_is_reported() {
         let beacon = Beacon::from_digest([5u8; 32]);
-        let home = Some((StarClass::M, ratio(1, 2), ratio(1, 1)));
+        let home = Some((StarClass::Red, ratio(1, 2), ratio(1, 1)));
         let (options, refused) = founding_options(&civ("biotic"), &beacon, home);
         assert!(refused.is_none());
         assert!(options[0].home, "the compiled home leads the options");
         assert!(options.len() > 1, "the derived draws stand beside it");
         // albedo 1 fails the Unit door: no home option, and the refusal is named.
-        let (options, refused) = founding_options(&civ("biotic"), &beacon, Some((StarClass::G, ratio(1, 1), ratio(1, 1))));
+        let (options, refused) = founding_options(&civ("biotic"), &beacon, Some((StarClass::Yellow, ratio(1, 1), ratio(1, 1))));
         assert!(refused.is_some(), "an unlawful home is reported, never silently unsited");
         assert!(options.iter().all(|o| !o.home));
         assert!(!options.is_empty(), "the band still has derived places to go");
@@ -400,8 +400,8 @@ mod tests {
 
     #[test]
     fn a_dead_site_is_never_chosen_while_living_land_exists() {
-        let dead = SiteOption { class: StarClass::B, albedo: ratio(1, 4), orbit: ratio(1, 1), viability: ratio(0, 1), home: true };
-        let alive = SiteOption { class: StarClass::G, albedo: ratio(0, 1), orbit: ratio(1, 1), viability: ratio(3, 4), home: false };
+        let dead = SiteOption { class: StarClass::BlueWhite, albedo: ratio(1, 4), orbit: ratio(1, 1), viability: ratio(0, 1), home: true };
+        let alive = SiteOption { class: StarClass::Yellow, albedo: ratio(0, 1), orbit: ratio(1, 1), viability: ratio(3, 4), home: false };
         for n in 0..64u8 {
             let pick = choose_site(&[dead.clone(), alive.clone()], [n; 32]);
             assert_eq!(pick, Some(1), "seed {n}: zero viability carries no weight");
@@ -410,8 +410,8 @@ mod tests {
 
     #[test]
     fn the_choice_replays_and_a_band_with_no_living_land_still_settles() {
-        let a = SiteOption { class: StarClass::M, albedo: ratio(0, 1), orbit: ratio(2, 1), viability: ratio(0, 1), home: true };
-        let b = SiteOption { class: StarClass::G, albedo: ratio(0, 1), orbit: ratio(9, 1), viability: ratio(0, 1), home: false };
+        let a = SiteOption { class: StarClass::Red, albedo: ratio(0, 1), orbit: ratio(2, 1), viability: ratio(0, 1), home: true };
+        let b = SiteOption { class: StarClass::Yellow, albedo: ratio(0, 1), orbit: ratio(9, 1), viability: ratio(0, 1), home: false };
         let options = [a, b];
         assert_eq!(choose_site(&options, [9u8; 32]), choose_site(&options, [9u8; 32]), "same seed, same choice");
         let picks: std::collections::BTreeSet<_> = (0..64u8).filter_map(|n| choose_site(&options, [n; 32])).collect();
@@ -421,8 +421,8 @@ mod tests {
 
     #[test]
     fn the_better_site_is_likelier_never_certain() {
-        let good = SiteOption { class: StarClass::G, albedo: ratio(0, 1), orbit: ratio(1, 1), viability: ratio(1, 1), home: false };
-        let poor = SiteOption { class: StarClass::K, albedo: ratio(0, 1), orbit: ratio(1, 1), viability: ratio(1, 8), home: true };
+        let good = SiteOption { class: StarClass::Yellow, albedo: ratio(0, 1), orbit: ratio(1, 1), viability: ratio(1, 1), home: false };
+        let poor = SiteOption { class: StarClass::Orange, albedo: ratio(0, 1), orbit: ratio(1, 1), viability: ratio(1, 8), home: true };
         let (mut g, mut p) = (0, 0);
         for n in 0..=255u8 {
             let mut seed = [0u8; 32];

@@ -21,7 +21,7 @@ become readable — and therefore economically actionable intelligence.
 2. **Deterministic narrative.** Same chronicle ⇒ same journal. Flavor
    selection (leisure lines, phrasing variants) seeds from receipt digests
    already in the chronicle — no wall clock, no ambient randomness.
-3. **Exact rationals as `p/q` strings** (C2R): growth, joules, sink,
+3. **Exact rationals as `p/q` strings** (C2R): growth, embers, sink,
    ratios. Never floats, never truncated integers.
 4. **Terminology law holds:** Furnace (never Crucible), no set-letter
    glyphs, world-book names from `06` (Emberkin, Coherent, Glasskeepers,
@@ -34,7 +34,7 @@ become readable — and therefore economically actionable intelligence.
 
 | source | narrative |
 |---|---|
-| banked joules vs heating need | surplus → building/expanding; deficit → red alert: fuel sought before freeze-lock |
+| banked embers vs heating need | surplus → building/expanding; deficit → red alert: fuel sought before freeze-lock |
 | famine list / freeze-lock | Red alert per resource, dormant zones named |
 | overheat / `entropy_vented` delta | thermal stress, radiator exhaustion vs pristine syntropic operations |
 | banked sink + vault band | offering absorption capacity to Furnace traders |
@@ -42,7 +42,7 @@ become readable — and therefore economically actionable intelligence.
 | registry axes (disposition/metabolism/perception) + StarClass/band | leisure & culture flavor (digest-seeded variants) |
 | chartered colonies / entities registered | expansion, population notes, "seeking space" |
 
-Trade requests derive: joule deficit → seeking fuel; high sink → selling
+Trade requests derive: ember deficit → seeking fuel; high sink → selling
 `S_cool`; famine → seeking the famined resource. Alert levels: Normal
 (cyan) · Warning (red) · Milestone (blue).
 

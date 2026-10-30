@@ -4,34 +4,34 @@
 //! **The law, era 1 (docs/78 design law 2, refactored in place 2026-10-15):**
 //! no square and no fixed dimension states a law. Flux through a
 //! fluid-dimension shell falls linearly, `I = L (1 − A) / r`, and the
-//! equilibrium temperature is held as `T` itself, in kelvin, `T = K · I`:
+//! equilibrium temperature is held as `T` itself, in degrees, `T = K · I`:
 //! exact for rational inputs, with no root anywhere. (Era 0 held `T⁴` from
 //! a `1/r²` flux, a flat 3-dimensional law; the names `t_eq4`, `bounds4`
 //! and `ceiling4` keep their call sites but now carry `T`.)
 //!
 //! All numbers here are placeholder parameters: `K` is anchored so a
-//! Sol-type body (G star, `L` = 1) at `r` = 1, albedo 0 sits at
-//! `T` = 279 K (mesic), i.e. `K = 279`.
+//! yellow star's world (`L` = 1) at `r` = 1, albedo 0 sits at
+//! `T` = 279° (mesic), i.e. `K = 279`.
 
 use crate::ratio::{ratio, Ratio};
 use num_traits::ToPrimitive;
 
-/// A cited kelvin anchor, exact — the only way a band bound or the folded
+/// A cited thermal anchor, exact — the only way a band bound or the folded
 /// constant enters this module (P2, operator ruling 2026-08-05): the
-/// parameter is a [`crate::anchor::KelvinAnchor`], a typed declaration
-/// carrying its empirical citation. Era 1 holds temperature itself (no
+/// parameter is a [`crate::anchor::ThermalAnchor`], a typed declaration
+/// carrying its own band meaning. Era 1 holds temperature itself (no
 /// fourth power).
-fn kelvin4(anchor: crate::anchor::KelvinAnchor) -> Ratio {
-    ratio(anchor.kelvin(), 1)
+fn anchor_degrees(anchor: crate::anchor::ThermalAnchor) -> Ratio {
+    ratio(anchor.degrees(), 1)
 }
 
-/// The thermal constant `K`: the Sol-equilibrium anchor in kelvin, so
+/// The thermal constant `K`: the home-equilibrium anchor in degrees, so
 /// `T(L=1, A=0, r=1) = K` lands mesic by calibration.
 pub fn thermal_k() -> Ratio {
-    kelvin4(crate::anchor::KelvinAnchor::SolEquilibrium)
+    anchor_degrees(crate::anchor::ThermalAnchor::HomeEquilibrium)
 }
 
-/// `T = K · L (1 − A) / r` — the equilibrium temperature, in kelvin, from
+/// `T = K · L (1 − A) / r` — the equilibrium temperature, in degrees, from
 /// the linear flux (era 1). Exact for rational inputs.
 pub fn t_eq4(luminosity: &Ratio, albedo: &Ratio, orbit_r: &Ratio) -> Ratio {
     insolation(luminosity, albedo, orbit_r) * thermal_k()
@@ -53,32 +53,32 @@ pub fn insolation(luminosity: &Ratio, albedo: &Ratio, orbit_r: &Ratio) -> Ratio 
 }
 
 /// The substrate equilibrium bands (05 §2): each is an inclusive interval
-/// in kelvin. A body's occupant substrate must match its band.
+/// in degrees. A body's occupant substrate must match its band.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SubstrateBand {
-    /// 10 K – 100 K: quantum/superconducting/high-density compute.
+    /// 10° – 100°: quantum/superconducting/high-density compute.
     Cryogenic,
-    /// 250 K – 320 K: carbon-based organics, hydro-biospheres.
+    /// 250° – 320°: carbon-based organics, hydro-biospheres.
     Mesic,
-    /// 600 K – 1500 K: high-flux foundries, plasma, lithic life.
+    /// 600° – 1500°: high-flux foundries, plasma, lithic life.
     HyperThermal,
 }
 
 impl SubstrateBand {
-    /// The inclusive `[lo, hi]` bounds in kelvin, from the cited anchors.
+    /// The inclusive `[lo, hi]` bounds in degrees, from the cited anchors.
     pub fn bounds4(self) -> (Ratio, Ratio) {
-        use crate::anchor::KelvinAnchor as At;
+        use crate::anchor::ThermalAnchor as At;
         match self {
-            SubstrateBand::Cryogenic => (kelvin4(At::CryoFloor), kelvin4(At::CryoCeiling)),
-            SubstrateBand::Mesic => (kelvin4(At::MesicFloor), kelvin4(At::MesicCeiling)),
+            SubstrateBand::Cryogenic => (anchor_degrees(At::CryoFloor), anchor_degrees(At::CryoCeiling)),
+            SubstrateBand::Mesic => (anchor_degrees(At::MesicFloor), anchor_degrees(At::MesicCeiling)),
             SubstrateBand::HyperThermal => {
-                (kelvin4(At::FoundryFloor), kelvin4(At::FoundryCeiling))
+                (anchor_degrees(At::FoundryFloor), anchor_degrees(At::FoundryCeiling))
             }
         }
     }
 }
 
-/// The falloff length for [`coverage`], in kelvin.
+/// The falloff length for [`coverage`], in degrees.
 ///
 /// **Derived, not chosen.** It is the width of the mesic band — the
 /// span a temperate world already occupies — so a world one band-width
@@ -95,9 +95,9 @@ pub fn coverage_scale4() -> Ratio {
 ///
 /// **This replaces a wall with a slope.** [`band_of`] answers whether a
 /// world falls inside one of three disjoint windows, so a world one
-/// kelvin outside a bound reads nothing while one kelvin inside reads
+/// degree outside a bound reads nothing while one degree inside reads
 /// everything — and the three windows do not cover the line, leaving
-/// 320–600 K supported by nothing at all. The derived furnace seats
+/// 320–600° supported by nothing at all. The derived furnace seats
 /// (mineral and plasmic foundings) land in that gap, which made a whole
 /// class of world uninhabitable by construction rather than by design
 /// (`20_FOUNDING` §4, §6c).
@@ -106,7 +106,7 @@ pub fn coverage_scale4() -> Ratio {
 ///
 /// ```text
 /// inside any band          coverage = 1        a plateau, not a peak
-/// outside every band       1 / (1 + d/scale)   d = kelvin to the nearest edge
+/// outside every band       1 / (1 + d/scale)   d = degrees to the nearest edge
 /// ```
 ///
 /// **Monotone in distance, strictly positive everywhere, and free of
@@ -148,12 +148,12 @@ pub fn coverage(t_eq4: &Ratio) -> Ratio {
 }
 
 /// THERMAL-1, the cryo law (05 §1.2): at or below this temperature the
-/// store is a lossless vault — the cryogenic band's ceiling, 100 K.
+/// store is a lossless vault — the cryogenic band's ceiling, 100°.
 pub fn cryo_vault_max4() -> Ratio {
     SubstrateBand::Cryogenic.bounds4().1
 }
 
-/// Does an accrued joule store leak at this temperature? False in the vault
+/// Does an accrued ember store leak at this temperature? False in the vault
 /// (cryo band and colder), true everywhere warmer (05 §1.2).
 pub fn leaks(t_eq4: &Ratio) -> bool {
     *t_eq4 > cryo_vault_max4()
@@ -175,45 +175,45 @@ pub fn band_of(t_eq4: &Ratio) -> Option<SubstrateBand> {
     None
 }
 
-/// The enumerator of known stars (NS-6 §7): each class fixes its sun's
-/// luminosity `L` (relative to Sol = 1), which drives every bound body's
+/// The enumerator of known stars (NS-6 §7): each class fixes its star's
+/// luminosity `L` (relative to the yellow class = 1), which drives every bound body's
 /// `T_eq⁴`. Discriminants are the permanent wire codes (NS-6 §7).
 /// Values are placeholder parameters.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
 pub enum StarClass {
-    // Main sequence (Morgan–Keenan), hottest to coolest.
-    O = 1,
-    B = 2,
-    A = 3,
-    F = 4,
-    G = 5,
-    K = 6,
-    M = 7,
+    // Main sequence, by colour, hottest to coolest.
+    Blue = 1,
+    BlueWhite = 2,
+    White = 3,
+    YellowWhite = 4,
+    Yellow = 5,
+    Orange = 6,
+    Red = 7,
     // Remnants, giants, and the lore exotic.
     BrownDwarf = 8,
     WhiteDwarf = 9,
     RedGiant = 10,
     NeutronStar = 11,
-    WolfRayet = 12,
+    WindStripped = 12,
     LuminalWhiteHole = 13,
 }
 
 impl StarClass {
     pub fn from_wire(code: u8) -> Option<Self> {
         match code {
-            1 => Some(Self::O),
-            2 => Some(Self::B),
-            3 => Some(Self::A),
-            4 => Some(Self::F),
-            5 => Some(Self::G),
-            6 => Some(Self::K),
-            7 => Some(Self::M),
+            1 => Some(Self::Blue),
+            2 => Some(Self::BlueWhite),
+            3 => Some(Self::White),
+            4 => Some(Self::YellowWhite),
+            5 => Some(Self::Yellow),
+            6 => Some(Self::Orange),
+            7 => Some(Self::Red),
             8 => Some(Self::BrownDwarf),
             9 => Some(Self::WhiteDwarf),
             10 => Some(Self::RedGiant),
             11 => Some(Self::NeutronStar),
-            12 => Some(Self::WolfRayet),
+            12 => Some(Self::WindStripped),
             13 => Some(Self::LuminalWhiteHole),
             _ => None,
         }
@@ -221,35 +221,35 @@ impl StarClass {
 
     /// **Magnetism — the field grade of this class** (operator ruling
     /// 2026-08-06: *how many planets can orbit a star should be based
-    /// on the magnetism of the star associated with the solar system*).
+    /// on the magnetism of the star associated with the star system*).
     ///
     /// Derived from the dynamo, the way the abundance spine wears
     /// metallicity: a star's field comes from its convective dynamo,
-    /// and convection deepens down the main sequence — O/B/A are
-    /// radiative (weak fossil fields), F begins shallow convection,
-    /// G is the solar dynamo, K runs deeper, M is fully convective and
+    /// and convection deepens down the main sequence — blue, blue-white and white are
+    /// radiative (weak fossil fields), yellow-white begins shallow convection,
+    /// yellow is the reference dynamo, orange runs deeper, red is fully convective and
     /// carries the strongest main-sequence fields (the packed systems
     /// are the measured case). Remnants: the white dwarf keeps a fossil
     /// megagauss field; the neutron star is the strongest field in
     /// nature but compact — a tight magnetosphere sweeps clean, so its
-    /// grade is anchored to the measured case (three planets at
-    /// PSR B1257+12, the first exoplanets ever found); Wolf–Rayet
+    /// grade is anchored to the measured case (three planets about a
+    /// pulsar); the wind-stripped star
     /// strips its own disk with wind. Grades are placeholder dials
     /// ruled at balance, like every figure in this table.
     pub fn magnetism(self) -> u8 {
         match self {
-            StarClass::O => 2,
-            StarClass::B => 3,
-            StarClass::A => 3,
-            StarClass::F => 5,
-            StarClass::G => 8,
-            StarClass::K => 9,
-            StarClass::M => 12,
+            StarClass::Blue => 2,
+            StarClass::BlueWhite => 3,
+            StarClass::White => 3,
+            StarClass::YellowWhite => 5,
+            StarClass::Yellow => 8,
+            StarClass::Orange => 9,
+            StarClass::Red => 12,
             StarClass::BrownDwarf => 10,
             StarClass::WhiteDwarf => 6,
             StarClass::RedGiant => 4,
             StarClass::NeutronStar => 3,
-            StarClass::WolfRayet => 2,
+            StarClass::WindStripped => 2,
             StarClass::LuminalWhiteHole => 12,
         }
     }
@@ -257,8 +257,8 @@ impl StarClass {
     /// **The ring REACH — how many rings this star's field anchors.**
     /// The law the ruling asked for: planet capacity is based on the
     /// magnetism, and at v1 the derivation is identity — one ring per
-    /// field grade. G reaches eight, which lands the home calibration
-    /// exactly: Sol's dynamo holds Sol's count. A ring is a distinct
+    /// field grade. Yellow reaches eight, which lands the home calibration
+    /// exactly: the home star's dynamo holds the home count. A ring is a distinct
     /// `orbit_r`; slots within a ring stay the turn law's business
     /// (60 × 60 per ring, ψ separating) — magnetism bounds how many
     /// rings exist, never how a ring fills.
@@ -266,7 +266,7 @@ impl StarClass {
         self.magnetism()
     }
 
-    /// Luminosity relative to Sol — the cited anchor table
+    /// Luminosity relative to the yellow class — the cited anchor table
     /// (`crate::anchor::luminosity`, operator ruling 2026-08-05) for
     /// every astronomical class; the lore class alone keeps a dial
     /// here, because fiction has no empirical citation and the census
@@ -279,8 +279,8 @@ impl StarClass {
             })
     }
 
-    /// The star's mass in solar masses (`M☉ = 1`) — the anchor Kepler's third
-    /// law reads. The lore White Hole has no citation, so it takes the solar
+    /// The star's mass in yellow-star masses (the yellow class = 1) — the anchor Kepler's third
+    /// law reads. The lore White Hole has no citation, so it takes the yellow
     /// baseline (trivial, no dial).
     pub fn mass(self) -> Ratio {
         crate::anchor::mass(self).unwrap_or_else(|| match self {
@@ -290,13 +290,13 @@ impl StarClass {
     }
 }
 
-/// The base orbital period: a reference G-type world at `r = 1` completes its
+/// The base orbital period: a reference yellow-star world at `r = 1` completes its
 /// 360° circuit in this many universal beats — one beat per degree of arc, the
 /// Base-60/360 tie-in. Every other period scales off it by Kepler's law.
 const BASE_ORBIT_BEATS: i64 = 360; // the beat↔degree definition (360° circuit)
 
 /// **The keplerian period, squared** (the Keplerian clock) — Kepler's third law
-/// `P² = (360)²·r³/M` in exact rationals (`r` in AU, `M` in `M☉`, `P` in beats).
+/// `P² = (360)²·r³/M` in exact rationals (`r` in unit orbits, `M` in yellow-star masses, `P` in beats).
 /// Squared because the period itself, `√(r³/M)`, is irrational and a ℚ-engine
 /// cannot hold it — but the semantic quantity, the count of completed orbits, is
 /// exact from `P²` alone (see [`local_years`]). A close orbit or a heavy star
@@ -381,26 +381,26 @@ mod tests {
 
     #[test]
     fn stellar_mass_ranks_the_main_sequence() {
-        // Massive hot stars burn heavy; dim red dwarfs are tiny.
-        assert!(StarClass::O.mass() > StarClass::G.mass(), "O outweighs the Sun");
-        assert_eq!(StarClass::G.mass(), r(1, 1), "G is the solar unit");
-        assert!(StarClass::G.mass() > StarClass::M.mass(), "the Sun outweighs a red dwarf");
-        assert_eq!(StarClass::M.mass(), r(1, 5), "M is the tiny red dwarf");
+        // Massive hot stars burn heavy; dim red stars are tiny.
+        assert!(StarClass::Blue.mass() > StarClass::Yellow.mass(), "blue outweighs yellow");
+        assert_eq!(StarClass::Yellow.mass(), r(1, 1), "yellow is the mass unit");
+        assert!(StarClass::Yellow.mass() > StarClass::Red.mass(), "yellow outweighs red");
+        assert_eq!(StarClass::Red.mass(), r(1, 5), "red is the tiny red star");
     }
 
     #[test]
     fn the_keplerian_clock_ages_planets_by_their_own_geometry() {
         use crate::thermal::{local_years, orbital_period_squared};
-        let g = StarClass::G.mass();
+        let g = StarClass::Yellow.mass();
         // Kepler: a distant orbit is a longer year than a close one (same star).
         let close = orbital_period_squared(&r(1, 2), &g);
         let far = orbital_period_squared(&r(4, 1), &g);
         assert!(far > close, "a distant world has a longer period");
         // A heavier star pulls a shorter year at the same orbit.
-        let round_heavy = orbital_period_squared(&r(1, 1), &StarClass::O.mass());
-        let round_sol = orbital_period_squared(&r(1, 1), &g);
-        assert!(round_heavy < round_sol, "a heavier star shortens the year");
-        // The reference G world at r=1 completes its 360-beat circuit exactly:
+        let round_heavy = orbital_period_squared(&r(1, 1), &StarClass::Blue.mass());
+        let round_home = orbital_period_squared(&r(1, 1), &g);
+        assert!(round_heavy < round_home, "a heavier star shortens the year");
+        // The reference yellow-star world at r=1 completes its 360-beat circuit exactly:
         // 0 years before beat 360, exactly 1 at beat 360, 2 at 720.
         assert_eq!(local_years(&r(1, 1), &g, 359), 0, "not yet a full orbit");
         assert_eq!(local_years(&r(1, 1), &g, 360), 1, "one 360-beat circuit = one local year");
@@ -408,15 +408,15 @@ mod tests {
         // Two planets, same beat, different ages: the close-and-heavy world has
         // lived far more local years than a distant one on the same cosmic tick.
         let beat = 3600;
-        let inner = local_years(&r(1, 4), &StarClass::O.mass(), beat);
-        let outer = local_years(&r(9, 1), &StarClass::M.mass(), beat);
+        let inner = local_years(&r(1, 4), &StarClass::Blue.mass(), beat);
+        let outer = local_years(&r(9, 1), &StarClass::Red.mass(), beat);
         assert!(inner > outer, "same beat, but the inner-heavy world is far older: {inner} vs {outer}");
     }
 
     #[test]
     fn the_diophantine_clock_is_an_exact_rational_floor() {
         use crate::thermal::{exact_sqrt, local_years, orbital_period_squared};
-        let g = StarClass::G.mass();
+        let g = StarClass::Yellow.mass();
         // A Diophantine track r = M·k² has a perfect-square P², so the period
         // is an exact rational and the year is a pure floor ⌊T/P⌋ — no isqrt.
         let k = r(3, 2); // an off-lattice continuous k
@@ -437,9 +437,9 @@ mod tests {
     }
 
     #[test]
-    fn sol_type_body_sits_mesic_at_exactly_279k() {
-        // G star, L=1, albedo 0, r=1 → T == K == 279 K, the mesic anchor.
-        let t = t_eq4(&StarClass::G.luminosity(), &r(0, 1), &r(1, 1));
+    fn home_equilibrium_body_sits_mesic_at_exactly_279() {
+        // Yellow star, L=1, albedo 0, r=1 → T == K == 279°, the mesic anchor.
+        let t = t_eq4(&StarClass::Yellow.luminosity(), &r(0, 1), &r(1, 1));
         assert_eq!(t, r(279, 1));
         assert_eq!(band_of(&t), Some(SubstrateBand::Mesic));
     }
@@ -460,40 +460,40 @@ mod tests {
     }
 
     #[test]
-    fn red_dwarf_at_one_unit_is_cold() {
-        // A red dwarf's world at r=1 is far colder than mesic: the warm
+    fn red_star_at_one_unit_is_cold() {
+        // A red star's world at r=1 is far colder than mesic: the warm
         // orbits hug a dim star.
-        let t = t_eq4(&StarClass::M.luminosity(), &r(0, 1), &r(1, 1));
+        let t = t_eq4(&StarClass::Red.luminosity(), &r(0, 1), &r(1, 1));
         assert!(t < SubstrateBand::Mesic.bounds4().0);
     }
 
     #[test]
-    fn blue_o_star_at_one_unit_exceeds_every_band() {
+    fn blue_star_at_one_unit_exceeds_every_band() {
         // Too hot for any substrate at r=1 — the equilibrium band is pushed
         // far outward (05 §3.1). Farther out is strictly cooler.
-        let hot = t_eq4(&StarClass::O.luminosity(), &r(0, 1), &r(1, 1));
+        let hot = t_eq4(&StarClass::Blue.luminosity(), &r(0, 1), &r(1, 1));
         assert_eq!(band_of(&hot), None);
-        let far = t_eq4(&StarClass::O.luminosity(), &r(0, 1), &r(100, 1));
+        let far = t_eq4(&StarClass::Blue.luminosity(), &r(0, 1), &r(100, 1));
         assert!(far < hot);
     }
 
     #[test]
     fn band_boundaries_are_exact_and_inclusive() {
-        assert_eq!(band_of(&r(250, 1)), Some(SubstrateBand::Mesic)); // 250 K lo
-        assert_eq!(band_of(&r(320, 1)), Some(SubstrateBand::Mesic)); // 320 K hi
-        assert_eq!(band_of(&r(321, 1)), None); // one kelvin above ⇒ no band
+        assert_eq!(band_of(&r(250, 1)), Some(SubstrateBand::Mesic)); // 250° lo
+        assert_eq!(band_of(&r(320, 1)), Some(SubstrateBand::Mesic)); // 320° hi
+        assert_eq!(band_of(&r(321, 1)), None); // one degree above ⇒ no band
     }
 
     #[test]
     fn main_sequence_luminosity_is_monotonic() {
         let seq = [
-            StarClass::O,
-            StarClass::B,
-            StarClass::A,
-            StarClass::F,
-            StarClass::G,
-            StarClass::K,
-            StarClass::M,
+            StarClass::Blue,
+            StarClass::BlueWhite,
+            StarClass::White,
+            StarClass::YellowWhite,
+            StarClass::Yellow,
+            StarClass::Orange,
+            StarClass::Red,
         ];
         for pair in seq.windows(2) {
             assert!(pair[0].luminosity() > pair[1].luminosity());

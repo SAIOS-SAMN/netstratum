@@ -487,7 +487,7 @@ its justification in the commit that lowers the ceiling.
 ### R20 Update (2026-08-12) — the parameter seeds sealed (7 retired)
 
 Task #3 advanced: the seven `parameter::seed` values (Encasement
-throughput, radiator base, joule leak, heating/zone, sink throughput,
+throughput, radiator base, ember leak, heating/zone, sink throughput,
 friction rate, veil toll) moved from the open-dial census to the
 sealed class. They earned it, provably: each is the epoch-0 value every
 pre-charter beat read, so editing one recomputes every old chronicle's

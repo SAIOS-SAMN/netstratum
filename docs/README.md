@@ -41,7 +41,7 @@ The universe beneath the game, derived from one grammar of shares and phases
 | 85 | [The round, the turning and the reading, derived](85_ROUND_TURNING_READING.md) |
 | 86 | [The land: what a world feeds wild](86_THE_LAND.md) |
 | 87 | [Knowledge, movement and the economy: one physics](87_KNOWLEDGE_MOVEMENT_ECONOMY.md) |
-| 88 | [The geoid (superseded by 89)](88_THE_GEOID.md) |
+| 88 | [The equipotential figure (superseded by 89)](88_THE_GEOID.md) |
 | 89 | [One story: from the universal core to a mind, and where it breaks](89_ONE_STORY.md) |
 | 90 | [The erratic core: the orthogonal release and the first layer of order](90_ERRATIC_CORE.md) |
 | 91 | [The disc from the collapse, the wind from the heart](91_DISC_FROM_THE_COLLAPSE.md) |
@@ -101,7 +101,7 @@ The universe beneath the game, derived from one grammar of shares and phases
 | 33 | [Trade desk · fleets · alignment · local capital](33_TRADE_FLEET_AND_DESK.md) |
 | 34 | [Matter balance: elements · alchemy · fleets · entropy ∥ syntropy](34_MATTER_BALANCE.md) |
 | 35 | [Orbit dynamo · estate real estate · exploration economics](35_ORBIT_DYNAMO_AND_ESTATE.md) |
-| 36 | [Defense axioms · species-relative security · covert terraform · espionage](36_DEFENSE_AXIOMS.md) |
+| 36 | [Defense axioms · species-relative security · covert worldshape · espionage](36_DEFENSE_AXIOMS.md) |
 | 37 | [Imperium TAXON — species · clades · economy · planet · labs](37_IMPERIUM_TAXON.md) |
 | 38 | [Cognition convergence (the mapping as law)](38_COGNITION_CONVERGENCE.md) |
 | 39 | [The PHASE-3 flip (landed)](39_PHASE3_FLIP.md) |

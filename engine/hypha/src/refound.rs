@@ -128,7 +128,7 @@ pub fn refounded_under(home: &Path) -> Option<String> {
 
 /// The RE-founding, steps 1 to 4 and the marker, with the keys already in the
 /// uplink home (never minted): found, originate (the flat L1 torus, periods
-/// 2 Mpc), reserve the union tier, the first ledger entry at the world's u
+/// 64 cells), reserve the union tier, the first ledger entry at the world's u
 /// with a zero parent; when the entry seals, `refounded` names the origin it
 /// sealed under. A step the court refuses stops the rest. Returns whether it
 /// sealed, and what the court said at each step.

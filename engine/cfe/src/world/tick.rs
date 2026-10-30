@@ -298,22 +298,22 @@ impl World {
                 .find(|(held, _)| held == orb_id)
                 .map(|(_, held)| held.clone())
                 .unwrap_or(NO_BOON);
-            // THERMAL-1: the heat law, live only when the sun is
+            // THERMAL-1: the heat law, live only when the star is
             // commissioned and this orb is sited (the opt-in guard).
             let holder = peek(&self.orbs, *orb_id);
             let site = holder.and_then(|held| held.thermal.clone());
-            let joule_famined = holder
-                .map(|held| held.famine.contains(&Resource::Joule))
+            let ember_famined = holder
+                .map(|held| held.famine.contains(&Resource::Ember))
                 .unwrap_or(false);
             let mut efficiency = one.clone();
             let mut t4: Option<Ratio> = None;
             let mut frozen = false;
             if let (Some(class), Some(site)) = (self.star, site) {
                 let t_eq4 = thermal::t_eq4(&class.luminosity(), site.albedo.value(), site.orbit_r.value());
-                // ECON-J freeze-lock (05 §1.2): a sub-mesic orb in joule
+                // ECON-E freeze-lock (05 §1.2): a sub-mesic orb in ember
                 // famine is frozen whole — no flows until fuel arrives.
                 let sub_mesic = t_eq4 < thermal::SubstrateBand::Mesic.bounds4().0;
-                frozen = sub_mesic && joule_famined;
+                frozen = sub_mesic && ember_famined;
                 let stellar_load = t_eq4.clone() / thermal::thermal_k();
                 // Weighted: a zone running at half its inputs runs its
                 // furnace at half.
@@ -327,8 +327,8 @@ impl World {
                     None => rates.get(Parameter::RadiatorBase).clone(),
                 };
                 let heat_net = stellar_load + factory - radiator;
-                // ECON-J (05 §1.2): heating upkeep on a sub-mesic orb —
-                // every active zone burns joules against the cold.
+                // ECON-E (05 §1.2): heating upkeep on a sub-mesic orb —
+                // every active zone burns embers against the cold.
                 if sub_mesic && !frozen && !active.is_empty() {
                     let running: Ratio = active
                         .iter()
@@ -339,7 +339,7 @@ impl World {
                     if let Some(magnitude) = &boon[1] {
                         burn *= magnitude.clone();
                     }
-                    accrue(&mut self.accrued, *orb_id, Resource::Joule, -burn);
+                    accrue(&mut self.accrued, *orb_id, Resource::Ember, -burn);
                 }
                 // SINK-1 (05 §1.4): vault-band headroom is captured as
                 // bankable sink by active cryo-lattice arrays — the
@@ -365,7 +365,7 @@ impl World {
                 }
                 if !frozen && heat_net > zero {
                     // The syntropic arm first (05 §1.2): shells encase
-                    // up to their throughput; joules accrue as yield.
+                    // up to their throughput; embers accrue as yield.
                     let shells: Ratio = active
                         .iter()
                         .filter(|(zone, _)| zone.kind == ZoneKind::Encasement)
@@ -378,7 +378,7 @@ impl World {
                     }
                     let encased = heat_net.clone().min(throughput);
                     if encased > zero {
-                        accrue(&mut self.accrued, *orb_id, Resource::Joule, encased.clone());
+                        accrue(&mut self.accrued, *orb_id, Resource::Ember, encased.clone());
                     }
                     // The entropic arm: only the overflow vents.
                     let overflow = heat_net - encased;
@@ -428,7 +428,7 @@ impl World {
             // G2 stasis (ruled 2026-08-12): an element-eating line that
             // cannot meet this beat's food bill in its own element is
             // frozen — all local production suspended, structures held —
-            // exactly the whole-orb freeze a joule-famined sub-mesic orb
+            // exactly the whole-orb freeze an ember-famined sub-mesic orb
             // takes. It is a per-beat condition, recomputed and never
             // stored: the moment trade or minting refills the element
             // bank, the next beat's bill is met and the line runs again.
@@ -519,7 +519,7 @@ impl World {
                     // G2: an element-eater's FOOD slot (the biomass line)
                     // is not a resource flow — it settles against the
                     // element bank below, so it never accrues here.
-                    // Every other yield (iron extraction, joule capture)
+                    // Every other yield (iron extraction, ember capture)
                     // rides the resource store verbatim.
                     if !(element_ration.is_some() && resource == Resource::Biomass) {
                         // The catalyst fluxes extraction alone; food and
@@ -558,14 +558,14 @@ impl World {
                     }
                 }
             }
-            // The cryo law (05 §1.2): accrued joules leak outside the
+            // The cryo law (05 §1.2): accrued embers leak outside the
             // vault (T⁴ > 100⁴), floored at zero; lossless in the cold.
             if let Some(t4) = t4 {
                 if t4 > thermal::cryo_vault_max4() {
-                    let held_joules = triple_amount(&self.accrued, *orb_id, Resource::Joule);
-                    if held_joules > zero {
-                        let leak = held_joules.min(rates.get(Parameter::JouleLeakPerTick).clone());
-                        accrue(&mut self.accrued, *orb_id, Resource::Joule, -leak);
+                    let held_embers = triple_amount(&self.accrued, *orb_id, Resource::Ember);
+                    if held_embers > zero {
+                        let leak = held_embers.min(rates.get(Parameter::EmberLeakPerTick).clone());
+                        accrue(&mut self.accrued, *orb_id, Resource::Ember, -leak);
                     }
                 }
             }
@@ -759,8 +759,8 @@ impl World {
             overheat_cleared,
         }
     }
-    /// Famine relief for one orb (02 §2.4). Joule relief on a cold orb
-    /// needs the one-tick heating bill covered (ECON-J), not zero.
+    /// Famine relief for one orb (02 §2.4). Ember relief on a cold orb
+    /// needs the one-tick heating bill covered (ECON-E), not zero.
     pub(super) fn relieve_recovered(&mut self, orb: u64) {
         let stamp = self.clock.now();
         let star = self.star;
@@ -793,7 +793,7 @@ impl World {
                 .filter(|(consumed, _)| *consumed == resource)
                 .map(|(_, amount)| amount)
                 .fold(ratio(0, 1), |sum, amount| sum + amount);
-            if resource == Resource::Joule {
+            if resource == Resource::Ember {
                 one_tick += heating_need.clone();
             }
             if held.banked_amount(resource) >= one_tick {
@@ -831,15 +831,15 @@ impl World {
     /// **G2 (#29) — the FOOD-element CYCLE at a collect touch.** An
     /// element-eater eats the stored food its zones ran on this span and
     /// synthesizes more from ENERGY to refill its larder toward a span's
-    /// buffer: it spends Joule to mint the element (a conserved
-    /// transmutation, bounded by the element's richness — `minted ≤ joule
+    /// buffer: it spends Ember to mint the element (a conserved
+    /// transmutation, bounded by the element's richness — `minted ≤ ember
     /// × richness`, so a rarer element costs more energy). Returns
-    /// `(element, joule_spent, minted, eaten)` to receipt as
+    /// `(element, ember_spent, minted, eaten)` to receipt as
     /// `ElementFarmed`, or `None` for a non-eater, no bill, or no star.
     /// Every v1 (biotic/unsealed) world reads `None` in O(1) — byte-identical.
     ///
     /// The larder moves by `minted − eaten`: in steady state the line
-    /// farms exactly what it ate and holds the buffer; short of joule it
+    /// farms exactly what it ate and holds the buffer; short of ember it
     /// eats into the buffer and freezes; overstocked it coasts on the
     /// stored food and farms less. `eaten` never exceeds what is stored,
     /// so the larder never goes negative.
@@ -875,10 +875,10 @@ impl World {
         let have = held.element_amount(&element);
         // Eat only what is stored — a frozen span (empty larder) eats nothing.
         let eaten = span.clone().min(have.clone());
-        // Refill toward the buffer after eating, joule-bounded.
-        let joule = held.banked_amount(Resource::Joule);
+        // Refill toward the buffer after eating, ember-bounded.
+        let ember = held.banked_amount(Resource::Ember);
         let want = (span - (have - eaten.clone())).max(ratio(0, 1));
-        let minted = want.min(joule * richness.clone());
+        let minted = want.min(ember * richness.clone());
         if minted <= ratio(0, 1) && eaten <= ratio(0, 1) {
             return None;
         }
@@ -887,7 +887,7 @@ impl World {
 
     /// G2: the base FOOD bill an element-eater's active zones levy this
     /// beat, in element units — the Biomass upkeep components (the food
-    /// slot) summed and vigour-weighted, exactly the shape ECON-J's
+    /// slot) summed and vigour-weighted, exactly the shape ECON-E's
     /// heating burn takes. This is both the stasis threshold (a line
     /// that cannot meet it freezes) and the amount consumed when it can.
     pub(super) fn element_food_bill(

@@ -55,7 +55,7 @@ The candidates visible in the tree, none ruled:
 
 - **Pen weight** — verified work preferences authority at handoff
   (couples axis 2 to axis 1's one-writer law);
-- **Minting rights** — value from verified work, the thermal/joule
+- **Minting rights** — value from verified work, the thermal/ember
   lineage's instinct (value is encased work, never fiat);
 - **Receipt-coupled crystallization** — tech emergence reads
   receipted solves instead of the conductor's artifact files

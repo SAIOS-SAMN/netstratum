@@ -531,7 +531,7 @@ unaccounted.** Neutrality is the unaccounted gap one level up.
 
 **Landed three times already, and never made total:**
 
-- thermal — encasement mints joules (syntropic), overflow vents
+- thermal — encasement mints embers (syntropic), overflow vents
   (entropic); `05 §1.2`, encase-first/vent-overflow.
 - the entropy dual ledger — VENT-1/SINK-1, banked against vented.
 - the eight cohesion books — four syntropic/entropic pairs, never

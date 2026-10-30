@@ -161,7 +161,7 @@ fn conversions() -> [(ZoneKind, Option<Resource>, Resource); 6] {
         (ZoneKind::Smelter, Some(Resource::Iron), Resource::Alloy),
         (ZoneKind::Synthesizer, Some(Resource::Alloy), Resource::Diamond),
         (ZoneKind::Resonator, Some(Resource::Alloy), Resource::Crystal),
-        (ZoneKind::Encasement, Some(Resource::Iron), Resource::Joule),
+        (ZoneKind::Encasement, Some(Resource::Iron), Resource::Ember),
         (ZoneKind::CryoArray, Some(Resource::Iron), Resource::Sink),
     ]
 }
@@ -170,7 +170,7 @@ fn conversions() -> [(ZoneKind, Option<Resource>, Resource); 6] {
 /// environment before any conversion: its constitutive nature, not a universal
 /// baseline. This reads the primary-resource axis the science law already tables
 /// (`science.rs`: mineral is pressure/metal work → Iron, biotic is life →
-/// Biomass, plasmic rides resonance/energy → Joule, never Iron). Biotic is the
+/// Biomass, plasmic rides resonance/energy → Ember, never Iron). Biotic is the
 /// generalist that also mines iron for tools; a plasmic energy-being has no iron
 /// in its world at all — the operator's law, *why would a plasmic want iron?*
 /// The ration (`metabolic_harvest`) always lies in this set.
@@ -182,7 +182,7 @@ fn conversions() -> [(ZoneKind, Option<Resource>, Resource); 6] {
 fn metabolic_traits(metabolism: u8) -> Vec<Resource> {
     match metabolism {
         1 => vec![Resource::Iron],                    // mineral — metal & pressure
-        3 => vec![Resource::Joule],                   // plasmic — energy, no iron
+        3 => vec![Resource::Ember],                   // plasmic — energy, no iron
         _ => vec![Resource::Biomass, Resource::Iron], // biotic — life, mines tools
     }
 }
@@ -199,7 +199,7 @@ fn requirement(kind: ZoneKind, ration: Resource) -> Option<(Option<Resource>, Re
         ZoneKind::Smelter => Some((Some(Resource::Iron), Resource::Alloy)),
         ZoneKind::Synthesizer => Some((Some(Resource::Alloy), Resource::Diamond)),
         ZoneKind::Resonator => Some((Some(Resource::Alloy), Resource::Crystal)),
-        ZoneKind::Encasement => Some((Some(Resource::Iron), Resource::Joule)),
+        ZoneKind::Encasement => Some((Some(Resource::Iron), Resource::Ember)),
         ZoneKind::CryoArray => Some((Some(Resource::Iron), Resource::Sink)),
         _ => None, // civic infrastructure — no metabolic pathway to obstruct
     }
@@ -747,7 +747,7 @@ mod tests {
         assert_eq!(plasmic.affinity(ZoneKind::Synthesizer), 0, "the deeper forge too");
         // A plasmic line never mines ore either — iron is simply not in its world.
         assert_eq!(plasmic.affinity(ZoneKind::Extractor), 0, "no iron to extract");
-        // Yet it still settles — the ration house (its Joule energy) is native.
+        // Yet it still settles — the ration house (its Ember energy) is native.
         assert!(plasmic.affinity(ZoneKind::Habitat) > 0);
     }
 

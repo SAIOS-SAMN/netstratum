@@ -473,7 +473,7 @@ arrive, so none needs closing.
 is not a new law. `11_AEON` §3 retired the word on 2026-07-30, and gave
 the reason in full:
 
-> "Charted" is retired: it imported terrestrial unary budding (one
+> "Charted" is retired: it imported unary budding (one
 > predecessor, mutate one axis) — half a model with no second half.
 
 and named that second half — **confluence** (`Confluent`, tag 44), *two

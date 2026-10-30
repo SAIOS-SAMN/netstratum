@@ -11,7 +11,7 @@ use std::path::PathBuf;
 fn resume_from_chronicle_ignores_missing_state_json() {
     let mut w = World::new();
     w.found("tlv-only").expect("found");
-    w.commission_star(StarClass::G).expect("star");
+    w.commission_star(StarClass::Yellow).expect("star");
     w.site_planet(FIRST_ORB, unit(0, 1), positive(1, 1), None, None)
         .expect("site");
     w.zone(0, ZoneKind::Extractor).expect("zone");
@@ -48,7 +48,7 @@ fn resume_from_chronicle_ignores_missing_state_json() {
 fn state_tlv_wire_round_trips_banks_without_json() {
     let mut w = World::new();
     w.found("wire-home").expect("found");
-    w.commission_star(StarClass::G).expect("star");
+    w.commission_star(StarClass::Yellow).expect("star");
     w.site_planet(FIRST_ORB, unit(0, 1), positive(1, 1), None, None)
         .expect("site");
     w.zone(0, ZoneKind::Habitat).expect("hab");

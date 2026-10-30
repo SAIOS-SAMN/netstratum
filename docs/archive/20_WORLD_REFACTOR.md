@@ -91,7 +91,7 @@ The remaining ~100 public functions are the game, and they stay
 together: founding and chartering, zoning and razing, collecting and
 upkeep, the thermal loop, trade and transfers, bonds, covenants,
 councils, offers and clearing, the tech tree, practices, prospecting
-and assay, wards and veils, gauge shifts, leaps and terraforming,
+and assay, wards and veils, gauge shifts, leaps and worldshaping,
 succession, galaxies, routes.
 
 `TickOutcome` and `Leap` are proposer-side returns and stay with them.

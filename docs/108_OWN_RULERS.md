@@ -31,7 +31,7 @@ Three kinds of ruler are distinguished:
 
 | # | Import | Kind | Stands for | Where |
 |---|---|---|---|---|
-| O1 | `HYDROGEN_K = 157,800` (hydrogen's ionization energy in kelvin) | display ruler | heat read on the lightest kind's grip | `life.rs` (grips and world heat in kelvin), `bin/life`, docs/82 |
+| O1 | `HYDROGEN_K = 157,800` (hydrogen's ionization energy in kelvin) and `CONTACT_K = 2,760` (the contact anchor, from Xylarium's life law) | display ruler | heat read on the lightest kind's grip | `life.rs` (grips and world heat in kelvin), `bin/life`, docs/82 |
 | O2 | `BELL_YEARS = 97,850` (a light round trip across a disc of the Milky Way's size, in Earth years; Xylarium's ladder) | display ruler | the bell counted in home years | `life.rs` (`BELL_YEARS`, the climb's clock), docs/82 |
 | O3 | `K = 279 K`, the blackbody equilibrium of a Sol-type body at 1 AU (`cfe::thermal::thermal_k`) | calibration | a world's temperature against its star's burn and its reach | `seating::site_of`, `cfe::thermal`, docs/78 §"The refactor onto era 1's physics" |
 | O4 | The star-class luminosity table (`cfe::thermal::StarClass`, the Sun as unit) used to site an era-1 world | calibration | a star's burn, read directly | `seating::site_of` |
@@ -95,6 +95,21 @@ moved to Netstratum's own vocabulary (ruling of 2026-10-30); its values stay
 as era 0's calibration until era 1 replaces each piece (ruling of 2026-10-14: era 0 a
 building set for demolition), and none of them is read by era 1 except
 through O3, O4 and O7.
+
+The native vocabulary (wire codes unchanged):
+
+| Was | Is |
+|---|---|
+| the joule (`Resource::Joule`, wire 5) | the ember (`Resource::Ember`) |
+| kelvin, `KelvinAnchor`, the Sol equilibrium | thermal degrees, `ThermalAnchor`, the home equilibrium |
+| star classes O, B, A, F, G, K, M; Wolf–Rayet | Blue, BlueWhite, White, YellowWhite, Yellow, Orange, Red; WindStripped |
+| the solar leap; a world's sun | the stellar leap; a world's star |
+| terraform, TERRA | worldshape, WORLDSHAPE |
+| ECON-J | ECON-E |
+| the clade aliases of Earth's taxonomy (felid, tardigrade, cetacean, cephalopod, hymenopteran, amphibian, cnidarian, avian, teleost, gastropod and others), and human, humanoid | retired; the coined clade names stand alone |
+| polity seeds europa, jovian-reach, sun-crown, sunwell, kepler-passage | rime-moon, giant-reach, star-crown, starwell, lantern-passage |
+| the geologic medium; the geoid | the lithic medium; the equipotential figure |
+| the torus in megaparsecs (docs/58) | the torus in cells |
 
 ## 4. Build order
 

@@ -48,7 +48,7 @@
 //! # The seed floor
 //!
 //! A stock never reaches zero. It clamps at a strictly positive
-//! `seed_floor` — scorched-earth extraction is punished by a stock too
+//! `seed_floor` — exhaustive extraction is punished by a stock too
 //! small to regenerate meaningfully, never by permanent death. Left
 //! fallow, a floored stock climbs back.
 

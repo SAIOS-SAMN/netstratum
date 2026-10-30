@@ -126,7 +126,7 @@ pub struct StellarVeinRow {
 #[derive(Debug, Clone)]
 pub struct StellarCapacityBoard {
     pub star: Option<crate::thermal::StarClass>,
-    /// `lines_of(class)` — deepest line this sun forges.
+    /// `lines_of(class)` — deepest line this star forges.
     pub reach: u8,
     /// CIV-REACH-1 — deepest line this *people* may open (≤ star reach).
     pub civ_reach: u8,
@@ -318,7 +318,7 @@ impl World {
         let next_hint = if at_war_count > 0 {
             "war walls trade — peace or renounce before license haul".into()
         } else if !self.crossed && techs_licensable.is_empty() {
-            "earn solar leap / techs, then open council for licensed leap".into()
+            "earn stellar leap / techs, then open council for licensed leap".into()
         } else if council_open == 0 && !techs_licensable.is_empty() {
             "seal council then `license <c> to <world> via <council> deal <n>`".into()
         } else if !techs_licensable.is_empty() && council_open > 0 {
@@ -414,7 +414,7 @@ impl World {
             }
             let local = star.is_some_and(|c| local_to(&p.element, c));
             let refines_now = star.is_some_and(|c| refines(&p.element, stratum_for_pressure, c));
-            let (family, _, natural) = crate::dop::element_properties(&p.element, star.unwrap_or(crate::thermal::StarClass::G));
+            let (family, _, natural) = crate::dop::element_properties(&p.element, star.unwrap_or(crate::thermal::StarClass::Yellow));
             let name = element_name(family, &p.element);
             veins.push(StellarVeinRow {
                 stratum: p.stratum,

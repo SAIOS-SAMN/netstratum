@@ -64,7 +64,7 @@ feedback term.
 
     1/32 per elapsed tick
 
-**What it is:** the decay rate on un-vaulted banked joules/sink,
+**What it is:** the decay rate on un-vaulted banked embers/sink,
 settled by receipt at touch. **Flat, never proportional** — the sealed
 rule computes `min(rate · ease · elapsed, banked)`, and the flatness is
 deliberate (`world/rules.rs::ease_of`, "the 2^1100 denominator lesson").

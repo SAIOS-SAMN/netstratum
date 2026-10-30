@@ -225,12 +225,12 @@ impl World {
             .unwrap_or_else(|| ratio(0, 1))
     }
 
-    /// The insolation normalized to a reference G-type star at unit orbit and
-    /// zero albedo (`I / L_G`), so a Sol-like seat reads ≈1 and the star's
-    /// class is a pure multiplier: an M-dwarf seat reads well below one, an
-    /// O-giant seat far above. Dimensionless, exact.
+    /// The insolation normalized to a reference yellow star at unit orbit and
+    /// zero albedo (`I / L_yellow`), so a home-equilibrium seat reads ≈1 and the star's
+    /// class is a pure multiplier: a red-star seat reads well below one, a
+    /// blue-star seat far above. Dimensionless, exact.
     pub fn insolation_norm(&self, orb: u64) -> Ratio {
-        let reference = crate::thermal::StarClass::G.luminosity();
+        let reference = crate::thermal::StarClass::Yellow.luminosity();
         if reference <= ratio(0, 1) {
             return ratio(0, 1);
         }
@@ -293,7 +293,7 @@ impl World {
     /// fraction of the raw starlight this species can convert. A clade matched
     /// to its band reads η=1 and drinks the planet's full light; a mismatched
     /// one (a flatlander on a scorched rock, a plasmoid on a temperate world)
-    /// reads η→0 and starves under the same sun. This is the ceiling the
+    /// reads η→0 and starves under the same star. This is the ceiling the
     /// syntropic and cultivated flows draw from — never itself the population
     /// ceiling.
     pub fn primary_production(&self, orb: u64) -> Ratio {
@@ -514,7 +514,7 @@ impl World {
     /// atmosphere/fluid — albedo > 0) and its footprint is mobile (more
     /// drifting bodies than anchored zones — population exceeds the built
     /// footprint, the swarm/spore signature). A solid airless world (albedo
-    /// 0) or a well-anchored one is false, so every standard terrestrial
+    /// 0) or a well-anchored one is false, so every standard rocky
     /// world stays byte-identical.
     pub fn mobility_affine(&self, orb: u64) -> bool {
         let in_medium = self.medium_density_of(orb) > ratio(0, 1);

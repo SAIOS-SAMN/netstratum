@@ -210,11 +210,11 @@ question was resolved (§6.2) and before any code lands:
    the orb's own mass/kind (a "giant" vs a rock) — never from zones
    built on it. A world's primordial ceiling is not something a player
    grows.
-3. **`r ≈ 0` — geological timescale.** The Medium's intrinsic rate is
+3. **`r ≈ 0` — lithic timescale.** The Medium's intrinsic rate is
    effectively zero within any playable era. `grained_logistic` needs
    no new form for this (an `r` near zero just barely creeps — see §4's
    surrogate); what changes is only the derivation `r` reads, from a
-   habitat's fast biotic yield to a near-null geological one. A
+   habitat's fast biotic yield to a near-null lithic one. A
    stripped gas giant does not come back.
 4. **Dual-arm conservation.** The mutating settle-at-touch deed (the
    piece task #28 already stopped short of, biomass or not) gains a
@@ -250,7 +250,7 @@ Board-Makers"** — the seat that "contracts and expands the board...
 creates it. Everything else plays on it." The progenitor powers table
 names this split exactly: **"create a new star"** is a progenitor
 power (chartering a world with a seated star); **"create a new
-planet"** is a new orbit under an *existing* sun, also progenitor work.
+planet"** is a new orbit under an *existing* star, also progenitor work.
 Planets then pass to sovereigns through **the delegation law**: *"A
 progenitor delegating a planet... is council-gated by default... The
 power to create is sovereign; the power to hand what was created into

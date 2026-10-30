@@ -28,7 +28,7 @@ implement; G2 does not test those.
 - **Founding is a choice (fixed for G2, direction of 2026-10-07: give the lines options, freedom and agency).** A pinned seat is the line's
   compiled home: one option, not an order. Beside it stand the regime's
   continuous draws and the open orbits (every twelfth of `k` out to 3)
-  around every main-sequence sun, about 365 options. The physics scores
+  around every main-sequence star, about 365 options. The physics scores
   each by `substrate_viability`, and the band draws among them,
   viability-weighted and chronicle-seeded (`siting::choose_site`). Better
   land is likelier, never guaranteed. A home the physics refuses (albedo 1:

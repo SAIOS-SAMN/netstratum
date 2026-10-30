@@ -313,7 +313,7 @@ fn through(worlds: &[Polity], i: usize, home_hub: usize, gate: &Gate, span: &Rat
 /// road melting `melt`, no more than the payer's free hulls hold on a melting
 /// road (the haul law; a road that does not melt asks no hull). Returns what
 /// was carried and what arrived, or why nothing crossed (walled, short, no
-/// free hull, or the transfer's refusal). The aperture needs the solar leap
+/// free hull, or the transfer's refusal). The aperture needs the stellar leap
 /// (THRESHOLD-1), granted to both as the hub clearing grants it.
 fn trip(worlds: &mut [Polity], from: usize, to: usize, amount: &Ratio, deal: u64, melt: &Ratio) -> Result<(Ratio, Ratio), String> {
     if from == to {
@@ -336,7 +336,7 @@ fn trip(worlds: &mut [Polity], from: usize, to: usize, amount: &Ratio, deal: u64
     }
     let carried = cfe::dop::Positive::new(load.clone()).ok_or("nothing to carry")?;
     for i in [from, to] {
-        if !worlds[i].world.knows_its_sun() {
+        if !worlds[i].world.knows_its_star() {
             let steward = worlds[i].steward;
             let _ = worlds[i].world.grant_tech_as(steward, cfe::world::FIRST_ORB, 0);
         }

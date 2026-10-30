@@ -216,7 +216,7 @@ respect war/treaty; catalog from archetype.
 |---------------|--------|
 | Mineral metabolism | Iron/alloy scrap recipes; heavy Hauler/Semi |
 | Biotic | Biomass/chitin recipes; organic names |
-| Plasmic | Joule/sink budget on mint and upkeep |
+| Plasmic | Ember/sink budget on mint and upkeep |
 | Expansionist | Runner emphasis; freight Futures affinity (Phase 4) |
 | Empiricist | Grade-gated yards; assay-linked Shares |
 | T4 Caravan | Route assign privilege / melt stack advantage (compose O6.1) |

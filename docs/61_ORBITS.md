@@ -57,10 +57,15 @@ points of the circle, never a float angle.
 
 ## The field law (G4), as the coordinator built it (2026-10-09, relayed as text)
 
-Exact over Q in Cl(4,1). Lengths in kpc between bells, AU inside a system.
-Energy in Earth-mass AU^2 (yr/2pi)^-2, so an orbit's stiffness is M/a^3 (M in
-suns, a in AU). Every derived value is put on a 60-bit grid (round down)
-before it enters the algebra; past that, everything is exact.
+> Recorded as relayed. Its units (kpc, AU, years, star masses, G and c) are
+> imported; era 0 is superseded by era 1, and its imports are listed in
+> docs/108 §3.
+
+Exact over Q in Cl(4,1). Lengths in kpc between bells, unit orbits inside a
+system. Energy in home-world-mass unit-orbit^2 (yr/2pi)^-2, so an orbit's
+stiffness is M/a^3 (M in star masses, a in unit orbits). Every derived value
+is put on a 60-bit grid (round down) before it enters the algebra; past that,
+everything is exact.
 
 1. **Bell screw.** pitch = lambda_core x (M_hole / M_core)^(1/3), lambda_core
    = c x the core's round trip to the rim (2 r_max / c); period = pitch / c;

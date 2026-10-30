@@ -22,7 +22,7 @@
 //!
 //! Early game the genesis seed is all there is; late game the accreted weight of
 //! the minted words drowns it out, and behaviour is dominated by the idiosyncratic
-//! structures the line invented to survive its own solar system.
+//! structures the line invented to survive its own star system.
 //!
 //! **The law, unbroken** (`need.rs`): this only ORDERS/WEIGHTS the reach — a bias
 //! on which family the Workbench tries first. The observation still supplies every

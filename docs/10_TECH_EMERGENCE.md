@@ -49,7 +49,7 @@ under sustained pressure or surplus. No two worlds need share a tree.
 
 | condition (derived from receipts) | crystallizes | modifier |
 |---|---|---|
-| joule famine survived ≥ 8 years total | Cryo-Resonant Insulation | HeatingReduction 3/4 |
+| ember famine survived ≥ 8 years total | Cryo-Resonant Insulation | HeatingReduction 3/4 |
 | overheat held ≥ 4 consecutive years | Overflow Discipline | EncasementBoost 5/4 |
 | vault sink banked ≥ threshold with zero demurrage | Lattice Deepening | SinkBoost 5/4 |
 | high vent ratio sustained (vented > encased, 4 years) | Radiator Doctrine | RadiatorBoost 5/4 |
@@ -59,17 +59,17 @@ One node per condition kind per orb (idempotent); prerequisites = the
 condition's own history, not a predecessor-pointer web (predecessors emerge naturally:
 no line survives 8 famine-years without first being cold).
 
-## 3a. TECH-1a landed (2026-07-29) — the discovery closure + the solar leap
+## 3a. TECH-1a landed (2026-07-29) — the discovery closure + the stellar leap
 
 The first slice: `TechDiscovered` (tag 39) wired byte-exact per §2.2's
-layout, and the union's kernel node landed — **the solar leap** (condition
+layout, and the union's kernel node landed — **the stellar leap** (condition
 0, 12_UNION §5a): a world's first thermal opt-in receipts that its people
-now know their sun. The opt-in is the leap's receipt — once per world,
+now know their star. The opt-in is the leap's receipt — once per world,
 never per orb; node id seeded from the kernel name + the discovering orb
-(SEAL B, replay re-derives it); `knows_its_sun()` is the reading that
-THRESHOLD-1 licensing and the shield gate on. Pre-solar is a lawful state:
+(SEAL B, replay re-derives it); `knows_its_star()` is the reading that
+THRESHOLD-1 licensing and the shield gate on. Pre-stellar is a lawful state:
 an unsited world lives whole and simply carries no leap. Evidence: four
-witnesses (once-per-world, replay+resume, byte-exact round-trip, pre-solar
+witnesses (once-per-world, replay+resume, byte-exact round-trip, pre-stellar
 lawful).
 
 ## 3b. TECH-1b landed (2026-07-29) — the crystallized tree
@@ -77,7 +77,7 @@ lawful).
 The emergent tree: at every year-voice boundary each orb's chronicle is
 weighed against the §3 condition table, exactly — famine spans and
 overheat spans summed from strike/relief receipts, vent ratios from
-sealed `VentSettled` vs collected joule yield, surplus and lattice
+sealed `VentSettled` vs collected ember yield, surplus and lattice
 readings from committed state. A condition that holds crystallizes its
 node once (idempotent per orb per condition); the node id is the seeded
 synthesis, `BLAKE3(chronicle root at crystallization ‖ orb ‖ condition)`
@@ -96,12 +96,12 @@ vault (banked sink 119994/1000 at the boundary, demurrage-free) with
 the composition law measured — capture = min(headroom, boosted
 lattice) still reads the headroom, so the boost binds only beside a
 doctrine-boosted radiator, never minting sink past the physics; the
-long stores earned on four apertured winters (K-band keeper, leaking
+long stores earned on four apertured winters (orange-star keeper, leaking
 and sub-mesic) with the ease measured on the receipt — 32 ticks at
 the halved flat rate settle exactly 1/2. Two laws inscribed by
 measurement along the way: a vault colony runs on fuel and steel (the
 array's build cost + upkeep struck iron famine at tick 41 in the
-first draft — the ECON-J burn bites beside the lattice), and the
+first draft — the ECON-E burn bites beside the lattice), and the
 boundary fires during the call after the round number (the clock
 advances at tick end). **Still open, recorded:** the throttle-α
 policy action (steward side); word-table naming beyond the §3
@@ -126,7 +126,7 @@ tech tree, it inherits a chronicle. The **succession deed**
 never a reset button — it refuses pure while any orb stands unfamished
 (the 07 §3 triage in its v1 cascade shape: every orb famished; richer
 interrupted-vs-collapsed triage recorded as deferred). On the deed the
-living tree drops to the world's kernel — the solar leap is the
+living tree drops to the world's kernel — the stellar leap is the
 world's own fact, not the line's — and every other node leaves the
 tree while standing in the chronicle forever. The successor's
 conditions then evaluate over receipts that include the predecessor's
@@ -143,23 +143,23 @@ with no new famine-years paid; a second succession mints a third node,
 no root repeating; the deed round-trips byte-exact; replay and resume
 carry the boundary.
 
-## 3d. TERRA-1 landed; SCIENCE-1 specced (2026-07-30)
+## 3d. WORLDSHAPE-1 landed; SCIENCE-1 specced (2026-07-30)
 
-**TERRA-1 (landed) — the gifted crown.** Terraforming is condition 6:
+**WORLDSHAPE-1 (landed) — the gifted crown.** Worldshaping is condition 6:
 the highest technology a civilization can hold, and the only one that
 is never crystallized locally — it licenses down from tier 0
 (`license_tech`, tag 40) and only onto a complete **base-7 stack**: the
-solar leap plus all five crystallized conditions, earned or granted
+stellar leap plus all five crystallized conditions, earned or granted
 (`BaseSevenUnfinished` refuses an unfinished stack). Under the crown —
 and only under it — the orbit that "does not move" moves:
-`World::terraform` re-seats a sited planet's albedo and orbit
+`World::worldshape` re-seats a sited planet's albedo and orbit
 (receipted as a fresh `PlanetSited`; replay takes the last seat), and
 the world crosses substrate bands. No new wire tags. The TUniversal
 calibration rides 11 §1: base-1 daily · base-7 weekly (the stack's
 rhythm) · base-60 yearly.
 
 **Defense dual-use (design 2026-08-08 — `36_DEFENSE_AXIOMS`).** Overt
-TERRA-1 remains the public crown path. Phase 5 adds **covert atmospheric
+WORLDSHAPE-1 remains the public crown path. Phase 5 adds **covert atmospheric
 tampering** (offensive medium shift without free PlanetSited rewrite)
 and species-relative defense tech families (CEL/ATM/COG/CYB/INF/KIN)
 that compose MASK-1, WARDEN-1, MANU-1, and escort hulls. Not landed;
@@ -202,8 +202,8 @@ trades nothing, and refuses every aperture until its gate is solved.
   combat, no dice: the Guardian is a puzzle, not a death machine.
 - **The prize is a licensed leap, council-gated.** Solving unlocks
   master templates — precursor tech nodes licensed through PLANNER-1's
-  gate like every leap (the solar leap stays never-licensed; the elder
-  world teaches no one their own sun). Templates are sealed grants the
+  gate like every leap (the stellar leap stays never-licensed; the elder
+  world teaches no one their own star). Templates are sealed grants the
   solver must still unlock (the unknown-leap law).
 - **The elder's chronicle is precursor VRP** — receipts from before the
   aeon (an annexed sheet, the 07 §3.1 door read passively): its record

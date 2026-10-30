@@ -49,9 +49,9 @@ breaks one of them is wrong before it is built.
    adopted (caught 2026-10-14: half-angle composition grew 2.9 bits a beat).
 9. **Construction, never search.**
 10. **Assume nothing about life** (caught 2026-10-14: a ladder that required
-    a solvent ruled out plasmic and geologic life). Life emerges from the
+    a solvent ruled out plasmic and lithic life). Life emerges from the
     quantum state between a planet and its star, in any medium the world
-    offers: chemical, geologic, plasmic, informational. No law assumes
+    offers: chemical, lithic, plasmic, informational. No law assumes
     water, carbon, a habitable zone or biology.
 11. **The number grammar: ℤ and ℚ are the singularity's two poles, ℝ the
     span between them (operator, 2026-10-17).** The singularity holds two
@@ -340,7 +340,8 @@ event deploys them all, and everything after is a closed form of t from it
     deployment: an even draw left core 1 keeping 95% of its galaxy). The
     centre keeps its tier's share; of the rest, the tier's medium (what
     physics leaves unformed) is set aside; the satellites break what
-    remains. Anchors, of order, to be cited before era 1's founding:
+    remains. Anchors, of order, to be cited before era 1's founding (imports,
+    docs/108 O5):
 
     | tier | centre keeps | medium, of the rest |
     |---|---|---|
@@ -357,8 +358,8 @@ event deploys them all, and everything after is a closed form of t from it
     share joins the medium. A core needs a hole of at least a grain (no
     hole, no core; Xylarium: a core comes only from a package); a star or an
     orb, a grain, until the founding manifest's scale gives physical floors
-    (Xylarium's: 0.08 suns for a star; roundness for a world, which Netstratum's
-    must state without a square).
+    (Xylarium's: 0.08 yellow-star masses for a star, an import; roundness
+    for a world, which Netstratum's must state without a square).
   - **Homology is linear.** Under ω = M/r, scaling a galaxy's masses and
     lengths by the same factor keeps its turning rates, so siblings scale
     with no root (Xylarium's lengths go by the cube root of mass under
@@ -431,7 +432,7 @@ event deploys them all, and everything after is a closed form of t from it
     the centre's reach; the rest is the medium. The share draws are gone.
     Placeholders: systems about a core `t = 1/6` (each about 0.235 of what
     it orbits, sized to the stand-in's grains); orbs about a star
-    `t = 1/283` (about 1e-4, the Solar System's order).
+    `t = 1/283` (about 1e-4, the Solar System's order; an import, docs/108).
   - **Defect, the systems-about-a-core layer is wrong** (operator,
     2026-10-15; measured by `motion var-e1`). The tidal law applied
     galaxy → star makes each star a quarter of what it orbits: every galaxy
@@ -639,9 +640,10 @@ orbits and the `1/r²` flux). Refactored in place, layer by layer:
 
 1. **Climate.** cfe's thermal law is the era-1 law where it lives
    (`cfe::thermal`): flux falls linearly, `I = L (1 − A) / r`, and
-   temperature is held as T in kelvin, `T = 279 K · I` (no fourth power,
-   no square); every site that reads it follows (~300). Pins written for
-   the flat law were restated; era 0's siting-determinism pins removed.
+   temperature is held as T in kelvin, `T = 279 K · I` (an import,
+   docs/108; no fourth power, no square); every site that reads it follows
+   (~300). Pins written for the flat law were restated; era 0's
+   siting-determinism pins removed.
 2. **Seating.** Each line is seated on an era-1 world, the unclaimed one
    where the physics reads its clade and metabolism most viable
    (`siting::viability_at`), spread across galaxies, and takes that

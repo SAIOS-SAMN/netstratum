@@ -10,9 +10,9 @@ impl World {
         self.crossed
     }
     /// THRESHOLD-1: a shielded world is one whose people have not made
-    /// the solar leap — the Watchers' charge, reachable by no aperture.
+    /// the stellar leap — the Watchers' charge, reachable by no aperture.
     pub fn is_shielded(&self) -> bool {
-        !self.knows_its_sun()
+        !self.knows_its_star()
     }
     /// AEON-1a: grade 0 of the key — the landed scalar read; every
     /// existing caller and law binds here unchanged.
@@ -87,7 +87,7 @@ impl World {
     }
     /// MASK-1a (14 §4) — draw the veil: renders cloud from here on
     /// (the chronicle never lies; the Watchers read through). A
-    /// standing joule toll settles at every collect; an unpayable
+    /// standing ember toll settles at every collect; an unpayable
     /// toll lifts the veil by receipt. Build scope.
     pub fn draw_veil(&mut self) -> Result<(), ActionRefused> {
         self.draw_veil_as(SOVEREIGN)

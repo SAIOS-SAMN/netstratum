@@ -32,15 +32,15 @@ use crate::ratio::{ratio, Ratio};
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
 pub enum Parameter {
-    /// THERMAL-1 (05 §1.2): joules one active encasement shell
+    /// THERMAL-1 (05 §1.2): embers one active encasement shell
     /// captures per tick.
     EncasementThroughput = 1,
     /// THERMAL-1 (05 §1.2): the orb's base radiator capacity.
     RadiatorBase = 2,
-    /// THERMAL-1 (05 §1.2): the per-tick leak on accrued joules
+    /// THERMAL-1 (05 §1.2): the per-tick leak on accrued embers
     /// outside the cryo vault.
-    JouleLeakPerTick = 3,
-    /// ECON-J (05 §1.2): joules one active zone burns per tick for
+    EmberLeakPerTick = 3,
+    /// ECON-E (05 §1.2): embers one active zone burns per tick for
     /// heating on a sub-mesic sited orb.
     HeatingPerZone = 4,
     /// SINK-1 (05 §1.4): sink one active cryo-lattice array captures
@@ -48,7 +48,7 @@ pub enum Parameter {
     SinkThroughput = 5,
     /// IDEO-1 (09 §3.2): the ideological friction rate φ.
     FrictionRate = 6,
-    /// MASK-1a (14 §4): the veil's standing joule toll per collect.
+    /// MASK-1a (14 §4): the veil's standing ember toll per collect.
     VeilToll = 7,
 }
 
@@ -57,7 +57,7 @@ impl Parameter {
         match code {
             1 => Some(Parameter::EncasementThroughput),
             2 => Some(Parameter::RadiatorBase),
-            3 => Some(Parameter::JouleLeakPerTick),
+            3 => Some(Parameter::EmberLeakPerTick),
             4 => Some(Parameter::HeatingPerZone),
             5 => Some(Parameter::SinkThroughput),
             6 => Some(Parameter::FrictionRate),
@@ -85,7 +85,7 @@ impl Parameter {
         match self {
             Parameter::EncasementThroughput => ratio(2, 1), // SEALED-RATE: epoch-0 charter seed
             Parameter::RadiatorBase => ratio(2, 1), // SEALED-RATE: epoch-0 charter seed
-            Parameter::JouleLeakPerTick => ratio(1, 8), // SEALED-RATE: epoch-0 charter seed
+            Parameter::EmberLeakPerTick => ratio(1, 8), // SEALED-RATE: epoch-0 charter seed
             Parameter::HeatingPerZone => ratio(1, 4), // SEALED-RATE: epoch-0 charter seed
             Parameter::SinkThroughput => ratio(2, 1), // SEALED-RATE: epoch-0 charter seed
             Parameter::FrictionRate => ratio(1, 8), // SEALED-RATE: epoch-0 charter seed
@@ -95,7 +95,7 @@ impl Parameter {
     pub const ALL: [Parameter; 7] = [
         Parameter::EncasementThroughput,
         Parameter::RadiatorBase,
-        Parameter::JouleLeakPerTick,
+        Parameter::EmberLeakPerTick,
         Parameter::HeatingPerZone,
         Parameter::SinkThroughput,
         Parameter::FrictionRate,

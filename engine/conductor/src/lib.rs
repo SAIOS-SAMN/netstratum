@@ -30,12 +30,12 @@
 //! entries carry `founder: "conductor"` — the observer marks them ⚙.
 //!
 //! **The autarkies feel the star (BOT-THERM):** genesis commissions
-//! every polity world's sun and sites its planet — spec-pinned, or
+//! every polity world's star and sites its planet — spec-pinned, or
 //! derived from the registry axes through the chronicle beacon (the
 //! civilization's own genesis receipts choose its sky). Furnace-sited
-//! polities answer heat with encasement shells and mint joules;
+//! polities answer heat with encasement shells and mint embers;
 //! Frost-sited polities raise a cryo-lattice array, bank sink, and hold
-//! expansion against the joule runway — honestly allowed to
+//! expansion against the ember runway — honestly allowed to
 //! freeze-lock; mesic polities keep their temperament untouched.
 //!
 //! Everything is deterministic: same era length → byte-identical
@@ -396,23 +396,23 @@ pub fn trade_intent(world: &World, metabolism: &str) -> Option<(Resource, Ratio,
     if let Some(regime) = regime(world, metabolism) {
         match regime {
             (Regime::Frost, _) => {
-                let starving = orb.famine.contains(&Resource::Joule);
+                let starving = orb.famine.contains(&Resource::Ember);
                 let sink = orb.banked_amount(Resource::Sink);
                 if starving && sink > ratio(0, 1) {
                     let give = lot(&half(sink));
                     let want = lot(&steep_want(&give, severity));
                     if give > ratio(0, 1) && want > ratio(0, 1) {
-                        return Some((Resource::Sink, give, Resource::Joule, want));
+                        return Some((Resource::Sink, give, Resource::Ember, want));
                     }
                 }
             }
             (Regime::Furnace, _) => {
-                let joules = orb.banked_amount(Resource::Joule);
-                if joules > ratio(TARGET_RESERVE.0, TARGET_RESERVE.1) {
-                    let give = lot(&half(joules.clone()));
-                    let want = lot(&relaxed_want(&give, &joules));
+                let embers = orb.banked_amount(Resource::Ember);
+                if embers > ratio(TARGET_RESERVE.0, TARGET_RESERVE.1) {
+                    let give = lot(&half(embers.clone()));
+                    let want = lot(&relaxed_want(&give, &embers));
                     if give > ratio(0, 1) && want > ratio(0, 1) {
-                        return Some((Resource::Joule, give, Resource::Sink, want));
+                        return Some((Resource::Ember, give, Resource::Sink, want));
                     }
                 }
             }
@@ -916,7 +916,7 @@ pub struct PolitySpec {
     pub policy: Policy,
     /// The world's spatial coordinate S = (x, y, z) on the 3-torus.
     pub position: (Ratio, Ratio, Ratio),
-    /// BOT-THERM: the world's sun, operator-pinned; `None` derives at
+    /// BOT-THERM: the world's star, operator-pinned; `None` derives at
     /// genesis from the civilization's registry axes, beacon-drawn
     /// from its own genesis receipts (Charter §9 — never wall clock).
     pub star: Option<StarClass>,
@@ -1529,12 +1529,12 @@ fn hex(bytes: &[u8; 32]) -> String {
 }
 
 /// BOT-THERM: the Frost runway law — a sub-mesic colony expands only
-/// when its banked joules cover the one-tick heating bill of the
-/// grown city (ECON-J, 05 §1.2: `heating_per_zone × (zones + 1)`).
+/// when its banked embers cover the one-tick heating bill of the
+/// grown city (ECON-E, 05 §1.2: `heating_per_zone × (zones + 1)`).
 /// Exact rational comparison: meeting the bill exactly holds the
 /// runway; one grain short refuses.
-pub fn joule_runway_allows(banked_joules: &Ratio, zones: usize) -> bool {
-    *banked_joules >= cfe::dop::heating_per_zone() * ratio(zones as i64 + 1, 1)
+pub fn ember_runway_allows(banked_embers: &Ratio, zones: usize) -> bool {
+    *banked_embers >= cfe::dop::heating_per_zone() * ratio(zones as i64 + 1, 1)
 }
 
 /// BOT-THERM: the thermal regime a polity world lives in. The mesic band
@@ -1906,7 +1906,7 @@ impl Polity {
             let _ = world.adopt_practice(practice);
         }
         // BOT-THERM: thermal genesis — every polity world founds under a
-        // real sun. Spec-pinned fields rule; absent ones derive from
+        // real star. Spec-pinned fields rule; absent ones derive from
         // the registry axes, beacon-seeded by the world's own genesis
         // receipt digest (the chronicle-seeded discipline, Charter §9).
         let digest = world
@@ -1956,7 +1956,7 @@ impl Polity {
         let (class, albedo, orbit) = (chosen.class, chosen.albedo, chosen.orbit);
         world
             .commission_star(class)
-            .expect("a fresh world has no sun yet");
+            .expect("a fresh world has no star yet");
         // An unlawful operator-pinned siting (albedo ≥ 1, orbit ≤ 0)
         // leaves the orb thermally dormant (the engine's opt-in guard)
         // instead of halting the board; derived seats are always lawful.
@@ -1990,7 +1990,7 @@ impl Polity {
         }
         // **DIO-3a: SEAL the CLADE AT GENESIS** (operator ruling 2026-08-16). Until
         // sealed, every founding line reads the flatlander default (clade 2,
-        // Mesic), so DIO-2's species-relative η is latent — a whale, a coral,
+        // Mesic), so DIO-2's species-relative η is latent — a soniform, a cnidiform
         // and a plasmoid all read the same temperate optimum. Translate the
         // spec's declared clade string to its code and seal it, so
         // `rejuvenation_clade` returns the real species and `habitability_flux`
@@ -3690,7 +3690,7 @@ impl Polity {
     /// Seat one zone if a tile is free and its cost is banked (the render gate —
     /// an unaffordable deed is rest). One zone per beat is the metabolic bound.
     ///
-    /// BOT-THERM (N-I6 follow-up, 2026-08-23): `joule_runway_allows` was
+    /// BOT-THERM (N-I6 follow-up, 2026-08-23): `ember_runway_allows` was
     /// written against `build_step`'s zone-raising and orphaned when
     /// N-I6 moved zone-raising here (`express_survival`) without
     /// carrying the gate — a sub-mesic (Frost) colony built with no
@@ -3709,7 +3709,7 @@ impl Polity {
         }
         if let Some((Regime::Frost, _)) = regime(&self.world, &self.spec.civilization.metabolism) {
             let zones_now = self.world.orb().map(|o| o.zones.len()).unwrap_or(0);
-            if !joule_runway_allows(&banked(&self.world, Resource::Joule), zones_now) {
+            if !ember_runway_allows(&banked(&self.world, Resource::Ember), zones_now) {
                 return;
             }
         }
@@ -4055,7 +4055,7 @@ impl Polity {
         true
     }
 
-    /// N-I10 — the sibling hears one folded word from the sun each beat it can
+    /// N-I10 — the sibling hears one folded word from the star each beat it can
     /// afford: it drains the word (understood) or walls and adopts it (learns a
     /// shared/inherited word its basin lacked). Hearing is looking — it pays
     /// `observe_price` (N-I7); a broke sibling fasts the hear. Bounded to one
@@ -4419,7 +4419,7 @@ impl Polity {
         // exactly as a barren beat rests; not a sweep). The owe column is
         // labor_force × the line's ration (mouths eat — buildings' upkeep is not
         // the pair), the have is the derived sustenance, and the owed direction
-        // is the species's ration (a plasmoid owes joule, not biomass — no
+        // is the species's ration (a plasmoid owes ember, not biomass — no
         // hardcode). The same reduce organ the grid seat runs. Pin G was read
         // in `cycle` after regrowth and before collect drained the larder; since
         // restore 3 a partly fed line thinks in proportion (`thinks`).
@@ -5702,7 +5702,7 @@ fn two_mut<T>(slice: &mut [T], i: usize, j: usize) -> (&mut T, &mut T) {
 /// E-APT / E3.3 — pure NPC element aperture trade (Wave-2).
 ///
 /// For every unordered pair that is not penned and not economically
-/// walled: if the exporter holds open matter, gift the solar leap when
+/// walled: if the exporter holds open matter, gift the stellar leap when
 /// needed (THRESHOLD-1), ship half the richest held element across the
 /// void under `pair_melt` / ROUTE-1 suppression, and land
 /// `ElementApertureSent` / `ElementApertureReceived`. Never invents
@@ -5715,7 +5715,7 @@ pub fn element_trade_step(worlds: &mut [Polity], beat: u64, span: &Ratio) -> Vec
     // Peels and shears, not sweeps (standing ruling; measured
     // 2026-08-12 at 66s of a 110s beat, 153 worlds): the pair loop
     // re-folded both sides' whole element ledgers per pair — O(n²)
-    // exact-rational folds — and re-granted the solar leap per pair.
+    // exact-rational folds — and re-granted the stellar leap per pair.
     // The mass is a per-WORLD reading: cache it once, refresh only the
     // two participants a clear actually moved; grant the leap once per
     // world in a pre-pass. Same pairs, same order, same choices —
@@ -5730,9 +5730,9 @@ pub fn element_trade_step(worlds: &mut [Polity], beat: u64, span: &Ratio) -> Vec
             })
             .unwrap_or_else(|| ratio(0, 1))
     };
-    // THRESHOLD-1 pre-pass: aperture needs the solar leap (condition 0).
+    // THRESHOLD-1 pre-pass: aperture needs the stellar leap (condition 0).
     for held in worlds.iter_mut() {
-        if !held.penned && !held.world.knows_its_sun() {
+        if !held.penned && !held.world.knows_its_star() {
             let steward = held.steward;
             let _ = held.world.grant_tech_as(steward, cfe::world::FIRST_ORB, 0);
         }
@@ -5989,7 +5989,7 @@ pub fn stamp_market_step(
             continue;
         };
         for &(i, _) in &members {
-            if !worlds[i].world.knows_its_sun() {
+            if !worlds[i].world.knows_its_star() {
                 let steward = worlds[i].steward;
                 let _ = worlds[i].world.grant_tech_as(steward, cfe::world::FIRST_ORB, 0);
             }

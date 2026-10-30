@@ -28,15 +28,15 @@ rails). Players never pay per-action fees; the chain never sees a game tick.
 
 ## 1. Domain registration (the in-game DNS)
 
-A domain (`netstratum://sol.prime`, `netstratum://outer-rim.trade`) is a
+A domain (`netstratum://lantern.prime`, `netstratum://outer-rim.trade`) is a
 human-readable address bound to a DOP orb — a planet, station, market hub, or
 entity profile.
 
 - **Root domains** carry a tiered annual lease (shorter/premium names price
   higher), settled through NS-7.
 - **Subdomains are free and unlimited** once the root is held
-  (`mars.sol.prime`, `station-4.sol.prime`) — managed locally by the owner's
-  ipsal-os entity, no settlement event.
+  (`cinder.lantern.prime`, `station-4.lantern.prime`) — managed locally by
+  the owner's ipsal-os entity, no settlement event.
 - **Resolution is protocol work:** a domain resolves to an orb address via
   NS-1; ownership and transfer are receipted via NS-3; the registry root
   anchors via NS-7 so ownership survives any single node.
@@ -45,7 +45,7 @@ entity profile.
 
 **Bindings:** NS-1 (address → orb), NS-3 (ownership receipts), NS-5 (host
 rewards), NS-7 (settlement). First consumer at spec time: registering
-`sol.prime` and resolving it from a second node.
+`lantern.prime` and resolving it from a second node.
 
 ## 2. Planet leasing and colony zoning
 
@@ -56,7 +56,7 @@ rather than selling whole worlds.
 |---|---|
 | **Fixed-yield lease** | tenant pays a periodic fee for a designated tile; predictable both ways |
 | **Revenue share** | zero upfront; a fixed fraction of tile output routes to the owner automatically via receipt logic — the low-barrier entry path for new players |
-| **Development speculation** | barren worlds lease at a discount to terraformers; tile value follows measured improvement (atmosphere, water) |
+| **Development speculation** | barren worlds lease at a discount to worldshapers; tile value follows measured improvement (atmosphere, water) |
 
 The RFA property that makes this trustworthy: splits compute in exact
 rational arithmetic — a 5% share of 1,000,003 units divides bit-for-bit
@@ -137,11 +137,11 @@ rules live there.
 The economy operates on a physical energy standard derived from the exact
 thermodynamic state variable `T_eq⁴`.
 
-- **Supply and minting:** energy (joules, tracked as exact rationals in
+- **Supply and minting:** energy (embers, tracked as exact rationals in
   the CFE chronicle) cannot be minted by fiat or player action; its total
   volume and local density are governed strictly by sector thermal balance
   (`05_THERMAL_BALANCE.md` §1, §3). The minting mechanism is **syntropic
-  encasement** (05 §1.2): joules enter the world only as excess stellar
+  encasement** (05 §1.2): embers enter the world only as excess stellar
   and factory heat captured by encasement shells — the Furnace mints, the
   Frost banks losslessly, warm stores leak.
 - **Thermal arbitrage:** the intrinsic price differential between
@@ -184,7 +184,7 @@ provable by simple rational-comparison ZK circuits. Game-loop determinism
 and zero-latency tick execution are preserved: the chain never computes,
 only notarizes.
 
-## 7. Neutral geological escrow (Litho-Chalcogen nodes)
+## 7. Neutral lithic escrow (Litho-Chalcogen nodes)
 
 Diplomacy needs a neutral place to hold a treaty and its collateral —
 somewhere neither party can quietly rewrite. In the world-book, the
@@ -203,10 +203,10 @@ Litho-Chalcogen escrow node rather than a mutable surface store.
   function is encoded as an exact-rational state machine and the node vitrifies —
   the escrowed state becomes immutable in-fiction.
 - **Exact-rational validation:** conditions evaluate strictly by exact rational
-  comparison over CFE chronicle data (e.g. "Empire A delivered ≥ 1,000,000 J
-  to Sector B within N ticks"). No float, no rounding, no subjective dispute
+  comparison over CFE chronicle data (e.g. "Empire A delivered ≥ 1,000,000
+  embers to Sector B within N ticks"). No float, no rounding, no subjective dispute
   window (Charter §3.2).
-- **Dual-key collateral lock:** parties deposit collateral — in-game joules,
+- **Dual-key collateral lock:** parties deposit collateral — in-game embers,
   coolant, or entropy rights, or NS-7-bridged ERC-721/1155 assets. While
   locked in the vitrified matrix it cannot be spent, moved, or re-pledged.
 - **Settlement:** condition true → release to the recipient; thermodynamic
@@ -252,16 +252,16 @@ inescapable monopolies.
 
 ## 8. Coolant arbitrage & sink capacity export (design stage)
 
-The cold half of the thermal axis, dual to §6.1's joule minting — physics
-inscribed at `05_THERMAL_BALANCE.md` §1.4; lands with the VENT-1/ECON-J
+The cold half of the thermal axis, dual to §6.1's ember minting — physics
+inscribed at `05_THERMAL_BALANCE.md` §1.4; lands with the VENT-1/ECON-E
 landing.
 
 - **The commodity:** a dim-star system's export is **Banked Sink**
-  (`S_cool`) — heat-absorption capacity in joule-commensurable units —
+  (`S_cool`) — heat-absorption capacity in ember-commensurable units —
   shipped physically (coolant out, entropic fluid back, re-armed against
   the void) or leased as the §6.2 thermal entropy rights.
-- **The books balance per side (05 §1.4):** importing joules increments
-  banked joules; absorbing a neighbour's waste consumes banked sink and,
+- **The books balance per side (05 §1.4):** importing embers increments
+  banked embers; absorbing a neighbour's waste consumes banked sink and,
   once shed to the void, settles into the absorber's `entropy_vented`
   ledger (`VentSettled`, collect-settled — nothing un-receipted).
 - **Earned, never passive (05 §1.4):** both captures gate through
@@ -269,6 +269,6 @@ landing.
   `(1−α)` settles as vented loss. Guardrails 1 and 6 hold: no gate is
   pay-to-win and no sink monopoly may be absolute.
 - **The equilibrium:** the `S_cool / J` price ratio is the Furnace↔Frost
-  exchange rate — cold systems import joules to live (ECON-J heating
+  exchange rate — cold systems import embers to live (ECON-E heating
   upkeep) and in exchange absorb the Furnace's thermal death. Placeholder
   pricing; tunes at balance.

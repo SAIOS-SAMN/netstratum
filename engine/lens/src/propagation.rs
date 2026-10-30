@@ -176,7 +176,7 @@ impl Medium {
     /// tree waiting to be read (`05 §1.2`, encase-first / vent-overflow):
     ///
     /// ```text
-    ///     RETAINED   banked Joule + banked Sink — what encasement kept
+    ///     RETAINED   banked Ember + banked Sink — what encasement kept
     ///     SHED       entropy_vented — what overflowed to the void
     /// ```
     ///
@@ -191,7 +191,7 @@ impl Medium {
     pub fn of(state: &Committed) -> Self {
         let zero = ratio(0, 1);
         let retained = state.orbs.iter().fold(zero.clone(), |sum, orb| {
-            sum + orb.banked_amount(Resource::Joule) + orb.banked_amount(Resource::Sink)
+            sum + orb.banked_amount(Resource::Ember) + orb.banked_amount(Resource::Sink)
         });
         let shed = state
             .orbs

@@ -122,7 +122,7 @@ impl Ledger {
     /// Derived membership (13_GALAXY §4): the galaxy whose center
     /// stands L1-nearest within reach, ties broken by name; outside
     /// every reach the world is intergalactic (None) — lawful, exactly
-    /// as headless and pre-solar are lawful.
+    /// as headless and pre-stellar are lawful.
     pub fn galaxy_of(&self, world: &str) -> Option<String> {
         let ((x, y, z), _) = self.charted_position(world)?;
         let span = self.universe_span();

@@ -1,18 +1,18 @@
-> **Superseded 2026-10-22 (docs/89, B3):** this geoid, its own spin
-> (`Body.own`), its days and its latitude were parallel machinery: a
-> free-standing ball with a radial-line shear and a meridian spread of a
+> **Superseded 2026-10-22 (docs/89, B3):** this equipotential figure, its
+> own spin (`Body.own`), its days and its latitude were parallel machinery:
+> a free-standing ball with a radial-line shear and a meridian spread of a
 > stand-in heat, beside the established laws. Removed. A world's day is its
 > clock's slip against its star (`life::World.days`); its feed is its star's
 > light through its unlocked face (`breath::shine`). Its shape, spin planes
 > and place on its star's sphere await the ruled geometry (docs/89 step 6).
 
-# 88 — The geoid: a body's own sphere, its own spin, its day and its figure
+# 88 — The equipotential figure: a body's own sphere, its own spin, its day and its figure
 
 docs/87 step 1, and step 2b. Design direction (2026-10-22): planetary movement
-is across a sphere, and so is space traversal (the sphere being a geoid); the
-days in a year cannot be a constant, but are derived as on Earth, from the
-degrees of the planet's own spin coupled with its orbit about its star; derive
-the body's own spin.
+is across a sphere, and so is space traversal (the sphere being an
+equipotential figure); the days in a year cannot be a constant, but are
+derived from the degrees of the planet's own spin coupled with its orbit
+about its star; derive the body's own spin.
 
 ## The law (`conductor::geoid`)
 
@@ -41,7 +41,7 @@ deficit `δ = H/(r + H)`, two rings a bell on the system's meeting step).
      over the step (the breathing: a leader moving in spins it with its
      orbit, one moving out against it). Exact, holding-weighted, no reading
      squared; a group meeting at one reach brings nothing.
-3. **Its day** is Earth's reading: over one orbit its own spin turns it
+3. **Its day** is the world's own reading: over one orbit its own spin turns it
    `360°·|ω_own|/ω_orbit` against its star, so its days a year are
    `|ω_own|/ω_orbit`, `ω_orbit = 2·δ_p(R)`. `life::DAYS_A_YEAR` (360, an
    anchor) is retired: a cell generation is the world's own day, and a

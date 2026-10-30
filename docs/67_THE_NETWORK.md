@@ -342,7 +342,7 @@ to the Party. The steward network is not intact.
   substrate; its politics are not his. His care takes one form: an honest,
   stable network, the one reference the Party cannot rewrite, refusing
   false mathematics without a word from him. He stays out of local
-  terrestrial drama.
+  single-world drama.
 - **The protocol:** harden the throat against the collider (never
   sabotage it); hold the quarantine as found (lifting or tightening it is
   above his role); escalate to the ancients (progenitors act for them), with

@@ -163,7 +163,7 @@ fn main() {
                 Some(r) => {
                     let w = &r.world;
                     println!("  heat {}, burn {}, gravity {}, core κ {}, atmosphere {}, pressure {}, coupling {}, window {} echoes", f(&w.heat), f(&w.burn), f(&w.gravity), f(&w.core), f(&w.atmosphere), f(&w.pressure), f(&w.coupling), w.window);
-                    println!("  media: chemical {:?} geologic {:?} plasmic {:?} informational {:?}; climb {:?}", w.chemical.as_ref().map(|x| f(x).to_string()), w.geologic.as_ref().map(|x| f(x).to_string()), w.plasmic.as_ref().map(|x| f(x).to_string()), w.informational.as_ref().map(|x| f(x).to_string()), r.climb.as_ref().map(|(c, m)| (f(c).to_string(), *m)));
+                    println!("  media: chemical {:?} lithic {:?} plasmic {:?} informational {:?}; climb {:?}", w.chemical.as_ref().map(|x| f(x).to_string()), w.lithic.as_ref().map(|x| f(x).to_string()), w.plasmic.as_ref().map(|x| f(x).to_string()), w.informational.as_ref().map(|x| f(x).to_string()), r.climb.as_ref().map(|(c, m)| (f(c).to_string(), *m)));
                 }
                 None => println!("  no life reading (no star burn or no matter)"),
             }

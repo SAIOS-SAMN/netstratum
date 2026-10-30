@@ -322,7 +322,7 @@ fn haul(
     // P5.22 mesh-guard: corridor aperture needs instrument witness.
     src.mesh_guard_haul(melt)?;
     // THRESHOLD-1 (12_UNION §7): the shield — an aperture touches only
-    // worlds whose peoples have made the solar leap (TECH-1a). A world
+    // worlds whose peoples have made the stellar leap (TECH-1a). A world
     // is a star system, so every aperture is interstellar; the first
     // lawful one is a world's crossing into the union.
     // WARDEN-1a: the elder's reverse shield — no aperture reaches a
@@ -338,10 +338,10 @@ fn haul(
     if src.at_war_with(dst.name()) || dst.at_war_with(src.name()) {
         return Err(ActionRefused::AtWar { partner: dst.name().to_string() });
     }
-    if !src.knows_its_sun() || !dst.knows_its_sun() {
+    if !src.knows_its_star() || !dst.knows_its_star() {
         return Err(ActionRefused::Shielded {
-            source_shielded: !src.knows_its_sun(),
-            dest_shielded: !dst.knows_its_sun(),
+            source_shielded: !src.knows_its_star(),
+            dest_shielded: !dst.knows_its_star(),
         });
     }
     if !src.orbs.iter().any(|held| held.orb_id == from) {
@@ -497,10 +497,10 @@ fn haul_element(
             partner: dst.name().to_string(),
         });
     }
-    if !src.knows_its_sun() || !dst.knows_its_sun() {
+    if !src.knows_its_star() || !dst.knows_its_star() {
         return Err(ActionRefused::Shielded {
-            source_shielded: !src.knows_its_sun(),
-            dest_shielded: !dst.knows_its_sun(),
+            source_shielded: !src.knows_its_star(),
+            dest_shielded: !dst.knows_its_star(),
         });
     }
     if !src.orbs.iter().any(|held| held.orb_id == from) {
@@ -603,10 +603,10 @@ pub fn charter_element_route(
             partner: b.name().to_string(),
         });
     }
-    if !a.knows_its_sun() || !b.knows_its_sun() {
+    if !a.knows_its_star() || !b.knows_its_star() {
         return Err(ActionRefused::Shielded {
-            source_shielded: !a.knows_its_sun(),
-            dest_shielded: !b.knows_its_sun(),
+            source_shielded: !a.knows_its_star(),
+            dest_shielded: !b.knows_its_star(),
         });
     }
     if a.routes.iter().any(|(held, _)| *held == deal)
@@ -728,10 +728,10 @@ pub fn stamp_aperture_transfer(
             partner: dst.name().to_string(),
         });
     }
-    if !src.knows_its_sun() || !dst.knows_its_sun() {
+    if !src.knows_its_star() || !dst.knows_its_star() {
         return Err(ActionRefused::Shielded {
-            source_shielded: !src.knows_its_sun(),
-            dest_shielded: !dst.knows_its_sun(),
+            source_shielded: !src.knows_its_star(),
+            dest_shielded: !dst.knows_its_star(),
         });
     }
     // #138 the resource GRAIN — the STAMP haul carries on the 1/1024 grain,
@@ -812,10 +812,10 @@ pub fn charter_route(
 ) -> Result<(), ActionRefused> {
     // BadEta is dead (29_CONSTRUCTION C1): efficiency is a `Unit` —
     // [0, 1) by construction — so the range judge has nothing to catch.
-    if !a.knows_its_sun() || !b.knows_its_sun() {
+    if !a.knows_its_star() || !b.knows_its_star() {
         return Err(ActionRefused::Shielded {
-            source_shielded: !a.knows_its_sun(),
-            dest_shielded: !b.knows_its_sun(),
+            source_shielded: !a.knows_its_star(),
+            dest_shielded: !b.knows_its_star(),
         });
     }
     if a.routes.iter().any(|(held, _)| *held == deal)
@@ -925,12 +925,12 @@ impl World {
         Some(dust)
     }
 
-    /// ROUTE-1: the year-voice maintenance draw — 1/4 joule per live
+    /// ROUTE-1: the year-voice maintenance draw — 1/4 ember per live
     /// lane (v1 placeholder). An unaffordable lane lapses by receipt
     /// on this book; the pair dies with either leg. Returns the
     /// lapsed deal ids.
     pub fn maintain_routes(&mut self, orb: u64) -> Vec<u64> {
-        // Year-voice toll: 1/4 joule — derived 1/(1+1+1+1).
+        // Year-voice toll: 1/4 ember — derived 1/(1+1+1+1).
         let four = {
             let two = ratio(1, 1) + ratio(1, 1);
             two.clone() + two
@@ -941,12 +941,12 @@ impl World {
         for deal in deals {
             let stamp = self.clock.now();
             let Some(held) = peel(&mut self.orbs, orb) else { break };
-            if held.banked_amount(Resource::Joule) >= toll {
-                held.bank(Resource::Joule, -toll.clone());
+            if held.banked_amount(Resource::Ember) >= toll {
+                held.bank(Resource::Ember, -toll.clone());
                 self.chronicle.append(
                     ClosureEvent::UpkeepSettled {
                         orb_id: orb,
-                        resource: Resource::Joule,
+                        resource: Resource::Ember,
                         amount: toll.clone(),
                     },
                     stamp,
@@ -1011,7 +1011,7 @@ pub fn core_magnetism(site: &crate::dop::ThermalSite) -> u64 {
 
 /// **Polity offset of the star's world** — sealed genesis disposition
 /// (1 expansionist · 2 empiricist · 3 epicurean). Stretches the period
-/// so different civil characters under different suns do not share a
+/// so different civil characters under different stars do not share a
 /// single clockwork. Unsealed worlds read as 1 (no extra stretch).
 pub fn star_polity_offset(world: &World) -> u64 {
     world
@@ -1228,7 +1228,7 @@ pub fn smelt(amount: &Ratio) -> Ratio {
 
 /// #136 — the ELEMENT-LEDGER GRAIN (1/1024). The element ledger declares a finer
 /// grain than the 1/64 market/resource smelt: element mints (the food synthesis
-/// `joule·richness`, the vein flow) are naturally sub-1/64, and flooring them to
+/// `ember·richness`, the vein flow) are naturally sub-1/64, and flooring them to
 /// 1/64 floors small quanta toward zero and starves the food economy. 1/1024 (the
 /// grain ONT-2 already floors the vein integral to) preserves 16× finer food while
 /// still bounding every element denominator to ≤ 1024 (~10 bits) — the #136
@@ -1456,9 +1456,9 @@ pub fn clear_trade(
 /// under one deal (the aperture shape). The deed is council-gated —
 /// it must reference an open council in the granting world (delegation
 /// settles inside diplomacy) — and shield-bounded: the receiving world
-/// must know its sun and have crossed (a licensed leap lands only on a
+/// must know its star and have crossed (a licensed leap lands only on a
 /// union member; below the threshold the young are left to their sky).
-/// The solar leap (condition 0) is never licensed. The leap may be
+/// The stellar leap (condition 0) is never licensed. The leap may be
 /// known or unknown to the receiver — the name and node arrive with
 /// the deed; a node the receiver already holds refuses idempotent.
 pub fn license_tech(
@@ -1470,9 +1470,9 @@ pub fn license_tech(
 ) -> Result<(), ActionRefused> {
     let Leap { condition, name, deal, council } = leap;
     if condition == 0 {
-        return Err(ActionRefused::SolarLeapNeverLicensed);
+        return Err(ActionRefused::StellarLeapNeverLicensed);
     }
-    // TERRA-1: the crown licenses only onto a finished base-7 stack —
+    // WORLDSHAPE-1: the crown licenses only onto a finished base-7 stack —
     // the gift completes what the line earned; it never substitutes.
     if condition == 6 && !dst.base_seven_complete() {
         return Err(ActionRefused::BaseSevenUnfinished);
@@ -1654,11 +1654,11 @@ fn deposit_receipt(sheet: &mut Vec<(u64, CrystalDeposit)>, receipt: &crate::vrp:
         &mut sheet.last_mut().expect("just pushed").1
     }
     match receipt.event() {
-        ClosureEvent::FamineStruck { orb_id, resource: Resource::Joule, .. } => {
+        ClosureEvent::FamineStruck { orb_id, resource: Resource::Ember, .. } => {
             let held = deposit(sheet, *orb_id);
             held.famine_open = held.famine_open.or(Some(receipt.stamp()));
         }
-        ClosureEvent::FamineRelieved { orb_id, resource: Resource::Joule } => {
+        ClosureEvent::FamineRelieved { orb_id, resource: Resource::Ember } => {
             let held = deposit(sheet, *orb_id);
             if let Some(struck) = held.famine_open.take() {
                 held.famine_total += receipt.stamp().saturating_sub(struck);
@@ -1676,7 +1676,7 @@ fn deposit_receipt(sheet: &mut Vec<(u64, CrystalDeposit)>, receipt: &crate::vrp:
                 .vented_entries
                 .push((receipt.stamp(), amount.clone()));
         }
-        ClosureEvent::YieldCollected { orb_id, resource: Resource::Joule, amount } => {
+        ClosureEvent::YieldCollected { orb_id, resource: Resource::Ember, amount } => {
             deposit(sheet, *orb_id)
                 .encased_entries
                 .push((receipt.stamp(), amount.clone()));

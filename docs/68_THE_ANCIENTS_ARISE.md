@@ -7,9 +7,7 @@ once a bounce in the conductor's year voice, after `core_bounce`.
 ## The readings it rests on, derived
 
 - **The bulge** is the core's own cell: torus L1 distance under one cell from
-  the core's centre. A cell is 1/32 Mpc (docs/58 §8), about 31 kpc, so any
-  galactic bulge (the Milky Way's 2 kpc, barren's `R_BULGE_KPC`) lies inside
-  it. The core's bell, one cell a beat, fills it in its first beat.
+  the core's centre. The cell is the torus's own unit (docs/58 §8). The core's bell, one cell a beat, fills it in its first beat.
 - **The core assembly time** is one beat: the bell's crossing of the bulge.
 - **The core period** is the core's own bounce period: `core_bounce` re-emits
   every core's holdings once a year (`YEAR_TICKS`).

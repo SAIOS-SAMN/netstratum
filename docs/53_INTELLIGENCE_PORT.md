@@ -50,7 +50,7 @@ and solver-verify commit only what conserves — **stays, absolute and unchanged
   verify  = solver-verify::verify_work verify  = kernel::admits
                   \                          /
                    grown_basis on the entity
-                   sun / vocabulary::fold on the civ
+                   fold / vocabulary::fold on the civ
 ```
 
 `think(observations, entity, membrane)` owns no algebra. Each seat only
@@ -95,7 +95,7 @@ the sector-door sampler). After the port:
 ```
 forge_task(digest)          stays (curriculum from the chronicle)
   → peel each train pair     iae::peel
-  → think(grown_basis, sun)  four moves
+  → think(grown_basis, fold)  four moves
     Glued      → render ThoughtRule → Program → verify_work → mint (38 §4)
     Unglueable → the residual is the next observation (same unique, next beat)
     Withheld   → rest this beat (honest)
@@ -160,7 +160,7 @@ beat, per living entity, form book pairs (have | owe):
   they re-derive as the unique glue of the thermal/ration pair. If still
   hardcoded arms, re-express or delete.
 - **D4.7** Species identity enters only as which ration column is peeled
-  (biomass / iron / joule / element).
+  (biomass / iron / ember / element).
 
 **Pins E–H:** (E) one habitat, two extractors, biomass residual ≠ 0 → think names
 Habitat or raze-Extractor, never a third Extractor, no disposition dial. (F)
@@ -175,10 +175,10 @@ vocabulary consulted.
 
 - **D5.1** `grown_basis` lives on the entity (sovereign / agent / NPC seat,
   `cfe/ipsal.rs` — today only `entity_id + handle + principal + grants`), not only
-  on the polity. The civ library is the sun (consilience, `vocabulary::fold`); the
+  on the polity. The civ library is the fold (consilience, `vocabulary::fold`); the
   vessel basis is fluid.
-- **D5.2** An automaton `research_step` may reduce against the sun; it may not
-  install. Two vessel deposits crystallize (fold / sun) — same polarity as
+- **D5.2** An automaton `research_step` may reduce against the fold; it may not
+  install. Two vessel deposits crystallize into the fold — same polarity as
   Xylarium L0.
 - **D5.3** A granted agent thinks only inside its scopes: a Collect-only agent may
   derive collect but may not render a Zone deed. Containment precedes the render,
@@ -228,7 +228,7 @@ second brain (lifespan is a clock on the mouth count).
 | N-I6 | survival think names a deed; delete the utility deciders | **Landed** `fd7bbcc` · Pins E, F, H · [`archive/N-I6.md`](archive/N-I6.md) |
 | N-I-VESSEL | basin per vessel (workspace, not `Entity`) | **Landed** `4399627` · Pin B at vessel grain · [`archive/N-I-VESSEL.md`](archive/N-I-VESSEL.md) |
 | N-I7 | metabolic debit on the look; leisure gates the observe | **Landed** `c079dfd` · [`archive/N-I7.md`](archive/N-I7.md) · unfunded line fasts; funded Fed line thinks |
-| N-I8 | sun / `vocabulary::fold` from two vessel deposits | **Landed** `ab01400` · [`archive/N-I8.md`](archive/N-I8.md) · Pin C (two offices mint), C− (one vantage does not) |
+| N-I8 | fold / `vocabulary::fold` from two vessel deposits | **Landed** `ab01400` · [`archive/N-I8.md`](archive/N-I8.md) · Pin C (two offices mint), C− (one vantage does not) |
 | N-I9 | same doors: CLI think verb = automaton path; NS-6 grant gates render | **waits** — product parity, not converse |
 | N-I10 | refraction between entities | **Landed** `3099b80` · [`archive/N-I10.md`](archive/N-I10.md) · peer drains or walls a folded word (primitive + steward swap) |
 
@@ -246,7 +246,7 @@ Program). `engine/solver/src/search.rs` = off the beat. `engine/solver/src/deriv
 labor/ration = have/owe columns. `engine/conductor/src/lib.rs` `research_step` /
 `build_step` = renders. `engine/conductor/src/cognition.rs` = delete as decider;
 keep disposition only as lens metadata. `engine/cfe/src/ipsal.rs` = entity
-`grown_basis` store. `engine/cfe/src/vocabulary.rs` = sun fold.
+`grown_basis` store. `engine/cfe/src/vocabulary.rs` = fold fold.
 
 **`solver` still does not import `cfe`.** Book peel lives in `cfe` (or conductor);
 it emits `iae::FullMeasurement`. Solver thinks measurements, not worlds.

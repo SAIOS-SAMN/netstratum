@@ -8,11 +8,11 @@
 use super::*;
 
 impl World {
-    /// THERMAL-1: the commissioned sun.
+    /// THERMAL-1: the commissioned star.
     pub fn star(&self) -> Option<crate::thermal::StarClass> {
         self.star
     }
-    /// THERMAL-1 — commission the container's sun (once per world): the
+    /// THERMAL-1 — commission the container's star (once per world): the
     /// StarClass fixes L for every orbit (NS-6 §7).
     pub fn commission_star(
         &mut self,
@@ -178,11 +178,11 @@ impl World {
         let band = crate::thermal::band_of(&teq);
         crate::dop::apply_endowment_add(held, &crate::dop::orbit_endowment(band));
         // TECH-1a (12_UNION §5a): a world's first thermal opt-in
-        // receipts the kernel solar leap — its people now know their
-        // sun. Once per world, never per orb; the node id is seeded
+        // receipts the kernel stellar leap — its people now know their
+        // star. Once per world, never per orb; the node id is seeded
         // from the kernel name + the discovering orb (SEAL B).
         if !self.techs.iter().any(|(_, condition, _, _)| *condition == 0) {
-            let mut seed = b"tech.kernel.solar-leap".to_vec();
+            let mut seed = b"tech.kernel.stellar-leap".to_vec();
             seed.extend_from_slice(&orb.to_le_bytes());
             let node: [u8; 32] = blake3::hash(&seed).into();
             self.techs.push((orb, 0, node, ratio(1, 1)));
@@ -193,7 +193,7 @@ impl World {
                     condition: 0,
                     modifier: 0,
                     magnitude: ratio(1, 1),
-                    name: "the solar leap".into(),
+                    name: "the stellar leap".into(),
                 },
                 SOVEREIGN,
             );

@@ -163,7 +163,7 @@ Survey targets, in order:
 1. `Resource` / `ZoneKind` closed enums and their exhaustive matches.
 2. **Boolean gates** — capabilities flattened to yes/no, which is the
    same collapse as reading a dual through one arm:
-   `can_smelt = level >= 3`, `knows_its_sun()`, `crossed`, `veiled`,
+   `can_smelt = level >= 3`, `knows_its_star()`, `crossed`, `veiled`,
    `warded: Option<bool>`, `industry_relevant()`, `permits()`.
 3. Iterations on dimensional expansion (the standing cartesian hunt).
 

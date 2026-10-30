@@ -88,7 +88,7 @@ impl PlanetFit {
 /// **Flatlander baseline** — clade 2 `bimaniform`.
 ///
 /// The knowledge baseline for design and play: planar tool-makers whose
-/// extract+regen suite is what Earth-trained operators already know.
+/// extract+regen suite is what operators already know.
 /// Imperium species string may read `bimaniform-flatlander` or
 /// `flatlander-baseline`; the wire is always clade 2.
 pub const FLATLANDER_CLADE: u8 = 2;

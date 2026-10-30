@@ -314,12 +314,12 @@ impl Replayer {
             if let Some(held) = peel(&mut *orbs, *orb_id) {
                 held.bank(*resource, amount.clone());
                 // The syntropic BOOK — the inverse of entropy_vented.
-                // A joule yield is an encased joule (the crystal
+                // An ember yield is an encased ember (the crystal
                 // sheet already reads it that way), so containing
                 // one books it, whether the excess came from a star
                 // or from friction. Replay must mirror the live path
                 // exactly or the two states diverge on a field.
-                if *resource == Resource::Joule {
+                if *resource == Resource::Ember {
                     held.syntropy_contained += amount.clone();
                 }
                 held.last_touch = receipt.stamp();
@@ -809,12 +809,12 @@ impl Replayer {
                 held.bank_element(*element, amount.clone());
             }
         }
-        // G2 (#29): the food-element cycle — spend joule, mint the element
+        // G2 (#29): the food-element cycle — spend ember, mint the element
         // (conserved transmutation, bounded in the kernel), net of what the
         // zones ate running the span: the larder moves by `minted − eaten`.
-        ClosureEvent::ElementFarmed { orb_id, element, joule, minted, eaten } => {
+        ClosureEvent::ElementFarmed { orb_id, element, ember, minted, eaten } => {
             if let Some(held) = peel(&mut *orbs, *orb_id) {
-                held.bank(Resource::Joule, -joule.clone());
+                held.bank(Resource::Ember, -ember.clone());
                 held.bank_element(*element, minted.clone() - eaten.clone());
             }
         }
@@ -1036,7 +1036,7 @@ impl Replayer {
             }
         }
         // TECH-1a: a discovered node replays into the tech list —
-        // the solar leap (condition 0) among them. The receipt's
+        // the stellar leap (condition 0) among them. The receipt's
         // magnitude rides along: it is the number the tick obeys
         // (receipt authority, operator ruling 2026-08-05).
         ClosureEvent::TechDiscovered { orb_id, node, condition, magnitude, .. } => {
@@ -1699,7 +1699,7 @@ impl Replayer {
         }
         ClosureEvent::TamperDetected { .. } => {
             // Residual audit only; pressure already set by CovertTamper
-            // or cleared/unmasked by overt terraform.
+            // or cleared/unmasked by overt worldshape.
         }
         ClosureEvent::PostureReoriented {
             disposition,

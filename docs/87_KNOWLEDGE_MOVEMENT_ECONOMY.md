@@ -2,8 +2,8 @@
 
 Operator 2026-10-22: accepted ("proceed with development") after "cut it
 over so that the economy is not just a spreadsheet or card catalogue",
-"planetary movement is across a sphere, space traversal is also in a sphere
-(where sphere is a geoid)" and "both economy and movement".
+planetary movement is across a sphere, and space traversal is also in a
+sphere (a body's equipotential figure), for both economy and movement.
 
 ## The principle
 
@@ -28,21 +28,21 @@ knowledge market). Its worth is never declared: it is what it opens below.
   it approaches the full flux T and never passes it. Past it a people
   reaches more flux: more worlds, or a finer lock with its star (Ψ_w,
   docs/82).
-- A people stands on a cap of its world's geoid, where its medium takes up
-  most flux; regions are caps, neighbours are caps that overlap (the
-  non-Euclidean Venn). Replaces the 64-tile board, the zone table and the
-  square surface.
+- A people stands on a cap of its world's equipotential figure, where its
+  medium takes up most flux; regions are caps, neighbours are caps that
+  overlap (the non-Euclidean Venn). Replaces the 64-tile board, the zone
+  table and the square surface.
 
 ## 3. Movement
 
-- **Place:** a point in degrees on a body's own geoid, its equipotential,
+- **Place:** a point in degrees on a body's own equipotential figure,
   set by its holding, its core share κ and its spin (docs/88).
 - **A path is a turning:** an arc is a rotor in degrees (docs/85,
   `forms::frame`). A trajectory is the composition of rotors through each
   tier's map, read in the observer's frame (A6), each frame its closed form
   `φ + ω·t` (law 5).
-- **Between bodies:** a chain of arcs on nested geoids joined at throats
-  (`enclosure::route`, the arcs added).
+- **Between bodies:** a chain of arcs on nested equipotential figures
+  joined at throats (`enclosure::route`, the arcs added).
 - **Cost of a carriage:** the pull crossed at each throat `H/(R + H)`; the
   arc on each sphere; the sense (prograde rides the frame's turn, the lever;
   retrograde pairs with it and pays the paired share, law 6); the window
@@ -85,8 +85,8 @@ body by its own gravity and density; both senses, pairing closes.
 
 ## Build order
 
-1. The geoid's figure (docs/88).
-2. Place on the geoid: a cap chosen by its own land.
+1. The equipotential figure (docs/88).
+2. Place on the equipotential figure: a cap chosen by its own land.
 3. Trajectories: composed rotors, sense, windows over `enclosure::route`;
    `torus_distance` retires; gate span, melt and freshness on them.
 4. Land with knowledge (h + k), replacing the zone board.

@@ -23,7 +23,7 @@
 //! is no second record of it to disagree with the books themselves.
 //!
 //! **Why it is not a base-7 condition.** The crystallized stack is full
-//! — conditions 0..=6, with the crown gated on the solar leap and all
+//! — conditions 0..=6, with the crown gated on the stellar leap and all
 //! five (`10 §3`, `§3b`). An eighth condition would change the base and
 //! silently move the crown's gate. Literacy needs no slot: it is
 //! already implied by receipts that exist.
@@ -61,9 +61,8 @@
 //! article IV clause 2 rules that this manifold is *one commitment per
 //! step*, and `Commitment.parent` is the chain's backward reference.
 //! That is the governing layer. A work a civilization aspires to is
-//! content — the same distinction that kept the `humans` civilization,
-//! the `humanoid` clade and `Human Capital` from being renamed when
-//! "human" was struck as a seat. Two correct uses in two layers is not
+//! content — the same distinction that kept a civilization's and a
+//! clade's own names from being renamed when a seat name was struck. Two correct uses in two layers is not
 //! a defect; the defect would be a third that conflates them.
 
 

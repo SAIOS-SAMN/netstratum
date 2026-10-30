@@ -236,7 +236,7 @@ proper words.
 The standing vocabulary is written out:
 
 - **exact rational arithmetic** — the principle; as an adjective,
-  **exact-rational** (e.g. "exact-rational joules", "an exact-rational state
+  **exact-rational** (e.g. "exact-rational embers", "an exact-rational state
   machine").
 - **the exact rationals** / **the rationals** — the number domain; **a pair of
   exact rationals** for a two-component value.

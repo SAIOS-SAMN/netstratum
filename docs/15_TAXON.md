@@ -47,7 +47,7 @@ partition needs:
 | **9** | ▼ | **abyssal-pressure** (trench / deep-pressure life) | open |
 | **10** | ◆ | **crystal-mind** (compute / lattice intelligence) | open |
 | **11** | ※ | **void-swarm** (vacuum eusocial — distinct from biotic-swarm) | open |
-| **12** | ❄ | **thermal-banker** (sink / joule specialists) | open |
+| **12** | ❄ | **thermal-banker** (sink / ember specialists) | open |
 | **13** | ☯ | **mirror-form** (reflection / dual-state — balances metashifter) | open |
 
 **Class ceiling: 13** (`dop::class_ceiling`, raised 2026-08-08 — six balance tiers).
@@ -61,7 +61,7 @@ partition needs:
 ## 3. The clade vocabulary (proposed, from the live register)
 
 Code 0 = unrecorded (lawful). Append-only; future seats reserve
-forward (18 gastropod — the register awaits its snail):
+forward (18 heliciform — the register awaits its line):
 
 **Display words (imperium — `37_IMPERIUM_TAXON`; wire codes stable):**
 
@@ -157,7 +157,7 @@ economic modes, planet fit, lab seats).
 |---------|--------|
 | Class + clade wire + seal | this doc §1–§4 · kernel |
 | Imperium display words | `37` §2 · `vocabulary::clade_word` |
-| **Flatlander baseline** = clade 2 bimaniform | `37` §3 · aliases human/flatlander |
+| **Flatlander baseline** = clade 2 bimaniform | `37` §3 · aliases flatlander/baseline |
 | Economic mode extractive/regenerative/**balanced** | `almanac::taxon_economy` |
 | Planet-coloured yields + regen tech gate | tick + zones |
 | Science lab seats by metabolism/clade | `science_lab` + `37` |

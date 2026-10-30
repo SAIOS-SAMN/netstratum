@@ -59,7 +59,7 @@ impl World {
     /// steward containment — the inbox form of the licensed arrival
     /// (the two-book licensing pair is recorded debt until NS-5
     /// arbitrates a true grantor). The crown law holds here: condition
-    /// 6 lands only on a complete base-7 stack; the solar leap is
+    /// 6 lands only on a complete base-7 stack; the stellar leap is
     /// never granted; one node per condition per orb.
     pub fn grant_tech_as(
         &mut self,
@@ -69,7 +69,7 @@ impl World {
     ) -> Result<(), ActionRefused> {
         self.permitted(actor, Scope::Build)?;
         if condition == 0 {
-            return Err(ActionRefused::SolarLeapNeverLicensed);
+            return Err(ActionRefused::StellarLeapNeverLicensed);
         }
         // Derived, not a hard-coded range: the licensable nodes are exactly
         // the crystallized tier and the crown — asked of the vocabulary
@@ -244,7 +244,7 @@ impl World {
                     }
                     _ => false,
                 };
-                cold && held.banked_amount(Resource::Joule) >= ratio(4, 1) * bill_year
+                cold && held.banked_amount(Resource::Ember) >= ratio(4, 1) * bill_year
             }
             _ => false,
         }

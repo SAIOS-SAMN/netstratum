@@ -5,16 +5,16 @@
 use super::*;
 
 impl World {
-    /// TECH-1a: has this world's people made the solar leap — do they
-    /// know the powers of their sun? Pre-solar is a lawful state
+    /// TECH-1a: has this world's people made the stellar leap — do they
+    /// know the powers of their star? Pre-stellar is a lawful state
     /// (12_UNION §5a); the reading gates licensing and the shield,
     /// never the world's own life.
-    pub fn knows_its_sun(&self) -> bool {
+    pub fn knows_its_star(&self) -> bool {
         self.techs.iter().any(|(_, condition, _, _)| *condition == 0)
     }
-    /// TERRA-1: is the BASE-7 stack complete — the solar leap plus
+    /// WORLDSHAPE-1: is the BASE-7 stack complete — the stellar leap plus
     /// all five crystallized conditions? Six earned nodes; the gifted
-    /// seventh (terraforming) completes base-7. Derived, never stored.
+    /// seventh (worldshaping) completes base-7. Derived, never stored.
     pub fn base_seven_complete(&self) -> bool {
         (0u8..=5).all(|condition| {
             self.techs.iter().any(|(_, held, _, _)| *held == condition)
@@ -416,7 +416,7 @@ impl World {
         }
         // ONT-2: the star is read before the vein is borrowed (proven Some
         // once a vein is found: prospecting requires it, and nothing
-        // uncommissions a sun). Regenerators no longer enter here — recovery
+        // uncommissions a star). Regenerators no longer enter here — recovery
         // is no longer an in-assay recurrence term; it derives separately
         // (ONT-3: orbital forcing / topological cycle injection).
         let star = self.star;
@@ -506,7 +506,7 @@ impl World {
     /// this derelict world's chronicle as its own substrate (07 §3).
     /// The refusal is computed pure (a living line refuses, nothing
     /// moves); on the deed the living tree drops to the world's kernel
-    /// (condition 0 — the sun is known to the WORLD, not to the line)
+    /// (condition 0 — the star is known to the WORLD, not to the line)
     /// and every other node leaves the tree while standing in the
     /// chronicle forever. The successor's conditions then evaluate
     /// over the whole inherited chronicle, and its node ids seed from

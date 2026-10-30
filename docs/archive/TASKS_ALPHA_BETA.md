@@ -185,7 +185,7 @@ Phased:
   layer, symbolic-π extension); `35_ORBIT_DYNAMO_AND_ESTATE.md` Q-O1/
   Q-O2 (ψ precession, hull/route as Holding 6–7); species-specific
   mechanics named in `06_CIVILIZATIONS.md` (Glasskeeper escrow,
-  Coherent proving-node role, Marrow terraforming) that are flavor
+  Coherent proving-node role, Marrow worldshaping) that are flavor
   text today with no mechanical hook.
 
 ## 6. The society layer — new design scope (2026-08-13)

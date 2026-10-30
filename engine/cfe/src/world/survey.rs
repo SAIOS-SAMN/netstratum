@@ -1,5 +1,5 @@
 //! Survey and terrain — scanning, charting, prospecting,
-//! terraforming, deposits.
+//! worldshaping, deposits.
 
 use super::*;
 use crate::literature::{work_of, WORKS};
@@ -8,7 +8,7 @@ use crate::literature::{work_of, WORKS};
 /// base-11*). Eleven nodes, in two tiers, and `7` is not one of them:
 ///
 /// ```text
-///     0        the solar leap
+///     0        the stellar leap
 ///     1..=5    the five crystallized conditions
 ///     6        the gifted crown — completes the BASE
 ///     7        NOT A SKY NODE — the re-emergence lesson (PRACTICE-1),
@@ -46,7 +46,7 @@ use crate::literature::{work_of, WORKS};
 /// what is there instead of restating how much of it there was.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum NodeKind {
-    /// Condition 0 — the solar leap. One, because a world has one star.
+    /// Condition 0 — the stellar leap. One, because a world has one star.
     Leap,
     /// The crystallized tier — every condition carrying a tech node.
     Crystallized,
@@ -78,7 +78,7 @@ pub fn node_kind(condition: u8) -> NodeKind {
         // node.
         Some("re-emergence") => NodeKind::Lesson,
         // The gifted crown completes the base.
-        Some("terraforming") => NodeKind::Crown,
+        Some("worldshaping") => NodeKind::Crown,
         Some(_) => NodeKind::Crystallized,
         None => {
             // Past the named vocabulary lie the uplift nodes, one per
@@ -123,7 +123,7 @@ pub fn count_of(kind: NodeKind) -> u8 {
             NodeKind::Leap => *c == 0,
             NodeKind::Crystallized => crate::dop::tech_node_of(*c).is_some(),
             NodeKind::Crown => {
-                crate::dop::condition_concept(*c) == Some("terraforming")
+                crate::dop::condition_concept(*c) == Some("worldshaping")
             }
             NodeKind::Lesson => {
                 crate::dop::condition_concept(*c) == Some("re-emergence")
@@ -167,26 +167,26 @@ pub fn first_work() -> u8 {
 pub const RE_EMERGENCE: u8 = 7;
 
 impl World {
-    /// TERRA-1: does this world hold the gifted terraforming node?
-    pub fn can_terraform(&self) -> bool {
+    /// WORLDSHAPE-1: does this world hold the gifted worldshaping node?
+    pub fn can_worldshape(&self) -> bool {
         self.techs.iter().any(|(_, condition, _, _)| *condition == 6)
     }
-    /// TERRA-1 — terraform: move a sited planet between substrate
+    /// WORLDSHAPE-1 — worldshape: move a sited planet between substrate
     /// bands by re-seating its albedo and orbit — the highest
     /// technology a civilization can hold, and only ever gifted
     /// (licensed down from tier 0 once the base-7 stack stands).
     /// Receipted as a fresh PlanetSited — replay takes the last
     /// seat; the orbit that "does not move" moves only under the
     /// crown tech.
-    pub fn terraform(
+    pub fn worldshape(
         &mut self,
         orb: u64,
         albedo: crate::dop::Unit,
         orbit_r: crate::dop::Positive,
     ) -> Result<(), ActionRefused> {
         use crate::dop::ThermalSite;
-        if !self.can_terraform() {
-            return Err(ActionRefused::TerraformUnearned);
+        if !self.can_worldshape() {
+            return Err(ActionRefused::WorldshapeUnearned);
         }
         if self.star.is_none() {
             return Err(ActionRefused::NoStarCommissioned);
@@ -195,7 +195,7 @@ impl World {
         // ranges, so nothing is left to re-check here.
         let held = peel(&mut self.orbs, orb).ok_or(ActionRefused::NoSuchOrb { orb })?;
         if held.thermal.is_none() {
-            // A first siting is the solar leap's door, not terraform's.
+            // A first siting is the stellar leap's door, not worldshape's.
             return Err(ActionRefused::NoStarCommissioned);
         }
         held.thermal = Some(ThermalSite {
@@ -337,7 +337,7 @@ impl World {
                         .any(|(o, c, _, _)| *o == orb && *c == condition),
                 };
                 let (progress, threshold) = match condition {
-                    0 => (u64::from(self.knows_its_sun()), 1),
+                    0 => (u64::from(self.knows_its_star()), 1),
                     1 => {
                         let open = sheet
                             .famine_open

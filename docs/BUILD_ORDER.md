@@ -241,20 +241,20 @@ N5/N6). Details and sequencing in 04 §6.
 
 - **THERMAL-1 landed** (2026-07-27): the equilibrium baseline drives the world —
   with the syntropic encasement (05 §1.2, the operator's expansion ruling:
-  the linear entropic-only design refused). The sun commissions
+  the linear entropic-only design refused). The star commissions
   (StarCommissioned, tag 24; NS-6 §7 StarClass codes fix L); planets site
   their orbits (PlanetSited, tag 25: albedo + orbit r); the tick runs the
   two-armed heat law in exact rationals: stellar load `T_eq⁴/K` + factory
-  heat − radiator, encase first (shells mint joules — Resource 5, zone
+  heat − radiator, encase first (shells mint embers — Resource 5, zone
   kind 5 — the 01 §6.1 commodity supply law made literal), only the
   overflow vents (yields degrade 1/(1+overflow); OverheatStruck/Cleared,
-  tags 22–23, the famine-strike shape); accrued joules leak 1/8 outside
+  tags 22–23, the famine-strike shape); accrued embers leak 1/8 outside
   the cryo vault (T⁴ ≤ 100⁴ lossless — the Frost banks what the Furnace
-  mints). Opt-in by construction: no sun ⇒ the pre-thermal engine,
+  mints). Opt-in by construction: no star ⇒ the pre-thermal engine,
   byte-identical. CLI: `star <class>` · `site <albedo> <r>` · `thermal` ·
   `zone … enc`. Evidence: clippy zero; **111/111 workspace witnesses
-  green** (6 thermal: dormant-without-sun; mesic Sol runs clean at exact
-  5/4 iron; the furnace mints 15/8 joules/tick with overflow 1/2 venting
+  green** (6 thermal: dormant-without-star; mesic yellow star runs clean at exact
+  5/4 iron; the furnace mints 15/8 embers/tick with overflow 1/2 venting
   at exactly 2/3 efficiency, strike/clear chronicled once each; the vault
   boundary flips at exactly 100⁴; typed refusals; replay matches with
   star+site+overheat and the orb round-trips byte-exact with tag 26).
@@ -262,25 +262,25 @@ N5/N6). Details and sequencing in 04 §6.
   founding colony cannot afford (a measured balance fact); thermal trade
   routes and entropy rights await the economy landings.
 
-- **VENT-1 + ECON-J + SINK-1 landed** (2026-07-27): the two-sided thermal
+- **VENT-1 + ECON-E + SINK-1 landed** (2026-07-27): the two-sided thermal
   balance sheet. VENT-1: vented overflow accumulates as workspace and seals
   by one `VentSettled` receipt at collect (tag 27) into the per-orb
   cumulative `entropy_vented` ledger (orb entry tag 28); conservation
-  measured exact (banked + leaked + vented = total excess). ECON-J: sited
-  sub-mesic orbs burn joules per active zone for heating; unpaid ⇒ joule
+  measured exact (banked + leaked + vented = total excess). ECON-E: sited
+  sub-mesic orbs burn embers per active zone for heating; unpaid ⇒ ember
   famine ⇒ freeze-lock (no flows at all); relief requires the one-tick
   heating bill covered. SINK-1: bankable sink (Resource 6) captured from
   vault-band headroom by cryo-lattice arrays (zone kind 6) — the
   infrastructure gate; the research and throttle-α gates deferred to the
   tech-tree landing (05 §1.4, recorded). Q2's receipted demurrage landed:
-  un-vaulted banked joules/sink decay 1/32 per elapsed tick, settled
+  un-vaulted banked embers/sink decay 1/32 per elapsed tick, settled
   openly at touch (`DemurrageSettled`, tag 29, anchored on `last_touch`);
   the vault charges nothing. Observer uplink: `state.json` carries
   star_class, entropy_vented, and the derived (never stored) syntropy
   ratio. Evidence: clippy zero; **116/116 workspace witnesses green**
   (5 new: the books balance exactly at 15/4 + 1/4 + 1 = 5; the cold orb
   freeze-locks; the vault captures 19999/10000 sink and pays no
-  demurrage; warm banked joules decay exactly 15/64 over 4 ticks by
+  demurrage; warm banked embers decay exactly 15/64 over 4 ticks by
   receipt; tags 27/29 byte-exact; replay matches with the dual ledger).
 
 - **JOURNAL-1 landed** (2026-07-27, coder-node worktree, merged by
@@ -291,7 +291,7 @@ N5/N6). Details and sequencing in 04 §6.
   half-open and closed under the clock law; boundary state grounds through
   prefix replay of the real chain; flavor seeds from the year's last
   receipt digest (Charter §9); all quantities exact `p/q`. Full 08 §2
-  mapping (joule stance vs the heating bill, famine/freeze-lock red alerts,
+  mapping (ember stance vs the heating bill, famine/freeze-lock red alerts,
   vent delta, sink offered to Furnace traders, exact growth, expansion
   notes, derived trade requests). Surfaces: `journal.jsonl` per world
   (append-only, idempotent, byte-identical regeneration) + the static
@@ -373,30 +373,30 @@ N5/N6). Details and sequencing in 04 §6.
   the banner → the paid window lapsed nothing → replay matches.
 - **BOT-THERM landed** (2026-07-27, coder-node worktree): NPC thermal
   adoption — the autarkies feel the star. Thermal genesis: every bot
-  world founds under a real sun — `BotWorld::genesis` commissions the
+  world founds under a real star — `BotWorld::genesis` commissions the
   star and sites the planet through the landed THERMAL-1 engine (no
   engine code touched). Specs carry optional `star`/`albedo`/`orbit`
-  fields (bots.json spellings "g", "m", "red-giant", …); absent fields
+  fields (bots.json spellings "yellow", "red", "red-giant", …); absent fields
   derive from the registry axes (mineral→Furnace seat, biotic→mesic
   seat) through the chronicle beacon seeded by the world's own genesis
   receipt digest (Charter §9 — no wall clock, no ambient entropy; two
   foundings are byte-identical, witnessed). Recorded ruling: a Frost
   seat is never derived — settling the vault is a deliberate act; the
-  seeded default file makes one: Frostwright (wood frog, new founding
-  bot) on an M sun at unit orbit (the cryogenic vault), Slagborn pinned
-  to a Furnace seat (G sun, albedo 1/2, half orbit — stellar load 2),
+  seeded default file makes one: Frostwright (freeze-tolerant, new founding
+  bot) on a red star at unit orbit (the cryogenic vault), Slagborn pinned
+  to a Furnace seat (yellow star, albedo 1/2, half orbit — stellar load 2),
   the three mesic seats left underived-field so the derived path runs
   in every era. Thermal temperament in the loop (existing laws held:
   one build per beat, through the contained actor, never in famine):
   Furnace bots answer a heat ledger past their shell throughput with
-  an encasement shell first — the joules mint — under two priority
+  an encasement shell first — the embers mint — under two priority
   rules earned red (below): shells come from surplus (the colony
   hoards until shell + next extractor are both funded), and industry
   outranks new settlement (when only the biomass line blocks an
   unlocked smelter, the rations are held for the forge). Frost bots
   raise their sink charter (one cryo-lattice array on the founding
-  iron), then hold every further build against the joule runway
-  (`joule_runway_allows`: banked joules ≥ heating_per_zone × (zones+1),
+  iron), then hold every further build against the ember runway
+  (`ember_runway_allows`: banked embers ≥ heating_per_zone × (zones+1),
   exact, boundary-inclusive) — famine avoidance honestly allowed to
   fail: Frostwright freeze-locks in the default era and the wall calls
   it red, legitimate drama, not a bug. Mesic bots' temperament is
@@ -414,7 +414,7 @@ N5/N6). Details and sequencing in 04 §6.
   year reads "red alert — freeze-lock", heating bill 15 exact, 199/100
   S_cool offered to Furnace traders under the Coherent register; the
   Furnace year reads Emberkin, 11/4 vented ("the shells want
-  widening"), an exact-rational joule bank.
+  widening"), an exact-rational ember bank.
   Phase 2 (trade execution against the wants the wall now shows)
   stays boarded, not landed. bots.json compat: pre-thermal files load
   unchanged (absent fields = derived seats); an unlawful pinned siting
@@ -422,10 +422,10 @@ N5/N6). Details and sequencing in 04 §6.
   Evidence: clippy zero; **134/134 workspace witnesses green** (129
   baseline + 5 new pins, red-first recorded): thermal genesis
   deterministic on both derived and pinned paths; a default era mints
-  hot and banks cold with state.json carrying star_class 7; the joule
+  hot and banks cold with state.json carrying star_class 7; the ember
   runway measurably defers the Frost (1 zone vs the mesic control's
   city) and flips at exactly 1/2 vs 49/100; a thermal year reaches the
-  wall carrying joule-bank/heating-bill/FREEZE-LOCK/S_cool and the
+  wall carrying ember-bank/heating-bill/FREEZE-LOCK/S_cool and the
   Emberkin/Coherent registers; the old bots.json shape still loads and
   derives.
 
@@ -635,7 +635,7 @@ The facet machinery (grant depths, permissions, expiry) stays ahead at N5
 | # | Landing | Contains | Proven by |
 |---|---|---|---|
 | **MARKET-1 — landed 2026-07-30** | The exchange rate | tags 49–50 wired: offers as resting receipted intents (no escrow — affordability judges at the fill; the price is the ratio, guardrail 6); `clear_trade` fills at the resting offer's exact price (price-time priority, ties by id), moves as two aperture pairs (deal, deal+1 — shield-checked, conservation-exact both directions), closes both intents; CLI `offer …` / `trade …` verbs; both books replay | witnessed: the 3-iron fill at the resting 1/2 price exactly (the late bidder keeps its surplus); conservation across both resources and both worlds; the unmatched offer rests and replays; NoCrossing moves nothing; the shield guards the fill |
-| **OFFER-1a — landed 2026-07-30 (first slice)** | The automatons trade | `trade_intent` (pure, regime-read): a joule-starving Frost with banked sink offers S_cool for fuel; a Furnace with surplus (> 4 J, placeholder) offers fuel for S_cool — halves of stock, never the whole (guardrail 1's spirit); v1 price 1:1 (05 §1.4 equilibrium pricing is the open design); `market_step` posts one intent per world (offer id = chronicle length, deterministic) and clears the first crossing per beat; wired into the conductor's heartbeat with the narrator line | **OFFER-1b witnessed 2026-07-30**: the survive-the-freeze arc whole — a shelled Furnace banks surplus and forms its intent; an arrayed Frost freeze-locks in joule famine with banked sink and forms its own; one market beat clears the crossing, the famine relieves through the fill, the thawed world flows again, both books carry OfferCleared, and replay reproduces the rescue from receipts alone. Still open: 05 §1.4 equilibrium pricing (the design doc is unwritten — the 1:1 parity stays a named placeholder until the operator rules the spec) |
+| **OFFER-1a — landed 2026-07-30 (first slice)** | The automatons trade | `trade_intent` (pure, regime-read): an ember-starving Frost with banked sink offers S_cool for fuel; a Furnace with surplus (> 4 embers, placeholder) offers fuel for S_cool — halves of stock, never the whole (guardrail 1's spirit); v1 price 1:1 (05 §1.4 equilibrium pricing is the open design); `market_step` posts one intent per world (offer id = chronicle length, deterministic) and clears the first crossing per beat; wired into the conductor's heartbeat with the narrator line | **OFFER-1b witnessed 2026-07-30**: the survive-the-freeze arc whole — a shelled Furnace banks surplus and forms its intent; an arrayed Frost freeze-locks in ember famine with banked sink and forms its own; one market beat clears the crossing, the famine relieves through the fill, the thawed world flows again, both books carry OfferCleared, and replay reproduces the rescue from receipts alone. Still open: 05 §1.4 equilibrium pricing (the design doc is unwritten — the 1:1 parity stays a named placeholder until the operator rules the spec) |
 | **BOARD-1 — landed 2026-07-30** | The trade board | the resting offers export to the state uplink as data fields (never prose); the observer gains the `market` view (standing intents per world + crossings-cleared count by event kind) and the observatory gains the trade board panel; the render mints no physics, prices stay ratios. Deferred, recorded: the wall.html journal trade lines (journal voice work) | verified live: a player's resting offer and six autonomous clears render from state alone |
 
 Dependency: the carrier gate is open (APERTURE-1 above). MARKET-1 needs the
@@ -686,7 +686,7 @@ played end to end through the CLI alone: found two worlds → `council`
 seals → `aperture` crosses (both chronicles synced atomically — a
 two-legged deed is never left half-saved) → `license 1..5` builds the
 receiver's stack → `license 6` gifts the crown → `resume` the receiver
-→ `tech` shows seven held → `terraform` moves the orbit across bands.
+→ `tech` shows seven held → `worldshape` moves the orbit across bands.
 New verbs: `elevate <delta>` · `age <class>` · `council …` ·
 `aperture … deal <n>` · `license … via <council> deal <n>`. Cross-world
 verbs reach CLI-saved worlds (the tlv resume carrier); polity worlds
@@ -818,16 +818,16 @@ market board's; union tags allocate from 52 at each landing.
 |---|---|---|---|
 | **SUBSTRATE-1** | C | **Landed 2026-07-29** | the no-anthropic-gate axis growth (12_UNION §5a): metabolism gains `plasmic` (sites Furnace — the stellar environs), perception gains `umbral` (occlusion-basis, the syzygial lines); append-only (the tag-registry discipline on the axes — never removed, never renamed); no new event tags. Evidence: the vocabulary witness registers a plasmic/umbral line, round-trips whole, and still refuses what was never added |
 | **LINEAGE-1** | C | **Landed 2026-07-29** | `resolve_head` walks the lineage pointer chain to its root — headless lawful (a rootless line resolves to itself), a dangling pointer resolves to the deepest recorded predecessor, a corrupt cycle stops deterministically; `lineage_domain(metabolism, band)` derives the progenitor domain a line elevates toward (thermal/lithic/cryo/mesic/plasmic), never stored, never chosen — no line answers to a planner of an alien physiology. No new event tags. Evidence: the chain/headless/dangling/cycle/domain witness green |
-| **AEON-1a** | B | **Landed 2026-07-29** | the manifold core: tags 42–46 byte-exact; the gauge key G on every world (exact rational wrapped [0,1), zero at genesis, moved only by receipt — the wrap is receipted, never re-derived); divergence/confluence as key changes (peer cleave named; interference midpoint caller-computed); the star moves in its region (`age_star` — a reddening G sun shifts every orbit's T_eq⁴ a thousandfold, replayed); the fold receipt (`seal_fold` — era sealed, base G advanced, nothing destroyed). Evidence: 5 witnesses green |
+| **AEON-1a** | B | **Landed 2026-07-29** | the manifold core: tags 42–46 byte-exact; the gauge key G on every world (exact rational wrapped [0,1), zero at genesis, moved only by receipt — the wrap is receipted, never re-derived); divergence/confluence as key changes (peer cleave named; interference midpoint caller-computed); the star moves in its region (`age_star` — a reddening yellow star shifts every orbit's T_eq⁴ a thousandfold, replayed); the fold receipt (`seal_fold` — era sealed, base G advanced, nothing destroyed). Evidence: 5 witnesses green |
 | AEON-1b | B | open | the conductor orchestration: aeon-voice alignment triggers (11 §1), divergence/confluence replacing charted speciation, resonance/clash friction on wrapped ΔG, four-C fold-eligibility, var rotation + G-sheet convergence seating (11 §5.2) |
-| **THRESHOLD-1** | A (after APERTURE-1) | **Landed 2026-07-29** | the shield: no aperture reaches a pre-solar world in either direction (typed `Shielded` naming the shielded side; a refusal moves nothing anywhere); the crossing: a world is a star system, so a world's first lawful aperture deed crosses both parties into the union — replay-derived (`has_crossed`), resume-carried; `is_shielded` the Watchers' reading. Deferred, recorded: the Watcher surface (shielded-worlds board) renders at BOARD-1 (reflection law); crossing-by-second-star-founding awaits the multi-star charter. Evidence: 2 witnesses (bidirectional refusal moves nothing; leap lifts shield → first aperture crosses both → replay+resume carry it) |
+| **THRESHOLD-1** | A (after APERTURE-1) | **Landed 2026-07-29** | the shield: no aperture reaches a pre-stellar world in either direction (typed `Shielded` naming the shielded side; a refusal moves nothing anywhere); the crossing: a world is a star system, so a world's first lawful aperture deed crosses both parties into the union — replay-derived (`has_crossed`), resume-carried; `is_shielded` the Watchers' reading. Deferred, recorded: the Watcher surface (shielded-worlds board) renders at BOARD-1 (reflection law); crossing-by-second-star-founding awaits the multi-star charter. Evidence: 2 witnesses (bidirectional refusal moves nothing; leap lifts shield → first aperture crosses both → replay+resume carry it) |
 | **BAND-1** | B | **Landed 2026-07-29** | the space-available law in the registry: the `station` office field (progenitor/watcher/observer/sovereign — append-only, an office never a rank; stationless is the common lawful state); seat widths as placeholder parameters (progenitor 8 per lineage domain — the band grows by domains as substrates elevate; watcher/observer 16; sovereign unbounded); the `NoSeatOpen` refusal names the room, its domain, and its width — a room filled, never a rank refused. Deferred, recorded: capacity as a live fiber reading (minted-plane count) awaits AEON-1b's plane surface. Evidence: the ninth-lithic-seat witness refuses exact while the mesic room seats; unknown office refuses typed; round-trip whole |
 | **ELEVATE-1** | confluence (AEON-1a + THRESHOLD-1) | **Landed 2026-07-29** | the three-gate gauge climb (12_UNION §6, discrete gauge morphodynamics): `elevate(delta)` executes as one `GaugeShifted` receipt, gated on three exact chronicle readings — S settlement (no famine/overheat, vent workspace sealed, demurrage current), T coherence (a loop closed within the year voice, 60 ticks — placeholder constant), G the crossing; refusal names every gate (`ElevationBarred` — each false escapable); the fiber never retreats (the delta is a `Positive` proven at the door — 29_CONSTRUCTION removed `BadClimb`). CLI `elevate` wired 2026-07-30 (the wiring audit); four-C trajectory reading (the fuller T gate) still open. Evidence: 3 witnesses green |
 | **COUNCIL-1** | D | **Landed 2026-07-29** | the multilateral covenant (tags 52–53): three or more orbs bound alike — same collateral, same quota, one boundary reckoning judging all together (the group over the individual; no early release or slash); a breacher's forfeit divides exactly among the faithful; total breach dissolves (collateral home, breaches still post — the books forget nothing); a council that starts unequal never starts (any member unable to stake refuses the whole seal). The two bypasses as derived readings, never flags: `is_imperial` (extraction past double reciprocity + breaches outweighing fulfilments — placeholder thresholds) and `council_breaches` (diplomacy failed = the slash receipts, counted). Single-world (the archipelago is society enough — the 09 precedent); cross-world councils compose at N5/N6. CLI `council` wired 2026-07-30 (the wiring audit); the delegation deed landed at PLANNER-1. Evidence: 4 witnesses green incl. exact forfeit split + pair conservation + replay |
-| **TECH-1a** | D | **Landed 2026-07-29** | the discovery closure (tag 39, byte-exact) + the kernel solar leap: a world's first thermal opt-in receipts that its people know their sun (once per world; the opt-in is the receipt; `knows_its_sun()` the gating read); pre-solar lawful. Evidence: 4 witnesses green (10 §3a) |
+| **TECH-1a** | D | **Landed 2026-07-29** | the discovery closure (tag 39, byte-exact) + the kernel stellar leap: a world's first thermal opt-in receipts that its people know their star (once per world; the opt-in is the receipt; `knows_its_star()` the gating read); pre-stellar lawful. Evidence: 4 witnesses green (10 §3a) |
 | **TECH-1b** | D | **Landed 2026-07-29** | the crystallized tree (10 §3b): all five conditions weighed exactly at every year boundary from receipts and committed state; seeded-synthesis node ids (BLAKE3 of the chronicle root — replay re-derives at the identical tick); all five modifiers live in the heat law (insulation ×3/4 heating, discipline ×5/4 encasement, deepening ×5/4 sink, doctrine ×5/4 radiator, long-stores ×1/2 demurrage threaded through every touch/affordability read); idempotent per orb per condition. Deferred, recorded: deepening/long-stores end-to-end arc witnesses; throttle-α policy action. Evidence: 3 witnesses green — held pressure crystallizes discipline beside the doctrine while the one-pair world is cured whole (measured survival); survived cold crystallizes insulation at 3/4 exact; replay+resume carry the tree |
 | **Naming (10 §2 law 4)** | D | **Landed 2026-07-30** | node names are never rung labels: `tech_node_name` composes concept (condition-fixed) × voice (node-hash-drawn) — two lines crystallizing the same condition speak of it differently; the hash is the identity, the name is the line's tongue |
-| **NOVEL-1** | D | **Landed 2026-07-30 (coder-03)** | the succession law (10 §3c, tag 59 `LineSucceeded`): a successor line inherits a chronicle, not a tree — the deed refuses pure while any orb stands unfamished (07 §3 triage, v1 cascade law: every orb famished); on the deed the living tree drops to the world's kernel (the sun is the world's fact, condition 0 stays) and every discovered node stands in the record forever; the successor's conditions evaluate over the whole inherited history and its node ids seed from roots containing that history + the deed — novel by construction, no new crystallizer code (the deposit sheet and the seeded synthesis already read this way). Deferred, recorded: registry/mirror-side line-identity handoff (the sigil-migration lane); conductor-driven succession for polity worlds; richer 07 §3 triage (interrupted vs collapsed) beyond the v1 law. Evidence: 4 witnesses green (a living line refuses pure and orphans nothing; predecessor node A stands while the successor mints B ≠ A from the inherited famine span — no new famine-years paid after the deed; a second succession mints a third novel node, three insulations standing, no root repeats; tag 59 round-trips byte-exact; replay matches and resume carries the boundary) — 198/198 workspace, clippy zero |
+| **NOVEL-1** | D | **Landed 2026-07-30 (coder-03)** | the succession law (10 §3c, tag 59 `LineSucceeded`): a successor line inherits a chronicle, not a tree — the deed refuses pure while any orb stands unfamished (07 §3 triage, v1 cascade law: every orb famished); on the deed the living tree drops to the world's kernel (the star is the world's fact, condition 0 stays) and every discovered node stands in the record forever; the successor's conditions evaluate over the whole inherited history and its node ids seed from roots containing that history + the deed — novel by construction, no new crystallizer code (the deposit sheet and the seeded synthesis already read this way). Deferred, recorded: registry/mirror-side line-identity handoff (the sigil-migration lane); conductor-driven succession for polity worlds; richer 07 §3 triage (interrupted vs collapsed) beyond the v1 law. Evidence: 4 witnesses green (a living line refuses pure and orphans nothing; predecessor node A stands while the successor mints B ≠ A from the inherited famine span — no new famine-years paid after the deed; a second succession mints a third novel node, three insulations standing, no root repeats; tag 59 round-trips byte-exact; replay matches and resume carries the boundary) — 198/198 workspace, clippy zero |
 | **Tier overlay (12_UNION §2a)** | — | **Landed 2026-07-30** | progenitors are tier 0, the board-makers — the conductor's operations named as their deeds (seed/expand/contract/overlay/deploy); tiers 1–3 below (architects · archivists · biosphere); the tier is a derived reading from station, rendered on the observer, never stored |
 | **CONSTEL-1** | D | **Landed 2026-07-30** | the constellation reading: `World::constellation(orb)` — per-condition held/progress/threshold derived from the crystallizer's own deposit sheet (never a second bookkeeping); the CLI `tech` card renders the base-7 sky (voice-names, exact tick progress, the crown's gate, the joint-venture prompt). Deferred, recorded: mirror-side export of the progress readings into `state.json` so the observer/web render the same card (mirror is coder-02/03's lane this cadence) |
 | WANT-1 | D | open (specced, 12_UNION §5b) | The want — famine speciated by entity: metabolic wants landed in shape (tag 5 strikes any store); cognitive wants specced (epistemological · resonance · novelty — receipts-derived, per-register voicing, candidate tags from 60) |
@@ -835,12 +835,12 @@ market board's; union tags allocate from 52 at each landing.
 | **WEB-1** | — | **Landed 2026-07-30 (v0)** | the observatory's window: `tools/webserve.py` (read-only file server — there is no API: the mirror's files are the protocol; one synthesized directory index; get only, writes refuse 405) + `tools/observatory.html` (text-first cyber-noir panels + the WebGL torus: wrapped point field, G as hue, additive crowd glow, drag-pan, wrapped-L1 hover). Floats exist only at the pixel (the render boundary, named in-file). Ahead: the push stream speaks NS-1 TLV over a socket (the house wire, never a third format); density heatfields as the board crowds |
 | **MERCHANT-1** | arbitrage (on ROUTE-1) | **Landed 2026-07-31 (core loop)** | The caravan: strictly additive v1 — the merchant bridges only pairs the iceberg has walled (pair_melt ≥ 1 direct), creating trade where none could exist, never front-running the open market. The triangle in one quote (B wants what A sells, pays in what A asks); profit test exact after both legs' melt; the merchant pays its stake, holds inventory when a second leg refuses (the risk is the trade); every leg is an ordinary clear_trade — melt, void share, all books receipted. pair_melt extracted as the one producer of the formula (clear_trade and every profit test read it). Layer-2 policy — SEAM-1 puts the trait boundary here; want-demand bids join post-kernel-Step-1. Witness: 23/16 profit exact on both books; no wall → no caravan |
 | **MARKET-2b** | conform (ruled: option b) | **Landed 2026-07-31** | The void-share receipt (tag 82): zero-sum stays universal — the melt is a first-class receipt on the receiving book, emitted by the same transition that computes the trade (one producer of the number; the judge only sums, never recomputes φ·D); sent = received + void share exactly; banks never move on it; losses receipted, never silent (the house precedent: vents, demurrage, friction). MERCHANT-1 can read melt directly off the receipts. Witness: 13/64 receipted on the 115/64 delivery — legs sum to 2 exactly |
-| **ROUTE-1** | lanes (on MARKET-2) | **Landed 2026-07-31** | the maintained lane: `charter_route` — two-legged (one deal id pairs the books), alloy 4 each side at charter, η ∈ [0,1) from the pair's best instrument grade ((1+g)/8 — built, never granted); clear_trade reads the best lane both books hold: melt × (1−η); `maintain_routes` draws 1/4 joule per lane at the year voice and an unpaid lane lapses by receipt (raw space returns; the pair dies with either leg). Conductor: trade wears the path (a cleared pair with no lane charters one when both can pay); CLI `charter <world> deal <n>`. Tags 79/80. Witness: the lane bends 1/4 → 1/8 exactly, lapse restores, both books replay |
+| **ROUTE-1** | lanes (on MARKET-2) | **Landed 2026-07-31** | the maintained lane: `charter_route` — two-legged (one deal id pairs the books), alloy 4 each side at charter, η ∈ [0,1) from the pair's best instrument grade ((1+g)/8 — built, never granted); clear_trade reads the best lane both books hold: melt × (1−η); `maintain_routes` draws 1/4 ember per lane at the year voice and an unpaid lane lapses by receipt (raw space returns; the pair dies with either leg). Conductor: trade wears the path (a cleared pair with no lane charters one when both can pay); CLI `charter <world> deal <n>`. Tags 79/80. Witness: the lane bends 1/4 → 1/8 exactly, lapse restores, both books replay |
 | **MARKET-2** | iceberg (converts 11 §2.1's trade side-fee) | **Landed 2026-07-31** | Samuelson iceberg transport: delivered = sent × (1 − φ·D), φ = 1/64, D = spatial L1 + wrapped key gap — the cargo itself melts (the void's share = sent − received, derivable from the aperture pair; the receipt speaks what landed); at φ·D ≥ 1 the pair is economically walled by decay physics (refused before movement, no rule needed). Natural price gradients: distant supply is smaller supply. clear_trade takes the transit distance (conductor reads spec positions; CLI reads the starchart; uncharted trades local). Sequence ahead (ruled): ROUTE-1 lane charters (maintenance-backed φ suppression) → MERCHANT-1 arbitrage function → VENUE-1 the bourse (CLOB depth) → FUTURE-1 council-backed beat-bound futures. Witness: the melt pin (whole at zero, 115/64 of 2 at gap 13/128, walled at 64) |
 | **MESH-1b #2** | consumer slice (mesh crate landed by coder-03) | **Landed 2026-07-30** | The pen: the receipted handoff wired into both writers. `cfe::vrp` names the hands (conductor = 1; seats derive from their name, `hand_of`); the chronicle funnel stamps every append with the held hand and cites a seal standing last (one point, ~20 deeds covered; the walk stays the only judge); the conductor's `pen_service` seals yields at the beat boundary from `yield <world> <seat>` control lines, pens the world out of beats/saves/market, and polls the carrier for the pen's return (re-resumes from the receipts, SEAL B); the CLI's `pen <world>` / `pen return <world>` verbs ask and yield, and the walk-checked `far_world` retired the founder-heuristic two-writer guard (pre-mesh conductor worlds refuse until their first seal, the refusal naming the door; far saves land in the world dir, not the colony's). NS-5 §7.5. Evidence: `pen_pins` — the full arc on one file, the walk green at every station |
-| **TERRA-1** | D | **Landed 2026-07-30** | terraforming as condition 6, the gifted crown: licenses only onto a complete base-7 stack (solar leap + five crystallized — `BaseSevenUnfinished` refuses); `World::terraform` re-seats a sited planet's albedo/orbit (fresh `PlanetSited`, replay takes the last seat, no new tags); CLI `terraform <A> <r>`; base-1/7/60 TUniversal calibration inscribed at 11 §1. Evidence: the crown witness — unearned orbit refuses, unfinished stack refuses, the gifted crown moves the world across bands, measured in T_eq⁴ |
+| **WORLDSHAPE-1** | D | **Landed 2026-07-30** | worldshaping as condition 6, the gifted crown: licenses only onto a complete base-7 stack (stellar leap + five crystallized — `BaseSevenUnfinished` refuses); `World::worldshape` re-seats a sited planet's albedo/orbit (fresh `PlanetSited`, replay takes the last seat, no new tags); CLI `worldshape <A> <r>`; base-1/7/60 TUniversal calibration inscribed at 11 §1. Evidence: the crown witness — unearned orbit refuses, unfinished stack refuses, the gifted crown moves the world across bands, measured in T_eq⁴ |
 | SCIENCE-1 | D | open (specced, 10 §3d) | speciated puzzle science: perception routes the solver (landed); metabolism routes relevance (a plasmic line carries no forge-of-iron); foreign capability by joint research venture — council + aperture + licensed leap composed |
-| **PLANNER-1** | confluence (COUNCIL-1 + TECH-1a) | **Landed 2026-07-29** | the licensed leap (tag 40): `license_tech` issues a technology into another world as a two-legged deal (TechLicensed out / TechDiscovered in — one node, seeded from deal+condition, derived identically on both sides); council-gated (an open council in the granting world — delegation settles inside diplomacy), shield-bounded, receiver must have crossed; **the solar leap is never licensed** (`SolarLeapNeverLicensed` — the young meet their sun themselves); idempotent per deal. The other five planner powers were already receipted deeds: create species (registry+genesis), create stars (`commission_star`), create planets (`chart`), gauge operations (`shift_gauge`), fiber extension (Mint). Deferred, recorded: authorship attribution (which progenitor issued — awaits cross-world identity at N5/N6); unknown-leap unlock mechanics (arrive-sealed) await TECH-1b. Evidence: 3 witnesses green |
+| **PLANNER-1** | confluence (COUNCIL-1 + TECH-1a) | **Landed 2026-07-29** | the licensed leap (tag 40): `license_tech` issues a technology into another world as a two-legged deal (TechLicensed out / TechDiscovered in — one node, seeded from deal+condition, derived identically on both sides); council-gated (an open council in the granting world — delegation settles inside diplomacy), shield-bounded, receiver must have crossed; **the stellar leap is never licensed** (`StellarLeapNeverLicensed` — the young meet their star themselves); idempotent per deal. The other five planner powers were already receipted deeds: create species (registry+genesis), create stars (`commission_star`), create planets (`chart`), gauge operations (`shift_gauge`), fiber extension (Mint). Deferred, recorded: authorship attribution (which progenitor issued — awaits cross-world identity at N5/N6); unknown-leap unlock mechanics (arrive-sealed) await TECH-1b. Evidence: 3 witnesses green |
 | GALAXY-1 | confluence (THRESHOLD-1 + AEON-1a + PLANNER-1) | **Landed whole 2026-07-30** — 1a (engine slice: tag 54 inscribed, deed + readings + card, 6 witnesses) + 1b (the year-voice observation sweep `observe_crossings` in conductor beat + run_era — creator resolves head-seat → domain founding head → conductor per the lineage law; the `t0 galaxies` verb reads the charted skies with derived membership; trigger witness green: crossing → creation → geometric idempotence → creator receipt) | one universe structurally (one torus, one card, one chart — aeons are G-sheets, never second universes); galaxies are lazy, never a static count — the founding galaxy is the whole charted torus today, and a new galaxy is created by the observation deed (`GalaxyObserved`, tag 54 reserved) when a crossing anchors past every charted reach (L1-wrapped); membership derived at the observer, never stored; the founding galaxy chartered lazily at the landing's first deed; span growth is Mint-class expansion, never contraction. Registry deltas: none — geography, not identity |
 
 | SURVEY-1 | wiring (N4 + P1 + conductor) | **Landed 2026-07-30** (operator directive — the role loop's top edge) | the Pathfinder directs the drills: a rung-5 colony pays the scan's crystal draw in its cycle (`survey_step`); single-orb worlds Charter the surveyed sector and open its first drill, multi-orb worlds place the next extractor on the scan's first resonant orb with room; unaffordable or starving, the survey idles lawfully (siting draws rule as before); every settled orb now collects each beat. Twin landing FUNCTION-1: the 12_UNION §4 function reading renders on the observer's civs board, derived never stored. Witness: the survey arc — earned crystal chain (heat-balanced), one draw → one charter → the drill on the surveyed sector → the spent lens idles → replay matches |
@@ -902,7 +902,7 @@ derived from the sigil. `civ new` registers and stops; there is nothing
 left for a file to hold and nothing left to drift.
 
 **Two truths cost a landed ruling before this.** `12_UNION` §2 seated
-the tardigrade line in the progenitor band; the seed file carried it,
+the hypobiotid line in the progenitor band; the seed file carried it,
 the built-in defaults did not, and a rebuilt `var` booted the defaults —
 so a board ran five lines, all T3, with the whole progenitor band absent
 from play. That is the failure the ruling exists to make unreachable.
@@ -922,7 +922,7 @@ content. That conflated two different things:
 The tell that the first cut was wrong: it kept Darlok — a *Master of
 Orion* race — while striking five neighbours on identical reasoning.
 And the six are not decoration, they are the class partition
-(`15_TAXON` §2): class 7 (apex-terrestrial) is seated by Sylvane and
+(`15_TAXON` §2): class 7 (apex-solitary) is seated by Sylvane and
 Forgeborn and by nobody else, so holding them out emptied a class, and
 clade 19 `draconic` — a landed operator ruling of 2026-08-01 — was
 orphaned by dropping the only line that wears it. All six are restored
@@ -1022,7 +1022,7 @@ See `35_ORBIT_DYNAMO_AND_ESTATE.md`, `ENDOWMENTS` §8.
 **Phase 5 design lock (2026-08-08):** `36_DEFENSE_AXIOMS.md` — defense as
 integrity of the entity (CEL/ATM/COG/CYB/INF/KIN) relative to metabolism,
 disposition, perception, clade; dual of ATM = **covert atmospheric
-tampering** (offensive terraform); espionage stack on veil/ward/instruments;
+tampering** (offensive worldshape); espionage stack on veil/ward/instruments;
 KIN escort remains first vertical. Board: P5.0–P5.26 on
 `archive/TASKS_TRADE_FLEET_DESK.md`.
 
@@ -1048,8 +1048,8 @@ MediumReinforced / TamperDetected; SCHEMA_V11; kernel **0.30.0**. See `36` §11.
 
 **P5-B + P5.19 dual-use:** tag **144** `PostureReoriented` — doctrine/perception/
 primary reorient in-game (1 STAMP); metabolism anatomy sealed at genesis;
-clade/perception colour tables; defend non-human voice. CovertTamper dual-use
-tax when terra held (2× crystal eighth); overt `terraform` clears pressure +
+clade/perception colour tables; defend non-bimaniform voice. CovertTamper dual-use
+tax when terra held (2× crystal eighth); overt `worldshape` clears pressure +
 unmasks. SCHEMA_V12; kernel **0.31.0**. CLI `posture set`.
 
 **KIN open-up design (`36` §12):** six compose-first expansions — metabolism
@@ -1099,7 +1099,7 @@ on external strand/isthmus/datum crates.
 | Science seated labs | pay unlock · dual ± · explosion · synth/clone/skin | tags **159–162** · `86ea4aa` |
 | Imperium clade words | Latin-sentience display; no Earth common animals | `37_IMPERIUM_TAXON.md` |
 | Taxon economy | extractive · regenerative · **balanced** + planet fit | `taxon_economy` · `75c35ca` |
-| Flatlander baseline | clade **2 bimaniform** (aliases human/flatlander) | always Balanced mode |
+| Flatlander baseline | clade **2 bimaniform** (alias flatlander) | always Balanced mode |
 | Class tiers | ceiling **13** (+6 balance archetypes) | corridor-nomad…mirror-form |
 | Office tiers | **T0–T15** (+6: herald…nexus) · seat width **+25** | `30_OFFICES` |
 | Open clade | **u16** · ceiling **345** = 20 + 25×13 | `fce10e0` · no u8 tax |

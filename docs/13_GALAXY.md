@@ -60,7 +60,7 @@ obeys (the universe gains dimensions as discoveries land, contract §9).
 - **Membership is derived, never stored** (the 12 §4 discipline): a world
   belongs to the galaxy whose center stands L1-nearest within reach.
   Frontier worlds outside every reach are intergalactic — lawful, exactly
-  as headless and pre-solar are lawful.
+  as headless and pre-stellar are lawful.
 - **The founding galaxy is chartered lazily too.** The landing's first
   observation deed encloses the seeded worlds retroactively (placeholder
   center (0, 0, 0), reach 16); until then it stays implicit, as today.

@@ -60,9 +60,11 @@ seat.
 **What was not struck, and the distinction is the same layer discipline
 that reverted the roster sweep.** `humans` as a civilization name, the
 `humanoid` clade, `human-readable`, `Human Capital` — all content, all
-untouched. A species in the roster is not a privileged seat, and
-renaming it would be the layer error, not the cure. What was struck is
-every place "human" named a seat or licensed an exception.
+untouched (the native-vocabulary ruling of 2026-10-30 has since retired
+`humans`, `humanoid` and `Human Capital` as Earth-centric content). A
+species in the roster is not a privileged seat, and renaming it would be
+the layer error, not the cure. What was struck is every place "human"
+named a seat or licensed an exception.
 
 **The standing trap.** A reading used as a target stops being a reading.
 Work reshapes itself into whatever the number counts, and the measure
@@ -389,7 +391,7 @@ grounds it was already in the tree, and it is the thermal law's own
 (`05 §1.2`, encase-first / vent-overflow):
 
 ```text
-    RETAINED   banked Joule + banked Sink   what encasement KEPT
+    RETAINED   banked Ember + banked Sink   what encasement KEPT
     SHED       entropy_vented (VENT-1)      what overflowed to the VOID
 ```
 
@@ -939,7 +941,7 @@ base-11*). An earlier draft of this section treated base-7 being full as
 a constraint to design around. It was a constraint to lift:
 
 ```text
-    0        the solar leap
+    0        the stellar leap
     1..=5    the five crystallized conditions
     6        the gifted crown — completes the BASE
     7        NOT A SKY NODE — PRACTICE-1's re-emergence lesson, which
@@ -1007,7 +1009,8 @@ that this manifold is *one commitment per step*, and `Commitment.parent`
 is the chain's backward reference. That is the governing layer; a work a
 civilization aspires to is content — the same distinction that kept the
 `humans` civilization, the `humanoid` clade and `Human Capital` from
-being renamed when "human" was struck as a seat (§1.0), and the same
+being renamed when "human" was struck as a seat (§1.0; the 2026-10-30
+native-vocabulary ruling retired them later, on other grounds), and the same
 verdict Q5 reached for `converged`. Two correct uses in two layers is
 not a defect; a third that conflated them would be.
 

@@ -179,7 +179,7 @@ pub mod jrn {
     pub const ALERT: u8 = 7;
     pub const HEADLINE: u8 = 8;
     pub const BODY: u8 = 9;
-    pub const BANKED_JOULES: u8 = 10;
+    pub const BANKED_EMBERS: u8 = 10;
     pub const HEATING_NEED: u8 = 11;
     pub const ENTROPY_VENTED: u8 = 12;
     pub const VENTED_YEAR: u8 = 13;

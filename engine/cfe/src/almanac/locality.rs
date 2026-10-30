@@ -22,14 +22,14 @@ use crate::thermal::StarClass;
 /// one system and absent from another.
 pub fn lines_of(class: StarClass) -> u8 {
     match class {
-        StarClass::O | StarClass::B => LINES,
-        StarClass::A | StarClass::F => 6,
-        StarClass::G => 5,
-        StarClass::K => 4,
-        StarClass::M => 3,
+        StarClass::Blue | StarClass::BlueWhite => LINES,
+        StarClass::White | StarClass::YellowWhite => 6,
+        StarClass::Yellow => 5,
+        StarClass::Orange => 4,
+        StarClass::Red => 3,
         // The remnants: a collapsed star is the deepest forge there is,
         // and a dwarf the shallowest.
-        StarClass::NeutronStar | StarClass::WolfRayet => LINES,
+        StarClass::NeutronStar | StarClass::WindStripped => LINES,
         StarClass::RedGiant | StarClass::WhiteDwarf => 5,
         StarClass::BrownDwarf => 2,
         StarClass::LuminalWhiteHole => LINES,
@@ -48,23 +48,23 @@ pub fn local_to(element: &[u8; 32], class: StarClass) -> bool {
 /// reach says what the people may *work*.
 ///
 /// - **No star** → 0 (prospect refuses `NoStarCommissioned` first).
-/// - **Star known, no grown tech** (solar leap alone is the sun, not
+/// - **Star known, no grown tech** (stellar leap alone is the star, not
 ///   an age) → **2** (bronze surface lines 1..=2).
 /// - Each crystallized base condition **1..=5** raises the ceiling by
 ///   one. Never exceeds the star's forge depth or `LINES`.
 ///
 /// ```text
 /// grown conditions (1..=5)   civ_reach (before star cap)
-/// 0  (bronze under a sun)    2
+/// 0  (bronze under a star)    2
 /// 1                          3
 /// …
 /// 5                          7  (= LINES)
 /// ```
 ///
-/// Condition 0 (solar leap, often granted at commission) does **not**
-/// deepen the mine — knowing the sun is prerequisite, not industry.
+/// Condition 0 (stellar leap, often granted at commission) does **not**
+/// deepen the mine — knowing the star is prerequisite, not industry.
 pub fn civ_reach(held_conditions: impl IntoIterator<Item = u8>, star: Option<StarClass>) -> u8 {
-    // Growth ladder: insulation…stores (1..=5). Solar (0) is not depth.
+    // Growth ladder: insulation…stores (1..=5). Stellar (0) is not depth.
     let mut growth = [false; 5];
     for c in held_conditions {
         if (1..=5).contains(&c) {

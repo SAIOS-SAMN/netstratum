@@ -1,6 +1,6 @@
 //! docs/82, step 1: what each world offers life. Per world (an orb of the
 //! pulse universe): its heat, size, gravity, atmosphere and pressure, and
-//! for each medium it holds (chemical, geologic, plasmic, informational)
+//! for each medium it holds (chemical, lithic, plasmic, informational)
 //! how well that medium carries a pattern, in halvings of its copy error.
 //! Nothing is assumed about life's form (docs/78, design law 10).
 //!
@@ -40,10 +40,12 @@ use cfe::ratio::{ratio, Ratio};
 use num_traits::Zero;
 
 /// The hydrogen anchor: an atom of tightness 1 holds to 157,800 K (its
-/// grip: what a bond holds against heat, for phase and plasma).
+/// grip: what a bond holds against heat, for phase and plasma). An import
+/// in kelvin, owed its derivation (docs/108 O1).
 pub const HYDROGEN_K: i64 = 157_800;
 /// A contact, what a copy fails on (docs/82 step 2): far weaker than a
-/// bond's grip. Anchored on water's copy error, about 1e-4 at 300 K
+/// bond's grip. Anchored on water's copy error, about 1e-4 at 300 K (an import,
+/// docs/108 O1)
 /// (Xylarium's life.rs): a contact of tightness 1 holds about 2,760 K.
 pub const CONTACT_K: i64 = 2_760;
 /// The doublings from a bare lineage to a mind's blueprint, `log2(B / b)`:
@@ -72,7 +74,7 @@ pub struct World {
     pub gases: Vec<(u32, Ratio)>,
     /// x before compression, per medium, if the world holds it.
     pub chemical: Option<Ratio>,
-    pub geologic: Option<Ratio>,
+    pub lithic: Option<Ratio>,
     pub plasmic: Option<Ratio>,
     pub informational: Option<Ratio>,
     /// The planet's clock against its star's (the coupling), and its
@@ -163,10 +165,10 @@ pub fn read(path: Vec<u64>, matter: &Manifest, heat: &Ratio, coupling: &Ratio, s
             consider(ga.clone().min(gb.clone()), a.tightness.clone().min(b.tightness.clone()));
         }
     }
-    // Geologic: the most abundant network former (two or more bonds) the
+    // Lithic: the most abundant network former (two or more bonds) the
     // heat does not melt to plasma.
     // A lattice holds a pattern by as many contacts as the former bonds.
-    let geologic = atoms.iter().filter(|(a, _)| !plasma(a) && a.unpaired >= 2).max_by(|x, y| x.1.cmp(&y.1)).map(|(a, _)| a.tightness.clone() * ratio(CONTACT_K * i64::from(a.unpaired), 1) / heat.clone());
+    let lithic = atoms.iter().filter(|(a, _)| !plasma(a) && a.unpaired >= 2).max_by(|x, y| x.1.cmp(&y.1)).map(|(a, _)| a.tightness.clone() * ratio(CONTACT_K * i64::from(a.unpaired), 1) / heat.clone());
     // Informational: the coupling's coherence over its slip, `rate / (1 − rate)`.
     let informational = (*coupling < ratio(1, 1)).then(|| coupling.clone() / (ratio(1, 1) - coupling.clone()));
     // Plasmic: the field the coupling sets holding the ionised share.
@@ -176,7 +178,7 @@ pub fn read(path: Vec<u64>, matter: &Manifest, heat: &Ratio, coupling: &Ratio, s
         if all.is_zero() { ratio(0, 1) } else { mass(&ionised) / all }
     };
     let plasmic = informational.clone().filter(|_| plasma_share > ratio(0, 1)).map(|x| x * plasma_share);
-    Some(World { path, heat, burn: star_burn.clone(), size, gravity, core, hold, atmosphere: ratio(0, 1), pressure: ratio(0, 1), gases, chemical: chemical.map(|(_, x)| x), geologic, plasmic, informational, coupling: coupling.clone(), delay, belts: ratio(0, 1), window: u64::MAX, days: None })
+    Some(World { path, heat, burn: star_burn.clone(), size, gravity, core, hold, atmosphere: ratio(0, 1), pressure: ratio(0, 1), gases, chemical: chemical.map(|(_, x)| x), lithic, plasmic, informational, coupling: coupling.clone(), delay, belts: ratio(0, 1), window: u64::MAX, days: None })
 }
 
 /// `e^(−λ)` bounded above by whole halvings, `2^(−⌊λ · 1442/1000⌋)` (so the
@@ -418,11 +420,11 @@ pub fn reference_pressure(worlds: &[World]) -> Ratio {
 }
 
 /// A people's medium, from its metabolism in the registry's vocabulary (the
-/// waking's map read back): mineral minds are geologic, biotic chemical,
+/// waking's map read back): mineral minds are lithic, biotic chemical,
 /// plasmic plasmic.
 pub fn medium_of(metabolism: &str) -> Option<&'static str> {
     match metabolism {
-        "mineral" => Some("geologic"),
+        "mineral" => Some("lithic"),
         "biotic" => Some("chemical"),
         "plasmic" => Some("plasmic"),
         _ => None,
@@ -439,7 +441,7 @@ pub fn home_heat(u: &Universe) -> Option<Ratio> {
 pub fn medium_halvings(w: &World, compression: &Ratio, medium: &str) -> Option<Ratio> {
     let x = match medium {
         "chemical" => w.chemical.as_ref(),
-        "geologic" => w.geologic.as_ref(),
+        "lithic" => w.lithic.as_ref(),
         "plasmic" => w.plasmic.as_ref(),
         _ => None,
     }?;
@@ -486,7 +488,7 @@ pub fn readings(u: &Universe, _seed: &[u8; 32]) -> std::collections::BTreeMap<Ve
         let torsion = twist_of(u, &w.path);
         let turn = period.clone().unwrap_or_else(|| ratio(0, 1));
         let climb = period.filter(|_| matter.as_ref().is_some_and(viable)).and_then(|p| {
-            [("chemical", &w.chemical), ("geologic", &w.geologic), ("plasmic", &w.plasmic)]
+            [("chemical", &w.chemical), ("lithic", &w.lithic), ("plasmic", &w.plasmic)]
                 .into_iter()
                 .filter_map(|(m, x)| x.as_ref().and_then(|x| climb_bells(&p, &home.year_bells, w.days.as_ref()?, x, &compression)).map(|b| (b, m)))
                 .min_by(|a, b| a.0.cmp(&b.0))
@@ -644,12 +646,12 @@ mod tests {
 
     #[test]
     fn the_land_takes_up_the_flux_its_medium_carries() {
-        let mut w = World { path: vec![], heat: ratio(2, 1), burn: ratio(1, 1), size: ratio(1, 1), gravity: ratio(1, 1), core: ratio(0, 1), hold: ratio(1, 1), atmosphere: ratio(0, 1), pressure: ratio(0, 1), gases: vec![], chemical: Some(ratio(2, 1)), geologic: Some(ratio(1, 2)), plasmic: None, informational: None, coupling: ratio(0, 1), delay: 0, belts: ratio(0, 1), window: 0, days: None };
+        let mut w = World { path: vec![], heat: ratio(2, 1), burn: ratio(1, 1), size: ratio(1, 1), gravity: ratio(1, 1), core: ratio(0, 1), hold: ratio(1, 1), atmosphere: ratio(0, 1), pressure: ratio(0, 1), gases: vec![], chemical: Some(ratio(2, 1)), lithic: Some(ratio(1, 2)), plasmic: None, informational: None, coupling: ratio(0, 1), delay: 0, belts: ratio(0, 1), window: 0, days: None };
         // x = 2 at no compression: h = 2·1442/1000 = 2.884, two whole
         // halvings, 3/4 carried; twice the home heat: 500·2·3/4 = 750.
         assert_eq!(wild(&w, &ratio(0, 1), "chemical", &ratio(1, 1)), ratio(750, 1));
         // Under a halving the medium carries nothing; an absent medium too.
-        assert_eq!(wild(&w, &ratio(0, 1), "geologic", &ratio(1, 1)), ratio(0, 1));
+        assert_eq!(wild(&w, &ratio(0, 1), "lithic", &ratio(1, 1)), ratio(0, 1));
         assert_eq!(wild(&w, &ratio(0, 1), "plasmic", &ratio(1, 1)), ratio(0, 1));
         // Hotter flux, a weaker medium: the uptake is the product, no band.
         w.heat = ratio(4, 1);
@@ -674,7 +676,7 @@ mod tests {
         assert_eq!(wake_bell(&w, 1, 60), Some(240 + 60 * 60));
         assert_eq!(recoherences_needed(&ratio(1, 2), &ratio(0, 1)), None, "under a halving, nothing carries");
         assert!(w.chemical.is_some(), "1 + 6 close and hold at 1,000 K");
-        assert!(w.geologic.is_some());
+        assert!(w.lithic.is_some());
         assert_eq!(w.informational, Some(ratio(59, 1)));
         assert_eq!(w.gases, vec![(2, ratio(10, 1))], "hydrogen is the volatile");
         assert!(w.core > ratio(0, 1), "Z = 6 forms the core");

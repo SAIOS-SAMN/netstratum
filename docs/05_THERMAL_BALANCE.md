@@ -40,7 +40,7 @@ radiation balance:
 
   • Cryo-Brittle Metals       • 100% Efficiency          • Radiator Overload
   • High Heating Cost         • Minimal Life Support     • Shield Degradation
-  • Atmosphere Freezes        • Optimal Human Capital    • Structural Distortion
+  • Atmosphere Freezes        • Optimal Population       • Structural Distortion
 ```
 
 ### 1.1 The exact-rational ruling (RFA semantics — binding on the CFE)
@@ -54,10 +54,10 @@ lawful formulation therefore never takes the root:
   constant `K = 1/(16πσ)` inscribed as a single rational placeholder
   parameter, `T_eq⁴` is exact. `T_eq` itself is display-only.
 - **Compare in fourth powers.** Every band threshold is stored as `T⁴`
-  (e.g. the mesic band `[250 K, 320 K]` is inscribed as
-  `[250⁴, 320⁴] = [3906250000, 10485760000]` in K⁴). Band membership is an
+  (e.g. the mesic band `[250°, 320°]` is inscribed as
+  `[250⁴, 320⁴] = [3906250000, 10485760000]` in degrees⁴). Band membership is an
   exact rational comparison; no root is ever evaluated.
-- Kelvin readouts shown to players are a client-side rendering; the chronicle
+- Degree readouts shown to players are a client-side rendering; the chronicle
   and all receipts carry only the exact `T⁴` rationals.
 
 **Carrying π exactly — the symbolic-π law.** Circular and spherical geometry
@@ -98,13 +98,13 @@ All terms are exact rationals per tick; the ledger accrues like yield (no
 float, no drift).
 
 **The linear (entropic-only) reading is refused (operator ruling
-2026-07-27).** A design in which every excess joule vents to the void
+2026-07-27).** A design in which every excess ember vents to the void
 discards the residual — against the house law that the residual is
 structured information, measured and kept. The complete loop has two arms:
 
 - **The syntropic arm — encasement (first):** excess heat is captured into
   ordered store before anything vents. Each tick,
-  `encased = min(Heat_Net, encasement throughput)` accrues as **joules** —
+  `encased = min(Heat_Net, encasement throughput)` accrues as **embers** —
   the commodity money of `01_ECONOMY.md` §6.1, whose supply law ("governed
   strictly by sector thermal balance") this mechanic makes literal.
   Encasement is provided by encasement shells (a zone kind), the harvest
@@ -116,11 +116,11 @@ structured information, measured and kept. The complete loop has two arms:
   entering, OverheatCleared on leaving — the famine strike/relief shape).
   The void is the failure mode, never the design.
 
-**The cryo law — the Frost is the bank:** accrued (uncollected) joules
+**The cryo law — the Frost is the bank:** accrued (uncollected) embers
 *leak* `1/8` per tick, floored at zero (the D3 spoilage precedent) — except
-where `T_eq⁴ ≤ 100⁴ K⁴` (the cryogenic band and colder), where the store
+where `T_eq⁴ ≤ 100⁴ °⁴` (the cryogenic band and colder), where the store
 holds **lossless**: the coherence-vault physics of the Coherent
-(`06` §1.4). Banked (collected, receipted) joules are canonical everywhere.
+(`06` §1.4). Banked (collected, receipted) embers are canonical everywhere.
 Consequence: the Furnace **mints**, the Frost **banks**, and the thermal
 trade loop (§4) closes into a circuit — mint → encase → ship cold-ward →
 vault — with entropy-to-void the only true loss. This two-armed closure is
@@ -146,7 +146,7 @@ gravitational radius `r_g = 2GM/c²` that continuously ejects energy outward at
   exact rational.
 - **Role:** a hyper-dense energy anchor at the extreme of the Furnace regime
   (§3.1) — it pushes the equilibrium radius far outward, makes the surrounding
-  sectors the richest joule sources in the trade loop (§4), and its
+  sectors the richest ember sources in the trade loop (§4), and its
   gravitational/thermal push forces high-efficiency ring architecture around
   it. `M`, `Δt`, `r_g` are placeholder parameters that tune at balance time.
 
@@ -155,14 +155,14 @@ stability.)*
 
 ### 1.4 The sink dual — exporting cold, and the earned syntropic state
 
-**(Landed 2026-07-27 as VENT-1/ECON-J/SINK-1 — except the research and
+**(Landed 2026-07-27 as VENT-1/ECON-E/SINK-1 — except the research and
 throttle gates, which await the tech-tree landing; the infrastructure gate
 is live.)**
 
 **Exporting cold is exporting absorption capacity.** A dim-star system
 (`T_eq⁴ → 0`) holds the rarest resource in a high-flux universe: radiator
 headroom. It does not ship a negative substance — it sells **Banked Sink**
-(`S_cool`), the capacity to absorb heat, measured in the same joule-
+(`S_cool`), the capacity to absorb heat, measured in the same ember-
 commensurable units as the energy side. Two export mechanisms:
 
 - **Physical:** cryogenic coolant cycles out; entropic (heated) fluid
@@ -175,7 +175,7 @@ commensurable units as the energy side. Two export mechanisms:
 
 | surplus side (heat) | deficit side (cold) |
 |---|---|
-| banked joules (captured syntropy) | banked sink (captured headroom) |
+| banked embers (captured syntropy) | banked sink (captured headroom) |
 | vented entropy (accumulated loss) | absorbed heat (imported waste) |
 
 **Conservation invariants (exact, witnessed at landing):** hot side:
@@ -201,15 +201,15 @@ passes three gates, symmetric for energy and sink:
    collect — never un-receipted.
 
 **Symmetric decay (the §1.2 leak law, both sides):** accrued stores leak
-outside their native band — joules leak when warm, sink leaks when
+outside their native band — embers leak when warm, sink leaks when
 irradiated without insulation. Banked stores are canonical and never leak
 (landed law); vaulting either side in a Glasskeeper escrow node (01 §7)
 holds it lossless long-term.
 
 **The trade equilibrium:** the price ratio `S_cool / J` is the natural
 exchange rate of the Furnace↔Frost axis — energy cheap where sink is
-priceless, sink abundant where energy is scarce (ECON-J heating upkeep).
-Cold systems import joules to live; in exchange they absorb the thermal
+priceless, sink abundant where energy is scarce (ECON-E heating upkeep).
+Cold systems import embers to live; in exchange they absorb the thermal
 death of the Furnace. Placeholder pricing; tunes at balance.
 
 ---
@@ -218,7 +218,7 @@ death of the Furnace. Placeholder pricing; tunes at balance.
 
 The term "Goldilocks Zone" is **refused vocabulary** (in the spirit of
 Charter §8). It is anthropocentric chauvinism: it assumes carbon-based,
-liquid-water life at ≈300 K is the universal baseline, when there is no
+liquid-water life at ≈300° is the universal baseline, when there is no
 baseline for lifeforms in the universe by population or density. In a world
 where species, computational substrates, and industrial megastructures
 operate across radically different thermal envelopes, there is no universal
@@ -233,15 +233,15 @@ has its own optimal operating band `T_opt` and tolerance window `ΔT`
 ```
                        SUBSTRATE THERMAL ENVELOPES
 
-  CRYOGENIC BAND           MESIC BAND (Earth-type)        HYPER-THERMAL BAND
-  [ 10 K – 100 K ]            [ 250 K – 320 K ]            [ 600 K – 1500 K ]
+  CRYOGENIC BAND           MESIC BAND (biotic)             HYPER-THERMAL BAND
+  [ 10° – 100° ]              [ 250° – 320° ]              [ 600° – 1500° ]
          │                            │                            │
   • Quantum Processors         • Carbon-Based Organics      • High-Flux Foundries
   • Superconductors            • Hydro-Biospheres           • Plasma Collectors
-  • High-Density AI            • Human Capital              • Metal Synthesis
+  • High-Density AI            • Population                 • Metal Synthesis
 ```
 
-### 2.1 The cryogenic substrate (10 K – 100 K)
+### 2.1 The cryogenic substrate (10° – 100°)
 
 - **Occupants:** quantum compute cores, automated agent harnesses,
   superconducting power grids, liquid-gas processors.
@@ -250,21 +250,21 @@ has its own optimal operating band `T_opt` and tolerance window `ΔT`
   and tanks processing output; warm-space operation demands heavy
   refrigeration work.
 
-### 2.2 The mesic substrate (250 K – 320 K)
+### 2.2 The mesic substrate (250° – 320°)
 
 - **Occupants:** carbon-based biomass, traditional habitats, agricultural
   domes.
-- **Optimal placement:** medium-luminosity orbits (what old Earth texts
-  naively called "Goldilocks").
-- **Friction:** highly sensitive to fluctuation — a ±30 K shift causes
+- **Optimal placement:** medium-luminosity orbits (the band §2's refused
+  vocabulary named).
+- **Friction:** highly sensitive to fluctuation — a ±30° shift causes
   ecological collapse or massive life-support overhead.
 
-### 2.3 The hyper-thermal substrate (600 K – 1500 K)
+### 2.3 The hyper-thermal substrate (600° – 1500°)
 
 - **Occupants:** exotic silicon/lithic lifeforms, plasma refineries, Dyson
   energy harvesters, heavy alloy smelters.
-- **Optimal placement:** inner-system furnace zones near dense Class O/B
-  stars or white dwarfs.
+- **Optimal placement:** inner-system furnace zones near dense blue and
+  blue-white stars or white dwarfs.
 - **Friction:** high structural stress, but zero heating overhead for
   high-activation-energy chemistry and nuclear work.
 
@@ -280,7 +280,7 @@ three operational regions. Note these are zones of the *grid*; which zone is
 
 - **Physics:** `T_eq⁴` above the thermal melting threshold — the star
   radiates massive photon energy and the vacuum cannot dissipate it.
-- **Pro:** hyper-cheap solar energy (Dyson arrays at 300% yield —
+- **Pro:** hyper-cheap stellar energy (Dyson arrays at 300% yield —
   placeholder).
 - **Con:** heavy thermal maintenance — continuous energy and coolant spend on
   radiator arrays and heat sinks, governed by the `Heat_Net` ledger (§1.2).
@@ -295,11 +295,11 @@ three operational regions. Note these are zones of the *grid*; which zone is
 
 ### 3.3 The Absolute Frost Zone (extreme cold)
 
-- **Physics:** `T_eq⁴ < 100⁴ K⁴` — far orbits, or low-density red-dwarf
+- **Physics:** `T_eq⁴ < 100⁴ °⁴` — far orbits, or low-density red-star
   sectors.
 - **Pro:** maximum radiator headroom — foundries, quantum processors, and
   high-energy weapons run at full overdrive without overheating.
-- **Con:** zero ambient solar power; habitats and transit conduits burn
+- **Con:** zero ambient stellar power; habitats and transit conduits burn
   thermal heating fuel to prevent embrittlement and atmosphere freeze-out.
 
 ---
@@ -331,7 +331,7 @@ produces non-zero-sum diplomacy:
 
 ```
    CRYOGENIC EMPIRE                                    MESIC / CARBON EMPIRE
-   (Supercomputing AI)                                 (Human Population)
+   (Supercomputing AI)                                 (Biotic Population)
    ┌──────────────────────────────┐                    ┌──────────────────────────────┐
    │ • Outer Frozen Moon:         │                    │ • Outer Frozen Moon:         │
    │   PARADISE (0 Coolant Cost)  │                    │   WASTE (High Heat Cost)     │
@@ -357,9 +357,9 @@ produces non-zero-sum diplomacy:
 | Variable | High star density/luminosity | Low star density/luminosity |
 |---|---|---|
 | Equilibrium radius (per band) | pushed far outward into the sector | pulled tight, close to the star surface |
-| Energy yield | massive solar output | low solar (requires fusion/nuclear) |
+| Energy yield | massive stellar output | low stellar (requires fusion/nuclear) |
 | Primary resource need | coolants, radiators, thermal shields | heating fuel, energy cells, insulation |
-| Industrial advantage | rapid solar harvesting | supercomputing, heavy weapons cooling |
+| Industrial advantage | rapid stellar harvesting | supercomputing, heavy weapons cooling |
 
 Centering the math on thermal equilibrium gives every star type a distinct
 physical personality, turns spatial placement into a high-stakes engineering
@@ -393,7 +393,7 @@ layers, world to chain:
 ### 7.1 Energy is the in-world currency — chronicle-native, never a token
 
 `T_eq⁴` gives every sector an exact, replayable marginal cost of energy:
-near-free in the Furnace, expensive in the Frost. Energy (joules, exact
+near-free in the Furnace, expensive in the Frost. Energy (embers, exact
 rationals in the chronicle) is therefore the commodity money of the world —
 its supply set by physics, not by a mint. The hot/cold price differential is
 the monetary system: coolant flowing hot-ward and energy cold-ward is a
@@ -452,7 +452,7 @@ holographic" proposal (see `docs/OPEN_QUESTIONS.md` Q1):
   agreement alone.
 - **Structure is not history.** A homological / connectivity invariant can
   prove "a route exists" or "a loop is closed", but it cannot prove "≥ N
-  joules were delivered by tick T". Quota and delivery facts settle by exact
+  embers were delivered by tick T". Quota and delivery facts settle by exact
   rational inequality inside the proof, not by a topological invariant.
 
 The chain still never computes physics (§7.3); it verifies one succinct proof

@@ -8,7 +8,7 @@
 //! `signed_remainder` / `reduce_pair` the grid seat runs.
 //!
 //! **The species is the column.** The owed direction is the species's ration —
-//! a plasmoid owes joule, a biotic owes biomass, an element-eater owes its
+//! a plasmoid owes ember, a biotic owes biomass, an element-eater owes its
 //! element — read from the caller as `ration_dir`, never a hardcoded Biomass.
 //! Identity lives in the measurement (the same law as the sister trees' roster
 //! peel), not in a branch.

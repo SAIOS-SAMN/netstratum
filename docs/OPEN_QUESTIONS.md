@@ -45,7 +45,7 @@ load-bearing, not tunable:
    gravity/CFT duality; it does not make arbitrary game-state bookkeeping
    reconstructable at O(1) from a 2D boundary.
 5. **Homology proves structure, not history.** Betti numbers can show "a
-   route exists" or "a loop is closed" but cannot prove "≥ N joules delivered
+   route exists" or "a loop is closed" but cannot prove "≥ N embers delivered
    by tick T". Persistent homology is also expensive; the "beats ZK on
    throughput, independent of tick count" claim compares different problems.
 6. **PoUW's open problem is verification.** "The simulation is the useful
@@ -86,7 +86,7 @@ recorded so a flat "no" doesn't bury a good tuning lever.
    state never mutates silently (SEAL B), but decay may accumulate as
    workspace and settle in one receipt at collect/transfer (the
    VentSettled shape), or be held off by storage upkeep. Reopen trigger:
-   balance wants banked joules not to be a free eternal store outside
+   balance wants banked embers not to be a free eternal store outside
    Glasskeeper vaults.
 3. **A global conservation sheet — reopenable at N6.** Per-side
    invariants (05 §1.4) stay the orb-level ground truth; they compose
@@ -305,7 +305,7 @@ Not law until ruled and landed — except **coded defaults** below.
 
 ---
 
-## Q-D — Defense axioms · covert terraform · espionage (opened 2026-08-08)
+## Q-D — Defense axioms · covert worldshape · espionage (opened 2026-08-08)
 
 Recorded from `36_DEFENSE_AXIOMS.md`. Not law until ruled and landed.
 

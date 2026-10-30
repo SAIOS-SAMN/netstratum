@@ -173,15 +173,15 @@ Quantities render exact (`9/2`, never `4.5`).
 ## 8. The topology and the registry — civilization → star → planet → colony
 
 **Ruled by the operator 2026-07-25; star/cardinality ruling 2026-07-26.**
-A civilization (species-level identity: "humans", "deep-chorus") spans stars.
-A star — a star system named for its sun ("sol") — is the simulation
-container: a collection of planets bound to one sun, sharing one clock, one
-chronicle, one receipt chain (= one replay unit today, one mesh/consensus unit
-at N6). This tier was formerly named "world"; it is renamed **star** because
-the sun is what the planets orbit and what fixes their thermal regime
-(`05_THERMAL_BALANCE.md` §1), and each star carries a `StarClass`
-(NS-6 §7). A planet ("mars") is a settled body orbiting the star; a colony is
-a civilization's settlement on a planet.
+A civilization (species-level identity: "bimaniform", "deep-chorus") spans
+stars. A star — a star system named for its star ("lantern") — is the
+simulation container: a collection of planets bound to one star, sharing one
+clock, one chronicle, one receipt chain (= one replay unit today, one
+mesh/consensus unit at N6). This tier was formerly named "world"; it is
+renamed **star** because the star is what the planets orbit and what fixes
+their thermal regime (`05_THERMAL_BALANCE.md` §1), and each star carries a
+`StarClass` (NS-6 §7). A planet ("cinder") is a settled body orbiting the
+star; a colony is a civilization's settlement on a planet.
 
 **Cardinality law (target, NS-6 §6):** `civilization 1:N star 1:N planet
 1:N colony` — a star holds many planets, a planet hosts many colonies

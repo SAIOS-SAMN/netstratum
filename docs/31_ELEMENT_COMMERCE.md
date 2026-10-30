@@ -202,7 +202,7 @@ Want / market:
 
 | Surface | Show |
 |---------|------|
-| Solar systems | Elements kinds·mass (already) |
+| Star systems | Elements kinds·mass (already) |
 | New view `routes` | element routes, melt, rail, upkeep (**E3.8 landed**) |
 | New view `refineries` | tuned element, throughput, heat (**E3.8 landed**) |
 | Civ drill-down | top 3 elements by mass; open routes |

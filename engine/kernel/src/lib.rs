@@ -1160,14 +1160,14 @@ fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
             Vec::new()
         }
         // G2 (#29): an element-eater's food cycle — it synthesizes its
-        // element from energy (a conserved transmutation; the joule spend
+        // element from energy (a conserved transmutation; the ember spend
         // is checked in conservation(), here the element mint is bounded)
         // and eats some of the same element running its zones. The net
         // element change is `minted − eaten`. The mint bound is the
-        // element's own natural flow (richness): minted ≤ joule × richness,
-        // so a rarer element yields less per joule. No star → zero bound.
-        ClosureEvent::ElementFarmed { element, joule, minted, eaten, .. } => {
-            if *minted < ratio(0, 1) || *joule < ratio(0, 1) || *eaten < ratio(0, 1) {
+        // element's own natural flow (richness): minted ≤ ember × richness,
+        // so a rarer element yields less per ember. No star → zero bound.
+        ClosureEvent::ElementFarmed { element, ember, minted, eaten, .. } => {
+            if *minted < ratio(0, 1) || *ember < ratio(0, 1) || *eaten < ratio(0, 1) {
                 return Err(Refused::ElementNotPositive {
                     element: *element,
                     amount: Box::new(minted.clone()),
@@ -1176,7 +1176,7 @@ fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
             let bound = match prior.star {
                 Some(class) => {
                     let (_, _, richness) = cfe::dop::element_properties(element, class);
-                    joule.clone() * richness
+                    ember.clone() * richness
                 }
                 None => ratio(0, 1),
             };
@@ -1643,7 +1643,7 @@ fn covered(event: &ClosureEvent) -> bool {
         // Witnessed in `element_pins.rs`.
         | E::AssayStruck { .. }
         // G2 (#29): the element-food synthesis — a conserved transmutation
-        // (joule spend + bounded element mint), covered by the value law.
+        // (ember spend + bounded element mint), covered by the value law.
         | E::ElementFarmed { .. }
         // ING-2b (tag 182): the staple food settle on the element ledger —
         // an element move (net regrown − eaten), covered by the element law
@@ -2021,12 +2021,12 @@ fn admitted_deltas(
             non_negative(Resource::Crystal, amount)?;
             vec![(Resource::Crystal, -amount.clone())]
         }
-        // G2 (#29): the joule spent to synthesize the food-element leaves
+        // G2 (#29): the ember spent to synthesize the food-element leaves
         // the resource ledger (the element mint is checked in
         // element_move). Sign-guarded — a farm cannot bank energy.
-        E::ElementFarmed { joule, .. } => {
-            non_negative(Resource::Joule, joule)?;
-            vec![(Resource::Joule, -joule.clone())]
+        E::ElementFarmed { ember, .. } => {
+            non_negative(Resource::Ember, ember)?;
+            vec![(Resource::Ember, -ember.clone())]
         }
         // Convey — the postal theorems, held at the gate. The move nets
         // zero (amount out, amount in); only the postage leaves the
