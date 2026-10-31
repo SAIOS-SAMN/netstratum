@@ -1,31 +1,28 @@
 # Netstratum documentation
 
-The documents are the design record: each states a law (or a decision) before
-the code that builds it, and records what was read once built. Read the
-charter first; for the universe, read era 1 in order; for what is built and
-what is owed, read the register.
-
-**Conventions.** The *operator* is the project's maintainer. Codes in
-capitals are names: work items (`TRADE-1`, `NS-5`), spec and seal names
-(SEAL A, STAMP, the currency), technology families (KIN, ATM, COG) and
-acronyms (CLI, RFA, MHD, UMD). Commit hashes cite where a law was built.
-Documents under [archive/](archive/) are superseded working notes, kept for
-the record.
-
 ## Start here
 
+- [Status](STATUS.md): what Netstratum is, what works today, and where each
+  part is heading.
 - [Architecture](ARCHITECTURE.md): how the workspace is organized and where
   to make a change.
 - [Concepts](CONCEPTS.md): every term, with its definition, formula and code
   location.
-- [00 — The charter](00_CHARTER.md): the founding document, read whole.
-- [102 — Alignment](102_ALIGNMENT.md): one vocabulary for every tier and the
-  register of everything built and owed (kept current).
-- [GAME_SPEC](GAME_SPEC.md), [SYSTEM_SPEC](SYSTEM_SPEC.md): the game and the
-  system as specified.
-- [BUILD_ORDER](BUILD_ORDER.md), [OPEN_QUESTIONS](OPEN_QUESTIONS.md),
-  [Equations](EQUATIONS.md): the build sequence, the open questions, the
-  equations in one place.
+- [The charter](00_CHARTER.md): the project's binding rules.
+
+## The design record
+
+The numbered documents below are the design record: each states a law or a
+decision before the code that builds it. They are reference material, read
+when working on the part they cover; [STATUS.md](STATUS.md) and the code take
+precedence where they differ. The register of open era-1 work is
+[102_ALIGNMENT.md](102_ALIGNMENT.md); the equations are collected in
+[EQUATIONS.md](EQUATIONS.md); open questions are in
+[OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).
+
+Codes in capitals are names: work items (`TRADE-1`, `NS-5`), spec and seal
+names (SEAL A, STAMP), technology families (KIN, ATM, COG) and acronyms (CLI,
+RFA, MHD, UMD). Commit hashes cite where a law was built.
 
 ## Era 1: the sphere universe (78 onward)
 
@@ -150,10 +147,11 @@ The universe beneath the game, derived from one grammar of shares and phases
 ## Reference
 
 - [Ground](GROUND.md), [Hubs](HUBS.md), [JSON_DISPLAY_ONLY](JSON_DISPLAY_ONLY.md),
-  [BETA_RUNBOOK](BETA_RUNBOOK.md), [FORGE_BUDGET](FORGE_BUDGET.md).
+  [FORGE_BUDGET](FORGE_BUDGET.md).
 - [`../protocols/`](../protocols/): the NS protocol stack (NS-1 … NS-7).
 - [`vectors/`](vectors/): recorded reference readings.
-- [`archive/`](archive/): superseded specifications and the working notes of
-  past build cycles (handoffs, directives, task lists), kept for history.
+- [`archive/`](archive/): superseded specifications (the earlier game and
+  system specifications, build order and beta runbook) and the working notes
+  of past build cycles, kept for history.
   The notes were written by AI sessions under the operator's direction;
   findings are marked "Identified", "Fixed" or "Remediated".

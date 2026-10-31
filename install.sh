@@ -31,6 +31,7 @@
 #   --no-build       skip cargo build; use whatever already sits in target/
 #   --no-genesis     prepare files only, do not found the worlds
 #   --cadence N      seconds between beats, for `run` (default: 2)
+#   --grains G       the universe's size in grains, a number or 2^N (default: 2^40)
 #   --force          act on a root that already holds a live universe
 #   --yes            never prompt (for non-interactive use)
 #
@@ -45,6 +46,7 @@ var_root="var"
 do_build=1
 do_genesis=1
 cadence=2
+grains='2^40'
 force=0
 assume_yes=0
 
@@ -68,6 +70,7 @@ Options:
   --no-build      skip cargo build
   --no-genesis    prepare files only; do not found the worlds
   --cadence N     seconds between beats, for run (default: 2)
+  --grains G      the universe's size in grains, a number or 2^N (default: 2^40)
   --force         act on a root that already holds a live universe
   --yes           never prompt
 USAGE
@@ -88,6 +91,7 @@ parse_args() {
       --var)     [ $# -ge 2 ] || die "--var needs a directory"; var_root="$2"; shift 2 ;;
       --roster)  die "--roster is gone: the founding roster is compiled (engine/conductor/src/polities.rs)" ;;
       --cadence) [ $# -ge 2 ] || die "--cadence needs a number"; cadence="$2"; shift 2 ;;
+      --grains)  [ $# -ge 2 ] || die "--grains needs a size"; grains="$2"; shift 2 ;;
       --no-build)   do_build=0; shift ;;
       --no-genesis) do_genesis=0; shift ;;
       --force)      force=1; shift ;;
@@ -206,6 +210,11 @@ cmd_install() {
   mkdir -p "$root"
   say "roster: the 22 compiled founding seats; each band chooses where it settles"
 
+  if [ ! -f "$root/pulse.bin" ]; then
+    step "Founding the universe ($grains grains)"
+    "$REPO/target/release/pulse" "$root" found "$grains"
+  fi
+
   if [ "$do_genesis" -eq 1 ]; then
     step "Founding the worlds (one bounded beat, then exit)"
     "$bin" --var "$root" --cycles 1 --cadence 0
@@ -219,7 +228,7 @@ cmd_install() {
   say "  python3 tools/observer.py --root $var_root --watch 2"
   say "  python3 tools/webserve.py --root $var_root --port 8081"
   say "  target/release/netstratum                the hands-on client"
-  say "  target/release/ns-hypha follow $var_root  fold this universe onto the :7520 court"
+  say "  target/release/observe --var $var_root universe   read the universe"
   say ""
   say "  ./install.sh fresh  --var $var_root      wipe and start over"
 }
@@ -265,7 +274,7 @@ cmd_status() {
   fi
   if ! looks_like_universe "$root"; then
     if dir_is_empty "$root"; then
-      say "state:        prepared and empty — the conductor seeds and founds it on first run"
+      say "state:        universe founded, worlds not yet — the conductor founds them on its first run"
     else
       say "state:        present, but holds no universe"
     fi

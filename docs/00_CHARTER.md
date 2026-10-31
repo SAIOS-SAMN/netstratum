@@ -163,11 +163,12 @@ scored or capped form in them is refused.
 
 ## 6. Governance
 
-`docs/BUILD_ORDER.md` records the build order, and the current landing is
-read there rather than inferred. Each landing is written test-first, with
-its failing and passing output recorded; landings proceed one at a time;
-evidence is quoted verbatim. The repository's history is its git history,
-and changes are committed only on the operator's approval.
+[STATUS.md](STATUS.md) states what is built and where each part is heading,
+and the register in [102_ALIGNMENT.md](102_ALIGNMENT.md) lists every open item
+of the era-1 work with its dependencies. A law is written into its design
+document, with the test that proves it, before it is built
+([CONTRIBUTING.md](../CONTRIBUTING.md)). The repository's history is its git
+history.
 
 ## 7. Settlement on external chains
 
