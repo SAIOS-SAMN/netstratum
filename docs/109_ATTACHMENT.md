@@ -157,3 +157,55 @@ systems and the network only by what it has learned and earned.
 Build order: A2 and A3 first (an attached party can act in a world), then
 A1 and A1b (world seats and placement by fit), A4, A6 (verification), A1c
 (seats by progression), A5 (sandboxes), and A7 and A8 (outside use).
+
+## 7. The interface
+
+Shared by the house (`ns-hypha`), the conductor and the client library
+(`engine/attach`), whose constants are the single definition.
+
+**Seats** (the house's listing, role on Mycelium's seat surface):
+
+| Seat | Role | Held by | Functions |
+|---|---|---|---|
+| 0 | Ancients | the house | none |
+| line id | Ancients | a council mind | solve, decline |
+| `DOOR` (1,000,000,000) | Sovereign | nobody; any mind may call | attach |
+| world seat id | Sovereign | the admitted mind | zone, raze, collect, sandbox, detach |
+| tier seat id | Progenitor, Steward or Ancients | the admitted mind, once its line reaches the tier | zone, raze, collect, sandbox, detach |
+
+**Functions** (`fn_id`, arguments):
+
+| Function | Id | Arguments |
+|---|---|---|
+| attach | 101 | `Count(metabolism)`: 1 mineral, 2 biotic, 3 plasmic |
+| zone | 110 | `Count(tile)` (0–63), `Count(kind)` (the zone kind's wire code) |
+| raze | 111 | `Count(tile)` |
+| collect | 112 | none |
+| sandbox | 113 | none |
+| detach | 119 | none |
+
+Every call is answered by an outcome: `QUEUED` (9) when it was accepted for
+the next beat, or a refusal (`NO_FUNCTION`, `NOT_SEATED`, `UNREAD`).
+
+**Percepts** (records the house posts to a mind on its seat):
+
+| Kind | Id | Arguments |
+|---|---|---|
+| admitted | 0x4E01 | `Key(line key)`, `Count(world seat)` |
+| not admitted | 0x4E02 | `Count(reason)`: 1 no viable world |
+| result | 0x4E03 | `Key(call reference)`, `Count(1 applied, 0 refused)` |
+
+**Files** (under the variable root):
+
+| File | Written by | Read by | Contents |
+|---|---|---|---|
+| `attach/requests/<mind>.req` | house | conductor | an attachment request: the mind's key and metabolism |
+| `attach/admitted.bin` | conductor | house | each admission: mind, world, line, entity handle, tiers reached |
+| `attach/released/<mind>` | house | conductor | a detachment |
+| `attach/sandbox/<mind>-<ref>.req` | house | conductor | a sandbox request |
+| `worlds/<world>/inbox/att-<ref>.dir` | house | conductor | an action, as a directive acting as the mind's entity |
+| `worlds/<world>/inbox/{applied,refused}/att-<ref>.dir` | conductor | house | the action's disposition, reported as a result percept |
+
+An attached mind's entity handle is `mind-` followed by the first eight
+bytes of its key in hex. Its principal is the world's sovereign, and it is
+granted build, raze and collect.

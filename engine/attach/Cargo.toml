@@ -1,0 +1,11 @@
+[package]
+name = "attach"
+version = "0.1.0"
+edition = "2021"
+license.workspace = true
+description = "Attachment to Netstratum through the Mycelium hypha: the interface constants, the file exchange between the house and the conductor, and the client library an external agent or sandbox uses (docs/109)"
+
+[dependencies]
+mycelium.workspace = true
+cfe = { path = "../cfe" }
+ed25519-dalek = "2.1"

@@ -48,11 +48,32 @@ pub struct Entity {
 }
 
 impl Entity {
-    /// May this entity take an action of the given scope?
+    /// May this entity take an action of the given scope, by its own
+    /// grants alone? (`permits_in` also checks its principals.)
     pub fn permits(&self, scope: Scope) -> bool {
         match self.principal {
             None => true,
             Some(_) => self.grants.contains(&scope),
         }
     }
+}
+
+/// May `actor` take an action of `scope` among `entities`? An agent's
+/// authority is bounded by every principal above it: the actor and each
+/// principal up to the sovereign must permit the scope. A chain that names an
+/// unregistered entity, or that does not reach a sovereign within the number
+/// of entities, permits nothing.
+pub fn permits_in(entities: &[Entity], actor: u64, scope: Scope) -> bool {
+    let mut at = actor;
+    for _ in 0..=entities.len() {
+        let Some(entity) = entities.iter().find(|held| held.entity_id == at) else { return false };
+        if !entity.permits(scope) {
+            return false;
+        }
+        match entity.principal {
+            None => return true,
+            Some(principal) => at = principal,
+        }
+    }
+    false
 }

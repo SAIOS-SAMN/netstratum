@@ -112,8 +112,17 @@ impl World {
     }
     /// Register a scripted agent contained by the sovereign (N3).
     pub fn register_agent(&mut self, handle: &str) -> Result<u64, ActionRefused> {
+        self.register_agent_under(SOVEREIGN, handle)
+    }
+    /// Register an agent contained by `principal`, the sovereign or another
+    /// agent. A contained agent acts only within its own grants and within
+    /// every principal's above it (`ipsal::permits_in`).
+    pub fn register_agent_under(&mut self, principal: u64, handle: &str) -> Result<u64, ActionRefused> {
         if self.entities.is_empty() {
             return Err(ActionRefused::NoSuchEntity { entity: SOVEREIGN });
+        }
+        if !self.entities.iter().any(|held| held.entity_id == principal) {
+            return Err(ActionRefused::NoSuchEntity { entity: principal });
         }
         if self.entities.iter().any(|held| held.handle == handle) {
             return Err(ActionRefused::HandleTaken {
@@ -124,13 +133,13 @@ impl World {
         self.entities.push(Entity {
             entity_id,
             handle: handle.to_string(),
-            principal: Some(SOVEREIGN),
+            principal: Some(principal),
             grants: Vec::new(),
         });
         self.close(
             ClosureEvent::EntityRegistered {
                 entity_id,
-                principal: SOVEREIGN,
+                principal,
                 handle: handle.to_string(),
             },
             SOVEREIGN,
@@ -177,10 +186,9 @@ impl World {
         if self.collapsed.is_some() {
             return Err(ActionRefused::CivilizationCollapsed);
         }
-        let entity = self
-            .entity(actor)
+        self.entity(actor)
             .ok_or(ActionRefused::NoSuchEntity { entity: actor })?;
-        match entity.permits(scope) {
+        match crate::ipsal::permits_in(&self.entities, actor, scope) {
             true => Ok(()),
             false => Err(ActionRefused::NotPermitted { entity: actor, scope }),
         }

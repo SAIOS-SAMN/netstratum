@@ -119,3 +119,51 @@ fn a_revoked_scope_stays_revoked() {
         .expect("the agent stands");
     assert_eq!(agent.grants, vec![Scope::Collect], "the revoked scope stays revoked");
 }
+
+#[test]
+fn an_agent_contained_by_an_agent_acts_only_within_both_grants() {
+    let mut world = World::new();
+    world.found("meridian").expect("founding closes");
+    world.zone(0, ZoneKind::Extractor).expect("builds");
+    world.zone(8, ZoneKind::Habitat).expect("builds");
+    let outer = world.register_agent("outer").expect("registers");
+    let inner = world.register_agent_under(outer, "inner").expect("registers under an agent");
+    assert_eq!(world.entity(inner).and_then(|e| e.principal), Some(outer));
+    world.tick();
+    // The inner agent's own grant is not enough: its principal must hold it too.
+    world.grant(inner, Scope::Collect).expect("granted");
+    assert_eq!(
+        world.collect_as(inner, FIRST_ORB),
+        Err(ActionRefused::NotPermitted { entity: inner, scope: Scope::Collect }),
+        "a contained agent is bounded by its principal"
+    );
+    world.grant(outer, Scope::Collect).expect("granted");
+    world.collect_as(inner, FIRST_ORB).expect("both grants hold");
+    // Revoking the principal's grant cuts every agent beneath it at once.
+    world.revoke(outer, Scope::Collect).expect("revoked");
+    world.tick();
+    assert_eq!(
+        world.collect_as(inner, FIRST_ORB),
+        Err(ActionRefused::NotPermitted { entity: inner, scope: Scope::Collect })
+    );
+}
+
+#[test]
+fn a_nested_entity_registry_replays_from_receipts_alone() {
+    let mut world = World::new();
+    world.found("meridian").expect("founding closes");
+    let outer = world.register_agent("outer").expect("registers");
+    let inner = world.register_agent_under(outer, "inner").expect("registers");
+    world.grant(outer, Scope::Build).expect("granted");
+    world.grant(inner, Scope::Build).expect("granted");
+    world.zone_as(inner, FIRST_ORB, 3, ZoneKind::Extractor).expect("builds within both grants");
+    let replayed = World::resume(world.chronicle().clone());
+    assert_eq!(replayed.entities(), world.entities(), "the nested registry is carried by its receipts");
+}
+
+#[test]
+fn registering_under_an_unknown_principal_refuses() {
+    let mut world = World::new();
+    world.found("meridian").expect("founding closes");
+    assert_eq!(world.register_agent_under(99, "orphan"), Err(ActionRefused::NoSuchEntity { entity: 99 }));
+}

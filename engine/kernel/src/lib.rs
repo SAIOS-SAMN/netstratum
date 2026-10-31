@@ -182,7 +182,12 @@ use solver_verify::{verify_work_class, WorkBroken, WorkClass};
 /// **0.37.0 — Seated science labs.** Tags 159–162 ScienceSeated /
 /// LabCreated / ScienceExploded / RogueFactionStruck; SCHEMA_V16 lab
 /// state; dual ± outcomes + derived explosion risk (no free dials).
-pub const KERNEL_VERSION: Version = Version { major: 0, minor: 37, patch: 0 };
+///
+/// **0.38.0 — Contained agents.** Containment reads the principal chain: an
+/// agent acts only within its own grants and every principal's above it
+/// (`cfe::ipsal::permits_in`), so an agent may contain agents (docs/109 A4).
+/// An agent whose principal is the sovereign reads as before.
+pub const KERNEL_VERSION: Version = Version { major: 0, minor: 38, patch: 0 };
 
 /// The gate's version, as it rides the wire.
 ///
@@ -2628,12 +2633,13 @@ fn containment(prior: &Committed, step: &Step) -> Result<(), Refused> {
             return Ok(());
         }
     }
-    let entity = prior
+    prior
         .entities
         .iter()
         .find(|held| held.entity_id == step.actor)
         .ok_or(Refused::NoSuchEntity { actor: step.actor })?;
-    match entity.permits(scope) {
+    // An agent acts within its own grants and every principal's above it.
+    match cfe::ipsal::permits_in(&prior.entities, step.actor, scope) {
         true => Ok(()),
         false => Err(Refused::NotPermitted { actor: step.actor, scope }),
     }
